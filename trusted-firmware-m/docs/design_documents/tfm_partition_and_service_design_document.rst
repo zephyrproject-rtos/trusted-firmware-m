@@ -42,7 +42,7 @@ partition information:
     struct spm_partition_desc_t {
         struct spm_partition_runtime_data_t runtime_data;
         const struct spm_partition_static_data_t *static_data;
-        const struct tfm_spm_partition_platform_data_t *platform_data;
+        const struct platform_data_t *platform_data;
     #if TFM_PSA_API
         const struct tfm_spm_partition_memory_data_t *memory_data;
     #endif
@@ -118,9 +118,9 @@ defined structure for service information:
     struct tfm_spm_service_t {
         const struct tfm_spm_service_db_t *service_db;
         struct spm_partition_desc_t *partition;
-        struct tfm_list_node_t handle_list;
+        struct bi_list_node_t handle_list;
         struct tfm_msg_queue_t msg_queue;
-        struct tfm_list_node_t list;
+        struct bi_list_node_t list;
     };
 
 These members are necessary for a service and the following bullets explain the

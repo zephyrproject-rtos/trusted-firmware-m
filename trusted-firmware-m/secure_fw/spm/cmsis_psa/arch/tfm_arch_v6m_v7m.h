@@ -23,6 +23,13 @@
 /* Initial EXC_RETURN value in LR when a thread is loaded at the first time */
 #define EXC_RETURN_THREAD_S_PSP                 0xFFFFFFFD
 
+/* Exception return behavior */
+
+/* stack pointer used to restore context: 0=MSP 1=PSP. */
+#define EXC_RETURN_SPSEL    (1UL << 2)
+/* processor mode for return: 0=Handler mode 1=Thread mod. */
+#define EXC_RETURN_MODE     (1UL << 3)
+
 struct tfm_arch_ctx_t {
     uint32_t    r8;
     uint32_t    r9;
@@ -132,6 +139,30 @@ __STATIC_INLINE void tfm_arch_init_secure_msp(uint32_t msplim)
      * The MSP limit value can be used in more strict memory check.
      */
     (void)msplim;
+}
+
+/**
+ * \brief Whether in privileged level
+ *
+ * \retval true             If current execution runs in privileged level.
+ * \retval false            If current execution runs in unprivileged level.
+ */
+__STATIC_INLINE bool tfm_arch_is_priv(void)
+{
+    CONTROL_Type ctrl;
+
+    /* If in Handler mode */
+    if (__get_IPSR()) {
+        return true;
+    }
+
+    /* If in privileged Thread mode */
+    ctrl.w = __get_CONTROL();
+    if (!ctrl.b.nPRIV) {
+        return true;
+    }
+
+    return false;
 }
 
 #endif

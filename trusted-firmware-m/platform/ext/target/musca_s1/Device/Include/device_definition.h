@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -188,6 +188,17 @@ extern struct spi_ip6524_dev_t SPI0_DEV_S;
 extern struct spi_ip6524_dev_t SPI0_DEV_NS;
 #endif
 
+/* QSPI Flash Controller driver structures  */
+#ifdef QSPI_IP6514E_S
+#include "qspi_ip6514e_drv.h"
+extern struct qspi_ip6514e_dev_t QSPI_DEV_S;
+#endif
+
+#ifdef QSPI_IP6514E_NS
+#include "qspi_ip6514e_drv.h"
+extern struct qspi_ip6514e_dev_t QSPI_DEV_NS;
+#endif
+
 /* ARM PPC driver structures */
 #ifdef AHB_PPC0_S
 #include "ppc_sse200_drv.h"
@@ -233,6 +244,19 @@ extern struct musca_s1_scc_dev_t MUSCA_S1_SCC_DEV_NS;
 #ifdef SSE_200_CACHE_S
 #include "cache_drv.h"
 extern struct arm_cache_dev_t SSE_200_CACHE_DEV_S;
+#endif
+
+/* ======= External peripheral configuration structure declarations ======= */
+
+/* MT25QL Flash memory library structures */
+#if (defined(MT25QL_NS) && defined(QSPI_IP6514E_NS))
+#include "mt25ql_flash_lib.h"
+extern struct mt25ql_dev_t MT25QL_DEV_NS;
+#endif
+
+#if (defined(MT25QL_S) && defined(QSPI_IP6514E_S))
+#include "mt25ql_flash_lib.h"
+extern struct mt25ql_dev_t MT25QL_DEV_S;
 #endif
 
 #ifdef __cplusplus

@@ -18,19 +18,9 @@
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
-{
-    /* Configures non-secure memory spaces in the target */
-    gtzc_init_cfg();
-    sau_and_idau_cfg();
-    pinmux_init_cfg();
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   uint32_t partition_idx,
-                  const struct tfm_spm_partition_platform_data_t *platform_data)
+                  const struct platform_data_t *platform_data)
 {
     /* plat data are ignored */
     return TFM_PLAT_ERR_SUCCESS;

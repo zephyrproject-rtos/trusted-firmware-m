@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -231,14 +232,20 @@ static cy_en_prot_status_t get_region(const PROT_SMPU_SMPU_STRUCT_Type *smpu,
 
     /* Figure out the base, size, and subregion mask to use */
     if (smpu == ITS_SMPU_STRUCT) {
+        struct tfm_hal_its_fs_info_t its_fs_info;
         /* Retrieve the ITS region definition */
-        tfm_hal_its_fs_info(base, size);
+        tfm_hal_its_fs_info(&its_fs_info);
+        *base = its_fs_info.flash_area_addr;
+        *size = its_fs_info.flash_area_size;
     } else if (smpu == NVC_SMPU_STRUCT) {
         /* Retrieve the non-volatile counters region definition */
         nvc_flash_block(base, size);
     } else if (smpu == PS_SMPU_STRUCT) {
+        struct tfm_hal_ps_fs_info_t ps_fs_info;
         /* Retrieve the PS region definition */
-        tfm_hal_ps_fs_info(base, size);
+        tfm_hal_ps_fs_info(&ps_fs_info);
+        *base = ps_fs_info.flash_area_addr;
+        *size = ps_fs_info.flash_area_size;
     } else {
         /* We don't know where to get the region definition */
         ret = CY_PROT_FAILURE;

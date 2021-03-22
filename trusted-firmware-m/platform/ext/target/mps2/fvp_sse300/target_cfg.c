@@ -112,28 +112,28 @@ extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP3;
 #define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
         UART0_CMSDK_BASE_NS,
         UART0_CMSDK_BASE_NS + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_uart1 = {
+struct platform_data_t tfm_peripheral_uart1 = {
         UART1_CMSDK_BASE_S,
         UART1_CMSDK_BASE_S + 0xFFF,
         PPC_SP_PERIPH_EXP1,
         UART1_PERIPH_PPCEXP1_POS_MASK
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_fpga_io = {
+struct platform_data_t tfm_peripheral_fpga_io = {
         MPS2_IO_FPGAIO_BASE_S,
         MPS2_IO_FPGAIO_BASE_S + 0xFFF,
         PPC_SP_PERIPH_EXP2,
         FPGA_IO_PERIPH_PPCEXP2_POS_MASK
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
         SYSTIMER0_ARMV8_M_BASE_S,
         SYSTIMER0_ARMV8_M_BASE_S + 0xFFF,
         PPC_SP_PERIPH0,

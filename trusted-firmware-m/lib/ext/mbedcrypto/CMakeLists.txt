@@ -19,7 +19,7 @@ if ("${MBEDCRYPTO_PATH}" STREQUAL "DOWNLOAD")
 
     if (PATCH_FILES)
         FetchContent_Declare(mbedcrypto
-            GIT_REPOSITORY https://github.com/ARMmbed/mbedtls.git
+            GIT_REPOSITORY ${MBEDCRYPTO_GIT_REMOTE}
             GIT_TAG ${MBEDCRYPTO_VERSION}
             GIT_SHALLOW TRUE
             GIT_PROGRESS TRUE
@@ -28,7 +28,7 @@ if ("${MBEDCRYPTO_PATH}" STREQUAL "DOWNLOAD")
         )
     else()
         FetchContent_Declare(mbedcrypto
-            GIT_REPOSITORY https://github.com/ARMmbed/mbedtls.git
+            GIT_REPOSITORY ${MBEDCRYPTO_GIT_REMOTE}
             GIT_TAG ${MBEDCRYPTO_VERSION}
             GIT_SHALLOW TRUE
             GIT_PROGRESS TRUE

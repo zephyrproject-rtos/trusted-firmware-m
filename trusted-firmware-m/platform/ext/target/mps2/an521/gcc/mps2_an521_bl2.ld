@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2017-2019 Arm Limited
+; * Copyright (c) 2017-2020 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -89,12 +89,14 @@ SECTIONS
     {
         . = ALIGN(4);
         __copy_table_start__ = .;
-        LONG (__etext)
-        LONG (__data_start__)
-        LONG (__data_end__ - __data_start__)
-        LONG (DEFINED(__etext2) ? __etext2 : 0)
-        LONG (DEFINED(__data2_start__) ? __data2_start__ : 0)
-        LONG (DEFINED(__data2_start__) ? __data2_end__ - __data2_start__ : 0)
+#ifdef CODE_SHARING
+        LONG (LOADADDR(.tfm_shared_symbols))
+        LONG (ADDR(.tfm_shared_symbols))
+        LONG (SIZEOF(.tfm_shared_symbols))
+#endif
+        LONG (LOADADDR(.data))
+        LONG (ADDR(.data))
+        LONG (SIZEOF(.data))
         __copy_table_end__ = .;
     } > FLASH
 
@@ -105,26 +107,35 @@ SECTIONS
     {
         . = ALIGN(4);
         __zero_table_start__ = .;
-        LONG (__bss_start__)
-        LONG (__bss_end__ - __bss_start__)
-        LONG (DEFINED(__bss2_start__) ? __bss2_start__ : 0)
-        LONG (DEFINED(__bss2_start__) ? __bss2_end__ - __bss2_start__ : 0)
+        LONG (ADDR(.bss))
+        LONG (SIZEOF(.bss))
         __zero_table_end__ = .;
     } > FLASH
 
-    __etext = .;
+#ifdef CODE_SHARING
+    /* The code sharing between bootloader and runtime firmware requires to
+     * share the global variables. Section size must be equal with
+     * SHARED_SYMBOL_AREA_SIZE defined in region_defs.h
+     */
+    .tfm_shared_symbols :
+    {
+        *(.data.mbedtls_calloc_func)
+        *(.data.mbedtls_free_func)
+        *(.data.mbedtls_exit)
+        *(.data.memset_func)
+        . = ALIGN(SHARED_SYMBOL_AREA_SIZE);
+    } > RAM AT > FLASH
+#endif
 
-    .tfm_bl2_shared_data : ALIGN(32)
+    .tfm_bl2_shared_data :
     {
         . += BOOT_TFM_SHARED_DATA_SIZE;
     } > RAM
     Image$$SHARED_DATA$$RW$$Base = ADDR(.tfm_bl2_shared_data);
     Image$$SHARED_DATA$$RW$$Limit = ADDR(.tfm_bl2_shared_data) + SIZEOF(.tfm_bl2_shared_data);
 
-    .data : AT (__etext)
+    .data : ALIGN(4)
     {
-        __data_start__ = .;
-        *(vtable)
         *(.data*)
 
         . = ALIGN(4);
@@ -150,23 +161,18 @@ SECTIONS
 
         KEEP(*(.jcr*))
         . = ALIGN(4);
-        /* All data end */
-        __data_end__ = .;
 
-    } > RAM
+    } > RAM AT > FLASH
     Image$$ER_DATA$$Base = ADDR(.data);
 
-    .bss :
+    .bss : ALIGN(4)
     {
-        . = ALIGN(4);
         __bss_start__ = .;
         *(.bss*)
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
-    } > RAM
-
-    bss_size = __bss_end__ - __bss_start__;
+    } > RAM AT > RAM
 
     .msp_stack : ALIGN(32)
     {

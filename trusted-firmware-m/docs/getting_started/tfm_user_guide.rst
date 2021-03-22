@@ -224,7 +224,7 @@ Execute TF-M example and regression tests on Musca test chip boards
 .. Note::
 
     Before executing any images on Musca-B1 board, please check the
-    :doc:`target platform readme </platform/ext/target/musca_b1/readme>`
+    :doc:`target platform readme </platform/ext/target/musca_b1/sse_200/readme>`
     to have the correct setup.
 
 Example application with BL2 bootloader
@@ -426,6 +426,12 @@ and ``tfm_ns.bin``:
 - Linux::
 
     srec_cat bin/tfm_s.bin -Binary -offset 0xA000000 bin/tfm_ns.bin -Binary -offset 0xA080000 -o tfm.hex -Intel
+
+Example application or regression tests on Musca-B1 using the Secure Enclave
+============================================================================
+
+Follow the above procedures, but to create a unified hex please check the
+:doc:`Musca-B1 Secure Enclave readme </platform/ext/target/musca_b1/secure_enclave/readme>`.
 
 ********************************************************
 Execute TF-M example and regression tests on MPS3 boards

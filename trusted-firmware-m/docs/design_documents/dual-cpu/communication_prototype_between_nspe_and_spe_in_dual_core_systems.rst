@@ -5,7 +5,6 @@ Communication Prototype Between NSPE And SPE In Dual Core System
 :Authors: David Hu
 :Organization: Arm Limited
 :Contact: david.hu@arm.com
-:Status: Accepted
 
 ************
 Introduction
@@ -30,13 +29,13 @@ This design document focuses on the dual core communication design inside TF-M.
 Some changes to TF-M core/Secure Partition Manager (SPM) are listed to support
 the dual core communication. This document only discuss about the implementation
 in TF-M Inter-Process Communication (IPC) model.
-The TF-M non-secure interface library is tightly coupled with mailbox and RTOS
+The TF-M non-secure interface library depends on mailbox and NS RTOS
 implementation. The related changes to TF-M non-secure interface library are not
 discussed in detail in this document.
 
 Some requirements to mailbox functionalities are defined in this document. The
 detailed mailbox design or implementations is not specified in this document.
-Please refer to mailbox dedicate documents.
+Please refer to mailbox dedicate document [1]_.
 
 Organization of the document
 ============================
@@ -94,9 +93,9 @@ Data transferred between NPSE and SPE
 =====================================
 
 A mailbox message should contain the information and parameters of a PSA client
-call. After SPE is notified by a mailbox event, SPE fetches the mailbox message
-from NSPE for PSA Client call processing.
-The mailbox design document should define the structure of the mailbox message.
+call. After SPE is notified by a mailbox event, SPE fetches the parameters from
+NSPE for PSA Client call processing.
+The mailbox design document [1]_ defines the structure of the mailbox message.
 
 The information and parameters of PSA Client call in the mailbox message include
 
@@ -115,11 +114,11 @@ The information and parameters of PSA Client call in the mailbox message include
 - NSPE Client ID. Optional. The NSPE Client ID is required when NSPE RTOS
   enforces non-secure task isolation.
 
-The mailbox design document can define additional members in mailbox message to
+The mailbox implementation may define additional members in mailbox message to
 accomplish mailbox communication between NSPE and SPE.
 
 When the PSA Client call is completed in TF-M, the return result, such as
-PSA_SUCCESS or the handle, should be returned from SPE to NSPE via mailbox.
+PSA_SUCCESS or a handle, should be returned from SPE to NSPE via mailbox.
 
 Mailbox synchronization between NSPE and SPE
 ============================================
@@ -132,9 +131,6 @@ should protect concurrent operations from the other core.
 
 Support of multiple ongoing NS PSA client calls (informative)
 =============================================================
-
-Current TF-M implementation (git tag TF-Mv1.0-RC3) only supports single
-outstanding PSA client call from NSPE.
 
 If the support of multiple ongoing NS PSA client calls in TF-M is required
 in dual-core systems, an optional queue can be maintained in TF-M core to store
@@ -173,8 +169,8 @@ sections.
 
 - `Inter-Processor Communication interrupt handler`_ discusses about the
   Inter-Processor Communication interrupt handler
-- `TF-M Remote Procedure Call (RPC) module`_ introduces TF-M Remote Procedure
-  Call module to support dual-core communication.
+- `TF-M Remote Procedure Call (RPC) layer`_ introduces TF-M Remote Procedure
+  Call layer to support dual-core communication.
 - `PendSV handler`_ specifies the mailbox tasks in PendSV handler.
 - `Return value replying routine in TF-M`_ proposes the routine to reply the
   return value to NSPE.
@@ -188,12 +184,8 @@ asserted by NSPE.
 The platform specific interrupt handler should complete the interrupt
 operations, such as interrupt EOI or acknowledge.
 
-The interrupt handler should call generic mailbox API(s) to check whether an
-inbound mailbox event has occurred. Mailbox functions should be implemented in
-platform vendor driver to check mailbox status in NSPE and distinguish spurious
-events.
-The interrupt handler should assert a PendSV after the inbound mailbox event is
-confirmed. The triggered PendSV handler will deal with the mailbox events.
+The interrupt handler should call SPE mailbox API(s) to deal with the inbound
+mailbox event. The SPE mailbox may assert a PendSV.
 
 Platform specific driver should put Inter-Processor Communication interrupt into
 a proper exception priority, according to system and application requirements.
@@ -206,31 +198,16 @@ The proper priority setting should guarantee that
 
 The exception priority setting is IMPLEMENTATION DEFINED.
 
-It is recommended to implement mailbox time-consuming operations in PendSV
-handler, such as mailbox message copying from NSPE to SPE. This can decrease the
-response latency for other interrupts, compared with putting all the mailbox
-operations in interrupt handler. Refer to `PendSV handler`_ for more details of
-PendSV handler.
+TF-M Remote Procedure Call (RPC) layer
+======================================
 
-In actual mailbox implementation, Inter-Processor Communication interrupt
-handler can execute more mailbox processing, such as mailbox message parsing and
-copying, to simplify the synchronization. It may increase the time consumption
-in interrupt handling. Therefore, it might block the handling of other
-interrupts whose priorities are lower or equal to Inter-Processor Communication
-interrupt. As a result, it becomes more important to adjust the
-Interrupt-Processor Communication interrupt priority in TF-M, according to
-specific system and implementation requirements.
+This design brings up a concept of Remote Procedure Call layer in TF-M.
 
-TF-M Remote Procedure Call (RPC) module
-=======================================
-
-This design brings up a concept of Remote Procedure Call module in TF-M.
-
-The RPC module sits between TF-M SPM and mailbox implementation. The purpose of
-RPC module is to decouple mailbox implementation and TF-M SPM and enhance the
+The RPC layer sits between TF-M SPM and mailbox implementation. The purpose of
+RPC layer is to decouple mailbox implementation and TF-M SPM and enhance the
 generality of entire dual-core communication.
 
-The RPC module provides a set of APIs to TF-M SPM to handle and reply PSA client
+The RPC layer provides a set of APIs to TF-M SPM to handle and reply PSA client
 call from NSPE in dual-core scenario. Please refer to
 `TF-M RPC definitions to TF-M SPM`_ for API details.
 It hides the details of specific mailbox implementation from TF-M SPM. It avoids
@@ -238,11 +215,11 @@ modifying TF-M SPM to fit mailbox development and changes.
 It can keep a unified PSA client call process in TF-M SPM in both single
 Armv8-M scenario and dual core scenario.
 
-The RPC module defines a set callback functions for mailbox implementation to
+The RPC layer defines a set callback functions for mailbox implementation to
 hook its specific mailbox operations. When TF-M SPM invokes RPC APIs to deal
-with NSPE PSA client call, RPC module eventually calls the callbacks to execute
+with NSPE PSA client call, RPC layer eventually calls the callbacks to execute
 mailbox operations.
-RPC module also defines a set of PSA client call handler APIs for mailbox
+RPC layer also defines a set of PSA client call handler APIs for mailbox
 implementation. RPC specific client call handlers parse the PSA client call
 parameters and invoke common TF-M PSA client call handlers. Please refer to
 `TF-M RPC definitions for mailbox`_ for the details.
@@ -256,8 +233,8 @@ mailbox event(s) in the bottom half of PendSV handler. The top half of PendSV
 contains the original scheduling.
 
 Mailbox handling must be executed after the original scheduling to make sure
-that when mailbox handling triggers the sleeping secure service, the status of
-sleeping secure service has been updated in scheduling.
+that the status of sleeping secure service has been updated in scheduling when
+mailbox handling triggers the sleeping secure service.
 
 A compile flag can be defined to disable mailbox handling in PendSV handler in
 single Armv8-M scenario during building.
@@ -273,23 +250,20 @@ PendSV handler should call RPC API ``tfm_rpc_client_call_handler()`` to check
 and handle PSA client call request from NSPE. ``tfm_rpc_client_call_handler()``
 invokes request handling callback function to eventually execute specific
 mailbox message handling operations. The mailbox APIs are defined in mailbox
-design document
+design document [1]_.
 
 The handling process in mailbox operation consists of the following steps.
 
-1. If copy operations are not done in Inter-Processor Communication interrupt
-   handler, the mailbox handling should fetch the mailbox message(s) containing
-   PSA client call request from NSPE. Proper protection and synchronization
-   should be implemented in mailbox to guarantee that the operations are not
-   interfered by NSPE mailbox operations or Inter-Processor Communication
-   interrupt handler. If a queue is maintained inside TF-M core, mailbox
-   handling can fetch multiple mailbox messages together into the queue, to save
-   the time of synchronization between two cores.
+1. SPE mailbox fetches the PSA client call parameters from NSPE mailbox.
+   Proper protection and synchronization should be implemented in mailbox to
+   guarantee that the operations are not interfered by NSPE mailbox operations
+   or Inter-Processor Communication interrupt handler.
+   If a queue is maintained inside TF-M core, SPE mailbox can fetch multiple
+   PSA client calls together into the queue, to save the time of synchronization
+   between two cores.
 
-2. Mailbox handling parses the mailbox message copied in SPE and fetches the
-   information of the PSA client call, including the PSA client call type.
-   Additional checks can be executed to make sure that the mailbox message is
-   valid. It may require additional information carried in the mailbox message.
+2. SPE mailbox parses the PSA client call paramters copied from NSPE, including
+   the PSA client call type.
 
 3. The PSA client call request is dispatched to the dedicated TF-M RPC PSA
    client call handler. The PSA client call request is processed in the
@@ -311,10 +285,8 @@ handler definitions can be adjusted to be more generic for dual-core scenario
 and single Armv8-M implementation. Please refer to
 `Summary of changes to TF-M core/SPM`_ for details.
 
-If there are multiple NSPE PSA client call requests pending, the mailbox
-handling can process mailbox messages one by one. Mailbox handling can complete
-all the mailbox messages processing before running to the bottom half of the
-PendSV handler.
+If there are multiple NSPE PSA client call requests pending, SPE mailbox can
+process mailbox messages one by one.
 
 Implementation details in PendSV handler
 ----------------------------------------
@@ -343,8 +315,8 @@ routines.
 
 - `Replying routine for psa_framework_version() and psa_version()`_ describes
   the routine for ``psa_framework_version()`` and ``psa_version()``.
-- `Replying routine for psa_connect(), psa_call() and psa_close()` describes the
-  routine for ``psa_connect()``, ``psa_call()`` and ``psa_close()``.
+- `Replying routine for psa_connect(), psa_call() and psa_close()`_ describes
+  the routine for ``psa_connect()``, ``psa_call()`` and ``psa_close()``.
 
 Replying routine for psa_framework_version() and psa_version()
 --------------------------------------------------------------
@@ -371,10 +343,10 @@ is completed in the target Secure Partition. The target Secure Partition calls
 mailbox reply operations. The mailbox reply functions must not trigger context
 switch inside SVC handler.
 
-If an errors occurs in the handlers, the TF-M RPC handlers,
+If an error occurs in the handlers, the TF-M RPC handlers,
 ``tfm_rpc_psa_call()``, ``tfm_rpc_psa_connect()`` and ``tfm_rpc_psa_close()``,
 may terminate and return the error, without triggering the target Secure
-Partition. The mailbox implementation should return error code to NSPE.
+Partition. The mailbox implementation should return THE error code to NSPE.
 
 A compile flag should be defined to enable replying routine via mailbox in
 dual-core scenario during building.
@@ -387,7 +359,7 @@ This section discusses the general changes related to NSPE and SPE
 communication to current TF-M core/SPM implementations.
 
 The detailed mailbox implementations are not covered in this section. Please
-refer to mailbox related specific documents.
+refer to mailbox dedicated document [1]_.
 The platform specific implementations are also not covered in this section,
 including the Inter-Processor Communication interrupt or its interrupt handler.
 
@@ -396,11 +368,11 @@ Common PSA client call handlers
 
 Common PSA client call handlers should be extracted from current PSA client
 call handlers implementation in TF-M.
-Common PSA client call handlers are shared by both TF-M RPC module in dual-core
+Common PSA client call handlers are shared by both TF-M RPC layer in dual-core
 scenario and SVCall handlers in single Armv8-M scenario.
 
-TF-M RPC module
-===============
+TF-M RPC layer
+==============
 
 This section describes the TF-M RPC data types and APIs.
 
@@ -488,6 +460,32 @@ specific mailbox reply.
 Please note that ``tfm_rpc_client_call_reply()`` doesn't return the status of
 underlying mailbox reply process.
 
+``tfm_rpc_set_caller_data()``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This function sets the private data of the NS caller in TF-M message to identify
+the caller after PSA client call is completed.
+
+.. code-block:: c
+
+  void tfm_rpc_set_caller_data(struct tfm_msg_body_t *msg, int32_t client_id);
+
+Parameters
+~~~~~~~~~~
+
++---------------+-----------------------------------------------------+
+| ``msg``       | TF-M message to be set with NS caller private data. |
++---------------+-----------------------------------------------------+
+| ``client_id`` | The client ID of the NS caller.                     |
++---------------+-----------------------------------------------------+
+
+Usage
+~~~~~
+
+``tfm_rpc_set_caller_data()`` invokes callback function ``get_caller_data()`` to
+fetch the private data of caller of PSA client call and set it into TF-M message
+structure.
+
 TF-M RPC definitions for mailbox
 --------------------------------
 
@@ -520,6 +518,7 @@ This structures contains the callback functions for specific mailbox operations.
   struct tfm_rpc_ops_t {
       void (*handle_req)(void);
       void (*reply)(const void *owner, int32_t ret);
+      const void * (*get_caller_data)(int32_t client_id);
   };
 
 ``tfm_rpc_register_ops()``
@@ -755,7 +754,14 @@ Some optional changes or optimizations are listed below.
   ``psa_close()`` can be optimized to skip asserting PendSV in dual-core
   scenario.
 
+*********
+Reference
+*********
+
+.. [1] :doc:`Mailbox Design in TF-M on Dual-core System <./mailbox_design_on_dual_core_system>`
+
 ----------------
 
-Copyright (c) 2019-2020 Arm Limited. All Rights Reserved.
-Copyright (c) 2020 Cypress Semiconductor Corporation
+*Copyright (c) 2019-2021 Arm Limited. All Rights Reserved.*
+
+*Copyright (c) 2020 Cypress Semiconductor Corporation.*

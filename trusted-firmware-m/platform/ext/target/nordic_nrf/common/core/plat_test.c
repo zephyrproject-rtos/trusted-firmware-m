@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
+#include <string.h>
 #include "tfm_plat_test.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <hal/nrf_gpio.h>
 #include <hal/nrf_timer.h>
+#include <helpers/nrfx_reset_reason.h>
 #include <nrf_board.h>
+#include <region_defs.h>
+#include <tfm_platform_api.h>
+#include <log/tfm_log.h>
 
-#define TIMER_RELOAD_VALUE (16*1024*1024)
+#define TIMER_RELOAD_VALUE (1*1000*1000)
 #define USERLED_MASK       (1UL)
+
+/* Area used by psa-arch-tests to keep state. */
+#define PSA_TEST_SCRATCH_AREA_SIZE (0x400)
 
 static bool initialized = false;
 
@@ -69,6 +77,15 @@ uint32_t tfm_plat_test_get_userled_mask(void)
     return USERLED_MASK;
 }
 
+static void timer_init(NRF_TIMER_Type * TIMER, uint32_t ticks)
+{
+    nrf_timer_mode_set(TIMER, NRF_TIMER_MODE_TIMER);
+    nrf_timer_bit_width_set(TIMER, NRF_TIMER_BIT_WIDTH_32);
+    nrf_timer_frequency_set(TIMER, NRF_TIMER_FREQ_1MHz);
+    nrf_timer_cc_set(TIMER, NRF_TIMER_CC_CHANNEL0, ticks);
+    nrf_timer_one_shot_enable(TIMER, NRF_TIMER_CC_CHANNEL0);
+}
+
 static void timer_stop(NRF_TIMER_Type * TIMER)
 {
     nrf_timer_task_trigger(TIMER, NRF_TIMER_TASK_STOP);
@@ -79,11 +96,6 @@ static void timer_stop(NRF_TIMER_Type * TIMER)
 static void timer_start(NRF_TIMER_Type * TIMER)
 {
     timer_stop(TIMER);
-    nrf_timer_mode_set(TIMER, NRF_TIMER_MODE_TIMER);
-    nrf_timer_bit_width_set(TIMER, NRF_TIMER_BIT_WIDTH_32);
-    nrf_timer_frequency_set(TIMER, NRF_TIMER_FREQ_16MHz);
-    nrf_timer_cc_set(TIMER, NRF_TIMER_CC_CHANNEL0, TIMER_RELOAD_VALUE);
-    nrf_timer_one_shot_enable(TIMER, NRF_TIMER_CC_CHANNEL0);
 
     nrf_timer_task_trigger(TIMER, NRF_TIMER_TASK_CLEAR);
     nrf_timer_int_enable(TIMER, NRF_TIMER_INT_COMPARE0_MASK);
@@ -93,6 +105,7 @@ static void timer_start(NRF_TIMER_Type * TIMER)
 
 void tfm_plat_test_secure_timer_start(void)
 {
+    timer_init(NRF_TIMER0, TIMER_RELOAD_VALUE);
     timer_start(NRF_TIMER0);
 }
 
@@ -103,10 +116,54 @@ void tfm_plat_test_secure_timer_stop(void)
 
 void tfm_plat_test_non_secure_timer_start(void)
 {
+    timer_init(NRF_TIMER1, TIMER_RELOAD_VALUE);
     timer_start(NRF_TIMER1);
 }
 
 void tfm_plat_test_non_secure_timer_stop(void)
 {
     timer_stop(NRF_TIMER1);
+}
+
+void pal_timer_init_ns(uint32_t ticks)
+{
+    timer_init(NRF_TIMER1, ticks);
+    NVIC_EnableIRQ(TIMER1_IRQn);
+}
+
+void pal_timer_start_ns(void)
+{
+    timer_start(NRF_TIMER1);
+}
+
+void pal_timer_stop_ns(void)
+{
+    timer_stop(NRF_TIMER1);
+}
+
+#if !defined(TFM_ENABLE_IRQ_TEST)
+/* Watchdog timeout handler. */
+void TIMER1_Handler(void)
+{
+    pal_timer_stop_ns();
+    int ret = tfm_platform_system_reset();
+    if (ret) {
+        LOG_MSG("Reset failed: %d\n", ret);
+    }
+}
+#endif
+
+uint32_t pal_nvmem_get_addr(void)
+{
+    static bool psa_scratch_initialized = false;
+    static __ALIGN(4) uint8_t __psa_scratch[PSA_TEST_SCRATCH_AREA_SIZE];
+
+    if (!psa_scratch_initialized && (nrfx_reset_reason_get() == 0)){
+        /* PSA API tests expect this area to be initialized to all 0xFFs after a
+         * power-on reset.
+         */
+        memset(__psa_scratch, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
+    }
+    psa_scratch_initialized = true;
+    return (uint32_t)__psa_scratch;
 }

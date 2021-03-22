@@ -20,7 +20,6 @@
 /* adapted from Cypress PSoC64 Peripheral-Driver-Library v1.3.1
    startup_psoc6_02_cm4.S*/
 
-#include "region_defs.h"
 #include "tfm_plat_config.h"
 
     /* The CPU VTOR register */

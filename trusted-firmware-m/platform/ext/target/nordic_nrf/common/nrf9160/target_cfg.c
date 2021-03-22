@@ -23,12 +23,12 @@
 #include <spu.h>
 #include <nrfx.h>
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
     NRF_TIMER0_S_BASE,
     NRF_TIMER0_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
     NRF_UARTE1_S_BASE,
     NRF_UARTE1_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
 };

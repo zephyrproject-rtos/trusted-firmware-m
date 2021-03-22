@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Cypress Semiconductor Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -19,6 +20,10 @@ target_include_directories(platform_region_defs
     INTERFACE
         partition
 )
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
+)
 
 #========================= Platform common defs ===============================#
 
@@ -32,9 +37,9 @@ target_sources(tfm_s
         $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/cy_syslib_iar.c>
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
-    $<$<C_COMPILER_ID:IAR>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_common_s.icf>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(NS)
@@ -117,7 +122,6 @@ target_sources(platform_s
         ./driver_dap.c
         ./nv_counters.c
         ./services/src/tfm_platform_system.c
-        ./dummy_crypto_keys.c
         ./Device/Source/device_definition.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -198,26 +202,40 @@ target_include_directories(platform_ns
 
 target_compile_definitions(platform_ns
     PUBLIC
-        TFM_MULTI_CORE_MULTI_CLIENT_CALL
         RTE_USART5
 )
 
 # device_cfg.h defines the number of mailbox queue slots to support multiple
 # PSA client calls feature.
-target_include_directories(psa_interface
+target_include_directories(tfm_ns_interface
     INTERFACE
         Device/Config
 )
 
 target_link_libraries(platform_ns
     PRIVATE
-        psa_interface
+        tfm_ns_interface
 )
 
 ########################### export sources #####################################
 
-set(EXPORT_SRC_DIR    ${CMAKE_BINARY_DIR}/install/export/tfm/src)
+set(INSTALL_INTERFACE_INC_DIR    ${TFM_INSTALL_PATH}/interface/include)
+set(INSTALL_INTERFACE_SRC_DIR    ${TFM_INSTALL_PATH}/interface/src)
+set(INSTALL_IMAGE_SIGNING_DIR    ${TFM_INSTALL_PATH}/image_signing)
+set(INSTALL_MEMORY_LAYOUT_DIR    ${TFM_INSTALL_PATH}/memory_layout)
 
-install(FILES   mailbox/platform_multicore.c
-                mailbox/platform_ns_mailbox.c
-    DESTINATION ${EXPORT_SRC_DIR}/platform)
+install(FILES       mailbox/platform_multicore.c
+                    mailbox/platform_ns_mailbox.c
+        DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
+
+install(FILES       mailbox/platform_multicore.h
+                    mailbox/ns_ipc_config.h
+                    Device/Config/device_cfg.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+
+install(FILES       partition/flash_layout.h
+                    partition/region_defs.h
+        DESTINATION ${INSTALL_MEMORY_LAYOUT_DIR})
+
+install(FILES       security/policy/policy_multi_CM0_CM4_tfm_dev_certs.json
+        DESTINATION ${INSTALL_IMAGE_SIGNING_DIR})

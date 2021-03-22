@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2020 ARM Limited
- * Copyright 2016-2018 Cypress Semiconductor Corporation
+ * Copyright (c) 2016-2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -301,6 +301,13 @@ SECTIONS
 
     Image$$ER_TFM_DATA$$Base = ADDR(.data);
     Image$$ER_TFM_DATA$$Limit = ADDR(.data) + SIZEOF(.data) + SIZEOF(.bss);
+
+#if defined(PSA_API_TEST_ENABLED)
+    .PSA_API_TEST_NVMEM PSA_API_TEST_NVMEM_START (NOLOAD) :
+    {
+        . += PSA_API_TEST_NVMEM_SIZE;
+    } > ram
+#endif
 
 #if defined (NS_DATA_SHARED_START)
     .TFM_SHARED NS_DATA_SHARED_START (NOLOAD) :

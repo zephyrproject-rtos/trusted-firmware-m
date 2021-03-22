@@ -20,7 +20,6 @@
 /* adapted from Cypress PSoC64 Peripheral-Driver-Library v1.3.1
    startup_psoc6_02_cm0plus.S*/
 
-#include "region_defs.h"
 #include "tfm_plat_config.h"
 
     /* Address of the NMI handler */

@@ -27,10 +27,10 @@ add_library(${CC312_LIB_TARGET} STATIC)
 # it. it's still possible to create multiple targets by altering the name
 # variable.
 if(NOT TARGET ${CC312_PAL_TARGET})
-    add_library(${CC312_PAL_TARGET} STATIC EXCLUDE_FROM_ALL)
+    add_library(${CC312_PAL_TARGET} INTERFACE)
 endif()
 if(NOT TARGET ${CC312_CDMPU_TARGET})
-    add_library(${CC312_CDMPU_TARGET} STATIC EXCLUDE_FROM_ALL)
+    add_library(${CC312_CDMPU_TARGET} INTERFACE)
 endif()
 
 add_subdirectory(codesafe)
@@ -56,25 +56,23 @@ target_link_libraries(${CC312_LIB_TARGET}
 ########################## PAL #################################################
 
 target_compile_definitions(${CC312_PAL_TARGET}
-    PRIVATE
+    INTERFACE
         CC_TRNG_MODE=0
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:CC_PAL_MAX_LOG_LEVEL=3>
-    PUBLIC
         CC_IOT
 )
 
 ########################## CDMPU ###############################################
 
 target_link_libraries(${CC312_CDMPU_TARGET}
-    PRIVATE
+    INTERFACE
         ${CC312_PAL_TARGET}
 )
 
 target_compile_definitions(${CC312_CDMPU_TARGET}
-    PRIVATE
+    INTERFACE
         DLLI_MAX_BUFF_SIZE=0x10000
         USE_MBEDTLS_CRYPTOCELL
         CC_MNG_MIN_BACKUP_SIZE_IN_BYTES=512
-    PUBLIC
         CC_IOT
 )

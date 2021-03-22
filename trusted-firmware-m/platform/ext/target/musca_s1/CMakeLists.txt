@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -24,8 +24,8 @@ target_sources(tfm_s
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_cmsdk_musca_s.S>
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_common_s.sct>
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
 )
 
 if(NS)
@@ -68,10 +68,13 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
+        Libraries
 )
 
 target_sources(platform_s
     PRIVATE
+        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
+        CMSIS_Driver/Driver_QSPI_Flash.c
         CMSIS_Driver/Driver_Flash_MRAM.c
         CMSIS_Driver/Driver_MPC.c
         CMSIS_Driver/Driver_PPC.c
@@ -84,11 +87,13 @@ target_sources(platform_s
         Native_Driver/gpio_cmsdk_drv.c
         Native_Driver/uart_pl011_drv.c
         Native_Driver/musca_s1_scc_drv.c
+        Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/cache_drv.c
         spm_hal.c
         tfm_hal_isolation.c
         target_cfg.c
         Native_Driver/timer_cmsdk_drv.c
+        Libraries/mt25ql_flash_lib.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -120,6 +125,7 @@ target_include_directories(platform_ns
         Device/Include
         Native_Driver
         services/include
+        Libraries
 )
 
 #========================= Platform BL2 =======================================#
@@ -142,12 +148,13 @@ if(BL2)
         PUBLIC
             partition
             Device/Include
+            Libraries
         PRIVATE
             .
             CMSIS_Driver/Config
             Device/Config
             Native_Driver
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
-            ${CMAKE_CURRENT_BINARY_DIR}/../../../../bl2/ext/mcuboot # for mcuboot_config.h only
+            ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
     )
 endif()

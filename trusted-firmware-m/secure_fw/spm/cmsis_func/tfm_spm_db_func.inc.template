@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,38 +13,38 @@
 #include "psa_manifest/sid.h"
 
 {# Produce a build error if heap_size is presented in the manifest, because of the dynamic memory allocation is not supported now. #}
-{% for manifest in manifests %}
-    {% if manifest.manifest.heap_size %}
-#error "Please do not add 'heap_size' for partition '{{manifest.manifest.name}}', the dynamic memory allocation is not supported now!"
+{% for partition in partitions %}
+    {% if partition.manifest.heap_size %}
+#error "Please do not add 'heap_size' for partition '{{partition.manifest.name}}', the dynamic memory allocation is not supported now!"
     {% endif %}
 {% endfor %}
 /**************************************************************************/
 /** IRQ count per partition */
 /**************************************************************************/
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-    {% if manifest.manifest.irqs %}
-#define TFM_PARTITION_{{manifest.manifest.name}}_IRQ_COUNT {{manifest.manifest.irqs | length() }}
+    {% if partition.manifest.irqs %}
+#define TFM_PARTITION_{{partition.manifest.name}}_IRQ_COUNT {{partition.manifest.irqs | length() }}
     {% else %}
-#define TFM_PARTITION_{{manifest.manifest.name}}_IRQ_COUNT 0
+#define TFM_PARTITION_{{partition.manifest.name}}_IRQ_COUNT 0
     {% endif %}
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
 {% endfor %}
 /**************************************************************************/
 /** Declarations of partition init functions */
 /**************************************************************************/
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-extern void {{manifest.manifest.entry_point}}(void);
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+extern void {{partition.manifest.entry_point}}(void);
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
 {% endfor %}
@@ -66,18 +66,18 @@ static uint32_t ns_interrupt_ctx_stack[
 static uint32_t tfm_core_interrupt_ctx_stack[
         sizeof(struct interrupted_ctx_stack_frame_t) / sizeof(uint32_t)];
 
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-static uint32_t ctx_stack_{{manifest.manifest.name}}[
+static uint32_t ctx_stack_{{partition.manifest.name}}[
         (sizeof(struct interrupted_ctx_stack_frame_t) +
-            (TFM_PARTITION_{{manifest.manifest.name}}_IRQ_COUNT) * (
+            (TFM_PARTITION_{{partition.manifest.name}}_IRQ_COUNT) * (
                 sizeof(struct interrupted_ctx_stack_frame_t) +
                 sizeof(struct handler_ctx_stack_frame_t)
         )) / sizeof(uint32_t)];
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
 {% endfor %}
@@ -85,13 +85,13 @@ uint32_t *ctx_stack_list[] =
 {
     ns_interrupt_ctx_stack,
     tfm_core_interrupt_ctx_stack,
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-    ctx_stack_{{manifest.manifest.name}},
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    ctx_stack_{{partition.manifest.name}},
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 {% endfor %}
 };
@@ -99,15 +99,15 @@ uint32_t *ctx_stack_list[] =
 /**************************************************************************/
 /** Dependencies array for Secure Partition */
 /**************************************************************************/
-{% for manifest in manifests %}
-    {% if manifest.manifest.dependencies %}
-        {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.dependencies %}
+        {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
         {% endif %}
-static int32_t dependencies_{{manifest.manifest.name}}[] =
+static int32_t dependencies_{{partition.manifest.name}}[] =
 {
-        {% for dependence in manifest.manifest.dependencies %}
-            {% for service in manifest.manifest.services %}
+        {% for dependence in partition.manifest.dependencies %}
+            {% for service in partition.manifest.services %}
                 {% if dependence == service.name %}
 #error "Please DO NOT include SP's own RoT Service '{{dependence}}', which will cause a deadlock!"
                 {% endif %}
@@ -115,8 +115,8 @@ static int32_t dependencies_{{manifest.manifest.name}}[] =
     {{dependence}}_SID,
         {% endfor %}
 };
-        {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+        {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
         {% endif %}
 
     {% endif %}
@@ -136,36 +136,36 @@ const struct spm_partition_static_data_t static_data_list[] =
         .partition_flags      = SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_PSA_ROT,
     },
 
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
     {{'{'}}
-        .partition_id         = {{manifest.manifest.name}},
-    {% if manifest.attr.tfm_partition_ipc %}
+        .partition_id         = {{partition.manifest.name}},
+    {% if partition.attr.tfm_partition_ipc %}
         .partition_flags      = SPM_PART_FLAG_IPC
     {% else %}
         .partition_flags      = 0
     {% endif %}
-    {% if manifest.manifest.type == "APPLICATION-ROT" %}
+    {% if partition.manifest.type == "APPLICATION-ROT" %}
                               | SPM_PART_FLAG_APP_ROT
-    {% elif manifest.manifest.type == "PSA-ROT" %}
+    {% elif partition.manifest.type == "PSA-ROT" %}
                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
     {% else %}
-#error "Unsupported type '{{manifest.manifest.type}}' for partition '{{manifest.manifest.name}}'!"
+#error "Unsupported type '{{partition.manifest.type}}' for partition '{{partition.manifest.name}}'!"
     {% endif %}
                               ,
-        .partition_priority   = TFM_PRIORITY({{manifest.manifest.priority}}),
-        .partition_init       = {{manifest.manifest.entry_point}},
-        .dependencies_num     = {{manifest.manifest.dependencies | length()}},
-    {% if manifest.manifest.dependencies %}
-        .p_dependencies       = dependencies_{{manifest.manifest.name}},
+        .partition_priority   = TFM_PRIORITY({{partition.manifest.priority}}),
+        .partition_init       = {{partition.manifest.entry_point}},
+        .dependencies_num     = {{partition.manifest.dependencies | length()}},
+    {% if partition.manifest.dependencies %}
+        .p_dependencies       = dependencies_{{partition.manifest.name}},
     {% else %}
         .p_dependencies       = NULL,
     {% endif %}
     {{'},'}}
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
 {% endfor %}
@@ -174,15 +174,15 @@ const struct spm_partition_static_data_t static_data_list[] =
 /**************************************************************************/
 /** The platform data of the partition list */
 /**************************************************************************/
-{% for manifest in manifests %}
-    {% if manifest.manifest.mmio_regions %}
-        {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.mmio_regions %}
+        {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
         {% endif %}
-const struct tfm_spm_partition_platform_data_t *
-    platform_data_list_{{manifest.manifest.name}}[] =
+const struct platform_data_t *
+    platform_data_list_{{partition.manifest.name}}[] =
 {
-        {% for region in manifest.manifest.mmio_regions %}
+        {% for region in partition.manifest.mmio_regions %}
             {% if region.conditional %}
 #ifdef {{region.conditional}}
             {% endif %}
@@ -193,28 +193,28 @@ const struct tfm_spm_partition_platform_data_t *
         {% endfor %}
     NULL
 };
-        {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+        {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
         {% endif %}
 
     {% endif %}
 {% endfor %}
-const struct tfm_spm_partition_platform_data_t **platform_data_list_list[] =
+const struct platform_data_t **platform_data_list_list[] =
 {
     NULL,
     NULL,
 
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-    {% if manifest.manifest.mmio_regions %}
-    platform_data_list_{{manifest.manifest.name}},
-    {% else %}{# if manifest.manifest.mmio_regions #}
+    {% if partition.manifest.mmio_regions %}
+    platform_data_list_{{partition.manifest.name}},
+    {% else %}{# if partition.manifest.mmio_regions #}
     NULL,
-    {% endif %}{# if manifest.manifest.mmio_regions #}
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% endif %}{# if partition.manifest.mmio_regions #}
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
 {% endfor %}
@@ -228,12 +228,12 @@ static struct spm_partition_desc_t partition_list [] =
     {{'{{0}}'}}, /* placeholder for Non-secure internal partition */
     {{'{{0}}'}},   /* placeholder for TF-M Core internal partition */
 
-{% for manifest in manifests %}
+{% for partition in partitions %}
     /* -----------------------------------------------------------------------*/
-    /* - Partition DB record for {{manifest.manifest.name}} */
+    /* - Partition DB record for {{partition.manifest.name}} */
     /* -----------------------------------------------------------------------*/
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
     {{'{'}}
     /* Runtime data */
@@ -241,8 +241,8 @@ static struct spm_partition_desc_t partition_list [] =
         .static_data              = NULL,
         .platform_data_list       = NULL,
     {{'},'}}
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
 {% endfor %}

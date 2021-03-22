@@ -232,8 +232,6 @@ modes are supported by which platforms:
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | AN519               | Yes             | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
-| AN539               | Yes             | Yes           | Yes      | Yes            | No           |
-+---------------------+-----------------+---------------+----------+----------------+--------------+
 | FVP_SSE300_MPS2     | No              | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | FVP_SSE300_MPS3     | No              | Yes           | Yes      | Yes            | No           |
@@ -248,9 +246,9 @@ modes are supported by which platforms:
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | AN524               | Yes             | No            | No       | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
-| PSoC64              | Yes             | No            | No       | No             | No           |
+| AN547               | No              | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
-| SSE-200_AWS         | Yes             | Yes           | Yes      | Yes            | No           |
+| PSoC64              | Yes             | No            | No       | No             | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | STM_DISCO_L562QE    | No              | Yes           | No       | No             | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
@@ -311,7 +309,7 @@ compile time switches:
 
 Example of how to provide the secure image minimum version::
 
-    cmake -DTFM_PLATFORM=musca_b1 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMCUBOOT_S_IMAGE_MIN_VER=1.2.3+4 ..
+    cmake -DTFM_PLATFORM=musca_b1/sse_200 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMCUBOOT_S_IMAGE_MIN_VER=1.2.3+4 ..
 
 ********************
 Signature algorithms
@@ -383,19 +381,18 @@ MCUBoot related compile time switches can be set by cmake variables.
     Can be used to configure the level of logging in MCUBoot. The possible
     values are the following:
 
-    - **LOG_LEVEL_OFF**
-    - **LOG_LEVEL_ERROR**
-    - **LOG_LEVEL_WARNING**
-    - **LOG_LEVEL_INFO**
-    - **LOG_LEVEL_DEBUG**
+    - **OFF**
+    - **ERROR**
+    - **WARNING**
+    - **INFO**
+    - **DEBUG**
 
     The logging in MCUBoot can be disabled and thus the code size can be reduced
-    by setting it to ``LOG_LEVEL_OFF``. Its value depends on the build type. If
-    the build type is ``Debug`` and a value has been provided (e.g. through the
-    command line or the CMake GUI) then that value will be used, otherwise it is
-    ``LOG_LEVEL_INFO`` by default. In case of different kinds of ``Release``
-    builds its value is set to ``LOG_LEVEL_OFF`` (any other value will be
-    overridden).
+    by setting it to ``OFF``. Its value depends on the build type. If the build
+    type is ``Debug`` then default value is ``INFO``. In case of different kinds
+    of ``Release`` builds the default value is ``OFF``. The default value can
+    be overridden through the command line or in the CMake GUI regardless of the
+    build type.
 - MCUBOOT_ENC_IMAGES (default: False):
     - **True:** Adds encrypted image support in the source and encrypts the
       resulting image using the ``enc-rsa2048-pub.pem`` key found in the MCUBoot
@@ -430,7 +427,7 @@ images.
 The version number of the image (single image boot) can manually be passed in
 through the command line in the cmake configuration step::
 
-    cmake -DTFM_PLATFORM=musca_b1 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DIMAGE_VERSION_S=1.2.3+4 ..
+    cmake -DTFM_PLATFORM=musca_b1/sse_200 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DIMAGE_VERSION_S=1.2.3+4 ..
 
 Alternatively, the version number can be less specific (e.g 1, 1.2, or 1.2.3),
 where the missing numbers are automatically set to zero. The image version
@@ -464,7 +461,7 @@ and its value should always be increased if a security flaw was fixed in the
 current image version. The value of the security counter (single image boot) can
 be specified at build time in the cmake configuration step::
 
-    cmake -DTFM_PLATFORM=musca_b1 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DSECURITY_COUNTER_S=42 ../
+    cmake -DTFM_PLATFORM=musca_b1/sse_200 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DSECURITY_COUNTER_S=42 ../
 
 The security counter can be independent from the image version, but not
 necessarily. Alternatively, if it is not specified at build time with the
@@ -794,4 +791,20 @@ RAM loading is enabled, notice that image with higher version number
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+****************************************
+Integration with Firmware Update service
+****************************************
+The shim layer of the Firmware Update partition calls the APIs in
+bootutil_misc.c to control the image status.
+
+- Call ``boot_write_magic()`` to make the image as a candidate image for booting.
+- Call ``boot_set_confirmed()`` to make the image as a permanent image.
+
+.. Note::
+    Currently, in direct-xip mode and ram-load mode, TF-M cannot get the
+    information of which slot contains the running image from the bootloader.
+    So the Firmware Update partition cannot decide where to write the new
+    image. As a result, the firmware update service is not supported in
+    direct-xip mode and ram-load mode.
+
+*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*

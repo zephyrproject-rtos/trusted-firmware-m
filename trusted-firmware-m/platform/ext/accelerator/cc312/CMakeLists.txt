@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-# Allow linking to things 'upwards' in the directory tree (in this case bl2 / tfm_partition_crypto)
+# Allow linking to things 'upwards' in the directory tree (in this case bl2 / tfm_psa_rot_partition_crypto)
 cmake_policy(SET CMP0079 NEW)
 # Allow relative paths
 cmake_policy(SET CMP0076 NEW)
@@ -24,7 +24,6 @@ if(BL2)
     target_sources(bl2_crypto_hw
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/cc312.c
-            $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
             $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},PROVISIONING>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_provisioning.c>
     )
 
@@ -48,11 +47,18 @@ if(BL2)
     add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/bl2_cc312)
     set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 
+    target_sources(bl2_cc312
+        PUBLIC
+            $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
+    )
+
     # Adding two targets as link-time dependencies of each other seems bad, but
     # in reality it just means that they'll share headers and compile defs.
     target_link_libraries(bl2_cc312
         PRIVATE
             bl2_mbedcrypto
+        PUBLIC
+            platform_bl2
     )
     target_link_libraries(bl2_mbedcrypto
         PRIVATE
@@ -61,14 +67,8 @@ if(BL2)
             bl2_crypto_hw
     )
 
-    #Link utils to PAL for logging
-    target_link_libraries(cc312_pal
-        PRIVATE
-            bl2_crypto_hw
-    )
-
     target_link_libraries(cc312_cdmpu
-        PRIVATE
+        INTERFACE
             bl2_mbedcrypto
     )
 
@@ -93,8 +93,8 @@ if(BL2)
 
     target_include_directories(cc312_cdmpu
         BEFORE
-        PUBLIC
-        ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
+        INTERFACE
+            ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
     )
 endif()
 
@@ -131,11 +131,18 @@ set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
 add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/crypto_service_cc312)
 set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 
+target_sources(crypto_service_cc312
+    PUBLIC
+        $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
+)
+
 # Adding two targets as link-time dependencies of each other seems bad, but
 # in reality it just means that they'll share headers and compile defs.
 target_link_libraries(crypto_service_cc312
     PRIVATE
         crypto_service_mbedcrypto
+    PUBLIC
+        platform_s
 )
 target_link_libraries(crypto_service_mbedcrypto
     PRIVATE

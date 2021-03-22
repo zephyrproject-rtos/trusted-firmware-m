@@ -60,7 +60,7 @@ Trusted Firmware-M Documentation
             <p>List of supported boards and platforms.</p>
         </li>
         <li class="grid-item">
-            <a href="https://ci.trustedfirmware.org/job/tf-m-build-docs/lastSuccessfulBuild/artifact/trusted-firmware-m/build/install/doc/reference_manual/html/index.html">
+            <a href="https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/reference_manual/html/index.html">
                 <img alt="" src="_static/images/tfm.png"/>
                 <h2>API</h2>
             </a>
@@ -89,6 +89,7 @@ Trusted Firmware-M Documentation
     docs/reference/index
     docs/design_documents/index
     platform/ext/index
+    docs/threat_models/index
 
 
 .. toctree::

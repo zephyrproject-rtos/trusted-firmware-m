@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -66,6 +66,8 @@
         PSA_FUNCTION_NAME(psa_export_key)
 #define psa_export_public_key \
         PSA_FUNCTION_NAME(psa_export_public_key)
+#define psa_purge_key \
+        PSA_FUNCTION_NAME(psa_purge_key)
 #define psa_copy_key \
         PSA_FUNCTION_NAME(psa_copy_key)
 #define psa_cipher_operation_init \

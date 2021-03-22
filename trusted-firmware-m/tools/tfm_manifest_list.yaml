@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -22,11 +22,8 @@
       "pid": 256,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_ps.*"
+           "*tfm_*partition_ps.*"
          ],
-         "object_list": [
-           "*test_ps_nv_counters.*",
-         ]
       }
     },
     {
@@ -40,7 +37,7 @@
       "pid": 257,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_its.*"
+           "*tfm_*partition_its.*"
          ]
       }
     },
@@ -55,7 +52,7 @@
       "pid": 258,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_audit.*"
+           "*tfm_*partition_audit.*"
          ]
       }
     },
@@ -70,7 +67,7 @@
       "pid": 259,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_crypto.*"
+           "*tfm_*partition_crypto.*"
          ]
       }
     },
@@ -85,7 +82,7 @@
       "pid": 260,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_platform.*"
+           "*tfm_*partition_platform.*"
          ]
       }
     },
@@ -100,7 +97,7 @@
       "pid": 261,
       "linker_pattern": {
         "library_list": [
-           "*tfm_partition_attestation.*"
+           "*tfm_*partition_attestation.*"
          ]
       }
     },
@@ -115,8 +112,8 @@
       "version_minor": 1,
       "pid": 262,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ss_core_test.*"
+        "library_list": [
+           "*tfm_*partition_core_test.*"
          ]
       }
     },
@@ -131,8 +128,8 @@
       "version_minor": 1,
       "pid": 263,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ss_core_test_2.*"
+        "library_list": [
+           "*tfm_*partition_core_test_2.*"
          ]
       }
     },
@@ -147,16 +144,8 @@
       "version_minor": 1,
       "pid": 264,
       "linker_pattern": {
-        "object_list": [
-          "*tfm_secure_client_service.*",
-          "*test_framework*",
-          "*uart_stdout.*",
-          "*Driver_USART.*",
-          "*arm_uart_drv.*",   # MPS2-AN521, MPS2-AN519
-          "*uart_pl011_drv.*", # Musca-A, Musca-B1
-          "*uart_cmsdk_drv*",  # MPS3-AN524
-          "*secure_suites.*",
-          "*attestation_s_interface_testsuite.*"
+        "library_list": [
+           "*tfm_*partition_secure_client_service.*"
          ]
       }
     },
@@ -171,8 +160,8 @@
       "version_minor": 1,
       "pid": 265,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ipc_service_test.*"
+        "library_list": [
+           "*tfm_*partition_ipc_service.*"
          ]
       }
     },
@@ -187,8 +176,8 @@
       "version_minor": 1,
       "pid": 266,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ipc_client_test.*"
+        "library_list": [
+           "*tfm_*partition_ipc_client.*"
          ]
       }
     },
@@ -203,9 +192,8 @@
       "version_minor": 1,
       "pid": 267,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_irq_test_service_1.*",
-           "*timer_cmsdk*",
+        "library_list": [
+           "*tfm_*partition_irq_test_1.*"
          ]
       }
     },
@@ -220,8 +208,8 @@
       "version_minor": 1,
       "pid": 268,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_ps_test_service.*"
+        "library_list": [
+           "*tfm_*partition_ps_test.*"
          ]
       }
     },
@@ -236,10 +224,56 @@
       "version_minor": 1,
       "pid": 269,
       "linker_pattern": {
-        "object_list": [
-           "*tfm_secure_client_2.*"
+        "library_list": [
+           "*tfm_*partition_secure_client_2.*"
          ]
       }
-    }
+    },
+    {
+      "name": "TF-M PSA Proxy Service",
+      "short_name": "TFM_SP_PSA_PROXY",
+      "manifest": "secure_fw/partitions/psa_proxy/tfm_psa_proxy.yaml",
+      "tfm_extensions": true,
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_PARTITION_PSA_PROXY",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 270,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_psa_proxy.*"
+         ]
+      }
+    },
+    {
+      "name": "TFM Firmware Update Service",
+      "short_name": "TFM_SP_FWU",
+      "manifest": "secure_fw/partitions/firmware_update/tfm_firmware_update.yaml",
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_PARTITION_FIRMWARE_UPDATE",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 271,
+      "linker_pattern": {
+        "library_list": [
+          "*tfm_*partition_fwu*"
+         ]
+      }
+    },
+    {
+      "name": "TFM FFM11 Partition Service",
+      "short_name": "TFM_SP_FFM11",
+      "manifest": "secure_fw/partitions/tfm_ffm11_partition/tfm_ffm11_partition.yaml",
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_PARTITION_FFM11",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 272,
+      "linker_pattern": {
+        "library_list": [
+          "*tfm_*partition_ffm11.*"
+        ]
+      }
+    },
   ]
 }

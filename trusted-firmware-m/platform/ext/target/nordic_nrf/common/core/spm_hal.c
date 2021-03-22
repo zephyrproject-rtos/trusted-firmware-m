@@ -22,34 +22,15 @@ extern const struct memory_region_limits memory_regions;
 #if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT)
 static struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
-#define PARTITION_REGION_PERIPH_START   6
+#define PARTITION_REGION_PERIPH_START   5
 #define PARTITION_REGION_PERIPH_MAX_NUM 2
 
 static uint32_t periph_num_count = 0;
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
-{
-    enum tfm_plat_err_t err = TFM_PLAT_ERR_SUCCESS;
-
-    /* Configures non-secure memory spaces in the target */
-    sau_and_idau_cfg();
-
-    err = spu_init_cfg();
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = spu_periph_init_cfg();
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   uint32_t partition_idx,
-                  const struct tfm_spm_partition_platform_data_t *platform_data)
+                  const struct platform_data_t *platform_data)
 {
     if (!platform_data) {
         return TFM_PLAT_ERR_INVALID_INPUT;

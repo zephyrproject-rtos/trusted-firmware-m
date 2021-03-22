@@ -239,3 +239,75 @@ macro(add_convert_to_bin_target target)
         DEPENDS ${target}_hex
     )
 endmacro()
+
+# Macro for sharing code among independent binaries. This function extracts
+# some parts of the code based on a symbol template file and creates a text
+# file, which contains the symbols with their absolute addresses, which can be
+# picked up by the linker when linking the other target.
+# INPUTS:
+#     TARGET -                -  Target to extract the symbols/objects from
+#     SHARED_SYMBOL_TEMPLATE  -  Template with names of symbols to share
+macro(compiler_create_shared_code TARGET SHARED_SYMBOL_TEMPLATE)
+    # Create a temporary file, which contains all extracted symbols from 'TARGET'
+    set(ALL_SYMBOLS ${CMAKE_CURRENT_BINARY_DIR}/all_symbols.txt)
+
+    set_property(TARGET ${TARGET} APPEND_STRING PROPERTY LINK_FLAGS " --symdefs=${ALL_SYMBOLS}")
+
+    # Find the CMake script doing the symbol filtering.
+    find_file(FILTER_SYMBOLS_SCRIPT "FilterSharedSymbols.cmake" PATHS ${CMAKE_MODULE_PATH} PATH_SUFFIXES Common NO_DEFAULT_PATH)
+
+    # Single step, just filter the unwanted symbols from symdefs file
+    add_custom_command(TARGET ${TARGET}
+                        POST_BUILD
+
+                        COMMAND ${CMAKE_COMMAND}
+                            -DSHARED_SYMBOL_TEMPLATE=${SHARED_SYMBOL_TEMPLATE}
+                            -DALL_SYMBOLS=${ALL_SYMBOLS}
+                            -P ${FILTER_SYMBOLS_SCRIPT}
+                        BYPRODUCTS
+                            ${CMAKE_CURRENT_BINARY_DIR}/shared_symbols_name.txt
+                            ${CMAKE_CURRENT_BINARY_DIR}/shared_symbols_addr.txt
+                        COMMENT "Filtering shared symbols"
+    )
+endmacro()
+
+macro(compiler_weaken_symbols TARGET SHARED_CODE_PATH ORIG_TARGET LIB_LIST)
+    # Find the CMake scripts
+    find_file(WEAKEN_SYMBOLS_SCRIPT "WeakenSymbols.cmake" PATHS ${CMAKE_MODULE_PATH} PATH_SUFFIXES Common NO_DEFAULT_PATH)
+
+    add_custom_command(TARGET ${TARGET}
+                        PRE_LINK
+
+                        COMMAND ${CMAKE_COMMAND}
+                            -DLIB_LIST='${LIB_LIST}'
+                            -DSHARED_CODE_PATH=${SHARED_CODE_PATH}
+                            -P ${WEAKEN_SYMBOLS_SCRIPT}
+                        COMMENT "Set conflicting symbols to be weak in the original libraries to avoid collision")
+
+    # If sharing target is defined by TF-M build then setup dependency
+    if(NOT ${ORIG_TARGET} STREQUAL "EXTERNAL_TARGET")
+        add_dependencies(${TARGET} ${ORIG_TARGET})
+    endif()
+endmacro()
+
+# Macro for linking shared code to given target. Location of shared code could
+# be outside of the TF-M project. Its location can be defined with the CMake
+# command line argument "SHARED_CODE_PATH". The file containing the shared objects
+# must be named "shared_symbols_addr.txt".
+# INPUTS:
+#     TARGET            Target to link the shared code to
+#     SHARED_CODE_PATH  Shared code located in this folder
+#     ORIG_TARGET       Target that shared code was extraced from <TARGET | "EXTERNAL_TARGET">
+#     LIB_LIST          List of libraries which are linked to top level target
+macro(compiler_link_shared_code TARGET SHARED_CODE_PATH ORIG_TARGET LIB_LIST)
+    # ARMCLANG requires adding a symbol definition file to the source file list.
+    # This is the output of the -symdefs compiler switch.
+    set_source_files_properties(${SHARED_CODE_PATH}/shared_symbols_addr.txt PROPERTIES EXTERNAL_OBJECT true GENERATED true)
+    target_sources(${TARGET} PRIVATE ${SHARED_CODE_PATH}/shared_symbols_addr.txt)
+
+    compiler_weaken_symbols(${TARGET}
+                            ${SHARED_CODE_PATH}
+                            ${ORIG_TARGET}
+                            "${LIB_LIST}"
+    )
+endmacro()

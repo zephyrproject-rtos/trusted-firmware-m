@@ -187,9 +187,10 @@ Here is the RoT Service ID table used in TF-M.
    audit_logging               0x00000                0x000-0x01F
    initial_attestation         0x00000                0x020-0x03F
    platform                    0x00000                0x040-0x05F
-   protected_storage           0x00000                0x060-0x07F
+   protected_storage           0x00000                0x060-0x06F
+   internal_trusted_storage    0x00000                0x070-0x07F
    crypto                      0x00000                0x080-0x09F
-   internal_trusted_storage    0x00000                0x0A0-0x0BF
+   firmware_update             0x00000                0x0A0-0x0BF
    test_secure_service         0x0000F                0x000-0x01F
    core_test                   0x0000F                0x020-0x03F
    core_test_2                 0x0000F                0x040-0x05F
@@ -210,7 +211,7 @@ TF-M uses the below structure to indicate a peripheral memory.
 
 .. code-block:: c
 
-  struct tfm_spm_partition_platform_data_t {
+  struct platform_data_t {
     uint32_t periph_start;
     uint32_t periph_limit;
     int16_t periph_ppc_bank;
@@ -226,7 +227,7 @@ Here is a example for it:
 
 .. code-block:: c
 
-   struct tfm_spm_partition_platform_data_t tfm_peripheral_A;
+   struct platform_data_t tfm_peripheral_A;
    #define TFM_PERIPHERAL_A                 (&tfm_peripheral_A)
 
 linker_pattern
@@ -463,4 +464,4 @@ Reference
 
 --------------
 
-*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2021, Arm Limited. All rights reserved.*

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,8 +14,9 @@
 #include "tfm_svcalls.h"
 #include "utilities.h"
 #include "tfm/tfm_core_svc.h"
-#include "common/tfm_boot_data.h"
-#include "common/psa_client_service_apis.h"
+#include "ffm/tfm_boot_data.h"
+#include "ffm/psa_client_service_apis.h"
+#include "tfm_hal_spm_logdev.h"
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
@@ -93,12 +94,6 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
     case TFM_SVC_PSA_EOI:
         tfm_spm_psa_eoi(ctx);
         break;
-    case TFM_SVC_ENABLE_IRQ:
-        tfm_spm_enable_irq(ctx);
-        break;
-    case TFM_SVC_DISABLE_IRQ:
-        tfm_spm_disable_irq(ctx);
-        break;
     case TFM_SVC_PSA_PANIC:
         tfm_spm_psa_panic();
         break;
@@ -107,6 +102,15 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
         break;
     case TFM_SVC_PSA_LIFECYCLE:
         return tfm_spm_get_lifecycle_state();
+#if (TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_SILENCE)
+    case TFM_SVC_OUTPUT_UNPRIV_STRING:
+        return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
+#endif
+    case TFM_SVC_PSA_IRQ_ENABLE:
+        tfm_spm_irq_enable(ctx);
+        break;
+    case TFM_SVC_PSA_IRQ_DISABLE:
+        return tfm_spm_irq_disable(ctx);
     default:
 #ifdef PLATFORM_SVC_HANDLERS
         return (platform_svc_handlers(svc_num, ctx, lr));
@@ -118,9 +122,24 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
     return PSA_SUCCESS;
 }
 
-uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return)
+
+uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
 {
-    tfm_svc_number_t svc_number = TFM_SVC_SFN_REQUEST;
+    tfm_svc_number_t svc_number = TFM_SVC_PSA_FRAMEWORK_VERSION;
+    uint32_t *svc_args = msp;
+
+    if (!(exc_return & EXC_RETURN_MODE)) {
+        /* Calling SVC from Handler Mode is not supported */
+        tfm_core_panic();
+    }
+
+    if ((exc_return & EXC_RETURN_MODE) && (exc_return & EXC_RETURN_SPSEL)) {
+        /* Use PSP when both EXC_RETURN.MODE and EXC_RETURN.SPSEL are set */
+        svc_args = psp;
+    } else {
+        svc_args = msp;
+    }
+
     /*
      * Stack contains:
      * r0, r1, r2, r3, r12, r14 (lr), the return address and xPSR

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -133,10 +133,11 @@ psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec in_vec[],
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     uint32_t handle = iov->op_handle;
     uint32_t *handle_out = out_vec[0].base;
-    psa_key_handle_t key_handle = iov->key_handle;
+    psa_key_id_t key_id = iov->key_id;
     psa_algorithm_t alg = iov->alg;
+    mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    status = tfm_crypto_check_handle_owner(key_id, NULL);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -148,10 +149,14 @@ psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec in_vec[],
     if (status != PSA_SUCCESS) {
         return status;
     }
-
     *handle_out = handle;
 
-    status = psa_cipher_encrypt_setup(operation, key_handle, alg);
+    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = psa_cipher_encrypt_setup(operation, encoded_key, alg);
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
         (void)tfm_crypto_operation_release(handle_out);
@@ -182,10 +187,11 @@ psa_status_t tfm_crypto_cipher_decrypt_setup(psa_invec in_vec[],
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     uint32_t handle = iov->op_handle;
     uint32_t *handle_out = out_vec[0].base;
-    psa_key_handle_t key_handle = iov->key_handle;
+    psa_key_id_t key_id = iov->key_id;
     psa_algorithm_t alg = iov->alg;
+    mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(key_handle, NULL);
+    status = tfm_crypto_check_handle_owner(key_id, NULL);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -199,8 +205,12 @@ psa_status_t tfm_crypto_cipher_decrypt_setup(psa_invec in_vec[],
     }
 
     *handle_out = handle;
+    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
-    status = psa_cipher_decrypt_setup(operation, key_handle, alg);
+    status = psa_cipher_decrypt_setup(operation, encoded_key, alg);
     if (status != PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
         (void)tfm_crypto_operation_release(handle_out);

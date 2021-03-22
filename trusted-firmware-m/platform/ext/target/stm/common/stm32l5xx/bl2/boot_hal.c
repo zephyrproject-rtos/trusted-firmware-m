@@ -27,8 +27,32 @@
 #include "cmsis.h"
 #include "Driver_Flash.h"
 #include "region_defs.h"
-
+#if defined(EXTERNAL_FLASH)
+#include "flash_map_backend/flash_map_backend.h"
+#endif /*  defined(EXTERNAL_FLASH) */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+#if defined(EXTERNAL_FLASH)
+extern ARM_DRIVER_FLASH OSPI_FLASH_DEV_NAME;
+
+int flash_device_base(uint8_t fd_id, uintptr_t *ret)
+{
+    switch (fd_id) {
+    case  FLASH_DEVICE_ID :
+        *ret = FLASH_DEVICE_BASE;
+        break;
+    case OSPI_FLASH_DEV_ID:
+        *ret = OSPI_FLASH_BASE_ADDRESS;
+        break;
+    default:
+        BOOT_LOG_ERR("invalid flash ID %d; expected %d",
+                fd_id, FLASH_DEVICE_ID);
+        *ret = -1;
+        return -1;
+    }
+    return 0;
+}
+
+#endif /*  defined(EXTERNAL_FLASH) */
 /* Place code in a specific section */
 #if defined(__ICCARM__)
 #pragma default_function_attributes = @ ".BL2_NoHdp_Code"
@@ -196,7 +220,13 @@ int32_t boot_platform_init(void)
     BOOT_LOG_ERR("Error while initializing Flash Interface");
     Error_Handler();
   }
-
+#if defined(EXTERNAL_FLASH)
+  if (OSPI_FLASH_DEV_NAME.Initialize(NULL) != ARM_DRIVER_OK)
+  {
+    BOOT_LOG_ERR("Error while initializing ospi Flash Interface");
+    Error_Handler();
+  }
+#endif
   return 0;
 }
 

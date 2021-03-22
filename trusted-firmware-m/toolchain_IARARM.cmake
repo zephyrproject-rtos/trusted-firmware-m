@@ -184,3 +184,11 @@ macro(add_convert_to_bin_target target)
         DEPENDS ${target}_hex
     )
 endmacro()
+
+macro(compiler_create_shared_code TARGET SHARED_SYMBOL_TEMPLATE)
+    message(FATAL_ERROR "Code sharing support is not implemented by IAR.")
+endmacro()
+
+macro(compiler_link_shared_code TARGET SHARED_CODE_PATH ORIG_TARGET LIB_LIST)
+    message(FATAL_ERROR "Code sharing support is not implemented by IAR.")
+endmacro()

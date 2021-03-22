@@ -94,21 +94,21 @@ extern ARM_DRIVER_MPC Driver_SRAM1_MPC, Driver_SRAM2_MPC;
 #define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_std_uart = {
+struct platform_data_t tfm_peripheral_std_uart = {
         UART0_BASE + NS_OFFSET,
         UART0_BASE + NS_OFFSET + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_uart1 = {
+struct platform_data_t tfm_peripheral_uart1 = {
         UART1_BASE,
         UART1_BASE + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
 
-struct tfm_spm_partition_platform_data_t tfm_peripheral_timer0 = {
+struct platform_data_t tfm_peripheral_timer0 = {
         TMR01_BASE,
         TMR01_BASE + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,

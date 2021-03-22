@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -29,7 +29,7 @@ if(BL2)
 
     target_link_libraries(platform_bl2
         PRIVATE
-            $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:bl2_crypto_hw>
+            $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_STATE}>:bl2_crypto_hw>
     )
 endif()
 

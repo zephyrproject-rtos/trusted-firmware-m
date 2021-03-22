@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -101,4 +101,20 @@ void psa_panic(void)
     __ASM volatile("SVC %0           \n"
                    "BX LR            \n"
                    : : "I" (TFM_SVC_PSA_PANIC));
+}
+
+__attribute__((naked))
+void psa_irq_enable(psa_signal_t irq_signal)
+{
+    __ASM volatile("SVC %0           \n"
+                   "BX LR            \n"
+                   : : "I" (TFM_SVC_PSA_IRQ_ENABLE));
+}
+
+__attribute__((naked))
+psa_irq_status_t psa_irq_disable(psa_signal_t irq_signal)
+{
+    __ASM volatile("SVC %0           \n"
+                   "BX LR            \n"
+                   : : "I" (TFM_SVC_PSA_IRQ_DISABLE));
 }

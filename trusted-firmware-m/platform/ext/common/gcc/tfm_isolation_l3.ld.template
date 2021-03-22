@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2020 Arm Limited
+; * Copyright (c) 2009-2021 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -60,15 +60,15 @@ SECTIONS
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA))
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-        LONG (LOADADDR(.ER_{{manifest.manifest.name}}_RWZI))
-        LONG (ADDR(.ER_{{manifest.manifest.name}}_RWZI))
-        LONG (SIZEOF(.ER_{{manifest.manifest.name}}_RWZI))
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+        LONG (LOADADDR(.ER_{{partition.manifest.name}}_RWZI))
+        LONG (ADDR(.ER_{{partition.manifest.name}}_RWZI))
+        LONG (SIZEOF(.ER_{{partition.manifest.name}}_RWZI))
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 {% endfor %}
 #if defined(S_CODE_SRAM_ALIAS_BASE)
@@ -84,18 +84,14 @@ SECTIONS
         __zero_table_start__ = .;
         LONG (ADDR(.TFM_BSS))
         LONG (SIZEOF(.TFM_BSS))
-{% for manifest in manifests %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-        LONG (ADDR(.{{manifest.manifest.name}}_RWZI_BSS))
-        LONG (SIZEOF(.{{manifest.manifest.name}}_RWZI_BSS))
-    {% if manifest.attr.tfm_partition_ipc %}
-        LONG (ADDR(.{{manifest.manifest.name}}_LINKER_STACK))
-        LONG (SIZEOF(.{{manifest.manifest.name}}_LINKER_STACK))
-    {% endif %}
-        {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+        LONG (ADDR(.{{partition.manifest.name}}_RWZI_BSS))
+        LONG (SIZEOF(.{{partition.manifest.name}}_RWZI_BSS))
+        {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 {% endfor %}
         __zero_table_end__ = .;
@@ -106,32 +102,32 @@ SECTIONS
     Image$$PT_RO_START$$Base = .;
 
     /**** PSA RoT RO CODE + RO-data starts here */
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-    .{{manifest.manifest.name}}_RO : ALIGN(32)
+    .{{partition.manifest.name}}_RO : ALIGN(32)
     {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}}:*(.text*)
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}}(.text*)
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_FN)
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
-    Image$${{manifest.manifest.name}}_RO$$Base = ADDR(.{{manifest.manifest.name}}_RO);
-    Image$${{manifest.manifest.name}}_RO$$Limit = ADDR(.{{manifest.manifest.name}}_RO) + SIZEOF(.{{manifest.manifest.name}}_RO);
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    Image$${{partition.manifest.name}}_RO$$Base = ADDR(.{{partition.manifest.name}}_RO);
+    Image$${{partition.manifest.name}}_RO$$Limit = ADDR(.{{partition.manifest.name}}_RO) + SIZEOF(.{{partition.manifest.name}}_RO);
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
     {% endif %}
@@ -139,32 +135,32 @@ SECTIONS
     /**** PSA RoT RO CODE + data ends here */
 
     /**** APPLICATION RoT RO CODE + data starts here */
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
-    .{{manifest.manifest.name}}_RO : ALIGN(32)
+    .{{partition.manifest.name}}_RO : ALIGN(32)
     {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}}:*(.text*)
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}}(.text*)
         {{pattern}}:*(.rodata*)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_FN)
+        *({{partition.manifest.name}}_APP-ROT_ATTR_FN)
         . = ALIGN(32);
     } > FLASH
-    Image$${{manifest.manifest.name}}_CODE$$Base = ADDR(.{{manifest.manifest.name}}_RO);
-    Image$${{manifest.manifest.name}}_CODE$$Limit = ADDR(.{{manifest.manifest.name}}_RO) + SIZEOF(.{{manifest.manifest.name}}_RO);
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    Image$${{partition.manifest.name}}_CODE$$Base = ADDR(.{{partition.manifest.name}}_RO);
+    Image$${{partition.manifest.name}}_CODE$$Limit = ADDR(.{{partition.manifest.name}}_RO) + SIZEOF(.{{partition.manifest.name}}_RO);
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
     {% endif %}
@@ -174,10 +170,6 @@ SECTIONS
     /**** Unprivileged Secure code starts here */
     .ER_UNPRIV_CODE : ALIGN(32)
     {
-        *platform_retarget_dev.*(.text*)
-        *platform_retarget_dev.*(.rodata*)
-        *device_definition.*(.text*)
-        *device_definition.*(.rodata*)
         *(SFN)
         *armlib*:*(.text*)
         *armlib*:*(.rodata*)
@@ -279,73 +271,62 @@ SECTIONS
     Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
     /**** PSA RoT DATA start here */
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'PSA-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
 
     /* Position tag */
     . = ALIGN(32);
-    Image$$PT_{{manifest.manifest.name}}_PRIVATE_DATA_START$$Base = .;
+    Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_START$$Base = .;
 
-    .ER_{{manifest.manifest.name}}_RWZI : ALIGN(32)
+    .ER_{{partition.manifest.name}}_RWZI : ALIGN(32)
     {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}}:*(.data*)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_RW)
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_RW)
         . = ALIGN(32);
     } > RAM AT> FLASH
-    Image$$ER_{{manifest.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{manifest.manifest.name}}_RWZI);
-    Image$$ER_{{manifest.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{manifest.manifest.name}}_RWZI) + SIZEOF(.ER_{{manifest.manifest.name}}_RWZI);
+    Image$$ER_{{partition.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{partition.manifest.name}}_RWZI);
+    Image$$ER_{{partition.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{partition.manifest.name}}_RWZI) + SIZEOF(.ER_{{partition.manifest.name}}_RWZI);
 
-    .{{manifest.manifest.name}}_RWZI_BSS : ALIGN(32)
+    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(32)
     {
-        start_of_{{manifest.manifest.name}}_RWZI = .;
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+        start_of_{{partition.manifest.name}}_RWZI = .;
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}}:*(.bss*)
         {{pattern}}:*(COMMON)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}}(.bss*)
         {{pattern}}(COMMON)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_ZI)
-        . += (. - start_of_{{manifest.manifest.name}}_RWZI) ? 0 : 4;
+        *({{partition.manifest.name}}_PSA-ROT_ATTR_ZI)
+        . += (. - start_of_{{partition.manifest.name}}_RWZI) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM
-    Image$$ER_{{manifest.manifest.name}}_RWZI$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_RWZI_BSS);
-    Image$$ER_{{manifest.manifest.name}}_RWZI$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_RWZI_BSS) + SIZEOF(.{{manifest.manifest.name}}_RWZI_BSS);
-
-    {% if manifest.attr.tfm_partition_ipc %}
-
-    .{{manifest.manifest.name}}_LINKER_STACK : ALIGN(128)
-    {
-        . += {{manifest.manifest.stack_size}};
-    } > RAM
-    Image$${{manifest.manifest.name}}_LINKER_STACK$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_LINKER_STACK);
-    Image$${{manifest.manifest.name}}_LINKER_STACK$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER_STACK) + SIZEOF(.{{manifest.manifest.name}}_LINKER_STACK);
-
-    {% endif %}
+    Image$$ER_{{partition.manifest.name}}_RWZI$$ZI$$Base = ADDR(.{{partition.manifest.name}}_RWZI_BSS);
+    Image$$ER_{{partition.manifest.name}}_RWZI$$ZI$$Limit = ADDR(.{{partition.manifest.name}}_RWZI_BSS) + SIZEOF(.{{partition.manifest.name}}_RWZI_BSS);
 
     /* Position tag */
     . = ALIGN(32);
-    Image$$PT_{{manifest.manifest.name}}_PRIVATE_DATA_END$$Base = .;
+    Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_END$$Base = .;
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
     {% endif %}
@@ -365,73 +346,62 @@ SECTIONS
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 
     /**** APPLICATION RoT DATA start here */
-{% for manifest in manifests %}
-    {% if manifest.manifest.type == 'APPLICATION-ROT' %}
-    {% if manifest.attr.conditional %}
-#ifdef {{manifest.attr.conditional}}
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    {% if partition.attr.conditional %}
+#ifdef {{partition.attr.conditional}}
     {% endif %}
 
     /* Position tag */
     . = ALIGN(32);
-    Image$$PT_{{manifest.manifest.name}}_PRIVATE_DATA_START$$Base = .;
+    Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_START$$Base = .;
 
-    .ER_{{manifest.manifest.name}}_RWZI : ALIGN(32)
+    .ER_{{partition.manifest.name}}_RWZI : ALIGN(32)
     {
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}}:*(.data*)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}}(.data*)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_RW)
+        *({{partition.manifest.name}}_APP-ROT_ATTR_RW)
         . = ALIGN(32);
     } > RAM AT> FLASH
-    Image$$.ER_{{manifest.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{manifest.manifest.name}}_RWZI);
-    Image$$.ER_{{manifest.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{manifest.manifest.name}}_RWZI) + SIZEOF(.ER_{{manifest.manifest.name}}_RWZI);
+    Image$$.ER_{{partition.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{partition.manifest.name}}_RWZI);
+    Image$$.ER_{{partition.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{partition.manifest.name}}_RWZI) + SIZEOF(.ER_{{partition.manifest.name}}_RWZI);
 
-    .{{manifest.manifest.name}}_RWZI_BSS : ALIGN(32)
+    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(32)
     {
-        start_of_{{manifest.manifest.name}}_RWZI = .;
-    {% if manifest.attr.linker_pattern.library_list %}
-        {% for pattern in manifest.attr.linker_pattern.library_list %}
+        start_of_{{partition.manifest.name}}_RWZI = .;
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}}:*(.bss*)
         {{pattern}}:*(COMMON)
         {% endfor %}
     {% endif %}
-    {% if manifest.attr.linker_pattern.object_list %}
-        {% for pattern in manifest.attr.linker_pattern.object_list %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
         {{pattern}}(.bss*)
         {{pattern}}(COMMON)
         {% endfor %}
     {% endif %}
-        *({{manifest.manifest.name}}_ATTR_ZI)
-        . += (. - start_of_{{manifest.manifest.name}}_RWZI) ? 0 : 4;
+        *({{partition.manifest.name}}_APP-ROT_ATTR_ZI)
+        . += (. - start_of_{{partition.manifest.name}}_RWZI) ? 0 : 4;
         . = ALIGN(32);
     } > RAM AT> RAM
-    Image$$ER_{{manifest.manifest.name}}_RWZI$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_RWZI_BSS);
-    Image$$ER_{{manifest.manifest.name}}_RWZI$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_RWZI_BSS) + SIZEOF(.{{manifest.manifest.name}}_RWZI_BSS);
-
-    {% if manifest.attr.tfm_partition_ipc %}
-
-    .{{manifest.manifest.name}}_LINKER_STACK : ALIGN(128)
-    {
-        . += {{manifest.manifest.stack_size}};
-    } > RAM
-    Image$${{manifest.manifest.name}}_LINKER_STACK$$ZI$$Base = ADDR(.{{manifest.manifest.name}}_LINKER_STACK);
-    Image$${{manifest.manifest.name}}_LINKER_STACK$$ZI$$Limit = ADDR(.{{manifest.manifest.name}}_LINKER_STACK) + SIZEOF(.{{manifest.manifest.name}}_LINKER_STACK);
-
-    {% endif %}
+    Image$$ER_{{partition.manifest.name}}_RWZI$$ZI$$Base = ADDR(.{{partition.manifest.name}}_RWZI_BSS);
+    Image$$ER_{{partition.manifest.name}}_RWZI$$ZI$$Limit = ADDR(.{{partition.manifest.name}}_RWZI_BSS) + SIZEOF(.{{partition.manifest.name}}_RWZI_BSS);
 
     /* Position tag */
     . = ALIGN(32);
-    Image$$PT_{{manifest.manifest.name}}_PRIVATE_DATA_END$$Base = .;
+    Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_END$$Base = .;
 
-    {% if manifest.attr.conditional %}
-#endif /* {{manifest.attr.conditional}} */
+    {% if partition.attr.conditional %}
+#endif /* {{partition.attr.conditional}} */
     {% endif %}
 
     {% endif %}

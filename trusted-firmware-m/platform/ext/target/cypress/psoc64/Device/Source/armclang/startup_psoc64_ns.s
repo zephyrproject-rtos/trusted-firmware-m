@@ -1,6 +1,6 @@
 ;/*
 ; * Copyright (c) 2009-2020 ARM Limited. All rights reserved.
-; * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+; * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
 ; *
 ; * SPDX-License-Identifier: Apache-2.0
 ; *
@@ -255,7 +255,7 @@ Vectors_Copy
                 STR R3, [R0]
                 ADDS R0, R0, #4
                 ADDS R1, R1, #4
-                SUBS R2, R2, #1
+                SUBS R2, R2, #4
                 CMP R2, #0
                 BNE Vectors_Copy
                 LDR     R0, =__ramVectors

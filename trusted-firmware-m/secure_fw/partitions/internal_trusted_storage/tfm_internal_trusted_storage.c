@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,8 @@
 
 #include "tfm_internal_trusted_storage.h"
 
+#include "tfm_hal_its.h"
+#include "tfm_hal_ps.h"
 #include "flash/its_flash.h"
 #include "flash_fs/its_flash_fs.h"
 #include "psa_manifest/pid.h"
@@ -14,6 +16,10 @@
 #include "tfm_its_defs.h"
 #include "tfm_its_req_mngr.h"
 #include "its_utils.h"
+
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+#include "ps_object_defs.h"
+#endif
 
 #ifndef ITS_BUF_SIZE
 /* By default, set the ITS buffer size to the max asset size so that all
@@ -33,11 +39,31 @@ static uint8_t g_fid[ITS_FILE_ID_SIZE];
 static struct its_file_info_t g_file_info;
 
 static its_flash_fs_ctx_t fs_ctx_its;
+static struct its_flash_fs_config_t fs_cfg_its = {
+    .flash_dev = &ITS_FLASH_DEV,
+    .program_unit = ITS_FLASH_ALIGNMENT,
+    .max_file_size = ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE, ITS_FLASH_ALIGNMENT),
+    .max_num_files = ITS_NUM_ASSETS + 1, /* Extra file for atomic replacement */
+};
+
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
 static its_flash_fs_ctx_t fs_ctx_ps;
+static struct its_flash_fs_config_t fs_cfg_ps = {
+    .flash_dev = &PS_FLASH_DEV,
+    .program_unit = PS_FLASH_ALIGNMENT,
+    .max_file_size = ITS_UTILS_ALIGN(PS_MAX_OBJECT_SIZE, PS_FLASH_ALIGNMENT),
+    .max_num_files = PS_MAX_NUM_OBJECTS,
+};
+#endif
 
 static its_flash_fs_ctx_t *get_fs_ctx(int32_t client_id)
 {
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     return (client_id == TFM_SP_PS) ? &fs_ctx_ps : &fs_ctx_its;
+#else
+    (void)client_id;
+    return &fs_ctx_its;
+#endif
 }
 
 /**
@@ -55,13 +81,81 @@ static void tfm_its_get_fid(int32_t client_id,
     tfm_memcpy(fid + sizeof(client_id), (const void *)&uid, sizeof(uid));
 }
 
+/**
+ * \brief Initialise the static filesystem configurations.
+ *
+ * \return Returns PSA_ERROR_PROGRAMMER_ERROR if there is a configuration error,
+ *         and PSA_SUCCESS otherwise.
+ */
+static psa_status_t init_fs_cfg(void)
+{
+    struct tfm_hal_its_fs_info_t its_fs_info;
+
+    /* Check the compile-time program unit matches the runtime value */
+    if (TFM_HAL_ITS_FLASH_DRIVER.GetInfo()->program_unit
+        != TFM_HAL_ITS_PROGRAM_UNIT) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    /* Retrieve flash properties from the ITS flash driver */
+    fs_cfg_its.sector_size = TFM_HAL_ITS_FLASH_DRIVER.GetInfo()->sector_size;
+    fs_cfg_its.erase_val = TFM_HAL_ITS_FLASH_DRIVER.GetInfo()->erased_value;
+
+    /* Retrieve FS parameters from the ITS HAL */
+    if (tfm_hal_its_fs_info(&its_fs_info) != TFM_HAL_SUCCESS) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    /* Derive address, block_size and num_blocks from the HAL parameters */
+    fs_cfg_its.flash_area_addr = its_fs_info.flash_area_addr;
+    fs_cfg_its.block_size = fs_cfg_its.sector_size
+                            * its_fs_info.sectors_per_block;
+    fs_cfg_its.num_blocks = its_fs_info.flash_area_size / fs_cfg_its.block_size;
+
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+    struct tfm_hal_ps_fs_info_t ps_fs_info;
+
+    /* Check the compile-time program unit matches the runtime value */
+    if (TFM_HAL_PS_FLASH_DRIVER.GetInfo()->program_unit
+        != TFM_HAL_PS_PROGRAM_UNIT) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    /* Retrieve flash properties from the PS flash driver */
+    fs_cfg_ps.sector_size = TFM_HAL_PS_FLASH_DRIVER.GetInfo()->sector_size;
+    fs_cfg_ps.erase_val = TFM_HAL_PS_FLASH_DRIVER.GetInfo()->erased_value;
+
+    /* Retrieve FS parameters from the PS HAL */
+    if (tfm_hal_ps_fs_info(&ps_fs_info) != TFM_HAL_SUCCESS) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    /* Derive address, block_size and num_blocks from the HAL parameters */
+    fs_cfg_ps.flash_area_addr = ps_fs_info.flash_area_addr;
+    fs_cfg_ps.block_size = fs_cfg_ps.sector_size * ps_fs_info.sectors_per_block;
+    fs_cfg_ps.num_blocks = ps_fs_info.flash_area_size / fs_cfg_ps.block_size;
+#endif
+
+    return PSA_SUCCESS;
+}
+
 psa_status_t tfm_its_init(void)
 {
     psa_status_t status;
 
-    /* Initialise the ITS context */
-    status = its_flash_fs_prepare(&fs_ctx_its,
-                                  its_flash_get_info(ITS_FLASH_ID_INTERNAL));
+    status = init_fs_cfg();
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Initialise the ITS filesystem context */
+    status = its_flash_fs_init_ctx(&fs_ctx_its, &fs_cfg_its, &ITS_FLASH_OPS);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Prepare the ITS filesystem */
+    status = its_flash_fs_prepare(&fs_ctx_its);
 #ifdef ITS_CREATE_FLASH_LAYOUT
     /* If ITS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
      * create a ITS flash layout. ITS service will generate an empty and valid
@@ -83,16 +177,25 @@ psa_status_t tfm_its_init(void)
             return status;
         }
 
-        /* Attempt to initialise again */
-        status = its_flash_fs_prepare(&fs_ctx_its,
-                                     its_flash_get_info(ITS_FLASH_ID_INTERNAL));
+        /* Attempt to prepare again */
+        status = its_flash_fs_prepare(&fs_ctx_its);
     }
 #endif /* ITS_CREATE_FLASH_LAYOUT */
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-    /* Initialise the PS context */
-    status = its_flash_fs_prepare(&fs_ctx_ps,
-                                  its_flash_get_info(ITS_FLASH_ID_EXTERNAL));
+    /* Check status of ITS initialisation before continuing with PS */
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Initialise the PS filesystem context */
+    status = its_flash_fs_init_ctx(&fs_ctx_ps, &fs_cfg_ps, &PS_FLASH_OPS);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Prepare the PS filesystem */
+    status = its_flash_fs_prepare(&fs_ctx_ps);
 #ifdef PS_CREATE_FLASH_LAYOUT
     /* If PS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
      * create a PS flash layout. PS service will generate an empty and valid
@@ -114,12 +217,10 @@ psa_status_t tfm_its_init(void)
             return status;
         }
 
-        /* Attempt to initialise again */
-        status = its_flash_fs_prepare(&fs_ctx_ps,
-                                     its_flash_get_info(ITS_FLASH_ID_EXTERNAL));
+        /* Attempt to prepare again */
+        status = its_flash_fs_prepare(&fs_ctx_ps);
     }
 #endif /* PS_CREATE_FLASH_LAYOUT */
-
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
     return status;

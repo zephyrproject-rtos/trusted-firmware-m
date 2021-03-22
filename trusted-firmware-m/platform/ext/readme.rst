@@ -20,8 +20,9 @@ accelerators.
 
 In order to use a cryptographic accelerator, a platform must set
 ``CRYPTO_HW_ACCELERATOR_TYPE`` in preload.cmake. This option maps directly to
-the subdirectories of the accelerator directory. Currently the only available
-accelerator is the CryptoCell ``cc312``.
+the subdirectories of the accelerator directory. Currently available
+accelerators are : the CryptoCell ``cc312``, the STMicroelectronics accelerator
+``stm`` .
 
 A minimal API is exposed to interact with accelerators, the details of this api
 are in ``accelerator/interface/crypto_hw.h``. Implementation of the API is
@@ -294,52 +295,6 @@ binary. It requires the following definition:
   is executed from. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is configured to
   be ``RAM_LOAD``.
 
-Protected Storage (PS) Service definitions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The PS service requires the following definitions:
-
-- ``PS_FLASH_AREA_ADDR`` - Defines the flash address where the protected storage
-  area starts.
-- ``PS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area
-  for protected storage in bytes.
-- ``PS_SECTOR_SIZE`` - Defines the size of the external flash sectors (the
-  smallest erasable unit) in bytes.
-- ``PS_SECTORS_PER_BLOCK`` - Defines the number of contiguous PS_SECTOR_SIZE
-  to form a logical block in the filesystem.
-- ``PS_FLASH_DEV_NAME`` - Specifies the flash device used by PS to store the
-  data.
-- ``PS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
-  bytes.
-
-.. Note::
-
-    The sectors must be consecutive.
-    The platform may implement ``tfm_hal_ps_fs_info()`` as an alternative
-    to defining ``PS_FLASH_AREA_ADDR`` and ``PS_FLASH_AREA_SIZE``.
-
-Internal Trusted Storage (ITS) Service definitions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The ITS service requires the following definitions:
-
-- ``ITS_FLASH_AREA_ADDR`` - Defines the flash address where the internal trusted
-  storage area starts.
-- ``ITS_FLASH_AREA_SIZE`` - Defines the size of the dedicated flash area for
-  internal trusted storage in bytes.
-- ``ITS_SECTOR_SIZE`` - Defines the size of the internal flash sectors (the
-  smallest erasable unit) in bytes.
-- ``ITS_SECTORS_PER_BLOCK`` - Defines the number of contiguous ITS_SECTOR_SIZE
-  to form a logical block in the filesystem.
-- ``ITS_FLASH_DEV_NAME`` - Specifies the internal flash device used by ITS to
-  store the data.
-- ``ITS_FLASH_PROGRAM_UNIT`` - Defines the smallest flash programmable unit in
-  bytes.
-
-.. Note::
-
-    The sectors must be consecutive.
-    The platform may implement ``tfm_hal_its_fs_info()`` as an alternative
-    to defining ``ITS_FLASH_AREA_ADDR`` and ``ITS_FLASH_AREA_SIZE``.
-
 ***************************************
 Expose target support for HW components
 ***************************************
@@ -353,5 +308,5 @@ HW components:
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
 *Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*

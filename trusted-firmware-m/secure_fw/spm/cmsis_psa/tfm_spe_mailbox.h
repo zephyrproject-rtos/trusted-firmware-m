@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,11 @@
 #define __TFM_SPE_MAILBOX_H__
 
 #include "tfm_mailbox.h"
+
+/* A handle to a mailbox message in use */
+typedef int32_t    mailbox_msg_handle_t;
+
+#define MAILBOX_MSG_NULL_HANDLE          ((mailbox_msg_handle_t)0)
 
 /* A single slot structure in SPE mailbox queue */
 struct secure_mailbox_slot_t {

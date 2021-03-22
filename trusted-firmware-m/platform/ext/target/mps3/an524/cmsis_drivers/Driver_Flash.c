@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -40,7 +40,7 @@
 /* Driver version */
 #define ARM_FLASH_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0)
 
-#define FLASH_REDIRECT_BASE   PS_FLASH_AREA_ADDR
+#define FLASH_REDIRECT_BASE   FLASH_PS_AREA_OFFSET
 #define FLASH_REDIRECT_LIMIT  (FLASH_REDIRECT_BASE   \
                                + FLASH_PS_AREA_SIZE \
                                + FLASH_ITS_AREA_SIZE \

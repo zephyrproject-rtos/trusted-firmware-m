@@ -21,7 +21,9 @@ enum tfm_spm_request_type_t {
  */
 int32_t tfm_spm_request_reset_vote(void);
 
+#ifndef TFM_PSA_API
 void tfm_enable_irq(psa_signal_t irq_signal);
 void tfm_disable_irq(psa_signal_t irq_signal);
+#endif
 
 #endif /* __TFM_SPM_SERVICES_H__ */

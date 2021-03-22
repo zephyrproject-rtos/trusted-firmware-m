@@ -12,7 +12,7 @@ This file should enumerate the hardware peripherals that are available for TF-M
 on the platform. The name of the peripheral used by a service is set in its
 manifest file. The platform have to provide a macro for each of the provided
 peripherals, that is substituted to a pointer to type
-``struct tfm_spm_partition_platform_data_t``. The memory that the pointer points
+``struct platform_data_t``. The memory that the pointer points
 to is allocated by the platform code. The pointer gets stored in the partitions
 database in SPM, and it is provided to the SPM HAL functions.
 

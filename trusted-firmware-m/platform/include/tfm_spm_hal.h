@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #define __TFM_SPM_HAL_H__
 
 #include <stdint.h>
+#include "fih.h"
 #include "tfm_secure_api.h"
 #ifdef TFM_MULTI_CORE_TOPOLOGY
 #include "tfm_multi_core.h"
@@ -29,7 +30,7 @@
  * platform in the header file tfm_peripherals_def.h. For details on this, see
  * the documentation of that file.
  */
-struct tfm_spm_partition_platform_data_t;
+struct platform_data_t;
 
 enum irq_target_state_t {
     TFM_IRQ_TARGET_STATE_SECURE,
@@ -57,16 +58,62 @@ struct tfm_spm_partition_memory_data_t
 };
 #endif
 
+#ifdef TFM_FIH_PROFILE_ON
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 /**
  * \brief This function initialises the HW used for isolation, and sets the
  *        default configuration for them.
+ * This function is called during TF-M core early startup, after DB init
  *
- * This function is called during TF-M core early startup, before DB init
- *
- * \return Returns values as specified by the \ref tfm_plat_err_t
+ * \return Returns values as specified by FIH specific platform error code.
  */
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void);
+fih_int tfm_spm_hal_setup_isolation_hw(void);
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
+/**
+ * \brief Configure peripherals for a partition based on the platform data and
+ *        partition index from the DB
+ *
+ * This function is called during partition initialisation (before calling the
+ * init function for the partition)
+ *
+ * \param[in] partition_idx    The index of the partition that this peripheral
+ *                             is assigned to.
+ * \param[in] platform_data    The platform fields of the partition DB record to
+ *                             be used for configuration.
+ *
+ * \return Returns values as specified by FIH specific platform error code
+ */
+fih_int tfm_spm_hal_configure_default_isolation(
+                 uint32_t partition_idx,
+                 const struct platform_data_t *platform_data);
+/**
+ * \brief Configures the system debug properties.
+ *        The default configuration of this function should disable secure debug
+ *        when either DAUTH_NONE or DAUTH_NS_ONLY define is set. It is up to the
+ *        platform owner to decide if secure debug can be turned on in their
+ *        system, if DAUTH_FULL define is present.
+ *        The DAUTH_CHIP_DEFAULT define should not be considered a safe default
+ *        option unless explicitly noted by the chip vendor.
+ *        The implementation has to expect that one of those defines is going to
+ *        be set. Otherwise, a compile error needs to be triggered.
+ *
+ * \return Returns values as specified by FIH specific platform error code
+ */
+fih_int tfm_spm_hal_init_debug(void);
+
+/**
+ * \brief This function verifies the settings of HW used for memory isolation,
+ *        to make sure that important settings was not skipped due to fault
+ *        injection attacks.
+ *
+ * This function is called during TF-M core late startup, before passing
+ * execution to non-secure code.
+ *
+ * \return Returns values as specified by FIH specific platform error code
+ */
+fih_int tfm_spm_hal_verify_isolation_hw(void);
+#else /* TFM_FIH_PROFILE_ON */
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 /**
  * \brief This function initialises the HW used for isolation, and sets the
@@ -94,7 +141,7 @@ enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void);
  */
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                  uint32_t partition_idx,
-                 const struct tfm_spm_partition_platform_data_t *platform_data);
+                 const struct platform_data_t *platform_data);
 /**
  * \brief Configures the system debug properties.
  *        The default configuration of this function should disable secure debug
@@ -109,6 +156,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t tfm_spm_hal_init_debug(void);
+#endif /* TFM_FIH_PROFILE_ON */
 
 /**
  * \brief Enables the fault handlers and sets priorities.

@@ -42,5 +42,10 @@ if (TFM_PROFILE)
     include(config/profile/${TFM_PROFILE}.cmake)
 endif()
 
+# Load TF-M model specific default config
+if (TFM_PSA_API)
+    include(config/tfm_ipc_config_default.cmake)
+endif()
+
 # Load defaults, setting options not already set
 include(config/config_default.cmake)

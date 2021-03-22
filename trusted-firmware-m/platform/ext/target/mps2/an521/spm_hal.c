@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include "cmsis.h"
+#include "fih.h"
 #include "tfm_spm_hal.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
@@ -24,36 +25,30 @@ extern const struct memory_region_limits memory_regions;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
-#define PARTITION_REGION_PERIPH_START   6
+#define PARTITION_REGION_PERIPH_START   5
 #define PARTITION_REGION_PERIPH_MAX_NUM 2
 
 uint32_t periph_num_count = 0;
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
-{
-    int32_t ret = ARM_DRIVER_OK;
-    /* Configures non-secure memory spaces in the target */
-    sau_and_idau_cfg();
-    ret = mpc_init_cfg();
-    if (ret != ARM_DRIVER_OK) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    ppc_init_cfg();
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
+#ifdef TFM_FIH_PROFILE_ON
+fih_int tfm_spm_hal_configure_default_isolation(
+                  uint32_t partition_idx,
+                  const struct platform_data_t *platform_data)
+#else /* TFM_FIH_PROFILE_ON */
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   uint32_t partition_idx,
-                  const struct tfm_spm_partition_platform_data_t *platform_data)
+                  const struct platform_data_t *platform_data)
+#endif /* TFM_FIH_PROFILE_ON */
 {
+    fih_int fih_rc = FIH_FAILURE;
     bool privileged = tfm_is_partition_privileged(partition_idx);
 #if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1)
     struct mpu_armv8m_region_cfg_t region_cfg;
 #endif
 
     if (!platform_data) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+        FIH_RET(fih_int_encode(TFM_PLAT_ERR_INVALID_INPUT));
     }
 
 #if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1)
@@ -61,7 +56,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         region_cfg.region_nr = PARTITION_REGION_PERIPH_START + periph_num_count;
         periph_num_count++;
         if (periph_num_count >= PARTITION_REGION_PERIPH_MAX_NUM) {
-            return TFM_PLAT_ERR_MAX_VALUE;
+            FIH_RET(fih_int_encode(TFM_PLAT_ERR_MAX_VALUE));
         }
         region_cfg.region_base = platform_data->periph_start;
         region_cfg.region_limit = platform_data->periph_limit;
@@ -70,6 +65,20 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
         region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
 
+#ifdef TFM_FIH_PROFILE_ON
+        FIH_CALL(mpu_armv8m_disable, fih_rc, &dev_mpu_s);
+
+        FIH_CALL(mpu_armv8m_region_enable, fih_rc, &dev_mpu_s, &region_cfg);
+        if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+            FIH_RET(fih_int_encode(TFM_PLAT_ERR_SYSTEM_ERR));
+        }
+
+        FIH_CALL(mpu_armv8m_enable, fih_rc, &dev_mpu_s,
+                 PRIVILEGED_DEFAULT_ENABLE, HARDFAULT_NMI_ENABLE);
+        if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+            FIH_RET(fih_int_encode(TFM_PLAT_ERR_SYSTEM_ERR));
+        }
+#else /* TFM_FIH_PROFILE_ON */
         mpu_armv8m_disable(&dev_mpu_s);
 
         if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg)
@@ -78,10 +87,25 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         }
         mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
                           HARDFAULT_NMI_ENABLE);
+#endif /* TFM_FIH_PROFILE_ON */
     }
 #endif /* defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1) */
 
     if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
+#ifdef TFM_FIH_PROFILE_ON
+        FIH_CALL(ppc_configure_to_secure, fih_rc,
+                 platform_data->periph_ppc_bank,
+                 platform_data->periph_ppc_loc);
+        if (privileged) {
+            FIH_CALL(ppc_clr_secure_unpriv, fih_rc,
+                     platform_data->periph_ppc_bank,
+                     platform_data->periph_ppc_loc);
+        } else {
+            FIH_CALL(ppc_en_secure_unpriv, fih_rc,
+                     platform_data->periph_ppc_bank,
+                     platform_data->periph_ppc_loc);
+        }
+#else /* TFM_FIH_PROFILE_ON */
         ppc_configure_to_secure(platform_data->periph_ppc_bank,
                                 platform_data->periph_ppc_loc);
         if (privileged) {
@@ -91,8 +115,11 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
             ppc_en_secure_unpriv(platform_data->periph_ppc_bank,
                                  platform_data->periph_ppc_loc);
         }
+#endif /* TFM_FIH_PROFILE_ON */
     }
-    return TFM_PLAT_ERR_SUCCESS;
+
+    fih_rc = fih_int_encode(TFM_PLAT_ERR_SUCCESS);
+    FIH_RET(fih_rc);
 }
 
 void MPC_Handler(void)
@@ -194,10 +221,21 @@ enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
     return system_reset_cfg();
 }
 
+#ifdef TFM_FIH_PROFILE_ON
+fih_int tfm_spm_hal_init_debug(void)
+{
+    fih_int fih_rc = FIH_FAILURE;
+
+    FIH_CALL(init_debug, fih_rc);
+
+    FIH_RET(fih_rc);
+}
+#else /* TFM_FIH_PROFILE_ON */
 enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
 {
     return init_debug();
 }
+#endif /* TFM_FIH_PROFILE_ON */
 
 enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
 {
@@ -208,3 +246,17 @@ enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
 {
     return nvic_interrupt_enable();
 }
+
+#ifdef TFM_FIH_PROFILE_ON
+fih_int tfm_spm_hal_verify_isolation_hw(void)
+{
+    fih_int fih_rc = FIH_INT_INIT(TFM_PLAT_ERR_SYSTEM_ERR);
+
+    FIH_CALL(verify_isolation_hw, fih_rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_PANIC;
+    }
+
+    FIH_RET(fih_int_encode(TFM_PLAT_ERR_SUCCESS));
+}
+#endif /* TFM_FIH_PROFILE_ON */

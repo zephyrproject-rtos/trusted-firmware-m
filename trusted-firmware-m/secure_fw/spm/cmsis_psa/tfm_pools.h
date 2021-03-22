@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,40 +8,22 @@
 #define __TFM_POOLS_H__
 
 #include <stdbool.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/*
- * Resource pool - few known size resources allocation/free is required,
- * so pool is more applicable than heap.
- */
+#include "lists.h"
 
 /*
  * Pool Instance:
  *  [ Pool Instance ] + N * [ Pool Chunks ]
  */
 struct tfm_pool_chunk_t {
-    struct tfm_list_node_t list;        /* Chunk list                     */
-    void *pool;                         /* Point to the parent pool       */
-    uint8_t data[0];                    /* Data indicator                 */
-};
-
-/*
- * tfm_pool_chunk_t minus the zero length "data" member,
- * required for standards compliant C
- */
-struct tfm_pool_chunk_s_t {
-    struct tfm_list_node_t list;        /* Chunk list                     */
-    void *pool;                         /* Point to the parent pool       */
+    struct bi_list_node_t list;         /* Chunk list                     */
+    uint8_t data[];                     /* Data indicator                 */
 };
 
 struct tfm_pool_instance_t {
     size_t chunksz;                     /* Chunks size of pool member     */
     size_t chunk_count;                 /* A number of chunks in the pool */
-    struct tfm_list_node_t chunks_list; /* Chunk list head in pool        */
-    struct tfm_pool_chunk_s_t chunks[0]; /* Data indicator                */
+    struct bi_list_node_t chunks_list;  /* Chunk list head in pool        */
+    uint8_t chunks[];                   /* Data indicator                 */
 };
 
 /*
@@ -55,7 +37,7 @@ struct tfm_pool_instance_t {
     static uint8_t name##_pool_buf[((chunksz) +                             \
                                    sizeof(struct tfm_pool_chunk_t)) * (num) \
                                    + sizeof(struct tfm_pool_instance_t)]    \
-                                   __attribute__((aligned(4)));            \
+                                   __attribute__((aligned(4)));             \
     static struct tfm_pool_instance_t *name =                               \
                             (struct tfm_pool_instance_t *)name##_pool_buf
 
@@ -75,8 +57,8 @@ struct tfm_pool_instance_t {
  * \param[in] chunksz           Size of chunks.
  * \param[in] num               Number of chunks.
  *
- * \retval IPC_SUCCESS          Success.
- * \retval IPC_ERROR_BAD_PARAMETERS Parameters error.
+ * \retval SPM_SUCCESS          Success.
+ * \retval SPM_ERROR_BAD_PARAMETERS Parameters error.
  */
 int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
                       size_t chunksz, size_t num);
@@ -94,9 +76,11 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool);
 /**
  * \brief Free the allocated memory.
  *
+ * \param[in] pool              pool pointer decleared by \ref TFM_POOL_DECLARE
+ *
  * \param[in] ptr               Buffer pointer want to free.
  */
-void tfm_pool_free(void *ptr);
+void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr);
 
 /**
  * \brief Checks whether a pointer points to a chunk data in the pool.
@@ -110,9 +94,5 @@ void tfm_pool_free(void *ptr);
  */
 bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,
                                  uint8_t *data);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __TFM_POOLS_H__ */

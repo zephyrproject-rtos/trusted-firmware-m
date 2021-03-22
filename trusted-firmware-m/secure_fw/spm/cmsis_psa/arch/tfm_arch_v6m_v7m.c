@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,6 +8,7 @@
 #include <inttypes.h>
 #include "tfm_hal_device_header.h"
 #include "tfm_arch.h"
+#include "exception_info.h"
 
 #if !defined(__ARM_ARCH_6M__) && !defined(__ARM_ARCH_7M__) && \
     !defined(__ARM_ARCH_7EM__)
@@ -85,25 +86,18 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
 }
 
 #if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *svc_args, uint32_t exc_return);
+uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return);
 #pragma required = tfm_core_svc_handler
 #endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-    "MOVS    r0, #4                \n" /* Check store SP in thread mode to r0 */
-    "MOV     r1, lr                \n"
-    "TST     r0, r1                \n"
-    "BEQ     handler               \n"
-    "MRS     r0, PSP               \n" /* Coming from thread mode */
-    "B       sp_stored             \n"
-    "handler:                      \n"
-    "BX      lr                    \n" /* Coming from handler mode */
-    "sp_stored:                    \n"
-    "MOV     r1, lr                \n"
-    "BL      tfm_core_svc_handler  \n"
-    "BX      r0                    \n"
+    "MRS     r0, MSP                        \n"
+    "MRS     r1, PSP                        \n"
+    "MOV     r2, lr                         \n"
+    "BL      tfm_core_svc_handler           \n"
+    "BX      r0                             \n"
     );
 }
 
@@ -113,12 +107,14 @@ __attribute__((naked)) void SVC_Handler(void)
 #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
 void HardFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
     /* HFSR can be read to provide further information of cause of HardFault */
      __ASM volatile("b    .");
 }
 #elif defined(__ARM_ARCH_6M__)
 void HardFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
     /* In a baseline implementation there is no way, to find out whether this is
      * a hard fault triggered directly, or another fault that has been
      * escalated.
@@ -130,16 +126,19 @@ void HardFault_Handler(void)
 /* Reserved for future usage */
 __attribute__((naked)) void MemManage_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_MEMFAULT);
     __ASM volatile("b    .");
 }
 
 __attribute__((naked)) void BusFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_BUSFAULT);
     __ASM volatile("b    .");
 }
 
 __attribute__((naked)) void UsageFault_Handler(void)
 {
+    EXCEPTION_INFO(EXCEPTION_TYPE_USAGEFAULT);
     __ASM volatile("b    .");
 }
 
@@ -155,7 +154,7 @@ void tfm_arch_set_secure_exception_priorities(void)
     NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
 }
 
-void tfm_arch_configure_coprocessors(void)
+void tfm_arch_config_extensions(void)
 {
     /* There are no coprocessors in Armv6-M implementations */
 #ifndef __ARM_ARCH_6M__

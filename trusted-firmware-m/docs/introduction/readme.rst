@@ -83,7 +83,7 @@ It is assumed that the reader is familiar with specifications can be found at
 The current TF-M implementation specifically targets TrustZone for ARMv8-M so a
 good understanding of the v8-M architecture is also necessary. A good place to
 get started with ARMv8-M is
-`developer.arm.com <https://developer.arm.com/technologies/trustzone>`__.
+`developer.arm.com <https://developer.arm.com/architectures/cpu-architecture/m-profile>`__.
 
 **********************
 Really getting started
@@ -116,6 +116,8 @@ Platforms supported
 ###################
     - Cortex-M55 system:
 
+        - `FPGA image loaded on MPS3 board (AN547).
+          <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps3>`_
         - `Fast model FVP_SSE300_MPS2.
           <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`_
 
@@ -133,8 +135,6 @@ Platforms supported
           <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
         - `FPGA image loaded on MPS3 board (AN524).
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`_
-        - `Arm DesignStart FPGA on AWS Cloud.
-          <https://developer.arm.com/docs/101965/0102/arm-designstart-fpga-on-cloud-arm-ds-getting-started>`_
         - `LPC55S69.
           <https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus/lpc5500-cortex-m33/lpcxpresso55s69-development-board:LPC55S69-EVK>`_
         - `NUCLEO L552ZE Q.
@@ -150,7 +150,7 @@ Platforms supported
 
     - Cortex-M23 system:
 
-        - `FPGA image loaded on MPS2 board (AN519, AN539).
+        - `FPGA image loaded on MPS2 board (AN519).
           <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
         - `M2351.
           <https://www.nuvoton.com/products/iot-solution/iot-platform/numaker-pfm-m2351/>`_
@@ -159,6 +159,10 @@ Platforms supported
 
         - `PSoc64.
           <https://www.cypress.com/documentation/product-brochures/cypress-psoc-64-secure-microcontrollers>`_
+
+    - Secure Enclave system:
+
+        - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/musca_b1/secure_enclave/readme>`
 
 The document :doc:`Platform Deprecation and Removal </docs/contributing/platform_deprecation>`
 lists the deprecated platforms planned to be removed from upstream.
@@ -186,7 +190,7 @@ Version history
 | v1.0        | 2020-03-27   | 1.0 release        | v20.03_API1.0     |
 +-------------+--------------+--------------------+-------------------+
 | v1.1        | 2020-07-15   | 1.1 release        | 1f960947          |
-+---------------------------------------------------------------------+
++-------------+--------------+--------------------+-------------------+
 | v1.2.0      | 2020-11-25   | 1.2.0 release      | 90c8e680          |
 +-------------+--------------+--------------------+-------------------+
 
@@ -202,4 +206,4 @@ version numbers.
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

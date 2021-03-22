@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -94,9 +94,9 @@ void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
 void tfm_arch_set_secure_exception_priorities(void);
 
 /**
- * \brief Configure coprocessors
+ * \brief Configure coprocessors and hardware re-entrant detection if supported.
  */
-void tfm_arch_configure_coprocessors(void);
+void tfm_arch_config_extensions(void);
 
 /*
  * Clear float point status.
