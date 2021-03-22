@@ -56,6 +56,9 @@
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
+        "tst     lr, #0x40                  \n" /* Was NS interrupted by S? */
+        "it      eq                         \n"
+        "bxeq    lr                         \n" /* Yes, do not schedule */
         "mrs     r0, psp                    \n"
         "mrs     r1, psplim                 \n"
         "push    {r0, r1, r2, lr}           \n"
