@@ -25,13 +25,13 @@
 
 #include "test_i058.h"
 
-client_test_t test_i058_client_tests_list[] = {
+const client_test_t test_i058_client_tests_list[] = {
     NULL,
     client_test_psa_doorbell_signal,
     NULL,
 };
 
-int32_t client_test_psa_doorbell_signal(caller_security_t caller)
+int32_t client_test_psa_doorbell_signal(caller_security_t caller __UNUSED)
 {
    int32_t            status = VAL_STATUS_SUCCESS;
    psa_handle_t       handle = 0;
