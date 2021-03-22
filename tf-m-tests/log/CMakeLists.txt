@@ -32,3 +32,22 @@ target_link_libraries(tfm_ns_log
     PRIVATE
         platform_ns
 )
+
+################################ S Log #########################################
+add_library(tfm_s_log STATIC EXCLUDE_FROM_ALL)
+
+target_sources(tfm_s_log
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/interface/src/log/tfm_log_raw.c
+)
+
+target_include_directories(tfm_s_log
+    PUBLIC
+        ${CMAKE_SOURCE_DIR}/interface/include/
+        ${CMAKE_SOURCE_DIR}/interface/include/log
+)
+
+target_link_libraries(tfm_s_log
+    PRIVATE
+        platform_s
+)

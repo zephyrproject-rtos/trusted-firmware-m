@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -10,36 +10,43 @@ if (NOT TFM_PARTITION_PROTECTED_STORAGE)
     return()
 endif()
 
-add_library(tfm_partition_ps_test STATIC)
+add_library(tfm_psa_rot_partition_ps_test STATIC)
 
-target_sources(tfm_partition_ps_test
+target_sources(tfm_psa_rot_partition_ps_test
     PRIVATE
         ./tfm_ps_test_service.c
 )
 
-target_include_directories(tfm_partition_ps_test
+# The generated sources
+target_sources(tfm_psa_rot_partition_ps_test
+    PRIVATE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/test_services/tfm_ps_test_service/auto_generated/intermedia_tfm_ps_test_service.c>
+)
+
+target_include_directories(tfm_psa_rot_partition_ps_test
     PUBLIC
         .
     PRIVATE
         ${CMAKE_BINARY_DIR}/generated/test_services/tfm_ps_test_service
 )
 
-target_link_libraries(tfm_partition_ps_test
+target_link_libraries(tfm_psa_rot_partition_ps_test
     PRIVATE
         tfm_secure_api
         psa_interface
         platform_s
-        tfm_partition_ps
+        tfm_app_rot_partition_ps
 )
 
 target_link_libraries(tfm_spm
     PRIVATE
-        tfm_partition_ps_test
+        tfm_psa_rot_partition_ps_test
 )
 
 ############################ Secure API ########################################
 
-target_sources(tfm_secure_api
+target_sources(tfm_sprt
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_ps_test_service_api.c
 )
@@ -55,7 +62,7 @@ set_source_files_properties(tfm_ps_test_service_api.c
 
 target_link_libraries(tfm_partitions
     INTERFACE
-        tfm_partition_ps_test
+        tfm_psa_rot_partition_ps_test
 )
 
 target_compile_definitions(tfm_partition_defs

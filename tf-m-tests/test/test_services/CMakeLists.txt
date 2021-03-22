@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -16,26 +16,29 @@ if (TEST_S)
     # Secure tests are declared in this dir so that it can use the secure CPU
     # definitions
     add_library(tfm_s_tests INTERFACE)
-    if (TFM_PARTITION_CRYPTO)
+    if (TFM_PARTITION_CRYPTO OR FORWARD_PROT_MSG)
         add_library(tfm_test_suite_crypto_s STATIC EXCLUDE_FROM_ALL)
     endif()
-    if (TFM_PARTITION_INITIAL_ATTESTATION)
+    if (TFM_PARTITION_INITIAL_ATTESTATION OR FORWARD_PROT_MSG)
         add_library(tfm_test_suite_attestation_s STATIC EXCLUDE_FROM_ALL)
     endif()
-    if(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+    if(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OR FORWARD_PROT_MSG)
         add_library(tfm_test_suite_its_s STATIC EXCLUDE_FROM_ALL)
     endif()
-    if (TFM_PARTITION_PROTECTED_STORAGE)
+    if (TFM_PARTITION_PROTECTED_STORAGE OR FORWARD_PROT_MSG)
         add_library(tfm_test_suite_ps_s STATIC EXCLUDE_FROM_ALL)
     endif()
     if(NOT TFM_PSA_API AND TFM_PARTITION_AUDIT_LOG)
         add_library(tfm_test_suite_audit_s STATIC EXCLUDE_FROM_ALL)
     endif()
-    if(TFM_PARTITION_PLATFORM)
+    if(TFM_PARTITION_PLATFORM OR FORWARD_PROT_MSG)
         add_library(tfm_test_suite_platform_s STATIC EXCLUDE_FROM_ALL)
     endif()
     if(TFM_PSA_API)
         add_library(tfm_test_suite_ipc_s STATIC EXCLUDE_FROM_ALL)
+    endif()
+    if(TFM_PARTITION_FIRMWARE_UPDATE)
+        add_library(tfm_test_suite_fwu_s STATIC EXCLUDE_FROM_ALL)
     endif()
 endif()
 

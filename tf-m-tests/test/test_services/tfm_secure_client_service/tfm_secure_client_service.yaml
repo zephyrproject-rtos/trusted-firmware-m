@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -53,6 +53,13 @@
     "TFM_ATTEST_GET_PUBLIC_KEY",
     "TFM_PS_TEST_PREPARE",
     "TFM_SP_PLATFORM_SYSTEM_RESET",
-    "TFM_SP_PLATFORM_IOCTL"
+    "TFM_SP_PLATFORM_IOCTL",
+    "TFM_FWU_WRITE",
+    "TFM_FWU_INSTALL",
+    "TFM_FWU_ABORT",
+    "TFM_FWU_QUERY",
+    "TFM_FWU_REQUEST_REBOOT",
+    "TFM_FWU_ACCEPT",
+    "TFM_FFM11_SERVICE1"
   ]
 }

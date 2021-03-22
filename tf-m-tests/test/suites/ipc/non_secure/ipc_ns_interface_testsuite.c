@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,9 +9,7 @@
 #include "ipc_ns_tests.h"
 #include "psa/client.h"
 #include "test_framework_helpers.h"
-#ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
-#endif
 
 /* List of tests */
 static void tfm_ipc_test_1001(struct test_result_t *ret);
@@ -34,6 +32,14 @@ static void tfm_ipc_test_1009(struct test_result_t *ret);
 #endif
 
 static void tfm_ipc_test_1010(struct test_result_t *ret);
+
+#ifdef TFM_IPC_ISOLATION_3_RETRIEVE_APP_MEM
+static void tfm_ipc_test_1011(struct test_result_t *ret);
+#endif
+
+#ifdef TFM_PARTITION_FFM11
+static void tfm_ipc_test_1012(struct test_result_t *ret);
+#endif
 
 static struct test_t ipc_veneers_tests[] = {
     {&tfm_ipc_test_1001, "TFM_IPC_TEST_1001",
@@ -62,6 +68,14 @@ static struct test_t ipc_veneers_tests[] = {
 #endif
     {&tfm_ipc_test_1010, "TFM_IPC_TEST_1010",
      "Test psa_call with the status of PSA_ERROR_PROGRAMMER_ERROR", {TEST_PASSED}},
+#ifdef TFM_IPC_ISOLATION_3_RETRIEVE_APP_MEM
+    {&tfm_ipc_test_1011, "TFM_IPC_TEST_1011",
+     "Call APP RoT access another APP RoT memory test service", {TEST_PASSED}},
+#endif
+#ifdef TFM_PARTITION_FFM11
+    {&tfm_ipc_test_1012, "TFM_IPC_TEST_1012",
+     "Accessing stateless service from non-secure client", {TEST_PASSED}},
+#endif
 };
 
 void register_testsuite_ns_ipc_interface(struct test_suite_t *p_test_suite)
@@ -104,7 +118,7 @@ static void tfm_ipc_test_1002(struct test_result_t *ret)
     version = psa_version(IPC_SERVICE_TEST_BASIC_SID);
     if (version == PSA_VERSION_NONE) {
         TEST_FAIL("RoT Service is not implemented or caller is not authorized" \
-                  "to access it!\r\n");
+                  " to access it!\r\n");
         return;
     } else {
         /* Valid version number */
@@ -247,6 +261,7 @@ static void tfm_ipc_test_1006(struct test_result_t *ret)
 static void tfm_ipc_test_1007(struct test_result_t *ret)
 {
     psa_handle_t handle;
+    psa_status_t status;
     int test_result;
     struct psa_outvec outvecs[1] = {{&test_result, sizeof(test_result)}};
 
@@ -260,10 +275,13 @@ static void tfm_ipc_test_1007(struct test_result_t *ret)
         return;
     }
 
-    psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
+    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
+    if (status == PSA_SUCCESS) {
+        ret->val = TEST_PASSED;
+    } else {
+        ret->val = TEST_FAILED;
+    }
 
-    /* The system should panic in psa_call. If runs here, the test fails. */
-    ret->val = TEST_FAILED;
     psa_close(handle);
 }
 #endif
@@ -360,3 +378,68 @@ static void tfm_ipc_test_1010(struct test_result_t *ret)
 
     psa_close(handle);
 }
+
+#ifdef TFM_IPC_ISOLATION_3_RETRIEVE_APP_MEM
+/**
+ * \brief Call IPC_CLIENT_TEST_RETRIEVE_APP_MEM_SID RoT Service
+ * to run the ARoT access another ARoT mem test.
+ */
+static void tfm_ipc_test_1011(struct test_result_t *ret)
+{
+    psa_handle_t handle;
+    psa_status_t status;
+    int test_result;
+    struct psa_outvec outvecs[1] = {{&test_result, sizeof(test_result)}};
+
+    handle = psa_connect(IPC_CLIENT_TEST_RETRIEVE_APP_MEM_SID,
+                         IPC_CLIENT_TEST_RETRIEVE_APP_MEM_VERSION);
+    if (handle > 0) {
+        TEST_LOG("Connect success!\r\n");
+    } else {
+        TEST_LOG("The RoT Service has refused the connection!\r\n");
+        ret->val = TEST_FAILED;
+        return;
+    }
+
+    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, outvecs, 1);
+    if (status == PSA_SUCCESS) {
+        ret->val = TEST_PASSED;
+    } else {
+        ret->val = TEST_FAILED;
+    }
+
+    psa_close(handle);
+}
+#endif
+
+#ifdef TFM_PARTITION_FFM11
+/**
+ * \brief Accessing a stateless service
+ *
+ * \note Accessing stateless service from non-secure client.
+ */
+static void tfm_ipc_test_1012(struct test_result_t *ret)
+{
+    uint32_t data = 0xFFFFABCD;
+    psa_handle_t handle;
+    psa_status_t status;
+    psa_invec in_vec[] = { {&data, sizeof(uint32_t)} };
+
+    /* Connecting to a stateless service should fail. */
+    handle = psa_connect(TFM_FFM11_SERVICE1_SID, TFM_FFM11_SERVICE1_VERSION);
+    if (handle > 0) {
+        TEST_FAIL("Connecting to stateless service test should fail.\r\n");
+        return;
+    }
+
+    /* Calling a stateless service should succeed. */
+    status = psa_call(TFM_FFM11_SERVICE1_HANDLE, PSA_IPC_CALL,
+                      in_vec, 1, NULL, 0);
+    if (status < 0) {
+        TEST_FAIL("Calling a stateless service test fail.\r\n");
+        return;
+    }
+
+    ret->val = TEST_PASSED;
+}
+#endif

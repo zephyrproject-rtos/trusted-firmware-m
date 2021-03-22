@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,7 +16,6 @@
 #ifdef PSA_API_TEST_NS
 #include "psa_api_test.h"
 #endif
-#include "target_cfg.h"
 #include "tfm_plat_ns.h"
 #include "driver/Driver_USART.h"
 #include "device_cfg.h"
@@ -26,7 +25,6 @@
 #endif
 #include "tfm_log.h"
 #include "uart_stdout.h"
-#include "region.h"
 
 /**
  * \brief Modified table template for user defined SVC functions
@@ -64,11 +62,17 @@ extern void * const osRtxUserSVC[1+USER_SVC_COUNT];
  */
 #if defined(TEST_FRAMEWORK_NS) || defined(TEST_FRAMEWORK_S) \
  || defined(PSA_API_TEST_NS)
-static uint64_t test_app_stack[(4u * 1024u) / (sizeof(uint64_t))]; /* 4KB */
 static const osThreadAttr_t thread_attr = {
     .name = "test_thread",
-    .stack_mem = test_app_stack,
-    .stack_size = sizeof(test_app_stack),
+    .stack_size = 4096U
+};
+#endif
+
+#ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
+static osThreadFunc_t mailbox_thread_func = tfm_ns_mailbox_thread_runner;
+static const osThreadAttr_t mailbox_thread_attr = {
+    .name = "mailbox_thread",
+    .stack_size = 1024U
 };
 #endif
 
@@ -143,26 +147,23 @@ __attribute__((noreturn))
 #endif
 int main(void)
 {
-#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
-    /* Set Main Stack Pointer limit */
-    REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Base);
-    __set_MSPLIM((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
-                                        $$ZI$$Base));
-#endif
-
     if (tfm_ns_platform_init() != ARM_DRIVER_OK) {
         /* Avoid undefined behavior if platform init failed */
         while(1);
     }
 
+    (void) osKernelInitialize();
+
 #ifdef TFM_MULTI_CORE_TOPOLOGY
     tfm_ns_multi_core_boot();
 #endif
 
-    (void) osKernelInitialize();
-
     /* Initialize the TFM NS interface */
     tfm_ns_interface_init();
+
+#ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
+    (void) osThreadNew(mailbox_thread_func, NULL, &mailbox_thread_attr);
+#endif
 
 #if defined(TEST_FRAMEWORK_NS) || defined(TEST_FRAMEWORK_S)
     thread_func = test_app;

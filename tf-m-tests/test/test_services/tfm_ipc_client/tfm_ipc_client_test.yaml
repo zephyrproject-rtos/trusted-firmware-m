@@ -49,12 +49,20 @@
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
+    },
+    {
+      "name": "IPC_CLIENT_TEST_RETRIEVE_APP_MEM",
+      "sid": "0x0000F065",
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
     }
   ],
   "dependencies": [
     "IPC_SERVICE_TEST_PSA_ACCESS_APP_READ_ONLY_MEM",
     "IPC_SERVICE_TEST_PSA_ACCESS_APP_MEM",
     "IPC_SERVICE_TEST_BASIC",
-    "IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM"
+    "IPC_SERVICE_TEST_APP_ACCESS_PSA_MEM",
+    "TFM_SECURE_CLIENT_2"
   ]
 }

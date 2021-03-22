@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,23 +10,26 @@
 #include "test_framework.h"
 
 /* Service specific includes */
-#ifdef TFM_PARTITION_PROTECTED_STORAGE
+#if defined(TFM_PARTITION_PROTECTED_STORAGE) || defined(FORWARD_PROT_MSG)
 #include "ps_ns_tests.h"
 #endif
-#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+#if defined(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE) || defined(FORWARD_PROT_MSG)
 #include "its_ns_tests.h"
 #endif
-#ifdef TFM_PARTITION_CRYPTO
+#if defined(TFM_PARTITION_CRYPTO) || defined(FORWARD_PROT_MSG)
 #include "crypto_ns_tests.h"
 #endif
-#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+#if defined(TFM_PARTITION_FIRMWARE_UPDATE)
+#include "fwu_ns_tests.h"
+#endif
+#if defined(TFM_PARTITION_INITIAL_ATTESTATION) || defined(FORWARD_PROT_MSG)
 #include "attest_ns_tests.h"
 #include "qcbor_ns_tests.h"
 #ifndef SYMMETRIC_INITIAL_ATTESTATION
 #include "t_cose_ns_tests.h"
 #endif /* !SYMMETRIC_INITIAL_ATTESTATION */
 #endif
-#ifdef TFM_PARTITION_PLATFORM
+#if defined(TFM_PARTITION_PLATFORM) || defined(FORWARD_PROT_MSG)
 #include "platform_ns_tests.h"
 #endif
 #include "core_ns_tests.h"
@@ -44,26 +47,26 @@
 static struct test_suite_t test_suites[] = {
     /* List test cases which are compliant with level 1 isolation */
 
-#ifdef TFM_PARTITION_PROTECTED_STORAGE
+#if defined(TFM_PARTITION_PROTECTED_STORAGE) || defined(FORWARD_PROT_MSG)
     {&register_testsuite_ns_psa_ps_interface, 0, 0, 0},
 #endif
 
-#ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+#if defined(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE) || defined(FORWARD_PROT_MSG)
     /* Non-secure ITS test cases */
     {&register_testsuite_ns_psa_its_interface, 0, 0, 0},
 #endif
 
-#ifdef TFM_PARTITION_CRYPTO
+#if defined(TFM_PARTITION_CRYPTO) || defined(FORWARD_PROT_MSG)
     /* Non-secure Crypto test cases */
     {&register_testsuite_ns_crypto_interface, 0, 0, 0},
 #endif
 
-#ifdef TFM_PARTITION_PLATFORM
+#if defined(TFM_PARTITION_PLATFORM) || defined(FORWARD_PROT_MSG)
     /* Non-secure platform service test cases */
     {&register_testsuite_ns_platform_interface, 0, 0, 0},
 #endif
 
-#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+#if defined(TFM_PARTITION_INITIAL_ATTESTATION) || defined(FORWARD_PROT_MSG)
     /* Non-secure initial attestation service test cases */
     {&register_testsuite_ns_attestation_interface, 0, 0, 0},
 
@@ -79,6 +82,11 @@ static struct test_suite_t test_suites[] = {
 #ifdef TFM_PARTITION_AUDIT_LOG
     /* Non-secure Audit Logging test cases */
     {&register_testsuite_ns_audit_interface, 0, 0, 0},
+#endif
+
+#ifdef TFM_PARTITION_FIRMWARE_UPDATE
+    /* Non-secure Firmware Update test cases */
+    {&register_testsuite_ns_psa_fwu_interface, 0, 0, 0},
 #endif
 
 /* Non-secure core test cases */

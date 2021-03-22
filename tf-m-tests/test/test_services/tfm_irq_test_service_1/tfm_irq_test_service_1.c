@@ -384,7 +384,9 @@ static void spm_irq_test_1_execute_test_scenario_ipc(psa_signal_t signal)
 
 int32_t tfm_irq_test_1_init(void)
 {
+#ifndef TFM_PSA_API
     tfm_enable_irq(SPM_CORE_IRQ_TEST_1_SIGNAL_TIMER_0_IRQ);
+#endif
 #ifdef TFM_PSA_API
     psa_signal_t signals = 0;
 
