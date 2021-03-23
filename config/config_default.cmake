@@ -174,7 +174,7 @@ set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCU
 set(MCUBOOT_VERSION                     "v1.7.2"   CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
-set(PSA_ARCH_TESTS_VERSION              "8644bd0"  CACHE STRING    "The version of PSA arch tests to use")
+set(PSA_ARCH_TESTS_VERSION              "b0635d9"  CACHE STRING    "The version of PSA arch tests to use")
 
 ################################################################################
 ################################################################################
