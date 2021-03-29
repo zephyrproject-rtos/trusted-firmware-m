@@ -200,6 +200,25 @@ Here is the RoT Service ID table used in TF-M.
    tfm_ps_test_service         0x0000F                0x0C0-0x0DF
    =========================== ====================== ========================
 
+RoT Service Stateless Handle Distribution
+-----------------------------------------
+A RoT Service may include stateless services. They are distinguished and
+referenced by stateless handles. In manifest, a ``stateless_handle`` attribute
+is set for indexing stateless services. The valid range is [1, 32] in current
+implementation and may extend.
+
+Here is the stateless handle allocation for partitions in TF-M. Partitions not
+listed are not applied to stateless mechanism yet.
+
+.. table:: Stateless Handle table
+   :widths: auto
+
+   =============================== =======================
+    **Partition name**              **Stateless Handle**
+   =============================== =======================
+   TFM_SP_CRYPTO                   1
+   =============================== =======================
+
 mmio_regions
 ------------
 This attribute is a list of MMIO region objects which the Secure Partition
