@@ -36,8 +36,8 @@ add_custom_target(tfm_docs_sphinx_cfg
 )
 add_custom_command(OUTPUT ${SPHINX_TMP_DOC_DIR}/conf.py
     COMMAND ${CMAKE_COMMAND} -E make_directory ${SPHINX_TMP_DOC_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/build_docs/conf.py ${SPHINX_TMP_DOC_DIR}/conf.py
-    MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/build_docs/conf.py
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/docs/conf.py ${SPHINX_TMP_DOC_DIR}/conf.py
+    MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/docs/conf.py
     BYPRODUCTS ${SPHINX_TMP_DOC_DIR}
 )
 

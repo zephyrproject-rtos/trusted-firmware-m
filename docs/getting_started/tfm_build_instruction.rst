@@ -440,7 +440,10 @@ targets.
 .. code-block:: bash
 
     # Build the documentation from build_docs directory
-    cd <TF-M base folder>/ build_docs/
+    cd <TF-M base folder>
+    mkdir build_docs
+    cp docs/conf.py build_docs/conf.py
+    cd build_docs
     sphinx-build ./ user_guide
 
     # Build the documentation from a custom location
