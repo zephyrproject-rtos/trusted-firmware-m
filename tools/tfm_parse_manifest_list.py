@@ -197,14 +197,14 @@ def gen_files(context, gen_file_lists):
 def process_stateless_services(partitions, static_handle_max_num):
     """
     This function collects all stateless services together, and allocates
-    stateless handle for them.
-    If the stateless handle is set to a valid value in yaml file, it is used as
-    the index directly, if the stateless handle is set as "auto" or not set,
-    framework will allocate a valid index for the service.
-    After that, framework puts each service into a stateless service list at
-    position of its "index". Other elements in list are left None.
+    stateless handles for them.
+    If the stateless handle is set to a valid value in yaml/json file, it is
+    converted to a index directly, if the stateless handle is set as "auto",
+    or not set, framework will allocate a valid index for the service.
+    After that, framework puts each service into a reordered stateless service
+    list at position of "index". Other positions in list are left "None".
     """
-    stateless_services = []
+    raw_stateless_services = []
 
     # Collect all stateless services first.
     for partition in partitions:
@@ -218,12 +218,12 @@ def process_stateless_services(partitions, static_handle_max_num):
             if 'connection_based' not in service:
                 raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
             if service['connection_based'] is False:
-                stateless_services.append(service)
+                raw_stateless_services.append(service)
 
-    if len(stateless_services) == 0:
+    if len(raw_stateless_services) == 0:
         return []
 
-    if len(stateless_services) > static_handle_max_num:
+    if len(raw_stateless_services) > static_handle_max_num:
         raise Exception("Stateless service numbers range exceed.")
 
     """
@@ -233,42 +233,50 @@ def process_stateless_services(partitions, static_handle_max_num):
     at index "handle - 1", since handle value starts from 1 and list index
     starts from 0.
     """
-    reordered_stateless_list = [None] * static_handle_max_num
+    reordered_stateless_services = [None] * static_handle_max_num
 
-    # Fill in services with specified stateless handle, index is "handle - 1".
-    for service in stateless_services:
-        if service['stateless_handle'] == "auto":
-            continue
-        try:
-            if reordered_stateless_list[service['stateless_handle']-1] is not None:
-                raise Exception("Duplicated stateless service handle.")
-            reordered_stateless_list[service['stateless_handle']-1] = service
-        except IndexError:
-            raise Exception("Stateless service index out of range.")
-        # Remove recorded node from the existing list
-        stateless_services.remove(service)
+    for service in raw_stateless_services:
+        service_handle = service['stateless_handle']
 
-    # Auto-allocate stateless handle
+        # Fill in service list with specified stateless handle, otherwise skip
+        if isinstance(service_handle, int):
+            if service_handle < 1 or service_handle > static_handle_max_num:
+                raise Exception("Invalid stateless_handle setting.")
+            # Convert handle index to reordered service list index
+            service_handle = service_handle - 1
+
+            if reordered_stateless_services[service_handle] is not None:
+                raise Exception("Duplicated stateless_handle setting.")
+            reordered_stateless_services[service_handle] = service
+            # Remove recorded node from the existing list
+            raw_stateless_services.remove(service)
+
+    # Auto-allocate stateless handle and encode the stateless handle
     for i in range(0, static_handle_max_num):
-        if reordered_stateless_list[i] == None and len(stateless_services) > 0:
-            service = stateless_services.pop(0)
-            service['stateless_handle'] = i + 1
-            reordered_stateless_list[i] = service
+        service = reordered_stateless_services[i]
+
+        if service == None and len(raw_stateless_services) > 0:
+            service = raw_stateless_services.pop(0)
+
         """
         Encode stateless flag and version into stateless handle
         bit 30: stateless handle indicator
         bit 15-8: stateless service version
         bit 7-0: stateless handle index
         """
-        if reordered_stateless_list[i] != None:
-            stateless_handle_value = reordered_stateless_list[i]['stateless_handle']
+        stateless_handle_value = 0
+        if service != None:
+            stateless_index = (i & 0xFF)
+            stateless_handle_value |= stateless_index
             stateless_flag = 1 << 30
             stateless_handle_value |= stateless_flag
-            stateless_version = (reordered_stateless_list[i]['version'] & 0xFF) << 8
+            stateless_version = (service['version'] & 0xFF) << 8
             stateless_handle_value |= stateless_version
-            reordered_stateless_list[i]['stateless_handle'] = '0x%08x' % stateless_handle_value
+            service['stateless_handle_value'] = '0x{0:08x}'.format(stateless_handle_value)
 
-    return reordered_stateless_list
+        reordered_stateless_services[i] = service
+
+    return reordered_stateless_services
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Parse secure partition manifest list and generate files listed by the file list',

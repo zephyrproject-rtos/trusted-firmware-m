@@ -40,7 +40,7 @@
 #define STAIC_HANDLE_IDX_MASK \
     (uint32_t)((1UL << STAIC_HANDLE_IDX_BIT_WIDTH) - 1)
 #define GET_INDEX_FROM_STATIC_HANDLE(handle) \
-    (uint32_t)(((handle) & STAIC_HANDLE_IDX_MASK) - 1)
+    (uint32_t)((handle) & STAIC_HANDLE_IDX_MASK)
 
 #define STAIC_HANDLE_VER_BIT_WIDTH      8
 #define STAIC_HANDLE_VER_OFFSET         8
