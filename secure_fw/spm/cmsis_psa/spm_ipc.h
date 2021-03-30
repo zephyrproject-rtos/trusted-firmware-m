@@ -49,14 +49,14 @@
 #define GET_VERSION_FROM_STATIC_HANDLE(handle) \
     (uint32_t)(((handle) >> STAIC_HANDLE_VER_OFFSET) & STAIC_HANDLE_VER_MASK)
 
+/* Validate the static handle indicator bit */
 #define STAIC_HANDLE_INDICATOR_OFFSET   30
-/*
- * A valid static handle must have indicator bit set, have a positive index,
- * 1 <= index <= STATIC_HANDLE_NUM_LIMIT.
- */
-#define IS_VALID_STATIC_HANDLE(handle)                      \
-    (((handle) & (1UL << STAIC_HANDLE_INDICATOR_OFFSET)) && \
-     (GET_INDEX_FROM_STATIC_HANDLE(handle) < STATIC_HANDLE_NUM_LIMIT))
+#define IS_STATIC_HANDLE(handle) \
+    ((handle) & (1UL << STAIC_HANDLE_INDICATOR_OFFSET))
+
+/* Valid index should be [0, STATIC_HANDLE_NUM_LIMIT-1] */
+#define IS_VALID_STATIC_HANDLE_IDX(index) \
+    (((index) >= 0) && ((index) < STATIC_HANDLE_NUM_LIMIT))
 
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 

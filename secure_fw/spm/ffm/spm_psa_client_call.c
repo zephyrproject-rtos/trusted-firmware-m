@@ -151,8 +151,13 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     }
 
     /* Allocate space from handle pool for static handle. */
-    if (IS_VALID_STATIC_HANDLE(handle)) {
+    if (IS_STATIC_HANDLE(handle)) {
         index = GET_INDEX_FROM_STATIC_HANDLE(handle);
+
+        if (!IS_VALID_STATIC_HANDLE_IDX(index)) {
+            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+        }
+
         service = GET_STATELESS_SERVICE(index);
         sid = GET_STATELESS_SID(index);
 
@@ -312,7 +317,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
     }
 
     /* It is a PROGRAMMER ERROR if called with a stateless handle. */
-    if (IS_VALID_STATIC_HANDLE(handle)) {
+    if (IS_STATIC_HANDLE(handle)) {
         TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
     }
 
