@@ -77,7 +77,13 @@ def process_manifest(manifest_list_files):
     memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
 
     print("Start to generate PSA manifests:")
+    pid_list = []
     for manifest_item in manifest_list:
+        # Check if partition ID is duplicated
+        if manifest_item['pid'] in pid_list:
+            raise Exception("PID No. {pid} has already been used!".format(pid=manifest_item['pid']))
+        pid_list.append(manifest_item['pid'])
+
         # Replace environment variables in the manifest path
         manifest_path = os.path.expandvars(manifest_item['manifest'])
         file = open(manifest_path)
