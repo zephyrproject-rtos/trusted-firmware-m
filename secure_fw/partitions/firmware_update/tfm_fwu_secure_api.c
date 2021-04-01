@@ -42,10 +42,7 @@ psa_status_t psa_fwu_write(uint32_t image_id,
 
     psa_close(handle);
 #else
-    status = tfm_tfm_fwu_write_req_veneer(in_vec,
-                                          IOVEC_LEN(in_vec),
-                                          NULL,
-                                          0);
+    status = tfm_fwu_write_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
 #endif
 
     /* A parameter with a buffer pointer where its data length is longer than
@@ -94,8 +91,8 @@ psa_status_t psa_fwu_install(psa_image_id_t image_id,
 
     psa_close(handle);
 #else
-    status = tfm_tfm_fwu_install_req_veneer(in_vec, IOVEC_LEN(in_vec),
-                                            out_vec, IOVEC_LEN(out_vec));
+    status = tfm_fwu_install_req_veneer(in_vec, IOVEC_LEN(in_vec),
+                                        out_vec, IOVEC_LEN(out_vec));
 #endif
 
     /* A parameter with a buffer pointer where its data length is longer than
@@ -133,8 +130,8 @@ psa_status_t psa_fwu_abort(psa_image_id_t image_id)
 
     psa_close(handle);
 #else
-    status = tfm_tfm_fwu_abort_req_veneer(in_vec, IOVEC_LEN(in_vec),
-                                          NULL, 0);
+    status = tfm_fwu_abort_req_veneer(in_vec, IOVEC_LEN(in_vec),
+                                      NULL, 0);
 #endif
 
     /* A parameter with a buffer pointer where its data length is longer than
@@ -175,8 +172,8 @@ psa_status_t psa_fwu_query(psa_image_id_t image_id, psa_image_info_t *info)
 
     psa_close(handle);
 #else
-    status = tfm_tfm_fwu_query_req_veneer(in_vec, IOVEC_LEN(in_vec),
-                                          out_vec, IOVEC_LEN(out_vec));
+    status = tfm_fwu_query_req_veneer(in_vec, IOVEC_LEN(in_vec),
+                                      out_vec, IOVEC_LEN(out_vec));
 #endif
 
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
@@ -204,7 +201,7 @@ psa_status_t psa_fwu_request_reboot(void)
 
     psa_close(handle);
 #else
-    status = tfm_tfm_fwu_request_reboot_req_veneer(NULL, 0, NULL, 0);
+    status = tfm_fwu_request_reboot_req_veneer(NULL, 0, NULL, 0);
 #endif
 
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
@@ -232,7 +229,7 @@ psa_status_t psa_fwu_accept(void)
 
     psa_close(handle);
 #else
-    status = tfm_tfm_fwu_accept_req_veneer(NULL, 0, NULL, 0);
+    status = tfm_fwu_accept_req_veneer(NULL, 0, NULL, 0);
 #endif
 
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {

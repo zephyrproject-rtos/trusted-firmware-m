@@ -40,8 +40,7 @@ psa_status_t psa_ps_set(psa_storage_uid_t uid,
     psa_close(handle);
 
 #else
-    status = tfm_tfm_ps_set_req_veneer(in_vec, IOVEC_LEN(in_vec),
-                                       NULL, 0);
+    status = tfm_ps_set_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
 
     /* A parameter with a buffer pointer pointer that has data length longer
      * than maximum permitted is treated as a secure violation.
@@ -90,8 +89,8 @@ psa_status_t psa_ps_get(psa_storage_uid_t uid,
     psa_close(handle);
 
 #else
-    status = tfm_tfm_ps_get_req_veneer(in_vec, IOVEC_LEN(in_vec),
-                                        out_vec, IOVEC_LEN(out_vec));
+    status = tfm_ps_get_req_veneer(in_vec, IOVEC_LEN(in_vec),
+                                   out_vec, IOVEC_LEN(out_vec));
 
    /* A parameter with a buffer pointer pointer that has data length longer
     * than maximum permitted is treated as a secure violation.
@@ -134,8 +133,8 @@ psa_status_t psa_ps_get_info(psa_storage_uid_t uid,
     psa_close(handle);
 
 #else
-    status = tfm_tfm_ps_get_info_req_veneer(in_vec, IOVEC_LEN(in_vec),
-                                            out_vec, IOVEC_LEN(out_vec));
+    status = tfm_ps_get_info_req_veneer(in_vec, IOVEC_LEN(in_vec),
+                                        out_vec, IOVEC_LEN(out_vec));
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
@@ -167,8 +166,7 @@ psa_status_t psa_ps_remove(psa_storage_uid_t uid)
     psa_close(handle);
 
 #else
-    status = tfm_tfm_ps_remove_req_veneer(in_vec, IOVEC_LEN(in_vec),
-                                           NULL, 0);
+    status = tfm_ps_remove_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
@@ -225,8 +223,7 @@ uint32_t psa_ps_get_support(void)
 
     psa_close(handle);
 #else
-    (void)tfm_tfm_ps_get_support_req_veneer(NULL, 0,
-                                            out_vec, IOVEC_LEN(out_vec));
+    (void)tfm_ps_get_support_req_veneer(NULL, 0, out_vec, IOVEC_LEN(out_vec));
 #endif
 
     return support_flags;

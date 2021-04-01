@@ -22,10 +22,9 @@ psa_status_t psa_ps_set(psa_storage_uid_t uid,
         { .base = &create_flags, .len = sizeof(create_flags) }
     };
 
-    status = tfm_ns_interface_dispatch(
-                                  (veneer_fn)tfm_tfm_ps_set_req_veneer,
-                                  (uint32_t)in_vec,  IOVEC_LEN(in_vec),
-                                  (uint32_t)NULL, 0);
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_ps_set_req_veneer,
+                                       (uint32_t)in_vec,  IOVEC_LEN(in_vec),
+                                       (uint32_t)NULL, 0);
 
     /* A parameter with a buffer pointer pointer that has data length longer
      * than maximum permitted is treated as a secure violation.
@@ -57,10 +56,9 @@ psa_status_t psa_ps_get(psa_storage_uid_t uid,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    status = tfm_ns_interface_dispatch(
-                                  (veneer_fn)tfm_tfm_ps_get_req_veneer,
-                                  (uint32_t)in_vec,  IOVEC_LEN(in_vec),
-                                  (uint32_t)out_vec, IOVEC_LEN(out_vec));
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_ps_get_req_veneer,
+                                       (uint32_t)in_vec,  IOVEC_LEN(in_vec),
+                                       (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
     *p_data_length = out_vec[0].len;
 
@@ -79,10 +77,9 @@ psa_status_t psa_ps_get_info(psa_storage_uid_t uid,
         { .base = p_info, .len = sizeof(*p_info) }
     };
 
-    status = tfm_ns_interface_dispatch(
-                                  (veneer_fn)tfm_tfm_ps_get_info_req_veneer,
-                                  (uint32_t)in_vec,  IOVEC_LEN(in_vec),
-                                  (uint32_t)out_vec, IOVEC_LEN(out_vec));
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_ps_get_info_req_veneer,
+                                       (uint32_t)in_vec,  IOVEC_LEN(in_vec),
+                                       (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
     return status;
 }
@@ -94,10 +91,9 @@ psa_status_t psa_ps_remove(psa_storage_uid_t uid)
         { .base = &uid, .len = sizeof(uid) }
     };
 
-    status = tfm_ns_interface_dispatch(
-                                  (veneer_fn)tfm_tfm_ps_remove_req_veneer,
-                                  (uint32_t)in_vec,  IOVEC_LEN(in_vec),
-                                  (uint32_t)NULL, 0);
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_ps_remove_req_veneer,
+                                       (uint32_t)in_vec,  IOVEC_LEN(in_vec),
+                                       (uint32_t)NULL, 0);
 
     return status;
 }
@@ -135,10 +131,9 @@ uint32_t psa_ps_get_support(void)
         { .base = &support_flags, .len = sizeof(support_flags) }
     };
 
-    (void)tfm_ns_interface_dispatch(
-                               (veneer_fn)tfm_tfm_ps_get_support_req_veneer,
-                               (uint32_t)NULL,  0,
-                               (uint32_t)out_vec, IOVEC_LEN(out_vec));
+    (void)tfm_ns_interface_dispatch((veneer_fn)tfm_ps_get_support_req_veneer,
+                                    (uint32_t)NULL,  0,
+                                    (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
     return support_flags;
 }

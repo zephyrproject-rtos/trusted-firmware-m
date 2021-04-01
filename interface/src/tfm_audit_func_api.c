@@ -11,17 +11,17 @@
 #include "tfm_ns_interface.h"
 
 #define API_DISPATCH(sfn_name)                                    \
-    tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer, \
+    tfm_ns_interface_dispatch((veneer_fn)sfn_name##_veneer,       \
         (uint32_t)in_vec, IOVEC_LEN(in_vec),                      \
         (uint32_t)out_vec, IOVEC_LEN(out_vec))
 
 #define API_DISPATCH_NO_INVEC(sfn_name)                           \
-    tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer, \
+    tfm_ns_interface_dispatch((veneer_fn)sfn_name##_veneer,       \
         (uint32_t)NULL, 0,                                        \
         (uint32_t)out_vec, IOVEC_LEN(out_vec))
 
 #define API_DISPATCH_NO_OUTVEC(sfn_name)                          \
-    tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer, \
+    tfm_ns_interface_dispatch((veneer_fn)sfn_name##_veneer,       \
         (uint32_t)in_vec, IOVEC_LEN(in_vec),                      \
         (uint32_t)NULL, 0)
 
@@ -41,7 +41,7 @@ psa_status_t psa_audit_retrieve_record(const uint32_t record_index,
         {.base = buffer, .len = buffer_size},
     };
 
-    status = API_DISPATCH(audit_core_retrieve_record);
+    status = API_DISPATCH(tfm_audit_core_retrieve_record);
 
     *record_size = out_vec[0].len;
 
@@ -56,7 +56,7 @@ psa_status_t psa_audit_get_info(uint32_t *num_records, uint32_t *size)
         {.base = size, .len = sizeof(uint32_t)},
     };
 
-    status = API_DISPATCH_NO_INVEC(audit_core_get_info);
+    status = API_DISPATCH_NO_INVEC(tfm_audit_core_get_info);
 
     return status;
 }
@@ -72,7 +72,7 @@ psa_status_t psa_audit_get_record_info(const uint32_t record_index,
         {.base = size, .len = sizeof(uint32_t)},
     };
 
-    status = API_DISPATCH(audit_core_get_record_info);
+    status = API_DISPATCH(tfm_audit_core_get_record_info);
 
     return status;
 }
@@ -87,7 +87,7 @@ psa_status_t psa_audit_delete_record(const uint32_t record_index,
         {.base = token, .len = token_size},
     };
 
-    status = API_DISPATCH_NO_OUTVEC(audit_core_delete_record);
+    status = API_DISPATCH_NO_OUTVEC(tfm_audit_core_delete_record);
 
     return status;
 }

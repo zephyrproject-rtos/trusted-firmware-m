@@ -12,12 +12,12 @@
 #include "tfm_ns_interface.h"
 
 #define API_DISPATCH(sfn_name, sfn_id)                               \
-        tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer,\
+        tfm_ns_interface_dispatch((veneer_fn)sfn_name##_veneer,      \
         (uint32_t)in_vec, IOVEC_LEN(in_vec),                         \
         (uint32_t)out_vec, IOVEC_LEN(out_vec))
 
 #define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)                     \
-        tfm_ns_interface_dispatch((veneer_fn)tfm_##sfn_name##_veneer,\
+        tfm_ns_interface_dispatch((veneer_fn)sfn_name##_veneer,      \
         (uint32_t)in_vec, IOVEC_LEN(in_vec),                         \
         (uint32_t)NULL, 0)
 

@@ -22,7 +22,14 @@ extern "C" {
     {% endif %}
 /******** {{partition.manifest.name}} ********/
     {% for function in partition.manifest.secure_functions%}
+        {% if function.signal.lower().startswith('tfm_') %}
+        {# If signal already contains tfm_ prefix, avoid adding a duplicated one
+           in veneer function name.
+        #}
+psa_status_t {{function.signal.lower()}}_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+        {% else %}
 psa_status_t tfm_{{function.signal.lower()}}_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
+        {% endif %}
     {% endfor %}
     {% if partition.attr.conditional %}
 #endif /* {{partition.attr.conditional}} */
