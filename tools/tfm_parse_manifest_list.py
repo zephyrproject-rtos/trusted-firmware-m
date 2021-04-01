@@ -76,14 +76,27 @@ def process_manifest(manifest_list_files):
     manifesttemplate = ENV.get_template('secure_fw/partitions/manifestfilename.template')
     memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
 
-    print("Start to generate PSA manifests:")
     pid_list = []
-    for manifest_item in manifest_list:
+    no_pid_manifest_idx = []
+    for i, manifest_item in enumerate(manifest_list):
+        # Check if partition ID is manually set
+        if 'pid' not in manifest_item.keys():
+            no_pid_manifest_idx.append(i)
+            continue
         # Check if partition ID is duplicated
         if manifest_item['pid'] in pid_list:
             raise Exception("PID No. {pid} has already been used!".format(pid=manifest_item['pid']))
         pid_list.append(manifest_item['pid'])
+    # Automatically generate PIDs for partitions without PID
+    pid = 256
+    for idx in no_pid_manifest_idx:
+        while pid in pid_list:
+            pid += 1
+        manifest_list[idx]['pid'] = pid
+        pid_list.append(pid)
 
+    print("Start to generate PSA manifests:")
+    for manifest_item in manifest_list:
         # Replace environment variables in the manifest path
         manifest_path = os.path.expandvars(manifest_item['manifest'])
         file = open(manifest_path)
