@@ -34,6 +34,11 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         *psa_lifecycle.* (+RO)
     }
 
+    /**** Section for holding partition static data */
+    TFM_SP_STATIC_LIST +0 ALIGN 4 {
+        *(.partition_info)
+    }
+
     /**** PSA RoT RO part (CODE + RODATA) start here */
     /*
      * This empty, zero long execution region is here to mark the start address

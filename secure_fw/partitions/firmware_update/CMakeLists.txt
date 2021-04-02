@@ -21,6 +21,10 @@ target_include_directories(tfm_psa_rot_partition_fwu
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update
 )
+target_include_directories(tfm_partitions
+    INTERFACE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update
+)
 
 target_sources(tfm_psa_rot_partition_fwu
     PRIVATE
@@ -28,7 +32,12 @@ target_sources(tfm_psa_rot_partition_fwu
         tfm_fwu.c
         $<$<BOOL:${TFM_PSA_API}>:
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/intermedia_tfm_firmware_update.c>
-        )
+)
+target_sources(tfm_partitions
+    INTERFACE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/static_info_tfm_firmware_update.c>
+)
 
 # Include the bootloader specific configuration.
 if ((NOT TFM_FWU_BOOTLOADER_LIB) OR (NOT EXISTS ${TFM_FWU_BOOTLOADER_LIB}))

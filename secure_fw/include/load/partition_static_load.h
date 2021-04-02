@@ -24,7 +24,7 @@
 #define POSITION_TO_PTR(x, t)               (t)(x)
 
 /* Length of extendable variables in partition static type */
-#define STATIC_INFO_EXT_LENGTH              0
+#define STATIC_INFO_EXT_LENGTH              2
 /*
  * Argument "ps_ptr" must have be a "struct partition_static_info_t *" type and
  * must be validated before using.
