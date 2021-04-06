@@ -26,7 +26,6 @@ target_include_directories(psa_interface
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_BINARY_DIR}/generated/interface/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/os_wrapper
         $<$<OR:$<BOOL:${FORWARD_PROT_MSG}>,$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>:${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core>
 )
 
