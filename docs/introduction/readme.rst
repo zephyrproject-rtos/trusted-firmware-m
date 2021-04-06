@@ -143,6 +143,8 @@ Platforms supported
           <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF9160-DK>`_
         - `nRF5340 DK (nordic_nrf/nrf5340dk_nrf5340_cpuapp).
           <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-DK>`_
+        - `BL5340 DVK (lairdconnectivity/bl5340_dvk_cpuapp).
+          <https://www.lairdconnect.com/wireless-modules/bluetooth-modules/bluetooth-5-modules/bl5340-series-multi-core-bluetooth-52-802154-nfc-modules>`_
 
     - Cortex-M23 system:
 

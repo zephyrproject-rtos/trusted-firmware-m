@@ -122,6 +122,12 @@ Raymond Ngun
     :email: `Raymond.Ngunn@cypress.com <raymond.ngunn@cypress.com>`__
     :github: `RaymondNgun <https://github.com/RaymondNgun>`__
 
+Laird Connectivity Platforms:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Jamie McCrae
+    :email: `Jamie.McCrae@lairdconnect.com <jamie.mccrae@lairdconnect.com>`__
+    :github: `thedjnk <https://github.com/thedjnk>`__
 
 Nordic Semiconductor Platforms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

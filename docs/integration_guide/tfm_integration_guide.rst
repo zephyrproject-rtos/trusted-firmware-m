@@ -30,6 +30,7 @@ The hardware platforms currently supported are:
 - STM32L5xx: Cortex-M33 based platform (STM32L562 and STM32L552 socs)
 - nRF9160 DK (Cortex-M33)
 - nRF5340 DK (Cortex-M33 Application MCU)
+- BL5340 DVK (Cortex-M33 Application MCU)
 
 The files related to the supported platforms are contained under the
 ``platform`` subfolder. The platform specific files are under
@@ -63,6 +64,9 @@ More information about the nRF5340 DK platform can be found in:
 
 More information about the nRF9160 DK platform can be found in:
 `nRF9160 DK product page <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF9160-DK>`__
+
+More information about the BL5340 platform can be found in:
+`BL5340 product page <https://www.lairdconnect.com/wireless-modules/bluetooth-modules/bluetooth-5-modules/bl5340-series-multi-core-bluetooth-52-802154-nfc-modules>`__
 
 Generic drivers and startup/scatter files
 =========================================

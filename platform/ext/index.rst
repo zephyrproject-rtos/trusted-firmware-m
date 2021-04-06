@@ -48,6 +48,13 @@ Supported Platforms
 
 .. toctree::
     :maxdepth: 4
+    :caption: Laird Connectivity
+    :glob:
+
+    target/lairdconnectivity/**
+
+.. toctree::
+    :maxdepth: 4
     :caption: Nuvoton
     :glob:
 

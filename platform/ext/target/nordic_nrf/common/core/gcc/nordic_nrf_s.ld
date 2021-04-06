@@ -33,9 +33,7 @@ MEMORY
 #if defined(PSA_PROXY_SHARED_MEMORY_BASE)
   PSA_PROXY_SHARED_MEMORY_RAM (rw) : ORIGIN = PSA_PROXY_SHARED_MEMORY_BASE, LENGTH = PSA_PROXY_SHARED_MEMORY_SIZE
 #endif
-
 }
-
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
 #define VENEERS()
@@ -162,7 +160,7 @@ SECTIONS
         *psa_client.*(.rodata*)
         *psa_service.*(.text*)             /* NXP */
         *psa_service.*(.rodata*)
-        *psa_lifecycle.*(.text*)             /* NXP */
+        *psa_lifecycle.*(.text*)           /* NXP */
         *psa_lifecycle.*(.rodata*)
         *tfm_log_raw.*(.text*)             /* NXP */
         *tfm_log_raw.*(.rodata*)
