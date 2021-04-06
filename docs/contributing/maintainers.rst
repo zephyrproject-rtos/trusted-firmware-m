@@ -111,8 +111,8 @@ Michel JAOUEN
     :github: `jamike <https://github.com/jamike>`__
 
 
-Infineon/Cypress Platform:
-~~~~~~~~~~~~~~~~~
+Infineon/Cypress Platforms
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Chris Brand
     :email: `Chris Brand@cypress.com <chris.brand@cypress.com>`__

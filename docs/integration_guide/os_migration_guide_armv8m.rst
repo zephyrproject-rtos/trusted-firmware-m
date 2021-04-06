@@ -24,14 +24,14 @@ List of requirements
   then it also have to use the
   ``enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)``
   API function provided by TF-M, as described in
-  :doc:`NS client identification documentation <tfm_ns_client_identification>`.
+  :doc:`NS client identification documentation </docs/technical_references/tfm_ns_client_identification>`.
 - if the OS doesn't support the API mentioned above, it should set
   ``TFM_NS_CLIENT_IDENTIFICATION`` to ``OFF`` in the cmake system.
 - .. Note::
 
     This is NOT REQUIRED when the Non Secure OS build is meant
     to be integrated with TF-M running in Secure world.
-  
+
   If generic function calls into Secure world have to be supported in Non Secure
   builds, integrate an API for secure stack memory management (e.g. the
   TrustZone API for secure stack memory management described in
@@ -39,4 +39,4 @@ List of requirements
 
 --------------
 
-*Copyright (c) 2018-2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*

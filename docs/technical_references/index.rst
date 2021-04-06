@@ -1,5 +1,5 @@
-Design Documents
-================
+Technical References
+====================
 
 .. toctree::
     :maxdepth: 2

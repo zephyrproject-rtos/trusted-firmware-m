@@ -1,13 +1,13 @@
-Platforms
-=========
+Supported Platforms
+===================
 
 .. toctree::
     :maxdepth: 1
     :caption: Information
 
-    readme
     /platform/readme
-    /docs/contributing/platform_deprecation.rst
+    readme
+    /platform/ext/platform_deprecation.rst
 
 .. toctree::
     :maxdepth: 4
@@ -55,4 +55,4 @@ Platforms
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*

@@ -458,7 +458,7 @@ Reference
 
 .. [RFC7925] `Transport Layer Security (TLS) / Datagram Transport Layer Security (DTLS) Profiles for the Internet of Things <https://tools.ietf.org/html/rfc7925>`_
 
-.. [PROFILE-S] :doc:`Trusted Firmware-M Profile Small Design </docs/design_documents/profiles/tfm_profile_small>`
+.. [PROFILE-S] :doc:`Trusted Firmware-M Profile Small Design </docs/technical_references/profiles/tfm_profile_small>`
 
 .. [RFC7252] `The Constrained Application Protocol (CoAP) <https://tools.ietf.org/html/rfc7252>`_
 
@@ -466,12 +466,12 @@ Reference
 
 .. [RFC7251] `AES-CCM Elliptic Curve Cryptography (ECC) Cipher Suites for TLS <https://tools.ietf.org/html/rfc7251>`_
 
-.. [CRYPTO-DESIGN] :doc:`Crypto design </docs/design_documents/tfm_crypto_design>`
+.. [CRYPTO-DESIGN] :doc:`Crypto design </docs/technical_references/tfm_crypto_design>`
 
-.. [ITS-INTEGRATE] :doc:`ITS integration guide </docs/reference/services/tfm_its_integration_guide>`
+.. [ITS-INTEGRATE] :doc:`ITS integration guide </docs/integration_guide/services/tfm_its_integration_guide>`
 
 .. [TFM-BUILD] :doc:`TF-M build instruction </docs/getting_started/tfm_build_instruction>`
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*

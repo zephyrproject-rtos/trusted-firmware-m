@@ -13,9 +13,9 @@ List of the guidelines
 **********************
 The prerequisites before going to the review stage:
 
-- Read the :doc:`Contributing Guidelines </docs/contributing/contributing>`
+- Read the :doc:`Contributing Process </docs/contributing/contributing_process>`
   to know basic concepts.
-- Read the :doc:`Source Structure </docs/design_documents/source_structure>`
+- Read the :doc:`Source Structure </docs/technical_references/source_structure>`
   for structure related reference.
 
 The review guidelines consist of these items:
@@ -234,4 +234,4 @@ SPRTL          secure-fw/partitions/lib/sprt/*
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*

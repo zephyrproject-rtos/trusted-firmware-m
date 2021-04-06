@@ -40,8 +40,8 @@ manifest file IRQ declaration example
     ]}
 
 See
-:doc:`secure IRQ handling <../getting_started/tfm_secure_irq_handling>` for
-further information on IRQ source and signal.
+:doc:`secure IRQ handling </docs/technical_references/tfm_secure_irq_handling>`
+for further information on IRQ source and signal.
 
 Partition ISR function
 ======================
@@ -231,4 +231,4 @@ Does not return: The call is invalid, one or more of the following are true:
 - ``irq_signal`` indicates more than one signal.
 - ``irq_signal`` is not currently asserted.
 
-*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2021, Arm Limited. All rights reserved.*

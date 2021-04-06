@@ -158,7 +158,7 @@ The ITS filesystem and flash interfaces and their implementation can be found in
 ``secure_fw/partitions/internal_trusted_storage/flash`` respectively. More
 information about the filesystem and flash interfaces can be found in the
 :doc:`ITS integration guide
-</docs/reference/services/tfm_its_integration_guide>`.
+</docs/integration_guide/services/tfm_its_integration_guide>`.
 
 The ITS service implementation in
 ``secure_fw/partitions/internal_trusted_storage/tfm_internal_trusted_storage.c``,
@@ -293,14 +293,14 @@ TF-M core tracks the current client IDs running in the secure or non-secure
 processing environment. It provides a dedicated API to retrieve the client ID
 which performs the service request.
 
-:doc:`NS client identification documentation </docs/getting_started/tfm_ns_client_identification>`
+:doc:`NS client identification documentation </docs/technical_references/tfm_ns_client_identification>`
 provides further details on how client identification works.
 
 PS service uses that TF-M core API to retrieve the client ID and associate it
 as the owner of an asset. Only the owner can read, write or delete that asset
 based on the creation flags.
 
-The :doc:`integration guide </docs/getting_started/tfm_integration_guide>`
+The :doc:`integration guide </docs/integration_guide/tfm_integration_guide>`
 provides further details of non-secure implementation requirements for TF-M.
 
 Cryptographic Interface

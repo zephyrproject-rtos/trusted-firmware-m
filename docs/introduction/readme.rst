@@ -37,15 +37,15 @@ the platform. TF-M is supported on several Cortex-M based
 Systems (RTOS).
 
 Terms ``TFM`` and ``TF-M`` are commonly used in documents and code and both
-refer to ``Trusted Firmware M.`` :doc:`Glossary </docs/reference/glossary>`
-has the list of terms and abbreviations.
+refer to ``Trusted Firmware M.`` :doc:`Glossary </docs/glossary>` has the list
+of terms and abbreviations.
 
 #######
 License
 #######
 The software is provided under a BSD-3-Clause :doc:`License </docs/contributing/lic>`.
 Contributions to this project are accepted under the same license with developer
-sign-off as described in the :doc:`Contributing Guidelines </docs/contributing/contributing>`.
+sign-off as described in the :doc:`Contributing Guidelines </docs/contributing/contributing_process>`.
 
 This project contains code from other projects as listed below. The code from
 external projects is limited to ``app``, ``bl2``, ``lib`` and ``platform``
@@ -62,10 +62,10 @@ folders. The original license text is included in those source files.
 #########################
 Release Notes and Process
 #########################
-The :doc:`Release Cadence and Process </docs/contributing/release_process>` provides
+The :doc:`Release Cadence and Process </docs/releases/release_process>` provides
 release cadence and process information.
 
-The :doc:`Change Log & Release Notes </docs/reference/changelog>` provides details of
+The :doc:`Releases </docs/releases/index>` provides details of
 major features of the release and platforms supported.
 
 ###############
@@ -102,11 +102,11 @@ To build & run TF-M:
       on running the example.
 
 To port TF-M to a another system or OS, follow the
-:doc:`OS Integration Guide </docs/getting_started/tfm_integration_guide>`
+:doc:`OS Integration Guide </docs/integration_guide/tfm_integration_guide>`
 
-Please also see the :doc:`glossary </docs/reference/glossary>` of terms used in the project.
+Please also see the :doc:`glossary </docs/glossary>` of terms used in the project.
 
-:doc:`Contributing Guidelines </docs/contributing/contributing>` contains guidance on how to
+:doc:`Contributing Guidelines </docs/contributing/contributing_process>` contains guidance on how to
 contribute to this project.
 
 Further documents can be found in the ``docs`` folder.
@@ -162,7 +162,7 @@ Platforms supported
 
         - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/musca_b1/secure_enclave/readme>`
 
-The document :doc:`Platform Deprecation and Removal </docs/contributing/platform_deprecation>`
+The document :doc:`Platform Deprecation and Removal </platform/ext/platform_deprecation>`
 lists the deprecated platforms planned to be removed from upstream.
 
 ####################
@@ -195,7 +195,7 @@ Version history
 +-------------+--------------+--------------------+-------------------+
 
 Please refer to
-:ref:`docs/contributing/release_process:Release Version Scheme` for interpreting
+:ref:`docs/releases/release_process:Release Version Scheme` for interpreting
 version numbers.
 
 .. _Cortex-M33: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m33

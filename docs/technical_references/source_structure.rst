@@ -6,7 +6,7 @@ Trusted Firmware-M Source Structure
 :Contact: tf-m@lists.trustedfirmware.org
 
 .. note::
-  Reference the document :doc:`Glossary </docs/reference/glossary>` for terms
+  Reference the document :doc:`Glossary </docs/glossary>` for terms
   and abbreviations.
 
 ************
@@ -162,4 +162,4 @@ cmsis_func/\*                       The library model implementation. [2]
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*

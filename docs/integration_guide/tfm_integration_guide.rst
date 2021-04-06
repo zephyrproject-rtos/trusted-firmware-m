@@ -7,12 +7,12 @@ with other hardware platforms and operating systems.
 *****************
 How to build TF-M
 *****************
-Follow the :doc:`Build instructions <tfm_build_instruction>`.
+Follow the :doc:`Build instructions </docs/getting_started/tfm_build_instruction>`.
 
 ********************************************************
 How to export files for building non-secure applications
 ********************************************************
-Explained in the :doc:`Build instructions <tfm_build_instruction>`.
+Explained in the :doc:`Build instructions </docs/getting_started/tfm_build_instruction>`.
 
 *************************
 How to add a new platform
@@ -122,7 +122,7 @@ and returns the return value from the service to the caller.
 
 The protected storage service uses a numerical ID, to identify the clients that
 use the service. For details see
-:doc:`ns client identification documentation <tfm_ns_client_identification>`.
+:doc:`ns client identification documentation </docs/technical_references/tfm_ns_client_identification>`.
 
 Interface with non-secure world regression tests
 ================================================
@@ -144,7 +144,7 @@ implementation of these wrappers to be able to run the tests.
 NS client Identification
 ========================
 See
-:doc:`ns client identification documentation <tfm_ns_client_identification>`.
+:doc:`ns client identification documentation </docs/technical_references/tfm_ns_client_identification>`.
 
 *********************
 Non-secure interrupts

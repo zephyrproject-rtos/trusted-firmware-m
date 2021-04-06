@@ -1,15 +1,11 @@
-Reference
-=========
-
+Integration Guide
+=================
 .. toctree::
     :maxdepth: 1
     :glob:
 
-    changelog
-    glossary
-    security
     */index
-    /tools/index
+    *
 
 --------------
 

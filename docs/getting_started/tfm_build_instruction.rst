@@ -167,7 +167,7 @@ TF-M Profiles
 TF-M Profiles are implemented as a single cmake configuration file, under the
 ``config/profile`` directory. A good understanding can be gained quickly by
 looking at the Profile configuration files, but the ultimate reference for
-Profiles are the design documents in the ``docs/design_documents/profiles/``
+Profiles are the design documents in the ``docs/technical_references/profiles/``
 directory.
 
 PSA test configuration
@@ -563,4 +563,4 @@ Alternately using traditional cmake syntax
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

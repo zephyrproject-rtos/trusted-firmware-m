@@ -1,5 +1,5 @@
-Contributing
-============
+Contributing Process
+====================
 
 Contributions to the TF-M project need to follow the process below.
 
@@ -77,4 +77,4 @@ Contributions to the TF-M project need to follow the process below.
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

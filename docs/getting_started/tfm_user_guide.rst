@@ -5,8 +5,8 @@ How to compile and run TF-M and example test application for CoreLink
 SSE-200 subsystem on the MPS2 board and on the Fast Model(FVP).
 
 Follow :doc:`build instruction <tfm_build_instruction>` to build the binaries.
-Follow :doc:`secure boot <tfm_secure_boot>` to build the binaries with or
-without BL2 bootloader.
+Follow :doc:`secure boot </docs/technical_references/tfm_secure_boot>` to build the
+binaries with or without BL2 bootloader.
 
 ****************************************************************
 Execute TF-M example and regression tests on MPS2 boards and FVP
@@ -565,7 +565,7 @@ port (baud 115200 8n1) the following messages::
 Firmware upgrade and image validation with BL2 bootloader
 =========================================================
 High level operation of BL2 bootloader and instructions for testing firmware
-upgrade is described in :doc:`secure boot <tfm_secure_boot>`.
+upgrade is described in :doc:`secure boot </docs/technical_references/tfm_secure_boot>`.
 
 --------------
 
@@ -576,4 +576,4 @@ upgrade is described in :doc:`secure boot <tfm_secure_boot>`.
 .. _Keil MDK: http://www2.keil.com/mdk5
 .. _Keil MDK Documentation: https://www2.keil.com/mdk5/docs
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
