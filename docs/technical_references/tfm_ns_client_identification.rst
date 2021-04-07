@@ -15,24 +15,7 @@ Thread Context Management for Armv8-M TrustZone APIs, as described
 However TF-M needs an extra API, to assign a client ID to the TZ context created
 as a result of the
 ``TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)`` call.
-
-To do this, the
-``enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)`` have to be
-called from an SVC handler, with the client ID of the currently running client.
-
-In the current implementation of TF-M, an SVC call is provided for the NS
-clients to be called at the beginning of their main function.
-
-``SVC(SVC_TFM_NSPM_REGISTER_CLIENT_ID);``
-
-The SVC call handler of the above SVC maps the name of the current thread to a
-hardcoded client id, and sends it to the TF-M core via the earlier discussed
-API.
-
-The mapping is implemented in ``interface/src/tfm_nspm_svc_handler.c``.
-
-The system integrators **may** implement the non-secure ID mapping based on
-their application/threat model.
+See ``interface/include/ext/tz_context.h`` for details of API declarations.
 
 In case the NS OS doesn't use the Thread Context Management for Armv8-M
 TrustZone APIs, then TF-M considers the NS SW as a single client, and assigns a
@@ -40,4 +23,4 @@ client ID to it automatically.
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*

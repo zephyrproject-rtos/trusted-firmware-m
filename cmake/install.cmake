@@ -39,7 +39,6 @@ install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa_manifest
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
                     ${INTERFACE_INC_DIR}/tfm_ns_interface.h
-                    ${INTERFACE_INC_DIR}/tfm_ns_svc.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 install(FILES       ${INTERFACE_INC_DIR}/ext/tz_context.h
@@ -54,12 +53,6 @@ if (TFM_MULTI_CORE_TOPOLOGY)
 else()
     install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_veneers.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/tfm/veneers)
-endif()
-
-if (TFM_NS_CLIENT_IDENTIFICATION)
-    install(FILES       ${INTERFACE_INC_DIR}/tfm_nspm_api.h
-                        ${INTERFACE_INC_DIR}/tfm_nspm_svc_handler.h
-            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if (TFM_PARTITION_PROTECTED_STORAGE OR FORWARD_PROT_MSG)
@@ -117,7 +110,6 @@ if (TFM_MULTI_CORE_TOPOLOGY)
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox_thread.c
-                        ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox_test.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 else()
     if(TFM_PSA_API)
@@ -126,12 +118,6 @@ else()
     endif()
 
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c.example
-            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-endif()
-
-if (TFM_NS_CLIENT_IDENTIFICATION)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_nspm_api.c
-                        ${INTERFACE_SRC_DIR}/tfm_nspm_svc_handler.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
