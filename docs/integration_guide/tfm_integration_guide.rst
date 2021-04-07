@@ -102,27 +102,42 @@ the devices available in the hardware platform.
 ***************************
 How to integrate another OS
 ***************************
-To work with TF-M, the OS needs to support the Armv8-M architecture and, in
-particular, it needs to be able to run in the non-secure world. More
-information about OS migration to the Armv8-M architecture can be found in the
-:doc:`OS requirements <os_migration_guide_armv8m>`. Depending upon the system
-configuration this may require configuring drivers to use appropriate address
-ranges.
+
+OS migration to Armv8-M platforms
+=================================
+To work with TF-M on Armv8-M platforms, the OS needs to support the Armv8-M
+architecture and, in particular, it needs to be able to run in the non-secure
+world. More information about OS migration to the Armv8-M architecture can be
+found in the :doc:`OS requirements <os_migration_guide_armv8m>`. Depending upon
+the system configuration this may require configuring drivers to use appropriate
+address ranges.
 
 Interface with TF-M
 ===================
 The files needed for the interface with TF-M are exported at the
 ``<install_dir>/interface`` path. The NS side is only allowed to call
-TF-M secure functions (veneers) from the NS Thread mode. For this reason, the
-API is a collection of functions in the ``<install_dir>/interface/include``
-directory. For example, the interface for the Protected Storage (PS) service
-is described in the file ``psa_ps_api.h`` as a collection of functions that
-call service veneer functions. This API is a wrapper for the secure veneers,
-and returns the return value from the service to the caller.
+TF-M secure functions (veneers) from the NS Thread mode.
 
-The protected storage service uses a numerical ID, to identify the clients that
-use the service. For details see
-:doc:`ns client identification documentation </docs/technical_references/tfm_ns_client_identification>`.
+TF-M interface header files are exported in ``<install_dir>/interface/include``
+directory. For example, the Protected Storage (PS) service PSA API is declared
+in the file ``<install_dir>/interface/include/psa/protected_storage.h``.
+
+TF-M also exports a reference implementation of PSA APIs for NS clients in the
+``<install_dir>/interface/src``.
+
+On Armv8-M TrustZone based platforms, NS OS shall implement interface API
+``tfm_ns_interface_dispatch()`` to integrate with TF-M implementation of PSA
+APIs. See ``interface/include/tfm_ns_interface.h`` for the detailed declaration
+of ``tfm_ns_interface_dispatch()``.
+TF-M provides an example of ``tfm_ns_interface_dispatch()`` implementation on
+Armv8-M TrustZone based platforms. In this example, NS OS calls mutex in
+``tfm_ns_interface_dispatch()`` to synchronize multiple NS client calls to TF-M.
+See ``interface/src/tfm_ns_interface.c.example`` for more details.
+
+TF-M provides a reference implementation of NS mailbox on multi-core platforms,
+under folder ``interface/src/multi_core``.
+See :doc:`Mailbox design </docs/technical_references/dual-cpu/mailbox_design_on_dual_core_system>`
+for TF-M multi-core mailbox design.
 
 Interface with non-secure world regression tests
 ================================================
