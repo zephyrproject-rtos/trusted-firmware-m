@@ -253,12 +253,16 @@ cmake.
 TF-M build examples
 *******************
 
+.. Note::
+   By default, CMAKE_BUILD_TYPE is set to Release, for debug support change
+   this to Debug. See below for an example.
+
 Example: building TF-M for AN521 platform using GCC:
 ====================================================
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DCMAKE_BUILD_TYPE=Debug
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -286,6 +290,7 @@ to explicitly include it. In case other toolchain is required, i.e. ARM Clang, s
 specify in the command line
 
 .. code-block:: bash
+
     cd <TF-M base folder>
     cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_ARMCLANG.cmake -DTEST_S=ON -DTEST_NS=ON
     cmake --build cmake_build -- install
@@ -323,7 +328,7 @@ PSA API tests simultaneously is **not** supported.
 
 The value of the TEST_PSA_API variable is the suite to be run.
 
-.. code-block::
+.. code-block:: bash
 
     -DTEST_PSA_API=INTERNAL_TRUSTED_STORAGE
     -DTEST_PSA_API=PROTECTED_STORAGE
@@ -356,7 +361,7 @@ Build for PSA FF (IPC) compliance tests
 The build system provides support for building and integrating the PSA FF
 compliance test. This support is controlled by the TEST_PSA_API variable:
 
-.. code-block::
+.. code-block:: bash
 
     -DTEST_PSA_API=IPC
 
