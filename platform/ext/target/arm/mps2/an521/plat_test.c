@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -62,6 +62,10 @@ void tfm_plat_test_secure_timer_start(void)
     cmsdk_timer_set_reload_value(&CMSDK_TIMER0_DEV_S, TIMER_RELOAD_VALUE);
     cmsdk_timer_enable(&CMSDK_TIMER0_DEV_S);
     cmsdk_timer_enable_interrupt(&CMSDK_TIMER0_DEV_S);
+}
+
+void tfm_plat_test_secure_timer_clear_intr(void) {
+    cmsdk_timer_clear_interrupt(&CMSDK_TIMER0_DEV_S);
 }
 
 void tfm_plat_test_secure_timer_stop(void)
