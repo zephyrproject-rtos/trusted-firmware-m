@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -50,9 +50,9 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
 
 __tfm_psa_secure_gateway_attributes__
 psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
-                               const struct tfm_control_parameter_t *ctrl_param,
-                               const psa_invec *in_vec,
-                               psa_outvec *out_vec)
+                                 uint32_t ctrl_param,
+                                 const psa_invec *in_vec,
+                                 psa_outvec *out_vec)
 {
     __ASM volatile("SVC %0           \n"
                    "BXNS LR          \n"

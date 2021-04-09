@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #include "tfm/tfm_core_svc.h"
 #include "psa/client.h"
 #include "tfm_api.h"
+#include "tfm_psa_call_param.h"
 
 __attribute__((naked))
 uint32_t psa_framework_version(void)
@@ -36,8 +37,9 @@ psa_handle_t psa_connect(uint32_t sid, uint32_t version)
 
 __attribute__((naked))
 static psa_status_t psa_call_param_pack(psa_handle_t handle,
-                                   struct tfm_control_parameter_t *ctrl_param,
-                                   const psa_invec *in_vec, psa_outvec *out_vec)
+                                        uint32_t ctrl_param,
+                                        const psa_invec *in_vec,
+                                        psa_outvec *out_vec)
 {
     __ASM volatile("SVC %0           \n"
                    "BX LR            \n"
@@ -51,12 +53,18 @@ psa_status_t psa_call(psa_handle_t handle,
                       psa_outvec *out_vec,
                       size_t out_len)
 {
-    struct tfm_control_parameter_t ctrl_param;
-    ctrl_param.type = type;
-    ctrl_param.in_len = in_len;
-    ctrl_param.out_len = out_len;
+    if ((type > INT16_MAX) ||
+        (type < INT16_MIN) ||
+        (in_len > PSA_MAX_IOVEC) ||
+        (out_len > PSA_MAX_IOVEC) ||
+        ((in_len + out_len) > PSA_MAX_IOVEC)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
-    return psa_call_param_pack(handle, &ctrl_param, in_vec, out_vec);
+    return psa_call_param_pack(handle,
+                               PARAM_PACK(type, in_len, out_len),
+                               in_vec,
+                               out_vec);
 }
 
 __attribute__((naked))
