@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2020 Arm Limited
+; * Copyright (c) 2009-2021 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 ; </h>
 
                 IMPORT |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|
+                IMPORT |Image$$ARM_LIB_STACK$$ZI$$Limit|
 
 ; Vector Table Mapped to Address 0 at Reset
 
@@ -106,6 +107,9 @@ Reset_Handler   PROC
                 MOVS    R1, #2
                 ORRS    R0, R0, R1     ; Select switch to PSP
                 MSR     control, R0
+
+                LDR     R0, =|Image$$ARM_LIB_STACK$$ZI$$Limit|
+                MSR     PSP, R0
 
                 LDR     R0, =__main
                 BX      R0

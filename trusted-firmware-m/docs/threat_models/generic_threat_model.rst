@@ -1123,7 +1123,7 @@ Reference
 
 .. [ADVISORY-TFMV-1] :doc:`Advisory TFMV-1 </docs/reference/security_advisories/stack_seal_vulnerability>`
 
-.. [ADVISORY-TFMV-2] :doc:`Advisory TFMV-2 </docs/reference/security_advisories/ssvc_caller_sp_fetching_vulnerability>`
+.. [ADVISORY-TFMV-2] :doc:`Advisory TFMV-2 </docs/reference/security_advisories/svc_caller_sp_fetching_vulnerability>`
 
 --------------------
 

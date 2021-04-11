@@ -78,7 +78,7 @@ target_sources(platform_s
         target_cfg.c
         tfm_hal_isolation.c
         uart_stdout.c
-        $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_link_libraries(platform_s

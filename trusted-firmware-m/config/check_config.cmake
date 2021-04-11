@@ -74,3 +74,7 @@ tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT MCUBOOT_DATA_SHARING)
 
 get_property(TFM_FIH_PROFILE_LIST CACHE TFM_FIH_PROFILE PROPERTY STRINGS)
 tfm_invalid_config(NOT TFM_FIH_PROFILE IN_LIST TFM_FIH_PROFILE_LIST)
+
+########################### TF-M audit log #####################################
+
+tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND TFM_PSA_API)
