@@ -1,7 +1,7 @@
 #!/bin/sh
 
-TFM_GIT_SHA=TF-Mv1.3.0-RC1
-TFM_TESTS_GIT_SHA=TF-Mv1.3.0-RC1
+TFM_GIT_SHA=TF-Mv1.3.0
+TFM_TESTS_GIT_SHA=TF-Mv1.3.0
 PSA_ARCH_TESTS_GIT_SHA=8644bd00fbc59b16aa2b43d8bd4ec51132e57a62
 
 if [ ! -d trusted-firmware-m/.git ]; then
