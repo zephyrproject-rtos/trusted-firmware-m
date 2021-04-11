@@ -30,7 +30,8 @@ if(BL2)
 
     target_compile_options(bl2_mbedcrypto
         PRIVATE
-            -Wno-unused-parameter
+            $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
+            $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
     )
 endif()
 include(${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/CMakeLists.txt)
@@ -50,6 +51,6 @@ target_compile_definitions(crypto_service_mbedcrypto
 
 target_compile_options(crypto_service_mbedcrypto
     PRIVATE
-        -Wno-unused-parameter
+        $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
+        $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
 )
-

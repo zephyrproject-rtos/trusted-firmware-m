@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,7 +12,7 @@
  * Defines for TFM version.
  */
 #define VERSION_MAJOR    1
-#define VERSION_MINOR    2
+#define VERSION_MINOR    3
 #define VERSION_HOTFIX   0
 #define VERSION_STRING   ""
 

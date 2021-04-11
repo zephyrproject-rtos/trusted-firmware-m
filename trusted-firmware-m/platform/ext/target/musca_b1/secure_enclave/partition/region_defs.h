@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@
 
 #define S_DATA_START            (SRAM_BASE)
 #define S_DATA_SIZE             (SRAM_SIZE)
-#define S_UNPRIV_DATA_SIZE      (0x3000)
+#define S_UNPRIV_DATA_SIZE      (0x2800)
 #define S_DATA_LIMIT            (S_DATA_START + S_DATA_SIZE - 1)
 #define S_DATA_PRIV_START       (S_DATA_START + S_UNPRIV_DATA_SIZE)
 

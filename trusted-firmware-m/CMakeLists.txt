@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-set(TFM_VERSION 1.2.0)
+set(TFM_VERSION 1.3.0)
 
 ############################ CONFIGURATION #####################################
 

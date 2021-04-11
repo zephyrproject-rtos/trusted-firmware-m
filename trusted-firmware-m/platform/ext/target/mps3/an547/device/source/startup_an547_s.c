@@ -184,7 +184,7 @@ DEFAULT_IRQ_HANDLER(UART5_Handler)
 
 extern const pFunc __VECTOR_TABLE[496];
        const pFunc __VECTOR_TABLE[496] __VECTOR_TABLE_ATTRIBUTE = {
-  (pFunc)(&__INITIAL_SP),            /*      Initial Stack Pointer */
+  (pFunc)(&__MSP_INITIAL_SP),        /*      Initial Stack Pointer */
   Reset_Handler,                     /*      Reset Handler */
   NMI_Handler,                       /* -14: NMI Handler */
   HardFault_Handler,                 /* -13: Hard Fault Handler */

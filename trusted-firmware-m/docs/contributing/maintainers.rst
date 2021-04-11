@@ -11,21 +11,21 @@ document.
 Maintainers
 ===========
 
-Abhishek Pandit
-    :email: `abhishek.pandit@arm.com <abhishek.pandit@arm.com>`__
-    :github: `abhishek-pandit <https://github.com/abhishek-pandit>`__
-
-Ashutosh Singh
-    :email: `ashutosh.singh@arm.com <ashutosh.singh@arm.com>`__
-    :github: `ashutoshksingh <https://github.com/ashutoshksingh>`__
-
-Miklos Balint
-    :email: `miklos.balint@arm.com <miklos.balint@arm.com>`__
-    :github: `wmnt <https://github.com/wmnt>`__
-
 Anton Komlev
     :email: `Anton.Komlev@arm.com <Anton.Komlev@arm.com>`__
     :github: `Anton-TF <https://github.com/Anton-TF>`__
+
+Chris Brand
+    :email: `Chris.Brand@cypress.com <chris.brand@cypress.com>`__
+    :github: `UEWBot <https://github.com/UEWBot>`__
+
+Ken Liu
+    :email: `Ken.Liu@arm.com <Ken.Liu@arm.com>`__
+    :github: `KenLSoft <https://github.com/KenLSoft>`__
+
+David Hu
+    :email: `David.Hu@arm.com <David.Hu@arm.com>`__
+    :github: `davidhuziji <https://github.com/davidhuziji>`__
 
 
 Code owners
@@ -111,7 +111,7 @@ Michel JAOUEN
     :github: `jamike <https://github.com/jamike>`__
 
 
-Cypress Platform:
+Infineon/Cypress Platform:
 ~~~~~~~~~~~~~~~~~
 
 Chris Brand
