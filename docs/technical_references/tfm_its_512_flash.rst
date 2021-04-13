@@ -72,7 +72,7 @@ Functional flow diagram
 
 The logic of the proposal is described in the following diagram
 
-.. code-block::
+.. code-block:: rst
 
         |----------------------|
         |   data write()       |
