@@ -55,7 +55,8 @@ static psa_status_t ps_object_auth_decrypt(uint32_t fid,
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
     size_t out_len;
 
-    err = ps_crypto_setkey();
+    err = ps_crypto_setkey(obj->header.crypto.ref.key_label,
+                           sizeof(obj->header.crypto.ref.key_label));
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -102,7 +103,8 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
     size_t out_len;
 
-    err = ps_crypto_setkey();
+    err = ps_crypto_setkey(obj->header.crypto.ref.key_label,
+                           sizeof(obj->header.crypto.ref.key_label));
     if (err != PSA_SUCCESS) {
         return err;
     }

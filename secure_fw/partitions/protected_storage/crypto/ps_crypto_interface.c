@@ -35,7 +35,6 @@
  */
 typedef char PS_ERROR_NOT_AEAD_ALG[(PSA_ALG_IS_AEAD(PS_CRYPTO_ALG)) ? 1 : -1];
 
-static const uint8_t ps_key_label[] = "storage_key";
 static psa_key_id_t ps_key;
 static uint8_t ps_crypto_iv_buf[PS_IV_LEN_BYTES];
 
@@ -47,11 +46,15 @@ psa_status_t ps_crypto_init(void)
     return PSA_SUCCESS;
 }
 
-psa_status_t ps_crypto_setkey(void)
+psa_status_t ps_crypto_setkey(const uint8_t *key_label, size_t key_label_len)
 {
     psa_status_t status;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
     psa_key_derivation_operation_t op = PSA_KEY_DERIVATION_OPERATION_INIT;
+
+    if (key_label_len == 0 || key_label == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
     /* Set the key attributes for the storage key */
     psa_set_key_usage_flags(&attributes, PS_KEY_USAGE);
@@ -67,8 +70,8 @@ psa_status_t ps_crypto_setkey(void)
 
     /* Supply the PS key label as an input to the key derivation */
     status = psa_key_derivation_input_bytes(&op, PSA_KEY_DERIVATION_INPUT_LABEL,
-                                            ps_key_label,
-                                            sizeof(ps_key_label));
+                                            key_label,
+                                            key_label_len);
     if (status != PSA_SUCCESS) {
         goto err_release_op;
     }

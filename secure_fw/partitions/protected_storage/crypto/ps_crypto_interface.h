@@ -20,6 +20,10 @@ extern "C" {
 #define PS_KEY_LEN_BYTES  16
 #define PS_TAG_LEN_BYTES  16
 #define PS_IV_LEN_BYTES   12
+/* The key label consists of the uid + client_id, thus the length of it is:
+ * sizeof(psa_storage_uid_t) + sizeof(int32_t).
+ */
+#define PS_KEY_LABEL_LEN_BYTES 12
 
 /* Union containing crypto policy implementations. The ref member provides the
  * reference implementation. Further members can be added to the union to
@@ -27,6 +31,7 @@ extern "C" {
  */
 union ps_crypto_t {
     struct {
+        uint8_t key_label[PS_KEY_LABEL_LEN_BYTES]; /*!< Key label value */
         uint8_t tag[PS_TAG_LEN_BYTES]; /*!< MAC value of AEAD object */
         uint8_t iv[PS_IV_LEN_BYTES];   /*!< IV value of AEAD object */
     } ref;
@@ -42,9 +47,12 @@ psa_status_t ps_crypto_init(void);
 /**
  * \brief Sets the key to use for crypto operations for the current client.
  *
+ * \param[in]     key_label       Pointer to the key label
+ * \param[in]     key_label_len   Length of the key label
+ *
  * \return Returns values as described in \ref psa_status_t
  */
-psa_status_t ps_crypto_setkey(void);
+psa_status_t ps_crypto_setkey(const uint8_t *key_label, size_t key_label_len);
 
 /**
  * \brief Destroys the transient key used for crypto operations.
