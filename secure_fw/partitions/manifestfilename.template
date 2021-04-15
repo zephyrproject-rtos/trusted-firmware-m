@@ -16,10 +16,22 @@ extern "C" {
 
 {% if attr.tfm_partition_ipc %}
     {% set ns = namespace(iterator_counter=0) %}
+    {% if manifest.psa_framework_version == 1.1 and manifest.model == "SFN" %}
+#define {{"%-55s"|format(manifest.name + "_MODEL_IPC")}} 0
+#define {{"%-55s"|format(manifest.name + "_MODEL_SFN")}} 1
+    {% else %}
+#define {{"%-55s"|format(manifest.name + "_MODEL_IPC")}} 1
+#define {{"%-55s"|format(manifest.name + "_MODEL_SFN")}} 0
+    {% endif %}
+
     {% if manifest.services %}
         {% for service in manifest.services %}
+            {% if manifest.psa_framework_version == 1.1 and manifest.model == "SFN" %}
+psa_status_t {{service.name|lower}}_sfn(const psa_msg_t* msg);
+            {% else %}
 #define {{"%-55s"|format(service.name + "_SIGNAL")}} (1U << ({{"%d"|format(ns.iterator_counter)}} + 4))
-            {% set ns.iterator_counter = ns.iterator_counter + 1 %}
+                {% set ns.iterator_counter = ns.iterator_counter + 1 %}
+            {% endif %}
         {% endfor %}
     {% endif %}
     {% if ns.iterator_counter > 28 %}

@@ -41,7 +41,10 @@
 /* Common service structure type */
 struct service_load_info_t {
     uintptr_t       name_strid;         /* String ID for name               */
-    psa_signal_t    signal;             /* Service signal                   */
+    union {
+        psa_signal_t    signal;         /* Service signal                   */
+        uintptr_t       sfn;            /* Secure Function                  */
+    };
     uint32_t        sid;                /* Service ID                       */
     uint32_t        flags;              /* Flags                            */
     uint32_t        version;            /* Service version                  */
