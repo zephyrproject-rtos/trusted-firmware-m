@@ -5,7 +5,6 @@ Secure Enclave solution for Trusted Firmware-M
 :Author: Mark Horvath
 :Organization: Arm Limited
 :Contact: Mark Horvath <mark.horvath@arm.com>
-:Status: Draft
 
 ********
 Abstract

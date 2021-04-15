@@ -5,7 +5,6 @@ Firmware Update Service
 :Author: Sherry Zhang
 :Organization: Arm Limited
 :Contact: Sherry Zhang <Sherry.Zhang2@arm.com>
-:Status: Draft
 
 .. contents:: Table of Contents
 
