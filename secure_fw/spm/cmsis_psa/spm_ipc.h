@@ -17,15 +17,9 @@
 #include "tfm_thread.h"
 #include "psa/service.h"
 
-#define TFM_VERSION_POLICY_RELAXED      0
-#define TFM_VERSION_POLICY_STRICT       1
-
 #define TFM_HANDLE_STATUS_IDLE          0
 #define TFM_HANDLE_STATUS_ACTIVE        1
 #define TFM_HANDLE_STATUS_CONNECT_ERROR 2
-
-#define PART_REGION_ADDR(partition, region) \
-    (uint32_t)&REGION_NAME(Image$$, partition, region)
 
 #define TFM_CONN_HANDLE_MAX_NUM         16
 
@@ -60,19 +54,6 @@
 
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
-/* Privileged definitions for partition thread mode */
-#define TFM_PARTITION_UNPRIVILEGED_MODE 0
-#define TFM_PARTITION_PRIVILEGED_MODE   1
-
-#define SPM_PART_FLAG_APP_ROT           0x01
-#define SPM_PART_FLAG_PSA_ROT           0x02
-#define SPM_PART_FLAG_IPC               0x04
-
-#define TFM_PRIORITY_HIGH               THRD_PRIOR_HIGHEST
-#define TFM_PRIORITY_NORMAL             THRD_PRIOR_MEDIUM
-#define TFM_PRIORITY_LOW                THRD_PRIOR_LOWEST
-#define TFM_PRIORITY(LEVEL)             TFM_PRIORITY_##LEVEL
-
 #define TFM_MSG_MAGIC                   0x15154343
 
 /* Message struct to collect parameter from client */
@@ -103,9 +84,7 @@ struct partition_memory_t {
 };
 
 /**
- * Holds the fields of the partition DB used by the SPM code. The values of
- * these fields are calculated at compile time, and set during initialisation
- * phase.
+ * Partition storage common type.
  */
 struct partition_static_t {
     uint32_t psa_ff_ver;                /* PSA-FF version                   */

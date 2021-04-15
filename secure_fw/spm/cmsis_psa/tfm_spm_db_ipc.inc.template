@@ -137,9 +137,9 @@ const struct partition_static_t static_data_list[] =
 #if TFM_MULTI_CORE_TOPOLOGY
         .flags                = SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_IPC,
 #else
-        .flags                = SPM_PART_FLAG_APP_ROT | SPM_PART_FLAG_IPC,
+        .flags                = SPM_PART_FLAG_IPC,
 #endif
-        .priority             = TFM_PRIORITY_LOW,
+        .priority             = PARTITION_PRI_LOWEST,
         .entry                = tfm_nspm_thread_entry,
         .stack_base_addr      = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
         .stack_size           = S_PSP_STACK_SIZE,
@@ -170,14 +170,13 @@ const struct partition_static_t static_data_list[] =
         .flags                 = 0
     {% endif %}
     {% if partition.manifest.type == "APPLICATION-ROT" %}
-                               | SPM_PART_FLAG_APP_ROT
+                               | 0,
     {% elif partition.manifest.type == "PSA-ROT" %}
-                               | SPM_PART_FLAG_PSA_ROT | SPM_PART_FLAG_APP_ROT
+                               | SPM_PART_FLAG_PSA_ROT,
     {% else %}
 #error "Unsupported type '{{partition.manifest.type}}' for partition '{{partition.manifest.name}}'!"
     {% endif %}
-                              ,
-        .priority             = TFM_PRIORITY({{partition.manifest.priority}}),
+        .priority             = PARTITION_PRI_{{partition.manifest.priority}},
         .entry                = {{partition.manifest.entry_point}},
         .stack_base_addr      = (uint32_t){{partition.manifest.name.lower()}}_stack,
         .stack_size           = (uint32_t){{partition.manifest.stack_size}},
