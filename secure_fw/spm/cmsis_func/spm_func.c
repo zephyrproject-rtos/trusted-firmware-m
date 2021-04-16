@@ -474,12 +474,12 @@ static enum tfm_status_e tfm_start_partition(
                                          const struct iovec_params_t *iovec_ptr,
                                          uint32_t excReturn)
 {
+    register uint32_t partition_idx;
     enum tfm_status_e res;
     uint32_t caller_partition_idx = desc_ptr->caller_part_idx;
     const struct spm_partition_runtime_data_t *curr_part_data;
     const struct spm_partition_runtime_data_t *caller_part_data;
     uint32_t caller_flags;
-    register uint32_t partition_idx;
     uint32_t psp;
     uint32_t partition_psp, partition_psplim;
     uint32_t partition_state;

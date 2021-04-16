@@ -109,7 +109,7 @@ void tfm_core_thrd_set_state(struct tfm_core_thread_t *pth, uint32_t new_state)
      * depth while searching for a first runnable thread.
      */
     if ((pth->state == THRD_STATE_RUNNABLE) &&
-        (RNBL_HEAD == NULL || (pth->prior < RNBL_HEAD->prior))) {
+        ((RNBL_HEAD == NULL) || (pth->prior < RNBL_HEAD->prior))) {
         RNBL_HEAD = pth;
     } else {
         RNBL_HEAD = LIST_HEAD;

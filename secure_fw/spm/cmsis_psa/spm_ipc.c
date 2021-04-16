@@ -202,7 +202,7 @@ int32_t tfm_spm_set_rhandle(struct service_t *service,
 }
 
 /**
- * \brief                   Get reverse handle value from connection hanlde.
+ * \brief                   Get reverse handle value from connection handle.
  *
  * \param[in] service       Target service context pointer
  * \param[in] conn_handle   Connection handle created by
@@ -211,7 +211,7 @@ int32_t tfm_spm_set_rhandle(struct service_t *service,
  * \retval void *           Success
  * \retval "Does not return"  Panic for those:
  *                              service pointer are NULL
- *                              hanlde is \ref PSA_NULL_HANDLE
+ *                              handle is \ref PSA_NULL_HANDLE
  *                              handle node does not be found
  */
 static void *tfm_spm_get_rhandle(struct service_t *service,
@@ -965,7 +965,7 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
                           TFM_STACK_SEALED_SIZE;
 
         if (is_stack_alloc_fp_space(exc_return)) {
-#if defined (__FPU_USED) && (__FPU_USED == 1U)
+#if defined(__FPU_USED) && (__FPU_USED == 1U)
             if (FPU->FPCCR & FPU_FPCCR_TS_Msk) {
                 stacked_ctx_pos += TFM_ADDTIONAL_FP_CONTEXT_WORDS *
                                    sizeof(uint32_t);

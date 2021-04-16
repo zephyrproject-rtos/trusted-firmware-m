@@ -200,12 +200,12 @@ void tfm_arch_set_secure_exception_priorities(void)
 
 void tfm_arch_config_extensions(void)
 {
-#if defined (__FPU_PRESENT) && (__FPU_PRESENT == 1U)
+#if defined(__FPU_PRESENT) && (__FPU_PRESENT == 1U)
     /* Configure Secure access to the FPU only if the secure image is being
      * built with the FPU in use. This avoids introducing extra interrupt
      * latency when the FPU is not used by the SPE.
      */
-#if defined (__FPU_USED) && (__FPU_USED == 1U)
+#if defined(__FPU_USED) && (__FPU_USED == 1U)
     /* Enable Secure privileged and unprivilged access to the FP Extension */
     SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
                   | (3U << 11U*2U);  /* enable CP11 full access */

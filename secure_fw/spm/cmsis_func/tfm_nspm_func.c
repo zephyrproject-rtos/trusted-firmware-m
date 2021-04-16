@@ -34,7 +34,7 @@ static struct ns_client_list_t {
 static int32_t free_index = 0U;
 static int32_t active_ns_client_idx = INVALID_NS_CLIENT_IDX;
 
-static int get_next_ns_client_id()
+static int get_next_ns_client_id(void)
 {
     static int32_t next_ns_client_id = DEFAULT_NS_CLIENT_ID;
 
@@ -78,8 +78,10 @@ int32_t tfm_nspm_get_current_client_id(void)
  * Currently the context management only contains the NS ID identification
  */
 
-/// Initialize secure context memory system
-/// \return execution status (1: success, 0: error)
+/**
+ * Initialize secure context memory system
+ * \return execution status (1: success, 0: error)
+ */
 /* This veneer is TF-M internal, not a secure service */
 __tfm_nspm_secure_gateway_attributes__
 uint32_t TZ_InitContextSystem_S(void)
@@ -108,13 +110,15 @@ uint32_t TZ_InitContextSystem_S(void)
     return 1U;
 }
 
-/// Allocate context memory for calling secure software modules in TrustZone
-/// \param[in]  module   identifies software modules called from non-secure mode
-/// \return value != 0 id TrustZone memory slot identifier
-/// \return value 0    no memory available or internal error
+/**
+ * Allocate context memory for calling secure software modules in TrustZone
+ * \param[in]  module   identifies software modules called from non-secure mode
+ * \return value != 0 id TrustZone memory slot identifier
+ * \return value 0    no memory available or internal error
+ */
 /* This veneer is TF-M internal, not a secure service */
 __tfm_nspm_secure_gateway_attributes__
-TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
+TZ_MemoryId_t TZ_AllocModuleContext_S(TZ_ModuleId_t module)
 {
     TZ_MemoryId_t tz_id = 1;
     (void) module; /* Currently unused */
@@ -141,12 +145,14 @@ TZ_MemoryId_t TZ_AllocModuleContext_S (TZ_ModuleId_t module)
     return tz_id;
 }
 
-/// Free context memory that was previously allocated with \ref TZ_AllocModuleContext_S
-/// \param[in]  id  TrustZone memory slot identifier
-/// \return execution status (1: success, 0: error)
+/**
+ * Free context memory that was previously allocated with \ref TZ_AllocModuleContext_S
+ * \param[in]  id  TrustZone memory slot identifier
+ * \return execution status (1: success, 0: error)
+ */
 /* This veneer is TF-M internal, not a secure service */
 __tfm_nspm_secure_gateway_attributes__
-uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
+uint32_t TZ_FreeModuleContext_S(TZ_MemoryId_t id)
 {
 #ifdef CONFIG_TFM_ENABLE_CTX_MGMT
 #ifdef TFM_NS_CLIENT_IDENTIFICATION
@@ -183,15 +189,17 @@ uint32_t TZ_FreeModuleContext_S (TZ_MemoryId_t id)
     (void)id;
 #endif /* CONFIG_TFM_ENABLE_CTX_MGMT */
 
-    return 1U;    // Success
+    return 1U;    /* Success */
 }
 
-/// Load secure context (called on RTOS thread context switch)
-/// \param[in]  id  TrustZone memory slot identifier
-/// \return execution status (1: success, 0: error)
+/**
+ * Load secure context (called on RTOS thread context switch)
+ * \param[in]  id  TrustZone memory slot identifier
+ * \return execution status (1: success, 0: error)
+ */
 /* This veneer is TF-M internal, not a secure service */
 __tfm_nspm_secure_gateway_attributes__
-uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
+uint32_t TZ_LoadContext_S(TZ_MemoryId_t id)
 {
 #ifdef CONFIG_TFM_ENABLE_CTX_MGMT
 #ifdef TFM_NS_CLIENT_IDENTIFICATION
@@ -222,15 +230,17 @@ uint32_t TZ_LoadContext_S (TZ_MemoryId_t id)
     (void)id;
 #endif /* CONFIG_TFM_ENABLE_CTX_MGMT */
 
-    return 1U;    // Success
+    return 1U;    /* Success */
 }
 
-/// Store secure context (called on RTOS thread context switch)
-/// \param[in]  id  TrustZone memory slot identifier
-/// \return execution status (1: success, 0: error)
+/**
+ * Store secure context (called on RTOS thread context switch)
+ * \param[in]  id  TrustZone memory slot identifier
+ * \return execution status (1: success, 0: error)
+ */
 /* This veneer is TF-M internal, not a secure service */
 __tfm_nspm_secure_gateway_attributes__
-uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
+uint32_t TZ_StoreContext_S(TZ_MemoryId_t id)
 {
 #ifdef CONFIG_TFM_ENABLE_CTX_MGMT
 #ifdef TFM_NS_CLIENT_IDENTIFICATION
@@ -266,12 +276,12 @@ uint32_t TZ_StoreContext_S (TZ_MemoryId_t id)
     (void)id;
 #endif /* CONFIG_TFM_ENABLE_CTX_MGMT */
 
-    return 1U;    // Success
+    return 1U;    /* Success */
 }
 
 #ifdef TFM_NS_CLIENT_IDENTIFICATION
 __tfm_nspm_secure_gateway_attributes__
-enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)
+enum tfm_status_e tfm_register_client_id(int32_t ns_client_id)
 {
     int current_client_id;
 
@@ -291,7 +301,7 @@ enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)
     }
 
     current_client_id = NsClientIdList[active_ns_client_idx].ns_client_id;
-    if (current_client_id >= 0 ) {
+    if (current_client_id >= 0) {
         /* The client ID is invalid */
         return TFM_ERROR_INVALID_PARAMETER;
     }
@@ -318,5 +328,5 @@ void configure_ns_code(void)
     /* Clears LSB of the function address to indicate the function-call
      * will perform the switch from secure to non-secure
      */
-    ns_entry = (nsfptr_t) cmse_nsfptr_create(entry_ptr);
+    ns_entry = (nsfptr_t)cmse_nsfptr_create(entry_ptr);
 }

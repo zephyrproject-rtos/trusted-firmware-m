@@ -162,7 +162,7 @@ void __STATIC_INLINE tfm_core_thrd_set_retval(struct tfm_core_thread_t *pth,
  *
  * Notes :
  *  This function validates thread info. It returns error if thread info
- *  is not correct. Thread is avaliable after successful tfm_core_thrd_start().
+ *  is not correct. Thread is available after successful tfm_core_thrd_start().
  */
 uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth);
 
