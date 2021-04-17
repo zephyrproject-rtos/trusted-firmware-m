@@ -659,7 +659,6 @@ uint32_t tfm_spm_init(void)
 
         /* Skip NULL checking on statically reserved arraries. */
         partition->p_static = &static_data_list[i];
-        partition->memory_data = &memory_data_list[i];
 
         if (!(partition->p_static->flags & SPM_PART_FLAG_IPC)) {
             tfm_core_panic();
@@ -722,8 +721,9 @@ uint32_t tfm_spm_init(void)
         tfm_core_thrd_init(pth,
                            (tfm_core_thrd_entry_t)partition->p_static->entry,
                            NULL,
-                           (uintptr_t)partition->memory_data->stack_top,
-                           (uintptr_t)partition->memory_data->stack_bottom);
+                           (uintptr_t)(partition->p_static->stack_base_addr +
+                                       partition->p_static->stack_size),
+                           (uintptr_t)partition->p_static->stack_base_addr);
 
         pth->prior = partition->p_static->priority;
 
@@ -819,15 +819,15 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
             /* FIXME: only MPU-based implementations are supported currently */
 #ifdef TFM_FIH_PROFILE_ON
             FIH_CALL(tfm_hal_mpu_update_partition_boundary, fih_rc,
-                     p_next_partition->memory_data->data_start,
-                     p_next_partition->memory_data->data_limit);
+                     p_next_partition->p_static->mems.start,
+                     p_next_partition->p_static->mems.limit);
             if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
                 tfm_core_panic();
             }
 #else /* TFM_FIH_PROFILE_ON */
             if (tfm_hal_mpu_update_partition_boundary(
-                                      p_next_partition->memory_data->data_start,
-                                      p_next_partition->memory_data->data_limit)
+                                      p_next_partition->p_static->mems.start,
+                                      p_next_partition->p_static->mems.limit)
                                                            != TFM_HAL_SUCCESS) {
                 tfm_core_panic();
             }

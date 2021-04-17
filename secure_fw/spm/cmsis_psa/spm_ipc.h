@@ -97,6 +97,11 @@ struct tfm_msg_body_t {
     struct bi_list_node_t msg_node;    /* For list operators             */
 };
 
+struct partition_memory_t {
+    uintptr_t start;
+    uintptr_t limit;
+};
+
 /**
  * Holds the fields of the partition DB used by the SPM code. The values of
  * these fields are calculated at compile time, and set during initialisation
@@ -115,6 +120,9 @@ struct partition_static_t {
     uintptr_t platform_data;            /* Platform specific data           */
     uint32_t ndeps;                     /* Numbers of depended services     */
     uint32_t *deps;                     /* Pointer to dependency arrays     */
+#if TFM_LVL == 3
+    struct partition_memory_t mems;     /* Partition memories               */
+#endif
 };
 
 /**
@@ -132,8 +140,6 @@ struct partition_t {
     uint32_t signals_allowed;
     uint32_t signals_waiting;
     uint32_t signals_asserted;
-    /** A list of platform_data pointers */
-    const struct tfm_spm_partition_memory_data_t *memory_data;
 };
 
 struct spm_partition_db_t {

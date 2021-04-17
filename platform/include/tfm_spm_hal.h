@@ -37,27 +37,6 @@ enum irq_target_state_t {
     TFM_IRQ_TARGET_STATE_NON_SECURE,
 };
 
-#ifdef TFM_PSA_API
-/**
- * \brief Holds SPM db fields that define the memory regions used by a
- *        partition.
- */
-struct tfm_spm_partition_memory_data_t
-{
-#if TFM_LVL == 3
-    uint32_t data_start;    /* Start of the private data region of current
-                             * partition. Specifically, the private data
-                             * includes RW, ZI and the partition stack below.
-                             */
-    uint32_t data_limit;    /* Address of the byte beyond the end of the data
-                             * region of this partition.
-                             */
-#endif
-    uint32_t stack_bottom;  /* The bottom of the stack for the partition. */
-    uint32_t stack_top;     /* The top of the stack for the partition. */
-};
-#endif
-
 #ifdef TFM_FIH_PROFILE_ON
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 /**
