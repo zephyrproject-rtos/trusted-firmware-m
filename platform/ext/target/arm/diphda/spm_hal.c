@@ -24,6 +24,8 @@
 
 #define HOST_SYS_RST_CTRL_OFFSET 0x0
 #define HOST_CPU_CORE0_WAKEUP_OFFSET 0x308
+#define HOST_CPU_PE0_CONFIG_OFFSET 0x010
+#define AA64nAA32_MASK (1 << 3)
 
 void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
@@ -32,21 +34,28 @@ void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
 
     volatile uint32_t *bir_base = (uint32_t *)DIPHDA_HOST_BIR_BASE;
 
-    /* Program Boot Instruction Register to jump to BL32 base address
-     * at 0x02003000, corresponding assembler instructions are as below.
-     * e51f1000     ldr r1, [pc, #-0]
-     * e12fff11     bx  r1
-     * 02003000     .word   0x02003000
+    /* Program Boot Instruction Register to jump to BL2 (TF-A) base address
+     * at 0x02354000, corresponding assembler instructions are as below.
+     * 0x58000040     ldr       x0, Label
+     * 0xD61F0000     br        x0
+     * 0x02354000     Label:    .dword 0x020d3000
      */
-    bir_base[0] = 0xE51F1000;
-    bir_base[1] = 0xE12fff11;
-    bir_base[2] = 0x02003000;
+    bir_base[0] = 0x58000040;
+    bir_base[1] = 0xD61F0000;
+    bir_base[2] = 0x02354000;
 
     volatile uint32_t *reset_ctl_reg = (uint32_t *)(DIPHDA_BASE_SCR_BASE
                                                     + HOST_SYS_RST_CTRL_OFFSET);
     volatile uint32_t *reset_ctl_wakeup_reg =
                         (uint32_t *)(DIPHDA_HOST_BASE_SYSTEM_CONTROL_BASE
                                      + HOST_CPU_CORE0_WAKEUP_OFFSET);
+
+    volatile uint32_t *PE0_CONFIG =
+                        (uint32_t *)(DIPHDA_HOST_BASE_SYSTEM_CONTROL_BASE
+                                     + HOST_CPU_PE0_CONFIG_OFFSET);
+
+    /* Select host CPU architecture as AArch64 */
+    *PE0_CONFIG |= AA64nAA32_MASK; /* 0b1 – AArch64 */
 
     /* wakeup CORE0 before bringing it out of reset */
     *reset_ctl_wakeup_reg = 0x1;
