@@ -457,7 +457,7 @@ void tfm_spm_psa_reply(uint32_t *args)
 {
     psa_handle_t msg_handle;
     psa_status_t status;
-    struct tfm_spm_service_t *service = NULL;
+    struct service_t *service = NULL;
     struct tfm_msg_body_t *msg = NULL;
     int32_t ret = PSA_SUCCESS;
     struct tfm_conn_handle_t *conn_handle;
