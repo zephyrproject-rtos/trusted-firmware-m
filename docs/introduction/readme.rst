@@ -141,10 +141,8 @@ Platforms supported
           <https://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-discovery-kits/stm32l562e-dk.html>`_
         - `nRF9160 DK (nordic_nrf/nrf9160dk_nrf9160).
           <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF9160-DK>`_
-        - `nRF5340 PDK (nordic_nrf/nrf5340pdk_nrf5340_cpuapp).
-          <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-PDK>`_
         - `nRF5340 DK (nordic_nrf/nrf5340dk_nrf5340_cpuapp).
-          <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-PDK>`_
+          <https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-DK>`_
 
     - Cortex-M23 system:
 
