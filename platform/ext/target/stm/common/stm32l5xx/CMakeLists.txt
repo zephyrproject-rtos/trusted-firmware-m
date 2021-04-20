@@ -194,6 +194,7 @@ endif()
 
 install(FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/stm_tool.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/bin2hex.py
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../bl2/ext/mcuboot/scripts/macro_parser.py
         DESTINATION ${CMAKE_BINARY_DIR}/scripts/ )
 
@@ -208,6 +209,7 @@ endif()
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/regression.sh
          ${PREPROCESSOR_FILE}
          ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/TFM_UPDATE.sh
+         ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/TFM_BIN2HEX.sh
          ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/postbuild.sh
          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
          DESTINATION ${CMAKE_BINARY_DIR} )
