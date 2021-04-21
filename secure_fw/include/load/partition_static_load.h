@@ -34,4 +34,9 @@
      (ps_ptr)->ndeps * sizeof(uint32_t) +                               \
      (ps_ptr)->nservices * sizeof(struct service_static_info_t))
 
+#define STATIC_INF_DEPS(ps_ptr)                                         \
+    ((uintptr_t)(ps_ptr)->vars + STATIC_INFO_EXT_LENGTH * sizeof(uintptr_t))
+#define STATIC_INF_SERVICE(ps_ptr)                                      \
+    ((uintptr_t)STATIC_INF_DEPS(ps_ptr) + (ps_ptr)->ndeps * sizeof(uint32_t))
+
 #endif /* __PARTITION_STATIC_LOAD_H__ */
