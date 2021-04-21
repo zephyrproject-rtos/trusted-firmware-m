@@ -37,7 +37,7 @@ Supported Platforms
     :caption: STM
     :glob:
 
-    target/stm/**
+    target/stm/index
 
 .. toctree::
     :maxdepth: 4
