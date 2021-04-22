@@ -5,7 +5,12 @@ Building TF-M
 -------------
 
 Follow the instructions in :doc:`Building instructions </docs/technical_references/instructions/tfm_build_instruction>`.
-Build instructions with platform name: mps3/an547 (-DTFM_PLATFORM=mps3/an547).
+Build instructions with platform name: arm/mps3/an547 (-DTFM_PLATFORM=arm/mps3/an547).
+
+.. note::
+
+   When building with GNUARM, please use the version of gcc shipped with zephyr
+   SDK 0.13.0-alpha1, arm-zephyr-eabi-gcc version 10.3.0.
 
 .. note::
 
