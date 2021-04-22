@@ -198,13 +198,13 @@ def process_stateless_services(partitions, static_handle_max_num):
     """
     This function collects all stateless services together, and allocates
     stateless handles for them.
-    If the stateless handle is set to a valid value in yaml/json file, it is
-    converted to a index directly, if the stateless handle is set as "auto",
-    or not set, framework will allocate a valid index for the service.
-    After that, framework puts each service into a reordered stateless service
-    list at position of "index". Other positions in list are left "None".
+    Valid stateless handle in service will be converted to an index. If the
+    stateless handle is set as "auto", or not set, framework will allocate a
+    valid index for the service.
+    Framework puts each service into a reordered stateless service list at
+    position of "index". Other unused positions are left None.
     """
-    raw_stateless_services = []
+    collected_stateless_services = []
 
     # Collect all stateless services first.
     for partition in partitions:
@@ -218,45 +218,51 @@ def process_stateless_services(partitions, static_handle_max_num):
             if 'connection_based' not in service:
                 raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
             if service['connection_based'] is False:
-                raw_stateless_services.append(service)
+                collected_stateless_services.append(service)
 
-    if len(raw_stateless_services) == 0:
+    if len(collected_stateless_services) == 0:
         return []
 
-    if len(raw_stateless_services) > static_handle_max_num:
-        raise Exception("Stateless service numbers range exceed.")
+    if len(collected_stateless_services) > static_handle_max_num:
+        raise Exception("Stateless service numbers range exceed {number}.".format(number=static_handle_max_num))
 
     """
-    Allocate an empty stateless service list to store services and find the
-    service easily by handle.
-    Use service stateless handle values as indexes. Put service in the list
-    at index "handle - 1", since handle value starts from 1 and list index
-    starts from 0.
+    Allocate an empty stateless service list to store services.
+    Use "handle - 1" as the index for service, since handle value starts from
+    1 and list index starts from 0.
     """
     reordered_stateless_services = [None] * static_handle_max_num
+    auto_alloc_services = []
 
-    for service in raw_stateless_services:
+    for service in collected_stateless_services:
+        # If not set, it is "auto" by default
+        if 'stateless_handle' not in service:
+            auto_alloc_services.append(service)
+            continue
+
         service_handle = service['stateless_handle']
 
         # Fill in service list with specified stateless handle, otherwise skip
         if isinstance(service_handle, int):
             if service_handle < 1 or service_handle > static_handle_max_num:
-                raise Exception("Invalid stateless_handle setting.")
+                raise Exception("Invalid stateless_handle setting: {handle}.".format(handle=service['stateless_handle']))
             # Convert handle index to reordered service list index
             service_handle = service_handle - 1
 
             if reordered_stateless_services[service_handle] is not None:
-                raise Exception("Duplicated stateless_handle setting.")
+                raise Exception("Duplicated stateless_handle setting: {handle}.".format(handle=service['stateless_handle']))
             reordered_stateless_services[service_handle] = service
-            # Remove recorded node from the existing list
-            raw_stateless_services.remove(service)
+        elif service_handle == 'auto':
+            auto_alloc_services.append(service)
+        else:
+            raise Exception("Invalid stateless_handle setting: {handle}.".format(handle=service['stateless_handle']))
 
     # Auto-allocate stateless handle and encode the stateless handle
     for i in range(0, static_handle_max_num):
         service = reordered_stateless_services[i]
 
-        if service == None and len(raw_stateless_services) > 0:
-            service = raw_stateless_services.pop(0)
+        if service == None and len(auto_alloc_services) > 0:
+            service = auto_alloc_services.pop(0)
 
         """
         Encode stateless flag and version into stateless handle
