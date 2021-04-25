@@ -11,3 +11,4 @@ Sphinx>=1.4
 m2r
 sphinx-rtd-theme
 sphinxcontrib-plantuml
+sphinxcontrib-svg2pdfconverter
