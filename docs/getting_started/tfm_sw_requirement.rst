@@ -283,6 +283,7 @@ The following additional tools are needed:
     - Sphinx v1.7.9
     - m2r v0.2.0
     - sphinxcontrib-plantuml
+    - sphinxcontrib-svg2pdfconverter
     - sphinx-rtd-theme
     - Graphviz dot v2.38.0 or later
     - PlantUML v1.2018.11 or later
@@ -382,6 +383,7 @@ To build the TF-M firmware the following tools are needed:
    "Doxygen",">1.8","Reference manual"
    "Sphinx",">1.4","User Guide"
    "sphinxcontrib-plantuml",,"User Guide"
+   "sphinxcontrib-svg2pdfconverter",,"User Guide"
    "sphinx-trd-theme",,"User Guide"
    "Git",,
    "PlantUML",">v1.2018.11","Reference Manual, User Guide"
@@ -411,6 +413,7 @@ Dependency chain:
     state refman as "Reference Manual" <<doc>>
     state rtd_theme as "sphinx-rtd-theme" <<doc>>
     state sphnix_puml as "sphinxcontrib-plantuml" <<doc>>
+    state sphnix_svg as "sphinxcontrib-svg2pdfconverter" <<doc>>
     state JRE as "JRE" <<doc>> : Java Runtime Environment
     state gwiz as "Graphwiz dot" <<doc>>
     state Sphinx as "Sphinx" <<doc>>
@@ -444,9 +447,11 @@ Dependency chain:
     Sphinx --> m2r
     Sphinx --> rtd_theme
     Sphinx --> sphnix_puml
+    Sphinx --> sphnix_svg
     m2r --> Python3
     rtd_theme --> Python3
     sphnix_puml --> Python3
+    sphnix_svg --> Python3
     Sphinx --> PlantUML
     PlantUML --> JRE
     PlantUML --> gwiz
