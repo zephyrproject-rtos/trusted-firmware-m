@@ -497,11 +497,13 @@ typedef int32_t fih_int;
 
 #define fih_int_encode(x)     (x)
 
+#define fih_int_encode_zero_equality(x) ((x) == 0 ? 0 : 1)
+
 #define fih_eq(x, y)          ((x) == (y))
 
 #define fih_not_eq(x, y)      ((x) != (y))
 
-#define fih_delay_init()
+#define fih_delay_init()      (0)
 #define fih_delay()
 
 #define FIH_CALL(f, ret, ...) \
@@ -512,6 +514,10 @@ typedef int32_t fih_int;
 #define FIH_RET(ret) \
     do { \
         return ret; \
+    } while (0)
+
+#define FIH_PANIC do { \
+        while(1) {}; \
     } while (0)
 
 #define FIH_CFI_STEP_INIT(x)

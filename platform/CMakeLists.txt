@@ -69,7 +69,7 @@ target_link_libraries(platform_s
     PUBLIC
         platform_common_interface
         platform_region_defs
-        tfm_fih
+        tfm_fih_headers
     PRIVATE
         psa_interface
         tfm_secure_api

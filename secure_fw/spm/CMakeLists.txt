@@ -87,7 +87,7 @@ target_link_libraries(tfm_spm
         tfm_boot_status
         tfm_secure_api
         tfm_partitions
-        tfm_fih
+        tfm_fih_headers
         tfm_sprt
 )
 
