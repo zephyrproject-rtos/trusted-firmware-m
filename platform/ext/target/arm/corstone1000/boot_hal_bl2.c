@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -35,25 +35,6 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 REGION_DECLARE(Image$$, ER_DATA, $$Base)[];
 REGION_DECLARE(Image$$, ARM_LIB_HEAP, $$ZI$$Limit)[];
-
-__attribute__((naked)) void boot_clear_bl2_ram_area(void)
-{
-    __ASM volatile(
-        ".syntax unified                             \n"
-        "movs    r0, #0                              \n"
-        "ldr     r1, =Image$$ER_DATA$$Base           \n"
-        "ldr     r2, =Image$$ARM_LIB_HEAP$$ZI$$Limit \n"
-        "subs    r2, r2, r1                          \n"
-        "Loop:                                       \n"
-        "subs    r2, #4                              \n"
-        "blt     Clear_done                          \n"
-        "str     r0, [r1, r2]                        \n"
-        "b       Loop                                \n"
-        "Clear_done:                                 \n"
-        "bx      lr                                  \n"
-         : : : "r0" , "r1" , "r2" , "memory"
-    );
-}
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 extern struct flash_area flash_map[];
@@ -113,8 +94,6 @@ extern void add_bank_offset_to_image_offset(uint32_t bank_offset);
 int32_t boot_platform_init(void)
 {
     int32_t result;
-    enum tfm_plat_err_t plat_err;
-    uint32_t bank_offset;
 
     result = corstone1000_watchdog_init();
     if (result != ARM_DRIVER_OK) {
@@ -130,6 +109,15 @@ int32_t boot_platform_init(void)
     if (result != ARM_DRIVER_OK) {
         return 1;
     }
+
+    return 0;
+}
+
+int32_t boot_platform_post_init(void)
+{
+    int32_t result;
+    uint32_t bank_offset;
+    enum tfm_plat_err_t plat_err;
 
 #ifdef CRYPTO_HW_ACCELERATOR
     result = crypto_hw_accelerator_init();

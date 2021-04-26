@@ -113,7 +113,7 @@ target_sources(platform_bl2
         Native_Driver/watchdog.c
         Native_Driver/arm_watchdog_drv.c
         fip_parser/fip_parser.c
-        bl2_boot_hal.c
+        boot_hal_bl2.c
         fw_update_agent/fwu_agent.c
         bl2_security_cnt.c
 )

@@ -158,7 +158,6 @@ if(BL2)
             device/source/device_definition.c
             device/source/system_core_init.c
             native_drivers/uart_cmsdk_drv.c
-            boot_hal.c
     )
 
     target_include_directories(platform_bl2

@@ -134,7 +134,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             device/source/system_core_init.c
             device/source/device_definition.c
             cmsis_drivers/Driver_Flash.c

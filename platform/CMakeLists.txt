@@ -147,7 +147,7 @@ if(BL2)
 
     target_sources(platform_bl2
         PRIVATE
-            ext/common/boot_hal.c
+            ext/common/boot_hal_bl2.c
             $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
             $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
             $<$<BOOL:${PLATFORM_DEFAULT_ROTPK}>:ext/common/template/tfm_rotpk.c>

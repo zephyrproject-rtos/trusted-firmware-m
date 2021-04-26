@@ -162,7 +162,7 @@ if(BL2)
             device/source/system_core_init.c
             native_drivers/uart_cmsdk_drv.c
             native_drivers/emulated_flash_drv.c
-            boot_hal.c
+            boot_hal_bl2.c
     )
 
     target_include_directories(platform_bl2

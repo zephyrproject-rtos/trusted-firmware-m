@@ -183,7 +183,6 @@ target_sources(tfm_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
             CMSIS_Driver/Driver_Flash_MRAM.c

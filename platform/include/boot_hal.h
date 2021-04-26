@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2020 STMicroelectronics. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -8,6 +8,9 @@
 
 #ifndef __BOOT_HAL_H__
 #define __BOOT_HAL_H__
+
+#include <stdint.h>
+#include "cmsis_compiler.h"
 
 /* Include header section */
 
@@ -36,7 +39,7 @@ struct boot_arm_vector_table {
  *          next stage software components.
  *        - Etc.
  */
-void boot_clear_bl2_ram_area(void);
+void boot_clear_ram_area(void);
 
 /*
  * \brief Chain-loading the next image in the boot sequence.
@@ -53,6 +56,15 @@ void boot_jump_to_next_image(uint32_t reset_handler_addr) __NO_RETURN;
  * \return Returns 0 on success, non-zero otherwise
  */
 int32_t boot_platform_init(void);
+
+/**
+ * \brief Perform later platform specific initialization. Runs at the end of the
+ *        boot initialization phase, for platform-specific code that depends on
+ *        other initialization code being run beforehand.
+ *
+ * \return Returns 0 on success, non-zero otherwise
+ */
+int32_t boot_platform_post_init(void);
 
 /**
  * \brief Platform operation to start secure image.

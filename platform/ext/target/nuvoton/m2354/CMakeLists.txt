@@ -98,7 +98,6 @@ target_sources(platform_s
         ../common/spm_hal.c
         ../common/tfm_hal_isolation.c
         ../common/tfm_hal_platform.c
-        ../common/boot_hal.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
         ${PLATFORM_DIR}/ext/common/tfm_platform.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
@@ -142,7 +141,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            ../common/boot_hal.c
             device/source/device_definition.c
             device/source/system_core_init.c
             ../common/cmsis_drivers/Driver_Flash.c

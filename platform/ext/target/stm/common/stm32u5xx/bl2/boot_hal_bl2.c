@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    boot_hal.c
+  * @file    boot_hal_bl2.c
   * @author  MCD Application Team
   * @brief   This file contains  mcuboot stm32u5xx hardware specific implementation
   *

@@ -104,7 +104,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
             uart_stdout.c

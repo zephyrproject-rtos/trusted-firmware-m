@@ -131,6 +131,12 @@ int main(void)
         FIH_PANIC;
     }
 
+    /* Perform platform specific post-initialization */
+    if (boot_platform_post_init() != 0) {
+        BOOT_LOG_ERR("Platform post init failed");
+        FIH_PANIC;
+    }
+
 #ifdef TEST_BL2
     (void)run_mcuboot_testsuite();
 #endif /* TEST_BL2 */

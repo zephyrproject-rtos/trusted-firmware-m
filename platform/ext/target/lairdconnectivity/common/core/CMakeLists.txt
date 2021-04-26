@@ -145,7 +145,6 @@ if(BL2)
 
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_Flash.c
             cmsis_drivers/Driver_QSPI.c
             ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_USART.c

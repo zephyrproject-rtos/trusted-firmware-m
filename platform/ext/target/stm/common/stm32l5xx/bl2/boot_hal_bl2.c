@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    boot_hal.c
+  * @file    boot_hal_bl2.c
   * @author  MCD Application Team
   * @brief   This file contains  mcuboot stm32l5xx hardware specific implementation
   *
@@ -73,7 +73,7 @@ __attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handler_addr)
         ".syntax unified                 \n"
 #endif
         "mov     r7, r0                  \n"
-        "bl      boot_clear_bl2_ram_area \n" /* Clear RAM before jump */
+        "bl      boot_clear_ram_area     \n" /* Clear RAM before jump */
         "movs    r0, #0                  \n" /* Clear registers: R0-R12, */
         "mov     r1, r0                  \n" /* except R7 */
         "mov     r2, r0                  \n"
@@ -158,7 +158,7 @@ __attribute__((section(".BL2_NoHdp_Code")))
   * @note
   * @retval void
   */
-void boot_clear_bl2_ram_area(void)
+void boot_clear_ram_area(void)
 {
   __IO uint32_t *pt = (uint32_t *)BL2_DATA_START;
   uint32_t index;

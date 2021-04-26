@@ -148,7 +148,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             retarget/platform_retarget_dev.c
             cmsis_core/system_cmsdk_mps2_an521.c
             cmsis_drivers/Driver_Flash.c
