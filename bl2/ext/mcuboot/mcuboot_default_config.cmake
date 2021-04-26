@@ -12,6 +12,9 @@ set(TEST_BL2                            OFF         CACHE BOOL      "Whether to 
 set(DEFAULT_MCUBOOT_SECURITY_COUNTERS   ON          CACHE BOOL      "Whether to use the default security counter configuration defined by TF-M project")
 set(DEFAULT_MCUBOOT_FLASH_MAP           ON          CACHE BOOL      "Whether to use the default flash map defined by TF-M project")
 
+set(MCUBOOT_S_IMAGE_FLASH_AREA_NUM      0           CACHE STRING    "ID of the flash area containing the primary Secure image")
+set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     1           CACHE STRING    "ID of the flash area containing the primary Non-Secure image")
+
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")
 set(MCUBOOT_EXECUTION_SLOT              1           CACHE STRING    "Slot from which to execute the image, used for XIP mode")
 set(MCUBOOT_LOG_LEVEL                   "INFO"      CACHE STRING    "Level of logging to use for MCUboot [OFF, ERROR, WARNING, INFO, DEBUG]")
