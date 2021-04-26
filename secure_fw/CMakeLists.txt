@@ -127,30 +127,38 @@ endif()
 
 ############################### CODE SHARING ###################################
 if (TFM_CODE_SHARING)
-    set(LIB_LIST mbedcrypto
-                 crypto_service_cc312
-                 platform_s
-                 tfm_psa_rot_partition_crypto
-                 tfm_psa_rot_partition_audit
-                 tfm_psa_rot_partition_attestation
-                 tfm_app_rot_partition_ps
-                 tfm_psa_rot_partition_its
-                 tfm_psa_rot_partition_platform
-                 platform_s
-                 tfm_sprt
-                 tfm_spm
+    target_link_shared_code(tfm_s
+        bl2
     )
-    if (TFM_CODE_SHARING_PATH)
-        compiler_link_shared_code(tfm_s
-                                  ${TFM_CODE_SHARING_PATH} # Path to shared code
-                                  EXTERNAL_TARGET # Not produced by tf-m build
-                                  "${LIB_LIST}"
-        )
-    else()
-        compiler_link_shared_code(tfm_s
-                                  ${CMAKE_CURRENT_BINARY_DIR}/../bl2
-                                  bl2
-                                  "${LIB_LIST}"
-        )
-    endif()
+
+    # mbedtls is build outside of tree, so we have to use the _from_dependency
+    # version of this function to attach the custom_command to the tfm_s target.
+    # It's also picky about stripping the symbols, so we just make them weak
+    # instead.
+    target_weaken_symbols_from_dependency(tfm_s crypto_service_mbedcrypto
+        mbedtls_asn1*
+        mbedtls_mpi*
+        mbedtls_platform*
+        mbedtls_rsa*
+
+        #This group is only relevant if BL2 image encryption is on
+        mbedtls_md*
+
+        #This group has two functions that cause runtime errors when shared, so the
+        #error-free ones are listed piece by piece
+        mbedtls_internal_sha256*
+        mbedtls_sha256_free
+        mbedtls_sha256_init
+        mbedtls_sha256_finish
+        mbedtls_sha256_starts
+
+        #Symbols necessary to make sharing additional functions possible
+        mbedtls_calloc*
+        mbedtls_free*
+
+        #Miscellaneous functions
+        mbedtls_exit*
+        memset_func*
+    )
+
 endif()

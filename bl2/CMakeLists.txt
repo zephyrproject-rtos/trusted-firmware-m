@@ -136,7 +136,7 @@ target_compile_options(bl2_mbedx509
 ############################### CODE SHARING ###################################
 
 if (TFM_CODE_SHARING)
-    compiler_create_shared_code(bl2 ${CMAKE_CURRENT_SOURCE_DIR}/src/shared_symbol_template.txt)
+    target_share_symbols(bl2 ${CMAKE_CURRENT_SOURCE_DIR}/bl2_shared_symbols.txt)
 
     if (NOT EXISTS ${MBEDCRYPTO_PATH}/library/code_share.c)
         message(FATAL_ERROR "File ${MBEDCRYPTO_PATH}/library/code_share.c does not exist.
