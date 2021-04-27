@@ -454,21 +454,6 @@ static enum spm_err_t tfm_spm_partition_set_iovec(uint32_t partition_idx,
     return SPM_ERR_OK;
 }
 
-/**
- * \brief Get the flags associated with a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Flags associated with the partition
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-static uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].static_data->
-           partition_flags;
-}
-
 static enum tfm_status_e tfm_start_partition(
                                          const struct tfm_sfn_req_s *desc_ptr,
                                          const struct iovec_params_t *iovec_ptr,
@@ -770,6 +755,12 @@ static enum tfm_status_e tfm_core_check_sfn_req_rules(
     return TFM_SUCCESS;
 }
 
+uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
+{
+    return g_spm_partition_db.partitions[partition_idx].static_data->
+           partition_flags;
+}
+
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].static_data->
@@ -907,48 +898,6 @@ int32_t tfm_spm_check_buffer_access(uint32_t  partition_idx,
     }
 
     return TFM_ERROR_INVALID_PARAMETER;
-}
-
-void tfm_spm_get_caller_client_id_handler(uint32_t *svc_args)
-{
-    uintptr_t result_ptr_value = svc_args[0];
-    uint32_t running_partition_idx =
-            tfm_spm_partition_get_running_partition_idx();
-    const uint32_t running_partition_flags =
-            tfm_spm_partition_get_flags(running_partition_idx);
-    const struct spm_partition_runtime_data_t *curr_part_data =
-            tfm_spm_partition_get_runtime_data(running_partition_idx);
-    int res = 0;
-
-    if (!(running_partition_flags & SPM_PART_FLAG_APP_ROT) ||
-        curr_part_data->partition_state == SPM_PARTITION_STATE_HANDLING_IRQ ||
-        curr_part_data->partition_state == SPM_PARTITION_STATE_SUSPENDED) {
-        /* This handler shouldn't be called from outside partition context.
-         * Also if the current partition is handling IRQ, the caller partition
-         * index might not be valid;
-         * Partitions are only allowed to run while S domain is locked.
-         */
-        svc_args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
-        return;
-    }
-
-    /* Make sure that the output pointer points to a memory area that is owned
-     * by the partition
-     */
-    res = tfm_spm_check_buffer_access(running_partition_idx,
-                                      (void *)result_ptr_value,
-                                      sizeof(curr_part_data->caller_client_id),
-                                      2);
-    if (res != TFM_SUCCESS) {
-        /* Not in accessible range, return error */
-        svc_args[0] = (uint32_t)res;
-        return;
-    }
-
-    *((int32_t *)result_ptr_value) = curr_part_data->caller_client_id;
-
-    /* Store return value in r0 */
-    svc_args[0] = (uint32_t)TFM_SUCCESS;
 }
 
 /* This SVC handler is called if veneer is running in thread mode */

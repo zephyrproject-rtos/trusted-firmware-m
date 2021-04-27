@@ -382,5 +382,15 @@ void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx);
  */
 void tfm_spm_seal_psp_stacks(void);
 
+/**
+ * \brief Get the flags associated with a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Flags associated with the partition
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx);
 
 #endif /* __SPM_FUNC_H__ */

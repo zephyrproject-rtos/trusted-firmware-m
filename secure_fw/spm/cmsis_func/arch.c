@@ -27,15 +27,6 @@ void jump_to_ns_code(void)
 }
 
 __attribute__((naked))
-int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id)
-{
-    __ASM volatile(
-        "SVC %0\n"
-        "BX LR\n"
-        : : "I" (TFM_SVC_GET_CALLER_CLIENT_ID));
-}
-
-__attribute__((naked))
 static int32_t tfm_spm_request(int32_t request_type)
 {
     __ASM volatile(

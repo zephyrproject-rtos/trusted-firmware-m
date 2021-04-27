@@ -66,9 +66,6 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
     case TFM_SVC_SFN_RETURN:
         retval = tfm_spm_partition_return_handler(exc_return);
         break;
-    case TFM_SVC_GET_CALLER_CLIENT_ID:
-        tfm_spm_get_caller_client_id_handler(svc_args);
-        break;
     case TFM_SVC_SPM_REQUEST:
         tfm_spm_request_handler((struct tfm_state_context_t *)svc_args);
         break;
