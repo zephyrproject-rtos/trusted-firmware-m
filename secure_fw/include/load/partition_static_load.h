@@ -32,11 +32,15 @@
 #define STATIC_INFSZ_BYTES(ps_ptr)                                      \
     (sizeof(*(ps_ptr)) + STATIC_INFO_EXT_LENGTH * sizeof(uintptr_t) +   \
      (ps_ptr)->ndeps * sizeof(uint32_t) +                               \
-     (ps_ptr)->nservices * sizeof(struct service_static_info_t))
+     (ps_ptr)->nservices * sizeof(struct service_static_info_t) +       \
+     (ps_ptr)->nassets * sizeof(struct asset_desc_t))
 
 #define STATIC_INF_DEPS(ps_ptr)                                         \
     ((uintptr_t)(ps_ptr)->vars + STATIC_INFO_EXT_LENGTH * sizeof(uintptr_t))
 #define STATIC_INF_SERVICE(ps_ptr)                                      \
     ((uintptr_t)STATIC_INF_DEPS(ps_ptr) + (ps_ptr)->ndeps * sizeof(uint32_t))
+#define STATIC_INF_ASSET(ps_ptr)                                        \
+    ((uintptr_t)STATIC_INF_SERVICE(ps_ptr) +                            \
+     (ps_ptr)->nservices * sizeof(struct service_static_info_t))
 
 #endif /* __PARTITION_STATIC_LOAD_H__ */

@@ -15,11 +15,15 @@
 #include "load/partition_static_load.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
+#include "load/asset_defs.h"
 #include "psa_manifest/pid.h"
 #include "psa_manifest/sid.h"
 
 #define TFM_SP_NS_PROXY_NDEPS                                   (0)
 #define TFM_SP_NS_PROXY_NSERVS                                  (0)
+#if TFM_LVL == 3
+#define TFM_SP_NS_PROXY_NASSETS                                 (1)
+#endif
 
 /* Memory region declaration */
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
@@ -34,6 +38,9 @@ struct partition_tfm_sp_ns_proxy_static_info_t {
     /* per-partition variable length data */
     uintptr_t                       stack_pos;
     uintptr_t                       heap_pos;
+#if TFM_LVL == 3
+    struct asset_desc_t             assets[TFM_SP_NS_PROXY_NASSETS];
+#endif
 } __attribute__((aligned(4)));
 
 /* Partition static, deps, service static data. Put to a dedicated section. */
@@ -52,14 +59,19 @@ const struct partition_tfm_sp_ns_proxy_static_info_t
         .heap_size                  = 0,
         .ndeps                      = TFM_SP_NS_PROXY_NDEPS,
         .nservices                  = TFM_SP_NS_PROXY_NSERVS,
-        .plat_cookie                = 0,
 #if TFM_LVL == 3
-        .mems                       = {
-            .start                    = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
-            .limit                    = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Limit),
-        },
+        .nassets                    = TFM_SP_NS_PROXY_NASSETS,
 #endif
     },
     .stack_pos                      = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
     .heap_pos                       = 0,
+#if TFM_LVL == 3
+    .assets                         = {
+        {
+            .mem.addr_x             = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
+            .mem.addr_y             = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Limit),
+            .attr                   = ASSET_MEM_RD_BIT | ASSET_MEM_WR_BIT,
+        },
+    },
+#endif
 };

@@ -36,17 +36,6 @@
 #define SPM_PART_FLAG_PSA_ROT                   (1U << 8)
 #define SPM_PART_FLAG_IPC                       (1U << 9)
 
-#if TFM_LVL == 3
-/**
- * Holds isolation memory regions used by a partition. Could be extended if
- * more isolation regions are required.
- */
-struct private_data_t {
-    uintptr_t start;
-    uintptr_t limit;
-};
-#endif
-
 /* Common partition structure type */
 struct partition_static_info_t {
     uint32_t        psa_ff_ver;         /* Encode the version with magic    */
@@ -57,10 +46,7 @@ struct partition_static_info_t {
     size_t          heap_size;          /* Heap size                        */
     uint32_t        ndeps;              /* Dependency number                */
     uint32_t        nservices;          /* Service number                   */
-    uintptr_t       plat_cookie;        /* A cookie for platform binding    */
-#if TFM_LVL == 3
-    struct private_data_t mems;         /* Partition isolation memory data  */
-#endif
+    uint32_t        nassets;            /* Asset numbers                    */
     uintptr_t       vars[];             /* Struct extendable indicator      */
 } __attribute__((aligned(4)));
 

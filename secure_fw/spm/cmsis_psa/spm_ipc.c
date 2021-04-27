@@ -35,6 +35,7 @@
 #include "tfm/tfm_spm_services.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
+#include "load/asset_defs.h"
 #include "load/partition_static_load.h"
 
 #include "secure_fw/partitions/tfm_service_list.inc"
@@ -694,10 +695,11 @@ uint32_t tfm_spm_init(void)
     struct partition_t *partition;
     struct service_t *service;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
-    const struct platform_data_t **platform_data_p;
+    const struct platform_data_t *platform_data_p;
     uintptr_t part_static_start, part_static_end;
     struct partition_static_info_t *p_cmninf;
     struct service_static_info_t *p_service_static;
+    struct asset_desc_t *p_asset_static;
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
 #endif
@@ -748,24 +750,28 @@ uint32_t tfm_spm_init(void)
 
         partition->p_static = p_cmninf;
 
-        platform_data_p = POSITION_TO_PTR(p_cmninf->plat_cookie,
-                                          const struct platform_data_t **);
-        if (platform_data_p != NULL) {
-            while ((*platform_data_p) != NULL) {
-#ifdef TFM_FIH_PROFILE_ON
-                FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, i,
-                         *platform_data_p);
-                if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
-                    tfm_core_panic();
-                }
-#else /* TFM_FIH_PROFILE_ON */
-                if (tfm_spm_hal_configure_default_isolation(i,
-                            *platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
-                    tfm_core_panic();
-                }
-#endif /* TFM_FIH_PROFILE_ON */
-                ++platform_data_p;
+        /* Init partition device object assets */
+        p_asset_static = (struct asset_desc_t *)STATIC_INF_ASSET(p_cmninf);
+        for (i = 0; i < p_cmninf->nassets; i++) {
+            /* Skip the memory-based asset */
+            if (!(p_asset_static[i].attr & ASSET_DEV_REF_BIT)) {
+                continue;
             }
+
+            platform_data_p = POSITION_TO_PTR(p_asset_static[i].dev.addr_ref,
+                                              struct platform_data_t *);
+#ifdef TFM_FIH_PROFILE_ON
+            FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, i,
+                     platform_data_p);
+            if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+                tfm_core_panic();
+            }
+#else /* TFM_FIH_PROFILE_ON */
+            if (tfm_spm_hal_configure_default_isolation(i,
+                platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
+                tfm_core_panic();
+            }
+#endif /* TFM_FIH_PROFILE_ON */
         }
 
         partition->signals_allowed |= PSA_DOORBELL;
@@ -862,6 +868,7 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 {
 #if TFM_LVL != 1
     struct partition_t *p_next_partition;
+    struct partition_static_info_t *p_part_static;
     uint32_t is_privileged;
 #endif
     struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();
@@ -875,8 +882,8 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
         p_next_partition = TFM_GET_CONTAINER_PTR(pth_next,
                                                  struct partition_t,
                                                  sp_thread);
-
-        if (p_next_partition->p_static->flags & SPM_PART_FLAG_PSA_ROT) {
+        p_part_static = p_next_partition->p_static;
+        if (p_part_static->flags & SPM_PART_FLAG_PSA_ROT) {
             is_privileged = TFM_PARTITION_PRIVILEGED_MODE;
         } else {
             is_privileged = TFM_PARTITION_UNPRIVILEGED_MODE;
@@ -890,18 +897,25 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
          * PRoTs cannot work in unprivileged mode, make them privileged now.
          */
         if (is_privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
+            struct asset_desc_t *p_asset =
+                (struct asset_desc_t *)STATIC_INF_ASSET(p_part_static);
+            /* Partition must have private data as the first asset in LVL3 */
+            if (p_part_static->nassets == 0) {
+                tfm_core_panic();
+            }
+            if (p_asset->attr & ASSET_DEV_REF_BIT) {
+                tfm_core_panic();
+            }
             /* FIXME: only MPU-based implementations are supported currently */
 #ifdef TFM_FIH_PROFILE_ON
             FIH_CALL(tfm_hal_mpu_update_partition_boundary, fih_rc,
-                     p_next_partition->p_static->mems.start,
-                     p_next_partition->p_static->mems.limit);
+                     p_asset->mem.addr_x, p_asset->mem.addr_y);
             if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
                 tfm_core_panic();
             }
 #else /* TFM_FIH_PROFILE_ON */
-            if (tfm_hal_mpu_update_partition_boundary(
-                                      p_next_partition->p_static->mems.start,
-                                      p_next_partition->p_static->mems.limit)
+            if (tfm_hal_mpu_update_partition_boundary(p_asset->mem.addr_x,
+                                                      p_asset->mem.addr_y)
                                                            != TFM_HAL_SUCCESS) {
                 tfm_core_panic();
             }
