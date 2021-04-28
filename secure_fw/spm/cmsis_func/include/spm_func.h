@@ -303,9 +303,9 @@ void tfm_spm_memory_permission_check_handler(uint32_t *svc_args);
  * \param[in] len               The length of the buffer
  * \param[in] alignment         The expected alignment (in bits)
  *
- * \return 1 if the check passes, 0 otherwise.
+ * \return TFM_SUCCESS on successful return, an error code otherwise
  *
- * \note For a 0 long buffer the check fails.
+ * \note For a zero length buffer the check fails.
  */
 int32_t tfm_spm_check_buffer_access(uint32_t  partition_idx,
                                     void     *start_addr,

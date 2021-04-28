@@ -163,9 +163,9 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
                                       (void *)buf_start,
                                       buf_size,
                                       2);
-    if (!res) {
+    if (res != TFM_SUCCESS) {
         /* Not in accessible range, return error */
-        args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
+        args[0] = (uint32_t)res;
         return;
     }
 #else

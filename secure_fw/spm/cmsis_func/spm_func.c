@@ -894,26 +894,19 @@ int32_t tfm_spm_check_buffer_access(uint32_t  partition_idx,
 
     alignment_mask = (((uintptr_t)1) << alignment) - 1;
 
-    /* Check that the pointer is aligned properly */
-    if (start_addr_value & alignment_mask) {
-        /* not aligned, return error */
-        return 0;
+    /* Check pointer alignment and protect against overflow and zero len */
+    if (!(start_addr_value & alignment_mask) &&
+        (end_addr_value > start_addr_value)) {
+        /* Check that the range is in S_DATA */
+        if ((start_addr_value >= S_DATA_START) &&
+            (end_addr_value <= (S_DATA_START + S_DATA_SIZE))) {
+            return TFM_SUCCESS;
+        } else {
+            return TFM_ERROR_NOT_IN_RANGE;
+        }
     }
 
-    /* Protect against overflow (and zero len) */
-    if (end_addr_value <= start_addr_value) {
-        return 0;
-    }
-
-    /* For privileged partition execution, all secure data memory and stack
-     * is accessible
-     */
-    if (start_addr_value >= S_DATA_START &&
-        end_addr_value <= (S_DATA_START + S_DATA_SIZE)) {
-        return 1;
-    }
-
-    return 0;
+    return TFM_ERROR_INVALID_PARAMETER;
 }
 
 void tfm_spm_get_caller_client_id_handler(uint32_t *svc_args)
@@ -946,9 +939,9 @@ void tfm_spm_get_caller_client_id_handler(uint32_t *svc_args)
                                       (void *)result_ptr_value,
                                       sizeof(curr_part_data->caller_client_id),
                                       2);
-    if (!res) {
+    if (res != TFM_SUCCESS) {
         /* Not in accessible range, return error */
-        svc_args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
+        svc_args[0] = (uint32_t)res;
         return;
     }
 
