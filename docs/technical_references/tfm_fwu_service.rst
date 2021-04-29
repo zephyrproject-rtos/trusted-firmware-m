@@ -251,10 +251,6 @@ Three image types are defined in this partition.
 - FWU_IMAGE_TYPE_SECURE: the secure image
 - FWU_IMAGE_TYPE_FULL: the secure + non_secure image
 
-.. Note::
-
-    Currently, images update with dependency is not supported by FWU in multiple image boot.
-
 Macros **FWU_CALCULATE_IMAGE_ID**, **FWU_IMAGE_ID_GET_TYPE** and
 **FWU_IMAGE_ID_GET_SLOT** are dedicated to converting the image id, type, and
 slot. The service users can call these macros to get the image ID.
