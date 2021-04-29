@@ -6,13 +6,13 @@ LPCXpresso55S69
 1. Building TF-M
 ****************
 
-There are two options for TF-M build - with or without secondary bootloader (BL2).
+There are two options for the TF-M build - with or without secondary bootloader (BL2).
 
 1.1 Building TF-M demo without BL2
 ==================================
-To build a S and NS application image for the LPCXpresso55S69 run the ``build_tfm_demo.py`` script in ``platform/ext/target/nxp/lpcxpresso55s69/scripts``
+To build S and NS application image for the LPCXpresso55S69, run the ``build_tfm_demo.py`` script in ``platform/ext/target/nxp/lpcxpresso55s69/scripts``
 
-Or do it manually using following commands:
+Or do it manually using the following commands:
 
 .. code:: bash
 
@@ -22,10 +22,10 @@ Or do it manually using following commands:
 1.2 Building TF-M demo with BL2
 ===============================
 
-To build a S and NS application along with a BL2 (bootloader) image for the
+To build S and NS application along with a BL2 (bootloader) image for the
 LPCXpresso55S69 run the ``build_tfm_demo_bl2.py`` script in ``platform/ext/target/nxp/lpcxpresso55s69/scripts``
 
-Or do it manually using following commands:
+Or do it manually using the following commands:
 
 .. code:: bash
 		
@@ -35,7 +35,7 @@ Or do it manually using following commands:
 1.3 Building TF-M regression tests
 ==================================
 
-To run the S and NS regression tests (``TEST_S=ON`` and ``TEST_NS=ON``) the
+To run the S and NS regression tests (``TEST_S=ON`` and ``TEST_NS=ON``), the
 secondary image areas must be set to 0 (firmware updates are not possible). 
 Use the ``build_tfm_regression.py`` script in ``platform/ext/target/nxp/lpcxpresso55s69/scripts``
 or do it manually using following commands:
@@ -51,19 +51,26 @@ or do it manually using following commands:
     cannot be run on the board without modifying the flash layout due to the
     amount of available on-chip flash memory.
 
-******************************
-2. Flashing with Segger J-Link
-******************************
+****************
+2. Flashing TF-M
+****************
 
-The LPCXpresso55S69 ships, by default, uses DAPLink firmware. 
+After generating the binaries, there are three options to flash them using:
+	1) **External Segger J-Link flasher**
+	2) **On-board J-Link debugger** - with update of LPC-Link2 debugger to the Segger J-Link firmware
+	3) **PyOCD** - supports both DAPLink and J-Link interfaces. The LPCXpresso55S69 boards, by default, use DAPLink firmware.
+
+2.1 Flashing with Segger J-Link
+===============================
+
 For command line flashing it is recommended to use external Segger J-Link flasher or to
 update the LPC-Link 2 debugger on the development board with the firmware provided by Segger, 
 which makes the device behave as if there is an on-board J-Link debugger.
 
 For onboard J-Link debugger option please follow this step: 
 
-2.1 Update the LPC-Link 2 to Segger J-Link
-==========================================
+2.1.1 Update the LPC-Link 2 to Segger J-Link
+--------------------------------------------
 
 -  Install a recent version of the `J-Link Software and Documentation
    Pack <https://www.segger.com/downloads/jlink#J-LinkSoftwareAndDocumentationPack>`__.
@@ -85,19 +92,19 @@ For onboard J-Link debugger option please follow this step:
 
     $ ./program_JLINK ../probe_firmware/LPCXpressoV2/Firmware_JLink_LPCXpressoV2_20190404.bin
 
-Then remove link on the DFU jumper and power cycle.
+Then remove the link on the DFU jumper and power cycle.
 
-2.2 Flash images with ``JLinkCommander``
-========================================
+2.1.2 Flash images with ``JLinkCommander``
+------------------------------------------
 
-To flash TF-M images you can use the flash scripts provided in ``platform/ext/target/nxp/lpcxpresso55s69/scripts`` folder:
-	- ``flash.py`` - for uploading image without BL2
-	- ``flash_bl2.py`` - for uploading image with BL 2
+To flash TF-M images use the flash scripts provided in ``platform/ext/target/nxp/lpcxpresso55s69/scripts`` folder:
+	- ``flash_JLink.py`` - for uploading image without BL2
+	- ``flash_bl2_JLink.py`` - for uploading image with BL2
 	
-Or you can do it manually according the following steps:
+Or you can do it manually according to paragraph ``2.1.2.1``.
 
-2.2.1 Connect to the board using ``JLinkCommander``
----------------------------------------------------
+2.1.2.1 Connect to the board using ``JLinkCommander``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Windows:**
 ::
@@ -133,26 +140,69 @@ Or you can do it manually according the following steps:
 	...
 	Cortex-M33 identified.
 
-2.2.2 Flash the builded images
-------------------------------
+2.1.2.2 Flash the built images
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you builded TF-M with the BL2 secondary bootloader use following commands:
+If you built TF-M with the BL2 secondary bootloader, use following commands:
 ::
 
-    J-Link> loadfile bin/bl2.hex
-    J-Link> loadfile bin/tfm_s_signed.bin 0x00008000
-    J-Link> loadfile bin/tfm_ns_signed.bin 0x00030000
+    J-Link> loadfile ${BUILD_DIR}/bl2.hex
+    J-Link> loadfile ${BUILD_DIR}/tfm_s_signed.bin 0x00008000
+    J-Link> loadfile ${BUILD_DIR}/tfm_ns_signed.bin 0x00030000
 
-When BL2 is disabled, generate Intel hex files from the output axf (elf)
-files and then flash the secure and non-secure images:
+When BL2 is disabled, flash the generated hex secure and non-secure images:
 ::
 
-    $ arm-none-eabi-objcopy -S -O ihex bin/tfm_s.axf tfm_s.hex
-    $ arm-none-eabi-objcopy -S -O ihex bin/tfm_ns.axf tfm_ns.hex
+	J-Link> loadfile ${BUILD_DIR}/tfm_s.hex
+	J-Link> loadfile ${BUILD_DIR}/tfm_ns.hex
+
+2.2 Flashing with PyOCD
+=======================
+PyOCD is an open source Python package for programming and debugging Arm Cortex-M microcontrollers using multiple supported types of USB debug probes. 
+See: `PyOCD <https://pypi.org/project/pyocd/>`__
+
+To flash TF-M images with PyOCD you can use the flash scripts provided in ``platform/ext/target/nxp/lpcxpresso55s69/scripts`` folder:
+	- ``flash_PyOCD.py`` - for uploading image without BL2
+	- ``flash_bl2_PyOCD.py`` - for uploading image with BL2
+	
+You should get the following output (flashing without BL2):
 ::
 
-	J-Link> loadfile tfm_s.hex
-	J-Link> loadfile tfm_ns.hex
+	$ python flash_PyOCD.py
+	0001749:INFO:eraser:Mass erasing device...
+	0001749:INFO:eraser:Erasing chip...
+	0001902:INFO:eraser:Done
+	0001902:INFO:eraser:Successfully erased.
+	[====================] 100%
+	0007694:INFO:loader:Erased 262144 bytes (8 sectors), programmed 203776 bytes (398 pages), skipped 0 bytes (0 pages) at 33.91 kB/s
+	[====================] 100%
+	0005187:INFO:loader:Erased 131072 bytes (4 sectors), programmed 121856 bytes (238 pages), skipped 0 bytes (0 pages) at 34.13 kB/s
+
+
+Or do it manually according the following steps:
+
+If you built TF-M with the BL2 secondary bootloader, use the following commands:
+::
+
+	$ pyocd erase --mass -t LPC55S69
+	$ pyocd flash ${BUILD_DIR}/tfm_s.hex -t LPC55S69
+	$ pyocd flash ${BUILD_DIR}/tfm_ns.hex -t LPC55S69
+
+When BL2 is disabled, flash the generated hex secure and non-secure images:
+::
+
+	$ pyocd erase --mass -t LPC55S69
+	$ pyocd flash ${BUILD_DIR}/bl2.hex -t LPC55S69
+	$ pyocd flash ${BUILD_DIR}/tfm_s_signed.bin --base-address 0x8000 -t LPC55S69
+	$ pyocd flash ${BUILD_DIR}/tfm_ns_signed.bin --base-address 0x30000 -t LPC55S69
+
+.. Note::
+
+    At present, the reset target command does not seem to respond, so you can reset the device to start firmware execution via the physical RESET button (S4). There is sometimes also a stability issue with the flash erasing, so if the script freezes, it is needed to terminate the script, physically reset the target an rerun it again.
+
+.. Warning::
+
+    When using PyOCD on Windows, there might currently occur an issue with the ``libusb`` library. In that case, download the ``libusb`` library from `here <https://libusb.info/>`__ and copy .DLL file into the Python installation folder (next to python.exe)
 
 ************
 3. Debugging
@@ -176,7 +226,7 @@ configure a new project on Ozone as follows:
 -  Host Interface: USB
 -  Program File: build/secure\_fw/tfm\_s.axf (etc.)
 
-Once the project has been setup, and the firmware has previously been
+Once the project has been set up, and the firmware has previously been
 flashed to the board, connect to the target via:
 
 -  Debug > Start Debug Session > Attach to a Running Program
@@ -190,18 +240,28 @@ another appropriate location, and reset the device to debug.
 ======================
 
     **NOTE**: If you are debugging, make sure to set the
-    ``-DCMAKE_BUILD_TYPE`` value to ``-DCMAKE_BUILD_TYPE=Debug`` when
+    build type variable to ``-DCMAKE_BUILD_TYPE=Debug`` when
     building TF-M so that debug information is available to GDB.
 
-    **NOTE**: When debugging with the mbed-crypto library, you also require an
+    **NOTE**: When debugging with the mbed-crypto library, it is needed to add an
     additional ``-DMBEDCRYPTO_BUILD_TYPE=DEBUG`` compile-time switch.
 
 
 3.2.1 Start the GDB server, pointing to the secure application image:
 ---------------------------------------------------------------------
+You can use JLinkGDBServer or PyOCD server depending on the interface configured in the previous step.
+
+**J-Link GDB server:**
+
 .. code:: bash
 
     JLinkGDBServer -device lpc55s69 -if swd -speed 2000
+	
+**PyOCD GDB server:**
+
+.. code:: bash
+
+    pyocd gdbserver -f 2000k -t LPC55S69
 
 3.2.2 Connecting to the GDB server
 ----------------------------------
@@ -212,7 +272,7 @@ In a separate terminal, start the GDB client in ``tui`` (text UI) mode:
 
     $ arm-none-eabi-gdb --tui secure_fw/tfm_s.axf
 
-Then from the client connect to the remote GDB server we started
+Then from the client connect to the remote GDB server that was started
 earlier:
 
 With ``JLinkGDBServer`` (default port 2331):
@@ -221,6 +281,14 @@ With ``JLinkGDBServer`` (default port 2331):
 
     (gdb) target remote:2331
     Remote debugging using :2331
+	
+With ``pyocd gdbserver`` (default port 3333):
+
+.. code:: bash
+
+    (gdb) target remote:3333
+    Remote debugging using :3333
+
 
 3.2.3 Reset and stop at ``main``
 --------------------------------
@@ -270,7 +338,7 @@ common problems.
 
 --------------
 
+*Copyright (c) 2021, NXP Semiconductors. All rights reserved.*
 *Copyright (c) 2020, Linaro. All rights reserved.*
 *Copyright (c) 2020, Arm Limited. All rights reserved.*
-*Copyright (c) 2021, NXP Semiconductors. All rights reserved.*
 *SPDX-License-Identifier: BSD-3-Clause*
