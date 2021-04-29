@@ -17,6 +17,7 @@ add_subdirectory("${MCUBOOT_PATH}/boot/bootutil" bootutil)
 target_include_directories(bootutil
     PUBLIC
         include
+        config
 )
 
 target_link_libraries(bootutil
