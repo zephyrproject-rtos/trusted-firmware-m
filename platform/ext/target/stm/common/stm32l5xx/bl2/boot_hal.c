@@ -27,6 +27,10 @@
 #include "cmsis.h"
 #include "Driver_Flash.h"
 #include "region_defs.h"
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "crypto_hw.h"
+#endif
+#include "bootutil/fault_injection_hardening.h"
 #if defined(EXTERNAL_FLASH)
 #include "flash_map_backend/flash_map_backend.h"
 #endif /*  defined(EXTERNAL_FLASH) */
@@ -193,7 +197,16 @@ int32_t boot_platform_init(void)
        - Set NVIC Group Priority to 3
        - Low Level Initialization
      */
+  int result;
   HAL_Init();
+#ifdef CRYPTO_HW_ACCELERATOR
+  result = crypto_hw_accelerator_init();
+  if (result) {
+    BOOT_LOG_ERR("Error while initializing Crypto Hw");
+    Error_Handler();
+  }
+  (void)fih_delay_init();
+#endif /* CRYPTO_HW_ACCELERATOR */
 
   /* Configure the System clock to have a frequency of 110 MHz */
   SystemClock_Config();
