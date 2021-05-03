@@ -46,6 +46,11 @@ target_include_directories(tfm_test_framework_s
         .
 )
 
+target_compile_definitions(tfm_psa_rot_partition_core_test
+    PRIVATE
+        $<$<BOOL:${TFM_INTERACTIVE_TEST}>:CORE_TEST_INTERACTIVE>
+)
+
 # header files included by other libraries
 add_library(tfm_psa_rot_partition_core_test_defs INTERFACE)
 

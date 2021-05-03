@@ -21,10 +21,10 @@
  */
 
 /* Define test suite for t_cose library */
-static void tfm_t_cose_test_8001(struct test_result_t *ret);
+static void tfm_t_cose_test_1001(struct test_result_t *ret);
 
 static struct test_t t_cose_regression_test[] = {
-    {&tfm_t_cose_test_8001, "TFM_T_COSE_TEST_8001",
+    {&tfm_t_cose_test_1001, "TFM_NS_T_COSE_TEST_1001",
      "Regression test of t_cose library", {TEST_PASSED} },
 };
 
@@ -57,7 +57,7 @@ static void fputs_wrapper(const char *string, void *out_ctx, int new_line)
 #endif
 }
 
-static void tfm_t_cose_test_8001(struct test_result_t *ret)
+static void tfm_t_cose_test_1001(struct test_result_t *ret)
 {
     int32_t test_failed_cnt = 0;
 
@@ -80,6 +80,6 @@ register_testsuite_ns_t_cose(struct test_suite_t *p_test_suite)
                  sizeof(t_cose_regression_test[0]));
 
     set_testsuite("T_COSE regression test"
-                  "(TFM_T_COSE_TEST_8XXX)",
+                  "(TFM_NS_T_COSE_TEST_1XXX)",
                   t_cose_regression_test, list_size, p_test_suite);
 }

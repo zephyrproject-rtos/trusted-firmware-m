@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -32,6 +32,6 @@ psa_status_t tfm_ps_test_system_prepare(void)
 
     return status;
 #else
-    return tfm_tfm_ps_test_prepare_veneer(NULL, 0, NULL, 0);
+    return tfm_ps_test_prepare_veneer(NULL, 0, NULL, 0);
 #endif
 }

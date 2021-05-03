@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -42,6 +42,6 @@ psa_status_t tfm_secure_client_2_call_test(int32_t id, const void *arg,
         { .base = arg, .len = arg_len },
     };
 
-    return tfm_tfm_secure_client_2_call_veneer(in_vec, 2, NULL, 0);
+    return tfm_secure_client_2_call_veneer(in_vec, 2, NULL, 0);
 #endif
 }
