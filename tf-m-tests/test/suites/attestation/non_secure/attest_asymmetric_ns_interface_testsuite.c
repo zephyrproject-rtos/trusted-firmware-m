@@ -19,25 +19,25 @@ static const uint8_t challenge_buffer[TEST_CHALLENGE_OBJ_SIZE] = {
 /* Define test suite for attestation service tests */
 /* List of tests */
 #ifdef INCLUDE_TEST_CODE /* Remove them from release build */
-static void tfm_attest_test_2001(struct test_result_t *ret);
-static void tfm_attest_test_2002(struct test_result_t *ret);
-static void tfm_attest_test_2003(struct test_result_t *ret);
+static void tfm_attest_test_1001(struct test_result_t *ret);
+static void tfm_attest_test_1002(struct test_result_t *ret);
+static void tfm_attest_test_1003(struct test_result_t *ret);
 #endif
-static void tfm_attest_test_2004(struct test_result_t *ret);
-static void tfm_attest_test_2005(struct test_result_t *ret);
+static void tfm_attest_test_1004(struct test_result_t *ret);
+static void tfm_attest_test_1005(struct test_result_t *ret);
 
 static struct test_t attestation_interface_tests[] = {
 #ifdef INCLUDE_TEST_CODE /* Remove them from release build */
-    {&tfm_attest_test_2001, "TFM_ATTEST_TEST_2001",
+    {&tfm_attest_test_1001, "TFM_NS_ATTEST_TEST_1001",
      "Minimal token test of attest token", {TEST_PASSED} },
-    {&tfm_attest_test_2002, "TFM_ATTEST_TEST_2002",
+    {&tfm_attest_test_1002, "TFM_NS_ATTEST_TEST_1002",
      "Minimal token size test of attest token", {TEST_PASSED} },
-    {&tfm_attest_test_2003, "TFM_ATTEST_TEST_2003",
+    {&tfm_attest_test_1003, "TFM_NS_ATTEST_TEST_1003",
      "Short circuit signature test of attest token", {TEST_PASSED} },
 #endif
-    {&tfm_attest_test_2004, "TFM_ATTEST_TEST_2004",
+    {&tfm_attest_test_1004, "TFM_NS_ATTEST_TEST_1004",
      "ECDSA signature test of attest token", {TEST_PASSED} },
-    {&tfm_attest_test_2005, "TFM_ATTEST_TEST_2005",
+    {&tfm_attest_test_1005, "TFM_NS_ATTEST_TEST_1005",
      "Negative test cases for initial attestation service", {TEST_PASSED} },
 };
 
@@ -50,7 +50,7 @@ register_testsuite_ns_attestation_interface(struct test_suite_t *p_test_suite)
                  sizeof(attestation_interface_tests[0]));
 
     set_testsuite("Initial Attestation Service non-secure interface tests"
-                  "(TFM_ATTEST_TEST_2XXX)",
+                  "(TFM_NS_ATTEST_TEST_1XXX)",
                   attestation_interface_tests, list_size, p_test_suite);
 }
 
@@ -63,7 +63,7 @@ register_testsuite_ns_attestation_interface(struct test_suite_t *p_test_suite)
  *  - only hard coded challenge is included
  *  - token signature is the hash of the token concatenated twice
  */
-static void tfm_attest_test_2001(struct test_result_t *ret)
+static void tfm_attest_test_1001(struct test_result_t *ret)
 {
     int32_t err;
 
@@ -81,7 +81,7 @@ static void tfm_attest_test_2001(struct test_result_t *ret)
  * \brief Get the size of the minimal token, only include a hard coded
  *        challenge, but omit the rest of the claims
  */
-static void tfm_attest_test_2002(struct test_result_t *ret)
+static void tfm_attest_test_1002(struct test_result_t *ret)
 {
     int32_t err;
 
@@ -102,7 +102,7 @@ static void tfm_attest_test_2002(struct test_result_t *ret)
  *
  * More info in token_test.h
  */
-static void tfm_attest_test_2003(struct test_result_t *ret)
+static void tfm_attest_test_1003(struct test_result_t *ret)
 {
     int32_t err;
 
@@ -126,7 +126,7 @@ static void tfm_attest_test_2003(struct test_result_t *ret)
  *
  * More info in token_test.h
  */
-static void tfm_attest_test_2004(struct test_result_t *ret)
+static void tfm_attest_test_1004(struct test_result_t *ret)
 {
     int32_t err;
 
@@ -148,7 +148,7 @@ static void tfm_attest_test_2004(struct test_result_t *ret)
  *    - Calling initial attestation service with smaller buffer size than the
  *      expected size of the token.
  */
-static void tfm_attest_test_2005(struct test_result_t *ret)
+static void tfm_attest_test_1005(struct test_result_t *ret)
 {
     psa_status_t err;
     size_t token_buf_size = TEST_TOKEN_SIZE;

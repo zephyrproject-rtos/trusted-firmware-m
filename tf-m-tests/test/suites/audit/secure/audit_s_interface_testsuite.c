@@ -32,7 +32,7 @@
 static void tfm_audit_test_1001(struct test_result_t *ret);
 
 static struct test_t audit_veneers_tests[] = {
-    {&tfm_audit_test_1001, "TFM_AUDIT_TEST_1001",
+    {&tfm_audit_test_1001, "TFM_S_AUDIT_TEST_1001",
      "Secure functional", {TEST_PASSED} },
 };
 
@@ -43,7 +43,7 @@ void register_testsuite_s_audit_interface(struct test_suite_t *p_test_suite)
     list_size = (sizeof(audit_veneers_tests) /
                  sizeof(audit_veneers_tests[0]));
 
-    set_testsuite("Audit Logging secure interface test (TFM_AUDIT_TEST_1XXX)",
+    set_testsuite("Audit Logging secure interface test (TFM_S_AUDIT_TEST_1XXX)",
                   audit_veneers_tests, list_size, p_test_suite);
 }
 

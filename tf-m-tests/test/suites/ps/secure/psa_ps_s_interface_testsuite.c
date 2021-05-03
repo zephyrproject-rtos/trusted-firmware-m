@@ -47,73 +47,73 @@ static uint8_t read_asset_data[PS_MAX_ASSET_SIZE] = {0};
 static size_t read_asset_datal_len = 0;
 
 /* List of tests */
-static void tfm_ps_test_2001(struct test_result_t *ret);
-static void tfm_ps_test_2002(struct test_result_t *ret);
-static void tfm_ps_test_2003(struct test_result_t *ret);
-static void tfm_ps_test_2004(struct test_result_t *ret);
-static void tfm_ps_test_2005(struct test_result_t *ret);
-static void tfm_ps_test_2006(struct test_result_t *ret);
-static void tfm_ps_test_2007(struct test_result_t *ret);
-static void tfm_ps_test_2008(struct test_result_t *ret);
-static void tfm_ps_test_2009(struct test_result_t *ret);
-static void tfm_ps_test_2010(struct test_result_t *ret);
-static void tfm_ps_test_2011(struct test_result_t *ret);
-static void tfm_ps_test_2012(struct test_result_t *ret);
-static void tfm_ps_test_2013(struct test_result_t *ret);
-static void tfm_ps_test_2014(struct test_result_t *ret);
-static void tfm_ps_test_2015(struct test_result_t *ret);
-static void tfm_ps_test_2016(struct test_result_t *ret);
-static void tfm_ps_test_2017(struct test_result_t *ret);
-static void tfm_ps_test_2018(struct test_result_t *ret);
-static void tfm_ps_test_2019(struct test_result_t *ret);
-static void tfm_ps_test_2020(struct test_result_t *ret);
-static void tfm_ps_test_2021(struct test_result_t *ret);
-static void tfm_ps_test_2022(struct test_result_t *ret);
+static void tfm_ps_test_1001(struct test_result_t *ret);
+static void tfm_ps_test_1002(struct test_result_t *ret);
+static void tfm_ps_test_1003(struct test_result_t *ret);
+static void tfm_ps_test_1004(struct test_result_t *ret);
+static void tfm_ps_test_1005(struct test_result_t *ret);
+static void tfm_ps_test_1006(struct test_result_t *ret);
+static void tfm_ps_test_1007(struct test_result_t *ret);
+static void tfm_ps_test_1008(struct test_result_t *ret);
+static void tfm_ps_test_1009(struct test_result_t *ret);
+static void tfm_ps_test_1010(struct test_result_t *ret);
+static void tfm_ps_test_1011(struct test_result_t *ret);
+static void tfm_ps_test_1012(struct test_result_t *ret);
+static void tfm_ps_test_1013(struct test_result_t *ret);
+static void tfm_ps_test_1014(struct test_result_t *ret);
+static void tfm_ps_test_1015(struct test_result_t *ret);
+static void tfm_ps_test_1016(struct test_result_t *ret);
+static void tfm_ps_test_1017(struct test_result_t *ret);
+static void tfm_ps_test_1018(struct test_result_t *ret);
+static void tfm_ps_test_1019(struct test_result_t *ret);
+static void tfm_ps_test_1020(struct test_result_t *ret);
+static void tfm_ps_test_1021(struct test_result_t *ret);
+static void tfm_ps_test_1022(struct test_result_t *ret);
 
 static struct test_t psa_ps_s_tests[] = {
-    {&tfm_ps_test_2001, "TFM_PS_TEST_2001",
+    {&tfm_ps_test_1001, "TFM_S_PS_TEST_1001",
      "Set interface"},
-    {&tfm_ps_test_2002, "TFM_PS_TEST_2002",
+    {&tfm_ps_test_1002, "TFM_S_PS_TEST_1002",
      "Set interface with create flags"},
-    {&tfm_ps_test_2003, "TFM_PS_TEST_2003",
+    {&tfm_ps_test_1003, "TFM_S_PS_TEST_1003",
      "Set interface with NULL data pointer"},
-    {&tfm_ps_test_2004, "TFM_PS_TEST_2004",
+    {&tfm_ps_test_1004, "TFM_S_PS_TEST_1004",
      "Set interface with invalid data length"},
-    {&tfm_ps_test_2005, "TFM_PS_TEST_2005",
+    {&tfm_ps_test_1005, "TFM_S_PS_TEST_1005",
      "Set interface with write once UID"},
-    {&tfm_ps_test_2006, "TFM_PS_TEST_2006",
+    {&tfm_ps_test_1006, "TFM_S_PS_TEST_1006",
      "Get interface with valid data"},
-    {&tfm_ps_test_2007, "TFM_PS_TEST_2007",
+    {&tfm_ps_test_1007, "TFM_S_PS_TEST_1007",
      "Get interface with zero data length"},
-    {&tfm_ps_test_2008, "TFM_PS_TEST_2008",
+    {&tfm_ps_test_1008, "TFM_S_PS_TEST_1008",
      "Get interface with invalid UIDs"},
-    {&tfm_ps_test_2009, "TFM_PS_TEST_2009",
+    {&tfm_ps_test_1009, "TFM_S_PS_TEST_1009",
      "Get interface with invalid data lengths and offsets"},
-    {&tfm_ps_test_2010, "TFM_PS_TEST_2010",
+    {&tfm_ps_test_1010, "TFM_S_PS_TEST_1010",
      "Get interface with NULL data pointer"},
-    {&tfm_ps_test_2011, "TFM_PS_TEST_2011",
+    {&tfm_ps_test_1011, "TFM_S_PS_TEST_1011",
      "Get info interface with write once UID"},
-    {&tfm_ps_test_2012, "TFM_PS_TEST_2012",
+    {&tfm_ps_test_1012, "TFM_S_PS_TEST_1012",
      "Get info interface with valid UID"},
-    {&tfm_ps_test_2013, "TFM_PS_TEST_2013",
+    {&tfm_ps_test_1013, "TFM_S_PS_TEST_1013",
      "Get info interface with invalid UIDs"},
-    {&tfm_ps_test_2014, "TFM_PS_TEST_2014",
+    {&tfm_ps_test_1014, "TFM_S_PS_TEST_1014",
      "Get info interface with NULL info pointer"},
-    {&tfm_ps_test_2015, "TFM_PS_TEST_2015",
+    {&tfm_ps_test_1015, "TFM_S_PS_TEST_1015",
      "Remove interface with valid UID"},
-    {&tfm_ps_test_2016, "TFM_PS_TEST_2016",
+    {&tfm_ps_test_1016, "TFM_S_PS_TEST_1016",
      "Remove interface with write once UID"},
-    {&tfm_ps_test_2017, "TFM_PS_TEST_2017",
+    {&tfm_ps_test_1017, "TFM_S_PS_TEST_1017",
      "Remove interface with invalid UID"},
-    {&tfm_ps_test_2018, "TFM_PS_TEST_2018",
+    {&tfm_ps_test_1018, "TFM_S_PS_TEST_1018",
      "Block compaction after remove"},
-    {&tfm_ps_test_2019, "TFM_PS_TEST_2019",
+    {&tfm_ps_test_1019, "TFM_S_PS_TEST_1019",
      "Multiple partial gets"},
-    {&tfm_ps_test_2020, "TFM_PS_TEST_2020",
+    {&tfm_ps_test_1020, "TFM_S_PS_TEST_1020",
      "Multiple sets to same UID from same thread"},
-    {&tfm_ps_test_2021, "TFM_PS_TEST_2021",
+    {&tfm_ps_test_1021, "TFM_S_PS_TEST_1021",
      "Get support interface"},
-    {&tfm_ps_test_2022, "TFM_PS_TEST_2022",
+    {&tfm_ps_test_1022, "TFM_S_PS_TEST_1022",
      "Set, get and remove interface with different asset sizes"},
 };
 
@@ -123,7 +123,7 @@ void register_testsuite_s_psa_ps_interface(struct test_suite_t *p_test_suite)
 
     list_size = (sizeof(psa_ps_s_tests) / sizeof(psa_ps_s_tests[0]));
 
-    set_testsuite("PSA protected storage S interface tests (TFM_PS_TEST_2XXX)",
+    set_testsuite("PSA protected storage S interface tests (TFM_S_PS_TEST_1XXX)",
                   psa_ps_s_tests, list_size, p_test_suite);
 }
 
@@ -132,7 +132,7 @@ void register_testsuite_s_psa_ps_interface(struct test_suite_t *p_test_suite)
  * - Valid UID, no data, no flags
  * - Invalid UID, no data, no flags
  */
-static void tfm_ps_test_2001(struct test_result_t *ret)
+static void tfm_ps_test_1001(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_1;
@@ -177,7 +177,7 @@ static void tfm_ps_test_2001(struct test_result_t *ret)
  * - Valid create flags (with previously created UID)
  * - Invalid create flags
  */
-static void tfm_ps_test_2002(struct test_result_t *ret)
+static void tfm_ps_test_1002(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_2;
@@ -231,7 +231,7 @@ static void tfm_ps_test_2002(struct test_result_t *ret)
  *       so this case is not tested here.
  *
  */
-static void tfm_ps_test_2003(struct test_result_t *ret)
+static void tfm_ps_test_1003(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_3;
@@ -252,7 +252,7 @@ static void tfm_ps_test_2003(struct test_result_t *ret)
  * \brief Tests set function with:
  * - Data length longer than maximum permitted
  */
-static void tfm_ps_test_2004(struct test_result_t *ret)
+static void tfm_ps_test_1004(struct test_result_t *ret)
 {
 #ifndef TFM_PSA_API
     psa_status_t status;
@@ -283,7 +283,7 @@ static void tfm_ps_test_2004(struct test_result_t *ret)
  * \brief Tests set function with:
  * - Write once UID that has already been created
  */
-static void tfm_ps_test_2005(struct test_result_t *ret)
+static void tfm_ps_test_1005(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = WRITE_ONCE_UID;
@@ -324,7 +324,7 @@ static void tfm_ps_test_2005(struct test_result_t *ret)
  * - Valid data, zero offset
  * - Valid data, non-zero offset
  */
-static void tfm_ps_test_2006(struct test_result_t *ret)
+static void tfm_ps_test_1006(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_2;
@@ -405,7 +405,7 @@ static void tfm_ps_test_2006(struct test_result_t *ret)
  * - Zero data length, zero offset
  * - Zero data length, non-zero offset
  */
-static void tfm_ps_test_2007(struct test_result_t *ret)
+static void tfm_ps_test_1007(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_3;
@@ -468,7 +468,7 @@ static void tfm_ps_test_2007(struct test_result_t *ret)
  * - Unset UID
  * - Invalid UID
  */
-static void tfm_ps_test_2008(struct test_result_t *ret)
+static void tfm_ps_test_1008(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_1;
@@ -515,7 +515,7 @@ static void tfm_ps_test_2008(struct test_result_t *ret)
  * - Data length + offset greater than UID length
  * - Invalid data len and offset
  */
-static void tfm_ps_test_2009(struct test_result_t *ret)
+static void tfm_ps_test_1009(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_2;
@@ -650,7 +650,7 @@ static void tfm_ps_test_2009(struct test_result_t *ret)
  *       so this case is not tested here.
  *
  */
-static void tfm_ps_test_2010(struct test_result_t *ret)
+static void tfm_ps_test_1010(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_3;
@@ -687,7 +687,7 @@ static void tfm_ps_test_2010(struct test_result_t *ret)
  * \brief Tests get info function with:
  * - Write once UID
  */
-static void tfm_ps_test_2011(struct test_result_t *ret)
+static void tfm_ps_test_1011(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = WRITE_ONCE_UID;
@@ -718,7 +718,7 @@ static void tfm_ps_test_2011(struct test_result_t *ret)
  * \brief Tests get info function with:
  * - Valid UID
  */
-static void tfm_ps_test_2012(struct test_result_t *ret)
+static void tfm_ps_test_1012(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_1;
@@ -766,7 +766,7 @@ static void tfm_ps_test_2012(struct test_result_t *ret)
  * - Unset UID
  * - Invalid UID
  */
-static void tfm_ps_test_2013(struct test_result_t *ret)
+static void tfm_ps_test_1013(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_2;
@@ -815,7 +815,7 @@ static void tfm_ps_test_2013(struct test_result_t *ret)
  * \brief Tests get info function with:
  * - NULL info pointer
  */
-static void tfm_ps_test_2014(struct test_result_t *ret)
+static void tfm_ps_test_1014(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_3;
@@ -858,7 +858,7 @@ static void tfm_ps_test_2014(struct test_result_t *ret)
  * \brief Tests remove function with:
  * - Valid UID
  */
-static void tfm_ps_test_2015(struct test_result_t *ret)
+static void tfm_ps_test_1015(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_1;
@@ -911,7 +911,7 @@ static void tfm_ps_test_2015(struct test_result_t *ret)
  * \brief Tests remove function with:
  * - Write once UID
  */
-static void tfm_ps_test_2016(struct test_result_t *ret)
+static void tfm_ps_test_1016(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = WRITE_ONCE_UID;
@@ -930,7 +930,7 @@ static void tfm_ps_test_2016(struct test_result_t *ret)
  * \brief Tests remove function with:
  * - Invalid UID
  */
-static void tfm_ps_test_2017(struct test_result_t *ret)
+static void tfm_ps_test_1017(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = INVALID_UID;
@@ -952,7 +952,7 @@ static void tfm_ps_test_2017(struct test_result_t *ret)
  *        the beginning of the block. This test verifies that the compaction
  *        works correctly by reading back UID 2.
  */
-static void tfm_ps_test_2018(struct test_result_t *ret)
+static void tfm_ps_test_1018(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid_1 = TEST_UID_2;
@@ -1016,7 +1016,7 @@ static void tfm_ps_test_2018(struct test_result_t *ret)
 /**
  * \brief Tests set and multiple partial gets.
  */
-static void tfm_ps_test_2019(struct test_result_t *ret)
+static void tfm_ps_test_1019(struct test_result_t *ret)
 {
     psa_status_t status;
     uint32_t i;
@@ -1066,7 +1066,7 @@ static void tfm_ps_test_2019(struct test_result_t *ret)
 /**
  * \brief Tests multiple sets to the same UID.
  */
-static void tfm_ps_test_2020(struct test_result_t *ret)
+static void tfm_ps_test_1020(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID_2;
@@ -1125,7 +1125,7 @@ static void tfm_ps_test_2020(struct test_result_t *ret)
 /**
  * \brief Tests get support function.
  */
-static void tfm_ps_test_2021(struct test_result_t *ret)
+static void tfm_ps_test_1021(struct test_result_t *ret)
 {
     uint32_t support_flags;
 
@@ -1144,7 +1144,7 @@ static void tfm_ps_test_2021(struct test_result_t *ret)
  * - Data length of different asset sizes
  * - No flags
  */
-static void tfm_ps_test_2022(struct test_result_t *ret)
+static void tfm_ps_test_1022(struct test_result_t *ret)
 {
     uint8_t cycle;
     psa_status_t status;

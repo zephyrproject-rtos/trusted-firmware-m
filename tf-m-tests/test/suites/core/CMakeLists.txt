@@ -13,7 +13,7 @@ add_library(tfm_test_suite_core_ns STATIC EXCLUDE_FROM_ALL)
 
 target_sources(tfm_test_suite_core_ns
     PRIVATE
-        non_secure/core_ns_interactive_testsuite.c
+        $<$<BOOL:${TFM_INTERACTIVE_TEST}>:non_secure/core_ns_interactive_testsuite.c>
         non_secure/core_ns_positive_testsuite.c
         non_secure/core_test_api.c
 )
@@ -27,7 +27,6 @@ target_compile_definitions(tfm_test_suite_core_ns
     PRIVATE
         DOMAIN_NS=1
         $<$<BOOL:${TFM_IRQ_TEST}>:TFM_ENABLE_IRQ_TEST>
-        $<$<BOOL:${TFM_INTERACTIVE_TEST}>:CORE_TEST_INTERACTIVE>
 )
 
 target_link_libraries(tfm_test_suite_core_ns
@@ -39,7 +38,6 @@ target_link_libraries(tfm_test_suite_core_ns
         platform_ns
         tfm_psa_rot_partition_core_test_defs
 )
-
 
 target_link_libraries(tfm_ns_tests
     INTERFACE

@@ -111,6 +111,8 @@ static void tfm_ns_multi_core_boot(void)
         }
     }
 }
+#else
+extern uint32_t tfm_ns_interface_init(void);
 #endif
 
 /**
@@ -156,10 +158,10 @@ int main(void)
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
     tfm_ns_multi_core_boot();
-#endif
-
+#else
     /* Initialize the TFM NS interface */
     tfm_ns_interface_init();
+#endif
 
 #ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
     (void) osThreadNew(mailbox_thread_func, NULL, &mailbox_thread_attr);

@@ -29,7 +29,7 @@
 
 #define TOSTRING(x) #x
 #define CORE_TEST_DESCRIPTION(number, fn, description) \
-    {fn, "TFM_CORE_TEST_"TOSTRING(number),\
+    {fn, "TFM_NS_CORE_TEST_"TOSTRING(number),\
      description, {TEST_PASSED} }
 
 #ifndef TFM_PSA_API
@@ -104,7 +104,7 @@ void register_testsuite_ns_core_positive(struct test_suite_t *p_test_suite)
 
     list_size = (sizeof(core_tests) / sizeof(core_tests[0]));
 
-    set_testsuite("Core non-secure positive tests (TFM_CORE_TEST_1XXX)",
+    set_testsuite("Core non-secure positive tests (TFM_NS_CORE_TEST_1XXX)",
                   core_tests, list_size, p_test_suite);
 }
 

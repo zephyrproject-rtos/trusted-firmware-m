@@ -53,40 +53,40 @@
  */
 
 /* List of tests */
-static void tfm_ps_test_4001(struct test_result_t *ret);
-static void tfm_ps_test_4002(struct test_result_t *ret);
-static void tfm_ps_test_4003(struct test_result_t *ret);
-static void tfm_ps_test_4004(struct test_result_t *ret);
-static void tfm_ps_test_4005(struct test_result_t *ret);
-static void tfm_ps_test_4006(struct test_result_t *ret);
-static void tfm_ps_test_4007(struct test_result_t *ret);
-static void tfm_ps_test_4008(struct test_result_t *ret);
-static void tfm_ps_test_4009(struct test_result_t *ret);
+static void tfm_ps_test_3001(struct test_result_t *ret);
+static void tfm_ps_test_3002(struct test_result_t *ret);
+static void tfm_ps_test_3003(struct test_result_t *ret);
+static void tfm_ps_test_3004(struct test_result_t *ret);
+static void tfm_ps_test_3005(struct test_result_t *ret);
+static void tfm_ps_test_3006(struct test_result_t *ret);
+static void tfm_ps_test_3007(struct test_result_t *ret);
+static void tfm_ps_test_3008(struct test_result_t *ret);
+static void tfm_ps_test_3009(struct test_result_t *ret);
 
 static struct test_t interface_tests[] = {
-    {&tfm_ps_test_4001, "TFM_PS_TEST_4001",
+    {&tfm_ps_test_3001, "TFM_S_PS_TEST_3001",
      "Check PS area version when NV counters 1/2/3 have the same value", {TEST_PASSED}},
-    {&tfm_ps_test_4002, "TFM_PS_TEST_4002",
+    {&tfm_ps_test_3002, "TFM_S_PS_TEST_3002",
      "Check PS area version when it is different from NV counters 1/2/3", {TEST_PASSED}},
-    {&tfm_ps_test_4003, "TFM_PS_TEST_4003",
+    {&tfm_ps_test_3003, "TFM_S_PS_TEST_3003",
      "Check PS area version when NV counters 1 and 2 are equals, 3 is "
      "different, and PS area version match NV counters 1 and 2", {TEST_PASSED}},
-    {&tfm_ps_test_4004, "TFM_PS_TEST_4004",
+    {&tfm_ps_test_3004, "TFM_S_PS_TEST_3004",
      "Check PS area version when NV counters 2 and 3 are equals, 1 is "
      "different and PS area version match NV counter 2 and 3", {TEST_PASSED}},
-    {&tfm_ps_test_4005, "TFM_PS_TEST_4005",
+    {&tfm_ps_test_3005, "TFM_S_PS_TEST_3005",
      "Check PS area version when NV counters 2 and 3 are equals, 1 is "
      "different and PS area version match NV counter 1", {TEST_PASSED}},
-    {&tfm_ps_test_4006, "TFM_PS_TEST_4006",
+    {&tfm_ps_test_3006, "TFM_S_PS_TEST_3006",
      "Check PS area version when NV counters 1, 2 and 3 have different values "
      "and PS area version match NV counter 1 value", {TEST_PASSED}},
-    {&tfm_ps_test_4007, "TFM_PS_TEST_4007",
+    {&tfm_ps_test_3007, "TFM_S_PS_TEST_3007",
      "Check PS area version when NV counters 1, 2 and 3 have different values "
      "and PS area version match NV counter 2 value", {TEST_PASSED}},
-    {&tfm_ps_test_4008, "TFM_PS_TEST_4008",
+    {&tfm_ps_test_3008, "TFM_S_PS_TEST_3008",
      "Check PS area version when NV counters 1, 2 and 3 have different values "
      "and PS area version match NV counter 3 value", {TEST_PASSED}},
-    {&tfm_ps_test_4009, "TFM_PS_TEST_4009",
+    {&tfm_ps_test_3009, "TFM_S_PS_TEST_3009",
      "Check PS area version when NV counter 1 cannot be incremented", {TEST_PASSED}},
 };
 
@@ -94,7 +94,7 @@ void register_testsuite_s_rollback_protection(struct test_suite_t *p_test_suite)
 {
     uint32_t list_size = (sizeof(interface_tests) / sizeof(interface_tests[0]));
 
-    set_testsuite("PS rollback protection tests (TFM_PS_TEST_4XXX)",
+    set_testsuite("PS rollback protection tests (TFM_S_PS_TEST_3XXX)",
                   interface_tests, list_size, p_test_suite);
 }
 
@@ -103,7 +103,7 @@ void register_testsuite_s_rollback_protection(struct test_suite_t *p_test_suite)
  *        It also checks that the 3 NV counters are aligned and they have been
  *        increased by 1 unit.
  */
-static void tfm_ps_test_4001(struct test_result_t *ret)
+static void tfm_ps_test_3001(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID;
@@ -219,7 +219,7 @@ static void tfm_ps_test_4001(struct test_result_t *ret)
  * \brief Check PS area version when it is different from NV counters
  *        1/2/3.
  */
-static void tfm_ps_test_4002(struct test_result_t *ret)
+static void tfm_ps_test_3002(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID;
@@ -317,7 +317,7 @@ static void tfm_ps_test_4002(struct test_result_t *ret)
  *        It simulates a power cut during write action while the counter 3 is
  *        being increased.
  */
-static void tfm_ps_test_4003(struct test_result_t *ret)
+static void tfm_ps_test_3003(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID;
@@ -387,7 +387,7 @@ static void tfm_ps_test_4003(struct test_result_t *ret)
  *        2 and 3, and the new PS area version is corrupted and only the old
  *        version match the NV counters.
  */
-static void tfm_ps_test_4004(struct test_result_t *ret)
+static void tfm_ps_test_3004(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID;
@@ -457,7 +457,7 @@ static void tfm_ps_test_4004(struct test_result_t *ret)
  *        2 and 3, and the new PS area version is corrupted and only the old
  *        version match the NV counters.
  */
-static void tfm_ps_test_4005(struct test_result_t *ret)
+static void tfm_ps_test_3005(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID;
@@ -529,7 +529,7 @@ static void tfm_ps_test_4005(struct test_result_t *ret)
  * \brief Check PS area version when NV counters 1, 2 and 3 have different
  *        values and PS area version match NV counter 1 value.
  */
-static void tfm_ps_test_4006(struct test_result_t *ret)
+static void tfm_ps_test_3006(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID;
@@ -607,7 +607,7 @@ static void tfm_ps_test_4006(struct test_result_t *ret)
  * \brief Check PS area version when NV counters 1, 2 and 3 have different
  *        values and PS area version match NV counter 2 value.
  */
-static void tfm_ps_test_4007(struct test_result_t *ret)
+static void tfm_ps_test_3007(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID;
@@ -693,7 +693,7 @@ static void tfm_ps_test_4007(struct test_result_t *ret)
  * \brief Check PS area version when NV counters 1, 2 and 3 have different
  *        values and PS area version match NV counter 3 value.
  */
-static void tfm_ps_test_4008(struct test_result_t *ret)
+static void tfm_ps_test_3008(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID;
@@ -791,7 +791,7 @@ static void tfm_ps_test_4008(struct test_result_t *ret)
  * \brief Check PS area version when NV counter 1 cannot be incremented
  *        (e.g it has reached its maximum value)
  */
-static void tfm_ps_test_4009(struct test_result_t *ret)
+static void tfm_ps_test_3009(struct test_result_t *ret)
 {
     psa_status_t status;
     const psa_storage_uid_t uid = TEST_UID;
