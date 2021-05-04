@@ -109,7 +109,6 @@ static ARM_FLASH_CAPABILITIES N25Q256A_Driver_GetCapabilities(void)
     return N25Q256ADriverCapabilities;
 }
 
-
 static int32_t N25Q256A_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
     ARG_UNUSED(cb_event);

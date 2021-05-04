@@ -47,9 +47,10 @@
 
 #define SE_BL2_PARTITION_SIZE           (0x10000)     /* 64 KiB */
 #define TFM_PARTITION_SIZE              (0x60000)     /* 384 KiB */
-#define OPTEE_PARTITION_SIZE            (0x80000)     /* 512 KiB */
-#define U_BOOT_PARTITION_SIZE           (0x80000)     /* 512 KiB */
-#define SPL_PARTITION_SIZE              (0x40000)     /* 256 KiB */
+#define FIP_MAX_SIZE                    (0x80000)     /* 512 KiB */
+#define FIP1_SIZE                       (0x151573)     /* 1350 KiB */
+#define FIP2_SIZE                       (0x80000)     /* 512 KiB */
+#define FIP_SIGNATURE_AREA_SIZE         (0x1000)      /* 4 KiB */
 
 
 /* Secure Enclave internal SRAM */
@@ -113,32 +114,19 @@
 #define FLASH_AREA_1_OFFSET             (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
 #define FLASH_AREA_1_SIZE               (TFM_PARTITION_SIZE)
 
-/* OPTEE primary and secondary images */
+/* Host FIPs */
+#define FLASH_FIP1_OFFSET               (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE + FIP_SIGNATURE_AREA_SIZE)
+#define FLASH_FIP1_ADDRESS              (FLASH_BASE_ADDRESS + FLASH_FIP1_OFFSET)
+#define FLASH_FIP1_SIZE                 (FIP1_SIZE)
+#define FLASH_FIP2_OFFSET               (FLASH_FIP1_OFFSET + FIP_MAX_SIZE)
+#define FLASH_FIP2_ADDRESS              (FLASH_BASE_ADDRESS + FLASH_FIP2_OFFSET)
+#define FLASH_FIP2_SIZE                 (FIP2_SIZE)
+
+/* Host BL2 (TF-A) primary and secondary image. */
 #define FLASH_AREA_2_ID                 (FLASH_AREA_1_ID + 1)
-#define FLASH_AREA_2_OFFSET             (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
-#define FLASH_AREA_2_SIZE               (OPTEE_PARTITION_SIZE)
-
 #define FLASH_AREA_3_ID                 (FLASH_AREA_2_ID + 1)
-#define FLASH_AREA_3_OFFSET             (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
-#define FLASH_AREA_3_SIZE               (OPTEE_PARTITION_SIZE)
-
-/* U-boot primary and secondary images */
-#define FLASH_AREA_4_ID                 (FLASH_AREA_3_ID + 1)
-#define FLASH_AREA_4_OFFSET             (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
-#define FLASH_AREA_4_SIZE               (U_BOOT_PARTITION_SIZE)
-
-#define FLASH_AREA_5_ID                 (FLASH_AREA_4_ID + 1)
-#define FLASH_AREA_5_OFFSET             (FLASH_AREA_4_OFFSET + FLASH_AREA_4_SIZE)
-#define FLASH_AREA_5_SIZE               (U_BOOT_PARTITION_SIZE)
-
-/* SPL primary and secondary images */
-#define FLASH_AREA_6_ID                 (FLASH_AREA_5_ID + 1)
-#define FLASH_AREA_6_OFFSET             (FLASH_AREA_5_OFFSET + FLASH_AREA_5_SIZE)
-#define FLASH_AREA_6_SIZE               (SPL_PARTITION_SIZE)
-
-#define FLASH_AREA_7_ID                 (FLASH_AREA_6_ID + 1)
-#define FLASH_AREA_7_OFFSET             (FLASH_AREA_6_OFFSET + FLASH_AREA_6_SIZE)
-#define FLASH_AREA_7_SIZE               (SPL_PARTITION_SIZE)
+#define FLASH_INVALID_OFFSET            (0xFFFFFFFF)
+#define FLASH_INVALID_SIZE              (0xFFFFFFFF)
 
 /* Macros needed to imgtool.py, used when creating TF-M signed image */
 #define IMAGE_LOAD_ADDRESS              (SRAM_BASE)
@@ -149,11 +137,9 @@
 
 #define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
                                          ((x) == 1) ? FLASH_AREA_2_ID : \
-                                         ((x) == 2) ? FLASH_AREA_4_ID : \
                                                       255 )
 #define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_1_ID : \
                                          ((x) == 1) ? FLASH_AREA_3_ID : \
-                                         ((x) == 2) ? FLASH_AREA_5_ID : \
                                                       255 )
 
 #define FLASH_AREA_IMAGE_SCRATCH        255

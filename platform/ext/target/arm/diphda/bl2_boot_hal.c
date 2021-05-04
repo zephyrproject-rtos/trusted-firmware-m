@@ -12,6 +12,10 @@
 #include "Driver_Flash.h"
 #include "flash_layout.h"
 #include "bootutil/fault_injection_hardening.h"
+#include "bootutil/bootutil_log.h"
+#include "fip_parser.h"
+#include "flash_map/flash_map.h"
+#include <string.h>
 
 #if defined(CRYPTO_HW_ACCELERATOR) || \
     defined(CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING)
@@ -43,9 +47,35 @@ __attribute__((naked)) void boot_clear_bl2_ram_area(void)
     );
 }
 
+extern struct flash_area flash_map[];
+
+int32_t fill_bl2_flash_map_by_parsing_fips(void)
+{
+    int result;
+    uint32_t tfa_offset = 0;
+    uint32_t tfa_size = 0;
+
+    result = parse_fip_and_extract_tfa_info(FLASH_FIP1_ADDRESS, FLASH_FIP1_SIZE,
+            &tfa_offset, &tfa_size);
+    if (result != FIP_PARSER_SUCCESS) {
+        BOOT_LOG_ERR("parse_fip_and_extract_tfa_info failed");
+        return 1;
+    }
+
+    flash_map[2].fa_off = FLASH_FIP1_OFFSET + tfa_offset;
+    flash_map[2].fa_size = tfa_size;
+
+    return 0;
+}
+
 int32_t boot_platform_init(void)
 {
     int32_t result;
+
+    result = fill_bl2_flash_map_by_parsing_fips();
+    if (result) {
+        return 1;
+    }
 
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {

@@ -14,8 +14,16 @@
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
-
-const struct flash_area flash_map[] = {
+/*
+ * flash_map[0]: TF-M Primary
+ * flash_map[1]: TF-M Secondary
+ * flash_map[2]: TF-A Primary
+ * flash_map[3]: TF-A Secondaary
+ *
+ * TF-A flash area's fa_off and fa_size are populated
+ * by parsing FIP.
+ */
+struct flash_area flash_map[] = {
     {
         .fa_id = FLASH_AREA_0_ID,
         .fa_device_id = FLASH_DEVICE_ID,
@@ -34,29 +42,15 @@ const struct flash_area flash_map[] = {
         .fa_id = FLASH_AREA_2_ID,
         .fa_device_id = FLASH_DEVICE_ID,
         .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_AREA_2_OFFSET,
-        .fa_size = FLASH_AREA_2_SIZE,
+        .fa_off = FLASH_INVALID_OFFSET,
+        .fa_size = FLASH_INVALID_SIZE,
     },
     {
         .fa_id = FLASH_AREA_3_ID,
         .fa_device_id = FLASH_DEVICE_ID,
         .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_AREA_3_OFFSET,
-        .fa_size = FLASH_AREA_3_SIZE,
-    },
-    {
-        .fa_id = FLASH_AREA_4_ID,
-        .fa_device_id = FLASH_DEVICE_ID,
-        .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_AREA_4_OFFSET,
-        .fa_size = FLASH_AREA_4_SIZE,
-    },
-    {
-        .fa_id = FLASH_AREA_5_ID,
-        .fa_device_id = FLASH_DEVICE_ID,
-        .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_AREA_5_OFFSET,
-        .fa_size = FLASH_AREA_5_SIZE,
+        .fa_off = FLASH_INVALID_OFFSET,
+        .fa_size = FLASH_INVALID_SIZE,
     },
 };
 

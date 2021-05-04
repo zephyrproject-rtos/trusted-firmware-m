@@ -75,6 +75,8 @@ target_link_libraries(platform_s
 
 #========================= Platform BL2 =======================================#
 
+set(BL2_SOURCE ${CMAKE_SOURCE_DIR}/bl2)
+
 target_sources(platform_bl2
     PRIVATE
         CMSIS_Driver/Driver_Flash.c
@@ -84,6 +86,7 @@ target_sources(platform_bl2
         Native_Driver/uart_pl011_drv.c
         Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         Native_Driver/spi_n25q256a_flash_lib.c
+        fip_parser/fip_parser.c
         bl2_boot_hal.c
 )
 
@@ -107,8 +110,10 @@ target_include_directories(platform_bl2
         CMSIS_Driver/Config
         Device/Config
         Native_Driver
+        fip_parser
         ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
         ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
+        $<BUILD_INTERFACE:${BL2_SOURCE}/ext/mcuboot/include>
 )
 
 #========================= BL1 component =======================================#
