@@ -231,6 +231,8 @@ target_sources(bl1_main
         ../Native_Driver/firewall.c
         ../Native_Driver/uart_pl011_drv.c
         ../tfm_rotpk.c
+        ../Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
+        ../Native_Driver/spi_n25q256a_flash_lib.c
         bl1_boot_hal.c
         bl1_flash_map.c
         bl1_security_cnt.c

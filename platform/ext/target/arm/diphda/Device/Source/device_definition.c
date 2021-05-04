@@ -41,3 +41,28 @@ struct mhu_v2_x_dev_t MHU1_SE_TO_HOST_DEV = {(DIPHDA_SEH_1_SENDER_BASE),
 struct mhu_v2_x_dev_t MHU1_HOST_TO_SE_DEV = {(DIPHDA_HSE_1_RECEIVER_BASE),
                                              (MHU_V2_X_RECEIVER_FRAME)};
 #endif
+
+/* QSPI driver structures */
+#if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
+static const struct axi_qspi_dev_cfg_t AXI_QSPI_DEV_CFG_S = {
+    .base = DIPHDA_AXI_QSPI_CTRL_REG_BASE,
+    .scc_base = DIPHDA_HOST_FPGA_SCC_REGISTERS
+};
+struct axi_qspi_dev_t AXI_QSPI_DEV_S = {
+    .cfg = &AXI_QSPI_DEV_CFG_S,
+    .is_initialized = false
+};
+#endif
+
+/* ======= External peripheral configuration structure definitions ======= */
+
+#if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
+struct spi_n25q256a_dev_t SPI_N25Q256A_DEV = {
+    .controller = &AXI_QSPI_DEV_S,
+    .total_sector_cnt = 0,
+    .page_size = 0,
+    .sector_size = 0,
+    .program_unit = 0,
+    .is_initialized = false
+};
+#endif

@@ -58,6 +58,8 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         Native_Driver/uart_pl011_drv.c
         Native_Driver/mhu_v2_x.c
+        Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
+        Native_Driver/spi_n25q256a_flash_lib.c
         spm_hal.c
         tfm_hal_isolation.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -77,6 +79,8 @@ target_sources(platform_bl2
         Device/Source/device_definition.c
         Device/Source/system_core_init.c
         Native_Driver/uart_pl011_drv.c
+        Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
+        Native_Driver/spi_n25q256a_flash_lib.c
         bl2_boot_hal.c
         bl2_security_cnt.c
         tfm_rotpk.c

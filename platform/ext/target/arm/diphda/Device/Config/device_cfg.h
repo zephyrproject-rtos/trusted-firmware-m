@@ -29,4 +29,10 @@
 /*ARM MHU1 Host to SE*/
 #define MHU1_HOST_TO_SE
 
+/* External PMOD SF3 Flash Device */
+#define SPI_N25Q256A_S
+
+/* AXI QSPI Controller */
+#define AXI_QSPI_S
+
 #endif  /* __DEVICE_CFG_H__ */

@@ -62,11 +62,15 @@
 #define BL1_DATA_SIZE                   (0x10000)     /* 64 KiB*/
 #define BL1_DATA_LIMIT                  (BL1_DATA_START + BL1_DATA_SIZE - 1)
 
-#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)      /* 4 KiB */
-
+/* PMOD SF3 NOR FLASH */
+#define PMOD_SF3_FLASH_TOTAL_SIZE       (0x02000000)  /* 32 MB Nor Flash (PMOD SF3) */
+#define PMOD_SF3_FLASH_SECTOR_SIZE      (0x00001000)  /* 4 KB Sub sector size*/
+#define PMOD_SF3_FLASH_PAGE_SIZE        (256U)        /* 256 B */
+#define PMOD_SF3_FLASH_PROGRAM_UNIT     (1U)          /* 1 B */
 
 #define FLASH_DEV_NAME Driver_FLASH0
-#define FLASH_TOTAL_SIZE                (0x02000000)  /* 32 MB */
+#define FLASH_TOTAL_SIZE                (PMOD_SF3_FLASH_TOTAL_SIZE)  /* 32 MB */
+#define FLASH_AREA_IMAGE_SECTOR_SIZE    (PMOD_SF3_FLASH_SECTOR_SIZE)      /* 4 KiB */
 
 #ifdef BL1
 
@@ -155,24 +159,24 @@
 
 #endif /* BL1 */
 
-#define FLASH1_SECTOR_SIZE              0x400 /* 1 kB */
+#define FLASH_SECTOR_SIZE              (PMOD_SF3_FLASH_SECTOR_SIZE) /* 1 kB */
 
 #define FLASH_ITS_AREA_OFFSET           (0)
-#define FLASH_ITS_AREA_SIZE             (4 * FLASH1_SECTOR_SIZE)  /* 4 KiB */
+#define FLASH_ITS_AREA_SIZE             (4 * FLASH_SECTOR_SIZE)  /* 4 KiB */
 
 #define FLASH_PS_AREA_OFFSET            (FLASH_ITS_AREA_OFFSET + \
                                          FLASH_ITS_AREA_SIZE)
-#define FLASH_PS_AREA_SIZE              (16 * FLASH1_SECTOR_SIZE)  /* 16 KB */
+#define FLASH_PS_AREA_SIZE              (16 * FLASH_SECTOR_SIZE)  /* 16 KB */
 
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_PS_AREA_OFFSET + \
                                          FLASH_PS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH1_SECTOR_SIZE)      /* 1 KiB */
+#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_SECTOR_SIZE)      /* 1 KiB */
 
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
  * TF-M ITS Integration Guide.
  */
-#define TFM_HAL_ITS_FLASH_DRIVER Driver_FLASH1
+#define TFM_HAL_ITS_FLASH_DRIVER Driver_FLASH0
 
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
@@ -190,7 +194,7 @@
  * Note: Further documentation of these definitions can be found in the
  * TF-M PS Integration Guide.
  */
-#define TFM_HAL_PS_FLASH_DRIVER Driver_FLASH1
+#define TFM_HAL_PS_FLASH_DRIVER Driver_FLASH0
 
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
@@ -204,12 +208,12 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_PS_PROGRAM_UNIT         (1)
 
-#define NV_COUNTERS_FLASH_DEV_NAME Driver_FLASH1
+#define NV_COUNTERS_FLASH_DEV_NAME Driver_FLASH0
 
 /* NV Counters definitions */
 #define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
 #define TFM_NV_COUNTERS_AREA_SIZE    (0x20) /* 24 Bytes*/
 #define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH1_SECTOR_SIZE
+#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_SECTOR_SIZE
 
 #endif /* __FLASH_LAYOUT_H__ */

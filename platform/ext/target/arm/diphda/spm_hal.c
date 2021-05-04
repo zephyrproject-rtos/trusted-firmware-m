@@ -20,11 +20,7 @@
 
 #include "platform_base_address.h"
 
-enum tfm_plat_err_t tfm_spm_hal_init_isolation_hw(void)
-{
-    /* Setup of isolation HW not implemented yet. */
-    return TFM_PLAT_ERR_SUCCESS;
-}
+#include "xilinx_pg153_axi_qspi_controller_drv.h"
 
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                  bool priviledged,
@@ -41,6 +37,9 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
 
 void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
+    /* Switch the flash controller to XiP mode for the host */
+    select_xip_mode(&AXI_QSPI_DEV_S);
+
     volatile uint32_t *bir_base = (uint32_t *)DIPHDA_HOST_BIR_BASE;
 
     /* Program Boot Instruction Register to jump to BL32 base address

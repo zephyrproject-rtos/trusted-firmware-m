@@ -46,4 +46,16 @@ extern struct mhu_v2_x_dev_t MHU1_SE_TO_HOST_DEV;
 extern struct mhu_v2_x_dev_t MHU1_HOST_TO_SE_DEV;
 #endif
 
+/* QSPI Flash Controller driver structures  */
+#if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
+#include "xilinx_pg153_axi_qspi_controller_drv.h"
+extern struct axi_qspi_dev_t AXI_QSPI_DEV_S;
+#endif
+
+/* PMOD SF3 Nor Flash N25Q256A driver structures */
+#if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
+#include "spi_n25q256a_flash_lib.h"
+extern struct spi_n25q256a_dev_t SPI_N25Q256A_DEV;
+#endif
+
 #endif  /* __DEVICE_DEFINITION_H__ */
