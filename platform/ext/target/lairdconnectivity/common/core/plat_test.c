@@ -273,7 +273,6 @@ void tfm_plat_test_set_led_status(uint32_t status)
 
 uint32_t tfm_plat_test_get_userled_mask(void)
 {
-#warning "check this"
     return PORT_EXPANDER_LED1_IO;
 }
 

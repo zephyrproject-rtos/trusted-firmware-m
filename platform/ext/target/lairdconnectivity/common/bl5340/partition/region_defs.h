@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Nordic Semiconductor ASA. All rights reserved.
+ * Copyright (c) 2021 Laird Connectivity. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +43,7 @@
 #define PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE   (0x250)
 
 /*
- * SPU flash region granularity is 32 KB on nRF5340. Alignment
+ * SPU flash region granularity is 16KB on nRF5340. Alignment
  * of partitions is defined in accordance with this constraint.
  */
 #ifdef BL2
@@ -104,7 +105,7 @@
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 #define S_DATA_START    (S_RAM_ALIAS(0x0))
-#define S_DATA_SIZE     ((TOTAL_RAM_SIZE / 4) * 3)
+#define S_DATA_SIZE     (TOTAL_RAM_SIZE / 2)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 /* The CMSE veneers shall be placed in an NSC region

@@ -152,7 +152,12 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
     NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET(NRF_UARTE1));
 #endif
 
+#ifdef CORE_TEST_INTERACTIVE
+    /* TWIM2 is a secure peripheral for the interactive test, so its IRQ has
+     * to target S state
+     */
     NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET(NRF_TWIM2));
+#endif
 
     return TFM_PLAT_ERR_SUCCESS;
 }
