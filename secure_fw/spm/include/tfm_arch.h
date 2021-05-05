@@ -36,7 +36,7 @@ struct tfm_state_context_t {
     uint32_t    lr;
     uint32_t    ra;
     uint32_t    xpsr;
-};
+} __attribute__ ((aligned(8)));
 
 #define TFM_STATE_RET_VAL(ctx) (((struct tfm_state_context_t *)((ctx)->sp))->r0)
 

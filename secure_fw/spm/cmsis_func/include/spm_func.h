@@ -13,6 +13,7 @@
 #include "spm_partition_defs.h"
 #include "tfm_arch.h"
 #include "psa/client.h"
+#include "tfm_api.h"
 
 #define SPM_PARTITION_STATE_UNINIT       0
 #define SPM_PARTITION_STATE_IDLE         1
@@ -271,16 +272,17 @@ void tfm_spm_partition_set_signal_mask(uint32_t partition_idx,
 void tfm_spm_secure_api_init_done(void);
 
 /**
- * \brief Called if veneer is running in thread mode
+ * \brief Called for requests or returns from partition
  */
-uint32_t tfm_spm_partition_request_svc_handler(
-        const uint32_t *svc_args, uint32_t lr);
+void tfm_spm_partition_request_return_handler(
+        const uint32_t *svc_args, uint32_t exc_return, uint32_t *msp);
 
 /**
- * \brief Called when secure service returns
+ * \brief Called when SPM has completed a partition request or return
  */
-uint32_t tfm_spm_partition_return_handler(uint32_t lr);
-
+void tfm_spm_partition_completion_handler(enum tfm_status_e res,
+                                          uint32_t exc_return,
+                                          uint32_t *msp);
 /**
  * \brief Stores caller's client id in state context
  */
