@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <arm_cmse.h>
+#include "arch.h"
 #include "bitops.h"
 #include "fih.h"
 #include "tfm_nspm.h"
@@ -789,7 +790,7 @@ void tfm_spm_secure_api_init_done(void)
     tfm_secure_api_initializing = 0;
 }
 
-enum tfm_status_e tfm_spm_sfn_request_handler(
+static enum tfm_status_e tfm_spm_sfn_request_handler(
                              struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
 {
     enum tfm_status_e res;
@@ -801,14 +802,11 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
         tfm_secure_api_error_handler();
     }
 
-    __disable_irq();
-
     desc_ptr->caller_part_idx = tfm_spm_partition_get_running_partition_idx();
 
     res = tfm_core_check_sfn_parameters(desc_ptr, &iovecs);
     if (res != TFM_SUCCESS) {
         /* The sanity check of iovecs failed. */
-        __enable_irq();
         tfm_secure_api_error_handler();
     }
 
@@ -817,7 +815,6 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
         /* FixMe: error compartmentalization TBD */
         tfm_spm_partition_set_state(
             desc_ptr->caller_part_idx, SPM_PARTITION_STATE_CLOSED);
-        __enable_irq();
         SPMLOG_ERRMSG("Unauthorized service request!\r\n");
         tfm_secure_api_error_handler();
     }
@@ -825,12 +822,9 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
     res = tfm_start_partition(desc_ptr, &iovecs, excReturn);
     if (res != TFM_SUCCESS) {
         /* FixMe: consider possible fault scenarios */
-        __enable_irq();
         SPMLOG_ERRMSG("Failed to process service request!\r\n");
         tfm_secure_api_error_handler();
     }
-
-    __enable_irq();
 
     return res;
 }
@@ -900,13 +894,30 @@ int32_t tfm_spm_check_buffer_access(uint32_t  partition_idx,
     return TFM_ERROR_INVALID_PARAMETER;
 }
 
-/* This SVC handler is called if veneer is running in thread mode */
-uint32_t tfm_spm_partition_request_svc_handler(
-        const uint32_t *svc_ctx, uint32_t excReturn)
+static void tfm_spm_partition_requests_thread(struct tfm_sfn_req_s *desc_ptr,
+                                              uint32_t exc_return,
+                                              uint32_t is_return,
+                                              uintptr_t msp)
 {
-    struct tfm_sfn_req_s *desc_ptr;
+    enum tfm_status_e res;
+    uint32_t exc_ret;
 
-    if (!(excReturn & EXC_RETURN_STACK_PROCESS)) {
+    if (!is_return) {
+        res = tfm_spm_sfn_request_handler(desc_ptr, exc_return);
+        exc_ret = EXC_RETURN_SECURE_FUNCTION;
+    } else {
+        res = tfm_return_from_partition(&exc_return);
+        exc_ret = exc_return;
+    }
+    /* Reset MSP at top of stack and do TFM_SVC_SFN_COMPLETION */
+    tfm_sfn_completion(res, exc_ret, msp);
+}
+
+/* This SVC handler is called if veneer is running in thread mode */
+void tfm_spm_partition_request_return_handler(
+        const uint32_t *svc_ctx, uint32_t exc_return, uint32_t *msp)
+{
+    if (!(exc_return & EXC_RETURN_STACK_PROCESS)) {
         /* Service request SVC called with MSP active.
          * Either invalid configuration for Thread mode or SVC called
          * from Handler mode, which is not supported.
@@ -916,13 +927,37 @@ uint32_t tfm_spm_partition_request_svc_handler(
         tfm_secure_api_error_handler();
     }
 
-    desc_ptr = (struct tfm_sfn_req_s *)svc_ctx[0];
+    /* Setup a context on the stack to trigger exception return */
+    struct tfm_state_context_t ctx = {0};
 
-    if (tfm_spm_sfn_request_handler(desc_ptr, excReturn) != TFM_SUCCESS) {
+    ctx.r0 = svc_ctx ? svc_ctx[0] : (uintptr_t) NULL;
+    ctx.r1 = exc_return;
+    ctx.r2 = svc_ctx ? 0 : 1;
+    ctx.r3 = (uintptr_t) msp;
+    ctx.xpsr = XPSR_T32;
+    ctx.ra = (uint32_t) tfm_spm_partition_requests_thread & ~0x1UL;
+
+    __set_MSP((uint32_t)&ctx);
+
+    tfm_arch_trigger_exc_return(EXC_RETURN_THREAD_S_MSP);
+}
+
+void tfm_spm_partition_completion_handler(enum tfm_status_e res, uint32_t exc_return, uint32_t *msp)
+{
+    if (res != TFM_SUCCESS) {
         tfm_secure_api_error_handler();
     }
 
-    return EXC_RETURN_SECURE_FUNCTION;
+    uint32_t msp_stack_val = (uint32_t)msp + sizeof(struct tfm_state_context_t);
+
+    /* Equivalent to a call to __set_MSP() and then tfm_arch_trigger_exc_return
+     * with the exc_return value received as parameter in the handler
+     */
+    __ASM volatile (
+        "MSR msp, %0\n"
+        "MOV R0, %1\n"
+        "BX R0"
+        : : "r" (msp_stack_val), "r" (exc_return) : );
 }
 
 /* This SVC handler is called, if a thread mode execution environment is to
@@ -953,31 +988,6 @@ uint32_t tfm_spm_depriv_req_handler(uint32_t *svc_args, uint32_t excReturn)
         tfm_secure_api_error_handler();
     }
     return EXC_RETURN_SECURE_FUNCTION;
-}
-
-/* This SVC handler is called when sfn returns */
-uint32_t tfm_spm_partition_return_handler(uint32_t lr)
-{
-    enum tfm_status_e res;
-
-    if (!(lr & EXC_RETURN_STACK_PROCESS)) {
-        /* Partition return SVC called with MSP active.
-         * This should not happen!
-         */
-        ERROR_MSG("Partition return SVC called with MSP active!");
-        tfm_secure_api_error_handler();
-    }
-
-    res = tfm_return_from_partition(&lr);
-    if (res != TFM_SUCCESS) {
-        /* Unlock errors indicate ctx database corruption or unknown anomalies
-         * Halt execution
-         */
-        ERROR_MSG("Secure API error during unlock!");
-        tfm_secure_api_error_handler();
-    }
-
-    return lr;
 }
 
 /* This SVC handler is called if a deprivileged IRQ handler was executed, and

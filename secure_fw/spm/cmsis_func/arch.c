@@ -57,6 +57,15 @@ void tfm_disable_irq(psa_signal_t irq_signal)
 }
 
 __attribute__((naked))
+void tfm_sfn_completion(enum tfm_status_e res, uint32_t exc_return, uintptr_t msp)
+{
+    __ASM volatile("MSR msp, r2\n"
+                   "SVC %0\n"
+                   "BX LR\n"
+                   : : "I" (TFM_SVC_SFN_COMPLETION) : );
+}
+
+__attribute__((naked))
 static psa_signal_t psa_wait_internal(psa_signal_t signal_mask,
                                       uint32_t timeout)
 {
@@ -81,6 +90,12 @@ psa_signal_t psa_wait(psa_signal_t signal_mask, uint32_t timeout)
         }
         __WFI();
     }
+}
+
+__attribute__((naked))
+void tfm_arch_trigger_exc_return(uint32_t exc_return)
+{
+    __ASM volatile("BX R0");
 }
 
 __attribute__((naked))
