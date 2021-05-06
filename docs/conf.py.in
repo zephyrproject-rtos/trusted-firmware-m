@@ -138,6 +138,16 @@ rst_prolog = """
 .. |TFM_VERSION| replace:: @SPHINXCFG_TFM_VERSION@
 """
 
+# Enable figures and tables auto numbering
+numfig = True
+numfig_secnum_depth = 0
+numfig_format = {
+    'figure': 'Figure %s:',
+    'table': 'Table %s:',
+    'code-block': 'Listing %s:',
+    'section': '%s'
+}
+
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
