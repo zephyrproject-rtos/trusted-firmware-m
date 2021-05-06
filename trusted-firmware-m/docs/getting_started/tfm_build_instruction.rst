@@ -19,8 +19,11 @@ Getting the source-code
     cd <base folder>
     git clone https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
 
-Dependency management is now handled by cmake. If you wish to alter this
-behaviour, see :ref:`docs/getting_started/tfm_build_instruction:Manual
+To simplify documentation commands, the new created repository under
+``trusted-firmware-m`` would be referenced as ``<TF-M base folder>`` and
+its parent, the ``<base folder>``. Dependency management is now handled by
+cmake. If you wish to alter this behaviour, see
+:ref:`docs/getting_started/tfm_build_instruction:Manual
 dependency management`
 
 .. Note::
@@ -70,9 +73,6 @@ Required cmake parameters for building TF-M
 +======================+=======================================================+
 | TFM_PLATFORM         | The target platform as a path from the base directory |
 |                      | ``/platform/ext/target``, or as an absolute path.     |
-+----------------------+-------------------------------------------------------+
-| TFM_TOOLCHAIN_FILE   | The path to the toolchain file that corresponds to    |
-|                      | the desired compiler.                                 |
 +----------------------+-------------------------------------------------------+
 
 By default release configuration builds. Alternate build types can be controlled
@@ -167,7 +167,7 @@ TF-M Profiles
 TF-M Profiles are implemented as a single cmake configuration file, under the
 ``config/profile`` directory. A good understanding can be gained quickly by
 looking at the Profile configuration files, but the ultimate reference for
-Profiles are the design documents in the ``docs/design_documents/profiles/``
+Profiles are the design documents in the ``docs/technical_references/profiles/``
 directory.
 
 PSA test configuration
@@ -253,21 +253,23 @@ cmake.
 TF-M build examples
 *******************
 
+.. Note::
+   By default, CMAKE_BUILD_TYPE is set to Release, for debug support change
+   this to Debug. See below for an example.
+
 Example: building TF-M for AN521 platform using GCC:
 ====================================================
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cd <TF-M base folder>
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DCMAKE_BUILD_TYPE=Debug
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
     cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
@@ -282,6 +284,17 @@ Alternately using traditional cmake syntax
     It is recommended to build each different build configuration in a separate
     build directory.
 
+As seen above, the toolchain can be set using the -DTFM_TOOLCHAIN_FILE parameter. Without
+it, the build command takes the GNU ARM toolchain as default, so there is no need
+to explicitly include it. In case other toolchain is required, i.e. ARM Clang, simply
+specify in the command line
+
+.. code-block:: bash
+
+    cd <TF-M base folder>
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_ARMCLANG.cmake -DTEST_S=ON -DTEST_NS=ON
+    cmake --build cmake_build -- install
+
 Regression Tests for the AN521 target platform
 ==============================================
 
@@ -292,20 +305,18 @@ features are enabled.
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
+    cd <TF-M base folder>
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTEST_S=ON -DTEST_NS=ON
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DTEST_S=ON -DTEST_NS=ON
     make install
 
 Build for PSA Functional API compliance tests
@@ -317,7 +328,7 @@ PSA API tests simultaneously is **not** supported.
 
 The value of the TEST_PSA_API variable is the suite to be run.
 
-.. code-block::
+.. code-block:: bash
 
     -DTEST_PSA_API=INTERNAL_TRUSTED_STORAGE
     -DTEST_PSA_API=PROTECTED_STORAGE
@@ -330,20 +341,18 @@ tests for the Crypto service:
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
+    cd <TF-M base folder>
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTEST_PSA_API=CRYPTO
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=CRYPTO
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DTEST_PSA_API=CRYPTO
     make install
 
 Build for PSA FF (IPC) compliance tests
@@ -352,26 +361,24 @@ Build for PSA FF (IPC) compliance tests
 The build system provides support for building and integrating the PSA FF
 compliance test. This support is controlled by the TEST_PSA_API variable:
 
-.. code-block::
+.. code-block:: bash
 
     -DTEST_PSA_API=IPC
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
+    cd <TF-M base folder>
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     make install
 
 Location of build artifacts
@@ -412,7 +419,7 @@ Building the Reference Manual
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521
     cmake --build cmake_doc -- tfm_docs_refman_html tfm_docs_refman_pdf
 
 The documentation files will be available under the directory::
@@ -424,7 +431,7 @@ Building the User Guide
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake
+    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521
     cmake --build cmake_doc -- tfm_docs_userguide_html tfm_docs_userguide_pdf
 
 The documentation files will be available under the directory::
@@ -440,7 +447,10 @@ targets.
 .. code-block:: bash
 
     # Build the documentation from build_docs directory
-    cd <TF-M base folder>/ build_docs/
+    cd <TF-M base folder>
+    mkdir build_docs
+    cp docs/conf.py build_docs/conf.py
+    cd build_docs
     sphinx-build ./ user_guide
 
     # Build the documentation from a custom location
@@ -542,22 +552,20 @@ With new cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    cd <TF-M base folder>
+    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
 
 .. code-block:: bash
 
-    cd <base folder>
-    cd trusted-firmware-m
+    cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    cmake .. -DTFM_PLATFORM=mps2/an521 -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
     make install
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

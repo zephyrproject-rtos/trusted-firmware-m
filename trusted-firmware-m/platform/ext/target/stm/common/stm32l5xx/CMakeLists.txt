@@ -166,6 +166,7 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_dma.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_pwr.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rcc.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rcc_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_cortex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_gpio.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_uart.c
@@ -174,6 +175,9 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_hash.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_hash_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_pka.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/low_level_rng.c
     )
 
     target_compile_options(platform_bl2
@@ -194,6 +198,7 @@ endif()
 
 install(FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/stm_tool.py
+        ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/bin2hex.py
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../bl2/ext/mcuboot/scripts/macro_parser.py
         DESTINATION ${CMAKE_BINARY_DIR}/scripts/ )
 
@@ -208,6 +213,7 @@ endif()
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/regression.sh
          ${PREPROCESSOR_FILE}
          ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/TFM_UPDATE.sh
+         ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/TFM_BIN2HEX.sh
          ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/postbuild.sh
          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
          DESTINATION ${CMAKE_BINARY_DIR} )

@@ -11,7 +11,7 @@ set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 if (NOT NRF_BOARD_SELECTED)
     if (${TFM_PLATFORM} STREQUAL "nordic_nrf/nrf5340")
-        set(hint nordic_nrf/nrf5340pdk_nrf5340_cpuapp)
+        set(hint nordic_nrf/nrf5340dk_nrf5340_cpuapp)
     else()
         set(hint nordic_nrf/nrf9160dk_nrf9160)
     endif()

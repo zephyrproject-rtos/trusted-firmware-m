@@ -5,14 +5,13 @@
  *
  */
 
+#include "array.h"
 #include "tfm_veneers.h"
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
 #endif
-
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
 #ifdef TFM_PSA_API
 #include "psa/client.h"
@@ -37,12 +36,12 @@
         (psa_outvec *)NULL, 0)
 #else
 #define API_DISPATCH(sfn_name, sfn_id)                         \
-    tfm_##sfn_name##_veneer(                                   \
+    sfn_name##_veneer(                                         \
         in_vec, ARRAY_SIZE(in_vec),                            \
         out_vec, ARRAY_SIZE(out_vec))
 
 #define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)               \
-    tfm_##sfn_name##_veneer(                                   \
+    sfn_name##_veneer(                                         \
         in_vec, ARRAY_SIZE(in_vec),                            \
         NULL, 0)
 #endif /* TFM_PSA_API */

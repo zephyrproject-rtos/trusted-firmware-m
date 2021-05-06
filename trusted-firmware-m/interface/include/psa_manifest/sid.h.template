@@ -29,7 +29,7 @@ extern "C" {
                 {% endif %}
                 {% if partition.manifest.psa_framework_version > 1.0 and service.connection_based == false %}
                     {% set str = service.name + "_HANDLE" %}
-#define {{"%-58s"|format(str)}} ({{"%s"|format(service.stateless_handle)}}U)
+#define {{"%-58s"|format(str)}} ({{"%s"|format(service.stateless_handle_value)}}U)
                 {% endif %}
             {% endfor %}
         {% endif %}

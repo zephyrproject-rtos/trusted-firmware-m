@@ -40,7 +40,7 @@
 #define STAIC_HANDLE_IDX_MASK \
     (uint32_t)((1UL << STAIC_HANDLE_IDX_BIT_WIDTH) - 1)
 #define GET_INDEX_FROM_STATIC_HANDLE(handle) \
-    (uint32_t)(((handle) & STAIC_HANDLE_IDX_MASK) - 1)
+    (uint32_t)((handle) & STAIC_HANDLE_IDX_MASK)
 
 #define STAIC_HANDLE_VER_BIT_WIDTH      8
 #define STAIC_HANDLE_VER_OFFSET         8
@@ -49,14 +49,14 @@
 #define GET_VERSION_FROM_STATIC_HANDLE(handle) \
     (uint32_t)(((handle) >> STAIC_HANDLE_VER_OFFSET) & STAIC_HANDLE_VER_MASK)
 
+/* Validate the static handle indicator bit */
 #define STAIC_HANDLE_INDICATOR_OFFSET   30
-/*
- * A valid static handle must have indicator bit set, have a positive index,
- * 1 <= index <= STATIC_HANDLE_NUM_LIMIT.
- */
-#define IS_VALID_STATIC_HANDLE(handle)                      \
-    (((handle) & (1UL << STAIC_HANDLE_INDICATOR_OFFSET)) && \
-     (GET_INDEX_FROM_STATIC_HANDLE(handle) < STATIC_HANDLE_NUM_LIMIT))
+#define IS_STATIC_HANDLE(handle) \
+    ((handle) & (1UL << STAIC_HANDLE_INDICATOR_OFFSET))
+
+/* Valid index should be [0, STATIC_HANDLE_NUM_LIMIT-1] */
+#define IS_VALID_STATIC_HANDLE_IDX(index) \
+    (((index) >= 0) && ((index) < STATIC_HANDLE_NUM_LIMIT))
 
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
@@ -78,7 +78,7 @@
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
     int32_t magic;
-    struct tfm_spm_service_t *service; /* RoT service pointer            */
+    struct service_t *service;         /* RoT service pointer            */
     struct tfm_event_t ack_evnt;       /* Event for ack reponse          */
     psa_msg_t msg;                     /* PSA message body               */
     psa_invec invec[PSA_MAX_IOVEC];    /* Put in/out vectors in msg body */
@@ -95,6 +95,11 @@ struct tfm_msg_body_t {
                                         */
 #endif
     struct bi_list_node_t msg_node;    /* For list operators             */
+};
+
+struct partition_memory_t {
+    uintptr_t start;
+    uintptr_t limit;
 };
 
 /**
@@ -115,6 +120,9 @@ struct partition_static_t {
     uintptr_t platform_data;            /* Platform specific data           */
     uint32_t ndeps;                     /* Numbers of depended services     */
     uint32_t *deps;                     /* Pointer to dependency arrays     */
+#if TFM_LVL == 3
+    struct partition_memory_t mems;     /* Partition memories               */
+#endif
 };
 
 /**
@@ -132,8 +140,6 @@ struct partition_t {
     uint32_t signals_allowed;
     uint32_t signals_waiting;
     uint32_t signals_asserted;
-    /** A list of platform_data pointers */
-    const struct tfm_spm_partition_memory_data_t *memory_data;
 };
 
 struct spm_partition_db_t {
@@ -154,7 +160,7 @@ struct tfm_spm_service_db_t {
 };
 
 /* RoT Service data */
-struct tfm_spm_service_t {
+struct service_t {
     const struct tfm_spm_service_db_t *service_db;/* Service database pointer */
     struct partition_t *partition;           /*
                                               * Point to secure partition
@@ -167,7 +173,7 @@ struct tfm_spm_service_t {
 /* Stateless RoT service tracking array item type. Indexed by static handle */
 struct stateless_service_tracking_t {
     uint32_t                 sid;           /* Service ID */
-    struct tfm_spm_service_t *p_service;    /* Service instance */
+    struct service_t         *p_service;    /* Service instance */
 };
 
 /* RoT connection handle list */
@@ -187,7 +193,7 @@ struct tfm_conn_handle_t {
                                          *  - non secure client endpoint id.
                                          */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
-    struct tfm_spm_service_t *service;  /* RoT service pointer                */
+    struct service_t *service;          /* RoT service pointer                */
     struct bi_list_node_t list;         /* list node                          */
 };
 
@@ -230,9 +236,8 @@ uint32_t tfm_spm_partition_get_running_partition_id(void);
  * \retval NULL             Create failed
  * \retval "Not NULL"       Service handle created
  */
-struct tfm_conn_handle_t *tfm_spm_create_conn_handle(
-                                        struct tfm_spm_service_t *service,
-                                        int32_t client_id);
+struct tfm_conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
+                                                     int32_t client_id);
 
 /**
  * \brief                   Validate connection handle for client connect
@@ -258,7 +263,7 @@ int32_t tfm_spm_validate_conn_handle(
  * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find service by handle
  */
-int32_t tfm_spm_free_conn_handle(struct tfm_spm_service_t *service,
+int32_t tfm_spm_free_conn_handle(struct service_t *service,
                                  struct tfm_conn_handle_t *conn_handle);
 
 /******************** Partition management functions *************************/
@@ -294,9 +299,9 @@ struct partition_t *tfm_spm_get_running_partition(void);
  *
  * \retval NULL             Failed
  * \retval "Not NULL"       Target service context pointer,
- *                          \ref tfm_spm_service_t structures
+ *                          \ref service_t structures
  */
-struct tfm_spm_service_t *tfm_spm_get_service_by_sid(uint32_t sid);
+struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 
 /************************ Message functions **********************************/
 
@@ -339,7 +344,7 @@ struct tfm_msg_body_t *
  * \param[in] caller_outvec Array of caller output \ref psa_outvec structures
  */
 void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
-                      struct tfm_spm_service_t *service,
+                      struct service_t *service,
                       psa_handle_t handle,
                       int32_t type, int32_t client_id,
                       psa_invec *invec, size_t in_len,
@@ -356,7 +361,7 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
  * \param[in] msg           message created by tfm_spm_create_msg()
  *                          \ref tfm_msg_body_t structures
  */
-void tfm_spm_send_event(struct tfm_spm_service_t *service,
+void tfm_spm_send_event(struct service_t *service,
                         struct tfm_msg_body_t *msg);
 
 /**
@@ -371,7 +376,7 @@ void tfm_spm_send_event(struct tfm_spm_service_t *service,
  * \retval SPM_ERROR_BAD_PARAMETERS Bad parameters input
  * \retval SPM_ERROR_VERSION Check failed
  */
-int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
+int32_t tfm_spm_check_client_version(struct service_t *service,
                                      uint32_t version);
 
 /**
@@ -386,7 +391,7 @@ int32_t tfm_spm_check_client_version(struct tfm_spm_service_t *service,
  * \retval SPM_ERROR_GENERIC Authorization check failed
  */
 int32_t tfm_spm_check_authorization(uint32_t sid,
-                                    struct tfm_spm_service_t *service,
+                                    struct service_t *service,
                                     bool ns_caller);
 
 /**
@@ -493,7 +498,7 @@ void tfm_core_handler_mode(void);
  * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find handle node
  */
-int32_t tfm_spm_set_rhandle(struct tfm_spm_service_t *service,
+int32_t tfm_spm_set_rhandle(struct service_t *service,
                             struct tfm_conn_handle_t *conn_handle,
                             void *rhandle);
 

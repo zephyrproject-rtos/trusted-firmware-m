@@ -13,12 +13,16 @@
 #  ******************************************************************************
 
 echo "regression script started"
+sn_option=""
+if [ $# -eq 1 ]; then
+sn_option="sn=$1"
+fi
 PATH="/C/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/":$PATH
 stm32programmercli="STM32_Programmer_CLI"
 # remove write protection
 secbootadd0=0x180030
-connect="-c port=SWD mode=UR --hardRst"
-connect_no_reset="-c port=SWD mode=HotPlug"
+connect="-c port=SWD "$sn_option" mode=UR --hardRst"
+connect_no_reset="-c port=SWD "$sn_option" mode=HotPlug"
 rdp_0="-ob RDP=0xAA TZEN=1"
 remove_bank1_protect="-ob SECWM1_PSTRT=127 SECWM1_PEND=0 WRP1A_PSTRT=127 WRP1A_PEND=0 WRP1B_PSTRT=127 WRP1B_PEND=0"
 remove_bank2_protect="-ob SECWM2_PSTRT=127 SECWM2_PEND=0 WRP2A_PSTRT=127 WRP2A_PEND=0 WRP2B_PSTRT=127 WRP2B_PEND=0"

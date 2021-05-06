@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include "array.h"
 #include "psa/initial_attestation.h"
 #include "psa/client.h"
 #include "tfm_veneers.h"
@@ -14,8 +15,6 @@
 #include "psa_manifest/sid.h"
 #endif
 #include <string.h>
-
-#define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
 psa_status_t
 psa_initial_attest_get_token(const uint8_t *auth_challenge,

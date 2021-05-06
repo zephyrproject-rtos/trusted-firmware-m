@@ -1,17 +1,15 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include "psa/client.h"
 #include "psa/internal_trusted_storage.h"
 #include "tfm_api.h"
-
 #include "tfm_ns_interface.h"
 #include "tfm_veneers.h"
-
-#define IOVEC_LEN(x) (sizeof(x)/sizeof(x[0]))
 
 psa_status_t psa_its_set(psa_storage_uid_t uid,
                          size_t data_length,
@@ -26,7 +24,7 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
         { .base = &create_flags, .len = sizeof(create_flags) }
     };
 
-    status = tfm_ns_interface_dispatch((veneer_fn)tfm_tfm_its_set_req_veneer,
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_its_set_req_veneer,
                                        (uint32_t)in_vec, IOVEC_LEN(in_vec),
                                        (uint32_t)NULL, 0);
 
@@ -58,7 +56,7 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    status = tfm_ns_interface_dispatch((veneer_fn)tfm_tfm_its_get_req_veneer,
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_its_get_req_veneer,
                                        (uint32_t)in_vec, IOVEC_LEN(in_vec),
                                        (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
@@ -84,10 +82,9 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
         { .base = p_info, .len = sizeof(*p_info) }
     };
 
-    status = tfm_ns_interface_dispatch(
-                                     (veneer_fn)tfm_tfm_its_get_info_req_veneer,
-                                     (uint32_t)in_vec, IOVEC_LEN(in_vec),
-                                     (uint32_t)out_vec, IOVEC_LEN(out_vec));
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_its_get_info_req_veneer,
+                                       (uint32_t)in_vec, IOVEC_LEN(in_vec),
+                                       (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -102,7 +99,7 @@ psa_status_t psa_its_remove(psa_storage_uid_t uid)
         { .base = &uid, .len = sizeof(uid) }
     };
 
-    return tfm_ns_interface_dispatch((veneer_fn)tfm_tfm_its_remove_req_veneer,
+    return tfm_ns_interface_dispatch((veneer_fn)tfm_its_remove_req_veneer,
                                      (uint32_t)in_vec, IOVEC_LEN(in_vec),
                                      (uint32_t)NULL, 0);
 }

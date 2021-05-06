@@ -20,7 +20,7 @@ Trusted Firmware-M Documentation
                 <h2>Introduction</h2>
             </a>
             <p>Introducing the Trusted Firmware-M Project: overview,
-               architecture, features, and licensing</p>
+               architecture, features, and licensing.</p>
         </li>
         <li class="grid-item">
             <a href="docs/getting_started/index.html">
@@ -31,6 +31,13 @@ Trusted Firmware-M Documentation
                system, and then build and run a sample application.</p>
         </li>
         <li class="grid-item">
+            <a href="platform/ext/index.html">
+                <img alt="" src="_static/images/tfm.png"/>
+                <h2>Supported Platforms</h2>
+            </a>
+            <p>List of supported boards and platforms.</p>
+        </li>
+        <li class="grid-item">
             <a href="docs/contributing/index.html">
                 <img alt="" src="_static/images/tfm.png"/>
                 <h2>Contribution Guidelines</h2>
@@ -39,39 +46,33 @@ Trusted Firmware-M Documentation
                to submit patches directly to the project.</p>
         </li>
         <li class="grid-item">
-            <a href="docs/reference/index.html">
+            <a href="docs/integration_guide/index.html">
                 <img alt="" src="_static/images/tfm.png"/>
-                <h2>References</h2>
+                <h2>Integration Guidelines</h2>
             </a>
-            <p>User guides, API Documentation, interfaces</p>
+            <p>Guidelines for integration with TF-M.</p>
         </li>
         <li class="grid-item">
-            <a href="docs/design_documents/index.html">
+            <a href="docs/technical_references/index.html">
                 <img alt="" src="_static/images/tfm.png"/>
-                <h2>Design</h2>
+                <h2>Technical References</h2>
             </a>
-            <p>Design documents, threat models.</p>
+            <p>Design documents.</p>
         </li>
         <li class="grid-item">
-            <a href="platform/ext/index.html">
+            <a href="docs/security/index.html">
                 <img alt="" src="_static/images/tfm.png"/>
-                <h2>Platforms</h2>
+                <h2>Security</h2>
             </a>
-            <p>List of supported boards and platforms.</p>
+            <p>Requirements, processes, and thread models for ensuring security
+               is addressed within the TF-M project.</p>
         </li>
         <li class="grid-item">
-            <a href="https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/reference_manual/html/index.html">
+            <a href="docs/releases/index.html">
                 <img alt="" src="_static/images/tfm.png"/>
-                <h2>API</h2>
+                <h2>Releases</h2>
             </a>
-            <p>Doxygen documentation.</p>
-        </li>
-        <li class="grid-item">
-        <a href="https://developer.arm.com/architectures/security-architectures/platform-security-architecture">
-            <img alt="" src="_static/images/tfm.png"/>
-            <h2>PSA</h2>
-        </a>
-        <p>Platform Security Architecture (PSA) information.</p>
+            <p>Release notes.</p>
         </li>
     </ul>
 
@@ -85,11 +86,12 @@ Trusted Firmware-M Documentation
     Home<self>
     docs/introduction/index
     docs/getting_started/index
-    docs/contributing/index
-    docs/reference/index
-    docs/design_documents/index
     platform/ext/index
-    docs/threat_models/index
+    docs/contributing/index
+    docs/integration_guide/index
+    docs/technical_references/index
+    docs/security/index
+    docs/releases/index
 
 
 .. toctree::
@@ -97,11 +99,11 @@ Trusted Firmware-M Documentation
     :hidden:
     :caption: Quick Links
 
+    API Reference <https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/reference_manual/html/index.html>
     Security Center <https://developer.trustedfirmware.org/w/collaboration/security_center>
-    docs/reference/changelog
-    docs/reference/glossary
-    docs/contributing/lic
+    Platform Security Architecture <https://developer.arm.com/architectures/security-architectures/platform-security-architecture>
+    docs/glossary
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

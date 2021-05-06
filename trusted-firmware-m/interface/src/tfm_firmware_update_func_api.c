@@ -5,13 +5,11 @@
  *
  */
 
+#include "psa/client.h"
 #include "psa/update.h"
 #include "tfm_api.h"
-
 #include "tfm_ns_interface.h"
 #include "tfm_veneers.h"
-
-#define IOVEC_LEN(x) (uint32_t)(sizeof(x)/sizeof(x[0]))
 
 psa_status_t psa_fwu_write(uint32_t image_id,
                            size_t block_offset,
@@ -26,7 +24,7 @@ psa_status_t psa_fwu_write(uint32_t image_id,
         { .base = block, .len = block_size }
     };
 
-    status = tfm_ns_interface_dispatch((veneer_fn)tfm_tfm_fwu_write_req_veneer,
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_fwu_write_req_veneer,
                                        (uint32_t)in_vec, IOVEC_LEN(in_vec),
                                        (uint32_t)NULL, 0);
 
@@ -56,7 +54,7 @@ psa_status_t psa_fwu_install(psa_image_id_t image_id,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    status = tfm_ns_interface_dispatch((veneer_fn)tfm_tfm_fwu_install_req_veneer,
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_fwu_install_req_veneer,
                                        (uint32_t)in_vec, IOVEC_LEN(in_vec),
                                        (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
@@ -75,7 +73,7 @@ psa_status_t psa_fwu_abort(psa_image_id_t image_id)
         { .base = &image_id, .len = sizeof(image_id) }
     };
 
-    status = tfm_ns_interface_dispatch((veneer_fn)tfm_tfm_fwu_abort_req_veneer,
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_fwu_abort_req_veneer,
                                        (uint32_t)in_vec, IOVEC_LEN(in_vec),
                                        (uint32_t)NULL, 0);
 
@@ -97,7 +95,7 @@ psa_status_t psa_fwu_query(psa_image_id_t image_id, psa_image_info_t *info)
         { .base = info, .len = sizeof(*info)}
     };
 
-    status = tfm_ns_interface_dispatch((veneer_fn)tfm_tfm_fwu_query_req_veneer,
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_fwu_query_req_veneer,
                                        (uint32_t)in_vec, IOVEC_LEN(in_vec),
                                        (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
@@ -112,9 +110,10 @@ psa_status_t psa_fwu_request_reboot(void)
 {
     psa_status_t status;
 
-    status = tfm_ns_interface_dispatch((veneer_fn)tfm_tfm_fwu_request_reboot_req_veneer,
-                                       (uint32_t)NULL, 0,
-                                       (uint32_t)NULL, 0);
+    status = tfm_ns_interface_dispatch(
+                                   (veneer_fn)tfm_fwu_request_reboot_req_veneer,
+                                   (uint32_t)NULL, 0,
+                                   (uint32_t)NULL, 0);
 
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -127,7 +126,7 @@ psa_status_t psa_fwu_accept(void)
 {
     psa_status_t status;
 
-    status = tfm_ns_interface_dispatch((veneer_fn)tfm_tfm_fwu_accept_req_veneer,
+    status = tfm_ns_interface_dispatch((veneer_fn)tfm_fwu_accept_req_veneer,
                                        (uint32_t)NULL, 0,
                                        (uint32_t)NULL, 0);
 

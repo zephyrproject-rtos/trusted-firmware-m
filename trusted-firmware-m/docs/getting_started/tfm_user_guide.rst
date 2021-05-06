@@ -5,8 +5,8 @@ How to compile and run TF-M and example test application for CoreLink
 SSE-200 subsystem on the MPS2 board and on the Fast Model(FVP).
 
 Follow :doc:`build instruction <tfm_build_instruction>` to build the binaries.
-Follow :doc:`secure boot <tfm_secure_boot>` to build the binaries with or
-without BL2 bootloader.
+Follow :doc:`secure boot </docs/technical_references/tfm_secure_boot>` to build the
+binaries with or without BL2 bootloader.
 
 ****************************************************************
 Execute TF-M example and regression tests on MPS2 boards and FVP
@@ -233,16 +233,6 @@ Example application with BL2 bootloader
 #. Create a unified hex file comprising of both ``bl2.bin`` and
    ``tfm_s_ns_signed.bin``.
 
-    - For Musca-A
-
-        - Windows::
-
-            srec_cat.exe bin\bl2.bin -Binary -offset 0x200000 bin\tfm_s_ns_signed.bin -Binary -offset 0x220000 -o tfm.hex -Intel
-
-        - Linux::
-
-            srec_cat bin/bl2.bin -Binary -offset 0x200000 bin/tfm_s_ns_signed.bin -Binary -offset 0x220000 -o tfm.hex -Intel
-
     - For Musca-B1
 
         - Windows::
@@ -398,12 +388,7 @@ skipped but there should be no failed tests::
 
     Another way this can be achieved is by using ``srec_cat`` with the ``-fill``
     parameter to fill the corresponding area in the binary with the erase value
-    of the flash (``0xFF``). For example, for Musca-A the command for
-    concatenating the ``bl2`` and ``tfm_s_ns_signed`` binaries would become::
-
-        srec_cat bin/bl2.bin -Binary -offset 0x200000 \
-                 bin/tfm_s_ns_signed.bin -Binary -offset 0x220000 \
-                 -fill 0xFF 0x420000 0x425000 -o tfm.hex -Intel
+    of the flash (``0xFF``).
 
     Refer to the platform flash layout for appropriate addresses to erase on
     other platforms.
@@ -580,7 +565,7 @@ port (baud 115200 8n1) the following messages::
 Firmware upgrade and image validation with BL2 bootloader
 =========================================================
 High level operation of BL2 bootloader and instructions for testing firmware
-upgrade is described in :doc:`secure boot <tfm_secure_boot>`.
+upgrade is described in :doc:`secure boot </docs/technical_references/tfm_secure_boot>`.
 
 --------------
 
@@ -591,4 +576,4 @@ upgrade is described in :doc:`secure boot <tfm_secure_boot>`.
 .. _Keil MDK: http://www2.keil.com/mdk5
 .. _Keil MDK Documentation: https://www2.keil.com/mdk5/docs
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

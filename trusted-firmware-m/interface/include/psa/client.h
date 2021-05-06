@@ -17,6 +17,10 @@
 extern "C" {
 #endif
 
+#ifndef IOVEC_LEN
+#define IOVEC_LEN(arr) ((uint32_t)(sizeof(arr)/sizeof(arr[0])))
+#endif
+
 /*********************** PSA Client Macros and Types *************************/
 
 /**

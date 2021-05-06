@@ -23,7 +23,6 @@ possible.
 
 The following environments are supported:
 
-    - Ubuntu 16.04 x64
     - Ubuntu 18.04 x64
     - Windows 10 x64
 
@@ -104,27 +103,73 @@ This section lists steps to set-up TF-M build environment under Linux and Window
 Please also check the `Exceptions and special cases`_  chapter for any special
 requirements depending on the tools you are using.
 
+The build system can generate two documents: The Reference Manual and the
+User Guide. Both documents can be generated in HTML and PDF format.
+
+.. Note::
+    Support for document generation in the build environment is not mandatory.
+    Missing document generation tools will not block building the
+    TF-M firmware.
+
 Ubuntu
 ======
 
-Install the following tools:
+Setup needed tools for Ubuntu
+-----------------------------
 
-    - Arm DS |DEV_STUDIO_VERSION|.
+Tools required to build sources:
+
+    - Arm DS |DEV_STUDIO_VERSION| (Arm DS Ultimate Edition)
+      or GNU Arm compiler v7.3.1+
     - Git tools v2.10.0
     - CMake (see the `CMake`_ chapter)
     - GNU Make (see the `GNU make`_ chapter)
-    - SRecord v1.58 (for Musca test chip boards)
+    - `SRecord v1.58 <http://srecord.sourceforge.net/download.html/>`__
+      (for Musca test chip boards)
     - Python3 and the pip package manager (from Python 3.4 it's included)
-    - The necessary Python3 packages are listed in the requirements.txt file.
-      To install all needed just do:
+    - Python3 packages as listed in tools/requirements.txt file
+
+Tools required to generate documentation:
+
+    - Doxygen v1.8.0 or later - for reference manual
+    - Graphviz dot v2.38.0 or later
+    - PlantUML v1.2018.11 or later
+    - Java runtime environment 1.8 or later (for running PlantUML)
+    - LaTeX - for PDF generation only
+    - PdfLaTeX - for PDF generation only
+    - Python3 packages as listed in tools/requirements.txt - for user manual
+
+Download and install the required tools:
 
 .. code-block:: bash
 
-    pip install -r tools/requirements.txt
+    sudo apt-get update
+    sudo apt-get install -y git curl wget build-essential libssl-dev python3 \
+    python3-pip doxygen graphviz default-jre doxygen-latex
+    mkdir ~/plantuml
+    curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
 
+Clone the TF-M Sources
+(see :ref:`docs/getting_started/tfm_build_instruction:Getting the source-code`),
+then
 
-Setup environment variables in Linux
-------------------------------------
+.. code-block:: bash
+
+    pip3 install --upgrade pip
+    cd trusted-firmware-m
+    pip3 install -r tools/requirements.txt
+
+Finally, install C compiler (see `C compilers`_), CMake (see `CMake`_)
+and SRecord as required.
+
+Setup environment variables for Ubuntu
+--------------------------------------
+
+To import CMake in your bash shell console:
+
+.. code-block:: bash
+
+    export PATH=<CMake path>/bin:$PATH
 
 To import Arm Compiler v6.13 in your bash shell console:
 
@@ -134,12 +179,6 @@ To import Arm Compiler v6.13 in your bash shell console:
     export ARM_TOOL_VARIANT=ult
     export ARM_PRODUCT_PATH=<ARM_DS_PATH>/sw/mappings
     export ARMLMD_LICENSE_FILE=<LICENSE_FILE_PATH>
-
-To import CMake in your bash shell console:
-
-.. code-block:: bash
-
-    export PATH=<CMake path>/bin:$PATH
 
 To import GNU Arm in your bash shell console:
 
@@ -153,42 +192,97 @@ To import IAR Arm compiler in your bash shell console:
 
     export PATH=<IAR compiler path>/bin:$PATH
 
+To import PLATUML:
+
+.. code-block:: bash
+
+    export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
+
 Windows
 =======
 
-Install the following tools:
+Setup needed tools for Windows
+------------------------------
+
+Tools required to build sources:
 
     - uVision |KEIL_VERSION| or Arm DS |DEV_STUDIO_VERSION| (Arm DS Ultimate Edition)
       or GNU Arm compiler v7.3.1+
     - Git client latest version (https://git-scm.com/download/win)
     - CMake (`native Windows version <https://cmake.org/download/>`__,
       see the `CMake`_ chapter)
-    - GNU make
+    - GNU make (http://gnuwin32.sourceforge.net/packages/make.htm)
     - `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__ (for Musca test
       chip boards)
     - Python3 `(native Windows version) <https://www.python.org/downloads/>`__ and
       the pip package manager (from Python 3.4 it's included)
-    - The necessary Python3 packages are listed in the requirements.txt file.
-      To install all needed just do:
+    - Python3 packages as listed in tools/requirements.txt file
+
+Tools required to generate documentation:
+
+    - `Doxygen v1.8.0
+      <https://sourceforge.net/projects/doxygen/files/snapshots/doxygen-1.8-svn/
+      windows/doxygenw20140924_1_8_8.zip/download>`__
+      or later - for reference manual
+    - `Graphviz dot v2.38.0
+      <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
+      or later
+    - `PlantUML v1.2018.11
+      <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
+      or later
+    - The Java runtime 1.8 or later (for running PlantUML) is part of the Arm DS
+      installation or can be downloaded from
+      `here <https://www.java.com/en/download/>`__
+    - LaTeX - for PDF generation only
+    - PdfLaTeX - for PDF generation only
+    - `MikTeX <https://miktex.org/download>`__ - for PDF generation only
+    - Python3 packages as listed in tools/requirements.txt - for user manual
+
+Download and install the required tools from above.
+
+Clone the TF-M Sources
+(see :ref:`docs/getting_started/tfm_build_instruction:Getting the source-code`),
+then
 
 .. code-block:: bash
 
+    cd trusted-firmware-m
     pip install -r tools\requirements.txt
 
-Setup environment variables in Windows
---------------------------------------
+Finally, install C compiler (see `C compilers`_), CMake (see `CMake`_)
+and SRecord as required.
 
-Add CMake to your PATH variable:
+Setup environment variables for Windows
+---------------------------------------
+Set the environment variables, assuming that:
+
+    - CMake, doxygen, dot, and MikTeX binaries are available on the PATH.
+    - Java JVM is used from Arm DS installation.
+    - plantuml.jar is available at c:\\plantuml\\plantuml.jar
+
+To import CMake to your PATH variable:
 
 .. code-block:: bash
 
     set PATH=<CMake_Path>\bin;$PATH
 
+To import PLATUML:
+
+.. code-block:: bash
+
+    set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
+
+To set PATH for ARMDS:
+
+.. code-block:: bash
+
+    set PATH=$PATH;<ARM_DS_PATH>\sw\java\bin
+
 There are several configurations depending on a toolset you are using.
 The typical cases are listed below.
 
 Armclang + Arm DS
-^^^^^^^^^^^^^^^^^
+
 .. code-block:: bash
 
     set PATH=<ARM_DS_PATH>\sw\ARMCompiler6.13\bin;$PATH
@@ -197,148 +291,16 @@ Armclang + Arm DS
     set ARMLMD_LICENSE_FILE=<LICENSE_FILE_PATH>
 
 Armclang + Keil MDK Arm
-^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: bash
 
     set PATH=<uVision path>\ARM\ARMCLANG\bin;$PATH
 
 GNU Arm
-^^^^^^^
 
 .. code-block:: bash
 
     set PATH=<GNU Arm path>\bin;$PATH
-
-**************************
-Building the documentation
-**************************
-
-The build system is prepared to support generation of two documents:
-The Reference Manual and the User Guide.
-The Reference Manual is Doxygen based, while the User Guide is
-Sphinx based. Both document can be generated in HTML and PDF format.
-
-Support for document generation in the build environment is not mandatory.
-Missing document generation tools will not block building the TF-M firmware.
-
-To compile the TF-M Reference Manual
-====================================
-
-The following additional tools are needed:
-
-    - Doxygen v1.8.0 or later
-    - Graphviz dot v2.38.0 or later
-    - PlantUML v1.2018.11 or later
-    - Java runtime environment 1.8 or later (for running PlantUML)
-    - LaTeX - for PDF generation only
-    - PdfLaTeX - for PDF generation only
-
-Set-up the needed tools and environment in Linux
-------------------------------------------------
-
-.. code-block:: bash
-
-    sudo apt-get install -y doxygen graphviz default-jre
-    mkdir ~/plantuml
-    curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
-    export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
-
-For PDF generation:
-
-.. code-block:: bash
-
-    sudo apt-get install -y doxygen-latex
-
-Set-up the needed tools and environment in Windows
---------------------------------------------------
-
-Download and install the following tools:
-
-    - `Doxygen
-      1.8.8 <https://sourceforge.net/projects/doxygen/files/snapshots/doxygen-1.8-svn/windows/doxygenw20140924_1_8_8.zip/download>`__
-    - `Graphviz
-      2.38 <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
-    - The Java runtime is part of the Arm DS installation or can be
-      `downloaded from here <https://www.java.com/en/download/>`__
-    - `PlantUML <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
-    -  `MikTeX <https://miktex.org/download>`__ - for PDF generation only
-
-Set the environment variables, assuming that:
-
-    - doxygen, dot, and MikTeX binaries are available on the PATH.
-    - Java JVM is used from Arm DS installation.
-
-::
-
-    set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
-    set PATH=$PATH;<ARM_DS_PATH>\sw\java\bin
-
-To compile the TF-M User Guide
-==============================
-
-The following additional tools are needed:
-
-    - Python3 and the following modules:
-    - Sphinx v1.7.9
-    - m2r v0.2.0
-    - sphinxcontrib-plantuml
-    - sphinx-rtd-theme
-    - Graphviz dot v2.38.0 or later
-    - PlantUML v1.2018.11 or later
-    - Java runtime environment 1.8 or later (for running PlantUML)
-    - LaTeX - for PDF generation only
-    - PdfLaTeX - for PDF generation only
-
-Set-up the tools and environment in Linux
------------------------------------------
-
-.. code-block:: bash
-
-    sudo apt-get install -y python3 graphviz default-jre
-    pip install -r tools/requirements.txt
-    mkdir ~/plantuml
-    curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
-
-For PDF generation:
-
-.. code-block:: bash
-
-    sudo apt-get install -y doxygen-latex
-    export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
-
-Set-up the tools and environment in Windows
--------------------------------------------
-
-Download and install the following tools:
-
-    - `Graphviz 2.38 <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
-    - The Java runtime is part of the Arm DS installation or can be `downloaded from here <https://www.java.com/en/download/>`__
-    - `PlantUML <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
-    -  `MikTeX <https://miktex.org/download>`__ - for PDF generation only
-    - Python3 `(native Windows version) <https://www.python.org/downloads/>`__
-    - The necessary Python3 packages are listed in the requirements.txt file.
-      To install all needed packages just do:
-
-.. code-block:: bash
-
-    pip install -r tools\requirements.txt
-
-.. Note::
-     When building the documentation the first time, MikTeX might
-     prompt for installing missing LaTeX components. Please allow the MikTeX
-     package manager to set-up these.
-
-Set the environment variables, assuming that:
-
-    - plantuml.jar is available at c:\\plantuml\\plantuml.jar
-    - doxygen, dot, and MikTeX binaries are available on the PATH.
-    - Java JVM is used from DS5 installation.
-
-.. code-block:: bash
-
-    set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
-    set PATH=$PATH;<ARM_DS_PATH>\sw\java\bin
 
 ****************************
 Exceptions and special cases
@@ -380,8 +342,9 @@ To build the TF-M firmware the following tools are needed:
    "click",,"Firmware"
    "imgtool",,"Firmware"
    "Doxygen",">1.8","Reference manual"
-   "Sphinx",">1.4","User Guide"
+   "Sphinx","=1.7.9","User Guide"
    "sphinxcontrib-plantuml",,"User Guide"
+   "sphinxcontrib-svg2pdfconverter",,"User Guide"
    "sphinx-trd-theme",,"User Guide"
    "Git",,
    "PlantUML",">v1.2018.11","Reference Manual, User Guide"
@@ -411,6 +374,7 @@ Dependency chain:
     state refman as "Reference Manual" <<doc>>
     state rtd_theme as "sphinx-rtd-theme" <<doc>>
     state sphnix_puml as "sphinxcontrib-plantuml" <<doc>>
+    state sphnix_svg as "sphinxcontrib-svg2pdfconverter" <<doc>>
     state JRE as "JRE" <<doc>> : Java Runtime Environment
     state gwiz as "Graphwiz dot" <<doc>>
     state Sphinx as "Sphinx" <<doc>>
@@ -444,9 +408,11 @@ Dependency chain:
     Sphinx --> m2r
     Sphinx --> rtd_theme
     Sphinx --> sphnix_puml
+    Sphinx --> sphnix_svg
     m2r --> Python3
     rtd_theme --> Python3
     sphnix_puml --> Python3
+    sphnix_svg --> Python3
     Sphinx --> PlantUML
     PlantUML --> JRE
     PlantUML --> gwiz

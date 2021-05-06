@@ -20,6 +20,7 @@
 #include "ffm/spm_error_base.h"
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
+#include "tfm_psa_call_param.h"
 
 /*********************** SPM functions for PSA Client APIs *******************/
 
@@ -68,7 +69,6 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
     struct partition_t *partition = NULL;
     uint32_t privileged;
     int32_t type;
-    struct tfm_control_parameter_t ctrl_param;
 
     TFM_CORE_ASSERT(args != NULL);
     handle = (psa_handle_t)args[0];
@@ -80,21 +80,9 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
     privileged = tfm_spm_partition_get_privileged_mode(
         partition->p_static->flags);
 
-    /*
-     * Read parameters from the arguments. It is a PROGRAMMER ERROR if the
-     * memory reference for buffer is invalid or not readable.
-     */
-    if (tfm_memory_check((const void *)args[1],
-        sizeof(struct tfm_control_parameter_t), ns_caller,
-        TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
-    }
-
-    spm_memcpy(&ctrl_param, (const void *)args[1], sizeof(ctrl_param));
-
-    type = ctrl_param.type;
-    in_num = ctrl_param.in_len;
-    out_num = ctrl_param.out_len;
+    type = (int32_t)((args[1] & TYPE_MASK) >> TYPE_OFFSET);
+    in_num = (size_t)((args[1] & IN_LEN_MASK) >> IN_LEN_OFFSET);
+    out_num = (size_t)((args[1] & OUT_LEN_MASK) >> OUT_LEN_OFFSET);
     inptr = (psa_invec *)args[2];
     outptr = (psa_outvec *)args[3];
 
@@ -457,7 +445,7 @@ void tfm_spm_psa_reply(uint32_t *args)
 {
     psa_handle_t msg_handle;
     psa_status_t status;
-    struct tfm_spm_service_t *service = NULL;
+    struct service_t *service = NULL;
     struct tfm_msg_body_t *msg = NULL;
     int32_t ret = PSA_SUCCESS;
     struct tfm_conn_handle_t *conn_handle;

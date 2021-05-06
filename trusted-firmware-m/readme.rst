@@ -45,6 +45,6 @@ Feedback can be submitted via email to
 .. _Trusted Firmware-M documentation: `Documentation home`_
 .. _Documentation home: https://ci.trustedfirmware.org/job/tf-m-build-docs-nightly/lastStableBuild/artifact/trusted-firmware-m/build/docs/user_guide/html/index.html
 .. _trustedfirmware.org: http://www.trustedfirmware.org
-.. _Release notes: https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/user_guide/html/docs/reference/changelog.html
+.. _Release notes: https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/user_guide/html/docs/reference/releases/index.html
 
 *Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
