@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright 2019-2020 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,10 +12,10 @@
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "mpu_armv8m_drv.h"
-#include "region.h"
-#include "region_defs.h"
 #include "utilities.h"
+
 #include "Driver_Common.h"
+#include "log/tfm_log.h"
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
@@ -22,7 +23,7 @@ extern const struct memory_region_limits memory_regions;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
-#define PARTITION_REGION_PERIPH_START   5
+#define PARTITION_REGION_PERIPH_START   6   //NXP 5
 #define PARTITION_REGION_PERIPH_MAX_NUM 2
 
 uint32_t periph_num_count = 0;
@@ -65,7 +66,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                           HARDFAULT_NMI_ENABLE);
     }
 #endif /* defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1) */
-    if (platform_data->periph_ppc_bank != 0) {
+    if (platform_data->periph_ppc_bank != 0 /* PPC_SP_DO_NOT_CONFIGURE */) {
         ppc_configure_to_secure(platform_data->periph_ppc_bank,
                                 platform_data->periph_ppc_loc, privileged);
 
@@ -75,11 +76,11 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
 
 void SEC_VIO_IRQHandler(void)
 {
-    /* Clear interrupt flag and pending IRQ */
+	/* Clear interrupt flag and pending IRQ */
     NVIC_ClearPendingIRQ(SEC_VIO_IRQn);
 
     /* Print fault message and block execution */
-    ERROR_MSG("Security violation!");
+    ERROR_MSG("Oops... MPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright 2019-2020 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -86,7 +87,6 @@ void tfm_plat_test_secure_timer_start(void)
 {
     /* Match Configuration */
     ctimer_match_config_t matchConfig;
-    /* ctimer_callback_t cb_func; */
     ctimer_config_t config;
 
     /* Use 12 MHz clock for some of the Ctimer */
@@ -129,7 +129,6 @@ void tfm_plat_test_non_secure_timer_start(void)
 {
     /* Match Configuration */
     ctimer_match_config_t matchConfig;
-    // ctimer_callback_t cb_func;
     ctimer_config_t config;
 
     /* Use 12 MHz clock for some of the Ctimer */
