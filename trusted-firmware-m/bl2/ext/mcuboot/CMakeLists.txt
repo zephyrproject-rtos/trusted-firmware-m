@@ -17,6 +17,7 @@ add_subdirectory("${MCUBOOT_PATH}/boot/bootutil" bootutil)
 target_include_directories(bootutil
     PUBLIC
         include
+        config
 )
 
 target_link_libraries(bootutil
@@ -205,6 +206,7 @@ if(NS)
         )
     else()
         add_custom_command(OUTPUT tfm_s_ns_signed.bin
+            WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
             DEPENDS tfm_s_ns_bin tfm_s_ns.bin
             DEPENDS signing_layout_s
 
@@ -223,7 +225,7 @@ if(NS)
             -s ${MCUBOOT_SECURITY_COUNTER_S}
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
-            tfm_s_ns.bin
+            ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns.bin
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns_signed.bin
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns_signed.bin $<TARGET_FILE_DIR:bl2>
         )

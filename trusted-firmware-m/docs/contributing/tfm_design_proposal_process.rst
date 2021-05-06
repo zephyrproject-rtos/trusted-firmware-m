@@ -49,7 +49,7 @@ Example document fragment::
 Design documents are kept in three different sections of the documentation
 reflecting the status of the document. The status of the document determines
 the section it is in. Open (*Draft* and *Detailed* status) and accepted design
-documents shall be put to the ``docs/design_documents`` directory.
+documents shall be put to the ``docs/technical_references`` directory.
 
 .. important::
   - 'Author' and 'Organization' can be *OPTIONAL* but at least one of them is
@@ -78,7 +78,7 @@ Process steps
 
 - Write the design proposal in the format that is described in this document
   with the *Status* set to *Draft* if *Status* field is provided. Put it to the
-  ``docs/design_documents`` directory and create a pull request.
+  ``docs/technical_references`` directory and create a pull request.
 - Start an e-mail thread on the
   `TF-M mailing list <mailto:tf-m@lists.trustedfirmware.org>`_ for discussing
   the proposal.
@@ -98,8 +98,8 @@ Process steps
 .. uml::
 
   @startuml
-  !define DRAFT_DIR **docs/design_documents/**
-  !define REJECTED_DIR **docs/design_documents/rejected/**
+  !define DRAFT_DIR **docs/technical_references/**
+  !define REJECTED_DIR **docs/technical_references/rejected/**
   !define GERRIT_URL https://review.trustedfirmware.org
   !define GERRIT_LINK [[GERRIT_URL trustedfirmware.org]]
   !define MAINTAINER_RST_URL https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/tree/docs/maintainers.rst
@@ -153,4 +153,4 @@ Process steps
 
 --------------
 
-*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2021, Arm Limited. All rights reserved.*

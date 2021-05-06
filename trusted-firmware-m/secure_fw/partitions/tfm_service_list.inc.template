@@ -66,7 +66,7 @@ const struct tfm_spm_service_db_t service_db[] =
 /**************************************************************************/
 /** The service list */
 /**************************************************************************/
-struct tfm_spm_service_t service[] =
+struct service_t g_services[] =
 {
 {% for partition in partitions %}
     {% if partition.attr.tfm_partition_ipc %}

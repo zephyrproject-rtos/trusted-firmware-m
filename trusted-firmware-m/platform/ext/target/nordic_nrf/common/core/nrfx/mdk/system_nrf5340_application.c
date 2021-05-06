@@ -226,10 +226,6 @@ void SystemInit(void)
 
         #endif
 
-        /* Allow Non-Secure code to run FPU instructions.
-         * If only the secure code should control FPU power state these registers should be configured accordingly in the secure application code. */
-        SCB->NSACR |= (3UL << 10);
-
         /* Handle fw-branch APPROTECT setup. */
         nrf53_handle_approtect();
 

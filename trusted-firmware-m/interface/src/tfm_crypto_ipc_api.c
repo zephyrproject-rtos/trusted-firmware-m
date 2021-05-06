@@ -11,8 +11,6 @@
 #include "psa_manifest/sid.h"
 #include "psa/client.h"
 
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
-
 #define PSA_CONNECT(service)                                    \
     psa_handle_t ipc_handle;                                    \
     ipc_handle = psa_connect(service##_SID, service##_VERSION); \
@@ -24,12 +22,12 @@
 
 #define API_DISPATCH(sfn_name, sfn_id)                          \
     psa_call(ipc_handle, PSA_IPC_CALL,                          \
-        in_vec, ARRAY_SIZE(in_vec),                             \
-        out_vec, ARRAY_SIZE(out_vec))
+        in_vec, IOVEC_LEN(in_vec),                              \
+        out_vec, IOVEC_LEN(out_vec))
 
 #define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)                \
     psa_call(ipc_handle, PSA_IPC_CALL,                          \
-        in_vec, ARRAY_SIZE(in_vec),                             \
+        in_vec, IOVEC_LEN(in_vec),                              \
         (psa_outvec *)NULL, 0)
 
 psa_status_t psa_crypto_init(void)
@@ -947,12 +945,12 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key,
 
     PSA_CONNECT(TFM_CRYPTO);
 
-    size_t in_len = ARRAY_SIZE(in_vec);
+    size_t in_len = IOVEC_LEN(in_vec);
     if (additional_data == NULL) {
         in_len--;
     }
     status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len,
-                      out_vec, ARRAY_SIZE(out_vec));
+                      out_vec, IOVEC_LEN(out_vec));
 
     *ciphertext_length = out_vec[0].len;
 
@@ -1008,12 +1006,12 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key,
 
     PSA_CONNECT(TFM_CRYPTO);
 
-    size_t in_len = ARRAY_SIZE(in_vec);
+    size_t in_len = IOVEC_LEN(in_vec);
     if (additional_data == NULL) {
         in_len--;
     }
     status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len,
-                      out_vec, ARRAY_SIZE(out_vec));
+                      out_vec, IOVEC_LEN(out_vec));
 
     *plaintext_length = out_vec[0].len;
 
@@ -1142,12 +1140,12 @@ psa_status_t psa_asymmetric_encrypt(psa_key_id_t key,
 
     PSA_CONNECT(TFM_CRYPTO);
 
-    size_t in_len = ARRAY_SIZE(in_vec);
+    size_t in_len = IOVEC_LEN(in_vec);
     if (salt == NULL) {
         in_len--;
     }
     status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len,
-                      out_vec, ARRAY_SIZE(out_vec));
+                      out_vec, IOVEC_LEN(out_vec));
 
     *output_length = out_vec[0].len;
 
@@ -1190,12 +1188,12 @@ psa_status_t psa_asymmetric_decrypt(psa_key_id_t key,
 
     PSA_CONNECT(TFM_CRYPTO);
 
-    size_t in_len = ARRAY_SIZE(in_vec);
+    size_t in_len = IOVEC_LEN(in_vec);
     if (salt == NULL) {
         in_len--;
     }
     status = psa_call(ipc_handle, PSA_IPC_CALL, in_vec, in_len,
-                      out_vec, ARRAY_SIZE(out_vec));
+                      out_vec, IOVEC_LEN(out_vec));
 
     *output_length = out_vec[0].len;
 

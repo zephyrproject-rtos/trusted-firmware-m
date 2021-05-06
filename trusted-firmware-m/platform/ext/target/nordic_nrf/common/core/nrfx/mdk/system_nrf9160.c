@@ -218,9 +218,6 @@ void SystemInit(void)
              */
         #endif
 
-        /* Allow Non-Secure code to run FPU instructions. 
-         * If only the secure code should control FPU power state these registers should be configured accordingly in the secure application code. */
-        SCB->NSACR |= (3UL << 10);
     #endif
     
     /* Enable the FPU if the compiler used floating point unit instructions. __FPU_USED is a MACRO defined by the

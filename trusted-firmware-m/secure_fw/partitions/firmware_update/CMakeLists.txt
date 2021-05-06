@@ -15,6 +15,8 @@ cmake_policy(SET CMP0079 NEW)
 add_library(tfm_psa_rot_partition_fwu STATIC)
 
 target_include_directories(tfm_psa_rot_partition_fwu
+    INTERFACE
+        ${CMAKE_SOURCE_DIR}/secure_fw/include/tfm
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update

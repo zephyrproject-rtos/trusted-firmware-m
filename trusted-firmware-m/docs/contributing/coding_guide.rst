@@ -18,7 +18,7 @@ remain within clear scope.
 The guidance below is provided as a help. It isn't meant to be a definitive
 list.
 
-As implied in the :doc:`contributing guide </docs/contributing/contributing>`
+As implied in the :doc:`contributing guide </docs/contributing/contributing_process>`
 maintainers have the right to decide on what's acceptable in case of any
 divergence.
 
@@ -76,4 +76,4 @@ List of rules
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*

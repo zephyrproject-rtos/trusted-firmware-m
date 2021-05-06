@@ -10,6 +10,7 @@
   "name": "TFM_SP_FFM11",
   "type": "APPLICATION-ROT",
   "priority": "NORMAL",
+  "model": "IPC",
   "entry_point": "tfm_ffm11_partition_main",
   "stack_size": "0x200",
   "services": [

@@ -22,7 +22,7 @@ bl2_file_to_preprocess=$projectdir/image_macros_to_preprocess_bl2.c
 preprocess_bl2_file=$projectdir/image_macros_preprocessed_bl2.c
 regressionsh=$projectdir/regression.sh
 updatesh=$projectdir/TFM_UPDATE.sh
-
+bin2hexsh=$projectdir/TFM_BIN2HEX.sh
 basedir=$projectdir
 echo preprocess bl2 file
 preprocess $projectdir $bl2_file_to_preprocess $preprocess_bl2_file
@@ -138,6 +138,33 @@ exit 1
 fi
 echo $updatebat" updated"
 command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b unused -m  RE_IMAGE_FLASH_UNUSED -s 0 "$updatesh
+$command  >> $projectdir"/output.txt"
+ret=$?
+if [ $ret != 0 ]; then
+echo "postbuild.sh failed"
+echo $command
+exit 1
+fi
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b boot -m  RE_BL2_PERSO_ADDRESS -s 0 "$bin2hexsh
+$command  >> $projectdir"/output.txt"
+ret=$?
+if [ $ret != 0 ]; then
+echo "postbuild.sh failed"
+echo $command
+exit 1
+fi
+
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b slot0 -m  RE_IMAGE_FLASH_ADDRESS_SECURE -s 0 "$bin2hexsh
+$command  >> $projectdir"/output.txt"
+ret=$?
+if [ $ret != 0 ]; then
+echo "postbuild.sh failed"
+echo $command
+exit 1
+fi
+
+echo $updatebat" updated"
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b slot1 -m  RE_IMAGE_FLASH_ADDRESS_NON_SECURE -s 0 "$bin2hexsh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then

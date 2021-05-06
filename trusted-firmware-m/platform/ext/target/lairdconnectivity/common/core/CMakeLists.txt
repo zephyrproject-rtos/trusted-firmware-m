@@ -1,0 +1,123 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020, Nordic Semiconductor ASA.
+# Copyright (c) 2021, Laird Connectivity.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+cmake_policy(SET CMP0076 NEW)
+set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
+
+#========================= Platform common defs ===============================#
+
+# Specify the location of platform specific build dependencies.
+
+target_add_scatter_file(tfm_s
+    $<$<C_COMPILER_ID:GNU>:${NRF_FOLDER_PATH}/gcc/nordic_nrf_s.ld>
+)
+
+if(NS)
+    target_add_scatter_file(tfm_ns
+        $<$<C_COMPILER_ID:GNU>:${NRF_FOLDER_PATH}/gcc/nordic_nrf_ns.ld>
+    )
+    target_link_libraries(CMSIS_5_tfm_ns
+        INTERFACE
+            CMSIS_5_RTX_V8MMN
+    )
+endif()
+
+if(BL2)
+    target_add_scatter_file(bl2
+            $<$<C_COMPILER_ID:GNU>:${NRF_FOLDER_PATH}/gcc/nordic_nrf_bl2.ld>
+    )
+endif()
+
+#========================= Platform Secure ====================================#
+
+target_include_directories(platform_s
+    PUBLIC
+        .
+        ${NRF_FOLDER_PATH}/native_drivers
+        ${NRF_FOLDER_PATH}/nrfx
+        ${NRF_FOLDER_PATH}/nrfx/mdk
+        ${NRF_FOLDER_PATH}/nrfx/drivers/include
+        ${PLATFORM_DIR}/..
+)
+
+target_sources(platform_s
+    PRIVATE
+        cmsis_drivers/Driver_Flash.c
+        cmsis_drivers/Driver_QSPI.c
+        cmsis_drivers/Driver_USART.c
+        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
+        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twim.c
+        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
+        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_qspi.c
+        ${NRF_FOLDER_PATH}/nrfx_glue.c
+        ${NRF_FOLDER_PATH}/native_drivers/mpu_armv8m_drv.c
+        ${NRF_FOLDER_PATH}/native_drivers/spu.c
+        ${NRF_FOLDER_PATH}/spm_hal.c
+        ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
+        nv_counters.c
+        plat_test.c
+)
+
+target_compile_options(platform_s
+    PUBLIC
+        ${COMPILER_CMSE_FLAG}
+)
+
+#========================= Platform Non-Secure ================================#
+
+target_include_directories(platform_ns
+    PUBLIC
+        .
+        ${NRF_FOLDER_PATH}/nrfx
+        ${NRF_FOLDER_PATH}/nrfx/mdk
+        ${NRF_FOLDER_PATH}/nrfx/drivers/include
+        ${PLATFORM_DIR}/..
+    PRIVATE
+        ${PLATFORM_DIR}/../interface/include
+)
+
+target_sources(platform_ns
+    PRIVATE
+        cmsis_drivers/Driver_USART.c
+        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
+        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twim.c
+        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
+        ${NRF_FOLDER_PATH}/nrfx_glue.c
+        plat_test.c
+)
+
+#========================= Platform BL2 =======================================#
+
+if(BL2)
+    target_include_directories(platform_bl2
+        PUBLIC
+            .
+            ${NRF_FOLDER_PATH}/nrfx
+            ${NRF_FOLDER_PATH}/nrfx/mdk
+            ${NRF_FOLDER_PATH}/nrfx/drivers/include
+        PRIVATE
+            ${PLATFORM_DIR}/..
+    )
+
+    target_sources(platform_bl2
+        PRIVATE
+            boot_hal.c
+            cmsis_drivers/Driver_Flash.c
+            cmsis_drivers/Driver_QSPI.c
+            cmsis_drivers/Driver_USART.c
+            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
+            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twim.c
+            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
+            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_qspi.c
+            ${NRF_FOLDER_PATH}/nrfx_glue.c
+            nv_counters.c
+    )
+endif()

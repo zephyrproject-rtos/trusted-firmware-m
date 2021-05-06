@@ -44,7 +44,6 @@ target_sources(platform_s
     PRIVATE
         target_cfg.c
         ../core/nrfx/mdk/system_nrf5340_application.c
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_compile_definitions(platform_s

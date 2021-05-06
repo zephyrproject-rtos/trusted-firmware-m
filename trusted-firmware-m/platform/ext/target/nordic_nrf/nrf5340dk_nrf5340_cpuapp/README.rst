@@ -20,7 +20,7 @@ Documentation
 The following links provide useful information about the nRF5340
 
 nRF5340 DK website:
-   https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-PDK
+   https://www.nordicsemi.com/Software-and-tools/Development-Kits/nRF5340-DK
 
 Nordic Semiconductor Infocenter: https://infocenter.nordicsemi.com
 

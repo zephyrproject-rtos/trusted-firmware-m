@@ -187,7 +187,7 @@ will not be added to the index (So it cannot be referenced if needed)
 
 Other types of tables such as list-tables and csv-tables are also permitted, as
 seen on :doc:`/docs/getting_started/tfm_sw_requirement` and
-:doc:`/docs/reference/releases/1.0`
+:doc:`/docs/releases/1.0`
 
 
 External Links
@@ -260,7 +260,7 @@ Glossary term
 =============
 
 For technical terms and abbreviations, the recommended guidance is to add an
-entry to the :doc:`/docs/reference/glossary` and refer to it, using the `term:`
+entry to the :doc:`/docs/glossary` and refer to it, using the `term:`
 directive
 
 
@@ -297,4 +297,4 @@ References
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*

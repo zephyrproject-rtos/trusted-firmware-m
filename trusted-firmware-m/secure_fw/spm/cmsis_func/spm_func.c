@@ -55,7 +55,7 @@ REGION_DECLARE_T(Image$$, TFM_SECURE_STACK, $$ZI$$Limit, struct iovec_args_t)[];
 static uint32_t *tfm_secure_stack_seal =
     ((uint32_t *)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1]) - 2;
 
-REGION_DECLARE_T(Image$$, ARM_LIB_STACK_SEAL, $$ZI$$Base, uint32_t);
+REGION_DECLARE_T(Image$$, ARM_LIB_STACK_SEAL, $$ZI$$Base, uint32_t)[];
 
 /*
  * Function to seal the psp stacks for Function model of TF-M.
@@ -86,8 +86,8 @@ void tfm_spm_seal_psp_stacks(void)
      * Seal the ARM_LIB_STACK by writing the seal value to the reserved
      * region.
      */
-    uint32_t *arm_lib_stck_seal_base = (uint32_t *)&REGION_NAME(Image$$,
-                                       ARM_LIB_STACK_SEAL, $$ZI$$Base);
+    uint32_t *arm_lib_stck_seal_base =
+        ((uint32_t *)&REGION_NAME(Image$$, ARM_LIB_STACK_SEAL, $$ZI$$Base)[-1]) - 2;
 
     *(arm_lib_stck_seal_base) = TFM_STACK_SEAL_VALUE;
     *(arm_lib_stck_seal_base + 1) = TFM_STACK_SEAL_VALUE;
@@ -802,7 +802,7 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
                              struct tfm_sfn_req_s *desc_ptr, uint32_t excReturn)
 {
     enum tfm_status_e res;
-    struct iovec_params_t iovecs;
+    struct iovec_params_t iovecs = {0};
 
     res = tfm_check_sfn_req_integrity(desc_ptr);
     if (res != TFM_SUCCESS) {

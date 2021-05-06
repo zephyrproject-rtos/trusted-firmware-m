@@ -15,7 +15,6 @@
   "services": [
     {
       "name": "TFM_SP_PLATFORM_SYSTEM_RESET",
-      "signal": "PLATFORM_SP_SYSTEM_RESET_SIG",
       "sid": "0x00000040",
       "non_secure_clients": true,
       "minor_version": 1,
@@ -23,7 +22,6 @@
     },
     {
       "name": "TFM_SP_PLATFORM_IOCTL",
-      "signal": "PLATFORM_SP_IOCTL_SIG",
       "sid": "0x00000041",
       "non_secure_clients": true,
       "minor_version": 1,
@@ -31,7 +29,6 @@
      },
      {
        "name": "TFM_SP_PLATFORM_NV_COUNTER",
-       "signal": "PLATFORM_SP_NV_COUNTER_SIG",
        "sid": "0x00000042",
        "non_secure_clients": false,
        "version": 1,
