@@ -71,6 +71,15 @@ set(CMAKE_PROJECT_INCLUDE_BEFORE ${CMAKE_SOURCE_DIR}/cmake/disable_compiler_dete
 project("Trusted Firmware M" VERSION ${TFM_VERSION} LANGUAGES C ASM)
 tfm_toolchain_reload_compiler()
 
+# Synchronise the install path variables. If CMAKE_INSTALL_PREFIX is manually
+# set then set both to the value of that, else set both to the value of
+# TFM_INSTALL_PATH. This has to be done after the call to `project()`.
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX  ${TFM_INSTALL_PATH} CACHE PATH  "" FORCE)
+else()
+    set(TFM_INSTALL_PATH  ${CMAKE_INSTALL_PREFIX} CACHE PATH  "Path to which to install TF-M files" FORCE)
+endif()
+
 ############################ Config Check ######################################
 
 include(${CMAKE_SOURCE_DIR}/config/check_config.cmake)
