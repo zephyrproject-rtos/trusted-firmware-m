@@ -157,7 +157,8 @@ target_link_libraries(tfm_secure_api
 target_include_directories(tfm_secure_api
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/model_ipc/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/interface>
+        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/arch/include>
 )
 

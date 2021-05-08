@@ -1,13 +1,13 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include "svc_num.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
-#include "tfm/tfm_core_svc.h"
 #include "tfm/tfm_spm_services.h"
 
 __attribute__((naked))

@@ -13,7 +13,7 @@
 #include "tfm_core_trustzone.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"
-#include "tfm/tfm_core_svc.h"
+#include "svc_num.h"
 #include "ffm/tfm_boot_data.h"
 #include "ffm/psa_client_service_apis.h"
 #include "tfm_hal_spm_logdev.h"
@@ -23,11 +23,11 @@ REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 
 #ifdef PLATFORM_SVC_HANDLERS
-extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
+extern int32_t platform_svc_handlers(uint8_t svc_num,
                                      uint32_t *ctx, uint32_t lr);
 #endif
 
-static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
+static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
     bool ns_caller = false;
@@ -125,7 +125,7 @@ static int32_t SVC_Handler_IPC(tfm_svc_number_t svc_num, uint32_t *ctx,
 
 uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
 {
-    tfm_svc_number_t svc_number = TFM_SVC_PSA_FRAMEWORK_VERSION;
+    uint8_t svc_number = TFM_SVC_PSA_FRAMEWORK_VERSION;
     uint32_t *svc_args = msp;
 
     if (!(exc_return & EXC_RETURN_MODE)) {
@@ -149,7 +149,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
         /* SV called directly from secure context. Check instruction for
          * svc_number
          */
-        svc_number = ((tfm_svc_number_t *)svc_args[6])[-2];
+        svc_number = ((uint8_t *)svc_args[6])[-2];
     } else {
         /* Secure SV executing with NS return.
          * NS cannot directly trigger S SVC so this should not happen. This is

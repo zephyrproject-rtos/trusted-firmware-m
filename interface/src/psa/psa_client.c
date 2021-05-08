@@ -6,9 +6,10 @@
  */
 
 #include <inttypes.h>
-#include "tfm/tfm_core_svc.h"
 #include "psa/client.h"
+#include "svc_num.h"
 #include "tfm_api.h"
+#include "tfm_hal_device_header.h"
 #include "tfm_psa_call_param.h"
 
 __attribute__((naked))

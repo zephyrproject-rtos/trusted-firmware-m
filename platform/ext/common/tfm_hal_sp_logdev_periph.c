@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,12 @@
 
 #include "tfm_hal_sp_logdev.h"
 #include "uart_stdout.h"
-#include "tfm/tfm_core_svc.h"
+#ifdef TFM_PSA_API
+#include "svc_num.h"
+#else
+#include "tfm_core_svc.h"
+#endif /* TFM_PSA_API */
+#include "tfm_hal_device_header.h"
 
 __attribute__((naked))
 static int tfm_output_unpriv_string(const unsigned char *str, size_t len)
