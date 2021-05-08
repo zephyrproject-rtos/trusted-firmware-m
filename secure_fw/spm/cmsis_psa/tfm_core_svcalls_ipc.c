@@ -122,16 +122,10 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
     return PSA_SUCCESS;
 }
 
-
 uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
 {
     uint8_t svc_number = TFM_SVC_PSA_FRAMEWORK_VERSION;
     uint32_t *svc_args = msp;
-
-    if (!(exc_return & EXC_RETURN_MODE)) {
-        /* Calling SVC from Handler Mode is not supported */
-        tfm_core_panic();
-    }
 
     if ((exc_return & EXC_RETURN_MODE) && (exc_return & EXC_RETURN_SPSEL)) {
         /* Use PSP when both EXC_RETURN.MODE and EXC_RETURN.SPSEL are set */
@@ -157,6 +151,12 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
          */
         tfm_core_panic();
     }
+
+    if (!(exc_return & EXC_RETURN_MODE)
+                                  != (svc_number > TFM_SVC_THREAD_NUMBER_END)) {
+        tfm_core_panic();
+    }
+
     switch (svc_number) {
     case TFM_SVC_SPM_INIT:
         tfm_arch_clear_fp_status();
