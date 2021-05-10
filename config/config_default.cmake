@@ -145,7 +145,7 @@ set(TFM_FWU_BOOTLOADER_LIB              "mcuboot"   CACHE STRING    "Bootloader 
 ################################## Tests #######################################
 
 set(TFM_INTERACTIVE_TEST                OFF         CACHE BOOL      "Enable interactive tests")
-set(TFM_IRQ_TEST                        OFF         CACHE BOOL      "Enable IRQ tests")
+set(TFM_ENABLE_SLIH_TEST                OFF         CACHE BOOL      "Enable Second-Level Interrupt Handling tests")
 set(TFM_PERIPH_ACCESS_TEST              OFF         CACHE BOOL      "Enable peripheral access tests")
 
 set(PS_TEST_NV_COUNTERS                 ON          CACHE BOOL      "Use the test NV counters to test Protected Storage rollback scenarios")

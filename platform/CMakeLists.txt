@@ -98,7 +98,7 @@ target_link_libraries(platform_ns
 
 target_compile_definitions(platform_ns
     PRIVATE
-        $<$<BOOL:${TFM_IRQ_TEST}>:TFM_ENABLE_IRQ_TEST>
+        $<$<BOOL:${TFM_ENABLE_SLIH_TEST}>:TFM_ENABLE_SLIH_TEST>
         $<$<BOOL:${TFM_PERIPH_ACCESS_TEST}>:TFM_ENABLE_PERIPH_ACCESS_TEST>
 )
 

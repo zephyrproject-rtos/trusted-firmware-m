@@ -79,3 +79,8 @@ tfm_invalid_config(NOT TFM_FIH_PROFILE IN_LIST TFM_FIH_PROFILE_LIST)
 ########################### TF-M audit log #####################################
 
 tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND TFM_PSA_API)
+
+########################### TF-M Tests     #####################################
+
+tfm_invalid_config(TFM_ENABLE_SLIH_TEST AND TFM_ISOLATION_LEVEL GREATER 1)
+tfm_invalid_config(TFM_ENABLE_SLIH_TEST AND NOT TFM_PSA_API)

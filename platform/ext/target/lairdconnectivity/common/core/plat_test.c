@@ -340,7 +340,7 @@ void pal_timer_stop_ns(void)
     timer_stop(NRF_TIMER1);
 }
 
-#if !defined(TFM_ENABLE_IRQ_TEST)
+#if !defined(TFM_ENABLE_SLIH_TEST)
 /* Watchdog timeout handler. */
 void TIMER1_Handler(void)
 {
