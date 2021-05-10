@@ -12,3 +12,4 @@ m2r
 sphinx-rtd-theme
 sphinxcontrib-plantuml
 sphinxcontrib-svg2pdfconverter
+sphinx-tabs

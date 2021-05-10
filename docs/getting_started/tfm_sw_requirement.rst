@@ -15,7 +15,7 @@ Supported build environments
 
 TF-M officially supports a limited set of build environments and setups. In
 this context, official support means that the environments listed below
-are actively used by team members and active developers hence users should
+are actively used by team members and active developers, hence users should
 be able to recreate the same configurations by following the instructions
 described below. In case of problems, the TF-M team provides support
 only for these environments, but building in other environments can still be
@@ -345,7 +345,8 @@ To build the TF-M firmware the following tools are needed:
    "Sphinx","=1.7.9","User Guide"
    "sphinxcontrib-plantuml",,"User Guide"
    "sphinxcontrib-svg2pdfconverter",,"User Guide"
-   "sphinx-trd-theme",,"User Guide"
+   "sphinx-rtd-theme",,"User Guide"
+   "sphinx-tabs",,"User Guide"
    "Git",,
    "PlantUML",">v1.2018.11","Reference Manual, User Guide"
    "Graphviz dot",">v2.38.0","Reference manual"
@@ -373,6 +374,7 @@ Dependency chain:
     state u_guide as "User Guide" <<doc>>
     state refman as "Reference Manual" <<doc>>
     state rtd_theme as "sphinx-rtd-theme" <<doc>>
+    state tabs as "sphinx-tabs" <<doc>>
     state sphnix_puml as "sphinxcontrib-plantuml" <<doc>>
     state sphnix_svg as "sphinxcontrib-svg2pdfconverter" <<doc>>
     state JRE as "JRE" <<doc>> : Java Runtime Environment
@@ -407,10 +409,12 @@ Dependency chain:
     u_guide --> Sphinx
     Sphinx --> m2r
     Sphinx --> rtd_theme
+    Sphinx --> tabs
     Sphinx --> sphnix_puml
     Sphinx --> sphnix_svg
     m2r --> Python3
     rtd_theme --> Python3
+    tabs --> Python3
     sphnix_puml --> Python3
     sphnix_svg --> Python3
     Sphinx --> PlantUML
