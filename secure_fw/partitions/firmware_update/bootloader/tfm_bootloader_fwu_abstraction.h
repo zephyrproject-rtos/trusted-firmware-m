@@ -116,7 +116,8 @@ psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
  * \return PSA_SUCCESS         On success
  *         PSA_ERROR_GENERIC_ERROR       A fatal error occurred
  */
-psa_status_t fwu_bootloader_mark_image_accepted(void);
+psa_status_t fwu_bootloader_mark_image_accepted(
+                                             bl_image_id_t bootloader_image_id);
 
 /**
  * \brief Abort the current image download process.

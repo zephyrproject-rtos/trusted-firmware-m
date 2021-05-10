@@ -174,7 +174,7 @@ fwu_bootloader_mark_image_accepted(function)
 
 .. code-block:: c
 
-    psa_status_t fwu_bootloader_mark_image_accepted(void);
+    psa_status_t fwu_bootloader_mark_image_accepted(bl_image_id_t bootloader_image_id);
 
 **Description**
 

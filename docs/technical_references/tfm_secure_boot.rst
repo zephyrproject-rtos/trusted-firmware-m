@@ -797,8 +797,9 @@ Integration with Firmware Update service
 The shim layer of the Firmware Update partition calls the APIs in
 bootutil_misc.c to control the image status.
 
-- Call ``boot_write_magic()`` to make the image as a candidate image for booting.
-- Call ``boot_set_confirmed()`` to make the image as a permanent image.
+- Call ``boot_set_pending_multi()`` to make the image as a candidate image for
+  booting.
+- Call ``boot_set_confirmed_multi()`` to make the image as a permanent image.
 
 .. Note::
     Currently, in direct-xip mode and ram-load mode, TF-M cannot get the

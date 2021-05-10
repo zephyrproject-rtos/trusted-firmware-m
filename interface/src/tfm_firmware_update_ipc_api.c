@@ -155,10 +155,13 @@ psa_status_t psa_fwu_request_reboot(void)
     return status;
 }
 
-psa_status_t psa_fwu_accept(void)
+psa_status_t psa_fwu_accept(psa_image_id_t image_id)
 {
     psa_handle_t handle;
     psa_status_t status;
+    psa_invec in_vec[] = {
+        { .base = &image_id, .len = sizeof(image_id) }
+    };
 
     handle = psa_connect(TFM_FWU_ACCEPT_SID,
                          TFM_FWU_ACCEPT_VERSION);
@@ -166,7 +169,7 @@ psa_status_t psa_fwu_accept(void)
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, NULL, 0);
+    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), NULL, 0);
 
     psa_close(handle);
 
