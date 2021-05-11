@@ -24,23 +24,26 @@
 #define POSITION_TO_PTR(x, t)               (t)(x)
 
 /* Length of extendable variables in partition static type */
-#define STATIC_INFO_EXT_LENGTH              2
+#define LOAD_INFO_EXT_LENGTH                2
 /*
- * Argument "ps_ptr" must have be a "struct partition_static_info_t *" type and
+ * Argument "ps_ptr" must have be a "struct partition_load_info_t *" type and
  * must be validated before using.
  */
-#define STATIC_INFSZ_BYTES(ps_ptr)                                      \
-    (sizeof(*(ps_ptr)) + STATIC_INFO_EXT_LENGTH * sizeof(uintptr_t) +   \
-     (ps_ptr)->ndeps * sizeof(uint32_t) +                               \
-     (ps_ptr)->nservices * sizeof(struct service_static_info_t) +       \
+#define LOAD_INFSZ_BYTES(ps_ptr)                                       \
+    (sizeof(*(ps_ptr)) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t) +    \
+     (ps_ptr)->ndeps * sizeof(uint32_t) +                              \
+     (ps_ptr)->nservices * sizeof(struct service_load_info_t) +        \
      (ps_ptr)->nassets * sizeof(struct asset_desc_t))
 
-#define STATIC_INF_DEPS(ps_ptr)                                         \
-    ((uintptr_t)(ps_ptr + 1) + STATIC_INFO_EXT_LENGTH * sizeof(uintptr_t))
-#define STATIC_INF_SERVICE(ps_ptr)                                      \
-    ((uintptr_t)STATIC_INF_DEPS(ps_ptr) + (ps_ptr)->ndeps * sizeof(uint32_t))
-#define STATIC_INF_ASSET(ps_ptr)                                        \
-    ((uintptr_t)STATIC_INF_SERVICE(ps_ptr) +                            \
-     (ps_ptr)->nservices * sizeof(struct service_static_info_t))
+/* 'Allocate' stack based on load info */
+#define LOAD_ALLOCED_STACK_ADDR(ps_ptr)    (*((uintptr_t *)(ps_ptr + 1)))
+
+#define LOAD_INFO_DEPS(ps_ptr)                                         \
+    ((uintptr_t)(ps_ptr + 1) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t))
+#define LOAD_INFO_SERVICE(ps_ptr)                                      \
+    ((uintptr_t)LOAD_INFO_DEPS(ps_ptr) + (ps_ptr)->ndeps * sizeof(uint32_t))
+#define LOAD_INFO_ASSET(ps_ptr)                                        \
+    ((uintptr_t)LOAD_INFO_SERVICE(ps_ptr) +                            \
+     (ps_ptr)->nservices * sizeof(struct service_load_info_t))
 
 #endif /* __PARTITION_STATIC_LOAD_H__ */

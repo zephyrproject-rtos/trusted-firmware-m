@@ -76,9 +76,9 @@ if (TEST_PSA_API STREQUAL IPC)
     target_sources(tfm_app_rot_partition_server_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_server_partition_psa.c)
     target_sources(tfm_partitions INTERFACE
-        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/static_info_driver_partition_psa.c
-        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/static_info_client_partition_psa.c
-        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/static_info_server_partition_psa.c
+        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_driver_partition_psa.c
+        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_client_partition_psa.c
+        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_server_partition_psa.c
     )
 endif()
 

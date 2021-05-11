@@ -432,7 +432,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
             tfm_core_panic();
         }
 
-        dep = (uint32_t *)STATIC_INF_DEPS(partition->p_static);
+        dep = (uint32_t *)LOAD_INFO_DEPS(partition->p_static);
         for (i = 0; i < partition->p_static->ndeps; i++) {
             if (dep[i] == sid) {
                 break;
@@ -683,7 +683,7 @@ static struct service_t *tfm_allocate_service(uint32_t service_count)
 }
 
 /* Check partition static data validation */
-bool tfm_validate_partition_static(struct partition_static_info_t *p_cmninf)
+bool tfm_validate_partition_static(struct partition_load_info_t *p_cmninf)
 {
     return ((p_cmninf->psa_ff_ver & PARTITION_INFO_MAGIC_MASK)
             == PARTITION_INFO_MAGIC);
@@ -692,15 +692,14 @@ bool tfm_validate_partition_static(struct partition_static_info_t *p_cmninf)
 uint32_t tfm_spm_init(void)
 {
     uint32_t i, j;
-    uintptr_t *p_ext_static_info;
     struct partition_t *partition;
     struct service_t *service;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
     const struct platform_data_t *platform_data_p;
-    uintptr_t part_static_start, part_static_end;
-    struct partition_static_info_t *p_cmninf;
-    struct service_static_info_t *p_service_static;
-    struct asset_desc_t *p_asset_static;
+    uintptr_t part_load_start, part_load_end;
+    struct partition_load_info_t *p_cmninf;
+    struct service_load_info_t *p_service_static;
+    struct asset_desc_t *p_asset_load;
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
 #endif
@@ -711,14 +710,14 @@ uint32_t tfm_spm_init(void)
                   TFM_CONN_HANDLE_MAX_NUM);
 
     /* Load partition and service data */
-    part_static_start = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Base);
-    part_static_end = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Limit);
-    while (part_static_start < part_static_end) {
-        p_cmninf = (struct partition_static_info_t *)part_static_start;
+    part_load_start = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Base);
+    part_load_end = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Limit);
+    while (part_load_start < part_load_end) {
+        p_cmninf = (struct partition_load_info_t *)part_load_start;
 
         /* Validate static info section range */
-        part_static_start += STATIC_INFSZ_BYTES(p_cmninf);
-        if (part_static_start > part_static_end) {
+        part_load_start += LOAD_INFSZ_BYTES(p_cmninf);
+        if (part_load_start > part_load_end) {
             tfm_core_panic();
         }
 
@@ -752,14 +751,14 @@ uint32_t tfm_spm_init(void)
         partition->p_static = p_cmninf;
 
         /* Init partition device object assets */
-        p_asset_static = (struct asset_desc_t *)STATIC_INF_ASSET(p_cmninf);
+        p_asset_load = (struct asset_desc_t *)LOAD_INFO_ASSET(p_cmninf);
         for (i = 0; i < p_cmninf->nassets; i++) {
             /* Skip the memory-based asset */
-            if (!(p_asset_static[i].attr & ASSET_DEV_REF_BIT)) {
+            if (!(p_asset_load[i].attr & ASSET_DEV_REF_BIT)) {
                 continue;
             }
 
-            platform_data_p = POSITION_TO_PTR(p_asset_static[i].dev.addr_ref,
+            platform_data_p = POSITION_TO_PTR(p_asset_load[i].dev.addr_ref,
                                               struct platform_data_t *);
 #ifdef TFM_FIH_PROFILE_ON
             FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, i,
@@ -803,13 +802,12 @@ uint32_t tfm_spm_init(void)
         }
 
         /* Extendable partition static info is right after p_cmninf. */
-        p_ext_static_info = (uintptr_t *)(p_cmninf + 1);
         tfm_core_thrd_init(
                     pth,
                     POSITION_TO_ENTRY(p_cmninf->entry, tfm_core_thrd_entry_t),
                     NULL,
-                    p_ext_static_info[0] + p_cmninf->stack_size,
-                    p_ext_static_info[0]);
+                    LOAD_ALLOCED_STACK_ADDR(p_cmninf) + p_cmninf->stack_size,
+                    LOAD_ALLOCED_STACK_ADDR(p_cmninf));
 
         pth->prior = TO_THREAD_PRIORITY(PARTITION_GET_PRIOR(p_cmninf->flags));
 
@@ -825,7 +823,7 @@ uint32_t tfm_spm_init(void)
 
         /* Init Services in the partition */
         p_service_static =
-            (struct service_static_info_t *)STATIC_INF_SERVICE(p_cmninf);
+            (struct service_load_info_t *)LOAD_INFO_SERVICE(p_cmninf);
         for (i = 0; i < p_cmninf->nservices; i++) {
             /* Fill service runtime data */
             partition->signals_allowed |= p_service_static[i].signal;
@@ -871,7 +869,7 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 {
 #if TFM_LVL != 1
     struct partition_t *p_next_partition;
-    const struct partition_static_info_t *p_part_static;
+    const struct partition_load_info_t *p_part_static;
     uint32_t is_privileged;
 #endif
     struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();
@@ -901,7 +899,7 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
          */
         if (is_privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
             struct asset_desc_t *p_asset =
-                (struct asset_desc_t *)STATIC_INF_ASSET(p_part_static);
+                (struct asset_desc_t *)LOAD_INFO_ASSET(p_part_static);
             /* Partition must have private data as the first asset in LVL3 */
             if (p_part_static->nassets == 0) {
                 tfm_core_panic();

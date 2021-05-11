@@ -36,7 +36,7 @@ target_sources(tfm_psa_rot_partition_fwu
 target_sources(tfm_partitions
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/static_info_tfm_firmware_update.c>
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/load_info_tfm_firmware_update.c>
 )
 
 # The bootloader specific configuration.

@@ -42,7 +42,7 @@ target_sources(tfm_psa_rot_partition_psa_proxy
 )
 target_sources(tfm_partitions
     INTERFACE
-        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/psa_proxy/auto_generated/static_info_tfm_psa_proxy.c
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/psa_proxy/auto_generated/load_info_tfm_psa_proxy.c
 )
 
 target_link_libraries(tfm_psa_rot_partition_psa_proxy

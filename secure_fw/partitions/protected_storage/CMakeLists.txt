@@ -56,7 +56,7 @@ target_sources(tfm_app_rot_partition_ps
 target_sources(tfm_partitions
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/protected_storage/auto_generated/static_info_tfm_protected_storage.c>
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/protected_storage/auto_generated/load_info_tfm_protected_storage.c>
 )
 
 target_link_libraries(tfm_app_rot_partition_ps

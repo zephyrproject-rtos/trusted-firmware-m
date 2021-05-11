@@ -41,7 +41,7 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
 
     /**** Section for holding partition static data */
 #define block TFM_SP_STATIC_LIST with alignment = 4 {
-    ro section .partition_info object static_info_*.o,
+    ro section .partition_info object load_info_*.o,
 }
 
     /**** PSA RoT RO part (CODE + RODATA) start here */

@@ -54,9 +54,9 @@ extern uint8_t {{manifest.name|lower}}_stack[];
 extern void {{manifest.entry_point}}(void);
 
 /* partition static info type definition */
-struct partition_{{manifest.name|lower}}_static_info_t {
+struct partition_{{manifest.name|lower}}_load_info_t {
     /* common length data */
-    struct partition_static_info_t  cmn_info;
+    struct partition_load_info_t    cmn_info;
     /* per-partition variable length data */
     uintptr_t                       stack_pos;
     uintptr_t                       heap_pos;
@@ -64,7 +64,7 @@ struct partition_{{manifest.name|lower}}_static_info_t {
     uint32_t                        deps[{{(manifest.name|upper + "_NDEPS")}}];
 {% endif %}
 {% if manifest.services %}
-    struct service_static_info_t    services[{{(manifest.name|upper + "_NSERVS")}}];
+    struct service_load_info_t    services[{{(manifest.name|upper + "_NSERVS")}}];
 {% endif %}
 #if TFM_LVL == 3
     struct asset_desc_t             assets[{{(manifest.name|upper + "_NASSETS")}}];
@@ -76,7 +76,7 @@ struct partition_{{manifest.name|lower}}_static_info_t {
 } __attribute__((aligned(4)));
 
 /* Partition static, deps, service static data. Put to a dedicated section. */
-const struct partition_{{manifest.name|lower}}_static_info_t {{manifest.name|lower}}_static
+const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower}}_static
     __attribute__((used, section(".partition_info"))) = {
     .cmn_info = {
 {% if manifest.psa_framework_version == 1.0 %}

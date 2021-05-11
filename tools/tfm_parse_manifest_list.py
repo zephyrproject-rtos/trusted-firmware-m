@@ -75,7 +75,7 @@ def process_manifest(manifest_list_files):
 
     manifesttemplate = ENV.get_template('secure_fw/partitions/manifestfilename.template')
     memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
-    infotemplate = ENV.get_template('secure_fw/partitions/partition_static_info.template')
+    infotemplate = ENV.get_template('secure_fw/partitions/partition_load_info.template')
 
     pid_list = []
     no_pid_manifest_idx = []
@@ -116,7 +116,7 @@ def process_manifest(manifest_list_files):
         context['file_name'] = outfile_name.replace('.h', '')
         outfile_name = os.path.join(manifest_dir, "psa_manifest", outfile_name).replace('\\', '/')
         intermediafile_name = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + context['file_name'] + '.c').replace('\\', '/')
-        infofile_name = os.path.join(manifest_dir, "auto_generated", 'static_info_' + context['file_name'] + '.c').replace('\\', '/')
+        infofile_name = os.path.join(manifest_dir, "auto_generated", 'load_info_' + context['file_name'] + '.c').replace('\\', '/')
 
         """
         Remove the `source_path` portion of the filepaths, so that it can be

@@ -32,7 +32,7 @@
     ((flag) & SERVICE_VERSION_POLICY_MASK)
 
 /* Common service structure type */
-struct service_static_info_t {
+struct service_load_info_t {
     uintptr_t       name_strid;         /* String ID for name               */
     psa_signal_t    signal;             /* Service signal                   */
     uint32_t        sid;                /* Service ID                       */

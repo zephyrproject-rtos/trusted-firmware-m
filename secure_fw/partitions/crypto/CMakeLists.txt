@@ -36,7 +36,7 @@ target_sources(tfm_psa_rot_partition_crypto
 target_sources(tfm_partitions
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto/auto_generated/static_info_tfm_crypto.c>
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto/auto_generated/load_info_tfm_crypto.c>
 )
 
 # Set include directory

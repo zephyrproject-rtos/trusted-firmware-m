@@ -27,7 +27,7 @@ target_sources(tfm_app_rot_partition_ffm11
 target_sources(tfm_partitions
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/tfm_ffm11_partition/auto_generated/static_info_tfm_ffm11_partition.c>
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/tfm_ffm11_partition/auto_generated/load_info_tfm_ffm11_partition.c>
 )
 
 # Set include directory

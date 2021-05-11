@@ -21,7 +21,7 @@
 #define TFM_PARTITION_PRIVILEGED_MODE           (1U)
 
 /*
- * Partition static data - flags
+ * Partition load data - flags
  * bit 7-0: priority
  * bit 8: 1 - PSA_ROT, 0 - APP_ROT
  * bit 9: 1 - IPC model, 0 - SFN model
@@ -42,7 +42,7 @@
  * aligned. It includes: stack and heap position, dependencies, services and
  * assets data.
  */
-struct partition_static_info_t {
+struct partition_load_info_t {
     uint32_t        psa_ff_ver;         /* Encode the version with magic    */
     uint32_t        pid;                /* Partition ID                     */
     uint32_t        flags;              /* ARoT/PRoT, SFN/IPC, priority     */

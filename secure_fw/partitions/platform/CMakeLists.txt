@@ -25,7 +25,7 @@ target_sources(tfm_psa_rot_partition_platform
 target_sources(tfm_partitions
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/platform/auto_generated/static_info_tfm_platform.c>
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/platform/auto_generated/load_info_tfm_platform.c>
 )
 
 # Set include directory

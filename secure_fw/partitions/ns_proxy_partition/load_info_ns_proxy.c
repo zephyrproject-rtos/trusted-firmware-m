@@ -32,9 +32,9 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 /* Entrypoint function declaration */
 extern void tfm_nspm_thread_entry(void);
 
-struct partition_tfm_sp_ns_proxy_static_info_t {
+struct partition_tfm_sp_ns_proxy_load_info_t {
     /* common length data */
-    struct partition_static_info_t  cmn_info;
+    struct partition_load_info_t  cmn_info;
     /* per-partition variable length data */
     uintptr_t                       stack_pos;
     uintptr_t                       heap_pos;
@@ -44,7 +44,7 @@ struct partition_tfm_sp_ns_proxy_static_info_t {
 } __attribute__((aligned(4)));
 
 /* Partition static, deps, service static data. Put to a dedicated section. */
-const struct partition_tfm_sp_ns_proxy_static_info_t
+const struct partition_tfm_sp_ns_proxy_load_info_t
     tfm_sp_ns_proxy_static __attribute__((used, section(".partition_info"))) = {
     .cmn_info = {
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
