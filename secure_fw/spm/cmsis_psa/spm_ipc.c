@@ -692,6 +692,7 @@ bool tfm_validate_partition_static(struct partition_static_info_t *p_cmninf)
 uint32_t tfm_spm_init(void)
 {
     uint32_t i, j;
+    uintptr_t *p_ext_static_info;
     struct partition_t *partition;
     struct service_t *service;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
@@ -801,12 +802,14 @@ uint32_t tfm_spm_init(void)
             tfm_core_panic();
         }
 
+        /* Extendable partition static info is right after p_cmninf. */
+        p_ext_static_info = (uintptr_t *)(p_cmninf + 1);
         tfm_core_thrd_init(
                     pth,
                     POSITION_TO_ENTRY(p_cmninf->entry, tfm_core_thrd_entry_t),
                     NULL,
-                    (uintptr_t)(p_cmninf->vars[0] + p_cmninf->stack_size),
-                    (uintptr_t)p_cmninf->vars[0]);
+                    p_ext_static_info[0] + p_cmninf->stack_size,
+                    p_ext_static_info[0]);
 
         pth->prior = TO_THREAD_PRIORITY(PARTITION_GET_PRIOR(p_cmninf->flags));
 
@@ -868,7 +871,7 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 {
 #if TFM_LVL != 1
     struct partition_t *p_next_partition;
-    struct partition_static_info_t *p_part_static;
+    const struct partition_static_info_t *p_part_static;
     uint32_t is_privileged;
 #endif
     struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();

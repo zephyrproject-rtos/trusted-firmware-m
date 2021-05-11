@@ -36,7 +36,12 @@
 #define SPM_PART_FLAG_PSA_ROT                   (1U << 8)
 #define SPM_PART_FLAG_IPC                       (1U << 9)
 
-/* Common partition structure type */
+/*
+ * Common partition structure type, the extendable data is right after it.
+ * Extendable data has different size for each partition, and must be 4-byte
+ * aligned. It includes: stack and heap position, dependencies, services and
+ * assets data.
+ */
 struct partition_static_info_t {
     uint32_t        psa_ff_ver;         /* Encode the version with magic    */
     uint32_t        pid;                /* Partition ID                     */
@@ -47,7 +52,6 @@ struct partition_static_info_t {
     uint32_t        ndeps;              /* Dependency number                */
     uint32_t        nservices;          /* Service number                   */
     uint32_t        nassets;            /* Asset numbers                    */
-    uintptr_t       vars[];             /* Struct extendable indicator      */
 } __attribute__((aligned(4)));
 
 #endif /* __PARTITION_DEFS_H__ */

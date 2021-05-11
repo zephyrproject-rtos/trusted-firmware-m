@@ -36,7 +36,7 @@
      (ps_ptr)->nassets * sizeof(struct asset_desc_t))
 
 #define STATIC_INF_DEPS(ps_ptr)                                         \
-    ((uintptr_t)(ps_ptr)->vars + STATIC_INFO_EXT_LENGTH * sizeof(uintptr_t))
+    ((uintptr_t)(ps_ptr + 1) + STATIC_INFO_EXT_LENGTH * sizeof(uintptr_t))
 #define STATIC_INF_SERVICE(ps_ptr)                                      \
     ((uintptr_t)STATIC_INF_DEPS(ps_ptr) + (ps_ptr)->ndeps * sizeof(uint32_t))
 #define STATIC_INF_ASSET(ps_ptr)                                        \
