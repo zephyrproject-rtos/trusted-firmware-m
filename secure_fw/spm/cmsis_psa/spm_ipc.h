@@ -83,7 +83,7 @@ struct tfm_msg_body_t {
  * divided to structures, to keep the related fields close to each other.
  */
 struct partition_t {
-    const struct partition_load_info_t *p_static;
+    const struct partition_load_info_t *p_ldinf;
     void *p_platform;
     void *p_interrupts;
     void *p_metadata;
@@ -102,7 +102,7 @@ struct spm_partition_db_t {
 
 /* RoT Service data */
 struct service_t {
-    const struct service_load_info_t *service_db;   /* Service static pointer */
+    const struct service_load_info_t *p_ldinf;      /* Service static pointer */
     struct partition_t *partition;                  /* Owner of the service   */
     struct bi_list_node_t handle_list;              /* Service handle list    */
     struct bi_list_node_t list;                     /* For list operation     */

@@ -31,7 +31,7 @@ struct service_t g_services[] =
     /******** {{partition.manifest.name}} ********/
             {% for service in partition.manifest.services %}
     {{'{'}}
-        .service_db = NULL,
+        .p_ldinf = NULL,
         .partition = NULL,
         .handle_list = {0},
         .list = {0},

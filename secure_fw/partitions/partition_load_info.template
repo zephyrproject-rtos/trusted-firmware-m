@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "region.h"
-#include "load/partition_static_load.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
@@ -58,13 +57,13 @@ struct partition_{{manifest.name|lower}}_load_info_t {
     /* common length data */
     struct partition_load_info_t    cmn_info;
     /* per-partition variable length data */
-    uintptr_t                       stack_pos;
-    uintptr_t                       heap_pos;
+    uintptr_t                       stack_addr;
+    uintptr_t                       heap_addr;
 {% if manifest.dependencies %}
     uint32_t                        deps[{{(manifest.name|upper + "_NDEPS")}}];
 {% endif %}
 {% if manifest.services %}
-    struct service_load_info_t    services[{{(manifest.name|upper + "_NSERVS")}}];
+    struct service_load_info_t      services[{{(manifest.name|upper + "_NSERVS")}}];
 {% endif %}
 #if TFM_LVL == 3
     struct asset_desc_t             assets[{{(manifest.name|upper + "_NASSETS")}}];
@@ -106,8 +105,8 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         .nservices                  = {{(manifest.name|upper + "_NSERVS")}},
         .nassets                    = {{(manifest.name|upper + "_NASSETS")}},
     },
-    .stack_pos                      = PTR_TO_POSITION({{manifest.name|lower}}_stack),
-    .heap_pos                       = 0,
+    .stack_addr                     = (uintptr_t){{manifest.name|lower}}_stack,
+    .heap_addr                      = 0,
 {% if manifest.dependencies %}
     .deps = {
     {% for dep in manifest.dependencies %}
@@ -155,7 +154,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
 #ifdef {{region.conditional}}
     {% endif %}
         {
-            .dev.addr_ref           = PTR_TO_POSITION({{region.name}}),
+            .dev.addr_ref           = PTR_TO_REFERENCE({{region.name}}),
             .attr                   = ASSET_DEV_REF_BIT,
         },
     {% if region.conditional %}
@@ -171,7 +170,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
 #ifdef {{region.conditional}}
         {% endif %}
         {
-            .dev.addr_ref           = PTR_TO_POSITION({{region.name}}),
+            .dev.addr_ref           = PTR_TO_REFERENCE({{region.name}}),
             .attr                   = ASSET_DEV_REF_BIT,
         },
         {% if region.conditional %}

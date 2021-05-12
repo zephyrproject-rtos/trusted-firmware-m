@@ -31,6 +31,9 @@
 #define SERVICE_GET_VERSION_POLICY(flag)        \
     ((flag) & SERVICE_VERSION_POLICY_MASK)
 
+#define STRID_TO_STRING_PTR(strid)              (const char *)(strid)
+#define STRING_PTR_TO_STRID(str)                (uintptr_t)(str)
+
 /* Common service structure type */
 struct service_load_info_t {
     uintptr_t       name_strid;         /* String ID for name               */

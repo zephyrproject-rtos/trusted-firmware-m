@@ -76,7 +76,7 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
         tfm_core_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_static->flags);
+        partition->p_ldinf->flags);
 
     type = (int32_t)(int16_t)((args[1] & TYPE_MASK) >> TYPE_OFFSET);
     in_num = (size_t)((args[1] & IN_LEN_MASK) >> IN_LEN_OFFSET);
@@ -174,7 +174,7 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
         tfm_core_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_static->flags);
+        partition->p_ldinf->flags);
 
     /*
      * Write the message to the service buffer. It is a fatal error if the
@@ -237,7 +237,7 @@ void tfm_spm_psa_set_rhandle(uint32_t *args)
     }
 
     /* It is a PROGRAMMER ERROR if a stateless service sets rhandle. */
-    if (SERVICE_IS_STATELESS(msg->service->service_db->flags)) {
+    if (SERVICE_IS_STATELESS(msg->service->p_ldinf->flags)) {
         tfm_core_panic();
     }
 
@@ -273,7 +273,7 @@ size_t tfm_spm_psa_read(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_static->flags);
+        partition->p_ldinf->flags);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -396,7 +396,7 @@ void tfm_spm_psa_write(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_static->flags);
+        partition->p_ldinf->flags);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -513,7 +513,7 @@ void tfm_spm_psa_reply(uint32_t *args)
              * psa_call().
              */
             update_caller_outvec_len(msg);
-            if (SERVICE_IS_STATELESS(service->service_db->flags)) {
+            if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
                 tfm_spm_free_conn_handle(service, conn_handle);
             }
         } else {
@@ -585,7 +585,7 @@ void tfm_spm_psa_eoi(uint32_t *args)
         tfm_core_panic();
     }
 
-    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
+    irq_line = get_irq_line_for_signal(partition->p_ldinf->pid, irq_signal);
     /* It is a fatal error if passed signal is not an interrupt signal. */
     if (irq_line < 0) {
         tfm_core_panic();
@@ -624,7 +624,7 @@ void tfm_spm_irq_enable(uint32_t *args)
         tfm_core_panic();
     }
 
-    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
+    irq_line = get_irq_line_for_signal(partition->p_ldinf->pid, irq_signal);
     if (irq_line < 0) {
         tfm_core_panic();
     }
@@ -645,7 +645,7 @@ psa_irq_status_t tfm_spm_irq_disable(uint32_t *args)
         tfm_core_panic();
     }
 
-    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
+    irq_line = get_irq_line_for_signal(partition->p_ldinf->pid, irq_signal);
     if (irq_line < 0) {
         tfm_core_panic();
     }

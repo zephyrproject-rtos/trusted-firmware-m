@@ -36,6 +36,11 @@
 #define SPM_PART_FLAG_PSA_ROT                   (1U << 8)
 #define SPM_PART_FLAG_IPC                       (1U << 9)
 
+#define PARTITION_PRIORITY(flag)                ((flag) & PARTITION_PRI_MASK)
+#define TO_THREAD_PRIORITY(x)                   (x)
+
+#define ENTRY_TO_POSITION(x)                    (uintptr_t)(x)
+#define POSITION_TO_ENTRY(x, t)                 (t)(x)
 /*
  * Common partition structure type, the extendable data is right after it.
  * Extendable data has different size for each partition, and must be 4-byte

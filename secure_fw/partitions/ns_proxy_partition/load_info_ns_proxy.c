@@ -12,7 +12,6 @@
 #include "region.h"
 #include "region_defs.h"
 #include "spm_partition_defs.h"
-#include "load/partition_static_load.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
@@ -36,8 +35,8 @@ struct partition_tfm_sp_ns_proxy_load_info_t {
     /* common length data */
     struct partition_load_info_t  cmn_info;
     /* per-partition variable length data */
-    uintptr_t                       stack_pos;
-    uintptr_t                       heap_pos;
+    uintptr_t                       stack_addr;
+    uintptr_t                       heap_addr;
 #if TFM_LVL == 3
     struct asset_desc_t             assets[TFM_SP_NS_PROXY_NASSETS];
 #endif
@@ -63,8 +62,8 @@ const struct partition_tfm_sp_ns_proxy_load_info_t
         .nassets                    = TFM_SP_NS_PROXY_NASSETS,
 #endif
     },
-    .stack_pos                      = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
-    .heap_pos                       = 0,
+    .stack_addr                      = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
+    .heap_addr                       = 0,
 #if TFM_LVL == 3
     .assets                         = {
         {

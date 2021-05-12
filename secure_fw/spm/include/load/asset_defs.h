@@ -17,6 +17,9 @@
 /* Customized objects such as device or symbol. Refer by 'dev' in the union. */
 #define ASSET_DEV_REF_BIT           (1U << 3)
 
+#define PTR_TO_REFERENCE(x)         (uintptr_t)(x)
+#define REFERENCE_TO_PTR(x, t)      (t)(x)
+
 struct asset_desc_t {
     union {
         struct {                            /* Memory asset type        */

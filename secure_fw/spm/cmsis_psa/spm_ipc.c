@@ -28,18 +28,16 @@
 #include "tfm_core_trustzone.h"
 #include "lists.h"
 #include "tfm_pools.h"
-#include "region.h"
-#include "region_defs.h"
 #include "spm_partition_defs.h"
 #include "psa_manifest/pid.h"
 #include "tfm/tfm_spm_services.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
-#include "load/partition_static_load.h"
+#include "load/spm_load_api.h"
 
-#include "secure_fw/partitions/tfm_service_list.inc"
-#include "tfm_spm_db_ipc.inc"
+extern struct spm_partition_db_t g_spm_partition_db;
+static struct service_t *all_services;
 
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
@@ -49,10 +47,6 @@ void tfm_set_irq_signal(uint32_t partition_id, psa_signal_t signal,
                         uint32_t irq_line);
 
 #include "tfm_secure_irq_handlers_ipc.inc"
-
-/* Partition static data region */
-REGION_DECLARE(Image$$, TFM_SP_STATIC_LIST, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_SP_STATIC_LIST, $$RO$$Limit);
 
 /*********************** Connection handle conversion APIs *******************/
 
@@ -251,9 +245,9 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
      */
     BI_LIST_FOR_EACH(node, head) {
         tmp_msg = TO_CONTAINER(node, struct tfm_msg_body_t, msg_node);
-        if (tmp_msg->service->service_db->signal == signal && msg) {
+        if (tmp_msg->service->p_ldinf->signal == signal && msg) {
             return msg;
-        } else if (tmp_msg->service->service_db->signal == signal) {
+        } else if (tmp_msg->service->p_ldinf->signal == signal) {
             msg = tmp_msg;
             BI_LIST_REMOVE_NODE(node);
         }
@@ -281,7 +275,7 @@ static uint32_t get_partition_idx(uint32_t partition_id)
     }
 
     for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
-        if (g_spm_partition_db.partitions[i].p_static->pid == partition_id) {
+        if (g_spm_partition_db.partitions[i].p_ldinf->pid == partition_id) {
             return i;
         }
     }
@@ -299,7 +293,7 @@ static uint32_t get_partition_idx(uint32_t partition_id)
  */
 static uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
 {
-    return g_spm_partition_db.partitions[partition_idx].p_static->flags;
+    return g_spm_partition_db.partitions[partition_idx].p_ldinf->flags;
 }
 
 #if TFM_LVL != 1
@@ -349,16 +343,16 @@ bool tfm_is_partition_privileged(uint32_t partition_idx)
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
-    uint32_t i, num;
+    struct service_t *p_serv = all_services;
 
-    num = sizeof(g_services) / sizeof(struct service_t);
-    for (i = 0; i < num; i++) {
-        if (g_services[i].service_db->sid == sid) {
-            return &g_services[i];
-        }
+    while (p_serv && p_serv->p_ldinf->sid != sid) {
+        p_serv = TO_CONTAINER(BI_LIST_NEXT_NODE(&p_serv->list),
+                              struct service_t, list);
+        if (p_serv == all_services)
+            return NULL;
     }
 
-    return NULL;
+    return p_serv;
 }
 
 /**
@@ -395,14 +389,14 @@ int32_t tfm_spm_check_client_version(struct service_t *service,
 {
     TFM_CORE_ASSERT(service);
 
-    switch (SERVICE_GET_VERSION_POLICY(service->service_db->flags)) {
+    switch (SERVICE_GET_VERSION_POLICY(service->p_ldinf->flags)) {
     case TFM_VERSION_POLICY_RELAXED:
-        if (version > service->service_db->version) {
+        if (version > service->p_ldinf->version) {
             return SPM_ERROR_VERSION;
         }
         break;
     case TFM_VERSION_POLICY_STRICT:
-        if (version != service->service_db->version) {
+        if (version != service->p_ldinf->version) {
             return SPM_ERROR_VERSION;
         }
         break;
@@ -423,7 +417,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
     TFM_CORE_ASSERT(service);
 
     if (ns_caller) {
-        if (!SERVICE_IS_NS_ACCESSIBLE(service->service_db->flags)) {
+        if (!SERVICE_IS_NS_ACCESSIBLE(service->p_ldinf->flags)) {
             return SPM_ERROR_GENERIC;
         }
     } else {
@@ -432,14 +426,14 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
             tfm_core_panic();
         }
 
-        dep = (uint32_t *)LOAD_INFO_DEPS(partition->p_static);
-        for (i = 0; i < partition->p_static->ndeps; i++) {
+        dep = (uint32_t *)LOAD_INFO_DEPS(partition->p_ldinf);
+        for (i = 0; i < partition->p_ldinf->ndeps; i++) {
             if (dep[i] == sid) {
                 break;
             }
         }
 
-        if (i == partition->p_static->ndeps) {
+        if (i == partition->p_ldinf->ndeps) {
             return SPM_ERROR_GENERIC;
         }
     }
@@ -481,7 +475,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
 
     /* Check that the running partition owns the message */
     partition_id = tfm_spm_partition_get_running_partition_id();
-    if (partition_id != p_msg->service->partition->p_static->pid) {
+    if (partition_id != p_msg->service->partition->p_ldinf->pid) {
         return NULL;
     }
 
@@ -560,12 +554,12 @@ void tfm_spm_send_event(struct service_t *service,
     struct partition_t *partition = NULL;
     psa_signal_t signal = 0;
 
-    if (!msg || !service || !service->service_db || !service->partition) {
+    if (!msg || !service || !service->p_ldinf || !service->partition) {
         tfm_core_panic();
     }
 
     partition = service->partition;
-    signal = service->service_db->signal;
+    signal = service->p_ldinf->signal;
 
     /* Add message to partition message list tail */
     BI_LIST_INSERT_BEFORE(&partition->msg_list, &msg->msg_node);
@@ -594,8 +588,8 @@ uint32_t tfm_spm_partition_get_running_partition_id(void)
     struct partition_t *partition;
 
     partition = tfm_spm_get_running_partition();
-    if (partition && partition->p_static) {
-        return partition->p_static->pid;
+    if (partition && partition->p_ldinf) {
+        return partition->p_ldinf->pid;
     } else {
         return INVALID_PARTITION_ID;
     }
@@ -646,59 +640,13 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
     return SPM_ERROR_MEMORY_CHECK;
 }
 
-/* Allocate runtime space for partition from the pool. Static allocation. */
-static struct partition_t *tfm_allocate_partition(void)
-{
-    static uint32_t partition_pool_pos = 0;
-    struct partition_t *p_partition_allocated = NULL;
-
-    if (partition_pool_pos >= g_spm_partition_db.partition_count) {
-        return NULL;
-    }
-
-    p_partition_allocated = &g_spm_partition_db.partitions[partition_pool_pos];
-    partition_pool_pos++;
-
-    return p_partition_allocated;
-}
-
-/* Allocate runtime space for service from the pool. Static allocation. */
-static struct service_t *tfm_allocate_service(uint32_t service_count)
-{
-    static uint32_t service_pool_pos = 0;
-    struct service_t *p_service_allocated = NULL;
-    uint32_t num_of_services = sizeof(g_services) / sizeof(struct service_t);
-
-    if ((service_count == 0) ||
-        (service_count > num_of_services) ||
-        (service_pool_pos >= num_of_services) ||
-        (service_pool_pos + service_count > num_of_services)) {
-            return NULL;
-    }
-
-    p_service_allocated = &g_services[service_pool_pos];
-    service_pool_pos += service_count;
-
-    return p_service_allocated;
-}
-
-/* Check partition static data validation */
-bool tfm_validate_partition_static(struct partition_load_info_t *p_cmninf)
-{
-    return ((p_cmninf->psa_ff_ver & PARTITION_INFO_MAGIC_MASK)
-            == PARTITION_INFO_MAGIC);
-}
-
 uint32_t tfm_spm_init(void)
 {
-    uint32_t i, j, part_idx;
+    uint32_t i, j, part_idx = 0;
     struct partition_t *partition;
-    struct service_t *service;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
     const struct platform_data_t *platform_data_p;
-    uintptr_t part_load_start, part_load_end;
-    struct partition_load_info_t *p_cmninf;
-    struct service_load_info_t *p_service_static;
+    const struct partition_load_info_t *p_cmninf;
     struct asset_desc_t *p_asset_load;
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
@@ -709,49 +657,17 @@ uint32_t tfm_spm_init(void)
                   sizeof(struct tfm_conn_handle_t),
                   TFM_CONN_HANDLE_MAX_NUM);
 
-    /* Load partition and service data */
-    part_idx = 0;
-    part_load_start = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Base);
-    part_load_end = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Limit);
-    while (part_load_start < part_load_end) {
-        p_cmninf = (struct partition_load_info_t *)part_load_start;
-
-        /* Validate static info section range */
-        part_load_start += LOAD_INFSZ_BYTES(p_cmninf);
-        if (part_load_start > part_load_end) {
-            tfm_core_panic();
+    while (1) {
+        partition = load_a_partition_assuredly();
+        if (partition == NULL) {
+            break;
         }
 
-        /* Validate partition static info */
-        if (!tfm_validate_partition_static(p_cmninf)) {
-            tfm_core_panic();
-        }
-        if (!(p_cmninf->flags & SPM_PART_FLAG_IPC)) {
-            tfm_core_panic();
-        }
-        if ((p_cmninf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
-            > PSA_FRAMEWORK_VERSION) {
-            ERROR_MSG("Warning: Partition requires higher framework version!");
-            tfm_core_panic();
-        }
+        load_services_assuredly(partition, &all_services);
 
-        /* Allocate runtime space */
-        partition = tfm_allocate_partition();
-        if (!partition) {
-            tfm_core_panic();
-        }
-        if (p_cmninf->nservices) {
-            service = tfm_allocate_service(p_cmninf->nservices);
-            if (!service) {
-                tfm_core_panic();
-            }
-        } else {
-            service = NULL;
-        }
+        p_cmninf = partition->p_ldinf;
 
-        partition->p_static = p_cmninf;
-
-        /* Init partition device object assets */
+        /* Init mmio assets */
         p_asset_load = (struct asset_desc_t *)LOAD_INFO_ASSET(p_cmninf);
         for (i = 0; i < p_cmninf->nassets; i++) {
             /* Skip the memory-based asset */
@@ -759,8 +675,8 @@ uint32_t tfm_spm_init(void)
                 continue;
             }
 
-            platform_data_p = POSITION_TO_PTR(p_asset_load[i].dev.addr_ref,
-                                              struct platform_data_t *);
+            platform_data_p = REFERENCE_TO_PTR(p_asset_load[i].dev.addr_ref,
+                                               struct platform_data_t *);
 
             /*
              * TODO: some partitions declare MMIO not exist on specific
@@ -825,7 +741,7 @@ uint32_t tfm_spm_init(void)
                     LOAD_ALLOCED_STACK_ADDR(p_cmninf) + p_cmninf->stack_size,
                     LOAD_ALLOCED_STACK_ADDR(p_cmninf));
 
-        pth->prior = TO_THREAD_PRIORITY(PARTITION_GET_PRIOR(p_cmninf->flags));
+        pth->prior = TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_cmninf->flags));
 
         if (p_cmninf->pid == TFM_SP_NON_SECURE_ID) {
             p_ns_entry_thread = pth;
@@ -837,32 +753,6 @@ uint32_t tfm_spm_init(void)
             tfm_core_panic();
         }
 
-        /* Init Services in the partition */
-        p_service_static =
-            (struct service_load_info_t *)LOAD_INFO_SERVICE(p_cmninf);
-        for (i = 0; i < p_cmninf->nservices; i++) {
-            /* Fill service runtime data */
-            partition->signals_allowed |= p_service_static[i].signal;
-            service[i].service_db = &p_service_static[i];
-            service[i].partition = partition;
-
-            /* Populate the p_service of stateless_service_ref[] */
-            if (SERVICE_IS_STATELESS(p_service_static[i].flags)) {
-                for (j = 0; j < STATIC_HANDLE_NUM_LIMIT; j++) {
-                    if (stateless_service_ref[j].sid ==
-                        p_service_static[i].sid) {
-                        stateless_service_ref[j].p_service = &service[i];
-                        break;
-                    }
-                }
-                /* Stateless service not found in tracking table */
-                if (j >= STATIC_HANDLE_NUM_LIMIT) {
-                    tfm_core_panic();
-                }
-            }
-
-            BI_LIST_INIT_NODE(&service[i].handle_list);
-        }
         part_idx++;
     }
 
@@ -900,7 +790,7 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
         p_next_partition = TO_CONTAINER(pth_next,
                                         struct partition_t,
                                         sp_thread);
-        p_part_static = p_next_partition->p_static;
+        p_part_static = p_next_partition->p_ldinf;
         if (p_part_static->flags & SPM_PART_FLAG_PSA_ROT) {
             is_privileged = TFM_PARTITION_PRIVILEGED_MODE;
         } else {
@@ -1059,7 +949,7 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
          * the preempted context of SP can be different with the one who
          * preempts veneer.
          */
-        if (p_cur_sp->p_static->pid != TFM_SP_NON_SECURE_ID) {
+        if (p_cur_sp->p_ldinf->pid != TFM_SP_NON_SECURE_ID) {
             tfm_core_panic();
         }
 
@@ -1084,7 +974,7 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
         if (stacked_ctx_pos != p_cur_sp->sp_thread.stk_top) {
             tfm_core_panic();
         }
-    } else if (p_cur_sp->p_static->pid <= 0) {
+    } else if (p_cur_sp->p_ldinf->pid <= 0) {
         tfm_core_panic();
     }
 }
@@ -1104,7 +994,7 @@ void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
         if (!partition) {
             tfm_core_panic();
         }
-        running_partition_flags = partition->p_static->flags;
+        running_partition_flags = partition->p_ldinf->flags;
 
         /* Currently only PSA Root of Trust services are allowed to make Reset
          * vote request

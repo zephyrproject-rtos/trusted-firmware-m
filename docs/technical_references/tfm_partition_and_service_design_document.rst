@@ -113,7 +113,7 @@ defined structure for service information:
 .. code-block:: c
 
     struct tfm_spm_service_t {
-        const struct tfm_spm_service_db_t *service_db;
+        const struct tfm_spm_service_db_t *p_ldinf;
         struct spm_partition_desc_t *partition;
         struct bi_list_node_t handle_list;
         struct tfm_msg_queue_t msg_queue;
