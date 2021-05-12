@@ -41,14 +41,10 @@ Four extremely important things about this file:
 #include <string.h>
 #include <stdint.h>
 
-#include "../sst/non_secure/ns_test_helpers.h"
 #include "psa/protected_storage.h"
-#include "test/framework/test_framework_helpers.h"
-#include "tfm_memory_utils.h"
 #include "psa/crypto.h"
-#include "psa/crypto_sizes.h"
+#include "test_framework.h"
 `001
-#include <stdint.h>
 
 static uint32_t shift_reg = 0x55555555;
 static int i;  /* generic counter variable */
@@ -171,7 +167,7 @@ void test_thread (struct test_result_t *ret) {
         return;
     }
     /* Check that the data is correct */
-    if (tfm_memcmp($act_data, $exp_data,
+    if (memcmp($act_data, $exp_data,
                    $length) != 0) {
         TEST_FAIL("Read data should be equal to result data");
         return;
@@ -182,7 +178,7 @@ void test_thread (struct test_result_t *ret) {
     for (i = 0;  i < strlen((char *) $act_data_var);  ++i) {
         crc_byte ($act_data_var[i]);
     }
-    $hash_var = shift_reg;
+    /* $hash_var = shift_reg; */
 `029
     sst_status = psa_ps_remove($uid);
 `030
@@ -270,7 +266,7 @@ void test_thread (struct test_result_t *ret) {
     }
 `056
     /* Check that the data is correct */
-    if (tfm_memcmp($act_data, $exp_data,
+    if (memcmp($act_data, $exp_data,
                    $length) != 0) {
         TEST_FAIL("Read data should be equal to result data");
         return;
