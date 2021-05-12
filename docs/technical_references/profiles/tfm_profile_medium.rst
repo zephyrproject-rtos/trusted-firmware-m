@@ -33,7 +33,7 @@ TF-M Profile Medium defines the following feature set:
 
     - Crypto
 
-        - Support both symmetric ciphers and asymmetric ciphers
+        - Support both symmetric cryptography and asymmetric cryptography
         - Asymmetric key based cipher suite suggested in TLS/DTLS profiles for
           IoT [RFC7925]_ and CoAP [RFC7252]_, including
 
@@ -94,8 +94,9 @@ TF-M IPC model implementation follows the PSA Firmware Framework for M
 Crypto service
 ==============
 
-Compared to Profile Small, Profile Medium includes asymmetric cipher to support
-direct connection to Cloud services via common protocols, such as TLS/DTLS 1.2.
+Compared to Profile Small, Profile Medium includes asymmetric cryptography to
+support direct connection to Cloud services via common protocols, such as
+TLS/DTLS 1.2.
 
 As suggested in CoAP [RFC7252]_ and [RFC7925]_, TF-M Profile Medium by default
 selects ``TLS_ECDHE_ECDSA_WITH_AES_128_CCM`` as reference, which requires:
@@ -253,6 +254,9 @@ shown below.
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_PARTITION_CRYPTO``                   | ``ON``                                                                                              | Enable Crypto service               |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED``    | ``ON``                                                                                              | Disable Crypto asymmetric           |
+   |                                            |                                                                                                     | encryption operations               |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_MBEDCRYPTO_CONFIG_PATH``             | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_medium.h`` | Mbed Crypto config file path        |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_PARTITION_INITIAL_ATTESTATION``      | ``ON``                                                                                              | Enable Initial Attestation service  |
@@ -292,23 +296,23 @@ Some cryptography tests are disabled due to the reduced Mbed Crypto config.
    :widths: auto
    :align: center
 
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | Configs                                    | Default value                                                                                       | Descriptions                        |
-   +============================================+=====================================================================================================+=====================================+
-   | ``TFM_CRYPTO_TEST_ALG_CBC``                | ``OFF``                                                                                             | Test CBC cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CCM``                | ``ON``                                                                                              | Test CCM cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``                                                                                             | Test CFB cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``                                                                                             | Test CTR cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``                                                                                             | Test GCM cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``                                                                                             | Test SHA-512 cryptography algorithm |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``                                                                                             | Test SHA-512 cryptography algorithm |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   +--------------------------------------------+---------------+--------------------------------+
+   | Configs                                    | Default value | Descriptions                   |
+   +============================================+===============+================================+
+   | ``TFM_CRYPTO_TEST_ALG_CBC``                | ``OFF``       | Disable CBC mode test          |
+   +--------------------------------------------+---------------+--------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CCM``                | ``ON``        | Enable CCM mode test           |
+   +--------------------------------------------+---------------+--------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``       | Disable CFB mode test          |
+   +--------------------------------------------+---------------+--------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``       | Disable CTR mode test          |
+   +--------------------------------------------+---------------+--------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``       | Disable GCM mode test          |
+   +--------------------------------------------+---------------+--------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``       | Disable SHA-512 algorithm test |
+   +--------------------------------------------+---------------+--------------------------------+
+   | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``       | Disable HKDF algorithm test    |
+   +--------------------------------------------+---------------+--------------------------------+
 
 Device configuration extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -323,16 +327,24 @@ Crypto service configurations
 Crypto Secure Partition
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-TF-M Profile Medium enables Crypto SP in top-level CMake config file and selects
-all the Crypto modules.
+TF-M Profile Medium enables Crypto SP in top-level CMake config file.
+The following PSA Crypto operationts are enabled by default.
+
+   - Hash operations
+   - Message authentication codes
+   - Symmetric ciphers
+   - AEAD operations
+   - Asymmetric key algorithm based signature and verification
+   - Key derivation
+   - Key management
 
 Mbed Crypto configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 TF-M Profile Medium adds a dedicated Mbed Crypto config file
 ``tfm_mbedcrypto_config_profile_medium.h`` at
-``/lib/ext/mbedcrypto/mbedcrypto_config``
-file, instead of the common one ``tfm_mbedcrypto_config_default.h`` [CRYPTO-DESIGN]_.
+``/lib/ext/mbedcrypto/mbedcrypto_config`` folder, instead of the common one
+``tfm_mbedcrypto_config_default.h`` [CRYPTO-DESIGN]_.
 
 Major Mbed Crypto configurations are set as listed below:
 
