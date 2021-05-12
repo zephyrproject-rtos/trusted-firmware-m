@@ -15,8 +15,10 @@
 #include "tfm_core_utils.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"
+#include "load/spm_load_api.h"
 #include "ffm/tfm_boot_data.h"
 #include "ffm/psa_api.h"
+#include "tfm_hal_isolation.h"
 #include "tfm_hal_spm_logdev.h"
 #include "load/partition_defs.h"
 #include "psa/client.h"
@@ -151,7 +153,10 @@ uint32_t tfm_flih_prepare_depriv_flih(uintptr_t ctx, uint32_t *svc_args)
     } else {
         p_stat_ctx = (struct tfm_state_context_t *)irq_sp_thread->arch_ctx.sp;
         tfm_core_thrd_set_curr(irq_sp_thread);
-        tfm_set_up_isolation_boundary(irq_sp);
+        if (curr_sp->p_boundaries != irq_sp->p_boundaries) {
+            tfm_hal_update_boundaries(irq_sp->p_ldinf,
+                                      irq_sp->p_boundaries);
+        }
         tfm_arch_set_psplim(irq_sp_thread->stk_btm);
     }
 
@@ -195,7 +200,10 @@ uint32_t tfm_flih_return_to_isr(uintptr_t ctx, psa_flih_result_t result)
     }
 
     if (curr_sp != prev_sp) {
-        tfm_set_up_isolation_boundary(prev_sp);
+        if (prev_sp->p_boundaries != curr_sp->p_boundaries) {
+            tfm_hal_update_boundaries(prev_sp->p_ldinf,
+                                      prev_sp->p_boundaries);
+        }
         tfm_core_thrd_set_curr(&(prev_sp->sp_thread));
         tfm_arch_set_psplim(prev_sp->sp_thread.stk_btm);
     }

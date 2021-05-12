@@ -322,8 +322,7 @@ void tfm_spm_hal_get_ns_access_attr(const void *p, size_t s,
  *
  * \return True if the access is granted, false otherwise.
  */
-bool tfm_spm_hal_has_access_to_region(const void *p, size_t s,
-                                              int flags);
+bool tfm_spm_hal_has_access_to_region(const void *p, size_t s, int flags);
 #endif /* !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0) */
 
 #endif /* __TFM_SPM_HAL_H__ */

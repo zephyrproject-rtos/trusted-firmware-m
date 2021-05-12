@@ -85,7 +85,7 @@ struct tfm_msg_body_t {
  */
 struct partition_t {
     const struct partition_load_info_t *p_ldinf;
-    void *p_platform;
+    void *p_boundaries;
     void *p_interrupts;
     void *p_metadata;
     struct tfm_core_thread_t sp_thread;
@@ -375,13 +375,6 @@ uint32_t tfm_spm_get_caller_privilege_mode(void);
  * \retval              The client ID
  */
 int32_t tfm_spm_get_client_id(bool ns_caller);
-
-/**
- * \brief               Set up the isolation boundary of the given partition.
- *
- * \param[in] partition The partition of which the boundary is set up.
- */
-void tfm_set_up_isolation_boundary(const struct partition_t *partition);
 
 /*
  * PendSV specified function.

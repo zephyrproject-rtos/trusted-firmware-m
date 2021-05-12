@@ -266,34 +266,6 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
     return msg;
 }
 
-#if TFM_LVL != 1
-/**
- * \brief Change the privilege mode for partition thread mode.
- *
- * \param[in] privileged        Privileged mode,
- *                                \ref TFM_PARTITION_PRIVILEGED_MODE
- *                                and \ref TFM_PARTITION_UNPRIVILEGED_MODE
- *
- * \note Barrier instructions are not called by this function, and if
- *       it is called in thread mode, it might be necessary to call
- *       them after this function returns.
- */
-static void tfm_spm_partition_change_privilege(uint32_t privileged)
-{
-    CONTROL_Type ctrl;
-
-    ctrl.w = __get_CONTROL();
-
-    if (privileged == TFM_PARTITION_PRIVILEGED_MODE) {
-        ctrl.b.nPRIV = 0;
-    } else {
-        ctrl.b.nPRIV = 1;
-    }
-
-    __set_CONTROL(ctrl.w);
-}
-#endif /* if(TFM_LVL != 1) */
-
 uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
 {
 #if TFM_LVL == 1
@@ -666,13 +638,11 @@ int32_t tfm_spm_get_client_id(bool ns_caller)
 
 uint32_t tfm_spm_init(void)
 {
-    uint32_t i;
-    bool privileged;
     struct partition_t *partition;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
-    const struct platform_data_t *platform_data_p;
     const struct partition_load_info_t *p_ldinf;
-    struct asset_desc_t *p_asset_load;
+    void *p_boundaries = NULL;
+
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
 #endif
@@ -703,54 +673,21 @@ uint32_t tfm_spm_init(void)
             load_irqs_assuredly(partition);
         }
 
-        /* Init mmio assets */
-        if (p_ldinf->nassets > 0) {
-            if (tfm_spm_partition_get_privileged_mode(p_ldinf->flags) ==
-                TFM_PARTITION_PRIVILEGED_MODE) {
-                privileged = true;
-            } else {
-                privileged = false;
-            }
+        /* Bind the partition with plaform. */
+#if TFM_FIH_PROFILE_ON
+        FIH_CALL(tfm_hal_bind_boundaries, fih_rc, partition->p_ldinf,
+                 &p_boundaries);
+        if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+            tfm_core_panic();
         }
-
-        p_asset_load = (struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
-        for (i = 0; i < p_ldinf->nassets; i++) {
-            /* Skip the memory-based asset */
-            if (!(p_asset_load[i].attr & ASSET_ATTR_NAMED_MMIO)) {
-                continue;
-            }
-
-            platform_data_p = REFERENCE_TO_PTR(p_asset_load[i].dev.dev_ref,
-                                               struct platform_data_t *);
-
-            /*
-             * TODO: some partitions declare MMIO not exist on specific
-             * platforms, and the platform defines a dummy NULL reference
-             * for these MMIO items, which cause 'nassets' to contain several
-             * NULL items. Skip these NULL items initialization temporarily to
-             * avoid HAL API panic.
-             * Eventually, these platform-specific partitions need to be moved
-             * into a platform-specific folder. Then this workaround can be
-             * removed.
-             */
-            if (!platform_data_p) {
-                continue;
-            }
-
-#ifdef TFM_FIH_PROFILE_ON
-            FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc,
-                     privileged, platform_data_p);
-            if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
-                tfm_core_panic();
-            }
 #else /* TFM_FIH_PROFILE_ON */
-            if (tfm_spm_hal_configure_default_isolation(privileged,
-                platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
-                tfm_core_panic();
-            }
-#endif /* TFM_FIH_PROFILE_ON */
+        if (tfm_hal_bind_boundaries(partition->p_ldinf,
+                                    &p_boundaries) != TFM_HAL_SUCCESS) {
+            tfm_core_panic();
         }
+#endif /* TFM_FIH_PROFILE_ON */
 
+        partition->p_boundaries = p_boundaries;
         partition->signals_allowed |= PSA_DOORBELL;
 
         tfm_event_init(&partition->event);
@@ -795,80 +732,27 @@ uint32_t tfm_spm_init(void)
     return p_ns_entry_thread->arch_ctx.lr;
 }
 
-#if TFM_LVL != 1
-static void set_up_boundary(const struct partition_load_info_t *p_ldinf)
-{
-#if TFM_LVL == 3
-#if defined(TFM_FIH_PROFILE_ON) && (TFM_LVL == 3)
-    fih_int fih_rc = FIH_FAILURE;
-#endif
-    /*
-     * FIXME: To implement isolations among partitions in isolation level 3,
-     * each partition needs to run in unprivileged mode. Currently some
-     * PRoTs cannot work in unprivileged mode, make them privileged now.
-     */
-    if (!(p_ldinf->flags & SPM_PART_FLAG_PSA_ROT)) {
-        struct asset_desc_t *p_asset =
-            (struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
-        /* Partition must have private data as the first asset in LVL3 */
-        if (p_ldinf->nassets == 0) {
-            tfm_core_panic();
-        }
-        if (p_asset->attr & ASSET_ATTR_NAMED_MMIO) {
-            tfm_core_panic();
-        }
-        /* FIXME: only MPU-based implementations are supported currently */
-#ifdef TFM_FIH_PROFILE_ON
-        FIH_CALL(tfm_hal_mpu_update_partition_boundary, fih_rc,
-                    p_asset->mem.start, p_asset->mem.limit);
-        if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
-            tfm_core_panic();
-        }
-#else /* TFM_FIH_PROFILE_ON */
-        if (tfm_hal_mpu_update_partition_boundary(p_asset->mem.start,
-                                                  p_asset->mem.limit)
-                                                           != TFM_HAL_SUCCESS) {
-            tfm_core_panic();
-        }
-#endif /* TFM_FIH_PROFILE_ON */
-    }
-#else /* TFM_LVL == 3 */
-    (void)p_ldinf;
-#endif /* TFM_LVL == 3 */
-}
-#endif /* TFM_LVL != 1 */
-
-void tfm_set_up_isolation_boundary(const struct partition_t *partition)
-{
-#if TFM_LVL != 1
-    const struct partition_load_info_t *p_ldinf;
-    uint32_t is_privileged;
-
-    p_ldinf = partition->p_ldinf;
-    is_privileged = p_ldinf->flags & SPM_PART_FLAG_PSA_ROT ?
-                                                TFM_PARTITION_PRIVILEGED_MODE :
-                                                TFM_PARTITION_UNPRIVILEGED_MODE;
-
-    tfm_spm_partition_change_privilege(is_privileged);
-
-    set_up_boundary(p_ldinf);
-#else /* TFM_LVL != 1 */
-    (void)partition;
-#endif /* TFM_LVL != 1 */
-}
-
 void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 {
-    struct partition_t *p_next_partition;
+    struct partition_t *p_part_curr, *p_part_next;
     struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();
     struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr();
 
     if (pth_next != NULL && pth_curr != pth_next) {
-        p_next_partition = TO_CONTAINER(pth_next,
-                                        struct partition_t,
-                                        sp_thread);
-        tfm_set_up_isolation_boundary(p_next_partition);
+        p_part_curr = TO_CONTAINER(pth_curr, struct partition_t, sp_thread);
+        p_part_next = TO_CONTAINER(pth_next, struct partition_t, sp_thread);
 
+        /*
+         * If required, let the platform update boundary based on its
+         * implementation. Change privilege, MPU or other configurations.
+         */
+        if (p_part_curr->p_boundaries != p_part_next->p_boundaries) {
+            if (tfm_hal_update_boundaries(p_part_next->p_ldinf,
+                                          p_part_next->p_boundaries)
+                                                        != TFM_HAL_SUCCESS) {
+                tfm_core_panic();
+            }
+        }
         tfm_core_thrd_switch_context(p_actx, pth_curr, pth_next);
     }
 

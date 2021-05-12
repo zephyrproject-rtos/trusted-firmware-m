@@ -24,7 +24,7 @@
 
 struct asset_desc_t {
     union {
-        struct {                            /* Memory asset type        */
+        struct {                            /* Memory-based asset type  */
             uintptr_t start;
             uintptr_t limit;
         } mem;
