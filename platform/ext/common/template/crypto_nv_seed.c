@@ -24,7 +24,7 @@ int tfm_plat_crypto_nv_seed_read(unsigned char *buf, size_t buf_len)
     }
 }
 
-int tfm_plat_crypto_nv_seed_write(unsigned char *buf, size_t buf_len)
+int tfm_plat_crypto_nv_seed_write(const unsigned char *buf, size_t buf_len)
 {
     psa_storage_uid_t uid = NV_SEED_FILE_ID;
     psa_status_t status;

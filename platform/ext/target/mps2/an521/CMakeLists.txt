@@ -180,3 +180,8 @@ target_compile_definitions(tfm_psa_rot_partition_crypto
     PRIVATE
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<BOOL:${PLATFORM_DUMMY_NV_SEED}>>:PLATFORM_DUMMY_NV_SEED>
 )
+
+target_include_directories(crypto_service_mbedcrypto
+    PUBLIC
+        ${CMAKE_SOURCE_DIR}/platform/include
+)

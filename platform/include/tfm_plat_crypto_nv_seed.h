@@ -36,6 +36,6 @@ int tfm_plat_crypto_nv_seed_read(unsigned char *buf, size_t buf_len);
  * \return Return TFM_CRYPTO_NV_SEED_SUCCESS on success,
  *         or TFM_CRYPTO_NV_SEED_FAILED on failure.
  */
-int tfm_plat_crypto_nv_seed_write(unsigned char *buf, size_t buf_len);
+int tfm_plat_crypto_nv_seed_write(const unsigned char *buf, size_t buf_len);
 
 #endif /* __TFM_PLAT_CRYPTO_NV_SEED_H__ */

@@ -7,6 +7,8 @@
 #ifndef __MBEDTLS_AN521_CONF_H__
 #define __MBEDTLS_AN521_CONF_H__
 
+#include "tfm_plat_crypto_nv_seed.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
