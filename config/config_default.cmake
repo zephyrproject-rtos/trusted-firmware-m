@@ -123,7 +123,8 @@ set(CRYPTO_MAC_MODULE_DISABLED          FALSE       CACHE BOOL      "Disable PSA
 set(CRYPTO_HASH_MODULE_DISABLED         FALSE       CACHE BOOL      "Disable PSA Crypto Hash module")
 set(CRYPTO_CIPHER_MODULE_DISABLED       FALSE       CACHE BOOL      "Disable PSA Crypto Cipher module")
 set(CRYPTO_GENERATOR_MODULE_DISABLED    FALSE       CACHE BOOL      "Disable PSA Crypto Key Derivation module")
-set(CRYPTO_ASYMMETRIC_MODULE_DISABLED   FALSE       CACHE BOOL      "Disable PSA Crypto Asymmetric key module")
+set(CRYPTO_ASYM_SIGN_MODULE_DISABLED    FALSE       CACHE BOOL      "Disable PSA Crypto asymmetric key signature module")
+set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED FALSE       CACHE BOOL      "Disable PSA Crypto asymmetric key encryption module")
 set(CRYPTO_KEY_DERIVATION_MODULE_DISABLED FALSE     CACHE BOOL      "Disable PSA Crypto key derivation module")
 set(CRYPTO_IOVEC_BUFFER_SIZE            5120        CACHE STRING    "Default size of the internal scratch buffer used for PSA FF IOVec allocations")
 

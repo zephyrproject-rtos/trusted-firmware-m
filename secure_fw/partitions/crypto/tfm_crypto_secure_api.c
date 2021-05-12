@@ -1316,7 +1316,7 @@ psa_status_t psa_sign_hash(psa_key_id_t key_id,
                            size_t signature_size,
                            size_t *signature_length)
 {
-#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
+#ifdef TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1347,7 +1347,7 @@ psa_status_t psa_sign_hash(psa_key_id_t key_id,
 #endif
 
     return status;
-#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
+#endif /* TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED */
 }
 
 psa_status_t psa_asymmetric_verify(psa_key_id_t key_id,
@@ -1368,7 +1368,7 @@ psa_status_t psa_verify_hash(psa_key_id_t key_id,
                              const uint8_t *signature,
                              size_t signature_length)
 {
-#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
+#ifdef TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1395,7 +1395,7 @@ psa_status_t psa_verify_hash(psa_key_id_t key_id,
 #endif
 
     return status;
-#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
+#endif /* TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED */
 }
 
 psa_status_t psa_asymmetric_encrypt(psa_key_id_t key_id,
@@ -1408,7 +1408,7 @@ psa_status_t psa_asymmetric_encrypt(psa_key_id_t key_id,
                                     size_t output_size,
                                     size_t *output_length)
 {
-#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
+#ifdef TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1456,7 +1456,7 @@ psa_status_t psa_asymmetric_encrypt(psa_key_id_t key_id,
 #endif
 
     return status;
-#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
+#endif /* TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED */
 }
 
 psa_status_t psa_asymmetric_decrypt(psa_key_id_t key_id,
@@ -1469,7 +1469,7 @@ psa_status_t psa_asymmetric_decrypt(psa_key_id_t key_id,
                                     size_t output_size,
                                     size_t *output_length)
 {
-#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
+#ifdef TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1517,7 +1517,7 @@ psa_status_t psa_asymmetric_decrypt(psa_key_id_t key_id,
 #endif
 
     return status;
-#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
+#endif /* TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED */
 }
 
 psa_status_t psa_key_derivation_get_capacity(

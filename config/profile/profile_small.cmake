@@ -19,7 +19,8 @@ set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Prot
 
 set(ITS_BUF_SIZE                        32          CACHE STRING    "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
 
-set(CRYPTO_ASYMMETRIC_MODULE_DISABLED   TRUE        CACHE BOOL      "Disable PSA Crypto Asymmetric key module")
+set(CRYPTO_ASYM_SIGN_MODULE_DISABLED    ON          CACHE BOOL      "Disable PSA Crypto asymmetric key signature module")
+set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED ON          CACHE BOOL      "Disable PSA Crypto asymmetric key encryption module")
 
 set(SYMMETRIC_INITIAL_ATTESTATION       ON          CACHE BOOL      "Use symmetric crypto for inital attestation")
 

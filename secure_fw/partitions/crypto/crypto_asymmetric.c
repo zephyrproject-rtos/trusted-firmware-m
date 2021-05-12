@@ -25,7 +25,7 @@ psa_status_t tfm_crypto_sign_hash(psa_invec in_vec[],
                                   psa_outvec out_vec[],
                                   size_t out_len)
 {
-#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
+#ifdef TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 0, 1);
@@ -55,7 +55,7 @@ psa_status_t tfm_crypto_sign_hash(psa_invec in_vec[],
 
     return psa_sign_hash(encoded_key, alg, hash, hash_length,
                          signature, signature_size, &(out_vec[0].len));
-#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
+#endif /* TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_verify_hash(psa_invec in_vec[],
@@ -63,7 +63,7 @@ psa_status_t tfm_crypto_verify_hash(psa_invec in_vec[],
                                     psa_outvec out_vec[],
                                     size_t out_len)
 {
-#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
+#ifdef TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 3, out_len, 0, 0);
@@ -94,7 +94,7 @@ psa_status_t tfm_crypto_verify_hash(psa_invec in_vec[],
 
     return psa_verify_hash(encoded_key, alg, hash, hash_length,
                            signature, signature_length);
-#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
+#endif /* TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
@@ -102,7 +102,7 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
                                            psa_outvec out_vec[],
                                            size_t out_len)
 {
-#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
+#ifdef TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -155,7 +155,7 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
     return psa_asymmetric_encrypt(encoded_key, alg, input, input_length,
                                   salt, salt_length,
                                   output, output_size, &(out_vec[0].len));
-#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
+#endif /* TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_asymmetric_decrypt(psa_invec in_vec[],
@@ -163,7 +163,7 @@ psa_status_t tfm_crypto_asymmetric_decrypt(psa_invec in_vec[],
                                            psa_outvec out_vec[],
                                            size_t out_len)
 {
-#ifdef TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED
+#ifdef TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
 
@@ -198,6 +198,6 @@ psa_status_t tfm_crypto_asymmetric_decrypt(psa_invec in_vec[],
     return psa_asymmetric_decrypt(encoded_key, alg, input, input_length,
                                   salt, salt_length,
                                   output, output_size, &(out_vec[0].len));
-#endif /* TFM_CRYPTO_ASYMMETRIC_MODULE_DISABLED */
+#endif /* TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED */
 }
 /*!@}*/
