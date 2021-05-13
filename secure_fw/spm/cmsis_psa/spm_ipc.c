@@ -668,7 +668,8 @@ static struct service_t *tfm_allocate_service(uint32_t service_count)
     struct service_t *p_service_allocated = NULL;
     uint32_t num_of_services = sizeof(g_services) / sizeof(struct service_t);
 
-    if ((service_count > num_of_services) ||
+    if ((service_count == 0) ||
+        (service_count > num_of_services) ||
         (service_pool_pos >= num_of_services) ||
         (service_pool_pos + service_count > num_of_services)) {
             return NULL;
@@ -736,9 +737,13 @@ uint32_t tfm_spm_init(void)
         if (!partition) {
             tfm_core_panic();
         }
-        service = tfm_allocate_service(p_cmninf->nservices);
-        if (!service) {
-            tfm_core_panic();
+        if (p_cmninf->nservices) {
+            service = tfm_allocate_service(p_cmninf->nservices);
+            if (!service) {
+                tfm_core_panic();
+            }
+        } else {
+            service = NULL;
         }
 
         partition->p_static = p_cmninf;
