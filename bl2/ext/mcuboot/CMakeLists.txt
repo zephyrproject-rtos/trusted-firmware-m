@@ -62,6 +62,7 @@ configure_file(include/mcuboot_config/mcuboot_config.h.in
 find_package(Python3)
 
 set(FLASH_AREA_NUM 0)
+set(IMAGE_TYPE "S_IMAGE")
 if (MCUBOOT_IMAGE_NUMBER GREATER 1)
     configure_file(signing_layout.c.in signing_layout_s.c @ONLY)
     add_library(signing_layout_s OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_s.c)
@@ -82,6 +83,7 @@ target_compile_definitions(signing_layout_s
     PRIVATE
         $<$<BOOL:${BL2}>:BL2>
         $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
+        $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},DIRECT_XIP>:IMAGE_ROM_FIXED>
 )
 target_link_libraries(signing_layout_s
     PRIVATE
@@ -135,6 +137,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
 )
 
 set(FLASH_AREA_NUM 1)
+set(IMAGE_TYPE "NS_IMAGE")
 configure_file(signing_layout.c.in signing_layout_ns.c @ONLY)
 
 add_library(signing_layout_ns OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_ns.c)
@@ -148,6 +151,7 @@ target_compile_definitions(signing_layout_ns
     PRIVATE
         $<$<BOOL:${BL2}>:BL2>
         $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
+        $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},DIRECT_XIP>:IMAGE_ROM_FIXED>
 )
 target_link_libraries(signing_layout_ns
     PRIVATE
