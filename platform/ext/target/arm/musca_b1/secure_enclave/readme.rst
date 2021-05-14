@@ -65,10 +65,11 @@ To produce all the images, TF-M build needs to be executed twice:
 
 - One build needed to create the SSE-200 images (BL0 and the combined SSE-200
   image containing TF-M and the non-secure application), target platform needs
-  to be set to ``musca_b1/sse_200`` and the ``FORWARD_PROT_MSG`` cmake flag also
+  to be set to ``arm/musca_b1/sse_200`` and the ``FORWARD_PROT_MSG`` cmake flag
+  also
   needs to be set.
 - One build needed to create the SE images (MCUBoot and TF-M), target platform
-  needs to be set to ``musca_b1/secure_enclave``.
+  needs to be set to ``arm/musca_b1/secure_enclave``.
 
 The order of the two builds is indifferent. The BL2 setting is mandatory for
 both builds, but MCUBoot image is only built for the SE platform. The cmake

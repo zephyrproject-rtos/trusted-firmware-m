@@ -28,7 +28,7 @@
  * 0x0A1E_4000 Internal Trusted Storage Area (16 KB)
  * 0x0A1E_8000 NV counters area (4 KB)
  * 0x0A1E_9000 TF-M key area (256 bytes) This area is referred to in
- *             /lib/ext/cryptocell-312-runtime/shared/hw/include/musca_s1/  \
+ *             /lib/ext/cryptocell-312-runtime/shared/hw/include/arm/musca_s1/ \
  *             dx_reg_base_host.h Do not change one without changing the other.
  * 0x0A1E_9100 Unused
  * 0x0020_0000 Protected storage area (20 KB) This area is placed in the QSPI
@@ -46,7 +46,7 @@
  * 0x0A1E_4000 Internal Trusted Storage Area (16 KB)
  * 0x0A1E_8000 NV counters area (4 KB)
  * 0x0A1E_9000 TF-M key area (256 bytes) This area is referred to in
- *             /lib/ext/cryptocell-312-runtime/shared/hw/include/musca_s1/  \
+ *             /lib/ext/cryptocell-312-runtime/shared/hw/include/arm/musca_s1/ \
  *             dx_reg_base_host.h Do not change one without changing the other.
  * 0x0A1E_9100 Unused
  * 0x0020_0000 Protected storage area (20 KB) This area is placed in the QSPI

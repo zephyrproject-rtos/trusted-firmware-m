@@ -262,7 +262,7 @@ Example: building TF-M for AN521 platform using GCC:
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DCMAKE_BUILD_TYPE=Debug
+    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DCMAKE_BUILD_TYPE=Debug
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -272,7 +272,7 @@ Alternately using traditional cmake syntax
     cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
+    cmake .. -DTFM_PLATFORM=arm/mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
     make install
 
 .. Note::
@@ -292,7 +292,7 @@ specify in the command line
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_ARMCLANG.cmake -DTEST_S=ON -DTEST_NS=ON
+    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_ARMCLANG.cmake -DTEST_S=ON -DTEST_NS=ON
     cmake --build cmake_build -- install
 
 Regression Tests for the AN521 target platform
@@ -306,7 +306,7 @@ features are enabled.
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTEST_S=ON -DTEST_NS=ON
+    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -DTEST_S=ON -DTEST_NS=ON
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -316,7 +316,7 @@ Alternately using traditional cmake syntax
     cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DTEST_S=ON -DTEST_NS=ON
+    cmake .. -DTFM_PLATFORM=arm/mps2/an521 -DTEST_S=ON -DTEST_NS=ON
     make install
 
 Build for PSA Functional API compliance tests
@@ -342,7 +342,7 @@ tests for the Crypto service:
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTEST_PSA_API=CRYPTO
+    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -DTEST_PSA_API=CRYPTO
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -352,7 +352,7 @@ Alternately using traditional cmake syntax
     cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DTEST_PSA_API=CRYPTO
+    cmake .. -DTFM_PLATFORM=arm/mps2/an521 -DTEST_PSA_API=CRYPTO
     make install
 
 Build for PSA FF (IPC) compliance tests
@@ -368,7 +368,7 @@ compliance test. This support is controlled by the TEST_PSA_API variable:
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
+    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -378,7 +378,7 @@ Alternately using traditional cmake syntax
     cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
+    cmake .. -DTFM_PLATFORM=arm/mps2/an521 -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     make install
 
 Location of build artifacts
@@ -419,7 +419,7 @@ Building the Reference Manual
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521
+    cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
     cmake --build cmake_doc -- tfm_docs_refman_html tfm_docs_refman_pdf
 
 The documentation files will be available under the directory::
@@ -431,7 +431,7 @@ Building the User Guide
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_doc -DTFM_PLATFORM=mps2/an521
+    cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
     cmake --build cmake_doc -- tfm_docs_userguide_html tfm_docs_userguide_pdf
 
 The documentation files will be available under the directory::
@@ -553,7 +553,7 @@ With new cmake syntax
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=mps2/an521 -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -563,7 +563,7 @@ Alternately using traditional cmake syntax
     cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=mps2/an521 -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
+    cmake .. -DTFM_PLATFORM=arm/mps2/an521 -DMBEDCRYPTO_PATH=<Mbed Crypto base folder>/mbedtls
     make install
 
 --------------

@@ -48,7 +48,7 @@ New platforms supported
 
   - Secure Enclave system:
 
-    - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/musca_b1/secure_enclave/readme>`
+    - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/arm/musca_b1/secure_enclave/readme>`
 
 Deprecated platforms
 ====================

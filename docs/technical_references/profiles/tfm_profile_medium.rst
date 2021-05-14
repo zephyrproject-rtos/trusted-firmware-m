@@ -430,7 +430,7 @@ build type **MinSizeRel**, built by **Armclang**.
 
    cd <TFM root dir>
    mkdir build && cd build
-   cmake -DTFM_PLATFORM=mps2/an521 \
+   cmake -DTFM_PLATFORM=arm/mps2/an521 \
          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
          -DTFM_PROFILE=profile_medium \
          -DCMAKE_BUILD_TYPE=MinSizeRel \
@@ -444,7 +444,7 @@ The following commands build Profile Medium with regression test cases on
 
    cd <TFM root dir>
    mkdir build && cd build
-   cmake -DTFM_PLATFORM=mps2/an521 \
+   cmake -DTFM_PLATFORM=arm/mps2/an521 \
          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
          -DTFM_PROFILE=profile_medium \
          -DCMAKE_BUILD_TYPE=MinSizeRel \
