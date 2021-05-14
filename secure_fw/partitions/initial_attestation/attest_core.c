@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -904,65 +904,3 @@ initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
 error:
     return error_mapping_to_psa_status_t(attest_err);
 }
-
-#ifdef SYMMETRIC_INITIAL_ATTESTATION
-psa_status_t
-initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
-                                    psa_outvec *out_vec, uint32_t num_outvec)
-{
-    (void)in_vec;
-    (void)num_invec;
-    (void)out_vec;
-    (void)num_outvec;
-
-    return PSA_ERROR_NOT_SUPPORTED;
-}
-#else /* SYMMETRIC_INITIAL_ATTESTATION */
-psa_status_t
-initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
-                                    psa_outvec *out_vec, uint32_t num_outvec)
-{
-    enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
-    struct q_useful_buf key_buffer;
-    uint8_t *key_source;
-    size_t key_len;
-    psa_ecc_family_t curve_type;
-
-    (void)in_vec;
-
-    if (num_invec != 0 || num_outvec != 3) {
-        attest_err = PSA_ATTEST_ERR_INVALID_INPUT;
-        goto error;
-    }
-
-    key_buffer.ptr = out_vec[0].base;
-    key_buffer.len = out_vec[0].len;
-
-    if (out_vec[1].len != sizeof(curve_type) ||
-        out_vec[2].len != sizeof(key_len)) {
-        attest_err = PSA_ATTEST_ERR_INVALID_INPUT;
-        goto error;
-    }
-
-    attest_err = attest_get_initial_attestation_public_key(&key_source,
-                                                           &key_len,
-                                                           &curve_type);
-    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-        goto error;
-    }
-
-    if (key_buffer.len < key_len) {
-        attest_err = PSA_ATTEST_ERR_BUFFER_OVERFLOW;
-        goto error;
-    }
-
-    (void)tfm_memcpy(key_buffer.ptr, key_source, key_len);
-
-    *(psa_ecc_family_t *)out_vec[1].base = curve_type;
-
-    *(size_t *)out_vec[2].base = key_len;
-
-error:
-    return error_mapping_to_psa_status_t(attest_err);
-}
-#endif /* SYMMETRIC_INITIAL_ATTESTATION */

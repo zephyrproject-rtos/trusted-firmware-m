@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -107,22 +107,6 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
  */
 psa_status_t
 initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
-                                    psa_outvec *out_vec, uint32_t num_outvec);
-
-/**
- * \brief Get the initial attestation public key.
- *
- * \param[in]     in_vec     Pointer to in_vec array, which contains input data
- *                           to attestation service
- * \param[in]     num_invec  Number of elements in in_vec array
- * \param[out]    out_vec    Pointer to out_vec array, which contains pointer
- *                           where to store the output data
- * \param[in]     num_outvec Number of elements in out_vec array
- *
- * \return Returns error code as specified in \ref psa_status_t
- */
-psa_status_t
-initial_attest_get_public_key(const psa_invec  *in_vec,  uint32_t num_invec,
                                     psa_outvec *out_vec, uint32_t num_outvec);
 
 #ifdef __cplusplus

@@ -237,12 +237,6 @@ interface:
     psa_initial_attest_get_token_size(size_t challenge_size,
                                       size_t *token_size);
 
-    psa_status_t
-    tfm_initial_attest_get_public_key(uint8_t          *public_key,
-                                      size_t            public_key_buf_size,
-                                      size_t           *public_key_len,
-                                      psa_ecc_family_t *elliptic_curve_type);
-
 The caller must allocate a large enough buffer, where the token is going to be
 created by Initial Attestation Service. The size of the created token is highly
 dependent on the number of software components in the system and the provided
@@ -582,10 +576,6 @@ does not need to operate such a service.
 +=========================+=========================================+=========================================+
 | Authentication mode     | HMAC over SHA256                        | ECDSA P256 over SHA256                  |
 +-------------------------+-----------------------------------------+-----------------------------------------+
-| Supported APIs          | - psa_initial_attest_get_token(..)      | - psa_initial_attest_get_token(..)      |
-|                         | - psa_initial_attest_get_token_size(..) | - psa_initial_attest_get_token_size(..) |
-|                         |                                         | - tfm_initial_attest_get_public_key(..) |
-+-------------------------+-----------------------------------------+-----------------------------------------+
 | Crypto key type in HW   | Symmetric key                           | ECDSA private key (secp256r1)           |
 +-------------------------+-----------------------------------------+-----------------------------------------+
 | Secrets are stored      | Device and database                     | Device only                             |
@@ -668,4 +658,4 @@ that user has license for DS-5 and FVP models:
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*

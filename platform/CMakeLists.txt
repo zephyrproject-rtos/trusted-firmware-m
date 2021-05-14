@@ -51,6 +51,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DUMMY_CRYPTO_KEYS}>:ext/common/template/crypto_keys.c>
         $<$<BOOL:${PLATFORM_DUMMY_ROTPK}>:ext/common/template/tfm_rotpk.c>
         $<$<BOOL:${PLATFORM_DUMMY_IAK}>:ext/common/template/tfm_initial_attestation_key_material.c>
+        $<$<AND:$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${PLATFORM_DUMMY_IAK}>,$<BOOL:${TEST_S}>>:ext/common/template/tfm_initial_attest_pub_key.c>
 )
 
 target_link_libraries(platform_s
@@ -87,6 +88,7 @@ target_include_directories(platform_ns
 target_sources(platform_ns
     PRIVATE
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
+        $<$<AND:$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${PLATFORM_DUMMY_IAK}>,$<BOOL:${TEST_NS}>>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/tfm_initial_attest_pub_key.c>
 )
 
 target_link_libraries(platform_ns
