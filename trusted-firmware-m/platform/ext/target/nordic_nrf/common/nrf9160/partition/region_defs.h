@@ -147,6 +147,11 @@
 #define SECONDARY_PARTITION_SIZE (FLASH_S_PARTITION_SIZE + \
                                   FLASH_NS_PARTITION_SIZE)
 
+/* Non-secure storage region */
+#define NRF_NS_STORAGE_PARTITION_START \
+            (NS_ROM_ALIAS(NRF_FLASH_NS_STORAGE_AREA_OFFSET))
+#define NRF_NS_STORAGE_PARTITION_SIZE (NRF_FLASH_NS_STORAGE_AREA_SIZE)
+
 #ifdef BL2
 /* Bootloader regions */
 #define BL2_CODE_START    (S_ROM_ALIAS(FLASH_AREA_BL2_OFFSET))
