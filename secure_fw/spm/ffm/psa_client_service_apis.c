@@ -78,7 +78,7 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
     privileged = tfm_spm_partition_get_privileged_mode(
         partition->p_static->flags);
 
-    type = (int32_t)((args[1] & TYPE_MASK) >> TYPE_OFFSET);
+    type = (int32_t)(int16_t)((args[1] & TYPE_MASK) >> TYPE_OFFSET);
     in_num = (size_t)((args[1] & IN_LEN_MASK) >> IN_LEN_OFFSET);
     out_num = (size_t)((args[1] & OUT_LEN_MASK) >> OUT_LEN_OFFSET);
     inptr = (psa_invec *)args[2];
