@@ -134,7 +134,7 @@ void tfm_core_thrd_start_scheduler(struct tfm_core_thread_t *pth)
     TFM_CORE_ASSERT(pth != NULL);
     TFM_CORE_ASSERT(pth->arch_ctx.sp != 0);
 
-    tfm_arch_update_ctx(&pth->arch_ctx);
+    tfm_arch_set_ctx(&pth->arch_ctx);
 
     CURR_THRD = pth;
 

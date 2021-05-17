@@ -138,11 +138,22 @@ __STATIC_INLINE uintptr_t tfm_arch_seal_thread_stack(uintptr_t stk)
 }
 
 /**
- * \brief Update architecture context value into hardware
+ * \brief Get architecture context value into context struct
  *
  * \param[in] p_actx        Pointer of context data
  */
-__STATIC_INLINE void tfm_arch_update_ctx(struct tfm_arch_ctx_t *p_actx)
+__STATIC_INLINE void tfm_arch_get_ctx(struct tfm_arch_ctx_t *p_actx)
+{
+    p_actx->sp = __get_PSP();
+    p_actx->sp_limit = __get_PSPLIM();
+}
+
+/**
+ * \brief Set architecture context value into hardware
+ *
+ * \param[in] p_actx        Pointer of context data
+ */
+__STATIC_INLINE void tfm_arch_set_ctx(struct tfm_arch_ctx_t *p_actx)
 {
     __set_PSP(p_actx->sp);
     __set_PSPLIM(p_actx->sp_limit);
