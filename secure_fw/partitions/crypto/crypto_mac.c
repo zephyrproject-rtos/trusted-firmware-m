@@ -44,7 +44,7 @@ psa_status_t tfm_crypto_mac_sign_setup(psa_invec in_vec[],
     psa_algorithm_t alg = iov->alg;
     mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(key_id, NULL);
+    status = tfm_crypto_check_handle_owner(key_id);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -105,7 +105,7 @@ psa_status_t tfm_crypto_mac_verify_setup(psa_invec in_vec[],
     psa_algorithm_t alg = iov->alg;
     mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(key_id, NULL);
+    status = tfm_crypto_check_handle_owner(key_id);
     if (status != PSA_SUCCESS) {
         return status;
     }

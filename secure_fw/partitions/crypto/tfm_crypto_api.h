@@ -100,15 +100,10 @@ psa_status_t tfm_crypto_key_attributes_to_client(
  *        partition
  *
  * \param[in]  key    key given as input
- * \param[out] index  Optionally, pointer to hold the internal index
- *                    corresponding to the input handle. Valid only
- *                    on PSA_SUCCESS, it's returned only if the input
- *                    parameter is not NULL.
  *
  * \return Return values as described in \ref psa_status_t
  */
-psa_status_t tfm_crypto_check_handle_owner(psa_key_id_t key,
-                                           uint32_t *index);
+psa_status_t tfm_crypto_check_handle_owner(psa_key_id_t key);
 
 /**
  * \brief Checks that there is enough local storage in RAM to keep another key,
