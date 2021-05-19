@@ -97,6 +97,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
     case TFM_SVC_OUTPUT_UNPRIV_STRING:
         svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0],
                                              svc_args[1]);
+        break;
 #endif
     default:
 #ifdef PLATFORM_SVC_HANDLERS
