@@ -691,7 +691,7 @@ bool tfm_validate_partition_static(struct partition_load_info_t *p_cmninf)
 
 uint32_t tfm_spm_init(void)
 {
-    uint32_t i, j;
+    uint32_t i, j, part_idx;
     struct partition_t *partition;
     struct service_t *service;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
@@ -710,6 +710,7 @@ uint32_t tfm_spm_init(void)
                   TFM_CONN_HANDLE_MAX_NUM);
 
     /* Load partition and service data */
+    part_idx = 0;
     part_load_start = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Base);
     part_load_end = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Limit);
     while (part_load_start < part_load_end) {
@@ -761,13 +762,13 @@ uint32_t tfm_spm_init(void)
             platform_data_p = POSITION_TO_PTR(p_asset_load[i].dev.addr_ref,
                                               struct platform_data_t *);
 #ifdef TFM_FIH_PROFILE_ON
-            FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, i,
+            FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, part_idx,
                      platform_data_p);
             if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
                 tfm_core_panic();
             }
 #else /* TFM_FIH_PROFILE_ON */
-            if (tfm_spm_hal_configure_default_isolation(i,
+            if (tfm_spm_hal_configure_default_isolation(part_idx,
                 platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
                 tfm_core_panic();
             }
@@ -847,6 +848,7 @@ uint32_t tfm_spm_init(void)
 
             BI_LIST_INIT_NODE(&service[i].handle_list);
         }
+        part_idx++;
     }
 
     /*
