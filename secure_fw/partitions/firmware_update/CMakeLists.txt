@@ -39,12 +39,11 @@ target_sources(tfm_partitions
             ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/static_info_tfm_firmware_update.c>
 )
 
-# Include the bootloader specific configuration.
-if ((NOT TFM_FWU_BOOTLOADER_LIB) OR (NOT EXISTS ${TFM_FWU_BOOTLOADER_LIB}))
+# The bootloader specific configuration.
+if ((NOT TFM_FWU_BOOTLOADER_LIB) OR (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/bootloader/${TFM_FWU_BOOTLOADER_LIB}))
     message(FATAL_ERROR "TFM_FWU_BOOTLOADER_LIB invalid")
 endif()
-
-include(${TFM_FWU_BOOTLOADER_LIB})
+add_subdirectory(bootloader/${TFM_FWU_BOOTLOADER_LIB})
 
 target_link_libraries(tfm_psa_rot_partition_fwu
     PRIVATE

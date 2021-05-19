@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_fwu_mcuboot_util INTERFACE)
 
@@ -13,7 +15,7 @@ target_sources(tfm_fwu_mcuboot_util
         ${MCUBOOT_PATH}/boot/bootutil/src/tlv.c
         ${CMAKE_SOURCE_DIR}/bl2/src/flash_map.c
         ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/flash_map_extended.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/bootloader/mcuboot/tfm_mcuboot_fwu.c
+        ./tfm_mcuboot_fwu.c
 )
 
 target_include_directories(tfm_fwu_mcuboot_util
@@ -22,7 +24,7 @@ target_include_directories(tfm_fwu_mcuboot_util
         ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include
         ${MCUBOOT_PATH}/boot/bootutil/include
         ${MCUBOOT_PATH}/boot/bootutil/src
-        ${CMAKE_CURRENT_SOURCE_DIR}/bootloader
+        ${CMAKE_CURRENT_SOURCE_DIR}/../
 )
 
 target_link_libraries(tfm_fwu_mcuboot_util
