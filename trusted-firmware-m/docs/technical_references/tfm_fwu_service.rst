@@ -5,7 +5,6 @@ Firmware Update Service
 :Author: Sherry Zhang
 :Organization: Arm Limited
 :Contact: Sherry Zhang <Sherry.Zhang2@arm.com>
-:Status: Draft
 
 .. contents:: Table of Contents
 
@@ -66,7 +65,7 @@ The structure of the TF-M Firmware Update service is listed below:
 ***********************
 Service API description
 ***********************
-This service follows the `Firmware Update API <https://developer.arm.com/documentation/ihi0093/0000/>`_ spec of version 0.7.
+This service follows the PSA Firmware Update API spec of version 0.7 [1]_.
 It implements the mandatory interface functions listed in section 5.1 and the
 optional interface ``psa_fwu_accept()``. Please refer to Firmware Update spec
 for the detailed description.
@@ -108,26 +107,25 @@ Parameters
 
 fwu_bootloader_staging_area_init(function)
 ------------------------------------------
-Prototype
-^^^^^^^^^
+**Prototype**
+
 .. code-block:: c
 
     psa_status_t fwu_bootloader_staging_area_init(bl_image_id_t bootloader_image_id);
 
-Description
-^^^^^^^^^^^
+**Description**
+
 Prepare the staging area of the image with the given ID for image download.
 For example, initialize the staging area, open the flash area, and so on.
 The image will be written into the staging area later.
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 - ``bootloader_image_id``: The identifier of the target image in bootloader.
 
 fwu_bootloader_load_image(function)
 -----------------------------------
-Prototype
-^^^^^^^^^
+**Prototype**
 
 .. code-block:: c
 
@@ -136,12 +134,12 @@ Prototype
                                            const void    *block,
                                            size_t        block_size);
 
-Description
-^^^^^^^^^^^
+**Description**
+
 Load the image to its staging area.
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 - ``bootloader_image_id``: The identifier of the target image in bootloader.
 - ``image_offset``: The offset of the image being passed into block, in bytes.
 - ``block``: A buffer containing a block of image data. This might be a complete image or a subset.
@@ -149,78 +147,78 @@ Parameters
 
 fwu_bootloader_install_image(function)
 ---------------------------------------------
-Prototype
-^^^^^^^^^
+**Prototype**
+
 .. code-block:: c
 
     psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
                                               bl_image_id_t       *dependency,
                                               psa_image_version_t *dependency_version);
 
-Description
-^^^^^^^^^^^
+**Description**
+
 Check the authenticity and integrity of the image. If a reboot is required to
 complete the check, then mark this image as a candidate so that the next time
 bootloader runs it will take this image as a candidate one to bootup. Return
 the error code PSA_SUCCESS_REBOOT.
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
 - ``bootloader_image_id``: The identifier of the target image in bootloader.
 - ``dependency``: Bootloader image ID of dependency if needed.
 - ``dependency_version``: Bootloader image version of dependency if needed.
 
 fwu_bootloader_mark_image_accepted(function)
 --------------------------------------------
-Prototype
-^^^^^^^^^
+**Prototype**
+
 .. code-block:: c
 
     psa_status_t fwu_bootloader_mark_image_accepted(void);
 
-Description
-^^^^^^^^^^^
+**Description**
+
 Call this API to mark the running images as permanent/accepted to avoid
 revert when next time bootup. Usually, this API is called after the running
 images have been verified as valid.
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
     N/A
 
 fwu_bootloader_abort(function)
 ------------------------------
-Prototype
-^^^^^^^^^
+**Prototype**
+
 .. code-block:: c
 
     psa_status_t fwu_bootloader_abort(void);
 
-Description
-^^^^^^^^^^^
+**Description**
+
 Abort the current image download process.
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
     N/A
 
 fwu_bootloader_get_image_info(function)
 ---------------------------------------
-Prototype
-^^^^^^^^^
+**Prototype**
+
 .. code-block:: c
 
     psa_status_t fwu_bootloader_get_image_info(bl_image_id_t    bootloader_image_id,
                                                bool             staging_area,
                                                tfm_image_info_t *info);
 
-Description
-^^^^^^^^^^^
+**Description**
+
 Get the image information of the given bootloader_image_id in the staging area
 or the running area.
 
-Parameters
-^^^^^^^^^^
+**Parameters**
+
     - ``bootloader_image_id``: The identifier of the target image in bootloader.
     - ``active_image``: Indicates image location.
 
@@ -253,10 +251,6 @@ Three image types are defined in this partition.
 - FWU_IMAGE_TYPE_SECURE: the secure image
 - FWU_IMAGE_TYPE_FULL: the secure + non_secure image
 
-.. Note::
-
-    Currently, images update with dependency is not supported by FWU in multiple image boot.
-
 Macros **FWU_CALCULATE_IMAGE_ID**, **FWU_IMAGE_ID_GET_TYPE** and
 **FWU_IMAGE_ID_GET_SLOT** are dedicated to converting the image id, type, and
 slot. The service users can call these macros to get the image ID.
@@ -271,9 +265,9 @@ Benefits Analysis on this Partition
 
 Implement the FWU functionality in the non-secure side
 ======================================================
-The Firmware Update APIs listed in `User interfaces`_ can also be implemented
-in the non-secure side. The library model implementation can be referred to for
-the non-secure side implementation.
+The APIs listed in PSA Firmware Update API spec [1]_ can also be implemented in
+the non-secure side. The library model implementation can be referred to for the
+non-secure side implementation.
 
 Pros and Cons for Implementing FWU APIs in Secure Side
 ======================================================
@@ -309,5 +303,13 @@ Cons
 Users can decide whether to call the FWU service in TF-M directly or implement
 the Firmware Update APIs in the non-secure side based on the pros and cons
 analysis above.
+
+*********
+Reference
+*********
+
+.. [1] `PSA Firwmare Update API <https://developer.arm.com/documentation/ihi0093/0000/>`_
+
+--------------
 
 *Copyright (c) 2021, Arm Limited. All rights reserved.*

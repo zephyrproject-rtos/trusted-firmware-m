@@ -17,15 +17,9 @@
 #include "tfm_thread.h"
 #include "psa/service.h"
 
-#define TFM_VERSION_POLICY_RELAXED      0
-#define TFM_VERSION_POLICY_STRICT       1
-
 #define TFM_HANDLE_STATUS_IDLE          0
 #define TFM_HANDLE_STATUS_ACTIVE        1
 #define TFM_HANDLE_STATUS_CONNECT_ERROR 2
-
-#define PART_REGION_ADDR(partition, region) \
-    (uint32_t)&REGION_NAME(Image$$, partition, region)
 
 #define TFM_CONN_HANDLE_MAX_NUM         16
 
@@ -60,19 +54,6 @@
 
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
-/* Privileged definitions for partition thread mode */
-#define TFM_PARTITION_UNPRIVILEGED_MODE 0
-#define TFM_PARTITION_PRIVILEGED_MODE   1
-
-#define SPM_PART_FLAG_APP_ROT           0x01
-#define SPM_PART_FLAG_PSA_ROT           0x02
-#define SPM_PART_FLAG_IPC               0x04
-
-#define TFM_PRIORITY_HIGH               THRD_PRIOR_HIGHEST
-#define TFM_PRIORITY_NORMAL             THRD_PRIOR_MEDIUM
-#define TFM_PRIORITY_LOW                THRD_PRIOR_LOWEST
-#define TFM_PRIORITY(LEVEL)             TFM_PRIORITY_##LEVEL
-
 #define TFM_MSG_MAGIC                   0x15154343
 
 /* Message struct to collect parameter from client */
@@ -97,40 +78,12 @@ struct tfm_msg_body_t {
     struct bi_list_node_t msg_node;    /* For list operators             */
 };
 
-struct partition_memory_t {
-    uintptr_t start;
-    uintptr_t limit;
-};
-
-/**
- * Holds the fields of the partition DB used by the SPM code. The values of
- * these fields are calculated at compile time, and set during initialisation
- * phase.
- */
-struct partition_static_t {
-    uint32_t psa_ff_ver;                /* PSA-FF version                   */
-    uint32_t pid;                       /* Partition ID                     */
-    uint32_t flags;                     /* Flags of the partition           */
-    uint32_t priority;                  /* Priority of the partition thread */
-    sp_entry_point entry;               /* Entry point of the partition     */
-    uintptr_t stack_base_addr;          /* Stack base of the partition      */
-    size_t stack_size;                  /* Stack size of the partition      */
-    uintptr_t heap_base_addr;           /* Heap base of the partition       */
-    size_t heap_size;                   /* Heap size of the partition       */
-    uintptr_t platform_data;            /* Platform specific data           */
-    uint32_t ndeps;                     /* Numbers of depended services     */
-    uint32_t *deps;                     /* Pointer to dependency arrays     */
-#if TFM_LVL == 3
-    struct partition_memory_t mems;     /* Partition memories               */
-#endif
-};
-
 /**
  * Holds the fields that define a partition for SPM. The fields are further
  * divided to structures, to keep the related fields close to each other.
  */
 struct partition_t {
-    const struct partition_static_t *p_static;
+    const struct partition_load_info_t *p_static;
     void *p_platform;
     void *p_interrupts;
     void *p_metadata;
@@ -147,27 +100,12 @@ struct spm_partition_db_t {
     struct partition_t *partitions;
 };
 
-/* Service database defined by manifest */
-struct tfm_spm_service_db_t {
-    char *name;                     /* Service name                          */
-    uint32_t partition_id;          /* Partition ID which service belong to  */
-    psa_signal_t signal;            /* Service signal                        */
-    uint32_t sid;                   /* Service identifier                    */
-    bool non_secure_client;         /* If can be called by non secure client */
-    bool connection_based;          /* 'true' for connection-based service   */
-    uint32_t version;               /* Service version                       */
-    uint32_t version_policy;        /* Service version policy                */
-};
-
 /* RoT Service data */
 struct service_t {
-    const struct tfm_spm_service_db_t *service_db;/* Service database pointer */
-    struct partition_t *partition;           /*
-                                              * Point to secure partition
-                                              * data
-                                              */
-    struct bi_list_node_t handle_list;       /* Service handle list          */
-    struct bi_list_node_t list;              /* For list operation           */
+    const struct service_load_info_t *service_db;   /* Service static pointer */
+    struct partition_t *partition;                  /* Owner of the service   */
+    struct bi_list_node_t handle_list;              /* Service handle list    */
+    struct bi_list_node_t list;                     /* For list operation     */
 };
 
 /* Stateless RoT service tracking array item type. Indexed by static handle */

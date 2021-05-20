@@ -5,7 +5,9 @@ Security Advisories
     :maxdepth: 1
     :glob:
 
-    *
+    stack_seal_vulnerability
+    svc_caller_sp_fetching_vulnerability
+    crypto_multi_part_ops_abort_fail
 
 --------------
 

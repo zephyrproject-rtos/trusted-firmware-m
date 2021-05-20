@@ -8,8 +8,8 @@
 #include "tfm_arch.h"
 #include "tfm_thread.h"
 #include "utilities.h"
+#include "svc_num.h"
 #include "tfm_memory_utils.h"
-#include "tfm/tfm_core_svc.h"
 #include "tfm_core_utils.h"
 
 /* Force ZERO in case ZI(bss) clear is missing */

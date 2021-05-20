@@ -153,7 +153,7 @@ lowest interrupt of 'A' is triggered. This can go until the highest priority
 interrupt of 'A' is triggered, and then this last handler is interrupted. At
 this point the context stack looks like this:
 
-.. code-block::
+.. code-block:: rst
 
   +------------+
   | [intr_ctx] |
@@ -172,11 +172,10 @@ this point the context stack looks like this:
 
 So the max stack size can be calculated as a function of the IRQ count of 'A':
 
-.. code-block::
-
+.. code-block:: c
 
   max_stack_size = intr_ctx_size + (IRQ_CNT * (intr_ctx_size + hndl_ctx_size))
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*

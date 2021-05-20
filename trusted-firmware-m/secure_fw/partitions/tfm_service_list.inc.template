@@ -17,52 +17,6 @@
 
 {% endfor %}
 
-const struct tfm_spm_service_db_t service_db[] =
-{
-{% for partition in partitions %}
-    {% if partition.attr.tfm_partition_ipc %}
-        {% if partition.manifest.services %}
-            {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-            {% endif %}
-    /******** {{partition.manifest.name}} ********/
-            {% for service in partition.manifest.services %}
-    {{'{'}}
-        .name = "{{service.name}}",
-        .partition_id = {{partition.manifest.name}},
-        .signal = {{service.name}}_SIGNAL,
-        .sid = {{service.sid}},
-            {% if service.non_secure_clients is sameas true %}
-        .non_secure_client = true,
-            {% else %}
-        .non_secure_client = false,
-            {% endif %}
-            {% if partition.manifest.psa_framework_version > 1.0 and service.connection_based is sameas false %}
-        .connection_based = false,
-            {% else %}
-        .connection_based = true,
-            {% endif %}
-            {% if service.version %}
-        .version = {{service.version}},
-            {% else %}
-        .version = 1,
-            {% endif %}
-            {% if service.version_policy %}
-        .version_policy = TFM_VERSION_POLICY_{{service.version_policy}}
-            {% else %}
-        .version_policy = TFM_VERSION_POLICY_STRICT
-            {% endif %}
-    {{'}'}},
-            {% endfor %}
-            {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-            {% endif %}
-        {% endif %}
-
-    {% endif %}
-{% endfor %}
-};
-
 /**************************************************************************/
 /** The service list */
 /**************************************************************************/

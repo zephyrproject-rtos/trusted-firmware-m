@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright 2019-2020 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +29,8 @@
 #define S_PSP_STACK_SIZE        (0x0000800)
 
 #define NS_HEAP_SIZE            (0x0001000)
-#define NS_MSP_STACK_SIZE       (0x0000400)
-#define NS_PSP_STACK_SIZE       (0x0000C00)
+#define NS_MSP_STACK_SIZE       (0x00000A0)
+#define NS_PSP_STACK_SIZE       (0x0000140)
 
 /* This size of buffer is big enough to store an attestation
  * token produced by initial attestation service
@@ -117,18 +118,13 @@
 #define NS_DATA_SIZE    (TOTAL_RAM_SIZE - S_DATA_SIZE)
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
-
 /* Flash is divided into 32 kB sub-regions. Each sub-region can be assigned individual
 security tier by programing corresponding registers in secure AHB controller.*/
 #define FLASH_SUBREGION_SIZE    (0x8000)     /* 32 kB */
 
-
-
 /* RAM is divided into 4 kB sub-regions. Each sub-region can be assigned individual
 security tier by programing corresponding registers in secure AHB controller. */
 #define DATA_SUBREGION_SIZE 0x1000      /* 4 KB*/
-
-
 
 /* NS partition information is used for MPC and SAU configuration */
 #define NS_PARTITION_START \

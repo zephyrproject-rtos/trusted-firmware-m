@@ -9,11 +9,7 @@
 #include "bitops.h"
 #include "spm_psa_client_call.h"
 #include "psa/lifecycle.h"
-#ifdef TFM_PSA_API
 #include "spm_ipc.h"
-#else
-#include "spm_func.h"
-#endif
 #include "tfm_core_utils.h"
 #include "tfm_hal_defs.h"
 #include "tfm_hal_platform.h"
@@ -21,6 +17,8 @@
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
 #include "tfm_psa_call_param.h"
+#include "load/partition_defs.h"
+#include "load/service_defs.h"
 
 /*********************** SPM functions for PSA Client APIs *******************/
 
@@ -239,7 +237,7 @@ void tfm_spm_psa_set_rhandle(uint32_t *args)
     }
 
     /* It is a PROGRAMMER ERROR if a stateless service sets rhandle. */
-    if (!msg->service->service_db->connection_based) {
+    if (SERVICE_IS_STATELESS(msg->service->service_db->flags)) {
         tfm_core_panic();
     }
 
@@ -515,7 +513,7 @@ void tfm_spm_psa_reply(uint32_t *args)
              * psa_call().
              */
             update_caller_outvec_len(msg);
-            if (!service->service_db->connection_based) {
+            if (SERVICE_IS_STATELESS(service->service_db->flags)) {
                 tfm_spm_free_conn_handle(service, conn_handle);
             }
         } else {
