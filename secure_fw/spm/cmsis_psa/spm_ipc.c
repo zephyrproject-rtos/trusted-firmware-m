@@ -250,7 +250,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
      * partition mask until no remaining message. Search may be optimized.
      */
     BI_LIST_FOR_EACH(node, head) {
-        tmp_msg = TFM_GET_CONTAINER_PTR(node, struct tfm_msg_body_t, msg_node);
+        tmp_msg = TO_CONTAINER(node, struct tfm_msg_body_t, msg_node);
         if (tmp_msg->service->service_db->signal == signal && msg) {
             return msg;
         } else if (tmp_msg->service->service_db->signal == signal) {
@@ -385,7 +385,7 @@ struct partition_t *tfm_spm_get_running_partition(void)
     struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr();
     struct partition_t *partition;
 
-    partition = TFM_GET_CONTAINER_PTR(pth, struct partition_t, sp_thread);
+    partition = TO_CONTAINER(pth, struct partition_t, sp_thread);
 
     return partition;
 }
@@ -882,9 +882,9 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
 
     if (pth_next != NULL && pth_curr != pth_next) {
 #if TFM_LVL != 1
-        p_next_partition = TFM_GET_CONTAINER_PTR(pth_next,
-                                                 struct partition_t,
-                                                 sp_thread);
+        p_next_partition = TO_CONTAINER(pth_next,
+                                        struct partition_t,
+                                        sp_thread);
         p_part_static = p_next_partition->p_static;
         if (p_part_static->flags & SPM_PART_FLAG_PSA_ROT) {
             is_privileged = TFM_PARTITION_PRIVILEGED_MODE;

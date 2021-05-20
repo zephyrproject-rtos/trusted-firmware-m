@@ -210,9 +210,9 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 
-    (TFM_GET_CONTAINER_PTR(tmp_msg,
-                           struct tfm_conn_handle_t,
-                           internal_msg))->status = TFM_HANDLE_STATUS_ACTIVE;
+    (TO_CONTAINER(tmp_msg,
+                  struct tfm_conn_handle_t,
+                  internal_msg))->status = TFM_HANDLE_STATUS_ACTIVE;
 
     spm_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
 

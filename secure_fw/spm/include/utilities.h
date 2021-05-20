@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -30,7 +30,7 @@ void tfm_core_panic(void);
 #endif
 
 /* Get container structure start address from member */
-#define TFM_GET_CONTAINER_PTR(ptr, type, member) \
+#define TO_CONTAINER(ptr, type, member) \
     (type *)((unsigned long)(ptr) - offsetof(type, member))
 
 #define ERROR_MSG(msg)
