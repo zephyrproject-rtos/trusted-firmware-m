@@ -124,15 +124,13 @@ control is taken back to client.
     The only signals implemented in the current TF-M implementation are
     interrupt signals.
 
-Signature
----------
+**Signature**
 
 .. code-block:: c
 
     psa_signal_t psa_wait(psa_signal_t signal_mask, uint32_t timeout);
 
-Parameters
-----------
+**Parameters**
 
 ``psa_signal_t signal_mask`` defines the set of interrupt signals that can
 resume execution of the secure service.
@@ -140,8 +138,7 @@ resume execution of the secure service.
 ``uint32_t timeout`` defines timeout for the function, as defined in PSA
 Firmware Framework 1.0-beta-0 (Chapter 4.3.3).
 
-Return
-------
+**Return**
 
 The return value indicates the signal(s) that triggered the resumption of the
 service; i.e. If multiple interrupt events have been handled, it will be
@@ -152,20 +149,17 @@ tfm_enable_irq()
 
 A call to ``tfm_enable_irq()`` from a secure service enables an irq.
 
-Signature
----------
+**Signature**
 
 .. code-block:: c
 
     void tfm_enable_irq(psa_signal_t irq_signal);
 
-Parameters
-----------
+**Parameters**
 
 ``psa_signal_t irq_signal`` defines the interrupt signal to be enabled.
 
-Return
-------
+**Return**
 
 ``void`` Success.
 
@@ -179,19 +173,17 @@ tfm_disable_irq()
 
 A call to ``tfm_disable_irq()`` from a secure service disables an irq.
 
-Signature
----------
+**Signature**
 
 .. code-block:: c
 
     void tfm_disable_irq(psa_signal_t irq_signal);
 
-Parameters
-----------
+**Parameters**
+
 ``psa_signal_t irq_signal`` defines the interrupt signal to be disabled.
 
-Return
-------
+**Return**
 
 ``void``: Success.
 
@@ -207,21 +199,18 @@ A call ``to psa_eoi()`` from a secure service function or a Partition ISR
 informs SPM that an interrupt has been processed. This clears the IRQ signal in
 the asserted signal mask associated with the partition.
 
-Signature
----------
+**Signature**
 
 .. code-block:: c
 
     void psa_eoi(psa_signal_t irq_signal);
 
-Parameters
-----------
+**Parameters**
 
 ``psa_signal_t irq_signal`` defines the interrupt signal that has been
 processed.
 
-Return
-------
+**Return**
 
 ``void``: Success.
 
@@ -230,5 +219,7 @@ Does not return: The call is invalid, one or more of the following are true:
 - ``irq_signal`` is not an interrupt signal.
 - ``irq_signal`` indicates more than one signal.
 - ``irq_signal`` is not currently asserted.
+
+--------------
 
 *Copyright (c) 2019-2021, Arm Limited. All rights reserved.*

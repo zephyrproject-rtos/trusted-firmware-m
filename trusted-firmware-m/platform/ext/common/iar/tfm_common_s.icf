@@ -39,6 +39,11 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
        ro object tfm_log_raw.o
        };
 
+    /**** Section for holding partition static data */
+#define block TFM_SP_STATIC_LIST with alignment = 4 {
+    ro section .partition_info object load_info_*.o,
+}
+
     /**** PSA RoT RO part (CODE + RODATA) start here */
     /*
      * This empty, zero long execution region is here to mark the start address
@@ -196,6 +201,10 @@ define block SRAM_WATERMARK with size = 0 { };
 define block LR_CODE with fixed order {
        block ER_TFM_CODE,
        block TFM_UNPRIV_CODE,
+
+/**** Section for holding partition static data */
+       block TFM_SP_STATIC_LIST,
+
        block TFM_PSA_CODE_START,
 
        block TFM_PSA_ROT_LINKER,

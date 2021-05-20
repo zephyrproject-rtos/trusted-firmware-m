@@ -44,6 +44,11 @@ install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
 install(FILES       ${INTERFACE_INC_DIR}/ext/tz_context.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR}/ext)
 
+if (TFM_PSA_API)
+    install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_param.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+endif()
+
 if (TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${INTERFACE_INC_DIR}/multi_core/tfm_multi_core_api.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox.h

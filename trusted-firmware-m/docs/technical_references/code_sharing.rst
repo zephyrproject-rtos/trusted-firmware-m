@@ -5,7 +5,6 @@ Code sharing between independently linked XIP binaries
 :Authors: Tamas Ban
 :Organization: Arm Limited
 :Contact: tamas.ban@arm.com
-:Status: Draft
 
 **********
 Motivation

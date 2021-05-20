@@ -51,6 +51,9 @@ typedef struct tfm_fwu_mcuboot_ctx_s {
 
 static tfm_fwu_mcuboot_ctx_t mcuboot_ctx[TFM_FWU_MAX_IMAGES];
 static fwu_image_info_data_t boot_shared_data;
+extern const uint32_t boot_img_magic[];
+#define BOOT_MAGIC_ARR_SZ \
+    (sizeof(boot_img_magic) / sizeof(boot_img_magic[0]))
 
 static int convert_id_from_bl_to_mcuboot(bl_image_id_t bl_image_id,
                                          uint8_t *mcuboot_image_id)
@@ -79,6 +82,7 @@ static int convert_id_from_bl_to_mcuboot(bl_image_id_t bl_image_id,
     return 0;
 }
 
+#if (MCUBOOT_IMAGE_NUMBER > 1)
 static int convert_id_from_mcuboot_to_bl(uint8_t mcuboot_image_id,
                                          bl_image_id_t *bl_image_id)
 {
@@ -88,16 +92,6 @@ static int convert_id_from_mcuboot_to_bl(uint8_t mcuboot_image_id,
         return -1;
     }
 
-#if (MCUBOOT_IMAGE_NUMBER == 1)
-    /* Only full image upgrade is supported in this case. */
-    if (mcuboot_image_id != 0) {
-        LOG_MSG("TFM FWU: multi-image is not supported in current mcuboot configuration.\n\r");
-        return -1;
-    }
-
-    /* The image id in mcuboot. 0: the full image. */
-    image_type = FWU_IMAGE_TYPE_FULL;
-#else
     if (mcuboot_image_id == 0) {
         /* The image id in mcuboot. 0: the secure image. */
         image_type = FWU_IMAGE_TYPE_SECURE;
@@ -109,11 +103,11 @@ static int convert_id_from_mcuboot_to_bl(uint8_t mcuboot_image_id,
                 mcuboot_image_id);
         return -1;
     }
-#endif
+
     *bl_image_id = image_type;
     return 0;
 }
-
+#endif
 
 /*
  * Get the flash area of the image mcuboot_image_id.
@@ -145,6 +139,42 @@ static int fwu_bootloader_get_shared_data(void)
     return tfm_core_get_boot_data(TLV_MAJOR_FWU,
                                   (struct tfm_boot_data *)&boot_shared_data,
                                   sizeof(boot_shared_data));
+}
+
+static psa_status_t get_running_image_version(uint8_t mcuboot_image_id,
+                                              struct image_version *image_ver)
+{
+    struct shared_data_tlv_entry tlv_entry;
+    uint8_t *tlv_end;
+    uint8_t *tlv_curr;
+
+    /* The bootloader writes the image version information into the memory which
+     * is shared between MCUboot and TF-M. Read the shared memory.
+     */
+    if (boot_shared_data.header.tlv_magic != SHARED_DATA_TLV_INFO_MAGIC) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+
+    tlv_end = (uint8_t *)&boot_shared_data +
+                boot_shared_data.header.tlv_tot_len;
+    tlv_curr = boot_shared_data.data;
+
+    while (tlv_curr < tlv_end) {
+        (void)memcpy(&tlv_entry, tlv_curr, SHARED_DATA_ENTRY_HEADER_SIZE);
+        if ((GET_FWU_CLAIM(tlv_entry.tlv_type) == SW_VERSION) &&
+            (GET_FWU_MODULE(tlv_entry.tlv_type) == mcuboot_image_id)) {
+            if (tlv_entry.tlv_len != sizeof(struct image_version)) {
+                return PSA_ERROR_GENERIC_ERROR;
+            }
+            memcpy(image_ver,
+                tlv_curr + SHARED_DATA_ENTRY_HEADER_SIZE,
+                tlv_entry.tlv_len);
+            return PSA_SUCCESS;
+        }
+        tlv_curr += SHARED_DATA_ENTRY_HEADER_SIZE + tlv_entry.tlv_len;
+    }
+
+    return PSA_ERROR_GENERIC_ERROR;
 }
 
 psa_status_t fwu_bootloader_init(void)
@@ -227,37 +257,62 @@ psa_status_t fwu_bootloader_load_image(bl_image_id_t bootloader_image_id,
     return PSA_SUCCESS;
 }
 
-static bool check_image_dependency(uint8_t mcuboot_image_id,
-                                uint8_t *dependency,
-                                psa_image_version_t *version)
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+/**
+ * \brief Compare image version numbers not including the build number.
+ *
+ * \param[in] image_ver_1 The first image version to compare.
+ *
+ * \param[in] image_ver_2 The second image version to compare.
+ *
+ * \return true         image_ver_1 is greater or equal than image_ver_2.
+ * \return false        image_ver_1 is less than image_ver_2.
+ */
+static bool is_version_greater_or_equal(const struct image_version *image_ver_1,
+                                        const struct image_version *image_ver_2)
 {
-    bool found = false;
-
-    if ((dependency == NULL || version == NULL)) {
-        return found;
+    if (image_ver_1->iv_major > image_ver_2->iv_major) {
+        return true;
     }
-
-    /* Currently only single image update is supported. So no dependency is
-     * required.
-     */
-    /* TODO: Add the dependency check to support multiple image update.*/
-    *dependency = TFM_MCUBOOT_FWU_INVALID_IMAGE_ID;
-    *version = (psa_image_version_t){.iv_major = 0, .iv_minor = 0,
-                           .iv_revision = 0, .iv_build_num = 0};
-
-    return found;
+    if (image_ver_1->iv_major < image_ver_2->iv_major) {
+        return false;
+    }
+    /* The major version numbers are equal, continue comparison. */
+    if (image_ver_1->iv_minor > image_ver_2->iv_minor) {
+        return true;
+    }
+    if (image_ver_1->iv_minor < image_ver_2->iv_minor) {
+        return false;
+    }
+    /* The minor version numbers are equal, continue comparison. */
+    if (image_ver_1->iv_revision >= image_ver_2->iv_revision) {
+        return true;
+    }
+    return false;
 }
+#endif
 
 psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
                                           bl_image_id_t *dependency,
-                                       psa_image_version_t *dependency_version)
+                                        psa_image_version_t *dependency_version)
 {
     uint8_t mcuboot_image_id = 0;
-    uint8_t dependency_mcuboot;
-    bl_image_id_t dependency_bl;
-    psa_image_version_t version;
     const struct flash_area *fap;
     uint8_t index;
+    psa_status_t ret;
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    struct image_tlv_iter it;
+    struct image_header hdr;
+    int rc;
+    uint32_t off;
+    uint16_t len;
+    struct image_dependency dep;
+    struct image_version image_ver = { 0 };
+    const struct flash_area *fap_secondary;
+    struct image_header hdr_secondary;
+    uint32_t boot_magic[BOOT_MAGIC_ARR_SZ];
+    bool check_pass = false;
+#endif
 
     if ((dependency == NULL || dependency_version == NULL)) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -275,32 +330,132 @@ psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (check_image_dependency(mcuboot_image_id,
-                               &dependency_mcuboot,
-                               &version)) {
-        if (convert_id_from_mcuboot_to_bl(dependency_mcuboot,
-                                          &dependency_bl) != 0) {
-            return PSA_ERROR_INVALID_ARGUMENT;
-        }
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    /* Read the image header. */
+    if (flash_area_read(fap, 0, &hdr, sizeof(hdr)) != 0) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
 
-        *dependency = dependency_bl;
-        *dependency_version = version;
+    /* Return PSA_ERROR_GENERIC_ERROR if the image header is invalid. */
+    if (hdr.ih_magic != IMAGE_MAGIC) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
 
-        /* PSA_ERROR_DEPENDENCY_NEEDED indicates that a dependency is
-         * required. See the function description in
-         * tfm_bootloader_fwu_abstraction.h.
-         */
-        return PSA_ERROR_DEPENDENCY_NEEDED;
-    } else {
-        /* Write the magic in the image trailer so that this image will be set
-         * taken as a candidate.
-         */
-        if (boot_write_magic(fap) != 0) {
+    /* Initialize the iterator. */
+    if (bootutil_tlv_iter_begin(&it, &hdr, fap, IMAGE_TLV_DEPENDENCY, true)) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+
+    /* Iterate and verify the image dependencies. */
+    while (true) {
+        rc = bootutil_tlv_iter_next(&it, &off, &len, NULL);
+        if (rc < 0) {
             return PSA_ERROR_GENERIC_ERROR;
-        } else {
-            /* System reboot is always required. */
-            return PSA_SUCCESS_REBOOT;
+        } else if (rc > 0) {
+            /* No more dependency found. */
+            rc = 0;
+            ret = PSA_SUCCESS_REBOOT;
+            break;
         }
+        check_pass = false;
+
+        /* A dependency requirement is found. */
+        if (flash_area_read(fap, off, &dep, len) != 0) {
+            return PSA_ERROR_GENERIC_ERROR;
+        }
+
+        if (dep.image_id > MCUBOOT_IMAGE_NUMBER) {
+            return PSA_ERROR_GENERIC_ERROR;
+        }
+
+        /* As this partition does not validate the image in the secondary slot,
+         * so it has no information of which image will be chosen to run after
+         * reboot. So if the dependency image in the primary slot or that in the
+         * secondary slot can meet the dependency requirement, then the
+         * dependency check pass.
+         */
+        /* Check the dependency image in the primary slot. */
+        if (get_running_image_version(dep.image_id,
+                                      &image_ver) != PSA_SUCCESS) {
+            return PSA_ERROR_GENERIC_ERROR;
+        }
+
+        /* Check whether the version of the running image can meet the
+         * dependency requirement.
+         */
+        if (is_version_greater_or_equal(&image_ver,
+                                        &dep.image_min_version)) {
+            check_pass = true;
+        } else {
+            /* The running image cannot meet the dependency requirement. Check
+             * the dependency image in the secondary slot.
+             */
+            if ((flash_area_open(FLASH_AREA_IMAGE_SECONDARY(dep.image_id),
+                                 &fap_secondary)) != 0) {
+                return PSA_ERROR_GENERIC_ERROR;
+            }
+            if (flash_area_read(fap_secondary,
+                                0,
+                                &hdr_secondary,
+                                sizeof(hdr_secondary)) != 0) {
+                flash_area_close(fap_secondary);
+                return PSA_ERROR_GENERIC_ERROR;
+            }
+
+            /* Check the version of the dependency image in the secondary slot
+             * only if the image header, as well as the boot magic, is good.
+             */
+            if (hdr_secondary.ih_magic == IMAGE_MAGIC) {
+                /* Check the boot magic. */
+                if (flash_area_read(fap_secondary,
+                                    fap_secondary->fa_size - BOOT_MAGIC_SZ,
+                                    boot_magic,
+                                    BOOT_MAGIC_SZ) != 0) {
+                    flash_area_close(fap_secondary);
+                    return PSA_ERROR_GENERIC_ERROR;
+                }
+                if ((memcmp(boot_magic, boot_img_magic, BOOT_MAGIC_SZ) == 0) &&
+                    (is_version_greater_or_equal(&hdr_secondary.ih_ver,
+                                                 &dep.image_min_version))) {
+                    /* The dependency image in the secondary slot meet the
+                     * dependency requirement.
+                     */
+                    check_pass = true;
+                }
+            }
+            flash_area_close(fap_secondary);
+        }
+        if (!check_pass) {
+            if (convert_id_from_mcuboot_to_bl(dep.image_id,
+                                              dependency) != 0) {
+                return PSA_ERROR_GENERIC_ERROR;
+            }
+
+            /* Return the first dependency check failed image. */
+            memcpy(dependency_version,
+                   &dep.image_min_version,
+                   sizeof(*dependency_version));
+            ret = PSA_ERROR_DEPENDENCY_NEEDED;
+            break;
+        }
+    }
+#else
+    /* No dependency check is needed in single image case. */
+    ret = PSA_SUCCESS_REBOOT;
+#endif
+
+    /* Write the boot magic in the image trailer so that this image will be
+     * taken as a candidate. Note that even if a dependency is required, the
+     * boot magic should still be set. Therefore when circular dependency exists
+     * the firmware update will not enter the loop of returning
+     * PSA_ERROR_DEPENDENCY_NEEDED when installing. When all the dependencies
+     * are installed, the user should call the psa_fwu_install API to install
+     * this image again.
+     */
+    if (boot_write_magic(fap) != 0) {
+        return PSA_ERROR_GENERIC_ERROR;
+    } else {
+        return ret;
     }
 }
 
@@ -469,10 +624,6 @@ psa_status_t fwu_bootloader_get_image_info(bl_image_id_t bootloader_image_id,
                                   psa_image_info_t *info)
 {
     struct image_version image_ver = { 0 };
-    struct shared_data_tlv_entry tlv_entry;
-    uint8_t *tlv_end;
-    uint8_t *tlv_curr;
-    bool found = false;
     uint8_t mcuboot_image_id = 0;
 
     if (info == NULL) {
@@ -494,33 +645,8 @@ psa_status_t fwu_bootloader_get_image_info(bl_image_id_t bootloader_image_id,
          */
         info->state = PSA_IMAGE_INSTALLED;
 
-        /* When getting the primary image information, read it from the
-         * shared memory.
-         */
-        if (boot_shared_data.header.tlv_magic != SHARED_DATA_TLV_INFO_MAGIC) {
-            return PSA_ERROR_GENERIC_ERROR;
-        }
-
-        tlv_end = (uint8_t *)&boot_shared_data +
-                  boot_shared_data.header.tlv_tot_len;
-        tlv_curr = boot_shared_data.data;
-
-        while (tlv_curr < tlv_end) {
-            (void)memcpy(&tlv_entry, tlv_curr, SHARED_DATA_ENTRY_HEADER_SIZE);
-            if ((GET_FWU_CLAIM(tlv_entry.tlv_type) == SW_VERSION) &&
-               (GET_FWU_MODULE(tlv_entry.tlv_type) == mcuboot_image_id)) {
-                if (tlv_entry.tlv_len != sizeof(struct image_version)) {
-                    return PSA_ERROR_GENERIC_ERROR;
-                }
-                memcpy(&image_ver,
-                    tlv_curr + SHARED_DATA_ENTRY_HEADER_SIZE,
-                    tlv_entry.tlv_len);
-                found = true;
-                break;
-            }
-            tlv_curr += SHARED_DATA_ENTRY_HEADER_SIZE + tlv_entry.tlv_len;
-        }
-        if (found) {
+        if (get_running_image_version(mcuboot_image_id,
+                                      &image_ver) == PSA_SUCCESS) {
             info->version.iv_major = image_ver.iv_major;
             info->version.iv_minor = image_ver.iv_minor;
             info->version.iv_revision = image_ver.iv_revision;

@@ -40,69 +40,68 @@ __Vectors:
     .long   PendSV_Handler                                  /* PendSV Handler*/
     .long   SysTick_Handler                                 /* SysTick Handler*/
 
-    /* External Interrupts */
-    .long   WDT_BOD_IRQHandler  /* Windowed watchdog timer, Brownout detect, Flash interrupt */
-    .long   DMA0_IRQHandler  /* DMA0 controller */
-    .long   GINT0_IRQHandler  /* GPIO group 0 */
-    .long   GINT1_IRQHandler  /* GPIO group 1 */
-    .long   PIN_INT0_IRQHandler  /* Pin interrupt 0 or pattern match engine slice 0 */
-    .long   PIN_INT1_IRQHandler  /* Pin interrupt 1or pattern match engine slice 1 */
-    .long   PIN_INT2_IRQHandler  /* Pin interrupt 2 or pattern match engine slice 2 */
-    .long   PIN_INT3_IRQHandler  /* Pin interrupt 3 or pattern match engine slice 3 */
-    .long   UTICK0_IRQHandler  /* Micro-tick Timer */
-    .long   MRT0_IRQHandler  /* Multi-rate timer */
-    .long   CTIMER0_IRQHandler  /* Standard counter/timer CTIMER0 */
-    .long   CTIMER1_IRQHandler  /* Standard counter/timer CTIMER1 */
-    .long   SCT0_IRQHandler  /* SCTimer/PWM */
-    .long   CTIMER3_IRQHandler  /* Standard counter/timer CTIMER3 */
-    .long   FLEXCOMM0_IRQHandler  /* Flexcomm Interface 0 (USART, SPI, I2C, I2S, FLEXCOMM) */
-    .long   FLEXCOMM1_IRQHandler  /* Flexcomm Interface 1 (USART, SPI, I2C, I2S, FLEXCOMM) */
-    .long   FLEXCOMM2_IRQHandler  /* Flexcomm Interface 2 (USART, SPI, I2C, I2S, FLEXCOMM) */
-    .long   FLEXCOMM3_IRQHandler  /* Flexcomm Interface 3 (USART, SPI, I2C, I2S, FLEXCOMM) */
-    .long   FLEXCOMM4_IRQHandler  /* Flexcomm Interface 4 (USART, SPI, I2C, I2S, FLEXCOMM) */
-    .long   FLEXCOMM5_IRQHandler  /* Flexcomm Interface 5 (USART, SPI, I2C, I2S, FLEXCOMM) */
-    .long   FLEXCOMM6_IRQHandler  /* Flexcomm Interface 6 (USART, SPI, I2C, I2S, FLEXCOMM) */
-    .long   FLEXCOMM7_IRQHandler  /* Flexcomm Interface 7 (USART, SPI, I2C, I2S, FLEXCOMM) */
-    .long   ADC0_IRQHandler  /* ADC0  */
-    .long   Reserved39_IRQHandler  /* Reserved interrupt */
-    .long   ACMP_IRQHandler  /* ACMP  interrupts */
-    .long   Reserved41_IRQHandler  /* Reserved interrupt */
-    .long   Reserved42_IRQHandler  /* Reserved interrupt */
-    .long   USB0_NEEDCLK_IRQHandler  /* USB Activity Wake-up Interrupt */
-    .long   USB0_IRQHandler  /* USB device */
-    .long   RTC_IRQHandler  /* RTC alarm and wake-up interrupts */
-    .long   Reserved46_IRQHandler  /* Reserved interrupt */
-    .long   MAILBOX_IRQHandler  /* WAKEUP,Mailbox interrupt (present on selected devices) */
-    .long   PIN_INT4_IRQHandler  /* Pin interrupt 4 or pattern match engine slice 4 int */
-    .long   PIN_INT5_IRQHandler  /* Pin interrupt 5 or pattern match engine slice 5 int */
-    .long   PIN_INT6_IRQHandler  /* Pin interrupt 6 or pattern match engine slice 6 int */
-    .long   PIN_INT7_IRQHandler  /* Pin interrupt 7 or pattern match engine slice 7 int */
-    .long   CTIMER2_IRQHandler  /* Standard counter/timer CTIMER2 */
-    .long   CTIMER4_IRQHandler  /* Standard counter/timer CTIMER4 */
-    .long   OS_EVENT_IRQHandler  /* OSEVTIMER0 and OSEVTIMER0_WAKEUP interrupts */
-    .long   Reserved55_IRQHandler  /* Reserved interrupt */
-    .long   Reserved56_IRQHandler  /* Reserved interrupt */
-    .long   Reserved57_IRQHandler  /* Reserved interrupt */
-    .long   SDIO_IRQHandler  /* SD/MMC  */
-    .long   Reserved59_IRQHandler  /* Reserved interrupt */
-    .long   Reserved60_IRQHandler  /* Reserved interrupt */
-    .long   Reserved61_IRQHandler  /* Reserved interrupt */
-    .long   USB1_UTMI_IRQHandler  /* USB1_UTMI */
-    .long   USB1_IRQHandler  /* USB1 interrupt */
-    .long   USB1_NEEDCLK_IRQHandler  /* USB1 activity */
-    .long   SEC_HYPERVISOR_CALL_IRQHandler  /* SEC_HYPERVISOR_CALL interrupt */
-    .long   SEC_GPIO_INT0_IRQ0_IRQHandler  /* SEC_GPIO_INT0_IRQ0 interrupt */
-    .long   SEC_GPIO_INT0_IRQ1_IRQHandler  /* SEC_GPIO_INT0_IRQ1 interrupt */
-    .long   PLU_IRQHandler  /* PLU interrupt */
-    .long   SEC_VIO_IRQHandler  /* SEC_VIO interrupt */
-    .long   HASHCRYPT_IRQHandler  /* HASHCRYPT interrupt */
-    .long   CASER_IRQHandler  /* CASPER interrupt */
-    .long   PUF_IRQHandler  /* PUF interrupt */
-    .long   PQ_IRQHandler  /* PQ interrupt */
-    .long   DMA1_IRQHandler  /* DMA1 interrupt */
-    .long   LSPI_HS_IRQHandler  /* Flexcomm Interface 8 (SPI, , FLEXCOMM) */
-
-    .size   __Vectors, . - __Vectors
+                                                            /* External Interrupts*/
+    .long    WDT_BOD_IRQHandler                              /* Windowed watchdog timer, Brownout detect, Flash interrupt */
+    .long    DMA0_IRQHandler                              /* DMA0 controller */
+    .long    GINT0_IRQHandler                              /* GPIO group 0 */
+    .long    GINT1_IRQHandler                              /* GPIO group 1 */
+    .long    PIN_INT0_IRQHandler                              /* Pin interrupt 0 or pattern match engine slice 0 */
+    .long    PIN_INT1_IRQHandler                              /* Pin interrupt 1or pattern match engine slice 1 */
+    .long    PIN_INT2_IRQHandler                              /* Pin interrupt 2 or pattern match engine slice 2 */
+    .long    PIN_INT3_IRQHandler                              /* Pin interrupt 3 or pattern match engine slice 3 */
+    .long    UTICK0_IRQHandler                              /* Micro-tick Timer */
+    .long    MRT0_IRQHandler                              /* Multi-rate timer */
+    .long    CTIMER0_IRQHandler                              /* Standard counter/timer CTIMER0 */
+    .long    CTIMER1_IRQHandler                              /* Standard counter/timer CTIMER1 */
+    .long    SCT0_IRQHandler                              /* SCTimer/PWM */
+    .long    CTIMER3_IRQHandler                              /* Standard counter/timer CTIMER3 */
+    .long    FLEXCOMM0_IRQHandler                              /* Flexcomm Interface 0 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    .long    FLEXCOMM1_IRQHandler                              /* Flexcomm Interface 1 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    .long    FLEXCOMM2_IRQHandler                              /* Flexcomm Interface 2 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    .long    FLEXCOMM3_IRQHandler                              /* Flexcomm Interface 3 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    .long    FLEXCOMM4_IRQHandler                              /* Flexcomm Interface 4 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    .long    FLEXCOMM5_IRQHandler                              /* Flexcomm Interface 5 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    .long    FLEXCOMM6_IRQHandler                              /* Flexcomm Interface 6 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    .long    FLEXCOMM7_IRQHandler                              /* Flexcomm Interface 7 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    .long    ADC0_IRQHandler                              /* ADC0  */
+    .long    Reserved39_IRQHandler                              /* Reserved interrupt */
+    .long    ACMP_IRQHandler                              /* ACMP  interrupts */
+    .long    Reserved41_IRQHandler                              /* Reserved interrupt */
+    .long    Reserved42_IRQHandler                              /* Reserved interrupt */
+    .long    USB0_NEEDCLK_IRQHandler                              /* USB Activity Wake-up Interrupt */
+    .long    USB0_IRQHandler                              /* USB device */
+    .long    RTC_IRQHandler                              /* RTC alarm and wake-up interrupts */
+    .long    Reserved46_IRQHandler                              /* Reserved interrupt */
+    .long    MAILBOX_IRQHandler                              /* WAKEUP,Mailbox interrupt (present on selected devices) */
+    .long    PIN_INT4_IRQHandler                              /* Pin interrupt 4 or pattern match engine slice 4 int */
+    .long    PIN_INT5_IRQHandler                              /* Pin interrupt 5 or pattern match engine slice 5 int */
+    .long    PIN_INT6_IRQHandler                              /* Pin interrupt 6 or pattern match engine slice 6 int */
+    .long    PIN_INT7_IRQHandler                              /* Pin interrupt 7 or pattern match engine slice 7 int */
+    .long    CTIMER2_IRQHandler                              /* Standard counter/timer CTIMER2 */
+    .long    CTIMER4_IRQHandler                              /* Standard counter/timer CTIMER4 */
+    .long    OS_EVENT_IRQHandler                              /* OSEVTIMER0 and OSEVTIMER0_WAKEUP interrupts */
+    .long    Reserved55_IRQHandler                              /* Reserved interrupt */
+    .long    Reserved56_IRQHandler                              /* Reserved interrupt */
+    .long    Reserved57_IRQHandler                              /* Reserved interrupt */
+    .long    SDIO_IRQHandler                              /* SD/MMC  */
+    .long    Reserved59_IRQHandler                              /* Reserved interrupt */
+    .long    Reserved60_IRQHandler                              /* Reserved interrupt */
+    .long    Reserved61_IRQHandler                              /* Reserved interrupt */
+    .long    USB1_PHY_IRQHandler                              /* USB1_PHY */
+    .long    USB1_IRQHandler                              /* USB1 interrupt */
+    .long    USB1_NEEDCLK_IRQHandler                              /* USB1 activity */
+    .long    SEC_HYPERVISOR_CALL_IRQHandler                              /* SEC_HYPERVISOR_CALL interrupt */
+    .long    SEC_GPIO_INT0_IRQ0_IRQHandler                              /* SEC_GPIO_INT0_IRQ0 interrupt */
+    .long    SEC_GPIO_INT0_IRQ1_IRQHandler                              /* SEC_GPIO_INT0_IRQ1 interrupt */
+    .long    PLU_IRQHandler                              /* PLU interrupt */
+    .long    SEC_VIO_IRQHandler                              /* SEC_VIO interrupt */
+    .long    HASHCRYPT_IRQHandler                              /* HASHCRYPT interrupt */
+    .long    CASER_IRQHandler                              /* CASPER interrupt */
+    .long    PUF_IRQHandler                              /* PUF interrupt */
+    .long    PQ_IRQHandler                              /* PQ interrupt */
+    .long    DMA1_IRQHandler                              /* DMA1 interrupt */
+    .long    FLEXCOMM8_IRQHandler                              /* Flexcomm Interface 8 (SPI, , FLEXCOMM) */
+    .size    __Vectors, . - __Vectors
 
     .text
     .thumb
@@ -232,7 +231,6 @@ Reset_Handler:
 #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
 
     mrs     r0, control    /* Get control value */
-    orr     r0, r0, #1     /* Select switch to unprivilage mode */
     orr     r0, r0, #2     /* Select switch to PSP */
     msr     control, r0
     ldr     r0, =Image$$ARM_LIB_STACK$$ZI$$Limit
@@ -715,12 +713,12 @@ Reserved61_IRQHandler:
 
     .align 1
     .thumb_func
-    .weak USB1_UTMI_IRQHandler
-    .type USB1_UTMI_IRQHandler, %function
-USB1_UTMI_IRQHandler:
-    ldr   r0,=USB1_UTMI_DriverIRQHandler
+    .weak USB1_PHY_IRQHandler
+    .type USB1_PHY_IRQHandler, %function
+USB1_PHY_IRQHandler:
+    ldr   r0,=USB1_PHY_DriverIRQHandler
     bx    r0
-    .size USB1_UTMI_IRQHandler, . - USB1_UTMI_IRQHandler
+    .size USB1_PHY_IRQHandler, . - USB1_PHY_IRQHandler
 
     .align 1
     .thumb_func
@@ -832,12 +830,12 @@ DMA1_IRQHandler:
 
     .align 1
     .thumb_func
-    .weak LSPI_HS_IRQHandler
-    .type LSPI_HS_IRQHandler, %function
-LSPI_HS_IRQHandler:
-    ldr   r0,=LSPI_HS_DriverIRQHandler
+    .weak FLEXCOMM8_IRQHandler
+    .type FLEXCOMM8_IRQHandler, %function
+FLEXCOMM8_IRQHandler:
+    ldr   r0,=FLEXCOMM8_DriverIRQHandler
     bx    r0
-    .size LSPI_HS_IRQHandler, . - LSPI_HS_IRQHandler
+    .size FLEXCOMM8_IRQHandler, . - FLEXCOMM8_IRQHandler
 
 /*    Macro to define default handlers. Default handler
  *    will be weak symbol and just dead loops. They can be
@@ -850,65 +848,65 @@ LSPI_HS_IRQHandler:
     def_irq_handler    MemManage_Handler
     def_irq_handler    BusFault_Handler
     def_irq_handler    DebugMon_Handler
-                def_irq_handler     WDT_BOD_DriverIRQHandler
-                def_irq_handler     DMA0_DriverIRQHandler
-                def_irq_handler     GINT0_DriverIRQHandler
-                def_irq_handler     GINT1_DriverIRQHandler
-                def_irq_handler     PIN_INT0_DriverIRQHandler
-                def_irq_handler     PIN_INT1_DriverIRQHandler
-                def_irq_handler     PIN_INT2_DriverIRQHandler
-                def_irq_handler     PIN_INT3_DriverIRQHandler
-                def_irq_handler     UTICK0_DriverIRQHandler
-                def_irq_handler     MRT0_DriverIRQHandler
-                def_irq_handler     CTIMER0_DriverIRQHandler
-                def_irq_handler     CTIMER1_DriverIRQHandler
-                def_irq_handler     SCT0_DriverIRQHandler
-                def_irq_handler     CTIMER3_DriverIRQHandler
-                def_irq_handler     FLEXCOMM0_DriverIRQHandler
-                def_irq_handler     FLEXCOMM1_DriverIRQHandler
-                def_irq_handler     FLEXCOMM2_DriverIRQHandler
-                def_irq_handler     FLEXCOMM3_DriverIRQHandler
-                def_irq_handler     FLEXCOMM4_DriverIRQHandler
-                def_irq_handler     FLEXCOMM5_DriverIRQHandler
-                def_irq_handler     FLEXCOMM6_DriverIRQHandler
-                def_irq_handler     FLEXCOMM7_DriverIRQHandler
-                def_irq_handler     ADC0_DriverIRQHandler
-                def_irq_handler     Reserved39_DriverIRQHandler
-                def_irq_handler     ACMP_DriverIRQHandler
-                def_irq_handler     Reserved41_DriverIRQHandler
-                def_irq_handler     Reserved42_DriverIRQHandler
-                def_irq_handler     USB0_NEEDCLK_DriverIRQHandler
-                def_irq_handler     USB0_DriverIRQHandler
-                def_irq_handler     RTC_DriverIRQHandler
-                def_irq_handler     Reserved46_DriverIRQHandler
-                def_irq_handler     MAILBOX_DriverIRQHandler
-                def_irq_handler     PIN_INT4_DriverIRQHandler
-                def_irq_handler     PIN_INT5_DriverIRQHandler
-                def_irq_handler     PIN_INT6_DriverIRQHandler
-                def_irq_handler     PIN_INT7_DriverIRQHandler
-                def_irq_handler     CTIMER2_DriverIRQHandler
-                def_irq_handler     CTIMER4_DriverIRQHandler
-                def_irq_handler     OS_EVENT_DriverIRQHandler
-                def_irq_handler     Reserved55_DriverIRQHandler
-                def_irq_handler     Reserved56_DriverIRQHandler
-                def_irq_handler     Reserved57_DriverIRQHandler
-                def_irq_handler     SDIO_DriverIRQHandler
-                def_irq_handler     Reserved59_DriverIRQHandler
-                def_irq_handler     Reserved60_DriverIRQHandler
-                def_irq_handler     Reserved61_DriverIRQHandler
-                def_irq_handler     USB1_UTMI_DriverIRQHandler
-                def_irq_handler     USB1_DriverIRQHandler
-                def_irq_handler     USB1_NEEDCLK_DriverIRQHandler
-                def_irq_handler     SEC_HYPERVISOR_CALL_DriverIRQHandler
-                def_irq_handler     SEC_GPIO_INT0_IRQ0_DriverIRQHandler
-                def_irq_handler     SEC_GPIO_INT0_IRQ1_DriverIRQHandler
-                def_irq_handler     PLU_DriverIRQHandler
-                def_irq_handler     SEC_VIO_DriverIRQHandler
-                def_irq_handler     HASHCRYPT_DriverIRQHandler
-                def_irq_handler     CASER_DriverIRQHandler
-                def_irq_handler     PUF_DriverIRQHandler
-                def_irq_handler     PQ_DriverIRQHandler
-                def_irq_handler     DMA1_DriverIRQHandler
-                def_irq_handler     LSPI_HS_DriverIRQHandler
+    def_irq_handler    WDT_BOD_DriverIRQHandler              /* Windowed watchdog timer, Brownout detect, Flash interrupt */
+    def_irq_handler    DMA0_DriverIRQHandler              /* DMA0 controller */
+    def_irq_handler    GINT0_DriverIRQHandler              /* GPIO group 0 */
+    def_irq_handler    GINT1_DriverIRQHandler              /* GPIO group 1 */
+    def_irq_handler    PIN_INT0_DriverIRQHandler              /* Pin interrupt 0 or pattern match engine slice 0 */
+    def_irq_handler    PIN_INT1_DriverIRQHandler              /* Pin interrupt 1or pattern match engine slice 1 */
+    def_irq_handler    PIN_INT2_DriverIRQHandler              /* Pin interrupt 2 or pattern match engine slice 2 */
+    def_irq_handler    PIN_INT3_DriverIRQHandler              /* Pin interrupt 3 or pattern match engine slice 3 */
+    def_irq_handler    UTICK0_DriverIRQHandler              /* Micro-tick Timer */
+    def_irq_handler    MRT0_DriverIRQHandler              /* Multi-rate timer */
+    def_irq_handler    CTIMER0_DriverIRQHandler              /* Standard counter/timer CTIMER0 */
+    def_irq_handler    CTIMER1_DriverIRQHandler              /* Standard counter/timer CTIMER1 */
+    def_irq_handler    SCT0_DriverIRQHandler              /* SCTimer/PWM */
+    def_irq_handler    CTIMER3_DriverIRQHandler              /* Standard counter/timer CTIMER3 */
+    def_irq_handler    FLEXCOMM0_DriverIRQHandler              /* Flexcomm Interface 0 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    def_irq_handler    FLEXCOMM1_DriverIRQHandler              /* Flexcomm Interface 1 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    def_irq_handler    FLEXCOMM2_DriverIRQHandler              /* Flexcomm Interface 2 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    def_irq_handler    FLEXCOMM3_DriverIRQHandler              /* Flexcomm Interface 3 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    def_irq_handler    FLEXCOMM4_DriverIRQHandler              /* Flexcomm Interface 4 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    def_irq_handler    FLEXCOMM5_DriverIRQHandler              /* Flexcomm Interface 5 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    def_irq_handler    FLEXCOMM6_DriverIRQHandler              /* Flexcomm Interface 6 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    def_irq_handler    FLEXCOMM7_DriverIRQHandler              /* Flexcomm Interface 7 (USART, SPI, I2C, I2S, FLEXCOMM) */
+    def_irq_handler    ADC0_DriverIRQHandler              /* ADC0  */
+    def_irq_handler    Reserved39_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    ACMP_DriverIRQHandler              /* ACMP  interrupts */
+    def_irq_handler    Reserved41_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    Reserved42_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    USB0_NEEDCLK_DriverIRQHandler              /* USB Activity Wake-up Interrupt */
+    def_irq_handler    USB0_DriverIRQHandler              /* USB device */
+    def_irq_handler    RTC_DriverIRQHandler              /* RTC alarm and wake-up interrupts */
+    def_irq_handler    Reserved46_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    MAILBOX_DriverIRQHandler              /* WAKEUP,Mailbox interrupt (present on selected devices) */
+    def_irq_handler    PIN_INT4_DriverIRQHandler              /* Pin interrupt 4 or pattern match engine slice 4 int */
+    def_irq_handler    PIN_INT5_DriverIRQHandler              /* Pin interrupt 5 or pattern match engine slice 5 int */
+    def_irq_handler    PIN_INT6_DriverIRQHandler              /* Pin interrupt 6 or pattern match engine slice 6 int */
+    def_irq_handler    PIN_INT7_DriverIRQHandler              /* Pin interrupt 7 or pattern match engine slice 7 int */
+    def_irq_handler    CTIMER2_DriverIRQHandler              /* Standard counter/timer CTIMER2 */
+    def_irq_handler    CTIMER4_DriverIRQHandler              /* Standard counter/timer CTIMER4 */
+    def_irq_handler    OS_EVENT_DriverIRQHandler              /* OSEVTIMER0 and OSEVTIMER0_WAKEUP interrupts */
+    def_irq_handler    Reserved55_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    Reserved56_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    Reserved57_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    SDIO_DriverIRQHandler              /* SD/MMC  */
+    def_irq_handler    Reserved59_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    Reserved60_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    Reserved61_DriverIRQHandler              /* Reserved interrupt */
+    def_irq_handler    USB1_PHY_DriverIRQHandler              /* USB1_PHY */
+    def_irq_handler    USB1_DriverIRQHandler              /* USB1 interrupt */
+    def_irq_handler    USB1_NEEDCLK_DriverIRQHandler              /* USB1 activity */
+    def_irq_handler    SEC_HYPERVISOR_CALL_DriverIRQHandler              /* SEC_HYPERVISOR_CALL interrupt */
+    def_irq_handler    SEC_GPIO_INT0_IRQ0_DriverIRQHandler              /* SEC_GPIO_INT0_IRQ0 interrupt */
+    def_irq_handler    SEC_GPIO_INT0_IRQ1_DriverIRQHandler              /* SEC_GPIO_INT0_IRQ1 interrupt */
+    def_irq_handler    PLU_DriverIRQHandler              /* PLU interrupt */
+    def_irq_handler    SEC_VIO_DriverIRQHandler              /* SEC_VIO interrupt */
+    def_irq_handler    HASHCRYPT_DriverIRQHandler              /* HASHCRYPT interrupt */
+    def_irq_handler    CASER_DriverIRQHandler              /* CASPER interrupt */
+    def_irq_handler    PUF_DriverIRQHandler              /* PUF interrupt */
+    def_irq_handler    PQ_DriverIRQHandler              /* PQ interrupt */
+    def_irq_handler    DMA1_DriverIRQHandler              /* DMA1 interrupt */
+    def_irq_handler    FLEXCOMM8_DriverIRQHandler              /* Flexcomm Interface 8 (SPI, , FLEXCOMM) */
 
     .end

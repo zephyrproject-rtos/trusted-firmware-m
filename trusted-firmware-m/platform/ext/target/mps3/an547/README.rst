@@ -4,18 +4,19 @@ Corstone-300 Ethos-U55 FPGA and FVP
 Building TF-M
 -------------
 
-Follow the instructions in Getting started guide / 2. Build instructions with platform name: mps3/an547 (-DTFM_PLATFORM=mps3/an547).
+Follow the instructions in :doc:`Building instructions </docs/getting_started/tfm_build_instruction>`.
+Build instructions with platform name: mps3/an547 (-DTFM_PLATFORM=mps3/an547).
 
-Note
-----
+.. note::
 
-This platform support does not provide software for Ethos-U55 IP, only contains base address and interrupt number for it.
+   This platform support does not provide software for Ethos-U55 IP, only
+   contains base address and interrupt number for it.
 
-Note
-----
+.. note::
 
-The built binaries can be run on both the Corstone-300 Ethos-U55 Ecosystem FVP (FVP_SSE300_MPS3) and Corstone SSE-300 with
-Ethos-U55 Example Subsystem for MPS3 (AN547).
+   The built binaries can be run on both the Corstone-300 Ethos-U55 Ecosystem
+   FVP (FVP_SSE300_MPS3) and Corstone SSE-300 with Ethos-U55 Example Subsystem
+   for MPS3 (AN547).
 
 To run the example code on Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN547)
 ---------------------------------------------------------------------------------------------

@@ -40,6 +40,11 @@ LR_CODE S_CODE_START {
         * (+RO)
     }
 
+    /**** Section for holding partition static data */
+    TFM_SP_STATIC_LIST +0 ALIGN 4 {
+        *(.partition_info)
+    }
+
     /**** PSA RoT CODE + RO-data starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}

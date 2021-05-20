@@ -7,9 +7,10 @@
 
 #include <inttypes.h>
 #include <stdio.h>
-#include "tfm/tfm_core_svc.h"
 #include "psa/client.h"
 #include "psa/service.h"
+#include "svc_num.h"
+#include "tfm_hal_device_header.h"
 
 __attribute__((naked))
 psa_signal_t psa_wait(psa_signal_t signal_mask, uint32_t timeout)

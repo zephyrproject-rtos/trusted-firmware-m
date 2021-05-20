@@ -424,8 +424,7 @@ TF-M PendSV handler calls this function to handle NSPE PSA client call request.
 
   void tfm_rpc_client_call_handler(void);
 
-Usage
-~~~~~
+**Usage**
 
 ``tfm_rpc_client_call_handler()`` invokes callback function ``handle_req()`` to
 execute specific mailbox handling.
@@ -442,8 +441,7 @@ result to NSPE.
 
   void tfm_rpc_client_call_reply(const void *owner, int32_t ret);
 
-Parameters
-~~~~~~~~~~
+**Parameters**
 
 +-----------+--------------------------------------------------------------+
 | ``owner`` | A handle to identify the owner of the PSA client call return |
@@ -452,8 +450,7 @@ Parameters
 | ``ret``   | PSA client call return result value.                         |
 +-----------+--------------------------------------------------------------+
 
-Usage
-~~~~~
+**Usage**
 
 ``tfm_rpc_client_call_reply()`` invokes callback function ``reply()`` to execute
 specific mailbox reply.
@@ -470,8 +467,7 @@ the caller after PSA client call is completed.
 
   void tfm_rpc_set_caller_data(struct tfm_msg_body_t *msg, int32_t client_id);
 
-Parameters
-~~~~~~~~~~
+**Parameters**
 
 +---------------+-----------------------------------------------------+
 | ``msg``       | TF-M message to be set with NS caller private data. |
@@ -479,8 +475,7 @@ Parameters
 | ``client_id`` | The client ID of the NS caller.                     |
 +---------------+-----------------------------------------------------+
 
-Usage
-~~~~~
+**Usage**
 
 ``tfm_rpc_set_caller_data()`` invokes callback function ``get_caller_data()`` to
 fetch the private data of caller of PSA client call and set it into TF-M message
@@ -530,15 +525,13 @@ This function registers underlying mailbox operations into TF-M RPC callbacks.
 
   int32_t tfm_rpc_register_ops(const struct tfm_rpc_ops_t *ops_ptr);
 
-Parameters
-~~~~~~~~~~
+**Parameters**
 
 +-------------+----------------------------------------------+
 | ``ops_ptr`` | Pointer to the specific operation structure. |
 +-------------+----------------------------------------------+
 
-Return
-~~~~~~
+**Return**
 
 +----------------------+-----------------------------------------+
 | ``TFM_RPC_SUCCESS``  | Operations are successfully registered. |
@@ -546,8 +539,7 @@ Return
 | ``Other error code`` | Fail to register operations.            |
 +----------------------+-----------------------------------------+
 
-Usage
-~~~~~
+**Usage**
 
 Mailbox should register TF-M RPC callbacks during mailbox initialization, before
 enabling secure services for NSPE.
@@ -564,8 +556,7 @@ This function unregisters underlying mailbox operations from TF-M RPC callbacks.
 
   void tfm_rpc_unregister_ops(void);
 
-Usage
-~~~~~
+**Usage**
 
 Currently one and only one underlying mailbox communication implementation is
 allowed in runtime.
@@ -579,16 +570,14 @@ TF-M RPC handler for psa_framework_version().
 
   uint32_t tfm_rpc_psa_framework_version(void);
 
-Return
-~~~~~~
+**Return**
 
 +-------------+---------------------------------------------------------+
 | ``version`` | The version of the PSA Framework implementation that is |
 |             | providing the runtime services.                         |
 +-------------+---------------------------------------------------------+
 
-Usage
-~~~~~
+**Usage**
 
 ``tfm_rpc_psa_framework_version()`` invokes common ``psa_framework_version()``
 handler in TF-M.
@@ -603,8 +592,7 @@ TF-M RPC handler for psa_version().
   uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
                                bool ns_caller);
 
-Parameters
-~~~~~~~~~~
+**Parameters**
 
 +---------------+-----------------------------------+
 | ``params``    | Base address of parameters.       |
@@ -612,8 +600,7 @@ Parameters
 | ``ns_caller`` | Whether the caller is non-secure. |
 +---------------+-----------------------------------+
 
-Return
-~~~~~~
+**Return**
 
 +----------------------+------------------------------------------------------+
 | ``PSA_VERSION_NONE`` | The RoT Service is not implemented, or the caller is |
@@ -622,8 +609,7 @@ Return
 | ``> 0``              | The minor version of the implemented RoT Service.    |
 +----------------------+------------------------------------------------------+
 
-Usage
-~~~~~
+**Usage**
 
 ``tfm_rpc_psa_version()`` invokes common ``psa_version()`` handler in TF-M.
 The parameters in params should be prepared before calling
@@ -639,8 +625,7 @@ TF-M RPC handler for ``psa_connect()``.
   psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
                                    bool ns_caller);
 
-Parameters
-~~~~~~~~~~
+**Parameters**
 
 +---------------+-----------------------------------+
 | ``params``    | Base address of parameters.       |
@@ -648,8 +633,7 @@ Parameters
 | ``ns_caller`` | Whether the caller is non-secure. |
 +---------------+-----------------------------------+
 
-Return
-~~~~~~
+**Return**
 
 +-------------------------+---------------------------------------------------+
 | ``PSA_SUCCESS``         | Success.                                          |
@@ -661,8 +645,7 @@ Return
 |                         | service.                                          |
 +-------------------------+---------------------------------------------------+
 
-Usage
-~~~~~
+**Usage**
 
 ``tfm_rpc_psa_connect()`` invokes common ``psa_connect()`` handler in TF-M.
 The parameters in params should be prepared before calling
@@ -678,8 +661,7 @@ TF-M RPC handler for ``psa_call()``.
   psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,
                                 bool ns_caller);
 
-Parameters
-~~~~~~~~~~
+**Parameters**
 
 +---------------+-----------------------------------+
 | ``params``    | Base address of parameters.       |
@@ -687,8 +669,7 @@ Parameters
 | ``ns_caller`` | Whether the caller is non-secure. |
 +---------------+-----------------------------------+
 
-Return
-~~~~~~
+**Return**
 
 +---------------------+---------------------------------------------+
 | ``PSA_SUCCESS``     | Success.                                    |
@@ -696,8 +677,7 @@ Return
 | ``Does not return`` | The call is invalid, or invalid parameters. |
 +---------------------+---------------------------------------------+
 
-Usage
-~~~~~
+**Usage**
 
 ``tfm_rpc_psa_call()`` invokes common ``psa_call()`` handler in TF-M.
 The parameters in params should be prepared before calling
@@ -713,8 +693,7 @@ TF-M RPC ``psa_close()`` handler
   void tfm_rpc_psa_close(const struct client_call_params_t *params,
                          bool ns_caller);
 
-Parameters
-~~~~~~~~~~
+**Parameters**
 
 +---------------+-----------------------------------+
 | ``params``    | Base address of parameters.       |
@@ -722,8 +701,7 @@ Parameters
 | ``ns_caller`` | Whether the caller is non-secure. |
 +---------------+-----------------------------------+
 
-Return
-~~~~~~
+**Return**
 
 +---------------------+---------------------------------------------+
 | ``void``            | Success.                                    |
@@ -731,8 +709,7 @@ Return
 | ``Does not return`` | The call is invalid, or invalid parameters. |
 +---------------------+---------------------------------------------+
 
-Usage
-~~~~~
+**Usage**
 
 ``tfm_rpc_psa_close()`` invokes common ``psa_close()`` handler in TF-M.
 The parameters in params should be prepared before calling

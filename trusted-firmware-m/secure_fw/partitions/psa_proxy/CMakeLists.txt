@@ -14,6 +14,7 @@ cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_psa_rot_partition_psa_proxy STATIC)
 
+# Set include directory
 target_include_directories(tfm_psa_rot_partition_psa_proxy
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
@@ -21,6 +22,10 @@ target_include_directories(tfm_psa_rot_partition_psa_proxy
     PUBLIC
         # Required for spm_ipc.h
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/../../spm/cmsis_psa
+)
+target_include_directories(tfm_partitions
+    INTERFACE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/psa_proxy
 )
 
 target_sources(tfm_psa_rot_partition_psa_proxy
@@ -34,6 +39,10 @@ target_sources(tfm_psa_rot_partition_psa_proxy
 target_sources(tfm_psa_rot_partition_psa_proxy
     PRIVATE
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/psa_proxy/auto_generated/intermedia_tfm_psa_proxy.c
+)
+target_sources(tfm_partitions
+    INTERFACE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/psa_proxy/auto_generated/load_info_tfm_psa_proxy.c
 )
 
 target_link_libraries(tfm_psa_rot_partition_psa_proxy

@@ -7,6 +7,7 @@
 
 #include "fih.h"
 #include "ffm/tfm_boot_data.h"
+#include "compile_check_defs.h"
 #include "region.h"
 #include "spm_ipc.h"
 #include "tfm_hal_platform.h"

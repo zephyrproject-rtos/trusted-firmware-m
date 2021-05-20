@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,6 @@
 
 #include <string.h>
 
-#include "tfm/tfm_core_svc.h"
 #include "tfm_secure_api.h"
 #include "region_defs.h"
 #include "spm_func.h"
@@ -20,7 +19,7 @@
 #include "ffm/tfm_boot_data.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
-extern int32_t platform_svc_handlers(tfm_svc_number_t svc_num,
+extern int32_t platform_svc_handlers(uint8_t svc_num,
                                      uint32_t *svc_args, uint32_t lr);
 #endif
 

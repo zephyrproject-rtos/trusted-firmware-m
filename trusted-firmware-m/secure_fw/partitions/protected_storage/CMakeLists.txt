@@ -28,6 +28,10 @@ target_include_directories(tfm_app_rot_partition_ps
     PRIVATE
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/protected_storage
 )
+target_include_directories(tfm_partitions
+    INTERFACE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/protected_storage
+)
 
 target_sources(tfm_app_rot_partition_ps
     PRIVATE
@@ -48,6 +52,11 @@ target_sources(tfm_app_rot_partition_ps
     PRIVATE
         $<$<BOOL:${TFM_PSA_API}>:
             ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/protected_storage/auto_generated/intermedia_tfm_protected_storage.c>
+)
+target_sources(tfm_partitions
+    INTERFACE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/protected_storage/auto_generated/load_info_tfm_protected_storage.c>
 )
 
 target_link_libraries(tfm_app_rot_partition_ps

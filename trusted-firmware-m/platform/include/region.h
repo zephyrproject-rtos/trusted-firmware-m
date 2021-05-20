@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,8 @@
 
 #ifndef __REGION_H__
 #define __REGION_H__
+
+#include <stdint.h>
 
 /* Macros to pick linker symbols */
 #define REGION(a, b, c) a##b##c
@@ -34,5 +36,8 @@
 #define _STACK$$ZI$$Limit _STACK$$Limit
 
 #endif  /* __ICCARM__ */
+
+#define PART_REGION_ADDR(partition, region) \
+    (uintptr_t)&REGION_NAME(Image$$, partition, region)
 
 #endif  /* __REGION_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,7 +31,13 @@ extern "C" {
 
     {% set irq_ns = namespace(irq_iterator_counter=27) %}
     {% for irq in manifest.irqs %}
-#define {{"%-55s"|format(irq.signal)}} (1U << ({{"%d"|format(irq_ns.irq_iterator_counter)}} + 4))
+        {% set irq_data = namespace() %}
+        {% if manifest.psa_framework_version == 1.0 %}
+            {% set irq_data.signal = irq.signal %}
+        {% else %}
+            {% set irq_data.signal = irq.name + "_SIGNAL" %}
+        {% endif %}
+#define {{"%-55s"|format(irq_data.signal)}} (1U << ({{"%d"|format(irq_ns.irq_iterator_counter)}} + 4))
         {% set irq_ns.irq_iterator_counter = irq_ns.irq_iterator_counter - 1 %}
     {% endfor %}
     {% if attr.tfm_partition_ipc %}
@@ -44,6 +50,13 @@ extern "C" {
 
 #error "Too many IRQ signals!"
         {% endif %}
+    {% endif %}
+    {% if manifest.psa_framework_version == 1.1 %}
+        {% for irq in manifest.irqs %}
+            {% if irq.handling == "FLIH" %}
+psa_flih_result_t {{irq.name|lower}}_flih(void);
+            {% endif %}
+        {% endfor %}
     {% endif %}
 {% else %}
     {# If no RoT Service is defined in the services attribute, then at least one IRQ must be declared. #}

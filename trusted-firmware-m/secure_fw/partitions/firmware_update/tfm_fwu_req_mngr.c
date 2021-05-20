@@ -156,7 +156,10 @@ psa_status_t tfm_fwu_install_req(psa_invec *in_vec, size_t in_len,
             fwu_ctx[image_index].in_use = false;
         } else if (status == PSA_SUCCESS_REBOOT) {
             fwu_ctx[image_index].image_state = PSA_IMAGE_REBOOT_NEEDED;
-        } else {
+        } else if (status != PSA_ERROR_DEPENDENCY_NEEDED) {
+            /* In PSA_ERROR_DEPENDENCY_NEEDED case, the image still keeps in
+             * CANDIDATE state.
+             */
             fwu_ctx[image_index].image_state = PSA_IMAGE_REJECTED;
         }
 
@@ -365,7 +368,6 @@ static psa_status_t tfm_fwu_install_ipc(void)
             psa_write(msg.handle, 0, &dependency_id, sizeof(dependency_id));
             psa_write(msg.handle, 1, &dependency_version,
                       sizeof(dependency_version));
-            fwu_ctx[image_index].image_state = PSA_IMAGE_REJECTED;
         } else {
             fwu_ctx[image_index].image_state = PSA_IMAGE_REJECTED;
         }

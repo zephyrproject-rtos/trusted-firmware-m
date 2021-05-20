@@ -67,12 +67,14 @@ Integration Guide
 *****************
 - Non-secure mailbox interface must be provided.
 - Shared memory must be configured:
+
   - If Secure Enclave can access TF-M's BSS section it is enough to set the
     area's size by the ``SHARED_BUFFER_SIZE`` macro.
   - If a special memory region must be used as the shared memory the
     ``PSA_PROXY_SHARED_MEMORY_BASE`` and ``PSA_PROXY_SHARED_MEMORY_SIZE``
     macros must be set. (Not just for compilation but for linking as well,
     becuase these macros used in the linker script/scatter file too.)
+
 - If memories are mapped to different addresses for Host and Secure Enclave
   address translation can be turned on by setting
   ``PSA_PROXY_ADDR_TRANSLATION`` macro and implementing the interface defined

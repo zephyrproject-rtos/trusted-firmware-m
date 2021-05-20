@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #include "ffm/spm_psa_client_call.h"
 #include "tfm_rpc.h"
 #include "utilities.h"
+#include "load/partition_defs.h"
 
 static void default_handle_req(void)
 {

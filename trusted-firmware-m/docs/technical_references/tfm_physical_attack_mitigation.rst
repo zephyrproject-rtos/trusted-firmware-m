@@ -5,7 +5,6 @@ Physical attack mitigation in Trusted Firmware-M
 :Authors: Tamas Ban; David Hu
 :Organization: Arm Limited
 :Contact: tamas.ban@arm.com; david.hu@arm.com
-:Status: Draft
 
 ************
 Requirements
@@ -624,3 +623,7 @@ Reference
 .. [2] `MCUboot project <https://github.com/mcu-tools/mcuboot/blob/master/boot/bootutil/include/bootutil/fault_injection_hardening.h>`_
 
 .. [3] `MCUboot fault injection mitigation <https://www.trustedfirmware.org/docs/TF-M_fault_injection_mitigation.pdf>`_
+
+--------------------------------
+
+*Copyright (c) 2021, Arm Limited. All rights reserved.*
