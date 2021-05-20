@@ -125,7 +125,6 @@ else()
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:${INTERFACE_SRC_DIR}/tfm_crypto_func_api.c>
         $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:${INTERFACE_SRC_DIR}/tfm_initial_attestation_func_api.c>
         $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:${INTERFACE_SRC_DIR}/tfm_firmware_update_func_api.c>
-        ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
     )
 
     # NS specific implementation of NS interface dispacther

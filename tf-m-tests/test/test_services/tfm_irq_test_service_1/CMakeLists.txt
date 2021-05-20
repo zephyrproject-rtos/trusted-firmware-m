@@ -20,10 +20,22 @@ target_sources(tfm_app_rot_partition_irq_test_1
             ${CMAKE_BINARY_DIR}/generated/test_services/tfm_irq_test_service_1/auto_generated/intermedia_tfm_irq_test_service_1.c>
 )
 
+target_sources(tfm_partitions
+    INTERFACE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/test_services/tfm_irq_test_service_1/auto_generated/load_info_tfm_irq_test_service_1.c>
+)
+
+# Set include directory
 target_include_directories(tfm_app_rot_partition_irq_test_1
     PUBLIC
         .
     PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/test_services/tfm_irq_test_service_1
+)
+
+target_include_directories(tfm_partitions
+    INTERFACE
         ${CMAKE_BINARY_DIR}/generated/test_services/tfm_irq_test_service_1
 )
 

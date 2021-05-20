@@ -28,6 +28,8 @@ void tfm_fwu_test_common_010(struct test_result_t *ret);
 void tfm_fwu_test_common_011(struct test_result_t *ret);
 void tfm_fwu_test_common_012(struct test_result_t *ret);
 void tfm_fwu_test_common_013(struct test_result_t *ret);
+void tfm_fwu_test_common_014(struct test_result_t *ret);
+void tfm_fwu_test_common_015(struct test_result_t *ret);
 
 #ifdef __cplusplus
 }
