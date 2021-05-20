@@ -9,6 +9,7 @@
 #include "spm_ipc.h"
 #include "tfm_core_utils.h"
 #include "tfm_memory_utils.h"
+#include "load/service_defs.h"
 #include "spm_psa_client_call.h"
 #include "utilities.h"
 #include "tfm_wait.h"
@@ -84,7 +85,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
     }
 
     /* It is a PROGRAMMER ERROR if connecting to a stateless service. */
-    if (!service->service_db->connection_based) {
+    if (SERVICE_IS_STATELESS(service->service_db->flags)) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 

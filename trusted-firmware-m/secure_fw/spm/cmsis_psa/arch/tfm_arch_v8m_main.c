@@ -14,7 +14,7 @@
 #include "exception_info.h"
 #include "tfm_secure_api.h"
 #include "spm_ipc.h"
-#include "tfm/tfm_core_svc.h"
+#include "svc_num.h"
 
 #if !defined(__ARM_ARCH_8M_MAIN__) && !defined(__ARM_ARCH_8_1M_MAIN__)
 #error "Unsupported ARM Architecture."
@@ -56,6 +56,9 @@
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
+        "tst     lr, #0x40                  \n" /* Was NS interrupted by S? */
+        "it      eq                         \n"
+        "bxeq    lr                         \n" /* Yes, do not schedule */
         "mrs     r0, psp                    \n"
         "mrs     r1, psplim                 \n"
         "push    {r0, r1, r2, lr}           \n"

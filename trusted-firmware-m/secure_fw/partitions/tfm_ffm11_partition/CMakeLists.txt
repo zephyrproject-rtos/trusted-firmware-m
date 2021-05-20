@@ -24,10 +24,20 @@ target_sources(tfm_app_rot_partition_ffm11
     PRIVATE
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/tfm_ffm11_partition/auto_generated/intermedia_tfm_ffm11_partition.c
 )
+target_sources(tfm_partitions
+    INTERFACE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/tfm_ffm11_partition/auto_generated/load_info_tfm_ffm11_partition.c>
+)
 
+# Set include directory
 target_include_directories(tfm_app_rot_partition_ffm11
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/tfm_ffm11_partition
+)
+target_include_directories(tfm_partitions
+    INTERFACE
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/tfm_ffm11_partition
 )
 

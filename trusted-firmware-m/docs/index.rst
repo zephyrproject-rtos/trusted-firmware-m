@@ -16,7 +16,7 @@ Trusted Firmware-M Documentation
     <ul class="grid">
         <li class="grid-item">
             <a href="docs/introduction/readme.html">
-                <img alt="" src="_static/images/tfm.png"/>
+                <img alt="" src="_static/images/tfm-introduction.png"/>
                 <h2>Introduction</h2>
             </a>
             <p>Introducing the Trusted Firmware-M Project: overview,
@@ -24,38 +24,38 @@ Trusted Firmware-M Documentation
         </li>
         <li class="grid-item">
             <a href="docs/getting_started/index.html">
-               <img alt="" src="_static/images/tfm.png"/>
-               <h2>Getting Started Guides</h2>
+               <img alt="" src="_static/images/tfm-documentation.png"/>
+               <h2>Getting Started</h2>
             </a>
             <p>Follow this guide to set up a development environment on your
                system, and then build and run a sample application.</p>
         </li>
         <li class="grid-item">
             <a href="platform/ext/index.html">
-                <img alt="" src="_static/images/tfm.png"/>
+                <img alt="" src="_static/images/tfm-platform.png"/>
                 <h2>Supported Platforms</h2>
             </a>
             <p>List of supported boards and platforms.</p>
         </li>
         <li class="grid-item">
             <a href="docs/contributing/index.html">
-                <img alt="" src="_static/images/tfm.png"/>
-                <h2>Contribution Guidelines</h2>
+                <img alt="" src="_static/images/tfm-contribution.png"/>
+                <h2>Contribution</h2>
             </a>
             <p>As an open-source project, we welcome and encourage the community
                to submit patches directly to the project.</p>
         </li>
         <li class="grid-item">
             <a href="docs/integration_guide/index.html">
-                <img alt="" src="_static/images/tfm.png"/>
-                <h2>Integration Guidelines</h2>
+                <img alt="" src="_static/images/tfm-integration.png"/>
+                <h2>Integration</h2>
             </a>
             <p>Guidelines for integration with TF-M.</p>
         </li>
         <li class="grid-item">
             <a href="docs/technical_references/index.html">
-                <img alt="" src="_static/images/tfm.png"/>
-                <h2>Technical References</h2>
+                <img alt="" src="_static/images/tfm-reference.png"/>
+                <h2>References</h2>
             </a>
             <p>Design documents.</p>
         </li>
@@ -69,7 +69,7 @@ Trusted Firmware-M Documentation
         </li>
         <li class="grid-item">
             <a href="docs/releases/index.html">
-                <img alt="" src="_static/images/tfm.png"/>
+                <img alt="" src="_static/images/tfm-release.png"/>
                 <h2>Releases</h2>
             </a>
             <p>Release notes.</p>

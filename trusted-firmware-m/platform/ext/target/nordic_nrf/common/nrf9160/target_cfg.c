@@ -22,6 +22,7 @@
 
 #include <spu.h>
 #include <nrfx.h>
+#include <hal/nrf_nvmc.h>
 
 struct platform_data_t tfm_peripheral_timer0 = {
     NRF_TIMER0_S_BASE,
@@ -229,6 +230,11 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
 
     /* GPIO pin configuration */
     spu_gpio_config_non_secure(0, false);
+
+    /* Enable the instruction cache (this can be done only from secure code;
+     * that's why it is placed here).
+     */
+    nrf_nvmc_icache_config_set(NRF_NVMC, NRF_NVMC_ICACHE_ENABLE);
 
     return TFM_PLAT_ERR_SUCCESS;
 }

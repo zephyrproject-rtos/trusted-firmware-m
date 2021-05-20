@@ -22,6 +22,10 @@ target_include_directories(tfm_psa_rot_partition_its
         # Required for ps_object_defs.h
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/../protected_storage
 )
+target_include_directories(tfm_partitions
+    INTERFACE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/internal_trusted_storage
+)
 
 target_sources(tfm_psa_rot_partition_its
     PRIVATE
@@ -42,6 +46,11 @@ target_sources(tfm_psa_rot_partition_its
     PRIVATE
         $<$<BOOL:${TFM_PSA_API}>:
             ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/internal_trusted_storage/auto_generated/intermedia_tfm_internal_trusted_storage.c>
+)
+target_sources(tfm_partitions
+    INTERFACE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/internal_trusted_storage/auto_generated/load_info_tfm_internal_trusted_storage.c>
 )
 
 target_link_libraries(tfm_psa_rot_partition_its

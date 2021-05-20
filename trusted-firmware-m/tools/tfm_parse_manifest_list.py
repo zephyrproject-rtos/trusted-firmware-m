@@ -75,6 +75,7 @@ def process_manifest(manifest_list_files):
 
     manifesttemplate = ENV.get_template('secure_fw/partitions/manifestfilename.template')
     memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
+    infotemplate = ENV.get_template('secure_fw/partitions/partition_load_info.template')
 
     pid_list = []
     no_pid_manifest_idx = []
@@ -115,6 +116,7 @@ def process_manifest(manifest_list_files):
         context['file_name'] = outfile_name.replace('.h', '')
         outfile_name = os.path.join(manifest_dir, "psa_manifest", outfile_name).replace('\\', '/')
         intermediafile_name = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + context['file_name'] + '.c').replace('\\', '/')
+        infofile_name = os.path.join(manifest_dir, "auto_generated", 'load_info_' + context['file_name'] + '.c').replace('\\', '/')
 
         """
         Remove the `source_path` portion of the filepaths, so that it can be
@@ -125,12 +127,14 @@ def process_manifest(manifest_list_files):
             source_path = os.path.expandvars(manifest_item['source_path'])
             outfile_name = os.path.relpath(outfile_name, start = source_path)
             intermediafile_name = os.path.relpath(intermediafile_name, start = source_path)
+            infofile_name = os.path.relpath(infofile_name, start = source_path)
 
         partition_db.append({"manifest": manifest, "attr": manifest_item, "header_file": outfile_name})
 
         if OUT_DIR is not None:
             outfile_name = os.path.join(OUT_DIR, outfile_name)
             intermediafile_name = os.path.join(OUT_DIR, intermediafile_name)
+            infofile_name = os.path.join(OUT_DIR, infofile_name)
 
         outfile_path = os.path.dirname(outfile_name)
         if not os.path.exists(outfile_path):
@@ -151,6 +155,16 @@ def process_manifest(manifest_list_files):
         memoutfile = io.open(intermediafile_name, "w", newline=None)
         memoutfile.write(memorytemplate.render(context))
         memoutfile.close()
+
+        infofile_path = os.path.dirname(infofile_name)
+        if not os.path.exists(infofile_path):
+            os.makedirs(infofile_path)
+
+        print ("Generating " + infofile_name)
+
+        info_outfile = io.open(infofile_name, "w", newline=None)
+        info_outfile.write(infotemplate.render(context))
+        info_outfile.close()
 
     return partition_db
 

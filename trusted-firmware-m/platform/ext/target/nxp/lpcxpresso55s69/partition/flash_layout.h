@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
- * Copyright (c) 2020 Cypress Semiconductor Corporation. All rights reserved.
- * Copyright (c) 2020 Linaro. All rights reserved.
+ * Copyright 2019-2021 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +42,15 @@
  *
  * Flash layout on LPC55S69 without BL2:
  *
- * 0x0000_0000 Secure + Non-secure image area (512 KB):
- *    0x0000_0000 Secure     image (256 KB)
- *    0x0004_0000 Non-secure image (256 KB)
- * 0x0008_0000 Protected Storage Area (10 KB)
- * 0x0008_2800 Internal Trusted Storage Area (8 KB)
- * 0x0008_4800 NV counters area (512 B)
- * 0x0008_4A00 Unused (77.5 KB)
+ * 0x0000_0000 Primary image area(576 kB):
+ *    0x0000_0000 Secure     image primary (320 kB)
+ *    0x0005_0000 Non-secure image primary (256 kB)
+ * Reserved area:
+ * 0xXXXX_XXXX Secure Binary tail Area (4 KB), if SB is used.
+ * 0xXXXX_XXXX Protected Storage Area (3 KB)
+ * 0xXXXX_XXXX Internal Trusted Storage Area (3 KB)
+ * 0xXXXX_XXXX NV counters area (512 B)
+ * 0xXXXX_XXXX Unused
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -64,7 +65,7 @@
 #define FLASH_S_PARTITION_SIZE          (0x28000) /* S partition: 160 KB */
 #define FLASH_NS_PARTITION_SIZE         (0x18000) /* NS partition: 96 KB */
 #else
-#define FLASH_S_PARTITION_SIZE          (0x40000) /* S partition:  256 KB*/
+#define FLASH_S_PARTITION_SIZE              (0x50000)       /* S partition: 320 kB*/
 #define FLASH_NS_PARTITION_SIZE         (0x40000) /* NS partition: 256 KB*/
 #endif /* BL2 */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
@@ -73,13 +74,13 @@
                                          FLASH_NS_PARTITION_SIZE)
 
 /* Sector size of the embedded flash hardware (erase/program) */
-#define FLASH_AREA_IMAGE_SECTOR_SIZE    (512)        /* 512 B. Flash memory program/erase operations have a page granularity. */
+#define FLASH_AREA_IMAGE_SECTOR_SIZE        (512)           /* 512 B. Flash memory program/erase operations have a page granularity. */
 
-/* Flash size, same as FLASH0_SIZE */
-#define FLASH_TOTAL_SIZE                (0x00098000) /* 608 KB. The last 17 pages (10 KB) are reserved on the 640 KB flash. Sub-region is 32KB, so available for application is 608 KB. */
-
+/* FLASH size */
+#define FLASH_TOTAL_SIZE                    (0x000A0000-(17*FLASH_AREA_IMAGE_SECTOR_SIZE))    /* 631.5 kB. The last 17 pages (8.5KB) are reserved for PFR on the 640KB flash. */
+                                                            
 /* Flash layout info for BL2 bootloader */
-#define FLASH_BASE_ADDRESS              (0x00000000)
+#define FLASH_BASE_ADDRESS                  (0x00000000)
 
 #ifdef BL2
 /* Offset and size definitions of the flash partitions that are handled by the
@@ -164,14 +165,16 @@
  * FLASH_NV_COUNTERS_AREA_OFFSET point to offsets in flash, but reads and writes
  * to these addresses are redirected to Code SRAM by Driver_Flash.c.
  */
+
+/* Protected Storage (PS) Service definitions */
 #define FLASH_PS_AREA_OFFSET            (FLASH_AREA_SCRATCH_OFFSET + \
                                          FLASH_AREA_SCRATCH_SIZE)
-#define FLASH_PS_AREA_SIZE              (0x2800)   /* 10 KB */
+#define FLASH_PS_AREA_SIZE              (0xC00) /* 3 KB */
 
 /* Internal Trusted Storage (ITS) Service definitions */
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET + \
                                          FLASH_PS_AREA_SIZE)
-#define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
+#define FLASH_ITS_AREA_SIZE             (0xC00) /* 3 KB */
 
 /* NV Counters definitions */
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
@@ -201,16 +204,17 @@
  * address instead of the full memory address.
  */
 /* Base address of dedicated flash area for PS */
-#define TFM_HAL_PS_FLASH_AREA_ADDR    FLASH_PS_AREA_OFFSET
+#define TFM_HAL_PS_FLASH_AREA_ADDR      FLASH_PS_AREA_OFFSET
 /* Size of dedicated flash area for PS */
-#define TFM_HAL_PS_FLASH_AREA_SIZE    FLASH_PS_AREA_SIZE
-#define PS_RAM_FS_SIZE                TFM_HAL_PS_FLASH_AREA_SIZE
+#define TFM_HAL_PS_FLASH_AREA_SIZE      FLASH_PS_AREA_SIZE
+#define PS_RAM_FS_SIZE                  TFM_HAL_PS_FLASH_AREA_SIZE
 /* Number of physical erase sectors per logical FS block */
-#define TFM_HAL_PS_SECTORS_PER_BLOCK  (8)
+#define TFM_HAL_PS_SECTORS_PER_BLOCK    3
+
 /* Smallest flash programmable unit in bytes */
-#define TFM_HAL_PS_PROGRAM_UNIT       FLASH_AREA_IMAGE_SECTOR_SIZE
-#define PS_FLASH_NAND_BUF_SIZE        (FLASH_AREA_IMAGE_SECTOR_SIZE * \
-                                       TFM_HAL_PS_SECTORS_PER_BLOCK)
+#define TFM_HAL_PS_PROGRAM_UNIT         FLASH_AREA_IMAGE_SECTOR_SIZE
+#define PS_FLASH_NAND_BUF_SIZE          (FLASH_AREA_IMAGE_SECTOR_SIZE * \
+                                        TFM_HAL_ITS_SECTORS_PER_BLOCK)
 
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
@@ -229,9 +233,10 @@
 #define TFM_HAL_ITS_FLASH_AREA_SIZE    FLASH_ITS_AREA_SIZE
 #define ITS_RAM_FS_SIZE                TFM_HAL_ITS_FLASH_AREA_SIZE
 /* Number of physical erase sectors per logical FS block */
-#define TFM_HAL_ITS_SECTORS_PER_BLOCK  (8)
+#define TFM_HAL_ITS_SECTORS_PER_BLOCK   3
+
 /* Smallest flash programmable unit in bytes */
-#define TFM_HAL_ITS_PROGRAM_UNIT       FLASH_AREA_IMAGE_SECTOR_SIZE
+#define TFM_HAL_ITS_PROGRAM_UNIT        FLASH_AREA_IMAGE_SECTOR_SIZE
 #define ITS_FLASH_NAND_BUF_SIZE        (FLASH_AREA_IMAGE_SECTOR_SIZE * \
                                         TFM_HAL_ITS_SECTORS_PER_BLOCK)
 
@@ -242,14 +247,14 @@
 #define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* Use Flash memory to store Code data */
-#define S_ROM_ALIAS_BASE  (0x10000000)
-#define NS_ROM_ALIAS_BASE (0x00000000)
+#define S_ROM_ALIAS_BASE    (0x10000000)
+#define NS_ROM_ALIAS_BASE   (0x00000000)
 
 /* Use SRAM[0-4] memory to store RW data */
-#define S_RAM_ALIAS_BASE  (0x30000000)
-#define NS_RAM_ALIAS_BASE (0x20000000)
+#define S_RAM_ALIAS_BASE    (0x30000000)
+#define NS_RAM_ALIAS_BASE   (0x20000000)
 
-#define TOTAL_ROM_SIZE FLASH_TOTAL_SIZE
-#define TOTAL_RAM_SIZE (0x00044000)     /* RAM 0-4. 272 KB RAM for data (without SRAM X for code)*/
+#define TOTAL_ROM_SIZE      FLASH_TOTAL_SIZE
+#define TOTAL_RAM_SIZE      (0x00044000)     /* RAM 0-4. 272 KB RAM for data (without SRAM X for code)*/
 
 #endif /* __FLASH_LAYOUT_H__ */

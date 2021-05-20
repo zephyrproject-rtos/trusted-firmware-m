@@ -27,7 +27,9 @@
 /* Lower value has higher priority */
 #define THRD_PRIOR_MASK           0xFF
 #define THRD_PRIOR_HIGHEST        0x0
-#define THRD_PRIOR_MEDIUM         0x7F
+#define THRD_PRIOR_HIGH           0xF
+#define THRD_PRIOR_MEDIUM         0x1F
+#define THRD_PRIOR_LOW            0x7F
 #define THRD_PRIOR_LOWEST         0xFF
 
 /* Error code */

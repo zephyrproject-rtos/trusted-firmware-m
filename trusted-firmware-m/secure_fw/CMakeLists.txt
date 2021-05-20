@@ -28,6 +28,7 @@ add_subdirectory(partitions/platform)
 add_subdirectory(partitions/psa_proxy)
 add_subdirectory(partitions/firmware_update)
 add_subdirectory(partitions/tfm_ffm11_partition)
+add_subdirectory(partitions/ns_proxy_partition)
 add_subdirectory(spm)
 
 target_include_directories(secure_fw

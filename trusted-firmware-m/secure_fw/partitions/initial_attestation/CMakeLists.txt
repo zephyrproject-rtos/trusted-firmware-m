@@ -37,11 +37,21 @@ target_sources(tfm_psa_rot_partition_attestation
         $<$<BOOL:${TFM_PSA_API}>:
             ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/initial_attestation/auto_generated/intermedia_tfm_initial_attestation.c>
 )
+target_sources(tfm_partitions
+    INTERFACE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/initial_attestation/auto_generated/load_info_tfm_initial_attestation.c>
+)
 
+# Set include directory
 target_include_directories(tfm_psa_rot_partition_attestation
     PUBLIC
         .
     PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/initial_attestation
+)
+target_include_directories(tfm_partitions
+    INTERFACE
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/initial_attestation
 )
 

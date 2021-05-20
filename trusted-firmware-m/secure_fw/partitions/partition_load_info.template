@@ -1,0 +1,184 @@
+/*
+ * Copyright (c) 2021, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+{{utilities.donotedit_warning}}
+
+#include <stdint.h>
+#include <stddef.h>
+#include "region.h"
+#include "load/partition_static_load.h"
+#include "load/partition_defs.h"
+#include "load/service_defs.h"
+#include "load/asset_defs.h"
+#include "tfm_peripherals_def.h"
+#include "psa_manifest/pid.h"
+#include "psa_manifest/sid.h"
+#include "psa_manifest/{{file_name}}.h"
+
+{% set counter = namespace(dep_counter=0, service_counter=0, asset_counter=0) %}
+{% if manifest.dependencies %}
+    {% for dep in manifest.dependencies %}
+        {% set counter.dep_counter = counter.dep_counter + 1 %}
+    {% endfor %}
+{% endif %}
+{% if manifest.services %}
+    {% for service in manifest.services %}
+        {% set counter.service_counter = counter.service_counter + 1 %}
+    {% endfor %}
+{% endif %}
+{% if manifest.mmio_regions %}
+    {% for asset in manifest.mmio_regions %}
+        {% set counter.asset_counter = counter.asset_counter + 1 %}
+    {% endfor %}
+{% endif %}
+#define {{"%-55s"|format(manifest.name|upper + "_NDEPS")}} ({{"%d"|format(counter.dep_counter)}})
+#define {{"%-55s"|format(manifest.name|upper + "_NSERVS")}} ({{"%d"|format(counter.service_counter)}})
+#if TFM_LVL == 3
+#define {{"%-55s"|format(manifest.name|upper + "_NASSETS")}} ({{"%d"|format(counter.asset_counter)}} + 1)
+#else
+#define {{"%-55s"|format(manifest.name|upper + "_NASSETS")}} ({{"%d"|format(counter.asset_counter)}})
+#endif
+
+/* Memory region declaration */
+#if TFM_LVL == 3
+REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_START$$Base);
+REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_END$$Base);
+#endif
+extern uint8_t {{manifest.name|lower}}_stack[];
+
+/* Entrypoint function declaration */
+extern void {{manifest.entry_point}}(void);
+
+/* partition static info type definition */
+struct partition_{{manifest.name|lower}}_load_info_t {
+    /* common length data */
+    struct partition_load_info_t    cmn_info;
+    /* per-partition variable length data */
+    uintptr_t                       stack_pos;
+    uintptr_t                       heap_pos;
+{% if manifest.dependencies %}
+    uint32_t                        deps[{{(manifest.name|upper + "_NDEPS")}}];
+{% endif %}
+{% if manifest.services %}
+    struct service_load_info_t    services[{{(manifest.name|upper + "_NSERVS")}}];
+{% endif %}
+#if TFM_LVL == 3
+    struct asset_desc_t             assets[{{(manifest.name|upper + "_NASSETS")}}];
+#else
+{% if manifest.mmio_regions %}
+    struct asset_desc_t             assets[{{(manifest.name|upper + "_NASSETS")}}];
+{% endif %}
+#endif
+} __attribute__((aligned(4)));
+
+/* Partition static, deps, service static data. Put to a dedicated section. */
+const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower}}_static
+    __attribute__((used, section(".partition_info"))) = {
+    .cmn_info = {
+{% if manifest.psa_framework_version == 1.0 %}
+        .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
+{% elif manifest.psa_framework_version == 1.1 %}
+        .psa_ff_ver                 = 0x0101 | PARTITION_INFO_MAGIC,
+{% else %}
+#error "Unsupported ff version '{{manifest.psa_framework_version}}' for partition '{{manifest.name}}'!"
+{% endif %}
+        .pid                        = {{manifest.name}},
+        .flags                      = 0
+{% if manifest.psa_framework_version == 1.0 and attr.tfm_partition_ipc is sameas true %}
+                                    | SPM_PART_FLAG_IPC
+{% elif manifest.psa_framework_version == 1.1 and manifest.model == "IPC" %}
+                                    | SPM_PART_FLAG_IPC
+{% endif %}
+{% if manifest.type == "PSA-ROT" %}
+                                    | SPM_PART_FLAG_PSA_ROT
+{% elif manifest.type != "APPLICATION-ROT" %}
+#error "Unsupported type '{{manifest.type}}' for partition '{{manifest.name}}'!"
+{% endif %}
+                                    | PARTITION_PRI_{{manifest.priority}},
+        .entry                      = ENTRY_TO_POSITION({{manifest.entry_point}}),
+        .stack_size                 = {{manifest.stack_size}},
+        .heap_size                  = 0,
+        .ndeps                      = {{(manifest.name|upper + "_NDEPS")}},
+        .nservices                  = {{(manifest.name|upper + "_NSERVS")}},
+        .nassets                    = {{(manifest.name|upper + "_NASSETS")}},
+    },
+    .stack_pos                      = PTR_TO_POSITION({{manifest.name|lower}}_stack),
+    .heap_pos                       = 0,
+{% if manifest.dependencies %}
+    .deps = {
+    {% for dep in manifest.dependencies %}
+        {{dep}}_SID,
+    {% endfor %}
+    },
+{% endif %}
+{% if manifest.services %}
+    .services = {
+    {% for service in manifest.services %}
+        {
+            .name_strid             = STRING_PTR_TO_STRID("{{service.name}}"),
+            .signal                 = {{service.name}}_SIGNAL,
+            .sid                    = {{service.sid}},
+            .flags                  = 0
+        {% if service.non_secure_clients is sameas true %}
+                                    | SERVICE_FLAG_NS_ACCESSIBLE
+        {% endif %}
+        {% if manifest.psa_framework_version > 1.0 and service.connection_based is sameas false %}
+                                    | SERVICE_FLAG_STATELESS
+        {% endif %}
+        {% if service.version_policy %}
+                                    | TFM_VERSION_POLICY_{{service.version_policy}},
+        {% else %}
+                                    | TFM_VERSION_POLICY_STRICT,
+        {% endif %}
+        {% if service.version %}
+            .version                = {{service.version}},
+        {% else %}
+            .version                = 1,
+        {% endif %}
+        },
+    {% endfor %}
+    },
+{% endif %}
+#if TFM_LVL == 3
+    .assets                         = {
+        {
+            .mem.addr_x             = PART_REGION_ADDR(PT_{{manifest.name}}_PRIVATE, _DATA_START$$Base),
+            .mem.addr_y             = PART_REGION_ADDR(PT_{{manifest.name}}_PRIVATE, _DATA_END$$Base),
+            .attr                   = ASSET_MEM_RD_BIT | ASSET_MEM_WR_BIT,
+        },
+{% for region in manifest.mmio_regions %}
+    {% if region.conditional %}
+#ifdef {{region.conditional}}
+    {% endif %}
+        {
+            .dev.addr_ref           = PTR_TO_POSITION({{region.name}}),
+            .attr                   = ASSET_DEV_REF_BIT,
+        },
+    {% if region.conditional %}
+#endif
+    {% endif %}
+{% endfor %}
+    }
+#else
+{% if manifest.mmio_regions %}
+    .assets                         = {
+    {% for region in manifest.mmio_regions %}
+        {% if region.conditional %}
+#ifdef {{region.conditional}}
+        {% endif %}
+        {
+            .dev.addr_ref           = PTR_TO_POSITION({{region.name}}),
+            .attr                   = ASSET_DEV_REF_BIT,
+        },
+        {% if region.conditional %}
+#endif
+        {% endif %}
+    {% endfor %}
+    }
+{% endif %}
+#endif
+};

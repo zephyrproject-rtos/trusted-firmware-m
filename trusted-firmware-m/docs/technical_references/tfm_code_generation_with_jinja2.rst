@@ -64,7 +64,7 @@ Example
 
 Below code snippet enumerates services in Secure Partitions:
 
-.. code-block::
+.. code-block:: jinja
 
     {% for partition in partitions %}
         {% if partition.manifest.services %}
@@ -73,5 +73,7 @@ Below code snippet enumerates services in Secure Partitions:
             {% endfor %}
         {% endif %}
     {% endfor %}
+
+--------------
 
 *Copyright (c) 2019-2021, Arm Limited. All rights reserved.*

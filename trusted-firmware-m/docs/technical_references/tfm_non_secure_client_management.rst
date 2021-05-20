@@ -83,15 +83,13 @@ TZ_MemoryId_t data type
 
 TZ Memory ID identifies an allocated memory slot.
 
-TF-M usage
-""""""""""
+**TF-M usage**
 
 ``TZ_MemoryId_t`` is used for an index into an array containing active NS client
 IDs. The memory ID is required by CMSIS to be a positive integer, so it is
 mapped to the array index by being decremented by 1.
 
-Signature
-"""""""""
+**Signature**
 
 .. code-block:: c
 
@@ -102,20 +100,17 @@ Context management initialization: TZ_InitContextSystem_S
 
 Initialize secure context memory system.
 
-Return value
-""""""""""""
+**Return value**
 
 This function returns execution status: 1 for success, 0 for error.
 
-TF-M usage
-""""""""""
+**TF-M usage**
 
 This function call is used to identify a non-secure RTOS that has TZ context
 management capabilities, as this function is expected to be called before any
 other TZ API function is used.
 
-Signature
-""""""""""
+**Signature**
 
 .. code-block:: c
 
@@ -126,27 +121,23 @@ Context allocation: TZ_AllocModuleContext_S
 
 Allocate context memory for calling secure software modules in TrustZone.
 
-Parameters
-""""""""""
+**Parameters**
 
 ``module`` [input]: identifies software modules called from non-secure mode
 
-Return value
-""""""""""""
+**Return value**
 
 ``value != 0`` TrustZone memory slot identifier
 ``value == 0`` no memory available or internal error
 
-TF-M usage
-""""""""""
+**TF-M usage**
 
 This function is used to identify a new non-secure thread that may be identified
 as a client in the non-secure domain. The ``module`` parameter is unused. The
 returned ``TZ_MemoryId_t`` value is the index in the ``NsClientIdList`` array
 where the client ID for the newly allocated context is stored.
 
-Signature
-"""""""""
+**Signature**
 
 .. code-block:: c
 
@@ -157,26 +148,22 @@ Context freeing: TZ_FreeModuleContext_S
 
 Free context memory that was previously allocated with TZ_AllocModuleContext_S
 
-Parameters
-""""""""""
+**Parameters**
 
 ``id`` [input]: TrustZone memory slot identifier
 
-Return value
-""""""""""""
+**Return value**
 
 Execution status (1: success, 0: error)
 
-TF-M usage
-""""""""""
+**TF-M usage**
 
 This function indicates that a non-secure client is inactive, meaning that any
 subsequent references to the client ID are considered erroneous. In effect, the
 client ID indexed by ``(id – 1)`` is cleared and the memory slot flagged as
 free.
 
-Signature
-"""""""""
+**Signature**
 
 .. code-block:: c
 
@@ -187,25 +174,21 @@ Context activation: TZ_LoadContext_S
 
 Load secure context (called on RTOS thread context switch)
 
-Parameters
-""""""""""
+**Parameters**
 
 ``id`` [input]: TrustZone memory slot identifier
 
-Return value
-""""""""""""
+**Return value**
 
 Execution status (1: success, 0: error)
 
-TF-M usage
-""""""""""
+**TF-M usage**
 
 The client ID indexed by ``(id – 1)`` becomes the active NS client. Any
 subsequent secure service requests coming from non-secure domain will be
 associated with this client ID.
 
-Signature
-"""""""""
+**Signature**
 
 .. code-block:: c
 
@@ -216,25 +199,21 @@ Context deactivation: TZ_StoreContext_S
 
 Store secure context (called on RTOS thread context switch)
 
-Parameters
-""""""""""
+**Parameters**
 
 ``id`` [input]: TrustZone memory slot identifier
 
-Return value
-""""""""""""
+**Return value**
 
 Execution status (1: success, 0: error)
 
-TF-M usage
-""""""""""
+**TF-M usage**
 
 The client ID indexed by ``(id – 1)`` becomes inactive. Any subsequent secure
 service requests coming from non-secure domain will be invalid until a new NS
 context is loaded.
 
-Signature
-"""""""""
+**Signature**
 
 .. code-block:: c
 
@@ -302,19 +281,16 @@ Secure and non-secure client IDs are allocated from different ranges (negative
 IDs for non-secure clients, positive for secure clients). The function call is
 rejected if called with a secure ID.
 
-Parameters
-""""""""""
+**Parameters**
 
 ``ns_client_id`` [input]: The client ID to be assigned to the current context
 
-Return value
-""""""""""""
+**Return value**
 
 ``TFM_SUCCESS`` (0) if the client ID assigned successfully, a non-zero error
 code in case of error.
 
-Signature
-"""""""""
+**Signature**
 
 .. code-block:: c
 
@@ -385,4 +361,6 @@ References
 Description of the TZ API:
 https://www.keil.com/pack/doc/CMSIS/Core/html/group__context__trustzone__functions.html
 
-*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
+--------------
+
+*Copyright (c) 2019-2021, Arm Limited. All rights reserved.*

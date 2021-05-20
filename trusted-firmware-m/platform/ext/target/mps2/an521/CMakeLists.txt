@@ -167,3 +167,21 @@ if(BL2)
             native_drivers
     )
 endif()
+
+#========================= Crypto =============================================#
+
+target_sources(tfm_psa_rot_partition_crypto
+    PRIVATE
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/crypto_nv_seed.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<BOOL:${PLATFORM_DUMMY_NV_SEED}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/crypto_dummy_nv_seed.c>
+)
+
+target_compile_definitions(tfm_psa_rot_partition_crypto
+    PRIVATE
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<BOOL:${PLATFORM_DUMMY_NV_SEED}>>:PLATFORM_DUMMY_NV_SEED>
+)
+
+target_include_directories(crypto_service_mbedcrypto
+    PUBLIC
+        ${CMAKE_SOURCE_DIR}/platform/include
+)

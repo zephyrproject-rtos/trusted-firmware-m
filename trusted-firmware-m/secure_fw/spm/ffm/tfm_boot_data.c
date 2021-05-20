@@ -21,6 +21,7 @@
 #include "tfm_wait.h"
 #include "tfm_spm_hal.h"
 #include "spm_ipc.h"
+#include "load/partition_defs.h"
 #else
 #include "spm_func.h"
 #endif

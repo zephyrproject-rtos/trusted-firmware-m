@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,11 +12,15 @@
 #include <arm_cmse.h>
 #endif
 #include "tfm_arch.h"
-#include "tfm/tfm_core_svc.h"
 #include "tfm_api.h"
 #include "utilities.h"
 #include "tfm_boot_status.h"
 #include "psa/service.h"
+#ifdef TFM_PSA_API
+#include "svc_num.h"
+#else
+#include "tfm_core_svc.h"
+#endif /* TFM_PSA_API */
 
 #ifndef TFM_MULTI_CORE_TOPOLOGY
 #ifndef TFM_PSA_API

@@ -26,19 +26,24 @@ const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
         {% if partition.attr.conditional %}
 #ifdef {{partition.attr.conditional}}
         {% endif %}
-        {% for handler in partition.manifest.irqs %}
+        {% for irq in partition.manifest.irqs %}
             {% set irq_data = namespace() %}
-            {% if handler.source %}
-                {% set irq_data.line = handler.source %}
+            {% if irq.source %}
+                {% set irq_data.line = irq.source %}
             {% else %}
 #error "Interrupt source isn't provided for 'irqs' in partition {{partition.manifest.name}}"
             {% endif %}
-            {% if handler.tfm_irq_priority %}
-                {% set irq_data.priority = handler.tfm_irq_priority %}
+            {% if partition.manifest.psa_framework_version == 1.0 %}
+                {% set irq_data.signal = irq.signal %}
             {% else %}
-                {% set irq_data.priority = "TFM_DEFAULT_SECURE_IRQ_PRIOTITY" %}
+                {% set irq_data.signal = irq.name + "_SIGNAL" %}
             {% endif %}
-    {{ _irq_record(partition.manifest.name, handler.signal, irq_data.line, irq_data.priority) }}
+            {% if irq.tfm_irq_priority %}
+                {% set irq_data.priority = irq.tfm_irq_priority %}
+            {% else %}
+                {% set irq_data.priority = "TFM_DEFAULT_SECURE_IRQ_PRIORITY" %}
+            {% endif %}
+    {{ _irq_record(partition.manifest.name, irq_data.signal, irq_data.line, irq_data.priority) }}
         {% endfor %}
         {% if partition.attr.conditional %}
 #endif /* {{partition.attr.conditional}} */
@@ -57,17 +62,27 @@ const size_t tfm_core_irq_signals_count = (sizeof(tfm_core_irq_signals) /
         {% if partition.attr.conditional %}
 #ifdef {{partition.attr.conditional}}
         {% endif %}
-        {% for handler in partition.manifest.irqs %}
-            {% if handler.source is number %}
-void irq_{{handler.source}}_Handler(void)
-            {% elif handler.source %}
-void {{handler.source}}_Handler(void)
+        {% for irq in partition.manifest.irqs %}
+            {% set irq_data = namespace() %}
+            {% if partition.manifest.psa_framework_version == 1.0 %}
+                {% set irq_data.signal = irq.signal %}
+            {% else %}
+                {% set irq_data.signal = irq.name + "_SIGNAL" %}
+            {% endif %}
+            {% if irq.source is number %}
+void irq_{{irq.source}}_Handler(void)
+            {% elif irq.source %}
+void {{irq.source}}_Handler(void)
             {% else %}
 #error "Interrupt source isn't provided for 'irqs' in partition {{partition.manifest.name}}"
             {% endif %}
 {
-            {% if handler.source %}
-    tfm_set_irq_signal({{partition.manifest.name}}, {{handler.signal}}, {{handler.source}});
+            {% if irq.source %}
+                {% if partition.manifest.psa_framework_version == 1.1 and irq.handling == "FLIH" %}
+#error "FLIH is not supported yet!"
+                {% else %}
+    tfm_set_irq_signal({{partition.manifest.name}}, {{irq_data.signal}}, {{irq.source}});
+                {% endif %}
             {% else %}
 #error "Interrupt source isn't provided for 'irqs' in partition {{partition.manifest.name}}"
             {% endif %}

@@ -11,7 +11,7 @@
 #include "tfm_arch.h"
 #include "exception_info.h"
 #include "tfm_secure_api.h"
-#include "tfm/tfm_core_svc.h"
+#include "svc_num.h"
 
 #if !defined(__ARM_ARCH_8M_BASE__)
 #error "Unsupported ARM Architecture."
@@ -53,6 +53,13 @@
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
+#ifndef __ICCARM__
+        ".syntax unified                    \n"
+#endif
+        "movs    r0, #0x40                  \n"
+        "mov     r1, lr                     \n"
+        "tst     r0, r1                     \n" /* Was NS interrupted by S? */
+        "beq     exc_return                 \n" /* Yes, do not schedule */
         "mrs     r0, psp                    \n"
         "mrs     r1, psplim                 \n"
         "push    {r0, r1, r2, lr}           \n"
@@ -74,6 +81,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "mov     lr, r3                     \n"
         "msr     psp, r0                    \n"
         "msr     psplim, r1                 \n"
+        "exc_return:                        \n"
         "bx      lr                         \n"
     );
 }
