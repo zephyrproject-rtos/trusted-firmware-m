@@ -93,6 +93,11 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);
         break;
+#if (TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_SILENCE)
+    case TFM_SVC_OUTPUT_UNPRIV_STRING:
+        svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0],
+                                             svc_args[1]);
+#endif
     default:
 #ifdef PLATFORM_SVC_HANDLERS
         svc_args[0] = platform_svc_handlers(svc_num, svc_args, exc_return);
