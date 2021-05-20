@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -60,7 +60,7 @@ static void tfm_crypto_test_1038(struct test_result_t *ret);
 static struct test_t crypto_tests[] = {
     {&tfm_crypto_test_1001, "TFM_NS_CRYPTO_TEST_1001",
      "Non Secure Key management interface", {TEST_PASSED} },
-#ifdef TFM_NS_CRYPTO_TEST_ALG_CBC
+#ifdef TFM_CRYPTO_TEST_ALG_CBC
     {&tfm_crypto_test_1002, "TFM_NS_CRYPTO_TEST_1002",
      "Non Secure Symmetric encryption (AES-128-CBC) interface", {TEST_PASSED} },
 #endif /* TFM_CRYPTO_TEST_ALG_CBC */

@@ -20,10 +20,22 @@ target_sources(tfm_psa_rot_partition_core_test
             ${CMAKE_BINARY_DIR}/generated/test_services/tfm_core_test/auto_generated/intermedia_tfm_ss_core_test.c>
 )
 
+target_sources(tfm_partitions
+    INTERFACE
+        $<$<BOOL:${TFM_PSA_API}>:
+            ${CMAKE_BINARY_DIR}/generated/test_services/tfm_core_test/auto_generated/load_info_tfm_ss_core_test.c>
+)
+
+# Set include directory
 target_include_directories(tfm_psa_rot_partition_core_test
     PUBLIC
         .
     PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/test_services/tfm_core_test
+)
+
+target_include_directories(tfm_partitions
+    INTERFACE
         ${CMAKE_BINARY_DIR}/generated/test_services/tfm_core_test
 )
 
@@ -57,6 +69,11 @@ add_library(tfm_psa_rot_partition_core_test_defs INTERFACE)
 target_include_directories(tfm_psa_rot_partition_core_test_defs
     INTERFACE
         .
+)
+
+target_compile_definitions(tfm_psa_rot_partition_core_test
+    PRIVATE
+        $<$<BOOL:${TFM_PERIPH_ACCESS_TEST}>:TFM_ENABLE_PERIPH_ACCESS_TEST>
 )
 
 ############################ Partition Defs ####################################
