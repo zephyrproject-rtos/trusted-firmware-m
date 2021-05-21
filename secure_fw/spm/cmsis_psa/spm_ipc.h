@@ -102,16 +102,10 @@ struct spm_partition_db_t {
 
 /* RoT Service data */
 struct service_t {
-    const struct service_load_info_t *p_ldinf;      /* Service static pointer */
-    struct partition_t *partition;                  /* Owner of the service   */
-    struct bi_list_node_t handle_list;              /* Service handle list    */
-    struct bi_list_node_t list;                     /* For list operation     */
-};
-
-/* Stateless RoT service tracking array item type. Indexed by static handle */
-struct stateless_service_tracking_t {
-    uint32_t                 sid;           /* Service ID */
-    struct service_t         *p_service;    /* Service instance */
+    const struct service_load_info_t *p_ldinf;     /* Service load info      */
+    struct partition_t *partition;                 /* Owner of the service   */
+    struct bi_list_node_t handle_list;             /* Service handle list    */
+    struct bi_list_node_t list;                    /* For list operation     */
 };
 
 /* RoT connection handle list */

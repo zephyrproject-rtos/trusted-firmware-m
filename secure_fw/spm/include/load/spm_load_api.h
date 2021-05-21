@@ -44,11 +44,14 @@ struct partition_t *load_a_partition_assuredly(void);
 
 /*
  * Allocated numbers of service objects based on given partition.
- * Link services with 'list_head' if it is provided.
- * An 'assuredly' function, errors simply panic the system and never
+ * Link services with 'list_head' if it is provided. It also needs the
+ * stateless service reference table and whole table size for loading.
+ * As an 'assuredly' function, errors simply panic the system and never
  * return.
  */
 void load_services_assuredly(struct partition_t *p_partition,
-                             struct service_t **list_head);
+                             struct service_t **connection_services_listhead,
+                             struct service_t **stateless_service_ref_tbl,
+                             size_t ref_tbl_size);
 
 #endif /* __SPM_LOAD_API_H__ */

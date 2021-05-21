@@ -16,10 +16,8 @@
 #include "tfm_nspm.h"
 #include "ffm/spm_error_base.h"
 
-#define GET_STATELESS_SERVICE(index)    (stateless_service_ref[index].p_service)
-#define GET_STATELESS_SID(index)        (stateless_service_ref[index].sid)
-
-extern struct stateless_service_tracking_t stateless_service_ref[];
+#define GET_STATELESS_SERVICE(index)    (stateless_services_ref_tbl[index])
+extern const struct service_t *stateless_services_ref_tbl[];
 
 uint32_t tfm_spm_client_psa_framework_version(void)
 {
@@ -160,7 +158,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
         }
 
         service = GET_STATELESS_SERVICE(index);
-        sid = GET_STATELESS_SID(index);
+        sid = service->p_ldinf->sid;
 
         /*
          * It is a PROGRAMMER ERROR if the caller is not authorized to access

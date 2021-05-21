@@ -37,7 +37,8 @@
 #include "load/spm_load_api.h"
 
 extern struct spm_partition_db_t g_spm_partition_db;
-static struct service_t *all_services;
+static struct service_t *connection_services_listhead;
+struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
@@ -343,12 +344,12 @@ bool tfm_is_partition_privileged(uint32_t partition_idx)
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
-    struct service_t *p_serv = all_services;
+    struct service_t *p_serv = connection_services_listhead;
 
     while (p_serv && p_serv->p_ldinf->sid != sid) {
         p_serv = TO_CONTAINER(BI_LIST_NEXT_NODE(&p_serv->list),
                               struct service_t, list);
-        if (p_serv == all_services)
+        if (p_serv == connection_services_listhead)
             return NULL;
     }
 
@@ -390,12 +391,12 @@ int32_t tfm_spm_check_client_version(struct service_t *service,
     TFM_CORE_ASSERT(service);
 
     switch (SERVICE_GET_VERSION_POLICY(service->p_ldinf->flags)) {
-    case TFM_VERSION_POLICY_RELAXED:
+    case SERVICE_VERSION_POLICY_RELAXED:
         if (version > service->p_ldinf->version) {
             return SPM_ERROR_VERSION;
         }
         break;
-    case TFM_VERSION_POLICY_STRICT:
+    case SERVICE_VERSION_POLICY_STRICT:
         if (version != service->p_ldinf->version) {
             return SPM_ERROR_VERSION;
         }
@@ -663,7 +664,9 @@ uint32_t tfm_spm_init(void)
             break;
         }
 
-        load_services_assuredly(partition, &all_services);
+        load_services_assuredly(partition, &connection_services_listhead,
+                                           stateless_services_ref_tbl,
+                                           sizeof(stateless_services_ref_tbl));
 
         p_cmninf = partition->p_ldinf;
 

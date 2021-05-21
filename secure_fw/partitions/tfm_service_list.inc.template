@@ -46,17 +46,4 @@ struct service_t g_services[] =
 {% endfor %}
 };
 
-/* p_service field of tracking table will be populated in spm_init() */
-struct stateless_service_tracking_t stateless_service_ref[] = {
-    {% for service in stateless_services %}
-    {{'{'}}
-            {% if service is not none %}
-        .sid = {{service.sid}},
-            {% else %}
-        .sid = 0,
-            {% endif %}
-    {{'}'}},
-    {% endfor %}
-};
-
 #endif /* __TFM_SERVICE_LIST_INC__ */

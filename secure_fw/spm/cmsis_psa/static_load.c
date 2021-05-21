@@ -104,14 +104,16 @@ struct partition_t *load_a_partition_assuredly(void)
 }
 
 void load_services_assuredly(struct partition_t *p_partition,
-                             struct service_t **list_head)
+                             struct service_t **connection_services_listhead,
+                             struct service_t **stateless_service_ref_tbl,
+                             size_t ref_tbl_size)
 {
-    uint32_t i, j;
+    uint32_t i, serv_ldflags, hidx;
     struct service_t *services;
     const struct partition_load_info_t *p_ptldinf;
     const struct service_load_info_t *p_servldinf;
 
-    if (p_partition == NULL) {
+    if (!p_partition || !connection_services_listhead) {
         tfm_core_panic();
     }
 
@@ -128,28 +130,36 @@ void load_services_assuredly(struct partition_t *p_partition,
         services[i].p_ldinf = &p_servldinf[i];
         services[i].partition = p_partition;
 
-        /* Populate the p_service of stateless_service_ref[] */
-        if (SERVICE_IS_STATELESS(p_servldinf[i].flags)) {
-            for (j = 0; j < STATIC_HANDLE_NUM_LIMIT; j++) {
-                if (stateless_service_ref[j].sid == p_servldinf[i].sid) {
-                    stateless_service_ref[j].p_service = &services[i];
-                    break;
-                }
-            }
-            /* Stateless service not found in tracking table */
-            if (j >= STATIC_HANDLE_NUM_LIMIT) {
-                tfm_core_panic();
-            }
-        }
         BI_LIST_INIT_NODE(&services[i].handle_list);
         BI_LIST_INIT_NODE(&services[i].list);
 
-        if (list_head) {
-            if (*list_head) {
-                BI_LIST_INSERT_AFTER(&(*list_head)->list, &services[i].list);
-            } else {
-                *list_head = &services[i];
+        /* Populate the stateless service reference table */
+        serv_ldflags = p_servldinf[i].flags;
+        if (SERVICE_IS_STATELESS(serv_ldflags)) {
+            if ((stateless_service_ref_tbl == NULL) ||
+                (ref_tbl_size == 0) ||
+                (ref_tbl_size !=
+                 STATIC_HANDLE_NUM_LIMIT * sizeof(struct service_t *))) {
+                tfm_core_panic();
             }
+
+            hidx = SERVICE_GET_STATELESS_HINDEX(serv_ldflags);
+
+            if ((hidx >= STATIC_HANDLE_NUM_LIMIT) ||
+                stateless_service_ref_tbl[hidx]) {
+                tfm_core_panic();
+            }
+            stateless_service_ref_tbl[hidx] = &services[i];
+
+            /* Skip chaining stateless services as they won't be looked-up. */
+            continue;
+        }
+
+        if (*connection_services_listhead) {
+            BI_LIST_INSERT_AFTER(&(*connection_services_listhead)->list,
+                                 &services[i].list);
+        } else {
+            *connection_services_listhead = &services[i];
         }
     }
 }
