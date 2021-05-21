@@ -80,7 +80,7 @@ An IRQ handler is defined by the following nodes:
   ``signal`` and ``source`` are mandatory.
 
   ``tfm_irq_priority`` is optional. If ``tfm_irq_priority`` is not set for an
-  IRQ, the default is value is ``TFM_DEFAULT_SECURE_IRQ_PRIOTITY``.
+  IRQ, the default is value is ``TFM_DEFAULT_SECURE_IRQ_PRIORITY``.
 
 If an IRQ handler is registered, TF-M will:
 

@@ -11,7 +11,7 @@
 #include "tfm_hal_device_header.h"
 #include "psa/service.h"
 
-#define TFM_DEFAULT_SECURE_IRQ_PRIOTITY 128
+#define TFM_DEFAULT_SECURE_IRQ_PRIORITY 128
 
 struct tfm_core_irq_signal_data_t {
     int32_t partition_id;

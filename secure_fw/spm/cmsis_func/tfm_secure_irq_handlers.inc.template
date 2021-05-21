@@ -34,7 +34,7 @@ const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
             {% if handler.tfm_irq_priority %}
                 {% set irq_data.priority = handler.tfm_irq_priority %}
             {% else %}
-                {% set irq_data.priority = "TFM_DEFAULT_SECURE_IRQ_PRIOTITY" %}
+                {% set irq_data.priority = "TFM_DEFAULT_SECURE_IRQ_PRIORITY" %}
             {% endif %}
     {{ _irq_record(partition.manifest.name, handler.signal, irq_data.line, irq_data.priority) }}
         {% endfor %}
