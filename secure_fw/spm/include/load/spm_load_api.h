@@ -39,24 +39,37 @@
     ((uintptr_t)LOAD_INFO_ASSET(pldinf) +                              \
      (pldinf)->nassets * sizeof(struct asset_desc_t))
 
+
+/* Runtime partition struct list head node type */
+struct partition_head_t {
+    uint32_t reserved;                  /* Reserved             */
+    struct partition_t *next;           /* Next partition node  */
+};
+
+/* Runtime service struct list head node type */
+struct service_head_t {
+    uint32_t reserved;                  /* Reserved             */
+    struct service_t *next;             /* Next partition node  */
+};
+
 /*
- * Allocate a partition object and return if a load is successful.
+ * Load a partition object to linked list and return if a load is successful.
  * An 'assuredly' function, return NULL for no more partitions and
  * return a valid pointer if succeed. Other errors simply panic
  * the system and never return.
  */
-struct partition_t *load_a_partition_assuredly(void);
+struct partition_t *load_a_partition_assuredly(struct partition_head_t *head);
 
 /*
- * Allocated numbers of service objects based on given partition.
- * Link services with 'list_head' if it is provided. It also needs the
- * stateless service reference table and whole table size for loading.
+ * Load numbers of service objects to linked list based on given partition.
+ * It loads connection based services and stateless services that partition
+ * contains.
  * As an 'assuredly' function, errors simply panic the system and never
  * return.
  */
 void load_services_assuredly(struct partition_t *p_partition,
-                             struct service_t **connection_services_listhead,
-                             struct service_t **stateless_service_ref_tbl,
+                             struct service_head_t *services_listhead,
+                             struct service_t **stateless_services_ref_tbl,
                              size_t ref_tbl_size);
 
 /*

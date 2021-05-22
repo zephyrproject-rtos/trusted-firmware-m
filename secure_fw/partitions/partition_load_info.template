@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "region.h"
+#include "spm_ipc.h"
 #include "load/irq_defs.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
@@ -234,3 +235,9 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
     },
 {% endif %}
 };
+
+/* Placeholder for partition and service runtime space. Do not reference it. */
+static struct partition_t {{manifest.name|lower}}_partition_runtime_item
+    __attribute__((used, section(".bss.part_runtime")));
+static struct service_t {{manifest.name|lower}}_service_runtime_item[{{(manifest.name|upper + "_NSERVS")}}]
+    __attribute__((used, section(".bss.serv_runtime")));

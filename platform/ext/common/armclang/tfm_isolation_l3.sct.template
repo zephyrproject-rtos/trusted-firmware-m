@@ -134,6 +134,14 @@ LR_CODE S_CODE_START {
         * (+RW +ZI)
     }
 
+    ER_PART_RT_POOL +0 ALIGN 4 {
+        *(.bss.part_runtime)
+    }
+
+    ER_SERV_RT_POOL +0 ALIGN 4 {
+        *(.bss.serv_runtime)
+    }
+
     /**** PSA RoT RWZI starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}

@@ -36,8 +36,9 @@
 #include "load/spm_load_api.h"
 #include "load/irq_defs.h"
 
-extern struct spm_partition_db_t g_spm_partition_db;
-static struct service_t *connection_services_listhead;
+/* Partition and service runtime data list head/runtime data table */
+static struct partition_head_t partitions_listhead;
+static struct service_head_t services_listhead;
 struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
 /* Pools */
@@ -259,30 +260,6 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
     return msg;
 }
 
-/**
- * \brief Returns the index of the partition with the given partition ID.
- *
- * \param[in] partition_id     Partition id
- *
- * \return the partition idx if partition_id is valid,
- *         \ref SPM_INVALID_PARTITION_IDX othervise
- */
-static uint32_t get_partition_idx(uint32_t partition_id)
-{
-    uint32_t i;
-
-    if (partition_id == INVALID_PARTITION_ID) {
-        return SPM_INVALID_PARTITION_IDX;
-    }
-
-    for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
-        if (g_spm_partition_db.partitions[i].p_ldinf->pid == partition_id) {
-            return i;
-        }
-    }
-    return SPM_INVALID_PARTITION_IDX;
-}
-
 #if TFM_LVL != 1
 /**
  * \brief Change the privilege mode for partition thread mode.
@@ -326,25 +303,15 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
-    uint32_t i = 0;
-    struct service_t *p_serv = connection_services_listhead;
+    struct service_t *p_serv;
 
-    for (i = 0; i < STATIC_HANDLE_NUM_LIMIT; i++) {
-        if (stateless_services_ref_tbl[i]) {
-            if (stateless_services_ref_tbl[i]->p_ldinf->sid == sid) {
-                return stateless_services_ref_tbl[i];
-            }
+    UNI_LIST_FOR_EACH(p_serv, &services_listhead) {
+        if (p_serv->p_ldinf->sid == sid) {
+            return p_serv;
         }
     }
 
-    while (p_serv && p_serv->p_ldinf->sid != sid) {
-        p_serv = TO_CONTAINER(BI_LIST_NEXT_NODE(&p_serv->list),
-                              struct service_t, list);
-        if (p_serv == connection_services_listhead)
-            return NULL;
-    }
-
-    return p_serv;
+    return NULL;
 }
 
 /**
@@ -358,11 +325,14 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
  */
 static struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 {
-    uint32_t idx = get_partition_idx(partition_id);
+    struct partition_t *p_part;
 
-    if (idx != SPM_INVALID_PARTITION_IDX) {
-        return &(g_spm_partition_db.partitions[idx]);
+    UNI_LIST_FOR_EACH(p_part, &partitions_listhead) {
+        if (p_part->p_ldinf->pid == partition_id) {
+            return p_part;
+        }
     }
+
     return NULL;
 }
 
@@ -650,8 +620,11 @@ uint32_t tfm_spm_init(void)
                   sizeof(struct tfm_conn_handle_t),
                   TFM_CONN_HANDLE_MAX_NUM);
 
+    UNI_LISI_INIT_HEAD(&partitions_listhead);
+    UNI_LISI_INIT_HEAD(&services_listhead);
+
     while (1) {
-        partition = load_a_partition_assuredly();
+        partition = load_a_partition_assuredly(&partitions_listhead);
         if (partition == NULL) {
             break;
         }
@@ -659,7 +632,7 @@ uint32_t tfm_spm_init(void)
         p_ldinf = partition->p_ldinf;
 
         if (p_ldinf->nservices) {
-            load_services_assuredly(partition, &connection_services_listhead,
+            load_services_assuredly(partition, &services_listhead,
                                     stateless_services_ref_tbl,
                                     sizeof(stateless_services_ref_tbl));
         }

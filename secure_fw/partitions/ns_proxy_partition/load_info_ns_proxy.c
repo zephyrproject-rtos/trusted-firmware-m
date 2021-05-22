@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include "region.h"
 #include "region_defs.h"
+#include "spm_ipc.h"
 #include "spm_partition_defs.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
@@ -74,3 +75,7 @@ const struct partition_tfm_sp_ns_proxy_load_info_t
     },
 #endif
 };
+
+/* Placeholder for partition runtime space. Do not reference it. */
+static struct partition_t tfm_sp_ns_proxy_partition_runtime_item
+    __attribute__((used, section(".bss.part_runtime")));

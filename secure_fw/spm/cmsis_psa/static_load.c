@@ -18,57 +18,61 @@
 #include "load/service_defs.h"
 #include "psa/client.h"
 
-#include "secure_fw/partitions/tfm_service_list.inc"
-#include "tfm_spm_db_ipc.inc"
-
 /* Partition load data region */
 REGION_DECLARE(Image$$, TFM_SP_LOAD_LIST, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_SP_LOAD_LIST, $$RO$$Limit);
 
+/* Partition and service runtime pool region */
+REGION_DECLARE(Image$$, ER_PART_RT_POOL, $$ZI$$Base);
+REGION_DECLARE(Image$$, ER_PART_RT_POOL, $$ZI$$Limit);
+REGION_DECLARE(Image$$, ER_SERV_RT_POOL, $$ZI$$Base);
+REGION_DECLARE(Image$$, ER_SERV_RT_POOL, $$ZI$$Limit);
+
 static uintptr_t ldinf_sa = PART_REGION_ADDR(TFM_SP_LOAD_LIST, $$RO$$Base);
 static uintptr_t ldinf_ea = PART_REGION_ADDR(TFM_SP_LOAD_LIST, $$RO$$Limit);
+static uintptr_t part_pool_sa = PART_REGION_ADDR(ER_PART_RT_POOL, $$ZI$$Base);
+static uintptr_t part_pool_ea = PART_REGION_ADDR(ER_PART_RT_POOL, $$ZI$$Limit);
+static uintptr_t serv_pool_sa = PART_REGION_ADDR(ER_SERV_RT_POOL, $$ZI$$Base);
+static uintptr_t serv_pool_ea = PART_REGION_ADDR(ER_SERV_RT_POOL, $$ZI$$Limit);
 
-/* Allocate runtime space for partition from the pool. Static allocation. */
+/* Allocate runtime space for partition. Panic if pool runs out. */
 static struct partition_t *tfm_allocate_partition_assuredly(void)
 {
-    static uint32_t partition_pool_pos = 0;
-    struct partition_t *p_partition_allocated = NULL;
+    struct partition_t *p_part_allocated = (struct partition_t *)part_pool_sa;
 
-    if (partition_pool_pos >= g_spm_partition_db.partition_count) {
+    part_pool_sa += sizeof(struct partition_t);
+    if (part_pool_sa > part_pool_ea) {
         tfm_core_panic();
     }
 
-    p_partition_allocated = &g_spm_partition_db.partitions[partition_pool_pos];
-    partition_pool_pos++;
-
-    return p_partition_allocated;
+    return p_part_allocated;
 }
 
-/* Allocate runtime space for service from the pool. Static allocation. */
+/* Allocate runtime space for services. Panic if pool runs out. */
 static struct service_t *tfm_allocate_service_assuredly(uint32_t service_count)
 {
-    static uint32_t service_pool_pos = 0;
-    struct service_t *p_service_allocated = NULL;
-    uint32_t num_of_services = sizeof(g_services) / sizeof(struct service_t);
+    struct service_t *p_serv_allocated = (struct service_t *)serv_pool_sa;
 
     if (service_count == 0) {
         return NULL;
-    } else if ((service_count > num_of_services) ||
-               (service_pool_pos >= num_of_services) ||
-               (service_pool_pos + service_count > num_of_services)) {
+    }
+
+    serv_pool_sa += service_count * sizeof(struct service_t);
+    if (serv_pool_sa > serv_pool_ea) {
         tfm_core_panic();
     }
 
-    p_service_allocated = &g_services[service_pool_pos];
-    service_pool_pos += service_count;
-
-    return p_service_allocated;
+    return p_serv_allocated;
 }
 
-struct partition_t *load_a_partition_assuredly(void)
+struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
 {
     struct partition_load_info_t *p_ptldinf;
     struct partition_t           *partition;
+
+    if (!head) {
+        tfm_core_panic();
+    }
 
     if ((UINTPTR_MAX - ldinf_sa < sizeof(struct partition_load_info_t)) ||
         (ldinf_sa + sizeof(struct partition_load_info_t) >= ldinf_ea)) {
@@ -102,12 +106,14 @@ struct partition_t *load_a_partition_assuredly(void)
 
     ldinf_sa += LOAD_INFSZ_BYTES(p_ptldinf);
 
+    UNI_LIST_INSERT_AFTER(head, partition);
+
     return partition;
 }
 
 void load_services_assuredly(struct partition_t *p_partition,
-                             struct service_t **connection_services_listhead,
-                             struct service_t **stateless_service_ref_tbl,
+                             struct service_head_t *services_listhead,
+                             struct service_t **stateless_services_ref_tbl,
                              size_t ref_tbl_size)
 {
     uint32_t i, serv_ldflags, hidx;
@@ -115,7 +121,7 @@ void load_services_assuredly(struct partition_t *p_partition,
     const struct partition_load_info_t *p_ptldinf;
     const struct service_load_info_t *p_servldinf;
 
-    if (!p_partition || !connection_services_listhead) {
+    if (!p_partition || !services_listhead) {
         tfm_core_panic();
     }
 
@@ -131,14 +137,14 @@ void load_services_assuredly(struct partition_t *p_partition,
         p_partition->signals_allowed |= p_servldinf[i].signal;
         services[i].p_ldinf = &p_servldinf[i];
         services[i].partition = p_partition;
+        services[i].next = NULL;
 
         BI_LIST_INIT_NODE(&services[i].handle_list);
-        BI_LIST_INIT_NODE(&services[i].list);
 
         /* Populate the stateless service reference table */
         serv_ldflags = p_servldinf[i].flags;
         if (SERVICE_IS_STATELESS(serv_ldflags)) {
-            if ((stateless_service_ref_tbl == NULL) ||
+            if ((stateless_services_ref_tbl == NULL) ||
                 (ref_tbl_size == 0) ||
                 (ref_tbl_size !=
                  STATIC_HANDLE_NUM_LIMIT * sizeof(struct service_t *))) {
@@ -148,21 +154,13 @@ void load_services_assuredly(struct partition_t *p_partition,
             hidx = SERVICE_GET_STATELESS_HINDEX(serv_ldflags);
 
             if ((hidx >= STATIC_HANDLE_NUM_LIMIT) ||
-                stateless_service_ref_tbl[hidx]) {
+                stateless_services_ref_tbl[hidx]) {
                 tfm_core_panic();
             }
-            stateless_service_ref_tbl[hidx] = &services[i];
-
-            /* Skip chaining stateless services as they won't be looked-up. */
-            continue;
+            stateless_services_ref_tbl[hidx] = &services[i];
         }
 
-        if (*connection_services_listhead) {
-            BI_LIST_INSERT_AFTER(&(*connection_services_listhead)->list,
-                                 &services[i].list);
-        } else {
-            *connection_services_listhead = &services[i];
-        }
+        UNI_LIST_INSERT_AFTER(services_listhead, &services[i]);
     }
 }
 

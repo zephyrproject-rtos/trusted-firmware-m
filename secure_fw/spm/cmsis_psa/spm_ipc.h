@@ -93,11 +93,7 @@ struct partition_t {
     uint32_t signals_allowed;
     uint32_t signals_waiting;
     uint32_t signals_asserted;
-};
-
-struct spm_partition_db_t {
-    uint32_t partition_count;
-    struct partition_t *partitions;
+    struct partition_t *next;
 };
 
 /* RoT Service data */
@@ -105,7 +101,7 @@ struct service_t {
     const struct service_load_info_t *p_ldinf;     /* Service load info      */
     struct partition_t *partition;                 /* Owner of the service   */
     struct bi_list_node_t handle_list;             /* Service handle list    */
-    struct bi_list_node_t list;                    /* For list operation     */
+    struct service_t *next;                        /* For list operation     */
 };
 
 /* RoT connection handle list */
