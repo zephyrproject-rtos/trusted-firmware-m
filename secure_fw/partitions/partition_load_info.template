@@ -17,7 +17,7 @@
 #include "tfm_peripherals_def.h"
 #include "psa_manifest/pid.h"
 #include "psa_manifest/sid.h"
-#include "psa_manifest/{{file_name}}.h"
+#include "psa_manifest/{{manifest_out_basename}}.h"
 
 {% set counter = namespace(dep_counter=0, service_counter=0, asset_counter=0) %}
 {% if manifest.dependencies %}

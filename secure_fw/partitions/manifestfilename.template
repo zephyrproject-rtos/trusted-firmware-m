@@ -7,8 +7,8 @@
 
 {{utilities.donotedit_warning}}
 
-#ifndef __PSA_MANIFEST_{{file_name.upper()}}_H__
-#define __PSA_MANIFEST_{{file_name.upper()}}_H__
+#ifndef __PSA_MANIFEST_{{manifest_out_basename.upper()}}_H__
+#define __PSA_MANIFEST_{{manifest_out_basename.upper()}}_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,4 +71,4 @@ psa_flih_result_t {{irq.name|lower}}_flih(void);
 }
 #endif
 
-#endif /* __PSA_MANIFEST_{{file_name.upper()}}_H__ */
+#endif /* __PSA_MANIFEST_{{manifest_out_basename.upper()}}_H__ */
