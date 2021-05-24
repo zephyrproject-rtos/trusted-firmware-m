@@ -13,7 +13,7 @@ Use the following policy file for provisioning and signing:
 policy_multi_CM0_CM4_tfm.json
 
 Please make sure you have all required software installed as explained in the
-:doc:`software requirements </docs/getting_started/tfm_sw_requirement>`.
+:doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`.
 
 Please also make sure that all the source code are fetched by following
 :doc:`general building instruction </docs/technical_references/instructions/tfm_build_instruction>`.

@@ -5,7 +5,7 @@ Getting Started Guides
     :glob:
     :numbered:
 
-    tfm_sw_requirement
+    tfm_getting_started
 
 --------------
 

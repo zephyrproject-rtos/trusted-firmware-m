@@ -2,7 +2,7 @@
 Build instructions
 ##################
 Please make sure you have all required software installed as explained in the
-:doc:`software requirements </docs/getting_started/tfm_sw_requirement>`.
+:doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`.
 
 ****************
 TF-M build steps
@@ -31,7 +31,7 @@ dependency management`
 .. Note::
 
  - For building with Armclang compiler version 6.10.0+, please follow the note
-   in :doc:`software requirements </docs/getting_started/tfm_sw_requirement>`.
+   in :doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`.
  - For building with the IAR toolchain, please see the notes in
    :doc:`IAR software requirements <tfm_build_instruction_iar>`
 

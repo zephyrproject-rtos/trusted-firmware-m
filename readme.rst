@@ -21,7 +21,7 @@ Quick Links
 * `PSA certified`_
 * `Documentation home`_
 * `Release notes`_
-* `Software requirements`_
+* `TF-M getting started`_
 * `Build instructions`_
 * `Run TF-M examples on Arm platforms`_
 * `Contribution guidelines`_
@@ -36,7 +36,7 @@ Feedback can be submitted via email to
 .. _License: https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/user_guide/html/license.html
 .. _Contribution guidelines: https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/user_guide/html/docs/contributing/contributing_process.html
 .. _Build instructions: https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/user_guide/html/docs/technical_references/instructions/tfm_build_instruction.html
-.. _Software requirements: https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/user_guide/html/docs/getting_started/tfm_sw_requirement.html
+.. _TF-M getting started: https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/user_guide/html/docs/getting_started/tfm_getting_started.html
 .. _Run TF-M examples on Arm platforms: https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/user_guide/html/docs/technical_references/instructions/run_tfm_examples_on_arm_platforms.html
 .. _ARMv7-M and Armv8-M: https://developer.arm.com/architectures/cpu-architecture/m-profile
 .. _ARMv8-M Architecture: https://developer.arm.com/docs/100688/latest/an-introduction-to-the-armv8-m-architecture

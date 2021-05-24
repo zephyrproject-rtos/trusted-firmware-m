@@ -148,7 +148,7 @@ TF-M.
       | 10-2020-q4-major.
       | The support for CMSE feature is broken in version 10-2020-q4-major. The
       | fix will be available in future release version.
-      | A note is added in :ref:`docs/getting_started/tfm_sw_requirement:C compilers`.
+      | A note is added in :ref:`docs/getting_started/tfm_getting_started:Install a toolchain`.
     - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157
 
 Reference
