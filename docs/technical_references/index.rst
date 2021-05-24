@@ -8,8 +8,9 @@ Technical References
     :numbered:
 
     */index
+    /tools/index
     *
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
