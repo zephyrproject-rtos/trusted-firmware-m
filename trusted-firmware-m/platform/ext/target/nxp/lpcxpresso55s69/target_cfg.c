@@ -435,8 +435,8 @@ int32_t ppc_init_cfg(void)
 
     AHB_SECURE_CTRL->SEC_CTRL_APB_BRIDGE[0].SEC_CTRL_APB_BRIDGE1_MEM_CTRL2 =
         (0x33003333U) |                                                                     /* Bits have to be set to '1' according to UM.*/
-        AHB_SECURE_CTRL_SEC_CTRL_APB_BRIDGE1_MEM_CTRL2_FLASH_CTRL_RULE(0x3U) |              /* Flash controller = S*/
-        AHB_SECURE_CTRL_SEC_CTRL_APB_BRIDGE1_MEM_CTRL2_PRINCE_RULE(0x3U);                   /* PRINCE = S */
+        AHB_SECURE_CTRL_SEC_CTRL_APB_BRIDGE1_MEM_CTRL2_FLASH_CTRL_RULE(0x0U) |              /* Flash controller = S*/
+        AHB_SECURE_CTRL_SEC_CTRL_APB_BRIDGE1_MEM_CTRL2_PRINCE_RULE(0x0U);                   /* PRINCE = S */
 
     AHB_SECURE_CTRL->SEC_CTRL_APB_BRIDGE[0].SEC_CTRL_APB_BRIDGE1_MEM_CTRL3 =
         /* 0x0F000000U | */
