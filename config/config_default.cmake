@@ -159,6 +159,7 @@ set(TFM_CRYPTO_TEST_HKDF                ON          CACHE BOOL      "Test SHA-51
 set(TFM_FWU_TEST_REQUEST_REBOOT         OFF         CACHE BOOL      "Test psa_fwu_request_reboot")
 set(TFM_FWU_TEST_WRITE_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_write with data block NULL")
 set(TFM_FWU_TEST_QUERY_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_query with info NULL")
+set(TFM_FWU_TEST_SECURE                 OFF         CACHE BOOL      "Enable the secure firmware update tests")
 
 ################################## Dependencies ################################
 
