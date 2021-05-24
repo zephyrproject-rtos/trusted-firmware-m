@@ -10,6 +10,7 @@
 #define __SPM_LOAD_API_H__
 
 #include "asset_defs.h"
+#include "irq_defs.h"
 #include "partition_defs.h"
 #include "service_defs.h"
 #include "spm_ipc.h"
@@ -21,7 +22,8 @@
     (sizeof(*(pldinf)) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t) +    \
      (pldinf)->ndeps * sizeof(uint32_t) +                              \
      (pldinf)->nservices * sizeof(struct service_load_info_t) +        \
-     (pldinf)->nassets * sizeof(struct asset_desc_t))
+     (pldinf)->nassets * sizeof(struct asset_desc_t) +                 \
+     (pldinf)->nirqs * sizeof(struct irq_load_info_t))
 
 /* 'Allocate' stack based on load info */
 #define LOAD_ALLOCED_STACK_ADDR(pldinf)    (*((uintptr_t *)(pldinf + 1)))
@@ -33,6 +35,9 @@
 #define LOAD_INFO_ASSET(pldinf)                                        \
     ((uintptr_t)LOAD_INFO_SERVICE(pldinf) +                            \
      (pldinf)->nservices * sizeof(struct service_load_info_t))
+#define LOAD_INFO_IRQ(pldinf)                                          \
+    ((uintptr_t)LOAD_INFO_ASSET(pldinf) +                              \
+     (pldinf)->nassets * sizeof(struct asset_desc_t))
 
 /*
  * Allocate a partition object and return if a load is successful.
@@ -53,5 +58,13 @@ void load_services_assuredly(struct partition_t *p_partition,
                              struct service_t **connection_services_listhead,
                              struct service_t **stateless_service_ref_tbl,
                              size_t ref_tbl_size);
+
+/*
+ * Append IRQ signals to Partition signals.
+ * Set initial IRQ enabled status according to framework version.
+ * And initialize the IRQ.
+ * Any error within this API causes system to panic.
+ */
+void load_irqs_assuredly(struct partition_t *p_partition);
 
 #endif /* __SPM_LOAD_API_H__ */

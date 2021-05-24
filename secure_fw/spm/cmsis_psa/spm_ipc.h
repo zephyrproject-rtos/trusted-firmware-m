@@ -449,18 +449,20 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg);
 void notify_with_signal(int32_t partition_id, psa_signal_t signal);
 
 /**
- * \brief Return the IRQ line number associated with a signal
+ * \brief Return the IRQ load info context pointer associated with a signal
  *
- * \param[in]      partition_id    The ID of the partition in which we look for
- *                                 the signal.
- * \param[in]      signal          The signal to query for.
+ * \param[in]      p_ldinf      The load info of the partition in which we look
+ *                              for the signal.
+ * \param[in]      signal       The signal to query for.
  *
- * \retval None-negative value  The irq line associated with signal
- * \retval Negative value       if one of more the following are true:
+ * \retval NULL                 if one of more the following are true:
  *                              - the \ref signal indicates more than one signal
  *                              - the \ref signal does not belong to the
  *                                partition.
+ * \retval Any other value      The load info pointer associated with the signal
  */
-int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal);
+struct irq_load_info_t *get_irq_info_for_signal(
+                                    const struct partition_load_info_t *p_ldinf,
+                                    psa_signal_t signal);
 
 #endif /* __SPM_IPC_H__ */

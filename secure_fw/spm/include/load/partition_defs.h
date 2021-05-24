@@ -57,6 +57,7 @@ struct partition_load_info_t {
     uint32_t        ndeps;              /* Dependency number                */
     uint32_t        nservices;          /* Service number                   */
     uint32_t        nassets;            /* Asset numbers                    */
+    uint32_t        nirqs;              /* Number of IRQ owned by Partition */
 } __attribute__((aligned(4)));
 
 #endif /* __PARTITION_DEFS_H__ */

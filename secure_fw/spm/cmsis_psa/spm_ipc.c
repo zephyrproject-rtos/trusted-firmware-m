@@ -15,7 +15,6 @@
 #include "tfm_wait.h"
 #include "internal_errors.h"
 #include "tfm_spm_hal.h"
-#include "tfm_irq_list.h"
 #include "tfm_api.h"
 #include "tfm_secure_api.h"
 #include "tfm_memory_utils.h"
@@ -35,6 +34,7 @@
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
+#include "load/irq_defs.h"
 
 extern struct spm_partition_db_t g_spm_partition_db;
 static struct service_t *connection_services_listhead;
@@ -657,11 +657,17 @@ uint32_t tfm_spm_init(void)
             break;
         }
 
-        load_services_assuredly(partition, &connection_services_listhead,
-                                           stateless_services_ref_tbl,
-                                           sizeof(stateless_services_ref_tbl));
-
         p_ldinf = partition->p_ldinf;
+
+        if (p_ldinf->nservices) {
+            load_services_assuredly(partition, &connection_services_listhead,
+                                    stateless_services_ref_tbl,
+                                    sizeof(stateless_services_ref_tbl));
+        }
+
+        if (p_ldinf->nirqs) {
+            load_irqs_assuredly(partition);
+        }
 
         /* Init mmio assets */
         if (p_ldinf->nassets > 0) {
@@ -712,23 +718,6 @@ uint32_t tfm_spm_init(void)
         }
 
         partition->signals_allowed |= PSA_DOORBELL;
-
-        /* TODO: This can be optimized by generating the assigned signal
-         *       in code generation time.
-         */
-        for (j = 0; j < tfm_core_irq_signals_count; ++j) {
-            if (tfm_core_irq_signals[j].partition_id == p_ldinf->pid) {
-                partition->signals_allowed |=
-                                        tfm_core_irq_signals[j].signal_value;
-                if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
-                    == 0x0100) {
-                    tfm_spm_hal_enable_irq(tfm_core_irq_signals[j].irq_line);
-                } else if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
-                           == 0x0101) {
-                    tfm_spm_hal_disable_irq(tfm_core_irq_signals[j].irq_line);
-                }
-            }
-        }
 
         tfm_event_init(&partition->event);
         BI_LIST_INIT_NODE(&partition->msg_list);
@@ -922,22 +911,25 @@ void tfm_set_irq_signal(uint32_t partition_id, psa_signal_t signal,
     __enable_irq();
 }
 
-int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal)
+struct irq_load_info_t *get_irq_info_for_signal(
+                                    const struct partition_load_info_t *p_ldinf,
+                                    psa_signal_t signal)
 {
     size_t i;
+    struct irq_load_info_t *irq_info;
 
     if (!IS_ONLY_ONE_BIT_IN_UINT32(signal)) {
-        return -1;
+        return NULL;
     }
 
-    for (i = 0; i < tfm_core_irq_signals_count; ++i) {
-        if (tfm_core_irq_signals[i].partition_id == partition_id &&
-            tfm_core_irq_signals[i].signal_value == signal) {
-            return tfm_core_irq_signals[i].irq_line;
+    irq_info = (struct irq_load_info_t *)LOAD_INFO_IRQ(p_ldinf);
+    for (i = 0; i < p_ldinf->nirqs; i++) {
+        if (irq_info[i].signal == signal) {
+            return &irq_info[i];
         }
     }
 
-    return SPM_ERROR_GENERIC;
+    return NULL;
 }
 
 #if !defined(__ARM_ARCH_8_1M_MAIN__)

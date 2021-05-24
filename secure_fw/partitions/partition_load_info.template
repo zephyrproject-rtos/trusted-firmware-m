@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "region.h"
+#include "load/irq_defs.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
@@ -18,7 +19,7 @@
 #include "psa_manifest/sid.h"
 #include "psa_manifest/{{manifest_out_basename}}.h"
 
-{% set counter = namespace(dep_counter=0, service_counter=0, asset_counter=0) %}
+{% set counter = namespace(dep_counter=0, service_counter=0, asset_counter=0, irq_counter=0) %}
 {% if manifest.dependencies %}
     {% for dep in manifest.dependencies %}
         {% set counter.dep_counter = counter.dep_counter + 1 %}
@@ -34,6 +35,11 @@
         {% set counter.asset_counter = counter.asset_counter + 1 %}
     {% endfor %}
 {% endif %}
+{% if manifest.irqs %}
+    {% for irq in manifest.irqs %}
+        {% set counter.irq_counter = counter.irq_counter + 1 %}
+    {% endfor %}
+{% endif %}
 #define {{"%-55s"|format(manifest.name|upper + "_NDEPS")}} ({{"%d"|format(counter.dep_counter)}})
 #define {{"%-55s"|format(manifest.name|upper + "_NSERVS")}} ({{"%d"|format(counter.service_counter)}})
 #if TFM_LVL == 3
@@ -41,6 +47,7 @@
 #else
 #define {{"%-55s"|format(manifest.name|upper + "_NASSETS")}} ({{"%d"|format(counter.asset_counter)}})
 #endif
+#define {{"%-55s"|format(manifest.name|upper + "_NIRQS")}} ({{"%d"|format(counter.irq_counter)}})
 
 /* Memory region declaration */
 #if TFM_LVL == 3
@@ -72,6 +79,9 @@ struct partition_{{manifest.name|lower}}_load_info_t {
     struct asset_desc_t             assets[{{(manifest.name|upper + "_NASSETS")}}];
 {% endif %}
 #endif
+{% if manifest.irqs %}
+    struct irq_load_info_t          irqs[{{(manifest.name|upper + "_NIRQS")}}];
+{% endif %}
 } __attribute__((aligned(4)));
 
 /* Partition load, deps, service load data. Put to a dedicated section. */
@@ -104,6 +114,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         .ndeps                      = {{(manifest.name|upper + "_NDEPS")}},
         .nservices                  = {{(manifest.name|upper + "_NSERVS")}},
         .nassets                    = {{(manifest.name|upper + "_NASSETS")}},
+        .nirqs                      = {{(manifest.name|upper + "_NIRQS")}},
     },
     .stack_addr                     = (uintptr_t){{manifest.name|lower}}_stack,
     .heap_addr                      = 0,
@@ -161,7 +172,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
 #endif
     {% endif %}
 {% endfor %}
-    }
+    },
 #else
 {% if manifest.mmio_regions %}
     .assets                         = {
@@ -177,7 +188,30 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
 #endif
         {% endif %}
     {% endfor %}
-    }
+    },
 {% endif %}
 #endif
+{% if manifest.irqs %}
+    .irqs = {
+    {% for irq in manifest.irqs %}
+        {% set irq_info = namespace() %}
+        {% set irq_info.source = irq.source %}
+        {% if manifest.psa_framework_version == 1.1 and irq.handling == "FLIH" %}
+            {% set irq_info.flih_func = "(uint32_t)" + irq.name|lower + "_flih" %}
+        {% else %}
+            {% set irq_info.flih_func = 0 %}
+        {% endif %}
+        {% if manifest.psa_framework_version == 1.0 %}
+            {% set irq_info.signal = irq.signal %}
+        {% else %}
+            {% set irq_info.signal = irq.name + "_SIGNAL" %}
+        {% endif %}
+        {
+            .source    = {{irq_info.source}},
+            .flih_func = {{irq_info.flih_func}},
+            .signal    = {{irq_info.signal}},
+        },
+    {% endfor %}
+    },
+{% endif %}
 };

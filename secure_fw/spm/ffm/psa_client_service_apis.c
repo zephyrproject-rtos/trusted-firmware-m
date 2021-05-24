@@ -17,6 +17,7 @@
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
 #include "tfm_psa_call_param.h"
+#include "load/irq_defs.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 
@@ -574,7 +575,7 @@ void tfm_spm_psa_clear(void)
 void tfm_spm_psa_eoi(uint32_t *args)
 {
     psa_signal_t irq_signal;
-    int32_t irq_line = 0;
+    struct irq_load_info_t *irq_info = NULL;
     struct partition_t *partition = NULL;
 
     TFM_CORE_ASSERT(args != NULL);
@@ -585,9 +586,9 @@ void tfm_spm_psa_eoi(uint32_t *args)
         tfm_core_panic();
     }
 
-    irq_line = get_irq_line_for_signal(partition->p_ldinf->pid, irq_signal);
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
     /* It is a fatal error if passed signal is not an interrupt signal. */
-    if (irq_line < 0) {
+    if (!irq_info) {
         tfm_core_panic();
     }
 
@@ -598,8 +599,8 @@ void tfm_spm_psa_eoi(uint32_t *args)
 
     partition->signals_asserted &= ~irq_signal;
 
-    tfm_spm_hal_clear_pending_irq(irq_line);
-    tfm_spm_hal_enable_irq(irq_line);
+    tfm_spm_hal_clear_pending_irq((IRQn_Type)(irq_info->source));
+    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
 }
 
 void tfm_spm_psa_panic(void)
@@ -615,7 +616,7 @@ void tfm_spm_irq_enable(uint32_t *args)
 {
     struct partition_t *partition;
     psa_signal_t irq_signal;
-    uint32_t irq_line;
+    struct irq_load_info_t *irq_info;
 
     irq_signal = (psa_signal_t)args[0];
 
@@ -624,19 +625,19 @@ void tfm_spm_irq_enable(uint32_t *args)
         tfm_core_panic();
     }
 
-    irq_line = get_irq_line_for_signal(partition->p_ldinf->pid, irq_signal);
-    if (irq_line < 0) {
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    if (!irq_info) {
         tfm_core_panic();
     }
 
-    tfm_spm_hal_enable_irq((IRQn_Type)irq_line);
+    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
 }
 
 psa_irq_status_t tfm_spm_irq_disable(uint32_t *args)
 {
     struct partition_t *partition;
     psa_signal_t irq_signal;
-    uint32_t irq_line;
+    struct irq_load_info_t *irq_info;
 
     irq_signal = (psa_signal_t)args[0];
 
@@ -645,12 +646,12 @@ psa_irq_status_t tfm_spm_irq_disable(uint32_t *args)
         tfm_core_panic();
     }
 
-    irq_line = get_irq_line_for_signal(partition->p_ldinf->pid, irq_signal);
-    if (irq_line < 0) {
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    if (!irq_info) {
         tfm_core_panic();
     }
 
-    tfm_spm_hal_disable_irq((IRQn_Type)irq_line);
+    tfm_spm_hal_disable_irq((IRQn_Type)(irq_info->source));
 
     return 1;
 }

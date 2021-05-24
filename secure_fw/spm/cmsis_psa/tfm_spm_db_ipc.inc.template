@@ -19,23 +19,6 @@
 #error "Please do not add 'heap_size' for partition '{{partition.manifest.name}}', the dynamic memory allocation is not supported now!"
     {% endif %}
 {% endfor %}
-/**************************************************************************/
-/** IRQ count per partition */
-/**************************************************************************/
-{% for partition in partitions %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
-    {% if partition.manifest.irqs %}
-#define TFM_PARTITION_{{partition.manifest.name}}_IRQ_COUNT {{partition.manifest.irqs | length() }}
-    {% else %}
-#define TFM_PARTITION_{{partition.manifest.name}}_IRQ_COUNT 0
-    {% endif %}
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
-
-{% endfor %}
 
 /**************************************************************************/
 /** The partition list for the DB */
