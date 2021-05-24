@@ -761,6 +761,21 @@ uint32_t tfm_spm_init(void)
 
             platform_data_p = POSITION_TO_PTR(p_asset_load[i].dev.addr_ref,
                                               struct platform_data_t *);
+
+            /*
+             * TODO: some partitions declare MMIO not exist on specific
+             * platforms, and the platform defines a dummy NULL reference
+             * for these MMIO items, which cause 'nassets' to contain several
+             * NULL items. Skip these NULL items initialization temporarily to
+             * avoid HAL API panic.
+             * Eventually, these platform-specific partitions need to be moved
+             * into a platform-specific folder. Then this workaround can be
+             * removed.
+             */
+            if (!platform_data_p) {
+                continue;
+            }
+
 #ifdef TFM_FIH_PROFILE_ON
             FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, part_idx,
                      platform_data_p);
