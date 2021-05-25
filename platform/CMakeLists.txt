@@ -10,6 +10,7 @@ cmake_policy(SET CMP0079 NEW)
 
 add_library(platform_s STATIC)
 add_library(platform_region_defs INTERFACE)
+add_library(platform_common_interface INTERFACE)
 
 # under the multicore topology, NS is declared in the same place as the PSA
 # interface so that it picks up the compiler definitions for the NS CPU
@@ -25,15 +26,21 @@ set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 add_subdirectory(ext/target/${TFM_PLATFORM} target)
 
+#========================= Platform Common interface ==========================#
+
+target_include_directories(platform_common_interface
+    INTERFACE
+        ./ext
+        ./ext/cmsis
+        ./ext/common
+        ./ext/driver
+        ./include
+)
+
 #========================= Platform Secure ====================================#
 
 target_include_directories(platform_s
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/common>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/driver>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/cmsis>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/accelerator/interface>
 )
 
@@ -58,6 +65,7 @@ target_sources(platform_s
 
 target_link_libraries(platform_s
     PUBLIC
+        platform_common_interface
         platform_region_defs
         tfm_fih
     PRIVATE
@@ -85,16 +93,6 @@ target_compile_definitions(platform_s
 
 #========================= Platform Non-Secure ================================#
 
-target_include_directories(platform_ns
-    PUBLIC
-        ext
-        ext/common
-        ext/driver
-        ext/common
-        include
-        ext/cmsis
-)
-
 target_sources(platform_ns
     PRIVATE
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
@@ -103,6 +101,7 @@ target_sources(platform_ns
 
 target_link_libraries(platform_ns
     PUBLIC
+        platform_common_interface
         platform_region_defs
         tfm_ns_interface
 )
@@ -117,11 +116,6 @@ if(BL2)
     #TODO import policy
     target_include_directories(platform_bl2
         PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/cmsis>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/driver>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/common>
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext>
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/accelerator/interface>
     )
 
@@ -137,6 +131,7 @@ if(BL2)
 
     target_link_libraries(platform_bl2
         PUBLIC
+            platform_common_interface
             platform_region_defs
         PRIVATE
             psa_interface
