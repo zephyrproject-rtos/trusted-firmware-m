@@ -6,9 +6,6 @@ Getting Started Guides
     :numbered:
 
     tfm_sw_requirement
-    tfm_build_instruction
-    tfm_build_instruction_iar
-    tfm_user_guide
 
 --------------
 

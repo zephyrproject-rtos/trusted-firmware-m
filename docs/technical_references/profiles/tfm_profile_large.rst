@@ -452,7 +452,7 @@ Reference
 
 .. [8] :doc:`ITS integration guide </docs/integration_guide/services/tfm_its_integration_guide>`
 
-.. [9] :doc:`TF-M build instruction </docs/getting_started/tfm_build_instruction>`
+.. [9] :doc:`TF-M build instruction </docs/technical_references/instructions/tfm_build_instruction>`
 
 --------------
 

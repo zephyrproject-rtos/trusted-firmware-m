@@ -640,7 +640,7 @@ Reference
 
 .. [10] :doc:`Crypto design </docs/technical_references/tfm_crypto_design>`
 
-.. [11] :doc:`TF-M build instruction </docs/getting_started/tfm_build_instruction>`
+.. [11] :doc:`TF-M build instruction </docs/technical_references/instructions/tfm_build_instruction>`
 
 --------------
 

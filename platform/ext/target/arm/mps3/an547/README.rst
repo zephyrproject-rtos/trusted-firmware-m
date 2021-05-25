@@ -4,7 +4,7 @@ Corstone-300 Ethos-U55 FPGA and FVP
 Building TF-M
 -------------
 
-Follow the instructions in :doc:`Building instructions </docs/getting_started/tfm_build_instruction>`.
+Follow the instructions in :doc:`Building instructions </docs/technical_references/instructions/tfm_build_instruction>`.
 Build instructions with platform name: mps3/an547 (-DTFM_PLATFORM=mps3/an547).
 
 .. note::

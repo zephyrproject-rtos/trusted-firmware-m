@@ -1,8 +1,7 @@
-##########
-User guide
-##########
-How to compile and run TF-M and example test application for CoreLink
-SSE-200 subsystem on the MPS2 board and on the Fast Model(FVP).
+##################################
+Run TF-M examples on Arm platforms
+##################################
+Instructions for how to run TF-M and example test application on Arm platforms.
 
 Follow :doc:`build instruction <tfm_build_instruction>` to build the binaries.
 Follow :doc:`secure boot </docs/technical_references/tfm_secure_boot>` to build the
@@ -30,8 +29,6 @@ using the reference model for MPS2 (AN521), in  `Keil MDK`_ ,
 To run the example code on an SSE-200 Fast-Model
 ================================================
 Using FVP_MPS2_AEMv8M provided by `Arm Development Studio`_ 2019.1.
-
-
 
 Example application and regression tests without BL2 bootloader
 ---------------------------------------------------------------

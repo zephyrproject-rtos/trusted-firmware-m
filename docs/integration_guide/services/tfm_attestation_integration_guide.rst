@@ -639,9 +639,9 @@ that user has license for DS-5 and FVP models:
 
  - Build TF-M with any of the ``ConfigRegression*.cmake`` build configurations
    for MPS2 AN521 platform. More info in
-   :doc:`tfm_build_instruction </docs/getting_started/tfm_build_instruction>`.
+   :doc:`tfm_build_instruction </docs/technical_references/instructions/tfm_build_instruction>`.
  - Lunch FVP model in DS-5. More info in
-   :doc:`tfm_user_guide </docs/getting_started/tfm_user_guide>`.
+   :doc:`tfm_run_instruction </docs/technical_references/instructions/tfm_run_instruction>`.
  - Set a breakpoint in ``test/suites/attestation/attest_token_test.c``
    in ``decode_test_internal(..)`` after the ``token_main_alt(..)`` returned,
    i.e. on line 859. Execute the code in the model until the breakpoint hits

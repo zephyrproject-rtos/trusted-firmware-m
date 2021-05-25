@@ -7,12 +7,12 @@ with other hardware platforms and operating systems.
 *****************
 How to build TF-M
 *****************
-Follow the :doc:`Build instructions </docs/getting_started/tfm_build_instruction>`.
+Follow the :doc:`Build instructions </docs/technical_references/instructions/tfm_build_instruction>`.
 
 ********************************************************
 How to export files for building non-secure applications
 ********************************************************
-Explained in the :doc:`Build instructions </docs/getting_started/tfm_build_instruction>`.
+Explained in the :doc:`Build instructions </docs/technical_references/instructions/tfm_build_instruction>`.
 
 *************************
 How to add a new platform
