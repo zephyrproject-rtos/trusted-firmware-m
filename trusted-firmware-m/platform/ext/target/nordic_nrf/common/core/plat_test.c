@@ -158,7 +158,17 @@ uint32_t pal_nvmem_get_addr(void)
     static bool psa_scratch_initialized = false;
     static __ALIGN(4) uint8_t __psa_scratch[PSA_TEST_SCRATCH_AREA_SIZE];
 
-    if (!psa_scratch_initialized && (nrfx_reset_reason_get() == 0)){
+    /* The POWER/RESET peripherals are defined as non-secure, so
+     * the secure domain must access the non-secure address
+     */
+    uint32_t reset_reason;
+    #if NRF_POWER_HAS_RESETREAS
+        reset_reason = nrf_power_resetreas_get(NRF_POWER_NS);
+    #else
+        reset_reason = nrf_reset_resetreas_get(NRF_RESET_NS);
+    #endif
+
+    if (!psa_scratch_initialized && (reset_reason == 0)){
         /* PSA API tests expect this area to be initialized to all 0xFFs after a
          * power-on reset.
          */
