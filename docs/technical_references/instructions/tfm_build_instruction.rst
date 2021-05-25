@@ -397,74 +397,6 @@ system, they are also provided in
 ``<build_dir>/install/outputs/<target_platform>/``. In order to generate the
 artifacts in this location ``make install`` must be run.
 
-Building the documentation
-==========================
-Please ensure the dependencies for building the documentation are installed
-as explained in the :doc:`software requirements </docs/getting_started/tfm_sw_requirement>`.
-The requirements to build the firmware, are only required when using the CMAKE
-method
-
-There are currently two ways of building the documentation:
-- Using the CMake build system as custom targets
-- Manually using the appropriate tools (`sphinx-build`_/ `Doxygen`_)
-
-Using the CMake build-system
-----------------------------
-
-Building PDF output can be requested by invoking `tfm_docs_userguide_pdf/
-tfm_docs_userguide_pdf`
-
-.. Note::
-   For building the documentation all tools needed to build the firmware must
-   be available.
-
-Building the Reference Manual
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: bash
-
-    cd <TF-M base folder>
-    cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-    cmake --build cmake_doc -- tfm_docs_refman_html tfm_docs_refman_pdf
-
-The documentation files will be available under the directory::
-
-    cmake_doc/docs/reference_manual
-
-Building the User Guide
-^^^^^^^^^^^^^^^^^^^^^^^
-.. code-block:: bash
-
-    cd <TF-M base folder>
-    cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-    cmake --build cmake_doc -- tfm_docs_userguide_html tfm_docs_userguide_pdf
-
-The documentation files will be available under the directory::
-
-    cmake_doc/docs/user_guide
-
-Manually using documentation generation tools
----------------------------------------------
-
-Invoking Sphinx-build will build both user_guide and reference_manual
-targets.
-
-.. code-block:: bash
-
-    # Build the documentation from build_docs directory
-    cd <TF-M base folder>
-    mkdir build_docs
-    cp docs/conf.py build_docs/conf.py
-    cd build_docs
-    sphinx-build ./ user_guide
-
-    # Build the documentation from a custom location
-    # setting the build_docs as input
-
-    # Note that using this method will still generate the reference manual
-    # to the  <TF-M base folder>/build_docs/reference_manual
-    cd <TF-M base folder>/OTHER_DIR/OTHER_DIR2
-    sphinx-build  <TF-M base folder>/build_docs/ DESIRED_OUTPUT_DIR
-
 ****************************
 Manual dependency management
 ****************************
@@ -502,9 +434,6 @@ For required versions of the dependencies, refer to ``config/config_default.cmak
 .. Note::
  - CMSIS 5 is provided by the TF-M tests repo. If you wish to use a different
    source for CMSIS 5, it can be configured using CMSIS_5_PATH.
-
-.. _sphinx-build: https://www.sphinx-doc.org/en/master/man/sphinx-build.html
-.. _Doxygen: https://www.doxygen.nl
 
 TF-M Tests
 ==========

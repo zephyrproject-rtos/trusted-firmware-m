@@ -5,7 +5,10 @@ TF-M Detailed Instructions
     :maxdepth: 1
     :glob:
 
-    *
+    tfm_build_instruction
+    tfm_build_instruction_iar
+    tfm_run_instruction
+    documentation_generation
 
 --------------
 
