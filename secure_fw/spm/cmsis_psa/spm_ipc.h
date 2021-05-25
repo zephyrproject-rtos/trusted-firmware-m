@@ -342,6 +342,13 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          enum tfm_memory_access_e access,
                          uint32_t privileged);
 
+/**
+ * \brief               Set up the isolation boundary of the given partition.
+ *
+ * \param[in] partition The partition of which the boundary is set up.
+ */
+void tfm_set_up_isolation_boundary(const struct partition_t *partition);
+
 /*
  * PendSV specified function.
  *

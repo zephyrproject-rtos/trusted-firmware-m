@@ -736,65 +736,79 @@ uint32_t tfm_spm_init(void)
     return p_ns_entry_thread->arch_ctx.lr;
 }
 
-void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
-{
 #if TFM_LVL != 1
-    struct partition_t *p_next_partition;
-    const struct partition_load_info_t *p_part_static;
-    uint32_t is_privileged;
-#endif
-    struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();
-    struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr();
+static void set_up_boundary(const struct partition_load_info_t *p_ldinf)
+{
+#if TFM_LVL == 3
 #if defined(TFM_FIH_PROFILE_ON) && (TFM_LVL == 3)
     fih_int fih_rc = FIH_FAILURE;
 #endif
+    /*
+     * FIXME: To implement isolations among partitions in isolation level 3,
+     * each partition needs to run in unprivileged mode. Currently some
+     * PRoTs cannot work in unprivileged mode, make them privileged now.
+     */
+    if (!(p_ldinf->flags & SPM_PART_FLAG_PSA_ROT)) {
+        struct asset_desc_t *p_asset =
+            (struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
+        /* Partition must have private data as the first asset in LVL3 */
+        if (p_ldinf->nassets == 0) {
+            tfm_core_panic();
+        }
+        if (p_asset->attr & ASSET_DEV_REF_BIT) {
+            tfm_core_panic();
+        }
+        /* FIXME: only MPU-based implementations are supported currently */
+#ifdef TFM_FIH_PROFILE_ON
+        FIH_CALL(tfm_hal_mpu_update_partition_boundary, fih_rc,
+                    p_asset->mem.addr_x, p_asset->mem.addr_y);
+        if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+            tfm_core_panic();
+        }
+#else /* TFM_FIH_PROFILE_ON */
+        if (tfm_hal_mpu_update_partition_boundary(p_asset->mem.addr_x,
+                                                  p_asset->mem.addr_y)
+                                                           != TFM_HAL_SUCCESS) {
+            tfm_core_panic();
+        }
+#endif /* TFM_FIH_PROFILE_ON */
+    }
+#else /* TFM_LVL == 3 */
+    (void)p_ldinf;
+#endif /* TFM_LVL == 3 */
+}
+#endif /* TFM_LVL != 1 */
+
+void tfm_set_up_isolation_boundary(const struct partition_t *partition)
+{
+#if TFM_LVL != 1
+    const struct partition_load_info_t *p_ldinf;
+    uint32_t is_privileged;
+
+    p_ldinf = partition->p_ldinf;
+    is_privileged = p_ldinf->flags & SPM_PART_FLAG_PSA_ROT ?
+                                                TFM_PARTITION_PRIVILEGED_MODE :
+                                                TFM_PARTITION_UNPRIVILEGED_MODE;
+
+    tfm_spm_partition_change_privilege(is_privileged);
+
+    set_up_boundary(p_ldinf);
+#else /* TFM_LVL != 1 */
+    (void)partition;
+#endif /* TFM_LVL != 1 */
+}
+
+void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
+{
+    struct partition_t *p_next_partition;
+    struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();
+    struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr();
 
     if (pth_next != NULL && pth_curr != pth_next) {
-#if TFM_LVL != 1
         p_next_partition = TO_CONTAINER(pth_next,
                                         struct partition_t,
                                         sp_thread);
-        p_part_static = p_next_partition->p_ldinf;
-        if (p_part_static->flags & SPM_PART_FLAG_PSA_ROT) {
-            is_privileged = TFM_PARTITION_PRIVILEGED_MODE;
-        } else {
-            is_privileged = TFM_PARTITION_UNPRIVILEGED_MODE;
-        }
-
-        tfm_spm_partition_change_privilege(is_privileged);
-#if TFM_LVL == 3
-        /*
-         * FIXME: To implement isolations among partitions in isolation level 3,
-         * each partition needs to run in unprivileged mode. Currently some
-         * PRoTs cannot work in unprivileged mode, make them privileged now.
-         */
-        if (is_privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
-            struct asset_desc_t *p_asset =
-                (struct asset_desc_t *)LOAD_INFO_ASSET(p_part_static);
-            /* Partition must have private data as the first asset in LVL3 */
-            if (p_part_static->nassets == 0) {
-                tfm_core_panic();
-            }
-            if (p_asset->attr & ASSET_DEV_REF_BIT) {
-                tfm_core_panic();
-            }
-            /* FIXME: only MPU-based implementations are supported currently */
-#ifdef TFM_FIH_PROFILE_ON
-            FIH_CALL(tfm_hal_mpu_update_partition_boundary, fih_rc,
-                     p_asset->mem.addr_x, p_asset->mem.addr_y);
-            if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
-                tfm_core_panic();
-            }
-#else /* TFM_FIH_PROFILE_ON */
-            if (tfm_hal_mpu_update_partition_boundary(p_asset->mem.addr_x,
-                                                      p_asset->mem.addr_y)
-                                                           != TFM_HAL_SUCCESS) {
-                tfm_core_panic();
-            }
-#endif /* TFM_FIH_PROFILE_ON */
-        }
-#endif /* TFM_LVL == 3 */
-#endif /* TFM_LVL != 1 */
+        tfm_set_up_isolation_boundary(p_next_partition);
 
         tfm_core_thrd_switch_context(p_actx, pth_curr, pth_next);
     }
