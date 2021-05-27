@@ -56,6 +56,8 @@ uint32_t tfm_plat_test_get_userled_mask(void);
  */
 #ifdef TFM_ENABLE_SLIH_TEST
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
+#elif defined(TFM_ENABLE_FLIH_TEST)
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FLIH_TEST", "APP-ROT")
 #endif
 void tfm_plat_test_secure_timer_start(void);
 
@@ -65,6 +67,8 @@ void tfm_plat_test_secure_timer_start(void);
  */
 #ifdef TFM_ENABLE_SLIH_TEST
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
+#elif TFM_ENABLE_FLIH_TEST
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FLIH_TEST", "APP-ROT")
 #endif
 void tfm_plat_test_secure_timer_clear_intr(void);
 
@@ -73,6 +77,8 @@ void tfm_plat_test_secure_timer_clear_intr(void);
  */
 #ifdef TFM_ENABLE_SLIH_TEST
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
+#elif defined(TFM_ENABLE_FLIH_TEST)
+TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FLIH_TEST", "APP-ROT")
 #endif
 void tfm_plat_test_secure_timer_stop(void);
 

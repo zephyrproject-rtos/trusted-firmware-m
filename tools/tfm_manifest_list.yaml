@@ -290,5 +290,20 @@
          ]
       }
     },
+    {
+      "name": "TFM FLIH Test Service",
+      "short_name": "TFM_SP_FLIH_TEST",
+      "manifest": "${TFM_TEST_PATH}/test_services/tfm_flih_test_service/tfm_flih_test_service.yaml",
+      "source_path": "${TFM_TEST_PATH}",
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_ENABLE_FLIH_TEST",
+      "version_major": 0,
+      "version_minor": 1,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_flih_test.*"
+         ]
+      }
+    }
   ]
 }

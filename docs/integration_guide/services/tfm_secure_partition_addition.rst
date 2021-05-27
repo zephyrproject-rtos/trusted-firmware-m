@@ -177,7 +177,7 @@ Here is the RoT Service ID table used in TF-M.
    tfm_ipc_client              0x0000F                0x060-0x07F
    tfm_ipc_service             0x0000F                0x080-0x09F
    tfm_slih_test_service       0x0000F                0x0A0-0x0AF
-   Reserved                    0x0000F                0x0B0-0x0BF
+   tfm_flih_test_service       0x0000F                0x0B0-0x0BF
    tfm_ps_test_service         0x0000F                0x0C0-0x0DF
    tfm_ff11_partition          0x0000F                0x120-0x13F
    =========================== ====================== ========================
