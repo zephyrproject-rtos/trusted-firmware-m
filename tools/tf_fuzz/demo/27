@@ -1,4 +1,0 @@
-purpose to do the same sort of things as #26, but change around operands;
-set policy name randomPolicy anotherPolicy;
-set key name aKey data * policy randomPolicy;
-set key name aNewKey from *active policy anotherPolicy;

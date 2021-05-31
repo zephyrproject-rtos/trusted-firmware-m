@@ -1,3 +1,0 @@
-purpose to create a default (random) policy and create a key using it (no key material specified);
-set policy name randomPolicy;
-set key name akey policy randomPolicy;

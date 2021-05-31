@@ -1,2 +1,0 @@
-// purpose to make sure it complains if you don't provide a purpose
-set sst uid 104 data "Very simple test" expect pass;

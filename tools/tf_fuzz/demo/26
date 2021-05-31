@@ -1,4 +1,0 @@
-purpose to create a default (random) policy and create a key using it (random key data specified), then copy that key with another random policy;
-set policy name randomPolicy anotherPolicy;
-set key name aKey policy randomPolicy data *;
-set key name aNewKey from aKey policy anotherPolicy;

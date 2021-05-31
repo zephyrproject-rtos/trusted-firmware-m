@@ -1,6 +1,0 @@
-purpose to assign a sequence of values to a single asset;
-set sst name indecisive data "First value" flag none;
-set sst name indecisive data "Second value";
-set sst name indecisive data *;
-set sst name indecisive data "Fourth value";
-set sst name indecisive data *;

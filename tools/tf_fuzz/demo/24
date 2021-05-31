@@ -1,3 +1,0 @@
-purpose to create a default (random) policy and then print it to the log;
-set policy name randomPolicy;
-read policy name randomPolicy print;

@@ -1,4 +1,0 @@
-purpose to create a key, then read the key data ("material") into a variable;
-set policy name somePolicy alg sha3_224 attr noexport volatile;
-set key name aKey data * policy somePolicy;
-read key name aKey var keyDataVar;

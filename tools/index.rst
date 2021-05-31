@@ -6,8 +6,7 @@ Tools
     :glob:
 
     iat-verifier/*
-    tf_fuzz/docs/index
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*

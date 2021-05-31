@@ -1,2 +1,0 @@
-purpose to more-specifically override TF-Fuzz's expected result;
-read sst name napoleon chk "this won't work" exp generic_error;
