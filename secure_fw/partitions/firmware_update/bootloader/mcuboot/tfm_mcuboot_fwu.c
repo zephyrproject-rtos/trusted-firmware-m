@@ -460,15 +460,17 @@ psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
 psa_status_t fwu_bootloader_mark_image_accepted(
                                               bl_image_id_t bootloader_image_id)
 {
-    /* As DIRECT_XIP, RAM_LOAD and OVERWRITE_ONLY do not support image revert.
-     * So there is nothing to do in these three upgrade strategies. Image
-     * revert is only supported in SWAP upgrade strategy. In this case, the
-     * image need to be set as a permanent image, so that the next time reboot
-     * up, the image will still be the running image, otherwise, the image will
-     * be reverted and the original image will be chosen as the running image.
+    /* As RAM_LOAD and OVERWRITE_ONLY do not support image revert, the image
+     * does not need to be confirmed explicitly in these two upgrade strategies.
+     * Image revert is supported in SWAP upgrade strategy and DIRECT_XIP upgrade
+     * strategy when MCUBOOT_DIRECT_XIP_REVERT is true. In these cases, the
+     * image needs to be set as a permanent image explicitly. Then the accpeted
+     * image can still be selected as the running image during next time reboot
+     * up. Otherwise, the image will be reverted and the previous one will be
+     * chosen as the running image.
      */
-#if !defined(MCUBOOT_DIRECT_XIP) && !defined(MCUBOOT_RAM_LOAD) && \
-    !defined(MCUBOOT_OVERWRITE_ONLY)
+#if (defined(MCUBOOT_DIRECT_XIP) && defined(MCUBOOT_DIRECT_XIP_REVERT)) || \
+    defined(MCUBOOT_SWAP)
     uint8_t mcuboot_image_id = 0;
 
     if (convert_id_from_bl_to_mcuboot(bootloader_image_id,
