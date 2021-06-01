@@ -126,7 +126,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
                                     | SERVICE_FLAG_NS_ACCESSIBLE
         {% endif %}
         {% if manifest.psa_framework_version > 1.0 and service.connection_based is sameas false %}
-                                    | SERVICE_FLAG_STATELESS | {{"%x"|format(service.stateless_handle_index)}}
+                                    | SERVICE_FLAG_STATELESS | 0x{{"%x"|format(service.stateless_handle_index)}}
         {% endif %}
         {% if service.version_policy %}
                                     | SERVICE_VERSION_POLICY_{{service.version_policy}},
