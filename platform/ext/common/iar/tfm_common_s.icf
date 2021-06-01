@@ -39,9 +39,9 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
        ro object tfm_log_raw.o
        };
 
-    /**** Section for holding partition static data */
-define block TFM_SP_STATIC_LIST with alignment = 4 {
-    ro section .partition_info object load_info_*.o,
+    /**** Section for holding partition RO load data */
+define block TFM_SP_LOAD_LIST with alignment = 4 {
+    ro section .part_load object load_info_*.o,
 };
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
@@ -212,8 +212,7 @@ define block LR_CODE with fixed order {
        block ER_TFM_CODE,
        block TFM_UNPRIV_CODE,
 
-/**** Section for holding partition static data */
-       block TFM_SP_STATIC_LIST,
+       block TFM_SP_LOAD_LIST,
 
        block TFM_PSA_CODE_START,
 

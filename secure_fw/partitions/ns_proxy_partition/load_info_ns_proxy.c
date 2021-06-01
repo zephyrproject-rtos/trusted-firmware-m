@@ -32,9 +32,9 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 extern void tfm_nspm_thread_entry(void);
 
 struct partition_tfm_sp_ns_proxy_load_info_t {
-    /* common length data */
-    struct partition_load_info_t  cmn_info;
-    /* per-partition variable length data */
+    /* common length load data */
+    struct partition_load_info_t    load_info;
+    /* per-partition variable length load data */
     uintptr_t                       stack_addr;
     uintptr_t                       heap_addr;
 #if TFM_LVL == 3
@@ -42,10 +42,10 @@ struct partition_tfm_sp_ns_proxy_load_info_t {
 #endif
 } __attribute__((aligned(4)));
 
-/* Partition static, deps, service static data. Put to a dedicated section. */
+/* Partition load, deps, service load data. Put to a dedicated section. */
 const struct partition_tfm_sp_ns_proxy_load_info_t
-    tfm_sp_ns_proxy_static __attribute__((used, section(".partition_info"))) = {
-    .cmn_info = {
+    tfm_sp_ns_proxy_load __attribute__((used, section(".part_load"))) = {
+    .load_info = {
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
         .pid                        = TFM_SP_NON_SECURE_ID,
         .flags                      = PARTITION_PRI_LOWEST | SPM_PART_FLAG_IPC
@@ -62,8 +62,8 @@ const struct partition_tfm_sp_ns_proxy_load_info_t
         .nassets                    = TFM_SP_NS_PROXY_NASSETS,
 #endif
     },
-    .stack_addr                      = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
-    .heap_addr                       = 0,
+    .stack_addr                     = PART_REGION_ADDR(ARM_LIB_STACK, $$ZI$$Base),
+    .heap_addr                      = 0,
 #if TFM_LVL == 3
     .assets                         = {
         {

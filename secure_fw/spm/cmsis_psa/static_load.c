@@ -19,12 +19,12 @@
 #include "secure_fw/partitions/tfm_service_list.inc"
 #include "tfm_spm_db_ipc.inc"
 
-/* Partition static data region */
-REGION_DECLARE(Image$$, TFM_SP_STATIC_LIST, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_SP_STATIC_LIST, $$RO$$Limit);
+/* Partition load data region */
+REGION_DECLARE(Image$$, TFM_SP_LOAD_LIST, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_SP_LOAD_LIST, $$RO$$Limit);
 
-static uintptr_t ldinf_sa = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Base);
-static uintptr_t ldinf_ea = PART_REGION_ADDR(TFM_SP_STATIC_LIST, $$RO$$Limit);
+static uintptr_t ldinf_sa = PART_REGION_ADDR(TFM_SP_LOAD_LIST, $$RO$$Base);
+static uintptr_t ldinf_ea = PART_REGION_ADDR(TFM_SP_LOAD_LIST, $$RO$$Limit);
 
 /* Allocate runtime space for partition from the pool. Static allocation. */
 static struct partition_t *tfm_allocate_partition_assuredly(void)

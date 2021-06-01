@@ -195,13 +195,13 @@ SECTIONS
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
     Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
 
-    /**** Section for holding partition static RO data */
-    .TFM_SP_STATIC_LIST : ALIGN(4)
+    /**** Section for holding partition RO load data */
+    .TFM_SP_LOAD_LIST : ALIGN(4)
     {
-       KEEP(*(.partition_info))
+       KEEP(*(.part_load))
     } > FLASH
-    Image$$TFM_SP_STATIC_LIST$$RO$$Base = ADDR(.TFM_SP_STATIC_LIST);
-    Image$$TFM_SP_STATIC_LIST$$RO$$Limit = ADDR(.TFM_SP_STATIC_LIST) + SIZEOF(.TFM_SP_STATIC_LIST);
+    Image$$TFM_SP_LOAD_LIST$$RO$$Base = ADDR(.TFM_SP_LOAD_LIST);
+    Image$$TFM_SP_LOAD_LIST$$RO$$Limit = ADDR(.TFM_SP_LOAD_LIST) + SIZEOF(.TFM_SP_LOAD_LIST);
     . = ALIGN(32);
 
     /**** PSA RoT RO part (CODE + RODATA) start here */

@@ -14,7 +14,7 @@
 #include "service_defs.h"
 #include "spm_ipc.h"
 
-/* Length of extendable variables in partition static type */
+/* Length of extendable variables in partition load type */
 #define LOAD_INFO_EXT_LENGTH                2
 /* Argument "pldinf" must be a "struct partition_load_info_t *". */
 #define LOAD_INFSZ_BYTES(pldinf)                                       \

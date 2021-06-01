@@ -52,11 +52,11 @@ extern uint8_t {{manifest.name|lower}}_stack[];
 /* Entrypoint function declaration */
 extern void {{manifest.entry_point}}(void);
 
-/* partition static info type definition */
+/* partition load info type definition */
 struct partition_{{manifest.name|lower}}_load_info_t {
-    /* common length data */
-    struct partition_load_info_t    cmn_info;
-    /* per-partition variable length data */
+    /* common length load data */
+    struct partition_load_info_t    load_info;
+    /* per-partition variable length load data */
     uintptr_t                       stack_addr;
     uintptr_t                       heap_addr;
 {% if manifest.dependencies %}
@@ -74,10 +74,10 @@ struct partition_{{manifest.name|lower}}_load_info_t {
 #endif
 } __attribute__((aligned(4)));
 
-/* Partition static, deps, service static data. Put to a dedicated section. */
-const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower}}_static
-    __attribute__((used, section(".partition_info"))) = {
-    .cmn_info = {
+/* Partition load, deps, service load data. Put to a dedicated section. */
+const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower}}_load
+    __attribute__((used, section(".part_load"))) = {
+    .load_info = {
 {% if manifest.psa_framework_version == 1.0 %}
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
 {% elif manifest.psa_framework_version == 1.1 %}

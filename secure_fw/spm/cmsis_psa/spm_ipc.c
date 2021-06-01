@@ -640,7 +640,7 @@ uint32_t tfm_spm_init(void)
     struct partition_t *partition;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
     const struct platform_data_t *platform_data_p;
-    const struct partition_load_info_t *p_cmninf;
+    const struct partition_load_info_t *p_ldinf;
     struct asset_desc_t *p_asset_load;
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
@@ -661,11 +661,11 @@ uint32_t tfm_spm_init(void)
                                            stateless_services_ref_tbl,
                                            sizeof(stateless_services_ref_tbl));
 
-        p_cmninf = partition->p_ldinf;
+        p_ldinf = partition->p_ldinf;
 
         /* Init mmio assets */
-        if (p_cmninf->nassets > 0) {
-            if (tfm_spm_partition_get_privileged_mode(p_cmninf->flags) ==
+        if (p_ldinf->nassets > 0) {
+            if (tfm_spm_partition_get_privileged_mode(p_ldinf->flags) ==
                 TFM_PARTITION_PRIVILEGED_MODE) {
                 privileged = true;
             } else {
@@ -673,8 +673,8 @@ uint32_t tfm_spm_init(void)
             }
         }
 
-        p_asset_load = (struct asset_desc_t *)LOAD_INFO_ASSET(p_cmninf);
-        for (i = 0; i < p_cmninf->nassets; i++) {
+        p_asset_load = (struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
+        for (i = 0; i < p_ldinf->nassets; i++) {
             /* Skip the memory-based asset */
             if (!(p_asset_load[i].attr & ASSET_DEV_REF_BIT)) {
                 continue;
@@ -717,13 +717,13 @@ uint32_t tfm_spm_init(void)
          *       in code generation time.
          */
         for (j = 0; j < tfm_core_irq_signals_count; ++j) {
-            if (tfm_core_irq_signals[j].partition_id == p_cmninf->pid) {
+            if (tfm_core_irq_signals[j].partition_id == p_ldinf->pid) {
                 partition->signals_allowed |=
                                         tfm_core_irq_signals[j].signal_value;
-                if ((p_cmninf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
+                if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
                     == 0x0100) {
                     tfm_spm_hal_enable_irq(tfm_core_irq_signals[j].irq_line);
-                } else if ((p_cmninf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
+                } else if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
                            == 0x0101) {
                     tfm_spm_hal_disable_irq(tfm_core_irq_signals[j].irq_line);
                 }
@@ -738,17 +738,17 @@ uint32_t tfm_spm_init(void)
             tfm_core_panic();
         }
 
-        /* Extendable partition static info is right after p_cmninf. */
+        /* Extendable partition load info is right after p_ldinf. */
         tfm_core_thrd_init(
                     pth,
-                    POSITION_TO_ENTRY(p_cmninf->entry, tfm_core_thrd_entry_t),
+                    POSITION_TO_ENTRY(p_ldinf->entry, tfm_core_thrd_entry_t),
                     NULL,
-                    LOAD_ALLOCED_STACK_ADDR(p_cmninf) + p_cmninf->stack_size,
-                    LOAD_ALLOCED_STACK_ADDR(p_cmninf));
+                    LOAD_ALLOCED_STACK_ADDR(p_ldinf) + p_ldinf->stack_size,
+                    LOAD_ALLOCED_STACK_ADDR(p_ldinf));
 
-        pth->prior = TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_cmninf->flags));
+        pth->prior = TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_ldinf->flags));
 
-        if (p_cmninf->pid == TFM_SP_NON_SECURE_ID) {
+        if (p_ldinf->pid == TFM_SP_NON_SECURE_ID) {
             p_ns_entry_thread = pth;
             pth->param = (void *)tfm_spm_hal_get_ns_entry_point();
         }
