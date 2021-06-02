@@ -22,6 +22,9 @@
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 
+/* MSP bottom (higher address) */
+REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Limit);
+
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(uint8_t svc_num,
                                      uint32_t *ctx, uint32_t lr);
@@ -166,6 +169,11 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
         tfm_core_get_boot_data_handler(svc_args);
         break;
     default:
+        if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Limit)
+                                     - (uint32_t)msp) > TFM_STACK_SEALED_SIZE) {
+            /* The Main Stack has contents, not calling from Partition thread */
+            tfm_core_panic();
+        }
         svc_args[0] = SVC_Handler_IPC(svc_number, svc_args, exc_return);
         break;
     }
