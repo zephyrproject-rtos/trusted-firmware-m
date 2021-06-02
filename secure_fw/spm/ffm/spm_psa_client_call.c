@@ -17,7 +17,7 @@
 #include "ffm/spm_error_base.h"
 
 #define GET_STATELESS_SERVICE(index)    (stateless_services_ref_tbl[index])
-extern const struct service_t *stateless_services_ref_tbl[];
+extern struct service_t *stateless_services_ref_tbl[];
 
 uint32_t tfm_spm_client_psa_framework_version(void)
 {
