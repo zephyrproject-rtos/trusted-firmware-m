@@ -149,29 +149,6 @@ set(FORWARD_PROT_MSG                    OFF         CACHE BOOL      "Whether to 
 set(TFM_PARTITION_FIRMWARE_UPDATE       OFF         CACHE BOOL      "Enable firmware update partition")
 set(TFM_FWU_BOOTLOADER_LIB              "mcuboot"   CACHE STRING    "Bootloader configure file for Firmware Update partition")
 
-################################## Tests #######################################
-
-set(TFM_INTERACTIVE_TEST                OFF         CACHE BOOL      "Enable interactive tests")
-set(TFM_PERIPH_ACCESS_TEST              OFF         CACHE BOOL      "Enable peripheral access tests")
-
-set(PS_TEST_NV_COUNTERS                 ON          CACHE BOOL      "Use the test NV counters to test Protected Storage rollback scenarios")
-
-set(TFM_CRYPTO_TEST_ALG_CBC             ON          CACHE BOOL      "Test CBC cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_CCM             ON          CACHE BOOL      "Test CCM cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_CFB             ON          CACHE BOOL      "Test CFB cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_ECB             ON          CACHE BOOL      "Test ECB cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_CTR             ON          CACHE BOOL      "Test CTR cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_OFB             ON          CACHE BOOL      "Test OFB cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_GCM             ON          CACHE BOOL      "Test GCM cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_SHA_512         ON          CACHE BOOL      "Test SHA-512 cryptography algorithm")
-set(TFM_CRYPTO_TEST_HKDF                ON          CACHE BOOL      "Test the HKDF key derivation algorithm")
-set(TFM_CRYPTO_TEST_ECDH                ON          CACHE BOOL      "Test the ECDH key agreement algorithm")
-set(TFM_FWU_TEST_REQUEST_REBOOT         OFF         CACHE BOOL      "Test psa_fwu_request_reboot")
-set(TFM_FWU_TEST_WRITE_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_write with data block NULL")
-set(TFM_FWU_TEST_QUERY_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_query with info NULL")
-
-set(ATTEST_TEST_GET_PUBLIC_KEY          OFF         CACHE BOOL      "Require to retrieve Initial Attestation public in runtime for test purpose")
-
 ################################## Dependencies ################################
 
 set(MBEDCRYPTO_PATH                     "DOWNLOAD"  CACHE PATH      "Path to Mbed Crypto (or DOWNLOAD to fetch automatically")

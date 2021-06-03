@@ -36,20 +36,6 @@ set(TFM_PARTITION_FIRMWARE_UPDATE       OFF         CACHE BOOL      "Enable firm
 
 set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audit Log partition")
 
-################################## Tests #######################################
-
-# TFM_CRYPTO_TEST_ALG_CCM is the only test mode left enabled, to go with the
-# reduced crypto config
-set(TFM_CRYPTO_TEST_ALG_CBC             OFF         CACHE BOOL      "Test CBC cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_ECB             OFF         CACHE BOOL      "Test ECB cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_CTR             OFF         CACHE BOOL      "Test CTR cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_OFB             OFF         CACHE BOOL      "Test OFB cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_GCM             OFF         CACHE BOOL      "Test GCM cryptography mode")
-set(TFM_CRYPTO_TEST_ALG_SHA_512         OFF         CACHE BOOL      "Test SHA-512 cryptography algorithm")
-set(TFM_CRYPTO_TEST_HKDF                OFF         CACHE BOOL      "Test the HKDF key derivation algorithm")
-set(TFM_CRYPTO_TEST_ECDH                OFF         CACHE BOOL      "Test the ECDH key agreement algorithm")
-
 ################################## Dependencies ################################
 
 set(TFM_MBEDCRYPTO_CONFIG_PATH          "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_small.h" CACHE PATH "Config to use for Mbed Crypto")
