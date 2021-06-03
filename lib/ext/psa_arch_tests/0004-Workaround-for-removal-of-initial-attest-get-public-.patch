@@ -1,0 +1,78 @@
+From d2a1b0816667392b771193abfa532deb24699204 Mon Sep 17 00:00:00 2001
+From: David Hu <david.hu@arm.com>
+Date: Thu, 3 Jun 2021 15:03:33 +0800
+Subject: [PATCH] Workaround for removal of initial attest get public key API
+
+TF-M self-defined API of getting initial attestation public key has been
+removed to optimize initial attestation interface and implementation.
+
+Attestation test suite relies on get public key API. Add a workaround to
+enable attestation test suite to fetch Initial Attestation public key.
+
+Signed-off-by: David Hu <david.hu@arm.com>
+---
+ api-tests/CMakeLists.txt                      |  4 ++++
+ .../pal_attestation_crypto.c                  | 23 +++++++++++++++----
+ 2 files changed, 22 insertions(+), 5 deletions(-)
+
+diff --git a/api-tests/CMakeLists.txt b/api-tests/CMakeLists.txt
+index 07f78fe..06d9207 100644
+--- a/api-tests/CMakeLists.txt
++++ b/api-tests/CMakeLists.txt
+@@ -472,6 +472,10 @@ endif()
+ 
+ # Build PAL NSPE LIB
+ include(${PSA_ROOT_DIR}/platform/targets/${TARGET}/target.cmake)
++# Import dummy Initial Attestation public key from TF-M for test
++if (${SUITE} STREQUAL "INITIAL_ATTESTATION")
++    target_sources(${PSA_TARGET_PAL_NSPE_LIB} PRIVATE ${CMAKE_SOURCE_DIR}/platform/ext/common/template/tfm_initial_attest_pub_key.c)
++endif()
+ # Build VAL NSPE LIB
+ #add_definitions(-DVAL_NSPE_BUILD)
+ include(${PSA_ROOT_DIR}/val/val_nspe.cmake)
+diff --git a/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c b/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
+index 7f748c2..a45355e 100644
+--- a/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
++++ b/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
+@@ -17,9 +17,14 @@
+ 
+ #include "pal_attestation_crypto.h"
+ 
+-static uint32_t         public_key_registered;
++static uint32_t         public_key_registered = 0;
+ static psa_key_handle_t public_key_handle;
+ 
++/* Dummy Initial Attestation public key exported by TF-M for test */
++extern const psa_ecc_family_t initial_attest_curve_type;
++extern const uint8_t initial_attest_pub_key[];
++extern const uint32_t initial_attest_pub_key_size;
++
+ static inline struct q_useful_buf_c useful_buf_head(struct q_useful_buf_c buf,
+                                                   size_t amount)
+ {
+@@ -201,10 +206,18 @@ static int32_t pal_attest_get_public_key(uint8_t *public_key_buff, size_t public
+     memcpy(public_key_buff, (void *)&attest_public_key, *public_key_len);
+     status = PSA_SUCCESS;
+ #else
+-    status = tfm_initial_attest_get_public_key(public_key_buff,
+-                                               public_key_buf_size,
+-                                               public_key_len,
+-                                               elliptic_curve_type);
++    if (initial_attest_curve_type != PSA_ECC_CURVE_SECP256R1)
++        return PAL_ATTEST_ERR_KEY_FAIL;
++
++    if (public_key_buf_size < initial_attest_pub_key_size)
++        return PAL_ATTEST_ERR_SMALL_BUFFER;
++
++    memcpy(public_key_buff, initial_attest_pub_key,
++           initial_attest_pub_key_size);
++    *public_key_len = initial_attest_pub_key_size;
++    *elliptic_curve_type = initial_attest_curve_type;
++
++    status = PSA_SUCCESS;
+ #endif
+ 
+     return status;
+-- 
+2.25.1
+
