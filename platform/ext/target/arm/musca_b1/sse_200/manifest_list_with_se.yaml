@@ -165,7 +165,7 @@
       "short_name": "TFM_SP_SLIH_TEST",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_slih_test_service/tfm_slih_test_service.yaml",
       "source_path": "${TFM_TEST_PATH}",
-      "conditional": "TFM_ENABLE_SLIH_TEST",
+      "conditional": "TEST_NS_SLIH_IRQ",
       "version_major": 0,
       "version_minor": 1,
       "linker_pattern": {
@@ -179,7 +179,7 @@
       "short_name": "TFM_SP_FLIH_TEST",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_flih_test_service/tfm_flih_test_service.yaml",
       "source_path": "${TFM_TEST_PATH}",
-      "conditional": "TFM_ENABLE_FLIH_TEST",
+      "conditional": "TEST_NS_FLIH_IRQ",
       "version_major": 0,
       "version_minor": 1,
       "linker_pattern": {

@@ -76,7 +76,7 @@
 #define FLASH_AREA_SCRATCH_OFFSET       (FLASH_AREA_BL2_NOHDP_OFFSET+FLASH_AREA_BL2_NOHDP_SIZE)
 #define FLASH_AREA_SCRATCH_SIZE         (0x2000)
 /* according to test flash layout can change */
-#if defined(FLASH_LAYOUT_FOR_TEST) || defined(TEST_FRAMEWORK_S) || defined(TEST_FRAMEWORK_NS)
+#if defined(FLASH_LAYOUT_FOR_TEST)
 /* Non Volatile Counters definitions */
 #define FLASH_NV_COUNTERS_SECTOR_SIZE      (0x1000)
 /* fix me with overwrite scratch is not required */

@@ -49,3 +49,34 @@ endif()
 
 # Load defaults, setting options not already set
 include(config/config_default.cmake)
+
+# Load TF-M test suites setting
+if (TEST_S OR
+    TEST_NS OR
+    TEST_NS_ATTESTATION OR
+    TEST_NS_T_COSE OR
+    TEST_NS_QCBOR OR
+    TEST_NS_AUDIT OR
+    TEST_NS_CORE OR
+    TEST_NS_CRYPTO OR
+    TEST_NS_ITS OR
+    TEST_NS_PS OR
+    TEST_NS_PLATFORM OR
+    TEST_NS_FWU OR
+    TEST_NS_IPC OR
+    TEST_NS_SLIH_IRQ OR
+    TEST_NS_FLIH_IRQ OR
+    TEST_NS_MULTI_CORE OR
+    TEST_S_ATTESTATION OR
+    TEST_S_AUDIT OR
+    TEST_S_CRYPTO OR
+    TEST_S_ITS OR
+    TEST_S_PS OR
+    TEST_S_PLATFORM OR
+    TEST_S_FWU OR
+    TEST_S_IPC)
+
+    # TFM_TEST is an internal cmake temporary value to manage tf-m-tests source
+    set(TFM_TEST ON)
+    include(${TFM_TEST_REPO_PATH}/test/config/set_config.cmake)
+endif()

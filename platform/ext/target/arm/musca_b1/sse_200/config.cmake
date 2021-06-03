@@ -47,9 +47,9 @@ set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_SOURCE_DIR}/platform/ext/target/
 set(PSA_API_TEST_TARGET                 "musca_b1"   CACHE STRING    "Target to use when building the PSA API tests")
 
 if(TFM_PSA_API)
-    if (TFM_ENABLE_FLIH_TEST)
+    if (TEST_NS_FLIH_IRQ)
         message(FATAL_ERROR "FLIH testing has not been supported!")
     endif()
 
-    set(TFM_ENABLE_SLIH_TEST      ON           CACHE BOOL      "Enable SLIH testing")
+    set(TEST_NS_SLIH_IRQ      ON           CACHE BOOL      "Enable SLIH testing")
 endif()

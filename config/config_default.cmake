@@ -151,8 +151,6 @@ set(TFM_FWU_BOOTLOADER_LIB              "mcuboot"   CACHE STRING    "Bootloader 
 ################################## Tests #######################################
 
 set(TFM_INTERACTIVE_TEST                OFF         CACHE BOOL      "Enable interactive tests")
-set(TFM_ENABLE_SLIH_TEST                OFF         CACHE BOOL      "Enable Second-Level Interrupt Handling tests")
-set(TFM_ENABLE_FLIH_TEST                OFF         CACHE BOOL      "Enable First-Level Interrupt Handling tests")
 set(TFM_PERIPH_ACCESS_TEST              OFF         CACHE BOOL      "Enable peripheral access tests")
 
 set(PS_TEST_NV_COUNTERS                 ON          CACHE BOOL      "Use the test NV counters to test Protected Storage rollback scenarios")
@@ -168,7 +166,6 @@ set(TFM_CRYPTO_TEST_ECDH                ON          CACHE BOOL      "Test the EC
 set(TFM_FWU_TEST_REQUEST_REBOOT         OFF         CACHE BOOL      "Test psa_fwu_request_reboot")
 set(TFM_FWU_TEST_WRITE_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_write with data block NULL")
 set(TFM_FWU_TEST_QUERY_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_query with info NULL")
-set(TFM_FWU_TEST_SECURE                 OFF         CACHE BOOL      "Enable the secure firmware update tests")
 
 set(ATTEST_TEST_GET_PUBLIC_KEY          OFF         CACHE BOOL      "Require to retrieve Initial Attestation public in runtime for test purpose")
 
