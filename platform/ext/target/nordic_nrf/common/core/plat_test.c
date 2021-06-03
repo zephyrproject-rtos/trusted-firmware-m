@@ -155,25 +155,23 @@ void TIMER1_Handler(void)
 
 uint32_t pal_nvmem_get_addr(void)
 {
-    static bool psa_scratch_initialized = false;
     static __ALIGN(4) uint8_t __psa_scratch[PSA_TEST_SCRATCH_AREA_SIZE];
+#ifdef NRF_TRUSTZONE_NONSECURE
+    static bool psa_scratch_initialized = false;
 
-    /* The POWER/RESET peripherals are defined as non-secure, so
-     * the secure domain must access the non-secure address
-     */
-    uint32_t reset_reason;
-    #if NRF_POWER_HAS_RESETREAS
-        reset_reason = nrf_power_resetreas_get(NRF_POWER_NS);
-    #else
-        reset_reason = nrf_reset_resetreas_get(NRF_RESET_NS);
-    #endif
+    if (!psa_scratch_initialized) {
+        uint32_t reset_reason = nrfx_reset_reason_get();
+        nrfx_reset_reason_clear(reset_reason);
 
-    if (!psa_scratch_initialized && (reset_reason == 0)){
-        /* PSA API tests expect this area to be initialized to all 0xFFs after a
-         * power-on reset.
-         */
-        memset(__psa_scratch, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
+        int is_pinreset = reset_reason & NRFX_RESET_REASON_RESETPIN_MASK;
+        if ((reset_reason == 0) || is_pinreset){
+            /* PSA API tests expect this area to be initialized to all 0xFFs
+            * after a power-on or pin reset.
+            */
+            memset(__psa_scratch, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
+        }
+        psa_scratch_initialized = true;
     }
-    psa_scratch_initialized = true;
+#endif
     return (uint32_t)__psa_scratch;
 }
