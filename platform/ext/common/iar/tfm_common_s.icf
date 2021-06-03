@@ -164,6 +164,16 @@ keep {block HEAP, block ARM_LIB_HEAP};
 
 define block ER_TFM_DATA          with alignment = 8 {readwrite};
 
+define block ER_PART_RT_POOL      with alignment = 4 {
+    zi section .bss.part_runtime
+};
+
+define block ER_SERV_RT_POOL      with alignment = 4 {
+    zi section .bss.serv_runtime
+};
+
+keep {block ER_PART_RT_POOL, block ER_SERV_RT_POOL};
+
     /**** PSA RoT DATA start here */
     /*
      * This empty, zero long execution region is here to mark the start address
@@ -314,6 +324,10 @@ define block PRIV_DATA with fixed order {
     overlay HEAP_OVL,
 
     block ER_TFM_DATA,
+
+    block ER_PART_RT_POOL,
+
+    block ER_SERV_RT_POOL,
 
     /**** PSA RoT DATA start here */
     /*
