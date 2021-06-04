@@ -40,6 +40,16 @@ MEMORY
 #else
 #define VENEERS() \
     /* \
+     * We need a dummy section to "reset" the location counter to FLASH if the \
+     * previous section was > RAM. Not sure why. This avoids the error \
+     * "ERROR: CMSE stub ... too far ... from destination" Make a dummy  \
+     * assignment so the section is not optimized away. \
+     */ \
+    .sg_start_dummy : ALIGN(4) \
+    { \
+        SG_START_DUMMY_UNUSED = .; \
+    } > FLASH \
+    /* \
      * Place the CMSE Veneers (containing the SG instructions) in a correctly \
      * aligned region so that the SAU can programmed to just set this region as \
      * Non-Secure Callable. \
@@ -65,6 +75,22 @@ MEMORY
  \
     ASSERT ((Load$$LR$$LR_VENEER$$Limit - Load$$LR$$LR_VENEER$$Base) \
             <= CMSE_VENEER_REGION_SIZE, "Veneer region overflowed")
+#endif
+
+/* For builds without BL2, or when BL2 will be booting a single
+ * combined S and NS image, we force placing the veneers section
+ * at the end of the image (position 3), so as not to waste space
+ * as a result of the nRF veneer section alignment requirements.
+ * For regular builds with BL2 we keep the veneer placement as is
+ * (positions 1 or 2 depending on whether PSA_API_TEST_NS is
+ * defined).
+ */
+#if !defined(BL2) || (MCUBOOT_IMAGE_NUMBER == 1)
+#define VENEER_POS 3
+#elif defined(PSA_API_TEST_NS)
+#define VENEER_POS 1
+#else
+#define VENEER_POS 2
 #endif
 
 __heap_size__  = S_HEAP_SIZE;
@@ -248,7 +274,7 @@ SECTIONS
 
 #endif /* TFM_LVL != 1 */
 
-#ifdef PSA_API_TEST_NS
+#if VENEER_POS == 1
 VENEERS()
 #endif
 
@@ -276,7 +302,7 @@ VENEERS()
 
     } > FLASH
 
-#ifndef PSA_API_TEST_NS
+#if VENEER_POS == 2
 VENEERS()
 #endif
 
@@ -593,6 +619,10 @@ VENEERS()
     {
         KEEP(*(.ramfunc))
     } > RAM AT> FLASH
+#endif
+
+#if VENEER_POS == 3
+VENEERS()
 #endif
 
     Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;
