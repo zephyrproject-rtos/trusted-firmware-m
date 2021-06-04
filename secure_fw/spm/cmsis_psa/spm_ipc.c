@@ -334,14 +334,6 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
     }
 }
 
-bool tfm_is_partition_privileged(uint32_t partition_idx)
-{
-    uint32_t flags = tfm_spm_partition_get_flags(partition_idx);
-
-    return tfm_spm_partition_get_privileged_mode(flags) ==
-           TFM_PARTITION_PRIVILEGED_MODE;
-}
-
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
     struct service_t *p_serv = connection_services_listhead;
@@ -643,7 +635,8 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
 uint32_t tfm_spm_init(void)
 {
-    uint32_t i, j, part_idx = 0;
+    uint32_t i, j;
+    bool privileged;
     struct partition_t *partition;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
     const struct platform_data_t *platform_data_p;
@@ -671,6 +664,15 @@ uint32_t tfm_spm_init(void)
         p_cmninf = partition->p_ldinf;
 
         /* Init mmio assets */
+        if (p_cmninf->nassets > 0) {
+            if (tfm_spm_partition_get_privileged_mode(p_cmninf->flags) ==
+                TFM_PARTITION_PRIVILEGED_MODE) {
+                privileged = true;
+            } else {
+                privileged = false;
+            }
+        }
+
         p_asset_load = (struct asset_desc_t *)LOAD_INFO_ASSET(p_cmninf);
         for (i = 0; i < p_cmninf->nassets; i++) {
             /* Skip the memory-based asset */
@@ -696,13 +698,13 @@ uint32_t tfm_spm_init(void)
             }
 
 #ifdef TFM_FIH_PROFILE_ON
-            FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, part_idx,
-                     platform_data_p);
+            FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc,
+                     privileged, platform_data_p);
             if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
                 tfm_core_panic();
             }
 #else /* TFM_FIH_PROFILE_ON */
-            if (tfm_spm_hal_configure_default_isolation(part_idx,
+            if (tfm_spm_hal_configure_default_isolation(privileged,
                 platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
                 tfm_core_panic();
             }
@@ -755,8 +757,6 @@ uint32_t tfm_spm_init(void)
         if (tfm_core_thrd_start(pth) != THRD_SUCCESS) {
             tfm_core_panic();
         }
-
-        part_idx++;
     }
 
     /*

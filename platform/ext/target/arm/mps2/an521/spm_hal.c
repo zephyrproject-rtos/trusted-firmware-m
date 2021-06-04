@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,16 +33,15 @@ uint32_t periph_num_count = 0;
 
 #ifdef TFM_FIH_PROFILE_ON
 fih_int tfm_spm_hal_configure_default_isolation(
-                  uint32_t partition_idx,
+                  bool privileged,
                   const struct platform_data_t *platform_data)
 #else /* TFM_FIH_PROFILE_ON */
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                  uint32_t partition_idx,
+                  bool privileged,
                   const struct platform_data_t *platform_data)
 #endif /* TFM_FIH_PROFILE_ON */
 {
     fih_int fih_rc = FIH_FAILURE;
-    bool privileged = tfm_is_partition_privileged(partition_idx);
 #if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1)
     struct mpu_armv8m_region_cfg_t region_cfg;
 #endif

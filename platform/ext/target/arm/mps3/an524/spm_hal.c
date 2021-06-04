@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,11 +33,9 @@
 extern const struct memory_region_limits memory_regions;
 
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                  uint32_t partition_idx,
+                  bool privileged,
                   const struct platform_data_t *platform_data)
 {
-    bool privileged = tfm_is_partition_privileged(partition_idx);
-
     if (!platform_data) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }

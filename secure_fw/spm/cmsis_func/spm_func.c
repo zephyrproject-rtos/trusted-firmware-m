@@ -1224,6 +1224,7 @@ fih_int tfm_spm_partition_init(void)
     int32_t args[4] = {0};
     fih_int fail_cnt = FIH_INT_INIT(0);
     uint32_t idx;
+    bool privileged;
     const struct platform_data_t **platform_data_p;
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
@@ -1235,14 +1236,19 @@ fih_int tfm_spm_partition_init(void)
         platform_data_p = part->platform_data_list;
         if (platform_data_p != NULL) {
             while ((*platform_data_p) != NULL) {
+                if (tfm_is_partition_privileged(idx)) {
+                    privileged = true;
+                } else {
+                    privileged = false;
+                }
 #ifdef TFM_FIH_PROFILE_ON
-                FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc, idx,
-                         *platform_data_p);
+                FIH_CALL(tfm_spm_hal_configure_default_isolation, fih_rc,
+                         privileged, *platform_data_p);
                 if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
                     fail_cnt = fih_int_encode(fih_int_decode(fail_cnt) + 1);
                 }
 #else /* TFM_FIH_PROFILE_ON */
-                if (tfm_spm_hal_configure_default_isolation(idx,
+                if (tfm_spm_hal_configure_default_isolation(privileged,
                             *platform_data_p) != TFM_PLAT_ERR_SUCCESS) {
                     fail_cnt++;
                 }

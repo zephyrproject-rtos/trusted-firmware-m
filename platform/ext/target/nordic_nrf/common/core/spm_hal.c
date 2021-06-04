@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Nordic Semiconductor ASA. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -29,7 +29,7 @@ static uint32_t periph_num_count = 0;
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                  uint32_t partition_idx,
+                  bool privileged,
                   const struct platform_data_t *platform_data)
 {
     if (!platform_data) {
@@ -38,7 +38,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
 
 #if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1)
 
-    if (!tfm_is_partition_privileged(partition_idx)) {
+    if (!privileged) {
         struct mpu_armv8m_region_cfg_t region_cfg;
 
         region_cfg.region_nr = PARTITION_REGION_PERIPH_START + periph_num_count;

@@ -51,20 +51,19 @@ fih_int tfm_spm_hal_setup_isolation_hw(void);
 
 /**
  * \brief Configure peripherals for a partition based on the platform data and
- *        partition index from the DB
+ *        partition privilege
  *
  * This function is called during partition initialisation (before calling the
  * init function for the partition)
  *
- * \param[in] partition_idx    The index of the partition that this peripheral
- *                             is assigned to.
+ * \param[in] privileged       Whether the partition is privileged.
  * \param[in] platform_data    The platform fields of the partition DB record to
  *                             be used for configuration.
  *
  * \return Returns values as specified by FIH specific platform error code
  */
 fih_int tfm_spm_hal_configure_default_isolation(
-                 uint32_t partition_idx,
+                 bool privileged,
                  const struct platform_data_t *platform_data);
 /**
  * \brief Configures the system debug properties.
@@ -106,20 +105,19 @@ enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void);
 
 /**
  * \brief Configure peripherals for a partition based on the platform data and
- *        partition index from the DB
+ *        partition privilege
  *
  * This function is called during partition initialisation (before calling the
  * init function for the partition)
  *
- * \param[in] partition_idx    The index of the partition that this peripheral
- *                             is assigned to.
+ * \param[in] privileged       Whether the partition is privileged.
  * \param[in] platform_data    The platform fields of the partition DB record to
  *                             be used for configuration.
  *
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                 uint32_t partition_idx,
+                 bool priviledged,
                  const struct platform_data_t *platform_data);
 /**
  * \brief Configures the system debug properties.
