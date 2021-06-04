@@ -176,32 +176,23 @@ SECTIONS
 {% endfor %}
     /**** APPLICATION RoT RO CODE + data ends here */
 
+    .ER_TFM_CODE : ALIGN(4)
+    {
+        *libplatform_s*:*(.text*)
+        *libtfm_spm*:*(.text*)
+
+        *libplatform_s*:*(.rodata*)
+        *libtfm_spm*:*(.rodata*)
+    } > FLASH
+
     /**** Unprivileged Secure code starts here */
     .ER_UNPRIV_CODE : ALIGN(32)
     {
         *(SFN)
-        *armlib*:*(.text*)
-        *armlib*:*(.rodata*)
-        *libtfm_sprt*:*(.text*)
-        *libtfm_sprt*:*(.rodata*)
-        *psa_client.*(.text*)              /* NXP */
-        *psa_client.*(.rodata*)
-        *psa_service.*(.text*)             /* NXP */
-        *psa_service.*(.rodata*)
-        *psa_lifecycle.*(.text*)             /* NXP */
-        *psa_lifecycle.*(.rodata*)
-        . = ALIGN(32);
-    } > FLASH
-    Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.ER_UNPRIV_CODE);
-    Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.ER_UNPRIV_CODE) + SIZEOF(.ER_UNPRIV_CODE);
-
-    .ER_TFM_CODE : ALIGN(4)
-    {
         *(.text*)
 
         KEEP(*(.init))
         KEEP(*(.fini))
-
 
         /* .ctors */
         *crtbegin.o(.ctors)
@@ -220,7 +211,11 @@ SECTIONS
         *(.rodata*)
 
         KEEP(*(.eh_frame*))
+
+        . = ALIGN(32);
     } > FLASH
+    Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.ER_UNPRIV_CODE);
+    Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.ER_UNPRIV_CODE) + SIZEOF(.ER_UNPRIV_CODE);
 
     /* Position tag */
     . = ALIGN(32);

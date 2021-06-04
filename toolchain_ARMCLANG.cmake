@@ -69,6 +69,8 @@ macro(tfm_toolchain_reset_linker_flags)
         --diag_suppress=6314
         # Duplicate input files
         --diag_suppress=6304
+        # Pattern only matches removed unused sections.
+        --diag_suppress=6329
         $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:--fpu=softvfp>
     )
 endmacro()

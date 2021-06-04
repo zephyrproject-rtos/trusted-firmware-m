@@ -119,28 +119,6 @@ SECTIONS
         __zero_table_end__ = .;
     } > FLASH
 
-    .TFM_UNPRIV_CODE : ALIGN(32)
-    {
-        *libc_nano*:*(.text*)
-        *libc_nano*:*(.rodata*)
-        *(SFN)
-        *libgcc*:*(.text*)
-        *libgcc*:*(.rodata*)
-        *libtfm_sprt*:*(.text*)
-        *libtfm_sprt*:*(.rodata*)
-        *psa_client.*(.text*)              /* NXP */
-        *psa_client.*(.rodata*)
-        *psa_service.*(.text*)             /* NXP */
-        *psa_service.*(.rodata*)
-        *psa_lifecycle.*(.text*)             /* NXP */
-        *psa_lifecycle.*(.rodata*)
-        *tfm_log_raw.*(.text*)             /* NXP */
-        *tfm_log_raw.*(.rodata*)
-        . = ALIGN(32);
-    } > FLASH
-    Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
-    Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
-
     /**** Section for holding partition RO load data */
     .TFM_SP_LOAD_LIST : ALIGN(4)
     {
@@ -222,29 +200,11 @@ SECTIONS
 
     .ER_TFM_CODE : ALIGN(4)
     {
-        *(.text*)
+        *libplatform_s*:*(.text*)
+        *libtfm_spm*:*(.text*)
 
-        KEEP(*(.init))
-        KEEP(*(.fini))
-
-
-        /* .ctors */
-        *crtbegin.o(.ctors)
-        *crtbegin?.o(.ctors)
-        *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
-        *(SORT(.ctors.*))
-        *(.ctors)
-
-        /* .dtors */
-         *crtbegin.o(.dtors)
-         *crtbegin?.o(.dtors)
-         *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
-         *(SORT(.dtors.*))
-         *(.dtors)
-
-        *(.rodata*)
-
-        KEEP(*(.eh_frame*))
+        *libplatform_s*:*(.rodata*)
+        *libtfm_spm*:*(.rodata*)
     } > FLASH
 
     /**** Base address of secure data area */
@@ -479,6 +439,36 @@ SECTIONS
 
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
+
+    .TFM_UNPRIV_CODE : ALIGN(32)
+    {
+        *(SFN)
+        *(.text*)
+
+        KEEP(*(.init))
+        KEEP(*(.fini))
+
+        /* .ctors */
+        *crtbegin.o(.ctors)
+        *crtbegin?.o(.ctors)
+        *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+        *(SORT(.ctors.*))
+        *(.ctors)
+
+        /* .dtors */
+         *crtbegin.o(.dtors)
+         *crtbegin?.o(.dtors)
+         *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+         *(SORT(.dtors.*))
+         *(.dtors)
+
+        *(.rodata*)
+
+        KEEP(*(.eh_frame*))
+        . = ALIGN(32);
+    } > FLASH
+    Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
+    Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
 
 #ifdef RAM_VECTORS_SUPPORT
     .ramVectors (NOLOAD) : ALIGN(256)
