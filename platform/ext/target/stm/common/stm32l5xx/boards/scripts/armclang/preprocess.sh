@@ -14,7 +14,14 @@
 # arg1 is the build directory
 # arg2 is the file to preprocess
 # arg3 is output file beeing preprocessed
+# arg4 is optional, it fixes compiler full path if present
+
 function preprocess
 (
-armclang --target=arm-arm-none-eabi -march=armv8-m.main -E -P -xc -I$1 $2 -o $3
+local compiler=armclang
+if [ $# -eq 4 ]; then
+    compiler=$4
+fi
+
+$compiler --target=arm-arm-none-eabi -march=armv8-m.main -E -P -xc -I$1 $2 -o $3
 )
