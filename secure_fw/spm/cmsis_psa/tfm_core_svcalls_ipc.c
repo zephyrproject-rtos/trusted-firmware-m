@@ -158,7 +158,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
         tfm_core_panic();
     }
     switch (svc_number) {
-    case TFM_SVC_HANDLER_MODE:
+    case TFM_SVC_SPM_INIT:
         tfm_arch_clear_fp_status();
         exc_return = tfm_spm_init();
         break;
@@ -177,7 +177,7 @@ __attribute__ ((naked)) void tfm_core_handler_mode(void)
 {
     __ASM volatile("SVC %0           \n"
                    "BX LR            \n"
-                   : : "I" (TFM_SVC_HANDLER_MODE));
+                   : : "I" (TFM_SVC_SPM_INIT));
 }
 
 void tfm_access_violation_handler(void)
