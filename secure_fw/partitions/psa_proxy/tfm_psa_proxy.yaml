@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -30,13 +30,6 @@
     {
       "name": "TFM_ATTEST_GET_TOKEN_SIZE",
       "sid": "0x00000021",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_ATTEST_GET_PUBLIC_KEY",
-      "sid": "0x00000022",
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"

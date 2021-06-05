@@ -275,5 +275,21 @@
         ]
       }
     },
+    {
+      "name": "TFM Initial Attestation Test Service",
+      "short_name": "TFM_ATTEST_TEST_SERVICE",
+      "manifest": "${TFM_TEST_PATH}/test_services/tfm_attest_test_service/tfm_attest_test_service.yaml",
+      "source_path": "${TFM_TEST_PATH}",
+      "tfm_partition_ipc": true,
+      "conditional": "ATTEST_TEST_GET_PUBLIC_KEY",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 273,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_attest_test_service.*"
+         ]
+      }
+    },
   ]
 }

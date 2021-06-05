@@ -162,6 +162,8 @@ set(TFM_FWU_TEST_WRITE_WITH_NULL        OFF         CACHE BOOL      "Test psa_fw
 set(TFM_FWU_TEST_QUERY_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_query with info NULL")
 set(TFM_FWU_TEST_SECURE                 OFF         CACHE BOOL      "Enable the secure firmware update tests")
 
+set(ATTEST_TEST_GET_PUBLIC_KEY          OFF         CACHE BOOL      "Require to retrieve Initial Attestation public in runtime for test purpose")
+
 ################################## Dependencies ################################
 
 set(MBEDCRYPTO_PATH                     "DOWNLOAD"  CACHE PATH      "Path to Mbed Crypto (or DOWNLOAD to fetch automatically")

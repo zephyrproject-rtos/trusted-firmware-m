@@ -13,6 +13,11 @@ if (NOT FORWARD_PROT_MSG)
     set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
     if(CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
         set(PLATFORM_DUMMY_CRYPTO_KEYS      FALSE       CACHE BOOL      "Use dummy crypto keys. Should not be used in production.")
+        # Musca-B1 with OTP enabled is provisioned with a random Initial
+        # Attestation key generated in runtime.
+        # The public key data is not pre-defined and therefore it can only be
+        # retrieved in runtime for test.
+        set(ATTEST_TEST_GET_PUBLIC_KEY      ON          CACHE BOOL      "Require to retrieve Initial Attestation public in runtime for test purpose")
     endif()
     set(MCUBOOT_DATA_SHARING                ON         CACHE BOOL      "Add sharing of application specific data using the same shared data area as for the measured boot")
     set(TFM_PARTITION_FIRMWARE_UPDATE       ON         CACHE BOOL      "Enable firmware update partition")
