@@ -90,6 +90,9 @@ void tfm_spm_hal_get_secure_access_attr(const void *p, size_t s,
 {
     /* Check static memory layout to get memory attributes */
     tfm_get_secure_mem_region_attr(p, s, p_attr);
+#if TFM_LVL >= 2
+    p_attr->is_mpu_enabled = true;
+#endif
 }
 
 void tfm_spm_hal_get_ns_access_attr(const void *p, size_t s,
