@@ -12,11 +12,12 @@ and build the selected configuration as follow.
 
 ``> mkdir build && cd build``
 
-``> cmake .. -DTFM_PLATFORM=stm/nucleo_l552ze_q -DCMAKE_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -G"Unix Makefiles"``
+``> cmake .. -DTFM_PLATFORM=stm/nucleo_l552ze_q -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -G"Unix Makefiles"``
 
 ``> cmake --build ./  -- install``
 
 -------------
 
-*Copyright (c) 2019 STMicroelectronics. All rights reserved.*
+*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2019, STMicroelectronics. All rights reserved.*
 *SPDX-License-Identifier: BSD-3-Clause*
