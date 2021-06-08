@@ -18,6 +18,7 @@ add_library(tfm_partitions INTERFACE)
 # directories of the partitions
 add_library(tfm_partition_defs INTERFACE)
 
+add_subdirectory(spm)
 add_subdirectory(partitions/lib/sprt)
 add_subdirectory(partitions/audit_logging)
 add_subdirectory(partitions/crypto)
@@ -29,7 +30,7 @@ add_subdirectory(partitions/psa_proxy)
 add_subdirectory(partitions/firmware_update)
 add_subdirectory(partitions/tfm_ffm11_partition)
 add_subdirectory(partitions/ns_proxy_partition)
-add_subdirectory(spm)
+add_subdirectory(partitions/idle_partition)
 
 target_include_directories(secure_fw
     INTERFACE

@@ -24,6 +24,7 @@
  * operations.
  */
 #define TFM_SP_NON_SECURE_ID (0)
+#define TFM_SP_IDLE_ID       (1)
 /* A dummy partition for TFM_SP_CORE is created to handle secure partition
  * calls done directly from the core, before NS execution started.
  */
