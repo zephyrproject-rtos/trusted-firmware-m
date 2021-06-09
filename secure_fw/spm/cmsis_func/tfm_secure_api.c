@@ -11,7 +11,7 @@
 
 void tfm_secure_api_error_handler(void)
 {
-    ERROR_MSG("Security violation when calling secure API");
+    SPMLOG_ERRMSG("Security violation when calling secure API\r\n");
     tfm_core_panic();
 }
 

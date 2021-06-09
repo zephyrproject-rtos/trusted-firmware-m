@@ -762,7 +762,7 @@ static enum tfm_status_e tfm_core_check_sfn_req_rules(
 
         if ((id != TFM_SP_CORE_ID) || (tfm_secure_lock != 0)) {
             /* Invalid request during system initialization */
-            ERROR_MSG("Invalid service request during initialization!");
+            SPMLOG_ERRMSG("Invalid service request during initialization!\r\n");
             return TFM_ERROR_NOT_INITIALIZED;
         }
     }
@@ -806,7 +806,7 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
 
     res = tfm_check_sfn_req_integrity(desc_ptr);
     if (res != TFM_SUCCESS) {
-        ERROR_MSG("Invalid service request!");
+        SPMLOG_ERRMSG("Invalid service request!\r\n");
         tfm_secure_api_error_handler();
     }
 
@@ -827,7 +827,7 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
         tfm_spm_partition_set_state(
             desc_ptr->caller_part_idx, SPM_PARTITION_STATE_CLOSED);
         __enable_irq();
-        ERROR_MSG("Unauthorized service request!");
+        SPMLOG_ERRMSG("Unauthorized service request!\r\n");
         tfm_secure_api_error_handler();
     }
 
@@ -835,7 +835,7 @@ enum tfm_status_e tfm_spm_sfn_request_handler(
     if (res != TFM_SUCCESS) {
         /* FixMe: consider possible fault scenarios */
         __enable_irq();
-        ERROR_MSG("Failed to process service request!");
+        SPMLOG_ERRMSG("Failed to process service request!\r\n");
         tfm_secure_api_error_handler();
     }
 
@@ -877,7 +877,7 @@ int32_t tfm_spm_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr)
         /* Unlock errors indicate ctx database corruption or unknown
          * anomalies. Halt execution
          */
-        ERROR_MSG("Secure API error during unlock!");
+        SPMLOG_ERRMSG("Secure API error during unlock!\r\n");
         tfm_secure_api_error_handler();
     }
     return (int32_t)res;
@@ -963,7 +963,7 @@ uint32_t tfm_spm_partition_request_svc_handler(
          * from Handler mode, which is not supported.
          * FixMe: error severity TBD
          */
-        ERROR_MSG("Service request SVC called with MSP active!");
+        SPMLOG_ERRMSG("Service request SVC called with MSP active!\r\n");
         tfm_secure_api_error_handler();
     }
 
@@ -988,7 +988,7 @@ uint32_t tfm_spm_depriv_req_handler(uint32_t *svc_args, uint32_t excReturn)
 
     if (excReturn & EXC_RETURN_STACK_PROCESS) {
         /* FixMe: error severity TBD */
-        ERROR_MSG("Partition request SVC called with PSP active!");
+        SPMLOG_ERRMSG("Partition request SVC called with PSP active!\r\n");
         tfm_secure_api_error_handler();
     }
 
@@ -1048,7 +1048,7 @@ uint32_t tfm_spm_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr)
         /* Partition request SVC called with MSP active.
          * FixMe: error severity TBD
          */
-        ERROR_MSG("Partition request SVC called with MSP active!");
+        SPMLOG_ERRMSG("Partition request SVC called with MSP active!\r\n");
         tfm_secure_api_error_handler();
     }
 
@@ -1057,7 +1057,7 @@ uint32_t tfm_spm_depriv_return_handler(uint32_t *irq_svc_args, uint32_t lr)
         /* Unlock errors indicate ctx database corruption or unknown anomalies
          * Halt execution
          */
-        ERROR_MSG("Secure API error during unlock!");
+        SPMLOG_ERRMSG("Secure API error during unlock!\r\n");
         tfm_secure_api_error_handler();
     }
 

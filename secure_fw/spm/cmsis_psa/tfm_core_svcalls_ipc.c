@@ -115,7 +115,7 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
 #ifdef PLATFORM_SVC_HANDLERS
         return (platform_svc_handlers(svc_num, ctx, lr));
 #else
-        ERROR_MSG("Unknown SVC number requested!");
+        SPMLOG_ERRMSG("Unknown SVC number requested!\r\n");
         return PSA_ERROR_GENERIC_ERROR;
 #endif
     }

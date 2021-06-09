@@ -33,6 +33,7 @@ void tfm_core_panic(void);
 #define TO_CONTAINER(ptr, type, member) \
     (type *)((unsigned long)(ptr) - offsetof(type, member))
 
-#define ERROR_MSG(msg)
+/* FixMe: Replace ERROR_MSG() in platform code with a suitable API */
+#define ERROR_MSG(msg) SPMLOG_ERRMSG(msg "\r\n")
 
 #endif /* __TFM_UTILS_H__ */
