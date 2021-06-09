@@ -802,14 +802,11 @@ static enum tfm_status_e tfm_spm_sfn_request_handler(
         tfm_secure_api_error_handler();
     }
 
-    __disable_irq();
-
     desc_ptr->caller_part_idx = tfm_spm_partition_get_running_partition_idx();
 
     res = tfm_core_check_sfn_parameters(desc_ptr, &iovecs);
     if (res != TFM_SUCCESS) {
         /* The sanity check of iovecs failed. */
-        __enable_irq();
         tfm_secure_api_error_handler();
     }
 
@@ -818,7 +815,6 @@ static enum tfm_status_e tfm_spm_sfn_request_handler(
         /* FixMe: error compartmentalization TBD */
         tfm_spm_partition_set_state(
             desc_ptr->caller_part_idx, SPM_PARTITION_STATE_CLOSED);
-        __enable_irq();
         SPMLOG_ERRMSG("Unauthorized service request!\r\n");
         tfm_secure_api_error_handler();
     }
@@ -826,12 +822,9 @@ static enum tfm_status_e tfm_spm_sfn_request_handler(
     res = tfm_start_partition(desc_ptr, &iovecs, excReturn);
     if (res != TFM_SUCCESS) {
         /* FixMe: consider possible fault scenarios */
-        __enable_irq();
         SPMLOG_ERRMSG("Failed to process service request!\r\n");
         tfm_secure_api_error_handler();
     }
-
-    __enable_irq();
 
     return res;
 }
