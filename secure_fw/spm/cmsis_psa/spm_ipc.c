@@ -283,20 +283,6 @@ static uint32_t get_partition_idx(uint32_t partition_id)
     return SPM_INVALID_PARTITION_IDX;
 }
 
-/**
- * \brief Get the flags associated with a partition
- *
- * \param[in] partition_idx     Partition index
- *
- * \return Flags associated with the partition
- *
- * \note This function doesn't check if partition_idx is valid.
- */
-static uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx)
-{
-    return g_spm_partition_db.partitions[partition_idx].p_ldinf->flags;
-}
-
 #if TFM_LVL != 1
 /**
  * \brief Change the privilege mode for partition thread mode.
