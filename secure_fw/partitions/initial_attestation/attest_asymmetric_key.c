@@ -152,8 +152,6 @@ attest_get_signing_key_handle(psa_key_handle_t *handle)
 static enum psa_attest_err_t attest_calc_instance_id(void)
 {
     psa_status_t crypto_res;
-    enum psa_attest_err_t attest_res;
-    psa_ecc_family_t psa_curve;
     psa_hash_operation_t hash = psa_hash_operation_init();
 
     if (!attestation_public_key_len) {
