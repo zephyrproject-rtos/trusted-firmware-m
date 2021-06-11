@@ -39,7 +39,6 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        ext/common/template/attest_hal.c
         $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_ps.c>
         $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_its.c>
         ext/common/tfm_platform.c
