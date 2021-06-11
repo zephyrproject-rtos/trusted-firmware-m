@@ -50,6 +50,24 @@ class TemplateLoader(BaseLoader):
             source = f.read()
         return source, template, False
 
+def manifest_validation(partition_manifest):
+    """
+    This function validates FF-M compliance for partition manifest, and sets
+    default values for optional attributes.
+    More validation items will be added.
+    """
+    # Service FF-M manifest validation
+    if 'services' not in partition_manifest.keys():
+        return partition_manifest
+
+    for service in partition_manifest['services']:
+        if 'version' not in service.keys():
+            service['version'] = 1
+        if 'version_policy' not in service.keys():
+            service['version_policy'] = "STRICT"
+
+    return partition_manifest
+
 def process_partition_manifests(manifest_list_files):
     """
     Parse the input manifest, generate the data base for genereated files
@@ -97,7 +115,7 @@ def process_partition_manifests(manifest_list_files):
         # Replace environment variables in the manifest path
         manifest_path = os.path.expandvars(manifest_item['manifest'])
         file = open(manifest_path)
-        manifest = yaml.safe_load(file)
+        manifest = manifest_validation(yaml.safe_load(file))
         file.close()
 
         manifest_dir, manifest_name = os.path.split(manifest_path)
