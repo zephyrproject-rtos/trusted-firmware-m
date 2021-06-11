@@ -322,7 +322,14 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
+    uint32_t i = 0;
     struct service_t *p_serv = connection_services_listhead;
+
+    for (i = 0; i < STATIC_HANDLE_NUM_LIMIT; i++) {
+        if (stateless_services_ref_tbl[i]->p_ldinf->sid == sid) {
+            return stateless_services_ref_tbl[i];
+        }
+    }
 
     while (p_serv && p_serv->p_ldinf->sid != sid) {
         p_serv = TO_CONTAINER(BI_LIST_NEXT_NODE(&p_serv->list),

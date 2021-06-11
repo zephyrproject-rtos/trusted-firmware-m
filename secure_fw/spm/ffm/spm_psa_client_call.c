@@ -66,6 +66,11 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
+    /* It is a PROGRAMMER ERROR if connecting to a stateless service. */
+    if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+    }
+
     /*
      * It is a PROGRAMMER ERROR if the caller is not authorized to access the
      * RoT Service.
@@ -80,11 +85,6 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
      */
     if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
-    }
-
-    /* It is a PROGRAMMER ERROR if connecting to a stateless service. */
-    if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
     if (ns_caller) {
