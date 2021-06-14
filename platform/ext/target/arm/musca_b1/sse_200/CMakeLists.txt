@@ -87,6 +87,7 @@ target_include_directories(platform_s
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox>
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/cc312
 )
 
 target_sources(platform_s
@@ -189,6 +190,7 @@ if(BL2)
         PUBLIC
             partition
             Device/Include
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/cc312
         PRIVATE
             .
             CMSIS_Driver/Config

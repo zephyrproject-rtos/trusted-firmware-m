@@ -69,6 +69,7 @@ target_include_directories(platform_s
         partition
         services/include
         Libraries
+        cc312
 )
 
 target_sources(platform_s
@@ -149,6 +150,7 @@ if(BL2)
             partition
             Device/Include
             Libraries
+            cc312
         PRIVATE
             .
             CMSIS_Driver/Config

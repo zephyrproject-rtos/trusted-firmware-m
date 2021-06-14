@@ -84,19 +84,6 @@ if(BL2)
             $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
             $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
     )
-
-    #Include platform specific defs (registers etc)
-    target_include_directories(bl2_cc312
-        BEFORE
-        PUBLIC
-            ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
-    )
-
-    target_include_directories(cc312_cdmpu
-        BEFORE
-        INTERFACE
-            ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
-    )
 endif()
 
 ############################ Crypto Service ####################################
@@ -163,11 +150,4 @@ target_compile_options(crypto_service_mbedcrypto
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
-)
-
-#Include platform specific defs (registers etc)
-target_include_directories(crypto_service_cc312
-    BEFORE
-    PUBLIC
-    ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
 )

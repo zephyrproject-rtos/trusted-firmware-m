@@ -13,6 +13,7 @@ set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 target_include_directories(platform_region_defs
     INTERFACE
         partition
+        cc312
 )
 
 #========================= Platform common defs ===============================#
@@ -48,6 +49,7 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
+        cc312
 )
 
 target_sources(platform_s
@@ -100,6 +102,7 @@ target_include_directories(platform_bl2
     PUBLIC
         partition
         Device/Include
+        cc312
     PRIVATE
         .
         CMSIS_Driver/Config
