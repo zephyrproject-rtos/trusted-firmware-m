@@ -80,7 +80,6 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
         CMSIS_Driver/Driver_QSPI_Flash.c
         CMSIS_Driver/Driver_Flash_MRAM.c
         CMSIS_Driver/Driver_MPC.c
@@ -142,7 +141,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
             boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c

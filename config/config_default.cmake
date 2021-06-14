@@ -58,7 +58,6 @@ set(DEBUG_AUTHENTICATION                CHIP_DEFAULT CACHE STRING   "Debug authe
 set(SECURE_UART1                        OFF         CACHE BOOL      "Enable secure UART1")
 
 set(CRYPTO_HW_ACCELERATOR               OFF         CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
-set(CRYPTO_HW_ACCELERATOR_OTP_STATE     OFF         CACHE STRING    "Whether to enable the crypto hardware accelerator OTP memory on supported platforms (Set to PROVISIONING to enable OTP provisioning)")
 
 set(OTP_NV_COUNTERS_RAM_EMULATION       OFF         CACHE BOOL      "Enable OTP/NV_COUNTERS emulation in RAM. Has no effect on non-default implementations of the OTP and NV_COUNTERS")
 

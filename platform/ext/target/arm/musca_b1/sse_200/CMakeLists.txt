@@ -97,7 +97,6 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
         $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_QSPI_Flash.c>
         $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c>
         CMSIS_Driver/Driver_MPC.c
@@ -117,7 +116,6 @@ target_sources(platform_s
         spm_hal.c
         tfm_interrupts.c
         tfm_hal_isolation.c
-        attest_hal.c
         target_cfg.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/uart_pl011_drv.c
@@ -181,7 +179,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
             boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c

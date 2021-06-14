@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,8 +14,7 @@
 #include "flash_layout.h"
 #include "bootutil/fault_injection_hardening.h"
 
-#if defined(CRYPTO_HW_ACCELERATOR) || \
-    defined(CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING)
+#ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #endif
 
@@ -67,24 +66,6 @@ int32_t boot_platform_init(void)
 
     (void)fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
-
-/* This is a workaround to program the TF-M related cryptographic keys
- * to CC312 OTP memory. This functionality is independent from secure boot,
- * this is usually done on the factory floor during chip manufacturing.
- */
-#ifdef CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING
-    printf("OTP provisioning started.\r\n");
-    result = crypto_hw_accelerator_otp_provisioning();
-    if (result) {
-        printf("OTP provisioning FAILED: 0x%X\r\n", result);
-        return 1;
-    } else {
-        printf("OTP provisioning succeeded. TF-M won't be loaded.\r\n");
-
-        /* We don't need to boot - the only aim is provisioning. */
-        while (1);
-    }
-#endif /* CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING */
 
     return 0;
 }
