@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,6 +11,10 @@ cmake_policy(SET CMP0079 NEW)
 add_library(mcuboot_config INTERFACE)
 
 set(MCUBOOT_KEY_ENC "${MCUBOOT_PATH}/enc-rsa2048-pub.pem" CACHE FILEPATH "Path to key with which to encrypt binary")
+
+if (CONFIG_TFM_BOOT_STORE_MEASUREMENTS)
+    set(MCUBOOT_MEASURED_BOOT ON)
+endif()
 
 add_subdirectory("${MCUBOOT_PATH}/boot/bootutil" bootutil)
 

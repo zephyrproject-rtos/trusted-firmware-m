@@ -94,7 +94,7 @@ tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT MCUBOOT_DATA_SHARING)
 
 tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 # PS only uses the platform partition when PS_ROLLBACK_PROTECTION is ON, but
-# the dependency in the manifest file means the dependency is unconditional 
+# the dependency in the manifest file means the dependency is unconditional
 tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_PLATFORM)
 tfm_invalid_config(PS_ROLLBACK_PROTECTION AND NOT PS_ENCRYPTION)
 
