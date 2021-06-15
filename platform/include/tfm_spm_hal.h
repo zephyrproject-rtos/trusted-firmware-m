@@ -9,12 +9,19 @@
 #define __TFM_SPM_HAL_H__
 
 #include <stdint.h>
+#include "cmsis.h"
 #include "fih.h"
 #include "tfm_secure_api.h"
 #ifdef TFM_MULTI_CORE_TOPOLOGY
 #include "tfm_multi_core.h"
 #endif
 #include "tfm_plat_defs.h"
+
+/*
+ * Quantized default IRQ priority, the value is:
+ * (Number of configurable priority) / 4: (1UL << __NVIC_PRIO_BITS) / 4
+ */
+#define DEFAULT_IRQ_PRIORITY    (1UL << (__NVIC_PRIO_BITS - 2))
 
 /**
  * \brief Holds peripheral specific data fields required to manage the
@@ -195,16 +202,17 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void);
  * \brief Set the priority of a secure IRQ
  *
  * \param[in] irq_line    The IRQ to set the priority for. Might be less than 0
- * \param[in] priority    The priority to set. [0..255]
  *
  * \details This function sets the priority for the IRQ passed in the parameter.
- *          The precision of the priority value might be adjusted to match the
- *          available priority bits in the underlying target platform.
  *
  * \return Returns values as specified by the \ref tfm_plat_err_t
+ *
+ * \note The priority value must be less than the value of PendSV (0x80) and
+ *       greater than SVC (0x0).
+ *       Platforms are responsible for the priority values assignment to each
+ *       IRQ based on their platforms and use cases.
  */
-enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line,
-                                                        uint32_t priority);
+enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line);
 
 /**
  * \brief Clears a pending IRQ

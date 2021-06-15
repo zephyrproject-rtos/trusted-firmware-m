@@ -32,7 +32,6 @@ See the following example:
         {
           "source": "TFM_IRQ_LINE_TIMER_1",
           "signal": "TIMER_1"
-          "tfm_irq_priority": 64,
         }
       ],
 
@@ -54,10 +53,6 @@ An IRQ handler is defined by the following nodes:
   is important the macro name matches the platform's handler function for that
   IRQ source.
 - ``signal``: The name of the signal for this IRQ.
-- ``tfm_irq_priority``: The priority of the IRQ. This number must be in the
-  range [0-255] inclusive. Please note that some of the less significant bits of
-  this value might be dropped based on the number of priority bits implemented
-  in the platform.
 
 .. important::
 
@@ -79,14 +74,16 @@ An IRQ handler is defined by the following nodes:
 
   ``signal`` and ``source`` are mandatory.
 
-  ``tfm_irq_priority`` is optional. If ``tfm_irq_priority`` is not set for an
-  IRQ, the default is value is ``TFM_DEFAULT_SECURE_IRQ_PRIORITY``.
-
 If an IRQ handler is registered, TF-M will:
 
 - Set the IRQ with number or macro to target secure state
-- Set the priority of IRQ with number or macro to ``tfm_irq_priority`` or to
-  the default.
+- Set the priority of IRQ, the number is platform dependent. Platforms can
+  decide the priorities of each IRQ.
+
+.. Note::
+
+  The priority value for IRQ must be smaller than the value of PendSV, which is
+  0x80.
 
 TF-M configures the interrupt lines to be disabled by default. Interrupts for a
 service can be enabled by the secure service by calling

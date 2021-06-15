@@ -10,8 +10,6 @@
 
 #include "psa/service.h"
 
-#define TFM_DEFAULT_SECURE_IRQ_PRIOTITY 128
-
 struct irq_load_info_t {
     uint32_t source;                       /* IRQ source (number/index)       */
     uint32_t flih_func;                    /* FLIH function - 0 if SLIH       */

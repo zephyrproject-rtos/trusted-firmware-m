@@ -113,8 +113,7 @@ static fih_int tfm_core_init(void)
 
     for (i = 0; i < tfm_core_irq_signals_count; ++i) {
         plat_err = tfm_spm_hal_set_secure_irq_priority(
-                                          tfm_core_irq_signals[i].irq_line,
-                                          tfm_core_irq_signals[i].irq_priority);
+                                          tfm_core_irq_signals[i].irq_line);
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
             FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
         }

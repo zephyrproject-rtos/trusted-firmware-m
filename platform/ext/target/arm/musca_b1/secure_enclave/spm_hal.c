@@ -54,11 +54,9 @@ void tfm_spm_hal_wait_for_ns_cpu_ready(void)
     }
 }
 
-enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line,
-                                                        uint32_t priority)
+enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line)
 {
-    uint32_t quantized_priority = priority >> (8U - __NVIC_PRIO_BITS);
-    NVIC_SetPriority(irq_line, quantized_priority);
+    NVIC_SetPriority(irq_line, DEFAULT_IRQ_PRIORITY);
 
     return TFM_PLAT_ERR_SUCCESS;
 }

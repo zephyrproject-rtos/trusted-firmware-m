@@ -120,7 +120,6 @@ Here is a manifest reference example for the IPC model, please refer to
       {
         "source": "TFM_A_IRQ",
         "signal": "SPM_CORE_A_IRQ",
-        "tfm_irq_priority": 64,
       }
     ],
     "linker_pattern": {
