@@ -628,7 +628,7 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
 uint32_t tfm_spm_init(void)
 {
-    uint32_t i, j;
+    uint32_t i;
     bool privileged;
     struct partition_t *partition;
     struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;

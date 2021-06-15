@@ -190,7 +190,7 @@ void load_irqs_assuredly(struct partition_t *p_partition)
 
         if (tfm_spm_hal_set_irq_target_state(p_irq_info[i].source,
                                              TFM_IRQ_TARGET_STATE_SECURE)
-                                                      != TFM_PLAT_ERR_SUCCESS) {
+                                               != TFM_IRQ_TARGET_STATE_SECURE) {
             tfm_core_panic();
         }
 

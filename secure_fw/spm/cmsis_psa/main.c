@@ -10,6 +10,7 @@
 #include "compile_check_defs.h"
 #include "region.h"
 #include "spm_ipc.h"
+#include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
 #include "tfm_nspm.h"
 #include "tfm_spm_hal.h"
