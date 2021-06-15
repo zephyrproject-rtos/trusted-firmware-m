@@ -25,6 +25,7 @@ target_sources(tfm_psa_rot_partition_crypto
         crypto_aead.c
         crypto_asymmetric.c
         crypto_key_derivation.c
+        crypto_rng.c
 )
 
 # The generated sources
@@ -61,6 +62,7 @@ target_link_libraries(tfm_psa_rot_partition_crypto
 )
 target_compile_definitions(tfm_psa_rot_partition_crypto
     PUBLIC
+        $<$<BOOL:${CRYPTO_RNG_MODULE_DISABLED}>:TFM_CRYPTO_RNG_MODULE_DISABLED>
         $<$<BOOL:${CRYPTO_KEY_MODULE_DISABLED}>:TFM_CRYPTO_KEY_MODULE_DISABLED>
         $<$<BOOL:${CRYPTO_AEAD_MODULE_DISABLED}>:TFM_CRYPTO_AEAD_MODULE_DISABLED>
         $<$<BOOL:${CRYPTO_MAC_MODULE_DISABLED}>:TFM_CRYPTO_MAC_MODULE_DISABLED>
@@ -79,6 +81,7 @@ target_compile_definitions(tfm_psa_rot_partition_crypto
 
 message(STATUS "---------- Display crypto configuration - start --------------")
 
+message(STATUS "CRYPTO_RNG_MODULE_DISABLED is set to ${CRYPTO_RNG_MODULE_DISABLED}")
 message(STATUS "CRYPTO_KEY_MODULE_DISABLED is set to ${CRYPTO_KEY_MODULE_DISABLED}")
 message(STATUS "CRYPTO_AEAD_MODULE_DISABLED is set to ${CRYPTO_AEAD_MODULE_DISABLED}")
 message(STATUS "CRYPTO_MAC_MODULE_DISABLED is set to ${CRYPTO_MAC_MODULE_DISABLED}")

@@ -1378,7 +1378,7 @@ psa_status_t psa_key_derivation_key_agreement(
 psa_status_t psa_generate_random(uint8_t *output,
                                  size_t output_size)
 {
-#ifdef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
+#ifdef TFM_CRYPTO_RNG_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t status;
@@ -1402,7 +1402,7 @@ psa_status_t psa_generate_random(uint8_t *output,
                           TFM_CRYPTO_GENERATE_RANDOM);
 
     return status;
-#endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
+#endif /* TFM_CRYPTO_RNG_MODULE_DISABLED */
 }
 
 psa_status_t psa_generate_key(const psa_key_attributes_t *attributes,

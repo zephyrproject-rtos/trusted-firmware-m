@@ -534,27 +534,6 @@ psa_status_t tfm_crypto_key_derivation_key_agreement(psa_invec in_vec[],
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 }
 
-psa_status_t tfm_crypto_generate_random(psa_invec in_vec[],
-                                        size_t in_len,
-                                        psa_outvec out_vec[],
-                                        size_t out_len)
-{
-#ifdef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 1, out_len, 0, 1);
-
-    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    uint8_t *output = out_vec[0].base;
-    size_t output_size = out_vec[0].len;
-
-    return psa_generate_random(output, output_size);
-#endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
-}
-
 psa_status_t tfm_crypto_raw_key_agreement(psa_invec in_vec[],
                                           size_t in_len,
                                           psa_outvec out_vec[],
