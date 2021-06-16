@@ -280,8 +280,6 @@ necessary information of secure partition.
 - ``short_name``: should be the same as the ``name`` in the secure partition
   manifest file.
 - ``manifest``: the relative path of the manifest file to TF-M root.
-- ``tfm_partition_ipc``: indicate if this partition is compatible with the IPC
-  model.
 - ``conditional``: Optional. Configure control macro for this partition.
 - ``version_major``: major version the partition manifest.
 - ``version_minor``: minor version the partition manifest.
@@ -296,7 +294,6 @@ Reference configuration example:
       "name": "Example Service",
       "short_name": "TFM_SP_EXAMPLE",
       "manifest": "secure_fw/partitions/EXAMPLE/tfm_example.yaml",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_EXAMPLE",
       "version_major": 0,
       "version_minor": 1,

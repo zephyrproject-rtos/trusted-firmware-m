@@ -259,9 +259,6 @@ def process_stateless_services(partitions, stateless_index_max_num):
         # Skip the FF-M 1.0 partitions
         if partition['manifest']['psa_framework_version'] < 1.1:
             continue
-        # Skip the Non-IPC partitions
-        if partition['attr']['tfm_partition_ipc'] is not True:
-            continue
         for service in partition['manifest']['services']:
             if 'connection_based' not in service:
                 raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
