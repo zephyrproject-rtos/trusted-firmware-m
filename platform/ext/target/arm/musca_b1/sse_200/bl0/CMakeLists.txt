@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -38,8 +38,8 @@ target_include_directories(bl0
 
 target_include_directories(bl0
     PUBLIC
-        ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/../../../cmsis
-        ${CMAKE_MUSCA_B1_SSE_200_SOURCE_DIR}/../../../../include
+        ${CMAKE_SOURCE_DIR}/platform/ext/cmsis
+        ${CMAKE_SOURCE_DIR}/platform/include
 )
 
 target_compile_definitions(bl0
