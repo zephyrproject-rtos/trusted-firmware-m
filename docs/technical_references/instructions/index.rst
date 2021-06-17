@@ -7,7 +7,7 @@ TF-M Detailed Instructions
 
     tfm_build_instruction
     tfm_build_instruction_iar
-    tfm_run_instruction
+    run_tfm_examples_on_arm_platforms
     documentation_generation
 
 --------------

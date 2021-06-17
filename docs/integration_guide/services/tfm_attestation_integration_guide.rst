@@ -641,7 +641,7 @@ that user has license for DS-5 and FVP models:
    for MPS2 AN521 platform. More info in
    :doc:`tfm_build_instruction </docs/technical_references/instructions/tfm_build_instruction>`.
  - Lunch FVP model in DS-5. More info in
-   :doc:`tfm_run_instruction </docs/technical_references/instructions/tfm_run_instruction>`.
+   :doc:`Run TF-M examples on Arm platforms </docs/technical_references/instructions/run_tfm_examples_on_arm_platforms>`.
  - Set a breakpoint in ``test/suites/attestation/attest_token_test.c``
    in ``decode_test_internal(..)`` after the ``token_main_alt(..)`` returned,
    i.e. on line 859. Execute the code in the model until the breakpoint hits
