@@ -135,9 +135,9 @@ enum tfm_memory_access_e {
 };
 
 /**
- * \brief                   Get the current partition mode.
+ * \brief                   Get the privileged mode of Partition.
  *
- * \param[in] partition_flags               Flags of current partition
+ * \param[in] partition_flags               Flags of the Partition
  *
  * \retval TFM_PARTITION_PRIVILEGED_MODE    Privileged mode
  * \retval TFM_PARTITION_UNPRIVILEGED_MODE  Unprivileged mode

@@ -313,11 +313,15 @@ static void tfm_spm_partition_change_privilege(uint32_t privileged)
 
 uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
 {
+#if TFM_LVL == 1
+    return TFM_PARTITION_PRIVILEGED_MODE;
+#else /* TFM_LVL == 1 */
     if (partition_flags & SPM_PART_FLAG_PSA_ROT) {
         return TFM_PARTITION_PRIVILEGED_MODE;
     } else {
         return TFM_PARTITION_UNPRIVILEGED_MODE;
     }
+#endif /* TFM_LVL == 1 */
 }
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
