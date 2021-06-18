@@ -124,7 +124,6 @@ target_sources(platform_s
         ./driver_smpu.c
         ./driver_ppu.c
         ./driver_dap.c
-        ./nv_counters.c
         ./services/src/tfm_platform_system.c
         ./Device/Source/device_definition.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c

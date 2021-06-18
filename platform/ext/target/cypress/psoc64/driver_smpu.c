@@ -24,6 +24,7 @@
 #include "tfm_hal_its.h"
 #include "tfm_hal_ps.h"
 #include "tfm_memory_utils.h"
+#include "flash_layout.h"
 
 #include "cy_prot.h"
 
@@ -238,8 +239,9 @@ static cy_en_prot_status_t get_region(const PROT_SMPU_SMPU_STRUCT_Type *smpu,
         *base = its_fs_info.flash_area_addr;
         *size = its_fs_info.flash_area_size;
     } else if (smpu == NVC_SMPU_STRUCT) {
-        /* Retrieve the non-volatile counters region definition */
-        nvc_flash_block(base, size);
+        /* Retrieve the OTP / NV area info */
+        *base = FLASH_OTP_NV_COUNTERS_AREA_OFFSET;
+        *size = FLASH_OTP_NV_COUNTERS_AREA_SIZE;
     } else if (smpu == PS_SMPU_STRUCT) {
         struct tfm_hal_ps_fs_info_t ps_fs_info;
         /* Retrieve the PS region definition */
