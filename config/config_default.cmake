@@ -62,13 +62,13 @@ set(CRYPTO_HW_ACCELERATOR_OTP_STATE     OFF         CACHE STRING    "Whether to 
 
 set(OTP_NV_COUNTERS_RAM_EMULATION       OFF         CACHE BOOL      "Enable OTP/NV_COUNTERS emulation in RAM. Has no effect on non-default implementations of the OTP and NV_COUNTERS")
 
-set(PLATFORM_DUMMY_ATTEST_HAL           TRUE        CACHE BOOL      "Use dummy attest hal implementation. Should not be used in production.")
-set(PLATFORM_DUMMY_NV_COUNTERS          TRUE        CACHE BOOL      "Use dummy nv counter implementation. Should not be used in production.")
-set(PLATFORM_DUMMY_CRYPTO_KEYS          TRUE        CACHE BOOL      "Use dummy crypto keys. Should not be used in production.")
-set(PLATFORM_DUMMY_ROTPK                TRUE        CACHE BOOL      "Use dummy root of trust public key. Dummy key is the public key for the default keys in bl2. Should not be used in production.")
-set(PLATFORM_DUMMY_IAK                  TRUE        CACHE BOOL      "Use dummy initial attestation_key. Should not be used in production.")
-set(PLATFORM_DEFAULT_UART_STDOUT        TRUE        CACHE BOOL      "Use default uart stdout implementation.")
-set(PLATFORM_DUMMY_NV_SEED              TRUE        CACHE BOOL      "Use dummy NV seed implementation. Should not be used in production.")
+set(PLATFORM_DEFAULT_ATTEST_HAL         ON          CACHE BOOL      "Use default attest hal implementation.")
+set(PLATFORM_DEFAULT_NV_COUNTERS        ON          CACHE BOOL      "Use default nv counter implementation.")
+set(PLATFORM_DEFAULT_CRYPTO_KEYS        ON          CACHE BOOL      "Use default crypto keys implementation.")
+set(PLATFORM_DEFAULT_ROTPK              ON          CACHE BOOL      "Use default root of trust public key.")
+set(PLATFORM_DEFAULT_IAK                ON          CACHE BOOL      "Use default initial attestation_key.")
+set(PLATFORM_DEFAULT_UART_STDOUT        ON          CACHE BOOL      "Use default uart stdout implementation.")
+set(PLATFORM_DEFAULT_NV_SEED            ON          CACHE BOOL      "Use default NV seed implementation.")
 set(PLATFORM_DEFAULT_OTP                ON          CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
 set(PLATFORM_DEFAULT_PROVISIONING       ON          CACHE BOOL      "Use default provisioning implementation")
 

@@ -188,7 +188,7 @@ target_sources(bl1_main
     PRIVATE
         ${CMAKE_SOURCE_DIR}/platform/ext/common/boot_hal.c
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_SOURCE_DIR}/platform/ext/common/uart_stdout.c>
-        $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/nv_counters.c>
+        $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/nv_counters.c>
 )
 
 target_link_libraries(bl1_main

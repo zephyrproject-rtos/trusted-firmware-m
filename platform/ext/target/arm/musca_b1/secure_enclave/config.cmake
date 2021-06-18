@@ -11,7 +11,7 @@ set(NS                                  FALSE        CACHE BOOL      "Whether to
 set(TEST_NS                             OFF          CACHE BOOL      "Whether to build NS regression tests" FORCE)
 
 # Serial output is not available for Secure Enclave
-set(PLATFORM_DEFAULT_UART_STDOUT        FALSE        CACHE BOOL      "Use default uart stdout implementation." FORCE)
+set(PLATFORM_DEFAULT_UART_STDOUT        OFF          CACHE BOOL      "Use default uart stdout implementation." FORCE)
 set(MCUBOOT_LOG_LEVEL                   "NONE"       CACHE STRING    "Level of logging to use for MCUboot [OFF, ERROR, WARNING, INFO, DEBUG]" FORCE)
 
 # Test services are inaccessible via Proxy service
