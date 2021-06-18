@@ -14,7 +14,7 @@ set(MCUBOOT_IMAGE_NUMBER                3          CACHE STRING   "Number of ima
 set(TFM_MULTI_CORE_TOPOLOGY             ON         CACHE BOOL     "Whether to build for a dual-cpu architecture")
 set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to use a platform specific inter core communication instead of mailbox in dual-cpu topology")
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")
-set(PLATFORM_DUMMY_NV_SEED              FALSE      CACHE BOOL      "Use dummy NV seed implementation. Should not be used in production.")
+set(CRYPTO_NV_SEED                      OFF        CACHE BOOL      "Use stored NV seed to provide entropy")
 set(NS                                  FALSE      CACHE BOOL     "Whether to build NS app")
 
 set(PLATFORM_DUMMY_ROTPK                FALSE      CACHE BOOL     "Use dummy root of trust public key. Dummy key is the public key for the default keys in bl2. Should not be used in production.")

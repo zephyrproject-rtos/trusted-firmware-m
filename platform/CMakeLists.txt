@@ -50,6 +50,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DUMMY_CRYPTO_KEYS}>:ext/common/template/crypto_keys.c>
         $<$<BOOL:${PLATFORM_DUMMY_ROTPK}>:ext/common/template/tfm_rotpk.c>
         $<$<BOOL:${PLATFORM_DUMMY_IAK}>:ext/common/template/tfm_initial_attestation_key_material.c>
+        $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:ext/common/template/crypto_nv_seed.c>
         $<$<AND:$<NOT:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${PLATFORM_DUMMY_IAK}>,$<BOOL:${TEST_S_ATTESTATION}>>:ext/common/template/tfm_initial_attest_pub_key.c>
         $<$<OR:$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
@@ -65,6 +66,7 @@ target_link_libraries(platform_s
         tfm_secure_api
         tfm_arch
         tfm_partition_defs
+        crypto_service_mbedtls
 )
 
 target_compile_definitions(platform_s
@@ -176,22 +178,3 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
         $<$<BOOL:${TFM_CODE_SHARING}>:CODE_SHARING>
 )
-
-#========================= Crypto =============================================#
-if (TFM_PARTITION_CRYPTO)
-    target_sources(tfm_psa_rot_partition_crypto
-        PRIVATE
-            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/crypto_nv_seed.c>
-            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/crypto_dummy_nv_seed.c>
-    )
-
-    target_compile_definitions(tfm_psa_rot_partition_crypto
-        PRIVATE
-            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:PLATFORM_DUMMY_NV_SEED>
-    )
-
-    target_include_directories(crypto_service_mbedcrypto
-        PUBLIC
-            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    )
-endif()

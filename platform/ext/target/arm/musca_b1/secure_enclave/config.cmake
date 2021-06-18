@@ -22,6 +22,6 @@ set(TFM_ISOLATION_LEVEL                 1            CACHE STRING    "Isolation 
 
 # Crypto hardware accelerator is turned on by default
 set(CRYPTO_HW_ACCELERATOR               ON           CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
-set(PLATFORM_DUMMY_NV_SEED              FALSE        CACHE BOOL      "Use dummy NV seed implementation. Should not be used in production.")
+set(CRYPTO_NV_SEED                      OFF          CACHE BOOL      "Use stored NV seed to provide entropy")
 
 set(PSA_API_TEST_TARGET                 "musca_b1"   CACHE STRING    "Target to use when building the PSA API tests")

@@ -90,8 +90,8 @@ tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND NOT TFM_LIB_MODEL)
 
 ########################### TF-M crypto ########################################
 
-tfm_invalid_config(PLATFORM_DUMMY_NV_SEED AND CRYPTO_HW_ACCELERATOR)
-tfm_invalid_config(NOT PLATFORM_DUMMY_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
+tfm_invalid_config(CRYPTO_NV_SEED AND CRYPTO_HW_ACCELERATOR)
+tfm_invalid_config(NOT CRYPTO_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
 
 ########################### Test check config ##################################
 

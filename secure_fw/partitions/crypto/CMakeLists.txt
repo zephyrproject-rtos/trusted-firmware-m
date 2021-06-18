@@ -143,6 +143,7 @@ target_compile_definitions(crypto_service_mbedcrypto_config
         PSA_CRYPTO_SECURE
         # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077
         $<$<OR:$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>
+        $<$<BOOL:${CRYPTO_NV_SEED}>:CRYPTO_NV_SEED>
         $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:PLATFORM_DUMMY_NV_SEED>
 )
 cmake_policy(SET CMP0079 NEW)
@@ -199,4 +200,14 @@ target_link_libraries(crypto_service_mbedcrypto
         platform_s
     PUBLIC
         crypto_service_mbedcrypto_config
+)
+
+target_link_libraries(crypto_service_mbedtls
+    PRIVATE
+        platform_s
+)
+
+target_link_libraries(crypto_service_mbedx509
+    PRIVATE
+        platform_s
 )
