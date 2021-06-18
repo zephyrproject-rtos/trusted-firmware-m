@@ -60,6 +60,8 @@ set(SECURE_UART1                        OFF         CACHE BOOL      "Enable secu
 set(CRYPTO_HW_ACCELERATOR               OFF         CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
 set(CRYPTO_HW_ACCELERATOR_OTP_STATE     OFF         CACHE STRING    "Whether to enable the crypto hardware accelerator OTP memory on supported platforms (Set to PROVISIONING to enable OTP provisioning)")
 
+set(OTP_NV_COUNTERS_RAM_EMULATION       OFF         CACHE BOOL      "Enable OTP/NV_COUNTERS emulation in RAM. Has no effect on non-default implementations of the OTP and NV_COUNTERS")
+
 set(PLATFORM_DUMMY_ATTEST_HAL           TRUE        CACHE BOOL      "Use dummy attest hal implementation. Should not be used in production.")
 set(PLATFORM_DUMMY_NV_COUNTERS          TRUE        CACHE BOOL      "Use dummy nv counter implementation. Should not be used in production.")
 set(PLATFORM_DUMMY_CRYPTO_KEYS          TRUE        CACHE BOOL      "Use dummy crypto keys. Should not be used in production.")
@@ -67,6 +69,7 @@ set(PLATFORM_DUMMY_ROTPK                TRUE        CACHE BOOL      "Use dummy r
 set(PLATFORM_DUMMY_IAK                  TRUE        CACHE BOOL      "Use dummy initial attestation_key. Should not be used in production.")
 set(PLATFORM_DEFAULT_UART_STDOUT        TRUE        CACHE BOOL      "Use default uart stdout implementation.")
 set(PLATFORM_DUMMY_NV_SEED              TRUE        CACHE BOOL      "Use dummy NV seed implementation. Should not be used in production.")
+set(PLATFORM_DEFAULT_OTP                ON          CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
 
 ############################ Partitions ########################################
 

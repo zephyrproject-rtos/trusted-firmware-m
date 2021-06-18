@@ -63,6 +63,10 @@ tfm_invalid_config(NOT TFM_CODE_SHARING STREQUAL "OFF" AND NOT TFM_PLATFORM IN_L
 tfm_invalid_config(NOT TFM_CODE_SHARING STREQUAL "OFF" AND CRYPTO_HW_ACCELERATOR)
 tfm_invalid_config(TFM_CODE_SHARING STREQUAL "OFF" AND TFM_CODE_SHARING_PATH)
 
+########################## Platform ############################################
+
+tfm_invalid_config(OTP_NV_COUNTERS_RAM_EMULATION AND NOT (PLATFORM_DEFAULT_OTP OR PLATFORM_DEFAULT_NV_COUNTERS))
+
 ####################### SP META Pointer ########################################
 
 tfm_invalid_config(TFM_SP_META_PTR_ENABLE AND TFM_LIB_MODEL)
