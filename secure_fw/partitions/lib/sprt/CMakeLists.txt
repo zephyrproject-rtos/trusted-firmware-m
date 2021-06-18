@@ -21,6 +21,7 @@ target_sources(tfm_sprt
         ./crt_memcpy.c
         ./crt_memmove.c
         ./crt_memset.c
+        ./crt_strnlen.c
         ./service_api.c
         $<$<BOOL:${TFM_SP_META_PTR_ENABLE}>:./sprt_partition_metadata_indicator.c>
 )
