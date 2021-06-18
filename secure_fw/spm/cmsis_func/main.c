@@ -18,6 +18,8 @@
 #include "tfm_spm_hal.h"
 #include "tfm_spm_log.h"
 #include "tfm_version.h"
+#include "tfm_plat_otp.h"
+#include "tfm_plat_provisioning.h"
 
 /*
  * Avoids the semihosting issue
@@ -92,6 +94,21 @@ static fih_int tfm_core_init(void)
     hal_status = tfm_hal_platform_init();
     if (hal_status != TFM_HAL_SUCCESS) {
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+    }
+
+    plat_err = tfm_plat_otp_init();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+    }
+
+    /* Perform provisioning. */
+    if (tfm_plat_provisioning_is_required()) {
+        plat_err = tfm_plat_provisioning_perform();
+        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+        }
+    } else {
+        tfm_plat_provisioning_check_for_dummy_keys();
     }
 
     /* Configures architecture */

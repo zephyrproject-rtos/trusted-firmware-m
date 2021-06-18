@@ -70,6 +70,9 @@ set(PLATFORM_DUMMY_IAK                  TRUE        CACHE BOOL      "Use dummy i
 set(PLATFORM_DEFAULT_UART_STDOUT        TRUE        CACHE BOOL      "Use default uart stdout implementation.")
 set(PLATFORM_DUMMY_NV_SEED              TRUE        CACHE BOOL      "Use dummy NV seed implementation. Should not be used in production.")
 set(PLATFORM_DEFAULT_OTP                ON          CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
+set(PLATFORM_DEFAULT_PROVISIONING       ON          CACHE BOOL      "Use default provisioning implementation")
+
+set(TFM_DUMMY_PROVISIONING              ON          CACHE BOOL      "Provision with dummy values. NOT to be used in production")
 
 ############################ Partitions ########################################
 

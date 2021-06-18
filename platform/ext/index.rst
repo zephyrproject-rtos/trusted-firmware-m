@@ -9,6 +9,7 @@ Supported Platforms
     readme
     /platform/ext/platform_introduction.rst
     /platform/ext/platform_deprecation.rst
+    /platform/ext/platform_provisioning.rst
 
 .. toctree::
     :maxdepth: 1
@@ -16,7 +17,6 @@ Supported Platforms
     :glob:
 
     target/arm/**
-    otp_provisioning.rst
 
 .. toctree::
     :maxdepth: 1
