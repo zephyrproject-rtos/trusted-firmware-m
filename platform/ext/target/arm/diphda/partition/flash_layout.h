@@ -171,9 +171,11 @@
                                          FLASH_ITS_AREA_SIZE)
 #define FLASH_PS_AREA_SIZE              (16 * FLASH_SECTOR_SIZE)  /* 16 KB */
 
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_PS_AREA_OFFSET + \
-                                         FLASH_PS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_SECTOR_SIZE)      /* 1 KiB */
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_PS_AREA_OFFSET + \
+                                           FLASH_PS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
@@ -211,12 +213,13 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_PS_PROGRAM_UNIT         (1)
 
-#define NV_COUNTERS_FLASH_DEV_NAME Driver_FLASH0
+#define OTP_NV_COUNTERS_FLASH_DEV Driver_FLASH0
 
-/* NV Counters definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    (0x20) /* 24 Bytes*/
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_SECTOR_SIZE
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
 #endif /* __FLASH_LAYOUT_H__ */

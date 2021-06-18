@@ -44,7 +44,7 @@
 #define FLASH_REDIRECT_LIMIT  (FLASH_REDIRECT_BASE   \
                                + FLASH_PS_AREA_SIZE \
                                + FLASH_ITS_AREA_SIZE \
-                               + FLASH_NV_COUNTERS_AREA_SIZE)
+                               + FLASH_OTP_NV_COUNTERS_AREA_SIZE)
 #define FLASH_REDIRECT_DEST   0x38000000
 
 #define FLASH0_BASE_S         0x10000000

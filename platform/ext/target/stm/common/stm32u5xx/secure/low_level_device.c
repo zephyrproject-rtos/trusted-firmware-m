@@ -8,8 +8,10 @@
   *
   * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
   * All rights reserved.</center></h2>
+  * <h2><center>&copy; Copyright (c) 2021 Arm Limited.
+  * All rights reserved.</center></h2>
   *
-  * This software component is licensed by ST under BSD 3-Clause license,
+  * This software component is licensed under BSD 3-Clause license,
   * the "License"; You may not use this file except in compliance with the
   * License. You may obtain a copy of the License at:
   *                        opensource.org/licenses/BSD-3-Clause
@@ -20,7 +22,7 @@
 #include "low_level_flash.h"
 static struct flash_range write_vect[] =
 {
-  { FLASH_NV_COUNTERS_AREA_OFFSET, FLASH_NV_COUNTERS_AREA_OFFSET + FLASH_NV_COUNTER_AREA_SIZE - 1},
+  { FLASH_OTP_NV_COUNTERS_AREA_OFFSET, FLASH_OTP_NV_COUNTERS_AREA_OFFSET + FLASH_OTP_NV_COUNTERS_AREA_SIZE - 1},
   { FLASH_PS_AREA_OFFSET, FLASH_PS_AREA_OFFSET + FLASH_PS_AREA_SIZE - 1},
   { FLASH_ITS_AREA_OFFSET, FLASH_ITS_AREA_OFFSET + FLASH_ITS_AREA_SIZE - 1},
   /* Area for writing confirm flag on in installed image */
@@ -31,7 +33,7 @@ static struct flash_range write_vect[] =
 };
 static struct flash_range erase_vect[] =
 {
-  { FLASH_NV_COUNTERS_AREA_OFFSET, FLASH_NV_COUNTERS_AREA_OFFSET + FLASH_NV_COUNTER_AREA_SIZE - 1},
+  { FLASH_OTP_NV_COUNTERS_AREA_OFFSET, FLASH_OTP_NV_COUNTERS_AREA_OFFSET + FLASH_OTP_NV_COUNTERS_AREA_SIZE - 1},
   { FLASH_PS_AREA_OFFSET, FLASH_PS_AREA_OFFSET + FLASH_PS_AREA_SIZE - 1},
   { FLASH_ITS_AREA_OFFSET, FLASH_ITS_AREA_OFFSET + FLASH_ITS_AREA_SIZE - 1},
   /* Area for writing secondary images */
@@ -40,7 +42,7 @@ static struct flash_range erase_vect[] =
 
 static struct flash_range secure_vect[] =
 {
-  { FLASH_NV_COUNTERS_AREA_OFFSET, FLASH_NV_COUNTERS_AREA_OFFSET + FLASH_NV_COUNTER_AREA_SIZE - 1},
+  { FLASH_OTP_NV_COUNTERS_AREA_OFFSET, FLASH_OTP_NV_COUNTERS_AREA_OFFSET + FLASH_OTP_NV_COUNTERS_AREA_SIZE - 1},
   { FLASH_PS_AREA_OFFSET, FLASH_PS_AREA_OFFSET + FLASH_PS_AREA_SIZE - 1},
   { FLASH_ITS_AREA_OFFSET, FLASH_ITS_AREA_OFFSET + FLASH_ITS_AREA_SIZE - 1},
   /* Area for writing confirm flag on in installed image */

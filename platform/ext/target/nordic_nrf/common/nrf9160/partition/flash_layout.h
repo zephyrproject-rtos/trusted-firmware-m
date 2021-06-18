@@ -29,8 +29,7 @@
  *    0x000c_0000 Non-secure image secondary (192 KB)
  * 0x000f_0000 Protected Storage Area (20 KB)
  * 0x000f_4000 Internal Trusted Storage Area (16 KB)
- * 0x000f_6000 NV counters area (4 KB)
- * 0x000f_7000 Unused (4 KB)
+ * 0x000f_6000 OTP / NV counters  area (8 KB)
  * 0x000f_8000 Non-secure storage, used when built with NRF_NS_STORAGE=ON,
  *             otherwise unused (32 KB)
  *
@@ -41,8 +40,7 @@
  *    0x0007_8000 Non-secure image primary (480 KB)
  * 0x000f_0000 Protected Storage Area (16 KB)
  * 0x000f_4000 Internal Trusted Storage Area (8 KB)
- * 0x000f_6000 NV counters area (4 KB)
- * 0x000f_7000 Unused (4 KB)
+ * 0x000f_6000 OTP / NV counters  area (8 KB)
  * 0x000f_8000 Non-secure storage, used when built with NRF_NS_STORAGE=ON,
  *             otherwise unused (32 KB)
  */
@@ -155,20 +153,16 @@
                                          FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
-/* NV Counters definitions */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
-                                         FLASH_ITS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
+                                           FLASH_ITS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* Non-secure storage region */
 #define NRF_FLASH_NS_STORAGE_AREA_OFFSET    (FLASH_TOTAL_SIZE - \
                                              NRF_FLASH_NS_STORAGE_AREA_SIZE)
 #define NRF_FLASH_NS_STORAGE_AREA_SIZE      (0x8000)   /* 32 KB */
-
-/* PSA MMIO Area definitions */
-#define FLASH_MMIO_AREA_OFFSET          (FLASH_NV_COUNTERS_AREA_OFFSET + \
-                                         FLASH_NV_COUNTERS_AREA_SIZE)
-#define FLASH_MMIO_AREA_SIZE            (FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
@@ -225,11 +219,12 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_ITS_PROGRAM_UNIT       (0x4)
 
-/* NV Counters definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    (0x18) /* 24 Bytes */
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
 /* Use Flash memory to store Code data */
 #define FLASH_BASE_ADDRESS (0x00000000)

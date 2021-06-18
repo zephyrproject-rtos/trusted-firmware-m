@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Laird Connectivity. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -24,43 +24,34 @@
 #include "flash_layout.h"
 
 /* Compilation time checks to be sure the defines are well defined */
-#ifndef TFM_NV_COUNTERS_AREA_ADDR
-#error "TFM_NV_COUNTERS_AREA_ADDR must be defined in flash_layout.h"
+#ifndef TFM_OTP_NV_COUNTERS_AREA_ADDR
+#error "TFM_OTP_NV_COUNTERS_AREA_ADDR must be defined in flash_layout.h"
 #endif
 
-#ifndef TFM_NV_COUNTERS_AREA_SIZE
-#error "TFM_NV_COUNTERS_AREA_SIZE must be defined in flash_layout.h"
+#ifndef TFM_OTP_NV_COUNTERS_AREA_SIZE
+#error "TFM_OTP_NV_COUNTERS_AREA_SIZE must be defined in flash_layout.h"
 #endif
 
-#ifndef TFM_NV_COUNTERS_SECTOR_ADDR
-#error "TFM_NV_COUNTERS_SECTOR_ADDR must be defined in flash_layout.h"
+#ifndef TFM_OTP_NV_COUNTERS_SECTOR_SIZE
+#error "TFM_OTP_NV_COUNTERS_SECTOR_SIZE must be defined in flash_layout.h"
 #endif
 
-#ifndef TFM_NV_COUNTERS_SECTOR_SIZE
-#error "TFM_NV_COUNTERS_SECTOR_SIZE must be defined in flash_layout.h"
+#ifndef TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR
+#error "TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR must be defined in flash_layout.h as one or more backup NV counter defines are set"
 #endif
 
-#if (TFM_NV_COUNTERS_BACKUP_AREA_ADDR || TFM_NV_COUNTERS_BACKUP_SECTOR_ADDR)
-#ifndef TFM_NV_COUNTERS_BACKUP_AREA_ADDR
-#error "TFM_NV_COUNTERS_BACKUP_AREA_ADDR must be defined in flash_layout.h as one or more backup NV counter defines are set"
-#endif
-#ifndef TFM_NV_COUNTERS_BACKUP_SECTOR_ADDR
-#error "TFM_NV_COUNTERS_BACKUP_SECTOR_ADDR must be defined in flash_layout.h as one or more backup NV counter defines are set"
-#endif
-#endif
-
-#ifndef NV_COUNTERS_FLASH_DEV_NAME
-    #ifndef FLASH_DEV_NAME
-    #error "NV_COUNTERS_FLASH_DEV_NAME or FLASH_DEV_NAME must be defined in flash_layout.h"
+#ifndef OTP_NV_COUNTERS_FLASH_DEV
+    #ifndef TFM_HAL_ITS_FLASH_DRIVER
+    #error "OTP_NV_COUNTERS_FLASH_DEV or TFM_HAL_ITS_FLASH_DRIVER must be defined in flash_layout.h"
     #else
-    #define NV_COUNTERS_FLASH_DEV_NAME FLASH_DEV_NAME
+    #define OTP_NV_COUNTERS_FLASH_DEV TFM_HAL_ITS_FLASH_DRIVER
     #endif
 #endif
 /* End of compilation time checks to be sure the defines are well defined */
 
 #define NV_COUNTER_SIZE  sizeof(uint32_t)
 #define INIT_VALUE_SIZE  NV_COUNTER_SIZE
-#define NUM_NV_COUNTERS  ((TFM_NV_COUNTERS_AREA_SIZE - INIT_VALUE_SIZE) \
+#define NUM_NV_COUNTERS  ((TFM_OTP_NV_COUNTERS_AREA_SIZE - INIT_VALUE_SIZE) \
                           / NV_COUNTER_SIZE)
 
 #define NV_COUNTERS_INITIALIZED 0xC0DE0042U
@@ -76,7 +67,7 @@ struct nv_counters_t {
 };
 
 /* Import the CMSIS flash device driver */
-extern ARM_DRIVER_FLASH NV_COUNTERS_FLASH_DEV_NAME;
+extern ARM_DRIVER_FLASH OTP_NV_COUNTERS_FLASH_DEV;
 
 enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
 {
@@ -84,7 +75,7 @@ enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
     uint32_t i;
     struct nv_counters_t nv_counters = {{0}};
 
-    err = NV_COUNTERS_FLASH_DEV_NAME.Initialize(NULL);
+    err = OTP_NV_COUNTERS_FLASH_DEV.Initialize(NULL);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -92,9 +83,9 @@ enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
     /* Read the NV counter area to be able to erase the sector and write later
      * in the flash.
      */
-    err = NV_COUNTERS_FLASH_DEV_NAME.ReadData(TFM_NV_COUNTERS_AREA_ADDR,
-                                              &nv_counters,
-                                              TFM_NV_COUNTERS_AREA_SIZE);
+    err = OTP_NV_COUNTERS_FLASH_DEV.ReadData(TFM_OTP_NV_COUNTERS_AREA_ADDR,
+                                             &nv_counters,
+                                             TFM_OTP_NV_COUNTERS_AREA_SIZE);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -103,28 +94,28 @@ enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
         return TFM_PLAT_ERR_SUCCESS;
     }
 
-#ifdef TFM_NV_COUNTERS_BACKUP_AREA_ADDR
+#ifdef TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR
     /* Read the NV counter backup area to be able to erase the sector and
      * write later in the flash.
      */
-    err = NV_COUNTERS_FLASH_DEV_NAME.ReadData(TFM_NV_COUNTERS_BACKUP_AREA_ADDR,
+    err = OTP_NV_COUNTERS_FLASH_DEV.ReadData(TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR,
                                               &nv_counters,
-                                              TFM_NV_COUNTERS_AREA_SIZE);
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     if (nv_counters.init_value == NV_COUNTERS_INITIALIZED) {
         /* Erase main sector before write in it */
-        err = NV_COUNTERS_FLASH_DEV_NAME.EraseSector(TFM_NV_COUNTERS_SECTOR_ADDR);
+        err = OTP_NV_COUNTERS_FLASH_DEV.EraseSector(TFM_OTP_NV_COUNTERS_AREA_ADDR);
         if (err != ARM_DRIVER_OK) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
 
         /* Write in flash the in-memory NV counter content from the backup sector */
-        err = NV_COUNTERS_FLASH_DEV_NAME.ProgramData(TFM_NV_COUNTERS_AREA_ADDR,
-                                                     &nv_counters,
-                                                     TFM_NV_COUNTERS_AREA_SIZE);
+        err = OTP_NV_COUNTERS_FLASH_DEV.ProgramData(TFM_OTP_NV_COUNTERS_AREA_ADDR,
+                                                    &nv_counters,
+                                                    TFM_OTP_NV_COUNTERS_AREA_SIZE);
         if (err != ARM_DRIVER_OK) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
@@ -144,29 +135,29 @@ enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
     }
 
     /* Erase main sector before write in it */
-    err = NV_COUNTERS_FLASH_DEV_NAME.EraseSector(TFM_NV_COUNTERS_SECTOR_ADDR);
+    err = OTP_NV_COUNTERS_FLASH_DEV.EraseSector(TFM_OTP_NV_COUNTERS_AREA_ADDR);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Erase backup sector before write in it */
-    err = NV_COUNTERS_FLASH_DEV_NAME.EraseSector(TFM_NV_COUNTERS_BACKUP_SECTOR_ADDR);
+    err = OTP_NV_COUNTERS_FLASH_DEV.EraseSector(TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Write in flash the in-memory NV counter content after modification to the main sector */
-    err = NV_COUNTERS_FLASH_DEV_NAME.ProgramData(TFM_NV_COUNTERS_AREA_ADDR,
-                                                 &nv_counters,
-                                                 TFM_NV_COUNTERS_AREA_SIZE);
+    err = OTP_NV_COUNTERS_FLASH_DEV.ProgramData(TFM_OTP_NV_COUNTERS_AREA_ADDR,
+                                                &nv_counters,
+                                                TFM_OTP_NV_COUNTERS_AREA_SIZE);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     /* Write in flash the in-memory NV counter content after modification to the backup sector */
-    err = NV_COUNTERS_FLASH_DEV_NAME.ProgramData(TFM_NV_COUNTERS_BACKUP_AREA_ADDR,
-                                                 &nv_counters,
-                                                 TFM_NV_COUNTERS_AREA_SIZE);
+    err = OTP_NV_COUNTERS_FLASH_DEV.ProgramData(TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR,
+                                                &nv_counters,
+                                                TFM_OTP_NV_COUNTERS_AREA_SIZE);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -184,9 +175,9 @@ enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    flash_addr = TFM_NV_COUNTERS_AREA_ADDR + (counter_id * NV_COUNTER_SIZE);
+    flash_addr = TFM_OTP_NV_COUNTERS_AREA_ADDR + (counter_id * NV_COUNTER_SIZE);
 
-    err = NV_COUNTERS_FLASH_DEV_NAME.ReadData(flash_addr, val, NV_COUNTER_SIZE);
+    err = OTP_NV_COUNTERS_FLASH_DEV.ReadData(flash_addr, val, NV_COUNTER_SIZE);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -203,9 +194,9 @@ enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
     /* Read the NV counter area to be able to erase the sector and write later
      * in the flash.
      */
-    err = NV_COUNTERS_FLASH_DEV_NAME.ReadData(TFM_NV_COUNTERS_AREA_ADDR,
-                                              &nv_counters,
-                                              TFM_NV_COUNTERS_AREA_SIZE);
+    err = OTP_NV_COUNTERS_FLASH_DEV.ReadData(TFM_OTP_NV_COUNTERS_AREA_ADDR,
+                                             &nv_counters,
+                                             TFM_OTP_NV_COUNTERS_AREA_SIZE);
     if (err != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -218,34 +209,34 @@ enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
             return TFM_PLAT_ERR_INVALID_INPUT;
         }
 
-#ifdef TFM_NV_COUNTERS_BACKUP_AREA_ADDR
+#ifdef TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR
         /* Erase backup sector before write in it */
-        err = NV_COUNTERS_FLASH_DEV_NAME.EraseSector(
-                                                TFM_NV_COUNTERS_BACKUP_SECTOR_ADDR);
+        err = OTP_NV_COUNTERS_FLASH_DEV.EraseSector(
+                                                TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR);
         if (err != ARM_DRIVER_OK) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
 
         /* Write in flash the in-memory NV counter content after modification to the backup sector */
-        err = NV_COUNTERS_FLASH_DEV_NAME.ProgramData(TFM_NV_COUNTERS_BACKUP_AREA_ADDR,
-                                                     &nv_counters,
-                                                     TFM_NV_COUNTERS_AREA_SIZE);
+        err = OTP_NV_COUNTERS_FLASH_DEV.ProgramData(TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR,
+                                                    &nv_counters,
+                                                    TFM_OTP_NV_COUNTERS_AREA_SIZE);
         if (err != ARM_DRIVER_OK) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
 #endif
 
         /* Erase main sector before write in it */
-        err = NV_COUNTERS_FLASH_DEV_NAME.EraseSector(
-                                                TFM_NV_COUNTERS_SECTOR_ADDR);
+        err = OTP_NV_COUNTERS_FLASH_DEV.EraseSector(
+                                                TFM_OTP_NV_COUNTERS_AREA_ADDR);
         if (err != ARM_DRIVER_OK) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
 
         /* Write in flash the in-memory NV counter content after modification to the main sector */
-        err = NV_COUNTERS_FLASH_DEV_NAME.ProgramData(TFM_NV_COUNTERS_AREA_ADDR,
-                                                     &nv_counters,
-                                                     TFM_NV_COUNTERS_AREA_SIZE);
+        err = OTP_NV_COUNTERS_FLASH_DEV.ProgramData(TFM_OTP_NV_COUNTERS_AREA_ADDR,
+                                                    &nv_counters,
+                                                    TFM_OTP_NV_COUNTERS_AREA_SIZE);
         if (err != ARM_DRIVER_OK) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
