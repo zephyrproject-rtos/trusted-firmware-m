@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include "tfm_spm_log.h"
 
 /*
  * CPU spin here.
