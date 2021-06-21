@@ -150,7 +150,7 @@ Download and install the required tools:
     curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
 
 Clone the TF-M Sources
-(see :ref:`docs/technical_references/instructions/tfm_build_instruction:Getting the source-code`),
+(see :ref:`Getting the source-code`),
 then
 
 .. code-block:: bash
@@ -241,7 +241,7 @@ Tools required to generate documentation:
 Download and install the required tools from above.
 
 Clone the TF-M Sources
-(see :ref:`docs/technical_references/instructions/tfm_build_instruction:Getting the source-code`),
+(see :ref:`Getting the source-code`),
 then
 
 .. code-block:: bash

@@ -12,6 +12,8 @@ build environment. The instructions are below.
 
 Cmake version ``3.15.0`` or higher is required.
 
+.. _Getting the source-code:
+
 Getting the source-code
 =======================
 .. code-block:: bash
@@ -189,6 +191,8 @@ The Firmware Framework test suites are:
 
 Note that these map directly to the ``SUITE`` cmake variable used in the
 psa-arch-tests documentation.
+
+.. _Migration from legacy buildsystem:
 
 Migration from legacy buildsystem
 ---------------------------------
