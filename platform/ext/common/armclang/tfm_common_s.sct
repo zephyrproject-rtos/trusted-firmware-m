@@ -255,7 +255,7 @@ LR_VENEER CMSE_VENEER_REGION_START {
      * 32 bytes aligned region so that the SAU can be programmed to
      * just set this region as Non-Secure Callable.
      */
-    ER_CODE_CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
+    CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
         *(Veneer$$CMSE)
     }
 }
