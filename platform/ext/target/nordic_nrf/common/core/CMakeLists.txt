@@ -74,6 +74,11 @@ target_compile_options(platform_s
         ${COMPILER_CMSE_FLAG}
 )
 
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
+)
+
 #========================= Platform Non-Secure ================================#
 
 target_sources(platform_ns
@@ -93,6 +98,11 @@ target_include_directories(platform_ns
         ${PLATFORM_DIR}/..
     PRIVATE
         ${PLATFORM_DIR}/../interface/include
+)
+
+target_compile_definitions(platform_ns
+    PUBLIC
+        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
 )
 
 #========================= Platform BL2 =======================================#
