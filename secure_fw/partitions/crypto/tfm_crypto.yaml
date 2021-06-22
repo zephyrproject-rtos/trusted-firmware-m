@@ -344,6 +344,20 @@
       "minor_policy": "STRICT"
     },
     {
+      "name": "TFM_CRYPTO_SIGN_MESSAGE",
+      "signal": "TFM_CRYPTO_SIGN_MESSAGE",
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
+    },
+    {
+      "name": "TFM_CRYPTO_VERIFY_MESSAGE",
+      "signal": "TFM_CRYPTO_VERIFY_MESSAGE",
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
+    },
+    {
       "name": "TFM_CRYPTO_SIGN_HASH",
       "signal": "TFM_CRYPTO_SIGN_HASH",
       "non_secure_clients": true,

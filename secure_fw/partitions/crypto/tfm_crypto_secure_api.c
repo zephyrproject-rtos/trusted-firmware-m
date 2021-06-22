@@ -1038,6 +1038,73 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key_id,
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
+psa_status_t psa_sign_message(psa_key_id_t key_id,
+                              psa_algorithm_t alg,
+                              const uint8_t *input,
+                              size_t input_length,
+                              uint8_t *signature,
+                              size_t signature_size,
+                              size_t *signature_length)
+{
+#ifdef TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
+    psa_status_t status;
+    struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_SIGN_MESSAGE_SID,
+        .key_id = key_id,
+        .alg = alg,
+    };
+
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = input, .len = input_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = signature, .len = signature_size},
+    };
+
+    status = API_DISPATCH(tfm_crypto_sign_message,
+                          TFM_CRYPTO_SIGN_MESSAGE);
+
+    if (status == PSA_SUCCESS) {
+        *signature_length = out_vec[0].len;
+    }
+
+    return status;
+#endif /* TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED */
+}
+
+psa_status_t psa_verify_message(psa_key_id_t key_id,
+                                psa_algorithm_t alg,
+                                const uint8_t *input,
+                                size_t input_length,
+                                const uint8_t *signature,
+                                size_t signature_length)
+{
+#ifdef TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
+    psa_status_t status;
+    struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_VERIFY_MESSAGE_SID,
+        .key_id = key_id,
+        .alg = alg
+    };
+
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = input, .len = input_length},
+        {.base = signature, .len = signature_length}
+    };
+
+    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_verify_message,
+                                    TFM_CRYPTO_VERIFY_MESSAGE);
+
+    return status;
+#endif /* TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED */
+}
+
 psa_status_t psa_sign_hash(psa_key_id_t key_id,
                            psa_algorithm_t alg,
                            const uint8_t *hash,

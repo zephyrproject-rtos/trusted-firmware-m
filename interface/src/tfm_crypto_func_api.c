@@ -861,6 +861,65 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key,
     return status;
 }
 
+psa_status_t psa_sign_message(psa_key_id_t key,
+                              psa_algorithm_t alg,
+                              const uint8_t *input,
+                              size_t input_length,
+                              uint8_t *signature,
+                              size_t signature_size,
+                              size_t *signature_length)
+{
+    psa_status_t status;
+    struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_SIGN_MESSAGE_SID,
+        .key_id = key,
+        .alg = alg,
+    };
+
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = input, .len = input_length},
+    };
+    psa_outvec out_vec[] = {
+        {.base = signature, .len = signature_size},
+    };
+
+    status = API_DISPATCH(tfm_crypto_sign_message,
+                          TFM_CRYPTO_SIGN_MESSAGE);
+
+    if (status == PSA_SUCCESS) {
+        *signature_length = out_vec[0].len;
+    }
+
+    return status;
+}
+
+psa_status_t psa_verify_message(psa_key_id_t key,
+                                psa_algorithm_t alg,
+                                const uint8_t *input,
+                                size_t input_length,
+                                const uint8_t *signature,
+                                size_t signature_length)
+{
+    psa_status_t status;
+    struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_VERIFY_MESSAGE_SID,
+        .key_id = key,
+        .alg = alg
+    };
+
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = input, .len = input_length},
+        {.base = signature, .len = signature_length}
+    };
+
+    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_verify_message,
+                                    TFM_CRYPTO_VERIFY_MESSAGE);
+
+    return status;
+}
+
 psa_status_t psa_sign_hash(psa_key_id_t key,
                            psa_algorithm_t alg,
                            const uint8_t *hash,
