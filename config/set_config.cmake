@@ -14,6 +14,15 @@ if (TFM_EXTRA_CONFIG_PATH)
     include(${TFM_EXTRA_CONFIG_PATH})
 endif()
 
+# We usually don't need these messages, and they make it difficult to scan the
+# build log for error and warning messages, so we disable theme here.
+if(NOT TFM_BUILD_LOG_VERBOSE)
+    set(CMAKE_INSTALL_MESSAGE NEVER)
+    set(PARSE_MANIFEST_QUIET ON)
+    set(PARTITION_CONFIG_QUIET ON)
+    set(MEMORY_USAGE_QUIET ON)
+endif()
+
 # Load PSA config, setting options not already set
 if (TEST_PSA_API)
     include(config/tests/config_test_psa_api.cmake)
