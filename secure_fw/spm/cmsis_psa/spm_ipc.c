@@ -330,8 +330,10 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
     struct service_t *p_serv = connection_services_listhead;
 
     for (i = 0; i < STATIC_HANDLE_NUM_LIMIT; i++) {
-        if (stateless_services_ref_tbl[i]->p_ldinf->sid == sid) {
-            return stateless_services_ref_tbl[i];
+        if (stateless_services_ref_tbl[i]) {
+            if (stateless_services_ref_tbl[i]->p_ldinf->sid == sid) {
+                return stateless_services_ref_tbl[i];
+            }
         }
     }
 
