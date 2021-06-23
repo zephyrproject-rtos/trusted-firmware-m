@@ -25,6 +25,14 @@ donotedit_warning = \
 
 OUT_DIR = None # The root directory that files are generated to
 
+# variable for checking for duplicated sid
+sid_list = []
+partition_list_sid = []
+service_list = []
+sid_duplicated_partition = []
+sid_duplicated_sid = []
+sid_duplicated_service = []
+
 class TemplateLoader(BaseLoader):
     """
     Template loader class.
@@ -65,6 +73,20 @@ def manifest_validation(partition_manifest):
             service['version'] = 1
         if 'version_policy' not in service.keys():
             service['version_policy'] = "STRICT"
+
+        for k in range (len(sid_list)):
+            sid_item = sid_list[k]
+            if ((service['sid'] == sid_item) & (service['name'] != service_list[k])):
+                sid_duplicated_partition.append(partition_list_sid[k])
+                sid_duplicated_partition.append(partition_manifest['name'])
+                sid_duplicated_sid.append(sid_item)
+                sid_duplicated_sid.append(service['sid'])
+                sid_duplicated_service.append(service_list[k])
+                sid_duplicated_service.append(service['name'])
+
+        sid_list.append(service['sid'])
+        partition_list_sid.append(partition_manifest['name'])
+        service_list.append(service['name'])
 
     return partition_manifest
 
@@ -182,6 +204,18 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
                                "header_file": manifest_head_file,
                                "intermedia_file": intermedia_file,
                                "loadinfo_file": load_info_file})
+
+    if len(sid_duplicated_sid) != 0:
+        print("The following signals have duplicated sids."
+              "A Service requires a unique sid")
+        for i in range(len(sid_duplicated_sid)):
+            print("Partition: {parti} , Service: {servi} , SID: {sidn}".format(
+                  parti = sid_duplicated_partition[i],
+                  servi = sid_duplicated_service[i],
+                  sidn = sid_duplicated_sid[i])
+                 )
+
+        raise Exception("Duplicated SID found, check above for details")
 
     return partition_list
 
