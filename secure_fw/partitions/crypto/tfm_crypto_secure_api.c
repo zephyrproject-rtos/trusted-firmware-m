@@ -6,15 +6,16 @@
  */
 
 #include "array.h"
-#include "tfm_veneers.h"
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
 #ifdef TFM_PSA_API
+#include "psa/client.h"
 #include "psa_manifest/sid.h"
+#else
+#include "tfm_veneers.h"
 #endif
 
 #ifdef TFM_PSA_API
-#include "psa/client.h"
 
 #define API_DISPATCH(sfn_name, sfn_id)                         \
     psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL,                  \

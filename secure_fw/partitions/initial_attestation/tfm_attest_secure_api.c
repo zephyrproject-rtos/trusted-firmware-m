@@ -7,12 +7,13 @@
 
 #include "array.h"
 #include "psa/initial_attestation.h"
-#include "psa/client.h"
-#include "tfm_veneers.h"
 #include "tfm_memory_utils.h"
 #include "tfm_secure_api.h"
 #ifdef TFM_PSA_API
+#include "psa/client.h"
 #include "psa_manifest/sid.h"
+#else
+#include "tfm_veneers.h"
 #endif
 #include <string.h>
 
