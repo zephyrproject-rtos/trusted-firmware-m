@@ -7,12 +7,27 @@
 
 {{utilities.donotedit_warning}}
 
-{% for partition in partitions %}
-#ifdef {{partition.attr.conditional}}
-#include "{{partition.header_file}}"
-#endif /* {{partition.attr.conditional}} */
-{% endfor %}
 #include "psa_manifest/pid.h"
+
+{% for partition in partitions %}
+    {% if partition.manifest.irqs %}
+#ifdef {{partition.attr.conditional}}
+        {% if partition.manifest.psa_framework_version != 1.0 %}
+#error "Framework version greater than 1.0 is not supported"
+        {% endif %}
+        {% set irq_signal = namespace(bit=31) %}
+        {% for irq in partition.manifest.irqs %}
+            {% if (irq_signal.bit) < 4 %}
+#error "Too many IRQ signals!"
+            {% else %}
+#define {{"%-55s"|format(irq.signal)}} (1U << ({{"%d"|format(irq_signal.bit)}}))
+                {% set irq_signal.bit = irq_signal.bit - 1 %}
+            {% endif %}
+        {% endfor %}
+#endif /* {{partition.attr.conditional}} */
+    {% endif %}
+{% endfor %}
+
 {% macro _irq_record(partition_name, signal, line, priority) -%}
 { {{ partition_name }}, {{ signal }}, {{ line }}, {{ priority }} },
 {%- endmacro %}
