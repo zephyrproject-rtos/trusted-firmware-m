@@ -60,6 +60,7 @@ macro(tfm_toolchain_reset_linker_flags)
         --strict
         --symbols
         --xref
+        $<$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>:--no-merge>
         # Suppress link warnings that are consistant (and therefore hopefully
         # harmless)
         # https://developer.arm.com/documentation/100074/0608/linker-errors-and-warnings/list-of-the-armlink-error-and-warning-messages
