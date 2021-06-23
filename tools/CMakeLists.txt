@@ -123,11 +123,18 @@ add_custom_target(tfm_generated_files
     SOURCES ${OUTPUT_FILES}
 )
 
+if (PARSE_MANIFEST_QUIET)
+    set(PARSE_MANIFEST_QUIET_FLAG "-q")
+else()
+    set(PARSE_MANIFEST_QUIET_FLAG "")
+endif()
+
 add_custom_command(OUTPUT ${OUTPUT_FILES}
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tfm_parse_manifest_list.py
                                   -m ${COMBINED_LIST}
                                   -f ${GENERATED_FILE_LISTS}
                                   -o ${CMAKE_BINARY_DIR}/generated
+                                  ${PARSE_MANIFEST_QUIET_FLAG}
     DEPENDS ${TEMPLATE_FILES} ${MANIFEST_FILES}
     DEPENDS ${TEMP_MANIFEST_LISTS} ${CONFIGURED_MANIFEST_LISTS} ${GENERATED_FILE_LISTS}
 )
@@ -140,6 +147,7 @@ execute_process(
                                   -m ${COMBINED_LIST}
                                   -f ${GENERATED_FILE_LISTS}
                                   -o ${CMAKE_BINARY_DIR}/generated
+                                  ${PARSE_MANIFEST_QUIET_FLAG}
     RESULT_VARIABLE RET
 )
 

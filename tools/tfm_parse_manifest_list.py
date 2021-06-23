@@ -10,13 +10,14 @@ import io
 import re
 import sys
 import argparse
+import logging
 from jinja2 import Environment, BaseLoader, select_autoescape, TemplateNotFound
 
 try:
     import yaml
 except ImportError as e:
-    print (str(e) + ' To install it, type:')
-    print ('pip install PyYAML')
+    logging.error (str(e) + " To install it, type:")
+    logging.error ("pip install PyYAML")
     exit(1)
 
 donotedit_warning = \
@@ -150,12 +151,12 @@ def process_partition_manifests(manifest_lists):
     # Get all the manifests information as a dictionary
     for i, item in enumerate(manifest_lists):
         if i % 2 == 0 and not os.path.isfile(item):
-            print('Manifest list item [{}] must be a file'.format(i))
+            logging.error('Manifest list item [{}] must be a file'.format(i))
             exit(1)
 
         if i % 2 == 1:
             if not os.path.isdir(item):
-                print('Manifest list item [{}] must be a directory'.format(i))
+                logging.error('Manifest list item [{}] must be a directory'.format(i))
                 exit(1)
 
             # Skip original manifest paths
@@ -278,14 +279,14 @@ def gen_per_partition_files(context):
     memorytemplate = ENV.get_template(os.path.join(sys.path[0], 'templates/partition_intermedia.template'))
     infotemplate = ENV.get_template(os.path.join(sys.path[0], 'templates/partition_load_info.template'))
 
-    print ('Start to generate partition files:')
+    logging.info ("Start to generate partition files:")
 
     for one_partition in context['partitions']:
         partition_context['manifest'] = one_partition['manifest']
         partition_context['attr'] = one_partition['attr']
         partition_context['manifest_out_basename'] = one_partition['manifest_out_basename']
 
-        print ('Generating Header: ' + one_partition['header_file'])
+        logging.info ("Generating Header: " + one_partition['header_file'])
         outfile_path = os.path.dirname(one_partition['header_file'])
         if not os.path.exists(outfile_path):
             os.makedirs(outfile_path)
@@ -294,7 +295,7 @@ def gen_per_partition_files(context):
         headerfile.write(manifesttemplate.render(partition_context))
         headerfile.close()
 
-        print ('Generating Intermedia: ' + one_partition['intermedia_file'])
+        logging.info ("Generating Intermedia: " + one_partition['intermedia_file'])
         intermediafile_path = os.path.dirname(one_partition['intermedia_file'])
         if not os.path.exists(intermediafile_path):
             os.makedirs(intermediafile_path)
@@ -302,7 +303,7 @@ def gen_per_partition_files(context):
         intermediafile.write(memorytemplate.render(partition_context))
         intermediafile.close()
 
-        print ('Generating Loadinfo: ' + one_partition['loadinfo_file'])
+        logging.info ("Generating Loadinfo: " + one_partition['loadinfo_file'])
         infofile_path = os.path.dirname(one_partition['loadinfo_file'])
         if not os.path.exists(infofile_path):
             os.makedirs(infofile_path)
@@ -310,7 +311,7 @@ def gen_per_partition_files(context):
         infooutfile.write(infotemplate.render(partition_context))
         infooutfile.close()
 
-    print ('Per-partition files done:')
+    logging.info ("Per-partition files done:")
 
 def gen_summary_files(context, gen_file_lists):
     """
@@ -328,7 +329,7 @@ def gen_summary_files(context, gen_file_lists):
             file_list_yaml = yaml.safe_load(file_list_yaml_file)
             file_list.extend(file_list_yaml['file_list'])
 
-    print('Start to generate file from the generated list:')
+    logging.info("Start to generate file from the generated list:")
     for file in file_list:
         # Replace environment variables in the output filepath
         manifest_out_file = os.path.expandvars(file['output'])
@@ -337,7 +338,8 @@ def gen_summary_files(context, gen_file_lists):
 
         manifest_out_file = os.path.join(OUT_DIR, manifest_out_file)
 
-        print ('Generating ' + manifest_out_file)
+        logging.info ("Generating " + manifest_out_file)
+
         outfile_path = os.path.dirname(manifest_out_file)
         if not os.path.exists(outfile_path):
             os.makedirs(outfile_path)
@@ -348,7 +350,7 @@ def gen_summary_files(context, gen_file_lists):
         outfile.write(template.render(context))
         outfile.close()
 
-    print ('Generation of files done')
+    logging.info ("Generation of files done")
 
 def process_stateless_services(partitions):
     """
@@ -483,11 +485,17 @@ def parse_args():
                         , required=True
                         , metavar='file-list'
                         , help='These files descripe the file list to generate')
+    parser.add_argument('-q', '--quiet'
+                        , dest='quiet'
+                        , required=False
+                        , default=False
+                        , action='store_true'
+                        , help='Reduce log messages')
 
     args = parser.parse_args()
 
     if len(args.manifest_lists) % 2 != 0:
-        print('Invalid structure in manifest lists.\n'
+        logging.error('Invalid structure in manifest lists.\n'
               'Each element shall consist of a manifest list and its original path')
         exit(1)
 
@@ -511,6 +519,9 @@ def main():
     global OUT_DIR
 
     args = parse_args()
+
+    logging.basicConfig(format='%(message)s'
+                        , level=logging.WARNING if args.quiet else logging.INFO)
 
     OUT_DIR = os.path.abspath(args.outdir)
 
