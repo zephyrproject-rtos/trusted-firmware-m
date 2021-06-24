@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited
+ * Copyright (c) 2016-2021 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 #define __MPU_PRESENT             1U        /* MPU present */
 #define __SAUREGION_PRESENT       1U        /* SAU regions present */
 #define __VTOR_PRESENT            1U        /* VTOR present */
-#define __NVIC_PRIO_BITS          4U        /* Number of Bits used for Priority Levels */
+#define __NVIC_PRIO_BITS          2U        /* Number of Bits used for Priority Levels */
 #define __Vendor_SysTickConfig    0U        /* Set to 1 if different SysTick Config is used */
 #define __FPU_PRESENT             0U        /* no FPU present */
 #define __DSP_PRESENT             0U        /* no DSP extension present */
