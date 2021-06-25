@@ -207,10 +207,9 @@ def process_partition_manifests(manifest_lists):
                                'loadinfo_file': load_info_file})
 
     # Automatically assign PIDs for partitions without 'pid' attribute
-    pid = 256
+    pid = max(pid_list, default = 256 - 1)
     for idx in no_pid_manifest_idx:
-        while pid in pid_list:
-            pid += 1
+        pid += 1
         all_manifests[idx]['pid'] = pid
         pid_list.append(pid)
 
