@@ -29,6 +29,9 @@ add_subdirectory(partitions/psa_proxy)
 add_subdirectory(partitions/firmware_update)
 add_subdirectory(partitions/tfm_ffm11_partition)
 add_subdirectory(partitions/ns_proxy_partition)
+if (TFM_EXTRA_PARTITION_CMAKE_PATH)
+    add_subdirectory(${TFM_EXTRA_PARTITION_CMAKE_PATH} user_partition)
+endif()
 add_subdirectory(spm)
 
 target_include_directories(secure_fw
