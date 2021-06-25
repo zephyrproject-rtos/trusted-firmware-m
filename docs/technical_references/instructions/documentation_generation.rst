@@ -116,11 +116,12 @@ Build TF-M User Guide
 The following tools are needed:
 
     - Python3 and the following modules:
-    - Sphinx v1.7.9
+    - Sphinx v2.0.1
     - m2r v0.2.0
     - sphinxcontrib-plantuml
     - sphinxcontrib-svg2pdfconverter
     - sphinx-rtd-theme
+    - docutils v0.16
     - Graphviz dot v2.38.0 or later
     - PlantUML v1.2018.11 or later
     - Java runtime environment 1.8 or later (for running PlantUML)
@@ -135,7 +136,7 @@ The following tools are needed:
 
         .. code-block:: bash
 
-            sudo apt-get install -y python3 graphviz default-jre
+            sudo apt-get install -y python3 graphviz default-jre librsvg2-bin
             pip install -r tools/requirements.txt
             mkdir ~/plantuml
             curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
