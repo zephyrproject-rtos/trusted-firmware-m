@@ -27,6 +27,9 @@ set(CRYPTO_CONC_OPER_NUM                4           CACHE STRING    "The max num
 set(CRYPTO_ENGINE_BUF_SIZE              0x800       CACHE STRING    "Heap size for the crypto backend")
 set(CRYPTO_ASYM_SIGN_MODULE_DISABLED    ON          CACHE BOOL      "Disable PSA Crypto asymmetric key signature module")
 set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED ON          CACHE BOOL      "Disable PSA Crypto asymmetric key encryption module")
+# TODO CRYPTO_KEY_ID_ENCODES_OWNER shall be aligned with underlying crypto
+# library key ID encoding configuration
+set(CRYPTO_KEY_ID_ENCODES_OWNER         OFF         CACHE BOOL      "Encode client ID into Crypto PSA key ID")
 
 set(SYMMETRIC_INITIAL_ATTESTATION       ON          CACHE BOOL      "Use symmetric crypto for inital attestation")
 

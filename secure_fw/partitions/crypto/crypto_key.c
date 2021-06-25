@@ -15,7 +15,7 @@
 #include "tfm_crypto_private.h"
 
 #ifndef TFM_CRYPTO_KEY_MODULE_DISABLED
-#ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
 #ifndef TFM_CRYPTO_MAX_KEY_HANDLES
 #define TFM_CRYPTO_MAX_KEY_HANDLES (32)
 #endif
@@ -104,7 +104,7 @@ static void encoded_key_id_make(psa_key_id_t key, uint8_t slot_idx,
     /* Skip checking encoded_key */
     *encoded_key = mbedtls_svc_key_id_make(handle_owner[slot_idx].owner, key);
 }
-#else /* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
+#else /* CRYPTO_KEY_ID_ENCODES_OWNER */
 #define set_handle_owner(idx, client_id, key_handle)        do {} while (0)
 #define clean_handle_owner(idx)                             do {} while (0)
 
@@ -134,7 +134,7 @@ static inline void encoded_key_id_make(psa_key_id_t key, uint8_t slot_idx,
     /* Skip checking encoded_key */
     *encoded_key = mbedtls_svc_key_id_make(TFM_INVALID_CLIENT_ID, key);
 }
-#endif /* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
+#endif /* CRYPTO_KEY_ID_ENCODES_OWNER */
 #endif /* !TFM_CRYPTO_KEY_MODULE_DISABLED */
 
 /*!
@@ -161,7 +161,7 @@ psa_status_t tfm_crypto_key_attributes_from_client(
     key_attributes->core.bits = client_key_attr->bits;
 
     /* Use the client key id as the key_id and its partition id as the owner */
-#ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     key_attributes->core.id.key_id = client_key_attr->id;
     key_attributes->core.id.owner = client_id;
 #else
@@ -190,7 +190,7 @@ psa_status_t tfm_crypto_key_attributes_to_client(
     client_key_attr->bits = key_attributes->core.bits;
 
     /* Return the key_id as the client key id, do not return the owner */
-#ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     client_key_attr->id = key_attributes->core.id.key_id;
 #else
     client_key_attr->id = key_attributes->core.id;
@@ -330,7 +330,7 @@ psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
 
     status = psa_import_key(&key_attributes, data, data_length, &encoded_key);
     /* Update the imported key id */
-#ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     *psa_key = encoded_key.key_id;
 #else
     *psa_key = (psa_key_id_t)encoded_key;
@@ -382,7 +382,7 @@ psa_status_t tfm_crypto_open_key(psa_invec in_vec[],
     encoded_key = mbedtls_svc_key_id_make(partition_id, client_key_id);
 
     status = psa_open_key(encoded_key, &encoded_key);
-#ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     *key = encoded_key.key_id;
 #else
     *key = (psa_key_id_t)encoded_key;
@@ -711,7 +711,7 @@ psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
     encoded_key_id_make(source_key_id, i, &encoded_key);
 
     status = psa_copy_key(encoded_key, &key_attributes, &target_key);
-#ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     *target_key_id = target_key.key_id;
 #else
     *target_key_id = (psa_key_id_t)target_key;
@@ -766,7 +766,7 @@ psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
     }
 
     status = psa_generate_key(&key_attributes, &encoded_key);
-#ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     *key_handle = encoded_key.key_id;
 #else
     *key_handle = (psa_key_id_t)encoded_key;
