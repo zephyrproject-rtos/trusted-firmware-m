@@ -66,6 +66,7 @@ target_sources(platform_s
         native_drivers/spu.c
         spm_hal.c
         tfm_hal_isolation.c
+    PUBLIC
         plat_test.c
 )
 

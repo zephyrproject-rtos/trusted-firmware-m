@@ -132,7 +132,12 @@
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
 #define NS_DATA_START   (NS_RAM_ALIAS(S_DATA_SIZE))
+#ifdef PSA_API_TEST_IPC
+/* Last SRAM region must be kept secure for PSA FF tests */
+#define NS_DATA_SIZE    (TOTAL_RAM_SIZE - S_DATA_SIZE - SPU_SRAM_REGION_SIZE)
+#else
 #define NS_DATA_SIZE    (TOTAL_RAM_SIZE - S_DATA_SIZE)
+#endif
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for SPU configuration */
@@ -166,9 +171,37 @@
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
 
-/* Region used by psa-arch-tests to keep state */
+/* Regions used by psa-arch-tests to keep state */
 #define PSA_TEST_SCRATCH_AREA_SIZE (0x400)
+
+#ifdef PSA_API_TEST_IPC
+/* Firmware Framework test suites */
+#define FF_TEST_PARTITION_SIZE 0x100
+#define PSA_TEST_SCRATCH_AREA_BASE (NS_DATA_LIMIT + 1 - \
+                                    PSA_TEST_SCRATCH_AREA_SIZE - \
+                                    FF_TEST_PARTITION_SIZE)
+
+/* The psa-arch-tests implementation requires that the test partitions are
+ * placed in this specific order:
+ * TEST_NSPE_MMIO < TEST_SERVER < TEST_DRIVER
+ *
+ * TEST_NSPE_MMIO region must be in the NSPE, while TEST_SERVER and TEST_DRIVER
+ * must be in SPE.
+ *
+ * The TEST_NSPE_MMIO region is defined in the psa-arch-tests implementation,
+ * and it should be placed at the end of the NSPE area, after
+ * PSA_TEST_SCRATCH_AREA.
+ */
+#define FF_TEST_SERVER_PARTITION_MMIO_START  (NS_DATA_LIMIT + 1)
+#define FF_TEST_SERVER_PARTITION_MMIO_END    (FF_TEST_SERVER_PARTITION_MMIO_START + \
+                                              FF_TEST_PARTITION_SIZE - 1)
+#define FF_TEST_DRIVER_PARTITION_MMIO_START  (FF_TEST_SERVER_PARTITION_MMIO_END + 1)
+#define FF_TEST_DRIVER_PARTITION_MMIO_END    (FF_TEST_DRIVER_PARTITION_MMIO_START + \
+                                              FF_TEST_PARTITION_SIZE - 1)
+#else
+/* Development APIs test suites */
 #define PSA_TEST_SCRATCH_AREA_BASE (NS_DATA_LIMIT + 1 - \
                                     PSA_TEST_SCRATCH_AREA_SIZE)
+#endif /* PSA_API_TEST_IPC */
 
 #endif /* __REGION_DEFS_H__ */

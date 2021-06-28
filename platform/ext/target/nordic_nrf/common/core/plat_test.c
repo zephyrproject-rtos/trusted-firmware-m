@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include "tfm_plat_test.h"
+#include "pal_plat_test.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <hal/nrf_gpio.h>
@@ -23,8 +24,11 @@
 #include <helpers/nrfx_reset_reason.h>
 #include <nrf_board.h>
 #include <region_defs.h>
+
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
 #include <tfm_platform_api.h>
 #include <log/tfm_log.h>
+#endif
 
 #define TIMER_RELOAD_VALUE (1*1000*1000)
 #define USERLED_MASK       (1UL)
@@ -139,7 +143,7 @@ void pal_timer_stop_ns(void)
     timer_stop(NRF_TIMER1);
 }
 
-#if !defined(TEST_NS_SLIH_IRQ)
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
 /* Watchdog timeout handler. */
 void TIMER1_Handler(void)
 {

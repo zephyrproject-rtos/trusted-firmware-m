@@ -37,6 +37,31 @@ struct platform_data_t tfm_peripheral_std_uart = {
         NRF_UARTE1_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
 };
 
+#ifdef PSA_API_TEST_IPC
+struct platform_data_t
+    tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO = {
+        FF_TEST_SERVER_PARTITION_MMIO_START,
+        FF_TEST_SERVER_PARTITION_MMIO_END
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO = {
+        FF_TEST_DRIVER_PARTITION_MMIO_START,
+        FF_TEST_DRIVER_PARTITION_MMIO_END
+};
+
+/* This platform implementation uses PSA_TEST_SCRATCH_AREA for
+ * storing the state between resets, but the FF_TEST_NVMEM_REGIONS
+ * definitons are still needed for tests to compile.
+ */
+#define FF_TEST_NVMEM_REGION_START  0xFFFFFFFF
+#define FF_TEST_NVMEM_REGION_END    0xFFFFFFFF
+struct platform_data_t
+    tfm_peripheral_FF_TEST_NVMEM_REGION = {
+        FF_TEST_NVMEM_REGION_START,
+        FF_TEST_NVMEM_REGION_END
+};
+#endif /* PSA_API_TEST_IPC */
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
@@ -238,7 +263,10 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU2, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU3, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU4, false);
+#ifndef PSA_API_TEST_IPC
+    /* EGU5 is used as a secure peripheral in PSA FF tests */
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU5, false);
+#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM2, false);

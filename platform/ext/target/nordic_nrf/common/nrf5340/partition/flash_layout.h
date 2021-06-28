@@ -51,8 +51,15 @@
  */
 
 /* Size of a Secure and of a Non-secure image */
+#ifdef PSA_API_TEST_IPC
+/* Firmware Framework test suites */
+#define FLASH_S_PARTITION_SIZE                (0x48000)       /* S partition: 288 kB*/
+#define FLASH_NS_PARTITION_SIZE               (0x28000)       /* NS partition: 160 kB*/
+#else
 #define FLASH_S_PARTITION_SIZE                (0x40000)       /* S partition: 256 kB*/
 #define FLASH_NS_PARTITION_SIZE               (0x30000)       /* NS partition: 192 kB*/
+#endif
+
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
@@ -147,6 +154,11 @@
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
                                          FLASH_ITS_AREA_SIZE)
 #define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+
+/* PSA MMIO Area definitions */
+#define FLASH_MMIO_AREA_OFFSET          (FLASH_NV_COUNTERS_AREA_OFFSET + \
+                                         FLASH_NV_COUNTERS_AREA_SIZE)
+#define FLASH_MMIO_AREA_SIZE            (FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
