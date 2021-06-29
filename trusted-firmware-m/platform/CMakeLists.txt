@@ -149,6 +149,7 @@ target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${BL2}>:BL2>
         $<$<BOOL:${SECURE_UART1}>:SECURE_UART1>
+        $<$<BOOL:${NRF_NS_STORAGE}>:NRF_NS_STORAGE>
         DAUTH_${DEBUG_AUTHENTICATION}
         MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}
         $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA>

@@ -30,7 +30,8 @@
  * 0x000f_0000 Protected Storage Area (20 KB)
  * 0x000f_4000 Internal Trusted Storage Area (16 KB)
  * 0x000f_6000 NV counters area (4 KB)
- * 0x000f_7000 Unused
+ * 0x000f_7000 Unused (4 KB)
+ * 0x000f_8000 Non-secure storage used when built with NRF_NS_STORAGE=ON (32 KB)
  *
  * Flash layout on NRF9160 without BL2:
  *
@@ -40,7 +41,8 @@
  * 0x000f_0000 Protected Storage Area (16 KB)
  * 0x000f_4000 Internal Trusted Storage Area (8 KB)
  * 0x000f_6000 NV counters area (4 KB)
- * 0x000f_7000 Unused
+ * 0x000f_7000 Unused (4 KB)
+ * 0x000f_8000 Non-secure storage used when built with NRF_NS_STORAGE=ON (32 KB)
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -148,6 +150,11 @@
 #define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
                                          FLASH_ITS_AREA_SIZE)
 #define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+
+/* Non-secure storage region */
+#define NRF_FLASH_NS_STORAGE_AREA_OFFSET    (FLASH_TOTAL_SIZE - \
+                                             NRF_FLASH_NS_STORAGE_AREA_SIZE)
+#define NRF_FLASH_NS_STORAGE_AREA_SIZE      (0x8000)   /* 32 KB */
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
