@@ -285,6 +285,21 @@
            "*tfm_*partition_flih_test.*"
          ]
       }
-    }
+    },
+    {
+      "name": "TF-M Example Partition",
+      "short_name": "TFM_SP_EXAMPLE",
+      "manifest": "secure_fw/partitions/example_partition/tfm_example_partition.yaml",
+      "tfm_partition_ipc": true,
+      "conditional": "TFM_PARTITION_EXAMPLE",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 356,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_example.*"
+        ]
+      }
+    },
   ]
 }
