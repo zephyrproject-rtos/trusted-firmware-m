@@ -1,0 +1,55 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+{
+  "psa_framework_version": 1.0,
+  "name": "TFM_SP_EXAMPLE",
+  # Possible options: "PSA-ROT | APPLICATION-ROT"
+  "type": "APPLICATION-ROT",
+  "priority": "NORMAL",
+  "entry_point": "tfm_example_partition_main",
+  "stack_size": "0x200",
+  # Define MMIO regions that the service needs access to.
+  # "mmio_regions": [
+  #   {
+  #     "name": "TFM_PERIPHERAL_TIMER0",
+  #     "permission": "READ-WRITE"
+  #   }
+  # ],
+  "services": [
+    {
+      "name": "TFM_EXAMPLE_HASH",
+      # SIDs must be unique, ones that are currently in use are documented in
+      # tfm_secure_partition_addition.rst on line 184
+      "sid": "0x00001000",
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
+    },
+    # Define the secure service here.
+    # {
+    #   "name": "TFM_EXAMPLE_SERVICE",
+    #   # SIDs must be unique, ones that are currently in use are documented in
+    #   # tfm_secure_partition_addition.rst on line 184
+    #   "sid": "0x00001001",
+    #   "non_secure_clients": true,
+    #   "version": 1,
+    #   "version_policy": "STRICT"
+    # },
+  ],
+  # Define all the IRQs that the service wants to handle.
+  # "irqs": [
+  #   {
+  #     "source": "TFM_TIMER0_IRQ",
+  #     "signal": "TFM_EXAMPLE_SIGNAL_TIMER_0_IRQ",
+  #     "tfm_irq_priority": 64,
+  #   }
+  # ],
+  "dependencies": [
+    "TFM_CRYPTO"
+  ]
+}
