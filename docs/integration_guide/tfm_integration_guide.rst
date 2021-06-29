@@ -17,6 +17,13 @@ Explained in the :doc:`Build instructions </docs/technical_references/instructio
 *************************
 How to add a new platform
 *************************
+
+:doc:`Porting TF-M to a New Hardware </docs/integration_guide/porting_TFM_to_a_new_hardware>`
+contains guidance on how to add a new platform.
+
+*******************
+Supported Platforms
+*******************
 The hardware platforms currently supported are:
 
 - Soft Macro Model (SMM) Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
@@ -67,41 +74,6 @@ More information about the nRF9160 DK platform can be found in:
 
 More information about the BL5340 platform can be found in:
 `BL5340 product page <https://www.lairdconnect.com/wireless-modules/bluetooth-modules/bluetooth-5-modules/bl5340-series-multi-core-bluetooth-52-802154-nfc-modules>`__
-
-Generic drivers and startup/scatter files
-=========================================
-The addition of a new platform means the creation of a new subfolder inside
-``target/<board_name>`` to provide an implementation of the drivers currently
-used by TF-M, in particular MPC, PPC, and USART drivers. In addition to the
-drivers, startup and scatter files need to be provided for the supported
-toolchains.
-
-There are also board specific drivers which are used by the board
-platform to interact with the external world, for example during tests, that
-have to be provided, e.g. to blink LEDs or count time in the MPS2 board.
-
-.. Note::
-
-    Currently ITS, PS and BL2 bootloader use different flash interface
-
-Target configuration files
-==========================
-Inside the base root folder of the selected target, each implementation has to
-provide its own copy of ``target_cfg.c/.h``. This file has target specific
-configuration functions and settings that are called by the TF-M during the
-platform configuration step during TF-M boot. Examples of the configurations
-performed during this phase are the MPC configuration, the SAU configuration,
-or eventually PPC configuration if supported by the hardware platform.
-Similarly, the ``uart_stdout.c`` is used to provide functions needed to redirect
-the stdout on UART (this is currently used by TF-M to log messages).
-
-Platform retarget files
-=======================
-An important part that each new platform has to provide is the set of retarget
-files which are contained inside the ``retarget`` folder. These files define the
-peripheral base addresses for the platform, both for the secure and non-secure
-aliases (when available), and bind those addresses to the base addresses used by
-the devices available in the hardware platform.
 
 ***************************
 How to integrate another OS
