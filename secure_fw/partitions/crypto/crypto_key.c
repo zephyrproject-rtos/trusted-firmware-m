@@ -44,7 +44,7 @@ static void clean_handle_owner(uint8_t idx)
     /* Skip checking idx */
 
     handle_owner[idx].owner = TFM_INVALID_CLIENT_ID;
-    handle_owner[idx].key = NULL;
+    handle_owner[idx].key = (psa_key_id_t)0;
     handle_owner[idx].in_use = TFM_CRYPTO_NOT_IN_USE;
 }
 
