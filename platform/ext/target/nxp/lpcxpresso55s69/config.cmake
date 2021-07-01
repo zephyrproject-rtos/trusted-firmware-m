@@ -12,3 +12,6 @@ set(NXP_SDK_GIT_TAG                     "MCUX_2.9.0"    CACHE STRING    "The ver
 ############################ Partitions ########################################
 set(PS_NUM_ASSETS                       "5"             CACHE STRING    "The maximum number of assets to be stored in the Protected Storage area")
 set(PS_MAX_ASSET_SIZE                   "512"           CACHE STRING    "The maximum asset size to be stored in the Protected Storage area")
+
+set(BL2_S_IMAGE_START                   "0x8000"        CACHE STRING    "Base address of the secure image in configuration with BL2")
+set(BL2_NS_IMAGE_START                  "0x30000"       CACHE STRING    "Base address of the non secure image in configuration with BL2")
