@@ -86,7 +86,6 @@ target_sources(platform_bl2
         Native_Driver/spi_n25q256a_flash_lib.c
         bl2_boot_hal.c
         bl2_security_cnt.c
-        tfm_rotpk.c
 )
 
 target_sources(bl2

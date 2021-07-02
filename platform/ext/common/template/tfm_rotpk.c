@@ -47,9 +47,6 @@ tfm_plat_get_rotpk_hash(uint8_t image_id,
         case 2:
             return get_rotpk_hash(PLAT_OTP_ID_BL2_ROTPK_2, rotpk_hash,
                                   rotpk_hash_size);
-        case 3:
-            return get_rotpk_hash(PLAT_OTP_ID_BL2_ROTPK_3, rotpk_hash,
-                                  rotpk_hash_size);
         default:
             return TFM_PLAT_ERR_INVALID_INPUT;
     }

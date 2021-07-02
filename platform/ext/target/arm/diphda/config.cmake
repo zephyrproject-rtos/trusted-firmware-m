@@ -17,8 +17,6 @@ set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to en
 set(CRYPTO_NV_SEED                      OFF        CACHE BOOL      "Use stored NV seed to provide entropy")
 set(NS                                  FALSE      CACHE BOOL     "Whether to build NS app")
 
-set(PLATFORM_DUMMY_ROTPK                FALSE      CACHE BOOL     "Use dummy root of trust public key. Dummy key is the public key for the default keys in bl2. Should not be used in production.")
-
 # External dependency on OpenAMP and Libmetal
 set(LIBMETAL_SRC_PATH                   "DOWNLOAD"  CACHE PATH      "Path to Libmetal (or DOWNLOAD to fetch automatically")
 set(LIBMETAL_VERSION                    "f252f0e007fbfb8b3a52b1d5901250ddac96baad"  CACHE STRING    "The version of libmetal to use")
