@@ -591,6 +591,13 @@ VENEERS()
     .TFM_BSS : ALIGN(4)
     {
         __bss_start__ = .;
+        __partition_runtime_start__ = .;
+        KEEP(*(.bss.part_runtime))
+        __partition_runtime_end__ = .;
+        . = ALIGN(4);
+        __service_runtime_start__ = .;
+        KEEP(*(.bss.serv_runtime))
+        __service_runtime_end__ = .;
         *(.bss*)
         *(COMMON)
         . = ALIGN(4);
@@ -598,6 +605,10 @@ VENEERS()
     } > RAM AT> RAM
     Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
+    Image$$ER_PART_RT_POOL$$ZI$$Base = __partition_runtime_start__;
+    Image$$ER_PART_RT_POOL$$ZI$$Limit = __partition_runtime_end__;
+    Image$$ER_SERV_RT_POOL$$ZI$$Base = __service_runtime_start__;
+    Image$$ER_SERV_RT_POOL$$ZI$$Limit = __service_runtime_end__;
 
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
