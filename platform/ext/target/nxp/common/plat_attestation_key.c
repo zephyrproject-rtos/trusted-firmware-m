@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  * Copyright 2020 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,7 +54,7 @@ const uint8_t initial_attestation_private_key[] =
 
 /* Type of the EC curve which the key belongs to, in PSA curve ID form */
 #ifndef TFM_ATTESTATION_KEY_TYPE
-#define TFM_ATTESTATION_KEY_TYPE PSA_ECC_CURVE_SECP256R1 
+#define TFM_ATTESTATION_KEY_TYPE PSA_ECC_FAMILY_SECP_R1
 #endif
 
 /**

@@ -24,7 +24,7 @@
 
 /* The PSA algorithm used by this implementation */
 #define PS_CRYPTO_ALG \
-    PSA_ALG_AEAD_WITH_TAG_LENGTH(PS_CRYPTO_AEAD_ALG, PS_TAG_LEN_BYTES)
+    PSA_ALG_AEAD_WITH_SHORTENED_TAG(PS_CRYPTO_AEAD_ALG, PS_TAG_LEN_BYTES)
 
 /*
  * \brief Check whether the PS AEAD algorithm is a valid one

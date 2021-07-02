@@ -58,7 +58,7 @@ index 7f748c2..a45355e 100644
 -                                               public_key_buf_size,
 -                                               public_key_len,
 -                                               elliptic_curve_type);
-+    if (initial_attest_curve_type != PSA_ECC_CURVE_SECP256R1)
++    if (initial_attest_curve_type != PSA_ECC_FAMILY_SECP_R1)
 +        return PAL_ATTEST_ERR_KEY_FAIL;
 +
 +    if (public_key_buf_size < initial_attest_pub_key_size)

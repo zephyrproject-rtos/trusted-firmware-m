@@ -879,17 +879,6 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key,
     return status;
 }
 
-psa_status_t psa_asymmetric_sign(psa_key_id_t key,
-                                 psa_algorithm_t alg,
-                                 const uint8_t *hash,
-                                 size_t hash_length,
-                                 uint8_t *signature,
-                                 size_t signature_size,
-                                 size_t *signature_length)
-{
-    return psa_sign_hash(key, alg, hash, hash_length, signature, signature_size, signature_length);
-}
-
 psa_status_t psa_sign_hash(psa_key_id_t key,
                            psa_algorithm_t alg,
                            const uint8_t *hash,
@@ -919,16 +908,6 @@ psa_status_t psa_sign_hash(psa_key_id_t key,
     *signature_length = out_vec[0].len;
 
     return status;
-}
-
-psa_status_t psa_asymmetric_verify(psa_key_id_t key,
-                                   psa_algorithm_t alg,
-                                   const uint8_t *hash,
-                                   size_t hash_length,
-                                   const uint8_t *signature,
-                                   size_t signature_length)
-{
-    return psa_verify_hash(key, alg, hash, hash_length, signature, signature_length);
 }
 
 psa_status_t psa_verify_hash(psa_key_id_t key,
