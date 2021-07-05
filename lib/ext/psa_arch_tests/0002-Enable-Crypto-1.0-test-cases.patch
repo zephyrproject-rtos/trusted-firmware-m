@@ -1,0 +1,67 @@
+From 78094cc82bc595d5c4ca2ffe7fcfc17533d35300 Mon Sep 17 00:00:00 2001
+From: Summer Qin <summer.qin@arm.com>
+Date: Fri, 9 Jul 2021 17:40:28 +0800
+Subject: [PATCH 2/3] Enable Crypto 1.0 test cases
+
+psa_cipher_encrypt(), psa_cipher_decrypt(), psa_sign_message() and
+psa_verify_message() are supported now in tfm and mbedtls 3.0.
+Enable the test case for them.
+
+Signed-off-by: Summer Qin <summer.qin@arm.com>
+---
+ api-tests/dev_apis/crypto/common/test_crypto_common.h         | 2 ++
+ .../platform/targets/common/nspe/crypto/pal_crypto_intf.c     | 4 ----
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/api-tests/dev_apis/crypto/common/test_crypto_common.h b/api-tests/dev_apis/crypto/common/test_crypto_common.h
+index c213b7d..b1c6e65 100644
+--- a/api-tests/dev_apis/crypto/common/test_crypto_common.h
++++ b/api-tests/dev_apis/crypto/common/test_crypto_common.h
+@@ -38,6 +38,8 @@
+ #define INPUT_SEED_LEN                 4
+ #define INPUT_LABEL_LEN                5
+ 
++#define CRYPTO_1_0
++
+ extern const uint8_t key_data[];
+ 
+ extern const uint8_t rsa_128_key_pair[];
+diff --git a/api-tests/platform/targets/common/nspe/crypto/pal_crypto_intf.c b/api-tests/platform/targets/common/nspe/crypto/pal_crypto_intf.c
+index 7d8e633..dc2a292 100644
+--- a/api-tests/platform/targets/common/nspe/crypto/pal_crypto_intf.c
++++ b/api-tests/platform/targets/common/nspe/crypto/pal_crypto_intf.c
+@@ -648,7 +648,6 @@ int32_t pal_crypto_function(int type, va_list valist)
+ 			mac_operation            = va_arg(valist, psa_mac_operation_t *);
+ 			return psa_mac_abort(mac_operation);
+ 			break;
+-#ifdef CRYPTO_1_0
+ 		case PAL_CRYPTO_MAC_COMPUTE:
+ 			key                      = va_arg(valist, psa_key_id_t);
+ 			alg                      = va_arg(valist, psa_algorithm_t);
+@@ -665,7 +664,6 @@ int32_t pal_crypto_function(int type, va_list valist)
+ 								   output_size,
+ 								   p_output_length);
+ 			break;
+-#endif
+ 		case PAL_CRYPTO_MAC_OPERATION_INIT:
+ 			mac_operation            = va_arg(valist, psa_mac_operation_t *);
+ 			mac_operation_temp       = psa_mac_operation_init();
+@@ -814,7 +812,6 @@ int32_t pal_crypto_function(int type, va_list valist)
+ 								 output_size,
+ 								 p_output_length);
+ 			break;
+-#ifdef CRYPTO_1_0
+ 		case PAL_CRYPTO_SIGN_MESSAGE:
+ 			key                      = va_arg(valist, psa_key_id_t);
+ 			alg                      = va_arg(valist, psa_algorithm_t);
+@@ -845,7 +842,6 @@ int32_t pal_crypto_function(int type, va_list valist)
+ 									  input1,
+ 									  input_length1);
+ 			break;
+-#endif
+ 		case PAL_CRYPTO_VERIFY_HASH:
+ 			key                      = va_arg(valist, psa_key_id_t);
+ 			alg                      = va_arg(valist, psa_algorithm_t);
+-- 
+2.17.1
+

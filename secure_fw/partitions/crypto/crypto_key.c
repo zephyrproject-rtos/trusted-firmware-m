@@ -147,25 +147,30 @@ psa_status_t tfm_crypto_key_attributes_from_client(
                     int32_t client_id,
                     psa_key_attributes_t *key_attributes)
 {
+    psa_core_key_attributes_t *core;
+
     if (client_key_attr == NULL || key_attributes == NULL) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     *key_attributes = psa_key_attributes_init();
+    core = &(key_attributes->MBEDTLS_PRIVATE(core));
 
     /* Copy core key attributes from the client core key attributes */
-    key_attributes->core.type = client_key_attr->type;
-    key_attributes->core.lifetime = client_key_attr->lifetime;
-    key_attributes->core.policy.usage = client_key_attr->usage;
-    key_attributes->core.policy.alg = client_key_attr->alg;
-    key_attributes->core.bits = client_key_attr->bits;
+    core->MBEDTLS_PRIVATE(type) = client_key_attr->type;
+    core->MBEDTLS_PRIVATE(lifetime) = client_key_attr->lifetime;
+    core->MBEDTLS_PRIVATE(policy).MBEDTLS_PRIVATE(usage) =
+                                                     client_key_attr->usage;
+    core->MBEDTLS_PRIVATE(policy).MBEDTLS_PRIVATE(alg) =
+                                                     client_key_attr->alg;
+    core->MBEDTLS_PRIVATE(bits) = client_key_attr->bits;
 
     /* Use the client key id as the key_id and its partition id as the owner */
 #ifdef CRYPTO_KEY_ID_ENCODES_OWNER
-    key_attributes->core.id.key_id = client_key_attr->id;
-    key_attributes->core.id.owner = client_id;
+    core->MBEDTLS_PRIVATE(id).MBEDTLS_PRIVATE(key_id) = client_key_attr->id;
+    core->MBEDTLS_PRIVATE(id).MBEDTLS_PRIVATE(owner) = client_id;
 #else
-    key_attributes->core.id = client_key_attr->id;
+    core->MBEDTLS_PRIVATE(id) = client_key_attr->id;
 #endif
 
     return PSA_SUCCESS;
@@ -181,19 +186,20 @@ psa_status_t tfm_crypto_key_attributes_to_client(
 
     struct psa_client_key_attributes_s v = PSA_CLIENT_KEY_ATTRIBUTES_INIT;
     *client_key_attr = v;
+    psa_core_key_attributes_t core = key_attributes->MBEDTLS_PRIVATE(core);
 
     /* Copy core key attributes from the client core key attributes */
-    client_key_attr->type = key_attributes->core.type;
-    client_key_attr->lifetime = key_attributes->core.lifetime;
-    client_key_attr->usage = key_attributes->core.policy.usage;
-    client_key_attr->alg = key_attributes->core.policy.alg;
-    client_key_attr->bits = key_attributes->core.bits;
+    client_key_attr->type = core.MBEDTLS_PRIVATE(type);
+    client_key_attr->lifetime = core.MBEDTLS_PRIVATE(lifetime);
+    client_key_attr->usage = core.MBEDTLS_PRIVATE(policy).MBEDTLS_PRIVATE(usage);
+    client_key_attr->alg = core.MBEDTLS_PRIVATE(policy).MBEDTLS_PRIVATE(alg);
+    client_key_attr->bits = core.MBEDTLS_PRIVATE(bits);
 
     /* Return the key_id as the client key id, do not return the owner */
 #ifdef CRYPTO_KEY_ID_ENCODES_OWNER
-    client_key_attr->id = key_attributes->core.id.key_id;
+    client_key_attr->id = core.MBEDTLS_PRIVATE(id).MBEDTLS_PRIVATE(key_id);
 #else
-    client_key_attr->id = key_attributes->core.id;
+    client_key_attr->id = core.MBEDTLS_PRIVATE(id);
 #endif
 
     return PSA_SUCCESS;
@@ -331,7 +337,7 @@ psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
     status = psa_import_key(&key_attributes, data, data_length, &encoded_key);
     /* Update the imported key id */
 #ifdef CRYPTO_KEY_ID_ENCODES_OWNER
-    *psa_key = encoded_key.key_id;
+    *psa_key = encoded_key.MBEDTLS_PRIVATE(key_id);
 #else
     *psa_key = (psa_key_id_t)encoded_key;
 #endif
@@ -383,7 +389,7 @@ psa_status_t tfm_crypto_open_key(psa_invec in_vec[],
 
     status = psa_open_key(encoded_key, &encoded_key);
 #ifdef CRYPTO_KEY_ID_ENCODES_OWNER
-    *key = encoded_key.key_id;
+    *key = encoded_key.MBEDTLS_PRIVATE(key_id);
 #else
     *key = (psa_key_id_t)encoded_key;
 #endif
@@ -712,7 +718,7 @@ psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
 
     status = psa_copy_key(encoded_key, &key_attributes, &target_key);
 #ifdef CRYPTO_KEY_ID_ENCODES_OWNER
-    *target_key_id = target_key.key_id;
+    *target_key_id = target_key.MBEDTLS_PRIVATE(key_id);
 #else
     *target_key_id = (psa_key_id_t)target_key;
 #endif
@@ -767,7 +773,7 @@ psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
 
     status = psa_generate_key(&key_attributes, &encoded_key);
 #ifdef CRYPTO_KEY_ID_ENCODES_OWNER
-    *key_handle = encoded_key.key_id;
+    *key_handle = encoded_key.MBEDTLS_PRIVATE(key_id);
 #else
     *key_handle = (psa_key_id_t)encoded_key;
 #endif
