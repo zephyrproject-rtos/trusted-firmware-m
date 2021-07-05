@@ -1248,9 +1248,25 @@ psa_status_t psa_mac_compute(psa_key_id_t key,
                              size_t *mac_length)
 {
     psa_status_t status;
+    struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_MAC_COMPUTE_SID,
+        .alg = alg,
+        .key_id = key,
+    };
 
-    status = PSA_ERROR_NOT_SUPPORTED;
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = input, .len = input_length}
+    };
 
+    psa_outvec out_vec[] = {
+        {.base = mac, .len = mac_size}
+    };
+
+    status = API_DISPATCH(tfm_crypto_mac_compute,
+                          TFM_CRYPTO_MAC_COMPUTE);
+
+    *mac_length = out_vec[0].len;
     return status;
 }
 
@@ -1262,8 +1278,20 @@ psa_status_t psa_mac_verify(psa_key_id_t key,
                             const size_t mac_length)
 {
     psa_status_t status;
+    struct tfm_crypto_pack_iovec iov = {
+        .sfn_id = TFM_CRYPTO_MAC_VERIFY_SID,
+        .alg = alg,
+        .key_id = key,
+    };
 
-    status = PSA_ERROR_NOT_SUPPORTED;
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = input, .len = input_length},
+        {.base = mac, .len = mac_length}
+    };
+
+    status = API_DISPATCH_NO_OUTVEC(tfm_crypto_mac_verify,
+                                    TFM_CRYPTO_MAC_VERIFY);
 
     return status;
 }
