@@ -355,8 +355,42 @@ psa_status_t tfm_crypto_cipher_encrypt(psa_invec in_vec[],
                                        psa_outvec out_vec[],
                                        size_t out_len)
 {
-    /* FixMe: To be implemented */
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
+#else
+    psa_status_t status = PSA_SUCCESS;
+
+    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 0, 1);
+
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    psa_key_id_t key_id = iov->key_id;
+    psa_algorithm_t alg = iov->alg;
+    const uint8_t *input = in_vec[1].base;
+    size_t input_length = in_vec[1].len;
+    uint8_t *output = out_vec[0].base;
+    size_t output_size = out_vec[0].len;
+    mbedtls_svc_key_id_t encoded_key;
+
+    /* Initialise plaintext_length to zero. */
+    out_vec[0].len = 0;
+
+    status = tfm_crypto_check_handle_owner(key_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return psa_cipher_encrypt(encoded_key, alg, input, input_length,
+                              output, output_size, &out_vec[0].len);
+#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t tfm_crypto_cipher_decrypt(psa_invec in_vec[],
@@ -364,7 +398,41 @@ psa_status_t tfm_crypto_cipher_decrypt(psa_invec in_vec[],
                                        psa_outvec out_vec[],
                                        size_t out_len)
 {
-    /* FixMe: To be implemented */
+#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
+#else
+    psa_status_t status = PSA_SUCCESS;
+
+    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 0, 1);
+
+    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    psa_key_id_t key_id = iov->key_id;
+    psa_algorithm_t alg = iov->alg;
+    const uint8_t *input = in_vec[1].base;
+    size_t input_length = in_vec[1].len;
+    uint8_t *output = out_vec[0].base;
+    size_t output_size = out_vec[0].len;
+    mbedtls_svc_key_id_t encoded_key;
+
+    /* Initialise plaintext_length to zero. */
+    out_vec[0].len = 0;
+
+    status = tfm_crypto_check_handle_owner(key_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return psa_cipher_decrypt(encoded_key, alg, input, input_length,
+                              output, output_size, &out_vec[0].len);
+#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 /*!@}*/
