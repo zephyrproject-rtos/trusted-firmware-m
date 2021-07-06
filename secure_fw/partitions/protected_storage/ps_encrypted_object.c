@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,7 +28,9 @@
 /* FIXME: add the tag length to the crypto buffer size to account for the tag
  * being appended to the ciphertext by the crypto layer.
  */
-#define PS_CRYPTO_BUF_LEN (PS_MAX_ENCRYPTED_OBJ_SIZE + PS_TAG_LEN_BYTES)
+#define PS_TAG_IV_LEN_MAX   ((PS_TAG_LEN_BYTES > PS_IV_LEN_BYTES) ? \
+                             PS_TAG_LEN_BYTES : PS_IV_LEN_BYTES)
+#define PS_CRYPTO_BUF_LEN (PS_MAX_ENCRYPTED_OBJ_SIZE + PS_TAG_IV_LEN_MAX)
 
 static uint8_t ps_crypto_buf[PS_CRYPTO_BUF_LEN];
 
@@ -141,14 +143,22 @@ psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
     /* Read the encrypted object from the the persistent area */
     err = psa_its_get(fid, PS_OBJECT_START_POSITION,
                       PS_MAX_OBJECT_SIZE,
-                      (void *)obj->header.crypto.ref.iv,
+                      (void *)ps_crypto_buf,
                       &data_length);
     if (err != PSA_SUCCESS) {
         return err;
     }
 
-    /* Get the decrypt size */
+    /* Get the decrypt size. IV is also stored by ITS service. It is at the end
+     * of the read out data. Toolchains may add padding byte after iv array in
+     * crypto.ref structure. Separate the copies of header.info and iv array to
+     * skip the padding byte.
+     */
     decrypt_size = data_length - sizeof(obj->header.crypto.ref.iv);
+    tfm_memcpy(&obj->header.info, ps_crypto_buf, decrypt_size);
+    tfm_memcpy(obj->header.crypto.ref.iv,
+               ps_crypto_buf + decrypt_size,
+               sizeof(obj->header.crypto.ref.iv));
 
     /* Decrypt the object data */
     err = ps_object_auth_decrypt(fid, decrypt_size, obj);
@@ -172,11 +182,19 @@ psa_status_t ps_encrypted_object_write(uint32_t fid, struct ps_object_t *obj)
         return err;
     }
 
+    /* The IV will also be stored. The encrypted data is stored in ps_crypto_buf
+     * now. Append the value of the 'iv' to the end of the encrypted data.
+     * Toolchains may add padding byte after iv array in crypto.ref structure.
+     * The padding byte shall not be written into the storage area.
+     */
+    (void)tfm_memcpy(ps_crypto_buf + wrt_size,
+                     obj->header.crypto.ref.iv,
+                     sizeof(obj->header.crypto.ref.iv));
     wrt_size += sizeof(obj->header.crypto.ref.iv);
 
     /* Write the encrypted object to the persistent area. The tag values is not
      * copied as it is stored in the object table.
      */
-    return psa_its_set(fid, wrt_size, (const void *)obj->header.crypto.ref.iv,
+    return psa_its_set(fid, wrt_size, (const void *)ps_crypto_buf,
                        PSA_STORAGE_FLAG_NONE);
 }
