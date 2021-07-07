@@ -52,7 +52,7 @@ tfm_invalid_config(CRYPTO_HW_ACCELERATOR_OTP_STATE AND NOT (CRYPTO_HW_ACCELERATO
 ########################## BL2 #################################################
 
 get_property(MCUBOOT_STRATEGY_LIST CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS)
-tfm_invalid_config(NOT MCUBOOT_UPGRADE_STRATEGY IN_LIST MCUBOOT_STRATEGY_LIST)
+tfm_invalid_config(BL2 AND (NOT MCUBOOT_UPGRADE_STRATEGY IN_LIST MCUBOOT_STRATEGY_LIST))
 
 ####################### Code sharing ###########################################
 
