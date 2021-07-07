@@ -64,7 +64,7 @@ struct bi_list_node_t {
 
 /* Initialize the head node */
 #define UNI_LISI_INIT_HEAD(head) do {             \
-    if (head) {                                   \
+    if ((head) != NULL) {                         \
         (head)->next = NULL;                      \
     }                                             \
 } while (0)
