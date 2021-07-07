@@ -5,16 +5,21 @@
  *
  */
 
+#include "bitops.h"
 #include "psa/service.h"
 #include "spm_ipc.h"
 #include "tfm_core_utils.h"
-#include "tfm_memory_utils.h"
+#include "load/partition_defs.h"
 #include "load/service_defs.h"
+#include "load/irq_defs.h"
 #include "spm_psa_client_call.h"
 #include "utilities.h"
 #include "tfm_wait.h"
 #include "tfm_nspm.h"
 #include "ffm/spm_error_base.h"
+#include "tfm_rpc.h"
+#include "tfm_spm_hal.h"
+#include "tfm_hal_platform.h"
 
 #define GET_STATELESS_SERVICE(index)    (stateless_services_ref_tbl[index])
 extern struct service_t *stateless_services_ref_tbl[];
@@ -368,4 +373,527 @@ void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
      * and scheduler triggered
      */
     tfm_spm_send_event(service, msg);
+}
+
+psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
+                                        uint32_t timeout)
+{
+    struct partition_t *partition = NULL;
+
+    /*
+     * Timeout[30:0] are reserved for future use.
+     * SPM must ignore the value of RES.
+     */
+    timeout &= PSA_TIMEOUT_MASK;
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a PROGRAMMER ERROR if the signal_mask does not include any assigned
+     * signals.
+     */
+    if ((partition->signals_allowed & signal_mask) == 0) {
+        tfm_core_panic();
+    }
+
+    /*
+     * tfm_event_wait() blocks the caller thread if no signals are available.
+     * In this case, the return value of this function is temporary set into
+     * runtime context. After new signal(s) are available, the return value
+     * is updated with the available signal(s) and blocked thread gets to run.
+     */
+    if (timeout == PSA_BLOCK &&
+        (partition->signals_asserted & signal_mask) == 0) {
+        partition->signals_waiting = signal_mask;
+        tfm_event_wait(&partition->event);
+    } else if ((partition->signals_asserted & signal_mask) == 0) {
+        /* Activate scheduler to check if any higher priority thread to run */
+        tfm_core_thrd_activate_schedule();
+    }
+
+    return partition->signals_asserted & signal_mask;
+}
+
+psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
+{
+    struct tfm_msg_body_t *tmp_msg = NULL;
+    struct partition_t *partition = NULL;
+    uint32_t privileged;
+
+    /*
+     * Only one message could be retrieved every time for psa_get(). It is a
+     * fatal error if the input signal has more than a signal bit set.
+     */
+    if (!IS_ONLY_ONE_BIT_IN_UINT32(signal)) {
+        tfm_core_panic();
+    }
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+    privileged = tfm_spm_partition_get_privileged_mode(
+        partition->p_ldinf->flags);
+
+    /*
+     * Write the message to the service buffer. It is a fatal error if the
+     * input msg pointer is not a valid memory reference or not read-write.
+     */
+    if (tfm_memory_check(msg, sizeof(psa_msg_t), false, TFM_MEMORY_ACCESS_RW,
+        privileged) != SPM_SUCCESS) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the caller call psa_get() when no message has
+     * been set. The caller must call this function after an RoT Service signal
+     * is returned by psa_wait().
+     */
+    if (partition->signals_asserted == 0) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the RoT Service signal is not currently asserted.
+     */
+    if ((partition->signals_asserted & signal) == 0) {
+        tfm_core_panic();
+    }
+
+    /*
+     * Get message by signal from partition. It is a fatal error if getting
+     * failed, which means the input signal is not correspond to an RoT service.
+     */
+    tmp_msg = tfm_spm_get_msg_by_signal(partition, signal);
+    if (!tmp_msg) {
+        return PSA_ERROR_DOES_NOT_EXIST;
+    }
+
+    (TO_CONTAINER(tmp_msg,
+                  struct tfm_conn_handle_t,
+                  internal_msg))->status = TFM_HANDLE_STATUS_ACTIVE;
+
+    spm_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
+
+    return PSA_SUCCESS;
+}
+
+void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
+{
+    struct tfm_msg_body_t *msg = NULL;
+    struct tfm_conn_handle_t *conn_handle;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    /* It is a PROGRAMMER ERROR if a stateless service sets rhandle. */
+    if (SERVICE_IS_STATELESS(msg->service->p_ldinf->flags)) {
+        tfm_core_panic();
+    }
+
+    msg->msg.rhandle = rhandle;
+    conn_handle = tfm_spm_to_handle_instance(msg_handle);
+
+    /* Store reverse handle for following client calls. */
+    tfm_spm_set_rhandle(msg->service, conn_handle, rhandle);
+}
+
+size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
+                                  void *buffer, size_t num_bytes)
+{
+    size_t bytes;
+    struct tfm_msg_body_t *msg = NULL;
+    uint32_t privileged;
+    struct partition_t *partition = NULL;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    partition = msg->service->partition;
+    privileged = tfm_spm_partition_get_privileged_mode(
+        partition->p_ldinf->flags);
+
+    /*
+     * It is a fatal error if message handle does not refer to a request
+     * message
+     */
+    if (msg->msg.type < PSA_IPC_CALL) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if invec_idx is equal to or greater than
+     * PSA_MAX_IOVEC
+     */
+    if (invec_idx >= PSA_MAX_IOVEC) {
+        tfm_core_panic();
+    }
+
+    /* There was no remaining data in this input vector */
+    if (msg->msg.in_size[invec_idx] == 0) {
+        return 0;
+    }
+
+    /*
+     * Copy the client data to the service buffer. It is a fatal error
+     * if the memory reference for buffer is invalid or not read-write.
+     */
+    if (tfm_memory_check(buffer, num_bytes, false,
+        TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
+        tfm_core_panic();
+    }
+
+    bytes = num_bytes > msg->msg.in_size[invec_idx] ?
+                        msg->msg.in_size[invec_idx] : num_bytes;
+
+    spm_memcpy(buffer, msg->invec[invec_idx].base, bytes);
+
+    /* There maybe some remaining data */
+    msg->invec[invec_idx].base = (char *)msg->invec[invec_idx].base + bytes;
+    msg->msg.in_size[invec_idx] -= bytes;
+
+    return bytes;
+}
+
+size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
+                                  size_t num_bytes)
+{
+    struct tfm_msg_body_t *msg = NULL;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if message handle does not refer to a request
+     * message
+     */
+    if (msg->msg.type < PSA_IPC_CALL) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if invec_idx is equal to or greater than
+     * PSA_MAX_IOVEC
+     */
+    if (invec_idx >= PSA_MAX_IOVEC) {
+        tfm_core_panic();
+    }
+
+    /* There was no remaining data in this input vector */
+    if (msg->msg.in_size[invec_idx] == 0) {
+        return 0;
+    }
+
+    /*
+     * If num_bytes is greater than the remaining size of the input vector then
+     * the remaining size of the input vector is used.
+     */
+    if (num_bytes > msg->msg.in_size[invec_idx]) {
+        num_bytes = msg->msg.in_size[invec_idx];
+    }
+
+    /* There maybe some remaining data */
+    msg->invec[invec_idx].base = (char *)msg->invec[invec_idx].base +
+                                 num_bytes;
+    msg->msg.in_size[invec_idx] -= num_bytes;
+
+    return num_bytes;
+}
+
+void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
+                                 const void *buffer, size_t num_bytes)
+{
+    struct tfm_msg_body_t *msg = NULL;
+    uint32_t privileged;
+    struct partition_t *partition = NULL;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    partition = msg->service->partition;
+    privileged = tfm_spm_partition_get_privileged_mode(
+        partition->p_ldinf->flags);
+
+    /*
+     * It is a fatal error if message handle does not refer to a request
+     * message
+     */
+    if (msg->msg.type < PSA_IPC_CALL) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if outvec_idx is equal to or greater than
+     * PSA_MAX_IOVEC
+     */
+    if (outvec_idx >= PSA_MAX_IOVEC) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the call attempts to write data past the end of
+     * the client output vector
+     */
+    if (num_bytes > msg->msg.out_size[outvec_idx] -
+        msg->outvec[outvec_idx].len) {
+        tfm_core_panic();
+    }
+
+    /*
+     * Copy the service buffer to client outvecs. It is a fatal error
+     * if the memory reference for buffer is invalid or not readable.
+     */
+    if (tfm_memory_check(buffer, num_bytes, false,
+        TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
+        tfm_core_panic();
+    }
+
+    spm_memcpy((char *)msg->outvec[outvec_idx].base +
+               msg->outvec[outvec_idx].len, buffer, num_bytes);
+
+    /* Update the write number */
+    msg->outvec[outvec_idx].len += num_bytes;
+}
+
+void tfm_spm_partition_psa_reply(psa_handle_t msg_handle, psa_status_t status)
+{
+    struct service_t *service = NULL;
+    struct tfm_msg_body_t *msg = NULL;
+    int32_t ret = PSA_SUCCESS;
+    struct tfm_conn_handle_t *conn_handle;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    /*
+     * RoT Service information is needed in this function, stored it in message
+     * body structure. Only two parameters are passed in this function: handle
+     * and status, so it is useful and simply to do like this.
+     */
+    service = msg->service;
+    if (!service) {
+        tfm_core_panic();
+    }
+
+    /*
+     * Three type of message are passed in this function: CONNECTION, REQUEST,
+     * DISCONNECTION. It needs to process differently for each type.
+     */
+    conn_handle = tfm_spm_to_handle_instance(msg_handle);
+    switch (msg->msg.type) {
+    case PSA_IPC_CONNECT:
+        /*
+         * Reply to PSA_IPC_CONNECT message. Connect handle is returned if the
+         * input status is PSA_SUCCESS. Others return values are based on the
+         * input status.
+         */
+        if (status == PSA_SUCCESS) {
+            ret = msg_handle;
+        } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
+            /* Refuse the client connection, indicating a permanent error. */
+            tfm_spm_free_conn_handle(service, conn_handle);
+            ret = PSA_ERROR_CONNECTION_REFUSED;
+        } else if (status == PSA_ERROR_CONNECTION_BUSY) {
+            /* Fail the client connection, indicating a transient error. */
+            ret = PSA_ERROR_CONNECTION_BUSY;
+        } else {
+            tfm_core_panic();
+        }
+        break;
+    case PSA_IPC_DISCONNECT:
+        /* Service handle is not used anymore */
+        tfm_spm_free_conn_handle(service, conn_handle);
+
+        /*
+         * If the message type is PSA_IPC_DISCONNECT, then the status code is
+         * ignored
+         */
+        break;
+    default:
+        if (msg->msg.type >= PSA_IPC_CALL) {
+            /* Reply to a request message. Return values are based on status */
+            ret = status;
+            /*
+             * The total number of bytes written to a single parameter must be
+             * reported to the client by updating the len member of the
+             * psa_outvec structure for the parameter before returning from
+             * psa_call().
+             */
+            update_caller_outvec_len(msg);
+            if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
+                tfm_spm_free_conn_handle(service, conn_handle);
+            }
+        } else {
+            tfm_core_panic();
+        }
+    }
+
+    if (ret == PSA_ERROR_PROGRAMMER_ERROR) {
+        /*
+         * If the source of the programmer error is a Secure Partition, the SPM
+         * must panic the Secure Partition in response to a PROGRAMMER ERROR.
+         */
+        if (TFM_CLIENT_ID_IS_NS(msg->msg.client_id)) {
+            conn_handle->status = TFM_HANDLE_STATUS_CONNECT_ERROR;
+        } else {
+            tfm_core_panic();
+        }
+    } else {
+        conn_handle->status = TFM_HANDLE_STATUS_IDLE;
+    }
+
+    if (is_tfm_rpc_msg(msg)) {
+        tfm_rpc_client_call_reply(msg, ret);
+    } else {
+        tfm_event_wake(&msg->ack_evnt, ret);
+    }
+}
+
+void tfm_spm_partition_psa_notify(int32_t partition_id)
+{
+    notify_with_signal(partition_id, PSA_DOORBELL);
+}
+
+void tfm_spm_partition_psa_clear(void)
+{
+    struct partition_t *partition = NULL;
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the Secure Partition's doorbell signal is not
+     * currently asserted.
+     */
+    if ((partition->signals_asserted & PSA_DOORBELL) == 0) {
+        tfm_core_panic();
+    }
+    partition->signals_asserted &= ~PSA_DOORBELL;
+}
+
+void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
+{
+    struct irq_load_info_t *irq_info = NULL;
+    struct partition_t *partition = NULL;
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    /* It is a fatal error if passed signal is not an interrupt signal. */
+    if (!irq_info) {
+        tfm_core_panic();
+    }
+
+    if (irq_info->flih_func) {
+        /* This API is for SLIH IRQs only */
+        psa_panic();
+    }
+
+    /* It is a fatal error if passed signal is not currently asserted */
+    if ((partition->signals_asserted & irq_signal) == 0) {
+        tfm_core_panic();
+    }
+
+    partition->signals_asserted &= ~irq_signal;
+
+    tfm_spm_hal_clear_pending_irq((IRQn_Type)(irq_info->source));
+    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
+}
+
+void tfm_spm_partition_psa_panic(void)
+{
+    /*
+     * PSA FF recommends that the SPM causes the system to restart when a secure
+     * partition panics.
+     */
+    tfm_hal_system_reset();
+}
+
+void tfm_spm_partition_irq_enable(psa_signal_t irq_signal)
+{
+    struct partition_t *partition;
+    struct irq_load_info_t *irq_info;
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    if (!irq_info) {
+        tfm_core_panic();
+    }
+
+    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
+}
+
+psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal)
+{
+    struct partition_t *partition;
+    struct irq_load_info_t *irq_info;
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    if (!irq_info) {
+        tfm_core_panic();
+    }
+
+    tfm_spm_hal_disable_irq((IRQn_Type)(irq_info->source));
+
+    return 1;
+}
+
+void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
+{
+    struct irq_load_info_t *irq_info;
+    struct partition_t *partition;
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    if (!irq_info) {
+        tfm_core_panic();
+    }
+
+    if (!irq_info->flih_func) {
+        /* This API is for FLIH IRQs only */
+        tfm_core_panic();
+    }
+
+    if ((partition->signals_asserted & irq_signal) == 0) {
+        /* The signal is not asserted */
+        tfm_core_panic();
+    }
+
+    partition->signals_asserted &= ~irq_signal;
 }

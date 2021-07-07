@@ -102,7 +102,7 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr);
  */
 void tfm_spm_psa_close(uint32_t *args, bool ns_caller);
 
-/* Svcall for PSA Service APIs */
+/* Svcall for PSA Partition APIs */
 
 /**
  * \brief SVC handler for \ref psa_wait.
