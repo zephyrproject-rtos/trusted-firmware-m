@@ -83,4 +83,5 @@ tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND TFM_PSA_API)
 ########################### TF-M Tests     #####################################
 
 tfm_invalid_config(TFM_ENABLE_SLIH_TEST AND NOT TFM_PSA_API)
+tfm_invalid_config(TFM_ENABLE_FLIH_TEST AND NOT TFM_PSA_API)
 tfm_invalid_config(TFM_ENABLE_SLIH_TEST AND TFM_ENABLE_FLIH_TEST)
