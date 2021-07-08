@@ -127,6 +127,8 @@ The following tools are needed:
     - Java runtime environment 1.8 or later (for running PlantUML)
     - LaTeX - for PDF generation only
     - PdfLaTeX - for PDF generation only
+    - librsvg2-bin - a SVG pictures renderer library to support
+      sphinxcontrib-svg2pdfconverter
 
 .. tabs::
 

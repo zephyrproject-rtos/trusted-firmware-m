@@ -367,6 +367,7 @@ To build the TF-M firmware the following tools are needed:
    "Java runtime environment (JRE)",">1.8","Reference Manual, User Guide"
    "LaTex",,"pdf version of Reference Manual and User Guide"
    "PdfLaTex",,"pdf version of Reference Manual and User Guide"
+   "librsvg2-bin",, "User Guide"
 
 Dependency chain:
 
@@ -399,6 +400,7 @@ Dependency chain:
     state LaTex as "LaTex" <<pdf>>
     state PdfLaTex as "PdfLaTex" <<<<pdf>>>>
     state Doxygen as "Doxygen" <<doc>>
+    state librsvg as "librsvg2-bin" <<doc>>
 
     [*] --> fw
     fw --> c_comp
@@ -431,6 +433,7 @@ Dependency chain:
     tabs --> Python3
     sphnix_puml --> Python3
     sphnix_svg --> Python3
+    sphnix_svg --> librsvg
     Sphinx --> PlantUML
     PlantUML --> JRE
     PlantUML --> gwiz
