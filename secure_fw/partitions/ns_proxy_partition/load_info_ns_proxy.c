@@ -12,7 +12,6 @@
 #include "region.h"
 #include "region_defs.h"
 #include "spm_ipc.h"
-#include "spm_partition_defs.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"

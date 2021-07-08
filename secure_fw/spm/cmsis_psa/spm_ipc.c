@@ -27,7 +27,6 @@
 #include "tfm_core_trustzone.h"
 #include "lists.h"
 #include "tfm_pools.h"
-#include "spm_partition_defs.h"
 #include "psa_manifest/pid.h"
 #include "tfm/tfm_spm_services.h"
 #include "load/partition_defs.h"

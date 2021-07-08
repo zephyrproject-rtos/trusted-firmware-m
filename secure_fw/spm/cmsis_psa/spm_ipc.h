@@ -9,7 +9,6 @@
 #define __SPM_IPC_H__
 
 #include <stdint.h>
-#include "spm_partition_defs.h"
 #include "tfm_arch.h"
 #include "lists.h"
 #include "tfm_wait.h"
@@ -55,6 +54,8 @@
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
 #define TFM_MSG_MAGIC                   0x15154343
+
+typedef psa_flih_result_t (*psa_flih_func)(void);
 
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {

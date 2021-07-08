@@ -11,6 +11,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+/* TF-M internal partition ID */
+#define TFM_SP_NON_SECURE_ID                    (0)
+#define TFM_SP_IDLE_ID                          (1)
+#define INVALID_PARTITION_ID                    (~0U)
+
 /* Encode a magic number into version for validating partition info */
 #define PARTITION_INFO_VERSION_MASK             (0x0000FFFF)
 #define PARTITION_INFO_MAGIC_MASK               (0xFFFF0000)

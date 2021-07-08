@@ -12,7 +12,7 @@
 #include "tfm_memory_utils.h"
 #include "tfm_api.h"
 #include "tfm_core_utils.h"
-#include "spm_partition_defs.h"
+#include "psa_manifest/pid.h"
 #ifdef TFM_PSA_API
 #include "internal_errors.h"
 #include "utilities.h"
