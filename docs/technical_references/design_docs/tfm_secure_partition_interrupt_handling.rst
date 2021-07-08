@@ -40,7 +40,7 @@ manifest file IRQ declaration example
     ]}
 
 See
-:doc:`secure IRQ handling </docs/technical_references/tfm_secure_irq_handling>`
+:doc:`secure IRQ handling </docs/technical_references/design_docs/tfm_secure_irq_handling>`
 for further information on IRQ source and signal.
 
 Partition ISR function

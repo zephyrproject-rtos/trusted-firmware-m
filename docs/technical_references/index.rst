@@ -5,11 +5,9 @@ Technical References
     :maxdepth: 2
     :titlesonly:
     :glob:
-    :numbered:
 
     */index
     /tools/index
-    *
 
 --------------
 
