@@ -356,7 +356,7 @@ To build the TF-M firmware the following tools are needed:
    "click",,"Firmware"
    "imgtool",,"Firmware"
    "Doxygen",">1.8","Reference manual"
-   "Sphinx","=1.7.9","User Guide"
+   "Sphinx","=2.0.1","User Guide"
    "sphinxcontrib-plantuml",,"User Guide"
    "sphinxcontrib-svg2pdfconverter",,"User Guide"
    "sphinx-rtd-theme",,"User Guide"
