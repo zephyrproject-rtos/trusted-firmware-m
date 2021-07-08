@@ -12,6 +12,7 @@
 #ifdef TFM_PSA_API
 #include "psa/client.h"
 #include "psa_manifest/sid.h"
+#include "tfm_its_defs.h"
 #else
 #include "tfm_veneers.h"
 #endif
@@ -22,9 +23,6 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
                          psa_storage_create_flags_t create_flags)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
 
     psa_invec in_vec[] = {
         { .base = &uid, .len = sizeof(uid) },
@@ -33,14 +31,10 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
     };
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_ITS_SET_SID, TFM_ITS_SET_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
 
-    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), NULL, 0);
+    status = psa_call(TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_HANDLE, TFM_ITS_SET,
+                      in_vec, IOVEC_LEN(in_vec), NULL, 0);
 
-    psa_close(handle);
 #else
     status = tfm_its_set_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
 
@@ -65,9 +59,6 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
                          size_t *p_data_length)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
 
     psa_invec in_vec[] = {
         { .base = &uid, .len = sizeof(uid) },
@@ -83,15 +74,10 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
     }
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_ITS_GET_SID, TFM_ITS_GET_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
 
-    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), out_vec,
-                      IOVEC_LEN(out_vec));
+    status = psa_call(TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_HANDLE, TFM_ITS_GET,
+                      in_vec, IOVEC_LEN(in_vec), out_vec, IOVEC_LEN(out_vec));
 
-    psa_close(handle);
 #else
     status = tfm_its_get_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                     out_vec, IOVEC_LEN(out_vec));
@@ -116,9 +102,6 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
                               struct psa_storage_info_t *p_info)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
 
     psa_invec in_vec[] = {
         { .base = &uid, .len = sizeof(uid) }
@@ -129,15 +112,11 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
     };
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_ITS_GET_INFO_SID, TFM_ITS_GET_INFO_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
 
-    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), out_vec,
+    status = psa_call(TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_HANDLE,
+                      TFM_ITS_GET_INFO, in_vec, IOVEC_LEN(in_vec), out_vec,
                       IOVEC_LEN(out_vec));
 
-    psa_close(handle);
 #else
     status = tfm_its_get_info_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                          out_vec, IOVEC_LEN(out_vec));
@@ -158,23 +137,15 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
 psa_status_t psa_its_remove(psa_storage_uid_t uid)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
 
     psa_invec in_vec[] = {
         { .base = &uid, .len = sizeof(uid) }
     };
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_ITS_REMOVE_SID, TFM_ITS_REMOVE_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
 
-    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), NULL, 0);
-
-    psa_close(handle);
+    status = psa_call(TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_HANDLE,
+                      TFM_ITS_REMOVE, in_vec, IOVEC_LEN(in_vec), NULL, 0);
 
 #else
     status = tfm_its_remove_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
