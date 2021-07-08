@@ -6,7 +6,7 @@
  */
 
 #include "spm_ipc.h"
-#include "ffm/spm_psa_client_call.h"
+#include "ffm/psa_api.h"
 #include "tfm_rpc.h"
 #include "utilities.h"
 #include "load/partition_defs.h"

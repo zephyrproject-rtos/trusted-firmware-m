@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __TFM_PSA_CLIENT_CALL_H__
-#define __TFM_PSA_CLIENT_CALL_H__
+#ifndef __PSA_API_H__
+#define __PSA_API_H__
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -354,4 +354,4 @@ psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal);
  */
 void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal);
 
-#endif
+#endif /* __PSA_API_H__ */

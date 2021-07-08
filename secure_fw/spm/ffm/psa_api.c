@@ -12,7 +12,7 @@
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/irq_defs.h"
-#include "spm_psa_client_call.h"
+#include "psa_api.h"
 #include "utilities.h"
 #include "tfm_wait.h"
 #include "tfm_nspm.h"

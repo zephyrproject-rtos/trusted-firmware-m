@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __PSA_CLIENT_SERVICE_APIS_H__
-#define __PSA_CLIENT_SERVICE_APIS_H__
+#ifndef __PSA_API_SVC_H__
+#define __PSA_API_SVC_H__
 
 /* Svcall for PSA Client APIs */
 
@@ -309,4 +309,4 @@ psa_irq_status_t tfm_spm_irq_disable(uint32_t *args);
  */
 void tfm_spm_psa_reset_signal(uint32_t *args);
 
-#endif /* __PSA_CLIENT_SERVICE_APIS_H__ */
+#endif /* __PSA_API_SVC_H__ */
