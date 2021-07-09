@@ -8,6 +8,7 @@
 #include "bitops.h"
 #include "psa/service.h"
 #include "spm_ipc.h"
+#include "tfm_arch.h"
 #include "tfm_core_utils.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
@@ -29,9 +30,10 @@ uint32_t tfm_spm_client_psa_framework_version(void)
     return PSA_FRAMEWORK_VERSION;
 }
 
-uint32_t tfm_spm_client_psa_version(uint32_t sid, bool ns_caller)
+uint32_t tfm_spm_client_psa_version(uint32_t sid)
 {
     struct service_t *service;
+    bool ns_caller = tfm_spm_is_ns_caller();
 
     /*
      * It should return PSA_VERSION_NONE if the RoT Service is not
@@ -53,14 +55,14 @@ uint32_t tfm_spm_client_psa_version(uint32_t sid, bool ns_caller)
     return service->p_ldinf->version;
 }
 
-psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
-                                        bool ns_caller)
+psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
 {
     struct service_t *service;
     struct tfm_msg_body_t *msg;
     struct tfm_conn_handle_t *connect_handle;
     int32_t client_id;
     psa_handle_t handle;
+    bool ns_caller = tfm_spm_is_ns_caller();
 
     /*
      * It is a PROGRAMMER ERROR if the RoT Service does not exist on the
@@ -130,7 +132,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
 psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
                                      const psa_invec *inptr, size_t in_num,
                                      psa_outvec *outptr, size_t out_num,
-                                     bool ns_caller, uint32_t privileged)
+                                     uint32_t privileged)
 {
     psa_invec invecs[PSA_MAX_IOVEC];
     psa_outvec outvecs[PSA_MAX_IOVEC];
@@ -140,6 +142,12 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     int i, j;
     int32_t client_id;
     uint32_t sid, version, index;
+    bool ns_caller = tfm_spm_is_ns_caller();
+
+    /* The request type must be zero or positive. */
+    if (type < 0) {
+        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+    }
 
     /* It is a PROGRAMMER ERROR if in_len + out_len > PSA_MAX_IOVEC. */
     if ((in_num > PSA_MAX_IOVEC) ||
@@ -312,12 +320,13 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     return PSA_SUCCESS;
 }
 
-void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller)
+void tfm_spm_client_psa_close(psa_handle_t handle)
 {
     struct service_t *service;
     struct tfm_msg_body_t *msg;
     struct tfm_conn_handle_t *conn_handle;
     int32_t client_id;
+    bool ns_caller = tfm_spm_is_ns_caller();
 
     /* It will have no effect if called with the NULL handle */
     if (handle == PSA_NULL_HANDLE) {

@@ -356,6 +356,14 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          uint32_t privileged);
 
 /**
+ * \brief                       Get the ns_caller info from runtime context.
+ *
+ * \retval                      - true: the PSA API caller is from non-secure
+ *                              - false: the PSA API caller is from secure
+ */
+bool tfm_spm_is_ns_caller(void);
+
+/**
  * \brief               Set up the isolation boundary of the given partition.
  *
  * \param[in] partition The partition of which the boundary is set up.
@@ -388,11 +396,8 @@ uint32_t tfm_spm_init(void);
 /**
  * \brief Validate the whether NS caller re-enter.
  *
- * \param[in] p_cur_sp          Pointer to current partition.
  * \param[in] p_ctx             Pointer to current stack context.
  * \param[in] exc_return        EXC_RETURN value.
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Or from secure client.
  *
  * \retval void                 Success.
  *
@@ -400,20 +405,16 @@ uint32_t tfm_spm_init(void);
  *  For architecture v8.1m and later, will use hardware re-entrant detection.
  *  Otherwise will use the software solution to validate the caller.
  */
-void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
-                             uint32_t exc_return, bool ns_caller);
+void tfm_spm_validate_caller(uint32_t *p_ctx, uint32_t exc_return);
 #else
 /**
  * In v8.1 mainline, will use hardware re-entrant detection instead.
  */
 __STATIC_INLINE
-void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
-                             uint32_t exc_return, bool ns_caller)
+void tfm_spm_validate_caller(uint32_t *p_ctx, uint32_t exc_return)
 {
-    (void)p_cur_sp;
     (void)p_ctx;
     (void)exc_return;
-    (void)ns_caller;
     return;
 }
 #endif

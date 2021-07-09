@@ -20,10 +20,6 @@
 #include "ffm/psa_api_svc.h"
 #include "tfm_hal_spm_logdev.h"
 
-/* The section names come from the scatter file */
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-
 /* MSP bottom (higher address) */
 REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Limit);
 
@@ -42,43 +38,19 @@ struct tfm_svc_flih_ctx_t {
 static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
-    bool ns_caller = false;
-    struct partition_t *partition = NULL;
-    uint32_t veneer_base =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-    uint32_t veneer_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-
-    /*
-     * The caller security attribute detection bases on LR of state context.
-     * However, if SP calls PSA APIs based on its customized SVC, the LR may be
-     * occupied by general purpose value while calling SVC.
-     * Check if caller comes from non-secure: return address (ctx[6]) is belongs
-     * to veneer section, and the bit0 of LR (ctx[5]) is zero.
-     */
-    if (ctx[6] >= veneer_base && ctx[6] < veneer_limit &&
-        !(ctx[5] & TFM_VENEER_LR_BIT0_MASK)) {
-        ns_caller = true;
-    }
-
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
-
-    tfm_spm_validate_caller(partition, ctx, lr, ns_caller);
+    tfm_spm_validate_caller(ctx, lr);
 
     switch (svc_num) {
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_spm_psa_framework_version();
     case TFM_SVC_PSA_VERSION:
-        return tfm_spm_psa_version(ctx, ns_caller);
+        return tfm_spm_psa_version(ctx);
     case TFM_SVC_PSA_CONNECT:
-        return tfm_spm_psa_connect(ctx, ns_caller);
+        return tfm_spm_psa_connect(ctx);
     case TFM_SVC_PSA_CALL:
-        return tfm_spm_psa_call(ctx, ns_caller, lr);
+        return tfm_spm_psa_call(ctx, lr);
     case TFM_SVC_PSA_CLOSE:
-        tfm_spm_psa_close(ctx, ns_caller);
+        tfm_spm_psa_close(ctx);
         break;
     case TFM_SVC_PSA_WAIT:
         return tfm_spm_psa_wait(ctx);

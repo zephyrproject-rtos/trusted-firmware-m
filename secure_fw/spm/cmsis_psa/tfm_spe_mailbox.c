@@ -14,8 +14,6 @@
 #include "tfm_rpc.h"
 #include "tfm_multi_core.h"
 
-#define NS_CALLER_FLAG          (true)
-
 static struct secure_mailbox_queue_t spe_mailbox_queue;
 
 static int32_t tfm_mailbox_dispatch(uint32_t call_type,
@@ -36,12 +34,12 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_VERSION:
         spm_params.sid = params->psa_version_params.sid;
-        *psa_ret = tfm_rpc_psa_version(&spm_params, NS_CALLER_FLAG);
+        *psa_ret = tfm_rpc_psa_version(&spm_params);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CONNECT:
         spm_params.sid = params->psa_connect_params.sid;
         spm_params.version = params->psa_connect_params.version;
-        *psa_ret = tfm_rpc_psa_connect(&spm_params, NS_CALLER_FLAG);
+        *psa_ret = tfm_rpc_psa_connect(&spm_params);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CALL:
         spm_params.handle = params->psa_call_params.handle;
@@ -50,11 +48,11 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
         spm_params.in_len = params->psa_call_params.in_len;
         spm_params.out_vec = params->psa_call_params.out_vec;
         spm_params.out_len = params->psa_call_params.out_len;
-        *psa_ret = tfm_rpc_psa_call(&spm_params, NS_CALLER_FLAG);
+        *psa_ret = tfm_rpc_psa_call(&spm_params);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CLOSE:
         spm_params.handle = params->psa_close_params.handle;
-        tfm_rpc_psa_close(&spm_params, NS_CALLER_FLAG);
+        tfm_rpc_psa_close(&spm_params);
         return MAILBOX_SUCCESS;
     default:
         return MAILBOX_INVAL_PARAMS;

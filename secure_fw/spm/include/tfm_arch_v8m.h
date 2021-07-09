@@ -40,6 +40,11 @@
         EXC_RETURN_STACK_MAIN | EXC_RETURN_RES0 |               \
         EXC_RETURN_EXC_SECURE
 
+/* Exception numbers */
+#define EXC_NUM_THREAD_MODE                     (0)
+#define EXC_NUM_SVCALL                          (11)
+#define EXC_NUM_PENDSV                          (14)
+
 #if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
 struct tfm_arch_ctx_t {
     uint32_t    r4;

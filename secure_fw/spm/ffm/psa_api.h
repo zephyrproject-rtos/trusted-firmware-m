@@ -37,22 +37,18 @@ uint32_t tfm_spm_client_psa_framework_version(void);
  * \brief handler for \ref psa_version.
  *
  * \param[in] sid               RoT Service identity.
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Otherwise from secure client.
  *
  * \retval PSA_VERSION_NONE     The RoT Service is not implemented, or the
  *                              caller is not permitted to access the service.
  * \retval > 0                  The version of the implemented RoT Service.
  */
-uint32_t tfm_spm_client_psa_version(uint32_t sid, bool ns_caller);
+uint32_t tfm_spm_client_psa_version(uint32_t sid);
 
 /**
  * \brief handler for \ref psa_connect.
  *
  * \param[in] sid               RoT Service identity.
  * \param[in] version           The version of the RoT Service.
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Otherwise from secure client.
  *
  * \retval PSA_SUCCESS          Success.
  * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
@@ -63,8 +59,7 @@ uint32_t tfm_spm_client_psa_version(uint32_t sid, bool ns_caller);
  *                              supported, or the caller is not permitted to
  *                              access the service.
  */
-psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
-                                        bool ns_caller);
+psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version);
 
 /**
  * \brief handler for \ref psa_call.
@@ -81,8 +76,6 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
  *                              \ref psa_outvec
  * \param[in] out_num           Number of outut psa_outvec structures.
  *                              \ref psa_outvec
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Otherwise from secure client.
  * \param[in] privileged        Privileged mode or unprivileged mode:
  *                              \ref TFM_PARTITION_UNPRIVILEGED_MODE
  *                              \ref TFM_PARTITION_PRIVILEGED_MODE
@@ -100,15 +93,13 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version,
 psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
                                      const psa_invec *inptr, size_t in_num,
                                      psa_outvec *outptr, size_t out_num,
-                                     bool ns_caller, uint32_t privileged);
+                                     uint32_t privileged);
 
 /**
  * \brief handler for \ref psa_close.
  *
  * \param[in] handle            Service handle to the connection to be closed,
  *                              \ref psa_handle_t
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Otherwise from secure client.
  *
  * \retval void                 Success.
  * \retval "Does not return"    The call is invalid, one or more of the
@@ -117,7 +108,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
  *                                the null handle.
  * \arg                           The connection is handling a request.
  */
-void tfm_spm_client_psa_close(psa_handle_t handle, bool ns_caller);
+void tfm_spm_client_psa_close(psa_handle_t handle);
 
 /* PSA Partition API function body, for privileged use only. */
 

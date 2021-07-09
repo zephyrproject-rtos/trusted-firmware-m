@@ -34,22 +34,18 @@ uint32_t tfm_spm_psa_framework_version(void);
  * \brief SVC handler for \ref psa_version.
  *
  * \param[in] args              Include all input arguments: sid.
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Or from secure client.
  *
  * \retval PSA_VERSION_NONE     The RoT Service is not implemented, or the
  *                              caller is not permitted to access the service.
  * \retval > 0                  The version of the implemented RoT Service.
  */
-uint32_t tfm_spm_psa_version(uint32_t *args, bool ns_caller);
+uint32_t tfm_spm_psa_version(uint32_t *args);
 
 /**
  * \brief SVC handler for \ref psa_connect.
  *
  * \param[in] args              Include all input arguments:
  *                              sid, version.
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Or from secure client.
  *
  * \retval PSA_SUCCESS          Success.
  * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
@@ -60,15 +56,13 @@ uint32_t tfm_spm_psa_version(uint32_t *args, bool ns_caller);
  *                              supported, or the caller is not permitted to
  *                              access the service.
  */
-psa_status_t tfm_spm_psa_connect(uint32_t *args, bool ns_caller);
+psa_status_t tfm_spm_psa_connect(uint32_t *args);
 
 /**
  * \brief SVC handler for \ref psa_call.
  *
  * \param[in] args              Include all input arguments:
  *                              handle, in_vec, in_len, out_vec, out_len.
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Or from secure client.
  * \param[in] lr                EXC_RETURN value of the SVC.
  *
  * \retval >=0                  RoT Service-specific status value.
@@ -84,14 +78,12 @@ psa_status_t tfm_spm_psa_connect(uint32_t *args, bool ns_caller);
  * \arg                           The message is unrecognized by the RoT
  *                                Service or incorrectly formatted.
  */
-psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr);
+psa_status_t tfm_spm_psa_call(uint32_t *args, uint32_t lr);
 
 /**
  * \brief SVC handler for \ref psa_close.
  *
  * \param[in] args              Include all input arguments: handle.
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Or from secure client.
  *
  * \retval void                 Success.
  * \retval "Does not return"    The call is invalid, one or more of the
@@ -100,7 +92,7 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr);
  *                                the null handle.
  * \arg                           The connection is handling a request.
  */
-void tfm_spm_psa_close(uint32_t *args, bool ns_caller);
+void tfm_spm_psa_close(uint32_t *args);
 
 /* Svcall for PSA Partition APIs */
 

@@ -36,17 +36,17 @@ uint32_t tfm_spm_psa_framework_version(void)
     return tfm_spm_client_psa_framework_version();
 }
 
-uint32_t tfm_spm_psa_version(uint32_t *args, bool ns_caller)
+uint32_t tfm_spm_psa_version(uint32_t *args)
 {
     uint32_t sid;
 
     TFM_CORE_ASSERT(args != NULL);
     sid = (uint32_t)args[0];
 
-    return tfm_spm_client_psa_version(sid, ns_caller);
+    return tfm_spm_client_psa_version(sid);
 }
 
-psa_status_t tfm_spm_psa_connect(uint32_t *args, bool ns_caller)
+psa_status_t tfm_spm_psa_connect(uint32_t *args)
 {
     uint32_t sid;
     uint32_t version;
@@ -55,10 +55,10 @@ psa_status_t tfm_spm_psa_connect(uint32_t *args, bool ns_caller)
     sid = (uint32_t)args[0];
     version = (uint32_t)args[1];
 
-    return tfm_spm_client_psa_connect(sid, version, ns_caller);
+    return tfm_spm_client_psa_connect(sid, version);
 }
 
-psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
+psa_status_t tfm_spm_psa_call(uint32_t *args, uint32_t lr)
 {
     psa_handle_t handle;
     psa_invec *inptr;
@@ -84,23 +84,18 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
     inptr = (psa_invec *)args[2];
     outptr = (psa_outvec *)args[3];
 
-    /* The request type must be zero or positive. */
-    if (type < 0) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
-    }
-
     return tfm_spm_client_psa_call(handle, type, inptr, in_num, outptr, out_num,
-                                   ns_caller, privileged);
+                                   privileged);
 }
 
-void tfm_spm_psa_close(uint32_t *args, bool ns_caller)
+void tfm_spm_psa_close(uint32_t *args)
 {
     psa_handle_t handle;
 
     TFM_CORE_ASSERT(args != NULL);
     handle = args[0];
 
-    tfm_spm_client_psa_close(handle, ns_caller);
+    tfm_spm_client_psa_close(handle);
 }
 
 /****** SVC-use only. SVC args unstacking for PSA Partition APIs ******/
