@@ -687,12 +687,12 @@ psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
     const struct psa_client_key_attributes_s *client_key_attr = in_vec[1].base;
     psa_status_t status;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-    uint8_t i = 0;
+    uint8_t source_idx = 0, target_idx = 0;
     int32_t partition_id = 0;
     mbedtls_svc_key_id_t target_key;
     mbedtls_svc_key_id_t encoded_key;
 
-    status = find_empty_handle_owner_slot(&i);
+    status = find_empty_handle_owner_slot(&target_idx);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -709,12 +709,12 @@ psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
         return status;
     }
 
-    status = check_handle_owner(source_key_id, NULL);
+    status = check_handle_owner(source_key_id, &source_idx);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    encoded_key_id_make(source_key_id, i, &encoded_key);
+    encoded_key_id_make(source_key_id, source_idx, &encoded_key);
 
     status = psa_copy_key(encoded_key, &key_attributes, &target_key);
 #ifdef CRYPTO_KEY_ID_ENCODES_OWNER
@@ -723,7 +723,7 @@ psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
     *target_key_id = (psa_key_id_t)target_key;
 #endif
     if (status == PSA_SUCCESS) {
-        set_handle_owner(i, partition_id, *target_key_id);
+        set_handle_owner(target_idx, partition_id, *target_key_id);
     }
 
     return status;
