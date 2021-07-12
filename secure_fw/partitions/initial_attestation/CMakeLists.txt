@@ -60,7 +60,7 @@ target_link_libraries(tfm_psa_rot_partition_attestation
         tfm_secure_api
         platform_s
         tfm_qcbor
-        tfm_t_cose
+        tfm_t_cose_s
         secure_fw
         psa_interface
         tfm_sprt
