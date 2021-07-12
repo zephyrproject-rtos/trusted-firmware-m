@@ -29,6 +29,8 @@ extern "C" {
 #define MBEDTLS_SHA256_ALT
 #endif /* MBEDTLS_SHA256_C */
 
+#undef MBEDTLS_AES_SETKEY_DEC_ALT
+#undef MBEDTLS_AES_DECRYPT_ALT
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

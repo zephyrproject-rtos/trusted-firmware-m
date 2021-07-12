@@ -53,6 +53,9 @@ extern "C" {
 #define MBEDTLS_MD5_ALT
 #endif /* MBEDTLS_ECP_C && MBEDTLS_MD_C */
 
+#undef MBEDTLS_AES_SETKEY_DEC_ALT
+#undef MBEDTLS_AES_DECRYPT_ALT
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
