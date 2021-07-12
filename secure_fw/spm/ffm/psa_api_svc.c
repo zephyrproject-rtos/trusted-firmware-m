@@ -64,28 +64,18 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, uint32_t lr)
     psa_invec *inptr;
     psa_outvec *outptr;
     size_t in_num, out_num;
-    struct partition_t *partition = NULL;
-    uint32_t privileged;
     int32_t type;
 
     TFM_CORE_ASSERT(args != NULL);
     handle = (psa_handle_t)args[0];
-
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
-    privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_ldinf->flags);
-
     type = (int32_t)(int16_t)((args[1] & TYPE_MASK) >> TYPE_OFFSET);
     in_num = (size_t)((args[1] & IN_LEN_MASK) >> IN_LEN_OFFSET);
     out_num = (size_t)((args[1] & OUT_LEN_MASK) >> OUT_LEN_OFFSET);
     inptr = (psa_invec *)args[2];
     outptr = (psa_outvec *)args[3];
 
-    return tfm_spm_client_psa_call(handle, type, inptr, in_num, outptr, out_num,
-                                   privileged);
+    return tfm_spm_client_psa_call(handle, type, inptr, in_num, outptr,
+                                   out_num);
 }
 
 void tfm_spm_psa_close(uint32_t *args)

@@ -131,8 +131,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
 
 psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
                                      const psa_invec *inptr, size_t in_num,
-                                     psa_outvec *outptr, size_t out_num,
-                                     uint32_t privileged)
+                                     psa_outvec *outptr, size_t out_num)
 {
     psa_invec invecs[PSA_MAX_IOVEC];
     psa_outvec outvecs[PSA_MAX_IOVEC];
@@ -142,6 +141,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     int i, j;
     int32_t client_id;
     uint32_t sid, version, index;
+    uint32_t privileged;
     bool ns_caller = tfm_spm_is_ns_caller();
 
     /* The request type must be zero or positive. */
@@ -232,6 +232,8 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_core_panic();
     }
+
+    privileged = tfm_spm_get_caller_privilege_mode();
 
     /*
      * Read client invecs from the wrap input vector. It is a PROGRAMMER ERROR

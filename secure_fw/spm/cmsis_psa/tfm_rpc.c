@@ -59,8 +59,7 @@ psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
 
     return tfm_spm_client_psa_call(params->handle, params->type,
                                    params->in_vec, params->in_len,
-                                   params->out_vec, params->out_len,
-                                   TFM_PARTITION_UNPRIVILEGED_MODE);
+                                   params->out_vec, params->out_len);
 }
 
 void tfm_rpc_psa_close(const struct client_call_params_t *params)

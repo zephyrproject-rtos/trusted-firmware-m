@@ -615,12 +615,34 @@ bool tfm_spm_is_ns_caller(void)
     return (__get_active_exc_num() == EXC_NUM_PENDSV);
 #else
     struct partition_t *partition = tfm_spm_get_running_partition();
+
     if (!partition) {
         tfm_core_panic();
     }
 
     return (partition->p_ldinf->pid == TFM_SP_NON_SECURE_ID);
 #endif
+}
+
+uint32_t tfm_spm_get_caller_privilege_mode(void)
+{
+    struct partition_t *partition;
+
+#if defined(TFM_MULTI_CORE_TOPOLOGY) || defined(FORWARD_PROT_MSG)
+    /*
+     * In multi-core topology, if PSA request is from mailbox, the client
+     * is unprivileged.
+     */
+    if (__get_active_exc_num() == EXC_NUM_PENDSV) {
+        return TFM_PARTITION_UNPRIVILEGED_MODE;
+    }
+#endif
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    return tfm_spm_partition_get_privileged_mode(partition->p_ldinf->flags);
 }
 
 uint32_t tfm_spm_init(void)

@@ -76,9 +76,6 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version);
  *                              \ref psa_outvec
  * \param[in] out_num           Number of outut psa_outvec structures.
  *                              \ref psa_outvec
- * \param[in] privileged        Privileged mode or unprivileged mode:
- *                              \ref TFM_PARTITION_UNPRIVILEGED_MODE
- *                              \ref TFM_PARTITION_PRIVILEGED_MODE
  *
  * \retval PSA_SUCCESS          Success.
  * \retval "Does not return"    The call is invalid, one or more of the
@@ -92,8 +89,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version);
  */
 psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
                                      const psa_invec *inptr, size_t in_num,
-                                     psa_outvec *outptr, size_t out_num,
-                                     uint32_t privileged);
+                                     psa_outvec *outptr, size_t out_num);
 
 /**
  * \brief handler for \ref psa_close.

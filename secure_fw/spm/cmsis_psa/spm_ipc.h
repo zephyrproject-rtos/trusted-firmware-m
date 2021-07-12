@@ -364,6 +364,15 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 bool tfm_spm_is_ns_caller(void);
 
 /**
+ * \brief                       Get the privilege mode of service caller.
+ *
+ * \retval                      Privilege mode of the service caller
+ *                              \ref TFM_PARTITION_UNPRIVILEGED_MODE
+ *                              \ref TFM_PARTITION_PRIVILEGED_MODE
+ */
+uint32_t tfm_spm_get_caller_privilege_mode(void);
+
+/**
  * \brief               Set up the isolation boundary of the given partition.
  *
  * \param[in] partition The partition of which the boundary is set up.
