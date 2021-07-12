@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-#ifndef __MBEDTLS_AN521_CONF_H__
-#define __MBEDTLS_AN521_CONF_H__
+#ifndef __MBEDTLS_ENTROPY_NV_SEED_CONF_H__
+#define __MBEDTLS_ENTROPY_NV_SEED_CONF_H__
 
 #include "tfm_plat_crypto_nv_seed.h"
 
@@ -13,7 +13,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#undef MBEDTLS_TEST_NULL_ENTROPY
 #undef MBEDTLS_PLATFORM_NO_STD_FUNCTIONS
 #undef MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
 
@@ -29,4 +28,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* __MBEDTLS_AN521_CONF_H__ */
+#endif /* __MBEDTLS_ENTROPY_NV_SEED_CONF_H__ */
