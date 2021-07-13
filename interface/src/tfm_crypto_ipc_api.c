@@ -1336,7 +1336,7 @@ psa_status_t psa_cipher_encrypt(psa_key_id_t key,
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_ENCRYPT_SID,
         .alg = alg,
-        .key_id = key_id
+        .key_id = key
     };
 
     psa_invec in_vec[] = {
@@ -1372,7 +1372,7 @@ psa_status_t psa_cipher_decrypt(psa_key_id_t key,
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_DECRYPT_SID,
         .alg = alg,
-        .key_id = key_id
+        .key_id = key
     };
 
     psa_invec in_vec[] = {
