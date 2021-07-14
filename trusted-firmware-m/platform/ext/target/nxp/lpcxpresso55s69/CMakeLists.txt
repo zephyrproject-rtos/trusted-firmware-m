@@ -9,6 +9,8 @@
 
 cmake_policy(SET CMP0076 NEW)
 
+include(pull_drivers.cmake)
+
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER)
