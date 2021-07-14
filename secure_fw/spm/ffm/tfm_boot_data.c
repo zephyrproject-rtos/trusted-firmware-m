@@ -69,8 +69,12 @@ struct boot_data_access_policy {
  *        (identified by major_type).
  */
 static const struct boot_data_access_policy access_policy_table[] = {
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
     {TFM_SP_INITIAL_ATTESTATION, TLV_MAJOR_IAS},
+#endif
+#ifdef TFM_PARTITION_FIRMWARE_UPDATE
     {TFM_SP_FWU, TLV_MAJOR_FWU},
+#endif
 };
 
 /*!
