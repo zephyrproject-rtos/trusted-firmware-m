@@ -1,14 +1,13 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include <stddef.h>
-#include "tfm_ss_core_test.h"
-#include "tfm_api.h"
 #include "core_test_defs.h"
+#include "tfm_ss_core_test.h"
 #include "test_framework.h"
 #include "tfm_veneers.h"
 #include "tfm_secure_api.h"
@@ -26,8 +25,6 @@ static int32_t partition_init_done;
 #define INVALID_NS_CLIENT_ID  0x49abcdef
 #define EXPECTED_NS_CLIENT_ID (-1)
 
-#define IRQ_TEST_TOOL_CODE_LOCATION(name)
-
 #ifndef TFM_PSA_API
 /* Don't initialise caller_partition_id_zi and expect it to be linked in the
  * zero-initialised data area
@@ -40,7 +37,6 @@ static int32_t caller_client_id_zi;
 static int32_t caller_client_id_rw = INVALID_NS_CLIENT_ID;
 
 static int32_t* invalid_addresses [] = {(int32_t*)0x0, (int32_t*)0xFFF12000};
-
 #else /* !defined(TFM_PSA_API) */
 
 static psa_status_t psa_test_common(uint32_t sid, uint32_t version,
@@ -272,7 +268,6 @@ static psa_status_t test_ss_to_ss(void)
 {
     int32_t ret;
     /* Call to a different service, should be successful */
-    IRQ_TEST_TOOL_CODE_LOCATION(example_secure_service_start);
 #ifdef TFM_PSA_API
     ret = psa_test_common(SPM_CORE_TEST_2_SLAVE_SERVICE_SID,
                           SPM_CORE_TEST_2_SLAVE_SERVICE_VERSION,
@@ -280,7 +275,6 @@ static psa_status_t test_ss_to_ss(void)
 #else /* defined(TFM_PSA_API) */
     ret = tfm_spm_core_test_2_slave_service_veneer(NULL, 0, NULL, 0);
 #endif /* defined(TFM_PSA_API) */
-    IRQ_TEST_TOOL_CODE_LOCATION(example_secure_service_end);
     if (ret == CORE_TEST_ERRNO_SUCCESS_2) {
         return CORE_TEST_ERRNO_SUCCESS;
     } else {
@@ -307,7 +301,7 @@ static psa_status_t test_get_caller_client_id(void)
     for (i = 0; i < sizeof(invalid_addresses)/sizeof(invalid_addresses[0]); ++i)
     {
         ret = tfm_core_get_caller_client_id(invalid_addresses[i]);
-        if (ret != TFM_ERROR_INVALID_PARAMETER) {
+        if (ret == TFM_SUCCESS) {
             return CORE_TEST_ERRNO_TEST_FAULT;
         }
     }

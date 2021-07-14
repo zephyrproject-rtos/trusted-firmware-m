@@ -38,6 +38,7 @@ target_compile_definitions(tfm_test_suite_attestation_ns
         DOMAIN_NS=1
         $<$<CONFIG:Debug>:INCLUDE_TEST_CODE>
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
+        $<$<AND:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>>:ATTEST_TEST_GET_PUBLIC_KEY>
 )
 
 target_link_libraries(tfm_test_suite_attestation_ns
@@ -49,6 +50,7 @@ target_link_libraries(tfm_test_suite_attestation_ns
         tfm_attestation_defs
         tfm_boot_status
         platform_ns
+        $<$<AND:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>>:tfm_psa_rot_partition_attest_test_service_defs>
 )
 
 target_link_libraries(tfm_ns_tests
@@ -81,6 +83,7 @@ if (TEST_S)
         PRIVATE
             $<$<CONFIG:Debug>:INCLUDE_TEST_CODE>
             $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
+            $<$<AND:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>>:ATTEST_TEST_GET_PUBLIC_KEY>
     )
 
     target_link_libraries(tfm_test_suite_attestation_s
@@ -92,6 +95,7 @@ if (TEST_S)
             tfm_boot_status
             $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:tfm_psa_rot_partition_crypto>
             platform_s
+            $<$<AND:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>>:tfm_psa_rot_partition_attest_test_service_defs>
     )
 
     target_link_libraries(tfm_s_tests

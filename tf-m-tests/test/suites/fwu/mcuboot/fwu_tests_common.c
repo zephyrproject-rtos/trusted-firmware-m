@@ -571,11 +571,28 @@ void tfm_fwu_test_common_011(struct test_result_t *ret)
 void tfm_fwu_test_common_012(struct test_result_t *ret)
 {
     psa_status_t status;
+    psa_image_info_t info = { 0 };
+    psa_image_id_t running_image = \
+                (psa_image_id_t)FWU_CALCULATE_IMAGE_ID(FWU_IMAGE_ID_SLOT_ACTIVE,
+                                                       image_type_test,
+                                                       0);
 
     /* Accept the running image. */
-    status = psa_fwu_accept();
+    status = psa_fwu_accept(running_image);
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Accept should not fail");
+        return;
+    }
+
+    /* Query the running image. */
+    status = psa_fwu_query(running_image, &info);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Query should success");
+        return;
+    }
+
+    if (info.state != PSA_IMAGE_INSTALLED) {
+        TEST_FAIL("The active image should be in INSTALLED state");
         return;
     }
 

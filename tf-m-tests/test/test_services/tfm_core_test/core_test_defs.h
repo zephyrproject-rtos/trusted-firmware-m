@@ -31,20 +31,6 @@ extern "C" {
 #define CORE_TEST_ID_SECURE_IRQ           1017
 #define CORE_TEST_ID_BLOCK                2001
 
-enum irq_test_scenario_t {
-    IRQ_TEST_SCENARIO_NONE,
-    IRQ_TEST_SCENARIO_1,
-    IRQ_TEST_SCENARIO_2,
-    IRQ_TEST_SCENARIO_3,
-    IRQ_TEST_SCENARIO_4,
-    IRQ_TEST_SCENARIO_5,
-};
-
-struct irq_test_execution_data_t {
-    volatile int32_t timer0_triggered;
-    volatile int32_t timer1_triggered;
-};
-
 /* Use lower 16 bits in return value for error code, upper 16 for line number
  * in test service
  */

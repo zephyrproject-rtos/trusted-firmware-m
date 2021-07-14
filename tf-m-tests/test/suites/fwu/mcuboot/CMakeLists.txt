@@ -43,7 +43,7 @@ target_link_libraries(tfm_ns_tests
 
 ####################### Secure #################################################
 
-if (TEST_S)
+if (TEST_S AND TFM_FWU_TEST_SECURE)
     target_sources(tfm_test_suite_fwu_s
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/fwu_tests_common.c
@@ -69,6 +69,8 @@ if (TEST_S)
             $<$<BOOL:${TFM_FWU_TEST_REQUEST_REBOOT}>:TFM_FWU_TEST_REQUEST_REBOOT>
             $<$<BOOL:${TFM_FWU_TEST_QUERY_WITH_NULL}>:TFM_FWU_TEST_QUERY_WITH_NULL>
             $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
+        INTERFACE
+            TFM_FWU_TEST_SECURE_ENABLED
     )
 
     target_link_libraries(tfm_s_tests

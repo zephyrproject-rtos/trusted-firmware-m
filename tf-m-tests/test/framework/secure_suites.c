@@ -22,7 +22,7 @@
 #if defined(TFM_PARTITION_CRYPTO) || defined(FORWARD_PROT_MSG)
 #include "crypto_s_tests.h"
 #endif
-#if defined(TFM_PARTITION_FIRMWARE_UPDATE)
+#if defined(TFM_FWU_TEST_SECURE_ENABLED)
 #include "fwu_s_tests.h"
 #endif
 #if defined(TFM_PARTITION_PLATFORM) || defined(FORWARD_PROT_MSG)
@@ -72,8 +72,8 @@ static struct test_suite_t test_suites[] = {
     {&register_testsuite_s_audit_interface, 0, 0, 0},
 #endif
 
-#ifdef TFM_PARTITION_FIRMWARE_UPDATE
-    /* Non-secure Firmware Update test cases */
+#ifdef TFM_FWU_TEST_SECURE_ENABLED
+    /* Secure Firmware Update test cases */
     {&register_testsuite_s_psa_fwu_interface, 0, 0, 0},
 #endif
 
