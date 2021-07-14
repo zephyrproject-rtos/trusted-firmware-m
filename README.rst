@@ -14,17 +14,17 @@ This module in Zephyr has included TF-M and it's dependencies, they are:
 
 TF-M:
     repo: https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
-    commit: 9d93424a12b8cc2ba56518f76edadeaabc29e143
+    commit: a199c3047f320a2f82b9a0c27af5b50991184e0f
     license: BSD-3-Clause
 
 TF-M Tests:
     repo: https://git.trustedfirmware.org/TF-M/tf-m-tests.git
-    commit: eeba9de2f5c19293038d7d551cc0ceffe32d8992..
+    commit: b0c06b46b8a32d73794637e2a034a9cfbb4e883b
     license: Apache 2.0
 
 psa-arch-tests:
     repo: https://github.com/ARM-software/psa-arch-tests
-    commit: cd3f3caf3a5bbb543af2206056668422f4e135b9.
+    commit: 02d145d80da31bc78ce486bda99ad55597fea0ca
     license: Apache 2.0
 
 See also west.yml for more dependencies.
