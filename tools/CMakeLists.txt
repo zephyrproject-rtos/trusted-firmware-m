@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -10,10 +10,10 @@ find_package(Python3)
 
 ############################### Manifest declaration ###########################
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_manifest_list.yaml
-               ${CMAKE_CURRENT_BINARY_DIR}/tfm_manifest_list.yaml)
+get_filename_component(list_name ${TFM_MANIFEST_LIST} NAME)
+configure_file(${TFM_MANIFEST_LIST} ${CMAKE_CURRENT_BINARY_DIR}/${list_name})
 
-set(MANIFEST_LISTS ${CMAKE_CURRENT_BINARY_DIR}/tfm_manifest_list.yaml)
+set(MANIFEST_LISTS ${CMAKE_CURRENT_BINARY_DIR}/${list_name})
 set(MANIFEST_LISTS ${MANIFEST_LISTS} ${TFM_EXTRA_MANIFEST_LIST_PATH})
 
 if ("${TEST_PSA_API}" STREQUAL "IPC")
