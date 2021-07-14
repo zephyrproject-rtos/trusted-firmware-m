@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,8 +9,9 @@
 
 target_include_directories(${CC312_LIB_TARGET}
     PUBLIC
-        common
         cc3x_sym/driver
+    PRIVATE
+        common
         cc3x_sym/api
         pki/poly
         pki/ec_wrst

@@ -9,5 +9,6 @@
 #define CC3XX_DRIVER_H
 
 #include "cc3xx_psa_hash.h"
+#include "cc3xx_psa_cipher.h"
 
 #endif /* CC3XX_DRIVER_H */

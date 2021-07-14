@@ -8,8 +8,32 @@
 #ifndef CC3XX_CRYPTO_PRIMITIVES_H
 #define CC3XX_CRYPTO_PRIMITIVES_H
 
+#include "psa/crypto_types.h"
+#include "psa/crypto_driver_common.h"
+
 #include "hash_driver.h"
 
+#include "aes_driver.h"
+#include "chacha_driver.h"
+
 typedef HashContext_t cc3xx_hash_operation_t;
+
+typedef struct {
+    psa_algorithm_t alg;
+    psa_key_type_t key_type;
+    psa_encrypt_or_decrypt_t dir;
+    size_t block_size;
+
+    psa_status_t(*add_padding)(uint8_t *, size_t, size_t);
+
+    uint8_t unprocessed_data[AES_BLOCK_SIZE];
+    size_t  unprocessed_size;
+    uint8_t iv[AES_IV_SIZE];
+    size_t  iv_size;
+
+    AesContext_t aes_ctx;
+
+    ChachaContext_t chacha_ctx;
+} cc3xx_cipher_operation_t;
 
 #endif /* CC3XX_CRYPTO_PRIMITIVES_H */
