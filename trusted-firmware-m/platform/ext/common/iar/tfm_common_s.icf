@@ -39,10 +39,10 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
        ro object tfm_log_raw.o
        };
 
-    /**** Section for holding partition static data */
-#define block TFM_SP_STATIC_LIST with alignment = 4 {
-    ro section .partition_info object load_info_*.o,
-}
+    /**** Section for holding partition RO load data */
+define block TFM_SP_LOAD_LIST with alignment = 4 {
+    ro section .part_load object load_info_*.o,
+};
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
     /*
@@ -164,6 +164,16 @@ keep {block HEAP, block ARM_LIB_HEAP};
 
 define block ER_TFM_DATA          with alignment = 8 {readwrite};
 
+define block ER_PART_RT_POOL      with alignment = 4 {
+    zi section .bss.part_runtime
+};
+
+define block ER_SERV_RT_POOL      with alignment = 4 {
+    zi section .bss.serv_runtime
+};
+
+keep {block ER_PART_RT_POOL, block ER_SERV_RT_POOL};
+
     /**** PSA RoT DATA start here */
     /*
      * This empty, zero long execution region is here to mark the start address
@@ -202,8 +212,7 @@ define block LR_CODE with fixed order {
        block ER_TFM_CODE,
        block TFM_UNPRIV_CODE,
 
-/**** Section for holding partition static data */
-       block TFM_SP_STATIC_LIST,
+       block TFM_SP_LOAD_LIST,
 
        block TFM_PSA_CODE_START,
 
@@ -314,6 +323,10 @@ define block PRIV_DATA with fixed order {
     overlay HEAP_OVL,
 
     block ER_TFM_DATA,
+
+    block ER_PART_RT_POOL,
+
+    block ER_SERV_RT_POOL,
 
     /**** PSA RoT DATA start here */
     /*

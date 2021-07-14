@@ -17,6 +17,7 @@
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
 #include "tfm_psa_call_param.h"
+#include "load/irq_defs.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 
@@ -76,9 +77,9 @@ psa_status_t tfm_spm_psa_call(uint32_t *args, bool ns_caller, uint32_t lr)
         tfm_core_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_static->flags);
+        partition->p_ldinf->flags);
 
-    type = (int32_t)((args[1] & TYPE_MASK) >> TYPE_OFFSET);
+    type = (int32_t)(int16_t)((args[1] & TYPE_MASK) >> TYPE_OFFSET);
     in_num = (size_t)((args[1] & IN_LEN_MASK) >> IN_LEN_OFFSET);
     out_num = (size_t)((args[1] & OUT_LEN_MASK) >> OUT_LEN_OFFSET);
     inptr = (psa_invec *)args[2];
@@ -174,7 +175,7 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
         tfm_core_panic();
     }
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_static->flags);
+        partition->p_ldinf->flags);
 
     /*
      * Write the message to the service buffer. It is a fatal error if the
@@ -210,9 +211,9 @@ psa_status_t tfm_spm_psa_get(uint32_t *args)
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 
-    (TFM_GET_CONTAINER_PTR(tmp_msg,
-                           struct tfm_conn_handle_t,
-                           internal_msg))->status = TFM_HANDLE_STATUS_ACTIVE;
+    (TO_CONTAINER(tmp_msg,
+                  struct tfm_conn_handle_t,
+                  internal_msg))->status = TFM_HANDLE_STATUS_ACTIVE;
 
     spm_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
 
@@ -237,7 +238,7 @@ void tfm_spm_psa_set_rhandle(uint32_t *args)
     }
 
     /* It is a PROGRAMMER ERROR if a stateless service sets rhandle. */
-    if (SERVICE_IS_STATELESS(msg->service->service_db->flags)) {
+    if (SERVICE_IS_STATELESS(msg->service->p_ldinf->flags)) {
         tfm_core_panic();
     }
 
@@ -273,7 +274,7 @@ size_t tfm_spm_psa_read(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_static->flags);
+        partition->p_ldinf->flags);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -396,7 +397,7 @@ void tfm_spm_psa_write(uint32_t *args)
 
     partition = msg->service->partition;
     privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_static->flags);
+        partition->p_ldinf->flags);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -513,7 +514,7 @@ void tfm_spm_psa_reply(uint32_t *args)
              * psa_call().
              */
             update_caller_outvec_len(msg);
-            if (SERVICE_IS_STATELESS(service->service_db->flags)) {
+            if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
                 tfm_spm_free_conn_handle(service, conn_handle);
             }
         } else {
@@ -574,7 +575,7 @@ void tfm_spm_psa_clear(void)
 void tfm_spm_psa_eoi(uint32_t *args)
 {
     psa_signal_t irq_signal;
-    int32_t irq_line = 0;
+    struct irq_load_info_t *irq_info = NULL;
     struct partition_t *partition = NULL;
 
     TFM_CORE_ASSERT(args != NULL);
@@ -585,10 +586,15 @@ void tfm_spm_psa_eoi(uint32_t *args)
         tfm_core_panic();
     }
 
-    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
     /* It is a fatal error if passed signal is not an interrupt signal. */
-    if (irq_line < 0) {
+    if (!irq_info) {
         tfm_core_panic();
+    }
+
+    if (irq_info->flih_func) {
+        /* This API is for SLIH IRQs only */
+        psa_panic();
     }
 
     /* It is a fatal error if passed signal is not currently asserted */
@@ -598,8 +604,8 @@ void tfm_spm_psa_eoi(uint32_t *args)
 
     partition->signals_asserted &= ~irq_signal;
 
-    tfm_spm_hal_clear_pending_irq(irq_line);
-    tfm_spm_hal_enable_irq(irq_line);
+    tfm_spm_hal_clear_pending_irq((IRQn_Type)(irq_info->source));
+    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
 }
 
 void tfm_spm_psa_panic(void)
@@ -615,7 +621,7 @@ void tfm_spm_irq_enable(uint32_t *args)
 {
     struct partition_t *partition;
     psa_signal_t irq_signal;
-    uint32_t irq_line;
+    struct irq_load_info_t *irq_info;
 
     irq_signal = (psa_signal_t)args[0];
 
@@ -624,19 +630,19 @@ void tfm_spm_irq_enable(uint32_t *args)
         tfm_core_panic();
     }
 
-    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
-    if (irq_line < 0) {
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    if (!irq_info) {
         tfm_core_panic();
     }
 
-    tfm_spm_hal_enable_irq((IRQn_Type)irq_line);
+    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
 }
 
 psa_irq_status_t tfm_spm_irq_disable(uint32_t *args)
 {
     struct partition_t *partition;
     psa_signal_t irq_signal;
-    uint32_t irq_line;
+    struct irq_load_info_t *irq_info;
 
     irq_signal = (psa_signal_t)args[0];
 
@@ -645,12 +651,47 @@ psa_irq_status_t tfm_spm_irq_disable(uint32_t *args)
         tfm_core_panic();
     }
 
-    irq_line = get_irq_line_for_signal(partition->p_static->pid, irq_signal);
-    if (irq_line < 0) {
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    if (!irq_info) {
         tfm_core_panic();
     }
 
-    tfm_spm_hal_disable_irq((IRQn_Type)irq_line);
+    tfm_spm_hal_disable_irq((IRQn_Type)(irq_info->source));
 
     return 1;
+}
+
+void tfm_spm_psa_reset_signal(uint32_t *args)
+{
+    psa_signal_t irq_signal;
+    struct irq_load_info_t *irq_info;
+    struct partition_t *partition;
+
+    if (!args) {
+        tfm_core_panic();
+    }
+
+    irq_signal = (psa_signal_t)args[0];
+
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
+    if (!irq_info) {
+        tfm_core_panic();
+    }
+
+    if (!irq_info->flih_func) {
+        /* This API is for FLIH IRQs only */
+        tfm_core_panic();
+    }
+
+    if ((partition->signals_asserted & irq_signal) == 0) {
+        /* The signal is not asserted */
+        tfm_core_panic();
+    }
+
+    partition->signals_asserted &= ~irq_signal;
 }

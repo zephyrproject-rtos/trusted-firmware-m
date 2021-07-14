@@ -44,6 +44,15 @@ struct tfm_core_thread_t *tfm_core_thrd_get_curr(void)
     return CURR_THRD;
 }
 
+void tfm_core_thrd_set_curr(struct tfm_core_thread_t *pth)
+{
+    if (!pth) {
+        tfm_core_panic();
+    }
+
+    CURR_THRD = pth;
+}
+
 /* Insert a new thread into list by descending priority (Highest at head) */
 static void insert_by_prior(struct tfm_core_thread_t **head,
                             struct tfm_core_thread_t *node)
@@ -73,6 +82,7 @@ void tfm_core_thrd_init(struct tfm_core_thread_t *pth,
     pth->param = param;
     pth->stk_btm = stk_btm;
     pth->stk_top = stk_top;
+    pth->flih_ctx = stk_top;
 }
 
 uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth)
@@ -109,7 +119,7 @@ void tfm_core_thrd_set_state(struct tfm_core_thread_t *pth, uint32_t new_state)
      * depth while searching for a first runnable thread.
      */
     if ((pth->state == THRD_STATE_RUNNABLE) &&
-        (RNBL_HEAD == NULL || (pth->prior < RNBL_HEAD->prior))) {
+        ((RNBL_HEAD == NULL) || (pth->prior < RNBL_HEAD->prior))) {
         RNBL_HEAD = pth;
     } else {
         RNBL_HEAD = LIST_HEAD;
@@ -134,7 +144,7 @@ void tfm_core_thrd_start_scheduler(struct tfm_core_thread_t *pth)
     TFM_CORE_ASSERT(pth != NULL);
     TFM_CORE_ASSERT(pth->arch_ctx.sp != 0);
 
-    tfm_arch_update_ctx(&pth->arch_ctx);
+    tfm_arch_set_ctx(&pth->arch_ctx);
 
     CURR_THRD = pth;
 
@@ -154,6 +164,8 @@ void tfm_core_thrd_switch_context(struct tfm_arch_ctx_t *p_actx,
      */
     spm_memcpy(&prev->arch_ctx, p_actx, sizeof(*p_actx));
     spm_memcpy(p_actx, &next->arch_ctx, sizeof(next->arch_ctx));
+
+    prev->flih_ctx = prev->arch_ctx.sp;
 
     /* Update current thread indicator */
     CURR_THRD = next;

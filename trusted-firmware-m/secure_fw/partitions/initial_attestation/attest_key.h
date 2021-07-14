@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -67,23 +67,6 @@ attest_get_signing_key_handle(psa_key_handle_t *key_handle);
  */
 enum psa_attest_err_t
 attest_get_instance_id(struct q_useful_buf_c *id_buf);
-
-/**
- * \brief Get the public key derived from the initial attestation private key.
- *
- * \param[out] public_key       Pointer to public key buffer.
- * \param[out] public_key_len   Size of public key in bytes.
- * \param[out] public_key_curve Type of the curve that is used in the public
- *                              key.
- *
- * \retval  PSA_ATTEST_ERR_SUCCESS   Public key was successfully returned.
- * \retval  PSA_ATTEST_ERR_GENERAL   Public key could not be returned.
- */
-
-enum psa_attest_err_t
-attest_get_initial_attestation_public_key(uint8_t **public_key,
-                                          size_t *public_key_len,
-                                          psa_ecc_family_t *public_key_curve);
 
 #ifdef INCLUDE_COSE_KEY_ID
 /**

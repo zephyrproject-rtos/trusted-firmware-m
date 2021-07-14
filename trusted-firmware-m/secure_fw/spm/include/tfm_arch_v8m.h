@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,6 +21,7 @@
 #define EXC_RETURN_FPU_FRAME_BASIC              (1 << 4)
 #define EXC_RETURN_MODE_THREAD                  (1 << 3)
 #define EXC_RETURN_STACK_PROCESS                (1 << 2)
+#define EXC_RETURN_STACK_MAIN                   (0 << 2)
 #define EXC_RETURN_RES0                         (0 << 1)
 #define EXC_RETURN_EXC_SECURE                   (1)
 
@@ -30,6 +31,13 @@
         EXC_RETURN_SECURE_STACK | EXC_RETURN_STACK_RULE |       \
         EXC_RETURN_FPU_FRAME_BASIC | EXC_RETURN_MODE_THREAD |   \
         EXC_RETURN_STACK_PROCESS | EXC_RETURN_RES0 |            \
+        EXC_RETURN_EXC_SECURE
+
+#define EXC_RETURN_THREAD_S_MSP                                 \
+        EXC_RETURN_INDICATOR | EXC_RETURN_RES1 |                \
+        EXC_RETURN_SECURE_STACK | EXC_RETURN_STACK_RULE |       \
+        EXC_RETURN_FPU_FRAME_BASIC | EXC_RETURN_MODE_THREAD |   \
+        EXC_RETURN_STACK_MAIN | EXC_RETURN_RES0 |               \
         EXC_RETURN_EXC_SECURE
 
 #if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
@@ -130,11 +138,22 @@ __STATIC_INLINE uintptr_t tfm_arch_seal_thread_stack(uintptr_t stk)
 }
 
 /**
- * \brief Update architecture context value into hardware
+ * \brief Get architecture context value into context struct
  *
  * \param[in] p_actx        Pointer of context data
  */
-__STATIC_INLINE void tfm_arch_update_ctx(struct tfm_arch_ctx_t *p_actx)
+__STATIC_INLINE void tfm_arch_get_ctx(struct tfm_arch_ctx_t *p_actx)
+{
+    p_actx->sp = __get_PSP();
+    p_actx->sp_limit = __get_PSPLIM();
+}
+
+/**
+ * \brief Set architecture context value into hardware
+ *
+ * \param[in] p_actx        Pointer of context data
+ */
+__STATIC_INLINE void tfm_arch_set_ctx(struct tfm_arch_ctx_t *p_actx)
 {
     __set_PSP(p_actx->sp);
     __set_PSPLIM(p_actx->sp_limit);

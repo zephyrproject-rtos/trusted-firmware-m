@@ -68,7 +68,7 @@ void *tfm_pool_alloc(struct tfm_pool_instance_t *pool)
     }
 
     node = BI_LIST_NEXT_NODE(&pool->chunks_list);
-    pchunk = TFM_GET_CONTAINER_PTR(node, struct tfm_pool_chunk_t, list);
+    pchunk = TO_CONTAINER(node, struct tfm_pool_chunk_t, list);
 
     /* Remove node from list node, it will be added when pool free */
     BI_LIST_REMOVE_NODE(node);
@@ -80,7 +80,7 @@ void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr)
 {
     struct tfm_pool_chunk_t *pchunk;
 
-    pchunk = TFM_GET_CONTAINER_PTR(ptr, struct tfm_pool_chunk_t, data);
+    pchunk = TO_CONTAINER(ptr, struct tfm_pool_chunk_t, data);
     BI_LIST_INSERT_BEFORE(&pool->chunks_list, &pchunk->list);
 }
 
@@ -99,7 +99,7 @@ bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,
     }
 
     pool_chunk_address =
-    (uint32_t)TFM_GET_CONTAINER_PTR(data, struct tfm_pool_chunk_t, data);
+        (uint32_t)TO_CONTAINER(data, struct tfm_pool_chunk_t, data);
 
     /* Make sure that the chunk containing the message is aligned on */
     /* chunk boundary in the pool. */

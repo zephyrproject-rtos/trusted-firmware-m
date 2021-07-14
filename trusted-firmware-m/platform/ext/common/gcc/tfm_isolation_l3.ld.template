@@ -101,13 +101,13 @@ SECTIONS
     . = ALIGN(32);
     Image$$PT_RO_START$$Base = .;
 
-    /**** Section for holding partition static RO data */
-    .TFM_SP_STATIC_LIST : ALIGN(4)
+    /**** Section for holding partition RO load data */
+    .TFM_SP_LOAD_LIST : ALIGN(4)
     {
-       KEEP(*(.partition_info))
+       KEEP(*(.part_load))
     } > FLASH
-    Image$$TFM_SP_STATIC_LIST$$RO$$Base = ADDR(.TFM_SP_STATIC_LIST);
-    Image$$TFM_SP_STATIC_LIST$$RO$$Limit = ADDR(.TFM_SP_STATIC_LIST) + SIZEOF(.TFM_SP_STATIC_LIST);
+    Image$$TFM_SP_LOAD_LIST$$RO$$Base = ADDR(.TFM_SP_LOAD_LIST);
+    Image$$TFM_SP_LOAD_LIST$$RO$$Limit = ADDR(.TFM_SP_LOAD_LIST) + SIZEOF(.TFM_SP_LOAD_LIST);
     . = ALIGN(32);
 
     /**** PSA RoT RO CODE + RO-data starts here */
@@ -176,32 +176,23 @@ SECTIONS
 {% endfor %}
     /**** APPLICATION RoT RO CODE + data ends here */
 
+    .ER_TFM_CODE : ALIGN(4)
+    {
+        *libplatform_s*:*(.text*)
+        *libtfm_spm*:*(.text*)
+
+        *libplatform_s*:*(.rodata*)
+        *libtfm_spm*:*(.rodata*)
+    } > FLASH
+
     /**** Unprivileged Secure code starts here */
     .ER_UNPRIV_CODE : ALIGN(32)
     {
         *(SFN)
-        *armlib*:*(.text*)
-        *armlib*:*(.rodata*)
-        *libtfm_sprt*:*(.text*)
-        *libtfm_sprt*:*(.rodata*)
-        *psa_client.*(.text*)              /* NXP */
-        *psa_client.*(.rodata*)
-        *psa_service.*(.text*)             /* NXP */
-        *psa_service.*(.rodata*)
-        *psa_lifecycle.*(.text*)             /* NXP */
-        *psa_lifecycle.*(.rodata*)
-        . = ALIGN(32);
-    } > FLASH
-    Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.ER_UNPRIV_CODE);
-    Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.ER_UNPRIV_CODE) + SIZEOF(.ER_UNPRIV_CODE);
-
-    .ER_TFM_CODE : ALIGN(4)
-    {
         *(.text*)
 
         KEEP(*(.init))
         KEEP(*(.fini))
-
 
         /* .ctors */
         *crtbegin.o(.ctors)
@@ -220,7 +211,11 @@ SECTIONS
         *(.rodata*)
 
         KEEP(*(.eh_frame*))
+
+        . = ALIGN(32);
     } > FLASH
+    Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.ER_UNPRIV_CODE);
+    Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.ER_UNPRIV_CODE) + SIZEOF(.ER_UNPRIV_CODE);
 
     /* Position tag */
     . = ALIGN(32);
@@ -496,6 +491,13 @@ SECTIONS
     .TFM_BSS : ALIGN(4)
     {
         __bss_start__ = .;
+        __partition_runtime_start__ = .;
+        KEEP(*(.bss.part_runtime))
+        __partition_runtime_end__ = .;
+        . = ALIGN(4);
+        __service_runtime_start__ = .;
+        KEEP(*(.bss.serv_runtime))
+        __service_runtime_end__ = .;
         *(.bss*)
         *(COMMON)
         . = ALIGN(4);
@@ -503,6 +505,10 @@ SECTIONS
     } > RAM AT> RAM
     Image$$ER_TFM_DATA$$ZI$$Base = ADDR(.TFM_BSS);
     Image$$ER_TFM_DATA$$ZI$$Limit = ADDR(.TFM_BSS) + SIZEOF(.TFM_BSS);
+    Image$$ER_PART_RT_POOL$$ZI$$Base = __partition_runtime_start__;
+    Image$$ER_PART_RT_POOL$$ZI$$Limit = __partition_runtime_end__;
+    Image$$ER_SERV_RT_POOL$$ZI$$Base = __service_runtime_start__;
+    Image$$ER_SERV_RT_POOL$$ZI$$Limit = __service_runtime_end__;
 
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);

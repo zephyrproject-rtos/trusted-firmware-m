@@ -122,12 +122,15 @@ psa_status_t psa_fwu_request_reboot(void)
     return status;
 }
 
-psa_status_t psa_fwu_accept(void)
+psa_status_t psa_fwu_accept(psa_image_id_t image_id)
 {
     psa_status_t status;
+    psa_invec in_vec[] = {
+        { .base = &image_id, .len = sizeof(image_id) }
+    };
 
     status = tfm_ns_interface_dispatch((veneer_fn)tfm_fwu_accept_req_veneer,
-                                       (uint32_t)NULL, 0,
+                                       (uint32_t)in_vec, IOVEC_LEN(in_vec),
                                        (uint32_t)NULL, 0);
 
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {

@@ -8,6 +8,7 @@
 #define __TFM_POOLS_H__
 
 #include <stdbool.h>
+#include "compiler_ext_defs.h"
 #include "lists.h"
 
 /*
@@ -37,7 +38,7 @@ struct tfm_pool_instance_t {
     static uint8_t name##_pool_buf[((chunksz) +                             \
                                    sizeof(struct tfm_pool_chunk_t)) * (num) \
                                    + sizeof(struct tfm_pool_instance_t)]    \
-                                   __attribute__((aligned(4)));             \
+                                   __aligned(4);                            \
     static struct tfm_pool_instance_t *name =                               \
                             (struct tfm_pool_instance_t *)name##_pool_buf
 

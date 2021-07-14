@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,13 +149,13 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_ENABLE_IRQ_TEST
-    TFM_IRQ_TEST_1_LINKER +0 ALIGN 32 {
-        *tfm_irq_test_service_1.* (+RO)
+#ifdef TFM_ENABLE_SLIH_TEST
+    TFM_SP_SLIH_TEST_LINKER +0 ALIGN 32 {
+        *tfm_slih_test_service.* (+RO)
         *timer_cmsdk* (+RO)
-        *(TFM_IRQ_TEST_1_ATTR_FN)
+        *(TFM_SP_SLIH_TEST_ATTR_FN)
     }
-#endif /* TFM_ENABLE_IRQ_TEST */
+#endif /* TFM_ENABLE_SLIH_TEST */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     TFM_SP_SECURE_CLIENT_2_LINKER +0 ALIGN 32 {
@@ -278,19 +278,19 @@ LR_CODE S_CODE_START {
 #endif
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TFM_ENABLE_IRQ_TEST
-    TFM_IRQ_TEST_1_LINKER_DATA +0 ALIGN 32 {
-        *tfm_irq_test_service_1.* (+RW +ZI)
+#ifdef TFM_ENABLE_SLIH_TEST
+    TFM_SP_SLIH_TEST_LINKER_DATA +0 ALIGN 32 {
+        *tfm_slih_test_service.* (+RW +ZI)
         *timer_cmsdk* (+RW +ZI)
-        *(TFM_IRQ_TEST_1_ATTR_RW)
-        *(TFM_IRQ_TEST_1_ATTR_ZI)
+        *(TFM_SP_SLIH_TEST_ATTR_RW)
+        *(TFM_SP_SLIH_TEST_ATTR_ZI)
     }
 
 #if defined (TFM_PSA_API)
-    TFM_IRQ_TEST_1_LINKER_STACK +0 ALIGN 128 EMPTY 0x0400 {
+    TFM_SP_SLIH_TEST_LINKER_STACK +0 ALIGN 128 EMPTY 0x0400 {
     }
 #endif
-#endif /* TFM_ENABLE_IRQ_TEST */
+#endif /* TFM_ENABLE_SLIH_TEST */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     TFM_SP_SECURE_CLIENT_2_LINKER_DATA +0 ALIGN 32 {
@@ -522,7 +522,7 @@ LR_VENEER CMSE_VENEER_REGION_START {
      * 32 bytes aligned region so that the SAU can be programmed to
      * just set this region as Non-Secure Callable.
      */
-    ER_CODE_CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
+    CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
         *(Veneer$$CMSE)
     }
 }

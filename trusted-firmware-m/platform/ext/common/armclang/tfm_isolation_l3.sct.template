@@ -37,12 +37,13 @@ LR_CODE S_CODE_START {
     /**** This initial section contains mainly the SPM code and RO-data */
     ER_TFM_CODE +0 ALIGN 32 {
         *.o (RESET +First)
-        * (+RO)
+        *libtfm_spm* (+RO)
+        *libplatform_s* (+RO)
     }
 
-    /**** Section for holding partition static data */
-    TFM_SP_STATIC_LIST +0 ALIGN 4 {
-        *(.partition_info)
+    /**** Section for holding partition RO load data */
+    TFM_SP_LOAD_LIST +0 ALIGN 4 {
+        *(.part_load)
     }
 
     /**** PSA RoT CODE + RO-data starts here */
@@ -54,12 +55,12 @@ LR_CODE S_CODE_START {
     ER_{{partition.manifest.name}}_RO +0 ALIGN 32 {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
-        {{pattern}} (+RO)
+        {{pattern}} (+RO-CODE, +RO-DATA)
         {% endfor %}
     {% endif %}
     {% if partition.attr.linker_pattern.object_list %}
         {% for pattern in partition.attr.linker_pattern.object_list %}
-        {{pattern}} (+RO)
+        {{pattern}} (+RO-CODE, +RO-DATA)
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_PSA-ROT_ATTR_FN)
@@ -81,12 +82,12 @@ LR_CODE S_CODE_START {
     ER_{{partition.manifest.name}}_RO +0 ALIGN 32 {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
-        {{pattern}} (+RO)
+        {{pattern}} (+RO-CODE, +RO-DATA)
         {% endfor %}
     {% endif %}
     {% if partition.attr.linker_pattern.object_list %}
         {% for pattern in partition.attr.linker_pattern.object_list %}
-        {{pattern}} (+RO)
+        {{pattern}} (+RO-CODE, +RO-DATA)
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_APP-ROT_ATTR_FN)
@@ -102,11 +103,7 @@ LR_CODE S_CODE_START {
     /**** Unprivileged Secure code + RO-data starts here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
         *(SFN)
-        *armlib* (+RO)
-        *libtfm_sprt.a (+RO)
-        *psa_client.* (+RO)
-        *psa_service.* (+RO)
-        *psa_lifecycle.* (+RO)
+        * (+RO)
     }
 
     PT_RO_END +0 ALIGN 32 EMPTY 0x0 {
@@ -135,6 +132,14 @@ LR_CODE S_CODE_START {
 
     ER_TFM_DATA +0 {
         * (+RW +ZI)
+    }
+
+    ER_PART_RT_POOL +0 ALIGN 4 {
+        *(.bss.part_runtime)
+    }
+
+    ER_SERV_RT_POOL +0 ALIGN 4 {
+        *(.bss.serv_runtime)
     }
 
     /**** PSA RoT RWZI starts here */
@@ -231,9 +236,9 @@ LR_CODE S_CODE_START {
 #if defined(S_CODE_SRAM_ALIAS_BASE)
     /* eFlash driver code that gets copied from Flash to SRAM */
     ER_EFLASH_DRIVER_RO S_CODE_SRAM_ALIAS_BASE ALIGN 32 {
-        Driver_GFC100_EFlash.o (+RO)
-        gfc100_eflash_drv.o (+RO)
-        musca_b1_eflash_drv.o (+RO)
+        Driver_GFC100_EFlash.o (+RO-CODE, +RO-DATA)
+        gfc100_eflash_drv.o (+RO-CODE, +RO-DATA)
+        musca_b1_eflash_drv.o (+RO-CODE, +RO-DATA)
     }
 #endif
 }
@@ -244,7 +249,7 @@ LR_VENEER CMSE_VENEER_REGION_START {
      * 32 bytes aligned region so that the SAU can be programmed to
      * just set this region as Non-Secure Callable.
      */
-    ER_CODE_CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
+    CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
         *(Veneer$$CMSE)
     }
 }

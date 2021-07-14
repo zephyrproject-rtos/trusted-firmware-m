@@ -56,10 +56,9 @@ psa_status_t psa_call(psa_handle_t handle,
 {
     if ((type > INT16_MAX) ||
         (type < INT16_MIN) ||
-        (in_len > PSA_MAX_IOVEC) ||
-        (out_len > PSA_MAX_IOVEC) ||
-        ((in_len + out_len) > PSA_MAX_IOVEC)) {
-        return PSA_ERROR_INVALID_ARGUMENT;
+        (in_len > UINT8_MAX) ||
+        (out_len > UINT8_MAX)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     return psa_call_param_pack(handle,

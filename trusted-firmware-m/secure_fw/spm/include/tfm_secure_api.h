@@ -86,7 +86,7 @@ struct tfm_sfn_req_s {
     bool ns_caller;
 };
 
-extern int32_t tfm_core_get_caller_client_id(int32_t *caller_client_id);
+enum tfm_status_e tfm_core_get_caller_client_id(int32_t *caller_client_id);
 
 int32_t tfm_core_sfn_request(const struct tfm_sfn_req_s *desc_ptr);
 

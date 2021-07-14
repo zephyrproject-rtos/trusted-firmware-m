@@ -230,10 +230,6 @@ static void tfm_crypto_ipc_handler(void)
 
             /* Process the message type */
             switch (msg.type) {
-            case PSA_IPC_CONNECT:
-            case PSA_IPC_DISCONNECT:
-                psa_reply(msg.handle, PSA_SUCCESS);
-                break;
             case PSA_IPC_CALL:
                 /* Parse the message */
                 status = tfm_crypto_parse_msg(&msg, &iov, &sfn_id);

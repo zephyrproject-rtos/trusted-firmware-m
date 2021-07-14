@@ -24,12 +24,14 @@
  * operations.
  */
 #define TFM_SP_NON_SECURE_ID (0)
+#define TFM_SP_IDLE_ID       (1)
 /* A dummy partition for TFM_SP_CORE is created to handle secure partition
  * calls done directly from the core, before NS execution started.
  */
 #define TFM_SP_CORE_ID (1)
 
 #include "psa_manifest/pid.h"
+#include "psa/service.h"
 
 /* This limit is only used to define the size of the database reserved for
  * partitions. There's no requirement that it match the number of partitions
@@ -38,5 +40,6 @@
 #define SPM_MAX_PARTITIONS (TFM_MAX_USER_PARTITIONS + TFM_INTERNAL_PARTITIONS)
 
 typedef void(*sp_entry_point)(void);
+typedef psa_flih_result_t (*psa_flih_func)(void);
 
 #endif /* __SPM_PARTITION_DEFS_H__ */

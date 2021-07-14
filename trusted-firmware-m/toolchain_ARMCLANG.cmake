@@ -60,6 +60,7 @@ macro(tfm_toolchain_reset_linker_flags)
         --strict
         --symbols
         --xref
+        $<$<AND:$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>,$<STREQUAL:"${TEST_PSA_API}","IPC">>:--no-merge>
         # Suppress link warnings that are consistant (and therefore hopefully
         # harmless)
         # https://developer.arm.com/documentation/100074/0608/linker-errors-and-warnings/list-of-the-armlink-error-and-warning-messages
@@ -69,6 +70,8 @@ macro(tfm_toolchain_reset_linker_flags)
         --diag_suppress=6314
         # Duplicate input files
         --diag_suppress=6304
+        # Pattern only matches removed unused sections.
+        --diag_suppress=6329
         $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:--fpu=softvfp>
     )
 endmacro()

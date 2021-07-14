@@ -67,7 +67,7 @@ uint32_t tfm_plat_test_get_userled_mask(void)
 
 #endif /* TFM_ENABLE_PERIPH_ACCESS_TEST */
 
-#ifdef TFM_ENABLE_IRQ_TEST
+#ifdef TFM_ENABLE_SLIH_TEST
 
 #if (__ARM_FEATURE_CMSE & 0x2) /* Secure */
 
@@ -154,4 +154,4 @@ void tfm_plat_test_non_secure_timer_stop(void)
 }
 #endif /* (__ARM_FEATURE_CMSE & 0x2) */
 
-#endif /* TFM_ENABLE_IRQ_TEST */
+#endif /* TFM_ENABLE_SLIH_TEST */

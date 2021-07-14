@@ -7,29 +7,43 @@
 
 {{utilities.donotedit_warning}}
 
-#ifndef __PSA_MANIFEST_{{file_name.upper()}}_H__
-#define __PSA_MANIFEST_{{file_name.upper()}}_H__
+#ifndef __PSA_MANIFEST_{{manifest_out_basename.upper()}}_H__
+#define __PSA_MANIFEST_{{manifest_out_basename.upper()}}_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-{% if attr.tfm_partition_ipc %}
-    {% set ns = namespace(iterator_counter=0) %}
-    {% if manifest.services %}
-        {% for service in manifest.services %}
-#define {{"%-55s"|format(service.name + "_SIGNAL")}} (1U << ({{"%d"|format(ns.iterator_counter)}} + 4))
-            {% set ns.iterator_counter = ns.iterator_counter + 1 %}
-        {% endfor %}
-    {% endif %}
-    {% if ns.iterator_counter > 28 %}
-
-#error "Too many signals!"
-    {% endif %}
+{% if manifest.psa_framework_version == 1.1 and manifest.model == "SFN" %}
+#define {{"%-55s"|format(manifest.name + "_MODEL_IPC")}} 0
+#define {{"%-55s"|format(manifest.name + "_MODEL_SFN")}} 1
+{% else %}
+#define {{"%-55s"|format(manifest.name + "_MODEL_IPC")}} 1
+#define {{"%-55s"|format(manifest.name + "_MODEL_SFN")}} 0
 {% endif %}
-{% if manifest.irqs %}
 
-    {% set irq_ns = namespace(irq_iterator_counter=27) %}
+{# Service and IRQ at least one must be declared. #}
+{% if (manifest.services | length) == 0 and (manifest.irqs | length) == 0 %}
+#error "Service and IRQ at least one must be declared!"
+{% endif %}
+
+{% set service_signal = namespace(bit=4) %}
+{% if manifest.services %}
+    {% for service in manifest.services %}
+        {% if manifest.psa_framework_version == 1.1 and manifest.model == "SFN" %}
+psa_status_t {{service.name|lower}}_sfn(const psa_msg_t* msg);
+        {% else %}
+#define {{"%-55s"|format(service.name + "_SIGNAL")}} (1U << {{"%d"|format(service_signal.bit)}})
+            {% set service_signal.bit = service_signal.bit + 1 %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% if service_signal.bit > 32 %}
+#error "Too many services!"
+{% endif %}
+
+{% set irq_signal = namespace(bit=31) %}
+{% if manifest.irqs %}
     {% for irq in manifest.irqs %}
         {% set irq_data = namespace() %}
         {% if manifest.psa_framework_version == 1.0 %}
@@ -37,20 +51,9 @@ extern "C" {
         {% else %}
             {% set irq_data.signal = irq.name + "_SIGNAL" %}
         {% endif %}
-#define {{"%-55s"|format(irq_data.signal)}} (1U << ({{"%d"|format(irq_ns.irq_iterator_counter)}} + 4))
-        {% set irq_ns.irq_iterator_counter = irq_ns.irq_iterator_counter - 1 %}
+#define {{"%-55s"|format(irq_data.signal)}} (1U << {{"%d"|format(irq_signal.bit)}})
+        {% set irq_signal.bit = irq_signal.bit - 1 %}
     {% endfor %}
-    {% if attr.tfm_partition_ipc %}
-        {% if (ns.iterator_counter - 1) >= (irq_ns.irq_iterator_counter + 1) %}
-
-#error "Secure service and IRQ signal values overlap!"
-        {% endif %}
-    {% else %}
-        {% if (irq_ns.irq_iterator_counter + 1) < 0 %}
-
-#error "Too many IRQ signals!"
-        {% endif %}
-    {% endif %}
     {% if manifest.psa_framework_version == 1.1 %}
         {% for irq in manifest.irqs %}
             {% if irq.handling == "FLIH" %}
@@ -58,17 +61,16 @@ psa_flih_result_t {{irq.name|lower}}_flih(void);
             {% endif %}
         {% endfor %}
     {% endif %}
-{% else %}
-    {# If no RoT Service is defined in the services attribute, then at least one IRQ must be declared. #}
-    {% if attr.tfm_partition_ipc %}
-        {% if (manifest.services is not defined) or ((manifest.services | length()) == 0) %}
-#error "At least one IRQ must be declared!"
-        {% endif %}
-    {% endif %}
+{% endif %}
+{% if (irq_signal.bit + 1) < 4 %}
+#error "Too many IRQ signals!"
+{% endif %}
+{% if (service_signal.bit - 1) >= (irq_signal.bit + 1) %}
+#error "Total number of services and irqs exceeds 28."
 {% endif %}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __PSA_MANIFEST_{{file_name.upper()}}_H__ */
+#endif /* __PSA_MANIFEST_{{manifest_out_basename.upper()}}_H__ */

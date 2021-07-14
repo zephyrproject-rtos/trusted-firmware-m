@@ -6,7 +6,7 @@
  */
 
 #include <stdint.h>
-#include "log/tfm_log.h"
+#include "tfm_sp_log.h"
 #include "tfm_platform_api.h"
 #include "tfm_fwu.h"
 
@@ -17,7 +17,7 @@ psa_status_t tfm_internal_fwu_initialize(psa_image_id_t image_id)
 
     /* Check the image slot, the target should be the staging slot. */
     if (slot_id != FWU_IMAGE_ID_SLOT_STAGE) {
-        LOG_MSG("TFM FWU: invalid slot_id: %d", slot_id);
+        LOG_ERRFMT("TFM FWU: invalid slot_id: %d", slot_id);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -54,7 +54,7 @@ psa_status_t tfm_internal_fwu_install(psa_image_id_t image_id,
 
     /* Check the image slot, the target should be the staging slot. */
     if (slot_id != FWU_IMAGE_ID_SLOT_STAGE) {
-        LOG_MSG("TFM FWU: invalid slot_id: %d", slot_id);
+        LOG_ERRFMT("TFM FWU: invalid slot_id: %d", slot_id);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -100,7 +100,7 @@ psa_status_t tfm_internal_fwu_query(psa_image_id_t image_id,
     } else if (slot_id == FWU_IMAGE_ID_SLOT_ACTIVE) {
         active_image = true;
     } else {
-        LOG_MSG("TFM FWU: invalid slot_id: %d", slot_id);
+        LOG_ERRFMT("TFM FWU: invalid slot_id: %d", slot_id);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -112,7 +112,9 @@ void tfm_internal_fwu_request_reboot(void)
     tfm_platform_system_reset();
 }
 
-psa_status_t tfm_internal_fwu_accept(void)
+psa_status_t tfm_internal_fwu_accept(psa_image_id_t image_id)
 {
-    return fwu_bootloader_mark_image_accepted();
+    uint8_t image_type = (uint8_t)FWU_IMAGE_ID_GET_TYPE(image_id);
+
+    return fwu_bootloader_mark_image_accepted(image_type);
 }

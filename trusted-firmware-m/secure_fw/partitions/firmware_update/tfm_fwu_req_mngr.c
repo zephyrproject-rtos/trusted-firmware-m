@@ -211,17 +211,22 @@ psa_status_t tfm_fwu_request_reboot_req(psa_invec *in_vec, size_t in_len,
 }
 
 psa_status_t tfm_fwu_accept_req(psa_invec *in_vec, size_t in_len,
-                               psa_outvec *out_vec, size_t out_len)
+                                psa_outvec *out_vec, size_t out_len)
 {
-    (void)in_vec;
     (void)out_vec;
-    (void)in_len;
     (void)out_len;
+
+    psa_image_id_t image_id;
+
+    if (in_vec[0].len != sizeof(image_id) || in_len != 1) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    image_id = *((psa_image_id_t *)in_vec[0].base);
 
     /* This operation set the running image to INSTALLED state, the images
      * in the staging area does not impact this operation.
      */
-    return tfm_internal_fwu_accept();
+    return tfm_internal_fwu_accept(image_id);
 }
 
 /* Abort the currently running FWU. */
@@ -417,10 +422,22 @@ static psa_status_t tfm_fwu_request_reboot_ipc(void)
 
 static psa_status_t tfm_fwu_accept_ipc(void)
 {
+    psa_image_id_t image_id;
+    size_t num;
+
+    /* Check input parameters. */
+    if (msg.in_size[0] != sizeof(image_id)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+    num = psa_read(msg.handle, 0, &image_id, sizeof(image_id));
+    if (num != sizeof(image_id)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
     /* This operation set the running image to INSTALLED state, the images
      * in the staging area does not impact this operation.
      */
-    return tfm_internal_fwu_accept();
+    return tfm_internal_fwu_accept(image_id);
 }
 
 static psa_status_t tfm_fwu_abort_ipc(void)

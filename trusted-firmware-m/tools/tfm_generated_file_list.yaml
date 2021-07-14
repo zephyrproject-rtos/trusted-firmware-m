@@ -22,18 +22,6 @@
         "output": "secure_fw/spm/cmsis_func/tfm_spm_db_func.inc"
     },
     {
-        "name": "Secure Partition declarations for IPC",
-        "short_name": "tfm_partition_list_ipc",
-        "template": "secure_fw/spm/cmsis_psa/tfm_spm_db_ipc.inc.template",
-        "output": "secure_fw/spm/cmsis_psa/tfm_spm_db_ipc.inc"
-    },
-    {
-        "name": "Secure Service list",
-        "short_name": "tfm_service_list",
-        "template": "secure_fw/partitions/tfm_service_list.inc.template",
-        "output": "secure_fw/partitions/tfm_service_list.inc"
-    },
-    {
         "name": "Secure Veneers C file",
         "short_name": "tfm_veneers_c",
         "template": "secure_fw/spm/cmsis_func/tfm_veneers.c.template",

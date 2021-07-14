@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include "tfm_spm_log.h"
 
 /*
  * CPU spin here.
@@ -30,9 +31,10 @@ void tfm_core_panic(void);
 #endif
 
 /* Get container structure start address from member */
-#define TFM_GET_CONTAINER_PTR(ptr, type, member) \
+#define TO_CONTAINER(ptr, type, member) \
     (type *)((unsigned long)(ptr) - offsetof(type, member))
 
-#define ERROR_MSG(msg)
+/* FixMe: Replace ERROR_MSG() in platform code with a suitable API */
+#define ERROR_MSG(msg) SPMLOG_ERRMSG(msg "\r\n")
 
 #endif /* __TFM_UTILS_H__ */

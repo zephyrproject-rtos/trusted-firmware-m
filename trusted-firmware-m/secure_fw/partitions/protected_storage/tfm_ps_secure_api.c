@@ -7,9 +7,11 @@
 
 #include "array.h"
 #include "psa/protected_storage.h"
-#include "tfm_veneers.h"
 #ifdef TFM_PSA_API
+#include "psa/client.h"
 #include "psa_manifest/sid.h"
+#else
+#include "tfm_veneers.h"
 #endif
 
 psa_status_t psa_ps_set(psa_storage_uid_t uid,

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
- * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,6 +25,7 @@
 #include "cy_device.h"
 #include "cy_device_headers.h"
 #include "cy_ipc_drv.h"
+#include "cy_p64_watchdog.h"
 #include "cy_prot.h"
 #include "cy_pra.h"
 #include "pc_config.h"
@@ -34,11 +35,24 @@
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
+static enum tfm_plat_err_t handle_boot_wdt(void)
+{
+    /* Update watchdog timer to mark successfull start up of the image */
+    LOG_MSG("Checking boot watchdog\r\n");
+    if (cy_p64_wdg_is_enabled()) {
+        cy_p64_wdg_stop();
+        cy_p64_wdg_free();
+        LOG_MSG("Disabled boot watchdog\r\n");
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-        uint32_t partition_idx,
+        bool privileged,
         const struct platform_data_t *platform_data)
 {
-    (void) partition_idx; /* Unused parameter */
+    (void) privileged; /* Unused parameter */
     if (!platform_data) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
@@ -65,6 +79,9 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
 void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
     smpu_print_config();
+
+    /* Reset boot watchdog */
+    handle_boot_wdt();
 
     if (cy_access_port_control(CY_CM4_AP, CY_AP_EN) == 0) {
         /* The delay is required after Access port was enabled for
@@ -112,11 +129,9 @@ void tfm_spm_hal_wait_for_ns_cpu_ready(void)
     }
 }
 
-enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line,
-                                                        uint32_t priority)
+enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line)
 {
-    uint32_t quantized_priority = priority >> (8U - __NVIC_PRIO_BITS);
-    NVIC_SetPriority(irq_line, quantized_priority);
+    NVIC_SetPriority(irq_line, DEFAULT_IRQ_PRIORITY);
 
     return TFM_PLAT_ERR_SUCCESS;
 }

@@ -19,7 +19,17 @@ set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Prot
 
 set(ITS_BUF_SIZE                        32          CACHE STRING    "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
 
-set(CRYPTO_ASYMMETRIC_MODULE_DISABLED   TRUE        CACHE BOOL      "Disable PSA Crypto Asymmetric key module")
+set(CRYPTO_CONC_OPER_NUM                4           CACHE STRING    "The max number of concurrent operations that can be active (allocated) at any time in Crypto")
+# Profile Small assigns a much smller heap size for backend crypto library as
+# asymmetric cryptography is not enabled.
+# Assign 0x200 bytes for each operation and totally 0x800 byets for max 4
+# concurrent operation as set in CRYPTO_CONC_OPER_NUM above
+set(CRYPTO_ENGINE_BUF_SIZE              0x800       CACHE STRING    "Heap size for the crypto backend")
+set(CRYPTO_ASYM_SIGN_MODULE_DISABLED    ON          CACHE BOOL      "Disable PSA Crypto asymmetric key signature module")
+set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED ON          CACHE BOOL      "Disable PSA Crypto asymmetric key encryption module")
+# TODO CRYPTO_KEY_ID_ENCODES_OWNER shall be aligned with underlying crypto
+# library key ID encoding configuration
+set(CRYPTO_KEY_ID_ENCODES_OWNER         OFF         CACHE BOOL      "Encode client ID into Crypto PSA key ID")
 
 set(SYMMETRIC_INITIAL_ATTESTATION       ON          CACHE BOOL      "Use symmetric crypto for inital attestation")
 

@@ -128,9 +128,5 @@
         PSA_FUNCTION_NAME(psa_asymmetric_decrypt)
 #define psa_generate_key \
         PSA_FUNCTION_NAME(psa_generate_key)
-#define psa_set_key_domain_parameters \
-        PSA_FUNCTION_NAME(psa_set_key_domain_parameters)
-#define psa_get_key_domain_parameters \
-        PSA_FUNCTION_NAME(psa_get_key_domain_parameters)
 
 #endif /* CRYPTO_SPE_H */

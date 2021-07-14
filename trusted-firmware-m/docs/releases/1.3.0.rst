@@ -48,7 +48,7 @@ New platforms supported
 
   - Secure Enclave system:
 
-    - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/musca_b1/secure_enclave/readme>`
+    - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/arm/musca_b1/secure_enclave/readme>`
 
 Deprecated platforms
 ====================
@@ -148,7 +148,7 @@ TF-M.
       | 10-2020-q4-major.
       | The support for CMSE feature is broken in version 10-2020-q4-major. The
       | fix will be available in future release version.
-      | A note is added in :ref:`docs/getting_started/tfm_sw_requirement:C compilers`.
+      | A note is added in :ref:`docs/getting_started/tfm_getting_started:Install a toolchain`.
     - https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157
 
 Reference
@@ -160,11 +160,11 @@ Reference
 
   .. [3] :doc:`TF-M generic threat model </docs/security/threat_models/generic_threat_model>`
 
-  .. [4] :doc:`TF-M physical attack mitigation </docs/technical_references/tfm_physical_attack_mitigation>`
+  .. [4] :doc:`TF-M physical attack mitigation </docs/technical_references/design_docs/tfm_physical_attack_mitigation>`
 
-  .. [5] :doc:`TF-M Profile Large design </docs/technical_references/profiles/tfm_profile_large>`
+  .. [5] :doc:`TF-M Profile Large design </docs/technical_references/design_docs/profiles/tfm_profile_large>`
 
-  .. [6] :doc:`Code sharing between independently linked XIP binaries </docs/technical_references/code_sharing>`
+  .. [6] :doc:`Code sharing between independently linked XIP binaries </docs/technical_references/design_docs/code_sharing>`
 
   .. [7] :doc:`Security Handling </docs/security/security>`
 

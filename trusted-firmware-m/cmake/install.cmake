@@ -55,7 +55,7 @@ if (TFM_MULTI_CORE_TOPOLOGY)
                         ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox_config.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
-else()
+elseif (NOT TFM_PSA_API)
     install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_veneers.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/tfm/veneers)
 endif()

@@ -120,7 +120,6 @@ Here is a manifest reference example for the IPC model, please refer to
       {
         "source": "TFM_A_IRQ",
         "signal": "SPM_CORE_A_IRQ",
-        "tfm_irq_priority": 64,
       }
     ],
     "linker_pattern": {
@@ -138,33 +137,14 @@ that includes definitions of the Secure Partition IDs. The header file is
 uses the ``name`` attribute in the manifest as its name and the value is
 allocated by SPM.
 
+The Partition ID can be set to a fixed value or omitted to be auto allocated.
+
 .. code-block:: c
 
    #define name id-value
 
-Here is the Secure Partition ID table used in TF-M.
-
-.. table:: PID table
-   :widths: auto
-
-   =============================== =================
-    **Partition name**              **Partition ID**
-   =============================== =================
-   Reserved                        0-255
-   TFM_SP_PS                       256
-   TFM_SP_ITS                      257
-   TFM_SP_AUDIT_LOG                258
-   TFM_SP_CRYPTO                   259
-   TFM_SP_PLATFORM                 260
-   TFM_SP_INITIAL_ATTESTATION      261
-   TFM_SP_CORE_TEST                262
-   TFM_SP_CORE_TEST_2              263
-   TFM_SP_SECURE_TEST_PARTITION    264
-   TFM_SP_IPC_SERVICE_TEST         265
-   TFM_SP_IPC_CLIENT_TEST          266
-   TFM_IRQ_TEST_1                  267
-   TFM_SP_PS_TEST                  268
-   =============================== =================
+Please refer to ``<TF-M base folder>/tools/tfm_manifest_list.yaml`` for the PID
+allocations.
 
 About where to add the definition, please refer to the chapter `Add
 configuration`_.
@@ -196,9 +176,30 @@ Here is the RoT Service ID table used in TF-M.
    core_test_2                 0x0000F                0x040-0x05F
    tfm_ipc_client              0x0000F                0x060-0x07F
    tfm_ipc_service             0x0000F                0x080-0x09F
-   tfm_irq_test_service_1      0x0000F                0x0A0-0x0BF
+   tfm_slih_test_service       0x0000F                0x0A0-0x0AF
+   tfm_flih_test_service       0x0000F                0x0B0-0x0BF
    tfm_ps_test_service         0x0000F                0x0C0-0x0DF
+   tfm_ff11_partition          0x0000F                0x120-0x13F
    =========================== ====================== ========================
+
+RoT Service Stateless Handle Distribution
+-----------------------------------------
+A RoT Service may include stateless services. They are distinguished and
+referenced by stateless handles. In manifest, a ``stateless_handle`` attribute
+is set for indexing stateless services. The valid range is [1, 32] in current
+implementation and may extend.
+
+Here is the stateless handle allocation for partitions in TF-M. Partitions not
+listed are not applied to stateless mechanism yet.
+
+.. table:: Stateless Handle table
+   :widths: auto
+
+   =============================== =======================
+    **Partition name**              **Stateless Handle**
+   =============================== =======================
+   TFM_SP_CRYPTO                   1
+   =============================== =======================
 
 mmio_regions
 ------------
@@ -279,8 +280,6 @@ necessary information of secure partition.
 - ``short_name``: should be the same as the ``name`` in the secure partition
   manifest file.
 - ``manifest``: the relative path of the manifest file to TF-M root.
-- ``tfm_partition_ipc``: indicate if this partition is compatible with the IPC
-  model.
 - ``conditional``: Optional. Configure control macro for this partition.
 - ``version_major``: major version the partition manifest.
 - ``version_minor``: minor version the partition manifest.
@@ -295,7 +294,6 @@ Reference configuration example:
       "name": "Example Service",
       "short_name": "TFM_SP_EXAMPLE",
       "manifest": "secure_fw/partitions/EXAMPLE/tfm_example.yaml",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_EXAMPLE",
       "version_major": 0,
       "version_minor": 1,

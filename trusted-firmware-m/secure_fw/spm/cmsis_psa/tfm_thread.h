@@ -45,6 +45,7 @@ struct tfm_core_thread_t {
     void            *param;             /* entry parameter              */
     uintptr_t       stk_btm;            /* stack bottom (lower address) */
     uintptr_t       stk_top;            /* stack top    (higher address)*/
+    uintptr_t       flih_ctx;           /* FLIH context pointer         */
     uint32_t        prior;              /* priority                     */
     uint32_t        state;              /* state                        */
 
@@ -162,7 +163,7 @@ void __STATIC_INLINE tfm_core_thrd_set_retval(struct tfm_core_thread_t *pth,
  *
  * Notes :
  *  This function validates thread info. It returns error if thread info
- *  is not correct. Thread is avaliable after successful tfm_core_thrd_start().
+ *  is not correct. Thread is available after successful tfm_core_thrd_start().
  */
 uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth);
 
@@ -173,6 +174,18 @@ uint32_t tfm_core_thrd_start(struct tfm_core_thread_t *pth);
  *  Current running thread context pointer.
  */
 struct tfm_core_thread_t *tfm_core_thrd_get_curr(void);
+
+/*
+ * Set the current running thread
+ * Note:
+ *  This API is intended to update the current thread in FLIH handling.
+ *  So that in nested FLIH interrupts, the handler knows which isolation
+ *  boundary was preempted.
+ *  Although the CURR_THRD is updated, it does not mean the running Partition
+ *  thread is changed. It could also be the FLIH function which runs with the
+ *  same isolation boundary of the CURR_THRD.
+ */
+void tfm_core_thrd_set_curr(struct tfm_core_thread_t *pth);
 
 /*
  * Get next thread to run in list.

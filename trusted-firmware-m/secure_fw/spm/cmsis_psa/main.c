@@ -10,9 +10,8 @@
 #include "compile_check_defs.h"
 #include "region.h"
 #include "spm_ipc.h"
-#include "tfm_hal_platform.h"
 #include "tfm_hal_isolation.h"
-#include "tfm_irq_list.h"
+#include "tfm_hal_platform.h"
 #include "tfm_nspm.h"
 #include "tfm_spm_hal.h"
 #include "tfm_spm_log.h"
@@ -36,10 +35,8 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
 
 static fih_int tfm_core_init(void)
 {
-    size_t i;
     enum tfm_hal_status_t hal_status = TFM_HAL_ERROR_GENERIC;
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
-    enum irq_target_state_t irq_target_state = TFM_IRQ_TARGET_STATE_SECURE;
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
 #endif
@@ -115,21 +112,6 @@ static fih_int tfm_core_init(void)
     plat_err = tfm_spm_hal_nvic_interrupt_target_state_cfg();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-
-    for (i = 0; i < tfm_core_irq_signals_count; ++i) {
-        plat_err = tfm_spm_hal_set_secure_irq_priority(
-                                          tfm_core_irq_signals[i].irq_line,
-                                          tfm_core_irq_signals[i].irq_priority);
-        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-        }
-        irq_target_state = tfm_spm_hal_set_irq_target_state(
-                                          tfm_core_irq_signals[i].irq_line,
-                                          TFM_IRQ_TARGET_STATE_SECURE);
-        if (irq_target_state != TFM_IRQ_TARGET_STATE_SECURE) {
-            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-        }
     }
 
     /* Enable secure peripherals interrupts */

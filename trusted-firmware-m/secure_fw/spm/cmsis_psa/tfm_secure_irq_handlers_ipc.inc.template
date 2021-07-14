@@ -7,61 +7,14 @@
 
 {{utilities.donotedit_warning}}
 
-{% for partition in partitions %}
-#ifdef {{partition.attr.conditional}}
-#include "{{partition.header_file}}"
-#endif /* {{partition.attr.conditional}} */
-
-{% endfor %}
-
-#include "cmsis_compiler.h"
-{% macro _irq_record(partition_name, signal, line, priority) -%}
-{ {{ partition_name }}, {{ signal }}, {{ line }}, {{ priority }} },
-{%- endmacro %}
-
-/* Definitions of the signals of the IRQs (if any) */
-const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
-{% for partition in partitions %}
-    {% if partition.manifest.irqs %}
-        {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-        {% endif %}
-        {% for irq in partition.manifest.irqs %}
-            {% set irq_data = namespace() %}
-            {% if irq.source %}
-                {% set irq_data.line = irq.source %}
-            {% else %}
-#error "Interrupt source isn't provided for 'irqs' in partition {{partition.manifest.name}}"
-            {% endif %}
-            {% if partition.manifest.psa_framework_version == 1.0 %}
-                {% set irq_data.signal = irq.signal %}
-            {% else %}
-                {% set irq_data.signal = irq.name + "_SIGNAL" %}
-            {% endif %}
-            {% if irq.tfm_irq_priority %}
-                {% set irq_data.priority = irq.tfm_irq_priority %}
-            {% else %}
-                {% set irq_data.priority = "TFM_DEFAULT_SECURE_IRQ_PRIORITY" %}
-            {% endif %}
-    {{ _irq_record(partition.manifest.name, irq_data.signal, irq_data.line, irq_data.priority) }}
-        {% endfor %}
-        {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-        {% endif %}
-   {% endif %}
-{% endfor %}
-   {0, 0, 0, 0}                         /* add dummy element to avoid non-standard empty array */
-};
-
-const size_t tfm_core_irq_signals_count = (sizeof(tfm_core_irq_signals) /
-                                           sizeof(*tfm_core_irq_signals)) - 1; /* adjust for the dummy element */
-
 /* Definitions of privileged IRQ handlers (if any) */
 {% for partition in partitions %}
     {% if partition.manifest.irqs %}
         {% if partition.attr.conditional %}
 #ifdef {{partition.attr.conditional}}
         {% endif %}
+#include "{{partition.header_file}}"
+extern struct partition_{{partition.manifest.name|lower}}_load_info_t {{partition.manifest.name|lower}}_load;
         {% for irq in partition.manifest.irqs %}
             {% set irq_data = namespace() %}
             {% if partition.manifest.psa_framework_version == 1.0 %}
@@ -79,15 +32,15 @@ void {{irq.source}}_Handler(void)
 {
             {% if irq.source %}
                 {% if partition.manifest.psa_framework_version == 1.1 and irq.handling == "FLIH" %}
-#error "FLIH is not supported yet!"
+                    {% set irq_data.flih =  irq.name|lower + "_flih" %}
                 {% else %}
-    tfm_set_irq_signal({{partition.manifest.name}}, {{irq_data.signal}}, {{irq.source}});
+                    {% set irq_data.flih =  "NULL" %}
                 {% endif %}
+    spm_interrupt_handler((struct partition_load_info_t *)&{{partition.manifest.name|lower}}_load, {{irq_data.signal}}, {{irq.source}}, {{irq_data.flih}});
             {% else %}
 #error "Interrupt source isn't provided for 'irqs' in partition {{partition.manifest.name}}"
             {% endif %}
 }
-
         {% endfor %}
         {% if partition.attr.conditional %}
 #endif /* {{partition.attr.conditional}} */

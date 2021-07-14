@@ -45,6 +45,7 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/arch/tfm_arch.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/main.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_ipc.c>
+        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_load.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/spm_psa_client_call.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/psa_client_service_apis.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_core_svcalls_ipc.c>
@@ -65,6 +66,8 @@ target_sources(tfm_spm
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv6-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
 )
+
+target_include_directories(tfm_partitions INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa)
 
 #workaround for arch-test
 if (TEST_PSA_API STREQUAL IPC)

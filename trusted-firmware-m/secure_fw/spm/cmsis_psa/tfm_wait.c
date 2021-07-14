@@ -14,6 +14,7 @@ void tfm_event_wait(struct tfm_event_t *pevnt)
 
     pevnt->owner = tfm_core_thrd_get_curr();
     tfm_core_thrd_set_state(pevnt->owner, THRD_STATE_BLOCK);
+    tfm_arch_get_ctx(&(pevnt->owner->arch_ctx));
     tfm_core_thrd_activate_schedule();
 }
 

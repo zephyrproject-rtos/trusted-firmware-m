@@ -24,7 +24,7 @@ List of requirements
   then it also have to use the
   ``enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)``
   API function provided by TF-M, as described in
-  :doc:`NS client identification documentation </docs/technical_references/tfm_ns_client_identification>`.
+  :doc:`NS client identification documentation </docs/technical_references/design_docs/tfm_ns_client_identification>`.
 - if the OS doesn't support the API mentioned above, it should set
   ``TFM_NS_CLIENT_IDENTIFICATION`` to ``OFF`` in the cmake system.
 - .. Note::

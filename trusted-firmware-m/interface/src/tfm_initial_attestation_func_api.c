@@ -56,25 +56,3 @@ psa_initial_attest_get_token_size(size_t  challenge_size,
                             (uint32_t)in_vec,  IOVEC_LEN(in_vec),
                             (uint32_t)out_vec, IOVEC_LEN(out_vec));
 }
-
-psa_status_t
-tfm_initial_attest_get_public_key(uint8_t          *public_key,
-                                  size_t            public_key_buf_size,
-                                  size_t           *public_key_len,
-                                  psa_ecc_family_t *elliptic_curve_type)
-{
-    int32_t res;
-
-    psa_outvec out_vec[] = {
-        {.base = public_key,          .len = public_key_buf_size},
-        {.base = elliptic_curve_type, .len = sizeof(*elliptic_curve_type)},
-        {.base = public_key_len,      .len = sizeof(*public_key_len)}
-    };
-
-    res = tfm_ns_interface_dispatch(
-                        (veneer_fn)tfm_initial_attest_get_public_key_veneer,
-                        (uint32_t)NULL,  0,
-                        (uint32_t)out_vec, IOVEC_LEN(out_vec));
-
-    return (psa_status_t) res;
-}

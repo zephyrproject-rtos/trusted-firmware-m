@@ -26,8 +26,8 @@ Contributions to the TF-M project need to follow the process below.
 
   - Clone the TF-M code on your own machine from `TF-M git repository
     <https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git>`_.
-  - Follow the :doc:`SW Requirements </docs/getting_started/tfm_sw_requirement>`,
-    :doc:`Build Instructions </docs/getting_started/tfm_build_instruction>` and
+  - Follow the :doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`,
+    :doc:`Build Instructions </docs/technical_references/instructions/tfm_build_instruction>` and
     :doc:`Coding Guide </docs/contributing/coding_guide>` for the TF-M project.
   - Make your changes in logical chunks to help reviewers. Each commit should
     be a separate review and either work properly or be squashed after the

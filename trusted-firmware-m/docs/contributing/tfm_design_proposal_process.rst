@@ -69,9 +69,9 @@ In order to work on TF-M documentation the TF-M git repository has to be
 available locally. Setting up the documentation tools will allow pre-viewing the
 documentation file in preparation.
 For information on what tools are needed please refer to
-:doc:`sw requirements </docs/getting_started/tfm_sw_requirement>`. To see how to get
-a local copy of the TF-M repository please see
-:doc:`build instructions </docs/getting_started/tfm_build_instruction>`
+:doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`. To see
+how to get a local copy of the TF-M repository please see
+:doc:`build instructions </docs/technical_references/instructions/tfm_build_instruction>`
 
 Process steps
 -------------

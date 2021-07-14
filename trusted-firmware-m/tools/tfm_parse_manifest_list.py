@@ -50,7 +50,25 @@ class TemplateLoader(BaseLoader):
             source = f.read()
         return source, template, False
 
-def process_manifest(manifest_list_files):
+def manifest_validation(partition_manifest):
+    """
+    This function validates FF-M compliance for partition manifest, and sets
+    default values for optional attributes.
+    More validation items will be added.
+    """
+    # Service FF-M manifest validation
+    if 'services' not in partition_manifest.keys():
+        return partition_manifest
+
+    for service in partition_manifest['services']:
+        if 'version' not in service.keys():
+            service['version'] = 1
+        if 'version_policy' not in service.keys():
+            service['version_policy'] = "STRICT"
+
+    return partition_manifest
+
+def process_partition_manifests(manifest_list_files):
     """
     Parse the input manifest, generate the data base for genereated files
     and generate manifest header files.
@@ -65,17 +83,14 @@ def process_manifest(manifest_list_files):
     The partition data base.
     """
 
-    partition_db = []
+    partition_list = []
     manifest_list = []
 
     for f in manifest_list_files:
         with open(f) as manifest_list_yaml_file:
             manifest_dic = yaml.safe_load(manifest_list_yaml_file)
             manifest_list.extend(manifest_dic["manifest_list"])
-
-    manifesttemplate = ENV.get_template('secure_fw/partitions/manifestfilename.template')
-    memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
-    infotemplate = ENV.get_template('secure_fw/partitions/partition_load_info.template')
+            manifest_list_yaml_file.close()
 
     pid_list = []
     no_pid_manifest_idx = []
@@ -96,27 +111,18 @@ def process_manifest(manifest_list_files):
         manifest_list[idx]['pid'] = pid
         pid_list.append(pid)
 
-    print("Start to generate PSA manifests:")
     for manifest_item in manifest_list:
         # Replace environment variables in the manifest path
         manifest_path = os.path.expandvars(manifest_item['manifest'])
         file = open(manifest_path)
-        manifest = yaml.safe_load(file)
-
-        utilities = {}
-        utilities['donotedit_warning']=donotedit_warning
-
-        context = {}
-        context['manifest'] = manifest
-        context['attr'] = manifest_item
-        context['utilities'] = utilities
+        manifest = manifest_validation(yaml.safe_load(file))
+        file.close()
 
         manifest_dir, manifest_name = os.path.split(manifest_path)
-        outfile_name = manifest_name.replace('yaml', 'h').replace('json', 'h')
-        context['file_name'] = outfile_name.replace('.h', '')
-        outfile_name = os.path.join(manifest_dir, "psa_manifest", outfile_name).replace('\\', '/')
-        intermediafile_name = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + context['file_name'] + '.c').replace('\\', '/')
-        infofile_name = os.path.join(manifest_dir, "auto_generated", 'load_info_' + context['file_name'] + '.c').replace('\\', '/')
+        manifest_out_basename = manifest_name.replace('.yaml', '').replace('.json', '')
+        manifest_head_file = os.path.join(manifest_dir, "psa_manifest", manifest_out_basename + '.h').replace('\\', '/')
+        intermedia_file = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + manifest_out_basename + '.c').replace('\\', '/')
+        load_info_file = os.path.join(manifest_dir, "auto_generated", 'load_info_' + manifest_out_basename + '.c').replace('\\', '/')
 
         """
         Remove the `source_path` portion of the filepaths, so that it can be
@@ -125,50 +131,78 @@ def process_manifest(manifest_list_files):
         if 'source_path' in manifest_item:
             # Replace environment variables in the source path
             source_path = os.path.expandvars(manifest_item['source_path'])
-            outfile_name = os.path.relpath(outfile_name, start = source_path)
-            intermediafile_name = os.path.relpath(intermediafile_name, start = source_path)
-            infofile_name = os.path.relpath(infofile_name, start = source_path)
-
-        partition_db.append({"manifest": manifest, "attr": manifest_item, "header_file": outfile_name})
+            manifest_head_file = os.path.relpath(manifest_head_file, start = source_path)
+            intermedia_file = os.path.relpath(intermedia_file, start = source_path)
+            load_info_file = os.path.relpath(load_info_file, start = source_path)
 
         if OUT_DIR is not None:
-            outfile_name = os.path.join(OUT_DIR, outfile_name)
-            intermediafile_name = os.path.join(OUT_DIR, intermediafile_name)
-            infofile_name = os.path.join(OUT_DIR, infofile_name)
+            manifest_head_file = os.path.join(OUT_DIR, manifest_head_file)
+            intermedia_file = os.path.join(OUT_DIR, intermedia_file)
+            load_info_file = os.path.join(OUT_DIR, load_info_file)
 
-        outfile_path = os.path.dirname(outfile_name)
+        partition_list.append({"manifest": manifest, "attr": manifest_item,
+                               "manifest_out_basename": manifest_out_basename,
+                               "header_file": manifest_head_file,
+                               "intermedia_file": intermedia_file,
+                               "loadinfo_file": load_info_file})
+
+    return partition_list
+
+def gen_per_partition_files(context):
+    """
+    Generate per-partition files
+
+    Parameters
+    ----------
+    context:
+        context contains partition infos
+    """
+
+    subutilities = {}
+    subutilities['donotedit_warning'] = donotedit_warning
+
+    subcontext = {}
+    subcontext['utilities'] = subutilities
+
+    manifesttemplate = ENV.get_template('secure_fw/partitions/manifestfilename.template')
+    memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
+    infotemplate = ENV.get_template('secure_fw/partitions/partition_load_info.template')
+
+    print ("Start to generate partition files:")
+
+    for one_partition in context['partitions']:
+        subcontext['manifest'] = one_partition['manifest']
+        subcontext['attr'] = one_partition['attr']
+        subcontext['manifest_out_basename'] = one_partition['manifest_out_basename']
+
+        print ("Generating Header: " + one_partition['header_file'])
+        outfile_path = os.path.dirname(one_partition['header_file'])
         if not os.path.exists(outfile_path):
             os.makedirs(outfile_path)
 
-        print ("Generating " + outfile_name)
+        headerfile = io.open(one_partition['header_file'], "w", newline=None)
+        headerfile.write(manifesttemplate.render(subcontext))
+        headerfile.close()
 
-        outfile = io.open(outfile_name, "w", newline=None)
-        outfile.write(manifesttemplate.render(context))
-        outfile.close()
-
-        intermediafile_path = os.path.dirname(intermediafile_name)
+        print ("Generating Intermedia: " + one_partition['intermedia_file'])
+        intermediafile_path = os.path.dirname(one_partition['intermedia_file'])
         if not os.path.exists(intermediafile_path):
             os.makedirs(intermediafile_path)
+        intermediafile = io.open(one_partition['intermedia_file'], "w", newline=None)
+        intermediafile.write(memorytemplate.render(subcontext))
+        intermediafile.close()
 
-        print ("Generating " + intermediafile_name)
-
-        memoutfile = io.open(intermediafile_name, "w", newline=None)
-        memoutfile.write(memorytemplate.render(context))
-        memoutfile.close()
-
-        infofile_path = os.path.dirname(infofile_name)
+        print ("Generating Loadinfo: " + one_partition['loadinfo_file'])
+        infofile_path = os.path.dirname(one_partition['loadinfo_file'])
         if not os.path.exists(infofile_path):
             os.makedirs(infofile_path)
+        infooutfile = io.open(one_partition['loadinfo_file'], "w", newline=None)
+        infooutfile.write(infotemplate.render(subcontext))
+        infooutfile.close()
 
-        print ("Generating " + infofile_name)
+    print ("Per-partition files done:")
 
-        info_outfile = io.open(infofile_name, "w", newline=None)
-        info_outfile.write(infotemplate.render(context))
-        info_outfile.close()
-
-    return partition_db
-
-def gen_files(context, gen_file_lists):
+def gen_summary_files(context, gen_file_lists):
     """
     Generate files according to the gen_file_list
 
@@ -187,28 +221,28 @@ def gen_files(context, gen_file_lists):
     print("Start to generate file from the generated list:")
     for file in file_list:
         # Replace environment variables in the output filepath
-        outfile_name = os.path.expandvars(file["output"])
+        manifest_out_file = os.path.expandvars(file["output"])
         # Replace environment variables in the template filepath
         templatefile_name = os.path.expandvars(file["template"])
 
         if OUT_DIR is not None:
-            outfile_name = os.path.join(OUT_DIR, outfile_name)
+            manifest_out_file = os.path.join(OUT_DIR, manifest_out_file)
 
-        print ("Generating " + outfile_name)
+        print ("Generating " + manifest_out_file)
 
-        outfile_path = os.path.dirname(outfile_name)
+        outfile_path = os.path.dirname(manifest_out_file)
         if not os.path.exists(outfile_path):
             os.makedirs(outfile_path)
 
         template = ENV.get_template(templatefile_name)
 
-        outfile = io.open(outfile_name, "w", newline=None)
+        outfile = io.open(manifest_out_file, "w", newline=None)
         outfile.write(template.render(context))
         outfile.close()
 
     print ("Generation of files done")
 
-def process_stateless_services(partitions, static_handle_max_num):
+def process_stateless_services(partitions, stateless_index_max_num):
     """
     This function collects all stateless services together, and allocates
     stateless handles for them.
@@ -225,9 +259,6 @@ def process_stateless_services(partitions, static_handle_max_num):
         # Skip the FF-M 1.0 partitions
         if partition['manifest']['psa_framework_version'] < 1.1:
             continue
-        # Skip the Non-IPC partitions
-        if partition['attr']['tfm_partition_ipc'] is not True:
-            continue
         for service in partition['manifest']['services']:
             if 'connection_based' not in service:
                 raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
@@ -237,15 +268,15 @@ def process_stateless_services(partitions, static_handle_max_num):
     if len(collected_stateless_services) == 0:
         return []
 
-    if len(collected_stateless_services) > static_handle_max_num:
-        raise Exception("Stateless service numbers range exceed {number}.".format(number=static_handle_max_num))
+    if len(collected_stateless_services) > stateless_index_max_num:
+        raise Exception("Stateless service numbers range exceed {number}.".format(number=stateless_index_max_num))
 
     """
     Allocate an empty stateless service list to store services.
     Use "handle - 1" as the index for service, since handle value starts from
     1 and list index starts from 0.
     """
-    reordered_stateless_services = [None] * static_handle_max_num
+    reordered_stateless_services = [None] * stateless_index_max_num
     auto_alloc_services = []
 
     for service in collected_stateless_services:
@@ -258,7 +289,7 @@ def process_stateless_services(partitions, static_handle_max_num):
 
         # Fill in service list with specified stateless handle, otherwise skip
         if isinstance(service_handle, int):
-            if service_handle < 1 or service_handle > static_handle_max_num:
+            if service_handle < 1 or service_handle > stateless_index_max_num:
                 raise Exception("Invalid stateless_handle setting: {handle}.".format(handle=service['stateless_handle']))
             # Convert handle index to reordered service list index
             service_handle = service_handle - 1
@@ -272,7 +303,7 @@ def process_stateless_services(partitions, static_handle_max_num):
             raise Exception("Invalid stateless_handle setting: {handle}.".format(handle=service['stateless_handle']))
 
     # Auto-allocate stateless handle and encode the stateless handle
-    for i in range(0, static_handle_max_num):
+    for i in range(0, stateless_index_max_num):
         service = reordered_stateless_services[i]
 
         if service == None and len(auto_alloc_services) > 0:
@@ -293,6 +324,7 @@ def process_stateless_services(partitions, static_handle_max_num):
             stateless_version = (service['version'] & 0xFF) << 8
             stateless_handle_value |= stateless_version
             service['stateless_handle_value'] = '0x{0:08x}'.format(stateless_handle_value)
+            service['stateless_handle_index'] = stateless_index
 
         reordered_stateless_services[i] = service
 
@@ -369,18 +401,18 @@ def main():
     """
     os.chdir(os.path.join(sys.path[0], ".."))
 
-    partition_db = process_manifest(manifest_list)
+    partition_list = process_partition_manifests(manifest_list)
 
     utilities = {}
-    context = {}
-
     utilities['donotedit_warning'] = donotedit_warning
 
-    context['partitions'] = partition_db
+    context = {}
+    context['partitions'] = partition_list
     context['utilities'] = utilities
-    context['stateless_services'] = process_stateless_services(partition_db, 32)
+    context['stateless_services'] = process_stateless_services(partition_list, 32)
 
-    gen_files(context, gen_file_list)
+    gen_per_partition_files(context)
+    gen_summary_files(context, gen_file_list)
 
 if __name__ == "__main__":
     main()
