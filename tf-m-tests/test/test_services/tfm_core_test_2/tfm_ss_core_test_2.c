@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,6 @@
 #include <stddef.h>
 #include "core_test_defs.h"
 #include "tfm_ss_core_test_2.h"
-#include "tfm_api.h"
 #include "tfm_secure_api.h"
 #include "psa/service.h"
 #include "psa_manifest/pid.h"
@@ -30,9 +29,6 @@ static int32_t caller_client_id_rw = INVALID_NS_CLIENT_ID;
 
 static int32_t* invalid_addresses [] = {(int32_t*)0x0, (int32_t*)0xFFF12000};
 #endif /* !defined(TFM_PSA_API) */
-
-/* structures for secure IRQ testing */
-static struct irq_test_execution_data_t *current_execution_data;
 
 psa_status_t spm_core_test_2_slave_service(struct psa_invec *in_vec,
                                            size_t in_len,
@@ -65,7 +61,7 @@ psa_status_t spm_core_test_2_check_caller_client_id(struct psa_invec *in_vec,
     for (i = 0; i < sizeof(invalid_addresses)/sizeof(invalid_addresses[0]); ++i)
     {
         ret = tfm_core_get_caller_client_id(invalid_addresses[i]);
-        if (ret != TFM_ERROR_INVALID_PARAMETER) {
+        if (ret == TFM_SUCCESS) {
             return CORE_TEST_ERRNO_TEST_FAULT;
         }
     }
@@ -188,96 +184,6 @@ psa_status_t spm_core_test_2_sfn_invert(
     return spm_core_test_2_sfn_invert_internal(in_ptr, out_ptr, res_ptr, len);
 }
 
-static psa_status_t spm_core_test_2_prepare_test_scenario_internal(
-                               enum irq_test_scenario_t irq_test_scenario,
-                               struct irq_test_execution_data_t *execution_data)
-{
-    current_execution_data = execution_data;
-
-    switch (irq_test_scenario) {
-    case IRQ_TEST_SCENARIO_NONE:
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    case IRQ_TEST_SCENARIO_1:
-    case IRQ_TEST_SCENARIO_2:
-    case IRQ_TEST_SCENARIO_3:
-    case IRQ_TEST_SCENARIO_4:
-    case IRQ_TEST_SCENARIO_5:
-        /* No action is necessary*/
-        break;
-    default:
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    return CORE_TEST_ERRNO_SUCCESS;
-}
-
-psa_status_t spm_core_test_2_prepare_test_scenario(
-                             struct psa_invec *in_vec, size_t in_len,
-                             struct psa_outvec *out_vec, size_t out_size)
-{
-    if ((in_len != 2) ||
-        (in_vec[0].len != sizeof(uint32_t)) ||
-        (in_vec[1].len != sizeof(struct irq_test_execution_data_t *))) {
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    enum irq_test_scenario_t irq_test_scenario =
-            (enum irq_test_scenario_t) *(uint32_t *)in_vec[0].base;
-
-    struct irq_test_execution_data_t *execution_data =
-            *(struct irq_test_execution_data_t **)in_vec[1].base;
-
-    return spm_core_test_2_prepare_test_scenario_internal(irq_test_scenario,
-                                                          execution_data);
-}
-
-static psa_status_t spm_core_test_2_execute_test_scenario_internal(
-                                     enum irq_test_scenario_t irq_test_scenario)
-{
-    switch (irq_test_scenario) {
-    case IRQ_TEST_SCENARIO_NONE:
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    case IRQ_TEST_SCENARIO_1:
-        /* No action is necessary*/
-        break;
-    case IRQ_TEST_SCENARIO_2:
-        if (current_execution_data->timer0_triggered) {
-            return CORE_TEST_ERRNO_TEST_FAULT;
-        }
-        while (!current_execution_data->timer0_triggered) {
-            ;
-        }
-        break;
-    case IRQ_TEST_SCENARIO_3:
-    case IRQ_TEST_SCENARIO_4:
-        /* No action is necessary*/
-        break;
-    case IRQ_TEST_SCENARIO_5:
-        if (current_execution_data->timer1_triggered) {
-            return CORE_TEST_ERRNO_TEST_FAULT;
-        }
-        while (!current_execution_data->timer1_triggered) {
-            ;
-        }
-        break;
-    default:
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    return CORE_TEST_ERRNO_SUCCESS;
-}
-
-psa_status_t spm_core_test_2_execute_test_scenario(
-                                    struct psa_invec *in_vec, size_t in_len,
-                                    struct psa_outvec *out_vec, size_t out_size)
-{
-    enum irq_test_scenario_t irq_test_scenario =
-            (enum irq_test_scenario_t) *(uint32_t *)in_vec[0].base;
-
-    return spm_core_test_2_execute_test_scenario_internal(irq_test_scenario);
-}
-
-
 #ifdef TFM_PSA_API
 
 typedef psa_status_t (*core_test_2_func_t)(psa_msg_t *msg);
@@ -387,52 +293,6 @@ psa_status_t spm_core_test_2_wrap_sfn_invert(psa_msg_t *msg)
 
     return ret;
 }
-
-psa_status_t spm_core_test_2_wrap_prepare_test_scenario(psa_msg_t *msg)
-{
-    uint32_t irq_test_scenario;
-    struct irq_test_execution_data_t *execution_data;
-    size_t num;
-
-    if ((msg->in_size[0] != sizeof(uint32_t)) ||
-        (msg->in_size[1] != sizeof(struct irq_test_execution_data_t*)))  {
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    num = psa_read(msg->handle, 0, &irq_test_scenario, sizeof(irq_test_scenario));
-    if (num != msg->in_size[0]) {
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    num = psa_read(msg->handle, 1, &execution_data, sizeof(
-                                            struct irq_test_execution_data_t*));
-    if (num != msg->in_size[1]) {
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    return spm_core_test_2_prepare_test_scenario_internal((enum irq_test_scenario_t)
-                                                          irq_test_scenario,
-                                                          execution_data);
-}
-
-psa_status_t spm_core_test_2_wrap_execute_test_scenario(psa_msg_t *msg)
-{
-    uint32_t irq_test_scenario;
-    size_t num;
-
-    if (msg->in_size[0] != sizeof(uint32_t))  {
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    num = psa_read(msg->handle, 0, &irq_test_scenario, sizeof(irq_test_scenario));
-    if (num != msg->in_size[0]) {
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    return spm_core_test_2_execute_test_scenario_internal((enum irq_test_scenario_t)
-                                                          irq_test_scenario);
-}
-
 #endif /* defined(TFM_PSA_API) */
 
 /* FIXME: Add a testcase to test that a failed init makes the secure partition
@@ -460,14 +320,6 @@ psa_status_t core_test_2_init(void)
         } else if (signals & SPM_CORE_TEST_2_INVERT_SIGNAL) {
             core_test_2_signal_handle(SPM_CORE_TEST_2_INVERT_SIGNAL,
                                       spm_core_test_2_wrap_sfn_invert);
-        } else if (signals & SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO_SIGNAL) {
-            core_test_2_signal_handle(
-                                   SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO_SIGNAL,
-                                   spm_core_test_2_wrap_prepare_test_scenario);
-        } else if (signals & SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO_SIGNAL) {
-            core_test_2_signal_handle(
-                                   SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO_SIGNAL,
-                                   spm_core_test_2_wrap_execute_test_scenario);
         } else {
             ; /* do nothing */
         }

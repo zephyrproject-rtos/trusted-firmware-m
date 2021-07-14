@@ -40,20 +40,6 @@
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_CORE_TEST_2_SFN_PREPARE_TEST_SCENARIO",
-      "signal": "SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_CORE_TEST_2_SFN_EXECUTE_TEST_SCENARIO",
-      "signal": "SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
     }
   ],
   "services": [
@@ -84,20 +70,6 @@
       "non_secure_clients": true,
       "version": 1,
       "version_policy": "STRICT"
-    },
-    {
-    "name": "SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO",
-    "sid": "0x0000F044",
-    "non_secure_clients": true,
-    "version": 1,
-    "version_policy": "STRICT"
-    },
-    {
-    "name": "SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO",
-    "sid": "0x0000F045",
-    "non_secure_clients": true,
-    "version": 1,
-    "version_policy": "STRICT"
-    },
+    }
   ]
 }

@@ -15,12 +15,12 @@ add_library(tfm_test_suite_multi_core_ns STATIC EXCLUDE_FROM_ALL)
 
 target_sources(tfm_test_suite_multi_core_ns
     PRIVATE
-        non_secure/multi_core_ns_interface_testsuite.c
+        multi_core_ns_interface_testsuite.c
 )
 
 target_include_directories(tfm_test_suite_multi_core_ns
     PUBLIC
-        non_secure
+        ./
 )
 
 target_compile_definitions(tfm_test_suite_multi_core_ns

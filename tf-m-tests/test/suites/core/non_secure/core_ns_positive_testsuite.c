@@ -20,9 +20,6 @@
 #else  /* TFM_PSA_API */
 #include "tfm_veneers.h"
 #endif /* TFM_PSA_API */
-#ifdef TFM_ENABLE_IRQ_TEST
-#include "tfm_peripherals_def.h"
-#endif
 
 /* Define test suite for core tests */
 /* List of tests */
@@ -49,12 +46,6 @@ static void tfm_core_test_peripheral_access(struct test_result_t *ret);
 #endif
 static void tfm_core_test_iovec_sanitization(struct test_result_t *ret);
 static void tfm_core_test_outvec_write(struct test_result_t *ret);
-#ifdef TFM_ENABLE_IRQ_TEST
-static void tfm_core_test_irq(struct test_result_t *ret);
-
-static enum irq_test_scenario_t executing_irq_test_scenario = IRQ_TEST_SCENARIO_NONE;
-static struct irq_test_execution_data_t irq_test_execution_data = {0};
-#endif
 
 static struct test_t core_tests[] = {
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_NS_THREAD, tfm_core_test_ns_thread,
@@ -64,11 +55,6 @@ CORE_TEST_DESCRIPTION(CORE_TEST_ID_CHECK_INIT, tfm_core_test_check_init,
 #ifdef ENABLE_TFM_CORE_RECURSION_TESTS
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_RECURSION, tfm_core_test_recursion,
     "Test direct recursion of secure services"),
-#endif
-#ifdef TFM_ENABLE_IRQ_TEST
-CORE_TEST_DESCRIPTION(CORE_TEST_ID_SECURE_IRQ,
-    tfm_core_test_irq,
-    "Test secure irq"),
 #endif
 CORE_TEST_DESCRIPTION(CORE_TEST_ID_BUFFER_CHECK, tfm_core_test_buffer_check,
     "Test secure service buffer accesses"),
@@ -434,216 +420,6 @@ static void tfm_core_test_outvec_write(struct test_result_t *ret)
 
     ret->val = TEST_PASSED;
 }
-
-#ifdef TFM_ENABLE_IRQ_TEST
-static int32_t prepare_test_scenario_ns(
-                               enum irq_test_scenario_t test_scenario,
-                               struct irq_test_execution_data_t *execution_data)
-{
-    executing_irq_test_scenario = test_scenario;
-    switch (test_scenario) {
-    case IRQ_TEST_SCENARIO_NONE:
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    case IRQ_TEST_SCENARIO_1:
-    case IRQ_TEST_SCENARIO_2:
-    case IRQ_TEST_SCENARIO_3:
-    case IRQ_TEST_SCENARIO_4:
-        /* nothing to be done here */
-        break;
-    case IRQ_TEST_SCENARIO_5:
-        execution_data->timer1_triggered = 0;
-        tfm_plat_test_non_secure_timer_start();
-        break;
-    default:
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    return CORE_TEST_ERRNO_SUCCESS;
-}
-
-static int32_t execute_test_scenario_ns(
-                               enum irq_test_scenario_t test_scenario,
-                               struct irq_test_execution_data_t *execution_data)
-{
-
-    switch (test_scenario) {
-    case IRQ_TEST_SCENARIO_NONE:
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    case IRQ_TEST_SCENARIO_1:
-        if (execution_data->timer0_triggered) {
-            return CORE_TEST_ERRNO_TEST_FAULT;
-        }
-        while (!execution_data->timer0_triggered) {
-            ;
-        }
-        break;
-    case IRQ_TEST_SCENARIO_2:
-    case IRQ_TEST_SCENARIO_3:
-    case IRQ_TEST_SCENARIO_4:
-    case IRQ_TEST_SCENARIO_5:
-        /* nothing to be done here */
-        break;
-    default:
-        return CORE_TEST_ERRNO_INVALID_PARAMETER;
-    }
-
-    return CORE_TEST_ERRNO_SUCCESS;
-}
-
-void TIMER1_Handler (void)
-{
-    tfm_plat_test_non_secure_timer_stop();
-
-    switch (executing_irq_test_scenario) {
-    case IRQ_TEST_SCENARIO_NONE:
-    case IRQ_TEST_SCENARIO_1:
-    case IRQ_TEST_SCENARIO_2:
-    case IRQ_TEST_SCENARIO_3:
-    case IRQ_TEST_SCENARIO_4:
-        while (1) {}
-        /* shouldn't happen */
-        break;
-    case IRQ_TEST_SCENARIO_5:
-        irq_test_execution_data.timer1_triggered = 1;
-        break;
-    default:
-        while (1) {}
-        /* shouldn't happen */
-        break;
-    }
-}
-
-static int32_t tfm_core_test_irq_scenario(
-                                         enum irq_test_scenario_t test_scenario)
-{
-    struct irq_test_execution_data_t *execution_data_address =
-                                                       &irq_test_execution_data;
-    uint32_t scenario = test_scenario;
-
-    psa_invec in_vec[] = {
-                 {&scenario, sizeof(uint32_t)},
-                 {&execution_data_address,
-                                  sizeof(struct irq_test_execution_data_t *)} };
-    int32_t err;
-
-#ifdef TFM_PSA_API
-    err = psa_test_common(SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_SID,
-                          SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_VERSION,
-                          in_vec, 2, NULL, 0);
-#else
-    err = tfm_spm_irq_test_1_prepare_test_scenario_veneer(in_vec, 2, NULL, 0);
-#endif
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        return err;
-    }
-
-#ifdef TFM_PSA_API
-    err = psa_test_common(SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO_SID,
-                          SPM_CORE_TEST_2_PREPARE_TEST_SCENARIO_VERSION,
-                          in_vec, 2, NULL, 0);
-#else
-    err = tfm_spm_core_test_2_prepare_test_scenario_veneer(in_vec, 2, NULL, 0);
-#endif
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        return err;
-    }
-
-    err = prepare_test_scenario_ns(test_scenario, &irq_test_execution_data);
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        return err;
-    }
-
-#ifdef TFM_PSA_API
-    err = psa_test_common(SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_SID,
-                          SPM_CORE_IRQ_TEST_1_EXECUTE_TEST_SCENARIO_VERSION,
-                          in_vec, 2, NULL, 0);
-#else
-    err = tfm_spm_irq_test_1_execute_test_scenario_veneer(in_vec, 1, NULL, 0);
-#endif
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        return err;
-    }
-
-#ifdef TFM_PSA_API
-    err = psa_test_common(SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO_SID,
-                          SPM_CORE_TEST_2_EXECUTE_TEST_SCENARIO_VERSION,
-                          in_vec, 2, NULL, 0);
-#else
-    err = tfm_spm_core_test_2_execute_test_scenario_veneer(in_vec, 1, NULL, 0);
-#endif
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        return err;
-    }
-
-    err = execute_test_scenario_ns(test_scenario, &irq_test_execution_data);
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        return err;
-    }
-
-    return CORE_TEST_ERRNO_SUCCESS;
-}
-
-static void tfm_core_test_irq(struct test_result_t *ret)
-{
-    int32_t err;
-
-    struct irq_test_execution_data_t *execution_data_address =
-                                                       &irq_test_execution_data;
-    uint32_t scenario = IRQ_TEST_SCENARIO_NONE;
-
-    psa_invec in_vec[] = {
-                 {&scenario, sizeof(uint32_t)},
-                 {&execution_data_address,
-                                  sizeof(struct irq_test_execution_data_t *)} };
-
-    NVIC_EnableIRQ(TFM_TIMER1_IRQ);
-
-    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_1);
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        TEST_FAIL("Failed to execute IRQ test scenario 1.");
-        return;
-    }
-
-    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_2);
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        TEST_FAIL("Failed to execute IRQ test scenario 2.");
-        return;
-    }
-
-    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_3);
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        TEST_FAIL("Failed to execute IRQ test scenario 3.");
-        return;
-    }
-
-    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_4);
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        TEST_FAIL("Failed to execute IRQ test scenario 4.");
-        return;
-    }
-
-    err = tfm_core_test_irq_scenario(IRQ_TEST_SCENARIO_5);
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        TEST_FAIL("Failed to execute IRQ test scenario 5.");
-        return;
-    }
-
-    /* finally call prepare with scenario none as a teardown */
-#ifdef TFM_PSA_API
-    err = psa_test_common(SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_SID,
-                          SPM_CORE_IRQ_TEST_1_PREPARE_TEST_SCENARIO_VERSION,
-                          in_vec, 2, NULL, 0);
-#else
-    err = tfm_spm_irq_test_1_prepare_test_scenario_veneer(in_vec, 2, NULL, 0);
-#endif
-    if (err != CORE_TEST_ERRNO_SUCCESS) {
-        TEST_FAIL("Failed to tear down IRQ tests");
-        return;
-    }
-
-    ret->val = TEST_PASSED;
-}
-#endif
 
 /*
  * \brief Tests whether the initialisation of the service was successful.
