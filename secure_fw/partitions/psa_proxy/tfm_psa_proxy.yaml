@@ -6,10 +6,11 @@
 #-------------------------------------------------------------------------------
 
 {
-  "psa_framework_version": 1.0,
+  "psa_framework_version": 1.1,
   "name": "TFM_SP_PSA_PROXY",
   "type": "PSA-ROT",
   "priority": "HIGH",
+  "model": "IPC",
   "entry_point": "psa_proxy_sp_init",
   "stack_size": "0x0A00",
   "services": [
@@ -17,6 +18,8 @@
       "name": "TFM_CRYPTO",
       "sid": "0x00000080",
       "non_secure_clients": true,
+      "connection_based": false,
+      "stateless_handle": 1,
       "version": 1,
       "version_policy": "STRICT"
     },
@@ -24,6 +27,7 @@
       "name": "TFM_ATTEST_GET_TOKEN",
       "sid": "0x00000020",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
     },
@@ -31,6 +35,7 @@
       "name": "TFM_ATTEST_GET_TOKEN_SIZE",
       "sid": "0x00000021",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
     },
@@ -38,6 +43,7 @@
       "name": "TFM_ITS_SET",
       "sid": "0x00000070",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
     },
@@ -45,6 +51,7 @@
       "name": "TFM_ITS_GET",
       "sid": "0x00000071",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
     },
@@ -52,6 +59,7 @@
       "name": "TFM_ITS_GET_INFO",
       "sid": "0x00000072",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
     },
@@ -59,6 +67,7 @@
       "name": "TFM_ITS_REMOVE",
       "sid": "0x00000073",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
     },
@@ -66,6 +75,7 @@
       "name": "TFM_SP_PLATFORM_SYSTEM_RESET",
       "sid": "0x00000040",
       "non_secure_clients": true,
+      "connection_based": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -73,6 +83,7 @@
       "name": "TFM_SP_PLATFORM_IOCTL",
       "sid": "0x00000041",
       "non_secure_clients": true,
+      "connection_based": true,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
@@ -80,6 +91,7 @@
       "name": "TFM_SP_PLATFORM_NV_COUNTER",
       "sid": "0x00000042",
       "non_secure_clients": false,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
     },
@@ -87,6 +99,7 @@
       "name": "TFM_PS_SET",
       "sid": "0x00000060",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
      },
@@ -94,6 +107,7 @@
       "name": "TFM_PS_GET",
       "sid": "0x00000061",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
      },
@@ -101,6 +115,7 @@
       "name": "TFM_PS_GET_INFO",
       "sid": "0x00000062",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
      },
@@ -108,6 +123,7 @@
       "name": "TFM_PS_REMOVE",
       "sid": "0x00000063",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
      },
@@ -115,6 +131,7 @@
       "name": "TFM_PS_GET_SUPPORT",
       "sid": "0x00000064",
       "non_secure_clients": true,
+      "connection_based": true,
       "version": 1,
       "version_policy": "STRICT"
      }
