@@ -50,6 +50,7 @@ set(MCUBOOT_EXECUTION_SLOT              1           CACHE STRING    "Slot from w
 set(MCUBOOT_LOG_LEVEL                   "INFO"      CACHE STRING    "Level of logging to use for MCUboot [OFF, ERROR, WARNING, INFO, DEBUG]")
 set(MCUBOOT_HW_KEY                      ON          CACHE BOOL      "Whether to embed the entire public key in the image metadata instead of the hash only")
 set(MCUBOOT_UPGRADE_STRATEGY            "OVERWRITE_ONLY" CACHE STRING "Upgrade strategy for images")
+set(MCUBOOT_DIRECT_XIP_REVERT           ON          CACHE BOOL      "Enable the revert mechanism in direct-xip mode")
 set(MCUBOOT_MEASURED_BOOT               ON          CACHE BOOL      "Add boot measurement values to boot status. Used for initial attestation token")
 set(MCUBOOT_HW_ROLLBACK_PROT            ON          CACHE BOOL      "Enable security counter validation against non-volatile HW counters")
 set(MCUBOOT_ENC_IMAGES                  OFF         CACHE BOOL      "Enable encrypted image upgrade support")
@@ -117,15 +118,19 @@ set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Cryp
 # CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
 set(CRYPTO_ENGINE_BUF_SIZE              0x2080      CACHE STRING    "Heap size for the crypto backend")
 set(CRYPTO_CONC_OPER_NUM                8           CACHE STRING    "The max number of concurrent operations that can be active (allocated) at any time in Crypto")
+set(CRYPTO_RNG_MODULE_DISABLED          FALSE       CACHE BOOL      "Disable PSA Crypto random number generator module")
 set(CRYPTO_KEY_MODULE_DISABLED          FALSE       CACHE BOOL      "Disable PSA Crypto Key module")
 set(CRYPTO_AEAD_MODULE_DISABLED         FALSE       CACHE BOOL      "Disable PSA Crypto AEAD module")
 set(CRYPTO_MAC_MODULE_DISABLED          FALSE       CACHE BOOL      "Disable PSA Crypto MAC module")
 set(CRYPTO_HASH_MODULE_DISABLED         FALSE       CACHE BOOL      "Disable PSA Crypto Hash module")
 set(CRYPTO_CIPHER_MODULE_DISABLED       FALSE       CACHE BOOL      "Disable PSA Crypto Cipher module")
-set(CRYPTO_GENERATOR_MODULE_DISABLED    FALSE       CACHE BOOL      "Disable PSA Crypto Key Derivation module")
-set(CRYPTO_ASYMMETRIC_MODULE_DISABLED   FALSE       CACHE BOOL      "Disable PSA Crypto Asymmetric key module")
+set(CRYPTO_ASYM_SIGN_MODULE_DISABLED    FALSE       CACHE BOOL      "Disable PSA Crypto asymmetric key signature module")
+set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED FALSE       CACHE BOOL      "Disable PSA Crypto asymmetric key encryption module")
 set(CRYPTO_KEY_DERIVATION_MODULE_DISABLED FALSE     CACHE BOOL      "Disable PSA Crypto key derivation module")
 set(CRYPTO_IOVEC_BUFFER_SIZE            5120        CACHE STRING    "Default size of the internal scratch buffer used for PSA FF IOVec allocations")
+# TODO CRYPTO_KEY_ID_ENCODES_OWNER shall be aligned with underlying crypto
+# library key ID encoding configuration
+set(CRYPTO_KEY_ID_ENCODES_OWNER         ON          CACHE BOOL      "Encode client ID into Crypto PSA key ID")
 
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Initial Attestation partition")
 set(SYMMETRIC_INITIAL_ATTESTATION       OFF         CACHE BOOL      "Use symmetric crypto for inital attestation")
@@ -143,7 +148,8 @@ set(TFM_FWU_BOOTLOADER_LIB              "mcuboot"   CACHE STRING    "Bootloader 
 ################################## Tests #######################################
 
 set(TFM_INTERACTIVE_TEST                OFF         CACHE BOOL      "Enable interactive tests")
-set(TFM_IRQ_TEST                        OFF         CACHE BOOL      "Enable IRQ tests")
+set(TFM_ENABLE_SLIH_TEST                OFF         CACHE BOOL      "Enable Second-Level Interrupt Handling tests")
+set(TFM_ENABLE_FLIH_TEST                OFF         CACHE BOOL      "Enable First-Level Interrupt Handling tests")
 set(TFM_PERIPH_ACCESS_TEST              OFF         CACHE BOOL      "Enable peripheral access tests")
 
 set(PS_TEST_NV_COUNTERS                 ON          CACHE BOOL      "Use the test NV counters to test Protected Storage rollback scenarios")
@@ -159,6 +165,9 @@ set(TFM_CRYPTO_TEST_HKDF                ON          CACHE BOOL      "Test SHA-51
 set(TFM_FWU_TEST_REQUEST_REBOOT         OFF         CACHE BOOL      "Test psa_fwu_request_reboot")
 set(TFM_FWU_TEST_WRITE_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_write with data block NULL")
 set(TFM_FWU_TEST_QUERY_WITH_NULL        OFF         CACHE BOOL      "Test psa_fwu_query with info NULL")
+set(TFM_FWU_TEST_SECURE                 OFF         CACHE BOOL      "Enable the secure firmware update tests")
+
+set(ATTEST_TEST_GET_PUBLIC_KEY          OFF         CACHE BOOL      "Require to retrieve Initial Attestation public in runtime for test purpose")
 
 ################################## Dependencies ################################
 
@@ -170,14 +179,14 @@ set(TFM_MBEDCRYPTO_CONFIG_PATH          "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH "" CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
 set(TFM_TEST_REPO_PATH                  "DOWNLOAD"  CACHE PATH      "Path to TFM-TEST repo (or DOWNLOAD to fetch automatically")
-set(TFM_TEST_REPO_VERSION               "eeba9de"   CACHE STRING    "The version of tf-m-tests to use")
+set(TFM_TEST_REPO_VERSION               "b0c06b4"   CACHE STRING    "The version of tf-m-tests to use")
 set(CMSIS_5_PATH                        "DOWNLOAD"  CACHE PATH      "Path to CMSIS_5 (or DOWNLOAD to fetch automatically")
 
 set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "v1.7.2"   CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_VERSION                     "fbeef9b"   CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
-set(PSA_ARCH_TESTS_VERSION              "cd3f3ca"  CACHE STRING    "The version of PSA arch tests to use")
+set(PSA_ARCH_TESTS_VERSION              "02d145d"  CACHE STRING    "The version of PSA arch tests to use")
 
 ################################################################################
 ################################################################################

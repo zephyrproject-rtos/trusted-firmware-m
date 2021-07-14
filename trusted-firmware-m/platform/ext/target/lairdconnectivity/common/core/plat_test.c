@@ -340,7 +340,7 @@ void pal_timer_stop_ns(void)
     timer_stop(NRF_TIMER1);
 }
 
-#if !defined(TFM_ENABLE_IRQ_TEST)
+#if !defined(TFM_ENABLE_SLIH_TEST)
 /* Watchdog timeout handler. */
 void TIMER1_Handler(void)
 {
@@ -354,15 +354,23 @@ void TIMER1_Handler(void)
 
 uint32_t pal_nvmem_get_addr(void)
 {
-    static bool psa_scratch_initialized = false;
     static __ALIGN(4) uint8_t __psa_scratch[PSA_TEST_SCRATCH_AREA_SIZE];
+#ifdef NRF_TRUSTZONE_NONSECURE
+    static bool psa_scratch_initialized = false;
 
-    if (!psa_scratch_initialized && (nrfx_reset_reason_get() == 0)) {
-        /* PSA API tests expect this area to be initialized to all 0xFFs after a
-         * power-on reset.
-         */
-        memset(__psa_scratch, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
+    if (!psa_scratch_initialized) {
+        uint32_t reset_reason = nrfx_reset_reason_get();
+        nrfx_reset_reason_clear(reset_reason);
+
+        int is_pinreset = reset_reason & NRFX_RESET_REASON_RESETPIN_MASK;
+        if ((reset_reason == 0) || is_pinreset){
+            /* PSA API tests expect this area to be initialized to all 0xFFs
+            * after a power-on or pin reset.
+            */
+            memset(__psa_scratch, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
+        }
+        psa_scratch_initialized = true;
     }
-    psa_scratch_initialized = true;
+#endif
     return (uint32_t)__psa_scratch;
 }

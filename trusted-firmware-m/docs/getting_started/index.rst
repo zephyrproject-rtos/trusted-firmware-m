@@ -5,11 +5,7 @@ Getting Started Guides
     :glob:
     :numbered:
 
-    tfm_sw_requirement
-    tfm_build_instruction
-    tfm_build_instruction_iar
-    tfm_user_guide
-    /tools/index
+    tfm_getting_started
 
 --------------
 

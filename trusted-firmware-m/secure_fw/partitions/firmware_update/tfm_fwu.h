@@ -56,7 +56,7 @@ void tfm_internal_fwu_request_reboot(void);
 /*
  * Marks the image in the primary slot as confirmed.
  */
-psa_status_t tfm_internal_fwu_accept(void);
+psa_status_t tfm_internal_fwu_accept(psa_image_id_t image_id);
 
 #ifdef __cplusplus
 }

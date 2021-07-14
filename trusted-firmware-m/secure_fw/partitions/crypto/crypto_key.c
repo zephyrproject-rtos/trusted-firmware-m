@@ -13,21 +13,129 @@
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
 #include "tfm_crypto_private.h"
-#include <stdbool.h>
 
+#ifndef TFM_CRYPTO_KEY_MODULE_DISABLED
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
 #ifndef TFM_CRYPTO_MAX_KEY_HANDLES
 #define TFM_CRYPTO_MAX_KEY_HANDLES (32)
 #endif
+
 struct tfm_crypto_handle_owner_s {
     int32_t owner;           /*!< Owner of the allocated handle */
     psa_key_id_t key;        /*!< Allocated key */
     uint8_t in_use;          /*!< Flag to indicate if this in use */
 };
 
-#ifndef TFM_CRYPTO_KEY_MODULE_DISABLED
 static struct tfm_crypto_handle_owner_s
                                  handle_owner[TFM_CRYPTO_MAX_KEY_HANDLES] = {0};
-#endif
+
+static void set_handle_owner(uint8_t idx, int32_t client_id,
+                             psa_key_id_t key_handle)
+{
+    /* Skip checking idx */
+
+    handle_owner[idx].owner = client_id;
+    handle_owner[idx].key = key_handle;
+    handle_owner[idx].in_use = TFM_CRYPTO_IN_USE;
+}
+
+static void clean_handle_owner(uint8_t idx)
+{
+    /* Skip checking idx */
+
+    handle_owner[idx].owner = TFM_INVALID_CLIENT_ID;
+    handle_owner[idx].key = NULL;
+    handle_owner[idx].in_use = TFM_CRYPTO_NOT_IN_USE;
+}
+
+static psa_status_t find_empty_handle_owner_slot(uint8_t *idx)
+{
+    uint8_t i;
+
+    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
+        if (handle_owner[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
+            *idx = i;
+            return PSA_SUCCESS;
+        }
+    }
+
+    return PSA_ERROR_INSUFFICIENT_MEMORY;
+}
+
+/*
+ * Check that the requested handle belongs to the requesting partition
+ *
+ * Argument idx is optional. It points to the buffer to hold the internal
+ * index corresponding to the input handle. Valid only on PSA_SUCCESS.
+ * It is filled only if the input pointer is not NULL.
+ *
+ * Return values as described in \ref psa_status_t
+ */
+static psa_status_t check_handle_owner(psa_key_id_t key, uint8_t *idx)
+{
+    int32_t client_id = 0;
+    uint8_t i = 0;
+    psa_status_t status;
+
+    status = tfm_crypto_get_caller_id(&client_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
+        if (handle_owner[i].in_use && handle_owner[i].key == key) {
+            if (handle_owner[i].owner == client_id) {
+                if (idx) {
+                    *idx = i;
+                }
+                return PSA_SUCCESS;
+            } else {
+                return PSA_ERROR_NOT_PERMITTED;
+            }
+        }
+    }
+
+    return PSA_ERROR_INVALID_HANDLE;
+}
+
+static void encoded_key_id_make(psa_key_id_t key, uint8_t slot_idx,
+                                mbedtls_svc_key_id_t *encoded_key)
+{
+    /* Skip checking encoded_key */
+    *encoded_key = mbedtls_svc_key_id_make(handle_owner[slot_idx].owner, key);
+}
+#else /* CRYPTO_KEY_ID_ENCODES_OWNER */
+#define set_handle_owner(idx, client_id, key_handle)        do {} while (0)
+#define clean_handle_owner(idx)                             do {} while (0)
+
+static inline psa_status_t find_empty_handle_owner_slot(uint8_t *idx)
+{
+    *idx = 0;
+
+    return PSA_SUCCESS;
+}
+
+static inline psa_status_t check_handle_owner(psa_key_id_t key, uint8_t *idx)
+{
+    (void)key;
+
+    if (idx) {
+        *idx = 0;
+    }
+
+    return PSA_SUCCESS;
+}
+
+static inline void encoded_key_id_make(psa_key_id_t key, uint8_t slot_idx,
+                                       mbedtls_svc_key_id_t *encoded_key)
+{
+    (void)slot_idx;
+
+    /* Skip checking encoded_key */
+    *encoded_key = mbedtls_svc_key_id_make(TFM_INVALID_CLIENT_ID, key);
+}
+#endif /* CRYPTO_KEY_ID_ENCODES_OWNER */
+#endif /* !TFM_CRYPTO_KEY_MODULE_DISABLED */
 
 /*!
  * \defgroup public Public functions
@@ -53,8 +161,12 @@ psa_status_t tfm_crypto_key_attributes_from_client(
     key_attributes->core.bits = client_key_attr->bits;
 
     /* Use the client key id as the key_id and its partition id as the owner */
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     key_attributes->core.id.key_id = client_key_attr->id;
     key_attributes->core.id.owner = client_id;
+#else
+    key_attributes->core.id = client_key_attr->id;
+#endif
 
     return PSA_SUCCESS;
 }
@@ -78,40 +190,21 @@ psa_status_t tfm_crypto_key_attributes_to_client(
     client_key_attr->bits = key_attributes->core.bits;
 
     /* Return the key_id as the client key id, do not return the owner */
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     client_key_attr->id = key_attributes->core.id.key_id;
+#else
+    client_key_attr->id = key_attributes->core.id;
+#endif
 
     return PSA_SUCCESS;
 }
 
-psa_status_t tfm_crypto_check_handle_owner(psa_key_id_t key,
-                                           uint32_t *index)
+psa_status_t tfm_crypto_check_handle_owner(psa_key_id_t key)
 {
 #ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
-    int32_t partition_id = 0;
-    uint32_t i = 0;
-    psa_status_t status;
-
-    status = tfm_crypto_get_caller_id(&partition_id);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
-        if (handle_owner[i].in_use && handle_owner[i].key == key) {
-            if (handle_owner[i].owner == partition_id) {
-                if (index != NULL) {
-                    *index = i;
-                }
-                return PSA_SUCCESS;
-            } else {
-                return PSA_ERROR_NOT_PERMITTED;
-            }
-        }
-    }
-
-    return PSA_ERROR_INVALID_HANDLE;
+    return check_handle_owner(key, NULL);
 #endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
@@ -141,16 +234,7 @@ psa_status_t tfm_crypto_check_key_storage(uint32_t *index)
 #ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
     return PSA_ERROR_NOT_SUPPORTED;
 #else
-    uint32_t i;
-
-    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
-        if (handle_owner[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
-            *index = i;
-            return PSA_SUCCESS;
-        }
-    }
-
-    return PSA_ERROR_INSUFFICIENT_MEMORY;
+    return find_empty_handle_owner_slot((uint8_t *)index);
 #endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
@@ -168,9 +252,7 @@ psa_status_t tfm_crypto_set_key_storage(uint32_t index,
         return status;
     }
 
-    handle_owner[index].owner = partition_id;
-    handle_owner[index].key = key_handle;
-    handle_owner[index].in_use = TFM_CRYPTO_IN_USE;
+    set_handle_owner(index, partition_id, key_handle);
 
     return PSA_SUCCESS;
 #endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
@@ -225,20 +307,13 @@ psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
 
     psa_status_t status;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-    uint32_t i = 0;
+    uint8_t i = 0;
     mbedtls_svc_key_id_t encoded_key;
     int32_t partition_id = 0;
-    bool empty_found = false;
 
-    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
-        if (handle_owner[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
-            empty_found = true;
-            break;
-        }
-    }
-
-    if (!empty_found) {
-        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    status = find_empty_handle_owner_slot(&i);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     status = tfm_crypto_get_caller_id(&partition_id);
@@ -255,12 +330,14 @@ psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
 
     status = psa_import_key(&key_attributes, data, data_length, &encoded_key);
     /* Update the imported key id */
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     *psa_key = encoded_key.key_id;
+#else
+    *psa_key = (psa_key_id_t)encoded_key;
+#endif
 
     if (status == PSA_SUCCESS) {
-        handle_owner[i].owner = partition_id;
-        handle_owner[i].key = *psa_key;
-        handle_owner[i].in_use = TFM_CRYPTO_IN_USE;
+        set_handle_owner(i, partition_id, *psa_key);
     }
 
     return status;
@@ -289,16 +366,11 @@ psa_status_t tfm_crypto_open_key(psa_invec in_vec[],
     psa_status_t status;
     mbedtls_svc_key_id_t encoded_key;
     int32_t partition_id;
-    uint32_t i;
+    uint8_t i;
 
-    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
-        if (handle_owner[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
-            break;
-        }
-    }
-
-    if (i == TFM_CRYPTO_MAX_KEY_HANDLES) {
-        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    status = find_empty_handle_owner_slot(&i);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     status = tfm_crypto_get_caller_id(&partition_id);
@@ -310,12 +382,14 @@ psa_status_t tfm_crypto_open_key(psa_invec in_vec[],
     encoded_key = mbedtls_svc_key_id_make(partition_id, client_key_id);
 
     status = psa_open_key(encoded_key, &encoded_key);
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     *key = encoded_key.key_id;
+#else
+    *key = (psa_key_id_t)encoded_key;
+#endif
 
     if (status == PSA_SUCCESS) {
-        handle_owner[i].owner = partition_id;
-        handle_owner[i].key = *key;
-        handle_owner[i].in_use = TFM_CRYPTO_IN_USE;
+        set_handle_owner(i, partition_id, *key);
     }
 
     return status;
@@ -340,21 +414,20 @@ psa_status_t tfm_crypto_close_key(psa_invec in_vec[],
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
 
     psa_key_id_t key = iov->key_id;
-    uint32_t index;
+    uint8_t index;
     mbedtls_svc_key_id_t encoded_key;
+    psa_status_t status;
 
-    psa_status_t status = tfm_crypto_check_handle_owner(key, &index);
+    status = check_handle_owner(key, &index);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    encoded_key = mbedtls_svc_key_id_make(handle_owner[index].owner, key);
-    status = psa_close_key(encoded_key);
+    encoded_key_id_make(key, index, &encoded_key);
 
+    status = psa_close_key(encoded_key);
     if (status == PSA_SUCCESS) {
-        handle_owner[index].owner = 0;
-        handle_owner[index].key = 0;
-        handle_owner[index].in_use = TFM_CRYPTO_NOT_IN_USE;
+        clean_handle_owner(index);
     }
 
     return status;
@@ -378,21 +451,20 @@ psa_status_t tfm_crypto_destroy_key(psa_invec in_vec[],
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_key_id_t key = iov->key_id;
-    uint32_t index;
+    uint8_t index;
     mbedtls_svc_key_id_t encoded_key;
+    psa_status_t status;
 
-    psa_status_t status = tfm_crypto_check_handle_owner(key, &index);
+    status = check_handle_owner(key, &index);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    encoded_key = mbedtls_svc_key_id_make(handle_owner[index].owner, key);
+    encoded_key_id_make(key, index, &encoded_key);
 
     status = psa_destroy_key(encoded_key);
     if (status == PSA_SUCCESS) {
-        handle_owner[index].owner = 0;
-        handle_owner[index].key = 0;
-        handle_owner[index].in_use = TFM_CRYPTO_NOT_IN_USE;
+        clean_handle_owner(index);
     }
 
     return status;
@@ -421,16 +493,14 @@ psa_status_t tfm_crypto_get_key_attributes(psa_invec in_vec[],
     psa_status_t status;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
     mbedtls_svc_key_id_t encoded_key;
+    uint8_t index;
 
-    status = tfm_crypto_check_handle_owner(key, NULL);
+    status = check_handle_owner(key, &index);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    status = tfm_crypto_encode_id_and_owner(key, &encoded_key);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
+    encoded_key_id_make(key, index, &encoded_key);
 
     status = psa_get_key_attributes(encoded_key, &key_attributes);
     if (status == PSA_SUCCESS) {
@@ -502,15 +572,16 @@ psa_status_t tfm_crypto_export_key(psa_invec in_vec[],
     uint8_t *data = out_vec[0].base;
     size_t data_size = out_vec[0].len;
     mbedtls_svc_key_id_t encoded_key;
-    uint32_t index;
+    psa_status_t status;
+    uint8_t index;
 
-    psa_status_t status = tfm_crypto_check_handle_owner(key, &index);
-
+    status = check_handle_owner(key, &index);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    encoded_key = mbedtls_svc_key_id_make(handle_owner[index].owner, key);
+    encoded_key_id_make(key, index, &encoded_key);
+
     return psa_export_key(encoded_key, data, data_size,
                           &(out_vec[0].len));
 #endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
@@ -535,15 +606,15 @@ psa_status_t tfm_crypto_export_public_key(psa_invec in_vec[],
     uint8_t *data = out_vec[0].base;
     size_t data_size = out_vec[0].len;
     mbedtls_svc_key_id_t encoded_key;
-    uint32_t index;
+    psa_status_t status;
+    uint8_t index;
 
-    psa_status_t status = tfm_crypto_check_handle_owner(key, &index);
-
+    status = check_handle_owner(key, &index);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    encoded_key = mbedtls_svc_key_id_make(handle_owner[index].owner, key);
+    encoded_key_id_make(key, index, &encoded_key);
 
     return psa_export_public_key(encoded_key, data, data_size,
                                  &(out_vec[0].len));
@@ -567,22 +638,20 @@ psa_status_t tfm_crypto_purge_key(psa_invec in_vec[],
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_key_id_t key = iov->key_id;
-    uint32_t index;
     mbedtls_svc_key_id_t encoded_key;
+    psa_status_t status;
+    uint8_t index;
 
-    psa_status_t status = tfm_crypto_check_handle_owner(key, &index);
-
+    status = check_handle_owner(key, &index);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    encoded_key = mbedtls_svc_key_id_make(handle_owner[index].owner, key);
+    encoded_key_id_make(key, index, &encoded_key);
 
     status = psa_purge_key(encoded_key);
     if (status == PSA_SUCCESS) {
-        handle_owner[index].owner = 0;
-        handle_owner[index].key = 0;
-        handle_owner[index].in_use = TFM_CRYPTO_NOT_IN_USE;
+        clean_handle_owner(index);
     }
 
     return status;
@@ -612,21 +681,14 @@ psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
     const struct psa_client_key_attributes_s *client_key_attr = in_vec[1].base;
     psa_status_t status;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-    uint32_t i = 0;
+    uint8_t i = 0;
     int32_t partition_id = 0;
-    bool empty_found = false;
     mbedtls_svc_key_id_t target_key;
     mbedtls_svc_key_id_t encoded_key;
 
-    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
-        if (handle_owner[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
-            empty_found = true;
-            break;
-        }
-    }
-
-    if (!empty_found) {
-        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    status = find_empty_handle_owner_slot(&i);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     status = tfm_crypto_get_caller_id(&partition_id);
@@ -641,22 +703,21 @@ psa_status_t tfm_crypto_copy_key(psa_invec in_vec[],
         return status;
     }
 
-    status = tfm_crypto_check_handle_owner(source_key_id, NULL);
+    status = check_handle_owner(source_key_id, NULL);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    status = tfm_crypto_encode_id_and_owner(source_key_id, &encoded_key);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
+    encoded_key_id_make(source_key_id, i, &encoded_key);
 
     status = psa_copy_key(encoded_key, &key_attributes, &target_key);
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     *target_key_id = target_key.key_id;
+#else
+    *target_key_id = (psa_key_id_t)target_key;
+#endif
     if (status == PSA_SUCCESS) {
-        handle_owner[i].owner = partition_id;
-        handle_owner[i].key = *target_key_id;
-        handle_owner[i].in_use = TFM_CRYPTO_IN_USE;
+        set_handle_owner(i, partition_id, *target_key_id);
     }
 
     return status;
@@ -683,20 +744,13 @@ psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
     const struct psa_client_key_attributes_s *client_key_attr = in_vec[1].base;
     psa_status_t status;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-    uint32_t i = 0;
+    uint8_t i = 0;
     int32_t partition_id = 0;
-    bool empty_found = false;
     mbedtls_svc_key_id_t encoded_key;
 
-    for (i = 0; i < TFM_CRYPTO_MAX_KEY_HANDLES; i++) {
-        if (handle_owner[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
-            empty_found = true;
-            break;
-        }
-    }
-
-    if (!empty_found) {
-        return PSA_ERROR_INSUFFICIENT_MEMORY;
+    status = find_empty_handle_owner_slot(&i);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     status = tfm_crypto_get_caller_id(&partition_id);
@@ -712,12 +766,14 @@ psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
     }
 
     status = psa_generate_key(&key_attributes, &encoded_key);
+#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     *key_handle = encoded_key.key_id;
+#else
+    *key_handle = (psa_key_id_t)encoded_key;
+#endif
 
     if (status == PSA_SUCCESS) {
-        handle_owner[i].owner = partition_id;
-        handle_owner[i].key = *key_handle;
-        handle_owner[i].in_use = TFM_CRYPTO_IN_USE;
+        set_handle_owner(i, partition_id, *key_handle);
     }
 
     return status;

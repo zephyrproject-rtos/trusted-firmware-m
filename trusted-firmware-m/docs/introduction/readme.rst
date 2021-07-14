@@ -84,13 +84,13 @@ Trusted Firmware M source code is available on
 
 To build & run TF-M:
 
-    - Follow the :doc:`SW requirements guide </docs/getting_started/tfm_sw_requirement>`
+    - Follow the :doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`
       to set up your environment.
     - Follow the
-      :doc:`Build instructions </docs/getting_started/tfm_build_instruction>` to compile
-      and build the TF-M source.
-    - Follow the :doc:`User guide </docs/getting_started/tfm_user_guide>` for information
-      on running the example.
+      :doc:`Build instructions </docs/technical_references/instructions/tfm_build_instruction>`
+      to compile and build the TF-M source.
+    - Follow the :doc:`Run TF-M examples on Arm platforms </docs/technical_references/instructions/run_tfm_examples_on_arm_platforms>`
+      for information on running the example.
 
 To port TF-M to a another system or OS, follow the
 :doc:`OS Integration Guide </docs/integration_guide/tfm_integration_guide>`

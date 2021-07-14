@@ -15,7 +15,7 @@
 #define TFM_SVC_PSA_EOI                 (0x1)
 #define TFM_SVC_SFN_REQUEST             (0x2)
 #define TFM_SVC_SFN_RETURN              (0x3)
-#define TFM_SVC_GET_CALLER_CLIENT_ID    (0x4)
+#define TFM_SVC_SFN_COMPLETION          (0x4)
 #define TFM_SVC_SPM_REQUEST             (0x5)
 #define TFM_SVC_GET_BOOT_DATA           (0x6)
 #define TFM_SVC_DEPRIV_REQ              (0x7)

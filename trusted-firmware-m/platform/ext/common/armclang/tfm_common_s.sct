@@ -21,22 +21,19 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     /****  This initial section contains common code for secure binary */
     ER_TFM_CODE S_CODE_START {
         *.o (RESET +First)
-        * (+RO)
+        *libplatform_s* (.text*, .rodata*)
+        *libtfm_spm* (+RO)
     }
 
     /**** Unprivileged Secure code start here */
     TFM_UNPRIV_CODE +0 ALIGN 32 {
         *(SFN)
-        *armlib*
-        *libtfm_sprt.a (+RO)
-        *psa_client.* (+RO)
-        *psa_service.* (+RO)
-        *psa_lifecycle.* (+RO)
+        * (+RO)
     }
 
-    /**** Section for holding partition static data */
-    TFM_SP_STATIC_LIST +0 ALIGN 4 {
-        *(.partition_info)
+    /**** Section for holding partition RO load data */
+    TFM_SP_LOAD_LIST +0 ALIGN 4 {
+        *(.part_load)
     }
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
@@ -48,8 +45,9 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     }
 
     TFM_PSA_ROT_LINKER +0 ALIGN 32 {
-        *tfm_psa_rot_partition* (+RO)
-        *.o(TFM_*_PSA-ROT_ATTR_FN)
+        *tfm_psa_rot_partition* (+RO-CODE, +RO-DATA)
+        *libplatform_s* (TFM_*_PSA-ROT_ATTR_FN)
+        *.o (TFM_*_PSA-ROT_ATTR_FN)
     }
 
     /*
@@ -68,8 +66,9 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     }
 
     TFM_APP_ROT_LINKER +0 ALIGN 32 {
-        *tfm_app_rot_partition* (+RO)
-        *.o(TFM_*_APP-ROT_ATTR_FN)
+        *tfm_app_rot_partition* (+RO-CODE, +RO-DATA)
+        *libplatform_s* (TFM_*_APP-ROT_ATTR_FN)
+        *.o (TFM_*_APP-ROT_ATTR_FN)
     }
 
     /*
@@ -82,9 +81,9 @@ LR_CODE S_CODE_START S_CODE_SIZE {
 #if defined(S_CODE_SRAM_ALIAS_BASE)
     /* eFlash driver code that gets copied from Flash to SRAM */
     ER_CODE_SRAM S_CODE_SRAM_ALIAS_BASE ALIGN 4 {
-        Driver_GFC100_EFlash.o (+RO)
-        gfc100_eflash_drv.o (+RO)
-        musca_b1_eflash_drv.o (+RO)
+        Driver_GFC100_EFlash.o (.text, .text.*, .rodata, .rodata.*)
+        gfc100_eflash_drv.o (.text, .text.*, .rodata, .rodata.*)
+        musca_b1_eflash_drv.o (.text, .text.*, .rodata, .rodata.*)
     }
 #endif
 
@@ -197,6 +196,14 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         * (+RW +ZI)
     }
 
+    ER_PART_RT_POOL +0 ALIGN 4 {
+        *(.bss.part_runtime)
+    }
+
+    ER_SERV_RT_POOL +0 ALIGN 4 {
+        *(.bss.serv_runtime)
+    }
+
     /**** PSA RoT DATA start here */
     /*
      * This empty, zero long execution region is here to mark the start address
@@ -256,7 +263,7 @@ LR_VENEER CMSE_VENEER_REGION_START {
      * 32 bytes aligned region so that the SAU can be programmed to
      * just set this region as Non-Secure Callable.
      */
-    ER_CODE_CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
+    CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
         *(Veneer$$CMSE)
     }
 }

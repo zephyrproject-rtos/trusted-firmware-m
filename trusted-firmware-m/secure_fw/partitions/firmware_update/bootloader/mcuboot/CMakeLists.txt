@@ -11,7 +11,7 @@ add_library(tfm_fwu_mcuboot_util INTERFACE)
 
 target_sources(tfm_fwu_mcuboot_util
     INTERFACE
-        ${MCUBOOT_PATH}/boot/bootutil/src/bootutil_misc.c
+        ${MCUBOOT_PATH}/boot/bootutil/src/bootutil_public.c
         ${MCUBOOT_PATH}/boot/bootutil/src/tlv.c
         ${CMAKE_SOURCE_DIR}/bl2/src/flash_map.c
         ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/flash_map_extended.c
@@ -40,4 +40,5 @@ target_link_libraries(tfm_psa_rot_partition_fwu
 target_compile_definitions(tfm_psa_rot_partition_fwu
     PRIVATE
         MCUBOOT_${MCUBOOT_UPGRADE_STRATEGY}
+        $<$<BOOL:${MCUBOOT_DIRECT_XIP_REVERT}>:MCUBOOT_DIRECT_XIP_REVERT>
 )

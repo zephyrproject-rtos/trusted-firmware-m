@@ -13,6 +13,7 @@
 #include "spm_partition_defs.h"
 #include "tfm_arch.h"
 #include "psa/client.h"
+#include "tfm_api.h"
 
 #define SPM_PARTITION_STATE_UNINIT       0
 #define SPM_PARTITION_STATE_IDLE         1
@@ -271,16 +272,17 @@ void tfm_spm_partition_set_signal_mask(uint32_t partition_idx,
 void tfm_spm_secure_api_init_done(void);
 
 /**
- * \brief Called if veneer is running in thread mode
+ * \brief Called for requests or returns from partition
  */
-uint32_t tfm_spm_partition_request_svc_handler(
-        const uint32_t *svc_args, uint32_t lr);
+void tfm_spm_partition_request_return_handler(
+        const uint32_t *svc_args, uint32_t exc_return, uint32_t *msp);
 
 /**
- * \brief Called when secure service returns
+ * \brief Called when SPM has completed a partition request or return
  */
-uint32_t tfm_spm_partition_return_handler(uint32_t lr);
-
+void tfm_spm_partition_completion_handler(enum tfm_status_e res,
+                                          uint32_t exc_return,
+                                          uint32_t *msp);
 /**
  * \brief Stores caller's client id in state context
  */
@@ -303,9 +305,9 @@ void tfm_spm_memory_permission_check_handler(uint32_t *svc_args);
  * \param[in] len               The length of the buffer
  * \param[in] alignment         The expected alignment (in bits)
  *
- * \return 1 if the check passes, 0 otherwise.
+ * \return TFM_SUCCESS on successful return, an error code otherwise
  *
- * \note For a 0 long buffer the check fails.
+ * \note For a zero length buffer the check fails.
  */
 int32_t tfm_spm_check_buffer_access(uint32_t  partition_idx,
                                     void     *start_addr,
@@ -382,5 +384,15 @@ void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx);
  */
 void tfm_spm_seal_psp_stacks(void);
 
+/**
+ * \brief Get the flags associated with a partition
+ *
+ * \param[in] partition_idx     Partition index
+ *
+ * \return Flags associated with the partition
+ *
+ * \note This function doesn't check if partition_idx is valid.
+ */
+uint32_t tfm_spm_partition_get_flags(uint32_t partition_idx);
 
 #endif /* __SPM_FUNC_H__ */

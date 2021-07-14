@@ -48,7 +48,7 @@ Platforms introduction
 
     - Secure Enclave system:
 
-        - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/musca_b1/secure_enclave/readme>`
+        - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/arm/musca_b1/secure_enclave/readme>`
 
 The document :doc:`Platform Deprecation and Removal </platform/ext/platform_deprecation>`
 lists the deprecated platforms planned to be removed from upstream.

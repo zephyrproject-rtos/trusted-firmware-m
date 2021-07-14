@@ -15,8 +15,7 @@ Supported Platforms
     :caption: arm
     :glob:
 
-    target/musca_*/**
-    target/mps*/**
+    target/arm/**
     otp_provisioning.rst
 
 .. toctree::

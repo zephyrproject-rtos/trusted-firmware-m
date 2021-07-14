@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -118,11 +118,21 @@ __STATIC_INLINE uintptr_t tfm_arch_seal_thread_stack(uintptr_t stk)
 }
 
 /**
+ * \brief Get architecture context value into context struct
+ *
+ * \param[in] p_actx        Pointer of context data
+ */
+__STATIC_INLINE void tfm_arch_get_ctx(struct tfm_arch_ctx_t *p_actx)
+{
+    p_actx->sp = __get_PSP();
+}
+
+/**
  * \brief Update architecture context value into hardware
  *
  * \param[in] p_actx        Pointer of context data
  */
-__STATIC_INLINE void tfm_arch_update_ctx(struct tfm_arch_ctx_t *p_actx)
+__STATIC_INLINE void tfm_arch_set_ctx(struct tfm_arch_ctx_t *p_actx)
 {
     __set_PSP(p_actx->sp);
 }

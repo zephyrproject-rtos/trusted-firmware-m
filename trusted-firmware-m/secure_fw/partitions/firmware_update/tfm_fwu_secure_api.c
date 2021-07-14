@@ -211,12 +211,15 @@ psa_status_t psa_fwu_request_reboot(void)
     return status;
 }
 
-psa_status_t psa_fwu_accept(void)
+psa_status_t psa_fwu_accept(psa_image_id_t image_id)
 {
     psa_status_t status;
 #ifdef TFM_PSA_API
     psa_handle_t handle;
 #endif
+    psa_invec in_vec[] = {
+        { .base = &image_id, .len = sizeof(image_id) }
+    };
 
 #ifdef TFM_PSA_API
     handle = psa_connect(TFM_FWU_ACCEPT_SID,
@@ -225,11 +228,11 @@ psa_status_t psa_fwu_accept(void)
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, NULL, 0);
+    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), NULL, 0);
 
     psa_close(handle);
 #else
-    status = tfm_fwu_accept_req_veneer(NULL, 0, NULL, 0);
+    status = tfm_fwu_accept_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
 #endif
 
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {

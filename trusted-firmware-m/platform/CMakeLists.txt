@@ -39,7 +39,6 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        ext/common/template/attest_hal.c
         $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_ps.c>
         $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_its.c>
         ext/common/tfm_platform.c
@@ -51,6 +50,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DUMMY_CRYPTO_KEYS}>:ext/common/template/crypto_keys.c>
         $<$<BOOL:${PLATFORM_DUMMY_ROTPK}>:ext/common/template/tfm_rotpk.c>
         $<$<BOOL:${PLATFORM_DUMMY_IAK}>:ext/common/template/tfm_initial_attestation_key_material.c>
+        $<$<AND:$<NOT:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${PLATFORM_DUMMY_IAK}>,$<BOOL:${TEST_S}>>:ext/common/template/tfm_initial_attest_pub_key.c>
 )
 
 target_link_libraries(platform_s
@@ -87,6 +87,7 @@ target_include_directories(platform_ns
 target_sources(platform_ns
     PRIVATE
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
+        $<$<AND:$<NOT:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${PLATFORM_DUMMY_IAK}>,$<BOOL:${TEST_NS}>>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/tfm_initial_attest_pub_key.c>
 )
 
 target_link_libraries(platform_ns
@@ -97,7 +98,7 @@ target_link_libraries(platform_ns
 
 target_compile_definitions(platform_ns
     PRIVATE
-        $<$<BOOL:${TFM_IRQ_TEST}>:TFM_ENABLE_IRQ_TEST>
+        $<$<BOOL:${TFM_ENABLE_SLIH_TEST}>:TFM_ENABLE_SLIH_TEST>
         $<$<BOOL:${TFM_PERIPH_ACCESS_TEST}>:TFM_ENABLE_PERIPH_ACCESS_TEST>
 )
 
@@ -136,6 +137,7 @@ if(BL2)
         PUBLIC
             BL2
             MCUBOOT_${MCUBOOT_UPGRADE_STRATEGY}
+            $<$<BOOL:${MCUBOOT_DIRECT_XIP_REVERT}>:MCUBOOT_DIRECT_XIP_REVERT>
             $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
             $<$<BOOL:${MCUBOOT_HW_KEY}>:MCUBOOT_HW_KEY>
             MCUBOOT_FIH_PROFILE_${MCUBOOT_FIH_PROFILE}

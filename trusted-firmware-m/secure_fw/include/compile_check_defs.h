@@ -8,7 +8,7 @@
 #ifndef __COMPILE_CHECK_DEFS_H__
 #define __COMPILE_CHECK_DEFS_H__
 
-#include "load/partition_static_load.h"
+#include "load/spm_load_api.h"
 #include "tfm_thread.h"
 
 #if TO_THREAD_PRIORITY(PARTITION_PRI_HIGHEST) != THRD_PRIOR_HIGHEST ||  \

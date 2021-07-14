@@ -13,10 +13,10 @@ Use the following policy file for provisioning and signing:
 policy_multi_CM0_CM4_tfm.json
 
 Please make sure you have all required software installed as explained in the
-:doc:`software requirements </docs/getting_started/tfm_sw_requirement>`.
+:doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`.
 
 Please also make sure that all the source code are fetched by following
-:doc:`general building instruction </docs/getting_started/tfm_build_instruction>`.
+:doc:`general building instruction </docs/technical_references/instructions/tfm_build_instruction>`.
 
 Install CySecureTools or update it to the newest version (2.0.0 at the time of
 writing)
@@ -473,6 +473,8 @@ The process is the following:
    Then the script will read device public key and create device certificates
    based on the board serial number, root certificate and the device public key.
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+--------------
+
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
 
 *Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.*

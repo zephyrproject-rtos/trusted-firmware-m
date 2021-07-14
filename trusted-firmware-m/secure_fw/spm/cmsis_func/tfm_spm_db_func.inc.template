@@ -143,11 +143,7 @@ const struct spm_partition_static_data_t static_data_list[] =
     {% endif %}
     {{'{'}}
         .partition_id         = {{partition.manifest.name}},
-    {% if partition.attr.tfm_partition_ipc %}
-        .partition_flags      = SPM_PART_FLAG_IPC
-    {% else %}
         .partition_flags      = 0
-    {% endif %}
     {% if partition.manifest.type == "APPLICATION-ROT" %}
                               | SPM_PART_FLAG_APP_ROT
     {% elif partition.manifest.type == "PSA-ROT" %}

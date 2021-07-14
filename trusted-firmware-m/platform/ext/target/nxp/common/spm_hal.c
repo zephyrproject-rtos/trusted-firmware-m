@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  * Copyright 2019-2020 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -30,10 +30,9 @@ uint32_t periph_num_count = 0;
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                  uint32_t partition_idx,
+                  bool privileged,
                   const struct platform_data_t *platform_data)
 {
-    bool privileged = tfm_is_partition_privileged(partition_idx);
 #if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1)
     struct mpu_armv8m_region_cfg_t region_cfg;
 #endif
@@ -101,11 +100,9 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
     return *((uint32_t *)(memory_regions.non_secure_code_start+ 4));
 }
 
-enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line,
-                                                        uint32_t priority)
+enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line)
 {
-    uint32_t quantized_priority = priority >> (8U - __NVIC_PRIO_BITS);
-    NVIC_SetPriority(irq_line, quantized_priority);
+    NVIC_SetPriority(irq_line, DEFAULT_IRQ_PRIORITY);
     return TFM_PLAT_ERR_SUCCESS;
 }
 

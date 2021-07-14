@@ -60,7 +60,7 @@
 struct tfm_msg_body_t {
     int32_t magic;
     struct service_t *service;         /* RoT service pointer            */
-    struct tfm_event_t ack_evnt;       /* Event for ack reponse          */
+    struct tfm_event_t ack_evnt;       /* Event for ack response         */
     psa_msg_t msg;                     /* PSA message body               */
     psa_invec invec[PSA_MAX_IOVEC];    /* Put in/out vectors in msg body */
     psa_outvec outvec[PSA_MAX_IOVEC];
@@ -83,7 +83,7 @@ struct tfm_msg_body_t {
  * divided to structures, to keep the related fields close to each other.
  */
 struct partition_t {
-    const struct partition_load_info_t *p_static;
+    const struct partition_load_info_t *p_ldinf;
     void *p_platform;
     void *p_interrupts;
     void *p_metadata;
@@ -93,25 +93,15 @@ struct partition_t {
     uint32_t signals_allowed;
     uint32_t signals_waiting;
     uint32_t signals_asserted;
-};
-
-struct spm_partition_db_t {
-    uint32_t partition_count;
-    struct partition_t *partitions;
+    struct partition_t *next;
 };
 
 /* RoT Service data */
 struct service_t {
-    const struct service_load_info_t *service_db;   /* Service static pointer */
-    struct partition_t *partition;                  /* Owner of the service   */
-    struct bi_list_node_t handle_list;              /* Service handle list    */
-    struct bi_list_node_t list;                     /* For list operation     */
-};
-
-/* Stateless RoT service tracking array item type. Indexed by static handle */
-struct stateless_service_tracking_t {
-    uint32_t                 sid;           /* Service ID */
-    struct service_t         *p_service;    /* Service instance */
+    const struct service_load_info_t *p_ldinf;     /* Service load info      */
+    struct partition_t *partition;                 /* Owner of the service   */
+    struct bi_list_node_t handle_list;             /* Service handle list    */
+    struct service_t *next;                        /* For list operation     */
 };
 
 /* RoT connection handle list */
@@ -141,9 +131,9 @@ enum tfm_memory_access_e {
 };
 
 /**
- * \brief                   Get the current partition mode.
+ * \brief                   Get the privileged mode of Partition.
  *
- * \param[in] partition_flags               Flags of current partition
+ * \param[in] partition_flags               Flags of the Partition
  *
  * \retval TFM_PARTITION_PRIVILEGED_MODE    Privileged mode
  * \retval TFM_PARTITION_UNPRIVILEGED_MODE  Unprivileged mode
@@ -220,6 +210,18 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
  */
 struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
                                                  psa_signal_t signal);
+
+
+/**
+ * \brief                   Get partition by Partition ID.
+ *
+ * \param[in] partition_id  The Partition ID of the partition to get
+ *
+ * \retval NULL             Failed
+ * \retval "Not NULL"       Return the parttion context pointer
+ *                          \ref partition_t structures
+ */
+struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id);
 
 /**
  * \brief                   Get current running partition context.
@@ -352,6 +354,13 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          enum tfm_memory_access_e access,
                          uint32_t privileged);
 
+/**
+ * \brief               Set up the isolation boundary of the given partition.
+ *
+ * \param[in] partition The partition of which the boundary is set up.
+ */
+void tfm_set_up_isolation_boundary(const struct partition_t *partition);
+
 /*
  * PendSV specified function.
  *
@@ -455,18 +464,20 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg);
 void notify_with_signal(int32_t partition_id, psa_signal_t signal);
 
 /**
- * \brief Return the IRQ line number associated with a signal
+ * \brief Return the IRQ load info context pointer associated with a signal
  *
- * \param[in]      partition_id    The ID of the partition in which we look for
- *                                 the signal.
- * \param[in]      signal          The signal to query for.
+ * \param[in]      p_ldinf      The load info of the partition in which we look
+ *                              for the signal.
+ * \param[in]      signal       The signal to query for.
  *
- * \retval None-negative value  The irq line associated with signal
- * \retval Negative value       if one of more the following are true:
+ * \retval NULL                 if one of more the following are true:
  *                              - the \ref signal indicates more than one signal
  *                              - the \ref signal does not belong to the
  *                                partition.
+ * \retval Any other value      The load info pointer associated with the signal
  */
-int32_t get_irq_line_for_signal(int32_t partition_id, psa_signal_t signal);
+struct irq_load_info_t *get_irq_info_for_signal(
+                                    const struct partition_load_info_t *p_ldinf,
+                                    psa_signal_t signal);
 
 #endif /* __SPM_IPC_H__ */

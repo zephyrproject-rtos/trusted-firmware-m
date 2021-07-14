@@ -1,14 +1,15 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "tfm_platform_api.h"
-#include "tfm_veneers.h"
 #ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
+#else
+#include "tfm_veneers.h"
 #endif
 
 enum tfm_platform_err_t tfm_platform_system_reset(void)

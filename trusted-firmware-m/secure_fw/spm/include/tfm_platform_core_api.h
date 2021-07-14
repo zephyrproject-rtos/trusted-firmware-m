@@ -23,13 +23,4 @@
  */
 void tfm_access_violation_handler(void);
 
-/**
- * \brief Return whether a secure partition is privileged.
- *
- * \param[in] partition_idx  The index of the partition in the partition_db.
- *
- * \return True if the partition is privileged, false otherwise.
- */
-bool tfm_is_partition_privileged(uint32_t partition_idx);
-
 #endif /* __TFM_PLATFORM_CORE_API_H__ */

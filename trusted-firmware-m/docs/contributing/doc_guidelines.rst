@@ -20,7 +20,7 @@ The following short-list provides a quick summary of the rules.
 
 - If the patch modifies a present file, the file's style should be followed
 - If creating a new file,
-  :doc:`integration guide </docs/getting_started/tfm_sw_requirement>` can be used as a reference.
+  :doc:`integration guide </docs/integration_guide/tfm_integration_guide>` can be used as a reference.
 - When a new style is to be expressed, consult the `Python Documentation Guidelines`_
 
 *************
@@ -186,7 +186,7 @@ will not be added to the index (So it cannot be referenced if needed)
    +--------------+--------------+-------------+
 
 Other types of tables such as list-tables and csv-tables are also permitted, as
-seen on :doc:`/docs/getting_started/tfm_sw_requirement` and
+seen on :doc:`/docs/getting_started/tfm_getting_started` and
 :doc:`/docs/releases/1.0`
 
 
@@ -236,7 +236,7 @@ A document included in the documentation can be referenced by the `doc:` notatio
 
 .. code-block:: restructuredtext
 
-    :doc:`integration guide </docs/getting_started/tfm_sw_requirement>`
+    :doc:`integration guide </docs/integration_guide/tfm_integration_guide>`
 
 The path is relative to the root of the Trusted Firmware-M code.
 
@@ -248,7 +248,7 @@ In order to reference a specific section of a document, up to level 4 headers
 
 .. code-block:: restructuredtext
 
-    :ref:`docs/getting_started/tfm_sw_requirement:Tool & Dependency overview`
+    :ref:`docs/getting_started/tfm_getting_started:Tool & Dependency overview`
 
 This can also be used to quickly scroll to the specific section of the current
 document. This technique can be used to add complex table in the bottom of a

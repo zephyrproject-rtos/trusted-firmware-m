@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  * Copyright (c) 2018-2019, Laurence Lundblade.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -144,24 +144,6 @@ attest_get_signing_key_handle(psa_key_handle_t *handle)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-enum psa_attest_err_t
-attest_get_initial_attestation_public_key(uint8_t **public_key,
-                                          size_t *public_key_len,
-                                          psa_ecc_family_t *public_key_curve)
-{
-
-    /* If the public key length is 0 then it hasn't been loaded */
-    if (attestation_public_key_len == 0) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    *public_key       = attestation_public_key;
-    *public_key_len   = attestation_public_key_len;
-    *public_key_curve = attestation_key_curve;
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
 /*!
  * \brief Static function to calculate instance id.
  *
@@ -170,16 +152,9 @@ attest_get_initial_attestation_public_key(uint8_t **public_key,
 static enum psa_attest_err_t attest_calc_instance_id(void)
 {
     psa_status_t crypto_res;
-    enum psa_attest_err_t attest_res;
-    uint8_t *public_key;
-    size_t key_len;
-    psa_ecc_family_t psa_curve;
     psa_hash_operation_t hash = psa_hash_operation_init();
 
-    attest_res = attest_get_initial_attestation_public_key(&public_key,
-                                                           &key_len,
-                                                           &psa_curve);
-    if (attest_res != PSA_ATTEST_ERR_SUCCESS) {
+    if (!attestation_public_key_len) {
         return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
     }
 
@@ -188,7 +163,8 @@ static enum psa_attest_err_t attest_calc_instance_id(void)
         return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
     }
 
-    crypto_res = psa_hash_update(&hash, public_key, key_len);
+    crypto_res = psa_hash_update(&hash, attestation_public_key,
+                                 attestation_public_key_len);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
     }

@@ -66,9 +66,6 @@ int boot_save_shared_data(const struct image_header *hdr,
 
     image_ver = hdr->ih_ver;
 
-    /* TODO: add the module identifier into the fwu_minor after the module
-     * arg is supported.
-     */
     /* Currently hardcode it to 0 which indicates the full image. */
     fwu_minor = SET_FWU_MINOR(mcuboot_image_id, SW_VERSION);
     return boot_add_data_to_shared_area(TLV_MAJOR_FWU,

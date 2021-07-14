@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2020 ARM Limited
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,36 @@
 
 #define TFM_DRIVER_STDIO    Driver_USART5
 #define NS_DRIVER_STDIO     Driver_USART5
+
+/* UART pins HSIOM routing */
+#define ioss_0_port_5_pin_0_HSIOM P5_0_SCB5_UART_RX
+#define ioss_0_port_5_pin_1_HSIOM P5_1_SCB5_UART_TX
+
+/* UART pins configuration */
+#define CYBSP_UART_RX_ENABLED 1U
+#define CYBSP_UART_RX_PORT GPIO_PRT5
+#define CYBSP_UART_RX_PORT_NUM 5U
+#define CYBSP_UART_RX_PIN 0U
+#define CYBSP_UART_RX_NUM 0U
+#define CYBSP_UART_RX_DRIVEMODE CY_GPIO_DM_HIGHZ
+#define CYBSP_UART_RX_INIT_DRIVESTATE 1
+#ifndef ioss_0_port_5_pin_0_HSIOM
+        #define ioss_0_port_5_pin_0_HSIOM HSIOM_SEL_GPIO
+#endif
+#define CYBSP_UART_RX_HSIOM ioss_0_port_5_pin_0_HSIOM
+#define CYBSP_UART_RX_IRQ ioss_interrupts_gpio_5_IRQn
+#define CYBSP_UART_TX_ENABLED 1U
+#define CYBSP_UART_TX_PORT GPIO_PRT5
+#define CYBSP_UART_TX_PORT_NUM 5U
+#define CYBSP_UART_TX_PIN 1U
+#define CYBSP_UART_TX_NUM 1U
+#define CYBSP_UART_TX_DRIVEMODE CY_GPIO_DM_STRONG_IN_OFF
+#define CYBSP_UART_TX_INIT_DRIVESTATE 1
+#ifndef ioss_0_port_5_pin_1_HSIOM
+        #define ioss_0_port_5_pin_1_HSIOM HSIOM_SEL_GPIO
+#endif
+#define CYBSP_UART_TX_HSIOM ioss_0_port_5_pin_1_HSIOM
+#define CYBSP_UART_TX_IRQ ioss_interrupts_gpio_5_IRQn
 
 /**
  * \brief Store the addresses of memory regions

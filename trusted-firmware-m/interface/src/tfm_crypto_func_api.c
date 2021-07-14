@@ -1190,31 +1190,6 @@ psa_status_t psa_generate_key(const psa_key_attributes_t *attributes,
     return status;
 }
 
-psa_status_t psa_set_key_domain_parameters(psa_key_attributes_t *attributes,
-                                           psa_key_type_t type,
-                                           const uint8_t *data,
-                                           size_t data_length)
-{
-    psa_status_t status;
-
-    status = PSA_ERROR_NOT_SUPPORTED;
-
-    return status;
-}
-
-psa_status_t psa_get_key_domain_parameters(
-                                         const psa_key_attributes_t *attributes,
-                                         uint8_t *data,
-                                         size_t data_size,
-                                         size_t *data_length)
-{
-    psa_status_t status;
-
-    status = PSA_ERROR_NOT_SUPPORTED;
-
-    return status;
-}
-
 psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
                                 const uint8_t *input,
                                 size_t input_length)

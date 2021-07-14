@@ -339,7 +339,7 @@ psa_status_t tfm_crypto_key_derivation_input_key(psa_invec in_vec[],
     psa_key_derivation_operation_t *operation = NULL;
     mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(key_id, NULL);
+    status = tfm_crypto_check_handle_owner(key_id);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -421,7 +421,11 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
         status = psa_key_derivation_output_key(&key_attributes, operation,
                                                &encoded_key);
     }
+#ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
     *key_handle = encoded_key.key_id;
+#else
+    *key_handle = (psa_key_id_t)encoded_key;
+#endif
 
     if (status == PSA_SUCCESS) {
         status = tfm_crypto_set_key_storage(index, *key_handle);
@@ -509,7 +513,7 @@ psa_status_t tfm_crypto_key_derivation_key_agreement(psa_invec in_vec[],
     psa_key_derivation_step_t step = iov->step;
     mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(private_key, NULL);
+    status = tfm_crypto_check_handle_owner(private_key);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -531,27 +535,6 @@ psa_status_t tfm_crypto_key_derivation_key_agreement(psa_invec in_vec[],
                                             encoded_key,
                                             peer_key,
                                             peer_key_length);
-#endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
-}
-
-psa_status_t tfm_crypto_generate_random(psa_invec in_vec[],
-                                        size_t in_len,
-                                        psa_outvec out_vec[],
-                                        size_t out_len)
-{
-#ifdef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 1, out_len, 0, 1);
-
-    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    uint8_t *output = out_vec[0].base;
-    size_t output_size = out_vec[0].len;
-
-    return psa_generate_random(output, output_size);
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 }
 
@@ -578,7 +561,7 @@ psa_status_t tfm_crypto_raw_key_agreement(psa_invec in_vec[],
     size_t peer_key_length = in_vec[1].len;
     mbedtls_svc_key_id_t encoded_key;
 
-    psa_status_t status = tfm_crypto_check_handle_owner(private_key, NULL);
+    psa_status_t status = tfm_crypto_check_handle_owner(private_key);
 
     if (status != PSA_SUCCESS) {
         return status;

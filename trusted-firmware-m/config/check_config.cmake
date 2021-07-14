@@ -21,7 +21,7 @@ endfunction()
 
 tfm_invalid_config(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_LESS "7.3.1")
 
-set (TFM_L3_PLATFORM_LISTS mps2/an521 musca_b1/sse_200 stm/stm32l562e_dk)
+set (TFM_L3_PLATFORM_LISTS arm/mps2/an521 arm/musca_b1/sse_200 stm/stm32l562e_dk)
 
 tfm_invalid_config(TFM_ISOLATION_LEVEL LESS 1 OR TFM_ISOLATION_LEVEL GREATER 3)
 tfm_invalid_config(TFM_ISOLATION_LEVEL EQUAL 3 AND NOT TFM_PLATFORM IN_LIST TFM_L3_PLATFORM_LISTS)
@@ -32,6 +32,7 @@ tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND NOT TFM_PSA_API)
 tfm_invalid_config(TEST_S  AND TEST_PSA_API)
 tfm_invalid_config(TEST_NS AND TEST_PSA_API)
 
+tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 tfm_invalid_config((TFM_PARTITION_PROTECTED_STORAGE AND PS_ROLLBACK_PROTECTION) AND NOT TFM_PARTITION_PLATFORM)
 tfm_invalid_config(PS_ROLLBACK_PROTECTION AND NOT PS_ENCRYPTION)
 
@@ -55,7 +56,7 @@ tfm_invalid_config(NOT MCUBOOT_UPGRADE_STRATEGY IN_LIST MCUBOOT_STRATEGY_LIST)
 
 ####################### Code sharing ###########################################
 
-set(TFM_CODE_SHARING_PLATFORM_LISTS mps2/an521 musca_b1/sse_200) # Without crypto hw acceleration
+set(TFM_CODE_SHARING_PLATFORM_LISTS arm/mps2/an521 arm/musca_b1/sse_200) # Without crypto hw acceleration
 tfm_invalid_config(NOT TFM_CODE_SHARING STREQUAL "OFF" AND NOT TFM_PLATFORM IN_LIST TFM_CODE_SHARING_PLATFORM_LISTS)
 tfm_invalid_config(NOT TFM_CODE_SHARING STREQUAL "OFF" AND CRYPTO_HW_ACCELERATOR)
 tfm_invalid_config(TFM_CODE_SHARING STREQUAL "OFF" AND TFM_CODE_SHARING_PATH)
@@ -78,3 +79,8 @@ tfm_invalid_config(NOT TFM_FIH_PROFILE IN_LIST TFM_FIH_PROFILE_LIST)
 ########################### TF-M audit log #####################################
 
 tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND TFM_PSA_API)
+
+########################### TF-M Tests     #####################################
+
+tfm_invalid_config(TFM_ENABLE_SLIH_TEST AND NOT TFM_PSA_API)
+tfm_invalid_config(TFM_ENABLE_SLIH_TEST AND TFM_ENABLE_FLIH_TEST)

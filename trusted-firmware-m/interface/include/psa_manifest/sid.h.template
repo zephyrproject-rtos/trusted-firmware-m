@@ -15,24 +15,22 @@ extern "C" {
 #endif
 
 {% for partition in partitions %}
-    {% if partition.attr.tfm_partition_ipc %}
+    {% if partition.manifest.services %}
 /******** {{partition.manifest.name}} ********/
-        {% if partition.manifest.services %}
-            {% for service in partition.manifest.services %}
-                {% set str = service.name + "_SID" %}
+        {% for service in partition.manifest.services %}
+            {% set str = service.name + "_SID" %}
 #define {{"%-58s"|format(str)}} ({{"%10s"|format(service.sid)}}U)
-                {% set str = service.name + "_VERSION" %}
-                {% if service.version %}
+            {% set str = service.name + "_VERSION" %}
+            {% if service.version %}
 #define {{"%-58s"|format(str)}} ({{"%d"|format(service.version)}}U)
-                {% else %}
+            {% else %}
 #define {{"%-58s"|format(str)}} (1U)
-                {% endif %}
-                {% if partition.manifest.psa_framework_version > 1.0 and service.connection_based == false %}
-                    {% set str = service.name + "_HANDLE" %}
+            {% endif %}
+            {% if partition.manifest.psa_framework_version > 1.0 and service.connection_based == false %}
+                {% set str = service.name + "_HANDLE" %}
 #define {{"%-58s"|format(str)}} ({{"%s"|format(service.stateless_handle_value)}}U)
-                {% endif %}
-            {% endfor %}
-        {% endif %}
+            {% endif %}
+        {% endfor %}
 
     {% endif %}
 {% endfor %}

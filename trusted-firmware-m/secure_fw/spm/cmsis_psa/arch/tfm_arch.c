@@ -42,7 +42,7 @@ void tfm_arch_init_context(struct tfm_arch_ctx_t *p_actx,
                            void *param, uintptr_t pfn,
                            uintptr_t stk_btm, uintptr_t stk_top)
 {
-    struct tfm_state_context_t *p_stat_ctx=
+    struct tfm_state_context_t *p_stat_ctx =
             (struct tfm_state_context_t *)tfm_arch_seal_thread_stack(stk_top);
 
     /*

@@ -6,8 +6,8 @@ Trusted Firmware-M Generic Threat Model
 Introduction
 ************
 
-This document introduces a generic thread model of Trusted Firmware-M (TF-M).
-This generic thread model provides an overall analysis of TF-M implementation
+This document introduces a generic threat model of Trusted Firmware-M (TF-M).
+This generic threat model provides an overall analysis of TF-M implementation
 and identifies general threats and mitigation.
 
 .. note::
@@ -28,7 +28,7 @@ Root of Trust (RoT) service. Those RoT services belong to diverse RoT
 each RoT service may require a dedicated threat model.
 
 The analysis on specific models, topologies or RoT services may be covered in
-dedicated thread model documents. Those threat models are out of the scope of
+dedicated threat model documents. Those threat models are out of the scope of
 this document.
 
 Methodology
@@ -69,7 +69,7 @@ The TOE in this general model is the SPE, including TF-M and other components
 running in SPE.
 
 The TOE can vary in different TF-M models, RoT services and usage scenarios.
-Refer to dedicated thread models for the specific TOE definitions.
+Refer to dedicated threat models for the specific TOE definitions.
 
 ********************
 Asset identification
@@ -113,7 +113,7 @@ The Trust Boundary isolates SPE from NSPE, according to the TOE definition in
 in the figure below. Other modules inside SPE stay in the same TOE as TF-M does.
 
 Valid Data flows across the Trust Boundary are also shown in the figure below.
-This thread model only focuses on the data flows related to TF-M.
+This threat model only focuses on the data flows related to TF-M.
 
 .. figure:: overall-DFD.png
 
@@ -1107,7 +1107,7 @@ Reference
 
 .. [FF-M] `Arm® Platform Security Architecture Firmware Framework 1.0 <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf?revision=2d1429fa-4b5b-461a-a60e-4ef3d8f7f4b4>`_
 
-.. [DUAL-CPU-BOOT] :doc:`Booting a dual core system </docs/technical_references/dual-cpu/booting_a_dual_core_system>`
+.. [DUAL-CPU-BOOT] :doc:`Booting a dual core system </docs/technical_references/design_docs/dual-cpu/booting_a_dual_core_system>`
 
 .. [CVSS] `Common Vulnerability Scoring System Version 3.1 Calculator <https://www.first.org/cvss/calculator/3.1>`_
 
@@ -1115,9 +1115,9 @@ Reference
 
 .. [STRIDE] `The STRIDE Threat Model <https://docs.microsoft.com/en-us/previous-versions/commerce-server/ee823878(v=cs.20)?redirectedfrom=MSDN>`_
 
-.. [SECURE-BOOT] :doc:`Secure boot </docs/technical_references/tfm_secure_boot>`
+.. [SECURE-BOOT] :doc:`Secure boot </docs/technical_references/design_docs/tfm_secure_boot>`
 
-.. [ROLLBACK-PROTECT] :doc:`Rollback protection in TF-M secure boot </docs/technical_references/secure_boot_rollback_protection>`
+.. [ROLLBACK-PROTECT] :doc:`Rollback protection in TF-M secure boot </docs/technical_references/design_docs/secure_boot_rollback_protection>`
 
 .. [STACK-SEAL] `Armv8-M processor Secure software Stack Sealing vulnerability <https://developer.arm.com/support/arm-security-updates/armv8-m-stack-sealing>`_
 

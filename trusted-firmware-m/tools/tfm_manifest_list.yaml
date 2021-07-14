@@ -15,7 +15,6 @@
       "name": "Protected Storage Service",
       "short_name": "TFM_SP_PS",
       "manifest": "secure_fw/partitions/protected_storage/tfm_protected_storage.yaml",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_PROTECTED_STORAGE",
       "version_major": 0,
       "version_minor": 1,
@@ -30,7 +29,6 @@
       "name": "TF-M Internal Trusted Storage Service",
       "short_name": "TFM_SP_ITS",
       "manifest": "secure_fw/partitions/internal_trusted_storage/tfm_internal_trusted_storage.yaml",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_INTERNAL_TRUSTED_STORAGE",
       "version_major": 0,
       "version_minor": 1,
@@ -45,7 +43,6 @@
       "name": "TFM Audit Log Service",
       "short_name": "TFM_SP_AUDIT_LOG",
       "manifest": "secure_fw/partitions/audit_logging/tfm_audit_logging.yaml",
-      "tfm_partition_ipc": false,
       "conditional": "TFM_PARTITION_AUDIT_LOG",
       "version_major": 0,
       "version_minor": 1,
@@ -60,7 +57,6 @@
       "name": "TFM Crypto Service",
       "short_name": "TFM_SP_CRYPTO",
       "manifest": "secure_fw/partitions/crypto/tfm_crypto.yaml",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_CRYPTO",
       "version_major": 0,
       "version_minor": 1,
@@ -75,7 +71,6 @@
       "name": "TFM Platform Service",
       "short_name": "TFM_SP_PLATFORM",
       "manifest": "secure_fw/partitions/platform/tfm_platform.yaml",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_PLATFORM",
       "version_major": 0,
       "version_minor": 1,
@@ -90,7 +85,6 @@
       "name": "TFM Initial Attestation Service",
       "short_name": "TFM_SP_INITIAL_ATTESTATION",
       "manifest": "secure_fw/partitions/initial_attestation/tfm_initial_attestation.yaml",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_INITIAL_ATTESTATION",
       "version_major": 0,
       "version_minor": 1,
@@ -106,7 +100,6 @@
       "short_name": "TFM_SP_CORE_TEST",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_core_test/tfm_ss_core_test.yaml",
       "source_path": "${TFM_TEST_PATH}",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE",
       "version_major": 0,
       "version_minor": 1,
@@ -122,7 +115,6 @@
       "short_name": "TFM_SP_CORE_TEST_2",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_core_test_2/tfm_ss_core_test_2.yaml",
       "source_path": "${TFM_TEST_PATH}",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE",
       "version_major": 0,
       "version_minor": 1,
@@ -138,7 +130,6 @@
       "short_name": "TFM_SP_SECURE_TEST_PARTITION",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_secure_client_service/tfm_secure_client_service.yaml",
       "source_path": "${TFM_TEST_PATH}",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_SECURE_SERVICES",
       "version_major": 0,
       "version_minor": 1,
@@ -154,7 +145,6 @@
       "short_name": "TFM_SP_IPC_SERVICE_TEST",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_ipc_service/tfm_ipc_service_test.yaml",
       "source_path": "${TFM_TEST_PATH}",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE_IPC",
       "version_major": 0,
       "version_minor": 1,
@@ -170,7 +160,6 @@
       "short_name": "TFM_SP_IPC_CLIENT_TEST",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_ipc_client/tfm_ipc_client_test.yaml",
       "source_path": "${TFM_TEST_PATH}",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_CORE_IPC",
       "version_major": 0,
       "version_minor": 1,
@@ -182,27 +171,10 @@
       }
     },
     {
-      "name": "TFM IRQ Test Service 1",
-      "short_name": "TFM_IRQ_TEST_1",
-      "manifest": "${TFM_TEST_PATH}/test_services/tfm_irq_test_service_1/tfm_irq_test_service_1.yaml",
-      "source_path": "${TFM_TEST_PATH}",
-      "tfm_partition_ipc": true,
-      "conditional": "TFM_ENABLE_IRQ_TEST",
-      "version_major": 0,
-      "version_minor": 1,
-      "pid": 267,
-      "linker_pattern": {
-        "library_list": [
-           "*tfm_*partition_irq_test_1.*"
-         ]
-      }
-    },
-    {
       "name": "TF-M PS Test Service",
       "short_name": "TFM_SP_PS_TEST",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_ps_test_service/tfm_ps_test_service.yaml",
       "source_path": "${TFM_TEST_PATH}",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_PS",
       "version_major": 0,
       "version_minor": 1,
@@ -218,7 +190,6 @@
       "short_name": "TFM_SP_SECURE_CLIENT_2",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_secure_client_2/tfm_secure_client_2.yaml",
       "source_path": "${TFM_TEST_PATH}",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_TEST_SECURE_SERVICES",
       "version_major": 0,
       "version_minor": 1,
@@ -234,7 +205,6 @@
       "short_name": "TFM_SP_PSA_PROXY",
       "manifest": "secure_fw/partitions/psa_proxy/tfm_psa_proxy.yaml",
       "tfm_extensions": true,
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_PSA_PROXY",
       "version_major": 0,
       "version_minor": 1,
@@ -249,7 +219,6 @@
       "name": "TFM Firmware Update Service",
       "short_name": "TFM_SP_FWU",
       "manifest": "secure_fw/partitions/firmware_update/tfm_firmware_update.yaml",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_FIRMWARE_UPDATE",
       "version_major": 0,
       "version_minor": 1,
@@ -264,7 +233,6 @@
       "name": "TFM FFM11 Partition Service",
       "short_name": "TFM_SP_FFM11",
       "manifest": "secure_fw/partitions/tfm_ffm11_partition/tfm_ffm11_partition.yaml",
-      "tfm_partition_ipc": true,
       "conditional": "TFM_PARTITION_FFM11",
       "version_major": 0,
       "version_minor": 1,
@@ -275,5 +243,48 @@
         ]
       }
     },
+    {
+      "name": "TFM Initial Attestation Test Service",
+      "short_name": "TFM_ATTEST_TEST_SERVICE",
+      "manifest": "${TFM_TEST_PATH}/test_services/tfm_attest_test_service/tfm_attest_test_service.yaml",
+      "source_path": "${TFM_TEST_PATH}",
+      "conditional": "ATTEST_TEST_GET_PUBLIC_KEY",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 273,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_attest_test_service.*"
+         ]
+      }
+    },
+    {
+      "name": "TFM SLIH Test Service",
+      "short_name": "TFM_SP_SLIH_TEST",
+      "manifest": "${TFM_TEST_PATH}/test_services/tfm_slih_test_service/tfm_slih_test_service.yaml",
+      "source_path": "${TFM_TEST_PATH}",
+      "conditional": "TFM_ENABLE_SLIH_TEST",
+      "version_major": 0,
+      "version_minor": 1,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_slih_test.*"
+         ]
+      }
+    },
+    {
+      "name": "TFM FLIH Test Service",
+      "short_name": "TFM_SP_FLIH_TEST",
+      "manifest": "${TFM_TEST_PATH}/test_services/tfm_flih_test_service/tfm_flih_test_service.yaml",
+      "source_path": "${TFM_TEST_PATH}",
+      "conditional": "TFM_ENABLE_FLIH_TEST",
+      "version_major": 0,
+      "version_minor": 1,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*partition_flih_test.*"
+         ]
+      }
+    }
   ]
 }

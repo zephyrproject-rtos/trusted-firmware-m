@@ -102,10 +102,6 @@ static void get_sid_and_version_for_signal(psa_signal_t signal, uint32_t *sid,
         *sid = TFM_ATTEST_GET_TOKEN_SIZE_SID;
         *version = TFM_ATTEST_GET_TOKEN_SIZE_VERSION;
         break;
-    case TFM_ATTEST_GET_PUBLIC_KEY_SIGNAL:
-        *sid = TFM_ATTEST_GET_PUBLIC_KEY_SID;
-        *version = TFM_ATTEST_GET_PUBLIC_KEY_VERSION;
-        break;
     case TFM_ITS_SET_SIGNAL:
         *sid = TFM_ITS_SET_SID;
         *version = TFM_ITS_SET_VERSION;

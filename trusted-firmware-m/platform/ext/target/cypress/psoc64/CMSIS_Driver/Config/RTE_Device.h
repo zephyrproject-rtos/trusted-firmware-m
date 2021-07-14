@@ -199,17 +199,17 @@
 
 // <e> PPC (Peripheral Protection Controller) [Driver_PPU_CRYPTO_BOOT]
 // <i> Configuration settings for Driver_PPU_CRYPTO_BOOT in component ::Drivers:PPC
-#define   RTE_MS_PPU_CRYPTO_BOOT                    1
+#define   RTE_MS_PPU_CRYPTO_BOOT                    0
 // </e> PPC (Peripheral Protection Controller) [Driver_PPU_CRYPTO_BOOT]
 
 // <e> PPC (Peripheral Protection Controller) [Driver_PPU_CRYPTO_KEY0]
 // <i> Configuration settings for Driver_PPU_CRYPTO_KEY0 in component ::Drivers:PPC
-#define   RTE_MS_PPU_CRYPTO_KEY0                    1
+#define   RTE_MS_PPU_CRYPTO_KEY0                    0
 // </e> PPC (Peripheral Protection Controller) [Driver_PPU_CRYPTO_KEY0]
 
 // <e> PPC (Peripheral Protection Controller) [Driver_PPU_CRYPTO_KEY1]
 // <i> Configuration settings for Driver_PPU_CRYPTO_KEY1 in component ::Drivers:PPC
-#define   RTE_MS_PPU_CRYPTO_KEY1                    1
+#define   RTE_MS_PPU_CRYPTO_KEY1                    0
 // </e> PPC (Peripheral Protection Controller) [Driver_PPU_CRYPTO_KEY1]
 
 // <e> PPC (Peripheral Protection Controller) [Driver_PPU_CRYPTO_BUF]

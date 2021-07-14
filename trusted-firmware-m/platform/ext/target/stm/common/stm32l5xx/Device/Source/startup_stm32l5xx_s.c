@@ -348,6 +348,9 @@ void Reset_Handler(void)
 {
   __disable_irq();
   __set_MSPLIM((uint32_t)(&__MSP_STACK_LIMIT));
+#if defined ( __GNUC__ )
+  __set_MSP((uint32_t)(&__MSP_INITIAL_SP));
+#endif
   SystemInit();   /* CMSIS System Initialization */
   __set_PSP((uint32_t)(&__INITIAL_SP));
   __set_PSPLIM((uint32_t)(&__STACK_LIMIT));

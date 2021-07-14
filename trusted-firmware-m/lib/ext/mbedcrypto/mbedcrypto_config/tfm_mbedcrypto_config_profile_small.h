@@ -632,7 +632,7 @@
  *
  * Enable padding modes in the cipher layer.
  */
-#define MBEDTLS_CIPHER_PADDING_PKCS7
+//#define MBEDTLS_CIPHER_PADDING_PKCS7
 //#define MBEDTLS_CIPHER_PADDING_ONE_AND_ZEROS
 //#define MBEDTLS_CIPHER_PADDING_ZEROS_AND_LEN
 //#define MBEDTLS_CIPHER_PADDING_ZEROS
@@ -863,7 +863,7 @@
  * Note that this option is meant for internal use only and may be removed
  * without notice.
  */
-#define MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+//#define MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
 
 /**
  * \def MBEDTLS_MEMORY_DEBUG

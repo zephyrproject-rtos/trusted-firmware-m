@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -50,7 +50,8 @@ extensions = [
     'm2r', #Support markdown files. Needed for external code.
     'sphinx.ext.autosectionlabel', #Make sphinx generate a label for each section
     'sphinxcontrib.plantuml', #Add support for PlantUML drawings
-    'sphinxcontrib.rsvgconverter' #Add support for SVG to PDF
+    'sphinxcontrib.rsvgconverter', #Add support for SVG to PDF
+    'sphinx_tabs.tabs' #Enable tab extension in Sphinx
 ]
 
 #Location of PlantUML

@@ -6,7 +6,7 @@
  */
 
 #include "psa/crypto.h"
-#include "log/tfm_log.h"
+#include "tfm_sp_log.h"
 #include "bootutil_priv.h"
 #include "bootutil/bootutil.h"
 #include "bootutil/image.h"
@@ -52,8 +52,6 @@ typedef struct tfm_fwu_mcuboot_ctx_s {
 static tfm_fwu_mcuboot_ctx_t mcuboot_ctx[TFM_FWU_MAX_IMAGES];
 static fwu_image_info_data_t boot_shared_data;
 extern const uint32_t boot_img_magic[];
-#define BOOT_MAGIC_ARR_SZ \
-    (sizeof(boot_img_magic) / sizeof(boot_img_magic[0]))
 
 static int convert_id_from_bl_to_mcuboot(bl_image_id_t bl_image_id,
                                          uint8_t *mcuboot_image_id)
@@ -61,7 +59,7 @@ static int convert_id_from_bl_to_mcuboot(bl_image_id_t bl_image_id,
 #if (MCUBOOT_IMAGE_NUMBER == 1)
     /* Only full image upgrade is supported in this case. */
     if (bl_image_id != FWU_IMAGE_TYPE_FULL) {
-        LOG_MSG("TFM FWU: multi-image is not supported in current mcuboot configuration.");
+        LOG_ERRFMT("TFM FWU: multi-image is not supported in current mcuboot configuration.");
         return -1;
     }
 
@@ -75,7 +73,7 @@ static int convert_id_from_bl_to_mcuboot(bl_image_id_t bl_image_id,
         /* The image id in mcuboot. 1: the non-secure image. */
         *mcuboot_image_id = 1;
     }  else {
-        LOG_MSG("TFM FWU: invalid image_type: %d", bl_image_id);
+        LOG_ERRFMT("TFM FWU: invalid image_type: %d", bl_image_id);
         return -1;
     }
 #endif
@@ -99,7 +97,7 @@ static int convert_id_from_mcuboot_to_bl(uint8_t mcuboot_image_id,
         /* The image id in mcuboot. 1: the non-secure image. */
         image_type = FWU_IMAGE_TYPE_NONSECURE;
     }  else {
-        LOG_MSG("TFM FWU: invalid mcuboot image id\n\r: %d",
+        LOG_ERRFMT("TFM FWU: invalid mcuboot image id\n\r: %d",
                 mcuboot_image_id);
         return -1;
     }
@@ -199,7 +197,7 @@ psa_status_t fwu_bootloader_staging_area_init(bl_image_id_t bootloader_image_id)
 
     if (flash_area_open(FLASH_AREA_IMAGE_SECONDARY(mcuboot_image_id),
                         &fap) != 0) {
-        LOG_MSG("TFM FWU: opening flash failed.\r\n");
+        LOG_ERRFMT("TFM FWU: opening flash failed.\r\n");
         return PSA_ERROR_GENERIC_ERROR;
     }
 
@@ -215,7 +213,7 @@ psa_status_t fwu_bootloader_staging_area_init(bl_image_id_t bootloader_image_id)
     }
 
     if (flash_area_erase(fap, 0, fap->fa_size) != 0) {
-        LOG_MSG("TFM FWU: erasing flash failed.\r\n");
+        LOG_ERRFMT("TFM FWU: erasing flash failed.\r\n");
         return PSA_ERROR_GENERIC_ERROR;
     }
 
@@ -248,7 +246,7 @@ psa_status_t fwu_bootloader_load_image(bl_image_id_t bootloader_image_id,
     }
 
     if (flash_area_write(fap, block_offset, block, block_size) != 0) {
-        LOG_MSG("TFM FWU: write flash failed.\r\n");
+        LOG_ERRFMT("TFM FWU: write flash failed.\r\n");
         return PSA_ERROR_GENERIC_ERROR;
     }
 
@@ -452,29 +450,41 @@ psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
      * are installed, the user should call the psa_fwu_install API to install
      * this image again.
      */
-    if (boot_write_magic(fap) != 0) {
+    if (boot_set_pending_multi(mcuboot_image_id, false) != 0) {
         return PSA_ERROR_GENERIC_ERROR;
     } else {
         return ret;
     }
 }
 
-psa_status_t fwu_bootloader_mark_image_accepted(void)
+psa_status_t fwu_bootloader_mark_image_accepted(
+                                              bl_image_id_t bootloader_image_id)
 {
-    /* As DIRECT_XIP, RAM_LOAD and OVERWRITE_ONLY do not support image revert.
-     * So there is nothing to do in these three upgrade strategies. Image
-     * revert is only supported in SWAP upgrade strategy. In this case, the
-     * image need to be set as a permanent image, so that the next time reboot
-     * up, the image will still be the running image, otherwise, the image will
-     * be reverted and the original image will be chosen as the running image.
+    /* As RAM_LOAD and OVERWRITE_ONLY do not support image revert, the image
+     * does not need to be confirmed explicitly in these two upgrade strategies.
+     * Image revert is supported in SWAP upgrade strategy and DIRECT_XIP upgrade
+     * strategy when MCUBOOT_DIRECT_XIP_REVERT is true. In these cases, the
+     * image needs to be set as a permanent image explicitly. Then the accpeted
+     * image can still be selected as the running image during next time reboot
+     * up. Otherwise, the image will be reverted and the previous one will be
+     * chosen as the running image.
      */
-#if !defined(MCUBOOT_DIRECT_XIP) && !defined(MCUBOOT_RAM_LOAD) && \
-    !defined(MCUBOOT_OVERWRITE_ONLY)
-    if (boot_set_confirmed() != 0) {
+#if (defined(MCUBOOT_DIRECT_XIP) && defined(MCUBOOT_DIRECT_XIP_REVERT)) || \
+    defined(MCUBOOT_SWAP)
+    uint8_t mcuboot_image_id = 0;
+
+    if (convert_id_from_bl_to_mcuboot(bootloader_image_id,
+                                    &mcuboot_image_id) != 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (boot_set_confirmed_multi(mcuboot_image_id) != 0) {
         return PSA_ERROR_GENERIC_ERROR;
     }
-#endif
+#else
+    (void)bootloader_image_id;
     return PSA_SUCCESS;
+#endif
 }
 
 psa_status_t fwu_bootloader_abort(bl_image_id_t bootloader_image_id)
@@ -559,13 +569,13 @@ static psa_status_t get_secondary_image_info(uint8_t image_id,
 
     if ((flash_area_open(FLASH_AREA_IMAGE_SECONDARY(image_id),
                             &fap)) != 0) {
-        LOG_MSG("TFM FWU: opening flash failed.\r\n");
+        LOG_ERRFMT("TFM FWU: opening flash failed.\r\n");
         return PSA_ERROR_GENERIC_ERROR;
     }
 
     if (flash_area_read(fap, 0, &hdr, sizeof(hdr)) != 0) {
         flash_area_close(fap);
-        LOG_MSG("TFM FWU: reading flash failed.\r\n");
+        LOG_ERRFMT("TFM FWU: reading flash failed.\r\n");
         return PSA_ERROR_GENERIC_ERROR;
     }
 
@@ -588,7 +598,7 @@ static psa_status_t get_secondary_image_info(uint8_t image_id,
             info->version.iv_minor = hdr.ih_ver.iv_minor;
             info->version.iv_revision = hdr.ih_ver.iv_revision;
             info->version.iv_build_num = hdr.ih_ver.iv_build_num;
-            LOG_MSG("version= %d., %d., %d.,+ %d\n\r",
+            LOG_ERRFMT("version= %d., %d., %d.,+ %d\n\r",
                     info->version.iv_major,
                     info->version.iv_minor,
                     info->version.iv_revision,
@@ -625,7 +635,11 @@ psa_status_t fwu_bootloader_get_image_info(bl_image_id_t bootloader_image_id,
 {
     struct image_version image_ver = { 0 };
     uint8_t mcuboot_image_id = 0;
-
+#if !defined(MCUBOOT_DIRECT_XIP) && !defined(MCUBOOT_RAM_LOAD) && \
+    !defined(MCUBOOT_OVERWRITE_ONLY)
+    const struct flash_area *fap = NULL;
+    uint8_t image_ok = BOOT_FLAG_UNSET;
+#endif
     if (info == NULL) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
@@ -639,12 +653,33 @@ psa_status_t fwu_bootloader_get_image_info(bl_image_id_t bootloader_image_id,
     memset(info->digest, TFM_IMAGE_INFO_INVALID_DIGEST, sizeof(info->digest));
 
     if (active_image) {
-        /* Set the image state as accepted. */
-        /* TODO: check the image state by reading the image_ok flag in SWAP
-         * case.
-         */
-        info->state = PSA_IMAGE_INSTALLED;
+    /* As DIRECT_XIP, RAM_LOAD and OVERWRITE_ONLY do not support image revert.
+     * So the running image is in INSTALLED state in these three upgrade
+     * strategies. In the SWAP case, the image_ok flag should be read to check
+     * whether the running image has been confirmed as a pernament image.
+     */
+#if !defined(MCUBOOT_DIRECT_XIP) && !defined(MCUBOOT_RAM_LOAD) && \
+    !defined(MCUBOOT_OVERWRITE_ONLY)
+        if ((flash_area_open(FLASH_AREA_IMAGE_PRIMARY(mcuboot_image_id),
+                            &fap)) != 0) {
+            LOG_ERRFMT("TFM FWU: opening flash failed.\r\n");
+            return PSA_ERROR_GENERIC_ERROR;
+        }
 
+        /* Get value of image-ok flag of the image to check whether application
+         * itself is already confirmed.
+         */
+        if (boot_read_image_ok(fap, &image_ok) != 0) {
+            return PSA_ERROR_GENERIC_ERROR;
+        }
+        if (image_ok == BOOT_FLAG_SET) {
+            info->state = PSA_IMAGE_INSTALLED;
+        } else {
+            info->state = PSA_IMAGE_PENDING_INSTALL;
+        }
+#else
+        info->state = PSA_IMAGE_INSTALLED;
+#endif
         if (get_running_image_version(mcuboot_image_id,
                                       &image_ver) == PSA_SUCCESS) {
             info->version.iv_major = image_ver.iv_major;
