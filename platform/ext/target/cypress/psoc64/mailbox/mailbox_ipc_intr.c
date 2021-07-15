@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,7 +20,7 @@ __STATIC_INLINE void tfm_trigger_pendsv(void)
     SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
 }
 
-void mailbox_clear_intr(void)
+static void mailbox_clear_intr(void)
 {
     uint32_t status;
 
