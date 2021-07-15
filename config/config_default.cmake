@@ -26,8 +26,9 @@ set(TFM_NS_CLIENT_IDENTIFICATION        OFF         CACHE BOOL      "Enable NS c
 set(TFM_EXTRA_CONFIG_PATH               ""          CACHE PATH      "Path to extra cmake config file")
 
 set(TFM_MANIFEST_LIST                   ${CMAKE_SOURCE_DIR}/tools/tfm_manifest_list.yaml CACHE FILEPATH "TF-M native Secure Partition manifests list file")
-set(TFM_EXTRA_MANIFEST_LIST_PATH        ""          CACHE PATH      "Path to extra manifest file, used to declare extra partitions. Appended to standard TFM manifest")
+set(TFM_EXTRA_MANIFEST_LIST_FILES       ""          CACHE FILEPATH  "Extra manifest list file(s), used to list extra Secure Partition manifests.")
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ""          CACHE PATH      "Path to extra generated file list. Appended to stardard TFM generated file list.")
+set(TFM_EXTRA_PARTITION_PATHS           ""          CACHE PATH      "List of extra Secure Partitions directories. An extra Secure Parition folder contains source code, CMakeLists.txt and manifest files")
 
 set(TFM_SPM_LOG_LEVEL                   TFM_SPM_LOG_LEVEL_INFO          CACHE STRING    "Set default SPM log level as INFO level")
 set(TFM_PARTITION_LOG_LEVEL             TFM_PARTITION_LOG_LEVEL_INFO    CACHE STRING    "Set default Secure Partition log level as INFO level")
