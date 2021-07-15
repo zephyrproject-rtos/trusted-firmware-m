@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +14,6 @@
 #include "psa_manifest/sid.h"
 #include "tfm_multi_core_api.h"
 #include "tfm_ns_mailbox.h"
-#include "platform_multicore.h"
 #include "psa_proxy_shared_mem_mngr.h"
 
 #define NON_SECURE_CLIENT_ID            (-1)
