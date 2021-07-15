@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2021, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -378,8 +378,8 @@ int mbedtls_ecdsa_verify( mbedtls_ecp_group *grp,
 int mbedtls_ecdsa_genkey( mbedtls_ecdsa_context *ctx, mbedtls_ecp_group_id gid,
                   int (*f_rng)(void *, unsigned char *, size_t), void *p_rng )
 {
-    return( mbedtls_ecp_group_load( &ctx->grp, gid ) ||
-            cc_ecp_gen_keypair( &ctx->grp, &ctx->d, &ctx->Q, f_rng, p_rng ) );
+    return( mbedtls_ecp_group_load( &ctx->MBEDTLS_PRIVATE(grp), gid ) ||
+            cc_ecp_gen_keypair( &ctx->MBEDTLS_PRIVATE(grp), &ctx->MBEDTLS_PRIVATE(d), &ctx->MBEDTLS_PRIVATE(Q), f_rng, p_rng ) );
 }
 #endif /* MBEDTLS_ECDSA_GENKEY_ALT */
 
