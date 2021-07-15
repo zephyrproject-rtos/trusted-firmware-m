@@ -5,7 +5,9 @@
  *
  */
 
+#include <stdint.h>
 #include "bitops.h"
+#include "psa/lifecycle.h"
 #include "psa/service.h"
 #include "spm_ipc.h"
 #include "tfm_arch.h"
@@ -21,9 +23,22 @@
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
 #include "tfm_hal_platform.h"
+#include "tfm_psa_call_param.h"
 
 #define GET_STATELESS_SERVICE(index)    (stateless_services_ref_tbl[index])
 extern struct service_t *stateless_services_ref_tbl[];
+
+
+uint32_t tfm_spm_get_lifecycle_state(void)
+{
+    /*
+     * FixMe: return PSA_LIFECYCLE_UNKNOWN to the caller directly. It will be
+     * implemented in the future.
+     */
+    return PSA_LIFECYCLE_UNKNOWN;
+}
+
+/* PSA Client API function body */
 
 uint32_t tfm_spm_client_psa_framework_version(void)
 {
@@ -129,9 +144,10 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
     return PSA_SUCCESS;
 }
 
-psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
-                                     const psa_invec *inptr, size_t in_num,
-                                     psa_outvec *outptr, size_t out_num)
+psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
+                                     uint32_t ctrl_param,
+                                     const psa_invec *inptr,
+                                     psa_outvec *outptr)
 {
     psa_invec invecs[PSA_MAX_IOVEC];
     psa_outvec outvecs[PSA_MAX_IOVEC];
@@ -143,6 +159,9 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
     uint32_t sid, version, index;
     uint32_t privileged;
     bool ns_caller = tfm_spm_is_ns_caller();
+    int32_t type = (int32_t)(int16_t)((ctrl_param & TYPE_MASK) >> TYPE_OFFSET);
+    size_t in_num = (size_t)((ctrl_param & IN_LEN_MASK) >> IN_LEN_OFFSET);
+    size_t out_num = (size_t)((ctrl_param & OUT_LEN_MASK) >> OUT_LEN_OFFSET);
 
     /* The request type must be zero or positive. */
     if (type < 0) {
@@ -385,6 +404,8 @@ void tfm_spm_client_psa_close(psa_handle_t handle)
      */
     tfm_spm_send_event(service, msg);
 }
+
+/* PSA Partition API function body */
 
 psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
                                         uint32_t timeout)

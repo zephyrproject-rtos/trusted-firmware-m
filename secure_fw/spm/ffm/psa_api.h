@@ -23,6 +23,17 @@
              } \
         } while (0)
 
+/**
+ * \brief This function get the current PSA RoT lifecycle state.
+ *
+ * \return state                The current security lifecycle state of the PSA
+ *                              RoT. The PSA state and implementation state are
+ *                              encoded as follows:
+ * \arg                           state[15:8] – PSA lifecycle state
+ * \arg                           state[7:0] – IMPLEMENTATION DEFINED state
+ */
+uint32_t tfm_spm_get_lifecycle_state(void);
+
 /* PSA Client API function body, for privileged use only. */
 
 /**
@@ -66,15 +77,11 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version);
  *
  * \param[in] handle            Service handle to the established connection,
  *                              \ref psa_handle_t
- * \param[in] type              The request type.
- *                              Must be zero( \ref PSA_IPC_CALL) or positive.
+ * \param[in] ctrl_param        Parameters combined in uint32_t,
+ *                              includes request type, in_num and out_num.
  * \param[in] inptr             Array of input psa_invec structures.
  *                              \ref psa_invec
- * \param[in] in_num            Number of input psa_invec structures.
- *                              \ref psa_invec
  * \param[in] outptr            Array of output psa_outvec structures.
- *                              \ref psa_outvec
- * \param[in] out_num           Number of outut psa_outvec structures.
  *                              \ref psa_outvec
  *
  * \retval PSA_SUCCESS          Success.
@@ -87,9 +94,10 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version);
  * \arg                           The message is unrecognized by the RoT
  *                                Service or incorrectly formatted.
  */
-psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
-                                     const psa_invec *inptr, size_t in_num,
-                                     psa_outvec *outptr, size_t out_num);
+psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
+                                     uint32_t ctrl_param,
+                                     const psa_invec *inptr,
+                                     psa_outvec *outptr);
 
 /**
  * \brief handler for \ref psa_close.

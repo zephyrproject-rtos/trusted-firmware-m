@@ -10,6 +10,7 @@
 #include "tfm_rpc.h"
 #include "utilities.h"
 #include "load/partition_defs.h"
+#include "tfm_psa_call_param.h"
 
 static void default_handle_req(void)
 {
@@ -57,9 +58,11 @@ psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
 {
     TFM_CORE_ASSERT(params != NULL);
 
-    return tfm_spm_client_psa_call(params->handle, params->type,
-                                   params->in_vec, params->in_len,
-                                   params->out_vec, params->out_len);
+    return tfm_spm_client_psa_call(params->handle,
+                                   PARAM_PACK(params->type,
+                                              params->in_len,
+                                              params->out_len),
+                                   params->in_vec, params->out_vec);
 }
 
 void tfm_rpc_psa_close(const struct client_call_params_t *params)
