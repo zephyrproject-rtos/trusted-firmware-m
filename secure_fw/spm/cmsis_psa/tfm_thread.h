@@ -82,7 +82,7 @@ void tfm_core_thrd_init(struct tfm_core_thread_t *pth,
  *  Set thread priority. Priority is set to THRD_PRIOR_MEDIUM in
  *  tfm_core_thrd_init().
  */
-void __STATIC_INLINE tfm_core_thrd_set_priority(struct tfm_core_thread_t *pth,
+__STATIC_INLINE void tfm_core_thrd_set_priority(struct tfm_core_thread_t *pth,
                                                 uint32_t prior)
 {
     pth->prior &= ~THRD_PRIOR_MASK;
@@ -99,7 +99,7 @@ void __STATIC_INLINE tfm_core_thrd_set_priority(struct tfm_core_thread_t *pth,
  * Notes
  *  Reuse prior of thread context to shift down non-secure thread priority.
  */
-void __STATIC_INLINE tfm_core_thrd_set_secure(struct tfm_core_thread_t *pth,
+__STATIC_INLINE void tfm_core_thrd_set_secure(struct tfm_core_thread_t *pth,
                                               uint32_t attr_secure)
 {
     pth->prior &= ~THRD_ATTR_NON_SECURE;
@@ -130,7 +130,7 @@ void tfm_core_thrd_set_state(struct tfm_core_thread_t *pth, uint32_t new_state);
  * Return :
  *  State of thread
  */
-uint32_t __STATIC_INLINE tfm_core_thrd_get_state(struct tfm_core_thread_t *pth)
+__STATIC_INLINE uint32_t tfm_core_thrd_get_state(struct tfm_core_thread_t *pth)
 {
     return pth->state;
 }
@@ -146,7 +146,7 @@ uint32_t __STATIC_INLINE tfm_core_thrd_get_state(struct tfm_core_thread_t *pth)
  *  This API is useful for blocked syscall blocking thread. Syscall
  *  could set its return value to the caller before caller goes.
  */
-void __STATIC_INLINE tfm_core_thrd_set_retval(struct tfm_core_thread_t *pth,
+__STATIC_INLINE void tfm_core_thrd_set_retval(struct tfm_core_thread_t *pth,
                                               uint32_t retval)
 {
     TFM_STATE_RET_VAL(&pth->arch_ctx) = retval;
