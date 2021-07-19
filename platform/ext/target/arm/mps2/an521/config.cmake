@@ -10,8 +10,4 @@ set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext
 if(TFM_PSA_API)
     set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_an521_conf.h CACHE FILEPATH "Config to append to standard Mbed Crypto config, used by platforms to configure feature support")
     set(PLATFORM_DUMMY_NV_SEED        TRUE         CACHE BOOL      "Use dummy NV seed implementation. Should not be used in production.")
-    if (NOT TFM_ENABLE_SLIH_TEST)
-        # FLIH and SLIH testing can not be enabled at the same time
-        set(TFM_ENABLE_FLIH_TEST      ON           CACHE BOOL      "Enable FLIH testing")
-    endif()
 endif()
