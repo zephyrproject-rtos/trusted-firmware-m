@@ -1,7 +1,7 @@
 /*
  *  Elliptic curve DSA sign and verify functions
  *
- *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
+ *  Copyright (C) 2006-2021, ARM Limited, All Rights Reserved
  *  Copyright (C) 2019, STMicroelectronics, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
@@ -22,6 +22,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "mbedtls/ecdsa.h"
+#include "mbedtls/error.h"
 
 #if defined(MBEDTLS_ECDSA_C)
 #include "mbedtls/platform.h"
@@ -73,7 +74,7 @@ int mbedtls_ecdsa_sign( mbedtls_ecp_group *grp, mbedtls_mpi *r, mbedtls_mpi *s,
     ECDSA_VALIDATE_RET( buf   != NULL || blen == 0 );
 
     /* Fail cleanly on curves such as Curve25519 that can't be used for ECDSA */
-    if( grp->G.Y.p == NULL )
+    if( grp->G.MBEDTLS_PRIVATE(Y).MBEDTLS_PRIVATE(p) == NULL )
         return( MBEDTLS_ERR_ECP_BAD_INPUT_DATA );
 
     /* Make sure d is in range 1..n-1 */
@@ -211,7 +212,7 @@ int mbedtls_ecdsa_verify( mbedtls_ecp_group *grp,
     ECDSA_VALIDATE_RET( buf != NULL || blen == 0 );
 
     /* Fail cleanly on curves such as Curve25519 that can't be used for ECDSA */
-    if( grp->G.Y.p == NULL )
+    if( grp->G.MBEDTLS_PRIVATE(Y).MBEDTLS_PRIVATE(p) == NULL )
         return( MBEDTLS_ERR_ECP_BAD_INPUT_DATA );
 
     /* Make sure r and s are in range 1..n-1 */

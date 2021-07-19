@@ -7,7 +7,7 @@
  * hash functions are defined in <em>FIPS 180-4: Secure Hash Standard (SHS)</em>.
  */
 /*
- *  Copyright (C) 2006-2018, Arm Limited (or its affiliates), All Rights Reserved
+ *  Copyright (C) 2006-2021, Arm Limited (or its affiliates), All Rights Reserved
  *  Copyright (C) 2019, STMicroelectronics, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
@@ -47,7 +47,7 @@
  */
 typedef struct mbedtls_sha256_context
 {
-    int is224;                                      /*!< 0 = use SHA256, 1 = use SHA224 */
+    int MBEDTLS_PRIVATE(is224);                     /*!< 0 = use SHA256, 1 = use SHA224 */
     HASH_HandleTypeDef hhash;                       /*!< Handle of HASH HAL */
     uint8_t sbuf[ST_SHA256_BLOCK_SIZE + ST_SHA256_EXTRA_BYTES];
                                                     /*!< Buffer to store input data

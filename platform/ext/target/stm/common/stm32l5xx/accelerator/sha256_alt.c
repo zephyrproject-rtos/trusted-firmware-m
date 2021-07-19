@@ -1,7 +1,7 @@
 /*
  *  FIPS-180-2 compliant SHA-256 implementation
  *
- *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
+ *  Copyright (C) 2006-2021, ARM Limited, All Rights Reserved
  *  Copyright (C) 2019, STMicroelectronics, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
@@ -27,6 +27,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "mbedtls/sha256.h"
+#include "mbedtls/error.h"
 
 #if defined(MBEDTLS_SHA256_C)
 #if defined(MBEDTLS_SHA256_ALT)
@@ -86,7 +87,7 @@ void mbedtls_sha256_clone(mbedtls_sha256_context *dst,
     *dst = *src;
 }
 
-int mbedtls_sha256_starts_ret(mbedtls_sha256_context *ctx, int is224)
+int mbedtls_sha256_starts(mbedtls_sha256_context *ctx, int is224)
 {
     SHA256_VALIDATE_RET( ctx != NULL );
     SHA256_VALIDATE_RET( is224 == 0 || is224 == 1 );
@@ -102,7 +103,7 @@ int mbedtls_sha256_starts_ret(mbedtls_sha256_context *ctx, int is224)
         return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
     }
 
-    ctx->is224 = is224;
+    ctx->MBEDTLS_PRIVATE(is224) = is224;
 
     /* first block on 17 words */
     ctx->first = ST_SHA256_EXTRA_BYTES;
@@ -127,7 +128,7 @@ int mbedtls_internal_sha256_process( mbedtls_sha256_context *ctx, const unsigned
     HAL_HASH_ContextRestoring(&ctx->hhash, ctx->ctx_save_regs);
 #endif /* ST_HW_CONTEXT_SAVING */
 
-    if (ctx->is224 == 0) {
+    if (ctx->MBEDTLS_PRIVATE(is224) == 0) {
         if (HAL_HASHEx_SHA256_Accmlt(&ctx->hhash, (uint8_t *) data, ST_SHA256_BLOCK_SIZE) != 0) {
             return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         }
@@ -145,7 +146,7 @@ int mbedtls_internal_sha256_process( mbedtls_sha256_context *ctx, const unsigned
     return 0;
 }
 
-int mbedtls_sha256_update_ret(mbedtls_sha256_context *ctx, const unsigned char *input, size_t ilen)
+int mbedtls_sha256_update(mbedtls_sha256_context *ctx, const unsigned char *input, size_t ilen)
 {
     size_t currentlen = ilen;
 
@@ -169,7 +170,7 @@ int mbedtls_sha256_update_ret(mbedtls_sha256_context *ctx, const unsigned char *
         memcpy(ctx->sbuf + ctx->sbuf_len, input, (ST_SHA256_BLOCK_SIZE + ctx->first - ctx->sbuf_len));
         currentlen -= (ST_SHA256_BLOCK_SIZE + ctx->first - ctx->sbuf_len);
 
-        if (ctx->is224 == 0)
+        if (ctx->MBEDTLS_PRIVATE(is224) == 0)
         {
             if (HAL_HASHEx_SHA256_Accmlt(&ctx->hhash, (uint8_t *)(ctx->sbuf), ST_SHA256_BLOCK_SIZE + ctx->first) != 0)
             {
@@ -188,7 +189,7 @@ int mbedtls_sha256_update_ret(mbedtls_sha256_context *ctx, const unsigned char *
         size_t iter = currentlen / ST_SHA256_BLOCK_SIZE;
         if (iter != 0)
         {
-            if (ctx->is224 == 0)
+            if (ctx->MBEDTLS_PRIVATE(is224) == 0)
             {
                 if (HAL_HASHEx_SHA256_Accmlt(&ctx->hhash, (uint8_t *)(input + ST_SHA256_BLOCK_SIZE + ctx->first - ctx->sbuf_len), (iter * ST_SHA256_BLOCK_SIZE)) != 0)
                 {
@@ -222,7 +223,7 @@ int mbedtls_sha256_update_ret(mbedtls_sha256_context *ctx, const unsigned char *
     return 0;
 }
 
-int mbedtls_sha256_finish_ret(mbedtls_sha256_context *ctx, unsigned char output[32])
+int mbedtls_sha256_finish(mbedtls_sha256_context *ctx, unsigned char output[32])
 {
     SHA256_VALIDATE_RET( ctx != NULL );
     SHA256_VALIDATE_RET( (unsigned char *)output != NULL );
@@ -233,7 +234,7 @@ int mbedtls_sha256_finish_ret(mbedtls_sha256_context *ctx, unsigned char output[
 #endif /* ST_HW_CONTEXT_SAVING */
 
     /* Last accumulation for pending bytes in sbuf_len, then trig processing and get digest */
-    if (ctx->is224 == 0)
+    if (ctx->MBEDTLS_PRIVATE(is224) == 0)
     {
         if (HAL_HASHEx_SHA256_Accmlt_End(&ctx->hhash, ctx->sbuf, ctx->sbuf_len, output, ST_SHA256_TIMEOUT) != 0)
         {
