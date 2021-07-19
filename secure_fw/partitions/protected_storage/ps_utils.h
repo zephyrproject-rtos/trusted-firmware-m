@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -61,27 +61,6 @@ typedef char err_msg[(data_size <= data_buf_size)*2 - 1]
 psa_status_t ps_utils_check_contained_in(uint32_t superset_size,
                                          uint32_t subset_offset,
                                          uint32_t subset_size);
-
-
-#ifdef PS_ENCRYPTION
-/**
- * \brief Fills the uint8_t buffer with the client_id and the uid
- *
- * \param[in]  uid            The data identifier
- * \param[in]  client_id      Client id of the partition
- * \param[out] buff           The output buffer
- * \param[in]  buff_len       Length of the output buffer in bytes
- *
- * \retval PSA_SUCCESS                  Buffer filled successfully
- * \retval PSA_ERROR_INVALID_ARGUMENT   The buffer pointer is NULL
- * \retval PSA_ERROR_BUFFER_TOO_SMALL   The buffer cannot fit the client_id + uid
- *
- */
-psa_status_t ps_utils_fill_key_label(psa_storage_uid_t uid,
-                                     int32_t client_id,
-                                     uint8_t *buff,
-                                     size_t buff_len);
-#endif
 
 #ifdef __cplusplus
 }
