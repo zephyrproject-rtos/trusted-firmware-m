@@ -16,7 +16,7 @@ Or do it manually using the following commands:
 
 .. code:: bash
 
-    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
+    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
     $ cd build && make install
 
 1.2 Building TF-M demo with BL2
@@ -28,23 +28,23 @@ LPCXpresso55S69 run the ``build_tfm_demo_bl2.py`` script in ``platform/ext/targe
 Or do it manually using the following commands:
 
 .. code:: bash
-		
-    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DCMAKE_BUILD_TYPE=Relwithdebinfo -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
+
+    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
     $ cd build && make install
 
 1.3 Building TF-M regression tests
 ==================================
 
 To run the S and NS regression tests (``TEST_S=ON`` and ``TEST_NS=ON``), the
-secondary image areas must be set to 0 (firmware updates are not possible). 
+secondary image areas must be set to 0 (firmware updates are not possible).
 Use the ``build_tfm_regression.py`` script in ``platform/ext/target/nxp/lpcxpresso55s69/scripts``
 or do it manually using following commands:
 
 .. code:: bash
-		
-    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTEST_S=ON -DTEST_NS=ON -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
+
+    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTEST_S=ON -DTEST_NS=ON -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
     $ cd build && make install
-	
+
 .. Note::
 
     Currently ``Debug`` cannot be selected as build type and regression tests
@@ -56,9 +56,9 @@ or do it manually using following commands:
 ****************
 
 After generating the binaries, there are three options to flash them using:
-	1) **External Segger J-Link flasher**
-	2) **On-board J-Link debugger** - with update of LPC-Link2 debugger to the Segger J-Link firmware
-	3) **PyOCD** - supports both DAPLink and J-Link interfaces. The LPCXpresso55S69 boards, by default, use DAPLink firmware.
+    1) **External Segger J-Link flasher**
+    2) **On-board J-Link debugger** - with update of LPC-Link2 debugger to the Segger J-Link firmware
+    3) **PyOCD** - supports both DAPLink and J-Link interfaces. The LPCXpresso55S69 boards, by default, use DAPLink firmware.
 
 2.1 Flashing with Segger J-Link
 ===============================
@@ -82,15 +82,19 @@ For onboard J-Link debugger option please follow this step:
 -  Link the DFU jumper (J4) and make power cycle
 -  Flash the **NXP LPCXpresso On-Board** firmware image with ``lpcscrypt`` from the ``lpcscrypt_2.1.2_57/scripts`` folder as follows:
 
-**Windows:**
-::
+.. tabs::
 
-    $ program_JLINK ../probe_firmware/LPCXpressoV2/Firmware_JLink_LPCXpressoV2_20190404.bin
-	
-**Linux:**
-::
+    .. group-tab:: Linux
 
-    $ ./program_JLINK ../probe_firmware/LPCXpressoV2/Firmware_JLink_LPCXpressoV2_20190404.bin
+        .. code-block:: bash
+
+            $ ./program_JLINK ../probe_firmware/LPCXpressoV2/Firmware_JLink_LPCXpressoV2_20190404.bin
+
+    .. group-tab:: Windows
+
+        .. code-block:: bash
+
+            $ program_JLINK ../probe_firmware/LPCXpressoV2/Firmware_JLink_LPCXpressoV2_20190404.bin
 
 Then remove the link on the DFU jumper and power cycle.
 
@@ -98,63 +102,67 @@ Then remove the link on the DFU jumper and power cycle.
 ------------------------------------------
 
 To flash TF-M images use the flash scripts provided in ``platform/ext/target/nxp/lpcxpresso55s69/scripts`` folder:
-	- ``flash_JLink.py`` - for uploading image without BL2
-	- ``flash_bl2_JLink.py`` - for uploading image with BL2
-	
+    - ``flash_JLink.py`` - for uploading image without BL2
+    - ``flash_bl2_JLink.py`` - for uploading image with BL2
+
 Or you can do it manually according to paragraph ``2.1.2.1``.
 
 2.1.2.1 Connect to the board using ``JLinkCommander``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Windows:**
-::
+.. tabs::
 
-	$ JLink -device lpc55s69 -if swd -speed 2000 -autoconnect 1
-	
-	SEGGER J-Link Commander V6.98b (Compiled Mar 12 2021 15:03:29)
-	DLL version V6.98b, compiled Mar 12 2021 15:02:22
+    .. group-tab:: Linux
 
-	Connecting to J-Link via USB...O.K.
-	Firmware: J-Link LPCXpresso V2 compiled Apr  4 2019 16:54:03
-	Hardware version: V1.00
-	S/N: 729458359
-	VTref=3.300V
-	Device "LPC55S69_M33_0" selected.
-	...
-	Cortex-M33 identified.
-	
-**Linux:**
-::
+        .. code-block:: bash
 
-	$ JLinkExe -device lpc55s69 -if swd -speed 2000 -autoconnect 1
+            $ JLinkExe -device lpc55s69 -if swd -speed 2000 -autoconnect 1
 
-	SEGGER J-Link Commander V6.98b (Compiled Mar 12 2021 15:03:29)
-	DLL version V6.98b, compiled Mar 12 2021 15:02:22
+            SEGGER J-Link Commander V6.98b (Compiled Mar 12 2021 15:03:29)
+            DLL version V6.98b, compiled Mar 12 2021 15:02:22
 
-	Connecting to J-Link via USB...O.K.
-	Firmware: J-Link LPCXpresso V2 compiled Apr  4 2019 16:54:03
-	Hardware version: V1.00
-	S/N: 729458359
-	VTref=3.300V
-	Device "LPC55S69_M33_0" selected.
-	...
-	Cortex-M33 identified.
+            Connecting to J-Link via USB...O.K.
+            Firmware: J-Link LPCXpresso V2 compiled Apr  4 2019 16:54:03
+            Hardware version: V1.00
+            S/N: 729458359
+            VTref=3.300V
+            Device "LPC55S69_M33_0" selected.
+            ...
+            Cortex-M33 identified.
+
+    .. group-tab:: Windows
+
+        .. code-block:: bash
+
+            $ JLink -device lpc55s69 -if swd -speed 2000 -autoconnect 1
+
+            SEGGER J-Link Commander V6.98b (Compiled Mar 12 2021 15:03:29)
+            DLL version V6.98b, compiled Mar 12 2021 15:02:22
+
+            Connecting to J-Link via USB...O.K.
+            Firmware: J-Link LPCXpresso V2 compiled Apr  4 2019 16:54:03
+            Hardware version: V1.00
+            S/N: 729458359
+            VTref=3.300V
+            Device "LPC55S69_M33_0" selected.
+            ...
+            Cortex-M33 identified.
 
 2.1.2.2 Flash the built images
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you built TF-M with the BL2 secondary bootloader, use following commands:
+When BL2 is disabled, flash the generated hex secure and non-secure images:
 ::
 
     J-Link> loadfile ${BUILD_DIR}/bl2.hex
     J-Link> loadfile ${BUILD_DIR}/tfm_s_signed.bin 0x00008000
     J-Link> loadfile ${BUILD_DIR}/tfm_ns_signed.bin 0x00030000
 
-When BL2 is disabled, flash the generated hex secure and non-secure images:
+If you built TF-M with the BL2 secondary bootloader, use following commands:
 ::
 
-	J-Link> loadfile ${BUILD_DIR}/tfm_s.hex
-	J-Link> loadfile ${BUILD_DIR}/tfm_ns.hex
+    J-Link> loadfile ${BUILD_DIR}/tfm_s.hex
+    J-Link> loadfile ${BUILD_DIR}/tfm_ns.hex
 
 2.2 Flashing with PyOCD
 =======================
@@ -162,21 +170,21 @@ PyOCD is an open source Python package for programming and debugging Arm Cortex-
 See: `PyOCD <https://pypi.org/project/pyocd/>`__
 
 To flash TF-M images with PyOCD you can use the flash scripts provided in ``platform/ext/target/nxp/lpcxpresso55s69/scripts`` folder:
-	- ``flash_PyOCD.py`` - for uploading image without BL2
-	- ``flash_bl2_PyOCD.py`` - for uploading image with BL2
-	
+    - ``flash_PyOCD.py`` - for uploading image without BL2
+    - ``flash_bl2_PyOCD.py`` - for uploading image with BL2
+    
 You should get the following output (flashing without BL2):
 ::
 
-	$ python flash_PyOCD.py
-	0001749:INFO:eraser:Mass erasing device...
-	0001749:INFO:eraser:Erasing chip...
-	0001902:INFO:eraser:Done
-	0001902:INFO:eraser:Successfully erased.
-	[====================] 100%
-	0007694:INFO:loader:Erased 262144 bytes (8 sectors), programmed 203776 bytes (398 pages), skipped 0 bytes (0 pages) at 33.91 kB/s
-	[====================] 100%
-	0005187:INFO:loader:Erased 131072 bytes (4 sectors), programmed 121856 bytes (238 pages), skipped 0 bytes (0 pages) at 34.13 kB/s
+    $ python flash_PyOCD.py
+    0001749:INFO:eraser:Mass erasing device...
+    0001749:INFO:eraser:Erasing chip...
+    0001902:INFO:eraser:Done
+    0001902:INFO:eraser:Successfully erased.
+    [====================] 100%
+    0007694:INFO:loader:Erased 262144 bytes (8 sectors), programmed 203776 bytes (398 pages), skipped 0 bytes (0 pages) at 33.91 kB/s
+    [====================] 100%
+    0005187:INFO:loader:Erased 131072 bytes (4 sectors), programmed 121856 bytes (238 pages), skipped 0 bytes (0 pages) at 34.13 kB/s
 
 
 Or do it manually according the following steps:
@@ -184,17 +192,17 @@ Or do it manually according the following steps:
 If you built TF-M with the BL2 secondary bootloader, use the following commands:
 ::
 
-	$ pyocd erase --mass -t LPC55S69
-	$ pyocd flash ${BUILD_DIR}/tfm_s.hex -t LPC55S69
-	$ pyocd flash ${BUILD_DIR}/tfm_ns.hex -t LPC55S69
+    $ pyocd erase --mass -t LPC55S69
+    $ pyocd flash ${BUILD_DIR}/tfm_s.hex -t LPC55S69
+    $ pyocd flash ${BUILD_DIR}/tfm_ns.hex -t LPC55S69
 
 When BL2 is disabled, flash the generated hex secure and non-secure images:
 ::
 
-	$ pyocd erase --mass -t LPC55S69
-	$ pyocd flash ${BUILD_DIR}/bl2.hex -t LPC55S69
-	$ pyocd flash ${BUILD_DIR}/tfm_s_signed.bin --base-address 0x8000 -t LPC55S69
-	$ pyocd flash ${BUILD_DIR}/tfm_ns_signed.bin --base-address 0x30000 -t LPC55S69
+    $ pyocd erase --mass -t LPC55S69
+    $ pyocd flash ${BUILD_DIR}/bl2.hex -t LPC55S69
+    $ pyocd flash ${BUILD_DIR}/tfm_s_signed.bin --base-address 0x8000 -t LPC55S69
+    $ pyocd flash ${BUILD_DIR}/tfm_ns_signed.bin --base-address 0x30000 -t LPC55S69
 
 .. Note::
 
@@ -251,17 +259,19 @@ another appropriate location, and reset the device to debug.
 ---------------------------------------------------------------------
 You can use JLinkGDBServer or PyOCD server depending on the interface configured in the previous step.
 
-**J-Link GDB server:**
+.. tabs::
 
-.. code:: bash
+    .. group-tab:: J-Link GDB server
 
-    JLinkGDBServer -device lpc55s69 -if swd -speed 2000
-	
-**PyOCD GDB server:**
+        .. code-block:: bash
 
-.. code:: bash
+            $ JLinkGDBServer -device lpc55s69 -if swd -speed 2000
 
-    pyocd gdbserver -f 2000k -t LPC55S69
+    .. group-tab:: PyOCD GDB server
+
+        .. code:: bash
+
+            $ pyocd gdbserver -f 2000k -t LPC55S69
 
 3.2.2 Connecting to the GDB server
 ----------------------------------
@@ -275,19 +285,25 @@ In a separate terminal, start the GDB client in ``tui`` (text UI) mode:
 Then from the client connect to the remote GDB server that was started
 earlier:
 
-With ``JLinkGDBServer`` (default port 2331):
+.. tabs::
 
-.. code:: bash
+    .. group-tab:: J-Link GDB server
 
-    (gdb) target remote:2331
-    Remote debugging using :2331
-	
-With ``pyocd gdbserver`` (default port 3333):
+        With ``JLinkGDBServer`` (default port 2331):
 
-.. code:: bash
+        .. code:: bash
 
-    (gdb) target remote:3333
-    Remote debugging using :3333
+            (gdb) target remote:2331
+            Remote debugging using :2331
+
+    .. group-tab:: PyOCD GDB server
+
+        With ``pyocd gdbserver`` (default port 3333):
+
+        .. code:: bash
+
+            (gdb) target remote:3333
+            Remote debugging using :3333
 
 
 3.2.3 Reset and stop at ``main``

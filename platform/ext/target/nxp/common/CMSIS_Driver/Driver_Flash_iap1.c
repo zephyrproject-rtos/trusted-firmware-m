@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013-2018 ARM Limited. All rights reserved.
+ * Copyright 2019-2020 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,6 +27,7 @@
 #include "platform_base_address.h"
 #include "flash_layout.h"
 #include "fsl_iap.h"
+#include "log/tfm_log.h"
 
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  ((void)arg)
@@ -318,7 +320,7 @@ static status_t FLASH_ReadData(flash_config_t *config, uint32_t start, uint8_t *
     uint32_t readbackData[FLASH_DATAW_IDX_MAX + 1];
     while (lengthInBytes)
     {
-        uint32_t alignedStart = ALIGN_DOWN(start, kFLASH_AlignementUnitSingleWordRead);
+        uint32_t alignedStart = ALIGN_DOWN(start, (uint32_t)kFLASH_AlignementUnitSingleWordRead);
         status = FLASH_ReadSingleWord(config, alignedStart, readbackData);
         if (status != kStatus_FLASH_Success)
         {
@@ -343,7 +345,6 @@ static status_t FLASH_ReadData(flash_config_t *config, uint32_t start, uint8_t *
 static status_t FLASH_ReadSingleWord(flash_config_t *config, uint32_t start, uint32_t *readbackData)
 {
     status_t status = kStatus_Fail;
-    /* uint32_t byteSizes = sizeof(uint32_t) * (FLASH_DATAW_IDX_MAX + 1); */
 
     if (readbackData == NULL)
     {
