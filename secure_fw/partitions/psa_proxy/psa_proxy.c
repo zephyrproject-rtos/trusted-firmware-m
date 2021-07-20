@@ -99,10 +99,6 @@ static void get_sid_and_version_for_signal(psa_signal_t signal, uint32_t *sid,
                                            uint32_t *version)
 {
     switch (signal) {
-    case TFM_CRYPTO_SIGNAL:
-        *sid = TFM_CRYPTO_SID;
-        *version = TFM_CRYPTO_VERSION;
-        break;
     case TFM_ATTEST_GET_TOKEN_SIGNAL:
         *sid = TFM_ATTEST_GET_TOKEN_SID;
         *version = TFM_ATTEST_GET_TOKEN_VERSION;
