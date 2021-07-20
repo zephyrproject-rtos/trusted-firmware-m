@@ -145,6 +145,9 @@ psa_signal_t tfm_spm_psa_wait(uint32_t *args)
         (partition->signals_asserted & signal_mask) == 0) {
         partition->signals_waiting = signal_mask;
         tfm_event_wait(&partition->event);
+    } else if ((partition->signals_asserted & signal_mask) == 0) {
+        /* Activate scheduler to check if any higher priority thread to run */
+        tfm_core_thrd_activate_schedule();
     }
 
     return partition->signals_asserted & signal_mask;
