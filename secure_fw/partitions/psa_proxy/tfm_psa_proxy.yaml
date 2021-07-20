@@ -96,44 +96,13 @@
       "version_policy": "STRICT"
     },
     {
-      "name": "TFM_PS_SET",
+      "name": "TFM_PROTECTED_STORAGE_SERVICE",
       "sid": "0x00000060",
       "non_secure_clients": true,
-      "connection_based": true,
+      "connection_based": false,
+      "stateless_handle": 2,
       "version": 1,
       "version_policy": "STRICT"
-     },
-     {
-      "name": "TFM_PS_GET",
-      "sid": "0x00000061",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-     },
-     {
-      "name": "TFM_PS_GET_INFO",
-      "sid": "0x00000062",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-     },
-     {
-      "name": "TFM_PS_REMOVE",
-      "sid": "0x00000063",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-     },
-     {
-      "name": "TFM_PS_GET_SUPPORT",
-      "sid": "0x00000064",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-     }
+    }
   ]
 }
