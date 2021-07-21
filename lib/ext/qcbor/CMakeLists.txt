@@ -15,13 +15,11 @@ target_sources(tfm_qcbor
         src/qcbor_encode.c
         src/qcbor_decode.c
         src/UsefulBuf.c
-        util/qcbor_util.c
 )
 
 target_include_directories(tfm_qcbor
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/util>
 )
 
 target_link_libraries(tfm_qcbor
