@@ -105,6 +105,7 @@ target_compile_definitions(bl1_main
         MCUBOOT_IMAGE_NUMBER=${BL1_IMAGE_NUMBER}
         BL1
         BL2
+        $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
 )
 
 # Configurations based on bl2/CMakeLists.txt

@@ -73,6 +73,11 @@ target_link_libraries(platform_s
         tfm_spm
 )
 
+target_compile_definitions(platform_s
+    PRIVATE
+        $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
+)
+
 #========================= Platform BL2 =======================================#
 
 set(BL2_SOURCE ${CMAKE_SOURCE_DIR}/bl2)
@@ -88,6 +93,11 @@ target_sources(platform_bl2
         Native_Driver/spi_n25q256a_flash_lib.c
         fip_parser/fip_parser.c
         bl2_boot_hal.c
+)
+
+target_compile_definitions(platform_bl2
+    PRIVATE
+        $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
 )
 
 target_sources(bl2

@@ -72,6 +72,7 @@ set(PLATFORM_DEFAULT_OTP                ON          CACHE BOOL      "Use trusted
 set(PLATFORM_DEFAULT_PROVISIONING       ON          CACHE BOOL      "Use default provisioning implementation")
 
 set(TFM_DUMMY_PROVISIONING              ON          CACHE BOOL      "Provision with dummy values. NOT to be used in production")
+set(PLATFORM_IS_FVP                     FALSE       CACHE BOOL      "Whether to enable FVP or FPGA build of the platform.")
 
 ############################ Partitions ########################################
 
