@@ -89,3 +89,4 @@ tfm_invalid_config(TFM_ENABLE_SLIH_TEST AND TFM_ENABLE_FLIH_TEST)
 ########################### TF-M crypto ########################################
 
 tfm_invalid_config(PLATFORM_DUMMY_NV_SEED AND CRYPTO_HW_ACCELERATOR)
+tfm_invalid_config(NOT PLATFORM_DUMMY_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
