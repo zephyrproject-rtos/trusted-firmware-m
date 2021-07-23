@@ -1,18 +1,17 @@
-From b553a6f375fb2f55d776cca4663f8cd491e7445e Mon Sep 17 00:00:00 2001
+From 8236d35d7ed09e5c67a6269074fcc35391a8c0bf Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
-Date: Tue, 20 Jul 2021 11:48:40 +0800
-Subject: [PATCH] Align with mbedtls 3.0.0
+Date: Fri, 23 Jul 2021 18:10:55 +0800
+Subject: [PATCH] Align with mbedtls-3.0.0
 
-PSA_ALG_MD4 is removed from mbedtls 3.0.0. Use PSA_ALG_MD5 instead.
-PSA_KEY_USAGE_VERIFY is replaced by PSA_KEY_USAGE_VERIFY_HASH.
+PSA_ALG_MD4 is removed from mbedtls-3.0.0. Use PSA_ALG_MD5 instead.
 
 Signed-off-by: Summer Qin <summer.qin@arm.com>
 ---
- .../common/nspe/initial_attestation/pal_attestation_crypto.c  | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ .../common/nspe/initial_attestation/pal_attestation_crypto.c    | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c b/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
-index 7b233a2..33e77fc 100644
+index 4a25a20..33e77fc 100644
 --- a/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
 +++ b/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
 @@ -36,7 +36,7 @@ static psa_algorithm_t cose_hash_alg_id_to_psa(int32_t cose_hash_alg_id)
@@ -24,15 +23,6 @@ index 7b233a2..33e77fc 100644
          break;
      }
  
-@@ -215,7 +215,7 @@ static int32_t pal_attest_get_public_key(uint8_t          *public_key_buff,
- static uint32_t pal_import_attest_key(psa_algorithm_t key_alg)
- {
-     psa_status_t     status             = PAL_ATTEST_ERROR;
--    psa_key_usage_t  usage              = PSA_KEY_USAGE_VERIFY;
-+    psa_key_usage_t  usage              = PSA_KEY_USAGE_VERIFY_HASH;
-     psa_ecc_family_t ecc_family;
-     psa_key_type_t   attest_key_type;
-     size_t           public_key_size;
 -- 
 2.17.1
 
