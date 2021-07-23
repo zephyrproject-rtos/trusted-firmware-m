@@ -34,23 +34,6 @@
 
 static uint8_t ps_crypto_buf[PS_CRYPTO_BUF_LEN];
 
-static psa_status_t fill_key_label(struct ps_object_t *obj, size_t *length)
-{
-    psa_storage_uid_t uid = obj->header.crypto.ref.uid;
-    int32_t client_id = obj->header.crypto.ref.client_id;
-
-    if (PS_CRYPTO_BUF_LEN < (sizeof(client_id) + sizeof(uid))) {
-        return PSA_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    tfm_memcpy(ps_crypto_buf, &client_id, sizeof(client_id));
-    tfm_memcpy(ps_crypto_buf + sizeof(client_id), &uid, sizeof(uid));
-
-    *length = sizeof(client_id) + sizeof(uid);
-
-    return PSA_SUCCESS;
-}
-
 /**
  * \brief Performs authenticated decryption on object data, with the header as
  *        the associated data.
@@ -70,14 +53,10 @@ static psa_status_t ps_object_auth_decrypt(uint32_t fid,
 {
     psa_status_t err;
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
-    size_t out_len, label_length;
+    size_t out_len;
 
-    err = fill_key_label(obj, &label_length);
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
-    err = ps_crypto_setkey(ps_crypto_buf, label_length);
+    err = ps_crypto_setkey(obj->header.crypto.ref.key_label,
+                           sizeof(obj->header.crypto.ref.key_label));
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -122,14 +101,10 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
 {
     psa_status_t err;
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
-    size_t out_len, label_length;
+    size_t out_len;
 
-    err = fill_key_label(obj, &label_length);
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
-    err = ps_crypto_setkey(ps_crypto_buf, label_length);
+    err = ps_crypto_setkey(obj->header.crypto.ref.key_label,
+                           sizeof(obj->header.crypto.ref.key_label));
     if (err != PSA_SUCCESS) {
         return err;
     }
