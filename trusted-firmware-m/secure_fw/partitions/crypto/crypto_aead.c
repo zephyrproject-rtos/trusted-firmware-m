@@ -53,11 +53,6 @@ psa_status_t tfm_crypto_aead_encrypt(psa_invec in_vec[],
     /* Initialise ciphertext_length to zero. */
     out_vec[0].len = 0;
 
-    status = tfm_crypto_check_handle_owner(key_id);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
     status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
     if (status != PSA_SUCCESS) {
         return status;
@@ -102,11 +97,6 @@ psa_status_t tfm_crypto_aead_decrypt(psa_invec in_vec[],
 
     /* Initialise plaintext_length to zero. */
     out_vec[0].len = 0;
-
-    status = tfm_crypto_check_handle_owner(key_id);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
 
     status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
     if (status != PSA_SUCCESS) {
