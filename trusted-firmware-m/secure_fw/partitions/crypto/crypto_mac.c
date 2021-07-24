@@ -44,11 +44,6 @@ psa_status_t tfm_crypto_mac_sign_setup(psa_invec in_vec[],
     psa_algorithm_t alg = iov->alg;
     mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(key_id);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
     /* Init the handle in the operation with the one passed from the iov */
     *handle_out = iov->op_handle;
 
@@ -104,11 +99,6 @@ psa_status_t tfm_crypto_mac_verify_setup(psa_invec in_vec[],
     psa_key_id_t key_id = iov->key_id;
     psa_algorithm_t alg = iov->alg;
     mbedtls_svc_key_id_t encoded_key;
-
-    status = tfm_crypto_check_handle_owner(key_id);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
 
     /* Init the handle in the operation with the one passed from the iov */
     *handle_out = iov->op_handle;
@@ -340,11 +330,6 @@ psa_status_t tfm_crypto_mac_compute(psa_invec in_vec[],
     size_t mac_size = out_vec[0].len;
     mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(key_id);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
     status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
     if (status != PSA_SUCCESS) {
         return status;
@@ -378,11 +363,6 @@ psa_status_t tfm_crypto_mac_verify(psa_invec in_vec[],
     const uint8_t *mac = in_vec[2].base;
     size_t mac_length = in_vec[2].len;
     mbedtls_svc_key_id_t encoded_key;
-
-    status = tfm_crypto_check_handle_owner(key_id);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
 
     status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
     if (status != PSA_SUCCESS) {
