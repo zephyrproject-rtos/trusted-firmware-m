@@ -347,11 +347,6 @@ psa_status_t tfm_crypto_key_derivation_input_key(psa_invec in_vec[],
     psa_key_derivation_operation_t *operation = NULL;
     mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(key_id);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_KEY_DERIVATION_OPERATION,
                                          handle,
@@ -394,18 +389,12 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
     psa_key_id_t *key_handle = out_vec[0].base;
     psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
     int32_t partition_id;
-    uint32_t index;
     mbedtls_svc_key_id_t encoded_key;
 
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_KEY_DERIVATION_OPERATION,
                                          handle,
                                          (void **)&operation);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    status = tfm_crypto_check_key_storage(&index);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -429,15 +418,8 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
         status = psa_key_derivation_output_key(&key_attributes, operation,
                                                &encoded_key);
     }
-#ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
-    *key_handle = encoded_key.MBEDTLS_PRIVATE(key_id);
-#else
-    *key_handle = (psa_key_id_t)encoded_key;
-#endif
 
-    if (status == PSA_SUCCESS) {
-        status = tfm_crypto_set_key_storage(index, *key_handle);
-    }
+    *key_handle = encoded_key.MBEDTLS_PRIVATE(key_id);
 
     return status;
 #endif /* TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
@@ -521,11 +503,6 @@ psa_status_t tfm_crypto_key_derivation_key_agreement(psa_invec in_vec[],
     psa_key_derivation_step_t step = iov->step;
     mbedtls_svc_key_id_t encoded_key;
 
-    status = tfm_crypto_check_handle_owner(private_key);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_KEY_DERIVATION_OPERATION,
                                          handle,
@@ -568,12 +545,7 @@ psa_status_t tfm_crypto_raw_key_agreement(psa_invec in_vec[],
     const uint8_t *peer_key = in_vec[1].base;
     size_t peer_key_length = in_vec[1].len;
     mbedtls_svc_key_id_t encoded_key;
-
-    psa_status_t status = tfm_crypto_check_handle_owner(private_key);
-
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
+    psa_status_t status;
 
     status = tfm_crypto_encode_id_and_owner(private_key, &encoded_key);
     if (status != PSA_SUCCESS) {

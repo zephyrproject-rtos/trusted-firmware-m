@@ -846,7 +846,7 @@
  * Note that this option is meant for internal use only and may be removed
  * without notice.
  */
-//#define MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#define MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
 
 /**
  * \def MBEDTLS_MEMORY_DEBUG
