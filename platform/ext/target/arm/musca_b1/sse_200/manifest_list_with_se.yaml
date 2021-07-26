@@ -146,20 +146,6 @@
       }
     },
     {
-      "name": "TFM FFM11 Partition Service",
-      "short_name": "TFM_SP_FFM11",
-      "manifest": "secure_fw/partitions/tfm_ffm11_partition/tfm_ffm11_partition.yaml",
-      "conditional": "TFM_PARTITION_FFM11",
-      "version_major": 0,
-      "version_minor": 1,
-      "pid": 272,
-      "linker_pattern": {
-        "library_list": [
-          "*tfm_*partition_ffm11.*"
-        ]
-      }
-    },
-    {
       "name": "TFM Initial Attestation Test Service",
       "short_name": "TFM_ATTEST_TEST_SERVICE",
       "manifest": "${TFM_TEST_PATH}/test_services/tfm_attest_test_service/tfm_attest_test_service.yaml",
@@ -167,7 +153,7 @@
       "conditional": "ATTEST_TEST_GET_PUBLIC_KEY",
       "version_major": 0,
       "version_minor": 1,
-      "pid": 273,
+      "pid": 272,
       "linker_pattern": {
         "library_list": [
            "*tfm_*partition_attest_test_service.*"
