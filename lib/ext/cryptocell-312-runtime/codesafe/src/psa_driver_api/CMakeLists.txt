@@ -15,6 +15,7 @@ target_sources(${CC312_LIB_TARGET}
     PRIVATE
         src/cc3xx_psa_hash.c
         src/cc3xx_psa_cipher.c
+        src/cc3xx_psa_mac.c
 
         src/cc3xx_internal_aes.c
         src/cc3xx_internal_chacha20.c

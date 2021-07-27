@@ -8,8 +8,9 @@
 #ifndef CC3XX_CRYPTO_PRIMITIVES_H
 #define CC3XX_CRYPTO_PRIMITIVES_H
 
-#include "psa/crypto_types.h"
 #include "psa/crypto_driver_common.h"
+#include "psa/crypto_sizes.h"
+#include "psa/crypto_types.h"
 
 #include "hash_driver.h"
 
@@ -35,5 +36,15 @@ typedef struct {
 
     ChachaContext_t chacha_ctx;
 } cc3xx_cipher_operation_t;
+
+typedef struct {
+    psa_algorithm_t alg;
+    union {
+        cc3xx_cipher_operation_t cmac;
+        cc3xx_hash_operation_t hmac;
+    };
+    /* Only for HMAC */
+    uint8_t opad[PSA_HMAC_MAX_HASH_BLOCK_SIZE];
+} cc3xx_mac_operation_t;
 
 #endif /* CC3XX_CRYPTO_PRIMITIVES_H */
