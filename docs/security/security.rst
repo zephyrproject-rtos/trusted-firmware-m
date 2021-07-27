@@ -49,12 +49,16 @@ Security Advisories
 |  |TFMV-2|  | Invoking Secure functions from handler mode may cause TF-M IPC  |
 |            | model to behave unexpectedly.                                   |
 +------------+-----------------------------------------------------------------+
+|  |TFMV-3|  | ``abort()`` function may not take effect in TF-M Crypto         |
+|            | multi-part MAC/hashing/cipher operations.                       |
++------------+-----------------------------------------------------------------+
 
 .. _issue tracker: https://developer.trustedfirmware.org/project/view/2/
 .. _mailing list: https://lists.trustedfirmware.org/mailman/listinfo/tf-m
 
 .. |TFMV-1| replace:: :ref:`docs/security/security_advisories/stack_seal_vulnerability:Advisory TFMV-1`
 .. |TFMV-2| replace:: :ref:`docs/security/security_advisories/svc_caller_sp_fetching_vulnerability:Advisory TFMV-2`
+.. |TFMV-3| replace:: :ref:`docs/security/security_advisories/crypto_multi_part_ops_abort_fail:Advisory TFMV-3`
 
 .. _TrustedFirmware.org security incident process: https://developer.trustedfirmware.org/w/collaboration/security_center/
 
