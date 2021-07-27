@@ -716,11 +716,11 @@ uint32_t tfm_spm_init(void)
         p_asset_load = (struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
         for (i = 0; i < p_ldinf->nassets; i++) {
             /* Skip the memory-based asset */
-            if (!(p_asset_load[i].attr & ASSET_DEV_REF_BIT)) {
+            if (!(p_asset_load[i].attr & ASSET_ATTR_NAMED_MMIO)) {
                 continue;
             }
 
-            platform_data_p = REFERENCE_TO_PTR(p_asset_load[i].dev.addr_ref,
+            platform_data_p = REFERENCE_TO_PTR(p_asset_load[i].dev.dev_ref,
                                                struct platform_data_t *);
 
             /*
@@ -814,19 +814,19 @@ static void set_up_boundary(const struct partition_load_info_t *p_ldinf)
         if (p_ldinf->nassets == 0) {
             tfm_core_panic();
         }
-        if (p_asset->attr & ASSET_DEV_REF_BIT) {
+        if (p_asset->attr & ASSET_ATTR_NAMED_MMIO) {
             tfm_core_panic();
         }
         /* FIXME: only MPU-based implementations are supported currently */
 #ifdef TFM_FIH_PROFILE_ON
         FIH_CALL(tfm_hal_mpu_update_partition_boundary, fih_rc,
-                    p_asset->mem.addr_x, p_asset->mem.addr_y);
+                    p_asset->mem.start, p_asset->mem.limit);
         if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
             tfm_core_panic();
         }
 #else /* TFM_FIH_PROFILE_ON */
-        if (tfm_hal_mpu_update_partition_boundary(p_asset->mem.addr_x,
-                                                  p_asset->mem.addr_y)
+        if (tfm_hal_mpu_update_partition_boundary(p_asset->mem.start,
+                                                  p_asset->mem.limit)
                                                            != TFM_HAL_SUCCESS) {
             tfm_core_panic();
         }

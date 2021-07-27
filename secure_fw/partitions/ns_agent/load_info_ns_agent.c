@@ -71,11 +71,11 @@ const struct partition_tfm_sp_ns_agent_load_info_t
 #if TFM_LVL == 3
     .assets                         = {
         {
-            .mem.addr_x             = PART_REGION_ADDR(ARM_LIB_STACK,
+            .mem.start              = PART_REGION_ADDR(ARM_LIB_STACK,
                                                                     $$ZI$$Base),
-            .mem.addr_y             = PART_REGION_ADDR(ARM_LIB_STACK,
+            .mem.limit              = PART_REGION_ADDR(ARM_LIB_STACK,
                                                                    $$ZI$$Limit),
-            .attr                   = ASSET_MEM_RD_BIT | ASSET_MEM_WR_BIT,
+            .attr                   = ASSET_ATTR_READ_WRITE,
         },
     },
 #endif
