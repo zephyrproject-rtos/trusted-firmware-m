@@ -1,7 +1,7 @@
-From 4be33133eb9ae94e7a71c1385a771484322347d6 Mon Sep 17 00:00:00 2001
+From b19f2e11134d687174b7df89cedc9d73218e01b9 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
-Date: Fri, 9 Jul 2021 17:52:02 +0800
-Subject: [PATCH 3/3] Workaround for removal of initial attest get public key
+Date: Wed, 28 Jul 2021 11:17:30 +0800
+Subject: [PATCH 3/4] Workaround for removal of initial attest get public key
  API
 
 TF-M self-defined API of getting initial attestation public key has been
@@ -18,10 +18,10 @@ Signed-off-by: Summer Qin <summer.qin@arm.com>
  2 files changed, 22 insertions(+), 5 deletions(-)
 
 diff --git a/api-tests/CMakeLists.txt b/api-tests/CMakeLists.txt
-index e0f1dbe..0ebf78a 100644
+index 31b7ef7..a8d9c58 100644
 --- a/api-tests/CMakeLists.txt
 +++ b/api-tests/CMakeLists.txt
-@@ -610,6 +610,10 @@ endif()
+@@ -613,6 +613,10 @@ endif()
  
  # Build PAL NSPE LIB
  include(${PSA_ROOT_DIR}/platform/targets/${TARGET}/target.cmake)
@@ -33,7 +33,7 @@ index e0f1dbe..0ebf78a 100644
  #add_definitions(-DVAL_NSPE_BUILD)
  include(${PSA_ROOT_DIR}/val/val_nspe.cmake)
 diff --git a/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c b/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
-index 7b233a2..004c25b 100644
+index 4a25a20..04d9f42 100644
 --- a/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
 +++ b/api-tests/platform/targets/common/nspe/initial_attestation/pal_attestation_crypto.c
 @@ -17,9 +17,14 @@
