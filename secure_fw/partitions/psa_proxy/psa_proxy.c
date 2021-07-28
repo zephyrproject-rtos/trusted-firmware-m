@@ -60,6 +60,11 @@ static psa_status_t forward_message_to_secure_enclave(psa_signal_t signal,
         params.psa_call_params.handle = TFM_PROTECTED_STORAGE_SERVICE_HANDLE;
         params.psa_call_params.type = msg->type;
         break;
+    case TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_SIGNAL:
+        params.psa_call_params.handle =
+                                TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_HANDLE;
+        params.psa_call_params.type = msg->type;
+        break;
     default:
         params.psa_call_params.handle = *((psa_handle_t *)msg->rhandle);
         params.psa_call_params.type = PSA_IPC_CALL;
@@ -110,22 +115,6 @@ static void get_sid_and_version_for_signal(psa_signal_t signal, uint32_t *sid,
     case TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL:
         *sid = TFM_ATTEST_GET_TOKEN_SIZE_SID;
         *version = TFM_ATTEST_GET_TOKEN_SIZE_VERSION;
-        break;
-    case TFM_ITS_SET_SIGNAL:
-        *sid = TFM_ITS_SET_SID;
-        *version = TFM_ITS_SET_VERSION;
-        break;
-    case TFM_ITS_GET_SIGNAL:
-        *sid = TFM_ITS_GET_SID;
-        *version = TFM_ITS_GET_VERSION;
-        break;
-    case TFM_ITS_GET_INFO_SIGNAL:
-        *sid = TFM_ITS_GET_INFO_SID;
-        *version = TFM_ITS_GET_INFO_VERSION;
-        break;
-    case TFM_ITS_REMOVE_SIGNAL:
-        *sid = TFM_ITS_REMOVE_SID;
-        *version = TFM_ITS_REMOVE_VERSION;
         break;
     case TFM_SP_PLATFORM_SYSTEM_RESET_SIGNAL:
         *sid = TFM_SP_PLATFORM_SYSTEM_RESET_SID;
