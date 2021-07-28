@@ -198,6 +198,9 @@ listed are not applied to stateless mechanism yet.
     **Partition name**              **Stateless Handle**
    =============================== =======================
    TFM_SP_CRYPTO                   1
+   TFM_SP_PS                       2
+   TFM_SP_ITS                      3
+   TFM_SP_INITIAL_ATTESTATION      4
    =============================== =======================
 
 mmio_regions
