@@ -65,6 +65,10 @@ static psa_status_t forward_message_to_secure_enclave(psa_signal_t signal,
                                 TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_HANDLE;
         params.psa_call_params.type = msg->type;
         break;
+    case TFM_ATTESTATION_SERVICE_SIGNAL:
+        params.psa_call_params.handle = TFM_ATTESTATION_SERVICE_HANDLE;
+        params.psa_call_params.type = msg->type;
+        break;
     default:
         params.psa_call_params.handle = *((psa_handle_t *)msg->rhandle);
         params.psa_call_params.type = PSA_IPC_CALL;
@@ -108,14 +112,6 @@ static void get_sid_and_version_for_signal(psa_signal_t signal, uint32_t *sid,
                                            uint32_t *version)
 {
     switch (signal) {
-    case TFM_ATTEST_GET_TOKEN_SIGNAL:
-        *sid = TFM_ATTEST_GET_TOKEN_SID;
-        *version = TFM_ATTEST_GET_TOKEN_VERSION;
-        break;
-    case TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL:
-        *sid = TFM_ATTEST_GET_TOKEN_SIZE_SID;
-        *version = TFM_ATTEST_GET_TOKEN_SIZE_VERSION;
-        break;
     case TFM_SP_PLATFORM_SYSTEM_RESET_SIGNAL:
         *sid = TFM_SP_PLATFORM_SYSTEM_RESET_SID;
         *version = TFM_SP_PLATFORM_SYSTEM_RESET_VERSION;

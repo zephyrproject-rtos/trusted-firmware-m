@@ -24,18 +24,11 @@
       "version_policy": "STRICT"
     },
     {
-      "name": "TFM_ATTEST_GET_TOKEN",
+      "name": "TFM_ATTESTATION_SERVICE",
       "sid": "0x00000020",
       "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_ATTEST_GET_TOKEN_SIZE",
-      "sid": "0x00000021",
-      "non_secure_clients": true,
-      "connection_based": true,
+      "connection_based": false,
+      "stateless_handle": 4,
       "version": 1,
       "version_policy": "STRICT"
     },
