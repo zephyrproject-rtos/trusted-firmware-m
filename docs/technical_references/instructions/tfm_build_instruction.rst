@@ -160,7 +160,9 @@ used which does not support all features.
 +-----------------------------+-------------------------------------+---------------+
 | TFM_CRYPTO_TEST_ALG_SHA_512 | Test SHA-512 cryptography algorithm | ON            |
 +-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_HKDF        | Test SHA-512 cryptography algorithm | ON            |
+| TFM_CRYPTO_TEST_HKDF        | Test HKDF key derivation algorithm  | ON            |
++-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ECDH        | Test ECDH key agreement algorithm   | ON            |
 +-----------------------------+-------------------------------------+---------------+
 
 TF-M Profiles
