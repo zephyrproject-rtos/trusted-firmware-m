@@ -53,10 +53,6 @@ struct memory_region_limits {
     uint32_t non_secure_partition_limit;
     uint32_t veneer_base;
     uint32_t veneer_limit;
-#ifdef BL2
-    uint32_t secondary_partition_base;
-    uint32_t secondary_partition_limit;
-#endif /* BL2 */
 };
 
 /**
