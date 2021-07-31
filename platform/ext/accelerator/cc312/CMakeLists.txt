@@ -50,6 +50,10 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
+    if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
+        add_subdirectory(psa-adac)
+    endif()
+
     target_link_libraries(bl2_crypto_hw
         PUBLIC
             ${CC312_LIB_PREFIX}cc312
