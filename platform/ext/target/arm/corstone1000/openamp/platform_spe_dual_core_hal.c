@@ -9,7 +9,7 @@
 #include "device_definition.h"
 #include "mhu_v2_x.h"
 #include "tfm_plat_defs.h"
-#include "log/tfm_log.h"
+#include "tfm_spm_log.h"
 #include "cmsis.h"
 
 #define MHU1_SEH_NOTIFY_CH 0
@@ -21,10 +21,10 @@ static enum tfm_plat_err_t initialize_secure_enclave_to_host_mhu(void)
 
    status = mhu_v2_x_driver_init(&MHU1_SE_TO_HOST_DEV, MHU_REV_READ_FROM_HW);
    if (status != MHU_V_2_X_ERR_NONE) {
-       LOG_MSG("Secure-enclave to Host MHU driver initialization failed : %d.\r\n", status);
+       SPMLOG_ERRMSGVAL("Secure-enclave to Host MHU driver initialization failed: ", status);
        return TFM_PLAT_ERR_SYSTEM_ERR;
    }
-   LOG_MSG("Secure-enclave to Host MHU Driver initialized successfully.\r\n");
+   SPMLOG_INFMSG("Secure-enclave to Host MHU Driver initialized successfully.\r\n");
 
    return TFM_PLAT_ERR_SUCCESS;
 }
@@ -35,10 +35,10 @@ static enum tfm_plat_err_t initialize_host_to_secure_enclave_mhu(void)
 
    status = mhu_v2_x_driver_init(&MHU1_HOST_TO_SE_DEV, MHU_REV_READ_FROM_HW);
    if (status != MHU_V_2_X_ERR_NONE) {
-       LOG_MSG("Host to secure-enclave MHU driver initialization failed : %d.\r\n", status);
+       SPMLOG_ERRMSGVAL("Host to secure-enclave MHU driver initialization failed: ", status);
        return TFM_PLAT_ERR_SYSTEM_ERR;
    }
-   LOG_MSG("Host to secure-enclave MHU Driver initialized successfully.\r\n");
+   SPMLOG_INFMSG("Host to secure-enclave MHU Driver initialized successfully.\r\n");
 
    NVIC_EnableIRQ(HSE1_RECEIVER_COMBINED_IRQn);
 
@@ -79,14 +79,14 @@ enum tfm_plat_err_t tfm_hal_notify_peer(void)
 
     status = mhu_v2_x_set_access_request(dev);
     if (status != MHU_V_2_X_ERR_NONE) {
-        LOG_MSG("mhu_v2_x_set_access_request failed : %d\r\n", status);
+        SPMLOG_ERRMSGVAL("mhu_v2_x_set_access_request failed : ", status);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     do {
         status = mhu_v2_x_get_access_ready(dev, &access_ready);
         if (status != MHU_V_2_X_ERR_NONE) {
-            LOG_MSG("mhu_v2_x_get_access_ready failed : %d\r\n", status);
+            SPMLOG_ERRMSGVAL("mhu_v2_x_get_access_ready failed : ", status);
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
     } while(!access_ready);
@@ -94,13 +94,13 @@ enum tfm_plat_err_t tfm_hal_notify_peer(void)
     status = mhu_v2_x_channel_send(dev, MHU1_SEH_NOTIFY_CH, MHU1_SEH_NOTIFY_VAL);
 
     if (status != MHU_V_2_X_ERR_NONE) {
-        LOG_MSG("mhu_v2_x_channel_send : %d\r\n", status);
+        SPMLOG_ERRMSGVAL("mhu_v2_x_channel_send : ", status);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     status = mhu_v2_x_reset_access_request(dev);
     if (status != MHU_V_2_X_ERR_NONE) {
-        LOG_MSG("mhu_v2_x_reset_access_request : %d\r\n", status);
+        SPMLOG_ERRMSGVAL("mhu_v2_x_reset_access_request : ", status);
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     return TFM_PLAT_ERR_SUCCESS;

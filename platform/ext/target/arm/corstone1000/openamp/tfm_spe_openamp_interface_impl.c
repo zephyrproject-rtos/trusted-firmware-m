@@ -12,7 +12,7 @@
 #include <openamp/open_amp.h>
 
 #include "tfm_spe_openamp_interface.h"
-#include "log/tfm_log.h"
+#include "tfm_spm_log.h"
 #include "tfm_spe_shm_openamp.h"
 
 static metal_phys_addr_t shm_physmap[] = { SHM_START_PHY_ADDR };
@@ -170,10 +170,10 @@ int32_t tfm_to_openamp_init(openamp_to_tfm_callback cb,
     struct metal_device *device;
     struct metal_init_params metal_params = METAL_INIT_DEFAULTS;
 
-    LOG_MSG("TF-M OpenAMP[master] starting initialization...\r\n");
+    SPMLOG_INFMSG("TF-M OpenAMP[master] starting initialization...\r\n");
 
     if (cb == NULL || notify == NULL) {
-        LOG_MSG("invalid parameters\r\n");
+        SPMLOG_ERRMSG("invalid parameters\r\n");
         return ERROR;
     }
     tfm_callback = cb;
@@ -183,37 +183,37 @@ int32_t tfm_to_openamp_init(openamp_to_tfm_callback cb,
 
     status = metal_init(&metal_params);
     if (status != 0) {
-        LOG_MSG("metal_init: failed - error code\r\n");
+        SPMLOG_ERRMSG("metal_init: failed - error code\r\n");
         return ERROR;
     }
 
     status = metal_register_generic_device(&shm_device);
     if (status != 0) {
-        LOG_MSG("Couldn't register shared memory device\r\n");
+        SPMLOG_ERRMSG("Couldn't register shared memory device\r\n");
         return ERROR;
     }
 
     status = metal_device_open("generic", SHM_DEVICE_NAME, &device);
     if (status != 0) {
-        LOG_MSG("metal_device_open failed\r\n");
+        SPMLOG_ERRMSG("metal_device_open failed\r\n");
         return ERROR;
     }
 
     io = metal_device_io_region(device, 0);
     if (io == NULL) {
-        LOG_MSG("metal_device_io_region failed to get region\r\n");
+        SPMLOG_ERRMSG("metal_device_io_region failed to get region\r\n");
         return ERROR;
     }
 
     /* setup vdev */
     vq[0] = virtqueue_allocate(VRING_SIZE);
     if (vq[0] == NULL) {
-        LOG_MSG("virtqueue_allocate failed to alloc vq[0]\r\n");
+        SPMLOG_ERRMSG("virtqueue_allocate failed to alloc vq[0]\r\n");
         return ERROR;
     }
     vq[1] = virtqueue_allocate(VRING_SIZE);
     if (vq[1] == NULL) {
-        LOG_MSG("virtqueue_allocate failed to alloc vq[1]\r\n");
+        SPMLOG_ERRMSG("virtqueue_allocate failed to alloc vq[1]\r\n");
         return ERROR;
     }
 
@@ -238,10 +238,10 @@ int32_t tfm_to_openamp_init(openamp_to_tfm_callback cb,
     rpmsg_virtio_init_shm_pool(&shpool, (void *)SHM_START_VIRT_ADDR, SHM_SIZE);
     status = rpmsg_init_vdev(&rvdev, &vdev, ns_bind_cb, io, &shpool);
     if (status != 0) {
-        LOG_MSG("rpmsg_init_vdev failed : %d\r\n", status);
+        SPMLOG_ERRMSGVAL("rpmsg_init_vdev failed : ", status);
         return ERROR;
     }
-    LOG_MSG("rpmsg_init_vdev Done!\r\n");
+    SPMLOG_INFMSG("rpmsg_init_vdev Done!\r\n");
 
     return SUCCESS;
 }

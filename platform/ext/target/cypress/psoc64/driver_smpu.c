@@ -20,7 +20,8 @@
 #include "region_defs.h"
 #include "RTE_Device.h"
 #include "smpu_config.h"
-#include "log/tfm_log.h"
+#include <string.h>
+#include "tfm_spm_log.h"
 #include "tfm_hal_its.h"
 #include "tfm_hal_ps.h"
 #include "tfm_memory_utils.h"
@@ -30,6 +31,7 @@
 
 /* Affect all 8 subregions */
 #define ALL_ENABLED 0
+#define SMPU_NAME_MAX_SIZE 18
 
 struct smpu_resources {
     PROT_SMPU_SMPU_STRUCT_Type *smpu;
@@ -277,21 +279,22 @@ static cy_en_prot_status_t populate_region(const PROT_SMPU_SMPU_STRUCT_Type *smp
     return ret;
 }
 
-static void print_smpu_config(const char *name,
-                              const cy_stc_smpu_cfg_t *slave_config)
+static void print_smpu_config(const cy_stc_smpu_cfg_t *slave_config)
 {
-    LOG_MSG("%s - address = %p, size = 0x%x bytes, %s subregions enabled\r\n",
-           name,
-           slave_config->address,
-           REGIONSIZE_TO_BYTES(slave_config->regionSize),
-           slave_config->subregions == ALL_ENABLED ? "all" : "some");
-    if (slave_config->subregions != ALL_ENABLED) {
-        LOG_MSG("\tsubregion size = 0x%x bytes\r\n",
-                REGIONSIZE_TO_BYTES(slave_config->regionSize)/8);
+    SPMLOG_INFMSGVAL(" Address = ", (uintptr_t)slave_config->address);
+    SPMLOG_INFMSGVAL(" Size (bytes) = ",
+                     REGIONSIZE_TO_BYTES(slave_config->regionSize));
+    if (slave_config->subregions == ALL_ENABLED) {
+        SPMLOG_INFMSG(" All subregions enabled\r\n");
+    } else {
+        SPMLOG_INFMSGVAL("\tsubregion size (bytes) = ",
+                         REGIONSIZE_TO_BYTES(slave_config->regionSize)/8);
         for (int i=0; i<8; i++) {
-            LOG_MSG("\tsubregion %d %s\r\n",
-                    i,
-                    slave_config->subregions & (1<<i) ? "disabled" : "enabled");
+            if (slave_config->subregions & (1<<i)) {
+                SPMLOG_INFMSGVAL("\tDisabled subregion ", i);
+            } else {
+                SPMLOG_INFMSGVAL("\tEnabled subregion ", i);
+            }
         }
     }
 }
@@ -303,9 +306,10 @@ static void dump_smpu(const PROT_SMPU_SMPU_STRUCT_Type *smpu)
     uint32_t reg = smpu->ATT0;
 
     if (CY_PROT_SUCCESS == get_region(smpu, &base, &size)) {
-        LOG_MSG(" base = 0x%x, size = 0x%x\r\n", base, size);
+        SPMLOG_INFMSGVAL(" Wanted address = ", base);
+        SPMLOG_INFMSGVAL(" Wanted size (bytes) = ", size);
     } else {
-        LOG_MSG(" Unsupported dynamic SMPU region\r\n");
+        SPMLOG_ERRMSG(" Unsupported dynamic SMPU region\r\n");
     }
 
     if (_FLD2BOOL(PROT_SMPU_SMPU_STRUCT_ATT0_ENABLED, reg)) {
@@ -314,22 +318,24 @@ static void dump_smpu(const PROT_SMPU_SMPU_STRUCT_Type *smpu)
 
         reg = smpu->ADDR0;
         subregions = _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ADDR0_SUBREGION_DISABLE, reg);
-        LOG_MSG("\tAddress = 0x%x",
+        SPMLOG_INFMSGVAL(" Configured address = ",
                 _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ADDR0_ADDR24, reg) << 8);
-        LOG_MSG(", size = 0x%x bytes", REGIONSIZE_TO_BYTES(size));
-        LOG_MSG(", %s subregions enabled\r\n",
-                subregions == ALL_ENABLED ? "all" : "some");
-        if (subregions != ALL_ENABLED) {
-            LOG_MSG("\tsubregion size = 0x%x bytes\r\n",
-                    REGIONSIZE_TO_BYTES(size)/8);
+        SPMLOG_INFMSGVAL(" Configured size (bytes) = ", REGIONSIZE_TO_BYTES(size));
+        if (subregions == ALL_ENABLED) {
+            SPMLOG_INFMSG(" All subregions enabled\r\n");
+        } else {
+            SPMLOG_INFMSGVAL("\tsubregion size (bytes) = ",
+                REGIONSIZE_TO_BYTES(size)/8);
             for (int i=0; i<8; i++) {
-                LOG_MSG("\tsubregion %d %s\r\n",
-                        i,
-                        subregions & (1<<i) ? "disabled" : "enabled");
+                if (subregions & (1<<i)) {
+                    SPMLOG_INFMSGVAL("\tDisabled subregion ", i);
+                } else {
+                    SPMLOG_INFMSGVAL("\tEnabled subregion ", i);
+                }
             }
         }
     } else {
-        LOG_MSG("SMPU slave is disabled\r\n");
+        SPMLOG_ERRMSG("SMPU slave is disabled\r\n");
     }
 }
 
@@ -337,12 +343,18 @@ static void dump_smpu(const PROT_SMPU_SMPU_STRUCT_Type *smpu)
 
 void SMPU_Print_Config(const SMPU_Resources *smpu_dev)
 {
+    char smpu_str[SMPU_NAME_MAX_SIZE] = {0};
+
+    strcpy(smpu_str, smpu_name(smpu_dev));
+    SPMLOG_INFMSG(smpu_str);
     if (is_runtime(smpu_dev)) {
-        LOG_MSG("%s - configured algorithmically.", smpu_name(smpu_dev));
+        SPMLOG_INFMSG(" - configured algorithmically.\r\n");
 
         dump_smpu(smpu_dev->smpu);
     } else {
-        print_smpu_config(smpu_name(smpu_dev), &smpu_dev->slave_config);
+        SPMLOG_INFMSG(" - configured at compile time.\r\n");
+
+        print_smpu_config(&smpu_dev->slave_config);
     }
 }
 

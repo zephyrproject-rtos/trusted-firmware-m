@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2020 Nordic Semiconductor ASA. All rights reserved.
  * Copyright (c) 2021 Laird Connectivity. All rights reserved.
+ * Copyright (c) 2021, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +28,7 @@
 #include <drivers/include/nrfx_twi_twim.h>
 #include <lcz_board.h>
 #include <tfm_platform_api.h>
-#include <log/tfm_log.h>
+#include "tfm_spm_log.h"
 
 #ifndef RTE_TWIM2
 #error "RTE_TWIM2 must be defined to enable use of the I2C (TWI) GPIO port expander"
@@ -111,7 +112,7 @@ void TIMER1_Handler(void)
     pal_timer_stop_ns();
     int ret = tfm_platform_system_reset();
     if (ret) {
-        LOG_MSG("Reset failed: %d\n", ret);
+        SPMLOG_ERRMSGVAL("Reset failed: ", err);
     }
 }
 #endif

@@ -8,7 +8,7 @@
 #include "tfm_spe_dual_core_psa_client_secure_lib.h"
 #include "tfm_rpc.h"
 #include "tfm_spe_openamp_interface.h"
-#include "log/tfm_log.h"
+#include "tfm_spm_log.h"
 #include "tfm_spe_psa_client_lib_unordered_map.h"
 #include "psa/error.h"
 #include "utilities.h"
@@ -75,7 +75,7 @@ void send_service_reply_to_non_secure(int32_t reply, void *private)
 
     handle = unordered_map_get_entry_handle(s_map_entry);
     if (handle == INVALID_MAP_HANDLE) {
-        LOG_MSG("FATAL_ERROR: Map handle not valid\r\n");
+        SPMLOG_ERRMSG("FATAL_ERROR: Map handle not valid\r\n");
         TFM_CORE_ASSERT(0);
     }
     unordered_map_free(handle);
@@ -137,8 +137,8 @@ static psa_status_t alloc_and_prepare_out_vecs(psa_outvec **out_vec_start_ptr,
     }
     max_shared_mem_buffer_size = tfm_to_openamp_get_buffer_size();
     if (output_buffer_len > max_shared_mem_buffer_size) {
-        LOG_MSG("required buffer size (%d) is more than maximum available (%d)\r\n",
-                    output_buffer_len, max_shared_mem_buffer_size);
+        SPMLOG_ERRMSGVAL("required buffer size : ", output_buffer_len);
+        SPMLOG_ERRMSGVAL(" is more than maximum available : ", max_shared_mem_buffer_size);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -212,7 +212,7 @@ int32_t register_msg_to_spe_and_verify(void **private, const void *data, size_t 
     *private = NULL;
 
     if (len < sizeof(ns_openamp_msg_t)) {
-        LOG_MSG("Invalid parameters.\r\n");
+        SPMLOG_ERRMSG("Invalid parameters.\r\n");
         send_error_to_non_secure(OPENAMP_INVAL_PARAMS, 0);
         return OPENAMP_INVAL_PARAMS;
     }
@@ -221,7 +221,7 @@ int32_t register_msg_to_spe_and_verify(void **private, const void *data, size_t 
     ns_msg = (ns_openamp_msg_t*)data;
     ret = unordered_map_insert(ns_msg, data, &map_handle);
     if (ret) {
-        LOG_MSG("Map insert failed\r\n");
+        SPMLOG_ERRMSG("Map insert failed\r\n");
         send_error_to_non_secure(OPENAMP_MAP_FULL, ns_msg->request_id);
         return OPENAMP_MAP_FULL;
     }
@@ -230,7 +230,7 @@ int32_t register_msg_to_spe_and_verify(void **private, const void *data, size_t 
 
     /* verify msg after copy to the secure memory */
     if (check_msg(&s_map_entry->msg)) {
-        LOG_MSG("Message is invalid\r\n");
+        SPMLOG_ERRMSG("Message is invalid\r\n");
         send_error_to_non_secure(OPENAMP_INVAL_PARAMS, ns_msg->request_id);
         unordered_map_free(map_handle);
         return OPENAMP_INVAL_PARAMS;
@@ -282,7 +282,7 @@ void deliver_msg_to_tfm_spe(void *private)
             tfm_rpc_psa_close(&spm_params);
             break;
         default:
-            LOG_MSG("msg type did not recognized\r\n");
+            SPMLOG_ERRMSG("msg type did not recognized\r\n");
             send_error_to_non_secure(OPENAMP_INVAL_PARAMS, s_map_entry->msg.request_id);
             unordered_map_free(unordered_map_get_entry_handle(s_map_entry));
             break;

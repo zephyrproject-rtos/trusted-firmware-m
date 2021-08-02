@@ -14,12 +14,13 @@
 #include "target_cfg.h"
 #include "tfm_hal_isolation.h"
 #include "region_defs.h" //NXP
-#include "log/tfm_log.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_core_utils.h"
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
+#include "tfm_spm_log.h"
+
 /* It can be retrieved from the MPU_TYPE register. */
 #define MPU_REGION_NUM                  8
 
@@ -114,7 +115,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
     mpu_armv8m_clean(&dev_mpu_s);
-#if TFM_LVL == 3    
+#if TFM_LVL == 3
     int32_t i;
     /*
      * Update MPU region numbers. The numbers start from 0 and are continuous.
@@ -152,8 +153,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     n_configured_regions++;
 
 #if TARGET_DEBUG_LOG //NXP
-    LOG_MSG("=== [MPU Unpriviladged] =======\r\n");
-    LOG_MSG("Veneers = [0x%x, 0x%x] \r\n", region_cfg.region_base, region_cfg.region_limit);
+    SPMLOG_DBGMSGVAL("Veneers starts from : ", region_cfg.region_base);
+    SPMLOG_DBGMSGVAL("Veneers ends at : ", region_cfg.region_base +
+                                           region_cfg.region_limit);
 #endif
 
     /* TFM Core unprivileged code region */
@@ -172,7 +174,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     n_configured_regions++;
 
 #if TARGET_DEBUG_LOG //NXP
-    LOG_MSG("Code = [0x%x, 0x%x] \r\n", region_cfg.region_base, region_cfg.region_limit);    
+    SPMLOG_DBGMSGVAL("Code section starts from : ", region_cfg.region_base);
+    SPMLOG_DBGMSGVAL("Code section ends at : ", region_cfg.region_base +
+                                                region_cfg.region_limit);
 #endif
 
     /* NSPM PSP */
@@ -191,7 +195,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     n_configured_regions++;
 
 #if TARGET_DEBUG_LOG //NXP
-    LOG_MSG("NS STACK = [0x%x, 0x%x] \r\n", region_cfg.region_base, region_cfg.region_limit); 
+    SPMLOG_DBGMSGVAL("NS STACK starts from : ", region_cfg.region_base);
+    SPMLOG_DBGMSGVAL("NS STACK ends at : ", region_cfg.region_base +
+                                            region_cfg.region_limit);
 #endif
 
     /* RO region */
@@ -210,7 +216,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     n_configured_regions++;
 
 #if TARGET_DEBUG_LOG //NXP
-    LOG_MSG("RO APP CODE = [0x%x, 0x%x] \r\n", region_cfg.region_base, region_cfg.region_limit); 
+    SPMLOG_DBGMSGVAL("RO APP CODE starts from : ", region_cfg.region_base);
+    SPMLOG_DBGMSGVAL("RO APP CODE ends at : ", region_cfg.region_base +
+                                               region_cfg.region_limit);
 #endif
 
     /* RW, ZI and stack as one region */
@@ -229,8 +237,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     n_configured_regions++;
 
 #if TARGET_DEBUG_LOG //NXP
-    LOG_MSG("RW,ZI APP = [0x%x, 0x%x] \r\n", region_cfg.region_base, region_cfg.region_limit); 
-    LOG_MSG("===============================\r\n");
+    SPMLOG_DBGMSGVAL("RW, ZI APP starts from : ", region_cfg.region_base);
+    SPMLOG_DBGMSGVAL("RW, ZI APP ends at : ", region_cfg.region_base +
+                                              region_cfg.region_limit);
 #endif
 
     /* NS Data, mark as nonpriviladged */ //NXP
@@ -247,8 +256,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     n_configured_regions++;
 
 #if TARGET_DEBUG_LOG
-    LOG_MSG("NS Data = [0x%x, 0x%x] \r\n", NS_DATA_START, NS_DATA_LIMIT); 
-    LOG_MSG("===============================\r\n");
+    SPMLOG_DBGMSGVAL("NS Data starts from : ", region_cfg.region_base);
+    SPMLOG_DBGMSGVAL("NS Data ends at : ", region_cfg.region_base +
+                                           region_cfg.region_limit);
 #endif
 
 #ifdef TFM_SP_META_PTR_ENABLE
