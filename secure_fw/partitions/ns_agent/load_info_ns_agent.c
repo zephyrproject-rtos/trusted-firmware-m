@@ -41,6 +41,10 @@ struct partition_tfm_sp_ns_agent_load_info_t {
 } __attribute__((aligned(4)));
 
 /* Partition load, deps, service load data. Put to a dedicated section. */
+#if defined(__ICCARM__)
+#pragma location = ".part_load"
+__root
+#endif
 const struct partition_tfm_sp_ns_agent_load_info_t
     tfm_sp_ns_agent_load __attribute__((used, section(".part_load"))) = {
     .load_info = {
@@ -76,7 +80,10 @@ const struct partition_tfm_sp_ns_agent_load_info_t
     },
 #endif
 };
-
+#if defined(__ICCARM__)
+#pragma location = ".bss.part_runtime"
+__root
+#endif
 /* Placeholder for partition runtime space. Do not reference it. */
 static struct partition_t tfm_sp_ns_agent_partition_runtime_item
     __attribute__((used, section(".bss.part_runtime")));

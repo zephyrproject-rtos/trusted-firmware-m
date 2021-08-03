@@ -81,6 +81,10 @@ struct partition_{{manifest.name|lower}}_load_info_t {
 } __attribute__((aligned(4)));
 
 /* Partition load, deps, service load data. Put to a dedicated section. */
+#if defined(__ICCARM__)
+#pragma location = ".part_load"
+__root
+#endif /* __ICCARM__ */
 const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower}}_load
     __attribute__((used, section(".part_load"))) = {
     .load_info = {
@@ -223,9 +227,17 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
 };
 
 /* Placeholder for partition and service runtime space. Do not reference it. */
+#if defined(__ICCARM__)
+#pragma location=".bss.part_runtime"
+__root
+#endif /* __ICCARM__ */
 static struct partition_t {{manifest.name|lower}}_partition_runtime_item
     __attribute__((used, section(".bss.part_runtime")));
 {% if counter.service_counter > 0 %}
+#if defined(__ICCARM__)
+#pragma location = ".bss.serv_runtime"
+__root
+#endif /* __ICCARM__ */
 static struct service_t {{manifest.name|lower}}_service_runtime_item[{{(manifest.name|upper + "_NSERVS")}}]
     __attribute__((used, section(".bss.serv_runtime")));
 {% endif %}
