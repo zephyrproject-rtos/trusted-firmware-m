@@ -13,8 +13,6 @@
 #include "tfm_plat_device_id.h"
 #include "tfm_plat_otp.h"
 
-#include "log/tfm_log.h"
-
 #ifdef PLAT_HAS_BOOT_SEED /* Platform has boot seed register */
 #include "fsl_common.h"
 #endif

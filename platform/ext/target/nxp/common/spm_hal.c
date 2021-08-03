@@ -13,7 +13,6 @@
 #include "utilities.h"
 
 #include "Driver_Common.h"
-#include "log/tfm_log.h"
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;

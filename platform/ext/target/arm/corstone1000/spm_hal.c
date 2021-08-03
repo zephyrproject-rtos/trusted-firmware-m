@@ -13,7 +13,6 @@
 
 #include "device_definition.h"
 #include "region_defs.h"
-#include "log/tfm_log.h"
 #include "tfm_multi_core.h"
 #include "tfm_platform_core_api.h"
 #include "tfm_hal_isolation.h"
