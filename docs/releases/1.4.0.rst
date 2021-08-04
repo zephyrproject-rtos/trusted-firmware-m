@@ -58,6 +58,8 @@ The following platforms are successfully tested in this release.
 - Musca-B1
 - Musca-B1 Secure Enclave
 - Musca-S1
+- M2351
+- M2354
 - NUCLEO-L552ZE-Q
 - nrf5340dk
 - nrf9160dk
