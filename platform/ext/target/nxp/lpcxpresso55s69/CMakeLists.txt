@@ -118,6 +118,7 @@ target_sources(platform_s
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/uart/fsl_adapter_usart.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_casper.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.c
+        ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_ctimer.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_flexcomm.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_gpio.c
@@ -185,6 +186,7 @@ target_sources(platform_ns
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/uart/fsl_adapter_usart.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_casper.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.c
+        ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_ctimer.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_flexcomm.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_gpio.c
@@ -237,6 +239,7 @@ if(BL2)
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/uart/fsl_adapter_usart.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_casper.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.c
+            ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_flexcomm.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_hashcrypt.c
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_iap.c

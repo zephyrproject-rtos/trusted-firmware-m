@@ -8,7 +8,7 @@
 
 ################################## Dependencies ################################
 set(TFM_PLATFORM_NXP_HAL_FILE_PATH      "DOWNLOAD"      CACHE STRING    "Path to the NXP SDK hal (or DOWNLOAD to fetch automatically)")
-set(NXP_SDK_GIT_TAG                     "MCUX_2.9.0"    CACHE STRING    "The version of the NXP MCUXpresso SDK")
+set(NXP_SDK_GIT_TAG                     "MCUX_2.10.0"    CACHE STRING    "The version of the NXP MCUXpresso SDK")
 
 ############################ Partitions ########################################
 set(PS_NUM_ASSETS                       "5"             CACHE STRING    "The maximum number of assets to be stored in the Protected Storage area")
