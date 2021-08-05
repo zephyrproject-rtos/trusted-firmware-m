@@ -222,6 +222,7 @@
   */
 
 #define FLASH_DEV_NAME TFM_Driver_FLASH0
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x8)
 
 /* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the

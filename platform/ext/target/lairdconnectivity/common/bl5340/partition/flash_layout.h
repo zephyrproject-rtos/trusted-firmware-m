@@ -191,6 +191,7 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x4)
 
 /* Flash device name used by secondary slot and scratch area
  * Name is defined in flash driver file: Driver_QSPI.c

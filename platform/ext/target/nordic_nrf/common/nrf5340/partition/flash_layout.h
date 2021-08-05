@@ -172,6 +172,7 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x4)
 
 /* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the

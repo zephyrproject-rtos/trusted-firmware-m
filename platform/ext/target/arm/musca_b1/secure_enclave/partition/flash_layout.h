@@ -132,6 +132,8 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_EFLASH1
+/* Smallest flash programmable unit in bytes */
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x4)
 
 
 /* Assets in eFlash0 */
