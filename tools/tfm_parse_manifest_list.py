@@ -164,9 +164,9 @@ def gen_per_partition_files(context):
     subcontext = {}
     subcontext['utilities'] = subutilities
 
-    manifesttemplate = ENV.get_template('secure_fw/partitions/manifestfilename.template')
-    memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
-    infotemplate = ENV.get_template('secure_fw/partitions/partition_load_info.template')
+    manifesttemplate = ENV.get_template(os.path.join(os.path.relpath(os.path.dirname(__file__)), 'templates/manifestfilename.template'))
+    memorytemplate = ENV.get_template(os.path.join(os.path.relpath(os.path.dirname(__file__)), 'templates/partition_intermedia.template'))
+    infotemplate = ENV.get_template(os.path.join(os.path.relpath(os.path.dirname(__file__)), 'templates/partition_load_info.template'))
 
     print ("Start to generate partition files:")
 
