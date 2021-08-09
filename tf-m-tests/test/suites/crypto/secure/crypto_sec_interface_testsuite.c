@@ -49,9 +49,7 @@ static void tfm_crypto_test_1031(struct test_result_t *ret);
 static void tfm_crypto_test_1032(struct test_result_t *ret);
 static void tfm_crypto_test_1033(struct test_result_t *ret);
 static void tfm_crypto_test_1034(struct test_result_t *ret);
-#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
 static void tfm_crypto_test_1035(struct test_result_t *ret);
-#endif /* CRYPTO_KEY_ID_ENCODES_OWNER */
 #ifdef TFM_CRYPTO_TEST_ALG_CCM
 static void tfm_crypto_test_1036(struct test_result_t *ret);
 #endif /* TFM_CRYPTO_TEST_ALG_CCM */
@@ -122,10 +120,8 @@ static struct test_t crypto_tests[] = {
      "Secure key policy check permissions", {TEST_PASSED} },
     {&tfm_crypto_test_1034, "TFM_S_CRYPTO_TEST_1034",
      "Secure persistent key interface", {TEST_PASSED} },
-#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
     {&tfm_crypto_test_1035, "TFM_S_CRYPTO_TEST_1035",
      "Key access control", {TEST_PASSED} },
-#endif /* CRYPTO_KEY_ID_ENCODES_OWNER */
 #ifdef TFM_CRYPTO_TEST_ALG_CCM
     {&tfm_crypto_test_1036, "TFM_S_CRYPTO_TEST_1036",
      "Secure AEAD interface with truncated auth tag (AES-128-CCM-8)",
@@ -287,7 +283,6 @@ static void tfm_crypto_test_1034(struct test_result_t *ret)
     psa_persistent_key_test(1, ret);
 }
 
-#ifdef CRYPTO_KEY_ID_ENCODES_OWNER
 /**
  * \brief Tests key access control based on partition ID
  *
@@ -315,7 +310,7 @@ static void tfm_crypto_test_1035(struct test_result_t *ret)
     status = tfm_secure_client_2_call_test(
                                       TFM_SECURE_CLIENT_2_ID_CRYPTO_ACCESS_CTRL,
                                       &key_handle, sizeof(key_handle));
-    if (status != PSA_ERROR_NOT_PERMITTED) {
+    if (status != PSA_ERROR_INVALID_HANDLE) {
         TEST_FAIL("Should not be able to destroy key from another partition");
         return;
     }
@@ -327,7 +322,6 @@ static void tfm_crypto_test_1035(struct test_result_t *ret)
     }
     return;
 }
-#endif /* CRYPTO_KEY_ID_ENCODES_OWNER */
 
 #ifdef TFM_CRYPTO_TEST_ALG_CCM
 static void tfm_crypto_test_1036(struct test_result_t *ret)
