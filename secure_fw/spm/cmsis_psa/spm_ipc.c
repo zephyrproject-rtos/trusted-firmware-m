@@ -308,11 +308,12 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
-    struct service_t *p_serv;
+    struct service_t *p_prev, *p_curr;
 
-    UNI_LIST_FOR_EACH(p_serv, &services_listhead) {
-        if (p_serv->p_ldinf->sid == sid) {
-            return p_serv;
+    UNI_LIST_FOR_EACH_PREV(p_prev, p_curr, &services_listhead) {
+        if (p_curr->p_ldinf->sid == sid) {
+            UNI_LIST_MOVE_AFTER(&services_listhead, p_prev, p_curr);
+            return p_curr;
         }
     }
 

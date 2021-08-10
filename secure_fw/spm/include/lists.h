@@ -75,8 +75,22 @@ struct bi_list_node_t {
     (curr)->next = node;                          \
 } while (0)
 
+/* Move a node after posi node */
+#define UNI_LIST_MOVE_AFTER(posi, prev, node) do {\
+    if (prev != NULL) {                           \
+        (prev)->next = (node)->next;              \
+        (node)->next = (posi)->next;              \
+        (posi)->next = node;                      \
+    }                                             \
+} while (0)
+
 /* Go through each node of a list */
 #define UNI_LIST_FOR_EACH(node, head)             \
     for (node = (head)->next; node != NULL; node = (node)->next)
+
+/* Go through each node of a list with prev node */
+#define UNI_LIST_FOR_EACH_PREV(prev, node, head)  \
+    for (prev = NULL, node = (head)->next;        \
+                 node != NULL; prev = node, node = (prev)->next)
 
 #endif /* __LISTS_H__ */
