@@ -39,7 +39,7 @@
 #else
 #define __tfm_nspm_secure_gateway_attributes__ \
         __attribute__((cmse_nonsecure_entry))
-#endif /* !__ARMCC_VERSION */
+#endif /* !defined(__ARMCC_VERSION) && !defined(__ICCARM__) */
 #endif /* CONFIG_TFM_USE_TRUSTZONE */
 
 /**
