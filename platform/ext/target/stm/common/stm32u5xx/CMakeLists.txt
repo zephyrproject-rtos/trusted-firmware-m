@@ -19,14 +19,14 @@ target_include_directories(platform_region_defs
 
 target_compile_definitions(platform_region_defs
     INTERFACE
-        $<$<OR:$<BOOL:${TFM_NS_REG_TEST}>,$<BOOL:${TFM_S_REG_TEST}>>:FLASH_LAYOUT_FOR_TEST>
+        $<$<OR:$<BOOL:${TEST_NS}>,$<BOOL:${TEST_S}>>:FLASH_LAYOUT_FOR_TEST>
 )
 
 #========================= Platform common defs ===============================#
 target_add_scatter_file(tfm_s
-    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
-    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
-    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
+    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/tfm_common_s.sct>
+    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/tfm_common_s.ld>
+    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/tfm_common_s.icf>
     $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_isolation_l3.sct>
     $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_isolation_l3.ld>
 )
@@ -60,41 +60,43 @@ target_include_directories(platform_s
         ${STM_COMMON_DIR}/hal/CMSIS_Driver
         ${CMAKE_CURRENT_SOURCE_DIR}/Device/Include
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Inc
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure
         ${MBEDCRYPTO_PATH}/library
 )
 
 target_sources(platform_s
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/system_stm32l5xx.c
-        ${STM_COMMON_DIR}/hal/Native_Driver/tick.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/system_stm32u5xx.c
         ${STM_COMMON_DIR}/hal/Native_Driver/mpu_armv8m_drv.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/low_level_device.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_flash.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_flash_ex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_dma.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pwr.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pwr_ex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_gpio.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_uart.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_uart_ex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rcc.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rcc_ex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_gtzc.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_flash.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_flash_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_dma.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_dma_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pwr.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pwr_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_gpio.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_uart.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_uart_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rcc.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rcc_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_gtzc.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_platform_system>
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_cortex.c
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_platform_system.c>
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rng.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rng_ex.c
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash_ex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pka.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pka.c
         ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
 )
 
@@ -103,11 +105,10 @@ target_compile_options(platform_s
         ${COMPILER_CMSE_FLAG}
 )
 
-# GNU ld has some strange behaviour to do with weak functions, and does not deal
-# well with strong functions in static libraries overriding weak functions in
-# object files. For this reason, the file mailbox_ipc_intr is linked directly to
-# the ns binary as an object file. This issue does not affect armclang, but the
-# fix is compatible.
+# GNU ld and IAR does not deal well with strong functions in static libraries
+# overriding weak functions in object files. For this reason, files with strong
+# functions are linked as an object file. This issue does not affect armclang,
+# but the fix is compatible.
 target_sources(tfm_s
     PRIVATE
         ${STM_COMMON_DIR}/hal/Native_Driver/tick.c
@@ -123,17 +124,20 @@ target_include_directories(platform_ns
 
 target_sources(platform_ns
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/Templates/system_stm32l5xx.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/Templates/system_stm32u5xx.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_dma.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pwr.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pwr_ex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rcc.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_gpio.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_uart.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_uart_ex.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cortex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_dma.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_dma_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pwr.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pwr_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rcc.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_gpio.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_uart.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_uart_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_cortex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rcc.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rcc_ex.c
 )
 
 #========================= Platform BL2 =======================================#
@@ -149,35 +153,40 @@ if(BL2)
             ${MCUBOOT_PATH}/boot/bootutil/include
             $<TARGET_PROPERTY:bl2,BINARY_DIR>/ext/mcuboot
             ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/bl2
     )
 
     target_sources(platform_bl2
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/Templates/system_stm32l5xx.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/Templates/system_stm32u5xx.c
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/boot_hal.c
             ${STM_COMMON_DIR}/hal/Native_Driver/mpu_armv8m_drv.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/bl2/tfm_low_level_security.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/bl2/low_level_security.c
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/low_level_device.c
             ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
             ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_flash.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_flash_ex.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pwr_ex.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_dma.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pwr.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rcc.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rcc_ex.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cortex.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_gpio.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_uart.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_uart_ex.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_gtzc.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash_ex.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pka.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_flash.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_flash_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pwr_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_dma.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_dma_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pwr.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rcc.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rcc_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_cortex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_gpio.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_uart.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_uart_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_gtzc.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pka.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rng.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rng_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rtc.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rtc_ex.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_icache.c
             ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
     )
 
@@ -186,14 +195,14 @@ if(BL2)
             ${COMPILER_CMSE_FLAG}
     )
 
-    # GNU ld has some strange behaviour to do with weak functions, and does not deal
-    # well with strong functions in static libraries overriding weak functions in
-    # object files. For this reason, the file mailbox_ipc_intr is linked directly to
-    # the ns binary as an object file. This issue does not affect armclang, but the
-    # fix is compatible.
+    # GNU ld and IAR does not deal well with strong functions in static libraries
+    # overriding weak functions in object files. For this reason, files with strong
+    # functions are linked as an object file. This issue does not affect armclang,
+    # but the fix is compatible.
     target_sources(bl2
         PRIVATE
             ${STM_COMMON_DIR}/hal/Native_Driver/tick.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/bl2/stm32u5xx_hal_msp.c
     )
 endif()
 
@@ -219,17 +228,21 @@ install(FILES ${STM_COMMON_DIR}/scripts/regression.sh
          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
          DESTINATION ${CMAKE_BINARY_DIR} )
 
-if (TFM_S_REG_TEST OR TFM_NS_REG_TEST)
+if (${TEST_S} OR ${TEST_NS})
     #the define FLASH_LAYOUT_FOR_TEST
     #increase SECURE and NON SECURE IMAGE and modify the  content of  low_level_device.c from BL2 (low_level_flash.c)
     set(FLAGS_FOR_BL2_PREPROCESSING
         "#define FLASH_LAYOUT_FOR_TEST\n"
         "#define BL2\n"
+        "#define MCUBOOT_IMAGE_NUMBER 2\n"
+        "#define MCUBOOT_OVERWRITE_ONLY\n"
          )
     add_definitions("-DFLASH_LAYOUT_FOR_TEST")
 else()
     set(FLAGS_FOR_BL2_PREPROCESSING
         "#define BL2\n"
+        "#define MCUBOOT_IMAGE_NUMBER 2\n"
+        "#define MCUBOOT_OVERWRITE_ONLY\n"
        )
 endif()
 
@@ -243,15 +256,9 @@ set(CONTENT_FOR_BL2_PREPROCESSING
     "\tRE_BL2_WRP_START = (FLASH_AREA_BL2_OFFSET),\n"
     "\tRE_BL2_WRP_END = (FLASH_AREA_BL2_NOHDP_OFFSET+FLASH_AREA_BL2_NOHDP_SIZE-0x1),\n"
     "\tRE_BL2_HDP_END = (FLASH_AREA_BL2_NOHDP_OFFSET-0x1),\n"
-    "#if defined(EXTERNAL_FLASH)\n"
-    "\tRE_IMAGE_FLASH_SECURE_UPDATE = (OSPI_FLASH_BASE_ADDRESS+FLASH_AREA_2_OFFSET),\n"
-    "\tRE_IMAGE_FLASH_NON_SECURE_UPDATE = (OSPI_FLASH_BASE_ADDRESS+FLASH_AREA_3_OFFSET),\n"
-    "\tRE_IMAGE_FLASH_UNUSED = (FLASH_BASE_ADDRESS+FLASH_AREA_1_OFFSET+FLASH_AREA_1_SIZE),\n"
-    "#else\n"
     "\tRE_IMAGE_FLASH_SECURE_UPDATE = (FLASH_BASE_ADDRESS+FLASH_AREA_2_OFFSET),\n"
     "\tRE_IMAGE_FLASH_NON_SECURE_UPDATE = (FLASH_BASE_ADDRESS+FLASH_AREA_3_OFFSET),\n"
     "\tRE_IMAGE_FLASH_UNUSED = (FLASH_BASE_ADDRESS+FLASH_AREA_3_OFFSET+FLASH_AREA_3_SIZE),\n"
-    "#endif\n"
     "\tRE_IMAGE_FLASH_SCRATCH = (FLASH_BASE_ADDRESS+FLASH_AREA_SCRATCH_OFFSET),\n"
     "\tRE_IMAGE_FLASH_NV_COUNTERS = (FLASH_BASE_ADDRESS+FLASH_NV_COUNTERS_AREA_OFFSET),\n"
     "\tRE_IMAGE_FLASH_NV_PS = (FLASH_BASE_ADDRESS+FLASH_PS_AREA_OFFSET),\n"

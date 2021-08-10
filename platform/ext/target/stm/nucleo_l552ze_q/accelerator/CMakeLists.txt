@@ -21,7 +21,7 @@ if(BL2)
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/stm32l5xx_hal/Inc/
+            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
             ${PLATFORM_DIR}/ext/cmsis
     )
@@ -43,7 +43,7 @@ if(BL2)
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/stm32l5xx_hal/Inc/
+            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
             ${PLATFORM_DIR}/ext/cmsis
     )
@@ -63,7 +63,7 @@ target_include_directories(crypto_service_crypto_hw
         ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
         ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/stm32l5xx_hal/Inc/
+        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
         ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
         ${PLATFORM_DIR}/ext/cmsis
 )
@@ -72,7 +72,7 @@ target_include_directories(crypto_service_mbedcrypto
         ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
         ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/stm32l5xx_hal/Inc/
+        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
         ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
         ${PLATFORM_DIR}/ext/cmsis
 )
