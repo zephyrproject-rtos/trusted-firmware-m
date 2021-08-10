@@ -45,10 +45,6 @@ struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
 
-/* The veneer section names come from the scatter file */
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-
 void spm_interrupt_handler(struct partition_load_info_t *p_ldinf,
                            psa_signal_t signal,
                            uint32_t irq_line,
@@ -888,67 +884,3 @@ struct irq_load_info_t *get_irq_info_for_signal(
 
     return NULL;
 }
-
-#if !defined(__ARM_ARCH_8_1M_MAIN__)
-void tfm_spm_validate_caller(uint32_t *p_ctx, uint32_t exc_return)
-{
-    /*
-     * TODO: the reentrant detection mechanism needs to be changed when there
-     * is no boundaries.
-     */
-    uintptr_t stacked_ctx_pos;
-    bool ns_caller = false;
-    struct partition_t *p_cur_sp = tfm_spm_get_running_partition();
-    uint32_t veneer_base =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-    uint32_t veneer_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-
-    if (!p_cur_sp) {
-        tfm_core_panic();
-    }
-
-    /*
-     * The caller security attribute detection bases on LR of state context.
-     * However, if SP calls PSA APIs based on its customized SVC, the LR may be
-     * occupied by general purpose value while calling SVC.
-     * Check if caller comes from non-secure: return address (p_ctx[6]) belongs
-     * to veneer section, and the bit0 of LR (p_ctx[5]) is zero.
-     */
-    if (p_ctx[6] >= veneer_base && p_ctx[6] < veneer_limit &&
-        !(p_ctx[5] & TFM_VENEER_LR_BIT0_MASK)) {
-        ns_caller = true;
-    }
-
-    /* If called from ns, partition ID should be TFM_SP_NON_SECURE_ID. */
-    if ((ns_caller == true) !=
-        (p_cur_sp->p_ldinf->pid == TFM_SP_NON_SECURE_ID)) {
-            tfm_core_panic();
-    }
-
-    if (ns_caller) {
-        /*
-         * The background IRQ can't be supported, since if SP is executing,
-         * the preempted context of SP can be different with the one who
-         * preempts veneer. Check if veneer stack contains multiple contexts.
-         */
-        stacked_ctx_pos = (uintptr_t)p_ctx +
-                          sizeof(struct tfm_state_context_t) +
-                          TFM_STACK_SEALED_SIZE;
-
-        if (is_stack_alloc_fp_space(exc_return)) {
-#if defined(__FPU_USED) && (__FPU_USED == 1U)
-            if (FPU->FPCCR & FPU_FPCCR_TS_Msk) {
-                stacked_ctx_pos += TFM_ADDTIONAL_FP_CONTEXT_WORDS *
-                                   sizeof(uint32_t);
-            }
-#endif
-            stacked_ctx_pos += TFM_BASIC_FP_CONTEXT_WORDS * sizeof(uint32_t);
-        }
-
-        if (stacked_ctx_pos != p_cur_sp->sp_thread.stk_top) {
-            tfm_core_panic();
-        }
-    }
-}
-#endif

@@ -398,34 +398,6 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
  */
 uint32_t tfm_spm_init(void);
 
-#if !defined(__ARM_ARCH_8_1M_MAIN__)
-/**
- * \brief Validate the whether NS caller re-enter.
- *
- * \param[in] p_ctx             Pointer to current stack context.
- * \param[in] exc_return        EXC_RETURN value.
- *
- * \retval void                 Success.
- *
- * Notes:
- *  For architecture v8.1m and later, will use hardware re-entrant detection.
- *  Otherwise will use the software solution to validate the caller.
- */
-void tfm_spm_validate_caller(uint32_t *p_ctx, uint32_t exc_return);
-#else
-/**
- * In v8.1 mainline, will use hardware re-entrant detection instead.
- */
-__STATIC_INLINE
-void tfm_spm_validate_caller(uint32_t *p_ctx, uint32_t exc_return)
-{
-    (void)p_ctx;
-    (void)exc_return;
-    return;
-}
-#endif
-
-
 /**
  * \brief Converts a handle instance into a corresponded user handle.
  */

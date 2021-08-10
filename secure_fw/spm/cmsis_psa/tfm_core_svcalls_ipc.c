@@ -41,8 +41,6 @@ struct tfm_svc_flih_ctx_t {
 static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
-    tfm_spm_validate_caller(ctx, lr);
-
     switch (svc_num) {
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_spm_client_psa_framework_version();
