@@ -16,10 +16,10 @@
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
 
-#define TFM_SP_NS_PROXY_NDEPS                                   (0)
-#define TFM_SP_NS_PROXY_NSERVS                                  (0)
+#define TFM_SP_NS_AGENT_NDEPS                                   (0)
+#define TFM_SP_NS_AGENT_NSERVS                                  (0)
 #if TFM_LVL == 3
-#define TFM_SP_NS_PROXY_NASSETS                                 (1)
+#define TFM_SP_NS_AGENT_NASSETS                                 (1)
 #endif
 
 /* Memory region declaration */
@@ -29,20 +29,20 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 /* Entrypoint function declaration */
 extern void tfm_nspm_thread_entry(void);
 
-struct partition_tfm_sp_ns_proxy_load_info_t {
+struct partition_tfm_sp_ns_agent_load_info_t {
     /* common length load data */
     struct partition_load_info_t    load_info;
     /* per-partition variable length load data */
     uintptr_t                       stack_addr;
     uintptr_t                       heap_addr;
 #if TFM_LVL == 3
-    struct asset_desc_t             assets[TFM_SP_NS_PROXY_NASSETS];
+    struct asset_desc_t             assets[TFM_SP_NS_AGENT_NASSETS];
 #endif
 } __attribute__((aligned(4)));
 
 /* Partition load, deps, service load data. Put to a dedicated section. */
-const struct partition_tfm_sp_ns_proxy_load_info_t
-    tfm_sp_ns_proxy_load __attribute__((used, section(".part_load"))) = {
+const struct partition_tfm_sp_ns_agent_load_info_t
+    tfm_sp_ns_agent_load __attribute__((used, section(".part_load"))) = {
     .load_info = {
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
         .pid                        = TFM_SP_NON_SECURE_ID,
@@ -55,10 +55,10 @@ const struct partition_tfm_sp_ns_proxy_load_info_t
         .entry                      = ENTRY_TO_POSITION(tfm_nspm_thread_entry),
         .stack_size                 = S_PSP_STACK_SIZE,
         .heap_size                  = 0,
-        .ndeps                      = TFM_SP_NS_PROXY_NDEPS,
-        .nservices                  = TFM_SP_NS_PROXY_NSERVS,
+        .ndeps                      = TFM_SP_NS_AGENT_NDEPS,
+        .nservices                  = TFM_SP_NS_AGENT_NSERVS,
 #if TFM_LVL == 3
-        .nassets                    = TFM_SP_NS_PROXY_NASSETS,
+        .nassets                    = TFM_SP_NS_AGENT_NASSETS,
 #endif
     },
     .stack_addr                     = PART_REGION_ADDR(ARM_LIB_STACK,
@@ -78,5 +78,5 @@ const struct partition_tfm_sp_ns_proxy_load_info_t
 };
 
 /* Placeholder for partition runtime space. Do not reference it. */
-static struct partition_t tfm_sp_ns_proxy_partition_runtime_item
+static struct partition_t tfm_sp_ns_agent_partition_runtime_item
     __attribute__((used, section(".bss.part_runtime")));

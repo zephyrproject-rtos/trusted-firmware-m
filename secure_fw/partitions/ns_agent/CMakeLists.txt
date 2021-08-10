@@ -10,5 +10,5 @@ cmake_policy(SET CMP0079 NEW)
 
 target_sources(tfm_partitions
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/load_info_ns_proxy.c>
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/load_info_ns_agent.c>
 )
