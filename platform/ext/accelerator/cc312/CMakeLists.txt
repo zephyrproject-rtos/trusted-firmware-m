@@ -35,6 +35,7 @@ if(BL2)
 endif()
 
 ################################ BL2 ###########################################
+
 if(BL2)
     target_sources(bl2_crypto_hw
         PRIVATE
@@ -70,8 +71,9 @@ if(BL2)
     target_link_libraries(bl2_cc312
         PRIVATE
             bl2_mbedcrypto
-        PUBLIC
             platform_bl2
+        PUBLIC
+            platform_common_interface
     )
     target_link_libraries(bl2_mbedcrypto
         PRIVATE

@@ -160,6 +160,7 @@ endif()
 #TODO maybe just link the other platforms to this
 target_compile_definitions(platform_region_defs
     INTERFACE
+        $<$<BOOL:${BL1}>:BL1>
         $<$<BOOL:${BL2}>:BL2>
         $<$<BOOL:${SECURE_UART1}>:SECURE_UART1>
         DAUTH_${DEBUG_AUTHENTICATION}

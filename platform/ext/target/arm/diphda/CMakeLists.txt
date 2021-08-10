@@ -85,7 +85,6 @@ target_sources(platform_bl2
         Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         Native_Driver/spi_n25q256a_flash_lib.c
         bl2_boot_hal.c
-        bl2_security_cnt.c
 )
 
 target_sources(bl2

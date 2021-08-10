@@ -19,18 +19,18 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 const struct flash_area flash_map[] = {
     {
-        .fa_id = FLASH_AREA_0_ID,
+        .fa_id = FLASH_AREA_8_ID,
         .fa_device_id = FLASH_DEVICE_ID,
         .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_AREA_0_OFFSET,
-        .fa_size = FLASH_AREA_0_SIZE,
+        .fa_off = FLASH_AREA_8_OFFSET,
+        .fa_size = FLASH_AREA_8_SIZE,
     },
     {
-        .fa_id = FLASH_AREA_1_ID,
+        .fa_id = FLASH_AREA_9_ID,
         .fa_device_id = FLASH_DEVICE_ID,
         .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_AREA_1_OFFSET,
-        .fa_size = FLASH_AREA_1_SIZE,
+        .fa_off = FLASH_AREA_9_OFFSET,
+        .fa_size = FLASH_AREA_9_SIZE,
     },
 };
 

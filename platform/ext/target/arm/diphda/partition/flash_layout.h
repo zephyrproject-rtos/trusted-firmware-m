@@ -81,29 +81,27 @@
 #define IMAGE_EXECUTABLE_RAM_SIZE       (SRAM_SIZE - BL1_DATA_SIZE)
 
 /* BL2 primary and secondary images */
-#define FLASH_AREA_0_ID                 (1)
-#define FLASH_AREA_0_OFFSET             (0x50000)
-#define FLASH_AREA_0_SIZE               (SE_BL2_PARTITION_SIZE)
+#define FLASH_AREA_8_ID                 (1)
+#define FLASH_AREA_8_OFFSET             (0x50000)
+#define FLASH_AREA_8_SIZE               (SE_BL2_PARTITION_SIZE)
 
-#define FLASH_AREA_1_ID                 (FLASH_AREA_0_ID + 1)
-#define FLASH_AREA_1_OFFSET             (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
-#define FLASH_AREA_1_SIZE               (SE_BL2_PARTITION_SIZE)
+#define FLASH_AREA_9_ID                 (FLASH_AREA_8_ID + 1)
+#define FLASH_AREA_9_OFFSET             (FLASH_AREA_8_OFFSET + FLASH_AREA_8_SIZE)
+#define FLASH_AREA_9_SIZE               (SE_BL2_PARTITION_SIZE)
 
 /* Macros needed to imgtool.py, used when creating BL2 signed image */
-#define IMAGE_LOAD_ADDRESS              (SRAM_BASE + TFM_PARTITION_SIZE + BL2_DATA_GAP_SIZE)
-#define SECURE_IMAGE_OFFSET             (0x0)
-#define SECURE_IMAGE_MAX_SIZE           (SE_BL2_PARTITION_SIZE)
-#define NON_SECURE_IMAGE_OFFSET         (SE_BL2_PARTITION_SIZE)
-#define NON_SECURE_IMAGE_MAX_SIZE       (0x0)
+#define BL2_IMAGE_LOAD_ADDRESS          (SRAM_BASE + TFM_PARTITION_SIZE + BL2_DATA_GAP_SIZE)
+#define BL2_IMAGE_OFFSET                (0x0)
+#define BL2_IMAGE_MAX_SIZE              (SE_BL2_PARTITION_SIZE)
 
-#define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
-                                                      255 )
-#define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_1_ID : \
-                                                      255 )
+#define BL1_FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_8_ID : \
+                                                          255 )
+#define BL1_FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_9_ID : \
+                                                          255 )
 
-#define FLASH_AREA_IMAGE_SCRATCH        255
+#define BL1_FLASH_AREA_IMAGE_SCRATCH        255
 
-#else
+#endif /* BL1 */
 
 /* TF-M primary and secondary images */
 #define FLASH_AREA_0_ID                 (1)
@@ -159,8 +157,6 @@
                                                       255 )
 
 #define FLASH_AREA_IMAGE_SCRATCH        255
-
-#endif /* BL1 */
 
 #define FLASH_SECTOR_SIZE              (PMOD_SF3_FLASH_SECTOR_SIZE) /* 1 kB */
 

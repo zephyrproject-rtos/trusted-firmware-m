@@ -11,9 +11,6 @@
 #include "bootutil/fault_injection_hardening.h"
 #include <stdint.h>
 
-/* BL1 only loads 1 image. First 3 counters are used by PS service */
-#define TFM_BOOT_NV_COUNTER    (3)
-
 fih_int boot_nv_security_counter_init(void)
 {
     fih_int fih_rc = FIH_FAILURE;
@@ -38,7 +35,7 @@ fih_int boot_nv_security_counter_get(uint32_t image_id, fih_int *security_cnt)
     }
 
     fih_rc = fih_int_encode_zero_equality(
-             tfm_plat_read_nv_counter(TFM_BOOT_NV_COUNTER,
+             tfm_plat_read_nv_counter(PLAT_NV_COUNTER_BL1_0,
                                       sizeof(security_cnt_soft),
                                       (uint8_t *)&security_cnt_soft));
     *security_cnt = fih_int_encode(security_cnt_soft);
@@ -55,7 +52,7 @@ int32_t boot_nv_security_counter_update(uint32_t image_id,
         return -1;
     }
 
-    err = tfm_plat_set_nv_counter(TFM_BOOT_NV_COUNTER, img_security_cnt);
+    err = tfm_plat_set_nv_counter(PLAT_NV_COUNTER_BL1_0, img_security_cnt);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return -1;
     }
