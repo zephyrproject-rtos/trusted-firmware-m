@@ -31,7 +31,7 @@
 #define MBEDTLS_SHA256_ALT_H
 
 #if defined (MBEDTLS_SHA256_ALT)
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 
 #define ST_SHA256_BLOCK_SIZE  ((size_t)  64)        /*!< HW handles 512 bits, ie 64 bytes */
 #define ST_SHA256_EXTRA_BYTES ((size_t)  4)         /*!< One supplementary word on first block */

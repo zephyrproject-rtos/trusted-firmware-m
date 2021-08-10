@@ -44,7 +44,7 @@ extern "C" {
 
 #if defined (MBEDTLS_ECP_ALT)
 #include "mbedtls/platform.h"
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 
 /*
  * default mbed TLS elliptic curve arithmetic implementation

@@ -19,7 +19,7 @@
   ******************************************************************************
   */
 #include "low_level_rng.h"
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 
 static RNG_HandleTypeDef handle;
 static uint8_t users = 0;

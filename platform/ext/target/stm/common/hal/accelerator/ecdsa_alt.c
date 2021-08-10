@@ -27,7 +27,7 @@
 #if defined(MBEDTLS_ECDSA_C)
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/

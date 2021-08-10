@@ -22,7 +22,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 
 struct ospi_flash_range
 {

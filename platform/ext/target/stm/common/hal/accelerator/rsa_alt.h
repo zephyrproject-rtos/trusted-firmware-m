@@ -36,7 +36,7 @@ extern "C" {
 #endif
 
 #if defined(MBEDTLS_RSA_ALT)
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 
 // Regular implementation
 //

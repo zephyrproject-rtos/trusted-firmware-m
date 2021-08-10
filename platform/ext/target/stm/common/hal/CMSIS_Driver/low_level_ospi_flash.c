@@ -17,9 +17,9 @@
 #include "Driver_Flash.h"
 #include "low_level_ospi_flash.h"
 #include <string.h>
-#include "stm32l5xx.h"
+#include "stm32hal.h"
 #include "flash_layout.h"
-#include "stm32l562e_discovery_ospi.h"
+#include "board_ospi.h"
 #include <stdio.h>
 
 

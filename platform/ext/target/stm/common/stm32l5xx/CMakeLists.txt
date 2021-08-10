@@ -33,9 +33,9 @@ target_add_scatter_file(tfm_s
 
 if(NS)
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:GNU>:${STM_COMMON_DIR}/stm32l5xx/Device/Source/gcc/stm32l5xx_ns.ld>
-        $<$<C_COMPILER_ID:ARMClang>:${STM_COMMON_DIR}/stm32l5xx/Device/Source/armclang/stm32l5xx_ns.sct>
-        $<$<C_COMPILER_ID:IAR>:${STM_COMMON_DIR}/stm32l5xx/Device/Source/iar/stm32l5xx_ns.icf>
+        $<$<C_COMPILER_ID:GNU>:${STM_COMMON_DIR}/hal/template/gcc/appli_ns.ld>
+        $<$<C_COMPILER_ID:ARMClang>:${STM_COMMON_DIR}/hal/template/armclang/appli_ns.sct>
+        $<$<C_COMPILER_ID:IAR>:${STM_COMMON_DIR}/hal/template/iar/appli_ns.icf>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
@@ -45,9 +45,9 @@ endif()
 
 if(BL2)
     target_add_scatter_file(bl2
-        $<$<C_COMPILER_ID:GNU>:${STM_COMMON_DIR}/stm32l5xx/Device/Source/gcc/stm32l5xx_bl2.ld>
-        $<$<C_COMPILER_ID:ARMClang>:${STM_COMMON_DIR}/stm32l5xx/Device/Source/armclang/stm32l5xx_bl2.sct>
-        $<$<C_COMPILER_ID:IAR>:${STM_COMMON_DIR}/stm32l5xx/Device/Source/iar/stm32l5xx_bl2.icf>
+        $<$<C_COMPILER_ID:GNU>:${STM_COMMON_DIR}/hal/template/gcc/bl2.ld>
+        $<$<C_COMPILER_ID:ARMClang>:${STM_COMMON_DIR}/hal/template/armclang/bl2.sct>
+        $<$<C_COMPILER_ID:IAR>:${STM_COMMON_DIR}/hal/template/iar/bl2.icf>
     )
 endif()
 
@@ -56,8 +56,8 @@ endif()
 target_include_directories(platform_s
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver
+        ${STM_COMMON_DIR}/hal/Native_Driver
+        ${STM_COMMON_DIR}/hal/CMSIS_Driver
         ${CMAKE_CURRENT_SOURCE_DIR}/Device/Include
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Inc
         ${MBEDCRYPTO_PATH}/library
@@ -66,15 +66,15 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/system_stm32l5xx.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/tick.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/mpu_armv8m_drv.c
+        ${STM_COMMON_DIR}/hal/Native_Driver/tick.c
+        ${STM_COMMON_DIR}/hal/Native_Driver/mpu_armv8m_drv.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/low_level_device.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/low_level_flash.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/low_level_com.c
+        ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
+        ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_flash.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_flash_ex.c
@@ -95,7 +95,7 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_hash.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_hash_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_pka.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/low_level_rng.c
+        ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
 )
 
 target_compile_options(platform_s
@@ -110,7 +110,7 @@ target_compile_options(platform_s
 # fix is compatible.
 target_sources(tfm_s
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/tick.c
+        ${STM_COMMON_DIR}/hal/Native_Driver/tick.c
 )
 
 #========================= Platform Non-Secure ================================#
@@ -125,7 +125,7 @@ target_sources(platform_ns
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/Templates/system_stm32l5xx.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/low_level_com.c
+        ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_dma.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_pwr.c
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_pwr_ex.c
@@ -142,8 +142,8 @@ if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}
-            ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver
-            ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver
+            ${STM_COMMON_DIR}/hal/Native_Driver
+            ${STM_COMMON_DIR}/hal/CMSIS_Driver
             ${CMAKE_CURRENT_SOURCE_DIR}/Device/Include
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Inc
             ${MCUBOOT_PATH}/boot/bootutil/include
@@ -155,11 +155,11 @@ if(BL2)
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/Templates/system_stm32l5xx.c
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/boot_hal.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/mpu_armv8m_drv.c
+            ${STM_COMMON_DIR}/hal/Native_Driver/mpu_armv8m_drv.c
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/tfm_low_level_security.c
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/low_level_device.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/low_level_flash.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver/low_level_com.c
+            ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
+            ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_flash.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_flash_ex.c
@@ -178,7 +178,7 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_pka.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng.c
             ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Src/stm32l5xx_hal_rng_ex.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/low_level_rng.c
+            ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
     )
 
     target_compile_options(platform_bl2
@@ -193,29 +193,29 @@ if(BL2)
     # fix is compatible.
     target_sources(bl2
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/tick.c
+            ${STM_COMMON_DIR}/hal/Native_Driver/tick.c
     )
 endif()
 
 install(FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/stm_tool.py
-        ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/bin2hex.py
+        ${STM_COMMON_DIR}/scripts/stm_tool.py
+        ${STM_COMMON_DIR}/scripts/bin2hex.py
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../bl2/ext/mcuboot/scripts/macro_parser.py
         DESTINATION ${CMAKE_BINARY_DIR}/scripts/ )
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL GNU)
-    set(PREPROCESSOR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/gcc/preprocess.sh)
+    set(PREPROCESSOR_FILE ${STM_COMMON_DIR}/scripts/gcc/preprocess.sh)
 elseif (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
-    set(PREPROCESSOR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/armclang/preprocess.sh)
+    set(PREPROCESSOR_FILE ${STM_COMMON_DIR}/scripts/armclang/preprocess.sh)
 else()
-    set(PREPROCESSOR_FILE ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/iar/preprocess.sh)
+    set(PREPROCESSOR_FILE ${STM_COMMON_DIR}/scripts/iar/preprocess.sh)
 endif()
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/regression.sh
+install(FILES ${STM_COMMON_DIR}/scripts/regression.sh
          ${PREPROCESSOR_FILE}
-         ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/TFM_UPDATE.sh
-         ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/TFM_BIN2HEX.sh
-         ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/postbuild.sh
+         ${STM_COMMON_DIR}/scripts/TFM_UPDATE.sh
+         ${STM_COMMON_DIR}/scripts/TFM_BIN2HEX.sh
+         ${STM_COMMON_DIR}/scripts/postbuild.sh
          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
          DESTINATION ${CMAKE_BINARY_DIR} )
 

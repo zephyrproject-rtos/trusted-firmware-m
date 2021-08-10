@@ -16,7 +16,7 @@
   *
   ******************************************************************************
   */
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 /**
   * @brief This function configures the source of the time base:
   *        The time source is configured to have 1ms time base with a dedicated

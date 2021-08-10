@@ -107,7 +107,7 @@
 #endif
 
 #include "ecp_internal_alt.h"
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 
 #define ST_ECP_TIMEOUT     (5000U)
 

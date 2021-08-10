@@ -19,7 +19,7 @@
 #include "Driver_USART.h"
 
 #include "cmsis.h"
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 /* board configuration  */
 #include "board.h"
 #ifndef ARG_UNUSED

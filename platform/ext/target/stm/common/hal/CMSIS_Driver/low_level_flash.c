@@ -19,7 +19,7 @@
 #include <string.h>
 #include "cmsis.h"
 #include "flash_layout.h"
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 #include <stdio.h>
 
 #ifndef ARG_UNUSED
