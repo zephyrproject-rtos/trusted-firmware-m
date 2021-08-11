@@ -8,21 +8,7 @@
 #include "svc_num.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
-#include "tfm/tfm_spm_services.h"
 
-__attribute__((naked))
-static int32_t tfm_spm_request(int32_t request_type)
-{
-    __ASM volatile(
-        "SVC    %0\n"
-        "BX     lr\n"
-        : : "I" (TFM_SVC_SPM_REQUEST));
-}
-
-int32_t tfm_spm_request_reset_vote(void)
-{
-    return tfm_spm_request((int32_t)TFM_SPM_REQUEST_RESET_VOTE);
-}
 
 static void tfm_arch_init_state_ctx(struct tfm_state_context_t *p_stat_ctx,
                                     void *param, uintptr_t pfn)

@@ -26,7 +26,7 @@
 #include "region.h"
 #include "spm_partition_defs.h"
 #include "psa_manifest/pid.h"
-#include "tfm/tfm_spm_services.h"
+#include "tfm_spm_services.h"
 #include "tfm_spm_db_func.inc"
 
 /* Structure to temporarily save iovec parameters from PSA client */
@@ -1370,39 +1370,6 @@ void tfm_spm_partition_cleanup_context(uint32_t partition_idx)
         partition->runtime_data.iovec_args.out_vec[i].len = 0;
     }
     partition->runtime_data.orig_outvec = 0;
-}
-
-void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
-{
-    uint32_t *res_ptr = (uint32_t *)&svc_ctx->r0;
-    uint32_t running_partition_flags = 0;
-    uint32_t running_partition_idx;
-
-    /* Check permissions on request type basis */
-
-    switch (svc_ctx->r0) {
-    case TFM_SPM_REQUEST_RESET_VOTE:
-        running_partition_idx =
-            tfm_spm_partition_get_running_partition_idx();
-        running_partition_flags = tfm_spm_partition_get_flags(
-                                                         running_partition_idx);
-
-        /* Currently only PSA Root of Trust services are allowed to make Reset
-         * vote request
-         */
-        if ((running_partition_flags & SPM_PART_FLAG_PSA_ROT) == 0) {
-            *res_ptr = (uint32_t)TFM_ERROR_GENERIC;
-        }
-
-        /* FixMe: this is a placeholder for checks to be performed before
-         * allowing execution of reset
-         */
-        *res_ptr = (uint32_t)TFM_SUCCESS;
-
-        break;
-    default:
-        *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
-    }
 }
 
 enum spm_err_t tfm_spm_db_init(void)

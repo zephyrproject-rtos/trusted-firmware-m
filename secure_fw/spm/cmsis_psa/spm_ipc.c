@@ -29,7 +29,6 @@
 #include "tfm_pools.h"
 #include "region.h"
 #include "psa_manifest/pid.h"
-#include "tfm/tfm_spm_services.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
@@ -1052,37 +1051,3 @@ void tfm_spm_validate_caller(uint32_t *p_ctx, uint32_t exc_return)
     }
 }
 #endif
-
-void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
-{
-    uint32_t *res_ptr = (uint32_t *)&svc_ctx->r0;
-    uint32_t running_partition_flags = 0;
-    const struct partition_t *partition = NULL;
-
-    /* Check permissions on request type basis */
-
-    switch (svc_ctx->r0) {
-    case TFM_SPM_REQUEST_RESET_VOTE:
-        partition = tfm_spm_get_running_partition();
-        if (!partition) {
-            tfm_core_panic();
-        }
-        running_partition_flags = partition->p_ldinf->flags;
-
-        /* Currently only PSA Root of Trust services are allowed to make Reset
-         * vote request
-         */
-        if ((running_partition_flags & SPM_PART_FLAG_PSA_ROT) == 0) {
-            *res_ptr = (uint32_t)TFM_ERROR_GENERIC;
-        }
-
-        /* FixMe: this is a placeholder for checks to be performed before
-         * allowing execution of reset
-         */
-        *res_ptr = (uint32_t)TFM_SUCCESS;
-
-        break;
-    default:
-        *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
-    }
-}
