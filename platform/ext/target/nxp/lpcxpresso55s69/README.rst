@@ -323,7 +323,7 @@ device (``monitor reset``), and continue (``c``) execution.
 
     Breakpoint 1, main ()
         at [path]/secure_fw/core/tfm_core.c:189
-    189     tfm_arch_init_secure_msp((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
+    189     tfm_arch_init_secure_msp((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK,
 
 3.2.4 Commonly used GDB commands
 --------------------------------
@@ -356,5 +356,5 @@ common problems.
 
 *Copyright (c) 2021, NXP Semiconductors. All rights reserved.*
 *Copyright (c) 2020, Linaro. All rights reserved.*
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
 *SPDX-License-Identifier: BSD-3-Clause*

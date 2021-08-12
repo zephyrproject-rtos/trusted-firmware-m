@@ -10,8 +10,6 @@
 
 #include <stdint.h>
 
-typedef uint32_t psa_signal_t;
-
 void tfm_enable_irq(psa_signal_t irq_signal);
 void tfm_disable_irq(psa_signal_t irq_signal);
 

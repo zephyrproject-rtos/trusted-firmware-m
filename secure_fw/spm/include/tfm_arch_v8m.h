@@ -45,6 +45,8 @@
 #define EXC_NUM_SVCALL                          (11)
 #define EXC_NUM_PENDSV                          (14)
 
+#define VTOR_BASE                       (0xE000ED08)
+
 #if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
 struct tfm_arch_ctx_t {
     uint32_t    r4;
@@ -120,6 +122,16 @@ __STATIC_INLINE bool is_stack_alloc_fp_space(uint32_t lr)
 __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 {
     __set_PSPLIM(psplim);
+}
+
+/**
+ * \brief Set MSP limit value.
+ *
+ * \param[in] msplim        MSP limit value to be written.
+ */
+__STATIC_INLINE void tfm_arch_set_msplim(uint32_t msplim)
+{
+    __set_MSPLIM(msplim);
 }
 
 /**

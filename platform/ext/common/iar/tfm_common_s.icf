@@ -94,18 +94,18 @@ define block TFM_SECURE_DATA_START with size = 0 { };
 #ifndef TFM_MULTI_CORE_TOPOLOGY
     /* Shared area between BL2 and runtime to exchange data */
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
-define block ARM_LIB_STACK_MSP with alignment = 32, size = S_MSP_STACK_SIZE { };
+define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE { };
 define overlay STACK_DATA {block TFM_SHARED_DATA};
-define overlay STACK_DATA {block ARM_LIB_STACK_MSP};
+define overlay STACK_DATA {block ARM_LIB_STACK};
 
 # if !defined(TFM_PSA_API)
     /* Reserve space for stack seal (8 bytes) */
-define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE - 0x8 { };
-define block ARM_LIB_STACK_SEAL with size = 0x8 { };
+define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE - 0x8 { };
+define block ER_INITIAL_PSP_SEAL with size = 0x8 { };
 # else
-define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE { };
+define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE { };
 # endif
-keep {block TFM_SHARED_DATA, block ARM_LIB_STACK_MSP};
+keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 #endif
 
 #if !defined(TFM_PSA_API)
@@ -146,14 +146,14 @@ define block TFM_SECURE_PRIV_DATA_BOUNDARY with size = 0 { };
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
 
     /* MSP */
-define block ARM_LIB_STACK_MSP with alignment = 32, size = S_MSP_STACK_SIZE { };
+define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE { };
 
 define overlay STACK_DATA {block TFM_SHARED_DATA};
-define overlay STACK_DATA {block ARM_LIB_STACK_MSP};
+define overlay STACK_DATA {block ARM_LIB_STACK};
 
     /* PSP is privileged in multi-core topology */
-define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE { };
-keep {block TFM_SHARED_DATA, block ARM_LIB_STACK_MSP};
+define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE { };
+keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 #endif
 
 define block HEAP         with alignment = 8, size = S_HEAP_SIZE { };
@@ -272,10 +272,10 @@ define block DATA with fixed order {
     /* Shared area between BL2 and runtime to exchange data */
     overlay STACK_DATA,
     /* PSP is unprivileged in single-core topology */
-    block ARM_LIB_STACK,
+    block ER_INITIAL_PSP,
 # if !defined(TFM_PSA_API)
     /* Define stack seal block for Library mode */
-    block ARM_LIB_STACK_SEAL,
+    block ER_INITIAL_PSP_SEAL,
 # endif
 #endif
 
@@ -317,7 +317,7 @@ define block PRIV_DATA with fixed order {
     /* Shared area between BL2 and runtime to exchange data */
     overlay STACK_DATA,
     /* PSP is privileged in multi-core topology */
-    block ARM_LIB_STACK,
+    block ER_INITIAL_PSP,
 #endif
 
     overlay HEAP_OVL,

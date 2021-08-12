@@ -22,7 +22,7 @@
 #include "psa/client.h"
 
 /* MSP bottom (higher address) */
-REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Limit);
+REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(uint8_t svc_num,
@@ -176,7 +176,7 @@ uint32_t tfm_flih_return_to_isr(uintptr_t ctx, psa_flih_result_t result)
     struct partition_t *curr_sp, *prev_sp;
     struct tfm_svc_flih_ctx_t *flih_ctx;
     uint32_t msp_top =
-                (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Limit);
+                (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 
     /* Skip one tfm_svc_flih_ctx_t + 8 words (R4- R11) + seals (2 words) */
     flih_ctx = (struct tfm_svc_flih_ctx_t *)
@@ -257,6 +257,8 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
     case TFM_SVC_SPM_INIT:
         tfm_arch_clear_fp_status();
         exc_return = tfm_spm_init();
+        /* The following call does not return */
+        tfm_arch_free_msp_and_exc_ret(exc_return);
         break;
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);
@@ -268,7 +270,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         exc_return = tfm_flih_return_to_isr(flih_ctx, svc_args[0]);
         break;
     default:
-        if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Limit)
+        if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
                                      - (uint32_t)msp) > TFM_STACK_SEALED_SIZE) {
             /* The Main Stack has contents, not calling from Partition thread */
             tfm_core_panic();

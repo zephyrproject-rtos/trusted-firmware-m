@@ -8,7 +8,23 @@
 #include "svc_num.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
+#include "utilities.h"
 
+__attribute__((naked)) void tfm_arch_free_msp_and_exc_ret(uint32_t exc_return)
+{
+    __ASM volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                  \n"
+#endif
+        "MOV     lr, r0                   \n"
+        "LDR     r0, ="M2S(VTOR_BASE)"    \n" /* VTOR */
+        "LDR     r0, [r0]                 \n" /* MSP address */
+        "LDR     r0, [r0]                 \n" /* MSP */
+        "SUBS    r0, #8                   \n" /* Exclude stack seal */
+        "MSR     msp, r0                  \n" /* Free Main Stack space */
+        "BX      lr                       \n"
+    );
+}
 
 static void tfm_arch_init_state_ctx(struct tfm_state_context_t *p_stat_ctx,
                                     void *param, uintptr_t pfn)

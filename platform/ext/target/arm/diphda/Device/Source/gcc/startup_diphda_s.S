@@ -25,7 +25,7 @@
     .align   2
     .globl   __Vectors
 __Vectors:
-    .long    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit/*     Top of Stack */
+    .long    Image$$ARM_LIB_STACK$$ZI$$Limit    /*     Top of Stack */
     .long    Reset_Handler                      /*     Reset Handler */
     .long    NMI_Handler                        /* -14 NMI Handler */
     .long    HardFault_Handler                  /* -13 Hard Fault Handler */
@@ -215,12 +215,6 @@ Reset_Handler:
 
     bl    SystemInit
 
-    mrs     r0, control    /* Get control value */
-    movs    r1, #2
-    orrs    r0, r0, r1     /* Select switch to PSP */
-    msr     control, r0
-    ldr     r0, =Image$$ARM_LIB_STACK$$ZI$$Limit
-    msr     psp, r0
 
 #ifndef __START
 #define __START _start

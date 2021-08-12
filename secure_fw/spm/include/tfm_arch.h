@@ -103,6 +103,13 @@ void tfm_arch_config_extensions(void);
  */
 void tfm_arch_clear_fp_status(void);
 
+/*
+ * This function is called after SPM has initialized.
+ * It frees the stack used by SPM initialization and do Exception Return.
+ * It does not return.
+ */
+void tfm_arch_free_msp_and_exc_ret(uint32_t exc_return);
+
 void tfm_arch_init_context(struct tfm_arch_ctx_t *p_actx,
                            void *param, uintptr_t pfn,
                            uintptr_t stk_btm, uintptr_t stk_top);

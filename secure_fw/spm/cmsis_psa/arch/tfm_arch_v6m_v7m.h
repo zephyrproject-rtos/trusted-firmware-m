@@ -35,6 +35,8 @@
 #define EXC_NUM_SVCALL                          (11)
 #define EXC_NUM_PENDSV                          (14)
 
+#define VTOR_BASE                       (0xE000ED08)
+
 struct tfm_arch_ctx_t {
     uint32_t    r8;
     uint32_t    r9;
@@ -107,6 +109,20 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
      * The PSP limit value can be used in more strict memory check.
      */
     (void)psplim;
+}
+
+/**
+ * \brief Set MSP limit value.
+ *
+ * \param[in] msplim        MSP limit value to be written.
+ */
+__STATIC_INLINE void tfm_arch_set_msplim(uint32_t msplim)
+{
+    /*
+     * Defined as an empty function now.
+     * The MSP limit value can be used in more strict memory check.
+     */
+    (void)msplim;
 }
 
 /**

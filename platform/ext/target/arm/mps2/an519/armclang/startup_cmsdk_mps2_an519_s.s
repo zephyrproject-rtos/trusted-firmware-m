@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2016-2018 ARM Limited
+; * Copyright (c) 2016-2021 ARM Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
-                IMPORT |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|
                 IMPORT |Image$$ARM_LIB_STACK$$ZI$$Limit|
 
 ; Vector Table Mapped to Address 0 at Reset
@@ -37,7 +36,7 @@
 
                 PRESERVE8
 
-__Vectors       DCD     |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|  ; Top of Stack
+__Vectors       DCD     |Image$$ARM_LIB_STACK$$ZI$$Limit|  ; Top of Stack
                 DCD     Reset_Handler             ; Reset Handler
                 DCD     NMI_Handler               ; NMI Handler
                 DCD     HardFault_Handler         ; Hard Fault Handler
@@ -168,14 +167,6 @@ Reset_Handler   PROC
                 CPSID   i              ; Disable IRQs
                 LDR     R0, =SystemInit
                 BLX     R0
-                MRS     R0, control    ; Get control value
-                MOVS    R1, #2
-                ORRS    R0, R0, R1     ; Select switch to PSP
-                MSR     control, R0
-                LDR     R0, =|Image$$ARM_LIB_STACK$$ZI$$Limit|
-                MOVS    R1, #7
-                BICS    R0, R1         ; Make sure that the SP address is aligned to 8
-                MOV     SP, R0         ; Initialise PSP
                 LDR     R0, =__main
                 BX      R0
                 ENDP

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2021 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -33,14 +33,11 @@ typedef void( *pFunc )( void );
   External References
  *----------------------------------------------------------------------------*/
 
-#define __MSP_INITIAL_SP              REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Limit)
-#define __MSP_STACK_LIMIT             REGION_NAME(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Base)
+#define __MSP_INITIAL_SP              REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
+#define __MSP_STACK_LIMIT             REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base)
 
 extern uint32_t __MSP_INITIAL_SP;
 extern uint32_t __MSP_STACK_LIMIT;
-
-extern uint32_t __INITIAL_SP;
-extern uint32_t __STACK_LIMIT;
 
 extern void __PROGRAM_START(void) __NO_RETURN;
 
@@ -234,11 +231,6 @@ void Reset_Handler(void)
   __set_MSPLIM((uint32_t)(&__MSP_STACK_LIMIT));
 
   SystemInit();                             /* CMSIS System Initialization */
-  __ASM volatile("MRS     R0, control\n"    /* Get control value */
-                 "ORR     R0, R0, #2\n"     /* Select switch to PSP */
-                 "MSR     control, R0\n"    /* Load control register */
-                 :
-                 :
-                 : "r0");
+
   __PROGRAM_START();                        /* Enter PreMain (C library entry point) */
 }

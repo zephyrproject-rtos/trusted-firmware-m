@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2016-2020 ARM Limited
+; * Copyright (c) 2016-2021 ARM Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@
                 MODULE   ?cstartup
 
                 ;; Forward declaration of sections.
-                SECTION  ARM_LIB_STACK_MSP:DATA:NOROOT(3)
                 SECTION  ARM_LIB_STACK:DATA:NOROOT(3)
 
                 SECTION  .intvec:CODE:NOROOT(2)
@@ -43,7 +42,7 @@
                 DATA
 
 __vector_table      ;Core Interrupts
-                DCD     sfe(ARM_LIB_STACK_MSP)    ; Top of Stack
+                DCD     sfe(ARM_LIB_STACK)        ; Top of Stack
                 DCD     Reset_Handler             ; Reset Handler
                 DCD     NMI_Handler               ; NMI Handler
                 DCD     HardFault_Handler         ; Hard Fault Handler
@@ -171,14 +170,6 @@ Reset_Handler
                 CPSID   i              ; Disable IRQs
                 LDR     R0, =SystemInit
                 BLX     R0
-                MRS     R0, control    ; Get control value
-                MOVS    R1, #2
-                ORRS    R0, R0, R1     ; Select switch to PSP
-                MSR     control, R0
-                LDR     R0, =sfe(ARM_LIB_STACK)      ; End of PROC_STACK
-                MOVS    R1, #7
-                BICS    R0, R1         ; Make sure that the SP address is aligned to 8
-                MOV     SP, R0         ; Initialise PSP
                 LDR     R0, =__iar_program_start
                 BX      R0
 

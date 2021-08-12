@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2018 ARM Limited
+; * Copyright (c) 2009-2021 ARM Limited
 ; * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
 
 ; * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@
     .align 2
     .globl    __Vectors
 __Vectors:
-    .long    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit   /* Top of Stack */
+    .long    Image$$ARM_LIB_STACK$$ZI$$Limit   /* Top of Stack */
 
     /* Core interrupts */
     .long    Reset_Handler                  /* Reset Handler */
@@ -288,13 +288,6 @@ Reset_Handler:
 
     cpsid   i              /* Disable IRQs */
     bl    SystemInit
-
-    mrs     r0, control    /* Get control value */
-    movs    r1, #2
-    orrs    r0, r0, r1     /* Select switch to PSP */
-    msr     control, r0
-    ldr     r0, =Image$$ARM_LIB_STACK$$ZI$$Limit
-    msr     psp, r0
 
 #ifndef __START
 #define __START _start

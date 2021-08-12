@@ -31,7 +31,7 @@ __asm("  .global __ARM_use_no_argv\n");
 #error Invalid TFM_LVL value. Only TFM_LVL 1, 2 and 3 are supported in IPC model!
 #endif
 
-REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
+REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
 static fih_int tfm_core_init(void)
 {
@@ -123,13 +123,24 @@ static fih_int tfm_core_init(void)
     FIH_RET(fih_int_encode(TFM_SUCCESS));
 }
 
+__attribute__((naked))
 int main(void)
+{
+    __ASM volatile(
+        "ldr    r0, =0xFEF5EDA5     \n" /* Seal Main Stack before using */
+        "ldr    r1, =0xFEF5EDA5     \n"
+        "push   {r0, r1}            \n"
+        "bl     c_main              \n"
+    );
+}
+
+int c_main(void)
 {
     fih_int fih_rc = FIH_FAILURE;
 
     /* set Main Stack Pointer limit */
-    tfm_arch_init_secure_msp((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
-                                               $$ZI$$Base));
+    tfm_arch_set_msplim((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK,
+                                                                   $$ZI$$Base));
 
     fih_delay_init();
 
@@ -152,4 +163,6 @@ int main(void)
 
     /* Move to handler mode for further SPM initialization. */
     tfm_core_handler_mode();
+
+    return 0;
 }

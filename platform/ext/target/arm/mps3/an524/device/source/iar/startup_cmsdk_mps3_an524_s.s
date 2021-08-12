@@ -28,7 +28,6 @@
         MODULE   ?cstartup
 
         ;; Forward declaration of sections.
-        SECTION  ARM_LIB_STACK_MSP:DATA:NOROOT(3)
         SECTION  ARM_LIB_STACK:DATA:NOROOT(3)
 
         SECTION  .intvec:CODE:NOROOT(2)
@@ -43,7 +42,7 @@
         DATA
 
 __vector_table      ;Core Interrupts
-        DCD     sfe(ARM_LIB_STACK_MSP)    ; Top of Stack
+        DCD     sfe(ARM_LIB_STACK)        ; Top of Stack
         DCD     Reset_Handler             ; Reset Handler
         DCD     NMI_Handler               ; NMI Handler
         DCD     HardFault_Handler         ; Hard Fault Handler
@@ -204,11 +203,6 @@ Reset_Handler
         CPSID   i              ; Disable IRQs
         LDR     R0, =SystemInit
         BLX     R0
-        LDR     R0, =sfe(ARM_LIB_STACK)      ; End of PROC_STACK
-        MSR     PSP, R0
-        MRS     R0, control    ; Get control value
-        ORR     R0, R0, #2     ; Select switch to PSP
-        MSR     control, R0
         LDR     R0, =__iar_program_start
         BX      R0
 

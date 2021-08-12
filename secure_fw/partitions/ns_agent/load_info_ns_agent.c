@@ -23,8 +23,8 @@
 #endif
 
 /* Memory region declaration */
-REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
-REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
+REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
+REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
 
 /* Entrypoint function declaration */
 extern void tfm_nspm_thread_entry(void);
@@ -65,15 +65,15 @@ const struct partition_tfm_sp_ns_agent_load_info_t
         .nassets                    = TFM_SP_NS_AGENT_NASSETS,
 #endif
     },
-    .stack_addr                     = PART_REGION_ADDR(ARM_LIB_STACK,
+    .stack_addr                     = PART_REGION_ADDR(ER_INITIAL_PSP,
                                                                     $$ZI$$Base),
     .heap_addr                      = 0,
 #if TFM_LVL == 3
     .assets                         = {
         {
-            .mem.start              = PART_REGION_ADDR(ARM_LIB_STACK,
+            .mem.start              = PART_REGION_ADDR(ER_INITIAL_PSP,
                                                                     $$ZI$$Base),
-            .mem.limit              = PART_REGION_ADDR(ARM_LIB_STACK,
+            .mem.limit              = PART_REGION_ADDR(ER_INITIAL_PSP,
                                                                    $$ZI$$Limit),
             .attr                   = ASSET_ATTR_READ_WRITE,
         },
