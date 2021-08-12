@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 
+#define TFM_NS_CLIENT_INVALID_ID            ((int32_t)0)
+
 #if !defined(TFM_MULTI_CORE_TOPOLOGY)
 /*
  * The macro cmse_nsfptr_create defined in the gcc library uses the non-standard
