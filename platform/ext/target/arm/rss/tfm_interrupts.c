@@ -12,6 +12,7 @@
 #include "ffm/interrupt.h"
 #include "load/interrupt_defs.h"
 #include "platform_irq.h"
+#include "rss_comms_hal.h"
 
 static struct irq_t timer0_irq = {0};
 
@@ -35,8 +36,15 @@ enum tfm_hal_status_t tfm_timer0_irq_init(void *p_pt,
 
 static struct irq_t mbox_irq_info = {0};
 
+/* Platform specific inter-processor communication interrupt handler. */
 void CMU_MHU0_Receiver_Handler(void)
 {
+    (void)tfm_multi_core_hal_receive();
+
+    /*
+     * SPM will send a MAILBOX_SIGNAL to the corresponding partition
+     * indicating that a message has arrived and can be processed.
+     */
     spm_handle_interrupt(mbox_irq_info.p_pt, mbox_irq_info.p_ildi);
 }
 
@@ -46,6 +54,12 @@ enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
     mbox_irq_info.p_pt = p_pt;
     mbox_irq_info.p_ildi = p_ildi;
 
+    /* Set MHU interrupt priority to the same as PendSV (the lowest)
+     * TODO: Consider advantages/disadvantages of setting it one higher
+     */
+    NVIC_SetPriority(CMU_MHU0_Receiver_IRQn, NVIC_GetPriority(PendSV_IRQn));
+
+    /* CMU_MHU0 is a secure peripheral, so its IRQs have to target S state */
     NVIC_ClearTargetState(CMU_MHU0_Receiver_IRQn);
     NVIC_DisableIRQ(CMU_MHU0_Receiver_IRQn);
 

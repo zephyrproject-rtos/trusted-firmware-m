@@ -19,9 +19,3 @@ void tfm_hal_wait_for_ns_cpu_ready(void)
     /* Nothing to do, all necessary synchronization done by BL2 */
     return;
 }
-
-/* FIXME: delete once comms driver added */
-int32_t tfm_inter_core_comm_init(void)
-{
-    return 0;
-}

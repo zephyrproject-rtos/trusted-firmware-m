@@ -32,8 +32,10 @@
 static uint32_t n_configured_regions = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
+#ifndef TFM_MULTI_CORE_TOPOLOGY
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
+#endif
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
@@ -46,6 +48,7 @@ REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
 const struct mpu_armv8m_region_cfg_t region_cfg[] = {
+#ifndef TFM_MULTI_CORE_TOPOLOGY
     /* Veneer region */
     {
         0, /* will be updated before using */
@@ -59,6 +62,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_PRIV_EXEC_OK
 #endif
     },
+#endif
     /* TFM Core unprivileged code region */
     {
         0, /* will be updated before using */
@@ -308,6 +312,13 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
         flags |= CMSE_MPU_UNPRIV;
     }
 
+    /* If multi-core topology is enabled, then the client message has already
+     * been marshalled into SPE memory over the MHU, so only need to check
+     * access rights within the SPE here.
+     * FIXME: Will need to distinguish between NSPE->SPE veneer calls and
+     * multi-core topology calls if support for both is added.
+     */
+#ifndef TFM_MULTI_CORE_TOPOLOGY
     if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
         CONTROL_Type ctrl;
         ctrl.w = __TZ_get_CONTROL_NS();
@@ -318,6 +329,7 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
         }
         flags |= CMSE_NONSECURE;
     }
+#endif
 
     if (cmse_check_address_range((void *)base, size, flags) != NULL) {
         return TFM_HAL_SUCCESS;

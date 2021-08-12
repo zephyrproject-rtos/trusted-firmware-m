@@ -76,6 +76,8 @@ target_add_scatter_file(bl1_2
 
 #========================= Platform Secure ====================================#
 
+add_subdirectory(rss_comms)
+
 target_include_directories(platform_s
     PUBLIC
         .
