@@ -51,7 +51,6 @@ typedef struct tfm_fwu_mcuboot_ctx_s {
 
 static tfm_fwu_mcuboot_ctx_t mcuboot_ctx[TFM_FWU_MAX_IMAGES];
 static fwu_image_info_data_t boot_shared_data;
-extern const uint32_t boot_img_magic[];
 
 static int convert_id_from_bl_to_mcuboot(bl_image_id_t bl_image_id,
                                          uint8_t *mcuboot_image_id)
@@ -308,7 +307,7 @@ psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
     struct image_version image_ver = { 0 };
     const struct flash_area *fap_secondary;
     struct image_header hdr_secondary;
-    uint32_t boot_magic[BOOT_MAGIC_ARR_SZ];
+    uint8_t boot_magic[BOOT_MAGIC_SZ];
     bool check_pass = false;
 #endif
 
@@ -412,7 +411,7 @@ psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
                     flash_area_close(fap_secondary);
                     return PSA_ERROR_GENERIC_ERROR;
                 }
-                if ((memcmp(boot_magic, boot_img_magic, BOOT_MAGIC_SZ) == 0) &&
+                if ((memcmp(boot_magic, &boot_img_magic, BOOT_MAGIC_SZ) == 0) &&
                     (is_version_greater_or_equal(&hdr_secondary.ih_ver,
                                                  &dep.image_min_version))) {
                     /* The dependency image in the secondary slot meet the

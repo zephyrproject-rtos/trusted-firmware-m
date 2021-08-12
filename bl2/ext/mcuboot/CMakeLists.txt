@@ -63,6 +63,12 @@ target_link_libraries(bl2
 set(MCUBOOT_ALLOWED_LOG_LEVELS OFF ERROR WARNING INFO DEBUG)
 list(FIND MCUBOOT_ALLOWED_LOG_LEVELS ${MCUBOOT_LOG_LEVEL} LOG_LEVEL_ID)
 
+if (MCUBOOT_ALIGN_VAL GREATER 8)
+set (MCUBOOT_BOOT_MAX_ALIGN ${MCUBOOT_ALIGN_VAL})
+else()
+set (MCUBOOT_BOOT_MAX_ALIGN 8)
+endif()
+
 configure_file(include/mcuboot_config/mcuboot_config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/mcuboot_config/mcuboot_config.h
                @ONLY)
@@ -133,7 +139,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
         --layout $<TARGET_OBJECTS:signing_layout_s>
         -k ${MCUBOOT_KEY_S}
         --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
-        --align 1
+        --align ${MCUBOOT_ALIGN_VAL}
         --pad
         --pad-header
         -H ${BL2_HEADER_SIZE}
@@ -184,7 +190,7 @@ if(NS)
             --layout $<TARGET_OBJECTS:signing_layout_ns>
             -k ${MCUBOOT_KEY_NS}
             --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
-            --align 1
+            --align ${MCUBOOT_ALIGN_VAL}
             --pad
             --pad-header
             -H ${BL2_HEADER_SIZE}
@@ -234,7 +240,7 @@ if(NS)
             --layout $<TARGET_OBJECTS:signing_layout_s>
             -k $<IF:$<BOOL:${FORWARD_PROT_MSG}>,${MCUBOOT_KEY_NS},${MCUBOOT_KEY_S}>
             --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
-            --align 1
+            --align ${MCUBOOT_ALIGN_VAL}
             --pad
             --pad-header
             -H ${BL2_HEADER_SIZE}

@@ -17,11 +17,16 @@ set(MCUBOOT_HW_KEY                      ON          CACHE BOOL      "Whether to 
 set(MCUBOOT_UPGRADE_STRATEGY            "OVERWRITE_ONLY" CACHE STRING "Upgrade strategy for images")
 set(BL2_HEADER_SIZE                     0x400       CACHE STRING    "Header size")
 set(BL2_TRAILER_SIZE                    0x400       CACHE STRING    "Trailer size")
+set(MCUBOOT_ALIGN_VAL                   1           CACHE STRING    "align option for mcuboot and build image with imgtool [1, 2, 4, 8, 16, 32]")
 
 # Specifying a scope of the accepted values of MCUBOOT_UPGRADE_STRATEGY for
 # platforms to choose a specific upgrade strategy for images. These certain
 # configurations will be used to facilitate the later validation.
 set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP;DIRECT_XIP;RAM_LOAD")
+
+# Specifying a scope of the accepted values of MCUBOOT_ALIGN_VAL for
+# platforms requiring specific flash alignmnent
+set_property(CACHE MCUBOOT_ALIGN_VAL PROPERTY STRINGS "1;2;4;8;16;32")
 
 set(MCUBOOT_DIRECT_XIP_REVERT           ON          CACHE BOOL      "Enable the revert mechanism in direct-xip mode")
 set(MCUBOOT_MEASURED_BOOT               ON          CACHE BOOL      "Add boot measurement values to boot status. Used for initial attestation token")

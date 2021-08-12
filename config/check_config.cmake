@@ -69,6 +69,9 @@ tfm_invalid_config(BL2 AND (NOT MCUBOOT_UPGRADE_STRATEGY IN_LIST MCUBOOT_STRATEG
 
 tfm_invalid_config(MCUBOOT_IMAGE_NUMBER GREATER 3)
 
+get_property(MCUBOOT_ALIGN_VAL_LIST CACHE MCUBOOT_ALIGN_VAL PROPERTY STRINGS)
+tfm_invalid_config(BL2 AND (NOT MCUBOOT_ALIGN_VAL IN_LIST MCUBOOT_ALIGN_VAL_LIST))
+
 ####################### Code sharing ###########################################
 
 set(TFM_CODE_SHARING_PLATFORM_LISTS arm/mps2/an521 arm/musca_b1/sse_200) # Without crypto hw acceleration

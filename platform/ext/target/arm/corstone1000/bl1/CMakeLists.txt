@@ -304,7 +304,7 @@ add_custom_command(OUTPUT bl2_signed.bin
     WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
     #Sign secure binary image with provided secret key
-    COMMAND ${PYTHON_EXECUTABLE} ${BL2_SOURCE}/ext/mcuboot/scripts/wrapper/wrapper.py
+    COMMAND ${Python3_EXECUTABLE} ${BL2_SOURCE}/ext/mcuboot/scripts/wrapper/wrapper.py
         -v ${BL2_IMAGE_VERSION}
         --layout $<TARGET_OBJECTS:signing_layout_for_bl2>
         -k ${MCUBOOT_KEY_S}
