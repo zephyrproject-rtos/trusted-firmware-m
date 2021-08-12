@@ -52,6 +52,8 @@ extern "C" {
 #cmakedefine MCUBOOT_ENC_IMAGES
 #cmakedefine MCUBOOT_ENCRYPT_RSA
 
+#define MCUBOOT_BOOT_MAX_ALIGN @MCUBOOT_BOOT_MAX_ALIGN@
+
 /*
  * Cryptographic settings
  */
