@@ -9,12 +9,11 @@
 #include <stdio.h>
 #include "config_impl.h"
 #include "security_defs.h"
-#include "tfm_psa_call_pack.h"
-#include "tfm_arch.h"
-#include "tfm_secure_api.h"
-#include "tfm_api.h"
-#include "tfm_svcalls.h"
+#include "svc_num.h"
 #include "utilities.h"
+#include "tfm_arch.h"
+#include "tfm_psa_call_pack.h"
+#include "tfm_secure_api.h"
 
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
 #include "spm_ipc.h"
