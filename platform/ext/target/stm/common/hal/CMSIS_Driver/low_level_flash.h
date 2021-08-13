@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2020-2021 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,7 +22,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "stm32l5xx_hal.h"
+#include "stm32hal.h"
 
 struct flash_range
 {
@@ -38,10 +38,20 @@ struct low_level_device
 {
   struct flash_vect erase;
   struct flash_vect write;
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) && !defined(LOCAL_LOADER_CONFIG)
   struct flash_vect secure;
+#endif
+#if !defined(LOCAL_LOADER_CONFIG)
   uint32_t read_error;
+#endif
 };
 
 extern struct low_level_device FLASH0_DEV;
 
+#if !defined(LOCAL_LOADER_CONFIG)
+void NMI_Handler(void);
+#endif
+
 #endif /* __LOW_LEVEL_FLASH_H */
+
+
