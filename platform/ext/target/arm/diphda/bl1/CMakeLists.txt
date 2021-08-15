@@ -237,14 +237,26 @@ target_sources(bl1_main
         ../Device/Source/system_core_init.c
         ../Native_Driver/firewall.c
         ../Native_Driver/uart_pl011_drv.c
-        ../Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
-        ../Native_Driver/spi_n25q256a_flash_lib.c
         bl1_boot_hal.c
         bl1_flash_map.c
         bl1_security_cnt.c
         flash_map_extended.c
         bl1_rotpk.c
 )
+
+if (PLATFORM_IS_FVP)
+target_sources(bl1_main
+    PRIVATE
+        ../Native_Driver/spi_strataflashj3_flash_lib.c
+        ../Native_Driver/cfi_drv.c
+)
+else()
+target_sources(bl1_main
+    PRIVATE
+        ../Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
+        ../Native_Driver/spi_n25q256a_flash_lib.c
+)
+endif()
 
 target_include_directories(bl1_main
     PRIVATE

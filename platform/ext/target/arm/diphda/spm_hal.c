@@ -20,7 +20,7 @@
 
 #include "platform_base_address.h"
 
-#include "xilinx_pg153_axi_qspi_controller_drv.h"
+#include "flash_common.h"
 
 #define HOST_SYS_RST_CTRL_OFFSET 0x0
 #define HOST_CPU_CORE0_WAKEUP_OFFSET 0x308
@@ -29,8 +29,8 @@
 
 void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
-    /* Switch the flash controller to XiP mode for the host */
-    select_xip_mode(&AXI_QSPI_DEV_S);
+    /* Switch the shared flash to XiP mode for the host */
+    Select_XIP_Mode_For_Shared_Flash();
 
     volatile uint32_t *bir_base = (uint32_t *)DIPHDA_HOST_BIR_BASE;
 

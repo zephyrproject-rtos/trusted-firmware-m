@@ -54,11 +54,46 @@ struct axi_qspi_dev_t AXI_QSPI_DEV_S = {
 };
 #endif
 
+#if (defined (SPI_STRATAFLASHJ3_S) && defined (CFI_S))
+static const struct cfi_dev_cfg_t CFI_DEV_CFG_S = {
+    .base = DIPHDA_HOST_XNVM_BASE
+};
+struct cfi_dev_t CFI_DEV_S = {
+    .cfg = &CFI_DEV_CFG_S,
+};
+static const struct cfi_dev_cfg_t CFI_DEV_CFG_SE_SECURE_FLASH_S = {
+    .base = DIPHDA_SE_SECURE_FLASH_BASE_FVP
+};
+struct cfi_dev_t CFI_DEV_SE_SECURE_FLASH_S = {
+    .cfg = &CFI_DEV_CFG_SE_SECURE_FLASH_S,
+};
+#endif
+
 /* ======= External peripheral configuration structure definitions ======= */
 
 #if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
 struct spi_n25q256a_dev_t SPI_N25Q256A_DEV = {
     .controller = &AXI_QSPI_DEV_S,
+    .total_sector_cnt = 0,
+    .page_size = 0,
+    .sector_size = 0,
+    .program_unit = 0,
+    .is_initialized = false
+};
+#endif
+
+#if (defined(SPI_STRATAFLASHJ3_S) && defined(CFI_S))
+struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV = {
+    .controller = &CFI_DEV_S,
+    .total_sector_cnt = 0,
+    .page_size = 0,
+    .sector_size = 0,
+    .program_unit = 0,
+    .is_initialized = false
+};
+
+struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV_SE_SECURE_FLASH = {
+    .controller = &CFI_DEV_SE_SECURE_FLASH_S,
     .total_sector_cnt = 0,
     .page_size = 0,
     .sector_size = 0,

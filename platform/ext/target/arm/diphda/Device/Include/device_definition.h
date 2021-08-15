@@ -52,10 +52,24 @@ extern struct mhu_v2_x_dev_t MHU1_HOST_TO_SE_DEV;
 extern struct axi_qspi_dev_t AXI_QSPI_DEV_S;
 #endif
 
+/* CFI  Controller driver structures  */
+#if (defined(SPI_STRATAFLASHJ3_S) && defined(AXI_QSPI_S))
+#include "cfi_drv.h"
+extern struct cfi_dev_t CFI_DEV_S;
+extern struct cfi_dev_t CFI_DEV_SE_SECURE_FLASH_S;
+#endif
+
 /* PMOD SF3 Nor Flash N25Q256A driver structures */
 #if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
 #include "spi_n25q256a_flash_lib.h"
 extern struct spi_n25q256a_dev_t SPI_N25Q256A_DEV;
+#endif
+
+/* Intel Flash StrataJ3 driver structures */
+#if (defined(SPI_STRATAFLASHJ3_S) && defined(CFI_S))
+#include "spi_strataflashj3_flash_lib.h"
+extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV;
+extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV_SE_SECURE_FLASH;
 #endif
 
 #endif  /* __DEVICE_DEFINITION_H__ */

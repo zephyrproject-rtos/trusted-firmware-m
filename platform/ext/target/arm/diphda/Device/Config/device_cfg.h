@@ -32,7 +32,14 @@
 /* External PMOD SF3 Flash Device */
 #define SPI_N25Q256A_S
 
+/*External Intel Strata Flash Device*/
+#define SPI_STRATAFLASHJ3_S
+
 /* AXI QSPI Controller */
 #define AXI_QSPI_S
+
+/* CFI Controller */
+#define CFI_S
+
 
 #endif  /* __DEVICE_CFG_H__ */

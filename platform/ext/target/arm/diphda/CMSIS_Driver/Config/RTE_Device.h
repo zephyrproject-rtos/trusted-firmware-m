@@ -29,4 +29,7 @@
 #define   RTE_FLASH0                     1
 // </e> FLASH (Flash Memory) [Driver_FLASH0]
 
+#define   RTE_FLASH1                     1
+// </e> FLASH (Flash Memory) [Driver_FLASH1]
+
 #endif  /* __RTE_DEVICE_H */

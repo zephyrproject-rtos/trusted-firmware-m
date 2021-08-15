@@ -25,6 +25,11 @@
 #define UART0_DEV           UART0_PL011_DEV
 
 /* Externally attached PMOD SF3 Nor Flash Device to the MPS3 Board. */
+#if PLATFORM_IS_FVP
+#define FLASH0_DEV          SPI_STRATAFLASHJ3_DEV
+#define FLASH1_DEV          SPI_STRATAFLASHJ3_DEV_SE_SECURE_FLASH
+#else
 #define FLASH0_DEV          SPI_N25Q256A_DEV
+#endif
 
 #endif  /* __CMSIS_DRIVER_CONFIG_H__ */

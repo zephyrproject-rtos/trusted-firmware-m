@@ -67,10 +67,11 @@
  * required by the SE are defined here */
 #define DIPHDA_HOST_BIR_BASE                 (0x60000000U) /* Boot Instruction Register         */
 #define DIPHDA_HOST_SHARED_RAM_BASE          (0x62000000U) /* Shared RAM                        */
-#define DIPHDA_HOST_XNVM_BASE                (0x68000000U) /* XNVM                               */
-#define DIPHDA_AXI_QSPI_CTRL_REG_BASE        (0x80050000U) /* AXI QSPI Controller               */
+#define DIPHDA_HOST_XNVM_BASE                (0x68000000U) /* XNVM                              */
 #define DIPHDA_HOST_BASE_SYSTEM_CONTROL_BASE (0x7A010000U) /* Host SCB                          */
 #define DIPHDA_HOST_FIREWALL_BASE            (0x7A800000U) /* Host Firewall                     */
 #define DIPHDA_HOST_FPGA_SCC_REGISTERS       (0x80000000U) /* FPGA SCC Registers                */
+#define DIPHDA_AXI_QSPI_CTRL_REG_BASE        (0x80050000U) /* AXI QSPI Controller               */
+#define DIPHDA_SE_SECURE_FLASH_BASE_FVP      (0x80010000U) /* SE Flash                          */
 
 #endif  /* __PLATFORM_BASE_ADDRESS_H__ */

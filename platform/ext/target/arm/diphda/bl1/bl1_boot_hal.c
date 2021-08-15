@@ -22,44 +22,44 @@
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_SE_SECURE_FLASH;
+
 REGION_DECLARE(Image$$, ER_DATA, $$Base)[];
 REGION_DECLARE(Image$$, ARM_LIB_HEAP, $$ZI$$Limit)[];
 
-#define HOST_BIR_BASE                   0x00000000
-#define HOST_SHARED_RAM_BASE            0x02000000
-#define HOST_XNVM_BASE                  0x08000000
-#define AXI_QSPI_CTRL_REG_BASE          0x40050000
-#define HOST_BASE_SYSTEM_CONTROL_BASE   0x1A010000
-#define HOST_FIREWALL_BASE              0x1A800000
-#define HOST_FPGA_SCC_REGISTERS         0x40000000
-#define FW_CONTROLLER                   0
-#define COMP_FC1                        1
-#define SE_MID                          0
+#define HOST_BIR_BASE                       0x00000000
+#define HOST_SHARED_RAM_BASE                0x02000000
+#define HOST_XNVM_BASE                      0x08000000
+#define AXI_QSPI_CTRL_REG_BASE              0x40050000
+#define HOST_BASE_SYSTEM_CONTROL_BASE       0x1A010000
+#define HOST_FIREWALL_BASE                  0x1A800000
+#define HOST_FPGA_SCC_REGISTERS             0x40000000
+#define HOST_SE_SECURE_FLASH_BASE_FVP       0x60010000
+#define FW_CONTROLLER                       0
+#define COMP_FC1                            1
+#define SE_MID                              0
 
 static void setup_se_firewall(void)
 {
     enum rgn_mpl_t mpl_rights = 0;
 
+#if !(PLATFORM_IS_FVP)
     /* Configure the SE firewall controller */
     fc_select((void *)DIPHDA_FIREWALL_BASE, FW_CONTROLLER);
     fc_disable_bypass();
-
     fc_select_region(2);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
     fc_prog_rgn(RGN_SIZE_2MB, DIPHDA_FIREWALL_BASE);
     fc_init_mpl(RGN_MPE0);
-
     mpl_rights = (RGN_MPL_SECURE_READ_MASK |
                   RGN_MPL_SECURE_WRITE_MASK);
-
     fc_enable_mpl(RGN_MPE0, mpl_rights);
     fc_prog_mid(RGN_MPE0, SE_MID);
     fc_enable_mpe(RGN_MPE0);
     fc_enable_regions();
-
     fc_pe_enable();
-
+#endif
 
     /* Configure the SE firewall component 1 */
     fc_select((void *)DIPHDA_FIREWALL_BASE, COMP_FC1);
@@ -149,6 +149,24 @@ static void setup_se_firewall(void)
     fc_enable_mpe(RGN_MPE0);
     fc_enable_regions();
 
+#if PLATFORM_IS_FVP
+    /* SE Flash Write: 8MB */
+    fc_select_region(6);
+    fc_disable_regions();
+    fc_disable_mpe(RGN_MPE0);
+    fc_prog_rgn(RGN_SIZE_8MB, DIPHDA_SE_SECURE_FLASH_BASE_FVP);
+    fc_prog_rgn_upper_addr(HOST_SE_SECURE_FLASH_BASE_FVP);
+    fc_enable_addr_trans();
+    fc_init_mpl(RGN_MPE0);
+
+    mpl_rights = (RGN_MPL_SECURE_READ_MASK |
+                  RGN_MPL_SECURE_WRITE_MASK);
+
+    fc_enable_mpl(RGN_MPE0, mpl_rights);
+    fc_prog_mid(RGN_MPE0, SE_MID);
+    fc_enable_mpe(RGN_MPE0);
+    fc_enable_regions();
+#else
     /* QSPI Flash Write: 64KB */
     fc_select_region(6);
     fc_disable_regions();
@@ -159,11 +177,7 @@ static void setup_se_firewall(void)
     fc_init_mpl(RGN_MPE0);
 
     mpl_rights = (RGN_MPL_SECURE_READ_MASK |
-                  RGN_MPL_SECURE_WRITE_MASK |
-                  RGN_MPL_SECURE_EXECUTE_MASK |
-                  RGN_MPL_NONSECURE_READ_MASK |
-                  RGN_MPL_NONSECURE_WRITE_MASK |
-                  RGN_MPL_NONSECURE_EXECUTE_MASK);
+                  RGN_MPL_SECURE_WRITE_MASK);
 
     fc_enable_mpl(RGN_MPE0, mpl_rights);
     fc_prog_mid(RGN_MPE0, SE_MID);
@@ -191,7 +205,7 @@ static void setup_se_firewall(void)
     fc_prog_mid(RGN_MPE0, SE_MID);
     fc_enable_mpe(RGN_MPE0);
     fc_enable_regions();
-
+#endif
 
     fc_pe_enable();
 }
@@ -225,6 +239,12 @@ int32_t boot_platform_init(void)
     if (result != ARM_DRIVER_OK) {
         return 1;
     }
+#if PLATFORM_IS_FVP
+   result = FLASH_DEV_NAME_SE_SECURE_FLASH.Initialize(NULL);
+   if (result != ARM_DRIVER_OK) {
+       return 1;
+   }
+#endif
 
 #ifdef CRYPTO_HW_ACCELERATOR
     result = crypto_hw_accelerator_init();
@@ -259,6 +279,13 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     if (result != ARM_DRIVER_OK) {
         while (1);
     }
+
+#if PLATFORM_IS_FVP
+    result = FLASH_DEV_NAME_SE_SECURE_FLASH.Uninitialize();
+    if (result != ARM_DRIVER_OK) {
+        while (1);
+    }
+#endif
 
     vt_cpy = vt;
 
