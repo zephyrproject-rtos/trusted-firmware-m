@@ -18,6 +18,7 @@
 #include "tfm_mbedcrypto_include.h"
 #if defined(MBEDTLS_AES_DECRYPT_ALT) || defined(MBEDTLS_AES_SETKEY_DEC_ALT)
 #include "mbedtls/aes.h"
+#include "mbedtls/error.h"
 #endif
 
 #if defined(MBEDTLS_AES_DECRYPT_ALT) && defined(MBEDTLS_CCM_C)
@@ -35,7 +36,7 @@ int mbedtls_internal_aes_decrypt(mbedtls_aes_context *ctx,
     (void)input;
     (void)output;
 
-    return MBEDTLS_ERR_AES_FEATURE_UNAVAILABLE;
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
 }
 #endif
 
@@ -53,6 +54,6 @@ int mbedtls_aes_setkey_dec(mbedtls_aes_context *ctx, const unsigned char *key,
     (void)key;
     (void)keybits;
 
-    return MBEDTLS_ERR_AES_FEATURE_UNAVAILABLE;
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
 }
 #endif

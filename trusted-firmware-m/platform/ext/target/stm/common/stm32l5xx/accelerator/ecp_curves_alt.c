@@ -1,7 +1,7 @@
 /*
  *  Elliptic curves over GF(p): curve-specific data and functions
  *
- *  Copyright (C) 2006-2015, ARM Limited, All Rights Reserved
+ *  Copyright (C) 2006-2021, ARM Limited, All Rights Reserved
  *  Copyright (C) 2019, STMicroelectronics, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
@@ -568,9 +568,9 @@ static const mbedtls_mpi_uint brainpoolP512r1_n[] = {
  */
 static inline void ecp_mpi_load( mbedtls_mpi *X, const mbedtls_mpi_uint *p, size_t len )
 {
-    X->s = 1;
-    X->n = len / sizeof( mbedtls_mpi_uint );
-    X->p = (mbedtls_mpi_uint *) p;
+    X->MBEDTLS_PRIVATE(s) = 1;
+    X->MBEDTLS_PRIVATE(n) = len / sizeof( mbedtls_mpi_uint );
+    X->MBEDTLS_PRIVATE(p) = (mbedtls_mpi_uint *) p;
 }
 
 /*
@@ -579,9 +579,9 @@ static inline void ecp_mpi_load( mbedtls_mpi *X, const mbedtls_mpi_uint *p, size
 static inline void ecp_mpi_set1( mbedtls_mpi *X )
 {
     static mbedtls_mpi_uint one[] = { 1 };
-    X->s = 1;
-    X->n = 1;
-    X->p = one;
+    X->MBEDTLS_PRIVATE(s) = 1;
+    X->MBEDTLS_PRIVATE(n) = 1;
+    X->MBEDTLS_PRIVATE(p) = one;
 }
 
 /*
@@ -606,9 +606,9 @@ static int ecp_group_load( mbedtls_ecp_group *grp,
     ecp_mpi_load( &grp->B, b, blen );
     ecp_mpi_load( &grp->N, n, nlen );
 
-    ecp_mpi_load( &grp->G.X, gx, gxlen );
-    ecp_mpi_load( &grp->G.Y, gy, gylen );
-    ecp_mpi_set1( &grp->G.Z );
+    ecp_mpi_load( &grp->G.MBEDTLS_PRIVATE(X), gx, gxlen );
+    ecp_mpi_load( &grp->G.MBEDTLS_PRIVATE(Y), gy, gylen );
+    ecp_mpi_set1( &grp->G.MBEDTLS_PRIVATE(Z) );
 
     grp->pbits = mbedtls_mpi_bitlen( &grp->P );
     grp->nbits = mbedtls_mpi_bitlen( &grp->N );
@@ -628,7 +628,7 @@ static int ecp_group_load( mbedtls_ecp_group *grp,
     grp->st_a_abs = mbedtls_calloc(grp->st_modulus_size, sizeof( uint8_t ));
     MBEDTLS_MPI_CHK((grp->st_a_abs == NULL) ? MBEDTLS_ERR_ECP_ALLOC_FAILED : 0);
 
-    if (grp->A.p == NULL)
+    if (grp->A.MBEDTLS_PRIVATE(p) == NULL)
     {
         /* NIST prime curves: A coef = -3 */
         mbedtls_platform_zeroize(grp->st_a_abs, grp->st_modulus_size);
@@ -649,11 +649,11 @@ static int ecp_group_load( mbedtls_ecp_group *grp,
 
     grp->st_gx = mbedtls_calloc(grp->st_modulus_size, sizeof( uint8_t ));
     MBEDTLS_MPI_CHK((grp->st_gx == NULL) ? MBEDTLS_ERR_ECP_ALLOC_FAILED : 0);
-    mbedtls_mpi_write_binary(&grp->G.X, grp->st_gx, grp->st_modulus_size);
+    mbedtls_mpi_write_binary(&grp->G.MBEDTLS_PRIVATE(X), grp->st_gx, grp->st_modulus_size);
 
     grp->st_gy = mbedtls_calloc(grp->st_modulus_size, sizeof( uint8_t ));
     MBEDTLS_MPI_CHK((grp->st_gy == NULL) ? MBEDTLS_ERR_ECP_ALLOC_FAILED : 0);
-    mbedtls_mpi_write_binary(&grp->G.Y, grp->st_gy, grp->st_modulus_size);
+    mbedtls_mpi_write_binary(&grp->G.MBEDTLS_PRIVATE(Y), grp->st_gy, grp->st_modulus_size);
 
     grp->st_n = mbedtls_calloc(grp->st_order_size, sizeof( uint8_t ));
     MBEDTLS_MPI_CHK((grp->st_n == NULL) ? MBEDTLS_ERR_ECP_ALLOC_FAILED : 0);
@@ -746,9 +746,9 @@ static int ecp_use_curve25519( mbedtls_ecp_group *grp )
 
     /* Y intentionally not set, since we use x/z coordinates.
      * This is used as a marker to identify Montgomery curves! */
-    MBEDTLS_MPI_CHK( mbedtls_mpi_lset( &grp->G.X, 9 ) );
-    MBEDTLS_MPI_CHK( mbedtls_mpi_lset( &grp->G.Z, 1 ) );
-    mbedtls_mpi_free( &grp->G.Y );
+    MBEDTLS_MPI_CHK( mbedtls_mpi_lset( &grp->G.MBEDTLS_PRIVATE(X), 9 ) );
+    MBEDTLS_MPI_CHK( mbedtls_mpi_lset( &grp->G.MBEDTLS_PRIVATE(Z), 1 ) );
+    mbedtls_mpi_free( &grp->G.MBEDTLS_PRIVATE(Y) );
 
     /* Actually, the required msb for private keys */
     grp->nbits = 254;
@@ -785,9 +785,9 @@ static int ecp_use_curve448( mbedtls_ecp_group *grp )
 
     /* Y intentionally not set, since we use x/z coordinates.
      * This is used as a marker to identify Montgomery curves! */
-    MBEDTLS_MPI_CHK( mbedtls_mpi_lset( &grp->G.X, 5 ) );
-    MBEDTLS_MPI_CHK( mbedtls_mpi_lset( &grp->G.Z, 1 ) );
-    mbedtls_mpi_free( &grp->G.Y );
+    MBEDTLS_MPI_CHK( mbedtls_mpi_lset( &grp->G.MBEDTLS_PRIVATE(X), 5 ) );
+    MBEDTLS_MPI_CHK( mbedtls_mpi_lset( &grp->G.MBEDTLS_PRIVATE(Z), 1 ) );
+    mbedtls_mpi_free( &grp->G.MBEDTLS_PRIVATE(Y) );
 
     /* N = 2^446 - 13818066809895115352007386748515426880336692474882178609894547503885 */
     MBEDTLS_MPI_CHK( mbedtls_mpi_set_bit( &grp->N, 446, 1 ) );
@@ -949,7 +949,7 @@ static inline void carry64( mbedtls_mpi_uint *dst, mbedtls_mpi_uint *carry )
 }
 
 #define WIDTH       8 / sizeof( mbedtls_mpi_uint )
-#define A( i )      N->p + (i) * WIDTH
+#define A( i )      N->MBEDTLS_PRIVATE(p) + (i) * WIDTH
 #define ADD( i )    add64( p, A( i ), &c )
 #define NEXT        p += WIDTH; carry64( p, &c )
 #define LAST        p += WIDTH; *p = c; while( ++p < end ) *p = 0
@@ -966,8 +966,8 @@ static int ecp_mod_p192( mbedtls_mpi *N )
     /* Make sure we have enough blocks so that A(5) is legal */
     MBEDTLS_MPI_CHK( mbedtls_mpi_grow( N, 6 * WIDTH ) );
 
-    p = N->p;
-    end = p + N->n;
+    p = N->MBEDTLS_PRIVATE(p);
+    end = p + N->MBEDTLS_PRIVATE(n);
 
     ADD( 3 ); ADD( 5 );             NEXT; // A0 += A3 + A5
     ADD( 3 ); ADD( 4 ); ADD( 5 );   NEXT; // A1 += A3 + A4 + A5
@@ -1008,22 +1008,22 @@ cleanup:
 #if defined(MBEDTLS_HAVE_INT32)
 /* 32 bit */
 
-#define MAX32       N->n
-#define A( j )      N->p[j]
-#define STORE32     N->p[i] = cur;
+#define MAX32       N->MBEDTLS_PRIVATE(n)
+#define A( j )      N->MBEDTLS_PRIVATE(p)[j]
+#define STORE32     N->MBEDTLS_PRIVATE(p)[i] = cur;
 
 #else                               /* 64-bit */
 
-#define MAX32       N->n * 2
-#define A( j ) (j) % 2 ? (uint32_t)( N->p[(j)/2] >> 32 ) : \
-                         (uint32_t)( N->p[(j)/2] )
+#define MAX32       N->MBEDTLS_PRIVATE(n) * 2
+#define A( j ) (j) % 2 ? (uint32_t)( N->MBEDTLS_PRIVATE(p)[(j)/2] >> 32 ) : \
+                         (uint32_t)( N->MBEDTLS_PRIVATE(p)[(j)/2] )
 #define STORE32                                   \
     if( i % 2 ) {                                 \
-        N->p[i/2] &= 0x00000000FFFFFFFF;          \
-        N->p[i/2] |= ((mbedtls_mpi_uint) cur) << 32;        \
+        N->MBEDTLS_PRIVATE(p)[i/2] &= 0x00000000FFFFFFFF;          \
+        N->MBEDTLS_PRIVATE(p)[i/2] |= ((mbedtls_mpi_uint) cur) << 32;        \
     } else {                                      \
-        N->p[i/2] &= 0xFFFFFFFF00000000;          \
-        N->p[i/2] |= (mbedtls_mpi_uint) cur;                \
+        N->MBEDTLS_PRIVATE(p)[i/2] &= 0xFFFFFFFF00000000;          \
+        N->MBEDTLS_PRIVATE(p)[i/2] |= (mbedtls_mpi_uint) cur;                \
     }
 
 #endif /* sizeof( mbedtls_mpi_uint ) */
@@ -1058,10 +1058,10 @@ static inline void sub32( uint32_t *dst, uint32_t src, signed char *carry )
     mbedtls_mpi C;                                                      \
     mbedtls_mpi_uint Cp[ (b) / 8 / sizeof( mbedtls_mpi_uint) + 1 ];     \
                                                                         \
-    C.s = 1;                                                            \
-    C.n = (b) / 8 / sizeof( mbedtls_mpi_uint) + 1;                      \
-    C.p = Cp;                                                           \
-    memset( Cp, 0, C.n * sizeof( mbedtls_mpi_uint ) );                  \
+    C.MBEDTLS_PRIVATE(s) = 1;                                                            \
+    C.MBEDTLS_PRIVATE(n) = (b) / 8 / sizeof( mbedtls_mpi_uint) + 1;                      \
+    C.MBEDTLS_PRIVATE(p) = Cp;                                                           \
+    memset( Cp, 0, C.MBEDTLS_PRIVATE(n) * sizeof( mbedtls_mpi_uint ) );                  \
                                                                         \
     MBEDTLS_MPI_CHK( mbedtls_mpi_grow( N, (b) * 2 / 8 /                 \
                                        sizeof( mbedtls_mpi_uint ) ) );  \
@@ -1094,14 +1094,14 @@ static inline int fix_negative( mbedtls_mpi *N, signed char c, mbedtls_mpi *C, s
     ((void) bits);
 #else
     if( bits == 224 )
-        C->p[ C->n - 1 ] = ((mbedtls_mpi_uint) -c) << 32;
+        C->MBEDTLS_PRIVATE(p)[ C->MBEDTLS_PRIVATE(n) - 1 ] = ((mbedtls_mpi_uint) -c) << 32;
     else
 #endif
-        C->p[ C->n - 1 ] = (mbedtls_mpi_uint) -c;
+        C->MBEDTLS_PRIVATE(p)[ C->MBEDTLS_PRIVATE(n) - 1 ] = (mbedtls_mpi_uint) -c;
 
     /* N = - ( C - N ) */
     MBEDTLS_MPI_CHK( mbedtls_mpi_sub_abs( N, C, N ) );
-    N->s = -1;
+    N->MBEDTLS_PRIVATE(s) = -1;
 
 cleanup:
 
@@ -1253,22 +1253,22 @@ static int ecp_mod_p521( mbedtls_mpi *N )
      * we need to hold bits 513 to 1056, which is 34 limbs, that is
      * P521_WIDTH + 1. Otherwise P521_WIDTH is enough. */
 
-    if( N->n < P521_WIDTH )
+    if( N->MBEDTLS_PRIVATE(n) < P521_WIDTH )
         return( 0 );
 
     /* M = A1 */
-    M.s = 1;
-    M.n = N->n - ( P521_WIDTH - 1 );
-    if( M.n > P521_WIDTH + 1 )
-        M.n = P521_WIDTH + 1;
-    M.p = Mp;
-    memcpy( Mp, N->p + P521_WIDTH - 1, M.n * sizeof( mbedtls_mpi_uint ) );
+    M.MBEDTLS_PRIVATE(s) = 1;
+    M.MBEDTLS_PRIVATE(n) = N->MBEDTLS_PRIVATE(n) - ( P521_WIDTH - 1 );
+    if( M.MBEDTLS_PRIVATE(n) > P521_WIDTH + 1 )
+        M.MBEDTLS_PRIVATE(n) = P521_WIDTH + 1;
+    M.MBEDTLS_PRIVATE(p) = Mp;
+    memcpy( Mp, N->MBEDTLS_PRIVATE(p) + P521_WIDTH - 1, M.MBEDTLS_PRIVATE(n) * sizeof( mbedtls_mpi_uint ) );
     MBEDTLS_MPI_CHK( mbedtls_mpi_shift_r( &M, 521 % ( 8 * sizeof( mbedtls_mpi_uint ) ) ) );
 
     /* N = A0 */
-    N->p[P521_WIDTH - 1] &= P521_MASK;
-    for( i = P521_WIDTH; i < N->n; i++ )
-        N->p[i] = 0;
+    N->MBEDTLS_PRIVATE(p)[P521_WIDTH - 1] &= P521_MASK;
+    for( i = P521_WIDTH; i < N->MBEDTLS_PRIVATE(n); i++ )
+        N->MBEDTLS_PRIVATE(p)[i] = 0;
 
     /* N = A0 + A1 */
     MBEDTLS_MPI_CHK( mbedtls_mpi_add_abs( N, N, &M ) );
@@ -1299,24 +1299,24 @@ static int ecp_mod_p255( mbedtls_mpi *N )
     mbedtls_mpi M;
     mbedtls_mpi_uint Mp[P255_WIDTH + 2];
 
-    if( N->n < P255_WIDTH )
+    if( N->MBEDTLS_PRIVATE(n) < P255_WIDTH )
         return( 0 );
 
     /* M = A1 */
-    M.s = 1;
-    M.n = N->n - ( P255_WIDTH - 1 );
-    if( M.n > P255_WIDTH + 1 )
+    M.MBEDTLS_PRIVATE(s) = 1;
+    M.MBEDTLS_PRIVATE(n) = N->MBEDTLS_PRIVATE(n) - ( P255_WIDTH - 1 );
+    if( M.MBEDTLS_PRIVATE(n) > P255_WIDTH + 1 )
         return( MBEDTLS_ERR_ECP_BAD_INPUT_DATA );
-    M.p = Mp;
+    M.MBEDTLS_PRIVATE(p) = Mp;
     memset( Mp, 0, sizeof Mp );
-    memcpy( Mp, N->p + P255_WIDTH - 1, M.n * sizeof( mbedtls_mpi_uint ) );
+    memcpy( Mp, N->MBEDTLS_PRIVATE(p) + P255_WIDTH - 1, M.MBEDTLS_PRIVATE(n) * sizeof( mbedtls_mpi_uint ) );
     MBEDTLS_MPI_CHK( mbedtls_mpi_shift_r( &M, 255 % ( 8 * sizeof( mbedtls_mpi_uint ) ) ) );
-    M.n++; /* Make room for multiplication by 19 */
+    M.MBEDTLS_PRIVATE(n)++; /* Make room for multiplication by 19 */
 
     /* N = A0 */
     MBEDTLS_MPI_CHK( mbedtls_mpi_set_bit( N, 255, 0 ) );
-    for( i = P255_WIDTH; i < N->n; i++ )
-        N->p[i] = 0;
+    for( i = P255_WIDTH; i < N->MBEDTLS_PRIVATE(n); i++ )
+        N->MBEDTLS_PRIVATE(p)[i] = 0;
 
     /* N = A0 + 19 * A1 */
     MBEDTLS_MPI_CHK( mbedtls_mpi_mul_int( &M, &M, 19 ) );
@@ -1356,29 +1356,29 @@ static int ecp_mod_p448( mbedtls_mpi *N )
     mbedtls_mpi M, Q;
     mbedtls_mpi_uint Mp[P448_WIDTH + 1], Qp[P448_WIDTH];
 
-    if( N->n <= P448_WIDTH )
+    if( N->MBEDTLS_PRIVATE(n) <= P448_WIDTH )
         return( 0 );
 
     /* M = A1 */
-    M.s = 1;
-    M.n = N->n - ( P448_WIDTH );
-    if( M.n > P448_WIDTH )
+    M.MBEDTLS_PRIVATE(s) = 1;
+    M.MBEDTLS_PRIVATE(n) = N->MBEDTLS_PRIVATE(n) - ( P448_WIDTH );
+    if( M.MBEDTLS_PRIVATE(n) > P448_WIDTH )
         /* Shouldn't be called with N larger than 2^896! */
         return( MBEDTLS_ERR_ECP_BAD_INPUT_DATA );
-    M.p = Mp;
+    M.MBEDTLS_PRIVATE(p) = Mp;
     memset( Mp, 0, sizeof( Mp ) );
-    memcpy( Mp, N->p + P448_WIDTH, M.n * sizeof( mbedtls_mpi_uint ) );
+    memcpy( Mp, N->MBEDTLS_PRIVATE(p) + P448_WIDTH, M.MBEDTLS_PRIVATE(n) * sizeof( mbedtls_mpi_uint ) );
 
     /* N = A0 */
-    for( i = P448_WIDTH; i < N->n; i++ )
-        N->p[i] = 0;
+    for( i = P448_WIDTH; i < N->MBEDTLS_PRIVATE(n); i++ )
+        N->MBEDTLS_PRIVATE(p)[i] = 0;
 
     /* N += A1 */
     MBEDTLS_MPI_CHK( mbedtls_mpi_add_mpi( N, N, &M ) );
 
     /* Q = B1, N += B1 */
     Q = M;
-    Q.p = Qp;
+    Q.MBEDTLS_PRIVATE(p) = Qp;
     memcpy( Qp, Mp, sizeof( Qp ) );
     MBEDTLS_MPI_CHK( mbedtls_mpi_shift_r( &Q, 224 ) );
     MBEDTLS_MPI_CHK( mbedtls_mpi_add_mpi( N, N, &Q ) );
@@ -1386,10 +1386,10 @@ static int ecp_mod_p448( mbedtls_mpi *N )
     /* M = (B0 + B1) * 2^224, N += M */
     if( sizeof( mbedtls_mpi_uint ) > 4 )
         Mp[P224_WIDTH_MIN] &= ( (mbedtls_mpi_uint)-1 ) >> ( P224_UNUSED_BITS );
-    for( i = P224_WIDTH_MAX; i < M.n; ++i )
+    for( i = P224_WIDTH_MAX; i < M.MBEDTLS_PRIVATE(n); ++i )
         Mp[i] = 0;
     MBEDTLS_MPI_CHK( mbedtls_mpi_add_mpi( &M, &M, &Q ) );
-    M.n = P448_WIDTH + 1; /* Make room for shifted carry bit from the addition */
+    M.MBEDTLS_PRIVATE(n) = P448_WIDTH + 1; /* Make room for shifted carry bit from the addition */
     MBEDTLS_MPI_CHK( mbedtls_mpi_shift_l( &M, 224 ) );
     MBEDTLS_MPI_CHK( mbedtls_mpi_add_mpi( N, N, &M ) );
 
@@ -1418,33 +1418,33 @@ static inline int ecp_mod_koblitz( mbedtls_mpi *N, mbedtls_mpi_uint *Rp, size_t 
     mbedtls_mpi M, R;
     mbedtls_mpi_uint Mp[P_KOBLITZ_MAX + P_KOBLITZ_R + 1];
 
-    if( N->n < p_limbs )
+    if( N->MBEDTLS_PRIVATE(n) < p_limbs )
         return( 0 );
 
     /* Init R */
-    R.s = 1;
-    R.p = Rp;
-    R.n = P_KOBLITZ_R;
+    R.MBEDTLS_PRIVATE(s) = 1;
+    R.MBEDTLS_PRIVATE(p) = Rp;
+    R.MBEDTLS_PRIVATE(n) = P_KOBLITZ_R;
 
     /* Common setup for M */
-    M.s = 1;
-    M.p = Mp;
+    M.MBEDTLS_PRIVATE(s) = 1;
+    M.MBEDTLS_PRIVATE(p) = Mp;
 
     /* M = A1 */
-    M.n = N->n - ( p_limbs - adjust );
-    if( M.n > p_limbs + adjust )
-        M.n = p_limbs + adjust;
+    M.MBEDTLS_PRIVATE(n) = N->MBEDTLS_PRIVATE(n) - ( p_limbs - adjust );
+    if( M.MBEDTLS_PRIVATE(n) > p_limbs + adjust )
+        M.MBEDTLS_PRIVATE(n) = p_limbs + adjust;
     memset( Mp, 0, sizeof Mp );
-    memcpy( Mp, N->p + p_limbs - adjust, M.n * sizeof( mbedtls_mpi_uint ) );
+    memcpy( Mp, N->MBEDTLS_PRIVATE(p) + p_limbs - adjust, M.MBEDTLS_PRIVATE(n) * sizeof( mbedtls_mpi_uint ) );
     if( shift != 0 )
         MBEDTLS_MPI_CHK( mbedtls_mpi_shift_r( &M, shift ) );
-    M.n += R.n; /* Make room for multiplication by R */
+    M.MBEDTLS_PRIVATE(n) += R.MBEDTLS_PRIVATE(n); /* Make room for multiplication by R */
 
     /* N = A0 */
     if( mask != 0 )
-        N->p[p_limbs - 1] &= mask;
-    for( i = p_limbs; i < N->n; i++ )
-        N->p[i] = 0;
+        N->MBEDTLS_PRIVATE(p)[p_limbs - 1] &= mask;
+    for( i = p_limbs; i < N->MBEDTLS_PRIVATE(n); i++ )
+        N->MBEDTLS_PRIVATE(p)[i] = 0;
 
     /* N = A0 + R * A1 */
     MBEDTLS_MPI_CHK( mbedtls_mpi_mul_mpi( &M, &M, &R ) );
@@ -1453,20 +1453,20 @@ static inline int ecp_mod_koblitz( mbedtls_mpi *N, mbedtls_mpi_uint *Rp, size_t 
     /* Second pass */
 
     /* M = A1 */
-    M.n = N->n - ( p_limbs - adjust );
-    if( M.n > p_limbs + adjust )
-        M.n = p_limbs + adjust;
+    M.MBEDTLS_PRIVATE(n) = N->MBEDTLS_PRIVATE(n) - ( p_limbs - adjust );
+    if( M.MBEDTLS_PRIVATE(n) > p_limbs + adjust )
+        M.MBEDTLS_PRIVATE(n) = p_limbs + adjust;
     memset( Mp, 0, sizeof Mp );
-    memcpy( Mp, N->p + p_limbs - adjust, M.n * sizeof( mbedtls_mpi_uint ) );
+    memcpy( Mp, N->MBEDTLS_PRIVATE(p) + p_limbs - adjust, M.MBEDTLS_PRIVATE(n) * sizeof( mbedtls_mpi_uint ) );
     if( shift != 0 )
         MBEDTLS_MPI_CHK( mbedtls_mpi_shift_r( &M, shift ) );
-    M.n += R.n; /* Make room for multiplication by R */
+    M.MBEDTLS_PRIVATE(n) += R.MBEDTLS_PRIVATE(n); /* Make room for multiplication by R */
 
     /* N = A0 */
     if( mask != 0 )
-        N->p[p_limbs - 1] &= mask;
-    for( i = p_limbs; i < N->n; i++ )
-        N->p[i] = 0;
+        N->MBEDTLS_PRIVATE(p)[p_limbs - 1] &= mask;
+    for( i = p_limbs; i < N->MBEDTLS_PRIVATE(n); i++ )
+        N->MBEDTLS_PRIVATE(p)[i] = 0;
 
     /* N = A0 + R * A1 */
     MBEDTLS_MPI_CHK( mbedtls_mpi_mul_mpi( &M, &M, &R ) );

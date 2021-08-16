@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
- * Copyright (c) 2019 Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019, 2021 Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -102,7 +102,7 @@ void platform_mailbox_wait_for_notify(void)
                               0, IPC_RX_INT_MASK);
 }
 
-int platform_ns_ipc_init(void)
+static int platform_ns_ipc_init(void)
 {
     Cy_IPC_Drv_SetInterruptMask(Cy_IPC_Drv_GetIntrBaseAddr(IPC_RX_INTR_STRUCT),
                                 0, IPC_RX_INT_MASK);

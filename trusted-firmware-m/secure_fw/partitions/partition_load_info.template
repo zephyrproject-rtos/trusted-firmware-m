@@ -20,34 +20,18 @@
 #include "psa_manifest/sid.h"
 #include "psa_manifest/{{manifest_out_basename}}.h"
 
-{% set counter = namespace(dep_counter=0, service_counter=0, asset_counter=0, irq_counter=0) %}
-{% if manifest.dependencies %}
-    {% for dep in manifest.dependencies %}
-        {% set counter.dep_counter = counter.dep_counter + 1 %}
-    {% endfor %}
-{% endif %}
-{% if manifest.services %}
-    {% for service in manifest.services %}
-        {% set counter.service_counter = counter.service_counter + 1 %}
-    {% endfor %}
-{% endif %}
-{% if manifest.mmio_regions %}
-    {% for asset in manifest.mmio_regions %}
-        {% set counter.asset_counter = counter.asset_counter + 1 %}
-    {% endfor %}
-{% endif %}
-{% if manifest.irqs %}
-    {% for irq in manifest.irqs %}
-        {% set counter.irq_counter = counter.irq_counter + 1 %}
-    {% endfor %}
-{% endif %}
+{% set counter = namespace() %}
+{% set counter.dep_counter = manifest.dependencies|count %}
 #define {{"%-55s"|format(manifest.name|upper + "_NDEPS")}} ({{"%d"|format(counter.dep_counter)}})
+{% set counter.service_counter = manifest.services|count %}
 #define {{"%-55s"|format(manifest.name|upper + "_NSERVS")}} ({{"%d"|format(counter.service_counter)}})
+{% set counter.asset_counter = manifest.mmio_regions|count %}
 #if TFM_LVL == 3
 #define {{"%-55s"|format(manifest.name|upper + "_NASSETS")}} ({{"%d"|format(counter.asset_counter)}} + 1)
 #else
 #define {{"%-55s"|format(manifest.name|upper + "_NASSETS")}} ({{"%d"|format(counter.asset_counter)}})
 #endif
+{% set counter.irq_counter = manifest.irqs|count %}
 #define {{"%-55s"|format(manifest.name|upper + "_NIRQS")}} ({{"%d"|format(counter.irq_counter)}})
 
 /* Memory region declaration */
@@ -78,20 +62,20 @@ struct partition_{{manifest.name|lower}}_load_info_t {
     /* per-partition variable length load data */
     uintptr_t                       stack_addr;
     uintptr_t                       heap_addr;
-{% if manifest.dependencies %}
+{% if counter.dep_counter > 0 %}
     uint32_t                        deps[{{(manifest.name|upper + "_NDEPS")}}];
 {% endif %}
-{% if manifest.services %}
+{% if counter.service_counter > 0 %}
     struct service_load_info_t      services[{{(manifest.name|upper + "_NSERVS")}}];
 {% endif %}
 #if TFM_LVL == 3
     struct asset_desc_t             assets[{{(manifest.name|upper + "_NASSETS")}}];
 #else
-{% if manifest.mmio_regions %}
+{% if counter.asset_counter > 0 %}
     struct asset_desc_t             assets[{{(manifest.name|upper + "_NASSETS")}}];
 {% endif %}
 #endif
-{% if manifest.irqs %}
+{% if counter.irq_counter > 0 %}
     struct irq_load_info_t          irqs[{{(manifest.name|upper + "_NIRQS")}}];
 {% endif %}
 } __attribute__((aligned(4)));
@@ -134,14 +118,14 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
     },
     .stack_addr                     = (uintptr_t){{manifest.name|lower}}_stack,
     .heap_addr                      = 0,
-{% if manifest.dependencies %}
+{% if counter.dep_counter > 0 %}
     .deps = {
     {% for dep in manifest.dependencies %}
         {{dep}}_SID,
     {% endfor %}
     },
 {% endif %}
-{% if manifest.services %}
+{% if counter.service_counter > 0 %}
     .services = {
     {% for service in manifest.services %}
         {
@@ -180,21 +164,23 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
             .mem.addr_y             = PART_REGION_ADDR(PT_{{manifest.name}}_PRIVATE, _DATA_END$$Base),
             .attr                   = ASSET_MEM_RD_BIT | ASSET_MEM_WR_BIT,
         },
-{% for region in manifest.mmio_regions %}
-    {% if region.conditional %}
+{% if counter.asset_counter > 0 %}
+    {% for region in manifest.mmio_regions %}
+        {% if region.conditional %}
 #ifdef {{region.conditional}}
-    {% endif %}
+        {% endif %}
         {
             .dev.addr_ref           = PTR_TO_REFERENCE({{region.name}}),
             .attr                   = ASSET_DEV_REF_BIT,
         },
-    {% if region.conditional %}
+        {% if region.conditional %}
 #endif
-    {% endif %}
-{% endfor %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
     },
 #else
-{% if manifest.mmio_regions %}
+{% if counter.asset_counter > 0 %}
     .assets                         = {
     {% for region in manifest.mmio_regions %}
         {% if region.conditional %}
@@ -211,7 +197,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
     },
 {% endif %}
 #endif
-{% if manifest.irqs %}
+{% if counter.irq_counter > 0 %}
     .irqs = {
     {% for irq in manifest.irqs %}
         {% set irq_info = namespace() %}
@@ -239,5 +225,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
 /* Placeholder for partition and service runtime space. Do not reference it. */
 static struct partition_t {{manifest.name|lower}}_partition_runtime_item
     __attribute__((used, section(".bss.part_runtime")));
+{% if counter.service_counter > 0 %}
 static struct service_t {{manifest.name|lower}}_service_runtime_item[{{(manifest.name|upper + "_NSERVS")}}]
     __attribute__((used, section(".bss.serv_runtime")));
+{% endif %}

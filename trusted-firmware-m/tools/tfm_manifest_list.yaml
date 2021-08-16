@@ -201,21 +201,6 @@
       }
     },
     {
-      "name": "TF-M PSA Proxy Service",
-      "short_name": "TFM_SP_PSA_PROXY",
-      "manifest": "secure_fw/partitions/psa_proxy/tfm_psa_proxy.yaml",
-      "tfm_extensions": true,
-      "conditional": "TFM_PARTITION_PSA_PROXY",
-      "version_major": 0,
-      "version_minor": 1,
-      "pid": 270,
-      "linker_pattern": {
-        "library_list": [
-           "*tfm_*partition_psa_proxy.*"
-         ]
-      }
-    },
-    {
       "name": "TFM Firmware Update Service",
       "short_name": "TFM_SP_FWU",
       "manifest": "secure_fw/partitions/firmware_update/tfm_firmware_update.yaml",

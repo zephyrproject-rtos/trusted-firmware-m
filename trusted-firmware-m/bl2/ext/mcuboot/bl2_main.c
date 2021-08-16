@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Wind River Systems, Inc.
- * Copyright (c) 2017-2020 Arm Limited.
+ * Copyright (c) 2017-2021 Arm Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ __asm("  .global __ARM_use_no_argv\n");
 #endif
 
 #ifdef MCUBOOT_ENCRYPT_RSA
-#define BL2_MBEDTLS_MEM_BUF_LEN 0x225C
+#define BL2_MBEDTLS_MEM_BUF_LEN 0x3000
 #else
 #define BL2_MBEDTLS_MEM_BUF_LEN 0x2000
 #endif

@@ -10,7 +10,7 @@
  *
  */
 /*
- *  Copyright (C) 2006-2018, Arm Limited (or its affiliates), All Rights Reserved
+ *  Copyright (C) 2006-2021, Arm Limited (or its affiliates), All Rights Reserved
  *  Copyright (C) 2020, STMicroelectronics, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
@@ -50,37 +50,37 @@ extern "C" {
  */
 typedef struct mbedtls_rsa_context
 {
-    int ver;                    /*!<  Always 0.*/
-    size_t len;                 /*!<  The size of \p N in Bytes. */
+    int MBEDTLS_PRIVATE(ver);        /*!<  Always 0.*/
+    size_t MBEDTLS_PRIVATE(len);     /*!<  The size of \p N in Bytes. */
 
-    mbedtls_mpi N;              /*!<  The public modulus. */
-    mbedtls_mpi E;              /*!<  The public exponent. */
+    mbedtls_mpi MBEDTLS_PRIVATE(N);  /*!<  The public modulus. */
+    mbedtls_mpi MBEDTLS_PRIVATE(E);  /*!<  The public exponent. */
 
-    mbedtls_mpi D;              /*!<  The private exponent. */
-    mbedtls_mpi P;              /*!<  The first prime factor. */
-    mbedtls_mpi Q;              /*!<  The second prime factor. */
+    mbedtls_mpi MBEDTLS_PRIVATE(D);  /*!<  The private exponent. */
+    mbedtls_mpi MBEDTLS_PRIVATE(P);  /*!<  The first prime factor. */
+    mbedtls_mpi MBEDTLS_PRIVATE(Q);  /*!<  The second prime factor. */
 
-    mbedtls_mpi DP;             /*!<  <code>D % (P - 1)</code>. */
-    mbedtls_mpi DQ;             /*!<  <code>D % (Q - 1)</code>. */
-    mbedtls_mpi QP;             /*!<  <code>1 / (Q % P)</code>. */
+    mbedtls_mpi MBEDTLS_PRIVATE(DP); /*!<  <code>D % (P - 1)</code>. */
+    mbedtls_mpi MBEDTLS_PRIVATE(DQ); /*!<  <code>D % (Q - 1)</code>. */
+    mbedtls_mpi MBEDTLS_PRIVATE(QP); /*!<  <code>1 / (Q % P)</code>. */
 
-    mbedtls_mpi RN;             /*!<  cached <code>R^2 mod N</code>. */
+    mbedtls_mpi MBEDTLS_PRIVATE(RN); /*!<  cached <code>R^2 mod N</code>. */
 
-    mbedtls_mpi RP;             /*!<  cached <code>R^2 mod P</code>. */
-    mbedtls_mpi RQ;             /*!<  cached <code>R^2 mod Q</code>. */
+    mbedtls_mpi MBEDTLS_PRIVATE(RP); /*!<  cached <code>R^2 mod P</code>. */
+    mbedtls_mpi MBEDTLS_PRIVATE(RQ); /*!<  cached <code>R^2 mod Q</code>. */
 
-    mbedtls_mpi Vi;             /*!<  The cached blinding value. */
-    mbedtls_mpi Vf;             /*!<  The cached un-blinding value. */
+    mbedtls_mpi MBEDTLS_PRIVATE(Vi); /*!<  The cached blinding value. */
+    mbedtls_mpi MBEDTLS_PRIVATE(Vf); /*!<  The cached un-blinding value. */
 
-    int padding;                /*!< Selects padding mode:
+    int MBEDTLS_PRIVATE(padding);    /*!< Selects padding mode:
                                      #MBEDTLS_RSA_PKCS_V15 for 1.5 padding and
                                      #MBEDTLS_RSA_PKCS_V21 for OAEP or PSS. */
-    int hash_id;                /*!< Hash identifier of mbedtls_md_type_t type,
+    int MBEDTLS_PRIVATE(hash_id);    /*!< Hash identifier of mbedtls_md_type_t type,
                                      as specified in md.h for use in the MGF
                                      mask generating function used in the
                                      EME-OAEP and EMSA-PSS encodings. */
 #if defined(MBEDTLS_THREADING_C)
-    mbedtls_threading_mutex_t mutex;    /*!<  Thread-safety mutex. */
+    mbedtls_threading_mutex_t MBEDTLS_PRIVATE(mutex);    /*!<  Thread-safety mutex. */
 #endif
 }
 mbedtls_rsa_context;

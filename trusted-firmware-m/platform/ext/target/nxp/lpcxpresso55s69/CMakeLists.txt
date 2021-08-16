@@ -78,7 +78,7 @@ endif()
 target_include_directories(platform_s
     PUBLIC
         .
-        Native_Driver/project_template/s
+        project_template/s
         Device/Config
         Device/Include
         partition
@@ -101,13 +101,13 @@ target_sources(platform_s
         target_cfg.c
         ../common/spm_hal.c
         ../common/tfm_hal_isolation.c
-        ../common/CMSIS_Driver/Driver_Flash.c
+        ../common/CMSIS_Driver/Driver_Flash_iap1.c
         ../common/CMSIS_Driver/Driver_USART.c
         ../common/Native_Driver/mpu_armv8m_drv.c
-        Native_Driver/project_template/s/board.c
-        Native_Driver/project_template/s/clock_config.c
-        Native_Driver/project_template/s/peripherals.c
-        Native_Driver/project_template/s/pin_mux.c
+        project_template/s/board.c
+        project_template/s/clock_config.c
+        project_template/s/peripherals.c
+        project_template/s/pin_mux.c
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/system_LPC55S69_cm33_core0.c
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers/fsl_clock.c
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers/fsl_power.c
@@ -146,7 +146,7 @@ target_compile_options(platform_s
 # fix is compatible.
 target_sources(tfm_s
     PRIVATE
-        Native_Driver/project_template/s/hardware_init.c
+        project_template/s/hardware_init.c
 )
 
 #========================= Platform Non-Secure ================================#
@@ -157,7 +157,7 @@ target_include_directories(platform_ns
         Device/Config
         Device/Include
         Native_Driver
-        Native_Driver/project_template/ns
+        project_template/ns
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/lists
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager
@@ -169,11 +169,11 @@ target_include_directories(platform_ns
 
 target_sources(platform_ns
     PRIVATE
-        Native_Driver/project_template/ns/board.c
-        Native_Driver/project_template/ns/hardware_init.c
-        Native_Driver/project_template/ns/clock_config.c
-        Native_Driver/project_template/ns/peripherals.c
-        Native_Driver/project_template/ns/pin_mux.c
+        project_template/ns/board.c
+        project_template/ns/hardware_init.c
+        project_template/ns/clock_config.c
+        project_template/ns/peripherals.c
+        project_template/ns/pin_mux.c
         ${PLATFORM_DIR}/ext/target/nxp/common/CMSIS_Driver/Driver_USART.c
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/system_LPC55S69_cm33_core0.c
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers/fsl_clock.c
@@ -207,7 +207,7 @@ if(BL2)
         PUBLIC
             partition
             Device/Include
-            Native_Driver/project_template/bl2
+            project_template/bl2
             ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver
             ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers
@@ -223,10 +223,10 @@ if(BL2)
     target_sources(platform_bl2
         PRIVATE
             boot_hal.c
-            Native_Driver/project_template/bl2/board.c
-            Native_Driver/project_template/bl2/clock_config.c
-            Native_Driver/project_template/bl2/pin_mux.c
-            ../common/CMSIS_Driver/Driver_Flash.c
+            project_template/bl2/board.c
+            project_template/bl2/clock_config.c
+            project_template/bl2/pin_mux.c
+            ../common/CMSIS_Driver/Driver_Flash_iap1.c
             ../common/CMSIS_Driver/Driver_USART.c
             ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/system_LPC55S69_cm33_core0.c
             ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers/fsl_clock.c
@@ -255,6 +255,6 @@ if(BL2)
     # fix is compatible.
     target_sources(bl2
     PRIVATE
-        Native_Driver/project_template/bl2/hardware_init.c
+        project_template/bl2/hardware_init.c
     )
 endif()

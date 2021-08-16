@@ -29,7 +29,7 @@ static psa_status_t tfm_crypto_huk_derivation_setup(
                                       psa_key_derivation_operation_t *operation,
                                       psa_algorithm_t alg)
 {
-    operation->alg = TFM_CRYPTO_ALG_HUK_DERIVATION;
+    operation->MBEDTLS_PRIVATE(alg) = TFM_CRYPTO_ALG_HUK_DERIVATION;
     return PSA_SUCCESS;
 }
 
@@ -41,6 +41,7 @@ static psa_status_t tfm_crypto_huk_derivation_input_bytes(
 {
     psa_status_t status;
     int32_t partition_id;
+    psa_tls12_prf_key_derivation_t *tls12_prf;
 
     if (step != PSA_KEY_DERIVATION_INPUT_LABEL) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -66,16 +67,18 @@ static psa_status_t tfm_crypto_huk_derivation_input_bytes(
     /* Put the label in the tls12_prf ctx to make it available in the output key
      * step.
      */
-    operation->ctx.tls12_prf.label = mbedtls_calloc(1, sizeof(partition_id)
-                                                       + data_length);
-    if (operation->ctx.tls12_prf.label == NULL) {
+    tls12_prf = &(operation->MBEDTLS_PRIVATE(ctx).MBEDTLS_PRIVATE(tls12_prf));
+    tls12_prf->MBEDTLS_PRIVATE(label) =
+                 mbedtls_calloc(1, sizeof(partition_id) + data_length);
+    if (tls12_prf->MBEDTLS_PRIVATE(label) == NULL) {
         return PSA_ERROR_INSUFFICIENT_MEMORY;
     }
-    (void)tfm_memcpy(operation->ctx.tls12_prf.label, &partition_id,
+    (void)tfm_memcpy(tls12_prf->MBEDTLS_PRIVATE(label), &partition_id,
                      sizeof(partition_id));
-    (void)tfm_memcpy(operation->ctx.tls12_prf.label + sizeof(partition_id),
+    (void)tfm_memcpy(tls12_prf->MBEDTLS_PRIVATE(label) + sizeof(partition_id),
                      data, data_length);
-    operation->ctx.tls12_prf.label_length = sizeof(partition_id) + data_length;
+    tls12_prf->MBEDTLS_PRIVATE(label_length) = sizeof(partition_id) +
+                                               data_length;
 
     return PSA_SUCCESS;
 }
@@ -87,32 +90,37 @@ static psa_status_t tfm_crypto_huk_derivation_output_key(
 {
     enum tfm_plat_err_t err;
     size_t bytes = PSA_BITS_TO_BYTES(psa_get_key_bits(attributes));
+    psa_tls12_prf_key_derivation_t *tls12_prf =
+                &(operation->MBEDTLS_PRIVATE(ctx).MBEDTLS_PRIVATE(tls12_prf));
 
-    if (sizeof(operation->ctx.tls12_prf.output_block) < bytes) {
+    if (sizeof(tls12_prf->MBEDTLS_PRIVATE(output_block)) < bytes) {
         return PSA_ERROR_INSUFFICIENT_MEMORY;
     }
 
     /* Derive key material from the HUK and output it to the operation buffer */
-    err = tfm_plat_get_huk_derived_key(operation->ctx.tls12_prf.label,
-                                       operation->ctx.tls12_prf.label_length,
+    err = tfm_plat_get_huk_derived_key(tls12_prf->MBEDTLS_PRIVATE(label),
+                                       tls12_prf->MBEDTLS_PRIVATE(label_length),
                                        NULL, 0,
-                                       operation->ctx.tls12_prf.output_block,
+                                       tls12_prf->MBEDTLS_PRIVATE(output_block),
                                        bytes);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return PSA_ERROR_HARDWARE_FAILURE;
     }
 
-    return psa_import_key(attributes, operation->ctx.tls12_prf.output_block,
+    return psa_import_key(attributes, tls12_prf->MBEDTLS_PRIVATE(output_block),
                           bytes, key_id);
 }
 
 static psa_status_t tfm_crypto_huk_derivation_abort(
                                       psa_key_derivation_operation_t *operation)
 {
-    if (operation->ctx.tls12_prf.label != NULL) {
-        (void)tfm_memset(operation->ctx.tls12_prf.label, 0,
-                         operation->ctx.tls12_prf.label_length);
-        mbedtls_free(operation->ctx.tls12_prf.label);
+    psa_tls12_prf_key_derivation_t *tls12_prf =
+                &(operation->MBEDTLS_PRIVATE(ctx).MBEDTLS_PRIVATE(tls12_prf));
+
+    if (tls12_prf->MBEDTLS_PRIVATE(label) != NULL) {
+        (void)tfm_memset(tls12_prf->MBEDTLS_PRIVATE(label), 0,
+                         tls12_prf->MBEDTLS_PRIVATE(label_length));
+        mbedtls_free(tls12_prf->MBEDTLS_PRIVATE(label));
     }
 
     (void)tfm_memset(operation, 0, sizeof(*operation));
@@ -273,7 +281,7 @@ psa_status_t tfm_crypto_key_derivation_input_bytes(psa_invec in_vec[],
         return status;
     }
 
-    if (operation->alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
+    if (operation->MBEDTLS_PRIVATE(alg) == TFM_CRYPTO_ALG_HUK_DERIVATION) {
         return tfm_crypto_huk_derivation_input_bytes(operation, step, data,
                                                      data_length);
     } else {
@@ -414,7 +422,7 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
         return status;
     }
 
-    if (operation->alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
+    if (operation->MBEDTLS_PRIVATE(alg) == TFM_CRYPTO_ALG_HUK_DERIVATION) {
         status = tfm_crypto_huk_derivation_output_key(&key_attributes,
                                                       operation, &encoded_key);
     } else {
@@ -422,7 +430,7 @@ psa_status_t tfm_crypto_key_derivation_output_key(psa_invec in_vec[],
                                                &encoded_key);
     }
 #ifdef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
-    *key_handle = encoded_key.key_id;
+    *key_handle = encoded_key.MBEDTLS_PRIVATE(key_id);
 #else
     *key_handle = (psa_key_id_t)encoded_key;
 #endif
@@ -471,7 +479,7 @@ psa_status_t tfm_crypto_key_derivation_abort(psa_invec in_vec[],
 
     *handle_out = handle;
 
-    if (operation->alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
+    if (operation->MBEDTLS_PRIVATE(alg) == TFM_CRYPTO_ALG_HUK_DERIVATION) {
         status = tfm_crypto_huk_derivation_abort(operation);
     } else {
         status = psa_key_derivation_abort(operation);

@@ -158,6 +158,10 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle, int32_t type,
         }
 
         service = GET_STATELESS_SERVICE(index);
+        if (!service) {
+            tfm_core_panic();
+        }
+
         sid = service->p_ldinf->sid;
 
         /*

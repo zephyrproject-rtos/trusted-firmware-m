@@ -27,7 +27,7 @@ target_include_directories(tfm_qcbor
 target_link_libraries(tfm_qcbor
     PRIVATE
         tfm_attestation_defs
-        tfm_t_cose
+        tfm_t_cose_defs
 )
 
 ############################ qcbor test ########################################

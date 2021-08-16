@@ -276,12 +276,8 @@ static uint8_t mbedtls_mem_buf[TFM_CRYPTO_ENGINE_BUF_SIZE] = {0};
 
 static psa_status_t tfm_crypto_engine_init(void)
 {
-    /* Log unsafe entropy source */
-#if defined (MBEDTLS_TEST_NULL_ENTROPY)
-    LOG_INFFMT("\033[1;34m[Crypto] MBEDTLS_TEST_NULL_ENTROPY is not suitable for production!\033[0m\r\n");
-#endif
-
 #ifdef PLATFORM_DUMMY_NV_SEED
+    LOG_INFFMT("\033[1;34m[Crypto] Dummy Entropy NV Seed is not suitable for production!\033[0m\r\n");
     if (tfm_plat_crypto_create_entropy_seed() != TFM_CRYPTO_NV_SEED_SUCCESS) {
         return PSA_ERROR_GENERIC_ERROR;
     }

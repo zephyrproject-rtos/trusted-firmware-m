@@ -313,6 +313,8 @@ Some cryptography tests are disabled due to the reduced Mbed Crypto config.
    +--------------------------------------------+---------------+--------------------------------+
    | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``       | Disable HKDF algorithm test    |
    +--------------------------------------------+---------------+--------------------------------+
+   | ``TFM_CRYPTO_TEST_ECDH``                   | ``ON``        | Enable ECDH key agreement test |
+   +--------------------------------------------+---------------+--------------------------------+
 
 Device configuration extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

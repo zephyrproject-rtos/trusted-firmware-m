@@ -62,16 +62,20 @@
 
 /* Size of a Secure and of a Non-secure image */
 #ifdef BL2
-#define FLASH_S_PARTITION_SIZE          (0x28000) /* S partition: 160 KB */
-#define FLASH_NS_PARTITION_SIZE         (0x18000) /* NS partition: 96 KB */
-#else
+
+#define FLASH_S_PARTITION_SIZE              (0x28000) /* S partition: 160 KB */
+#define FLASH_NS_PARTITION_SIZE             (0x18000) /* NS partition: 96 KB */
+#define FLASH_MAX_PARTITION_SIZE            ((FLASH_S_PARTITION_SIZE >   \
+                                             FLASH_NS_PARTITION_SIZE) ? \
+                                             FLASH_S_PARTITION_SIZE :    \
+                                             FLASH_NS_PARTITION_SIZE)
+
+#else /* NO BL2 */
+
 #define FLASH_S_PARTITION_SIZE              (0x50000)       /* S partition: 320 kB*/
-#define FLASH_NS_PARTITION_SIZE         (0x40000) /* NS partition: 256 KB*/
+#define FLASH_NS_PARTITION_SIZE             (0x40000)       /* NS partition: 256 kB*/
+
 #endif /* BL2 */
-#define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
-                                          FLASH_NS_PARTITION_SIZE) ? \
-                                         FLASH_S_PARTITION_SIZE :    \
-                                         FLASH_NS_PARTITION_SIZE)
 
 /* Sector size of the embedded flash hardware (erase/program) */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE        (512)           /* 512 B. Flash memory program/erase operations have a page granularity. */
@@ -149,12 +153,20 @@
 
 #else /* NO BL2 */
 
-/* Secure + Non-secure image slot */
+
+#ifdef SB_FILE /* Use signed Secure Binary (SB) image */
+#define FLASH_SB_TAIL   0x1000 /* 4 KB */
+#else
+#define FLASH_SB_TAIL   0x0 /* 0 KB */
+#endif
+
+/* Secure + Non-secure image primary slot */
 #define FLASH_AREA_0_ID            (1)
 #define FLASH_AREA_0_OFFSET        (0x0)
 #define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE + \
-                                    FLASH_NS_PARTITION_SIZE)
-
+                                    FLASH_NS_PARTITION_SIZE + \
+                                    FLASH_SB_TAIL)
+                                    
 /* Not used*/
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_0_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)

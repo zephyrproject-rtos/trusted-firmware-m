@@ -82,6 +82,10 @@
         PSA_FUNCTION_NAME(psa_cipher_decrypt_setup)
 #define psa_cipher_update \
         PSA_FUNCTION_NAME(psa_cipher_update)
+#define psa_cipher_encrypt \
+        PSA_FUNCTION_NAME(psa_cipher_encrypt)
+#define psa_cipher_decrypt \
+        PSA_FUNCTION_NAME(psa_cipher_decrypt)
 #define psa_cipher_finish \
         PSA_FUNCTION_NAME(psa_cipher_finish)
 #define psa_cipher_abort \
@@ -116,8 +120,16 @@
         PSA_FUNCTION_NAME(psa_mac_sign_finish)
 #define psa_mac_verify_finish \
         PSA_FUNCTION_NAME(psa_mac_verify_finish)
+#define psa_mac_compute \
+        PSA_FUNCTION_NAME(psa_mac_compute)
+#define psa_mac_verify \
+        PSA_FUNCTION_NAME(psa_mac_verify)
 #define psa_mac_abort \
         PSA_FUNCTION_NAME(psa_mac_abort)
+#define psa_sign_message \
+        PSA_FUNCTION_NAME(psa_sign_message)
+#define psa_verify_message \
+        PSA_FUNCTION_NAME(psa_verify_message)
 #define psa_sign_hash \
         PSA_FUNCTION_NAME(psa_sign_hash)
 #define psa_verify_hash \
