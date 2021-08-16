@@ -101,6 +101,11 @@ target_link_libraries(bl2_mbedcrypto
         bl2_mbedcrypto_config
 )
 
+target_include_directories(bl2_mbedcrypto
+    PUBLIC
+        ${MBEDCRYPTO_PATH}/library
+)
+
 ############################### CODE SHARING ###################################
 
 if (TFM_CODE_SHARING)

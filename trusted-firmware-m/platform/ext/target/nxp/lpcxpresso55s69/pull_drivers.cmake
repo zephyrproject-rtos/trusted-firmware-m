@@ -66,7 +66,6 @@ file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_
 
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/utilities/assert/fsl_assert.c ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_assert.c)
 
-
 #========================= Pull MCUxpresso NXP SDK devices from https://github.com/NXPmicro/mcux-sdk =========================#
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/devices/LPC55S69/fsl_device_registers.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/fsl_device_registers.h)
 
@@ -95,3 +94,32 @@ file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_
 
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/devices/LPC55S69/drivers/fsl_clock.c  ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers/fsl_clock.c)
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/devices/LPC55S69/drivers/fsl_clock.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers/fsl_clock.h)
+
+#========================= Pull MCUxpresso NXP SDK project_template from https://github.com/NXPmicro/mcux-sdk - s =========================#
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/board.c ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/s/board.c)
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/board.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/s/board.h)
+
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/peripherals.c ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/s/peripherals.c)
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/peripherals.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/s/peripherals.h)
+
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/pin_mux.c ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/s/pin_mux.c)
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/pin_mux.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/s/pin_mux.h)
+
+#========================= Pull MCUxpresso NXP SDK project_template from https://github.com/NXPmicro/mcux-sdk - ns =========================#
+
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/board.c ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/ns/board.c)
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/board.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/ns/board.h)
+
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/peripherals.c ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/ns/peripherals.c)
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/peripherals.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/ns/peripherals.h)
+
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/pin_mux.c ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/ns/pin_mux.c)
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/pin_mux.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/ns/pin_mux.h)
+
+#========================= Pull MCUxpresso NXP SDK project_template from https://github.com/NXPmicro/mcux-sdk - bl2 =========================#
+
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/board.c ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/bl2/board.c)
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/board.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/bl2/board.h)
+
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/pin_mux.c ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/bl2/pin_mux.c)
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/boards/lpcxpresso55s69/project_template/pin_mux.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/project_template/bl2/pin_mux.h)

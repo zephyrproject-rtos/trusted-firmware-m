@@ -60,7 +60,7 @@ const char *initial_attestation_kid = "kid@trustedfirmware.example";
 
 /* Type of the EC curve which the key belongs to, in PSA curve ID form */
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_INITIAL_ATTESTATION", "PSA-ROT")
-const psa_ecc_family_t initial_attestation_curve_type = PSA_ECC_CURVE_SECP256R1;
+const psa_ecc_family_t initial_attestation_curve_type = PSA_ECC_FAMILY_SECP_R1;
 
 /* Initial attestation private key in raw format, without any encoding.
  * It belongs to the ECDSA P-256 curve.

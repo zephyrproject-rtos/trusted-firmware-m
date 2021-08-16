@@ -15,7 +15,7 @@ extern "C" {
 
 
 /* RNG Config */
-#undef MBEDTLS_TEST_NULL_ENTROPY
+#undef MBEDTLS_ENTROPY_NV_SEED
 #undef MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
 #define MBEDTLS_PLATFORM_ENTROPY
 #define MBEDTLS_ENTROPY_C
@@ -29,6 +29,8 @@ extern "C" {
 #define MBEDTLS_SHA256_ALT
 #endif /* MBEDTLS_SHA256_C */
 
+#undef MBEDTLS_AES_SETKEY_DEC_ALT
+#undef MBEDTLS_AES_DECRYPT_ALT
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

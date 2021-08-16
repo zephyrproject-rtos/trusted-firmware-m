@@ -43,15 +43,24 @@ static inline void deallocate_forward_handle(psa_handle_t *h)
     tfm_pool_free(forward_handle_pool, h);
 }
 
-static psa_status_t forward_psa_call_to_secure_enclave(const psa_msg_t *msg)
+static psa_status_t forward_psa_call_to_secure_enclave(psa_signal_t signal,
+                                                       const psa_msg_t *msg)
 {
     psa_status_t status;
-    psa_handle_t *forward_handle_ptr = (psa_handle_t *)msg->rhandle;
     struct psa_client_params_t params;
     int32_t ret;
 
-    params.psa_call_params.handle = *forward_handle_ptr;
     params.psa_call_params.type = PSA_IPC_CALL;
+
+    if (signal == TFM_CRYPTO_SIGNAL) {
+        /*
+         * The TF-M crypto service has been changed to stateless service, set
+         * the params with the stateless handle.
+         */
+        params.psa_call_params.handle = TFM_CRYPTO_HANDLE;
+    } else {
+        params.psa_call_params.handle = *((psa_handle_t *)msg->rhandle);
+    }
 
     status = psa_proxy_put_msg_into_shared_mem(msg, &params);
 
@@ -202,7 +211,7 @@ static void handle_signal(psa_signal_t signal)
         psa_reply(msg.handle, status);
         break;
     case PSA_IPC_CALL:
-        status = forward_psa_call_to_secure_enclave(&msg);
+        status = forward_psa_call_to_secure_enclave(signal, &msg);
         psa_reply(msg.handle, status);
         break;
     case PSA_IPC_DISCONNECT:

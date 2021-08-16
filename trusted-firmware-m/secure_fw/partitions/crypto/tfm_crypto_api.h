@@ -218,6 +218,8 @@ psa_status_t tfm_crypto_encode_id_and_owner(psa_key_id_t key_id,
     X(tfm_crypto_aead_finish)                 \
     X(tfm_crypto_aead_verify)                 \
     X(tfm_crypto_aead_abort)                  \
+    X(tfm_crypto_sign_message)                \
+    X(tfm_crypto_verify_message)              \
     X(tfm_crypto_sign_hash)                   \
     X(tfm_crypto_verify_hash)                 \
     X(tfm_crypto_asymmetric_encrypt)          \

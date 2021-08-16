@@ -11,6 +11,7 @@ set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cr
 
 if (NOT FORWARD_PROT_MSG)
     set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
+    set(PLATFORM_DUMMY_NV_SEED              FALSE       CACHE BOOL      "Use dummy NV seed implementation. Should not be used in production.")
     if(CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
         set(PLATFORM_DUMMY_CRYPTO_KEYS      FALSE       CACHE BOOL      "Use dummy crypto keys. Should not be used in production.")
         # Musca-B1 with OTP enabled is provisioned with a random Initial
@@ -37,8 +38,18 @@ else()
     set(CRYPTO_HW_ACCELERATOR               OFF         CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
     set(PS_TEST_NV_COUNTERS                 OFF         CACHE BOOL      "Use the test NV counters to test Protected Storage rollback scenarios")
     set(BL0 ON)
+
+    set(TFM_MANIFEST_LIST                   ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/manifest_list_with_se.yaml CACHE FILEPATH "Manifest Lists")
 endif()
 
-set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/arm/musca_b1/generated_file_list.yaml  CACHE PATH "Path to extra generated file list. Appended to stardard TFM generated file list." FORCE)
+set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_SOURCE_DIR}/platform/ext/target/arm/musca_b1/generated_file_list.yaml  CACHE PATH "Path to extra generated file list. Appended to stardard TFM generated file list." FORCE)
 
 set(PSA_API_TEST_TARGET                 "musca_b1"   CACHE STRING    "Target to use when building the PSA API tests")
+
+if(TFM_PSA_API)
+    if (TFM_ENABLE_FLIH_TEST)
+        message(FATAL_ERROR "FLIH testing has not been supported!")
+    endif()
+
+    set(TFM_ENABLE_SLIH_TEST      ON           CACHE BOOL      "Enable SLIH testing")
+endif()

@@ -160,3 +160,22 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
         $<$<BOOL:${TFM_CODE_SHARING}>:CODE_SHARING>
 )
+
+#========================= Crypto =============================================#
+if (TFM_PARTITION_CRYPTO)
+    target_sources(tfm_psa_rot_partition_crypto
+        PRIVATE
+            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/crypto_nv_seed.c>
+            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/crypto_dummy_nv_seed.c>
+    )
+
+    target_compile_definitions(tfm_psa_rot_partition_crypto
+        PRIVATE
+            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:PLATFORM_DUMMY_NV_SEED>
+    )
+
+    target_include_directories(crypto_service_mbedcrypto
+        PUBLIC
+            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
+endif()

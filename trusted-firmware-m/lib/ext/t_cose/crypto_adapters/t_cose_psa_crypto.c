@@ -2,7 +2,7 @@
  * t_cose_psa_crypto.c
  *
  * Copyright 2019, Laurence Lundblade
- * Copyright (c) 2020, Arm Limited. All rights reserved
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -100,7 +100,7 @@ static enum t_cose_err_t psa_status_to_t_cose_error_signing(psa_status_t err)
            err == PSA_ERROR_INVALID_SIGNATURE   ? T_COSE_ERR_SIG_VERIFY :
            err == PSA_ERROR_NOT_SUPPORTED       ? T_COSE_ERR_UNSUPPORTED_SIGNING_ALG:
            err == PSA_ERROR_INSUFFICIENT_MEMORY ? T_COSE_ERR_INSUFFICIENT_MEMORY :
-           err == PSA_ERROR_TAMPERING_DETECTED  ? T_COSE_ERR_TAMPERING_DETECTED :
+           err == PSA_ERROR_CORRUPTION_DETECTED ? T_COSE_ERR_TAMPERING_DETECTED :
                                                   T_COSE_ERR_SIG_FAIL;
 }
 
@@ -134,7 +134,7 @@ t_cose_crypto_pub_key_verify(int32_t               cose_algorithm_id,
      * signing_key passed in, not the cose_algorithm_id This check
      * looks for ECDSA signing as indicated by COSE and rejects what
      * is not. (Perhaps this check can be removed to save object code
-     * if it is the case that psa_asymmetric_verify() does the right
+     * if it is the case that psa_verify_hash() does the right
      * checks).
      */
     if(!PSA_ALG_IS_ECDSA(psa_alg_id)) {
@@ -183,7 +183,7 @@ t_cose_crypto_pub_key_sign(int32_t                cose_algorithm_id,
      * signing_key passed in, not the cose_algorithm_id This check
      * looks for ECDSA signing as indicated by COSE and rejects what
      * is not. (Perhaps this check can be removed to save object code
-     * if it is the case that psa_asymmetric_verify() does the right
+     * if it is the case that psa_verify_hash() does the right
      * checks).
      */
     if(!PSA_ALG_IS_ECDSA(psa_alg_id)) {

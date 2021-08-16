@@ -82,11 +82,9 @@ config changes due to TFM Profile.
 .. Note::
 
     The default entropy source configured for MbedTLS is
-    MBEDTLS_TEST_NULL_ENTROPY and this does not provide randomness
-    for production devices. It is required for production devices to select
-    either a hardware entropy source via MBEDTLS_ENTROPY_HARDWARE_ALT or
-    provision a unique seed for the device during production and use the
-    MBEDTLS_ENTROPY_NV_SEED option.
+    MBEDTLS_ENTROPY_NV_SEED with unique seed. For production devices,
+    it can also select a hardware entropy source via
+    MBEDTLS_ENTROPY_HARDWARE_ALT
 
 **************************
 Crypto service integration
@@ -115,4 +113,4 @@ Secure world.
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*

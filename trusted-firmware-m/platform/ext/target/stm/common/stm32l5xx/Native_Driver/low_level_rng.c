@@ -20,7 +20,6 @@
   */
 #include "low_level_rng.h"
 #include "stm32l5xx_hal.h"
-extern void Error_Handler(void);
 
 static RNG_HandleTypeDef handle;
 static uint8_t users = 0;
@@ -39,13 +38,13 @@ static uint8_t atomic_incr_u8(__IO uint8_t *valuePtr, uint8_t delta)
   return newValue;
 }
 
-static void RNG_Init(void)
+static int RNG_Init(void)
 {
   uint32_t dummy;
   /*  We're only supporting a single user of RNG */
   if (atomic_incr_u8(&users, 1) > 1)
   {
-    Error_Handler();
+    return -1;
   }
 
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
@@ -55,7 +54,8 @@ static void RNG_Init(void)
   PeriphClkInitStruct.RngClockSelection = RCC_RNGCLKSOURCE_MSI;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
-   Error_Handler();
+    users=0;
+    return -1;
   }
 
   /* RNG Peripheral clock enable */
@@ -70,6 +70,7 @@ static void RNG_Init(void)
 
   /* first random number generated after setting the RNGEN bit should not be used */
   HAL_RNG_GenerateRandomNumber(&handle, &dummy);
+  return 0;
 }
 
 static void RNG_GetBytes(uint8_t *output, size_t length, size_t *output_length)
@@ -116,7 +117,8 @@ static void RNG_DeInit(void)
 /*  interface for mbed-crypto */
 int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen)
 {
-  RNG_Init();
+  if (RNG_Init())
+    return -1;
   RNG_GetBytes(output, len, olen);
   RNG_DeInit();
   if (*olen != len)

@@ -60,6 +60,7 @@ target_include_directories(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver
         ${CMAKE_CURRENT_SOURCE_DIR}/Device/Include
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Inc
+        ${MBEDCRYPTO_PATH}/library
 )
 
 target_sources(platform_s

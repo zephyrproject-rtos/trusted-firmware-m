@@ -24,9 +24,9 @@ FILE = "flash.jlink"
 # Remove previous flash.jlink script file
 if os.path.isfile(FILE):
     if platform.system() == 'Windows':
-        os.system('del /f /q FILE')
+        os.system('del /f /q ' + FILE)
     else:
-        os.system('rm -rf FILE')
+        os.system('rm -rf ' + FILE)
 
 # Write the JLink configuration into flash.jlink script
 os.system('echo r >> ' + FILE)                                                      # reset the target

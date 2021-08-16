@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019, Arm Limited. All rights reserved.
- * Copyright (c) 2019, Cypress Semiconductor Corporation. All rights reserved
+ * Copyright (c) 2019, 2021, Cypress Semiconductor Corporation. All rights reserved
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -92,13 +92,5 @@ int platform_mailbox_send_msg_data(uint32_t data);
  * \brief Wait for a mailbox notify event.
  */
 void platform_mailbox_wait_for_notify(void);
-
-/**
- * \brief IPC initialization
- *
- * \retval 0               The operation succeeds.
- * \retval else            The operation fails.
- */
-int platform_ns_ipc_init(void);
 
 #endif
