@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -115,7 +115,7 @@ enum test_suite_err_t run_testsuite(struct test_suite_t *test_suite)
             return TEST_SUITE_ERR_INVALID_TEST_DATA;
         }
 
-        printf_set_color(WHITE);
+        printf_set_color(DEFAULT);
         TEST_LOG("> Executing '%s' \r\n  Description: '%s'\r\n",
                  p_test->name, p_test->desc);
 

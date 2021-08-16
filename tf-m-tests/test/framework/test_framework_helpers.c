@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -36,5 +36,5 @@ const char *asset_perms_to_str(uint8_t permissions)
 
 void printf_set_color(enum serial_color_t color_id)
 {
-    TEST_LOG("\33[3%dm", color_id);
+    TEST_LOG("\33[%dm", color_id);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -93,6 +93,7 @@ void psa_key_interface_test(const psa_key_type_t key_type,
     ret->val = TEST_PASSED;
 }
 
+#define CIPHER_TEST_KEY_ID (0x1)
 void psa_cipher_test(const psa_key_type_t key_type,
                      const psa_algorithm_t alg,
                      struct test_result_t *ret)
@@ -102,7 +103,7 @@ void psa_cipher_test(const psa_key_type_t key_type,
     psa_status_t status = PSA_SUCCESS;
     psa_key_handle_t key_handle;
     const uint8_t data[] = "THIS IS MY KEY1";
-    const size_t iv_length = PSA_BLOCK_CIPHER_BLOCK_SIZE(key_type);
+    const size_t iv_length = PSA_BLOCK_CIPHER_BLOCK_LENGTH(key_type);
     const uint8_t iv[] = "012345678901234";
     const uint8_t plain_text[BYTE_SIZE_CHUNK] = "Sixteen bytes!!";
     uint8_t decrypted_data[ENC_DEC_BUFFER_SIZE] = {0};
@@ -130,6 +131,7 @@ void psa_cipher_test(const psa_key_type_t key_type,
     psa_set_key_usage_flags(&key_attributes, usage);
     psa_set_key_algorithm(&key_attributes, alg);
     psa_set_key_type(&key_attributes, key_type);
+    psa_set_key_id(&key_attributes, CIPHER_TEST_KEY_ID);
 
     /* Import a key */
     status = psa_import_key(&key_attributes, data, sizeof(data), &key_handle);
@@ -300,6 +302,42 @@ void psa_cipher_test(const psa_key_type_t key_type,
         goto destroy_key;
     }
 
+#if DOMAIN_NS == 1U
+    /* Clear intermediate buffers for additional single-shot API tests */
+    memset(encrypted_data, 0, sizeof(plain_text));
+#else
+    tfm_memset(decrypted_data, 0, sizeof(plain_text));
+#endif
+
+    /* Replicate the encryption-decryption test above using single-shot APIs */
+    status = psa_cipher_encrypt(CIPHER_TEST_KEY_ID, alg, plain_text,
+                                BYTE_SIZE_CHUNK,
+                                encrypted_data, ENC_DEC_BUFFER_SIZE,
+                                &output_length);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error encrypting with the single-shot API");
+        goto destroy_key;
+    }
+
+    status = psa_cipher_decrypt(CIPHER_TEST_KEY_ID, alg, encrypted_data,
+                                ENC_DEC_BUFFER_SIZE,
+                                decrypted_data, ENC_DEC_BUFFER_SIZE,
+                                &output_length);
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error decrypting with the single shot API");
+        goto destroy_key;
+    }
+
+#if DOMAIN_NS == 1U
+    /* Check that the plain text matches the decrypted data */
+    comp_result = memcmp(plain_text, decrypted_data, sizeof(plain_text));
+#else
+    comp_result = tfm_memcmp(plain_text, decrypted_data, sizeof(plain_text));
+#endif
+    if (comp_result != 0) {
+        TEST_FAIL("Decrypted data doesn't match with plain text");
+    }
+
 destroy_key:
     /* Destroy the key */
     status = psa_destroy_key(key_handle);
@@ -387,7 +425,7 @@ static const psa_algorithm_t hash_alg[] = {
     PSA_ALG_SHA_512,
 };
 
-static const uint8_t hash_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
+static const uint8_t hash_val[][PSA_HASH_LENGTH(PSA_ALG_SHA_512)] = {
     {0x00, 0xD2, 0x90, 0xE2, 0x0E, 0x4E, 0xC1, 0x7E, /*!< SHA-224 */
      0x7A, 0x95, 0xF5, 0x10, 0x5C, 0x76, 0x74, 0x04,
      0x6E, 0xB5, 0x56, 0x5E, 0xE5, 0xE7, 0xBA, 0x15,
@@ -415,12 +453,12 @@ static const uint8_t hash_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
 void psa_hash_test(const psa_algorithm_t alg,
                    struct test_result_t *ret)
 {
-    const char *msg[] = {"This is my test message, ",
-                         "please generate a hash for this."};
-
-    const size_t msg_size[] = {25, 32}; /* Length in bytes of msg[0], msg[1] */
-    const uint32_t msg_num = sizeof(msg)/sizeof(msg[0]);
-    uint32_t idx;
+    const char *msg =
+        "This is my test message, please generate a hash for this.";
+    /* Length of each chunk in the multipart API */
+    const size_t msg_size[] = {25, 32};
+    const uint32_t msg_num = sizeof(msg_size)/sizeof(msg_size[0]);
+    uint32_t idx, start_idx = 0;
 
     psa_status_t status;
     psa_hash_operation_t handle = psa_hash_operation_init();
@@ -441,20 +479,31 @@ void psa_hash_test(const psa_algorithm_t alg,
     /* Update object with all the chunks of message */
     for (idx=0; idx<msg_num; idx++) {
         status = psa_hash_update(&handle,
-                                 (const uint8_t *)msg[idx],msg_size[idx]);
+                                 (const uint8_t *)&msg[start_idx],
+                                 msg_size[idx]);
         if (status != PSA_SUCCESS) {
             TEST_FAIL("Error updating the hash operation object");
             return;
         }
+        start_idx += msg_size[idx];
     }
 
     /* Cycle until idx points to the correct index in the algorithm table */
     for (idx=0; hash_alg[idx] != alg; idx++);
 
     /* Finalise and verify that the hash is as expected */
-    status = psa_hash_verify(&handle, &(hash_val[idx][0]), PSA_HASH_SIZE(alg));
+    status = psa_hash_verify(&handle, hash_val[idx], PSA_HASH_LENGTH(alg));
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error verifying the hash operation object");
+        return;
+    }
+
+    /* Do the same as above with the single shot APIs */
+    status = psa_hash_compare(alg,
+                              (const uint8_t *)msg, strlen(msg),
+                              hash_val[idx], PSA_HASH_LENGTH(alg));
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error using the single shot API");
         return;
     }
 
@@ -474,7 +523,7 @@ void psa_unsupported_mac_test(const psa_key_type_t key_type,
     ret->val = TEST_PASSED;
 
     /* Setup the key policy */
-    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_VERIFY);
+    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_VERIFY_HASH);
     psa_set_key_algorithm(&key_attributes, alg);
     psa_set_key_type(&key_attributes, key_type);
 
@@ -499,7 +548,7 @@ void psa_unsupported_mac_test(const psa_key_type_t key_type,
     }
 }
 
-static const uint8_t hmac_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
+static const uint8_t hmac_val[][PSA_HASH_LENGTH(PSA_ALG_SHA_512)] = {
     {0xc1, 0x9f, 0x19, 0xac, 0x05, 0x65, 0x5f, 0x02, /*!< SHA-224 */
      0x1b, 0x64, 0x32, 0xd9, 0xb1, 0x49, 0xba, 0x75,
      0x05, 0x60, 0x52, 0x4e, 0x78, 0xfa, 0x61, 0xc9,
@@ -524,22 +573,24 @@ static const uint8_t hmac_val[][PSA_HASH_SIZE(PSA_ALG_SHA_512)] = {
      0xa9, 0x6a, 0x5d, 0xb2, 0x81, 0xe1, 0x6f, 0x1f},
 };
 
-static const uint8_t long_key_hmac_val[PSA_HASH_SIZE(PSA_ALG_SHA_224)] = {
+static const uint8_t long_key_hmac_val[PSA_HASH_LENGTH(PSA_ALG_SHA_224)] = {
     0x47, 0xa3, 0x42, 0xb1, 0x2f, 0x52, 0xd3, 0x8f, /*!< SHA-224 */
     0x1e, 0x02, 0x4a, 0x46, 0x73, 0x0b, 0x77, 0xc1,
     0x5e, 0x93, 0x31, 0xa9, 0x3e, 0xc2, 0x81, 0xb5,
     0x3d, 0x07, 0x6f, 0x31
 };
 
+#define MAC_TEST_KEY_ID (0x1)
 void psa_mac_test(const psa_algorithm_t alg,
                   uint8_t use_long_key,
                   struct test_result_t *ret)
 {
-    const char *msg[] = {"This is my test message, ",
-                         "please generate a hmac for this."};
-    const size_t msg_size[] = {25, 32}; /* Length in bytes of msg[0], msg[1] */
-    const uint32_t msg_num = sizeof(msg)/sizeof(msg[0]);
-    uint32_t idx;
+    const char *msg =
+        "This is my test message, please generate a hmac for this.";
+    /* Length of each chunk in the multipart API */
+    const size_t msg_size[] = {25, 32};
+    const uint32_t msg_num = sizeof(msg_size)/sizeof(msg_size[0]);
+    uint32_t idx, start_idx = 0;
 
     psa_key_handle_t key_handle;
     const uint8_t data[] = "THIS IS MY KEY1";
@@ -550,7 +601,7 @@ void psa_mac_test(const psa_algorithm_t alg,
     psa_mac_operation_t handle = psa_mac_operation_init();
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
     psa_key_attributes_t retrieved_attributes = psa_key_attributes_init();
-    psa_key_usage_t usage = PSA_KEY_USAGE_VERIFY;
+    psa_key_usage_t usage = PSA_KEY_USAGE_VERIFY_HASH;
 
     ret->val = TEST_PASSED;
 
@@ -558,6 +609,7 @@ void psa_mac_test(const psa_algorithm_t alg,
     psa_set_key_usage_flags(&key_attributes, usage);
     psa_set_key_algorithm(&key_attributes, alg);
     psa_set_key_type(&key_attributes, key_type);
+    psa_set_key_id(&key_attributes, MAC_TEST_KEY_ID);
 
     /* Import key */
     if (use_long_key == 1) {
@@ -611,12 +663,13 @@ void psa_mac_test(const psa_algorithm_t alg,
     /* Update object with all the chunks of message */
     for (idx=0; idx<msg_num; idx++) {
         status = psa_mac_update(&handle,
-                                (const uint8_t *)msg[idx],
+                                (const uint8_t *)&msg[start_idx],
                                 msg_size[idx]);
         if (status != PSA_SUCCESS) {
             TEST_FAIL("Error during mac operation");
             goto destroy_key_mac;
         }
+        start_idx += msg_size[idx];
     }
 
     /* Cycle until idx points to the correct index in the algorithm table */
@@ -625,18 +678,36 @@ void psa_mac_test(const psa_algorithm_t alg,
     /* Finalise and verify the mac value */
     if (use_long_key == 1) {
         status = psa_mac_verify_finish(
-                                     &handle,
-                                     &(long_key_hmac_val[0]),
-                                     PSA_HASH_SIZE(PSA_ALG_HMAC_GET_HASH(alg)));
+                                   &handle,
+                                   long_key_hmac_val,
+                                   PSA_HASH_LENGTH(PSA_ALG_HMAC_GET_HASH(alg)));
     } else {
         status = psa_mac_verify_finish(
-                                     &handle,
-                                     &(hmac_val[idx][0]),
-                                     PSA_HASH_SIZE(PSA_ALG_HMAC_GET_HASH(alg)));
+                                   &handle,
+                                   hmac_val[idx],
+                                   PSA_HASH_LENGTH(PSA_ALG_HMAC_GET_HASH(alg)));
     }
     if (status != PSA_SUCCESS) {
         TEST_FAIL("Error during finalising the mac operation");
         goto destroy_key_mac;
+    }
+
+    /* Do the same as above with the single shot APIs */
+    if (use_long_key == 1) {
+        status = psa_mac_verify(MAC_TEST_KEY_ID, alg,
+                                (const uint8_t *)msg,
+                                strlen(msg),
+                                long_key_hmac_val,
+                                PSA_HASH_LENGTH(PSA_ALG_HMAC_GET_HASH(alg)));
+    } else {
+        status = psa_mac_verify(MAC_TEST_KEY_ID, alg,
+                                (const uint8_t *)msg,
+                                strlen(msg),
+                                hmac_val[idx],
+                                PSA_HASH_LENGTH(PSA_ALG_HMAC_GET_HASH(alg)));
+    }
+    if (status != PSA_SUCCESS) {
+        TEST_FAIL("Error using the single shot API");
     }
 
 destroy_key_mac:
@@ -720,7 +791,7 @@ void psa_aead_test(const psa_key_type_t key_type,
     }
 
     if (encrypted_data_length
-        != PSA_AEAD_ENCRYPT_OUTPUT_SIZE(alg, sizeof(plain_text))) {
+        != PSA_AEAD_ENCRYPT_OUTPUT_SIZE(key_type, alg, sizeof(plain_text))) {
         TEST_FAIL("Encrypted data length is different than expected");
         goto destroy_key_aead;
     }

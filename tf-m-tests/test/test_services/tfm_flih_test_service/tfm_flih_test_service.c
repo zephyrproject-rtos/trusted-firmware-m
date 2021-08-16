@@ -14,13 +14,15 @@
 /* The execution flow ensures there are no race conditions for test_type */
 static int32_t test_type = TFM_FLIH_TEST_CASE_INVALID;
 /*
+ * Records times of triggered
+ *
  * The test cases do not care about exact value of flih_timer_triggered.
  * They only needs to know if it has reached a certain value.
  * And it is a single-read-single-writer model.
  * So the race condition of accessing flih_timer_triggered between the Partition
  * thread and IRS is acceptable.
  */
-static uint32_t flih_timer_triggered = 0; /* Records times of triggered */
+static volatile uint32_t flih_timer_triggered = 0;
 
 psa_flih_result_t tfm_timer0_irq_flih(void)
 {
@@ -32,7 +34,7 @@ psa_flih_result_t tfm_timer0_irq_flih(void)
         return PSA_FLIH_NO_SIGNAL;
     case TFM_FLIH_TEST_CASE_2:
         flih_timer_triggered += 1;
-        if (flih_timer_triggered > 1) {
+        if (flih_timer_triggered == 10) {
             return PSA_FLIH_SIGNAL;
         } else {
             return PSA_FLIH_NO_SIGNAL;
@@ -62,7 +64,7 @@ static void flih_test_case_1(psa_msg_t *msg) {
 
     tfm_plat_test_secure_timer_start();
 
-    while (flih_timer_triggered < 1);
+    while (flih_timer_triggered < 10);
     tfm_plat_test_secure_timer_stop();
 
     psa_irq_disable(TFM_TIMER0_IRQ_SIGNAL);
@@ -77,7 +79,9 @@ static void flih_test_case_2(psa_msg_t *msg) {
 
     tfm_plat_test_secure_timer_start();
 
-    while (psa_wait(TFM_TIMER0_IRQ_SIGNAL, PSA_BLOCK) != TFM_TIMER0_IRQ_SIGNAL);
+    if (psa_wait(TFM_TIMER0_IRQ_SIGNAL, PSA_BLOCK) != TFM_TIMER0_IRQ_SIGNAL) {
+        psa_panic();
+    }
     tfm_plat_test_secure_timer_stop();
 
     psa_reset_signal(TFM_TIMER0_IRQ_SIGNAL);

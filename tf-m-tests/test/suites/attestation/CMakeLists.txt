@@ -44,7 +44,7 @@ target_compile_definitions(tfm_test_suite_attestation_ns
 target_link_libraries(tfm_test_suite_attestation_ns
     PRIVATE
         tfm_qcbor
-        tfm_t_cose
+        tfm_t_cose_ns
         tfm_test_framework_ns
         #TODO I'm not sure this should _really_ be linked here
         tfm_attestation_defs
@@ -89,7 +89,7 @@ if (TEST_S)
     target_link_libraries(tfm_test_suite_attestation_s
         PRIVATE
             tfm_qcbor
-            tfm_t_cose
+            tfm_t_cose_s
             tfm_test_framework_s
             tfm_attestation_defs
             tfm_boot_status

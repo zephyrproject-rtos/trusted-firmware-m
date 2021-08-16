@@ -23,7 +23,9 @@ static void slih_test_case_1(psa_msg_t *msg) {
 
     tfm_plat_test_secure_timer_start();
 
-    while (psa_wait(TFM_TIMER0_IRQ_SIGNAL, PSA_BLOCK) != TFM_TIMER0_IRQ_SIGNAL);
+    if (psa_wait(TFM_TIMER0_IRQ_SIGNAL, PSA_BLOCK) != TFM_TIMER0_IRQ_SIGNAL) {
+        psa_panic();
+    }
     timer0_handler();
 
     psa_reply(msg->handle, PSA_SUCCESS);
