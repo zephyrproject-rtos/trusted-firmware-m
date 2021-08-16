@@ -25,6 +25,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/cmake)
 include("common/CMakeSettings")
 include("common/Utils")
 
+# Causes toolchain to be re-evaluated
+unset(ENV{CC})
+
 # Let the CMake look for C compiler
 project(TargetConfigGen LANGUAGES C)
 
