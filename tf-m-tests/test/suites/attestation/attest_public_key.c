@@ -37,7 +37,7 @@ static psa_status_t attest_import_public_key(psa_key_handle_t *public_key,
     psa_key_attributes_t key_attributes = psa_key_attributes_init();
 
     /* Setup the key usage flags, algorithm and key type for public key */
-    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_VERIFY);
+    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_VERIFY_HASH);
     psa_set_key_algorithm(&key_attributes, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
     psa_set_key_type(&key_attributes, PSA_KEY_TYPE_ECC_PUBLIC_KEY(curve_type));
 
@@ -93,7 +93,7 @@ attest_register_initial_attestation_public_key(psa_key_handle_t *public_key)
         return PSA_ATTEST_ERR_GENERAL;
     }
 
-    if (initial_attest_curve_type != PSA_ECC_CURVE_SECP256R1) {
+    if (initial_attest_curve_type != PSA_ECC_FAMILY_SECP_R1) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 

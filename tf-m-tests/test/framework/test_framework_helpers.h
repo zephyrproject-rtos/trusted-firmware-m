@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,14 +17,15 @@ extern "C" {
 #endif
 
 enum serial_color_t {
-    BLACK = 0,
-    RED = 1,
-    GREEN = 2,
-    YELLOW = 3,
-    BLUE = 4,
-    MAGENDA = 5,
-    CYAN = 6,
-    WHITE = 7,
+    DEFAULT = 0,
+    BLACK   = 30,
+    RED     = 31,
+    GREEN   = 32,
+    YELLOW  = 33,
+    BLUE    = 34,
+    MAGENDA = 35,
+    CYAN    = 36,
+    WHITE   = 37,
 };
 
 /**

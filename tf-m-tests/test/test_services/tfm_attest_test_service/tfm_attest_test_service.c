@@ -91,7 +91,7 @@ static psa_status_t attest_export_public_key(void)
     }
 
     /* Setup the key policy for private key */
-    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_SIGN);
+    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_SIGN_HASH);
     psa_set_key_algorithm(&key_attributes, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
     psa_set_key_type(&key_attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(psa_curve));
 

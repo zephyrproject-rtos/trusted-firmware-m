@@ -282,7 +282,7 @@ static void tfm_crypto_test_1034(struct test_result_t *ret)
 #ifdef TFM_CRYPTO_TEST_ALG_CCM
 static void tfm_crypto_test_1035(struct test_result_t *ret)
 {
-    psa_algorithm_t alg = PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM,
+    psa_algorithm_t alg = PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM,
                                                        TRUNCATED_AUTH_TAG_LEN);
 
     psa_aead_test(PSA_KEY_TYPE_AES, alg, ret);
