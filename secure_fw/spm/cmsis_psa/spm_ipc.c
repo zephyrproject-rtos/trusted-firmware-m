@@ -34,7 +34,7 @@
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
-#include "load/irq_defs.h"
+#include "load/interrupt_defs.h"
 
 /* Partition and service runtime data list head/runtime data table */
 static struct partition_head_t partitions_listhead;

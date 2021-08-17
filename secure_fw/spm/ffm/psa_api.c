@@ -14,7 +14,7 @@
 #include "tfm_core_utils.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
-#include "load/irq_defs.h"
+#include "load/interrupt_defs.h"
 #include "psa_api.h"
 #include "utilities.h"
 #include "tfm_wait.h"

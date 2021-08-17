@@ -11,7 +11,7 @@
 #include <stddef.h>
 #include "region.h"
 #include "spm_ipc.h"
-#include "load/irq_defs.h"
+#include "load/interrupt_defs.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"

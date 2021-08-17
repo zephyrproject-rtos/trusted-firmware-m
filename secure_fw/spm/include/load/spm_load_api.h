@@ -10,7 +10,7 @@
 #define __SPM_LOAD_API_H__
 
 #include "asset_defs.h"
-#include "irq_defs.h"
+#include "interrupt_defs.h"
 #include "partition_defs.h"
 #include "service_defs.h"
 #include "spm_ipc.h"
