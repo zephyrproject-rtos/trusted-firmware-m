@@ -43,7 +43,6 @@ psa_status_t
 psa_initial_attest_get_token_size(size_t  challenge_size,
                                   size_t *token_size)
 {
-    psa_handle_t handle = PSA_NULL_HANDLE;
     psa_status_t status;
     psa_invec in_vec[] = {
         {&challenge_size, sizeof(challenge_size)}
