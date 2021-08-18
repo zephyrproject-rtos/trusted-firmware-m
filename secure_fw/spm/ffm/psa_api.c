@@ -18,7 +18,6 @@
 #include "psa_api.h"
 #include "utilities.h"
 #include "tfm_wait.h"
-#include "tfm_nspm.h"
 #include "ffm/spm_error_base.h"
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
@@ -109,11 +108,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
-    if (ns_caller) {
-        client_id = tfm_nspm_get_current_client_id();
-    } else {
-        client_id = tfm_spm_partition_get_running_partition_id();
-    }
+    client_id = tfm_spm_get_client_id(ns_caller);
 
     /*
      * Create connection handle here since it is possible to return the error
@@ -175,11 +170,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
-    if (ns_caller) {
-        client_id = tfm_nspm_get_current_client_id();
-    } else {
-        client_id = tfm_spm_partition_get_running_partition_id();
-    }
+    client_id = tfm_spm_get_client_id(ns_caller);
 
     /* Allocate space from handle pool for static handle. */
     if (IS_STATIC_HANDLE(handle)) {
@@ -359,11 +350,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle)
         TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
     }
 
-    if (ns_caller) {
-        client_id = tfm_nspm_get_current_client_id();
-    } else {
-        client_id = tfm_spm_partition_get_running_partition_id();
-    }
+    client_id = tfm_spm_get_client_id(ns_caller);
 
     conn_handle = tfm_spm_to_handle_instance(handle);
     /*

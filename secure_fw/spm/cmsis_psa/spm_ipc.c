@@ -23,6 +23,7 @@
 #include "spm_ipc.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_core_utils.h"
+#include "tfm_nspm.h"
 #include "tfm_rpc.h"
 #include "tfm_core_trustzone.h"
 #include "lists.h"
@@ -643,6 +644,24 @@ uint32_t tfm_spm_get_caller_privilege_mode(void)
     }
 
     return tfm_spm_partition_get_privileged_mode(partition->p_ldinf->flags);
+}
+
+int32_t tfm_spm_get_client_id(bool ns_caller)
+{
+    int32_t client_id;
+
+    if (ns_caller) {
+        client_id = tfm_nspm_get_current_client_id();
+    } else {
+        client_id = tfm_spm_partition_get_running_partition_id();
+    }
+
+    if (ns_caller != (client_id < 0)) {
+        /* NS client ID must be negative and Secure ID must >= 0 */
+        tfm_core_panic();
+    }
+
+    return client_id;
 }
 
 uint32_t tfm_spm_init(void)

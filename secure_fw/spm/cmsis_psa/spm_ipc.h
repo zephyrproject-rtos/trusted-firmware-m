@@ -367,6 +367,16 @@ bool tfm_spm_is_ns_caller(void);
 uint32_t tfm_spm_get_caller_privilege_mode(void);
 
 /**
+ * \brief               Get ID of current RoT Service client.
+ *                      This API ensures the caller gets a valid ID.
+ *
+ * \param[in] ns_caller If the client is Non-Secure or not.
+ *
+ * \retval              The client ID
+ */
+int32_t tfm_spm_get_client_id(bool ns_caller);
+
+/**
  * \brief               Set up the isolation boundary of the given partition.
  *
  * \param[in] partition The partition of which the boundary is set up.
