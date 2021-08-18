@@ -146,7 +146,7 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
  *
  * \return  Returns the partition ID
  */
-uint32_t tfm_spm_partition_get_running_partition_id(void);
+int32_t tfm_spm_partition_get_running_partition_id(void);
 
 /******************** Service handle management functions ********************/
 

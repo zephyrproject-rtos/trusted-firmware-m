@@ -101,6 +101,11 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
         tfm_core_panic();
     }
 
+    if (p_ptldinf->pid < 0) {
+        /* 0 is the internal NS Agent, besides the normal positive PIDs */
+        tfm_core_panic();
+    }
+
     partition = tfm_allocate_partition_assuredly();
     partition->p_ldinf = p_ptldinf;
 

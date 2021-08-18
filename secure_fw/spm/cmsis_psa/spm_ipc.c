@@ -422,7 +422,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
      * Check the conditions above
      */
     struct tfm_msg_body_t *p_msg;
-    uint32_t partition_id;
+    int32_t partition_id;
     struct tfm_conn_handle_t *p_conn_handle =
                                      tfm_spm_to_handle_instance(msg_handle);
 
@@ -551,7 +551,7 @@ void tfm_spm_send_event(struct service_t *service,
     }
 }
 
-uint32_t tfm_spm_partition_get_running_partition_id(void)
+int32_t tfm_spm_partition_get_running_partition_id(void)
 {
     struct partition_t *partition;
 
@@ -738,9 +738,6 @@ uint32_t tfm_spm_init(void)
         BI_LIST_INIT_NODE(&partition->msg_list);
 
         pth = &partition->sp_thread;
-        if (!pth) {
-            tfm_core_panic();
-        }
 
         /* Extendable partition load info is right after p_ldinf. */
         tfm_core_thrd_init(
@@ -934,7 +931,7 @@ void spm_interrupt_handler(struct partition_load_info_t *p_ldinf,
                            uint32_t irq_line,
                            psa_flih_func flih_func)
 {
-    uint32_t pid;
+    int32_t pid;
     psa_flih_result_t flih_result;
 
     pid = p_ldinf->pid;
