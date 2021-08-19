@@ -11,8 +11,7 @@
 #include "fih.h"
 #include "psa/client.h"
 #include "psa/service.h"
-#include "tfm_thread.h"
-#include "tfm_wait.h"
+#include "thread.h"
 #include "internal_errors.h"
 #include "tfm_spm_hal.h"
 #include "tfm_api.h"
@@ -34,21 +33,17 @@
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
-#include "load/interrupt_defs.h"
 
 /* Partition and service runtime data list head/runtime data table */
 static struct partition_head_t partitions_listhead;
 static struct service_head_t services_listhead;
 struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
+struct thread_t *pth_curr;
+
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
-
-void spm_interrupt_handler(struct partition_load_info_t *p_ldinf,
-                           psa_signal_t signal,
-                           uint32_t irq_line,
-                           psa_flih_func flih_func);
 
 #include "tfm_secure_irq_handlers_ipc.inc"
 
@@ -313,12 +308,7 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 
 struct partition_t *tfm_spm_get_running_partition(void)
 {
-    struct tfm_core_thread_t *pth = tfm_core_thrd_get_curr();
-    struct partition_t *partition;
-
-    partition = TO_CONTAINER(pth, struct partition_t, sp_thread);
-
-    return partition;
+    return TO_CONTAINER(pth_curr, struct partition_t, thrd);
 }
 
 int32_t tfm_spm_check_client_version(struct service_t *service,
@@ -393,7 +383,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
     struct tfm_msg_body_t *p_msg;
     int32_t partition_id;
     struct tfm_conn_handle_t *p_conn_handle =
-                                     tfm_spm_to_handle_instance(msg_handle);
+                                    tfm_spm_to_handle_instance(msg_handle);
 
     if (is_valid_chunk_data_in_pool(
         conn_handle_pool, (uint8_t *)p_conn_handle) != 1) {
@@ -449,7 +439,7 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     /* Clear message buffer before using it */
     spm_memset(msg, 0, sizeof(struct tfm_msg_body_t));
 
-    tfm_event_init(&msg->ack_evnt);
+    THRD_SYNC_INIT(&msg->ack_evnt);
     msg->magic = TFM_MSG_MAGIC;
     msg->service = service;
     msg->caller_outvec = caller_outvec;
@@ -505,8 +495,8 @@ void tfm_spm_send_event(struct service_t *service,
     partition->signals_asserted |= signal;
 
     if (partition->signals_waiting & signal) {
-        tfm_event_wake(
-                    &partition->event,
+        thrd_wake_up(
+                    &partition->waitobj,
                     (partition->signals_asserted & partition->signals_waiting));
         partition->signals_waiting &= ~signal;
     }
@@ -516,7 +506,7 @@ void tfm_spm_send_event(struct service_t *service,
      * thread.
      */
     if (!is_tfm_rpc_msg(msg)) {
-        tfm_event_wait(&msg->ack_evnt);
+        thrd_wait_on(&msg->ack_evnt, pth_curr);
     }
 }
 
@@ -635,9 +625,8 @@ int32_t tfm_spm_get_client_id(bool ns_caller)
 uint32_t tfm_spm_init(void)
 {
     struct partition_t *partition;
-    struct tfm_core_thread_t *pth, *p_ns_entry_thread = NULL;
     const struct partition_load_info_t *p_ldinf;
-    void *p_boundaries = NULL;
+    void *p_param, *p_boundaries = NULL;
 
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
@@ -686,57 +675,57 @@ uint32_t tfm_spm_init(void)
         partition->p_boundaries = p_boundaries;
         partition->signals_allowed |= PSA_DOORBELL;
 
-        tfm_event_init(&partition->event);
+        THRD_SYNC_INIT(&partition->waitobj);
         BI_LIST_INIT_NODE(&partition->msg_list);
 
-        pth = &partition->sp_thread;
+        THRD_INIT(&partition->thrd, &partition->ctx_ctrl,
+                  TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_ldinf->flags)));
 
-        /* Extendable partition load info is right after p_ldinf. */
-        tfm_core_thrd_init(
-                    pth,
-                    POSITION_TO_ENTRY(p_ldinf->entry, tfm_core_thrd_entry_t),
-                    NULL,
-                    LOAD_ALLOCED_STACK_ADDR(p_ldinf) + p_ldinf->stack_size,
-                    LOAD_ALLOCED_STACK_ADDR(p_ldinf));
-
-        pth->prior = TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_ldinf->flags));
-
+        p_param = NULL;
         if (p_ldinf->pid == TFM_SP_NON_SECURE_ID) {
-            p_ns_entry_thread = pth;
-            pth->param = (void *)tfm_spm_hal_get_ns_entry_point();
+            p_param = (void *)tfm_spm_hal_get_ns_entry_point();
         }
 
-        /* Kick off */
-        if (tfm_core_thrd_start(pth) != THRD_SUCCESS) {
-            tfm_core_panic();
-        }
+        thrd_start(&partition->thrd,
+                   POSITION_TO_ENTRY(p_ldinf->entry, thrd_fn_t), p_param,
+                   LOAD_ALLOCED_STACK_ADDR(p_ldinf),
+                   LOAD_ALLOCED_STACK_ADDR(p_ldinf) + p_ldinf->stack_size);
     }
 
-    /*
-     * All threads initialized, start the scheduler.
-     *
-     * NOTE:
-     * It is worthy to give the thread object to scheduler if the background
-     * context belongs to one of the threads. Here the background thread is the
-     * initialization thread who calls SPM SVC, which re-uses the non-secure
-     * entry thread's stack. After SPM initialization is done, this stack is
-     * cleaned up and the background context is never going to return. Tell
-     * the scheduler that the current thread is non-secure entry thread.
-     */
-    tfm_core_thrd_start_scheduler(p_ns_entry_thread);
-
-    return p_ns_entry_thread->arch_ctx.lr;
+    return thrd_start_scheduler(&pth_curr);
 }
 
-void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
-{
-    struct partition_t *p_part_curr, *p_part_next;
-    struct tfm_core_thread_t *pth_next = tfm_core_thrd_get_next();
-    struct tfm_core_thread_t *pth_curr = tfm_core_thrd_get_curr();
+/*
+ * Return both current and next context to assembly via AAPCS trick:
+ *   - Returning a 64 bit integer by 32-bit R0 and R1.
+ *
+ * This is architecture-specific, hence the scheduler entry and this
+ * 'do_schedule' MAY be different on another architecture.
+ */
+union returning_contexts_t {
+    struct {
+        uint32_t curr;
+        uint32_t next;
+    } ctx;
 
-    if (pth_next != NULL && pth_curr != pth_next) {
-        p_part_curr = TO_CONTAINER(pth_curr, struct partition_t, sp_thread);
-        p_part_next = TO_CONTAINER(pth_next, struct partition_t, sp_thread);
+    uint64_t curr_next_ctxs;
+};
+
+uint64_t do_schedule(void)
+{
+    union returning_contexts_t ret;
+    struct partition_t *p_part_curr, *p_part_next;
+    struct thread_t *pth_next = thrd_next();
+
+    p_part_curr = TO_CONTAINER(pth_curr, struct partition_t, thrd);
+    p_part_next = TO_CONTAINER(pth_next, struct partition_t, thrd);
+
+    if (pth_next != NULL && p_part_curr != p_part_next) {
+        /* Check if there is enough room on stack to save more context */
+        if ((p_part_curr->ctx_ctrl.sp_limit +
+             sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
+            tfm_core_panic();
+        }
 
         /*
          * If required, let the platform update boundary based on its
@@ -749,7 +738,6 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
                 tfm_core_panic();
             }
         }
-        tfm_core_thrd_switch_context(p_actx, pth_curr, pth_next);
     }
 
     /*
@@ -757,6 +745,13 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx)
      * Empty operation on single Armv8-M platform.
      */
     tfm_rpc_client_call_handler();
+
+    ret.ctx.curr = (uint32_t)pth_curr->p_context_ctrl;
+    ret.ctx.next = (uint32_t)pth_next->p_context_ctrl;
+
+    pth_curr = pth_next;
+
+    return ret.curr_next_ctxs;
 }
 
 void update_caller_outvec_len(struct tfm_msg_body_t *msg)
@@ -783,24 +778,10 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg)
     }
 }
 
-void notify_with_signal(int32_t partition_id, psa_signal_t signal)
+void spm_assert_signal(void *p_pt, psa_signal_t signal)
 {
-    struct partition_t *partition = NULL;
+    struct partition_t *partition = (struct partition_t *)p_pt;
 
-    /*
-     * The value of partition_id must be greater than zero as the target of
-     * notification must be a Secure Partition, providing a Non-secure
-     * Partition ID is a fatal error.
-     */
-    if (!TFM_CLIENT_ID_IS_S(partition_id)) {
-        tfm_core_panic();
-    }
-
-    /*
-     * It is a fatal error if partition_id does not correspond to a Secure
-     * Partition.
-     */
-    partition = tfm_spm_get_partition_by_id(partition_id);
     if (!partition) {
         tfm_core_panic();
     }
@@ -808,17 +789,16 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal)
     partition->signals_asserted |= signal;
 
     if (partition->signals_waiting & signal) {
-        tfm_event_wake(
-                      &partition->event,
-                      partition->signals_asserted & partition->signals_waiting);
+        thrd_wake_up(&partition->waitobj,
+                     partition->signals_asserted & partition->signals_waiting);
         partition->signals_waiting &= ~signal;
     }
 }
 
 __attribute__((naked))
-static void tfm_flih_deprivileged_handling(uint32_t p_ldinf,
-                                           psa_flih_func flih_func,
-                                           psa_signal_t signal)
+static psa_flih_result_t tfm_flih_deprivileged_handling(void *p_pt,
+                                                        psa_flih_func fn_flih,
+                                                        void *p_context_ctrl)
 {
     __ASM volatile("SVC %0           \n"
                    "BX LR            \n"
@@ -830,37 +810,34 @@ void spm_interrupt_handler(struct partition_load_info_t *p_ldinf,
                            uint32_t irq_line,
                            psa_flih_func flih_func)
 {
-    int32_t pid;
     psa_flih_result_t flih_result;
+    struct partition_t *p_pt;
 
-    pid = p_ldinf->pid;
+    p_pt = tfm_spm_get_partition_by_id(p_ldinf->pid);
+    if (!p_pt) {
+        tfm_core_panic();
+    }
 
     if (flih_func == NULL) {
         /* SLIH Model Handling */
-        __disable_irq();
         tfm_spm_hal_disable_irq(irq_line);
-        notify_with_signal(pid, signal);
-        __enable_irq();
-        return;
+        flih_result = PSA_FLIH_SIGNAL;
+    } else {
+        /* FLIH Model Handling */
+        if (tfm_spm_partition_get_privileged_mode(p_ldinf->flags) ==
+                                                TFM_PARTITION_PRIVILEGED_MODE) {
+            flih_result = flih_func();
+        } else {
+            flih_result = tfm_flih_deprivileged_handling(
+                                                      p_pt, flih_func,
+                                                      pth_curr->p_context_ctrl);
+        }
     }
 
-    /* FLIH Model Handling */
-    if (tfm_spm_partition_get_privileged_mode(p_ldinf->flags) ==
-                                                TFM_PARTITION_PRIVILEGED_MODE) {
-        flih_result = flih_func();
-        if (flih_result == PSA_FLIH_SIGNAL) {
-            __disable_irq();
-            notify_with_signal(pid, signal);
-            __enable_irq();
-        } else if (flih_result != PSA_FLIH_NO_SIGNAL) {
-            /*
-             * Nothing needed to do for PSA_FLIH_NO_SIGNAL
-             * But if the flih_result is invalid, should panic.
-             */
-            tfm_core_panic();
-        }
-    } else {
-        tfm_flih_deprivileged_handling((uint32_t)p_ldinf, flih_func, signal);
+    if (flih_result == PSA_FLIH_SIGNAL) {
+        __disable_irq();
+        spm_assert_signal(p_pt, signal);
+        __enable_irq();
     }
 }
 

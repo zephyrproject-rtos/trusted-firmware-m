@@ -26,7 +26,7 @@
 
 #define XPSR_T32            0x01000000
 
-/* General core state context */
+/* State context defined by architecture */
 struct tfm_state_context_t {
     uint32_t    r0;
     uint32_t    r1;
@@ -36,9 +36,38 @@ struct tfm_state_context_t {
     uint32_t    lr;
     uint32_t    ra;
     uint32_t    xpsr;
-} __attribute__ ((aligned(8)));
+};
 
-#define TFM_STATE_RET_VAL(ctx) (((struct tfm_state_context_t *)((ctx)->sp))->r0)
+/* Context addition to state context */
+struct tfm_additional_context_t {
+    uint32_t    callee[8];     /* R4-R11. NOT ORDERED!! */
+};
+
+/* Full thread context */
+struct full_context_t {
+    struct tfm_additional_context_t addi_ctx;
+    struct tfm_state_context_t      stat_ctx;
+};
+
+/* Context control */
+struct context_ctrl_t {
+    uint32_t                sp;        /* Stack pointer (higher address)   */
+    uint32_t                sp_limit;  /* Stack limit (lower address)      */
+    uint32_t                reserved;  /* Reserved                         */
+    uint32_t                exc_ret;   /* EXC_RETURN pattern.              */
+};
+
+/*
+ * The context on MSP when de-privileged FLIH Function calls SVC to return.
+ * It is the same when de-privileged FLIH Function is ready to run.
+ */
+struct context_flih_ret_t {
+    uint64_t stack_seal;    /* Two words stack seal */
+    struct tfm_additional_context_t addi_ctx;
+    uint32_t exc_ret;   /* EXC_RETURN value when interrupt exception ocurrs */
+    uint32_t psp;       /* PSP when interrupt exception ocurrs              */
+    struct tfm_state_context_t state_ctx; /* ctx on SVC_PREPARE_DEPRIV_FLIH */
+};
 
 __attribute__ ((always_inline))
 __STATIC_INLINE void tfm_arch_trigger_pendsv(void)
@@ -82,25 +111,13 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
     __ISB();
 }
 
-/*
- * Initialize CPU architecture specific thread context extension
- */
-void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
-                        uint32_t sp, uint32_t sp_limit);
-
-/*
- * Set secure exceptions priority
- */
+/* Set secure exceptions priority. */
 void tfm_arch_set_secure_exception_priorities(void);
 
-/**
- * \brief Configure coprocessors and hardware re-entrant detection if supported.
- */
+/* Configure various extensions. */
 void tfm_arch_config_extensions(void);
 
-/*
- * Clear float point status.
- */
+/* Clear float point status. */
 void tfm_arch_clear_fp_status(void);
 
 /*
@@ -110,7 +127,24 @@ void tfm_arch_clear_fp_status(void);
  */
 void tfm_arch_free_msp_and_exc_ret(uint32_t exc_return);
 
-void tfm_arch_init_context(struct tfm_arch_ctx_t *p_actx,
-                           void *param, uintptr_t pfn,
-                           uintptr_t stk_btm, uintptr_t stk_top);
+/*
+ * This function sets return value on APIs that cause scheduling, for example
+ * psa_wait(), by manipulating the control context - this is usaully setting the
+ * R0 register of the thread context.
+ */
+void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uintptr_t ret_code);
+
+/* Init a thread context on thread stack and update the control context. */
+void tfm_arch_init_context(void *p_ctx_ctrl,
+                           uintptr_t pfn, void *param, uintptr_t pfnlr,
+                           uintptr_t sp_limit, uintptr_t sp);
+
+/*
+ * Refresh the HW (sp, splimit) according to the given control context and
+ * returns the EXC_RETURN payload (caller might need it for following codes).
+ *
+ * The p_ctx_ctrl must have been initialized by tfm_arch_init_context
+ */
+uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl);
+
 #endif

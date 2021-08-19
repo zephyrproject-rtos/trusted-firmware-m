@@ -46,6 +46,10 @@
 
 #define ENTRY_TO_POSITION(x)                    (uintptr_t)(x)
 #define POSITION_TO_ENTRY(x, t)                 (t)(x)
+
+#define PTR_TO_REFERENCE(x)                     (uintptr_t)(x)
+#define REFERENCE_TO_PTR(x, t)                  (t)(x)
+
 /*
  * Common partition structure type, the extendable data is right after it.
  * Extendable data has different size for each partition, and must be 4-byte

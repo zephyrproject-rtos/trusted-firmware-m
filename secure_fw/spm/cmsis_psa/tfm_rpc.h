@@ -20,8 +20,7 @@
 #include "cmsis_compiler.h"
 #include "psa/client.h"
 #include "psa/service.h"
-#include "tfm_thread.h"
-#include "tfm_wait.h"
+#include "thread.h"
 #include "spm_ipc.h"
 
 #define TFM_RPC_SUCCESS             (0)

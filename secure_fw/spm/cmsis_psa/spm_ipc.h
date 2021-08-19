@@ -11,10 +11,10 @@
 #include <stdint.h>
 #include "tfm_arch.h"
 #include "lists.h"
-#include "tfm_wait.h"
 #include "tfm_secure_api.h"
-#include "tfm_thread.h"
+#include "thread.h"
 #include "psa/service.h"
+#include "load/interrupt_defs.h"
 
 #define TFM_HANDLE_STATUS_IDLE          0
 #define TFM_HANDLE_STATUS_ACTIVE        1
@@ -61,7 +61,7 @@ typedef psa_flih_result_t (*psa_flih_func)(void);
 struct tfm_msg_body_t {
     int32_t magic;
     struct service_t *service;         /* RoT service pointer            */
-    struct tfm_event_t ack_evnt;       /* Event for ack response         */
+    struct sync_obj_t ack_evnt;        /* Event for ack response         */
     psa_msg_t msg;                     /* PSA message body               */
     psa_invec invec[PSA_MAX_IOVEC];    /* Put in/out vectors in msg body */
     psa_outvec outvec[PSA_MAX_IOVEC];
@@ -79,22 +79,20 @@ struct tfm_msg_body_t {
     struct bi_list_node_t msg_node;    /* For list operators             */
 };
 
-/**
- * Holds the fields that define a partition for SPM. The fields are further
- * divided to structures, to keep the related fields close to each other.
- */
+/* Partition runtime type */
 struct partition_t {
     const struct partition_load_info_t *p_ldinf;
-    void *p_boundaries;
-    void *p_interrupts;
-    void *p_metadata;
-    struct tfm_core_thread_t sp_thread;
-    struct tfm_event_t event;
-    struct bi_list_node_t msg_list;
-    uint32_t signals_allowed;
-    uint32_t signals_waiting;
-    uint32_t signals_asserted;
-    struct partition_t *next;
+    void                               *p_boundaries;
+    void                               *p_interrupts;
+    void                               *p_metadata;
+    struct thread_t                    thrd;
+    struct sync_obj_t                  waitobj;
+    struct context_ctrl_t              ctx_ctrl;
+    struct bi_list_node_t              msg_list;
+    uint32_t                           signals_allowed;
+    uint32_t                           signals_waiting;
+    uint32_t                           signals_asserted;
+    struct partition_t                 *next;
 };
 
 /* RoT Service data */
@@ -382,11 +380,13 @@ int32_t tfm_spm_get_client_id(bool ns_caller);
  * Parameters :
  *  p_actx        -    Architecture context storage pointer
  *
- * Notes:
- *  This is a staging API. Scheduler should be called in SPM finally and
- *  this function will be obsoleted later.
+ * Return:
+ *  Pointers to context control (sp, splimit, dummy, lr) of the current and
+ *  the next thread.
+ *  Each takes 32 bits. The context control is used by PendSV_Handler to do
+ *  context switch.
  */
-void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
+uint64_t do_schedule(void);
 
 /**
  * \brief                      SPM initialization implementation
@@ -431,17 +431,12 @@ int32_t tfm_spm_set_rhandle(struct service_t *service,
 
 void update_caller_outvec_len(struct tfm_msg_body_t *msg);
 
-/**
- * \brief   notify the partition with the signal.
+/*
+ * Set partition signal.
  *
- * \param[in] partition_id      The ID of the partition to be notified.
- * \param[in] signal            The signal that the partition is to be notified
- *                              with.
- *
- * \retval void                 Success.
- * \retval "Does not return"    If partition_id is invalid.
+ * Assert a signal to given partition.
  */
-void notify_with_signal(int32_t partition_id, psa_signal_t signal);
+void spm_assert_signal(void *p_pt, psa_signal_t signal);
 
 /**
  * \brief Return the IRQ load info context pointer associated with a signal
@@ -459,5 +454,10 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal);
 struct irq_load_info_t *get_irq_info_for_signal(
                                     const struct partition_load_info_t *p_ldinf,
                                     psa_signal_t signal);
+
+void spm_interrupt_handler(struct partition_load_info_t *p_pldi,
+                           psa_signal_t signal,
+                           uint32_t irq_line,
+                           psa_flih_func flih_func);
 
 #endif /* __SPM_IPC_H__ */

@@ -17,7 +17,6 @@
 #include "load/interrupt_defs.h"
 #include "psa_api.h"
 #include "utilities.h"
-#include "tfm_wait.h"
 #include "ffm/spm_error_base.h"
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
@@ -419,7 +418,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     }
 
     /*
-     * tfm_event_wait() blocks the caller thread if no signals are available.
+     * thrd_wait_on() blocks the caller thread if no signals are available.
      * In this case, the return value of this function is temporary set into
      * runtime context. After new signal(s) are available, the return value
      * is updated with the available signal(s) and blocked thread gets to run.
@@ -427,10 +426,11 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     if (timeout == PSA_BLOCK &&
         (partition->signals_asserted & signal_mask) == 0) {
         partition->signals_waiting = signal_mask;
-        tfm_event_wait(&partition->event);
+        thrd_wait_on(&partition->waitobj,
+                     &(tfm_spm_get_running_partition()->thrd));
     } else if ((partition->signals_asserted & signal_mask) == 0) {
         /* Activate scheduler to check if any higher priority thread to run */
-        tfm_core_thrd_activate_schedule();
+        tfm_arch_trigger_pendsv();
     }
 
     return partition->signals_asserted & signal_mask;
@@ -782,13 +782,15 @@ void tfm_spm_partition_psa_reply(psa_handle_t msg_handle, psa_status_t status)
     if (is_tfm_rpc_msg(msg)) {
         tfm_rpc_client_call_reply(msg, ret);
     } else {
-        tfm_event_wake(&msg->ack_evnt, ret);
+        thrd_wake_up(&msg->ack_evnt, ret);
     }
 }
 
 void tfm_spm_partition_psa_notify(int32_t partition_id)
 {
-    notify_with_signal(partition_id, PSA_DOORBELL);
+    struct partition_t *p_pt = tfm_spm_get_partition_by_id(partition_id);
+
+    spm_assert_signal(p_pt, PSA_DOORBELL);
 }
 
 void tfm_spm_partition_psa_clear(void)

@@ -19,9 +19,6 @@
 #define ASSET_ATTR_MMIO             (ASSET_ATTR_NAMED_MMIO | \
                                      ASSET_ATTR_NUMBERED_MMIO)
 
-#define PTR_TO_REFERENCE(x)         (uintptr_t)(x)
-#define REFERENCE_TO_PTR(x, t)      (t)(x)
-
 struct asset_desc_t {
     union {
         struct {                            /* Memory-based asset type  */
