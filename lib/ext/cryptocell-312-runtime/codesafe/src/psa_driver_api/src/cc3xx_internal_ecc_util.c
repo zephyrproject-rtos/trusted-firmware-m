@@ -25,10 +25,10 @@ psa_status_t cc3xx_ecc_cc_error_to_psa_error(CCError_t cc_error)
     psa_status_t err;
 
     switch (cc_error) {
-
     case CC_SUCCESS:
-        err = PSA_SUCCESS;
+        return PSA_SUCCESS;
         break;
+
     case CC_ECPKI_ILLEGAL_DOMAIN_ID_ERROR:
     case CC_ECPKI_BUILD_KEY_ILLEGAL_DOMAIN_ID_ERROR:
     case CC_ECPKI_EXPORT_PUBL_KEY_ILLEGAL_DOMAIN_ID_ERROR:

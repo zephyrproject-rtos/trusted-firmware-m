@@ -47,7 +47,7 @@ psa_status_t cc3xx_internal_ecdsa_verify(const psa_key_attributes_t *attributes,
                                          bool do_hashing)
 {
 
-    CCEcpkiHashOpMode_t hash_mode;
+    CCEcpkiHashOpMode_t hash_mode = CC_ECPKI_HASH_OpModeLast;
     CCEcdsaVerifyUserContext_t pVerifyUserContext;
     CCEcpkiUserPublKey_t pUserPublKey;
     CCEcpkiUserPrivKey_t pUserPrivKey;
@@ -59,6 +59,11 @@ psa_status_t cc3xx_internal_ecdsa_verify(const psa_key_attributes_t *attributes,
     CCEcpkiBuildTempData_t temp_data;
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t cc_err;
+
+    err = cc3xx_psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
 
     err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
     if (err != PSA_SUCCESS) {
@@ -97,8 +102,6 @@ psa_status_t cc3xx_internal_ecdsa_verify(const psa_key_attributes_t *attributes,
         return err;
     }
 
-    psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
-
     cc_err = CC_EcdsaVerify(&pVerifyUserContext, &pUserPublKey, hash_mode,
                             (uint8_t *)signature, signature_length,
                             (uint8_t *)input, input_len);
@@ -122,7 +125,6 @@ psa_status_t cc3xx_internal_ecdsa_sign(
     size_t *signature_length, bool do_hashing)
 
 {
-
     psa_key_type_t key_type = psa_get_key_type(attributes);
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
     psa_ecc_family_t curve = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
@@ -134,8 +136,13 @@ psa_status_t cc3xx_internal_ecdsa_sign(
     EcdsaSignContext_t *pWorkingContext;
     CCEcpkiUserPrivKey_t pUserPrivKey;
     CCRndContext_t rnd_ctx;
-    CCEcpkiHashOpMode_t hash_mode;
+    CCEcpkiHashOpMode_t hash_mode = CC_ECPKI_HASH_OpModeLast;
     mbedtls_hmac_drbg_context hmac_drbg_ctx;
+
+    err = cc3xx_psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
 
     pWorkingContext = (EcdsaSignContext_t *)&pSignUserContext.context_buff;
     CC_PalMemSetZero(pWorkingContext, sizeof(EcdsaSignContext_t));
@@ -173,8 +180,6 @@ psa_status_t cc3xx_internal_ecdsa_sign(
                        cc_err);
         goto cleanup;
     }
-
-    psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
 
     if (PSA_ALG_ECDSA_IS_DETERMINISTIC(alg)) {
         /* When deterministic ECDSA is used we don't support
@@ -233,7 +238,12 @@ psa_status_t cc3xx_internal_rsa_verify(const psa_key_attributes_t *attributes,
 
     CCRsaPubUserContext_t *pPubUserContext;
     CCRsaUserPubKey_t *pUserPubKey;
-    CCRsaHashOpMode_t hash_mode;
+    CCRsaHashOpMode_t hash_mode = CC_RSA_HASH_OpModeLast;
+
+    err = cc3xx_psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
 
     pPubUserContext = (CCRsaPubUserContext_t *)mbedtls_calloc(
         1, sizeof(CCRsaPubUserContext_t));
@@ -259,8 +269,6 @@ psa_status_t cc3xx_internal_rsa_verify(const psa_key_attributes_t *attributes,
         err = cc3xx_rsa_cc_error_to_psa_error(cc_err);
         goto cleanup;
     }
-
-    psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
 
     if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg)) {
         cc_err = CC_RsaPkcs1V15Verify(pPubUserContext, pUserPubKey, hash_mode,
@@ -297,7 +305,12 @@ psa_status_t cc3xx_internal_rsa_sign(const psa_key_attributes_t *attributes,
     CCRndContext_t rnd_ctx;
     CCRsaPrivUserContext_t *user_context_ptr;
     CCRsaUserPrivKey_t *user_priv_key_ptr;
-    CCRsaHashOpMode_t hash_mode;
+    CCRsaHashOpMode_t hash_mode = CC_RSA_HASH_OpModeLast;
+
+    err = cc3xx_psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
 
     user_priv_key_ptr =
         (CCRsaUserPrivKey_t *)mbedtls_calloc(1, sizeof(CCRsaUserPrivKey_t));
@@ -318,8 +331,6 @@ psa_status_t cc3xx_internal_rsa_sign(const psa_key_attributes_t *attributes,
         err = cc3xx_rsa_cc_error_to_psa_error(cc_err);
         goto cleanup;
     }
-
-    psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
 
     err = cc3xx_ctr_drbg_get_ctx(&rnd_ctx);
     if (err != PSA_SUCCESS) {

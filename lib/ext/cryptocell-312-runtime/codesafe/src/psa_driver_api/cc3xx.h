@@ -16,5 +16,6 @@
 #include "cc3xx_psa_key_agreement.h"
 #include "cc3xx_psa_key_generation.h"
 #include "cc3xx_psa_asymmetric_signature.h"
+#include "cc3xx_psa_asymmetric_encryption.h"
 
 #endif /* CC3XX_DRIVER_H */
