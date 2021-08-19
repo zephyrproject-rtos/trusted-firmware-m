@@ -62,6 +62,8 @@ target_sources(tfm_spm
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/spm_func.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_core_svcalls_func.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_nspm_func.c>
+        $<$<AND:$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>,$<BOOL:${TFM_NS_MANAGE_NSID}>>:ns_client_ext/tfm_ns_ctx.c>
+        $<$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>:ns_client_ext/tfm_spm_ns_ctx.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_secure_api.c>
         #TODO add other arches
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
@@ -113,14 +115,7 @@ target_compile_definitions(tfm_spm
         $<$<CONFIG:Debug>:TFM_CORE_DEBUG>
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${MCUBOOT_MEASURED_BOOT}>>:BOOT_DATA_AVAILABLE>
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
-)
-
-# With constant optimizations on tfm_nspc_func emits a symbol that the linker
-# doesn't like. It's unclear why this is, so I'll put a TODO here, but for the
-# moment this fixes it with mimimal impact.
-set_source_files_properties(tfm_nspm_func.c
-    PROPERTIES
-        COMPILE_FLAGS -fno-ipa-cp
+        $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
 )
 
 # The veneers give warnings about not being properly declared so they get hidden
@@ -186,5 +181,6 @@ if(NOT TFM_MULTI_CORE_TOPOLOGY)
         PRIVATE
             $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_func/tfm_veneers.c>
             $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa/tfm_psa_api_veneers.c>
+            $<$<BOOL:${TFM_NS_MANAGE_NSID}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_client_ext/tfm_ns_client_ext.c>
     )
 endif()

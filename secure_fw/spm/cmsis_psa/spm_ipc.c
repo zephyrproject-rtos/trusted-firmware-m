@@ -35,6 +35,7 @@
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
+#include "tfm_nspm.h"
 
 /* Partition and service runtime data list head/runtime data table */
 static struct service_head_t services_listhead;
@@ -601,6 +602,11 @@ uint32_t tfm_spm_init(void)
 
     UNI_LISI_INIT_HEAD(PARTITION_LIST_ADDR);
     UNI_LISI_INIT_HEAD(&services_listhead);
+
+    /* Init the nonsecure context. */
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+     tfm_nspm_ctx_init();
+#endif
 
     while (1) {
         partition = load_a_partition_assuredly(PARTITION_LIST_ADDR);

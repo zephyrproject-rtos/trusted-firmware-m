@@ -41,8 +41,8 @@ install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
                     ${INTERFACE_INC_DIR}/tfm_ns_interface.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
-install(FILES       ${INTERFACE_INC_DIR}/ext/tz_context.h
-        DESTINATION ${INSTALL_INTERFACE_INC_DIR}/ext)
+install(FILES       ${INTERFACE_INC_DIR}/tfm_ns_client_ext.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 if (TFM_PSA_API)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_pack.h
