@@ -218,6 +218,8 @@ used which does not support all features.
 +-----------------------------+-------------------------------------+---------------+
 | TFM_CRYPTO_TEST_ALG_CTR     | Test CTR cryptography mode          | ON            |
 +-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_OFB     | Test OFB cryptography mode          | ON            |
++-----------------------------+-------------------------------------+---------------+
 | TFM_CRYPTO_TEST_ALG_GCM     | Test GCM cryptography mode          | ON            |
 +-----------------------------+-------------------------------------+---------------+
 | TFM_CRYPTO_TEST_ALG_SHA_512 | Test SHA-512 cryptography algorithm | ON            |
