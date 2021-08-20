@@ -16,6 +16,7 @@
 #include "psa/service.h"
 #include "psa_manifest/tfm_initial_attestation.h"
 #include "region_defs.h"
+#include "tfm_attest_defs.h"
 
 #define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)
 
@@ -108,22 +109,20 @@ static void tfm_abort(void)
         ;
 }
 
-static void attest_signal_handle(psa_signal_t signal, attest_func_t pfn)
+static void attest_signal_handle(psa_signal_t signal)
 {
     psa_msg_t msg;
     psa_status_t status;
 
     status = psa_get(signal, &msg);
     switch (msg.type) {
-    case PSA_IPC_CONNECT:
-        psa_reply(msg.handle, PSA_SUCCESS);
-        break;
-    case PSA_IPC_CALL:
-        status = (psa_status_t)pfn(&msg);
+    case TFM_ATTEST_GET_TOKEN:
+        status = psa_attest_get_token(&msg);
         psa_reply(msg.handle, status);
         break;
-    case PSA_IPC_DISCONNECT:
-        psa_reply(msg.handle, PSA_SUCCESS);
+    case TFM_ATTEST_GET_TOKEN_SIZE:
+        status = psa_attest_get_token_size(&msg);
+        psa_reply(msg.handle, status);
         break;
     default:
         tfm_abort();
@@ -143,12 +142,8 @@ psa_status_t attest_partition_init(void)
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & TFM_ATTEST_GET_TOKEN_SIGNAL) {
-            attest_signal_handle(TFM_ATTEST_GET_TOKEN_SIGNAL,
-                                 psa_attest_get_token);
-        } else if (signals & TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL) {
-            attest_signal_handle(TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL,
-                                 psa_attest_get_token_size);
+        if (signals & TFM_ATTESTATION_SERVICE_SIGNAL) {
+            attest_signal_handle(TFM_ATTESTATION_SERVICE_SIGNAL);
         } else {
             tfm_abort();
         }

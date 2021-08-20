@@ -27,9 +27,6 @@ set(CRYPTO_CONC_OPER_NUM                4           CACHE STRING    "The max num
 set(CRYPTO_ENGINE_BUF_SIZE              0x800       CACHE STRING    "Heap size for the crypto backend")
 set(CRYPTO_ASYM_SIGN_MODULE_DISABLED    ON          CACHE BOOL      "Disable PSA Crypto asymmetric key signature module")
 set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED ON          CACHE BOOL      "Disable PSA Crypto asymmetric key encryption module")
-# TODO CRYPTO_KEY_ID_ENCODES_OWNER shall be aligned with underlying crypto
-# library key ID encoding configuration
-set(CRYPTO_KEY_ID_ENCODES_OWNER         OFF         CACHE BOOL      "Encode client ID into Crypto PSA key ID")
 
 set(SYMMETRIC_INITIAL_ATTESTATION       ON          CACHE BOOL      "Use symmetric crypto for inital attestation")
 
@@ -48,7 +45,8 @@ set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cr
 set(TFM_CRYPTO_TEST_ALG_CTR             OFF         CACHE BOOL      "Test CTR cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_GCM             OFF         CACHE BOOL      "Test GCM cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_SHA_512         OFF         CACHE BOOL      "Test SHA-512 cryptography algorithm")
-set(TFM_CRYPTO_TEST_HKDF                OFF         CACHE BOOL      "Test SHA-512 cryptography algorithm")
+set(TFM_CRYPTO_TEST_HKDF                OFF         CACHE BOOL      "Test the HKDF key derivation algorithm")
+set(TFM_CRYPTO_TEST_ECDH                OFF         CACHE BOOL      "Test the ECDH key agreement algorithm")
 
 ################################## Dependencies ################################
 

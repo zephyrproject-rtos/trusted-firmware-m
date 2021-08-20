@@ -19,7 +19,7 @@ target_include_directories(platform_region_defs
 
 target_compile_definitions(platform_region_defs
     INTERFACE
-        $<$<OR:$<BOOL:${TEST_NS}>,$<BOOL:${TEST_S}>>:FLASH_LAYOUT_FOR_TEST>
+        $<$<BOOL:${TFM_TEST}>:FLASH_LAYOUT_FOR_TEST>
 )
 
 #========================= Platform common defs ===============================#
@@ -60,6 +60,7 @@ target_include_directories(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/CMSIS_Driver
         ${CMAKE_CURRENT_SOURCE_DIR}/Device/Include
         ${CMAKE_CURRENT_SOURCE_DIR}/stm32l5xx_hal/Inc
+        ${MBEDCRYPTO_PATH}/library
 )
 
 target_sources(platform_s
@@ -218,7 +219,7 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/regression.sh
          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
          DESTINATION ${CMAKE_BINARY_DIR} )
 
-if (${TEST_S} OR ${TEST_NS})
+if (${TFM_TEST})
     #the define FLASH_LAYOUT_FOR_TEST
     #increase SECURE and NON SECURE IMAGE and modify the  content of  low_level_device.c from BL2 (low_level_flash.c)
     set(FLAGS_FOR_BL2_PREPROCESSING

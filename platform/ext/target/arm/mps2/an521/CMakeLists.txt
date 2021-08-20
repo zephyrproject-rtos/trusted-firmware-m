@@ -98,14 +98,17 @@ target_sources(platform_s
         target_cfg.c
         native_drivers/ppc_sse200_drv.c
         native_drivers/arm_uart_drv.c
+        $<$<AND:$<NOT:$<BOOL:${TEST_NS_SLIH_IRQ}>>,$<NOT:$<BOOL:${TEST_NS_FLIH_IRQ}>>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/timer_cmsdk/timer_cmsdk.c>
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        $<$<OR:$<BOOL:${TEST_NS}>,$<BOOL:${TEST_S}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TFM_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_sources(tfm_sprt
     PRIVATE
-        native_drivers/timer_cmsdk/timer_cmsdk.c
+        # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
+        # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
+        $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/timer_cmsdk/timer_cmsdk.c>
 )
 
 target_compile_options(platform_s
@@ -171,21 +174,3 @@ if(BL2)
             native_drivers
     )
 endif()
-
-#========================= Crypto =============================================#
-
-target_sources(tfm_psa_rot_partition_crypto
-    PRIVATE
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/crypto_nv_seed.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<BOOL:${PLATFORM_DUMMY_NV_SEED}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/crypto_dummy_nv_seed.c>
-)
-
-target_compile_definitions(tfm_psa_rot_partition_crypto
-    PRIVATE
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<BOOL:${PLATFORM_DUMMY_NV_SEED}>>:PLATFORM_DUMMY_NV_SEED>
-)
-
-target_include_directories(crypto_service_mbedcrypto
-    PUBLIC
-        ${CMAKE_SOURCE_DIR}/platform/include
-)

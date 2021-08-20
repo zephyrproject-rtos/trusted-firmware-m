@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -188,6 +188,9 @@ psa_status_t ps_object_read(psa_storage_uid_t uid, int32_t client_id,
 
     /* Read object */
 #ifdef PS_ENCRYPTION
+    g_ps_object.header.crypto.ref.uid = uid;
+    g_ps_object.header.crypto.ref.client_id = client_id;
+
     err = ps_encrypted_object_read(g_obj_tbl_info.fid, &g_ps_object);
 #else
     /* Read object header */
@@ -243,6 +246,9 @@ psa_status_t ps_object_create(psa_storage_uid_t uid, int32_t client_id,
     if (err == PSA_SUCCESS) {
 #ifdef PS_ENCRYPTION
         /* Read the object */
+        g_ps_object.header.crypto.ref.uid = uid;
+        g_ps_object.header.crypto.ref.client_id = client_id;
+
         err = ps_encrypted_object_read(g_obj_tbl_info.fid, &g_ps_object);
 #else
         /* Read the object header */
@@ -294,6 +300,9 @@ psa_status_t ps_object_create(psa_storage_uid_t uid, int32_t client_id,
     }
 
 #ifdef PS_ENCRYPTION
+    g_ps_object.header.crypto.ref.uid = uid;
+    g_ps_object.header.crypto.ref.client_id = client_id;
+
     err = ps_encrypted_object_write(g_obj_tbl_info.fid, &g_ps_object);
 #else
     wrt_size = PS_OBJECT_SIZE(g_ps_object.header.info.current_size);
@@ -354,6 +363,9 @@ psa_status_t ps_object_write(psa_storage_uid_t uid, int32_t client_id,
 
     /* Read the object */
 #ifdef PS_ENCRYPTION
+    g_ps_object.header.crypto.ref.uid = uid;
+    g_ps_object.header.crypto.ref.client_id = client_id;
+
     err = ps_encrypted_object_read(g_obj_tbl_info.fid, &g_ps_object);
 #else
     err = ps_read_object(READ_ALL_OBJECT);
@@ -404,6 +416,9 @@ psa_status_t ps_object_write(psa_storage_uid_t uid, int32_t client_id,
     }
 
 #ifdef PS_ENCRYPTION
+    g_ps_object.header.crypto.ref.uid = uid;
+    g_ps_object.header.crypto.ref.client_id = client_id;
+
     err = ps_encrypted_object_write(g_obj_tbl_info.fid, &g_ps_object);
 #else
     wrt_size = PS_OBJECT_SIZE(g_ps_object.header.info.current_size);
@@ -453,6 +468,9 @@ psa_status_t ps_object_get_info(psa_storage_uid_t uid, int32_t client_id,
     }
 
 #ifdef PS_ENCRYPTION
+    g_ps_object.header.crypto.ref.uid = uid;
+    g_ps_object.header.crypto.ref.client_id = client_id;
+
     err = ps_encrypted_object_read(g_obj_tbl_info.fid, &g_ps_object);
 #else
     err = ps_read_object(READ_HEADER_ONLY);
@@ -486,6 +504,9 @@ psa_status_t ps_object_delete(psa_storage_uid_t uid, int32_t client_id)
     }
 
 #ifdef PS_ENCRYPTION
+    g_ps_object.header.crypto.ref.uid = uid;
+    g_ps_object.header.crypto.ref.client_id = client_id;
+
     err = ps_encrypted_object_read(g_obj_tbl_info.fid, &g_ps_object);
 #else
     err = ps_read_object(READ_HEADER_ONLY);

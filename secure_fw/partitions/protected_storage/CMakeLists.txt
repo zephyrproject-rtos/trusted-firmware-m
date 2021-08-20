@@ -42,9 +42,9 @@ target_sources(tfm_app_rot_partition_ps
         ps_utils.c
         $<$<BOOL:${PS_ENCRYPTION}>:crypto/ps_crypto_interface.c>
         $<$<BOOL:${PS_ENCRYPTION}>:ps_encrypted_object.c>
-        # The test_ps_nv_counters.c will be used instead, when secure test is ON
-        # and PS_TEST_NV_COUNTERS ON
-        $<$<NOT:$<AND:$<BOOL:${TEST_S}>,$<BOOL:${PS_TEST_NV_COUNTERS}>>>:nv_counters/ps_nv_counters.c>
+        # The test_ps_nv_counters.c will be used instead, when PS secure test is
+        # ON and PS_TEST_NV_COUNTERS is ON
+        $<$<NOT:$<AND:$<BOOL:${TEST_S_PS}>,$<BOOL:${PS_TEST_NV_COUNTERS}>>>:nv_counters/ps_nv_counters.c>
 )
 
 # The generated sources

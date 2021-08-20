@@ -112,7 +112,7 @@ See ``interface/src/tfm_ns_interface.c.example`` for more details.
 
 TF-M provides a reference implementation of NS mailbox on multi-core platforms,
 under folder ``interface/src/multi_core``.
-See :doc:`Mailbox design </docs/technical_references/dual-cpu/mailbox_design_on_dual_core_system>`
+See :doc:`Mailbox design </docs/technical_references/design_docs/dual-cpu/mailbox_design_on_dual_core_system>`
 for TF-M multi-core mailbox design.
 
 Interface with non-secure world regression tests
@@ -135,7 +135,7 @@ implementation of these wrappers to be able to run the tests.
 NS client Identification
 ========================
 See
-:doc:`ns client identification documentation </docs/technical_references/tfm_ns_client_identification>`.
+:doc:`ns client identification documentation </docs/technical_references/design_docs/tfm_ns_client_identification>`.
 
 *********************
 Non-secure interrupts

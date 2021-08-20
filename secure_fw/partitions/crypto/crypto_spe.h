@@ -126,6 +126,10 @@
         PSA_FUNCTION_NAME(psa_mac_verify)
 #define psa_mac_abort \
         PSA_FUNCTION_NAME(psa_mac_abort)
+#define psa_sign_message \
+        PSA_FUNCTION_NAME(psa_sign_message)
+#define psa_verify_message \
+        PSA_FUNCTION_NAME(psa_verify_message)
 #define psa_sign_hash \
         PSA_FUNCTION_NAME(psa_sign_hash)
 #define psa_verify_hash \

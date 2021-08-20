@@ -10,9 +10,12 @@ cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-set (CY_CORE_LIB_PATH "libs/core-lib")
-set (CY_PDL_LIB_PATH  "libs/mtb-pdl-cat1")
+set (CY_CORE_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/libs/core-lib)
+set (CY_PDL_LIB_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/libs/mtb-pdl-cat1)
+set (CY_PSOC64_DIR    ${CMAKE_CURRENT_SOURCE_DIR})
 
+set(P64_UTILS_LIB_TARGET   p64_utils_lib)
+add_subdirectory(libs/p64_utils)
 
 #========================= Platform region defs ===============================#
 
@@ -30,9 +33,9 @@ target_compile_definitions(platform_region_defs
 target_sources(tfm_s
     PRIVATE
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_psoc64_s.s>
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/${CY_PDL_LIB_PATH}/drivers/source/TOOLCHAIN_ARM/cy_syslib_mdk.s>
+        $<$<C_COMPILER_ID:ARMClang>:${CY_PDL_LIB_PATH}/drivers/source/TOOLCHAIN_ARM/cy_syslib_mdk.s>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_psoc64_s.S>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${CY_PDL_LIB_PATH}/drivers/source/TOOLCHAIN_GCC_ARM/cy_syslib_gcc.S>
+        $<$<C_COMPILER_ID:GNU>:${CY_PDL_LIB_PATH}/drivers/source/TOOLCHAIN_GCC_ARM/cy_syslib_gcc.S>
         $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_psoc64_s.s>
         $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/cy_syslib_iar.c>
 )
@@ -46,9 +49,9 @@ if(NS)
     target_sources(tfm_ns
         PRIVATE
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_psoc64_ns.s>
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/${CY_PDL_LIB_PATH}/drivers/source/TOOLCHAIN_ARM/cy_syslib_mdk.s>
+            $<$<C_COMPILER_ID:ARMClang>:${CY_PDL_LIB_PATH}/drivers/source/TOOLCHAIN_ARM/cy_syslib_mdk.s>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_psoc64_ns.S>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/${CY_PDL_LIB_PATH}/drivers/source/TOOLCHAIN_GCC_ARM/cy_syslib_gcc.S>
+            $<$<C_COMPILER_ID:GNU>:${CY_PDL_LIB_PATH}/drivers/source/TOOLCHAIN_GCC_ARM/cy_syslib_gcc.S>
             $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_psoc64_ns.s>
             $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/cy_syslib_iar.c>
     )
@@ -135,6 +138,7 @@ target_compile_definitions(platform_s
 target_link_libraries(platform_s
     PRIVATE
         tfm_spm
+        ${P64_UTILS_LIB_TARGET}
 )
 
 # GNU ld has some strange behaviour to do with weak functions, and does not deal

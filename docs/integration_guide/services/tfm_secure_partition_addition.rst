@@ -179,7 +179,6 @@ Here is the RoT Service ID table used in TF-M.
    tfm_slih_test_service       0x0000F                0x0A0-0x0AF
    tfm_flih_test_service       0x0000F                0x0B0-0x0BF
    tfm_ps_test_service         0x0000F                0x0C0-0x0DF
-   tfm_ff11_partition          0x0000F                0x120-0x13F
    =========================== ====================== ========================
 
 RoT Service Stateless Handle Distribution
@@ -199,6 +198,9 @@ listed are not applied to stateless mechanism yet.
     **Partition name**              **Stateless Handle**
    =============================== =======================
    TFM_SP_CRYPTO                   1
+   TFM_SP_PS                       2
+   TFM_SP_ITS                      3
+   TFM_SP_INITIAL_ATTESTATION      4
    =============================== =======================
 
 mmio_regions

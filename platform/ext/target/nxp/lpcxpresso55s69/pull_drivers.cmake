@@ -13,6 +13,9 @@ file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/common/fsl_common.c  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.c)
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/common/fsl_common.h  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common.h)
 
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/common/fsl_common_arm.c  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.c)
+file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/common/fsl_common_arm.h  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_common_arm.h)
+
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/ctimer/fsl_ctimer.c  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_ctimer.c)
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/drivers/ctimer/fsl_ctimer.h  ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers/fsl_ctimer.h)
 
@@ -65,7 +68,6 @@ file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/utilities/debug_console/str/fsl_str.h ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/str/fsl_str.h)
 
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/utilities/assert/fsl_assert.c ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_assert.c)
-
 
 #========================= Pull MCUxpresso NXP SDK devices from https://github.com/NXPmicro/mcux-sdk =========================#
 file(DOWNLOAD https://raw.githubusercontent.com/NXPmicro/mcux-sdk/${NXP_SDK_GIT_TAG}/devices/LPC55S69/fsl_device_registers.h ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/fsl_device_registers.h)

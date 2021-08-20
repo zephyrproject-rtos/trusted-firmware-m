@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
- * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,6 +25,7 @@
 #include "cy_device.h"
 #include "cy_device_headers.h"
 #include "cy_ipc_drv.h"
+#include "cy_p64_watchdog.h"
 #include "cy_prot.h"
 #include "cy_pra.h"
 #include "pc_config.h"
@@ -33,6 +34,19 @@
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
+
+static enum tfm_plat_err_t handle_boot_wdt(void)
+{
+    /* Update watchdog timer to mark successfull start up of the image */
+    LOG_MSG("Checking boot watchdog\r\n");
+    if (cy_p64_wdg_is_enabled()) {
+        cy_p64_wdg_stop();
+        cy_p64_wdg_free();
+        LOG_MSG("Disabled boot watchdog\r\n");
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
 
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         bool privileged,
@@ -65,6 +79,9 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
 void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
     smpu_print_config();
+
+    /* Reset boot watchdog */
+    handle_boot_wdt();
 
     if (cy_access_port_control(CY_CM4_AP, CY_AP_EN) == 0) {
         /* The delay is required after Access port was enabled for

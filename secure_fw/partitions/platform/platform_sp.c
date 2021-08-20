@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,7 +9,6 @@
 
 #include "tfm_platform_system.h"
 #include "tfm_plat_nv_counters.h"
-#include "tfm/tfm_spm_services.h"
 #include "tfm_secure_api.h"
 #include "psa_manifest/pid.h"
 
@@ -67,12 +66,6 @@ static bool nv_counter_access_grant(int32_t client_id,
 
 enum tfm_platform_err_t platform_sp_system_reset(void)
 {
-    /* Check if SPM allows the system reset */
-
-    if (tfm_spm_request_reset_vote() != 0) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
     /* FIXME: The system reset functionality is only supported in isolation
      *        level 1.
      */

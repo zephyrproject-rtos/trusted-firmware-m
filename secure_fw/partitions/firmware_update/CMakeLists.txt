@@ -16,7 +16,7 @@ add_library(tfm_psa_rot_partition_fwu STATIC)
 
 target_include_directories(tfm_psa_rot_partition_fwu
     INTERFACE
-        ${CMAKE_SOURCE_DIR}/secure_fw/include/tfm
+        ${CMAKE_SOURCE_DIR}/secure_fw/include
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update
@@ -56,6 +56,7 @@ target_link_libraries(tfm_psa_rot_partition_fwu
 target_compile_definitions(tfm_psa_rot_partition_fwu
     PRIVATE
         $<$<BOOL:${TFM_PSA_API}>:TFM_PSA_API>
+        $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
 )
 
 ############################ Secure API ########################################

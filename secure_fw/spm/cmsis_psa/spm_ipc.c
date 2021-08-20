@@ -27,9 +27,8 @@
 #include "tfm_core_trustzone.h"
 #include "lists.h"
 #include "tfm_pools.h"
-#include "spm_partition_defs.h"
+#include "region.h"
 #include "psa_manifest/pid.h"
-#include "tfm/tfm_spm_services.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
@@ -44,6 +43,10 @@ struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
+
+/* The veneer section names come from the scatter file */
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 
 void spm_interrupt_handler(struct partition_load_info_t *p_ldinf,
                            psa_signal_t signal,
@@ -305,11 +308,12 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
-    struct service_t *p_serv;
+    struct service_t *p_prev, *p_curr;
 
-    UNI_LIST_FOR_EACH(p_serv, &services_listhead) {
-        if (p_serv->p_ldinf->sid == sid) {
-            return p_serv;
+    UNI_LIST_FOR_EACH_PREV(p_prev, p_curr, &services_listhead) {
+        if (p_curr->p_ldinf->sid == sid) {
+            UNI_LIST_MOVE_AFTER(&services_listhead, p_prev, p_curr);
+            return p_curr;
         }
     }
 
@@ -602,6 +606,43 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
     }
 
     return SPM_ERROR_MEMORY_CHECK;
+}
+
+bool tfm_spm_is_ns_caller(void)
+{
+#if defined(TFM_MULTI_CORE_TOPOLOGY) || defined(FORWARD_PROT_MSG)
+    /* Multi-core NS PSA API request is processed by pendSV. */
+    return (__get_active_exc_num() == EXC_NUM_PENDSV);
+#else
+    struct partition_t *partition = tfm_spm_get_running_partition();
+
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    return (partition->p_ldinf->pid == TFM_SP_NON_SECURE_ID);
+#endif
+}
+
+uint32_t tfm_spm_get_caller_privilege_mode(void)
+{
+    struct partition_t *partition;
+
+#if defined(TFM_MULTI_CORE_TOPOLOGY) || defined(FORWARD_PROT_MSG)
+    /*
+     * In multi-core topology, if PSA request is from mailbox, the client
+     * is unprivileged.
+     */
+    if (__get_active_exc_num() == EXC_NUM_PENDSV) {
+        return TFM_PARTITION_UNPRIVILEGED_MODE;
+    }
+#endif
+    partition = tfm_spm_get_running_partition();
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    return tfm_spm_partition_get_privileged_mode(partition->p_ldinf->flags);
 }
 
 uint32_t tfm_spm_init(void)
@@ -949,24 +990,47 @@ struct irq_load_info_t *get_irq_info_for_signal(
 }
 
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
-void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
-                             uint32_t exc_return, bool ns_caller)
+void tfm_spm_validate_caller(uint32_t *p_ctx, uint32_t exc_return)
 {
+    /*
+     * TODO: the reentrant detection mechanism needs to be changed when there
+     * is no boundaries.
+     */
     uintptr_t stacked_ctx_pos;
+    bool ns_caller = false;
+    struct partition_t *p_cur_sp = tfm_spm_get_running_partition();
+    uint32_t veneer_base =
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
+    uint32_t veneer_limit =
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
+
+    if (!p_cur_sp) {
+        tfm_core_panic();
+    }
+
+    /*
+     * The caller security attribute detection bases on LR of state context.
+     * However, if SP calls PSA APIs based on its customized SVC, the LR may be
+     * occupied by general purpose value while calling SVC.
+     * Check if caller comes from non-secure: return address (p_ctx[6]) belongs
+     * to veneer section, and the bit0 of LR (p_ctx[5]) is zero.
+     */
+    if (p_ctx[6] >= veneer_base && p_ctx[6] < veneer_limit &&
+        !(p_ctx[5] & TFM_VENEER_LR_BIT0_MASK)) {
+        ns_caller = true;
+    }
+
+    /* If called from ns, partition ID should be TFM_SP_NON_SECURE_ID. */
+    if ((ns_caller == true) !=
+        (p_cur_sp->p_ldinf->pid == TFM_SP_NON_SECURE_ID)) {
+            tfm_core_panic();
+    }
 
     if (ns_caller) {
         /*
          * The background IRQ can't be supported, since if SP is executing,
          * the preempted context of SP can be different with the one who
-         * preempts veneer.
-         */
-        if (p_cur_sp->p_ldinf->pid != TFM_SP_NON_SECURE_ID) {
-            tfm_core_panic();
-        }
-
-        /*
-         * It is non-secure caller, check if veneer stack contains
-         * multiple contexts.
+         * preempts veneer. Check if veneer stack contains multiple contexts.
          */
         stacked_ctx_pos = (uintptr_t)p_ctx +
                           sizeof(struct tfm_state_context_t) +
@@ -985,42 +1049,6 @@ void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
         if (stacked_ctx_pos != p_cur_sp->sp_thread.stk_top) {
             tfm_core_panic();
         }
-    } else if (p_cur_sp->p_ldinf->pid <= 0) {
-        tfm_core_panic();
     }
 }
 #endif
-
-void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
-{
-    uint32_t *res_ptr = (uint32_t *)&svc_ctx->r0;
-    uint32_t running_partition_flags = 0;
-    const struct partition_t *partition = NULL;
-
-    /* Check permissions on request type basis */
-
-    switch (svc_ctx->r0) {
-    case TFM_SPM_REQUEST_RESET_VOTE:
-        partition = tfm_spm_get_running_partition();
-        if (!partition) {
-            tfm_core_panic();
-        }
-        running_partition_flags = partition->p_ldinf->flags;
-
-        /* Currently only PSA Root of Trust services are allowed to make Reset
-         * vote request
-         */
-        if ((running_partition_flags & SPM_PART_FLAG_PSA_ROT) == 0) {
-            *res_ptr = (uint32_t)TFM_ERROR_GENERIC;
-        }
-
-        /* FixMe: this is a placeholder for checks to be performed before
-         * allowing execution of reset
-         */
-        *res_ptr = (uint32_t)TFM_SUCCESS;
-
-        break;
-    default:
-        *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
-    }
-}

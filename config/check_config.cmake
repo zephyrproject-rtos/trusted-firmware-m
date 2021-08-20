@@ -28,9 +28,9 @@ tfm_invalid_config(TFM_ISOLATION_LEVEL EQUAL 3 AND NOT TFM_PLATFORM IN_LIST TFM_
 tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND NOT TFM_PSA_API)
 
 tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND NOT TFM_PSA_API)
+tfm_invalid_config(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM AND NOT TFM_MULTI_CORE_TOPOLOGY)
 
-tfm_invalid_config(TEST_S  AND TEST_PSA_API)
-tfm_invalid_config(TEST_NS AND TEST_PSA_API)
+tfm_invalid_config(TFM_TEST AND TEST_PSA_API)
 
 tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 tfm_invalid_config((TFM_PARTITION_PROTECTED_STORAGE AND PS_ROLLBACK_PROTECTION) AND NOT TFM_PARTITION_PLATFORM)
@@ -80,7 +80,13 @@ tfm_invalid_config(NOT TFM_FIH_PROFILE IN_LIST TFM_FIH_PROFILE_LIST)
 
 tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND TFM_PSA_API)
 
-########################### TF-M Tests     #####################################
+########################### TF-M crypto ########################################
 
-tfm_invalid_config(TFM_ENABLE_SLIH_TEST AND NOT TFM_PSA_API)
-tfm_invalid_config(TFM_ENABLE_SLIH_TEST AND TFM_ENABLE_FLIH_TEST)
+tfm_invalid_config(PLATFORM_DUMMY_NV_SEED AND CRYPTO_HW_ACCELERATOR)
+tfm_invalid_config(NOT PLATFORM_DUMMY_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
+
+########################### Test check config ##################################
+
+if(TFM_TEST)
+    include(config/tests/check_config.cmake)
+endif()

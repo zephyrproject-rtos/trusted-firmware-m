@@ -29,8 +29,6 @@
 #define TIMER_RELOAD_VALUE (1*1000*1000)
 #define USERLED_MASK       (1UL)
 
-/* Area used by psa-arch-tests to keep state. */
-#define PSA_TEST_SCRATCH_AREA_SIZE (0x400)
 
 static bool initialized = false;
 
@@ -141,7 +139,7 @@ void pal_timer_stop_ns(void)
     timer_stop(NRF_TIMER1);
 }
 
-#if !defined(TFM_ENABLE_SLIH_TEST)
+#if !defined(TEST_NS_SLIH_IRQ)
 /* Watchdog timeout handler. */
 void TIMER1_Handler(void)
 {
@@ -153,9 +151,9 @@ void TIMER1_Handler(void)
 }
 #endif
 
+#ifdef PSA_API_TEST_ENABLED
 uint32_t pal_nvmem_get_addr(void)
 {
-    static __ALIGN(4) uint8_t __psa_scratch[PSA_TEST_SCRATCH_AREA_SIZE];
 #ifdef NRF_TRUSTZONE_NONSECURE
     static bool psa_scratch_initialized = false;
 
@@ -166,12 +164,13 @@ uint32_t pal_nvmem_get_addr(void)
         int is_pinreset = reset_reason & NRFX_RESET_REASON_RESETPIN_MASK;
         if ((reset_reason == 0) || is_pinreset){
             /* PSA API tests expect this area to be initialized to all 0xFFs
-            * after a power-on or pin reset.
-            */
-            memset(__psa_scratch, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
+             * after a power-on or pin reset.
+             */
+            memset((void*)PSA_TEST_SCRATCH_AREA_BASE, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
         }
         psa_scratch_initialized = true;
     }
-#endif
-    return (uint32_t)__psa_scratch;
+#endif /* NRF_TRUSTZONE_NONSECURE */
+    return (uint32_t)PSA_TEST_SCRATCH_AREA_BASE;
 }
+#endif /* PSA_API_TEST_ENABLED */

@@ -21,7 +21,7 @@
  */
 
 /* Type of the EC curve which the key belongs to, in PSA curve ID form */
-const psa_ecc_family_t initial_attest_curve_type = PSA_ECC_CURVE_SECP256R1;
+const psa_ecc_family_t initial_attest_curve_type = PSA_ECC_FAMILY_SECP_R1;
 
 /*
  * Initial attestation public key in raw format, without any encoding.

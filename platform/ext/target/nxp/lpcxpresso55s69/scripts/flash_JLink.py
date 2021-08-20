@@ -15,18 +15,18 @@ FILE = "flash.jlink"
 # Remove previous flash.jlink script file
 if os.path.isfile(FILE):
     if platform.system() == 'Windows':
-        os.system('del /f /q FILE')
+        os.system('del /f /q ' + FILE)
     else:
-        os.system('rm -rf FILE')
-    
-# Write the JLink configuration into flash.jlink script  
+        os.system('rm -rf ' + FILE)
+
+# Write the JLink configuration into flash.jlink script
 os.system('echo r >> ' + FILE)                      # reset the target
 os.system('echo erase  >> ' + FILE)                 # erase the flash memory
 os.system('echo loadfile tfm_s.hex >> ' + FILE)     # flash the secure image into target
 os.system('echo loadfile tfm_ns.hex  >> ' + FILE)   # flash the non-secure image into target
 os.system('echo r >> ' + FILE)                      # reset the target
 os.system('echo go >> ' + FILE)                     # run the program
-os.system('echo exit >> ' + FILE)                   # exit the JLinkCommander 
+os.system('echo exit >> ' + FILE)                   # exit the JLinkCommander
 
 # Upload the configuration from flash.jlink script into the target device
 if platform.system() == 'Windows':

@@ -68,9 +68,6 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
     case TFM_SVC_SFN_COMPLETION:
         tfm_spm_partition_completion_handler(svc_args[0], svc_args[1], msp);
         break;
-    case TFM_SVC_SPM_REQUEST:
-        tfm_spm_request_handler((struct tfm_state_context_t *)svc_args);
-        break;
     case TFM_SVC_DEPRIV_REQ:
         retval = tfm_spm_depriv_req_handler(svc_args, exc_return);
         break;

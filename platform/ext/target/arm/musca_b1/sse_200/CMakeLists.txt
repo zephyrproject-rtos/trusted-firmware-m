@@ -114,9 +114,9 @@ target_sources(platform_s
         target_cfg.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/uart_pl011_drv.c
-        Native_Driver/timer_cmsdk_drv.c
+        $<$<NOT:$<BOOL:${TEST_NS_SLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TFM_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_multicore.c>
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_ns_mailbox.c>
@@ -126,6 +126,13 @@ target_sources(platform_s
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+target_sources(tfm_sprt
+    PRIVATE
+        # The SLIH test Partition accesses the timer as ARoT Partitions.
+        # Put the driver to SPRT so that the SLIH tests can access it.
+        $<$<BOOL:${TEST_NS_SLIH_IRQ}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
 )
 
 target_compile_definitions(platform_s

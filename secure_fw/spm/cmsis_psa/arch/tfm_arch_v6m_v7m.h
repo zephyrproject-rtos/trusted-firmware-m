@@ -30,6 +30,11 @@
 /* processor mode for return: 0=Handler mode 1=Thread mod. */
 #define EXC_RETURN_MODE     (1UL << 3)
 
+/* Exception numbers */
+#define EXC_NUM_THREAD_MODE                     (0)
+#define EXC_NUM_SVCALL                          (11)
+#define EXC_NUM_PENDSV                          (14)
+
 struct tfm_arch_ctx_t {
     uint32_t    r8;
     uint32_t    r9;

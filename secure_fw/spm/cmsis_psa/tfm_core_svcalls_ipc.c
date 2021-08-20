@@ -6,23 +6,20 @@
  */
 
 #include <string.h>
-#include "load/partition_defs.h"
 #include "region.h"
 #include "spm_ipc.h"
+#include "svc_num.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
 #include "tfm_core_trustzone.h"
 #include "tfm_core_utils.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"
-#include "svc_num.h"
 #include "ffm/tfm_boot_data.h"
-#include "ffm/psa_client_service_apis.h"
+#include "ffm/psa_api.h"
 #include "tfm_hal_spm_logdev.h"
-
-/* The section names come from the scatter file */
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
+#include "load/partition_defs.h"
+#include "psa/client.h"
 
 /* MSP bottom (higher address) */
 REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP, $$ZI$$Limit);
@@ -42,75 +39,54 @@ struct tfm_svc_flih_ctx_t {
 static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
-    bool ns_caller = false;
-    struct partition_t *partition = NULL;
-    uint32_t veneer_base =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-    uint32_t veneer_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-
-    /*
-     * The caller security attribute detection bases on LR of state context.
-     * However, if SP calls PSA APIs based on its customized SVC, the LR may be
-     * occupied by general purpose value while calling SVC.
-     * Check if caller comes from non-secure: return address (ctx[6]) is belongs
-     * to veneer section, and the bit0 of LR (ctx[5]) is zero.
-     */
-    if (ctx[6] >= veneer_base && ctx[6] < veneer_limit &&
-        !(ctx[5] & TFM_VENEER_LR_BIT0_MASK)) {
-        ns_caller = true;
-    }
-
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
-
-    tfm_spm_validate_caller(partition, ctx, lr, ns_caller);
+    tfm_spm_validate_caller(ctx, lr);
 
     switch (svc_num) {
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
-        return tfm_spm_psa_framework_version();
+        return tfm_spm_client_psa_framework_version();
     case TFM_SVC_PSA_VERSION:
-        return tfm_spm_psa_version(ctx, ns_caller);
+        return tfm_spm_client_psa_version(ctx[0]);
     case TFM_SVC_PSA_CONNECT:
-        return tfm_spm_psa_connect(ctx, ns_caller);
+        return tfm_spm_client_psa_connect(ctx[0], ctx[1]);
     case TFM_SVC_PSA_CALL:
-        return tfm_spm_psa_call(ctx, ns_caller, lr);
+        return tfm_spm_client_psa_call((psa_handle_t)ctx[0], ctx[1],
+                                       (const psa_invec *)ctx[2],
+                                       (psa_outvec *)ctx[3]);
     case TFM_SVC_PSA_CLOSE:
-        tfm_spm_psa_close(ctx, ns_caller);
+        tfm_spm_client_psa_close((psa_handle_t)ctx[0]);
         break;
     case TFM_SVC_PSA_WAIT:
-        return tfm_spm_psa_wait(ctx);
+        return tfm_spm_partition_psa_wait((psa_signal_t)ctx[0], ctx[1]);
     case TFM_SVC_PSA_GET:
-        return tfm_spm_psa_get(ctx);
+        return tfm_spm_partition_psa_get((psa_signal_t)ctx[0],
+                                         (psa_msg_t *)ctx[1]);
     case TFM_SVC_PSA_SET_RHANDLE:
-        tfm_spm_psa_set_rhandle(ctx);
+        tfm_spm_partition_psa_set_rhandle((psa_handle_t)ctx[0], (void *)ctx[1]);
         break;
     case TFM_SVC_PSA_READ:
-        return tfm_spm_psa_read(ctx);
+        return tfm_spm_partition_psa_read((psa_handle_t)ctx[0], ctx[1],
+                                          (void *)ctx[2], (size_t)ctx[3]);
     case TFM_SVC_PSA_SKIP:
-        return tfm_spm_psa_skip(ctx);
+        return tfm_spm_partition_psa_skip((psa_handle_t)ctx[0], ctx[1],
+                                          (size_t)ctx[2]);
     case TFM_SVC_PSA_WRITE:
-        tfm_spm_psa_write(ctx);
+        tfm_spm_partition_psa_write((psa_handle_t)ctx[0], ctx[1],
+                                    (void *)ctx[2], (size_t)ctx[3]);
         break;
     case TFM_SVC_PSA_REPLY:
-        tfm_spm_psa_reply(ctx);
+        tfm_spm_partition_psa_reply((psa_handle_t)ctx[0], (psa_status_t)ctx[1]);
         break;
     case TFM_SVC_PSA_NOTIFY:
-        tfm_spm_psa_notify(ctx);
+        tfm_spm_partition_psa_notify((int32_t)ctx[0]);
         break;
     case TFM_SVC_PSA_CLEAR:
-        tfm_spm_psa_clear();
+        tfm_spm_partition_psa_clear();
         break;
     case TFM_SVC_PSA_EOI:
-        tfm_spm_psa_eoi(ctx);
+        tfm_spm_partition_psa_eoi((psa_signal_t)ctx[0]);
         break;
     case TFM_SVC_PSA_PANIC:
-        tfm_spm_psa_panic();
-        break;
-    case TFM_SVC_SPM_REQUEST:
-        tfm_spm_request_handler((const struct tfm_state_context_t *)ctx);
+        tfm_spm_partition_psa_panic();
         break;
     case TFM_SVC_PSA_LIFECYCLE:
         return tfm_spm_get_lifecycle_state();
@@ -119,12 +95,12 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
 #endif
     case TFM_SVC_PSA_IRQ_ENABLE:
-        tfm_spm_irq_enable(ctx);
+        tfm_spm_partition_irq_enable((psa_signal_t)ctx[0]);
         break;
     case TFM_SVC_PSA_IRQ_DISABLE:
-        return tfm_spm_irq_disable(ctx);
+        return tfm_spm_partition_irq_disable((psa_signal_t)ctx[0]);
     case TFM_SVC_PSA_RESET_SIGNAL:
-        tfm_spm_psa_reset_signal(ctx);
+        tfm_spm_partition_psa_reset_signal((psa_signal_t)ctx[0]);
         break;
     default:
 #ifdef PLATFORM_SVC_HANDLERS

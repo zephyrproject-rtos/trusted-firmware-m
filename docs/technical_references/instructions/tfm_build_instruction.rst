@@ -60,6 +60,13 @@ config that has already been set at any of the prior stages.
    7. If it exists, TFM Profile specific config is applied from
       ``config/profile/<tfm_profile>.cmake``.
    8. ``config/config_default.cmake`` is loaded.
+   9. If ``TEST_S`` or ``TEST_NS`` or other single test suite config like
+      ``TEST_NS_ATTESTATION`` (see `Regression test configuration`_)is set, then
+      config from ``${TFM_TEST_REPO_PATH}/test/config/set_config.cmake`` and
+      ``${TFM_TEST_REPO_PATH}/test/config/default_ns_test_config.cmake`` or
+      ``${TFM_TEST_REPO_PATH}/test/config/default_s_test_config.cmake`` or
+      ``${TFM_TEST_REPO_PATH}/test/config/default_test_config.cmake`` is
+      applied.
 
 .. Warning::
     This means that command-line settings are not applied when they conflict
@@ -132,14 +139,69 @@ important options are listed below.
 Regression test configuration
 -----------------------------
 
-Regression test configuration is controlled entirely by the ``TEST_S`` and
-``TEST_NS`` cmake variables.
+Regression test configuration is controlled entirely by ``TEST_NS`` or
+``TEST_S`` or single test suite configuration. The group test
+configurations and single test suite configurations are listed below, all of
+them are disabled by default.
+
++---------------------+--------------------------------------------------------------------+
+| Parameter           | Description                                                        |
++=====================+====================================================================+
+| TEST_NS_ATTESTATION | Build non-secure regression Attestation tests.                     |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_T_COSE      | Build non-secure regression t_cose tests.                          |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_QCBOR       | Build non-secure regression QCBOR tests.                           |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_AUDIT       | Build non-secure regression Audit log tests.                       |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_CORE        | Build non-secure regression Core tests.                            |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_CRYPTO      | Build non-secure regression Crypto tests.                          |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_ITS         | Build non-secure regression ITS tests.                             |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_PS          | Build non-secure regression PS tests.                              |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_PLATFORM    | Build non-secure regression Platform tests.                        |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_FWU         | Build non-secure regression FWU tests.                             |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_IPC         | Build non-secure regression IPC tests.                             |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_SLIH_IRQ    | Build non-secure regression Second-Level Interrupt Handling tests. |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_FLIH_IRQ    | Build non-secure regression First-Level Interrupt Handling tests.  |
++---------------------+--------------------------------------------------------------------+
+| TEST_NS_MULTI_CORE  | Build non-secure regression multi-core tests.                      |
++---------------------+--------------------------------------------------------------------+
+| TEST_S_ATTESTATION  | Build secure regression Attestation tests.                         |
++---------------------+--------------------------------------------------------------------+
+| TEST_S_AUDIT        | Build secure regression Audit log tests.                           |
++---------------------+--------------------------------------------------------------------+
+| TEST_S_CRYPTO       | Build secure regression Crypto tests.                              |
++---------------------+--------------------------------------------------------------------+
+| TEST_S_ITS          | Build secure regression ITS tests.                                 |
++---------------------+--------------------------------------------------------------------+
+| TEST_S_PS           | Build secure regression PS tests.                                  |
++---------------------+--------------------------------------------------------------------+
+| TEST_S_PLATFORM     | Build secure regression Platform tests.                            |
++---------------------+--------------------------------------------------------------------+
+| TEST_S_FWU          | Build secure regression FWU tests.                                 |
++---------------------+--------------------------------------------------------------------+
+| TEST_S_IPC          | Build secure regression IPC tests.                                 |
++---------------------+--------------------------------------------------------------------+
+
+The single test suite can be opened when their dependencies like partitions or
+other specific configurations are set. On the one hand, some test suites depend
+on other test suites. On the other hand, some test suites have confict with
+other test suites. Test configurations and dependencies will be
+checked in ``${TFM_TEST_REPO_PATH}/test/config/check_config.cmake``.
 
 If regression testing is enabled, it will then enable all tests for the enabled
 secure partitions. If IPC mode is enabled via ``TFM_PSA_API`` the IPC tests will
-be enabled. QCBOR and T_COSE tests are linked to the Initial Attestation
-partition, as they are only used there. Multicore tests will be enabled if
-``TFM_MULTI_CORE_TOPOLOGY`` is enabled.
+be enabled. Multicore tests will be enabled if ``TFM_MULTI_CORE_TOPOLOGY`` is
+enabled.
 
 Some cryptographic tests can be enabled and disabled. This is done to prevent
 false failures from being reported when a smaller Mbed Crypto config is being
@@ -160,7 +222,9 @@ used which does not support all features.
 +-----------------------------+-------------------------------------+---------------+
 | TFM_CRYPTO_TEST_ALG_SHA_512 | Test SHA-512 cryptography algorithm | ON            |
 +-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_HKDF        | Test SHA-512 cryptography algorithm | ON            |
+| TFM_CRYPTO_TEST_HKDF        | Test HKDF key derivation algorithm  | ON            |
++-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ECDH        | Test ECDH key agreement algorithm   | ON            |
 +-----------------------------+-------------------------------------+---------------+
 
 TF-M Profiles

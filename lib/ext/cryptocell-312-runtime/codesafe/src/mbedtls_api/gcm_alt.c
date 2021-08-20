@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2021, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -580,40 +580,57 @@ int mbedtls_gcm_auth_decrypt( mbedtls_gcm_context *ctx,
 int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
                        int mode,
                        const unsigned char *iv,
-               size_t iv_len,
-               const unsigned char *aad,
-               size_t aad_len)
+                       size_t iv_len)
 {
     CC_UNUSED_PARAM(ctx);
     CC_UNUSED_PARAM(mode);
     CC_UNUSED_PARAM(iv);
     CC_UNUSED_PARAM(iv_len);
-    CC_UNUSED_PARAM(aad);
-    CC_UNUSED_PARAM(aad_len);
 
     return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
 }
 
 int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
-               size_t length,
-               const unsigned char *input,
-               unsigned char *output)
+                       const unsigned char *input,
+                       size_t input_length,
+                       unsigned char *output,
+                       size_t output_size,
+                       size_t *output_length)
 {
     CC_UNUSED_PARAM(ctx);
-    CC_UNUSED_PARAM(length);
     CC_UNUSED_PARAM(input);
+    CC_UNUSED_PARAM(input_length);
     CC_UNUSED_PARAM(output);
+    CC_UNUSED_PARAM(output_size);
+    CC_UNUSED_PARAM(output_length);
 
     return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
 }
 
 int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
-               unsigned char *tag,
-               size_t tag_len)
+                       unsigned char *output,
+                       size_t output_size,
+                       size_t *output_length,
+                       unsigned char *tag,
+                       size_t tag_len)
 {
     CC_UNUSED_PARAM(ctx);
+    CC_UNUSED_PARAM(output);
+    CC_UNUSED_PARAM(output_size);
+    CC_UNUSED_PARAM(output_length);
     CC_UNUSED_PARAM(tag);
     CC_UNUSED_PARAM(tag_len);
+
+    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+}
+
+int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
+                          const unsigned char *add,
+                          size_t add_len)
+{
+    CC_UNUSED_PARAM(ctx);
+    CC_UNUSED_PARAM(add);
+    CC_UNUSED_PARAM(add_len);
 
     return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
 }

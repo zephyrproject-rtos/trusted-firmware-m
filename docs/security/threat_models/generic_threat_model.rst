@@ -1107,7 +1107,7 @@ Reference
 
 .. [FF-M] `Arm® Platform Security Architecture Firmware Framework 1.0 <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf?revision=2d1429fa-4b5b-461a-a60e-4ef3d8f7f4b4>`_
 
-.. [DUAL-CPU-BOOT] :doc:`Booting a dual core system </docs/technical_references/dual-cpu/booting_a_dual_core_system>`
+.. [DUAL-CPU-BOOT] :doc:`Booting a dual core system </docs/technical_references/design_docs/dual-cpu/booting_a_dual_core_system>`
 
 .. [CVSS] `Common Vulnerability Scoring System Version 3.1 Calculator <https://www.first.org/cvss/calculator/3.1>`_
 
@@ -1115,9 +1115,9 @@ Reference
 
 .. [STRIDE] `The STRIDE Threat Model <https://docs.microsoft.com/en-us/previous-versions/commerce-server/ee823878(v=cs.20)?redirectedfrom=MSDN>`_
 
-.. [SECURE-BOOT] :doc:`Secure boot </docs/technical_references/tfm_secure_boot>`
+.. [SECURE-BOOT] :doc:`Secure boot </docs/technical_references/design_docs/tfm_secure_boot>`
 
-.. [ROLLBACK-PROTECT] :doc:`Rollback protection in TF-M secure boot </docs/technical_references/secure_boot_rollback_protection>`
+.. [ROLLBACK-PROTECT] :doc:`Rollback protection in TF-M secure boot </docs/technical_references/design_docs/secure_boot_rollback_protection>`
 
 .. [STACK-SEAL] `Armv8-M processor Secure software Stack Sealing vulnerability <https://developer.arm.com/support/arm-security-updates/armv8-m-stack-sealing>`_
 

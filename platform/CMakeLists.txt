@@ -50,7 +50,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DUMMY_CRYPTO_KEYS}>:ext/common/template/crypto_keys.c>
         $<$<BOOL:${PLATFORM_DUMMY_ROTPK}>:ext/common/template/tfm_rotpk.c>
         $<$<BOOL:${PLATFORM_DUMMY_IAK}>:ext/common/template/tfm_initial_attestation_key_material.c>
-        $<$<AND:$<NOT:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${PLATFORM_DUMMY_IAK}>,$<BOOL:${TEST_S}>>:ext/common/template/tfm_initial_attest_pub_key.c>
+        $<$<AND:$<NOT:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${PLATFORM_DUMMY_IAK}>,$<BOOL:${TEST_S_ATTESTATION}>>:ext/common/template/tfm_initial_attest_pub_key.c>
 )
 
 target_link_libraries(platform_s
@@ -87,7 +87,7 @@ target_include_directories(platform_ns
 target_sources(platform_ns
     PRIVATE
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
-        $<$<AND:$<NOT:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${PLATFORM_DUMMY_IAK}>,$<BOOL:${TEST_NS}>>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/tfm_initial_attest_pub_key.c>
+        $<$<AND:$<NOT:$<BOOL:${ATTEST_TEST_GET_PUBLIC_KEY}>>,$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${PLATFORM_DUMMY_IAK}>,$<BOOL:${TEST_NS_ATTESTATION}>>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/tfm_initial_attest_pub_key.c>
 )
 
 target_link_libraries(platform_ns
@@ -98,7 +98,7 @@ target_link_libraries(platform_ns
 
 target_compile_definitions(platform_ns
     PRIVATE
-        $<$<BOOL:${TFM_ENABLE_SLIH_TEST}>:TFM_ENABLE_SLIH_TEST>
+        $<$<BOOL:${TEST_NS_SLIH_IRQ}>:TEST_NS_SLIH_IRQ>
         $<$<BOOL:${TFM_PERIPH_ACCESS_TEST}>:TFM_ENABLE_PERIPH_ACCESS_TEST>
 )
 
@@ -160,3 +160,22 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
         $<$<BOOL:${TFM_CODE_SHARING}>:CODE_SHARING>
 )
+
+#========================= Crypto =============================================#
+if (TFM_PARTITION_CRYPTO)
+    target_sources(tfm_psa_rot_partition_crypto
+        PRIVATE
+            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/crypto_nv_seed.c>
+            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/template/crypto_dummy_nv_seed.c>
+    )
+
+    target_compile_definitions(tfm_psa_rot_partition_crypto
+        PRIVATE
+            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:PLATFORM_DUMMY_NV_SEED>
+    )
+
+    target_include_directories(crypto_service_mbedcrypto
+        PUBLIC
+            $<$<BOOL:${PLATFORM_DUMMY_NV_SEED}>:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
+endif()

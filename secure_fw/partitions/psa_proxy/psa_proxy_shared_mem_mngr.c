@@ -1,12 +1,12 @@
 /*
  * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "psa_proxy_shared_mem_mngr.h"
-#include "platform_multicore.h"
 #include "region_defs.h"
 #include "psa/service.h"
 #ifdef PSA_PROXY_ADDR_TRANSLATION

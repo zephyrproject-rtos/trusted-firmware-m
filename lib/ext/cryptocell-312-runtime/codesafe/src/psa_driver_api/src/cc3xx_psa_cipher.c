@@ -41,8 +41,8 @@ static psa_status_t cipher_setup(
         psa_encrypt_or_decrypt_t dir)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
-    psa_key_type_t key_type = attributes->core.type;
-    size_t key_bits = attributes->core.bits;
+    psa_key_type_t key_type = psa_get_key_type(attributes);
+    size_t key_bits = psa_get_key_bits(attributes);
 
     (void)key_length;
 

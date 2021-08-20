@@ -492,23 +492,6 @@
 //#define MBEDTLS_ECP_NORMALIZE_MXZ_ALT
 
 /**
- * \def MBEDTLS_TEST_NULL_ENTROPY
- *
- * Enables testing and use of mbed TLS without any configured entropy sources.
- * This permits use of the library on platforms before an entropy source has
- * been integrated (see for example the MBEDTLS_ENTROPY_HARDWARE_ALT or the
- * MBEDTLS_ENTROPY_NV_SEED switches).
- *
- * WARNING! This switch MUST be disabled in production builds, and is suitable
- * only for development.
- * Enabling the switch negates any security provided by the library.
- *
- * Requires MBEDTLS_ENTROPY_C, MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
- *
- */
-#define MBEDTLS_TEST_NULL_ENTROPY
-
-/**
  * \def MBEDTLS_ENTROPY_HARDWARE_ALT
  *
  * Uncomment this macro to let mbed TLS use your own implementation of a
@@ -793,7 +776,7 @@
  *
  * Uncomment this macro to prevent loading of default entropy functions.
  */
-#define MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
+//#define MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
 
 /**
  * \def MBEDTLS_NO_PLATFORM_ENTROPY
@@ -848,7 +831,7 @@
  * \note The entropy collector will write to the seed file before entropy is
  *       given to an external source, to update it.
  */
-//#define MBEDTLS_ENTROPY_NV_SEED
+#define MBEDTLS_ENTROPY_NV_SEED
 
 /* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
  *
@@ -863,7 +846,7 @@
  * Note that this option is meant for internal use only and may be removed
  * without notice.
  */
-//#define MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#define MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
 
 /**
  * \def MBEDTLS_MEMORY_DEBUG
@@ -1779,6 +1762,22 @@
 //#define MBEDTLS_SHA1_C
 
 /**
+ * \def MBEDTLS_SHA224_C
+ *
+ * Enable the SHA-224 cryptographic hash algorithm.
+ *
+ * Requires: MBEDTLS_SHA256_C. The library does not currently support enabling
+ *           SHA-224 without SHA-256.
+ *
+ * Module:  library/sha256.c
+ * Caller:  library/md.c
+ *          library/ssl_cookie.c
+ *
+ * This module adds support for SHA-224.
+ */
+#define MBEDTLS_SHA224_C
+
+/**
  * \def MBEDTLS_SHA256_C
  *
  * Enable the SHA-224 and SHA-256 cryptographic hash algorithms.
@@ -1791,6 +1790,22 @@
  * This module is required for the SSL/TLS 1.2 PRF function.
  */
 #define MBEDTLS_SHA256_C
+
+/**
+ * \def MBEDTLS_SHA384_C
+ *
+ * Enable the SHA-384 cryptographic hash algorithm.
+ *
+ * Requires: MBEDTLS_SHA512_C
+ *
+ * Module:  library/sha512.c
+ * Caller:  library/md.c
+ *          library/ssl_cli.c
+ *          library/ssl_srv.c
+ *
+ * Comment to disable SHA-384
+ */
+//#define MBEDTLS_SHA384_C
 
 /**
  * \def MBEDTLS_SHA512_C
@@ -1993,6 +2008,8 @@
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "mbedtls_accelerator_config.h"
+#elif defined(MBEDTLS_ENTROPY_NV_SEED)
+#include "mbedtls_entropy_nv_seed_config.h"
 #endif
 
 /* Target and application specific configurations

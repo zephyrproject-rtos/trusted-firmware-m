@@ -374,12 +374,6 @@ enum spm_err_t tfm_spm_db_init(void);
 uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
 
 /**
- * \brief                   Handle an SPM request by a secure service
- * \param[in] svc_ctx       The stacked SVC context
- */
-void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx);
-
-/**
  * \brief                   Function to seal the PSP stacks for Function mode.
  */
 void tfm_spm_seal_psp_stacks(void);

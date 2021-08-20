@@ -24,7 +24,7 @@ target_include_directories(tfm_spm
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func/include>
     PRIVATE
         ${CMAKE_SOURCE_DIR}
-        ${CMAKE_SOURCE_DIR}/secure_fw/include/tfm
+        ${CMAKE_SOURCE_DIR}/secure_fw/include
         ${CMAKE_BINARY_DIR}/generated
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_psa>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_func>
@@ -40,14 +40,13 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core_mem_check.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_rpc.c>
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_spe_mailbox.c>
+        $<$<AND:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>,$<NOT:$<BOOL:${TFM_PLAT_SPECIFIC_MULTI_CORE_COMM}>>>:cmsis_psa/tfm_spe_mailbox.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:ffm/tfm_core_mem_check.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/arch/tfm_arch.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/main.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_ipc.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_load.c>
-        $<$<BOOL:${TFM_PSA_API}>:ffm/spm_psa_client_call.c>
-        $<$<BOOL:${TFM_PSA_API}>:ffm/psa_client_service_apis.c>
+        $<$<BOOL:${TFM_PSA_API}>:ffm/psa_api.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_core_svcalls_ipc.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>>:cmsis_psa/tfm_nspm_ipc.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_pools.c>

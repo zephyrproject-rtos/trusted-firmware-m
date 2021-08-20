@@ -124,21 +124,21 @@ def process_partition_manifests(manifest_list_files):
         intermedia_file = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + manifest_out_basename + '.c').replace('\\', '/')
         load_info_file = os.path.join(manifest_dir, "auto_generated", 'load_info_' + manifest_out_basename + '.c').replace('\\', '/')
 
-        """
-        Remove the `source_path` portion of the filepaths, so that it can be
-        interpreted as a relative path from the OUT_DIR.
-        """
-        if 'source_path' in manifest_item:
-            # Replace environment variables in the source path
-            source_path = os.path.expandvars(manifest_item['source_path'])
-            manifest_head_file = os.path.relpath(manifest_head_file, start = source_path)
-            intermedia_file = os.path.relpath(intermedia_file, start = source_path)
-            load_info_file = os.path.relpath(load_info_file, start = source_path)
-
         if OUT_DIR is not None:
-            manifest_head_file = os.path.join(OUT_DIR, manifest_head_file)
-            intermedia_file = os.path.join(OUT_DIR, intermedia_file)
-            load_info_file = os.path.join(OUT_DIR, load_info_file)
+            """
+            Remove the `source_path` portion of the filepaths, so that it can be
+            interpreted as a relative path from the OUT_DIR.
+            """
+            if 'source_path' in manifest_item:
+                # Replace environment variables in the source path
+                source_path = os.path.expandvars(manifest_item['source_path'])
+                manifest_head_file = os.path.relpath(manifest_head_file, start = source_path)
+                intermedia_file = os.path.relpath(intermedia_file, start = source_path)
+                load_info_file = os.path.relpath(load_info_file, start = source_path)
+
+            manifest_head_file = os.path.join(OUT_DIR, manifest_head_file).replace('\\', '/')
+            intermedia_file = os.path.join(OUT_DIR, intermedia_file).replace('\\', '/')
+            load_info_file = os.path.join(OUT_DIR, load_info_file).replace('\\', '/')
 
         partition_list.append({"manifest": manifest, "attr": manifest_item,
                                "manifest_out_basename": manifest_out_basename,
@@ -164,9 +164,9 @@ def gen_per_partition_files(context):
     subcontext = {}
     subcontext['utilities'] = subutilities
 
-    manifesttemplate = ENV.get_template('secure_fw/partitions/manifestfilename.template')
-    memorytemplate = ENV.get_template('secure_fw/partitions/partition_intermedia.template')
-    infotemplate = ENV.get_template('secure_fw/partitions/partition_load_info.template')
+    manifesttemplate = ENV.get_template(os.path.join(os.path.relpath(os.path.dirname(__file__)), 'templates/manifestfilename.template'))
+    memorytemplate = ENV.get_template(os.path.join(os.path.relpath(os.path.dirname(__file__)), 'templates/partition_intermedia.template'))
+    infotemplate = ENV.get_template(os.path.join(os.path.relpath(os.path.dirname(__file__)), 'templates/partition_load_info.template'))
 
     print ("Start to generate partition files:")
 
@@ -386,11 +386,6 @@ def main():
 
     manifest_list = [os.path.abspath(x) for x in args.manifest_args]
     gen_file_list = [os.path.abspath(x) for x in args.gen_file_args]
-
-    # Arguments could be relative path.
-    # Convert to absolute path as we are going to change diretory later
-    if OUT_DIR is not None:
-        OUT_DIR = os.path.abspath(OUT_DIR)
 
     """
     Relative path to TF-M root folder is supported in the manifests

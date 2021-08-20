@@ -79,9 +79,8 @@
 #define BL2_HEADER_SIZE      (0x400)       /* 1 KB */
 #define BL2_TRAILER_SIZE     (0x400)       /* 1 KB */
 #else
-/* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
 #define BL2_HEADER_SIZE      (0x0)
-#define BL2_TRAILER_SIZE     (0x800)
+#define BL2_TRAILER_SIZE     (0x0)
 #endif /* BL2 */
 
 #define IMAGE_S_CODE_SIZE \
@@ -163,5 +162,10 @@
 #define BOOT_TFM_SHARED_DATA_SIZE (0x400)
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
+
+/* Region used by psa-arch-tests to keep state */
+#define PSA_TEST_SCRATCH_AREA_SIZE (0x400)
+#define PSA_TEST_SCRATCH_AREA_BASE (NS_DATA_LIMIT + 1 - \
+                                    PSA_TEST_SCRATCH_AREA_SIZE)
 
 #endif /* __REGION_DEFS_H__ */

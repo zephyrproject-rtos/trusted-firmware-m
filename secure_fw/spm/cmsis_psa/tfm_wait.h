@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,7 +25,7 @@ struct tfm_event_t {
  * Parameters:
  *  pevnt      -    The pointer of event object allocated by the caller
  */
-void __STATIC_INLINE tfm_event_init(struct tfm_event_t *pevnt)
+__STATIC_INLINE void tfm_event_init(struct tfm_event_t *pevnt)
 {
     pevnt->magic = TFM_EVENT_MAGIC;
     pevnt->owner = NULL;

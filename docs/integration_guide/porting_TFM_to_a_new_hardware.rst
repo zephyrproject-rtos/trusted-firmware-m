@@ -18,13 +18,13 @@ Prerequisites
 Building environnement
 ======================
 Make sure you have a working build environnement and that you can build
-TF-M on AN521 following the build instructions
-:doc:`Build instructions </docs/getting_started/tfm_build_instruction>`.
+TF-M on AN521 following the
+:doc:`Build instructions </docs/technical_references/instructions/tfm_build_instruction>`.
 
 Toolchains and software requirements
 ====================================
 
-Please follow the :doc:`SW requirements guide </docs/getting_started/tfm_sw_requirement>`.
+Please follow the :doc:`Getting started guide </docs/getting_started/tfm_getting_started>`.
 
 CMSIS Drivers
 =============
@@ -59,7 +59,8 @@ In a nutshell, this should be a 6 iterative steps process:
 
     #. Running the regression tests
 
-        - :doc:`Regression tests </docs/getting_started/tfm_build_instruction>`.
+        - See :doc:`Running TF-M on Arm platforms </docs/technical_references/instructions/run_tfm_examples_on_arm_platforms>`
+          as an example
 
 
 *****************
