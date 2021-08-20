@@ -78,5 +78,5 @@ if (TEST_S OR
 
     # TFM_TEST is an internal cmake temporary value to manage tf-m-tests source
     set(TFM_TEST ON)
-    include(${TFM_TEST_REPO_PATH}/test/config/set_config.cmake)
+    include(config/tests/set_config.cmake)
 endif()
