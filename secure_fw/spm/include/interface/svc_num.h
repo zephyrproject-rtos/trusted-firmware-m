@@ -8,8 +8,6 @@
 #ifndef __SVC_NUM_H__
 #define __SVC_NUM_H__
 
-#include "tfm_spm_log.h"
-
 /*
  * SVC numbers for FF-M compliant implementations.
  * 0x0 ~ 0x7F can be only called from Thread Mode, the rest from ISR only.
@@ -43,7 +41,7 @@
 #define TFM_SVC_SPM_INIT                (0x41)
 #define TFM_SVC_FLIH_FUNC_RETURN        (0x42)
 #define TFM_SVC_THREAD_NUMBER_END       (0x7F)
-#if (TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_SILENCE)
+#if TFM_SP_LOG_RAW_ENABLED
 #define TFM_SVC_OUTPUT_UNPRIV_STRING    (TFM_SVC_THREAD_NUMBER_END)
 #endif
 

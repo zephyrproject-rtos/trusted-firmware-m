@@ -59,3 +59,7 @@ include(lib/ext/tf-m-tests/tf-m-tests.cmake)
 if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
     include(${TFM_TEST_PATH}/config/set_config.cmake)
 endif()
+
+# Set secure log configs
+# It also depends on regression test config.
+include(config/tfm_secure_log.cmake)

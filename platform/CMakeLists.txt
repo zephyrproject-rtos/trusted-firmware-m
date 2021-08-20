@@ -43,7 +43,7 @@ target_sources(platform_s
         $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/tfm_hal_its.c>
         ext/common/tfm_platform.c
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
-        $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:ext/common/tfm_hal_spm_logdev_peripheral.c>
+        $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:ext/common/tfm_hal_spm_logdev_peripheral.c>
         ext/common/tfm_hal_memory_symbols.c
         $<$<BOOL:${PLATFORM_DUMMY_ATTEST_HAL}>:ext/common/template/attest_hal.c>
         $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:ext/common/template/nv_counters.c>

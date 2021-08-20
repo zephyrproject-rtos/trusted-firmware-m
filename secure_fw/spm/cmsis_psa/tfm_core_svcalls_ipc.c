@@ -90,7 +90,7 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         break;
     case TFM_SVC_PSA_LIFECYCLE:
         return tfm_spm_get_lifecycle_state();
-#if (TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_SILENCE)
+#if TFM_SP_LOG_RAW_ENABLED
     case TFM_SVC_OUTPUT_UNPRIV_STRING:
         return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
 #endif

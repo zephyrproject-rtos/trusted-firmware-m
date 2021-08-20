@@ -8,8 +8,6 @@
 #ifndef __TFM_CORE_SVC_H__
 #define __TFM_CORE_SVC_H__
 
-#include "tfm_spm_log.h"
-
 /* SVC numbers */
 #define TFM_SVC_PSA_WAIT                (0x0)
 #define TFM_SVC_PSA_EOI                 (0x1)
@@ -21,7 +19,7 @@
 #define TFM_SVC_DEPRIV_RET              (0x7)
 #define TFM_SVC_ENABLE_IRQ              (0x8)
 #define TFM_SVC_DISABLE_IRQ             (0x9)
-#if (TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_SILENCE)
+#if TFM_SP_LOG_RAW_ENABLED
 #define TFM_SVC_OUTPUT_UNPRIV_STRING    (0xA)
 #endif
 
