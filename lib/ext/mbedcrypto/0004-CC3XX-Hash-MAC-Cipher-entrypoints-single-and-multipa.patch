@@ -1,0 +1,426 @@
+From 0005fcbf85062d57fe24068192556ad99bb16c29 Mon Sep 17 00:00:00 2001
+From: Salome Thirot <salome.thirot@arm.com>
+Date: Wed, 7 Jul 2021 10:24:43 +0100
+Subject: [PATCH] CC3XX: Hash/MAC/Cipher entrypoints (single and multipart)
+
+Signed-off-by: Salome Thirot <salome.thirot@arm.com>
+Signed-off-by: Abbas Bracken Ziad <abbas.brackenziad@arm.com>
+---
+ .../psa/crypto_driver_contexts_composites.h   |   6 +
+ .../psa/crypto_driver_contexts_primitives.h   |   9 +
+ library/psa_crypto_driver_wrappers.c          | 187 ++++++++++++++++++
+ 3 files changed, 202 insertions(+)
+
+diff --git a/include/psa/crypto_driver_contexts_composites.h b/include/psa/crypto_driver_contexts_composites.h
+index 239fdcb33..1578d5440 100644
+--- a/include/psa/crypto_driver_contexts_composites.h
++++ b/include/psa/crypto_driver_contexts_composites.h
+@@ -38,6 +38,9 @@
+ 
+ /* Include the context structure definitions for those drivers that were
+  * declared during the autogeneration process. */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++#include "cc3xx_crypto_primitives.h"
++#endif
+ 
+ /* Include the context structure definitions for the Mbed TLS software drivers */
+ #include "psa/crypto_builtin_composites.h"
+@@ -56,6 +59,9 @@ typedef union {
+     mbedtls_transparent_test_driver_mac_operation_t transparent_test_driver_ctx;
+     mbedtls_opaque_test_driver_mac_operation_t opaque_test_driver_ctx;
+ #endif
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++    cc3xx_mac_operation_t cc3xx_driver_ctx;
++#endif
+ } psa_driver_mac_context_t;
+ 
+ #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_COMPOSITES_H */
+diff --git a/include/psa/crypto_driver_contexts_primitives.h b/include/psa/crypto_driver_contexts_primitives.h
+index 104d4bdb6..679112128 100644
+--- a/include/psa/crypto_driver_contexts_primitives.h
++++ b/include/psa/crypto_driver_contexts_primitives.h
+@@ -37,6 +37,9 @@
+ 
+ /* Include the context structure definitions for those drivers that were
+  * declared during the autogeneration process. */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++#include "cc3xx_crypto_primitives.h"
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ 
+ /* Include the context structure definitions for the Mbed TLS software drivers */
+ #include "psa/crypto_builtin_primitives.h"
+@@ -54,6 +57,9 @@ typedef union {
+ #if defined(PSA_CRYPTO_DRIVER_TEST)
+     mbedtls_transparent_test_driver_hash_operation_t test_driver_ctx;
+ #endif
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++    cc3xx_hash_operation_t cc3xx_driver_ctx;
++#endif
+ } psa_driver_hash_context_t;
+ 
+ typedef union {
+@@ -63,6 +69,9 @@ typedef union {
+     mbedtls_transparent_test_driver_cipher_operation_t transparent_test_driver_ctx;
+     mbedtls_opaque_test_driver_cipher_operation_t opaque_test_driver_ctx;
+ #endif
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++    cc3xx_cipher_operation_t cc3xx_driver_ctx;
++#endif
+ } psa_driver_cipher_context_t;
+ 
+ #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_PRIMITIVES_H */
+diff --git a/library/psa_crypto_driver_wrappers.c b/library/psa_crypto_driver_wrappers.c
+index 38d0e300e..666f4dea0 100644
+--- a/library/psa_crypto_driver_wrappers.c
++++ b/library/psa_crypto_driver_wrappers.c
+@@ -44,6 +44,16 @@
+ #include "test/drivers/test_driver.h"
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
+ 
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++#ifndef PSA_CRYPTO_DRIVER_PRESENT
++#define PSA_CRYPTO_DRIVER_PRESENT
++#endif
++#ifndef PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT
++#define PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT
++#endif
++#include "cc3xx.h"
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
++
+ /* Repeat above block for each JSON-declared driver during autogeneration */
+ #endif /* MBEDTLS_PSA_CRYPTO_DRIVERS */
+ 
+@@ -57,6 +67,10 @@
+ #define PSA_CRYPTO_OPAQUE_TEST_DRIVER_ID (3)
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
+ 
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++#define PSA_CRYPTO_CC3XX_DRIVER_ID (4)
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
++
+ /* Support the 'old' SE interface when asked to */
+ #if defined(MBEDTLS_PSA_CRYPTO_SE_C)
+ /* PSA_CRYPTO_DRIVER_PRESENT is defined when either a new-style or old-style
+@@ -771,6 +785,20 @@ psa_status_t psa_driver_wrapper_cipher_encrypt(
+             if( status != PSA_ERROR_NOT_SUPPORTED )
+                 return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++            status = cc3xx_psa_cipher_encrypt( attributes,
++                                               key_buffer,
++                                               key_buffer_size,
++                                               alg,
++                                               input,
++                                               input_length,
++                                               output,
++                                               output_size,
++                                               output_length );
++            /* Declared with fallback == true */
++            if( status != PSA_ERROR_NOT_SUPPORTED )
++                return( status );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+ 
+ #if defined(MBEDTLS_PSA_BUILTIN_CIPHER)
+@@ -853,6 +881,20 @@ psa_status_t psa_driver_wrapper_cipher_decrypt(
+             if( status != PSA_ERROR_NOT_SUPPORTED )
+                 return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++            status = cc3xx_psa_cipher_decrypt( attributes,
++                                               key_buffer,
++                                               key_buffer_size,
++                                               alg,
++                                               input,
++                                               input_length,
++                                               output,
++                                               output_size,
++                                               output_length );
++            /* Declared with fallback == true */
++            if( status != PSA_ERROR_NOT_SUPPORTED )
++                return( status );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+ 
+ #if defined(MBEDTLS_PSA_BUILTIN_CIPHER)
+@@ -930,6 +972,20 @@ psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
+             if( status != PSA_ERROR_NOT_SUPPORTED )
+                 return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++            status = cc3xx_cipher_encrypt_setup(
++                &operation->ctx.cc3xx_driver_ctx,
++                attributes,
++                key_buffer,
++                key_buffer_size,
++                alg );
++            /* Declared with fallback == true */
++            if( status == PSA_SUCCESS )
++                operation->id = PSA_CRYPTO_CC3XX_DRIVER_ID;
++
++            if( status != PSA_ERROR_NOT_SUPPORTED )
++                return( status );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+ #if defined(MBEDTLS_PSA_BUILTIN_CIPHER)
+             /* Fell through, meaning no accelerator supports this operation */
+@@ -1002,6 +1058,20 @@ psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
+             if( status != PSA_ERROR_NOT_SUPPORTED )
+                 return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++            status = cc3xx_cipher_decrypt_setup(
++                &operation->ctx.cc3xx_driver_ctx,
++                attributes,
++                key_buffer,
++                key_buffer_size,
++                alg );
++            /* Declared with fallback == true */
++            if( status == PSA_SUCCESS )
++                operation->id = PSA_CRYPTO_CC3XX_DRIVER_ID;
++
++            if( status != PSA_ERROR_NOT_SUPPORTED )
++                return( status );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+ #if defined(MBEDTLS_PSA_BUILTIN_CIPHER)
+             /* Fell through, meaning no accelerator supports this operation */
+@@ -1069,6 +1139,12 @@ psa_status_t psa_driver_wrapper_cipher_set_iv(
+                         &operation->ctx.opaque_test_driver_ctx,
+                         iv, iv_length ) );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return( cc3xx_cipher_set_iv(
++                        &operation->ctx.cc3xx_driver_ctx,
++                        iv, iv_length ) );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+     }
+ 
+@@ -1112,6 +1188,13 @@ psa_status_t psa_driver_wrapper_cipher_update(
+                         input, input_length,
+                         output, output_size, output_length ) );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return( cc3xx_cipher_update(
++                        &operation->ctx.cc3xx_driver_ctx,
++                        input, input_length,
++                        output, output_size, output_length ) );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+     }
+ 
+@@ -1152,6 +1235,12 @@ psa_status_t psa_driver_wrapper_cipher_finish(
+                         &operation->ctx.opaque_test_driver_ctx,
+                         output, output_size, output_length ) );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return( cc3xx_cipher_finish(
++                        &operation->ctx.cc3xx_driver_ctx,
++                        output, output_size, output_length ) );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX*/
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+     }
+ 
+@@ -1192,6 +1281,15 @@ psa_status_t psa_driver_wrapper_cipher_abort(
+                 sizeof( operation->ctx.opaque_test_driver_ctx ) );
+             return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            status = cc3xx_cipher_abort(
++                         &operation->ctx.cc3xx_driver_ctx );
++            mbedtls_platform_zeroize(
++                &operation->ctx.cc3xx_driver_ctx,
++                sizeof( operation->ctx.cc3xx_driver_ctx ) );
++            return( status );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+     }
+ 
+@@ -1219,6 +1317,12 @@ psa_status_t psa_driver_wrapper_hash_compute(
+     if( status != PSA_ERROR_NOT_SUPPORTED )
+         return( status );
+ #endif
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++    status = cc3xx_hash_compute(alg, input, input_length, hash, hash_size,
++            hash_length);
++    if (status != PSA_ERROR_NOT_SUPPORTED)
++        return status;
++#endif
+ 
+     /* If software fallback is compiled in, try fallback */
+ #if defined(MBEDTLS_PSA_BUILTIN_HASH)
+@@ -1255,6 +1359,16 @@ psa_status_t psa_driver_wrapper_hash_setup(
+         return( status );
+ #endif
+ 
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++    status = cc3xx_hash_setup(&operation->ctx.cc3xx_driver_ctx, alg);
++    if( status == PSA_SUCCESS )
++        operation->id = PSA_CRYPTO_CC3XX_DRIVER_ID;
++
++    if( status != PSA_ERROR_NOT_SUPPORTED) {
++        return( status );
++    }
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
++
+     /* If software fallback is compiled in, try fallback */
+ #if defined(MBEDTLS_PSA_BUILTIN_HASH)
+     status = mbedtls_psa_hash_setup( &operation->ctx.mbedtls_ctx, alg );
+@@ -1290,6 +1404,13 @@ psa_status_t psa_driver_wrapper_hash_clone(
+                         &source_operation->ctx.test_driver_ctx,
+                         &target_operation->ctx.test_driver_ctx ) );
+ #endif
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            target_operation->id = PSA_CRYPTO_CC3XX_DRIVER_ID;
++            return( cc3xx_hash_clone(
++                        &source_operation->ctx.cc3xx_driver_ctx,
++                        &target_operation->ctx.cc3xx_driver_ctx ) );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+         default:
+             (void) target_operation;
+             return( PSA_ERROR_BAD_STATE );
+@@ -1314,6 +1435,12 @@ psa_status_t psa_driver_wrapper_hash_update(
+                         &operation->ctx.test_driver_ctx,
+                         input, input_length ) );
+ #endif
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return( cc3xx_hash_update(
++                        &operation->ctx.cc3xx_driver_ctx,
++                        input, input_length ) );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+         default:
+             (void) input;
+             (void) input_length;
+@@ -1340,6 +1467,12 @@ psa_status_t psa_driver_wrapper_hash_finish(
+                         &operation->ctx.test_driver_ctx,
+                         hash, hash_size, hash_length ) );
+ #endif
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return( cc3xx_hash_finish(
++                        &operation->ctx.cc3xx_driver_ctx,
++                        hash, hash_size, hash_length ) );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+         default:
+             (void) hash;
+             (void) hash_size;
+@@ -1362,6 +1495,11 @@ psa_status_t psa_driver_wrapper_hash_abort(
+             return( mbedtls_test_transparent_hash_abort(
+                         &operation->ctx.test_driver_ctx ) );
+ #endif
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return( cc3xx_hash_abort(
++                        &operation->ctx.cc3xx_driver_ctx ) );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+         default:
+             return( PSA_ERROR_BAD_STATE );
+     }
+@@ -1505,6 +1643,14 @@ psa_status_t psa_driver_wrapper_mac_compute(
+             if( status != PSA_ERROR_NOT_SUPPORTED )
+                 return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++            status = cc3xx_mac_compute(attributes, key_buffer, key_buffer_size, alg,
++                input, input_length,
++                mac, mac_size, mac_length);
++            /* Declared with fallback == true */
++            if( status != PSA_ERROR_NOT_SUPPORTED )
++                return( status );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+ #if defined(MBEDTLS_PSA_BUILTIN_MAC)
+             /* Fell through, meaning no accelerator supports this operation */
+@@ -1573,6 +1719,17 @@ psa_status_t psa_driver_wrapper_mac_sign_setup(
+             if( status != PSA_ERROR_NOT_SUPPORTED )
+                 return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++            status = cc3xx_mac_sign_setup(
++                    &operation->ctx.cc3xx_driver_ctx,
++                    attributes,
++                    key_buffer, key_buffer_size,
++                    alg);
++            if (status == PSA_SUCCESS)
++                operation->id = PSA_CRYPTO_CC3XX_DRIVER_ID;
++            if (status != PSA_ERROR_NOT_SUPPORTED)
++                return status;
++#endif
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+ #if defined(MBEDTLS_PSA_BUILTIN_MAC)
+             /* Fell through, meaning no accelerator supports this operation */
+@@ -1644,6 +1801,17 @@ psa_status_t psa_driver_wrapper_mac_verify_setup(
+             if( status != PSA_ERROR_NOT_SUPPORTED )
+                 return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++            status = cc3xx_mac_verify_setup(
++                &operation->ctx.cc3xx_driver_ctx,
++                attributes,
++                key_buffer, key_buffer_size,
++                alg);
++            if (status == PSA_SUCCESS)
++                operation->id = PSA_CRYPTO_CC3XX_DRIVER_ID;
++            if (status != PSA_ERROR_NOT_SUPPORTED)
++                return status;
++#endif
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+ #if defined(MBEDTLS_PSA_BUILTIN_MAC)
+             /* Fell through, meaning no accelerator supports this operation */
+@@ -1710,6 +1878,10 @@ psa_status_t psa_driver_wrapper_mac_update(
+                         &operation->ctx.opaque_test_driver_ctx,
+                         input, input_length ) );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return(cc3xx_mac_update(&operation->ctx.cc3xx_driver_ctx, input, input_length));
++#endif
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+         default:
+             (void) input;
+@@ -1744,6 +1916,11 @@ psa_status_t psa_driver_wrapper_mac_sign_finish(
+                         &operation->ctx.opaque_test_driver_ctx,
+                         mac, mac_size, mac_length ) );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return(cc3xx_mac_sign_finish(&operation->ctx.cc3xx_driver_ctx,
++                        mac, mac_size, mac_length));
++#endif
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+         default:
+             (void) mac;
+@@ -1778,6 +1955,12 @@ psa_status_t psa_driver_wrapper_mac_verify_finish(
+                         &operation->ctx.opaque_test_driver_ctx,
+                         mac, mac_length ) );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return(cc3xx_mac_verify_finish(
++                        &operation->ctx.cc3xx_driver_ctx,
++                        mac, mac_length));
++#endif
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+         default:
+             (void) mac;
+@@ -1805,6 +1988,10 @@ psa_status_t psa_driver_wrapper_mac_abort(
+             return( mbedtls_test_opaque_mac_abort(
+                         &operation->ctx.opaque_test_driver_ctx ) );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++        case PSA_CRYPTO_CC3XX_DRIVER_ID:
++            return(cc3xx_mac_abort(&operation->ctx.cc3xx_driver_ctx));
++#endif
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+         default:
+             return( PSA_ERROR_INVALID_ARGUMENT );
+-- 
+2.25.1
+
