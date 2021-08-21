@@ -294,11 +294,11 @@ psa_status_t cc3xx_hash_compute(psa_algorithm_t alg, const uint8_t *input,
                                 size_t input_length, uint8_t *hash,
                                 size_t hash_size, size_t *hash_length)
 {
-    psa_status_t status              = PSA_ERROR_CORRUPTION_DETECTED;
-    psa_status_t abort_status        = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_status_t abort_status = PSA_ERROR_CORRUPTION_DETECTED;
     cc3xx_hash_operation_t operation = {0};
 
-    status       = cc3xx_hash_setup(&operation, alg);
+    status = cc3xx_hash_setup(&operation, alg);
     if (status != PSA_SUCCESS) {
         goto exit;
     }
@@ -312,9 +312,11 @@ psa_status_t cc3xx_hash_compute(psa_algorithm_t alg, const uint8_t *input,
     }
 
 exit:
-    cc3xx_hash_abort(&operation);
-    if (status != PSA_SUCCESS) {
+    abort_status = cc3xx_hash_abort(&operation);
+    if (status == PSA_SUCCESS) {
+        return abort_status;
+    } else {
         *hash_length = 0;
+        return status;
     }
-    return status;
 }
