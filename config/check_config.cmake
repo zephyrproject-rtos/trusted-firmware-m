@@ -88,5 +88,5 @@ tfm_invalid_config(NOT PLATFORM_DUMMY_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
 ########################### Test check config ##################################
 
 if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
-    include(config/tests/check_config.cmake)
+    include(${TFM_TEST_PATH}/config/check_config.cmake)
 endif()

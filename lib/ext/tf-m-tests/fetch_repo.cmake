@@ -1,17 +1,19 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-include(FetchContent)
-set(FETCHCONTENT_QUIET FALSE)
-
 # Set to not download submodules if that option is available
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
     cmake_policy(SET CMP0097 NEW)
 endif()
+
+include(FetchContent)
+set(FETCHCONTENT_QUIET FALSE)
+
+set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/lib/ext CACHE STRING "" FORCE)
 
 if ("${TFM_TEST_REPO_PATH}" STREQUAL "DOWNLOAD")
     FetchContent_Declare(tfm_test_repo

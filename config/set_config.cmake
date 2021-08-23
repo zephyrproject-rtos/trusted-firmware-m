@@ -50,35 +50,12 @@ endif()
 # Load defaults, setting options not already set
 include(config/config_default.cmake)
 
+# Fetch tf-m-tests repo during config, if NS or regression test is required.
+# Therefore tf-m-tests configs can be set with TF-M configs since their configs
+# are coupled.
+include(lib/ext/tf-m-tests/tf-m-tests.cmake)
+
 # Load TF-M regression test suites setting
-
-get_cmake_property(CACHE_VARS CACHE_VARIABLES)
-# By default all non-secure regression tests are disabled.
-# If TEST_NS or TEST_NS_XXX flag is passed via command line and set to ON,
-# selected corresponding features to support non-secure regression tests.
-foreach(CACHE_VAR ${CACHE_VARS})
-    string(REGEX MATCH "^TEST_NS.*" _NS_TEST_FOUND "${CACHE_VAR}")
-    if (_NS_TEST_FOUND AND "${${CACHE_VAR}}")
-        # TFM_NS_REG_TEST is a TF-M internal cmake flag to manage building
-        # tf-m-tests non-secure regression tests related source
-        set(TFM_NS_REG_TEST ON)
-        break()
-    endif()
-endforeach()
-
-# By default all secure regression tests are disabled.
-# If TEST_S or TEST_S_XXX flag is passed via command line and set to ON,
-# selected corresponding features to support secure regression tests.
-foreach(CACHE_VAR ${CACHE_VARS})
-    string(REGEX MATCH "^TEST_S.*" _S_TEST_FOUND "${CACHE_VAR}")
-    if (_S_TEST_FOUND AND "${${CACHE_VAR}}")
-        # TFM_S_REG_TEST is a TF-M internal cmake flag to manage building
-        # tf-m-tests secure regression tests related source
-        set(TFM_S_REG_TEST ON)
-        break()
-    endif()
-endforeach()
-
 if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
-    include(config/tests/set_config.cmake)
+    include(${TFM_TEST_PATH}/config/set_config.cmake)
 endif()
