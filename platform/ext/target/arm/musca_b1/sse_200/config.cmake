@@ -51,5 +51,7 @@ if(TFM_PSA_API)
         message(FATAL_ERROR "FLIH testing has not been supported!")
     endif()
 
-    set(TEST_NS_SLIH_IRQ      ON           CACHE BOOL      "Enable SLIH testing")
+    if (TEST_NS)
+        set(TEST_NS_SLIH_IRQ      ON           CACHE BOOL      "Enable SLIH testing")
+    endif()
 endif()
