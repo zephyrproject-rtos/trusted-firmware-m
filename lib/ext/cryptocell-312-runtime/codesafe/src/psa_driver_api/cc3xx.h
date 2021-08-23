@@ -14,5 +14,7 @@
 #include "cc3xx_psa_mac.h"
 #include "cc3xx_psa_aead.h"
 #include "cc3xx_psa_key_agreement.h"
+#include "cc3xx_psa_key_generation.h"
+#include "cc3xx_psa_asymmetric_signature.h"
 
 #endif /* CC3XX_DRIVER_H */

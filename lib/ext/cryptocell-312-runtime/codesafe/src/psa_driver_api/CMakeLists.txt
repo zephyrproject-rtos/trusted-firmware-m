@@ -20,9 +20,15 @@ target_sources(${CC312_LIB_TARGET}
         src/cc3xx_psa_entropy.c
         src/cc3xx_psa_key_agreement.c
 
+        src/cc3xx_internal_asn1_util.c
+        src/cc3xx_internal_ecc_util.c
+        src/cc3xx_internal_rsa_util.c
+        src/cc3xx_psa_asymmetric_signature.c
+        src/cc3xx_psa_key_generation.c
+        src/cc3xx_internal_drbg_util.c
+
         src/cc3xx_internal_aes.c
         src/cc3xx_internal_chacha20.c
-        src/cc3xx_internal_ecc.c
         src/cc3xx_internal_ecdh.c
 
         src/aead/cc3xx_psa_aead.c

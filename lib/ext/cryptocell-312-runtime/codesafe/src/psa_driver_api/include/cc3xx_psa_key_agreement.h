@@ -10,7 +10,7 @@
 
 #include "psa/crypto.h"
 
-#include "cc3xx_internal_ecc.h"
+#include "cc3xx_internal_ecc_util.h"
 #include "cc3xx_internal_ecdh.h"
 
 psa_status_t cc3xx_key_agreement(
