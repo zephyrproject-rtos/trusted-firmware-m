@@ -65,35 +65,24 @@ endif()
 
 ########################## Test framework sync #################################
 
-# Force TEST_NS ON if single NS test ON
-if (TEST_NS_ATTESTATION OR
-    TEST_NS_T_COSE OR
-    TEST_NS_QCBOR OR
-    TEST_NS_AUDIT OR
-    TEST_NS_CORE OR
-    TEST_NS_CRYPTO OR
-    TEST_NS_ITS OR
-    TEST_NS_PS OR
-    TEST_NS_PLATFORM OR
-    TEST_NS_FWU OR
-    TEST_NS_IPC OR
-    TEST_NS_SLIH_IRQ OR
-    TEST_NS_FLIH_IRQ OR
-    TEST_NS_MULTI_CORE)
-    set(TEST_FRAMEWORK_NS       ON        CACHE BOOL      "Whether to build NS regression tests framework")
-endif()
+get_cmake_property(CACHE_VARS CACHE_VARIABLES)
+# Force TEST_FRAMEWORK_NS ON if single NS test ON
+foreach(CACHE_VAR ${CACHE_VARS})
+    string(REGEX MATCH "^TEST_NS_.*" _NS_TEST_FOUND "${CACHE_VAR}")
+    if (_NS_TEST_FOUND AND "${${CACHE_VAR}}")
+        set(TEST_FRAMEWORK_NS       ON        CACHE BOOL      "Whether to build NS regression tests framework")
+        break()
+    endif()
+endforeach()
 
-# Force TEST_S ON if single S test ON
-if (TEST_S_ATTESTATION OR
-    TEST_S_AUDIT OR
-    TEST_S_CRYPTO OR
-    TEST_S_ITS OR
-    TEST_S_PS OR
-    TEST_S_PLATFORM OR
-    TEST_S_FWU OR
-    TEST_S_IPC)
-    set(TEST_FRAMEWORK_S        ON        CACHE BOOL      "Whether to build S regression tests framework")
-endif()
+# Force TEST_FRAMEWORK_S ON if single S test ON
+foreach(CACHE_VAR ${CACHE_VARS})
+    string(REGEX MATCH "^TEST_S_.*" _S_TEST_FOUND "${CACHE_VAR}")
+    if (_S_TEST_FOUND AND "${${CACHE_VAR}}")
+        set(TEST_FRAMEWORK_S        ON        CACHE BOOL      "Whether to build S regression tests framework")
+        break()
+    endif()
+endforeach()
 
 ########################## Load default config #################################
 

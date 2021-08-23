@@ -50,33 +50,35 @@ endif()
 # Load defaults, setting options not already set
 include(config/config_default.cmake)
 
-# Load TF-M test suites setting
-if (TEST_S OR
-    TEST_NS OR
-    TEST_NS_ATTESTATION OR
-    TEST_NS_T_COSE OR
-    TEST_NS_QCBOR OR
-    TEST_NS_AUDIT OR
-    TEST_NS_CORE OR
-    TEST_NS_CRYPTO OR
-    TEST_NS_ITS OR
-    TEST_NS_PS OR
-    TEST_NS_PLATFORM OR
-    TEST_NS_FWU OR
-    TEST_NS_IPC OR
-    TEST_NS_SLIH_IRQ OR
-    TEST_NS_FLIH_IRQ OR
-    TEST_NS_MULTI_CORE OR
-    TEST_S_ATTESTATION OR
-    TEST_S_AUDIT OR
-    TEST_S_CRYPTO OR
-    TEST_S_ITS OR
-    TEST_S_PS OR
-    TEST_S_PLATFORM OR
-    TEST_S_FWU OR
-    TEST_S_IPC)
+# Load TF-M regression test suites setting
 
-    # TFM_TEST is an internal cmake temporary value to manage tf-m-tests source
-    set(TFM_TEST ON)
+get_cmake_property(CACHE_VARS CACHE_VARIABLES)
+# By default all non-secure regression tests are disabled.
+# If TEST_NS or TEST_NS_XXX flag is passed via command line and set to ON,
+# selected corresponding features to support non-secure regression tests.
+foreach(CACHE_VAR ${CACHE_VARS})
+    string(REGEX MATCH "^TEST_NS.*" _NS_TEST_FOUND "${CACHE_VAR}")
+    if (_NS_TEST_FOUND AND "${${CACHE_VAR}}")
+        # TFM_NS_REG_TEST is a TF-M internal cmake flag to manage building
+        # tf-m-tests non-secure regression tests related source
+        set(TFM_NS_REG_TEST ON)
+        break()
+    endif()
+endforeach()
+
+# By default all secure regression tests are disabled.
+# If TEST_S or TEST_S_XXX flag is passed via command line and set to ON,
+# selected corresponding features to support secure regression tests.
+foreach(CACHE_VAR ${CACHE_VARS})
+    string(REGEX MATCH "^TEST_S.*" _S_TEST_FOUND "${CACHE_VAR}")
+    if (_S_TEST_FOUND AND "${${CACHE_VAR}}")
+        # TFM_S_REG_TEST is a TF-M internal cmake flag to manage building
+        # tf-m-tests secure regression tests related source
+        set(TFM_S_REG_TEST ON)
+        break()
+    endif()
+endforeach()
+
+if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
     include(config/tests/set_config.cmake)
 endif()

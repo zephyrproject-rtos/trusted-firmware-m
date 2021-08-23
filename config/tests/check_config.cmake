@@ -49,6 +49,9 @@ tfm_invalid_config((NOT TFM_PSA_API) AND (TEST_NS_IPC OR TEST_S_IPC OR TEST_NS_S
 tfm_invalid_config((NOT TFM_MULTI_CORE_TOPOLOGY) AND TEST_NS_MULTI_CORE)
 tfm_invalid_config(TEST_NS_T_COSE AND SYMMETRIC_INITIAL_ATTESTATION)
 
+# So far all regression tests are triggered from NS app
+tfm_invalid_config(NOT NS)
+
 ########################## Check suites dependence #############################
 
 tfm_invalid_config(TEST_NS_PS AND NOT TEST_NS_ITS)

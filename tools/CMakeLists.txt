@@ -15,7 +15,7 @@ configure_file(${TFM_MANIFEST_LIST} ${CMAKE_CURRENT_BINARY_DIR}/${list_name})
 
 set(MANIFEST_LISTS ${CMAKE_CURRENT_BINARY_DIR}/${list_name})
 
-if (TFM_TEST)
+if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
     list(APPEND TEMP_EXTRA_MANIFEST_LISTS ${TFM_TEST_PATH}/test_services/tfm_test_manifest_list.yaml)
 endif()
 

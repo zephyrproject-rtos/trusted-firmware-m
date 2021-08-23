@@ -30,7 +30,7 @@ tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND NOT TFM_PSA_API)
 tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND NOT TFM_PSA_API)
 tfm_invalid_config(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM AND NOT TFM_MULTI_CORE_TOPOLOGY)
 
-tfm_invalid_config(TFM_TEST AND TEST_PSA_API)
+tfm_invalid_config((TFM_S_REG_TEST OR TFM_NS_REG_TEST) AND TEST_PSA_API)
 
 tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 tfm_invalid_config((TFM_PARTITION_PROTECTED_STORAGE AND PS_ROLLBACK_PROTECTION) AND NOT TFM_PARTITION_PLATFORM)
@@ -87,6 +87,6 @@ tfm_invalid_config(NOT PLATFORM_DUMMY_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
 
 ########################### Test check config ##################################
 
-if(TFM_TEST)
+if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
     include(config/tests/check_config.cmake)
 endif()

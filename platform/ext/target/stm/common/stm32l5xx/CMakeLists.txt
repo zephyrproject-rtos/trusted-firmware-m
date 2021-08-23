@@ -19,7 +19,7 @@ target_include_directories(platform_region_defs
 
 target_compile_definitions(platform_region_defs
     INTERFACE
-        $<$<BOOL:${TFM_TEST}>:FLASH_LAYOUT_FOR_TEST>
+        $<$<OR:$<BOOL:${TFM_NS_REG_TEST}>,$<BOOL:${TFM_S_REG_TEST}>>:FLASH_LAYOUT_FOR_TEST>
 )
 
 #========================= Platform common defs ===============================#
@@ -219,7 +219,7 @@ install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/boards/scripts/regression.sh
          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
          DESTINATION ${CMAKE_BINARY_DIR} )
 
-if (${TFM_TEST})
+if (TFM_S_REG_TEST OR TFM_NS_REG_TEST)
     #the define FLASH_LAYOUT_FOR_TEST
     #increase SECURE and NON SECURE IMAGE and modify the  content of  low_level_device.c from BL2 (low_level_flash.c)
     set(FLAGS_FOR_BL2_PREPROCESSING
