@@ -117,7 +117,7 @@ void ps_crypto_set_iv(const union ps_crypto_t *crypto)
     (void)tfm_memcpy(ps_crypto_iv_buf, crypto->ref.iv, PS_IV_LEN_BYTES);
 }
 
-void ps_crypto_get_iv(union ps_crypto_t *crypto)
+psa_status_t ps_crypto_get_iv(union ps_crypto_t *crypto)
 {
     /* IV characteristic is algorithm dependent.
      * For GCM it is essential that it doesn't get repeated.
@@ -150,6 +150,16 @@ void ps_crypto_get_iv(union ps_crypto_t *crypto)
     /* If overflow, increment the MSBs */
     if (iv_l == 0) {
         iv_h++;
+
+        /* If overflow, return error. Different IV should be used. */
+        if (iv_h == 0) {
+            /* Reset iv_l and iv_h to the value before increasement. Otherwise,
+             * iv_l will start from '1' the next time this function is called.
+             */
+            iv_l--;
+            iv_h--;
+            return PSA_ERROR_GENERIC_ERROR;
+        }
     }
 
     /* Update the local buffer */
@@ -157,6 +167,8 @@ void ps_crypto_get_iv(union ps_crypto_t *crypto)
     (void)tfm_memcpy((ps_crypto_iv_buf + sizeof(iv_l)), &iv_h, sizeof(iv_h));
     /* Update the caller buffer */
     (void)tfm_memcpy(crypto->ref.iv, ps_crypto_iv_buf, PS_IV_LEN_BYTES);
+
+    return PSA_SUCCESS;
 }
 
 psa_status_t ps_crypto_encrypt_and_tag(union ps_crypto_t *crypto,
