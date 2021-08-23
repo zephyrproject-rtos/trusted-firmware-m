@@ -5,26 +5,15 @@
  *
  */
 
-#include <stdio.h>
 #include "tfm_spm_hal.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
-#include "mpu_armv8m_drv.h"
-#include "region_defs.h"
 #include "utilities.h"
 #include "region.h"
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
-
-enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                  bool privileged,
-                  const struct platform_data_t *platform_data)
-{
-    /* plat data are ignored */
-    return TFM_PLAT_ERR_SUCCESS;
-}
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
 {
@@ -106,3 +95,15 @@ enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
 /*    return nvic_interrupt_enable();*/
     return TFM_PLAT_ERR_SUCCESS;
 }
+
+#ifndef TFM_PSA_API
+
+enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
+                  bool privileged,
+                  const struct platform_data_t *platform_data)
+{
+    /* plat data are ignored */
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+#endif /* TFM_PSA_API */
