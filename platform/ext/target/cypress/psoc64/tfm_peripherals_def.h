@@ -21,11 +21,9 @@ extern "C" {
 struct platform_data_t;
 
 extern struct platform_data_t tfm_peripheral_std_uart;
-extern struct platform_data_t tfm_peripheral_uart1;
 extern struct platform_data_t tfm_peripheral_timer0;
 
 #define TFM_PERIPHERAL_STD_UART     (&tfm_peripheral_std_uart)
-#define TFM_PERIPHERAL_UART1        (&tfm_peripheral_uart1)
 #define TFM_PERIPHERAL_TIMER0       (&tfm_peripheral_timer0)
 
 #ifdef __cplusplus

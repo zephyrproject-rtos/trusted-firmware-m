@@ -48,19 +48,6 @@ static enum tfm_plat_err_t handle_boot_wdt(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-        bool privileged,
-        const struct platform_data_t *platform_data)
-{
-    (void) privileged; /* Unused parameter */
-    if (!platform_data) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-    /* TBD */
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
 {
     return memory_regions.non_secure_code_start;
