@@ -11,5 +11,6 @@
 #include "cc3xx_psa_hash.h"
 #include "cc3xx_psa_cipher.h"
 #include "cc3xx_psa_mac.h"
+#include "cc3xx_psa_aead.h"
 
 #endif /* CC3XX_DRIVER_H */

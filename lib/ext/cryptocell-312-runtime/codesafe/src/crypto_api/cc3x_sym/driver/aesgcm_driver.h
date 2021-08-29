@@ -12,7 +12,8 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-#if defined(MBEDTLS_GCM_C)
+/* TODO: How should this be passed? */
+// #if defined(MBEDTLS_GCM_C)
 
 /*
  * All the includes that are needed for code using this file to
@@ -145,7 +146,7 @@ drvError_t ProcessAesGcm(AesGcmContext_t *pAesGcmCtx, CCBuffInfo_t *pInputBuffIn
 
 
 
-#endif //  MBEDTLS_GCM_C
+// #endif //  MBEDTLS_GCM_C
 #endif // _AESGCM_DRIVER_H
 
 

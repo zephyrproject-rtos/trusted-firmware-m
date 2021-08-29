@@ -29,7 +29,7 @@ void cc3xx_chacha20_free(ChachaContext_t *ctx)
         return;
     }
 
-    CC_PalMemSet(ctx, 0, sizeof(AesContext_t));
+    CC_PalMemSet(ctx, 0, sizeof(ChachaContext_t));
 }
 
 psa_status_t cc3xx_chacha20_setkey(

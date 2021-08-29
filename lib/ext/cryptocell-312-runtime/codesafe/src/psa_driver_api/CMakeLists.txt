@@ -8,6 +8,7 @@
 target_include_directories(${CC312_LIB_TARGET}
     PUBLIC
         include
+        include/internal
         .
 )
 
@@ -19,6 +20,10 @@ target_sources(${CC312_LIB_TARGET}
 
         src/cc3xx_internal_aes.c
         src/cc3xx_internal_chacha20.c
+        src/aead/cc3xx_psa_aead.c
+        src/aead/cc3xx_psa_aead_ccm.c
+        src/aead/cc3xx_psa_aead_gcm.c
+        src/aead/cc3xx_psa_aead_chacha20_poly1305.c
 )
 
 target_compile_definitions(${CC312_LIB_TARGET}
