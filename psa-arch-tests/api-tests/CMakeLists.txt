@@ -582,6 +582,10 @@ add_custom_target(
         COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR}/src/${PSA_TARGET_GENERATE_DATABASE}-build/ -- clean
 )
 
+if(NOT DEFINED PSA_TOOLCHAIN_FILE)
+  set(PSA_TOOLCHAIN_FILE ${PSA_ROOT_DIR}/tools/cmake/compiler/${TOOLCHAIN}.cmake)
+endif()
+
 # Check for supported toolchain/s
 if(${TOOLCHAIN} IN_LIST PSA_TOOLCHAIN_SUPPORT)
 	if (DEFINED CROSS_COMPILE)
@@ -589,7 +593,7 @@ if(${TOOLCHAIN} IN_LIST PSA_TOOLCHAIN_SUPPORT)
 			message(FATAL_ERROR "[PSA] : Error: CROSS_COMPILE not supported for this toolchain, supported toolchain are : ${CROSS_COMPILE_TOOLCHAIN_SUPPORT}")
 		endif()
 	endif()
-	include(${PSA_ROOT_DIR}/tools/cmake/compiler/${TOOLCHAIN}.cmake)
+    include(${PSA_TOOLCHAIN_FILE})
 else()
 	message(FATAL_ERROR "[PSA] : Error: Unsupported value for -DTOOLCHAIN=${TOOLCHAIN}, supported toolchain are : ${PSA_TOOLCHAIN_SUPPORT}")
 endif()
