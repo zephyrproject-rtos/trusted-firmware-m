@@ -322,11 +322,11 @@ void SystemClock_Config(void)
 
 /* Place code in a specific section */
 #if defined(__ICCARM__)
-#pragma default_function_attributes = @ ".BL2_NoHdp_Code"
+#pragma default_function_attributes = @ ".BL2_Error_Code"
 #elif defined(__CC_ARM)
-#pragma arm section code = ".BL2_NoHdp_Code"
+#pragma arm section code = ".BL2_Error_Code"
 #else
-__attribute__((section(".BL2_NoHdp_Code")))
+__attribute__((section(".BL2_Error_Code")))
 #endif /* __ICCARM__ */
 
 /**

@@ -24,8 +24,10 @@ LR_CODE BL2_CODE_START {
     }
 
     ER_NOHDP_CODE (BL2_NOHDP_CODE_START) FIXED (BL2_NOHDP_CODE_SIZE) {
+        *(.BL2_NoHDP_Data)
         *(.BL2_NoHdp_Code)
         mpu_armv8m_drv.o (+RO)
+        *(.BL2_Error_Code, +LAST)
     }
 
     ER_DATA (BL2_DATA_START)  {

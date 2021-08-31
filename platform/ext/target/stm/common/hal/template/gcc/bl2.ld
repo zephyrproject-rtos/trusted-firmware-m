@@ -41,8 +41,11 @@ SECTIONS
 {
     .BL2_NoHdp_Code :
     {
-        *mpu_armv8m_drv.o (.text* .rodata*)
+        KEEP(*(.BL2_NoHdp_Data))
         KEEP(*(.BL2_NoHdp_Code))
+        *mpu_armv8m_drv.o (.text* .rodata*)
+        KEEP(*(.BL2_Error_Code))
+        __hdp_end__ = .;
     } > FLASH_NOHDP
 
     .text (BL2_CODE_START):

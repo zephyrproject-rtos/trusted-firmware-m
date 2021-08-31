@@ -12,9 +12,10 @@ define block LR_CODE with fixed order, maximum size = BL2_CODE_SIZE {block ER_CO
 place at address BL2_CODE_START {block LR_CODE};
 
 define block ER_NOHDP_CODE with fixed order, alignment = 8 {
-       readonly section .BL2_NoHdp_Code,
-       readonly object mpu_armv8m_drv.o};
-
+                                readonly section .BL2_NoHdp_Data,
+                                readonly section .BL2_NoHdp_Code,
+                                readonly object mpu_armv8m_drv.o,
+                                readonly section .BL2_Error_Code};
 define block LR_NOHDP_CODE with fixed order, maximum size = BL2_NOHDP_CODE_SIZE {block ER_NOHDP_CODE};
 place at address BL2_NOHDP_CODE_START {block LR_NOHDP_CODE};
 
