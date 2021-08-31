@@ -282,6 +282,21 @@ psa_status_t cc3xx_cipher_update(
             }
 
             break;
+        case PSA_ALG_ECB_NO_PADDING:
+            if (( ret = cc3xx_aes_crypt(
+                    &operation->aes_ctx,
+                    CIPHER_ECB,
+                    input_length,
+                    operation->iv,
+                    input,
+                    output) )
+                != PSA_SUCCESS) {
+                return ret;
+            }
+
+            *output_length = input_length;
+
+            break;
         case PSA_ALG_CTR:
             if (( ret = cc3xx_aes_crypt(
                     &operation->aes_ctx,
@@ -397,6 +412,7 @@ psa_status_t cc3xx_cipher_finish(
             *output_length = operation->block_size;
 
             break;
+        case PSA_ALG_ECB_NO_PADDING:
         case PSA_ALG_CTR:
         case PSA_ALG_OFB:
             return PSA_SUCCESS;
