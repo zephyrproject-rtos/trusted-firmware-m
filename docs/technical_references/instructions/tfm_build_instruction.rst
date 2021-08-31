@@ -216,6 +216,8 @@ used which does not support all features.
 +-----------------------------+-------------------------------------+---------------+
 | TFM_CRYPTO_TEST_ALG_CFB     | Test CFB cryptography mode          | ON            |
 +-----------------------------+-------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_ECB     | Test ECB cryptography mode          | ON            |
++-----------------------------+-------------------------------------+---------------+
 | TFM_CRYPTO_TEST_ALG_CTR     | Test CTR cryptography mode          | ON            |
 +-----------------------------+-------------------------------------+---------------+
 | TFM_CRYPTO_TEST_ALG_OFB     | Test OFB cryptography mode          | ON            |

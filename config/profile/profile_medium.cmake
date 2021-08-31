@@ -25,6 +25,7 @@ set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audi
 # reduced crypto config
 set(TFM_CRYPTO_TEST_ALG_CBC             OFF         CACHE BOOL      "Test CBC cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cryptography mode")
+set(TFM_CRYPTO_TEST_ALG_ECB             OFF         CACHE BOOL      "Test ECB cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_CTR             OFF         CACHE BOOL      "Test CTR cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_OFB             OFF         CACHE BOOL      "Test OFB cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_GCM             OFF         CACHE BOOL      "Test GCM cryptography mode")

@@ -32,6 +32,7 @@ set(MCUBOOT_FIH_PROFILE                 MEDIUM      CACHE STRING    "Fault injec
 # Specify the Crypto test cases
 set(TFM_CRYPTO_TEST_ALG_CBC             ON          CACHE BOOL      "Test CBC cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cryptography mode")
+set(TFM_CRYPTO_TEST_ALG_ECB             OFF         CACHE BOOL      "Test ECB cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_CTR             OFF         CACHE BOOL      "Test CTR cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_OFB             OFF         CACHE BOOL      "Test OFB cryptography mode")
 set(TFM_CRYPTO_TEST_ALG_GCM             ON          CACHE BOOL      "Test GCM cryptography mode")
