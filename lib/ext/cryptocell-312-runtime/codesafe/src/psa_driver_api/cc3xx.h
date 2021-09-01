@@ -8,8 +8,9 @@
 #ifndef CC3XX_DRIVER_H
 #define CC3XX_DRIVER_H
 
-#include "cc3xx_psa_hash.h"
 #include "cc3xx_psa_cipher.h"
+#include "cc3xx_psa_entropy.h"
+#include "cc3xx_psa_hash.h"
 #include "cc3xx_psa_mac.h"
 #include "cc3xx_psa_aead.h"
 
