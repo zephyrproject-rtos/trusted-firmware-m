@@ -687,7 +687,7 @@ uint32_t tfm_spm_init(void)
 
     while (1) {
         partition = load_a_partition_assuredly(&partitions_listhead);
-        if (partition == NULL) {
+        if (partition == NO_MORE_PARTITION) {
             break;
         }
 

@@ -76,7 +76,7 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
 
     if ((UINTPTR_MAX - ldinf_sa < sizeof(struct partition_load_info_t)) ||
         (ldinf_sa + sizeof(struct partition_load_info_t) >= ldinf_ea)) {
-        return NULL;
+        return NO_MORE_PARTITION;
     }
 
     p_ptldinf = (struct partition_load_info_t *)ldinf_sa;
