@@ -33,6 +33,17 @@ foreach(CACHE_VAR ${CACHE_VARS})
     endif()
 endforeach()
 
+# By default EXTRA_<NS/S>_TEST_SUITES_PATHS is not set, extra test is also an
+# out-of-tree build regression test, and if they are enabled,
+# TFM_<NS/S>_REG_TEST will be enabled.
+if (EXTRA_NS_TEST_SUITES_PATHS)
+    set(TFM_NS_REG_TEST ON)
+endif()
+
+if (EXTRA_S_TEST_SUITES_PATHS)
+    set(TFM_S_REG_TEST ON)
+endif()
+
 # If NS app, secure regression test or non-secure regression test is enabled,
 # fetch tf-m-tests repo.
 # The conditiions are actually overlapped but it can make the logic more clear.
