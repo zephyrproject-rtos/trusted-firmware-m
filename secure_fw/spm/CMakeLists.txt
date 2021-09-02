@@ -14,6 +14,10 @@ add_library(tfm_utilities INTERFACE)
 
 set(TFM_PARTITION_PLATFORM ON CACHE BOOL "Enable the TF-M Platform partition")
 
+# Generate TF-M version
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/tfm_version.h.in
+               ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include/tfm_version.h)
+
 target_include_directories(tfm_spm
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
@@ -26,6 +30,7 @@ target_include_directories(tfm_spm
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/secure_fw/include
         ${CMAKE_BINARY_DIR}/generated
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_psa>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_func>
 )
