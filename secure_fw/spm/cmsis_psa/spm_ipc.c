@@ -46,8 +46,6 @@ struct thread_t *pth_curr;
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
 
-#include "tfm_secure_irq_handlers_ipc.inc"
-
 /*********************** Connection handle conversion APIs *******************/
 
 #define CONVERSION_FACTOR_BITOFFSET    3
@@ -798,7 +796,7 @@ void spm_assert_signal(void *p_pt, psa_signal_t signal)
 
 __attribute__((naked))
 static psa_flih_result_t tfm_flih_deprivileged_handling(void *p_pt,
-                                                        psa_flih_func fn_flih,
+                                                        uintptr_t fn_flih,
                                                         void *p_context_ctrl)
 {
     __ASM volatile("SVC %0           \n"
@@ -806,38 +804,41 @@ static psa_flih_result_t tfm_flih_deprivileged_handling(void *p_pt,
                    : : "I" (TFM_SVC_PREPARE_DEPRIV_FLIH));
 }
 
-void spm_interrupt_handler(struct partition_load_info_t *p_ldinf,
-                           psa_signal_t signal,
-                           uint32_t irq_line,
-                           psa_flih_func flih_func)
+void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
 {
     psa_flih_result_t flih_result;
-    struct partition_t *p_pt;
+    struct partition_t *p_part;
 
-    p_pt = tfm_spm_get_partition_by_id(p_ldinf->pid);
-    if (!p_pt) {
+    if (!p_pt || !p_ildi) {
         tfm_core_panic();
     }
 
-    if (flih_func == NULL) {
+    p_part = (struct partition_t *)p_pt;
+
+    if (p_ildi->pid != p_part->p_ldinf->pid) {
+        tfm_core_panic();
+    }
+
+    if (p_ildi->flih_func == NULL) {
         /* SLIH Model Handling */
-        tfm_hal_irq_disable(irq_line);
+        tfm_hal_irq_disable(p_ildi->source);
         flih_result = PSA_FLIH_SIGNAL;
     } else {
         /* FLIH Model Handling */
-        if (tfm_spm_partition_get_privileged_mode(p_ldinf->flags) ==
+        if (tfm_spm_partition_get_privileged_mode(p_part->p_ldinf->flags) ==
                                                 TFM_PARTITION_PRIVILEGED_MODE) {
-            flih_result = flih_func();
+            flih_result = p_ildi->flih_func();
         } else {
             flih_result = tfm_flih_deprivileged_handling(
-                                                      p_pt, flih_func,
-                                                      pth_curr->p_context_ctrl);
+                                                   p_part,
+                                                   (uintptr_t)p_ildi->flih_func,
+                                                   pth_curr->p_context_ctrl);
         }
     }
 
     if (flih_result == PSA_FLIH_SIGNAL) {
         __disable_irq();
-        spm_assert_signal(p_pt, signal);
+        spm_assert_signal(p_pt, p_ildi->signal);
         __enable_irq();
     }
 }

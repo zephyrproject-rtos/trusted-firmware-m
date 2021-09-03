@@ -55,6 +55,19 @@ extern void {{manifest.entry_point}}(void);
 extern psa_status_t {{manifest.entry_init}}(void);
 {% endif %}
 
+/* Interrupt init functions */
+{% if counter.irq_counter > 0 %}
+    {% for irq in manifest.irqs %}
+        {% if irq.source is number %}}
+extern enum tfm_hal_status_t {{"irq_" + irq.source|string + "_init"}}(void *p_pt,
+                                                                      struct irq_load_info_t *p_ildi);
+        {% else %}
+extern enum tfm_hal_status_t {{irq.source|lower + "_init"}}(void *p_pt,
+                                                            struct irq_load_info_t *p_ildi);
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
 /* partition load info type definition */
 struct partition_{{manifest.name|lower}}_load_info_t {
     /* common length load data */
@@ -230,8 +243,13 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
     {% for irq in manifest.irqs %}
         {% set irq_info = namespace() %}
         {% set irq_info.source = irq.source %}
+        {% if irq.source is number %}}
+            {% set irq_info.source_symbol = "irq_" + irq.source|string %}
+        {% else %}
+            {% set irq_info.source_symbol = irq.source|lower %}
+        {% endif %}
         {% if manifest.psa_framework_version == 1.1 and irq.handling == "FLIH" %}
-            {% set irq_info.flih_func = "(uint32_t)" + irq.name|lower + "_flih" %}
+            {% set irq_info.flih_func = irq.name|lower + "_flih" %}
         {% else %}
             {% set irq_info.flih_func = 0 %}
         {% endif %}
@@ -241,9 +259,11 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
             {% set irq_info.signal = irq.name + "_SIGNAL" %}
         {% endif %}
         {
-            .source    = {{irq_info.source}},
+            .init = {{irq_info.source_symbol + "_init"}},
             .flih_func = {{irq_info.flih_func}},
-            .signal    = {{irq_info.signal}},
+            .pid = {{manifest.name}},
+            .source = {{irq_info.source}},
+            .signal = {{irq_info.signal}},
         },
     {% endfor %}
     },

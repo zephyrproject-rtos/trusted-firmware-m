@@ -58,7 +58,7 @@ To enable an interrupt, you need to do the following:
 - Binding the interrupt to a Secure Partition.
 - Granting the Secure Partition access permissions to the device of the
   interrupt.
-- Configurating the interrupt.
+- Initializing the interrupt.
 - Integrating the interrupt handling function
 
 TF-M has two Test Partitions as good examples for both FLIH [3]_ and SLIH [4]_.
@@ -86,7 +86,7 @@ version 1.0:
   {
     "irqs": [
       {
-        "source": "5",
+        "source": 5,
         "signal": "DUAL_TIMER_SIGNAL"
       },
       {
@@ -138,7 +138,7 @@ version 1.1:
         "handling": "FLIH"
       },
       {
-        "source"  : "5",
+        "source"  : 5,
         "name"    : "DUAL_TIMER",
         "handling": "SLIH"
       }
@@ -238,68 +238,98 @@ to put the driver codes to the Partition's CMake library:
           some_driver_code.c
   )
 
-Configurating the Interrupts
-============================
+Initializing the Interrupts
+===========================
 
-Setting up configurations for an interrupt mainly includes setting the priority
-and targetting the interrupt to Secure State.
+Platforms must define an interrupt initialization function for each Secure
+interrupt.
+
+The prototype of the function is:
+
+.. code-block:: c
+
+  enum tfm_hal_status_t {source_symbol}_init(void *p_pt,
+                                             struct irq_load_info_t *p_ildi)
+
+The ``{source_symbol}`` is:
+
+- ``irq_{source}``, if the ``source`` attribute of the IRQ in Partition manifest
+  is a number
+- Lowercase of ``source`` attribute, if ``source`` is a symbolic name
+
+For example if the manifest declares ``"source": 5``, then the function name
+is ``irq_5_init``.
+If the mannifest declares ``"source"  : "TIMER_1_IRQ"`` then the function
+name is ``timer_1_irq_init``.
+
+The initialization of an interrupt must include:
+
+- setting the priority
+- ensuring that the interrupt targets the Secure State.
+- saving the interrupt information
 
 Setting Priority
 ----------------
 
-TF-M provides a HAL API for platforms to set priorities for interrupts:
+The priority of external interrupts must be in the following range:
+``(0, N / 2)``, where ``N`` is the number of configurable priorities.
+Smaller values have higher priorities.
 
-.. code-block:: c
+For example if the number of configurable priority of your interrupt controller
+is 16, you must use the priorities in range ``(0, 8)`` only, boundaries
+excluded.
 
-  enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line);
+Note that these are not the values set into the interrupt controllers.
+Different platforms may have different values for those priorities.
+But if you use the ``NVIC_SetPriority`` function provided by CMSIS to set
+priorities, you can pass the values directly.
 
-The priority value must be less than the value of ``PendSV`` (0x80) and greater
-than the value of ``SVC`` (0x0).
-
-Platforms have the fexibilities on how to assign the priorities to interrupts
-and how to get the priority for the given ``irq_line`` in the HAL API.
-For example, platforms can define a static map between the ``irq_line`` and
-priorities for the API to search in.
+Platforms have the fexibilities on the assignment of priorities.
 
 Targeting Interrupts to Secure
 ------------------------------
 
-TF-M provides another HAL API for platforms to target interrupts to Secure
-State.
+In single core systems, platform integrators must ensure that the Secure
+interrupts target to Secure State by setting the Interrupt Controller.
+
+In multi-core systems, this might be optional.
+
+Saving the Interrupt Information
+--------------------------------
+
+The initialization function is called during Partition loading with the
+following information:
+
+- ``p_pt`` - pointer to Partition runtime struct of the owner Partition
+- ``p_ildi`` - pointer to ``irq_load_info_t`` struct of the interrupt
+
+Platforms must save the information for the future use.
+See `Integrating the Interrupt Handling Function`_ for the usage.
+
+The easiest way is to save them in global variables for each interrupt.
+TF-M provides a struct for saving the information:
 
 .. code-block:: c
 
-  enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
-                                          IRQn_Type irq_line,
-                                          enum irq_target_state_t target_state);
-
-The ``target_state`` is ``TFM_IRQ_TARGET_STATE_SECURE`` for Secure IRQs.
+  struct irq_t {
+      void                   *p_pt;
+      struct irq_load_info_t *p_ildi;
+  };
 
 Integrating the Interrupt Handling Function
 ===========================================
 
-TF-M automatically generates interrupt handling functions for each interrupt
-assigned to Secure Partitions during building.
-The format of the handling functions is:
+TF-M provides an interrupt handling entry for Secure interrupts:
 
 .. code-block:: c
 
-  void irq_{{source}}_Handler(void)
+  void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
 
-if ``source`` of the IRQ in manifest is a number.
+The ``p_pt`` and ``p_ildi`` are the information passed to interrupt
+initialization functions and saved by platforms.
 
-.. code-block:: c
-
-  void {{irq.source}}_Handler(void)
-
-if ``source`` of the IRQ in manifest is a symbolic name.
-
-Platforms should integrate the handling functions in their own manner.
-For example, they can put the functions to Vector Table directly or have a
-integration layer where the handlers in Vector Table calls the functions
-generated by TF-M.
-
-Please check ``startup_cmsdk_mps2_an521_s`` for example of the former approach.
+Platforms should call this entry function in the interrupt handlers defined in
+Vector Table with the saved information for each interrupt.
 
 ****************************
 Enabling the Interrupt Tests

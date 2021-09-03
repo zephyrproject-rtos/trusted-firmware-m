@@ -55,8 +55,6 @@
 
 #define TFM_MSG_MAGIC                   0x15154343
 
-typedef psa_flih_result_t (*psa_flih_func)(void);
-
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
     int32_t magic;
@@ -455,9 +453,17 @@ struct irq_load_info_t *get_irq_info_for_signal(
                                     const struct partition_load_info_t *p_ldinf,
                                     psa_signal_t signal);
 
-void spm_interrupt_handler(struct partition_load_info_t *p_pldi,
-                           psa_signal_t signal,
-                           uint32_t irq_line,
-                           psa_flih_func flih_func);
+/**
+ * \brief Entry of Secure interrupt handler. Platforms can call this function to
+ *        handle individual interrupts.
+ *
+ * \param[in] p_pt         The owner Partition of the interrupt to handle
+ * \param[in] p_ildi       The irq_load_info_t struct of the interrupt to handle
+ *
+ * Note:
+ *  The input parameters are maintained by platforms and they must be init-ed
+ *  in the interrupt init functions.
+ */
+void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi);
 
 #endif /* __SPM_IPC_H__ */

@@ -15,6 +15,12 @@
 extern "C" {
 #endif
 
+/*
+ * Quantized default IRQ priority, the value is:
+ * (Number of configurable priority) / 4: (1UL << __NVIC_PRIO_BITS) / 4
+ */
+#define DEFAULT_IRQ_PRIORITY    (1UL << (__NVIC_PRIO_BITS - 2))
+
 #define TFM_TIMER0_IRQ              (NvicMux3_IRQn)
 #define TFM_TIMER1_IRQ              (tcpwm_0_interrupts_1_IRQn)
 

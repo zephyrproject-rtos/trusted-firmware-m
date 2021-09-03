@@ -88,6 +88,7 @@ target_sources(platform_s
         native_drivers/mpu_armv8m_drv.c
         native_drivers/ppc_sse200_drv.c
         spm_hal.c
+        tfm_interrupts.c
         tfm_hal_isolation.c
         target_cfg.c
         native_drivers/ppc_sse200_drv.c

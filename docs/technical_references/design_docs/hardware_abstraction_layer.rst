@@ -584,6 +584,46 @@ This API clears an active and pending interrupt.
 - ``TFM_HAL_ERROR_GENERIC`` - failed to clear the pending interrupt.
 - ``TFM_HAL_SUCCESS`` - the pending interrupt has been cleared.
 
+Initializations
+^^^^^^^^^^^^^^^
+
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t {source_symbol}_init(void *p_pt,
+                                             struct irq_load_info_t *p_ildi)
+
+The ``{source_symbol}`` is:
+
+- ``irq_{source}``, if the ``source`` attribute of the IRQ in Partition manifest
+  is a number
+- Lowercase of ``source`` attribute, if ``source`` is a symbolic name
+
+**Description**
+
+Each interrupt has an initialization function individually.
+The :term:`SPM` calls the functions while loading the Partitions.
+
+The following initializations are required for each interrupt:
+
+- Setting the priority. The value must between 0 to 0x80 exclusively.
+- Ensuring that the interrupt targets the Secure State.
+- Saving the input parameters for future use.
+
+Platforms can have extra initializations as well.
+
+**Parameter**
+
+- ``p_pt`` - pointer to Partition runtime struct of the owner Partition
+- ``p_ildi`` - pointer to ``irq_load_info_t`` struct of the interrupt
+
+**Note**
+
+Please refer to the
+:doc: `IRQ intergration guide<tfm_secure_irq_integration_guide>`
+for more information.
+
 ************************************
 API Definition for Secure Partitions
 ************************************

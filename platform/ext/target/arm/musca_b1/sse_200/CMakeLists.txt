@@ -110,6 +110,7 @@ target_sources(platform_s
         $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c>
         Native_Driver/musca_b1_scc_drv.c
         spm_hal.c
+        tfm_interrupts.c
         tfm_hal_isolation.c
         attest_hal.c
         target_cfg.c

@@ -91,6 +91,7 @@ target_sources(platform_s
         Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/cache_drv.c
         spm_hal.c
+        tfm_interrupts.c
         tfm_hal_isolation.c
         target_cfg.c
         Native_Driver/timer_cmsdk_drv.c

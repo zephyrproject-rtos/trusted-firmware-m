@@ -186,14 +186,7 @@ void load_irqs_assuredly(struct partition_t *p_partition)
     for (i = 0; i < p_ldinf->nirqs; i++) {
         p_partition->signals_allowed |= p_irq_info[i].signal;
 
-        if (tfm_spm_hal_set_secure_irq_priority(p_irq_info[i].source)
-                                                      != TFM_PLAT_ERR_SUCCESS) {
-            tfm_core_panic();
-        }
-
-        if (tfm_spm_hal_set_irq_target_state(p_irq_info[i].source,
-                                             TFM_IRQ_TARGET_STATE_SECURE)
-                                               != TFM_IRQ_TARGET_STATE_SECURE) {
+        if (p_irq_info[i].init(p_partition, p_irq_info) != TFM_HAL_SUCCESS) {
             tfm_core_panic();
         }
 
