@@ -1,15 +1,18 @@
-From 0005fcbf85062d57fe24068192556ad99bb16c29 Mon Sep 17 00:00:00 2001
+From 45e1471dde01d5e9e4b6a4207aff56ede07393fb Mon Sep 17 00:00:00 2001
 From: Salome Thirot <salome.thirot@arm.com>
 Date: Wed, 7 Jul 2021 10:24:43 +0100
-Subject: [PATCH] CC3XX: Hash/MAC/Cipher entrypoints (single and multipart)
+Subject: [PATCH 1/1] CC3XX: Hardcode entrypoints for CC3XX driver
+
+Entry points for Hash/MAC/Cipher/AEAD single part.
 
 Signed-off-by: Salome Thirot <salome.thirot@arm.com>
 Signed-off-by: Abbas Bracken Ziad <abbas.brackenziad@arm.com>
+Signed-off-by: Georgios Vasilakis <georgios.vasilakis@nordicsemi.no>
 ---
  .../psa/crypto_driver_contexts_composites.h   |   6 +
  .../psa/crypto_driver_contexts_primitives.h   |   9 +
- library/psa_crypto_driver_wrappers.c          | 187 ++++++++++++++++++
- 3 files changed, 202 insertions(+)
+ library/psa_crypto_driver_wrappers.c          | 211 ++++++++++++++++++
+ 3 files changed, 226 insertions(+)
 
 diff --git a/include/psa/crypto_driver_contexts_composites.h b/include/psa/crypto_driver_contexts_composites.h
 index 239fdcb33..1578d5440 100644
@@ -70,7 +73,7 @@ index 104d4bdb6..679112128 100644
  
  #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_PRIMITIVES_H */
 diff --git a/library/psa_crypto_driver_wrappers.c b/library/psa_crypto_driver_wrappers.c
-index 38d0e300e..666f4dea0 100644
+index 38d0e300e..baaf5eab1 100644
 --- a/library/psa_crypto_driver_wrappers.c
 +++ b/library/psa_crypto_driver_wrappers.c
 @@ -44,6 +44,16 @@
@@ -323,7 +326,45 @@ index 38d0e300e..666f4dea0 100644
          default:
              return( PSA_ERROR_BAD_STATE );
      }
-@@ -1505,6 +1643,14 @@ psa_status_t psa_driver_wrapper_mac_compute(
+@@ -1399,6 +1537,18 @@ psa_status_t psa_driver_wrapper_aead_encrypt(
+             if( status != PSA_ERROR_NOT_SUPPORTED )
+                 return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++            status = cc3xx_aead_encrypt(
++                        attributes, key_buffer, key_buffer_size,
++                        alg,
++                        nonce, nonce_length,
++                        additional_data, additional_data_length,
++                        plaintext, plaintext_length,
++                        ciphertext, ciphertext_size, ciphertext_length );
++
++            if( status != PSA_ERROR_NOT_SUPPORTED )
++                return( status );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+ 
+             /* Fell through, meaning no accelerator supports this operation */
+@@ -1451,6 +1601,18 @@ psa_status_t psa_driver_wrapper_aead_decrypt(
+             if( status != PSA_ERROR_NOT_SUPPORTED )
+                 return( status );
+ #endif /* PSA_CRYPTO_DRIVER_TEST */
++#if defined(PSA_CRYPTO_DRIVER_CC3XX)
++            status = cc3xx_aead_decrypt(
++                        attributes, key_buffer, key_buffer_size,
++                        alg,
++                        nonce, nonce_length,
++                        additional_data, additional_data_length,
++                        ciphertext, ciphertext_length,
++                        plaintext, plaintext_size, plaintext_length );
++
++            if( status != PSA_ERROR_NOT_SUPPORTED )
++                return( status );
++#endif /* PSA_CRYPTO_DRIVER_CC3XX */
+ #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
+ 
+             /* Fell through, meaning no accelerator supports this operation */
+@@ -1505,6 +1667,14 @@ psa_status_t psa_driver_wrapper_mac_compute(
              if( status != PSA_ERROR_NOT_SUPPORTED )
                  return( status );
  #endif /* PSA_CRYPTO_DRIVER_TEST */
@@ -338,7 +379,7 @@ index 38d0e300e..666f4dea0 100644
  #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
  #if defined(MBEDTLS_PSA_BUILTIN_MAC)
              /* Fell through, meaning no accelerator supports this operation */
-@@ -1573,6 +1719,17 @@ psa_status_t psa_driver_wrapper_mac_sign_setup(
+@@ -1573,6 +1743,17 @@ psa_status_t psa_driver_wrapper_mac_sign_setup(
              if( status != PSA_ERROR_NOT_SUPPORTED )
                  return( status );
  #endif /* PSA_CRYPTO_DRIVER_TEST */
@@ -356,7 +397,7 @@ index 38d0e300e..666f4dea0 100644
  #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
  #if defined(MBEDTLS_PSA_BUILTIN_MAC)
              /* Fell through, meaning no accelerator supports this operation */
-@@ -1644,6 +1801,17 @@ psa_status_t psa_driver_wrapper_mac_verify_setup(
+@@ -1644,6 +1825,17 @@ psa_status_t psa_driver_wrapper_mac_verify_setup(
              if( status != PSA_ERROR_NOT_SUPPORTED )
                  return( status );
  #endif /* PSA_CRYPTO_DRIVER_TEST */
@@ -374,7 +415,7 @@ index 38d0e300e..666f4dea0 100644
  #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
  #if defined(MBEDTLS_PSA_BUILTIN_MAC)
              /* Fell through, meaning no accelerator supports this operation */
-@@ -1710,6 +1878,10 @@ psa_status_t psa_driver_wrapper_mac_update(
+@@ -1710,6 +1902,10 @@ psa_status_t psa_driver_wrapper_mac_update(
                          &operation->ctx.opaque_test_driver_ctx,
                          input, input_length ) );
  #endif /* PSA_CRYPTO_DRIVER_TEST */
@@ -385,7 +426,7 @@ index 38d0e300e..666f4dea0 100644
  #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
          default:
              (void) input;
-@@ -1744,6 +1916,11 @@ psa_status_t psa_driver_wrapper_mac_sign_finish(
+@@ -1744,6 +1940,11 @@ psa_status_t psa_driver_wrapper_mac_sign_finish(
                          &operation->ctx.opaque_test_driver_ctx,
                          mac, mac_size, mac_length ) );
  #endif /* PSA_CRYPTO_DRIVER_TEST */
@@ -397,7 +438,7 @@ index 38d0e300e..666f4dea0 100644
  #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
          default:
              (void) mac;
-@@ -1778,6 +1955,12 @@ psa_status_t psa_driver_wrapper_mac_verify_finish(
+@@ -1778,6 +1979,12 @@ psa_status_t psa_driver_wrapper_mac_verify_finish(
                          &operation->ctx.opaque_test_driver_ctx,
                          mac, mac_length ) );
  #endif /* PSA_CRYPTO_DRIVER_TEST */
@@ -410,7 +451,7 @@ index 38d0e300e..666f4dea0 100644
  #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
          default:
              (void) mac;
-@@ -1805,6 +1988,10 @@ psa_status_t psa_driver_wrapper_mac_abort(
+@@ -1805,6 +2012,10 @@ psa_status_t psa_driver_wrapper_mac_abort(
              return( mbedtls_test_opaque_mac_abort(
                          &operation->ctx.opaque_test_driver_ctx ) );
  #endif /* PSA_CRYPTO_DRIVER_TEST */
