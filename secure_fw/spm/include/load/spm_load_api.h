@@ -68,11 +68,13 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head);
  * contains.
  * As an 'assuredly' function, errors simply panic the system and never
  * return.
+ * This function returns the service signal set in a 32 bit number. Return
+ * ZERO if services are not represented by signals.
  */
-void load_services_assuredly(struct partition_t *p_partition,
-                             struct service_head_t *services_listhead,
-                             struct service_t **stateless_services_ref_tbl,
-                             size_t ref_tbl_size);
+uint32_t load_services_assuredly(struct partition_t *p_partition,
+                                 struct service_head_t *services_listhead,
+                                 struct service_t **stateless_services_ref_tbl,
+                                 size_t ref_tbl_size);
 
 /*
  * Append IRQ signals to Partition signals.

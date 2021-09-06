@@ -17,6 +17,7 @@
 #include "load/interrupt_defs.h"
 #include "psa_api.h"
 #include "utilities.h"
+#include "ffm/backend.h"
 #include "ffm/spm_error_base.h"
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
@@ -26,7 +27,6 @@
 
 #define GET_STATELESS_SERVICE(index)    (stateless_services_ref_tbl[index])
 extern struct service_t *stateless_services_ref_tbl[];
-
 
 uint32_t tfm_spm_get_lifecycle_state(void)
 {
@@ -130,13 +130,8 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
     tfm_spm_fill_msg(msg, service, handle, PSA_IPC_CONNECT,
                      client_id, NULL, 0, NULL, 0, NULL);
 
-    /*
-     * Send message and wake up the SP who is waiting on message queue,
-     * and scheduler triggered
-     */
-    tfm_spm_send_event(service, msg);
 
-    return PSA_SUCCESS;
+    return backend_instance.messaging(service, msg);
 }
 
 psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
@@ -323,13 +318,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     tfm_spm_fill_msg(msg, service, handle, type, client_id,
                      invecs, in_num, outvecs, out_num, outptr);
 
-    /*
-     * Send message and wake up the SP who is waiting on message queue,
-     * and scheduler triggered
-     */
-    tfm_spm_send_event(service, msg);
-
-    return PSA_SUCCESS;
+    return backend_instance.messaging(service, msg);
 }
 
 void tfm_spm_client_psa_close(psa_handle_t handle)
@@ -385,11 +374,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle)
     tfm_spm_fill_msg(msg, service, handle, PSA_IPC_DISCONNECT, client_id,
                      NULL, 0, NULL, 0, NULL);
 
-    /*
-     * Send message and wake up the SP who is waiting on message queue,
-     * and scheduler triggered
-     */
-    tfm_spm_send_event(service, msg);
+    (void)backend_instance.messaging(service, msg);
 }
 
 /* PSA Partition API function body */

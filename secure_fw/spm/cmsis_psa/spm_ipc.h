@@ -287,19 +287,6 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       psa_outvec *caller_outvec);
 
 /**
- * \brief                   Send message and wake up the SP who is waiting on
- *                          message queue, block the current thread and
- *                          scheduler triggered
- *
- * \param[in] service       Target service context pointer, which can be
- *                          obtained by partition management functions
- * \param[in] msg           message created by tfm_spm_create_msg()
- *                          \ref tfm_msg_body_t structures
- */
-void tfm_spm_send_event(struct service_t *service,
-                        struct tfm_msg_body_t *msg);
-
-/**
  * \brief                   Check the client version according to
  *                          version policy
  *

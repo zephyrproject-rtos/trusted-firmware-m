@@ -98,10 +98,6 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
         tfm_core_panic();
     }
 
-    if (!(p_ptldinf->flags & PARTITION_MODEL_IPC)) {
-        tfm_core_panic();
-    }
-
     if (p_ptldinf->pid < 0) {
         /* 0 is the internal NS Agent, besides the normal positive PIDs */
         tfm_core_panic();
@@ -117,12 +113,12 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
     return partition;
 }
 
-void load_services_assuredly(struct partition_t *p_partition,
-                             struct service_head_t *services_listhead,
-                             struct service_t **stateless_services_ref_tbl,
-                             size_t ref_tbl_size)
+uint32_t load_services_assuredly(struct partition_t *p_partition,
+                                 struct service_head_t *services_listhead,
+                                 struct service_t **stateless_services_ref_tbl,
+                                 size_t ref_tbl_size)
 {
-    uint32_t i, serv_ldflags, hidx;
+    uint32_t i, serv_ldflags, hidx, service_setting = 0;
     struct service_t *services;
     const struct partition_load_info_t *p_ptldinf;
     const struct service_load_info_t *p_servldinf;
@@ -140,10 +136,13 @@ void load_services_assuredly(struct partition_t *p_partition,
      */
     services = tfm_allocate_service_assuredly(p_ptldinf->nservices);
     for (i = 0; i < p_ptldinf->nservices && services; i++) {
-        p_partition->signals_allowed |= p_servldinf[i].signal;
         services[i].p_ldinf = &p_servldinf[i];
         services[i].partition = p_partition;
         services[i].next = NULL;
+
+        if (p_ptldinf->flags & PARTITION_MODEL_IPC) {
+            service_setting |= p_servldinf[i].signal;
+        }
 
         BI_LIST_INIT_NODE(&services[i].handle_list);
 
@@ -168,6 +167,8 @@ void load_services_assuredly(struct partition_t *p_partition,
 
         UNI_LIST_INSERT_AFTER(services_listhead, &services[i]);
     }
+
+    return service_setting;
 }
 
 void load_irqs_assuredly(struct partition_t *p_partition)
