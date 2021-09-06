@@ -144,6 +144,10 @@ Andrzej Głąbek
     :email: `oyvind.ronningstad@nordicsemi.no <oyvind.ronningstad@nordicsemi.no>`__
     :github: `oyvindronningstad <https://github.com/oyvindronningstad>`__
 
+Sebastian Bøe
+    :email: `sebastian.boe@nordicsemi.no <sebastian.boe@nordicsemi.no>`__
+    :github: `SebastianBoe <https://github.com/SebastianBoe>`__
+
 
 Nuvoton Platform:
 ~~~~~~~~~~~~~~~~~
