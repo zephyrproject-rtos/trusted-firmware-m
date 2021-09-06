@@ -508,14 +508,15 @@ TF-M Tests
 
 Dependency auto downloading is used by default.
 The TF-M build system downloads the tf-m-tests repo with a fixed version
-specified by ``TFM_TEST_REPO_VERSION`` in ``config/config_default.cmake``.
+specified by ``TFM_TEST_REPO_VERSION`` in
+:file:`lib/ext/tf-m-tests/repo_config_default.cmake`.
 The version can be a release tag or a commit hash.
 
 Developers who want a different version of tf-m-tests can override
 ``TFM_TEST_REPO_PATH`` to a local copy with the desired version.
 
-As the test repo is part of the TF-M project and coupled with TF-M repo a lot,
-The version should be updated when there are dependency changes between the TF-M
+As the test repo is part of the TF-M project and coupled with TF-M repo,
+the version should be updated when there are dependency changes between the TF-M
 repo and the test repo and when there is a complete change merged in test repo.
 
 A complete change is one or more patches that are for the same purpose, for
