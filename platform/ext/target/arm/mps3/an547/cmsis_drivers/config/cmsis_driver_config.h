@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef __CMSIS_DRIVER_CONFIG_H__
 #define __CMSIS_DRIVER_CONFIG_H__
 
-#include "platform_description.h"
+#include "cmsis.h"
 #include "device_definition.h"
 #include "RTE_Device.h"
 

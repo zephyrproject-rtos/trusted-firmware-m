@@ -19,7 +19,6 @@
 #include "target_cfg.h"
 #include "Driver_SSE300_PPC.h"
 #include "Driver_MPC.h"
-#include "platform_description.h"
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
