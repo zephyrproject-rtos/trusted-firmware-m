@@ -45,7 +45,7 @@ struct mhu_v2_x_dev_t MHU1_HOST_TO_SE_DEV = {(CORSTONE1000_HSE_1_RECEIVER_BASE),
 /* QSPI driver structures */
 #if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
 static const struct axi_qspi_dev_cfg_t AXI_QSPI_DEV_CFG_S = {
-    .base = CORSTONE1000_AXI_QSPI_CTRL_REG_BASE,
+    .base = CORSTONE1000_HOST_AXI_QSPI_CTRL_REG_BASE,
     .scc_base = CORSTONE1000_HOST_FPGA_SCC_REGISTERS
 };
 struct axi_qspi_dev_t AXI_QSPI_DEV_S = {
@@ -62,7 +62,7 @@ struct cfi_dev_t CFI_DEV_S = {
     .cfg = &CFI_DEV_CFG_S,
 };
 static const struct cfi_dev_cfg_t CFI_DEV_CFG_SE_SECURE_FLASH_S = {
-    .base = CORSTONE1000_SE_SECURE_FLASH_BASE_FVP
+    .base = CORSTONE1000_HOST_SE_SECURE_FLASH_BASE_FVP
 };
 struct cfi_dev_t CFI_DEV_SE_SECURE_FLASH_S = {
     .cfg = &CFI_DEV_CFG_SE_SECURE_FLASH_S,

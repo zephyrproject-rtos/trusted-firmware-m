@@ -52,16 +52,6 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     uint32_t rnr = TFM_ISOLATION_REGION_START_NUMBER; /* current region number */
     uint32_t base; /* start address */
     uint32_t limit; /* end address */
-    uint32_t total_region;
-
-    /* ARMv6-M only supports a unified MPU so reading DREGION is enough */
-    total_region = ((MPU->TYPE & MPU_TYPE_DREGION_Msk) >>
-                                MPU_TYPE_DREGION_Pos);
-
-    /* Clear all regions before initialization */
-    for (uint32_t i = 0; i < total_region; i++) {
-        ARM_MPU_ClrRegion(i);
-    }
 
     ARM_MPU_Disable();
 
