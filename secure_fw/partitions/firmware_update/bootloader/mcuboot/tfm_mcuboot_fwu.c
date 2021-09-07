@@ -483,8 +483,8 @@ psa_status_t fwu_bootloader_mark_image_accepted(
     }
 #else
     (void)bootloader_image_id;
-    return PSA_SUCCESS;
 #endif
+    return PSA_SUCCESS;
 }
 
 psa_status_t fwu_bootloader_abort(bl_image_id_t bootloader_image_id)
