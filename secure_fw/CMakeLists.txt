@@ -69,12 +69,19 @@ set_target_properties(tfm_s
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
+target_compile_options(tfm_s
+    PUBLIC
+        ${COMPILER_CP_FLAG}
+)
+
 target_link_options(tfm_s
     PRIVATE
         --entry=Reset_Handler
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/tfm_s.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/tfm_s.map>
+    PUBLIC
+        ${LINKER_CP_OPTION}
 )
 
 add_convert_to_bin_target(tfm_s)

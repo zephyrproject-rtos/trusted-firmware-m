@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -49,7 +49,6 @@ macro(tfm_toolchain_reset_compiler_flags)
         -nostdlib
         -std=c99
         $<$<BOOL:${TFM_DEBUG_SYMBOLS}>:-g>
-        $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:-msoft-float>
     )
 endmacro()
 
@@ -76,6 +75,13 @@ macro(tfm_toolchain_set_processor_arch)
                 string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
             endif()
         endif()
+        if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+            if (DEFINED CONFIG_TFM_SPE_FP)
+                if(CONFIG_TFM_SPE_FP STREQUAL "0")
+                    string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
+                endif()
+            endif()
+        endif()
     endif()
 
     # CMAKE_SYSTEM_ARCH variable is not a built-in CMAKE variable. It is used to
@@ -92,6 +98,14 @@ macro(tfm_toolchain_set_processor_arch)
             if ((NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main") AND
                 NOT TFM_SYSTEM_DSP)
                 string(APPEND CMAKE_SYSTEM_ARCH "+nodsp")
+            endif()
+        endif()
+    endif()
+
+    if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+        if (DEFINED CONFIG_TFM_SPE_FP)
+            if(CONFIG_TFM_SPE_FP STRGREATER 0)
+                string(APPEND CMAKE_SYSTEM_ARCH "+fp")
             endif()
         endif()
     endif()
@@ -125,6 +139,19 @@ macro(tfm_toolchain_reload_compiler)
 
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
+
+    set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
+
+    if (CONFIG_TFM_SPE_FP STREQUAL "2")
+        set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+        set(LINKER_CP_OPTION -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+    elseif (CONFIG_TFM_SPE_FP STREQUAL "1")
+        set(COMPILER_CP_FLAG -mfloat-abi=softfp -mfpu=${CONFIG_TFM_FP_ARCH})
+        set(LINKER_CP_OPTION -mfloat-abi=softfp -mfpu=${CONFIG_TFM_FP_ARCH})
+    else()
+        set(COMPILER_CP_FLAG -mfloat-abi=soft)
+        set(LINKER_CP_OPTION -mfloat-abi=soft)
+    endif()
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first

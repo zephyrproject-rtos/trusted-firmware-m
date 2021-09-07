@@ -27,6 +27,11 @@ target_link_libraries(bootutil
         bl2_mbedcrypto
 )
 
+target_compile_options(bootutil
+    PRIVATE
+        ${BL2_COMPILER_CP_FLAG}
+)
+
 target_compile_definitions(bootutil
     PRIVATE
         $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>

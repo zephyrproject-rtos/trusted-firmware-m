@@ -81,6 +81,8 @@ target_compile_definitions(platform_s
     PUBLIC
         TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL}
         $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION>
+        CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
+        $<$<BOOL:${CONFIG_TFM_LAZY_STACKING_SPE}>:CONFIG_TFM_LAZY_STACKING_SPE>
     PRIVATE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
         $<$<OR:$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>,$<STREQUAL:"${TEST_PSA_API}","IPC">>:CONFIG_TFM_ENABLE_MEMORY_PROTECT>
@@ -91,6 +93,11 @@ target_compile_definitions(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
+)
+
+target_compile_options(platform_s
+    PUBLIC
+        ${COMPILER_CP_FLAG}
 )
 
 #========================= Platform Non-Secure ================================#

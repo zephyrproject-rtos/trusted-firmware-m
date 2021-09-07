@@ -56,6 +56,9 @@ if (BL2)
     include(${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/mcuboot_default_config.cmake)
 endif()
 
+# Include coprocessor configs
+include(config/cp_config_default.cmake)
+
 # Load defaults, setting options not already set
 include(config/config_default.cmake)
 

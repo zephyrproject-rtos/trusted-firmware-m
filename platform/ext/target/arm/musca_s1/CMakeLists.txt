@@ -165,4 +165,9 @@ if(BL2)
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
     )
+
+    target_compile_options(platform_bl2
+        PRIVATE
+            ${BL2_COMPILER_CP_FLAG}
+    )
 endif()

@@ -36,6 +36,11 @@ target_link_libraries(bl2
         tfm_boot_status
 )
 
+target_compile_options(bl2
+    PRIVATE
+        ${BL2_COMPILER_CP_FLAG}
+)
+
 target_link_options(bl2
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl2.map>
@@ -108,6 +113,21 @@ target_link_libraries(bl2_mbedcrypto
 target_include_directories(bl2_mbedcrypto
     PUBLIC
         ${MBEDCRYPTO_PATH}/library
+)
+
+target_compile_options(bl2_mbedcrypto
+    PRIVATE
+        ${BL2_COMPILER_CP_FLAG}
+)
+
+target_compile_options(bl2_mbedtls
+    PRIVATE
+        ${BL2_COMPILER_CP_FLAG}
+)
+
+target_compile_options(bl2_mbedx509
+    PRIVATE
+        ${BL2_COMPILER_CP_FLAG}
 )
 
 ############################### CODE SHARING ###################################

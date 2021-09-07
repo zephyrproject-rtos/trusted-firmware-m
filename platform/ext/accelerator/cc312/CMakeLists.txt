@@ -104,6 +104,21 @@ if(BL2)
             $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
             $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
     )
+
+    target_compile_options(bl2_cc312
+        PRIVATE
+            ${BL2_COMPILER_CP_FLAG}
+    )
+
+    target_compile_options(bl2_crypto_hw
+        PRIVATE
+            ${BL2_COMPILER_CP_FLAG}
+    )
+
+    target_compile_options(cc312_cdmpu
+        INTERFACE
+            ${BL2_COMPILER_CP_FLAG}
+    )
 endif()
 
 ############################ Crypto Service ####################################

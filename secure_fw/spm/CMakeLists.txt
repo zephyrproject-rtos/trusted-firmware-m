@@ -117,6 +117,12 @@ target_compile_definitions(tfm_spm
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${MCUBOOT_MEASURED_BOOT}>>:BOOT_DATA_AVAILABLE>
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
+        CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
+)
+
+target_compile_options(tfm_spm
+    PUBLIC
+        ${COMPILER_CP_FLAG}
 )
 
 # The veneers give warnings about not being properly declared so they get hidden

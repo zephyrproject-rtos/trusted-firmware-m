@@ -46,18 +46,6 @@ target_sources(tfm_t_cose_common
         ${CMAKE_CURRENT_SOURCE_DIR}/crypto_adapters/t_cose_psa_crypto.c
 )
 
-############################ t_cose non secure #################################
-
-add_library(tfm_t_cose_ns STATIC EXCLUDE_FROM_ALL)
-
-target_link_libraries(tfm_t_cose_ns
-    PUBLIC
-        tfm_t_cose_common
-        tfm_t_cose_defs
-        tfm_qcbor
-        tfm_ns_interface
-)
-
 ############################ t_cose secure #####################################
 
 add_library(tfm_t_cose_s STATIC EXCLUDE_FROM_ALL)
@@ -66,30 +54,11 @@ target_link_libraries(tfm_t_cose_s
     PUBLIC
         tfm_t_cose_common
         tfm_t_cose_defs
-        tfm_qcbor
+        tfm_qcbor_s
         psa_interface
 )
 
-############################ t_cose test #######################################
-
-add_library(tfm_t_cose_test STATIC EXCLUDE_FROM_ALL)
-
-target_sources(tfm_t_cose_test
-    PRIVATE
-        test/run_tests.c
-        test/t_cose_make_psa_test_key.c
-        test/t_cose_make_test_messages.c
-        test/t_cose_sign_verify_test.c
-        test/t_cose_test.c
-)
-
-target_include_directories(tfm_t_cose_test
+target_compile_options(tfm_t_cose_s
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/test>
-)
-
-target_link_libraries(tfm_t_cose_test
-    PRIVATE
-        tfm_t_cose_ns
+        ${COMPILER_CP_FLAG}
 )
