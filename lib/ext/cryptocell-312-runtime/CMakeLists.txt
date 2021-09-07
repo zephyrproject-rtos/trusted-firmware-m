@@ -22,6 +22,13 @@ if (NOT DEFINED CC312_CDMPU_TARGET)
     set(CC312_CDMPU_TARGET cc312_cdmpu)
 endif()
 
+# Controls whether to build the PSA Crypto Unified Driver interface
+if (NOT DEFINED BUILD_PSA_DRIVER_API)
+    set(BUILD_PSA_DRIVER_API True)
+endif()
+message(STATUS
+    "${CC312_LIB_TARGET} has BUILD_PSA_DRIVER_API: ${BUILD_PSA_DRIVER_API}")
+
 add_library(${CC312_LIB_TARGET} STATIC)
 # The extra libraries don't change much, so if we've already got one just ignore
 # it. it's still possible to create multiple targets by altering the name

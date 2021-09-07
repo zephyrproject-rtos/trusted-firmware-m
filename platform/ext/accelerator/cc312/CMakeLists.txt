@@ -42,6 +42,8 @@ if(BL2)
     )
 
     set(CC312_LIB_TARGET bl2_cc312)
+    # BL2 does not use the PSA Crypto APIs so no need to build the PSA Driver API interface
+    set(BUILD_PSA_DRIVER_API False)
     set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
     add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/bl2_cc312)
@@ -127,6 +129,7 @@ target_link_libraries(platform_s
 )
 
 set(CC312_LIB_TARGET crypto_service_cc312)
+set(BUILD_PSA_DRIVER_API True)
 set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
 add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/crypto_service_cc312)

@@ -7,5 +7,7 @@
 
 add_subdirectory(src/crypto_api)
 add_subdirectory(src/mbedtls_api)
-add_subdirectory(src/psa_driver_api)
+if (BUILD_PSA_DRIVER_API)
+    add_subdirectory(src/psa_driver_api)
+endif()
 # add_subdirectory(src/secure_boot_debug)

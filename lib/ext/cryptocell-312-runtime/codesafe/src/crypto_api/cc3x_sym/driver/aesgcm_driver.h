@@ -12,8 +12,7 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-/* TODO: How should this be passed? */
-// #if defined(MBEDTLS_GCM_C)
+#if defined(MBEDTLS_GCM_C)
 
 /*
  * All the includes that are needed for code using this file to
@@ -116,38 +115,9 @@ typedef struct  AesGcmContext_t {
  */
 drvError_t ProcessAesGcm(AesGcmContext_t *pAesGcmCtx, CCBuffInfo_t *pInputBuffInfo, CCBuffInfo_t *pOutputBuffInfo, uint32_t blockSize);
 
-
 #ifdef __cplusplus
 }
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// #endif //  MBEDTLS_GCM_C
+#endif //  MBEDTLS_GCM_C
 #endif // _AESGCM_DRIVER_H
-
-
-
