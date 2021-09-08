@@ -20,7 +20,6 @@
 #include "platform_description.h"
 #include "device_definition.h"
 #include "region_defs.h"
-#include "tfm_hal_platform.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
 #include "cmsis_driver_config.h"

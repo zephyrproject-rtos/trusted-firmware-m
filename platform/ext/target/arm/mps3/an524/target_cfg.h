@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,6 +152,13 @@ enum tfm_plat_err_t enable_fault_handlers(void);
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t system_reset_cfg(void);
+
+/**
+ * \brief Configures the system debug properties.
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
+ */
+enum tfm_plat_err_t init_debug(void);
 
 /**
  * \brief Configures all external interrupts to target the

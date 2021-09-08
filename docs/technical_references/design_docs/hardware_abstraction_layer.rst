@@ -202,10 +202,14 @@ tfm_hal_platform_init()
 
 **Description**
 
-This API performs the platform-specific initialization.
+This API performs the platform initializations **before** the :term:`SPM`
+initialization.
 
-This API is called after architecture and platform common initialization has
-finished during system early startup.
+The initializations could include but not limited to:
+- Fault handlers
+- Reset configurations
+- Debug init
+- NVIC init
 
 **Parameter**
 

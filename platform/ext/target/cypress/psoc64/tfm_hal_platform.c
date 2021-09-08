@@ -14,6 +14,7 @@
 #include "region_defs.h"
 #include "target_cfg.h"
 #include "tfm_hal_platform.h"
+#include "tfm_plat_defs.h"
 #include "uart_stdout.h"
 
 /* FIXME:
@@ -47,6 +48,8 @@ void mock_tfm_shared_data(void)
 
 enum tfm_hal_status_t tfm_hal_platform_init(void)
 {
+    enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
+
     platform_init();
 
 #if defined(CY_DEVICE_SECURE)
@@ -59,6 +62,16 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 
     __enable_irq();
     stdio_init();
+
+    plat_err = nvic_interrupt_target_state_cfg();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+
+    plat_err = nvic_interrupt_enable();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
 
     return TFM_HAL_SUCCESS;
 }
