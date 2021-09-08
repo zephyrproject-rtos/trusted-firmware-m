@@ -29,6 +29,62 @@
 #define GET_STATELESS_SERVICE(index)    (stateless_services_ref_tbl[index])
 extern struct service_t *stateless_services_ref_tbl[];
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+
+/*
+ * The MM-IOVEC status
+ * The max total number of invec and outvec is 8.
+ * Each invec/outvec takes 4 bit, 32 bits in total.
+ *
+ * The encoding format of the MM-IOVEC status:
+ *--------------------------------------------------------------
+ *|  Bit   |  31 - 28  |  27 - 24  | ... |  7 - 4   |  3 - 0   |
+ *--------------------------------------------------------------
+ *| Vector | outvec[3] | outvec[2] | ... | invec[1] | invec[0] |
+ *--------------------------------------------------------------
+ *
+ * Take invec[0] as an example:
+ *
+ * bit 0:  whether invec[0] has been mapped.
+ * bit 1:  whether invec[0] has been unmapped.
+ * bit 2:  whether invec[0] has been accessed using psa_read(), psa_skip() or
+ *         psa_write().
+ * bit 3:  reserved for invec[0].
+ */
+
+#define IOVEC_STATUS_BITS              4   /* Each vector occupies 4 bits. */
+#define OUTVEC_IDX_BASE                4   /*
+                                            * Base index of outvec.
+                                            * There are four invecs in front of
+                                            * outvec.
+                                            */
+#define INVEC_IDX_BASE                 0   /* Base index of invec. */
+
+#define IOVEC_MAPPED_BIT               (1U << 0)
+#define IOVEC_UNMAPPED_BIT             (1U << 1)
+#define IOVEC_ACCESSED_BIT             (1U << 2)
+
+#define IOVEC_IS_MAPPED(msg, iovec_idx)      \
+    ((((msg)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) & \
+                               IOVEC_MAPPED_BIT)
+#define IOVEC_IS_UNMAPPED(msg, iovec_idx)    \
+    ((((msg)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) & \
+                               IOVEC_UNMAPPED_BIT)
+#define IOVEC_IS_ACCESSED(msg, iovec_idx)    \
+    ((((msg)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) & \
+                               IOVEC_ACCESSED_BIT)
+#define SET_IOVEC_MAPPED(msg, iovec_idx)     \
+    (((msg)->iovec_status) |= (IOVEC_MAPPED_BIT <<   \
+                              ((iovec_idx) * IOVEC_STATUS_BITS)))
+#define SET_IOVEC_UNMAPPED(msg, iovec_idx)   \
+    (((msg)->iovec_status) |= (IOVEC_UNMAPPED_BIT << \
+                              ((iovec_idx) * IOVEC_STATUS_BITS)))
+#define SET_IOVEC_ACCESSED(msg, iovec_idx)   \
+    (((msg)->iovec_status) |= (IOVEC_ACCESSED_BIT << \
+                              ((iovec_idx) * IOVEC_STATUS_BITS)))
+
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
 uint32_t tfm_spm_get_lifecycle_state(void)
 {
     /*
@@ -546,6 +602,18 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
         return 0;
     }
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+    /*
+     * It is a fatal error if the input vector has already been mapped using
+     * psa_map_invec().
+     */
+    if (IOVEC_IS_MAPPED(msg, (invec_idx + INVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    SET_IOVEC_ACCESSED(msg, (invec_idx + INVEC_IDX_BASE));
+#endif
+
     /*
      * Copy the client data to the service buffer. It is a fatal error
      * if the memory reference for buffer is invalid or not read-write.
@@ -598,6 +666,18 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
     if (msg->msg.in_size[invec_idx] == 0) {
         return 0;
     }
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+    /*
+     * It is a fatal error if the input vector has already been mapped using
+     * psa_map_invec().
+     */
+    if (IOVEC_IS_MAPPED(msg, (invec_idx + INVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    SET_IOVEC_ACCESSED(msg, (invec_idx + INVEC_IDX_BASE));
+#endif
 
     /*
      * If num_bytes is greater than the remaining size of the input vector then
@@ -656,6 +736,18 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
         msg->outvec[outvec_idx].len) {
         tfm_core_panic();
     }
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+    /*
+     * It is a fatal error if the output vector has already been mapped using
+     * psa_map_outvec().
+     */
+    if (IOVEC_IS_MAPPED(msg, (outvec_idx + OUTVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    SET_IOVEC_ACCESSED(msg, (outvec_idx + OUTVEC_IDX_BASE));
+#endif
 
     /*
      * Copy the service buffer to client outvecs. It is a fatal error
@@ -732,6 +824,29 @@ void tfm_spm_partition_psa_reply(psa_handle_t msg_handle, psa_status_t status)
         break;
     default:
         if (msg->msg.type >= PSA_IPC_CALL) {
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+
+            /*
+             * If the unmapped function is not called for an input/output vector
+             * that has been mapped, the framework will remove the mapping.
+             */
+            int i;
+
+            for (i = 0; i < PSA_MAX_IOVEC * 2; i++) {
+                if (IOVEC_IS_MAPPED(msg, i) && (!IOVEC_IS_UNMAPPED(msg, i))) {
+                    SET_IOVEC_UNMAPPED(msg, i);
+                    /*
+                     * Any output vectors that are still mapped will report that
+                     * zero bytes have been written.
+                     */
+                    if (i >= OUTVEC_IDX_BASE) {
+                        msg->outvec[i - OUTVEC_IDX_BASE].len = 0;
+                    }
+                }
+            }
+
+#endif
             /* Reply to a request message. Return values are based on status */
             ret = status;
             /*
@@ -908,3 +1023,276 @@ void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
     partition->signals_asserted &= ~irq_signal;
     CRITICAL_SECTION_LEAVE(cs_assert);
 }
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+
+const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
+                                            uint32_t invec_idx)
+{
+    struct tfm_msg_body_t *msg = NULL;
+    uint32_t privileged;
+    struct partition_t *partition = NULL;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    partition = msg->service->partition;
+    privileged = tfm_spm_partition_get_privileged_mode(
+                                                     partition->p_ldinf->flags);
+
+    /*
+     * It is a fatal error if MM-IOVEC has not been enabled for the RoT
+     * Service that received the message.
+     */
+    if (!SERVICE_ENABLED_MM_IOVEC(msg->service->p_ldinf->flags)) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if message handle does not refer to a request
+     * message.
+     */
+    if (msg->msg.type < PSA_IPC_CALL) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if invec_idx is equal to or greater than
+     * PSA_MAX_IOVEC.
+     */
+    if (invec_idx >= PSA_MAX_IOVEC) {
+        tfm_core_panic();
+    }
+
+    /* It is a fatal error if the input vector has length zero. */
+    if (msg->msg.in_size[invec_idx] == 0) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the input vector has already been mapped using
+     * psa_map_invec().
+     */
+    if (IOVEC_IS_MAPPED(msg, (invec_idx + INVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the input vector has already been accessed
+     * using psa_read() or psa_skip().
+     */
+    if (IOVEC_IS_ACCESSED(msg, (invec_idx + INVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the memory reference for the wrap input vector is
+     * invalid or not readable.
+     */
+    if (tfm_memory_check(msg->invec[invec_idx].base, msg->invec[invec_idx].len,
+        false, TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
+        tfm_core_panic();
+    }
+
+    SET_IOVEC_MAPPED(msg, (invec_idx + INVEC_IDX_BASE));
+
+    return msg->invec[invec_idx].base;
+}
+
+void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
+                                       uint32_t invec_idx)
+{
+    struct tfm_msg_body_t *msg = NULL;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if MM-IOVEC has not been enabled for the RoT
+     * Service that received the message.
+     */
+    if (!SERVICE_ENABLED_MM_IOVEC(msg->service->p_ldinf->flags)) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if message handle does not refer to a request
+     * message.
+     */
+    if (msg->msg.type < PSA_IPC_CALL) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if invec_idx is equal to or greater than
+     * PSA_MAX_IOVEC.
+     */
+    if (invec_idx >= PSA_MAX_IOVEC) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if The input vector has not been mapped by a call to
+     * psa_map_invec().
+     */
+    if (!IOVEC_IS_MAPPED(msg, (invec_idx + INVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the input vector has already been unmapped by a
+     * call to psa_unmap_invec().
+     */
+    if (IOVEC_IS_UNMAPPED(msg, (invec_idx + INVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    SET_IOVEC_UNMAPPED(msg, (invec_idx + INVEC_IDX_BASE));
+}
+
+void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
+                                       uint32_t outvec_idx)
+{
+    struct tfm_msg_body_t *msg = NULL;
+    uint32_t privileged;
+    struct partition_t *partition = NULL;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    partition = msg->service->partition;
+    privileged = tfm_spm_partition_get_privileged_mode(
+                                                     partition->p_ldinf->flags);
+
+    /*
+     * It is a fatal error if MM-IOVEC has not been enabled for the RoT
+     * Service that received the message.
+     */
+    if (!SERVICE_ENABLED_MM_IOVEC(msg->service->p_ldinf->flags)) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if message handle does not refer to a request
+     * message.
+     */
+    if (msg->msg.type < PSA_IPC_CALL) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if outvec_idx is equal to or greater than
+     * PSA_MAX_IOVEC.
+     */
+    if (outvec_idx >= PSA_MAX_IOVEC) {
+        tfm_core_panic();
+    }
+
+    /* It is a fatal error if the output vector has length zero. */
+    if (msg->msg.out_size[outvec_idx] == 0) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the output vector has already been mapped using
+     * psa_map_outvec().
+     */
+    if (IOVEC_IS_MAPPED(msg, (outvec_idx + OUTVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the output vector has already been accessed
+     * using psa_write().
+     */
+    if (IOVEC_IS_ACCESSED(msg, (outvec_idx + OUTVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the output vector is invalid or not read-write.
+     */
+    if (tfm_memory_check(msg->outvec[outvec_idx].base,
+                         msg->outvec[outvec_idx].len, false,
+                         TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
+        tfm_core_panic();
+    }
+    SET_IOVEC_MAPPED(msg, (outvec_idx + OUTVEC_IDX_BASE));
+
+    return msg->outvec[outvec_idx].base;
+}
+
+void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
+                                        uint32_t outvec_idx, size_t len)
+{
+    struct tfm_msg_body_t *msg = NULL;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if MM-IOVEC has not been enabled for the RoT
+     * Service that received the message.
+     */
+    if (!SERVICE_ENABLED_MM_IOVEC(msg->service->p_ldinf->flags)) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if message handle does not refer to a request
+     * message.
+     */
+    if (msg->msg.type < PSA_IPC_CALL) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if outvec_idx is equal to or greater than
+     * PSA_MAX_IOVEC.
+     */
+    if (outvec_idx >= PSA_MAX_IOVEC) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if len is greater than the output vector size.
+     */
+    if (len > msg->msg.out_size[outvec_idx]) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if The output vector has not been mapped by a call to
+     * psa_map_outvec().
+     */
+    if (!IOVEC_IS_MAPPED(msg, (outvec_idx + OUTVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    /*
+     * It is a fatal error if the output vector has already been unmapped by a
+     * call to psa_unmap_outvec().
+     */
+    if (IOVEC_IS_UNMAPPED(msg, (outvec_idx + OUTVEC_IDX_BASE))) {
+        tfm_core_panic();
+    }
+
+    SET_IOVEC_UNMAPPED(msg, (outvec_idx + OUTVEC_IDX_BASE));
+
+    /* Update the write number */
+    msg->outvec[outvec_idx].len = len;
+}
+
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */

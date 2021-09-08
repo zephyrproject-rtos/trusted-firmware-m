@@ -7,6 +7,8 @@
 #ifndef __PSA_INTERFACE_REDIRECT_H__
 #define __PSA_INTERFACE_REDIRECT_H__
 
+#include "psa/framework_feature.h"
+
 #if defined(CONFIG_TFM_PSA_API_SUPERVISOR_CALL)
 
 #define psa_framework_version    psa_framework_version_svc
@@ -52,6 +54,13 @@
 #define psa_irq_disable          psa_irq_disable_thread
 #define psa_reset_signal         psa_reset_signal_thread
 #define psa_rot_lifecycle_state  psa_rot_lifecycle_state_thread
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+#define psa_map_invec            psa_map_invec_thread
+#define psa_unmap_invec          psa_unmap_invec_thread
+#define psa_map_outvec           psa_map_outvec_thread
+#define psa_unmap_outvec         psa_unmap_outvec_thread
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
 #endif
 

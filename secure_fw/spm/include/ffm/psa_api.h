@@ -349,4 +349,32 @@ psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal);
  */
 void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal);
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+
+/**
+ * \brief Function body of psa_map_invec.
+ */
+const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
+                                            uint32_t invec_idx);
+
+/**
+ * \brief Function body of psa_unmap_invec.
+ */
+void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
+                                       uint32_t invec_idx);
+
+/**
+ * \brief Function body of psa_map_outvet.
+ */
+void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
+                                       uint32_t outvec_idx);
+
+/**
+ * \brief Function body of psa_unmap_outvec.
+ */
+void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
+                                        uint32_t outvec_idx, size_t len);
+
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
 #endif /* __PSA_API_H__ */

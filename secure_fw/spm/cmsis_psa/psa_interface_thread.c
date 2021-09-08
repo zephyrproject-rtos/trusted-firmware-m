@@ -346,4 +346,69 @@ uint32_t psa_rot_lifecycle_state_thread(void)
     );
 }
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+
+__naked
+__section(".psa_interface_thread_call")
+const void *psa_map_invec_thread(psa_handle_t msg_handle, uint32_t invec_idx)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_partition_psa_map_invec        \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_unified_abi                   \n"
+    );
+}
+
+__naked
+__section(".psa_interface_thread_call")
+void psa_unmap_invec_thread(psa_handle_t msg_handle, uint32_t invec_idx)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_partition_psa_unmap_invec      \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_unified_abi                   \n"
+    );
+}
+
+__naked
+__section(".psa_interface_thread_call")
+void *psa_map_outvec_thread(psa_handle_t msg_handle, uint32_t outvec_idx)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_partition_psa_map_outvec       \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_unified_abi                   \n"
+    );
+}
+
+__naked
+__section(".psa_interface_thread_call")
+void psa_unmap_outvec_thread(psa_handle_t msg_handle, uint32_t outvec_idx,
+                             size_t len)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_partition_psa_unmap_outvec     \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_unified_abi                   \n"
+    );
+}
+
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
 #endif /* CONFIG_TFM_PSA_API_THREAD_CALL */

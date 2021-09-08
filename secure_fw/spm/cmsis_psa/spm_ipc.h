@@ -83,6 +83,9 @@ struct tfm_msg_body_t {
                                         * client calls in multi-core topology
                                         */
 #endif
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+    uint32_t iovec_status;             /* MM-IOVEC status                */
+#endif
     struct bi_list_node_t msg_node;    /* For list operators             */
 };
 
