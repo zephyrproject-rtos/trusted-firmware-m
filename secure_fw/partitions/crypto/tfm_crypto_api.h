@@ -205,8 +205,6 @@ psa_status_t tfm_crypto_encode_id_and_owner(psa_key_id_t key_id,
     X(tfm_crypto_raw_key_agreement)           \
     X(tfm_crypto_generate_random)             \
     X(tfm_crypto_generate_key)                \
-    X(tfm_crypto_set_key_domain_parameters)   \
-    X(tfm_crypto_get_key_domain_parameters)   \
 
 #define X(api_name) UNIFORM_SIGNATURE_API(api_name);
 LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API
