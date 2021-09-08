@@ -14,9 +14,8 @@
 
 #include "internal/cc3xx_psa_aead_gcm.h"
 
-#define CC3XX_ERR_GCM_API_IS_NOT_SUPPORTED                                     \
-    -0x0016 /**< API is NOT supported.                                         \
-             */
+/*! API is NOT supported. */
+#define CC3XX_ERR_GCM_API_IS_NOT_SUPPORTED -0x0016
 
 /*! AES GCM data in maximal size in bytes. */
 #define CC3XX_AESGCM_DATA_IN_MAX_SIZE_BYTES 0xFFFF // (64KB - 1)
