@@ -78,6 +78,7 @@ target_sources(platform_s
         spm_hal.c
         target_cfg.c
         tfm_hal_isolation.c
+        tfm_hal_multi_core.c
         uart_stdout.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )

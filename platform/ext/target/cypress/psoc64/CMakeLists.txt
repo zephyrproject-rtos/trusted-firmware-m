@@ -119,6 +119,7 @@ target_sources(platform_s
         ./Native_Driver/generated_source/cycfg_qspi_memslot.c
         ./spm_hal.c
         ./tfm_interrupts.c
+        ./tfm_hal_multi_core.c
         ./tfm_hal_isolation.c
         ./CMSIS_Driver/Driver_Flash.c
         ./CMSIS_Driver/Driver_USART.c
