@@ -61,8 +61,8 @@ static fih_int tfm_core_init(void)
 #endif /* TFM_FIH_PROFILE_ON */
 
 #ifdef TFM_FIH_PROFILE_ON
-    FIH_CALL(tfm_spm_hal_verify_isolation_hw, fih_rc);
-    if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+    FIH_CALL(tfm_hal_verify_static_boundaries, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         tfm_core_panic();
     }
 #endif

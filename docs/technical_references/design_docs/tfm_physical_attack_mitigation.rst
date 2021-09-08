@@ -516,7 +516,7 @@ FIH library in TF-M SPM to mitigate physical attacks.
 
     .. code-block:: c
 
-      fih_int tfm_spm_hal_verify_isolation_hw(void);
+      fih_int tfm_hal_verify_static_boundaries(void);
 
     This function is intended to be called just before the security state
     transition and is responsible for checking all critical hardware

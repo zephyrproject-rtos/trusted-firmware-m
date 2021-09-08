@@ -72,18 +72,6 @@ fih_int tfm_spm_hal_setup_isolation_hw(void);
 fih_int tfm_spm_hal_configure_default_isolation(
                  bool privileged,
                  const struct platform_data_t *platform_data);
-
-/**
- * \brief This function verifies the settings of HW used for memory isolation,
- *        to make sure that important settings was not skipped due to fault
- *        injection attacks.
- *
- * This function is called during TF-M core late startup, before passing
- * execution to non-secure code.
- *
- * \return Returns values as specified by FIH specific platform error code
- */
-fih_int tfm_spm_hal_verify_isolation_hw(void);
 #else /* TFM_FIH_PROFILE_ON */
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 /**
