@@ -69,6 +69,9 @@
 #define PMOD_SF3_FLASH_PROGRAM_UNIT     (1U)          /* 1 B */
 
 #define FLASH_DEV_NAME Driver_FLASH0
+/* Smallest flash programmable unit in bytes */
+#define TFM_HAL_FLASH_PROGRAM_UNIT      (1)
+
 #define FLASH_TOTAL_SIZE                (PMOD_SF3_FLASH_TOTAL_SIZE)  /* 32 MB */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (PMOD_SF3_FLASH_SECTOR_SIZE)      /* 4 KiB */
 
