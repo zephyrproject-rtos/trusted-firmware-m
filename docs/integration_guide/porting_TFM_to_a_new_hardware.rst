@@ -787,8 +787,7 @@ Annex
 
     [config_cmake]
     set(BL2                                 OFF         CACHE BOOL      "Whether to build BL2")
-    set(TFM_PSA_API                         ON           CACHE BOOL      "Use PSA api (IPC mode) instead of secure library mode" FORCE)
-    set(NS                                  FALSE        CACHE BOOL      "Whether to build NS app" FORCE)
+    set(NS                                  FALSE       CACHE BOOL      "Whether to build NS app" FORCE)
 
 ------------
 

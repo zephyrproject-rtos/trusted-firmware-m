@@ -23,11 +23,13 @@ tfm_invalid_config(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSI
 
 set (TFM_L3_PLATFORM_LISTS arm/mps2/an521 arm/musca_b1/sse_200 stm/stm32l562e_dk)
 
+tfm_invalid_config(TFM_LIB_MODEL AND TFM_PSA_API)
+tfm_invalid_config(NOT TFM_LIB_MODEL AND NOT TFM_PSA_API)
 tfm_invalid_config(TFM_ISOLATION_LEVEL LESS 1 OR TFM_ISOLATION_LEVEL GREATER 3)
 tfm_invalid_config(TFM_ISOLATION_LEVEL EQUAL 3 AND NOT TFM_PLATFORM IN_LIST TFM_L3_PLATFORM_LISTS)
-tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND NOT TFM_PSA_API)
+tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND TFM_LIB_MODEL)
 
-tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND NOT TFM_PSA_API)
+tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND TFM_LIB_MODEL)
 tfm_invalid_config(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM AND NOT TFM_MULTI_CORE_TOPOLOGY)
 
 tfm_invalid_config((TFM_S_REG_TEST OR TFM_NS_REG_TEST) AND TEST_PSA_API)
@@ -38,7 +40,7 @@ tfm_invalid_config(PS_ROLLBACK_PROTECTION AND NOT PS_ENCRYPTION)
 
 tfm_invalid_config(SUITE STREQUAL "IPC" AND NOT TEST_PSA_API STREQUAL "IPC")
 
-tfm_invalid_config(TEST_PSA_API STREQUAL "IPC" AND NOT TFM_PSA_API)
+tfm_invalid_config(TEST_PSA_API STREQUAL "IPC" AND TFM_LIB_MODEL)
 tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND NOT TFM_PARTITION_CRYPTO)
 tfm_invalid_config(TEST_PSA_API STREQUAL "INITIAL_ATTESTATION" AND NOT TFM_PARTITION_INITIAL_ATTESTATION)
 tfm_invalid_config(TEST_PSA_API STREQUAL "INTERNAL_TRUSTED_STORAGE" AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
@@ -63,7 +65,7 @@ tfm_invalid_config(TFM_CODE_SHARING STREQUAL "OFF" AND TFM_CODE_SHARING_PATH)
 
 ####################### SP META Pointer ########################################
 
-tfm_invalid_config(TFM_SP_META_PTR_ENABLE AND NOT TFM_PSA_API)
+tfm_invalid_config(TFM_SP_META_PTR_ENABLE AND TFM_LIB_MODEL)
 
 ####################### Firmware Update Parttion ###############################
 
@@ -78,7 +80,7 @@ tfm_invalid_config(NOT TFM_FIH_PROFILE IN_LIST TFM_FIH_PROFILE_LIST)
 
 ########################### TF-M audit log #####################################
 
-tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND TFM_PSA_API)
+tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND NOT TFM_LIB_MODEL)
 
 ########################### TF-M crypto ########################################
 

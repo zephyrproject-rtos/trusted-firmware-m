@@ -6,7 +6,6 @@
 #-------------------------------------------------------------------------------
 
 set(TFM_PROFILE                         profile_large CACHE STRING    "Profile to use")
-set(TFM_PSA_API                         ON          CACHE BOOL      "Use PSA api (IPC mode) instead of secure library mode")
 set(TFM_ISOLATION_LEVEL                 3           CACHE STRING    "Isolation level")
 
 ############################ Partitions ########################################

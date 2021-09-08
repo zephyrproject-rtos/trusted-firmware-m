@@ -46,7 +46,7 @@ if os.path.isdir("build"):
         os.system('rm -rf build')
 
 # Generate the S and NS makefiles
-os.system('cmake -S . -B build -DBL2_S_IMAGE_START=' + BL2_S_IMAGE_START + ' -DBL2_NS_IMAGE_START=' + BL2_NS_IMAGE_START + ' -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"')
+os.system('cmake -S . -B build -DBL2_S_IMAGE_START=' + BL2_S_IMAGE_START + ' -DBL2_NS_IMAGE_START=' + BL2_NS_IMAGE_START + ' -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"')
 
 # Build the binaries
 os.chdir('build')

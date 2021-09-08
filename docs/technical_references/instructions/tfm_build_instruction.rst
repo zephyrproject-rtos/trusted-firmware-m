@@ -120,8 +120,8 @@ important options are listed below.
 +---------------------+----------------------------------------+---------------+
 | NS                  | Build NS app. Required for test code.  | ON            |
 +---------------------+----------------------------------------+---------------+
-| TFM_PSA_API         | Use PSA api (IPC mode) instead of      | OFF           |
-|                     | secure library mode.                   |               |
+| TFM_LIB_MODEL       | Use secure library model instead of    | OFF           |
+|                     | PSA api (IPC model).                   |               |
 +---------------------+----------------------------------------+---------------+
 | TFM_ISOLATION_LEVEL | Set TFM isolation level.               | 1             |
 +---------------------+----------------------------------------+---------------+
@@ -199,9 +199,8 @@ other test suites. Test configurations and dependencies will be
 checked in ``${TFM_TEST_REPO_PATH}/test/config/check_config.cmake``.
 
 If regression testing is enabled, it will then enable all tests for the enabled
-secure partitions. If IPC mode is enabled via ``TFM_PSA_API`` the IPC tests will
-be enabled. Multicore tests will be enabled if ``TFM_MULTI_CORE_TOPOLOGY`` is
-enabled.
+secure partitions.
+Multicore tests will be enabled if ``TFM_MULTI_CORE_TOPOLOGY`` is enabled.
 
 Some cryptographic tests can be enabled and disabled. This is done to prevent
 false failures from being reported when a smaller Mbed Crypto config is being
@@ -273,12 +272,11 @@ variables, in the format of cmake command line parameters.
 +------------------------------------------+---------------------------------------+
 | File                                     | Cmake command line                    |
 +==========================================+=======================================+
-| ConfigDefault.cmake                      | <No options>                          |
+| ConfigDefault.cmake                      | -DTFM_LIB_MODEL=ON                    |
 +------------------------------------------+---------------------------------------+
-| ConfigCoreIPC.cmake                      | -DTFM_PSA_API=ON                      |
+| ConfigCoreIPC.cmake                      | <no options>                          |
 +------------------------------------------+---------------------------------------+
-| ConfigCoreIPCTfmLevel2.cmake             | -DTFM_PSA_API=ON                      |
-|                                          | -DTFM_ISOLATION_LEVEL=2               |
+| ConfigCoreIPCTfmLevel2.cmake             | -DTFM_ISOLATION_LEVEL=2               |
 +------------------------------------------+---------------------------------------+
 | ConfigDefaultProfileS.cmake              | -DTFM_PROFILE=profile_small           |
 +------------------------------------------+---------------------------------------+
@@ -287,10 +285,8 @@ variables, in the format of cmake command line parameters.
 | ConfigRegression.cmake                   | -DTEST_NS=ON -DTEST_S=ON              |
 +------------------------------------------+---------------------------------------+
 | ConfigRegressionIPC.cmake                | -DTEST_NS=ON -DTEST_S=ON              |
-|                                          | -DTFM_PSA_API=ON                      |
 +------------------------------------------+---------------------------------------+
 | ConfigRegressionIPCTfmLevel2.cmake       | -DTEST_NS=ON -DTEST_S=ON              |
-|                                          | -DTFM_PSA_API=ON                      |
 |                                          | -DTFM_ISOLATION_LEVEL=2               |
 +------------------------------------------+---------------------------------------+
 | ConfigRegressionProfileS.cmake           | -DTFM_PROFILE=profile_small           |
@@ -302,10 +298,8 @@ variables, in the format of cmake command line parameters.
 | ConfigPsaApiTest.cmake                   | -DTEST_PSA_API=<test_suite>           |
 +------------------------------------------+---------------------------------------+
 | ConfigPsaApiTestIPC.cmake                | -DTEST_PSA_API=<test_suite>           |
-|                                          | -DTFM_PSA_API=ON                      |
 +------------------------------------------+---------------------------------------+
 | ConfigPsaApiTestIPCTfmLevel2.cmake       | -DTEST_PSA_API=<test_suite>           |
-|                                          | -DTFM_PSA_API=ON                      |
 |                                          | -DTFM_ISOLATION_LEVEL=2               |
 +------------------------------------------+---------------------------------------+
 | ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium          |
@@ -391,8 +385,8 @@ Alternately using traditional cmake syntax
     cmake .. -DTFM_PLATFORM=arm/mps2/an521 -DTEST_S=ON -DTEST_NS=ON
     make install
 
-Build for PSA Functional API compliance tests
-=============================================
+Build for PSA API tests
+=======================
 The build system provides support for building and integrating the PSA API tests
 from https://github.com/ARM-software/psa-arch-tests. PSA API tests are
 controlled using the TEST_PSA_API variable. Enabling both regression tests and
@@ -425,32 +419,6 @@ Alternately using traditional cmake syntax
     mkdir cmake_build
     cd cmake_build
     cmake .. -DTFM_PLATFORM=arm/mps2/an521 -DTEST_PSA_API=CRYPTO
-    make install
-
-Build for PSA FF (IPC) compliance tests
-=======================================
-
-The build system provides support for building and integrating the PSA FF
-compliance test. This support is controlled by the TEST_PSA_API variable:
-
-.. code-block:: bash
-
-    -DTEST_PSA_API=IPC
-
-.. code-block:: bash
-
-    cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
-    cmake --build cmake_build -- install
-
-Alternately using traditional cmake syntax
-
-.. code-block:: bash
-
-    cd <TF-M base folder>
-    mkdir cmake_build
-    cd cmake_build
-    cmake .. -DTFM_PLATFORM=arm/mps2/an521 -DTEST_PSA_API=IPC -DTFM_PSA_API=ON
     make install
 
 Location of build artifacts

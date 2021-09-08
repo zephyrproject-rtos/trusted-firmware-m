@@ -47,7 +47,6 @@ An example usage of test configuration shows below.
     cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521               \
                               -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake \
                               -DCMAKE_BUILD_TYPE=Release                  \
-                              -DTFM_PSA_API=ON                            \
                               -DTEST_NS_ATTESTATION=ON
 
 With this command, only non-secure initial attestation test suite will be built.
@@ -112,7 +111,7 @@ The setting is performed in following four steps.
 
     #. TF-M partitions configurations like ``TFM_PARTITION_CRYPTO``,
        ``TFM_PARTITION_INITIAL_ATTESTATION``, etc.
-    #. TF-M build mode configuration like ``TFM_PSA_API``.
+    #. TF-M build mode configuration like ``TFM_LIB_MODEL``.
     #. TF-M other configurations like ``TFM_PARTITION_FIRMWARE_UPDATE``,
        ``FORWARD_PROT_MSG``, etc.
 

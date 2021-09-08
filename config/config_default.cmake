@@ -16,7 +16,9 @@ set(TEST_S                              OFF         CACHE BOOL      "Whether to 
 set(TEST_NS                             OFF         CACHE BOOL      "Whether to build NS regression tests")
 set(TEST_PSA_API                        ""          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
 
-set(TFM_PSA_API                         OFF         CACHE BOOL      "Use PSA api (IPC mode) instead of secure library mode")
+# TFM_LIB_MODEL is the only user configuration for Library Model selection.
+# TFM_PSA_API becomes an internal variable. Please do NOT use it in build command line.
+set(TFM_LIB_MODEL                       OFF         CACHE BOOL      "Use secure library model instead of PSA API (IPC model)")
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
 set(TFM_FIH_PROFILE                     OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
@@ -108,7 +110,7 @@ set(ATTEST_INCLUDE_COSE_KEY_ID          OFF         CACHE BOOL      "Include COS
 
 set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Platform partition")
 
-set(TFM_PARTITION_AUDIT_LOG             ON          CACHE BOOL      "Enable Audit Log partition")
+set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audit Log partition")
 
 set(FORWARD_PROT_MSG                    OFF         CACHE BOOL      "Whether to forward all PSA RoT messages to a Secure Enclave")
 set(TFM_PARTITION_FIRMWARE_UPDATE       OFF         CACHE BOOL      "Enable firmware update partition")
@@ -127,7 +129,7 @@ set(MCUBOOT_PATH                        "DOWNLOAD"        CACHE PATH      "Path 
 set(MCUBOOT_VERSION                     "TF-Mv1.4-integ"  CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
-set(PSA_ARCH_TESTS_VERSION              "51ff2bd"  CACHE STRING    "The version of PSA arch tests to use")
+set(PSA_ARCH_TESTS_VERSION              "c00020e"   CACHE STRING    "The version of PSA arch tests to use")
 
 ################################################################################
 ################################################################################

@@ -16,7 +16,7 @@ Or do it manually using the following commands:
 
 .. code:: bash
 
-    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
+    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
     $ cd build && make install
 
 1.2 Building TF-M demo with BL2
@@ -29,7 +29,7 @@ Or do it manually using the following commands:
 
 .. code:: bash
 
-    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
+    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
     $ cd build && make install
 
 1.3 Building TF-M regression tests
@@ -42,7 +42,7 @@ or do it manually using following commands:
 
 .. code:: bash
 
-    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTEST_S=ON -DTEST_NS=ON -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
+    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTEST_S=ON -DTEST_NS=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
     $ cd build && make install
 
 .. Note::

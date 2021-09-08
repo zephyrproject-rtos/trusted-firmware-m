@@ -43,7 +43,9 @@ if (TFM_PROFILE)
 endif()
 
 # Load TF-M model specific default config
-if (TFM_PSA_API)
+if (TFM_LIB_MODEL)
+    include(config/tfm_library_config_default.cmake)
+else()
     include(config/tfm_ipc_config_default.cmake)
 endif()
 

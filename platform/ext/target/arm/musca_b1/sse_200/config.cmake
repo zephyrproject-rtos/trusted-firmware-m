@@ -26,7 +26,6 @@ if (NOT FORWARD_PROT_MSG)
 else()
     set(MCUBOOT_IMAGE_NUMBER                1           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")
     set(MCUBOOT_MEASURED_BOOT               OFF         CACHE BOOL      "Add boot measurement values to boot status. Used for initial attestation token")
-    set(TFM_PSA_API                         ON          CACHE BOOL      "Use PSA api (IPC mode) instead of secure library mode")
     set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Protected Storage partition")
     set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF      CACHE BOOL      "Enable Internal Trusted Storage partition")
     set(TFM_PARTITION_CRYPTO                OFF         CACHE BOOL      "Enable Crypto partition")
@@ -46,7 +45,7 @@ set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_SOURCE_DIR}/platform/ext/target/
 
 set(PSA_API_TEST_TARGET                 "musca_b1"   CACHE STRING    "Target to use when building the PSA API tests")
 
-if(TFM_PSA_API)
+if(NOT TFM_LIB_MODEL)
     if (TEST_NS_FLIH_IRQ)
         message(FATAL_ERROR "FLIH testing has not been supported!")
     endif()

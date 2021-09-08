@@ -12,6 +12,7 @@ Build TF-M with M2351 by following commands:
     $ cd build
     $ cmake ../ \
             -G"Unix Makefiles" \
+            -DTFM_LIB_MODEL=ON \
             -DTFM_PLATFORM=nuvoton/m2351 \
             -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
             -DTEST_NS=ON \
@@ -20,7 +21,7 @@ Build TF-M with M2351 by following commands:
 
 Define TEST_NS=ON or TEST_S=ON for non-secure or secure regression test.
 CMAKE_BUILD_TYPE could be "Release", "RelWithDebInfo" or "Minsizerel"
-TFM_PSA_API=ON and TFM_ISOLATION_LEVEL=2 can also be set but them cannot be
+TFM_LIB_MODEL=OFF and TFM_ISOLATION_LEVEL=2 can also be set but them cannot be
 defined with TEST_S=ON or TEST_NS=ON at the same time due to limited RAM size
 of M2351. Other cmake parameters should not be changed.
 

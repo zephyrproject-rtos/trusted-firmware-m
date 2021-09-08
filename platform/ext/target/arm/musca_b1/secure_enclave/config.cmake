@@ -7,7 +7,6 @@
 
 # Configuration values forced due to the Secure Enclave topology
 set(TFM_MULTI_CORE_TOPOLOGY             ON           CACHE BOOL      "Whether to build for a dual-cpu architecture" FORCE)
-set(TFM_PSA_API                         ON           CACHE BOOL      "Use PSA api (IPC mode) instead of secure library mode" FORCE)
 set(NS                                  FALSE        CACHE BOOL      "Whether to build NS app" FORCE)
 set(TEST_NS                             OFF          CACHE BOOL      "Whether to build NS regression tests" FORCE)
 

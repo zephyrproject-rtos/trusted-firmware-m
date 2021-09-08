@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 set(TFM_PROFILE                         profile_small CACHE STRING  "Profile to use")
-set(TFM_PSA_API                         OFF         CACHE BOOL      "Use PSA api (IPC mode) instead of secure library mode")
+set(TFM_LIB_MODEL                       ON          CACHE BOOL      "Use secure library model instead of PSA API (IPC model)")
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
 
 ########################## BL2 #################################################
