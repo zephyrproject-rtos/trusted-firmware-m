@@ -498,6 +498,92 @@ This API is called by :term:`SPM` to output logs.
 Please check :doc:`TF-M log system <tfm_log_system_design_document>` for more
 information.
 
+Interrupt APIs
+==============
+
+The SPM HAL interrupt APIs are intended for operations on Interrupt Controllers
+of platforms.
+
+APIs for control registers of interrupt sources are not in the scope of this set
+of APIs.
+Secure Partitions should define the APIs for managing interrupts with those MMIO
+registers.
+
+APIs
+----
+
+tfm_hal_irq_enable()
+^^^^^^^^^^^^^^^^^^^^
+
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_irq_enable(uint32_t irq_num)
+
+**Description**
+
+This API enables an interrupt from the Interrupt Controller of the platform.
+
+**Parameter**
+
+- ``irq_num`` - the interrupt to be enabled with a number
+
+**Return Values**
+
+- ``TFM_HAL_ERROR_INVALID_INPUT`` - the ``irq_num`` exceeds The maximum
+                                    supported number of external interrupts.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to enable the interrupt.
+- ``TFM_HAL_SUCCESS`` - the interrupt is successfully enabled.
+
+tfm_hal_irq_disable()
+^^^^^^^^^^^^^^^^^^^^^
+
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_irq_disable(uint32_t irq_num)
+
+**Description**
+
+This API disables an interrupt from the Interrupt Controller of the platform.
+
+**Parameter**
+
+- ``irq_num`` - the interrupt to be disabled with a number
+
+**Return Values**
+
+- ``TFM_HAL_ERROR_INVALID_INPUT`` - the ``irq_num`` exceeds The maximum
+                                    supported number of external interrupts.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to disable the interrupt.
+- ``TFM_HAL_SUCCESS`` - the interrupt is successfully disabled.
+
+tfm_hal_irq_clear_pending()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_irq_clear_pending(uint32_t irq_num)
+
+**Description**
+
+This API clears an active and pending interrupt.
+
+**Parameter**
+
+- ``irq_num`` - the interrupt to be disabled with a number
+
+**Return Values**
+
+- ``TFM_HAL_ERROR_INVALID_INPUT`` - the ``irq_num`` exceeds The maximum
+                                    supported number of external interrupts.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to clear the pending interrupt.
+- ``TFM_HAL_SUCCESS`` - the pending interrupt has been cleared.
+
 ************************************
 API Definition for Secure Partitions
 ************************************

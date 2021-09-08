@@ -575,32 +575,32 @@ tfm_spm_hal_nvic_interrupt_enable:
 
     enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void);
 
-tfm_spm_hal_clear_pending_irq:
-------------------------------
+tfm_hal_irq_clear_pending:
+--------------------------
 
     This function clears any pending IRQ.
 
 .. code-block:: c
 
-    void tfm_spm_hal_clear_pending_irq(IRQn_Type irq_line);
+    void tfm_hal_irq_clear_pending(uint32_t irq_num);
 
-tfm_spm_hal_enable_irq:
------------------------
+tfm_hal_irq_enable:
+-------------------
 
     This function enable an IRQ.
 
 .. code-block:: c
 
-    void tfm_spm_hal_enable_irq(IRQn_Type irq_line);
+    void tfm_hal_irq_enable(uint32_t irq_num);
 
-tfm_spm_hal_disable_irq:
-------------------------
+tfm_hal_irq_disable:
+--------------------
 
     This function disable an IRQ.
 
 .. code-block:: c
 
-    void tfm_spm_hal_disable_irq(IRQn_Type irq_line);
+    void tfm_hal_irq_disable(uint32_t irq_num);
 
 tfm_spm_hal_set_irq_target_state:
 ---------------------------------

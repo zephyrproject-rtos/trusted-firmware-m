@@ -20,6 +20,7 @@
 #include "ffm/spm_error_base.h"
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
+#include "tfm_hal_interrupt.h"
 #include "tfm_hal_platform.h"
 #include "tfm_psa_call_param.h"
 
@@ -840,8 +841,8 @@ void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
 
     partition->signals_asserted &= ~irq_signal;
 
-    tfm_spm_hal_clear_pending_irq((IRQn_Type)(irq_info->source));
-    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
+    tfm_hal_irq_clear_pending(irq_info->source);
+    tfm_hal_irq_enable(irq_info->source);
 }
 
 void tfm_spm_partition_psa_panic(void)
@@ -868,7 +869,7 @@ void tfm_spm_partition_irq_enable(psa_signal_t irq_signal)
         tfm_core_panic();
     }
 
-    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
+    tfm_hal_irq_enable(irq_info->source);
 }
 
 psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal)
@@ -886,7 +887,7 @@ psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal)
         tfm_core_panic();
     }
 
-    tfm_spm_hal_disable_irq((IRQn_Type)(irq_info->source));
+    tfm_hal_irq_disable(irq_info->source);
 
     return 1;
 }

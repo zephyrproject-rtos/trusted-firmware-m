@@ -10,6 +10,7 @@
 #include "region.h"
 #include "region_defs.h"
 #include "spm_ipc.h"
+#include "tfm_hal_interrupt.h"
 #include "tfm_plat_defs.h"
 #include "tfm_spm_hal.h"
 #include "utilities.h"
@@ -197,10 +198,10 @@ void load_irqs_assuredly(struct partition_t *p_partition)
         }
 
         if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK) == 0x0100) {
-            tfm_spm_hal_enable_irq(p_irq_info[i].source);
+            tfm_hal_irq_enable(p_irq_info[i].source);
         } else if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
                                                                     == 0x0101) {
-            tfm_spm_hal_disable_irq(p_irq_info[i].source);
+            tfm_hal_irq_disable(p_irq_info[i].source);
         }
         p_irq_info++;
     }

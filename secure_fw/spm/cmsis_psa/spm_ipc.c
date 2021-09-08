@@ -18,6 +18,7 @@
 #include "tfm_secure_api.h"
 #include "tfm_memory_utils.h"
 #include "tfm_hal_defs.h"
+#include "tfm_hal_interrupt.h"
 #include "tfm_hal_isolation.h"
 #include "spm_ipc.h"
 #include "tfm_peripherals_def.h"
@@ -820,7 +821,7 @@ void spm_interrupt_handler(struct partition_load_info_t *p_ldinf,
 
     if (flih_func == NULL) {
         /* SLIH Model Handling */
-        tfm_spm_hal_disable_irq(irq_line);
+        tfm_hal_irq_disable(irq_line);
         flih_result = PSA_FLIH_SIGNAL;
     } else {
         /* FLIH Model Handling */
