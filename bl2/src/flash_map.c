@@ -94,7 +94,7 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
     uint32_t aligned_off;
     uint8_t temp_buffer[sizeof(uint32_t)];
     uint8_t align_unit, i = 0;
-    int ret;
+    int ret = 0;
 
     /* Valid entries for data item width */
     uint32_t data_width_byte[] = {
