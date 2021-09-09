@@ -407,9 +407,6 @@ enum tfm_plat_err_t ppc_init_cfg(void)
     /* Grant non-secure access to peripherals on MAIN EXP1 */
     err |= Driver_PPC_SSE300_MAIN_EXP1.Initialize();
     err |= Driver_PPC_SSE300_MAIN_EXP1.ConfigSecurity(
-                                        DMA0_MAIN_PPCEXP1_POS_MASK,
-                                        PPC_SSE300_NONSECURE_CONFIG);
-    err |= Driver_PPC_SSE300_MAIN_EXP1.ConfigSecurity(
                                         DMA1_MAIN_PPCEXP1_POS_MASK,
                                         PPC_SSE300_NONSECURE_CONFIG);
     err |= Driver_PPC_SSE300_MAIN_EXP1.ConfigSecurity(
