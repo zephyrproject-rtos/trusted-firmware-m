@@ -251,10 +251,10 @@ void tfm_arch_config_extensions(void)
      * the NSPE. This configuration is left to NS privileged software.
      */
     SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
+#endif
 
 #if defined(__ARM_ARCH_8_1M_MAIN__)
     SCB->CCR |= SCB_CCR_TRD_Msk;
-#endif
 #endif
 }
 
