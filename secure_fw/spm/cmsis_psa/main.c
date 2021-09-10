@@ -146,6 +146,12 @@ int c_main(void)
      */
     tfm_arch_set_secure_exception_priorities();
 
+#if (CONFIG_TFM_SPE_FP >= 1)
+    tfm_arch_clear_fp_data();
+#endif
+
+    tfm_arch_clear_fp_status();
+
     /* Move to handler mode for further SPM initialization. */
     tfm_core_handler_mode();
 

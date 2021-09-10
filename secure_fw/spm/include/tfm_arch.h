@@ -118,6 +118,12 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
     __ISB();
 }
 
+#if (CONFIG_TFM_SPE_FP >= 1) && CONFIG_TFM_LAZY_STACKING_SPE
+#define ARCH_FLUSH_FP_CONTEXT()  __asm volatile("vmov  s0, s0 \n":::"memory")
+#else
+#define ARCH_FLUSH_FP_CONTEXT()
+#endif
+
 /* Set secure exceptions priority. */
 void tfm_arch_set_secure_exception_priorities(void);
 
@@ -126,6 +132,13 @@ void tfm_arch_config_extensions(void);
 
 /* Clear float point status. */
 void tfm_arch_clear_fp_status(void);
+
+#if (CONFIG_TFM_SPE_FP >= 1)
+/*
+ * Clear float point data.
+ */
+void tfm_arch_clear_fp_data(void);
+#endif
 
 /*
  * This function is called after SPM has initialized.

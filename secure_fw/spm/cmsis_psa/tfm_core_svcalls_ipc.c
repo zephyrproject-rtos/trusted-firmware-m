@@ -220,7 +220,6 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
 
     switch (svc_number) {
     case TFM_SVC_SPM_INIT:
-        tfm_arch_clear_fp_status();
         exc_return = tfm_spm_init();
         /* The following call does not return */
         tfm_arch_free_msp_and_exc_ret(

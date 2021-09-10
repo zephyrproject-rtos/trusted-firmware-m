@@ -697,6 +697,7 @@ uint64_t do_schedule(void)
                 tfm_core_panic();
             }
         }
+        ARCH_FLUSH_FP_CONTEXT();
     }
 
     /*
