@@ -40,8 +40,6 @@ static struct partition_head_t partitions_listhead;
 static struct service_head_t services_listhead;
 struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
-struct thread_t *pth_curr;
-
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
@@ -307,7 +305,7 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 
 struct partition_t *tfm_spm_get_running_partition(void)
 {
-    return TO_CONTAINER(pth_curr, struct partition_t, thrd);
+    return GET_THRD_OWNER(CURRENT_THREAD);
 }
 
 int32_t tfm_spm_check_client_version(struct service_t *service,
@@ -505,7 +503,7 @@ void tfm_spm_send_event(struct service_t *service,
      * thread.
      */
     if (!is_tfm_rpc_msg(msg)) {
-        thrd_wait_on(&msg->ack_evnt, pth_curr);
+        thrd_wait_on(&msg->ack_evnt, CURRENT_THREAD);
     }
 }
 
@@ -691,7 +689,7 @@ uint32_t tfm_spm_init(void)
                    LOAD_ALLOCED_STACK_ADDR(p_ldinf) + p_ldinf->stack_size);
     }
 
-    return thrd_start_scheduler(&pth_curr);
+    return thrd_start_scheduler(&CURRENT_THREAD);
 }
 
 /*
@@ -716,8 +714,8 @@ uint64_t do_schedule(void)
     struct partition_t *p_part_curr, *p_part_next;
     struct thread_t *pth_next = thrd_next();
 
-    p_part_curr = TO_CONTAINER(pth_curr, struct partition_t, thrd);
-    p_part_next = TO_CONTAINER(pth_next, struct partition_t, thrd);
+    p_part_curr = GET_THRD_OWNER(CURRENT_THREAD);
+    p_part_next = GET_THRD_OWNER(pth_next);
 
     if (pth_next != NULL && p_part_curr != p_part_next) {
         /* Check if there is enough room on stack to save more context */
@@ -745,10 +743,10 @@ uint64_t do_schedule(void)
      */
     tfm_rpc_client_call_handler();
 
-    ret.ctx.curr = (uint32_t)pth_curr->p_context_ctrl;
+    ret.ctx.curr = (uint32_t)CURRENT_THREAD->p_context_ctrl;
     ret.ctx.next = (uint32_t)pth_next->p_context_ctrl;
 
-    pth_curr = pth_next;
+    CURRENT_THREAD = pth_next;
 
     return ret.curr_next_ctxs;
 }
@@ -830,9 +828,9 @@ void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
             flih_result = p_ildi->flih_func();
         } else {
             flih_result = tfm_flih_deprivileged_handling(
-                                                   p_part,
-                                                   (uintptr_t)p_ildi->flih_func,
-                                                   pth_curr->p_context_ctrl);
+                                                p_part,
+                                                (uintptr_t)p_ildi->flih_func,
+                                                CURRENT_THREAD->p_context_ctrl);
         }
     }
 

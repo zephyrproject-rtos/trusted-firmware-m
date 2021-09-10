@@ -42,6 +42,13 @@ struct thread_t {
 };
 
 /*
+ * Definition for the current thread and its access helper preprocessor.
+ * The definition needs to be declared in one of the sources.
+ */
+extern struct thread_t *p_curr_thrd;
+#define CURRENT_THREAD p_curr_thrd
+
+/*
  * Initialize the thread_t struct with the given inputs.
  *
  * Parameters:
@@ -67,7 +74,16 @@ struct thread_t {
  *  The new priority may not take effect immediately.
  */
 #define THRD_SET_PRIORITY(p_thrd, priority) \
-                                          p_thrd->priority = (uint8_t)(priority)
+                                        p_thrd->priority = (uint8_t)(priority)
+
+/*
+ * Update current thread's bound context pointer.
+ *
+ * Parameters :
+ *  x              -     Context pointer to be bound with the current thread.
+ */
+#define THRD_UPDATE_CUR_CTXCTRL(x)         \
+                                CURRENT_THREAD->p_context_ctrl = (void *)(x)
 
 /*
  * Set thread state, and updates the runnable head.

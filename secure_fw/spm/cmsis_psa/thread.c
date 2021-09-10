@@ -10,6 +10,9 @@
 #include "tfm_arch.h"
 #include "utilities.h"
 
+/* Declaration of current thread pointer. */
+struct thread_t *p_curr_thrd;
+
 /* Force ZERO in case ZI(bss) clear is missing. */
 static struct thread_t *p_thrd_head = NULL; /* Point to the first thread. */
 static struct thread_t *p_rnbl_head = NULL; /* Point to the first runnable. */

@@ -55,6 +55,10 @@
 
 #define TFM_MSG_MAGIC                   0x15154343
 
+/* Get partition by thread or context data */
+#define GET_THRD_OWNER(x)        TO_CONTAINER(x, struct partition_t, thrd)
+#define GET_CTX_OWNER(x)         TO_CONTAINER(x, struct partition_t, ctx_ctrl)
+
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
     int32_t magic;

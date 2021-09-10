@@ -31,8 +31,6 @@ extern int32_t platform_svc_handlers(uint8_t svc_num,
                                      uint32_t *ctx, uint32_t lr);
 #endif
 
-extern struct thread_t *pth_curr;
-
 static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
@@ -122,14 +120,11 @@ uint32_t tfm_flih_prepare_depriv_flih(uint32_t *svc_args)
     struct context_ctrl_t flih_ctx_ctrl;
 
     /* Come too early before runtime setup, should not happen. */
-    if (!pth_curr) {
+    if (!CURRENT_THREAD) {
         tfm_core_panic();
     }
 
-    p_curr_sp = TO_CONTAINER(pth_curr->p_context_ctrl,
-                             struct partition_t,
-                             ctx_ctrl);
-
+    p_curr_sp = GET_CTX_OWNER(CURRENT_THREAD->p_context_ctrl);
     sp_limit =
            ((struct context_ctrl_t *)p_owner_sp->thrd.p_context_ctrl)->sp_limit;
 
@@ -144,11 +139,11 @@ uint32_t tfm_flih_prepare_depriv_flih(uint32_t *svc_args)
         }
 
         /*
-         * pth_curr->p_context_ctrl is the svc_args[2] on MSP, safe to update
-         * it. It is only used to track the owner of the thread data, i.e. the
-         * Partition that has been interrupted.
+         * CURRENT_THREAD->p_context_ctrl is the svc_args[2] on MSP, safe to
+         * update it. It is only used to track the owner of the thread data,
+         * i.e. the partition that has been interrupted.
          */
-        pth_curr->p_context_ctrl = &(p_owner_sp->ctx_ctrl);
+        THRD_UPDATE_CUR_CTXCTRL(&(p_owner_sp->ctx_ctrl));
     }
 
     tfm_arch_init_context(&flih_ctx_ctrl,
@@ -168,10 +163,8 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result, uint32_t *msp)
     struct context_flih_ret_t *p_ctx_flih_ret =
                                                (struct context_flih_ret_t *)msp;
 
-    p_prev_sp = TO_CONTAINER(p_ctx_flih_ret->state_ctx.r2,
-                                                  struct partition_t, ctx_ctrl);
-    p_owner_sp = TO_CONTAINER(pth_curr->p_context_ctrl,
-                              struct partition_t, ctx_ctrl);
+    p_prev_sp = GET_CTX_OWNER(p_ctx_flih_ret->state_ctx.r2);
+    p_owner_sp = GET_CTX_OWNER(CURRENT_THREAD->p_context_ctrl);
 
     if (p_owner_sp->p_boundaries != p_prev_sp->p_boundaries) {
         tfm_hal_update_boundaries(p_prev_sp->p_ldinf,
@@ -179,10 +172,10 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result, uint32_t *msp)
     }
 
     /* Restore context pointer */
-    pth_curr->p_context_ctrl = (void *)p_ctx_flih_ret->state_ctx.r2;
+    THRD_UPDATE_CUR_CTXCTRL(p_ctx_flih_ret->state_ctx.r2);
 
     tfm_arch_set_psplim(
-                 ((struct context_ctrl_t *)pth_curr->p_context_ctrl)->sp_limit);
+        ((struct context_ctrl_t *)CURRENT_THREAD->p_context_ctrl)->sp_limit);
     __set_PSP(p_ctx_flih_ret->psp);
 
     /* Set FLIH result to the ISR */
