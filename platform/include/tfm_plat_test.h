@@ -11,18 +11,6 @@
 #include "tfm_plat_defs.h"
 
 /**
- * \brief Busy wait until the user presses a specific button
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-void tfm_plat_test_wait_user_button_pressed(void);
-
-/**
- * \brief Busy wait until the user releases a specific button
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-void tfm_plat_test_wait_user_button_released(void);
-
-/**
  * \brief starts Secure timer
  *
  * Configures a timer to start counting, and generate a timer interrupt after a

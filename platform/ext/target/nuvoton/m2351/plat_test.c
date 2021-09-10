@@ -11,30 +11,7 @@
 #include "tfm_plat_test.h"
 #include "device_definition.h"
 
-#define BTN_WAIT_INIT_COUNTER_VALUE (10000u)
 #define TIMER_RELOAD_VALUE          (12000000)
-
-/**
- * \brief Simulate user reaction time
- */
-static void busy_wait_to_simulate_user(void)
-{
-    volatile uint32_t counter = BTN_WAIT_INIT_COUNTER_VALUE;
-    while (counter)
-    {
-        --counter;
-    }
-}
-
-void tfm_plat_test_wait_user_button_pressed(void)
-{
-    busy_wait_to_simulate_user();
-}
-
-void tfm_plat_test_wait_user_button_released(void)
-{
-    busy_wait_to_simulate_user();
-}
 
 void tfm_plat_test_non_secure_timer_start(void)
 {

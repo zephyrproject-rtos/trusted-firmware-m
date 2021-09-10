@@ -34,29 +34,6 @@
 
 static bool initialized = false;
 
-static void gpio_init(void)
-{
-    nrf_gpio_cfg_input(BUTTON1_PIN, BUTTON1_PULL);
-    nrf_gpio_cfg_output(LED1_PIN);
-    initialized = true;
-}
-
-void tfm_plat_test_wait_user_button_pressed(void)
-{
-    if (!initialized) gpio_init();
-
-    /* Wait until button is pressed */
-    while (nrf_gpio_pin_read(BUTTON1_PIN) != BUTTON1_ACTIVE_LEVEL) { ; }
-}
-
-void tfm_plat_test_wait_user_button_released(void)
-{
-    if (!initialized) gpio_init();
-
-    /* Wait until user button 0 is released */
-    while (nrf_gpio_pin_read(BUTTON1_PIN) == BUTTON1_ACTIVE_LEVEL) { ; }
-}
-
 static void timer_init(NRF_TIMER_Type * TIMER, uint32_t ticks)
 {
     nrf_timer_mode_set(TIMER, NRF_TIMER_MODE_TIMER);

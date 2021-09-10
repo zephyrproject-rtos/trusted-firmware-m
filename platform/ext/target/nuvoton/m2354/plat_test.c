@@ -11,24 +11,7 @@
 #include "tfm_plat_test.h"
 #include "device_definition.h"
 
-#define BTN_WAIT_INIT_COUNTER_VALUE (10000u)
 #define TIMER_RELOAD_VALUE          (12000000)
-
-void tfm_plat_test_wait_user_button_pressed(void)
-{
-    /* Wait until user button 0 is pressed */
-    while(PF11){
-        ;
-    }
-}
-
-void tfm_plat_test_wait_user_button_released(void)
-{
-    /* Wait until user button 0 is released */
-    while(!PF11){
-        ;
-    }
-}
 
 void tfm_plat_test_non_secure_timer_start(void)
 {
