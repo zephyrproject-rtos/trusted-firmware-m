@@ -99,7 +99,6 @@ target_link_libraries(platform_ns
 target_compile_definitions(platform_ns
     PRIVATE
         $<$<BOOL:${TEST_NS_SLIH_IRQ}>:TEST_NS_SLIH_IRQ>
-        $<$<BOOL:${TFM_PERIPH_ACCESS_TEST}>:TFM_ENABLE_PERIPH_ACCESS_TEST>
 )
 
 #========================= Platform BL2 =======================================#

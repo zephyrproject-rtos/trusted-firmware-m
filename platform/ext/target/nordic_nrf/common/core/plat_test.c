@@ -31,8 +31,6 @@
 #endif
 
 #define TIMER_RELOAD_VALUE (1*1000*1000)
-#define USERLED_MASK       (1UL)
-
 
 static bool initialized = false;
 
@@ -57,26 +55,6 @@ void tfm_plat_test_wait_user_button_released(void)
 
     /* Wait until user button 0 is released */
     while (nrf_gpio_pin_read(BUTTON1_PIN) == BUTTON1_ACTIVE_LEVEL) { ; }
-}
-
-uint32_t tfm_plat_test_get_led_status(void)
-{
-    if (!initialized) gpio_init();
-
-    return (nrf_gpio_pin_out_read(LED1_PIN) == LED1_ACTIVE_LEVEL);
-}
-
-void tfm_plat_test_set_led_status(uint32_t status)
-{
-    if (!initialized) gpio_init();
-
-    status &= USERLED_MASK;
-    nrf_gpio_pin_write(LED1_PIN, status == LED1_ACTIVE_LEVEL);
-}
-
-uint32_t tfm_plat_test_get_userled_mask(void)
-{
-    return USERLED_MASK;
 }
 
 static void timer_init(NRF_TIMER_Type * TIMER, uint32_t ticks)

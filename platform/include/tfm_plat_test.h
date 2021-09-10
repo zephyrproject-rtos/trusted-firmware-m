@@ -23,30 +23,6 @@ TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
 void tfm_plat_test_wait_user_button_released(void);
 
 /**
- * \brief Get the status of the LEDs used by tests
- *
- * \return Returns the current status of LEDs
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-uint32_t tfm_plat_test_get_led_status(void);
-
-/**
- * \brief Sets the status of the LEDs used by tests
- *
- * \param[in]  status  The status to be set
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-void tfm_plat_test_set_led_status(uint32_t status);
-
-/**
- * \brief Get the mask of the LEDs used for testing
- *
- * \return Returns the mask of the LEDs used for testing
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-uint32_t tfm_plat_test_get_userled_mask(void);
-
-/**
  * \brief starts Secure timer
  *
  * Configures a timer to start counting, and generate a timer interrupt after a
