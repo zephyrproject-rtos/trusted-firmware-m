@@ -18,9 +18,13 @@ target_sources(${CC312_LIB_TARGET}
         src/cc3xx_psa_cipher.c
         src/cc3xx_psa_mac.c
         src/cc3xx_psa_entropy.c
+        src/cc3xx_psa_key_agreement.c
 
         src/cc3xx_internal_aes.c
         src/cc3xx_internal_chacha20.c
+        src/cc3xx_internal_ecc.c
+        src/cc3xx_internal_ecdh.c
+
         src/aead/cc3xx_psa_aead.c
         src/aead/cc3xx_psa_aead_ccm.c
         src/aead/cc3xx_psa_aead_gcm.c
