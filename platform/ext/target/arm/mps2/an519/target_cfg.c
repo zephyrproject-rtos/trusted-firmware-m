@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited
+ * Copyright (c) 2018-2021 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,13 +103,6 @@ struct platform_data_t tfm_peripheral_uart1 = {
         UART1_BASE_S + 0xFFF,
         PPC_SP_APB_PPC_EXP1,
         CMSDK_UART1_APB_PPC_POS
-};
-
-struct platform_data_t tfm_peripheral_fpga_io = {
-        MPS2_IO_FPGAIO_BASE_S,
-        MPS2_IO_FPGAIO_BASE_S + 0xFFF,
-        PPC_SP_APB_PPC_EXP2,
-        CMSDK_FPGA_IO_PPC_POS
 };
 
 struct platform_data_t tfm_peripheral_timer0 = {

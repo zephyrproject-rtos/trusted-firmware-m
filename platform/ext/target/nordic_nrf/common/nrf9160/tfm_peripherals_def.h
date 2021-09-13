@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  * Copyright (c) 2020, Nordic Semiconductor ASA. All rights reserved.
  *
@@ -26,7 +26,6 @@ extern struct platform_data_t tfm_peripheral_timer0;
 
 #define TFM_PERIPHERAL_STD_UART     (&tfm_peripheral_std_uart)
 #define TFM_PERIPHERAL_TIMER0       (&tfm_peripheral_timer0)
-#define TFM_PERIPHERAL_FPGA_IO      (0)
 
 #ifdef PSA_API_TEST_IPC
 #define FF_TEST_UART_IRQ         (EGU5_IRQn)

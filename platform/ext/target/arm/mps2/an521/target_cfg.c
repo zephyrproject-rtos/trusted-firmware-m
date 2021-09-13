@@ -110,13 +110,6 @@ struct platform_data_t tfm_peripheral_uart1 = {
         CMSDK_UART1_APB_PPC_POS
 };
 
-struct platform_data_t tfm_peripheral_fpga_io = {
-        MPS2_IO_FPGAIO_BASE_S,
-        MPS2_IO_FPGAIO_BASE_S + 0xFFF,
-        PPC_SP_APB_PPC_EXP2,
-        CMSDK_FPGA_IO_PPC_POS
-};
-
 struct platform_data_t tfm_peripheral_timer0 = {
         CMSDK_TIMER0_BASE_S,
         CMSDK_TIMER1_BASE_S - 1,

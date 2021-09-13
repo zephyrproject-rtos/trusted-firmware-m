@@ -33,7 +33,6 @@ extern struct platform_data_t tfm_peripheral_std_qspi;
 #ifdef SECURE_QSPI
 #define TFM_PERIPHERAL_STD_QSPI     (&tfm_peripheral_std_qspi)
 #endif
-#define TFM_PERIPHERAL_FPGA_IO      (0)
 
 #ifdef __cplusplus
 }
