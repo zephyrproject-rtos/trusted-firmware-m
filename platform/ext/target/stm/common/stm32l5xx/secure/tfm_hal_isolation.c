@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,10 +19,9 @@
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
-
+#include "low_level_rng.h"
 /* It can be retrieved from the MPU_TYPE register. */
 #define MPU_REGION_NUM                  8
-
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
@@ -157,7 +156,10 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     gtzc_init_cfg();
     sau_and_idau_cfg();
     pinmux_init_cfg();
-
+    /* Start HW randomization */
+    if (RNG_Init()) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
     /* Set up static isolation boundaries inside SPE */
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
     struct mpu_armv8m_region_cfg_t localcfg;

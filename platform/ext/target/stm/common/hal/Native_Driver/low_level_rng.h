@@ -14,5 +14,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
 */
+#ifndef __LOW_LEVEL_RNG_H__
+#define __LOW_LEVEL_RNG_H__
 #include <stddef.h>
 int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen);
+int RNG_Init(void);
+void RNG_DeInit(void);
+
+#endif /* __LOW_LEVEL_RNG_H__ */

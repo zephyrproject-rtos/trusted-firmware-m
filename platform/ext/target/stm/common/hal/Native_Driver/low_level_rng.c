@@ -5,10 +5,10 @@
   * @brief   Low Level Interface module to use STM32 RNG Ip
   *          This file provides mbed-crypto random generataor
   *
-   ******************************************************************************
+  ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2020-2021 STMicroelectronics.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -38,7 +38,7 @@ static uint8_t atomic_incr_u8(__IO uint8_t *valuePtr, uint8_t delta)
   return newValue;
 }
 
-static int RNG_Init(void)
+int RNG_Init(void)
 {
   uint32_t dummy;
   /*  We're only supporting a single user of RNG */
@@ -46,7 +46,7 @@ static int RNG_Init(void)
   {
     return -1;
   }
-
+#if defined(STM32L562xx) || defined(STM32L552xx)
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
 
   /*Select PLLQ output as RNG clock source */
@@ -57,7 +57,10 @@ static int RNG_Init(void)
     users=0;
     return -1;
   }
-
+#else
+  /* Select RNG clock source */
+  __HAL_RCC_RNG_CONFIG(RCC_RNGCLKSOURCE_HSI48);
+#endif
   /* RNG Peripheral clock enable */
   __HAL_RCC_RNG_CLK_ENABLE();
 
@@ -66,7 +69,10 @@ static int RNG_Init(void)
   handle.State = HAL_RNG_STATE_RESET;
   handle.Lock = HAL_UNLOCKED;
 
-  HAL_RNG_Init(&handle);
+  if (HAL_RNG_Init(&handle) != HAL_OK)
+  {
+    return -2;
+  }
 
   /* first random number generated after setting the RNGEN bit should not be used */
   HAL_RNG_GenerateRandomNumber(&handle, &dummy);
@@ -76,6 +82,7 @@ static int RNG_Init(void)
 static void RNG_GetBytes(uint8_t *output, size_t length, size_t *output_length)
 {
   int32_t ret = 0;
+  uint8_t try = 0;
   __IO uint8_t random[4];
   *output_length = 0;
 
@@ -84,7 +91,15 @@ static void RNG_GetBytes(uint8_t *output, size_t length, size_t *output_length)
   {
     if (HAL_RNG_GenerateRandomNumber(&handle, (uint32_t *)random) != HAL_OK)
     {
-      ret = -1;
+      /* retry when random number generated are not immediately available */
+      if (try < 3)
+      {
+        try++;
+      }
+      else
+      {
+        ret = -1;
+      }
     }
     else
     {
@@ -103,7 +118,7 @@ static void RNG_GetBytes(uint8_t *output, size_t length, size_t *output_length)
   }
 }
 
-static void RNG_DeInit(void)
+void RNG_DeInit(void)
 {
   /*Disable the RNG peripheral */
   HAL_RNG_DeInit(&handle);
@@ -117,10 +132,7 @@ static void RNG_DeInit(void)
 /*  interface for mbed-crypto */
 int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen)
 {
-  if (RNG_Init())
-    return -1;
   RNG_GetBytes(output, len, olen);
-  RNG_DeInit();
   if (*olen != len)
   {
     return -1;
