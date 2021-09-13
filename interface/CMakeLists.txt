@@ -64,7 +64,7 @@ target_sources(tfm_secure_api
 
 if (TFM_MULTI_CORE_TOPOLOGY OR FORWARD_PROT_MSG)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core/tfm_mailbox_config.h.in
-                   ${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core/tfm_mailbox_config.h
+                   ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_mailbox_config.h
                    NEWLINE_STYLE UNIX
     )
 endif()
