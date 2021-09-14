@@ -22,16 +22,6 @@
 
 #include "xilinx_pg153_axi_qspi_controller_drv.h"
 
-enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                 bool priviledged,
-                 const struct platform_data_t *platform_data)
-{
-    /* Setup of isolation HW not implemented yet. */
-    (void) priviledged;
-    (void) platform_data;
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 #define HOST_SYS_RST_CTRL_OFFSET 0x0
 #define HOST_CPU_CORE0_WAKEUP_OFFSET 0x308
 
