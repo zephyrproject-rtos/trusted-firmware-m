@@ -98,6 +98,7 @@ target_sources(platform_s
         spm_hal.c
         tfm_interrupts.c
         tfm_hal_isolation.c
+        tfm_hal_platform.c
         target_cfg.c
         Native_Driver/timer_cmsdk_drv.c
         Libraries/mt25ql_flash_lib.c

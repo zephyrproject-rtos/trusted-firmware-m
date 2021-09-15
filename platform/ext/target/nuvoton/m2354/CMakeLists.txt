@@ -97,6 +97,7 @@ target_sources(platform_s
         target_cfg.c
         ../common/spm_hal.c
         ../common/tfm_hal_isolation.c
+        ../common/tfm_hal_platform.c
         ../common/boot_hal.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
         ${PLATFORM_DIR}/ext/common/tfm_platform.c

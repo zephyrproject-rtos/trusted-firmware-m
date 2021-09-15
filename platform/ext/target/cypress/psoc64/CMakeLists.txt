@@ -121,6 +121,7 @@ target_sources(platform_s
         ./tfm_interrupts.c
         ./tfm_hal_multi_core.c
         ./tfm_hal_isolation.c
+        ./tfm_hal_platform.c
         ./CMSIS_Driver/Driver_Flash.c
         ./CMSIS_Driver/Driver_USART.c
         ./target_cfg.c

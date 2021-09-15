@@ -101,6 +101,7 @@ target_sources(platform_s
         target_cfg.c
         ../common/spm_hal.c
         ../common/tfm_hal_isolation.c
+        ../common/tfm_hal_platform.c
         ../common/CMSIS_Driver/Driver_Flash_iap1.c
         ../common/CMSIS_Driver/Driver_USART.c
         ../common/Native_Driver/mpu_armv8m_drv.c

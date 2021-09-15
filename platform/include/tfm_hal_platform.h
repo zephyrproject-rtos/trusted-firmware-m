@@ -8,6 +8,9 @@
 #ifndef __TFM_HAL_PLATFORM_H__
 #define __TFM_HAL_PLATFORM_H__
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "tfm_hal_defs.h"
 
 /**

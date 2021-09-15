@@ -739,15 +739,3 @@ void ppc_clear_irq(void)
     Driver_APB_PPCEXP0.ClearInterrupt();
     Driver_APB_PPCEXP1.ClearInterrupt();
 }
-
-enum tfm_hal_status_t tfm_hal_platform_init(void)
-{
-    musca_s1_scc_mram_fast_read_enable(&MUSCA_S1_SCC_DEV);
-
-    arm_cache_enable_blocking(&SSE_200_CACHE_DEV);
-
-    __enable_irq();
-    stdio_init();
-
-    return TFM_HAL_SUCCESS;
-}

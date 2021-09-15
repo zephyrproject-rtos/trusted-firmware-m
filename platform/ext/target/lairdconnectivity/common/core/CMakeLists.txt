@@ -61,6 +61,7 @@ target_sources(platform_s
         ${NRF_FOLDER_PATH}/native_drivers/spu.c
         ${NRF_FOLDER_PATH}/spm_hal.c
         ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
+        ${NRF_FOLDER_PATH}/tfm_hal_platform.c
         plat_test.c
 )
 
