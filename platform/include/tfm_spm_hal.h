@@ -72,20 +72,6 @@ fih_int tfm_spm_hal_setup_isolation_hw(void);
 fih_int tfm_spm_hal_configure_default_isolation(
                  bool privileged,
                  const struct platform_data_t *platform_data);
-/**
- * \brief Configures the system debug properties.
- *        The default configuration of this function should disable secure debug
- *        when either DAUTH_NONE or DAUTH_NS_ONLY define is set. It is up to the
- *        platform owner to decide if secure debug can be turned on in their
- *        system, if DAUTH_FULL define is present.
- *        The DAUTH_CHIP_DEFAULT define should not be considered a safe default
- *        option unless explicitly noted by the chip vendor.
- *        The implementation has to expect that one of those defines is going to
- *        be set. Otherwise, a compile error needs to be triggered.
- *
- * \return Returns values as specified by FIH specific platform error code
- */
-fih_int tfm_spm_hal_init_debug(void);
 
 /**
  * \brief This function verifies the settings of HW used for memory isolation,
@@ -126,55 +112,7 @@ enum tfm_plat_err_t tfm_spm_hal_setup_isolation_hw(void);
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                  bool priviledged,
                  const struct platform_data_t *platform_data);
-/**
- * \brief Configures the system debug properties.
- *        The default configuration of this function should disable secure debug
- *        when either DAUTH_NONE or DAUTH_NS_ONLY define is set. It is up to the
- *        platform owner to decide if secure debug can be turned on in their
- *        system, if DAUTH_FULL define is present.
- *        The DAUTH_CHIP_DEFAULT define should not be considered a safe default
- *        option unless explicitly noted by the chip vendor.
- *        The implementation has to expect that one of those defines is going to
- *        be set. Otherwise, a compile error needs to be triggered.
- *
- * \return Returns values as specified by the \ref tfm_plat_err_t
- */
-enum tfm_plat_err_t tfm_spm_hal_init_debug(void);
 #endif /* TFM_FIH_PROFILE_ON */
-
-/**
- * \brief Enables the fault handlers and sets priorities.
- *
- * Secure fault (if present) must have the highest possible priority
- *
- * \return Returns values as specified by the \ref tfm_plat_err_t
- */
-enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void);
-
-/**
- * \brief Configures the system reset request properties
- *
- * \return Returns values as specified by the \ref tfm_plat_err_t
- */
-enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void);
-
-/**
- * \brief Configures all external interrupts to target the
- *        NS state, apart for the ones associated to secure
- *        peripherals (plus MPC and PPC)
- *
- * \return Returns values as specified by the \ref tfm_plat_err_t
- */
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void);
-
-/**
- * \brief This function enable the interrupts associated
- *        to the secure peripherals (plus the isolation boundary violation
- *        interrupts)
- *
- * \return Returns values as specified by the \ref tfm_plat_err_t
- */
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void);
 
 /**
  * \brief Get the VTOR value of non-secure image

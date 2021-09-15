@@ -70,45 +70,6 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
     return *((uint32_t *)(memory_regions.non_secure_code_start + 4));
 }
 
-enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
-{
-    volatile struct sysctrl_t *sys_ctrl =
-                                     (struct sysctrl_t *)CMSDK_SYSCTRL_BASE_S;
-
-#if defined(DAUTH_NONE)
-    /* Set all the debug enable selector bits to 1 */
-    sys_ctrl->secdbgset = All_SEL_STATUS;
-    /* Set all the debug enable bits to 0 */
-    sys_ctrl->secdbgclr =
-                   DBGEN_STATUS | NIDEN_STATUS | SPIDEN_STATUS | SPNIDEN_STATUS;
-#elif defined(DAUTH_NS_ONLY)
-    /* Set all the debug enable selector bits to 1 */
-    sys_ctrl->secdbgset = All_SEL_STATUS;
-    /* Set the debug enable bits to 1 for NS, and 0 for S mode */
-    sys_ctrl->secdbgset = DBGEN_STATUS | NIDEN_STATUS;
-    sys_ctrl->secdbgclr = SPIDEN_STATUS | SPNIDEN_STATUS;
-#elif defined(DAUTH_FULL)
-    /* Set all the debug enable selector bits to 1 */
-    sys_ctrl->secdbgset = All_SEL_STATUS;
-    /* Set all the debug enable bits to 1 */
-    sys_ctrl->secdbgset =
-                   DBGEN_STATUS | NIDEN_STATUS | SPIDEN_STATUS | SPNIDEN_STATUS;
-#else
-
-#if !defined(DAUTH_CHIP_DEFAULT)
-#error "No debug authentication setting is provided."
-#endif
-
-    /* Set all the debug enable selector bits to 0 */
-    sys_ctrl->secdbgclr = All_SEL_STATUS;
-
-    /* No need to set any enable bits because the value depends on
-     * input signals.
-     */
-#endif
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line)
 {
     NVIC_SetPriority(irq_line, DEFAULT_IRQ_PRIORITY);
@@ -147,26 +108,6 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     } else {
         return TFM_IRQ_TARGET_STATE_SECURE;
     }
-}
-
-enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void)
-{
-    return enable_fault_handlers();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
-{
-    return system_reset_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
-{
-    return nvic_interrupt_target_state_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
-{
-    return nvic_interrupt_enable();
 }
 
 #ifndef TFM_PSA_API

@@ -69,31 +69,6 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     return TFM_IRQ_TARGET_STATE_SECURE;
 }
 
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
-{
-    /* Nothing to do, target state of interrupts cannot be set on Armv6-m */
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
-enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void)
-{
-    /* Nothing to do, fault handlers are not implemented on Armv6-m */
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
-enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
-{
-    /* Nothing to do, system reset do no require any initialization */
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
-enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
-{
-    /* Nothing to do, no initialization options for the debug subsystem on
-     * Armv6-m */
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
 {
     return memory_regions.non_secure_code_start;

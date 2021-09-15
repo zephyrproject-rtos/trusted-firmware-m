@@ -123,28 +123,3 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
         return TFM_IRQ_TARGET_STATE_SECURE;
     }
 }
-
-enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void)
-{
-    return enable_fault_handlers();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
-{
-    return system_reset_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
-{
-    return init_debug();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
-{
-    return nvic_interrupt_target_state_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
-{
-    return nvic_interrupt_enable();
-}

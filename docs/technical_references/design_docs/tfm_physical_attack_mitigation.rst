@@ -598,8 +598,6 @@ of the program counter. The following steps are done on AN521 target, but this
 can be different on another target:
 
   - Bypass the configuration of isolation HW: SAU, MPC.
-  - Bypass tfm_spm_hal_nvic_interrupt_enable: The state of the MPC is checked
-    here whether is it initialized or not.
   - Bypass the setting of the PSP limit register. Otherwise, a stack overflow
     exception will happen. Because the secure PSP will be overwritten by the
     address of the non-secure stack and on this particular target the non-secure

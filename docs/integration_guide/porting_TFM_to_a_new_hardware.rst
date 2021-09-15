@@ -444,6 +444,20 @@ target_cfg.[ch]:
     by TF-M directly, but are expected to be called from the function
     tfm_hal_set_up_static_boundaries() in tfm_hal_isolation.c.
 
+tfm_hal_platform.c:
+-------------------
+
+    (location as defined in CMakeLists.txt)
+
+    Each platform is expected to implement the following API declared in
+    platform/include/tfm_hal_platform.h
+
+.. code-block:: c
+
+    enum tfm_hal_status_t tfm_hal_platform_init(void);
+
+    The function will be called before SPM initialization.
+
 tfm_hal_isolation.c:
 --------------------
 
@@ -567,16 +581,6 @@ tfm_spm_hal_get_ns_access_attr:
 
     void tfm_spm_hal_get_ns_access_attr(const void *p, size_t s, struct mem_attr_info_t *p_attr);
 
-tfm_spm_hal_nvic_interrupt_enable:
-----------------------------------
-
-    This function enables the interrupts associated with the secure peripherals
-    (plus the isolation boundary violation interrupts).
-
-.. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void);
-
 tfm_hal_irq_clear_pending:
 --------------------------
 
@@ -612,53 +616,6 @@ tfm_spm_hal_set_irq_target_state:
 .. code-block:: c
 
     enum irq_target_state_t tfm_spm_hal_set_irq_target_state(IRQn_Type irq_line, enum irq_target_state_t target_state);
-
-tfm_spm_hal_nvic_interrupt_target_state_cfg:
---------------------------------------------
-
-    This function configures all external interrupts to target the NS state,
-    apart from the ones associated with secure peripherals (plus MPC and PPC).
-
-.. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void);
-
-tfm_spm_hal_enable_fault_handlers:
-----------------------------------
-
-    This function enables the fault handlers and sets priorities.
-
-.. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void);
-
-tfm_spm_hal_system_reset_cfg:
------------------------------
-
-    This function will be called at init time, and should configure the
-    hardware to allow the system reset call to happen. Such configuration
-    could be to allow only the Secure world to call for a system reset.
-
-.. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void);
-
-tfm_spm_hal_init_debug:
------------------------
-
-    This function configures the system debug properties.
-    The default configuration of this function should disable secure debug
-    when either DAUTH_NONE or DAUTH_NS_ONLY define is set. It is up to the
-    platform owner to decide if secure debug can be turned on in their
-    system, if DAUTH_FULL define is present.
-    The DAUTH_CHIP_DEFAULT define should not be considered a safe default
-    option unless explicitly noted by the chip vendor.
-    The implementation should trigger a compilation error if none of these
-    defines are set.
-
-.. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_init_debug(void);
 
 Annex
 =====

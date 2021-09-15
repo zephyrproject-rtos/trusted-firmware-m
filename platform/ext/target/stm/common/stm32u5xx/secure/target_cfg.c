@@ -618,8 +618,3 @@ void gtzc_init_cfg(void)
   HAL_GTZC_TZSC_Lock(GTZC_TZSC1_S);
   HAL_GTZC_TZSC_Lock(GTZC_TZSC2_S);
 }
-
-void tfm_spm_hal_init_debug(void)
-{
-  /*  debug is available  only with RDP 0 for secure*/
-}

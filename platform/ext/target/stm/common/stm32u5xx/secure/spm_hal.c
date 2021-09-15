@@ -73,28 +73,6 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     }
 }
 
-enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void)
-{
-/*    return enable_fault_handlers();*/
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
-enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
-{
-/*    return system_reset_cfg();*/
-   return TFM_PLAT_ERR_SUCCESS;
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
-{
-    return nvic_interrupt_target_state_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
-{
-/*    return nvic_interrupt_enable();*/
-    return TFM_PLAT_ERR_SUCCESS;
-}
 #ifndef TFM_PSA_API
 
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
