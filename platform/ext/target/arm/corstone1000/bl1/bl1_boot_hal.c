@@ -33,6 +33,7 @@ REGION_DECLARE(Image$$, ARM_LIB_HEAP, $$ZI$$Limit)[];
 #define HOST_XNVM_BASE                  0x08000000
 #define HOST_BASE_SYSTEM_CONTROL_BASE   0x1A010000
 #define HOST_FIREWALL_BASE              0x1A800000
+#define HOST_INT_APBCOM                 0x1B900000
 #define HOST_FPGA_SCC_REGISTERS         0x40000000
 #define HOST_AXI_QSPI_CTRL_REG_BASE     0x40050000
 #define HOST_ETHERNET_CTRL_REG_BASE     0x40100000
@@ -182,6 +183,7 @@ static void setup_se_firewall(void)
     fc_prog_rgn_upper_addr(HOST_FIREWALL_BASE);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
+
     mpl_rights = (RGN_MPL_SECURE_READ_MASK |
                   RGN_MPL_SECURE_WRITE_MASK);
 
@@ -225,6 +227,24 @@ static void setup_se_firewall(void)
     fc_enable_mpe(RGN_MPE0);
     fc_enable_regions();
 #endif
+
+    /* SDC600 APB COM PORT */
+    fc_select_region(5);
+    fc_disable_regions();
+    fc_disable_mpe(RGN_MPE0);
+    fc_prog_rgn(RGN_SIZE_64KB, CORSTONE1000_HOST_INT_APBCOM_BASE);
+    fc_prog_rgn_upper_addr(HOST_INT_APBCOM);
+    fc_enable_addr_trans();
+    fc_init_mpl(RGN_MPE0);
+
+    mpl_rights = (RGN_MPL_SECURE_READ_MASK |
+                  RGN_MPL_SECURE_WRITE_MASK);
+
+    fc_enable_mpl(RGN_MPE0, mpl_rights);
+    fc_prog_mid(RGN_MPE0, SE_MID);
+    fc_enable_mpe(RGN_MPE0);
+    fc_enable_regions();
+
 
     fc_pe_enable();
 }

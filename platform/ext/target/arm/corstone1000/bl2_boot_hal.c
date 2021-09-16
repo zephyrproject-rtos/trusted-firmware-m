@@ -16,6 +16,12 @@
 #include "fip_parser.h"
 #include "flash_map/flash_map.h"
 #include <string.h>
+#include "tfm_plat_otp.h"
+#include "tfm_plat_provisioning.h"
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+#include "psa_adac_platform.h"
+#endif
 
 #if defined(CRYPTO_HW_ACCELERATOR) || \
     defined(CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING)
@@ -74,12 +80,38 @@ int32_t fill_bl2_flash_map_by_parsing_fips(uint32_t bank_offset)
     return 0;
 }
 
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+int psa_adac_to_tfm_apply_permissions(uint8_t permissions_mask[16])
+{
+    (void)permissions_mask;
+
+    int ret;
+    uint32_t dcu_reg_values[4];
+
+    /* Below values provide same access as when platform is in development
+       life cycle state */
+    dcu_reg_values[0] = 0xffffe7fc;
+    dcu_reg_values[1] = 0x800703ff;
+    dcu_reg_values[2] = 0xffffffff;
+    dcu_reg_values[3] = 0xffffffff;
+
+    ret = crypto_hw_apply_debug_permissions((uint8_t*)dcu_reg_values, 16);
+    BOOT_LOG_INF("%s: debug permission apply %s\n\r", __func__,
+            (ret == 0) ? "success" : "fail");
+
+    return ret;
+}
+
+uint8_t secure_debug_rotpk[32];
+
+#endif
+
 extern void add_bank_offset_to_image_offset(uint32_t bank_offset);
 
 int32_t boot_platform_init(void)
 {
     int32_t result;
-
+    enum tfm_plat_err_t plat_err;
     uint32_t bank_offset = BANK_0_PARTITION_OFFSET;
 
     result = fill_bl2_flash_map_by_parsing_fips(BANK_0_PARTITION_OFFSET);
@@ -100,6 +132,27 @@ int32_t boot_platform_init(void)
         return 1;
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
+
+    plat_err = tfm_plat_otp_init();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            BOOT_LOG_ERR("OTP system initialization failed");
+            FIH_PANIC;
+    }
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    if (!tfm_plat_provisioning_is_required()) {
+
+        plat_err = tfm_plat_otp_read(PLAT_OTP_ID_SECURE_DEBUG_PK, 32, secure_debug_rotpk);
+        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            return plat_err;
+        }
+
+        result = tfm_to_psa_adac_corstone1000_secure_debug(secure_debug_rotpk, 32);
+        BOOT_LOG_INF("%s: dipda_secure_debug is a %s.\r\n", __func__,
+                (result == 0) ? "success" : "failure");
+
+    }
+#endif
 
     return 0;
 }

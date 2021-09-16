@@ -71,6 +71,7 @@
 #define CORSTONE1000_HOST_XNVM_BASE                (0x68000000U) /* XNVM                              */
 #define CORSTONE1000_HOST_BASE_SYSTEM_CONTROL_BASE (0x7A010000U) /* Host SCB                          */
 #define CORSTONE1000_HOST_FIREWALL_BASE            (0x7A800000U) /* Host Firewall                     */
+#define CORSTONE1000_HOST_INT_APBCOM_BASE          (0x7B900000U) /* Internal APBCOM                   */
 #define CORSTONE1000_HOST_FPGA_SCC_REGISTERS       (0x80000000U) /* FPGA SCC Registers                */
 #define CORSTONE1000_HOST_SE_SECURE_FLASH_BASE_FVP (0x80010000U) /* SE Flash                          */
 #define CORSTONE1000_HOST_AXI_QSPI_CTRL_REG_BASE   (0x80050000U) /* AXI QSPI Controller               */
