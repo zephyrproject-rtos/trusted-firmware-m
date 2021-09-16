@@ -105,7 +105,6 @@ void thrd_wait_on(struct sync_obj_t *p_sync_obj, struct thread_t *pth)
 
     p_sync_obj->owner = pth;
     thrd_set_state(pth, THRD_STATE_BLOCK);
-    tfm_arch_trigger_pendsv();
 }
 
 void thrd_wake_up(struct sync_obj_t *p_sync_obj, uint32_t ret_val)
@@ -117,6 +116,5 @@ void thrd_wake_up(struct sync_obj_t *p_sync_obj, uint32_t ret_val)
         tfm_arch_set_context_ret_code(p_sync_obj->owner->p_context_ctrl,
                                       ret_val);
         p_sync_obj->owner = NULL;
-        tfm_arch_trigger_pendsv();
     }
 }

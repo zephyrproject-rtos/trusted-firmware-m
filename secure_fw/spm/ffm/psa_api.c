@@ -414,9 +414,6 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
         partition->signals_waiting = signal_mask;
         thrd_wait_on(&partition->waitobj,
                      &(tfm_spm_get_running_partition()->thrd));
-    } else if ((partition->signals_asserted & signal_mask) == 0) {
-        /* Activate scheduler to check if any higher priority thread to run */
-        tfm_arch_trigger_pendsv();
     }
 
     return partition->signals_asserted & signal_mask;

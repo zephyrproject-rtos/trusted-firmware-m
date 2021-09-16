@@ -241,6 +241,11 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
             tfm_core_panic();
         }
         svc_args[0] = SVC_Handler_IPC(svc_number, svc_args, exc_return);
+
+        if (THRD_EXPECTING_SCHEDULE()) {
+            tfm_arch_trigger_pendsv();
+        }
+
         break;
     }
 

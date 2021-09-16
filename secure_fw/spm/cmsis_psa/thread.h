@@ -8,8 +8,8 @@
 #ifndef __M_THREAD_H__ /* Add an extra M as thread.h is common. */
 #define __M_THREAD_H__
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 /* State codes */
 #define THRD_STATE_CREATING       0
@@ -36,7 +36,7 @@ typedef void *(*thrd_fn_t)(void *);
 struct thread_t {
     uint8_t         priority;           /* Priority                          */
     uint8_t         state;              /* State                             */
-    uint16_t        flags;              /* specific flags                    */
+    uint16_t        flags;              /* Specific flags                    */
     void            *p_context_ctrl;    /* Context control (sp, splimit, lr) */
     struct thread_t *next;              /* Next thread in list               */
 };
@@ -82,8 +82,16 @@ extern struct thread_t *p_curr_thrd;
  * Parameters :
  *  x              -     Context pointer to be bound with the current thread.
  */
-#define THRD_UPDATE_CUR_CTXCTRL(x)         \
+#define THRD_UPDATE_CUR_CTXCTRL(x)          \
                                 CURRENT_THREAD->p_context_ctrl = (void *)(x)
+
+/*
+ * Check if a schedule is under expectation by measuring on a given thread.
+ *
+ * Return :
+ *  `true` if schedule is under expectation. `false` if not.
+ */
+#define THRD_EXPECTING_SCHEDULE() (!(thrd_next() == CURRENT_THREAD))
 
 /*
  * Set thread state, and updates the runnable head.
@@ -130,7 +138,6 @@ struct thread_t *thrd_next(void);
  *  The EXC_RETURN payload of the first runnable thread for caller usage.
  */
 uint32_t thrd_start_scheduler(struct thread_t **ppth);
-
 
 /* Sync object */
 
