@@ -48,6 +48,17 @@ int crypto_hw_accelerator_huk_derive_key(const uint8_t *label,
                                          size_t context_size,
                                          uint8_t *key,
                                          size_t key_size);
+/**
+ * \brief Apply permissions on debug signals
+ *
+ * \param[in]   permissions_mask   permission vector for debug signals
+ *                                 vector bits interpretation is specific
+ *                                 to a target and depends on the architecture
+ * \param[in]   len                length of permission vector
+ *
+ * \return 0 on success, non-zero otherwise
+ */
+int crypto_hw_apply_debug_permissions(uint8_t *permissions_mask, uint32_t len);
 
 #ifdef __cplusplus
 }
