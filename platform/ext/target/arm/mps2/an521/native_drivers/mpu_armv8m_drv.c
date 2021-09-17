@@ -64,7 +64,6 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
 {
     MPU_Type *mpu = (MPU_Type *)dev->base;
 
-    enum mpu_armv8m_error_t ret_val = MPU_ARMV8M_OK;
     uint32_t ctrl_before;
     uint32_t base_cfg;
     uint32_t limit_cfg;
@@ -107,7 +106,7 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
     __DSB();
     __ISB();
 
-    return ret_val;
+    return MPU_ARMV8M_OK;
 }
 
 enum mpu_armv8m_error_t mpu_armv8m_region_disable(struct mpu_armv8m_dev_t *dev,

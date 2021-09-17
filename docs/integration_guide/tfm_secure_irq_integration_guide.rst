@@ -216,14 +216,6 @@ Here is an example of named region:
   The structure is defined by platforms and the name must be
   ``struct platform_data_t``.
 
-  TF-M provides a HAL API for platforms to set up permissions:
-
-  .. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                                  bool priviledged,
-                                  const struct platform_data_t *platform_data);
-
 - permission
 
   Required.

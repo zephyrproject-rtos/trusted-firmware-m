@@ -13,7 +13,6 @@
 #include "region.h"
 #include "target_cfg.h"
 #include "tfm_hal_isolation.h"
-
 #include "tfm_peripherals_def.h"
 #include "tfm_core_utils.h"
 #include "load/partition_defs.h"
