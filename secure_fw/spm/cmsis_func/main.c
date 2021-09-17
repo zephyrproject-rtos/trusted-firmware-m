@@ -34,6 +34,8 @@ __asm("  .global __ARM_use_no_argv\n");
 #endif
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK,  $$ZI$$Base);
+REGION_DECLARE(Image$$, ARM_LIB_STACK,  $$ZI$$Limit)[];
+REGION_DECLARE(Image$$, ER_INITIAL_PSP,  $$ZI$$Limit)[];
 
 static fih_int tfm_core_init(void)
 {
@@ -141,15 +143,17 @@ int main(void)
 #if !defined(__ICCARM__)
         ".syntax unified                               \n"
 #endif
-        "ldr     r0, =Image$$ARM_LIB_STACK$$ZI$$Limit  \n"
-        "msr     msp, r0                               \n"
-        "ldr     r0, =Image$$ER_INITIAL_PSP$$ZI$$Limit \n"
-        "msr     psp, r0                               \n"
+        "msr     msp, %0                               \n"
+        "msr     psp, %1                               \n"
         "mrs     r0, control                           \n"
         "movs    r1, #2                                \n"
         "orrs    r0, r0, r1                            \n" /* Switch to PSP */
         "msr     control, r0                           \n"
         "bl      c_main                                \n"
+        :
+        : "r" (REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)),
+          "r" (REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Limit))
+        : "r0", "memory"
     );
 }
 
