@@ -73,12 +73,6 @@
 #ifdef BL2
 #define BL2_HEADER_SIZE      (0x400)       /* 1 KB */
 #define BL2_TRAILER_SIZE     (0x400)       /* 1 KB */
-#else
-/* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
-#define BL2_HEADER_SIZE      (0x0)
-#define BL2_TRAILER_SIZE     (0x0)
-#endif /* BL2 */
-
 #if (MCUBOOT_IMAGE_NUMBER == 1) && \
     (NS_IMAGE_PRIMARY_PARTITION_OFFSET > S_IMAGE_PRIMARY_PARTITION_OFFSET)
 /* If secure image and nonsecure image are concatenated, and nonsecure image
@@ -87,7 +81,14 @@
  */
 #define IMAGE_S_CODE_SIZE \
             (FLASH_S_PARTITION_SIZE - BL2_HEADER_SIZE)
+#endif
 #else
+/* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
+#define BL2_HEADER_SIZE      (0x0)
+#define BL2_TRAILER_SIZE     (0x0)
+#endif /* BL2 */
+
+#ifndef IMAGE_S_CODE_SIZE
 #define IMAGE_S_CODE_SIZE \
             (FLASH_S_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 #endif
