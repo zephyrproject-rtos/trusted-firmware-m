@@ -204,9 +204,10 @@ void tfm_arch_set_secure_exception_priorities(void)
      * When AIRCR.PRIS is set, the Non-Secure execution can act on
      * FAULTMASK_NS, PRIMASK_NS or BASEPRI_NS register to boost its priority
      * number up to the value 0x80.
-     * For this reason, set the priority of the PendSV interrupt to 0x80.
+     * For this reason, set the priority of the PendSV interrupt to the next
+     * priority level configurable on the platform, just below 0x80.
      */
-    NVIC_SetPriority(PendSV_IRQn, 1 << (__NVIC_PRIO_BITS - 1));
+    NVIC_SetPriority(PendSV_IRQn, (1 << (__NVIC_PRIO_BITS - 1)) - 1);
 #endif
 }
 
