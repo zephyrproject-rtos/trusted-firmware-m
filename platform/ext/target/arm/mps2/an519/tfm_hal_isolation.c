@@ -21,7 +21,7 @@
 #include "load/spm_load_api.h"
 
 /* It can be retrieved from the MPU_TYPE register. */
-#define MPU_REGION_NUM                  16
+#define MPU_REGION_NUM                  8
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
