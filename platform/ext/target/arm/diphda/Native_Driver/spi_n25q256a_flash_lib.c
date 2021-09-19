@@ -439,3 +439,9 @@ enum n25q256a_error_t spi_n25q256a_initialize(struct spi_n25q256a_dev_t* dev)
 
     return N25Q256A_ERR_NONE;
 }
+
+void spi_n25q256a_uninitialize(struct spi_n25q256a_dev_t* dev)
+{
+    axi_qspi_uninitialize(dev->controller);
+    dev->is_initialized = false;
+}

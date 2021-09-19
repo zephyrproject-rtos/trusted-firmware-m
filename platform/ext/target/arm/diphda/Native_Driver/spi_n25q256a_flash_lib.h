@@ -40,6 +40,8 @@ struct spi_n25q256a_dev_t {
 
 enum n25q256a_error_t spi_n25q256a_initialize(struct spi_n25q256a_dev_t* dev);
 
+void spi_n25q256a_uninitialize(struct spi_n25q256a_dev_t* dev);
+
 enum n25q256a_error_t spi_n25q256a_erase(struct spi_n25q256a_dev_t* dev,
                                          uint32_t addr);
 

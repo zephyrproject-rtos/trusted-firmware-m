@@ -57,6 +57,11 @@ struct axi_qspi_dev_t {
 enum axi_qspi_error_t axi_qspi_initialize(struct axi_qspi_dev_t* dev);
 
 /**
+ * Unitialize to XIP controller.
+ */
+void axi_qspi_uninitialize(struct axi_qspi_dev_t* dev);
+
+/**
  * Main function to send data and rcv data through QSPI controller.
  */
 enum axi_qspi_error_t spi_transfer_and_receive(struct axi_qspi_dev_t* dev,

@@ -65,12 +65,6 @@ static ARM_DRIVER_VERSION ARM_Flash_GetVersion(void)
     return DriverVersion;
 }
 
-static int32_t ARM_Flash_Uninitialize(void)
-{
-    /* Nothing to be done */
-    return ARM_DRIVER_OK;
-}
-
 static ARM_FLASH_STATUS ARM_Flash_GetStatus(void)
 {
     return FlashStatus;
@@ -137,6 +131,13 @@ static int32_t N25Q256A_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
     return ARM_DRIVER_OK;
 }
 
+static int32_t N25Q256A_Flash_Uninitialize(void)
+{
+    /* Nothing to be done */
+    spi_n25q256a_uninitialize(ARM_FLASH0_DEV.dev);
+    return ARM_DRIVER_OK;
+}
+
 static int32_t N25Q256A_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
     enum n25q256a_error_t ret;
@@ -199,7 +200,7 @@ ARM_DRIVER_FLASH Driver_FLASH0 = {
     ARM_Flash_GetVersion,
     N25Q256A_Driver_GetCapabilities,
     N25Q256A_Flash_Initialize,
-    ARM_Flash_Uninitialize,
+    N25Q256A_Flash_Uninitialize,
     ARM_Flash_PowerControl,
     N25Q256A_Flash_ReadData,
     N25Q256A_Flash_ProgramData,

@@ -155,6 +155,12 @@ enum axi_qspi_error_t axi_qspi_initialize(struct axi_qspi_dev_t* dev)
     return AXI_QSPI_ERR_NONE;
 }
 
+void axi_qspi_uninitialize(struct axi_qspi_dev_t* dev)
+{
+    select_xip_mode(dev);
+    dev->is_initialized = false;
+}
+
 enum axi_qspi_error_t select_xip_mode(struct axi_qspi_dev_t* dev)
 {
     if (!dev->is_initialized) {
