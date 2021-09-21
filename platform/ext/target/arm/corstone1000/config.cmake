@@ -10,6 +10,7 @@ set(BL2                                 ON         CACHE BOOL     "Whether to bu
 set(BL2_TRAILER_SIZE                    0x800      CACHE STRING   "Trailer size")
 set(DEFAULT_MCUBOOT_FLASH_MAP           OFF        CACHE BOOL     "Whether to use the default flash map defined by TF-M project")
 set(MCUBOOT_UPGRADE_STRATEGY            "RAM_LOAD" CACHE STRING   "Upgrade strategy when multiple boot images are loaded [OVERWRITE_ONLY, SWAP, DIRECT_XIP, RAM_LOAD]")
+set(MCUBOOT_SECURITY_COUNTER_S          "1"      CACHE STRING    "Security counter for S image. auto sets it to IMAGE_VERSION_S")
 
 set(TFM_ISOLATION_LEVEL                 2          CACHE STRING   "Isolation level")
 set(MCUBOOT_IMAGE_NUMBER                2          CACHE STRING   "Whether to combine S and NS into either 1 image, or sign each separately")
@@ -18,6 +19,7 @@ set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to us
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")
 set(CRYPTO_NV_SEED                      OFF        CACHE BOOL     "Use stored NV seed to provide entropy")
 set(NS                                  FALSE      CACHE BOOL     "Whether to build NS app")
+set(PLATFORM_DEFAULT_OTP                FALSE      CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
 
 # External dependency on OpenAMP and Libmetal
 set(LIBMETAL_SRC_PATH                   "DOWNLOAD"  CACHE PATH      "Path to Libmetal (or DOWNLOAD to fetch automatically")
