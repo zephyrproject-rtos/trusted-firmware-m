@@ -17,25 +17,8 @@ List of requirements
 - If the OS manipulates directly the Link Register, the default Link Register
   value used in Handler mode transitions needs to be differentiated between
   Secure and Non Secure builds, i.e. ``0xFD`` and ``0xBC``, respectively.
-- If the OS supports the Thread Context Management for Armv8-M TrustZone APIs,
-  as described
-  `here <https://www.keil.com/pack/doc/CMSIS/Core/html/group__context__trustzone__functions.html>`__
-  , and would like to use the non-secure client identification feature of TF-M,
-  then it also have to use the
-  ``enum tfm_status_e tfm_register_client_id (int32_t ns_client_id)``
-  API function provided by TF-M, as described in
-  :doc:`NS client identification documentation </docs/technical_references/design_docs/tfm_ns_client_identification>`.
-- if the OS doesn't support the API mentioned above, it should set
-  ``TFM_NS_CLIENT_IDENTIFICATION`` to ``OFF`` in the cmake system.
-- .. Note::
-
-    This is NOT REQUIRED when the Non Secure OS build is meant
-    to be integrated with TF-M running in Secure world.
-
-  If generic function calls into Secure world have to be supported in Non Secure
-  builds, integrate an API for secure stack memory management (e.g. the
-  TrustZone API for secure stack memory management described in
-  ``tz_context.h``).
+- If the OS manages the non-secure client identification, pelase check the
+  :doc:`Non-secure Client Extension Integration Guide </docs/integration_guide/non-secure_client_extension_integration_guide>`.
 
 --------------
 

@@ -293,7 +293,7 @@ TF-M core tracks the current client IDs running in the secure or non-secure
 processing environment. It provides a dedicated API to retrieve the client ID
 which performs the service request.
 
-:doc:`NS client identification documentation </docs/technical_references/design_docs/tfm_ns_client_identification>`
+:doc:`Non-secure Client Extension Integration Guide </docs/integration_guide/non-secure_client_extension_integration_guide>`
 provides further details on how client identification works.
 
 PS service uses that TF-M core API to retrieve the client ID and associate it

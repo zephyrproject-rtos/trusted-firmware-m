@@ -134,8 +134,13 @@ implementation of these wrappers to be able to run the tests.
 
 NS client Identification
 ========================
-See
-:doc:`ns client identification documentation </docs/technical_references/design_docs/tfm_ns_client_identification>`.
+
+The NS client identification (NSID) is specified by either SPM or NSPE RTOS.
+If SPM manages the NSID (default option), then the same NSID (-1) will be used
+for all connections from NS clients.
+For the case that NSPE RTOS manages the NSID and/or different NSIDs should be
+used for different NS clients. See
+:doc:`Non-secure Client Extension Integration Guide </docs/integration_guide/non-secure_client_extension_integration_guide>`.
 
 *********************
 Non-secure interrupts
