@@ -65,10 +65,17 @@ static fih_int tfm_core_init(void)
     }
 #endif /* TFM_FIH_PROFILE_ON */
 
-    hal_status = tfm_hal_platform_init();
-    if (hal_status != TFM_HAL_SUCCESS) {
+#ifdef TFM_FIH_PROFILE_ON
+    FIH_CALL(tfm_hal_platform_init, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
+#else /* TFM_FIH_PROFILE_ON */
+    hal_status = tfm_hal_platform_init();
+    if (hal_status != TFM_HAL_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
+#endif /* TFM_FIH_PROFILE_ON */
 
     plat_err = tfm_plat_otp_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {

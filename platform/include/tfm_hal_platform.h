@@ -11,8 +11,21 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "fih.h"
 #include "tfm_hal_defs.h"
 
+#ifdef TFM_FIH_PROFILE_ON
+
+/**
+ * \brief This function performs the platform-specific initialization.
+ *
+ * This function is called after architecture and platform common initialization
+ * has finished during system early startup.
+ *
+ * \retval Returns values as specified by FIH specific platform error code.
+ */
+fih_int tfm_hal_platform_init(void);
+#else
 /**
  * \brief This function performs the platform-specific initialization.
  *
@@ -23,6 +36,7 @@
  * \retval TFM_HAL_ERROR_GENERIC    Generic errors.
  */
 enum tfm_hal_status_t tfm_hal_platform_init(void);
+#endif
 
 /**
  * \brief System reset
