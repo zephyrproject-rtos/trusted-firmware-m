@@ -979,14 +979,16 @@ psa_status_t its_flash_fs_mblock_reset_metablock(
     fs_ctx->scratch_metablock = ITS_METADATA_BLOCK1;
     fs_ctx->active_metablock = ITS_METADATA_BLOCK0;
 
-    /* Fill the block metadata for logical datablock 0, which has the physical
-     * id of the active metadata block. For this datablock, the space available
-     * for data is from the end of the metadata to the end of the block.
+    /* Fill the block metadata for logical datablock 0, which is given the
+     * physical ID of the current scratch metadata block so that it is in the
+     * active metadata block after the metadata blocks are swapped. For this
+     * datablock, the space available for data is from the end of the metadata
+     * to the end of the block.
      */
     block_meta.data_start =
         its_mblock_file_meta_offset(fs_ctx, fs_ctx->cfg->max_num_files);
     block_meta.free_size = fs_ctx->cfg->block_size - block_meta.data_start;
-    block_meta.phy_id = ITS_METADATA_BLOCK0;
+    block_meta.phy_id = fs_ctx->scratch_metablock;
     err = its_mblock_update_scratch_block_meta(fs_ctx, ITS_LOGICAL_DBLOCK0,
                                                &block_meta);
     if (err != PSA_SUCCESS) {
