@@ -10,8 +10,8 @@
 #include "compiler_ext_defs.h"
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
+#include "tfm_hal_platform.h"
 #include "tfm_rpc.h"
-#include "tfm_spm_hal.h" /* To be checked */
 #include "ffm/backend.h"
 #include "utilities.h"
 #include "load/partition_defs.h"
@@ -116,7 +116,7 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
     if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
-        p_param = (void *)tfm_spm_hal_get_ns_entry_point();
+        p_param = (void *)tfm_hal_get_ns_entry_point();
 
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
         SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;

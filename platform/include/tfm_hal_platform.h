@@ -64,4 +64,28 @@ int32_t tfm_hal_random_init(void);
  */
 int32_t tfm_hal_random_generate(uint8_t *rand, size_t size);
 
+/**
+ * \brief Get the VTOR value of non-secure image
+ *
+ * \return Returns the address where the vector table of the non-secure image
+ *         is located
+ */
+uint32_t tfm_hal_get_ns_VTOR(void);
+
+/**
+ * \brief Get the entry point of the non-secure image
+ *
+ * \return Returns the address of the non-secure image entry point
+ */
+uint32_t tfm_hal_get_ns_entry_point(void);
+
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+/**
+ * \brief Get the initial address of non-secure image main stack
+ *
+ * \return Returns the initial non-secure MSP
+ */
+uint32_t tfm_hal_get_ns_MSP(void);
+#endif /* TFM_MULTI_CORE_TOPOLOGY */
+
 #endif /* __TFM_HAL_PLATFORM_H__ */

@@ -28,3 +28,15 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 
     return TFM_HAL_SUCCESS;
 }
+
+uint32_t tfm_hal_get_ns_entry_point(void)
+{
+    /* Boot of Host processor not implemented yet. */
+    return 0;
+}
+
+uint32_t tfm_hal_get_ns_VTOR(void)
+{
+    /* Boot of Host processor not implemented yet. */
+    return 0;
+}
