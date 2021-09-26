@@ -9,6 +9,7 @@
 #include "cmsis.h"
 #include "mpu_armv8m_drv.h"
 #include "region.h"
+#include "spu.h"
 #include "target_cfg.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_spm_hal.h"
@@ -155,6 +156,74 @@ tfm_hal_update_boundaries(const struct partition_load_info_t *p_ldinf,
     return TFM_HAL_SUCCESS;
 }
 
+#if !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0)
+static bool accessible_to_region(const void *p, size_t s, int flags)
+{
+    cmse_address_info_t tt_base = cmse_TT((void *)p);
+    cmse_address_info_t tt_last = cmse_TT((void *)((uint32_t)p + s - 1));
+
+    uint32_t base_spu_id = tt_base.flags.idau_region;
+    uint32_t last_spu_id = tt_last.flags.idau_region;
+
+    size_t size;
+    uint32_t p_start = (uint32_t)p;
+    int i;
+
+    if ((base_spu_id >= spu_regions_flash_get_start_id()) &&
+        (last_spu_id <= spu_regions_flash_get_last_id())) {
+
+        size = spu_regions_flash_get_last_address_in_region(base_spu_id) + 1
+                                                                      - p_start;
+
+        if (cmse_check_address_range((void *)p_start, size, flags) == 0) {
+            return false;
+        }
+
+        for (i = base_spu_id + 1; i < last_spu_id; i++) {
+            p_start = spu_regions_flash_get_base_address_in_region(i);
+            if (cmse_check_address_range((void *)p_start,
+                spu_regions_flash_get_region_size(), flags) == 0) {
+                return false;
+            }
+        }
+
+        p_start = spu_regions_flash_get_base_address_in_region(last_spu_id);
+        size = (uint32_t)p + s - p_start;
+        if (cmse_check_address_range((void *)p_start, size, flags) == 0) {
+            return false;
+        }
+
+
+    } else if ((base_spu_id >= spu_regions_sram_get_start_id()) &&
+        (last_spu_id <= spu_regions_sram_get_last_id())) {
+
+        size = spu_regions_sram_get_last_address_in_region(base_spu_id) + 1
+                                                                      - p_start;
+        if (cmse_check_address_range((void *)p_start, size, flags) == 0) {
+            return false;
+        }
+
+        for (i = base_spu_id + 1; i < last_spu_id; i++) {
+            p_start = spu_regions_sram_get_base_address_in_region(i);
+            if (cmse_check_address_range((void *)p_start,
+                spu_regions_sram_get_region_size(), flags) == 0) {
+                return false;
+            }
+        }
+
+        p_start = spu_regions_sram_get_base_address_in_region(last_spu_id);
+        size = (uint32_t)p + s - p_start;
+        if (cmse_check_address_range((void *)p_start, size, flags) == 0) {
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    return true;
+}
+#endif /* !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0) */
+
 enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base, size_t size,
                                                 uint32_t attr)
 {
@@ -204,7 +273,7 @@ enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base, size_t size,
             (addr_info_base.flags.idau_region !=
              addr_info_last.flags.idau_region)) {
             range_access_allowed_by_mpu =
-                    tfm_spm_hal_has_access_to_region((void *)base, size, flags);
+                                accessible_to_region((void *)base, size, flags);
         }
     }
 #endif
