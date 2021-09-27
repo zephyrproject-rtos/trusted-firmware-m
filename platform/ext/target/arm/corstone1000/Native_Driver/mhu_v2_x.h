@@ -117,6 +117,23 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_send(const struct mhu_v2_x_dev_t *dev,
      uint32_t channel, uint32_t val);
 
 /**
+ * \brief Polls sender channel status.
+ *
+ * \param[in]  dev         MHU device struct \ref mhu_v2_x_dev_t
+ * \param[in]  channel     Channel to poll the status of.
+ * \param[out] value       Pointer to variable that will store the value.
+ *
+ * Polls sender channel status.
+ *
+ * \return Returns mhu_v2_x_error_t error code
+ *
+ * \note This function doesn't check if dev is NULL.
+ * \note This function doesn't check if channel is implemented.
+ */
+enum mhu_v2_x_error_t mhu_v2_x_channel_poll(const struct mhu_v2_x_dev_t *dev,
+     uint32_t channel, uint32_t *value);
+
+/**
  * \brief Clears the channel after the value is send over it.
  *
  * \param[in] dev         MHU device struct \ref mhu_v2_x_dev_t

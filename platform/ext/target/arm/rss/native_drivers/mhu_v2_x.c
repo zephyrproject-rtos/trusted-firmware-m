@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited
+ * Copyright (c) 2020-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,6 +214,23 @@ enum mhu_v2_x_error_t mhu_v2_x_channel_send(const struct mhu_v2_x_dev_t *dev,
 
     if(dev->frame == MHU_V2_X_SENDER_FRAME) {
         (SEND_FRAME(p_mhu))->send_ch_window[channel].ch_set = val;
+        return MHU_V_2_X_ERR_NONE;
+    } else {
+        return MHU_V_2_X_ERR_INVALID_ARG;
+    }
+}
+
+enum mhu_v2_x_error_t mhu_v2_x_channel_poll(const struct mhu_v2_x_dev_t *dev,
+     uint32_t channel, uint32_t *value)
+{
+    union _mhu_v2_x_frame_t *p_mhu = (union _mhu_v2_x_frame_t *)dev->base;
+
+    if ( !(dev->is_initialized) ) {
+        return MHU_V_2_X_ERR_NOT_INIT;
+    }
+
+    if (dev->frame == MHU_V2_X_SENDER_FRAME) {
+        *value = (SEND_FRAME(p_mhu))->send_ch_window[channel].ch_st;
         return MHU_V_2_X_ERR_NONE;
     } else {
         return MHU_V_2_X_ERR_INVALID_ARG;
