@@ -158,7 +158,11 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
                      const void *src, uint32_t len)
 {
     uint8_t add_padding[FLASH_PROGRAM_UNIT];
+#if (FLASH_PROGRAM_UNIT == 1)
+    uint8_t len_padding[FLASH_PROGRAM_UNIT]; /* zero sized arrayas are illegal C */
+#else
     uint8_t len_padding[FLASH_PROGRAM_UNIT - 1];
+#endif
 
     /* The PROGRAM_UNIT aligned value of `off` */
     uint32_t aligned_off;
