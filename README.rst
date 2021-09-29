@@ -14,14 +14,14 @@ This module in Zephyr has included TF-M and it's dependencies, they are:
 
 TF-M:
     repo: https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git
-    tag: TF-Mv1.4.0
-    commit: 7ef9178adad866d48e3af42d8a3129dfab792ed8
+    tag: TF-Mv1.4.1
+    commit: dd1fe44448db0f1750794cd9cf5596033f90f6f9
     license: BSD-3-Clause
 
 TF-M Tests:
     repo: https://git.trustedfirmware.org/TF-M/tf-m-tests.git
-    tag: TF-Mv1.4.0
-    commit: e1a8c9fb8394b1f6ea66d2611c070915b0d4b573
+    tag: TF-Mv1.4.1
+    commit: 60faad2ead1b967ec8e73accd793d3ed0e5c56bd
     license: Apache 2.0
 
 psa-arch-tests:
