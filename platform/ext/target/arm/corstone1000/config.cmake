@@ -37,5 +37,5 @@ set(OPENAMP_VERSION                     "33037b04e0732e58fc0fa36afc244999ef632e1
 if (${PLATFORM_IS_FVP})
     set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE        CACHE BOOL      "Whether to use psa-adac secure debug.")
 else()
-    set(PLATFORM_PSA_ADAC_SECURE_DEBUG      TRUE        CACHE BOOL      "Whether to use psa-adac secure debug.")
+    set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE        CACHE BOOL      "Whether to use psa-adac secure debug.")
 endif()
