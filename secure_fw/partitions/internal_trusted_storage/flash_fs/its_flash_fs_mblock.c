@@ -323,6 +323,97 @@ static inline psa_status_t its_mblock_validate_block_meta(
 
     return PSA_SUCCESS;
 }
+
+/**
+ * \brief Calculates the XOR on the whole metadata(not including the
+ *        metadata block header) in the scratch metadata block.
+ *
+ * \param[in,out] fs_ctx      Filesystem context
+ * \param[in] block_id        Metadata block ID
+ *
+ * \param[out] xor_value      XOR value based on all the medata in the block
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+static psa_status_t its_mblock_calculate_metadata_xor(
+                                              struct its_flash_fs_ctx_t *fs_ctx,
+                                              uint32_t block_id,
+                                              uint8_t *xor_value)
+{
+    uint32_t i, j;
+    psa_status_t err;
+    uint8_t metadata[ITS_UTILS_MAX(ITS_BLOCK_METADATA_SIZE,
+                                   ITS_FILE_METADATA_SIZE)];
+    uint8_t xor_value_temp = 0;
+
+    if ((block_id != ITS_METADATA_BLOCK0 && block_id != ITS_METADATA_BLOCK1) ||
+       (xor_value == NULL)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* Calculate the XOR value based on the block metadata. */
+    for (i = 0; i < its_num_active_dblocks(fs_ctx); i++) {
+        err = fs_ctx->ops->read(fs_ctx->cfg, block_id,
+                                metadata,
+                                its_mblock_block_meta_offset(i),
+                                ITS_BLOCK_METADATA_SIZE);
+        if (err != PSA_SUCCESS) {
+            return err;
+        }
+
+        /* Update the XOR value. */
+        for (j = 0; j < ITS_BLOCK_METADATA_SIZE; j++) {
+            xor_value_temp ^= metadata[j];
+        }
+    }
+
+    /* Calculate the XOR value based on the file metadata. */
+    for (i = 0; i < fs_ctx->cfg->max_num_files; i++) {
+        err = fs_ctx->ops->read(fs_ctx->cfg, block_id,
+                                metadata,
+                                its_mblock_file_meta_offset(fs_ctx, i),
+                                ITS_FILE_METADATA_SIZE);
+        if (err != PSA_SUCCESS) {
+            return err;
+        }
+
+        /* Update the XOR value. */
+        for (j = 0; j < ITS_FILE_METADATA_SIZE; j++) {
+            xor_value_temp ^= metadata[j];
+        }
+    }
+    *xor_value = xor_value_temp;
+    return PSA_SUCCESS;
+}
+
+/**
+ * \brief Checks the validity of metadata XOR.
+ *
+ * \param[in,out] fs_ctx      Filesystem context
+ * \param[in]     h_meta      Pointer to metadata block header
+ *
+ * \param[in] block_id        Metadata block ID
+ *
+ * \return Returns error code as specified in \ref psa_status_t
+ */
+static psa_status_t its_mblock_validate_metadata_xor(
+                               struct its_flash_fs_ctx_t *fs_ctx,
+                               const struct its_metadata_block_header_t *h_meta,
+                               uint32_t block_id)
+{
+    psa_status_t err;
+    uint8_t xor_value;
+
+    err = its_mblock_calculate_metadata_xor(fs_ctx, block_id, &xor_value);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
+
+    if (xor_value != h_meta->metadata_xor) {
+        return PSA_ERROR_STORAGE_FAILURE;
+    }
+    return PSA_SUCCESS;
+}
 #endif /* ITS_VALIDATE_METADATA_FROM_FLASH */
 
 /**
@@ -557,19 +648,29 @@ static inline psa_status_t its_mblock_validate_fs_version(uint8_t fs_version)
  * \param[in,out] fs_ctx  Filesystem context
  * \param[in]     h_meta  Pointer to metadata block header
  *
+ * \param[in] block_id    Metadata block ID
+ *
  * \return Returns error code as specified in \ref psa_status_t
  */
 static psa_status_t its_mblock_validate_header_meta(
                                struct its_flash_fs_ctx_t *fs_ctx,
-                               const struct its_metadata_block_header_t *h_meta)
+                               const struct its_metadata_block_header_t *h_meta,
+                               uint32_t block_id)
 {
     psa_status_t err;
 
     err = its_mblock_validate_fs_version(h_meta->fs_version);
-    if (err == PSA_SUCCESS) {
-        err = its_mblock_validate_swap_count(fs_ctx, h_meta->active_swap_count);
+    if (err != PSA_SUCCESS) {
+        return err;
     }
 
+    err = its_mblock_validate_swap_count(fs_ctx, h_meta->active_swap_count);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
+#ifdef ITS_VALIDATE_METADATA_FROM_FLASH
+    err = its_mblock_validate_metadata_xor(fs_ctx, h_meta, block_id);
+#endif
     return err;
 }
 
@@ -594,6 +695,17 @@ static psa_status_t its_mblock_write_scratch_meta_header(
         /* Increment again to avoid using the erase val as the swap count */
         fs_ctx->meta_block_header.active_swap_count++;
     }
+#ifdef ITS_VALIDATE_METADATA_FROM_FLASH
+    /* Calculate metadata XOR value. */
+    err = its_mblock_calculate_metadata_xor(fs_ctx,
+                                       fs_ctx->scratch_metablock,
+                                       &fs_ctx->meta_block_header.metadata_xor);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
+#else
+    fs_ctx->meta_block_header.metadata_xor = 0;
+#endif
 
     /* Write the metadata block header */
     return fs_ctx->ops->write(fs_ctx->cfg, fs_ctx->scratch_metablock,
@@ -620,7 +732,8 @@ static psa_status_t its_mblock_read_meta_header(
         return err;
     }
 
-    return its_mblock_validate_header_meta(fs_ctx, &fs_ctx->meta_block_header);
+    return its_mblock_validate_header_meta(fs_ctx, &fs_ctx->meta_block_header,
+                                           fs_ctx->active_metablock);
 }
 
 /**
@@ -695,7 +808,8 @@ static psa_status_t its_init_get_active_metablock(
     err = fs_ctx->ops->read(fs_ctx->cfg, ITS_METADATA_BLOCK0,
                             (uint8_t *)&h_meta0, 0, ITS_BLOCK_META_HEADER_SIZE);
     if (err == PSA_SUCCESS) {
-        if (its_mblock_validate_header_meta(fs_ctx, &h_meta0) == PSA_SUCCESS) {
+        if (its_mblock_validate_header_meta(fs_ctx, &h_meta0,
+                                        ITS_METADATA_BLOCK0) == PSA_SUCCESS) {
             num_valid_meta_blocks++;
             cur_meta_block = ITS_METADATA_BLOCK0;
         }
@@ -704,7 +818,8 @@ static psa_status_t its_init_get_active_metablock(
     err = fs_ctx->ops->read(fs_ctx->cfg, ITS_METADATA_BLOCK1,
                             (uint8_t *)&h_meta1, 0, ITS_BLOCK_META_HEADER_SIZE);
     if (err == PSA_SUCCESS) {
-        if (its_mblock_validate_header_meta(fs_ctx, &h_meta1) == PSA_SUCCESS) {
+        if (its_mblock_validate_header_meta(fs_ctx, &h_meta1,
+                                        ITS_METADATA_BLOCK1) == PSA_SUCCESS) {
             num_valid_meta_blocks++;
             cur_meta_block = ITS_METADATA_BLOCK1;
         }

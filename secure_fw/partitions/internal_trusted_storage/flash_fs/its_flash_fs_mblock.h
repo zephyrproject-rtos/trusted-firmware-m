@@ -26,7 +26,7 @@ extern "C" {
  *
  * \brief Defines the supported version.
  */
-#define ITS_SUPPORTED_VERSION  0x01
+#define ITS_SUPPORTED_VERSION  0x02
 
 /*!
  * \def ITS_METADATA_INVALID_INDEX
@@ -58,6 +58,9 @@ extern "C" {
                                  *   section's scratch block \
                                  */ \
     uint8_t fs_version;         /*!< Filesystem version */ \
+    uint8_t metadata_xor;       /*!< XOR value based on the whole metadata(not \
+                                 *   including the metadata block header) \
+                                 */ \
     uint8_t active_swap_count;  /*!< Number of times the metadata blocks have \
                                  *   been swapped \
                                  */
