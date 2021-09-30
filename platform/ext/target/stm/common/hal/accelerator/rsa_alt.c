@@ -1185,6 +1185,9 @@ int mbedtls_rsa_private( mbedtls_rsa_context *ctx,
 {
     int ret;
 
+    /* Silence warnings about unused variables */
+    (void)p_rng; (void)f_rng;
+
     /* Temporary holding the result */
     mbedtls_mpi T;
 
@@ -1429,8 +1432,11 @@ int mbedtls_rsa_rsaes_pkcs1_v15_encrypt( mbedtls_rsa_context *ctx,
     if( f_rng == NULL )
         return( MBEDTLS_ERR_RSA_BAD_INPUT_DATA );
 
+    /* EM = 0x00 || 0x02 || PS || 0x00 || M */
+    *p++ = 0x00;
     *p++ = MBEDTLS_RSA_CRYPT;
 
+    /* Generate PS and concatenate after 0x00 || 0x02 */
     while( nb_pad-- > 0 )
     {
         int rng_dl = 100;
@@ -1446,10 +1452,12 @@ int mbedtls_rsa_rsaes_pkcs1_v15_encrypt( mbedtls_rsa_context *ctx,
         p++;
     }
 
-    *p++ = 0;
+    /* Concatenate 0x00 || M after 0x00 || 0x02 || PS */
+    *p++ = 0x00;
     if( ilen != 0 )
         memcpy( p, input, ilen );
 
+    /* Encrypt */
     return( mbedtls_rsa_public(  ctx, output, output ) );
 }
 #endif /* MBEDTLS_PKCS1_V15 */
