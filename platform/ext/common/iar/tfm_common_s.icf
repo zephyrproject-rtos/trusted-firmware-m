@@ -24,6 +24,9 @@ define block ER_TFM_CODE with fixed order, alignment = 8, maximum size = S_CODE_
 #ifndef S_RAM_CODE_START
        rw section .textrw object *.o,           /* place __ramfunc in ROM if no TFM_RAM_CODE block */
 #endif
+       ro section .text  object *libplatform_s*,
+       ro section .rodata object *libplatform_s*,
+       ro object *libtfm_spm*,
        readonly
 };
 
@@ -80,11 +83,17 @@ define block TFM_APP_CODE_END with alignment = 32, size = 0 { };
 
 #if defined(S_CODE_SRAM_ALIAS_BASE)
     /* eFlash driver code that gets copied from Flash to SRAM */
-define block ER_CODE_SRAM with alignment = 4 {
+initialize by copy {
        ro object Driver_GFC100_EFlash.o,
        ro object gfc100_eflash_drv.o,
        ro object musca_b1_eflash_drv.o
-    };
+       };
+
+define block ER_CODE_SRAM  with fixed order, alignment = 8 {
+       rw section .text,
+       rw section .rodata
+       };
+
 place at address S_CODE_SRAM_ALIAS_BASE { block ER_CODE_SRAM };
 #endif
 
