@@ -50,6 +50,12 @@
         "short_name": "pid.h",
         "template": "interface/include/psa_manifest/pid.h.template",
         "output": "interface/include/psa_manifest/pid.h"
+    },
+    {
+        "name": "SPM config header",
+        "short_name": "config_impl.h",
+        "template": "interface/include/config_impl.h.template",
+        "output": "interface/include/config_impl.h"
     }
   ]
 }

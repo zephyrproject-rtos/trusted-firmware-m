@@ -109,6 +109,8 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
 
     partition_list = []
     manifest_list = []
+    ipc_partition_num = 0
+    sfn_partition_num = 0
 
     for f in manifest_list_files:
         with open(f) as manifest_list_yaml_file:
@@ -168,6 +170,14 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
         manifest = manifest_validation(yaml.safe_load(file))
         file.close()
 
+        # Count the number of IPC partitions
+        if manifest["psa_framework_version"] == 1.1 and manifest["model"] == 'IPC':
+            ipc_partition_num += 1
+        elif manifest["psa_framework_version"] == 1.1 and manifest["model"] == 'SFN':
+            sfn_partition_num += 1
+        elif "services" in manifest.keys():
+            ipc_partition_num += 1
+
         manifest_dir, manifest_name = os.path.split(manifest_path)
         manifest_out_basename = manifest_name.replace('.yaml', '').replace('.json', '')
 
@@ -217,7 +227,7 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
 
         raise Exception("Duplicated SID found, check above for details")
 
-    return partition_list
+    return partition_list, ipc_partition_num, sfn_partition_num
 
 def gen_per_partition_files(context):
     """
@@ -481,7 +491,7 @@ def main():
     """
     os.chdir(os.path.join(sys.path[0], ".."))
 
-    partition_list = process_partition_manifests(manifest_list, extra_manifests_list)
+    partition_list, ipc_partition_num, sfn_partition_num = process_partition_manifests(manifest_list, extra_manifests_list)
 
     utilities = {}
     utilities['donotedit_warning'] = donotedit_warning
@@ -490,6 +500,9 @@ def main():
     context['partitions'] = partition_list
     context['utilities'] = utilities
     context['stateless_services'] = process_stateless_services(partition_list, 32)
+
+    context['ipc_partition_num'] = ipc_partition_num
+    context['sfn_partition_num'] = sfn_partition_num
 
     gen_per_partition_files(context)
     gen_summary_files(context, gen_file_list)

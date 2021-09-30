@@ -1,0 +1,28 @@
+/*
+ * Copyright (c) 2021, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+{{utilities.donotedit_warning}}
+
+#ifndef __CONFIG_IMPL_H__
+#define __CONFIG_IMPL_H__
+
+{% if ipc_partition_num > 0 and sfn_partition_num == 0 %}
+#define BACKEND_IPC                 1
+{% elif sfn_partition_num > 0 and ipc_partition_num == 0 %}
+#define BACKEND_SFN                 1
+
+#if TFM_LVL > 1
+#error "High isolation level SFN model is not supported."
+#endif
+
+{% elif sfn_partition_num > 0 and ipc_partition_num > 0 %}
+#error "IPC and SFN co-work not supported yet."
+{% else %}
+#error "Invalid partition number inputted, check configurations."
+{% endif %}
+
+#endif /* __CONFIG_IMPL_H__ */
