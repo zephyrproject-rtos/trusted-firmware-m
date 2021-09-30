@@ -541,9 +541,12 @@ __attribute__((naked)) void boot_clear_bl2_ram_area(void)
     );
 }
 
+extern void add_bank_offset_to_image_offset(uint32_t bank_offset);
+
 int32_t boot_platform_init(void)
 {
     int32_t result;
+    uint32_t bank_offset = BANK_0_PARTITION_OFFSET;
 
 #if !(PLATFORM_IS_FVP)
     setup_mpu();
@@ -552,6 +555,7 @@ int32_t boot_platform_init(void)
 #if !(PLATFORM_IS_FVP)
     setup_host_firewall();
 #endif
+    add_bank_offset_to_image_offset(bank_offset);
 
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {

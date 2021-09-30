@@ -47,35 +47,47 @@ __attribute__((naked)) void boot_clear_bl2_ram_area(void)
     );
 }
 
+#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 extern struct flash_area flash_map[];
 
-int32_t fill_bl2_flash_map_by_parsing_fips(void)
+int32_t fill_bl2_flash_map_by_parsing_fips(uint32_t bank_offset)
 {
     int result;
     uint32_t tfa_offset = 0;
     uint32_t tfa_size = 0;
 
-    result = parse_fip_and_extract_tfa_info(FLASH_FIP1_ADDRESS, FLASH_FIP1_SIZE,
-            &tfa_offset, &tfa_size);
+    /* parse directly from flash using XIP mode */
+    /* FIP is large so its not a good idea to load it in memory */
+    result = parse_fip_and_extract_tfa_info(bank_offset + FLASH_FIP_ADDRESS,
+                  FLASH_FIP_SIZE,
+                  &tfa_offset, &tfa_size);
     if (result != FIP_PARSER_SUCCESS) {
         BOOT_LOG_ERR("parse_fip_and_extract_tfa_info failed");
         return 1;
     }
 
-    flash_map[2].fa_off = FLASH_FIP1_OFFSET + tfa_offset;
+    flash_map[2].fa_off = FLASH_FIP_OFFSET + tfa_offset;
     flash_map[2].fa_size = tfa_size;
+    flash_map[3].fa_off = flash_map[2].fa_off + flash_map[2].fa_size;
+    flash_map[3].fa_size = tfa_size;
 
     return 0;
 }
+
+extern void add_bank_offset_to_image_offset(uint32_t bank_offset);
 
 int32_t boot_platform_init(void)
 {
     int32_t result;
 
-    result = fill_bl2_flash_map_by_parsing_fips();
+    uint32_t bank_offset = BANK_0_PARTITION_OFFSET;
+
+    result = fill_bl2_flash_map_by_parsing_fips(BANK_0_PARTITION_OFFSET);
     if (result) {
         return 1;
     }
+
+    add_bank_offset_to_image_offset(bank_offset);
 
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {
