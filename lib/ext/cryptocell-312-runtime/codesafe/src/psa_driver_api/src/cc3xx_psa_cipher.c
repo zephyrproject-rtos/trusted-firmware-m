@@ -145,25 +145,50 @@ psa_status_t cc3xx_cipher_set_iv(
         const uint8_t *iv, size_t iv_length)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+    uint8_t *iv_pnt = (uint8_t *)iv;
+    uint32_t counter = 0;
 
     if (iv_length > AES_IV_SIZE) {
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
-    if (iv_length != 0) {
-        CC_PalMemCopy(operation->iv, iv, iv_length);
-        operation->iv_size =  iv_length;
-    }
-
-    ret = PSA_SUCCESS;
-
     if (operation->key_type == PSA_KEY_TYPE_CHACHA20) {
-        if (( ret = cc3xx_chacha20_starts(
-                &operation->chacha_ctx,
-                iv,
-                0U) )
-            != PSA_SUCCESS) {
-            return ret;
+        /* When the IV is 16 bytes the first four bytes contain the counter in little endian.
+         * When the IV is 12 bytes it contains only the IV and the counter should be set to 0.
+         * More information in ChaCha20 section here:
+         * https://armmbed.github.io/mbed-crypto/html/api/ops/ciphers.html
+         **/
+
+        switch (iv_length) {
+            case 16:
+                CC_PalMemCopy((uint8_t *)&counter, iv_pnt, 4);
+                iv_pnt+=4;
+                ret = cc3xx_chacha20_starts(
+                        &operation->chacha_ctx,
+                        iv_pnt,
+                        counter);
+                break;
+            case 12:
+                ret = cc3xx_chacha20_starts(
+                        &operation->chacha_ctx,
+                        iv_pnt,
+                        counter);
+                break;
+            case 8:
+                /* FixMe: Add support for IV length 8 cases */
+                ret = PSA_ERROR_NOT_SUPPORTED;
+                break;
+            default:
+                ret = PSA_ERROR_NOT_SUPPORTED;
+                break;
+        }
+
+    } else {
+
+        if (iv_length != 0) {
+            CC_PalMemCopy(operation->iv, iv, iv_length);
+            operation->iv_size =  iv_length;
+            ret = PSA_SUCCESS;
         }
     }
 
