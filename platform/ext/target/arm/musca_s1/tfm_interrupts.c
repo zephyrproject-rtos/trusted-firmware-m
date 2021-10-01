@@ -32,3 +32,27 @@ enum tfm_hal_status_t tfm_timer0_irq_init(void *p_pt,
 
     return TFM_HAL_SUCCESS;
 }
+
+#ifdef PSA_API_TEST_IPC
+
+static struct irq_t ff_test_uart_irq;
+
+void FF_TEST_UART_IRQ_Handler(void)
+{
+    spm_handle_interrupt(ff_test_uart_irq.p_pt, ff_test_uart_irq.p_ildi);
+}
+
+enum tfm_hal_status_t ff_test_uart_irq_init(void *p_pt,
+                                            struct irq_load_info_t *p_ildi)
+{
+    ff_test_uart_irq.p_ildi = p_ildi;
+    ff_test_uart_irq.p_pt = p_pt;
+
+    NVIC_SetPriority(FF_TEST_UART_IRQ, DEFAULT_IRQ_PRIORITY);
+    NVIC_ClearTargetState(FF_TEST_UART_IRQ);
+    NVIC_DisableIRQ(FF_TEST_UART_IRQ);
+
+    return TFM_HAL_SUCCESS;
+}
+
+#endif
