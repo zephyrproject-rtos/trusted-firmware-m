@@ -117,11 +117,18 @@
 
 
 /* 1MB: space in flash to store metadata and uefi variables */
+#define FWU_METADATA_FLASH_DEV          (FLASH_DEV_NAME)
+#define FWU_METADATA_FLASH_SECTOR_SIZE  (FLASH_SECTOR_SIZE)
+
 #define FWU_METADATA_PARTITION_OFFSET   (FLASH_BASE_OFFSET)
-#define FWU_METADATA_AREA_SIZE          (FLASH_SECTOR_SIZE)     /* 4KB */
+#define FWU_METADATA_AREA_SIZE          (FWU_METADATA_FLASH_SECTOR_SIZE)
 #define FWU_METADATA_REPLICA_1_OFFSET   (FLASH_BASE_OFFSET)
 #define FWU_METADATA_REPLICA_2_OFFSET   (FWU_METADATA_REPLICA_1_OFFSET + \
                                          FWU_METADATA_AREA_SIZE)
+#define FWU_PRIVATE_AREA_SIZE           (FLASH_SECTOR_SIZE)
+#define FWU_PRIVATE_AREA_OFFSET         (FWU_METADATA_REPLICA_2_OFFSET + \
+                                         FWU_METADATA_AREA_SIZE)
+
 #define NR_OF_FW_BANKS                  (2)
 #define NR_OF_IMAGES_IN_FW_BANK         (4) /* Secure Enclave: BL2 and TF-M \
                                              * Host: FIP and Kernel image
@@ -217,7 +224,7 @@
 /*** ITS, PS and NV Counters ***/
 /*******************************/
 
-#define FLASH_ITS_AREA_OFFSET           (0)
+#define FLASH_ITS_AREA_OFFSET           (0x10000)  /* 64 KB */
 #define FLASH_ITS_AREA_SIZE             (4 * FLASH_SECTOR_SIZE)  /* 4 KiB */
 
 #define FLASH_PS_AREA_OFFSET            (FLASH_ITS_AREA_OFFSET + \

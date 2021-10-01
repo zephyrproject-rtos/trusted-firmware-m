@@ -238,6 +238,7 @@ target_sources(bl1_main
         ../Device/Source/system_core_init.c
         ../Native_Driver/firewall.c
         ../Native_Driver/uart_pl011_drv.c
+        ../fw_update_agent/fwu_agent.c
         bl1_boot_hal.c
         bl1_flash_map.c
         bl1_security_cnt.c
@@ -267,6 +268,7 @@ target_include_directories(bl1_main
         ../CMSIS_Driver/Config
         ../Device/Config
         ../Native_Driver
+        ../fw_update_agent
 )
 
 ############################### SIGNING BL2 image ##################################

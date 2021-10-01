@@ -12,8 +12,12 @@
 #include "Driver_Flash.h"
 #include "flash_layout.h"
 #include "bootutil/fault_injection_hardening.h"
+#include "bootutil/bootutil_log.h"
 #include "firewall.h"
 #include "mpu_config.h"
+#include "tfm_plat_otp.h"
+#include "tfm_plat_provisioning.h"
+#include "fwu_agent.h"
 
 #if defined(CRYPTO_HW_ACCELERATOR) || \
     defined(CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING)
@@ -594,6 +598,20 @@ int32_t boot_platform_init(void)
         return 1;
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
+
+    result = tfm_plat_otp_init();
+    if (result != TFM_PLAT_ERR_SUCCESS) {
+        BOOT_LOG_ERR("OTP system initialization failed");
+        FIH_PANIC;
+    }
+
+    if (tfm_plat_provisioning_is_required()) {
+        result = fwu_metadata_provision();
+        if (result != FWU_AGENT_SUCCESS) {
+            BOOT_LOG_ERR("Provisioning FWU Metadata failed");
+            FIH_PANIC;
+        }
+    }
 
     return 0;
 }
