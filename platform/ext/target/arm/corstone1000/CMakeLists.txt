@@ -51,6 +51,7 @@ target_include_directories(platform_s
         services/include
     INTERFACE
         cc312
+        fw_update_agent
 )
 
 target_sources(platform_s
@@ -67,6 +68,7 @@ target_sources(platform_s
         tfm_hal_platform.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        fw_update_agent/uefi_capsule_parser.c
 )
 
 if (PLATFORM_IS_FVP)
