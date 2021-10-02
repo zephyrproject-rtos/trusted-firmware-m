@@ -23,9 +23,20 @@ enum fwu_agent_error_t {
         FWU_AGENT_ERROR = (-1)
 };
 
+#define FWU_ASSERT(_c_)                                                        \
+                if (!(_c_)) {                                                  \
+                    FWU_LOG_MSG("%s:%d assert hit\n\r", __func__, __LINE__);   \
+                    while(1) {};                                               \
+                }                                                              \
+
+
 enum fwu_agent_error_t fwu_metadata_provision(void);
 enum fwu_agent_error_t fwu_metadata_init(void);
 
+/* host to secure enclave:
+ * firwmare update image is sent accross
+ */
+enum fwu_agent_error_t corstone1000_fwu_flash_image(void);
 
 #endif /* FWU_AGENT_H */
 

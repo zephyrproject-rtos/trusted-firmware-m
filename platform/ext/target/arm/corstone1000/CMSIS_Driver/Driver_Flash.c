@@ -175,6 +175,11 @@ int32_t Select_XIP_Mode_For_Shared_Flash(void)
     return ARM_DRIVER_OK;
 }
 
+int32_t Select_Write_Mode_For_Shared_Flash(void)
+{
+    return ARM_DRIVER_OK;
+}
+
 static int32_t STRATAFLASHJ3_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
     ARG_UNUSED(cb_event);
@@ -389,6 +394,12 @@ ARM_DRIVER_FLASH Driver_FLASH1 = {
 int32_t Select_XIP_Mode_For_Shared_Flash(void)
 {
     select_xip_mode(&AXI_QSPI_DEV_S);
+    return ARM_DRIVER_OK;
+}
+
+int32_t Select_Write_Mode_For_Shared_Flash(void)
+{
+    select_qspi_mode(&AXI_QSPI_DEV_S);
     return ARM_DRIVER_OK;
 }
 

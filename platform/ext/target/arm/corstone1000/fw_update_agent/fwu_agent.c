@@ -11,6 +11,10 @@
 #include "Driver_Flash.h"
 #include "flash_layout.h"
 #include "fip_parser/external/uuid.h"
+#include "region_defs.h"
+#include "uefi_capsule_parser.h"
+#include "flash_common.h"
+#include "platform_base_address.h"
 
 /* Properties of image in a bank */
 struct fwu_image_properties {
@@ -73,8 +77,26 @@ struct fwu_private_metadata {
 
 } __packed;
 
+
 struct fwu_metadata _metadata;
+
 int is_initialized = 0;
+
+capsule_image_info_t capsule_info;
+
+enum fwu_agent_state_t {
+    FWU_AGENT_STATE_UNKNOWN = -1,
+    FWU_AGENT_STATE_REGULAR = 0,
+    FWU_AGENT_STATE_TRIAL,
+};
+
+struct efi_guid full_capsule_image_guid = {
+    .time_low = 0x3a770ddc,
+    .time_mid = 0x409b,
+    .time_hi_and_version = 0x48b2,
+    .clock_seq_and_node = {0x81, 0x41, 0x93, 0xb7, 0xc6, 0x0b, 0x20, 0x9e}
+};
+
 
 #define IMAGE_ACCEPTED          (1)
 #define IMAGE_NOT_ACCEPTED      (0)
@@ -84,7 +106,11 @@ int is_initialized = 0;
 #define IMAGE_1                 (1)
 #define IMAGE_2                 (2)
 #define IMAGE_3                 (3)
+#define IMAGE_END               (IMAGE_3)
+#define IMAGE_ALL               (IMAGE_END + 1)
+#define IMAGE_NOT_RECOGNIZED    (-1)
 #define INVALID_VERSION         (0xffffffff)
+
 
 #ifndef FWU_METADATA_FLASH_DEV
     #ifndef FLASH_DEV_NAME
@@ -305,5 +331,204 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
 
     FWU_LOG_MSG("%s: FWU METADATA PROVISIONED.\n\r", __func__);
     return FWU_AGENT_SUCCESS;
+}
+
+static enum fwu_agent_state_t get_fwu_agent_state(
+        struct fwu_metadata *metadata_ptr,
+        struct fwu_private_metadata *priv_metadata_ptr)
+{
+    uint32_t boot_index;
+
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    boot_index = priv_metadata_ptr->boot_index;
+
+    if (boot_index != metadata_ptr->active_index) {
+        return FWU_AGENT_STATE_TRIAL;
+    }
+
+    for (int i = 0; i < NR_OF_IMAGES_IN_FW_BANK; i++) {
+        if ((metadata_ptr->img_entry[i].img_props[boot_index].accepted)
+                == (IMAGE_NOT_ACCEPTED)) {
+            return FWU_AGENT_STATE_TRIAL;
+        }
+    }
+
+    FWU_LOG_MSG("%s: exit: FWU_AGENT_STATE_REGULAR\n\r", __func__);
+    return FWU_AGENT_STATE_REGULAR;
+}
+
+static int get_image_info_in_bank(struct efi_guid* guid, uint32_t* image_bank_offset)
+{
+    if ((memcmp(guid, &full_capsule_image_guid, sizeof(struct efi_guid))) == 0) {
+        *image_bank_offset = 0;
+        return IMAGE_ALL;
+    }
+
+    return IMAGE_NOT_RECOGNIZED;
+}
+
+static enum fwu_agent_error_t erase_bank(uint32_t bank_offset)
+{
+    int ret;
+    uint32_t sectors;
+
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    if ((bank_offset % FWU_METADATA_FLASH_SECTOR_SIZE) != 0) {
+        return FWU_AGENT_ERROR;
+    }
+
+    if ((BANK_PARTITION_SIZE % FWU_METADATA_FLASH_SECTOR_SIZE) != 0) {
+        return FWU_AGENT_ERROR;
+    }
+
+    sectors = BANK_PARTITION_SIZE / FWU_METADATA_FLASH_SECTOR_SIZE;
+
+    FWU_LOG_MSG("%s: erasing sectors = %u, from offset = %u\n\r", __func__,
+                     sectors, bank_offset);
+
+    for (int i = 0; i < sectors; i++) {
+        ret = FWU_METADATA_FLASH_DEV.EraseSector(
+                bank_offset + (i * FWU_METADATA_FLASH_SECTOR_SIZE));
+        if (ret != ARM_DRIVER_OK) {
+            return FWU_AGENT_ERROR;
+        }
+    }
+
+    FWU_LOG_MSG("%s: exit\n\r", __func__);
+    return FWU_AGENT_SUCCESS;
+}
+
+
+static enum fwu_agent_error_t flash_full_capsule(
+        struct fwu_metadata* metadata, void* images, uint32_t size,
+        uint32_t version)
+{
+    int ret;
+    uint32_t active_index = metadata->active_index;
+    uint32_t bank_offset;
+    uint32_t previous_active_index;
+
+    FWU_LOG_MSG("%s: enter: image = 0x%p, size = %u, version = %u\n\r"
+                , __func__, images, size, version);
+
+    if (!metadata || !images) {
+        return FWU_AGENT_ERROR;
+    }
+
+    if (size > BANK_PARTITION_SIZE) {
+        return FWU_AGENT_ERROR;
+    }
+
+    if (version <=
+            (metadata->img_entry[IMAGE_0].img_props[active_index].version)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    if (active_index == BANK_0) {
+        previous_active_index = BANK_1;
+        bank_offset = BANK_1_PARTITION_OFFSET;
+    } else if (active_index == BANK_1) {
+        previous_active_index = BANK_0;
+        bank_offset = BANK_0_PARTITION_OFFSET;
+    } else {
+        return FWU_AGENT_ERROR;
+    }
+
+    if (erase_bank(bank_offset)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: writing capsule to the flash at offset = %u...\n\r",
+                      __func__, bank_offset);
+    ret = FWU_METADATA_FLASH_DEV.ProgramData(bank_offset, images, size);
+    if (ret != ARM_DRIVER_OK) {
+        return FWU_AGENT_ERROR;
+    }
+    FWU_LOG_MSG("%s: images are written to bank offset = %u\n\r", __func__,
+                     bank_offset);
+
+    /* Change system state to trial bank state */
+    for (int i = 0; i < NR_OF_IMAGES_IN_FW_BANK; i++) {
+        metadata->img_entry[i].img_props[previous_active_index].accepted =
+                                                        IMAGE_NOT_ACCEPTED;
+        metadata->img_entry[i].img_props[previous_active_index].version = version;
+    }
+    metadata->active_index = previous_active_index;
+    metadata->previous_active_index = active_index;
+
+    ret = metadata_write(metadata);
+    if (ret) {
+        return ret;
+    }
+
+    FWU_LOG_MSG("%s: exit\n\r", __func__);
+    return FWU_AGENT_SUCCESS;
+}
+
+enum fwu_agent_error_t corstone1000_fwu_flash_image(void)
+{
+    enum fwu_agent_error_t ret;
+    struct fwu_private_metadata priv_metadata;
+    enum fwu_agent_state_t current_state;
+    void *capsule_ptr = (char*)CORSTONE1000_HOST_DRAM_UEFI_CAPSULE;
+    int image_index;
+    uint32_t image_bank_offset;
+    uint32_t nr_images;
+
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    if (!is_initialized) {
+        return FWU_AGENT_ERROR;
+    }
+
+    Select_Write_Mode_For_Shared_Flash();
+
+    if (metadata_read(&_metadata)) {
+        ret =  FWU_AGENT_ERROR;
+        goto out;
+    }
+
+    if (private_metadata_read(&priv_metadata)) {
+        ret =  FWU_AGENT_ERROR;
+        goto out;
+    }
+
+    /* Firmware update process can only start in regular state. */
+    current_state = get_fwu_agent_state(&_metadata, &priv_metadata);
+    if (current_state != FWU_AGENT_STATE_REGULAR) {
+        ret =  FWU_AGENT_ERROR;
+        goto out;
+    }
+
+    memset(&capsule_info, 0, sizeof(capsule_image_info_t));
+    if (uefi_capsule_retrieve_images(capsule_ptr, &capsule_info)) {
+        ret =  FWU_AGENT_ERROR;
+        goto out;
+    }
+    nr_images = capsule_info.nr_image;
+
+    for (int i = 0; i < nr_images; i++) {
+        image_index = get_image_info_in_bank(&capsule_info.guid[i],
+                                &image_bank_offset);
+        switch(image_index) {
+            case IMAGE_ALL:
+                ret = flash_full_capsule(&_metadata, capsule_info.image[i],
+                                         capsule_info.size[i],
+                                         capsule_info.version[i]);
+                break;
+            default:
+                FWU_LOG_MSG("%s: sent image not recognized\n\r", __func__);
+                ret = FWU_AGENT_ERROR;
+                break;
+        }
+    }
+
+out:
+    Select_XIP_Mode_For_Shared_Flash();
+
+    FWU_LOG_MSG("%s: exit: ret = %d\n\r", __func__, ret);
+    return ret;
 }
 
