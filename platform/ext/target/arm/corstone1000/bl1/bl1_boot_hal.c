@@ -47,6 +47,7 @@ REGION_DECLARE(Image$$, ARM_LIB_HEAP, $$ZI$$Limit)[];
 #define HOST_AXI_QSPI_CTRL_REG_BASE_SE_SECURE_FLASH    0x60010000
 
 #define HOST_DRAM_BASE                  0x80000000
+#define HOST_DRAM_UEFI_CAPSULE          0x80000000
 
 #define SE_MID                          0
 
@@ -241,6 +242,22 @@ static void setup_se_firewall(void)
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
 
+    mpl_rights = (RGN_MPL_SECURE_READ_MASK |
+                  RGN_MPL_SECURE_WRITE_MASK);
+
+    fc_enable_mpl(RGN_MPE0, mpl_rights);
+    fc_prog_mid(RGN_MPE0, SE_MID);
+    fc_enable_mpe(RGN_MPE0);
+    fc_enable_regions();
+
+    /* DDR/DRAM/UEFI_CAPSULE: 32MB */
+    fc_select_region(6);
+    fc_disable_regions();
+    fc_disable_mpe(RGN_MPE0);
+    fc_prog_rgn(RGN_SIZE_32MB, CORSTONE1000_HOST_DRAM_UEFI_CAPSULE);
+    fc_prog_rgn_upper_addr(HOST_DRAM_UEFI_CAPSULE);
+    fc_enable_addr_trans();
+    fc_init_mpl(RGN_MPE0);
     mpl_rights = (RGN_MPL_SECURE_READ_MASK |
                   RGN_MPL_SECURE_WRITE_MASK);
 

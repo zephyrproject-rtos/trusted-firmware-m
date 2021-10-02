@@ -69,6 +69,7 @@ target_sources(platform_s
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         fw_update_agent/uefi_capsule_parser.c
+        fw_update_agent/fwu_agent.c
 )
 
 if (PLATFORM_IS_FVP)
