@@ -273,7 +273,10 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_RTC0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_RTC1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_DPPIC, false);
+#ifndef PSA_API_TEST_IPC
+    /* WDT0 is used as a secure peripheral in PSA FF tests */
     spu_peripheral_config_non_secure((uint32_t)NRF_WDT0, false);
+#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_WDT1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_COMP, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU0, false);
