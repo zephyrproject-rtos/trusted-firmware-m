@@ -517,7 +517,7 @@ tfm_spm_hal_configure_default_isolation:
 
 .. code-block:: c
 
-    enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(uint32_t partition_idx, const struct platform_data_t *platform_data);
+    enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(bool privileged, const struct platform_data_t *platform_data);
 
 .. Note::
 
