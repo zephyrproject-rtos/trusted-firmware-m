@@ -14,6 +14,7 @@
 #include "bootutil/fault_injection_hardening.h"
 #include "bootutil/bootutil_log.h"
 #include "firewall.h"
+#include "watchdog.h"
 #include "mpu_config.h"
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
@@ -588,6 +589,11 @@ int32_t boot_platform_init(void)
 {
     int32_t result;
     uint32_t bank_offset;
+
+    result = corstone1000_watchdog_init();
+    if (result != ARM_DRIVER_OK) {
+        return 1;
+    }
 
 #if !(PLATFORM_IS_FVP)
     setup_mpu();

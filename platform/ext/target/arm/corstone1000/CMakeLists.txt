@@ -62,6 +62,8 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         Native_Driver/uart_pl011_drv.c
         Native_Driver/mhu_v2_x.c
+        Native_Driver/watchdog.c
+        Native_Driver/arm_watchdog_drv.c
         spm_hal.c
         tfm_hal_multi_core.c
         tfm_hal_isolation.c
@@ -107,6 +109,8 @@ target_sources(platform_bl2
         Device/Source/device_definition.c
         Device/Source/system_core_init.c
         Native_Driver/uart_pl011_drv.c
+        Native_Driver/watchdog.c
+        Native_Driver/arm_watchdog_drv.c
         fip_parser/fip_parser.c
         bl2_boot_hal.c
         fw_update_agent/fwu_agent.c

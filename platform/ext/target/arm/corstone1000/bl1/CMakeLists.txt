@@ -239,6 +239,8 @@ target_sources(bl1_main
         ../Native_Driver/firewall.c
         ../Native_Driver/uart_pl011_drv.c
         ../fw_update_agent/fwu_agent.c
+        ../Native_Driver/arm_watchdog_drv.c
+        ../Native_Driver/watchdog.c
         bl1_boot_hal.c
         bl1_flash_map.c
         bl1_security_cnt.c

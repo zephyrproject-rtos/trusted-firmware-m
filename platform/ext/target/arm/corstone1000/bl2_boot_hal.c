@@ -15,6 +15,7 @@
 #include "bootutil/bootutil_log.h"
 #include "fip_parser.h"
 #include "flash_map/flash_map.h"
+#include "watchdog.h"
 #include <string.h>
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
@@ -114,6 +115,11 @@ int32_t boot_platform_init(void)
     int32_t result;
     enum tfm_plat_err_t plat_err;
     uint32_t bank_offset;
+
+    result = corstone1000_watchdog_init();
+    if (result != ARM_DRIVER_OK) {
+        return 1;
+    }
 
     result = fill_bl2_flash_map_by_parsing_fips(BANK_0_PARTITION_OFFSET);
     if (result) {
