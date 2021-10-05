@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 #
 # -----------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -41,6 +41,8 @@ os.environ['LANG'] = 'C.UTF-8'
                                    'flash.')
 @click.option('-x', '--hex-addr', type=imgtool.main.BasedIntParamType(),
               required=False, help='Adjust address in hex output file.')
+@click.option('--measured-boot-record', default=False, is_flag=True, help='Add '
+              'CBOR encoded measured boot record to the image manifest.')
 @click.option('--save-enctlv', default=False, is_flag=True,
               help='When upgrading, save encrypted key TLVs instead of plain '
                    'keys. Enable when BOOT_SWAP_SAVE_ENCTLV config option '
@@ -91,17 +93,21 @@ os.environ['LANG'] = 'C.UTF-8'
 def wrap(key, align, version, header_size, pad_header, layout, pad, confirm,
          max_sectors, overwrite_only, endian, encrypt, infile, outfile,
          dependencies, hex_addr, erased_val, save_enctlv, public_key_format,
-         security_counter, encrypt_keylen):
+         security_counter, encrypt_keylen, measured_boot_record):
 
     slot_size = macro_parser.evaluate_macro(layout, sign_bin_size_re, 0, 1)
     load_addr = macro_parser.evaluate_macro(layout, load_addr_re, 0, 1)
     rom_fixed = macro_parser.evaluate_macro(layout, rom_fixed_re, 0, 1)
-    if "_s" in layout:
-        boot_record = "SPE"
-    elif "_ns" in layout:
-        boot_record = "NSPE"
+
+    if measured_boot_record:
+        if "_s" in layout:
+            record_sw_type = "SPE"
+        elif "_ns" in layout:
+            record_sw_type = "NSPE"
+        else:
+            record_sw_type = "NSPE_SPE"
     else:
-        boot_record = "NSPE_SPE"
+        record_sw_type = None
 
     if int(align) <= 8 :
         #default behaviour for max_align
@@ -130,7 +136,7 @@ def wrap(key, align, version, header_size, pad_header, layout, pad, confirm,
             # FIXME
             raise click.UsageError("Signing and encryption must use the same "
                                    "type of key")
-    img.create(key, public_key_format, enckey, dependencies, boot_record,
+    img.create(key, public_key_format, enckey, dependencies, record_sw_type,
                None, encrypt_keylen=int(encrypt_keylen))
     img.save(outfile, hex_addr)
 

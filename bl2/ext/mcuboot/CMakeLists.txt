@@ -152,6 +152,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
         -d \"\(1,${MCUBOOT_NS_IMAGE_MIN_VER}\)\"
         $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
         $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+        $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
         $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
         ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_signed.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_signed.bin $<TARGET_FILE_DIR:bl2>
@@ -204,6 +205,7 @@ if(NS)
             $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+            $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_ns_signed.bin
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_ns_signed.bin $<TARGET_FILE_DIR:bl2>
     )
@@ -252,6 +254,7 @@ if(NS)
             -L ${MCUBOOT_ENC_KEY_LEN_S}
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+            $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns.bin
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns_signed.bin
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns_signed.bin $<TARGET_FILE_DIR:bl2>
