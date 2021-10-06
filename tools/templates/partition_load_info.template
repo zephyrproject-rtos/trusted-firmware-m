@@ -111,7 +111,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         .pid                        = {{manifest.name}},
         .flags                      = 0
 {% if (manifest.psa_framework_version == 1.1 and manifest.model == "IPC") or manifest.psa_framework_version == 1.0 %}
-                                    | SPM_PART_FLAG_IPC
+                                    | PARTITION_MODEL_IPC
 {% endif %}
 {% if manifest.type == "PSA-ROT" %}
                                     | SPM_PART_FLAG_PSA_ROT

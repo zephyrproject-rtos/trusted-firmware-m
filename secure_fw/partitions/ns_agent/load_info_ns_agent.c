@@ -51,7 +51,7 @@ const struct partition_tfm_sp_ns_agent_load_info_t
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
         .pid                        = TFM_SP_NON_SECURE_ID,
         .flags                      = (PARTITION_PRI_LOWEST - 1)
-                                                             | SPM_PART_FLAG_IPC
+                                    | PARTITION_MODEL_IPC
 #if TFM_MULTI_CORE_TOPOLOGY
                                     | SPM_PART_FLAG_PSA_ROT
 #endif

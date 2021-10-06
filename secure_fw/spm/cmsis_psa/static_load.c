@@ -98,7 +98,7 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
         tfm_core_panic();
     }
 
-    if (!(p_ptldinf->flags & SPM_PART_FLAG_IPC)) {
+    if (!(p_ptldinf->flags & PARTITION_MODEL_IPC)) {
         tfm_core_panic();
     }
 

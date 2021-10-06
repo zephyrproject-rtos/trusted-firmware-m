@@ -38,8 +38,10 @@
 #define PARTITION_PRI_LOWEST                    (0xFF)
 #define PARTITION_PRI_MASK                      (0xFF)
 
+/* TODO: This def couples with library model, rename it later. */
 #define SPM_PART_FLAG_PSA_ROT                   (1U << 8)
-#define SPM_PART_FLAG_IPC                       (1U << 9)
+
+#define PARTITION_MODEL_IPC                     (1U << 9)
 
 #define PARTITION_PRIORITY(flag)                ((flag) & PARTITION_PRI_MASK)
 #define TO_THREAD_PRIORITY(x)                   (x)
