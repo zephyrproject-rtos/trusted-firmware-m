@@ -11,6 +11,7 @@
 
 #if defined(MBEDTLS_CHACHA20_C)
 #include "mbedtls/chacha20.h"
+#include "mbedtls/error.h"
 #include "chacha20_alt.h"
 #include "mbedtls/platform_util.h"
 #include "chacha_driver.h"
@@ -147,7 +148,7 @@ int mbedtls_chacha20_update( mbedtls_chacha20_context *ctx,
     drvRc = ProcessChacha(chachaCtx, &inBuffInfo, &outBuffInfo, size);
     if (drvRc != 0) {
         CC_PAL_LOG_ERR("\nProcessChacha failed %d", drvRc);
-        return MBEDTLS_ERR_CHACHA20_HW_ACCEL_FAILED;
+        return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
     }
 
     return ( 0 );
