@@ -41,6 +41,7 @@ enum tfm_crypto_operation_type {
     TFM_CRYPTO_MAC_OPERATION = 2,
     TFM_CRYPTO_HASH_OPERATION = 3,
     TFM_CRYPTO_KEY_DERIVATION_OPERATION = 4,
+    TFM_CRYPTO_AEAD_OPERATION = 5,
 
     /* Used to force the enum size */
     TFM_CRYPTO_OPERATION_TYPE_MAX = INT_MAX
