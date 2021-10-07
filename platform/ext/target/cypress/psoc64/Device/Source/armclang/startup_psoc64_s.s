@@ -134,11 +134,8 @@ Vectors_Copy
                 LDR     R0, =SystemInit
                 BLX     R0
                 MOV     R3, SP
-                MRS     R0, control    ; Get control value
                 MOVS    R1, #2
-                ORRS    R0, R0, R1     ; Select switch to PSP
 
-                MSR     control, R0
                 MOV     SP, R3
                 LDR     R0, =__main
                 BX      R0
