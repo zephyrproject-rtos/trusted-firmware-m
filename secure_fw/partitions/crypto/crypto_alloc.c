@@ -36,6 +36,7 @@ struct tfm_crypto_operation_s {
         psa_mac_operation_t mac;          /*!< MAC operation context */
         psa_hash_operation_t hash;        /*!< Hash operation context */
         psa_key_derivation_operation_t key_deriv; /*!< Key derivation operation context */
+        psa_aead_operation_t aead;        /*!< AEAD operation context */
     } operation;
 };
 
@@ -67,6 +68,9 @@ static void memset_operation_context(uint32_t index)
         break;
     case TFM_CRYPTO_KEY_DERIVATION_OPERATION:
         mem_size = sizeof(psa_key_derivation_operation_t);
+        break;
+    case TFM_CRYPTO_AEAD_OPERATION:
+        mem_size = sizeof(psa_aead_operation_t);
         break;
     case TFM_CRYPTO_OPERATION_NONE:
     default:
