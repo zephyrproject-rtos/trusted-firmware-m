@@ -62,6 +62,7 @@ target_include_directories(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Inc
         ${CMAKE_CURRENT_SOURCE_DIR}/secure
         ${MBEDCRYPTO_PATH}/library
+        ${CMAKE_SOURCE_DIR}/include
 )
 
 target_sources(platform_s

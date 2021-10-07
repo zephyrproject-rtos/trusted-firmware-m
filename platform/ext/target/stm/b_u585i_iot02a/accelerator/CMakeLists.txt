@@ -56,6 +56,7 @@ target_sources(crypto_service_crypto_hw
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha1_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha256_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/stm.c
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/huk.c
 )
 
 target_include_directories(crypto_service_crypto_hw
@@ -66,6 +67,7 @@ target_include_directories(crypto_service_crypto_hw
         ${PLATFORM_DIR}/ext/target/stm/common/stm32u5xx/hal/Inc/
         ${PLATFORM_DIR}/ext/target/stm/common/stm32u5xx/Device/Include/
         ${PLATFORM_DIR}/ext/cmsis
+        ${PLATFORM_DIR}/include
 )
 target_include_directories(crypto_service_mbedcrypto
     PUBLIC
