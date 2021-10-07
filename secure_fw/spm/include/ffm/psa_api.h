@@ -247,14 +247,16 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
  * \param[in] status            Message result value to be reported to the
  *                              client.
  *
- * \retval void                 Success.
+ * \retval Positive integer     Success, the connection handle.
+ * \retval PSA_SUCCESS          Success
  * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
  *                              following are true:
  * \arg                         msg_handle is invalid.
  * \arg                         An invalid status code is specified for the
  *                              type of message.
  */
-void tfm_spm_partition_psa_reply(psa_handle_t msg_handle, psa_status_t status);
+int32_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
+                                    psa_status_t status);
 
 /**
  * \brief Function body of \ref psa_norify.

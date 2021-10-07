@@ -65,6 +65,11 @@ uint32_t tfm_psa_framework_version_veneer(void)
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"
+#elif defined(CONFIG_TFM_PSA_API_SFN_CALL)
+        "   push   {r4, lr}                                   \n"
+        "   bl     psa_framework_version_sfn                  \n"
+        "   pop    {r3, r4}                                   \n"
+        "   mov    lr, r4                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_FRAMEWORK_VERSION)"       \n"
 #endif
@@ -102,6 +107,11 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"
+#elif defined(CONFIG_TFM_PSA_API_SFN_CALL)
+        "   push   {r4, lr}                                   \n"
+        "   bl     psa_version_sfn                            \n"
+        "   pop    {r3, r4}                                   \n"
+        "   mov    lr, r4                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_VERSION)"                 \n"
 #endif
@@ -139,6 +149,11 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"
+#elif defined(CONFIG_TFM_PSA_API_SFN_CALL)
+        "   push   {r4, lr}                                   \n"
+        "   bl     psa_connect_sfn                            \n"
+        "   pop    {r3, r4}                                   \n"
+        "   mov    lr, r4                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_CONNECT)"                 \n"
 #endif
@@ -181,6 +196,11 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"
+#elif defined(CONFIG_TFM_PSA_API_SFN_CALL)
+        "   push   {r4, lr}                                   \n"
+        "   bl     psa_call_pack_sfn                          \n"
+        "   pop    {r3, r4}                                   \n"
+        "   mov    lr, r4                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_CALL)"                    \n"
 #endif
@@ -218,6 +238,11 @@ void tfm_psa_close_veneer(psa_handle_t handle)
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"
+#elif defined(CONFIG_TFM_PSA_API_SFN_CALL)
+        "   push   {r4, lr}                                   \n"
+        "   bl     psa_close_sfn                              \n"
+        "   pop    {r3, r4}                                   \n"
+        "   mov    lr, r4                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_CLOSE)"                   \n"
 #endif

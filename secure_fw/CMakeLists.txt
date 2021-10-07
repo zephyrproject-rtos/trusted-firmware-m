@@ -101,6 +101,7 @@ target_link_libraries(tfm_secure_api
 set_source_files_properties(
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_thread.c
+    ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c
     PROPERTIES
     COMPILE_FLAGS $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
     COMPILE_FLAGS $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
@@ -112,6 +113,7 @@ target_sources(tfm_secure_api
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c>
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_thread.c>
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c>
 )
 
 target_compile_definitions(tfm_secure_api

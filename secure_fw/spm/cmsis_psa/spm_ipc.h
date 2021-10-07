@@ -59,6 +59,7 @@
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
 #define TFM_MSG_MAGIC                   0x15154343
+#define TFM_MSG_MAGIC_SFN               0x21216565
 
 /* Get partition by thread or context data */
 #define GET_THRD_OWNER(x)        TO_CONTAINER(x, struct partition_t, thrd)
@@ -67,8 +68,12 @@
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
     int32_t magic;
-    struct service_t *service;         /* RoT service pointer            */
-    struct sync_obj_t ack_evnt;        /* Event for ack response         */
+    struct partition_t *p_client;      /* Caller partition              */
+    struct service_t *service;         /* RoT service pointer           */
+    union {
+        struct sync_obj_t ack_evnt;    /* IPC - Ack response event       */
+        uint32_t sfn_magic;            /* SFN - Indicate a SFN message   */
+    };
     psa_msg_t msg;                     /* PSA message body               */
     psa_invec invec[PSA_MAX_IOVEC];    /* Put in/out vectors in msg body */
     psa_outvec outvec[PSA_MAX_IOVEC];
@@ -95,10 +100,16 @@ struct partition_t {
     void                               *p_boundaries;
     void                               *p_interrupts;
     void                               *p_metadata;
-    struct thread_t                    thrd;
+    union {
+        struct thread_t                thrd;            /* IPC model */
+        uint32_t                       state;           /* SFN model */
+    };
     struct sync_obj_t                  waitobj;
     struct context_ctrl_t              ctx_ctrl;
-    struct bi_list_node_t              msg_list;
+    union {
+        struct bi_list_node_t          msg_list;        /* IPC model */
+        struct tfm_msg_body_t          *p_msg;          /* SFN model */
+    };
     uint32_t                           signals_allowed;
     uint32_t                           signals_waiting;
     uint32_t                           signals_asserted;
@@ -130,7 +141,6 @@ struct tfm_conn_handle_t {
                                          *  - non secure client endpoint id.
                                          */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
-    struct service_t *service;          /* RoT service pointer                */
     struct bi_list_node_t list;         /* list node                          */
 };
 

@@ -62,6 +62,23 @@
 #define psa_unmap_outvec         psa_unmap_outvec_thread
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
+#elif defined(CONFIG_TFM_PSA_API_SFN_CALL)
+
+#define psa_framework_version    psa_framework_version_sfn
+#define psa_version              psa_version_sfn
+#define psa_connect              psa_connect_sfn
+#define tfm_psa_call_pack        psa_call_pack_sfn
+#define psa_close                psa_close_sfn
+#define psa_wait                 psa_wait_sfn
+#define psa_read                 psa_read_sfn
+#define psa_skip                 psa_skip_sfn
+#define psa_write                psa_write_sfn
+#define psa_panic                psa_panic_sfn
+
+#else
+
+#error "NO ABI is chosen, check configurations."
+
 #endif
 
 #endif /* __PSA_INTERFACE_REDIRECT_H__ */

@@ -30,7 +30,7 @@
 #define THRD_ERR_GENERIC          1
 
 /* Thread entry function type */
-typedef void *(*thrd_fn_t)(void *);
+typedef void (*thrd_fn_t)(void *);
 
 /* Thread context */
 struct thread_t {

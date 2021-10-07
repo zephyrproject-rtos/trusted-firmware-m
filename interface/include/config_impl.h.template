@@ -51,9 +51,14 @@
  * CONFIG_TFM_NS_AGENT_TZ_STK_SIZE_SHIFT_FACTOR for reference, and allow
  * modification of the factor based on application situation. The stack size
  * value is aligned to 8 bytes.
+ * The minimum value is 0x400 to satisfy the SPM functional requirement.
+ * Manifest tool will assure this.
  */
+    {% if total_stk.size|int < 2048 %}
+        {% set total_stk.size = 2048 %}
+    {% endif %}
 #define CONFIG_TFM_NS_AGENT_TZ_STK_SIZE_SHIFT_FACTOR             1
-#define {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}} \
+#define {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}}  \
     ((({{"0x%x"|format(total_stk.size)}} >> CONFIG_TFM_NS_AGENT_TZ_STK_SIZE_SHIFT_FACTOR) + 0x7) & (~0x7))
 
 {% elif sfn_partition_num > 0 and ipc_partition_num > 0 %}

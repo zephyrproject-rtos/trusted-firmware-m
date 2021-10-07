@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include "bitops.h"
 #include "critical_section.h"
+#include "current.h"
 #include "fih.h"
 #include "psa/client.h"
 #include "psa/service.h"
@@ -141,7 +142,7 @@ struct tfm_conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
         return NULL;
     }
 
-    p_handle->service = service;
+    p_handle->internal_msg.service = service;
     p_handle->status = TFM_HANDLE_STATUS_IDLE;
     p_handle->client_id = client_id;
 
@@ -310,7 +311,7 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 
 struct partition_t *tfm_spm_get_running_partition(void)
 {
-    return GET_THRD_OWNER(CURRENT_THREAD);
+    return GET_CURRENT_COMPONENT();
 }
 
 int32_t tfm_spm_check_client_version(struct service_t *service,
@@ -439,11 +440,12 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     TFM_CORE_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
-    spm_memset(msg, 0, sizeof(struct tfm_msg_body_t));
+    spm_memset(&msg->msg, 0, sizeof(psa_msg_t));
 
     THRD_SYNC_INIT(&msg->ack_evnt);
     msg->magic = TFM_MSG_MAGIC;
     msg->service = service;
+    msg->p_client = GET_CURRENT_COMPONENT();
     msg->caller_outvec = caller_outvec;
     msg->msg.client_id = client_id;
 
@@ -647,7 +649,6 @@ uint32_t tfm_spm_init(void)
         }
 #endif /* TFM_FIH_PROFILE_ON */
 
-        /* TODO: Replace this 'BACKEND_IPC' after SFN get involved. */
         backend_instance.comp_init_assuredly(partition, service_setting);
     }
 
@@ -722,8 +723,11 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg)
      * FixeMe: abstract these part into dedicated functions to avoid
      * accessing thread context in psa layer
      */
-    /* If it is a NS request via RPC, the owner of this message is not set */
-    if (!is_tfm_rpc_msg(msg)) {
+    /*
+     * If it is a NS request via RPC, the owner of this message is not set.
+     * Or if it is a SFN message, it does not have owner thread state either.
+     */
+    if ((!is_tfm_rpc_msg(msg)) && (msg->sfn_magic != TFM_MSG_MAGIC_SFN)) {
         TFM_CORE_ASSERT(msg->ack_evnt.owner->state == THRD_STATE_BLOCK);
     }
 

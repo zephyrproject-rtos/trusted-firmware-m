@@ -41,7 +41,7 @@ struct context_ctrl_t *p_spm_thread_context;
 
 /*
  * Send message and wake up the SP who is waiting on message queue, block the
- * current thread and triggere scheduler.
+ * current thread and trigger scheduler.
  */
 static psa_status_t ipc_messaging(struct service_t *service,
                                   struct tfm_msg_body_t *msg)
@@ -80,13 +80,20 @@ static psa_status_t ipc_messaging(struct service_t *service,
     return PSA_SUCCESS;
 }
 
-static void ipc_replying(struct tfm_msg_body_t *p_msg, psa_status_t status)
+static int32_t ipc_replying(struct tfm_msg_body_t *p_msg, int32_t status)
 {
     if (is_tfm_rpc_msg(p_msg)) {
         tfm_rpc_client_call_reply(p_msg, status);
     } else {
         thrd_wake_up(&p_msg->ack_evnt, status);
     }
+
+    /*
+     * 'psa_reply' exists in IPC model only and returns 'void'. Return
+     * 'PSA_SUCCESS' here always since SPM does not forward the status
+     * to the caller.
+     */
+    return PSA_SUCCESS;
 }
 
 /* Parameters are treated as assuredly */

@@ -124,7 +124,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
 {% elif manifest.entry_init %}
         .entry                      = ENTRY_TO_POSITION({{manifest.entry_init}}),
 {% else %}
-        .entry                      = NULL,
+        .entry                      = 0,
 {% endif %}
         .stack_size                 = {{manifest.stack_size}},
         .heap_size                  = 0,

@@ -16,6 +16,7 @@
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/interrupt_defs.h"
+#include "ffm/psa_api.h"
 #include "utilities.h"
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
@@ -287,7 +288,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        service = conn_handle->service;
+        service = conn_handle->internal_msg.service;
     }
 
     if (!service) {
@@ -407,7 +408,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle)
         TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
     }
 
-    service = conn_handle->service;
+    service = conn_handle->internal_msg.service;
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         tfm_core_panic();
@@ -469,8 +470,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     if (timeout == PSA_BLOCK &&
         (partition->signals_asserted & signal_mask) == 0) {
         partition->signals_waiting = signal_mask;
-        thrd_wait_on(&partition->waitobj,
-                     &(tfm_spm_get_running_partition()->thrd));
+        thrd_wait_on(&partition->waitobj, CURRENT_THREAD);
     }
 
     return partition->signals_asserted & signal_mask;
@@ -765,7 +765,8 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
     msg->outvec[outvec_idx].len += num_bytes;
 }
 
-void tfm_spm_partition_psa_reply(psa_handle_t msg_handle, psa_status_t status)
+int32_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
+                                    psa_status_t status)
 {
     struct service_t *service = NULL;
     struct tfm_msg_body_t *msg = NULL;
@@ -878,7 +879,7 @@ void tfm_spm_partition_psa_reply(psa_handle_t msg_handle, psa_status_t status)
         conn_handle->status = TFM_HANDLE_STATUS_IDLE;
     }
 
-    backend_instance.replying(msg, ret);
+    return backend_instance.replying(msg, ret);
 }
 
 void tfm_spm_partition_psa_notify(int32_t partition_id)
@@ -930,7 +931,7 @@ void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
 
     if (irq_info->flih_func) {
         /* This API is for SLIH IRQs only */
-        psa_panic();
+        tfm_core_panic();
     }
 
     /* It is a fatal error if passed signal is not currently asserted */
