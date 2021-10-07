@@ -67,11 +67,11 @@ target_sources(tfm_spm
         $<$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>:ns_client_ext/tfm_spm_ns_ctx.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_secure_api.c>
         #TODO add other arches
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8-m.base>>:cmsis_psa/arch/tfm_arch_v8m_base.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv6-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>>:cmsis_psa/arch/tfm_arch_v8m_base.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
 )
 
 target_include_directories(tfm_partitions INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa)
