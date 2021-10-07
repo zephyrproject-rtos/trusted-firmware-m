@@ -26,7 +26,7 @@
  *
  * Flash layout on nucleo_l552ze_q with BL2 (multiple image boot):
  *
- * 0x0000_0000 BL2 - MCUBoot (72 KB)
+ * 0x0000_0000 BL2 - MCUBoot (38 KB)
  * 0x0000_e000 OTP / NV counters area (8 KB)
  * 0x0001_0000 Secure Storage Area (8 KB)
  * 0x0001_2000 Internal Trusted Storage Area (8 KB)
@@ -37,7 +37,7 @@
  *
  * Flash layout on nucleo_l552ze_q with BL2 (multiple image boot, layout for test):
  * No Firmware update , ITS, PS in RAM.
- * 0x0000_0000 BL2 - MCUBoot (72 KB)
+ * 0x0000_0000 BL2 - MCUBoot (38 KB)
  * 0x0000_e000 OTP / NV counters area  area (8 KB)
  * 0x0001_0000 Secure Storage Area (8 KB)
  * 0x0001_2000 Internal Trusted Storage Area (8 KB)
@@ -73,17 +73,17 @@
 
 /* scratch area */
 #define FLASH_AREA_SCRATCH_OFFSET       (FLASH_AREA_BL2_NOHDP_OFFSET+FLASH_AREA_BL2_NOHDP_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE         (0x2000)
-/* according to test flash layout can change */
-#if defined(FLASH_LAYOUT_FOR_TEST)
+#define FLASH_AREA_SCRATCH_SIZE         (0x0)
 
 /* OTP_definitions */
 #define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
-#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
-                                           FLASH_ITS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_AREA_SCRATCH_OFFSET + \
+                                           FLASH_AREA_SCRATCH_SIZE)
 #define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_SECTOR_SIZE + \
                                            FLASH_OTP_NV_COUNTERS_SECTOR_SIZE)
 
+/* according to test flash layout can change */
+#if defined(FLASH_LAYOUT_FOR_TEST)
 /* fix me with test config PS and ITS in RAM */
 /* Secure Storage (PS) Service definitions */
 #define FLASH_PS_AREA_SIZE             (0x2000)
@@ -102,11 +102,6 @@
 #define FLASH_AREA_0_OFFSET             (FLASH_ITS_AREA_OFFSET+FLASH_ITS_AREA_SIZE)
 #define FLASH_AREA_0_SIZE               (FLASH_S_PARTITION_SIZE)
 #else
-
-/* OTP_definitions */
-#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
-                                           FLASH_ITS_AREA_SIZE)
-#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* fix me with test config PS and ITS in RAM */
 /* Secure Storage (PS) Service definitions */
@@ -149,8 +144,6 @@
 /** Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS           ((2 * FLASH_PARTITION_SIZE) / \
                                          FLASH_AREA_IMAGE_SECTOR_SIZE)
-
-#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
 
 #define SECURE_IMAGE_OFFSET             (0x0)
 #define SECURE_IMAGE_MAX_SIZE           FLASH_S_PARTITION_SIZE
