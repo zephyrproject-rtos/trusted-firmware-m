@@ -119,7 +119,7 @@ void tfm_plat_provisioning_check_for_dummy_keys(void)
 
     if(iak_start == 0xA4906F6DB254B4A9) {
         BOOT_LOG_WRN("%s%s%s%s",
-                     "\033[1;31m"
+                     "\033[1;31m",
                      "This device was provisioned with dummy keys. ",
                      "This device is \033[1;1mNOT SECURE",
                      "\033[0m");
