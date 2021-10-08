@@ -36,8 +36,9 @@ extern "C" {
  *    header structure: struct shared_data_tlv_entry and the data. In the entry
  *    header is a type field (tly_type) which identify the consumer of the
  *    entry in the runtime SW and specify the subtype of that data item. There
- *    is a size field (tlv_len) which covers the size of the entry header and
- *    the data. After this structure comes the actual data.
+ *    is a size field (tlv_len) which covers the length of the data
+ *    (not including the entry header structure). After this structure comes
+ *    the actual data.
  *  - Arbitrary number and size of data entry can be in the shared memory area.
  *
  * This table gives of overview about the tlv_type field in the entry header.
@@ -198,7 +199,7 @@ struct shared_data_tlv_header {
  */
 struct shared_data_tlv_entry {
     uint16_t tlv_type;
-    uint16_t tlv_len; /* size of single TLV entry (including this header). */
+    uint16_t tlv_len; /* size of single TLV entry (not including this header) */
 };
 
 /**
