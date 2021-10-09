@@ -310,12 +310,14 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                   | SAU_RLAR_ENABLE_Msk;
 
+#ifdef BL2
     /* Secondary image partition */
     SAU->RNR = 4;
     SAU->RBAR = (memory_regions.secondary_partition_base
                  & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.secondary_partition_limit
                  & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+#endif
 
     /* Allows SAU to define the CODE region as a NSC */
     sacfg->nsccfg |= CODENSC;
@@ -357,6 +359,8 @@ enum tfm_plat_err_t mpc_init_cfg(void)
         ERROR_MSG("Failed to Configure MPC for SRAM!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
+
+#ifdef BL2
     ret = Driver_SRAM_MPC.ConfigRegion(
                                       memory_regions.secondary_partition_base,
                                       memory_regions.secondary_partition_limit,
@@ -365,6 +369,7 @@ enum tfm_plat_err_t mpc_init_cfg(void)
         ERROR_MSG("Failed to Configure MPC for SRAM!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
+#endif
 
     /* Lock down the MPC configuration */
     ret = Driver_ISRAM0_MPC.LockDown();
