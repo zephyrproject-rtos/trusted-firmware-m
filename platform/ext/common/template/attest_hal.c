@@ -7,11 +7,11 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include "tfm_attest_hal.h"
 #include "tfm_plat_boot_seed.h"
 #include "tfm_plat_device_id.h"
 #include "tfm_plat_otp.h"
+#include "tfm_strnlen.h"
 
 static enum tfm_security_lifecycle_t map_otp_lcs_to_tfm_slc(enum plat_otp_lcs_t lcs) {
     switch (lcs) {
@@ -58,7 +58,7 @@ tfm_attest_hal_get_verification_service(uint32_t *size, uint8_t *buf)
         return err;
     }
 
-    *size = strnlen((char*)buf, otp_size);
+    *size = tfm_strnlen((char*)buf, otp_size);
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -79,7 +79,7 @@ tfm_attest_hal_get_profile_definition(uint32_t *size, uint8_t *buf)
         return err;
     }
 
-    *size = strnlen((char*)buf, otp_size);
+    *size = tfm_strnlen((char*)buf, otp_size);
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -132,7 +132,7 @@ enum tfm_plat_err_t tfm_plat_get_hw_version(uint32_t *size, uint8_t *buf)
         return err;
     }
 
-    *size = strnlen((char*)buf, otp_size);
+    *size = tfm_strnlen((char*)buf, otp_size);
 
     return TFM_PLAT_ERR_SUCCESS;
 }
