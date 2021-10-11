@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-set(TFM_VERSION 1.4.0)
+include(version.cmake)
 
 ############################ CONFIGURATION #####################################
 
@@ -93,7 +93,6 @@ endif()
 add_subdirectory(lib/ext)
 add_subdirectory(lib/fih)
 add_subdirectory(tools)
-add_subdirectory(docs)
 if(NS)
     # Set to ${TFM_TEST_REPO_PATH}/app by default
     add_subdirectory(${TFM_APP_PATH} ${CMAKE_CURRENT_BINARY_DIR}/app)

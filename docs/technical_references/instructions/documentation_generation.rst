@@ -7,10 +7,8 @@ The build system is prepared to support generation of two documents:
 - Reference Manual. Doxygen based.
 - User Guide. Sphinx based.
 
-Both documents can be generated in HTML and PDF format.
-
-Support for document generation in the build environment is not mandatory.
-Missing document generation tools will not block building the TF-M firmware.
+Both documents can be generated in HTML and PDF format and independently from
+building the project binary artifacts.
 
 ***************************
 Build TF-M Reference Manual
@@ -48,8 +46,8 @@ The following tools are needed:
             .. code-block:: bash
 
                 cd <TF-M base folder>
-                cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-                cmake --build cmake_doc -- tfm_docs_refman_html tfm_docs_refman_pdf
+                cmake -S docs -B build_docs
+                cmake --build build_docs -- tfm_docs_refman_html tfm_docs_refman_pdf
 
             The documentation files will be available under the directory ``cmake_doc/docs/reference_manual``.
 
@@ -104,10 +102,10 @@ The following tools are needed:
         .. code-block:: bash
 
             cd <TF-M base folder>
-            cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-            cmake --build cmake_doc -- tfm_docs_refman_html tfm_docs_refman_pdf
+            cmake -S docs -B build_docs -G"Unix Makefiles"
+            cmake --build build_docs -- tfm_docs_refman_html tfm_docs_refman_pdf
 
-        The documentation files will be available under the directory ``cmake_doc\docs\reference_manual``.
+        The documentation files will be available under the directory ``build_docs\docs\reference_manual``.
 
 *********************
 Build TF-M User Guide
@@ -154,10 +152,10 @@ The following tools are needed:
             .. code-block:: bash
 
                 cd <TF-M base folder>
-                cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-                cmake --build cmake_doc -- tfm_docs_userguide_html tfm_docs_userguide_pdf
+                cmake -S docs -B build_docs
+                cmake --build build_docs -- tfm_docs_userguide_html tfm_docs_userguide_pdf
 
-            The documentation files will be available under the directory ``cmake_doc/docs/user_guide``.
+            The documentation files will be available under the directory ``build_docs/docs/user_guide``.
 
             - Manually using the appropriate tools (`sphinx-build`_/ `Doxygen`_)
 
@@ -222,10 +220,10 @@ The following tools are needed:
         .. code-block:: bash
 
             cd <TF-M base folder>
-            cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-            cmake --build cmake_doc -- tfm_docs_userguide_html tfm_docs_userguide_pdf
+            cmake -S docs -B build_docs -G"Unix Makefiles"
+            cmake --build build_docs -- tfm_docs_userguide_html tfm_docs_userguide_pdf
 
-        The documentation files will be available under the directory ``cmake_doc\docs\user_guide``.
+        The documentation files will be available under the directory ``build_docs\docs\user_guide``.
 
 .. _sphinx-build: https://www.sphinx-doc.org/en/master/man/sphinx-build.html
 .. _Doxygen: https://www.doxygen.nl
