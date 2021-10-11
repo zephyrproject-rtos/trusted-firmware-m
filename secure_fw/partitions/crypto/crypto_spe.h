@@ -50,6 +50,26 @@
         PSA_FUNCTION_NAME(psa_aead_encrypt)
 #define psa_aead_decrypt \
         PSA_FUNCTION_NAME(psa_aead_decrypt)
+#define psa_aead_encrypt_setup \
+        PSA_FUNCTION_NAME(psa_aead_encrypt_setup)
+#define psa_aead_decrypt_setup \
+        PSA_FUNCTION_NAME(psa_aead_decrypt_setup)
+#define psa_aead_generate_nonce \
+        PSA_FUNCTION_NAME(psa_aead_generate_nonce)
+#define psa_aead_set_nonce \
+        PSA_FUNCTION_NAME(psa_aead_set_nonce)
+#define psa_aead_set_lengths \
+        PSA_FUNCTION_NAME(psa_aead_set_lengths)
+#define psa_aead_update_ad \
+        PSA_FUNCTION_NAME(psa_aead_update_ad)
+#define psa_aead_update \
+        PSA_FUNCTION_NAME(psa_aead_update)
+#define psa_aead_finish \
+        PSA_FUNCTION_NAME(psa_aead_finish)
+#define psa_aead_verify \
+        PSA_FUNCTION_NAME(psa_aead_verify)
+#define psa_aead_abort \
+        PSA_FUNCTION_NAME(psa_aead_abort)
 #define psa_open_key \
         PSA_FUNCTION_NAME(psa_open_key)
 #define psa_close_key \
