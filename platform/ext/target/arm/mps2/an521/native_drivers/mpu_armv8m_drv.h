@@ -11,7 +11,6 @@
 #include <stdint.h>
 
 #include "cmsis.h"
-#include "fih.h"
 
 #define PRIVILEGED_DEFAULT_ENABLE 1
 #define HARDFAULT_NMI_ENABLE      1
@@ -81,31 +80,31 @@ struct mpu_armv8m_region_cfg_raw_t {
  * \note This function doesn't check if dev is NULL.
  */
 
-fih_int mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
-                          uint32_t privdef_en,
-                          uint32_t hfnmi_en);
+enum mpu_armv8m_error_t mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
+                                          uint32_t privdef_en,
+                                          uint32_t hfnmi_en);
 
 /**
  * \brief Disable MPU
  *
  * \param[in] dev            MPU device \ref mpu_armv8m_dev_t
  *
- * \return Error code \ref arm_mpu_error_t
+ * \return Error code \ref mpu_armv8m_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-fih_int mpu_armv8m_disable(struct mpu_armv8m_dev_t *dev);
+enum mpu_armv8m_error_t mpu_armv8m_disable(struct mpu_armv8m_dev_t *dev);
 
 /**
  * \brief Disable MPU and clean all regions
  *
  * \param[in] dev            MPU device \ref mpu_armv8m_dev_t
  *
- * \return Error code \ref arm_mpu_error_t
+ * \return Error code \ref mpu_armv8m_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-fih_int mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev);
+enum mpu_armv8m_error_t mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev);
 
 /**
  * \brief Enable MPU Region
@@ -113,12 +112,13 @@ fih_int mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev);
  * \param[in] dev            MPU device \ref mpu_armv8m_dev_t
  * \param[in] region_cfg     MPU region config \ref mpu_armv8m_region_cfg_t
  *
- * \return Error code \ref arm_mpu_error_t
+ * \return Error code \ref mpu_armv8m_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-fih_int mpu_armv8m_region_enable(struct mpu_armv8m_dev_t *dev,
-                                 struct mpu_armv8m_region_cfg_t *region_cfg);
+enum mpu_armv8m_error_t mpu_armv8m_region_enable(
+                                struct mpu_armv8m_dev_t *dev,
+                                struct mpu_armv8m_region_cfg_t *region_cfg);
 
 /**
  * \brief Disable MPU Region
@@ -126,11 +126,11 @@ fih_int mpu_armv8m_region_enable(struct mpu_armv8m_dev_t *dev,
  * \param[in] dev            MPU device \ref mpu_armv8m_dev_t
  * \param[in] region_nr            Region number
  *
- * \return Error code \ref arm_mpu_error_t
+ * \return Error code \ref mpu_armv8m_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-fih_int mpu_armv8m_region_disable(struct mpu_armv8m_dev_t *dev,
-                                  uint32_t region_nr);
+enum mpu_armv8m_error_t mpu_armv8m_region_disable(struct mpu_armv8m_dev_t *dev,
+                                                  uint32_t region_nr);
 
 #endif /* __MPU_ARMV8M_DRV_H__ */

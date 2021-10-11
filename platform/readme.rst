@@ -18,7 +18,6 @@ database in SPM, and it is provided to the SPM HAL functions.
 
 Peripherals currently used by the services in TF-M
 --------------------------------------------------
-- ``TFM_PERIPHERAL_FPGA_IO`` - FPGA system control and I/O
 - ``TFM_PERIPHERAL_UART1``-  UART1
 
 .. Note::

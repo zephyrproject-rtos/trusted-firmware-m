@@ -116,13 +116,6 @@ struct platform_data_t tfm_peripheral_std_uart = {
         -1
 };
 
-struct platform_data_t tfm_peripheral_fpga_io = {
-        FPGA_IO_BASE_S,
-        FPGA_IO_BASE_S + 0xFFF,
-        PPC_SP_PERIPH_EXP2,
-        FPGA_IO_PERIPH_PPCEXP2_POS_MASK
-};
-
 struct platform_data_t tfm_peripheral_timer0 = {
         SYSTIMER0_ARMV8_M_BASE_S,
         SYSTIMER0_ARMV8_M_BASE_S + 0xFFF,

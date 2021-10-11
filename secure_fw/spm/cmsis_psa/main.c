@@ -16,6 +16,8 @@
 #include "tfm_spm_hal.h"
 #include "tfm_spm_log.h"
 #include "tfm_version.h"
+#include "tfm_plat_otp.h"
+#include "tfm_plat_provisioning.h"
 
 /*
  * Avoids the semihosting issue
@@ -31,7 +33,7 @@ __asm("  .global __ARM_use_no_argv\n");
 #error Invalid TFM_LVL value. Only TFM_LVL 1, 2 and 3 are supported in IPC model!
 #endif
 
-REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
+REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
 static fih_int tfm_core_init(void)
 {
@@ -95,6 +97,21 @@ static fih_int tfm_core_init(void)
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
 
+    plat_err = tfm_plat_otp_init();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+    }
+
+    /* Perform provisioning. */
+    if (tfm_plat_provisioning_is_required()) {
+        plat_err = tfm_plat_provisioning_perform();
+        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+        }
+    } else {
+        tfm_plat_provisioning_check_for_dummy_keys();
+    }
+
     /* Configures architecture */
     tfm_arch_config_extensions();
 
@@ -123,13 +140,24 @@ static fih_int tfm_core_init(void)
     FIH_RET(fih_int_encode(TFM_SUCCESS));
 }
 
+__attribute__((naked))
 int main(void)
+{
+    __ASM volatile(
+        "ldr    r0, =0xFEF5EDA5     \n" /* Seal Main Stack before using */
+        "ldr    r1, =0xFEF5EDA5     \n"
+        "push   {r0, r1}            \n"
+        "bl     c_main              \n"
+    );
+}
+
+int c_main(void)
 {
     fih_int fih_rc = FIH_FAILURE;
 
     /* set Main Stack Pointer limit */
-    tfm_arch_init_secure_msp((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
-                                               $$ZI$$Base));
+    tfm_arch_set_msplim((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK,
+                                                                   $$ZI$$Base));
 
     fih_delay_init();
 
@@ -152,4 +180,6 @@ int main(void)
 
     /* Move to handler mode for further SPM initialization. */
     tfm_core_handler_mode();
+
+    return 0;
 }

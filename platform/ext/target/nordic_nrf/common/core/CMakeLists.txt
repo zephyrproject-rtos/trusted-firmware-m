@@ -66,6 +66,8 @@ target_sources(platform_s
         native_drivers/spu.c
         spm_hal.c
         tfm_hal_isolation.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
+    PUBLIC
         plat_test.c
 )
 

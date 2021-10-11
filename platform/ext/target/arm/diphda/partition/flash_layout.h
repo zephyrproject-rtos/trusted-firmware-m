@@ -69,6 +69,9 @@
 #define PMOD_SF3_FLASH_PROGRAM_UNIT     (1U)          /* 1 B */
 
 #define FLASH_DEV_NAME Driver_FLASH0
+/* Smallest flash programmable unit in bytes */
+#define TFM_HAL_FLASH_PROGRAM_UNIT      (1)
+
 #define FLASH_TOTAL_SIZE                (PMOD_SF3_FLASH_TOTAL_SIZE)  /* 32 MB */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (PMOD_SF3_FLASH_SECTOR_SIZE)      /* 4 KiB */
 
@@ -78,29 +81,27 @@
 #define IMAGE_EXECUTABLE_RAM_SIZE       (SRAM_SIZE - BL1_DATA_SIZE)
 
 /* BL2 primary and secondary images */
-#define FLASH_AREA_0_ID                 (1)
-#define FLASH_AREA_0_OFFSET             (0x50000)
-#define FLASH_AREA_0_SIZE               (SE_BL2_PARTITION_SIZE)
+#define FLASH_AREA_8_ID                 (1)
+#define FLASH_AREA_8_OFFSET             (0x50000)
+#define FLASH_AREA_8_SIZE               (SE_BL2_PARTITION_SIZE)
 
-#define FLASH_AREA_1_ID                 (FLASH_AREA_0_ID + 1)
-#define FLASH_AREA_1_OFFSET             (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
-#define FLASH_AREA_1_SIZE               (SE_BL2_PARTITION_SIZE)
+#define FLASH_AREA_9_ID                 (FLASH_AREA_8_ID + 1)
+#define FLASH_AREA_9_OFFSET             (FLASH_AREA_8_OFFSET + FLASH_AREA_8_SIZE)
+#define FLASH_AREA_9_SIZE               (SE_BL2_PARTITION_SIZE)
 
 /* Macros needed to imgtool.py, used when creating BL2 signed image */
-#define IMAGE_LOAD_ADDRESS              (SRAM_BASE + TFM_PARTITION_SIZE + BL2_DATA_GAP_SIZE)
-#define SECURE_IMAGE_OFFSET             (0x0)
-#define SECURE_IMAGE_MAX_SIZE           (SE_BL2_PARTITION_SIZE)
-#define NON_SECURE_IMAGE_OFFSET         (SE_BL2_PARTITION_SIZE)
-#define NON_SECURE_IMAGE_MAX_SIZE       (0x0)
+#define BL2_IMAGE_LOAD_ADDRESS          (SRAM_BASE + TFM_PARTITION_SIZE + BL2_DATA_GAP_SIZE)
+#define BL2_IMAGE_OFFSET                (0x0)
+#define BL2_IMAGE_MAX_SIZE              (SE_BL2_PARTITION_SIZE)
 
-#define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
-                                                      255 )
-#define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_1_ID : \
-                                                      255 )
+#define BL1_FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_8_ID : \
+                                                          255 )
+#define BL1_FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_9_ID : \
+                                                          255 )
 
-#define FLASH_AREA_IMAGE_SCRATCH        255
+#define BL1_FLASH_AREA_IMAGE_SCRATCH        255
 
-#else
+#endif /* BL1 */
 
 /* TF-M primary and secondary images */
 #define FLASH_AREA_0_ID                 (1)
@@ -157,8 +158,6 @@
 
 #define FLASH_AREA_IMAGE_SCRATCH        255
 
-#endif /* BL1 */
-
 #define FLASH_SECTOR_SIZE              (PMOD_SF3_FLASH_SECTOR_SIZE) /* 1 kB */
 
 #define FLASH_ITS_AREA_OFFSET           (0)
@@ -168,9 +167,11 @@
                                          FLASH_ITS_AREA_SIZE)
 #define FLASH_PS_AREA_SIZE              (16 * FLASH_SECTOR_SIZE)  /* 16 KB */
 
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_PS_AREA_OFFSET + \
-                                         FLASH_PS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_SECTOR_SIZE)      /* 1 KiB */
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_PS_AREA_OFFSET + \
+                                           FLASH_PS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
@@ -208,12 +209,13 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_PS_PROGRAM_UNIT         (1)
 
-#define NV_COUNTERS_FLASH_DEV_NAME Driver_FLASH0
+#define OTP_NV_COUNTERS_FLASH_DEV Driver_FLASH0
 
-/* NV Counters definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    (0x20) /* 24 Bytes*/
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_SECTOR_SIZE
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
 #endif /* __FLASH_LAYOUT_H__ */

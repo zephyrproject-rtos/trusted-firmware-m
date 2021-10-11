@@ -10,13 +10,16 @@
 #define __SPM_LOAD_API_H__
 
 #include "asset_defs.h"
-#include "irq_defs.h"
+#include "interrupt_defs.h"
 #include "partition_defs.h"
 #include "service_defs.h"
 #include "spm_ipc.h"
 
+/* No more partition to be loaded */
+#define NO_MORE_PARTITION        NULL
+
 /* Length of extendable variables in partition load type */
-#define LOAD_INFO_EXT_LENGTH                2
+#define LOAD_INFO_EXT_LENGTH                        (2)
 /* Argument "pldinf" must be a "struct partition_load_info_t *". */
 #define LOAD_INFSZ_BYTES(pldinf)                                       \
     (sizeof(*(pldinf)) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t) +    \
@@ -39,7 +42,6 @@
     ((uintptr_t)LOAD_INFO_ASSET(pldinf) +                              \
      (pldinf)->nassets * sizeof(struct asset_desc_t))
 
-
 /* Runtime partition struct list head node type */
 struct partition_head_t {
     uint32_t reserved;                  /* Reserved             */
@@ -54,9 +56,9 @@ struct service_head_t {
 
 /*
  * Load a partition object to linked list and return if a load is successful.
- * An 'assuredly' function, return NULL for no more partitions and
- * return a valid pointer if succeed. Other errors simply panic
- * the system and never return.
+ * An 'assuredly' function, return NO_MORE_PARTITION for no more partitions and
+ * return a valid pointer if succeed. Other errors simply panic the system and
+ * never return.
  */
 struct partition_t *load_a_partition_assuredly(struct partition_head_t *head);
 

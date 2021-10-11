@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,8 @@
 
 #ifndef __TFM_CORE_TRUSTZONE_H__
 #define __TFM_CORE_TRUSTZONE_H__
+
+#include "security_defs.h"
 
 /* This file holds specification or design defined TrustZone settings. */
 
@@ -17,7 +19,7 @@
  * 0xFEF5EDA5.
  */
 #define TFM_STACK_SEALED_SIZE           8
-#define TFM_STACK_SEAL_VALUE            0xFEF5EDA5
+#define TFM_STACK_SEAL_VALUE            STACK_SEAL_PATTERN
 
 /*
  * The numbers in 32bit words while basic FP involved in preempted context:

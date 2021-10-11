@@ -5,43 +5,80 @@
  *
  */
 
-#include "svc_num.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
+#include "utilities.h"
 
-
-static void tfm_arch_init_state_ctx(struct tfm_state_context_t *p_stat_ctx,
-                                    void *param, uintptr_t pfn)
+__attribute__((naked)) void tfm_arch_free_msp_and_exc_ret(uint32_t exc_return)
 {
-    p_stat_ctx->r0 = (uint32_t)param;
-    p_stat_ctx->ra = (uint32_t)pfn;
-    /*
-     * Prevent thread exits:
-     * Only T32 is supported, so bit[0] must be 1. Clear the bit[0] of LR to
-     * trigger a fault.
-     */
-    p_stat_ctx->lr = ((uint32_t)pfn) & (~1UL);
-    p_stat_ctx->xpsr = XPSR_T32;
+    __ASM volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                  \n"
+#endif
+        "MOV     lr, r0                   \n"
+        "LDR     r0, ="M2S(VTOR_BASE)"    \n" /* VTOR */
+        "LDR     r0, [r0]                 \n" /* MSP address */
+        "LDR     r0, [r0]                 \n" /* MSP */
+        "SUBS    r0, #8                   \n" /* Exclude stack seal */
+        "MSR     msp, r0                  \n" /* Free Main Stack space */
+        "BX      lr                       \n"
+    );
 }
 
-void tfm_arch_init_context(struct tfm_arch_ctx_t *p_actx,
-                           void *param, uintptr_t pfn,
-                           uintptr_t stk_btm, uintptr_t stk_top)
+void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uintptr_t ret_code)
 {
-    struct tfm_state_context_t *p_stat_ctx =
-            (struct tfm_state_context_t *)tfm_arch_seal_thread_stack(stk_top);
+    ((struct full_context_t *)(((struct context_ctrl_t *)p_ctx_ctrl)->sp))
+                                                       ->stat_ctx.r0 = ret_code;
+}
 
-    /*
-     * Shift back SP to leave space for holding common state context
-     * since thread is kicked off through exception return.
-     */
-    p_stat_ctx--;
+/*
+ * Initializes the State Context. The Context is used to do Except Return to
+ * Thread Mode to start a function.
+ *
+ * p_sctx[out] - pointer to the State Context to be initialized.
+ * param [in]  - The parameter for the function to start
+ * pfn   [in]  - Pointer to the function to excute
+ * pfnlr [in]  - The Link Register of the State Context - the return address of
+ *               the function
+ */
+static void tfm_arch_init_state_context(struct tfm_state_context_t *p_sctx,
+                                        void *param,
+                                        uintptr_t pfn, uintptr_t pfnlr)
+{
+    p_sctx->r0 = (uint32_t)param;
+    p_sctx->ra = (uint32_t)pfn;
+    p_sctx->lr = (uint32_t)pfnlr;
+    p_sctx->xpsr = XPSR_T32;
+}
 
-    /* First the common state context - ZERO it before usage. */
-    spm_memset(p_stat_ctx, 0, sizeof(*p_stat_ctx));
-    tfm_arch_init_state_ctx(p_stat_ctx, param, pfn);
+void tfm_arch_init_context(void *p_ctx_ctrl,
+                           uintptr_t pfn, void *param, uintptr_t pfnlr,
+                           uintptr_t sp_limit, uintptr_t sp)
+{
+    struct full_context_t *p_tctx =
+            (struct full_context_t *)arch_seal_thread_stack(sp);
 
-    /* Then the architecture-specific context. */
-    spm_memset(p_actx, 0, sizeof(*p_actx));
-    tfm_arch_init_actx(p_actx, (uint32_t)p_stat_ctx, (uint32_t)stk_btm);
+    p_tctx--;
+
+    spm_memset(p_tctx, 0, sizeof(*p_tctx));
+
+    tfm_arch_init_state_context(&p_tctx->stat_ctx, param, pfn, pfnlr);
+
+    ((struct context_ctrl_t *)p_ctx_ctrl)->exc_ret  = EXC_RETURN_THREAD_S_PSP;
+    ((struct context_ctrl_t *)p_ctx_ctrl)->sp_limit = sp_limit;
+    ((struct context_ctrl_t *)p_ctx_ctrl)->sp       = (uintptr_t)p_tctx;
+}
+
+uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl)
+{
+    struct context_ctrl_t *ctx_ctrl;
+    struct tfm_state_context_t *sc;
+
+    ctx_ctrl  = (struct context_ctrl_t *)p_ctx_ctrl;
+    sc = &(((struct full_context_t *)(ctx_ctrl->sp))->stat_ctx);
+
+    tfm_arch_set_psplim(ctx_ctrl->sp_limit);
+    __set_PSP((uintptr_t)sc);
+
+    return ctx_ctrl->exc_ret;
 }

@@ -26,11 +26,6 @@ if(BL2)
         PUBLIC
             CRYPTO_HW_ACCELERATOR
     )
-
-    target_link_libraries(platform_bl2
-        PRIVATE
-            $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_STATE}>:bl2_crypto_hw>
-    )
 endif()
 
 ############################ Crypto Service ####################################
@@ -43,9 +38,4 @@ target_include_directories(crypto_service_crypto_hw
 target_compile_definitions(crypto_service_crypto_hw
     PUBLIC
         CRYPTO_HW_ACCELERATOR
-)
-
-target_link_libraries(platform_s
-    PRIVATE
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:crypto_service_crypto_hw>
 )

@@ -13,6 +13,7 @@ set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 target_include_directories(platform_region_defs
     INTERFACE
         partition
+        cc312
 )
 
 #========================= Platform common defs ===============================#
@@ -48,6 +49,7 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
+        cc312
 )
 
 target_sources(platform_s
@@ -62,6 +64,7 @@ target_sources(platform_s
         Native_Driver/spi_n25q256a_flash_lib.c
         spm_hal.c
         tfm_hal_isolation.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
@@ -82,8 +85,6 @@ target_sources(platform_bl2
         Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         Native_Driver/spi_n25q256a_flash_lib.c
         bl2_boot_hal.c
-        bl2_security_cnt.c
-        tfm_rotpk.c
 )
 
 target_sources(bl2
@@ -100,6 +101,7 @@ target_include_directories(platform_bl2
     PUBLIC
         partition
         Device/Include
+        cc312
     PRIVATE
         .
         CMSIS_Driver/Config

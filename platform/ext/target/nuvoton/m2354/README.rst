@@ -16,14 +16,13 @@ Build TF-M with M2354 by following commands:
             -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
             -DTEST_S=ON \
             -DTEST_NS=ON \
-            -DTFM_PSA_API=ON \
             -DTFM_ISOLATION_LEVEL=2 \
             -DCMAKE_BUILD_TYPE=Release \
     $ make install
 
 Define TEST_NS=ON or TEST_S=ON for non-secure or secure regression test.
 CMAKE_BUILD_TYPE could be "Release", "Debug", "RelWithDebInfo" or "Minsizerel"
-TFM_PSA_API=ON and TFM_ISOLATION_LEVEL=2 can also be set.
+TFM_ISOLATION_LEVEL=2 can also be set.
 Other cmake parameters should not be changed.
 
 Flashing Image with Nuvoton NuLink Tool

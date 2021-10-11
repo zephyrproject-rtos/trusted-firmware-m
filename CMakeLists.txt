@@ -106,7 +106,7 @@ if(BL2)
 endif()
 add_subdirectory(platform)
 
-if(NS AND TFM_TEST)
+if(TFM_NS_REG_TEST OR TFM_S_REG_TEST)
     # Set to ${TFM_TEST_REPO_PATH}/test by default
     add_subdirectory(${TFM_TEST_PATH} ${CMAKE_CURRENT_BINARY_DIR}/test)
 endif()

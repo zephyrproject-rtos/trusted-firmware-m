@@ -14,7 +14,42 @@ get_filename_component(list_name ${TFM_MANIFEST_LIST} NAME)
 configure_file(${TFM_MANIFEST_LIST} ${CMAKE_CURRENT_BINARY_DIR}/${list_name})
 
 set(MANIFEST_LISTS ${CMAKE_CURRENT_BINARY_DIR}/${list_name})
-set(MANIFEST_LISTS ${MANIFEST_LISTS} ${TFM_EXTRA_MANIFEST_LIST_PATH})
+
+if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
+    list(APPEND TEMP_EXTRA_MANIFEST_LISTS ${TFM_TEST_PATH}/test_services/tfm_test_manifest_list.yaml)
+endif()
+
+if (TFM_EXTRA_MANIFEST_LIST_FILES)
+    list(APPEND TEMP_EXTRA_MANIFEST_LISTS ${TFM_EXTRA_MANIFEST_LIST_FILES})
+endif()
+
+# Build up out-of-tree manifest list array
+# Each manifest list occupies two elements in out-of-tree manifest list array:
+# - Manifest list path under build directory after configure_file()
+# - The original path of manifest list in source directory. It can be used to
+#   build up manifest file path if manifest file path is a relative one in
+#   manifest list.
+set(POSTFIX 1)
+
+foreach(MANIFEST_LIST IN LISTS TEMP_EXTRA_MANIFEST_LISTS)
+    if (NOT EXISTS ${MANIFEST_LIST})
+        message(FATAL_ERROR "Extra manifest list ${MANIFEST_LIST} doesn't exist")
+    endif()
+
+    get_filename_component(MANIFEST_LIST_NAME ${MANIFEST_LIST} NAME_WLE)
+    set(TEMP_MANIFEST_LIST
+        ${CMAKE_CURRENT_BINARY_DIR}/${MANIFEST_LIST_NAME}_${POSTFIX}.yaml)
+
+    configure_file(${MANIFEST_LIST} ${TEMP_MANIFEST_LIST})
+    list(APPEND OUT_OF_TREE_MANIFEST_LIST ${TEMP_MANIFEST_LIST})
+
+    get_filename_component(MANIFEST_LIST_PATH ${MANIFEST_LIST} DIRECTORY)
+    # Append the manifest list original path.
+    # Manifest file path can be a relative one to manifest list.
+    list(APPEND OUT_OF_TREE_MANIFEST_LIST ${MANIFEST_LIST_PATH})
+
+    math(EXPR POSTFIX "${POSTFIX} + 1")
+endforeach()
 
 if ("${TEST_PSA_API}" STREQUAL "IPC")
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_ff_test_manifest_list.yaml
@@ -76,6 +111,7 @@ add_custom_command(OUTPUT ${OUTPUT_FILES}
                                   -m ${MANIFEST_LISTS}
                                   -f ${GENERATED_FILE_LISTS}
                                   -o ${CMAKE_BINARY_DIR}/generated
+                                  -e ${OUT_OF_TREE_MANIFEST_LIST}
     DEPENDS ${TEMPLATE_FILES} ${MANIFEST_FILES}
     DEPENDS ${MANIFEST_LISTS}
 )
@@ -88,6 +124,7 @@ execute_process(
                                   -m ${MANIFEST_LISTS}
                                   -f ${GENERATED_FILE_LISTS}
                                   -o ${CMAKE_BINARY_DIR}/generated
+                                  -e ${OUT_OF_TREE_MANIFEST_LIST}
     RESULT_VARIABLE RET
 )
 

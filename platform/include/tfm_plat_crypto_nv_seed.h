@@ -17,6 +17,14 @@
 #define TFM_CRYPTO_NV_SEED_FAILED  -1
 
 /**
+ * \brief Provision Seed to NV storage. Fails if a seed is already in storage.
+ *
+ * \return Return TFM_CRYPTO_NV_SEED_SUCCESS on success,
+ *         or TFM_CRYPTO_NV_SEED_FAILED on failure.
+ */
+int tfm_plat_crypto_provision_entropy_seed(void);
+
+/**
  * \brief Read Seed from NV storage.
  *
  * \param[out] buf        Buffer to store the seed

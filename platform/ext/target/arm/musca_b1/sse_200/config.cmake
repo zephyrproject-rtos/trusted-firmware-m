@@ -6,27 +6,17 @@
 #-------------------------------------------------------------------------------
 
 
-set(PLATFORM_DUMMY_ATTEST_HAL           FALSE       CACHE BOOL      "Use dummy boot hal implementation. Should not be used in production.")
 set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cryptography mode")
 
 if (NOT FORWARD_PROT_MSG)
     set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
-    set(PLATFORM_DUMMY_NV_SEED              FALSE       CACHE BOOL      "Use dummy NV seed implementation. Should not be used in production.")
-    if(CRYPTO_HW_ACCELERATOR_OTP_STATE STREQUAL "ENABLED")
-        set(PLATFORM_DUMMY_CRYPTO_KEYS      FALSE       CACHE BOOL      "Use dummy crypto keys. Should not be used in production.")
-        # Musca-B1 with OTP enabled is provisioned with a random Initial
-        # Attestation key generated in runtime.
-        # The public key data is not pre-defined and therefore it can only be
-        # retrieved in runtime for test.
-        set(ATTEST_TEST_GET_PUBLIC_KEY      ON          CACHE BOOL      "Require to retrieve Initial Attestation public in runtime for test purpose")
-    endif()
+    set(CRYPTO_NV_SEED                      OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
     set(MCUBOOT_DATA_SHARING                ON         CACHE BOOL      "Add sharing of application specific data using the same shared data area as for the measured boot")
     set(TFM_PARTITION_FIRMWARE_UPDATE       ON         CACHE BOOL      "Enable firmware update partition")
     set(BL0 OFF)
 else()
     set(MCUBOOT_IMAGE_NUMBER                1           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")
     set(MCUBOOT_MEASURED_BOOT               OFF         CACHE BOOL      "Add boot measurement values to boot status. Used for initial attestation token")
-    set(TFM_PSA_API                         ON          CACHE BOOL      "Use PSA api (IPC mode) instead of secure library mode")
     set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Protected Storage partition")
     set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF      CACHE BOOL      "Enable Internal Trusted Storage partition")
     set(TFM_PARTITION_CRYPTO                OFF         CACHE BOOL      "Enable Crypto partition")
@@ -46,10 +36,12 @@ set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_SOURCE_DIR}/platform/ext/target/
 
 set(PSA_API_TEST_TARGET                 "musca_b1"   CACHE STRING    "Target to use when building the PSA API tests")
 
-if(TFM_PSA_API)
+if(NOT TFM_LIB_MODEL)
     if (TEST_NS_FLIH_IRQ)
         message(FATAL_ERROR "FLIH testing has not been supported!")
     endif()
 
-    set(TEST_NS_SLIH_IRQ      ON           CACHE BOOL      "Enable SLIH testing")
+    if (TEST_NS)
+        set(TEST_NS_SLIH_IRQ      ON           CACHE BOOL      "Enable SLIH testing")
+    endif()
 endif()

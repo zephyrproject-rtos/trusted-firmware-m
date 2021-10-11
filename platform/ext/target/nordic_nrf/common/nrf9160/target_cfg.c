@@ -34,6 +34,33 @@ struct platform_data_t tfm_peripheral_std_uart = {
     NRF_UARTE1_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
 };
 
+#ifdef PSA_API_TEST_IPC
+struct platform_data_t
+    tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO = {
+        FF_TEST_SERVER_PARTITION_MMIO_START,
+        FF_TEST_SERVER_PARTITION_MMIO_END
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO = {
+        FF_TEST_DRIVER_PARTITION_MMIO_START,
+        FF_TEST_DRIVER_PARTITION_MMIO_END
+};
+
+/* This platform implementation uses PSA_TEST_SCRATCH_AREA for
+ * storing the state between resets, but the FF_TEST_NVMEM_REGIONS
+ * definitons are still needed for tests to compile.
+ */
+#define FF_TEST_NVMEM_REGION_START  0xFFFFFFFF
+#define FF_TEST_NVMEM_REGION_END    0xFFFFFFFF
+struct platform_data_t
+    tfm_peripheral_FF_TEST_NVMEM_REGION = {
+        FF_TEST_NVMEM_REGION_START,
+        FF_TEST_NVMEM_REGION_END
+};
+#endif /* PSA_API_TEST_IPC */
+
+
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
@@ -41,6 +68,9 @@ REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
 #ifdef BL2
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 #endif /* BL2 */
+#ifdef NRF_NS_STORAGE
+REGION_DECLARE(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base);
+#endif /* NRF_NS_STORAGE */
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -68,6 +98,14 @@ const struct memory_region_limits memory_regions = {
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
         SECONDARY_PARTITION_SIZE - 1,
 #endif /* BL2 */
+
+#ifdef NRF_NS_STORAGE
+    .non_secure_storage_partition_base =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base),
+    .non_secure_storage_partition_limit =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base) +
+        NRF_NS_STORAGE_PARTITION_SIZE - 1,
+#endif /* NRF_NS_STORAGE */
 };
 
 /* To write into AIRCR register, 0x5FA value must be write to the VECTKEY field,
@@ -184,6 +222,13 @@ enum tfm_plat_err_t spu_init_cfg(void)
                                         memory_regions.secondary_partition_limit);
 #endif /* BL2 */
 
+#ifdef NRF_NS_STORAGE
+    /* Configures storage partition to be non-secure */
+    spu_regions_flash_config_non_secure(
+        memory_regions.non_secure_storage_partition_base,
+        memory_regions.non_secure_storage_partition_limit);
+#endif /* NRF_NS_STORAGE */
+
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -212,7 +257,10 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU2, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU3, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU4, false);
+#ifndef PSA_API_TEST_IPC
+    /* EGU5 is used as a secure peripheral in PSA FF tests */
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU5, false);
+#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM2, false);

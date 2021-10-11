@@ -27,24 +27,23 @@
  * Flash layout on nucleo_l552ze_q with BL2 (multiple image boot):
  *
  * 0x0000_0000 BL2 - MCUBoot (72 KB)
- * 0x0000_e000 NV counters area (4 KB)
- * 0x0000_f000 Secure Storage Area (8 KB)
- * 0x0001_1000 Internal Trusted Storage Area (8 KB)
- * 0x0001_3000 Secure image     primary slot (180 KB)
- * 0x0004_0000 Non-secure image primary slot (36 KB)
- * 0x0004_9000 Secure image     secondary slot (180 KB)
- * 0x0007_6000 Non-secure image secondary slot (36 KB)
- * 0x0007_F000 Unused (4 KB)
+ * 0x0000_e000 OTP / NV counters area (8 KB)
+ * 0x0001_0000 Secure Storage Area (8 KB)
+ * 0x0001_2000 Internal Trusted Storage Area (8 KB)
+ * 0x0001_4000 Secure image     primary slot (180 KB)
+ * 0x0004_1000 Non-secure image primary slot (36 KB)
+ * 0x0004_a000 Secure image     secondary slot (180 KB)
+ * 0x0007_7000 Non-secure image secondary slot (36 KB)
  *
  * Flash layout on nucleo_l552ze_q with BL2 (multiple image boot, layout for test):
  * No Firmware update , ITS, PS in RAM.
  * 0x0000_0000 BL2 - MCUBoot (72 KB)
- * 0x0000_e000 NV counters area (4 KB)
- * 0x0000_f000 Secure Storage Area (8 KB)
- * 0x0001_1000 Internal Trusted Storage Area (8 KB)
- * 0x0001_3000 Secure image     primary slot (224 KB)
- * 0x0004_b000 Non-secure image primary slot (168 KB)
- * 0x0007_5000 Unused (44K)
+ * 0x0000_e000 OTP / NV counters area  area (8 KB)
+ * 0x0001_0000 Secure Storage Area (8 KB)
+ * 0x0001_2000 Internal Trusted Storage Area (8 KB)
+ * 0x0001_4000 Secure image     primary slot (224 KB)
+ * 0x0004_c000 Non-secure image primary slot (172 KB)
+ * 0x0007_7000 Unused (40K)
  * The size of a partition. This should be large enough to contain a S or NS
  * sw binary. Each FLASH_AREA_IMAGE contains two partitions. See Flash layout
  * above.
@@ -77,15 +76,19 @@
 #define FLASH_AREA_SCRATCH_SIZE         (0x2000)
 /* according to test flash layout can change */
 #if defined(FLASH_LAYOUT_FOR_TEST)
-/* Non Volatile Counters definitions */
-#define FLASH_NV_COUNTERS_SECTOR_SIZE      (0x1000)
-/* fix me with overwrite scratch is not required */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_AREA_SCRATCH_OFFSET)
+
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
+                                           FLASH_ITS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_SECTOR_SIZE + \
+                                           FLASH_OTP_NV_COUNTERS_SECTOR_SIZE)
 
 /* fix me with test config PS and ITS in RAM */
 /* Secure Storage (PS) Service definitions */
 #define FLASH_PS_AREA_SIZE             (0x2000)
-#define FLASH_PS_AREA_OFFSET           (FLASH_NV_COUNTERS_AREA_OFFSET+FLASH_NV_COUNTERS_SECTOR_SIZE)
+#define FLASH_PS_AREA_OFFSET           (FLASH_OTP_NV_COUNTERS_AREA_OFFSET + \
+                                        FLASH_OTP_NV_COUNTERS_AREA_SIZE)
 
 /* Internal Trusted Storage (ITS) Service definitions */
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET+FLASH_PS_AREA_SIZE)
@@ -99,15 +102,17 @@
 #define FLASH_AREA_0_OFFSET             (FLASH_ITS_AREA_OFFSET+FLASH_ITS_AREA_SIZE)
 #define FLASH_AREA_0_SIZE               (FLASH_S_PARTITION_SIZE)
 #else
-/* Non Volatile Counters definitions */
-#define FLASH_NV_COUNTERS_SECTOR_SIZE      (0x1000)
-/* fix me with overwrite scratch is not required */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_AREA_SCRATCH_OFFSET)
+
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
+                                           FLASH_ITS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* fix me with test config PS and ITS in RAM */
 /* Secure Storage (PS) Service definitions */
 #define FLASH_PS_AREA_SIZE             (0x2000)
-#define FLASH_PS_AREA_OFFSET           (FLASH_NV_COUNTERS_AREA_OFFSET+FLASH_NV_COUNTERS_SECTOR_SIZE)
+#define FLASH_PS_AREA_OFFSET           (FLASH_OTP_NV_COUNTERS_AREA_OFFSET + \
+                                        FLASH_OTP_NV_COUNTERS_AREA_SIZE)
 
 /* Internal Trusted Storage (ITS) Service definitions */
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET+FLASH_PS_AREA_SIZE)
@@ -145,7 +150,7 @@
 #define MCUBOOT_MAX_IMG_SECTORS           ((2 * FLASH_PARTITION_SIZE) / \
                                          FLASH_AREA_IMAGE_SECTOR_SIZE)
 
-#define FLASH_NV_COUNTERS_AREA_SIZE     (0x18)     /* 16 Bytes */
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
 
 #define SECURE_IMAGE_OFFSET             (0x0)
 #define SECURE_IMAGE_MAX_SIZE           FLASH_S_PARTITION_SIZE
@@ -158,6 +163,7 @@
   */
 
 #define FLASH_DEV_NAME TFM_Driver_FLASH0
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x8)
 
 /* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
@@ -197,15 +203,12 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_ITS_PROGRAM_UNIT       (0x8)
 
-/* NV Counters definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    (0x18)/* 24 Bytes */
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
-
-/* BL2 NV Counters definitions  */
-#define BL2_NV_COUNTERS_AREA_ADDR    FLASH_BL2_NVCNT_AREA_OFFSET
-#define BL2_NV_COUNTERS_AREA_SIZE    FLASH_BL2_NVCNT_AREA_SIZE
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
 #define BL2_S_RAM_ALIAS_BASE  (0x30000000)
 #define BL2_NS_RAM_ALIAS_BASE (0x20000000)

@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include "tfm_plat_test.h"
+#include "pal_plat_test.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <hal/nrf_gpio.h>
@@ -23,57 +24,15 @@
 #include <helpers/nrfx_reset_reason.h>
 #include <nrf_board.h>
 #include <region_defs.h>
+
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
 #include <tfm_platform_api.h>
 #include <log/tfm_log.h>
+#endif
 
 #define TIMER_RELOAD_VALUE (1*1000*1000)
-#define USERLED_MASK       (1UL)
-
 
 static bool initialized = false;
-
-static void gpio_init(void)
-{
-    nrf_gpio_cfg_input(BUTTON1_PIN, BUTTON1_PULL);
-    nrf_gpio_cfg_output(LED1_PIN);
-    initialized = true;
-}
-
-void tfm_plat_test_wait_user_button_pressed(void)
-{
-    if (!initialized) gpio_init();
-
-    /* Wait until button is pressed */
-    while (nrf_gpio_pin_read(BUTTON1_PIN) != BUTTON1_ACTIVE_LEVEL) { ; }
-}
-
-void tfm_plat_test_wait_user_button_released(void)
-{
-    if (!initialized) gpio_init();
-
-    /* Wait until user button 0 is released */
-    while (nrf_gpio_pin_read(BUTTON1_PIN) == BUTTON1_ACTIVE_LEVEL) { ; }
-}
-
-uint32_t tfm_plat_test_get_led_status(void)
-{
-    if (!initialized) gpio_init();
-
-    return (nrf_gpio_pin_out_read(LED1_PIN) == LED1_ACTIVE_LEVEL);
-}
-
-void tfm_plat_test_set_led_status(uint32_t status)
-{
-    if (!initialized) gpio_init();
-
-    status &= USERLED_MASK;
-    nrf_gpio_pin_write(LED1_PIN, status == LED1_ACTIVE_LEVEL);
-}
-
-uint32_t tfm_plat_test_get_userled_mask(void)
-{
-    return USERLED_MASK;
-}
 
 static void timer_init(NRF_TIMER_Type * TIMER, uint32_t ticks)
 {
@@ -139,7 +98,7 @@ void pal_timer_stop_ns(void)
     timer_stop(NRF_TIMER1);
 }
 
-#if !defined(TEST_NS_SLIH_IRQ)
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
 /* Watchdog timeout handler. */
 void TIMER1_Handler(void)
 {

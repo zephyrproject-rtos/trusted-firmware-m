@@ -9,89 +9,65 @@
 #include "spm_ipc.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_arch.h"
+#include "tfm_core_utils.h"
 #include "exception_info.h"
 #include "tfm_secure_api.h"
+#include "spm_ipc.h"
 #include "svc_num.h"
+#include "utilities.h"
 
 #if !defined(__ARM_ARCH_8M_BASE__)
 #error "Unsupported ARM Architecture."
 #endif
 
-/*
- * Stack status at PendSV entry:
- *
- *                                            [ R0 - R3  ]<- PSP
- *                                            [ R12      ]
- *                                            [ LR_of_RA ]
- *                       MSP->[ ........ ]    [ RA       ]
- *                            [ ........ ]    [ XPSR     ]
- *                                            [ ........ ]
- *                                            [ ........ ]
- *
- * Stack status before calling pendsv_do_schedule():
- *
- *                       MSP->[ R4 - R11 ]
- *                            [ PSP      ]--->[ R0 - R3  ]
- *                            [ PSP Limit]    [ R12      ]
- *                            [ R2(dummy)]    [ LR_of_RA ]
- *                            [ LR       ]    [ RA       ]
- *                            [ ........ ]    [ XPSR     ]
- *                            [ ........ ]    [ ........ ]
- *                                            [ ........ ]
- *
- * tfm_pendsv_do_schedule() updates stacked context into current thread and
- * replace stacked context with context of next thread.
- *
- * Scheduler does not support handler mode thread so take PSP/PSP_LIMIT as
- * thread SP/SP_LIMIT. R2 holds dummy data due to stack operation is 8 bytes
- * aligned.
- */
 #if defined(__ICCARM__)
-#pragma required = tfm_pendsv_do_schedule
+#pragma required = do_schedule
 #endif
 
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
-#ifndef __ICCARM__
+#if !defined(__ICCARM__)
         ".syntax unified                    \n"
 #endif
-        "movs    r0, #0x40                  \n"
-        "mov     r1, lr                     \n"
-        "tst     r0, r1                     \n" /* Was NS interrupted by S? */
-        "beq     exc_return                 \n" /* Yes, do not schedule */
-        "mrs     r0, psp                    \n"
-        "mrs     r1, psplim                 \n"
-        "push    {r0, r1, r2, lr}           \n"
-        "push    {r4-r7}                    \n"
-        "mov     r4, r8                     \n"
-        "mov     r5, r9                     \n"
-        "mov     r6, r10                    \n"
-        "mov     r7, r11                    \n"
-        "push    {r4-r7}                    \n"
-        "mov     r0, sp                     \n"
-        "bl      tfm_pendsv_do_schedule     \n"
-        "pop     {r4-r7}                    \n"
-        "mov     r8, r4                     \n"
-        "mov     r9, r5                     \n"
-        "mov     r10, r6                    \n"
-        "mov     r11, r7                    \n"
-        "pop     {r4-r7}                    \n"
-        "pop     {r0-r3}                    \n"
-        "mov     lr, r3                     \n"
-        "msr     psp, r0                    \n"
-        "msr     psplim, r1                 \n"
-        "exc_return:                        \n"
-        "bx      lr                         \n"
+        "   movs    r0, #0x40               \n"
+        "   mov     r1, lr                  \n"
+        "   tst     r0, r1                  \n" /* Was NS interrupted by S? */
+        "   beq     v8b_pendsv_exit         \n" /* Yes, do not schedule */
+        "   push    {r0, lr}                \n" /* Save dummy R0, LR */
+        "   bl      do_schedule             \n"
+        "   pop     {r2, r3}                \n"
+        "   mov     lr, r3                  \n"
+        "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
+        "   beq     v8b_pendsv_exit         \n" /* No schedule if curr = next */
+        "   mrs     r2, psp                 \n"
+        "   mrs     r3, psplim              \n"
+        "   subs    r2, #32                 \n" /* Make room for r4-r7 */
+        "   stm     r2!, {r4-r7}            \n" /* Save callee registers */
+        "   mov     r4, r8                  \n"
+        "   mov     r5, r9                  \n"
+        "   mov     r6, r10                 \n"
+        "   mov     r7, r11                 \n"
+        "   stm     r2!, {r4-r7}            \n"
+        "   mov     r5, lr                  \n"
+        "   subs    r2, #32                 \n" /* reset r2(SP) to top */
+        "   stm     r0!, {r2, r3, r4, r5}   \n" /* Save struct context_ctrl_t */
+        "   ldm     r1!, {r2, r3, r4, r5}   \n" /* Load ctx of next thread */
+        "   mov     lr, r5                  \n"
+        "   adds    r2, #16                 \n" /* Start of popping r4-r11 */
+        "   ldm     r2!, {r4-r7}            \n"
+        "   mov     r8, r4                  \n"
+        "   mov     r9, r5                  \n"
+        "   mov     r10, r6                 \n"
+        "   mov     r11, r7                 \n"
+        "   subs    r2, #32                 \n"
+        "   ldm     r2!, {r4-r7}            \n"
+        "   adds    r2, #16                 \n" /* End of popping r4-r11 */
+        "   msr     psp, r2                 \n"
+        "   msr     psplim, r3              \n"
+        "v8b_pendsv_exit:                   \n"
+        "   bx      lr                      \n"
     );
-}
-
-void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
-                        uint32_t sp, uint32_t sp_limit)
-{
-    p_actx->sp = sp;
-    p_actx->sp_limit = sp_limit;
-    p_actx->lr = EXC_RETURN_THREAD_S_PSP;
 }
 
 /**
@@ -132,7 +108,6 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"
-    "SUB     sp, #8                         \n" /* For FLIH PID and signal */
     "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BL      tfm_core_svc_handler           \n"
     "MOV     lr, r0                         \n"
@@ -143,7 +118,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
     "BGT     to_flih_func                   \n"
     "BLT     from_flih_func                 \n"
-    "ADD     sp, #16                        \n"
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BX      lr                             \n"
     "to_flih_func:                          \n"
     "PUSH    {r4-r7}                        \n"
@@ -163,14 +138,15 @@ __attribute__((naked)) void SVC_Handler(void)
     "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
     "BX      lr                             \n"
     "from_flih_func:                        \n"
-    "ADD     sp, #24                        \n"
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "POP     {r4, r5}                       \n" /* Seal stack */
     "POP     {r4-r7}                        \n"
     "MOV     r8, r4                         \n"
     "MOV     r9, r5                         \n"
     "MOV     r10, r6                        \n"
     "MOV     r11, r7                        \n"
     "POP     {r4-r7}                        \n"
-    "ADD     sp, #16                        \n"
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BX      lr                             \n"
     );
 }
@@ -204,9 +180,10 @@ void tfm_arch_set_secure_exception_priorities(void)
      * When AIRCR.PRIS is set, the Non-Secure execution can act on
      * FAULTMASK_NS, PRIMASK_NS or BASEPRI_NS register to boost its priority
      * number up to the value 0x80.
-     * For this reason, set the priority of the PendSV interrupt to 0x80.
+     * For this reason, set the priority of the PendSV interrupt to the next
+     * priority level configurable on the platform, just below 0x80.
      */
-    NVIC_SetPriority(PendSV_IRQn, 1 << (__NVIC_PRIO_BITS - 1));
+    NVIC_SetPriority(PendSV_IRQn, (1 << (__NVIC_PRIO_BITS - 1)) - 1);
 #endif
 }
 

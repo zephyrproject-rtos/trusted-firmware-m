@@ -14,6 +14,10 @@ add_library(tfm_utilities INTERFACE)
 
 set(TFM_PARTITION_PLATFORM ON CACHE BOOL "Enable the TF-M Platform partition")
 
+# Generate TF-M version
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/tfm_version.h.in
+               ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include/tfm_version.h)
+
 target_include_directories(tfm_spm
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
@@ -26,6 +30,7 @@ target_include_directories(tfm_spm
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/secure_fw/include
         ${CMAKE_BINARY_DIR}/generated
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_psa>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_func>
 )
@@ -50,8 +55,7 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_core_svcalls_ipc.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>>:cmsis_psa/tfm_nspm_ipc.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_pools.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_thread.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_wait.c>
+        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/thread.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/main.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/arch.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/spm_func.c>
@@ -97,6 +101,7 @@ target_link_libraries(tfm_spm
         $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_client_partition>
         $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_server_partition>
         tfm_fih
+        tfm_sprt
 )
 
 target_compile_definitions(tfm_spm
@@ -118,7 +123,10 @@ set_source_files_properties(tfm_nspm_func.c
 # to not overshadow _real_ warnings.
 set_source_files_properties(tfm_secure_api.c
     PROPERTIES
-        COMPILE_FLAGS -Wno-implicit-function-declaration
+        COMPILE_FLAGS
+            $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:IAR>:>
 )
 
 ############################ Partition Defs ####################################

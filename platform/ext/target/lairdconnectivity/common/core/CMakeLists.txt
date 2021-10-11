@@ -61,7 +61,6 @@ target_sources(platform_s
         ${NRF_FOLDER_PATH}/native_drivers/spu.c
         ${NRF_FOLDER_PATH}/spm_hal.c
         ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
-        nv_counters.c
         plat_test.c
 )
 
@@ -118,6 +117,5 @@ if(BL2)
             ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
             ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_qspi.c
             ${NRF_FOLDER_PATH}/nrfx_glue.c
-            nv_counters.c
     )
 endif()

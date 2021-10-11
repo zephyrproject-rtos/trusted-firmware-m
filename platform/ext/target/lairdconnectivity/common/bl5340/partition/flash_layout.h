@@ -28,8 +28,7 @@
  *    0x000B_0000 Non-secure image primary (256 KB)
  * 0x000f_0000 Protected Storage area (16 KB)
  * 0x000f_4000 Internal Trusted Storage area (8 KB)
- * 0x000f_6000 NV counters main area (4 KB)
- * 0x000f_7000 NV counters backup area (4 KB)
+ * 0x000f_6000 OTP / NV counters area (8 KB)
  * 0x000f_8000 Unused (optional NVS used in Zephyr) (32 KB)
  * QSPI:
  * 0x0000_0000 Secondary image area (896 KB):
@@ -47,8 +46,7 @@
  *    0x000A_0000 Non-secure image primary (320 KB)
  * 0x000f_0000 Protected Storage main area (16 KB)
  * 0x000f_4000 Internal Trusted Storage main area (8 KB)
- * 0x000f_6000 NV counters main area (4 KB)
- * 0x000f_7000 NV counters backup area (4 KB)
+ * 0x000f_6000 OTP / NV counters area (8 KB)
  * 0x000f_8000 Unused (optional NVS used in Zephyr) (32 KB)
  * QSPI:
  * 0x0000_0000 Unused (1 MB)
@@ -174,10 +172,12 @@
                                          FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
-/* NV Counters definitions */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
-                                         FLASH_ITS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
+                                           FLASH_ITS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
+
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
@@ -191,6 +191,7 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x4)
 
 /* Flash device name used by secondary slot and scratch area
  * Name is defined in flash driver file: Driver_QSPI.c
@@ -245,15 +246,13 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_ITS_PROGRAM_UNIT       (0x4)
 
-/* NV Counter definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    (0x18) /* 24 Bytes */
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
-/* Backup NV Counter definitions */
-#define TFM_NV_COUNTERS_BACKUP_AREA_ADDR    (FLASH_NV_COUNTERS_AREA_OFFSET + FLASH_AREA_IMAGE_SECTOR_SIZE)
-#define TFM_NV_COUNTERS_BACKUP_SECTOR_ADDR  (FLASH_NV_COUNTERS_AREA_OFFSET + FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Use Flash memory to store Code data */
 #define FLASH_BASE_ADDRESS (0x00000000)

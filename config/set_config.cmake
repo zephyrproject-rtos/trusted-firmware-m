@@ -43,40 +43,30 @@ if (TFM_PROFILE)
 endif()
 
 # Load TF-M model specific default config
-if (TFM_PSA_API)
+if (TFM_LIB_MODEL)
+    include(config/tfm_library_config_default.cmake)
+else()
     include(config/tfm_ipc_config_default.cmake)
 endif()
 
 # Load defaults, setting options not already set
 include(config/config_default.cmake)
 
-# Load TF-M test suites setting
-if (TEST_S OR
-    TEST_NS OR
-    TEST_NS_ATTESTATION OR
-    TEST_NS_T_COSE OR
-    TEST_NS_QCBOR OR
-    TEST_NS_AUDIT OR
-    TEST_NS_CORE OR
-    TEST_NS_CRYPTO OR
-    TEST_NS_ITS OR
-    TEST_NS_PS OR
-    TEST_NS_PLATFORM OR
-    TEST_NS_FWU OR
-    TEST_NS_IPC OR
-    TEST_NS_SLIH_IRQ OR
-    TEST_NS_FLIH_IRQ OR
-    TEST_NS_MULTI_CORE OR
-    TEST_S_ATTESTATION OR
-    TEST_S_AUDIT OR
-    TEST_S_CRYPTO OR
-    TEST_S_ITS OR
-    TEST_S_PS OR
-    TEST_S_PLATFORM OR
-    TEST_S_FWU OR
-    TEST_S_IPC)
-
-    # TFM_TEST is an internal cmake temporary value to manage tf-m-tests source
-    set(TFM_TEST ON)
-    include(config/tests/set_config.cmake)
+# Load MCUboot specific default.cmake
+if (BL2)
+    include(${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/mcuboot_default_config.cmake)
 endif()
+
+# Fetch tf-m-tests repo during config, if NS or regression test is required.
+# Therefore tf-m-tests configs can be set with TF-M configs since their configs
+# are coupled.
+include(lib/ext/tf-m-tests/tf-m-tests.cmake)
+
+# Load TF-M regression test suites setting
+if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
+    include(${TFM_TEST_PATH}/config/set_config.cmake)
+endif()
+
+# Set secure log configs
+# It also depends on regression test config.
+include(config/tfm_secure_log.cmake)

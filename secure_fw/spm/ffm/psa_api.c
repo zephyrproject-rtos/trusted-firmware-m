@@ -14,14 +14,13 @@
 #include "tfm_core_utils.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
-#include "load/irq_defs.h"
+#include "load/interrupt_defs.h"
 #include "psa_api.h"
 #include "utilities.h"
-#include "tfm_wait.h"
-#include "tfm_nspm.h"
 #include "ffm/spm_error_base.h"
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
+#include "tfm_hal_interrupt.h"
 #include "tfm_hal_platform.h"
 #include "tfm_psa_call_param.h"
 
@@ -109,11 +108,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
     }
 
-    if (ns_caller) {
-        client_id = tfm_nspm_get_current_client_id();
-    } else {
-        client_id = tfm_spm_partition_get_running_partition_id();
-    }
+    client_id = tfm_spm_get_client_id(ns_caller);
 
     /*
      * Create connection handle here since it is possible to return the error
@@ -175,11 +170,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
     }
 
-    if (ns_caller) {
-        client_id = tfm_nspm_get_current_client_id();
-    } else {
-        client_id = tfm_spm_partition_get_running_partition_id();
-    }
+    client_id = tfm_spm_get_client_id(ns_caller);
 
     /* Allocate space from handle pool for static handle. */
     if (IS_STATIC_HANDLE(handle)) {
@@ -359,11 +350,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle)
         TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
     }
 
-    if (ns_caller) {
-        client_id = tfm_nspm_get_current_client_id();
-    } else {
-        client_id = tfm_spm_partition_get_running_partition_id();
-    }
+    client_id = tfm_spm_get_client_id(ns_caller);
 
     conn_handle = tfm_spm_to_handle_instance(handle);
     /*
@@ -432,7 +419,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     }
 
     /*
-     * tfm_event_wait() blocks the caller thread if no signals are available.
+     * thrd_wait_on() blocks the caller thread if no signals are available.
      * In this case, the return value of this function is temporary set into
      * runtime context. After new signal(s) are available, the return value
      * is updated with the available signal(s) and blocked thread gets to run.
@@ -440,10 +427,11 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     if (timeout == PSA_BLOCK &&
         (partition->signals_asserted & signal_mask) == 0) {
         partition->signals_waiting = signal_mask;
-        tfm_event_wait(&partition->event);
+        thrd_wait_on(&partition->waitobj,
+                     &(tfm_spm_get_running_partition()->thrd));
     } else if ((partition->signals_asserted & signal_mask) == 0) {
         /* Activate scheduler to check if any higher priority thread to run */
-        tfm_core_thrd_activate_schedule();
+        tfm_arch_trigger_pendsv();
     }
 
     return partition->signals_asserted & signal_mask;
@@ -795,13 +783,15 @@ void tfm_spm_partition_psa_reply(psa_handle_t msg_handle, psa_status_t status)
     if (is_tfm_rpc_msg(msg)) {
         tfm_rpc_client_call_reply(msg, ret);
     } else {
-        tfm_event_wake(&msg->ack_evnt, ret);
+        thrd_wake_up(&msg->ack_evnt, ret);
     }
 }
 
 void tfm_spm_partition_psa_notify(int32_t partition_id)
 {
-    notify_with_signal(partition_id, PSA_DOORBELL);
+    struct partition_t *p_pt = tfm_spm_get_partition_by_id(partition_id);
+
+    spm_assert_signal(p_pt, PSA_DOORBELL);
 }
 
 void tfm_spm_partition_psa_clear(void)
@@ -851,8 +841,8 @@ void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
 
     partition->signals_asserted &= ~irq_signal;
 
-    tfm_spm_hal_clear_pending_irq((IRQn_Type)(irq_info->source));
-    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
+    tfm_hal_irq_clear_pending(irq_info->source);
+    tfm_hal_irq_enable(irq_info->source);
 }
 
 void tfm_spm_partition_psa_panic(void)
@@ -879,7 +869,7 @@ void tfm_spm_partition_irq_enable(psa_signal_t irq_signal)
         tfm_core_panic();
     }
 
-    tfm_spm_hal_enable_irq((IRQn_Type)(irq_info->source));
+    tfm_hal_irq_enable(irq_info->source);
 }
 
 psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal)
@@ -897,7 +887,7 @@ psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal)
         tfm_core_panic();
     }
 
-    tfm_spm_hal_disable_irq((IRQn_Type)(irq_info->source));
+    tfm_hal_irq_disable(irq_info->source);
 
     return 1;
 }

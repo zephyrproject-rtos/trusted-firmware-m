@@ -45,37 +45,7 @@
 #define EXC_NUM_SVCALL                          (11)
 #define EXC_NUM_PENDSV                          (14)
 
-#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
-struct tfm_arch_ctx_t {
-    uint32_t    r4;
-    uint32_t    r5;
-    uint32_t    r6;
-    uint32_t    r7;
-    uint32_t    r8;
-    uint32_t    r9;
-    uint32_t    r10;
-    uint32_t    r11;
-    uint32_t    sp;
-    uint32_t    sp_limit;
-    uint32_t    dummy;
-    uint32_t    lr;
-};
-#elif defined(__ARM_ARCH_8M_BASE__)
-struct tfm_arch_ctx_t {
-    uint32_t    r8;
-    uint32_t    r9;
-    uint32_t    r10;
-    uint32_t    r11;
-    uint32_t    r4;
-    uint32_t    r5;
-    uint32_t    r6;
-    uint32_t    r7;
-    uint32_t    sp;
-    uint32_t    sp_limit;
-    uint32_t    dummy;
-    uint32_t    lr;
-};
-#endif
+#define VTOR_BASE                       (0xE000ED08)
 
 /* Disable NS exceptions by setting NS PRIMASK to 1 */
 #define TFM_NS_EXC_DISABLE()    __TZ_set_PRIMASK_NS(1)
@@ -123,6 +93,16 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 }
 
 /**
+ * \brief Set MSP limit value.
+ *
+ * \param[in] msplim        MSP limit value to be written.
+ */
+__STATIC_INLINE void tfm_arch_set_msplim(uint32_t msplim)
+{
+    __set_MSPLIM(msplim);
+}
+
+/**
  * \brief Seal the thread stack.
  *
  * This function must be called only when the caller is using MSP.
@@ -131,7 +111,7 @@ __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
  *
  * \retval stack         Updated thread stack address.
  */
-__STATIC_INLINE uintptr_t tfm_arch_seal_thread_stack(uintptr_t stk)
+__STATIC_INLINE uintptr_t arch_seal_thread_stack(uintptr_t stk)
 {
     TFM_CORE_ASSERT((stk & 0x7) == 0);
     stk -= TFM_STACK_SEALED_SIZE;
@@ -140,28 +120,6 @@ __STATIC_INLINE uintptr_t tfm_arch_seal_thread_stack(uintptr_t stk)
     *((uint32_t *)(stk + 4)) = TFM_STACK_SEAL_VALUE;
 
     return stk;
-}
-
-/**
- * \brief Get architecture context value into context struct
- *
- * \param[in] p_actx        Pointer of context data
- */
-__STATIC_INLINE void tfm_arch_get_ctx(struct tfm_arch_ctx_t *p_actx)
-{
-    p_actx->sp = __get_PSP();
-    p_actx->sp_limit = __get_PSPLIM();
-}
-
-/**
- * \brief Set architecture context value into hardware
- *
- * \param[in] p_actx        Pointer of context data
- */
-__STATIC_INLINE void tfm_arch_set_ctx(struct tfm_arch_ctx_t *p_actx)
-{
-    __set_PSP(p_actx->sp);
-    __set_PSPLIM(p_actx->sp_limit);
 }
 
 /**

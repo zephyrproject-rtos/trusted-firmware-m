@@ -99,32 +99,6 @@ psa_status_t tfm_crypto_encode_id_and_owner(psa_key_id_t key_id,
     return PSA_SUCCESS;
 }
 
-psa_status_t tfm_crypto_set_key_domain_parameters(psa_invec in_vec[],
-                                   size_t in_len,
-                                   psa_outvec out_vec[],
-                                   size_t out_len)
-{
-#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    /* FixMe: To be implemented */
-    return PSA_ERROR_NOT_SUPPORTED;
-#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
-}
-
-psa_status_t tfm_crypto_get_key_domain_parameters(psa_invec in_vec[],
-                                   size_t in_len,
-                                   psa_outvec out_vec[],
-                                   size_t out_len)
-{
-#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    /* FixMe: To be implemented */
-    return PSA_ERROR_NOT_SUPPORTED;
-#endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
-}
-
 psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
                                    size_t in_len,
                                    psa_outvec out_vec[],

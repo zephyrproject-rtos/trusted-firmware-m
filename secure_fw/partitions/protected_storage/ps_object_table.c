@@ -336,9 +336,13 @@ __STATIC_INLINE psa_status_t ps_object_table_nvc_generate_auth_tag(
 {
     struct ps_crypto_assoc_data_t assoc_data;
     union ps_crypto_t *crypto = &obj_table->crypto;
+    psa_status_t err;
 
     /* Get new IV */
-    ps_crypto_get_iv(crypto);
+    err = ps_crypto_get_iv(crypto);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
 
     assoc_data.nv_counter = nvc_1;
     (void)tfm_memcpy(assoc_data.obj_table_data,
@@ -460,9 +464,13 @@ __STATIC_INLINE psa_status_t ps_object_table_generate_auth_tag(
                                               struct ps_obj_table_t *obj_table)
 {
     union ps_crypto_t *crypto = &obj_table->crypto;
+    psa_status_t err;
 
     /* Get new IV */
-    ps_crypto_get_iv(crypto);
+    err = ps_crypto_get_iv(crypto);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
 
     return ps_crypto_generate_auth_tag(crypto,
                                        PS_CRYPTO_ASSOCIATED_DATA(crypto),

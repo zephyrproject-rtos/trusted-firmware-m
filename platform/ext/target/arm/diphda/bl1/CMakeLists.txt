@@ -104,6 +104,7 @@ target_compile_definitions(bl1_main
     PRIVATE
         MCUBOOT_IMAGE_NUMBER=${BL1_IMAGE_NUMBER}
         BL1
+        BL2
 )
 
 # Configurations based on bl2/CMakeLists.txt
@@ -114,6 +115,7 @@ set(BL2_SOURCE ${CMAKE_SOURCE_DIR}/bl2)
 target_sources(bl1_main
     PRIVATE
         ${BL2_SOURCE}/src/flash_map.c
+        ${BL2_SOURCE}/src/provisioning.c
 )
 
 target_include_directories(bl1_main
@@ -143,7 +145,6 @@ target_sources(bl1_main
     PRIVATE
         ${BL2_SOURCE}/ext/mcuboot/bl2_main.c
         ${BL2_SOURCE}/ext/mcuboot/keys.c
-        ${BL2_SOURCE}/ext/mcuboot/flash_map_extended.c
         ${BL2_SOURCE}/ext/mcuboot/flash_map_legacy.c
 )
 
@@ -188,9 +189,9 @@ target_sources(bl1_main
     PRIVATE
         ${CMAKE_SOURCE_DIR}/platform/ext/common/boot_hal.c
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_SOURCE_DIR}/platform/ext/common/uart_stdout.c>
-        $<$<BOOL:${PLATFORM_DUMMY_NV_COUNTERS}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/nv_counters.c>
-        $<$<BOOL:${PLATFORM_DUMMY_ROTPK}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/tfm_rotpk.c>
-        $<$<BOOL:${PLATFORM_DUMMY_IAK}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/tfm_initial_attestation_key_material.c>
+        $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/nv_counters.c>
+        $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/flash_otp_nv_counters_backend.c>
+        $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/otp_flash.c>
 )
 
 target_link_libraries(bl1_main
@@ -203,8 +204,13 @@ target_compile_definitions(bl1_main
     PRIVATE
         MCUBOOT_${MCUBOOT_UPGRADE_STRATEGY}
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
+        $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
         $<$<BOOL:${MCUBOOT_HW_KEY}>:MCUBOOT_HW_KEY>
         MCUBOOT_FIH_PROFILE_${MCUBOOT_FIH_PROFILE}
+        $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
+        $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
+        $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION>
+        $<$<BOOL:${TFM_DUMMY_PROVISIONING}>:TFM_DUMMY_PROVISIONING>
 )
 
 # Configurations based on cc312 cmake files
@@ -230,12 +236,13 @@ target_sources(bl1_main
         ../Device/Source/system_core_init.c
         ../Native_Driver/firewall.c
         ../Native_Driver/uart_pl011_drv.c
-        ../tfm_rotpk.c
         ../Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         ../Native_Driver/spi_n25q256a_flash_lib.c
         bl1_boot_hal.c
         bl1_flash_map.c
         bl1_security_cnt.c
+        flash_map_extended.c
+        bl1_rotpk.c
 )
 
 target_include_directories(bl1_main
@@ -252,8 +259,8 @@ target_include_directories(bl1_main
 
 find_package(Python3)
 
-set(FLASH_AREA_NUM 0)
-configure_file(${BL2_SOURCE}/ext/mcuboot/signing_layout.c.in ${CMAKE_CURRENT_BINARY_DIR}/signing_layout.c @ONLY)
+set(FLASH_AREA_NUM 8)
+configure_file(signing_layout.c.in ${CMAKE_CURRENT_BINARY_DIR}/signing_layout.c @ONLY)
 add_library(signing_layout_for_bl2 OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout.c)
 
 target_compile_options(signing_layout_for_bl2

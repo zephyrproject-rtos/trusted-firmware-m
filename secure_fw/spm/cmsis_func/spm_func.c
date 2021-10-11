@@ -56,7 +56,7 @@ REGION_DECLARE_T(Image$$, TFM_SECURE_STACK, $$ZI$$Limit, struct iovec_args_t)[];
 static uint32_t *tfm_secure_stack_seal =
     ((uint32_t *)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1]) - 2;
 
-REGION_DECLARE_T(Image$$, ARM_LIB_STACK_SEAL, $$ZI$$Base, uint32_t)[];
+REGION_DECLARE_T(Image$$, ER_INITIAL_PSP_SEAL, $$ZI$$Base, uint32_t)[];
 
 /*
  * Function to seal the psp stacks for Function model of TF-M.
@@ -84,11 +84,11 @@ void tfm_spm_seal_psp_stacks(void)
     *(tfm_secure_stack_seal + 1) = TFM_STACK_SEAL_VALUE;
 
     /*
-     * Seal the ARM_LIB_STACK by writing the seal value to the reserved
+     * Seal the ER_INITIAL_PSP by writing the seal value to the reserved
      * region.
      */
     uint32_t *arm_lib_stck_seal_base =
-        ((uint32_t *)&REGION_NAME(Image$$, ARM_LIB_STACK_SEAL, $$ZI$$Base)[-1]) - 2;
+        ((uint32_t *)&REGION_NAME(Image$$, ER_INITIAL_PSP_SEAL, $$ZI$$Base)[-1]) - 2;
 
     *(arm_lib_stck_seal_base) = TFM_STACK_SEAL_VALUE;
     *(arm_lib_stck_seal_base + 1) = TFM_STACK_SEAL_VALUE;
@@ -652,9 +652,9 @@ static enum tfm_status_e tfm_return_from_partition(uint32_t *excReturn)
             (struct tfm_state_context_t *)ret_part_data->stack_ptr);
         *excReturn = ret_part_data->lr;
         __set_PSP(ret_part_data->stack_ptr);
-        REGION_DECLARE_T(Image$$, ARM_LIB_STACK, $$ZI$$Base, uint32_t)[];
+        REGION_DECLARE_T(Image$$, ER_INITIAL_PSP, $$ZI$$Base, uint32_t)[];
         uint32_t psp_stack_bottom =
-            (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+            (uint32_t)REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
         tfm_arch_set_psplim(psp_stack_bottom);
 
         iovec_args = &REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1];

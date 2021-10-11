@@ -30,8 +30,8 @@
  * 0x101c_0000 - 0x101f_ffff Reserved
  *  0x101c_0000 Internal Trusted Storage Area (16 KB)
  *  0x101c_4000 Protected Storage Area (24 KB)
- *  0x101c_a000 Unused area (23 KB)
- *  0x101c_fc00 NV counters area (1 KB)
+ *  0x101c_a000 Unused area (22 KB)
+ *  0x101c_f800 OTP / NV counters area (2 KB)
  *  0x101d_0000 Reserved (192 KB)
  * 0x101f_ffff End of Flash
  *
@@ -80,12 +80,13 @@
 /* Unused Area */
 #define FLASH_UNUSED_AREA_OFFSET        (FLASH_PS_AREA_OFFSET + \
                                          FLASH_PS_AREA_SIZE)
-#define FLASH_UNUSED_AREA_SIZE          (0x5c00)   /* 23 KB */
+#define FLASH_UNUSED_AREA_SIZE          (0x5800)   /* 22 KB */
 
-/* Non-volatile Counters Area */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_UNUSED_AREA_OFFSET + \
-                                         FLASH_UNUSED_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (2 * FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_UNUSED_AREA_OFFSET + \
+                                           FLASH_UNUSED_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 4)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
 #define FLASH_AREA_SYSTEM_RESERVED_SIZE (0x30000) /* 192 KB */
 
@@ -106,12 +107,14 @@
 #define FLASH_DATA_AREA_SIZE            (FLASH_ITS_AREA_SIZE + \
                                          FLASH_PS_AREA_SIZE + \
                                          FLASH_UNUSED_AREA_SIZE + \
-                                         FLASH_NV_COUNTERS_AREA_SIZE + \
+                                         FLASH_OTP_NV_COUNTERS_AREA_SIZE + \
                                          FLASH_AREA_SYSTEM_RESERVED_SIZE)
 
 #if (FLASH_DATA_AREA_OFFSET + FLASH_DATA_AREA_SIZE) > (FLASH_TOTAL_SIZE)
 #error "Out of Flash memory"
 #endif
+
+#define TFM_HAL_FLASH_PROGRAM_UNIT      0x1
 
 /* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
@@ -155,11 +158,13 @@
 /* Decrease flash wear slightly, at the cost of increased ITS service memory */
 #define ITS_MAX_BLOCK_DATA_COPY 512
 
-/* NV Counters definitions */
-#define TFM_NV_COUNTERS_FLASH_DEV    Driver_FLASH0
-#define TFM_NV_COUNTERS_AREA_SIZE    FLASH_NV_COUNTERS_AREA_SIZE
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
+
 
 /* Use Flash to store Code data */
 #define S_ROM_ALIAS_BASE  (0x10000000)

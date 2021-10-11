@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,7 +9,6 @@ set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/lib/ext CACHE STRING "" FORCE)
 add_subdirectory(qcbor)
 add_subdirectory(t_cose)
 add_subdirectory(mbedcrypto)
-add_subdirectory(tf-m-tests)
 add_subdirectory(CMSIS_5)
 if(BL2)
     add_subdirectory(mcuboot)

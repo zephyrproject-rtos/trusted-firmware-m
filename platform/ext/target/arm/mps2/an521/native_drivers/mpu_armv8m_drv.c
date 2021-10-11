@@ -7,16 +7,15 @@
 
 #include "mpu_armv8m_drv.h"
 #include "cmsis_cpu.h"
-#include "fih.h"
 
 /*
  * FixMe:
  * This is a beta quality driver for MPU in v8M. To be finalized.
  */
 
-fih_int mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
-                          uint32_t privdef_en,
-                          uint32_t hfnmi_en)
+enum mpu_armv8m_error_t mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
+                                          uint32_t privdef_en,
+                                          uint32_t hfnmi_en)
 {
     /*No error checking*/
 
@@ -46,22 +45,22 @@ fih_int mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
     __DSB();
     __ISB();
 
-    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
+    return MPU_ARMV8M_OK;
 }
 
-fih_int mpu_armv8m_disable(struct mpu_armv8m_dev_t *dev)
+enum mpu_armv8m_error_t mpu_armv8m_disable(struct mpu_armv8m_dev_t *dev)
 {
     MPU_Type *mpu = (MPU_Type *)dev->base;
 
     /* Reset all fields as enable does full setup */
     mpu->CTRL = 0;
 
-    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
+    return MPU_ARMV8M_OK;
 }
 
-
-fih_int mpu_armv8m_region_enable(struct mpu_armv8m_dev_t *dev,
-                                 struct mpu_armv8m_region_cfg_t *region_cfg)
+enum mpu_armv8m_error_t mpu_armv8m_region_enable(
+                                struct mpu_armv8m_dev_t *dev,
+                                struct mpu_armv8m_region_cfg_t *region_cfg)
 {
     MPU_Type *mpu = (MPU_Type *)dev->base;
 
@@ -71,7 +70,7 @@ fih_int mpu_armv8m_region_enable(struct mpu_armv8m_dev_t *dev,
 
     /*FIXME : Add complete error checking*/
     if ((region_cfg->region_base & ~MPU_RBAR_BASE_Msk) != 0) {
-        FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
+        return MPU_ARMV8M_ERROR;
     }
     /* region_limit doesn't need to be aligned but the scatter
      * file needs to be setup to ensure that partitions do not overlap.
@@ -107,12 +106,11 @@ fih_int mpu_armv8m_region_enable(struct mpu_armv8m_dev_t *dev,
     __DSB();
     __ISB();
 
-    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
+    return MPU_ARMV8M_OK;
 }
 
-
-fih_int mpu_armv8m_region_disable(struct mpu_armv8m_dev_t *dev,
-                                  uint32_t region_nr)
+enum mpu_armv8m_error_t mpu_armv8m_region_disable(struct mpu_armv8m_dev_t *dev,
+                                                  uint32_t region_nr)
 {
 
     MPU_Type *mpu = (MPU_Type *)dev->base;
@@ -131,25 +129,18 @@ fih_int mpu_armv8m_region_disable(struct mpu_armv8m_dev_t *dev,
     /*Restore main MPU control*/
     mpu->CTRL = ctrl_before;
 
-    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
+    return MPU_ARMV8M_OK;
 }
 
-fih_int mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev)
+enum mpu_armv8m_error_t mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev)
 {
     MPU_Type *mpu = (MPU_Type *)dev->base;
     uint32_t i = (mpu->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
-    fih_int fih_rc = fih_int_encode(MPU_ARMV8M_ERROR);
 
     while (i > 0) {
-        FIH_CALL(mpu_armv8m_region_disable, fih_rc, dev, i - 1);
+        mpu_armv8m_region_disable(dev, i - 1);
         i--;
     }
 
-#ifdef TFM_FIH_PROFILE_ON
-    if (i > 0) {
-        FIH_PANIC;
-    }
-#endif
-
-    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
+    return MPU_ARMV8M_OK;
 }

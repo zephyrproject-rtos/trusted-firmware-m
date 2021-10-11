@@ -141,8 +141,10 @@ void ps_crypto_set_iv(const union ps_crypto_t *crypto);
  * \brief Gets a new IV value into the crypto union.
  *
  * \param[out] crypto  Pointer to the crypto union
+ *
+ * \return Returns values as described in \ref psa_status_t
  */
-void ps_crypto_get_iv(union ps_crypto_t *crypto);
+psa_status_t ps_crypto_get_iv(union ps_crypto_t *crypto);
 
 #ifdef __cplusplus
 }

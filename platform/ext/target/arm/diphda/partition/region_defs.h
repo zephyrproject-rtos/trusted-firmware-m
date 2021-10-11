@@ -94,16 +94,7 @@
 #define BL1_CODE_SIZE     (0x00020000)     /* Whole SE ROM, 128 KiB */
 #define BL1_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
-#ifndef BL1
-/* Shared data area between bootloader and runtime firmware.
- * Shared data area is allocated at the beginning of the privileged data area,
- * it is overlapping with TF-M Secure code's MSP stack
- */
 #define BOOT_TFM_SHARED_DATA_BASE (S_DATA_PRIV_START)
-#else
-/* Shared data area between BL1 and BL2 */
-#define BOOT_TFM_SHARED_DATA_BASE (BL1_DATA_START + BL1_DATA_SIZE)
-#endif
 
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)

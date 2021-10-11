@@ -38,14 +38,20 @@
 #define PARTITION_PRI_LOWEST                    (0xFF)
 #define PARTITION_PRI_MASK                      (0xFF)
 
+/* TODO: This def couples with library model, rename it later. */
 #define SPM_PART_FLAG_PSA_ROT                   (1U << 8)
-#define SPM_PART_FLAG_IPC                       (1U << 9)
+
+#define PARTITION_MODEL_IPC                     (1U << 9)
 
 #define PARTITION_PRIORITY(flag)                ((flag) & PARTITION_PRI_MASK)
 #define TO_THREAD_PRIORITY(x)                   (x)
 
 #define ENTRY_TO_POSITION(x)                    (uintptr_t)(x)
 #define POSITION_TO_ENTRY(x, t)                 (t)(x)
+
+#define PTR_TO_REFERENCE(x)                     (uintptr_t)(x)
+#define REFERENCE_TO_PTR(x, t)                  (t)(x)
+
 /*
  * Common partition structure type, the extendable data is right after it.
  * Extendable data has different size for each partition, and must be 4-byte
@@ -54,7 +60,7 @@
  */
 struct partition_load_info_t {
     uint32_t        psa_ff_ver;         /* Encode the version with magic    */
-    uint32_t        pid;                /* Partition ID                     */
+    int32_t         pid;                /* Partition ID                     */
     uint32_t        flags;              /* ARoT/PRoT, SFN/IPC, priority     */
     uintptr_t       entry;              /* Entry point                      */
     size_t          stack_size;         /* Stack size                       */

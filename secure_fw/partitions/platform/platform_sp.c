@@ -17,9 +17,9 @@
 
 /* Access map using NVCOUNTER_IDX -> tfm_partition-id key-value pairs */
 static const int32_t nv_counter_access_map[NV_COUNTER_MAP_SIZE] = {
-                                          [PLAT_NV_COUNTER_0] = TFM_SP_PS,
-                                          [PLAT_NV_COUNTER_1] = TFM_SP_PS,
-                                          [PLAT_NV_COUNTER_2] = TFM_SP_PS
+                                          [PLAT_NV_COUNTER_PS_0] = TFM_SP_PS,
+                                          [PLAT_NV_COUNTER_PS_1] = TFM_SP_PS,
+                                          [PLAT_NV_COUNTER_PS_2] = TFM_SP_PS
               };
 
 #ifdef TFM_PSA_API

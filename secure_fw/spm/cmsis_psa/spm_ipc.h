@@ -11,10 +11,10 @@
 #include <stdint.h>
 #include "tfm_arch.h"
 #include "lists.h"
-#include "tfm_wait.h"
 #include "tfm_secure_api.h"
-#include "tfm_thread.h"
+#include "thread.h"
 #include "psa/service.h"
+#include "load/interrupt_defs.h"
 
 #define TFM_HANDLE_STATUS_IDLE          0
 #define TFM_HANDLE_STATUS_ACTIVE        1
@@ -55,13 +55,11 @@
 
 #define TFM_MSG_MAGIC                   0x15154343
 
-typedef psa_flih_result_t (*psa_flih_func)(void);
-
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
     int32_t magic;
     struct service_t *service;         /* RoT service pointer            */
-    struct tfm_event_t ack_evnt;       /* Event for ack response         */
+    struct sync_obj_t ack_evnt;        /* Event for ack response         */
     psa_msg_t msg;                     /* PSA message body               */
     psa_invec invec[PSA_MAX_IOVEC];    /* Put in/out vectors in msg body */
     psa_outvec outvec[PSA_MAX_IOVEC];
@@ -79,22 +77,20 @@ struct tfm_msg_body_t {
     struct bi_list_node_t msg_node;    /* For list operators             */
 };
 
-/**
- * Holds the fields that define a partition for SPM. The fields are further
- * divided to structures, to keep the related fields close to each other.
- */
+/* Partition runtime type */
 struct partition_t {
     const struct partition_load_info_t *p_ldinf;
-    void *p_platform;
-    void *p_interrupts;
-    void *p_metadata;
-    struct tfm_core_thread_t sp_thread;
-    struct tfm_event_t event;
-    struct bi_list_node_t msg_list;
-    uint32_t signals_allowed;
-    uint32_t signals_waiting;
-    uint32_t signals_asserted;
-    struct partition_t *next;
+    void                               *p_boundaries;
+    void                               *p_interrupts;
+    void                               *p_metadata;
+    struct thread_t                    thrd;
+    struct sync_obj_t                  waitobj;
+    struct context_ctrl_t              ctx_ctrl;
+    struct bi_list_node_t              msg_list;
+    uint32_t                           signals_allowed;
+    uint32_t                           signals_waiting;
+    uint32_t                           signals_asserted;
+    struct partition_t                 *next;
 };
 
 /* RoT Service data */
@@ -146,7 +142,7 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
  *
  * \return  Returns the partition ID
  */
-uint32_t tfm_spm_partition_get_running_partition_id(void);
+int32_t tfm_spm_partition_get_running_partition_id(void);
 
 /******************** Service handle management functions ********************/
 
@@ -367,11 +363,14 @@ bool tfm_spm_is_ns_caller(void);
 uint32_t tfm_spm_get_caller_privilege_mode(void);
 
 /**
- * \brief               Set up the isolation boundary of the given partition.
+ * \brief               Get ID of current RoT Service client.
+ *                      This API ensures the caller gets a valid ID.
  *
- * \param[in] partition The partition of which the boundary is set up.
+ * \param[in] ns_caller If the client is Non-Secure or not.
+ *
+ * \retval              The client ID
  */
-void tfm_set_up_isolation_boundary(const struct partition_t *partition);
+int32_t tfm_spm_get_client_id(bool ns_caller);
 
 /*
  * PendSV specified function.
@@ -379,11 +378,13 @@ void tfm_set_up_isolation_boundary(const struct partition_t *partition);
  * Parameters :
  *  p_actx        -    Architecture context storage pointer
  *
- * Notes:
- *  This is a staging API. Scheduler should be called in SPM finally and
- *  this function will be obsoleted later.
+ * Return:
+ *  Pointers to context control (sp, splimit, dummy, lr) of the current and
+ *  the next thread.
+ *  Each takes 32 bits. The context control is used by PendSV_Handler to do
+ *  context switch.
  */
-void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
+uint64_t do_schedule(void);
 
 /**
  * \brief                      SPM initialization implementation
@@ -394,34 +395,6 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
  *                             returned.
  */
 uint32_t tfm_spm_init(void);
-
-#if !defined(__ARM_ARCH_8_1M_MAIN__)
-/**
- * \brief Validate the whether NS caller re-enter.
- *
- * \param[in] p_ctx             Pointer to current stack context.
- * \param[in] exc_return        EXC_RETURN value.
- *
- * \retval void                 Success.
- *
- * Notes:
- *  For architecture v8.1m and later, will use hardware re-entrant detection.
- *  Otherwise will use the software solution to validate the caller.
- */
-void tfm_spm_validate_caller(uint32_t *p_ctx, uint32_t exc_return);
-#else
-/**
- * In v8.1 mainline, will use hardware re-entrant detection instead.
- */
-__STATIC_INLINE
-void tfm_spm_validate_caller(uint32_t *p_ctx, uint32_t exc_return)
-{
-    (void)p_ctx;
-    (void)exc_return;
-    return;
-}
-#endif
-
 
 /**
  * \brief Converts a handle instance into a corresponded user handle.
@@ -456,17 +429,12 @@ int32_t tfm_spm_set_rhandle(struct service_t *service,
 
 void update_caller_outvec_len(struct tfm_msg_body_t *msg);
 
-/**
- * \brief   notify the partition with the signal.
+/*
+ * Set partition signal.
  *
- * \param[in] partition_id      The ID of the partition to be notified.
- * \param[in] signal            The signal that the partition is to be notified
- *                              with.
- *
- * \retval void                 Success.
- * \retval "Does not return"    If partition_id is invalid.
+ * Assert a signal to given partition.
  */
-void notify_with_signal(int32_t partition_id, psa_signal_t signal);
+void spm_assert_signal(void *p_pt, psa_signal_t signal);
 
 /**
  * \brief Return the IRQ load info context pointer associated with a signal
@@ -484,5 +452,18 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal);
 struct irq_load_info_t *get_irq_info_for_signal(
                                     const struct partition_load_info_t *p_ldinf,
                                     psa_signal_t signal);
+
+/**
+ * \brief Entry of Secure interrupt handler. Platforms can call this function to
+ *        handle individual interrupts.
+ *
+ * \param[in] p_pt         The owner Partition of the interrupt to handle
+ * \param[in] p_ildi       The irq_load_info_t struct of the interrupt to handle
+ *
+ * Note:
+ *  The input parameters are maintained by platforms and they must be init-ed
+ *  in the interrupt init functions.
+ */
+void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi);
 
 #endif /* __SPM_IPC_H__ */

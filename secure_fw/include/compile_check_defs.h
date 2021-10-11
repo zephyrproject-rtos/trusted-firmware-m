@@ -9,7 +9,7 @@
 #define __COMPILE_CHECK_DEFS_H__
 
 #include "load/spm_load_api.h"
-#include "tfm_thread.h"
+#include "thread.h"
 
 #if TO_THREAD_PRIORITY(PARTITION_PRI_HIGHEST) != THRD_PRIOR_HIGHEST ||  \
     TO_THREAD_PRIORITY(PARTITION_PRI_HIGH) != THRD_PRIOR_HIGH ||        \

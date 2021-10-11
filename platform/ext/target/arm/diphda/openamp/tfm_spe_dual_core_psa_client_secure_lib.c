@@ -23,8 +23,6 @@ typedef struct output_buffer_with_payload {
     uint8_t payload[]; /* outdata follows */
 } output_buffer_with_payload_t;
 
-#define NS_CALLER_FLAG          (true)
-
 static void prepare_and_send_output_msg(int32_t reply, int32_t request_id)
 {
     s_openamp_msg_t msg;
@@ -256,13 +254,13 @@ void deliver_msg_to_tfm_spe(void *private)
             break;
         case OPENAMP_PSA_VERSION:
             spm_params.sid = s_map_entry->msg.params.psa_version_params.sid;
-            psa_ret = tfm_rpc_psa_version(&spm_params, NS_CALLER_FLAG);
+            psa_ret = tfm_rpc_psa_version(&spm_params);
             send_service_reply_to_non_secure(psa_ret, s_map_entry);
             break;
         case OPENAMP_PSA_CONNECT:
             spm_params.sid = s_map_entry->msg.params.psa_connect_params.sid;
             spm_params.version = s_map_entry->msg.params.psa_connect_params.version;
-            psa_ret = tfm_rpc_psa_connect(&spm_params, NS_CALLER_FLAG);
+            psa_ret = tfm_rpc_psa_connect(&spm_params);
             if (psa_ret != PSA_SUCCESS) {
                 send_service_reply_to_non_secure(psa_ret, s_map_entry);
             }
@@ -273,7 +271,7 @@ void deliver_msg_to_tfm_spe(void *private)
                 send_service_reply_to_non_secure(psa_ret, s_map_entry);
                 break;
             }
-            psa_ret = tfm_rpc_psa_call(&spm_params, NS_CALLER_FLAG);
+            psa_ret = tfm_rpc_psa_call(&spm_params);
             if (psa_ret != PSA_SUCCESS) {
                 send_service_reply_to_non_secure(psa_ret, s_map_entry);
                 break;
@@ -281,7 +279,7 @@ void deliver_msg_to_tfm_spe(void *private)
             break;
         case OPENAMP_PSA_CLOSE:
             spm_params.handle = s_map_entry->msg.params.psa_close_params.handle;
-            tfm_rpc_psa_close(&spm_params, NS_CALLER_FLAG);
+            tfm_rpc_psa_close(&spm_params);
             break;
         default:
             LOG_MSG("msg type did not recognized\r\n");

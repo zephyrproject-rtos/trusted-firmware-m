@@ -10,6 +10,7 @@
 #include "region.h"
 #include "region_defs.h"
 #include "spm_ipc.h"
+#include "tfm_hal_interrupt.h"
 #include "tfm_plat_defs.h"
 #include "tfm_spm_hal.h"
 #include "utilities.h"
@@ -76,7 +77,7 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
 
     if ((UINTPTR_MAX - ldinf_sa < sizeof(struct partition_load_info_t)) ||
         (ldinf_sa + sizeof(struct partition_load_info_t) >= ldinf_ea)) {
-        return NULL;
+        return NO_MORE_PARTITION;
     }
 
     p_ptldinf = (struct partition_load_info_t *)ldinf_sa;
@@ -97,7 +98,12 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
         tfm_core_panic();
     }
 
-    if (!(p_ptldinf->flags & SPM_PART_FLAG_IPC)) {
+    if (!(p_ptldinf->flags & PARTITION_MODEL_IPC)) {
+        tfm_core_panic();
+    }
+
+    if (p_ptldinf->pid < 0) {
+        /* 0 is the internal NS Agent, besides the normal positive PIDs */
         tfm_core_panic();
     }
 
@@ -180,22 +186,15 @@ void load_irqs_assuredly(struct partition_t *p_partition)
     for (i = 0; i < p_ldinf->nirqs; i++) {
         p_partition->signals_allowed |= p_irq_info[i].signal;
 
-        if (tfm_spm_hal_set_secure_irq_priority(p_irq_info[i].source)
-                                                      != TFM_PLAT_ERR_SUCCESS) {
-            tfm_core_panic();
-        }
-
-        if (tfm_spm_hal_set_irq_target_state(p_irq_info[i].source,
-                                             TFM_IRQ_TARGET_STATE_SECURE)
-                                               != TFM_IRQ_TARGET_STATE_SECURE) {
+        if (p_irq_info[i].init(p_partition, p_irq_info) != TFM_HAL_SUCCESS) {
             tfm_core_panic();
         }
 
         if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK) == 0x0100) {
-            tfm_spm_hal_enable_irq(p_irq_info[i].source);
+            tfm_hal_irq_enable(p_irq_info[i].source);
         } else if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
                                                                     == 0x0101) {
-            tfm_spm_hal_disable_irq(p_irq_info[i].source);
+            tfm_hal_irq_disable(p_irq_info[i].source);
         }
         p_irq_info++;
     }

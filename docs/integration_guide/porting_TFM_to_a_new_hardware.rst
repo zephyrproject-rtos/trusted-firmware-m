@@ -93,26 +93,28 @@ shims to the CMSIS drivers. It also contains the scatter files that can be
 used for the tfm_s partition.
 
 This folder also contains another folder named template. The latter contains
-dummy/example implementations for a set of features which will be
-init and used during development.
+example implementations that are used for platforms by default, but which can be
+altered or replaced if other functionality is required.
 
-    +------------------------------+---------------------------------------------------------------------------+
-    |    name                      |        description                                                        |
-    +==============================+===========================================================================+
-    |PLATFORM_DUMMY_ATTEST_HAL     |Use the dummy implementation of the attestation HAL (default True)         |
-    +------------------------------+---------------------------------------------------------------------------+
-    |PLATFORM_DUMMY_NV_COUNTERS    |Use the dummy implementation of the counters in NV (default True)          |
-    +------------------------------+---------------------------------------------------------------------------+
-    |PLATFORM_DUMMY_CRYPTO_KEYS    |Use the dummy implementation of crypto keys (default True)                 |
-    +------------------------------+---------------------------------------------------------------------------+
-    |PLATFORM_DUMMY_ROTPK          |Use the dummy implementation of the RoT Public Key (default True)          |
-    +------------------------------+---------------------------------------------------------------------------+
-    |PLATFORM_DUMMY_IAK            |Use the dummy implementation of the initial attestation key (default True) |
-    +------------------------------+---------------------------------------------------------------------------+
-
-.. Note::
-
-   Do not use the dummy implementations in production.
+    +------------------------------+-----------------------------------------------------------------------------+
+    |    name                      |        description                                                          |
+    +==============================+=============================================================================+
+    |PLATFORM_DEFAULT_ATTEST_HAL   |Use the default implementation of the attestation HAL (default True)         |
+    +------------------------------+-----------------------------------------------------------------------------+
+    |PLATFORM_DEFAULT_NV_COUNTERS  |Use the default implementation of the counters in NV (default True)          |
+    +------------------------------+-----------------------------------------------------------------------------+
+    |PLATFORM_DEFAULT_CRYPTO_KEYS  |Use the default implementation of crypto keys (default True)                 |
+    +------------------------------+-----------------------------------------------------------------------------+
+    |PLATFORM_DEFAULT_ROTPK        |Use the default implementation of the RoT Public Key (default True)          |
+    +------------------------------+-----------------------------------------------------------------------------+
+    |PLATFORM_DEFAULT_IAK          |Use the default implementation of the initial attestation key (default True) |
+    +------------------------------+-----------------------------------------------------------------------------+
+    |PLATFORM_DEFAULT_UART_STDOUT  |Use the default implementation of the uart for stdout output (default True)  |
+    +------------------------------+-----------------------------------------------------------------------------+
+    |PLATFORM_DEFAULT_NV_SEED      |Use the default implementation of the NV seed in the RNG (default True)      |
+    +------------------------------+-----------------------------------------------------------------------------+
+    |PLATFORM_DEFAULT_OTP          |Use the default implementation of the OTP (default True)                     |
+    +------------------------------+-----------------------------------------------------------------------------+
 
 ***************
 Platform Folder
@@ -517,7 +519,7 @@ tfm_spm_hal_configure_default_isolation:
 
 .. code-block:: c
 
-    enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(uint32_t partition_idx, const struct platform_data_t *platform_data);
+    enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(bool privileged, const struct platform_data_t *platform_data);
 
 .. Note::
 
@@ -575,32 +577,32 @@ tfm_spm_hal_nvic_interrupt_enable:
 
     enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void);
 
-tfm_spm_hal_clear_pending_irq:
-------------------------------
+tfm_hal_irq_clear_pending:
+--------------------------
 
     This function clears any pending IRQ.
 
 .. code-block:: c
 
-    void tfm_spm_hal_clear_pending_irq(IRQn_Type irq_line);
+    void tfm_hal_irq_clear_pending(uint32_t irq_num);
 
-tfm_spm_hal_enable_irq:
------------------------
+tfm_hal_irq_enable:
+-------------------
 
     This function enable an IRQ.
 
 .. code-block:: c
 
-    void tfm_spm_hal_enable_irq(IRQn_Type irq_line);
+    void tfm_hal_irq_enable(uint32_t irq_num);
 
-tfm_spm_hal_disable_irq:
-------------------------
+tfm_hal_irq_disable:
+--------------------
 
     This function disable an IRQ.
 
 .. code-block:: c
 
-    void tfm_spm_hal_disable_irq(IRQn_Type irq_line);
+    void tfm_hal_irq_disable(uint32_t irq_num);
 
 tfm_spm_hal_set_irq_target_state:
 ---------------------------------
@@ -787,8 +789,7 @@ Annex
 
     [config_cmake]
     set(BL2                                 OFF         CACHE BOOL      "Whether to build BL2")
-    set(TFM_PSA_API                         ON           CACHE BOOL      "Use PSA api (IPC mode) instead of secure library mode" FORCE)
-    set(NS                                  FALSE        CACHE BOOL      "Whether to build NS app" FORCE)
+    set(NS                                  FALSE       CACHE BOOL      "Whether to build NS app" FORCE)
 
 ------------
 

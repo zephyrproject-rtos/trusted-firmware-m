@@ -134,9 +134,11 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
         return err;
     }
 
-    /* FIXME: should have an IV per object with key diversification */
     /* Get a new IV for each encryption */
-    ps_crypto_get_iv(&obj->header.crypto);
+    err = ps_crypto_get_iv(&obj->header.crypto);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
 
     /* Use File ID as a part of the associated data to authenticate
      * the object in the FS. The tag will be stored in the object table and

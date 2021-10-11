@@ -116,6 +116,7 @@ target_sources(platform_s
         ./Native_Driver/generated_source/cycfg_system.c
         ./Native_Driver/generated_source/cycfg_qspi_memslot.c
         ./spm_hal.c
+        ./tfm_interrupts.c
         ./tfm_hal_isolation.c
         ./CMSIS_Driver/Driver_Flash.c
         ./CMSIS_Driver/Driver_USART.c
@@ -123,9 +124,9 @@ target_sources(platform_s
         ./driver_smpu.c
         ./driver_ppu.c
         ./driver_dap.c
-        ./nv_counters.c
         ./services/src/tfm_platform_system.c
         ./Device/Source/device_definition.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )

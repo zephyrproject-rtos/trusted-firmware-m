@@ -28,6 +28,7 @@ target_sources(tfm_s
     PRIVATE
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_cmsdk_musca_s.s>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_cmsdk_musca_s.S>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_cmsdk_musca_s.s>
 )
 
 # Use a common scatter file for Isolation L1 and L2, a dedicated one for Isolation L3
@@ -45,10 +46,12 @@ if(NS)
         PRIVATE
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_cmsdk_musca_ns.s>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_cmsdk_musca_ns.S>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_cmsdk_musca_ns.s>
     )
     target_add_scatter_file(tfm_ns
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/musca_ns.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/musca_ns.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/musca_ns.icf>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
@@ -61,10 +64,12 @@ if(BL2)
         PRIVATE
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_cmsdk_musca_bl2.s>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_cmsdk_musca_bl2.S>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_cmsdk_musca_bl2.s>
     )
     target_add_scatter_file(bl2
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/musca_bl2.sct>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/musca_bl2.ld>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/musca_bl2.icf>
     )
 endif()
 
@@ -87,11 +92,11 @@ target_include_directories(platform_s
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox>
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/cc312
 )
 
 target_sources(platform_s
     PRIVATE
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
         $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_QSPI_Flash.c>
         $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c>
         CMSIS_Driver/Driver_MPC.c
@@ -109,14 +114,15 @@ target_sources(platform_s
         $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c>
         Native_Driver/musca_b1_scc_drv.c
         spm_hal.c
+        tfm_interrupts.c
         tfm_hal_isolation.c
-        attest_hal.c
         target_cfg.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/uart_pl011_drv.c
         $<$<NOT:$<BOOL:${TEST_NS_SLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        $<$<BOOL:${TFM_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_multicore.c>
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_ns_mailbox.c>
@@ -173,7 +179,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
             boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
@@ -189,6 +194,7 @@ if(BL2)
         PUBLIC
             partition
             Device/Include
+            ${CMAKE_MUSCA_B1_COMMON_DIR}/cc312
         PRIVATE
             .
             CMSIS_Driver/Config

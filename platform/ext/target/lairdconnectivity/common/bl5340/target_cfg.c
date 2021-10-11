@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Nordic Semiconductor ASA.
  * Copyright (c) 2021 Laird Connectivity.
  *
@@ -37,13 +37,6 @@ struct platform_data_t tfm_peripheral_std_uart = {
         NRF_UARTE1_S_BASE,
         NRF_UARTE1_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
 };
-
-#ifdef CORE_TEST_INTERACTIVE
-struct platform_data_t tfm_peripheral_std_i2c = {
-        NRF_TWIM2_S_BASE,
-        NRF_TWIM2_S_BASE + (sizeof(NRF_TWIM_Type) - 1),
-};
-#endif
 
 #ifdef SECURE_QSPI
 struct platform_data_t tfm_peripheral_std_qspi = {
@@ -152,13 +145,6 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
     NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET(NRF_UARTE1));
 #endif
 
-#ifdef CORE_TEST_INTERACTIVE
-    /* TWIM2 is a secure peripheral for the interactive test, so its IRQ has
-     * to target S state
-     */
-    NVIC_ClearTargetState(NRFX_IRQ_NUMBER_GET(NRF_TWIM2));
-#endif
-
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -224,10 +210,6 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_SPIM1, false);
 #endif
     spu_peripheral_config_non_secure((uint32_t)NRF_SPIM4, false);
-#ifndef CORE_TEST_INTERACTIVE
-    /* TWIM2 is a secure peripheral for the platform test, so we need to leave it as Secure */
-    spu_peripheral_config_non_secure((uint32_t)NRF_SPIM2, false);
-#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_SPIM3, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_SAADC, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_TIMER0, false);

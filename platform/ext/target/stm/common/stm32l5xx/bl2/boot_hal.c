@@ -22,6 +22,7 @@
 #include "boot_hal_cfg.h"
 #include "boot_hal.h"
 #include "uart_stdout.h"
+#include "low_level_rng.h"
 #include "tfm_low_level_security.h"
 #include "target_cfg.h"
 #include "cmsis.h"
@@ -120,6 +121,7 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
 
     vt_cpy=vt;
+    RNG_DeInit();
     /* activate protection before jumping in secure image */
     TFM_LL_SECU_UpdateRunTimeProtections();
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__)
@@ -199,6 +201,11 @@ int32_t boot_platform_init(void)
      */
   int result;
   HAL_Init();
+  /* Initialize RNG */
+  if (RNG_Init()){
+      BOOT_LOG_ERR("Error while initializing RNG Ip");
+      Error_Handler();
+  }
 #ifdef CRYPTO_HW_ACCELERATOR
   result = crypto_hw_accelerator_init();
   if (result) {
@@ -315,11 +322,11 @@ void SystemClock_Config(void)
 
 /* Place code in a specific section */
 #if defined(__ICCARM__)
-#pragma default_function_attributes = @ ".BL2_NoHdp_Code"
+#pragma default_function_attributes = @ ".BL2_Error_Code"
 #elif defined(__CC_ARM)
-#pragma arm section code = ".BL2_NoHdp_Code"
+#pragma arm section code = ".BL2_Error_Code"
 #else
-__attribute__((section(".BL2_NoHdp_Code")))
+__attribute__((section(".BL2_Error_Code")))
 #endif /* __ICCARM__ */
 
 /**

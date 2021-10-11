@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2017-2018 ARM Limited
+; * Copyright (c) 2017-2021 ARM Limited
 ; * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ CY_CPU_VTOR_ADDR       EQU    0xE000ED08
 
                 PRESERVE8
 
-                IMPORT |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|
+                IMPORT |Image$$ARM_LIB_STACK$$ZI$$Limit|
 
 ; Vector Table Mapped to Address 0 at Reset
 
@@ -52,7 +52,7 @@ CY_CPU_VTOR_ADDR       EQU    0xE000ED08
                 IMPORT  Cy_SysIpcPipeIsrCm0
 
 __Vectors       ;Core Interrupts
-                DCD     |Image$$ARM_LIB_STACK_MSP$$ZI$$Limit|  ; Top of Stack
+                DCD     |Image$$ARM_LIB_STACK$$ZI$$Limit|  ; Top of Stack
                 DCD     Reset_Handler             ; Reset Handler
                 DCD     CY_NMI_HANLDER_ADDR       ; NMI Handler
                 DCD     HardFault_Handler         ; Hard Fault Handler
@@ -134,11 +134,8 @@ Vectors_Copy
                 LDR     R0, =SystemInit
                 BLX     R0
                 MOV     R3, SP
-                MRS     R0, control    ; Get control value
                 MOVS    R1, #2
-                ORRS    R0, R0, R1     ; Select switch to PSP
 
-                MSR     control, R0
                 MOV     SP, R3
                 LDR     R0, =__main
                 BX      R0

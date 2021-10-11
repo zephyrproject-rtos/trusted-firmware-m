@@ -5,44 +5,18 @@
  *
  */
 
-#include <stdio.h>
 #include "cmsis.h"
 #include "tfm_spm_hal.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
-#include "mpu_armv8m_drv.h"
-#include "region_defs.h"
 #include "utilities.h"
-#include "region.h"
 
 /* Import MPC driver */
 extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC;
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
-
-struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
-
-enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                  bool privileged,
-                  const struct platform_data_t *platform_data)
-{
-    if (!platform_data) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-
-    if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
-        if (privileged) {
-            ppc_clr_secure_unpriv(platform_data->periph_ppc_bank,
-                                  platform_data->periph_ppc_loc);
-        } else {
-            ppc_en_secure_unpriv(platform_data->periph_ppc_bank,
-                                 platform_data->periph_ppc_loc);
-        }
-    }
-    return TFM_PLAT_ERR_SUCCESS;
-}
 
 void MPC_Handler(void)
 {
@@ -155,3 +129,29 @@ enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
 {
     return nvic_interrupt_enable();
 }
+
+#ifndef TFM_PSA_API
+
+enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
+                  bool privileged,
+                  const struct platform_data_t *platform_data)
+{
+    if (!platform_data) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
+        ppc_configure_to_secure(platform_data->periph_ppc_bank,
+                                platform_data->periph_ppc_loc);
+        if (privileged) {
+            ppc_clr_secure_unpriv(platform_data->periph_ppc_bank,
+                                  platform_data->periph_ppc_loc);
+        } else {
+            ppc_en_secure_unpriv(platform_data->periph_ppc_bank,
+                                 platform_data->periph_ppc_loc);
+        }
+    }
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+#endif /* TFM_PSA_API */

@@ -16,7 +16,7 @@ Or do it manually using the following commands:
 
 .. code:: bash
 
-    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
+    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
     $ cd build && make install
 
 1.2 Building TF-M demo with BL2
@@ -29,7 +29,7 @@ Or do it manually using the following commands:
 
 .. code:: bash
 
-    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
+    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
     $ cd build && make install
 
 1.3 Building TF-M regression tests
@@ -42,7 +42,7 @@ or do it manually using following commands:
 
 .. code:: bash
 
-    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTEST_S=ON -DTEST_NS=ON -DTFM_PSA_API=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
+    $ cmake -S . -B build -DTFM_PLATFORM=nxp/lpcxpresso55s69 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DTFM_PROFILE=profile_medium -DCMAKE_BUILD_TYPE=Relwithdebinfo -DBL2=OFF -DTEST_S=ON -DTEST_NS=ON -DTFM_ISOLATION_LEVEL=2 -G"Unix Makefiles"
     $ cd build && make install
 
 .. Note::
@@ -323,7 +323,7 @@ device (``monitor reset``), and continue (``c``) execution.
 
     Breakpoint 1, main ()
         at [path]/secure_fw/core/tfm_core.c:189
-    189     tfm_arch_init_secure_msp((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
+    189     tfm_arch_init_secure_msp((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK,
 
 3.2.4 Commonly used GDB commands
 --------------------------------
@@ -356,5 +356,5 @@ common problems.
 
 *Copyright (c) 2021, NXP Semiconductors. All rights reserved.*
 *Copyright (c) 2020, Linaro. All rights reserved.*
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
 *SPDX-License-Identifier: BSD-3-Clause*

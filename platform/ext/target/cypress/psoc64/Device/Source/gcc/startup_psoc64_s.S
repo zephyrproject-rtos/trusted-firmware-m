@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2020 ARM Limited. All rights reserved.
+ * Copyright (c) 2009-2021 ARM Limited. All rights reserved.
  * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -35,7 +35,7 @@
     .align 2
     .globl    __Vectors
 __Vectors:
-    .long    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit /* Top of Stack */
+    .long    Image$$ARM_LIB_STACK$$ZI$$Limit /* Top of Stack */
     .long    Reset_Handler         /* Reset Handler */
     .long    CY_NMI_HANLDER_ADDR   /* NMI Handler */
     .long    HardFault_Handler     /* Hard Fault Handler */
@@ -271,13 +271,6 @@ Reset_Handler:
 #ifndef __NO_SYSTEM_INIT
     bl    SystemInit
 #endif
-
-    mrs     r0, control    /* Get control value */
-    movs    r1, #2
-    orrs    r0, r0, r1     /* Select switch to PSP */
-    msr     control, r0
-    ldr r0, =Image$$ARM_LIB_STACK$$ZI$$Limit
-    msr     psp, r0
 
     bl    main
 

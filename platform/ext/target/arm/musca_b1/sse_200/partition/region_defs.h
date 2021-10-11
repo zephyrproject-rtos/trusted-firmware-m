@@ -78,8 +78,19 @@
 #define BL2_TRAILER_SIZE     (0xC00)
 #endif /* BL2 */
 
+#if (MCUBOOT_IMAGE_NUMBER == 1) && \
+    (NS_IMAGE_PRIMARY_PARTITION_OFFSET > S_IMAGE_PRIMARY_PARTITION_OFFSET)
+/* If secure image and nonsecure image are concatenated, and nonsecure image
+ * locates at the higher memory range, then the secure image does not need
+ * the trailer area.
+ */
+#define IMAGE_S_CODE_SIZE \
+            (FLASH_S_PARTITION_SIZE - BL2_HEADER_SIZE)
+#else
 #define IMAGE_S_CODE_SIZE \
             (FLASH_S_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
+#endif
+
 #define IMAGE_NS_CODE_SIZE \
             (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 

@@ -23,8 +23,8 @@
 #endif
 
 /* Memory region declaration */
-REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
-REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
+REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
+REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
 
 /* Entrypoint function declaration */
 extern void tfm_nspm_thread_entry(void);
@@ -51,7 +51,7 @@ const struct partition_tfm_sp_ns_agent_load_info_t
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
         .pid                        = TFM_SP_NON_SECURE_ID,
         .flags                      = (PARTITION_PRI_LOWEST - 1)
-                                                             | SPM_PART_FLAG_IPC
+                                    | PARTITION_MODEL_IPC
 #if TFM_MULTI_CORE_TOPOLOGY
                                     | SPM_PART_FLAG_PSA_ROT
 #endif
@@ -65,17 +65,17 @@ const struct partition_tfm_sp_ns_agent_load_info_t
         .nassets                    = TFM_SP_NS_AGENT_NASSETS,
 #endif
     },
-    .stack_addr                     = PART_REGION_ADDR(ARM_LIB_STACK,
+    .stack_addr                     = PART_REGION_ADDR(ER_INITIAL_PSP,
                                                                     $$ZI$$Base),
     .heap_addr                      = 0,
 #if TFM_LVL == 3
     .assets                         = {
         {
-            .mem.addr_x             = PART_REGION_ADDR(ARM_LIB_STACK,
+            .mem.start              = PART_REGION_ADDR(ER_INITIAL_PSP,
                                                                     $$ZI$$Base),
-            .mem.addr_y             = PART_REGION_ADDR(ARM_LIB_STACK,
+            .mem.limit              = PART_REGION_ADDR(ER_INITIAL_PSP,
                                                                    $$ZI$$Limit),
-            .attr                   = ASSET_MEM_RD_BIT | ASSET_MEM_WR_BIT,
+            .attr                   = ASSET_ATTR_READ_WRITE,
         },
     },
 #endif

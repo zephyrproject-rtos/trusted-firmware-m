@@ -124,7 +124,7 @@ LR_CODE S_CODE_START {
     }
 
     /* MSP */
-    ARM_LIB_STACK_MSP +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    ARM_LIB_STACK +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
     }
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
@@ -185,7 +185,7 @@ LR_CODE S_CODE_START {
     }
 
     /* PSP is unprivileged in single-core topology */
-    ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
+    ER_INITIAL_PSP +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
     }
 
 {% for partition in partitions %}
