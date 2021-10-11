@@ -31,7 +31,7 @@ psa_status_t cc3xx_key_agreement(
                     publ_key,
                     publ_key_size,
                     output,
-                    output_size) )
+                    &output_size) )
                     != PSA_SUCCESS) {
                 *output_length = 0;
                 return ret;
@@ -69,7 +69,7 @@ psa_status_t cc3xx_key_agreement(
             if (( ret = cc3xx_ecdh_calc_secret_wrst(
                     &ctx,
                     output,
-                    output_size) )
+                    &output_size) )
                     != PSA_SUCCESS) {
                 *output_length = 0;
                 return ret;

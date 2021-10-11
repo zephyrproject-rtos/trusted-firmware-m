@@ -34,7 +34,7 @@ typedef struct cc3xx_ecdh_context_t {
  */
 psa_status_t cc3xx_ecdh_calc_secret_wrst(
         cc3xx_ecdh_context_t *ctx,
-        uint8_t *secret, size_t secret_size);
+        uint8_t *secret, size_t *secret_size);
 
 /**
  * @brief   Calculate a shared secret value (Montgomery)
@@ -53,6 +53,6 @@ psa_status_t cc3xx_ecdh_calc_secret_wrst(
 psa_status_t cc3xx_ecdh_calc_secret_mont(
         const uint8_t *priv_key, size_t priv_key_size,
         const uint8_t *publ_key, size_t publ_key_size,
-        uint8_t *secret, size_t secret_size);
+        uint8_t *secret, size_t *secret_size);
 
 #endif /* CC3XX_INTERNAL_ECDH_H */

@@ -13,7 +13,7 @@
 
 psa_status_t cc3xx_ecdh_calc_secret_wrst(
         cc3xx_ecdh_context_t *ctx,
-        uint8_t *secret, size_t secret_size)
+        uint8_t *secret, size_t *secret_size)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t status;
@@ -28,7 +28,7 @@ psa_status_t cc3xx_ecdh_calc_secret_wrst(
     status = CC_EcdhSvdpDh(&ctx->publ_key,
                            &ctx->priv_key,
                            secret,
-                           &secret_size,
+                           secret_size,
                            &EcdhTempData);
     if (status != CC_OK) {
         CC_PAL_LOG_ERR("Error calculating shared secret value\n");
@@ -46,7 +46,7 @@ exit:
 psa_status_t cc3xx_ecdh_calc_secret_mont(
         const uint8_t *priv_key, size_t priv_key_size,
         const uint8_t *publ_key, size_t publ_key_size,
-        uint8_t *secret, size_t secret_size)
+        uint8_t *secret, size_t *secret_size)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t status;
@@ -59,7 +59,7 @@ psa_status_t cc3xx_ecdh_calc_secret_mont(
     }
 
     status = CC_EcMontScalarmult(secret,
-                                 &secret_size,
+                                 secret_size,
                                  priv_key,
                                  priv_key_size,
                                  publ_key,
