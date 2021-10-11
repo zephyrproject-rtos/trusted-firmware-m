@@ -18,6 +18,7 @@
 #include <string.h>
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
+#include "fwu_agent.h"
 
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
 #include "psa_adac_platform.h"
@@ -112,14 +113,12 @@ int32_t boot_platform_init(void)
 {
     int32_t result;
     enum tfm_plat_err_t plat_err;
-    uint32_t bank_offset = BANK_0_PARTITION_OFFSET;
+    uint32_t bank_offset;
 
     result = fill_bl2_flash_map_by_parsing_fips(BANK_0_PARTITION_OFFSET);
     if (result) {
         return 1;
     }
-
-    add_bank_offset_to_image_offset(bank_offset);
 
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {
@@ -153,6 +152,9 @@ int32_t boot_platform_init(void)
 
     }
 #endif
+
+    bl2_get_boot_bank(&bank_offset);
+    add_bank_offset_to_image_offset(bank_offset);
 
     return 0;
 }

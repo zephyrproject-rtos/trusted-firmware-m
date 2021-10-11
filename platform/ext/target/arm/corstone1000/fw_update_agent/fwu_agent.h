@@ -38,5 +38,8 @@ enum fwu_agent_error_t fwu_metadata_init(void);
  */
 enum fwu_agent_error_t corstone1000_fwu_flash_image(void);
 
-#endif /* FWU_AGENT_H */
 
+void bl1_get_boot_bank(uint32_t *bank_offset);
+void bl2_get_boot_bank(uint32_t *bank_offset);
+
+#endif /* FWU_AGENT_H */

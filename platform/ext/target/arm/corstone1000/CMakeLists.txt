@@ -109,6 +109,7 @@ target_sources(platform_bl2
         Native_Driver/uart_pl011_drv.c
         fip_parser/fip_parser.c
         bl2_boot_hal.c
+        fw_update_agent/fwu_agent.c
 )
 
 if (PLATFORM_IS_FVP)
@@ -155,6 +156,7 @@ target_include_directories(platform_bl2
         ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
         ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
         $<BUILD_INTERFACE:${BL2_SOURCE}/ext/mcuboot/include>
+        fw_update_agent
 )
 
 #========================= BL1 component =======================================#
