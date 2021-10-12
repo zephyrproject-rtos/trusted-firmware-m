@@ -62,6 +62,8 @@
  * is used as a temporary storage during image swapping.
  */
 
+/* Area for downloading bl2 image */
+#define FLASH_AREA_BL2_BIN_OFFSET       (0x0)
 /* area for BL2 code protected by hdp */
 #define FLASH_AREA_BL2_OFFSET           (0x0)
 #define FLASH_AREA_BL2_SIZE             (0xd800)

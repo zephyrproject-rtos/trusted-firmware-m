@@ -63,7 +63,7 @@ echo $command
 exit 1
 fi
 
-command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b boot -m  RE_BL2_PERSO_ADDRESS -s 0 "$updatesh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b boot -m  RE_BL2_BIN_ADDRESS -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -126,6 +126,22 @@ echo "postbuild.sh failed"
 echo $command
 exit 1
 fi
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b nvmcnt -m  RE_BL2_NVMCNT_ADDRESS -s 0 "$updatesh
+$command  >> $projectdir"/output.txt"
+ret=$?
+if [ $ret != 0 ]; then
+echo "postbuild.sh failed"
+echo $command
+exit 1
+fi
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b prov -m  RE_BL2_PROVISION_ADDRESS -s 0 "$updatesh
+$command  >> $projectdir"/output.txt"
+ret=$?
+if [ $ret != 0 ]; then
+echo "postbuild.sh failed"
+echo $command
+exit 1
+fi
 echo $updatebat" updated"
 command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b sst -m  RE_IMAGE_FLASH_NV_PS -s 0 "$updatesh
 $command  >> $projectdir"/output.txt"
@@ -153,7 +169,7 @@ echo "postbuild.sh failed"
 echo $command
 exit 1
 fi
-command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b boot -m  RE_BL2_PERSO_ADDRESS -s 0 "$bin2hexsh
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b boot -m  RE_BL2_BIN_ADDRESS -s 0 "$bin2hexsh
 $command  >> $projectdir"/output.txt"
 ret=$?
 if [ $ret != 0 ]; then
@@ -161,6 +177,7 @@ echo "postbuild.sh failed"
 echo $command
 exit 1
 fi
+
 
 command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b slot0 -m  RE_IMAGE_FLASH_ADDRESS_SECURE -s 0 "$bin2hexsh
 $command  >> $projectdir"/output.txt"

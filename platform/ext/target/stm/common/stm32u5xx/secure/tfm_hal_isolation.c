@@ -131,7 +131,8 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         FLOW_CTRL_MPU_S_CH_R4,
 #endif /* FLOW_CONTROL */
     },
-    /* TFM Non volatile data region (NVCNT/SST/ITS) */
+    /* TFM Non volatile data region (OTP/NVM/SST/ITS) */
+    /* OTP is write protected (Option Byte protection) */
     {
         0, /* will be updated before using */
         TFM_NV_DATA_START,

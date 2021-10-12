@@ -23,8 +23,17 @@
 #include "region_defs.h"
 MEMORY
 {
+#if defined(BL2_NVMCNT_AREA_BASE)
+  FLASH_NVMCNT(rx) : ORIGIN = BL2_NVMCNT_AREA_BASE, LENGTH = BL2_NVMCNT_AREA_SIZE
+#endif
   FLASH (rx)  : ORIGIN = BL2_CODE_START, LENGTH = BL2_CODE_SIZE
   FLASH_NOHDP (rx)  : ORIGIN = BL2_NOHDP_CODE_START, LENGTH = BL2_NOHDP_CODE_SIZE
+#if defined(BL2_OTP_AREA_BASE)
+  FLASH_OTP(rx) : ORIGIN = BL2_OTP_AREA_BASE, LENGTH = BL2_OTP_AREA_SIZE
+#endif
+#if defined(BL2_NVM_AREA_BASE)
+  FLASH_NVM(rx) : ORIGIN = BL2_NVM_AREA_BASE, LENGTH = BL2_NVM_AREA_SIZE
+#endif
   RAM   (rwx) : ORIGIN = BL2_DATA_START, LENGTH = BL2_DATA_SIZE
 }
 
@@ -39,6 +48,28 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
+
+#if defined(BL2_OTP_AREA_BASE)
+    .BL2_OTP :
+    {
+       KEEP(*(.BL2_OTP_Const)) 
+    } > FLASH_OTP
+#endif
+
+#if defined(BL2_NVM_AREA_BASE)
+    .BL2_NVM :
+    {
+        KEEP(*(.BL2_NVM_Const)) 
+    } > FLASH_NVM
+#endif
+
+#if defined(BL2_NVMCNT_AREA_BASE)
+    .BL2_NVMCNT :
+    {
+        KEEP(*(.BL2_NVMCNT_Const)) 
+    } > FLASH_NVMCNT
+#endif
+
     .BL2_NoHdp_Code :
     {
         KEEP(*(.BL2_NoHdp_Data))

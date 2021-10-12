@@ -16,9 +16,27 @@ define block ER_NOHDP_CODE with fixed order, alignment = 8 {
                                 readonly section .BL2_NoHdp_Code,
                                 readonly object mpu_armv8m_drv.o,
                                 readonly section .BL2_Error_Code};
+
 define block LR_NOHDP_CODE with fixed order, maximum size = BL2_NOHDP_CODE_SIZE {block ER_NOHDP_CODE};
 place at address BL2_NOHDP_CODE_START {block LR_NOHDP_CODE};
-
+#if defined(BL2_OTP_AREA_BASE)
+define block LR_OTP_CONST {
+                                readonly object otp_provision.o
+                          };
+place at address BL2_OTP_AREA_BASE  {block LR_OTP_CONST};
+#endif
+#if defined(BL2_NVM_AREA_BASE)
+define block LR_NVM_INIT {
+                                readonly object nvm_init.o
+                          };
+place at address BL2_NVM_AREA_BASE  {block LR_NVM_INIT};
+#endif
+#if defined(BL2_NVMCNT_AREA_BASE)
+define block LR_NVMCNT_INIT {
+                                readonly object nvmcnt_init.o
+                          };
+place at address BL2_NVMCNT_AREA_BASE  {block LR_NVMCNT_INIT};
+#endif
 define block ER_DATA            with alignment = 32 {readwrite};
 define block ARM_LIB_STACK      with alignment = 32, size = BL2_MSP_STACK_SIZE { };
 define block HEAP               with alignment = 8, size = BL2_HEAP_SIZE { };

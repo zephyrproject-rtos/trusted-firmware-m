@@ -195,6 +195,17 @@
 #define BL2_SRAM_AREA_BASE                  (_SRAM1_BASE_NS)
 #define BL2_SRAM_AREA_END                   (_SRAM4_BASE_S +  _SRAM4_SIZE_MAX -1)
 
+/* Define Area provision by BL2 */
+#define BL2_OTP_AREA_BASE                   S_ROM_ALIAS(TFM_OTP_NV_COUNTERS_AREA_ADDR)
+#define BL2_OTP_AREA_SIZE                   (TFM_OTP_NV_COUNTERS_AREA_SIZE)
+/* Define Area for Initializing NVM counter */
+/* backup sector is initialised */
+#define BL2_NVM_AREA_BASE                   S_ROM_ALIAS(TFM_NV_COUNTERS_AREA_ADDR+FLASH_AREA_IMAGE_SECTOR_SIZE)
+#define BL2_NVM_AREA_SIZE                   (FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* Define Area for initializing BL2_NVCNT   */
+/* backup sector is initialised */
+#define BL2_NVMCNT_AREA_BASE                S_ROM_ALIAS(FLASH_BL2_NVCNT_AREA_OFFSET+FLASH_AREA_IMAGE_SECTOR_SIZE)
+#define BL2_NVMCNT_AREA_SIZE                (FLASH_AREA_IMAGE_SECTOR_SIZE)
 #endif /* BL2 */
 
 
@@ -259,9 +270,9 @@
 #endif /* LOADER_CODE_SIZE > LOADER_MAX_CODE_SIZE */
 
 /* TFM non volatile data (NVCNT/PS/ITS) region */
-#define TFM_NV_DATA_START                   (S_ROM_ALIAS(FLASH_OTP_NV_COUNTERS_AREA_OFFSET))
-#define TFM_NV_DATA_SIZE                    (FLASH_OTP_NV_COUNTER_AREA_SIZE + \
-                                             FLASH_PS_AREA_SIZE + FLASH_ITS_AREA_SIZE)
+#define TFM_NV_DATA_START                   (S_ROM_ALIAS(FLASH_AREA_OTP_OFFSET))
+#define TFM_NV_DATA_SIZE                    (FLASH_AREA_OTP_SIZE + FLASH_NV_COUNTERS_AREA_SIZE \
+                                             + FLASH_PS_AREA_SIZE + FLASH_ITS_AREA_SIZE)
 #define TFM_NV_DATA_LIMIT                   (TFM_NV_DATA_START + TFM_NV_DATA_SIZE - 1)
 /* Additional Check to detect flash download slot overlap or overflow */
 #if defined(MCUBOOT_EXT_LOADER)
