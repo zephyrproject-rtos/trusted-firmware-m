@@ -19,7 +19,7 @@
 
 #ifdef UART0_PL011
 static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG = {
-    .base = DIPHDA_UART_BASE,
+    .base = CORSTONE1000_UART_BASE,
     .def_baudrate = DEFAULT_UART_BAUDRATE,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
@@ -33,20 +33,20 @@ struct uart_pl011_dev_t UART0_PL011_DEV = {&(UART0_PL011_DEV_CFG),
 #endif
 
 #ifdef MHU1_SE_TO_HOST
-struct mhu_v2_x_dev_t MHU1_SE_TO_HOST_DEV = {(DIPHDA_SEH_1_SENDER_BASE),
+struct mhu_v2_x_dev_t MHU1_SE_TO_HOST_DEV = {(CORSTONE1000_SEH_1_SENDER_BASE),
                                              (MHU_V2_X_SENDER_FRAME)};
 #endif
 
 #ifdef MHU1_HOST_TO_SE
-struct mhu_v2_x_dev_t MHU1_HOST_TO_SE_DEV = {(DIPHDA_HSE_1_RECEIVER_BASE),
+struct mhu_v2_x_dev_t MHU1_HOST_TO_SE_DEV = {(CORSTONE1000_HSE_1_RECEIVER_BASE),
                                              (MHU_V2_X_RECEIVER_FRAME)};
 #endif
 
 /* QSPI driver structures */
 #if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
 static const struct axi_qspi_dev_cfg_t AXI_QSPI_DEV_CFG_S = {
-    .base = DIPHDA_AXI_QSPI_CTRL_REG_BASE,
-    .scc_base = DIPHDA_HOST_FPGA_SCC_REGISTERS
+    .base = CORSTONE1000_AXI_QSPI_CTRL_REG_BASE,
+    .scc_base = CORSTONE1000_HOST_FPGA_SCC_REGISTERS
 };
 struct axi_qspi_dev_t AXI_QSPI_DEV_S = {
     .cfg = &AXI_QSPI_DEV_CFG_S,
@@ -56,13 +56,13 @@ struct axi_qspi_dev_t AXI_QSPI_DEV_S = {
 
 #if (defined (SPI_STRATAFLASHJ3_S) && defined (CFI_S))
 static const struct cfi_dev_cfg_t CFI_DEV_CFG_S = {
-    .base = DIPHDA_HOST_XNVM_BASE
+    .base = CORSTONE1000_HOST_XNVM_BASE
 };
 struct cfi_dev_t CFI_DEV_S = {
     .cfg = &CFI_DEV_CFG_S,
 };
 static const struct cfi_dev_cfg_t CFI_DEV_CFG_SE_SECURE_FLASH_S = {
-    .base = DIPHDA_SE_SECURE_FLASH_BASE_FVP
+    .base = CORSTONE1000_SE_SECURE_FLASH_BASE_FVP
 };
 struct cfi_dev_t CFI_DEV_SE_SECURE_FLASH_S = {
     .cfg = &CFI_DEV_CFG_SE_SECURE_FLASH_S,

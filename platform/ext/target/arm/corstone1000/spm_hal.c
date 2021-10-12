@@ -32,7 +32,7 @@ void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
     /* Switch the shared flash to XiP mode for the host */
     Select_XIP_Mode_For_Shared_Flash();
 
-    volatile uint32_t *bir_base = (uint32_t *)DIPHDA_HOST_BIR_BASE;
+    volatile uint32_t *bir_base = (uint32_t *)CORSTONE1000_HOST_BIR_BASE;
 
     /* Program Boot Instruction Register to jump to BL2 (TF-A) base address
      * at 0x02354000, corresponding assembler instructions are as below.
@@ -44,14 +44,14 @@ void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
     bir_base[1] = 0xD61F0000;
     bir_base[2] = 0x02354000;
 
-    volatile uint32_t *reset_ctl_reg = (uint32_t *)(DIPHDA_BASE_SCR_BASE
+    volatile uint32_t *reset_ctl_reg = (uint32_t *)(CORSTONE1000_BASE_SCR_BASE
                                                     + HOST_SYS_RST_CTRL_OFFSET);
     volatile uint32_t *reset_ctl_wakeup_reg =
-                        (uint32_t *)(DIPHDA_HOST_BASE_SYSTEM_CONTROL_BASE
+                        (uint32_t *)(CORSTONE1000_HOST_BASE_SYSTEM_CONTROL_BASE
                                      + HOST_CPU_CORE0_WAKEUP_OFFSET);
 
     volatile uint32_t *PE0_CONFIG =
-                        (uint32_t *)(DIPHDA_HOST_BASE_SYSTEM_CONTROL_BASE
+                        (uint32_t *)(CORSTONE1000_HOST_BASE_SYSTEM_CONTROL_BASE
                                      + HOST_CPU_PE0_CONFIG_OFFSET);
 
     /* Select host CPU architecture as AArch64 */

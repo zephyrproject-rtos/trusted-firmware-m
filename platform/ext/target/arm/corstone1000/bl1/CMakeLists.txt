@@ -46,7 +46,7 @@ target_link_libraries(bl1
 # added here, as those not use this image number macro.
 target_sources(bl1
     PRIVATE
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/../Device/Source/gcc/startup_diphda_bl.S>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/../Device/Source/gcc/startup_corstone1000_bl.S>
 )
 
 # Needed for the GCC startup files
@@ -71,10 +71,10 @@ add_dependencies(bl1
 
 target_sources(bl1_scatter
     PRIVATE
-        ../Device/Source/gcc/diphda_bl1.ld
+        ../Device/Source/gcc/corstone1000_bl1.ld
 )
 
-set_source_files_properties(../Device/Source/gcc/diphda_bl1.ld
+set_source_files_properties(../Device/Source/gcc/corstone1000_bl1.ld
     PROPERTIES
     LANGUAGE C
 )

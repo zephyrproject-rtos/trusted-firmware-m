@@ -1,14 +1,14 @@
-########################
-Use of OpenAMP in Diphda
-########################
-ARM's Diphda platform uses openamp for tf-m non-secure
+##############################
+Use of OpenAMP in Corstone1000
+##############################
+ARM's Corstone1000 platform uses openamp for tf-m non-secure
 communication. The openamp interface is used to recieve
 messages and send response to the host (Linux). The
 PSA Client library decodes messages received through
 OpenAMP and fowards the decoded messages to TF-M's SPM.
 
 TF-M has Mailbox solution which supports non-secure
-bare-meta applications. In the Diphda, the non-secure side
+bare-meta applications. In the Corstone1000, the non-secure side
 is Linux environment so openamp is used instead.
 
 The file naming convention used here is aligned with TF-M's

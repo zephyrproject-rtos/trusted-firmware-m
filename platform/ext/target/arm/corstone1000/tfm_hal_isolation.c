@@ -118,7 +118,7 @@ enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
 }
 
 /*
- * Implementation of tfm_hal_bind_boundaries() on Diphda:
+ * Implementation of tfm_hal_bind_boundaries() on Corstone1000:
  *
  * The API encodes some attributes into a handle and returns it to SPM.
  * The attributes include isolation boundaries, privilege, and MMIO information.

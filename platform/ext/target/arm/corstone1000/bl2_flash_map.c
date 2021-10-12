@@ -69,7 +69,7 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
         rc = 0;
     }
     else if (image_id == 1 || image_id == 2) {
-        (*exec_ram_start) = DIPHDA_HOST_SHARED_RAM_BASE;
+        (*exec_ram_start) = CORSTONE1000_HOST_SHARED_RAM_BASE;
         (*exec_ram_size) = 0x20000000U;
         rc = 0;
     }

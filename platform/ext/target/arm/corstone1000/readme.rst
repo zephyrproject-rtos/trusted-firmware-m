@@ -1,12 +1,12 @@
-###########
-ARM: Diphda
-###########
+##################
+ARM: Corstone-1000
+##################
 
 ************
 Introduction
 ************
 
-The ARM's Diphda platform is a reference implementation of PSA FF-M
+The ARM's Corstone-1000 platform is a reference implementation of PSA FF-M
 architecture where NSPE and SPE environments are partitioned into
 Cortex-A35 and Cortex-M0+ respectively.
 
@@ -39,12 +39,16 @@ System boot
 Build
 *****
 
-cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/diphda
+.. code-block::
 
-cmake --build build -- install
+    cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000
+    cmake --build build -- install
 
-The binaries will will installed inside:
-./build/install/outputs/ARM/DIPHDA
+The binaries will be installed inside:
+
+.. code-block::
+
+    ./build/install/outputs/ARM/CORSTONE1000
 
 --------------
 

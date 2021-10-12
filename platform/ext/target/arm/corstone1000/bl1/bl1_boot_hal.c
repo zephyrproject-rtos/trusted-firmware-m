@@ -45,12 +45,12 @@ static void setup_se_firewall(void)
 
 #if !(PLATFORM_IS_FVP)
     /* Configure the SE firewall controller */
-    fc_select((void *)DIPHDA_FIREWALL_BASE, FW_CONTROLLER);
+    fc_select((void *)CORSTONE1000_FIREWALL_BASE, FW_CONTROLLER);
     fc_disable_bypass();
     fc_select_region(2);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_2MB, DIPHDA_FIREWALL_BASE);
+    fc_prog_rgn(RGN_SIZE_2MB, CORSTONE1000_FIREWALL_BASE);
     fc_init_mpl(RGN_MPE0);
     mpl_rights = (RGN_MPL_SECURE_READ_MASK |
                   RGN_MPL_SECURE_WRITE_MASK);
@@ -62,7 +62,7 @@ static void setup_se_firewall(void)
 #endif
 
     /* Configure the SE firewall component 1 */
-    fc_select((void *)DIPHDA_FIREWALL_BASE, COMP_FC1);
+    fc_select((void *)CORSTONE1000_FIREWALL_BASE, COMP_FC1);
     fc_disable_bypass();
     fc_pe_disable();
 
@@ -70,7 +70,7 @@ static void setup_se_firewall(void)
     fc_select_region(1);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_4KB, DIPHDA_HOST_BIR_BASE);
+    fc_prog_rgn(RGN_SIZE_4KB, CORSTONE1000_HOST_BIR_BASE);
     fc_prog_rgn_upper_addr(HOST_BIR_BASE);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
@@ -86,7 +86,7 @@ static void setup_se_firewall(void)
     fc_select_region(2);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_4MB, DIPHDA_HOST_SHARED_RAM_BASE);
+    fc_prog_rgn(RGN_SIZE_4MB, CORSTONE1000_HOST_SHARED_RAM_BASE);
     fc_prog_rgn_upper_addr(HOST_SHARED_RAM_BASE);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
@@ -104,7 +104,7 @@ static void setup_se_firewall(void)
     fc_select_region(3);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_32MB, DIPHDA_HOST_XNVM_BASE);
+    fc_prog_rgn(RGN_SIZE_32MB, CORSTONE1000_HOST_XNVM_BASE);
     fc_prog_rgn_upper_addr(HOST_XNVM_BASE);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
@@ -120,7 +120,7 @@ static void setup_se_firewall(void)
     fc_select_region(4);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_64KB, DIPHDA_HOST_BASE_SYSTEM_CONTROL_BASE);
+    fc_prog_rgn(RGN_SIZE_64KB, CORSTONE1000_HOST_BASE_SYSTEM_CONTROL_BASE);
     fc_prog_rgn_upper_addr(HOST_BASE_SYSTEM_CONTROL_BASE);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
@@ -137,7 +137,7 @@ static void setup_se_firewall(void)
     fc_select_region(5);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_2MB, DIPHDA_HOST_FIREWALL_BASE);
+    fc_prog_rgn(RGN_SIZE_2MB, CORSTONE1000_HOST_FIREWALL_BASE);
     fc_prog_rgn_upper_addr(HOST_FIREWALL_BASE);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
@@ -154,7 +154,7 @@ static void setup_se_firewall(void)
     fc_select_region(6);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_8MB, DIPHDA_SE_SECURE_FLASH_BASE_FVP);
+    fc_prog_rgn(RGN_SIZE_8MB, CORSTONE1000_SE_SECURE_FLASH_BASE_FVP);
     fc_prog_rgn_upper_addr(HOST_SE_SECURE_FLASH_BASE_FVP);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
@@ -171,7 +171,7 @@ static void setup_se_firewall(void)
     fc_select_region(6);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_64KB, DIPHDA_AXI_QSPI_CTRL_REG_BASE);
+    fc_prog_rgn(RGN_SIZE_64KB, CORSTONE1000_AXI_QSPI_CTRL_REG_BASE);
     fc_prog_rgn_upper_addr(AXI_QSPI_CTRL_REG_BASE);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
@@ -188,7 +188,7 @@ static void setup_se_firewall(void)
     fc_select_region(7);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_4KB, DIPHDA_HOST_FPGA_SCC_REGISTERS);
+    fc_prog_rgn(RGN_SIZE_4KB, CORSTONE1000_HOST_FPGA_SCC_REGISTERS);
     fc_prog_rgn_upper_addr(HOST_FPGA_SCC_REGISTERS);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
