@@ -157,4 +157,10 @@ void ppc_clear_irq(void);
  */
 void sau_and_idau_cfg(void);
 
+/**
+ * \brief Sets to secure the initialized non-secure regions of
+ *        the Memory Protection Controller.
+ */
+void mpc_revert_non_secure_to_secure_cfg(void);
+
 #endif /* __TARGET_CFG_H__ */

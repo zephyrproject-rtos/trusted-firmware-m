@@ -89,7 +89,7 @@ extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP3;
 #define PERIPHERALS_BASE_NS_END        (0x4FFFFFFF)
 
 /* Enable system reset request for CPU 0 */
-#define ENABLE_CPU0_SYSTEM_RESET_REQUEST (1U << 4U)
+#define ENABLE_CPU0_SYSTEM_RESET_REQUEST (1U << 8U)
 
 /* To write into AIRCR register, 0x5FA value must be write to the VECTKEY field,
  * otherwise the processor ignores the write.
@@ -371,22 +371,14 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     }
 #endif
 
-    /* Lock down the MPC configuration */
-    ret = Driver_ISRAM0_MPC.LockDown();
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Lock down MPC for ISRAM0!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    ret = Driver_SRAM_MPC.LockDown();
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Lock down MPC for SRAM!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
 
     /* Lock down not used MPC's */
     Driver_QSPI_MPC.LockDown();
     Driver_ISRAM1_MPC.LockDown();
+
+    /* SRAM and ISRAM0 MPCs left unlocked as they are not reset if NVIC system
+     * reset asserted.
+     */
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
@@ -395,6 +387,23 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     __ISB();
 
     return TFM_PLAT_ERR_SUCCESS;
+}
+
+void mpc_revert_non_secure_to_secure_cfg(void)
+{
+    Driver_ISRAM0_MPC.ConfigRegion(MPC_ISRAM0_RANGE_BASE_S,
+                                   MPC_ISRAM0_RANGE_LIMIT_S,
+                                   ARM_MPC_ATTR_SECURE);
+
+    Driver_SRAM_MPC.ConfigRegion(MPC_SRAM_RANGE_BASE_S,
+                                 MPC_SRAM_RANGE_LIMIT_S,
+                                 ARM_MPC_ATTR_SECURE);
+
+    /* Add barriers to assure the MPC configuration is done before continue
+     * the execution.
+     */
+    __DSB();
+    __ISB();
 }
 
 void mpc_clear_irq(void)
