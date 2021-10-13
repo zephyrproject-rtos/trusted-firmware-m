@@ -36,7 +36,7 @@ if(NOT DEFINED PYTHON_EXECUTABLE)
 	message(FATAL_ERROR "FindPythonModules: mandatory parameter PYTHON_EXECUTABLE is missing.")
 endif()
 
-include(Common/Utils)
+include(Utils)
 
 foreach(_mod ${PythonModules_FIND_COMPONENTS})
 	string(TOUPPER ${_mod} _mod_upper)

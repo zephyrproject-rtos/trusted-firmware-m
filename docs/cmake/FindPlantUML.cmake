@@ -31,7 +31,7 @@
 #   PLANTUML_FOUND          = Was the .jar file found and sucesfuly executed.
 #
 
-include(Common/Utils)
+include(Utils)
 
 find_package(Java 1.8 COMPONENTS Runtime)
 if(Java_Runtime_FOUND)

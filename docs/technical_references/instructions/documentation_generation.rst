@@ -39,6 +39,11 @@ The following tools are needed:
             # For PDF generation
             sudo apt-get install -y doxygen-latex
 
+            # Additional Python dependencies for documentation
+            pip3 install --upgrade pip
+            cd trusted-firmware-m
+            pip3 install -r tools/requirements_docs.txt
+
         2. Currently, there are two ways of building TF-M reference manual:
 
             - Using the CMake build system as custom targets
@@ -92,6 +97,11 @@ The following tools are needed:
         - Java JVM is used from Arm DS installation.
 
         .. code-block:: bash
+
+            # Additional Python dependencies for documentation
+            pip3 install --upgrade pip
+            cd trusted-firmware-m
+            pip3 install -r tools\requirements_docs.txt
 
             set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
             set PATH=$PATH;<ARM_DS_PATH>\sw\java\bin

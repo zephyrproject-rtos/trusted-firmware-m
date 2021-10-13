@@ -1,0 +1,10 @@
+graphviz
+Jinja2>=2.10.3
+latex
+Sphinx==2.0.1
+m2r
+sphinx-rtd-theme
+sphinxcontrib-plantuml
+sphinxcontrib-svg2pdfconverter
+sphinx-tabs==1.1.13
+docutils==0.16
