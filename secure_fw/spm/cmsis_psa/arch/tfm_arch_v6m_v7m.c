@@ -6,6 +6,7 @@
  */
 
 #include <inttypes.h>
+#include "compiler_ext_defs.h"
 #include "tfm_core_utils.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_arch.h"
@@ -20,6 +21,50 @@
 
 extern uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr);
 
+/* Delcaraction flag to control the scheduling logic in PendSV. */
+static uint32_t pendsv_idling = 0;
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+__naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                                       uint32_t stk_base, uint32_t stk_limit)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                \n"
+#endif
+        "   push   {r4, lr}                             \n"
+        "   cpsid  i                                    \n"
+        "   cmp    r2, #0                               \n"
+        "   beq    v6v7_lock_sched                      \n"
+        "   mov    r4, sp                               \n"/* switch stack   */
+        "   mov    sp, r2                               \n"
+        "   mov    r2, r4                               \n"
+        "v6v7_lock_sched:                               \n"/* lock pendsv    */
+        "   ldr    r3, =%a1                             \n"/* R2 = caller SP */
+        "   movs   r4, #0x1                             \n"/* Do not touch   */
+        "   str    r4, [r3, #0]                         \n"
+        "   cpsie  i                                    \n"
+        "   push   {r2, r3}                             \n"
+        "   bl     %a0                                  \n"
+        "   pop    {r2, r3}                             \n"
+        "   cpsid  i                                    \n"
+        "   cmp    r2, #0                               \n"
+        "   beq    v6v7_release_sched                   \n"
+        "   mov    sp, r2                               \n"/* switch stack   */
+        "v6v7_release_sched:                            \n"
+        "   ldr    r2, =%a1                             \n"/* release pendsv */
+        "   movs   r3, #0                               \n"
+        "   str    r3, [r2, #0]                         \n"
+        "   cpsie  i                                    \n"
+        "   pop    {r4, pc}                             \n"
+        : : "i" (spcall_execute_c),
+            "i" (&pendsv_idling)
+    );
+}
+
+#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+
 #if defined(__ICCARM__)
 #pragma required = do_schedule
 #endif
@@ -30,8 +75,11 @@ __attribute__((naked)) void PendSV_Handler(void)
 #if !defined(__ICCARM__)
         ".syntax unified                    \n"
 #endif
+        "   ldr     r0, =%a1                \n"
+        "   cmp     r0, #0                  \n"
+        "   bne     v6v7_pendsv_exit        \n"
         "   push    {r0, lr}                \n"
-        "   bl      do_schedule             \n"
+        "   bl      %a0                     \n"
         "   pop     {r2, r3}                \n"
         "   mov     lr, r3                  \n"
         "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
@@ -61,6 +109,8 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   msr     psp, r2                 \n"
         "v6v7_pendsv_exit:                  \n"
         "   bx      lr                      \n"
+        :: "i" (do_schedule),
+           "i" (&pendsv_idling)
     );
 }
 

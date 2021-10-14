@@ -9,9 +9,10 @@
 #define __BACKEND_H__
 
 #include <stdint.h>
-#include "psa/error.h"
 #include "spm_ipc.h"
+#include "tfm_arch.h"
 #include "load/spm_load_api.h"
+#include "psa/error.h"
 
 /* BASIC TYPE DEFINITIONS */
 
@@ -44,5 +45,9 @@ extern const struct backend_ops_t backend_instance;
 /* The component list, and a MACRO indicate this is not a common global. */
 extern struct partition_head_t partition_listhead;
 #define PARTITION_LIST_ADDR (&partition_listhead)
+
+/* TODO: Put this into NS Agent related service when available. */
+extern struct context_ctrl_t *p_spm_thread_context;
+#define SPM_THREAD_CONTEXT p_spm_thread_context
 
 #endif /* __BACKEND_H__ */

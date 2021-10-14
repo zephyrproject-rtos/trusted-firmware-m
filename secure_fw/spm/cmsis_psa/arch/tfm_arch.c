@@ -31,6 +31,21 @@ void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uintptr_t ret_code)
                                                        ->stat_ctx.r0 = ret_code;
 }
 
+/* Caution: Keep 'uint32_t' always for collecting thread return values! */
+__attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
+{
+    __ASM volatile(
+#ifndef __ICCARM__
+        ".syntax unified                                 \n"
+#endif
+        "ldr     r0, =%a0                                \n"
+        "ldr     r1, ="M2S(SCB_ICSR_PENDSVSET_Msk)"      \n"
+        "str     r1, [r0, #0]                            \n"
+        "bx      lr                                      \n"
+        :: "i" (&(SCB->ICSR))
+    );
+}
+
 /*
  * Initializes the State Context. The Context is used to do Except Return to
  * Thread Mode to start a function.
