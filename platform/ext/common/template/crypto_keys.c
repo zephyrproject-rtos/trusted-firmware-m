@@ -22,6 +22,10 @@
 #include "tfm_plat_otp.h"
 #include "mbedtls/hkdf.h"
 
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "crypto_hw.h"
+#endif /* CRYPTO_HW_ACCELERATOR */
+
 enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
                                                  size_t label_size,
                                                  const uint8_t *context,
