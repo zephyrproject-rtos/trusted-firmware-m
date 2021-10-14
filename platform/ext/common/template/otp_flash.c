@@ -106,6 +106,7 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     }
 }
 
+#if defined(OTP_WRITEABLE)
 static enum tfm_plat_err_t read_from_input(enum tfm_otp_element_id_t id,
                                       uint32_t offset, size_t in_len,
                                       const uint8_t *in)
@@ -203,6 +204,16 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
 }
+#else
+enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
+                                       size_t in_len, const uint8_t *in)
+{
+    (void)id;
+    (void)in_len;
+    (void)in;
+    return TFM_PLAT_ERR_UNSUPPORTED;
+}
+#endif
 
 enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
                                           size_t *size)
