@@ -8,7 +8,7 @@
 #include "psa/client.h"
 #include "tfm_ns_interface.h"
 #include "tfm_api.h"
-#include "tfm_psa_call_param.h"
+#include "tfm_psa_call_pack.h"
 
 /**** API functions ****/
 

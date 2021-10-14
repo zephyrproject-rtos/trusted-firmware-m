@@ -45,7 +45,7 @@ install(FILES       ${INTERFACE_INC_DIR}/ext/tz_context.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR}/ext)
 
 if (TFM_PSA_API)
-    install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_param.h
+    install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_pack.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 

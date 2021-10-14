@@ -5,8 +5,11 @@
  *
  */
 
-#ifndef __TFM_PSA_CALL_PARAM_H__
-#define __TFM_PSA_CALL_PARAM_H__
+#ifndef __TFM_PSA_CALL_PACK_H__
+#define __TFM_PSA_CALL_PACK_H__
+
+#include "psa_config.h"
+#include "psa/client.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,8 +27,13 @@ extern "C" {
          ((((uint32_t)in_len) << IN_LEN_OFFSET) & IN_LEN_MASK) | \
          ((((uint32_t)out_len) << OUT_LEN_OFFSET) & OUT_LEN_MASK))
 
+psa_status_t tfm_psa_call_pack(psa_handle_t handle,
+                               uint32_t ctrl_param,
+                               const psa_invec *in_vec,
+                               psa_outvec *out_vec);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __TFM_PSA_CALL_PARAM_H__ */
+#endif /* __TFM_PSA_CALL_PACK_H__ */

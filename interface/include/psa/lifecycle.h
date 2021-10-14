@@ -8,6 +8,8 @@
 #ifndef __PSA_LIFECYCLE_H__
 #define __PSA_LIFECYCLE_H__
 
+#include "psa_config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif

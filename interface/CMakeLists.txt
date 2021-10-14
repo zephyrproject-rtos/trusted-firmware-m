@@ -54,10 +54,8 @@ target_compile_definitions(psa_interface
 
 target_sources(tfm_secure_api
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_client.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_service.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_lifecycle.c>
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
+    $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c>
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
 )
 
 ###################### Export configurations to NS #############################

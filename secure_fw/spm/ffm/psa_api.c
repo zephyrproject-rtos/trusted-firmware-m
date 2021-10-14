@@ -23,7 +23,7 @@
 #include "tfm_spm_hal.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_hal_platform.h"
-#include "tfm_psa_call_param.h"
+#include "tfm_psa_call_pack.h"
 
 #define GET_STATELESS_SERVICE(index)    (stateless_services_ref_tbl[index])
 extern struct service_t *stateless_services_ref_tbl[];
