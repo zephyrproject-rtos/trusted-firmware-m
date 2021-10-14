@@ -27,6 +27,16 @@
 #error "High isolation level SFN model is not supported."
 #endif
 
+    {% set total_stk = namespace(size=0) %}
+    {% for partition in partitions %}
+        {% if "0x" in partition.manifest.stack_size or "0X" in partition.manifest.stack_size %}
+            {% set total_stk.size = total_stk.size + partition.manifest.stack_size|int(base=16) %}
+        {% else %}
+            {% set total_stk.size = total_stk.size + partition.manifest.stack_size|int(base=10) %}
+        {% endif %}
+    {% endfor %}
+#define {{"%-36s"|format("SUM_OF_PARTITION_STACK_SIZES")}} ((({{"0x%x"|format(total_stk.size)}} >> 1) + 0x7) & (~0x7))
+
 {% elif sfn_partition_num > 0 and ipc_partition_num > 0 %}
 #error "IPC and SFN co-work not supported yet."
 {% else %}
