@@ -80,6 +80,8 @@ target_include_directories(platform_s
         Native_Driver/generated_source
         ./CMSIS_Driver/Config
         mailbox
+    PRIVATE
+        ${CY_PDL_LIB_PATH}/cmsis/include
 )
 
 target_sources(platform_s
@@ -203,6 +205,8 @@ target_include_directories(platform_ns
         ${CY_CORE_LIB_PATH}/include
         Native_Driver/generated_source
         ./CMSIS_Driver/Config
+    PRIVATE
+        ${CY_PDL_LIB_PATH}/cmsis/include
 )
 
 target_compile_definitions(platform_ns
