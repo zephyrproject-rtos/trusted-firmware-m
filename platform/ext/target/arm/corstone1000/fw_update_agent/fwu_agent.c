@@ -537,6 +537,76 @@ out:
     return ret;
 }
 
+static enum fwu_agent_error_t accept_full_capsule(
+          struct fwu_metadata* metadata,
+          struct fwu_private_metadata* priv_metadata)
+{
+    uint32_t active_index = metadata->active_index;
+    enum fwu_agent_error_t ret;
+
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    for (int i = 0; i < NR_OF_IMAGES_IN_FW_BANK; i++) {
+        metadata->img_entry[i].img_props[active_index].accepted =
+                                                            IMAGE_ACCEPTED;
+    }
+
+    priv_metadata->boot_attempted = 0;
+
+    ret = private_metadata_write(priv_metadata);
+    if (ret) {
+        return ret;
+    }
+
+    ret = metadata_write(metadata);
+    if (ret) {
+        return ret;
+    }
+
+    FWU_LOG_MSG("%s: exit: fwu state is changed to regular\n\r", __func__);
+    return FWU_AGENT_SUCCESS;
+}
+
+static enum fwu_agent_error_t fwu_accept_image(struct efi_guid* guid,
+        struct fwu_metadata *metadata,
+        struct fwu_private_metadata *priv_metadata)
+{
+    enum fwu_agent_state_t current_state;
+    int image_index;
+    uint32_t image_bank_offset;
+    enum fwu_agent_error_t ret;
+
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    /* it is expected to receive this call only when
+       in trial state */
+    current_state = get_fwu_agent_state(metadata, priv_metadata);
+    if (current_state != FWU_AGENT_STATE_TRIAL) {
+        return FWU_AGENT_ERROR;
+    }
+
+    /* booted from previous_active_bank, not expected
+     * to receive this call in this state, rather host should
+     * call corstone1000_fwu_select_previous */
+    if (metadata->active_index != priv_metadata->boot_index) {
+        return FWU_AGENT_ERROR;
+    }
+
+    image_index = get_image_info_in_bank(guid, &image_bank_offset);
+    switch(image_index) {
+        case IMAGE_ALL:
+            ret = accept_full_capsule(metadata, priv_metadata);
+            break;
+        default:
+            FWU_LOG_MSG("%s: sent image not recognized\n\r", __func__);
+            ret = FWU_AGENT_ERROR;
+            break;
+    }
+
+    FWU_LOG_MSG("%s: exit: ret = %d\n\r", __func__, ret);
+    return ret;
+}
+
 void bl1_get_boot_bank(uint32_t *bank_offset)
 {
     struct fwu_private_metadata priv_metadata;
