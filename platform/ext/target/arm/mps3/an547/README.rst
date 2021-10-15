@@ -9,11 +9,6 @@ Build instructions with platform name: arm/mps3/an547 (-DTFM_PLATFORM=arm/mps3/a
 
 .. note::
 
-   When building with GNUARM, please use the version of gcc shipped with zephyr
-   SDK 0.13.0-alpha1, arm-zephyr-eabi-gcc version 10.3.0.
-
-.. note::
-
    This platform support does not provide software for Ethos-U55 IP, only
    contains base address and interrupt number for it.
 
