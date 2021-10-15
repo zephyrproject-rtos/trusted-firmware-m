@@ -35,6 +35,11 @@ struct backend_ops_t {
     psa_status_t (*messaging)(struct service_t *p_serv,
                               struct tfm_msg_body_t *p_msg);
 
+    /*
+     * Runtime model-specific message replying.
+     * Return the acked status.
+     */
+    void (*replying)(struct tfm_msg_body_t *p_msg, psa_status_t status);
 };
 
 /* RUNTIME MODEL BACKENDS DECLARATION */

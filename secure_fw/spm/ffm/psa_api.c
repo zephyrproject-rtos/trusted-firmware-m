@@ -763,11 +763,7 @@ void tfm_spm_partition_psa_reply(psa_handle_t msg_handle, psa_status_t status)
         conn_handle->status = TFM_HANDLE_STATUS_IDLE;
     }
 
-    if (is_tfm_rpc_msg(msg)) {
-        tfm_rpc_client_call_reply(msg, ret);
-    } else {
-        thrd_wake_up(&msg->ack_evnt, ret);
-    }
+    backend_instance.replying(msg, ret);
 }
 
 void tfm_spm_partition_psa_notify(int32_t partition_id)

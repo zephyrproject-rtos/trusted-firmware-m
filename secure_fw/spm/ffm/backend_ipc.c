@@ -80,6 +80,15 @@ static psa_status_t ipc_messaging(struct service_t *service,
     return PSA_SUCCESS;
 }
 
+static void ipc_replying(struct tfm_msg_body_t *p_msg, psa_status_t status)
+{
+    if (is_tfm_rpc_msg(p_msg)) {
+        tfm_rpc_client_call_reply(p_msg, status);
+    } else {
+        thrd_wake_up(&p_msg->ack_evnt, status);
+    }
+}
+
 /* Parameters are treated as assuredly */
 static void ipc_comp_init_assuredly(struct partition_t *p_pt,
                                     uint32_t service_setting)
@@ -132,4 +141,5 @@ const struct backend_ops_t backend_instance = {
     .comp_init_assuredly = ipc_comp_init_assuredly,
     .system_run          = ipc_system_run,
     .messaging           = ipc_messaging,
+    .replying            = ipc_replying,
 };
