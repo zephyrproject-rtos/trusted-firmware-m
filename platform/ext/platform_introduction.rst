@@ -2,6 +2,10 @@
 Platforms introduction
 ######################
 
+    - Olympus system
+
+        - Corstone-Polaris Ethos-U55 FVP (Olympus CPU plus Ethos-U55)
+
     - Cortex-M55 system:
 
         - `FPGA image loaded on MPS3 board (AN547).

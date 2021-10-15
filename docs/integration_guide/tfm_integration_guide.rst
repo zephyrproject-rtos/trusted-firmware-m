@@ -37,6 +37,7 @@ The hardware platforms currently supported are:
 - nRF9160 DK (Cortex-M33)
 - nRF5340 DK (Cortex-M33 Application MCU)
 - BL5340 DVK (Cortex-M33 Application MCU)
+- Corstone-Polaris Ethos-U55 FVP (Olympus CPU plus Ethos-U55)
 
 The files related to the supported platforms are contained under the
 ``platform`` subfolder. The platform specific files are under
