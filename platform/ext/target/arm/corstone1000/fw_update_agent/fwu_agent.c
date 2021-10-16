@@ -607,6 +607,64 @@ static enum fwu_agent_error_t fwu_accept_image(struct efi_guid* guid,
     return ret;
 }
 
+static enum fwu_agent_error_t fwu_select_previous(
+        struct fwu_metadata *metadata,
+        struct fwu_private_metadata *priv_metadata)
+{
+    enum fwu_agent_error_t ret;
+    enum fwu_agent_state_t current_state;
+    uint32_t index;
+
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    /* it is expected to receive this call only when
+       in trial state */
+    current_state = get_fwu_agent_state(metadata, priv_metadata);
+    if (current_state != FWU_AGENT_STATE_TRIAL) {
+        return FWU_AGENT_ERROR;
+    }
+
+    /* not expected to receive this call in this state, system
+     * did not boot from previous active index */
+    if (metadata->previous_active_index != priv_metadata->boot_index) {
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: trial state: active index = %u, previous active = %u\n\r",
+            __func__, metadata->active_index, metadata->previous_active_index);
+
+    index = metadata->previous_active_index;
+    for (int i = 0; i < NR_OF_IMAGES_IN_FW_BANK; i++) {
+        if (metadata->img_entry[i].img_props[index].accepted != IMAGE_ACCEPTED)
+        {
+            FWU_ASSERT(0);
+        }
+    }
+
+    index = metadata->active_index;
+    metadata->active_index = metadata->previous_active_index;
+    metadata->previous_active_index = index;
+
+    priv_metadata->boot_attempted = 0;
+
+    ret = private_metadata_write(priv_metadata);
+    if (ret) {
+        return ret;
+    }
+
+    ret = metadata_write(metadata);
+    if (ret) {
+        return ret;
+    }
+
+    FWU_LOG_MSG("%s: in regular state by choosing previous active bank\n\r",
+                 __func__);
+
+    FWU_LOG_MSG("%s: exit: ret = %d\n\r", __func__, ret);
+    return ret;
+
+}
+
 void bl1_get_boot_bank(uint32_t *bank_offset)
 {
     struct fwu_private_metadata priv_metadata;
