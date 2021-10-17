@@ -545,7 +545,7 @@ attest_add_verification_service(struct attest_token_encode_ctx *token_ctx)
 {
     struct q_useful_buf_c service;
     uint32_t size;
-    uint8_t buf[VERIFCATION_URL_MAX_SIZE];
+    uint8_t buf[VERIFICATION_URL_MAX_SIZE];
     enum tfm_plat_err_t err;
 
     err = tfm_attest_hal_get_verification_service(&size, buf);

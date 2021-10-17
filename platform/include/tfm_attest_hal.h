@@ -29,11 +29,11 @@ enum tfm_security_lifecycle_t {
 };
 
 /**
- * \def VERIFCATION_URL_MAX_SIZE
+ * \def VERIFICATION_URL_MAX_SIZE
  *
  * \brief Maximum size of verification URL in bytes
  */
-#define VERIFCATION_URL_MAX_SIZE (32u)
+#define VERIFICATION_URL_MAX_SIZE (32u)
 
 /**
  * \def PROFILE_DEFINITION_MAX_SIZE
