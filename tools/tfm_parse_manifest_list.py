@@ -128,6 +128,25 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
                 manifest_list_yaml_file.close()
 
     for i, manifest_item in enumerate(manifest_list):
+        valid_enabled_conditions  = ['on',  'true',  'enabled']
+        valid_disabled_conditions = ['off', 'false', 'disabled']
+        is_enabled = ''
+
+        if 'conditional' in manifest_item.keys():
+            is_enabled = manifest_item['conditional'].lower()
+        else:
+            # Partitions without 'conditional' is alwasy on
+            is_enabled = 'on'
+
+        if is_enabled in valid_disabled_conditions:
+            continue
+        elif is_enabled not in valid_enabled_conditions:
+            raise Exception('Invalid "conditional" attribute: "{}" for {}. '
+                            'Please set to one of {} or {}, case-insensitive.'\
+                            .format(manifest_item['conditional'],
+                                    manifest_item['name'],
+                                    valid_enabled_conditions, valid_disabled_conditions))
+
         # Check if partition ID is manually set
         if 'pid' not in manifest_item.keys():
             no_pid_manifest_idx.append(i)
