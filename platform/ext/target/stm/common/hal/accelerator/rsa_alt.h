@@ -59,7 +59,9 @@ typedef struct mbedtls_rsa_context
     mbedtls_mpi MBEDTLS_PRIVATE(D);  /*!<  The private exponent. */
     mbedtls_mpi MBEDTLS_PRIVATE(P);  /*!<  The first prime factor. */
     mbedtls_mpi MBEDTLS_PRIVATE(Q);  /*!<  The second prime factor. */
-
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+    mbedtls_mpi MBEDTLS_PRIVATE(Phi);/*!<  The Euler tolient function. */
+#endif
     mbedtls_mpi MBEDTLS_PRIVATE(DP); /*!<  <code>D % (P - 1)</code>. */
     mbedtls_mpi MBEDTLS_PRIVATE(DQ); /*!<  <code>D % (Q - 1)</code>. */
     mbedtls_mpi MBEDTLS_PRIVATE(QP); /*!<  <code>1 / (Q % P)</code>. */

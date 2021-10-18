@@ -54,6 +54,7 @@
 #include "../library/rsa_alt_helpers.h"
 #include "mbedtls/oid.h"
 #include "mbedtls/platform_util.h"
+#include "mbedtls/error.h"
 
 #include <string.h>
 
@@ -249,7 +250,56 @@ cleanup:
      return ret;
 }
 
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+/**
+ * @brief       Compute Euler totient function of n
+ * @param[in]   p            prime
+ * @param[in]   q            prime
+ * @param[out]  output       phi = ( p - 1 )*( q - 1 )
+ * @retval      0            Ok
+ */
+static int rsa_deduce_phi( const mbedtls_mpi *p,
+                           const mbedtls_mpi *q,
+                           mbedtls_mpi *phi )
+{
+    int ret = 0;
 
+     /* Temporaries holding P-1, Q-1 */
+    mbedtls_mpi P1, Q1;
+
+    mbedtls_mpi_init( &P1 );
+    mbedtls_mpi_init( &Q1 );
+
+    /* P1 = p - 1 */
+    MBEDTLS_MPI_CHK( mbedtls_mpi_sub_int( &P1, p, 1 ) );
+
+    /* Q1 = q - 1 */
+    MBEDTLS_MPI_CHK( mbedtls_mpi_sub_int( &Q1, q, 1 ) );
+
+    /* phi = ( p - 1 ) * ( q - 1 ) */
+    MBEDTLS_MPI_CHK( rsa_mpi2pka_mul( phi, &P1, &Q1 ) );
+
+cleanup:
+
+    mbedtls_mpi_free( &P1 );
+    mbedtls_mpi_free( &Q1 );
+
+    return ret;
+}
+#endif
+
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+/**
+ * @brief       Call the PKA modular exponentiation : output = input^e mod n
+ * @param[in]   input        Input of the modexp
+ * @param[in]   ctx          RSA context
+ * @param[in]   is_private   public (0) or private (1) exponentiation
+ * @param[in]   is_protected normal (0) or protected (1) exponentiation
+ * @param[out]  output       Output of the ModExp (with length of the modulus)
+ * @retval      0                                       Ok
+ * @retval      MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED    Error in the HW
+ */
+#else
 /**
  * @brief       Call the PKA modular exponentiation : output = input^e mod n
  * @param[in]   input        Input of the modexp
@@ -259,8 +309,12 @@ cleanup:
  * @retval      0                                       Ok
  * @retval      MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED    Error in the HW
  */
+#endif
 static int rsa_pka_modexp( mbedtls_rsa_context *ctx,
                            int is_private,
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+                           int is_protected,
+#endif
                            const unsigned char *input,
                            unsigned char *output )
 {
@@ -271,6 +325,12 @@ static int rsa_pka_modexp( mbedtls_rsa_context *ctx,
     PKA_ModExpInTypeDef in = {0};
     uint8_t *e_binary = NULL;
     uint8_t *n_binary = NULL;
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+    /* parameters for exponentiation in protected mode */
+    size_t philen;
+    PKA_ModExpProtectModeInTypeDef in_protected = {0};
+    uint8_t *phi_binary = NULL;
+#endif
 
     RSA_VALIDATE_RET( ctx != NULL );
     RSA_VALIDATE_RET( input != NULL );
@@ -297,11 +357,45 @@ static int rsa_pka_modexp( mbedtls_rsa_context *ctx,
     MBEDTLS_MPI_CHK( ( n_binary == NULL ) ? MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED : 0 );
     MBEDTLS_MPI_CHK( mbedtls_mpi_write_binary( &ctx->MBEDTLS_PRIVATE(N), n_binary, nlen ) );
 
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+    if ( is_protected )
+    {
+        philen = mbedtls_mpi_size( &ctx->MBEDTLS_PRIVATE(Phi) );
+
+        /* first phi computation */
+        if ( 0 == philen )
+        {
+            MBEDTLS_MPI_CHK( rsa_deduce_phi( &ctx->MBEDTLS_PRIVATE(P) , &ctx->MBEDTLS_PRIVATE(Q) , &ctx->MBEDTLS_PRIVATE(Phi) ) );
+            philen = mbedtls_mpi_size( &ctx->MBEDTLS_PRIVATE(Phi)  );
+        }
+
+        phi_binary = mbedtls_calloc( 1, philen );
+        MBEDTLS_MPI_CHK( ( phi_binary == NULL ) ? MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED : 0 );
+        MBEDTLS_MPI_CHK( mbedtls_mpi_write_binary( &ctx->MBEDTLS_PRIVATE(Phi) , phi_binary, philen ) );
+
+        in_protected.expSize = elen;           /* Exponent length */
+        in_protected.OpSize  = nlen;           /* modulus length */
+        in_protected.pOp1    = input;
+        in_protected.pExp    = e_binary;       /* Exponent */
+        in_protected.pMod    = n_binary;       /* modulus */
+        in_protected.pPhi    = phi_binary;     /* Euler tolient function */
+    }
+    else
+    /* exponention in normal mode */
+    {
+        in.expSize = elen;           /* Exponent length */
+        in.OpSize  = nlen;           /* modulus length */
+        in.pOp1    = input;
+        in.pExp    = e_binary;       /* Exponent */
+        in.pMod    = n_binary;       /* modulus */
+    }
+#else
     in.expSize = elen;           /* Exponent length */
     in.OpSize  = nlen;           /* modulus length */
     in.pOp1    = input;
     in.pExp    = e_binary;       /* Exponent */
     in.pMod    = n_binary;       /* modulus */
+#endif
 
     /* Enable HW peripheral clock */
     __HAL_RCC_PKA_CLK_ENABLE();
@@ -313,8 +407,21 @@ static int rsa_pka_modexp( mbedtls_rsa_context *ctx,
     /* Reset PKA RAM */
     HAL_PKA_RAMReset(&hpka);
 
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+    if ( is_protected )
+    {
+        /* output = input ^ e_binary mod n (protected mode) */
+        MBEDTLS_MPI_CHK( ( HAL_PKA_ModExpProtectMode( &hpka, &in_protected, ST_PKA_TIMEOUT ) != HAL_OK ) ? MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED : 0 );
+    }
+    else
+    {
+         /* output = input ^ e_binary mod n (normal mode) */
+        MBEDTLS_MPI_CHK( ( HAL_PKA_ModExp( &hpka, &in, ST_PKA_TIMEOUT ) != HAL_OK ) ? MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED : 0 );
+    }
+#else
     /* output = input ^ e_binary mod n */
     MBEDTLS_MPI_CHK( ( HAL_PKA_ModExp( &hpka, &in, ST_PKA_TIMEOUT ) != HAL_OK ) ? MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED : 0 );
+#endif
 
     HAL_PKA_ModExp_GetResult( &hpka, (uint8_t *)output );
 
@@ -338,6 +445,13 @@ cleanup:
         mbedtls_free( n_binary );
     }
 
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+    if (phi_binary != NULL)
+    {
+        mbedtls_platform_zeroize( phi_binary, philen );
+        mbedtls_free( phi_binary );
+    }
+#endif
 
     return ret;
 }
@@ -493,7 +607,7 @@ int mbedtls_rsa_import( mbedtls_rsa_context *ctx,
                         const mbedtls_mpi *P, const mbedtls_mpi *Q,
                         const mbedtls_mpi *D, const mbedtls_mpi *E )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     RSA_VALIDATE_RET( ctx != NULL );
 
     if( ( N != NULL && ( ret = mbedtls_mpi_copy( &ctx->MBEDTLS_PRIVATE(N), N ) ) != 0 ) ||
@@ -786,7 +900,7 @@ int mbedtls_rsa_export( const mbedtls_rsa_context *ctx,
                         mbedtls_mpi *N, mbedtls_mpi *P, mbedtls_mpi *Q,
                         mbedtls_mpi *D, mbedtls_mpi *E )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     int is_priv;
     RSA_VALIDATE_RET( ctx != NULL );
 
@@ -830,7 +944,7 @@ int mbedtls_rsa_export( const mbedtls_rsa_context *ctx,
 int mbedtls_rsa_export_crt( const mbedtls_rsa_context *ctx,
                             mbedtls_mpi *DP, mbedtls_mpi *DQ, mbedtls_mpi *QP )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     int is_priv;
     RSA_VALIDATE_RET( ctx != NULL );
 
@@ -917,7 +1031,7 @@ int mbedtls_rsa_gen_key( mbedtls_rsa_context *ctx,
                  void *p_rng,
                  unsigned int nbits, int exponent )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     mbedtls_mpi H, G, L;
     int prime_quality = 0;
     RSA_VALIDATE_RET( ctx != NULL );
@@ -1109,7 +1223,7 @@ int mbedtls_rsa_public( mbedtls_rsa_context *ctx,
                 const unsigned char *input,
                 unsigned char *output )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     mbedtls_mpi T;
 
     RSA_VALIDATE_RET( ctx != NULL );
@@ -1135,13 +1249,21 @@ int mbedtls_rsa_public( mbedtls_rsa_context *ctx,
     }
 
     /* output = input ^ E mod N */
-
-    MBEDTLS_MPI_CHK( rsa_pka_modexp( ctx, 0 /* public */, input, output ) );
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+    /*
+     * Protected decryption
+     */
+    /* T = T ^ D mod N */
+    MBEDTLS_MPI_CHK( rsa_pka_modexp( ctx, 0 /* private */, 0 /* un protected mode */, input, output ) );
+#else
+    /* T = T ^ D mod N */
+    MBEDTLS_MPI_CHK( rsa_pka_modexp( ctx, 0 /* private */, input, output ) );
+#endif
 
 cleanup:
 
 #if defined(MBEDTLS_THREADING_C)
-    if( mbedtls_mutex_unlock( &ctx->MBEDTLS_PRIVATE(mutex) ) != 0 )
+    if( mbedtls_mutex_unlock( &ctx->mutex ) != 0 )
         return( MBEDTLS_ERR_THREADING_MUTEX_ERROR );
 #endif
 
@@ -1183,10 +1305,9 @@ int mbedtls_rsa_private( mbedtls_rsa_context *ctx,
                  const unsigned char *input,
                  unsigned char *output )
 {
-    int ret;
-
     /* Silence warnings about unused variables */
     (void)p_rng; (void)f_rng;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
 
     /* Temporary holding the result */
     mbedtls_mpi T;
@@ -1234,8 +1355,16 @@ int mbedtls_rsa_private( mbedtls_rsa_context *ctx,
     MBEDTLS_MPI_CHK( mbedtls_mpi_copy( &I, &T ) );
 
 #if defined(MBEDTLS_RSA_NO_CRT)
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+    /*
+     * Protected decryption
+     */
+    /* T = T ^ D mod N */
+    MBEDTLS_MPI_CHK( rsa_pka_modexp( ctx, 1 /* private */, 1 /* protected mode */, input, output ) );
+#else
     /* T = T ^ D mod N */
     MBEDTLS_MPI_CHK( rsa_pka_modexp( ctx, 1 /* private */, input, output ) );
+#endif
 #else
     /*
      * Faster decryption using the CRT
@@ -1330,7 +1459,7 @@ int mbedtls_rsa_rsaes_oaep_encrypt( mbedtls_rsa_context *ctx,
                             unsigned char *output )
 {
     size_t olen;
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     unsigned char *p = output;
     unsigned int hlen;
     const mbedtls_md_info_t *md_info;
@@ -1412,7 +1541,7 @@ int mbedtls_rsa_rsaes_pkcs1_v15_encrypt( mbedtls_rsa_context *ctx,
                                  unsigned char *output )
 {
     size_t nb_pad, olen;
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     unsigned char *p = output;
 
     RSA_VALIDATE_RET( ctx != NULL );
@@ -1508,7 +1637,7 @@ int mbedtls_rsa_rsaes_oaep_decrypt( mbedtls_rsa_context *ctx,
                             unsigned char *output,
                             size_t output_max_len )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     size_t ilen, i, pad_len;
     unsigned char *p, bad, pad_done;
     unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
@@ -1737,7 +1866,7 @@ int mbedtls_rsa_rsaes_pkcs1_v15_decrypt( mbedtls_rsa_context *ctx,
                                  unsigned char *output,
                                  size_t output_max_len )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     size_t ilen, i, plaintext_max_size;
     unsigned char buf[MBEDTLS_MPI_MAX_SIZE];
     /* The following variables take sensitive values: their value must
@@ -1924,7 +2053,7 @@ int mbedtls_rsa_rsassa_pss_sign( mbedtls_rsa_context *ctx,
     unsigned char *p = sig;
     unsigned char salt[MBEDTLS_MD_MAX_SIZE];
     size_t slen, min_slen, hlen, offset = 0;
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     size_t msb;
     const mbedtls_md_info_t *md_info;
     mbedtls_md_context_t md_ctx;
@@ -2171,7 +2300,7 @@ int mbedtls_rsa_rsassa_pkcs1_v15_sign( mbedtls_rsa_context *ctx,
                                const unsigned char *hash,
                                unsigned char *sig )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     unsigned char *sig_try = NULL, *verif = NULL;
 
     RSA_VALIDATE_RET( ctx != NULL );
@@ -2276,7 +2405,7 @@ int mbedtls_rsa_rsassa_pss_verify_ext( mbedtls_rsa_context *ctx,
                                int expected_salt_len,
                                const unsigned char *sig )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     size_t siglen;
     unsigned char *p;
     unsigned char *hash_start;
@@ -2545,7 +2674,7 @@ int mbedtls_rsa_pkcs1_verify( mbedtls_rsa_context *ctx,
  */
 int mbedtls_rsa_copy( mbedtls_rsa_context *dst, const mbedtls_rsa_context *src )
 {
-    int ret;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     RSA_VALIDATE_RET( dst != NULL );
     RSA_VALIDATE_RET( src != NULL );
 
