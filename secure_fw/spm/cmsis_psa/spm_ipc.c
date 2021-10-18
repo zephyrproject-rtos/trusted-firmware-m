@@ -259,7 +259,7 @@ uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
 #if TFM_LVL == 1
     return TFM_PARTITION_PRIVILEGED_MODE;
 #else /* TFM_LVL == 1 */
-    if (partition_flags & SPM_PART_FLAG_PSA_ROT) {
+    if (partition_flags & PARTITION_MODEL_PSA_ROT) {
         return TFM_PARTITION_PRIVILEGED_MODE;
     } else {
         return TFM_PARTITION_UNPRIVILEGED_MODE;

@@ -38,7 +38,7 @@ const struct partition_tfm_sp_idle_load_info_t
         .psa_ff_ver                 = 0x0101 | PARTITION_INFO_MAGIC,
         .pid                        = TFM_SP_IDLE_ID,
         .flags                      = PARTITION_PRI_LOWEST | PARTITION_MODEL_IPC
-                                      | SPM_PART_FLAG_PSA_ROT,
+                                      | PARTITION_MODEL_PSA_ROT,
         .entry                      = ENTRY_TO_POSITION(tfm_idle_thread),
         .stack_size                 = IDLE_SP_STACK_SIZE,
         .heap_size                  = 0,

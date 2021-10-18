@@ -114,7 +114,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
                                     | PARTITION_MODEL_IPC
 {% endif %}
 {% if manifest.type == "PSA-ROT" %}
-                                    | SPM_PART_FLAG_PSA_ROT
+                                    | PARTITION_MODEL_PSA_ROT
 {% elif manifest.type != "APPLICATION-ROT" %}
 #error "Unsupported type '{{manifest.type}}' for partition '{{manifest.name}}'!"
 {% endif %}

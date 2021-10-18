@@ -53,7 +53,7 @@ const struct partition_tfm_sp_ns_agent_load_info_t
         .flags                      = (PARTITION_PRI_LOWEST - 1)
                                     | PARTITION_MODEL_IPC
 #if TFM_MULTI_CORE_TOPOLOGY
-                                    | SPM_PART_FLAG_PSA_ROT
+                                    | PARTITION_MODEL_PSA_ROT
 #endif
                                     ,
         .entry                      = ENTRY_TO_POSITION(tfm_nspm_thread_entry),

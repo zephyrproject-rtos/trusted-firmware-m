@@ -348,7 +348,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = !!(p_ldinf->flags & SPM_PART_FLAG_PSA_ROT);
+    privileged = !!(p_ldinf->flags & PARTITION_MODEL_PSA_ROT);
 #endif
 
     p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);

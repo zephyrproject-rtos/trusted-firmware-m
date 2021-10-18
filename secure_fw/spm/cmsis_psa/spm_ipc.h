@@ -22,6 +22,10 @@
 
 #define TFM_CONN_HANDLE_MAX_NUM         16
 
+/* Privileged definitions for partition thread mode */
+#define TFM_PARTITION_UNPRIVILEGED_MODE         (0U)
+#define TFM_PARTITION_PRIVILEGED_MODE           (1U)
+
 /*
  * Set a number limit for stateless handle.
  * Valid handle must be positive, set client handle minimum value to 1.
