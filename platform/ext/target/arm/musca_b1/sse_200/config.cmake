@@ -28,8 +28,6 @@ else()
     set(CRYPTO_HW_ACCELERATOR               OFF         CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
     set(PS_TEST_NV_COUNTERS                 OFF         CACHE BOOL      "Use the test NV counters to test Protected Storage rollback scenarios")
     set(BL0 ON)
-
-    set(TFM_MANIFEST_LIST                   ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/manifest_list_with_se.yaml CACHE FILEPATH "Manifest Lists")
 endif()
 
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_SOURCE_DIR}/platform/ext/target/arm/musca_b1/generated_file_list.yaml  CACHE PATH "Path to extra generated file list. Appended to stardard TFM generated file list." FORCE)
