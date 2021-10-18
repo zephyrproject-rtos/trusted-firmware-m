@@ -446,36 +446,6 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg);
  */
 void spm_assert_signal(void *p_pt, psa_signal_t signal);
 
-/**
- * \brief Return the IRQ load info context pointer associated with a signal
- *
- * \param[in]      p_ldinf      The load info of the partition in which we look
- *                              for the signal.
- * \param[in]      signal       The signal to query for.
- *
- * \retval NULL                 if one of more the following are true:
- *                              - the \ref signal indicates more than one signal
- *                              - the \ref signal does not belong to the
- *                                partition.
- * \retval Any other value      The load info pointer associated with the signal
- */
-struct irq_load_info_t *get_irq_info_for_signal(
-                                    const struct partition_load_info_t *p_ldinf,
-                                    psa_signal_t signal);
-
-/**
- * \brief Entry of Secure interrupt handler. Platforms can call this function to
- *        handle individual interrupts.
- *
- * \param[in] p_pt         The owner Partition of the interrupt to handle
- * \param[in] p_ildi       The irq_load_info_t struct of the interrupt to handle
- *
- * Note:
- *  The input parameters are maintained by platforms and they must be init-ed
- *  in the interrupt init functions.
- */
-void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi);
-
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
 
 /*

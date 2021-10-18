@@ -10,6 +10,7 @@
 #include "critical_section.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
+#include "interrupt.h"
 #include "spm_ipc.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"

@@ -13,6 +13,7 @@
 #include "tfm_peripherals_def.h"
 #include "tfm_peripherals_config.h"
 #include "load/interrupt_defs.h"
+#include "ffm/interrupt.h"
 #include "tfm_spm_hal.h"
 
 

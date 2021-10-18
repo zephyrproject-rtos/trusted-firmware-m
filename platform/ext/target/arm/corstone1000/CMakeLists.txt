@@ -89,11 +89,6 @@ target_sources(platform_s
 )
 endif()
 
-target_link_libraries(platform_s
-    PUBLIC
-        tfm_spm
-)
-
 target_compile_definitions(platform_s
     PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>

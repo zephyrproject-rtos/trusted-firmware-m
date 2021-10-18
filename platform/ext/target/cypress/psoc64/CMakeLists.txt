@@ -141,7 +141,6 @@ target_compile_definitions(platform_s
 
 target_link_libraries(platform_s
     PRIVATE
-        tfm_spm
         ${P64_UTILS_LIB_TARGET}
 )
 
