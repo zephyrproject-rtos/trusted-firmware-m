@@ -111,6 +111,8 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
     manifest_list = []
     ipc_partition_num = 0
     sfn_partition_num = 0
+    pid_list = []
+    no_pid_manifest_idx = []
 
     for f in manifest_list_files:
         with open(f) as manifest_list_yaml_file:
@@ -136,26 +138,16 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
                     manifest_list.append(dict)
                 manifest_list_yaml_file.close()
 
-    pid_list = []
-    no_pid_manifest_idx = []
     for i, manifest_item in enumerate(manifest_list):
         # Check if partition ID is manually set
         if 'pid' not in manifest_item.keys():
             no_pid_manifest_idx.append(i)
-            continue
         # Check if partition ID is duplicated
-        if manifest_item['pid'] in pid_list:
+        elif manifest_item['pid'] in pid_list:
             raise Exception("PID No. {pid} has already been used!".format(pid=manifest_item['pid']))
-        pid_list.append(manifest_item['pid'])
-    # Automatically generate PIDs for partitions without PID
-    pid = 256
-    for idx in no_pid_manifest_idx:
-        while pid in pid_list:
-            pid += 1
-        manifest_list[idx]['pid'] = pid
-        pid_list.append(pid)
+        else:
+            pid_list.append(manifest_item['pid'])
 
-    for manifest_item in manifest_list:
         # Replace environment variables in the manifest path
         manifest_path = os.path.expandvars(manifest_item['manifest'])
 
@@ -214,6 +206,14 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
                                "header_file": manifest_head_file,
                                "intermedia_file": intermedia_file,
                                "loadinfo_file": load_info_file})
+
+    # Automatically assign PIDs for partitions without 'pid' attribute
+    pid = 256
+    for idx in no_pid_manifest_idx:
+        while pid in pid_list:
+            pid += 1
+        manifest_list[idx]['pid'] = pid
+        pid_list.append(pid)
 
     if len(sid_duplicated_sid) != 0:
         print("The following signals have duplicated sids."
