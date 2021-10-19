@@ -2,7 +2,7 @@
 Mailbox Design in TF-M on Dual-core System
 ##########################################
 
-:Authors: David Hu
+:Author: David Hu
 :Organization: Arm Limited
 :Contact: david.hu@arm.com
 

@@ -2,10 +2,9 @@
 Booting a Dual-Core System
 ##########################
 
-:Authors: Chris Brand
+:Author: Chris Brand
 :Organization: Cypress Semiconductor Corporation
 :Contact: chris.brand@cypress.com
-:Status: Accepted
 
 *******************
 System Architecture

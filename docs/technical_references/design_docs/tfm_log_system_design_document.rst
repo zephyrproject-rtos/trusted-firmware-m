@@ -2,7 +2,7 @@
 Log system design document
 ##########################
 
-:Authors: Shawn Shan
+:Author: Shawn Shan
 :Organization: Arm Limited
 :Contact: shawn.shan@arm.com
 

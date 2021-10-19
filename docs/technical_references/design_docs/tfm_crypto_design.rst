@@ -4,7 +4,6 @@ Crypto Service design
 :Author: Antonio de Angelis
 :Organization: Arm Limited
 :Contact: Antonio de Angelis <antonio.deangelis@arm.com>
-:Status: Accepted
 
 .. contents:: Table of Contents
 

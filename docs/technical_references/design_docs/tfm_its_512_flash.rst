@@ -5,7 +5,6 @@ Add support for block-aligned flash in Internal Trusted Storage
 :Author: Minos Galanakis
 :Organization: Arm Limited
 :Contact: Minos Galanakis <minos.galanakis@arm.com>
-:Status: Accepted
 
 Abstract
 ========

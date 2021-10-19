@@ -5,7 +5,6 @@ Non-secure Client Management
 :Author: Miklos Balint
 :Organization: Arm Limited
 :Contact: Miklos Balint <miklos.balint@arm.com>
-:Status: Accepted
 
 ***********
 Terminology

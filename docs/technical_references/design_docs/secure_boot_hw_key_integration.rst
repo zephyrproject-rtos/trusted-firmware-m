@@ -4,7 +4,6 @@ HW crypto key integration in TF-M secure boot
 :Author: Tamas Ban
 :Organization: Arm Limited
 :Contact: Tamas Ban <tamas.ban@arm.com>
-:Status: Accepted
 
 Abstract
 --------
