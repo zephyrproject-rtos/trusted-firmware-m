@@ -125,7 +125,6 @@ target_sources(platform_ns
         native_drivers/systimer_armv8-m_drv.c
         native_drivers/uart_cmsdk_drv.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_include_directories(platform_ns
