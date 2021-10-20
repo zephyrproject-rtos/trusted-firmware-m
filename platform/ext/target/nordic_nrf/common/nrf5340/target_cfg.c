@@ -27,14 +27,319 @@
 #define PIN_XL1 0
 #define PIN_XL2 1
 
-struct platform_data_t tfm_peripheral_timer0 = {
-        NRF_TIMER0_S_BASE,
-        NRF_TIMER0_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+struct platform_data_t tfm_peripheral_dcnf = {
+    NRF_DCNF_S_BASE,
+    NRF_DCNF_S_BASE + (sizeof(NRF_DCNF_Type) - 1),
 };
 
-struct platform_data_t tfm_peripheral_std_uart = {
-        NRF_UARTE1_S_BASE,
-        NRF_UARTE1_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+struct platform_data_t tfm_peripheral_fpu = {
+    NRF_FPU_S_BASE,
+    NRF_FPU_S_BASE + (sizeof(NRF_FPU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_oscillators = {
+    NRF_OSCILLATORS_S_BASE,
+    NRF_OSCILLATORS_S_BASE + (sizeof(NRF_OSCILLATORS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_regulators = {
+    NRF_REGULATORS_S_BASE,
+    NRF_REGULATORS_S_BASE + (sizeof(NRF_REGULATORS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_clock = {
+    NRF_CLOCK_S_BASE,
+    NRF_CLOCK_S_BASE + (sizeof(NRF_CLOCK_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_power = {
+    NRF_POWER_S_BASE,
+    NRF_POWER_S_BASE + (sizeof(NRF_POWER_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_reset = {
+    NRF_RESET_S_BASE,
+    NRF_RESET_S_BASE + (sizeof(NRF_RESET_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim0 = {
+    NRF_SPIM0_S_BASE,
+    NRF_SPIM0_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spis0 = {
+    NRF_SPIS0_S_BASE,
+    NRF_SPIS0_S_BASE + (sizeof(NRF_SPIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twim0 = {
+    NRF_TWIM0_S_BASE,
+    NRF_TWIM0_S_BASE + (sizeof(NRF_TWIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twis0 = {
+    NRF_TWIS0_S_BASE,
+    NRF_TWIS0_S_BASE + (sizeof(NRF_TWIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_uarte0 = {
+    NRF_UARTE0_S_BASE,
+    NRF_UARTE0_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim1 = {
+    NRF_SPIM1_S_BASE,
+    NRF_SPIM1_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spis1 = {
+    NRF_SPIS1_S_BASE,
+    NRF_SPIS1_S_BASE + (sizeof(NRF_SPIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twim1 = {
+    NRF_TWIM1_S_BASE,
+    NRF_TWIM1_S_BASE + (sizeof(NRF_TWIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twis1 = {
+    NRF_TWIS1_S_BASE,
+    NRF_TWIS1_S_BASE + (sizeof(NRF_TWIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_uarte1 = {
+    NRF_UARTE1_S_BASE,
+    NRF_UARTE1_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim4 = {
+    NRF_SPIM4_S_BASE,
+    NRF_SPIM4_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim2 = {
+    NRF_SPIM2_S_BASE,
+    NRF_SPIM2_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spis2 = {
+    NRF_SPIS2_S_BASE,
+    NRF_SPIS2_S_BASE + (sizeof(NRF_SPIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twim2 = {
+    NRF_TWIM2_S_BASE,
+    NRF_TWIM2_S_BASE + (sizeof(NRF_TWIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twis2 = {
+    NRF_TWIS2_S_BASE,
+    NRF_TWIS2_S_BASE + (sizeof(NRF_TWIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_uarte2 = {
+    NRF_UARTE2_S_BASE,
+    NRF_UARTE2_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim3 = {
+    NRF_SPIM3_S_BASE,
+    NRF_SPIM3_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spis3 = {
+    NRF_SPIS3_S_BASE,
+    NRF_SPIS3_S_BASE + (sizeof(NRF_SPIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twim3 = {
+    NRF_TWIM3_S_BASE,
+    NRF_TWIM3_S_BASE + (sizeof(NRF_TWIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twis3 = {
+    NRF_TWIS3_S_BASE,
+    NRF_TWIS3_S_BASE + (sizeof(NRF_TWIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_uarte3 = {
+    NRF_UARTE3_S_BASE,
+    NRF_UARTE3_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_saadc = {
+    NRF_SAADC_S_BASE,
+    NRF_SAADC_S_BASE + (sizeof(NRF_SAADC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_timer0 = {
+    NRF_TIMER0_S_BASE,
+    NRF_TIMER0_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_timer1 = {
+    NRF_TIMER1_S_BASE,
+    NRF_TIMER1_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_timer2 = {
+    NRF_TIMER2_S_BASE,
+    NRF_TIMER2_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_rtc0 = {
+    NRF_RTC0_S_BASE,
+    NRF_RTC0_S_BASE + (sizeof(NRF_RTC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_rtc1 = {
+    NRF_RTC1_S_BASE,
+    NRF_RTC1_S_BASE + (sizeof(NRF_RTC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_dppic = {
+    NRF_DPPIC_S_BASE,
+    NRF_DPPIC_S_BASE + (sizeof(NRF_DPPIC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_wdt0 = {
+    NRF_WDT0_S_BASE,
+    NRF_WDT0_S_BASE + (sizeof(NRF_WDT_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_wdt1 = {
+    NRF_WDT1_S_BASE,
+    NRF_WDT1_S_BASE + (sizeof(NRF_WDT_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_comp = {
+    NRF_COMP_S_BASE,
+    NRF_COMP_S_BASE + (sizeof(NRF_COMP_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_lpcomp = {
+    NRF_LPCOMP_S_BASE,
+    NRF_LPCOMP_S_BASE + (sizeof(NRF_LPCOMP_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu0 = {
+    NRF_EGU0_S_BASE,
+    NRF_EGU0_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu1 = {
+    NRF_EGU1_S_BASE,
+    NRF_EGU1_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu2 = {
+    NRF_EGU2_S_BASE,
+    NRF_EGU2_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu3 = {
+    NRF_EGU3_S_BASE,
+    NRF_EGU3_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu4 = {
+    NRF_EGU4_S_BASE,
+    NRF_EGU4_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu5 = {
+    NRF_EGU5_S_BASE,
+    NRF_EGU5_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pwm0 = {
+    NRF_PWM0_S_BASE,
+    NRF_PWM0_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pwm1 = {
+    NRF_PWM1_S_BASE,
+    NRF_PWM1_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pwm2 = {
+    NRF_PWM2_S_BASE,
+    NRF_PWM2_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pwm3 = {
+    NRF_PWM3_S_BASE,
+    NRF_PWM3_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pdm0 = {
+    NRF_PDM0_S_BASE,
+    NRF_PDM0_S_BASE + (sizeof(NRF_PDM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_i2s0 = {
+    NRF_I2S0_S_BASE,
+    NRF_I2S0_S_BASE + (sizeof(NRF_I2S_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_ipc = {
+    NRF_IPC_S_BASE,
+    NRF_IPC_S_BASE + (sizeof(NRF_IPC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_qspi = {
+    NRF_QSPI_S_BASE,
+    NRF_QSPI_S_BASE + (sizeof(NRF_QSPI_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_nfct = {
+    NRF_NFCT_S_BASE,
+    NRF_NFCT_S_BASE + (sizeof(NRF_NFCT_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_mutex = {
+    NRF_MUTEX_S_BASE,
+    NRF_MUTEX_S_BASE + (sizeof(NRF_MUTEX_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_qdec0 = {
+    NRF_QDEC0_S_BASE,
+    NRF_QDEC0_S_BASE + (sizeof(NRF_QDEC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_qdec1 = {
+    NRF_QDEC1_S_BASE,
+    NRF_QDEC1_S_BASE + (sizeof(NRF_QDEC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_usbd = {
+    NRF_USBD_S_BASE,
+    NRF_USBD_S_BASE + (sizeof(NRF_USBD_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_usbregulator = {
+    NRF_USBREGULATOR_S_BASE,
+    NRF_USBREGULATOR_S_BASE + (sizeof(NRF_USBREG_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_nvmc = {
+    NRF_NVMC_S_BASE,
+    NRF_NVMC_S_BASE + (sizeof(NRF_NVMC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_p0 = {
+    NRF_P0_S_BASE,
+    NRF_P0_S_BASE + (sizeof(NRF_GPIO_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_p1 = {
+    NRF_P1_S_BASE,
+    NRF_P1_S_BASE + (sizeof(NRF_GPIO_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_vmc = {
+    NRF_VMC_S_BASE,
+    NRF_VMC_S_BASE + (sizeof(NRF_VMC_Type) - 1),
 };
 
 #ifdef PSA_API_TEST_IPC
