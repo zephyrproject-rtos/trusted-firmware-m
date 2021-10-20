@@ -284,7 +284,6 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_PDM, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_I2S, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_IPC, false);
-    spu_peripheral_config_non_secure((uint32_t)NRF_GPIOTE1_NS, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_NVMC, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_VMC, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_P0, false);
