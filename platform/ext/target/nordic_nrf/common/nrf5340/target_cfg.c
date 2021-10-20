@@ -255,9 +255,30 @@ enum tfm_plat_err_t spu_init_cfg(void)
 enum tfm_plat_err_t spu_periph_init_cfg(void)
 {
     /* Peripheral configuration */
+
+    /* The following peripherals share ID:
+     * - FPU
+     * - DCNF
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_FPU, false);
+    /* The following peripherals share ID:
+     * - REGULATORS
+     * - OSCILLATORS
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_REGULATORS, false);
+    /* The following peripherals share ID:
+     * - CLOCK
+     * - POWER
+     * - RESET
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_CLOCK, false);
+    /* The following peripherals share ID: (referred to as Serial-Box)
+     * - SPIMx
+     * - SPISx
+     * - TWIMx
+     * - TWISx
+     * - UARTEx
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_SPIM0, false);
 #ifndef SECURE_UART1
     /* UART1 is a secure peripheral, so we need to leave Serial-Box 1 as Secure */
@@ -278,6 +299,10 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_WDT0, false);
 #endif
     spu_peripheral_config_non_secure((uint32_t)NRF_WDT1, false);
+    /* The following peripherals share ID:
+     * - COMP
+     * - LPCOMP
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_COMP, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU1, false);

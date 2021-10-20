@@ -235,8 +235,24 @@ enum tfm_plat_err_t spu_init_cfg(void)
 enum tfm_plat_err_t spu_periph_init_cfg(void)
 {
     /* Peripheral configuration */
+
+    /* The following peripherals share ID:
+     * - REGULATORS
+     * - OSCILLATORS
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_REGULATORS, false);
+    /* The following peripherals share ID:
+     * - CLOCK
+     * - POWER
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_CLOCK, false);
+    /* The following peripherals share ID: (referred to as Serial-Box)
+     * - SPIMx
+     * - SPISx
+     * - TWIMx
+     * - TWISx
+     * - UARTEx
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_SPIM0, false);
 #ifndef SECURE_UART1
     /* UART1 is a secure peripheral, so we need to leave Serial-Box 1 as Secure */
