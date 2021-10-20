@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "compiler_ext_defs.h"
 #include "svc_num.h"
+#include "tfm_psa_call_pack.h"
 #include "psa/client.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
