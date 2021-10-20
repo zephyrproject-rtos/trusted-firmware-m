@@ -84,6 +84,19 @@ __attribute__ ((always_inline)) __STATIC_INLINE uint32_t __get_LR(void)
 }
 #endif
 
+__STATIC_INLINE uint32_t __save_disable_irq(void)
+{
+    uint32_t result;
+
+    __ASM volatile ("mrs %0, primask \n cpsid i" : "=r" (result) :: "memory");
+    return result;
+}
+
+__STATIC_INLINE void __restore_irq(uint32_t status)
+{
+    __ASM volatile ("msr primask, %0" :: "r" (status) : "memory");
+}
+
 __attribute__ ((always_inline))
 __STATIC_INLINE uint32_t __get_active_exc_num(void)
 {

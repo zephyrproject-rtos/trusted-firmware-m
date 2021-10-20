@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include "bitops.h"
+#include "critical_section.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
 #include "spm_ipc.h"
@@ -778,6 +779,7 @@ void tfm_spm_partition_psa_notify(int32_t partition_id)
 
 void tfm_spm_partition_psa_clear(void)
 {
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     struct partition_t *partition = NULL;
 
     partition = tfm_spm_get_running_partition();
@@ -792,11 +794,15 @@ void tfm_spm_partition_psa_clear(void)
     if ((partition->signals_asserted & PSA_DOORBELL) == 0) {
         tfm_core_panic();
     }
+
+    CRITICAL_SECTION_ENTER(cs_assert);
     partition->signals_asserted &= ~PSA_DOORBELL;
+    CRITICAL_SECTION_LEAVE(cs_assert);
 }
 
 void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
 {
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     struct irq_load_info_t *irq_info = NULL;
     struct partition_t *partition = NULL;
 
@@ -821,7 +827,9 @@ void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
         tfm_core_panic();
     }
 
+    CRITICAL_SECTION_ENTER(cs_assert);
     partition->signals_asserted &= ~irq_signal;
+    CRITICAL_SECTION_LEAVE(cs_assert);
 
     tfm_hal_irq_clear_pending(irq_info->source);
     tfm_hal_irq_enable(irq_info->source);
@@ -876,6 +884,7 @@ psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal)
 
 void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
 {
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     struct irq_load_info_t *irq_info;
     struct partition_t *partition;
 
@@ -899,5 +908,7 @@ void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
         tfm_core_panic();
     }
 
+    CRITICAL_SECTION_ENTER(cs_assert);
     partition->signals_asserted &= ~irq_signal;
+    CRITICAL_SECTION_LEAVE(cs_assert);
 }

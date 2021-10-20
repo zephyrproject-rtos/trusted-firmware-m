@@ -8,6 +8,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include "bitops.h"
+#include "critical_section.h"
 #include "fih.h"
 #include "psa/client.h"
 #include "psa/service.h"
@@ -227,6 +228,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
 {
     struct bi_list_node_t *node, *head;
     struct tfm_msg_body_t *tmp_msg, *msg = NULL;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     TFM_CORE_ASSERT(partition);
 
@@ -250,7 +252,9 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
         }
     }
 
+    CRITICAL_SECTION_ENTER(cs_assert);
     partition->signals_asserted &= ~signal;
+    CRITICAL_SECTION_LEAVE(cs_assert);
 
     return msg;
 }
@@ -735,11 +739,14 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg)
 
 void spm_assert_signal(void *p_pt, psa_signal_t signal)
 {
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     struct partition_t *partition = (struct partition_t *)p_pt;
 
     if (!partition) {
         tfm_core_panic();
     }
+
+    CRITICAL_SECTION_ENTER(cs_assert);
 
     partition->signals_asserted |= signal;
 
@@ -748,6 +755,8 @@ void spm_assert_signal(void *p_pt, psa_signal_t signal)
                      partition->signals_asserted & partition->signals_waiting);
         partition->signals_waiting &= ~signal;
     }
+
+    CRITICAL_SECTION_LEAVE(cs_assert);
 }
 
 __attribute__((naked))
@@ -793,9 +802,7 @@ void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
     }
 
     if (flih_result == PSA_FLIH_SIGNAL) {
-        __disable_irq();
         spm_assert_signal(p_pt, p_ildi->signal);
-        __enable_irq();
     }
 }
 
