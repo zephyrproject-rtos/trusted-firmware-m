@@ -77,6 +77,7 @@ target_sources(platform_s
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cortex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_flash.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_flash_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_dma.c
@@ -97,6 +98,8 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pka.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cryp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cryp_ex.c
         ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
 )
 
@@ -178,6 +181,8 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pka.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cryp.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cryp_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng_ex.c
             ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
