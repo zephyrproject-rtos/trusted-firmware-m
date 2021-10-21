@@ -226,14 +226,16 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
         plat_data_ptr = REFERENCE_TO_PTR(p_asset[i].dev.dev_ref,
                                          struct platform_data_t *);
 
-        ppc_configure_to_secure(plat_data_ptr->periph_ppc_bank,
-                                plat_data_ptr->periph_ppc_mask);
-        if (privileged) {
-            ppc_clr_secure_unpriv(plat_data_ptr->periph_ppc_bank,
-                                  plat_data_ptr->periph_ppc_mask);
-        } else {
-            ppc_en_secure_unpriv(plat_data_ptr->periph_ppc_bank,
-                                 plat_data_ptr->periph_ppc_mask);
+        if (plat_data_ptr->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
+            ppc_configure_to_secure(plat_data_ptr->periph_ppc_bank,
+                                    plat_data_ptr->periph_ppc_mask);
+            if (privileged) {
+                ppc_clr_secure_unpriv(plat_data_ptr->periph_ppc_bank,
+                                      plat_data_ptr->periph_ppc_mask);
+            } else {
+                ppc_en_secure_unpriv(plat_data_ptr->periph_ppc_bank,
+                                     plat_data_ptr->periph_ppc_mask);
+            }
         }
 #if TFM_LVL == 2
         /*
