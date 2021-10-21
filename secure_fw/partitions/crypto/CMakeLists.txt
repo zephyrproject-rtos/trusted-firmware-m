@@ -139,6 +139,7 @@ add_library(crypto_service_mbedcrypto_config INTERFACE)
 
 target_compile_definitions(crypto_service_mbedcrypto_config
     INTERFACE
+        BUILD_PSA_DRIVER_API=True
         MBEDTLS_CONFIG_FILE="${TFM_MBEDCRYPTO_CONFIG_PATH}"
         $<$<BOOL:${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}>:MBEDTLS_USER_CONFIG_FILE="${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}">
         PSA_CRYPTO_SECURE

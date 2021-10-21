@@ -48,6 +48,7 @@ add_subdirectory(shared)
 
 target_compile_definitions(${CC312_LIB_TARGET}
     PRIVATE
+        $<IF:$<BOOL:${BUILD_PSA_DRIVER_API}>,BUILD_PSA_DRIVER_API=True,BUILD_PSA_DRIVER_API=False>
         DLLI_MAX_BUFF_SIZE=0x10000
         USE_MBEDTLS_CRYPTOCELL
         CC_MNG_MIN_BACKUP_SIZE_IN_BYTES=512
