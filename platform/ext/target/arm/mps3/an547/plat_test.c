@@ -7,36 +7,27 @@
 
 #include "cmsis.h"
 #include "systimer_armv8-m_drv.h"
-#include "syscounter_armv8-m_cntrl_drv.h"
 #include "tfm_plat_test.h"
 #include "device_definition.h"
 
-#define TIMER_RELOAD_VALUE          (SystemCoreClock)
+/* Interrupt interval is set to 1 ms */
+#define TIMER_RELOAD_VALUE          (SYSTIMER0_ARMV8M_DEFAULT_FREQ_HZ / 1000)
 
 void tfm_plat_test_secure_timer_start(void)
 {
-    syscounter_armv8_m_cntrl_init(&SYSCOUNTER_CNTRL_ARMV8_M_DEV_S);
-
     systimer_armv8_m_init(&SYSTIMER0_ARMV8_M_DEV_S);
-    systimer_armv8_m_set_timer_value(&SYSTIMER0_ARMV8_M_DEV_S, TIMER_RELOAD_VALUE);
+    systimer_armv8_m_set_autoinc_reload(&SYSTIMER0_ARMV8_M_DEV_S, TIMER_RELOAD_VALUE);
+    systimer_armv8_m_enable_autoinc(&SYSTIMER0_ARMV8_M_DEV_S);
     systimer_armv8_m_enable_interrupt(&SYSTIMER0_ARMV8_M_DEV_S);
+}
+
+void tfm_plat_test_secure_timer_clear_intr(void)
+{
+    systimer_armv8_m_clear_autoinc_interrupt(&SYSTIMER0_ARMV8_M_DEV_S);
 }
 
 void tfm_plat_test_secure_timer_stop(void)
 {
     systimer_armv8_m_uninit(&SYSTIMER0_ARMV8_M_DEV_S);
     systimer_armv8_m_clear_autoinc_interrupt(&SYSTIMER0_ARMV8_M_DEV_S);
-}
-
-void tfm_plat_test_non_secure_timer_start(void)
-{
-    systimer_armv8_m_init(&SYSTIMER1_ARMV8_M_DEV_NS);
-    systimer_armv8_m_set_timer_value(&SYSTIMER1_ARMV8_M_DEV_NS, TIMER_RELOAD_VALUE);
-    systimer_armv8_m_enable_interrupt(&SYSTIMER1_ARMV8_M_DEV_NS);
-}
-
-void tfm_plat_test_non_secure_timer_stop(void)
-{
-    systimer_armv8_m_uninit(&SYSTIMER1_ARMV8_M_DEV_NS);
-    systimer_armv8_m_clear_autoinc_interrupt(&SYSTIMER1_ARMV8_M_DEV_NS);
 }

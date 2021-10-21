@@ -22,6 +22,9 @@
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
+#include "device_definition.h"
+#include "syscounter_armv8-m_cntrl_drv.h"
+#include "uart_stdout.h"
 
 /* Throw out bus error when an access causes security violation */
 #define CMSDK_SECRESPCFG_BUS_ERR_MASK   (1UL << 0)
@@ -564,4 +567,17 @@ void ppc_clear_irq(void)
     for (i = 0; i < PPC_BANK_COUNT; i++) {
         ppc_bank_drivers[i]->ClearInterrupt();
     }
+}
+
+enum tfm_hal_status_t tfm_hal_platform_init(void)
+{
+    /* Syscounter enabled by default. This way App-RoT partitions can use
+     * systimers without the need to add the syscounter as an mmio devide.
+     */
+    syscounter_armv8_m_cntrl_init(&SYSCOUNTER_CNTRL_ARMV8_M_DEV_S);
+
+    __enable_irq();
+    stdio_init();
+
+    return TFM_HAL_SUCCESS;
 }
