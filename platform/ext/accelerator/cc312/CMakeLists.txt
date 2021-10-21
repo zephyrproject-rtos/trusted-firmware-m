@@ -84,6 +84,12 @@ if(BL2)
             bl2_crypto_hw
     )
 
+    # boot_hal depends on crypto_hw_accelerator abstractions
+    target_link_libraries(platform_bl2
+        PRIVATE
+            bl2_crypto_hw
+    )
+
     target_link_libraries(cc312_cdmpu
         INTERFACE
             bl2_mbedcrypto
