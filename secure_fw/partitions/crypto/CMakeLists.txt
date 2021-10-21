@@ -158,10 +158,7 @@ set(ENABLE_DOCS OFF)
 set(INSTALL_MBEDTLS_HEADERS OFF)
 set(LIB_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto/install)
 
-set(lib_target crypto_service_mbedcrypto_libs)
-set(mbedcrypto_target crypto_service_mbedcrypto)
-set(mbedtls_target crypto_service_mbedtls)
-set(mbedx509_target crypto_service_mbedx509)
+# Set the prefix to be used by mbedTLS targets
 set(MBEDTLS_TARGET_PREFIX crypto_service_)
 
 # Mbedcrypto is quite a large lib, and it uses too much memory for it to be
