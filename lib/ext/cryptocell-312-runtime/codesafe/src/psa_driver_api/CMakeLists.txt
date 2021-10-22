@@ -26,7 +26,7 @@ target_sources(${CC312_LIB_TARGET}
         src/cc3xx_psa_asymmetric_signature.c
         src/cc3xx_psa_key_generation.c
         src/cc3xx_internal_drbg_util.c
-
+        src/cc3xx_internal_hash_util.c
         src/cc3xx_internal_aes.c
         src/cc3xx_internal_chacha20.c
         src/cc3xx_internal_ecdh.c

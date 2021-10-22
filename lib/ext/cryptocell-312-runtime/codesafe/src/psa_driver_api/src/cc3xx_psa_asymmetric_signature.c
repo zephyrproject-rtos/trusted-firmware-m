@@ -10,6 +10,7 @@
 #include "cc3xx_internal_ecc_util.h"
 #include "cc3xx_internal_rsa_util.h"
 #include "cc3xx_psa_hash.h"
+#include "cc3xx_internal_hash_util.h"
 #include "mbedtls/hmac_drbg.h"
 #include "psa/crypto.h"
 
@@ -36,95 +37,6 @@
 #define mbedtls_calloc calloc
 #define mbedtls_free free
 #endif
-
-static void psa_hash_mode_to_cc_hash_mode(psa_algorithm_t alg,
-                                          bool performHashing, void *hash_mode)
-{
-
-    psa_algorithm_t hash_alg = PSA_ALG_SIGN_GET_HASH(alg);
-
-    switch (hash_alg) {
-
-    case PSA_ALG_SHA_1:
-
-        if (PSA_ALG_IS_ECDSA(alg)) {
-            *(CCEcpkiHashOpMode_t *)hash_mode =
-                performHashing ? CC_ECPKI_HASH_SHA1_mode
-                               : CC_ECPKI_AFTER_HASH_SHA1_mode;
-        } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) ||
-                   PSA_ALG_IS_RSA_PSS(alg)) {
-            *(CCRsaHashOpMode_t *)hash_mode =
-                performHashing ? CC_RSA_HASH_SHA1_mode : CC_RSA_After_SHA1_mode;
-        }
-        break;
-
-    case PSA_ALG_SHA_224:
-
-        if (PSA_ALG_IS_ECDSA(alg)) {
-            *(CCEcpkiHashOpMode_t *)hash_mode =
-                performHashing ? CC_ECPKI_HASH_SHA224_mode
-                               : CC_ECPKI_AFTER_HASH_SHA224_mode;
-        } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) ||
-                   PSA_ALG_IS_RSA_PSS(alg)) {
-            *(CCRsaHashOpMode_t *)hash_mode = performHashing
-                                                  ? CC_RSA_HASH_SHA224_mode
-                                                  : CC_RSA_After_SHA224_mode;
-        }
-        break;
-
-    case PSA_ALG_SHA_256:
-
-        if (PSA_ALG_IS_ECDSA(alg)) {
-            *(CCEcpkiHashOpMode_t *)hash_mode =
-                performHashing ? CC_ECPKI_HASH_SHA256_mode
-                               : CC_ECPKI_AFTER_HASH_SHA256_mode;
-        } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) ||
-                   PSA_ALG_IS_RSA_PSS(alg)) {
-            *(CCRsaHashOpMode_t *)hash_mode = performHashing
-                                                  ? CC_RSA_HASH_SHA256_mode
-                                                  : CC_RSA_After_SHA256_mode;
-        }
-        break;
-
-    case PSA_ALG_SHA_384:
-
-        if (PSA_ALG_IS_ECDSA(alg)) {
-            *(CCEcpkiHashOpMode_t *)hash_mode =
-                performHashing ? CC_ECPKI_HASH_SHA384_mode
-                               : CC_ECPKI_AFTER_HASH_SHA384_mode;
-        } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) ||
-                   PSA_ALG_IS_RSA_PSS(alg)) {
-            *(CCRsaHashOpMode_t *)hash_mode = performHashing
-                                                  ? CC_RSA_HASH_SHA384_mode
-                                                  : CC_RSA_After_SHA384_mode;
-        }
-        break;
-
-    case PSA_ALG_SHA_512:
-
-        if (PSA_ALG_IS_ECDSA(alg)) {
-            *(CCEcpkiHashOpMode_t *)hash_mode =
-                performHashing ? CC_ECPKI_HASH_SHA512_mode
-                               : CC_ECPKI_AFTER_HASH_SHA512_mode;
-        } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) ||
-                   PSA_ALG_IS_RSA_PSS(alg)) {
-            *(CCRsaHashOpMode_t *)hash_mode = performHashing
-                                                  ? CC_RSA_HASH_SHA512_mode
-                                                  : CC_RSA_After_SHA512_mode;
-        }
-        break;
-
-    default:
-
-        if (PSA_ALG_IS_ECDSA(alg)) {
-            *(CCEcpkiHashOpMode_t *)hash_mode = CC_ECPKI_HASH_OpModeLast;
-        } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) ||
-                   PSA_ALG_IS_RSA_PSS(alg)) {
-            *(CCRsaHashOpMode_t *)hash_mode = CC_RSA_HASH_OpModeLast;
-        }
-        break;
-    }
-}
 
 psa_status_t cc3xx_internal_ecdsa_verify(const psa_key_attributes_t *attributes,
                                          const uint8_t *key, size_t key_length,
