@@ -288,13 +288,13 @@ static int error_mapping_cc_to_mbedtls_rsa (CCError_t cc_error, CC_RSA_OP op)
             break;
         default:
             ret = -1;
-            CC_PAL_LOG_ERR("Unknown CC_ERROR %d (0x%08x)\n", cc_error, cc_error);
+            CC_PAL_LOG_ERR("Unknown CC_ERROR %d (0x%08x)\r\n", cc_error, cc_error);
             break;
     }
 
 
-    CC_PAL_LOG_INFO("Converted CC_ERROR %d (0x%08x) to MBEDTLS_ERR %d\n",
-                    cc_error, cc_error, ret);
+    CC_PAL_LOG_DEBUG("Converted CC_ERROR %d (0x%08x) to MBEDTLS_ERR %d\r\n",
+                     cc_error, cc_error, ret);
     return ret;
 }
 

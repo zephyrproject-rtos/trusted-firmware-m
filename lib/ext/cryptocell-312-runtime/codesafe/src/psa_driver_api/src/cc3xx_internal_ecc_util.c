@@ -153,11 +153,12 @@ psa_status_t cc3xx_ecc_cc_error_to_psa_error(CCError_t cc_error)
 
     default:
         err = PSA_ERROR_GENERIC_ERROR;
-        CC_PAL_LOG_ERR("Unknown CC_ERROR %d\n", cc_error);
+        CC_PAL_LOG_ERR("Unknown CC_ERROR %d\r\n", cc_error);
         break;
     }
 
-    CC_PAL_LOG_DEBUG("Converted CC_ERROR %d to PSA_ERROR %d\n", cc_error, err);
+    CC_PAL_LOG_DEBUG("Converted CC_ERROR %d (0x%08x) to PSA_ERROR %d\r\n",
+                     cc_error, cc_error, err);
     return err;
 }
 
