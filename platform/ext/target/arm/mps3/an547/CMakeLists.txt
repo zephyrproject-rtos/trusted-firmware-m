@@ -97,6 +97,7 @@ target_sources(platform_s
         spm_hal.c
         tfm_interrupts.c
         target_cfg.c
+        tfm_peripherals_def.c
         tfm_hal_isolation.c
         tfm_hal_platform.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c

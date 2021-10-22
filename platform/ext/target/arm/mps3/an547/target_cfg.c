@@ -99,20 +99,6 @@ extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP3;
 #define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
 
-struct platform_data_t tfm_peripheral_std_uart = {
-        UART0_BASE_NS,
-        UART0_BASE_NS + 0xFFF,
-        PPC_SP_DO_NOT_CONFIGURE,
-        -1
-};
-
-struct platform_data_t tfm_peripheral_timer0 = {
-        SYSTIMER0_ARMV8_M_BASE_S,
-        SYSTIMER0_ARMV8_M_BASE_S + 0xFFF,
-        PPC_SP_PERIPH0,
-        SYSTEM_TIMER0_PERIPH_PPC0_POS_MASK
-};
-
 static DRIVER_PPC_SSE300 *const ppc_bank_drivers[] = {
     &Driver_PPC_SSE300_MAIN0,
     &Driver_PPC_SSE300_MAIN_EXP0,
