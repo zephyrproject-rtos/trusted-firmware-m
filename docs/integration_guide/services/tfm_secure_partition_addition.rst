@@ -268,6 +268,13 @@ Add CMake configure files
 -------------------------
 - CMakeLists.txt, which is the compilation configuration for this module.
 
+.. Note::
+   The secure partition must be built as a standalone static library, and the
+   name of the library must follow this pattern, as it affects how the linker
+   script will lay the partition in memory:
+   - ``tfm_psa_rot_partition*`` in case of a PSA RoT partition
+   - ``tfm_app_rot_partition*`` in case of an Application RoT partition
+
 The current CMake configuration should also be updated, by updating
 config_default.cmake to include the definition of the newly introduced partition
 and adding the relevant subdirectoy in ``secure_fw/CMakeLists.txt``.
