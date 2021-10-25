@@ -21,7 +21,7 @@
 #include "psa_manifest/{{manifest_out_basename}}.h"
 
 {% set counter = namespace() %}
-{% set counter.dep_counter = manifest.dependencies|count %}
+{% set counter.dep_counter = manifest.dependencies|count + manifest.weak_dependencies|count %}
 #define {{"%-55s"|format(manifest.name|upper + "_NDEPS")}} ({{"%d"|format(counter.dep_counter)}})
 {% set counter.service_counter = manifest.services|count %}
 #define {{"%-55s"|format(manifest.name|upper + "_NSERVS")}} ({{"%d"|format(counter.service_counter)}})
@@ -139,6 +139,11 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
     .deps = {
     {% for dep in manifest.dependencies %}
         {{dep}}_SID,
+    {% endfor %}
+    {% for dep in manifest.weak_dependencies %}
+#ifdef {{dep}}_SID
+        {{dep}}_SID,
+#endif
     {% endfor %}
     },
 {% endif %}
