@@ -124,6 +124,7 @@ macro(target_add_scatter_file target)
         set_source_files_properties(${SCATTER_FILE_PATH}
             PROPERTIES
             LANGUAGE C
+            KEEP_EXTENSION True # Don't use .o extension for the preprocessed file
         )
     endforeach()
 
