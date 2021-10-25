@@ -38,6 +38,7 @@ struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 // We assume we are the only consumer of MPU regions and we use this
 // variable to keep track of what the next available region is.
 static uint32_t n_configured_regions = 0;
+enum tfm_hal_status_t mpu_init_cfg(void);
 
 enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
 {
@@ -52,7 +53,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
-    if (mpu_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
+    if (mpu_init_cfg() != TFM_HAL_SUCCESS) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
