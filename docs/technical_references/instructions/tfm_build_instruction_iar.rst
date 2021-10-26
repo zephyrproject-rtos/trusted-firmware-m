@@ -12,7 +12,7 @@ Notes for building with IARARM
     IAR Embedded Workbench for ARM (EWARM) versions 8.42 or later are required.
 
     Currently the MUSCA_B1 and MUSCA_S1 targets are not supported with IARARM,
-    due to lack of testing. The FVP_SSE300_MPS2 target is currently not supported by IARARM.
+    due to lack of testing.
 
     cmake needs to be version 3.14 or newer.
 

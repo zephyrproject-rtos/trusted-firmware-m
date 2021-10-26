@@ -73,6 +73,7 @@ target_link_libraries(platform_s
         tfm_secure_api
         tfm_arch
         tfm_partition_defs
+        $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:tfm_sprt>
         $<$<AND:$<BOOL:${TFM_PARTITION_CRYPTO}>,$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>>:crypto_service_mbedtls>
 )
 
@@ -164,7 +165,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${BL2}>:BL2>
         $<$<BOOL:${SECURE_UART1}>:SECURE_UART1>
         DAUTH_${DEBUG_AUTHENTICATION}
-        MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}
+        $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>
         $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA>
         $<$<STREQUAL:${MCUBOOT_SIGNATURE_TYPE},RSA>:MCUBOOT_SIGN_RSA_LEN=${MCUBOOT_SIGNATURE_KEY_LEN}>
         $<$<STREQUAL:${MCUBOOT_EXECUTION_SLOT},2>:LINK_TO_SECONDARY_PARTITION>

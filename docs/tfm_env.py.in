@@ -9,7 +9,7 @@
 # by cmake and evaluated by the Python builder
 
 cmake_env = { "SPHINX_TMP_DOC_DIR"         : "@SPHINX_TMP_DOC_DIR@",
-              "TFM_ROOT_DIR"               : "@CMAKE_SOURCE_DIR@",
+              "TFM_ROOT_DIR"               : "@CMAKE_SOURCE_DIR@/..",
               "PLANTUML_JAR_PATH"          : "@PLANTUML_JAR_PATH@",
               "Java_JAVA_EXECUTABLE"       : "@Java_JAVA_EXECUTABLE@",
               "DOXYGEN_EXECUTABLE"         : "@DOXYGEN_EXECUTABLE@",

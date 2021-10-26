@@ -1,91 +1,12 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include <stdbool.h>
 #include "compiler_ext_defs.h"
 #include "tfm_spm_hal.h"
-#include "psa/error.h"
-#include "tfm_nspm.h"
-#include "utilities.h"
-#include "ext/tz_context.h"
-
-#define DEFAULT_NS_CLIENT_ID ((int32_t)-1)
-
-int32_t tfm_nspm_get_current_client_id(void)
-{
-    return DEFAULT_NS_CLIENT_ID;
-}
-
-/* TF-M implementation of the CMSIS TZ RTOS thread context management API */
-
-/**
- * Initialize secure context memory system
- * \return execution status (1: success, 0: error)
- */
-/* This veneer is TF-M internal, not a secure service */
-__tfm_nspm_secure_gateway_attributes__
-uint32_t TZ_InitContextSystem_S(void)
-{
-    return 1U;
-}
-
-/**
- * Allocate context memory for calling secure software modules in TrustZone
- * \param[in]  module   identifies software modules called from non-secure mode
- * \return value != 0 id TrustZone memory slot identifier
- * \return value 0    no memory available or internal error
- */
-/* This veneer is TF-M internal, not a secure service */
-__tfm_nspm_secure_gateway_attributes__
-TZ_MemoryId_t TZ_AllocModuleContext_S(TZ_ModuleId_t module)
-{
-    /* add attribute 'noinline' to avoid a build error. */
-    (void)module;
-    return 1U;
-}
-
-/**
- * Free context memory that was previously allocated with \ref TZ_AllocModuleContext_S
- * \param[in]  id  TrustZone memory slot identifier
- * \return execution status (1: success, 0: error)
- */
-/* This veneer is TF-M internal, not a secure service */
-__tfm_nspm_secure_gateway_attributes__
-uint32_t TZ_FreeModuleContext_S(TZ_MemoryId_t id)
-{
-    (void)id;
-    return 1U;
-}
-
-/**
- * Load secure context (called on RTOS thread context switch)
- * \param[in]  id  TrustZone memory slot identifier
- * \return execution status (1: success, 0: error)
- */
-/* This veneer is TF-M internal, not a secure service */
-__tfm_nspm_secure_gateway_attributes__
-uint32_t TZ_LoadContext_S(TZ_MemoryId_t id)
-{
-    (void)id;
-    return 1U;
-}
-
-/**
- * Store secure context (called on RTOS thread context switch)
- * \param[in]  id  TrustZone memory slot identifier
- * \return execution status (1: success, 0: error)
- */
-/* This veneer is TF-M internal, not a secure service */
-__tfm_nspm_secure_gateway_attributes__
-uint32_t TZ_StoreContext_S(TZ_MemoryId_t id)
-{
-    (void)id;
-    return 1U;
-}
 
 /*
  * 'r0' impliedly holds the address of non-secure entry,

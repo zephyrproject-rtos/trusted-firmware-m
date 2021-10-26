@@ -9,11 +9,6 @@ Build instructions with platform name: arm/mps3/an547 (-DTFM_PLATFORM=arm/mps3/a
 
 .. note::
 
-   When building with GNUARM, please use the version of gcc shipped with zephyr
-   SDK 0.13.0-alpha1, arm-zephyr-eabi-gcc version 10.3.0.
-
-.. note::
-
    This platform support does not provide software for Ethos-U55 IP, only
    contains base address and interrupt number for it.
 
@@ -58,14 +53,14 @@ The MPS3 board tested is HBI0309C.
 #. After completing the procedure you should be able to visualize on the serial
    port (baud 115200 8n1) the following messages::
 
+    [INF] Starting bootloader
     [INF] Swap type: none
     [INF] Swap type: none
     [INF] Bootloader chainload address offset: 0x0
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
-    TF-M isolation level is: 0x00000001
-    Booting TFM v1.2.0
-    Jumping to non-secure code...
+    Booting TFM v1.4.0
+    [Crypto] Dummy Entropy NV Seed is not suitable for production!
     Non-Secure system starting...
 
 To run the example code on Corstone-300 Ethos-U55 Ecosystem FVP
@@ -75,9 +70,9 @@ FVP is available to download `here <https://developer.arm.com/tools-and-software
 #. Install the FVP
 #. Copy ``bl2.axf`` and ``tfm_s_ns_signed.bin`` files from
    build dir to ``<FVP installation path>/models/Linux64_GCC-6.4/``
-#. Navigate to the same directory and execute the following command to start FVP:
+#. Navigate to the same directory and execute the following command to start FVP::
 
-    ./FVP_MPS3_Corstone_SSE-300 -a cpu0*="bl2.axf" --data "tfm_s_ns_signed.bin"@0x01000000
+    $ ./FVP_MPS3_Corstone_SSE-300 -a cpu0*="bl2.axf" --data "tfm_s_ns_signed.bin"@0x01000000
 
 #. After completing the procedure you should be able to visualize on the serial
    port the following messages::
@@ -91,9 +86,8 @@ FVP is available to download `here <https://developer.arm.com/tools-and-software
     [INF] Bootloader chainload address offset: 0x0
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
-    TF-M isolation level is: 0x00000001
-    Booting TFM v1.2.0
-    Jumping to non-secure code...
+    Booting TFM v1.4.0
+    [Crypto] Dummy Entropy NV Seed is not suitable for production!
     Non-Secure system starting...
 
 -------------

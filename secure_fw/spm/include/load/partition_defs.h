@@ -21,10 +21,6 @@
 #define PARTITION_INFO_MAGIC_MASK               (0xFFFF0000)
 #define PARTITION_INFO_MAGIC                    (0x5F5F0000)
 
-/* Privileged definitions for partition thread mode */
-#define TFM_PARTITION_UNPRIVILEGED_MODE         (0U)
-#define TFM_PARTITION_PRIVILEGED_MODE           (1U)
-
 /*
  * Partition load data - flags
  * bit 7-0: priority
@@ -38,9 +34,7 @@
 #define PARTITION_PRI_LOWEST                    (0xFF)
 #define PARTITION_PRI_MASK                      (0xFF)
 
-/* TODO: This def couples with library model, rename it later. */
-#define SPM_PART_FLAG_PSA_ROT                   (1U << 8)
-
+#define PARTITION_MODEL_PSA_ROT                 (1U << 8)
 #define PARTITION_MODEL_IPC                     (1U << 9)
 
 #define PARTITION_PRIORITY(flag)                ((flag) & PARTITION_PRI_MASK)

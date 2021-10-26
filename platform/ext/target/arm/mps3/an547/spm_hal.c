@@ -146,3 +146,11 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
 }
 
 #endif /* TFM_PSA_API */
+
+void tfm_hal_system_reset(void)
+{
+    __disable_irq();
+    mpc_revert_non_secure_to_secure_cfg();
+
+    NVIC_SystemReset();
+}

@@ -2,10 +2,9 @@
 Memory Access Check of Trusted Firmware-M in Multi-Core Topology
 ################################################################
 
-:Authors: David Hu
+:Author: David Hu
 :Organization: Arm Limited
 :Contact: david.hu@arm.com
-:Status: Accepted
 
 ************
 Introduction

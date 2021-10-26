@@ -122,7 +122,6 @@ target_sources(platform_ns
         retarget/platform_retarget_dev.c
         cmsis_core/system_cmsdk_mps2_an519.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_include_directories(platform_ns

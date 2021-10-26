@@ -47,7 +47,6 @@
 #define AHB_USER_1_BASE_NS               0x41105000 /* AHB USER 1 Non-Secure base address */
 #define AHB_USER_2_BASE_NS               0x41106000 /* AHB USER 2 Non-Secure base address */
 #define AHB_USER_3_BASE_NS               0x41107000 /* AHB USER 3 Non-Secure base address */
-#define DMA_0_BASE_NS                    0x41200000 /* DMA 0 Non-Secure base address */
 #define DMA_1_BASE_NS                    0x41201000 /* DMA 1 Non-Secure base address */
 #define DMA_2_BASE_NS                    0x41202000 /* DMA 2 Non-Secure base address */
 #define DMA_3_BASE_NS                    0x41203000 /* DMA 3 Non-Secure base address */
@@ -124,7 +123,6 @@
 #define AHB_USER_1_BASE_S                0x51105000 /* AHB USER 1 Secure base address */
 #define AHB_USER_2_BASE_S                0x51106000 /* AHB USER 2 Secure base address */
 #define AHB_USER_3_BASE_S                0x51107000 /* AHB USER 3 Secure base address */
-#define DMA_0_BASE_S                     0x51200000 /* DMA 0 Secure base address */
 #define DMA_1_BASE_S                     0x51201000 /* DMA 1 Secure base address */
 #define DMA_2_BASE_S                     0x51202000 /* DMA 2 Secure base address */
 #define DMA_3_BASE_S                     0x51203000 /* DMA 3 Secure base address */

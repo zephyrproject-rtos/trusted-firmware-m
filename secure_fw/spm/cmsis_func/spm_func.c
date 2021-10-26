@@ -1379,7 +1379,7 @@ enum spm_err_t tfm_spm_db_init(void)
     /* This function initialises partition db */
 
     /* For the non secure Execution environment */
-    tfm_nspm_configure_clients();
+    tfm_nspm_ctx_init();
 
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         g_spm_partition_db.partitions[i].runtime_data.partition_state =

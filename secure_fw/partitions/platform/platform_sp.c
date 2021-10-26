@@ -11,15 +11,25 @@
 #include "tfm_plat_nv_counters.h"
 #include "tfm_secure_api.h"
 #include "psa_manifest/pid.h"
+#include "load/partition_defs.h"
 
 #define NV_COUNTER_ID_SIZE  sizeof(enum tfm_nv_counter_t)
+
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
 #define NV_COUNTER_MAP_SIZE   3
+#else /* TFM_PARTITION_PROTECTED_STORAGE */
+#define NV_COUNTER_MAP_SIZE   1
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 /* Access map using NVCOUNTER_IDX -> tfm_partition-id key-value pairs */
 static const int32_t nv_counter_access_map[NV_COUNTER_MAP_SIZE] = {
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
                                           [PLAT_NV_COUNTER_PS_0] = TFM_SP_PS,
                                           [PLAT_NV_COUNTER_PS_1] = TFM_SP_PS,
                                           [PLAT_NV_COUNTER_PS_2] = TFM_SP_PS
+#else
+                                          [0] = INVALID_PARTITION_ID
+#endif
               };
 
 #ifdef TFM_PSA_API

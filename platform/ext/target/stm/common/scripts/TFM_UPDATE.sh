@@ -39,6 +39,8 @@ sst=
 scratch=
 nvcounter=
 boot=
+nvmcnt=
+prov=
 unused=
 
 $stm32programmercli $connect -d $BINPATH/tfm_s_signed.bin $slot0 -v

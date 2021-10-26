@@ -9,14 +9,23 @@ cmake_minimum_required(VERSION 3.15)
 
 add_custom_target(docs)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
 find_package(Python3)
 find_package(Sphinx)
-find_package(PythonModules COMPONENTS m2r sphinx-rtd-theme sphinxcontrib.plantuml)
+
+# suppress warnings on mismatched names in PythonModules
+set(FPHSA_NAME_MISMATCHED True)
+find_package(PythonModules COMPONENTS m2r2 sphinx-rtd-theme sphinxcontrib.plantuml)
 find_package(PlantUML)
 find_package(Doxygen 1.8.0)
 find_package(LATEX COMPONENTS PDFLATEX)
 
 ################################## ENV #########################################
+
+include(../version.cmake)
+
+project("Trusted Firmware M. Documentation" VERSION ${TFM_VERSION} LANGUAGES)
 
 set(SPHINXCFG_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/user_guide)
 set(SPHINX_TMP_DOC_DIR ${CMAKE_CURRENT_BINARY_DIR}/temp)
@@ -36,14 +45,14 @@ add_custom_target(tfm_docs_sphinx_cfg
 )
 add_custom_command(OUTPUT ${SPHINX_TMP_DOC_DIR}/conf.py
     COMMAND ${CMAKE_COMMAND} -E make_directory ${SPHINX_TMP_DOC_DIR}
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/docs/conf.py ${SPHINX_TMP_DOC_DIR}/conf.py
-    MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/docs/conf.py
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/conf.py ${SPHINX_TMP_DOC_DIR}/conf.py
+    MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/conf.py
     BYPRODUCTS ${SPHINX_TMP_DOC_DIR}
 )
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_env.py.in ${SPHINX_TMP_DOC_DIR}/tfm_env.py @ONLY)
 
-if (SPHINX_FOUND AND PLANTUML_FOUND AND PY_M2R_FOUND AND PY_SPHINX-RTD-THEME_FOUND AND PY_SPHINXCONTRIB.PLANTUML)
+if (SPHINX_FOUND AND PLANTUML_FOUND AND PY_M2R2_FOUND AND PY_SPHINX-RTD-THEME_FOUND AND PY_SPHINXCONTRIB.PLANTUML)
 
     file(GLOB_RECURSE SPHINXCFG_DOC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.rst)
 
@@ -54,7 +63,7 @@ if (SPHINX_FOUND AND PLANTUML_FOUND AND PY_M2R_FOUND AND PY_SPHINX-RTD-THEME_FOU
         DEPENDS tfm_docs_sphinx_cfg
         DEPENDS ${SPHINXCFG_DOC_FILES}
     )
-    add_custom_target(tfm_docs_userguide_html
+    add_custom_target(tfm_docs_userguide_html ALL
         DEPENDS "${SPHINXCFG_OUTPUT_PATH}/html/index.html"
         DEPENDS "${SPHINXCFG_OUTPUT_PATH}/html/"
     )
@@ -96,7 +105,7 @@ if (DOXYGEN_FOUND AND DOXYGEN_DOT_FOUND AND PLANTUML_FOUND)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         DEPENDS ${DOXYCFG_DOC_FILES}
     )
-    add_custom_target(tfm_docs_refman_html
+    add_custom_target(tfm_docs_refman_html ALL
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         DEPENDS ${DOXYCFG_OUTPUT_PATH}/html
     )

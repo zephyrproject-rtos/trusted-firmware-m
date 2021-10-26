@@ -31,9 +31,6 @@
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
-#ifdef BL2
-REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
-#endif /* BL2 */
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -49,15 +46,6 @@ const struct memory_region_limits memory_regions = {
 
     .veneer_base = (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
     .veneer_limit = (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
-
-#ifdef BL2
-    .secondary_partition_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
-
-    .secondary_partition_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
-        SECONDARY_PARTITION_SIZE - 1,
-#endif /* BL2 */
 };
 
 /* Configures the RAM region to NS callable in sacfg block's nsccfg register */
@@ -89,7 +77,7 @@ extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP3;
 #define PERIPHERALS_BASE_NS_END        (0x4FFFFFFF)
 
 /* Enable system reset request for CPU 0 */
-#define ENABLE_CPU0_SYSTEM_RESET_REQUEST (1U << 4U)
+#define ENABLE_CPU0_SYSTEM_RESET_REQUEST (1U << 8U)
 
 /* To write into AIRCR register, 0x5FA value must be write to the VECTKEY field,
  * otherwise the processor ignores the write.
@@ -310,13 +298,6 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                   | SAU_RLAR_ENABLE_Msk;
 
-    /* Secondary image partition */
-    SAU->RNR = 4;
-    SAU->RBAR = (memory_regions.secondary_partition_base
-                 & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = (memory_regions.secondary_partition_limit
-                 & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
-
     /* Allows SAU to define the CODE region as a NSC */
     sacfg->nsccfg |= CODENSC;
 }
@@ -357,31 +338,14 @@ enum tfm_plat_err_t mpc_init_cfg(void)
         ERROR_MSG("Failed to Configure MPC for SRAM!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_SRAM_MPC.ConfigRegion(
-                                      memory_regions.secondary_partition_base,
-                                      memory_regions.secondary_partition_limit,
-                                      ARM_MPC_ATTR_NONSECURE);
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Configure MPC for SRAM!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    /* Lock down the MPC configuration */
-    ret = Driver_ISRAM0_MPC.LockDown();
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Lock down MPC for ISRAM0!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    ret = Driver_SRAM_MPC.LockDown();
-    if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Lock down MPC for SRAM!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
 
     /* Lock down not used MPC's */
     Driver_QSPI_MPC.LockDown();
     Driver_ISRAM1_MPC.LockDown();
+
+    /* SRAM and ISRAM0 MPCs left unlocked as they are not reset if NVIC system
+     * reset asserted.
+     */
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
@@ -390,6 +354,23 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     __ISB();
 
     return TFM_PLAT_ERR_SUCCESS;
+}
+
+void mpc_revert_non_secure_to_secure_cfg(void)
+{
+    Driver_ISRAM0_MPC.ConfigRegion(MPC_ISRAM0_RANGE_BASE_S,
+                                   MPC_ISRAM0_RANGE_LIMIT_S,
+                                   ARM_MPC_ATTR_SECURE);
+
+    Driver_SRAM_MPC.ConfigRegion(MPC_SRAM_RANGE_BASE_S,
+                                 MPC_SRAM_RANGE_LIMIT_S,
+                                 ARM_MPC_ATTR_SECURE);
+
+    /* Add barriers to assure the MPC configuration is done before continue
+     * the execution.
+     */
+    __DSB();
+    __ISB();
 }
 
 void mpc_clear_irq(void)
@@ -425,9 +406,6 @@ enum tfm_plat_err_t ppc_init_cfg(void)
 
     /* Grant non-secure access to peripherals on MAIN EXP1 */
     err |= Driver_PPC_SSE300_MAIN_EXP1.Initialize();
-    err |= Driver_PPC_SSE300_MAIN_EXP1.ConfigSecurity(
-                                        DMA0_MAIN_PPCEXP1_POS_MASK,
-                                        PPC_SSE300_NONSECURE_CONFIG);
     err |= Driver_PPC_SSE300_MAIN_EXP1.ConfigSecurity(
                                         DMA1_MAIN_PPCEXP1_POS_MASK,
                                         PPC_SSE300_NONSECURE_CONFIG);

@@ -23,7 +23,9 @@ set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation l
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
 set(TFM_FIH_PROFILE                     OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 
-set(TFM_NS_CLIENT_IDENTIFICATION        OFF         CACHE BOOL      "Enable NS client identification")
+# An NSPE client_id is provided by the NSPE OS via the SPM or directly by the SPM.
+# When `TFM_NS_MANAGE_NSID` is `ON`, TF-M supports NSPE OS providing NSPE client_id.
+set(TFM_NS_MANAGE_NSID                  OFF         CACHE BOOL      "Support NSPE OS providing NSPE client_id")
 
 set(TFM_EXTRA_CONFIG_PATH               ""          CACHE PATH      "Path to extra cmake config file")
 
@@ -72,6 +74,7 @@ set(PLATFORM_DEFAULT_OTP                ON          CACHE BOOL      "Use trusted
 set(PLATFORM_DEFAULT_PROVISIONING       ON          CACHE BOOL      "Use default provisioning implementation")
 
 set(TFM_DUMMY_PROVISIONING              ON          CACHE BOOL      "Provision with dummy values. NOT to be used in production")
+set(PLATFORM_IS_FVP                     FALSE       CACHE BOOL      "Whether to enable FVP or FPGA build of the platform.")
 
 ############################ Partitions ########################################
 

@@ -74,7 +74,7 @@
 #define BL2_TRAILER_SIZE     (0x800)
 #endif /* BL2 */
 
-#if (MCUBOOT_IMAGE_NUMBER == 1) && \
+#if (!defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)) && \
     (NS_IMAGE_PRIMARY_PARTITION_OFFSET > S_IMAGE_PRIMARY_PARTITION_OFFSET)
 /* If secure image and nonsecure image are concatenated, and nonsecure image
  * locates at the higher memory range, then the secure image does not need

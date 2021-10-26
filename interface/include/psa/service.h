@@ -11,8 +11,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "psa/error.h"
 #include "psa/client.h"
+#include "psa_config.h"
+#include "psa/error.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -2,7 +2,7 @@
 SQUAD metrics dashboard
 #######################
 
-:Authors: Hugo L'Hostis
+:Author: Hugo L'Hostis
 :Organization: Arm Limited
 :Contact: hugo.lhostis@arm.com
 

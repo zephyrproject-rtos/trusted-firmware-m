@@ -58,8 +58,8 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_Flash.c
-        cmsis_drivers/Driver_USART.c
-        nrfx/drivers/src/nrfx_uarte.c
+        $<$<BOOL:${SECURE_UART1}>:cmsis_drivers/Driver_USART.c>
+        $<$<BOOL:${SECURE_UART1}>:nrfx/drivers/src/nrfx_uarte.c>
         nrfx/drivers/src/nrfx_nvmc.c
         nrfx_glue.c
         native_drivers/mpu_armv8m_drv.c

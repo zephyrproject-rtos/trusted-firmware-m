@@ -22,11 +22,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "mbedtls/ecdsa.h"
-#include "mbedtls/error.h"
 
 #if defined(MBEDTLS_ECDSA_C)
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
+#include "mbedtls/error.h"
 #include "stm32hal.h"
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +57,7 @@ int mbedtls_ecdsa_sign( mbedtls_ecp_group *grp, mbedtls_mpi *r, mbedtls_mpi *s,
                 const mbedtls_mpi *d, const unsigned char *buf, size_t blen,
                 int (*f_rng)(void *, unsigned char *, size_t), void *p_rng )
 {
-    int ret = 0;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     uint8_t *d_binary;
     uint8_t *k_binary = NULL;
 
@@ -74,7 +74,7 @@ int mbedtls_ecdsa_sign( mbedtls_ecp_group *grp, mbedtls_mpi *r, mbedtls_mpi *s,
     ECDSA_VALIDATE_RET( buf   != NULL || blen == 0 );
 
     /* Fail cleanly on curves such as Curve25519 that can't be used for ECDSA */
-    if( grp->G.MBEDTLS_PRIVATE(Y).MBEDTLS_PRIVATE(p) == NULL )
+    if( ! mbedtls_ecdsa_can_do( grp->id ) || grp->G.MBEDTLS_PRIVATE(Y).MBEDTLS_PRIVATE(p) == NULL )
         return( MBEDTLS_ERR_ECP_BAD_INPUT_DATA );
 
     /* Make sure d is in range 1..n-1 */
@@ -87,6 +87,9 @@ int mbedtls_ecdsa_sign( mbedtls_ecp_group *grp, mbedtls_mpi *r, mbedtls_mpi *s,
     ECDSA_SignIn.modulus        = grp->st_p;
     ECDSA_SignIn.coefSign       = grp->st_a_sign;
     ECDSA_SignIn.coef           = grp->st_a_abs;
+#if defined(GENERATOR_HW_PKA_EXTENDED_API)
+    ECDSA_SignIn.coefB          = grp->st_b;
+#endif
     ECDSA_SignIn.basePointX     = grp->st_gx;
     ECDSA_SignIn.basePointY     = grp->st_gy;
     ECDSA_SignIn.primeOrder     = grp->st_n;
@@ -178,6 +181,20 @@ cleanup:
     return ret;
 }
 
+int mbedtls_ecdsa_can_do( mbedtls_ecp_group_id gid )
+{
+    switch( gid )
+    {
+#ifdef MBEDTLS_ECP_DP_CURVE25519_ENABLED
+        case MBEDTLS_ECP_DP_CURVE25519: return 0;
+#endif
+#ifdef MBEDTLS_ECP_DP_CURVE448_ENABLED
+        case MBEDTLS_ECP_DP_CURVE448: return 0;
+#endif
+    default: return 1;
+    }
+}
+
 #endif /* MBEDTLS_ECDSA_SIGN_ALT*/
 
 #if defined(MBEDTLS_ECDSA_VERIFY_ALT)
@@ -196,7 +213,7 @@ int mbedtls_ecdsa_verify( mbedtls_ecp_group *grp,
                           const mbedtls_mpi *r,
                           const mbedtls_mpi *s)
 {
-    int ret = 0;
+    int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     size_t olen;
     uint8_t *Q_binary;
     uint8_t *r_binary = NULL;

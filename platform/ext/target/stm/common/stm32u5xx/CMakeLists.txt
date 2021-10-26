@@ -62,6 +62,7 @@ target_include_directories(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Inc
         ${CMAKE_CURRENT_SOURCE_DIR}/secure
         ${MBEDCRYPTO_PATH}/library
+        ${CMAKE_SOURCE_DIR}/include
 )
 
 target_sources(platform_s
@@ -98,7 +99,10 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pka.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_cryp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_cryp_ex.c
         ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
+        ${STM_COMMON_DIR}/hal/Native_Driver/nv_counters.c
 )
 
 target_compile_options(platform_s
@@ -189,6 +193,10 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rtc_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_icache.c
             ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
+            ${STM_COMMON_DIR}/hal/provision/otp_provision.c
+            ${STM_COMMON_DIR}/hal/Native_Driver/nv_counters.c
+            ${STM_COMMON_DIR}/hal/provision/nvm_init.c
+            ${STM_COMMON_DIR}/hal/provision/nvmcnt_init.c
     )
 
     target_compile_options(platform_bl2
@@ -252,7 +260,9 @@ set(CONTENT_FOR_BL2_PREPROCESSING
     "enum bl2_image_attributes {\n"
     "\tRE_IMAGE_FLASH_ADDRESS_SECURE = (FLASH_BASE_ADDRESS+FLASH_AREA_0_OFFSET),\n"
     "\tRE_IMAGE_FLASH_ADDRESS_NON_SECURE = (FLASH_BASE_ADDRESS+FLASH_AREA_1_OFFSET),\n"
-    "\tRE_BL2_PERSO_ADDRESS = (FLASH_BASE_ADDRESS+FLASH_AREA_BL2_OFFSET),\n"
+    "\tRE_BL2_BIN_ADDRESS = (FLASH_BASE_ADDRESS+FLASH_AREA_BL2_BIN_OFFSET),\n"
+    "\tRE_BL2_NVMCNT_ADDRESS = (FLASH_BASE_ADDRESS+FLASH_BL2_NVCNT_AREA_OFFSET),\n"
+    "\tRE_BL2_PROVISION_ADDRESS = (FLASH_BASE_ADDRESS+FLASH_AREA_OTP_OFFSET),\n"
     "\tRE_BL2_BOOT_ADDRESS = (FLASH_BASE_ADDRESS+FLASH_AREA_BL2_OFFSET),\n"
     "\tRE_BL2_WRP_START = (FLASH_AREA_BL2_OFFSET),\n"
     "\tRE_BL2_WRP_END = (FLASH_AREA_BL2_NOHDP_OFFSET+FLASH_AREA_BL2_NOHDP_SIZE-0x1),\n"
@@ -261,7 +271,7 @@ set(CONTENT_FOR_BL2_PREPROCESSING
     "\tRE_IMAGE_FLASH_NON_SECURE_UPDATE = (FLASH_BASE_ADDRESS+FLASH_AREA_3_OFFSET),\n"
     "\tRE_IMAGE_FLASH_UNUSED = (FLASH_BASE_ADDRESS+FLASH_AREA_3_OFFSET+FLASH_AREA_3_SIZE),\n"
     "\tRE_IMAGE_FLASH_SCRATCH = (FLASH_BASE_ADDRESS+FLASH_AREA_SCRATCH_OFFSET),\n"
-    "\tRE_IMAGE_FLASH_NV_COUNTERS = (FLASH_BASE_ADDRESS+FLASH_OTP_NV_COUNTERS_AREA_OFFSET),\n"
+    "\tRE_IMAGE_FLASH_NV_COUNTERS = (FLASH_BASE_ADDRESS+FLASH_NV_COUNTERS_AREA_OFFSET),\n"
     "\tRE_IMAGE_FLASH_NV_PS = (FLASH_BASE_ADDRESS+FLASH_PS_AREA_OFFSET),\n"
     "\tRE_IMAGE_FLASH_NV_ITS = (FLASH_BASE_ADDRESS+FLASH_ITS_AREA_OFFSET)\n}\;"
 )

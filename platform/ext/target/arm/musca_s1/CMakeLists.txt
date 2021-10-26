@@ -122,7 +122,6 @@ target_sources(platform_ns
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_include_directories(platform_ns

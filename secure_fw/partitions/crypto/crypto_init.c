@@ -27,7 +27,7 @@
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
-#endif /* CRYPTO_HW_ACCLERATOR */
+#endif /* CRYPTO_HW_ACCELERATOR */
 
 #ifdef TFM_PSA_API
 #include "psa/service.h"

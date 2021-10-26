@@ -10,7 +10,7 @@
 #include "tfm_rpc.h"
 #include "utilities.h"
 #include "load/partition_defs.h"
-#include "tfm_psa_call_param.h"
+#include "tfm_psa_call_pack.h"
 
 static void default_handle_req(void)
 {

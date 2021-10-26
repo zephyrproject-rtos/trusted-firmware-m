@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,8 @@
 #define __TFM_NSPM_H__
 
 #include <stdint.h>
+
+#define TFM_NS_CLIENT_INVALID_ID            ((int32_t)0)
 
 #if !defined(TFM_MULTI_CORE_TOPOLOGY)
 /*
@@ -38,12 +40,10 @@
 #endif /* !__ARMCC_VERSION */
 #endif /* __GNUC__ && !TFM_MULTI_CORE_TOPOLOGY */
 
-#ifndef TFM_PSA_API
 /**
  * \brief initialise the NS context database
  */
-void tfm_nspm_configure_clients(void);
-#endif
+void tfm_nspm_ctx_init(void);
 
 /**
  * \brief Get the client ID of the current NS client

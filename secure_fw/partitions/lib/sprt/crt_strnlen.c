@@ -7,7 +7,7 @@
 
 #include <stddef.h>
 
-size_t strnlen(const char *s, size_t maxlen)
+size_t tfm_strnlen(const char *s, size_t maxlen)
 {
     size_t idx;
 

@@ -2,7 +2,7 @@
 Trusted Firmware-M Profile Large Design
 #######################################
 
-:Authors: David Hu
+:Author: David Hu
 :Organization: Arm Limited
 :Contact: david.hu@arm.com
 

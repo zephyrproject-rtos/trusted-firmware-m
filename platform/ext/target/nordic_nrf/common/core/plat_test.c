@@ -32,8 +32,6 @@
 
 #define TIMER_RELOAD_VALUE (1*1000*1000)
 
-static bool initialized = false;
-
 static void timer_init(NRF_TIMER_Type * TIMER, uint32_t ticks)
 {
     nrf_timer_mode_set(TIMER, NRF_TIMER_MODE_TIMER);

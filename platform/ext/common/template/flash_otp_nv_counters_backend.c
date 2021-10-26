@@ -197,8 +197,8 @@ enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *dat
                 input_copy_size = cnt - input_idx;
             }
 
-            memcpy(block + ((offset + input_idx) % sizeof(block)),
-                   data + input_idx,
+            memcpy((void*)(block + ((offset + input_idx) % sizeof(block))),
+                   (void*)((uint8_t *)data + input_idx),
                    input_copy_size);
 
             input_idx += input_copy_size;

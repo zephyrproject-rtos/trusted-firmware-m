@@ -55,6 +55,29 @@
 #define BUTTON_CLK_ENABLE                 __HAL_RCC_GPIOC_CLK_ENABLE()
 #define BUTTON_PIN                        GPIO_PIN_13
 #endif /* MCUBOOT_EXT_LOADER */
+#include "template/flash_otp_nv_counters_backend.h"
+#include "nv_counters.h"
+#ifdef BL2_OTP_AREA_BASE
+extern  struct flash_otp_nv_counters_region_t otp_stm_provision;
+#define OTP_KEEP otp_stm_provision.init_value
+#else
+#define OTP_KEEP (0)
+#endif
+
+#ifdef BL2_NVM_AREA_BASE
+extern  struct nv_counters_t nvm_init;
+#define NVM_KEEP nvm_init.init_value
+#else
+#define NVM_KEEP (0)
+#endif
+
+#ifdef BL2_NVMCNT_AREA_BASE
+extern  struct nv_counters_t nvmcnt_init;
+#define NVMCNT_KEEP nvmcnt_init.init_value
+#else
+#define NVMCNT_KEEP (0)
+#endif
+
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 
@@ -543,6 +566,13 @@ int32_t boot_platform_init(void)
          - Set NVIC Group Priority to 3
          - Low Level Initialization
        */
+    /*  Place here to force linker to keep provision and init const */
+     __IO uint32_t otp = OTP_KEEP;
+     __IO uint32_t nvm = NVM_KEEP;
+     __IO uint32_t nvmcnt = NVMCNT_KEEP;
+    (void)otp;
+    (void)nvm;
+    (void)nvmcnt;
     HAL_Init();
 #ifdef TFM_DEV_MODE
     /* Init for log */

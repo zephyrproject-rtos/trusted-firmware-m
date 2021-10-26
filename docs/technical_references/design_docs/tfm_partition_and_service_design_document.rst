@@ -2,10 +2,9 @@
 Partition and Service Design Document
 #####################################
 
-:Authors: Summer Qin
+:Author: Summer Qin
 :Organization: Arm Limited
 :Contact: summer.qin@arm.com
-:Status: Accepted
 
 ***********
 Terminology

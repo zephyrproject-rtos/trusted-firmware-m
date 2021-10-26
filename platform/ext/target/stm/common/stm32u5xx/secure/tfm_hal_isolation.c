@@ -131,7 +131,8 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         FLOW_CTRL_MPU_S_CH_R4,
 #endif /* FLOW_CONTROL */
     },
-    /* TFM Non volatile data region (NVCNT/SST/ITS) */
+    /* TFM Non volatile data region (OTP/NVM/SST/ITS) */
+    /* OTP is write protected (Option Byte protection) */
     {
         0, /* will be updated before using */
         TFM_NV_DATA_START,
@@ -348,7 +349,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = !!(p_ldinf->flags & SPM_PART_FLAG_PSA_ROT);
+    privileged = !!(p_ldinf->flags & PARTITION_MODEL_PSA_ROT);
 #endif
 
     p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);

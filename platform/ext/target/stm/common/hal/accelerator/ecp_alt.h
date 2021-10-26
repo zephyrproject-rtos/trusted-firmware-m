@@ -132,13 +132,6 @@ mbedtls_ecp_group;
  * \{
  */
 
-#if !defined(MBEDTLS_ECP_MAX_BITS)
-/**
- * The maximum size of the groups, that is, of \c N and \c P.
- */
-#define MBEDTLS_ECP_MAX_BITS     521   /**< The maximum size of groups, in bits. */
-#endif
-
 #define MBEDTLS_ECP_MAX_BYTES    ( ( MBEDTLS_ECP_MAX_BITS + 7 ) / 8 )
 #define MBEDTLS_ECP_MAX_PT_LEN   ( 2 * MBEDTLS_ECP_MAX_BYTES + 1 )
 

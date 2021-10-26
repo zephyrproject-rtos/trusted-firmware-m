@@ -50,5 +50,33 @@ LR_CODE BL2_CODE_START {
      * size of the SRAM available.
      */
     ScatterAssert(ImageLimit(SRAM_WATERMARK) <= BL2_DATA_START + BL2_DATA_SIZE)
-
 }
+
+#if defined(BL2_OTP_AREA_BASE)
+
+ER_OTP BL2_OTP_AREA_BASE {
+    ER_OTP_CONST (BL2_OTP_AREA_BASE) FIXED (BL2_OTP_AREA_SIZE) {
+        *(.BL2_OTP_Const)
+    }
+}
+
+#endif
+
+#if defined(BL2_NVM_AREA_BASE)
+
+ER_NVM BL2_NVM_AREA_BASE {
+    ER_NVM_CONST (BL2_NVM_AREA_BASE) FIXED (BL2_NVM_AREA_SIZE) {
+        *(.BL2_NVM_Const)
+    }
+}
+
+#endif
+#if defined(BL2_NVMCNT_AREA_BASE)
+
+ER_NVMCNT BL2_NVMCNT_AREA_BASE {
+    ER_NVMCNT_CONST (BL2_NVMCNT_AREA_BASE) FIXED (BL2_NVMCNT_AREA_SIZE) {
+        *(.BL2_NVMCNT_Const)
+    }
+}
+
+#endif

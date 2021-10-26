@@ -42,7 +42,6 @@ target_link_libraries(psa_interface
 target_compile_definitions(psa_interface
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:TFM_PSA_API>
-        $<$<BOOL:${TFM_NS_CLIENT_IDENTIFICATION}>:TFM_NS_CLIENT_IDENTIFICATION>
         $<$<BOOL:${CONFIG_TFM_ENABLE_CTX_MGMT}>:CONFIG_TFM_ENABLE_CTX_MGMT>
         $<$<BOOL:${TFM_ISOLATION_LEVEL}>:TFM_LVL=${TFM_ISOLATION_LEVEL}>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
@@ -54,10 +53,8 @@ target_compile_definitions(psa_interface
 
 target_sources(tfm_secure_api
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_client.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_service.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_lifecycle.c>
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
+    $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c>
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
 )
 
 ###################### Export configurations to NS #############################

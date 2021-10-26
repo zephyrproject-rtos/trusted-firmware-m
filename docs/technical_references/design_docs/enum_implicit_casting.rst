@@ -2,10 +2,9 @@
 Fixing implicit casting for C enumeration values
 ################################################
 
-:Authors: Hugues de Valon
+:Author: Hugues de Valon
 :Organization: Arm Limited
 :Contact: hugues.devalon@arm.com
-:Status: Accepted
 
 ********
 Abstract

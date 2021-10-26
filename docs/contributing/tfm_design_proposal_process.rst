@@ -44,7 +44,6 @@ Example document fragment::
     :Author: Antonio de Angelis
     :Organization: Arm Limited
     :Contact: Antonio de Angelis <antonio.deangelis@arm.com>
-    :Status: Draft
 
 Design documents are kept in three different sections of the documentation
 reflecting the status of the document. The status of the document determines

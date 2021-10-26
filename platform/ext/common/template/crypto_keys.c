@@ -22,6 +22,10 @@
 #include "tfm_plat_otp.h"
 #include "mbedtls/hkdf.h"
 
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "crypto_hw.h"
+#endif /* CRYPTO_HW_ACCELERATOR */
+
 enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
                                                  size_t label_size,
                                                  const uint8_t *context,
@@ -29,7 +33,7 @@ enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
                                                  uint8_t *key,
                                                  size_t key_size)
 {
-#ifdef CRYPTO_HW_ACCLERATOR
+#ifdef CRYPTO_HW_ACCELERATOR
     return crypto_hw_accelerator_huk_derive_key(label, label_size, context,
                                                 context_size, key, key_size);
 #else
@@ -66,7 +70,7 @@ out:
     memset(huk_buf, 0, sizeof(huk_buf));
 
     return err;
-#endif /* CRYPTO_HW_ACCLERATOR */
+#endif /* CRYPTO_HW_ACCELERATOR */
 }
 
 #ifdef SYMMETRIC_INITIAL_ATTESTATION

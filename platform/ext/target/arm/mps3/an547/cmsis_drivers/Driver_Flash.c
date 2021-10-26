@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -60,7 +60,7 @@ static const ARM_DRIVER_VERSION DriverVersion = {
 /* Driver Capabilities */
 static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
     0, /* event_ready */
-    2, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
+    0, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
     1  /* erase_chip */
 };
 

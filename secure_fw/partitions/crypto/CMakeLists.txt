@@ -25,6 +25,7 @@ target_sources(tfm_psa_rot_partition_crypto
         crypto_aead.c
         crypto_asymmetric.c
         crypto_key_derivation.c
+        crypto_key_management.c
         crypto_rng.c
 )
 

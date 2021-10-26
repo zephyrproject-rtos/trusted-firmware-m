@@ -53,10 +53,6 @@ struct memory_region_limits {
     uint32_t non_secure_partition_limit;
     uint32_t veneer_base;
     uint32_t veneer_limit;
-#ifdef BL2
-    uint32_t secondary_partition_base;
-    uint32_t secondary_partition_limit;
-#endif /* BL2 */
 };
 
 /**
@@ -156,5 +152,11 @@ void ppc_clear_irq(void);
  * \brief Configures SAU and IDAU.
  */
 void sau_and_idau_cfg(void);
+
+/**
+ * \brief Sets to secure the initialized non-secure regions of
+ *        the Memory Protection Controller.
+ */
+void mpc_revert_non_secure_to_secure_cfg(void);
 
 #endif /* __TARGET_CFG_H__ */
