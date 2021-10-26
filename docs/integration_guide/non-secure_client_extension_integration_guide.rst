@@ -81,9 +81,9 @@ non-secure handler mode.
   uint32_t tfm_nsce_init(uint32_t ctx_requested)
 
 This function should be called before any other NSCE APIs below to do non-secure
-context intialization in NSCE for the calling NS entity. `ctx_requested` is the
+context initialization in NSCE for the calling NS entity. `ctx_requested` is the
 number of the contexts requested by the NS entity. The number of assigned
-context will be returned. It may be equal to or smaller than the equested
+context will be returned. It may be equal to or smaller than the requested
 context number based on the current available resource in TF-M. If
 `ctx_requested` is `0`, then the maximum available context number will be
 assigned and returned. If the initialization is failed, `0` should be returned.
