@@ -203,6 +203,8 @@ __PACKED_STRUCT plat_otp_layout_t {
             uint16_t iak_id_zero_bits;
             uint16_t bl2_rotpk_zero_bits[3];
             uint16_t bl1_rotpk_zero_bits;
+            uint16_t secure_debug_pk_zero_bits;
+            uint16_t reserved;
         };
 
         uint8_t iak_len[4];
@@ -220,6 +222,8 @@ __PACKED_STRUCT plat_otp_layout_t {
 
         uint8_t bl1_rotpk[32];
         uint8_t bl1_nv_counter[16];
+
+        uint8_t secure_debug_pk[32];
     };
 };
 
@@ -502,6 +506,15 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    err = verify_zero_bits_count(otp->secure_debug_pk,
+                                 sizeof(otp->secure_debug_pk),
+                                 (uint8_t*)&otp->secure_debug_pk_zero_bits);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+#endif
+
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -651,6 +664,10 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
 
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
+
+    case PLAT_OTP_ID_SECURE_DEBUG_PK:
+        return otp_read(otp->secure_debug_pk,
+                        sizeof(otp->secure_debug_pk), out_len, out);
 
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
@@ -842,6 +859,11 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
 
+    case PLAT_OTP_ID_SECURE_DEBUG_PK:
+        return otp_write(otp->secure_debug_pk,
+                         sizeof(otp->secure_debug_pk), in_len, in,
+                         (uint8_t*)&otp->secure_debug_pk_zero_bits);
+
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
@@ -920,6 +942,10 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
 
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
+
+    case PLAT_OTP_ID_SECURE_DEBUG_PK:
+        *size = sizeof(otp->secure_debug_pk);
+        break;
 
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;

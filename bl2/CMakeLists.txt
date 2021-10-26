@@ -51,6 +51,7 @@ target_link_options(bl2
 target_compile_definitions(bl2
     PRIVATE
         $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
 )
 
 add_convert_to_bin_target(bl2)

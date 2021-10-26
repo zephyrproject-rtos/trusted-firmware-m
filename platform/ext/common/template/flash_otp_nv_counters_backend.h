@@ -54,6 +54,8 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
 #endif /* BL1 */
 
         uint8_t entropy_seed[64];
+
+        uint8_t secure_debug_pk[32];
     };
 #endif /* PLATFORM_DEFAULT_OTP */
 

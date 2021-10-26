@@ -44,6 +44,8 @@ enum tfm_otp_element_id_t {
 
     PLAT_OTP_ID_ENTROPY_SEED,
 
+    PLAT_OTP_ID_SECURE_DEBUG_PK,
+
     PLAT_OTP_ID_MAX = UINT32_MAX,
 };
 
