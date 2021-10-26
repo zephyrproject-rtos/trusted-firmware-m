@@ -173,33 +173,32 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
         manifest_dir, manifest_name = os.path.split(manifest_path)
         manifest_out_basename = manifest_name.replace('.yaml', '').replace('.json', '')
 
-        if OUT_DIR is not None:
-            if 'output_path' in manifest_item:
-                # Build up generated files directory accroding to the relative
-                # path specified in output_path by the partition
-                output_path = os.path.expandvars(manifest_item['output_path'])
-                manifest_head_file = os.path.join(output_path, "psa_manifest", manifest_out_basename + '.h')
-                intermedia_file = os.path.join(output_path, "auto_generated", 'intermedia_' + manifest_out_basename + '.c')
-                load_info_file = os.path.join(output_path, "auto_generated", 'load_info_' + manifest_out_basename + '.c')
-            else:
-                manifest_head_file = os.path.join(manifest_dir, "psa_manifest", manifest_out_basename + '.h')
-                intermedia_file = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + manifest_out_basename + '.c')
-                load_info_file = os.path.join(manifest_dir, "auto_generated", 'load_info_' + manifest_out_basename + '.c')
+        if 'output_path' in manifest_item:
+            # Build up generated files directory accroding to the relative
+            # path specified in output_path by the partition
+            output_path = os.path.expandvars(manifest_item['output_path'])
+            manifest_head_file = os.path.join(output_path, "psa_manifest", manifest_out_basename + '.h')
+            intermedia_file = os.path.join(output_path, "auto_generated", 'intermedia_' + manifest_out_basename + '.c')
+            load_info_file = os.path.join(output_path, "auto_generated", 'load_info_' + manifest_out_basename + '.c')
+        else:
+            manifest_head_file = os.path.join(manifest_dir, "psa_manifest", manifest_out_basename + '.h')
+            intermedia_file = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + manifest_out_basename + '.c')
+            load_info_file = os.path.join(manifest_dir, "auto_generated", 'load_info_' + manifest_out_basename + '.c')
 
-                """
-                Remove the `source_path` portion of the filepaths, so that it can be
-                interpreted as a relative path from the OUT_DIR.
-                """
-                if 'source_path' in manifest_item:
-                    # Replace environment variables in the source path
-                    source_path = os.path.expandvars(manifest_item['source_path'])
-                    manifest_head_file = os.path.relpath(manifest_head_file, start = source_path)
-                    intermedia_file = os.path.relpath(intermedia_file, start = source_path)
-                    load_info_file = os.path.relpath(load_info_file, start = source_path)
+            """
+            Remove the `source_path` portion of the filepaths, so that it can be
+            interpreted as a relative path from the OUT_DIR.
+            """
+            if 'source_path' in manifest_item:
+                # Replace environment variables in the source path
+                source_path = os.path.expandvars(manifest_item['source_path'])
+                manifest_head_file = os.path.relpath(manifest_head_file, start = source_path)
+                intermedia_file = os.path.relpath(intermedia_file, start = source_path)
+                load_info_file = os.path.relpath(load_info_file, start = source_path)
 
-            manifest_head_file = os.path.join(OUT_DIR, manifest_head_file).replace('\\', '/')
-            intermedia_file = os.path.join(OUT_DIR, intermedia_file).replace('\\', '/')
-            load_info_file = os.path.join(OUT_DIR, load_info_file).replace('\\', '/')
+        manifest_head_file = os.path.join(OUT_DIR, manifest_head_file).replace('\\', '/')
+        intermedia_file = os.path.join(OUT_DIR, intermedia_file).replace('\\', '/')
+        load_info_file = os.path.join(OUT_DIR, load_info_file).replace('\\', '/')
 
         partition_list.append({"manifest": manifest, "attr": manifest_item,
                                "manifest_out_basename": manifest_out_basename,
@@ -306,8 +305,7 @@ def gen_summary_files(context, gen_file_lists):
         # Replace environment variables in the template filepath
         templatefile_name = os.path.expandvars(file["template"])
 
-        if OUT_DIR is not None:
-            manifest_out_file = os.path.join(OUT_DIR, manifest_out_file)
+        manifest_out_file = os.path.join(OUT_DIR, manifest_out_file)
 
         print ("Generating " + manifest_out_file)
 
@@ -417,10 +415,9 @@ def parse_args():
 
     parser.add_argument('-o', '--outdir'
                         , dest='outdir'
-                        , required=False
-                        , default=None
+                        , required=True
                         , metavar='out_dir'
-                        , help='The root directory for generated files, the default is TF-M root folder.')
+                        , help='The root directory for generated files')
 
     parser.add_argument('-m', '--manifest'
                         , nargs='+'
