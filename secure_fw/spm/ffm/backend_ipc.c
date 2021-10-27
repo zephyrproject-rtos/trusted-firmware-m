@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include "compiler_ext_defs.h"
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_rpc.h"
@@ -19,6 +20,24 @@
 
 /* Declare the global component list */
 struct partition_head_t partition_listhead;
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+#ifdef TFM_MULTI_CORE_TOPOLOGY
+/* TODO: To be checked when RPC design updates. */
+static uint8_t spm_stack_local[CONFIG_TFM_SPM_THREAD_STACK_SIZE] __aligned(8);
+struct context_ctrl_t spm_thread_context = {
+    .sp       = (uint32_t)&spm_stack_local[CONFIG_TFM_SPM_THREAD_STACK_SIZE],
+    .sp_limit = (uint32_t)spm_stack_local,
+    .reserved = 0,
+    .exc_ret  = 0,
+};
+struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
+#else
+struct context_ctrl_t *p_spm_thread_context;
+#endif
+
+#endif
 
 /*
  * Send message and wake up the SP who is waiting on message queue, block the
@@ -78,6 +97,11 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
 
     if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
         p_param = (void *)tfm_spm_hal_get_ns_entry_point();
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+        SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
+#endif
+
     }
 
     thrd_start(&p_pt->thrd,

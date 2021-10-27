@@ -10,6 +10,8 @@
 #include "psa/error.h"
 #include "tfm_core_utils.h"
 #include "utilities.h"
+#include "tfm_arch.h"
+#include "thread.h"
 #include "tfm_spe_mailbox.h"
 #include "tfm_rpc.h"
 #include "tfm_multi_core.h"
@@ -271,6 +273,14 @@ int32_t tfm_mailbox_handle_msg(void)
          * Skip checking psa_call() since it neither returns immediately nor
          * has return value.
          */
+    }
+
+    /*
+     * Some requests are serviced immediately, so only trigger pendsv if the
+     * thread state is changed to runnable.
+     */
+    if ((pend_slots != 0) && THRD_EXPECTING_SCHEDULE()) {
+        tfm_arch_trigger_pendsv();
     }
 
     tfm_mailbox_hal_enter_critical();

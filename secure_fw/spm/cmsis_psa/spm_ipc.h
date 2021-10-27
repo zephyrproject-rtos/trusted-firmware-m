@@ -9,6 +9,7 @@
 #define __SPM_IPC_H__
 
 #include <stdint.h>
+#include "config_impl.h"
 #include "tfm_arch.h"
 #include "lists.h"
 #include "tfm_secure_api.h"
@@ -460,5 +461,26 @@ struct irq_load_info_t *get_irq_info_for_signal(
  *  in the interrupt init functions.
  */
 void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi);
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+/*
+ * SPM dispatcher to handle the API call under non-privileged model.
+ * This API runs under callers stack, and switch to SPM stack when
+ * calling 'p_fn', then switch back to caller stack before returning
+ * to the caller.
+ *
+ * fn_addr      - the target function to be called.
+ * frame_addr   - customized ABI frame type for the function call.
+ * switch_stack - indicator if need to switch stack.
+ */
+void spm_interface_thread_dispatcher(uintptr_t fn_addr,
+                                     uintptr_t frame_addr,
+                                     uint32_t  switch_stack);
+
+/* Execute a customized ABI function in C */
+void spcall_execute_c(uintptr_t fn_addr, uintptr_t frame_addr);
+
+#endif
 
 #endif /* __SPM_IPC_H__ */

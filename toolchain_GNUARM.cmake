@@ -68,12 +68,31 @@ macro(tfm_toolchain_reset_linker_flags)
 endmacro()
 
 macro(tfm_toolchain_set_processor_arch)
-    set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
-    set(CMAKE_SYSTEM_ARCHITECTURE ${TFM_SYSTEM_ARCHITECTURE})
+    if (DEFINED TFM_SYSTEM_PROCESSOR)
+        set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
+
+        if (DEFINED TFM_SYSTEM_DSP)
+            if (NOT TFM_SYSTEM_DSP)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
+            endif()
+        endif()
+    endif()
+
+    # CMAKE_SYSTEM_ARCH variable is not a built-in CMAKE variable. It is used to
+    # set the compile and link flags when TFM_SYSTEM_PROCESSOR is not specified.
+    # The variable name is choosen to align with the ARMCLANG toolchain file.
+    set(CMAKE_SYSTEM_ARCH         ${TFM_SYSTEM_ARCHITECTURE})
 
     if (DEFINED TFM_SYSTEM_DSP)
-        if(NOT TFM_SYSTEM_DSP)
-            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
+        # +nodsp modifier is only supported from GCC version 8.
+        # CMAKE_C_COMPILER_VERSION is not guaranteed to be defined.
+        EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION )
+        if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+            # armv8.1-m.main arch does not have +nodsp option
+            if ((NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main") AND
+                NOT TFM_SYSTEM_DSP)
+                string(APPEND CMAKE_SYSTEM_ARCH "+nodsp")
+            endif()
         endif()
     endif()
 endmacro()
@@ -86,10 +105,17 @@ macro(tfm_toolchain_reload_compiler)
     unset(CMAKE_C_FLAGS_INIT)
     unset(CMAKE_ASM_FLAGS_INIT)
 
-    set(CMAKE_C_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_ASM_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_C_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_ASM_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    if (DEFINED TFM_SYSTEM_PROCESSOR)
+        set(CMAKE_C_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_ASM_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_C_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_ASM_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    else()
+        set(CMAKE_C_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_ASM_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_C_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_ASM_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+    endif()
 
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
@@ -124,6 +150,7 @@ macro(target_add_scatter_file target)
         set_source_files_properties(${SCATTER_FILE_PATH}
             PROPERTIES
             LANGUAGE C
+            KEEP_EXTENSION True # Don't use .o extension for the preprocessed file
         )
     endforeach()
 

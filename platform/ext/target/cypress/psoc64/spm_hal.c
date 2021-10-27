@@ -19,7 +19,7 @@
 #include "target_cfg.h"
 #include "tfm_multi_core.h"
 #include "tfm_platform_core_api.h"
-#include "log/tfm_log.h"
+#include "tfm_spm_log.h"
 
 #include "cycfg.h"
 #include "cy_device.h"
@@ -38,11 +38,11 @@ extern const struct memory_region_limits memory_regions;
 static enum tfm_plat_err_t handle_boot_wdt(void)
 {
     /* Update watchdog timer to mark successfull start up of the image */
-    LOG_MSG("Checking boot watchdog\r\n");
+    SPMLOG_INFMSG("Checking boot watchdog\r\n");
     if (cy_p64_wdg_is_enabled()) {
         cy_p64_wdg_stop();
         cy_p64_wdg_free();
-        LOG_MSG("Disabled boot watchdog\r\n");
+        SPMLOG_INFMSG("Disabled boot watchdog\r\n");
     }
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -74,10 +74,10 @@ void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr)
         /* The delay is required after Access port was enabled for
         * debugger/programmer to connect and set TEST BIT */
         Cy_SysLib_Delay(100);
-        LOG_MSG("Enabled CM4_AP DAP control\r\n");
+        SPMLOG_INFMSG("Enabled CM4_AP DAP control\r\n");
     }
 
-    LOG_MSG("Starting Cortex-M4 at 0x%x\r\n", start_addr);
+    SPMLOG_INFMSGVAL("Starting Cortex-M4 at ", start_addr);
     Cy_SysEnableCM4(start_addr);
 }
 
@@ -108,7 +108,7 @@ void tfm_spm_hal_wait_for_ns_cpu_ready(void)
                 Cy_IPC_Drv_ReleaseNotify(Cy_IPC_Drv_GetIpcBaseAddress(IPC_RX_CHAN),
                                          IPC_RX_RELEASE_MASK);
                 if (data == ~IPC_SYNC_MAGIC) {
-                    LOG_MSG("\n\rCores sync success.\r\n");
+                    SPMLOG_INFMSG("Cores sync success.\r\n");
                     break;
                 }
             }

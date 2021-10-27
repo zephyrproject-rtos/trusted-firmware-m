@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2020 Nordic Semiconductor ASA. All rights reserved.
+ * Copyright (c) 2021, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +28,7 @@
 
 #if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
 #include <tfm_platform_api.h>
-#include <log/tfm_log.h>
+#include "tfm_spm_log.h"
 #endif
 
 #define TIMER_RELOAD_VALUE (1*1000*1000)
@@ -103,7 +104,7 @@ void TIMER1_Handler(void)
     pal_timer_stop_ns();
     int ret = tfm_platform_system_reset();
     if (ret) {
-        LOG_MSG("Reset failed: %d\n", ret);
+        SPMLOG_ERRMSGVAL("Reset failed: ", ret);
     }
 }
 #endif

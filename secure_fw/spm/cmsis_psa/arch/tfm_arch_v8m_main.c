@@ -6,6 +6,7 @@
  */
 
 #include <inttypes.h>
+#include "compiler_ext_defs.h"
 #include "tfm_hal_device_header.h"
 #include "region_defs.h"
 #include "tfm_arch.h"
@@ -21,6 +22,54 @@
 #error "Unsupported ARM Architecture."
 #endif
 
+/* Delcaraction flag to control the scheduling logic in PendSV. */
+static uint32_t pendsv_idling = EXC_RETURN_SECURE_STACK;
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+__naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                                       uint32_t stk_base, uint32_t stk_limit)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                \n"
+#endif
+        "   push   {r4-r6, lr}                          \n"
+        "   cpsid  i                                    \n"
+        "   mov    r4, r2                               \n"
+        "   mrs    r5, psplim                           \n"
+        "   movs   r12, #0                              \n"
+        "   cmp    r2, #0                               \n"
+        "   itttt  ne                                   \n"/*To callee stack*/
+        "   msrne  psplim, r12                          \n"
+        "   movne  r4, sp                               \n"
+        "   movne  sp, r2                               \n"
+        "   msrne  psplim, r3                           \n"
+        "   ldr    r2, =%a1                             \n"/*To lock sched  */
+        "   movs   r3, #0x0                             \n"
+        "   str    r3, [r2, #0]                         \n"
+        "   cpsie  i                                    \n"
+        "   bl     %a0                                  \n"
+        "   cpsid  i                                    \n"
+        "   movs   r12, #0                              \n"
+        "   cmp    r4, #0                               \n"
+        "   ittt   ne                                   \n"/*To caller stack*/
+        "   msrne  psplim, r12                          \n"
+        "   movne  sp, r4                               \n"
+        "   msrne  psplim, r5                           \n"
+        "   ldr    r4, =%a1                             \n"/*To unlock sched*/
+        "   movs   r5, %2                               \n"
+        "   str    r5, [r4, #0]                         \n"
+        "   cpsie  i                                    \n"
+        "   pop    {r4-r6, pc}                          \n"
+        : : "i" (spcall_execute_c),
+            "i" (&pendsv_idling),
+            "I" (EXC_RETURN_SECURE_STACK)
+    );
+}
+
+#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+
 #if defined(__ICCARM__)
 #pragma required = do_schedule
 #endif
@@ -28,10 +77,15 @@
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
-        "   tst     lr, #0x40               \n" /* Was NS interrupted by S? */
+#if !defined(__ICCARM__)
+        ".syntax unified                    \n"
+#endif
+        "   ldr     r0, =%a1                \n"
+        "   ldr     r0, [r0]                \n"
+        "   ands    r0, lr                  \n"
         "   beq     v8m_pendsv_exit         \n" /* Yes, do not schedule */
         "   push    {r0, lr}                \n" /* Save dummy R0, LR */
-        "   bl      do_schedule             \n"
+        "   bl      %a0                     \n"
         "   pop     {r2, lr}                \n"
         "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
         "   beq     v8m_pendsv_exit         \n" /* No schedule if curr = next */
@@ -45,6 +99,8 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   msr     psplim, r3              \n"
         "v8m_pendsv_exit:                   \n"
         "   bx      lr                      \n"
+        :: "i" (do_schedule),
+           "i" (&pendsv_idling)
     );
 }
 

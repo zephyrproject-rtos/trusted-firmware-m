@@ -12,10 +12,16 @@
 
 {% if ipc_partition_num > 0 and sfn_partition_num == 0 %}
 #define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_IPC")}} 1
+
+#if TFM_LVL > 1
 #define {{"%-56s"|format("CONFIG_TFM_PSA_API_SUPERVISOR_CALL")}} 1
+#else
+#define {{"%-56s"|format("CONFIG_TFM_PSA_API_THREAD_CALL")}} 1
+#define {{"%-56s"|format("CONFIG_TFM_SPM_THREAD_STACK_SIZE")}} 1024
+#endif
 
 {% elif sfn_partition_num > 0 and ipc_partition_num == 0 %}
-#define CONFIG_TFM_SPM_BACKEND_SFN                 1
+#define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_SFN")}} 1
 
 #if TFM_LVL > 1
 #error "High isolation level SFN model is not supported."

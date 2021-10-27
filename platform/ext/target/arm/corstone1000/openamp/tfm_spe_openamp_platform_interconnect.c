@@ -10,7 +10,7 @@
 #include "tfm_rpc.h"
 #include "tfm_spe_openamp_interface.h"
 #include "tfm_multi_core.h"
-#include "log/tfm_log.h"
+#include "tfm_spm_log.h"
 #include "utilities.h"
 
 static void *registered_msg = NULL;
@@ -47,7 +47,7 @@ static void service_reply(const void *priv, int32_t ret)
 static const void *get_caller_private_data(int32_t client_id)
 {
     if (!registered_msg) {
-        LOG_MSG("FATAL_ERROR: Map pointer cannot be NULL.\r\n");
+        SPMLOG_ERRMSG("FATAL_ERROR: Map pointer cannot be NULL.\r\n");
         TFM_CORE_ASSERT(0);
     }
 
@@ -68,7 +68,7 @@ void notify_request_from_openamp(void)
 
     ret = tfm_hal_notify_peer();
     if (ret) {
-        LOG_MSG("tfm_hal_notify_peer failed %d\r\n", ret);
+        SPMLOG_ERRMSGVAL("tfm_hal_notify_peer failed ", ret);
     }
     return;
 }
@@ -80,14 +80,14 @@ static int32_t tfm_spe_openamp_lib_init(void)
 
     ret = tfm_dual_core_hal_init();
     if (ret) {
-        LOG_MSG("tfm_dual_core_hal_init failed : %d\r\n", ret);
+        SPMLOG_ERRMSGVAL("tfm_dual_core_hal_init failed ", ret);
         return OPENAMP_INIT_ERROR;
     }
 
     ret = tfm_to_openamp_init(callback_from_openamp,
                               notify_request_from_openamp);
     if (ret) {
-        LOG_MSG("tfm_to_openamp_init failed : %d\r\n", ret);
+        SPMLOG_ERRMSGVAL("tfm_to_openamp_init failed ", ret);
         return OPENAMP_INIT_ERROR;
     }
 
@@ -96,11 +96,11 @@ static int32_t tfm_spe_openamp_lib_init(void)
     /* Register RPC callbacks */
     ret = tfm_rpc_register_ops(&openamp_rpc_ops);
     if (ret) {
-        LOG_MSG("tfm_rpc_register_ops failed : %d\r\n", ret);
+        SPMLOG_ERRMSGVAL("tfm_rpc_register_ops failed ", ret);
         return OPENAMP_CALLBACK_REG_ERROR;
     }
 
-    LOG_MSG("tfm_spe_openamp_lib_init initialized success.\r\n");
+    SPMLOG_INFMSG("tfm_spe_openamp_lib_init initialized success.\r\n");
     return OPENAMP_SUCCESS;
 }
 

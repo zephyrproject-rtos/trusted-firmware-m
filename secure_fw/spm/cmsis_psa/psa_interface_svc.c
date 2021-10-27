@@ -13,7 +13,7 @@
 #include "psa/lifecycle.h"
 #include "psa/service.h"
 
-#ifdef CONFIG_TFM_PSA_API_SUPERVISOR_CALL
+#if defined(CONFIG_TFM_PSA_API_SUPERVISOR_CALL)
 
 __naked uint32_t psa_framework_version_svc(void)
 {

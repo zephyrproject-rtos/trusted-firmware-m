@@ -69,12 +69,6 @@ struct context_flih_ret_t {
     struct tfm_state_context_t state_ctx; /* ctx on SVC_PREPARE_DEPRIV_FLIH */
 };
 
-__attribute__ ((always_inline))
-__STATIC_INLINE void tfm_arch_trigger_pendsv(void)
-{
-    SCB->ICSR = SCB_ICSR_PENDSVSET_Msk;
-}
-
 /**
  * \brief Get Link Register
  * \details Returns the value of the Link Register (LR)
@@ -146,5 +140,19 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
  * The p_ctx_ctrl must have been initialized by tfm_arch_init_context
  */
 uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl);
+
+/*
+ * Triggers scheduler. A return type is assigned in case
+ * SPM returns values by the context.
+ */
+uint32_t tfm_arch_trigger_pendsv(void);
+
+
+/*
+ * Switch to a new stack area, lock scheduler and call function.
+ * If 'stk_base' is ZERO, stack won't be switched and re-use caller stack.
+ */
+uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                               uint32_t stk_base, uint32_t stk_limit);
 
 #endif
