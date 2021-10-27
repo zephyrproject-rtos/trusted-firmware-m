@@ -16,8 +16,6 @@
 
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
@@ -60,12 +58,6 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     limit = (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 
     configure_mpu(rnr++, base, limit, XN_EXEC_OK, AP_RO_PRIV_UNPRIV);
-
-    /* NSPM PSP */
-    base = (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-    limit = (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
-
-    configure_mpu(rnr++, base, limit, XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
 
     /* RO region */
     base = (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base);

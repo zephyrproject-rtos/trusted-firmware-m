@@ -23,8 +23,6 @@ REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
 
 #ifdef TFM_SP_META_PTR_ENABLE
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
@@ -319,24 +317,6 @@ enum tfm_hal_status_t mpu_init_cfg(void)
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
     region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_OK;
-
-    err = mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg);
-
-    if (err != MPU_ARMV8M_OK) {
-        return TFM_HAL_ERROR_GENERIC;
-    }
-
-    /* NSPM PSP */
-    region_cfg.region_nr = n_configured_regions++;
-
-    region_cfg.region_base =
-            (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-    region_cfg.region_limit =
-            (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
-    region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-    region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-    region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
-    region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
 
     err = mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg);
 

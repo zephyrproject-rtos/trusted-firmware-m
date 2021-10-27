@@ -46,7 +46,6 @@ REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$ZI$$Limit);
 
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
 
 REGION_DECLARE(Image$$, ER_VENEER, $$Limit);
 
@@ -65,22 +64,6 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         FLOW_CTRL_MPU_S_EN_R0,
         FLOW_STEP_MPU_S_CH_R0,
         FLOW_CTRL_MPU_S_CH_R0,
-#endif /* FLOW_CONTROL */
-    },
-    /* TFM Core unprivileged data region */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base),
-        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-        MPU_ARMV8M_XN_EXEC_NEVER,
-        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
-#ifdef FLOW_CONTROL
-        FLOW_STEP_MPU_S_EN_R1,
-        FLOW_CTRL_MPU_S_EN_R1,
-        FLOW_STEP_MPU_S_CH_R1,
-        FLOW_CTRL_MPU_S_CH_R1,
 #endif /* FLOW_CONTROL */
     },
     /* TFM_Core privileged code region   */

@@ -150,18 +150,15 @@ SECTIONS
         *libtfm_spm*:*(.rodata*)
     } > FLASH
     /* unpriv data is placed 1st */
+# if !defined(TFM_PSA_API)
     /* PSP is unprivileged in single-core topology */
     .psp_stack : ALIGN(32)
     {
-# if !defined(TFM_PSA_API)
         . += (__psp_stack_size__ - 0x8); // reserve space for stack seal (8 bytes)
-# else
-        . += (__psp_stack_size__);
-# endif
     } > RAM
     Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
     Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-# if !defined(TFM_PSA_API)
+
     .psp_stack_seal_res :
     {
         . += 0x8;

@@ -65,8 +65,6 @@ REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
 #ifdef TFM_SP_META_PTR_ENABLE
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
@@ -91,16 +89,6 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
-    },
-    /* NSPM PSP */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Limit),
-        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-        MPU_ARMV8M_XN_EXEC_NEVER,
-        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
         MPU_ARMV8M_SH_NONE
     },
     /* RO region */

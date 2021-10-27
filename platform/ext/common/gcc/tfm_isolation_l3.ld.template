@@ -325,14 +325,6 @@ SECTIONS
     /* Position tag */
     Image$$PT_PRIV_RWZI_END$$Base = .;
 
-    /* PSP is unprivileged in single-core topology */
-    .psp_stack : ALIGN(32)
-    {
-        . += (__psp_stack_size__);
-    } > RAM
-    Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-
     /**** APPLICATION RoT DATA start here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
