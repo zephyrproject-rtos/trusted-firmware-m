@@ -17,6 +17,7 @@
 
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
 
+__section(".psa_interface_thread_call")
 __naked static uint32_t psa_interface_unified_abi(uint32_t r0)
 {
     __asm volatile(
@@ -30,6 +31,7 @@ __naked static uint32_t psa_interface_unified_abi(uint32_t r0)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked uint32_t psa_framework_version_thread(void)
 {
     __asm volatile(
@@ -45,6 +47,7 @@ __naked uint32_t psa_framework_version_thread(void)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked uint32_t psa_version_thread(uint32_t sid)
 {
     __asm volatile(
@@ -60,6 +63,7 @@ __naked uint32_t psa_version_thread(uint32_t sid)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked psa_handle_t psa_connect_thread(uint32_t sid, uint32_t version)
 {
     __asm volatile(
@@ -75,6 +79,7 @@ __naked psa_handle_t psa_connect_thread(uint32_t sid, uint32_t version)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked psa_status_t tfm_psa_call_pack_thread(psa_handle_t handle,
                                               uint32_t ctrl_param,
                                               const psa_invec *in_vec,
@@ -93,6 +98,7 @@ __naked psa_status_t tfm_psa_call_pack_thread(psa_handle_t handle,
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_close_thread(psa_handle_t handle)
 {
     __asm volatile(
@@ -108,6 +114,7 @@ __naked void psa_close_thread(psa_handle_t handle)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked psa_signal_t psa_wait_thread(psa_signal_t signal_mask,
                                      uint32_t timeout)
 {
@@ -124,6 +131,7 @@ __naked psa_signal_t psa_wait_thread(psa_signal_t signal_mask,
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked psa_status_t psa_get_thread(psa_signal_t signal, psa_msg_t *msg)
 {
     __asm volatile(
@@ -139,6 +147,7 @@ __naked psa_status_t psa_get_thread(psa_signal_t signal, psa_msg_t *msg)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_set_rhandle_thread(psa_handle_t msg_handle, void *rhandle)
 {
     __asm volatile(
@@ -148,11 +157,12 @@ __naked void psa_set_rhandle_thread(psa_handle_t msg_handle, void *rhandle)
         "push   {r0-r4, lr}                                 \n"
         "ldr    r0, =%a0                                    \n"
         "b      %a1                                         \n"
-        :: "i" (psa_set_rhandle_thread),
+        :: "i" (tfm_spm_partition_psa_set_rhandle),
            "i" (psa_interface_unified_abi)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked size_t psa_read_thread(psa_handle_t msg_handle, uint32_t invec_idx,
                                void *buffer, size_t num_bytes)
 {
@@ -169,6 +179,7 @@ __naked size_t psa_read_thread(psa_handle_t msg_handle, uint32_t invec_idx,
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked size_t psa_skip_thread(psa_handle_t msg_handle,
                                uint32_t invec_idx, size_t num_bytes)
 {
@@ -185,6 +196,7 @@ __naked size_t psa_skip_thread(psa_handle_t msg_handle,
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_write_thread(psa_handle_t msg_handle, uint32_t outvec_idx,
                               const void *buffer, size_t num_bytes)
 {
@@ -201,6 +213,7 @@ __naked void psa_write_thread(psa_handle_t msg_handle, uint32_t outvec_idx,
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_reply_thread(psa_handle_t msg_handle, psa_status_t status)
 {
     __asm volatile(
@@ -216,6 +229,7 @@ __naked void psa_reply_thread(psa_handle_t msg_handle, psa_status_t status)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_notify_thread(int32_t partition_id)
 {
     __asm volatile(
@@ -231,6 +245,7 @@ __naked void psa_notify_thread(int32_t partition_id)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_clear_thread(void)
 {
     __asm volatile(
@@ -246,6 +261,7 @@ __naked void psa_clear_thread(void)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_eoi_thread(psa_signal_t irq_signal)
 {
     __asm volatile(
@@ -261,6 +277,7 @@ __naked void psa_eoi_thread(psa_signal_t irq_signal)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_panic_thread(void)
 {
     __asm volatile(
@@ -276,6 +293,7 @@ __naked void psa_panic_thread(void)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked psa_irq_status_t psa_irq_disable_thread(psa_signal_t irq_signal)
 {
     __asm volatile(
@@ -291,6 +309,7 @@ __naked psa_irq_status_t psa_irq_disable_thread(psa_signal_t irq_signal)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_irq_enable_thread(psa_signal_t irq_signal)
 {
     __asm volatile(
@@ -306,6 +325,7 @@ __naked void psa_irq_enable_thread(psa_signal_t irq_signal)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked void psa_reset_signal_thread(psa_signal_t irq_signal)
 {
     __asm volatile(
@@ -321,6 +341,7 @@ __naked void psa_reset_signal_thread(psa_signal_t irq_signal)
     );
 }
 
+__section(".psa_interface_thread_call")
 __naked uint32_t psa_rot_lifecycle_state_thread(void)
 {
     __asm volatile(
