@@ -45,7 +45,8 @@
 #define EXC_NUM_SVCALL                          (11)
 #define EXC_NUM_PENDSV                          (14)
 
-#define VTOR_BASE                       (0xE000ED08)
+#define ICSR_ADDR                       (0xE000ED04)
+#define VTOR_ADDR                       (0xE000ED08)
 
 /* Disable NS exceptions by setting NS PRIMASK to 1 */
 #define TFM_NS_EXC_DISABLE()    __TZ_set_PRIMASK_NS(1)

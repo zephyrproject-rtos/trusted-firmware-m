@@ -7,14 +7,14 @@
 
 #include <inttypes.h>
 #include "compiler_ext_defs.h"
+#include "exception_info.h"
 #include "spm_ipc.h"
+#include "svc_num.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
-#include "exception_info.h"
 #include "tfm_secure_api.h"
-#include "spm_ipc.h"
-#include "svc_num.h"
+#include "tfm_svcalls.h"
 #include "utilities.h"
 
 #if !defined(__ARM_ARCH_8M_BASE__)
@@ -22,7 +22,22 @@
 #endif
 
 /* Delcaraction flag to control the scheduling logic in PendSV. */
-static uint32_t pendsv_idling = EXC_RETURN_SECURE_STACK;
+__used static uint32_t pendsv_idling = EXC_RETURN_SECURE_STACK;
+
+/* IAR Specific */
+#if defined(__ICCARM__)
+
+#pragma required = do_schedule
+#pragma required = pendsv_idling
+#pragma required = tfm_core_svc_handler
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+#pragma required = spcall_execute_c
+
+#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+
+#endif
 
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
 
@@ -45,11 +60,11 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   mov    sp, r2                               \n"
         "   msr    psplim, r3                           \n"
         "v8b_lock_sched:                                \n"/*To lock sched  */
-        "   ldr    r2, =%a1                             \n"
+        "   ldr    r2, =pendsv_idling                   \n"
         "   movs   r3, #0x0                             \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
-        "   bl     %a0                                  \n"
+        "   bl     spcall_execute_c                     \n"
         "   cpsid  i                                    \n"
         "   cmp    r4, #0                               \n"
         "   beq    v8b_release_sched                    \n"
@@ -58,22 +73,15 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   mov    sp, r4                               \n"
         "   msr    psplim, r5                           \n"
         "v8b_release_sched:                             \n"
-        "   ldr    r2, =%a1                             \n"/*To unlock sched*/
-        "   movs   r3, %2                               \n"
+        "   ldr    r2, =pendsv_idling                   \n"/*To unlock sched*/
+        "   movs   r3, #"M2S(EXC_RETURN_SECURE_STACK)"  \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
         "   pop    {r4-r6, pc}                          \n"
-        : : "i" (spcall_execute_c),
-            "i" (&pendsv_idling),
-            "I" (EXC_RETURN_SECURE_STACK)
     );
 }
 
 #endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
-
-#if defined(__ICCARM__)
-#pragma required = do_schedule
-#endif
 
 __attribute__((naked)) void PendSV_Handler(void)
 {
@@ -81,13 +89,13 @@ __attribute__((naked)) void PendSV_Handler(void)
 #if !defined(__ICCARM__)
         ".syntax unified                    \n"
 #endif
-        "   ldr     r0, =%a1                \n"
+        "   ldr     r0, =pendsv_idling      \n"
         "   ldr     r0, [r0]                \n"
         "   mov     r1, lr                  \n"
         "   tst     r0, r1                  \n" /* Was NS interrupted by S? */
         "   beq     v8b_pendsv_exit         \n" /* Yes, do not schedule */
         "   push    {r0, lr}                \n" /* Save dummy R0, LR */
-        "   bl      %a0                     \n"
+        "   bl      do_schedule             \n"
         "   pop     {r2, r3}                \n"
         "   mov     lr, r3                  \n"
         "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
@@ -119,8 +127,6 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   msr     psplim, r3              \n"
         "v8b_pendsv_exit:                   \n"
         "   bx      lr                      \n"
-        : : "i" (do_schedule),
-            "i" (&pendsv_idling)
     );
 }
 
@@ -146,12 +152,6 @@ __attribute__((naked)) void HardFault_Handler(void)
 
     __ASM volatile("b    .");
 }
-
-#if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
-                              uint32_t *psp);
-#pragma required = tfm_core_svc_handler
-#endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {

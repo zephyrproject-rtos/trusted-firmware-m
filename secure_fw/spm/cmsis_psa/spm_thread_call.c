@@ -31,6 +31,7 @@ struct spcall_abi_frame_t {
 typedef uint32_t (*target_fn_t)(uint32_t a0, uint32_t a1,
                                 uint32_t a2, uint32_t a3);
 
+__used
 void spcall_execute_c(uintptr_t fn_addr, uintptr_t frame_addr)
 {
     struct spcall_abi_frame_t *p_frame =
@@ -40,6 +41,7 @@ void spcall_execute_c(uintptr_t fn_addr, uintptr_t frame_addr)
                                          p_frame->a2, p_frame->a3);
 }
 
+__used
 void spm_interface_thread_dispatcher(uintptr_t fn_addr,
                                      uintptr_t frame_addr,
                                      uint32_t  switch_stack)

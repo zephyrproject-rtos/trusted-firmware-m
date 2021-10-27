@@ -16,7 +16,7 @@ __attribute__((naked)) void tfm_arch_free_msp_and_exc_ret(uint32_t exc_return)
         ".syntax unified                  \n"
 #endif
         "MOV     lr, r0                   \n"
-        "LDR     r0, ="M2S(VTOR_BASE)"    \n" /* VTOR */
+        "LDR     r0, ="M2S(VTOR_ADDR)"    \n" /* VTOR */
         "LDR     r0, [r0]                 \n" /* MSP address */
         "LDR     r0, [r0]                 \n" /* MSP */
         "SUBS    r0, #8                   \n" /* Exclude stack seal */
@@ -38,11 +38,10 @@ __attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
 #ifndef __ICCARM__
         ".syntax unified                                 \n"
 #endif
-        "ldr     r0, =%a0                                \n"
+        "ldr     r0, ="M2S(ICSR_ADDR)"                   \n"
         "ldr     r1, ="M2S(SCB_ICSR_PENDSVSET_Msk)"      \n"
         "str     r1, [r0, #0]                            \n"
         "bx      lr                                      \n"
-        :: "i" (&(SCB->ICSR))
     );
 }
 
