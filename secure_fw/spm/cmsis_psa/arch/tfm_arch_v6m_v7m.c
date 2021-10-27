@@ -76,6 +76,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         ".syntax unified                    \n"
 #endif
         "   ldr     r0, =%a1                \n"
+        "   ldr     r0, [r0]                \n"
         "   cmp     r0, #0                  \n"
         "   bne     v6v7_pendsv_exit        \n"
         "   push    {r0, lr}                \n"
