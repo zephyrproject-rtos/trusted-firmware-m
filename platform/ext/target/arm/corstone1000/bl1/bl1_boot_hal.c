@@ -598,9 +598,13 @@ int32_t boot_platform_init(void)
 {
     int32_t result;
 
+#if !(PLATFORM_IS_FVP)
     setup_mpu();
+#endif
     setup_se_firewall();
+#if !(PLATFORM_IS_FVP)
     setup_host_firewall();
+#endif
 
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {

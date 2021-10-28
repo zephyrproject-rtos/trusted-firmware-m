@@ -19,7 +19,13 @@ set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to us
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")
 set(CRYPTO_NV_SEED                      OFF        CACHE BOOL     "Use stored NV seed to provide entropy")
 set(NS                                  FALSE      CACHE BOOL     "Whether to build NS app")
-set(PLATFORM_DEFAULT_OTP                FALSE      CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
+
+# FVP is not integrated/tested with CC312.
+if (${PLATFORM_IS_FVP})
+  set(PLATFORM_DEFAULT_OTP              TRUE      CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
+else()
+  set(PLATFORM_DEFAULT_OTP              FALSE      CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
+endif()
 
 # External dependency on OpenAMP and Libmetal
 set(LIBMETAL_SRC_PATH                   "DOWNLOAD"  CACHE PATH      "Path to Libmetal (or DOWNLOAD to fetch automatically")
