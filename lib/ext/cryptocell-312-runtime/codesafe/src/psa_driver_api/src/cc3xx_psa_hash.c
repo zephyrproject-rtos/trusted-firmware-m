@@ -282,7 +282,7 @@ psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation, uint8_t *hash,
 psa_status_t cc3xx_hash_abort(cc3xx_hash_operation_t *operation)
 {
     /* The object has not been used yet, there is nothing to do */
-    if (operation->mode == 0) {
+    if (operation->mode == HASH_NULL_MODE || operation->mode == HASH_RESERVE32B) {
         return PSA_SUCCESS;
     }
 
