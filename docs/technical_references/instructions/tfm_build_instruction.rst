@@ -94,17 +94,20 @@ Build type is controlled by the ``CMAKE_BUILD_TYPE`` variable. The possible
 types are:
 
  - ``Debug``
- - ``Relwithdebinfo``
+ - ``RelWithDebInfo``
  - ``Release``
- - ``Minsizerel``
+ - ``MinSizeRel``
 
 ``Release`` is default.
 
-Both ``Debug`` and ``Relwithdebinfo`` will include debug symbols in the output
-files. ``Relwithdebinfo``, ``Release`` and ``Minsizerel`` have optimization
-turned on and hence will produce smaller, faster code. ``Minsizerel`` will
-produce the smallest code, and hence is often a good idea on RAM or flash
-constrained systems.
+Debug symbols are added by default to all builds, but can be removed
+from ``Release`` and ``MinSizeRel`` builds by setting
+``TFM_DEBUG_SYMBOLS`` to ``OFF``.
+
+``RelWithDebInfo``, ``Release`` and ``MinSizeRel`` all have different
+optimizations turned on and hence will produce smaller, faster code
+than ``Debug``. ``MinSizeRel`` will produce the smallest code, and
+hence is often a good idea on RAM or flash constrained systems.
 
 Other cmake parameters
 ----------------------
