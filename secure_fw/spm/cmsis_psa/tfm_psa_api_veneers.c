@@ -150,12 +150,6 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
         "   svc    "M2S(TFM_SVC_PSA_PANIC)"                   \n"
         "   b      .                                          \n"
 #endif
-            : :
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
-        "i" (tfm_spm_client_psa_connect),
-        "I" (TFM_SVC_PSA_PANIC),
-        "i" (spm_interface_thread_dispatcher)
-#endif
     );
 }
 
@@ -198,12 +192,6 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
         "   svc    "M2S(TFM_SVC_PSA_PANIC)"                   \n"
         "   b      .                                          \n"
 #endif
-            : :
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
-        "i" (tfm_spm_client_psa_call),
-        "I" (TFM_SVC_PSA_PANIC),
-        "i" (spm_interface_thread_dispatcher)
-#endif
     );
 }
 
@@ -241,6 +229,5 @@ void tfm_psa_close_veneer(psa_handle_t handle)
         "   svc    "M2S(TFM_SVC_PSA_PANIC)"                   \n"
         "   b      .                                          \n"
 #endif
-            : :
     );
 }
