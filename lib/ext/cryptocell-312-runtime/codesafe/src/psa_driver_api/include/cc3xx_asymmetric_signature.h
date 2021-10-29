@@ -5,10 +5,14 @@
  *
  */
 
-#ifndef CC3XX_PSA_ASYMMETRIC_SIGNATURE_H
-#define CC3XX_PSA_ASYMMETRIC_SIGNATURE_H
+#ifndef CC3XX_ASYMMETRIC_SIGNATURE_H
+#define CC3XX_ASYMMETRIC_SIGNATURE_H
 
 #include "psa/crypto.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 psa_status_t cc3xx_sign_message(const psa_key_attributes_t *attributes,
                                 const uint8_t *key, size_t key_length,
@@ -34,5 +38,7 @@ psa_status_t cc3xx_verify_hash(const psa_key_attributes_t *attributes,
                                psa_algorithm_t alg, const uint8_t *hash,
                                size_t hash_length, const uint8_t *signature,
                                size_t signature_length);
-
-#endif /* CC3XX_PSA_ASYMMETRIC_SIGNATURE_H */
+#ifdef __cplusplus
+}
+#endif
+#endif /* CC3XX_ASYMMETRIC_SIGNATURE_H */

@@ -15,7 +15,7 @@
 #include <psa/crypto.h>
 
 #include "cc3xx_internal_chacha20.h"
-#include "internal/cc3xx_psa_aead_chacha20_poly1305.h"
+#include "cc3xx_internal_chacha20_poly1305.h"
 
 static psa_status_t chacha20_poly1305_crypt(const unsigned char key[32],
                                             const unsigned char nonce[12],
@@ -151,7 +151,7 @@ cleanup:
 }
 
 /* TODO: Figure out best strategy for cc310 vs cc312 */
-psa_status_t cc3xx_psa_aead_encrypt_chacha20_poly1305(
+psa_status_t cc3xx_encrypt_chacha20_poly1305(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,
@@ -178,7 +178,7 @@ psa_status_t cc3xx_psa_aead_encrypt_chacha20_poly1305(
     return status;
 }
 
-psa_status_t cc3xx_psa_aead_decrypt_chacha20_poly1305(
+psa_status_t cc3xx_decrypt_chacha20_poly1305(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,

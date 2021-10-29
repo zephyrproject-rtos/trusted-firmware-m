@@ -10,6 +10,10 @@
 
 #include "cc3xx_crypto_primitives.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief    Initialize the specified AES context.
  */
@@ -47,4 +51,7 @@ psa_status_t cc3xx_aes_crypt(
         const uint8_t *input,
         uint8_t *output);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* CC3XX_INTERNAL_AES_H */

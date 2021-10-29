@@ -5,7 +5,9 @@
  *
  */
 
-#include "cc3xx_psa_cipher.h"
+#include "cc3xx_cipher.h"
+#include "cc3xx_internal_aes.h"
+#include "cc3xx_internal_chacha20.h"
 #include "cc_pal_mem.h"
 
 /* FixMe: implement pkcs#7 padding in HW
@@ -101,7 +103,6 @@ static psa_status_t cipher_setup(
 
         break;
     default:
-        // Software fallback
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -375,7 +376,6 @@ psa_status_t cc3xx_cipher_update(
 
         break;
     default:
-        // Software fallback
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -448,7 +448,6 @@ psa_status_t cc3xx_cipher_finish(
     case PSA_KEY_TYPE_CHACHA20:
         return PSA_SUCCESS;
     default:
-        // Software fallback
         ret = PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -465,7 +464,6 @@ psa_status_t cc3xx_cipher_abort(cc3xx_cipher_operation_t *operation)
         cc3xx_chacha20_free(&operation->chacha_ctx);
         return PSA_ERROR_NOT_SUPPORTED;
     default:
-        // Software fallback
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -474,7 +472,7 @@ psa_status_t cc3xx_cipher_abort(cc3xx_cipher_operation_t *operation)
     return PSA_SUCCESS;
 }
 
-psa_status_t cc3xx_psa_cipher_encrypt(
+psa_status_t cc3xx_cipher_encrypt(
         const psa_key_attributes_t *attributes,
         const uint8_t *key_buffer,
         size_t key_buffer_size,
@@ -545,7 +543,7 @@ psa_status_t cc3xx_psa_cipher_encrypt(
     return ret;
 }
 
-psa_status_t cc3xx_psa_cipher_decrypt(
+psa_status_t cc3xx_cipher_decrypt(
         const psa_key_attributes_t *attributes,
         const uint8_t *key_buffer,
         size_t key_buffer_size,

@@ -11,7 +11,7 @@
 #include "cc_rng_plat.h"
 #include "llf_rnd_trng.h"
 
-#include "cc3xx_psa_entropy.h"
+#include "cc3xx_entropy.h"
 #include "psa/crypto.h"
 
 psa_status_t cc3xx_get_entropy(uint32_t flags, size_t *estimate_bits,

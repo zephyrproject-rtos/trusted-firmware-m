@@ -5,14 +5,14 @@
  *
  */
 
-#ifndef HASH_COMMON_H
-#define HASH_COMMON_H
+#ifndef CC3XX_HASH_H
+#define CC3XX_HASH_H
 
 #include "cc3xx_crypto_primitives.h"
 #include "psa/crypto.h"
 
-#if defined(MBEDTLS_CONFIG_FILE)
-#include MBEDTLS_CONFIG_FILE
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 psa_status_t cc3xx_hash_setup(cc3xx_hash_operation_t *operation,
@@ -32,4 +32,7 @@ psa_status_t cc3xx_hash_abort(cc3xx_hash_operation_t *operation);
 psa_status_t cc3xx_hash_compute(psa_algorithm_t alg, const uint8_t *input,
                                 size_t input_length, uint8_t *hash,
                                 size_t hash_size, size_t *hash_length);
-#endif /*HASH_COMMON_H */
+#ifdef __cplusplus
+}
+#endif
+#endif /* CC3XX_HASH_H */

@@ -5,17 +5,17 @@
  *
  */
 
-#ifndef CC3XX_DRIVER_H
-#define CC3XX_DRIVER_H
+#ifndef CC3XX_H
+#define CC3XX_H
 
-#include "cc3xx_psa_cipher.h"
-#include "cc3xx_psa_entropy.h"
-#include "cc3xx_psa_hash.h"
-#include "cc3xx_psa_mac.h"
-#include "cc3xx_psa_aead.h"
-#include "cc3xx_psa_key_agreement.h"
-#include "cc3xx_psa_key_generation.h"
-#include "cc3xx_psa_asymmetric_signature.h"
-#include "cc3xx_psa_asymmetric_encryption.h"
+#include "cc3xx_cipher.h"
+#include "cc3xx_entropy.h"
+#include "cc3xx_hash.h"
+#include "cc3xx_mac.h"
+#include "cc3xx_aead.h"
+#include "cc3xx_key_agreement.h"
+#include "cc3xx_key_generation.h"
+#include "cc3xx_asymmetric_signature.h"
+#include "cc3xx_asymmetric_encryption.h"
 
-#endif /* CC3XX_DRIVER_H */
+#endif /* CC3XX_H */

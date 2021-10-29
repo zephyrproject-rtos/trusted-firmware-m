@@ -12,6 +12,10 @@
 
 #include "cc_ecpki_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Context structure required for Weierstrass curves (PSA_ECC_FAMILY_SECT_XX)
  */
@@ -55,4 +59,7 @@ psa_status_t cc3xx_ecdh_calc_secret_mont(
         const uint8_t *publ_key, size_t publ_key_size,
         uint8_t *secret, size_t *secret_size);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* CC3XX_INTERNAL_ECDH_H */

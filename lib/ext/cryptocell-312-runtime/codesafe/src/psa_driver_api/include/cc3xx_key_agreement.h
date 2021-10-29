@@ -5,13 +5,14 @@
  *
  */
 
-#ifndef CC3XX_PSA_KEY_AGREEMENT_H
-#define CC3XX_PSA_KEY_AGREEMENT_H
+#ifndef CC3XX_KEY_AGREEMENT_H
+#define CC3XX_KEY_AGREEMENT_H
 
 #include "psa/crypto.h"
 
-#include "cc3xx_internal_ecc_util.h"
-#include "cc3xx_internal_ecdh.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 psa_status_t cc3xx_key_agreement(
         const psa_key_attributes_t *attributes,
@@ -20,4 +21,7 @@ psa_status_t cc3xx_key_agreement(
         uint8_t *output, size_t output_size, size_t *output_length,
         psa_algorithm_t alg);
 
-#endif /* CC3XX_PSA_KEY_AGREEMENT_H */
+#ifdef __cplusplus
+}
+#endif
+#endif /* CC3XX_KEY_AGREEMENT_H */

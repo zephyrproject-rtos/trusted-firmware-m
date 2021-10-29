@@ -5,7 +5,7 @@
  *
  */
 
-#include "cc3xx_psa_asymmetric_encryption.h"
+#include "cc3xx_asymmetric_encryption.h"
 #include "cc3xx_internal_rsa_util.h"
 #include "cc3xx_internal_hash_util.h"
 #include "cc3xx_internal_drbg_util.h"

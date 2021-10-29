@@ -13,11 +13,16 @@
 #include "psa/crypto_types.h"
 
 #include "hash_driver.h"
-
 #include "aes_driver.h"
 #include "chacha_driver.h"
 
-typedef HashContext_t cc3xx_hash_operation_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct {
+    HashContext_t ctx;
+} cc3xx_hash_operation_t;
 
 typedef struct {
     psa_algorithm_t alg;
@@ -47,4 +52,7 @@ typedef struct {
     uint8_t opad[PSA_HMAC_MAX_HASH_BLOCK_SIZE];
 } cc3xx_mac_operation_t;
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* CC3XX_CRYPTO_PRIMITIVES_H */

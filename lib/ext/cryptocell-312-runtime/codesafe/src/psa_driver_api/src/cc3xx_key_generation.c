@@ -5,12 +5,12 @@
  *
  */
 
-#include "cc3xx_psa_key_generation.h"
+#include "cc3xx_key_generation.h"
 #include "cc3xx_internal_asn1_util.h"
 #include "cc3xx_internal_drbg_util.h"
 #include "cc3xx_internal_ecc_util.h"
 #include "cc3xx_internal_rsa_util.h"
-#include "cc3xx_psa_hash.h"
+#include "cc3xx_hash.h"
 #include "psa/crypto.h"
 
 #include "cc_common.h"
@@ -191,7 +191,7 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
     pCcPrivKey->PriveKeyDb.NonCrt.eSizeInBits = pCcPubKey->eSizeInBits;
     pCcPrivKey->PriveKeyDb.NonCrt.e[0] = pubExp;
 
-    /* .....   calculate primes (P, Q) and nonCRT key (N, D) ..... */
+    /* calculate primes (P, Q) and nonCRT key (N, D) */
     do {
         cc_err = RsaGenPandQ(&rndContext, key_bits, pubExpSizeBits,
                              (uint32_t *)&pubExp, pKeyGenData);
@@ -219,7 +219,8 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
     }
 
     /* The NonCrt.d will be discarded when we caclulate the Crt parameterers
-     * so we need to keep it */
+     * so we need to keep it
+     */
     CC_PalMemCopy(d_buff, pCcPrivKey->PriveKeyDb.NonCrt.d, keySizeBytes);
 
     /* calculate Barrett tags for P,Q and set into context */
@@ -259,7 +260,7 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
     }
 
 end:
-    /* zeroing temp buffers  */
+    /* zeroing temp buffers */
     CC_PalMemSetZero(d_buff, sizeof(PSA_BITS_TO_BYTES(key_bits)));
     CC_PalMemSetZero(pCcPrivKey, sizeof(CCRsaPrivKey_t));
     CC_PalMemSetZero(pCcPubKey, sizeof(CCRsaPubKey_t));
@@ -323,7 +324,8 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
     if (PSA_KEY_TYPE_IS_ECC(key_type)) {
         if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
             /* Revert to software driver when the requested key is a
-             * public key (no conversion needed) */
+             * public key (no conversion needed)
+             */
             err = PSA_ERROR_NOT_SUPPORTED;
 
         } else {
@@ -345,7 +347,8 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
             }
 
             *data_length = data_size;
-            err = cc3xx_ecc_cc_publ_to_psa_publ(&pUserPublKey, data, data_length);
+            err = cc3xx_ecc_cc_publ_to_psa_publ(&pUserPublKey,
+                                                data, data_length);
             if (err != PSA_SUCCESS) {
                 return err;
             }
@@ -354,7 +357,8 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
 
         if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
             /* Revert to software driver when the requested key is a
-             * public key (no conversion needed) */
+             * public key (no conversion needed)
+             */
             err = PSA_ERROR_NOT_SUPPORTED;
         } else {
             err = cc3xx_rsa_psa_priv_to_psa_publ(

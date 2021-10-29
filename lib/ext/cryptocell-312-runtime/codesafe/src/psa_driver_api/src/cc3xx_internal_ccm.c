@@ -14,8 +14,7 @@
 #include "cc_pal_mem.h"
 #include "cc_pal_types.h"
 
-/* PSA new */
-#include "internal/cc3xx_psa_aead_ccm.h"
+#include "cc3xx_internal_ccm.h"
 #include <psa/crypto.h>
 
 /************************ From "mbedtls_ccm_common" *************/
@@ -638,7 +637,7 @@ cleanup:
     return status;
 }
 
-psa_status_t cc3xx_psa_aead_encrypt_ccm(
+psa_status_t cc3xx_encrypt_ccm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,
@@ -662,7 +661,7 @@ psa_status_t cc3xx_psa_aead_encrypt_ccm(
                           tag_length, CRYPTO_DIRECTION_ENCRYPT, ccm_mode);
 }
 
-psa_status_t cc3xx_psa_aead_decrypt_ccm(
+psa_status_t cc3xx_decrypt_ccm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,

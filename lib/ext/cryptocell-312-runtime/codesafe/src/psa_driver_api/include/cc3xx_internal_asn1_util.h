@@ -25,6 +25,10 @@
 #include "cc_ecpki_local.h"
 #include "pka_ec_wrst.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \name DER constants
  * These constants comply with the DER encoded ASN.1 type tags.
@@ -160,4 +164,7 @@ psa_status_t cc3xx_asn1_get_len(unsigned char **p, const unsigned char *end,
  */
 psa_status_t cc3xx_asn1_get_int(unsigned char **p, const unsigned char *end, int *val);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* CC3XX_INTERNAL_ASN1_UTIL_H */

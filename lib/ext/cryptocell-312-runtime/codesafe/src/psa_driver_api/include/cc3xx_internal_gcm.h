@@ -5,15 +5,16 @@
  *
  */
 
-#ifndef CC3XX_PSA_DRIVER_AEAD_CHACHA20_POLY1305_H
-#define CC3XX_PSA_DRIVER_AEAD_CHACHA20_POLY1305_H
+#ifndef CC3XX_INTERNAL_GCM_H
+#define CC3XX_INTERNAL_GCM_H
 
-#include <psa/crypto_driver_common.h>
+#include <psa/crypto.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-psa_status_t cc3xx_psa_aead_encrypt_chacha20_poly1305(
+
+psa_status_t cc3xx_encrypt_gcm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,
@@ -21,7 +22,7 @@ psa_status_t cc3xx_psa_aead_encrypt_chacha20_poly1305(
     size_t plaintext_length, uint8_t *ciphertext, size_t ciphertext_size,
     size_t *ciphertext_length);
 
-psa_status_t cc3xx_psa_aead_decrypt_chacha20_poly1305(
+psa_status_t cc3xx_decrypt_gcm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,
@@ -33,4 +34,4 @@ psa_status_t cc3xx_psa_aead_decrypt_chacha20_poly1305(
 }
 #endif
 
-#endif /* CC3XX_PSA_DRIVER_AEAD_CHACHA20_POLY1305_H */
+#endif /* CC3XX_INTERNAL_GCM_H */

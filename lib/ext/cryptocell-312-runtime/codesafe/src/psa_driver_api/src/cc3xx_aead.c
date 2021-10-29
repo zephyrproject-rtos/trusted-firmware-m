@@ -11,16 +11,59 @@
 #include "cc_pal_types.h"
 #include <psa/crypto.h>
 
-#include "cc3xx_psa_aead.h"
-#include "internal/cc3xx_psa_aead_ccm.h"
-#include "internal/cc3xx_psa_aead_chacha20_poly1305.h"
-#include "internal/cc3xx_psa_aead_gcm.h"
+#include "cc3xx_aead.h"
+#include "cc3xx_internal_ccm.h"
+#include "cc3xx_internal_chacha20_poly1305.h"
+#include "cc3xx_internal_gcm.h"
 
-/*
- * NOTE: The cc3xx chachapoly impl assumes 256-bit keys.
- * Figure out if this is a limitation- if so we must
- * remember to restrict this in the relevant .json file.
- */
+static psa_status_t check_alg(psa_algorithm_t alg, psa_algorithm_t *ref_alg)
+{
+    psa_algorithm_t default_alg = PSA_ALG_AEAD_WITH_DEFAULT_LENGTH_TAG(alg);
+    size_t tag_length = PSA_ALG_AEAD_GET_TAG_LENGTH(alg);
+    size_t valid_tag_lengths[7];
+
+    *ref_alg = default_alg;
+    switch (default_alg) {
+    case PSA_ALG_CCM:
+        valid_tag_lengths[0] = 4;
+        valid_tag_lengths[1] = 6;
+        valid_tag_lengths[2] = 8;
+        valid_tag_lengths[3] = 10;
+        valid_tag_lengths[4] = 12;
+        valid_tag_lengths[5] = 14;
+        valid_tag_lengths[6] = 16;
+        break;
+    case PSA_ALG_GCM:
+        valid_tag_lengths[0] = 4;
+        valid_tag_lengths[1] = 8;
+        valid_tag_lengths[2] = 12;
+        valid_tag_lengths[3] = 13;
+        valid_tag_lengths[4] = 14;
+        valid_tag_lengths[5] = 15;
+        valid_tag_lengths[6] = 16;
+        break;
+    case PSA_ALG_CHACHA20_POLY1305:
+        if (tag_length != 16) {
+            return PSA_ERROR_NOT_SUPPORTED;
+        }
+    default:
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    /* Cycle through all valid tag lengths for CCM or GCM */
+    uint32_t i;
+    for (i=0; i<7; i++) {
+        if (tag_length == valid_tag_lengths[i]) {
+            break;
+        }
+    }
+
+    if (i == 7) {
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    return PSA_SUCCESS;
+}
 
 psa_status_t
 cc3xx_aead_encrypt(const psa_key_attributes_t *attributes,
@@ -32,38 +75,31 @@ cc3xx_aead_encrypt(const psa_key_attributes_t *attributes,
                    size_t ciphertext_size, size_t *ciphertext_length)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_algorithm_t ref_alg;
 
-    /* TODO: What's the correct shortcut for "any CCM"/"any GCM" (for valid tag
-     * sizes)? */
-    switch (alg) {
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 4):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 6):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 8):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 10):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 12):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 14):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 16):
-        status = cc3xx_psa_aead_encrypt_ccm(
+    /* Validate the algorithm first */
+    status = check_alg(alg, &ref_alg);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    switch (ref_alg) {
+    case PSA_ALG_CCM:
+        status = cc3xx_encrypt_ccm(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, plaintext,
             plaintext_length, ciphertext, ciphertext_size, ciphertext_length);
         break;
 
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 4):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 8):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 12):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 13):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 14):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 15):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 16):
-        status = cc3xx_psa_aead_encrypt_gcm(
+    case PSA_ALG_GCM:
+        status = cc3xx_encrypt_gcm(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, plaintext,
             plaintext_length, ciphertext, ciphertext_size, ciphertext_length);
         break;
 
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CHACHA20_POLY1305, 16):
-        status = cc3xx_psa_aead_encrypt_chacha20_poly1305(
+    case PSA_ALG_CHACHA20_POLY1305:
+        status = cc3xx_encrypt_chacha20_poly1305(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, plaintext,
             plaintext_length, ciphertext, ciphertext_size, ciphertext_length);
@@ -88,36 +124,31 @@ psa_status_t cc3xx_aead_decrypt(const psa_key_attributes_t *attributes,
                                 size_t plaintext_size, size_t *plaintext_length)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_algorithm_t ref_alg;
 
-    switch (alg) {
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 4):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 6):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 8):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 10):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 12):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 14):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 16):
-        status = cc3xx_psa_aead_decrypt_ccm(
+    /* Validate the algorithm first */
+    status = check_alg(alg, &ref_alg);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    switch (ref_alg) {
+    case PSA_ALG_CCM:
+        status = cc3xx_decrypt_ccm(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, ciphertext,
             ciphertext_length, plaintext, plaintext_size, plaintext_length);
         break;
 
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 4):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 8):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 12):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 13):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 14):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 15):
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 16):
-        status = cc3xx_psa_aead_decrypt_gcm(
+    case PSA_ALG_GCM:
+        status = cc3xx_decrypt_gcm(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, ciphertext,
             ciphertext_length, plaintext, plaintext_size, plaintext_length);
         break;
 
-    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CHACHA20_POLY1305, 16):
-        status = cc3xx_psa_aead_decrypt_chacha20_poly1305(
+    case PSA_ALG_CHACHA20_POLY1305:
+        status = cc3xx_decrypt_chacha20_poly1305(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, ciphertext,
             ciphertext_length, plaintext, plaintext_size, plaintext_length);

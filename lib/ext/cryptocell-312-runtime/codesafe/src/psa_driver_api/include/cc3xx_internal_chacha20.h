@@ -10,6 +10,10 @@
 
 #include "cc3xx_crypto_primitives.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief   Initialize the specified ChaCha20 context.
  */
@@ -44,4 +48,7 @@ psa_status_t cc3xx_chacha20_update(
         const uint8_t *input,
         unsigned char *output);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* CC3XX_INTERNAL_CHACHA20_H */

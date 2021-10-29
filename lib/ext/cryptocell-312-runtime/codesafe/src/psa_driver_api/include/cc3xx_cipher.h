@@ -5,14 +5,15 @@
  *
  */
 
-#ifndef CC3XX_PSA_CIPHER_H
-#define CC3XX_PSA_CIPHER_H
+#ifndef CC3XX_CIPHER_H
+#define CC3XX_CIPHER_H
 
 #include "psa/crypto.h"
-
 #include "cc3xx_crypto_primitives.h"
-#include "cc3xx_internal_aes.h"
-#include "cc3xx_internal_chacha20.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 psa_status_t cc3xx_cipher_encrypt_setup(
         cc3xx_cipher_operation_t *operation,
@@ -42,7 +43,7 @@ psa_status_t cc3xx_cipher_finish(
 psa_status_t cc3xx_cipher_abort(
         cc3xx_cipher_operation_t *operation);
 
-psa_status_t cc3xx_psa_cipher_encrypt(
+psa_status_t cc3xx_cipher_encrypt(
         const psa_key_attributes_t *attributes,
         const uint8_t *key_buffer,
         size_t key_buffer_size,
@@ -53,7 +54,7 @@ psa_status_t cc3xx_psa_cipher_encrypt(
         size_t output_size,
         size_t *output_length);
 
-psa_status_t cc3xx_psa_cipher_decrypt(
+psa_status_t cc3xx_cipher_decrypt(
         const psa_key_attributes_t *attributes,
         const uint8_t *key_buffer,
         size_t key_buffer_size,
@@ -64,4 +65,7 @@ psa_status_t cc3xx_psa_cipher_decrypt(
         size_t output_size,
         size_t *output_length);
 
-#endif /* CC3XX_PSA_CIPHER_H */
+#ifdef __cplusplus
+}
+#endif
+#endif /* CC3XX_CIPHER_H */

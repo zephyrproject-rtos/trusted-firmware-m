@@ -25,6 +25,10 @@
 
 #include "cc_rsa_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Minimal and maximal size of RSA modulus in bits
  * According to FIPS 186-4 size in bits should be in range [1024...3072] */
 #if defined(ARCH_IS_CC310)
@@ -63,5 +67,7 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
 CCError_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
                                       size_t psa_pub_key_buffer_size,
                                       CCRsaUserPubKey_t *UserPubKey_ptr);
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* CC3XX_INTERNAL_RSA_UTIL_H */

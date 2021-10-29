@@ -5,10 +5,14 @@
  *
  */
 
-#ifndef CC3XX_PSA_KEY_GENERATION_H
-#define CC3XX_PSA_KEY_GENERATION_H
+#ifndef CC3XX_KEY_GENERATION_H
+#define CC3XX_KEY_GENERATION_H
 
 #include "psa/crypto.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
                                 uint8_t *key_buffer, size_t key_buffer_size,
@@ -18,5 +22,7 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
                                      const uint8_t *key_buffer,
                                      size_t key_buffer_size, uint8_t *data,
                                      size_t data_size, size_t *data_length);
-
-#endif /* CC3XX_PSA_KEY_GENERATION_H */
+#ifdef __cplusplus
+}
+#endif
+#endif /* CC3XX_KEY_GENERATION_H */

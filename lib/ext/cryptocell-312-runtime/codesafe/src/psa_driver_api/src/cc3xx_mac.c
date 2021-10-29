@@ -5,16 +5,12 @@
  *
  */
 
-#include "cc3xx_psa_mac.h"
-#include "cc3xx_psa_cipher.h"
-#include "cc3xx_psa_hash.h"
+#include "cc3xx_mac.h"
+#include "cc3xx_cipher.h"
+#include "cc3xx_hash.h"
 #include "aes_driver.h"
 #include "cc_pal_log.h"
 #include "cc_pal_mem.h"
-
-#if defined(MBEDTLS_CONFIG_FILE)
-#include MBEDTLS_CONFIG_FILE
-#endif
 
 /* SHA512 is not supported, this is the only size we will need */
 #define MD_MAX_SIZE 32
@@ -244,19 +240,17 @@ static psa_status_t hmac_setup(cc3xx_mac_operation_t *operation,
     cc3xx_hash_operation_t *hmac = &(operation->hmac);
 
     switch (hash_alg) {
-#if defined MBEDTLS_SHA1_C
+#ifdef CC3XX_CONFIG_SUPPORT_SHA1
     case PSA_ALG_SHA_1:
-        hmac->mode = HASH_SHA1;
+        hmac->ctx.mode = HASH_SHA1;
         break;
-#endif
-#if defined MBEDTLS_SHA256_C
+#endif /* CC3XX_CONFIG_SUPPORT_SHA1 */
     case PSA_ALG_SHA_224:
-        hmac->mode = HASH_SHA224;
+        hmac->ctx.mode = HASH_SHA224;
         break;
     case PSA_ALG_SHA_256:
-        hmac->mode = HASH_SHA256;
+        hmac->ctx.mode = HASH_SHA256;
         break;
-#endif
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -315,10 +309,12 @@ static psa_status_t hmac_finish(cc3xx_mac_operation_t *operation, uint8_t *mac,
     size_t hash_size  = 0;
     size_t block_size;
 
-    switch (hmac->mode) {
+    switch (hmac->ctx.mode) {
+#ifdef CC3XX_CONFIG_SUPPORT_SHA1
     case HASH_SHA1:
         hash_alg = PSA_ALG_SHA_1;
         break;
+#endif /* CC3XX_CONFIG_SUPPORT_SHA1 */
     case HASH_SHA224:
         hash_alg = PSA_ALG_SHA_224;
         break;

@@ -5,7 +5,7 @@
  *
  */
 
-#include "cc3xx_psa_hash.h"
+#include "cc3xx_hash.h"
 #include "cc_pal_log.h"
 #include "cc_pal_mem.h"
 
@@ -21,48 +21,51 @@
  * \brief  Update a hash operation
  *
  * In CC312, DMA (i.e. for hash module input ) needs access to physical and
- * continues memory. In order to assure the DMA can access the residue data saved
+ * contiguous memory. In order to assure the DMA can access the residue data saved
  * in the hashCtx, it is being to copied to a local stack variable. In case memory
  * is guaranteed to be DMAable, this copy can be removed, and hashCtx->prevData can
  * be used.
  */
-static psa_status_t hashUpdate(cc3xx_hash_operation_t *pHashUserCtx,
-                               uint8_t *pDataIn, size_t dataInSize)
+static psa_status_t hash_update(cc3xx_hash_operation_t *pHashUserCtx,
+                                uint8_t *pDataIn, size_t dataInSize)
 {
-    uint32_t rc       = 0;
+    uint32_t rc = 0;
     size_t bytesToAdd = 0;
     uint32_t localPrevDataIn[HASH_SHA512_BLOCK_SIZE_IN_WORDS];
     CCBuffInfo_t inBuffInfo;
+    HashContext_t *ctx_ptr = &(pHashUserCtx->ctx);
 
-    /* If pHashUserCtx->prevDataInSize > 0, fill it with with the current data
+    /* If ctx_ptr->prevDataInSize > 0, fill it with with the
+     * current data
      */
     bytesToAdd = CC_MIN(
-        ((pHashUserCtx->blockSizeInBytes - pHashUserCtx->prevDataInSize) %
-         pHashUserCtx->blockSizeInBytes),
+      ((ctx_ptr->blockSizeInBytes - ctx_ptr->prevDataInSize) %
+        ctx_ptr->blockSizeInBytes),
         dataInSize);
     if (bytesToAdd > 0) {
         /* add the data to the remaining buffer */
-        CC_PalMemCopy(
-            &(((uint8_t *)(pHashUserCtx
-                               ->prevDataIn))[pHashUserCtx->prevDataInSize]),
+        CC_PalMemCopy(&(((uint8_t *)
+            (ctx_ptr->prevDataIn))[ctx_ptr->prevDataInSize]),
             pDataIn, bytesToAdd);
-        pHashUserCtx->prevDataInSize += bytesToAdd;
+        ctx_ptr->prevDataInSize += bytesToAdd;
         pDataIn += bytesToAdd;
         dataInSize -= bytesToAdd;
     }
 
-    /* If the remaining buffer is full, process the block (else, the remaining
-    buffer will be processed in the next update or finish) */
-    if (pHashUserCtx->prevDataInSize == pHashUserCtx->blockSizeInBytes) {
-        /* Copy prevDataIn to stack, in order to ensure continues and physical
-        memory access. That way, DMA will be able to access the data on any
-        platform.*/
-        CC_PalMemCopy(localPrevDataIn, pHashUserCtx->prevDataIn,
+    /* If the remaining buffer is full, process the block (else, the
+     * remaining buffer will be processed in the next update or finish)
+     */
+    if (ctx_ptr->prevDataInSize == ctx_ptr->blockSizeInBytes){
+        /* Copy prevDataIn to stack, in order to ensure contiguous and physical
+         * memory access. That way, DMA will be able to access the data on any
+         * platform.
+         */
+        CC_PalMemCopy(localPrevDataIn, ctx_ptr->prevDataIn,
                       CC_MIN(HASH_SHA512_BLOCK_SIZE_IN_WORDS * sizeof(uint32_t),
-                             pHashUserCtx->prevDataInSize));
+                             ctx_ptr->prevDataInSize));
 
         rc = SetDataBuffersInfo((uint8_t *)localPrevDataIn,
-                                pHashUserCtx->blockSizeInBytes, &inBuffInfo,
+                                ctx_ptr->blockSizeInBytes, &inBuffInfo,
                                 NULL, 0, NULL);
         if (rc != 0) {
             CC_PAL_LOG_ERR("illegal data buffers\n");
@@ -70,21 +73,21 @@ static psa_status_t hashUpdate(cc3xx_hash_operation_t *pHashUserCtx,
         }
 
         rc = ProcessHashDrv(pHashUserCtx, &inBuffInfo,
-                            pHashUserCtx->blockSizeInBytes);
+                            ctx_ptr->blockSizeInBytes);
         if (rc != CC_OK) {
             CC_PAL_LOG_ERR("ProcessHashDrv failed, ret = %d\n", rc);
             return PSA_ERROR_GENERIC_ERROR;
         }
-        pHashUserCtx->prevDataInSize = 0;
+        ctx_ptr->prevDataInSize = 0;
     }
 
     /* Process all the blocks that remain in the data */
-    bytesToAdd = (dataInSize / pHashUserCtx->blockSizeInBytes) *
-                 pHashUserCtx->blockSizeInBytes;
+    bytesToAdd = (dataInSize / ctx_ptr->blockSizeInBytes) *
+                 ctx_ptr->blockSizeInBytes;
     if (bytesToAdd > 0) {
 
-        rc =
-            SetDataBuffersInfo(pDataIn, bytesToAdd, &inBuffInfo, NULL, 0, NULL);
+        rc = SetDataBuffersInfo(pDataIn, bytesToAdd, &inBuffInfo,
+                                NULL, 0, NULL);
         if (rc != 0) {
             CC_PAL_LOG_ERR("illegal data buffers\n");
             return PSA_ERROR_GENERIC_ERROR;
@@ -103,10 +106,10 @@ static psa_status_t hashUpdate(cc3xx_hash_operation_t *pHashUserCtx,
     bytesToAdd = dataInSize;
     if (bytesToAdd > 0) {
         CC_PalMemCopy(
-            (uint8_t *)&(
-                (pHashUserCtx->prevDataIn)[pHashUserCtx->prevDataInSize]),
+            (uint8_t *)
+            &((ctx_ptr->prevDataIn)[ctx_ptr->prevDataInSize]),
             pDataIn, bytesToAdd);
-        pHashUserCtx->prevDataInSize += bytesToAdd;
+        ctx_ptr->prevDataInSize += bytesToAdd;
     }
     return PSA_SUCCESS;
 }
@@ -124,27 +127,27 @@ psa_status_t cc3xx_hash_setup(cc3xx_hash_operation_t *operation,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    pHashCtx = (HashContext_t *)operation;
+    pHashCtx = &(operation->ctx);
     CC_PalMemSetZero(pHashCtx, sizeof(HashContext_t));
     switch (alg) {
-#if defined MBEDTLS_SHA1_C
+#ifdef CC3XX_CONFIG_SUPPORT_SHA1
     case PSA_ALG_SHA_1:
         pHashCtx->mode = HASH_SHA1;
         break;
-#endif
-#if defined MBEDTLS_SHA256_C
+#endif /* CC3XX_CONFIG_SUPPORT_SHA1 */
     case PSA_ALG_SHA_224:
         pHashCtx->mode = HASH_SHA224;
         break;
     case PSA_ALG_SHA_256:
         pHashCtx->mode = HASH_SHA256;
         break;
-#endif
+    case PSA_ALG_SHA_384:
+    case PSA_ALG_SHA_512:
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
     pHashCtx->blockSizeInBytes = HASH_BLOCK_SIZE_IN_BYTES;
-    drvError_t ret             = InitHashDrv(operation);
+    drvError_t ret = InitHashDrv(operation);
     if (ret == HASH_DRV_OK) {
         return PSA_SUCCESS;
     } else { /* change PSA error code? */
@@ -168,14 +171,16 @@ psa_status_t cc3xx_hash_update(cc3xx_hash_operation_t *operation,
                                const uint8_t *input, size_t input_length)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+
     if (NULL == operation) {
         CC_PAL_LOG_ERR("ctx is NULL\n");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     if (0 == input_length) {
-        /* This is a valid situation, no need to call hashUpdate.
-        HashFinish will produce the result. */
+        /* This is a valid situation, no need to call cc3xx_hash_update.
+         * cc3xx_hash_finish will produce the result.
+         */
         return PSA_SUCCESS;
     }
 
@@ -186,7 +191,7 @@ psa_status_t cc3xx_hash_update(cc3xx_hash_operation_t *operation,
     }
 
     while (input_length > MAX_HASH_CHUNK_SIZE) {
-        status = hashUpdate(operation, (uint8_t *)input, MAX_HASH_CHUNK_SIZE);
+        status = hash_update(operation, (uint8_t *)input, MAX_HASH_CHUNK_SIZE);
 
         input_length -= MAX_HASH_CHUNK_SIZE;
         input += MAX_HASH_CHUNK_SIZE;
@@ -197,7 +202,7 @@ psa_status_t cc3xx_hash_update(cc3xx_hash_operation_t *operation,
         }
     }
 
-    status = hashUpdate(operation, (uint8_t *)input, input_length);
+    status = hash_update(operation, (uint8_t *)input, input_length);
     if (status != PSA_SUCCESS) {
         CC_PAL_LOG_ERR("hashUpdate failed, status = %d\n", status);
         return status;
@@ -206,12 +211,13 @@ psa_status_t cc3xx_hash_update(cc3xx_hash_operation_t *operation,
     return status;
 }
 
-psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation, uint8_t *hash,
+psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation,
+                               uint8_t *hash,
                                size_t hash_size, size_t *hash_length)
 {
     uint32_t localPrevDataIn[HASH_SHA512_BLOCK_SIZE_IN_WORDS];
     size_t dataInSize = 0;
-    drvError_t drvRc  = HASH_DRV_OK;
+    drvError_t drvRc = HASH_DRV_OK;
     CCBuffInfo_t inBuffInfo;
     HashContext_t *pHashCtx = NULL;
 
@@ -219,11 +225,12 @@ psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation, uint8_t *hash,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    pHashCtx = (HashContext_t *)operation;
+    pHashCtx = &(operation->ctx);
     if (pHashCtx->prevDataInSize != 0) {
         /* Copy prevDataIn to stack, in order to ensure continues and physical
-        memory access. That way, DMA will be able to access the data on any
-        platform.*/
+         * memory access. That way, DMA will be able to access the data on any
+         * platform.
+         */
         CC_PalMemCopy(localPrevDataIn, pHashCtx->prevDataIn,
                       CC_MIN(HASH_SHA512_BLOCK_SIZE_IN_WORDS * sizeof(uint32_t),
                              pHashCtx->prevDataInSize));
@@ -282,7 +289,8 @@ psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation, uint8_t *hash,
 psa_status_t cc3xx_hash_abort(cc3xx_hash_operation_t *operation)
 {
     /* The object has not been used yet, there is nothing to do */
-    if (operation->mode == HASH_NULL_MODE || operation->mode == HASH_RESERVE32B) {
+    if (operation->ctx.mode == HASH_NULL_MODE ||
+        operation->ctx.mode == HASH_RESERVE32B) {
         return PSA_SUCCESS;
     }
 

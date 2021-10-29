@@ -5,11 +5,15 @@
  *
  */
 
-#ifndef CC3XX_PSA_MAC_H
-#define CC3XX_PSA_MAC_H
+#ifndef CC3XX_MAC_H
+#define CC3XX_MAC_H
 
 #include "cc3xx_crypto_primitives.h"
 #include "psa/crypto.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 psa_status_t cc3xx_mac_sign_setup(cc3xx_mac_operation_t *operation,
                                   const psa_key_attributes_t *attributes,
@@ -40,5 +44,7 @@ psa_status_t cc3xx_mac_compute(const psa_key_attributes_t *attributes,
                                const uint8_t *input, size_t input_length,
                                uint8_t *mac, size_t mac_size,
                                size_t *mac_length);
-
-#endif /* CC3XX_PSA_MAC_H */
+#ifdef __cplusplus
+}
+#endif
+#endif /* CC3XX_MAC_H */

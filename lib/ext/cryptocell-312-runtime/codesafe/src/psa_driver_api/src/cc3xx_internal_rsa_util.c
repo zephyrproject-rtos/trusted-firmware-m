@@ -551,6 +551,10 @@ End:
 
 psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
 {
+#ifndef CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
+    return ((cc_error == CC_SUCCESS) ?
+                    PSA_SUCCESS : PSA_ERROR_HARDWARE_FAILURE);
+#else /* CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION */
     psa_status_t err;
     switch (cc_error) {
     case CC_SUCCESS:
@@ -666,4 +670,5 @@ psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
     CC_PAL_LOG_DEBUG("Converted CC_ERROR %d (0x%08x) to PSA_ERROR %d\r\n",
                      cc_error, cc_error, err);
     return err;
+#endif /* CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION */
 }

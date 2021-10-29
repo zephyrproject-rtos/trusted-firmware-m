@@ -24,6 +24,10 @@
 //#include "pka_ec_wrst.h"
 #include "cc_ecpki_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief   Convert CC error code to PSA error
  *
@@ -108,5 +112,7 @@ psa_status_t cc3xx_ecc_psa_publ_to_cc_publ(CCEcpkiDomainID_t DomainId,
                                            const uint8_t *publ_key,
                                            size_t publ_key_size,
                                            CCEcpkiUserPublKey_t *pUserPublKey);
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* CC3XX_INTERNAL_ECC_UTIL_H */

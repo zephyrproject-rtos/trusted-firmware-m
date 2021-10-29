@@ -5,11 +5,11 @@
  *
  */
 
-#include "cc3xx_psa_asymmetric_signature.h"
+#include "cc3xx_asymmetric_signature.h"
 #include "cc3xx_internal_drbg_util.h"
 #include "cc3xx_internal_ecc_util.h"
 #include "cc3xx_internal_rsa_util.h"
-#include "cc3xx_psa_hash.h"
+#include "cc3xx_hash.h"
 #include "cc3xx_internal_hash_util.h"
 #include "mbedtls/hmac_drbg.h"
 #include "psa/crypto.h"
@@ -350,7 +350,8 @@ psa_status_t cc3xx_internal_rsa_sign(const psa_key_attributes_t *attributes,
          * not enough room, use the maximum salt length that fits. The
          * constraint is that the hash length plus the salt length plus 2 bytes
          * must be at most the key length. This complies with FIPS 186-4 §5.5
-         * (e) and RFC 8017 (PKCS#1 v2.2) §9.1.1 step 3. */
+         * (e) and RFC 8017 (PKCS#1 v2.2) §9.1.1 step 3.
+         */
         size_t hash_len = PSA_HASH_LENGTH(PSA_ALG_SIGN_GET_HASH(alg));
         size_t output_len = PSA_BITS_TO_BYTES(key_bits);
         size_t salt_len;

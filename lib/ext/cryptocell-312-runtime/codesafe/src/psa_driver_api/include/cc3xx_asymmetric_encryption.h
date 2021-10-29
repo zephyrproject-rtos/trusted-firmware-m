@@ -5,11 +5,14 @@
  *
  */
 
-#ifndef CC3XX_PSA_ASYMMETRIC_ENCRYPTION_H
-#define CC3XX_PSA_ASYMMETRIC_ENCRYPTION_H
+#ifndef CC3XX_ASYMMETRIC_ENCRYPTION_H
+#define CC3XX_ASYMMETRIC_ENCRYPTION_H
 
 #include "psa/crypto.h"
-#include <stdlib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 psa_status_t cc3xx_asymmetric_encrypt(const psa_key_attributes_t *attributes,
                                       const uint8_t *key_buffer,
@@ -30,5 +33,7 @@ psa_status_t cc3xx_asymmetric_decrypt(const psa_key_attributes_t *attributes,
                                       const uint8_t *salt, size_t salt_length,
                                       uint8_t *output, size_t output_size,
                                       size_t *output_length);
-
-#endif /* CC3XX_PSA_ASYMMETRIC_ENCRYPTION_H */
+#ifdef __cplusplus
+}
+#endif
+#endif /* CC3XX_ASYMMETRIC_ENCRYPTION_H */

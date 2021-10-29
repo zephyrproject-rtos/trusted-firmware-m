@@ -12,7 +12,7 @@
 #include "cc_pal_types.h"
 #include <psa/crypto.h>
 
-#include "internal/cc3xx_psa_aead_gcm.h"
+#include "cc3xx_internal_gcm.h"
 
 /*! API is NOT supported. */
 #define CC3XX_ERR_GCM_API_IS_NOT_SUPPORTED -0x0016
@@ -509,7 +509,7 @@ cleanup:
 }
 
 /* TODO: Figure out best strategy for cc310 vs cc312 */
-psa_status_t cc3xx_psa_aead_encrypt_gcm(
+psa_status_t cc3xx_encrypt_gcm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,
@@ -539,7 +539,7 @@ psa_status_t cc3xx_psa_aead_encrypt_gcm(
     return status;
 }
 
-psa_status_t cc3xx_psa_aead_decrypt_gcm(
+psa_status_t cc3xx_decrypt_gcm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,

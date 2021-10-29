@@ -5,15 +5,16 @@
  *
  */
 
-#ifndef CC3XX_PSA_DRIVER_AEAD_GCM_H
-#define CC3XX_PSA_DRIVER_AEAD_GCM_H
+#ifndef CC3XX_INTERNAL_CCM_H
+#define CC3XX_INTERNAL_CCM_H
 
-#include <psa/crypto_driver_common.h>
+#include <psa/crypto.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-psa_status_t cc3xx_psa_aead_encrypt_gcm(
+
+psa_status_t cc3xx_encrypt_ccm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,
@@ -21,7 +22,7 @@ psa_status_t cc3xx_psa_aead_encrypt_gcm(
     size_t plaintext_length, uint8_t *ciphertext, size_t ciphertext_size,
     size_t *ciphertext_length);
 
-psa_status_t cc3xx_psa_aead_decrypt_gcm(
+psa_status_t cc3xx_decrypt_ccm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,
@@ -33,4 +34,4 @@ psa_status_t cc3xx_psa_aead_decrypt_gcm(
 }
 #endif
 
-#endif /* CC3XX_PSA_DRIVER_AEAD_GCM_H */
+#endif /* CC3XX_INTERNAL_CCM_H */

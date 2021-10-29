@@ -5,7 +5,9 @@
  *
  */
 
-#include "cc3xx_psa_key_agreement.h"
+#include "cc3xx_key_agreement.h"
+#include "cc3xx_internal_ecdh.h"
+#include "cc3xx_internal_ecc_util.h"
 
 psa_status_t cc3xx_key_agreement(
         const psa_key_attributes_t *attributes,
