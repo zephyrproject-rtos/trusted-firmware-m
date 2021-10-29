@@ -13,15 +13,15 @@ __attribute__((naked)) void tfm_arch_free_msp_and_exc_ret(uint32_t exc_return)
 {
     __ASM volatile(
 #if !defined(__ICCARM__)
-        ".syntax unified                  \n"
+        ".syntax unified                        \n"
 #endif
-        "MOV     lr, r0                   \n"
-        "LDR     r0, ="M2S(VTOR_ADDR)"    \n" /* VTOR */
-        "LDR     r0, [r0]                 \n" /* MSP address */
-        "LDR     r0, [r0]                 \n" /* MSP */
-        "SUBS    r0, #8                   \n" /* Exclude stack seal */
-        "MSR     msp, r0                  \n" /* Free Main Stack space */
-        "BX      lr                       \n"
+        "mov     lr, r0                         \n"
+        "ldr     r0, ="M2S(SCB_VTOR_ADDR)"      \n" /* VTOR */
+        "ldr     r0, [r0]                       \n" /* MSP address */
+        "ldr     r0, [r0]                       \n" /* MSP */
+        "subs    r0, #8                         \n" /* Exclude stack seal */
+        "msr     msp, r0                        \n" /* Free Main Stack space */
+        "bx      lr                             \n"
     );
 }
 
@@ -36,12 +36,12 @@ __attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
 {
     __ASM volatile(
 #ifndef __ICCARM__
-        ".syntax unified                                 \n"
+        ".syntax unified                               \n"
 #endif
-        "ldr     r0, ="M2S(ICSR_ADDR)"                   \n"
-        "ldr     r1, ="M2S(SCB_ICSR_PENDSVSET_Msk)"      \n"
-        "str     r1, [r0, #0]                            \n"
-        "bx      lr                                      \n"
+        "ldr     r0, ="M2S(SCB_ICSR_ADDR)"             \n"
+        "ldr     r1, ="M2S(SCB_ICSR_PENDSVSET_BIT)"    \n"
+        "str     r1, [r0, #0]                          \n"
+        "bx      lr                                    \n"
     );
 }
 

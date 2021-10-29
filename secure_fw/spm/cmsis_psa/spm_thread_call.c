@@ -52,7 +52,7 @@ void spm_interface_thread_dispatcher(uintptr_t fn_addr,
 
     if (THRD_EXPECTING_SCHEDULE()) {
         ((struct spcall_abi_frame_t *)frame_addr)->a0 =
-                                         tfm_arch_trigger_pendsv();
+                                        tfm_arch_trigger_pendsv();
     }
 }
 
