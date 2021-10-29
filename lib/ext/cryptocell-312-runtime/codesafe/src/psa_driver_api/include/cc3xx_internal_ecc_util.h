@@ -49,9 +49,9 @@ psa_status_t cc3xx_ecc_cc_priv_to_cc_publ(CCEcpkiUserPrivKey_t *pUserPrivKey,
 /**
  * @brief   Convert ECPKI to PSA public key buffer
  *
- * @param[in]  publ_key      Public key buffer
- * @param[in]  publ_key_size Public key buffer size
- * @param[out] pUserPublKey  ECPKI public key
+ * @param[in]     publ_key        Public key buffer
+ * @param[in/out] publ_key_length Public key buffer size
+ * @param[out]    pUserPublKey    ECPKI public key
  *
  * @retval PSA_SUCCESS
  * @retval PSA_ERROR_NOT_SUPPORTED
@@ -59,7 +59,7 @@ psa_status_t cc3xx_ecc_cc_priv_to_cc_publ(CCEcpkiUserPrivKey_t *pUserPrivKey,
  */
 psa_status_t cc3xx_ecc_cc_publ_to_psa_publ(CCEcpkiUserPublKey_t *pUserPublKey,
                                            uint8_t *publ_key,
-                                           size_t publ_key_size);
+                                           size_t  *publ_key_length);
 
 /**
  * @brief   Extract domain ID from PSA

@@ -210,25 +210,19 @@ psa_status_t cc3xx_ecc_cc_priv_to_cc_publ(CCEcpkiUserPrivKey_t *pUserPrivKey,
 
 psa_status_t cc3xx_ecc_cc_publ_to_psa_publ(CCEcpkiUserPublKey_t *pUserPublKey,
                                            uint8_t *publ_key,
-                                           size_t publ_key_size)
+                                           size_t  *publ_key_length)
 {
-    psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t cc_err;
 
-    if (publ_key == NULL) {
+    if (publ_key == NULL || publ_key_length == NULL) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
+
     cc_err = CC_EcpkiPubKeyExport(pUserPublKey, CC_EC_PointUncompressed,
-                                  publ_key, &publ_key_size);
-    err = cc3xx_ecc_cc_error_to_psa_error(cc_err);
+                                  publ_key, publ_key_length);
 
-    if (err != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("Error building public key failed with error code %d\n",
-                       cc_err);
-    }
-
-    return err;
+    return cc3xx_ecc_cc_error_to_psa_error(cc_err);
 }
 
 psa_status_t cc3xx_ecc_psa_domain_to_cc_domain(psa_ecc_family_t curve,

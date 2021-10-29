@@ -51,7 +51,7 @@ cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
     psa_key_type_t key_type = psa_get_key_type(attributes);
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
     psa_ecc_family_t curve = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
-    psa_status_t ret;
+    psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t rc;
     const CCEcpkiDomain_t *pDomain;
     CCEcpkiDomainID_t domainId;
@@ -64,10 +64,10 @@ cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
         sizeof(CCEcpkiKgTempData_t) + sizeof(CCRndContext_t) +
         sizeof(CCEcpkiUserPrivKey_t) + sizeof(CCEcpkiUserPublKey_t);
 
-    ret = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
-    if (ret != PSA_SUCCESS) {
+    err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
+    if (err != PSA_SUCCESS) {
         CC_PAL_LOG_ERR("Error - curve is not supported\n");
-        return ret;
+        return err;
     }
 
     pDomain = CC_EcpkiGetEcDomain(domainId);
@@ -87,8 +87,8 @@ cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
     pUserPrivKey = (CCEcpkiUserPrivKey_t *)(pRndContext + 1);
     pUserPublKey = (CCEcpkiUserPublKey_t *)(pUserPrivKey + 1);
 
-    ret = cc3xx_ctr_drbg_get_ctx(pRndContext);
-    if (ret != PSA_SUCCESS) {
+    err = cc3xx_ctr_drbg_get_ctx(pRndContext);
+    if (err != PSA_SUCCESS) {
         goto end;
     }
 
@@ -99,19 +99,19 @@ cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
 
     if (rc != CC_SUCCESS) {
         CC_PAL_LOG_ERR("Error - Key generation ended with result: %d\n", rc);
-        ret = cc3xx_ecc_cc_error_to_psa_error(rc);
+        err = cc3xx_ecc_cc_error_to_psa_error(rc);
         goto end;
     }
 
     CC_CommonReverseMemcpy(key_buffer, (uint8_t *)pPrivKey->PrivKey,
                            PSA_BITS_TO_BYTES(key_bits));
 
-    ret = PSA_SUCCESS;
+    err = PSA_SUCCESS;
 
 end:
     CC_PalMemSetZero(pTempBuff, pTempBuffsize);
     mbedtls_free(pTempBuff);
-    return ret;
+    return err;
 }
 
 static psa_status_t
@@ -119,7 +119,7 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
                                uint8_t *key_buffer, size_t key_buffer_size)
 {
     CCError_t cc_err = CC_FAIL;
-    psa_status_t status;
+    psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
     uint32_t pubExpSizeBits, mask;
     CCRndContext_t rndContext;
@@ -166,8 +166,8 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
         return PSA_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    status = cc3xx_ctr_drbg_get_ctx(&rndContext);
-    if (status != PSA_SUCCESS) {
+    err = cc3xx_ctr_drbg_get_ctx(&rndContext);
+    if (err != PSA_SUCCESS) {
         cc_err = CC_FAIL;
         goto end;
     }
@@ -218,8 +218,8 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
         goto end;
     }
 
-    /* The NonCrt.d will be discarded when we caclulate the Crt parameterers so
-     * we need to keep it */
+    /* The NonCrt.d will be discarded when we caclulate the Crt parameterers
+     * so we need to keep it */
     CC_PalMemCopy(d_buff, pCcPrivKey->PriveKeyDb.NonCrt.d, keySizeBytes);
 
     /* calculate Barrett tags for P,Q and set into context */
@@ -317,36 +317,59 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
     psa_ecc_family_t curve = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
     CCEcpkiUserPrivKey_t pUserPrivKey;
     CCEcpkiUserPublKey_t pUserPublKey;
-    psa_status_t err;
+    psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCEcpkiDomainID_t domainId;
 
-    if (PSA_KEY_TYPE_IS_ECC(key_type) && PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
-        err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
-        if (err != PSA_SUCCESS) {
-            CC_PAL_LOG_ERR("Error - curve is not supported\n");
-            return err;
+    if (PSA_KEY_TYPE_IS_ECC(key_type)) {
+        if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
+            /* Revert to software driver when the requested key is a
+             * public key (no conversion needed) */
+            err = PSA_ERROR_NOT_SUPPORTED;
+
+        } else {
+            err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
+            if (err != PSA_SUCCESS) {
+                CC_PAL_LOG_ERR("Error - curve is not supported\n");
+                return err;
+            }
+
+            err = cc3xx_ecc_psa_priv_to_cc_priv(domainId, key_buffer,
+                                                key_buffer_size, &pUserPrivKey);
+            if (err != PSA_SUCCESS) {
+                return err;
+            }
+
+            err = cc3xx_ecc_cc_priv_to_cc_publ(&pUserPrivKey, &pUserPublKey);
+            if (err != PSA_SUCCESS) {
+                return err;
+            }
+
+            *data_length = data_size;
+            err = cc3xx_ecc_cc_publ_to_psa_publ(&pUserPublKey, data, data_length);
+            if (err != PSA_SUCCESS) {
+                return err;
+            }
+        }
+    } else if (PSA_KEY_TYPE_IS_RSA(key_type)) {
+
+        if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
+            /* Revert to software driver when the requested key is a
+             * public key (no conversion needed) */
+            err = PSA_ERROR_NOT_SUPPORTED;
+        } else {
+            err = cc3xx_rsa_psa_priv_to_psa_publ(
+                (uint8_t *)key_buffer, key_buffer_size, data, data_size);
+
+            if (err != PSA_SUCCESS) {
+                return err;
+            }
+
+            *data_length = key_buffer_size;
         }
 
-        err = cc3xx_ecc_psa_priv_to_cc_priv(domainId, key_buffer,
-                                            key_buffer_size, &pUserPrivKey);
-
-        if (err != PSA_SUCCESS) {
-            return err;
-        }
-
-        err = cc3xx_ecc_cc_priv_to_cc_publ(&pUserPrivKey, &pUserPublKey);
-        if (err != PSA_SUCCESS) {
-            return err;
-        }
-
-        err = cc3xx_ecc_cc_publ_to_psa_publ(&pUserPublKey, data, data_size);
-        return err;
-    } else if (PSA_KEY_TYPE_IS_RSA(key_type) &&
-               PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
-        err = cc3xx_rsa_psa_priv_to_psa_publ((uint8_t *)key_buffer,
-                                             key_buffer_size, data, data_size);
-        return err;
+    } else {
+        err = PSA_ERROR_NOT_SUPPORTED;
     }
 
-    return PSA_ERROR_NOT_SUPPORTED;
+    return err;
 }
