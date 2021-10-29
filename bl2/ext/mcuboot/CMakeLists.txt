@@ -105,7 +105,7 @@ if(NS)
         DEPENDS tfm_s_bin tfm_ns_bin
         DEPENDS signing_layout_s
 
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/assemble.py
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/assemble.py
             --layout $<TARGET_OBJECTS:signing_layout_s>
             -s $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
             -n $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
@@ -123,7 +123,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
     WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
     #Sign secure binary image with provided secret key
-    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
         -v ${MCUBOOT_IMAGE_VERSION_S}
         --layout $<TARGET_OBJECTS:signing_layout_s>
         -k ${MCUBOOT_KEY_S}
@@ -173,7 +173,7 @@ if(NS)
         WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
         #Sign non-secure binary image with provided secret key
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
             -v ${MCUBOOT_IMAGE_VERSION_NS}
             --layout $<TARGET_OBJECTS:signing_layout_ns>
             -k ${MCUBOOT_KEY_NS}
@@ -206,7 +206,7 @@ if(NS)
             # binary file. This only uses the local assemble.py script (not from
             # upstream mcuboot) because that script is geared towards zephyr
             # support
-            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/assemble.py
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/assemble.py
                 --layout $<TARGET_OBJECTS:signing_layout_s>
                 -s $<TARGET_FILE_DIR:bl2>/tfm_s_signed.bin
                 -n $<TARGET_FILE_DIR:bl2>/tfm_ns_signed.bin
@@ -222,7 +222,7 @@ if(NS)
         # Use the non-secure key to sign the combined image if FORWARD_PROT_MSG is set.
         # In such a configuration there is a subsystem with higher privileges controlling the
         # the boot process and current implementation requires to use the non-secure key here.
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
             -v ${MCUBOOT_IMAGE_VERSION_S}
             --layout $<TARGET_OBJECTS:signing_layout_s>
             -k $<IF:$<BOOL:${FORWARD_PROT_MSG}>,${MCUBOOT_KEY_NS},${MCUBOOT_KEY_S}>
