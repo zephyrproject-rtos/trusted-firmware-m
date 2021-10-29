@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,6 +16,7 @@
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
+#include "region_defs.h"
 
 #define TFM_SP_NS_AGENT_NDEPS                                   (0)
 #define TFM_SP_NS_AGENT_NSERVS                                  (0)
@@ -26,9 +28,9 @@
 extern void tfm_nspm_thread_entry(void);
 
 /* Stack */
-uint8_t ns_agent_tz_stack[CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE] __aligned(0x20);
+uint8_t ns_agent_mailbox_stack[S_PSP_STACK_SIZE] __aligned(0x20);
 
-struct partition_tfm_sp_ns_agent_load_info_t {
+struct partition_tfm_sp_ns_agent_mailbox_load_info_t {
     /* common length load data */
     struct partition_load_info_t    load_info;
     /* per-partition variable length load data */
@@ -44,8 +46,8 @@ struct partition_tfm_sp_ns_agent_load_info_t {
 #pragma location = ".part_load"
 __root
 #endif
-const struct partition_tfm_sp_ns_agent_load_info_t
-    tfm_sp_ns_agent_load __attribute__((used, section(".part_load"))) = {
+const struct partition_tfm_sp_ns_agent_mailbox_load_info_t
+    tfm_sp_ns_agent_mailbox_load __attribute__((used, section(".part_load"))) = {
     .load_info = {
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
         .pid                        = TFM_SP_NON_SECURE_ID,
@@ -53,7 +55,7 @@ const struct partition_tfm_sp_ns_agent_load_info_t
                                     | PARTITION_MODEL_IPC
                                     | PARTITION_MODEL_PSA_ROT,
         .entry                      = ENTRY_TO_POSITION(tfm_nspm_thread_entry),
-        .stack_size                 = CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE,
+        .stack_size                 = S_PSP_STACK_SIZE,
         .heap_size                  = 0,
         .ndeps                      = TFM_SP_NS_AGENT_NDEPS,
         .nservices                  = TFM_SP_NS_AGENT_NSERVS,
@@ -61,14 +63,14 @@ const struct partition_tfm_sp_ns_agent_load_info_t
         .nassets                    = TFM_SP_NS_AGENT_NASSETS,
 #endif
     },
-    .stack_addr                     = (uintptr_t)ns_agent_tz_stack,
+    .stack_addr                     = (uintptr_t)ns_agent_mailbox_stack,
     .heap_addr                      = 0,
 #if TFM_LVL == 3
     .assets                         = {
         {
-            .mem.start              = (uintptr_t)ns_agent_tz_stack,
+            .mem.start              = (uintptr_t)ns_agent_mailbox_stack,
             .mem.limit              =
-               (uintptr_t)&ns_agent_tz_stack[CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE],
+               (uintptr_t)&ns_agent_mailbox_stack[S_PSP_STACK_SIZE],
             .attr                   = ASSET_ATTR_READ_WRITE,
         },
     },
@@ -79,5 +81,5 @@ const struct partition_tfm_sp_ns_agent_load_info_t
 __root
 #endif
 /* Placeholder for partition runtime space. Do not reference it. */
-static struct partition_t tfm_sp_ns_agent_partition_runtime_item
+static struct partition_t tfm_sp_ns_agent_mailbox_partition_runtime_item
     __attribute__((used, section(".bss.part_runtime")));

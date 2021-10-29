@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -28,7 +29,8 @@ add_subdirectory(partitions/internal_trusted_storage)
 add_subdirectory(partitions/platform)
 add_subdirectory(partitions/psa_proxy)
 add_subdirectory(partitions/firmware_update)
-add_subdirectory(partitions/ns_agent)
+add_subdirectory(partitions/ns_agent_tz)
+add_subdirectory(partitions/ns_agent_mailbox)
 add_subdirectory(partitions/idle_partition)
 if (TFM_EXTRA_PARTITION_PATHS)
     set(POSTFIX 1)
