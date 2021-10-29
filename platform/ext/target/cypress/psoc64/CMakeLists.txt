@@ -216,15 +216,17 @@ target_compile_definitions(platform_ns
 
 # device_cfg.h defines the number of mailbox queue slots to support multiple
 # PSA client calls feature.
-target_include_directories(tfm_ns_interface
-    INTERFACE
-        Device/Config
-)
+if (NS)
+    target_include_directories(tfm_ns_interface
+        INTERFACE
+            Device/Config
+    )
 
-target_link_libraries(platform_ns
-    PRIVATE
-        tfm_ns_interface
-)
+    target_link_libraries(platform_ns
+        PRIVATE
+            tfm_ns_interface
+    )
+endif()
 
 ########################### export sources #####################################
 
