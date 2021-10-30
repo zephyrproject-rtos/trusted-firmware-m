@@ -41,6 +41,8 @@ __attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
         "ldr     r0, ="M2S(SCB_ICSR_ADDR)"             \n"
         "ldr     r1, ="M2S(SCB_ICSR_PENDSVSET_BIT)"    \n"
         "str     r1, [r0, #0]                          \n"
+        "dsb     #0xf                                  \n"
+        "isb                                           \n"
         "bx      lr                                    \n"
     );
 }
