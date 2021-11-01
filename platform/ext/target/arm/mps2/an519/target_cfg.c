@@ -382,8 +382,7 @@ void ppc_init_cfg(void)
                          (1U << CMSDK_DTIMER_APB_PPC_POS) |
                          (1U << CMSDK_MHU0_APB_PPC_POS) |
                          (1U << CMSDK_MHU1_APB_PPC_POS);
-    /* Grant non-secure access to S32K Timer in PPC1*/
-    spctrl->apbnsppc1 |= (1U << CMSDK_S32K_TIMER_PPC_POS);
+
     /* Grant non-secure access for APB peripherals on EXP1 */
     spctrl->apbnsppcexp1 |= (1U << CMSDK_SPI0_APB_PPC_POS) |
                             (1U << CMSDK_SPI1_APB_PPC_POS) |

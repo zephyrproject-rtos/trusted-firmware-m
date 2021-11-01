@@ -523,14 +523,7 @@ int32_t ppc_init_cfg(void)
                                     ARM_PPC_NONSECURE_ONLY,
                                     ARM_PPC_PRIV_ONLY);
 
-    /* Grant non-secure access to S32K Timer in PPC1*/
     ret = Driver_APB_PPC1.Initialize();
-    if (ret != ARM_DRIVER_OK) {
-        return ret;
-    }
-    ret = Driver_APB_PPC1.ConfigPeriph(CMSDK_S32K_TIMER_PPC_POS,
-                                    ARM_PPC_NONSECURE_ONLY,
-                                    ARM_PPC_PRIV_ONLY);
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
