@@ -32,7 +32,7 @@ set(LIBMETAL_SRC_PATH                   "DOWNLOAD"  CACHE PATH      "Path to Lib
 set(LIBMETAL_VERSION                    "f252f0e007fbfb8b3a52b1d5901250ddac96baad"  CACHE STRING    "The version of libmetal to use")
 
 set(LIBOPENAMP_SRC_PATH                 "DOWNLOAD"  CACHE PATH      "Path to Libopenamp (or DOWNLOAD to fetch automatically")
-set(OPENAMP_VERSION                     "33037b04e0732e58fc0fa36afc244999ef632e10"  CACHE STRING    "The version of openamp to use")
+set(OPENAMP_VERSION                     "347397decaa43372fc4d00f965640ebde042966d"  CACHE STRING    "The version of openamp to use")
 
 if (${PLATFORM_IS_FVP})
     set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE        CACHE BOOL      "Whether to use psa-adac secure debug.")
