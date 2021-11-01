@@ -16,12 +16,9 @@
 #include "cc_pal_abort.h"
 #include "cc_pal_mem.h"
 #include "cc_pal_types.h"
-#include <psa/crypto.h>
 
 #include "cc3xx_internal_gcm.h"
-
-/*! API is NOT supported. */
-#define CC3XX_ERR_GCM_API_IS_NOT_SUPPORTED -0x0016
+#include "psa/crypto.h"
 
 /*! AES GCM data in maximal size in bytes. */
 #define CC3XX_AESGCM_DATA_IN_MAX_SIZE_BYTES 0xFFFF // (64KB - 1)
@@ -48,40 +45,38 @@
 /*! AES GCM Tag size: 16 bytes. */
 #define CC3XX_AESGCM_TAG_SIZE_16_BYTES 16
 
-static void gcm_context_init(AesGcmContext_t *context)
+static psa_status_t gcm_setkey(
+        AesGcmContext_t *ctx,
+        const uint8_t *key,
+        size_t key_bits,
+        cryptoDirection_t direction)
 {
-    CC_PalMemSetZero(context, sizeof(AesGcmContext_t));
-}
-
-static void gcm_context_free(AesGcmContext_t *context)
-{
-    CC_PalMemSetZero(context, sizeof(AesGcmContext_t));
-}
-
-static psa_status_t gcm_set_key(AesGcmContext_t *context,
-                                const unsigned char *key, unsigned int keybits)
-{
-    if (context == NULL || key == NULL) {
-        CC_PAL_LOG_ERR("Null pointer, ctx or key are NULL\n");
+    if (NULL == ctx || NULL == key) {
+        CC_PAL_LOG_ERR("Null pointer exception\n");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    switch (keybits) {
+    if (CRYPTO_DIRECTION_NUM_OF_ENC_MODES <= direction) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ctx->dir = direction;
+
+    switch (key_bits) {
     case 128:
-        context->keySizeId = KEY_SIZE_128_BIT;
+        ctx->keySizeId = KEY_SIZE_128_BIT;
         break;
     case 192:
-        context->keySizeId = KEY_SIZE_192_BIT;
+        ctx->keySizeId = KEY_SIZE_192_BIT;
         break;
     case 256:
-        context->keySizeId = KEY_SIZE_256_BIT;
+        ctx->keySizeId = KEY_SIZE_256_BIT;
         break;
     default:
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    /* Copy user key to context */
-    CC_PalMemCopy(context->keyBuf, key, PSA_BITS_TO_BYTES(keybits));
+    CC_PalMemCopy(ctx->keyBuf, key, PSA_BITS_TO_BYTES(key_bits));
 
     return PSA_SUCCESS;
 }
@@ -311,6 +306,7 @@ static psa_status_t gcm_process_aad(AesGcmContext_t *context,
 }
 
 static psa_status_t gcm_process_cipher(AesGcmContext_t *context,
+                                       size_t length,
                                        const uint8_t *pTextDataIn,
                                        uint8_t *pTextDataOut)
 {
@@ -319,7 +315,7 @@ static psa_status_t gcm_process_cipher(AesGcmContext_t *context,
     CCBuffInfo_t outBuffInfo;
 
     /* Must NOT perform in this case */
-    if (0 == context->dataSize) {
+    if (0 == length) {
         return PSA_SUCCESS;
     }
 
@@ -327,14 +323,14 @@ static psa_status_t gcm_process_cipher(AesGcmContext_t *context,
     context->processMode = DRV_AESGCM_Process_DataIn;
 
     /* set data buffers structures */
-    rc = SetDataBuffersInfo(pTextDataIn, context->dataSize, &inBuffInfo,
-                            pTextDataOut, context->dataSize, &outBuffInfo);
+    rc = SetDataBuffersInfo(pTextDataIn,  length, &inBuffInfo,
+                            pTextDataOut, length, &outBuffInfo);
     if (rc != 0) {
         CC_PAL_LOG_ERR("illegal data buffers\n");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo, context->dataSize);
+    rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo, length);
     if (rc != AES_DRV_OK) {
         CC_PAL_LOG_ERR("processing cipher failed with error code %d\n", rc);
         return PSA_ERROR_DATA_INVALID;
@@ -440,9 +436,11 @@ static psa_status_t gcm_crypt_and_tag(
 
     /* TODO: Do we want this on the stack? */
     AesGcmContext_t context;
-    gcm_context_init(&context);
+    cc3xx_gcm_init(&context);
 
-    status = gcm_set_key(&context, key_buffer, key_buffer_size * 8);
+    status = gcm_setkey(&context,
+                        key_buffer, PSA_BYTES_TO_BITS(key_buffer_size),
+                        direction);
     if (status != PSA_SUCCESS) {
         goto cleanup;
     }
@@ -469,7 +467,7 @@ static psa_status_t gcm_crypt_and_tag(
     }
 
     /* Aes-GCM Process Cipher function */
-    status = gcm_process_cipher(&context, input, output);
+    status = gcm_process_cipher(&context, context.dataSize, input, output);
     if (status != PSA_SUCCESS) {
         goto cleanup;
     }
@@ -509,7 +507,7 @@ cleanup:
 
     /* TODO: We simply clear the context here, so is the above work necessary?
      */
-    gcm_context_free(&context);
+    cc3xx_gcm_free(&context);
 
     return status;
 }
@@ -522,7 +520,7 @@ cleanup:
  *
  *  @{
  */
-psa_status_t cc3xx_encrypt_gcm(
+psa_status_t cc3xx_gcm_encrypt(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,
@@ -552,7 +550,7 @@ psa_status_t cc3xx_encrypt_gcm(
     return status;
 }
 
-psa_status_t cc3xx_decrypt_gcm(
+psa_status_t cc3xx_gcm_decrypt(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
     size_t nonce_length, const uint8_t *additional_data,
@@ -582,5 +580,170 @@ psa_status_t cc3xx_decrypt_gcm(
         plaintext, plaintext_length);
 
     return status;
+}
+
+void cc3xx_gcm_init(AesGcmContext_t *ctx)
+{
+    if (NULL == ctx) {
+        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        return;
+    }
+
+    CC_PalMemSetZero(ctx, sizeof(AesGcmContext_t));
+}
+
+void cc3xx_gcm_free(AesGcmContext_t *ctx)
+{
+    if (NULL == ctx) {
+        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        return;
+    }
+
+    CC_PalMemSetZero(ctx, sizeof(AesGcmContext_t));
+}
+
+psa_status_t cc3xx_gcm_setkey_enc(
+    AesGcmContext_t *ctx,
+    const uint8_t *key,
+    size_t key_bits)
+{
+    return gcm_setkey(ctx, key, key_bits, CRYPTO_DIRECTION_ENCRYPT);
+}
+
+psa_status_t cc3xx_gcm_setkey_dec(
+    AesGcmContext_t *ctx,
+    const uint8_t *key,
+    size_t key_bits)
+{
+    return gcm_setkey(ctx, key, key_bits, CRYPTO_DIRECTION_DECRYPT);
+}
+
+psa_status_t cc3xx_gcm_set_nonce(
+    AesGcmContext_t *ctx,
+    const uint8_t *pIv,
+    size_t ivSize)
+{
+    psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+
+    if (NULL == ctx || NULL == pIv) {
+        CC_PAL_LOG_ERR("Null pointer exception\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ret = gcm_calc_h(ctx);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("gcm_calc_h failed: %d\n", ret);
+        return ret;
+    }
+
+    ctx->ivSize = ivSize;
+
+    ret = gcm_process_j0(ctx, pIv);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("gcm_process_j0 failed: %d", ret);
+        return ret;
+    }
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t cc3xx_gcm_set_lengths(
+    AesGcmContext_t *ctx,
+    size_t aadSize,
+    size_t dataSize)
+{
+    if (NULL == ctx) {
+        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (CC3XX_AESGCM_AAD_MAX_SIZE_BYTES < aadSize) {
+        printf("aadSize > %d\r\n", CC3XX_AESGCM_AAD_MAX_SIZE_BYTES);
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (CC3XX_AESGCM_DATA_IN_MAX_SIZE_BYTES < dataSize) {
+        printf("dataSize < %d\r\n", CC3XX_AESGCM_DATA_IN_MAX_SIZE_BYTES);
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ctx->aadSize  = aadSize;
+    ctx->dataSize = dataSize;
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t cc3xx_gcm_update_ad(
+    AesGcmContext_t *ctx,
+    const uint8_t *add,
+    size_t aadSize)
+{
+    psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+
+    if (NULL == ctx || NULL == add) {
+        CC_PAL_LOG_ERR("Null pointer exception\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ctx->aadSize = aadSize;
+
+    ret = gcm_process_aad(ctx, add);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("gcm_process_aad failed: %d", ret);
+        return ret;
+    }
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t cc3xx_gcm_update(
+    AesGcmContext_t *ctx,
+    size_t size,
+    const uint8_t *input,
+    uint8_t *output)
+{
+    psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+
+    if (NULL == ctx || NULL == input || NULL == output) {
+        CC_PAL_LOG_ERR("Null pointer exception\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ret = gcm_process_cipher(ctx, size, input, output);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("gcm_process_cipher failed: %d", ret);
+        return ret;
+    }
+
+    ret = gcm_process_lenA_lenC(ctx);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("gcm_process_lenA_lenC failed: %d", ret);
+        return ret;
+    }
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t cc3xx_gcm_finish(
+    AesGcmContext_t *ctx,
+    uint8_t *tag,
+    size_t tagSize)
+{
+    psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+
+    if (NULL == ctx || NULL == tag) {
+        CC_PAL_LOG_ERR("Null pointer exception\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ctx->tagSize = tagSize;
+
+    ret = gcm_finish(ctx, tag);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("gcm_finish failed: %d", ret);
+        return ret;
+    }
+
+    return PSA_SUCCESS;
 }
 /** @} */ // end of internal_gcm

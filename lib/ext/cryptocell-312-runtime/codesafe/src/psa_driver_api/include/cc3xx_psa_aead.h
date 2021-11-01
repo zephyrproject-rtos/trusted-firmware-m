@@ -80,6 +80,185 @@ cc3xx_aead_decrypt(const psa_key_attributes_t *attributes,
                    size_t ciphertext_length, uint8_t *plaintext,
                    size_t plaintext_size, size_t *plaintext_length);
 
+/*!
+ * \brief Set the key for a multipart authenticated encryption operation.
+ *
+ * \param[in] operation       The operation object to set up.
+ * \param[in] attributes      The attributes of the key to be set.
+ * \param[in] key_buffer      The buffer containing the key material.
+ * \param[in] key_buffer_size Size of \p key_buffer in bytes.
+ * \param[in] alg             The AEAD algorithm
+ *                            (#PSA_ALG_IS_AEAD(\p alg) must be true).
+ *
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_BAD_STATE
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ */
+psa_status_t cc3xx_aead_encrypt_setup(
+        cc3xx_aead_operation_t *operation,
+        const psa_key_attributes_t *attributes,
+        const uint8_t *key_buffer, size_t key_buffer_size,
+        psa_algorithm_t alg);
+
+/*!
+ * \brief Set the key for a multipart authenticated decryption operation
+ *
+ * \param[in] operation       The operation object to set up.
+ * \param[in] attributes      The attributes of the key to be set.
+ * \param[in] key_buffer      The buffer containing the key material.
+ * \param[in] key_buffer_size Size of \p key_buffer in bytes.
+ * \param[in] alg             The AEAD algorithm
+ *                            (#PSA_ALG_IS_AEAD(\p alg) must be true).
+ *
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_BAD_STATE
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ */
+psa_status_t cc3xx_aead_decrypt_setup(
+        cc3xx_aead_operation_t *operation,
+        const psa_key_attributes_t *attributes,
+        const uint8_t *key_buffer, size_t key_buffer_size,
+        psa_algorithm_t alg);
+
+/*!
+ * \brief Set the nonce for an authenticated encryption or decryption operation.
+ *
+ * \param[in] operation    Active AEAD operation.
+ * \param[in] nonce        Buffer containing the nonce to use.
+ * \param[in] nonce_length Size of the nonce in bytes.
+ *
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_GENERIC_ERROR
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_DATA_INVALID
+ */
+psa_status_t cc3xx_aead_set_nonce(
+        cc3xx_aead_operation_t *operation,
+        const uint8_t *nonce,
+        size_t nonce_length);
+
+/*!
+ * \brief Declare the lengths of the message and additional data for AEAD
+ * 
+ * \param[in] operation        Active AEAD operation.
+ * \param[in] ad_length        Size of the additional data in bytes.
+ * \param[in] plaintext_length Size of the plaintext to encrypt in bytes.
+ * 
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ */
+psa_status_t cc3xx_aead_set_lengths(
+        cc3xx_aead_operation_t *operation,
+        size_t ad_length,
+        size_t plaintext_length);
+
+/*!
+ * \brief Pass additional data to an active AEAD operation
+ * 
+ * \param[in] operation    Active AEAD operation.
+ * \param[in] input        Buffer containing the additional data.
+ * \param[in] input_length Size of the input buffer in bytes.
+ * 
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ * \retval #PSA_ERROR_DATA_INVALID
+ */
+psa_status_t cc3xx_aead_update_ad(
+        cc3xx_aead_operation_t *operation,
+        const uint8_t *input,
+        size_t input_length);
+
+/*!
+ * \brief Encrypt or decrypt a message fragment in an active AEAD operation.
+ * 
+ * \param[in]  operation     Active AEAD operation.
+ * \param[in]  input         Buffer containing the message fragment.
+ * \param[in]  input_length  Size of the input buffer in bytes.
+ * \param[out] output        Buffer where the output is to be written.
+ * \param[in]  output_size   Size of the output buffer in bytes.
+ * \param[out] output_length The number of bytes that make up the output.
+ * 
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ * \retval #PSA_ERROR_DATA_INVALID
+ */
+psa_status_t cc3xx_aead_update(
+        cc3xx_aead_operation_t *operation,
+        const uint8_t *input,
+        size_t input_length,
+        uint8_t *output,
+        size_t output_size,
+        size_t *output_length);
+
+/*!
+ * \brief Finish encrypting a message in an AEAD operation.
+ * 
+ * \param[in] operation          Active AEAD operation.
+ * \param[out] ciphertext        Buffer containing the ciphertext.
+ * \param[in] ciphertext_size    Size of the ciphertext buffer in bytes.
+ * \param[out] ciphertext_length The number of bytes that make up the ciphertext
+ * \param[out] tag               Buffer where the tag is to be written.
+ * \param[in] tag_size           Size of the tag buffer in bytes.
+ * \param[out] tag_length        The number of bytes that make up the tag.
+ *
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ */
+psa_status_t cc3xx_aead_finish(
+        cc3xx_aead_operation_t *operation,
+        uint8_t *ciphertext,
+        size_t ciphertext_size,
+        size_t *ciphertext_length,
+        uint8_t *tag,
+        size_t tag_size,
+        size_t *tag_length);
+
+/*!
+ * \brief Finish decrypting a message in an AEAD operation.
+ * 
+ * \param[in] operation         Active AEAD operation.
+ * \param[out] plaintext        Buffer containing the plaintext.
+ * \param[in] plaintext_size    Size of the plaintext buffer in bytes.
+ * \param[out] plaintext_length The number of bytes that make up the plaintext
+ * \param[in] tag               Buffer containing the tag
+ * \param[in] tag_length        Size of the tag buffer in bytes
+ * 
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_INVALID_ARGUMENT
+ * \retval #PSA_ERROR_CORRUPTION_DETECTED
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ */
+psa_status_t cc3xx_aead_verify(
+        cc3xx_aead_operation_t *operation,
+        uint8_t *plaintext,
+        size_t plaintext_size,
+        size_t *plaintext_length,
+        const uint8_t *tag,
+        size_t tag_length);
+/*!
+ * \brief Abort an AEAD operation
+ *
+ * \param[out] operation Initialized AEAD operation.
+ *
+ * \retval #PSA_SUCCESS
+ * \retval #PSA_ERROR_NOT_SUPPORTED
+ */
+psa_status_t cc3xx_aead_abort(cc3xx_aead_operation_t *operation);
+
 #ifdef __cplusplus
 }
 #endif

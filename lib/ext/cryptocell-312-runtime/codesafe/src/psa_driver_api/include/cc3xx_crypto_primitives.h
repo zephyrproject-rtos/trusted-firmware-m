@@ -47,7 +47,15 @@ typedef struct cc3xx_cipher_operation_s cc3xx_cipher_operation_t;
  */
 typedef struct cc3xx_mac_operation_s cc3xx_mac_operation_t;
 
+/*! \typedef cc3xx_aead_operation_t
+ *
+ * \brief A AEAD opertion context is aliased to \ref cc3xx_cipher_operation_t
+ *
+ */
+typedef cc3xx_cipher_operation_t cc3xx_aead_operation_t;
+
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* CC3XX_CRYPTO_PRIMITIVES_H */
