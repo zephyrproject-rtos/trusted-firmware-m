@@ -48,16 +48,6 @@
 #define SCB_ICSR_ADDR                    (0xE000ED04)
 #define SCB_ICSR_PENDSVSET_BIT           (0x10000000)
 
-/*
- * Shout an error at current when VTOR does not present.
- * TODO: Do not rely on VTOR to retrieve MSP initial value.
- */
-#if defined(__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-#define SCB_VTOR_ADDR                    (0xE000ED08)
-#else
-#error "VTOR not present, check configurations."
-#endif
-
 /* Disable NS exceptions by setting NS PRIMASK to 1 */
 #define TFM_NS_EXC_DISABLE()    __TZ_set_PRIMASK_NS(1)
 /* Enable NS exceptions by setting NS PRIMASK to 0 */

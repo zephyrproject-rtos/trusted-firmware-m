@@ -223,7 +223,9 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         tfm_arch_clear_fp_status();
         exc_return = tfm_spm_init();
         /* The following call does not return */
-        tfm_arch_free_msp_and_exc_ret(exc_return);
+        tfm_arch_free_msp_and_exc_ret(
+            (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit),
+            exc_return);
         break;
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);

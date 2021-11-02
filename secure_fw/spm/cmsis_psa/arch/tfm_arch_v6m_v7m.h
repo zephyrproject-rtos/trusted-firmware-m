@@ -38,16 +38,6 @@
 #define SCB_ICSR_ADDR                   (0xE000ED04)
 #define SCB_ICSR_PENDSVSET_BIT          (0x10000000)
 
-/*
- * Report an error at current when VTOR does not present.
- * TODO: Do not rely on VTOR to retrieve MSP initial value.
- */
-#if defined(__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-#define SCB_VTOR_ADDR                    (0xE000ED08)
-#else
-#error "VTOR not present, check configurations."
-#endif
-
 /**
  * \brief Check whether Secure or Non-secure stack is used to restore stack
  *        frame on exception return.

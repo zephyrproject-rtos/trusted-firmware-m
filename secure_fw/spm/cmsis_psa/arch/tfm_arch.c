@@ -5,23 +5,22 @@
  *
  */
 
+#include "compiler_ext_defs.h"
+#include "security_defs.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
 #include "utilities.h"
 
-__attribute__((naked)) void tfm_arch_free_msp_and_exc_ret(uint32_t exc_return)
+__naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
+                                           uint32_t exc_return)
 {
     __ASM volatile(
 #if !defined(__ICCARM__)
         ".syntax unified                        \n"
 #endif
-        "mov     lr, r0                         \n"
-        "ldr     r0, ="M2S(SCB_VTOR_ADDR)"      \n" /* VTOR */
-        "ldr     r0, [r0]                       \n" /* MSP address */
-        "ldr     r0, [r0]                       \n" /* MSP */
-        "subs    r0, #8                         \n" /* Exclude stack seal */
-        "msr     msp, r0                        \n" /* Free Main Stack space */
-        "bx      lr                             \n"
+        "subs    r0, #8                         \n" /* SEAL room */
+        "msr     msp, r0                        \n"
+        "bx      r1                             \n"
     );
 }
 
