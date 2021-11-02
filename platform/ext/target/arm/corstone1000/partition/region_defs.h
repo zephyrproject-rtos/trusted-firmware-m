@@ -37,7 +37,6 @@
  */
 #define PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE   (0x250)
 
-#define BL2_HEADER_SIZE      (0x400)       /* 1 KB */
 #define BL2_TRAILER_SIZE     (0x800)       /* 2 KB */
 
 #define IMAGE_TFM_CODE_SIZE \

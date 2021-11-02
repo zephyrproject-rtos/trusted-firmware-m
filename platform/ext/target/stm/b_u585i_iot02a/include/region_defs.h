@@ -89,7 +89,6 @@
  * for the image header and trailer introduced by the bootloader.
  */
 
-#define BL2_HEADER_SIZE                     (0x400)
 #define BL2_TRAILER_SIZE                    (0x2000)
 #ifdef BL2
 #define S_IMAGE_PRIMARY_PARTITION_OFFSET    (FLASH_AREA_0_OFFSET)
