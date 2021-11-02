@@ -104,13 +104,13 @@ static psa_status_t cmac_setup(cc3xx_cipher_operation_t *cmac,
         return status;
     }
 
-    status = cmac_init(&(cmac->aes_ctx));
+    status = cmac_init(&(cmac->ctx.aes));
     if (status != PSA_SUCCESS) {
         CC_PAL_LOG_ERR(" 'cmac_init' failed with psa return code %d\n", status);
         return status;
     }
 
-    status = cmac_setkey(&(cmac->aes_ctx), key_buffer,
+    status = cmac_setkey(&(cmac->ctx.aes), key_buffer,
                          psa_get_key_bits(attributes));
     if (status != PSA_SUCCESS) {
         CC_PAL_LOG_ERR(" 'cmac_setkey' failed with psa return code %d\n",
@@ -145,7 +145,7 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
             return PSA_ERROR_INVALID_ARGUMENT;
         }
 
-        ret = ProcessAesDrv(&(cmac_ctx->aes_ctx), &inBuffInfo, &outBuffInfo,
+        ret = ProcessAesDrv(&(cmac_ctx->ctx.aes), &inBuffInfo, &outBuffInfo,
                             block_size);
 
         if (ret != AES_DRV_OK) {
@@ -172,7 +172,7 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
 
         /* Process the input data, excluding any final partial or complete block
          */
-        ret = ProcessAesDrv(&(cmac_ctx->aes_ctx), &inBuffInfo, &outBuffInfo,
+        ret = ProcessAesDrv(&(cmac_ctx->ctx.aes), &inBuffInfo, &outBuffInfo,
                             main_chunk_in_bytes);
         if (ret != AES_DRV_OK) {
             CC_PAL_LOG_ERR("ProcessAesDrv failed with return code %d\n", ret);
@@ -213,7 +213,7 @@ static psa_status_t cmac_finish(cc3xx_cipher_operation_t *cmac_ctx,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    ret = FinishAesDrv(&(cmac_ctx->aes_ctx), &inBuffInfo, &outBuffInfo,
+    ret = FinishAesDrv(&(cmac_ctx->ctx.aes), &inBuffInfo, &outBuffInfo,
                        (uint32_t)(cmac_ctx)->unprocessed_size);
 
     if (ret != AES_DRV_OK) {
@@ -221,7 +221,7 @@ static psa_status_t cmac_finish(cc3xx_cipher_operation_t *cmac_ctx,
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    CC_PalMemCopy(output, cmac_ctx->aes_ctx.ivBuf, AES_IV_SIZE);
+    CC_PalMemCopy(output, cmac_ctx->ctx.aes.ivBuf, AES_IV_SIZE);
 
     CC_PalMemSetZero(cmac_ctx, sizeof(cc3xx_cipher_operation_t));
 

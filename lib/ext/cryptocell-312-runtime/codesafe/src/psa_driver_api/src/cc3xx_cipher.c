@@ -10,13 +10,6 @@
 #include "cc3xx_internal_chacha20.h"
 #include "cc_pal_mem.h"
 
-/* FixMe: implement pkcs#7 padding in HW
- * The function below was taken from Mbed TLS and implements pkcs#7
- * padding in software. It might be possible to do this in HW using
- * CC; however, we will need to modify the SW abstraction function:
- * ProcessAesDrv, and others.
- */
-
 static psa_status_t add_pkcs_padding(
         uint8_t *output,
         size_t output_size,
@@ -63,12 +56,12 @@ static psa_status_t cipher_setup(
 
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
-        cc3xx_aes_init(&operation->aes_ctx);
+        cc3xx_aes_init(&operation->ctx.aes);
 
         switch (operation->dir) {
         case PSA_CRYPTO_DRIVER_ENCRYPT:
             if (( ret = cc3xx_aes_setkey_enc(
-                    &operation->aes_ctx,
+                    &operation->ctx.aes,
                     key,
                     key_bits) )
                 != PSA_SUCCESS) {
@@ -78,7 +71,7 @@ static psa_status_t cipher_setup(
             break;
         case PSA_CRYPTO_DRIVER_DECRYPT:
             if (( ret = cc3xx_aes_setkey_dec(
-                    &operation->aes_ctx,
+                    &operation->ctx.aes,
                     key,
                     key_bits) )
                 != PSA_SUCCESS) {
@@ -92,10 +85,10 @@ static psa_status_t cipher_setup(
 
         break;
     case PSA_KEY_TYPE_CHACHA20:
-        cc3xx_chacha20_init(&operation->chacha_ctx);
+        cc3xx_chacha20_init(&operation->ctx.chacha);
 
         if (( ret = cc3xx_chacha20_setkey(
-                &operation->chacha_ctx,
+                &operation->ctx.chacha,
                 key) )
             != PSA_SUCCESS) {
             return ret;
@@ -165,13 +158,13 @@ psa_status_t cc3xx_cipher_set_iv(
                 CC_PalMemCopy((uint8_t *)&counter, iv_pnt, 4);
                 iv_pnt+=4;
                 ret = cc3xx_chacha20_starts(
-                        &operation->chacha_ctx,
+                        &operation->ctx.chacha,
                         iv_pnt,
                         counter);
                 break;
             case 12:
                 ret = cc3xx_chacha20_starts(
-                        &operation->chacha_ctx,
+                        &operation->ctx.chacha,
                         iv_pnt,
                         counter);
                 break;
@@ -256,7 +249,7 @@ psa_status_t cc3xx_cipher_update(
                               copy_len);
 
                 if (( ret = cc3xx_aes_crypt(
-                        &operation->aes_ctx,
+                        &operation->ctx.aes,
                         CIPHER_CBC,
                         block_size,
                         operation->iv,
@@ -294,7 +287,7 @@ psa_status_t cc3xx_cipher_update(
 
             if (0 != input_length) {
                 if (( ret = cc3xx_aes_crypt(
-                        &operation->aes_ctx,
+                        &operation->ctx.aes,
                         CIPHER_CBC,
                         input_length,
                         operation->iv,
@@ -310,7 +303,7 @@ psa_status_t cc3xx_cipher_update(
             break;
         case PSA_ALG_ECB_NO_PADDING:
             if (( ret = cc3xx_aes_crypt(
-                    &operation->aes_ctx,
+                    &operation->ctx.aes,
                     CIPHER_ECB,
                     input_length,
                     operation->iv,
@@ -325,7 +318,7 @@ psa_status_t cc3xx_cipher_update(
             break;
         case PSA_ALG_CTR:
             if (( ret = cc3xx_aes_crypt(
-                    &operation->aes_ctx,
+                    &operation->ctx.aes,
                     CIPHER_CTR,
                     input_length,
                     operation->iv,
@@ -340,7 +333,7 @@ psa_status_t cc3xx_cipher_update(
             break;
         case PSA_ALG_OFB:
             if (( ret = cc3xx_aes_crypt(
-                    &operation->aes_ctx,
+                    &operation->ctx.aes,
                     CIPHER_OFB,
                     input_length,
                     operation->iv,
@@ -364,7 +357,7 @@ psa_status_t cc3xx_cipher_update(
         break;
     case PSA_KEY_TYPE_CHACHA20:
         if (( ret = cc3xx_chacha20_update(
-                &operation->chacha_ctx,
+                &operation->ctx.chacha,
                 input_length,
                 input,
                 output) )
@@ -424,7 +417,7 @@ psa_status_t cc3xx_cipher_finish(
             }
 
             if (( ret = cc3xx_aes_crypt(
-                    &operation->aes_ctx,
+                    &operation->ctx.aes,
                     CIPHER_CBC,
                     output_size,
                     operation->iv,
@@ -458,10 +451,10 @@ psa_status_t cc3xx_cipher_abort(cc3xx_cipher_operation_t *operation)
 {
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
-        cc3xx_aes_free(&operation->aes_ctx);
+        cc3xx_aes_free(&operation->ctx.aes);
         break;
     case PSA_KEY_TYPE_CHACHA20:
-        cc3xx_chacha20_free(&operation->chacha_ctx);
+        cc3xx_chacha20_free(&operation->ctx.chacha);
         return PSA_ERROR_NOT_SUPPORTED;
     default:
         return PSA_ERROR_NOT_SUPPORTED;

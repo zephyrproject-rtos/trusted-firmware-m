@@ -14,6 +14,8 @@
 
 #include "hash_driver.h"
 #include "aes_driver.h"
+#include "aesgcm_driver.h"
+#include "aesccm_driver.h"
 #include "chacha_driver.h"
 
 #ifdef __cplusplus
@@ -37,9 +39,12 @@ typedef struct {
     uint8_t iv[AES_IV_SIZE];
     size_t  iv_size;
 
-    AesContext_t aes_ctx;
-
-    ChachaContext_t chacha_ctx;
+    union {
+        AesContext_t    aes;
+        AesGcmContext_t aes_gcm;
+        AesCcmContext_t aes_ccm;
+        ChachaContext_t chacha;
+    } ctx;
 } cc3xx_cipher_operation_t;
 
 typedef struct {
