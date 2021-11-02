@@ -131,7 +131,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
         --align 1
         --pad
         --pad-header
-        -H 0x400
+        -H ${BL2_HEADER_SIZE}
         -s ${MCUBOOT_SECURITY_COUNTER_S}
         -L ${MCUBOOT_ENC_KEY_LEN_S}
         -d \"\(1,${MCUBOOT_NS_IMAGE_MIN_VER}\)\"
@@ -182,7 +182,7 @@ if(NS)
             --align 1
             --pad
             --pad-header
-            -H 0x400
+            -H ${BL2_HEADER_SIZE}
             -s ${MCUBOOT_SECURITY_COUNTER_NS}
             -L ${MCUBOOT_ENC_KEY_LEN_NS}
             -d \"\(0, ${MCUBOOT_S_IMAGE_MIN_VER}\)\"
@@ -232,7 +232,7 @@ if(NS)
             --align 1
             --pad
             --pad-header
-            -H 0x400
+            -H ${BL2_HEADER_SIZE}
             -s ${MCUBOOT_SECURITY_COUNTER_S}
             -L ${MCUBOOT_ENC_KEY_LEN_S}
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
