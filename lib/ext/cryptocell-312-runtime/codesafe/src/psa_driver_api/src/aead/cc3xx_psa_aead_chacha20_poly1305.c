@@ -23,7 +23,7 @@ static psa_status_t chacha20_poly1305_crypt(const unsigned char key[32],
                                             const unsigned char *input,
                                             unsigned char *output)
 {
-    ChachaContext_t context;
+    ChachaContext_t context = {0};
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 
     cc3xx_chacha20_init(&context);
@@ -167,6 +167,10 @@ psa_status_t cc3xx_psa_aead_encrypt_chacha20_poly1305(
      */
     uint8_t *tag = ciphertext + plaintext_length;
 
+    if (nonce_length != CHACHA_IV_96_SIZE_BYTES){
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     status = chacha20_poly1305_crypt_and_tag(
         CRYPTO_DIRECTION_ENCRYPT, key_buffer, key_buffer_size, plaintext_length,
         nonce, additional_data, additional_data_length, plaintext, ciphertext,
@@ -197,6 +201,10 @@ psa_status_t cc3xx_psa_aead_decrypt_chacha20_poly1305(
     const uint8_t *tag = ciphertext + ciphertext_length_without_tag;
 
     CC_PalMemCopy(local_tag_buffer, tag, tag_length);
+
+    if (nonce_length != CHACHA_IV_96_SIZE_BYTES){
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
     status = chacha20_poly1305_crypt_and_tag(
         CRYPTO_DIRECTION_DECRYPT, key_buffer, key_buffer_size,
