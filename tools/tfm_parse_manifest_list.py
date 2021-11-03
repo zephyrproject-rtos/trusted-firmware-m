@@ -185,17 +185,6 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
             intermedia_file = os.path.join(manifest_dir, "auto_generated", 'intermedia_' + manifest_out_basename + '.c')
             load_info_file = os.path.join(manifest_dir, "auto_generated", 'load_info_' + manifest_out_basename + '.c')
 
-            """
-            Remove the `source_path` portion of the filepaths, so that it can be
-            interpreted as a relative path from the OUT_DIR.
-            """
-            if 'source_path' in manifest_item:
-                # Replace environment variables in the source path
-                source_path = os.path.expandvars(manifest_item['source_path'])
-                manifest_head_file = os.path.relpath(manifest_head_file, start = source_path)
-                intermedia_file = os.path.relpath(intermedia_file, start = source_path)
-                load_info_file = os.path.relpath(load_info_file, start = source_path)
-
         manifest_head_file = os.path.join(OUT_DIR, manifest_head_file).replace('\\', '/')
         intermedia_file = os.path.join(OUT_DIR, intermedia_file).replace('\\', '/')
         load_info_file = os.path.join(OUT_DIR, load_info_file).replace('\\', '/')
