@@ -36,17 +36,17 @@ if(TFM_SYSTEM_DSP)
     message(FATAL_ERROR "Hardware DSP is currently not supported in TF-M")
 endif()
 
+# The default build type is release. If debug symbols are needed then
+# -DCMAKE_BUILD_TYPE=debug should be used (likewise with other build types)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+endif()
+
 include(config/set_config.cmake)
 
 if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
    NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
     Message(FATAL_ERROR "Unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
-endif()
-
-# The default build type is release. If debug symbols are needed then
-# -DCMAKE_BUILD_TYPE=debug should be used (likewise with other build types)
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
