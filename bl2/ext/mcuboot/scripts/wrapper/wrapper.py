@@ -74,6 +74,9 @@ os.environ['LANG'] = 'C.UTF-8'
               callback=imgtool.main.validate_security_counter,
               help='Specify the value of security counter. Use the `auto` '
               'keyword to automatically generate it from the image version.')
+@click.option('-L', '--encrypt-keylen', type=click.Choice(['128', '256']),
+              default='128',
+              help='Specify the value of encrypt key length. Default 128.')
 @click.option('-v', '--version', callback=imgtool.main.validate_version,
               required=True)
 @click.option('--align', type=click.Choice(['1', '2', '4', '8']),
@@ -88,7 +91,7 @@ os.environ['LANG'] = 'C.UTF-8'
 def wrap(key, align, version, header_size, pad_header, layout, pad, confirm,
          max_sectors, overwrite_only, endian, encrypt, infile, outfile,
          dependencies, hex_addr, erased_val, save_enctlv, public_key_format,
-         security_counter):
+         security_counter, encrypt_keylen):
 
     slot_size = macro_parser.evaluate_macro(layout, sign_bin_size_re, 0, 1)
     load_addr = macro_parser.evaluate_macro(layout, load_addr_re, 0, 1)
@@ -119,8 +122,8 @@ def wrap(key, align, version, header_size, pad_header, layout, pad, confirm,
             # FIXME
             raise click.UsageError("Signing and encryption must use the same "
                                    "type of key")
-
-    img.create(key, public_key_format, enckey, dependencies, boot_record)
+    img.create(key, public_key_format, enckey, dependencies, boot_record,
+               None, encrypt_keylen=int(encrypt_keylen))
     img.save(outfile, hex_addr)
 
 

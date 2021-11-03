@@ -133,6 +133,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
         --pad-header
         -H 0x400
         -s ${MCUBOOT_SECURITY_COUNTER_S}
+        -L ${MCUBOOT_ENC_KEY_LEN_S}
         -d \"\(1,${MCUBOOT_NS_IMAGE_MIN_VER}\)\"
         $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
         $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
@@ -183,6 +184,7 @@ if(NS)
             --pad-header
             -H 0x400
             -s ${MCUBOOT_SECURITY_COUNTER_NS}
+            -L ${MCUBOOT_ENC_KEY_LEN_NS}
             -d \"\(0, ${MCUBOOT_S_IMAGE_MIN_VER}\)\"
             $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
@@ -232,6 +234,7 @@ if(NS)
             --pad-header
             -H 0x400
             -s ${MCUBOOT_SECURITY_COUNTER_S}
+            -L ${MCUBOOT_ENC_KEY_LEN_S}
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns.bin
