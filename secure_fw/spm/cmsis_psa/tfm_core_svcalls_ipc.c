@@ -34,20 +34,25 @@ extern int32_t platform_svc_handlers(uint8_t svc_num,
 static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
+    psa_status_t status = PSA_SUCCESS;
+
     switch (svc_num) {
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_spm_client_psa_framework_version();
     case TFM_SVC_PSA_VERSION:
         return tfm_spm_client_psa_version(ctx[0]);
     case TFM_SVC_PSA_CONNECT:
-        return tfm_spm_client_psa_connect(ctx[0], ctx[1]);
-    case TFM_SVC_PSA_CALL:
-        return tfm_spm_client_psa_call((psa_handle_t)ctx[0], ctx[1],
-                                       (const psa_invec *)ctx[2],
-                                       (psa_outvec *)ctx[3]);
-    case TFM_SVC_PSA_CLOSE:
-        tfm_spm_client_psa_close((psa_handle_t)ctx[0]);
+        status = tfm_spm_client_psa_connect(ctx[0], ctx[1]);
         break;
+    case TFM_SVC_PSA_CALL:
+        status = tfm_spm_client_psa_call((psa_handle_t)ctx[0], ctx[1],
+                                         (const psa_invec *)ctx[2],
+                                         (psa_outvec *)ctx[3]);
+        break;
+    case TFM_SVC_PSA_CLOSE:
+        status = tfm_spm_client_psa_close((psa_handle_t)ctx[0]);
+        spm_handle_programmer_errors(status);
+        return PSA_SUCCESS;
     case TFM_SVC_PSA_WAIT:
         return tfm_spm_partition_psa_wait((psa_signal_t)ctx[0], ctx[1]);
     case TFM_SVC_PSA_GET:
@@ -103,7 +108,8 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         return PSA_ERROR_GENERIC_ERROR;
 #endif
     }
-    return PSA_SUCCESS;
+    spm_handle_programmer_errors(status);
+    return status;
 }
 
 extern void tfm_flih_func_return(psa_flih_result_t result);

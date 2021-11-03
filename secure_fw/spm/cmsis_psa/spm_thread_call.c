@@ -12,6 +12,7 @@
 #include "tfm_arch.h"
 #include "utilities.h"
 #include "ffm/backend.h"
+#include "ffm/psa_api.h"
 #include "psa/client.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
@@ -54,6 +55,8 @@ void spm_interface_thread_dispatcher(uintptr_t fn_addr,
         ((struct spcall_abi_frame_t *)frame_addr)->a0 =
                                         tfm_arch_trigger_pendsv();
     }
+
+    spm_handle_programmer_errors(((struct spcall_abi_frame_t *)frame_addr)->a0);
 }
 
 #endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
