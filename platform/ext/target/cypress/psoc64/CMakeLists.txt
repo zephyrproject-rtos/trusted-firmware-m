@@ -130,16 +130,6 @@ target_link_libraries(platform_s
         ${P64_UTILS_LIB_TARGET}
 )
 
-# GNU ld has some strange behaviour to do with weak functions, and does not deal
-# well with strong functions in static libraries overriding weak functions in
-# object files. For this reason, the file mailbox_ipc_intr is linked directly to
-# the s binary as an object file. This issue does not affect armclang, but the
-# fix is compatible.
-target_sources(tfm_s
-    PRIVATE
-        ./mailbox/mailbox_ipc_intr.c
-)
-
 #========================= Platform Non-Secure ================================#
 
 target_sources(platform_ns

@@ -275,14 +275,6 @@ int32_t tfm_mailbox_handle_msg(void)
          */
     }
 
-    /*
-     * Some requests are serviced immediately, so only trigger pendsv if the
-     * thread state is changed to runnable.
-     */
-    if ((pend_slots != 0) && THRD_EXPECTING_SCHEDULE()) {
-        tfm_arch_trigger_pendsv();
-    }
-
     tfm_mailbox_hal_enter_critical();
 
     /* Clean the NSPE mailbox pending status. */

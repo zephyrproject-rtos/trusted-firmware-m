@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +125,8 @@
 #define BL2_DATA_SIZE     (S_DATA_SIZE)
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
+/* NSPE-to-SPE interrupt */
+#define MAILBOX_IRQ MHU0_MSG_0_IRQn
 
 #endif /* __REGION_DEFS_H__ */
 

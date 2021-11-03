@@ -545,10 +545,6 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
 bool tfm_spm_is_ns_caller(void)
 {
-#if defined(TFM_MULTI_CORE_TOPOLOGY)
-    /* Multi-core NS PSA API request is processed by pendSV. */
-    return (__get_active_exc_num() == EXC_NUM_PENDSV);
-#else
     struct partition_t *partition = tfm_spm_get_running_partition();
 
     if (!partition) {
@@ -556,22 +552,12 @@ bool tfm_spm_is_ns_caller(void)
     }
 
     return (partition->p_ldinf->pid == TFM_SP_NON_SECURE_ID);
-#endif
 }
 
 uint32_t tfm_spm_get_caller_privilege_mode(void)
 {
     struct partition_t *partition;
 
-#if defined(TFM_MULTI_CORE_TOPOLOGY) || defined(FORWARD_PROT_MSG)
-    /*
-     * In multi-core topology, if PSA request is from mailbox, the client
-     * is unprivileged.
-     */
-    if (__get_active_exc_num() == EXC_NUM_PENDSV) {
-        return TFM_PARTITION_UNPRIVILEGED_MODE;
-    }
-#endif
     partition = tfm_spm_get_running_partition();
     if (!partition) {
         tfm_core_panic();
@@ -700,12 +686,6 @@ uint64_t do_schedule(void)
         CURRENT_THREAD = pth_next;
         CRITICAL_SECTION_LEAVE(cs);
     }
-
-    /*
-     * Handle pending mailbox message from NS in multi-core topology.
-     * Empty operation on single Armv8-M platform.
-     */
-    tfm_rpc_client_call_handler();
 
     return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }

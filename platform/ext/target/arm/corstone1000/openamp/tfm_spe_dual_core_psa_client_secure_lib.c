@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -290,11 +291,6 @@ void deliver_msg_to_tfm_spe(void *private)
             send_error_to_non_secure(OPENAMP_INVAL_PARAMS, s_map_entry->msg.request_id);
             unordered_map_free(unordered_map_get_entry_handle(s_map_entry));
             break;
-    }
-
-    /* trigger the service thread to handle the inserted request */
-    if (THRD_EXPECTING_SCHEDULE()) {
-        tfm_arch_trigger_pendsv();
     }
 }
 
