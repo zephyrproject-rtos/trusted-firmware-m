@@ -39,7 +39,10 @@ static psa_status_t cipher_setup(
     psa_key_type_t key_type = psa_get_key_type(attributes);
     size_t key_bits = psa_get_key_bits(attributes);
 
-    (void)key_length;
+    if (PSA_BYTES_TO_BITS(key_length) != key_bits) {
+        /* The attributes don't match the buffer given as input */
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
     if (!PSA_ALG_IS_CIPHER(alg)) {
         return PSA_ERROR_BAD_STATE;

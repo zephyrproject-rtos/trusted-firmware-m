@@ -14,6 +14,9 @@
 extern "C" {
 #endif
 
+/**
+ * \brief Encrypt and create auth tag with AES-GCM
+ */
 psa_status_t cc3xx_encrypt_gcm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
@@ -22,6 +25,9 @@ psa_status_t cc3xx_encrypt_gcm(
     size_t plaintext_length, uint8_t *ciphertext, size_t ciphertext_size,
     size_t *ciphertext_length);
 
+/**
+ * \brief Decrypt and validate auth tag with AES-GCM
+ */
 psa_status_t cc3xx_decrypt_gcm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,

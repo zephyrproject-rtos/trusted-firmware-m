@@ -17,8 +17,6 @@
 #include "cc3xx_internal_ccm.h"
 #include <psa/crypto.h>
 
-/************************ From "mbedtls_ccm_common" *************/
-
 /*! The size of the AES CCM star nonce in bytes. */
 #define AESCCM_STAR_NONCE_SIZE_BYTES 13
 /*! The size of source address of the AES CCM star in bytes. */
@@ -149,7 +147,6 @@ static psa_status_t ccm_init(AesCcmContext_t *context,
                              const uint8_t *pNonce, uint8_t sizeOfN,
                              uint8_t sizeOfT, uint32_t ccmMode)
 {
-
     uint8_t ctrStateBuf[CC_AES_BLOCK_SIZE_IN_BYTES] = {0};
     uint8_t qFieldSize = 15 - sizeOfN;
     uint8_t *tempBuff;
@@ -277,7 +274,6 @@ static psa_status_t ccm_ass_data(AesCcmContext_t *context,
                                  const uint8_t *pAssocData,
                                  size_t assocDataSize)
 {
-
     uint32_t firstBlockRemSize = 0;
     uint8_t Asize = 0;
     drvError_t rc;
@@ -374,7 +370,6 @@ static psa_status_t ccm_text_data(AesCcmContext_t *context,
                                   const uint8_t *pTextDataIn,
                                   size_t textDataSize, uint8_t *pTextDataOut)
 {
-
     drvError_t rc;
     CCBuffInfo_t inBuffInfo;
     CCBuffInfo_t outBuffInfo;
@@ -394,13 +389,14 @@ static psa_status_t ccm_text_data(AesCcmContext_t *context,
     }
 
     /* check overlapping of input-output buffers:
-     1. in-placement operation is permitted, i.e. pTextDataIn = pTextDataOut
-     2. If pTextDataIn > pTextDataOut, operation is valid since HW reads the
-     block, perform operation and write the result to output which will not
-     overwrite the next input operation block. And the tag/mac result is written
-     to another temporary buffer see in ccm_finish()
-     3. BUT,  pTextDataIn < pTextDataOut, operation is NOT valid since the
-     output result will  overwrite the next input block, or expected tag/mac */
+     * 1. in-placement operation is permitted, i.e. pTextDataIn = pTextDataOut
+     * 2. If pTextDataIn > pTextDataOut, operation is valid since HW reads the
+     *    block, perform operation and write the result to output which will not
+     *    overwrite the next input operation block. And the tag/mac result is
+     *    written to another temporary buffer see in ccm_finish()
+     * 3. BUT,  pTextDataIn < pTextDataOut, operation is NOT valid since the
+     *    output result will  overwrite the next input block, or expected tag/mac
+     */
     if ((pTextDataIn < pTextDataOut) &&
         (pTextDataIn + textDataSize > pTextDataOut)) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -432,9 +428,10 @@ static psa_status_t ccm_text_data(AesCcmContext_t *context,
         return PSA_ERROR_DATA_INVALID;
     }
 
-#else
+#else /* defined(AES_NO_TUNNEL) || defined(ARCH_IS_CC310) */
 
-    /* invoke two separate operations in case of no tunneling is supported by HW
+    /* invoke two separate operations in case of no tunneling is supported
+     * by HW
      */
 
     if (context->dir == CRYPTO_DIRECTION_ENCRYPT) {
@@ -477,7 +474,7 @@ static psa_status_t ccm_text_data(AesCcmContext_t *context,
         }
     }
 
-#endif
+#endif /* defined(AES_NO_TUNNEL) || defined(ARCH_IS_CC310) */
 
     return PSA_SUCCESS;
 }
@@ -490,7 +487,8 @@ static psa_status_t ccm_finish(AesCcmContext_t *context, unsigned char *macBuf,
     drvError_t rc;
     /* important to define different buffer for mac to support CCM with TextData
      * in-place and pTextDataIn > pTextDataOut overlapping addresses, see
-     * comment in ccm_text_data()*/
+     * comment in ccm_text_data()
+     */
     uint8_t localMacBuf[CC_AES_BLOCK_SIZE_IN_BYTES];
     CCBuffInfo_t inBuffInfo;
     CCBuffInfo_t outBuffInfo;
@@ -507,8 +505,6 @@ static psa_status_t ccm_finish(AesCcmContext_t *context, unsigned char *macBuf,
     qFieldSize = 15 - context->sizeOfN;
 
     /* encrypt (decrypt) the CCM-MAC value */
-    /* -------------------------------------------------------------------------
-     */
 
     /* set operation to CTR mode */
     context->mode = CIPHER_CTR;

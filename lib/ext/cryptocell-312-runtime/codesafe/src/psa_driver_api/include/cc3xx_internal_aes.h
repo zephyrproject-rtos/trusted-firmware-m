@@ -15,17 +15,17 @@ extern "C" {
 #endif
 
 /**
- * \brief    Initialize the specified AES context.
+ * \brief Initialize the specified AES context.
  */
 void cc3xx_aes_init(AesContext_t *ctx);
 
 /**
- * \brief   Release and clear the specified AES context.
+ * \brief Release and clear the specified AES context.
  */
 void cc3xx_aes_free(AesContext_t *ctx);
 
 /**
- * \brief   Set the encryption key.
+ * \brief Set the encryption key.
  */
 psa_status_t cc3xx_aes_setkey_enc(
         AesContext_t *ctx,
@@ -33,7 +33,7 @@ psa_status_t cc3xx_aes_setkey_enc(
         size_t key_bits);
 
 /**
- * \brief   Set the decryption key.
+ * \brief Set the decryption key.
  */
 psa_status_t cc3xx_aes_setkey_dec(
         AesContext_t *ctx,
@@ -41,7 +41,7 @@ psa_status_t cc3xx_aes_setkey_dec(
         size_t key_bits);
 
 /**
- * \brief   AES block encryption/decryption.
+ * \brief AES block encryption/decryption.
  */
 psa_status_t cc3xx_aes_crypt(
         AesContext_t *ctx,

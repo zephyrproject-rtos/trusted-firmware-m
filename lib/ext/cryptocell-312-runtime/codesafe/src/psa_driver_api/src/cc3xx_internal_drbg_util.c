@@ -10,6 +10,8 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/hmac_drbg.h"
 
+#define CC3XX_CTR_DRBG_INITIALIZED 0x5A44A5A8
+
 mbedtls_ctr_drbg_context global_ctr_drbg_ctx;
 mbedtls_hmac_drbg_context global_hmac_drbg_ctx;
 mbedtls_entropy_context global_entropy_ctx;

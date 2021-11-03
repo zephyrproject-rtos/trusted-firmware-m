@@ -43,27 +43,51 @@ extern "C" {
 #define CC3XX_RSA_MAX_VALID_KEYGEN_SIZE_VALUE_IN_BITS 3072
 #endif
 
+/**
+ * \brief Converts a \ref CCError_t to the corresponding \ref psa_status_t
+ *
+ * \param[in] cc_error An error of type \ref CCError_t
+ *
+ * \retval The corresponding value of type \ref psa_status_t
+ */
 psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error);
 
+/**
+ * \brief Translate an RSA private key in DER format
+ */
 CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
                                       size_t key_buffer_size, uint32_t *n,
                                       uint32_t *e, uint32_t *d, uint32_t *p,
                                       uint32_t *q, uint32_t *dP, uint32_t *dQ,
                                       uint32_t *qInv, size_t d_size_bytes);
-
+/**
+ * \brief Extract the public key from the private key in PSA format
+ */
 CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
                                          size_t priv_key_buffer_size,
                                          uint8_t *publ_key_buffer,
                                          size_t publ_key_buffer_size);
-
+/**
+ * \brief Convert a private key in PSA format to the same key in CC format, i.e.
+ *        the type specified by the low-level driver code, i.e.
+ *        \ref CCRsaUserPrivKey_t
+ */
 CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
                                         size_t psa_priv_key_buffer_size,
                                         CCRsaUserPrivKey_t *UserPrivKey_ptr);
-
+/**
+ * \brief Extract the public key from a private key in PSA format, and in the
+ *        process translates it to CC format, i.e. the type specified by the
+ *        low-level driver, i.e. \ref CCRsaUserPubKey_t
+ */
 CCError_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
                                        size_t psa_pub_key_buffer_size,
                                        CCRsaUserPubKey_t *UserPubKey_ptr);
-
+/**
+ * \brief Convert a public key in PSA format to the same key in CC format, i.e.
+ *        the type specified by the low-level driver code, i.e.
+ *        \ref CCRsaUserPubKey_t
+ */
 CCError_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
                                       size_t psa_pub_key_buffer_size,
                                       CCRsaUserPubKey_t *UserPubKey_ptr);
