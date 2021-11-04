@@ -5,8 +5,16 @@
  *
  */
 
-#ifndef CC3XX_KEY_AGREEMENT_H
-#define CC3XX_KEY_AGREEMENT_H
+#ifndef CC3XX_PSA_KEY_AGREEMENT_H
+#define CC3XX_PSA_KEY_AGREEMENT_H
+
+/** \file cc3xx_psa_key_agreement.h
+ *
+ * This file contains the declaration of the entry points associated to the
+ * raw key agreement (i.e. ECDH) as described by the PSA * Cryptoprocessor
+ * Driver interface specification.
+ *
+ */
 
 #include "psa/crypto.h"
 
@@ -39,4 +47,4 @@ psa_status_t cc3xx_key_agreement(
 #ifdef __cplusplus
 }
 #endif
-#endif /* CC3XX_KEY_AGREEMENT_H */
+#endif /* CC3XX_PSA_KEY_AGREEMENT_H */

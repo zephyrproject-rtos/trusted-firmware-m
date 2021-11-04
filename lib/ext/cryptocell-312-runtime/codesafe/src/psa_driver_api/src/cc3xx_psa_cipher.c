@@ -5,7 +5,15 @@
  *
  */
 
-#include "cc3xx_cipher.h"
+/** \file cc3xx_psa_cipher.c
+ *
+ * This file contains the implementation of the entry points associated to the
+ * cipher capability (single-part and multipart) as described by the PSA
+ * Cryptoprocessor Driver interface specification.
+ *
+ */
+
+#include "cc3xx_psa_cipher.h"
 #include "cc3xx_internal_aes.h"
 #include "cc3xx_internal_chacha20.h"
 #include "cc_pal_mem.h"

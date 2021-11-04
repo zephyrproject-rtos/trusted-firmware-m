@@ -5,9 +5,17 @@
  *
  */
 
-#include "cc3xx_mac.h"
-#include "cc3xx_cipher.h"
-#include "cc3xx_hash.h"
+/** \file cc3xx_psa_mac.c
+ *
+ * This file contains the implementation of the entry points associated to the
+ * mac capability (single-part and multipart) as described by the PSA
+ * Cryptoprocessor Driver interface specification.
+ *
+ */
+
+#include "cc3xx_psa_mac.h"
+#include "cc3xx_psa_cipher.h"
+#include "cc3xx_psa_hash.h"
 #include "aes_driver.h"
 #include "cc_pal_log.h"
 #include "cc_pal_mem.h"

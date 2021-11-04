@@ -5,8 +5,16 @@
  *
  */
 
-#ifndef CC3XX_HASH_H
-#define CC3XX_HASH_H
+#ifndef CC3XX_PSA_HASH_H
+#define CC3XX_PSA_HASH_H
+
+/** \file cc3xx_psa_hash.h
+ *
+ * This file contains the declaration of the entry points associated to the
+ * hash capability (single-part and multipart) as described by the PSA
+ * Cryptoprocessor Driver interface specification.
+ *
+ */
 
 #include "cc3xx_crypto_primitives.h"
 #include "psa/crypto.h"
@@ -91,4 +99,4 @@ psa_status_t cc3xx_hash_compute(psa_algorithm_t alg, const uint8_t *input,
 #ifdef __cplusplus
 }
 #endif
-#endif /* CC3XX_HASH_H */
+#endif /* CC3XX_PSA_HASH_H */

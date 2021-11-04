@@ -5,8 +5,16 @@
  *
  */
 
-#ifndef CC3XX_ASYMMETRIC_ENCRYPTION_H
-#define CC3XX_ASYMMETRIC_ENCRYPTION_H
+#ifndef CC3XX_PSA_ASYMMETRIC_ENCRYPTION_H
+#define CC3XX_PSA_ASYMMETRIC_ENCRYPTION_H
+
+/** \file cc3xx_psa_asymmetric_encryption.h
+ *
+ * This file contains the declaration of the entry points associated to the
+ * asymmetric encryption capability as described by the PSA Cryptoprocessor
+ * Driver interface specification.
+ *
+ */
 
 #include "psa/crypto.h"
 
@@ -72,4 +80,4 @@ psa_status_t cc3xx_asymmetric_decrypt(const psa_key_attributes_t *attributes,
 #ifdef __cplusplus
 }
 #endif
-#endif /* CC3XX_ASYMMETRIC_ENCRYPTION_H */
+#endif /* CC3XX_PSA_ASYMMETRIC_ENCRYPTION_H */

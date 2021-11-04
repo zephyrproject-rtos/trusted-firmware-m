@@ -13,15 +13,16 @@ target_include_directories(${CC312_LIB_TARGET}
 
 target_sources(${CC312_LIB_TARGET}
     PRIVATE
-        src/cc3xx_hash.c
-        src/cc3xx_cipher.c
-        src/cc3xx_mac.c
-        src/cc3xx_entropy.c
-        src/cc3xx_key_agreement.c
-        src/cc3xx_asymmetric_signature.c
-        src/cc3xx_asymmetric_encryption.c
-        src/cc3xx_key_generation.c
-        src/cc3xx_aead.c
+        # PSA Cryptoprocessor Unified Driver interface entry point sources
+        src/cc3xx_psa_hash.c
+        src/cc3xx_psa_cipher.c
+        src/cc3xx_psa_mac.c
+        src/cc3xx_psa_entropy.c
+        src/cc3xx_psa_key_agreement.c
+        src/cc3xx_psa_asymmetric_signature.c
+        src/cc3xx_psa_asymmetric_encryption.c
+        src/cc3xx_psa_key_generation.c
+        src/cc3xx_psa_aead.c
         # Internal sources
         src/cc3xx_internal_asn1_util.c
         src/cc3xx_internal_ecc_util.c

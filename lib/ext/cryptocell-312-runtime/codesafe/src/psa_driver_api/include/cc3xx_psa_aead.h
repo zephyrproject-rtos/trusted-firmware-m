@@ -5,8 +5,16 @@
  *
  */
 
-#ifndef CC3XX_AEAD_H
-#define CC3XX_AEAD_H
+#ifndef CC3XX_PSA_AEAD_H
+#define CC3XX_PSA_AEAD_H
+
+/** \file cc3xx_psa_aead.h
+ *
+ * This file contains the declaration of the entry points associated to the
+ * aead capability (single-part and multipart) as described by the PSA
+ * Cryptoprocessor Driver interface specification.
+ *
+ */
 
 #include <psa/crypto.h>
 
@@ -75,4 +83,4 @@ cc3xx_aead_decrypt(const psa_key_attributes_t *attributes,
 #ifdef __cplusplus
 }
 #endif
-#endif /* CC3XX_AEAD_H */
+#endif /* CC3XX_PSA_AEAD_H */

@@ -5,11 +5,19 @@
  *
  */
 
-#include "cc3xx_asymmetric_signature.h"
+/** \file cc3xx_psa_asymmetric_signature.c
+ *
+ * This file contains the implementation of the entry points associated to the
+ * asymmetric signature capability as described by the PSA Cryptoprocessor
+ * Driver interface specification.
+ *
+ */
+
+#include "cc3xx_psa_asymmetric_signature.h"
 #include "cc3xx_internal_drbg_util.h"
 #include "cc3xx_internal_ecc_util.h"
 #include "cc3xx_internal_rsa_util.h"
-#include "cc3xx_hash.h"
+#include "cc3xx_psa_hash.h"
 #include "cc3xx_internal_hash_util.h"
 #include "mbedtls/hmac_drbg.h"
 #include "psa/crypto.h"

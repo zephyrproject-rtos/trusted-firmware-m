@@ -5,8 +5,16 @@
  *
  */
 
-#ifndef CC3XX_KEY_GENERATION_H
-#define CC3XX_KEY_GENERATION_H
+#ifndef CC3XX_PSA_KEY_GENERATION_H
+#define CC3XX_PSA_KEY_GENERATION_H
+
+/** \file cc3xx_psa_key_generation.h
+ *
+ * This file contains the declaration of the entry points associated to the
+ * key generation (i.e. random generation and extraction of public keys) as
+ * described by the PSA Cryptoprocessor Driver interface specification.
+ *
+ */
 
 #include "psa/crypto.h"
 
@@ -48,4 +56,4 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
 #ifdef __cplusplus
 }
 #endif
-#endif /* CC3XX_KEY_GENERATION_H */
+#endif /* CC3XX_PSA_KEY_GENERATION_H */

@@ -5,8 +5,16 @@
  *
  */
 
-#ifndef CC3XX_CIPHER_H
-#define CC3XX_CIPHER_H
+#ifndef CC3XX_PSA_CIPHER_H
+#define CC3XX_PSA_CIPHER_H
+
+/** \file cc3xx_psa_cipher.h
+ *
+ * This file contains the declaration of the entry points associated to the
+ * cipher capability (single-part and multipart) as described by the PSA
+ * Cryptoprocessor Driver interface specification.
+ *
+ */
 
 #include "psa/crypto.h"
 #include "cc3xx_crypto_primitives.h"
@@ -175,4 +183,4 @@ psa_status_t cc3xx_cipher_decrypt(
 #ifdef __cplusplus
 }
 #endif
-#endif /* CC3XX_CIPHER_H */
+#endif /* CC3XX_PSA_CIPHER_H */

@@ -5,7 +5,15 @@
  *
  */
 
-#include "cc3xx_key_agreement.h"
+/** \file cc3xx_psa_key_agreement.c
+ *
+ * This file contains the implementation of the entry points associated to the
+ * raw key agreement (i.e. ECDH) as described by the PSA * Cryptoprocessor
+ * Driver interface specification.
+ *
+ */
+
+#include "cc3xx_psa_key_agreement.h"
 #include "cc3xx_internal_ecdh.h"
 #include "cc3xx_internal_ecc_util.h"
 

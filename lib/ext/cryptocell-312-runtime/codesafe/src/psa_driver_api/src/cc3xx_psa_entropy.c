@@ -5,14 +5,20 @@
  *
  */
 
+/** \file cc3xx_psa_entropy.c
+ *
+ * This file contains the implementation of the entry points associated
+ * to the entropy capability as described by the PSA Cryptoprocessor
+ * Driver interface specification.
+ *
+ */
+
+#include "cc3xx_psa_entropy.h"
 #include "cc_pal_log.h"
 #include "cc_pal_mem.h"
 #include "cc_rnd_common.h"
 #include "cc_rng_plat.h"
 #include "llf_rnd_trng.h"
-
-#include "cc3xx_entropy.h"
-#include "psa/crypto.h"
 
 psa_status_t cc3xx_get_entropy(uint32_t flags, size_t *estimate_bits,
                                uint8_t *output, size_t output_size)

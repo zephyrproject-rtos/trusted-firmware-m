@@ -5,13 +5,21 @@
  *
  */
 
+/** \file cc3xx_psa_aead.c
+ *
+ * This file contains the implementations of the entry points associated to the
+ * aead capability (single-part and multipart) as described by the PSA
+ * Cryptoprocessor Driver interface specification.
+ *
+ */
+
 #include "aes_driver.h"
 #include "cc_pal_abort.h"
 #include "cc_pal_mem.h"
 #include "cc_pal_types.h"
 #include <psa/crypto.h>
 
-#include "cc3xx_aead.h"
+#include "cc3xx_psa_aead.h"
 #include "cc3xx_internal_ccm.h"
 #include "cc3xx_internal_chacha20_poly1305.h"
 #include "cc3xx_internal_gcm.h"

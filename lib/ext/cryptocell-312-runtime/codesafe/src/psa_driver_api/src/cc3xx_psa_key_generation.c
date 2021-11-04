@@ -5,12 +5,20 @@
  *
  */
 
-#include "cc3xx_key_generation.h"
+/** \file cc3xx_psa_key_generation.c
+ *
+ * This file contains the implementation of the entry points associated to the
+ * key generation (i.e. random generation and extraction of public keys) as
+ * described by the PSA Cryptoprocessor Driver interface specification.
+ *
+ */
+
+#include "cc3xx_psa_key_generation.h"
 #include "cc3xx_internal_asn1_util.h"
 #include "cc3xx_internal_drbg_util.h"
 #include "cc3xx_internal_ecc_util.h"
 #include "cc3xx_internal_rsa_util.h"
-#include "cc3xx_hash.h"
+#include "cc3xx_psa_hash.h"
 #include "psa/crypto.h"
 
 #include "cc_common.h"
