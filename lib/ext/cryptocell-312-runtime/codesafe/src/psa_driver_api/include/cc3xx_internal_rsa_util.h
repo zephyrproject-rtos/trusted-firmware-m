@@ -80,8 +80,8 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
  *        process translates it to CC format, i.e. the type specified by the
  *        low-level driver, i.e. \ref CCRsaUserPubKey_t
  */
-psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
-                                          size_t psa_pub_key_buffer_size,
+psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_priv_key_buffer,
+                                          size_t psa_priv_key_buffer_size,
                                           CCRsaUserPubKey_t *UserPubKey_ptr);
 /**
  * \brief Convert a public key in PSA format to the same key in CC format, i.e.

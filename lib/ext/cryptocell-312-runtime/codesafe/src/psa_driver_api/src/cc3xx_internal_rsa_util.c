@@ -82,15 +82,15 @@ end:
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
 }
 
-psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
-                                          size_t psa_pub_key_buffer_size,
+psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_priv_key_buffer,
+                                          size_t psa_priv_key_buffer_size,
                                           CCRsaUserPubKey_t *UserPubKey_ptr)
 
 {
-    uint8_t *pub_key_buffer_start_pnt = (uint8_t *)psa_pub_key_buffer;
-    uint8_t **pub_key_buffer_start = &pub_key_buffer_start_pnt;
-    uint8_t *pub_key_buffer_end =
-        (uint8_t *)psa_pub_key_buffer + psa_pub_key_buffer_size;
+    uint8_t *priv_key_buffer_start_pnt = (uint8_t *)psa_priv_key_buffer;
+    uint8_t **priv_key_buffer_start = &priv_key_buffer_start_pnt;
+    uint8_t *priv_key_buffer_end =
+        (uint8_t *)psa_priv_key_buffer + psa_priv_key_buffer_size;
     uint8_t *n_ptr;
     size_t n_len;
     uint8_t *e_ptr;
@@ -101,7 +101,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
     CCError_t cc_err = CC_FAIL;
 
     /* Move the pointer after the sequence */
-    ret = cc3xx_asn1_get_tag(pub_key_buffer_start, pub_key_buffer_end, &len,
+    ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_CONSTRUCTED |
                                  CC3XX_TAG_ASN1_SEQUENCE);
     if (ret < 0) {
@@ -110,35 +110,35 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
     }
 
     /* Move the pointer after the version */
-    ret = cc3xx_asn1_get_int(pub_key_buffer_start, pub_key_buffer_end, &dummy);
+    ret = cc3xx_asn1_get_int(priv_key_buffer_start, priv_key_buffer_end, &dummy);
     if (ret < 0) {
         cc_err = CC_FAIL;
         goto end;
     }
 
     /* Get the modulus n */
-    ret = cc3xx_asn1_get_tag(pub_key_buffer_start, pub_key_buffer_end, &len,
+    ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
         cc_err = CC_FAIL;
         goto end;
     }
 
-    n_ptr = *pub_key_buffer_start;
+    n_ptr = *priv_key_buffer_start;
     n_len = len;
-    *pub_key_buffer_start += len;
+    *priv_key_buffer_start += len;
 
     /* Get the exponent e */
-    ret = cc3xx_asn1_get_tag(pub_key_buffer_start, pub_key_buffer_end, &len,
+    ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
         cc_err = CC_FAIL;
         goto end;
     }
 
-    e_ptr = *pub_key_buffer_start;
+    e_ptr = *priv_key_buffer_start;
     e_len = len;
-    *pub_key_buffer_start += len;
+    *priv_key_buffer_start += len;
 
     cc_err = CC_RsaPubKeyBuild(UserPubKey_ptr, e_ptr, e_len, n_ptr, n_len);
 
