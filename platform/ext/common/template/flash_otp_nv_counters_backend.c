@@ -93,6 +93,10 @@ enum tfm_plat_err_t init_otp_nv_counters_flash(void)
 #endif
 /* End of compilation time checks to be sure the defines are well defined */
 
+#ifndef OTP_NV_COUNTERS_RAM_EMULATION
+static uint8_t block[OTP_NV_COUNTERS_WRITE_BLOCK_SIZE];
+#endif
+
 /* Import the CMSIS flash device driver */
 extern ARM_DRIVER_FLASH OTP_NV_COUNTERS_FLASH_DEV;
 
@@ -144,7 +148,6 @@ static enum tfm_plat_err_t erase_flash_region(size_t start, size_t size)
 static enum tfm_plat_err_t copy_flash_region(size_t from, size_t to, size_t size)
 {
     enum tfm_plat_err_t err = TFM_PLAT_ERR_SUCCESS;
-    uint8_t block[OTP_NV_COUNTERS_WRITE_BLOCK_SIZE];
     size_t copy_size;
     size_t idx;
     size_t end;
@@ -187,7 +190,6 @@ static enum tfm_plat_err_t make_backup(void)
 enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *data, uint32_t cnt)
 {
     enum tfm_plat_err_t err = TFM_PLAT_ERR_SUCCESS;
-    uint8_t block[OTP_NV_COUNTERS_WRITE_BLOCK_SIZE];
     size_t copy_size;
     size_t idx;
     size_t start;
@@ -302,7 +304,6 @@ enum tfm_plat_err_t init_otp_nv_counters_flash(void)
     size_t idx;
     size_t end;
     size_t copy_size;
-    uint8_t block[OTP_NV_COUNTERS_WRITE_BLOCK_SIZE];
 
     if ((TFM_OTP_NV_COUNTERS_AREA_SIZE) < sizeof(struct flash_otp_nv_counters_region_t)) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
