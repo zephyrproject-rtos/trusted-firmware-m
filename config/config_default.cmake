@@ -21,6 +21,7 @@ set(TEST_PSA_API                        ""          CACHE STRING    "Which (if a
 # TFM_PSA_API becomes an internal variable. Please do NOT use it in build command line.
 set(TFM_LIB_MODEL                       OFF         CACHE BOOL      "Use secure library model instead of PSA API (IPC model)")
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
+set(PSA_FRAMEWORK_HAS_MM_IOVEC          OFF         CACHE BOOL      "Enable MM-IOVEC")
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
 set(TFM_FIH_PROFILE                     OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 

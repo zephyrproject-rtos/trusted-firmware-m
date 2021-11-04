@@ -9,6 +9,9 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
+# Generate framework feature
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/psa/framework_feature.h.in
+               ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h)
 
 if (TFM_MULTI_CORE_TOPOLOGY)
     include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
