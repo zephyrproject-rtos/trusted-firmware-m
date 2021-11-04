@@ -39,6 +39,9 @@ static psa_status_t cc3xx_internal_rsa_encrypt(
     CCRndContext_t *pRndContext = &rndContext;
     CCRsaHashOpMode_t hashOpMode = CC_RSA_HASH_OpModeLast;
 
+    /* Zero output length by default */
+    *output_length = 0;
+
     status = cc3xx_ctr_drbg_get_ctx(pRndContext);
     if (status != PSA_SUCCESS) {
         return status;
@@ -58,16 +61,17 @@ static psa_status_t cc3xx_internal_rsa_encrypt(
     }
 
     if (PSA_KEY_TYPE_IS_KEY_PAIR(key_type)) {
-        error = cc3xx_rsa_psa_priv_to_cc_pub(key_buffer,
+        status = cc3xx_rsa_psa_priv_to_cc_pub(key_buffer,
                                              key_buffer_size,
                                              pUserPubKey);
     } else {
-        error = cc3xx_rsa_psa_pub_to_cc_pub(key_buffer,
+        status = cc3xx_rsa_psa_pub_to_cc_pub(key_buffer,
                                             key_buffer_size,
                                             pUserPubKey);
     }
 
-    if (error != CC_OK) {
+    if (status != PSA_SUCCESS) {
+        error = CC_FAIL;
         goto cleanup;
     }
 
@@ -93,14 +97,17 @@ static psa_status_t cc3xx_internal_rsa_encrypt(
                                       input_length,
                                       (unsigned char *)output);
     } else {
-        return PSA_ERROR_INVALID_ARGUMENT;
+        CC_PAL_LOG_ERR("alg variable is corrupted");
+        while (1) {
+            /* Panic as the caller of this has already checked the
+             * algorithm validity
+             */
+        };
     }
 
     if (error == CC_OK) {
         *output_length =  PSA_BITS_TO_BYTES(
             ((CCRsaPubKey_t *)pUserPubKey->PublicKeyDbBuff)->nSizeInBits);
-    } else {
-        *output_length = 0;
     }
 
 cleanup:
@@ -131,6 +138,9 @@ static psa_status_t cc3xx_internal_rsa_decrypt(
     CCRsaPrimeData_t *pPrimeData = NULL;
     CCRsaHashOpMode_t hashOpMode = CC_RSA_HASH_OpModeLast;
 
+    /* Zero output length by default */
+    *output_length = 0;
+
     if (PSA_ALG_IS_RSA_OAEP(alg)) {
         status = cc3xx_psa_hash_mode_to_cc_hash_mode(alg, true, &hashOpMode);
         if (status != PSA_SUCCESS) {
@@ -144,9 +154,10 @@ static psa_status_t cc3xx_internal_rsa_decrypt(
         goto cleanup;
     }
 
-    error = cc3xx_rsa_psa_priv_to_cc_priv(key_buffer, key_buffer_size,
+    status = cc3xx_rsa_psa_priv_to_cc_priv(key_buffer, key_buffer_size,
                                           pUserPrivKey);
-    if (error != CC_OK) {
+    if (status != PSA_SUCCESS) {
+        error = CC_FAIL;
         goto cleanup;
     }
 
@@ -173,15 +184,15 @@ static psa_status_t cc3xx_internal_rsa_decrypt(
                                       output,
                                       output_length);
     } else {
-        return PSA_ERROR_INVALID_ARGUMENT;
+        CC_PAL_LOG_ERR("alg variable is corrupted");
+        while (1) {
+            /* Panic as the caller of this has already checked the
+             * algorithm validity
+             */
+        };
     }
 
-    if (error != CC_OK) {
-        *output_length = 0;
-        goto cleanup;
-    }
-
-    if (*output_length > output_size) {
+    if (error == CC_OK && *output_length > output_size) {
         error = CC_RSA_15_ERROR_IN_DECRYPTED_DATA_SIZE;
         goto cleanup;
     }

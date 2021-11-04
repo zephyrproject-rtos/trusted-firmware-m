@@ -249,13 +249,14 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
     }
 
     CC_PalMemSetZero(key_buffer, key_buffer_size);
-    cc_err = cc3xx_rsa_save_der_priv_key(
+    err = cc3xx_rsa_save_der_priv_key(
         key_buffer, key_buffer_size, pCcPubKey->n, pCcPubKey->e, d_buff,
         pKeyGenData->KGData.p, pKeyGenData->KGData.q,
         pCcPrivKey->PriveKeyDb.Crt.dP, pCcPrivKey->PriveKeyDb.Crt.dQ,
         pCcPrivKey->PriveKeyDb.Crt.qInv, keySizeBytes);
 
-    if (cc_err != CC_OK) {
+    if (err != PSA_SUCCESS) {
+        cc_err = CC_FAIL;
         CC_PalMemSetZero(key_buffer, key_buffer_size);
     }
 

@@ -25,9 +25,9 @@
 #define mbedtls_free free
 #endif
 
-CCError_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
-                                      size_t psa_pub_key_buffer_size,
-                                      CCRsaUserPubKey_t *UserPubKey_ptr)
+psa_status_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
+                                         size_t psa_pub_key_buffer_size,
+                                         CCRsaUserPubKey_t *UserPubKey_ptr)
 
 {
     uint8_t *pub_key_buffer_start_pnt = (uint8_t *)psa_pub_key_buffer;
@@ -40,20 +40,23 @@ CCError_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
     size_t e_len;
     size_t len;
     int ret;
+    CCError_t cc_err = CC_FAIL;
 
     /* Move the pointer after the sequence */
     ret = cc3xx_asn1_get_tag(pub_key_buffer_start, pub_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_CONSTRUCTED |
                                  CC3XX_TAG_ASN1_SEQUENCE);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     /* Get the modulus n */
     ret = cc3xx_asn1_get_tag(pub_key_buffer_start, pub_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     n_ptr = *pub_key_buffer_start;
@@ -65,19 +68,23 @@ CCError_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
     ret = cc3xx_asn1_get_tag(pub_key_buffer_start, pub_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     e_ptr = *pub_key_buffer_start;
     e_len = len;
     *pub_key_buffer_start += len;
 
-    return CC_RsaPubKeyBuild(UserPubKey_ptr, e_ptr, e_len, n_ptr, n_len);
+    cc_err = CC_RsaPubKeyBuild(UserPubKey_ptr, e_ptr, e_len, n_ptr, n_len);
+
+end:
+    return cc3xx_rsa_cc_error_to_psa_error(cc_err);
 }
 
-CCError_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
-                                       size_t psa_pub_key_buffer_size,
-                                       CCRsaUserPubKey_t *UserPubKey_ptr)
+psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
+                                          size_t psa_pub_key_buffer_size,
+                                          CCRsaUserPubKey_t *UserPubKey_ptr)
 
 {
     uint8_t *pub_key_buffer_start_pnt = (uint8_t *)psa_pub_key_buffer;
@@ -91,26 +98,30 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
     size_t len;
     int dummy;
     int ret;
+    CCError_t cc_err = CC_FAIL;
 
     /* Move the pointer after the sequence */
     ret = cc3xx_asn1_get_tag(pub_key_buffer_start, pub_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_CONSTRUCTED |
                                  CC3XX_TAG_ASN1_SEQUENCE);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     /* Move the pointer after the version */
     ret = cc3xx_asn1_get_int(pub_key_buffer_start, pub_key_buffer_end, &dummy);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     /* Get the modulus n */
     ret = cc3xx_asn1_get_tag(pub_key_buffer_start, pub_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     n_ptr = *pub_key_buffer_start;
@@ -121,19 +132,23 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_pub_key_buffer,
     ret = cc3xx_asn1_get_tag(pub_key_buffer_start, pub_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     e_ptr = *pub_key_buffer_start;
     e_len = len;
     *pub_key_buffer_start += len;
 
-    return CC_RsaPubKeyBuild(UserPubKey_ptr, e_ptr, e_len, n_ptr, n_len);
+    cc_err = CC_RsaPubKeyBuild(UserPubKey_ptr, e_ptr, e_len, n_ptr, n_len);
+
+end:
+    return cc3xx_rsa_cc_error_to_psa_error(cc_err);
 }
 
-CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
-                                        size_t psa_priv_key_buffer_size,
-                                        CCRsaUserPrivKey_t *UserPrivKey_ptr)
+psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
+                                           size_t psa_priv_key_buffer_size,
+                                           CCRsaUserPrivKey_t *UserPrivKey_ptr)
 
 {
     uint8_t *p_ptr;
@@ -149,7 +164,7 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
     int ret;
     size_t len;
     int dummy;
-    CCError_t cc_err = CC_SUCCESS;
+    CCError_t cc_err = CC_FAIL;
 
     uint8_t *priv_key_buffer_start_pnt = (uint8_t *)psa_priv_key_buffer;
     uint8_t **priv_key_buffer_start = &priv_key_buffer_start_pnt;
@@ -161,21 +176,24 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
                              CC3XX_TAG_ASN1_CONSTRUCTED |
                                  CC3XX_TAG_ASN1_SEQUENCE);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     /* Move the pointer after the version */
     ret =
         cc3xx_asn1_get_int(priv_key_buffer_start, priv_key_buffer_end, &dummy);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     /* Move the pointer after the modulus n */
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
     *priv_key_buffer_start += len;
 
@@ -183,7 +201,8 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
     *priv_key_buffer_start += len;
 
@@ -191,7 +210,8 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
     *priv_key_buffer_start += len;
 
@@ -199,7 +219,8 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     p_ptr = *priv_key_buffer_start;
@@ -211,7 +232,8 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     q_ptr = *priv_key_buffer_start;
@@ -223,7 +245,8 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     dP_ptr = *priv_key_buffer_start;
@@ -235,7 +258,8 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     dQ_ptr = *priv_key_buffer_start;
@@ -247,7 +271,8 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     qInv_ptr = *priv_key_buffer_start;
@@ -258,15 +283,15 @@ CCError_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
     cc_err = CC_RsaPrivKeyCrtBuild(UserPrivKey_ptr, p_ptr, p_len, q_ptr, q_len,
                                    dP_ptr, dP_len, dQ_ptr, dQ_len, qInv_ptr,
                                    qInv_len);
-    return cc_err;
+end:
+    return cc3xx_rsa_cc_error_to_psa_error(cc_err);
 }
 
-CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
-                                         size_t priv_key_buffer_size,
-                                         uint8_t *publ_key_buffer,
-                                         size_t publ_key_buffer_size)
+psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
+                                            size_t priv_key_buffer_size,
+                                            uint8_t *publ_key_buffer,
+                                            size_t publ_key_buffer_size)
 {
-
     uint8_t *priv_key_buffer_start_pnt = priv_key_buffer;
     uint8_t **priv_key_buffer_start = &priv_key_buffer_start_pnt;
     uint8_t *priv_key_buffer_end = priv_key_buffer + priv_key_buffer_size;
@@ -278,7 +303,7 @@ CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
     uint8_t *pub_key_buffer_end_pnt = publ_key_buffer + publ_key_buffer_size;
     uint8_t **pub_key_buffer_end = &pub_key_buffer_end_pnt;
 
-    CCError_t cc_err = CC_OK;
+    CCError_t cc_err = CC_FAIL;
     int bytes_written;
     size_t buffer_used;
     size_t len;
@@ -289,19 +314,22 @@ CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
                              CC3XX_TAG_ASN1_CONSTRUCTED |
                                  CC3XX_TAG_ASN1_SEQUENCE);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     ret =
         cc3xx_asn1_get_int(priv_key_buffer_start, priv_key_buffer_end, &dummy);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     n_pnt = *priv_key_buffer_start;
@@ -312,7 +340,8 @@ CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
                              CC3XX_TAG_ASN1_INTEGER);
     if (ret < 0) {
-        return CC_FAIL;
+        cc_err = CC_FAIL;
+        goto end;
     }
 
     e_pnt = *priv_key_buffer_start;
@@ -323,7 +352,7 @@ CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
     buffer_used = bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_big_integer(pub_key_buffer_end,
@@ -331,7 +360,7 @@ CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     bytes_written =
@@ -339,7 +368,7 @@ CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_tag(pub_key_buffer_end, publ_key_buffer,
@@ -348,7 +377,7 @@ CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     /* The asn1 functions write to the end of the buffer.
@@ -369,34 +398,33 @@ CCError_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
                          publ_key_buffer_size - buffer_used);
     }
 
-End:
-    return cc_err;
+end:
+    return cc3xx_rsa_cc_error_to_psa_error(cc_err);
 }
 
-CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
-                                      size_t key_buffer_size, uint32_t *n,
-                                      uint32_t *e, uint32_t *d, uint32_t *p,
-                                      uint32_t *q, uint32_t *dP, uint32_t *dQ,
-                                      uint32_t *qInv, size_t d_size_bytes)
+psa_status_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
+                                         size_t key_buffer_size, uint32_t *n,
+                                         uint32_t *e, uint32_t *d, uint32_t *p,
+                                         uint32_t *q, uint32_t *dP, uint32_t *dQ,
+                                         uint32_t *qInv, size_t d_size_bytes)
 {
-
     uint8_t *key_buffer_end_pnt = key_buffer + key_buffer_size;
     uint8_t **key_buffer_end = &key_buffer_end_pnt;
-    CCError_t cc_err = CC_OK;
-    uint8_t *temp_buff;
+    CCError_t cc_err = CC_FAIL;
+    uint8_t *temp_buff = NULL;
     int bytes_written;
     size_t buffer_used;
 
     temp_buff = (uint8_t *)mbedtls_calloc(1, d_size_bytes);
     if (temp_buff == NULL) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     cc_err = CC_CommonConvertLswMswWordsToMsbLsbBytes(temp_buff, d_size_bytes,
                                                       qInv, d_size_bytes / 2);
     if (cc_err != CC_OK) {
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_big_integer(key_buffer_end, key_buffer,
@@ -404,13 +432,13 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used = bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     cc_err = CC_CommonConvertLswMswWordsToMsbLsbBytes(temp_buff, d_size_bytes,
                                                       dQ, d_size_bytes / 2);
     if (cc_err != CC_OK) {
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_big_integer(key_buffer_end, key_buffer,
@@ -418,13 +446,13 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     cc_err = CC_CommonConvertLswMswWordsToMsbLsbBytes(temp_buff, d_size_bytes,
                                                       dP, d_size_bytes / 2);
     if (cc_err != CC_OK) {
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_big_integer(key_buffer_end, key_buffer,
@@ -432,13 +460,13 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     cc_err = CC_CommonConvertLswMswWordsToMsbLsbBytes(temp_buff, d_size_bytes,
                                                       q, d_size_bytes / 2);
     if (cc_err != CC_OK) {
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_big_integer(key_buffer_end, key_buffer,
@@ -446,13 +474,13 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     cc_err = CC_CommonConvertLswMswWordsToMsbLsbBytes(temp_buff, d_size_bytes,
                                                       p, d_size_bytes / 2);
     if (cc_err != CC_OK) {
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_big_integer(key_buffer_end, key_buffer,
@@ -460,13 +488,13 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     cc_err = CC_CommonConvertLswMswWordsToMsbLsbBytes(temp_buff, d_size_bytes,
                                                       d, d_size_bytes);
     if (cc_err != CC_OK) {
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_big_integer(key_buffer_end, key_buffer,
@@ -474,7 +502,7 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     CC_PalMemCopy(temp_buff, (uint8_t *)e, 3);
@@ -484,13 +512,13 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     cc_err = CC_CommonConvertLswMswWordsToMsbLsbBytes(temp_buff, d_size_bytes,
                                                       n, d_size_bytes);
     if (cc_err != CC_OK) {
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_big_integer(key_buffer_end, key_buffer,
@@ -498,14 +526,14 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_int(key_buffer_end, key_buffer, 0);
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     bytes_written =
@@ -513,7 +541,7 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     bytes_written = cc3xx_asn1_write_tag(key_buffer_end, key_buffer,
@@ -522,7 +550,7 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
-        goto End;
+        goto end;
     }
 
     /* The asn1 functions write to the end of the buffer.
@@ -541,12 +569,14 @@ CCError_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
                          key_buffer_size - buffer_used);
     }
 
-End:
-    /* zeroing temp buffers  */
-    CC_PalMemSetZero(temp_buff, d_size_bytes);
-    mbedtls_free(temp_buff);
+end:
+    if (temp_buff) {
+        /* zeroing temp buffers  */
+        CC_PalMemSetZero(temp_buff, d_size_bytes);
+        mbedtls_free(temp_buff);
+    }
 
-    return cc_err;
+    return cc3xx_rsa_cc_error_to_psa_error(cc_err);
 }
 
 psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
@@ -672,3 +702,4 @@ psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
     return err;
 #endif /* CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION */
 }
+

@@ -234,7 +234,7 @@ psa_status_t cc3xx_internal_rsa_verify(const psa_key_attributes_t *attributes,
     psa_key_type_t key_type = psa_get_key_type(attributes);
     size_t hash_bytes = PSA_HASH_LENGTH(PSA_ALG_SIGN_GET_HASH(alg));
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
-    CCError_t cc_err;
+    CCError_t cc_err = CC_FAIL;
 
     CCRsaPubUserContext_t *pPubUserContext;
     CCRsaUserPubKey_t *pUserPubKey;
@@ -259,14 +259,11 @@ psa_status_t cc3xx_internal_rsa_verify(const psa_key_attributes_t *attributes,
     }
 
     if (PSA_KEY_TYPE_IS_KEY_PAIR(key_type)) {
-        cc_err =
-            cc3xx_rsa_psa_priv_to_cc_pub(key_buffer, key_length, pUserPubKey);
+        err = cc3xx_rsa_psa_priv_to_cc_pub(key_buffer, key_length, pUserPubKey);
     } else {
-        cc_err =
-            cc3xx_rsa_psa_pub_to_cc_pub(key_buffer, key_length, pUserPubKey);
+        err = cc3xx_rsa_psa_pub_to_cc_pub(key_buffer, key_length, pUserPubKey);
     }
-    if (cc_err != CC_SUCCESS) {
-        err = cc3xx_rsa_cc_error_to_psa_error(cc_err);
+    if (err != PSA_SUCCESS) {
         goto cleanup;
     }
 
@@ -307,6 +304,13 @@ psa_status_t cc3xx_internal_rsa_sign(const psa_key_attributes_t *attributes,
     CCRsaUserPrivKey_t *user_priv_key_ptr;
     CCRsaHashOpMode_t hash_mode = CC_RSA_HASH_OpModeLast;
 
+    if (PSA_ALG_IS_RSA_PSS(alg)) {
+        if (PSA_BITS_TO_BYTES(key_bits) <
+            2 * PSA_HASH_LENGTH(PSA_ALG_SIGN_GET_HASH(alg))) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
+    }
+
     err = cc3xx_psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
     if (err != PSA_SUCCESS) {
         return err;
@@ -325,15 +329,16 @@ psa_status_t cc3xx_internal_rsa_sign(const psa_key_attributes_t *attributes,
         return PSA_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    cc_err = cc3xx_rsa_psa_priv_to_cc_priv(key_buffer, key_length,
+    err = cc3xx_rsa_psa_priv_to_cc_priv(key_buffer, key_length,
                                            user_priv_key_ptr);
-    if (cc_err != CC_SUCCESS) {
-        err = cc3xx_rsa_cc_error_to_psa_error(cc_err);
+    if (err != PSA_SUCCESS) {
+        cc_err = CC_FAIL;
         goto cleanup;
     }
 
     err = cc3xx_ctr_drbg_get_ctx(&rnd_ctx);
     if (err != PSA_SUCCESS) {
+        cc_err = CC_FAIL;
         goto cleanup;
     }
 
@@ -356,10 +361,7 @@ psa_status_t cc3xx_internal_rsa_sign(const psa_key_attributes_t *attributes,
         size_t output_len = PSA_BITS_TO_BYTES(key_bits);
         size_t salt_len;
 
-        if (output_len < 2 * hash_len) {
-            err = PSA_ERROR_INVALID_ARGUMENT;
-            goto cleanup;
-        } else if (output_len >= 2 * hash_len + 2) {
+        if (output_len >= 2 * hash_len + 2) {
             salt_len = hash_len;
         } else {
             salt_len = output_len - hash_len - 2;
@@ -371,14 +373,13 @@ psa_status_t cc3xx_internal_rsa_sign(const psa_key_attributes_t *attributes,
                           input_length, (uint8_t *)signature, signature_length);
     }
 
-    err = cc3xx_rsa_cc_error_to_psa_error(cc_err);
-
 cleanup:
     CC_PalMemSetZero(user_priv_key_ptr, sizeof(CCRsaUserPrivKey_t));
     CC_PalMemSetZero(user_context_ptr, sizeof(CCRsaPrivUserContext_t));
     mbedtls_free(user_priv_key_ptr);
     mbedtls_free(user_context_ptr);
-    return err;
+
+    return cc3xx_rsa_cc_error_to_psa_error(cc_err);
 }
 
 psa_status_t cc3xx_sign_hash(const psa_key_attributes_t *attributes,
