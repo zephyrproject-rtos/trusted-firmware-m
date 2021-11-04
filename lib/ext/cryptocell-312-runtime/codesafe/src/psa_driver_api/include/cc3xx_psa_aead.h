@@ -12,7 +12,7 @@
  *
  * This file contains the declaration of the entry points associated to the
  * aead capability (single-part and multipart) as described by the PSA
- * Cryptoprocessor Driver interface specification.
+ * Cryptoprocessor Driver interface specification
  *
  */
 

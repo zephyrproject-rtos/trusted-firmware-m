@@ -5,12 +5,22 @@
  *
  */
 
+/** \file cc3xx_internal_aes.c
+ *
+ * This file contains the implementation of the internal functions to
+ * perform symmetric encryption and decryption using the AES algorithm
+ *
+ */
+
 #include "cc3xx_internal_aes.h"
 
 #include "cc_pal_types.h"
 #include "cc_pal_mem.h"
 #include "cc_pal_abort.h"
 
+/**
+ * \ingroup internal_aes
+ */
 void cc3xx_aes_init(AesContext_t *ctx)
 {
     if (NULL == ctx) {
@@ -24,6 +34,9 @@ void cc3xx_aes_init(AesContext_t *ctx)
     ctx->outputDataAddrType = DLLI_ADDR;
 }
 
+/**
+ * \ingroup internal_aes
+ */
 void cc3xx_aes_free(AesContext_t *ctx)
 {
     if (NULL == ctx) {
@@ -73,6 +86,13 @@ static psa_status_t aes_setkey(
     return PSA_SUCCESS;
 }
 
+/** \defgroup internal_aes Internal AES module
+ *
+ *  Internal functions used by the driver to perform AES cipher encryption
+ *  and decryption
+ *
+ *  @{
+ */
 psa_status_t cc3xx_aes_setkey_enc(
         AesContext_t *ctx,
         const uint8_t *key,
@@ -141,3 +161,4 @@ psa_status_t cc3xx_aes_crypt(
 
     return PSA_SUCCESS;
 }
+/** @} */ // end of internal_aes

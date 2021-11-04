@@ -9,7 +9,7 @@
  *
  * This file contains the implementation of the entry points associated to the
  * asymmetric signature capability as described by the PSA Cryptoprocessor
- * Driver interface specification.
+ * Driver interface specification
  *
  */
 
@@ -46,6 +46,13 @@
 #define mbedtls_free free
 #endif
 
+/** \defgroup psa_asym_sign PSA driver entry points for asymmetric sign/verify
+ *
+ *  Entry points for asymmetric message signing and signature verification as
+ *  described by the PSA Cryptoprocessor Unified Driver interface specification
+ *
+ *  @{
+ */
 psa_status_t cc3xx_internal_ecdsa_verify(const psa_key_attributes_t *attributes,
                                          const uint8_t *key, size_t key_length,
                                          psa_algorithm_t alg,
@@ -54,7 +61,6 @@ psa_status_t cc3xx_internal_ecdsa_verify(const psa_key_attributes_t *attributes,
                                          size_t signature_length,
                                          bool do_hashing)
 {
-
     CCEcpkiHashOpMode_t hash_mode = CC_ECPKI_HASH_OpModeLast;
     CCEcdsaVerifyUserContext_t pVerifyUserContext;
     CCEcpkiUserPublKey_t pUserPublKey;
@@ -85,8 +91,8 @@ psa_status_t cc3xx_internal_ecdsa_verify(const psa_key_attributes_t *attributes,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
-    /* FIXME: From here the code is only applicable to weistrass keys, add
-     * conditional when other curves are ready
+    /* FIXME: From here the code is only applicable to weistrass and koblitz
+     * curves, but needs to be extended to support Ed25519 when available
      */
     if (PSA_KEY_TYPE_IS_KEY_PAIR(key_type)) {
         cc_err = cc3xx_ecc_psa_priv_to_cc_priv(domainId, key, key_length,
@@ -480,3 +486,4 @@ psa_status_t cc3xx_verify_message(const psa_key_attributes_t *attributes,
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
+/** @} */ // end of psa_asym_sign

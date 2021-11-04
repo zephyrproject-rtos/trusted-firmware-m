@@ -9,7 +9,7 @@
  *
  * This file contains the implementation of the entry points associated to the
  * hash capability (single-part and multipart) as described by the PSA
- * Cryptoprocessor Driver interface specification.
+ * Cryptoprocessor Driver interface specification
  *
  */
 
@@ -18,12 +18,6 @@
 #include "cc_pal_mem.h"
 
 #define MAX_HASH_CHUNK_SIZE 0xffff
-
-/*!
- * \defgroup private Private functions
- *
- */
-/*!@{*/
 
 /**
  * \brief  Update a hash operation
@@ -122,8 +116,13 @@ static psa_status_t hash_update(cc3xx_hash_operation_t *pHashUserCtx,
     return PSA_SUCCESS;
 }
 
-/*!@}*/
-
+/** \defgroup psa_hash PSA driver entry points for hashing
+ *
+ *  Entry points for hashing operations as described by the PSA Cryptoprocessor
+ *  Unified Driver interface specification
+ *
+ *  @{
+ */
 psa_status_t cc3xx_hash_setup(cc3xx_hash_operation_t *operation,
                               psa_algorithm_t alg)
 {
@@ -336,3 +335,4 @@ exit:
         return status;
     }
 }
+/** @} */ // end of psa_hash

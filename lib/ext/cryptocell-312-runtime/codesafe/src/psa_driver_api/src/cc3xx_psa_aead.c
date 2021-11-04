@@ -24,11 +24,14 @@
 #include "cc3xx_internal_chacha20_poly1305.h"
 #include "cc3xx_internal_gcm.h"
 
+/* Number of valid tag lengths sizes both for CCM and GCM modes */
+#define VALID_TAG_LENGTH_SIZE 7
+
 static psa_status_t check_alg(psa_algorithm_t alg, psa_algorithm_t *ref_alg)
 {
     psa_algorithm_t default_alg = PSA_ALG_AEAD_WITH_DEFAULT_LENGTH_TAG(alg);
     size_t tag_length = PSA_ALG_AEAD_GET_TAG_LENGTH(alg);
-    size_t valid_tag_lengths[7];
+    size_t valid_tag_lengths[VALID_TAG_LENGTH_SIZE];
 
     *ref_alg = default_alg;
     switch (default_alg) {
@@ -60,19 +63,26 @@ static psa_status_t check_alg(psa_algorithm_t alg, psa_algorithm_t *ref_alg)
 
     /* Cycle through all valid tag lengths for CCM or GCM */
     uint32_t i;
-    for (i=0; i<7; i++) {
+    for (i = 0; i < VALID_TAG_LENGTH_SIZE; i++) {
         if (tag_length == valid_tag_lengths[i]) {
             break;
         }
     }
 
-    if (i == 7) {
+    if (i == VALID_TAG_LENGTH_SIZE) {
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
     return PSA_SUCCESS;
 }
 
+/** \defgroup psa_aead PSA driver entry points for AEAD
+ *
+ *  Entry points for AEAD encryption and decryption as described by the PSA
+ *  Cryptoprocessor Unified Driver interface specification
+ *
+ *  @{
+ */
 psa_status_t
 cc3xx_aead_encrypt(const psa_key_attributes_t *attributes,
                    const uint8_t *key_buffer, size_t key_buffer_size,
@@ -169,3 +179,4 @@ psa_status_t cc3xx_aead_decrypt(const psa_key_attributes_t *attributes,
 
     return status;
 }
+/** @} */ // end of psa_aead

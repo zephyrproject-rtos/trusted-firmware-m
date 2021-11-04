@@ -5,11 +5,25 @@
  *
  */
 
+/** \file cc3xx_internal_hash_util.c
+ *
+ * This file contains the implementation of the internal utility functions used
+ * to convert Hash types between PSA and low-level CC driver format
+ *
+ */
+
 #include "psa/crypto.h"
 #include "cc_ecpki_types.h"
 #include "cc_rsa_types.h"
 #include "cc_pal_log.h"
 
+/** \defgroup internal_hash_util Internal ECC utility functions
+ *
+ *  Internal functions required to provide utilities for handling hash type
+ *  conversions
+ *
+ *  @{
+ */
 psa_status_t cc3xx_psa_hash_mode_to_cc_hash_mode(psa_algorithm_t alg,
                                                  bool performHashing,
                                                  void *hash_mode)
@@ -113,3 +127,4 @@ psa_status_t cc3xx_psa_hash_mode_to_cc_hash_mode(psa_algorithm_t alg,
 
     return PSA_SUCCESS;
 }
+/** @} */ // end of internal_hash_util

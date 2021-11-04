@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_rsa_util.h
+ *
+ * This file contains the declarations of the internal utility functions used
+ * to manipulate RSA types and key formats
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_RSA_UTIL_H
 #define CC3XX_INTERNAL_RSA_UTIL_H
 
@@ -30,7 +37,8 @@ extern "C" {
 #endif
 
 /* Minimal and maximal size of RSA modulus in bits
- * According to FIPS 186-4 size in bits should be in range [1024...3072] */
+ * According to FIPS 186-4 size in bits should be in range [1024...3072]
+ */
 #if defined(ARCH_IS_CC310)
 #define CC3XX_RSA_MIN_VALID_KEY_SIZE_VALUE_IN_BITS 1024
 #define CC3XX_RSA_MAX_VALID_KEY_SIZE_VALUE_IN_BITS 2048

@@ -9,7 +9,7 @@
  *
  * This file contains the implementation of the entry points associated to the
  * asymmetric encryption capability as described by the PSA Cryptoprocessor
- * Driver interface specification.
+ * Driver interface specification
  *
  */
 
@@ -221,6 +221,13 @@ cleanup:
     return cc3xx_rsa_cc_error_to_psa_error(error);
 }
 
+/** \defgroup psa_asym_encrypt PSA driver entry points for asymmetric cipher
+ *
+ *  Entry points for asymmetric cipher encryption and decryption as described
+ *  by the PSA Cryptoprocessor Unified Driver interface specification
+ *
+ *  @{
+ */
 psa_status_t cc3xx_asymmetric_encrypt(const psa_key_attributes_t *attributes,
                                       const uint8_t *key_buffer,
                                       size_t key_buffer_size,
@@ -268,3 +275,4 @@ psa_status_t cc3xx_asymmetric_decrypt(const psa_key_attributes_t *attributes,
 
     return status;
 }
+/** @} */ // end of psa_asym_encrypt

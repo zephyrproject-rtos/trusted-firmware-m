@@ -9,7 +9,7 @@
  *
  * This file contains the implementation of the entry points associated to the
  * key generation (i.e. random generation and extraction of public keys) as
- * described by the PSA Cryptoprocessor Driver interface specification.
+ * described by the PSA Cryptoprocessor Driver interface specification
  *
  */
 
@@ -283,6 +283,14 @@ end:
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
 }
 
+/** \defgroup psa_key_generation PSA driver entry points for key handling
+ *
+ *  Entry points for random key generation and key format manipulation and
+ *  translation as described by the PSA Cryptoprocessor Unified Driver interface
+ *  specification
+ *
+ *  @{
+ */
 psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
                                 uint8_t *key_buffer, size_t key_buffer_size,
                                 size_t *key_buffer_length)
@@ -386,3 +394,4 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
 
     return err;
 }
+/** @} */ // end of psa_key_generation

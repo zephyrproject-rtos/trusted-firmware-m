@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_aes.h
+ *
+ * This file contains the declaration of the internal functions to
+ * perform symmetric encryption and decryption using the AES algorithm
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_AES_H
 #define CC3XX_INTERNAL_AES_H
 

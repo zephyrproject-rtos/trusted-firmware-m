@@ -5,6 +5,12 @@
  *
  */
 
+/** \file cc3xx_internal_gcm.c
+ *
+ * This file contains the implementation of the internal functions required to
+ * perform AEAD using AES-GCM
+ *
+ */
 #include "aesgcm_driver.h"
 #include "cc_common.h"
 #include "cc_pal_abort.h"
@@ -509,6 +515,13 @@ cleanup:
 }
 
 /* TODO: Figure out best strategy for cc310 vs cc312 */
+
+/** \defgroup internal_gcm Internal GCM functions
+ *
+ *  Internal functions used by the driver to perform AEAD using AES-GCM mode
+ *
+ *  @{
+ */
 psa_status_t cc3xx_encrypt_gcm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
@@ -570,3 +583,4 @@ psa_status_t cc3xx_decrypt_gcm(
 
     return status;
 }
+/** @} */ // end of internal_gcm

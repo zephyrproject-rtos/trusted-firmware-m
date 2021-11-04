@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_chacha20_poly1305.h
+ *
+ * This file contains the declarations of the internal functions to
+ * perform AEAD using the Chacha20-Poly1305 algorithm
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_CHACHA20_POLY1305_H
 #define CC3XX_INTERNAL_CHACHA20_POLY1305_H
 

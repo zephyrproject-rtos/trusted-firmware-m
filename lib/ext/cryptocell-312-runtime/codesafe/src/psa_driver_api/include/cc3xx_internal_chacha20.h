@@ -5,6 +5,14 @@
  *
  */
 
+/** \file cc3xx_internal_chacha20.h
+ *
+ * This file contains the declarations of the internal functions to
+ * perform symmetric encryption and decryption using the Chacha20
+ * algorithm
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_CHACHA20_H
 #define CC3XX_INTERNAL_CHACHA20_H
 

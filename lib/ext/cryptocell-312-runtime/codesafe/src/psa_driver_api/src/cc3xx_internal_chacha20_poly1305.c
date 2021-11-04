@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_chacha20_poly1305.c
+ *
+ * This file contains the implementation of the internal functions to
+ * perform AEAD using the Chacha20-Poly1305 algorithm
+ *
+ */
+
 #include "cc_common.h"
 #include "cc_pal_abort.h"
 #include "cc_pal_mem.h"
@@ -151,6 +158,13 @@ cleanup:
 }
 
 /* TODO: Figure out best strategy for cc310 vs cc312 */
+
+/** \defgroup internal_chacha20_poly1305 Internal Chacha20-Poly1305 functions
+ *
+ *  Internal functions used by the driver to perform AEAD using Chacha20-Poly1305 mode
+ *
+ *  @{
+ */
 psa_status_t cc3xx_encrypt_chacha20_poly1305(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
@@ -225,3 +239,4 @@ psa_status_t cc3xx_decrypt_chacha20_poly1305(
 
     return status;
 }
+/** @} */ // end of internal_chacha20_poly1305

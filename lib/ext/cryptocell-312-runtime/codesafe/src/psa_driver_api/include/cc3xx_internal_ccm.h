@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_ccm.h
+ *
+ * This file contains the declarations of the internal functions to
+ * perform AEAD using the AES-CCM algorithm
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_CCM_H
 #define CC3XX_INTERNAL_CCM_H
 

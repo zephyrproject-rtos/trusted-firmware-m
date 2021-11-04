@@ -20,6 +20,21 @@
 
 #include "mbedtls_cc_ec_mont_edw_error.h"
 
+/** \file cc3xx_internal_ecc_util.c
+ *
+ * This file contains the implementation of the internal functions and utilities
+ * required to translate between PSA and CC low-level Elliptic Curve types and
+ * format conversions
+ *
+ */
+
+/** \defgroup internal_ecc_util Internal ECC utility functions
+ *
+ *  Internal functions required to provide utilities for handling ECC type
+ *  conversions
+ *
+ *  @{
+ */
 psa_status_t cc3xx_ecc_cc_error_to_psa_error(CCError_t cc_error)
 {
 #ifndef CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
@@ -345,3 +360,4 @@ exit:
     CC_PalMemSetZero(&BuildTempData, sizeof(CCEcpkiBuildTempData_t));
     return ret;
 }
+/** @} */ // end of internal_ecc_util

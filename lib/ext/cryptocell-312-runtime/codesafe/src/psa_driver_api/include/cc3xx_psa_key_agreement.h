@@ -12,7 +12,7 @@
  *
  * This file contains the declaration of the entry points associated to the
  * raw key agreement (i.e. ECDH) as described by the PSA * Cryptoprocessor
- * Driver interface specification.
+ * Driver interface specification
  *
  */
 

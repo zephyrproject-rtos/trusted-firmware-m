@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_ccm.c
+ *
+ * This file contains the implementation of the internal functions to
+ * perform AEAD using the AES-CCM algorithm
+ *
+ */
+
 #define CC_PAL_LOG_CUR_COMPONENT CC_LOG_MASK_CC_API
 
 #include "aesccm_driver.h"
@@ -633,6 +640,12 @@ cleanup:
     return status;
 }
 
+/** \defgroup internal_ccm Internal CCM functions
+ *
+ *  Internal functions used by the driver to perform AEAD using AES-CCM mode
+ *
+ *  @{
+ */
 psa_status_t cc3xx_encrypt_ccm(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
@@ -689,3 +702,4 @@ psa_status_t cc3xx_decrypt_ccm(
 
     return status;
 }
+/** @} */ // end of internal_ccm

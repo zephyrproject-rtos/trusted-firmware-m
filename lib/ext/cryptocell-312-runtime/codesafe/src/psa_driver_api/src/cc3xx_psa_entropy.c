@@ -9,7 +9,7 @@
  *
  * This file contains the implementation of the entry points associated
  * to the entropy capability as described by the PSA Cryptoprocessor
- * Driver interface specification.
+ * Driver interface specification
  *
  */
 
@@ -20,6 +20,15 @@
 #include "cc_rng_plat.h"
 #include "llf_rnd_trng.h"
 
+/** \defgroup psa_entropy PSA driver entry points for entropy collection
+ *
+ *  Entry points for entropy collection from the TRNG source as described by the
+ *  PSA Cryptoprocessor Unified Driver interface specification. The TRNG
+ *  operates by sampling the output of a fast free-running ring oscillator in a
+ *  different (slower) clock domain
+ *
+ *  @{
+ */
 psa_status_t cc3xx_get_entropy(uint32_t flags, size_t *estimate_bits,
                                uint8_t *output, size_t output_size)
 {
@@ -87,3 +96,4 @@ psa_status_t cc3xx_get_entropy(uint32_t flags, size_t *estimate_bits,
 end:
     return status;
 }
+/** @} */ // end of psa_entropy

@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_ecdh.h
+ *
+ * This file contains the declarations of the internal functions required to
+ * perform Elliptic Curve Diffie-Hellman, i.e. ECDH raw key agreement
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_ECDH_H
 #define CC3XX_INTERNAL_ECDH_H
 

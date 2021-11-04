@@ -12,6 +12,23 @@
 
 #define CC3XX_CTR_DRBG_INITIALIZED 0x5A44A5A8
 
+/** \file cc3xx_internal_drbg_util.c
+ *
+ * This file contains the implementation of the internal functions to provide
+ * a DRBG, i.e. Deterministic Random Binary Generator based on algorithms as
+ * CTR and HMAC, plus to handle entropy contexts. This file has a direct
+ * dependency on mbedTLS related objects
+ *
+ */
+
+/** \defgroup internal_drbg_util Internal DRBG objects
+ *
+ *  Internal functions and global objects required to provide DRBG
+ *  functionalities. It has a direct dependency on mbedTLS CTR/DRBG/entropy
+ *  objects
+ *
+ *  @{
+ */
 mbedtls_ctr_drbg_context global_ctr_drbg_ctx;
 mbedtls_hmac_drbg_context global_hmac_drbg_ctx;
 mbedtls_entropy_context global_entropy_ctx;
@@ -121,3 +138,4 @@ psa_status_t cc3xx_hmac_drbg_get_ctx(CCRndContext_t *rnd_ctx,
 
     return PSA_SUCCESS;
 }
+/** @} */ // end of internal_drbg_util

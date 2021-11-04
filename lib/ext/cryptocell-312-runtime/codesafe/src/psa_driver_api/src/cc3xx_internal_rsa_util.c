@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_rsa_util.c
+ *
+ * This file contains the implementation of the internal utility functions used
+ * to manipulate RSA types and key formats
+ *
+ */
+
 #include "cc3xx_internal_rsa_util.h"
 #include "cc3xx_internal_asn1_util.h"
 
@@ -25,6 +32,13 @@
 #define mbedtls_free free
 #endif
 
+/** \defgroup internal_rsa_util Internal RSA utility functions
+ *
+ *  Internal functions required to provide utilities for handling RSA type
+ *  conversions
+ *
+ *  @{
+ */
 psa_status_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
                                          size_t psa_pub_key_buffer_size,
                                          CCRsaUserPubKey_t *UserPubKey_ptr)
@@ -685,7 +699,7 @@ psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
         break;
 
     /* For now, there is no better error code for malloc failure, both in CC and
-     * mbedtls
+     * PSA status
      */
     case CC_OUT_OF_RESOURCE_ERROR:
         err = PSA_ERROR_INSUFFICIENT_MEMORY;
@@ -702,4 +716,4 @@ psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
     return err;
 #endif /* CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION */
 }
-
+/** @} */ // end of internal_rsa_util

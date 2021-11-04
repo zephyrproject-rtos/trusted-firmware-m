@@ -9,7 +9,7 @@
  *
  * This file contains the implementation of the entry points associated to the
  * mac capability (single-part and multipart) as described by the PSA
- * Cryptoprocessor Driver interface specification.
+ * Cryptoprocessor Driver interface specification
  *
  */
 
@@ -23,12 +23,9 @@
 /* SHA512 is not supported, this is the only size we will need */
 #define MD_MAX_SIZE 32
 
-/*!
- * \defgroup private Private functions
+/** \brief Return the block size for different hashing algorithms
  *
  */
-/*!@{*/
-
 static size_t psa_get_hash_block_size(psa_algorithm_t alg)
 {
     switch (alg) {
@@ -45,8 +42,8 @@ static size_t psa_get_hash_block_size(psa_algorithm_t alg)
     }
 }
 
-/*
- * Initialize a context
+/** \brief Initialize a context
+ *
  */
 static psa_status_t cmac_init(AesContext_t *ctx)
 {
@@ -67,6 +64,9 @@ static psa_status_t cmac_init(AesContext_t *ctx)
     return PSA_SUCCESS;
 }
 
+/** \brief Set the key on a multipart CMAC context
+ *
+ */
 static psa_status_t cmac_setkey(AesContext_t *ctx, const unsigned char *key,
                                 unsigned int keybits)
 {
@@ -98,6 +98,9 @@ static psa_status_t cmac_setkey(AesContext_t *ctx, const unsigned char *key,
     return PSA_SUCCESS;
 }
 
+/** \brief Setup a multipart CMAC context
+ *
+ */
 static psa_status_t cmac_setup(cc3xx_cipher_operation_t *cmac,
                                const psa_key_attributes_t *attributes,
                                const uint8_t *key_buffer,
@@ -128,6 +131,9 @@ static psa_status_t cmac_setup(cc3xx_cipher_operation_t *cmac,
     return PSA_SUCCESS;
 }
 
+/** \brief Update a multipart CMAC operation with new inut data
+ *
+ */
 static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
                                 const unsigned char *input, size_t ilen)
 {
@@ -202,6 +208,9 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
     return PSA_SUCCESS;
 }
 
+/** \brief Finalize a multipart CMAC operation by producing the
+ *         corresponding MAC
+ */
 static psa_status_t cmac_finish(cc3xx_cipher_operation_t *cmac_ctx,
                                 unsigned char *output)
 {
@@ -236,6 +245,9 @@ static psa_status_t cmac_finish(cc3xx_cipher_operation_t *cmac_ctx,
     return PSA_SUCCESS;
 }
 
+/** \brief Setup an HMAC operation context with a given key and hash
+ *         algorithm
+ */
 static psa_status_t hmac_setup(cc3xx_mac_operation_t *operation,
                                const uint8_t *key_buffer,
                                size_t key_buffer_size, psa_algorithm_t hash_alg)
@@ -307,6 +319,9 @@ cleanup:
     return status;
 }
 
+/** \brief Finalize a multipart HMAC operation by producing the
+ *         corresponding MAC
+ */
 static psa_status_t hmac_finish(cc3xx_mac_operation_t *operation, uint8_t *mac,
                                 size_t mac_size)
 {
@@ -367,6 +382,9 @@ exit:
     return status;
 }
 
+/** \brief Setup a multipart MAC operation context with given key and algorithm
+ *
+ */
 static psa_status_t mac_setup(cc3xx_mac_operation_t *operation,
                               const psa_key_attributes_t *attributes,
                               const uint8_t *key_buffer, size_t key_buffer_size,
@@ -396,8 +414,13 @@ static psa_status_t mac_setup(cc3xx_mac_operation_t *operation,
     return status;
 }
 
-/*!@}*/
-
+/** \defgroup psa_mac PSA driver entry points for MAC operations
+ *
+ *  Entry points for MAC computation and verification as described by the PSA
+ *  Cryptoprocessor Unified Driver interface specification
+ *
+ *  @{
+ */
 psa_status_t cc3xx_mac_sign_setup(cc3xx_mac_operation_t *operation,
                                   const psa_key_attributes_t *attributes,
                                   const uint8_t *key_buffer,
@@ -521,3 +544,4 @@ exit:
     cc3xx_mac_abort(&operation);
     return status;
 }
+/** @} */ // end of psa_mac

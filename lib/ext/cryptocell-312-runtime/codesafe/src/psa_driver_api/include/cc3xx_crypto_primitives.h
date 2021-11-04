@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_crypto_primitives.h
+ *
+ * This file contains the declaration of public types associated
+ * to the CC3XX driver
+ *
+ */
+
 #ifndef CC3XX_CRYPTO_PRIMITIVES_H
 #define CC3XX_CRYPTO_PRIMITIVES_H
 

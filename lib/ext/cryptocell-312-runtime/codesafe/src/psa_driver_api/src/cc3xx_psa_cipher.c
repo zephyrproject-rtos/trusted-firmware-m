@@ -9,7 +9,7 @@
  *
  * This file contains the implementation of the entry points associated to the
  * cipher capability (single-part and multipart) as described by the PSA
- * Cryptoprocessor Driver interface specification.
+ * Cryptoprocessor Driver interface specification
  *
  */
 
@@ -61,7 +61,7 @@ static psa_status_t cipher_setup(
     operation->alg        = alg;
     operation->key_type   = key_type;
     operation->dir        = dir;
-    operation->iv_size    =  PSA_CIPHER_IV_LENGTH(key_type, alg);
+    operation->iv_size    = PSA_CIPHER_IV_LENGTH(key_type, alg);
     operation->block_size = (PSA_ALG_IS_STREAM_CIPHER(alg) ? 1 :
                              PSA_BLOCK_CIPHER_BLOCK_LENGTH(key_type));
 
@@ -119,6 +119,13 @@ static psa_status_t cipher_setup(
     return ret;
 }
 
+/** \defgroup psa_cipher PSA driver entry points for symmetric cipher
+ *
+ *  Entry points for symmetric cipher encryption and decryption as described
+ *  by the PSA Cryptoprocessor Unified Driver interface specification
+ *
+ *  @{
+ */
 psa_status_t cc3xx_cipher_encrypt_setup(
         cc3xx_cipher_operation_t *operation,
         const psa_key_attributes_t *attributes,
@@ -614,3 +621,4 @@ psa_status_t cc3xx_cipher_decrypt(
 
     return ret;
 }
+/** @} */ // end of psa_cipher

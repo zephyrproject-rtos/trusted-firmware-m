@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_gcm.h
+ *
+ * This file contains the declarations of the internal functions required to
+ * perform AEAD using AES-GCM
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_GCM_H
 #define CC3XX_INTERNAL_GCM_H
 

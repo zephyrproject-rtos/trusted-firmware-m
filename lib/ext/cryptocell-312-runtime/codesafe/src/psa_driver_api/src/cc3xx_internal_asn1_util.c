@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_asn1_util.c
+ *
+ * This file contains the implementation of the internal functions and
+ * utilities to perform parsing of ASN-1 encoded key buffers
+ *
+ */
+
 #include "cc3xx_internal_asn1_util.h"
 #include "psa/crypto.h"
 
@@ -16,6 +23,9 @@
             (g) += ret;                                                        \
     } while (0)
 
+/**
+ * \ingroup internal_asn1_util
+ */
 int cc3xx_asn1_write_len(unsigned char **p, const unsigned char *start,
                          size_t len)
 {
@@ -64,6 +74,9 @@ int cc3xx_asn1_write_len(unsigned char **p, const unsigned char *start,
     return PSA_ERROR_GENERIC_ERROR;
 }
 
+/**
+ * \ingroup internal_asn1_util
+ */
 int cc3xx_asn1_write_tag(unsigned char **p, const unsigned char *start,
                          unsigned char tag)
 {
@@ -76,6 +89,9 @@ int cc3xx_asn1_write_tag(unsigned char **p, const unsigned char *start,
     return (1);
 }
 
+/**
+ * \ingroup internal_asn1_util
+ */
 int cc3xx_asn1_write_big_integer(unsigned char **p, const unsigned char *start,
                                  uint8_t *data, size_t data_size)
 {
@@ -188,6 +204,12 @@ static int asn1_get_tagged_int(unsigned char **p, const unsigned char *end,
     return (PSA_SUCCESS);
 }
 
+/** \defgroup internal_asn1_util Internal ASN-1 parsing functions
+ *
+ *  Internal functions used by the driver to parse objets in ASN-1 format
+ *
+ *  @{
+ */
 psa_status_t cc3xx_asn1_get_tag(unsigned char **p, const unsigned char *end,
                                 size_t *len, int tag)
 {
@@ -274,3 +296,4 @@ int cc3xx_asn1_write_int(unsigned char **p, unsigned char *start, int val)
 {
     return (asn1_write_tagged_int(p, start, val, CC3XX_TAG_ASN1_INTEGER));
 }
+/** @} */ // end of internal_asn1_util

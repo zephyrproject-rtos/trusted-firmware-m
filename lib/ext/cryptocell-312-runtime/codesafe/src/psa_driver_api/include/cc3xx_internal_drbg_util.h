@@ -5,6 +5,15 @@
  *
  */
 
+/** \file cc3xx_internal_drbg_util.h
+ *
+ * This file contains the declarations of the internal functions to provide
+ * a DRBG, i.e. Deterministic Random Binary Generator based on algorithms as
+ * CTR and HMAC, plus to handle entropy contexts. This file has a direct
+ * dependency on mbedTLS related objects
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_DRBG_UTIL_H
 #define CC3XX_INTERNAL_DRBG_UTIL_H
 

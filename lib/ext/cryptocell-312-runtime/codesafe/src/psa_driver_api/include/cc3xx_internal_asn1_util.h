@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_asn1_util.h
+ *
+ * This file contains the declaration of the internal functions and
+ * utilities to perform parsing of ASN-1 encoded key buffers
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_ASN1_UTIL_H
 #define CC3XX_INTERNAL_ASN1_UTIL_H
 

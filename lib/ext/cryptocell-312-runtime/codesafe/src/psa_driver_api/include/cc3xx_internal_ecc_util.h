@@ -5,23 +5,20 @@
  *
  */
 
+/** \file cc3xx_internal_ecc_util.h
+ *
+ * This file contains the declarations of the internal functions and utilities
+ * required to translate between PSA and CC low-level Elliptic Curve types and
+ * format conversions
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_ECC_UTIL_H
 #define CC3XX_INTERNAL_ECC_UTIL_H
 
 #include "psa/crypto.h"
 
-//#include "cc_common.h"
-//#include "cc_pal_abort.h"
-//#include "cc_pal_mem.h"
-//#include "cc_pal_types.h"
-
-//#include "cc_ecpki_build.h"
 #include "cc_ecpki_domain.h"
-//#include "cc_ecpki_ecdsa.h"
-//#include "cc_ecpki_error.h"
-//#include "cc_ecpki_kg.h"
-//#include "cc_ecpki_local.h"
-//#include "pka_ec_wrst.h"
 #include "cc_ecpki_types.h"
 
 #ifdef __cplusplus

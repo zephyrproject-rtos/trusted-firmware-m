@@ -12,7 +12,7 @@
  *
  * This file contains the declaration of the entry points associated to the
  * key generation (i.e. random generation and extraction of public keys) as
- * described by the PSA Cryptoprocessor Driver interface specification.
+ * described by the PSA Cryptoprocessor Driver interface specification
  *
  */
 

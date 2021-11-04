@@ -11,6 +11,21 @@
 #include "cc_pal_mem.h"
 #include "cc_pal_abort.h"
 
+/** \file cc3xx_internal_chacha20.c
+ *
+ * This file contains the implementation of the internal functions to
+ * perform symmetric encryption and decryption using the Chacha20
+ * algorithm
+ *
+ */
+
+/** \defgroup internal_chacha20 Internal Chacha20 functions
+ *
+ *  Internal functions used by the driver to perform Chacha20 cipher encryption
+ *  and decryption
+ *
+ *  @{
+ */
 void cc3xx_chacha20_init(ChachaContext_t *ctx)
 {
     if (NULL == ctx) {
@@ -110,3 +125,4 @@ psa_status_t cc3xx_chacha20_update(
 
     return PSA_SUCCESS;
 }
+/** @} */ // end of internal_chacha20

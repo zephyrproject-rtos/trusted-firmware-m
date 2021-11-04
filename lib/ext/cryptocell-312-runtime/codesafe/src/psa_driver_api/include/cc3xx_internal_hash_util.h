@@ -5,6 +5,13 @@
  *
  */
 
+/** \file cc3xx_internal_hash_util.h
+ *
+ * This file contains the declarations of the internal utility functions used
+ * to convert Hash types between PSA and low-level CC driver format
+ *
+ */
+
 #ifndef CC3XX_INTERNAL_HASH_UTIL_H
 #define CC3XX_INTERNAL_HASH_UTIL_H
 

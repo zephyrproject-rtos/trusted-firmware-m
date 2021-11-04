@@ -5,12 +5,26 @@
  *
  */
 
+/** \file cc3xx_internal_ecdh.c
+ *
+ * This file contains the implementation of the internal functions required to
+ * perform Elliptic Curve Diffie-Hellman, i.e. ECDH raw key agreement
+ *
+ */
+
 #include "cc3xx_internal_ecdh.h"
 #include <cc_ecpki_dh.h>
 #include <cc_ec_mont_api.h>
 #include <cc_pal_log.h>
 #include <cc_pal_mem.h>
 
+/** \defgroup internal_ecdh_util Internal ECDH functions
+ *
+ *  Internal functions required to implement the Diffie-Hellman protocol based
+ *  on Elliptic Curves, i.e. ECDH
+ *
+ *  @{
+ */
 psa_status_t cc3xx_ecdh_calc_secret_wrst(
         cc3xx_ecdh_context_t *ctx,
         uint8_t *secret, size_t *secret_size)
@@ -77,3 +91,4 @@ exit:
     CC_PalMemSetZero(&EcMontTempBuff, sizeof(CCEcMontTempBuff_t));
     return ret;
 }
+/** @} */ // end of internal_ecdh_util
