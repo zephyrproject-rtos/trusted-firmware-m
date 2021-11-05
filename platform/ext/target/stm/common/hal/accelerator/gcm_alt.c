@@ -25,6 +25,13 @@
 
 #if defined(MBEDTLS_GCM_C)
 #if defined(MBEDTLS_GCM_ALT)
+#ifdef BUILD_CRYPTO_TFM
+#include "stm32hal.h"
+#include "interface/include/psa_manifest/pid.h"
+#include "tfm_crypto_defs.h"
+extern psa_status_t tfm_crypto_get_caller_id(int32_t *id);
+#endif
+
 #define MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED        -0x0016  /**< API is NOT supported. */
 #define CC_UNUSED_PARAM(prm)  ((void)prm)
 
@@ -183,15 +190,13 @@ int mbedtls_gcm_setkey( mbedtls_gcm_context *ctx,
 {
     unsigned int i;
     int ret = 0;
+#if BUILD_CRYPTO_TFM
+    int32_t id;
+#endif
 
     GCM_VALIDATE_RET( ctx != NULL );
 
     switch (keybits) {
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
-        case 0:
-            /* implicit request for using HUK */
-            break;
-#endif
         case 128:
             ctx->hcryp_gcm.Init.KeySize = CRYP_KEYSIZE_128B;;
             break;
@@ -223,18 +228,32 @@ int mbedtls_gcm_setkey( mbedtls_gcm_context *ctx,
 #if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
     ctx->hcryp_gcm.Instance = SAES;
     ctx->hcryp_gcm.Init.Algorithm  = CRYP_AES_ECB;
+#if BUILD_CRYPTO_TFM
+    tfm_crypto_get_caller_id(&id);
+#ifdef TFM_PARTITION_TEST_PS
+    if (id == TFM_SP_PS_TEST)
+    {
+        id = TFM_SP_PS;
+    }
+#endif
 
-    if ( 0 == keybits )
+    if (id == TFM_SP_PS)
     {
         ctx->hcryp_gcm.Init.KeyMode = CRYP_KEYMODE_NORMAL;
-        ctx->hcryp_gcm.Init.KeyProtection = CRYP_KEYSEL_HW;
+        ctx->hcryp_gcm.Init.KeySelect = CRYP_KEYSEL_HW;
+        ctx->hcryp_gcm.Init.KeyProtection = CRYP_KEYPROT_DISABLE;
     }
     else
     {
         ctx->hcryp_gcm.Init.KeyMode = CRYP_KEYMODE_NORMAL;
-        ctx->hcryp_gcm.Init.KeyProtection = CRYP_KEYSEL_NORMAL;
+        ctx->hcryp_gcm.Init.KeySelect = CRYP_KEYSEL_NORMAL;
+        ctx->hcryp_gcm.Init.KeyProtection = CRYP_KEYPROT_DISABLE;
     }
-
+#else
+    ctx->hcryp_gcm.Init.KeyMode = CRYP_KEYMODE_NORMAL;
+    ctx->hcryp_gcm.Init.KeySelect = CRYP_KEYSEL_NORMAL;
+    ctx->hcryp_gcm.Init.KeyProtection = CRYP_KEYPROT_DISABLE;
+#endif
     /* Deinitializes the CRYP peripheral */
     if (HAL_CRYP_DeInit(&ctx->hcryp_gcm) != HAL_OK)
     {

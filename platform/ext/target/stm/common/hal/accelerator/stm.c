@@ -15,6 +15,9 @@
 
 int crypto_hw_accelerator_init(void)
 {
+#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED)
+    __HAL_RCC_SHSI_ENABLE();
+#endif
     return 0;
 }
 
