@@ -16,7 +16,8 @@
 #ifndef CC3XX_INTERNAL_CHACHA20_H
 #define CC3XX_INTERNAL_CHACHA20_H
 
-#include "cc3xx_crypto_primitives.h"
+#include "psa/crypto.h"
+#include "chacha_driver.h"
 
 #ifdef __cplusplus
 extern "C" {

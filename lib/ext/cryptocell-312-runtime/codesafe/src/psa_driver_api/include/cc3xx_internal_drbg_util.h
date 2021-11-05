@@ -17,9 +17,11 @@
 #ifndef CC3XX_INTERNAL_DRBG_UTIL_H
 #define CC3XX_INTERNAL_DRBG_UTIL_H
 
+#include "psa/crypto.h"
+
 #include "cc_ecpki_types.h"
 #include "cc_rnd_common.h"
-#include "psa/crypto.h"
+
 #include "mbedtls/hmac_drbg.h"
 
 #ifdef __cplusplus

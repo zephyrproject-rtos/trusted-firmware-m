@@ -15,7 +15,8 @@
 #ifndef CC3XX_INTERNAL_AES_H
 #define CC3XX_INTERNAL_AES_H
 
-#include "cc3xx_crypto_primitives.h"
+#include "psa/crypto.h"
+#include "aes_driver.h"
 
 #ifdef __cplusplus
 extern "C" {

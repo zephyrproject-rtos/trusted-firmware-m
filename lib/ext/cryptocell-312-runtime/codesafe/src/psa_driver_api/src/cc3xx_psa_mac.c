@@ -14,6 +14,7 @@
  */
 
 #include "cc3xx_psa_mac.h"
+#include "cc3xx_crypto_primitives_private.h"
 #include "cc3xx_psa_cipher.h"
 #include "cc3xx_psa_hash.h"
 #include "aes_driver.h"

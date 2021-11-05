@@ -14,6 +14,7 @@
  */
 
 #include "cc3xx_psa_cipher.h"
+#include "cc3xx_crypto_primitives_private.h"
 #include "cc3xx_internal_aes.h"
 #include "cc3xx_internal_chacha20.h"
 #include "cc_pal_mem.h"

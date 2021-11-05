@@ -15,7 +15,7 @@
 #ifndef CC3XX_INTERNAL_CHACHA20_POLY1305_H
 #define CC3XX_INTERNAL_CHACHA20_POLY1305_H
 
-#include <psa/crypto.h>
+#include "psa/crypto.h"
 
 #ifdef __cplusplus
 extern "C" {

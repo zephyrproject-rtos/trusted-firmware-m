@@ -14,6 +14,7 @@
  */
 
 #include "cc3xx_psa_hash.h"
+#include "cc3xx_crypto_primitives_private.h"
 #include "cc_pal_log.h"
 #include "cc_pal_mem.h"
 

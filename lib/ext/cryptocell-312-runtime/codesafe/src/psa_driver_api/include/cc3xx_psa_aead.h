@@ -16,7 +16,7 @@
  *
  */
 
-#include <psa/crypto.h>
+#include "psa/crypto.h"
 
 #ifdef __cplusplus
 extern "C" {

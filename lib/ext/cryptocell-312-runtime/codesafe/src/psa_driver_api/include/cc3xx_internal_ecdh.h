@@ -23,14 +23,24 @@
 extern "C" {
 #endif
 
-/**
- * Context structure required for Weierstrass curves (PSA_ECC_FAMILY_SECT_XX)
+/*!
+ * \struct cc3xx_ecdh_context_s
+ *
+ * \brief Context structure required for Weierstrass curves
+ *
  */
-typedef struct cc3xx_ecdh_context_t {
+struct cc3xx_ecdh_context_s {
     CCEcpkiDomainID_t domain_id;
     CCEcpkiUserPrivKey_t priv_key;
     CCEcpkiUserPublKey_t publ_key;
-} cc3xx_ecdh_context_t;
+};
+
+/*! \typedef cc3xx_ecdh_context_t
+ *
+ * \brief A concise way to refer to \ref cc3xx_ecdh_context_s
+ *
+ */
+typedef struct cc3xx_ecdh_context_s cc3xx_ecdh_context_t;
 
 /**
  * @brief   Calculate a shared secret value (Short Weierstrass)

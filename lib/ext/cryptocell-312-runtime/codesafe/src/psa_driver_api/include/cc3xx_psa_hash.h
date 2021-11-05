@@ -16,8 +16,8 @@
  *
  */
 
-#include "cc3xx_crypto_primitives.h"
 #include "psa/crypto.h"
+#include "cc3xx_crypto_primitives.h"
 
 #ifdef __cplusplus
 extern "C" {
