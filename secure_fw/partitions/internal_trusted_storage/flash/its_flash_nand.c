@@ -49,54 +49,99 @@ static psa_status_t its_flash_nand_read(const struct its_flash_fs_config_t *cfg,
                                         size_t offset, size_t size)
 {
     int32_t err;
-    uint32_t addr = get_phys_address(cfg, block_id, offset);
     struct its_flash_nand_dev_t *flash_dev =
         (struct its_flash_nand_dev_t *)cfg->flash_dev;
+    uint32_t addr;
 
-    err = flash_dev->driver->ReadData(addr, buff, size);
-    if (err != ARM_DRIVER_OK) {
-        return PSA_ERROR_STORAGE_FAILURE;
+    if (block_id == ITS_BLOCK_INVALID_ID) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    if (block_id == flash_dev->buf_block_id_0) {
+        (void)tfm_memcpy(buff, flash_dev->write_buf_0 + offset, size);
+    } else if (block_id == flash_dev->buf_block_id_1) {
+        (void)tfm_memcpy(buff, flash_dev->write_buf_1 + offset, size);
+    } else {
+        addr = get_phys_address(cfg, block_id, offset);
+        err = flash_dev->driver->ReadData(addr, buff, size);
+        if (err != ARM_DRIVER_OK) {
+            return PSA_ERROR_STORAGE_FAILURE;
+        }
     }
 
     return PSA_SUCCESS;
 }
 
-static psa_status_t its_flash_nand_write(const struct its_flash_fs_config_t *cfg,
-                                         uint32_t block_id, const uint8_t *buff,
-                                         size_t offset, size_t size)
+static psa_status_t its_flash_nand_write(
+                                    const struct its_flash_fs_config_t *cfg,
+                                    uint32_t block_id, const uint8_t *buff,
+                                    size_t offset, size_t size)
 {
     struct its_flash_nand_dev_t *flash_dev =
         (struct its_flash_nand_dev_t *)cfg->flash_dev;
 
-    if (flash_dev->buf_block_id == ITS_BLOCK_INVALID_ID) {
-        flash_dev->buf_block_id = block_id;
-    } else if (flash_dev->buf_block_id != block_id) {
+    if (block_id == ITS_BLOCK_INVALID_ID) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    /* Buffer the write data */
-    (void)tfm_memcpy(flash_dev->write_buf + offset, buff, size);
+    /* Write to the match block buffer if exists. Otherwise use the empty
+     * buffer if exists. If no more empty buffer, return error.
+     */
+    if (block_id == flash_dev->buf_block_id_0) {
+        (void)tfm_memcpy(flash_dev->write_buf_0 + offset, buff, size);
+    } else if (block_id == flash_dev->buf_block_id_1) {
+        (void)tfm_memcpy(flash_dev->write_buf_1 + offset, buff, size);
+    } else if (flash_dev->buf_block_id_0 == ITS_BLOCK_INVALID_ID) {
+        flash_dev->buf_block_id_0 = block_id;
+        (void)tfm_memcpy(flash_dev->write_buf_0 + offset, buff, size);
+    } else if (flash_dev->buf_block_id_1 == ITS_BLOCK_INVALID_ID) {
+        flash_dev->buf_block_id_1 = block_id;
+        (void)tfm_memcpy(flash_dev->write_buf_1 + offset, buff, size);
+    } else {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
 
     return PSA_SUCCESS;
 }
 
-static psa_status_t its_flash_nand_flush(const struct its_flash_fs_config_t *cfg)
+static psa_status_t its_flash_nand_flush(
+                                    const struct its_flash_fs_config_t *cfg,
+                                    uint32_t block_id)
 {
     int32_t err;
     struct its_flash_nand_dev_t *flash_dev =
         (struct its_flash_nand_dev_t *)cfg->flash_dev;
-    uint32_t addr = get_phys_address(cfg, flash_dev->buf_block_id, 0);
+    uint32_t addr;
 
-    /* Flush the buffered write data to flash*/
-    err = flash_dev->driver->ProgramData(addr, flash_dev->write_buf,
-                                         cfg->block_size);
-    if (err != ARM_DRIVER_OK) {
-        return PSA_ERROR_STORAGE_FAILURE;
+    if (block_id == flash_dev->buf_block_id_0) {
+        addr = get_phys_address(cfg, flash_dev->buf_block_id_0, 0);
+
+        /* Flush the buffered write data to flash*/
+        err = flash_dev->driver->ProgramData(addr, flash_dev->write_buf_0,
+                                            cfg->block_size);
+        if (err != ARM_DRIVER_OK) {
+            return PSA_ERROR_STORAGE_FAILURE;
+        }
+
+        /* Clear the write buffer */
+        (void)tfm_memset(flash_dev->write_buf_0, 0, flash_dev->buf_size);
+        flash_dev->buf_block_id_0 = ITS_BLOCK_INVALID_ID;
+    } else if (block_id == flash_dev->buf_block_id_1) {
+        addr = get_phys_address(cfg, flash_dev->buf_block_id_1, 0);
+
+        /* Flush the buffered write data to flash*/
+        err = flash_dev->driver->ProgramData(addr, flash_dev->write_buf_1,
+                                             cfg->block_size);
+        if (err != ARM_DRIVER_OK) {
+            return PSA_ERROR_STORAGE_FAILURE;
+        }
+
+        /* Clear the write buffer */
+        (void)tfm_memset(flash_dev->write_buf_1, 0, flash_dev->buf_size);
+        flash_dev->buf_block_id_1 = ITS_BLOCK_INVALID_ID;
+    } else {
+        return PSA_ERROR_GENERIC_ERROR;
     }
-
-    /* Clear the write buffer */
-    (void)tfm_memset(flash_dev->write_buf, 0, flash_dev->buf_size);
-    flash_dev->buf_block_id = ITS_BLOCK_INVALID_ID;
 
     return PSA_SUCCESS;
 }

@@ -26,8 +26,13 @@ extern "C" {
 
 struct its_flash_nand_dev_t {
     ARM_DRIVER_FLASH *driver;
-    uint32_t buf_block_id;
-    uint8_t *write_buf;
+    /* Two write buffers are reserved as the metadata block and the file block
+     * write can be mixed in the file system operation.
+     */
+    uint32_t buf_block_id_0;
+    uint32_t buf_block_id_1;
+    uint8_t *write_buf_0;
+    uint8_t *write_buf_1;
     size_t buf_size;
 };
 

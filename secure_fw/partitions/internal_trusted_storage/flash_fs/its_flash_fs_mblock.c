@@ -1087,7 +1087,7 @@ psa_status_t its_flash_fs_mblock_meta_update_finalize(
     }
 
     /* Commit metadata block modifications to flash */
-    err = fs_ctx->ops->flush(fs_ctx->cfg);
+    err = fs_ctx->ops->flush(fs_ctx->cfg, fs_ctx->scratch_metablock);
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -1314,7 +1314,7 @@ psa_status_t its_flash_fs_mblock_reset_metablock(
     }
 
     /* Commit metadata block modifications to flash */
-    err = fs_ctx->ops->flush(fs_ctx->cfg);
+    err = fs_ctx->ops->flush(fs_ctx->cfg, fs_ctx->scratch_metablock);
     if (err != PSA_SUCCESS) {
         return err;
     }
