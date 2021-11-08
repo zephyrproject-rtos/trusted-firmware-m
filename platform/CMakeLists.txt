@@ -166,6 +166,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${BL1}>:BL1>
         $<$<BOOL:${BL2}>:BL2>
         BL2_HEADER_SIZE=${BL2_HEADER_SIZE}
+        BL2_TRAILER_SIZE=${BL2_TRAILER_SIZE}
         $<$<BOOL:${SECURE_UART1}>:SECURE_UART1>
         DAUTH_${DEBUG_AUTHENTICATION}
         $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>

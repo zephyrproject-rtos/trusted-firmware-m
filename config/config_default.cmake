@@ -10,6 +10,7 @@ set(TFM_PLATFORM                        ""          CACHE STRING    "Platform to
 set(CROSS_COMPILE                       arm-none-eabi CACHE STRING  "Cross-compilation triplet")
 
 set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "Header size")
+set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "Trailer size")
 set(NS                                  ON          CACHE BOOL      "Whether to build NS app")
 
 set(TEST_S                              OFF         CACHE BOOL      "Whether to build S regression tests")

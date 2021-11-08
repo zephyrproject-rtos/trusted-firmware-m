@@ -16,6 +16,7 @@ set(MCUBOOT_LOG_LEVEL                   "INFO"      CACHE STRING    "Level of lo
 set(MCUBOOT_HW_KEY                      ON          CACHE BOOL      "Whether to embed the entire public key in the image metadata instead of the hash only")
 set(MCUBOOT_UPGRADE_STRATEGY            "OVERWRITE_ONLY" CACHE STRING "Upgrade strategy for images")
 set(BL2_HEADER_SIZE                     0x400       CACHE STRING    "Header size")
+set(BL2_TRAILER_SIZE                    0x400       CACHE STRING    "Trailer size")
 
 # Specifying a scope of the accepted values of MCUBOOT_UPGRADE_STRATEGY for
 # platforms to choose a specific upgrade strategy for images. These certain
