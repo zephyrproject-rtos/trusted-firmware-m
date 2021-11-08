@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -20,6 +21,21 @@
   "version_major": 0,
   "version_minor": 1,
   "manifest_list": [
+    {
+      "name": "Non-Secure Mailbox Agent",
+      "short_name": "TFM_NS_AGENT_MAILBOX",
+      "manifest": "${CMAKE_SOURCE_DIR}/secure_fw/partitions/ns_agent_mailbox/ns_agent_mailbox.yaml",
+      "output_path": "secure_fw/partitions/ns_agent_mailbox",
+      "conditional": "@TFM_MULTI_CORE_TOPOLOGY@",
+      "version_major": 0,
+      "version_minor": 1,
+      "pid": 0,
+      "linker_pattern": {
+        "library_list": [
+           "*tfm_*ns_agent_mailbox.*"
+         ],
+      }
+    },
     {
       "name": "Protected Storage Service",
       "short_name": "TFM_SP_PS",
