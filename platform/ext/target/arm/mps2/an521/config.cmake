@@ -13,3 +13,10 @@ if(NOT TFM_LIB_MODEL)
         set(TEST_NS_FLIH_IRQ      ON           CACHE BOOL      "Enable FLIH testing")
     endif()
 endif()
+
+if(BL2)
+    set(BL2_TRAILER_SIZE 0x10000 CACHE STRING "Trailer size")
+else()
+    #No header if no bootloader, but keep IMAGE_CODE_SIZE the same
+    set(BL2_TRAILER_SIZE 0x10400 CACHE STRING "Trailer size")
+endif()

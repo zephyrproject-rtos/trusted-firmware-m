@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+set(BL2_TRAILER_SIZE                    0x800        CACHE STRING    "Trailer size")
 
 # Configuration values forced due to the Secure Enclave topology
 set(TFM_MULTI_CORE_TOPOLOGY             ON           CACHE BOOL      "Whether to build for a dual-cpu architecture" FORCE)

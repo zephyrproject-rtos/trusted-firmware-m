@@ -9,6 +9,7 @@
 ########################## BL2 #################################################
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")
+set(BL2_TRAILER_SIZE                    0x2000      CACHE STRING    "Trailer size")
 
 ################################## Dependencies ################################
 set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")

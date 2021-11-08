@@ -60,18 +60,6 @@
                                            + FLASH_S_PARTITION_SIZE)
 #endif /* !LINK_TO_SECONDARY_PARTITION */
 
-#ifdef BL2
-/* Boot partition structure if MCUBoot is used:
- * 1. Bootloader header
- * 2. Image area
- * 3. Trailer
- */
-#define BL2_TRAILER_SIZE     (0x400)     /* 1 KB */
-#else
-/* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
-#define BL2_TRAILER_SIZE     (0x800)
-#endif /* BL2 */
-
 #if (!defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)) && \
     (NS_IMAGE_PRIMARY_PARTITION_OFFSET > S_IMAGE_PRIMARY_PARTITION_OFFSET)
 /* If secure image and nonsecure image are concatenated, and nonsecure image
