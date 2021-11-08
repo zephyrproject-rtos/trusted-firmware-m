@@ -47,4 +47,11 @@ enum fwu_agent_error_t corstone1000_fwu_host_ack(void);
 void bl1_get_boot_bank(uint32_t *bank_offset);
 void bl2_get_boot_bank(uint32_t *bank_offset);
 
+/* When in trial state, start the timer for host to respond.
+ * Diable timer when host responds back either by calling
+ * corstone1000_fwu_accept_image or corstone1000_fwu_select_previous.
+ * Otherwise, resets the system.
+ */
+void host_acknowledgement_timer_to_reset(void);
+
 #endif /* FWU_AGENT_H */

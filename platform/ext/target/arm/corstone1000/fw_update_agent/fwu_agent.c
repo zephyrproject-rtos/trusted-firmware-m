@@ -15,6 +15,7 @@
 #include "uefi_capsule_parser.h"
 #include "flash_common.h"
 #include "platform_base_address.h"
+#include "platform_description.h"
 
 /* Properties of image in a bank */
 struct fwu_image_properties {
@@ -126,6 +127,8 @@ struct efi_guid full_capsule_image_guid = {
 
 /* Import the CMSIS flash device driver */
 extern ARM_DRIVER_FLASH FWU_METADATA_FLASH_DEV;
+
+#define HOST_ACK_TIMEOUT_SEC    (6 * 60) /* ~seconds, not exact */
 
 static enum fwu_agent_error_t private_metadata_read(
         struct fwu_private_metadata* p_metadata)
@@ -762,6 +765,13 @@ void bl2_get_boot_bank(uint32_t *bank_offset)
     return;
 }
 
+static void disable_host_ack_timer(void)
+{
+    FWU_LOG_MSG("%s: timer to reset is disabled\n\r", __func__);
+    SysTick->CTRL &= (~SysTick_CTRL_ENABLE_Msk);
+}
+
+
 enum fwu_agent_error_t corstone1000_fwu_host_ack(void)
 {
     enum fwu_agent_error_t ret;
@@ -803,9 +813,77 @@ enum fwu_agent_error_t corstone1000_fwu_host_ack(void)
                                 &priv_metadata);
     }
 
+    if (ret == FWU_AGENT_SUCCESS) {
+        disable_host_ack_timer();
+    }
+
 out:
     Select_XIP_Mode_For_Shared_Flash();
 
     FWU_LOG_MSG("%s: exit: ret = %d\n\r", __func__, ret);
     return ret;
+}
+
+static int systic_counter = 0;
+
+void SysTick_Handler(void)
+{
+    systic_counter++;
+    if ((systic_counter % 10) == 0) {
+        FWU_LOG_MSG("%s: counted = %d, expiring on = %u\n\r", __func__,
+                                systic_counter, HOST_ACK_TIMEOUT_SEC);
+    }
+    if (systic_counter == HOST_ACK_TIMEOUT_SEC) {
+        FWU_LOG_MSG("%s, timer expired, reseting the system\n\r", __func__);
+        NVIC_SystemReset();
+    }
+}
+
+/* When in trial state, start the timer for host to respond.
+ * Diable timer when host responds back either by calling
+ * corstone1000_fwu_accept_image or corstone1000_fwu_select_previous.
+ * Otherwise, resets the system.
+ */
+void host_acknowledgement_timer_to_reset(void)
+{
+    struct fwu_private_metadata priv_metadata;
+    enum fwu_agent_state_t current_state;
+    uint32_t boot_attempted;
+    uint32_t boot_index;
+
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    Select_Write_Mode_For_Shared_Flash();
+
+    if (!is_initialized) {
+        FWU_ASSERT(0);
+    }
+
+    if (private_metadata_read(&priv_metadata)) {
+        FWU_ASSERT(0);
+    }
+
+    if (metadata_read(&_metadata)) {
+        FWU_ASSERT(0);
+    }
+
+    Select_XIP_Mode_For_Shared_Flash();
+
+    current_state = get_fwu_agent_state(&_metadata, &priv_metadata);
+
+    if (current_state == FWU_AGENT_STATE_TRIAL) {
+        FWU_LOG_MSG("%s: in trial state, starting host ack timer\n\r",
+                        __func__);
+        systic_counter = 0;
+        if (SysTick_Config(SysTick_LOAD_RELOAD_Msk)) {
+            FWU_LOG_MSG("%s: timer init failed\n\r", __func__);
+            FWU_ASSERT(0);
+        } else {
+            FWU_LOG_MSG("%s: timer started: seconds to expire : %u\n\r",
+                        __func__, HOST_ACK_TIMEOUT_SEC);
+        }
+    }
+
+    FWU_LOG_MSG("%s: exit\n\r", __func__);
+    return;
 }
