@@ -37,6 +37,35 @@ static psa_status_t add_pkcs_padding(
     return PSA_SUCCESS;
 }
 
+static psa_status_t get_pkcs_padding(
+        uint8_t *input,
+        size_t input_len,
+        size_t *data_len)
+{
+    size_t i, pad_idx;
+    uint8_t padding_len, bad = 0;
+
+    if(NULL == input || NULL == data_len) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    padding_len = input[input_len - 1];
+    *data_len = input_len - padding_len;
+
+    /* Avoid logical || since it results in a branch */
+    bad |= padding_len > input_len;
+    bad |= padding_len == 0;
+
+    /* The number of bytes checked must be independent of padding_len,
+     * so pick input_len, which is usually 8 or 16 (one block) */
+    pad_idx = input_len - padding_len;
+    for( i = 0; i < input_len; i++ ) {
+        bad |= ( input[i] ^ padding_len ) * ( i >= pad_idx );
+    }
+
+    return( PSA_ERROR_INVALID_PADDING * ( bad != 0 ) );
+}
+
 static psa_status_t cipher_setup(
         cc3xx_cipher_operation_t *operation,
         const psa_key_attributes_t *attributes,
@@ -113,8 +142,10 @@ static psa_status_t cipher_setup(
 
     if (operation->alg == PSA_ALG_CBC_PKCS7) {
         operation->add_padding = add_pkcs_padding;
+        operation->get_padding = get_pkcs_padding;
     } else {
         operation->add_padding = NULL;
+        operation->get_padding = NULL;
     }
 
     return ret;
@@ -444,6 +475,14 @@ psa_status_t cc3xx_cipher_finish(
                     output ))
                 != PSA_SUCCESS) {
                 return ret;
+            }
+
+            /* Set output size for decryption */
+            if (operation->dir == PSA_CRYPTO_DRIVER_DECRYPT){
+                return(operation->get_padding(
+                            output,
+                            operation->block_size,
+                            output_length));
             }
 
             *output_length = operation->block_size;
