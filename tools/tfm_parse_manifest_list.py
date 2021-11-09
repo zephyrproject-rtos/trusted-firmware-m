@@ -7,6 +7,7 @@
 
 import os
 import io
+import re
 import sys
 import argparse
 from jinja2 import Environment, BaseLoader, select_autoescape, TemplateNotFound
@@ -23,7 +24,11 @@ donotedit_warning = \
                     'WARNING: This is an auto-generated file. Do not edit!' + \
                     ' ***********/'
 
+TFM_ROOT_DIR = os.path.join(sys.path[0], '..')
 OUT_DIR = None # The root directory that files are generated to
+
+# PID[0, TFM_PID_BASE] are reserved for TF-M SPM and test usages
+TFM_PID_BASE = 256
 
 # variable for checking for duplicated sid
 sid_list = []
@@ -52,18 +57,48 @@ class TemplateLoader(BaseLoader):
             source = f.read()
         return source, template, False
 
+def get_single_macro_def_from_file(file_name, macro_name):
+    """
+    This function parses the given file_name to get the definition of the given
+    C Macro (macro_name).
+
+    It assumes that the target Macro has no multiple definitions in different
+    build configurations.
+
+    It supports Macros defined in multi-line, for example:
+    #define SOME_MACRO          \
+                            the_macro_value
+
+    Inputs:
+        - file_name: the file to get the Macro from
+        - macro_name: the name of the Macro to get
+    Returns:
+        - The Macro definition with '()' stripped, or Exception if not found
+    """
+
+    with open(file_name, 'r') as f:
+        pattern = re.compile(r'#define\s+{}[\\\s]+.*'.format(macro_name))
+        result = pattern.findall(f.read())
+
+        if len(result) != 1:
+            raise Exception('{} not defined or has multiple definitions'.format(macro_name))
+
+    macro_def = result[0].split()[-1].strip('()')
+
+    return macro_def
+
 def manifest_validation(partition_manifest, pid):
     """
     This function validates FF-M compliance for partition manifest, and sets
     default values for optional attributes.
-    The validation is skipped for TF-M specific Partitions (PID < 256).
+    The validation is skipped for TF-M specific Partitions (PID < TFM_PID_BASE).
     More validation items will be added.
     """
 
     service_list = partition_manifest.get('services', [])
     irq_list     = partition_manifest.get('irqs', [])
 
-    if (pid == None or pid >= 256) \
+    if (pid == None or pid >= TFM_PID_BASE) \
        and len(service_list) == 0 and len(irq_list) == 0:
         raise Exception('{} must declare at least either a secure service or an IRQ!'
                         .format(partition_manifest['name']))
@@ -176,7 +211,7 @@ def process_partition_manifests(manifest_lists):
         with open(manifest_path) as manifest_file:
             manifest = manifest_validation(yaml.safe_load(manifest_file), pid)
 
-        if pid == None or pid >= 256:
+        if pid == None or pid >= TFM_PID_BASE:
             # Count the number of IPC/SFN partitions
             if manifest['psa_framework_version'] == 1.1 and manifest['model'] == 'SFN':
                 sfn_partition_num += 1
@@ -207,7 +242,7 @@ def process_partition_manifests(manifest_lists):
                                'loadinfo_file': load_info_file})
 
     # Automatically assign PIDs for partitions without 'pid' attribute
-    pid = max(pid_list, default = 256 - 1)
+    pid = max(pid_list, default = TFM_PID_BASE - 1)
     for idx in no_pid_manifest_idx:
         pid += 1
         all_manifests[idx]['pid'] = pid
@@ -217,7 +252,7 @@ def process_partition_manifests(manifest_lists):
     context['ipc_partition_num'] = ipc_partition_num
     context['sfn_partition_num'] = sfn_partition_num
 
-    context['stateless_services'] = process_stateless_services(partition_list, 32)
+    context['stateless_services'] = process_stateless_services(partition_list)
 
     return context
 
@@ -314,7 +349,7 @@ def gen_summary_files(context, gen_file_lists):
 
     print ('Generation of files done')
 
-def process_stateless_services(partitions, stateless_index_max_num):
+def process_stateless_services(partitions):
     """
     This function collects all stateless services together, and allocates
     stateless handles for them.
@@ -324,7 +359,12 @@ def process_stateless_services(partitions, stateless_index_max_num):
     Framework puts each service into a reordered stateless service list at
     position of "index". Other unused positions are left None.
     """
+
+    STATIC_HANDLE_CONFIG_FILE = 'secure_fw/spm/cmsis_psa/spm_ipc.h'
+
     collected_stateless_services = []
+    stateless_index_max_num = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_NUM_LIMIT'), base = 10)
 
     # Collect all stateless services first.
     for partition in partitions:
@@ -377,6 +417,20 @@ def process_stateless_services(partitions, stateless_index_max_num):
         else:
             raise Exception('Invalid stateless_handle setting: {handle}.'.format(handle=service['stateless_handle']))
 
+    STATIC_HANDLE_IDX_BIT_WIDTH = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_IDX_BIT_WIDTH'), base = 10)
+    STATIC_HANDLE_IDX_MASK = (1 << STATIC_HANDLE_IDX_BIT_WIDTH) - 1
+
+    STATIC_HANDLE_INDICATOR_OFFSET = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_INDICATOR_OFFSET'), base = 10)
+
+    STATIC_HANDLE_VER_OFFSET = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_VER_OFFSET'), base = 10)
+
+    STATIC_HANDLE_VER_BIT_WIDTH = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_VER_BIT_WIDTH'), base = 10)
+    STATIC_HANDLE_VER_MASK = (1 << STATIC_HANDLE_VER_BIT_WIDTH) - 1
+
     # Auto-allocate stateless handle and encode the stateless handle
     for i in range(0, stateless_index_max_num):
         service = reordered_stateless_services[i]
@@ -386,17 +440,14 @@ def process_stateless_services(partitions, stateless_index_max_num):
 
         """
         Encode stateless flag and version into stateless handle
-        bit 30: stateless handle indicator
-        bit 15-8: stateless service version
-        bit 7-0: stateless handle index
+        Check STATIC_HANDLE_CONFIG_FILE for details
         """
         stateless_handle_value = 0
         if service != None:
-            stateless_index = (i & 0xFF)
+            stateless_index = (i & STATIC_HANDLE_IDX_MASK)
             stateless_handle_value |= stateless_index
-            stateless_flag = 1 << 30
-            stateless_handle_value |= stateless_flag
-            stateless_version = (service['version'] & 0xFF) << 8
+            stateless_handle_value |= (1 << STATIC_HANDLE_INDICATOR_OFFSET)
+            stateless_version = (service['version'] & STATIC_HANDLE_VER_MASK) << STATIC_HANDLE_VER_OFFSET
             stateless_handle_value |= stateless_version
             service['stateless_handle_value'] = '0x{0:08x}'.format(stateless_handle_value)
             service['stateless_handle_index'] = stateless_index
