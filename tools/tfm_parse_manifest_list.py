@@ -52,18 +52,24 @@ class TemplateLoader(BaseLoader):
             source = f.read()
         return source, template, False
 
-def manifest_validation(partition_manifest):
+def manifest_validation(partition_manifest, pid):
     """
     This function validates FF-M compliance for partition manifest, and sets
     default values for optional attributes.
+    The validation is skipped for TF-M specific Partitions (PID < 256).
     More validation items will be added.
     """
 
-    # Service FF-M manifest validation
-    if 'services' not in partition_manifest.keys():
-        return partition_manifest
+    service_list = partition_manifest.get('services', [])
+    irq_list     = partition_manifest.get('irqs', [])
 
-    for service in partition_manifest['services']:
+    if (pid == None or pid >= 256) \
+       and len(service_list) == 0 and len(irq_list) == 0:
+        raise Exception('{} must declare at least either a secure service or an IRQ!'
+                        .format(partition_manifest['name']))
+
+    # Service FF-M manifest validation
+    for service in service_list:
         if 'version' not in service.keys():
             service['version'] = 1
         if 'version_policy' not in service.keys():
@@ -152,11 +158,15 @@ def process_partition_manifests(manifest_lists):
         # Check if partition ID is manually set
         if 'pid' not in manifest_item.keys():
             no_pid_manifest_idx.append(i)
-        # Check if partition ID is duplicated
-        elif manifest_item['pid'] in pid_list:
-            raise Exception('PID No. {pid} has already been used!'.format(pid=manifest_item['pid']))
+            pid = None
         else:
-            pid_list.append(manifest_item['pid'])
+            pid = manifest_item['pid']
+
+            # Check if partition ID is duplicated
+            if pid in pid_list:
+                raise Exception('PID No. {pid} has already been used!'.format(pid))
+            else:
+                pid_list.append(pid)
 
         # Replace environment variables in the manifest path
         manifest_path = os.path.expandvars(manifest_item['manifest'])
@@ -164,7 +174,7 @@ def process_partition_manifests(manifest_lists):
         manifest_path = os.path.join(manifest_item['list_path'], manifest_path).replace('\\', '/')
 
         with open(manifest_path) as manifest_file:
-            manifest = manifest_validation(yaml.safe_load(manifest_file))
+            manifest = manifest_validation(yaml.safe_load(manifest_file), pid)
 
         # Count the number of IPC partitions
         if manifest['psa_framework_version'] == 1.1 and manifest['model'] == 'IPC':
@@ -324,7 +334,10 @@ def process_stateless_services(partitions, stateless_index_max_num):
         # Skip the FF-M 1.0 partitions
         if partition['manifest']['psa_framework_version'] < 1.1:
             continue
-        for service in partition['manifest']['services']:
+
+        service_list = partition['manifest'].get('services', [])
+
+        for service in service_list:
             if 'connection_based' not in service:
                 raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
             if service['connection_based'] is False:

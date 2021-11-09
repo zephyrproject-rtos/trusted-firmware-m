@@ -58,7 +58,7 @@
       "conditional": "@TFM_PARTITION_AUDIT_LOG@",
       "version_major": 0,
       "version_minor": 1,
-      "pid": 258,
+      "pid": 255,
       "linker_pattern": {
         "library_list": [
            "*tfm_*partition_audit.*"
