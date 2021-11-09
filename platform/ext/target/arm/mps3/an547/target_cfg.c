@@ -568,16 +568,3 @@ void ppc_clear_irq(void)
         ppc_bank_drivers[i]->ClearInterrupt();
     }
 }
-
-enum tfm_hal_status_t tfm_hal_platform_init(void)
-{
-    /* Syscounter enabled by default. This way App-RoT partitions can use
-     * systimers without the need to add the syscounter as an mmio devide.
-     */
-    syscounter_armv8_m_cntrl_init(&SYSCOUNTER_CNTRL_ARMV8_M_DEV_S);
-
-    __enable_irq();
-    stdio_init();
-
-    return TFM_HAL_SUCCESS;
-}

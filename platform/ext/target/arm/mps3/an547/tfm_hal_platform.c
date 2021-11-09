@@ -10,10 +10,12 @@
 #include "tfm_hal_platform.h"
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
+#include "device_definition.h"
 
 enum tfm_hal_status_t tfm_hal_platform_init(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
+    enum syscounter_armv8_m_cntrl_error_t counter_err = SYSCOUNTER_ARMV8_M_ERR_NONE;
 
     plat_err = enable_fault_handlers();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
@@ -27,6 +29,14 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 
     plat_err = init_debug();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+
+    /* Syscounter enabled by default. This way App-RoT partitions can use
+     * systimers without the need to add the syscounter as an mmio devide.
+     */
+    counter_err = syscounter_armv8_m_cntrl_init(&SYSCOUNTER_CNTRL_ARMV8_M_DEV_S);
+    if (counter_err != SYSCOUNTER_ARMV8_M_ERR_NONE) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
@@ -44,4 +54,12 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
     }
 
     return TFM_HAL_SUCCESS;
+}
+
+void tfm_hal_system_reset(void)
+{
+    __disable_irq();
+    mpc_revert_non_secure_to_secure_cfg();
+
+    NVIC_SystemReset();
 }
