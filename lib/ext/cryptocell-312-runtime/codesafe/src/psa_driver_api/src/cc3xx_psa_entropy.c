@@ -23,7 +23,7 @@
 /** \defgroup psa_entropy PSA driver entry points for entropy collection
  *
  *  Entry points for entropy collection from the TRNG source as described by the
- *  PSA Cryptoprocessor Unified Driver interface specification. The TRNG
+ *  PSA Cryptoprocessor Driver interface specification. The TRNG
  *  operates by sampling the output of a fast free-running ring oscillator in a
  *  different (slower) clock domain
  *

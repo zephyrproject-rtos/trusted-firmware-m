@@ -120,7 +120,7 @@ static psa_status_t hash_update(cc3xx_hash_operation_t *pHashUserCtx,
 /** \defgroup psa_hash PSA driver entry points for hashing
  *
  *  Entry points for hashing operations as described by the PSA Cryptoprocessor
- *  Unified Driver interface specification
+ *  Driver interface specification
  *
  *  @{
  */

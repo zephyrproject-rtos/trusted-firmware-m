@@ -286,7 +286,7 @@ end:
 /** \defgroup psa_key_generation PSA driver entry points for key handling
  *
  *  Entry points for random key generation and key format manipulation and
- *  translation as described by the PSA Cryptoprocessor Unified Driver interface
+ *  translation as described by the PSA Cryptoprocessor Driver interface
  *  specification
  *
  *  @{

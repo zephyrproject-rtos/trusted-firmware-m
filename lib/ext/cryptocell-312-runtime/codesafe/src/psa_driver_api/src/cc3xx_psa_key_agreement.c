@@ -8,8 +8,8 @@
 /** \file cc3xx_psa_key_agreement.c
  *
  * This file contains the implementation of the entry points associated to the
- * raw key agreement (i.e. ECDH) as described by the PSA Cryptoprocessor Unified
- * Driver interface specification
+ * raw key agreement (i.e. ECDH) as described by the PSA Cryptoprocessor Driver
+ * interface specification
  *
  */
 
@@ -20,7 +20,7 @@
 /** \defgroup psa_key_agreement PSA driver entry points for raw key agreement
  *
  *  Entry points for raw key agreement as described by the PSA Cryptoprocessor
- *  Unified Driver interface specification
+ *  Driver interface specification
  *
  *  @{
  */

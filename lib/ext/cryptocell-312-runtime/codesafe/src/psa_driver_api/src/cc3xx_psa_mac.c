@@ -418,7 +418,7 @@ static psa_status_t mac_setup(cc3xx_mac_operation_t *operation,
 /** \defgroup psa_mac PSA driver entry points for MAC operations
  *
  *  Entry points for MAC computation and verification as described by the PSA
- *  Cryptoprocessor Unified Driver interface specification
+ *  Cryptoprocessor Driver interface specification
  *
  *  @{
  */

@@ -10,7 +10,7 @@
  * This file contains the definition of public types associated
  * to the CC3XX driver. It's meant to be included only by those
  * modules which require access to the private implementation
- * of the CC3XX types.
+ * of the CC3XX types
  *
  */
 

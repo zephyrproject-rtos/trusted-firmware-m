@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-/* Make the private structure names visible to the code that includes the
+/* Make the private structure names visible to the code that includes
  * this public interface header
  */
 struct cc3xx_hash_operation_s;

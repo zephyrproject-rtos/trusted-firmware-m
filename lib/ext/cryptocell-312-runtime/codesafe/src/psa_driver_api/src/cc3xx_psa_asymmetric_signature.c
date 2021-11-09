@@ -49,7 +49,7 @@
 /** \defgroup psa_asym_sign PSA driver entry points for asymmetric sign/verify
  *
  *  Entry points for asymmetric message signing and signature verification as
- *  described by the PSA Cryptoprocessor Unified Driver interface specification
+ *  described by the PSA Cryptoprocessor Driver interface specification
  *
  *  @{
  */

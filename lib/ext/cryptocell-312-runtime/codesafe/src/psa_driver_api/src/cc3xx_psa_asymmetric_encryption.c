@@ -224,7 +224,7 @@ cleanup:
 /** \defgroup psa_asym_encrypt PSA driver entry points for asymmetric cipher
  *
  *  Entry points for asymmetric cipher encryption and decryption as described
- *  by the PSA Cryptoprocessor Unified Driver interface specification
+ *  by the PSA Cryptoprocessor Driver interface specification
  *
  *  @{
  */

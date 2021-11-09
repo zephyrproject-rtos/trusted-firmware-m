@@ -79,7 +79,7 @@ static psa_status_t check_alg(psa_algorithm_t alg, psa_algorithm_t *ref_alg)
 /** \defgroup psa_aead PSA driver entry points for AEAD
  *
  *  Entry points for AEAD encryption and decryption as described by the PSA
- *  Cryptoprocessor Unified Driver interface specification
+ *  Cryptoprocessor Driver interface specification
  *
  *  @{
  */

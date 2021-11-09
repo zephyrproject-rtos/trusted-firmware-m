@@ -123,7 +123,7 @@ static psa_status_t cipher_setup(
 /** \defgroup psa_cipher PSA driver entry points for symmetric cipher
  *
  *  Entry points for symmetric cipher encryption and decryption as described
- *  by the PSA Cryptoprocessor Unified Driver interface specification
+ *  by the PSA Cryptoprocessor Driver interface specification
  *
  *  @{
  */
