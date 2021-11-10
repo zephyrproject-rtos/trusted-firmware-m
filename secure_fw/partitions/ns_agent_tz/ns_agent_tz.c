@@ -26,7 +26,7 @@ __naked void ns_agent_tz_main(void)
         "   ldr      r3, ="M2S(STACK_SEAL_PATTERN)" \n" /* SEAL double-check */
         "   cmp      r2, r3                         \n"
         "   bne      ns_agent_nspe_jump_panic       \n"
-#if (CONFIG_TFM_FP >= 1)
+#if (CONFIG_TFM_FLOAT_ABI > 0)
         "   vscclrm  {s0-s31, vpr}                  \n"
         "   mov      r1, #0                         \n"
         "   vmsr     fpscr_nzcvqc, r1               \n"

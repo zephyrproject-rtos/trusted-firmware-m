@@ -29,7 +29,7 @@ __naked void ns_agent_tz_main(void)
         "   movs     r2, #1                         \n" /* For NS execution */
         "   bics     r0, r2                         \n"
         "   mov      r1, r0                         \n"
-#if (CONFIG_TFM_FP >= 1)
+#if (CONFIG_TFM_FLOAT_ABI >= 1)
         "   vmov     d0, r0, r1                     \n"
         "   vmov     d1, r0, r1                     \n"
         "   vmov     d2, r0, r1                     \n"

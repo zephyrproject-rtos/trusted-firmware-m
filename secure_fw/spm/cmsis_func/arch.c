@@ -269,7 +269,7 @@ void tfm_arch_config_extensions(void)
  */
 #if defined(__FPU_PRESENT) && (__FPU_PRESENT == 1U)
 
-#if defined(CONFIG_TFM_ENABLE_FPU)
+#if defined(CONFIG_TFM_ENABLE_CP10CP11)
     /*
      * Enable Secure privileged and unprivilged access to the FP Extension.
      * Note: On Armv8-M, if Non-Secure access to the FPU is needed, Secure access

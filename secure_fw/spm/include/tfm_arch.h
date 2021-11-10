@@ -191,7 +191,7 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
     __ISB();
 }
 
-#if (CONFIG_TFM_FP >= 1) && CONFIG_TFM_LAZY_STACKING
+#if (CONFIG_TFM_FLOAT_ABI >= 1) && CONFIG_TFM_LAZY_STACKING
 #define ARCH_FLUSH_FP_CONTEXT()  __asm volatile("vmov  s0, s0 \n":::"memory")
 #else
 #define ARCH_FLUSH_FP_CONTEXT()
@@ -203,7 +203,7 @@ void tfm_arch_set_secure_exception_priorities(void);
 /* Configure various extensions. */
 void tfm_arch_config_extensions(void);
 
-#if (CONFIG_TFM_FP >= 1)
+#if (CONFIG_TFM_FLOAT_ABI > 0)
 /* Clear float point data. */
 void tfm_arch_clear_fp_data(void);
 #endif

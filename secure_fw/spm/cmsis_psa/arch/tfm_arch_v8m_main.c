@@ -15,9 +15,7 @@
 #include "tfm_hal_device_header.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"
-#if defined(__FPU_USED) && (__FPU_USED == 1U) && (CONFIG_TFM_FP >= 1)
 #include "core_ext.h"
-#endif
 
 #if !defined(__ARM_ARCH_8M_MAIN__) && !defined(__ARM_ARCH_8_1M_MAIN__)
 #error "Unsupported ARM Architecture."
@@ -213,7 +211,7 @@ void tfm_arch_set_secure_exception_priorities(void)
 
 void tfm_arch_config_extensions(void)
 {
-#if defined(CONFIG_TFM_ENABLE_FPU)
+#if defined(CONFIG_TFM_ENABLE_CP10CP11)
     /*
      * Enable SPE privileged and unprivileged access to the FP Extension.
      * Note: On Armv8-M, if Non-secure access to the FPU is needed, Secure
@@ -233,7 +231,7 @@ void tfm_arch_config_extensions(void)
     SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
 #endif
 
-#if (CONFIG_TFM_FP >= 1)
+#if (CONFIG_TFM_FLOAT_ABI >= 1)
 
 #ifdef CONFIG_TFM_LAZY_STACKING
     /* Enable lazy stacking. */
@@ -260,18 +258,22 @@ void tfm_arch_config_extensions(void)
 
     /* Prevent non-secure from modifying FPU’s power setting. */
     SCnSCB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
-#endif /* CONFIG_TFM_FP >= 1 */
+#endif /* CONFIG_TFM_FLOAT_ABI >= 1 */
 
 #if defined(__ARM_ARCH_8_1M_MAIN__)
     SCB->CCR |= SCB_CCR_TRD_Msk;
 #endif
 }
 
-#if (CONFIG_TFM_FP >= 1)
+#if (CONFIG_TFM_FLOAT_ABI > 0)
 __attribute__((naked, noinline, used)) void tfm_arch_clear_fp_data(void)
 {
     __ASM volatile(
                     "eor  r0, r0, r0         \n"
+                    "vmsr fpscr, r0          \n"
+#if (defined(__ARM_ARCH_8_1M_MAIN__))
+                    "vscclrm {s0-s31,vpr}    \n"
+#else
                     "vmov s0, r0             \n"
                     "vmov s1, r0             \n"
                     "vmov s2, r0             \n"
@@ -304,7 +306,7 @@ __attribute__((naked, noinline, used)) void tfm_arch_clear_fp_data(void)
                     "vmov s29, r0            \n"
                     "vmov s30, r0            \n"
                     "vmov s31, r0            \n"
-                    "vmsr fpscr, r0          \n"
+#endif
                     "bx   lr                 \n"
                   );
 }

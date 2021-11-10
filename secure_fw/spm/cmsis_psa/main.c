@@ -86,8 +86,8 @@ static fih_int tfm_core_init(void)
 
     SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_LVL);
 
-#if (CONFIG_TFM_FP == 2)
-    SPMLOG_INFMSG("TF-M FP mode: Hardware\r\n");
+#if (CONFIG_TFM_FLOAT_ABI == 2)
+    SPMLOG_INFMSG("TF-M Float ABI: Hard\r\n");
 #ifdef CONFIG_TFM_LAZY_STACKING
     SPMLOG_INFMSG("Lazy stacking enabled\r\n");
 #else

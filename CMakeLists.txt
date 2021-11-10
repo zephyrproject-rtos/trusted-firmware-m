@@ -16,9 +16,6 @@ include(cmake/version.cmake)
 # Configure TFM_PLATFORM
 include(${CMAKE_SOURCE_DIR}/config/tfm_platform.cmake)
 
-if(TFM_SYSTEM_MVE)
-    message(FATAL_ERROR "Hardware MVE is currently not supported in TF-M")
-endif()
 if(TFM_SYSTEM_DSP)
     message(FATAL_ERROR "Hardware DSP is currently not supported in TF-M")
 endif()

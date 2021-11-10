@@ -44,8 +44,8 @@ if(NS)
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
-            $<$<STREQUAL:${CONFIG_TFM_FP},hard>:CMSIS_5_RTX_V8MMFN>
-            $<$<STREQUAL:${CONFIG_TFM_FP},soft>:CMSIS_5_RTX_V8MMN>
+            $<$<OR:$<BOOL:${CONFIG_TFM_ENABLE_FP}>,$<BOOL:${CONFIG_TFM_ENABLE_MVE_FP}>>:CMSIS_5_RTX_V8MMFN>
+            $<$<NOT:$<OR:$<BOOL:${CONFIG_TFM_ENABLE_FP}>,$<BOOL:${CONFIG_TFM_ENABLE_MVE_FP}>>>:CMSIS_5_RTX_V8MMN>
     )
     target_compile_options(tfm_ns
         PUBLIC

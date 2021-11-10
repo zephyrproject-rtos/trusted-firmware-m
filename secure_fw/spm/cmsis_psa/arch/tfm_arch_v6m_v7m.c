@@ -190,7 +190,7 @@ void tfm_arch_config_extensions(void)
 {
     /* There are no coprocessors in Armv6-M implementations */
 #ifndef __ARM_ARCH_6M__
-#if defined(CONFIG_TFM_ENABLE_FPU)
+#if defined(CONFIG_TFM_ENABLE_CP10CP11)
     /* Enable privileged and unprivilged access to the floating-point
      * coprocessor.
      */

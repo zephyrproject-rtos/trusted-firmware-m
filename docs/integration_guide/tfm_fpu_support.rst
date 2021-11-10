@@ -16,7 +16,7 @@ Environment (NSPE).
   security vulnerability [4]_.
 * Support Inter-Process Communication (IPC) [5]_ model in TF-M, and doesn't
   support LIBRARY or SFN model.
-* Support Armv8.0-M mainline.
+* Support Armv8-M mainline.
 * Support isolation level 1,2,3.
 * Does not support use FPU in First-Level Interrupt Handling (FLIH) [6]_ at
   current stage.
@@ -27,7 +27,7 @@ you enable FP support on your platforms.
 .. Note::
     Alternatively, if you intend to use FP in your own NSPE application but the
     TF-M SPE services that you enable do not require FP, you can set the CMake
-    configuration ``CONFIG_TFM_ENABLE_FPU`` to ``ON`` and **ignore** any
+    configuration ``CONFIG_TFM_ENABLE_CP10CP11`` to ``ON`` and **ignore** any
     configurations described below.
 
 .. Note::
@@ -63,22 +63,24 @@ CMake configurations for FP support
 ===================================
 The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
 
-* ``CONFIG_TFM_FP`` are used to configure FP ABI type for secure and non-secure
-  side both.
+* ``CONFIG_TFM_ENABLE_FP`` is used to enable/disable FPU usage.
 
-  +-------------------+---------------------------+
-  | CONFIG_TFM_FP     | FP ABI type [2]_ [3]_     |
-  +===================+===========================+
-  | soft (default)    | Software                  |
-  +-------------------+---------------------------+
-  | hard              | Hardware                  |
-  +-------------------+---------------------------+
-
-  FP software ABI type is default in TF-M.
+  +--------------------------+---------------------------+
+  | CONFIG_TFM_ENABLE_FP     | FP support                |
+  +==========================+===========================+
+  | off (default)            | FP diasabled              |
+  +--------------------------+---------------------------+
+  | on                       | FP enabled                |
+  +--------------------------+---------------------------+
 
 .. Note::
-    If you build TF-M SPE with ``CONFIG_TFM_FP=hard`` and provide your own NSPE
-    application, your own NSPE **must** take care of enabling floating point
+    ``CONFIG_TFM_FLOAT_ABI`` depends on ``CONFIG_TFM_ENABLE_FP``. If
+    ``CONFIG_TFM_ENABLE_FP is set ``CONFIG_TFM_FLOAT_ABI`` is automatically
+    set to ``hard``.
+
+.. Note::
+    If you build TF-M SPE with ``CONFIG_TFM_ENABLE_FP=on`` and provide your own
+    NSPE application, your own NSPE **must** take care of enabling floating point
     coprocessors CP10 and CP11 on the NS side to avoid aforementioned NOCP usage
     fault.
 

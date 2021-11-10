@@ -51,15 +51,6 @@ tfm_invalid_config(TEST_PSA_API STREQUAL "PROTECTED_STORAGE" AND NOT TFM_PARTITI
 tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_PROTECTED_STORAGE)
 
-########################## FPU ################################################
-
-tfm_invalid_config(NOT (CONFIG_TFM_FP STREQUAL "soft" OR CONFIG_TFM_FP STREQUAL "hard"))
-tfm_invalid_config(NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CONFIG_TFM_FP STREQUAL "hard")
-tfm_invalid_config((NOT CONFIG_TFM_FP_ARCH) AND CONFIG_TFM_FP STREQUAL "hard")
-tfm_invalid_config((NOT TFM_PSA_API) AND CONFIG_TFM_FP STREQUAL "hard")
-tfm_invalid_config(CONFIG_TFM_FP STREQUAL "soft" AND CONFIG_TFM_LAZY_STACKING)
-tfm_invalid_config(CONFIG_TFM_FP STREQUAL "hard" AND NOT CONFIG_TFM_ENABLE_FPU)
-
 ########################## BL1 #################################################
 
 tfm_invalid_config((BL1 AND PLATFORM_DEFAULT_BL1 AND CONFIG_TFM_BOOT_STORE_MEASUREMENTS) AND NOT TFM_PARTITION_MEASURED_BOOT)

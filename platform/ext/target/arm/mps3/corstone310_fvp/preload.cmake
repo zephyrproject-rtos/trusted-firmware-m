@@ -13,4 +13,3 @@
 # Set architecture and CPU
 set(TFM_SYSTEM_PROCESSOR cortex-m85)
 set(TFM_SYSTEM_ARCHITECTURE armv8.1-m.main)
-set(TFM_SYSTEM_MVE OFF)

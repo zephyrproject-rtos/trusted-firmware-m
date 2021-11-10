@@ -190,14 +190,14 @@ option(CC312_LEGACY_DRIVER_API_ENABLED
 #        need to fallback to the legacy driver as the new PSA driver overflows
 #        the available flash memory on Musca-S1 and Musca-B1
 if ((NOT ${CC312_LEGACY_DRIVER_API_ENABLED}) AND
-    TEST_S AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (${CONFIG_TFM_FP} STREQUAL "hard"))
+    TEST_S AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (${CONFIG_TFM_FLOAT_ABI} STREQUAL "hard"))
     set(CC312_LEGACY_DRIVER_API_ENABLED ON)
     message(WARNING
         "The CC-312 legacy driver interface fallback is forced to ${CC312_LEGACY_DRIVER_API_ENABLED}. \
         The following parameters are not supported at the same time: \
         (TEST_S: ${TEST_S}, \
         CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}, \
-        CONFIG_TFM_FP: ${CONFIG_TFM_FP}) for the PSA Cryptoprocessor driver interface due to flash memory constraints.")
+        CONFIG_TFM_FLOAT_ABI: ${CONFIG_TFM_FLOAT_ABI}) for the PSA Cryptoprocessor driver interface due to flash memory constraints.")
 endif()
 
 # FixMe: Secure tests enabled and Debug builds on Musca-B1 need to fallback to

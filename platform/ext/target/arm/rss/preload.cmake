@@ -13,7 +13,6 @@
 # Set architecture and CPU
 set(TFM_SYSTEM_PROCESSOR cortex-m55)
 set(TFM_SYSTEM_ARCHITECTURE armv8.1-m.main)
-set(TFM_SYSTEM_MVE OFF)
 
 # RSS has a CryptoCell-312 as an accelerator.
 set(CRYPTO_HW_ACCELERATOR_TYPE cc312)

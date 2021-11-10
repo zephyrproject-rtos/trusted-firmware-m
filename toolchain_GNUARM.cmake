@@ -88,20 +88,37 @@ macro(tfm_toolchain_set_processor_arch)
                 endif()
             endif()
             if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
-                if (DEFINED CONFIG_TFM_FP)
-                    if(CONFIG_TFM_FP STREQUAL "0" AND
-                        NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv6-m")
-                            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
-                    endif()
+                if(NOT CONFIG_TFM_ENABLE_FP AND
+                    NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv6-m")
+                        string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
                 endif()
             endif()
         endif()
+
+        if(TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
+            if(NOT CONFIG_TFM_ENABLE_MVE)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
+            endif()
+            if(NOT CONFIG_TFM_ENABLE_MVE_FP)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve.fp")
+            endif()
+        endif()
+
     endif()
 
     # CMAKE_SYSTEM_ARCH variable is not a built-in CMAKE variable. It is used to
     # set the compile and link flags when TFM_SYSTEM_PROCESSOR is not specified.
     # The variable name is choosen to align with the ARMCLANG toolchain file.
     set(CMAKE_SYSTEM_ARCH         ${TFM_SYSTEM_ARCHITECTURE})
+
+    if(TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
+        if(CONFIG_TFM_ENABLE_MVE)
+            string(APPEND CMAKE_SYSTEM_ARCH "+mve")
+        endif()
+        if(CONFIG_TFM_ENABLE_MVE_FP)
+            string(APPEND CMAKE_SYSTEM_ARCH "+mve.fp")
+        endif()
+    endif()
 
     if (DEFINED TFM_SYSTEM_DSP)
         # +nodsp modifier is only supported from GCC version 8.
@@ -115,12 +132,11 @@ macro(tfm_toolchain_set_processor_arch)
     endif()
 
     if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
-        if (DEFINED CONFIG_TFM_FP)
-            if(CONFIG_TFM_FP STREQUAL "hard")
-                string(APPEND CMAKE_SYSTEM_ARCH "+fp")
-            endif()
+        if(CONFIG_TFM_ENABLE_FP)
+            string(APPEND CMAKE_SYSTEM_ARCH "+fp")
         endif()
     endif()
+
 endmacro()
 
 macro(tfm_toolchain_reload_compiler)
@@ -161,9 +177,13 @@ macro(tfm_toolchain_reload_compiler)
 
     set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
 
-    if (CONFIG_TFM_FP STREQUAL "hard")
-        set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
-        set(LINKER_CP_OPTION -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+    if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+        set(COMPILER_CP_FLAG -mfloat-abi=hard)
+        set(LINKER_CP_OPTION -mfloat-abi=hard)
+        if (CONFIG_TFM_ENABLE_FP OR CONFIG_TFM_ENABLE_MVE_FP)
+            set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+            set(LINKER_CP_OPTION -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+        endif()
     else()
         set(COMPILER_CP_FLAG -mfloat-abi=soft)
         set(LINKER_CP_OPTION -mfloat-abi=soft)
