@@ -370,7 +370,7 @@ Dependency chain
     fw --> pyasn1
     fw --> yaml
     fw --> jinja2
-    fw --> cbor
+    fw --> cbor2
     fw --> click
     fw --> imgtool
     c_comp --> GCC
@@ -380,7 +380,7 @@ Dependency chain
     pyasn1 --> python
     yaml --> python
     jinja2 --> python
-    cbor --> python
+    cbor2 --> python
     click --> python
     imgtool --> python
    @enduml

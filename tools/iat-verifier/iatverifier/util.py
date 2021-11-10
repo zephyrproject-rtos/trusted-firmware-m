@@ -8,7 +8,7 @@
 from collections.abc import Iterable
 from copy import deepcopy
 
-import cbor
+import cbor2
 import yaml
 import base64
 from ecdsa import SigningKey, VerifyingKey
@@ -51,7 +51,7 @@ def convert_map_to_token_files(mapfile, keyfile, outfile, method='sign'):
 
 
 def convert_map_to_token(token_map, signing_key, wfh, method='sign'):
-    token = cbor.dumps(token_map)
+    token = cbor2.dumps(token_map)
 
     if method == 'raw':
         signed_token = token
@@ -68,7 +68,7 @@ def convert_map_to_token(token_map, signing_key, wfh, method='sign'):
 
 def convert_token_to_map(raw_data):
     payload = get_cose_payload(raw_data)
-    token_map = cbor.loads(payload)
+    token_map = cbor2.loads(payload)
     return _relabel_keys(token_map)
 
 
