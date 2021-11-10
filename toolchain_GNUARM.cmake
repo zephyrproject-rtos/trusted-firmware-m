@@ -102,6 +102,12 @@ macro(tfm_toolchain_reload_compiler)
     tfm_toolchain_reset_compiler_flags()
     tfm_toolchain_reset_linker_flags()
 
+    if (CMAKE_C_COMPILER_VERSION VERSION_EQUAL 10.2.1)
+        message(FATAL_ERROR "GNU Arm compiler version 10-2020-q4-major has an issue in CMSE support."
+                            " Select other GNU Arm compiler versions instead."
+                            " See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157 for the issue detail.")
+    endif()
+
     unset(CMAKE_C_FLAGS_INIT)
     unset(CMAKE_ASM_FLAGS_INIT)
 
