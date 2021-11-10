@@ -202,9 +202,25 @@ static uint32_t ipc_system_run(void)
     return control;
 }
 
+static void ipc_wait(struct partition_t *p_pt, psa_signal_t signals)
+{
+    (void)signals;
+
+    thrd_wait_on(&p_pt->waitobj, CURRENT_THREAD);
+}
+
+static void ipc_wake_up(struct partition_t *p_pt, psa_signal_t signals)
+{
+    thrd_wake_up(&p_pt->waitobj,
+                 p_pt->signals_asserted & p_pt->signals_waiting);
+    p_pt->signals_waiting &= ~signals;
+}
+
 const struct backend_ops_t backend_instance = {
     .comp_init_assuredly = ipc_comp_init_assuredly,
     .system_run          = ipc_system_run,
     .messaging           = ipc_messaging,
     .replying            = ipc_replying,
+    .wait                = ipc_wait,
+    .wake_up             = ipc_wake_up,
 };

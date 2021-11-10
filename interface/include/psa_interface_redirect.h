@@ -108,6 +108,19 @@
 #define psa_connect              psa_connect_sfn
 #define psa_close                psa_close_sfn
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#define psa_wait                 psa_wait_sfn
+#define psa_irq_enable           psa_irq_enable_sfn
+#define psa_irq_disable          psa_irq_disable_sfn
+/* This API is only used for FLIH. */
+#if CONFIG_TFM_FLIH_API == 1
+#define psa_reset_signal         psa_reset_signal_sfn
+#endif
+/* This API is only used for SLIH. */
+#if CONFIG_TFM_SLIH_API == 1
+#define psa_eoi                  psa_eoi_sfn
+#endif
+#endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 #define psa_map_invec            psa_map_invec_sfn

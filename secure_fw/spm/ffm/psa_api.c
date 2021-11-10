@@ -439,7 +439,8 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 
 /* PSA Partition API function body */
 
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1 \
+    || CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
 psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
                                         uint32_t timeout)
 {
@@ -470,12 +471,14 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     if (timeout == PSA_BLOCK &&
         (partition->signals_asserted & signal_mask) == 0) {
         partition->signals_waiting = signal_mask;
-        thrd_wait_on(&partition->waitobj, CURRENT_THREAD);
+        backend_instance.wait(partition, signal_mask);
     }
 
     return partition->signals_asserted & signal_mask;
 }
+#endif
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 {
     struct conn_handle_t *handle = NULL;

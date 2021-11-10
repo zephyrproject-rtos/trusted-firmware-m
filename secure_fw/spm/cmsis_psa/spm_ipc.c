@@ -679,9 +679,7 @@ void spm_assert_signal(void *p_pt, psa_signal_t signal)
     partition->signals_asserted |= signal;
 
     if (partition->signals_waiting & signal) {
-        thrd_wake_up(&partition->waitobj,
-                     partition->signals_asserted & partition->signals_waiting);
-        partition->signals_waiting &= ~signal;
+        backend_instance.wake_up(partition, signal);
     }
 
     CRITICAL_SECTION_LEAVE(cs_assert);

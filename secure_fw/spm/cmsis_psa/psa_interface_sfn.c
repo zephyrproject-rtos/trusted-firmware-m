@@ -61,6 +61,11 @@ void psa_write_sfn(psa_handle_t msg_handle, uint32_t outvec_idx,
     tfm_spm_partition_psa_write(msg_handle, outvec_idx, buffer, num_bytes);
 }
 
+void psa_panic_sfn(void)
+{
+    tfm_spm_partition_psa_panic();
+}
+
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 
@@ -103,6 +108,37 @@ void psa_close_sfn(psa_handle_t handle)
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+psa_signal_t psa_wait_sfn(psa_signal_t signal_mask, uint32_t timeout)
+{
+    return tfm_spm_partition_psa_wait(signal_mask, timeout);
+}
+
+void psa_irq_enable_sfn(psa_signal_t irq_signal)
+{
+    tfm_spm_partition_psa_irq_enable(irq_signal);
+}
+
+psa_irq_status_t psa_irq_disable_sfn(psa_signal_t irq_signal)
+{
+    return tfm_spm_partition_psa_irq_disable(irq_signal);
+}
+#endif
+
+#if CONFIG_TFM_SLIH_API == 1
+void psa_eoi_sfn(psa_signal_t irq_signal)
+{
+    tfm_spm_partition_psa_eoi(irq_signal);
+}
+#endif
+
+#if CONFIG_TFM_FLIH_API == 1
+void psa_reset_signal_sfn(psa_signal_t irq_signal)
+{
+    tfm_spm_partition_psa_reset_signal(irq_signal);
+}
+#endif
+
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 
 const void *psa_map_invec_sfn(psa_handle_t msg_handle, uint32_t invec_idx)
@@ -127,8 +163,3 @@ void psa_unmap_outvec_sfn(psa_handle_t msg_handle, uint32_t outvec_idx,
 }
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
-
-void psa_panic_sfn(void)
-{
-    tfm_spm_partition_psa_panic();
-}

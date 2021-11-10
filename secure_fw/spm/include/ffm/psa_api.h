@@ -125,8 +125,8 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle);
 
 /* PSA Partition API function body, for privileged use only. */
 
-/* This API is only used in IPC backend. */
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1 \
+    || CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
 /**
  * \brief Function body of \ref psa_wait.
  *
@@ -141,7 +141,10 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle);
  */
 psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
                                         uint32_t timeout);
+#endif
 
+/* This API is only used in IPC backend. */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 /**
  * \brief Function body of \ref psa_get.
  *

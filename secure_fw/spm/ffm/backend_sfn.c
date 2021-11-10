@@ -133,8 +133,6 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
                    POSITION_TO_ENTRY(spm_thread_fn, thrd_fn_t),
                    POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t));
     }
-
-    (void)service_set;
 }
 
 uint32_t sfn_system_run(void)
@@ -142,9 +140,25 @@ uint32_t sfn_system_run(void)
     return thrd_start_scheduler(&CURRENT_THREAD);
 }
 
+static void sfn_wait(struct partition_t *p_pt, psa_signal_t signals)
+{
+    while (!(p_pt->signals_waiting & p_pt->signals_asserted))
+        ;
+
+    p_pt->signals_waiting &= ~signals;
+}
+
+static void sfn_wake_up(struct partition_t *p_pt, psa_signal_t signals)
+{
+    (void)p_pt;
+    (void)signals;
+}
+
 const struct backend_ops_t backend_instance = {
     .comp_init_assuredly = sfn_comp_init_assuredly,
     .system_run          = sfn_system_run,
     .messaging           = sfn_messaging,
-    .replying            = sfn_replying
+    .replying            = sfn_replying,
+    .wait                = sfn_wait,
+    .wake_up             = sfn_wake_up,
 };

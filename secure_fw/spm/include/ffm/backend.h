@@ -40,6 +40,18 @@ struct backend_ops_t {
      * Return the connection handle or the acked status code.
      */
     psa_status_t (*replying)(struct conn_handle_t *handle, int32_t status);
+
+    /*
+     * Runtime model-specific Partition wait operation.
+     * Put the Partition to a status that waits for signals.
+     */
+    void (*wait)(struct partition_t *p_pt, psa_signal_t signals);
+
+    /*
+     * Runtime model-specific Partition wake up operation.
+     * Wakes up the Partition with the give signals.
+     */
+    void (*wake_up)(struct partition_t *p_pt, psa_signal_t signals);
 };
 
 /* RUNTIME MODEL BACKENDS DECLARATION */
