@@ -22,7 +22,7 @@
 #include "flash_layout.h"
 
 #define BL2_HEAP_SIZE           (0x00001000)
-#define BL2_MSP_STACK_SIZE      (0x00001800)
+#define BL2_MSP_STACK_SIZE      (0x00002000)
 
 #define S_HEAP_SIZE             (0x00001000)
 #define S_MSP_STACK_SIZE_INIT   (0x00000400)
