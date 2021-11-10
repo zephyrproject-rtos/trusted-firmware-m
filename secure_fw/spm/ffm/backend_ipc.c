@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include "critical_section.h"
 #include "compiler_ext_defs.h"
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
@@ -48,6 +49,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     if (!msg || !service || !service->p_ldinf || !service->partition) {
         tfm_core_panic();
@@ -56,6 +58,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
     p_owner = service->partition;
     signal = service->p_ldinf->signal;
 
+    CRITICAL_SECTION_ENTER(cs_assert);
     /* Add message to partition message list tail */
     BI_LIST_INSERT_BEFORE(&p_owner->msg_list, &msg->msg_node);
 
@@ -67,6 +70,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
                      (p_owner->signals_asserted & p_owner->signals_waiting));
         p_owner->signals_waiting &= ~signal;
     }
+    CRITICAL_SECTION_LEAVE(cs_assert);
 
     /*
      * If it is a NS request via RPC, it is unnecessary to block current

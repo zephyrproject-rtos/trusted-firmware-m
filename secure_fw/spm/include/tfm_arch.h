@@ -24,6 +24,9 @@
 #error "Unsupported ARM Architecture."
 #endif
 
+#define SCHEDULER_LOCKED    1
+#define SCHEDULER_UNLOCKED  0
+
 #define XPSR_T32            0x01000000
 
 /* State context defined by architecture */

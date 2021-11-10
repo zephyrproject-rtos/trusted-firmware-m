@@ -135,6 +135,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
     int32_t client_id;
     psa_handle_t handle;
     bool ns_caller = tfm_spm_is_ns_caller();
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     /*
      * It is a PROGRAMMER ERROR if the RoT Service does not exist on the
@@ -172,7 +173,9 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
      * Create connection handle here since it is possible to return the error
      * code to client when creation fails.
      */
+    CRITICAL_SECTION_ENTER(cs_assert);
     connect_handle = tfm_spm_create_conn_handle(service, client_id);
+    CRITICAL_SECTION_LEAVE(cs_assert);
     if (!connect_handle) {
         return PSA_ERROR_CONNECTION_BUSY;
     }
@@ -187,7 +190,6 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
     /* No input or output needed for connect message */
     tfm_spm_fill_msg(msg, service, handle, PSA_IPC_CONNECT,
                      client_id, NULL, 0, NULL, 0, NULL);
-
 
     return backend_instance.messaging(service, msg);
 }
@@ -206,6 +208,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     int32_t client_id;
     uint32_t sid, version, index;
     uint32_t privileged;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = tfm_spm_is_ns_caller();
     int32_t type = (int32_t)(int16_t)((ctrl_param & TYPE_MASK) >> TYPE_OFFSET);
     size_t in_num = (size_t)((ctrl_param & IN_LEN_MASK) >> IN_LEN_OFFSET);
@@ -255,7 +258,9 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
             TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
         }
 
+        CRITICAL_SECTION_ENTER(cs_assert);
         conn_handle = tfm_spm_create_conn_handle(service, client_id);
+        CRITICAL_SECTION_LEAVE(cs_assert);
 
         if (!conn_handle) {
             TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_BUSY);
@@ -772,6 +777,7 @@ int32_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
     struct tfm_msg_body_t *msg = NULL;
     int32_t ret = PSA_SUCCESS;
     struct tfm_conn_handle_t *conn_handle;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     /* It is a fatal error if message handle is invalid */
     msg = tfm_spm_get_msg_from_handle(msg_handle);
@@ -879,7 +885,16 @@ int32_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         conn_handle->status = TFM_HANDLE_STATUS_IDLE;
     }
 
-    return backend_instance.replying(msg, ret);
+    /*
+     * TODO: It can be optimized further by moving critical section protection
+     * to mailbox. Also need to check implementation when secure context is
+     * involved.
+     */
+    CRITICAL_SECTION_ENTER(cs_assert);
+    ret = backend_instance.replying(msg, ret);
+    CRITICAL_SECTION_LEAVE(cs_assert);
+
+    return ret;
 }
 
 void tfm_spm_partition_psa_notify(int32_t partition_id)

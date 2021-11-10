@@ -47,6 +47,8 @@ struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
 
+extern uint32_t scheduler_lock;
+
 /*********************** Connection handle conversion APIs *******************/
 
 #define CONVERSION_FACTOR_BITOFFSET    3
@@ -173,17 +175,22 @@ int32_t tfm_spm_validate_conn_handle(
 int32_t tfm_spm_free_conn_handle(struct service_t *service,
                                  struct tfm_conn_handle_t *conn_handle)
 {
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+
     TFM_CORE_ASSERT(service);
     TFM_CORE_ASSERT(conn_handle != NULL);
 
     /* Clear magic as the handler is not used anymore */
     conn_handle->internal_msg.magic = 0;
 
+    CRITICAL_SECTION_ENTER(cs_assert);
     /* Remove node from handle list */
     BI_LIST_REMOVE_NODE(&conn_handle->list);
 
     /* Back handle buffer to pool */
     tfm_pool_free(conn_handle_pool, conn_handle);
+    CRITICAL_SECTION_LEAVE(cs_assert);
+
     return SPM_SUCCESS;
 }
 
@@ -243,9 +250,11 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
      * There may be multiple messages for this RoT Service signal, do not clear
      * partition mask until no remaining message. Search may be optimized.
      */
+    CRITICAL_SECTION_ENTER(cs_assert);
     BI_LIST_FOR_EACH(node, head) {
         tmp_msg = TO_CONTAINER(node, struct tfm_msg_body_t, msg_node);
         if (tmp_msg->service->p_ldinf->signal == signal && msg) {
+            CRITICAL_SECTION_LEAVE(cs_assert);
             return msg;
         } else if (tmp_msg->service->p_ldinf->signal == signal) {
             msg = tmp_msg;
@@ -253,7 +262,6 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
         }
     }
 
-    CRITICAL_SECTION_ENTER(cs_assert);
     partition->signals_asserted &= ~signal;
     CRITICAL_SECTION_LEAVE(cs_assert);
 
@@ -673,14 +681,17 @@ union returning_contexts_t {
 
 uint64_t do_schedule(void)
 {
-    union returning_contexts_t ret;
+    union returning_contexts_t ret_ctx;
     struct partition_t *p_part_curr, *p_part_next;
     struct thread_t *pth_next = thrd_next();
 
+    ret_ctx.ctx.curr = (uint32_t)CURRENT_THREAD->p_context_ctrl;
+    ret_ctx.ctx.next = (uint32_t)CURRENT_THREAD->p_context_ctrl;
     p_part_curr = GET_THRD_OWNER(CURRENT_THREAD);
     p_part_next = GET_THRD_OWNER(pth_next);
 
-    if (pth_next != NULL && p_part_curr != p_part_next) {
+    if (scheduler_lock != SCHEDULER_LOCKED && pth_next != NULL &&
+        p_part_curr != p_part_next) {
         /* Check if there is enough room on stack to save more context */
         if ((p_part_curr->ctx_ctrl.sp_limit +
              sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
@@ -699,6 +710,9 @@ uint64_t do_schedule(void)
             }
         }
         ARCH_FLUSH_FP_CONTEXT();
+
+        ret_ctx.ctx.next = (uint32_t)pth_next->p_context_ctrl;
+        CURRENT_THREAD = pth_next;
     }
 
     /*
@@ -707,12 +721,7 @@ uint64_t do_schedule(void)
      */
     tfm_rpc_client_call_handler();
 
-    ret.ctx.curr = (uint32_t)CURRENT_THREAD->p_context_ctrl;
-    ret.ctx.next = (uint32_t)pth_next->p_context_ctrl;
-
-    CURRENT_THREAD = pth_next;
-
-    return ret.curr_next_ctxs;
+    return ret_ctx.curr_next_ctxs;
 }
 
 void update_caller_outvec_len(struct tfm_msg_body_t *msg)

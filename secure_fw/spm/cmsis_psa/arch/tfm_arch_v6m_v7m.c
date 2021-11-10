@@ -21,13 +21,13 @@
 #endif
 
 /* Delcaraction flag to control the scheduling logic in PendSV. */
-__used static uint32_t pendsv_idling = 0;
+uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
 /* IAR Specific */
 #if defined(__ICCARM__)
 
 #pragma required = do_schedule
-#pragma required = pendsv_idling
+#pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
@@ -55,8 +55,8 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   mov    sp, r2                               \n"
         "   mov    r2, r4                               \n"
         "v6v7_lock_sched:                               \n"/* lock pendsv    */
-        "   ldr    r3, =pendsv_idling                   \n"/* R2 = caller SP */
-        "   movs   r4, #0x1                             \n"/* Do not touch   */
+        "   ldr    r3, =scheduler_lock                  \n"/* R2 = caller SP */
+        "   movs   r4, #"M2S(SCHEDULER_LOCKED)"         \n"/* Do not touch   */
         "   str    r4, [r3, #0]                         \n"
         "   cpsie  i                                    \n"
         "   push   {r2, r3}                             \n"
@@ -67,8 +67,8 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   beq    v6v7_release_sched                   \n"
         "   mov    sp, r2                               \n"/* switch stack   */
         "v6v7_release_sched:                            \n"
-        "   ldr    r2, =pendsv_idling                   \n"/* release pendsv */
-        "   movs   r3, #0                               \n"
+        "   ldr    r2, =scheduler_lock                  \n"/* release pendsv */
+        "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
         "   pop    {r4, pc}                             \n"
@@ -83,10 +83,6 @@ __attribute__((naked)) void PendSV_Handler(void)
 #if !defined(__ICCARM__)
         ".syntax unified                    \n"
 #endif
-        "   ldr     r0, =pendsv_idling      \n"
-        "   ldr     r0, [r0]                \n"
-        "   cmp     r0, #0                  \n"
-        "   bne     v6v7_pendsv_exit        \n"
         "   push    {r0, lr}                \n"
         "   bl      do_schedule             \n"
         "   pop     {r2, r3}                \n"

@@ -27,13 +27,13 @@
 #endif
 
 /* Delcaraction flag to control the scheduling logic in PendSV. */
-__used static uint32_t pendsv_idling = EXC_RETURN_SECURE_STACK;
+uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
 /* IAR Specific */
 #if defined(__ICCARM__)
 
 #pragma required = do_schedule
-#pragma required = pendsv_idling
+#pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
@@ -51,36 +51,36 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
 {
     __asm volatile(
 #if !defined(__ICCARM__)
-        ".syntax unified                                \n"
+        ".syntax unified                            \n"
 #endif
-        "   push   {r4-r6, lr}                          \n"
-        "   cpsid  i                                    \n"
-        "   mov    r4, r2                               \n"
-        "   mrs    r5, psplim                           \n"
-        "   movs   r12, #0                              \n"
-        "   cmp    r2, #0                               \n"
-        "   itttt  ne                                   \n"/*To callee stack*/
-        "   msrne  psplim, r12                          \n"
-        "   movne  r4, sp                               \n"
-        "   movne  sp, r2                               \n"
-        "   msrne  psplim, r3                           \n"
-        "   ldr    r2, =pendsv_idling                   \n"/*To lock sched  */
-        "   movs   r3, #0x0                             \n"
-        "   str    r3, [r2, #0]                         \n"
-        "   cpsie  i                                    \n"
-        "   bl     spcall_execute_c                     \n"
-        "   cpsid  i                                    \n"
-        "   movs   r12, #0                              \n"
-        "   cmp    r4, #0                               \n"
-        "   ittt   ne                                   \n"/*To caller stack*/
-        "   msrne  psplim, r12                          \n"
-        "   movne  sp, r4                               \n"
-        "   msrne  psplim, r5                           \n"
-        "   ldr    r4, =pendsv_idling                   \n"/*To unlock sched*/
-        "   movs   r5, #"M2S(EXC_RETURN_SECURE_STACK)"  \n"
-        "   str    r5, [r4, #0]                         \n"
-        "   cpsie  i                                    \n"
-        "   pop    {r4-r6, pc}                          \n"
+        "   push   {r4-r6, lr}                      \n"
+        "   cpsid  i                                \n"
+        "   mov    r4, r2                           \n"
+        "   mrs    r5, psplim                       \n"
+        "   movs   r12, #0                          \n"
+        "   cmp    r2, #0                           \n"
+        "   itttt  ne                               \n" /* To callee stack */
+        "   msrne  psplim, r12                      \n"
+        "   movne  r4, sp                           \n"
+        "   movne  sp, r2                           \n"
+        "   msrne  psplim, r3                       \n"
+        "   ldr    r2, =scheduler_lock              \n" /* To lock sched */
+        "   movs   r3, #"M2S(SCHEDULER_LOCKED)"     \n"
+        "   str    r3, [r2, #0]                     \n"
+        "   cpsie  i                                \n"
+        "   bl     spcall_execute_c                 \n"
+        "   cpsid  i                                \n"
+        "   movs   r12, #0                          \n"
+        "   cmp    r4, #0                           \n"
+        "   ittt   ne                               \n" /* To caller stack */
+        "   msrne  psplim, r12                      \n"
+        "   movne  sp, r4                           \n"
+        "   msrne  psplim, r5                       \n"
+        "   ldr    r4, =scheduler_lock              \n" /* To unlock sched */
+        "   movs   r5, #"M2S(SCHEDULER_UNLOCKED)"   \n"
+        "   str    r5, [r4, #0]                     \n"
+        "   cpsie  i                                \n"
+        "   pop    {r4-r6, pc}                      \n"
     );
 }
 
@@ -90,27 +90,26 @@ __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
 #if !defined(__ICCARM__)
-        ".syntax unified                    \n"
+        ".syntax unified                                \n"
 #endif
-        "   ldr     r0, =pendsv_idling      \n"
-        "   ldr     r0, [r0]                \n"
-        "   ands    r0, lr                  \n"
-        "   beq     v8m_pendsv_exit         \n" /* Yes, do not schedule */
-        "   push    {r0, lr}                \n" /* Save dummy R0, LR */
-        "   bl      do_schedule             \n"
-        "   pop     {r2, lr}                \n"
-        "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
-        "   beq     v8m_pendsv_exit         \n" /* No schedule if curr = next */
-        "   mrs     r2, psp                 \n"
-        "   mrs     r3, psplim              \n"
-        "   stmdb   r2!, {r4-r11}           \n" /* Save callee registers */
-        "   stmia   r0, {r2, r3, r4, lr}    \n" /* Save struct context_ctrl_t */
-        "   ldmia   r1, {r2, r3, r4, lr}    \n" /* Load ctx of next thread */
-        "   ldmia   r2!, {r4-r11}           \n" /* Restore callee registers */
-        "   msr     psp, r2                 \n"
-        "   msr     psplim, r3              \n"
-        "v8m_pendsv_exit:                   \n"
-        "   bx      lr                      \n"
+        "   movs    r0, #"M2S(EXC_RETURN_SECURE_STACK)" \n"
+        "   ands    r0, lr                              \n" /* NS interrupted */
+        "   beq     v8m_pendsv_exit                     \n" /* No schedule */
+        "   push    {r0, lr}                            \n" /* Save R0, LR */
+        "   bl      do_schedule                         \n"
+        "   pop     {r2, lr}                            \n"
+        "   cmp     r0, r1                              \n" /* curr, next ctx */
+        "   beq     v8m_pendsv_exit                     \n" /* No schedule */
+        "   mrs     r2, psp                             \n"
+        "   mrs     r3, psplim                          \n"
+        "   stmdb   r2!, {r4-r11}                       \n" /* Save callee */
+        "   stmia   r0, {r2, r3, r4, lr}                \n" /* Save curr ctx */
+        "   ldmia   r1, {r2, r3, r4, lr}                \n" /* Load next ctx */
+        "   ldmia   r2!, {r4-r11}                       \n" /* Restore callee */
+        "   msr     psp, r2                             \n"
+        "   msr     psplim, r3                          \n"
+        "v8m_pendsv_exit:                               \n"
+        "   bx      lr                                  \n"
     );
 }
 
