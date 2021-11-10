@@ -39,6 +39,7 @@ install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa_manifest
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
                     ${INTERFACE_INC_DIR}/tfm_ns_interface.h
+                    ${INTERFACE_INC_DIR}/psa_config.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_ns_client_ext.h
@@ -63,12 +64,16 @@ endif()
 if (TFM_PARTITION_PROTECTED_STORAGE OR FORWARD_PROT_MSG)
     install(FILES       ${INTERFACE_INC_DIR}/psa/protected_storage.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
+    install(FILES       ${INTERFACE_INC_DIR}/tfm_ps_defs.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OR FORWARD_PROT_MSG)
     install(FILES       ${INTERFACE_INC_DIR}/psa/internal_trusted_storage.h
                         ${INTERFACE_INC_DIR}/psa/storage_common.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
+    install(FILES       ${INTERFACE_INC_DIR}/tfm_its_defs.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if (TFM_PARTITION_CRYPTO OR FORWARD_PROT_MSG)
@@ -88,6 +93,8 @@ endif()
 if (TFM_PARTITION_INITIAL_ATTESTATION OR FORWARD_PROT_MSG)
     install(FILES       ${INTERFACE_INC_DIR}/psa/initial_attestation.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
+    install(FILES       ${INTERFACE_INC_DIR}/tfm_attest_defs.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if(TFM_PARTITION_AUDIT_LOG)
