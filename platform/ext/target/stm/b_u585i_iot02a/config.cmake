@@ -10,7 +10,11 @@
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")
 set(BL2_TRAILER_SIZE                    0x2000      CACHE STRING    "Trailer size")
-
+set(MCUBOOT_ALIGN_VAL                   16          CACHE STRING    "Align option to build image with imgtool")
+set(MCUBOOT_UPGRADE_STRATEGY            "SWAP_USING_SCRATCH"      CACHE STRING    "Upgrade strategy for images")
+set(TFM_PARTITION_FIRMWARE_UPDATE       ON          CACHE BOOL      "Enable firmware update partition")
+set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable platform partition")
+set(MCUBOOT_DATA_SHARING                ON          CACHE BOOL      "Enable Data Sharing")
 ################################## Dependencies ################################
 set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
 set(CRYPTO_NV_SEED                      OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
