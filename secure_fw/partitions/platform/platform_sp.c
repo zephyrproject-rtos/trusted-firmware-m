@@ -220,12 +220,12 @@ platform_sp_nv_counter_ipc(const psa_msg_t *msg)
         err = tfm_plat_increment_nv_counter(counter_id);
         break;
     case TFM_PLATFORM_API_ID_NV_READ:
-        num = psa_read(msg->handle, 0, &counter_id, msg->in_size[0]);
-
         if (msg->in_size[0] != NV_COUNTER_ID_SIZE ||
             in_len != 1 || out_len != 1) {
             return TFM_PLATFORM_ERR_SYSTEM_ERROR;
         }
+
+        num = psa_read(msg->handle, 0, &counter_id, msg->in_size[0]);
 
         if (!nv_counter_access_grant(msg->client_id, counter_id)) {
            return TFM_PLATFORM_ERR_SYSTEM_ERROR;
