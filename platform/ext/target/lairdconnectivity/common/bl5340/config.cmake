@@ -14,3 +14,4 @@ set(MCUBOOT_UPGRADE_STRATEGY            "SWAP"               CACHE STRING    "En
 if(NOT BL2)
     set(BL2_TRAILER_SIZE                0x800                CACHE STRING    "Trailer size")
 endif()
+set(NRF_NS_STORAGE                      OFF                  CACHE BOOL      "Enable non-secure storage partition")
