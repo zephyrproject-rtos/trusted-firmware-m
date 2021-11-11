@@ -19,7 +19,7 @@
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
-void SPU_Handler(void)
+void SPU_IRQHandler(void)
 {
     /*
      * TODO
