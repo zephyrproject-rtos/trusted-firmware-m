@@ -176,28 +176,28 @@ static void dump_error(uint32_t error_type)
 {
     bool stack_error = false;
 
-    SPMLOG_DBGMSG("FATAL ERROR: ");
+    SPMLOG_ERRMSG("FATAL ERROR: ");
     switch (error_type) {
     case EXCEPTION_TYPE_SECUREFAULT:
-        SPMLOG_DBGMSG("SecureFault\r\n");
+        SPMLOG_ERRMSG("SecureFault\r\n");
         break;
     case EXCEPTION_TYPE_HARDFAULT:
-        SPMLOG_DBGMSG("HardFault\r\n");
+        SPMLOG_ERRMSG("HardFault\r\n");
         break;
     case EXCEPTION_TYPE_MEMFAULT:
-        SPMLOG_DBGMSG("MemManage fault\r\n");
+        SPMLOG_ERRMSG("MemManage fault\r\n");
         stack_error = true;
         break;
     case EXCEPTION_TYPE_BUSFAULT:
-        SPMLOG_DBGMSG("BusFault\r\n");
+        SPMLOG_ERRMSG("BusFault\r\n");
         stack_error = true;
         break;
     case EXCEPTION_TYPE_USAGEFAULT:
-        SPMLOG_DBGMSG("UsageFault\r\n");
+        SPMLOG_ERRMSG("UsageFault\r\n");
         stack_error = true;
         break;
     default:
-        SPMLOG_DBGMSG("Unknown\r\n");
+        SPMLOG_ERRMSG("Unknown\r\n");
         break;
     }
     dump_exception_info_t(stack_error, &exception_info);
