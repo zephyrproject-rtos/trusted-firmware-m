@@ -18,17 +18,6 @@
 /* Declared in target_cfg.c */
 extern const struct memory_region_limits memory_regions;
 
-enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-        bool privileged,
-        const struct platform_data_t *platform_data)
-{
-    /* Nothing to do, there is no isolation HW in this platform to be
-     * configured by Secure Enclave */
-    (void) privileged;
-    (void) platform_data;
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line)
 {
     NVIC_SetPriority(irq_line, DEFAULT_IRQ_PRIORITY);
