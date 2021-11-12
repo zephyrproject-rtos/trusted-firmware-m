@@ -131,11 +131,11 @@ def process_partition_manifests(manifest_lists):
     # Parse the manifests
     for i, manifest_item in enumerate(all_manifests):
         valid_enabled_conditions  = ['on',  'true',  'enabled']
-        valid_disabled_conditions = ['off', 'false', 'disabled']
+        valid_disabled_conditions = ['off', 'false', 'disabled', '']
         is_enabled = ''
 
         if 'conditional' in manifest_item.keys():
-            is_enabled = manifest_item['conditional'].lower()
+            is_enabled = str(manifest_item['conditional']).lower()
         else:
             # Partitions without 'conditional' is alwasy on
             is_enabled = 'on'
