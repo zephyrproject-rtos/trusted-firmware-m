@@ -613,11 +613,11 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_VMC, false);
 
     /* DPPI channel configuration */
-    spu_dppi_config_non_secure(false);
+    spu_dppi_config_non_secure(0x0, false);
 
     /* GPIO pin configuration (P0 and P1 ports) */
-    spu_gpio_config_non_secure(0, false);
-    spu_gpio_config_non_secure(1, false);
+    spu_gpio_config_non_secure(0, 0x0, false);
+    spu_gpio_config_non_secure(1, 0x0, false);
 
     /* Configure properly the XL1 and XL2 pins so that the low-frequency crystal
      * oscillator (LFXO) can be used.
