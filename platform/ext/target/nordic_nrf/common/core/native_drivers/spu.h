@@ -118,27 +118,29 @@ void spu_peripheral_config_non_secure(uint32_t periph_base_addr, bool periph_loc
 /**
  * Configure DPPI channels to be accessible from Non-Secure domain.
  *
+ * \param channels_mask Bitmask with channels configuration.
  * \param dppi_lock Variable indicating whether to lock DPPI channel security
  *
  * \note all channels are configured as Non-Secure
  */
-static inline void spu_dppi_config_non_secure(bool dppi_lock)
+static inline void spu_dppi_config_non_secure(uint32_t channels_mask, bool dppi_lock)
 {
-    nrf_spu_dppi_config_set(NRF_SPU, 0, 0x0, dppi_lock);
+    nrf_spu_dppi_config_set(NRF_SPU, 0, channels_mask, dppi_lock);
 }
 
 /**
  * Configure GPIO pins to be accessible from Non-Secure domain.
  *
  * \param port_number GPIO Port number
+ * \param gpio_mask Bitmask with gpio configuration.
  * \param gpio_lock Variable indicating whether to lock GPIO port security
  *
  * \note all pins are configured as Non-Secure
  */
-static inline void spu_gpio_config_non_secure(uint8_t port_number,
+static inline void spu_gpio_config_non_secure(uint8_t port_number, uint32_t gpio_mask,
     bool gpio_lock)
 {
-    nrf_spu_gpio_config_set(NRF_SPU, port_number, 0x0, gpio_lock);
+    nrf_spu_gpio_config_set(NRF_SPU, port_number, gpio_mask, gpio_lock);
 }
 
 /**
