@@ -44,6 +44,7 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         target_cfg.c
+        ${NRF_FOLDER_PATH}/../nrf5340/tfm_interrupts.c
         ${NRF_FOLDER_PATH}/nrfx/mdk/system_nrf5340_application.c
 )
 
