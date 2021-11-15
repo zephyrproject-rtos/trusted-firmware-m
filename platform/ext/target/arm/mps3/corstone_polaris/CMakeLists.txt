@@ -148,12 +148,6 @@ target_include_directories(platform_ns
         partition
 )
 
-# TODO: For some reason this is needed
-target_link_libraries(platform_ns
-    PRIVATE
-        psa_interface
-)
-
 #========================= Platform BL2 =======================================#
 
 if(BL2)
