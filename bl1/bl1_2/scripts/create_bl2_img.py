@@ -42,6 +42,23 @@ def parse_version(version_string):
                         version[2].to_bytes(2, "little"),
                         version[3].to_bytes(4, "little")])
 
+def derive_encryption_key(security_counter):
+    with open(args.encrypt_key_file, "rb") as encrypt_key_file:
+        encrypt_key = encrypt_key_file.read()
+
+    state = struct_pack([(1).to_bytes(4, byteorder='little'),
+                         # C keeps the null byte, python removes it, so we add
+                         # it back manually.
+                         "BL2_DECRYPTION_KEY".encode('ascii') + bytes(1),
+                         bytes(1), security_counter,
+                         (32).to_bytes(4, byteorder='little')])
+    state_hash_object = hashlib.sha256()
+    state_hash_object.update(state)
+    state_hash = state_hash_object.digest()
+    return Cipher(algorithms.AES(encrypt_key), modes.ECB()).encryptor().update(state_hash)
+
+
+
 def sign_binary_blob(blob):
     priv_key = pyhsslms.HssLmsPrivateKey(args.sign_key_file)
     # Remove the first 4 bytes since it's HSS info
@@ -55,10 +72,7 @@ def hash_binary_blob(blob):
    hash.update(blob)
    return hash.digest()
 
-def encrypt_binary_blob(blob, counter_val):
-    with open(args.encrypt_key_file, "rb") as encrypt_key_file:
-        encrypt_key = encrypt_key_file.read()
-
+def encrypt_binary_blob(blob, counter_val, encrypt_key):
     cipher = Cipher(algorithms.AES(encrypt_key), modes.CTR(counter_val))
     return cipher.encryptor().update(blob)
 
@@ -92,7 +106,8 @@ plaintext = struct_pack([
     ],
     pad_to=bl2_partition_size - (1452 + 16 + 8 + 4))
 
-ciphertext = encrypt_binary_blob(plaintext, counter_val)
+encrypt_key = derive_encryption_key(int(args.img_security_counter, 16).to_bytes(4, 'little'))
+ciphertext = encrypt_binary_blob(plaintext, counter_val, encrypt_key)
 
 data_to_sign = struct_pack([
     version,

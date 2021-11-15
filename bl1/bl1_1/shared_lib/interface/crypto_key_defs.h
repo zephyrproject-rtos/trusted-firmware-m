@@ -23,16 +23,12 @@ extern "C" {
 #define BL2_ENCRYPTION_KEY_SIZE (32)
 #endif /* BL2_ENCRYPTION_KEY_SIZE */
 
- enum tfm_bl1_key_id_t {
+enum tfm_bl1_key_id_t {
     TFM_BL1_KEY_HUK,
     TFM_BL1_KEY_BL2_ENCRYPTION,
     TFM_BL1_KEY_ROTPK_0,
-#ifdef TEST_BL1_1
-    TFM_BL1_KEY_TEST_1,
-    TFM_BL1_KEY_TEST_2,
-#endif /* TEST_BL1_1 */
 
-  tfm_bl1_key_max,
+    TFM_BL1_KEY_USER,
 };
 
 #ifdef __cplusplus

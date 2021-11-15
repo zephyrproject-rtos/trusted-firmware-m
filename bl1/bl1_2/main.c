@@ -119,6 +119,8 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
     struct bl1_2_image_t *image_to_decrypt;
     struct bl1_2_image_t *image_after_decrypt =
         (struct bl1_2_image_t *)BL2_IMAGE_START;
+    uint8_t key_buf[32];
+    uint8_t label[] = "BL2_DECRYPTION_KEY";
 
 #ifdef TFM_BL1_MEMORY_MAPPED_FLASH
     /* If we have memory-mapped flash, we can do the decrypt directly from the
@@ -144,11 +146,28 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
     image_to_decrypt = (struct bl1_2_image_t *)BL2_IMAGE_START;
 #endif /* TFM_BL1_MEMORY_MAPPED_FLASH */
 
-    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_BL2_ENCRYPTION,
-                        image_to_decrypt->header.ctr_iv,
-                        (uint8_t *)&image_to_decrypt->protected_values.encrypted_data,
-                        sizeof(image_after_decrypt->protected_values.encrypted_data),
-                        (uint8_t *)&image_after_decrypt->protected_values.encrypted_data);
+    /* As the security counter is an attacker controlled parameter, bound the
+     * values to a sensible range. In this case, we choose 1024 as the bound as
+     * it is the same as the max amount of signatures as a H=10 LMS key.
+     */
+    if (image_to_decrypt->protected_values.security_counter >= 1024) {
+        FIH_RET(FIH_FAILURE);
+    }
+
+    /* The image security counter is used as a KDF input */
+    rc = bl1_derive_key(TFM_BL1_KEY_BL2_ENCRYPTION, label, sizeof(label),
+                        (uint8_t *)&image_to_decrypt->protected_values.security_counter,
+                        sizeof(image_to_decrypt->protected_values.security_counter),
+                        key_buf, sizeof(key_buf));
+    if (rc) {
+        FIH_RET(fih_int_encode_zero_equality(rc));
+    }
+
+    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, key_buf,
+                                 image_to_decrypt->header.ctr_iv,
+                                 (uint8_t *)&image_to_decrypt->protected_values.encrypted_data,
+                                 sizeof(image_after_decrypt->protected_values.encrypted_data),
+                                 (uint8_t *)&image_after_decrypt->protected_values.encrypted_data);
     if (rc) {
         FIH_RET(fih_int_encode_zero_equality(rc));
     }
