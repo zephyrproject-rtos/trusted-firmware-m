@@ -48,7 +48,7 @@ macro(tfm_toolchain_reset_compiler_flags)
         -mthumb
         -nostdlib
         -std=c99
-        $<$<BOOL:${TFM_DEBUG_SYMBOLS}>:-g>
+        $<$<OR:$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<BOOL:${TFM_CODE_COVERAGE}>>:-g>
     )
 endmacro()
 
