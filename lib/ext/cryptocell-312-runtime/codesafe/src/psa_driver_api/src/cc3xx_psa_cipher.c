@@ -294,7 +294,7 @@ psa_status_t cc3xx_cipher_update(
                            - operation->unprocessed_size;
 
                 CC_PalMemCopy(&(operation->unprocessed_data
-                [operation->unprocessed_size]),
+                               [operation->unprocessed_size]),
                               input,
                               copy_len);
 
@@ -311,11 +311,11 @@ psa_status_t cc3xx_cipher_update(
 
                 operation->unprocessed_size = 0;
 
-                *output_length = block_size;
-                output       += block_size;
+                *output_length += block_size;
+                output         += block_size;
 
-                input         += copy_len;
-                input_length  -= copy_len;
+                input          += copy_len;
+                input_length   -= copy_len;
             }
 
             if (0 != input_length) {
@@ -328,11 +328,11 @@ psa_status_t cc3xx_cipher_update(
                 }
 
                 CC_PalMemCopy(operation->unprocessed_data,
-                              &(input[copy_len]),
+                              &(input[input_length - copy_len]),
                               copy_len);
 
                 operation->unprocessed_size += copy_len;
-                input_length  -= copy_len;
+                input_length   -= copy_len;
             }
 
             if (0 != input_length) {
