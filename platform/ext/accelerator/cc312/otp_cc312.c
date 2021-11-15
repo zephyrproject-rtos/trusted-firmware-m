@@ -245,7 +245,7 @@ static enum tfm_plat_err_t otp_read(const uint8_t *addr, size_t size,
     uint8_t out_done;
     size_t copy_size;
 
-    if (size < out_len) {
+    if (out_len < size) {
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
@@ -263,15 +263,15 @@ static enum tfm_plat_err_t otp_read(const uint8_t *addr, size_t size,
      * the last word. This is checked for all words, in case the first word is
      * also the last word.
      */
-    for(out_done = 0; out_done < out_len;) {
+    for(out_done = 0; out_done < size;) {
         start_offset = ((uint32_t)addr + out_done) & 0x3;
         word_ptr = (uint32_t*)(addr + out_done - start_offset);
 
         word = *word_ptr;
 
         copy_size = sizeof(word) - start_offset;
-        if (out_done + copy_size > out_len) {
-            copy_size = out_len - out_done;
+        if (out_done + copy_size > size) {
+            copy_size = size - out_done;
         }
 
 
