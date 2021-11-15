@@ -218,6 +218,16 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
     boot_jump_to_next_image(vt_cpy->reset);
 }
 
+__WEAK int boot_platform_pre_load(uint32_t image_id)
+{
+    return 0;
+}
+
+__WEAK int boot_platform_post_load(uint32_t image_id)
+{
+    return 0;
+}
+
 #ifdef MEASURED_BOOT_API
 static int boot_add_data_to_shared_area(uint8_t        major_type,
                                         uint16_t       minor_type,
