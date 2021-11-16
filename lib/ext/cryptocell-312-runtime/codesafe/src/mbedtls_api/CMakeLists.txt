@@ -5,12 +5,23 @@
 #
 #-------------------------------------------------------------------------------
 
-target_include_directories(${CC312_LIB_TARGET}
-    PRIVATE
+target_include_directories(${CC312_CDMPU_TARGET}
+    INTERFACE
         .
 )
 
-target_sources(${CC312_LIB_TARGET}
+target_sources(${CC312_CDMPU_TARGET}
+    INTERFACE
+        ccm_alt.c
+        mbedtls_common.c
+)
+
+target_include_directories(${CC312_MBEDTLS_API_TARGET}
+    INTERFACE
+        .
+)
+
+target_sources(${CC312_MBEDTLS_API_TARGET}
     PRIVATE
         aes_alt.c
         cc_ecp_internal.c
@@ -31,15 +42,4 @@ target_sources(${CC312_LIB_TARGET}
         sha1_alt.c
         sha256_alt.c
         trng_api.c
-)
-
-target_include_directories(${CC312_CDMPU_TARGET}
-    INTERFACE
-        .
-)
-
-target_sources(${CC312_CDMPU_TARGET}
-    INTERFACE
-        ccm_alt.c
-        mbedtls_common.c
 )

@@ -28,7 +28,7 @@ target_sources(${CC312_LIB_TARGET}
 )
 
 target_include_directories(${CC312_PAL_TARGET}
-    INTERFACE
+    PRIVATE
         include
         include/proj/cc3x
         hw/include

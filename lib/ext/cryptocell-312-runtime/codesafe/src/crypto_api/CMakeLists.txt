@@ -8,7 +8,9 @@
 ########################## LIB #################################################
 
 target_include_directories(${CC312_LIB_TARGET}
-    PRIVATE
+    PUBLIC
+        cc3x_sym/driver
+    INTERFACE
         common
         cc3x_sym/driver
         cc3x_sym/api

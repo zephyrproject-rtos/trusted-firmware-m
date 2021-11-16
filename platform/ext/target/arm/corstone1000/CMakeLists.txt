@@ -49,6 +49,7 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
+    INTERFACE
         cc312
 )
 
@@ -140,6 +141,7 @@ target_include_directories(platform_bl2
     PUBLIC
         partition
         Device/Include
+    INTERFACE
         cc312
     PRIVATE
         .
