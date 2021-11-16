@@ -10,8 +10,10 @@ cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
 # Generate framework feature
+set(PSA_FRAMEWORK_ISOLATION_LEVEL   ${TFM_ISOLATION_LEVEL})
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/psa/framework_feature.h.in
-               ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h)
+               ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
+               @ONLY)
 
 if (TFM_MULTI_CORE_TOPOLOGY)
     include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
