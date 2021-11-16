@@ -38,6 +38,11 @@ enum fwu_agent_error_t fwu_metadata_init(void);
  */
 enum fwu_agent_error_t corstone1000_fwu_flash_image(void);
 
+/* host to secure enclave:
+ * host responds with this api to acknowledge its successful
+ * boot.
+ */
+enum fwu_agent_error_t corstone1000_fwu_host_ack(void);
 
 void bl1_get_boot_bank(uint32_t *bank_offset);
 void bl2_get_boot_bank(uint32_t *bank_offset);

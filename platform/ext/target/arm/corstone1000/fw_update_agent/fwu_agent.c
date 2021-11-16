@@ -762,3 +762,50 @@ void bl2_get_boot_bank(uint32_t *bank_offset)
     return;
 }
 
+enum fwu_agent_error_t corstone1000_fwu_host_ack(void)
+{
+    enum fwu_agent_error_t ret;
+    struct fwu_private_metadata priv_metadata;
+    enum fwu_agent_state_t current_state;
+
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    if (!is_initialized) {
+        return FWU_AGENT_ERROR;
+    }
+
+    Select_Write_Mode_For_Shared_Flash();
+
+    if (metadata_read(&_metadata)) {
+        ret = FWU_AGENT_ERROR;
+        goto out;
+    }
+
+    if (private_metadata_read(&priv_metadata)) {
+        ret = FWU_AGENT_ERROR;
+        goto out;
+    }
+
+    current_state = get_fwu_agent_state(&_metadata, &priv_metadata);
+    if (current_state == FWU_AGENT_STATE_REGULAR) {
+        ret = FWU_AGENT_SUCCESS; /* nothing to be done */
+        goto out;
+    } else if (current_state != FWU_AGENT_STATE_TRIAL) {
+        FWU_ASSERT(0);
+    }
+
+    if (_metadata.active_index != priv_metadata.boot_index) {
+        /* firmware update failed, revert back to previous bank */
+        ret = fwu_select_previous(&_metadata, &priv_metadata);
+    } else {
+        /* firmware update successful */
+        ret = fwu_accept_image(&full_capsule_image_guid, &_metadata,
+                                &priv_metadata);
+    }
+
+out:
+    Select_XIP_Mode_For_Shared_Flash();
+
+    FWU_LOG_MSG("%s: exit: ret = %d\n\r", __func__, ret);
+    return ret;
+}

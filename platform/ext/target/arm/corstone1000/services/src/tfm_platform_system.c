@@ -21,20 +21,30 @@ enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
                                                psa_outvec *out_vec)
 {
     int32_t ret = TFM_PLATFORM_ERR_SUCCESS;
+
     corstone1000_ioctl_in_params_t *in_params =
-                                    (corstone1000_ioctl_in_params_t *)in_vec->base;
-    corstone1000_ioctl_out_params_t *out_params = (corstone1000_ioctl_out_params_t *)out_vec->base;
+                              (corstone1000_ioctl_in_params_t *)in_vec->base;
+
+    corstone1000_ioctl_out_params_t *out_params =
+                              (corstone1000_ioctl_out_params_t *)out_vec->base;
 
     switch(in_params->ioctl_id) {
+
         case IOCTL_CORSTONE1000_FWU_FLASH_IMAGES:
             out_params->result = corstone1000_fwu_flash_image();
             if (!out_params->result) {
                 NVIC_SystemReset();
             }
             break;
+
+        case IOCTL_CORSTONE1000_FWU_HOST_ACK:
+            out_params->result = corstone1000_fwu_host_ack();
+            break;
+
         default:
             ret = TFM_PLATFORM_ERR_NOT_SUPPORTED;
             break;
+
     }
 
     return ret;
