@@ -5,13 +5,13 @@
 #
 #-------------------------------------------------------------------------------
 
-target_include_directories(${CC312_LIB_TARGET}
+target_include_directories(${CC312_PSA_DRIVER_API_TARGET}
     PUBLIC
         .
         include
 )
 
-target_sources(${CC312_LIB_TARGET}
+target_sources(${CC312_PSA_DRIVER_API_TARGET}
     PRIVATE
         # PSA Cryptoprocessor Unified Driver interface entry point sources
         src/cc3xx_psa_hash.c
@@ -35,10 +35,4 @@ target_sources(${CC312_LIB_TARGET}
         src/cc3xx_internal_ccm.c
         src/cc3xx_internal_gcm.c
         src/cc3xx_internal_chacha20_poly1305.c
-)
-
-target_compile_definitions(${CC312_LIB_TARGET}
-    PUBLIC
-        MBEDTLS_PSA_CRYPTO_DRIVERS
-        PSA_CRYPTO_DRIVER_CC3XX
 )

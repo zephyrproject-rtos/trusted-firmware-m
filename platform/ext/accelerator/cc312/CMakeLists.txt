@@ -37,6 +37,9 @@ endif()
 ################################ BL2 ###########################################
 
 if(BL2)
+
+    set(CC312_LIB_PREFIX bl2_)
+
     target_sources(bl2_crypto_hw
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/cc312.c
@@ -49,28 +52,25 @@ if(BL2)
 
     target_link_libraries(bl2_crypto_hw
         PUBLIC
-            bl2_cc312
+            ${CC312_LIB_PREFIX}cc312
         PRIVATE
             bl2_mbedcrypto
             platform_bl2
     )
 
-    set(CC312_LIB_TARGET bl2_cc312)
     set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
     set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
-    set(BUILD_PSA_DRIVER_API False)
-    add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/bl2_cc312)
-    unset(BUILD_PSA_DRIVER_API)
+    add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${CC312_LIB_PREFIX}cc312)
     set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 
-    target_sources(bl2_cc312
+    target_sources(${CC312_LIB_PREFIX}cc312
         PUBLIC
             $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
     )
 
     # Adding two targets as link-time dependencies of each other seems bad, but
     # in reality it just means that they'll share headers and compile defs.
-    target_link_libraries(bl2_cc312
+    target_link_libraries(${CC312_LIB_PREFIX}cc312_mbedtls_api
         PRIVATE
             bl2_mbedcrypto
             platform_bl2
@@ -79,7 +79,7 @@ if(BL2)
     )
     target_link_libraries(bl2_mbedcrypto
         PRIVATE
-            bl2_cc312
+            ${CC312_LIB_PREFIX}cc312_mbedtls_api
         PUBLIC
             bl2_crypto_hw
     )
@@ -90,7 +90,7 @@ if(BL2)
             bl2_crypto_hw
     )
 
-    target_link_libraries(cc312_cdmpu
+    target_link_libraries(${CC312_LIB_PREFIX}cc312_cdmpu
         INTERFACE
             bl2_mbedcrypto
     )
@@ -107,7 +107,7 @@ if(BL2)
             $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
     )
 
-    target_compile_options(bl2_cc312
+    target_compile_options(${CC312_LIB_PREFIX}cc312
         PRIVATE
             ${BL2_COMPILER_CP_FLAG}
     )
@@ -117,13 +117,17 @@ if(BL2)
             ${BL2_COMPILER_CP_FLAG}
     )
 
-    target_compile_options(cc312_cdmpu
+    target_compile_options(${CC312_LIB_PREFIX}cc312_cdmpu
         INTERFACE
             ${BL2_COMPILER_CP_FLAG}
     )
+    unset(CC312_LIB_PREFIX)
+
 endif()
 
 ############################ Crypto Service ####################################
+
+set(CC312_LIB_PREFIX crypto_service_)
 
 target_sources(crypto_service_crypto_hw
     PRIVATE
@@ -138,26 +142,25 @@ target_include_directories(crypto_service_crypto_hw
 
 target_link_libraries(crypto_service_crypto_hw
     PUBLIC
-        crypto_service_cc312
+        ${CC312_LIB_PREFIX}cc312
     PRIVATE
         crypto_service_mbedcrypto
         platform_s
 )
 
-set(CC312_LIB_TARGET crypto_service_cc312)
 set(SAVED_BUILD_TYPE ${CMAKE_BUILD_TYPE})
 set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
-add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/crypto_service_cc312)
+add_subdirectory(${CC312_PATH} ${CMAKE_CURRENT_BINARY_DIR}/${CC312_LIB_PREFIX}cc312)
 set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 
-target_sources(crypto_service_cc312
-    PUBLIC
+target_sources(${CC312_LIB_PREFIX}cc312
+    PRIVATE
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
 )
 
 # Adding two targets as link-time dependencies of each other seems bad, but
 # in reality it just means that they'll share headers and compile defs.
-target_link_libraries(crypto_service_cc312
+target_link_libraries(${CC312_LIB_PREFIX}cc312_psa_driver_api
     PRIVATE
         crypto_service_mbedcrypto
     PUBLIC
@@ -165,7 +168,7 @@ target_link_libraries(crypto_service_cc312
 )
 target_link_libraries(crypto_service_mbedcrypto
     PRIVATE
-        crypto_service_cc312
+        ${CC312_LIB_PREFIX}cc312_psa_driver_api
     PUBLIC
         crypto_service_crypto_hw
 )
@@ -181,3 +184,5 @@ target_compile_options(crypto_service_mbedcrypto
         $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
 )
+
+unset(CC312_LIB_PREFIX)

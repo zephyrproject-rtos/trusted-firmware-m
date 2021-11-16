@@ -75,6 +75,7 @@ target_include_directories(platform_s
         partition
         services/include
         Libraries
+    INTERFACE
         cc312
 )
 
@@ -156,6 +157,7 @@ if(BL2)
             partition
             Device/Include
             Libraries
+        INTERFACE
             cc312
         PRIVATE
             .

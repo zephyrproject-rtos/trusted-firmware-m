@@ -10,7 +10,7 @@
 target_include_directories(${CC312_LIB_TARGET}
     PUBLIC
         cc3x_sym/driver
-    PRIVATE
+    INTERFACE
         common
         cc3x_sym/api
         pki/poly

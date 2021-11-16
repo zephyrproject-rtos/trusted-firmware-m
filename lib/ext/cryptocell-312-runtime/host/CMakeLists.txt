@@ -29,12 +29,12 @@ target_sources(${CC312_LIB_TARGET}
 ########################## PAL #################################################
 
 target_include_directories(${CC312_PAL_TARGET}
-    INTERFACE
+    PUBLIC
         src/hal
 )
 
 target_sources(${CC312_PAL_TARGET}
-    INTERFACE
+    PRIVATE
         src/pal/cc_pal_trng.c
         src/pal/no_os/cc_pal_abort_plat.c
         src/pal/no_os/cc_pal_apbc.c
