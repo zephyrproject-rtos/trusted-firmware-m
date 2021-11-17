@@ -102,18 +102,18 @@ static fih_int tfm_core_init(void)
     SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_LVL);
 
 #if (CONFIG_TFM_SPE_FP == 0)
-    SPMLOG_INFMSG("\033[1;33mTF-M FPU mode: Software\033[0m\r\n");
+    SPMLOG_INFMSG("TF-M FP mode: Software\r\n");
 #elif (CONFIG_TFM_SPE_FP == 1)
-    SPMLOG_INFMSG("\033[1;33mTF-M FPU mode: Hybird\033[0m\r\n");
+    SPMLOG_INFMSG("TF-M FP mode: Hybird\r\n");
 #elif (CONFIG_TFM_SPE_FP == 2)
-    SPMLOG_INFMSG("\033[1;33mTF-M FPU mode: Hardware\033[0m\r\n");
+    SPMLOG_INFMSG("TF-M FP mode: Hardware\r\n");
 #endif
 
 #if (CONFIG_TFM_SPE_FP >= 1)
 #ifdef CONFIG_TFM_LAZY_STACKING_SPE
-    SPMLOG_INFMSG("\033[1;33mLazy stacking enabled\033[0m\r\n");
+    SPMLOG_INFMSG("Lazy stacking enabled\r\n");
 #else
-    SPMLOG_INFMSG("\033[1;33mLazy stacking disabled\033[0m\r\n");
+    SPMLOG_INFMSG("Lazy stacking disabled\r\n");
 #endif
 #endif
 
