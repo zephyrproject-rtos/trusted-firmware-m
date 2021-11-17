@@ -456,17 +456,18 @@ command line to include out-of-tree Secure Partitions.
 
   A list of the absolute path(s) of the manifest list(s) provided by out-of-tree
   Secure Partition(s).
-  Use semicolons ``;`` to separate multiple manifest lists.
+  Use semicolons ``;`` to separate multiple manifest lists. Wrap the multiple
+  manifest lists with double quotes.
 
 - ``TFM_EXTRA_PARTITION_PATHS``
 
-  A list of the absoluate directories of the out-of-tree Secure Partition source
+  A list of the absolute directories of the out-of-tree Secure Partition source
   code folder(s). TF-M build system searches ``CMakeLists.txt`` of partitions in
   the source code folder(s).
   Use semicolons ``;`` to separate multiple out-of-tree Secure Partition
-  directorires.
+  directories. Wrap the multiple directories with double quotes.
 
-A single out-of-tree Secure Partition folder can be orignazied as the figure
+A single out-of-tree Secure Partition folder can be organized as the figure
 below.
 
 ::
@@ -486,7 +487,7 @@ below.
   -DTFM_EXTRA_MANIFEST_LIST_FILES=<Absolute-path-sp-folder/manifest_list.yaml>
   -DTFM_EXTRA_PARTITION_PATHS=<Absolute-path-sp-folder>
 
-Multiple out-of-tree Secure Partitions can be origanzied in diverse structures.
+Multiple out-of-tree Secure Partitions can be organized in diverse structures.
 For example, multiple Secure Partitions can be maintained under the same
 directory as shown below.
 
@@ -512,7 +513,7 @@ command line can be configured as listed below.
 
 .. code-block:: bash
 
-  -DTFM_EXTRA_MANIFEST_LIST_FILES=<Absolute-path-top-level-folder/manifes_list.yaml>
+  -DTFM_EXTRA_MANIFEST_LIST_FILES=<Absolute-path-top-level-folder/manifest_list.yaml>
   -DTFM_EXTRA_PARTITION_PATHS=<Absolute-path-top-level-folder>
 
 Alternatively, out-of-tree Secure Partitions can be separated in different
@@ -529,12 +530,12 @@ folders.
 In the example above, each Secure Partition manages its own manifest files and
 CMakeLists.txt. ``TFM_EXTRA_MANIFEST_LIST_FILES`` and
 ``TFM_EXTRA_PARTITION_PATHS`` in build command line can be configured as listed
-below.
+below. Please note those input shall be wrapped with double quotes.
 
 .. code-block:: bash
 
-  -DTFM_EXTRA_MANIFEST_LIST_FILES=<Absolute-path-part-1-folder/manifes_list.yaml>;<Absolute-path-part-2-folder/manifes_list.yaml>
-  -DTFM_EXTRA_PARTITION_PATHS=<Absolute-path-part-1-folder>;<Absolute-path-part-2-folder>
+  -DTFM_EXTRA_MANIFEST_LIST_FILES="<Absolute-path-part-1-folder/manifes_list.yaml>;<Absolute-path-part-2-folder/manifes_list.yaml>"
+  -DTFM_EXTRA_PARTITION_PATHS="<Absolute-path-part-1-folder>;<Absolute-path-part-2-folder>"
 
 .. Note::
 
