@@ -10,13 +10,9 @@
 .vscode/
 
 # Garbage files
-build*/
-cmake_build*/
+/build*/
+/cmake_build*/
 *.orig
 **/__pycache__
 *.pyc
 
-# TF-Fuzz build artifacts
-*.o
-*_grammar.*
-tfz
