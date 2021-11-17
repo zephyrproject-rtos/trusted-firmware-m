@@ -122,14 +122,16 @@ static enum tfm_plat_err_t read_from_input(enum tfm_otp_element_id_t id,
         return err;
     }
 
-    copy_size = in_len < value_size ? in_len : value_size;
+    if (in_len > value_size) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
 
-    err = read_otp_nv_counters_flash(offset, buffer, copy_size);
+    err = read_otp_nv_counters_flash(offset, buffer, in_len);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
-    for (idx = 0; idx < copy_size; idx++) {
+    for (idx = 0; idx < in_len; idx++) {
         if ((buffer[idx] | in[idx]) != in[idx]) {
             return TFM_PLAT_ERR_INVALID_INPUT;
         }
@@ -137,7 +139,7 @@ static enum tfm_plat_err_t read_from_input(enum tfm_otp_element_id_t id,
         buffer[idx] |= in[idx];
     }
 
-    err = write_otp_nv_counters_flash(offset, buffer, copy_size);
+    err = write_otp_nv_counters_flash(offset, buffer, in_len);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

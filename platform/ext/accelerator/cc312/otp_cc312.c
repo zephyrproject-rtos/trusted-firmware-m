@@ -236,18 +236,15 @@ static inline struct plat_otp_layout_t *get_cc312_otp_ptr(void){
 
 
 
-static enum tfm_plat_err_t otp_read(const uint8_t *addr, size_t size,
+static enum tfm_plat_err_t otp_read(const uint8_t *addr, size_t item_size,
                                     size_t out_len, uint8_t *out)
 {
     uint32_t* word_ptr;
     uint32_t word;
     uint32_t start_offset;
-    uint8_t out_done;
+    size_t out_done;
     size_t copy_size;
-
-    if (out_len < size) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
+    size_t total_copy_size = item_size < out_len ? item_size : out_len;
 
     /* CC312 OTP can only be read / written in 32 bit words. In order to allow
      * access to unaligned uint8_t pointers (as per the function definition):
@@ -263,15 +260,15 @@ static enum tfm_plat_err_t otp_read(const uint8_t *addr, size_t size,
      * the last word. This is checked for all words, in case the first word is
      * also the last word.
      */
-    for(out_done = 0; out_done < size;) {
+    for(out_done = 0; out_done < total_copy_size;) {
         start_offset = ((uint32_t)addr + out_done) & 0x3;
         word_ptr = (uint32_t*)(addr + out_done - start_offset);
 
         word = *word_ptr;
 
         copy_size = sizeof(word) - start_offset;
-        if (out_done + copy_size > size) {
-            copy_size = size - out_done;
+        if (out_done + copy_size > total_copy_size) {
+            copy_size = total_copy_size - out_done;
         }
 
 
@@ -318,7 +315,7 @@ static enum tfm_plat_err_t otp_write(uint8_t *addr, size_t size,
     uint32_t current_word;
     uint32_t word;
     uint32_t start_offset;
-    uint8_t in_done = 0;
+    size_t in_done = 0;
     size_t copy_size;
     uint16_t zero_count;
 
@@ -589,6 +586,7 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_HUK:
         return otp_read(otp->huk, sizeof(otp->huk), out_len, out);
     case PLAT_OTP_ID_IAK:
+        /* The IAK is stored in the rot_public_key slot */
         return otp_read(otp->rot_public_key,
                         sizeof(otp->rot_public_key), out_len, out);
 
@@ -773,6 +771,7 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(otp->huk, sizeof(otp->huk), in_len, in,
                          (uint8_t*)&otp->icv_programmed_flags.huk_zero_bits);
     case PLAT_OTP_ID_IAK:
+        /* The IAK is stored in the rot_public_key slot */
         return otp_write(otp->rot_public_key, sizeof(otp->rot_public_key),
                          in_len, in,
                          (uint8_t*)&otp->oem_programmed_flags.oem_rot_public_key_zero_bits);
@@ -858,6 +857,7 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         *size = sizeof(otp->huk);
         break;
     case PLAT_OTP_ID_IAK:
+        /* The IAK is stored in the rot_public_key slot */
         *size = sizeof(otp->rot_public_key);
         break;
 
