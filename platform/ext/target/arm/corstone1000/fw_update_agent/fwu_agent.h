@@ -54,4 +54,20 @@ void bl2_get_boot_bank(uint32_t *bank_offset);
  */
 void host_acknowledgement_timer_to_reset(void);
 
+enum fwu_nv_counter_index_t {
+    FWU_BL2_NV_COUNTER = 0,
+    FWU_TFM_NV_COUNTER,
+    FWU_TFA_NV_COUNTER,
+    FWU_MAX_NV_COUNTER_INDEX = FWU_TFA_NV_COUNTER
+};
+
+/* stage nv counter into private metadata section of the flash.
+ * staged nv counters are written to the otp when firmware update
+ * is successful
+ * the function assumes that the api is called in the boot loading
+ * stage
+ */
+enum fwu_agent_error_t fwu_stage_nv_counter(enum fwu_nv_counter_index_t index,
+        uint32_t img_security_cnt);
+
 #endif /* FWU_AGENT_H */

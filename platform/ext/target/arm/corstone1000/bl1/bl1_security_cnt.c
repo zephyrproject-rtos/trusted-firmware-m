@@ -10,6 +10,8 @@
 #include "tfm_plat_defs.h"
 #include "bootutil/fault_injection_hardening.h"
 #include <stdint.h>
+#include "tfm_plat_provisioning.h"
+#include "fwu_agent.h"
 
 fih_int boot_nv_security_counter_init(void)
 {
@@ -47,14 +49,26 @@ int32_t boot_nv_security_counter_update(uint32_t image_id,
                                         uint32_t img_security_cnt)
 {
     enum tfm_plat_err_t err;
+    enum fwu_agent_error_t fwu_err;
 
     if (image_id != 0) {
         return -1;
     }
 
-    err = tfm_plat_set_nv_counter(PLAT_NV_COUNTER_BL1_0, img_security_cnt);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return -1;
+    if (tfm_plat_provisioning_is_required()) {
+
+        err = tfm_plat_set_nv_counter(PLAT_NV_COUNTER_BL1_0, img_security_cnt);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return -1;
+        }
+
+    } else {
+
+        fwu_err = fwu_stage_nv_counter(FWU_BL2_NV_COUNTER, img_security_cnt);
+        if (fwu_err != FWU_AGENT_SUCCESS) {
+            return -1;
+        }
+
     }
 
     return 0;

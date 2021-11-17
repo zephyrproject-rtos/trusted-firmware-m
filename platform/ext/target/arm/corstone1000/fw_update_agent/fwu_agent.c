@@ -16,6 +16,8 @@
 #include "flash_common.h"
 #include "platform_base_address.h"
 #include "platform_description.h"
+#include "tfm_plat_nv_counters.h"
+#include "tfm_plat_defs.h"
 
 /* Properties of image in a bank */
 struct fwu_image_properties {
@@ -78,6 +80,9 @@ struct fwu_private_metadata {
 
        /* counter: tracking number of boot attempted so far */
        uint32_t boot_attempted;
+
+       /* staged nv_counter: temprary location before written to the otp */
+       uint32_t nv_counter[NR_OF_IMAGES_IN_FW_BANK];
 
 } __packed;
 
@@ -771,6 +776,56 @@ static void disable_host_ack_timer(void)
     SysTick->CTRL &= (~SysTick_CTRL_ENABLE_Msk);
 }
 
+static enum fwu_agent_error_t update_nv_counters(
+                        struct fwu_private_metadata* priv_metadata)
+{
+    enum tfm_plat_err_t err;
+    uint32_t security_cnt;
+    enum tfm_nv_counter_t tfm_nv_counter_i;
+
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    for (int i = 0; i <= FWU_MAX_NV_COUNTER_INDEX; i++) {
+
+        switch (i) {
+            case FWU_BL2_NV_COUNTER:
+                tfm_nv_counter_i = PLAT_NV_COUNTER_BL1_0;
+                break;
+            case FWU_TFM_NV_COUNTER:
+                tfm_nv_counter_i = PLAT_NV_COUNTER_BL2_0;
+                break;
+            case FWU_TFA_NV_COUNTER:
+                tfm_nv_counter_i = PLAT_NV_COUNTER_BL2_1;
+                break;
+            default:
+                FWU_ASSERT(0);
+                break;
+        }
+
+        err = tfm_plat_read_nv_counter(tfm_nv_counter_i,
+                        sizeof(security_cnt), (uint8_t *)&security_cnt);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return FWU_AGENT_ERROR;
+        }
+
+        if (priv_metadata->nv_counter[i] < security_cnt) {
+            return FWU_AGENT_ERROR;
+        } else if (priv_metadata->nv_counter[i] > security_cnt) {
+            FWU_LOG_MSG("%s: updaing index = %u nv counter = %u->%u\n\r",
+                        __func__, i, security_cnt,
+                        priv_metadata->nv_counter[FWU_BL2_NV_COUNTER]);
+            err = tfm_plat_set_nv_counter(tfm_nv_counter_i,
+                                    priv_metadata->nv_counter[FWU_BL2_NV_COUNTER]);
+            if (err != TFM_PLAT_ERR_SUCCESS) {
+                return FWU_AGENT_ERROR;
+            }
+        }
+
+    }
+
+    FWU_LOG_MSG("%s: exit\n\r", __func__);
+    return FWU_AGENT_SUCCESS;
+}
 
 enum fwu_agent_error_t corstone1000_fwu_host_ack(void)
 {
@@ -811,6 +866,9 @@ enum fwu_agent_error_t corstone1000_fwu_host_ack(void)
         /* firmware update successful */
         ret = fwu_accept_image(&full_capsule_image_guid, &_metadata,
                                 &priv_metadata);
+        if (!ret) {
+            ret = update_nv_counters(&priv_metadata);
+        }
     }
 
     if (ret == FWU_AGENT_SUCCESS) {
@@ -886,4 +944,41 @@ void host_acknowledgement_timer_to_reset(void)
 
     FWU_LOG_MSG("%s: exit\n\r", __func__);
     return;
+}
+
+/* stage nv counter into private metadata section of the flash.
+ * staged nv counters are written to the otp when firmware update
+ * is successful
+ * the function assumes that the api is called in the boot loading
+ * stage
+ */
+enum fwu_agent_error_t fwu_stage_nv_counter(enum fwu_nv_counter_index_t index,
+        uint32_t img_security_cnt)
+{
+    struct fwu_private_metadata priv_metadata;
+
+    FWU_LOG_MSG("%s: enter: index = %u, val = %u\n\r", __func__,
+                                index, img_security_cnt);
+
+    if (!is_initialized) {
+        FWU_ASSERT(0);
+    }
+
+    if (index > FWU_MAX_NV_COUNTER_INDEX) {
+        return FWU_AGENT_ERROR;
+    }
+
+    if (private_metadata_read(&priv_metadata)) {
+        FWU_ASSERT(0);
+    }
+
+    if (priv_metadata.nv_counter[index] != img_security_cnt) {
+        priv_metadata.nv_counter[index] = img_security_cnt;
+        if (private_metadata_write(&priv_metadata)) {
+            FWU_ASSERT(0);
+        }
+    }
+
+    FWU_LOG_MSG("%s: exit\n\r", __func__);
+    return FWU_AGENT_SUCCESS;
 }
