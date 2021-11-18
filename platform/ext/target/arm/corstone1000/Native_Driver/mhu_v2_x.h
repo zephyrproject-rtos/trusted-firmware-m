@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited
+ * Copyright (c) 2020-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ enum mhu_v2_x_supported_revisions {
 };
 
 struct mhu_v2_x_dev_t {
-    const uint32_t base;
+    const uintptr_t base;
     enum mhu_v2_x_frame_t frame;
     uint32_t subversion;    /*!< Hardware subversion: v2.X */
     bool is_initialized;    /*!< Indicates if the MHU driver
@@ -91,8 +91,6 @@ enum mhu_v2_x_error_t mhu_v2_x_driver_init(struct mhu_v2_x_dev_t *dev,
  * \brief Returns the number of channels implemented.
  *
  * \param[in] dev         MHU device struct \ref mhu_v2_x_dev_t
- *
- * Returns the number of channels implemented.
  *
  * \return Returns the number of channels implemented.
  *
