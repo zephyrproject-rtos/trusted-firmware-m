@@ -79,3 +79,22 @@ int corstone1000_watchdog_init()
     
     return ARM_DRIVER_OK;
 }
+
+/*
+ * Secure Host Watchdog WS1 Handler
+ * efi_reset_system from the host triggers "Secure
+ * watchdog WS1 interrupt" to reset the system. Host
+ * cannot access this interrupt by design, so SE
+ * resets the system using this handler
+ *
+ */
+void SECURE_WATCHDOG_WS1_IRQHandler(void){
+    NVIC_SystemReset();
+}
+
+/*Enable Secure Watchdog WS1 Interrupt
+ * in NVIC controller (asserted by host)*/
+void corstone1000_host_watchdog_handler_init(){
+    NVIC_EnableIRQ(SECURE_WATCHDOG_WS1_IRQn);
+}
+

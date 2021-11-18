@@ -29,4 +29,13 @@ int corstone1000_watchdog_init();
  */
 int corstone1000_watchdog_reset_timer();
 
+/**
+ *  \brief Initializes Interrupt Handler for
+ *   Secure Host Watchdog (WS1).
+ *
+ *  \returns  VOID
+ */
+void corstone1000_host_watchdog_handler_init();
+
+
 #endif /* watchdog_h */

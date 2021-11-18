@@ -24,5 +24,7 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
+    corstone1000_host_watchdog_handler_init();
+
     return TFM_HAL_SUCCESS;
 }
