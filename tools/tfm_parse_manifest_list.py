@@ -176,14 +176,12 @@ def process_partition_manifests(manifest_lists):
         with open(manifest_path) as manifest_file:
             manifest = manifest_validation(yaml.safe_load(manifest_file), pid)
 
-        # Count the number of IPC partitions
-        if manifest['psa_framework_version'] == 1.1 and manifest['model'] == 'IPC':
-            ipc_partition_num += 1
-        elif manifest['psa_framework_version'] == 1.1 and manifest['model'] == 'SFN':
-            sfn_partition_num += 1
-        elif 'services' in manifest.keys() or 'irqs' in manifest.keys():
-            # This is only to skip Library Model Partitions
-            ipc_partition_num += 1
+        if pid == None or pid >= 256:
+            # Count the number of IPC/SFN partitions
+            if manifest['psa_framework_version'] == 1.1 and manifest['model'] == 'SFN':
+                sfn_partition_num += 1
+            else:
+                ipc_partition_num += 1
 
         manifest_out_basename = os.path.splitext(os.path.basename(manifest_path))[0]
 
