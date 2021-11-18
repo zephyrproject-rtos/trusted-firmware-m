@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -34,29 +35,29 @@
 #define STATIC_HANDLE_NUM_LIMIT         32
 #define CLIENT_HANDLE_VALUE_MIN         1
 
-#define STAIC_HANDLE_IDX_BIT_WIDTH      8
-#define STAIC_HANDLE_IDX_MASK \
-    (uint32_t)((1UL << STAIC_HANDLE_IDX_BIT_WIDTH) - 1)
+#define STATIC_HANDLE_IDX_BIT_WIDTH     8
+#define STATIC_HANDLE_IDX_MASK \
+    (uint32_t)((1UL << STATIC_HANDLE_IDX_BIT_WIDTH) - 1)
 #define GET_INDEX_FROM_STATIC_HANDLE(handle) \
-    (uint32_t)((handle) & STAIC_HANDLE_IDX_MASK)
+    (uint32_t)((handle) & STATIC_HANDLE_IDX_MASK)
 
-#define STAIC_HANDLE_VER_BIT_WIDTH      8
-#define STAIC_HANDLE_VER_OFFSET         8
-#define STAIC_HANDLE_VER_MASK \
-    (uint32_t)((1UL << STAIC_HANDLE_VER_BIT_WIDTH) - 1)
+#define STATIC_HANDLE_VER_BIT_WIDTH     8
+#define STATIC_HANDLE_VER_OFFSET        8
+#define STATIC_HANDLE_VER_MASK \
+    (uint32_t)((1UL << STATIC_HANDLE_VER_BIT_WIDTH) - 1)
 #define GET_VERSION_FROM_STATIC_HANDLE(handle) \
-    (uint32_t)(((handle) >> STAIC_HANDLE_VER_OFFSET) & STAIC_HANDLE_VER_MASK)
+    (uint32_t)(((handle) >> STATIC_HANDLE_VER_OFFSET) & STATIC_HANDLE_VER_MASK)
 
 /* Validate the static handle indicator bit */
-#define STAIC_HANDLE_INDICATOR_OFFSET   30
+#define STATIC_HANDLE_INDICATOR_OFFSET  30
 #define IS_STATIC_HANDLE(handle) \
-    ((handle) & (1UL << STAIC_HANDLE_INDICATOR_OFFSET))
+    ((handle) & (1UL << STATIC_HANDLE_INDICATOR_OFFSET))
 
 /* Valid index should be [0, STATIC_HANDLE_NUM_LIMIT-1] */
 #define IS_VALID_STATIC_HANDLE_IDX(index) \
     (((index) >= 0) && ((index) < STATIC_HANDLE_NUM_LIMIT))
 
-#define SPM_INVALID_PARTITION_IDX     (~0U)
+#define SPM_INVALID_PARTITION_IDX       (~0U)
 
 #define TFM_MSG_MAGIC                   0x15154343
 #define TFM_MSG_MAGIC_SFN               0x21216565
