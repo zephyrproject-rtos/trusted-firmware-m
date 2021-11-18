@@ -70,6 +70,7 @@
 #define STRATA_SE_FLASH_PROGRAM_UNIT    (1U)          /* 4 B */
 
 #define FLASH_DEV_NAME_SE_SECURE_FLASH  Driver_FLASH1
+#define SECURE_FLASH_SECTOR_SIZE        STRATA_NVM_FLASH_SECTOR_SIZE
 
 #else
 
@@ -79,12 +80,21 @@
 #define PMOD_SF3_FLASH_PAGE_SIZE        (256U)        /* 256 B */
 #define PMOD_SF3_FLASH_PROGRAM_UNIT     (1U)          /* 1 B */
 
-#define FLASH_DEV_NAME Driver_FLASH0
+/* SST26VF064B NOR FLASH */
+#define SST26VF064B_FLASH_TOTAL_SIZE    (0x00800000)  /* 8 MB Nor Flash (SST26VF064B) */
+#define SST26VF064B_FLASH_SECTOR_SIZE   (0x00010000)  /* 64 KB Sub sector size*/
+#define SST26VF064B_FLASH_PAGE_SIZE     (256U)        /* 256 B */
+#define SST26VF064B_FLASH_PROGRAM_UNIT  (1U)          /* 1 B */
+
+#define FLASH_DEV_NAME                  Driver_FLASH0
 
 #define FLASH_TOTAL_SIZE                (PMOD_SF3_FLASH_TOTAL_SIZE)  /* 32 MB */
-#define FLASH_AREA_IMAGE_SECTOR_SIZE    (PMOD_SF3_FLASH_SECTOR_SIZE)      /* 4 KiB */
+#define FLASH_AREA_IMAGE_SECTOR_SIZE    (PMOD_SF3_FLASH_SECTOR_SIZE) /* 4 KiB */
 #define FLASH_SECTOR_SIZE               (PMOD_SF3_FLASH_SECTOR_SIZE) /* 1 kB */
 #define TFM_HAL_FLASH_PROGRAM_UNIT      (PMOD_SF3_FLASH_PROGRAM_UNIT)
+
+#define FLASH_DEV_NAME_SE_SECURE_FLASH  Driver_FLASH1
+#define SECURE_FLASH_SECTOR_SIZE        SST26VF064B_FLASH_SECTOR_SIZE
 
 #endif
 
@@ -225,33 +235,29 @@
 /*******************************/
 
 #define FLASH_ITS_AREA_OFFSET           (0x10000)  /* 64 KB */
-#define FLASH_ITS_AREA_SIZE             (4 * FLASH_SECTOR_SIZE)  /* 4 KiB */
+#define FLASH_ITS_AREA_SIZE             (4 * SECURE_FLASH_SECTOR_SIZE)
 
 #define FLASH_PS_AREA_OFFSET            (FLASH_ITS_AREA_OFFSET + \
                                          FLASH_ITS_AREA_SIZE)
-#define FLASH_PS_AREA_SIZE              (16 * FLASH_SECTOR_SIZE)  /* 16 KB */
+#define FLASH_PS_AREA_SIZE              (16 * SECURE_FLASH_SECTOR_SIZE)
 
 /* OTP_definitions */
 #define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_PS_AREA_OFFSET + \
                                            FLASH_PS_AREA_SIZE)
-#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
-#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (SECURE_FLASH_SECTOR_SIZE * 2)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE SECURE_FLASH_SECTOR_SIZE
 
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
  * TF-M ITS Integration Guide.
  */
-#if PLATFORM_IS_FVP
-#define TFM_HAL_ITS_FLASH_DRIVER Driver_FLASH1
-#else
-#define TFM_HAL_ITS_FLASH_DRIVER Driver_FLASH0
-#endif
+#define TFM_HAL_ITS_FLASH_DRIVER FLASH_DEV_NAME_SE_SECURE_FLASH
 
 /* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
  * TF-M PS Integration Guide.
  */
-#define TFM_HAL_PS_FLASH_DRIVER Driver_FLASH0
+#define TFM_HAL_PS_FLASH_DRIVER FLASH_DEV_NAME_SE_SECURE_FLASH
 
 /* In this target the CMSIS driver requires only the offset from the base
  * address instead of the full memory address.
@@ -277,7 +283,7 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_PS_PROGRAM_UNIT         (1)
 
-#define OTP_NV_COUNTERS_FLASH_DEV Driver_FLASH0
+#define OTP_NV_COUNTERS_FLASH_DEV FLASH_DEV_NAME_SE_SECURE_FLASH
 
 /* OTP / NV counter definitions */
 #define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)

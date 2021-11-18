@@ -69,6 +69,17 @@ struct cfi_dev_t CFI_DEV_SE_SECURE_FLASH_S = {
 };
 #endif
 
+#if (defined (SPI_SST26VF064B_S) && defined (AXI_QSPI_S))
+static const struct axi_qspi_dev_cfg_t AXI_QSPI_DEV_2_CFG_S = {
+    .base = CORSTONE1000_HOST_AXI_QSPI_CTRL_REG_BASE_SE_SECURE_FLASH,
+    .scc_base = CORSTONE1000_HOST_FPGA_SCC_REGISTERS
+};
+struct axi_qspi_dev_t AXI_QSPI_DEV_2_S = {
+    .cfg = &AXI_QSPI_DEV_2_CFG_S,
+    .is_initialized = false
+};
+#endif
+
 /* ======= External peripheral configuration structure definitions ======= */
 
 #if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
@@ -94,6 +105,17 @@ struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV = {
 
 struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV_SE_SECURE_FLASH = {
     .controller = &CFI_DEV_SE_SECURE_FLASH_S,
+    .total_sector_cnt = 0,
+    .page_size = 0,
+    .sector_size = 0,
+    .program_unit = 0,
+    .is_initialized = false
+};
+#endif
+
+#if (defined (SPI_SST26VF064B_S) && defined (AXI_QSPI_S))
+struct spi_sst26vf064b_dev_t SPI_SST26VF064B_DEV = {
+    .controller = &AXI_QSPI_DEV_2_S,
     .total_sector_cnt = 0,
     .page_size = 0,
     .sector_size = 0,

@@ -75,6 +75,7 @@
 #define CORSTONE1000_HOST_FPGA_SCC_REGISTERS       (0x80000000U) /* FPGA SCC Registers                */
 #define CORSTONE1000_HOST_SE_SECURE_FLASH_BASE_FVP (0x80010000U) /* SE Flash                          */
 #define CORSTONE1000_HOST_AXI_QSPI_CTRL_REG_BASE   (0x80050000U) /* AXI QSPI Controller               */
+#define CORSTONE1000_HOST_AXI_QSPI_CTRL_REG_BASE_SE_SECURE_FLASH (0x90010000U) /* AXI QSPI Controller for SE FLash  */
 #define CORSTONE1000_HOST_DRAM_UEFI_CAPSULE        (0xA0000000U) /* 1.5 GB DDR                        */
 
 #endif  /* __PLATFORM_BASE_ADDRESS_H__ */

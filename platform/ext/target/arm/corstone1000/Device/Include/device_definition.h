@@ -52,6 +52,12 @@ extern struct mhu_v2_x_dev_t MHU1_HOST_TO_SE_DEV;
 extern struct axi_qspi_dev_t AXI_QSPI_DEV_S;
 #endif
 
+/* QSPI Flash Controller driver structures for SE FLASH */
+#if (defined(SPI_SST26VF064B_S) && defined(AXI_QSPI_S))
+#include "xilinx_pg153_axi_qspi_controller_drv.h"
+extern struct axi_qspi_dev_t AXI_QSPI_DEV_2_S;
+#endif
+
 /* CFI  Controller driver structures  */
 #if (defined(SPI_STRATAFLASHJ3_S) && defined(AXI_QSPI_S))
 #include "cfi_drv.h"
@@ -63,6 +69,12 @@ extern struct cfi_dev_t CFI_DEV_SE_SECURE_FLASH_S;
 #if (defined(SPI_N25Q256A_S) && defined(AXI_QSPI_S))
 #include "spi_n25q256a_flash_lib.h"
 extern struct spi_n25q256a_dev_t SPI_N25Q256A_DEV;
+#endif
+
+/* SST26VF064B Flash driver structures */
+#if (defined(SPI_SST26VF064B_S) && defined(AXI_QSPI_S))
+#include "spi_sst26vf064b_flash_lib.h"
+extern struct spi_sst26vf064b_dev_t SPI_SST26VF064B_DEV;
 #endif
 
 /* Intel Flash StrataJ3 driver structures */

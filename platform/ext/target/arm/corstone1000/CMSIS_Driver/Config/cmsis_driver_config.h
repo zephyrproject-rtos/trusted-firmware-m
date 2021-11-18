@@ -26,10 +26,15 @@
 
 /* Externally attached PMOD SF3 Nor Flash Device to the MPS3 Board. */
 #if PLATFORM_IS_FVP
+/* Intel Strata Flash (32MB NVM FLASH). */
 #define FLASH0_DEV          SPI_STRATAFLASHJ3_DEV
+/* Intel Strata Flash (8MB SE FLASH). */
 #define FLASH1_DEV          SPI_STRATAFLASHJ3_DEV_SE_SECURE_FLASH
 #else
+/* Externally attached PMOD SF3 Nor Flash Device to the MPS3 Board. */
 #define FLASH0_DEV          SPI_N25Q256A_DEV
+/* SST26VF064B Flash Device (8MB SE FLASH). */
+#define FLASH1_DEV          SPI_SST26VF064B_DEV
 #endif
 
 #endif  /* __CMSIS_DRIVER_CONFIG_H__ */

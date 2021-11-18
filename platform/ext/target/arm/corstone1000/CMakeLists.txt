@@ -85,6 +85,7 @@ target_sources(platform_s
     PRIVATE
         Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         Native_Driver/spi_n25q256a_flash_lib.c
+        Native_Driver/spi_sst26vf064b_flash_lib.c
 )
 endif()
 
@@ -128,6 +129,7 @@ target_sources(platform_bl2
     PRIVATE
         Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         Native_Driver/spi_n25q256a_flash_lib.c
+        Native_Driver/spi_sst26vf064b_flash_lib.c
 )
 endif()
 

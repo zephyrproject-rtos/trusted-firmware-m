@@ -267,6 +267,23 @@ static void setup_se_firewall(void)
     fc_enable_mpe(RGN_MPE0);
     fc_enable_regions();
 
+#if !(PLATFORM_IS_FVP)
+    fc_select_region(7);
+    fc_disable_regions();
+    fc_disable_mpe(RGN_MPE0);
+    fc_prog_rgn(RGN_SIZE_64KB, CORSTONE1000_HOST_AXI_QSPI_CTRL_REG_BASE_SE_SECURE_FLASH);
+    fc_prog_rgn_upper_addr(HOST_AXI_QSPI_CTRL_REG_BASE_SE_SECURE_FLASH);
+    fc_enable_addr_trans();
+    fc_init_mpl(RGN_MPE0);
+
+    mpl_rights = (RGN_MPL_SECURE_READ_MASK |
+                  RGN_MPL_SECURE_WRITE_MASK);
+
+    fc_enable_mpl(RGN_MPE0, mpl_rights);
+    fc_prog_mid(RGN_MPE0, SE_MID);
+    fc_enable_mpe(RGN_MPE0);
+    fc_enable_regions();
+#endif
 
     fc_pe_enable();
 }
@@ -607,7 +624,7 @@ int32_t boot_platform_init(void)
     if (result != ARM_DRIVER_OK) {
         return 1;
     }
-#if PLATFORM_IS_FVP
+#if PLATFORM_DEFAULT_OTP
    result = FLASH_DEV_NAME_SE_SECURE_FLASH.Initialize(NULL);
    if (result != ARM_DRIVER_OK) {
        return 1;
@@ -665,7 +682,7 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
         while (1);
     }
 
-#if PLATFORM_IS_FVP
+#if PLATFORM_DEFAULT_OTP
     result = FLASH_DEV_NAME_SE_SECURE_FLASH.Uninitialize();
     if (result != ARM_DRIVER_OK) {
         while (1);
