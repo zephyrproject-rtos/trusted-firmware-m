@@ -8,6 +8,7 @@
 #include "tfm_spm_hal.h"
 #include "tfm_arch.h"
 #include "arch.h"
+#include "tfm_nspm.h"
 
 void configure_ns_code(void)
 {
