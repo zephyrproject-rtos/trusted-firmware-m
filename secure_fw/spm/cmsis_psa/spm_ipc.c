@@ -144,6 +144,8 @@ struct tfm_conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
         return NULL;
     }
 
+    spm_memset(p_handle, 0, sizeof(*p_handle));
+
     p_handle->internal_msg.service = service;
     p_handle->status = TFM_HANDLE_STATUS_IDLE;
     p_handle->client_id = client_id;
