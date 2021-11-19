@@ -95,7 +95,9 @@ target_include_directories(crypto_service_mbedcrypto
 target_compile_definitions(crypto_service_crypto_hw
     PRIVATE
         ST_HW_CONTEXT_SAVING
-        BUILD_CRYPTO_TFM
+        $<$<AND:$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>,$<STREQUAL:${PS_CRYPTO_AEAD_ALG},PSA_ALG_GCM>>:BUILD_CRYPTO_TFM>
+    INTERFACE
+        $<$<AND:$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>,$<STREQUAL:${PS_CRYPTO_AEAD_ALG},PSA_ALG_GCM>>:MBEDTLS_GCM_C>
 )
 
 target_link_libraries(crypto_service_crypto_hw
