@@ -548,7 +548,7 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
 bool tfm_spm_is_ns_caller(void)
 {
-#if defined(TFM_MULTI_CORE_TOPOLOGY) || defined(FORWARD_PROT_MSG)
+#if defined(TFM_MULTI_CORE_TOPOLOGY)
     /* Multi-core NS PSA API request is processed by pendSV. */
     return (__get_active_exc_num() == EXC_NUM_PENDSV);
 #else
