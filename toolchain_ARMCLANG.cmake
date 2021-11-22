@@ -175,7 +175,7 @@ macro(tfm_toolchain_reload_compiler)
 
     include(Compiler/ARMClang)
     __compiler_armclang(C)
-    include(Compiler/ARMCC)
+    include(Compiler/ARMCC-ASM)
     __compiler_armcc(ASM)
 
     # Cmake's armclang support will set either mcpu or march, but march gives
