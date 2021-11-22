@@ -55,4 +55,8 @@
 #error "Invalid partition number input, check configurations."
 {% endif %}
 
+#if (CONFIG_TFM_FP > 0) && (CONFIG_TFM_SPM_BACKEND_SFN == 1)
+#error "FP is not supported for SFN model."
+#endif
+
 #endif /* __CONFIG_IMPL_H__ */
