@@ -116,7 +116,6 @@ static enum tfm_plat_err_t read_from_input(enum tfm_otp_element_id_t id,
 {
     enum tfm_plat_err_t err = TFM_PLAT_ERR_SUCCESS;
     size_t value_size;
-    size_t copy_size;
     uint8_t buffer[in_len];
     size_t idx;
 
