@@ -7,12 +7,11 @@
 
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/arm/mps2/an521/generated_file_list.yaml  CACHE PATH "Path to extra generated file list. Appended to stardard TFM generated file list." FORCE)
 
-if(NOT TFM_LIB_MODEL)
-    if (NOT TEST_NS_SLIH_IRQ AND TEST_NS)
-        # FLIH and SLIH testing can not be enabled at the same time
-        set(TEST_NS_FLIH_IRQ      ON           CACHE BOOL      "Enable FLIH testing")
-    endif()
-endif()
+set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON    CACHE BOOL    "Platform supports SLIH IRQ tests")
+set(PLATFORM_FLIH_IRQ_TEST_SUPPORT    ON    CACHE BOOL    "Platform supports FLIH IRQ tests")
+
+# Make FLIH IRQ test as the default IRQ test on AN521
+set(TEST_NS_SLIH_IRQ                  OFF   CACHE BOOL    "Whether to build NS regression Second-Level Interrupt Handling tests")
 
 if(BL2)
     set(BL2_TRAILER_SIZE 0x10000 CACHE STRING "Trailer size")

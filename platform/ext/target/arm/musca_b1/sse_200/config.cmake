@@ -34,15 +34,7 @@ set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_SOURCE_DIR}/platform/ext/target/
 
 set(PSA_API_TEST_TARGET                 "musca_b1"   CACHE STRING    "Target to use when building the PSA API tests")
 
-if(NOT TFM_LIB_MODEL)
-    if (TEST_NS_FLIH_IRQ)
-        message(FATAL_ERROR "FLIH testing has not been supported!")
-    endif()
-
-    if (TEST_NS)
-        set(TEST_NS_SLIH_IRQ      ON           CACHE BOOL      "Enable SLIH testing")
-    endif()
-endif()
+set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON    CACHE BOOL    "Platform supports SLIH IRQ tests")
 
 if(BL2)
     set(BL2_TRAILER_SIZE 0x800 CACHE STRING "Trailer size")

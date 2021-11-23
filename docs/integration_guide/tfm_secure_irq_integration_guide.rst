@@ -336,13 +336,12 @@ Enabling the Interrupt Tests
 ****************************
 
 TF-M provides test suites for FLIH and SLIH interrupts respectively.
-They are disabled by default. The configurations are:
+They are disabled by default.
 
-- TEST_NS_FLIH_IRQ
-- TEST_NS_SLIH_IRQ
+.. note::
 
-The tests share the same timer ``TFM_TIMER0_IRQ`` thus cannot be enabled at the
-same time.
+  FLIH interrupt test and SLIH interrupt test share the same timer
+  ``TFM_TIMER0_IRQ`` thus cannot be enabled at the same time.
 
 To enable the tests, please follow steps in the previous sections.
 In addition, you need to implement the following APIs of timer control:
@@ -350,6 +349,21 @@ In addition, you need to implement the following APIs of timer control:
 - ``void tfm_plat_test_secure_timer_start(void)``
 - ``void tfm_plat_test_secure_timer_clear_intr(void)``
 - ``void tfm_plat_test_secure_timer_stop(void)``
+
+You shall also select the following flags in platform specific ``config.cmake``
+to indicate that FLIH and SLIH interrupt tests are supported respectively.
+
+- ``PLATFORM_FLIH_IRQ_TEST_SUPPORT``: platform implements support of FLIH
+  interrupt tests
+- ``PLATFORM_SLIH_IRQ_TEST_SUPPORT``: platform implements support of SLIH
+  interrupt tests
+
+The following configurations control SLIH and FLIH interrupt tests:
+
+- ``TEST_NS_FLIH_IRQ``
+- ``TEST_NS_SLIH_IRQ``
+
+They can be enabled via build command line or via ``TEST_NS``.
 
 ************************************
 Migrating to Firmware Framework v1.1
