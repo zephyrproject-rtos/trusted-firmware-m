@@ -129,6 +129,9 @@ target_sources(platform_s
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_multicore.c>
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_ns_mailbox.c>
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/mhu_v2_x.c>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_nv_counters.c>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_otp.c>
+        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_provisioning.c>
 )
 
 target_compile_options(platform_s
@@ -189,6 +192,9 @@ if(BL2)
             ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/gfc100_eflash_drv.c
             ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c
             Native_Driver/musca_b1_scc_drv.c
+            $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_nv_counters.c>
+            $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_otp.c>
+            $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_provisioning.c>
     )
 
     target_include_directories(platform_bl2
