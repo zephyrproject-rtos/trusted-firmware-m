@@ -19,3 +19,4 @@ add_compile_definitions(
     STM32U585xx
     USE_HAL_DRIVER
 )
+set(PSA_API_TEST_TARGET stm32l562e_dk)

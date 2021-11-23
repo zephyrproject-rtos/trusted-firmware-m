@@ -22,7 +22,7 @@
 #include "flash_layout.h"
 
 #define BL2_HEAP_SIZE           (0x00001000)
-#define BL2_MSP_STACK_SIZE      (0x00001800)
+#define BL2_MSP_STACK_SIZE      (0x00002000)
 
 #define S_HEAP_SIZE             (0x00001000)
 #define S_MSP_STACK_SIZE_INIT   (0x00000400)
@@ -76,14 +76,6 @@
  * because we reserve space for the image header and trailer introduced
  * by the bootloader.
  */
-#ifdef BL2
-#define BL2_HEADER_SIZE      (0x400)       /* 1 KB */
-#define BL2_TRAILER_SIZE     (0x400)       /* 1 KB */
-#else
-/* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
-#define BL2_HEADER_SIZE      (0x0)
-#define BL2_TRAILER_SIZE     (0x800)
-#endif /* BL2 */
 
 #if (!defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)) && \
     (NS_IMAGE_PRIMARY_PARTITION_OFFSET > S_IMAGE_PRIMARY_PARTITION_OFFSET)

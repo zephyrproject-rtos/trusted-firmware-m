@@ -48,6 +48,7 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<AND:$<COMPILE_LANGUAGE:C>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:-mfpu=none>
         $<$<AND:$<COMPILE_LANGUAGE:ASM>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:--fpu=none>
         $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
+        $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
     )
 endmacro()
 
@@ -174,7 +175,7 @@ macro(tfm_toolchain_reload_compiler)
 
     include(Compiler/ARMClang)
     __compiler_armclang(C)
-    include(Compiler/ARMCC)
+    include(Compiler/ARMCC-ASM)
     __compiler_armcc(ASM)
 
     # Cmake's armclang support will set either mcpu or march, but march gives

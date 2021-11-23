@@ -22,6 +22,10 @@
 #define __aligned(x) __attribute__((aligned(x)))
 #endif
 
+#ifndef __used
+#define __used __attribute__((used))
+#endif
+
 #endif /* __ARMCC_VERSION __GNUC__ __ICCARM__*/
 
 #endif /* __COMPILER_EXT_DEFS_H__ */

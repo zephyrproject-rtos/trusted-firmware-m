@@ -11,7 +11,6 @@
 
 {% for partition in partitions %}
     {% if partition.manifest.irqs %}
-#ifdef {{partition.attr.conditional}}
         {% if partition.manifest.psa_framework_version != 1.0 %}
 #error "Framework version greater than 1.0 is not supported"
         {% endif %}
@@ -24,7 +23,6 @@
                 {% set irq_signal.bit = irq_signal.bit - 1 %}
             {% endif %}
         {% endfor %}
-#endif /* {{partition.attr.conditional}} */
     {% endif %}
 {% endfor %}
 {% macro _irq_record(partition_name, signal, line) -%}
@@ -35,9 +33,6 @@
 const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
 {% for partition in partitions %}
     {% if partition.manifest.irqs %}
-        {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-        {% endif %}
         {% for handler in partition.manifest.irqs %}
             {% set irq_data = namespace() %}
             {% if handler.source %}
@@ -47,9 +42,6 @@ const struct tfm_core_irq_signal_data_t tfm_core_irq_signals[] = {
             {% endif %}
     {{ _irq_record(partition.manifest.name, handler.signal, irq_data.line) }}
         {% endfor %}
-        {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-        {% endif %}
    {% endif %}
 {% endfor %}
    {0,0,0}                         /* add dummy element to avoid non-standard empty array */
@@ -66,15 +58,9 @@ extern void priv_irq_handler_main(uint32_t partition_id,
 /* Forward declarations of unpriv IRQ handlers*/
 {% for partition in partitions %}
     {% if partition.manifest.irqs %}
-        {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-        {% endif %}
         {% for handler in partition.manifest.irqs %}
 extern void {{handler.signal}}_isr(void);
         {% endfor %}
-        {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-        {% endif %}
 
     {% endif %}
 {% endfor %}
@@ -82,9 +68,6 @@ extern void {{handler.signal}}_isr(void);
 /* Definitions of privileged IRQ handlers */
 {% for partition in partitions %}
     {% if partition.manifest.irqs %}
-        {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-        {% endif %}
         {% for handler in partition.manifest.irqs %}
             {% if handler.source is number %}
 void irq_{{handler.source}}_Handler(void)
@@ -105,9 +88,6 @@ void {{handler.source}}_Handler(void)
 }
 
         {% endfor %}
-        {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-        {% endif %}
 
     {% endif %}
 {% endfor %}

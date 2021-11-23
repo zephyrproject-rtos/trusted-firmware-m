@@ -39,6 +39,15 @@ extern "C" {
 fih_int tfm_hal_set_up_static_boundaries(void);
 
 /**
+ * \brief This function is responsible for checking all critical isolation
+          configurations.
+ *
+ * \return TFM_HAL_SUCCESS - the verification passed.
+ *         TFM_HAL_ERROR_GENERIC - the verification failed.
+ */
+fih_int tfm_hal_verify_static_boundaries(void);
+
+/**
  * \brief  Update the isolation boundaries.
  *
  * \param[in]   p_ldinf         Partition load information.

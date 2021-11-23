@@ -36,9 +36,8 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
        ro object *6M_tl*.a,
        ro object *7M_tl*.a,
        ro object *libtfm_sprt.a,
-       ro object psa_client.o,
-       ro object psa_service.o,
-       ro object psa_lifecycle.o,
+       ro object psa_interface_*.o,
+       ro object tfm_psa_call_pack.o,
        ro object tfm_log_raw.o
        };
 

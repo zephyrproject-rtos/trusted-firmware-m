@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include "tfm_plat_test.h"
+#include "pal_plat_test.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <hal/nrf_gpio.h>
@@ -27,8 +28,11 @@
 #include <drivers/include/nrfx_twim.h>
 #include <drivers/include/nrfx_twi_twim.h>
 #include <lcz_board.h>
+
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
 #include <tfm_platform_api.h>
 #include "tfm_spm_log.h"
+#endif
 
 #ifndef RTE_TWIM2
 #error "RTE_TWIM2 must be defined to enable use of the I2C (TWI) GPIO port expander"
@@ -38,8 +42,6 @@
 
 /* Area used by psa-arch-tests to keep state. */
 #define PSA_TEST_SCRATCH_AREA_SIZE  (0x400)
-
-static bool initialized = false;
 
 static void timer_init(NRF_TIMER_Type * TIMER, uint32_t ticks)
 {
@@ -105,21 +107,21 @@ void pal_timer_stop_ns(void)
     timer_stop(NRF_TIMER1);
 }
 
-#if !defined(TEST_NS_SLIH_IRQ)
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
 /* Watchdog timeout handler. */
 void TIMER1_Handler(void)
 {
     pal_timer_stop_ns();
     int ret = tfm_platform_system_reset();
     if (ret) {
-        SPMLOG_ERRMSGVAL("Reset failed: ", err);
+        SPMLOG_ERRMSGVAL("Reset failed: ", ret);
     }
 }
 #endif
 
+#ifdef PSA_API_TEST_ENABLED
 uint32_t pal_nvmem_get_addr(void)
 {
-    static __ALIGN(4) uint8_t __psa_scratch[PSA_TEST_SCRATCH_AREA_SIZE];
 #ifdef NRF_TRUSTZONE_NONSECURE
     static bool psa_scratch_initialized = false;
 
@@ -130,12 +132,13 @@ uint32_t pal_nvmem_get_addr(void)
         int is_pinreset = reset_reason & NRFX_RESET_REASON_RESETPIN_MASK;
         if ((reset_reason == 0) || is_pinreset){
             /* PSA API tests expect this area to be initialized to all 0xFFs
-            * after a power-on or pin reset.
-            */
-            memset(__psa_scratch, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
+             * after a power-on or pin reset.
+             */
+            memset((void*)PSA_TEST_SCRATCH_AREA_BASE, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
         }
         psa_scratch_initialized = true;
     }
-#endif
-    return (uint32_t)__psa_scratch;
+#endif /* NRF_TRUSTZONE_NONSECURE */
+    return (uint32_t)PSA_TEST_SCRATCH_AREA_BASE;
 }
+#endif /* PSA_API_TEST_ENABLED */

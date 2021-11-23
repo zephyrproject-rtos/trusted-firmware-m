@@ -87,6 +87,11 @@ enum tfm_plat_err_t tfm_plat_otp_init(void);
  *                                      into in bytes.
  * \param[out] out                      Buffer to read the element into.
  *
+ * \note                                If the size of the internal OTP
+ *                                      representation of the item is different
+ *                                      to out_len, then the smaller of the two
+ *                                      is the amount of bytes that must be
+ *                                      read.
  *
  * \retval TFM_PLAT_ERR_SUCCESS         The element is read successfully.
  * \retval TFM_PLAT_ERR_UNSUPPORTED     The given element has not been
@@ -113,6 +118,12 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
  *                                      If such a write is requested, the
  *                                      function should return an error code and
  *                                      not alter the contents of OTP memory.
+ *
+ * \note                                If the size of the internal OTP
+ *                                      representation of the item is smaller
+ *                                      than in_len, this function must return
+ *                                      an error other than TFM_PLAT_ERR_SUCCESS
+ *                                      and not write any OTP.
  *
  * \retval TFM_PLAT_ERR_SUCCESS         The OTP is written successfully
  * \retval TFM_PLAT_ERR_UNSUPPORTED     The given element has not been

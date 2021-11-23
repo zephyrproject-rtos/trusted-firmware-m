@@ -122,48 +122,6 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     }
 }
 
-enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void)
-{
-    return enable_fault_handlers();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
-{
-    return system_reset_cfg();
-}
-
-void tfm_hal_system_reset(void)
-{
-    __disable_irq();
-    mpc_revert_non_secure_to_secure_cfg();
-
-    NVIC->ICPR[0] = UINT32_MAX;         /* Clear all pending interrupts */
-    NVIC->ICPR[1] = UINT32_MAX;         /* Clear all pending interrupts */
-    NVIC->ICPR[2] = UINT32_MAX;         /* Clear all pending interrupts */
-    NVIC->ICPR[3] = UINT32_MAX;         /* Clear all pending interrupts */
-    NVIC->ICPR[4] = UINT32_MAX;         /* Clear all pending interrupts */
-    NVIC->ICPR[5] = UINT32_MAX;         /* Clear all pending interrupts */
-    NVIC->ICPR[6] = UINT32_MAX;         /* Clear all pending interrupts */
-    NVIC->ICPR[7] = UINT32_MAX;         /* Clear all pending interrupts */
-
-    NVIC_SystemReset();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
-{
-    return init_debug();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
-{
-    return nvic_interrupt_target_state_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
-{
-    return nvic_interrupt_enable();
-}
-
 #ifndef TFM_PSA_API
 
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(

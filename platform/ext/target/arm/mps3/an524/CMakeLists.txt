@@ -93,6 +93,7 @@ target_sources(platform_s
         spm_hal.c
         tfm_interrupts.c
         tfm_hal_isolation.c
+        tfm_hal_platform.c
         target_cfg.c
         native_drivers/ppc_sse200_drv.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c

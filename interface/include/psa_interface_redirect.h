@@ -7,6 +7,8 @@
 #ifndef __PSA_INTERFACE_REDIRECT_H__
 #define __PSA_INTERFACE_REDIRECT_H__
 
+#include "psa/framework_feature.h"
+
 #if defined(CONFIG_TFM_PSA_API_SUPERVISOR_CALL)
 
 #define psa_framework_version    psa_framework_version_svc
@@ -52,6 +54,30 @@
 #define psa_irq_disable          psa_irq_disable_thread
 #define psa_reset_signal         psa_reset_signal_thread
 #define psa_rot_lifecycle_state  psa_rot_lifecycle_state_thread
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+#define psa_map_invec            psa_map_invec_thread
+#define psa_unmap_invec          psa_unmap_invec_thread
+#define psa_map_outvec           psa_map_outvec_thread
+#define psa_unmap_outvec         psa_unmap_outvec_thread
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
+#elif defined(CONFIG_TFM_PSA_API_SFN_CALL)
+
+#define psa_framework_version    psa_framework_version_sfn
+#define psa_version              psa_version_sfn
+#define psa_connect              psa_connect_sfn
+#define tfm_psa_call_pack        psa_call_pack_sfn
+#define psa_close                psa_close_sfn
+#define psa_wait                 psa_wait_sfn
+#define psa_read                 psa_read_sfn
+#define psa_skip                 psa_skip_sfn
+#define psa_write                psa_write_sfn
+#define psa_panic                psa_panic_sfn
+
+#else
+
+#error "NO ABI is chosen, check configurations."
 
 #endif
 

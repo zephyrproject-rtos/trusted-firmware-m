@@ -103,7 +103,7 @@ uint32_t *get_exception_frame(uint32_t lr, uint32_t msp, uint32_t psp)
 static void dump_exception_info_t(bool stack_error,
                                   struct exception_info_t *ctx)
 {
-    SPMLOG_DBGMSG("Here is some context for the exception:\n");
+    SPMLOG_DBGMSG("Here is some context for the exception:\r\n");
     SPMLOG_DBGMSGVAL("    EXC_RETURN (LR): ", ctx->EXC_RETURN);
     SPMLOG_DBGMSG("    Exception came from");
 #ifdef TRUSTZONE_PRESENT
@@ -115,9 +115,9 @@ static void dump_exception_info_t(bool stack_error,
 #endif
 
     if (is_return_thread_mode(ctx->EXC_RETURN)) {
-        SPMLOG_DBGMSG(" thread mode.\n");
+        SPMLOG_DBGMSG(" thread mode.\r\n");
     } else {
-        SPMLOG_DBGMSG(" handler mode.\n");
+        SPMLOG_DBGMSG(" handler mode.\r\n");
     }
     SPMLOG_DBGMSGVAL("    xPSR:    ", ctx->xPSR);
     SPMLOG_DBGMSGVAL("    MSP:     ", ctx->MSP);
@@ -130,7 +130,7 @@ static void dump_exception_info_t(bool stack_error,
     SPMLOG_DBGMSGVAL("    Exception frame at: ", (uint32_t)ctx->EXC_FRAME);
     if (stack_error) {
         SPMLOG_DBGMSG(
-            "       (Note that the exception frame may be corrupted for this type of error.)\n");
+            "       (Note that the exception frame may be corrupted for this type of error.)\r\n");
     }
     SPMLOG_DBGMSGVAL("        R0:   ", ctx->EXC_FRAME_COPY[0]);
     SPMLOG_DBGMSGVAL("        R1:   ", ctx->EXC_FRAME_COPY[1]);
@@ -148,14 +148,14 @@ static void dump_exception_info_t(bool stack_error,
     if (ctx->BFARVALID) {
         SPMLOG_DBGMSGVAL("    BFAR: ", ctx->BFAR);
     } else {
-        SPMLOG_DBGMSG("    BFAR:  Not Valid\n");
+        SPMLOG_DBGMSG("    BFAR:  Not Valid\r\n");
     }
     SPMLOG_DBGMSGVAL("    MMFSR: ",
                     (ctx->CFSR & SCB_CFSR_MEMFAULTSR_Msk) >> SCB_CFSR_MEMFAULTSR_Pos);
     if (ctx->MMARVALID) {
         SPMLOG_DBGMSGVAL("    MMFAR: ", ctx->MMFAR);
     } else {
-        SPMLOG_DBGMSG("    MMFAR: Not Valid\n");
+        SPMLOG_DBGMSG("    MMFAR: Not Valid\r\n");
     }
     SPMLOG_DBGMSGVAL("    UFSR:  ",
                     (ctx->CFSR & SCB_CFSR_USGFAULTSR_Msk) >> SCB_CFSR_USGFAULTSR_Pos);
@@ -165,7 +165,7 @@ static void dump_exception_info_t(bool stack_error,
     if (ctx->SFARVALID) {
         SPMLOG_DBGMSGVAL("    SFAR: ", ctx->SFAR);
     } else {
-        SPMLOG_DBGMSG("    SFAR: Not Valid\n");
+        SPMLOG_DBGMSG("    SFAR: Not Valid\r\n");
     }
 #endif
 
@@ -176,28 +176,28 @@ static void dump_error(uint32_t error_type)
 {
     bool stack_error = false;
 
-    SPMLOG_DBGMSG("FATAL ERROR: ");
+    SPMLOG_ERRMSG("FATAL ERROR: ");
     switch (error_type) {
     case EXCEPTION_TYPE_SECUREFAULT:
-        SPMLOG_DBGMSG("SecureFault\n");
+        SPMLOG_ERRMSG("SecureFault\r\n");
         break;
     case EXCEPTION_TYPE_HARDFAULT:
-        SPMLOG_DBGMSG("HardFault\n");
+        SPMLOG_ERRMSG("HardFault\r\n");
         break;
     case EXCEPTION_TYPE_MEMFAULT:
-        SPMLOG_DBGMSG("MemManage fault\n");
+        SPMLOG_ERRMSG("MemManage fault\r\n");
         stack_error = true;
         break;
     case EXCEPTION_TYPE_BUSFAULT:
-        SPMLOG_DBGMSG("BusFault\n");
+        SPMLOG_ERRMSG("BusFault\r\n");
         stack_error = true;
         break;
     case EXCEPTION_TYPE_USAGEFAULT:
-        SPMLOG_DBGMSG("UsageFault\n");
+        SPMLOG_ERRMSG("UsageFault\r\n");
         stack_error = true;
         break;
     default:
-        SPMLOG_DBGMSG("Unknown\n");
+        SPMLOG_ERRMSG("Unknown\r\n");
         break;
     }
     dump_exception_info_t(stack_error, &exception_info);

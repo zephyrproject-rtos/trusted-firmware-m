@@ -49,13 +49,18 @@ else()
     include(config/tfm_ipc_config_default.cmake)
 endif()
 
-# Load defaults, setting options not already set
-include(config/config_default.cmake)
-
 # Load MCUboot specific default.cmake
+# Set BL2 to ON by default, OFF if the platform specifically defines this property
+set(BL2 ON CACHE BOOL "Whether to build BL2")
 if (BL2)
     include(${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/mcuboot_default_config.cmake)
 endif()
+
+# Include coprocessor configs
+include(config/cp_config_default.cmake)
+
+# Load defaults, setting options not already set
+include(config/config_default.cmake)
 
 # Fetch tf-m-tests repo during config, if NS or regression test is required.
 # Therefore tf-m-tests configs can be set with TF-M configs since their configs

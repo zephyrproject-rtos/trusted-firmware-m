@@ -129,13 +129,16 @@ struct its_flash_fs_ops_t {
      *
      * \param[in] cfg  Filesystem configuration
      *
+     * \param[in] block_id  Block ID
+     *
      * \note It is permitted for write() to commit block updates immediately, in
      *       which case this function is a no-op.
      *
      * \return Returns PSA_SUCCESS if the function is executed correctly.
      *         Otherwise, it returns PSA_ERROR_STORAGE_FAILURE.
      */
-    psa_status_t (*flush)(const struct its_flash_fs_config_t *cfg);
+    psa_status_t (*flush)(const struct its_flash_fs_config_t *cfg,
+                          uint32_t block_id);
 
     /**
      * \brief Erases block ID data.

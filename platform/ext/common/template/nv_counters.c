@@ -178,10 +178,6 @@ static enum tfm_plat_err_t set_nv_counter_flash(enum flash_nv_counter_id_t count
         return err;
     }
 
-    if (value < counter_value) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-
     if (counter_value == UINT32_MAX) {
         return TFM_PLAT_ERR_MAX_VALUE;
     }
@@ -192,10 +188,10 @@ static enum tfm_plat_err_t set_nv_counter_flash(enum flash_nv_counter_id_t count
 
     counter_value = value;
 
-    err = read_otp_nv_counters_flash(offsetof(struct flash_otp_nv_counters_region_t,
-                                              flash_nv_counters)
-                                     + counter_id * sizeof(uint32_t),
-                                     &counter_value, sizeof(counter_value));
+    err = write_otp_nv_counters_flash(offsetof(struct flash_otp_nv_counters_region_t,
+                                               flash_nv_counters)
+                                      + counter_id * sizeof(uint32_t),
+                                      &counter_value, sizeof(counter_value));
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

@@ -247,14 +247,16 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
  * \param[in] status            Message result value to be reported to the
  *                              client.
  *
- * \retval void                 Success.
+ * \retval Positive integer     Success, the connection handle.
+ * \retval PSA_SUCCESS          Success
  * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
  *                              following are true:
  * \arg                         msg_handle is invalid.
  * \arg                         An invalid status code is specified for the
  *                              type of message.
  */
-void tfm_spm_partition_psa_reply(psa_handle_t msg_handle, psa_status_t status);
+int32_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
+                                    psa_status_t status);
 
 /**
  * \brief Function body of \ref psa_norify.
@@ -348,5 +350,33 @@ psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal);
  * \arg                       \a irq_signal is not currently asserted.
  */
 void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal);
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+
+/**
+ * \brief Function body of psa_map_invec.
+ */
+const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
+                                            uint32_t invec_idx);
+
+/**
+ * \brief Function body of psa_unmap_invec.
+ */
+void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
+                                       uint32_t invec_idx);
+
+/**
+ * \brief Function body of psa_map_outvet.
+ */
+void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
+                                       uint32_t outvec_idx);
+
+/**
+ * \brief Function body of psa_unmap_outvec.
+ */
+void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
+                                        uint32_t outvec_idx, size_t len);
+
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
 #endif /* __PSA_API_H__ */

@@ -6,10 +6,10 @@
 
 #include <stdbool.h>
 
-#include "tfm_spm_hal.h"
 #include "region_defs.h"
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
+#include "tfm_hal_multi_core.h"
 #include "tfm_multi_core.h"
 #include "tfm_secure_api.h"
 #include "utilities.h"
@@ -461,7 +461,7 @@ int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr)
     security_attr_init(&security_attr);
 
     /* Retrieve security attributes of target memory region */
-    tfm_spm_hal_get_mem_security_attr(p, s, &security_attr);
+    tfm_hal_get_mem_security_attr(p, s, &security_attr);
 
     if (security_attr_check(security_attr, flags) != TFM_SUCCESS) {
         return (int32_t)TFM_ERROR_GENERIC;
@@ -471,7 +471,7 @@ int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr)
 
     if (security_attr.is_secure) {
         /* Retrieve access attributes of secure memory region */
-        tfm_spm_hal_get_secure_access_attr(p, s, &mem_attr);
+        tfm_hal_get_secure_access_attr(p, s, &mem_attr);
 
 #if TFM_LVL != 1
         /* Secure MPU must be enabled in Isolation Level 2 and 3 */
@@ -481,7 +481,7 @@ int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr)
 #endif
     } else {
         /* Retrieve access attributes of non-secure memory region. */
-        tfm_spm_hal_get_ns_access_attr(p, s, &mem_attr);
+        tfm_hal_get_ns_access_attr(p, s, &mem_attr);
     }
 
     return (int32_t)mem_attr_check(mem_attr, flags);

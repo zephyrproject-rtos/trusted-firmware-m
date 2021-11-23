@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -48,8 +48,7 @@ macro(tfm_toolchain_reset_compiler_flags)
         -mthumb
         -nostdlib
         -std=c99
-        $<$<BOOL:${TFM_CODE_COVERAGE}>:-g>
-        $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:-msoft-float>
+        $<$<OR:$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<BOOL:${TFM_CODE_COVERAGE}>>:-g>
     )
 endmacro()
 
@@ -76,6 +75,13 @@ macro(tfm_toolchain_set_processor_arch)
                 string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
             endif()
         endif()
+        if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+            if (DEFINED CONFIG_TFM_SPE_FP)
+                if(CONFIG_TFM_SPE_FP STREQUAL "0")
+                    string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
+                endif()
+            endif()
+        endif()
     endif()
 
     # CMAKE_SYSTEM_ARCH variable is not a built-in CMAKE variable. It is used to
@@ -95,12 +101,26 @@ macro(tfm_toolchain_set_processor_arch)
             endif()
         endif()
     endif()
+
+    if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+        if (DEFINED CONFIG_TFM_SPE_FP)
+            if(CONFIG_TFM_SPE_FP STRGREATER 0)
+                string(APPEND CMAKE_SYSTEM_ARCH "+fp")
+            endif()
+        endif()
+    endif()
 endmacro()
 
 macro(tfm_toolchain_reload_compiler)
     tfm_toolchain_set_processor_arch()
     tfm_toolchain_reset_compiler_flags()
     tfm_toolchain_reset_linker_flags()
+
+    if (CMAKE_C_COMPILER_VERSION VERSION_EQUAL 10.2.1)
+        message(FATAL_ERROR "GNU Arm compiler version 10-2020-q4-major has an issue in CMSE support."
+                            " Select other GNU Arm compiler versions instead."
+                            " See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157 for the issue detail.")
+    endif()
 
     unset(CMAKE_C_FLAGS_INIT)
     unset(CMAKE_ASM_FLAGS_INIT)
@@ -119,6 +139,19 @@ macro(tfm_toolchain_reload_compiler)
 
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
+
+    set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
+
+    if (CONFIG_TFM_SPE_FP STREQUAL "2")
+        set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+        set(LINKER_CP_OPTION -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+    elseif (CONFIG_TFM_SPE_FP STREQUAL "1")
+        set(COMPILER_CP_FLAG -mfloat-abi=softfp -mfpu=${CONFIG_TFM_FP_ARCH})
+        set(LINKER_CP_OPTION -mfloat-abi=softfp -mfpu=${CONFIG_TFM_FP_ARCH})
+    else()
+        set(COMPILER_CP_FLAG -mfloat-abi=soft)
+        set(LINKER_CP_OPTION -mfloat-abi=soft)
+    endif()
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first

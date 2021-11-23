@@ -19,10 +19,12 @@
 #include "target_cfg.h"
 #include "Driver_SSE300_PPC.h"
 #include "Driver_MPC.h"
-#include "platform_description.h"
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
+#include "device_definition.h"
+#include "syscounter_armv8-m_cntrl_drv.h"
+#include "uart_stdout.h"
 
 /* Throw out bus error when an access causes security violation */
 #define CMSDK_SECRESPCFG_BUS_ERR_MASK   (1UL << 0)
@@ -96,20 +98,6 @@ extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP3;
 
 #define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
-
-struct platform_data_t tfm_peripheral_std_uart = {
-        UART0_BASE_NS,
-        UART0_BASE_NS + 0xFFF,
-        PPC_SP_DO_NOT_CONFIGURE,
-        -1
-};
-
-struct platform_data_t tfm_peripheral_timer0 = {
-        SYSTIMER0_ARMV8_M_BASE_S,
-        SYSTIMER0_ARMV8_M_BASE_S + 0xFFF,
-        PPC_SP_PERIPH0,
-        SYSTEM_TIMER0_PERIPH_PPC0_POS_MASK
-};
 
 static DRIVER_PPC_SSE300 *const ppc_bank_drivers[] = {
     &Driver_PPC_SSE300_MAIN0,

@@ -98,6 +98,7 @@ target_sources(platform_s
         spm_hal.c
         tfm_interrupts.c
         tfm_hal_isolation.c
+        tfm_hal_platform.c
         target_cfg.c
         Native_Driver/timer_cmsdk_drv.c
         Libraries/mt25ql_flash_lib.c
@@ -163,5 +164,10 @@ if(BL2)
             Native_Driver
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
+    )
+
+    target_compile_options(platform_bl2
+        PRIVATE
+            ${BL2_COMPILER_CP_FLAG}
     )
 endif()

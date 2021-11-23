@@ -90,6 +90,7 @@ target_sources(platform_s
         spm_hal.c
         tfm_interrupts.c
         tfm_hal_isolation.c
+        tfm_hal_platform.c
         target_cfg.c
         native_drivers/ppc_sse200_drv.c
         native_drivers/arm_uart_drv.c

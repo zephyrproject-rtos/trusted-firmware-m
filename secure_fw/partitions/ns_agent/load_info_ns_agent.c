@@ -9,8 +9,8 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "region.h"
-#include "region_defs.h"
+#include "compiler_ext_defs.h"
+#include "config_impl.h"
 #include "spm_ipc.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
@@ -22,12 +22,11 @@
 #define TFM_SP_NS_AGENT_NASSETS                                 (1)
 #endif
 
-/* Memory region declaration */
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
-
 /* Entrypoint function declaration */
 extern void tfm_nspm_thread_entry(void);
+
+/* Stack */
+uint8_t ns_agent_tz_stack[CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE] __aligned(0x20);
 
 struct partition_tfm_sp_ns_agent_load_info_t {
     /* common length load data */
@@ -52,12 +51,9 @@ const struct partition_tfm_sp_ns_agent_load_info_t
         .pid                        = TFM_SP_NON_SECURE_ID,
         .flags                      = (PARTITION_PRI_LOWEST - 1)
                                     | PARTITION_MODEL_IPC
-#if TFM_MULTI_CORE_TOPOLOGY
-                                    | PARTITION_MODEL_PSA_ROT
-#endif
-                                    ,
+                                    | PARTITION_MODEL_PSA_ROT,
         .entry                      = ENTRY_TO_POSITION(tfm_nspm_thread_entry),
-        .stack_size                 = S_PSP_STACK_SIZE,
+        .stack_size                 = CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE,
         .heap_size                  = 0,
         .ndeps                      = TFM_SP_NS_AGENT_NDEPS,
         .nservices                  = TFM_SP_NS_AGENT_NSERVS,
@@ -65,16 +61,14 @@ const struct partition_tfm_sp_ns_agent_load_info_t
         .nassets                    = TFM_SP_NS_AGENT_NASSETS,
 #endif
     },
-    .stack_addr                     = PART_REGION_ADDR(ER_INITIAL_PSP,
-                                                                    $$ZI$$Base),
+    .stack_addr                     = (uintptr_t)ns_agent_tz_stack,
     .heap_addr                      = 0,
 #if TFM_LVL == 3
     .assets                         = {
         {
-            .mem.start              = PART_REGION_ADDR(ER_INITIAL_PSP,
-                                                                    $$ZI$$Base),
-            .mem.limit              = PART_REGION_ADDR(ER_INITIAL_PSP,
-                                                                   $$ZI$$Limit),
+            .mem.start              = (uintptr_t)ns_agent_tz_stack,
+            .mem.limit              =
+               (uintptr_t)&ns_agent_tz_stack[CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE],
             .attr                   = ASSET_ATTR_READ_WRITE,
         },
     },

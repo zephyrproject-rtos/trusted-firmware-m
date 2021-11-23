@@ -116,6 +116,7 @@ target_sources(platform_s
         spm_hal.c
         tfm_interrupts.c
         tfm_hal_isolation.c
+        tfm_hal_platform.c
         target_cfg.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/uart_pl011_drv.c

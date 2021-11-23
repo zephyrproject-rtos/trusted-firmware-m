@@ -37,36 +37,12 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
 static fih_int tfm_core_init(void)
 {
-    enum tfm_hal_status_t hal_status = TFM_HAL_ERROR_GENERIC;
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
+#else
+    enum tfm_hal_status_t hal_status = TFM_HAL_ERROR_GENERIC;
 #endif
-
-    /* Enables fault handlers */
-    plat_err = tfm_spm_hal_enable_fault_handlers();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-
-    /* Configures the system reset request properties */
-    plat_err = tfm_spm_hal_system_reset_cfg();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-
-    /* Configures debug authentication */
-#ifdef TFM_FIH_PROFILE_ON
-    FIH_CALL(tfm_spm_hal_init_debug, fih_rc);
-    if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-#else /* TFM_FIH_PROFILE_ON */
-    plat_err = tfm_spm_hal_init_debug();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_ERROR_GENERIC;
-    }
-#endif /* TFM_FIH_PROFILE_ON */
 
     /*
      * Access to any peripheral should be performed after programming
@@ -85,17 +61,23 @@ static fih_int tfm_core_init(void)
 #endif /* TFM_FIH_PROFILE_ON */
 
 #ifdef TFM_FIH_PROFILE_ON
-    FIH_CALL(tfm_spm_hal_verify_isolation_hw, fih_rc);
-    if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+    FIH_CALL(tfm_hal_verify_static_boundaries, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         tfm_core_panic();
     }
 #endif
 
-    /* Performs platform specific initialization */
-    hal_status = tfm_hal_platform_init();
-    if (hal_status != TFM_HAL_SUCCESS) {
+#ifdef TFM_FIH_PROFILE_ON
+    FIH_CALL(tfm_hal_platform_init, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
+#else /* TFM_FIH_PROFILE_ON */
+    hal_status = tfm_hal_platform_init();
+    if (hal_status != TFM_HAL_SUCCESS) {
+        return TFM_ERROR_GENERIC;
+    }
+#endif /* TFM_FIH_PROFILE_ON */
 
     plat_err = tfm_plat_otp_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
@@ -119,23 +101,25 @@ static fih_int tfm_core_init(void)
 
     SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_LVL);
 
+#if (CONFIG_TFM_SPE_FP == 0)
+    SPMLOG_INFMSG("TF-M FP mode: Software\r\n");
+#elif (CONFIG_TFM_SPE_FP == 1)
+    SPMLOG_INFMSG("TF-M FP mode: Hybird\r\n");
+#elif (CONFIG_TFM_SPE_FP == 2)
+    SPMLOG_INFMSG("TF-M FP mode: Hardware\r\n");
+#endif
+
+#if (CONFIG_TFM_SPE_FP >= 1)
+#ifdef CONFIG_TFM_LAZY_STACKING_SPE
+    SPMLOG_INFMSG("Lazy stacking enabled\r\n");
+#else
+    SPMLOG_INFMSG("Lazy stacking disabled\r\n");
+#endif
+#endif
+
     tfm_core_validate_boot_data();
 
     configure_ns_code();
-
-    /* Configures all interrupts to retarget NS state, except for
-     * secure peripherals
-     */
-    plat_err = tfm_spm_hal_nvic_interrupt_target_state_cfg();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-
-    /* Enable secure peripherals interrupts */
-    plat_err = tfm_spm_hal_nvic_interrupt_enable();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
 
     FIH_RET(fih_int_encode(TFM_SUCCESS));
 }
@@ -177,6 +161,12 @@ int c_main(void)
      * secure SVC or SecureFault. Do it before PSA API initialization.
      */
     tfm_arch_set_secure_exception_priorities();
+
+#if (CONFIG_TFM_SPE_FP >= 1)
+    tfm_arch_clear_fp_data();
+#endif
+
+    tfm_arch_clear_fp_status();
 
     /* Move to handler mode for further SPM initialization. */
     tfm_core_handler_mode();

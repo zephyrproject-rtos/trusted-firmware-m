@@ -135,7 +135,7 @@ enum tfm_plat_err_t system_reset_cfg(void);
 /**
  * \brief Configures the system debug properties.
  *
- * \return Returns values as specified by the \ref fih_int
+ * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t init_debug(void);
 

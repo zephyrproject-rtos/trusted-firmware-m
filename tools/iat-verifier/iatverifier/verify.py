@@ -12,7 +12,7 @@ import logging
 import struct
 import sys
 
-import cbor
+import cbor2
 from ecdsa import SigningKey
 from pycose.sign1message import Sign1Message
 
@@ -217,7 +217,7 @@ def decode_sw_component(raw_sw_component, keep_going=True, strict=False):
 
 def decode_and_validate_iat(encoded_iat, keep_going=False, strict=False):
     try:
-        raw_token = cbor.loads(encoded_iat)
+        raw_token = cbor2.loads(encoded_iat)
     except Exception as e:
         msg = 'Invalid CBOR: {}'
         raise ValueError(msg.format(e))

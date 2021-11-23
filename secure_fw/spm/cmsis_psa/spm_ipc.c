@@ -8,6 +8,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include "bitops.h"
+#include "critical_section.h"
+#include "current.h"
 #include "fih.h"
 #include "psa/client.h"
 #include "psa/service.h"
@@ -44,6 +46,8 @@ struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
                  TFM_CONN_HANDLE_MAX_NUM);
+
+extern uint32_t scheduler_lock;
 
 /*********************** Connection handle conversion APIs *******************/
 
@@ -140,7 +144,9 @@ struct tfm_conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
         return NULL;
     }
 
-    p_handle->service = service;
+    spm_memset(p_handle, 0, sizeof(*p_handle));
+
+    p_handle->internal_msg.service = service;
     p_handle->status = TFM_HANDLE_STATUS_IDLE;
     p_handle->client_id = client_id;
 
@@ -171,17 +177,22 @@ int32_t tfm_spm_validate_conn_handle(
 int32_t tfm_spm_free_conn_handle(struct service_t *service,
                                  struct tfm_conn_handle_t *conn_handle)
 {
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+
     TFM_CORE_ASSERT(service);
     TFM_CORE_ASSERT(conn_handle != NULL);
 
     /* Clear magic as the handler is not used anymore */
     conn_handle->internal_msg.magic = 0;
 
+    CRITICAL_SECTION_ENTER(cs_assert);
     /* Remove node from handle list */
     BI_LIST_REMOVE_NODE(&conn_handle->list);
 
     /* Back handle buffer to pool */
     tfm_pool_free(conn_handle_pool, conn_handle);
+    CRITICAL_SECTION_LEAVE(cs_assert);
+
     return SPM_SUCCESS;
 }
 
@@ -227,6 +238,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
 {
     struct bi_list_node_t *node, *head;
     struct tfm_msg_body_t *tmp_msg, *msg = NULL;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     TFM_CORE_ASSERT(partition);
 
@@ -240,9 +252,11 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
      * There may be multiple messages for this RoT Service signal, do not clear
      * partition mask until no remaining message. Search may be optimized.
      */
+    CRITICAL_SECTION_ENTER(cs_assert);
     BI_LIST_FOR_EACH(node, head) {
         tmp_msg = TO_CONTAINER(node, struct tfm_msg_body_t, msg_node);
         if (tmp_msg->service->p_ldinf->signal == signal && msg) {
+            CRITICAL_SECTION_LEAVE(cs_assert);
             return msg;
         } else if (tmp_msg->service->p_ldinf->signal == signal) {
             msg = tmp_msg;
@@ -251,6 +265,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
     }
 
     partition->signals_asserted &= ~signal;
+    CRITICAL_SECTION_LEAVE(cs_assert);
 
     return msg;
 }
@@ -306,7 +321,7 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 
 struct partition_t *tfm_spm_get_running_partition(void)
 {
-    return GET_THRD_OWNER(CURRENT_THREAD);
+    return GET_CURRENT_COMPONENT();
 }
 
 int32_t tfm_spm_check_client_version(struct service_t *service,
@@ -435,11 +450,12 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     TFM_CORE_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
-    spm_memset(msg, 0, sizeof(struct tfm_msg_body_t));
+    spm_memset(&msg->msg, 0, sizeof(psa_msg_t));
 
     THRD_SYNC_INIT(&msg->ack_evnt);
     msg->magic = TFM_MSG_MAGIC;
     msg->service = service;
+    msg->p_client = GET_CURRENT_COMPONENT();
     msg->caller_outvec = caller_outvec;
     msg->msg.client_id = client_id;
 
@@ -532,7 +548,7 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
 bool tfm_spm_is_ns_caller(void)
 {
-#if defined(TFM_MULTI_CORE_TOPOLOGY) || defined(FORWARD_PROT_MSG)
+#if defined(TFM_MULTI_CORE_TOPOLOGY)
     /* Multi-core NS PSA API request is processed by pendSV. */
     return (__get_active_exc_num() == EXC_NUM_PENDSV);
 #else
@@ -643,7 +659,6 @@ uint32_t tfm_spm_init(void)
         }
 #endif /* TFM_FIH_PROFILE_ON */
 
-        /* TODO: Replace this 'BACKEND_IPC' after SFN get involved. */
         backend_instance.comp_init_assuredly(partition, service_setting);
     }
 
@@ -668,14 +683,17 @@ union returning_contexts_t {
 
 uint64_t do_schedule(void)
 {
-    union returning_contexts_t ret;
+    union returning_contexts_t ret_ctx;
     struct partition_t *p_part_curr, *p_part_next;
     struct thread_t *pth_next = thrd_next();
 
+    ret_ctx.ctx.curr = (uint32_t)CURRENT_THREAD->p_context_ctrl;
+    ret_ctx.ctx.next = (uint32_t)CURRENT_THREAD->p_context_ctrl;
     p_part_curr = GET_THRD_OWNER(CURRENT_THREAD);
     p_part_next = GET_THRD_OWNER(pth_next);
 
-    if (pth_next != NULL && p_part_curr != p_part_next) {
+    if (scheduler_lock != SCHEDULER_LOCKED && pth_next != NULL &&
+        p_part_curr != p_part_next) {
         /* Check if there is enough room on stack to save more context */
         if ((p_part_curr->ctx_ctrl.sp_limit +
              sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
@@ -693,6 +711,10 @@ uint64_t do_schedule(void)
                 tfm_core_panic();
             }
         }
+        ARCH_FLUSH_FP_CONTEXT();
+
+        ret_ctx.ctx.next = (uint32_t)pth_next->p_context_ctrl;
+        CURRENT_THREAD = pth_next;
     }
 
     /*
@@ -701,12 +723,7 @@ uint64_t do_schedule(void)
      */
     tfm_rpc_client_call_handler();
 
-    ret.ctx.curr = (uint32_t)CURRENT_THREAD->p_context_ctrl;
-    ret.ctx.next = (uint32_t)pth_next->p_context_ctrl;
-
-    CURRENT_THREAD = pth_next;
-
-    return ret.curr_next_ctxs;
+    return ret_ctx.curr_next_ctxs;
 }
 
 void update_caller_outvec_len(struct tfm_msg_body_t *msg)
@@ -717,8 +734,11 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg)
      * FixeMe: abstract these part into dedicated functions to avoid
      * accessing thread context in psa layer
      */
-    /* If it is a NS request via RPC, the owner of this message is not set */
-    if (!is_tfm_rpc_msg(msg)) {
+    /*
+     * If it is a NS request via RPC, the owner of this message is not set.
+     * Or if it is a SFN message, it does not have owner thread state either.
+     */
+    if ((!is_tfm_rpc_msg(msg)) && (msg->sfn_magic != TFM_MSG_MAGIC_SFN)) {
         TFM_CORE_ASSERT(msg->ack_evnt.owner->state == THRD_STATE_BLOCK);
     }
 
@@ -735,11 +755,14 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg)
 
 void spm_assert_signal(void *p_pt, psa_signal_t signal)
 {
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     struct partition_t *partition = (struct partition_t *)p_pt;
 
     if (!partition) {
         tfm_core_panic();
     }
+
+    CRITICAL_SECTION_ENTER(cs_assert);
 
     partition->signals_asserted |= signal;
 
@@ -748,6 +771,8 @@ void spm_assert_signal(void *p_pt, psa_signal_t signal)
                      partition->signals_asserted & partition->signals_waiting);
         partition->signals_waiting &= ~signal;
     }
+
+    CRITICAL_SECTION_LEAVE(cs_assert);
 }
 
 __attribute__((naked))
@@ -793,9 +818,7 @@ void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
     }
 
     if (flih_result == PSA_FLIH_SIGNAL) {
-        __disable_irq();
         spm_assert_signal(p_pt, p_ildi->signal);
-        __enable_irq();
     }
 }
 

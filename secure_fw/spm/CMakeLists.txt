@@ -53,7 +53,7 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_thread_call.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_load.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/psa_api.c>
-        $<$<BOOL:${TFM_PSA_API}>:ffm/backend_ipc.c>
+        $<$<BOOL:${TFM_PSA_API}>:ffm/backend.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_core_svcalls_ipc.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>>:cmsis_psa/tfm_nspm_ipc.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_pools.c>
@@ -81,13 +81,13 @@ if (TEST_PSA_API STREQUAL IPC)
     target_include_directories(tfm_partitions INTERFACE ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests)
     target_sources(tfm_psa_rot_partition_driver_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_driver_partition_psa.c)
-    target_compile_definitions(tfm_psa_rot_partition_driver_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1)
+    target_compile_definitions(tfm_psa_rot_partition_driver_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
     target_sources(tfm_app_rot_partition_client_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_client_partition_psa.c)
-    target_compile_definitions(tfm_app_rot_partition_client_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1)
+    target_compile_definitions(tfm_app_rot_partition_client_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
     target_sources(tfm_app_rot_partition_server_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_server_partition_psa.c)
-    target_compile_definitions(tfm_app_rot_partition_server_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1)
+    target_compile_definitions(tfm_app_rot_partition_server_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
     target_sources(tfm_partitions INTERFACE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_driver_partition_psa.c
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_client_partition_psa.c
@@ -117,6 +117,12 @@ target_compile_definitions(tfm_spm
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${MCUBOOT_MEASURED_BOOT}>>:BOOT_DATA_AVAILABLE>
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
+        CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
+)
+
+target_compile_options(tfm_spm
+    PUBLIC
+        ${COMPILER_CP_FLAG}
 )
 
 # The veneers give warnings about not being properly declared so they get hidden
@@ -181,7 +187,6 @@ if(NOT TFM_MULTI_CORE_TOPOLOGY)
     target_sources(tfm_s
         PRIVATE
             $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_func/tfm_veneers.c>
-            $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa/tfm_psa_api_veneers.c>
             $<$<BOOL:${TFM_NS_MANAGE_NSID}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_client_ext/tfm_ns_client_ext.c>
     )
 endif()

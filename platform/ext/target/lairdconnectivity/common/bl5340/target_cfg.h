@@ -45,6 +45,10 @@ struct memory_region_limits {
     uint32_t non_secure_partition_limit;
     uint32_t veneer_base;
     uint32_t veneer_limit;
+#ifdef NRF_NS_STORAGE
+    uint32_t non_secure_storage_partition_base;
+    uint32_t non_secure_storage_partition_limit;
+#endif /* NRF_NS_STORAGE */
 };
 
 /**

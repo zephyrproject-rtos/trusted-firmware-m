@@ -19,7 +19,7 @@
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
-void SPU_Handler(void)
+void SPU_IRQHandler(void)
 {
     /*
      * TODO
@@ -92,31 +92,6 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     } else {
         return TFM_IRQ_TARGET_STATE_SECURE;
     }
-}
-
-enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void)
-{
-    return enable_fault_handlers();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
-{
-    return system_reset_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
-{
-    return init_debug();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
-{
-    return nvic_interrupt_target_state_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
-{
-    return nvic_interrupt_enable();
 }
 
 bool tfm_spm_hal_has_access_to_region(const void *p, size_t s,

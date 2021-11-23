@@ -7,14 +7,14 @@
 
 #include <inttypes.h>
 #include "compiler_ext_defs.h"
+#include "exception_info.h"
 #include "spm_ipc.h"
+#include "svc_num.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
-#include "exception_info.h"
 #include "tfm_secure_api.h"
-#include "spm_ipc.h"
-#include "svc_num.h"
+#include "tfm_svcalls.h"
 #include "utilities.h"
 
 #if !defined(__ARM_ARCH_8M_BASE__)
@@ -22,7 +22,22 @@
 #endif
 
 /* Delcaraction flag to control the scheduling logic in PendSV. */
-static uint32_t pendsv_idling = EXC_RETURN_SECURE_STACK;
+uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
+
+/* IAR Specific */
+#if defined(__ICCARM__)
+
+#pragma required = do_schedule
+#pragma required = scheduler_lock
+#pragma required = tfm_core_svc_handler
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+#pragma required = spcall_execute_c
+
+#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+
+#endif
 
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
 
@@ -38,89 +53,79 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   mov    r4, r2                               \n"
         "   cmp    r2, #0                               \n"
         "   beq    v8b_lock_sched                       \n"
-        "   mrs    r5, psplim                           \n"/*To caller stack*/
+        "   mrs    r5, psplim                           \n"/* To caller stack */
         "   movs   r4, #0                               \n"
         "   msr    psplim, r4                           \n"
         "   mov    r4, sp                               \n"
         "   mov    sp, r2                               \n"
         "   msr    psplim, r3                           \n"
-        "v8b_lock_sched:                                \n"/*To lock sched  */
-        "   ldr    r2, =%a1                             \n"
-        "   movs   r3, #0x0                             \n"
+        "v8b_lock_sched:                                \n"/* To lock sched */
+        "   ldr    r2, =scheduler_lock                  \n"
+        "   movs   r3, #"M2S(SCHEDULER_LOCKED)"         \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
-        "   bl     %a0                                  \n"
+        "   bl     spcall_execute_c                     \n"
         "   cpsid  i                                    \n"
         "   cmp    r4, #0                               \n"
         "   beq    v8b_release_sched                    \n"
-        "   movs   r3, #0                               \n"/*To callee stack*/
+        "   movs   r3, #0                               \n"/* To callee stack */
         "   msr    psplim, r3                           \n"
         "   mov    sp, r4                               \n"
         "   msr    psplim, r5                           \n"
         "v8b_release_sched:                             \n"
-        "   ldr    r2, =%a1                             \n"/*To unlock sched*/
-        "   movs   r3, %2                               \n"
+        "   ldr    r2, =scheduler_lock                  \n"/* To unlock sched */
+        "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
         "   pop    {r4-r6, pc}                          \n"
-        : : "i" (spcall_execute_c),
-            "i" (&pendsv_idling),
-            "I" (EXC_RETURN_SECURE_STACK)
     );
 }
 
 #endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
 
-#if defined(__ICCARM__)
-#pragma required = do_schedule
-#endif
-
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
 #if !defined(__ICCARM__)
-        ".syntax unified                    \n"
+        ".syntax unified                                \n"
 #endif
-        "   ldr     r0, =%a1                \n"
-        "   ldr     r0, [r0]                \n"
-        "   mov     r1, lr                  \n"
-        "   tst     r0, r1                  \n" /* Was NS interrupted by S? */
-        "   beq     v8b_pendsv_exit         \n" /* Yes, do not schedule */
-        "   push    {r0, lr}                \n" /* Save dummy R0, LR */
-        "   bl      %a0                     \n"
-        "   pop     {r2, r3}                \n"
-        "   mov     lr, r3                  \n"
-        "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
-        "   beq     v8b_pendsv_exit         \n" /* No schedule if curr = next */
-        "   mrs     r2, psp                 \n"
-        "   mrs     r3, psplim              \n"
-        "   subs    r2, #32                 \n" /* Make room for r4-r7 */
-        "   stm     r2!, {r4-r7}            \n" /* Save callee registers */
-        "   mov     r4, r8                  \n"
-        "   mov     r5, r9                  \n"
-        "   mov     r6, r10                 \n"
-        "   mov     r7, r11                 \n"
-        "   stm     r2!, {r4-r7}            \n"
-        "   mov     r5, lr                  \n"
-        "   subs    r2, #32                 \n" /* reset r2(SP) to top */
-        "   stm     r0!, {r2, r3, r4, r5}   \n" /* Save struct context_ctrl_t */
-        "   ldm     r1!, {r2, r3, r4, r5}   \n" /* Load ctx of next thread */
-        "   mov     lr, r5                  \n"
-        "   adds    r2, #16                 \n" /* Start of popping r4-r11 */
-        "   ldm     r2!, {r4-r7}            \n"
-        "   mov     r8, r4                  \n"
-        "   mov     r9, r5                  \n"
-        "   mov     r10, r6                 \n"
-        "   mov     r11, r7                 \n"
-        "   subs    r2, #32                 \n"
-        "   ldm     r2!, {r4-r7}            \n"
-        "   adds    r2, #16                 \n" /* End of popping r4-r11 */
-        "   msr     psp, r2                 \n"
-        "   msr     psplim, r3              \n"
-        "v8b_pendsv_exit:                   \n"
-        "   bx      lr                      \n"
-        : : "i" (do_schedule),
-            "i" (&pendsv_idling)
+        "   movs    r0, #"M2S(EXC_RETURN_SECURE_STACK)" \n"
+        "   mov     r1, lr                              \n"
+        "   tst     r0, r1                              \n" /* NS interrupted */
+        "   beq     v8b_pendsv_exit                     \n" /* No schedule */
+        "   push    {r0, lr}                            \n" /* Save R0, LR */
+        "   bl      do_schedule                         \n"
+        "   pop     {r2, r3}                            \n"
+        "   mov     lr, r3                              \n"
+        "   cmp     r0, r1                              \n" /* curr, next ctx */
+        "   beq     v8b_pendsv_exit                     \n" /* No schedule */
+        "   mrs     r2, psp                             \n"
+        "   mrs     r3, psplim                          \n"
+        "   subs    r2, #32                             \n" /* For r4-r7 */
+        "   stm     r2!, {r4-r7}                        \n" /* Save callee */
+        "   mov     r4, r8                              \n"
+        "   mov     r5, r9                              \n"
+        "   mov     r6, r10                             \n"
+        "   mov     r7, r11                             \n"
+        "   stm     r2!, {r4-r7}                        \n"
+        "   mov     r5, lr                              \n"
+        "   subs    r2, #32                             \n" /* set SP to top */
+        "   stm     r0!, {r2, r3, r4, r5}               \n" /* Save curr ctx */
+        "   ldm     r1!, {r2, r3, r4, r5}               \n" /* Load next ctx */
+        "   mov     lr, r5                              \n"
+        "   adds    r2, #16                             \n" /* Pop r4-r11 */
+        "   ldm     r2!, {r4-r7}                        \n"
+        "   mov     r8, r4                              \n"
+        "   mov     r9, r5                              \n"
+        "   mov     r10, r6                             \n"
+        "   mov     r11, r7                             \n"
+        "   subs    r2, #32                             \n"
+        "   ldm     r2!, {r4-r7}                        \n"
+        "   adds    r2, #16                             \n" /* Pop r4-r11 end */
+        "   msr     psp, r2                             \n"
+        "   msr     psplim, r3                          \n"
+        "v8b_pendsv_exit:                               \n"
+        "   bx      lr                                  \n"
     );
 }
 
@@ -146,12 +151,6 @@ __attribute__((naked)) void HardFault_Handler(void)
 
     __ASM volatile("b    .");
 }
-
-#if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
-                              uint32_t *psp);
-#pragma required = tfm_core_svc_handler
-#endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {

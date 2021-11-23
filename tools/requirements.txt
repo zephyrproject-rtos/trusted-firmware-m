@@ -1,4 +1,4 @@
-cbor>=1.0.0
+cbor2
 click
 cryptography
 pyasn1

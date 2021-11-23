@@ -9,6 +9,11 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
+# Generate framework feature
+set(PSA_FRAMEWORK_ISOLATION_LEVEL   ${TFM_ISOLATION_LEVEL})
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/psa/framework_feature.h.in
+               ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
+               @ONLY)
 
 if (TFM_MULTI_CORE_TOPOLOGY)
     include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
@@ -54,7 +59,6 @@ target_compile_definitions(psa_interface
 target_sources(tfm_secure_api
     INTERFACE
     $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c>
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
 )
 
 ###################### Export configurations to NS #############################

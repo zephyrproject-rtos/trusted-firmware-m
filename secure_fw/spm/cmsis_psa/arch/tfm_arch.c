@@ -5,23 +5,22 @@
  *
  */
 
+#include "compiler_ext_defs.h"
+#include "security_defs.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
 #include "utilities.h"
 
-__attribute__((naked)) void tfm_arch_free_msp_and_exc_ret(uint32_t exc_return)
+__naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
+                                           uint32_t exc_return)
 {
     __ASM volatile(
 #if !defined(__ICCARM__)
-        ".syntax unified                  \n"
+        ".syntax unified                        \n"
 #endif
-        "MOV     lr, r0                   \n"
-        "LDR     r0, ="M2S(VTOR_BASE)"    \n" /* VTOR */
-        "LDR     r0, [r0]                 \n" /* MSP address */
-        "LDR     r0, [r0]                 \n" /* MSP */
-        "SUBS    r0, #8                   \n" /* Exclude stack seal */
-        "MSR     msp, r0                  \n" /* Free Main Stack space */
-        "BX      lr                       \n"
+        "subs    r0, #8                         \n" /* SEAL room */
+        "msr     msp, r0                        \n"
+        "bx      r1                             \n"
     );
 }
 
@@ -36,13 +35,14 @@ __attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
 {
     __ASM volatile(
 #ifndef __ICCARM__
-        ".syntax unified                                 \n"
+        ".syntax unified                               \n"
 #endif
-        "ldr     r0, =%a0                                \n"
-        "ldr     r1, ="M2S(SCB_ICSR_PENDSVSET_Msk)"      \n"
-        "str     r1, [r0, #0]                            \n"
-        "bx      lr                                      \n"
-        :: "i" (&(SCB->ICSR))
+        "ldr     r0, ="M2S(SCB_ICSR_ADDR)"             \n"
+        "ldr     r1, ="M2S(SCB_ICSR_PENDSVSET_BIT)"    \n"
+        "str     r1, [r0, #0]                          \n"
+        "dsb     #0xf                                  \n"
+        "isb                                           \n"
+        "bx      lr                                    \n"
     );
 }
 

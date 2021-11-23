@@ -25,7 +25,7 @@ if ("${MCUBOOT_PATH}" STREQUAL "DOWNLOAD")
         GIT_TAG ${MCUBOOT_VERSION}
         GIT_SHALLOW FALSE
         GIT_PROGRESS TRUE
-        GIT_SUBMODULES ${MCUBOOT_SUBMODULES}
+        GIT_SUBMODULES "${MCUBOOT_SUBMODULES}"
     )
     # ToDo: set GIT_SHALLOW to 'TRUE' when MCUBOOT_VERSION will be set to a tag
     # (instead of a commit hash) with the new release.

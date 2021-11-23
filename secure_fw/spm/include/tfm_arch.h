@@ -24,6 +24,9 @@
 #error "Unsupported ARM Architecture."
 #endif
 
+#define SCHEDULER_LOCKED    1
+#define SCHEDULER_UNLOCKED  0
+
 #define XPSR_T32            0x01000000
 
 /* State context defined by architecture */
@@ -84,6 +87,19 @@ __attribute__ ((always_inline)) __STATIC_INLINE uint32_t __get_LR(void)
 }
 #endif
 
+__STATIC_INLINE uint32_t __save_disable_irq(void)
+{
+    uint32_t result;
+
+    __ASM volatile ("mrs %0, primask \n cpsid i" : "=r" (result) :: "memory");
+    return result;
+}
+
+__STATIC_INLINE void __restore_irq(uint32_t status)
+{
+    __ASM volatile ("msr primask, %0" :: "r" (status) : "memory");
+}
+
 __attribute__ ((always_inline))
 __STATIC_INLINE uint32_t __get_active_exc_num(void)
 {
@@ -105,6 +121,12 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
     __ISB();
 }
 
+#if (CONFIG_TFM_SPE_FP >= 1) && CONFIG_TFM_LAZY_STACKING_SPE
+#define ARCH_FLUSH_FP_CONTEXT()  __asm volatile("vmov  s0, s0 \n":::"memory")
+#else
+#define ARCH_FLUSH_FP_CONTEXT()
+#endif
+
 /* Set secure exceptions priority. */
 void tfm_arch_set_secure_exception_priorities(void);
 
@@ -114,12 +136,19 @@ void tfm_arch_config_extensions(void);
 /* Clear float point status. */
 void tfm_arch_clear_fp_status(void);
 
+#if (CONFIG_TFM_SPE_FP >= 1)
+/*
+ * Clear float point data.
+ */
+void tfm_arch_clear_fp_data(void);
+#endif
+
 /*
  * This function is called after SPM has initialized.
  * It frees the stack used by SPM initialization and do Exception Return.
  * It does not return.
  */
-void tfm_arch_free_msp_and_exc_ret(uint32_t exc_return);
+void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base, uint32_t exc_return);
 
 /*
  * This function sets return value on APIs that cause scheduling, for example

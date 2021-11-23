@@ -52,9 +52,6 @@ psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
     }
 
     status = psa_import_key(&key_attributes, data, data_length, &encoded_key);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
 
     /* Update the imported key id */
     *psa_key = encoded_key.MBEDTLS_PRIVATE(key_id);

@@ -21,7 +21,7 @@
 #include "psa_manifest/{{manifest_out_basename}}.h"
 
 {% set counter = namespace() %}
-{% set counter.dep_counter = manifest.dependencies|count %}
+{% set counter.dep_counter = manifest.dependencies|count + manifest.weak_dependencies|count %}
 #define {{"%-55s"|format(manifest.name|upper + "_NDEPS")}} ({{"%d"|format(counter.dep_counter)}})
 {% set counter.service_counter = manifest.services|count %}
 #define {{"%-55s"|format(manifest.name|upper + "_NSERVS")}} ({{"%d"|format(counter.service_counter)}})
@@ -124,7 +124,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
 {% elif manifest.entry_init %}
         .entry                      = ENTRY_TO_POSITION({{manifest.entry_init}}),
 {% else %}
-        .entry                      = NULL,
+        .entry                      = 0,
 {% endif %}
         .stack_size                 = {{manifest.stack_size}},
         .heap_size                  = 0,
@@ -139,6 +139,11 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
     .deps = {
     {% for dep in manifest.dependencies %}
         {{dep}}_SID,
+    {% endfor %}
+    {% for dep in manifest.weak_dependencies %}
+#ifdef {{dep}}_SID
+        {{dep}}_SID,
+#endif
     {% endfor %}
     },
 {% endif %}
@@ -159,6 +164,9 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         {% endif %}
         {% if manifest.psa_framework_version > 1.0 and service.connection_based is sameas false %}
                                     | SERVICE_FLAG_STATELESS | 0x{{"%x"|format(service.stateless_handle_index)}}
+        {% endif %}
+        {% if manifest.psa_framework_version > 1.0 and service.mm_iovec == "enable" %}
+                                    | SERVICE_FLAG_MM_IOVEC
         {% endif %}
         {% if service.version_policy %}
                                     | SERVICE_VERSION_POLICY_{{service.version_policy}},

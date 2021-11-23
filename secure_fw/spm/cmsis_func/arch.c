@@ -9,9 +9,9 @@
 #include "compiler_ext_defs.h"
 #include "exception_info.h"
 #include "tfm_secure_api.h"
+#include "tfm_svcalls.h"
 
 #if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return);
 #pragma required = tfm_core_svc_handler
 #endif
 

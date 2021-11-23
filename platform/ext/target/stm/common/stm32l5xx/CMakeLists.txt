@@ -71,6 +71,7 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_platform.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/low_level_device.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c

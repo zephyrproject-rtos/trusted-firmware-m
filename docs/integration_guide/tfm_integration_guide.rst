@@ -28,7 +28,6 @@ The hardware platforms currently supported are:
 
 - Soft Macro Model (SMM) Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
 - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
-- Corstone-300 Ecosystem FVP (Cortex-M55 SSE-300 MPS2+)
 - Corstone-300 Ethos-U55 FVP (Cortex-M55 plus Ethos-U55 SSE-300 MPS3)
 - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
@@ -38,6 +37,7 @@ The hardware platforms currently supported are:
 - nRF9160 DK (Cortex-M33)
 - nRF5340 DK (Cortex-M33 Application MCU)
 - BL5340 DVK (Cortex-M33 Application MCU)
+- Corstone-Polaris Ethos-U55 FVP (Olympus CPU plus Ethos-U55)
 
 The files related to the supported platforms are contained under the
 ``platform`` subfolder. The platform specific files are under

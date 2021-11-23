@@ -79,6 +79,8 @@ target_include_directories(crypto_service_crypto_hw
         ${PLATFORM_DIR}/ext/target/stm/common/stm32u5xx/Device/Include/
         ${PLATFORM_DIR}/ext/cmsis
         ${PLATFORM_DIR}/include
+        ${CMAKE_BINARY_DIR}/generated
+        ${CMAKE_SOURCE_DIR}/interface/include
 )
 target_include_directories(crypto_service_mbedcrypto
     PUBLIC
@@ -93,6 +95,7 @@ target_include_directories(crypto_service_mbedcrypto
 target_compile_definitions(crypto_service_crypto_hw
     PRIVATE
         ST_HW_CONTEXT_SAVING
+        BUILD_CRYPTO_TFM
 )
 
 target_link_libraries(crypto_service_crypto_hw
@@ -104,4 +107,8 @@ target_link_libraries(crypto_service_crypto_hw
 target_link_libraries(platform_s
     PRIVATE
         crypto_service_crypto_hw
+)
+target_link_libraries(crypto_service_crypto_hw
+     INTERFACE
+     tfm_partition_defs
 )

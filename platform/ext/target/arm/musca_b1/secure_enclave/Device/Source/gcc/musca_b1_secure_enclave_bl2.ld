@@ -47,7 +47,7 @@ SECTIONS
         __Vectors_Size = __Vectors_End - __Vectors;
         __end__ = .;
 
-        *startup_musca_b1_secure_enclave_bl2.*
+        *startup_musca_b1_secure_enclave_bl2.*(.text*)
     } > FLASH
 
     /* eFlash driver code that gets copied from Flash to SRAM */

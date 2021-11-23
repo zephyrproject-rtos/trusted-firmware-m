@@ -119,7 +119,9 @@ target_sources(platform_s
         ./Native_Driver/generated_source/cycfg_qspi_memslot.c
         ./spm_hal.c
         ./tfm_interrupts.c
+        ./tfm_hal_multi_core.c
         ./tfm_hal_isolation.c
+        ./tfm_hal_platform.c
         ./CMSIS_Driver/Driver_Flash.c
         ./CMSIS_Driver/Driver_USART.c
         ./target_cfg.c
@@ -214,15 +216,17 @@ target_compile_definitions(platform_ns
 
 # device_cfg.h defines the number of mailbox queue slots to support multiple
 # PSA client calls feature.
-target_include_directories(tfm_ns_interface
-    INTERFACE
-        Device/Config
-)
+if (NS)
+    target_include_directories(tfm_ns_interface
+        INTERFACE
+            Device/Config
+    )
 
-target_link_libraries(platform_ns
-    PRIVATE
-        tfm_ns_interface
-)
+    target_link_libraries(platform_ns
+        PRIVATE
+            tfm_ns_interface
+    )
+endif()
 
 ########################### export sources #####################################
 

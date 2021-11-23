@@ -9,7 +9,8 @@ set(TFM_TOOLCHAIN_FILE                  ${CMAKE_SOURCE_DIR}/toolchain_GNUARM.cma
 set(TFM_PLATFORM                        ""          CACHE STRING    "Platform to build TF-M for. Must be either a relative path from [TF-M]/platform/ext/target, or an absolute path.")
 set(CROSS_COMPILE                       arm-none-eabi CACHE STRING  "Cross-compilation triplet")
 
-set(BL2                                 ON          CACHE BOOL      "Whether to build BL2")
+set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "Header size")
+set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "Trailer size")
 set(NS                                  ON          CACHE BOOL      "Whether to build NS app")
 
 set(TEST_S                              OFF         CACHE BOOL      "Whether to build S regression tests")
@@ -20,6 +21,7 @@ set(TEST_PSA_API                        ""          CACHE STRING    "Which (if a
 # TFM_PSA_API becomes an internal variable. Please do NOT use it in build command line.
 set(TFM_LIB_MODEL                       OFF         CACHE BOOL      "Use secure library model instead of PSA API (IPC model)")
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
+set(PSA_FRAMEWORK_HAS_MM_IOVEC          OFF         CACHE BOOL      "Enable MM-IOVEC")
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
 set(TFM_FIH_PROFILE                     OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 
@@ -42,13 +44,17 @@ set(TFM_CODE_SHARING_PATH               ""          CACHE PATH      "Path to rep
 
 set(TFM_INSTALL_PATH                    ${CMAKE_BINARY_DIR}/install CACHE PATH "Path to which to install TF-M files")
 
-set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to build the binary for lcov tools by adding -g")
+set(TFM_DEBUG_SYMBOLS                   ON          CACHE BOOL      "Add debug symbols. Note that setting CMAKE_BUILD_TYPE to Debug or RelWithDebInfo will also add debug symbols.")
+set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to build the binary for lcov tools")
 
 set(TFM_SP_META_PTR_ENABLE              OFF         CACHE BOOL      "Use Partition Metadata Pointer")
 
 set(TFM_PXN_ENABLE                      OFF         CACHE BOOL      "Use Privileged execute never (PXN)")
 
 set(TFM_EXCEPTION_INFO_DUMP             OFF         CACHE BOOL      "On fatal errors in the secure firmware, capture info about the exception. Print the info if the SPM log level is sufficient.")
+
+set(CONFIG_TFM_SPE_FP                   0           CACHE STRING    "FP ABI type in SPE: 0-software, 1-hybird, 2-hardware")
+set(CONFIG_TFM_LAZY_STACKING_SPE        OFF         CACHE BOOL      "Disable lazy stacking from SPE")
 
 ############################ Platform ##########################################
 
@@ -71,6 +77,7 @@ set(PLATFORM_DEFAULT_IAK                ON          CACHE BOOL      "Use default
 set(PLATFORM_DEFAULT_UART_STDOUT        ON          CACHE BOOL      "Use default uart stdout implementation.")
 set(PLATFORM_DEFAULT_NV_SEED            ON          CACHE BOOL      "Use default NV seed implementation.")
 set(PLATFORM_DEFAULT_OTP                ON          CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
+set(PLATFORM_DEFAULT_OTP_WRITEABLE      ON          CACHE BOOL      "Use OTP memory with write support")
 set(PLATFORM_DEFAULT_PROVISIONING       ON          CACHE BOOL      "Use default provisioning implementation")
 
 set(TFM_DUMMY_PROVISIONING              ON          CACHE BOOL      "Provision with dummy values. NOT to be used in production")
@@ -121,6 +128,8 @@ set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Plat
 
 set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audit Log partition")
 
+set(TFM_PARTITION_PSA_PROXY             OFF         CACHE BOOL      "Enable PSA Proxy partition")
+
 set(FORWARD_PROT_MSG                    OFF         CACHE BOOL      "Whether to forward all PSA RoT messages to a Secure Enclave")
 set(TFM_PARTITION_FIRMWARE_UPDATE       OFF         CACHE BOOL      "Enable firmware update partition")
 set(TFM_FWU_BOOTLOADER_LIB              "mcuboot"   CACHE STRING    "Bootloader configure file for Firmware Update partition")
@@ -131,14 +140,20 @@ set(MBEDCRYPTO_PATH                     "DOWNLOAD"  CACHE PATH      "Path to Mbe
 set(MBEDCRYPTO_VERSION                  "feature-cc-psa-crypto-drivers" CACHE STRING "The version of Mbed Crypto to use")
 set(MBEDCRYPTO_GIT_REMOTE               "https://github.com/noonfom/mbedtls" CACHE STRING "The URL (or path) to retrieve MbedTLS from.")
 set(MBEDCRYPTO_BUILD_TYPE               "${CMAKE_BUILD_TYPE}" CACHE STRING "Build type of Mbed Crypto library")
-set(TFM_MBEDCRYPTO_CONFIG_PATH          "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h" CACHE PATH "Config to use for Mbed Crypto")
+set(TFM_MBEDCRYPTO_CONFIG_PATH
+  "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h" CACHE PATH
+  "Config to use for Mbed Crypto. For increased flexibility when pointing to a file, set the type \
+of this setting to 'STRING' by passing the :<type> portion when specifying the setting value in \
+the command line. E.g. '-DTFM_MBEDCRYPTO_CONFIG_PATH:STRING=some_file_which_is_generated.h' \
+This can be useful if the config file is generated and placed inside a directory already added \
+to the include path of mbedtls.")
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH "" CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
 set(MCUBOOT_PATH                        "DOWNLOAD"        CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "TF-Mv1.4-integ"  CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_VERSION                     "v1.8.0"  CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
-set(PSA_ARCH_TESTS_VERSION              "51ff2bd"   CACHE STRING    "The version of PSA arch tests to use")
+set(PSA_ARCH_TESTS_VERSION              "v21.10_API1.3_ADAC_ALPHA-1"   CACHE STRING    "The version of PSA arch tests to use")
 
 ################################################################################
 ################################################################################
@@ -149,3 +164,7 @@ set(PSA_ARCH_TESTS_VERSION              "51ff2bd"   CACHE STRING    "The version
 ########################## FIH #################################################
 
 set_property(CACHE TFM_FIH_PROFILE PROPERTY STRINGS "OFF;LOW;MEDIUM;HIGH")
+
+########################## FP #################################################
+
+set_property(CACHE CONFIG_TFM_SPE_FP PROPERTY STRINGS "0;1;2")

@@ -15,6 +15,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define OTP_NV_COUNTERS_INITIALIZED 0xC0DE8112U
+#define OTP_NV_COUNTERS_IS_VALID    0x3072C0DEU
 
 __PACKED_STRUCT flash_otp_nv_counters_region_t {
     /* Must be the first item */

@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include "critical_section.h"
 #include "compiler_ext_defs.h"
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
@@ -41,13 +42,14 @@ struct context_ctrl_t *p_spm_thread_context;
 
 /*
  * Send message and wake up the SP who is waiting on message queue, block the
- * current thread and triggere scheduler.
+ * current thread and trigger scheduler.
  */
 static psa_status_t ipc_messaging(struct service_t *service,
                                   struct tfm_msg_body_t *msg)
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     if (!msg || !service || !service->p_ldinf || !service->partition) {
         tfm_core_panic();
@@ -56,6 +58,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
     p_owner = service->partition;
     signal = service->p_ldinf->signal;
 
+    CRITICAL_SECTION_ENTER(cs_assert);
     /* Add message to partition message list tail */
     BI_LIST_INSERT_BEFORE(&p_owner->msg_list, &msg->msg_node);
 
@@ -67,6 +70,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
                      (p_owner->signals_asserted & p_owner->signals_waiting));
         p_owner->signals_waiting &= ~signal;
     }
+    CRITICAL_SECTION_LEAVE(cs_assert);
 
     /*
      * If it is a NS request via RPC, it is unnecessary to block current
@@ -77,6 +81,22 @@ static psa_status_t ipc_messaging(struct service_t *service,
         thrd_wait_on(&msg->ack_evnt, CURRENT_THREAD);
     }
 
+    return PSA_SUCCESS;
+}
+
+static int32_t ipc_replying(struct tfm_msg_body_t *p_msg, int32_t status)
+{
+    if (is_tfm_rpc_msg(p_msg)) {
+        tfm_rpc_client_call_reply(p_msg, status);
+    } else {
+        thrd_wake_up(&p_msg->ack_evnt, status);
+    }
+
+    /*
+     * 'psa_reply' exists in IPC model only and returns 'void'. Return
+     * 'PSA_SUCCESS' here always since SPM does not forward the status
+     * to the caller.
+     */
     return PSA_SUCCESS;
 }
 
@@ -132,4 +152,5 @@ const struct backend_ops_t backend_instance = {
     .comp_init_assuredly = ipc_comp_init_assuredly,
     .system_run          = ipc_system_run,
     .messaging           = ipc_messaging,
+    .replying            = ipc_replying,
 };

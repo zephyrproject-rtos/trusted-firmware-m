@@ -324,9 +324,3 @@ void ppc_init_cfg(void)
   pinmux_init_cfg();
   /*  all peripheral  are non secured after reset */
 }
-
-
-void tfm_spm_hal_init_debug(void)
-{
-  /*  debug is available  only with RDP 0 for secure*/
-}

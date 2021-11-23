@@ -69,12 +69,19 @@ set_target_properties(tfm_s
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
+target_compile_options(tfm_s
+    PUBLIC
+        ${COMPILER_CP_FLAG}
+)
+
 target_link_options(tfm_s
     PRIVATE
         --entry=Reset_Handler
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/tfm_s.map>
         $<$<C_COMPILER_ID:ARMClang>:--map>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/tfm_s.map>
+    PUBLIC
+        ${LINKER_CP_OPTION}
 )
 
 add_convert_to_bin_target(tfm_s)
@@ -94,6 +101,7 @@ target_link_libraries(tfm_secure_api
 set_source_files_properties(
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_thread.c
+    ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c
     PROPERTIES
     COMPILE_FLAGS $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
     COMPILE_FLAGS $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
@@ -105,6 +113,7 @@ target_sources(tfm_secure_api
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c>
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_thread.c>
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c>
 )
 
 target_compile_definitions(tfm_secure_api
