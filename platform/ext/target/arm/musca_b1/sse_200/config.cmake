@@ -23,6 +23,11 @@ else()
     set(TFM_PARTITION_INITIAL_ATTESTATION   OFF         CACHE BOOL      "Enable Initial Attestation partition")
     set(TFM_PARTITION_PLATFORM              OFF         CACHE BOOL      "Enable Platform partition")
     set(TFM_PARTITION_PSA_PROXY             ON          CACHE BOOL      "Enable PSA Proxy partition")
+
+    set(PLATFORM_DEFAULT_OTP                OFF         CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
+    set(PLATFORM_DEFAULT_PROVISIONING       OFF         CACHE BOOL      "Use default provisioning implementation")
+    set(PLATFORM_DEFAULT_NV_COUNTERS        OFF         CACHE BOOL      "Use default nv counter implementation.")
+
     # In case of forwarding, there is no CRYPTO partition compiled,
     # thus no need for crypto hw accelerator.
     set(CRYPTO_HW_ACCELERATOR               OFF         CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
