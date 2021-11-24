@@ -50,10 +50,10 @@ extern "C" {
 struct its_flash_fs_config_t {
     const void *flash_dev;    /**< Pointer to the flash device */
     uint32_t flash_area_addr; /**< Base address of the flash region */
-    uint16_t sector_size;     /**< Size of the flash device's physical erase
+    uint32_t sector_size;     /**< Size of the flash device's physical erase
                                *   unit
                                */
-    uint16_t block_size;      /**< Size of a logical filesystem erase unit, a
+    uint32_t block_size;      /**< Size of a logical filesystem erase unit, a
                                *   multiple of sector_size.
                                */
     uint16_t num_blocks;      /**< Number of logical erase blocks */
