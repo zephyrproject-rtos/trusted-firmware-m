@@ -786,7 +786,6 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    size_t idx = 0;
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
         {.base = plaintext, .len = plaintext_length},
@@ -801,7 +800,7 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key,
     }
 
     if (nonce != NULL) {
-        for (idx = 0; idx < nonce_length; idx++) {
+        for (size_t idx = 0; idx < nonce_length; idx++) {
             iov.aead_in.nonce[idx] = nonce[idx];
         }
     }
@@ -843,7 +842,6 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    size_t idx = 0;
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
         {.base = ciphertext, .len = ciphertext_length},
@@ -858,7 +856,7 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key,
     }
 
     if (nonce != NULL) {
-        for (idx = 0; idx < nonce_length; idx++) {
+        for (size_t idx = 0; idx < nonce_length; idx++) {
             iov.aead_in.nonce[idx] = nonce[idx];
         }
     }
