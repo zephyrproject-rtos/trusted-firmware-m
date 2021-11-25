@@ -50,9 +50,7 @@ else()
 endif()
 
 # Load MCUboot specific default.cmake
-# Set BL2 to ON by default, OFF if the platform specifically defines this property
-set(BL2 ON CACHE BOOL "Whether to build BL2")
-if (BL2)
+if (NOT DEFINED BL2 OR BL2)
     include(${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/mcuboot_default_config.cmake)
 endif()
 

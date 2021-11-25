@@ -9,8 +9,7 @@ set(TFM_TOOLCHAIN_FILE                  ${CMAKE_SOURCE_DIR}/toolchain_GNUARM.cma
 set(TFM_PLATFORM                        ""          CACHE STRING    "Platform to build TF-M for. Must be either a relative path from [TF-M]/platform/ext/target, or an absolute path.")
 set(CROSS_COMPILE                       arm-none-eabi CACHE STRING  "Cross-compilation triplet")
 
-set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "Header size")
-set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "Trailer size")
+set(BL2                                 ON          CACHE BOOL      "Whether to build BL2")
 set(NS                                  ON          CACHE BOOL      "Whether to build NS app")
 
 set(TEST_S                              OFF         CACHE BOOL      "Whether to build S regression tests")
@@ -86,6 +85,9 @@ set(PLATFORM_IS_FVP                     FALSE       CACHE BOOL      "Whether to 
 set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE       CACHE BOOL      "Whether to use psa-adac secure debug.")
 set(PLATFORM_PSA_ADAC_SOURCE_PATH       "DOWNLOAD"  CACHE PATH      "Path to source dir of psa-adac.")
 set(PLATFORM_PSA_ADAC_VERSION           "427923cc0152578d536fb2065154d5d0dd874910" CACHE STRING "The version of psa-adac to use.")
+
+set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "BL2 Header size")
+set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer size")
 
 ############################ Partitions ########################################
 
