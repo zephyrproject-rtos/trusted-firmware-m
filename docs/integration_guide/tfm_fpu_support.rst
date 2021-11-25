@@ -12,13 +12,14 @@ Point Unit (FPU) [2]_ when FP support is enabled in SPE at current stage.
   hardware.
 * Support lazy stacking on/off.
 * Support Inter-Process Communication (IPC) [5]_ model in TF-M, and doesn't
-  support LIBRARY model.
+  support LIBRARY or SFN model.
 * Support Armv8-M [6]_ mainline or later.
 * Support isolation level 1,2,3.
+* Does not support use FPU in First-Level Interrupt Handling (FLIH) [7]_ at
+  current stage.
 
-FP support is enabled on Arm musca S1 [7]_ platform as a reference
-implementation. Please refer to musca s1 platform code when FP support is
-enabled on other platforms.
+Please refer to Arm musca S1 [8]_ platform as a reference implementation when
+you enable FP support on your platforms.
 
 Secure libraries are compiled with ``COMPILER_CP_FLAG`` and linked with
 ``LINKER_CP_OPTION`` for different FP ABI types. All those libraries shall be
@@ -95,7 +96,9 @@ Reference
 
 .. [6] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
 
-.. [7] `Musca-S1 Test Chip Board <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
+.. [7] :doc:`Secure Interrupt Integration Guide </docs/integration_guide/tfm_secure_irq_integration_guide>`
+
+.. [8] `Musca-S1 Test Chip Board <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
 
 
 --------------
