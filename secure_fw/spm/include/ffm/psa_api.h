@@ -313,7 +313,7 @@ void tfm_spm_partition_psa_panic(void);
  * \arg                       \a irq_signal is not an interrupt signal.
  * \arg                       \a irq_signal indicates more than one signal.
  */
-void tfm_spm_partition_irq_enable(psa_signal_t irq_signal);
+void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal);
 
 /**
  * \brief Function body of psa_irq_disable.
@@ -331,7 +331,7 @@ void tfm_spm_partition_irq_enable(psa_signal_t irq_signal);
  *
  * \note The current implementation always return 1. Do not use the return.
  */
-psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal);
+psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal);
 
 /**
  * \brief Function body of \ref psa_reset_signal.

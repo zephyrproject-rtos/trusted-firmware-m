@@ -88,10 +88,10 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
 #endif
     case TFM_SVC_PSA_IRQ_ENABLE:
-        tfm_spm_partition_irq_enable((psa_signal_t)ctx[0]);
+        tfm_spm_partition_psa_irq_enable((psa_signal_t)ctx[0]);
         break;
     case TFM_SVC_PSA_IRQ_DISABLE:
-        return tfm_spm_partition_irq_disable((psa_signal_t)ctx[0]);
+        return tfm_spm_partition_psa_irq_disable((psa_signal_t)ctx[0]);
     case TFM_SVC_PSA_RESET_SIGNAL:
         tfm_spm_partition_psa_reset_signal((psa_signal_t)ctx[0]);
         break;

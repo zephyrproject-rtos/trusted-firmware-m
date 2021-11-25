@@ -971,7 +971,7 @@ void tfm_spm_partition_psa_panic(void)
     tfm_hal_system_reset();
 }
 
-void tfm_spm_partition_irq_enable(psa_signal_t irq_signal)
+void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
 {
     struct partition_t *partition;
     struct irq_load_info_t *irq_info;
@@ -989,7 +989,7 @@ void tfm_spm_partition_irq_enable(psa_signal_t irq_signal)
     tfm_hal_irq_enable(irq_info->source);
 }
 
-psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal)
+psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal)
 {
     struct partition_t *partition;
     struct irq_load_info_t *irq_info;

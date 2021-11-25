@@ -295,7 +295,7 @@ psa_irq_status_t psa_irq_disable_thread(psa_signal_t irq_signal)
         ".syntax unified                                    \n"
 #endif
         "push   {r0-r4, lr}                                 \n"
-        "ldr    r0, =tfm_spm_partition_irq_disable          \n"
+        "ldr    r0, =tfm_spm_partition_psa_irq_disable      \n"
         "mov    r1, sp                                      \n"
         "b      psa_interface_unified_abi                   \n"
     );
@@ -310,7 +310,7 @@ void psa_irq_enable_thread(psa_signal_t irq_signal)
         ".syntax unified                                    \n"
 #endif
         "push   {r0-r4, lr}                                 \n"
-        "ldr    r0, =tfm_spm_partition_irq_enable           \n"
+        "ldr    r0, =tfm_spm_partition_psa_irq_enable       \n"
         "mov    r1, sp                                      \n"
         "b      psa_interface_unified_abi                   \n"
     );
