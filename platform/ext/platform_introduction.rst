@@ -30,6 +30,8 @@ Platforms introduction
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`_
         - `LPC55S69.
           <https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus/lpc5500-cortex-m33/lpcxpresso55s69-development-board:LPC55S69-EVK>`_
+        - 'B-U585I-IOT02A.
+          <https://www.st.com/en/evaluation-tools/B-U585I-IOT02A.html>`_
         - `NUCLEO L552ZE Q.
           <https://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-nucleo-boards/nucleo-l552ze-q.html>`_
         - `DISCO L562QE.
