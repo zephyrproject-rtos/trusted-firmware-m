@@ -4,4 +4,4 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
-set(TFM_VERSION 1.4.0)
+set(TFM_VERSION 1.5.0)
