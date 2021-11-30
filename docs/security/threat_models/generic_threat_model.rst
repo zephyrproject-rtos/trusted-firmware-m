@@ -888,10 +888,10 @@ via mailbox.
   |               | purpose registers not banked before switching into NSPE to |
   |               | prevent NSPE probing secure context from the registers.    |
   |               |                                                            |
-  |               | Current TF-M implementation doesn't support FPU in SPE.    |
-  |               | TF-M build will stop if FPU is enabled on platform.        |
-  |               | Therefore, FPU registers doesn't contain data that needs   |
-  |               | to be protected from NSPE.                                 |
+  |               | In current TF-M implementation, when FPU is enabled in SPE,|
+  |               | TF-M configures Non-secure Access Control Register (NSACR) |
+  |               | to disable NSPE to access FPU. Therefore, FP register      |
+  |               | context belonging to SPE is protected from NSPE.           |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 4.3 (Medium)                                               |
   +---------------+------------------------------------------------------------+
@@ -923,10 +923,10 @@ This section identifies threats on ``DF5`` defined in `Data Flow Diagram`_.
   |               | automatically cleans up the registers not banked before    |
   |               | switching to Non-secure state while taking NS interrupts.  |
   |               |                                                            |
-  |               | Current TF-M implementation doesn't support FPU in SPE.    |
-  |               | TF-M build will stop if FPU is enabled on platform.        |
-  |               | Therefore, FPU registers doesn't contain data that needs   |
-  |               | to be protected from NSPE.                                 |
+  |               | In current TF-M implementation, when FPU is enabled in SPE,|
+  |               | TF-M configures NSACR to disable NSPE to access FPU.       |
+  |               | Therefore, FP register context belonging to SPE is         |
+  |               | protected from NSPE.                                       |
   |               |                                                            |
   |               | On dual-cpu platforms, shared registers are implementation |
   |               | defined, such as Inter-Processor Communication registers.  |
@@ -1003,10 +1003,10 @@ This section identifies threats on ``DF6`` defined in `Data Flow Diagram`_.
   |               | not banked, such as R0~R3 and R12, during secure interrupt |
   |               | return, before NSPE software can access those registers.   |
   |               |                                                            |
-  |               | Current TF-M implementation doesn't support FPU in SPE.    |
-  |               | TF-M build will stop if FPU is enabled on platform.        |
-  |               | Therefore, FPU registers doesn't contain data that needs   |
-  |               | to be protected from NSPE.                                 |
+  |               | In current TF-M implementation, when FPU is enabled in SPE,|
+  |               | TF-M configures NSACR to disable NSPE to access FPU.       |
+  |               | Therefore, FP register context belonging to SPE is         |
+  |               | protected from NSPE.                                       |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 4.3 (Medium)                                               |
   +---------------+------------------------------------------------------------+
@@ -1085,6 +1085,33 @@ above.
   | String        |                                                            |
   +---------------+------------------------------------------------------------+
 
+.. table:: VLLDM instruction security vulnerability
+  :widths: 10 50
+
+  +---------------+------------------------------------------------------------+
+  | Index         | **TFM-GENERIC-FP-VLLDM**                                   |
+  +---------------+------------------------------------------------------------+
+  | Description   | Secure data in FP registers may be disclosed to NSPE when  |
+  |               | VLLDM instruction is abandoned due to an exception mid-way.|
+  +---------------+------------------------------------------------------------+
+  | Justification | Refer to [VLLDM Vulnerability]_ for details.               |
+  +---------------+------------------------------------------------------------+
+  | Category      | Tampering/Information disclosure                           |
+  +---------------+------------------------------------------------------------+
+  | Mitigation    | In current TF-M implementation, when FPU is enabled in SPE,|
+  |               | TF-M configures NSACR to disable NSPE to access FPU.       |
+  |               | Therefore, secure data in FP registers is protected from   |
+  |               | NSPE.                                                      |
+  |               |                                                            |
+  |               | Refer to [VLLDM Vulnerability]_, for details on analysis   |
+  |               | and mitigation.                                            |
+  +---------------+------------------------------------------------------------+
+  | CVSS Score    | 3.4 (Low)                                                  |
+  +---------------+------------------------------------------------------------+
+  | CVSS Vector   | CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:U/C:L/I:L/A:N               |
+  | String        |                                                            |
+  +---------------+------------------------------------------------------------+
+
 ***************
 Version control
 ***************
@@ -1097,6 +1124,8 @@ Version control
   | v0.1    | Initial draft                                    | TF-M v1.1     |
   +---------+--------------------------------------------------+---------------+
   | v1.0    | First version                                    | TF-M v1.2.0   |
+  +---------+--------------------------------------------------+---------------+
+  | v1.1    | Update version                                   | TF-M v1.5.0   |
   +---------+--------------------------------------------------+---------------+
 
 *********
@@ -1124,6 +1153,8 @@ Reference
 .. [ADVISORY-TFMV-1] :doc:`Advisory TFMV-1 </docs/security/security_advisories/stack_seal_vulnerability>`
 
 .. [ADVISORY-TFMV-2] :doc:`Advisory TFMV-2 </docs/security/security_advisories/svc_caller_sp_fetching_vulnerability>`
+
+.. [VLLDM Vulnerability] : `VLLDM instruction Security Vulnerability <https://developer.arm.com/support/arm-security-updates/vlldm-instruction-security-vulnerability>`_
 
 --------------------
 
