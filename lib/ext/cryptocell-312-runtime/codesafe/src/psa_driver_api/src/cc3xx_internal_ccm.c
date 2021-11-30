@@ -15,7 +15,6 @@
 #define CC_PAL_LOG_CUR_COMPONENT CC_LOG_MASK_CC_API
 
 #include "aesccm_driver.h"
-#include "cc_aesccm_error.h"
 #include "cc_common.h"
 #include "cc_pal_abort.h"
 #include "cc_pal_mem.h"
@@ -26,15 +25,11 @@
 
 /*! The size of the AES CCM star nonce in bytes. */
 #define AESCCM_STAR_NONCE_SIZE_BYTES 13
-/*! The size of source address of the AES CCM star in bytes. */
-#define AESCCM_STAR_SOURCE_ADDRESS_SIZE_BYTES 8
 
 /*! AES CCM mode: CCM. */
 #define AESCCM_MODE_CCM 0
 /*! AES CCM mode: CCM star. */
 #define AESCCM_MODE_STAR 1
-
-/************************ Type definitions **********************/
 
 /* AES-CCM* Security levels (ieee-802.15.4-2011, Table 58) */
 #define AESCCM_STAR_SECURITY_LEVEL_NONE 0
@@ -46,50 +41,40 @@
 #define AESCCM_STAR_SECURITY_LEVEL_ENC_MIC_64 6
 #define AESCCM_STAR_SECURITY_LEVEL_ENC_MIC_128 7
 
-/************************ static functions **********************/
-
-static void ccm_context_init(AesCcmContext_t *context)
+static psa_status_t ccm_setkey(
+        AesCcmContext_t *ctx,
+        const uint8_t *key,
+        size_t key_bits,
+        cryptoDirection_t direction)
 {
-    CC_PalMemSetZero(context, sizeof(AesCcmContext_t));
-}
-
-static void ccm_context_free(AesCcmContext_t *context)
-{
-    CC_PalMemSetZero(context, sizeof(AesCcmContext_t));
-}
-
-static psa_status_t ccm_setkey(AesCcmContext_t *context, const uint8_t *key,
-                               size_t keybits)
-{
-    if (context == NULL || key == NULL) {
-        CC_PAL_LOG_ERR("Null pointer, ctx or key are NULL\n");
+    if (NULL == ctx || NULL == key) {
+        CC_PAL_LOG_ERR("Null pointer exception\n");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    switch (keybits) {
+    if (CRYPTO_DIRECTION_NUM_OF_ENC_MODES <= direction) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ctx->dir = direction;
+
+    switch (key_bits) {
     case 128:
-
-        context->keySizeId = KEY_SIZE_128_BIT;
+        ctx->keySizeId = KEY_SIZE_128_BIT;
         break;
-
 #if !defined(ARCH_IS_CC310)
     case 192:
-
-        context->keySizeId = KEY_SIZE_192_BIT;
+        ctx->keySizeId = KEY_SIZE_192_BIT;
         break;
-
     case 256:
-
-        context->keySizeId = KEY_SIZE_256_BIT;
+        ctx->keySizeId = KEY_SIZE_256_BIT;
         break;
-#endif
-
+#endif /* ARCH_IS_CC310 */
     default:
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    /* Copy user key to context */
-    CC_PalMemCopy(context->keyBuf, key, PSA_BITS_TO_BYTES(keybits));
+    CC_PalMemCopy(ctx->keyBuf, key, PSA_BITS_TO_BYTES(key_bits));
 
     return PSA_SUCCESS;
 }
@@ -102,11 +87,9 @@ static psa_status_t ccm_get_security_level(uint8_t SizeOfT,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    /*
-        The security level field for AES-CCM* as defined in ieee-802.15.4-2011,
-       Table 58. System spec requirement CCM*-3: The CCM* shall support only the
-       security levels that include encryption (1XX values).
-        */
+    /* The security level field for AES-CCM* as defined in ieee-802.15.4-2011,
+     * Table 58. System spec requirement CCM*-3: The CCM* shall support only the
+     * security levels that include encryption (1XX values). */
     if (SecurityField < 4) {
         switch (SizeOfT) {
         case 0:
@@ -160,7 +143,8 @@ static psa_status_t ccm_init(AesCcmContext_t *context,
     drvError_t rc;
     CCBuffInfo_t inBuffInfo;
     CCBuffInfo_t outBuffInfo;
-    uint8_t securityLevelField = 0;
+    uint8_t securityLevelField;
+    uint8_t securityField;
 
     /* check the Encrypt / Decrypt flag validity */
     if (encryptDecryptFlag >= CRYPTO_DIRECTION_NUM_OF_ENC_MODES) {
@@ -178,7 +162,7 @@ static psa_status_t ccm_init(AesCcmContext_t *context,
             return PSA_ERROR_INVALID_ARGUMENT;
         }
     } else if (ccmMode == AESCCM_MODE_STAR) {
-        uint8_t securityField = pNonce[AESCCM_STAR_NONCE_SIZE_BYTES - 1];
+        securityField = pNonce[AESCCM_STAR_NONCE_SIZE_BYTES - 1];
 
         /* check CCM STAR MAC size */
         if (ccm_get_security_level(sizeOfT, securityField,
@@ -589,9 +573,9 @@ ccm_auth_crypt(const uint8_t *key_buffer, size_t key_buffer_size, size_t length,
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     AesCcmContext_t context;
 
-    ccm_context_init(&context);
+    cc3xx_ccm_init(&context);
 
-    status = ccm_setkey(&context, key_buffer, key_buffer_size * 8);
+    status = ccm_setkey(&context, key_buffer, key_buffer_size * 8, dir);
     if (status != PSA_SUCCESS) {
         goto cleanup;
     }
@@ -624,7 +608,7 @@ ccm_auth_crypt(const uint8_t *key_buffer, size_t key_buffer_size, size_t length,
     }
 
 cleanup:
-    ccm_context_free(&context);
+    cc3xx_ccm_free(&context);
 
     if (status == PSA_SUCCESS) {
         if (dir == CRYPTO_DIRECTION_ENCRYPT) {
@@ -702,4 +686,217 @@ psa_status_t cc3xx_decrypt_ccm(
 
     return status;
 }
+
+void cc3xx_ccm_init(AesCcmContext_t *ctx)
+{
+    if (NULL == ctx) {
+        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        return;
+    }
+
+    CC_PalMemSetZero(ctx, sizeof(AesCcmContext_t));
+}
+
+void cc3xx_ccm_free(AesCcmContext_t *ctx)
+{
+    if (NULL == ctx) {
+        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        return;
+    }
+
+    CC_PalMemSetZero(ctx, sizeof(AesCcmContext_t));
+}
+
+psa_status_t cc3xx_ccm_setkey_enc(
+        AesCcmContext_t *ctx,
+        const uint8_t *key,
+        size_t key_bits)
+{
+    return ccm_setkey(ctx, key, key_bits, CRYPTO_DIRECTION_ENCRYPT);
+}
+
+psa_status_t cc3xx_ccm_setkey_dec(
+        AesCcmContext_t *ctx,
+        const uint8_t *key,
+        size_t key_bits)
+{
+    return ccm_setkey(ctx, key, key_bits, CRYPTO_DIRECTION_DECRYPT);
+}
+
+psa_status_t cc3xx_ccm_set_lengths(
+        AesCcmContext_t *ctx,
+        size_t aadSize,
+        size_t dataSize)
+{
+    if (NULL == ctx) {
+        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ctx->aadSize  = aadSize;
+    ctx->dataSize = dataSize;
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t cc3xx_ccm_set_nonce(
+        AesCcmContext_t *ctx,
+        const uint8_t *pNonce,
+        size_t sizeOfN,
+        size_t sizeOfT,
+        uint32_t ccmMode)
+{
+    uint8_t ctrStateBuf[CC_AES_BLOCK_SIZE_IN_BYTES] = {0};
+    uint8_t qFieldSize = 15 - sizeOfN;
+    uint8_t *tempBuff;
+    drvError_t rc;
+    CCBuffInfo_t inBuffInfo;
+    CCBuffInfo_t outBuffInfo;
+    uint8_t securityLevelField;
+    uint8_t securityField;
+
+    if (NULL == ctx || NULL == pNonce) {
+        CC_PAL_LOG_ERR("Null pointer exception\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (ccmMode == AESCCM_MODE_CCM) {
+        if ((sizeOfT < 4) || (sizeOfT > 16) || ((sizeOfT & 1) != 0)) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
+    } else if (ccmMode == AESCCM_MODE_STAR) {
+        securityField = pNonce[AESCCM_STAR_NONCE_SIZE_BYTES - 1];
+
+        if (ccm_get_security_level(sizeOfT, securityField,
+                                   &securityLevelField) != PSA_SUCCESS) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
+
+        if (sizeOfN != AESCCM_STAR_NONCE_SIZE_BYTES) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
+
+        if (pNonce[AESCCM_STAR_NONCE_SIZE_BYTES - 1] != securityLevelField) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
+    } else {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((qFieldSize < 2) || (qFieldSize > 8)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((qFieldSize < 4) && ((ctx->dataSize >> (qFieldSize * 8)) > 0)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (sizeOfN < 7 || sizeOfN >= CC_AES_BLOCK_SIZE_IN_BYTES) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ctx->mode = CIPHER_CBC_MAC;
+    ctx->sizeOfT = sizeOfT;
+
+    tempBuff = ctx->tempBuff;
+
+    if (ctx->aadSize > 0) {
+        tempBuff[0] = 1 << 6;
+    }
+
+    tempBuff[0] |= ((sizeOfT - 2) / 2) << 3;
+    tempBuff[0] |= (qFieldSize - 1);
+
+    CC_PalMemCopy(tempBuff + 1, pNonce, sizeOfN);
+    CC_CommonReverseMemcpy(tempBuff + 16 - min(qFieldSize, 4),
+                           (uint8_t *)&ctx->dataSize, min(qFieldSize, 4));
+
+    rc = SetDataBuffersInfo(tempBuff, CC_AES_BLOCK_SIZE_IN_BYTES, &inBuffInfo,
+                            NULL, 0, &outBuffInfo);
+    if (rc != 0) {
+        CC_PAL_LOG_ERR("illegal data buffers\n");
+        return PSA_ERROR_DATA_INVALID;
+    }
+
+    rc = ProcessAesCcmDrv(ctx, &inBuffInfo, &outBuffInfo,
+                          CC_AES_BLOCK_SIZE_IN_BYTES);
+    if (rc != AES_DRV_OK) {
+        CC_PAL_LOG_ERR("calculating MAC failed with error code %d\n", rc);
+        return PSA_ERROR_DATA_INVALID;
+    }
+
+    ctrStateBuf[0] = qFieldSize - 1;
+    CC_PalMemCopy(ctrStateBuf + 1, pNonce, sizeOfN);
+    ctrStateBuf[15] = 1;
+    CC_PalMemCopy((uint8_t *)ctx->ctrStateBuf, ctrStateBuf,
+                  CC_AES_BLOCK_SIZE_IN_BYTES);
+
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t cc3xx_ccm_update_ad(
+        AesCcmContext_t *ctx,
+        const uint8_t *add,
+        size_t aadSize)
+{
+    psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+
+    if (NULL == ctx) {
+        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ret = ccm_ass_data(ctx, add, aadSize);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("ccm_ass_data failed: %d", ret);
+        return ret;
+    }
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t cc3xx_ccm_update(
+        AesCcmContext_t *ctx,
+        size_t dataSize,
+        const uint8_t *input,
+        uint8_t *output)
+{
+    psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+
+    if (NULL == ctx) {
+        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ret = ccm_text_data(ctx, input, dataSize, output);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("ccm_text_data failed: %d", ret);
+        return ret;
+    }
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t cc3xx_ccm_finish(
+        AesCcmContext_t *ctx,
+        uint8_t *macBuf,
+        size_t sizeOfT)
+{
+    psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+
+    if (NULL == ctx) {
+        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ret = ccm_finish(ctx, macBuf, &sizeOfT);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("ccm_finish failed: %d", ret);
+        return ret;
+    }
+
+    return PSA_SUCCESS;
+}
+
 /** @} */ // end of internal_ccm

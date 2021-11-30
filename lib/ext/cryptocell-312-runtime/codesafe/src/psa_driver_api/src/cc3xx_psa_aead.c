@@ -83,6 +83,7 @@ static psa_status_t aead_setup(
         psa_encrypt_or_decrypt_t dir)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_algorithm_t ref_alg;
     psa_key_type_t key_type = psa_get_key_type(attributes);
     size_t key_bits = psa_get_key_bits(attributes);
 
@@ -95,15 +96,25 @@ static psa_status_t aead_setup(
         return PSA_ERROR_BAD_STATE;
     }
 
+    /* Validate the algorithm first */
+    ret = check_alg(alg, &ref_alg);
+    if (ret != PSA_SUCCESS) {
+        return ret;
+    }
+
     CC_PalMemSetZero(operation, sizeof(cc3xx_aead_operation_t));
 
-    operation->alg         =  alg;
+    operation->alg         =  ref_alg;
     operation->key_type    =  key_type;
     operation->dir         =  dir;
     operation->iv_size     =  PSA_CIPHER_IV_LENGTH(key_type, alg);
     operation->block_size  = (PSA_ALG_IS_STREAM_CIPHER(alg) ? 1 :
                               PSA_BLOCK_CIPHER_BLOCK_LENGTH(key_type));
     operation->add_padding = NULL;
+    operation->get_padding = NULL;
+    operation->tag_length  = PSA_AEAD_TAG_LENGTH(key_type,
+                                                 psa_get_key_bits(attributes),
+                                                 alg);
 
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
@@ -138,6 +149,34 @@ static psa_status_t aead_setup(
 
             break;
         case PSA_ALG_CCM:
+            cc3xx_ccm_init(&operation->ctx.aes_ccm);
+
+            switch (operation->dir) {
+            case PSA_CRYPTO_DRIVER_ENCRYPT:
+                if (( ret = cc3xx_ccm_setkey_enc(
+                        &operation->ctx.aes_ccm,
+                        key,
+                        key_bits) )
+                    != PSA_SUCCESS) {
+                    return ret;
+                }
+
+                break;
+            case PSA_CRYPTO_DRIVER_DECRYPT:
+                if (( ret = cc3xx_ccm_setkey_dec(
+                        &operation->ctx.aes_ccm,
+                        key,
+                        key_bits) )
+                    != PSA_SUCCESS) {
+                    return ret;
+                }
+
+                break;
+            default:
+                return PSA_ERROR_NOT_SUPPORTED;
+            }
+
+            break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -306,6 +345,17 @@ psa_status_t cc3xx_aead_set_nonce(
 
             break;
         case PSA_ALG_CCM:
+            if ((ret = cc3xx_ccm_set_nonce(
+                    &operation->ctx.aes_ccm,
+                    nonce,
+                    nonce_length,
+                    operation->tag_length,
+                    0))
+                != PSA_SUCCESS) {
+                return ret;
+            }
+
+            break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -345,6 +395,15 @@ psa_status_t cc3xx_aead_set_lengths(
 
             break;
         case PSA_ALG_CCM:
+            if (( ret = cc3xx_ccm_set_lengths(
+                    &operation->ctx.aes_ccm,
+                    ad_length,
+                    plaintext_length) )
+                != PSA_SUCCESS) {
+                return ret;
+            }
+
+            break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -384,6 +443,15 @@ psa_status_t cc3xx_aead_update_ad(
 
             break;
         case PSA_ALG_CCM:
+            if (( ret = cc3xx_ccm_update_ad(
+                    &operation->ctx.aes_ccm,
+                    input,
+                    input_size) )
+                != PSA_SUCCESS) {
+                return ret;
+            }
+
+            break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -431,6 +499,18 @@ psa_status_t cc3xx_aead_update(
 
             break;
         case PSA_ALG_CCM:
+            if (( ret = cc3xx_ccm_update(
+                    &operation->ctx.aes_ccm,
+                    input_length,
+                    input,
+                    output ))
+                != PSA_SUCCESS) {
+                return ret;
+            }
+
+            *output_length = input_length;
+
+            break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -480,6 +560,17 @@ psa_status_t cc3xx_aead_finish(
 
             break;
         case PSA_ALG_CCM:
+            if (( ret = cc3xx_ccm_finish(
+                    &operation->ctx.aes_ccm,
+                    tag,
+                    tag_size))
+                != PSA_SUCCESS) {
+                return ret;
+            }
+
+            *tag_length = tag_size;
+
+            break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -526,6 +617,15 @@ psa_status_t cc3xx_aead_verify(
 
             break;
         case PSA_ALG_CCM:
+            if (( ret = cc3xx_ccm_finish(
+                    &operation->ctx.aes_ccm,
+                    (uint8_t *)tag,
+                    tag_size))
+                != PSA_SUCCESS) {
+                return ret;
+            }
+
+            break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -553,6 +653,8 @@ psa_status_t cc3xx_aead_abort(cc3xx_aead_operation_t *operation)
             cc3xx_gcm_free(&operation->ctx.aes_gcm);
             break;
         case PSA_ALG_CCM:
+            cc3xx_ccm_free(&operation->ctx.aes_ccm);
+            break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }

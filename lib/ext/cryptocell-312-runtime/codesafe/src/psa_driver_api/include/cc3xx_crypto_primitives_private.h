@@ -52,13 +52,15 @@ struct cc3xx_cipher_operation_s {
     psa_encrypt_or_decrypt_t dir; /*!< Encrypting or decrypting direction */
     size_t block_size;            /*!< Block size of the underlying cipher */
 
-    psa_status_t(*add_padding)(uint8_t *, size_t, size_t);   /*!< Add padding func */
-    psa_status_t(*get_padding)(uint8_t *, size_t, size_t *); /*!< Get padding func */
+    psa_status_t(*add_padding)(uint8_t *, size_t, size_t);   /*!< Add padding */
+    psa_status_t(*get_padding)(uint8_t *, size_t, size_t *); /*!< Get padding */
 
-    uint8_t unprocessed_data[AES_BLOCK_SIZE]; /*!< Any data still to process */
-    size_t  unprocessed_size; /*!< Size of the data in unprocesse_data */
-    uint8_t iv[AES_IV_SIZE];  /*!< Initialisation Vector */
-    size_t  iv_size;          /*!< Size of the IV */
+    uint8_t unprocessed_data[AES_BLOCK_SIZE]; /*!< Cached data */
+    size_t  unprocessed_size;                 /*!< Size of the cached data */
+    uint8_t iv[AES_IV_SIZE];                  /*!< Initialisation Vector */
+    size_t  iv_size;                          /*!< Size of the IV */
+
+    size_t tag_length; /*!< Size of the MAC in an AEAD operations */
 
     union {
         AesContext_t    aes;     /*!< Low-level AES context */

@@ -43,6 +43,75 @@ psa_status_t cc3xx_decrypt_ccm(
     size_t ciphertext_length, uint8_t *plaintext, size_t plaintext_size,
     size_t *plaintext_length);
 
+/**
+ * \brief    Initialize the specified AES CCM context
+ */
+void cc3xx_ccm_init(AesCcmContext_t *ctx);
+
+/**
+ * \brief   Release and clear the specified AES CCM context
+ */
+void cc3xx_ccm_free(AesCcmContext_t *ctx);
+
+/**
+ * \brief   Set the encryption key
+ */
+psa_status_t cc3xx_ccm_setkey_enc(
+        AesCcmContext_t *ctx,
+        const uint8_t *key,
+        size_t key_bits);
+
+/**
+ * \brief   Set the decryption key
+ */
+psa_status_t cc3xx_ccm_setkey_dec(
+        AesCcmContext_t *ctx,
+        const uint8_t *key,
+        size_t key_bits);
+
+/**
+ * \brief   Set the message and additional data lengths
+ */
+psa_status_t cc3xx_ccm_set_lengths(
+        AesCcmContext_t *ctx,
+        size_t aadSize,
+        size_t dataSize);
+
+/**
+ * \brief   Set the nonce
+ */
+psa_status_t cc3xx_ccm_set_nonce(
+        AesCcmContext_t *ctx,
+        const uint8_t *pNonce,
+        size_t sizeOfN,
+        size_t sizeOfT,
+        uint32_t ccmMode);
+
+/**
+ * \brief   Pass in the additional data
+ */
+psa_status_t cc3xx_ccm_update_ad(
+        AesCcmContext_t *ctx,
+        const uint8_t *add,
+        size_t aadSize);
+
+/**
+ * \brief   Encrypt or decrypt a message fragment.
+ */
+psa_status_t cc3xx_ccm_update(
+        AesCcmContext_t *ctx,
+        size_t dataSize,
+        const uint8_t *input,
+        uint8_t *output);
+
+/**
+ * \brief   Finish the encryption/decryption and compute the authentication tag.
+ */
+psa_status_t cc3xx_ccm_finish(
+        AesCcmContext_t *ctx,
+        uint8_t *macBuf,
+        size_t sizeOfT);
+
 #ifdef __cplusplus
 }
 #endif
