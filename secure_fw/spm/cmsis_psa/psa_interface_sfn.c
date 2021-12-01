@@ -108,6 +108,31 @@ void psa_write_sfn(psa_handle_t msg_handle, uint32_t outvec_idx,
     tfm_spm_partition_psa_write(msg_handle, outvec_idx, buffer, num_bytes);
 }
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+
+const void *psa_map_invec_sfn(psa_handle_t msg_handle, uint32_t invec_idx)
+{
+    return tfm_spm_partition_psa_map_invec(msg_handle, invec_idx);
+}
+
+void psa_unmap_invec_sfn(psa_handle_t msg_handle, uint32_t invec_idx)
+{
+    tfm_spm_partition_psa_unmap_invec(msg_handle, invec_idx);
+}
+
+void *psa_map_outvec_sfn(psa_handle_t msg_handle, uint32_t outvec_idx)
+{
+    return tfm_spm_partition_psa_map_outvec(msg_handle, outvec_idx);
+}
+
+void psa_unmap_outvec_sfn(psa_handle_t msg_handle, uint32_t outvec_idx,
+                          size_t len)
+{
+    tfm_spm_partition_psa_unmap_outvec(msg_handle, outvec_idx, len);
+}
+
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
 void psa_panic_sfn(void)
 {
     tfm_spm_partition_psa_panic();

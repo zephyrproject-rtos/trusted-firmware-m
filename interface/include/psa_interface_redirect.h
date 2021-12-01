@@ -75,6 +75,13 @@
 #define psa_write                psa_write_sfn
 #define psa_panic                psa_panic_sfn
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+#define psa_map_invec            psa_map_invec_sfn
+#define psa_unmap_invec          psa_unmap_invec_sfn
+#define psa_map_outvec           psa_map_outvec_sfn
+#define psa_unmap_outvec         psa_unmap_outvec_sfn
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
 #else
 
 #error "NO ABI is chosen, check configurations."
