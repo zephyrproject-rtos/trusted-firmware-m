@@ -354,8 +354,8 @@ VENEERS()
     {
         . += __msp_init_stack_size__;
     } > RAM
-    Image$$ARM_LIB_STACK_MSP$$ZI$$Base = ADDR(.msp_stack);
-    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
     /* PSP is unprivileged in single-core topology */
     .psp_stack : ALIGN(32)
@@ -366,16 +366,16 @@ VENEERS()
         . += (__psp_stack_size__);
 # endif
     } > RAM
-    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+    Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
+    Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 
 # if !defined(TFM_PSA_API)
     .psp_stack_seal_res :
     {
         . += 0x8;
     } > RAM
-    Image$$ARM_LIB_STACK_SEAL$$ZI$$Base = ADDR(.psp_stack_seal_res);
-    Image$$ARM_LIB_STACK_SEAL$$ZI$$Limit = ADDR(.psp_stack_seal_res) + SIZEOF(.psp_stack_seal_res);
+    Image$$ER_INITIAL_PSP_SEAL$$ZI$$Base = ADDR(.psp_stack_seal_res);
+    Image$$ER_INITIAL_PSP_SEAL$$ZI$$Limit = ADDR(.psp_stack_seal_res) + SIZEOF(.psp_stack_seal_res);
 # endif
 #endif
 
@@ -506,16 +506,16 @@ VENEERS()
     {
         . += __msp_init_stack_size__;
     } > RAM
-    Image$$ARM_LIB_STACK_MSP$$ZI$$Base = ADDR(.msp_stack);
-    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
     /* PSP is privileged in multi-core topology */
     .psp_stack : ALIGN(32)
     {
         . += __psp_stack_size__;
     } > RAM
-    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+    Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
+    Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 #endif
 
     /**** PSA RoT DATA start here */
@@ -642,5 +642,9 @@ VENEERS()
     Load$$LR$$LR_SECONDARY_PARTITION$$Base = SECONDARY_PARTITION_START;
 #endif /* BL2 */
 
-    PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
+#ifdef NRF_NS_STORAGE
+    Load$$LR$$LR_NRF_NS_STORAGE_PARTITION$$Base = NRF_NS_STORAGE_PARTITION_START;
+#endif /* NRF_NS_STORAGE */
+
+    PROVIDE(__stack = Image$$ER_INITIAL_PSP$$ZI$$Limit);
 }

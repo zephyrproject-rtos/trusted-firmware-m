@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,6 +24,14 @@ extern "C" {
 #define MPU_ARMV8M_MAIR_ATTR_CODE_IDX        1
 #define MPU_ARMV8M_MAIR_ATTR_DATA_VAL        0xFF
 #define MPU_ARMV8M_MAIR_ATTR_DATA_IDX        2
+
+#if defined(NRF9160_XXAA)
+#define MPU_ARMV8M_NUM_REGIONS 16
+#elif defined(NRF5340_XXAA_APPLICATION)
+#define MPU_ARMV8M_NUM_REGIONS 8
+#else
+#error "Unknown device"
+#endif
 
 struct mpu_armv8m_dev_t {
     const uint32_t base;
@@ -91,7 +99,7 @@ enum mpu_armv8m_error_t mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
  *
  * \param[in] dev            MPU device \ref mpu_armv8m_dev_t
  *
- * \return Error code \ref arm_mpu_error_t
+ * \return Error code \ref mpu_armv8m_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
@@ -102,7 +110,7 @@ enum mpu_armv8m_error_t mpu_armv8m_disable(struct mpu_armv8m_dev_t *dev);
  *
  * \param[in] dev            MPU device \ref mpu_armv8m_dev_t
  *
- * \return Error code \ref arm_mpu_error_t
+ * \return Error code \ref mpu_armv8m_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
@@ -114,7 +122,7 @@ enum mpu_armv8m_error_t mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev);
  * \param[in] dev            MPU device \ref mpu_armv8m_dev_t
  * \param[in] region_cfg     MPU region config \ref mpu_armv8m_region_cfg_t
  *
- * \return Error code \ref arm_mpu_error_t
+ * \return Error code \ref mpu_armv8m_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
@@ -128,7 +136,7 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
  * \param[in] dev            MPU device \ref mpu_armv8m_dev_t
  * \param[in] region_nr            Region number
  *
- * \return Error code \ref arm_mpu_error_t
+ * \return Error code \ref mpu_armv8m_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */

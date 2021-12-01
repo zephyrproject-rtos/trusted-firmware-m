@@ -27,8 +27,8 @@
  * 0x0007_0000 Non-secure image secondary slot (96 KB)
  * 0x0008_8000 Protected Storage Area (10 KB)
  * 0x0008_A800 Internal Trusted Storage Area (8 KB)
- * 0x0008_C800 NV counters area (512 B)
- * 0x0008_CA00 Unused (45.5 KB)
+ * 0x0008_C800 OTP / NV counters area (2 KB)
+ * 0x0008_D000 Unused (44 KB)
  *
  * Flash layout on LPC55S69 with BL2 (single image boot):
  *
@@ -37,8 +37,8 @@
  * 0x0004_8000 Secondary image area (Secure + Non-secure images) (256 KB)
  * 0x0008_8000 Protected Storage Area (10 KB)
  * 0x0008_A800 Internal Trusted Storage Area (8 KB)
- * 0x0008_C800 NV counters area (512 B)
- * 0x0008_CA00 Unused (45.5 KB)
+ * 0x0008_C800 OTP / NV counters area (2 KB)
+ * 0x0008_D000 Unused (44 KB)
  *
  * Flash layout on LPC55S69 without BL2:
  *
@@ -49,7 +49,7 @@
  * 0xXXXX_XXXX Secure Binary tail Area (4 KB), if SB is used.
  * 0xXXXX_XXXX Protected Storage Area (3 KB)
  * 0xXXXX_XXXX Internal Trusted Storage Area (3 KB)
- * 0xXXXX_XXXX NV counters area (512 B)
+ * 0xXXXX_XXXX OTP area (2 KB)
  * 0xXXXX_XXXX Unused
  */
 
@@ -174,8 +174,8 @@
 #endif /* BL2 */
 
 /* Note: FLASH_PS_AREA_OFFSET, FLASH_ITS_AREA_OFFSET and
- * FLASH_NV_COUNTERS_AREA_OFFSET point to offsets in flash, but reads and writes
- * to these addresses are redirected to Code SRAM by Driver_Flash.c.
+ * FLASH_OTP_NV_COUNTERS_AREA_OFFSET point to offsets in flash, but reads and
+ * writes to these addresses are redirected to Code SRAM by Driver_Flash.c.
  */
 
 /* Protected Storage (PS) Service definitions */
@@ -188,10 +188,11 @@
                                          FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0xC00) /* 3 KB */
 
-/* NV Counters definitions */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
-                                         FLASH_ITS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
+                                           FLASH_ITS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 4)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
@@ -205,6 +206,8 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
+/* Smallest flash programmable unit in bytes */
+#define TFM_HAL_FLASH_PROGRAM_UNIT       FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
@@ -252,11 +255,12 @@
 #define ITS_FLASH_NAND_BUF_SIZE        (FLASH_AREA_IMAGE_SECTOR_SIZE * \
                                         TFM_HAL_ITS_SECTORS_PER_BLOCK)
 
-/* NV Counters definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    FLASH_NV_COUNTERS_AREA_SIZE
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
 /* Use Flash memory to store Code data */
 #define S_ROM_ALIAS_BASE    (0x10000000)

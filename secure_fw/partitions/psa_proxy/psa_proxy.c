@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +14,6 @@
 #include "psa_manifest/sid.h"
 #include "tfm_multi_core_api.h"
 #include "tfm_ns_mailbox.h"
-#include "platform_multicore.h"
 #include "psa_proxy_shared_mem_mngr.h"
 
 #define NON_SECURE_CLIENT_ID            (-1)
@@ -43,23 +43,36 @@ static inline void deallocate_forward_handle(psa_handle_t *h)
     tfm_pool_free(forward_handle_pool, h);
 }
 
-static psa_status_t forward_psa_call_to_secure_enclave(psa_signal_t signal,
+static psa_status_t forward_message_to_secure_enclave(psa_signal_t signal,
                                                        const psa_msg_t *msg)
 {
     psa_status_t status;
     struct psa_client_params_t params;
     int32_t ret;
 
-    params.psa_call_params.type = PSA_IPC_CALL;
-
-    if (signal == TFM_CRYPTO_SIGNAL) {
-        /*
-         * The TF-M crypto service has been changed to stateless service, set
-         * the params with the stateless handle.
-         */
+    /* Use stateless handle for stateless services. */
+    switch (signal) {
+    case TFM_CRYPTO_SIGNAL:
         params.psa_call_params.handle = TFM_CRYPTO_HANDLE;
-    } else {
+        params.psa_call_params.type = msg->type;
+        break;
+    case TFM_PROTECTED_STORAGE_SERVICE_SIGNAL:
+        params.psa_call_params.handle = TFM_PROTECTED_STORAGE_SERVICE_HANDLE;
+        params.psa_call_params.type = msg->type;
+        break;
+    case TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_SIGNAL:
+        params.psa_call_params.handle =
+                                TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_HANDLE;
+        params.psa_call_params.type = msg->type;
+        break;
+    case TFM_ATTESTATION_SERVICE_SIGNAL:
+        params.psa_call_params.handle = TFM_ATTESTATION_SERVICE_HANDLE;
+        params.psa_call_params.type = msg->type;
+        break;
+    default:
         params.psa_call_params.handle = *((psa_handle_t *)msg->rhandle);
+        params.psa_call_params.type = PSA_IPC_CALL;
+        break;
     }
 
     status = psa_proxy_put_msg_into_shared_mem(msg, &params);
@@ -99,34 +112,6 @@ static void get_sid_and_version_for_signal(psa_signal_t signal, uint32_t *sid,
                                            uint32_t *version)
 {
     switch (signal) {
-    case TFM_CRYPTO_SIGNAL:
-        *sid = TFM_CRYPTO_SID;
-        *version = TFM_CRYPTO_VERSION;
-        break;
-    case TFM_ATTEST_GET_TOKEN_SIGNAL:
-        *sid = TFM_ATTEST_GET_TOKEN_SID;
-        *version = TFM_ATTEST_GET_TOKEN_VERSION;
-        break;
-    case TFM_ATTEST_GET_TOKEN_SIZE_SIGNAL:
-        *sid = TFM_ATTEST_GET_TOKEN_SIZE_SID;
-        *version = TFM_ATTEST_GET_TOKEN_SIZE_VERSION;
-        break;
-    case TFM_ITS_SET_SIGNAL:
-        *sid = TFM_ITS_SET_SID;
-        *version = TFM_ITS_SET_VERSION;
-        break;
-    case TFM_ITS_GET_SIGNAL:
-        *sid = TFM_ITS_GET_SID;
-        *version = TFM_ITS_GET_VERSION;
-        break;
-    case TFM_ITS_GET_INFO_SIGNAL:
-        *sid = TFM_ITS_GET_INFO_SID;
-        *version = TFM_ITS_GET_INFO_VERSION;
-        break;
-    case TFM_ITS_REMOVE_SIGNAL:
-        *sid = TFM_ITS_REMOVE_SID;
-        *version = TFM_ITS_REMOVE_VERSION;
-        break;
     case TFM_SP_PLATFORM_SYSTEM_RESET_SIGNAL:
         *sid = TFM_SP_PLATFORM_SYSTEM_RESET_SID;
         *version = TFM_SP_PLATFORM_SYSTEM_RESET_VERSION;
@@ -138,26 +123,6 @@ static void get_sid_and_version_for_signal(psa_signal_t signal, uint32_t *sid,
     case TFM_SP_PLATFORM_NV_COUNTER_SIGNAL:
         *sid = TFM_SP_PLATFORM_NV_COUNTER_SID;
         *version = TFM_SP_PLATFORM_NV_COUNTER_VERSION;
-        break;
-    case TFM_PS_SET_SIGNAL:
-        *sid = TFM_PS_SET_SID;
-        *version = TFM_PS_SET_VERSION;
-        break;
-    case TFM_PS_GET_SIGNAL:
-        *sid = TFM_PS_GET_SID;
-        *version = TFM_PS_GET_VERSION;
-        break;
-    case TFM_PS_GET_INFO_SIGNAL:
-        *sid = TFM_PS_GET_INFO_SID;
-        *version = TFM_PS_GET_INFO_VERSION;
-        break;
-    case TFM_PS_REMOVE_SIGNAL:
-        *sid = TFM_PS_REMOVE_SID;
-        *version = TFM_PS_REMOVE_VERSION;
-        break;
-    case TFM_PS_GET_SUPPORT_SIGNAL:
-        *sid = TFM_PS_GET_SUPPORT_SID;
-        *version = TFM_PS_GET_SUPPORT_VERSION;
         break;
     default:
         psa_panic();
@@ -210,16 +175,13 @@ static void handle_signal(psa_signal_t signal)
         status = psa_connect_to_secure_enclave(signal, &msg);
         psa_reply(msg.handle, status);
         break;
-    case PSA_IPC_CALL:
-        status = forward_psa_call_to_secure_enclave(signal, &msg);
-        psa_reply(msg.handle, status);
-        break;
     case PSA_IPC_DISCONNECT:
         psa_disconnect_from_secure_enclave(&msg);
         psa_reply(msg.handle, PSA_SUCCESS);
         break;
     default:
-        psa_panic();
+        status = forward_message_to_secure_enclave(signal, &msg);
+        psa_reply(msg.handle, status);
         break;
     }
 }

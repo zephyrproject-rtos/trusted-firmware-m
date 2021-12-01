@@ -93,14 +93,24 @@ target_sources(platform_s
         native_drivers/mpu_armv8m_drv.c
         native_drivers/ppc_sse300_drv.c
         native_drivers/syscounter_armv8-m_cntrl_drv.c
-        native_drivers/systimer_armv8-m_drv.c
         native_drivers/uart_cmsdk_drv.c
         spm_hal.c
+        tfm_interrupts.c
         target_cfg.c
+        tfm_peripherals_def.c
         tfm_hal_isolation.c
+        tfm_hal_platform.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+)
+
+target_sources(tfm_sprt
+    PRIVATE
+        # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
+        # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
+        $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
 )
 
 target_link_libraries(platform_s
@@ -121,10 +131,7 @@ target_sources(platform_ns
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/system_core_init.c
-        native_drivers/systimer_armv8-m_drv.c
         native_drivers/uart_cmsdk_drv.c
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_include_directories(platform_ns
@@ -140,13 +147,6 @@ target_include_directories(platform_ns
         device/source/armclang
         native_drivers
         partition
-        services/src
-)
-
-# TODO: For some reason this is needed
-target_link_libraries(platform_ns
-    PRIVATE
-        psa_interface
 )
 
 #========================= Platform BL2 =======================================#

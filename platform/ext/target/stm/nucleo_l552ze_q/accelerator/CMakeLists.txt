@@ -11,17 +11,17 @@ if(BL2)
 
     target_sources(bl2_crypto_hw
         PUBLIC
-            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/sha1_alt.c
-            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/sha256_alt.c
-            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/stm.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha1_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha256_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/stm.c
     )
 
     target_include_directories(bl2_crypto_hw
         PRIVATE
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
-            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/stm32l5xx_hal/Inc/
+            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
             ${PLATFORM_DIR}/ext/cmsis
     )
@@ -41,9 +41,9 @@ if(BL2)
     target_include_directories(bl2_mbedcrypto
         PUBLIC
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
-            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
             ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/stm32l5xx_hal/Inc/
+            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
             ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
             ${PLATFORM_DIR}/ext/cmsis
     )
@@ -53,28 +53,30 @@ endif()
 
 target_sources(crypto_service_crypto_hw
     PRIVATE
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/sha1_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/sha256_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/stm.c
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha1_alt.c
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha256_alt.c
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/stm.c
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/huk.c
 )
 
 target_include_directories(crypto_service_crypto_hw
     PRIVATE
         ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
         ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/stm32l5xx_hal/Inc/
+        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
         ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
         ${PLATFORM_DIR}/ext/cmsis
 )
 target_include_directories(crypto_service_mbedcrypto
     PUBLIC
         ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/accelerator/
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
         ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/stm32l5xx_hal/Inc/
+        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
         ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
         ${PLATFORM_DIR}/ext/cmsis
+        ${PLATFORM_DIR}/include
 )
 
 target_compile_definitions(crypto_service_crypto_hw

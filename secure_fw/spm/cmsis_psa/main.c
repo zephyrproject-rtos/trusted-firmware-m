@@ -16,6 +16,8 @@
 #include "tfm_spm_hal.h"
 #include "tfm_spm_log.h"
 #include "tfm_version.h"
+#include "tfm_plat_otp.h"
+#include "tfm_plat_provisioning.h"
 
 /*
  * Avoids the semihosting issue
@@ -31,40 +33,16 @@ __asm("  .global __ARM_use_no_argv\n");
 #error Invalid TFM_LVL value. Only TFM_LVL 1, 2 and 3 are supported in IPC model!
 #endif
 
-REGION_DECLARE(Image$$, ARM_LIB_STACK_MSP,  $$ZI$$Base);
+REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
 static fih_int tfm_core_init(void)
 {
-    enum tfm_hal_status_t hal_status = TFM_HAL_ERROR_GENERIC;
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
+#else
+    enum tfm_hal_status_t hal_status = TFM_HAL_ERROR_GENERIC;
 #endif
-
-    /* Enables fault handlers */
-    plat_err = tfm_spm_hal_enable_fault_handlers();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-
-    /* Configures the system reset request properties */
-    plat_err = tfm_spm_hal_system_reset_cfg();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-
-    /* Configures debug authentication */
-#ifdef TFM_FIH_PROFILE_ON
-    FIH_CALL(tfm_spm_hal_init_debug, fih_rc);
-    if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-#else /* TFM_FIH_PROFILE_ON */
-    plat_err = tfm_spm_hal_init_debug();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_ERROR_GENERIC;
-    }
-#endif /* TFM_FIH_PROFILE_ON */
 
     /*
      * Access to any peripheral should be performed after programming
@@ -83,16 +61,37 @@ static fih_int tfm_core_init(void)
 #endif /* TFM_FIH_PROFILE_ON */
 
 #ifdef TFM_FIH_PROFILE_ON
-    FIH_CALL(tfm_spm_hal_verify_isolation_hw, fih_rc);
-    if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
+    FIH_CALL(tfm_hal_verify_static_boundaries, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         tfm_core_panic();
     }
 #endif
 
-    /* Performs platform specific initialization */
+#ifdef TFM_FIH_PROFILE_ON
+    FIH_CALL(tfm_hal_platform_init, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+    }
+#else /* TFM_FIH_PROFILE_ON */
     hal_status = tfm_hal_platform_init();
     if (hal_status != TFM_HAL_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+        return TFM_ERROR_GENERIC;
+    }
+#endif /* TFM_FIH_PROFILE_ON */
+
+    plat_err = tfm_plat_otp_init();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+    }
+
+    /* Perform provisioning. */
+    if (tfm_plat_provisioning_is_required()) {
+        plat_err = tfm_plat_provisioning_perform();
+        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+        }
+    } else {
+        tfm_plat_provisioning_check_for_dummy_keys();
     }
 
     /* Configures architecture */
@@ -102,34 +101,47 @@ static fih_int tfm_core_init(void)
 
     SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_LVL);
 
+#if (CONFIG_TFM_SPE_FP == 0)
+    SPMLOG_INFMSG("TF-M FP mode: Software\r\n");
+#elif (CONFIG_TFM_SPE_FP == 1)
+    SPMLOG_INFMSG("TF-M FP mode: Hybird\r\n");
+#elif (CONFIG_TFM_SPE_FP == 2)
+    SPMLOG_INFMSG("TF-M FP mode: Hardware\r\n");
+#endif
+
+#if (CONFIG_TFM_SPE_FP >= 1)
+#ifdef CONFIG_TFM_LAZY_STACKING_SPE
+    SPMLOG_INFMSG("Lazy stacking enabled\r\n");
+#else
+    SPMLOG_INFMSG("Lazy stacking disabled\r\n");
+#endif
+#endif
+
     tfm_core_validate_boot_data();
 
     configure_ns_code();
 
-    /* Configures all interrupts to retarget NS state, except for
-     * secure peripherals
-     */
-    plat_err = tfm_spm_hal_nvic_interrupt_target_state_cfg();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-
-    /* Enable secure peripherals interrupts */
-    plat_err = tfm_spm_hal_nvic_interrupt_enable();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
-    }
-
     FIH_RET(fih_int_encode(TFM_SUCCESS));
 }
 
+__attribute__((naked))
 int main(void)
+{
+    __ASM volatile(
+        "ldr    r0, =0xFEF5EDA5     \n" /* Seal Main Stack before using */
+        "ldr    r1, =0xFEF5EDA5     \n"
+        "push   {r0, r1}            \n"
+        "bl     c_main              \n"
+    );
+}
+
+int c_main(void)
 {
     fih_int fih_rc = FIH_FAILURE;
 
     /* set Main Stack Pointer limit */
-    tfm_arch_init_secure_msp((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK_MSP,
-                                               $$ZI$$Base));
+    tfm_arch_set_msplim((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK,
+                                                                   $$ZI$$Base));
 
     fih_delay_init();
 
@@ -150,6 +162,14 @@ int main(void)
      */
     tfm_arch_set_secure_exception_priorities();
 
+#if (CONFIG_TFM_SPE_FP >= 1)
+    tfm_arch_clear_fp_data();
+#endif
+
+    tfm_arch_clear_fp_status();
+
     /* Move to handler mode for further SPM initialization. */
     tfm_core_handler_mode();
+
+    return 0;
 }

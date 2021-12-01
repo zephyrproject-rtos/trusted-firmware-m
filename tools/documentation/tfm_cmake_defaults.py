@@ -105,7 +105,7 @@ if cmake_env is None:
     tfm_def_doc_root = os.path.join(tfm_def_root_dir, "docs")
     tfm_def_copy_doc_root = os.path.join(tfm_def_copy_dir, "docs")
 
-    tfm_def_doxy_root = os.path.join(tfm_def_root_dir, "doxygen")
+    tfm_def_doxy_root = os.path.join(tfm_def_doc_root, "doxygen")
 
     tfm_def_doxy_output_dir = os.path.join(tfm_def_copy_dir,
                                            tfm_def_doxy_output_dir)

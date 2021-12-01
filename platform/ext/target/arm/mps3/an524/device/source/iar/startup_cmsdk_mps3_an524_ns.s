@@ -1,5 +1,6 @@
 ;/*
 ; * Copyright (c) 2016-2020 ARM Limited
+; * Copyright (c) 2020-2021 IAR Systems AB
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -201,7 +202,6 @@ Reset_Handler
         LDR      R0, =sfe(ARM_LIB_STACK)       ; End of ARM_LIB_STACK
         MSR      PSP, R0
         MRS      R0, CONTROL    ; Get control value
-        ORR      R0, R0, #1     ; Select switch to non privileged mode
         ORR      R0, R0, #2     ; Select switch to PSP
         MSR      CONTROL, R0
         LDR      R0, =__iar_program_start

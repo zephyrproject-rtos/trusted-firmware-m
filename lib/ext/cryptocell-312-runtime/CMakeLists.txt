@@ -47,6 +47,7 @@ target_compile_definitions(${CC312_LIB_TARGET}
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:CC_PAL_MAX_LOG_LEVEL=3>
     PUBLIC
         CC_IOT
+        CC_SUPPORT_PKA_64_16
 )
 target_link_libraries(${CC312_LIB_TARGET}
     PRIVATE
@@ -60,6 +61,7 @@ target_compile_definitions(${CC312_PAL_TARGET}
         CC_TRNG_MODE=0
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:CC_PAL_MAX_LOG_LEVEL=3>
         CC_IOT
+        CC_SUPPORT_PKA_64_16
 )
 
 ########################## CDMPU ###############################################
@@ -75,4 +77,5 @@ target_compile_definitions(${CC312_CDMPU_TARGET}
         USE_MBEDTLS_CRYPTOCELL
         CC_MNG_MIN_BACKUP_SIZE_IN_BYTES=512
         CC_IOT
+        CC_SUPPORT_PKA_64_16
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,10 +10,11 @@
 #include "psa/error.h"
 #include "tfm_core_utils.h"
 #include "utilities.h"
+#include "tfm_arch.h"
+#include "thread.h"
 #include "tfm_spe_mailbox.h"
 #include "tfm_rpc.h"
-
-#define NS_CALLER_FLAG          (true)
+#include "tfm_multi_core.h"
 
 static struct secure_mailbox_queue_t spe_mailbox_queue;
 
@@ -35,12 +36,12 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_VERSION:
         spm_params.sid = params->psa_version_params.sid;
-        *psa_ret = tfm_rpc_psa_version(&spm_params, NS_CALLER_FLAG);
+        *psa_ret = tfm_rpc_psa_version(&spm_params);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CONNECT:
         spm_params.sid = params->psa_connect_params.sid;
         spm_params.version = params->psa_connect_params.version;
-        *psa_ret = tfm_rpc_psa_connect(&spm_params, NS_CALLER_FLAG);
+        *psa_ret = tfm_rpc_psa_connect(&spm_params);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CALL:
         spm_params.handle = params->psa_call_params.handle;
@@ -49,11 +50,11 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
         spm_params.in_len = params->psa_call_params.in_len;
         spm_params.out_vec = params->psa_call_params.out_vec;
         spm_params.out_len = params->psa_call_params.out_len;
-        *psa_ret = tfm_rpc_psa_call(&spm_params, NS_CALLER_FLAG);
+        *psa_ret = tfm_rpc_psa_call(&spm_params);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CLOSE:
         spm_params.handle = params->psa_close_params.handle;
-        tfm_rpc_psa_close(&spm_params, NS_CALLER_FLAG);
+        tfm_rpc_psa_close(&spm_params);
         return MAILBOX_SUCCESS;
     default:
         return MAILBOX_INVAL_PARAMS;
@@ -274,6 +275,14 @@ int32_t tfm_mailbox_handle_msg(void)
          */
     }
 
+    /*
+     * Some requests are serviced immediately, so only trigger pendsv if the
+     * thread state is changed to runnable.
+     */
+    if ((pend_slots != 0) && THRD_EXPECTING_SCHEDULE()) {
+        tfm_arch_trigger_pendsv();
+    }
+
     tfm_mailbox_hal_enter_critical();
 
     /* Clean the NSPE mailbox pending status. */
@@ -403,4 +412,9 @@ int32_t tfm_mailbox_init(void)
     }
 
     return MAILBOX_SUCCESS;
+}
+
+int32_t tfm_inter_core_comm_init(void)
+{
+    return tfm_mailbox_init();
 }

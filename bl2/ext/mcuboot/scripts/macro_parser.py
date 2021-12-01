@@ -32,7 +32,7 @@ def parse_and_sum(text):
         msg += " (NON-)SECURE_IMAGE_MAX_SIZE macros"
         raise Exception(msg)
 
-    nums = re.findall(r'(0x[A-Fa-f0-9]+)|[\d]+', m.group(0))
+    nums = re.findall(r'0x[A-Fa-f0-9]+|[\d]+', m.group(0))
     for i in range(len(nums)):
         nums[i] = int(nums[i], 0)
     ops = re.findall(r'\+|\-', m.group(0))

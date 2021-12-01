@@ -105,7 +105,7 @@ psa_status_t its_flash_fs_dblock_compact_block(
      * block update.
      */
     if (lblock != ITS_LOGICAL_DBLOCK0) {
-        err = fs_ctx->ops->flush(fs_ctx->cfg);
+        err = fs_ctx->ops->flush(fs_ctx->cfg, scratch_id);
     }
 
     return err;
@@ -184,7 +184,7 @@ psa_status_t its_flash_fs_dblock_write_file(
      * block update.
      */
     if (file_meta->lblock != ITS_LOGICAL_DBLOCK0) {
-        err = fs_ctx->ops->flush(fs_ctx->cfg);
+        err = fs_ctx->ops->flush(fs_ctx->cfg, scratch_id);
     }
 
     return err;

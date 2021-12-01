@@ -31,12 +31,16 @@ David Hu
 Code owners
 ===========
 
-Bootloader
-~~~~~~~~~~
+Bootloader and FWU
+~~~~~~~~~~~~~~~~~~
 
 Tamas Ban
     :email: `Tamas.Ban@arm.com <Tamas.Ban@arm.com>`__
     :github: `tamban01 <https://github.com/tamban01>`__
+
+Sherry Zhang
+    :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__
+    :github: `sherryzhang <https://github.com/sherryzhang>`__
 
 Secure Storage
 ~~~~~~~~~~~~~~
@@ -45,23 +49,31 @@ Jamie Fox
     :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
     :github: `jf549 <https://github.com/jf549>`__
 
+Sherry Zhang
+    :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__
+    :github: `sherryzhang <https://github.com/sherryzhang>`__
+
 Crypto
 ~~~~~~
 
-Soby Mathew
-    :email: `Soby.Mathew@arm.com <Soby.Mathew@arm.com>`__
-    :github: `soby-mathew <https://github.com/soby-mathew>`__
+Antonio de Angelis
+    :email: `Antonio.deAngelis@arm.com <Antonio.deAngelis@arm.com>`__
+    :github: `adeaarm <https://github.com/adeaarm>`__
 
-SPM & IPC
-~~~~~~~~~
+Summer Qin
+    :email: `Summer.Qin@arm.com <Summer.Qin@arm.com>`__
+    :github: `Summer-ARM <https://github.com/Summer-ARM>`__
+
+Framework (SPM, etc.)
+~~~~~~~~~~~~~~~~~~~~~
 
 Ken Liu
     :email: `Ken.Liu@arm.com <Ken.Liu@arm.com>`__
     :github: `KenLSoft <https://github.com/KenLSoft>`__
 
-Mate Toth-Pal
-    :email: `Mate.Toth-Pal@arm.com <Mate.Toth-Pal@arm.com>`__
-    :github: `matetothpal <https://github.com/matetothpal>`__
+Kevin Peng
+    :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
+    :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
 
 Audit Log
 ~~~~~~~~~
@@ -73,17 +85,35 @@ Jamie Fox
 Attestation
 ~~~~~~~~~~~
 
-Tamas Ban
-    :email: `Tamas.Ban@arm.com <Tamas.Ban@arm.com>`__
-    :github: `tamban01 <https://github.com/tamban01>`__
+Maulik Patel
+    :email: `Maulik.Patel@arm.com <Maulik.Patel@arm.com>`__
+    :github: `maulik-arm <https://github.com/maulik-arm>`__
 
-CMake Build System
-~~~~~~~~~~~~~~~~~~
+David Hu
+    :email: `David.Hu@arm.com <David.Hu@arm.com>`__
+    :github: `davidhuziji <https://github.com/davidhuziji>`__
+
+Build System
+~~~~~~~~~~~~
+
+Raef Coles
+    :email: `Raef.Coles@arm.com <Raef.Coles@arm.com>`__
+    :github: `RcColes <https://github.com/RcColes>`__
 
 Anton Komlev
     :email: `Anton.Komlev@arm.com <Anton.Komlev@arm.com>`__
     :github: `Anton-TF <https://github.com/Anton-TF>`__
 
+Tests
+~~~~~
+
+David Hu
+    :email: `David.Hu@arm.com <David.Hu@arm.com>`__
+    :github: `davidhuziji <https://github.com/davidhuziji>`__
+
+Kevin Peng
+    :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
+    :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
 
 Arm Platforms: MPS2, MPS3, Musca(A,B1,S1)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -91,10 +121,6 @@ Arm Platforms: MPS2, MPS3, Musca(A,B1,S1)
 Mark Horvath
     :email: `Mark.Horvath@arm.com <mark.horvath@arm.com>`__
     :github: `mark-horvath-arm <https://github.com/mark-horvath-arm>`__
-
-Lakshmi Kailasanathan
-    :email: `Lakshmi.Kailasanathan@arm.com <lakshmi.kailasanathan@arm.com>`__
-    :github: `lakkai <https://github.com/lakkai>`__
 
 NXP Platforms
 ~~~~~~~~~~~~~
@@ -144,6 +170,10 @@ Andrzej Głąbek
     :email: `oyvind.ronningstad@nordicsemi.no <oyvind.ronningstad@nordicsemi.no>`__
     :github: `oyvindronningstad <https://github.com/oyvindronningstad>`__
 
+Sebastian Bøe
+    :email: `sebastian.boe@nordicsemi.no <sebastian.boe@nordicsemi.no>`__
+    :github: `SebastianBoe <https://github.com/SebastianBoe>`__
+
 
 Nuvoton Platform:
 ~~~~~~~~~~~~~~~~~
@@ -154,4 +184,4 @@ WS Chang
 
 =============
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*

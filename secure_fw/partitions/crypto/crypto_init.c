@@ -17,9 +17,9 @@
  */
 #include "mbedtls/memory_buffer_alloc.h"
 
-#ifdef PLATFORM_DUMMY_NV_SEED
-#include "tfm_plat_crypto_dummy_nv_seed.h"
-#endif
+#ifdef CRYPTO_NV_SEED
+#include "tfm_plat_crypto_nv_seed.h"
+#endif /* CRYPTO_NV_SEED */
 
 #ifndef TFM_PSA_API
 #include "tfm_secure_api.h"
@@ -27,7 +27,7 @@
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
-#endif /* CRYPTO_HW_ACCLERATOR */
+#endif /* CRYPTO_HW_ACCELERATOR */
 
 #ifdef TFM_PSA_API
 #include "psa/service.h"
@@ -276,12 +276,20 @@ static uint8_t mbedtls_mem_buf[TFM_CRYPTO_ENGINE_BUF_SIZE] = {0};
 
 static psa_status_t tfm_crypto_engine_init(void)
 {
-#ifdef PLATFORM_DUMMY_NV_SEED
-    LOG_INFFMT("\033[1;34m[Crypto] Dummy Entropy NV Seed is not suitable for production!\033[0m\r\n");
-    if (tfm_plat_crypto_create_entropy_seed() != TFM_CRYPTO_NV_SEED_SUCCESS) {
+
+#ifdef CRYPTO_NV_SEED
+#ifdef TFM_PSA_API
+    if (tfm_plat_crypto_provision_entropy_seed() != TFM_CRYPTO_NV_SEED_SUCCESS) {
         return PSA_ERROR_GENERIC_ERROR;
     }
-#endif
+#else
+    LOG_INFFMT("\033[1;31m[Crypto] ");
+    LOG_INFFMT("TF-M in library mode uses a dummy NV seed. ");
+    LOG_INFFMT("This is not suitable for production! ");
+    LOG_INFFMT("This device is \033[1;1mNOT SECURE");
+    LOG_INFFMT("\033[0m\r\n");
+#endif /* TFM_PSA_API */
+#endif /* CRYPTO_NV_SEED */
 
     /* Initialise the Mbed Crypto memory allocator to use static
      * memory allocation from the provided buffer instead of using

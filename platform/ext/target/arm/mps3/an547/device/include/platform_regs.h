@@ -254,14 +254,14 @@ struct sse300_nsacfg_t {
 #define GPIO1_MAIN_PPCEXP0_POS_MASK             (1UL << 1)
 #define GPIO2_MAIN_PPCEXP0_POS_MASK             (1UL << 2)
 #define GPIO3_MAIN_PPCEXP0_POS_MASK             (1UL << 3)
-#define USB_AND_ETHERNET_MAIN_PPCEXP0_POS_MASK  (1UL << 4)
-#define USER_AHB0_MAIN_PPCEXP0_POS_MASK         (1UL << 5)
-#define USER_AHB1_MAIN_PPCEXP0_POS_MASK         (1UL << 6)
-#define USER_AHB2_MAIN_PPCEXP0_POS_MASK         (1UL << 7)
+#define USER_AHB0_MAIN_PPCEXP0_POS_MASK         (1UL << 4)
+#define USER_AHB1_MAIN_PPCEXP0_POS_MASK         (1UL << 5)
+#define USER_AHB2_MAIN_PPCEXP0_POS_MASK         (1UL << 6)
+#define USER_AHB3_MAIN_PPCEXP0_POS_MASK         (1UL << 7)
+#define USB_AND_ETHERNET_MAIN_PPCEXP0_POS_MASK  (1UL << 8)
 /* End MAIN PPCEXP0 peripherals definition */
 
 /* MAIN PPCEXP1 peripherals definition */
-#define DMA0_MAIN_PPCEXP1_POS_MASK                 (1UL << 0)
 #define DMA1_MAIN_PPCEXP1_POS_MASK                 (1UL << 1)
 #define DMA2_MAIN_PPCEXP1_POS_MASK                 (1UL << 2)
 #define DMA3_MAIN_PPCEXP1_POS_MASK                 (1UL << 3)
@@ -288,9 +288,13 @@ struct sse300_nsacfg_t {
 /* End PERIPH PPC1 peripherals definition */
 
 /* PERIPH PPCEXP0 peripherals definition */
-#define MPC_SRAM_PERIPH_PPCEXP0_POS_MASK           (1UL << 0)
-#define MPC_QSPI_PERIPH_PPCEXP0_POS_MASK           (1UL << 1)
-#define MPC_DDR4_PERIPH_PPCEXP0_POS_MASK           (1UL << 2)
+#define USER_MEM_APB0_PERIPH_PPCEXP0_POS_MASK      (1UL << 0)
+#define USER_MEM_APB1_PERIPH_PPCEXP0_POS_MASK      (1UL << 1)
+#define NPU_APB0_PERIPH_PPCEXP0_POS_MASK           (1UL << 4)
+#define NPU_APB1_PERIPH_PPCEXP0_POS_MASK           (1UL << 5)
+#define MPC_SRAM_PERIPH_PPCEXP0_POS_MASK           (1UL << 13)
+#define MPC_QSPI_PERIPH_PPCEXP0_POS_MASK           (1UL << 14)
+#define MPC_DDR4_PERIPH_PPCEXP0_POS_MASK           (1UL << 15)
 /* End PERIPH PPCEXP0 peripherals definition */
 
 /* PERIPH PPCEXP1 peripherals definition */
@@ -324,22 +328,6 @@ struct sse300_nsacfg_t {
 struct cpu0_pwrctrl_t {
     volatile uint32_t cpupwrcfg;      /* 0x000 (R/W) CPU 0 Local Power
                                        *             Configuration */
-    volatile uint32_t reserved0[1011];
-    volatile uint32_t pidr4;          /* 0xFD0 (R/ ) Peripheral ID 4 */
-    volatile uint32_t reserved1[3];
-    volatile uint32_t pidr0;          /* 0xFE0 (R/ ) Peripheral ID 0 */
-    volatile uint32_t pidr1;          /* 0xFE4 (R/ ) Peripheral ID 1 */
-    volatile uint32_t pidr2;          /* 0xFE8 (R/ ) Peripheral ID 2 */
-    volatile uint32_t pidr3;          /* 0xFEC (R/ ) Peripheral ID 3 */
-    volatile uint32_t cidr0;          /* 0xFF0 (R/ ) Component ID 0 */
-    volatile uint32_t cidr1;          /* 0xFF4 (R/ ) Component ID 1 */
-    volatile uint32_t cidr2;          /* 0xFF8 (R/ ) Component ID 2 */
-    volatile uint32_t cidr3;          /* 0xFFC (R/ ) Component ID 3 */
-};
-
-struct cpu0_identity_t {
-    volatile uint32_t cpuid;          /* 0x000 (R/ ) Unique CPU 0 Identity
-                                       *             Number */
     volatile uint32_t reserved0[1011];
     volatile uint32_t pidr4;          /* 0xFD0 (R/ ) Peripheral ID 4 */
     volatile uint32_t reserved1[3];

@@ -29,6 +29,8 @@
 #include "flash_map_backend/flash_map_backend.h"
 #include "boot_hal.h"
 #include "uart_stdout.h"
+#include "tfm_plat_otp.h"
+#include "tfm_plat_provisioning.h"
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -85,6 +87,7 @@ int main(void)
 {
     struct boot_rsp rsp;
     fih_int fih_rc = FIH_FAILURE;
+    enum tfm_plat_err_t plat_err;
 
     /* Initialise the mbedtls static memory allocator so that mbedtls allocates
      * memory from the provided static buffer instead of from the heap.
@@ -102,6 +105,22 @@ int main(void)
     }
 
     BOOT_LOG_INF("Starting bootloader");
+
+    plat_err = tfm_plat_otp_init();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            BOOT_LOG_ERR("OTP system initialization failed");
+            FIH_PANIC;
+    }
+
+    if (tfm_plat_provisioning_is_required()) {
+        plat_err = tfm_plat_provisioning_perform();
+        if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+            BOOT_LOG_ERR("Provisioning failed");
+            FIH_PANIC;
+        }
+    } else {
+        tfm_plat_provisioning_check_for_dummy_keys();
+    }
 
     FIH_CALL(boot_nv_security_counter_init, fih_rc);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {

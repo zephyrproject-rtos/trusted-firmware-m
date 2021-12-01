@@ -58,6 +58,7 @@ target_link_libraries(tfm_psa_rot_partition_its
         tfm_secure_api
         platform_s
         psa_interface
+        tfm_sprt
 )
 
 target_compile_definitions(tfm_psa_rot_partition_its
@@ -73,7 +74,7 @@ target_compile_definitions(tfm_psa_rot_partition_its
     PRIVATE
         $<$<BOOL:${ITS_CREATE_FLASH_LAYOUT}>:ITS_CREATE_FLASH_LAYOUT>
         $<$<BOOL:${ITS_RAM_FS}>:ITS_RAM_FS>
-        $<$<OR:$<BOOL:${ITS_VALIDATE_METADATA_FROM_FLASH}>,$<BOOL:PS_VALIDATE_METADATA_FROM_FLASH>>:ITS_VALIDATE_METADATA_FROM_FLASH>
+        $<$<OR:$<BOOL:${ITS_VALIDATE_METADATA_FROM_FLASH}>,$<BOOL:${PS_VALIDATE_METADATA_FROM_FLASH}>>:ITS_VALIDATE_METADATA_FROM_FLASH>
         ITS_MAX_ASSET_SIZE=${ITS_MAX_ASSET_SIZE}
         ITS_NUM_ASSETS=${ITS_NUM_ASSETS}
         $<$<BOOL:${ITS_BUF_SIZE}>:ITS_BUF_SIZE=${ITS_BUF_SIZE}>
@@ -116,7 +117,10 @@ target_sources(tfm_sprt
 # to not overshadow _real_ warnings.
 set_source_files_properties(tfm_its_secure_api.c
     PROPERTIES
-        COMPILE_FLAGS -Wno-implicit-function-declaration
+        COMPILE_FLAGS
+            $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:IAR>:>
 )
 
 ############################ Partition Defs ####################################

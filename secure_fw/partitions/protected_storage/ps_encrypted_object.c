@@ -34,6 +34,23 @@
 
 static uint8_t ps_crypto_buf[PS_CRYPTO_BUF_LEN];
 
+static psa_status_t fill_key_label(struct ps_object_t *obj, size_t *length)
+{
+    psa_storage_uid_t uid = obj->header.crypto.ref.uid;
+    int32_t client_id = obj->header.crypto.ref.client_id;
+
+    if (PS_CRYPTO_BUF_LEN < (sizeof(client_id) + sizeof(uid))) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    tfm_memcpy(ps_crypto_buf, &client_id, sizeof(client_id));
+    tfm_memcpy(ps_crypto_buf + sizeof(client_id), &uid, sizeof(uid));
+
+    *length = sizeof(client_id) + sizeof(uid);
+
+    return PSA_SUCCESS;
+}
+
 /**
  * \brief Performs authenticated decryption on object data, with the header as
  *        the associated data.
@@ -53,10 +70,14 @@ static psa_status_t ps_object_auth_decrypt(uint32_t fid,
 {
     psa_status_t err;
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
-    size_t out_len;
+    size_t out_len, label_length;
 
-    err = ps_crypto_setkey(obj->header.crypto.ref.key_label,
-                           sizeof(obj->header.crypto.ref.key_label));
+    err = fill_key_label(obj, &label_length);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
+
+    err = ps_crypto_setkey(ps_crypto_buf, label_length);
     if (err != PSA_SUCCESS) {
         return err;
     }
@@ -101,17 +122,23 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
 {
     psa_status_t err;
     uint8_t *p_obj_data = (uint8_t *)&obj->header.info;
-    size_t out_len;
+    size_t out_len, label_length;
 
-    err = ps_crypto_setkey(obj->header.crypto.ref.key_label,
-                           sizeof(obj->header.crypto.ref.key_label));
+    err = fill_key_label(obj, &label_length);
     if (err != PSA_SUCCESS) {
         return err;
     }
 
-    /* FIXME: should have an IV per object with key diversification */
+    err = ps_crypto_setkey(ps_crypto_buf, label_length);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
+
     /* Get a new IV for each encryption */
-    ps_crypto_get_iv(&obj->header.crypto);
+    err = ps_crypto_get_iv(&obj->header.crypto);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
 
     /* Use File ID as a part of the associated data to authenticate
      * the object in the FS. The tag will be stored in the object table and
@@ -142,9 +169,17 @@ psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
     uint32_t decrypt_size;
     size_t data_length;
 
-    /* Read the encrypted object from the the persistent area */
+    /* Read the encrypted object from the persistent area. The data stored via
+     * ITS interface of this `fid` is the encrypted object together with the
+     * `IV`.
+     * In the psa_its_get, the buffer size is not checked. Check the buffer size
+     * here.
+     */
+    if (sizeof(ps_crypto_buf) < PS_MAX_ENCRYPTED_OBJ_SIZE + PS_IV_LEN_BYTES) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
     err = psa_its_get(fid, PS_OBJECT_START_POSITION,
-                      PS_MAX_OBJECT_SIZE,
+                      PS_MAX_ENCRYPTED_OBJ_SIZE + PS_IV_LEN_BYTES,
                       (void *)ps_crypto_buf,
                       &data_length);
     if (err != PSA_SUCCESS) {

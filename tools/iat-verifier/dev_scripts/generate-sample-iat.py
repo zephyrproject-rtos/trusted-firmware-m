@@ -9,7 +9,7 @@
 import base64
 import struct
 
-import cbor
+import cbor2
 from ecdsa import SigningKey
 from pycose.sign1message import Sign1Message
 
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     outfile = sys.argv[2]
 
     sk = SigningKey.from_pem(open(keyfile, 'rb').read())
-    token = cbor.dumps(token_map)
+    token = cbor2.dumps(token_map)
     signed_token = sign_eat(token, sk)
 
     with open(outfile, 'wb') as wfh:

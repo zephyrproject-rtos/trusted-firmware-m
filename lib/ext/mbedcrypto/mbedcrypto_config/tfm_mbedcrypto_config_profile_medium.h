@@ -1411,7 +1411,7 @@
  * This module adds support for the Hashed Message Authentication Code
  * (HMAC)-based key derivation function (HKDF).
  */
-//#define MBEDTLS_HKDF_C
+#define MBEDTLS_HKDF_C
 
 /**
  * \def MBEDTLS_HMAC_DRBG_C
@@ -1924,7 +1924,7 @@
 /* ECP options */
 //#define MBEDTLS_ECP_MAX_BITS             521 /**< Maximum bit size of groups */
 //#define MBEDTLS_ECP_WINDOW_SIZE            6 /**< Maximum window size used */
-//#define MBEDTLS_ECP_FIXED_POINT_OPTIM      1 /**< Enable fixed-point speed-up */
+#define MBEDTLS_ECP_FIXED_POINT_OPTIM        0 /**< Disable fixed-point speed-up */
 
 /* Entropy options */
 //#define MBEDTLS_ENTROPY_MAX_SOURCES                20 /**< Maximum number of sources supported */
@@ -2005,6 +2005,10 @@
 //#define MBEDTLS_PLATFORM_GMTIME_R_ALT
 
 /* \} name SECTION: Customisation configuration options */
+
+#ifdef CRYPTO_NV_SEED
+#include "tfm_mbedcrypto_config_extra_nv_seed.h"
+#endif /* CRYPTO_NV_SEED */
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "mbedtls_accelerator_config.h"

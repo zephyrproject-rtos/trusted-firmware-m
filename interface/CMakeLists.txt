@@ -9,6 +9,11 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
+# Generate framework feature
+set(PSA_FRAMEWORK_ISOLATION_LEVEL   ${TFM_ISOLATION_LEVEL})
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/psa/framework_feature.h.in
+               ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
+               @ONLY)
 
 if (TFM_MULTI_CORE_TOPOLOGY)
     include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
@@ -42,7 +47,6 @@ target_link_libraries(psa_interface
 target_compile_definitions(psa_interface
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:TFM_PSA_API>
-        $<$<BOOL:${TFM_NS_CLIENT_IDENTIFICATION}>:TFM_NS_CLIENT_IDENTIFICATION>
         $<$<BOOL:${CONFIG_TFM_ENABLE_CTX_MGMT}>:CONFIG_TFM_ENABLE_CTX_MGMT>
         $<$<BOOL:${TFM_ISOLATION_LEVEL}>:TFM_LVL=${TFM_ISOLATION_LEVEL}>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
@@ -54,17 +58,14 @@ target_compile_definitions(psa_interface
 
 target_sources(tfm_secure_api
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_client.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_service.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/psa/psa_lifecycle.c>
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/log/tfm_log_raw.c
+    $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c>
 )
 
 ###################### Export configurations to NS #############################
 
 if (TFM_MULTI_CORE_TOPOLOGY OR FORWARD_PROT_MSG)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core/tfm_mailbox_config.h.in
-                   ${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core/tfm_mailbox_config.h
+                   ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_mailbox_config.h
                    NEWLINE_STYLE UNIX
     )
 endif()

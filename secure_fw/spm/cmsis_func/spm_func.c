@@ -26,7 +26,7 @@
 #include "region.h"
 #include "spm_partition_defs.h"
 #include "psa_manifest/pid.h"
-#include "tfm/tfm_spm_services.h"
+#include "tfm_spm_services.h"
 #include "tfm_spm_db_func.inc"
 
 /* Structure to temporarily save iovec parameters from PSA client */
@@ -56,7 +56,7 @@ REGION_DECLARE_T(Image$$, TFM_SECURE_STACK, $$ZI$$Limit, struct iovec_args_t)[];
 static uint32_t *tfm_secure_stack_seal =
     ((uint32_t *)&REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1]) - 2;
 
-REGION_DECLARE_T(Image$$, ARM_LIB_STACK_SEAL, $$ZI$$Base, uint32_t)[];
+REGION_DECLARE_T(Image$$, ER_INITIAL_PSP_SEAL, $$ZI$$Base, uint32_t)[];
 
 /*
  * Function to seal the psp stacks for Function model of TF-M.
@@ -84,11 +84,11 @@ void tfm_spm_seal_psp_stacks(void)
     *(tfm_secure_stack_seal + 1) = TFM_STACK_SEAL_VALUE;
 
     /*
-     * Seal the ARM_LIB_STACK by writing the seal value to the reserved
+     * Seal the ER_INITIAL_PSP by writing the seal value to the reserved
      * region.
      */
     uint32_t *arm_lib_stck_seal_base =
-        ((uint32_t *)&REGION_NAME(Image$$, ARM_LIB_STACK_SEAL, $$ZI$$Base)[-1]) - 2;
+        ((uint32_t *)&REGION_NAME(Image$$, ER_INITIAL_PSP_SEAL, $$ZI$$Base)[-1]) - 2;
 
     *(arm_lib_stck_seal_base) = TFM_STACK_SEAL_VALUE;
     *(arm_lib_stck_seal_base + 1) = TFM_STACK_SEAL_VALUE;
@@ -652,9 +652,9 @@ static enum tfm_status_e tfm_return_from_partition(uint32_t *excReturn)
             (struct tfm_state_context_t *)ret_part_data->stack_ptr);
         *excReturn = ret_part_data->lr;
         __set_PSP(ret_part_data->stack_ptr);
-        REGION_DECLARE_T(Image$$, ARM_LIB_STACK, $$ZI$$Base, uint32_t)[];
+        REGION_DECLARE_T(Image$$, ER_INITIAL_PSP, $$ZI$$Base, uint32_t)[];
         uint32_t psp_stack_bottom =
-            (uint32_t)REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+            (uint32_t)REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
         tfm_arch_set_psplim(psp_stack_bottom);
 
         iovec_args = &REGION_NAME(Image$$, TFM_SECURE_STACK, $$ZI$$Limit)[-1];
@@ -1372,39 +1372,6 @@ void tfm_spm_partition_cleanup_context(uint32_t partition_idx)
     partition->runtime_data.orig_outvec = 0;
 }
 
-void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx)
-{
-    uint32_t *res_ptr = (uint32_t *)&svc_ctx->r0;
-    uint32_t running_partition_flags = 0;
-    uint32_t running_partition_idx;
-
-    /* Check permissions on request type basis */
-
-    switch (svc_ctx->r0) {
-    case TFM_SPM_REQUEST_RESET_VOTE:
-        running_partition_idx =
-            tfm_spm_partition_get_running_partition_idx();
-        running_partition_flags = tfm_spm_partition_get_flags(
-                                                         running_partition_idx);
-
-        /* Currently only PSA Root of Trust services are allowed to make Reset
-         * vote request
-         */
-        if ((running_partition_flags & SPM_PART_FLAG_PSA_ROT) == 0) {
-            *res_ptr = (uint32_t)TFM_ERROR_GENERIC;
-        }
-
-        /* FixMe: this is a placeholder for checks to be performed before
-         * allowing execution of reset
-         */
-        *res_ptr = (uint32_t)TFM_SUCCESS;
-
-        break;
-    default:
-        *res_ptr = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
-    }
-}
-
 enum spm_err_t tfm_spm_db_init(void)
 {
     uint32_t i;
@@ -1412,7 +1379,7 @@ enum spm_err_t tfm_spm_db_init(void)
     /* This function initialises partition db */
 
     /* For the non secure Execution environment */
-    tfm_nspm_configure_clients();
+    tfm_nspm_ctx_init();
 
     for (i = 0; i < g_spm_partition_db.partition_count; i++) {
         g_spm_partition_db.partitions[i].runtime_data.partition_state =

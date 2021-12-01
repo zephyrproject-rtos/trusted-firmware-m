@@ -51,7 +51,7 @@ SECTIONS
         KEEP(*(.init))
         KEEP(*(.fini))
 
-        *startup_cmsdk_musca_bl2.*
+        *startup_cmsdk_musca_bl2.*(.text*)
     } > FLASH
 
     /* eFlash driver code that gets copied from Flash to SRAM */

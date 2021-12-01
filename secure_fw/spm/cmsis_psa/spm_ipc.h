@@ -9,19 +9,23 @@
 #define __SPM_IPC_H__
 
 #include <stdint.h>
-#include "spm_partition_defs.h"
+#include "config_impl.h"
 #include "tfm_arch.h"
 #include "lists.h"
-#include "tfm_wait.h"
 #include "tfm_secure_api.h"
-#include "tfm_thread.h"
+#include "thread.h"
 #include "psa/service.h"
+#include "load/interrupt_defs.h"
 
 #define TFM_HANDLE_STATUS_IDLE          0
 #define TFM_HANDLE_STATUS_ACTIVE        1
 #define TFM_HANDLE_STATUS_CONNECT_ERROR 2
 
 #define TFM_CONN_HANDLE_MAX_NUM         16
+
+/* Privileged definitions for partition thread mode */
+#define TFM_PARTITION_UNPRIVILEGED_MODE         (0U)
+#define TFM_PARTITION_PRIVILEGED_MODE           (1U)
 
 /*
  * Set a number limit for stateless handle.
@@ -55,12 +59,21 @@
 #define SPM_INVALID_PARTITION_IDX     (~0U)
 
 #define TFM_MSG_MAGIC                   0x15154343
+#define TFM_MSG_MAGIC_SFN               0x21216565
+
+/* Get partition by thread or context data */
+#define GET_THRD_OWNER(x)        TO_CONTAINER(x, struct partition_t, thrd)
+#define GET_CTX_OWNER(x)         TO_CONTAINER(x, struct partition_t, ctx_ctrl)
 
 /* Message struct to collect parameter from client */
 struct tfm_msg_body_t {
     int32_t magic;
-    struct service_t *service;         /* RoT service pointer            */
-    struct tfm_event_t ack_evnt;       /* Event for ack response         */
+    struct partition_t *p_client;      /* Caller partition              */
+    struct service_t *service;         /* RoT service pointer           */
+    union {
+        struct sync_obj_t ack_evnt;    /* IPC - Ack response event       */
+        uint32_t sfn_magic;            /* SFN - Indicate a SFN message   */
+    };
     psa_msg_t msg;                     /* PSA message body               */
     psa_invec invec[PSA_MAX_IOVEC];    /* Put in/out vectors in msg body */
     psa_outvec outvec[PSA_MAX_IOVEC];
@@ -75,25 +88,32 @@ struct tfm_msg_body_t {
                                         * client calls in multi-core topology
                                         */
 #endif
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+    uint32_t iovec_status;             /* MM-IOVEC status                */
+#endif
     struct bi_list_node_t msg_node;    /* For list operators             */
 };
 
-/**
- * Holds the fields that define a partition for SPM. The fields are further
- * divided to structures, to keep the related fields close to each other.
- */
+/* Partition runtime type */
 struct partition_t {
     const struct partition_load_info_t *p_ldinf;
-    void *p_platform;
-    void *p_interrupts;
-    void *p_metadata;
-    struct tfm_core_thread_t sp_thread;
-    struct tfm_event_t event;
-    struct bi_list_node_t msg_list;
-    uint32_t signals_allowed;
-    uint32_t signals_waiting;
-    uint32_t signals_asserted;
-    struct partition_t *next;
+    void                               *p_boundaries;
+    void                               *p_interrupts;
+    void                               *p_metadata;
+    union {
+        struct thread_t                thrd;            /* IPC model */
+        uint32_t                       state;           /* SFN model */
+    };
+    struct sync_obj_t                  waitobj;
+    struct context_ctrl_t              ctx_ctrl;
+    union {
+        struct bi_list_node_t          msg_list;        /* IPC model */
+        struct tfm_msg_body_t          *p_msg;          /* SFN model */
+    };
+    uint32_t                           signals_allowed;
+    uint32_t                           signals_waiting;
+    uint32_t                           signals_asserted;
+    struct partition_t                 *next;
 };
 
 /* RoT Service data */
@@ -121,7 +141,6 @@ struct tfm_conn_handle_t {
                                          *  - non secure client endpoint id.
                                          */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
-    struct service_t *service;          /* RoT service pointer                */
     struct bi_list_node_t list;         /* list node                          */
 };
 
@@ -141,17 +160,11 @@ enum tfm_memory_access_e {
 uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
 
 /**
- * \brief                   Handle an SPM request by a secure service
- * \param[in] svc_ctx       The stacked SVC context
- */
-void tfm_spm_request_handler(const struct tfm_state_context_t *svc_ctx);
-
-/**
  * \brief   Get the running partition ID.
  *
  * \return  Returns the partition ID
  */
-uint32_t tfm_spm_partition_get_running_partition_id(void);
+int32_t tfm_spm_partition_get_running_partition_id(void);
 
 /******************** Service handle management functions ********************/
 
@@ -292,19 +305,6 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       psa_outvec *caller_outvec);
 
 /**
- * \brief                   Send message and wake up the SP who is waiting on
- *                          message queue, block the current thread and
- *                          scheduler triggered
- *
- * \param[in] service       Target service context pointer, which can be
- *                          obtained by partition management functions
- * \param[in] msg           message created by tfm_spm_create_msg()
- *                          \ref tfm_msg_body_t structures
- */
-void tfm_spm_send_event(struct service_t *service,
-                        struct tfm_msg_body_t *msg);
-
-/**
  * \brief                   Check the client version according to
  *                          version policy
  *
@@ -355,11 +355,31 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
                          uint32_t privileged);
 
 /**
- * \brief               Set up the isolation boundary of the given partition.
+ * \brief                       Get the ns_caller info from runtime context.
  *
- * \param[in] partition The partition of which the boundary is set up.
+ * \retval                      - true: the PSA API caller is from non-secure
+ *                              - false: the PSA API caller is from secure
  */
-void tfm_set_up_isolation_boundary(const struct partition_t *partition);
+bool tfm_spm_is_ns_caller(void);
+
+/**
+ * \brief                       Get the privilege mode of service caller.
+ *
+ * \retval                      Privilege mode of the service caller
+ *                              \ref TFM_PARTITION_UNPRIVILEGED_MODE
+ *                              \ref TFM_PARTITION_PRIVILEGED_MODE
+ */
+uint32_t tfm_spm_get_caller_privilege_mode(void);
+
+/**
+ * \brief               Get ID of current RoT Service client.
+ *                      This API ensures the caller gets a valid ID.
+ *
+ * \param[in] ns_caller If the client is Non-Secure or not.
+ *
+ * \retval              The client ID
+ */
+int32_t tfm_spm_get_client_id(bool ns_caller);
 
 /*
  * PendSV specified function.
@@ -367,11 +387,13 @@ void tfm_set_up_isolation_boundary(const struct partition_t *partition);
  * Parameters :
  *  p_actx        -    Architecture context storage pointer
  *
- * Notes:
- *  This is a staging API. Scheduler should be called in SPM finally and
- *  this function will be obsoleted later.
+ * Return:
+ *  Pointers to context control (sp, splimit, dummy, lr) of the current and
+ *  the next thread.
+ *  Each takes 32 bits. The context control is used by PendSV_Handler to do
+ *  context switch.
  */
-void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
+uint64_t do_schedule(void);
 
 /**
  * \brief                      SPM initialization implementation
@@ -382,41 +404,6 @@ void tfm_pendsv_do_schedule(struct tfm_arch_ctx_t *p_actx);
  *                             returned.
  */
 uint32_t tfm_spm_init(void);
-
-#if !defined(__ARM_ARCH_8_1M_MAIN__)
-/**
- * \brief Validate the whether NS caller re-enter.
- *
- * \param[in] p_cur_sp          Pointer to current partition.
- * \param[in] p_ctx             Pointer to current stack context.
- * \param[in] exc_return        EXC_RETURN value.
- * \param[in] ns_caller         If 'true', call from non-secure client.
- *                              Or from secure client.
- *
- * \retval void                 Success.
- *
- * Notes:
- *  For architecture v8.1m and later, will use hardware re-entrant detection.
- *  Otherwise will use the software solution to validate the caller.
- */
-void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
-                             uint32_t exc_return, bool ns_caller);
-#else
-/**
- * In v8.1 mainline, will use hardware re-entrant detection instead.
- */
-__STATIC_INLINE
-void tfm_spm_validate_caller(struct partition_t *p_cur_sp, uint32_t *p_ctx,
-                             uint32_t exc_return, bool ns_caller)
-{
-    (void)p_cur_sp;
-    (void)p_ctx;
-    (void)exc_return;
-    (void)ns_caller;
-    return;
-}
-#endif
-
 
 /**
  * \brief Converts a handle instance into a corresponded user handle.
@@ -451,17 +438,12 @@ int32_t tfm_spm_set_rhandle(struct service_t *service,
 
 void update_caller_outvec_len(struct tfm_msg_body_t *msg);
 
-/**
- * \brief   notify the partition with the signal.
+/*
+ * Set partition signal.
  *
- * \param[in] partition_id      The ID of the partition to be notified.
- * \param[in] signal            The signal that the partition is to be notified
- *                              with.
- *
- * \retval void                 Success.
- * \retval "Does not return"    If partition_id is invalid.
+ * Assert a signal to given partition.
  */
-void notify_with_signal(int32_t partition_id, psa_signal_t signal);
+void spm_assert_signal(void *p_pt, psa_signal_t signal);
 
 /**
  * \brief Return the IRQ load info context pointer associated with a signal
@@ -479,5 +461,39 @@ void notify_with_signal(int32_t partition_id, psa_signal_t signal);
 struct irq_load_info_t *get_irq_info_for_signal(
                                     const struct partition_load_info_t *p_ldinf,
                                     psa_signal_t signal);
+
+/**
+ * \brief Entry of Secure interrupt handler. Platforms can call this function to
+ *        handle individual interrupts.
+ *
+ * \param[in] p_pt         The owner Partition of the interrupt to handle
+ * \param[in] p_ildi       The irq_load_info_t struct of the interrupt to handle
+ *
+ * Note:
+ *  The input parameters are maintained by platforms and they must be init-ed
+ *  in the interrupt init functions.
+ */
+void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi);
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+/*
+ * SPM dispatcher to handle the API call under non-privileged model.
+ * This API runs under callers stack, and switch to SPM stack when
+ * calling 'p_fn', then switch back to caller stack before returning
+ * to the caller.
+ *
+ * fn_addr      - the target function to be called.
+ * frame_addr   - customized ABI frame type for the function call.
+ * switch_stack - indicator if need to switch stack.
+ */
+void spm_interface_thread_dispatcher(uintptr_t fn_addr,
+                                     uintptr_t frame_addr,
+                                     uint32_t  switch_stack);
+
+/* Execute a customized ABI function in C */
+void spcall_execute_c(uintptr_t fn_addr, uintptr_t frame_addr);
+
+#endif
 
 #endif /* __SPM_IPC_H__ */

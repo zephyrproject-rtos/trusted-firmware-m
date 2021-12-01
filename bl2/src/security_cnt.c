@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,9 +11,10 @@
 #include "bootutil/fault_injection_hardening.h"
 #include <stdint.h>
 
-#define TFM_BOOT_NV_COUNTER_0    PLAT_NV_COUNTER_3   /* NV counter of Image 0 */
-#define TFM_BOOT_NV_COUNTER_1    PLAT_NV_COUNTER_4   /* NV counter of Image 1 */
-#define TFM_BOOT_NV_COUNTER_MAX  PLAT_NV_COUNTER_MAX
+#define TFM_BOOT_NV_COUNTER_0    PLAT_NV_COUNTER_BL2_0   /* NV counter of Image 0 */
+#define TFM_BOOT_NV_COUNTER_1    PLAT_NV_COUNTER_BL2_1   /* NV counter of Image 1 */
+#define TFM_BOOT_NV_COUNTER_2    PLAT_NV_COUNTER_BL2_2   /* NV counter of Image 2 */
+#define TFM_BOOT_NV_COUNTER_MAX  PLAT_NV_COUNTER_BL2_2 + 1
 
 static enum tfm_nv_counter_t get_nv_counter_from_image_id(uint32_t image_id)
 {
@@ -55,7 +56,7 @@ fih_int boot_nv_security_counter_get(uint32_t image_id, fih_int *security_cnt)
     }
 
     nv_counter = get_nv_counter_from_image_id(image_id);
-    if (nv_counter == TFM_BOOT_NV_COUNTER_MAX) {
+    if (nv_counter >= TFM_BOOT_NV_COUNTER_MAX) {
         FIH_RET(FIH_FAILURE);
     }
 
@@ -75,7 +76,7 @@ int32_t boot_nv_security_counter_update(uint32_t image_id,
     enum tfm_plat_err_t err;
 
     nv_counter = get_nv_counter_from_image_id(image_id);
-    if (nv_counter == TFM_BOOT_NV_COUNTER_MAX) {
+    if (nv_counter >= TFM_BOOT_NV_COUNTER_MAX) {
         return -1;
     }
 

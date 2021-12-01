@@ -237,10 +237,12 @@ __packed struct  __iar_u32 { uint32_t v; };
 #endif
 
 #undef __WEAK                           /* undo the definition from DLib_Defaults.h */
-#if __ICCARM_V8
-  #define __WEAK __attribute__((weak))
-#else
-  #define __WEAK _Pragma("__weak")
+#ifndef   __WEAK
+  #if __ICCARM_V8
+    #define __WEAK __attribute__((weak))
+  #else
+    #define __WEAK _Pragma("__weak")
+  #endif
 #endif
 
 #ifndef __PROGRAM_START
@@ -261,6 +263,24 @@ __packed struct  __iar_u32 { uint32_t v; };
 
 #ifndef __VECTOR_TABLE_ATTRIBUTE
 #define __VECTOR_TABLE_ATTRIBUTE  @".intvec"
+#endif
+
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+#ifndef __STACK_SEAL
+#define __STACK_SEAL              STACKSEAL$$Base
+#endif
+
+#ifndef __TZ_STACK_SEAL_SIZE
+#define __TZ_STACK_SEAL_SIZE      8U
+#endif
+
+#ifndef __TZ_STACK_SEAL_VALUE
+#define __TZ_STACK_SEAL_VALUE     0xFEF5EDA5FEF5EDA5ULL
+#endif
+
+__STATIC_FORCEINLINE void __TZ_set_STACKSEAL_S (uint32_t* stackTop) {
+  *((uint64_t *)stackTop) = __TZ_STACK_SEAL_VALUE;
+}
 #endif
 
 #ifndef __ICCARM_INTRINSICS_VERSION__
@@ -333,7 +353,13 @@ __packed struct  __iar_u32 { uint32_t v; };
 
   #define __set_BASEPRI(VALUE)        (__arm_wsr("BASEPRI", (VALUE)))
   #define __set_BASEPRI_MAX(VALUE)    (__arm_wsr("BASEPRI_MAX", (VALUE)))
-  #define __set_CONTROL(VALUE)        (__arm_wsr("CONTROL", (VALUE)))
+
+__STATIC_FORCEINLINE void __set_CONTROL(uint32_t control)
+{
+  __arm_wsr("CONTROL", control);
+  __iar_builtin_ISB();
+}
+
   #define __set_FAULTMASK(VALUE)      (__arm_wsr("FAULTMASK", (VALUE)))
   #define __set_MSP(VALUE)            (__arm_wsr("MSP", (VALUE)))
 
@@ -355,7 +381,13 @@ __packed struct  __iar_u32 { uint32_t v; };
   #endif
 
   #define __TZ_get_CONTROL_NS()       (__arm_rsr("CONTROL_NS"))
-  #define __TZ_set_CONTROL_NS(VALUE)  (__arm_wsr("CONTROL_NS", (VALUE)))
+
+__STATIC_FORCEINLINE void __TZ_set_CONTROL_NS(uint32_t control)
+{
+  __arm_wsr("CONTROL_NS", control);
+  __iar_builtin_ISB();
+}
+
   #define __TZ_get_PSP_NS()           (__arm_rsr("PSP_NS"))
   #define __TZ_set_PSP_NS(VALUE)      (__arm_wsr("PSP_NS", (VALUE)))
   #define __TZ_get_MSP_NS()           (__arm_rsr("MSP_NS"))
@@ -677,6 +709,7 @@ __packed struct  __iar_u32 { uint32_t v; };
     __IAR_FT void   __TZ_set_CONTROL_NS(uint32_t value)
     {
       __asm volatile("MSR      CONTROL_NS,%0" :: "r" (value));
+      __iar_builtin_ISB();
     }
 
     __IAR_FT uint32_t   __TZ_get_PSP_NS(void)
@@ -959,5 +992,9 @@ __packed struct  __iar_u32 { uint32_t v; };
 
 #pragma diag_default=Pe940
 #pragma diag_default=Pe177
+
+#define __SXTB16_RORn(ARG1, ARG2) __SXTB16(__ROR(ARG1, ARG2))
+
+#define __SXTAB16_RORn(ARG1, ARG2, ARG3) __SXTAB16(ARG1, __ROR(ARG2, ARG3))
 
 #endif /* __CMSIS_ICCARM_H__ */

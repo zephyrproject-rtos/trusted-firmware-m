@@ -28,7 +28,6 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extension
 
 macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
-    string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_CPU_FLAG "${CMAKE_SYSTEM_PROCESSOR}")
 
     add_compile_options(
         $<$<COMPILE_LANGUAGE:C>:-Wno-ignored-optimization-argument>
@@ -49,6 +48,7 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<AND:$<COMPILE_LANGUAGE:C>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:-mfpu=none>
         $<$<AND:$<COMPILE_LANGUAGE:ASM>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:--fpu=none>
         $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
+        $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
     )
 endmacro()
 
@@ -77,27 +77,77 @@ macro(tfm_toolchain_reset_linker_flags)
 endmacro()
 
 macro(tfm_toolchain_set_processor_arch)
-    set(CMAKE_SYSTEM_PROCESSOR       ${TFM_SYSTEM_PROCESSOR})
-    set(CMAKE_SYSTEM_ARCHITECTURE    ${TFM_SYSTEM_ARCHITECTURE})
+    if (DEFINED TFM_SYSTEM_PROCESSOR)
+        set(CMAKE_SYSTEM_PROCESSOR       ${TFM_SYSTEM_PROCESSOR})
+
+        if (DEFINED TFM_SYSTEM_MVE)
+            if(NOT TFM_SYSTEM_MVE)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
+            endif()
+        endif()
+
+        if (DEFINED TFM_SYSTEM_FP)
+            if(NOT TFM_SYSTEM_FP)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
+            endif()
+        endif()
+
+        if (DEFINED TFM_SYSTEM_DSP)
+            if(NOT TFM_SYSTEM_DSP)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
+            endif()
+        endif()
+
+        string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_CPU_FLAG "${CMAKE_SYSTEM_PROCESSOR}")
+    else()
+        set(CMAKE_ASM_CPU_FLAG  ${TFM_SYSTEM_ARCHITECTURE})
+
+        # Armasm uses different syntax than armclang for architecture targets
+        string(REGEX REPLACE "\\armv" "" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
+        string(REGEX REPLACE "\\armv" "" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
+
+        # Modifiers are additive instead of subtractive (.fp Vs .no_fp)
+        if (TFM_SYSTEM_DSP)
+            string(APPEND CMAKE_ASM_CPU_FLAG ".dsp")
+        else()
+            if (TFM_SYSTEM_MVE)
+                string(APPEND CMAKE_ASM_CPU_FLAG ".mve")
+            endif()
+
+            if (TFM_SYSTEM_FP)
+                string(APPEND CMAKE_ASM_CPU_FLAG ".fp")
+            endif()
+        endif()
+    endif()
+
+    # CMAKE_SYSTEM_ARCH is an ARMCLANG CMAKE internal variable, used to set
+    # compile and linker flags up until CMake 3.21 where CMP0123 was introduced:
+    # https://cmake.org/cmake/help/latest/policy/CMP0123.html
+    # This behavior is overwritten by setting CMAKE_C_FLAGS in
+    # tfm_toolchain_reload_compiler.
+    # Another use of this variable is to statisfy a requirement for ARMCLANG to
+    # set either the target CPU or the Architecture. This variable needs to be
+    # set to allow targeting architectures without a specific CPU.
+    set(CMAKE_SYSTEM_ARCH            ${TFM_SYSTEM_ARCHITECTURE})
 
     set(CMAKE_C_COMPILER_TARGET      arm-${CROSS_COMPILE})
     set(CMAKE_ASM_COMPILER_TARGET    arm-${CROSS_COMPILE})
 
     if (DEFINED TFM_SYSTEM_MVE)
         if(NOT TFM_SYSTEM_MVE)
-            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
+            string(APPEND CMAKE_SYSTEM_ARCH "+nomve")
         endif()
     endif()
 
     if (DEFINED TFM_SYSTEM_FP)
         if(NOT TFM_SYSTEM_FP)
-            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
+            string(APPEND CMAKE_SYSTEM_ARCH "+nofp")
         endif()
     endif()
 
     if (DEFINED TFM_SYSTEM_DSP)
         if(NOT TFM_SYSTEM_DSP)
-            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
+            string(APPEND CMAKE_SYSTEM_ARCH "+nodsp")
         endif()
     endif()
 
@@ -106,9 +156,9 @@ macro(tfm_toolchain_set_processor_arch)
     # the ones we intend to use so that the validation will never fail.
     include(Compiler/ARMClang)
     set(CMAKE_C_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
-    set(CMAKE_C_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_PROCESSOR})
+    set(CMAKE_C_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_ARCH})
     set(CMAKE_ASM_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
-    set(CMAKE_ASM_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_PROCESSOR})
+    set(CMAKE_ASM_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_ARCH})
 endmacro()
 
 macro(tfm_toolchain_reload_compiler)
@@ -125,25 +175,27 @@ macro(tfm_toolchain_reload_compiler)
 
     include(Compiler/ARMClang)
     __compiler_armclang(C)
-    include(Compiler/ARMCC)
+    include(Compiler/ARMCC-ASM)
     __compiler_armcc(ASM)
 
     # Cmake's armclang support will set either mcpu or march, but march gives
     # better code size so we manually set it.
-    set(CMAKE_C_FLAGS   "-march=${CMAKE_SYSTEM_ARCHITECTURE}")
+    set(CMAKE_C_FLAGS   "-march=${CMAKE_SYSTEM_ARCH}")
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
-    set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
-    # But armlink doesn't support this +dsp syntax
-    string(REGEX REPLACE "\\+nodsp" "" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nodsp" "" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
-    # And uses different syntax for +nofp
-    string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+    if (DEFINED TFM_SYSTEM_PROCESSOR)
+        set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
+        # But armlink doesn't support this +dsp syntax
+        string(REGEX REPLACE "\\+nodsp" "" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nodsp" "" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+        # And uses different syntax for +nofp
+        string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
 
-    string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
-    string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+    endif()
 
     # Workaround for issues with --depend-single-line with armasm and Ninja
     if (CMAKE_GENERATOR STREQUAL "Ninja")

@@ -14,6 +14,10 @@ add_library(tfm_utilities INTERFACE)
 
 set(TFM_PARTITION_PLATFORM ON CACHE BOOL "Enable the TF-M Platform partition")
 
+# Generate TF-M version
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/tfm_version.h.in
+               ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include/tfm_version.h)
+
 target_include_directories(tfm_spm
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
@@ -24,8 +28,9 @@ target_include_directories(tfm_spm
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func/include>
     PRIVATE
         ${CMAKE_SOURCE_DIR}
-        ${CMAKE_SOURCE_DIR}/secure_fw/include/tfm
+        ${CMAKE_SOURCE_DIR}/secure_fw/include
         ${CMAKE_BINARY_DIR}/generated
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_psa>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_func>
 )
@@ -40,31 +45,33 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core_mem_check.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_rpc.c>
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_spe_mailbox.c>
+        $<$<AND:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>,$<NOT:$<BOOL:${TFM_PLAT_SPECIFIC_MULTI_CORE_COMM}>>>:cmsis_psa/tfm_spe_mailbox.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:ffm/tfm_core_mem_check.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/arch/tfm_arch.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/main.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_ipc.c>
+        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_thread_call.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_load.c>
-        $<$<BOOL:${TFM_PSA_API}>:ffm/spm_psa_client_call.c>
-        $<$<BOOL:${TFM_PSA_API}>:ffm/psa_client_service_apis.c>
+        $<$<BOOL:${TFM_PSA_API}>:ffm/psa_api.c>
+        $<$<BOOL:${TFM_PSA_API}>:ffm/backend.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_core_svcalls_ipc.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>>:cmsis_psa/tfm_nspm_ipc.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_pools.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_thread.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_wait.c>
+        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/thread.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/main.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/arch.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/spm_func.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_core_svcalls_func.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_nspm_func.c>
+        $<$<AND:$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>,$<BOOL:${TFM_NS_MANAGE_NSID}>>:ns_client_ext/tfm_ns_ctx.c>
+        $<$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>:ns_client_ext/tfm_spm_ns_ctx.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_secure_api.c>
         #TODO add other arches
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8-m.base>>:cmsis_psa/arch/tfm_arch_v8m_base.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv8-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv6-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${CMAKE_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>>:cmsis_psa/arch/tfm_arch_v8m_base.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
 )
 
 target_include_directories(tfm_partitions INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa)
@@ -74,10 +81,13 @@ if (TEST_PSA_API STREQUAL IPC)
     target_include_directories(tfm_partitions INTERFACE ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests)
     target_sources(tfm_psa_rot_partition_driver_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_driver_partition_psa.c)
+    target_compile_definitions(tfm_psa_rot_partition_driver_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
     target_sources(tfm_app_rot_partition_client_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_client_partition_psa.c)
+    target_compile_definitions(tfm_app_rot_partition_client_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
     target_sources(tfm_app_rot_partition_server_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_server_partition_psa.c)
+    target_compile_definitions(tfm_app_rot_partition_server_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
     target_sources(tfm_partitions INTERFACE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_driver_partition_psa.c
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_client_partition_psa.c
@@ -98,6 +108,7 @@ target_link_libraries(tfm_spm
         $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_client_partition>
         $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_server_partition>
         tfm_fih
+        tfm_sprt
 )
 
 target_compile_definitions(tfm_spm
@@ -105,21 +116,23 @@ target_compile_definitions(tfm_spm
         $<$<CONFIG:Debug>:TFM_CORE_DEBUG>
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${MCUBOOT_MEASURED_BOOT}>>:BOOT_DATA_AVAILABLE>
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
+        $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
+        CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
 )
 
-# With constant optimizations on tfm_nspc_func emits a symbol that the linker
-# doesn't like. It's unclear why this is, so I'll put a TODO here, but for the
-# moment this fixes it with mimimal impact.
-set_source_files_properties(tfm_nspm_func.c
-    PROPERTIES
-        COMPILE_FLAGS -fno-ipa-cp
+target_compile_options(tfm_spm
+    PUBLIC
+        ${COMPILER_CP_FLAG}
 )
 
 # The veneers give warnings about not being properly declared so they get hidden
 # to not overshadow _real_ warnings.
 set_source_files_properties(tfm_secure_api.c
     PROPERTIES
-        COMPILE_FLAGS -Wno-implicit-function-declaration
+        COMPILE_FLAGS
+            $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:IAR>:>
 )
 
 ############################ Partition Defs ####################################
@@ -174,6 +187,6 @@ if(NOT TFM_MULTI_CORE_TOPOLOGY)
     target_sources(tfm_s
         PRIVATE
             $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_func/tfm_veneers.c>
-            $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa/tfm_psa_api_veneers.c>
+            $<$<BOOL:${TFM_NS_MANAGE_NSID}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_client_ext/tfm_ns_client_ext.c>
     )
 endif()

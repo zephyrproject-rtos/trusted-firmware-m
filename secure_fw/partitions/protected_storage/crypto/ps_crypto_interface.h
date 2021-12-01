@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,10 +20,6 @@ extern "C" {
 #define PS_KEY_LEN_BYTES  16
 #define PS_TAG_LEN_BYTES  16
 #define PS_IV_LEN_BYTES   12
-/* The key label consists of the uid + client_id, thus the length of it is:
- * sizeof(psa_storage_uid_t) + sizeof(int32_t).
- */
-#define PS_KEY_LABEL_LEN_BYTES 12
 
 /* Union containing crypto policy implementations. The ref member provides the
  * reference implementation. Further members can be added to the union to
@@ -31,9 +27,10 @@ extern "C" {
  */
 union ps_crypto_t {
     struct {
-        uint8_t key_label[PS_KEY_LABEL_LEN_BYTES]; /*!< Key label value */
         uint8_t tag[PS_TAG_LEN_BYTES]; /*!< MAC value of AEAD object */
         uint8_t iv[PS_IV_LEN_BYTES];   /*!< IV value of AEAD object */
+        psa_storage_uid_t uid;         /*!< UID for key label */
+        int32_t client_id;             /*!< Owner client ID for key label */
     } ref;
 };
 
@@ -144,8 +141,10 @@ void ps_crypto_set_iv(const union ps_crypto_t *crypto);
  * \brief Gets a new IV value into the crypto union.
  *
  * \param[out] crypto  Pointer to the crypto union
+ *
+ * \return Returns values as described in \ref psa_status_t
  */
-void ps_crypto_get_iv(union ps_crypto_t *crypto);
+psa_status_t ps_crypto_get_iv(union ps_crypto_t *crypto);
 
 #ifdef __cplusplus
 }

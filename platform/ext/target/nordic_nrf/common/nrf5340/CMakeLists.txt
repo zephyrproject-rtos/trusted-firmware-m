@@ -88,3 +88,10 @@ if(BL2)
             NRF5340_XXAA_APPLICATION
     )
 endif()
+
+#========================= Platform region defs ===============================#
+
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        $<$<BOOL:${NRF_NS_STORAGE}>:NRF_NS_STORAGE>
+)

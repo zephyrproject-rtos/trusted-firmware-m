@@ -5,7 +5,6 @@ Code Generation With Jinja2
 :Author: Mate Toth-Pal
 :Organization: Arm Limited
 :Contact: Mate Toth-Pal <mate.toth-pal@arm.com>
-:Status: Accepted
 
 ***************************************
 Generating files from templates in TF-M

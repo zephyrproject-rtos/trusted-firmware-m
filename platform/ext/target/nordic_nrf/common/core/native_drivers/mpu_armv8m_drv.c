@@ -77,6 +77,10 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
      * file needs to be setup to ensure that partitions do not overlap.
      */
 
+    if (region_cfg->region_nr >= MPU_ARMV8M_NUM_REGIONS) {
+        return MPU_ARMV8M_ERROR;
+    }
+
     ctrl_before = mpu->CTRL;
     mpu->CTRL = 0;
 

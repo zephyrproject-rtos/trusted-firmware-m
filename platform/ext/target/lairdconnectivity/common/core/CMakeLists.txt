@@ -50,8 +50,6 @@ target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_QSPI.c
-        cmsis_drivers/Driver_USART.c
-        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
         ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_nvmc.c
         ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twim.c
         ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
@@ -61,13 +59,28 @@ target_sources(platform_s
         ${NRF_FOLDER_PATH}/native_drivers/spu.c
         ${NRF_FOLDER_PATH}/spm_hal.c
         ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
-        nv_counters.c
+        ${NRF_FOLDER_PATH}/tfm_hal_platform.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
+    PUBLIC
         plat_test.c
 )
+
+if(SECURE_UART1)
+    target_sources(platform_s
+        PRIVATE
+            cmsis_drivers/Driver_USART.c
+            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
+    )
+endif()
 
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -118,6 +131,5 @@ if(BL2)
             ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
             ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_qspi.c
             ${NRF_FOLDER_PATH}/nrfx_glue.c
-            nv_counters.c
     )
 endif()

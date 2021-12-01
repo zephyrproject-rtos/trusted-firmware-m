@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,15 +48,6 @@ const struct memory_region_limits memory_regions = {
 
     .veneer_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
-
-#ifdef BL2
-    .secondary_partition_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
-
-    .secondary_partition_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
-        SECONDARY_PARTITION_SIZE - 1,
-#endif /* BL2 */
 };
 
 /* Allows software, via SAU, to define the code region as a NSC */
@@ -364,14 +355,6 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
 
-#ifdef BL2
-    /* Secondary image partition */
-    SAU->RNR  = 4U;
-    SAU->RBAR = (memory_regions.secondary_partition_base  & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = (memory_regions.secondary_partition_limit & SAU_RLAR_LADDR_Msk)
-                | SAU_RLAR_ENABLE_Msk;
-#endif /* BL2 */
-
     /* Allows SAU to define the code region as a NSC */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     spctrl->nsccfg |= NSCCFG_CODENSC;
@@ -398,18 +381,6 @@ int32_t mpc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
-
-#ifndef LINK_TO_EFLASH1
-#ifdef BL2
-    /* Secondary image region */
-    ret = EFLASH_MPC.ConfigRegion(memory_regions.secondary_partition_base,
-                                  memory_regions.secondary_partition_limit,
-                                  ARM_MPC_ATTR_NONSECURE);
-    if (ret != ARM_DRIVER_OK) {
-        return ret;
-    }
-#endif /* BL2 */
-#endif
 
     /* SRAM MPC device needs to be initialialized so that the interrupt can be
      * enabled later. The default (secure only) config is used.

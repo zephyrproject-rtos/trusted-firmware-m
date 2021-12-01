@@ -68,14 +68,6 @@
  * because we reserve space for the image header and trailer introduced
  * by the bootloader.
  */
-#ifdef BL2
-#define BL2_HEADER_SIZE      (0x400)       /* 1 KB */
-#define BL2_TRAILER_SIZE     (0x800)       /* 2 KB */
-#else
-/* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
-#define BL2_HEADER_SIZE      (0x0)
-#define BL2_TRAILER_SIZE     (0x800)
-#endif /* BL2 */
 
 #define IMAGE_S_CODE_SIZE    (FLASH_S_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 #define IMAGE_NS_CODE_SIZE   (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)

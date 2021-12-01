@@ -68,9 +68,6 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
     case TFM_SVC_SFN_COMPLETION:
         tfm_spm_partition_completion_handler(svc_args[0], svc_args[1], msp);
         break;
-    case TFM_SVC_SPM_REQUEST:
-        tfm_spm_request_handler((struct tfm_state_context_t *)svc_args);
-        break;
     case TFM_SVC_DEPRIV_REQ:
         retval = tfm_spm_depriv_req_handler(svc_args, exc_return);
         break;
@@ -92,7 +89,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);
         break;
-#if (TFM_SPM_LOG_LEVEL > TFM_SPM_LOG_LEVEL_SILENCE)
+#if TFM_SP_LOG_RAW_ENABLED
     case TFM_SVC_OUTPUT_UNPRIV_STRING:
         svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0],
                                              svc_args[1]);

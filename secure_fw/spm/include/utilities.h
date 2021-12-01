@@ -37,4 +37,8 @@ void tfm_core_panic(void);
 /* FixMe: Replace ERROR_MSG() in platform code with a suitable API */
 #define ERROR_MSG(msg) SPMLOG_ERRMSG(msg "\r\n")
 
+/* Stringify preprocessors, no leading underscore. ('STRINGIFY') */
+#define STRINGIFY_EXPAND(x) #x
+#define M2S(m) STRINGIFY_EXPAND(m)
+
 #endif /* __TFM_UTILS_H__ */

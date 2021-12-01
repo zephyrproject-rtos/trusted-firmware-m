@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2020 ARM Limited. All rights reserved.
+ * Copyright (c) 2009-2021 ARM Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -30,7 +30,7 @@
     .align  2
     .globl  __Vectors
 __Vectors:
-    .long   Image$$ARM_LIB_STACK_MSP$$ZI$$Limit /* Top of Stack */
+    .long   Image$$ARM_LIB_STACK$$ZI$$Limit /* Top of Stack */
 
     .long   Reset_Handler               /* Reset Handler */
     .long   NMI_Handler                 /* NMI Handler */
@@ -253,12 +253,6 @@ Reset_Handler:
     str     r0, [r1]
 
     bl      SystemInit
-
-    mrs     r0, control    /* Get control value */
-    orr     r0, r0, #2     /* Select switch to PSP */
-    msr     control, r0
-    ldr     r0, =Image$$ARM_LIB_STACK$$ZI$$Limit
-    msr     psp, r0
 
 /* Call _start function provided by libraries.
  * If those libraries are not accessible, define __START as your entry point.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited
+ * Copyright (c) 2018-2021 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,13 +103,6 @@ struct platform_data_t tfm_peripheral_uart1 = {
         UART1_BASE_S + 0xFFF,
         PPC_SP_APB_PPC_EXP1,
         CMSDK_UART1_APB_PPC_POS
-};
-
-struct platform_data_t tfm_peripheral_fpga_io = {
-        MPS2_IO_FPGAIO_BASE_S,
-        MPS2_IO_FPGAIO_BASE_S + 0xFFF,
-        PPC_SP_APB_PPC_EXP2,
-        CMSDK_FPGA_IO_PPC_POS
 };
 
 struct platform_data_t tfm_peripheral_timer0 = {
@@ -389,8 +382,7 @@ void ppc_init_cfg(void)
                          (1U << CMSDK_DTIMER_APB_PPC_POS) |
                          (1U << CMSDK_MHU0_APB_PPC_POS) |
                          (1U << CMSDK_MHU1_APB_PPC_POS);
-    /* Grant non-secure access to S32K Timer in PPC1*/
-    spctrl->apbnsppc1 |= (1U << CMSDK_S32K_TIMER_PPC_POS);
+
     /* Grant non-secure access for APB peripherals on EXP1 */
     spctrl->apbnsppcexp1 |= (1U << CMSDK_SPI0_APB_PPC_POS) |
                             (1U << CMSDK_SPI1_APB_PPC_POS) |

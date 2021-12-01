@@ -13,86 +13,22 @@
 #include "bootutil/bootutil_log.h"
 #include "Driver_Flash.h"
 
-/* When undefined FLASH_DEV_NAME_0 or FLASH_DEVICE_ID_0 , default */
-#if !defined(FLASH_DEV_NAME_0) || !defined(FLASH_DEVICE_ID_0)
-#define FLASH_DEV_NAME_0  FLASH_DEV_NAME
-#define FLASH_DEVICE_ID_0 FLASH_DEVICE_ID
-#endif
+#define FLASH_PROGRAM_UNIT    TFM_HAL_FLASH_PROGRAM_UNIT
 
-/* When undefined FLASH_DEV_NAME_1 or FLASH_DEVICE_ID_1 , default */
-#if !defined(FLASH_DEV_NAME_1) || !defined(FLASH_DEVICE_ID_1)
-#define FLASH_DEV_NAME_1  FLASH_DEV_NAME
-#define FLASH_DEVICE_ID_1 FLASH_DEVICE_ID
-#endif
+/**
+ * Return the greatest value not greater than `value` that is aligned to
+ * `alignment`.
+ */
+#define FLOOR_ALIGN(value, alignment) ((value) & ~((alignment) - 1))
 
-/* When undefined FLASH_DEV_NAME_2 or FLASH_DEVICE_ID_2 , default */
-#if !defined(FLASH_DEV_NAME_2) || !defined(FLASH_DEVICE_ID_2)
-#define FLASH_DEV_NAME_2  FLASH_DEV_NAME
-#define FLASH_DEVICE_ID_2 FLASH_DEVICE_ID
-#endif
+/**
+ * Return the least value not less than `value` that is aligned to `alignment`.
+ */
+#define CEILING_ALIGN(value, alignment) \
+                         (((value) + ((alignment) - 1)) & ~((alignment) - 1))
 
-/* When undefined FLASH_DEV_NAME_3 or FLASH_DEVICE_ID_3 , default */
-#if !defined(FLASH_DEV_NAME_3) || !defined(FLASH_DEVICE_ID_3)
-#define FLASH_DEV_NAME_3  FLASH_DEV_NAME
-#define FLASH_DEVICE_ID_3 FLASH_DEVICE_ID
-#endif
-
-/* When undefined FLASH_DEV_NAME_SCRATCH or FLASH_DEVICE_ID_SCRATCH , default */
-#if !defined(FLASH_DEV_NAME_SCRATCH) || !defined(FLASH_DEVICE_ID_SCRATCH)
-#define FLASH_DEV_NAME_SCRATCH  FLASH_DEV_NAME
-#define FLASH_DEVICE_ID_SCRATCH FLASH_DEVICE_ID
-#endif
-
-#define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
-
-/* Flash device names must be specified by target */
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME_0;
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME_1;
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME_2;
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME_3;
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME_SCRATCH;
-
-static const struct flash_area flash_map[] = {
-    {
-        .fa_id = FLASH_AREA_0_ID,
-        .fa_device_id = FLASH_DEVICE_ID_0,
-        .fa_driver = &FLASH_DEV_NAME_0,
-        .fa_off = FLASH_AREA_0_OFFSET,
-        .fa_size = FLASH_AREA_0_SIZE,
-    },
-    {
-        .fa_id = FLASH_AREA_2_ID,
-        .fa_device_id = FLASH_DEVICE_ID_2,
-        .fa_driver = &FLASH_DEV_NAME_2,
-        .fa_off = FLASH_AREA_2_OFFSET,
-        .fa_size = FLASH_AREA_2_SIZE,
-    },
-#if (MCUBOOT_IMAGE_NUMBER == 2)
-    {
-        .fa_id = FLASH_AREA_1_ID,
-        .fa_device_id = FLASH_DEVICE_ID_1,
-        .fa_driver = &FLASH_DEV_NAME_1,
-        .fa_off = FLASH_AREA_1_OFFSET,
-        .fa_size = FLASH_AREA_1_SIZE,
-    },
-    {
-        .fa_id = FLASH_AREA_3_ID,
-        .fa_device_id = FLASH_DEVICE_ID_3,
-        .fa_driver = &FLASH_DEV_NAME_3,
-        .fa_off = FLASH_AREA_3_OFFSET,
-        .fa_size = FLASH_AREA_3_SIZE,
-    },
-#endif
-    {
-        .fa_id = FLASH_AREA_SCRATCH_ID,
-        .fa_device_id = FLASH_DEVICE_ID_SCRATCH,
-        .fa_driver = &FLASH_DEV_NAME_SCRATCH,
-        .fa_off = FLASH_AREA_SCRATCH_OFFSET,
-        .fa_size = FLASH_AREA_SCRATCH_SIZE,
-    },
-};
-
-static const int flash_map_entry_num = ARRAY_SIZE(flash_map);
+extern const struct flash_area flash_map[];
+extern const int flash_map_entry_num;
 
 /*
  * Check the target address in the flash_area_xxx operation.
@@ -146,28 +82,226 @@ void flash_area_close(const struct flash_area *area)
     /* Nothing to do. */
 }
 
+/*
+ * Read/write/erase. Offset is relative from beginning of flash area.
+ * `off` and `len` can be any alignment.
+ * Return 0 on success, other value on failure.
+ */
 int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
                     uint32_t len)
 {
+    uint32_t remaining_len;
+    uint32_t aligned_off;
+    uint8_t temp_buffer[sizeof(uint32_t)];
+    uint8_t align_unit, i = 0;
+    int ret = 0;
+
+    /* Valid entries for data item width */
+    uint32_t data_width_byte[] = {
+        sizeof(uint8_t),
+        sizeof(uint16_t),
+        sizeof(uint32_t),
+    };
+    ARM_FLASH_CAPABILITIES DriverCapabilities;
+
     BOOT_LOG_DBG("read area=%d, off=%#x, len=%#x", area->fa_id, off, len);
 
     if (!is_range_valid(area, off, len)) {
         return -1;
     }
+    remaining_len = len;
 
-    return DRV_FLASH_AREA(area)->ReadData(area->fa_off + off, dst, len);
+    /* CMSIS ARM_FLASH_ReadData API requires the `addr` data type size aligned.
+     * Data type size is specified by the data_width in ARM_FLASH_CAPABILITIES.
+     */
+    DriverCapabilities = DRV_FLASH_AREA(area)->GetCapabilities();
+    align_unit = data_width_byte[DriverCapabilities.data_width];
+    aligned_off = FLOOR_ALIGN(off, align_unit);
+
+    /* Read the first align_unit long data if `off` is not aligned. */
+    if (aligned_off != off) {
+        ret = DRV_FLASH_AREA(area)->ReadData(area->fa_off + aligned_off,
+                                             temp_buffer,
+                                             align_unit);
+        if (ret < 0) {
+            return ret;
+        }
+
+        /* Copy the read data from off. */
+        for (i = 0; i + off - aligned_off < align_unit; i++) {
+            ((uint8_t *)dst)[i] = temp_buffer[i + off - aligned_off];
+        }
+        remaining_len -= align_unit - (off - aligned_off);
+    }
+
+    /* CMSIS ARM_FLASH_ReadData does not require the alignment of `cnt`.*/
+    if (remaining_len) {
+        ret = DRV_FLASH_AREA(area)->ReadData(area->fa_off + off + i,
+                                             (uint8_t *)dst + i,
+                                             remaining_len);
+    }
+
+    /* CMSIS ARM_FLASH_ReadData can return the number of data items read or
+     * Status Error Codes which are negative for failures.
+     */
+    if (ret < 0) {
+        return ret;
+    } else {
+        return 0;
+    }
 }
 
+/* Writes `len` bytes of flash memory at `off` from the buffer at `src`.
+ * `off` and `len` can be any alignment.
+ */
 int flash_area_write(const struct flash_area *area, uint32_t off,
                      const void *src, uint32_t len)
 {
+    uint8_t add_padding[FLASH_PROGRAM_UNIT];
+#if (FLASH_PROGRAM_UNIT == 1)
+    uint8_t len_padding[FLASH_PROGRAM_UNIT]; /* zero sized arrayas are illegal C */
+#else
+    uint8_t len_padding[FLASH_PROGRAM_UNIT - 1];
+#endif
+
+    /* The PROGRAM_UNIT aligned value of `off` */
+    uint32_t aligned_off;
+
+    /* The total write length. */
+    uint32_t aligned_len;
+    uint32_t i, k;
+
+    /* The index in src[] that has been programmed. */
+    uint32_t src_written_idx = 0;
+    uint32_t add_padding_size, len_padding_size;
+    uint32_t write_size;
+    uint32_t last_unit_start_off = 0;
+    /*
+     *    aligned_off           off           last_unit_start_off
+     *        |                  |                     |
+     *        | add_padding_size |                     |   | len_padding_size  |
+     *        |+++++++++++++++++++**|******************|***@@@@@@@@@@@@@@@@@@@@|
+     *        |                     |                  |                       |
+     * ---->--|---- PROGRAM UNIT ---|-- PROGRAM UNIT --|---- PROGRAM UNIT -----|
+     *        |                     |                  |                       |
+     *        |+++++++++++++++++++**|******************|***@@@@@@@@@@@@@@@@@@@@|
+     *                            |<-------- len --------->|
+     */
+
     BOOT_LOG_DBG("write area=%d, off=%#x, len=%#x", area->fa_id, off, len);
 
+    /* Align the target address. The area->fa_off should already be aligned. */
+    aligned_off = FLOOR_ALIGN(off, FLASH_PROGRAM_UNIT);
+    add_padding_size = off - aligned_off;
     if (!is_range_valid(area, off, len)) {
         return -1;
     }
 
-    return DRV_FLASH_AREA(area)->ProgramData(area->fa_off + off, src, len);
+    /* Read the bytes from aligned_off to off. */
+    if (flash_area_read(area, aligned_off, add_padding, add_padding_size)) {
+        return -1;
+    }
+
+    /* Align the write size */
+    aligned_len = CEILING_ALIGN(len + add_padding_size, FLASH_PROGRAM_UNIT);
+    len_padding_size = aligned_len - len - add_padding_size;
+    if (!is_range_valid(area, aligned_off, aligned_len)) {
+        return -1;
+    }
+
+    /* Read the bytes from (off + len) to (off + aligned_len). */
+    if (flash_area_read(area, off + len, len_padding,
+                        len_padding_size)) {
+        return -1;
+    }
+
+    /* Program the first FLASH_PROGRAM_UNIT. */
+    if (add_padding_size) {
+        /* Fill the first program unit bytes with data from src. */
+        for (i = add_padding_size, src_written_idx = 0;
+             i < FLASH_PROGRAM_UNIT && src_written_idx < len;
+             i++, src_written_idx++) {
+            add_padding[i] = ((uint8_t *)src)[src_written_idx];
+        }
+        if (src_written_idx == len) {
+            /* aligned_len equals to FLASH_PROGRAM_UNIT in this case.
+             * Fill the len_padding_size datas into add_padding.
+             */
+            for (k = 0; i < FLASH_PROGRAM_UNIT && k < len_padding_size;
+                 i++, k++) {
+                add_padding[i] = len_padding[k];
+            }
+            if (k != len_padding_size) {
+                return -1;
+            }
+        }
+
+        /* Check the first program unit bytes are all filled. */
+        if (i != FLASH_PROGRAM_UNIT) {
+            return -1;
+        }
+        if (DRV_FLASH_AREA(area)->ProgramData(area->fa_off + aligned_off,
+                                              add_padding,
+                                              FLASH_PROGRAM_UNIT)) {
+            return -1;
+        }
+    }
+
+    /* 'src_written_idx' indicates the number of the src data which has already
+     * been programed into flash. 'src_written_idx' equals to 'len' means that
+     * all the data in src has been programmed and aligned_len equals to
+     * FLASH_PROGRAM_UNIT. This case has been handled above.
+     * 'src_written_idx' less than 'len' means that not all the data in src has
+     * been programmed.
+     */
+    if (src_written_idx < len) {
+        /* Program from the first aligned bytes(src_written_idx) to the last
+         * aligned bytes in src.
+         */
+        write_size = FLOOR_ALIGN(len - src_written_idx, FLASH_PROGRAM_UNIT);
+        if (write_size > 0) {
+            if (DRV_FLASH_AREA(area)->ProgramData(
+                                           area->fa_off + off + src_written_idx,
+                                           src,
+                                           write_size)) {
+                return -1;
+            }
+            src_written_idx += write_size;
+        }
+        last_unit_start_off = src_written_idx;
+
+        /* Program the last program unit data into flash. */
+        if (len_padding_size) {
+            /* Copy the last unaligned bytes in src to add_padding. */
+            for (i = 0; i < FLASH_PROGRAM_UNIT && src_written_idx < len;
+                 i++, src_written_idx++) {
+                add_padding[i] = ((uint8_t *)src)[src_written_idx];
+            }
+
+            if (src_written_idx != len) {
+                return -1;
+            }
+            /* Copy the len_padding_size bytes in len_padding to add_padding. */
+            for (k = 0; i < FLASH_PROGRAM_UNIT && k < len_padding_size;
+                 i++, k++) {
+                add_padding[i] = len_padding[k];
+            }
+            write_size = add_padding_size + last_unit_start_off +
+                         FLASH_PROGRAM_UNIT;
+            if (i != FLASH_PROGRAM_UNIT || k != len_padding_size ||
+                aligned_len != write_size) {
+                return -1;
+            }
+            if (DRV_FLASH_AREA(area)->ProgramData(
+                                area->fa_off + off + last_unit_start_off,
+                                add_padding,
+                                FLASH_PROGRAM_UNIT)) {
+                return -1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 int flash_area_erase(const struct flash_area *area, uint32_t off, uint32_t len)

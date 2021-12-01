@@ -11,8 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "psa/error.h"
 #include "psa/client.h"
+#include "psa_config.h"
+#include "psa/error.h"
+#include "psa/framework_feature.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -322,6 +324,111 @@ psa_irq_status_t psa_irq_disable(psa_signal_t irq_signal);
  * \arg                       \a irq_signal is not currently asserted.
  */
 void psa_reset_signal(psa_signal_t irq_signal);
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+
+/**
+ * \brief Map a client input vector for direct access by a Secure Partition RoT
+ *        Service.
+ *
+ * \param[in] msg_handle        Handle for the client's message.
+ * \param[in] invec_idx         Index of input vector to map. Must be
+ *                              less than \ref PSA_MAX_IOVEC.
+ *
+ * \retval                      A pointer to the input vector data.
+ * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           MM-IOVEC has not been enabled for the RoT
+ *                                Service that received the message.
+ * \arg                           msg_handle is invalid.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
+ * \arg                           invec_idx is equal to or greater than
+ *                                \ref PSA_MAX_IOVEC.
+ * \arg                           The input vector has length zero.
+ * \arg                           The input vector has already been mapped using
+ *                                psa_map_invec().
+ * \arg                           The input vector has already been accessed
+ *                                using psa_read() or psa_skip().
+ */
+const void *psa_map_invec(psa_handle_t msg_handle, uint32_t invec_idx);
+
+/**
+ * \brief Unmap a previously mapped client input vector from a Secure Partition
+ *        RoT Service.
+ *
+ * \param[in] msg_handle        Handle for the client's message.
+ * \param[in] invec_idx         Index of input vector to map. Must be
+ *                              less than \ref PSA_MAX_IOVEC.
+ *
+ * \retval void
+ * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           msg_handle is invalid.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
+ * \arg                           invec_idx is equal to or greater than
+ *                                \ref PSA_MAX_IOVEC.
+ * \arg                           The input vector has not been mapped by a call
+ *                                to psa_map_invec().
+ * \arg                           The input vector has already been unmapped by
+ *                                a call to psa_unmap_invec().
+ */
+void psa_unmap_invec(psa_handle_t msg_handle, uint32_t invec_idx);
+
+/**
+ * \brief Map a client output vector for direct access by a Secure Partition RoT
+ *        Service.
+ *
+ * \param[in] msg_handle        Handle for the client's message.
+ * \param[in] outvec_idx        Index of output vector to map. Must be
+ *                              less than \ref PSA_MAX_IOVEC.
+ *
+ * \retval                      A pointer to the output vector data.
+ * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           MM-IOVEC has not been enabled for the RoT
+ *                                Service that received the message.
+ * \arg                           msg_handle is invalid.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
+ * \arg                           outvec_idx is equal to or greater than
+ *                                \ref PSA_MAX_IOVEC.
+ * \arg                           The output vector has length zero.
+ * \arg                           The output vector has already been mapped
+ *                                using psa_map_outvec().
+ * \arg                           The output vector has already been accessed
+ *                                using psa_write().
+ */
+void *psa_map_outvec(psa_handle_t msg_handle, uint32_t outvec_idx);
+
+/**
+ * \brief Unmap a previously mapped client output vector from a Secure Partition
+ *        RoT Service.
+ *
+ * \param[in] msg_handle        Handle for the client's message.
+ * \param[in] outvec_idx        Index of output vector to map. Must be
+ *                              less than \ref PSA_MAX_IOVEC.
+ * \param[in] len               The number of bytes written to the output
+ *                              vector. This must be less than or equal to the
+ *                              size of the output vector.
+ *
+ * \retval void
+ * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           msg_handle is invalid.
+ * \arg                           msg_handle does not refer to a request
+ *                                message.
+ * \arg                           outvec_idx is equal to or greater than
+ *                                \ref PSA_MAX_IOVEC.
+ * \arg                           The output vector has not been mapped by a
+ *                                call to psa_map_outvec().
+ * \arg                           The output vector has already been unmapped by
+ *                                a call to psa_unmap_outvec().
+ */
+void psa_unmap_outvec(psa_handle_t msg_handle, uint32_t outvec_idx, size_t len);
+
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
 #ifdef __cplusplus
 }

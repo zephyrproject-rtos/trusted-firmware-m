@@ -11,63 +11,9 @@
 #include "device_definition.h"
 #include "tfm_peripherals_def.h"
 
-#define USERLED_MASK                (0x3)
-#define BTN_WAIT_INIT_COUNTER_VALUE (10000u)
 #define TIMER_RELOAD_VALUE          (CTIMER_CLK_FREQ * 1) /* 1 sec */
 
-#ifdef TFM_ENABLE_PERIPH_ACCESS_TEST
-
-/**
- * \brief Store the state of the mocked LED
- *
- * This variable have to be linked to the data section of the partition
- * TFM_SP_CORE_TEST so that in case of in case of isolation within the secure
- * domain the Core Test service can access it.
- */
-uint32_t led_status
-    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-    = 0x02u;
-
-/**
- * \brief Simulate user reaction time
- */
-static void busy_wait_to_simulate_user(void)
-{
-    volatile uint32_t counter = BTN_WAIT_INIT_COUNTER_VALUE;
-    while (counter)
-    {
-        --counter;
-    }
-}
-
-void tfm_plat_test_wait_user_button_pressed(void)
-{
-    busy_wait_to_simulate_user();
-}
-
-void tfm_plat_test_wait_user_button_released(void)
-{
-    busy_wait_to_simulate_user();
-}
-
-uint32_t tfm_plat_test_get_led_status(void)
-{
-    return led_status;
-}
-
-void tfm_plat_test_set_led_status(uint32_t status)
-{
-    led_status = status & USERLED_MASK;
-}
-
-uint32_t tfm_plat_test_get_userled_mask(void)
-{
-    return USERLED_MASK;
-}
-
-#endif /* TFM_ENABLE_PERIPH_ACCESS_TEST */
-
-#ifdef TFM_ENABLE_SLIH_TEST
+#ifdef TEST_NS_SLIH_IRQ
 
 #if (__ARM_FEATURE_CMSE & 0x2) /* Secure */
 
@@ -154,4 +100,4 @@ void tfm_plat_test_non_secure_timer_stop(void)
 }
 #endif /* (__ARM_FEATURE_CMSE & 0x2) */
 
-#endif /* TFM_ENABLE_SLIH_TEST */
+#endif /* TEST_NS_SLIH_IRQ */

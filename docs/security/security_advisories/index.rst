@@ -8,6 +8,7 @@ Security Advisories
     stack_seal_vulnerability
     svc_caller_sp_fetching_vulnerability
     crypto_multi_part_ops_abort_fail
+    profile_small_key_id_encoding_vulnerability
 
 --------------
 

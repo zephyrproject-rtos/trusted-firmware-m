@@ -59,7 +59,10 @@ target_sources(tfm_sprt
 # to not overshadow _real_ warnings.
 set_source_files_properties(tfm_platform_secure_api.c
     PROPERTIES
-        COMPILE_FLAGS -Wno-implicit-function-declaration
+        COMPILE_FLAGS
+            $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:IAR>:>
 )
 
 ############################ Partition Defs ####################################

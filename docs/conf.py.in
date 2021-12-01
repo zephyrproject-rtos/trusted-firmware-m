@@ -47,7 +47,7 @@ release = '@SPHINXCFG_TFM_VERSION_FULL@'
 # ones.
 extensions = [
     'sphinx.ext.imgmath',
-    'm2r', #Support markdown files. Needed for external code.
+    'm2r2', #Support markdown files. Needed for external code.
     'sphinx.ext.autosectionlabel', #Make sphinx generate a label for each section
     'sphinxcontrib.plantuml', #Add support for PlantUML drawings
     'sphinxcontrib.rsvgconverter', #Add support for SVG to PDF
@@ -127,7 +127,7 @@ html_show_copyright = False
 
 #Add custom css for HTML. Used to allow full page width rendering
 def setup(app):
-    app.add_stylesheet('css/tfm_custom.css')
+    app.add_css_file('css/tfm_custom.css')
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -137,6 +137,16 @@ htmlhelp_basename = 'TF-M doc'
 rst_prolog = """
 .. |TFM_VERSION| replace:: @SPHINXCFG_TFM_VERSION@
 """
+
+# Enable figures and tables auto numbering
+numfig = True
+numfig_secnum_depth = 0
+numfig_format = {
+    'figure': 'Figure %s:',
+    'table': 'Table %s:',
+    'code-block': 'Listing %s:',
+    'section': '%s'
+}
 
 # -- Options for LaTeX output ------------------------------------------------
 

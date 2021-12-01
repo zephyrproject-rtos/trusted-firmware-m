@@ -22,10 +22,12 @@ target_sources(tfm_s
     PRIVATE
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_cmsdk_musca_s.s>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_cmsdk_musca_s.S>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_cmsdk_musca_s.s>
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(NS)
@@ -33,10 +35,12 @@ if(NS)
         PRIVATE
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_cmsdk_musca_ns.s>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_cmsdk_musca_ns.S>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_cmsdk_musca_ns.s>
     )
     target_add_scatter_file(tfm_ns
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/musca_ns.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/musca_ns.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/musca_ns.icf>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
@@ -49,10 +53,12 @@ if(BL2)
         PRIVATE
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/startup_cmsdk_musca_bl2.s>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_cmsdk_musca_bl2.S>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_cmsdk_musca_bl2.s>
     )
     target_add_scatter_file(bl2
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/musca_bl2.sct>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/musca_bl2.ld>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/musca_bl2.icf>
     )
 endif()
 
@@ -69,11 +75,11 @@ target_include_directories(platform_s
         partition
         services/include
         Libraries
+        cc312
 )
 
 target_sources(platform_s
     PRIVATE
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
         CMSIS_Driver/Driver_QSPI_Flash.c
         CMSIS_Driver/Driver_Flash_MRAM.c
         CMSIS_Driver/Driver_MPC.c
@@ -90,10 +96,13 @@ target_sources(platform_s
         Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/cache_drv.c
         spm_hal.c
+        tfm_interrupts.c
         tfm_hal_isolation.c
+        tfm_hal_platform.c
         target_cfg.c
         Native_Driver/timer_cmsdk_drv.c
         Libraries/mt25ql_flash_lib.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -114,7 +123,6 @@ target_sources(platform_ns
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_include_directories(platform_ns
@@ -133,7 +141,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:${CMAKE_CURRENT_SOURCE_DIR}/crypto_keys.c>
             boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
@@ -149,6 +156,7 @@ if(BL2)
             partition
             Device/Include
             Libraries
+            cc312
         PRIVATE
             .
             CMSIS_Driver/Config
@@ -156,5 +164,10 @@ if(BL2)
             Native_Driver
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
+    )
+
+    target_compile_options(platform_bl2
+        PRIVATE
+            ${BL2_COMPILER_CP_FLAG}
     )
 endif()

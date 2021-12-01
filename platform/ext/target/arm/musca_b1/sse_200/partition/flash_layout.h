@@ -31,8 +31,8 @@
  * 0x0A16_0000 Non-secure image secondary slot (512 KB)
  * 0x0A1E_0000 Scratch area (64 KB)
  * 0x0A1F_0000 Internal Trusted Storage Area (32 KB)
- * 0x0A1F_8000 NV counters area (16 KB)
- * 0x0A1F_C000 Unused (32 KB)
+ * 0x0A1F_8000 OTP / NV counter area (8 KB)
+ * 0x0A1F_A000 Unused (40 KB)
  *
  * Flash layout on Musca-B1 with BL2 (single image boot):
  *
@@ -45,8 +45,8 @@
  *    0x0A16_0000 Non-secure image secondary (512 KB)
  * 0x0A1E_0000 Scratch area (64 KB)
  * 0x0A1F_0000 Internal Trusted Storage Area (32 KB)
- * 0x0A1F_8000 NV counters area (16 KB)
- * 0x0A1F_C000 Unused (32 KB)
+ * 0x0A1F_8000 OTP / NV counter area (8 KB)
+ * 0x0A1F_A000 Unused (40 KB)
  *
  * Note: As eFlash is written at runtime, the eFlash driver code is placed
  * in code SRAM to avoid any interference.
@@ -152,10 +152,11 @@
                                          FLASH_AREA_SCRATCH_SIZE)
 #define FLASH_ITS_AREA_SIZE             (2 * FLASH_AREA_IMAGE_SECTOR_SIZE)
 
-/* NV Counters definitions */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
-                                         FLASH_ITS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
+                                           FLASH_ITS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
@@ -175,6 +176,8 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_EFLASH0
+/* Smallest flash programmable unit in bytes */
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x4)
 
 /* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
@@ -214,11 +217,12 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_ITS_PROGRAM_UNIT       (0x4)
 
-/* NV Counters definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    (0x18) /* 24 Bytes */
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_NV_COUNTERS_AREA_SIZE
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
 /* Use eFlash 0 memory to store Code data */
 #define S_ROM_ALIAS_BASE  (0x1A000000)
@@ -290,6 +294,9 @@
 #define FLASH_AREA_SCRATCH_SIZE         0
 
 #define FLASH_DEV_NAME                  Driver_EFLASH0
+/* Smallest flash programmable unit in bytes */
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x4)
+
 #define FLASH_AREA_BL2_OFFSET           0
 #define FLASH_AREA_BL2_SIZE             0x20000
 

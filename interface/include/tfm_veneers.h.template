@@ -17,9 +17,6 @@ extern "C" {
 #endif
 
 {% for partition in partitions %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
 /******** {{partition.manifest.name}} ********/
     {% for function in partition.manifest.secure_functions%}
         {% if function.signal.lower().startswith('tfm_') %}
@@ -31,9 +28,6 @@ psa_status_t {{function.signal.lower()}}_veneer(psa_invec *in_vec, size_t in_len
 psa_status_t tfm_{{function.signal.lower()}}_veneer(psa_invec *in_vec, size_t in_len, psa_outvec *out_vec, size_t out_len);
         {% endif %}
     {% endfor %}
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
 
 {% endfor %}
 #ifdef __cplusplus

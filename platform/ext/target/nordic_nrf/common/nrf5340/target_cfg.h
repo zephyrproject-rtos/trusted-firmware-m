@@ -50,6 +50,10 @@ struct memory_region_limits {
     uint32_t secondary_partition_base;
     uint32_t secondary_partition_limit;
 #endif /* BL2 */
+#ifdef NRF_NS_STORAGE
+    uint32_t non_secure_storage_partition_base;
+    uint32_t non_secure_storage_partition_limit;
+#endif /* NRF_NS_STORAGE */
 };
 
 /**

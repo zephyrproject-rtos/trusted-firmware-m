@@ -33,9 +33,9 @@ if(BL2)
         PRIVATE
             ${STM_COMMON_DIR}/stm32l5xx/Device/Source/startup_stm32l5xx_bl2.c
             ${STM_COMMON_DIR}/stm32l5xx/bl2/low_level_ospi_device.c
-            ${STM_COMMON_DIR}/stm32l5xx/CMSIS_Driver/low_level_ospi_flash.c
-            ${STM_COMMON_DIR}/stm32l5xx/stm32l5xx_hal/Src/stm32l5xx_hal_ospi.c
-            ${STM_COMMON_DIR}/Components/mx25lm51245g/mx25lm51245g.c
+            ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_ospi_flash.c
+            ${STM_COMMON_DIR}/stm32l5xx/hal/Src/stm32l5xx_hal_ospi.c
+            ${STM_COMMON_DIR}/hal/Components/mx25lm51245g/mx25lm51245g.c
             ${STM32L563E_DK_DIR}/src/stm32l562e_discovery_ospi.c
     )
     target_include_directories(bl2

@@ -33,26 +33,9 @@ specified.
 
 - ``CRYPTO_HW_ACCELERATOR``
    - ``ON`` All possible mbedtls cryptographic operations will be offloaded to
-     the accelerator. This mode is required for
-     ``CRYPTO_HW_ACCELERATOR_OTP_STATE`` to have an effect.
+     the accelerator.
    - ``OFF`` The cryptographic accelerator will be ignored and software
      cryptography will be used.
-
-- ``CRYPTO_HW_ACCELERATOR_OTP_STATE``
-   - ``DISABLED`` The HW accelerator will not use any data from its onboard OTP
-     (One Time Programmable) memory.
-   - ``PROVISIONING`` This special mode is used to program cryptographic
-     material into the OTP memory. When the flag is set TF-M will not boot, but
-     will instead program the hardware unique key, the root of trust private key
-     and the attestation private key into the OTP memory.
-   - ``ENABLED`` The HW accelerator will use the previously programmed data as
-     the hardware unique key, the root of trust private key and the attestation
-     private key.
-
-.. Warning::
-
-   Provisioning **can not** be reversed, and data in the OTP memory **can not**
-   be changed once set.
 
 cmsis
 =====

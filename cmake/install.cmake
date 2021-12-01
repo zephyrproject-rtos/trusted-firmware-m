@@ -39,13 +39,14 @@ install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa_manifest
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
                     ${INTERFACE_INC_DIR}/tfm_ns_interface.h
+                    ${INTERFACE_INC_DIR}/psa_config.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
-install(FILES       ${INTERFACE_INC_DIR}/ext/tz_context.h
-        DESTINATION ${INSTALL_INTERFACE_INC_DIR}/ext)
+install(FILES       ${INTERFACE_INC_DIR}/tfm_ns_client_ext.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 if (TFM_PSA_API)
-    install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_param.h
+    install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_pack.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
@@ -53,7 +54,7 @@ if (TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${INTERFACE_INC_DIR}/multi_core/tfm_multi_core_api.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox.h
-                        ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox_config.h
+                        ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_mailbox_config.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 elseif (NOT TFM_PSA_API)
     install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_veneers.h
@@ -63,12 +64,16 @@ endif()
 if (TFM_PARTITION_PROTECTED_STORAGE OR FORWARD_PROT_MSG)
     install(FILES       ${INTERFACE_INC_DIR}/psa/protected_storage.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
+    install(FILES       ${INTERFACE_INC_DIR}/tfm_ps_defs.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OR FORWARD_PROT_MSG)
     install(FILES       ${INTERFACE_INC_DIR}/psa/internal_trusted_storage.h
                         ${INTERFACE_INC_DIR}/psa/storage_common.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
+    install(FILES       ${INTERFACE_INC_DIR}/tfm_its_defs.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if (TFM_PARTITION_CRYPTO OR FORWARD_PROT_MSG)
@@ -88,6 +93,8 @@ endif()
 if (TFM_PARTITION_INITIAL_ATTESTATION OR FORWARD_PROT_MSG)
     install(FILES       ${INTERFACE_INC_DIR}/psa/initial_attestation.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
+    install(FILES       ${INTERFACE_INC_DIR}/tfm_attest_defs.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
 if(TFM_PARTITION_AUDIT_LOG)

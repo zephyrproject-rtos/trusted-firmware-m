@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  * Copyright 2019-2020 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,17 +70,20 @@
  * because we reserve space for the image header and trailer introduced
  * by the bootloader.
  */
-#ifdef BL2
-#define BL2_HEADER_SIZE      (0x400)       /* 1 KB */
-#define BL2_TRAILER_SIZE     (0x400)       /* 1 KB */
-#else
-/* No header if no bootloader, but keep IMAGE_CODE_SIZE the same */
-#define BL2_HEADER_SIZE      (0x0)
-#define BL2_TRAILER_SIZE     (0x0)
-#endif /* BL2 */
 
+#if (!defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)) && \
+    (NS_IMAGE_PRIMARY_PARTITION_OFFSET > S_IMAGE_PRIMARY_PARTITION_OFFSET)
+/* If secure image and nonsecure image are concatenated, and nonsecure image
+ * locates at the higher memory range, then the secure image does not need
+ * the trailer area.
+ */
+#define IMAGE_S_CODE_SIZE \
+            (FLASH_S_PARTITION_SIZE - BL2_HEADER_SIZE)
+#else
 #define IMAGE_S_CODE_SIZE \
             (FLASH_S_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
+#endif
+
 #define IMAGE_NS_CODE_SIZE \
             (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 

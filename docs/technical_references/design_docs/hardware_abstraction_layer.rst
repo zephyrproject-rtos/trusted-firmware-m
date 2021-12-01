@@ -202,10 +202,14 @@ tfm_hal_platform_init()
 
 **Description**
 
-This API performs the platform-specific initialization.
+This API performs the platform initializations **before** the :term:`SPM`
+initialization.
 
-This API is called after architecture and platform common initialization has
-finished during system early startup.
+The initializations could include but not limited to:
+- Fault handlers
+- Reset configurations
+- Debug init
+- NVIC init
 
 **Parameter**
 
@@ -252,56 +256,56 @@ Memory Access Attributes
 ------------------------
 The memory access attributes are encoded as bit fields, you can logic OR them to
 have a combination of the atrributes, for example
-``TFM_HAL_MEM_ATTR_UNPRIVILEGED | TFM_HAL_MEM_ATTR_READABLE`` is unprivileged
+``TFM_HAL_ACCESS_UNPRIVILEGED | TFM_HAL_ACCESS_READABLE`` is unprivileged
 readable. The data type is `uint32_t`.
 
-TFM_HAL_MEM_ATTR_EXECUTABLE
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TFM_HAL_ACCESS_EXECUTABLE
+^^^^^^^^^^^^^^^^^^^^^^^^^
 The memory is executable.
 
 .. code-block:: c
 
-  #define TFM_HAL_MEM_ATTR_EXECUTABLE (1UL << 0)
+  #define TFM_HAL_ACCESS_EXECUTABLE (1UL << 0)
 
-TFM_HAL_MEM_ATTR_READABLE
-^^^^^^^^^^^^^^^^^^^^^^^^^
+TFM_HAL_ACCESS_READABLE
+^^^^^^^^^^^^^^^^^^^^^^^
 The memory is readable.
 
 .. code-block:: c
 
-  #define TFM_HAL_MEM_ATTR_READABLE (1UL << 1)
+  #define TFM_HAL_ACCESS_READABLE (1UL << 1)
 
-TFM_HAL_MEM_ATTR_WRITABLE
-^^^^^^^^^^^^^^^^^^^^^^^^^
+TFM_HAL_ACCESS_WRITABLE
+^^^^^^^^^^^^^^^^^^^^^^^
 The memory is writable.
 
 .. code-block:: c
 
-  #define TFM_HAL_MEM_ATTR_WRITABLE (1UL << 2)
+  #define TFM_HAL_ACCESS_WRITABLE (1UL << 2)
 
-TFM_HAL_MEM_ATTR_UNPRIVILEGED
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TFM_HAL_ACCESS_UNPRIVILEGED
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The memory is unprivileged mode accessible.
 
 .. code-block:: c
 
-  #define TFM_HAL_MEM_ATTR_UNPRIVILEGED (1UL << 3)
+  #define TFM_HAL_ACCESS_UNPRIVILEGED (1UL << 3)
 
-TFM_HAL_MEM_ATTR_DEVICE
-^^^^^^^^^^^^^^^^^^^^^^^
+TFM_HAL_ACCESS_DEVICE
+^^^^^^^^^^^^^^^^^^^^^
 The memory is a MMIO device.
 
 .. code-block:: c
 
-  #define TFM_HAL_MEM_ATTR_DEVICE (1UL << 4)
+  #define TFM_HAL_ACCESS_DEVICE (1UL << 4)
 
-TFM_HAL_MEM_ATTR_NS
-^^^^^^^^^^^^^^^^^^^
+TFM_HAL_ACCESS_NS
+^^^^^^^^^^^^^^^^^
 The memory is accessible from :term:`NSPE`
 
 .. code-block:: c
 
-  #define TFM_HAL_MEM_ATTR_NS (1UL << 5)
+  #define TFM_HAL_ACCESS_NS (1UL << 5)
 
 APIs
 ----
@@ -311,7 +315,7 @@ tfm_hal_set_up_static_boundaries()
 
 .. code-block:: c
 
-  tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
+  enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
 
 **Description**
 
@@ -332,31 +336,31 @@ boundaries.
 - ``TFM_HAL_SUCCESS`` - the isolation boundaries have been set up.
 - ``TFM_HAL_ERROR_GENERIC`` - failed to set up the isolation boundaries.
 
-tfm_hal_mpu_update_partition_boundary
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tfm_hal_update_boundaries()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 **Prototype**
 
 .. code-block:: c
 
-  enum tfm_hal_status_t tfm_hal_mpu_update_partition_boundary(uintptr_t start,
-                                                              uintptr_t end);
+  enum tfm_hal_status_t tfm_hal_update_boundaries(
+                              const struct partition_load_info_t *p_ldinf,
+                              void *p_boundaries);
 
 **Description**
 
-This API updates the partition isolation boundary for isolation level 3.
-Inside the partition isolation boundary is the private data of the running
-Secure Partition.
-This boundary is updated dynamically when :term:`SPM` switches Partitions in
-isolation level 3.
+This API updates the partition isolation boundary for isolation level 2 and 3.
+The isolation boundary includes the thread privilege and the partition private
+data.
+In isolation level 2, the :term:`SPM` only updates the partition thread
+privilege. In isolation level 3, the :term:`SPM` updates the partition thread
+privilege, and protects each partition's private data.
 
-The access permissions of the boundary is all privileged mode read-write.
-
-Platforms decide which :term:`MPU` region the paritition boundary uses.
+The access permissions outside the boundary is platform-dependent.
 
 **Parameter**
 
-- ``start`` - start address of the partition boundary.
-- ``end`` - end address of the partition boundary.
+- ``p_ldinf`` - Partition load information.
+- ``p_boundaries`` - Platform boundary handle for the partition.
 
 **Return Values**
 
@@ -399,6 +403,40 @@ permissions.
   permissions.
 - ``TFM_HAL_ERROR_INVALID_INPUT`` - Invalid inputs.
 - ``TFM_HAL_ERROR_GENERIC`` - An error occurred.
+
+tfm_hal_bind_boundaries()
+^^^^^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_bind_boundaries(
+                                    const struct partition_load_info_t *p_ldinf,
+                                    void **pp_boundaries);
+
+**Description**
+
+This API binds partition with the platform via a boundary handle.
+
+**Parameter**
+
+- ``p_ldinf`` - Partition load information.
+- ``pp_boundaries`` - Pointer of a the partition's platform boundary handle.
+
+**Return Values**
+
+- ``TFM_HAL_SUCCESS`` - the handle has been binded successfully.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to bind the handle.
+
+.. Note::
+
+  The platform maintains the platform-specific settings for SPM further usage,
+  such as updating partition hardware boundaries or checking resource
+  accessibility. The platform needs to manage the settings with an internal
+  mechanism, and returns a handle to SPM. SPM delivers this handle back to
+  platform when necessary. And SPM checks this handle to decide if the
+  platform-specific settings need to be updated. Hence multiple partitions can
+  have the same handle if they have the same platform-specific settings.
 
 Log API
 =======
@@ -463,6 +501,132 @@ This API is called by :term:`SPM` to output logs.
 
 Please check :doc:`TF-M log system <tfm_log_system_design_document>` for more
 information.
+
+Interrupt APIs
+==============
+
+The SPM HAL interrupt APIs are intended for operations on Interrupt Controllers
+of platforms.
+
+APIs for control registers of interrupt sources are not in the scope of this set
+of APIs.
+Secure Partitions should define the APIs for managing interrupts with those MMIO
+registers.
+
+APIs
+----
+
+tfm_hal_irq_enable()
+^^^^^^^^^^^^^^^^^^^^
+
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_irq_enable(uint32_t irq_num)
+
+**Description**
+
+This API enables an interrupt from the Interrupt Controller of the platform.
+
+**Parameter**
+
+- ``irq_num`` - the interrupt to be enabled with a number
+
+**Return Values**
+
+- ``TFM_HAL_ERROR_INVALID_INPUT`` - the ``irq_num`` exceeds The maximum
+                                    supported number of external interrupts.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to enable the interrupt.
+- ``TFM_HAL_SUCCESS`` - the interrupt is successfully enabled.
+
+tfm_hal_irq_disable()
+^^^^^^^^^^^^^^^^^^^^^
+
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_irq_disable(uint32_t irq_num)
+
+**Description**
+
+This API disables an interrupt from the Interrupt Controller of the platform.
+
+**Parameter**
+
+- ``irq_num`` - the interrupt to be disabled with a number
+
+**Return Values**
+
+- ``TFM_HAL_ERROR_INVALID_INPUT`` - the ``irq_num`` exceeds The maximum
+                                    supported number of external interrupts.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to disable the interrupt.
+- ``TFM_HAL_SUCCESS`` - the interrupt is successfully disabled.
+
+tfm_hal_irq_clear_pending()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t tfm_hal_irq_clear_pending(uint32_t irq_num)
+
+**Description**
+
+This API clears an active and pending interrupt.
+
+**Parameter**
+
+- ``irq_num`` - the interrupt to be disabled with a number
+
+**Return Values**
+
+- ``TFM_HAL_ERROR_INVALID_INPUT`` - the ``irq_num`` exceeds The maximum
+                                    supported number of external interrupts.
+- ``TFM_HAL_ERROR_GENERIC`` - failed to clear the pending interrupt.
+- ``TFM_HAL_SUCCESS`` - the pending interrupt has been cleared.
+
+Initializations
+^^^^^^^^^^^^^^^
+
+**Prototype**
+
+.. code-block:: c
+
+  enum tfm_hal_status_t {source_symbol}_init(void *p_pt,
+                                             struct irq_load_info_t *p_ildi)
+
+The ``{source_symbol}`` is:
+
+- ``irq_{source}``, if the ``source`` attribute of the IRQ in Partition manifest
+  is a number
+- Lowercase of ``source`` attribute, if ``source`` is a symbolic name
+
+**Description**
+
+Each interrupt has an initialization function individually.
+The :term:`SPM` calls the functions while loading the Partitions.
+
+The following initializations are required for each interrupt:
+
+- Setting the priority. The value must between 0 to 0x80 exclusively.
+- Ensuring that the interrupt targets the Secure State.
+- Saving the input parameters for future use.
+
+Platforms can have extra initializations as well.
+
+**Parameter**
+
+- ``p_pt`` - pointer to Partition runtime struct of the owner Partition
+- ``p_ildi`` - pointer to ``irq_load_info_t`` struct of the interrupt
+
+**Note**
+
+Please refer to the
+:doc: `IRQ intergration guide<tfm_secure_irq_integration_guide>`
+for more information.
 
 ************************************
 API Definition for Secure Partitions

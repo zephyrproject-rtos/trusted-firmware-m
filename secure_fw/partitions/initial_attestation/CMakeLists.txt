@@ -59,7 +59,7 @@ target_link_libraries(tfm_psa_rot_partition_attestation
     PRIVATE
         tfm_secure_api
         platform_s
-        tfm_qcbor
+        tfm_qcbor_s
         tfm_t_cose_s
         secure_fw
         psa_interface
@@ -72,7 +72,7 @@ target_compile_definitions(tfm_psa_rot_partition_attestation
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
         $<$<BOOL:${ATTEST_INCLUDE_OPTIONAL_CLAIMS}>:INCLUDE_OPTIONAL_CLAIMS>
         $<$<BOOL:${ATTEST_INCLUDE_COSE_KEY_ID}>:INCLUDE_COSE_KEY_ID>
-        $<$<NOT:$<BOOL:${PLATFORM_DUMMY_ATTEST_HAL}>>:CLAIM_VALUE_CHECK>
+        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>>:CLAIM_VALUE_CHECK>
 )
 
 ########################### Attest defs ########################################
@@ -95,7 +95,10 @@ target_sources(tfm_sprt
 # to not overshadow _real_ warnings.
 set_source_files_properties(tfm_attest_secure_api.c
     PROPERTIES
-        COMPILE_FLAGS -Wno-implicit-function-declaration
+        COMPILE_FLAGS
+            $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
+            $<$<C_COMPILER_ID:IAR>:>
 )
 
 ############################ Partition Defs ####################################

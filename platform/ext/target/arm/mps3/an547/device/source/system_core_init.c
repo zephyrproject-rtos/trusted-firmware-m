@@ -59,11 +59,11 @@ void SystemInit (void)
 {
 
 #if defined (__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-  SCB->VTOR = (uint32_t)(&__VECTOR_TABLE);
+    SCB->VTOR = (uint32_t)(&__VECTOR_TABLE);
 #endif
 
 #if (defined (__FPU_USED) && (__FPU_USED == 1U)) || \
-    (defined (__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE == 1U))
+    (defined (__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE >= 0U))
     SCB->CPACR |= ((3U << 10U*2U) |           /* enable CP10 Full Access */
                    (3U << 11U*2U)  );         /* enable CP11 Full Access */
 #endif
@@ -71,4 +71,14 @@ void SystemInit (void)
 #ifdef UNALIGNED_SUPPORT_DISABLE
     SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
 #endif
+
+    /* Enable Loop and branch info cache */
+    SCB->CCR |= SCB_CCR_LOB_Msk;
+    __ISB();
+
+    /* Set CPDLPSTATE.CLPSTATE to 0, so PDCORE will not enter low-power state. Set
+     * CPDLPSTATE.ELPSTATE to 0, to stop the processor from trying to switch the EPU
+     * into retention state
+     */
+    PWRMODCTL->CPDLPSTATE &= 0xFFFFFF00UL;
 }

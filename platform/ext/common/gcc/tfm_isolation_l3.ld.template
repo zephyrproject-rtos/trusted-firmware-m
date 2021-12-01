@@ -61,15 +61,9 @@ SECTIONS
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA))
 {% for partition in partitions %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
         LONG (LOADADDR(.ER_{{partition.manifest.name}}_RWZI))
         LONG (ADDR(.ER_{{partition.manifest.name}}_RWZI))
         LONG (SIZEOF(.ER_{{partition.manifest.name}}_RWZI))
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
 {% endfor %}
 #if defined(S_CODE_SRAM_ALIAS_BASE)
         LONG (LOADADDR(.ER_EFLASH_DRIVER_RO))
@@ -85,14 +79,8 @@ SECTIONS
         LONG (ADDR(.TFM_BSS))
         LONG (SIZEOF(.TFM_BSS))
 {% for partition in partitions %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
         LONG (ADDR(.{{partition.manifest.name}}_RWZI_BSS))
         LONG (SIZEOF(.{{partition.manifest.name}}_RWZI_BSS))
-        {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
 {% endfor %}
         __zero_table_end__ = .;
     } > FLASH
@@ -113,9 +101,6 @@ SECTIONS
     /**** PSA RoT RO CODE + RO-data starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
     .{{partition.manifest.name}}_RO : ALIGN(32)
     {
     {% if partition.attr.linker_pattern.library_list %}
@@ -135,9 +120,6 @@ SECTIONS
     } > FLASH
     Image$${{partition.manifest.name}}_RO$$Base = ADDR(.{{partition.manifest.name}}_RO);
     Image$${{partition.manifest.name}}_RO$$Limit = ADDR(.{{partition.manifest.name}}_RO) + SIZEOF(.{{partition.manifest.name}}_RO);
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
 
     {% endif %}
 {% endfor %}
@@ -146,9 +128,6 @@ SECTIONS
     /**** APPLICATION RoT RO CODE + data starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
     .{{partition.manifest.name}}_RO : ALIGN(32)
     {
     {% if partition.attr.linker_pattern.library_list %}
@@ -168,9 +147,6 @@ SECTIONS
     } > FLASH
     Image$${{partition.manifest.name}}_CODE$$Base = ADDR(.{{partition.manifest.name}}_RO);
     Image$${{partition.manifest.name}}_CODE$$Limit = ADDR(.{{partition.manifest.name}}_RO) + SIZEOF(.{{partition.manifest.name}}_RO);
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
 
     {% endif %}
 {% endfor %}
@@ -271,15 +247,12 @@ SECTIONS
     {
         . += __msp_init_stack_size__;
     } > RAM
-    Image$$ARM_LIB_STACK_MSP$$ZI$$Base = ADDR(.msp_stack);
-    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
+    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
     /**** PSA RoT DATA start here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
 
     /* Position tag */
     . = ALIGN(32);
@@ -329,10 +302,6 @@ SECTIONS
     . = ALIGN(32);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_END$$Base = .;
 
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
-
     {% endif %}
 {% endfor %}
     /**** PSA RoT DATA end here */
@@ -346,16 +315,12 @@ SECTIONS
     {
         . += (__psp_stack_size__);
     } > RAM
-    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+    Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
+    Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 
     /**** APPLICATION RoT DATA start here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
-
     /* Position tag */
     . = ALIGN(32);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_START$$Base = .;
@@ -403,10 +368,6 @@ SECTIONS
     /* Position tag */
     . = ALIGN(32);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_END$$Base = .;
-
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
 
     {% endif %}
 {% endfor %}

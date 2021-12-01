@@ -97,10 +97,12 @@ target_sources(platform_s
         target_cfg.c
         ../common/spm_hal.c
         ../common/tfm_hal_isolation.c
+        ../common/tfm_hal_platform.c
         ../common/boot_hal.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
         ${PLATFORM_DIR}/ext/common/tfm_platform.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 

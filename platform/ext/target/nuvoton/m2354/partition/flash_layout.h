@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +21,9 @@
 /* Flash layout on M2354 with BL2 (single image boot):
  *
  * 0x0000_0000 BL2 - MCUBoot (64KB)
- * 0x0001_0000 Protected Storage Area (32 KB)
- * 0x0000_8000 Internal Trusted Storage Area (28 KB)
- * 0x0000_F000 NV counters area (4 KB)
+ * 0x0001_0000 Protected Storage Area (28 KB)
+ * 0x0000_7000 Internal Trusted Storage Area (28 KB)
+ * 0x0000_E000 OTP / NV counters area (8 KB)
  * 0x0002_0000 Primary image area (320KB):
  *    0x0002_0000 Secure     image primary
  *    0x0007_0000 Non-secure image primary
@@ -94,17 +94,18 @@
 
 /* Protected Storage (PS) Service definitions */
 #define FLASH_PS_AREA_OFFSET            (0x10000)
-#define FLASH_PS_AREA_SIZE              (0x8000)
+#define FLASH_PS_AREA_SIZE              (0x7000)
 
 /* Internal Trusted Storage (ITS) Service definitions */
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET + \
                                          FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x7000)
 
-/* NV Counters definitions */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
-                                         FLASH_ITS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
+                                           FLASH_ITS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
@@ -118,6 +119,8 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
+/* Smallest flash programmable unit in bytes */
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x4)
 
 /* Protected Storage (PS) Service definitions
  * Note: Further documentation of these definitions can be found in the
@@ -157,11 +160,12 @@
 /* Specifies the smallest flash programmable unit in bytes */
 #define TFM_HAL_ITS_PROGRAM_UNIT  (0x4)
 
-/* NV Counters definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    (0x18) /* 24 Bytes */
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
 /* Use SRAM1 memory to store Code data */
 #define S_ROM_ALIAS_BASE  (0x00000000)

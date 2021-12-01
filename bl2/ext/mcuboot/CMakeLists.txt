@@ -27,6 +27,16 @@ target_link_libraries(bootutil
         bl2_mbedcrypto
 )
 
+target_compile_options(bootutil
+    PRIVATE
+        ${BL2_COMPILER_CP_FLAG}
+)
+
+target_compile_definitions(bootutil
+    PRIVATE
+        $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
+)
+
 target_include_directories(mcuboot_config
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> # for mcuboot_config.h only
@@ -100,7 +110,7 @@ if(NS)
         DEPENDS tfm_s_bin tfm_ns_bin
         DEPENDS signing_layout_s
 
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/assemble.py
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/assemble.py
             --layout $<TARGET_OBJECTS:signing_layout_s>
             -s $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
             -n $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
@@ -118,7 +128,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
     WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
     #Sign secure binary image with provided secret key
-    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
         -v ${MCUBOOT_IMAGE_VERSION_S}
         --layout $<TARGET_OBJECTS:signing_layout_s>
         -k ${MCUBOOT_KEY_S}
@@ -126,8 +136,9 @@ add_custom_command(OUTPUT tfm_s_signed.bin
         --align 1
         --pad
         --pad-header
-        -H 0x400
+        -H ${BL2_HEADER_SIZE}
         -s ${MCUBOOT_SECURITY_COUNTER_S}
+        -L ${MCUBOOT_ENC_KEY_LEN_S}
         -d \"\(1,${MCUBOOT_NS_IMAGE_MIN_VER}\)\"
         $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
         $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
@@ -168,7 +179,7 @@ if(NS)
         WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
         #Sign non-secure binary image with provided secret key
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
             -v ${MCUBOOT_IMAGE_VERSION_NS}
             --layout $<TARGET_OBJECTS:signing_layout_ns>
             -k ${MCUBOOT_KEY_NS}
@@ -176,8 +187,9 @@ if(NS)
             --align 1
             --pad
             --pad-header
-            -H 0x400
+            -H ${BL2_HEADER_SIZE}
             -s ${MCUBOOT_SECURITY_COUNTER_NS}
+            -L ${MCUBOOT_ENC_KEY_LEN_NS}
             -d \"\(0, ${MCUBOOT_S_IMAGE_MIN_VER}\)\"
             $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
@@ -201,7 +213,7 @@ if(NS)
             # binary file. This only uses the local assemble.py script (not from
             # upstream mcuboot) because that script is geared towards zephyr
             # support
-            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/assemble.py
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/assemble.py
                 --layout $<TARGET_OBJECTS:signing_layout_s>
                 -s $<TARGET_FILE_DIR:bl2>/tfm_s_signed.bin
                 -n $<TARGET_FILE_DIR:bl2>/tfm_ns_signed.bin
@@ -217,7 +229,7 @@ if(NS)
         # Use the non-secure key to sign the combined image if FORWARD_PROT_MSG is set.
         # In such a configuration there is a subsystem with higher privileges controlling the
         # the boot process and current implementation requires to use the non-secure key here.
-        COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
             -v ${MCUBOOT_IMAGE_VERSION_S}
             --layout $<TARGET_OBJECTS:signing_layout_s>
             -k $<IF:$<BOOL:${FORWARD_PROT_MSG}>,${MCUBOOT_KEY_NS},${MCUBOOT_KEY_S}>
@@ -225,8 +237,9 @@ if(NS)
             --align 1
             --pad
             --pad-header
-            -H 0x400
+            -H ${BL2_HEADER_SIZE}
             -s ${MCUBOOT_SECURITY_COUNTER_S}
+            -L ${MCUBOOT_ENC_KEY_LEN_S}
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns.bin

@@ -283,6 +283,10 @@ static psa_status_t tfm_fwu_write_ipc(void)
     uint8_t image_index;
 
     /* Check input parameters. */
+    if (msg.in_size[2] > sizeof(data_block)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     if (msg.in_size[0] != sizeof(image_id) ||
         msg.in_size[1] != sizeof(block_offset)) {
         return PSA_ERROR_PROGRAMMER_ERROR;

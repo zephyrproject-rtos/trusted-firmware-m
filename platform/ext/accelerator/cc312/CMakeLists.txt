@@ -13,18 +13,33 @@ if(NOT DEFINED CC312_PATH)
     set(CC312_PATH ../../../../lib/ext/cryptocell-312-runtime CACHE PATH "Path to CC312 lib")
 endif()
 
-target_compile_definitions(platform_bl2
+if(BL2)
+    target_compile_definitions(platform_bl2
+        PRIVATE
+            CRYPTO_HW_ACCELERATOR
+    )
+endif()
+
+################################ OTP ###########################################
+
+target_sources(platform_s
     PRIVATE
-        $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_STATE}>:CRYPTO_HW_ACCELERATOR_OTP_${CRYPTO_HW_ACCELERATOR_OTP_STATE}>
-        CRYPTO_HW_ACCELERATOR
+        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${CMAKE_CURRENT_SOURCE_DIR}/otp_cc312.c>
 )
 
+if(BL2)
+    target_sources(platform_bl2
+        PRIVATE
+        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${CMAKE_CURRENT_SOURCE_DIR}/otp_cc312.c>
+    )
+endif()
+
 ################################ BL2 ###########################################
+
 if(BL2)
     target_sources(bl2_crypto_hw
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/cc312.c
-            $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},PROVISIONING>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_provisioning.c>
     )
 
     target_include_directories(bl2_crypto_hw
@@ -38,7 +53,6 @@ if(BL2)
         PRIVATE
             bl2_mbedcrypto
             platform_bl2
-            $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},PROVISIONING>:cc312_cdmpu>
     )
 
     set(CC312_LIB_TARGET bl2_cc312)
@@ -57,13 +71,20 @@ if(BL2)
     target_link_libraries(bl2_cc312
         PRIVATE
             bl2_mbedcrypto
-        PUBLIC
             platform_bl2
+        PUBLIC
+            platform_common_interface
     )
     target_link_libraries(bl2_mbedcrypto
         PRIVATE
             bl2_cc312
         PUBLIC
+            bl2_crypto_hw
+    )
+
+    # boot_hal depends on crypto_hw_accelerator abstractions
+    target_link_libraries(platform_bl2
+        PRIVATE
             bl2_crypto_hw
     )
 
@@ -76,7 +97,6 @@ if(BL2)
         PUBLIC
             CRYPTO_HW_ACCELERATOR
             MBEDTLS_ECDH_LEGACY_CONTEXT
-            $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_STATE}>:CRYPTO_HW_ACCELERATOR_OTP_${CRYPTO_HW_ACCELERATOR_OTP_STATE}>
     )
 
     target_compile_options(bl2_mbedcrypto
@@ -85,17 +105,19 @@ if(BL2)
             $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
     )
 
-    #Include platform specific defs (registers etc)
-    target_include_directories(bl2_cc312
-        BEFORE
-        PUBLIC
-            ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
+    target_compile_options(bl2_cc312
+        PRIVATE
+            ${BL2_COMPILER_CP_FLAG}
     )
 
-    target_include_directories(cc312_cdmpu
-        BEFORE
+    target_compile_options(bl2_crypto_hw
+        PRIVATE
+            ${BL2_COMPILER_CP_FLAG}
+    )
+
+    target_compile_options(cc312_cdmpu
         INTERFACE
-            ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
+            ${BL2_COMPILER_CP_FLAG}
     )
 endif()
 
@@ -118,12 +140,6 @@ target_link_libraries(crypto_service_crypto_hw
     PRIVATE
         crypto_service_mbedcrypto
         platform_s
-)
-
-target_link_libraries(platform_s
-    PRIVATE
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:crypto_service_crypto_hw>
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_OTP_STATE},ENABLED>:crypto_service_cc312>
 )
 
 set(CC312_LIB_TARGET crypto_service_cc312)
@@ -156,18 +172,10 @@ target_compile_definitions(crypto_service_mbedcrypto
     PUBLIC
         CRYPTO_HW_ACCELERATOR
         MBEDTLS_ECDH_LEGACY_CONTEXT
-        $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_STATE}>:CRYPTO_HW_ACCELERATOR_OTP_${CRYPTO_HW_ACCELERATOR_OTP_STATE}>
 )
 
 target_compile_options(crypto_service_mbedcrypto
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
-)
-
-#Include platform specific defs (registers etc)
-target_include_directories(crypto_service_cc312
-    BEFORE
-    PUBLIC
-    ${CC312_PATH}/shared/hw/include/${TFM_PLATFORM}
 )

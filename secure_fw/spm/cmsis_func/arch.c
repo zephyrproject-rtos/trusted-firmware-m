@@ -9,10 +9,9 @@
 #include "compiler_ext_defs.h"
 #include "exception_info.h"
 #include "tfm_secure_api.h"
-#include "tfm/tfm_spm_services.h"
+#include "tfm_svcalls.h"
 
 #if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return);
 #pragma required = tfm_core_svc_handler
 #endif
 
@@ -24,20 +23,6 @@ void jump_to_ns_code(void)
     ns_entry();
 
     tfm_core_panic();
-}
-
-__attribute__((naked))
-static int32_t tfm_spm_request(int32_t request_type)
-{
-    __ASM volatile(
-        "SVC    %0\n"
-        "BX     lr\n"
-        : : "I" (TFM_SVC_SPM_REQUEST));
-}
-
-int32_t tfm_spm_request_reset_vote(void)
-{
-    return tfm_spm_request((int32_t)TFM_SPM_REQUEST_RESET_VOTE);
 }
 
 __attribute__((naked))

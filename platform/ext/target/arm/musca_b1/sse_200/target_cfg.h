@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited
+ * Copyright (c) 2018-2021 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,10 +62,6 @@ struct memory_region_limits {
     uint32_t non_secure_partition_limit;
     uint32_t veneer_base;
     uint32_t veneer_limit;
-#ifdef BL2
-    uint32_t secondary_partition_base;
-    uint32_t secondary_partition_limit;
-#endif /* BL2 */
 };
 
 /**

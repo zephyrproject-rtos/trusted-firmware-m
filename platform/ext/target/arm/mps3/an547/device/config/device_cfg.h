@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,7 @@
 
 /* System Timer Armv8-M */
 #define SYSTIMER0_ARMV8_M_S
-#define SYSTIMER1_ARMV8_M_NS
 
-#define SYSTIMER0_ARMV8M_DEFAULT_FREQ_HZ    (25000000ul)
-#define SYSTIMER1_ARMV8M_DEFAULT_FREQ_HZ    (25000000ul)
+#define SYSTIMER0_ARMV8M_DEFAULT_FREQ_HZ    (32000000ul)
 
 #endif  /* __DEVICE_CFG_H__ */

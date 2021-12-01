@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "psa_config.h"
 #include "psa/error.h"
 
 #ifdef __cplusplus

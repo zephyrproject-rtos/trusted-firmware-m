@@ -2,10 +2,9 @@
 Booting a Dual-Core System
 ##########################
 
-:Authors: Chris Brand
+:Author: Chris Brand
 :Organization: Cypress Semiconductor Corporation
 :Contact: chris.brand@cypress.com
-:Status: Accepted
 
 *******************
 System Architecture
@@ -94,7 +93,7 @@ Three new HAL functions are required:
 
 .. code-block:: c
 
-    void tfm_spm_hal_boot_ns_cpu(uintptr_t start_addr);
+    void tfm_hal_boot_ns_cpu(uintptr_t start_addr);
 
 - Called on the secure core from ``tfm_core_init()`` after hardware protections
   have been configured.
@@ -104,7 +103,7 @@ Three new HAL functions are required:
 
 .. code-block:: c
 
-    void tfm_spm_hal_wait_for_ns_cpu_ready(void);
+    void tfm_hal_wait_for_ns_cpu_ready(void);
 
 - Called on the secure core from the end of ``tfm_core_init()`` where on a
   single core system the secure code calls into the non-secure code.
@@ -134,3 +133,4 @@ that platforms only have to provide the new functions if they are required.
 ---------------
 
 Copyright (c) 2019 Cypress Semiconductor Corporation
+Copyright (c) 2021, Arm Limited. All rights reserved.

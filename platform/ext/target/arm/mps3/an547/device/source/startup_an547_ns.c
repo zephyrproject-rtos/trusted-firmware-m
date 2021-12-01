@@ -53,7 +53,7 @@ void Reset_Handler  (void) __NO_RETURN;
   Exception / Interrupt Handler
  *----------------------------------------------------------------------------*/
 #define DEFAULT_IRQ_HANDLER(handler_name)  \
-void __WEAK handler_name(void); \
+void __WEAK handler_name(void) __NO_RETURN; \
 void handler_name(void) { \
     while(1); \
 }
@@ -349,7 +349,6 @@ void Reset_Handler(void)
 
   SystemInit();                             /* CMSIS System Initialization */
   __ASM volatile("MRS     R0, control\n"    /* Get control value */
-                 "ORR     R0, R0, #1\n"     /* Select switch to unprivilage mode */
                  "ORR     R0, R0, #2\n"     /* Select switch to PSP */
                  "MSR     control, R0\n"    /* Load control register */
                  :

@@ -6,79 +6,111 @@
  */
 
 #include <inttypes.h>
-#include "tfm_hal_device_header.h"
-#include "region_defs.h"
-#include "tfm_arch.h"
-#include "tfm_memory_utils.h"
-#include "tfm_core_utils.h"
+#include "compiler_ext_defs.h"
 #include "exception_info.h"
-#include "tfm_secure_api.h"
+#include "region_defs.h"
 #include "spm_ipc.h"
 #include "svc_num.h"
+#include "tfm_arch.h"
+#include "tfm_core_utils.h"
+#include "tfm_hal_device_header.h"
+#include "tfm_memory_utils.h"
+#include "tfm_secure_api.h"
+#include "tfm_svcalls.h"
+#include "utilities.h"
+#if defined(__FPU_USED) && (__FPU_USED == 1U) && (CONFIG_TFM_SPE_FP >= 1)
+#include "core_ext.h"
+#endif
 
 #if !defined(__ARM_ARCH_8M_MAIN__) && !defined(__ARM_ARCH_8_1M_MAIN__)
 #error "Unsupported ARM Architecture."
 #endif
 
-/*
- * Stack status at PendSV entry:
- *
- *                                            [ R0 - R3  ]<- PSP
- *                                            [ R12      ]
- *                                            [ LR_of_RA ]
- *                       MSP->[ ........ ]    [ RA       ]
- *                            [ ........ ]    [ XPSR     ]
- *                                            [ ........ ]
- *                                            [ ........ ]
- *
- * Stack status before calling pendsv_do_schedule():
- *
- *                       MSP->[ R4 - R11 ]
- *                            [ PSP      ]--->[ R0 - R3  ]
- *                            [ PSP Limit]    [ R12      ]
- *                            [ R2(dummy)]    [ LR_of_RA ]
- *                            [ LR       ]    [ RA       ]
- *                            [ ........ ]    [ XPSR     ]
- *                            [ ........ ]    [ ........ ]
- *                                            [ ........ ]
- *
- * tfm_pendsv_do_schedule() updates stacked context into current thread and
- * replace stacked context with context of next thread.
- *
- * Scheduler does not support handler mode thread so take PSP/PSP_LIMIT as
- * thread SP/SP_LIMIT. R2 holds dummy data due to stack operation is 8 bytes
- * aligned.
- */
+/* Delcaraction flag to control the scheduling logic in PendSV. */
+uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
+
+/* IAR Specific */
 #if defined(__ICCARM__)
-#pragma required = tfm_pendsv_do_schedule
+
+#pragma required = do_schedule
+#pragma required = scheduler_lock
+#pragma required = tfm_core_svc_handler
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+#pragma required = spcall_execute_c
+
+#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+
 #endif
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+__naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                                       uint32_t stk_base, uint32_t stk_limit)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                            \n"
+#endif
+        "   push   {r4-r6, lr}                      \n"
+        "   cpsid  i                                \n"
+        "   mov    r4, r2                           \n"
+        "   mrs    r5, psplim                       \n"
+        "   movs   r12, #0                          \n"
+        "   cmp    r2, #0                           \n"
+        "   itttt  ne                               \n" /* To callee stack */
+        "   msrne  psplim, r12                      \n"
+        "   movne  r4, sp                           \n"
+        "   movne  sp, r2                           \n"
+        "   msrne  psplim, r3                       \n"
+        "   ldr    r2, =scheduler_lock              \n" /* To lock sched */
+        "   movs   r3, #"M2S(SCHEDULER_LOCKED)"     \n"
+        "   str    r3, [r2, #0]                     \n"
+        "   cpsie  i                                \n"
+        "   bl     spcall_execute_c                 \n"
+        "   cpsid  i                                \n"
+        "   movs   r12, #0                          \n"
+        "   cmp    r4, #0                           \n"
+        "   ittt   ne                               \n" /* To caller stack */
+        "   msrne  psplim, r12                      \n"
+        "   movne  sp, r4                           \n"
+        "   msrne  psplim, r5                       \n"
+        "   ldr    r4, =scheduler_lock              \n" /* To unlock sched */
+        "   movs   r5, #"M2S(SCHEDULER_UNLOCKED)"   \n"
+        "   str    r5, [r4, #0]                     \n"
+        "   cpsie  i                                \n"
+        "   pop    {r4-r6, pc}                      \n"
+    );
+}
+
+#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
 
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
-        "tst     lr, #0x40                  \n" /* Was NS interrupted by S? */
-        "it      eq                         \n"
-        "bxeq    lr                         \n" /* Yes, do not schedule */
-        "mrs     r0, psp                    \n"
-        "mrs     r1, psplim                 \n"
-        "push    {r0, r1, r2, lr}           \n"
-        "push    {r4-r11}                   \n"
-        "mov     r0, sp                     \n"
-        "bl      tfm_pendsv_do_schedule     \n"
-        "pop     {r4-r11}                   \n"
-        "pop     {r0, r1, r2, lr}           \n"
-        "msr     psp, r0                    \n"
-        "msr     psplim, r1                 \n"
-        "bx      lr                         \n"
+#if !defined(__ICCARM__)
+        ".syntax unified                                \n"
+#endif
+        "   movs    r0, #"M2S(EXC_RETURN_SECURE_STACK)" \n"
+        "   ands    r0, lr                              \n" /* NS interrupted */
+        "   beq     v8m_pendsv_exit                     \n" /* No schedule */
+        "   push    {r0, lr}                            \n" /* Save R0, LR */
+        "   bl      do_schedule                         \n"
+        "   pop     {r2, lr}                            \n"
+        "   cmp     r0, r1                              \n" /* curr, next ctx */
+        "   beq     v8m_pendsv_exit                     \n" /* No schedule */
+        "   mrs     r2, psp                             \n"
+        "   mrs     r3, psplim                          \n"
+        "   stmdb   r2!, {r4-r11}                       \n" /* Save callee */
+        "   stmia   r0, {r2, r3, r4, lr}                \n" /* Save curr ctx */
+        "   ldmia   r1, {r2, r3, r4, lr}                \n" /* Load next ctx */
+        "   ldmia   r2!, {r4-r11}                       \n" /* Restore callee */
+        "   msr     psp, r2                             \n"
+        "   msr     psplim, r3                          \n"
+        "v8m_pendsv_exit:                               \n"
+        "   bx      lr                                  \n"
     );
-}
-
-void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
-                        uint32_t sp, uint32_t sp_limit)
-{
-    p_actx->sp = sp;
-    p_actx->sp_limit = sp_limit;
-    p_actx->lr = EXC_RETURN_THREAD_S_PSP;
 }
 
 /**
@@ -108,19 +140,18 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"
-    "SUB     sp, #8                         \n" /* For FLIH PID and signal */
     "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
-    "BL      tfm_core_svc_handler           \n" /* New EXC_RET returned */
+    "BL      tfm_core_svc_handler           \n"
     "MOV     lr, r0                         \n"
-    "LDR     r1, [sp]                       \n" /* Original EXC_RETURN */
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "AND     r0, #8                         \n" /* Mode bit */
-    "AND     r1, #8                         \n"
-    "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
+    "AND     r3, r1, #8                     \n"
+    "SUBS    r0, r3                         \n" /* Compare EXC_RETURN values */
     "BGT     to_flih_func                   \n"
     "BLT     from_flih_func                 \n"
-    "ADD     sp, #16                        \n"
     "BX      lr                             \n"
     "to_flih_func:                          \n"
+    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "PUSH    {r4-r11}                       \n"
     "LDR     r4, =0xFEF5EDA5                \n" /* clear r4-r11 */
     "MOV     r5, r4                         \n"
@@ -133,9 +164,9 @@ __attribute__((naked)) void SVC_Handler(void)
     "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
     "BX      lr                             \n"
     "from_flih_func:                        \n"
-    "ADD     sp, #24                        \n"
+    "POP     {r4, r5}                       \n" /* Seal stack */
     "POP     {r4-r11}                       \n"
-    "ADD     sp, #16                        \n"
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BX      lr                             \n"
     );
 }
@@ -219,9 +250,10 @@ void tfm_arch_set_secure_exception_priorities(void)
      * When AIRCR.PRIS is set, the Non-Secure execution can act on
      * FAULTMASK_NS, PRIMASK_NS or BASEPRI_NS register to boost its priority
      * number up to the value 0x80.
-     * For this reason, set the priority of the PendSV interrupt to 0x80.
+     * For this reason, set the priority of the PendSV interrupt to the next
+     * priority level configurable on the platform, just below 0x80.
      */
-    NVIC_SetPriority(PendSV_IRQn, 1 << (__NVIC_PRIO_BITS - 1));
+    NVIC_SetPriority(PendSV_IRQn, (1 << (__NVIC_PRIO_BITS - 1)) - 1);
 #endif
 }
 
@@ -233,28 +265,44 @@ void tfm_arch_config_extensions(void)
      * latency when the FPU is not used by the SPE.
      */
 #if defined(__FPU_USED) && (__FPU_USED == 1U)
+/* For secure uses FPU only */
+#if (CONFIG_TFM_SPE_FP >= 1)
+#ifdef __GNUC__
     /* Enable Secure privileged and unprivilged access to the FP Extension */
     SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
                   | (3U << 11U*2U);  /* enable CP11 full access */
-
-    /* If the SPE will ever use the floating-point registers for sensitive data,
-     * then FPCCR.TS, FPCCR.CLRONRET and FPCCR.CLRONRETS must be set at
-     * initialisation and not changed again afterwards.
-     */
-    FPU->FPCCR |= FPU_FPCCR_TS_Msk
-                  | FPU_FPCCR_CLRONRET_Msk
-                  | FPU_FPCCR_CLRONRETS_Msk;
 #endif
 
-    /* Permit Non-secure access to the Floating-point Extension.
-     * Note: It is still necessary to set CPACR_NS to enable the FP Extension in
-     * the NSPE. This configuration is left to NS privileged software.
+#ifdef CONFIG_TFM_LAZY_STACKING_SPE
+    /* Enable lazy stacking */
+    FPU->FPCCR |= FPU_FPCCR_LSPEN_Msk;
+#else
+    /* Disable lazy stacking */
+    FPU->FPCCR &= ~FPU_FPCCR_LSPEN_Msk;
+#endif
+    /* If the SPE will ever use the floating-point registers for sensitive
+     * data, then FPCCR.ASPEN, FPCCR.TS, FPCCR.CLRONRET and FPCCR.CLRONRETS
+     * must be set at initialisation and not changed again afterwards.
      */
-    SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
+    FPU->FPCCR |= FPU_FPCCR_ASPEN_Msk
+                  | FPU_FPCCR_TS_Msk
+                  | FPU_FPCCR_CLRONRET_Msk
+                  | FPU_FPCCR_CLRONRETS_Msk;
+
+    /* If FPU is used by secure only, prevent non-secure from modifying FPU’s
+     * power setting.
+     */
+    SCnSCB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
+
+    /* Disable Non-secure access to the Floating-point Extension.
+     */
+    SCB->NSACR &= ~(SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk);
+#endif /* CONFIG_TFM_SPE_FP >= 1 */
+#endif /* __FPU_USED */
+#endif /* __FPU_PRESENT */
 
 #if defined(__ARM_ARCH_8_1M_MAIN__)
     SCB->CCR |= SCB_CCR_TRD_Msk;
-#endif
 #endif
 }
 
@@ -268,3 +316,46 @@ __attribute__((naked, noinline)) void tfm_arch_clear_fp_status(void)
                    "bx   lr                  \n"
                   );
 }
+
+#if (CONFIG_TFM_SPE_FP >= 1)
+__attribute__((naked, noinline)) void tfm_arch_clear_fp_data(void)
+{
+    __ASM volatile(
+                    "eor  r0, r0, r0         \n"
+                    "vmov s0, r0             \n"
+                    "vmov s1, r0             \n"
+                    "vmov s2, r0             \n"
+                    "vmov s3, r0             \n"
+                    "vmov s4, r0             \n"
+                    "vmov s5, r0             \n"
+                    "vmov s6, r0             \n"
+                    "vmov s7, r0             \n"
+                    "vmov s8, r0             \n"
+                    "vmov s9, r0             \n"
+                    "vmov s10, r0            \n"
+                    "vmov s11, r0            \n"
+                    "vmov s12, r0            \n"
+                    "vmov s13, r0            \n"
+                    "vmov s14, r0            \n"
+                    "vmov s15, r0            \n"
+                    "vmov s16, r0            \n"
+                    "vmov s17, r0            \n"
+                    "vmov s18, r0            \n"
+                    "vmov s19, r0            \n"
+                    "vmov s20, r0            \n"
+                    "vmov s21, r0            \n"
+                    "vmov s22, r0            \n"
+                    "vmov s23, r0            \n"
+                    "vmov s24, r0            \n"
+                    "vmov s25, r0            \n"
+                    "vmov s26, r0            \n"
+                    "vmov s27, r0            \n"
+                    "vmov s28, r0            \n"
+                    "vmov s29, r0            \n"
+                    "vmov s30, r0            \n"
+                    "vmov s31, r0            \n"
+                    "vmsr fpscr, r0          \n"
+                    "bx   lr                 \n"
+                  );
+}
+#endif

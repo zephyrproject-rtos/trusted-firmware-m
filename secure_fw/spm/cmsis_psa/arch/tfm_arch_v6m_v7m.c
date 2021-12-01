@@ -6,8 +6,12 @@
  */
 
 #include <inttypes.h>
-#include "tfm_hal_device_header.h"
+#include "compiler_ext_defs.h"
+#include "spm_ipc.h"
 #include "tfm_arch.h"
+#include "tfm_core_utils.h"
+#include "tfm_hal_device_header.h"
+#include "tfm_svcalls.h"
 #include "svc_num.h"
 #include "exception_info.h"
 
@@ -16,81 +20,102 @@
 #error "Unsupported ARM Architecture."
 #endif
 
-extern uint32_t SVCHandler_main(uint32_t *svc_args, uint32_t lr);
+/* Delcaraction flag to control the scheduling logic in PendSV. */
+uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
-/*
- * Stack status at PendSV entry:
- *
- *                                            [ R0 - R3  ]<- PSP
- *                                            [ R12      ]
- *                                            [ LR_of_RA ]
- *                       MSP->[ ........ ]    [ RA       ]
- *                            [ ........ ]    [ XPSR     ]
- *                                            [ ........ ]
- *                                            [ ........ ]
- *
- * Stack status before calling tfm_pendsv_do_schedule():
- *
- *                       MSP->[ R8 - R9  ]
- *                            [ R4 - R7  ]
- *                            [ PSP      ]--->[ R0 - R3  ]
- *                            [ LR       ]    [ R12      ]
- *                            [ ........ ]    [ LR_of_RA ]
- *                            [ ........ ]    [ RA       ]
- *                                            [ XPSR     ]
- *                                            [ ........ ]
- *                                            [ ........ ]
- *
- * tfm_pendsv_do_schedule() updates stacked context into current thread and
- * replace stacked context with context of next thread.
- *
- * Scheduler does not support handler mode thread so take PSP as thread SP.
- */
+/* IAR Specific */
 #if defined(__ICCARM__)
-extern void tfm_pendsv_do_schedule(void);
-#pragma required = tfm_pendsv_do_schedule
+
+#pragma required = do_schedule
+#pragma required = scheduler_lock
+#pragma required = tfm_core_svc_handler
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+#pragma required = spcall_execute_c
+
+#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+
 #endif
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+
+__naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                                       uint32_t stk_base, uint32_t stk_limit)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                \n"
+#endif
+        "   push   {r4, lr}                             \n"
+        "   cpsid  i                                    \n"
+        "   cmp    r2, #0                               \n"
+        "   beq    v6v7_lock_sched                      \n"
+        "   mov    r4, sp                               \n"/* switch stack   */
+        "   mov    sp, r2                               \n"
+        "   mov    r2, r4                               \n"
+        "v6v7_lock_sched:                               \n"/* lock pendsv    */
+        "   ldr    r3, =scheduler_lock                  \n"/* R2 = caller SP */
+        "   movs   r4, #"M2S(SCHEDULER_LOCKED)"         \n"/* Do not touch   */
+        "   str    r4, [r3, #0]                         \n"
+        "   cpsie  i                                    \n"
+        "   push   {r2, r3}                             \n"
+        "   bl     spcall_execute_c                     \n"
+        "   pop    {r2, r3}                             \n"
+        "   cpsid  i                                    \n"
+        "   cmp    r2, #0                               \n"
+        "   beq    v6v7_release_sched                   \n"
+        "   mov    sp, r2                               \n"/* switch stack   */
+        "v6v7_release_sched:                            \n"
+        "   ldr    r2, =scheduler_lock                  \n"/* release pendsv */
+        "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"
+        "   str    r3, [r2, #0]                         \n"
+        "   cpsie  i                                    \n"
+        "   pop    {r4, pc}                             \n"
+    );
+}
+
+#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
 
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
-        "MRS     r0, psp                    \n"
-        "PUSH    {r0, lr}                   \n"
-        "PUSH    {r4-r7}                    \n"
-        "MOV     r4, r8                     \n"
-        "MOV     r5, r9                     \n"
-        "MOV     r6, r10                    \n"
-        "MOV     r7, r11                    \n"
-        "PUSH    {r4-r7}                    \n"
-        "MOV     r0, sp                     \n"
-        "BL      tfm_pendsv_do_schedule     \n"
-        "POP     {r4-r7}                    \n"
-        "MOV     r8, r4                     \n"
-        "MOV     r9, r5                     \n"
-        "MOV     r10, r6                    \n"
-        "MOV     r11, r7                    \n"
-        "POP     {r4-r7}                    \n"
-        "POP     {r0, r1}                   \n"
-        "MOV     lr, r1                     \n"
-        "MSR     psp, r0                    \n"
-        "BX      lr                         \n"
+#if !defined(__ICCARM__)
+        ".syntax unified                    \n"
+#endif
+        "   push    {r0, lr}                \n"
+        "   bl      do_schedule             \n"
+        "   pop     {r2, r3}                \n"
+        "   mov     lr, r3                  \n"
+        "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
+        "   beq     v6v7_pendsv_exit        \n" /* No schedule if curr = next */
+        "   mrs     r2, psp                 \n"
+        "   subs    r2, #32                 \n" /* Make room for r4-r11 */
+        "   stm     r2!, {r4-r7}            \n" /* Save callee registers */
+        "   mov     r4, r8                  \n"
+        "   mov     r5, r9                  \n"
+        "   mov     r6, r10                 \n"
+        "   mov     r7, r11                 \n"
+        "   stm     r2!, {r4-r7}            \n"
+        "   mov     r5, lr                  \n"
+        "   subs    r2, #32                 \n" /* reset r2(SP) to top */
+        "   stm     r0!, {r2, r3, r4, r5}   \n" /* Save struct context_ctrl_t */
+        "   ldm     r1!, {r2, r3, r4, r5}   \n" /* Load ctx of next thread */
+        "   mov     lr, r5                  \n"
+        "   adds    r2, #16                 \n" /* Start of popping r4-r11 */
+        "   ldm     r2!, {r4-r7}            \n"
+        "   mov     r8, r4                  \n"
+        "   mov     r9, r5                  \n"
+        "   mov     r10, r6                 \n"
+        "   mov     r11, r7                 \n"
+        "   subs    r2, #32                 \n"
+        "   ldm     r2!, {r4-r7}            \n"
+        "   adds    r2, #16                 \n" /* End of popping r4-r11 */
+        "   msr     psp, r2                 \n"
+        "v6v7_pendsv_exit:                  \n"
+        "   bx      lr                      \n"
     );
 }
-
-void tfm_arch_init_actx(struct tfm_arch_ctx_t *p_actx,
-                        uint32_t sp, uint32_t sp_limit)
-{
-    (void)sp_limit;
-
-    p_actx->sp = sp;
-    p_actx->lr = EXC_RETURN_THREAD_S_PSP;
-}
-
-#if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
-                              uint32_t *psp);
-#pragma required = tfm_core_svc_handler
-#endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {
@@ -101,7 +126,6 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"
-    "SUB     sp, #8                         \n" /* For FLIH PID and signal */
     "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BL      tfm_core_svc_handler           \n"
     "MOV     lr, r0                         \n"
@@ -112,7 +136,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
     "BGT     to_flih_func                   \n"
     "BLT     from_flih_func                 \n"
-    "ADD     sp, #16                        \n"
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BX      lr                             \n"
     "to_flih_func:                          \n"
     "PUSH    {r4-r7}                        \n"
@@ -132,14 +156,15 @@ __attribute__((naked)) void SVC_Handler(void)
     "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
     "BX      lr                             \n"
     "from_flih_func:                        \n"
-    "ADD     sp, #24                        \n"
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "POP     {r4, r5}                       \n" /* Seal stack */
     "POP     {r4-r7}                        \n"
     "MOV     r8, r4                         \n"
     "MOV     r9, r5                         \n"
     "MOV     r10, r6                        \n"
     "MOV     r11, r7                        \n"
     "POP     {r4-r7}                        \n"
-    "ADD     sp, #16                        \n"
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BX      lr                             \n"
     );
 }

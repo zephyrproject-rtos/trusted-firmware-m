@@ -372,17 +372,28 @@ Platform specific implementation includes critical TF-M HAL implementations.
 A malicious actor can perform physical attack against those platform specific
 implementations to bypass the countermeasures in TF-M common code.
 
-Debug access setting
-^^^^^^^^^^^^^^^^^^^^
-TF-M configures debug access according to device lifecycle and accessible debug
-certificates. In general, TF-M locks down the debug port if the device is in
-secure production state. TF-M exposed a HAL API for this purpose.
+Platform early initialization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TFM provides a HAL API for platforms to perform HW initialization before SPM
+initialization starts.
 The system integrator is responsible to implement this API on a particular SoC
 and harden it against physical attacks:
 
 .. code-block:: c
 
-  enum tfm_plat_err_t tfm_spm_hal_init_debug(void);
+  enum tfm_hal_status_t tfm_hal_platform_init(void);
+
+The API can have several initializations on different modules. The system
+integrator can choose to even harden some of these initializations functions
+within this platform init API. One of the examples is the debug access setting.
+
+Debug access setting
+********************
+TF-M configures debug access according to device lifecycle and accessible debug
+certificates. In general, TF-M locks down the debug port if the device is in
+secure production state.
+The system integrator can put the settings into an API and harden it against
+physical attacks.
 
 Platform specific isolation configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -481,13 +492,13 @@ FIH library in TF-M SPM to mitigate physical attacks.
         |
         |--> tfm_core_init()
         |           |
-        |           |--> tfm_spm_hal_init_debug()
-        |           |                  |
-        |           |                  |--> platform specific debug init
-        |           |
         |           |--> tfm_hal_set_up_static_boundaries()
+        |           |                  |
+        |           |                  |--> platform specific isolation impl.
+        |           |
+        |           |--> tfm_hal_platform_init()
         |                              |
-        |                              |--> platform specific isolation impl.
+        |                              |--> platform specific init
         |
         |--> During each partition initialization
                     |
@@ -505,7 +516,7 @@ FIH library in TF-M SPM to mitigate physical attacks.
 
     .. code-block:: c
 
-      fih_int tfm_spm_hal_verify_isolation_hw(void);
+      fih_int tfm_hal_verify_static_boundaries(void);
 
     This function is intended to be called just before the security state
     transition and is responsible for checking all critical hardware
@@ -587,8 +598,6 @@ of the program counter. The following steps are done on AN521 target, but this
 can be different on another target:
 
   - Bypass the configuration of isolation HW: SAU, MPC.
-  - Bypass tfm_spm_hal_nvic_interrupt_enable: The state of the MPC is checked
-    here whether is it initialized or not.
   - Bypass the setting of the PSP limit register. Otherwise, a stack overflow
     exception will happen. Because the secure PSP will be overwritten by the
     address of the non-secure stack and on this particular target the non-secure

@@ -16,6 +16,7 @@
 #ifdef TFM_PSA_API
 #include "psa/service.h"
 #include "psa_manifest/tfm_internal_trusted_storage.h"
+#include "tfm_its_defs.h"
 #else
 #include <stdbool.h>
 #include "tfm_secure_api.h"
@@ -284,7 +285,7 @@ static psa_status_t tfm_its_remove_ipc(void)
     return tfm_its_remove(msg.client_id, uid);
 }
 
-static void its_signal_handle(psa_signal_t signal, its_func_t pfn)
+static void its_signal_handle(psa_signal_t signal)
 {
     psa_status_t status;
 
@@ -294,15 +295,21 @@ static void its_signal_handle(psa_signal_t signal, its_func_t pfn)
     }
 
     switch (msg.type) {
-    case PSA_IPC_CONNECT:
-        psa_reply(msg.handle, PSA_SUCCESS);
-        break;
-    case PSA_IPC_CALL:
-        status = pfn();
+    case TFM_ITS_SET:
+        status = tfm_its_set_ipc();
         psa_reply(msg.handle, status);
         break;
-    case PSA_IPC_DISCONNECT:
-        psa_reply(msg.handle, PSA_SUCCESS);
+    case TFM_ITS_GET:
+        status = tfm_its_get_ipc();
+        psa_reply(msg.handle, status);
+        break;
+    case TFM_ITS_GET_INFO:
+        status = tfm_its_get_info_ipc();
+        psa_reply(msg.handle, status);
+        break;
+    case TFM_ITS_REMOVE:
+        status = tfm_its_remove_ipc();
+        psa_reply(msg.handle, status);
         break;
     default:
         psa_panic();
@@ -321,14 +328,8 @@ psa_status_t tfm_its_req_mngr_init(void)
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & TFM_ITS_SET_SIGNAL) {
-            its_signal_handle(TFM_ITS_SET_SIGNAL, tfm_its_set_ipc);
-        } else if (signals & TFM_ITS_GET_SIGNAL) {
-            its_signal_handle(TFM_ITS_GET_SIGNAL, tfm_its_get_ipc);
-        } else if (signals & TFM_ITS_GET_INFO_SIGNAL) {
-            its_signal_handle(TFM_ITS_GET_INFO_SIGNAL, tfm_its_get_info_ipc);
-        } else if (signals & TFM_ITS_REMOVE_SIGNAL) {
-            its_signal_handle(TFM_ITS_REMOVE_SIGNAL, tfm_its_remove_ipc);
+        if (signals & TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_SIGNAL) {
+            its_signal_handle(TFM_INTERNAL_TRUSTED_STORAGE_SERVICE_SIGNAL);
         } else {
             psa_panic();
         }

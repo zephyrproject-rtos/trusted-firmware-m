@@ -24,6 +24,9 @@ define block ER_TFM_CODE with fixed order, alignment = 8, maximum size = S_CODE_
 #ifndef S_RAM_CODE_START
        rw section .textrw object *.o,           /* place __ramfunc in ROM if no TFM_RAM_CODE block */
 #endif
+       ro section .text  object *libplatform_s*,
+       ro section .rodata object *libplatform_s*,
+       ro object *libtfm_spm*,
        readonly
 };
 
@@ -33,9 +36,8 @@ define block TFM_UNPRIV_CODE with alignment = 32 {
        ro object *6M_tl*.a,
        ro object *7M_tl*.a,
        ro object *libtfm_sprt.a,
-       ro object psa_client.o,
-       ro object psa_service.o,
-       ro object psa_lifecycle.o,
+       ro object psa_interface_*.o,
+       ro object tfm_psa_call_pack.o,
        ro object tfm_log_raw.o
        };
 
@@ -80,11 +82,17 @@ define block TFM_APP_CODE_END with alignment = 32, size = 0 { };
 
 #if defined(S_CODE_SRAM_ALIAS_BASE)
     /* eFlash driver code that gets copied from Flash to SRAM */
-define block ER_CODE_SRAM with alignment = 4 {
+initialize by copy {
        ro object Driver_GFC100_EFlash.o,
        ro object gfc100_eflash_drv.o,
        ro object musca_b1_eflash_drv.o
-    };
+       };
+
+define block ER_CODE_SRAM  with fixed order, alignment = 8 {
+       rw section .text,
+       rw section .rodata
+       };
+
 place at address S_CODE_SRAM_ALIAS_BASE { block ER_CODE_SRAM };
 #endif
 
@@ -94,18 +102,18 @@ define block TFM_SECURE_DATA_START with size = 0 { };
 #ifndef TFM_MULTI_CORE_TOPOLOGY
     /* Shared area between BL2 and runtime to exchange data */
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
-define block ARM_LIB_STACK_MSP with alignment = 32, size = S_MSP_STACK_SIZE { };
+define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE { };
 define overlay STACK_DATA {block TFM_SHARED_DATA};
-define overlay STACK_DATA {block ARM_LIB_STACK_MSP};
+define overlay STACK_DATA {block ARM_LIB_STACK};
 
 # if !defined(TFM_PSA_API)
     /* Reserve space for stack seal (8 bytes) */
-define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE - 0x8 { };
-define block ARM_LIB_STACK_SEAL with size = 0x8 { };
+define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE - 0x8 { };
+define block ER_INITIAL_PSP_SEAL with size = 0x8 { };
 # else
-define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE { };
+define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE { };
 # endif
-keep {block TFM_SHARED_DATA, block ARM_LIB_STACK_MSP};
+keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 #endif
 
 #if !defined(TFM_PSA_API)
@@ -146,14 +154,14 @@ define block TFM_SECURE_PRIV_DATA_BOUNDARY with size = 0 { };
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
 
     /* MSP */
-define block ARM_LIB_STACK_MSP with alignment = 32, size = S_MSP_STACK_SIZE { };
+define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE { };
 
 define overlay STACK_DATA {block TFM_SHARED_DATA};
-define overlay STACK_DATA {block ARM_LIB_STACK_MSP};
+define overlay STACK_DATA {block ARM_LIB_STACK};
 
     /* PSP is privileged in multi-core topology */
-define block ARM_LIB_STACK with alignment = 32, size = S_PSP_STACK_SIZE { };
-keep {block TFM_SHARED_DATA, block ARM_LIB_STACK_MSP};
+define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE { };
+keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 #endif
 
 define block HEAP         with alignment = 8, size = S_HEAP_SIZE { };
@@ -272,10 +280,10 @@ define block DATA with fixed order {
     /* Shared area between BL2 and runtime to exchange data */
     overlay STACK_DATA,
     /* PSP is unprivileged in single-core topology */
-    block ARM_LIB_STACK,
+    block ER_INITIAL_PSP,
 # if !defined(TFM_PSA_API)
     /* Define stack seal block for Library mode */
-    block ARM_LIB_STACK_SEAL,
+    block ER_INITIAL_PSP_SEAL,
 # endif
 #endif
 
@@ -317,7 +325,7 @@ define block PRIV_DATA with fixed order {
     /* Shared area between BL2 and runtime to exchange data */
     overlay STACK_DATA,
     /* PSP is privileged in multi-core topology */
-    block ARM_LIB_STACK,
+    block ER_INITIAL_PSP,
 #endif
 
     overlay HEAP_OVL,

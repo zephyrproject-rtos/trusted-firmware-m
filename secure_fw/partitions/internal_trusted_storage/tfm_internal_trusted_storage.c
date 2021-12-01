@@ -16,6 +16,7 @@
 #include "tfm_its_defs.h"
 #include "tfm_its_req_mngr.h"
 #include "its_utils.h"
+#include "tfm_sp_log.h"
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "ps_object_defs.h"
@@ -172,6 +173,7 @@ psa_status_t tfm_its_init(void)
         /* Remove all data in the ITS memory area and create a valid ITS flash
          * layout in that area.
          */
+        LOG_INFFMT("Creating an empty ITS flash layout.\r\n");
         status = its_flash_fs_wipe_all(&fs_ctx_its);
         if (status != PSA_SUCCESS) {
             return status;
@@ -212,6 +214,7 @@ psa_status_t tfm_its_init(void)
         /* Remove all data in the PS memory area and create a valid PS flash
          * layout in that area.
          */
+        LOG_INFFMT("Creating an empty PS flash layout.\r\n");
         status = its_flash_fs_wipe_all(&fs_ctx_ps);
         if (status != PSA_SUCCESS) {
             return status;

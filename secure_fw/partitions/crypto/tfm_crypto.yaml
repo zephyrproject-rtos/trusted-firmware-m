@@ -482,9 +482,6 @@
     },
   ],
   "dependencies": [
-    "TFM_ITS_SET",
-    "TFM_ITS_GET",
-    "TFM_ITS_GET_INFO",
-    "TFM_ITS_REMOVE",
+    "TFM_INTERNAL_TRUSTED_STORAGE_SERVICE"
   ]
 }

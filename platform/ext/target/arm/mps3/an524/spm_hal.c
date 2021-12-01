@@ -5,13 +5,10 @@
  *
  */
 
-#include <stdio.h>
 #include "cmsis.h"
 #include "tfm_spm_hal.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"
-#include "mpu_armv8m_drv.h"
-#include "region_defs.h"
 #include "platform_description.h"
 #include "Driver_Common.h"
 #include "region.h"
@@ -31,26 +28,6 @@
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
-
-enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                  bool privileged,
-                  const struct platform_data_t *platform_data)
-{
-    if (!platform_data) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-
-    if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
-        if (privileged) {
-            ppc_configure_to_secure_priv(platform_data->periph_ppc_bank,
-                                         platform_data->periph_ppc_loc);
-        } else {
-            ppc_en_secure_unpriv(platform_data->periph_ppc_bank,
-                                 platform_data->periph_ppc_loc);
-        }
-    }
-    return TFM_PLAT_ERR_SUCCESS;
-}
 
 void MPC_Handler(void)
 {
@@ -93,45 +70,6 @@ uint32_t tfm_spm_hal_get_ns_entry_point(void)
     return *((uint32_t *)(memory_regions.non_secure_code_start + 4));
 }
 
-enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
-{
-    volatile struct sysctrl_t *sys_ctrl =
-                                     (struct sysctrl_t *)CMSDK_SYSCTRL_BASE_S;
-
-#if defined(DAUTH_NONE)
-    /* Set all the debug enable selector bits to 1 */
-    sys_ctrl->secdbgset = All_SEL_STATUS;
-    /* Set all the debug enable bits to 0 */
-    sys_ctrl->secdbgclr =
-                   DBGEN_STATUS | NIDEN_STATUS | SPIDEN_STATUS | SPNIDEN_STATUS;
-#elif defined(DAUTH_NS_ONLY)
-    /* Set all the debug enable selector bits to 1 */
-    sys_ctrl->secdbgset = All_SEL_STATUS;
-    /* Set the debug enable bits to 1 for NS, and 0 for S mode */
-    sys_ctrl->secdbgset = DBGEN_STATUS | NIDEN_STATUS;
-    sys_ctrl->secdbgclr = SPIDEN_STATUS | SPNIDEN_STATUS;
-#elif defined(DAUTH_FULL)
-    /* Set all the debug enable selector bits to 1 */
-    sys_ctrl->secdbgset = All_SEL_STATUS;
-    /* Set all the debug enable bits to 1 */
-    sys_ctrl->secdbgset =
-                   DBGEN_STATUS | NIDEN_STATUS | SPIDEN_STATUS | SPNIDEN_STATUS;
-#else
-
-#if !defined(DAUTH_CHIP_DEFAULT)
-#error "No debug authentication setting is provided."
-#endif
-
-    /* Set all the debug enable selector bits to 0 */
-    sys_ctrl->secdbgclr = All_SEL_STATUS;
-
-    /* No need to set any enable bits because the value depends on
-     * input signals.
-     */
-#endif
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line)
 {
     NVIC_SetPriority(irq_line, DEFAULT_IRQ_PRIORITY);
@@ -172,22 +110,24 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     }
 }
 
-enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void)
+#ifndef TFM_PSA_API
+enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
+                  bool privileged,
+                  const struct platform_data_t *platform_data)
 {
-    return enable_fault_handlers();
-}
+    if (!platform_data) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
 
-enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
-{
-    return system_reset_cfg();
+    if (platform_data->periph_ppc_bank != PPC_SP_DO_NOT_CONFIGURE) {
+        if (privileged) {
+            ppc_configure_to_secure_priv(platform_data->periph_ppc_bank,
+                                         platform_data->periph_ppc_loc);
+        } else {
+            ppc_en_secure_unpriv(platform_data->periph_ppc_bank,
+                                 platform_data->periph_ppc_loc);
+        }
+    }
+    return TFM_PLAT_ERR_SUCCESS;
 }
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
-{
-    return nvic_interrupt_target_state_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
-{
-    return nvic_interrupt_enable();
-}
+#endif

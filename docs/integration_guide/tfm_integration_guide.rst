@@ -28,7 +28,6 @@ The hardware platforms currently supported are:
 
 - Soft Macro Model (SMM) Cortex-M33 SSE-200 subsystem for MPS2+ (AN521)
 - Cortex-M23 IoT Kit subsystem for MPS2+ (AN519)
-- Corstone-300 Ecosystem FVP (Cortex-M55 SSE-300 MPS2+)
 - Corstone-300 Ethos-U55 FVP (Cortex-M55 plus Ethos-U55 SSE-300 MPS3)
 - Musca-B1 test chip board (Cortex-M33 SSE-200 subsystem)
 - Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
@@ -38,6 +37,7 @@ The hardware platforms currently supported are:
 - nRF9160 DK (Cortex-M33)
 - nRF5340 DK (Cortex-M33 Application MCU)
 - BL5340 DVK (Cortex-M33 Application MCU)
+- Corstone-Polaris Ethos-U55 FVP (Olympus CPU plus Ethos-U55)
 
 The files related to the supported platforms are contained under the
 ``platform`` subfolder. The platform specific files are under
@@ -134,8 +134,13 @@ implementation of these wrappers to be able to run the tests.
 
 NS client Identification
 ========================
-See
-:doc:`ns client identification documentation </docs/technical_references/design_docs/tfm_ns_client_identification>`.
+
+The NS client identification (NSID) is specified by either SPM or NSPE RTOS.
+If SPM manages the NSID (default option), then the same NSID (-1) will be used
+for all connections from NS clients.
+For the case that NSPE RTOS manages the NSID and/or different NSIDs should be
+used for different NS clients. See
+:doc:`Non-secure Client Extension Integration Guide </docs/integration_guide/non-secure_client_extension_integration_guide>`.
 
 *********************
 Non-secure interrupts

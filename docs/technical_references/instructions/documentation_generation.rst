@@ -2,34 +2,41 @@
 Documentation generation
 ########################
 
-The build system is prepared to support generation of two documents:
+Two documents are available for generation:
 
-- Reference Manual. Doxygen based.
-- User Guide. Sphinx based.
+- Reference Manual (HTML, PDF)
+- User Guide (HTML, PDF)
 
-Both documents can be generated in HTML and PDF format.
+The documentation build is independent from building the binary artifacts.
 
-Support for document generation in the build environment is not mandatory.
-Missing document generation tools will not block building the TF-M firmware.
+******************************
+Tools and building environment
+******************************
 
-***************************
-Build TF-M Reference Manual
-***************************
-
-The following tools are needed:
+These tools are used to generate TF-M documentation:
 
     - Doxygen v1.8.0 or later
     - Graphviz dot v2.38.0 or later
     - PlantUML v1.2018.11 or later
-    - Java runtime environment 1.8 or later (for running PlantUML)
-    - LaTeX - for PDF generation only
-    - PdfLaTeX - for PDF generation only
+    - Java runtime environment v1.8 or later (for running PlantUML)
+    - Sphinx and other python modules, listed in ``tools/requirements_docs.txt``
+
+Additionally, for PDFs format:
+
+    - LaTeX
+    - PdfLaTeX
+
+There are two ways of building TF-M reference manual:
+
+    1. As a custom target of TF-M CMake build system
+    2. Directly, using the command line tools
+
+
+To prepare your building environment execute the following steps:
 
 .. tabs::
 
     .. group-tab:: Linux
-
-        1. Set-up the needed tools and environment:
 
         .. code-block:: bash
 
@@ -41,191 +48,174 @@ The following tools are needed:
             # For PDF generation
             sudo apt-get install -y doxygen-latex
 
-        2. Currently, there are two ways of building TF-M reference manual:
-
-            - Using the CMake build system as custom targets
-
-            .. code-block:: bash
-
-                cd <TF-M base folder>
-                cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-                cmake --build cmake_doc -- tfm_docs_refman_html tfm_docs_refman_pdf
-
-            The documentation files will be available under the directory ``cmake_doc/docs/reference_manual``.
-
-            - Manually using the appropriate tools (`sphinx-build`_/ `Doxygen`_)
-
-            .. code-block:: bash
-
-                # Build the documentation from build_docs directory
-                cd <TF-M base folder>
-                mkdir build_docs
-                cp docs/conf.py build_docs/conf.py
-                cd build_docs
-                sphinx-build ./ user_guide
-
-                # Build the documentation from a custom location
-                # setting the build_docs as input
-
-                # Note that using this method will still generate the reference manual
-                # to the  <TF-M base folder>/build_docs/reference_manual
-                cd <TF-M base folder>/<OTHER_DIR>/<OTHER_DIR2>
-                sphinx-build  <TF-M base folder>/build_docs/ <DESIRED_OUTPUT_DIR>
-
-            .. Note::
-
-                Invoking Sphinx-build will build both user_guide and
-                reference_manual targets.
+            # Install the required Python modules
+            pip3 install --upgrade pip
+            cd trusted-firmware-m
+            pip3 install -r tools/requirements_docs.txt
 
     .. group-tab:: Windows
 
-        1. Download and install the following tools:
+        Download and install the following tools:
 
-        - `Doxygen 1.8.8 <https://sourceforge.net/projects/doxygen/files/snapshots/doxygen-1.8-svn/windows/doxygenw20140924_1_8_8.zip/download>`__
-        - `Graphviz 2.38 <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
-        - The Java runtime is part of the Arm DS installation or can be
-          downloaded from `here <https://www.java.com/en/download/>`__
-        - `PlantUML <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
-        -  `MikTeX <https://miktex.org/download>`__ - for PDF generation only
+            - `Doxygen 1.8.8 <https://sourceforge.net/projects/doxygen/files/snapshots/doxygen-1.8-svn/windows/doxygenw20140924_1_8_8.zip/download>`__
+            - `Graphviz 2.38 <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
+            - The Java runtime is part of the Arm DS installation or can be
+               downloaded from `here <https://www.java.com/en/download/>`__
+            - `PlantUML <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
+            -  `MikTeX <https://miktex.org/download>`__ - for PDF generation only
 
-        2. Set the environment variables, assuming that:
+        Set the environment variables, assuming that:
 
-        - doxygen, dot, and MikTeX binaries are available on the PATH.
-        - Java JVM is used from Arm DS installation.
+            - doxygen, dot, and MikTeX binaries are available on the PATH.
+            - Java JVM is used from Arm DS installation.
 
         .. code-block:: bash
 
             set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
             set PATH=$PATH;<ARM_DS_PATH>\sw\java\bin
 
-        3. Using the CMake build system as custom targets to build TF-M
-           reference manual:
+            # Install the required Python modules
+            pip3 install --upgrade pip
+            cd trusted-firmware-m
+            pip3 install -r tools\requirements_docs.txt
 
-        .. code-block:: bash
+***************************
+Build TF-M Reference Manual
+***************************
 
-            cd <TF-M base folder>
-            cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-            cmake --build cmake_doc -- tfm_docs_refman_html tfm_docs_refman_pdf
-
-        The documentation files will be available under the directory ``cmake_doc\docs\reference_manual``.
-
-*********************
-Build TF-M User Guide
-*********************
-
-The following tools are needed:
-
-    - Python3 and the following modules:
-    - Sphinx v2.0.1
-    - m2r v0.2.0
-    - sphinxcontrib-plantuml
-    - sphinxcontrib-svg2pdfconverter
-    - sphinx-rtd-theme
-    - docutils v0.16
-    - Graphviz dot v2.38.0 or later
-    - PlantUML v1.2018.11 or later
-    - Java runtime environment 1.8 or later (for running PlantUML)
-    - LaTeX - for PDF generation only
-    - PdfLaTeX - for PDF generation only
-    - librsvg2-bin - a SVG pictures renderer library to support
-      sphinxcontrib-svg2pdfconverter
+The Reference Manual will be generated in the ``build_docs/docs/reference_manual``.
 
 .. tabs::
 
     .. group-tab:: Linux
 
-        1. Set-up the tools and environment:
-
         .. code-block:: bash
 
-            sudo apt-get install -y python3 graphviz default-jre librsvg2-bin
-            pip install -r tools/requirements.txt
-            mkdir ~/plantuml
-            curl -L http://sourceforge.net/projects/plantuml/files/plantuml.jar/download --output ~/plantuml/plantuml.jar
-
-            # For PDF generation
-            sudo apt-get install -y doxygen-latex
-            export PLANTUML_JAR_PATH=~/plantuml/plantuml.jar
-
-        2. Currently, there are two ways of building TF-M user guide:
-
-            - Using the CMake build system as custom targets
-
-            .. code-block:: bash
-
-                cd <TF-M base folder>
-                cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-                cmake --build cmake_doc -- tfm_docs_userguide_html tfm_docs_userguide_pdf
-
-            The documentation files will be available under the directory ``cmake_doc/docs/user_guide``.
-
-            - Manually using the appropriate tools (`sphinx-build`_/ `Doxygen`_)
-
-            .. code-block:: bash
-
-                # Build the documentation from build_docs directory
-                cd <TF-M base folder>
-                mkdir build_docs
-                cp docs/conf.py build_docs/conf.py
-                cd build_docs
-                sphinx-build ./ user_guide
-
-                # Build the documentation from a custom location
-                # setting the build_docs as input
-
-                # Note that using this method will still generate the reference manual
-                # to the  <TF-M base folder>/build_docs/reference_manual
-                cd <TF-M base folder>/<OTHER_DIR>/<OTHER_DIR2>
-                sphinx-build  <TF-M base folder>/build_docs/ <DESIRED_OUTPUT_DIR>
-
-            .. Note::
-
-                Invoking Sphinx-build will build both user_guide and
-                reference_manual targets.
+            cd <TF-M base folder>
+            cmake -S docs -B build_docs
+            cmake --build build_docs -- tfm_docs_refman_html tfm_docs_refman_pdf
 
     .. group-tab:: Windows
-
-        1. Download and install the following tools:
-
-        - `Graphviz 2.38 <https://graphviz.gitlab.io/_pages/Download/windows/graphviz-2.38.msi>`__
-        - The Java runtime is part of the Arm DS installation or can be `downloaded from here <https://www.java.com/en/download/>`__
-        - `PlantUML <http://sourceforge.net/projects/plantuml/files/plantuml.jar/download>`__
-        - `MikTeX <https://miktex.org/download>`__ - for PDF generation only
-        - Python3 `(native Windows version) <https://www.python.org/downloads/>`__
-        - The necessary Python3 packages are listed in the requirements.txt file.
-
-        To install all needed packages just do:
-
-        .. code-block:: bash
-
-            pip install -r tools\requirements.txt
-
-        .. Note::
-            When building the documentation the first time, MikTeX might prompt
-            for installing missing LaTeX components. Please allow the MikTeX
-            package manager to set-up these.
-
-        2. Set the environment variables, assuming that:
-
-        - plantuml.jar is available at c:\\plantuml\\plantuml.jar
-        - doxygen, dot, and MikTeX binaries are available on the PATH.
-        - Java JVM is used from DS5 installation.
-
-        .. code-block:: bash
-
-            set PLANTUML_JAR_PATH=<plantuml_Path>\plantuml.jar
-            set PATH=$PATH;<ARM_DS_PATH>\sw\java\bin
-
-        3. Using the CMake build system as custom targets to build TF-M user
-           guide:
 
         .. code-block:: bash
 
             cd <TF-M base folder>
-            cmake -S . -B cmake_doc -DTFM_PLATFORM=arm/mps2/an521
-            cmake --build cmake_doc -- tfm_docs_userguide_html tfm_docs_userguide_pdf
+            cmake -S docs -B build_docs -G"Unix Makefiles"
+            cmake --build build_docs -- tfm_docs_refman_html tfm_docs_refman_pdf
 
-        The documentation files will be available under the directory ``cmake_doc\docs\user_guide``.
+*********************
+Build TF-M User Guide
+*********************
+
+The User Manual will be available under the directory ``build_docs/docs/user_guide``.
+
+.. tabs::
+
+    .. group-tab:: Linux
+
+        .. code-block:: bash
+
+            cd <TF-M base folder>
+            cmake -S docs -B build_docs
+            cmake --build build_docs -- tfm_docs_userguide_html tfm_docs_userguide_pdf
+
+    .. group-tab:: Windows
+
+        .. code-block:: bash
+
+            cd <TF-M base folder>
+            cmake -S docs -B build_docs -G"Unix Makefiles"
+            cmake --build build_docs -- tfm_docs_userguide_html tfm_docs_userguide_pdf
+
+
+***************************************
+Direct build using a command line tools
+***************************************
+
+The direct build will build both user_guide and reference_manual.
+
+
+.. tabs::
+
+    .. group-tab:: Linux
+
+        .. code-block:: bash
+
+            # Build the documentation from build_docs directory
+            cd <TF-M base folder>
+            mkdir build_docs
+            cp docs/conf.py build_docs/conf.py
+            cd build_docs
+            sphinx-build ./ user_guide
+
+    .. group-tab:: Windows
+
+        .. code-block:: bash
+
+            # Command line tools is yet not available for Windows
+
+############
+Dependencies
+############
+
+.. uml::
+
+   @startuml
+    skinparam state {
+      BackgroundColor #92AEE0
+      FontColor black
+      FontSize 16
+      AttributeFontColor black
+      AttributeFontSize 16
+      BackgroundColor<<pdf>> #A293E2
+      BackgroundColor<<doc>> #90DED6
+    }
+    state u_guide as "User Guide" <<doc>>
+    state refman as "Reference Manual" <<doc>>
+    state rtd_theme as "sphinx-rtd-theme" <<doc>>
+    state tabs as "sphinx-tabs" <<doc>>
+    state sphnix_puml as "sphinxcontrib-plantuml" <<doc>>
+    state sphnix_svg as "sphinxcontrib-svg2pdfconverter" <<doc>>
+    state JRE as "JRE" <<doc>> : Java Runtime Environment
+    state gwiz as "Graphwiz dot" <<doc>>
+    state Sphinx as "Sphinx" <<doc>>
+    state python as "Python v3" <<doc>>
+    state m2r as "m2r2" <<doc>>
+    state PlantUML as "PlantUML" <<doc>>
+    state LaTex as "LaTex" <<pdf>>
+    state PdfLaTex as "PdfLaTex" <<pdf>>
+    state Doxygen as "Doxygen" <<doc>>
+    state librsvg as "librsvg2-bin" <<doc>>
+
+    [*] --> u_guide
+    u_guide --> Sphinx
+    Sphinx --> m2r
+    Sphinx --> rtd_theme
+    Sphinx --> tabs
+    Sphinx --> sphnix_puml
+    Sphinx --> sphnix_svg
+    m2r --> python
+    rtd_theme --> python
+    tabs --> python
+    sphnix_puml --> python
+    sphnix_svg --> python
+    sphnix_svg --> librsvg
+    Sphinx --> PlantUML
+    PlantUML --> JRE
+    PlantUML --> gwiz
+    Sphinx --> LaTex
+    LaTex --> PdfLaTex
+
+    [*] --> refman
+    refman --> Doxygen
+    Doxygen --> PlantUML
+    Doxygen --> LaTex
+    state Legend {
+      state x as "For PDF generation only" <<pdf>>
+    }
+
+   @enduml
+
 
 .. _sphinx-build: https://www.sphinx-doc.org/en/master/man/sphinx-build.html
 .. _Doxygen: https://www.doxygen.nl

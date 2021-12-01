@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -48,8 +48,7 @@ macro(tfm_toolchain_reset_compiler_flags)
         -mthumb
         -nostdlib
         -std=c99
-        $<$<BOOL:${TFM_CODE_COVERAGE}>:-g>
-        $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:-msoft-float>
+        $<$<OR:$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<BOOL:${TFM_CODE_COVERAGE}>>:-g>
     )
 endmacro()
 
@@ -68,12 +67,46 @@ macro(tfm_toolchain_reset_linker_flags)
 endmacro()
 
 macro(tfm_toolchain_set_processor_arch)
-    set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
-    set(CMAKE_SYSTEM_ARCHITECTURE ${TFM_SYSTEM_ARCHITECTURE})
+    if (DEFINED TFM_SYSTEM_PROCESSOR)
+        set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
+
+        if (DEFINED TFM_SYSTEM_DSP)
+            if (NOT TFM_SYSTEM_DSP)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
+            endif()
+        endif()
+        if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+            if (DEFINED CONFIG_TFM_SPE_FP)
+                if(CONFIG_TFM_SPE_FP STREQUAL "0")
+                    string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
+                endif()
+            endif()
+        endif()
+    endif()
+
+    # CMAKE_SYSTEM_ARCH variable is not a built-in CMAKE variable. It is used to
+    # set the compile and link flags when TFM_SYSTEM_PROCESSOR is not specified.
+    # The variable name is choosen to align with the ARMCLANG toolchain file.
+    set(CMAKE_SYSTEM_ARCH         ${TFM_SYSTEM_ARCHITECTURE})
 
     if (DEFINED TFM_SYSTEM_DSP)
-        if(NOT TFM_SYSTEM_DSP)
-            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
+        # +nodsp modifier is only supported from GCC version 8.
+        # CMAKE_C_COMPILER_VERSION is not guaranteed to be defined.
+        EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION )
+        if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+            # armv8.1-m.main arch does not have +nodsp option
+            if ((NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main") AND
+                NOT TFM_SYSTEM_DSP)
+                string(APPEND CMAKE_SYSTEM_ARCH "+nodsp")
+            endif()
+        endif()
+    endif()
+
+    if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+        if (DEFINED CONFIG_TFM_SPE_FP)
+            if(CONFIG_TFM_SPE_FP STRGREATER 0)
+                string(APPEND CMAKE_SYSTEM_ARCH "+fp")
+            endif()
         endif()
     endif()
 endmacro()
@@ -83,16 +116,42 @@ macro(tfm_toolchain_reload_compiler)
     tfm_toolchain_reset_compiler_flags()
     tfm_toolchain_reset_linker_flags()
 
+    if (CMAKE_C_COMPILER_VERSION VERSION_EQUAL 10.2.1)
+        message(FATAL_ERROR "GNU Arm compiler version 10-2020-q4-major has an issue in CMSE support."
+                            " Select other GNU Arm compiler versions instead."
+                            " See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157 for the issue detail.")
+    endif()
+
     unset(CMAKE_C_FLAGS_INIT)
     unset(CMAKE_ASM_FLAGS_INIT)
 
-    set(CMAKE_C_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_ASM_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_C_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
-    set(CMAKE_ASM_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    if (DEFINED TFM_SYSTEM_PROCESSOR)
+        set(CMAKE_C_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_ASM_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_C_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_ASM_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    else()
+        set(CMAKE_C_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_ASM_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_C_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_ASM_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+    endif()
 
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
+
+    set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
+
+    if (CONFIG_TFM_SPE_FP STREQUAL "2")
+        set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+        set(LINKER_CP_OPTION -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+    elseif (CONFIG_TFM_SPE_FP STREQUAL "1")
+        set(COMPILER_CP_FLAG -mfloat-abi=softfp -mfpu=${CONFIG_TFM_FP_ARCH})
+        set(LINKER_CP_OPTION -mfloat-abi=softfp -mfpu=${CONFIG_TFM_FP_ARCH})
+    else()
+        set(COMPILER_CP_FLAG -mfloat-abi=soft)
+        set(LINKER_CP_OPTION -mfloat-abi=soft)
+    endif()
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first
@@ -124,6 +183,7 @@ macro(target_add_scatter_file target)
         set_source_files_properties(${SCATTER_FILE_PATH}
             PROPERTIES
             LANGUAGE C
+            KEEP_EXTENSION True # Don't use .o extension for the preprocessed file
         )
     endforeach()
 

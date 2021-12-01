@@ -63,9 +63,9 @@ const cy_stc_scb_uart_config_t KITPROG_UART_config =
 /* TCPWM Timer driver structures */
 #if defined(CY_TCPWM0_TIMER0_S)
 cy_stc_tcpwm_counter_config_t tcpwm_config_timer0
-#if defined(TFM_ENABLE_SLIH_TEST)
+#if defined(TEST_NS_SLIH_IRQ)
     TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
-#endif /* TFM_ENABLE_SLIH_TEST */
+#endif /* TEST_NS_SLIH_IRQ */
     = {
     .period             = TIMER0_MATCH, /* Upper limit (wrap around) */
     .clockPrescaler     = CY_TCPWM_COUNTER_PRESCALER_DIVBY_8, /* Clk_counter = Clk_input / 8 */
@@ -90,9 +90,9 @@ cy_stc_tcpwm_counter_config_t tcpwm_config_timer0
 
 #if (CY_CPU_CORTEX_M0P)
 cy_stc_sysint_t CY_TCPWM_NVIC_CFG_S
-#if defined(TFM_ENABLE_SLIH_TEST)
+#if defined(TEST_NS_SLIH_IRQ)
     TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
-#endif /* TFM_ENABLE_SLIH_TEST */
+#endif /* TEST_NS_SLIH_IRQ */
     = {
     .intrSrc = TFM_TIMER0_IRQ,             /* NVIC #3 */
     .cm0pSrc = tcpwm_0_interrupts_0_IRQn,  /* IRQ 123 */
@@ -100,9 +100,9 @@ cy_stc_sysint_t CY_TCPWM_NVIC_CFG_S
 };
 #endif
 tfm_timer_irq_test_dev_t CY_TCPWM0_TIMER0_DEV_S
-#if defined(TFM_ENABLE_SLIH_TEST)
+#if defined(TEST_NS_SLIH_IRQ)
     TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
-#endif /* TFM_ENABLE_SLIH_TEST */
+#endif /* TEST_NS_SLIH_IRQ */
     = {
     .is_initialized     = false,
     .tcpwm_base         = TCPWM0,

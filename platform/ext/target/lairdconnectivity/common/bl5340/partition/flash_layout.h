@@ -23,32 +23,32 @@
  *
  * Internal flash:
  * 0x0000_0000 BL2 - MCUBoot (64 KB)
- * 0x0001_0000 Primary image area (896 KB):
- *    0x0001_0000 Secure     image primary (640 KB)
- *    0x000B_0000 Non-secure image primary (256 KB)
+ * 0x0001_0000 Primary image area (864 KB):
+ *    0x0001_0000 Secure     image primary (576 KB)
+ *    0x000A_0000 Non-secure image primary (288 KB)
+ * 0x000e_8000 Scratch (32 KB)
  * 0x000f_0000 Protected Storage area (16 KB)
  * 0x000f_4000 Internal Trusted Storage area (8 KB)
- * 0x000f_6000 NV counters main area (4 KB)
- * 0x000f_7000 NV counters backup area (4 KB)
+ * 0x000f_6000 OTP / NV counters area (8 KB)
  * 0x000f_8000 Unused (optional NVS used in Zephyr) (32 KB)
  * QSPI:
- * 0x0000_0000 Secondary image area (896 KB):
- *    0x0000_0000 Secure     image secondary (640 KB)
- *    0x000A_0000 Non-secure image secondary (256 KB)
- * 0x000e_0000 Scratch (128 KB)
+ * 0x0000_0000 Secondary image area (864 KB):
+ *    0x0000_0000 Secure     image secondary (576 KB)
+ *    0x0009_0000 Non-secure image secondary (288 KB)
+ * 0x000d_8000 Unused (160 KB)
  * 0x0010_0000 Unused (optional LFS used in Zephyr) (7 MB)
  *
  *
  * Flash layout on BL5340 Application MCU without BL2:
  *
  * Internal flash:
- * 0x0000_0000 Primary image area (960 KB):
- *    0x0000_0000 Secure     image primary (640 KB)
- *    0x000A_0000 Non-secure image primary (320 KB)
+ * 0x0000_0000 Primary image area (928 KB):
+ *    0x0000_0000 Secure     image primary (576 KB)
+ *    0x0009_0000 Non-secure image primary (352 KB)
+ * 0x000e_8000 Scratch (32 KB)
  * 0x000f_0000 Protected Storage main area (16 KB)
  * 0x000f_4000 Internal Trusted Storage main area (8 KB)
- * 0x000f_6000 NV counters main area (4 KB)
- * 0x000f_7000 NV counters backup area (4 KB)
+ * 0x000f_6000 OTP / NV counters area (8 KB)
  * 0x000f_8000 Unused (optional NVS used in Zephyr) (32 KB)
  * QSPI:
  * 0x0000_0000 Unused (1 MB)
@@ -63,13 +63,13 @@
  */
 
 /* Size of a Secure and of a Non-secure image */
-#define FLASH_S_PARTITION_SIZE                (0xA0000)       /* S partition: 640 KB */
+#define FLASH_S_PARTITION_SIZE                (0x90000)       /* S partition: 576 KB */
 #ifdef BL2
 /* Using BL2 */
-#define FLASH_NS_PARTITION_SIZE               (0x40000)       /* NS partition: 256 KB */
+#define FLASH_NS_PARTITION_SIZE               (0x48000)       /* NS partition: 288 KB */
 #else
 /* Without BL2 */
-#define FLASH_NS_PARTITION_SIZE               (0x50000)       /* NS partition: 320 KB */
+#define FLASH_NS_PARTITION_SIZE               (0x58000)       /* NS partition: 352 KB */
 #endif
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
@@ -100,7 +100,7 @@
 #define FLASH_AREA_BL2_OFFSET      (0x0)
 #define FLASH_AREA_BL2_SIZE        (0x10000) /* 64 KB */
 
-#define FLASH_AREA_SCRATCH_SIZE    (0x20000) /* 128 KB */
+#define FLASH_AREA_SCRATCH_SIZE    (0x8000) /* 32 KB */
 
 #if !defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)
 /* Secure + Non-secure image primary slot (internal flash) */
@@ -115,9 +115,9 @@
 #define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE + \
                                     FLASH_NS_PARTITION_SIZE)
 
-/* Scratch area (QSPI) */
+/* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
-#define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
+#define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    ((FLASH_S_PARTITION_SIZE + \
@@ -127,9 +127,6 @@
 #define MCUBOOT_STATUS_MAX_ENTRIES ((FLASH_S_PARTITION_SIZE + \
                                      FLASH_NS_PARTITION_SIZE) / \
                                     FLASH_AREA_SCRATCH_SIZE)
-
-#define FLASH_PS_AREA_OFFSET       (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
-
 #elif (MCUBOOT_IMAGE_NUMBER == 2)
 /* Secure image primary slot */
 #define FLASH_AREA_0_ID            (1)
@@ -151,9 +148,9 @@
 #define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
 #define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
 
-/* Scratch area (QSPI) */
+/* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
-#define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
+#define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_STATUS_MAX_ENTRIES (FLASH_MAX_PARTITION_SIZE / \
@@ -161,12 +158,11 @@
 
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
-
-#define FLASH_PS_AREA_OFFSET       (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
 #else /* MCUBOOT_IMAGE_NUMBER > 2 */
 #error "Only MCUBOOT_IMAGE_NUMBER 1 and 2 are supported!"
 #endif /* MCUBOOT_IMAGE_NUMBER */
 
+#define FLASH_PS_AREA_OFFSET            (FLASH_AREA_SCRATCH_OFFSET + FLASH_AREA_SCRATCH_SIZE)
 #define FLASH_PS_AREA_SIZE              (0x4000)   /* 16 KB */
 
 /* Internal Trusted Storage (ITS) Service definitions */
@@ -174,10 +170,16 @@
                                          FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
-/* NV Counters definitions */
-#define FLASH_NV_COUNTERS_AREA_OFFSET   (FLASH_ITS_AREA_OFFSET + \
-                                         FLASH_ITS_AREA_SIZE)
-#define FLASH_NV_COUNTERS_AREA_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* OTP_definitions */
+#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
+                                           FLASH_ITS_AREA_SIZE)
+#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
+#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
+
+/* Non-secure storage region */
+#define NRF_FLASH_NS_STORAGE_AREA_OFFSET    (FLASH_TOTAL_SIZE - \
+                                             NRF_FLASH_NS_STORAGE_AREA_SIZE)
+#define NRF_FLASH_NS_STORAGE_AREA_SIZE      (0x8000)   /* 32 KB */
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
@@ -191,6 +193,7 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
+#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x4)
 
 /* Flash device name used by secondary slot and scratch area
  * Name is defined in flash driver file: Driver_QSPI.c
@@ -199,8 +202,8 @@
 #define FLASH_DEVICE_ID_2 (FLASH_DEVICE_ID+1)
 #define FLASH_DEV_NAME_3  Driver_FLASH1
 #define FLASH_DEVICE_ID_3 (FLASH_DEVICE_ID+1)
-#define FLASH_DEV_NAME_SCRATCH Driver_FLASH1
-#define FLASH_DEVICE_ID_SCRATCH (FLASH_DEVICE_ID+1)
+#define FLASH_DEV_NAME_SCRATCH Driver_FLASH0
+#define FLASH_DEVICE_ID_SCRATCH (FLASH_DEVICE_ID)
 
 #define TFM_HAL_ITS_FLASH_DRIVER Driver_FLASH0
 #define TFM_HAL_PS_FLASH_DRIVER Driver_FLASH0
@@ -245,15 +248,12 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_ITS_PROGRAM_UNIT       (0x4)
 
-/* NV Counter definitions */
-#define TFM_NV_COUNTERS_AREA_ADDR    FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_AREA_SIZE    (0x18) /* 24 Bytes */
-#define TFM_NV_COUNTERS_SECTOR_ADDR  FLASH_NV_COUNTERS_AREA_OFFSET
-#define TFM_NV_COUNTERS_SECTOR_SIZE  FLASH_AREA_IMAGE_SECTOR_SIZE
-
-/* Backup NV Counter definitions */
-#define TFM_NV_COUNTERS_BACKUP_AREA_ADDR    (FLASH_NV_COUNTERS_AREA_OFFSET + FLASH_AREA_IMAGE_SECTOR_SIZE)
-#define TFM_NV_COUNTERS_BACKUP_SECTOR_ADDR  (FLASH_NV_COUNTERS_AREA_OFFSET + FLASH_AREA_IMAGE_SECTOR_SIZE)
+/* OTP / NV counter definitions */
+#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
+#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
+#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
+#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
+                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
 /* Use Flash memory to store Code data */
 #define FLASH_BASE_ADDRESS (0x00000000)

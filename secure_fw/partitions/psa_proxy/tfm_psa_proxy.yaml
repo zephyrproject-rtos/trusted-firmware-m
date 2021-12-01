@@ -24,50 +24,20 @@
       "version_policy": "STRICT"
     },
     {
-      "name": "TFM_ATTEST_GET_TOKEN",
+      "name": "TFM_ATTESTATION_SERVICE",
       "sid": "0x00000020",
       "non_secure_clients": true,
-      "connection_based": true,
+      "connection_based": false,
+      "stateless_handle": 4,
       "version": 1,
       "version_policy": "STRICT"
     },
     {
-      "name": "TFM_ATTEST_GET_TOKEN_SIZE",
-      "sid": "0x00000021",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_ITS_SET",
+      "name": "TFM_INTERNAL_TRUSTED_STORAGE_SERVICE",
       "sid": "0x00000070",
       "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_ITS_GET",
-      "sid": "0x00000071",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_ITS_GET_INFO",
-      "sid": "0x00000072",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_ITS_REMOVE",
-      "sid": "0x00000073",
-      "non_secure_clients": true,
-      "connection_based": true,
+      "connection_based": false,
+      "stateless_handle": 3,
       "version": 1,
       "version_policy": "STRICT"
     },
@@ -96,44 +66,13 @@
       "version_policy": "STRICT"
     },
     {
-      "name": "TFM_PS_SET",
+      "name": "TFM_PROTECTED_STORAGE_SERVICE",
       "sid": "0x00000060",
       "non_secure_clients": true,
-      "connection_based": true,
+      "connection_based": false,
+      "stateless_handle": 2,
       "version": 1,
       "version_policy": "STRICT"
-     },
-     {
-      "name": "TFM_PS_GET",
-      "sid": "0x00000061",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-     },
-     {
-      "name": "TFM_PS_GET_INFO",
-      "sid": "0x00000062",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-     },
-     {
-      "name": "TFM_PS_REMOVE",
-      "sid": "0x00000063",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-     },
-     {
-      "name": "TFM_PS_GET_SUPPORT",
-      "sid": "0x00000064",
-      "non_secure_clients": true,
-      "connection_based": true,
-      "version": 1,
-      "version_policy": "STRICT"
-     }
+    }
   ]
 }

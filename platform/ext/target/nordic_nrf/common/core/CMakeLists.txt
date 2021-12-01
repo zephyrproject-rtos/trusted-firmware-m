@@ -58,20 +58,34 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_Flash.c
-        cmsis_drivers/Driver_USART.c
-        nrfx/drivers/src/nrfx_uarte.c
         nrfx/drivers/src/nrfx_nvmc.c
         nrfx_glue.c
         native_drivers/mpu_armv8m_drv.c
         native_drivers/spu.c
         spm_hal.c
         tfm_hal_isolation.c
+        tfm_hal_platform.c
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
+    PUBLIC
         plat_test.c
 )
+
+if(SECURE_UART1)
+    target_sources(platform_s
+        PRIVATE
+            cmsis_drivers/Driver_USART.c
+            nrfx/drivers/src/nrfx_uarte.c
+    )
+endif()
 
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -93,6 +107,11 @@ target_include_directories(platform_ns
         ${PLATFORM_DIR}/..
     PRIVATE
         ${PLATFORM_DIR}/../interface/include
+)
+
+target_compile_definitions(platform_ns
+    PUBLIC
+        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
 )
 
 #========================= Platform BL2 =======================================#

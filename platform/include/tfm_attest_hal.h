@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,8 +25,22 @@ enum tfm_security_lifecycle_t {
     TFM_SLC_NON_PSA_ROT_DEBUG         = 0x4000u,
     TFM_SLC_RECOVERABLE_PSA_ROT_DEBUG = 0x5000u,
     TFM_SLC_DECOMMISSIONED            = 0x6000u,
-    TFM_SLC_MAX_VALUE                 = 0x60FFu,
+    TFM_SLC_MAX_VALUE                 = UINT32_MAX,
 };
+
+/**
+ * \def VERIFICATION_URL_MAX_SIZE
+ *
+ * \brief Maximum size of verification URL in bytes
+ */
+#define VERIFICATION_URL_MAX_SIZE (32u)
+
+/**
+ * \def PROFILE_DEFINITION_MAX_SIZE
+ *
+ * \brief Maximum size of profile definition in bytes
+ */
+#define PROFILE_DEFINITION_MAX_SIZE (32u)
 
 /**
  * \brief Retrieve the security lifecycle of the device
@@ -44,13 +58,17 @@ enum tfm_security_lifecycle_t tfm_attest_hal_get_security_lifecycle(void);
  * It can be a text string that can be used to locate the service or can be a
  * URL specifying the address of the service.
  *
- * \param[out]  size  Length of the string, without the termination zero byte.
+ * \param[in/out] size  As an input value it indicates the size of the caller
+ *                      allocated buffer (in bytes) to store the HW version. At
+ *                      return its value is updated with the exact size of the
+ *                      verification service URL.
+ * \param[out]    buf   Pointer to the buffer to store the verification service
+ *                      URL.
  *
- * \return NULL pointer if not available otherwise the address of the
- *         verification service string in the device memory.
+ * \return  Returns error code specified in \ref tfm_plat_err_t
  */
-const char *
-tfm_attest_hal_get_verification_service(uint32_t *size);
+enum tfm_plat_err_t
+tfm_attest_hal_get_verification_service(uint32_t *size, uint8_t *buf);
 
 /**
  * \brief Retrieve the name of the profile definition document for initial
@@ -60,14 +78,16 @@ tfm_attest_hal_get_verification_service(uint32_t *size);
  *  being a full description of the claims, their usage, verification and
  *  token signing.
  *
- * \param[out]  size  Length of the document name, without the termination zero
- *                    byte.
+ * \param[in/out] size  As an input value it indicates the size of the caller
+ *                      allocated buffer (in bytes) to store the HW version. At
+ *                      return its value is updated with the exact size of the
+ *                      profile definition.
+ * \param[out]    buf   Pointer to the buffer to store the profile definition.
  *
- * \return NULL pointer if not available otherwise the address of the document
- *         name string in the device memory.
+ * \return  Returns error code specified in \ref tfm_plat_err_t
  */
-const char *
-tfm_attest_hal_get_profile_definition(uint32_t *size);
+enum tfm_plat_err_t
+tfm_attest_hal_get_profile_definition(uint32_t *size, uint8_t *buf);
 
 #ifdef __cplusplus
 }

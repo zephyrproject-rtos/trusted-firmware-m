@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -88,5 +88,13 @@ void tfm_get_ns_mem_region_attr(const void *p, size_t s,
  *         TFM_ERROR_GENERIC otherwise.
  */
 int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr);
+
+/**
+ * \brief Initialization of the multi core communication.
+ *
+ * \retval 0                    Operation succeeded.
+ * \retval Other return code    Operation failed with an error code.
+ */
+int32_t tfm_inter_core_comm_init(void);
 
 #endif /* __TFM_MULTI_CORE_H__ */

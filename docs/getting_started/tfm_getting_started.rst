@@ -139,6 +139,11 @@ versions are:
                     set PATH=<ARM_CLANG_PATH>\sw\ARMCompiler6.10.1\bin;$PATH
                     set ARM_PRODUCT_PATH=<ARM_CLANG_PATH>\sw\mappings
 
+      .. note::
+
+          ArmClang compiler *v6.17* may cause MemManage fault in TF-M higher level isolations.
+          The issue is under investigation and recommended to avoid using this version.
+
     - GNU Arm compiler v7.3.1+
 
       .. tabs::
@@ -338,38 +343,15 @@ Tool & Dependency overview
 
 To build the TF-M firmware the following tools are needed:
 
-.. csv-table:: Tool dependencies
-   :header: "Name", "Version", "Component"
+   - C compiler of supported toolchains
+   - CMake version 3.15 or later
+   - Git
+   - gmake, aka GNU Make
+   - Python v3.x
+   - a set of python modules listed in ``tools/requiremtns.txt``
 
-   "C compiler",,"Firmware"
-   "CMake",,
-   "GNU Make",,
-   "tf-m-tests",CMake handles it,
-   "mbed-crypto",CMake handles it,
-   "MCUboot",CMake handles it,
-   "Python",3.x,"Firmware, User Guide"
-   "yaml",,"Firmware"
-   "pyasn1",,"Firmware"
-   "jinja2",,"Firmware"
-   "cryptography",,"Firmware"
-   "cbor",,"Firmware"
-   "click",,"Firmware"
-   "imgtool",,"Firmware"
-   "Doxygen",">1.8","Reference manual"
-   "Sphinx","=2.0.1","User Guide"
-   "sphinxcontrib-plantuml",,"User Guide"
-   "sphinxcontrib-svg2pdfconverter",,"User Guide"
-   "sphinx-rtd-theme",,"User Guide"
-   "sphinx-tabs",,"User Guide"
-   "Git",,
-   "PlantUML",">v1.2018.11","Reference Manual, User Guide"
-   "Graphviz dot",">v2.38.0","Reference manual"
-   "Java runtime environment (JRE)",">1.8","Reference Manual, User Guide"
-   "LaTex",,"pdf version of Reference Manual and User Guide"
-   "PdfLaTex",,"pdf version of Reference Manual and User Guide"
-   "librsvg2-bin",, "User Guide"
-
-Dependency chain:
+Dependency chain
+----------------
 
 .. uml::
 
@@ -380,76 +362,32 @@ Dependency chain:
       FontSize 16
       AttributeFontColor black
       AttributeFontSize 16
-      BackgroundColor<<pdf>> #A293E2
-      BackgroundColor<<doc>> #90DED6
     }
     state fw as "Firmware" : TF-M binary
     state c_comp as "C Compiler" : C99
-    state gmake as "GNU make"
-    state u_guide as "User Guide" <<doc>>
-    state refman as "Reference Manual" <<doc>>
-    state rtd_theme as "sphinx-rtd-theme" <<doc>>
-    state tabs as "sphinx-tabs" <<doc>>
-    state sphnix_puml as "sphinxcontrib-plantuml" <<doc>>
-    state sphnix_svg as "sphinxcontrib-svg2pdfconverter" <<doc>>
-    state JRE as "JRE" <<doc>> : Java Runtime Environment
-    state gwiz as "Graphwiz dot" <<doc>>
-    state Sphinx as "Sphinx" <<doc>>
-    state m2r as "m2r" <<doc>>
-    state PlantUML as "PlantUML" <<doc>>
-    state LaTex as "LaTex" <<pdf>>
-    state PdfLaTex as "PdfLaTex" <<<<pdf>>>>
-    state Doxygen as "Doxygen" <<doc>>
-    state librsvg as "librsvg2-bin" <<doc>>
+    state python as "Python" : v3.x
 
-    [*] --> fw
     fw --> c_comp
     fw --> CMake
     CMake --> gmake
+    CMake --> Ninja
     fw --> cryptography
     fw --> pyasn1
     fw --> yaml
     fw --> jinja2
-    fw --> cbor
+    fw --> cbor2
     fw --> click
     fw --> imgtool
-    cryptography --> Python3
-    pyasn1 --> Python3
-    yaml --> Python3
-    jinja2 --> Python3
-    cbor --> Python3
-    click --> Python3
-    imgtool --> Python3
-
-    [*] --> u_guide
-    u_guide --> Sphinx
-    Sphinx --> m2r
-    Sphinx --> rtd_theme
-    Sphinx --> tabs
-    Sphinx --> sphnix_puml
-    Sphinx --> sphnix_svg
-    m2r --> Python3
-    rtd_theme --> Python3
-    tabs --> Python3
-    sphnix_puml --> Python3
-    sphnix_svg --> Python3
-    sphnix_svg --> librsvg
-    Sphinx --> PlantUML
-    PlantUML --> JRE
-    PlantUML --> gwiz
-    Sphinx --> LaTex
-    LaTex --> PdfLaTex
-
-    [*] --> refman
-    refman --> Doxygen
-    Doxygen --> PlantUML
-    Doxygen --> LaTex
-    state Legend {
-      state x as "For PDF generation only" <<pdf>>
-      state y as "For document generation only" <<doc>>
-      state z as "Mandatory"
-    }
-
+    c_comp --> GCC
+    c_comp --> CLANG
+    c_comp --> IAR
+    cryptography --> python
+    pyasn1 --> python
+    yaml --> python
+    jinja2 --> python
+    cbor2 --> python
+    click --> python
+    imgtool --> python
    @enduml
 
 ##########

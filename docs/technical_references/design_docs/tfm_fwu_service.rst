@@ -32,35 +32,35 @@ This partition supports the following features:
 Components
 **********
 The structure of the TF-M Firmware Update service is listed below:
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------------------+
-   | **Component name**          | **Description**                                               | **Location**                                                                     |
-   +=============================+===============================================================+==================================================================================+
-   | SPE client API interface    | This module exports the client API of PSA Firmware Update to  | ``./secure_fw/partitions/firmware_update/tfm_fwu_secure_api.c``                  |
-   |                             | the other services available in TF-M.                         |                                                                                  |
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------------------+
-   | NSPE client API interface   | This module exports the client API of PSA Firmware Update to  | ``./interface/src/tfm_firmware_update_func_api.c``                               |
-   |                             | the NSPE(i.e. to the applications).                           | ``./interface/src/tfm_firmware_update_ipc_api.c``                                |
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------------------+
-   | Manifest                    | The manifest file is a description of the service components  | ``./secure_fw/partitions/firmware_update/tfm_firmware_update.yaml``              |
-   |                             | for both library mode and IPC mode.                           |                                                                                  |
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------------------+
-   | Secure functions and IPC    | This module handles all the secure function requests in       | ``./secure_fw/partitions/firmware_update/tfm_fwu_req_mngr.c``                    |
-   | request handlers            | library model and all the service requests in IPC model.      |                                                                                  |
-   |                             | It maitains the image state context and calls the image ID    |                                                                                  |
-   |                             | converter to achieve the firmware update functionalities.     |                                                                                  |
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------------------+
-   | Image ID Converter          | This module converts the image ID between psa_image_id_t,     | ``./secure_fw/partitions/firmware_update/tfm_fwu_internal.c``                    |
-   |                             | which is the image ID structure in user interfaces, and       |                                                                                  |
-   |                             | bl_image_id_t which is the image ID structure in bootloader.  |                                                                                  |
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------------------+
-   | Shim layer between FWU and  | This module provides the APIs with the functionality of       | ``./secure_fw/partitions/firmware_update/tfm_bootloader_fwu_abstraction.h``      |
-   | bootloader                  | operating the bootloader to cooperate with the Firmware Update|                                                                                  |
-   |                             | service                                                       |                                                                                  |
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------------------+
-   | Shim layer example based on | This module is the implementation of the shim layer between   | ``./secure_fw/partitions/firmware_update/bootloader/mcuboot/tfm_mcuboot_fwu.c``  |
-   | MCUboot                     | FWU and bootloader based on MCUboot.                          |                                                                                  |
-   |                             |                                                               |                                                                                  |
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------------------+
+   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
+   | **Component name**          | **Description**                                               | **Location**                                                                          |
+   +=============================+===============================================================+=======================================================================================+
+   | SPE client API interface    | This module exports the client API of PSA Firmware Update to  | ``./secure_fw/partitions/firmware_update/tfm_fwu_secure_api.c``                       |
+   |                             | the other services available in TF-M.                         |                                                                                       |
+   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
+   | NSPE client API interface   | This module exports the client API of PSA Firmware Update to  | ``./interface/src/tfm_firmware_update_func_api.c``                                    |
+   |                             | the NSPE(i.e. to the applications).                           | ``./interface/src/tfm_firmware_update_ipc_api.c``                                     |
+   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
+   | Manifest                    | The manifest file is a description of the service components  | ``./secure_fw/partitions/firmware_update/tfm_firmware_update.yaml``                   |
+   |                             | for both library mode and IPC mode.                           |                                                                                       |
+   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
+   | Secure functions and IPC    | This module handles all the secure function requests in       | ``./secure_fw/partitions/firmware_update/tfm_fwu_req_mngr.c``                         |
+   | request handlers            | library model and all the service requests in IPC model.      |                                                                                       |
+   |                             | It maitains the image state context and calls the image ID    |                                                                                       |
+   |                             | converter to achieve the firmware update functionalities.     |                                                                                       |
+   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
+   | Image ID Converter          | This module converts the image ID between psa_image_id_t,     | ``./secure_fw/partitions/firmware_update/tfm_fwu_internal.c``                         |
+   |                             | which is the image ID structure in user interfaces, and       |                                                                                       |
+   |                             | bl_image_id_t which is the image ID structure in bootloader.  |                                                                                       |
+   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
+   | Shim layer between FWU and  | This module provides the APIs with the functionality of       | ``./secure_fw/partitions/firmware_update/bootloader/tfm_bootloader_fwu_abstraction.h``|
+   | bootloader                  | operating the bootloader to cooperate with the Firmware Update|                                                                                       |
+   |                             | service                                                       |                                                                                       |
+   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
+   | Shim layer example based on | This module is the implementation of the shim layer between   | ``./secure_fw/partitions/firmware_update/bootloader/mcuboot/tfm_mcuboot_fwu.c``       |
+   | MCUboot                     | FWU and bootloader based on MCUboot.                          |                                                                                       |
+   |                             |                                                               |                                                                                       |
+   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
 
 ***********************
 Service API description

@@ -27,16 +27,346 @@
 #define PIN_XL1 0
 #define PIN_XL2 1
 
+struct platform_data_t tfm_peripheral_dcnf = {
+    NRF_DCNF_S_BASE,
+    NRF_DCNF_S_BASE + (sizeof(NRF_DCNF_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_fpu = {
+    NRF_FPU_S_BASE,
+    NRF_FPU_S_BASE + (sizeof(NRF_FPU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_oscillators = {
+    NRF_OSCILLATORS_S_BASE,
+    NRF_OSCILLATORS_S_BASE + (sizeof(NRF_OSCILLATORS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_regulators = {
+    NRF_REGULATORS_S_BASE,
+    NRF_REGULATORS_S_BASE + (sizeof(NRF_REGULATORS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_clock = {
+    NRF_CLOCK_S_BASE,
+    NRF_CLOCK_S_BASE + (sizeof(NRF_CLOCK_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_power = {
+    NRF_POWER_S_BASE,
+    NRF_POWER_S_BASE + (sizeof(NRF_POWER_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_reset = {
+    NRF_RESET_S_BASE,
+    NRF_RESET_S_BASE + (sizeof(NRF_RESET_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim0 = {
+    NRF_SPIM0_S_BASE,
+    NRF_SPIM0_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spis0 = {
+    NRF_SPIS0_S_BASE,
+    NRF_SPIS0_S_BASE + (sizeof(NRF_SPIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twim0 = {
+    NRF_TWIM0_S_BASE,
+    NRF_TWIM0_S_BASE + (sizeof(NRF_TWIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twis0 = {
+    NRF_TWIS0_S_BASE,
+    NRF_TWIS0_S_BASE + (sizeof(NRF_TWIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_uarte0 = {
+    NRF_UARTE0_S_BASE,
+    NRF_UARTE0_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim1 = {
+    NRF_SPIM1_S_BASE,
+    NRF_SPIM1_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spis1 = {
+    NRF_SPIS1_S_BASE,
+    NRF_SPIS1_S_BASE + (sizeof(NRF_SPIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twim1 = {
+    NRF_TWIM1_S_BASE,
+    NRF_TWIM1_S_BASE + (sizeof(NRF_TWIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twis1 = {
+    NRF_TWIS1_S_BASE,
+    NRF_TWIS1_S_BASE + (sizeof(NRF_TWIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_uarte1 = {
+    NRF_UARTE1_S_BASE,
+    NRF_UARTE1_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim4 = {
+    NRF_SPIM4_S_BASE,
+    NRF_SPIM4_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim2 = {
+    NRF_SPIM2_S_BASE,
+    NRF_SPIM2_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spis2 = {
+    NRF_SPIS2_S_BASE,
+    NRF_SPIS2_S_BASE + (sizeof(NRF_SPIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twim2 = {
+    NRF_TWIM2_S_BASE,
+    NRF_TWIM2_S_BASE + (sizeof(NRF_TWIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twis2 = {
+    NRF_TWIS2_S_BASE,
+    NRF_TWIS2_S_BASE + (sizeof(NRF_TWIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_uarte2 = {
+    NRF_UARTE2_S_BASE,
+    NRF_UARTE2_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spim3 = {
+    NRF_SPIM3_S_BASE,
+    NRF_SPIM3_S_BASE + (sizeof(NRF_SPIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_spis3 = {
+    NRF_SPIS3_S_BASE,
+    NRF_SPIS3_S_BASE + (sizeof(NRF_SPIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twim3 = {
+    NRF_TWIM3_S_BASE,
+    NRF_TWIM3_S_BASE + (sizeof(NRF_TWIM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_twis3 = {
+    NRF_TWIS3_S_BASE,
+    NRF_TWIS3_S_BASE + (sizeof(NRF_TWIS_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_uarte3 = {
+    NRF_UARTE3_S_BASE,
+    NRF_UARTE3_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_saadc = {
+    NRF_SAADC_S_BASE,
+    NRF_SAADC_S_BASE + (sizeof(NRF_SAADC_Type) - 1),
+};
+
 struct platform_data_t tfm_peripheral_timer0 = {
-        NRF_TIMER0_S_BASE,
-        NRF_TIMER0_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+    NRF_TIMER0_S_BASE,
+    NRF_TIMER0_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
 };
 
-struct platform_data_t tfm_peripheral_std_uart = {
-        NRF_UARTE1_S_BASE,
-        NRF_UARTE1_S_BASE + (sizeof(NRF_UARTE_Type) - 1),
+struct platform_data_t tfm_peripheral_timer1 = {
+    NRF_TIMER1_S_BASE,
+    NRF_TIMER1_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
 };
 
+struct platform_data_t tfm_peripheral_timer2 = {
+    NRF_TIMER2_S_BASE,
+    NRF_TIMER2_S_BASE + (sizeof(NRF_TIMER_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_rtc0 = {
+    NRF_RTC0_S_BASE,
+    NRF_RTC0_S_BASE + (sizeof(NRF_RTC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_rtc1 = {
+    NRF_RTC1_S_BASE,
+    NRF_RTC1_S_BASE + (sizeof(NRF_RTC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_dppic = {
+    NRF_DPPIC_S_BASE,
+    NRF_DPPIC_S_BASE + (sizeof(NRF_DPPIC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_wdt0 = {
+    NRF_WDT0_S_BASE,
+    NRF_WDT0_S_BASE + (sizeof(NRF_WDT_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_wdt1 = {
+    NRF_WDT1_S_BASE,
+    NRF_WDT1_S_BASE + (sizeof(NRF_WDT_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_comp = {
+    NRF_COMP_S_BASE,
+    NRF_COMP_S_BASE + (sizeof(NRF_COMP_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_lpcomp = {
+    NRF_LPCOMP_S_BASE,
+    NRF_LPCOMP_S_BASE + (sizeof(NRF_LPCOMP_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu0 = {
+    NRF_EGU0_S_BASE,
+    NRF_EGU0_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu1 = {
+    NRF_EGU1_S_BASE,
+    NRF_EGU1_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu2 = {
+    NRF_EGU2_S_BASE,
+    NRF_EGU2_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu3 = {
+    NRF_EGU3_S_BASE,
+    NRF_EGU3_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu4 = {
+    NRF_EGU4_S_BASE,
+    NRF_EGU4_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_egu5 = {
+    NRF_EGU5_S_BASE,
+    NRF_EGU5_S_BASE + (sizeof(NRF_EGU_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pwm0 = {
+    NRF_PWM0_S_BASE,
+    NRF_PWM0_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pwm1 = {
+    NRF_PWM1_S_BASE,
+    NRF_PWM1_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pwm2 = {
+    NRF_PWM2_S_BASE,
+    NRF_PWM2_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pwm3 = {
+    NRF_PWM3_S_BASE,
+    NRF_PWM3_S_BASE + (sizeof(NRF_PWM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_pdm0 = {
+    NRF_PDM0_S_BASE,
+    NRF_PDM0_S_BASE + (sizeof(NRF_PDM_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_i2s0 = {
+    NRF_I2S0_S_BASE,
+    NRF_I2S0_S_BASE + (sizeof(NRF_I2S_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_ipc = {
+    NRF_IPC_S_BASE,
+    NRF_IPC_S_BASE + (sizeof(NRF_IPC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_qspi = {
+    NRF_QSPI_S_BASE,
+    NRF_QSPI_S_BASE + (sizeof(NRF_QSPI_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_nfct = {
+    NRF_NFCT_S_BASE,
+    NRF_NFCT_S_BASE + (sizeof(NRF_NFCT_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_mutex = {
+    NRF_MUTEX_S_BASE,
+    NRF_MUTEX_S_BASE + (sizeof(NRF_MUTEX_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_qdec0 = {
+    NRF_QDEC0_S_BASE,
+    NRF_QDEC0_S_BASE + (sizeof(NRF_QDEC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_qdec1 = {
+    NRF_QDEC1_S_BASE,
+    NRF_QDEC1_S_BASE + (sizeof(NRF_QDEC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_usbd = {
+    NRF_USBD_S_BASE,
+    NRF_USBD_S_BASE + (sizeof(NRF_USBD_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_usbregulator = {
+    NRF_USBREGULATOR_S_BASE,
+    NRF_USBREGULATOR_S_BASE + (sizeof(NRF_USBREG_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_nvmc = {
+    NRF_NVMC_S_BASE,
+    NRF_NVMC_S_BASE + (sizeof(NRF_NVMC_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_p0 = {
+    NRF_P0_S_BASE,
+    NRF_P0_S_BASE + (sizeof(NRF_GPIO_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_p1 = {
+    NRF_P1_S_BASE,
+    NRF_P1_S_BASE + (sizeof(NRF_GPIO_Type) - 1),
+};
+
+struct platform_data_t tfm_peripheral_vmc = {
+    NRF_VMC_S_BASE,
+    NRF_VMC_S_BASE + (sizeof(NRF_VMC_Type) - 1),
+};
+
+#ifdef PSA_API_TEST_IPC
+struct platform_data_t
+    tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO = {
+        FF_TEST_SERVER_PARTITION_MMIO_START,
+        FF_TEST_SERVER_PARTITION_MMIO_END
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO = {
+        FF_TEST_DRIVER_PARTITION_MMIO_START,
+        FF_TEST_DRIVER_PARTITION_MMIO_END
+};
+
+/* This platform implementation uses PSA_TEST_SCRATCH_AREA for
+ * storing the state between resets, but the FF_TEST_NVMEM_REGIONS
+ * definitons are still needed for tests to compile.
+ */
+#define FF_TEST_NVMEM_REGION_START  0xFFFFFFFF
+#define FF_TEST_NVMEM_REGION_END    0xFFFFFFFF
+struct platform_data_t
+    tfm_peripheral_FF_TEST_NVMEM_REGION = {
+        FF_TEST_NVMEM_REGION_START,
+        FF_TEST_NVMEM_REGION_END
+};
+#endif /* PSA_API_TEST_IPC */
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
@@ -45,6 +375,9 @@ REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
 #ifdef BL2
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 #endif /* BL2 */
+#ifdef NRF_NS_STORAGE
+REGION_DECLARE(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base);
+#endif /* NRF_NS_STORAGE */
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -72,6 +405,14 @@ const struct memory_region_limits memory_regions = {
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
         SECONDARY_PARTITION_SIZE - 1,
 #endif /* BL2 */
+
+#ifdef NRF_NS_STORAGE
+    .non_secure_storage_partition_base =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base),
+    .non_secure_storage_partition_limit =
+        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base) +
+        NRF_NS_STORAGE_PARTITION_SIZE - 1,
+#endif /* NRF_NS_STORAGE */
 };
 
 /* To write into AIRCR register, 0x5FA value must be write to the VECTKEY field,
@@ -206,15 +547,43 @@ enum tfm_plat_err_t spu_init_cfg(void)
         memory_regions.secondary_partition_limit);
 #endif /* BL2 */
 
+#ifdef NRF_NS_STORAGE
+    /* Configures storage partition to be non-secure */
+    spu_regions_flash_config_non_secure(
+        memory_regions.non_secure_storage_partition_base,
+        memory_regions.non_secure_storage_partition_limit);
+#endif /* NRF_NS_STORAGE */
+
     return TFM_PLAT_ERR_SUCCESS;
 }
 
 enum tfm_plat_err_t spu_periph_init_cfg(void)
 {
     /* Peripheral configuration */
+
+    /* The following peripherals share ID:
+     * - FPU
+     * - DCNF
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_FPU, false);
+    /* The following peripherals share ID:
+     * - REGULATORS
+     * - OSCILLATORS
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_REGULATORS, false);
+    /* The following peripherals share ID:
+     * - CLOCK
+     * - POWER
+     * - RESET
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_CLOCK, false);
+    /* The following peripherals share ID: (referred to as Serial-Box)
+     * - SPIMx
+     * - SPISx
+     * - TWIMx
+     * - TWISx
+     * - UARTEx
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_SPIM0, false);
 #ifndef SECURE_UART1
     /* UART1 is a secure peripheral, so we need to leave Serial-Box 1 as Secure */
@@ -230,15 +599,25 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_RTC0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_RTC1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_DPPIC, false);
+#ifndef PSA_API_TEST_IPC
+    /* WDT0 is used as a secure peripheral in PSA FF tests */
     spu_peripheral_config_non_secure((uint32_t)NRF_WDT0, false);
+#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_WDT1, false);
+    /* The following peripherals share ID:
+     * - COMP
+     * - LPCOMP
+     */
     spu_peripheral_config_non_secure((uint32_t)NRF_COMP, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU2, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU3, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU4, false);
+#ifndef PSA_API_TEST_IPC
+    /* EGU5 is used as a secure peripheral in PSA FF tests */
     spu_peripheral_config_non_secure((uint32_t)NRF_EGU5, false);
+#endif
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM1, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_PWM2, false);
@@ -248,7 +627,6 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_IPC, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_QSPI, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_NFCT, false);
-    spu_peripheral_config_non_secure((uint32_t)NRF_GPIOTE1_NS, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_MUTEX, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_QDEC0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_QDEC1, false);

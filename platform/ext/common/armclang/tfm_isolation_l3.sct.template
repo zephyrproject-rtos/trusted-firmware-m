@@ -49,9 +49,6 @@ LR_CODE S_CODE_START {
     /**** PSA RoT CODE + RO-data starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
     ER_{{partition.manifest.name}}_RO +0 ALIGN 32 {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -65,9 +62,6 @@ LR_CODE S_CODE_START {
     {% endif %}
         *({{partition.manifest.name}}_PSA-ROT_ATTR_FN)
     }
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
 
     {% endif %}
 {% endfor %}
@@ -76,9 +70,6 @@ LR_CODE S_CODE_START {
     /**** APPLICATION RoT CODE + RO-data starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
     ER_{{partition.manifest.name}}_RO +0 ALIGN 32 {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -92,9 +83,6 @@ LR_CODE S_CODE_START {
     {% endif %}
         *({{partition.manifest.name}}_APP-ROT_ATTR_FN)
     }
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
 
     {% endif %}
 {% endfor %}
@@ -124,7 +112,7 @@ LR_CODE S_CODE_START {
     }
 
     /* MSP */
-    ARM_LIB_STACK_MSP +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    ARM_LIB_STACK +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
     }
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
@@ -145,9 +133,6 @@ LR_CODE S_CODE_START {
     /**** PSA RoT RWZI starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
 
     PT_{{partition.manifest.name}}_PRIVATE_DATA_START +0 ALIGN 32 {
         /* Position tag */
@@ -172,10 +157,6 @@ LR_CODE S_CODE_START {
         /* Position tag */
     }
 
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
-
     {% endif %}
 {% endfor %}
 
@@ -185,14 +166,11 @@ LR_CODE S_CODE_START {
     }
 
     /* PSP is unprivileged in single-core topology */
-    ARM_LIB_STACK +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
+    ER_INITIAL_PSP +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
     }
 
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
-    {% if partition.attr.conditional %}
-#ifdef {{partition.attr.conditional}}
-    {% endif %}
 
     PT_{{partition.manifest.name}}_PRIVATE_DATA_START +0 ALIGN 32 {
         /* Position tag */
@@ -216,10 +194,6 @@ LR_CODE S_CODE_START {
     PT_{{partition.manifest.name}}_PRIVATE_DATA_END +0 ALIGN 32 {
         /* Position tag */
     }
-
-    {% if partition.attr.conditional %}
-#endif /* {{partition.attr.conditional}} */
-    {% endif %}
 
     {% endif %}
 {% endfor %}

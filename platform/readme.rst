@@ -18,7 +18,6 @@ database in SPM, and it is provided to the SPM HAL functions.
 
 Peripherals currently used by the services in TF-M
 --------------------------------------------------
-- ``TFM_PERIPHERAL_FPGA_IO`` - FPGA system control and I/O
 - ``TFM_PERIPHERAL_UART1``-  UART1
 
 .. Note::
@@ -60,8 +59,8 @@ Debug authentication settings
 *****************************
 
 A platform may provide the option to configure debug authentication. TF-M core
-calls the HAL function ``enum tfm_plat_err_t tfm_spm_hal_init_debug(void)``
-which configures debug authentication based on the following defines:
+calls the HAL function ``enum tfm_hal_status_t tfm_hal_platform_init(void)``
+in which debug authentication is configured based on the following defines:
 
   - `DAUTH_NONE`: Debugging the system is not enabled.
   - `DAUTH_NS_ONLY`: Invasive and non invasive debugging of non-secure code is
@@ -77,7 +76,7 @@ the options above to the cmake command with the
 `DEBUG_AUTHENTICATION` is `DAUTH_CHIP_DEFAULT`.
 
 .. Note::
-   ``enum tfm_plat_err_t tfm_spm_hal_init_debug(void)`` is called during the
+   ``enum tfm_hal_status_t tfm_hal_platform_init(void)`` is called during the
    TF-M core initialisation phase, before initialising secure partition. This
    means that BL2 runs with the chip default setting.
 

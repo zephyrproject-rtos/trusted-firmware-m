@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Nordic Semiconductor ASA.
 # Copyright (c) 2021, Laird Connectivity.
 #
@@ -50,7 +50,6 @@ target_sources(platform_s
 target_compile_definitions(platform_s
     PUBLIC
         NRF5340_XXAA_APPLICATION
-        $<$<BOOL:${TFM_INTERACTIVE_TEST}>:CORE_TEST_INTERACTIVE>
         $<$<BOOL:${SECURE_QSPI}>:SECURE_QSPI>
 )
 
@@ -91,3 +90,10 @@ if(BL2)
             NRF5340_XXAA_APPLICATION
     )
 endif()
+
+#========================= Platform region defs ===============================#
+
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        $<$<BOOL:${NRF_NS_STORAGE}>:NRF_NS_STORAGE>
+)

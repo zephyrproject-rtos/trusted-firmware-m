@@ -5,7 +5,6 @@ Protected Storage service key management
 :Author: Jamie Fox
 :Organization: Arm Limited
 :Contact: Jamie Fox <jamie.fox@arm.com>
-:Status: Accepted
 
 Background
 ==========

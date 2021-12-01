@@ -179,7 +179,6 @@ Here is the RoT Service ID table used in TF-M.
    tfm_slih_test_service       0x0000F                0x0A0-0x0AF
    tfm_flih_test_service       0x0000F                0x0B0-0x0BF
    tfm_ps_test_service         0x0000F                0x0C0-0x0DF
-   tfm_ff11_partition          0x0000F                0x120-0x13F
    =========================== ====================== ========================
 
 RoT Service Stateless Handle Distribution
@@ -199,6 +198,9 @@ listed are not applied to stateless mechanism yet.
     **Partition name**              **Stateless Handle**
    =============================== =======================
    TFM_SP_CRYPTO                   1
+   TFM_SP_PS                       2
+   TFM_SP_ITS                      3
+   TFM_SP_INITIAL_ATTESTATION      4
    =============================== =======================
 
 mmio_regions
@@ -266,6 +268,13 @@ Add CMake configure files
 -------------------------
 - CMakeLists.txt, which is the compilation configuration for this module.
 
+.. Note::
+   The secure partition must be built as a standalone static library, and the
+   name of the library must follow this pattern, as it affects how the linker
+   script will lay the partition in memory:
+   - ``tfm_psa_rot_partition*`` in case of a PSA RoT partition
+   - ``tfm_app_rot_partition*`` in case of an Application RoT partition
+
 The current CMake configuration should also be updated, by updating
 config_default.cmake to include the definition of the newly introduced partition
 and adding the relevant subdirectoy in ``secure_fw/CMakeLists.txt``.
@@ -280,11 +289,17 @@ necessary information of secure partition.
 - ``short_name``: should be the same as the ``name`` in the secure partition
   manifest file.
 - ``manifest``: the relative path of the manifest file to TF-M root.
+  In out-of-tree secure partition, ``manifest`` can be an absolute path or the
+  relative path to the current manifest list file.
 - ``conditional``: Optional. Configure control macro for this partition.
 - ``version_major``: major version the partition manifest.
 - ``version_minor``: minor version the partition manifest.
 - ``pid``: Secure Partition ID value distributed in chapter `Secure Partition
   ID Distribution`_.
+- ``output_dir``: Optional. Secure Partition can specify a relative path to
+  ``<build_dir>/generated`` to hold the generated files.
+  It enables Secure Partition to select a generated path independent from its
+  source code path, for example in out-of-tree Secure Parition build.
 
 Reference configuration example:
 
@@ -299,11 +314,6 @@ Reference configuration example:
       "version_minor": 1,
       "pid": 256
     }
-
-.. Note::
-   The manifest configuration can be placed in a different external manifest
-   list. In this case, the cmake variable TFM_EXTRA_MANIFEST_LIST_PATH should be
-   set to the path of the external manifest list.
 
 Implement the RoT services
 ==========================
@@ -433,6 +443,105 @@ it from somewhere. One option is to create a new testsuite, such as
 Once the test and service has been implemented, the project can be built and
 executed. The user should see the "Hello World" message in the console as
 received by the testsuite.
+
+Out-of-tree Secure Partition build
+----------------------------------
+
+TF-M supports out-of-tree Secure Partition build, whose source code folders
+are maintained outside TF-M repo. Developers can configure
+``TFM_EXTRA_MANIFEST_LIST_FILES`` and ``TFM_EXTRA_PARTITION_PATHS`` in build
+command line to include out-of-tree Secure Partitions.
+
+- ``TFM_EXTRA_MANIFEST_LIST_FILES``
+
+  A list of the absolute path(s) of the manifest list(s) provided by out-of-tree
+  Secure Partition(s).
+  Use semicolons ``;`` to separate multiple manifest lists. Wrap the multiple
+  manifest lists with double quotes.
+
+- ``TFM_EXTRA_PARTITION_PATHS``
+
+  A list of the absolute directories of the out-of-tree Secure Partition source
+  code folder(s). TF-M build system searches ``CMakeLists.txt`` of partitions in
+  the source code folder(s).
+  Use semicolons ``;`` to separate multiple out-of-tree Secure Partition
+  directories. Wrap the multiple directories with double quotes.
+
+A single out-of-tree Secure Partition folder can be organized as the figure
+below.
+
+::
+
+  secure partition folder
+        ├── CMakeLists.txt
+        ├── manifest_list.yaml
+        ├── out_of_tree_partition_manifest.yaml
+        └── source code
+
+In the example above, ``TFM_EXTRA_MANIFEST_LIST_FILES`` and
+``TFM_EXTRA_PARTITION_PATHS`` in the build command can be configured as listed
+below.
+
+.. code-block:: bash
+
+  -DTFM_EXTRA_MANIFEST_LIST_FILES=<Absolute-path-sp-folder/manifest_list.yaml>
+  -DTFM_EXTRA_PARTITION_PATHS=<Absolute-path-sp-folder>
+
+Multiple out-of-tree Secure Partitions can be organized in diverse structures.
+For example, multiple Secure Partitions can be maintained under the same
+directory as shown below.
+
+::
+
+  top-level folder
+        ├── Partition 1
+        │       ├── CMakeLists.txt
+        │       ├── partition_1_manifest.yaml
+        │       └── source code
+        ├── Partition 2
+        │       └── ...
+        ├── Partition 3
+        │       └── ...
+        ├── manifest_list.yaml
+        └── Root CMakeLists.txt
+
+In the example above, a root CMakeLists.txt includes all the partitions'
+CMakLists.txt, for example via ``add_subdirectory()``. The manifest_list.yaml
+lists all partitions' manifest files.
+``TFM_EXTRA_MANIFEST_LIST_FILES`` and ``TFM_EXTRA_PARTITION_PATHS`` in build
+command line can be configured as listed below.
+
+.. code-block:: bash
+
+  -DTFM_EXTRA_MANIFEST_LIST_FILES=<Absolute-path-top-level-folder/manifest_list.yaml>
+  -DTFM_EXTRA_PARTITION_PATHS=<Absolute-path-top-level-folder>
+
+Alternatively, out-of-tree Secure Partitions can be separated in different
+folders.
+
+::
+
+    partition 1 folder                    partition 2 folder
+        ├── CMakeLists.txt                    ├── CMakeLists.txt
+        ├── manifest_list.yaml                ├── manifest_list.yaml
+        ├── partition_1_manifest.yaml         ├── partition_2_manifest.yaml
+        └── source code                       └── source code
+
+In the example above, each Secure Partition manages its own manifest files and
+CMakeLists.txt. ``TFM_EXTRA_MANIFEST_LIST_FILES`` and
+``TFM_EXTRA_PARTITION_PATHS`` in build command line can be configured as listed
+below. Please note those input shall be wrapped with double quotes.
+
+.. code-block:: bash
+
+  -DTFM_EXTRA_MANIFEST_LIST_FILES="<Absolute-path-part-1-folder/manifes_list.yaml>;<Absolute-path-part-2-folder/manifes_list.yaml>"
+  -DTFM_EXTRA_PARTITION_PATHS="<Absolute-path-part-1-folder>;<Absolute-path-part-2-folder>"
+
+.. Note::
+
+   Manifest list paths in ``TFM_EXTRA_MANIFEST_LIST_FILES`` do NOT have to be
+   one-to-one mapping to Secure Partition directories in
+   ``TFM_EXTRA_PARTITION_PATHS``. The orders don't matter either.
 
 Further Notes
 -------------

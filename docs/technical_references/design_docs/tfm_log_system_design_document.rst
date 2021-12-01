@@ -2,7 +2,7 @@
 Log system design document
 ##########################
 
-:Authors: Shawn Shan
+:Author: Shawn Shan
 :Organization: Arm Limited
 :Contact: shawn.shan@arm.com
 
@@ -135,7 +135,8 @@ Take debug message as an example:
 Partition Log System
 ====================
 Partition log outputting required rich formatting in particular cases. There is
-a customized print inside TF-M(``tfm_log_printf``), and it is wrapped as macro.
+a customized print inside TF-M(``tfm_sp_log_printf``), and it is wrapped as
+macro.
 
 Level Control
 -------------

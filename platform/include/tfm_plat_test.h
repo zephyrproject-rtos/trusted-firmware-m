@@ -11,42 +11,6 @@
 #include "tfm_plat_defs.h"
 
 /**
- * \brief Busy wait until the user presses a specific button
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-void tfm_plat_test_wait_user_button_pressed(void);
-
-/**
- * \brief Busy wait until the user releases a specific button
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-void tfm_plat_test_wait_user_button_released(void);
-
-/**
- * \brief Get the status of the LEDs used by tests
- *
- * \return Returns the current status of LEDs
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-uint32_t tfm_plat_test_get_led_status(void);
-
-/**
- * \brief Sets the status of the LEDs used by tests
- *
- * \param[in]  status  The status to be set
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-void tfm_plat_test_set_led_status(uint32_t status);
-
-/**
- * \brief Get the mask of the LEDs used for testing
- *
- * \return Returns the mask of the LEDs used for testing
- */
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_CORE_TEST", "PSA-ROT")
-uint32_t tfm_plat_test_get_userled_mask(void);
-
-/**
  * \brief starts Secure timer
  *
  * Configures a timer to start counting, and generate a timer interrupt after a
@@ -54,9 +18,9 @@ uint32_t tfm_plat_test_get_userled_mask(void);
  * the timer should be long enough so that the test service can go to the state
  * where it starts waiting for the interrupt.
  */
-#ifdef TFM_ENABLE_SLIH_TEST
+#ifdef TEST_NS_SLIH_IRQ
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
-#elif defined(TFM_ENABLE_FLIH_TEST)
+#elif defined(TEST_NS_FLIH_IRQ)
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FLIH_TEST", "APP-ROT")
 #endif
 void tfm_plat_test_secure_timer_start(void);
@@ -65,9 +29,9 @@ void tfm_plat_test_secure_timer_start(void);
 /**
  * \brief Clears Secure timer interrupt
  */
-#ifdef TFM_ENABLE_SLIH_TEST
+#ifdef TEST_NS_SLIH_IRQ
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
-#elif TFM_ENABLE_FLIH_TEST
+#elif TEST_NS_FLIH_IRQ
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FLIH_TEST", "APP-ROT")
 #endif
 void tfm_plat_test_secure_timer_clear_intr(void);
@@ -75,9 +39,9 @@ void tfm_plat_test_secure_timer_clear_intr(void);
 /**
  * \brief Stops the Secure timer and clears the timer interrupt.
  */
-#ifdef TFM_ENABLE_SLIH_TEST
+#ifdef TEST_NS_SLIH_IRQ
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
-#elif defined(TFM_ENABLE_FLIH_TEST)
+#elif defined(TEST_NS_FLIH_IRQ)
 TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FLIH_TEST", "APP-ROT")
 #endif
 void tfm_plat_test_secure_timer_stop(void);

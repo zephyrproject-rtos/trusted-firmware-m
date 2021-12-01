@@ -35,7 +35,10 @@ Service source files
 - ``crypto_aead.c`` : This module handles requests for AEAD operations
 - ``crypto_key_derivation.c`` : This module handles requests for key derivation
   related operations
-- ``crypto_key.c`` : This module handles requests for key related operations
+- ``crypto_key_management.c`` : This module handles requests for key management
+  related operations
+- ``crypto_key.c`` : This module handles requests for key backend operations,
+  including key attributes switch between caller and service.
 - ``crypto_asymmetric.c`` : This module handles requests for asymmetric
   cryptographic operations
 - ``crypto_init.c`` : This module provides basic functions to initialise the

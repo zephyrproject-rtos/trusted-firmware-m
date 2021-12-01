@@ -94,13 +94,16 @@ target_sources(platform_s
         native_drivers/mpu_armv8m_drv.c
         native_drivers/ppc_sse200_drv.c
         spm_hal.c
+        tfm_interrupts.c
         tfm_hal_isolation.c
+        tfm_hal_platform.c
         target_cfg.c
         native_drivers/ppc_sse200_drv.c
         native_drivers/arm_uart_drv.c
-        $<$<AND:$<NOT:$<BOOL:${TFM_ENABLE_SLIH_TEST}>>,$<NOT:$<BOOL:${TFM_ENABLE_FLIH_TEST}>>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/timer_cmsdk/timer_cmsdk.c>
+        $<$<AND:$<NOT:$<BOOL:${TEST_NS_SLIH_IRQ}>>,$<NOT:$<BOOL:${TEST_NS_FLIH_IRQ}>>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/timer_cmsdk/timer_cmsdk.c>
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        $<$<OR:$<BOOL:${TEST_NS}>,$<BOOL:${TEST_S}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
@@ -108,7 +111,7 @@ target_sources(tfm_sprt
     PRIVATE
         # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
         # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
-        $<$<OR:$<BOOL:${TFM_ENABLE_SLIH_TEST}>,$<BOOL:${TFM_ENABLE_FLIH_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/timer_cmsdk/timer_cmsdk.c>
+        $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/timer_cmsdk/timer_cmsdk.c>
 )
 
 target_compile_options(platform_s
@@ -126,7 +129,6 @@ target_sources(platform_ns
         retarget/platform_retarget_dev.c
         cmsis_core/system_cmsdk_mps2_an521.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
 target_link_libraries(platform_ns

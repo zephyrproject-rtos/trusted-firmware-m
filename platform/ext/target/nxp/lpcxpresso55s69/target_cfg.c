@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
  * Copyright (c) 2019-2020 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +24,7 @@
 #include "tfm_plat_defs.h"
 #include "region.h"
 #include "tfm_assert.h"
-#include "log/tfm_log.h"
+#include "tfm_spm_log.h"
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
@@ -194,12 +194,20 @@ void sau_and_idau_cfg(void)
 #endif /* BL2 */
 
 #if TARGET_DEBUG_LOG
-    LOG_MSG("=== [SAU NS] =======\r\n");
-    LOG_MSG("NS ROM [0x%x, 0x%x]\r\n", memory_regions.non_secure_partition_base, memory_regions.non_secure_partition_limit);
-    LOG_MSG("NS DATA [0x%x, 0x%x]\r\n", NS_DATA_START, NS_DATA_LIMIT);
-    LOG_MSG("NSC [0x%x, 0x%x]\r\n", memory_regions.veneer_base, memory_regions.veneer_limit);
-    LOG_MSG("PERIPHERALS [0x%x, 0x%x]\r\n", PERIPHERALS_BASE_NS_START, PERIPHERALS_BASE_NS_END);
-#endif    
+    SPMLOG_DBGMSG("=== [SAU NS] =======\r\n");
+    SPMLOG_DBGMSGVAL("NS ROM starts from : ",
+                                      memory_regions.non_secure_partition_base);
+    SPMLOG_DBGMSGVAL("NS ROM ends at : ",
+                                      memory_regions.non_secure_partition_base +
+                                     memory_regions.non_secure_partition_limit);
+    SPMLOG_DBGMSGVAL("NS DATA start from : ", NS_DATA_START);
+    SPMLOG_DBGMSGVAL("NS DATA ends at : ", NS_DATA_START + NS_DATA_LIMIT);
+    SPMLOG_DBGMSGVAL("NSC starts with : ", memory_regions.veneer_base);
+    SPMLOG_DBGMSGVAL("NSC ends at : ", memory_regions.veneer_base +
+                                       memory_regions.veneer_limit);
+    SPMLOG_DBGMSGVAL("PERIPHERALS starts with : ", PERIPHERALS_BASE_NS_START);
+    SPMLOG_DBGMSGVAL("PERIPHERALS ends at : ", PERIPHERALS_BASE_NS_END);
+#endif
 }
 
 /*------------------- Memory configuration functions -------------------------*/
@@ -222,7 +230,7 @@ int32_t mpc_init_cfg(void)
      *  1    Non-secure, privileged access allowed.
      *  2    Secure, user access allowed.
      *  3    Secure, privileged access allowed. */
-   
+
     /* == Flash region == */
 
     /* The regions have to be alligned to 32 kB to cover the AHB Flash Region. */
@@ -362,20 +370,25 @@ int32_t mpc_init_cfg(void)
                 AHB_SECURE_CTRL->SEC_CTRL_RAM4[0].MEM_RULE[0] &= ~(0xF << ((ns_region_id-64)*4));
         }
     }
-    
+
     /* Security access rules for USB-HS RAM sub region 0_0 to 0_3. Each USB-HS RAM sub region is 4 kbytes */
-    AHB_SECURE_CTRL->SEC_CTRL_USB_HS[0].MEM_RULE[0] = 
+    AHB_SECURE_CTRL->SEC_CTRL_USB_HS[0].MEM_RULE[0] =
         AHB_SECURE_CTRL_SEC_CTRL_USB_HS_MEM_RULE_SRAM_SECT_0_RULE(0x0U) |                   /* Address space: 0x4010_0000 - 0x4010_0FFF */
         AHB_SECURE_CTRL_SEC_CTRL_USB_HS_MEM_RULE_SRAM_SECT_1_RULE(0x0U) |                   /* Address space: 0x4010_1000 - 0x4010_1FFF */
         AHB_SECURE_CTRL_SEC_CTRL_USB_HS_MEM_RULE_SRAM_SECT_2_RULE(0x0U) |                   /* Address space: 0x4010_2000 - 0x4010_2FFF */
         AHB_SECURE_CTRL_SEC_CTRL_USB_HS_MEM_RULE_SRAM_SECT_3_RULE(0x0U);                    /* Address space: 0x4010_3000 - 0x4010_3FFF */
-	
+
 #if TARGET_DEBUG_LOG
-    LOG_MSG("=== [AHB MPC NS] =======\r\n");
-    LOG_MSG("NS ROM [0x%x, 0x%x]\r\n", memory_regions.non_secure_partition_base, memory_regions.non_secure_partition_limit);
-    LOG_MSG("NS DATA [0x%x, 0x%x]\r\n", NS_DATA_START, NS_DATA_LIMIT);
+    SPMLOG_DBGMSG("=== [AHB MPC NS] =======\r\n");
+    SPMLOG_DBGMSGVAL("NS ROM starts from : ",
+                                      memory_regions.non_secure_partition_base);
+    SPMLOG_DBGMSGVAL("NS ROM ends at : ",
+                                      memory_regions.non_secure_partition_base +
+                                     memory_regions.non_secure_partition_limit);
+    SPMLOG_DBGMSGVAL("NS DATA start from : ", NS_DATA_START);
+    SPMLOG_DBGMSGVAL("NS DATA ends at : ", NS_DATA_START + NS_DATA_LIMIT);
 #endif
-    
+
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
      */
@@ -395,7 +408,7 @@ int32_t ppc_init_cfg(void)
      *  1    Non-secure, privileged access allowed.
      *  2    Secure, user access allowed.
      *  3    Secure, privileged access allowed. */
- 
+
     /* Security access rules for APB Bridge 0 peripherals. */
     AHB_SECURE_CTRL->SEC_CTRL_APB_BRIDGE[0].SEC_CTRL_APB_BRIDGE0_MEM_CTRL0 =
         (0x30000000U) |                                                                     /* Bits have to be set to '1' according to UM.*/

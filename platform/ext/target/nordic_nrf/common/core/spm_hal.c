@@ -19,63 +19,7 @@
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
-#if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT)
-static struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
-
-#define PARTITION_REGION_PERIPH_START   5
-#define PARTITION_REGION_PERIPH_MAX_NUM 2
-
-static uint32_t periph_num_count = 0;
-#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
-
-enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                  bool privileged,
-                  const struct platform_data_t *platform_data)
-{
-    if (!platform_data) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-
-#if defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1)
-
-    if (!privileged) {
-        struct mpu_armv8m_region_cfg_t region_cfg;
-
-        region_cfg.region_nr = PARTITION_REGION_PERIPH_START + periph_num_count;
-        periph_num_count++;
-        if (periph_num_count >= PARTITION_REGION_PERIPH_MAX_NUM) {
-            return TFM_PLAT_ERR_MAX_VALUE;
-        }
-        region_cfg.region_base = platform_data->periph_start;
-        region_cfg.region_limit = platform_data->periph_limit;
-        region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DEVICE_IDX;
-        region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-        region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
-        region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
-
-        mpu_armv8m_disable(&dev_mpu_s);
-
-        if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg)
-            != MPU_ARMV8M_OK) {
-            return TFM_PLAT_ERR_SYSTEM_ERR;
-        }
-        mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
-                          HARDFAULT_NMI_ENABLE);
-    }
-#endif /* defined(CONFIG_TFM_ENABLE_MEMORY_PROTECT) && (TFM_LVL != 1) */
-
-    /* Peripheral for a (secure) partition is configured as Secure.
-     * Note that the SPU does not allow to configure PRIV/nPRIV permissions
-     * for address ranges, including peripheral address space.
-     */
-    if (platform_data->periph_start != 0) {
-        spu_periph_configure_to_secure(platform_data->periph_start);
-    }
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
-void SPU_Handler(void)
+void SPU_IRQHandler(void)
 {
     /*
      * TODO
@@ -150,31 +94,6 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     }
 }
 
-enum tfm_plat_err_t tfm_spm_hal_enable_fault_handlers(void)
-{
-    return enable_fault_handlers();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_system_reset_cfg(void)
-{
-    return system_reset_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_init_debug(void)
-{
-    return init_debug();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_target_state_cfg(void)
-{
-    return nvic_interrupt_target_state_cfg();
-}
-
-enum tfm_plat_err_t tfm_spm_hal_nvic_interrupt_enable(void)
-{
-    return nvic_interrupt_enable();
-}
-
 bool tfm_spm_hal_has_access_to_region(const void *p, size_t s,
                                               int flags)
 {
@@ -239,3 +158,25 @@ bool tfm_spm_hal_has_access_to_region(const void *p, size_t s,
 
     return true;
 }
+
+#ifndef TFM_PSA_API
+enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
+        bool privileged, const struct platform_data_t *platform_data)
+{
+    // When TFM_PSA_API is disabled the isolation level must be
+    // 1. With isolation level 1 there is no distinction between
+    // privileged secure partitions and unprivileged secure
+    // partitions.
+    (void)privileged;
+
+    if (!platform_data) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    if (platform_data->periph_start != 0) {
+        spu_periph_configure_to_secure(platform_data->periph_start);
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+#endif /* TFM_PSA_API */

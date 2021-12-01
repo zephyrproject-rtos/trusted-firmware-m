@@ -347,23 +347,12 @@ The structure of shared data must be the following:
            uint16_t tlv_tot_len;
        };
 
--  After the header there come the entries which are composed from an
+-  The header is followed by the entries which are composed from an
    entry header structure: ``struct shared_data_tlv_entry`` and the data. In
-   the entry header is a type field ``tlv_type`` which identify the consumer of
-   the entry in the runtime software and specify the subtype of that data item.
-
-   .. Note::
-
-       There is a size field ``tlv_len`` which has different definitions in the
-       upstream MCUboot repository and in its TF-M forked version:
-
-       - Upstream MCUboot: Covers only the length of data but not the header
-         size.
-       - TF-M MCUboot: Covers the size of the entry header and the data
-         together.
-
-       This difference is handled by TF-M code based on which bootloader is used
-       along with TF-M runtime.
+   the entry header there is a type and a length field. The ``tlv_type`` field
+   identifies the consumer of the entry in the runtime software and specify the
+   subtype of that data item. The ``tlv_len`` field covers the length of the
+   data (not including the size of the entry header).
 
    After the entry header structure comes the actual data.
 
@@ -542,10 +531,10 @@ Related compile time options
 ----------------------------
 - ``BOOT_DATA_AVAILABLE``: The boot data is expected to be present in the shared
   data area between the boot loader and the runtime firmware when it's ON.
-  Otherwise, when it's OFF does not check the content of the shared data area.
-  Also assume that the TLV header is present and valid (the magic number is
-  correct) and there are no other data entries. Its default value depends on
-  the BL2 flag.
+  Otherwise, when it's OFF does not check the content of the shared data area
+  but instead assumes that the TLV header is present and valid (the magic number
+  is correct) and there are no data entries. Its default value depends on the
+  BL2 flag.
 
 ***************************************************************************
 Comparison of asymmetric and symmetric algorithm based token authentication

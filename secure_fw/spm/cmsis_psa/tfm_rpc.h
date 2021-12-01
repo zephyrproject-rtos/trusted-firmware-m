@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,8 +20,7 @@
 #include "cmsis_compiler.h"
 #include "psa/client.h"
 #include "psa/service.h"
-#include "tfm_thread.h"
-#include "tfm_wait.h"
+#include "thread.h"
 #include "spm_ipc.h"
 
 #define TFM_RPC_SUCCESS             (0)
@@ -72,20 +71,17 @@ uint32_t tfm_rpc_psa_framework_version(void);
  * \brief RPC handler for \ref psa_version.
  *
  * \param[in] params            Base address of parameters
- * \param[in] ns_caller         If 'true', indicate the non-secure caller
  *
  * \retval PSA_VERSION_NONE     The RoT Service is not implemented, or the
  *                              caller is not permitted to access the service.
  * \retval > 0                  The version of the implemented RoT Service.
  */
-uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
-                             bool ns_caller);
+uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params);
 
 /**
  * \brief RPC handler for \ref psa_connect.
  *
  * \param[in] params            Base address of parameters
- * \param[in] ns_caller         If 'true', indicate the non-secure caller
  *
  * \retval PSA_SUCCESS          Success.
  * \retval PSA_CONNECTION_BUSY  The SPM cannot make the connection
@@ -94,14 +90,12 @@ uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
  *                              supported, or the caller is not permitted to
  *                              access the service.
  */
-psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
-                                 bool ns_caller);
+psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params);
 
 /**
  * \brief RPC handler for \ref psa_call.
  *
  * \param[in] params            Base address of parameters
- * \param[in] ns_caller         If 'true', indicate the non-secure caller
  *
  * \retval PSA_SUCCESS          Success.
  * \retval "Does not return"    The call is invalid, one or more of the
@@ -113,14 +107,12 @@ psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
  * \arg                           The message is unrecognized or
  *                                incorrectly formatted.
  */
-psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,
-                              bool ns_caller);
+psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params);
 
 /**
  * \brief RPC handler for \ref psa_close.
  *
  * \param[in] params            Base address of parameters
- * \param[in] ns_caller         If 'true', indicate the non-secure caller
  *
  * \retval void                 Success.
  * \retval "Does not return"    The call is invalid, one or more of the
@@ -128,8 +120,7 @@ psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,
  * \arg                           An invalid handle was provided that is not
  *                                the null handle..
  */
-void tfm_rpc_psa_close(const struct client_call_params_t *params,
-                       bool ns_caller);
+void tfm_rpc_psa_close(const struct client_call_params_t *params);
 
 /**
  * \brief Register underlying mailbox communication operations.

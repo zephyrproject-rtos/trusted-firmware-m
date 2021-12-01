@@ -11,3 +11,7 @@ set(SECURE_UART1                        ON                   CACHE BOOL      "En
 set(SECURE_QSPI                         ON                   CACHE BOOL      "Enable secure QSPI")
 set(ITS_NUM_ASSETS                      "5"                  CACHE STRING    "The maximum number of assets to be stored in the Internal Trusted Storage area")
 set(MCUBOOT_UPGRADE_STRATEGY            "SWAP"               CACHE STRING    "Enable using scratch flash section for swapping images")
+if(NOT BL2)
+    set(BL2_TRAILER_SIZE                0x800                CACHE STRING    "Trailer size")
+endif()
+set(NRF_NS_STORAGE                      OFF                  CACHE BOOL      "Enable non-secure storage partition")
