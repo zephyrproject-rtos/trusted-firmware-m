@@ -255,7 +255,7 @@ static void setup_se_firewall(void)
     fc_select_region(6);
     fc_disable_regions();
     fc_disable_mpe(RGN_MPE0);
-    fc_prog_rgn(RGN_SIZE_32MB, CORSTONE1000_HOST_DRAM_UEFI_CAPSULE);
+    fc_prog_rgn(RGN_SIZE_512MB, CORSTONE1000_HOST_DRAM_UEFI_CAPSULE);
     fc_prog_rgn_upper_addr(HOST_DRAM_UEFI_CAPSULE);
     fc_enable_addr_trans();
     fc_init_mpl(RGN_MPE0);
@@ -385,6 +385,7 @@ static void setup_host_firewall(void)
     fc_init_mpl(RGN_MPE0);
 
     mpl_rights = (RGN_MPL_ANY_MST_MASK | RGN_MPL_SECURE_READ_MASK |
+                                         RGN_MPL_SECURE_WRITE_MASK |
                                          RGN_MPL_NONSECURE_READ_MASK |
                                          RGN_MPL_NONSECURE_WRITE_MASK |
                                          RGN_MPL_NONSECURE_EXECUTE_MASK);

@@ -45,34 +45,34 @@ extern "C" {
 /*
  * This structure holds the parameters used in a PSA client call.
  */
-typedef struct psa_client_in_params {
+typedef struct __attribute__((packed)) psa_client_in_params {
     union {
-        struct {
+        struct __attribute__((packed)) {
             uint32_t        sid;
         } psa_version_params;
 
-        struct {
+        struct __attribute__((packed)) {
             uint32_t        sid;
             uint32_t        version;
         } psa_connect_params;
 
-        struct {
+        struct __attribute__((packed)) {
             psa_handle_t     handle;
             int32_t          type;
-            psa_invec        *in_vec;
-            size_t           in_len;
-            psa_outvec       *out_vec;
-            size_t           out_len;
+            uint32_t         in_vec;
+            uint32_t         in_len;
+            uint32_t         out_vec;
+            uint32_t         out_len;
         } psa_call_params;
 
-        struct {
+        struct __attribute__((packed)) {
             psa_handle_t    handle;
         } psa_close_params;
     };
 } psa_client_in_params_t;
 
 /* Openamp message passed from NSPE to SPE to deliver a PSA client call */
-typedef struct ns_openamp_msg {
+typedef struct __attribute__((packed)) ns_openamp_msg {
     uint32_t                    call_type;   /* PSA client call type */
     psa_client_in_params_t      params;      /* Contain parameters used in PSA
                                               * client call
@@ -99,16 +99,16 @@ typedef struct ns_openamp_msg {
 /*
  * This structure holds the location of the out data of the PSA client call.
  */
-typedef struct psa_client_out_params {
-    psa_outvec      *out_vec;
-    size_t          out_len;
+typedef struct __attribute__((packed)) psa_client_out_params {
+    uint32_t          out_vec;
+    uint32_t          out_len;
 } psa_client_out_params_t;
 
 
 /* Openamp message from SPE to NSPE delivering the reply back for a PSA client
  * call.
  */
-typedef struct s_openamp_msg {
+typedef struct __attribute__((packed)) s_openamp_msg {
     int32_t                     request_id;  /* Using this id, the non-secure
                                               * library identifies the request.
                                               * TF-M forwards the same

@@ -9,6 +9,7 @@
 #include "flash_common.h"
 #include "platform_base_address.h"
 #include "tfm_hal_multi_core.h"
+#include "fwu_agent.h"
 
 #define HOST_SYS_RST_CTRL_OFFSET 0x0
 #define HOST_CPU_CORE0_WAKEUP_OFFSET 0x308

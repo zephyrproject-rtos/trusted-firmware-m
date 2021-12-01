@@ -194,9 +194,6 @@ enum sst26vf064b_error_t spi_sst26vf064b_erase_chip(struct spi_sst26vf064b_dev_t
 enum sst26vf064b_error_t spi_sst26vf064b_erase_block(struct spi_sst26vf064b_dev_t* dev,
         uint32_t addr)
 {
-    enum sst26vf064b_error_t ret;
-    enum axi_qspi_error_t qspi_ret;
-
     if (!dev->is_initialized) {
         SPI_FLASH_LOG_MSG("%s: not initialized\n\r", __func__);
         return SST26VF064B_ERR_NOT_INITIALIZED;

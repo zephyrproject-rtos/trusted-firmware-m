@@ -906,8 +906,6 @@ void host_acknowledgement_timer_to_reset(void)
 {
     struct fwu_private_metadata priv_metadata;
     enum fwu_agent_state_t current_state;
-    uint32_t boot_attempted;
-    uint32_t boot_index;
 
     FWU_LOG_MSG("%s: enter\n\r", __func__);
 
