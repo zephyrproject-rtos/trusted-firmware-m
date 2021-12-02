@@ -7,6 +7,7 @@
 #-------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.22)
+cmake_policy(SET CMP0115 NEW)
 
 # Don't load this file if it is specified as a cmake toolchain file
 if(NOT TFM_TOOLCHAIN_FILE)
