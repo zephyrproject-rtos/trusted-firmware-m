@@ -926,7 +926,7 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key_id,
         .sfn_id = TFM_CRYPTO_AEAD_ENCRYPT_SID,
         .key_id = key_id,
         .alg = alg,
-        .aead_in = {.nonce = {0}, .nonce_length = nonce_length}
+        .aead_in = {.nonce = {0}, .nonce_length = 0}
     };
 
     /* Sanitize the optional input */
@@ -935,7 +935,7 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key_id,
     }
 
     psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = NULL, .len = 0},
         {.base = plaintext, .len = plaintext_length},
         {.base = additional_data, .len = additional_data_length},
     };
@@ -951,7 +951,11 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key_id,
         for (size_t idx = 0; idx < nonce_length; idx++) {
             iov.aead_in.nonce[idx] = nonce[idx];
         }
+        iov.aead_in.nonce_length = nonce_length;
     }
+
+    in_vec[0].base = &iov;
+    in_vec[0].len = sizeof(struct tfm_crypto_pack_iovec);
 
 #ifdef TFM_PSA_API
     size_t in_len = ARRAY_SIZE(in_vec);
@@ -991,7 +995,7 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key_id,
         .sfn_id = TFM_CRYPTO_AEAD_DECRYPT_SID,
         .key_id = key_id,
         .alg = alg,
-        .aead_in = {.nonce = {0}, .nonce_length = nonce_length}
+        .aead_in = {.nonce = {0}, .nonce_length = 0}
     };
 
     /* Sanitize the optional input */
@@ -1000,7 +1004,7 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key_id,
     }
 
     psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = NULL, .len = 0},
         {.base = ciphertext, .len = ciphertext_length},
         {.base = additional_data, .len = additional_data_length},
     };
@@ -1016,7 +1020,11 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key_id,
         for (size_t idx = 0; idx < nonce_length; idx++) {
             iov.aead_in.nonce[idx] = nonce[idx];
         }
+        iov.aead_in.nonce_length = nonce_length;
     }
+
+    in_vec[0].base = &iov;
+    in_vec[0].len = sizeof(struct tfm_crypto_pack_iovec);
 
 #ifdef TFM_PSA_API
     size_t in_len = ARRAY_SIZE(in_vec);
