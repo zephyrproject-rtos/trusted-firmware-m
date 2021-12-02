@@ -97,7 +97,7 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
     int ret = 0;
 
     /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
+    const uint32_t data_width_byte[] = {
         sizeof(uint8_t),
         sizeof(uint16_t),
         sizeof(uint32_t),
@@ -175,7 +175,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
     uint32_t src_written_idx = 0;
     uint32_t add_padding_size, len_padding_size;
     uint32_t write_size;
-    uint32_t last_unit_start_off = 0;
+    uint32_t last_unit_start_off;
     /*
      *    aligned_off           off           last_unit_start_off
      *        |                  |                     |

@@ -395,7 +395,7 @@ static void ps_signal_handle(psa_signal_t signal)
 psa_status_t tfm_ps_req_mngr_init(void)
 {
 #ifdef TFM_PSA_API
-    psa_signal_t signals = 0;
+    psa_signal_t signals;
 
     if (tfm_ps_init() != PSA_SUCCESS) {
         psa_panic();

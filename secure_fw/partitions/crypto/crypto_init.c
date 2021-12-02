@@ -211,7 +211,7 @@ static psa_status_t tfm_crypto_parse_msg(psa_msg_t *msg,
 
 static void tfm_crypto_ipc_handler(void)
 {
-    psa_signal_t signals = 0;
+    psa_signal_t signals;
     psa_msg_t msg;
     psa_status_t status = PSA_SUCCESS;
     uint32_t sfn_id = TFM_CRYPTO_SID_INVALID;
@@ -222,10 +222,7 @@ static void tfm_crypto_ipc_handler(void)
         if (signals & TFM_CRYPTO_SIGNAL) {
             /* Extract the message */
             if (psa_get(TFM_CRYPTO_SIGNAL, &msg) != PSA_SUCCESS) {
-                /* FIXME: Should be replaced by TF-M error handling */
-                while (1) {
-                    ;
-                }
+                psa_panic();
             }
 
             /* Process the message type */
@@ -234,24 +231,16 @@ static void tfm_crypto_ipc_handler(void)
                 /* Parse the message */
                 status = tfm_crypto_parse_msg(&msg, &iov, &sfn_id);
                 /* Call the dispatcher based on the SID passed as type */
-                if (sfn_id != TFM_CRYPTO_SID_INVALID) {
+                if (status == PSA_SUCCESS) {
                     status = tfm_crypto_call_sfn(&msg, &iov, sfn_id);
-                } else {
-                    status = PSA_ERROR_GENERIC_ERROR;
                 }
                 psa_reply(msg.handle, status);
                 break;
             default:
-                /* FIXME: Should be replaced by TF-M error handling */
-                while (1) {
-                    ;
-                }
+                psa_panic();
             }
         } else {
-            /* FIXME: Should be replaced by TF-M error handling */
-            while (1) {
-               ;
-            }
+            psa_panic();
         }
     }
 

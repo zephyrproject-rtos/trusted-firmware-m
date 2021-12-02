@@ -55,7 +55,7 @@
 
 /* Valid index should be [0, STATIC_HANDLE_NUM_LIMIT-1] */
 #define IS_VALID_STATIC_HANDLE_IDX(index) \
-    (((index) >= 0) && ((index) < STATIC_HANDLE_NUM_LIMIT))
+    ((uint32_t)(index) < STATIC_HANDLE_NUM_LIMIT)
 
 #define SPM_INVALID_PARTITION_IDX       (~0U)
 

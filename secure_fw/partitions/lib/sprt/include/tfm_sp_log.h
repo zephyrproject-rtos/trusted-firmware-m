@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -29,7 +29,7 @@ extern "C" {
 
 #if (TFM_PARTITION_LOG_LEVEL > TFM_PARTITION_LOG_LEVEL_DEBUG || \
      TFM_PARTITION_LOG_LEVEL < TFM_PARTITION_LOG_LEVEL_SILENCE)
-#error "Incorrect TFM_PARTITION_LOG_LEVEL value!"
+#error "Incorrect TFM_PARTITION_LOG_LEVEL value!"
 #endif
 
 #if (TFM_PARTITION_LOG_LEVEL == TFM_PARTITION_LOG_LEVEL_DEBUG)
