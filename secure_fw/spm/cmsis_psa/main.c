@@ -124,18 +124,7 @@ static fih_int tfm_core_init(void)
     FIH_RET(fih_int_encode(TFM_SUCCESS));
 }
 
-__attribute__((naked))
 int main(void)
-{
-    __ASM volatile(
-        "ldr    r0, =0xFEF5EDA5     \n" /* Seal Main Stack before using */
-        "ldr    r1, =0xFEF5EDA5     \n"
-        "push   {r0, r1}            \n"
-        "bl     c_main              \n"
-    );
-}
-
-int c_main(void)
 {
     fih_int fih_rc = FIH_FAILURE;
 
