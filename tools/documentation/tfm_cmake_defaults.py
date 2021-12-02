@@ -163,21 +163,17 @@ else:
 
 # Version will be retrieved in that order Git -> Cmake -> Boilerplate
 try:
-    vrex = re.compile(r'TF-Mv(?P<VER_MAJ>\d{1,2}).(?P<VER_MIN>\d{1,2}).?'
-                      r'(?P<VER_HOT>\d{0,2})(?P<RC>\-RC\d)?-'
-                      r'(?P<PATCH_NO>\d+)-(?P<GIT_HASH>[a-g0-9]+)')
-    tfm_def_tfm_ver_full = check_output(["git",
-                                         "describe",
-                                         "--tags",
-                                         "--long"]).decode('UTF-8').strip()
+    vrex = re.compile(r'(?P<GIT_HASH>[a-f0-9]{40})'
+                      r'+\s+tag\s+refs\/tags\/TF-Mv(?P<VER_MAJ>\d+).'
+                      r'(?P<VER_MIN>\d+).?(?P<VER_HOT>\d+)(?P<RC>-RC\d+)?')
 
+    tfm_def_tfm_ver_full = check_output("git for-each-ref refs/tags --sort=-taggerdate --count=1",
+                                        encoding = 'UTF-8')
     _v = vrex.search(tfm_def_tfm_ver_full)
-    proj = "TF-M"
     version  = [ _v.group("VER_MAJ"),
                  _v.group("VER_MIN"),
                  _v.group("VER_HOT"),
                  _v.group("RC")]
-    commit_no  = _v.group("PATCH_NO")
     git_hash  = _v.group("GIT_HASH")
 
     # Sanitize the verison and remove empty entries
@@ -185,12 +181,18 @@ try:
     tfm_def_tfm_ver_full = ".".join(version)
     tfm_def_tfm_ver_shrt = ".".join(version[:2])
 
-    if (int(commit_no) > 0):
-        tfm_def_tfm_ver_full = "%s+ ( %s )" % (tfm_def_tfm_ver_full, git_hash)
-        tfm_def_tfm_ver_shrt = "%s+ ( %s )" % (tfm_def_tfm_ver_shrt, git_hash)
+    vlrex = re.compile(r'^(?P<GIT_HASH_LATEST>[a-f0-9]{40})')
+
+    git_hash_latest = check_output("git rev-parse HEAD", encoding = 'UTF-8')
+
+    git_hash_latest = vlrex.search(git_hash_latest).group('GIT_HASH_LATEST')
+
+    if git_hash != git_hash_latest:
+        git_hash_latest = git_hash_latest[:7]
+        tfm_def_tfm_ver_full = "%s+ ( %s )" % (tfm_def_tfm_ver_full, git_hash_latest)
+        tfm_def_tfm_ver_shrt = "%s+ ( %s )" % (tfm_def_tfm_ver_shrt, git_hash_latest)
 
     tfm_def_tfm_ver_shrt = tfm_def_tfm_ver_full
-
 
 except Exception as E:
     try:
