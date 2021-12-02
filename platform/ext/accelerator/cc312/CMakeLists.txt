@@ -39,6 +39,8 @@ endif()
 if(BL2)
 
     set(CC312_LIB_PREFIX bl2_)
+    # Platform depedency needed to access platform specific dx_reg_base_host.h
+    set(CC312_PLATFORM_DEPENDENCY platform_bl2)
 
     target_sources(bl2_crypto_hw
         PRIVATE
@@ -127,12 +129,15 @@ if(BL2)
     )
 
     unset(CC312_LIB_PREFIX)
+    unset(CC312_PLATFORM_DEPENDENCY)
 
 endif()
 
 ############################ Crypto Service ####################################
 
 set(CC312_LIB_PREFIX crypto_service_)
+# Platform depedency needed to access platform specific dx_reg_base_host.h
+set(CC312_PLATFORM_DEPENDENCY platform_s)
 
 target_sources(crypto_service_crypto_hw
     PRIVATE
@@ -191,3 +196,4 @@ target_compile_options(crypto_service_mbedcrypto
 )
 
 unset(CC312_LIB_PREFIX)
+unset(CC312_PLATFORM_DEPENDENCY)

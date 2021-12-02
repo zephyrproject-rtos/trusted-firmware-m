@@ -29,6 +29,11 @@ add_subdirectory(codesafe)
 add_subdirectory(host)
 add_subdirectory(shared)
 
+#  Platform depedency must be defined at this point scope
+if (NOT TARGET ${CC312_PLATFORM_DEPENDENCY})
+  message(ERROR "CC312_PLATFORM_DEPENDENCY target is not available for CC-312")
+endif()
+
 ########################## LIB #################################################
 
 target_compile_definitions(${CC312_LIB_TARGET}
@@ -46,7 +51,7 @@ target_link_libraries(${CC312_LIB_TARGET}
     PRIVATE
         ${CC312_PAL_TARGET}
         ${CC312_LIB_PREFIX}mbedcrypto
-        platform_s
+        ${CC312_PLATFORM_DEPENDENCY}
     INTERFACE
         ${CC312_MBEDTLS_API_TARGET}
 )
@@ -62,7 +67,7 @@ target_compile_definitions(${CC312_PAL_TARGET}
 
 target_link_libraries(${CC312_PAL_TARGET}
     PRIVATE
-        platform_s
+        ${CC312_PLATFORM_DEPENDENCY}
 )
 
 ########################## CDMPU ###############################################
@@ -89,5 +94,5 @@ target_link_libraries(${CC312_MBEDTLS_API_TARGET}
     INTERFACE
         ${CC312_LIB_TARGET}
     PRIVATE
-        platform_s
+        ${CC312_PLATFORM_DEPENDENCY}
 )
