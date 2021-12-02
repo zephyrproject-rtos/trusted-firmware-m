@@ -32,7 +32,7 @@
 static psa_status_t hash_update(cc3xx_hash_operation_t *pHashUserCtx,
                                 uint8_t *pDataIn, size_t dataInSize)
 {
-    uint32_t rc = 0;
+    uint32_t rc;
     size_t bytesToAdd = 0;
     uint32_t localPrevDataIn[HASH_SHA512_BLOCK_SIZE_IN_WORDS];
     CCBuffInfo_t inBuffInfo;

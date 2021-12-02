@@ -403,7 +403,7 @@ psa_status_t cc3xx_sign_hash(const psa_key_attributes_t *attributes,
                              size_t signature_size, size_t *signature_length)
 {
 
-    if (PSA_ALG_IS_ECDSA(alg) || PSA_ALG_IS_DETERMINISTIC_ECDSA(alg)) {
+    if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_sign(
             attributes, key, key_length, alg, input, input_length, signature,
             signature_size, signature_length, false);
@@ -422,7 +422,7 @@ psa_status_t cc3xx_verify_hash(const psa_key_attributes_t *attributes,
                                size_t hash_length, const uint8_t *signature,
                                size_t signature_length)
 {
-    if (PSA_ALG_IS_ECDSA(alg) || PSA_ALG_IS_DETERMINISTIC_ECDSA(alg)) {
+    if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_verify(attributes, key, key_length, alg,
                                            hash, hash_length, signature,
                                            signature_length, false);
@@ -474,7 +474,7 @@ psa_status_t cc3xx_verify_message(const psa_key_attributes_t *attributes,
                                   size_t input_length, const uint8_t *signature,
                                   size_t signature_length)
 {
-    if (PSA_ALG_IS_ECDSA(alg) || PSA_ALG_IS_DETERMINISTIC_ECDSA(alg)) {
+    if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_verify(attributes, key, key_length, alg,
                                            input, input_length, signature,
                                            signature_length, true);

@@ -138,10 +138,10 @@ static psa_status_t cmac_setup(cc3xx_cipher_operation_t *cmac,
 static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
                                 const unsigned char *input, size_t ilen)
 {
-    drvError_t ret = 0;
+    drvError_t ret;
     unsigned int block_size;
     size_t blocks_num;
-    size_t main_chunk_in_bytes = 0;
+    size_t main_chunk_in_bytes;
     CCBuffInfo_t inBuffInfo;
     CCBuffInfo_t outBuffInfo;
     block_size = cmac_ctx->block_size;

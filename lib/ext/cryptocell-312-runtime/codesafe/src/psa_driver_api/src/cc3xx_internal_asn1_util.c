@@ -132,7 +132,7 @@ int cc3xx_asn1_write_big_integer(unsigned char **p, const unsigned char *start,
 static int asn1_write_tagged_int(unsigned char **p, unsigned char *start,
                                  int val, int tag)
 {
-    int ret = PSA_ERROR_GENERIC_ERROR;
+    int ret; /* This is used by the CC3XX_ASN1_CHK_ADD macro */
     size_t len = 0;
 
     do {

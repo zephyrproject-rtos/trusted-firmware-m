@@ -72,7 +72,7 @@ psa_status_t cc3xx_gcm_setkey_dec(
 psa_status_t cc3xx_gcm_set_nonce(
     AesGcmContext_t *ctx,
     const uint8_t *nonce,
-    size_t nonce_length);
+    size_t nonce_size);
 /**
  * \brief   Set the message and additional data lengths
  */
@@ -86,7 +86,7 @@ psa_status_t cc3xx_gcm_set_lengths(
 psa_status_t cc3xx_gcm_update_ad(
     AesGcmContext_t *ctx,
     const uint8_t *add,
-    size_t add_len);
+    size_t add_size);
 /**
  * \brief   Encrypt or decrypt a message fragment.
  */
@@ -101,7 +101,7 @@ psa_status_t cc3xx_gcm_update(
 psa_status_t cc3xx_gcm_finish(
     AesGcmContext_t *ctx,
     uint8_t *tag,
-    size_t tag_len);
+    size_t tag_size);
 
 #ifdef __cplusplus
 }

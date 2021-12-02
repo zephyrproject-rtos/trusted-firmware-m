@@ -38,7 +38,7 @@ static psa_status_t add_pkcs_padding(
 }
 
 static psa_status_t get_pkcs_padding(
-        uint8_t *input,
+        const uint8_t *input,
         size_t input_len,
         size_t *data_len)
 {
@@ -479,6 +479,11 @@ psa_status_t cc3xx_cipher_finish(
 
             /* Set output size for decryption */
             if (operation->dir == PSA_CRYPTO_DRIVER_DECRYPT){
+                /* get_padding() is initialised for CBC_PKCS7 only */
+                if (operation->get_padding == NULL) {
+                    return PSA_ERROR_CORRUPTION_DETECTED;
+                }
+
                 return(operation->get_padding(
                             output,
                             operation->block_size,

@@ -116,7 +116,7 @@ static psa_status_t gcm_init(AesGcmContext_t *context,
                              cryptoDirection_t direction, const uint8_t *pIv,
                              size_t ivSize, const uint8_t *pAad, size_t aadSize,
                              const uint8_t *pDataIn, size_t dataSize,
-                             uint8_t *pDataOut, const uint8_t *pTag,
+                             const uint8_t *pDataOut, const uint8_t *pTag,
                              size_t tagSize)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
@@ -205,7 +205,7 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv)
     CCBuffInfo_t outBuffInfo;
 
     if (CC3XX_AESGCM_IV_96_BITS_SIZE_BYTES == context->ivSize) {
-        // Concatenate IV||0(31)||1
+        /* Concatenate IV||0(31)||1 */
         CC_PalMemCopy(context->J0, pIv, CC3XX_AESGCM_IV_96_BITS_SIZE_BYTES);
         context->J0[3] = SWAP_ENDIAN(0x00000001);
     } else {
@@ -236,8 +236,7 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv)
         /* Build & Calculate the second phase buffer */
         /*********************************************/
         CC_PalMemSetZero(context->tempBuf, sizeof(context->tempBuf));
-        context->tempBuf[3] =
-            (context->ivSize << 3) & BITMASK(CC_BITS_IN_32BIT_WORD);
+        context->tempBuf[3] = (context->ivSize << 3) & CC_32BIT_MAX_VALUE;
         context->tempBuf[3] = SWAP_ENDIAN(context->tempBuf[3]);
 
         /* Set process mode to 'CalcJ0' */
@@ -346,12 +345,10 @@ static psa_status_t gcm_process_lenA_lenC(AesGcmContext_t *context)
     CCBuffInfo_t outBuffInfo;
 
     /* Build buffer */
-    context->tempBuf[1] =
-        (context->aadSize << 3) & BITMASK(CC_BITS_IN_32BIT_WORD);
+    context->tempBuf[1] = (context->aadSize << 3) & CC_32BIT_MAX_VALUE;
     context->tempBuf[1] = SWAP_ENDIAN(context->tempBuf[1]);
     context->tempBuf[0] = 0;
-    context->tempBuf[3] =
-        (context->dataSize << 3) & BITMASK(CC_BITS_IN_32BIT_WORD);
+    context->tempBuf[3] = (context->dataSize << 3) & CC_32BIT_MAX_VALUE;
     context->tempBuf[3] = SWAP_ENDIAN(context->tempBuf[3]);
     context->tempBuf[2] = 0;
 
@@ -620,12 +617,12 @@ psa_status_t cc3xx_gcm_setkey_dec(
 
 psa_status_t cc3xx_gcm_set_nonce(
     AesGcmContext_t *ctx,
-    const uint8_t *pIv,
-    size_t ivSize)
+    const uint8_t *nonce,
+    size_t nonce_size)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
-    if (NULL == ctx || NULL == pIv) {
+    if (NULL == ctx || NULL == nonce) {
         CC_PAL_LOG_ERR("Null pointer exception\n");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
@@ -636,9 +633,9 @@ psa_status_t cc3xx_gcm_set_nonce(
         return ret;
     }
 
-    ctx->ivSize = ivSize;
+    ctx->ivSize = nonce_size;
 
-    ret = gcm_process_j0(ctx, pIv);
+    ret = gcm_process_j0(ctx, nonce);
     if (ret != PSA_SUCCESS) {
         CC_PAL_LOG_ERR("gcm_process_j0 failed: %d", ret);
         return ret;
@@ -676,7 +673,7 @@ psa_status_t cc3xx_gcm_set_lengths(
 psa_status_t cc3xx_gcm_update_ad(
     AesGcmContext_t *ctx,
     const uint8_t *add,
-    size_t aadSize)
+    size_t add_size)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
@@ -685,7 +682,7 @@ psa_status_t cc3xx_gcm_update_ad(
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    ctx->aadSize = aadSize;
+    ctx->aadSize = add_size;
 
     ret = gcm_process_aad(ctx, add);
     if (ret != PSA_SUCCESS) {
@@ -727,7 +724,7 @@ psa_status_t cc3xx_gcm_update(
 psa_status_t cc3xx_gcm_finish(
     AesGcmContext_t *ctx,
     uint8_t *tag,
-    size_t tagSize)
+    size_t tag_size)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
@@ -736,7 +733,7 @@ psa_status_t cc3xx_gcm_finish(
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    ctx->tagSize = tagSize;
+    ctx->tagSize = tag_size;
 
     ret = gcm_finish(ctx, tag);
     if (ret != PSA_SUCCESS) {

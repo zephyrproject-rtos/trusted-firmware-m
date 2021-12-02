@@ -154,20 +154,20 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
     }
 
     pCcPrivKey = (CCRsaPrivKey_t *)mbedtls_calloc(1, sizeof(CCRsaPrivKey_t));
-    if (pCcPubKey == NULL) {
+    if (pCcPrivKey == NULL) {
         mbedtls_free(pCcPubKey);
         return PSA_ERROR_INSUFFICIENT_MEMORY;
     }
 
     pKeyGenData = (CCRsaKgData_t *)mbedtls_calloc(1, sizeof(CCRsaKgData_t));
-    if (pCcPubKey == NULL) {
+    if (pKeyGenData == NULL) {
         mbedtls_free(pCcPubKey);
         mbedtls_free(pCcPrivKey);
         return PSA_ERROR_INSUFFICIENT_MEMORY;
     }
 
     d_buff = (uint32_t *)mbedtls_calloc(1, PSA_BITS_TO_BYTES(key_bits));
-    if (pCcPubKey == NULL) {
+    if (d_buff == NULL) {
         mbedtls_free(pKeyGenData);
         mbedtls_free(pCcPubKey);
         mbedtls_free(pCcPrivKey);
@@ -270,7 +270,7 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
 
 end:
     /* zeroing temp buffers */
-    CC_PalMemSetZero(d_buff, sizeof(PSA_BITS_TO_BYTES(key_bits)));
+    CC_PalMemSetZero(d_buff, PSA_BITS_TO_BYTES(key_bits));
     CC_PalMemSetZero(pCcPrivKey, sizeof(CCRsaPrivKey_t));
     CC_PalMemSetZero(pCcPubKey, sizeof(CCRsaPubKey_t));
     CC_PalMemSetZero(pKeyGenData, sizeof(CCRsaKgData_t));

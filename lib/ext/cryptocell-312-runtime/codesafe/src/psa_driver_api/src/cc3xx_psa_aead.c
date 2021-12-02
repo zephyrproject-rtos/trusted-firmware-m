@@ -296,12 +296,12 @@ psa_status_t cc3xx_aead_decrypt(
 psa_status_t cc3xx_aead_encrypt_setup(
         cc3xx_aead_operation_t *operation,
         const psa_key_attributes_t *attributes,
-        const uint8_t *key, size_t key_length,
+        const uint8_t *key_buffer, size_t key_buffer_size,
         psa_algorithm_t alg)
 {
     return aead_setup(operation,
                       attributes,
-                      key, key_length,
+                      key_buffer, key_buffer_size,
                       alg,
                       PSA_CRYPTO_DRIVER_ENCRYPT);
 }
@@ -309,12 +309,12 @@ psa_status_t cc3xx_aead_encrypt_setup(
 psa_status_t cc3xx_aead_decrypt_setup(
         cc3xx_aead_operation_t *operation,
         const psa_key_attributes_t *attributes,
-        const uint8_t *key, size_t key_length,
+        const uint8_t *key_buffer, size_t key_buffer_size,
         psa_algorithm_t alg)
 {
     return aead_setup(operation,
                       attributes,
-                      key, key_length,
+                      key_buffer, key_buffer_size,
                       alg,
                       PSA_CRYPTO_DRIVER_DECRYPT);
 }
@@ -537,7 +537,7 @@ psa_status_t cc3xx_aead_finish(
 
     (void)ciphertext;
     (void)ciphertext_size;
-    ciphertext_length = 0;
+    *ciphertext_length = 0;
 
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
@@ -596,7 +596,7 @@ psa_status_t cc3xx_aead_verify(
 
     (void)plaintext;
     (void)plaintext_size;
-    plaintext_length = 0;
+    *plaintext_length = 0;
 
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:

@@ -52,8 +52,10 @@ struct cc3xx_cipher_operation_s {
     psa_encrypt_or_decrypt_t dir; /*!< Encrypt/decrypt direction */
     size_t block_size;            /*!< Block size of the cipher */
 
-    psa_status_t(*add_padding)(uint8_t *, size_t, size_t);   /*!< Add padding */
-    psa_status_t(*get_padding)(uint8_t *, size_t, size_t *); /*!< Get padding */
+    /*! Function that adds padding for padding-enabled cipher modes */
+    psa_status_t(*add_padding)(uint8_t *, size_t, size_t);
+    /*! Function that processes the padding when padding modes are used */
+    psa_status_t(*get_padding)(const uint8_t *, size_t, size_t *);
 
     uint8_t unprocessed_data[AES_BLOCK_SIZE]; /*!< Cached data */
     size_t  unprocessed_size;                 /*!< Size of the cached data */
