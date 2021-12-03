@@ -4,7 +4,6 @@ Introduction
 .. toctree::
     :maxdepth: 1
     :glob:
-    :numbered:
 
     readme
 
