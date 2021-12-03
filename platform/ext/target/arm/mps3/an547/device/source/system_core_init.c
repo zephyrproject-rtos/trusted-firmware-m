@@ -63,7 +63,7 @@ void SystemInit (void)
 #endif
 
 #if (defined (__FPU_USED) && (__FPU_USED == 1U)) || \
-    (defined (__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE >= 0U))
+    (defined (__ARM_FEATURE_MVE) && (__ARM_FEATURE_MVE >= 1U))
     SCB->CPACR |= ((3U << 10U*2U) |           /* enable CP10 Full Access */
                    (3U << 11U*2U)  );         /* enable CP11 Full Access */
 #endif
