@@ -47,10 +47,10 @@ struct cc3xx_hash_operation_s {
  * \brief A structure holding state information for an Cipher operation
  */
 struct cc3xx_cipher_operation_s {
-    psa_algorithm_t alg;          /*!< Cipher algorithm used in this context */
-    psa_key_type_t key_type;      /*!< Key type associated to the context */
-    psa_encrypt_or_decrypt_t dir; /*!< Encrypting or decrypting direction */
-    size_t block_size;            /*!< Block size of the underlying cipher */
+    psa_algorithm_t alg;          /*!< Cipher algorithm */
+    psa_key_type_t key_type;      /*!< Key type */
+    psa_encrypt_or_decrypt_t dir; /*!< Encrypt/decrypt direction */
+    size_t block_size;            /*!< Block size of the cipher */
 
     psa_status_t(*add_padding)(uint8_t *, size_t, size_t);   /*!< Add padding */
     psa_status_t(*get_padding)(uint8_t *, size_t, size_t *); /*!< Get padding */
@@ -60,13 +60,9 @@ struct cc3xx_cipher_operation_s {
     uint8_t iv[AES_IV_SIZE];                  /*!< Initialisation Vector */
     size_t  iv_size;                          /*!< Size of the IV */
 
-    size_t tag_length; /*!< Size of the MAC in an AEAD operations */
-
     union {
         AesContext_t    aes;     /*!< Low-level AES context */
-        AesGcmContext_t aes_gcm; /*!< Low-level AES GCM context */
-        AesCcmContext_t aes_ccm; /*!< Low-level AES CCM context */
-        ChachaContext_t chacha;  /*!< Low-level Chacha20 context */
+        ChachaContext_t chacha;  /*!< Low-level Chacha context */
     } ctx;
 };
 
@@ -85,7 +81,27 @@ struct cc3xx_mac_operation_s {
     uint8_t opad[PSA_HMAC_MAX_HASH_BLOCK_SIZE]; /*!< Opad as RFC-2104 */
 };
 
+/*!
+ * \struct cc3xx_aead_operation_s
+ *
+ * \brief A structure holding state information for an AEAD operation
+ */
+struct cc3xx_aead_operation_s {
+    psa_algorithm_t alg;          /*!< AEAD algorithm */
+    psa_key_type_t key_type;      /*!< Key type */
+    psa_encrypt_or_decrypt_t dir; /*!< Encrypt/decrypt direction */
+
+    size_t tag_length;            /*!< Size of the authentication tag */
+
+    union {
+        AesGcmContext_t gcm;      /*!< Low-level GCM context */
+        AesCcmContext_t ccm;      /*!< Low-level CCM context */
+        ChachaContext_t chacha;   /*!< Low-level Chacha context */
+    } ctx;
+};
+
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* CC3XX_CRYPTO_PRIMITIVES_PRIVATE_H */

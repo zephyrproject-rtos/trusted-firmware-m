@@ -107,11 +107,6 @@ static psa_status_t aead_setup(
     operation->alg         =  ref_alg;
     operation->key_type    =  key_type;
     operation->dir         =  dir;
-    operation->iv_size     =  PSA_CIPHER_IV_LENGTH(key_type, alg);
-    operation->block_size  = (PSA_ALG_IS_STREAM_CIPHER(alg) ? 1 :
-                              PSA_BLOCK_CIPHER_BLOCK_LENGTH(key_type));
-    operation->add_padding = NULL;
-    operation->get_padding = NULL;
     operation->tag_length  = PSA_AEAD_TAG_LENGTH(key_type,
                                                  psa_get_key_bits(attributes),
                                                  alg);
@@ -120,12 +115,12 @@ static psa_status_t aead_setup(
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
         case PSA_ALG_GCM:
-            cc3xx_gcm_init(&operation->ctx.aes_gcm);
+            cc3xx_gcm_init(&operation->ctx.gcm);
 
             switch (operation->dir) {
             case PSA_CRYPTO_DRIVER_ENCRYPT:
                 if (( ret = cc3xx_gcm_setkey_enc(
-                        &operation->ctx.aes_gcm,
+                        &operation->ctx.gcm,
                         key,
                         key_bits) )
                     != PSA_SUCCESS) {
@@ -135,7 +130,7 @@ static psa_status_t aead_setup(
                 break;
             case PSA_CRYPTO_DRIVER_DECRYPT:
                 if (( ret = cc3xx_gcm_setkey_dec(
-                        &operation->ctx.aes_gcm,
+                        &operation->ctx.gcm,
                         key,
                         key_bits) )
                     != PSA_SUCCESS) {
@@ -149,12 +144,12 @@ static psa_status_t aead_setup(
 
             break;
         case PSA_ALG_CCM:
-            cc3xx_ccm_init(&operation->ctx.aes_ccm);
+            cc3xx_ccm_init(&operation->ctx.ccm);
 
             switch (operation->dir) {
             case PSA_CRYPTO_DRIVER_ENCRYPT:
                 if (( ret = cc3xx_ccm_setkey_enc(
-                        &operation->ctx.aes_ccm,
+                        &operation->ctx.ccm,
                         key,
                         key_bits) )
                     != PSA_SUCCESS) {
@@ -164,7 +159,7 @@ static psa_status_t aead_setup(
                 break;
             case PSA_CRYPTO_DRIVER_DECRYPT:
                 if (( ret = cc3xx_ccm_setkey_dec(
-                        &operation->ctx.aes_ccm,
+                        &operation->ctx.ccm,
                         key,
                         key_bits) )
                     != PSA_SUCCESS) {
@@ -336,7 +331,7 @@ psa_status_t cc3xx_aead_set_nonce(
         switch (operation->alg) {
         case PSA_ALG_GCM:
             if ((ret = cc3xx_gcm_set_nonce(
-                    &operation->ctx.aes_gcm,
+                    &operation->ctx.gcm,
                     nonce,
                     nonce_length))
                 != PSA_SUCCESS) {
@@ -346,7 +341,7 @@ psa_status_t cc3xx_aead_set_nonce(
             break;
         case PSA_ALG_CCM:
             if ((ret = cc3xx_ccm_set_nonce(
-                    &operation->ctx.aes_ccm,
+                    &operation->ctx.ccm,
                     nonce,
                     nonce_length,
                     operation->tag_length,
@@ -386,7 +381,7 @@ psa_status_t cc3xx_aead_set_lengths(
         switch (operation->alg) {
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_set_lengths(
-                    &operation->ctx.aes_gcm,
+                    &operation->ctx.gcm,
                     ad_length,
                     plaintext_length) )
                 != PSA_SUCCESS) {
@@ -396,7 +391,7 @@ psa_status_t cc3xx_aead_set_lengths(
             break;
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_set_lengths(
-                    &operation->ctx.aes_ccm,
+                    &operation->ctx.ccm,
                     ad_length,
                     plaintext_length) )
                 != PSA_SUCCESS) {
@@ -434,7 +429,7 @@ psa_status_t cc3xx_aead_update_ad(
         switch (operation->alg) {
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_update_ad(
-                    &operation->ctx.aes_gcm,
+                    &operation->ctx.gcm,
                     input,
                     input_size) )
                 != PSA_SUCCESS) {
@@ -444,7 +439,7 @@ psa_status_t cc3xx_aead_update_ad(
             break;
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_update_ad(
-                    &operation->ctx.aes_ccm,
+                    &operation->ctx.ccm,
                     input,
                     input_size) )
                 != PSA_SUCCESS) {
@@ -487,7 +482,7 @@ psa_status_t cc3xx_aead_update(
         switch (operation->alg) {
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_update(
-                    &operation->ctx.aes_gcm,
+                    &operation->ctx.gcm,
                     input_length,
                     input,
                     output ))
@@ -500,7 +495,7 @@ psa_status_t cc3xx_aead_update(
             break;
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_update(
-                    &operation->ctx.aes_ccm,
+                    &operation->ctx.ccm,
                     input_length,
                     input,
                     output ))
@@ -549,7 +544,7 @@ psa_status_t cc3xx_aead_finish(
         switch (operation->alg) {
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_finish(
-                    &operation->ctx.aes_gcm,
+                    &operation->ctx.gcm,
                     tag,
                     tag_size))
                 != PSA_SUCCESS) {
@@ -561,7 +556,7 @@ psa_status_t cc3xx_aead_finish(
             break;
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_finish(
-                    &operation->ctx.aes_ccm,
+                    &operation->ctx.ccm,
                     tag,
                     tag_size))
                 != PSA_SUCCESS) {
@@ -608,7 +603,7 @@ psa_status_t cc3xx_aead_verify(
         switch (operation->alg) {
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_finish(
-                    &operation->ctx.aes_gcm,
+                    &operation->ctx.gcm,
                     (uint8_t *)tag,
                     tag_size))
                 != PSA_SUCCESS) {
@@ -618,7 +613,7 @@ psa_status_t cc3xx_aead_verify(
             break;
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_finish(
-                    &operation->ctx.aes_ccm,
+                    &operation->ctx.ccm,
                     (uint8_t *)tag,
                     tag_size))
                 != PSA_SUCCESS) {
@@ -650,10 +645,10 @@ psa_status_t cc3xx_aead_abort(cc3xx_aead_operation_t *operation)
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
         case PSA_ALG_GCM:
-            cc3xx_gcm_free(&operation->ctx.aes_gcm);
+            cc3xx_gcm_free(&operation->ctx.gcm);
             break;
         case PSA_ALG_CCM:
-            cc3xx_ccm_free(&operation->ctx.aes_ccm);
+            cc3xx_ccm_free(&operation->ctx.ccm);
             break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
