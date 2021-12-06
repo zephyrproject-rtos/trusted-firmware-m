@@ -48,7 +48,7 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
 
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+REGION_DECLARE(Image$$, ER_VENEER, $$Limit);
 
 const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     /* TFM Core unprivileged code region */

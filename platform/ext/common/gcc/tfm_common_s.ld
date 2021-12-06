@@ -29,9 +29,6 @@ MEMORY
 #if defined(S_CODE_SRAM_ALIAS_BASE)
   CODE_RAM (rwx) : ORIGIN = S_CODE_SRAM_ALIAS_BASE, LENGTH = TOTAL_CODE_SRAM_SIZE
 #endif
-#ifndef TFM_MULTI_CORE_TOPOLOGY
-  VENEERS  (rx)  : ORIGIN = CMSE_VENEER_REGION_START, LENGTH = CMSE_VENEER_REGION_SIZE
-#endif
 
 #if defined(PSA_PROXY_SHARED_MEMORY_BASE)
   PSA_PROXY_SHARED_MEMORY_RAM (rw) : ORIGIN = PSA_PROXY_SHARED_MEMORY_BASE, LENGTH = PSA_PROXY_SHARED_MEMORY_SIZE
@@ -55,9 +52,24 @@ SECTIONS
         __vectors_start__ = .;
         KEEP(*(.vectors))
         __vectors_end__ = .;
-        *startup*(.text*)
-        . = ALIGN(4);
     } > FLASH
+
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+    ASSERT(. <= ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE, ".TFM_VECTORS section size overflow.")
+    . = ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE;
+    /*
+     * Place the CMSE Veneers (containing the SG instruction) after the code, in
+     * a separate 32 bytes aligned region so that the SAU can programmed to just
+     * set this region as Non-Secure Callable.
+     */
+    .gnu.sgstubs ALIGN(32) : ALIGN(32)
+    {
+        *(.gnu.sgstubs*)
+        . = ALIGN(32);
+    } > FLASH
+    Image$$ER_VENEER$$Base = ADDR(.gnu.sgstubs);
+    Image$$VENEER_ALIGN$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
+#endif
 
     .copy.table : ALIGN(4)
     {
@@ -200,6 +212,7 @@ SECTIONS
 
     .ER_TFM_CODE : ALIGN(4)
     {
+        *startup*(.text*)
         *libplatform_s*:*(.text*)
         *libtfm_spm*:*(.text*)
 
@@ -554,21 +567,6 @@ SECTIONS
     {
         KEEP(*(.ramfunc))
     } > RAM AT> FLASH
-#endif
-
-#ifndef TFM_MULTI_CORE_TOPOLOGY
-    /*
-     * Place the CMSE Veneers (containing the SG instruction) after the code, in a
-     * separate 32 bytes aligned region so that the SAU can programmed to just set
-     * this region as Non-Secure Callable.
-     */
-    .gnu.sgstubs : ALIGN(32)
-    {
-        *(.gnu.sgstubs*)
-        . = ALIGN(32);
-    } > VENEERS AT> VENEERS
-    Load$$LR$$LR_VENEER$$Base = ADDR(.gnu.sgstubs);
-    Load$$LR$$LR_VENEER$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
 #endif
 
     Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;

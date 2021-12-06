@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited. All rights reserved.
+ * Copyright (c) 2017-2021 ARM Limited. All rights reserved.
  * Copyright (c) 2019-2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,6 +139,9 @@
  * and privileged data areas*/
 #define S_RAM_CODE_OFFSET    (S_DATA_PRIV_OFFSET + S_PRIV_DATA_SIZE)
 #define S_RAM_CODE_START     S_RAM_ALIAS(S_RAM_CODE_OFFSET)
+
+/* Size of vector table: 31 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0x80)
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \

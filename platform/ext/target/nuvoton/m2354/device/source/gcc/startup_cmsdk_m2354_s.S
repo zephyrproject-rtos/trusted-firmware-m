@@ -23,7 +23,7 @@
     .syntax    unified
     .arch    armv8-m.base
 
-    .section .vectors
+    .section .vectors, "a"
     .align 2
     .globl    __Vectors
 __Vectors:

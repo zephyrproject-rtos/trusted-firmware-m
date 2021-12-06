@@ -83,14 +83,12 @@
 #define IMAGE_NS_CODE_SIZE \
             (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
-#define CMSE_VENEER_REGION_SIZE     (0x340)
-
 /* Secure regions */
 #define S_IMAGE_PRIMARY_AREA_OFFSET \
              (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 /* Secure Code stored in Code SRAM */
 #define S_CODE_START    ((SRAM_BASE_S) +  (S_IMAGE_PRIMARY_AREA_OFFSET))
-#define S_CODE_SIZE     (IMAGE_S_CODE_SIZE - CMSE_VENEER_REGION_SIZE)
+#define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 /* Secure Data stored in DTCM */
@@ -98,8 +96,8 @@
 #define S_DATA_SIZE     (DTCM_BLK_SIZE * DTCM_BLK_NUM)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
-/* CMSE Veneers region */
-#define CMSE_VENEER_REGION_START  (S_CODE_LIMIT + 1)
+/* Size of vector table: 146 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0x24C)
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \

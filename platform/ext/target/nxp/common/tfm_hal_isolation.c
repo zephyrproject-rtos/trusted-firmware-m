@@ -29,23 +29,12 @@ static uint32_t n_configured_regions = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 #if TFM_LVL == 3
 static uint32_t idx_boundary_handle = 0;
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
 REGION_DECLARE(Image$$, PT_RO_START, $$Base);
 REGION_DECLARE(Image$$, PT_RO_END, $$Base);
 REGION_DECLARE(Image$$, PT_PRIV_RWZI_START, $$Base);
 REGION_DECLARE(Image$$, PT_PRIV_RWZI_END, $$Base);
 
 static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
-        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-        MPU_ARMV8M_XN_EXEC_OK,
-        MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
-    },
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, PT_RO_START, $$Base),

@@ -19,8 +19,30 @@
 LR_CODE S_CODE_START S_CODE_SIZE {
 
     /****  This initial section contains common code for secure binary */
-    ER_TFM_CODE S_CODE_START {
+    ER_VECTORS S_CODE_START S_CODE_VECTOR_TABLE_SIZE {
         *.o (RESET +First)
+    }
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+    ER_VECTORS_FILL +0 EMPTY (S_CODE_VECTOR_TABLE_SIZE - ImageLength(ER_VECTORS)) {
+    }
+    /*
+     * Place the CMSE Veneers (containing the SG instruction) in a separate
+     * 32 bytes aligned region so that the SAU can be programmed to
+     * just set this region as Non-Secure Callable.
+     */
+    ER_VENEER +0 FIXED ALIGN 32 {
+        *(Veneer$$CMSE)
+    }
+    /*
+     * The Limit of the VENEER_ALIGN region should be 32 bytes aligned  so that
+     * the SAU can set this region as Non-Secure Callable.
+     */
+    VENEER_ALIGN +0 ALIGN 32 EMPTY 0x0 {
+    }
+#endif
+
+    ER_TFM_CODE +0 {
+        *startup*(.text*)
         *libplatform_s* (.text*, .rodata*)
         *libtfm_spm* (+RO)
     }
@@ -255,19 +277,6 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      */
     ScatterAssert(ImageLimit(SRAM_WATERMARK) <= S_DATA_START + S_DATA_SIZE)
 }
-
-#ifndef TFM_MULTI_CORE_TOPOLOGY
-LR_VENEER CMSE_VENEER_REGION_START {
-    /*
-     * Place the CMSE Veneers (containing the SG instruction) in a separate
-     * 32 bytes aligned region so that the SAU can be programmed to
-     * just set this region as Non-Secure Callable.
-     */
-    CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
-        *(Veneer$$CMSE)
-    }
-}
-#endif
 
 LR_NS_PARTITION NS_PARTITION_START {
     /* Reserved place for NS application.
