@@ -131,6 +131,7 @@ extern struct platform_data_t tfm_peripheral_pwm2;
 extern struct platform_data_t tfm_peripheral_pwm3;
 extern struct platform_data_t tfm_peripheral_pdm0;
 extern struct platform_data_t tfm_peripheral_i2s0;
+extern struct platform_data_t tfm_peripheral_ipc;
 extern struct platform_data_t tfm_peripheral_qspi;
 extern struct platform_data_t tfm_peripheral_nfct;
 extern struct platform_data_t tfm_peripheral_mutex;
@@ -201,7 +202,7 @@ extern struct platform_data_t tfm_peripheral_vmc;
 #define TFM_PERIPHERAL_QDEC0        (&tfm_peripheral_qdec0)
 #define TFM_PERIPHERAL_QDEC1        (&tfm_peripheral_qdec1)
 #define TFM_PERIPHERAL_USBD         (&tfm_peripheral_usbd)
-#define TFM_PERIPHERAL_USBREGULATOR (&tfm_peripheral_usbreg)
+#define TFM_PERIPHERAL_USBREG       (&tfm_peripheral_usbreg)
 #define TFM_PERIPHERAL_NVMC         (&tfm_peripheral_nvmc)
 #define TFM_PERIPHERAL_GPIO0        (&tfm_peripheral_gpio0)
 #define TFM_PERIPHERAL_GPIO1        (&tfm_peripheral_gpio1)
