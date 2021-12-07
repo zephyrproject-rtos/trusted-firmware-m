@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Nordic Semiconductor ASA.
 # Copyright (c) 2021, Laird Connectivity.
 #
@@ -46,7 +46,7 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         target_cfg.c
-        ${NRF_FOLDER_PATH}/tfm_interrupts.c
+        $<$<BOOL:${TFM_PSA_API}>:${NRF_FOLDER_PATH}/tfm_interrupts.c>
         ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf5340_application.c
 )
 

@@ -106,7 +106,7 @@ target_sources(platform_s
         Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/cache_drv.c
         spm_hal.c
-        $<$<NOT:$<BOOL:${TEST_NS_FPU}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<NOT:$<BOOL:${TEST_NS_FPU}>>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         tfm_hal_isolation.c
         tfm_hal_platform.c
         target_cfg.c
@@ -124,7 +124,7 @@ target_sources(platform_s
 # hanlder function which symbol is in another library.
 target_sources(tfm_s
     PRIVATE
-        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<BOOL:${TEST_NS_FPU}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
 )
 
 target_compile_options(platform_s

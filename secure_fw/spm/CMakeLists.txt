@@ -74,7 +74,7 @@ target_sources(tfm_spm
 
 target_include_directories(tfm_spm_defs
     INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa>
 )
 
 target_link_libraries(tfm_spm

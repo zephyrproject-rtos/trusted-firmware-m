@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,6 @@
 #include "arch.h"
 #include "compiler_ext_defs.h"
 #include "tfm_secure_api.h"
-#include "tfm_svcalls.h"
 
 #if defined(__ICCARM__)
 #pragma required = tfm_core_svc_handler

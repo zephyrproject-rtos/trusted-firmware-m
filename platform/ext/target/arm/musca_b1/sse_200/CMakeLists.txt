@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -116,7 +116,7 @@ target_sources(platform_s
         $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c>
         Native_Driver/musca_b1_scc_drv.c
         spm_hal.c
-        tfm_interrupts.c
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         tfm_hal_isolation.c
         tfm_hal_platform.c
         target_cfg.c

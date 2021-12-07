@@ -16,10 +16,12 @@
 #include "region_defs.h" //NXP
 #include "tfm_peripherals_def.h"
 #include "tfm_core_utils.h"
+#include "tfm_spm_log.h"
+#ifdef TFM_PSA_API
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
-#include "tfm_spm_log.h"
+#endif /* TFM_PSA_API */
 
 /* It can be retrieved from the MPU_TYPE register. */
 #define MPU_REGION_NUM                  8
@@ -249,6 +251,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     return TFM_HAL_SUCCESS;
 }
 
+#ifdef TFM_PSA_API
 /*
  * Implementation of tfm_hal_bind_boundaries() on LPCXpresso55s69:
  *
@@ -448,3 +451,4 @@ enum tfm_hal_status_t tfm_hal_update_boundaries(
 #endif
     return TFM_HAL_SUCCESS;
 }
+#endif /* TFM_PSA_API */

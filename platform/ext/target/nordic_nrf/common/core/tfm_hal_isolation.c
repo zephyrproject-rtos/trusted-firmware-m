@@ -14,8 +14,10 @@
 #include "tfm_hal_isolation.h"
 #include "tfm_spm_hal.h"
 #include "mmio_defs.h"
-#include "load/spm_load_api.h"
 #include "array.h"
+#ifdef TFM_PSA_API
+#include "load/spm_load_api.h"
+#endif /* TFM_PSA_API */
 
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
@@ -59,6 +61,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     return TFM_HAL_SUCCESS;
 }
 
+#ifdef TFM_PSA_API
 enum tfm_hal_status_t
 tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
                         void **pp_boundaries)
@@ -153,6 +156,7 @@ tfm_hal_update_boundaries(const struct partition_load_info_t *p_ldinf,
 
     return TFM_HAL_SUCCESS;
 }
+#endif /* TFM_PSA_API */
 
 #if !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0)
 static bool accessible_to_region(const void *p, size_t s, int flags)
