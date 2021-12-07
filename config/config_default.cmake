@@ -9,12 +9,15 @@ set(TFM_TOOLCHAIN_FILE                  ${CMAKE_SOURCE_DIR}/toolchain_GNUARM.cma
 set(TFM_PLATFORM                        ""          CACHE STRING    "Platform to build TF-M for. Must be either a relative path from [TF-M]/platform/ext/target, or an absolute path.")
 set(CROSS_COMPILE                       arm-none-eabi CACHE STRING  "Cross-compilation triplet")
 
+set(BL1                                 OFF         CACHE BOOL      "Whether to build BL1")
 set(BL2                                 ON          CACHE BOOL      "Whether to build BL2")
 set(NS                                  ON          CACHE BOOL      "Whether to build NS app")
 
 set(TEST_S                              OFF         CACHE BOOL      "Whether to build S regression tests")
 set(TEST_NS                             OFF         CACHE BOOL      "Whether to build NS regression tests")
 set(TEST_PSA_API                        ""          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
+set(TEST_BL1_1                          OFF         CACHE BOOL      "Whether to build BL1_1 tests")
+set(TEST_BL1_2                          OFF         CACHE BOOL      "Whether to build BL1_2 tests")
 
 # TFM_LIB_MODEL is the only user configuration for Library Model selection.
 # TFM_PSA_API becomes an internal variable. Please do NOT use it in build command line.
@@ -71,6 +74,8 @@ set(CRYPTO_HW_ACCELERATOR               OFF         CACHE BOOL      "Whether to 
 
 set(OTP_NV_COUNTERS_RAM_EMULATION       OFF         CACHE BOOL      "Enable OTP/NV_COUNTERS emulation in RAM. Has no effect on non-default implementations of the OTP and NV_COUNTERS")
 
+set(PLATFORM_DEFAULT_BL1                ON          CACHE STRING    "Whether to use default BL1 or platform-specific one")
+
 set(PLATFORM_DEFAULT_ATTEST_HAL         ON          CACHE BOOL      "Use default attest hal implementation.")
 set(PLATFORM_DEFAULT_NV_COUNTERS        ON          CACHE BOOL      "Use default nv counter implementation.")
 set(PLATFORM_DEFAULT_CRYPTO_KEYS        ON          CACHE BOOL      "Use default crypto keys implementation.")
@@ -88,6 +93,9 @@ set(PLATFORM_IS_FVP                     FALSE       CACHE BOOL      "Whether to 
 set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE       CACHE BOOL      "Whether to use psa-adac secure debug.")
 set(PLATFORM_PSA_ADAC_SOURCE_PATH       "DOWNLOAD"  CACHE PATH      "Path to source dir of psa-adac.")
 set(PLATFORM_PSA_ADAC_VERSION           "427923cc0152578d536fb2065154d5d0dd874910" CACHE STRING "The version of psa-adac to use.")
+
+set(BL1_HEADER_SIZE                     0x000       CACHE STRING    "BL1 Header size")
+set(BL1_TRAILER_SIZE                    0x000       CACHE STRING    "BL1 Trailer size")
 
 set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "BL2 Header size")
 set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer size")

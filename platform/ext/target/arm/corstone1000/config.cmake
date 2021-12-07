@@ -1,11 +1,12 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
 set(BL1                                 ON         CACHE BOOL     "Whether to build BL1")
+set(PLATFORM_DEFAULT_BL1                OFF        CACHE STRING   "Whether to use default BL1 or platform-specific one")
 set(BL2                                 ON         CACHE BOOL     "Whether to build BL2")
 set(BL2_TRAILER_SIZE                    0x800      CACHE STRING   "Trailer size")
 set(DEFAULT_MCUBOOT_FLASH_MAP           OFF        CACHE BOOL     "Whether to use the default flash map defined by TF-M project")

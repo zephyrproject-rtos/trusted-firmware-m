@@ -53,6 +53,11 @@ else() #The default backend is IPC
     include(config/tfm_ipc_config_default.cmake)
 endif()
 
+# Load bl1 config
+if (BL1)
+    include(${CMAKE_SOURCE_DIR}/bl1/config/bl1_config_default.cmake)
+endif()
+
 # Load MCUboot specific default.cmake
 if (NOT DEFINED BL2 OR BL2)
     include(${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/mcuboot_default_config.cmake)

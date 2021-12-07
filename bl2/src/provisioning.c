@@ -23,10 +23,6 @@ __PACKED_STRUCT bl2_assembly_and_test_provisioning_data_t {
     uint8_t bl2_rotpk_1[32];
     uint8_t bl2_rotpk_2[32];
 
-#ifdef BL1
-    uint8_t bl1_rotpk_0[32];
-#endif /* BL1 */
-
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
     uint8_t secure_debug_pk[32];
 #endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
@@ -82,27 +78,6 @@ static const struct bl2_assembly_and_test_provisioning_data_t bl2_assembly_and_t
 #else
 #error "No public key available for given signing algorithm."
 #endif /* MCUBOOT_SIGN_RSA_LEN */
-#ifdef BL1
-#if (MCUBOOT_SIGN_RSA_LEN == 2048)
-    /* bl2 rotpk 0 */
-    {
-        0xfc, 0x57, 0x01, 0xdc, 0x61, 0x35, 0xe1, 0x32,
-        0x38, 0x47, 0xbd, 0xc4, 0x0f, 0x04, 0xd2, 0xe5,
-        0xbe, 0xe5, 0x83, 0x3b, 0x23, 0xc2, 0x9f, 0x93,
-        0x59, 0x3d, 0x00, 0x01, 0x8c, 0xfa, 0x99, 0x94,
-    },
-#elif (MCUBOOT_SIGN_RSA_LEN == 3072)
-    /* bl1 rotpk 0 */
-    {
-        0xbf, 0xe6, 0xd8, 0x6f, 0x88, 0x26, 0xf4, 0xff,
-        0x97, 0xfb, 0x96, 0xc4, 0xe6, 0xfb, 0xc4, 0x99,
-        0x3e, 0x46, 0x19, 0xfc, 0x56, 0x5d, 0xa2, 0x6a,
-        0xdf, 0x34, 0xc3, 0x29, 0x48, 0x9a, 0xdc, 0x38,
-    },
-#else
-#error "No public key available for given signing algorithm."
-#endif /* MCUBOOT_SIGN_RSA_LEN */
-#endif /* BL1 */
 
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
     {
@@ -171,15 +146,6 @@ enum tfm_plat_err_t provision_assembly_and_test(void)
     if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
         return err;
     }
-
-#ifdef BL1
-    err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_ROTPK_0,
-                             sizeof(bl2_assembly_and_test_prov_data.bl1_rotpk_0),
-                             bl2_assembly_and_test_prov_data.bl1_rotpk_0);
-    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
-        return err;
-    }
-#endif /* BL1 */
 
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
     err = tfm_plat_otp_write(PLAT_OTP_ID_SECURE_DEBUG_PK,

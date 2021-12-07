@@ -34,6 +34,34 @@ if(BL2)
     )
 endif()
 
+################################ BL1 ###########################################
+
+if(BL1 AND PLATFORM_DEFAULT_BL1)
+    add_subdirectory(cc312-rom)
+
+    target_sources(bl1_crypto_hw
+        PRIVATE
+            ./cc312_rom_crypto_hw.c
+            $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_crypto.c>
+            $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_trng.c>
+            $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${CMAKE_CURRENT_SOURCE_DIR}/otp_cc312.c>
+    )
+
+    target_link_libraries(bl1_crypto_hw
+        PUBLIC
+            bl1_1_shared_lib_interface
+            cc312_rom
+            platform_region_defs
+            tfm_fih_headers
+            platform_bl1
+    )
+
+    target_link_libraries(bl1_1_shared_lib
+        PUBLIC
+            bl1_crypto_hw
+    )
+endif()
+
 ################################ BL2 ###########################################
 
 if(BL2)
@@ -226,6 +254,12 @@ target_compile_definitions(crypto_service_mbedcrypto
     PUBLIC
         CRYPTO_HW_ACCELERATOR
         MBEDTLS_ECDH_LEGACY_CONTEXT
+)
+
+target_compile_options(crypto_service_cc312
+    PUBLIC
+        $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
+        $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
 )
 
 target_compile_options(crypto_service_mbedcrypto

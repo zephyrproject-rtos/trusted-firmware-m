@@ -22,6 +22,11 @@ if (BL2)
     add_library(platform_bl2 STATIC)
 endif()
 
+if (BL1 AND PLATFORM_DEFAULT_BL1)
+    add_library(platform_bl1 STATIC)
+    add_library(platform_bl1_interface INTERFACE)
+endif()
+
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 add_subdirectory(ext/target/${TFM_PLATFORM} target)
@@ -195,6 +200,54 @@ if(BL2)
 
 endif()
 
+#========================= Platform BL1_1 =====================================#
+
+if(BL1 AND PLATFORM_DEFAULT_BL1)
+    target_include_directories(platform_bl1_interface
+        INTERFACE
+            .
+            ./include
+            ./ext/cmsis
+            ./ext/driver
+    )
+
+    target_link_libraries(platform_bl1_interface
+        INTERFACE
+            platform_region_defs
+            platform_common_interface
+    )
+
+    target_compile_definitions(platform_bl1_interface
+        INTERFACE
+            $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
+            $<$<BOOL:${TFM_BL1_LOGGING}>:TFM_BL1_LOGGING>
+            $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
+            $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION>
+            $<$<BOOL:${TFM_DUMMY_PROVISIONING}>:TFM_DUMMY_PROVISIONING>
+            $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
+            $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
+    )
+
+    target_sources(platform_bl1
+        PRIVATE
+            ./ext/common/boot_hal_bl1.c
+            ./ext/common/uart_stdout.c
+            $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
+            $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
+            $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
+    )
+
+    target_link_libraries(platform_bl1
+        PUBLIC
+            platform_bl1_interface
+        PRIVATE
+            tfm_fih_implementation
+            tfm_fih_headers
+            $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:bl1_crypto_hw>
+    )
+
+endif()
+
 #========================= Platform region defs ===============================#
 
 #TODO maybe just link the other platforms to this
@@ -204,6 +257,9 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${BL2}>:BL2>
         BL2_HEADER_SIZE=${BL2_HEADER_SIZE}
         BL2_TRAILER_SIZE=${BL2_TRAILER_SIZE}
+        BL1_HEADER_SIZE=${BL1_HEADER_SIZE}
+        BL1_TRAILER_SIZE=${BL1_TRAILER_SIZE}
+        $<$<BOOL:${PLATFORM_DEFAULT_BL1}>:PLATFORM_DEFAULT_BL1>
         $<$<BOOL:${SECURE_UART1}>:SECURE_UART1>
         DAUTH_${DEBUG_AUTHENTICATION}
         $<$<BOOL:${MCUBOOT_IMAGE_NUMBER}>:MCUBOOT_IMAGE_NUMBER=${MCUBOOT_IMAGE_NUMBER}>

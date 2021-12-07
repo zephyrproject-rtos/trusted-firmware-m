@@ -89,6 +89,11 @@ if(BL2)
     add_subdirectory(bl2)
 endif()
 
+if(BL1 AND PLATFORM_DEFAULT_BL1)
+    add_subdirectory(bl1/bl1_2)
+    add_subdirectory(bl1/bl1_1)
+endif()
+
 add_subdirectory(platform)
 
 include(cmake/install.cmake)
