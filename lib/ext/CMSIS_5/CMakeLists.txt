@@ -18,9 +18,15 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL ARMClang)
     set_target_properties(CMSIS_5_RTX_V8MBN PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/ARM/RTX_V8MBN.lib)
     set_target_properties(CMSIS_5_RTX_CM3   PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/ARM/RTX_CM3.lib)
 elseif("${CMAKE_C_COMPILER_ID}" STREQUAL IAR)
+    add_library(CMSIS_5_RTX_V81MMN STATIC IMPORTED GLOBAL)
     set_target_properties(CMSIS_5_RTX_V8MMN PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V8MMN.a)
+    set_target_properties(CMSIS_5_RTX_V81MMN PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V81MMN.a)
     set_target_properties(CMSIS_5_RTX_V8MBN PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V8MBN.a)
     set_target_properties(CMSIS_5_RTX_CM3   PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_CM3.a)
+    target_link_libraries(CMSIS_5_RTX_V81MMN
+        INTERFACE
+            tfm_s_veneers
+    )
 else()
     message(FATAL_ERROR "${CMAKE_C_COMPILER_ID} does not have CMSIS RTX static libraries set up")
 endif()
