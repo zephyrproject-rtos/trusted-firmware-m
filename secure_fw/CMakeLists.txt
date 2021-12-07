@@ -11,42 +11,9 @@ cmake_minimum_required(VERSION 3.15)
 add_executable(tfm_s)
 add_library(secure_fw INTERFACE)
 add_library(tfm_secure_api INTERFACE)
-add_library(tfm_partitions INTERFACE)
-# Lots of seperate things need to know which partitions are enabled, so this
-# meta-target is provided so the related compile definitions can be collected in
-# such a way that they don't cause issues with linking to the full spm (which is
-# the other place these could be collected) Actual definitions are placed in the
-# directories of the partitions
-add_library(tfm_partition_defs INTERFACE)
 
 add_subdirectory(spm)
-add_subdirectory(partitions/lib/sprt)
-add_subdirectory(partitions/audit_logging)
-add_subdirectory(partitions/crypto)
-add_subdirectory(partitions/initial_attestation)
-add_subdirectory(partitions/protected_storage)
-add_subdirectory(partitions/internal_trusted_storage)
-add_subdirectory(partitions/platform)
-add_subdirectory(partitions/psa_proxy)
-add_subdirectory(partitions/firmware_update)
-add_subdirectory(partitions/ns_agent_tz)
-add_subdirectory(partitions/ns_agent_mailbox)
-if (CONFIG_TFM_SPM_BACKEND_IPC)
-    add_subdirectory(partitions/idle_partition)
-endif()
-
-if (TFM_EXTRA_PARTITION_PATHS)
-    set(POSTFIX 1)
-
-    foreach(EXTRA_PARTITION IN LISTS TFM_EXTRA_PARTITION_PATHS)
-        get_filename_component(EXTRA_PARTITION_NAME ${EXTRA_PARTITION} NAME_WLE)
-        set(TEMP_BINARY_EXTRA_PARTITION
-            ${CMAKE_CURRENT_BINARY_DIR}/partitions/${EXTRA_PARTITION_NAME}_${POSTFIX})
-        add_subdirectory(${EXTRA_PARTITION} ${TEMP_BINARY_EXTRA_PARTITION})
-
-        math(EXPR POSTFIX "${POSTFIX} + 1")
-    endforeach()
-endif()
+add_subdirectory(partitions)
 
 target_include_directories(secure_fw
     INTERFACE

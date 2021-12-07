@@ -9,6 +9,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 add_library(tfm_spm STATIC)
+add_library(tfm_spm_defs INTERFACE)
 add_library(tfm_boot_status INTERFACE)
 add_library(tfm_arch INTERFACE)
 add_library(tfm_utilities INTERFACE)
@@ -71,11 +72,15 @@ target_sources(tfm_spm
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
 )
 
-target_include_directories(tfm_partitions INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa)
+target_include_directories(tfm_spm_defs
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa
+)
 
 target_link_libraries(tfm_spm
     PUBLIC
         tfm_arch
+        tfm_spm_defs
     PRIVATE
         psa_interface
         platform_s
@@ -111,13 +116,6 @@ set_source_files_properties(tfm_secure_api.c
             $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
             $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
             $<$<C_COMPILER_ID:IAR>:>
-)
-
-############################ Partition Defs ####################################
-
-target_compile_definitions(tfm_partition_defs
-    INTERFACE
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:PSA_API_TEST_IPC>
 )
 
 ############################ TFM arch ##########################################
