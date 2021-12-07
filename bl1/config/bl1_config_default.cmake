@@ -6,6 +6,7 @@
 #-------------------------------------------------------------------------------
 
 set(TFM_BL2_ENCRYPTION_KEY_PATH         ${CMAKE_SOURCE_DIR}/bl1/bl1_2/bl2_dummy_encryption_key.bin CACHE STRING "Path to binary key to use for encrypting BL2")
+set(TFM_GUK_PATH                        ${CMAKE_SOURCE_DIR}/bl1/bl1_1/dummy_guk.bin CACHE STRING "Path to binary GUK key file to provision")
 set(TFM_BL2_IMAGE_FLASH_AREA_NUM        0           CACHE STRING    "Which flash area BL2 is stored in")
 
 set(TFM_BL2_SIGNING_KEY_PATH            ${CMAKE_SOURCE_DIR}/bl1/bl1_2/bl1_dummy_rotpk CACHE FILEPATH "Path to binary BL2 signing private key")

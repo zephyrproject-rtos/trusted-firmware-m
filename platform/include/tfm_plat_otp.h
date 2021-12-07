@@ -18,6 +18,7 @@ extern "C" {
 
 enum tfm_otp_element_id_t {
     PLAT_OTP_ID_HUK = 0,
+    PLAT_OTP_ID_GUK,
     PLAT_OTP_ID_IAK,
     PLAT_OTP_ID_IAK_LEN,
     PLAT_OTP_ID_IAK_TYPE,

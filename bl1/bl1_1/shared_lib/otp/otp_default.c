@@ -95,6 +95,10 @@ fih_int bl1_otp_read_key(enum tfm_bl1_key_id_t key_id, uint8_t *key_buf)
         plat_err = tfm_plat_otp_read(PLAT_OTP_ID_HUK, 32, key_buf);
         fih_rc = fih_int_encode_zero_equality(plat_err);
         break;
+    case TFM_BL1_KEY_GUK:
+        plat_err = tfm_plat_otp_read(PLAT_OTP_ID_GUK, GUK_SIZE, key_buf);
+        fih_rc = fih_int_encode_zero_equality(plat_err);
+        break;
     case TFM_BL1_KEY_BL2_ENCRYPTION:
         plat_err = tfm_plat_otp_read(PLAT_OTP_ID_KEY_BL2_ENCRYPTION, 32,
                                      key_buf);
