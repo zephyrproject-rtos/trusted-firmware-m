@@ -40,6 +40,12 @@ target_link_libraries(open_amp-static
     PRIVATE
         metal-static
 )
+
+target_compile_definitions(open_amp-static
+    PRIVATE
+        RPMSG_BUFFER_SIZE=8192
+)
+
 target_link_libraries(platform_s
     PRIVATE
         open_amp-static
