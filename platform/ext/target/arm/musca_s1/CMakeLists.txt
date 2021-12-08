@@ -106,21 +106,44 @@ target_sources(platform_s
         Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/cache_drv.c
         spm_hal.c
-        tfm_interrupts.c
+        $<$<NOT:$<BOOL:${TEST_NS_FPU}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         tfm_hal_isolation.c
         tfm_hal_platform.c
         target_cfg.c
-        Native_Driver/timer_cmsdk_drv.c
+        $<$<NOT:$<BOOL:${TEST_NS_FPU}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
         Libraries/mt25ql_flash_lib.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<NOT:$<BOOL:${TEST_NS_FPU}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+)
+
+# Adding new defined handler function to the library where the weak handler
+# funtion symbol are, to override weak handler funtion.
+# Otherwise the weak handler funtion cannot be replaced by the new defined
+# hanlder function which symbol is in another library.
+target_sources(tfm_s
+    PRIVATE
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
 )
 
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+target_sources(tfm_sprt
+    PRIVATE
+        # FPU client test partition access the timer as ARoT Partitions.
+        # Put the driver to SPRT so that FPU tests can access it.
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+)
+
+# To configure S and NS timer in S side for FP interrupt test
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -132,7 +155,6 @@ target_sources(platform_ns
         CMSIS_Driver/Driver_USART.c
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
 target_include_directories(platform_ns
@@ -144,6 +166,16 @@ target_include_directories(platform_ns
         Native_Driver
         services/include
         Libraries
+        ${CMAKE_SOURCE_DIR}/platform/ext/cmsis
+)
+
+# Adding new defined handler function to the library where the weak handler
+# funtion symbol are, to override weak handler funtion.
+# Otherwise the weak handler funtion cannot be replaced by the new defined
+# hanlder function which symbol is in another library.
+target_sources(tfm_ns
+    PRIVATE
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_fp_test_interrupt.c>
 )
 
 #========================= Platform BL2 =======================================#
