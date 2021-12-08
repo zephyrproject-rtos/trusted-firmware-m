@@ -11,7 +11,7 @@
 #include "tfm_plat_defs.h"
 #include "uart_stdout.h"
 
-enum tfm_hal_status_t tfm_hal_platform_init(void)
+enum tfm_hal_status_t tfm_hal_platform_common_init(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
 
