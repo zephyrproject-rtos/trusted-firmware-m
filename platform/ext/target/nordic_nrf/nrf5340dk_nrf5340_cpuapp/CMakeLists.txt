@@ -18,6 +18,7 @@ target_include_directories(platform_region_defs
 
 target_sources(platform_s
     PRIVATE
+        tfm_hal_platform.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
