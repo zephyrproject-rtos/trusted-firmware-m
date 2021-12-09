@@ -185,17 +185,17 @@ void load_irqs_assuredly(struct partition_t *p_partition)
     p_irq_info = (struct irq_load_info_t *)LOAD_INFO_IRQ(p_ldinf);
 
     for (i = 0; i < p_ldinf->nirqs; i++) {
-        p_partition->signals_allowed |= p_irq_info[i].signal;
+        p_partition->signals_allowed |= p_irq_info->signal;
 
-        if (p_irq_info[i].init(p_partition, p_irq_info) != TFM_HAL_SUCCESS) {
+        if (p_irq_info->init(p_partition, p_irq_info) != TFM_HAL_SUCCESS) {
             tfm_core_panic();
         }
 
         if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK) == 0x0100) {
-            tfm_hal_irq_enable(p_irq_info[i].source);
+            tfm_hal_irq_enable(p_irq_info->source);
         } else if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
                                                                     == 0x0101) {
-            tfm_hal_irq_disable(p_irq_info[i].source);
+            tfm_hal_irq_disable(p_irq_info->source);
         }
         p_irq_info++;
     }
