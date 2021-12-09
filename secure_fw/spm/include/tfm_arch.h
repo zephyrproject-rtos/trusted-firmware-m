@@ -67,8 +67,8 @@ struct context_ctrl_t {
 struct context_flih_ret_t {
     uint64_t stack_seal;    /* Two words stack seal */
     struct tfm_additional_context_t addi_ctx;
-    uint32_t exc_ret;   /* EXC_RETURN value when interrupt exception ocurrs */
     uint32_t psp;       /* PSP when interrupt exception ocurrs              */
+    uint32_t psplim;    /* PSPLIM when interrupt exception ocurrs when      */
     struct tfm_state_context_t state_ctx; /* ctx on SVC_PREPARE_DEPRIV_FLIH */
 };
 

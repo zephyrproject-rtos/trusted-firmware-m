@@ -40,6 +40,13 @@
         EXC_RETURN_STACK_MAIN | EXC_RETURN_RES0 |               \
         EXC_RETURN_EXC_SECURE
 
+#define EXC_RETURN_HANDLER_S_MSP                                \
+        EXC_RETURN_INDICATOR | EXC_RETURN_RES1 |                \
+        EXC_RETURN_SECURE_STACK | EXC_RETURN_STACK_RULE |       \
+        EXC_RETURN_FPU_FRAME_BASIC |                            \
+        EXC_RETURN_STACK_MAIN | EXC_RETURN_RES0 |               \
+        EXC_RETURN_EXC_SECURE
+
 /* Exception numbers */
 #define EXC_NUM_THREAD_MODE                     (0)
 #define EXC_NUM_SVCALL                          (11)

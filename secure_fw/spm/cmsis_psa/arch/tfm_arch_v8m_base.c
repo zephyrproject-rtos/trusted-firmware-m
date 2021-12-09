@@ -99,6 +99,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   mov     lr, r3                              \n"
         "   cmp     r0, r1                              \n" /* curr, next ctx */
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
+        "   cpsid   i                                   \n"
         "   mrs     r2, psp                             \n"
         "   mrs     r3, psplim                          \n"
         "   subs    r2, #32                             \n" /* For r4-r7 */
@@ -124,6 +125,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   adds    r2, #16                             \n" /* Pop r4-r11 end */
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
+        "   cpsie   i                                   \n"
         "v8b_pendsv_exit:                               \n"
         "   bx      lr                                  \n"
     );
@@ -161,19 +163,22 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"
-    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "MRS     r3, PSPLIM                     \n"
+    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
+    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "BL      tfm_core_svc_handler           \n"
     "MOV     lr, r0                         \n"
-    "LDR     r1, [sp]                       \n" /* Original EXC_RETURN */
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "MOVS    r2, #8                         \n"
     "ANDS    r0, r2                         \n" /* Mode bit */
     "ANDS    r1, r2                         \n"
+    "POP     {r2, r3}                       \n" /* PSP PSPLIM */
     "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
     "BGT     to_flih_func                   \n"
     "BLT     from_flih_func                 \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BX      lr                             \n"
     "to_flih_func:                          \n"
+    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
     "PUSH    {r4-r7}                        \n"
     "MOV     r4, r8                         \n"
     "MOV     r5, r9                         \n"
@@ -191,7 +196,6 @@ __attribute__((naked)) void SVC_Handler(void)
     "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
     "BX      lr                             \n"
     "from_flih_func:                        \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "POP     {r4, r5}                       \n" /* Seal stack */
     "POP     {r4-r7}                        \n"
     "MOV     r8, r4                         \n"
@@ -199,7 +203,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "MOV     r10, r6                        \n"
     "MOV     r11, r7                        \n"
     "POP     {r4-r7}                        \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "POP     {r1, r2}                       \n" /* PSP PSPLIM */
     "BX      lr                             \n"
     );
 }

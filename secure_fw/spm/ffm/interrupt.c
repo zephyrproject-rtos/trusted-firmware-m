@@ -8,6 +8,7 @@
 #include "interrupt.h"
 
 #include "bitops.h"
+#include "current.h"
 #include "tfm_arch.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_hal_isolation.h"
@@ -19,7 +20,7 @@
 __attribute__((naked))
 static psa_flih_result_t tfm_flih_deprivileged_handling(void *p_pt,
                                                         uintptr_t fn_flih,
-                                                        void *p_context_ctrl)
+                                                        void *curr_component)
 {
     __ASM volatile("SVC %0           \n"
                    "BX LR            \n"
@@ -53,7 +54,7 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
                                       uintptr_t flih_func)
 {
     struct partition_t *p_curr_sp;
-    uintptr_t sp_limit, stack;
+    uintptr_t sp_base, sp_limit, curr_stack, ctx_stack;
     struct context_ctrl_t flih_ctx_ctrl;
 
     /* Come too early before runtime setup, should not happen. */
@@ -61,32 +62,35 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
         tfm_core_panic();
     }
 
-    p_curr_sp = GET_CTX_OWNER(CURRENT_THREAD->p_context_ctrl);
-    sp_limit =
-           ((struct context_ctrl_t *)p_owner_sp->thrd.p_context_ctrl)->sp_limit;
+    p_curr_sp = GET_CURRENT_COMPONENT();
+    sp_base  = LOAD_ALLOCED_STACK_ADDR(p_owner_sp->p_ldinf)
+                                              + p_owner_sp->p_ldinf->stack_size;
+    sp_limit = LOAD_ALLOCED_STACK_ADDR(p_owner_sp->p_ldinf);
 
-    if (p_owner_sp == p_curr_sp) {
-        stack = (uintptr_t)__get_PSP();
+    curr_stack = (uintptr_t)__get_PSP();
+    if (curr_stack < sp_base && curr_stack > sp_limit) {
+        /* The IRQ Partition's stack is being used */
+        ctx_stack = curr_stack;
     } else {
-        stack = ((struct context_ctrl_t *)p_owner_sp->thrd.p_context_ctrl)->sp;
-
-        if (p_owner_sp->p_boundaries != p_curr_sp->p_boundaries) {
-            tfm_hal_update_boundaries(p_owner_sp->p_ldinf,
-                                      p_owner_sp->p_boundaries);
-        }
-
-        /*
-         * CURRENT_THREAD->p_context_ctrl is the svc_args[2] on MSP, safe to
-         * update it. It is only used to track the owner of the thread data,
-         * i.e. the partition that has been interrupted.
-         */
-        THRD_UPDATE_CUR_CTXCTRL(&(p_owner_sp->ctx_ctrl));
+        ctx_stack =
+                 ((struct context_ctrl_t *)p_owner_sp->thrd.p_context_ctrl)->sp;
     }
+
+    if (p_owner_sp->p_boundaries != p_curr_sp->p_boundaries) {
+        tfm_hal_update_boundaries(p_owner_sp->p_ldinf,
+                                  p_owner_sp->p_boundaries);
+    }
+
+    /*
+     * The CURRENT_COMPONENT has been stored on MSP by the SVC call, safe to
+     * update it.
+     */
+    SET_CURRENT_COMPONENT(p_owner_sp);
 
     tfm_arch_init_context(&flih_ctx_ctrl,
                           flih_func, NULL,
                           (uintptr_t)tfm_flih_func_return,
-                          sp_limit, stack);
+                          sp_limit, ctx_stack);
 
     (void)tfm_arch_refresh_hardware_context(&flih_ctx_ctrl);
 
@@ -99,25 +103,24 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
 {
     struct partition_t *p_prev_sp, *p_owner_sp;
 
-    p_prev_sp = GET_CTX_OWNER(p_ctx_flih_ret->state_ctx.r2);
-    p_owner_sp = GET_CTX_OWNER(CURRENT_THREAD->p_context_ctrl);
+    p_prev_sp = (struct partition_t *)(p_ctx_flih_ret->state_ctx.r2);
+    p_owner_sp = GET_CURRENT_COMPONENT();
 
     if (p_owner_sp->p_boundaries != p_prev_sp->p_boundaries) {
         tfm_hal_update_boundaries(p_prev_sp->p_ldinf,
                                   p_prev_sp->p_boundaries);
     }
 
-    /* Restore context pointer */
-    THRD_UPDATE_CUR_CTXCTRL(p_ctx_flih_ret->state_ctx.r2);
+    /* Restore current component */
+    SET_CURRENT_COMPONENT(p_prev_sp);
 
-    tfm_arch_set_psplim(
-        ((struct context_ctrl_t *)CURRENT_THREAD->p_context_ctrl)->sp_limit);
+    tfm_arch_set_psplim(p_ctx_flih_ret->psplim);
     __set_PSP(p_ctx_flih_ret->psp);
 
     /* Set FLIH result to the ISR */
     p_ctx_flih_ret->state_ctx.r0 = (uint32_t)result;
 
-    return p_ctx_flih_ret->exc_ret;
+    return EXC_RETURN_HANDLER_S_MSP;
 }
 
 void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
@@ -148,7 +151,7 @@ void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
             flih_result = tfm_flih_deprivileged_handling(
                                                 p_part,
                                                 (uintptr_t)p_ildi->flih_func,
-                                                CURRENT_THREAD->p_context_ctrl);
+                                                GET_CURRENT_COMPONENT());
         }
     }
 

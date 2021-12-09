@@ -685,6 +685,7 @@ uint64_t do_schedule(void)
     union returning_contexts_t ret_ctx;
     struct partition_t *p_part_curr, *p_part_next;
     struct thread_t *pth_next = thrd_next();
+    struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
 
     ret_ctx.ctx.curr = (uint32_t)CURRENT_THREAD->p_context_ctrl;
     ret_ctx.ctx.next = (uint32_t)CURRENT_THREAD->p_context_ctrl;
@@ -699,6 +700,7 @@ uint64_t do_schedule(void)
             tfm_core_panic();
         }
 
+        CRITICAL_SECTION_ENTER(cs);
         /*
          * If required, let the platform update boundary based on its
          * implementation. Change privilege, MPU or other configurations.
@@ -714,6 +716,7 @@ uint64_t do_schedule(void)
 
         ret_ctx.ctx.next = (uint32_t)pth_next->p_context_ctrl;
         CURRENT_THREAD = pth_next;
+        CRITICAL_SECTION_LEAVE(cs);
     }
 
     /*
