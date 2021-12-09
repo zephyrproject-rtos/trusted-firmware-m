@@ -97,7 +97,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
 #endif
     default:
 #ifdef PLATFORM_SVC_HANDLERS
-        svc_args[0] = platform_svc_handlers(svc_num, svc_args, exc_return);
+        svc_args[0] = platform_svc_handlers(svc_number, svc_args, exc_return);
 #else
         SPMLOG_ERRMSG("Unknown SVC number requested!\r\n");
 #endif
