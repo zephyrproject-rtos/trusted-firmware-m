@@ -31,7 +31,9 @@ enum tfm_hal_status_t tfm_hal_platform_common_init(void)
     }
 
     __enable_irq();
+#ifdef TFM_SPM_LOG_RAW_ENABLED
     stdio_init();
+#endif
 
     plat_err = nvic_interrupt_target_state_cfg();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
