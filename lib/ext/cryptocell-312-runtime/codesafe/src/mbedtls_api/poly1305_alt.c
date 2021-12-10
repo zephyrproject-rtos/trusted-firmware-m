@@ -88,14 +88,14 @@ int mbedtls_poly1305_mac( const unsigned char key[32],
         return MBEDTLS_ERR_POLY1305_BAD_INPUT_DATA;
     }
 
-    CC_PalMemCopy((unsigned char *)pKey, key, MBEDTLS_POLY_KEY_SIZE_BYTES);
+    CC_PalMemCopy((unsigned char *)pKey, key, sizeof(mbedtls_poly_key));
 
     rc = PolyMacCalc(pKey, NULL, 0, input, ilen, macRes, false);
     if (rc != 0) {
         return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
     }
 
-    CC_PalMemCopy(mac, (unsigned char *)macRes, MBEDTLS_POLY_MAC_SIZE_BYTES);
+    CC_PalMemCopy(mac, (unsigned char *)macRes, sizeof(mbedtls_poly_mac));
 
     return ( 0 );
 }
