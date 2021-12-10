@@ -32,7 +32,6 @@
 static psa_status_t hash_update(cc3xx_hash_operation_t *pHashUserCtx,
                                 uint8_t *pDataIn, size_t dataInSize)
 {
-    uint32_t rc;
     size_t bytesToAdd = 0;
     uint32_t localPrevDataIn[HASH_SHA512_BLOCK_SIZE_IN_WORDS];
     CCBuffInfo_t inBuffInfo;
@@ -67,9 +66,9 @@ static psa_status_t hash_update(cc3xx_hash_operation_t *pHashUserCtx,
                       CC_MIN(HASH_SHA512_BLOCK_SIZE_IN_WORDS * sizeof(uint32_t),
                              ctx_ptr->prevDataInSize));
 
-        rc = SetDataBuffersInfo((uint8_t *)localPrevDataIn,
-                                ctx_ptr->blockSizeInBytes, &inBuffInfo,
-                                NULL, 0, NULL);
+        uint32_t rc = SetDataBuffersInfo((uint8_t *)localPrevDataIn,
+                                         ctx_ptr->blockSizeInBytes, &inBuffInfo,
+                                         NULL, 0, NULL);
         if (rc != 0) {
             CC_PAL_LOG_ERR("illegal data buffers\n");
             return PSA_ERROR_GENERIC_ERROR;
@@ -89,8 +88,8 @@ static psa_status_t hash_update(cc3xx_hash_operation_t *pHashUserCtx,
                  ctx_ptr->blockSizeInBytes;
     if (bytesToAdd > 0) {
 
-        rc = SetDataBuffersInfo(pDataIn, bytesToAdd, &inBuffInfo,
-                                NULL, 0, NULL);
+        uint32_t rc = SetDataBuffersInfo(pDataIn, bytesToAdd, &inBuffInfo,
+                                         NULL, 0, NULL);
         if (rc != 0) {
             CC_PAL_LOG_ERR("illegal data buffers\n");
             return PSA_ERROR_GENERIC_ERROR;

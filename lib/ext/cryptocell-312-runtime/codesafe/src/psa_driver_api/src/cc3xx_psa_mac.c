@@ -138,7 +138,6 @@ static psa_status_t cmac_setup(cc3xx_cipher_operation_t *cmac,
 static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
                                 const unsigned char *input, size_t ilen)
 {
-    drvError_t ret;
     unsigned int block_size;
     size_t blocks_num;
     size_t main_chunk_in_bytes;
@@ -152,7 +151,7 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
             &(cmac_ctx)->unprocessed_data[cmac_ctx->unprocessed_size],
             input, block_size - cmac_ctx->unprocessed_size);
 
-        ret = SetDataBuffersInfo(
+        drvError_t ret = SetDataBuffersInfo(
             (const uint8_t *)&(cmac_ctx)->unprocessed_data, block_size,
             &inBuffInfo, NULL, 0, &outBuffInfo);
         if (ret != CC_OK) {
@@ -178,8 +177,8 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
     if (1 < blocks_num) {
         main_chunk_in_bytes = (blocks_num - 1) * block_size;
 
-        ret = SetDataBuffersInfo(input, main_chunk_in_bytes, &inBuffInfo, NULL,
-                                 0, &outBuffInfo);
+        drvError_t ret = SetDataBuffersInfo(input, main_chunk_in_bytes,
+                                            &inBuffInfo, NULL, 0, &outBuffInfo);
         if (ret != CC_OK) {
             CC_PAL_LOG_ERR("illegal data buffers\n");
             return PSA_ERROR_INVALID_ARGUMENT;
@@ -215,7 +214,7 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
 static psa_status_t cmac_finish(cc3xx_cipher_operation_t *cmac_ctx,
                                 unsigned char *output)
 {
-    drvError_t ret = 0;
+    drvError_t ret = CC_FAIL;
     CCBuffInfo_t inBuffInfo;
     CCBuffInfo_t outBuffInfo;
 
