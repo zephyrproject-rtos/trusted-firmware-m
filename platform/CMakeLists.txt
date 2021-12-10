@@ -223,6 +223,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             tfm_fih_implementation
             tfm_fih_headers
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:bl1_crypto_hw>
+            tfm_boot_status
     )
 
 endif()

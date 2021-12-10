@@ -207,6 +207,16 @@ target_sources(bl2
         bl2/flash_map_bl2.c
 )
 
+target_link_libraries(platform_bl2
+    PRIVATE
+        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:tfm_boot_status>
+)
+
+target_compile_definitions(platform_bl2
+    PUBLIC
+        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
+)
+
 #========================= Platform BL1 =======================================#
 
 target_sources(platform_bl1
@@ -229,4 +239,9 @@ target_include_directories(platform_bl1_interface
         ./device/config
         ./device/include
         ./native_drivers
+)
+
+target_compile_definitions(platform_bl1
+    PUBLIC
+        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
 )

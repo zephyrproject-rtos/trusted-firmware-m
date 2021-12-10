@@ -22,6 +22,7 @@ extern "C" {
 #define TLV_MAJOR_CORE     0x0
 #define TLV_MAJOR_IAS      0x1
 #define TLV_MAJOR_FWU      0x2
+#define TLV_MAJOR_MBS      0x3
 
 /**
  * The shared data between boot loader and runtime SW is TLV encoded. The
@@ -34,7 +35,7 @@ extern "C" {
  *    size of the shared data area including this header.
  *  - After the header there come the entries which are composed from an entry
  *    header structure: struct shared_data_tlv_entry and the data. In the entry
- *    header is a type field (tly_type) which identify the consumer of the
+ *    header is a type field (tlv_type) which identify the consumer of the
  *    entry in the runtime SW and specify the subtype of that data item. There
  *    is a size field (tlv_len) which covers the length of the data
  *    (not including the entry header structure). After this structure comes
@@ -58,6 +59,8 @@ extern "C" {
  * |---------------------------------------|
  * | MAJOR_IAS   | sw_module(6) | claim(6) |
  * |---------------------------------------|
+ * | MAJOR_MBS   | slot ID  (6) | claim(6) |
+ * |---------------------------------------|
  * | MAJOR_CORE  |          TBD            |
  * |---------------------------------------|
  */
@@ -76,16 +79,18 @@ extern "C" {
 #define SW_S_NS        0x06
 #define SW_MAX         0x07
 
-/* Initial attestation: Claim per SW components / SW modules */
+/* Initial attestation and Measured boot service: claim per SW components. */
 /* Bits: 0-2 */
 #define SW_VERSION       0x00
 #define SW_SIGNER_ID     0x01
 /* Reserved              0x02 */
 #define SW_TYPE          0x03
 /* Bits: 3-5 */
-#define SW_MEASURE_VALUE 0x08
-#define SW_MEASURE_TYPE  0x09
-#define SW_BOOT_RECORD   0x3F
+#define SW_MEASURE_VALUE                0x08
+#define SW_MEASURE_TYPE                 0x09
+#define SW_MEASURE_METADATA             0x0A
+#define SW_MEASURE_VALUE_NON_EXTENDABLE 0x0B
+#define SW_BOOT_RECORD                  0x3F
 
 /* Initial attestation: General claim does not belong any particular SW
  * component. But they might be part of the boot status.
@@ -98,31 +103,58 @@ extern "C" {
 #define MAJOR_MASK 0xF     /* 4  bit */
 #define MAJOR_POS  12      /* 12 bit */
 #define MINOR_MASK 0xFFF   /* 12 bit */
+#define MINOR_POS  0
+
+#define MASK_LEFT_SHIFT(data, mask, position)  \
+                    (((data) & (mask)) << (position))
+#define MASK_RIGHT_SHIFT(data, mask, position) \
+                    ((uint16_t)((data) & (mask)) >> (position))
 
 #define SET_TLV_TYPE(major, minor) \
-        ((((major) & MAJOR_MASK) << MAJOR_POS) | ((minor) & MINOR_MASK))
+                    (MASK_LEFT_SHIFT(major, MAJOR_MASK, MAJOR_POS) | \
+                     MASK_LEFT_SHIFT(minor, MINOR_MASK, MINOR_POS))
 #define GET_MAJOR(tlv_type) ((tlv_type) >> MAJOR_POS)
 #define GET_MINOR(tlv_type) ((tlv_type) &  MINOR_MASK)
 
-/* Initial attenstation and Firmware Update common macros */
-#define MODULE_POS 6               /* 6 bit */
-#define MODULE_MASK 0x3F           /* 6 bit */
-#define CLAIM_MASK 0x3F            /* 6 bit */
+/* Initial attestation, Measured boot and Firmware Update common macros */
+#define MODULE_POS  6       /* 6 bit */
+#define MODULE_MASK 0x3F    /* 6 bit */
+#define CLAIM_POS   0
+#define CLAIM_MASK  0x3F    /* 6 bit */
 
 /* Initial attestation specific macros */
 #define MEASUREMENT_CLAIM_POS 3    /* 3 bit */
 
-#define GET_IAS_MODULE(tlv_type) (GET_MINOR(tlv_type) >> MODULE_POS)
-#define GET_IAS_CLAIM(tlv_type)  (GET_MINOR(tlv_type) & CLAIM_MASK)
-#define SET_IAS_MINOR(sw_module, claim) (((sw_module) << 6) | (claim))
-#define GET_IAS_MEASUREMENT_CLAIM(ias_claim) ((ias_claim) >> \
-                                              MEASUREMENT_CLAIM_POS)
+#define GET_IAS_MODULE(tlv_type) \
+                  MASK_RIGHT_SHIFT(tlv_type, MINOR_MASK, MODULE_POS)
+#define GET_IAS_CLAIM(tlv_type) \
+                  MASK_RIGHT_SHIFT(tlv_type, CLAIM_MASK, CLAIM_POS)
+#define GET_IAS_MEASUREMENT_CLAIM(ias_claim) \
+                  MASK_RIGHT_SHIFT(ias_claim, CLAIM_MASK, MEASUREMENT_CLAIM_POS)
+#define SET_IAS_MINOR(sw_module, claim) \
+                  (MASK_LEFT_SHIFT(sw_module, MODULE_MASK, MODULE_POS) | \
+                   MASK_LEFT_SHIFT(claim, CLAIM_MASK, CLAIM_POS))
+
+/* Measured boot specific macros */
+#define SLOT_ID_POS  6
+#define SLOT_ID_MASK 0x3F   /* 6 bit */
+
+#define GET_MBS_SLOT(tlv_type) \
+                    MASK_RIGHT_SHIFT(tlv_type, MINOR_MASK, SLOT_ID_POS)
+#define GET_MBS_CLAIM(tlv_type) \
+                    MASK_RIGHT_SHIFT(tlv_type, CLAIM_MASK, CLAIM_POS)
+#define SET_MBS_MINOR(slot_index, claim) \
+                    (MASK_LEFT_SHIFT(slot_index, SLOT_ID_MASK, SLOT_ID_POS) | \
+                     MASK_LEFT_SHIFT(claim, CLAIM_MASK, CLAIM_POS))
+
 /* Firmware Update specific macros */
+#define GET_FWU_MODULE(tlv_type) \
+                    MASK_RIGHT_SHIFT(tlv_type, MINOR_MASK, MODULE_POS)
+#define GET_FWU_CLAIM(tlv_type) \
+                    MASK_RIGHT_SHIFT(tlv_type, CLAIM_MASK, CLAIM_POS)
 #define SET_FWU_MINOR(sw_module, claim)  \
-                 ((uint16_t)((sw_module & MODULE_MASK) << 6) | \
-                  (uint16_t)(claim & CLAIM_MASK))
-#define GET_FWU_CLAIM(tlv_type)  ((uint16_t)GET_MINOR(tlv_type) & CLAIM_MASK)
-#define GET_FWU_MODULE(tlv_type)  ((uint16_t)GET_MINOR(tlv_type) >> MODULE_POS)
+                    (MASK_LEFT_SHIFT(sw_module, MODULE_MASK, MODULE_POS) | \
+                     MASK_LEFT_SHIFT(claim, CLAIM_MASK, CLAIM_POS))
 
 /* Magic value which marks the beginning of shared data area in memory */
 #define SHARED_DATA_TLV_INFO_MAGIC    0x2016

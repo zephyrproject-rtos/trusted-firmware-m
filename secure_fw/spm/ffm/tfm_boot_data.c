@@ -74,6 +74,9 @@ static const struct boot_data_access_policy access_policy_table[] = {
 #ifdef TFM_PARTITION_FIRMWARE_UPDATE
     {TFM_SP_FWU, TLV_MAJOR_FWU},
 #endif
+#ifdef TFM_PARTITION_MEASURED_BOOT
+    {TFM_SP_MEASURED_BOOT, TLV_MAJOR_MBS},
+#endif
 };
 
 /*!
