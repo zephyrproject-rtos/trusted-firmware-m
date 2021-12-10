@@ -80,6 +80,7 @@ target_link_libraries(platform_s
 target_compile_definitions(platform_s
     PUBLIC
         TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL}
+        $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:TFM_SPM_LOG_RAW_ENABLED>
         $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION>
         CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
         $<$<BOOL:${CONFIG_TFM_LAZY_STACKING_SPE}>:CONFIG_TFM_LAZY_STACKING_SPE>
