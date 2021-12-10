@@ -11,7 +11,6 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -19,26 +18,7 @@ extern "C"
 
 #if defined(MBEDTLS_POLY1305_ALT)
 
-/************************ defines  ****************************/
-/*! The size of the POLY key in words. */
-#define MBEDTLS_POLY_KEY_SIZE_WORDS       8
-
-/*! The size of the POLY key in bytes. */
-#define MBEDTLS_POLY_KEY_SIZE_BYTES       32
-
-/*! The size of the POLY MAC in words. */
-#define MBEDTLS_POLY_MAC_SIZE_WORDS       4
-
-/*! The size of the POLY MAC in bytes. */
-#define MBEDTLS_POLY_MAC_SIZE_BYTES       16
-
 /************************ Typedefs  ****************************/
-/*! The definition of the ChaCha-MAC buffer. */
-typedef uint32_t mbedtls_poly_mac[MBEDTLS_POLY_MAC_SIZE_WORDS];
-
-/*! The definition of the ChaCha-key buffer. */
-typedef uint32_t mbedtls_poly_key[MBEDTLS_POLY_KEY_SIZE_WORDS];
-
 typedef struct mbedtls_poly1305_context
 {
     uint32_t r[4];      /** The value for 'r' (low 128 bits of the key). */
@@ -52,12 +32,7 @@ mbedtls_poly1305_context;
 #endif
 
 #ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
 }
 #endif
-
 
 #endif /* poly1305_alt.h */
