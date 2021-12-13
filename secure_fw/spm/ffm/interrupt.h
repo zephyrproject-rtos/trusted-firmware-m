@@ -5,6 +5,8 @@
  *
  */
 
+#include "spm_ipc.h"
+
 #include "load/interrupt_defs.h"
 #include "load/partition_defs.h"
 #include "psa/service.h"
@@ -41,9 +43,21 @@ void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi);
 
 /*
  * Prepare execution context for deprivileged FLIH functions
- * svc_args: IRQ owner partition_t pointer, flih_func, current thread data
+ * Parameters:
+ *      p_owner_sp - IRQ owner partition_t pointer
+ *      flih_func  - The FLIH Function
  */
-uint32_t tfm_flih_prepare_depriv_flih(uint32_t *svc_args);
+uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
+                                      uintptr_t flih_func);
 
-/* Go back to ISR from FLIH functions */
-uint32_t tfm_flih_return_to_isr(psa_flih_result_t result, uint32_t *msp);
+/*
+ * Go back to ISR from FLIH functions
+ * Parameters:
+ *      result - The return value of the FLIH Function, indicating to the SPM
+ *               how to complete the FLIH processing, for example setting signal
+ *               to the Secure Partition.
+ *      p_ctx_flih_ret - The contents on the Main Stack when this function is
+ *                       called. It is used to restore context.
+ */
+uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
+                                struct context_flih_ret_t *p_ctx_flih_ret);

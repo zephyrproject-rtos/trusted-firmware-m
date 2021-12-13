@@ -8,7 +8,6 @@
 #include "interrupt.h"
 
 #include "bitops.h"
-#include "spm_ipc.h"
 #include "tfm_arch.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_hal_isolation.h"
@@ -50,10 +49,10 @@ struct irq_load_info_t *get_irq_info_for_signal(
 
 extern void tfm_flih_func_return(psa_flih_result_t result);
 
-uint32_t tfm_flih_prepare_depriv_flih(uint32_t *svc_args)
+uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
+                                      uintptr_t flih_func)
 {
     struct partition_t *p_curr_sp;
-    struct partition_t *p_owner_sp = (struct partition_t *)svc_args[0];
     uintptr_t sp_limit, stack;
     struct context_ctrl_t flih_ctx_ctrl;
 
@@ -85,7 +84,7 @@ uint32_t tfm_flih_prepare_depriv_flih(uint32_t *svc_args)
     }
 
     tfm_arch_init_context(&flih_ctx_ctrl,
-                          (uintptr_t)svc_args[1], NULL,
+                          flih_func, NULL,
                           (uintptr_t)tfm_flih_func_return,
                           sp_limit, stack);
 
@@ -95,11 +94,10 @@ uint32_t tfm_flih_prepare_depriv_flih(uint32_t *svc_args)
 }
 
 /* Go back to ISR from FLIH functions */
-uint32_t tfm_flih_return_to_isr(psa_flih_result_t result, uint32_t *msp)
+uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
+                                struct context_flih_ret_t *p_ctx_flih_ret)
 {
     struct partition_t *p_prev_sp, *p_owner_sp;
-    struct context_flih_ret_t *p_ctx_flih_ret =
-                                               (struct context_flih_ret_t *)msp;
 
     p_prev_sp = GET_CTX_OWNER(p_ctx_flih_ret->state_ctx.r2);
     p_owner_sp = GET_CTX_OWNER(CURRENT_THREAD->p_context_ctrl);
