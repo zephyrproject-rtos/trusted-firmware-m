@@ -91,7 +91,7 @@ set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "BL2 Header 
 set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer size")
 
 ############################ Partitions ########################################
-
+set(CONFIG_TFM_PARTITION_QUIET          OFF         CACHE BOOL      "Disable printing of partition configuration during build")
 set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Protected Storage partition")
 set(PS_CREATE_FLASH_LAYOUT              ON          CACHE BOOL      "Create flash FS if it doesn't exist for Protected Storage partition")
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
