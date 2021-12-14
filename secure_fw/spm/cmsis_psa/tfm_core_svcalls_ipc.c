@@ -12,7 +12,6 @@
 #include "tfm_api.h"
 #include "tfm_arch.h"
 #include "tfm_core_trustzone.h"
-#include "tfm_core_utils.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"
 #include "load/spm_load_api.h"

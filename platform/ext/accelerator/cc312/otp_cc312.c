@@ -13,6 +13,7 @@
 #include "uart_stdout.h"
 #include "region_defs.h"
 #include "cmsis.h"
+#include <string.h>
 
 /* Define some offsets from the CC312 base address, to access particular
  * registers and memory regions

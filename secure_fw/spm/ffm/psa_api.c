@@ -14,7 +14,6 @@
 #include "interrupt.h"
 #include "spm_ipc.h"
 #include "tfm_arch.h"
-#include "tfm_core_utils.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/interrupt_defs.h"

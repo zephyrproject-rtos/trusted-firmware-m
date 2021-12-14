@@ -11,7 +11,6 @@
 #include "spm_ipc.h"
 #include "svc_num.h"
 #include "tfm_arch.h"
-#include "tfm_core_utils.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_memory_utils.h"
 #include "tfm_secure_api.h"

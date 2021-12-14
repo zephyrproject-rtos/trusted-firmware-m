@@ -9,7 +9,6 @@
 #include "compiler_ext_defs.h"
 #include "spm_ipc.h"
 #include "tfm_arch.h"
-#include "tfm_core_utils.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_svcalls.h"
 #include "svc_num.h"

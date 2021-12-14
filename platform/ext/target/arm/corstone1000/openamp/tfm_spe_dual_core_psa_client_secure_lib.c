@@ -16,7 +16,6 @@
 #include "psa/error.h"
 #include "utilities.h"
 #include "thread.h"
-#include "tfm_core_utils.h"
 
 /**
  * In linux environment and for psa_call type client api,

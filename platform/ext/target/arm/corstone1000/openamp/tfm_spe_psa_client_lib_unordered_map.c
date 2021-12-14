@@ -6,7 +6,7 @@
  */
 
 #include "tfm_spe_psa_client_lib_unordered_map.h"
-#include "tfm_core_utils.h"
+#include "utilities.h"
 #include "tfm_spe_openamp_interface.h"
 #include "tfm_spe_shm_openamp.h"
 #include <stdbool.h>

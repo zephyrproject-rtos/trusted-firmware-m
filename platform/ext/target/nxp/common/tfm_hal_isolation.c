@@ -15,9 +15,7 @@
 #include "tfm_hal_isolation.h"
 #include "region_defs.h" //NXP
 #include "tfm_peripherals_def.h"
-#include "tfm_core_utils.h"
-#include "tfm_spm_log.h"
-#ifdef TFM_PSA_API
+#if TFM_PSA_API
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"

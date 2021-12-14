@@ -10,40 +10,34 @@
 
 static void *memcpy_r(void *dest, const void *src, size_t n)
 {
-    union tfm_mem_addr_t p_dest, p_src;
+    union composite_addr_t p_dst, p_src;
 
-    p_dest.uint_addr = (uintptr_t)dest + n;
-    p_src.uint_addr = (uintptr_t)src + n;
+    p_dst.uint_addr = (uintptr_t)dest + n;
+    p_src.uint_addr = (uintptr_t)src  + n;
 
     /* Byte copy for unaligned address. check the last bit of address. */
-    while (n && (GET_MEM_ADDR_BIT0(p_dest.uint_addr) ||
-           GET_MEM_ADDR_BIT0(p_src.uint_addr))) {
-        *(--p_dest.p_byte) = *(--p_src.p_byte);
+    while (n && (ADDR_WORD_UNALIGNED(p_dst.uint_addr) ||
+                 ADDR_WORD_UNALIGNED(p_src.uint_addr))) {
+        *(--p_dst.p_byte) = *(--p_src.p_byte);
         n--;
-    }
-
-    /* Double byte copy for aligned address.
-     * Check the 2nd last bit of address.
-     */
-    while (n >= sizeof(uint16_t) && (GET_MEM_ADDR_BIT1(p_dest.uint_addr) ||
-           GET_MEM_ADDR_BIT1(p_src.uint_addr))) {
-        *(--p_dest.p_dbyte) = *(--p_src.p_dbyte);
-        n -= sizeof(uint16_t);
     }
 
     /* Quad byte copy for aligned address. */
     while (n >= sizeof(uint32_t)) {
-        *(--p_dest.p_qbyte) = *(--p_src.p_qbyte);
+        *(--p_dst.p_word) = *(--p_src.p_word);
         n -= sizeof(uint32_t);
     }
 
     /* Byte copy for the remaining bytes. */
     while (n--) {
-        *(--p_dest.p_byte) = *(--p_src.p_byte);
+        *(--p_dst.p_byte) = *(--p_src.p_byte);
     }
 
     return dest;
 }
+
+/* Mind the direction for copying in memcpy! */
+#define memcpy_f memcpy
 
 /*
  * For overlapped memory area:
@@ -52,15 +46,9 @@ static void *memcpy_r(void *dest, const void *src, size_t n)
  */
 void *memmove(void *dest, const void *src, size_t n)
 {
-    /*
-     * FixMe: Add a "assert (dest == NULL || src == NULL)" here
-     * after "assert()" for sprtl is implemented.
-     */
     if (src >= dest) {
-        memcpy(dest, src, n);
+        return memcpy_f(dest, src, n);
     } else {
-        memcpy_r(dest, src, n);
+        return memcpy_r(dest, src, n);
     }
-
-    return dest;
 }

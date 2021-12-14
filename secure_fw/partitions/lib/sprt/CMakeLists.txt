@@ -18,11 +18,11 @@ target_include_directories(tfm_sprt
 target_sources(tfm_sprt
     PRIVATE
         ./crt_memcmp.c
-        ./crt_memcpy.c
         ./crt_memmove.c
-        ./crt_memset.c
         ./crt_strnlen.c
         ./service_api.c
+        ${CMAKE_SOURCE_DIR}/secure_fw/shared/crt_memcpy.c
+        ${CMAKE_SOURCE_DIR}/secure_fw/shared/crt_memset.c
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_partition_metadata_indicator.c>
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_main.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:./sfn_common_thread.c>

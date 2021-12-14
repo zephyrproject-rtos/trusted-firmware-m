@@ -47,6 +47,7 @@ void tfm_arch_trigger_exc_return(uint32_t exc_return);
  *
  * \return               Does not return
  */
-void tfm_sfn_completion(enum tfm_status_e res, uint32_t exc_return, uintptr_t msp);
+void tfm_sfn_completion(enum tfm_status_e res, uint32_t exc_return,
+                        uintptr_t msp);
 
 #endif /* __ARCH_H__ */

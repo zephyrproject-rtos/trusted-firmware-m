@@ -8,7 +8,6 @@
 #include "compiler_ext_defs.h"
 #include "security_defs.h"
 #include "tfm_arch.h"
-#include "tfm_core_utils.h"
 #include "utilities.h"
 
 __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
@@ -46,7 +45,7 @@ void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
 }
 
 /* Caution: Keep 'uint32_t' always for collecting thread return values! */
-__attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
+__naked uint32_t tfm_arch_trigger_pendsv(void)
 {
     __ASM volatile(
 #ifndef __ICCARM__

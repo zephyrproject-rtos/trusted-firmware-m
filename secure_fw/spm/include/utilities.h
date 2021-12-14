@@ -8,7 +8,7 @@
 #define __TFM_UTILS_H__
 
 #include <stdbool.h>
-#include <stdio.h>
+#include <string.h>
 #include "tfm_spm_log.h"
 
 /*
@@ -40,5 +40,9 @@ void tfm_core_panic(void);
 /* Stringify preprocessors, no leading underscore. ('STRINGIFY') */
 #define STRINGIFY_EXPAND(x) #x
 #define M2S(m) STRINGIFY_EXPAND(m)
+
+/* Runtime memory operations forwarding */
+#define spm_memcpy memcpy
+#define spm_memset memset
 
 #endif /* __TFM_UTILS_H__ */

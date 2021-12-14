@@ -8,7 +8,6 @@
 #include "tfm_arch.h"
 #include "exception_info.h"
 #include "tfm_spm_log.h"
-#include "tfm_core_utils.h"
 
 struct exception_info_t {
     uint32_t EXC_RETURN;        /* EXC_RETURN value in LR. */

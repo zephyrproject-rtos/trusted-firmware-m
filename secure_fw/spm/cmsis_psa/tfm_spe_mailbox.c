@@ -9,7 +9,6 @@
 #include "cmsis_compiler.h"
 
 #include "psa/error.h"
-#include "tfm_core_utils.h"
 #include "utilities.h"
 #include "tfm_arch.h"
 #include "thread.h"

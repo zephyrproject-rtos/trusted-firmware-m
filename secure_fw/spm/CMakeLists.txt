@@ -40,7 +40,6 @@ target_include_directories(tfm_spm
 target_sources(tfm_spm
     PRIVATE
         ffm/tfm_boot_data.c
-        ffm/tfm_core_utils.c
         ffm/utilities.c
         $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:ffm/spm_log.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core_mem_check.c>

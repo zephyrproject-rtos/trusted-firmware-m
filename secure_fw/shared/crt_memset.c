@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,20 +9,20 @@
 
 void *memset(void *s, int c, size_t n)
 {
-    union tfm_mem_addr_t p_mem;
-    uint32_t quad_pattern;
+    union composite_addr_t p_mem;
+    uint32_t pattern_word;
 
     p_mem.p_byte = (uint8_t *)s;
-    quad_pattern = (((uint8_t)c) << 24) | (((uint8_t)c) << 16) |
+    pattern_word = (((uint8_t)c) << 24) | (((uint8_t)c) << 16) |
                    (((uint8_t)c) << 8) | ((uint8_t)c);
 
-    while (n && (p_mem.uint_addr & (sizeof(uint32_t) - 1))) {
+    while (n && ADDR_WORD_UNALIGNED(p_mem.uint_addr)) {
         *p_mem.p_byte++ = (uint8_t)c;
         n--;
     }
 
     while (n >= sizeof(uint32_t)) {
-        *p_mem.p_qbyte++ = quad_pattern;
+        *p_mem.p_word++ = pattern_word;
         n -= sizeof(uint32_t);
     }
 
