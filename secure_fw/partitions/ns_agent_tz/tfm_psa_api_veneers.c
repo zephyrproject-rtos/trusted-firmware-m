@@ -21,9 +21,19 @@
 #endif
 
 /*
- * Use assembly to:
- * - Explicit stack usage to perform re-entrant detection.
- * - SVC here to take hardware context management advantages.
+ * This is the veneers for FF-M Client APIs. The interfaces are written
+ * in assembly, and the reasons:
+ *
+ * - On the 8.0 version of Armv8-M with security extension, a mandatory
+ *   software solution needs to be applied because hardware reentrant
+ *   detection was not involved until 8.1. It requires TF-M to take full
+ *   control of stack usage to perform reentrant detection. Therefore
+ *   TF-M shall implement these veneers in the assembly code.
+ *
+ * - The non-secure context is pushed in the stack. When SPM API returns,
+ *   the pushed non-secure context is popped and overrides the returned
+ *   context before returning to NSPE. Therefore it is unnecessary to
+ *   explicitly clean up the context.
  */
 
 #if defined(__ICCARM__)
@@ -55,7 +65,8 @@ uint32_t tfm_psa_framework_version_veneer(void)
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic1                               \n"
 #endif
-
+        "   mrs    r3, control                                \n"
+        "   push   {r2, r3}                                   \n"
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_framework_version  \n"
@@ -73,7 +84,8 @@ uint32_t tfm_psa_framework_version_veneer(void)
 #else
         "   svc    "M2S(TFM_SVC_PSA_FRAMEWORK_VERSION)"       \n"
 #endif
-
+        "   pop    {r2, r3}                                   \n"
+        "   msr    control, r3                                \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic1:                                        \n"
@@ -97,7 +109,8 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic2                               \n"
 #endif
-
+        "   mrs    r3, control                                \n"
+        "   push   {r2, r3}                                   \n"
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_version            \n"
@@ -115,7 +128,8 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
 #else
         "   svc    "M2S(TFM_SVC_PSA_VERSION)"                 \n"
 #endif
-
+        "   pop    {r2, r3}                                   \n"
+        "   msr    control, r3                                \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic2:                                        \n"
@@ -139,7 +153,8 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic3                               \n"
 #endif
-
+        "   mrs    r3, control                                \n"
+        "   push   {r2, r3}                                   \n"
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_connect            \n"
@@ -157,7 +172,8 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
 #else
         "   svc    "M2S(TFM_SVC_PSA_CONNECT)"                 \n"
 #endif
-
+        "   pop    {r2, r3}                                    \n"
+        "   msr    control, r3                                \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic3:                                        \n"
@@ -186,7 +202,10 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
         "   bne    reent_panic4                               \n"
         "   pop    {r2, r3}                                   \n"
 #endif
-
+        "   mov    r12, r3                                    \n"
+        "   mrs    r3, control                                \n"
+        "   push   {r2, r3}                                   \n"
+        "   mov    r3, r12                                    \n"
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_call               \n"
@@ -204,7 +223,8 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
 #else
         "   svc    "M2S(TFM_SVC_PSA_CALL)"                    \n"
 #endif
-
+        "   pop    {r2, r3}                                   \n"
+        "   msr    control, r3                                \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic4:                                        \n"
@@ -228,7 +248,8 @@ void tfm_psa_close_veneer(psa_handle_t handle)
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic5                               \n"
 #endif
-
+        "   mrs    r3, control                                \n"
+        "   push   {r2, r3}                                   \n"
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_close              \n"
@@ -246,7 +267,8 @@ void tfm_psa_close_veneer(psa_handle_t handle)
 #else
         "   svc    "M2S(TFM_SVC_PSA_CLOSE)"                   \n"
 #endif
-
+        "   pop    {r2, r3}                                   \n"
+        "   msr    control, r3                                \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic5:                                        \n"
