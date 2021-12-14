@@ -87,6 +87,8 @@ enum uefi_capsule_error_t uefi_capsule_retrieve_images(void* capsule_ptr,
     uint32_t image_count;
     uint32_t auth_size;
 
+    uint32_t offset = 0x10;
+
     FWU_LOG_MSG("%s: enter, capsule ptr = 0x%p\n\r", __func__, capsule_ptr);
 
     if (!capsule_ptr) {
@@ -117,7 +119,7 @@ enum uefi_capsule_error_t uefi_capsule_retrieve_images(void* capsule_ptr,
         images_info->version[i] = image_header->version;
         FWU_LOG_MSG("%s: image %i version = %u\n\r", __func__, i,
                                 images_info->version[i]);
-
+#ifdef AUTHENTICATED_CAPSULE
         image_auth = (efi_firmware_image_authentication_t*)(
                         (char*)image_header +
                         sizeof (efi_firmware_management_capsule_image_header_t)
@@ -134,7 +136,12 @@ enum uefi_capsule_error_t uefi_capsule_retrieve_images(void* capsule_ptr,
                 (char*)image_header +
                 sizeof(efi_firmware_management_capsule_image_header_t) +
                 auth_size);
-
+#else
+        images_info->image[i] = (
+                (char*)image_header +
+                sizeof(efi_firmware_management_capsule_image_header_t) +
+                offset);
+#endif
         memcpy(&images_info->guid[i], &(image_header->update_image_type_id),
                                                         sizeof(struct efi_guid));
 
