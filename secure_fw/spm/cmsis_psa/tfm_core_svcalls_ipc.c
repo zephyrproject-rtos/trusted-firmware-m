@@ -52,8 +52,7 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         break;
     case TFM_SVC_PSA_CLOSE:
         status = tfm_spm_client_psa_close((psa_handle_t)ctx[0]);
-        spm_handle_programmer_errors(status);
-        return PSA_SUCCESS;
+        break;
     case TFM_SVC_PSA_WAIT:
         return tfm_spm_partition_psa_wait((psa_signal_t)ctx[0], ctx[1]);
     case TFM_SVC_PSA_GET:
