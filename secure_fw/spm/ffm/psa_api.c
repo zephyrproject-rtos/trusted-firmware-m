@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -193,10 +193,6 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
     }
 
     msg = tfm_spm_get_msg_buffer_from_conn_handle(connect_handle);
-    if (!msg) {
-        /* Have no enough resource to create message */
-        return PSA_ERROR_CONNECTION_BUSY;
-    }
 
     handle = tfm_spm_to_user_handle(connect_handle);
     /* No input or output needed for connect message */
@@ -250,7 +246,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
 
         service = GET_STATELESS_SERVICE(index);
         if (!service) {
-            tfm_core_panic();
+            return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
         sid = service->p_ldinf->sid;
@@ -306,11 +302,11 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         }
 
         service = conn_handle->internal_msg.service;
-    }
 
-    if (!service) {
-        /* FixMe: Need to implement one mechanism to resolve this failure. */
-        tfm_core_panic();
+        if (!service) {
+            /* FixMe: Need to implement a mechanism to resolve this failure. */
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
     }
 
     privileged = tfm_spm_get_caller_privilege_mode();
@@ -385,10 +381,6 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      * Service or incorrectly formatted.
      */
     msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
-    if (!msg) {
-        /* FixMe: Need to implement one mechanism to resolve this failure. */
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
 
     tfm_spm_fill_msg(msg, service, handle, type, client_id,
                      invecs, in_num, outvecs, out_num, outptr);
@@ -428,14 +420,10 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
     service = conn_handle->internal_msg.service;
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
-        tfm_core_panic();
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
-    if (!msg) {
-        /* FixMe: Need to implement one mechanism to resolve this failure. */
-        tfm_core_panic();
-    }
 
     /*
      * It is a PROGRAMMER ERROR if the connection is currently handling a
