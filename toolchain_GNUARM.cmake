@@ -52,6 +52,12 @@ macro(tfm_toolchain_reset_compiler_flags)
     )
 endmacro()
 
+if(TFM_MEMORY_USAGE_QUIET)
+    set(MEMORY_USAGE_FLAG "")
+else()
+    set(MEMORY_USAGE_FLAG LINKER:--print-memory-usage)
+endif()
+
 macro(tfm_toolchain_reset_linker_flags)
     set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
 
@@ -62,7 +68,7 @@ macro(tfm_toolchain_reset_linker_flags)
         LINKER:-fatal-warnings
         LINKER:--gc-sections
         LINKER:--no-wchar-size-warning
-        LINKER:--print-memory-usage
+        ${MEMORY_USAGE_FLAG}
     )
 endmacro()
 

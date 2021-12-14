@@ -6,6 +6,7 @@
 #-------------------------------------------------------------------------------
 
 set(TFM_TOOLCHAIN_FILE                  ${CMAKE_SOURCE_DIR}/toolchain_GNUARM.cmake CACHE FILEPATH    "Path to TFM compiler toolchain file")
+set(TFM_MEMORY_USAGE_QUIET              OFF         CACHE BOOL      "Disable the memory usage report")
 set(TFM_PLATFORM                        ""          CACHE STRING    "Platform to build TF-M for. Must be either a relative path from [TF-M]/platform/ext/target, or an absolute path.")
 set(CROSS_COMPILE                       arm-none-eabi CACHE STRING  "Cross-compilation triplet")
 

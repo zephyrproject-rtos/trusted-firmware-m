@@ -52,11 +52,17 @@ macro(tfm_toolchain_reset_compiler_flags)
     )
 endmacro()
 
+if(TFM_MEMORY_USAGE_QUIET)
+    set(MEMORY_USAGE_FLAG "")
+else()
+    set(MEMORY_USAGE_FLAG --info=summarysizes,sizes,totals,unused,veneers)
+endif()
+
 macro(tfm_toolchain_reset_linker_flags)
     set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
 
     add_link_options(
-        --info=summarysizes,sizes,totals,unused,veneers
+        ${MEMORY_USAGE_FLAG}
         --strict
         --symbols
         --xref
