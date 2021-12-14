@@ -5,6 +5,6 @@
 #
 #-------------------------------------------------------------------------------
 
-set(NRF_PATH platform/ext/target/${TFM_PLATFORM}/..)
+set(PLATFORM_PATH platform/ext/target/${TFM_PLATFORM}/..)
 
-include(${NRF_PATH}/common/nrf5340/config.cmake)
+include(${PLATFORM_PATH}/common/nrf5340/config.cmake)

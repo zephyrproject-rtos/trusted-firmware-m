@@ -7,6 +7,8 @@
 #
 #-------------------------------------------------------------------------------
 
+include(${PLATFORM_PATH}/common/core/${NRF_PLATFORM_PATH}/common/core/config.cmake)
+
 set(SECURE_UART1                        ON                   CACHE BOOL      "Enable secure UART1")
 set(SECURE_QSPI                         ON                   CACHE BOOL      "Enable secure QSPI")
 set(ITS_NUM_ASSETS                      "5"                  CACHE STRING    "The maximum number of assets to be stored in the Internal Trusted Storage area")
