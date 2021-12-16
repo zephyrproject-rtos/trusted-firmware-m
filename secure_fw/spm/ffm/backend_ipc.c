@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -119,7 +120,9 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
         p_param = (void *)tfm_hal_get_ns_entry_point();
 
 #ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifndef TFM_MULTI_CORE_TOPOLOGY
         SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
+#endif
 #endif
 
     }
@@ -134,6 +137,10 @@ static uint32_t ipc_system_run(void)
 {
     uint32_t control;
     struct partition_t *p_cur_pt;
+
+#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+    TFM_CORE_ASSERT(SPM_THREAD_CONTEXT);
+#endif
 
     control = thrd_start_scheduler(&CURRENT_THREAD);
 
