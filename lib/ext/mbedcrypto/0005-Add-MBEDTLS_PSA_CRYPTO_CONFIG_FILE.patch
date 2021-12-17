@@ -1,0 +1,35 @@
+From 282d65493d95ce8d3ddc63924c89fc9b44656018 Mon Sep 17 00:00:00 2001
+From: Summer Qin <summer.qin@arm.com>
+Date: Wed, 18 May 2022 18:13:12 +0800
+Subject: [PATCH] Add MBEDTLS_PSA_CRYPTO_CONFIG_FILE
+
+Signed-off-by: Summer Qin <summer.qin@arm.com>
+---
+ include/mbedtls/config_psa.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/include/mbedtls/config_psa.h b/include/mbedtls/config_psa.h
+index 68dda0f3..13e64dd7 100644
+--- a/include/mbedtls/config_psa.h
++++ b/include/mbedtls/config_psa.h
+@@ -31,9 +31,17 @@
+ #define MBEDTLS_CONFIG_PSA_H
+ 
+ #if defined(MBEDTLS_PSA_CRYPTO_CONFIG)
++#if defined(MBEDTLS_PSA_CRYPTO_CONFIG_FILE)
++#include MBEDTLS_PSA_CRYPTO_CONFIG_FILE
++#else
+ #include "psa/crypto_config.h"
++#endif
+ #endif /* defined(MBEDTLS_PSA_CRYPTO_CONFIG) */
+ 
++#if defined(MBEDTLS_PSA_CRYPTO_USER_CONFIG_FILE)
++#include MBEDTLS_PSA_CRYPTO_USER_CONFIG_FILE
++#endif
++
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+-- 
+2.17.1
+

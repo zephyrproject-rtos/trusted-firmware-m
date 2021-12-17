@@ -135,6 +135,7 @@ add_library(crypto_service_mbedcrypto_config INTERFACE)
 target_compile_definitions(crypto_service_mbedcrypto_config
     INTERFACE
         MBEDTLS_CONFIG_FILE="${TFM_MBEDCRYPTO_CONFIG_PATH}"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH}"
         $<$<BOOL:${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}>:MBEDTLS_USER_CONFIG_FILE="${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}">
         PSA_CRYPTO_SECURE
         # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077

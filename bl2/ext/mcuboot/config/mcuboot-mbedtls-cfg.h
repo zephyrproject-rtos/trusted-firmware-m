@@ -1,7 +1,7 @@
 /*
  *  Minimal configuration for using TLS in the bootloader
  *
- *  Copyright (C) 2006-2021, Arm Limited. All rights reserved.
+ *  Copyright (C) 2006-2022, Arm Limited. All rights reserved.
  *  Copyright (C) 2016, Linaro Ltd
  *
  *  SPDX-License-Identifier: Apache-2.0
@@ -84,7 +84,5 @@
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "mbedtls_accelerator_config.h"
 #endif
-
-#include "mbedtls/check_config.h"
 
 #endif /* __MCUBOOT_MBEDTLS_CFG__ */

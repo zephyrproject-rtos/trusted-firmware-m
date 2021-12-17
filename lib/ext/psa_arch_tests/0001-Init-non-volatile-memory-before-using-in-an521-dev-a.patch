@@ -1,7 +1,7 @@
-From c82920457b1e971e13a98d9937c9656ec600c5dc Mon Sep 17 00:00:00 2001
+From 028387d49761c20dbbbf36fd6e624774a67ca5e5 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
 Date: Mon, 11 Apr 2022 11:20:35 +0800
-Subject: [PATCH] Init non-volatile memory before using in an521 dev apis
+Subject: [PATCH 1/2] Init non-volatile memory before using in an521 dev apis
 
 psa arch test read data from non-volatile memory directly
 without initializing it. The data maybe randomly which may

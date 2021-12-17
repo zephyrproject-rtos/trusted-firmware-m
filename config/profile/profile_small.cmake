@@ -37,7 +37,8 @@ set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audi
 
 ################################## Dependencies ################################
 
-set(TFM_MBEDCRYPTO_CONFIG_PATH          "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_small.h" CACHE PATH "Config to use for Mbed Crypto")
+set(TFM_MBEDCRYPTO_CONFIG_PATH              "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_small.h" CACHE PATH "Config to use for Mbed Crypto")
+set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH   "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_profile_small.h" CACHE PATH "Config to use psa crypto setting for Mbed Crypto.")
 
 # If it is specified to select SFN model in build command, enable SFN model in
 # Profile Small.
