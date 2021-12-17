@@ -229,11 +229,9 @@ psa_status_t cc3xx_cipher_set_iv(
 
     } else {
 
-        if (iv_length != 0) {
-            CC_PalMemCopy(operation->iv, iv, iv_length);
-            operation->iv_size =  iv_length;
-            ret = PSA_SUCCESS;
-        }
+        CC_PalMemCopy(operation->iv, iv, iv_length);
+        operation->iv_size = iv_length;
+        ret = PSA_SUCCESS;
     }
 
     return ret;
@@ -533,6 +531,8 @@ psa_status_t cc3xx_cipher_encrypt(
         const uint8_t *key_buffer,
         size_t key_buffer_size,
         psa_algorithm_t alg,
+        const uint8_t *iv,
+        size_t iv_length,
         const uint8_t *input,
         size_t input_length,
         uint8_t *output,
@@ -541,7 +541,7 @@ psa_status_t cc3xx_cipher_encrypt(
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
     cc3xx_cipher_operation_t operation = {0};
-    size_t olength, accumulated_length;
+    size_t olength, accumulated_length = 0;
 
     if ( (ret = cc3xx_cipher_encrypt_setup(
             &operation,
@@ -554,26 +554,26 @@ psa_status_t cc3xx_cipher_encrypt(
         return ret;
     }
 
-    accumulated_length = 0;
-    if (operation.iv_size > 0) {
-        if ( (ret = cc3xx_cipher_set_iv(
-                &operation,
-                output,
-                operation.iv_size) )
-             != PSA_SUCCESS) {
-            cc3xx_cipher_abort(&operation);
-            return ret;
-        }
+    if (operation.iv_size != iv_length) {
+        cc3xx_cipher_abort(&operation);
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
-        accumulated_length = operation.iv_size;
+    if ( (ret = cc3xx_cipher_set_iv(
+            &operation,
+            iv,
+            iv_length) )
+         != PSA_SUCCESS) {
+        cc3xx_cipher_abort(&operation);
+        return ret;
     }
 
     if ( (ret = cc3xx_cipher_update(
             &operation,
             input,
             input_length,
-            output + operation.iv_size,
-            output_size - operation.iv_size,
+            output,
+            output_size,
             &olength) )
          != PSA_SUCCESS) {
         cc3xx_cipher_abort(&operation);
@@ -625,15 +625,13 @@ psa_status_t cc3xx_cipher_decrypt(
         return ret;
     }
 
-    if (operation.iv_size > 0) {
-        if ( (ret = cc3xx_cipher_set_iv(
-                &operation,
-                input,
-                operation.iv_size) )
-             != PSA_SUCCESS) {
-            cc3xx_cipher_abort(&operation);
-            return ret;
-        }
+    if ( (ret = cc3xx_cipher_set_iv(
+            &operation,
+            input,
+            operation.iv_size) )
+         != PSA_SUCCESS) {
+        cc3xx_cipher_abort(&operation);
+        return ret;
     }
 
     if ( (ret = cc3xx_cipher_update(

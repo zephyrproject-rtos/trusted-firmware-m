@@ -15,8 +15,7 @@ endif()
 
 if ("${MBEDCRYPTO_PATH}" STREQUAL "DOWNLOAD")
     find_package(Git)
-    # Workaround: DON'T PATCH REPO
-    # file(GLOB PATCH_FILES *.patch)
+    file(GLOB PATCH_FILES *.patch)
 
     if (PATCH_FILES)
         FetchContent_Declare(mbedcrypto
