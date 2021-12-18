@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -12,11 +13,6 @@
 #include "tfm_multi_core.h"
 
 #define DEFAULT_NS_CLIENT_ID            (-1)
-
-int32_t tfm_nspm_get_current_client_id(void)
-{
-    return DEFAULT_NS_CLIENT_ID;
-}
 
 void tfm_nspm_thread_entry(void)
 {

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -620,9 +621,7 @@ uint32_t tfm_spm_init(void)
     UNI_LISI_INIT_HEAD(&services_listhead);
 
     /* Init the nonsecure context. */
-#ifndef TFM_MULTI_CORE_TOPOLOGY
-     tfm_nspm_ctx_init();
-#endif
+    tfm_nspm_ctx_init();
 
     while (1) {
         partition = load_a_partition_assuredly(PARTITION_LIST_ADDR);
