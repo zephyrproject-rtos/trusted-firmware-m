@@ -31,14 +31,26 @@
 define block PT_RO_START with alignment = 32, size = 0 { };
 define block PT_RO_END with alignment = 32, size = 0 { };
 
+define block ER_VECTORS with size = S_CODE_VECTOR_TABLE_SIZE {
+       readonly section .intvec
+};
+
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+    /*
+     * Place the CMSE Veneers (containing the SG instruction) in a separate
+     * 32 bytes aligned region so that the SAU can be programmed to
+     * just set this region as Non-Secure Callable.
+     */
+define block ER_VENEER with alignment = 0x20 {section Veneer$$CMSE};
+
+define block VENEER_ALIGN with alignment = 0x20, size = 0 { };
+#endif
 
 define block ER_TFM_CODE with fixed order, alignment = 8 {
-    readonly section .intvec,
-    rw section .textrw object *.o,
+    ro section *startup*,
     ro section .text  object *libplatform_s*,
     ro section .rodata object *libplatform_s*,
-    ro object *libtfm_spm*,
-    readonly
+    ro object *libtfm_spm*
 };
     /**** Section for holding partition RO load data */
 define block TFM_SP_LOAD_LIST with alignment = 4 {
@@ -76,6 +88,12 @@ define block ER_{{partition.manifest.name}}_RO  with alignment = 32
     ro object {{pattern}},
         {% endfor %}
     {% endif %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
+       section {{partition.manifest.name}}_PSA-ROT_ATTR_FN,
+    {% endif %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+       section {{partition.manifest.name}}_APP-ROT_ATTR_FN,
+    {% endif %}
 };
 {% endfor %}
 /**** blocks CODE + RO-data definition ends here*/
@@ -83,13 +101,7 @@ define block ER_{{partition.manifest.name}}_RO  with alignment = 32
 /**** Block Unprivileged Secure code + RO-data definition starts here */
 define block TFM_UNPRIV_CODE with alignment = 32 {
     section SFN,
-    ro section .rodata object tfm_*_secure_api.o,
-    ro object *6M_tl*.a,
-    ro object *7M_tl*.a,
-    ro object *libtfm_sprt.a,
-    ro object psa_interface_*.o,
-    ro object tfm_psa_call_pack.o,
-    ro object tfm_log_raw.o
+    readonly
 };
 
  
@@ -101,9 +113,7 @@ define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SI
 define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE { };
 
 define block HEAP         with alignment = 8, size = S_HEAP_SIZE { };
-define block ARM_LIB_HEAP with alignment = 8, size = S_HEAP_SIZE { };
-define overlay HEAP_OVL {block HEAP};
-define overlay HEAP_OVL {block ARM_LIB_HEAP};
+define block ARM_LIB_HEAP {block HEAP};
 keep {block HEAP, block ARM_LIB_HEAP};
 
 define block ER_TFM_DATA          with alignment = 8 {readwrite};
@@ -118,36 +128,73 @@ define block ER_SERV_RT_POOL      with alignment = 4 {
 
 keep {block ER_PART_RT_POOL, block ER_SERV_RT_POOL};
 
-    /**** Blocks RWZI deginition starts here */
+    /**** Blocks RWZI definition starts here */
 {% for partition in partitions %}
+    {% if partition.manifest.type == 'PSA-ROT' %}
     /* Position  tag : start Block :*/
-define block PT_{{partition.manifest.name}}_PRIVATE_DATA_START with alignment = 32, size = 0 { };
+    define block PT_{{partition.manifest.name}}_PRIVATE_DATA_START with alignment = 32, size = 0 { };
 
-define block ER_{{partition.manifest.name}}_RWZI with alignment = 32 {
-{% if partition.attr.linker_pattern.library_list %}
+    define block ER_{{partition.manifest.name}}_RWZI with alignment = 32 {
+    {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
-    rw section .data object {{pattern}},
-    rw section .bss  object {{pattern}},
-        {% endfor %}
+	rw section .data object {{pattern}},
+	rw section .bss  object {{pattern}},
+	{% endfor %}
     {% endif %}
     {% if partition.attr.linker_pattern.object_list %}
         {% for pattern in partition.attr.linker_pattern.object_list %}
-    rw object {{pattern}},
+	rw object {{pattern}},
         {% endfor %}
     {% endif %}
+	section {{partition.manifest.name}}_PSA-ROT_ATTR_RW,
+	section {{partition.manifest.name}}_PSA-ROT_ATTR_ZI,
 };
 /* Position  tag : start Block :*/
-define block PT_{{partition.manifest.name}}_PRIVATE_DATA_END with alignment = 32, size = 0 { };
+    define block PT_{{partition.manifest.name}}_PRIVATE_DATA_END with alignment = 32, size = 0 { };
+    {% endif %}
 {% endfor %}
+
 /**** block Position tag  PSA RoT RWZI ends definition  */
 define block PT_PRIV_RWZI_END with alignment = 32, size = 0 { };
 
 /* PSP is unprivileged in single-core topology */
 define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE { };
+
+{% for partition in partitions %}
+    {% if partition.manifest.type == 'APPLICATION-ROT' %}
+    /* Position  tag : start Block :*/
+    define block PT_{{partition.manifest.name}}_PRIVATE_DATA_START with alignment = 32, size = 0 { };
+
+    define block ER_{{partition.manifest.name}}_RWZI with alignment = 32 {
+    {% if partition.attr.linker_pattern.library_list %}
+        {% for pattern in partition.attr.linker_pattern.library_list %}
+	rw section .data object {{pattern}},
+	rw section .bss  object {{pattern}},
+	{% endfor %}
+    {% endif %}
+    {% if partition.attr.linker_pattern.object_list %}
+        {% for pattern in partition.attr.linker_pattern.object_list %}
+	rw object {{pattern}},
+        {% endfor %}
+    {% endif %}
+	section {{partition.manifest.name}}_APP-ROT_ATTR_RW,
+	section {{partition.manifest.name}}_APP-ROT_ATTR_ZI,
+};
+/* Position  tag : start Block :*/
+    define block PT_{{partition.manifest.name}}_PRIVATE_DATA_END with alignment = 32, size = 0 { };
+    {% endif %}
+{% endfor %}
+
+
 define block PT_SRAM_WATERMARK with alignment = 32, size = 0 { };
 
 /* Define Flash content */
 define block LR_CODE with fixed order {
+    block ER_VECTORS,
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+    block ER_VENEER,
+    block VENEER_ALIGN,
+#endif
     block PT_RO_START,
     block ER_TFM_CODE,
     block TFM_SP_LOAD_LIST,
@@ -193,7 +240,7 @@ define block DATA with fixed order {
     block PT_PRIV_RWZI_START,
     block TFM_SHARED_DATA,
     block ARM_LIB_STACK,
-    overlay HEAP_OVL,
+    block ARM_LIB_HEAP,
     block ER_TFM_DATA,
     block ER_PART_RT_POOL,
     block ER_SERV_RT_POOL,
@@ -225,9 +272,6 @@ define block DATA with fixed order {
 };
 
 place at address S_DATA_START          { block DATA };
-
-define block LR_VENEER with alignment = 0x20, size = CMSE_VENEER_REGION_SIZE {section Veneer$$CMSE};
-place at address CMSE_VENEER_REGION_START {block LR_VENEER};
 
     /* Reserved place for NS application.
      * No code will be placed here, just address of this region is used in the
