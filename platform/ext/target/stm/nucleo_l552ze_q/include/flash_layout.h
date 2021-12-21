@@ -115,7 +115,7 @@
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET+FLASH_PS_AREA_SIZE)
 #define FLASH_ITS_AREA_SIZE             (0x2000)   /* 8 KB */
 
-#define FLASH_S_PARTITION_SIZE          (0x2D000) /* S partition */
+#define FLASH_S_PARTITION_SIZE          (0x2C000) /* S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x9000) /* NS partition */
 #define FLASH_PARTITION_SIZE (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 /* Secure image primary slot */
