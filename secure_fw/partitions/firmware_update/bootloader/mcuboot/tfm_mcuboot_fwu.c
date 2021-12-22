@@ -470,7 +470,7 @@ psa_status_t fwu_bootloader_mark_image_accepted(
      * chosen as the running image.
      */
 #if (defined(MCUBOOT_DIRECT_XIP) && defined(MCUBOOT_DIRECT_XIP_REVERT)) || \
-    defined(MCUBOOT_SWAP)
+    defined(MCUBOOT_SWAP_USING_SCRATCH) || defined(MCUBOOT_SWAP_USING_MOVE)
     uint8_t mcuboot_image_id = 0;
 
     if (convert_id_from_bl_to_mcuboot(bootloader_image_id,

@@ -23,7 +23,7 @@ set(BL2_TRAILER_SIZE                    0x400       CACHE STRING    "Trailer siz
 # Specifying a scope of the accepted values of MCUBOOT_UPGRADE_STRATEGY for
 # platforms to choose a specific upgrade strategy for images. These certain
 # configurations will be used to facilitate the later validation.
-set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP;DIRECT_XIP;RAM_LOAD")
+set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWAP_USING_SCRATCH;SWAP_USING_MOVE;DIRECT_XIP;RAM_LOAD")
 
 set(MCUBOOT_DIRECT_XIP_REVERT           ON          CACHE BOOL      "Enable the revert mechanism in direct-xip mode")
 set(MCUBOOT_MEASURED_BOOT               ON          CACHE BOOL      "Add boot measurement values to boot status. Used for initial attestation token")

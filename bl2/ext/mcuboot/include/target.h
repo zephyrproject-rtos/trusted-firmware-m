@@ -96,6 +96,7 @@ by target"
 #endif
 #endif /* (MCUBOOT_IMAGE_NUMBER == 2) */
 
+#if defined(MCUBOOT_SWAP_USING_SCRATCH)
 #ifndef FLASH_AREA_SCRATCH_OFFSET
 #error "FLASH_AREA_SCRATCH_OFFSET must be defined by the target"
 #endif
@@ -108,6 +109,7 @@ by target"
 #error "FLASH DEV_NAME_SCRATCH and DEVICE_ID_SCRATCH must be simultaneously defined \
 or not by target"
 #endif
+#endif /* defined(MCUBOOT_SWAP_USING_SCRATCH) */
 
 #ifndef FLASH_DEV_NAME
 #error "BL2 supports CMSIS flash interface and device name must be specified"
