@@ -160,8 +160,23 @@ The Partition ID can be set to a fixed value or omitted to be auto allocated.
 
    #define name id-value
 
-Please refer to ``<TF-M base folder>/tools/tfm_manifest_list.yaml`` for the PID
-allocations.
+.. table:: PID table
+   :widths: auto
+
+   ==================================== ======================
+   **Secure Partitions**                **PID Range**
+   ==================================== ======================
+   TF-M Internal Partitions             0 - 255
+   PSA and user Partitions              256 - 2999
+   TF-M test Partitions                 3000 - 4999
+   Firmware Framework test Partitions   5000 - 5999
+   Reserved                             6000 -
+   ==================================== ======================
+
+Please refer to ``<TF-M base folder>/tools/tfm_manifest_list.yaml``,
+``<TF-M test repo>/test/test_services/tfm_test_manifest_list.yaml`` and
+``<TF-M base folder>/tools/tfm_psa_ff_test_manifest_list.yaml`` for the detailed
+PID allocations.
 
 About where to add the definition, please refer to the chapter `Add
 configuration`_.
@@ -370,6 +385,10 @@ Reference configuration example:
          ]
       }
     }
+
+TF-M also supports out-of-tree Secure Partition build where you can have your
+own manifest lists.
+Please refer to `Out-of-tree Secure Partition build`_ for details.
 
 Implement the RoT services
 ==========================
