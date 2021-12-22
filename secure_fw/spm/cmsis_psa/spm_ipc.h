@@ -101,19 +101,19 @@ struct partition_t {
     void                               *p_boundaries;
     void                               *p_interrupts;
     void                               *p_metadata;
+    struct context_ctrl_t              ctx_ctrl;
+    uint32_t                           signals_allowed;
+    uint32_t                           signals_waiting;
+    uint32_t                           signals_asserted;
+    struct sync_obj_t                  waitobj;
     union {
         struct thread_t                thrd;            /* IPC model */
         uint32_t                       state;           /* SFN model */
     };
-    struct sync_obj_t                  waitobj;
-    struct context_ctrl_t              ctx_ctrl;
     union {
         struct bi_list_node_t          msg_list;        /* IPC model */
         struct tfm_msg_body_t          *p_msg;          /* SFN model */
     };
-    uint32_t                           signals_allowed;
-    uint32_t                           signals_waiting;
-    uint32_t                           signals_asserted;
     struct partition_t                 *next;
 };
 
