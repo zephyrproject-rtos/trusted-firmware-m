@@ -194,7 +194,7 @@ Here is the RoT Service ID table used in TF-M.
    :widths: auto
 
    =========================== ====================== ========================
-   **Services**                **Vendor ID(20 bits)** **Function ID(12 bits)**
+   **Partitions**              **Vendor ID(20 bits)** **Function ID(12 bits)**
    =========================== ====================== ========================
    audit_logging               0x00000                0x000-0x01F
    initial_attestation         0x00000                0x020-0x03F
@@ -203,7 +203,7 @@ Here is the RoT Service ID table used in TF-M.
    internal_trusted_storage    0x00000                0x070-0x07F
    crypto                      0x00000                0x080-0x09F
    firmware_update             0x00000                0x0A0-0x0BF
-   test_secure_service         0x0000F                0x000-0x01F
+   tfm_secure_client           0x0000F                0x000-0x01F
    core_test                   0x0000F                0x020-0x03F
    core_test_2                 0x0000F                0x040-0x05F
    tfm_ipc_client              0x0000F                0x060-0x07F
@@ -211,6 +211,10 @@ Here is the RoT Service ID table used in TF-M.
    tfm_slih_test_service       0x0000F                0x0A0-0x0AF
    tfm_flih_test_service       0x0000F                0x0B0-0x0BF
    tfm_ps_test_service         0x0000F                0x0C0-0x0DF
+   tfm_secure_client_2         0x0000F                0x0E0-0x0FF
+   tfm_sfn_test_service_1      0x0000F                0x100-0x11F
+   tfm_sfn_test_service_2      0x0000F                0x120-0x13F
+   tfm_attest_test_service     0x0000F                0x140-0x15F
    =========================== ====================== ========================
 
 RoT Service Stateless Handle Distribution
