@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
-# Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -26,14 +26,15 @@ sys.path.insert(0, os.path.abspath('../docs'))
 # -- Project information -----------------------------------------------------
 
 project = 'Trusted Firmware-M'
-copyright = '2017-2019, ARM CE-OSS'
+copyright = '2017-2022, ARM CE-OSS'
 author = 'ARM CE-OSS'
 title = 'User Guide'
 
-# The short X.Y version
+# The project version in the form: "vX.Y.Z" in case of clear release 
+# or "vX.Y.Z+ (latest SHA)" if an update was posted.
 version = '@SPHINXCFG_TFM_VERSION@'
-# The full version, including alpha/beta/rc tags
-release = '@SPHINXCFG_TFM_VERSION_FULL@'
+# Do not distinguish between release and version in Shpinx
+release = version
 
 
 # -- General configuration ---------------------------------------------------
