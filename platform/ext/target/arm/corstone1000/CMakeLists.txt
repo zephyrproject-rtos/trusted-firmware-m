@@ -64,7 +64,6 @@ target_sources(platform_s
         Native_Driver/mhu_v2_x.c
         Native_Driver/watchdog.c
         Native_Driver/arm_watchdog_drv.c
-        spm_hal.c
         tfm_hal_multi_core.c
         tfm_hal_isolation.c
         tfm_hal_platform.c

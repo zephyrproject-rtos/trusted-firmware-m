@@ -76,7 +76,6 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         mailbox/platform_multicore.c
         mailbox/platform_spe_mailbox.c
-        spm_hal.c
         target_cfg.c
         tfm_hal_isolation.c
         tfm_hal_multi_core.c
