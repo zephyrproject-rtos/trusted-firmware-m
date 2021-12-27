@@ -27,7 +27,7 @@ donotedit_warning = \
 TFM_ROOT_DIR = os.path.join(sys.path[0], '..')
 OUT_DIR = None # The root directory that files are generated to
 
-# PID[0, TFM_PID_BASE] are reserved for TF-M SPM and test usages
+# PID[0, TFM_PID_BASE - 1] are reserved for TF-M SPM and test usages
 TFM_PID_BASE = 256
 
 # variable for checking for duplicated sid
