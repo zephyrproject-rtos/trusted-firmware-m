@@ -8,6 +8,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include "aapcs_local.h"
 #include "bitops.h"
 #include "critical_section.h"
 #include "current.h"
@@ -659,31 +660,16 @@ uint32_t tfm_spm_init(void)
     return backend_instance.system_run();
 }
 
-/*
- * Return both current and next context to assembly via AAPCS trick:
- *   - Returning a 64 bit integer by 32-bit R0 and R1.
- *
- * This is architecture-specific, hence the scheduler entry and this
- * 'do_schedule' MAY be different on another architecture.
- */
-union returning_contexts_t {
-    struct {
-        uint32_t curr;
-        uint32_t next;
-    } ctx;
-
-    uint64_t curr_next_ctxs;
-};
-
 uint64_t do_schedule(void)
 {
-    union returning_contexts_t ret_ctx;
+    AAPCS_DUAL_U32_T ctx_ctrls;
     struct partition_t *p_part_curr, *p_part_next;
     struct thread_t *pth_next = thrd_next();
     struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
 
-    ret_ctx.ctx.curr = (uint32_t)CURRENT_THREAD->p_context_ctrl;
-    ret_ctx.ctx.next = (uint32_t)CURRENT_THREAD->p_context_ctrl;
+    AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)CURRENT_THREAD->p_context_ctrl,
+                                  (uint32_t)CURRENT_THREAD->p_context_ctrl);
+
     p_part_curr = GET_THRD_OWNER(CURRENT_THREAD);
     p_part_next = GET_THRD_OWNER(pth_next);
 
@@ -709,7 +695,8 @@ uint64_t do_schedule(void)
         }
         ARCH_FLUSH_FP_CONTEXT();
 
-        ret_ctx.ctx.next = (uint32_t)pth_next->p_context_ctrl;
+        AAPCS_DUAL_U32_SET_A1(ctx_ctrls, (uint32_t)pth_next->p_context_ctrl);
+
         CURRENT_THREAD = pth_next;
         CRITICAL_SECTION_LEAVE(cs);
     }
@@ -720,7 +707,7 @@ uint64_t do_schedule(void)
      */
     tfm_rpc_client_call_handler();
 
-    return ret_ctx.curr_next_ctxs;
+    return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }
 
 void update_caller_outvec_len(struct tfm_msg_body_t *msg)
