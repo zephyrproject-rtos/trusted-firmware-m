@@ -59,4 +59,9 @@
 #error "FP is not supported for SFN model."
 #endif
 
+{% if partition_statistics['connection_based_srv_num'] > 0 %}
+/* Connection-based services exist, include the connection-specific API set. */
+#define {{"%-56s"|format("CONFIG_TFM_CONNECTION_BASED_SERVICE_API")}} 1
+{% endif %}
+
 #endif /* __CONFIG_IMPL_H__ */

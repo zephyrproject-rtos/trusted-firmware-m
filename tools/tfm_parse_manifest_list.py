@@ -142,6 +142,7 @@ def process_partition_manifests(manifest_lists):
     pid_list = []
     no_pid_manifest_idx = []
     partition_statistics = {
+        'connection_based_srv_num': 0,
         'ipc_partition_num': 0,
         'sfn_partition_num': 0
     }
@@ -218,6 +219,12 @@ def process_partition_manifests(manifest_lists):
             else:
                 partition_statistics['ipc_partition_num'] += 1
 
+        for service in manifest.get('services', []):
+            if 'connection_based' not in service.keys():
+                partition_statistics['connection_based_srv_num'] += 1
+            elif service['connection_based']:
+                partition_statistics['connection_based_srv_num'] += 1
+
         manifest_out_basename = os.path.splitext(os.path.basename(manifest_path))[0]
 
         if 'output_path' in manifest_item:
@@ -250,7 +257,6 @@ def process_partition_manifests(manifest_lists):
 
     context['partitions'] = partition_list
     context['partition_statistics'] = partition_statistics
-
     context['stateless_services'] = process_stateless_services(partition_list)
 
     return context

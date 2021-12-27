@@ -26,24 +26,12 @@ __naked uint32_t psa_version_svc(uint32_t sid)
                    "bx      lr                                 \n");
 }
 
-__naked psa_handle_t psa_connect_svc(uint32_t sid, uint32_t version)
-{
-    __asm volatile("svc     "M2S(TFM_SVC_PSA_CONNECT)"         \n"
-                   "bx      lr                                 \n");
-}
-
 __naked psa_status_t tfm_psa_call_pack_svc(psa_handle_t handle,
                                            uint32_t ctrl_param,
                                            const psa_invec *in_vec,
                                            psa_outvec *out_vec)
 {
     __asm volatile("svc     "M2S(TFM_SVC_PSA_CALL)"            \n"
-                   "bx      lr                                 \n");
-}
-
-__naked void psa_close_svc(psa_handle_t handle)
-{
-    __asm volatile("svc     "M2S(TFM_SVC_PSA_CLOSE)"           \n"
                    "bx      lr                                 \n");
 }
 
@@ -56,12 +44,6 @@ __naked psa_signal_t psa_wait_svc(psa_signal_t signal_mask, uint32_t timeout)
 __naked psa_status_t psa_get_svc(psa_signal_t signal, psa_msg_t *msg)
 {
     __asm volatile("svc     "M2S(TFM_SVC_PSA_GET)"             \n"
-                   "bx      lr                                 \n");
-}
-
-__naked void psa_set_rhandle_svc(psa_handle_t msg_handle, void *rhandle)
-{
-    __asm volatile("svc     "M2S(TFM_SVC_PSA_SET_RHANDLE)"     \n"
                    "bx      lr                                 \n");
 }
 
@@ -139,3 +121,26 @@ __naked uint32_t psa_rot_lifecycle_state_svc(void)
     __asm volatile("svc     "M2S(TFM_SVC_PSA_LIFECYCLE)"       \n"
                    "bx      lr                                 \n");
 }
+
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+__naked psa_handle_t psa_connect_svc(uint32_t sid, uint32_t version)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_PSA_CONNECT)"         \n"
+                   "bx      lr                                 \n");
+}
+
+__naked void psa_close_svc(psa_handle_t handle)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_PSA_CLOSE)"           \n"
+                   "bx      lr                                 \n");
+}
+
+__naked void psa_set_rhandle_svc(psa_handle_t msg_handle, void *rhandle)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_PSA_SET_RHANDLE)"     \n"
+                   "bx      lr                                 \n");
+}
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */

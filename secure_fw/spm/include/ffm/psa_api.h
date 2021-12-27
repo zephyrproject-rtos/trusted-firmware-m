@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -59,23 +59,6 @@ uint32_t tfm_spm_client_psa_framework_version(void);
 uint32_t tfm_spm_client_psa_version(uint32_t sid);
 
 /**
- * \brief handler for \ref psa_connect.
- *
- * \param[in] sid               RoT Service identity.
- * \param[in] version           The version of the RoT Service.
- *
- * \retval PSA_SUCCESS          Success.
- * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
- *                              connection.
- * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
- *                              connection at the moment.
- * \retval "Does not return"    The RoT Service ID and version are not
- *                              supported, or the caller is not permitted to
- *                              access the service.
- */
-psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version);
-
-/**
  * \brief handler for \ref psa_call.
  *
  * \param[in] handle            Service handle to the established connection,
@@ -102,6 +85,26 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
                                      const psa_invec *inptr,
                                      psa_outvec *outptr);
 
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+/**
+ * \brief handler for \ref psa_connect.
+ *
+ * \param[in] sid               RoT Service identity.
+ * \param[in] version           The version of the RoT Service.
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
+ *                              connection.
+ * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
+ *                              connection at the moment.
+ * \retval "Does not return"    The RoT Service ID and version are not
+ *                              supported, or the caller is not permitted to
+ *                              access the service.
+ */
+psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version);
+
 /**
  * \brief handler for \ref psa_close.
  *
@@ -117,6 +120,8 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
  * \arg                           The connection is handling a request.
  */
 psa_status_t tfm_spm_client_psa_close(psa_handle_t handle);
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 /* PSA Partition API function body, for privileged use only. */
 
@@ -155,19 +160,6 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
  *                                reference.
  */
 psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg);
-
-/**
- * \brief Function body of \ref psa_set_rhandle.
- *
- * \param[in] msg_handle        Handle for the client's message.
- * \param[in] rhandle           Reverse handle allocated by the RoT Service.
- *
- * \retval void                 Success, rhandle will be provided with all
- *                              subsequent messages delivered on this
- *                              connection.
- * \retval "PROGRAMMER ERROR"   msg_handle is invalid.
- */
-void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle);
 
 /**
  * \brief Function body of \ref psa_read.
@@ -354,6 +346,24 @@ psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal);
  * \arg                       \a irq_signal is not currently asserted.
  */
 void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal);
+
+/* psa_set_rhandle is only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+/**
+ * \brief Function body of \ref psa_set_rhandle.
+ *
+ * \param[in] msg_handle        Handle for the client's message.
+ * \param[in] rhandle           Reverse handle allocated by the RoT Service.
+ *
+ * \retval void                 Success, rhandle will be provided with all
+ *                              subsequent messages delivered on this
+ *                              connection.
+ * \retval "PROGRAMMER ERROR"   msg_handle is invalid.
+ */
+void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle);
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 

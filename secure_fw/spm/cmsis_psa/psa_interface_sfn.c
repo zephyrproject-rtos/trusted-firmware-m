@@ -22,24 +22,6 @@ uint32_t psa_version_sfn(uint32_t sid)
     return tfm_spm_client_psa_version(sid);
 }
 
-psa_handle_t psa_connect_sfn(uint32_t sid, uint32_t version)
-{
-    struct partition_t *p_client, *p_target;
-    psa_status_t stat;
-
-    p_client = GET_CURRENT_COMPONENT();
-
-    stat = tfm_spm_client_psa_connect(sid, version);
-
-    p_target = GET_CURRENT_COMPONENT();
-    if (p_client != p_target) {
-        stat = tfm_spm_partition_psa_reply(p_target->p_msg->msg.handle, stat);
-    }
-
-    spm_handle_programmer_errors(stat);
-    return (psa_handle_t)stat;
-}
-
 psa_status_t psa_call_pack_sfn(psa_handle_t handle, uint32_t ctrl_param,
                                const psa_invec *in_vec, psa_outvec *out_vec)
 {
@@ -57,24 +39,6 @@ psa_status_t psa_call_pack_sfn(psa_handle_t handle, uint32_t ctrl_param,
 
     spm_handle_programmer_errors(stat);
     return (psa_status_t)stat;
-}
-
-void psa_close_sfn(psa_handle_t handle)
-{
-    struct partition_t *p_client, *p_target;
-    psa_status_t stat;
-
-    p_client = GET_CURRENT_COMPONENT();
-
-    stat = tfm_spm_client_psa_close(handle);
-
-    p_target = GET_CURRENT_COMPONENT();
-    if (p_client != p_target) {
-        stat = tfm_spm_partition_psa_reply(p_target->p_msg->msg.handle,
-                                           PSA_SUCCESS);
-    }
-
-    spm_handle_programmer_errors(stat);
 }
 
 psa_signal_t psa_wait_sfn(psa_signal_t signal_mask, uint32_t timeout)
@@ -105,6 +69,47 @@ void psa_write_sfn(psa_handle_t msg_handle, uint32_t outvec_idx,
 {
     tfm_spm_partition_psa_write(msg_handle, outvec_idx, buffer, num_bytes);
 }
+
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+psa_handle_t psa_connect_sfn(uint32_t sid, uint32_t version)
+{
+    struct partition_t *p_client, *p_target;
+    psa_status_t stat;
+
+    p_client = GET_CURRENT_COMPONENT();
+
+    stat = tfm_spm_client_psa_connect(sid, version);
+
+    p_target = GET_CURRENT_COMPONENT();
+    if (p_client != p_target) {
+        stat = tfm_spm_partition_psa_reply(p_target->p_msg->msg.handle, stat);
+    }
+
+    spm_handle_programmer_errors(stat);
+    return (psa_handle_t)stat;
+}
+
+void psa_close_sfn(psa_handle_t handle)
+{
+    struct partition_t *p_client, *p_target;
+    psa_status_t stat;
+
+    p_client = GET_CURRENT_COMPONENT();
+
+    stat = tfm_spm_client_psa_close(handle);
+
+    p_target = GET_CURRENT_COMPONENT();
+    if (p_client != p_target) {
+        stat = tfm_spm_partition_psa_reply(p_target->p_msg->msg.handle,
+                                           PSA_SUCCESS);
+    }
+
+    spm_handle_programmer_errors(stat);
+}
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 

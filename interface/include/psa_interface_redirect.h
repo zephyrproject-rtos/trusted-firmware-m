@@ -13,12 +13,9 @@
 
 #define psa_framework_version    psa_framework_version_svc
 #define psa_version              psa_version_svc
-#define psa_connect              psa_connect_svc
 #define tfm_psa_call_pack        tfm_psa_call_pack_svc
-#define psa_close                psa_close_svc
 #define psa_wait                 psa_wait_svc
 #define psa_get                  psa_get_svc
-#define psa_set_rhandle          psa_set_rhandle_svc
 #define psa_read                 psa_read_svc
 #define psa_skip                 psa_skip_svc
 #define psa_write                psa_write_svc
@@ -31,17 +28,20 @@
 #define psa_irq_disable          psa_irq_disable_svc
 #define psa_reset_signal         psa_reset_signal_svc
 #define psa_rot_lifecycle_state  psa_rot_lifecycle_state_svc
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+#define psa_connect              psa_connect_svc
+#define psa_close                psa_close_svc
+#define psa_set_rhandle          psa_set_rhandle_svc
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 #elif defined(CONFIG_TFM_PSA_API_CROSS_CALL)
 
 #define psa_framework_version    psa_framework_version_cross
 #define psa_version              psa_version_cross
-#define psa_connect              psa_connect_cross
 #define tfm_psa_call_pack        tfm_psa_call_pack_cross
-#define psa_close                psa_close_cross
 #define psa_wait                 psa_wait_cross
 #define psa_get                  psa_get_cross
-#define psa_set_rhandle          psa_set_rhandle_cross
 #define psa_read                 psa_read_cross
 #define psa_skip                 psa_skip_cross
 #define psa_write                psa_write_cross
@@ -54,6 +54,12 @@
 #define psa_irq_disable          psa_irq_disable_cross
 #define psa_reset_signal         psa_reset_signal_cross
 #define psa_rot_lifecycle_state  psa_rot_lifecycle_state_cross
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+#define psa_connect              psa_connect_cross
+#define psa_close                psa_close_cross
+#define psa_set_rhandle          psa_set_rhandle_cross
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 #define psa_map_invec            psa_map_invec_cross
@@ -66,14 +72,17 @@
 
 #define psa_framework_version    psa_framework_version_sfn
 #define psa_version              psa_version_sfn
-#define psa_connect              psa_connect_sfn
 #define tfm_psa_call_pack        psa_call_pack_sfn
-#define psa_close                psa_close_sfn
 #define psa_wait                 psa_wait_sfn
 #define psa_read                 psa_read_sfn
 #define psa_skip                 psa_skip_sfn
 #define psa_write                psa_write_sfn
 #define psa_panic                psa_panic_sfn
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+#define psa_connect              psa_connect_sfn
+#define psa_close                psa_close_sfn
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 #define psa_map_invec            psa_map_invec_sfn

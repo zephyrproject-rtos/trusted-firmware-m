@@ -139,69 +139,6 @@ uint32_t tfm_spm_client_psa_version(uint32_t sid)
     return service->p_ldinf->version;
 }
 
-psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
-{
-    struct service_t *service;
-    struct tfm_msg_body_t *msg;
-    struct tfm_conn_handle_t *connect_handle;
-    int32_t client_id;
-    psa_handle_t handle;
-    bool ns_caller = tfm_spm_is_ns_caller();
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
-
-    /*
-     * It is a PROGRAMMER ERROR if the RoT Service does not exist on the
-     * platform.
-     */
-    service = tfm_spm_get_service_by_sid(sid);
-    if (!service) {
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
-
-    /* It is a PROGRAMMER ERROR if connecting to a stateless service. */
-    if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    /*
-     * It is a PROGRAMMER ERROR if the caller is not authorized to access the
-     * RoT Service.
-     */
-    if (tfm_spm_check_authorization(sid, service, ns_caller) != SPM_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
-
-    /*
-     * It is a PROGRAMMER ERROR if the version of the RoT Service requested is
-     * not supported on the platform.
-     */
-    if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
-        return PSA_ERROR_CONNECTION_REFUSED;
-    }
-
-    client_id = tfm_spm_get_client_id(ns_caller);
-
-    /*
-     * Create connection handle here since it is possible to return the error
-     * code to client when creation fails.
-     */
-    CRITICAL_SECTION_ENTER(cs_assert);
-    connect_handle = tfm_spm_create_conn_handle(service, client_id);
-    CRITICAL_SECTION_LEAVE(cs_assert);
-    if (!connect_handle) {
-        return PSA_ERROR_CONNECTION_BUSY;
-    }
-
-    msg = tfm_spm_get_msg_buffer_from_conn_handle(connect_handle);
-
-    handle = tfm_spm_to_user_handle(connect_handle);
-    /* No input or output needed for connect message */
-    tfm_spm_fill_msg(msg, service, handle, PSA_IPC_CONNECT,
-                     client_id, NULL, 0, NULL, 0, NULL);
-
-    return backend_instance.messaging(service, msg);
-}
-
 psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
                                      uint32_t ctrl_param,
                                      const psa_invec *inptr,
@@ -388,6 +325,72 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     return backend_instance.messaging(service, msg);
 }
 
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
+{
+    struct service_t *service;
+    struct tfm_msg_body_t *msg;
+    struct tfm_conn_handle_t *connect_handle;
+    int32_t client_id;
+    psa_handle_t handle;
+    bool ns_caller = tfm_spm_is_ns_caller();
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+
+    /*
+     * It is a PROGRAMMER ERROR if the RoT Service does not exist on the
+     * platform.
+     */
+    service = tfm_spm_get_service_by_sid(sid);
+    if (!service) {
+        return PSA_ERROR_CONNECTION_REFUSED;
+    }
+
+    /* It is a PROGRAMMER ERROR if connecting to a stateless service. */
+    if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    /*
+     * It is a PROGRAMMER ERROR if the caller is not authorized to access the
+     * RoT Service.
+     */
+    if (tfm_spm_check_authorization(sid, service, ns_caller) != SPM_SUCCESS) {
+        return PSA_ERROR_CONNECTION_REFUSED;
+    }
+
+    /*
+     * It is a PROGRAMMER ERROR if the version of the RoT Service requested is
+     * not supported on the platform.
+     */
+    if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
+        return PSA_ERROR_CONNECTION_REFUSED;
+    }
+
+    client_id = tfm_spm_get_client_id(ns_caller);
+
+    /*
+     * Create connection handle here since it is possible to return the error
+     * code to client when creation fails.
+     */
+    CRITICAL_SECTION_ENTER(cs_assert);
+    connect_handle = tfm_spm_create_conn_handle(service, client_id);
+    CRITICAL_SECTION_LEAVE(cs_assert);
+    if (!connect_handle) {
+        return PSA_ERROR_CONNECTION_BUSY;
+    }
+
+    msg = tfm_spm_get_msg_buffer_from_conn_handle(connect_handle);
+
+    handle = tfm_spm_to_user_handle(connect_handle);
+    /* No input or output needed for connect message */
+    tfm_spm_fill_msg(msg, service, handle, PSA_IPC_CONNECT,
+                     client_id, NULL, 0, NULL, 0, NULL);
+
+    return backend_instance.messaging(service, msg);
+}
+
 psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 {
     struct service_t *service;
@@ -439,6 +442,8 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 
     return backend_instance.messaging(service, msg);
 }
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 /* PSA Partition API function body */
 
@@ -543,29 +548,6 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
     spm_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
 
     return PSA_SUCCESS;
-}
-
-void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
-{
-    struct tfm_msg_body_t *msg = NULL;
-    struct tfm_conn_handle_t *conn_handle;
-
-    /* It is a fatal error if message handle is invalid */
-    msg = tfm_spm_get_msg_from_handle(msg_handle);
-    if (!msg) {
-        tfm_core_panic();
-    }
-
-    /* It is a PROGRAMMER ERROR if a stateless service sets rhandle. */
-    if (SERVICE_IS_STATELESS(msg->service->p_ldinf->flags)) {
-        tfm_core_panic();
-    }
-
-    msg->msg.rhandle = rhandle;
-    conn_handle = tfm_spm_to_handle_instance(msg_handle);
-
-    /* Store reverse handle for following client calls. */
-    tfm_spm_set_rhandle(msg->service, conn_handle, rhandle);
 }
 
 size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
@@ -1039,6 +1021,34 @@ void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
     partition->signals_asserted &= ~irq_signal;
     CRITICAL_SECTION_LEAVE(cs_assert);
 }
+
+/* psa_set_rhandle is only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
+{
+    struct tfm_msg_body_t *msg = NULL;
+    struct tfm_conn_handle_t *conn_handle;
+
+    /* It is a fatal error if message handle is invalid */
+    msg = tfm_spm_get_msg_from_handle(msg_handle);
+    if (!msg) {
+        tfm_core_panic();
+    }
+
+    /* It is a PROGRAMMER ERROR if a stateless service sets rhandle. */
+    if (SERVICE_IS_STATELESS(msg->service->p_ldinf->flags)) {
+        tfm_core_panic();
+    }
+
+    msg->msg.rhandle = rhandle;
+    conn_handle = tfm_spm_to_handle_instance(msg_handle);
+
+    /* Store reverse handle for following client calls. */
+    tfm_spm_set_rhandle(msg->service, conn_handle, rhandle);
+}
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 

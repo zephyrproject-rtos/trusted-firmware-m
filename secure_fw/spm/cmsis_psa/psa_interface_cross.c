@@ -69,21 +69,6 @@ uint32_t psa_version_cross(uint32_t sid)
 
 __naked
 __section(".psa_interface_cross_call")
-psa_handle_t psa_connect_cross(uint32_t sid, uint32_t version)
-{
-    __asm volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                                    \n"
-#endif
-        "push   {r0-r4, lr}                                 \n"
-        "ldr    r0, =tfm_spm_client_psa_connect             \n"
-        "mov    r1, sp                                      \n"
-        "b      psa_interface_cross_unified_entry           \n"
-    );
-}
-
-__naked
-__section(".psa_interface_cross_call")
 psa_status_t tfm_psa_call_pack_cross(psa_handle_t handle,
                                      uint32_t ctrl_param,
                                      const psa_invec *in_vec,
@@ -95,21 +80,6 @@ psa_status_t tfm_psa_call_pack_cross(psa_handle_t handle,
 #endif
         "push   {r0-r4, lr}                                 \n"
         "ldr    r0, =tfm_spm_client_psa_call                \n"
-        "mov    r1, sp                                      \n"
-        "b      psa_interface_cross_unified_entry           \n"
-    );
-}
-
-__naked
-__section(".psa_interface_cross_call")
-void psa_close_cross(psa_handle_t handle)
-{
-    __asm volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                                    \n"
-#endif
-        "push   {r0-r4, lr}                                 \n"
-        "ldr    r0, =tfm_spm_client_psa_close               \n"
         "mov    r1, sp                                      \n"
         "b      psa_interface_cross_unified_entry           \n"
     );
@@ -140,21 +110,6 @@ psa_status_t psa_get_cross(psa_signal_t signal, psa_msg_t *msg)
 #endif
         "push   {r0-r4, lr}                                 \n"
         "ldr    r0, =tfm_spm_partition_psa_get              \n"
-        "mov    r1, sp                                      \n"
-        "b      psa_interface_cross_unified_entry           \n"
-    );
-}
-
-__naked
-__section(".psa_interface_cross_call")
-void psa_set_rhandle_cross(psa_handle_t msg_handle, void *rhandle)
-{
-    __asm volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                                    \n"
-#endif
-        "push   {r0-r4, lr}                                 \n"
-        "ldr    r0, =tfm_spm_partition_psa_set_rhandle      \n"
         "mov    r1, sp                                      \n"
         "b      psa_interface_cross_unified_entry           \n"
     );
@@ -342,6 +297,56 @@ uint32_t psa_rot_lifecycle_state_cross(void)
         "b      psa_interface_cross_unified_entry           \n"
     );
 }
+
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+__naked
+__section(".psa_interface_cross_call")
+psa_handle_t psa_connect_cross(uint32_t sid, uint32_t version)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_client_psa_connect             \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_cross_unified_entry           \n"
+    );
+}
+
+__naked
+__section(".psa_interface_cross_call")
+void psa_close_cross(psa_handle_t handle)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_client_psa_close               \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_cross_unified_entry           \n"
+    );
+}
+
+__naked
+__section(".psa_interface_cross_call")
+void psa_set_rhandle_cross(psa_handle_t msg_handle, void *rhandle)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_partition_psa_set_rhandle      \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_cross_unified_entry           \n"
+    );
+}
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 

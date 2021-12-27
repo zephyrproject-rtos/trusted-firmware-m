@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -42,25 +42,16 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         return tfm_spm_client_psa_framework_version();
     case TFM_SVC_PSA_VERSION:
         return tfm_spm_client_psa_version(ctx[0]);
-    case TFM_SVC_PSA_CONNECT:
-        status = tfm_spm_client_psa_connect(ctx[0], ctx[1]);
-        break;
     case TFM_SVC_PSA_CALL:
         status = tfm_spm_client_psa_call((psa_handle_t)ctx[0], ctx[1],
                                          (const psa_invec *)ctx[2],
                                          (psa_outvec *)ctx[3]);
-        break;
-    case TFM_SVC_PSA_CLOSE:
-        status = tfm_spm_client_psa_close((psa_handle_t)ctx[0]);
         break;
     case TFM_SVC_PSA_WAIT:
         return tfm_spm_partition_psa_wait((psa_signal_t)ctx[0], ctx[1]);
     case TFM_SVC_PSA_GET:
         return tfm_spm_partition_psa_get((psa_signal_t)ctx[0],
                                          (psa_msg_t *)ctx[1]);
-    case TFM_SVC_PSA_SET_RHANDLE:
-        tfm_spm_partition_psa_set_rhandle((psa_handle_t)ctx[0], (void *)ctx[1]);
-        break;
     case TFM_SVC_PSA_READ:
         return tfm_spm_partition_psa_read((psa_handle_t)ctx[0], ctx[1],
                                           (void *)ctx[2], (size_t)ctx[3]);
@@ -88,6 +79,18 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         break;
     case TFM_SVC_PSA_LIFECYCLE:
         return tfm_spm_get_lifecycle_state();
+/* Following svc handlers are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+    case TFM_SVC_PSA_CONNECT:
+        status = tfm_spm_client_psa_connect(ctx[0], ctx[1]);
+        break;
+    case TFM_SVC_PSA_CLOSE:
+        status = tfm_spm_client_psa_close((psa_handle_t)ctx[0]);
+        break;
+    case TFM_SVC_PSA_SET_RHANDLE:
+        tfm_spm_partition_psa_set_rhandle((psa_handle_t)ctx[0], (void *)ctx[1]);
+        break;
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 #if TFM_SP_LOG_RAW_ENABLED
     case TFM_SVC_OUTPUT_UNPRIV_STRING:
         return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
