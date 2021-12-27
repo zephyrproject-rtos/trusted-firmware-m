@@ -15,7 +15,7 @@
 #include "tfm_psa_call_pack.h"
 #include "tfm_secure_api.h"
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 #include "spm_ipc.h"
 #include "ffm/psa_api.h"
 #endif
@@ -38,16 +38,16 @@
 
 #if defined(__ICCARM__)
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 
 #pragma required = tfm_spm_client_psa_framework_version
 #pragma required = tfm_spm_client_psa_version
 #pragma required = tfm_spm_client_psa_connect
 #pragma required = tfm_spm_client_psa_call
 #pragma required = tfm_spm_client_psa_close
-#pragma required = spm_interface_thread_dispatcher
+#pragma required = spm_interface_cross_dispatcher
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL */
 
 #endif
 
@@ -67,12 +67,12 @@ uint32_t tfm_psa_framework_version_veneer(void)
 #endif
         "   mrs    r3, control                                \n"
         "   push   {r2, r3}                                   \n"
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_framework_version  \n"
         "   mov    r1, sp                                     \n"
         "   movs   r2, #0                                     \n"
-        "   bl     spm_interface_thread_dispatcher            \n"
+        "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"
@@ -111,12 +111,12 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
 #endif
         "   mrs    r3, control                                \n"
         "   push   {r2, r3}                                   \n"
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_version            \n"
         "   mov    r1, sp                                     \n"
         "   movs   r2, #0                                     \n"
-        "   bl     spm_interface_thread_dispatcher            \n"
+        "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"
@@ -155,12 +155,12 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
 #endif
         "   mrs    r3, control                                \n"
         "   push   {r2, r3}                                   \n"
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_connect            \n"
         "   mov    r1, sp                                     \n"
         "   movs   r2, #0                                     \n"
-        "   bl     spm_interface_thread_dispatcher            \n"
+        "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"
@@ -172,7 +172,7 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
 #else
         "   svc    "M2S(TFM_SVC_PSA_CONNECT)"                 \n"
 #endif
-        "   pop    {r2, r3}                                    \n"
+        "   pop    {r2, r3}                                   \n"
         "   msr    control, r3                                \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
@@ -206,12 +206,12 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
         "   mrs    r3, control                                \n"
         "   push   {r2, r3}                                   \n"
         "   mov    r3, r12                                    \n"
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_call               \n"
         "   mov    r1, sp                                     \n"
         "   movs   r2, #0                                     \n"
-        "   bl     spm_interface_thread_dispatcher            \n"
+        "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"
@@ -250,12 +250,12 @@ void tfm_psa_close_veneer(psa_handle_t handle)
 #endif
         "   mrs    r3, control                                \n"
         "   push   {r2, r3}                                   \n"
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
         "   push   {r0-r4, lr}                                \n"
         "   ldr    r0, =tfm_spm_client_psa_close              \n"
         "   mov    r1, sp                                     \n"
         "   movs   r2, #0                                     \n"
-        "   bl     spm_interface_thread_dispatcher            \n"
+        "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
         "   pop    {r2, r3}                                   \n"
         "   mov    lr, r3                                     \n"

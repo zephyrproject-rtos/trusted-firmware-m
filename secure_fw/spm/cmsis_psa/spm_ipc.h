@@ -446,7 +446,7 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg);
  */
 void spm_assert_signal(void *p_pt, psa_signal_t signal);
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 
 /*
  * SPM dispatcher to handle the API call under non-privileged model.
@@ -458,12 +458,12 @@ void spm_assert_signal(void *p_pt, psa_signal_t signal);
  * frame_addr   - customized ABI frame type for the function call.
  * switch_stack - indicator if need to switch stack.
  */
-void spm_interface_thread_dispatcher(uintptr_t fn_addr,
-                                     uintptr_t frame_addr,
-                                     uint32_t  switch_stack);
+void spm_interface_cross_dispatcher(uintptr_t fn_addr,
+                                    uintptr_t frame_addr,
+                                    uint32_t  switch_stack);
 
 /* Execute a customized ABI function in C */
-void spcall_execute_c(uintptr_t fn_addr, uintptr_t frame_addr);
+void cross_call_execute_c(uintptr_t fn_addr, uintptr_t frame_addr);
 
 #endif
 

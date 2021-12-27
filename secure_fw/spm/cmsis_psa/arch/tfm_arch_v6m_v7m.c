@@ -30,15 +30,15 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 
-#pragma required = spcall_execute_c
+#pragma required = cross_call_execute_c
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL */
 
 #endif
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 
 __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
                                        uint32_t stk_base, uint32_t stk_limit)
@@ -60,7 +60,7 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   str    r4, [r3, #0]                         \n"
         "   cpsie  i                                    \n"
         "   push   {r2, r3}                             \n"
-        "   bl     spcall_execute_c                     \n"
+        "   bl     cross_call_execute_c                 \n"
         "   pop    {r2, r3}                             \n"
         "   cpsid  i                                    \n"
         "   cmp    r2, #0                               \n"
@@ -75,7 +75,7 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
     );
 }
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL */
 
 __attribute__((naked)) void PendSV_Handler(void)
 {

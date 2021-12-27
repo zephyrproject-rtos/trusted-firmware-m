@@ -20,7 +20,7 @@
 #if TFM_LVL > 1
 #define {{"%-56s"|format("CONFIG_TFM_PSA_API_SUPERVISOR_CALL")}} 1
 #else /* TFM_LVL > 1 */
-#define {{"%-56s"|format("CONFIG_TFM_PSA_API_THREAD_CALL")}} 1
+#define {{"%-56s"|format("CONFIG_TFM_PSA_API_CROSS_CALL")}} 1
 
 /* SPM re-uses Trustzone NS agent stack. */
 #define {{"%-56s"|format("CONFIG_TFM_SPM_THREAD_STACK_SIZE")}}     \
