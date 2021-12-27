@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2022 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -44,6 +44,22 @@
 /* Driver version */
 #define ARM_FLASH_DRV_VERSION      ARM_DRIVER_VERSION_MAJOR_MINOR(1, 1)
 
+/**
+ * Data width values for ARM_FLASH_CAPABILITIES::data_width
+ * \ref ARM_FLASH_CAPABILITIES
+ */
+ enum {
+    DATA_WIDTH_8BIT   = 0u,
+    DATA_WIDTH_16BIT,
+    DATA_WIDTH_32BIT,
+    DATA_WIDTH_ENUM_SIZE
+};
+
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
 
 /* Driver Version */
 static const ARM_DRIVER_VERSION DriverVersion = {
@@ -125,9 +141,13 @@ struct emulated_flash_dev_t *FLASH0_DEV = &ARM_FLASH0_DEV;
 
 static int32_t ARM_Flash_FLASH0_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     enum emulated_flash_error_t rc = emulated_flash_read_data(FLASH0_DEV, addr, data, cnt);
     if (EMULATED_FLASH_ERR_NONE == rc) {
-        return ARM_DRIVER_OK;
+        cnt /= data_width_byte[DriverCapabilities.data_width];
+        return cnt;
     } else if(EMULATED_FLASH_ERR_INVALID_PARAM == rc) {
         return ARM_DRIVER_ERROR_PARAMETER;
     } else {
@@ -138,10 +158,13 @@ static int32_t ARM_Flash_FLASH0_ReadData(uint32_t addr, void *data, uint32_t cnt
 static int32_t ARM_Flash_FLASH0_ProgramData(uint32_t addr, const void *data,
                                      uint32_t cnt)
 {
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
     enum emulated_flash_error_t rc = emulated_flash_program_data(FLASH0_DEV, addr, data, cnt);
 
     if (EMULATED_FLASH_ERR_NONE == rc) {
-        return ARM_DRIVER_OK;
+        cnt /= data_width_byte[DriverCapabilities.data_width];
+        return cnt;
     } else if(EMULATED_FLASH_ERR_INVALID_PARAM == rc) {
         return ARM_DRIVER_ERROR_PARAMETER;
     } else if(EMULATED_FLASH_NOT_READY == rc) {
@@ -225,9 +248,12 @@ struct emulated_flash_dev_t *FLASH1_DEV = &ARM_FLASH1_DEV;
 
 static int32_t ARM_Flash_FLASH1_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
     enum emulated_flash_error_t rc = emulated_flash_read_data(FLASH1_DEV, addr, data, cnt);
     if (EMULATED_FLASH_ERR_NONE == rc) {
-        return ARM_DRIVER_OK;
+        cnt /= data_width_byte[DriverCapabilities.data_width];
+        return cnt;
     } else if(EMULATED_FLASH_ERR_INVALID_PARAM == rc) {
         return ARM_DRIVER_ERROR_PARAMETER;
     } else {
@@ -238,10 +264,13 @@ static int32_t ARM_Flash_FLASH1_ReadData(uint32_t addr, void *data, uint32_t cnt
 static int32_t ARM_Flash_FLASH1_ProgramData(uint32_t addr, const void *data,
                                      uint32_t cnt)
 {
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
     enum emulated_flash_error_t rc = emulated_flash_program_data(FLASH1_DEV, addr, data, cnt);
 
     if (EMULATED_FLASH_ERR_NONE == rc) {
-        return ARM_DRIVER_OK;
+        cnt /= data_width_byte[DriverCapabilities.data_width];
+        return cnt;
     } else if(EMULATED_FLASH_ERR_INVALID_PARAM == rc) {
         return ARM_DRIVER_ERROR_PARAMETER;
     } else if(EMULATED_FLASH_NOT_READY == rc) {

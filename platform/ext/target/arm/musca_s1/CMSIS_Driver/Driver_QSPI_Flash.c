@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ static const ARM_DRIVER_VERSION DriverVersion = {
 /* Driver Capabilities */
 static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
     EVENT_READY_NOT_AVAILABLE,
-    DATA_WIDTH_32BIT,
+    DATA_WIDTH_8BIT,
     CHIP_ERASE_SUPPORTED
 };
 
@@ -197,6 +197,9 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     uint32_t extra_bytes = 0;
     uint32_t extra_word = 0;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
 
     /* Check Flash memory boundaries */
@@ -228,13 +231,16 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_ProgramData(uint32_t addr,
                                      const void *data, uint32_t cnt)
 {
     enum mt25ql_error_t err = MT25QL_ERR_NONE;
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
 
     ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
 
@@ -260,7 +266,8 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr,
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_EraseSector(uint32_t addr)

@@ -409,10 +409,6 @@ CMSIS_Driver/Driver_Flash.c:
     Refer to the CMSIS `FLASH <https://www.keil.com/pack/doc/CMSIS/Driver/html/group__flash__interface__gr.html>`_
     documentation.
 
-    Note: there is a known misalignment with the current CMSIS Flash interface
-    in TF-M. Currently TF-M expects and returns the size whereas CMSIS Flash
-    specifies the number of elements.
-
 CMSIS_Driver/Driver_USART.c:
 ----------------------------
 
@@ -771,4 +767,4 @@ Annex
     # Requires armclang >= 6.10.1
     tfm_invalid_config((CMAKE_C_COMPILER_ID STREQUAL "ARMClang") AND (CMAKE_C_COMPILER_VERSION VERSION_LESS "6.10.1"))
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

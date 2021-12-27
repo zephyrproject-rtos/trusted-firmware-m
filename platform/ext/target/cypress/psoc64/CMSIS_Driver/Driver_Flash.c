@@ -66,7 +66,11 @@ static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
     0, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
     1  /* erase_chip */
 };
-
+static const uint32_t data_width_byte[] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
 
 #if (RTE_FLASH0)
 
@@ -133,6 +137,8 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     if ( (data == NULL) || (cnt == 0) ) {
         return ARM_DRIVER_OK;
     }
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
 
     // Wraparound check (before adding FLASH0_DEV->memory_base + addr)
     if (FLASH0_DEV->memory_base >= UINT32_MAX - addr) {
@@ -159,7 +165,8 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     // Using memcpy for reading
     memcpy(data, (void *)start_addr, cnt);
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
@@ -175,6 +182,9 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
     if ( (data == NULL) || (cnt == 0) ) {
         return ARM_DRIVER_ERROR_PARAMETER;
     }
+
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
 
     // Make sure cnt argument is aligned to program_unit size
     if (cnt % FLASH0_DEV->data->program_unit) {
@@ -211,7 +221,8 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
     switch (cy_status)
     {
         case CY_FLASH_DRV_SUCCESS:
-            return ARM_DRIVER_OK;
+            cnt /= data_width_byte[DriverCapabilities.data_width];
+            return cnt;
 
         case CY_FLASH_DRV_IPC_BUSY:
             return ARM_DRIVER_ERROR_BUSY;
