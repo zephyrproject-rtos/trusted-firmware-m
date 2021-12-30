@@ -86,6 +86,7 @@ tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_INTERNA
 # PS only uses the platform partition when PS_ROLLBACK_PROTECTION is ON, but
 # the dependency in the manifest file means the dependency is unconditional
 tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_PLATFORM)
+tfm_invalid_config(PS_ROLLBACK_PROTECTION AND TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED)
 tfm_invalid_config(PS_ROLLBACK_PROTECTION AND NOT PS_ENCRYPTION)
 
 ########################## FIH #################################################

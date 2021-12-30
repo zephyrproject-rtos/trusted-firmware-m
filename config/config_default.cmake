@@ -155,6 +155,7 @@ set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Plat
 set(PLATFORM_SERVICE_INPUT_BUFFER_SIZE  64          CACHE STRING    "Size of input buffer in platform service.")
 set(PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE 64          CACHE STRING    "Size of output buffer in platform service.")
 set(PLATFORM_SP_STACK_SIZE              "0x500"     CACHE STRING    "The stack size of the TF-M Platform Secure Partition")
+set(PLATFORM_NV_COUNTER_MODULE_DISABLED FALSE       CACHE BOOL      "Disable Non-volatile counter module")
 
 set(TFM_PARTITION_FIRMWARE_UPDATE       OFF         CACHE BOOL      "Enable firmware update partition")
 set(TFM_FWU_BOOTLOADER_LIB              "mcuboot"   CACHE STRING    "Bootloader configure file for Firmware Update partition")
