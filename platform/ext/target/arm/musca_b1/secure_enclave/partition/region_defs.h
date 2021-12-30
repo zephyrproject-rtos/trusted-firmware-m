@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,6 @@
 #define S_HEAP_SIZE             (0x0000200)
 #define S_MSP_STACK_SIZE_INIT   (0x0000400)
 #define S_MSP_STACK_SIZE        (0x0000800)
-#define S_PSP_STACK_SIZE        (0x0000800)
 
 /* This size of buffer is big enough to store an attestation
  * token produced by initial attestation service

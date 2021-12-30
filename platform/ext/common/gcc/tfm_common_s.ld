@@ -37,7 +37,9 @@ MEMORY
 }
 
 __heap_size__  = S_HEAP_SIZE;
+#if !defined(TFM_PSA_API)
 __psp_stack_size__ = S_PSP_STACK_SIZE;
+#endif
 __msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
 
 /* Library configurations */
