@@ -191,6 +191,10 @@ int main(void)
         FIH_PANIC;
     }
 
+#ifdef TEST_BL1_2
+    run_bl1_2_testsuite();
+#endif /* TEST_BL1_2 */
+
     BL1_LOG("[INF] Attempting to boot image 0\r\n");
     FIH_CALL(validate_image, fih_rc, 0);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
