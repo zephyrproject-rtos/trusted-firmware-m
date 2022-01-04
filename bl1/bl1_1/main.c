@@ -67,6 +67,10 @@ int main(void)
         FIH_PANIC;
     }
 
+#ifdef TEST_BL1_1
+    run_bl1_1_testsuite();
+#endif /* TEST_BL1_1 */
+
     /* Copy BL1_2 from OTP into SRAM*/
     FIH_CALL(bl1_read_bl1_2_image, fih_rc, (uint8_t *)BL1_2_CODE_START);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {

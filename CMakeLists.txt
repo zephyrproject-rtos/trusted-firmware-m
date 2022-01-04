@@ -80,7 +80,7 @@ add_subdirectory(lib/fih)
 add_subdirectory(tools)
 add_subdirectory(secure_fw)
 
-if(NS OR TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2)
+if(NS OR TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2 OR TEST_BL1_1 OR TEST_BL1_2)
     add_subdirectory(${TFM_TEST_REPO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/tf-m-tests)
 endif()
 
