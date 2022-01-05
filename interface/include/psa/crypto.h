@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -2928,7 +2928,9 @@ psa_status_t psa_verify_message( psa_key_id_t key,
  * \param key                   Identifier of the key to use for the operation.
  *                              It must be an asymmetric key pair. The key must
  *                              allow the usage #PSA_KEY_USAGE_SIGN_HASH.
- * \param alg                   A signature algorithm that is compatible with
+ * \param alg                   A signature algorithm (PSA_ALG_XXX
+ *                              value such that #PSA_ALG_IS_SIGN_HASH(\p alg)
+ *                              is true), that is compatible with
  *                              the type of \p key.
  * \param[in] hash              The hash or message to sign.
  * \param hash_length           Size of the \p hash buffer in bytes.
@@ -2981,7 +2983,9 @@ psa_status_t psa_sign_hash(psa_key_id_t key,
  *                          must be a public key or an asymmetric key pair. The
  *                          key must allow the usage
  *                          #PSA_KEY_USAGE_VERIFY_HASH.
- * \param alg               A signature algorithm that is compatible with
+ * \param alg               A signature algorithm (PSA_ALG_XXX
+ *                          value such that #PSA_ALG_IS_SIGN_HASH(\p alg)
+ *                          is true), that is compatible with
  *                          the type of \p key.
  * \param[in] hash          The hash or message whose signature is to be
  *                          verified.

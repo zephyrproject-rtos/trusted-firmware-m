@@ -45,6 +45,8 @@
 #define CCM_VALIDATE( cond ) \
     MBEDTLS_INTERNAL_VALIDATE( cond )
 
+/* API is NOT supported. */
+#define MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED -0x0020
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -465,6 +467,68 @@ int mbedtls_ccm_auth_decrypt( mbedtls_ccm_context *ctx, size_t length,
 
     return( mbedtls_ccm_star_auth_decrypt( ctx, length, iv, iv_len, add,
                 add_len, input, output, tag, tag_len ) );
+}
+
+int mbedtls_ccm_starts( mbedtls_ccm_context *ctx,
+                        int mode,
+                        const unsigned char *iv,
+                        size_t iv_len )
+{
+    UNUSED(ctx);
+    UNUSED(mode);
+    UNUSED(iv);
+    UNUSED(iv_len);
+
+    return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+}
+
+int mbedtls_ccm_set_lengths( mbedtls_ccm_context *ctx,
+                             size_t total_ad_len,
+                             size_t plaintext_len,
+                             size_t tag_len )
+{
+  UNUSED(ctx);
+  UNUSED(total_ad_len);
+  UNUSED(plaintext_len);
+  UNUSED(tag_len);
+
+  return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+}
+
+int mbedtls_ccm_update_ad( mbedtls_ccm_context *ctx,
+                           const unsigned char *ad,
+                           size_t ad_len )
+{
+  UNUSED(ctx);
+  UNUSED(ad);
+  UNUSED(ad_len);
+
+  return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+}
+
+int mbedtls_ccm_update( mbedtls_ccm_context *ctx,
+                        const unsigned char *input, size_t input_len,
+                        unsigned char *output, size_t output_size,
+                        size_t *output_len )
+{
+  UNUSED(ctx);
+  UNUSED(input);
+  UNUSED(input_len);
+  UNUSED(output);
+  UNUSED(output_size);
+  UNUSED(output_len);
+
+  return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+}
+
+int mbedtls_ccm_finish( mbedtls_ccm_context *ctx,
+                        unsigned char *tag, size_t tag_len )
+{
+  UNUSED(ctx);
+  UNUSED(tag);
+  UNUSED(tag_len);
+
+  return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
 }
 
 #endif /*MBEDTLS_CCM_ALT*/

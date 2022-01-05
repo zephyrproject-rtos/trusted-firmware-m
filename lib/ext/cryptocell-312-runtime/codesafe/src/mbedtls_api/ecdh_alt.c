@@ -108,8 +108,8 @@ static int mbedtls_ecp_tls_write_group_edwards( const mbedtls_ecp_group *grp, si
     /*
      * Next two bytes are the namedcurve value
      */
-    buf[0] = curve_info->MBEDTLS_PRIVATE(tls_id) >> 8;
-    buf[1] = curve_info->MBEDTLS_PRIVATE(tls_id) & 0xFF;
+    buf[0] = curve_info->tls_id >> 8;
+    buf[1] = curve_info->tls_id & 0xFF;
 
     return( 0 );
 }
@@ -181,10 +181,10 @@ static int mbedtls_ecp_tls_read_group_edwards( mbedtls_ecp_group *grp, const uns
     tls_id <<= 8;
     tls_id |= *(*buf)++;
 
-    if (curve_info->MBEDTLS_PRIVATE(tls_id) != tls_id){
+    if (curve_info->tls_id != tls_id){
             return( MBEDTLS_ERR_ECP_BAD_INPUT_DATA );
     }
-    return mbedtls_ecp_group_load( grp, curve_info->MBEDTLS_PRIVATE(grp_id) );
+    return mbedtls_ecp_group_load( grp, curve_info->grp_id );
 }
 
 /*
