@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -34,29 +35,29 @@
 #define STATIC_HANDLE_NUM_LIMIT         32
 #define CLIENT_HANDLE_VALUE_MIN         1
 
-#define STAIC_HANDLE_IDX_BIT_WIDTH      8
-#define STAIC_HANDLE_IDX_MASK \
-    (uint32_t)((1UL << STAIC_HANDLE_IDX_BIT_WIDTH) - 1)
+#define STATIC_HANDLE_IDX_BIT_WIDTH     8
+#define STATIC_HANDLE_IDX_MASK \
+    (uint32_t)((1UL << STATIC_HANDLE_IDX_BIT_WIDTH) - 1)
 #define GET_INDEX_FROM_STATIC_HANDLE(handle) \
-    (uint32_t)((handle) & STAIC_HANDLE_IDX_MASK)
+    (uint32_t)((handle) & STATIC_HANDLE_IDX_MASK)
 
-#define STAIC_HANDLE_VER_BIT_WIDTH      8
-#define STAIC_HANDLE_VER_OFFSET         8
-#define STAIC_HANDLE_VER_MASK \
-    (uint32_t)((1UL << STAIC_HANDLE_VER_BIT_WIDTH) - 1)
+#define STATIC_HANDLE_VER_BIT_WIDTH     8
+#define STATIC_HANDLE_VER_OFFSET        8
+#define STATIC_HANDLE_VER_MASK \
+    (uint32_t)((1UL << STATIC_HANDLE_VER_BIT_WIDTH) - 1)
 #define GET_VERSION_FROM_STATIC_HANDLE(handle) \
-    (uint32_t)(((handle) >> STAIC_HANDLE_VER_OFFSET) & STAIC_HANDLE_VER_MASK)
+    (uint32_t)(((handle) >> STATIC_HANDLE_VER_OFFSET) & STATIC_HANDLE_VER_MASK)
 
 /* Validate the static handle indicator bit */
-#define STAIC_HANDLE_INDICATOR_OFFSET   30
+#define STATIC_HANDLE_INDICATOR_OFFSET  30
 #define IS_STATIC_HANDLE(handle) \
-    ((handle) & (1UL << STAIC_HANDLE_INDICATOR_OFFSET))
+    ((handle) & (1UL << STATIC_HANDLE_INDICATOR_OFFSET))
 
 /* Valid index should be [0, STATIC_HANDLE_NUM_LIMIT-1] */
 #define IS_VALID_STATIC_HANDLE_IDX(index) \
     ((uint32_t)(index) < STATIC_HANDLE_NUM_LIMIT)
 
-#define SPM_INVALID_PARTITION_IDX     (~0U)
+#define SPM_INVALID_PARTITION_IDX       (~0U)
 
 #define TFM_MSG_MAGIC                   0x15154343
 #define TFM_MSG_MAGIC_SFN               0x21216565
@@ -100,19 +101,19 @@ struct partition_t {
     void                               *p_boundaries;
     void                               *p_interrupts;
     void                               *p_metadata;
+    struct context_ctrl_t              ctx_ctrl;
+    uint32_t                           signals_allowed;
+    uint32_t                           signals_waiting;
+    uint32_t                           signals_asserted;
+    struct sync_obj_t                  waitobj;
     union {
         struct thread_t                thrd;            /* IPC model */
         uint32_t                       state;           /* SFN model */
     };
-    struct sync_obj_t                  waitobj;
-    struct context_ctrl_t              ctx_ctrl;
     union {
         struct bi_list_node_t          msg_list;        /* IPC model */
         struct tfm_msg_body_t          *p_msg;          /* SFN model */
     };
-    uint32_t                           signals_allowed;
-    uint32_t                           signals_waiting;
-    uint32_t                           signals_asserted;
     struct partition_t                 *next;
 };
 
@@ -445,37 +446,7 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg);
  */
 void spm_assert_signal(void *p_pt, psa_signal_t signal);
 
-/**
- * \brief Return the IRQ load info context pointer associated with a signal
- *
- * \param[in]      p_ldinf      The load info of the partition in which we look
- *                              for the signal.
- * \param[in]      signal       The signal to query for.
- *
- * \retval NULL                 if one of more the following are true:
- *                              - the \ref signal indicates more than one signal
- *                              - the \ref signal does not belong to the
- *                                partition.
- * \retval Any other value      The load info pointer associated with the signal
- */
-struct irq_load_info_t *get_irq_info_for_signal(
-                                    const struct partition_load_info_t *p_ldinf,
-                                    psa_signal_t signal);
-
-/**
- * \brief Entry of Secure interrupt handler. Platforms can call this function to
- *        handle individual interrupts.
- *
- * \param[in] p_pt         The owner Partition of the interrupt to handle
- * \param[in] p_ildi       The irq_load_info_t struct of the interrupt to handle
- *
- * Note:
- *  The input parameters are maintained by platforms and they must be init-ed
- *  in the interrupt init functions.
- */
-void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi);
-
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 
 /*
  * SPM dispatcher to handle the API call under non-privileged model.
@@ -487,12 +458,12 @@ void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi);
  * frame_addr   - customized ABI frame type for the function call.
  * switch_stack - indicator if need to switch stack.
  */
-void spm_interface_thread_dispatcher(uintptr_t fn_addr,
-                                     uintptr_t frame_addr,
-                                     uint32_t  switch_stack);
+void spm_interface_cross_dispatcher(uintptr_t fn_addr,
+                                    uintptr_t frame_addr,
+                                    uint32_t  switch_stack);
 
 /* Execute a customized ABI function in C */
-void spcall_execute_c(uintptr_t fn_addr, uintptr_t frame_addr);
+void cross_call_execute_c(uintptr_t fn_addr, uintptr_t frame_addr);
 
 #endif
 

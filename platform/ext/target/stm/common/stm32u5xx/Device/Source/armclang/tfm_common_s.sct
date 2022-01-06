@@ -95,10 +95,6 @@ LR_CODE S_CODE_START S_CODE_SIZE {
 
     ER_INITIAL_PSP_SEAL +0 EMPTY 0x8 {
     }
-# else
-    /* PSP is unprivileged in single-core topology */
-    ER_INITIAL_PSP +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
-    }
 # endif /* !defined(TFM_PSA_API) */
 
 

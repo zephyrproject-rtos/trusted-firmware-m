@@ -31,7 +31,8 @@ extern "C" {
 #define AP_RO_PRIV_UNPRIV       0b110U
 #define AP_RW_PRIV_R_UNPRIV     0b010U
 
-#define TFM_ISOLATION_REGION_START_NUMBER (0)
+#define FIREWALL_REGION_NUMBER 0
+#define TFM_ISOLATION_REGION_START_NUMBER (FIREWALL_REGION_NUMBER + 1)
 
 static inline int is_power_two(uint32_t x)
 {

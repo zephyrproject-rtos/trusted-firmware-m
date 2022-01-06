@@ -22,11 +22,6 @@ extern "C" {
 #define {{"%-55s"|format(manifest.name + "_MODEL_SFN")}} 0
 {% endif %}
 
-{# Service and IRQ at least one must be declared. #}
-{% if (manifest.services | length) == 0 and (manifest.irqs | length) == 0 %}
-#error "Service and IRQ at least one must be declared!"
-{% endif %}
-
 {% set service_signal = namespace(bit=4) %}
 {% if manifest.services %}
     {% for service in manifest.services %}

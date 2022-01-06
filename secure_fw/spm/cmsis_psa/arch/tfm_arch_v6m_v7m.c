@@ -30,15 +30,15 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 
-#pragma required = spcall_execute_c
+#pragma required = cross_call_execute_c
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL */
 
 #endif
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 
 __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
                                        uint32_t stk_base, uint32_t stk_limit)
@@ -60,7 +60,7 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   str    r4, [r3, #0]                         \n"
         "   cpsie  i                                    \n"
         "   push   {r2, r3}                             \n"
-        "   bl     spcall_execute_c                     \n"
+        "   bl     cross_call_execute_c                 \n"
         "   pop    {r2, r3}                             \n"
         "   cpsid  i                                    \n"
         "   cmp    r2, #0                               \n"
@@ -75,7 +75,7 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
     );
 }
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL */
 
 __attribute__((naked)) void PendSV_Handler(void)
 {
@@ -89,6 +89,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   mov     lr, r3                  \n"
         "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
         "   beq     v6v7_pendsv_exit        \n" /* No schedule if curr = next */
+        "   cpsid   i                       \n"
         "   mrs     r2, psp                 \n"
         "   subs    r2, #32                 \n" /* Make room for r4-r11 */
         "   stm     r2!, {r4-r7}            \n" /* Save callee registers */
@@ -112,6 +113,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   ldm     r2!, {r4-r7}            \n"
         "   adds    r2, #16                 \n" /* End of popping r4-r11 */
         "   msr     psp, r2                 \n"
+        "   cpsie   i                       \n"
         "v6v7_pendsv_exit:                  \n"
         "   bx      lr                      \n"
     );
@@ -126,19 +128,21 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"
-    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "PUSH    {r2, r3}                       \n" /* PSP dummy */
+    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "BL      tfm_core_svc_handler           \n"
     "MOV     lr, r0                         \n"
-    "LDR     r1, [sp]                       \n" /* Original EXC_RETURN */
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "MOVS    r2, #8                         \n"
     "ANDS    r0, r2                         \n" /* Mode bit */
     "ANDS    r1, r2                         \n"
+    "POP     {r2, r3}                       \n" /* PSP dummy */
     "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
     "BGT     to_flih_func                   \n"
     "BLT     from_flih_func                 \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BX      lr                             \n"
     "to_flih_func:                          \n"
+    "PUSH    {r2, r3}                       \n" /* PSP dummy */
     "PUSH    {r4-r7}                        \n"
     "MOV     r4, r8                         \n"
     "MOV     r5, r9                         \n"
@@ -156,7 +160,6 @@ __attribute__((naked)) void SVC_Handler(void)
     "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
     "BX      lr                             \n"
     "from_flih_func:                        \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "POP     {r4, r5}                       \n" /* Seal stack */
     "POP     {r4-r7}                        \n"
     "MOV     r8, r4                         \n"
@@ -164,7 +167,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "MOV     r10, r6                        \n"
     "MOV     r11, r7                        \n"
     "POP     {r4-r7}                        \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "POP     {r1, r2}                       \n" /* PSP dummy */
     "BX      lr                             \n"
     );
 }

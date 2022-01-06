@@ -73,6 +73,7 @@ target_link_libraries(platform_s
         tfm_secure_api
         tfm_arch
         tfm_partition_defs
+        tfm_spm
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:tfm_sprt>
         $<$<AND:$<BOOL:${TFM_PARTITION_CRYPTO}>,$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>>:crypto_service_mbedtls>
 )
@@ -80,6 +81,7 @@ target_link_libraries(platform_s
 target_compile_definitions(platform_s
     PUBLIC
         TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL}
+        $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:TFM_SPM_LOG_RAW_ENABLED>
         $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION>
         CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
         $<$<BOOL:${CONFIG_TFM_LAZY_STACKING_SPE}>:CONFIG_TFM_LAZY_STACKING_SPE>
@@ -162,7 +164,22 @@ if(BL2)
             $<$<BOOL:${ATTEST_INCLUDE_COSE_KEY_ID}>:ATTEST_INCLUDE_COSE_KEY_ID>
             $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
+    )
+
+    if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
+
+        target_link_libraries(platform_bl2
+            PRIVATE
+                trusted-firmware-m-psa-adac
         )
+
+        target_compile_definitions(platform_bl2
+            PRIVATE
+                PLATFORM_PSA_ADAC_SECURE_DEBUG
+        )
+
+    endif()
+
 endif()
 
 #========================= Platform region defs ===============================#

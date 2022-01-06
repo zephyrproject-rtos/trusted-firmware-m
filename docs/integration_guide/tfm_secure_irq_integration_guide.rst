@@ -228,7 +228,7 @@ Here is an example of named region:
 The Device Drivers
 ------------------
 
-To give permissions of devices drivers to Secure Partitions, it is recommanded
+To give permissions of devices drivers to Secure Partitions, it is recommended
 to put the driver codes to the Partition's CMake library:
 
 .. code-block:: bash
@@ -261,6 +261,10 @@ For example if the manifest declares ``"source": 5``, then the function name
 is ``irq_5_init``.
 If the mannifest declares ``"source"  : "TIMER_1_IRQ"`` then the function
 name is ``timer_1_irq_init``.
+
+The function will be called by the Framework automatically during
+initialization. The function can be put in any source file that belongs to SPM,
+for example a ``tfm_interrupts.c`` added to the ``platform_s`` CMake target.
 
 The initialization of an interrupt must include:
 
@@ -328,8 +332,20 @@ TF-M provides an interrupt handling entry for Secure interrupts:
 The ``p_pt`` and ``p_ildi`` are the information passed to interrupt
 initialization functions and saved by platforms.
 
-Platforms should call this entry function in the interrupt handlers defined in
-Vector Table with the saved information for each interrupt.
+Platforms should call this entry function in the interrupt handlers held in
+Vector Table with the information saved by the interrupt initialization
+functions.
+If the information is saved as global variables, then the interrupt handlers can
+be put in the same source file that contains the initialization functions.
+
+Here is an example:
+
+.. code-block:: c
+
+  void TFM_TIMER0_IRQ_Handler(void) /* The handler in Vector Table */
+  {
+      spm_handle_interrupt(p_timer0_pt, p_tfm_timer0_irq_ldinf);
+  }
 
 ****************************
 Enabling the Interrupt Tests

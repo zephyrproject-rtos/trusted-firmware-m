@@ -13,15 +13,18 @@
 #include "psa/client.h"
 #include "psa/service.h"
 
-#define PROGRAMMER_ERROR_NULL
-#define TFM_PROGRAMMER_ERROR(ns_caller, error_status) \
-        do { \
-            if (ns_caller) { \
-                return error_status; \
-             } else { \
-                tfm_core_panic(); \
-             } \
-        } while (0)
+/**
+ * \brief This function handles the specific programmer error cases.
+ *
+ * \param[in] status            Standard error codes for the SPM.
+ *
+ * \retval void                 Status will not cause SPM panic
+ * \retval "SPM panic"          Following programmer errors are triggered by SP:
+ * \arg                           PSA_ERROR_PROGRAMMER_ERROR
+ * \arg                           PSA_ERROR_CONNECTION_REFUSED
+ * \arg                           PSA_ERROR_CONNECTION_BUSY
+ */
+void spm_handle_programmer_errors(psa_status_t status);
 
 /**
  * \brief This function get the current PSA RoT lifecycle state.
@@ -105,14 +108,15 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
  * \param[in] handle            Service handle to the connection to be closed,
  *                              \ref psa_handle_t
  *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_PROGRAMMER_ERROR The call is invalid, one or more of the
  *                              following are true:
+ * \arg                           Called with a stateless handle.
  * \arg                           An invalid handle was provided that is not
  *                                the null handle.
  * \arg                           The connection is handling a request.
  */
-void tfm_spm_client_psa_close(psa_handle_t handle);
+psa_status_t tfm_spm_client_psa_close(psa_handle_t handle);
 
 /* PSA Partition API function body, for privileged use only. */
 
@@ -313,7 +317,7 @@ void tfm_spm_partition_psa_panic(void);
  * \arg                       \a irq_signal is not an interrupt signal.
  * \arg                       \a irq_signal indicates more than one signal.
  */
-void tfm_spm_partition_irq_enable(psa_signal_t irq_signal);
+void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal);
 
 /**
  * \brief Function body of psa_irq_disable.
@@ -331,7 +335,7 @@ void tfm_spm_partition_irq_enable(psa_signal_t irq_signal);
  *
  * \note The current implementation always return 1. Do not use the return.
  */
-psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal);
+psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal);
 
 /**
  * \brief Function body of \ref psa_reset_signal.

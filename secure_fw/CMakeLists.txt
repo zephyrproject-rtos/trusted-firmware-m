@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -28,7 +29,8 @@ add_subdirectory(partitions/internal_trusted_storage)
 add_subdirectory(partitions/platform)
 add_subdirectory(partitions/psa_proxy)
 add_subdirectory(partitions/firmware_update)
-add_subdirectory(partitions/ns_agent)
+add_subdirectory(partitions/ns_agent_tz)
+add_subdirectory(partitions/ns_agent_mailbox)
 add_subdirectory(partitions/idle_partition)
 if (TFM_EXTRA_PARTITION_PATHS)
     set(POSTFIX 1)
@@ -100,7 +102,7 @@ target_link_libraries(tfm_secure_api
 
 set_source_files_properties(
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c
-    ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_thread.c
+    ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_cross.c
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c
     PROPERTIES
     COMPILE_FLAGS $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
@@ -112,7 +114,7 @@ set_source_files_properties(
 target_sources(tfm_secure_api
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_thread.c>
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_cross.c>
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c>
 )
 

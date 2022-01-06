@@ -22,7 +22,7 @@
     .syntax    unified
     .arch    armv6-m
 
-    .section .vectors
+    .section .vectors, "a"
     .align 2
     .globl    __Vectors
 __Vectors:

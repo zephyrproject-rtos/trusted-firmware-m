@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -620,9 +621,7 @@ uint32_t tfm_spm_init(void)
     UNI_LISI_INIT_HEAD(&services_listhead);
 
     /* Init the nonsecure context. */
-#ifndef TFM_MULTI_CORE_TOPOLOGY
-     tfm_nspm_ctx_init();
-#endif
+    tfm_nspm_ctx_init();
 
     while (1) {
         partition = load_a_partition_assuredly(PARTITION_LIST_ADDR);
@@ -686,6 +685,7 @@ uint64_t do_schedule(void)
     union returning_contexts_t ret_ctx;
     struct partition_t *p_part_curr, *p_part_next;
     struct thread_t *pth_next = thrd_next();
+    struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
 
     ret_ctx.ctx.curr = (uint32_t)CURRENT_THREAD->p_context_ctrl;
     ret_ctx.ctx.next = (uint32_t)CURRENT_THREAD->p_context_ctrl;
@@ -700,6 +700,7 @@ uint64_t do_schedule(void)
             tfm_core_panic();
         }
 
+        CRITICAL_SECTION_ENTER(cs);
         /*
          * If required, let the platform update boundary based on its
          * implementation. Change privilege, MPU or other configurations.
@@ -715,6 +716,7 @@ uint64_t do_schedule(void)
 
         ret_ctx.ctx.next = (uint32_t)pth_next->p_context_ctrl;
         CURRENT_THREAD = pth_next;
+        CRITICAL_SECTION_LEAVE(cs);
     }
 
     /*
@@ -773,72 +775,4 @@ void spm_assert_signal(void *p_pt, psa_signal_t signal)
     }
 
     CRITICAL_SECTION_LEAVE(cs_assert);
-}
-
-__attribute__((naked))
-static psa_flih_result_t tfm_flih_deprivileged_handling(void *p_pt,
-                                                        uintptr_t fn_flih,
-                                                        void *p_context_ctrl)
-{
-    __ASM volatile("SVC %0           \n"
-                   "BX LR            \n"
-                   : : "I" (TFM_SVC_PREPARE_DEPRIV_FLIH));
-}
-
-void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
-{
-    psa_flih_result_t flih_result;
-    struct partition_t *p_part;
-
-    if (!p_pt || !p_ildi) {
-        tfm_core_panic();
-    }
-
-    p_part = (struct partition_t *)p_pt;
-
-    if (p_ildi->pid != p_part->p_ldinf->pid) {
-        tfm_core_panic();
-    }
-
-    if (p_ildi->flih_func == NULL) {
-        /* SLIH Model Handling */
-        tfm_hal_irq_disable(p_ildi->source);
-        flih_result = PSA_FLIH_SIGNAL;
-    } else {
-        /* FLIH Model Handling */
-        if (tfm_spm_partition_get_privileged_mode(p_part->p_ldinf->flags) ==
-                                                TFM_PARTITION_PRIVILEGED_MODE) {
-            flih_result = p_ildi->flih_func();
-        } else {
-            flih_result = tfm_flih_deprivileged_handling(
-                                                p_part,
-                                                (uintptr_t)p_ildi->flih_func,
-                                                CURRENT_THREAD->p_context_ctrl);
-        }
-    }
-
-    if (flih_result == PSA_FLIH_SIGNAL) {
-        spm_assert_signal(p_pt, p_ildi->signal);
-    }
-}
-
-struct irq_load_info_t *get_irq_info_for_signal(
-                                    const struct partition_load_info_t *p_ldinf,
-                                    psa_signal_t signal)
-{
-    size_t i;
-    struct irq_load_info_t *irq_info;
-
-    if (!IS_ONLY_ONE_BIT_IN_UINT32(signal)) {
-        return NULL;
-    }
-
-    irq_info = (struct irq_load_info_t *)LOAD_INFO_IRQ(p_ldinf);
-    for (i = 0; i < p_ldinf->nirqs; i++) {
-        if (irq_info[i].signal == signal) {
-            return &irq_info[i];
-        }
-    }
-
-    return NULL;
 }

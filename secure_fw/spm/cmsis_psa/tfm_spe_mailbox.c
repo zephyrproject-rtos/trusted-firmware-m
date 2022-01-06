@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -194,15 +195,14 @@ int32_t tfm_mailbox_handle_msg(void)
 
     tfm_mailbox_hal_enter_critical();
 
-    /* Check if NSPE mailbox did assert a PSA client call request */
-    if (!ns_queue->pend_slots) {
-        tfm_mailbox_hal_exit_critical();
-        return MAILBOX_NO_PEND_EVENT;
-    }
-
     pend_slots = get_nspe_queue_pend_status(ns_queue);
 
     tfm_mailbox_hal_exit_critical();
+
+    /* Check if NSPE mailbox did assert a PSA client call request */
+    if (!pend_slots) {
+        return MAILBOX_NO_PEND_EVENT;
+    }
 
     for (idx = 0; idx < NUM_MAILBOX_QUEUE_SLOT; idx++) {
         mask_bits = (1 << idx);

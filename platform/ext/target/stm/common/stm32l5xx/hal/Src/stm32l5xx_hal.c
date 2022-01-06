@@ -49,11 +49,11 @@
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /**
- * @brief STM32L5xx HAL Driver version number
-   */
+  * @brief STM32L5xx HAL Driver version number
+  */
 #define STM32L5XX_HAL_VERSION_MAIN   (0x01U) /*!< [31:24] main version */
 #define STM32L5XX_HAL_VERSION_SUB1   (0x00U) /*!< [23:16] sub1 version */
-#define STM32L5XX_HAL_VERSION_SUB2   (0x02U) /*!< [15:8]  sub2 version */
+#define STM32L5XX_HAL_VERSION_SUB2   (0x04U) /*!< [15:8]  sub2 version */
 #define STM32L5XX_HAL_VERSION_RC     (0x00U) /*!< [7:0]  release candidate */
 #define STM32L5XX_HAL_VERSION        ((STM32L5XX_HAL_VERSION_MAIN  << 24U)\
                                       |(STM32L5XX_HAL_VERSION_SUB1 << 16U)\
@@ -77,7 +77,7 @@
   */
 __IO uint32_t uwTick;
 uint32_t uwTickPrio = (1UL << __NVIC_PRIO_BITS); /* Invalid priority */
-uint32_t uwTickFreq = HAL_TICK_FREQ_DEFAULT;  /* 1KHz */
+HAL_TickFreqTypeDef uwTickFreq = HAL_TICK_FREQ_DEFAULT;  /* 1KHz */
 /**
   * @}
   */
@@ -89,8 +89,8 @@ uint32_t uwTickFreq = HAL_TICK_FREQ_DEFAULT;  /* 1KHz */
   */
 
 /** @defgroup HAL_Exported_Functions_Group1 Initialization and de-initialization Functions
- *  @brief    Initialization and de-initialization functions
- *
+  *  @brief    Initialization and de-initialization functions
+  *
 @verbatim
  ===============================================================================
               ##### Initialization and de-initialization functions #####
@@ -162,7 +162,7 @@ HAL_StatusTypeDef HAL_Init(void)
 }
 
 /**
-  * @brief De-initialize common part of the HAL and stop the source of time base.
+  * @brief DeInitialize common part of the HAL and stop the source of time base.
   * @note This function is optional.
   * @retval HAL status
   */
@@ -233,10 +233,11 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 {
   HAL_StatusTypeDef  status = HAL_OK;
 
-  if (uwTickFreq != 0U)
+  /* Check uwTickFreq for MisraC 2012 (even if uwTickFreq is a enum type that doesn't take the value zero)*/
+  if ((uint32_t)uwTickFreq != 0U)
   {
     /*Configure the SysTick to have interrupt in 1ms time basis*/
-    if (HAL_SYSTICK_Config(SystemCoreClock / (1000U / uwTickFreq)) == 0U)
+    if (HAL_SYSTICK_Config(SystemCoreClock / (1000U / (uint32_t)uwTickFreq)) == 0U)
     {
       /* Configure the SysTick IRQ priority */
       if (TickPriority < (1UL << __NVIC_PRIO_BITS))
@@ -268,8 +269,8 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   */
 
 /** @defgroup HAL_Exported_Functions_Group2 HAL Control functions
- *  @brief    HAL Control functions
- *
+  *  @brief    HAL Control functions
+  *
 @verbatim
  ===============================================================================
                       ##### HAL Control functions #####
@@ -292,13 +293,13 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
   *        used as application time base.
   * @note In the default implementation, this variable is incremented each 1ms
   *       in SysTick ISR.
- * @note This function is declared as __weak to be overwritten in case of other
+  * @note This function is declared as __weak to be overwritten in case of other
   *      implementations in user file.
   * @retval None
   */
 __weak void HAL_IncTick(void)
 {
-  uwTick += uwTickFreq;
+  uwTick += (uint32_t)uwTickFreq;
 }
 
 /**
@@ -326,18 +327,25 @@ uint32_t HAL_GetTickPrio(void)
   * @param Freq tick frequency
   * @retval HAL status
   */
-HAL_StatusTypeDef HAL_SetTickFreq(uint32_t Freq)
+HAL_StatusTypeDef HAL_SetTickFreq(HAL_TickFreqTypeDef Freq)
 {
   HAL_StatusTypeDef status  = HAL_OK;
-  assert_param(IS_TICKFREQ(Freq));
+  HAL_TickFreqTypeDef prevTickFreq;
 
   if (uwTickFreq != Freq)
   {
+    /* Back up uwTickFreq frequency */
+    prevTickFreq = uwTickFreq;
+
+    /* Update uwTickFreq global variable used by HAL_InitTick() */
+    uwTickFreq = Freq;
+
     /* Apply the new tick Freq  */
     status = HAL_InitTick(uwTickPrio);
-    if (status == HAL_OK)
+    if (status != HAL_OK)
     {
-      uwTickFreq = Freq;
+      /* Restore previous tick frequency */
+      uwTickFreq = prevTickFreq;
     }
   }
 
@@ -348,7 +356,7 @@ HAL_StatusTypeDef HAL_SetTickFreq(uint32_t Freq)
   * @brief Return tick frequency.
   * @retval tick period in Hz
   */
-uint32_t HAL_GetTickFreq(void)
+HAL_TickFreqTypeDef HAL_GetTickFreq(void)
 {
   return uwTickFreq;
 }
@@ -372,10 +380,10 @@ __weak void HAL_Delay(uint32_t Delay)
   /* Add a period to guaranty minimum wait */
   if (wait < HAL_MAX_DELAY)
   {
-    wait += (uint32_t)(uwTickFreq);
+    wait += (uint32_t)uwTickFreq;
   }
 
-  while((HAL_GetTick() - tickstart) < wait)
+  while ((HAL_GetTick() - tickstart) < wait)
   {
   }
 }
@@ -418,7 +426,7 @@ __weak void HAL_ResumeTick(void)
   */
 uint32_t HAL_GetHalVersion(void)
 {
- return STM32L5XX_HAL_VERSION;
+  return STM32L5XX_HAL_VERSION;
 }
 
 /**
@@ -427,7 +435,7 @@ uint32_t HAL_GetHalVersion(void)
   */
 uint32_t HAL_GetREVID(void)
 {
-   return((DBGMCU->IDCODE & DBGMCU_IDCODE_REV_ID) >> DBGMCU_IDCODE_REV_ID_Pos);
+  return ((DBGMCU->IDCODE & DBGMCU_IDCODE_REV_ID) >> DBGMCU_IDCODE_REV_ID_Pos);
 }
 
 /**
@@ -436,7 +444,7 @@ uint32_t HAL_GetREVID(void)
   */
 uint32_t HAL_GetDEVID(void)
 {
-   return(DBGMCU->IDCODE & DBGMCU_IDCODE_DEV_ID);
+  return (DBGMCU->IDCODE & DBGMCU_IDCODE_DEV_ID);
 }
 
 /**
@@ -445,7 +453,7 @@ uint32_t HAL_GetDEVID(void)
   */
 uint32_t HAL_GetUIDw0(void)
 {
-   return(READ_REG(*((uint32_t *)UID_BASE)));
+  return (READ_REG(*((uint32_t *)UID_BASE)));
 }
 
 /**
@@ -454,7 +462,7 @@ uint32_t HAL_GetUIDw0(void)
   */
 uint32_t HAL_GetUIDw1(void)
 {
-   return(READ_REG(*((uint32_t *)(UID_BASE + 4U))));
+  return (READ_REG(*((uint32_t *)(UID_BASE + 4U))));
 }
 
 /**
@@ -463,7 +471,7 @@ uint32_t HAL_GetUIDw1(void)
   */
 uint32_t HAL_GetUIDw2(void)
 {
-   return(READ_REG(*((uint32_t *)(UID_BASE + 8U))));
+  return (READ_REG(*((uint32_t *)(UID_BASE + 8U))));
 }
 
 /**
@@ -471,38 +479,19 @@ uint32_t HAL_GetUIDw2(void)
   */
 
 /** @defgroup HAL_Exported_Functions_Group3 HAL Debug functions
- *  @brief    HAL Debug functions
- *
+  *  @brief    HAL Debug functions
+  *
 @verbatim
  ===============================================================================
                       ##### HAL Debug functions #####
  ===============================================================================
     [..]  This section provides functions allowing to:
-      (+) Enable/Disable Debug module during SLEEP mode
       (+) Enable/Disable Debug module during STOP0/STOP1/STOP2 modes
       (+) Enable/Disable Debug module during STANDBY mode
 
 @endverbatim
   * @{
   */
-
-/**
-  * @brief  Enable the Debug Module during SLEEP mode.
-  * @retval None
-  */
-void HAL_DBGMCU_EnableDBGSleepMode(void)
-{
-  SET_BIT(DBGMCU->CR, DBGMCU_CR_DBG_SLEEP);
-}
-
-/**
-  * @brief  Disable the Debug Module during SLEEP mode.
-  * @retval None
-  */
-void HAL_DBGMCU_DisableDBGSleepMode(void)
-{
-  CLEAR_BIT(DBGMCU->CR, DBGMCU_CR_DBG_SLEEP);
-}
 
 /**
   * @brief  Enable the Debug Module during STOP0/STOP1/STOP2 modes.
@@ -545,8 +534,8 @@ void HAL_DBGMCU_DisableDBGStandbyMode(void)
   */
 
 /** @defgroup HAL_Exported_Functions_Group4 HAL SYSCFG configuration functions
- *  @brief    HAL SYSCFG configuration functions
- *
+  *  @brief    HAL SYSCFG configuration functions
+  *
 @verbatim
  ===============================================================================
                       ##### HAL SYSCFG configuration functions #####
@@ -655,9 +644,9 @@ HAL_StatusTypeDef HAL_SYSCFG_EnableVREFBUF(void)
   tickstart = HAL_GetTick();
 
   /* Wait for VRR bit  */
-  while(READ_BIT(VREFBUF->CSR, VREFBUF_CSR_VRR) == 0U)
+  while (READ_BIT(VREFBUF->CSR, VREFBUF_CSR_VRR) == 0U)
   {
-    if((HAL_GetTick() - tickstart) > VREFBUF_TIMEOUT_VALUE)
+    if ((HAL_GetTick() - tickstart) > VREFBUF_TIMEOUT_VALUE)
     {
       return HAL_TIMEOUT;
     }
@@ -721,8 +710,8 @@ void HAL_SYSCFG_DisableIOAnalogSwitchVdd(void)
   */
 
 /** @defgroup HAL_Exported_Functions_Group5 HAL SYSCFG lock management functions
- *  @brief SYSCFG lock management functions.
- *
+  *  @brief SYSCFG lock management functions.
+  *
 @verbatim
  ===============================================================================
                        ##### SYSCFG lock functions #####
@@ -766,7 +755,7 @@ HAL_StatusTypeDef HAL_SYSCFG_GetLock(uint32_t *pItem)
   uint32_t tmp_lock;
 
   /* Check null pointer */
-  if(pItem == NULL)
+  if (pItem == NULL)
   {
     return HAL_ERROR;
   }
@@ -793,8 +782,8 @@ HAL_StatusTypeDef HAL_SYSCFG_GetLock(uint32_t *pItem)
 
 
 /** @defgroup HAL_Exported_Functions_Group6 HAL SYSCFG attributes management functions
- *  @brief SYSCFG attributes management functions.
- *
+  *  @brief SYSCFG attributes management functions.
+  *
 @verbatim
  ===============================================================================
                        ##### SYSCFG attributes functions #####
@@ -824,7 +813,7 @@ void HAL_SYSCFG_ConfigAttributes(uint32_t Item, uint32_t Attributes)
   tmp = SYSCFG_S->SECCFGR;
 
   /* Set or reset Item */
-  if((Attributes & SYSCFG_SEC) != 0x00U)
+  if ((Attributes & SYSCFG_SEC) != 0x00U)
   {
     tmp |= Item;
   }
@@ -848,7 +837,7 @@ void HAL_SYSCFG_ConfigAttributes(uint32_t Item, uint32_t Attributes)
 HAL_StatusTypeDef HAL_SYSCFG_GetConfigAttributes(uint32_t Item, uint32_t *pAttributes)
 {
   /* Check null pointer */
-  if(pAttributes == NULL)
+  if (pAttributes == NULL)
   {
     return HAL_ERROR;
   }
@@ -857,7 +846,7 @@ HAL_StatusTypeDef HAL_SYSCFG_GetConfigAttributes(uint32_t Item, uint32_t *pAttri
   assert_param(IS_SYSCFG_ITEMS_ATTRIBUTES(Item));
 
   /* Get the secure attribute state */
-  if((SYSCFG_S->SECCFGR & Item) != 0U)
+  if ((SYSCFG_S->SECCFGR & Item) != 0U)
   {
     *pAttributes = SYSCFG_SEC;
   }

@@ -32,34 +32,34 @@
 #define psa_reset_signal         psa_reset_signal_svc
 #define psa_rot_lifecycle_state  psa_rot_lifecycle_state_svc
 
-#elif defined(CONFIG_TFM_PSA_API_THREAD_CALL)
+#elif defined(CONFIG_TFM_PSA_API_CROSS_CALL)
 
-#define psa_framework_version    psa_framework_version_thread
-#define psa_version              psa_version_thread
-#define psa_connect              psa_connect_thread
-#define tfm_psa_call_pack        tfm_psa_call_pack_thread
-#define psa_close                psa_close_thread
-#define psa_wait                 psa_wait_thread
-#define psa_get                  psa_get_thread
-#define psa_set_rhandle          psa_set_rhandle_thread
-#define psa_read                 psa_read_thread
-#define psa_skip                 psa_skip_thread
-#define psa_write                psa_write_thread
-#define psa_reply                psa_reply_thread
-#define psa_notify               psa_notify_thread
-#define psa_clear                psa_clear_thread
-#define psa_eoi                  psa_eoi_thread
-#define psa_panic                psa_panic_thread
-#define psa_irq_enable           psa_irq_enable_thread
-#define psa_irq_disable          psa_irq_disable_thread
-#define psa_reset_signal         psa_reset_signal_thread
-#define psa_rot_lifecycle_state  psa_rot_lifecycle_state_thread
+#define psa_framework_version    psa_framework_version_cross
+#define psa_version              psa_version_cross
+#define psa_connect              psa_connect_cross
+#define tfm_psa_call_pack        tfm_psa_call_pack_cross
+#define psa_close                psa_close_cross
+#define psa_wait                 psa_wait_cross
+#define psa_get                  psa_get_cross
+#define psa_set_rhandle          psa_set_rhandle_cross
+#define psa_read                 psa_read_cross
+#define psa_skip                 psa_skip_cross
+#define psa_write                psa_write_cross
+#define psa_reply                psa_reply_cross
+#define psa_notify               psa_notify_cross
+#define psa_clear                psa_clear_cross
+#define psa_eoi                  psa_eoi_cross
+#define psa_panic                psa_panic_cross
+#define psa_irq_enable           psa_irq_enable_cross
+#define psa_irq_disable          psa_irq_disable_cross
+#define psa_reset_signal         psa_reset_signal_cross
+#define psa_rot_lifecycle_state  psa_rot_lifecycle_state_cross
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
-#define psa_map_invec            psa_map_invec_thread
-#define psa_unmap_invec          psa_unmap_invec_thread
-#define psa_map_outvec           psa_map_outvec_thread
-#define psa_unmap_outvec         psa_unmap_outvec_thread
+#define psa_map_invec            psa_map_invec_cross
+#define psa_unmap_invec          psa_unmap_invec_cross
+#define psa_map_outvec           psa_map_outvec_cross
+#define psa_unmap_outvec         psa_unmap_outvec_cross
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
 #elif defined(CONFIG_TFM_PSA_API_SFN_CALL)
@@ -74,6 +74,13 @@
 #define psa_skip                 psa_skip_sfn
 #define psa_write                psa_write_sfn
 #define psa_panic                psa_panic_sfn
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+#define psa_map_invec            psa_map_invec_sfn
+#define psa_unmap_invec          psa_unmap_invec_sfn
+#define psa_map_outvec           psa_map_outvec_sfn
+#define psa_unmap_outvec         psa_unmap_outvec_sfn
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
 #else
 

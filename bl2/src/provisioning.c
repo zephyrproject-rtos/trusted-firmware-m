@@ -26,6 +26,10 @@ __PACKED_STRUCT bl2_assembly_and_test_provisioning_data_t {
 #ifdef BL1
     uint8_t bl1_rotpk_0[32];
 #endif /* BL1 */
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    uint8_t secure_debug_pk[32];
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 };
 
 #ifdef TFM_DUMMY_PROVISIONING
@@ -99,6 +103,15 @@ static const struct bl2_assembly_and_test_provisioning_data_t bl2_assembly_and_t
 #error "No public key available for given signing algorithm."
 #endif /* MCUBOOT_SIGN_RSA_LEN */
 #endif /* BL1 */
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    {
+        0xf4, 0x0c, 0x8f, 0xbf, 0x12, 0xdb, 0x78, 0x2a,
+        0xfd, 0xf4, 0x75, 0x96, 0x6a, 0x06, 0x82, 0x36,
+        0xe0, 0x32, 0xab, 0x80, 0xd1, 0xb7, 0xf1, 0xbc,
+        0x9f, 0xe7, 0xd8, 0x7a, 0x88, 0xcb, 0x26, 0xd0,
+    },
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 };
 #else
 static const struct bl2_assembly_and_test_provisioning_data_t bl2_assembly_and_test_prov_data;
@@ -167,6 +180,15 @@ enum tfm_plat_err_t provision_assembly_and_test(void)
         return err;
     }
 #endif /* BL1 */
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    err = tfm_plat_otp_write(PLAT_OTP_ID_SECURE_DEBUG_PK,
+                             sizeof(bl2_assembly_and_test_prov_data.secure_debug_pk),
+                             bl2_assembly_and_test_prov_data.secure_debug_pk);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
     return err;
 }

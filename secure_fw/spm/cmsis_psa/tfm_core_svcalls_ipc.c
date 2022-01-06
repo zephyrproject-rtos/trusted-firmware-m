@@ -16,6 +16,7 @@
 #include "tfm_svcalls.h"
 #include "utilities.h"
 #include "load/spm_load_api.h"
+#include "ffm/interrupt.h"
 #include "ffm/tfm_boot_data.h"
 #include "ffm/psa_api.h"
 #include "tfm_hal_isolation.h"
@@ -34,19 +35,23 @@ extern int32_t platform_svc_handlers(uint8_t svc_num,
 static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
+    psa_status_t status = PSA_SUCCESS;
+
     switch (svc_num) {
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_spm_client_psa_framework_version();
     case TFM_SVC_PSA_VERSION:
         return tfm_spm_client_psa_version(ctx[0]);
     case TFM_SVC_PSA_CONNECT:
-        return tfm_spm_client_psa_connect(ctx[0], ctx[1]);
+        status = tfm_spm_client_psa_connect(ctx[0], ctx[1]);
+        break;
     case TFM_SVC_PSA_CALL:
-        return tfm_spm_client_psa_call((psa_handle_t)ctx[0], ctx[1],
-                                       (const psa_invec *)ctx[2],
-                                       (psa_outvec *)ctx[3]);
+        status = tfm_spm_client_psa_call((psa_handle_t)ctx[0], ctx[1],
+                                         (const psa_invec *)ctx[2],
+                                         (psa_outvec *)ctx[3]);
+        break;
     case TFM_SVC_PSA_CLOSE:
-        tfm_spm_client_psa_close((psa_handle_t)ctx[0]);
+        status = tfm_spm_client_psa_close((psa_handle_t)ctx[0]);
         break;
     case TFM_SVC_PSA_WAIT:
         return tfm_spm_partition_psa_wait((psa_signal_t)ctx[0], ctx[1]);
@@ -88,10 +93,10 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
 #endif
     case TFM_SVC_PSA_IRQ_ENABLE:
-        tfm_spm_partition_irq_enable((psa_signal_t)ctx[0]);
+        tfm_spm_partition_psa_irq_enable((psa_signal_t)ctx[0]);
         break;
     case TFM_SVC_PSA_IRQ_DISABLE:
-        return tfm_spm_partition_irq_disable((psa_signal_t)ctx[0]);
+        return tfm_spm_partition_psa_irq_disable((psa_signal_t)ctx[0]);
     case TFM_SVC_PSA_RESET_SIGNAL:
         tfm_spm_partition_psa_reset_signal((psa_signal_t)ctx[0]);
         break;
@@ -103,85 +108,8 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         return PSA_ERROR_GENERIC_ERROR;
 #endif
     }
-    return PSA_SUCCESS;
-}
-
-extern void tfm_flih_func_return(psa_flih_result_t result);
-
-/*
- * Prepare execution context for deprivileged FLIH functions
- * svc_args: IRQ owner partition_t pointer, flih_func, current thread data
- */
-uint32_t tfm_flih_prepare_depriv_flih(uint32_t *svc_args)
-{
-    struct partition_t *p_curr_sp;
-    struct partition_t *p_owner_sp = (struct partition_t *)svc_args[0];
-    uintptr_t sp_limit, stack;
-    struct context_ctrl_t flih_ctx_ctrl;
-
-    /* Come too early before runtime setup, should not happen. */
-    if (!CURRENT_THREAD) {
-        tfm_core_panic();
-    }
-
-    p_curr_sp = GET_CTX_OWNER(CURRENT_THREAD->p_context_ctrl);
-    sp_limit =
-           ((struct context_ctrl_t *)p_owner_sp->thrd.p_context_ctrl)->sp_limit;
-
-    if (p_owner_sp == p_curr_sp) {
-        stack = (uintptr_t)__get_PSP();
-    } else {
-        stack = ((struct context_ctrl_t *)p_owner_sp->thrd.p_context_ctrl)->sp;
-
-        if (p_owner_sp->p_boundaries != p_curr_sp->p_boundaries) {
-            tfm_hal_update_boundaries(p_owner_sp->p_ldinf,
-                                      p_owner_sp->p_boundaries);
-        }
-
-        /*
-         * CURRENT_THREAD->p_context_ctrl is the svc_args[2] on MSP, safe to
-         * update it. It is only used to track the owner of the thread data,
-         * i.e. the partition that has been interrupted.
-         */
-        THRD_UPDATE_CUR_CTXCTRL(&(p_owner_sp->ctx_ctrl));
-    }
-
-    tfm_arch_init_context(&flih_ctx_ctrl,
-                          (uintptr_t)svc_args[1], NULL,
-                          (uintptr_t)tfm_flih_func_return,
-                          sp_limit, stack);
-
-    (void)tfm_arch_refresh_hardware_context(&flih_ctx_ctrl);
-
-    return flih_ctx_ctrl.exc_ret;
-}
-
-/* Go back to ISR from FLIH functions */
-uint32_t tfm_flih_return_to_isr(psa_flih_result_t result, uint32_t *msp)
-{
-    struct partition_t *p_prev_sp, *p_owner_sp;
-    struct context_flih_ret_t *p_ctx_flih_ret =
-                                               (struct context_flih_ret_t *)msp;
-
-    p_prev_sp = GET_CTX_OWNER(p_ctx_flih_ret->state_ctx.r2);
-    p_owner_sp = GET_CTX_OWNER(CURRENT_THREAD->p_context_ctrl);
-
-    if (p_owner_sp->p_boundaries != p_prev_sp->p_boundaries) {
-        tfm_hal_update_boundaries(p_prev_sp->p_ldinf,
-                                  p_prev_sp->p_boundaries);
-    }
-
-    /* Restore context pointer */
-    THRD_UPDATE_CUR_CTXCTRL(p_ctx_flih_ret->state_ctx.r2);
-
-    tfm_arch_set_psplim(
-        ((struct context_ctrl_t *)CURRENT_THREAD->p_context_ctrl)->sp_limit);
-    __set_PSP(p_ctx_flih_ret->psp);
-
-    /* Set FLIH result to the ISR */
-    p_ctx_flih_ret->state_ctx.r0 = (uint32_t)result;
-
-    return p_ctx_flih_ret->exc_ret;
+    spm_handle_programmer_errors(status);
+    return status;
 }
 
 uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
@@ -230,10 +158,13 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         tfm_core_get_boot_data_handler(svc_args);
         break;
     case TFM_SVC_PREPARE_DEPRIV_FLIH:
-        exc_return = tfm_flih_prepare_depriv_flih(svc_args);
+        exc_return = tfm_flih_prepare_depriv_flih(
+                                            (struct partition_t *)svc_args[0],
+                                            (uintptr_t)svc_args[1]);
         break;
     case TFM_SVC_FLIH_FUNC_RETURN:
-        exc_return = tfm_flih_return_to_isr(svc_args[0], msp);
+        exc_return = tfm_flih_return_to_isr(svc_args[0],
+                                            (struct context_flih_ret_t *)msp);
         break;
     default:
         if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)

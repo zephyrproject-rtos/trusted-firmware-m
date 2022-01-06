@@ -76,7 +76,6 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         mailbox/platform_multicore.c
         mailbox/platform_spe_mailbox.c
-        spm_hal.c
         target_cfg.c
         tfm_hal_isolation.c
         tfm_hal_multi_core.c
@@ -86,10 +85,6 @@ target_sources(platform_s
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
-target_link_libraries(platform_s
-    PUBLIC
-        tfm_spm
-)
 #========================= Platform Non-Secure ================================#
 
 # FIXME: platform_ns must have at least 1 source, even if it is not used

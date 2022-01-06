@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019, Arm Limited. All rights reserved.
- * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -40,6 +40,12 @@ void tfm_plat_test_secure_timer_start(void)
         CY_TCPWM0_TIMER0_DEV_S.tcpwm_base,
         (1UL << CY_TCPWM0_TIMER0_DEV_S.tcpwm_counter_num)
     );
+}
+
+void tfm_plat_test_secure_timer_clear_intr(void) {
+    Cy_TCPWM_ClearInterrupt(CY_TCPWM0_TIMER0_DEV_S.tcpwm_base,
+                            CY_TCPWM0_TIMER0_DEV_S.tcpwm_counter_num,
+                            CY_TCPWM0_TIMER0_DEV_S.tcpwm_config->interruptSources);
 }
 
 void tfm_plat_test_secure_timer_stop(void)

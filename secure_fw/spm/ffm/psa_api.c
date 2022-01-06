@@ -10,6 +10,7 @@
 #include "critical_section.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
+#include "interrupt.h"
 #include "spm_ipc.h"
 #include "tfm_arch.h"
 #include "tfm_core_utils.h"
@@ -86,6 +87,17 @@ extern struct service_t *stateless_services_ref_tbl[];
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
+void spm_handle_programmer_errors(psa_status_t status)
+{
+    if (status == PSA_ERROR_PROGRAMMER_ERROR ||
+        status == PSA_ERROR_CONNECTION_REFUSED ||
+        status == PSA_ERROR_CONNECTION_BUSY) {
+        if (!tfm_spm_is_ns_caller()) {
+            tfm_core_panic();
+        }
+    }
+}
+
 uint32_t tfm_spm_get_lifecycle_state(void)
 {
     /*
@@ -143,12 +155,12 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
      */
     service = tfm_spm_get_service_by_sid(sid);
     if (!service) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
 
     /* It is a PROGRAMMER ERROR if connecting to a stateless service. */
     if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     /*
@@ -156,7 +168,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
      * RoT Service.
      */
     if (tfm_spm_check_authorization(sid, service, ns_caller) != SPM_SUCCESS) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
 
     /*
@@ -164,7 +176,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
      * not supported on the platform.
      */
     if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
+        return PSA_ERROR_CONNECTION_REFUSED;
     }
 
     client_id = tfm_spm_get_client_id(ns_caller);
@@ -216,14 +228,14 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
 
     /* The request type must be zero or positive. */
     if (type < 0) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     /* It is a PROGRAMMER ERROR if in_len + out_len > PSA_MAX_IOVEC. */
     if ((in_num > PSA_MAX_IOVEC) ||
         (out_num > PSA_MAX_IOVEC) ||
         (in_num + out_num > PSA_MAX_IOVEC)) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     client_id = tfm_spm_get_client_id(ns_caller);
@@ -233,7 +245,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         index = GET_INDEX_FROM_STATIC_HANDLE(handle);
 
         if (!IS_VALID_STATIC_HANDLE_IDX(index)) {
-            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+            return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
         service = GET_STATELESS_SERVICE(index);
@@ -249,13 +261,13 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
          */
         if (tfm_spm_check_authorization(sid, service, ns_caller)
             != SPM_SUCCESS) {
-            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_REFUSED);
+            return PSA_ERROR_CONNECTION_REFUSED;
         }
 
         version = GET_VERSION_FROM_STATIC_HANDLE(handle);
 
         if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
-            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+            return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
         CRITICAL_SECTION_ENTER(cs_assert);
@@ -263,7 +275,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         CRITICAL_SECTION_LEAVE(cs_assert);
 
         if (!conn_handle) {
-            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_CONNECTION_BUSY);
+            return PSA_ERROR_CONNECTION_BUSY;
         }
 
         conn_handle->rhandle = NULL;
@@ -274,7 +286,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
         if (tfm_spm_validate_conn_handle(conn_handle, client_id)
             != SPM_SUCCESS) {
-            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+            return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
         /*
@@ -282,7 +294,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
          * handling a request.
          */
         if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
-            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+            return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
         /*
@@ -310,7 +322,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      */
     if (tfm_memory_check(inptr, in_num * sizeof(psa_invec), ns_caller,
         TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     /*
@@ -320,7 +332,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      */
     if (tfm_memory_check(outptr, out_num * sizeof(psa_outvec), ns_caller,
         TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     spm_memset(invecs, 0, sizeof(invecs));
@@ -337,7 +349,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     for (i = 0; i < in_num; i++) {
         if (tfm_memory_check(invecs[i].base, invecs[i].len, ns_caller,
             TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
-            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+            return PSA_ERROR_PROGRAMMER_ERROR;
         }
     }
 
@@ -352,7 +364,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
                   (char *) invecs[i].base ||
                   (char *) invecs[j].base >=
                   (char *) invecs[i].base + invecs[i].len)) {
-                TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+                return PSA_ERROR_PROGRAMMER_ERROR;
             }
         }
     }
@@ -364,7 +376,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     for (i = 0; i < out_num; i++) {
         if (tfm_memory_check(outvecs[i].base, outvecs[i].len,
             ns_caller, TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
-            TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+            return PSA_ERROR_PROGRAMMER_ERROR;
         }
     }
 
@@ -375,7 +387,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
     if (!msg) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
-        TFM_PROGRAMMER_ERROR(ns_caller, PSA_ERROR_PROGRAMMER_ERROR);
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     tfm_spm_fill_msg(msg, service, handle, type, client_id,
@@ -384,7 +396,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     return backend_instance.messaging(service, msg);
 }
 
-void tfm_spm_client_psa_close(psa_handle_t handle)
+psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 {
     struct service_t *service;
     struct tfm_msg_body_t *msg;
@@ -394,12 +406,12 @@ void tfm_spm_client_psa_close(psa_handle_t handle)
 
     /* It will have no effect if called with the NULL handle */
     if (handle == PSA_NULL_HANDLE) {
-        return;
+        return PSA_SUCCESS;
     }
 
     /* It is a PROGRAMMER ERROR if called with a stateless handle. */
     if (IS_STATIC_HANDLE(handle)) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     client_id = tfm_spm_get_client_id(ns_caller);
@@ -410,7 +422,7 @@ void tfm_spm_client_psa_close(psa_handle_t handle)
      * the null handle.
      */
     if (tfm_spm_validate_conn_handle(conn_handle, client_id) != SPM_SUCCESS) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     service = conn_handle->internal_msg.service;
@@ -430,14 +442,14 @@ void tfm_spm_client_psa_close(psa_handle_t handle)
      * request.
      */
     if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
-        TFM_PROGRAMMER_ERROR(ns_caller, PROGRAMMER_ERROR_NULL);
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     /* No input or output needed for close message */
     tfm_spm_fill_msg(msg, service, handle, PSA_IPC_DISCONNECT, client_id,
                      NULL, 0, NULL, 0, NULL);
 
-    (void)backend_instance.messaging(service, msg);
+    return backend_instance.messaging(service, msg);
 }
 
 /* PSA Partition API function body */
@@ -971,7 +983,7 @@ void tfm_spm_partition_psa_panic(void)
     tfm_hal_system_reset();
 }
 
-void tfm_spm_partition_irq_enable(psa_signal_t irq_signal)
+void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
 {
     struct partition_t *partition;
     struct irq_load_info_t *irq_info;
@@ -989,7 +1001,7 @@ void tfm_spm_partition_irq_enable(psa_signal_t irq_signal)
     tfm_hal_irq_enable(irq_info->source);
 }
 
-psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal)
+psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal)
 {
     struct partition_t *partition;
     struct irq_load_info_t *irq_info;

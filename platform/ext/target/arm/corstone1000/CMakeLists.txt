@@ -51,6 +51,7 @@ target_include_directories(platform_s
         services/include
     INTERFACE
         cc312
+        fw_update_agent
 )
 
 target_sources(platform_s
@@ -61,12 +62,15 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         Native_Driver/uart_pl011_drv.c
         Native_Driver/mhu_v2_x.c
-        spm_hal.c
+        Native_Driver/watchdog.c
+        Native_Driver/arm_watchdog_drv.c
         tfm_hal_multi_core.c
         tfm_hal_isolation.c
         tfm_hal_platform.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        fw_update_agent/uefi_capsule_parser.c
+        fw_update_agent/fwu_agent.c
 )
 
 if (PLATFORM_IS_FVP)
@@ -80,13 +84,9 @@ target_sources(platform_s
     PRIVATE
         Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         Native_Driver/spi_n25q256a_flash_lib.c
+        Native_Driver/spi_sst26vf064b_flash_lib.c
 )
 endif()
-
-target_link_libraries(platform_s
-    PUBLIC
-        tfm_spm
-)
 
 target_compile_definitions(platform_s
     PRIVATE
@@ -104,8 +104,12 @@ target_sources(platform_bl2
         Device/Source/device_definition.c
         Device/Source/system_core_init.c
         Native_Driver/uart_pl011_drv.c
+        Native_Driver/watchdog.c
+        Native_Driver/arm_watchdog_drv.c
         fip_parser/fip_parser.c
         bl2_boot_hal.c
+        fw_update_agent/fwu_agent.c
+        bl2_security_cnt.c
 )
 
 if (PLATFORM_IS_FVP)
@@ -119,6 +123,7 @@ target_sources(platform_bl2
     PRIVATE
         Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         Native_Driver/spi_n25q256a_flash_lib.c
+        Native_Driver/spi_sst26vf064b_flash_lib.c
 )
 endif()
 
@@ -152,6 +157,7 @@ target_include_directories(platform_bl2
         ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
         ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
         $<BUILD_INTERFACE:${BL2_SOURCE}/ext/mcuboot/include>
+        fw_update_agent
 )
 
 #========================= BL1 component =======================================#

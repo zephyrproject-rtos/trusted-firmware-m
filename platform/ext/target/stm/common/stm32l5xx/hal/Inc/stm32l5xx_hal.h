@@ -23,7 +23,7 @@
 #define STM32L5xx_HAL_H
 
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -38,27 +38,31 @@
   */
 
 /* Exported types ------------------------------------------------------------*/
-/* Exported types ------------------------------------------------------------*/
-/* Exported constants --------------------------------------------------------*/
-
-/** @defgroup HAL_Exported_Constants HAL Exported Constants
+/** @defgroup HAL_Exported_Types HAL Exported Types
   * @{
   */
 
 /** @defgroup HAL_TICK_FREQ Tick Frequency
   * @{
   */
-#define  HAL_TICK_FREQ_10HZ         100U
-#define  HAL_TICK_FREQ_100HZ        10U
-#define  HAL_TICK_FREQ_1KHZ         1U
-#define  HAL_TICK_FREQ_DEFAULT      HAL_TICK_FREQ_1KHZ
-
+typedef enum
+{
+  HAL_TICK_FREQ_10HZ         = 100U,
+  HAL_TICK_FREQ_100HZ        = 10U,
+  HAL_TICK_FREQ_1KHZ         = 1U,
+  HAL_TICK_FREQ_DEFAULT      = HAL_TICK_FREQ_1KHZ
+} HAL_TickFreqTypeDef;
 /**
   * @}
   */
 
 /**
   * @}
+  */
+
+/* Exported constants --------------------------------------------------------*/
+/** @defgroup HAL_Exported_Constants HAL Exported Constants
+  * @{
   */
 
 /** @defgroup SYSCFG_Exported_Constants SYSCFG Exported Constants
@@ -200,8 +204,8 @@
 #define SYSCFG_FASTMODEPLUS_PB9        SYSCFG_CFGR1_I2C_PB9_FMP  /*!< Enable Fast-mode Plus on PB9 */
 
 /**
- * @}
- */
+  * @}
+  */
 
 /** @defgroup SYSCFG_Lock_items SYSCFG Lock items
   * @brief SYSCFG items to set lock on
@@ -252,7 +256,14 @@
   * @}
   */
 
+/**
+  * @}
+  */
+
 /* Exported macros -----------------------------------------------------------*/
+/** @defgroup HAL_Exported_Macros HAL Exported Macros
+  * @{
+  */
 
 /** @defgroup DBGMCU_Exported_Macros DBGMCU Exported Macros
   * @{
@@ -384,7 +395,7 @@
   */
 #define __HAL_SYSCFG_SRAM2_WRP_0_31_ENABLE(__SRAM2WRP__)    do {assert_param(IS_SYSCFG_SRAM2WRP_PAGE((__SRAM2WRP__)));\
                                                                 SET_BIT(SYSCFG->SWPR, (__SRAM2WRP__));\
-                                                            }while(0)
+                                                               }while(0)
 
 /** @brief  SRAM2 page 32 to 63 write protection enable macro
   * @param  __SRAM2WRP__  This parameter can be a combination of values of @ref SYSCFG_SRAM2WRP_32_63
@@ -392,7 +403,7 @@
   */
 #define __HAL_SYSCFG_SRAM2_WRP_32_63_ENABLE(__SRAM2WRP__)   do {assert_param(IS_SYSCFG_SRAM2WRP_PAGE((__SRAM2WRP__)));\
                                                                 SET_BIT(SYSCFG->SWPR2, (__SRAM2WRP__));\
-                                                            }while(0)
+                                                               }while(0)
 
 /** @brief  SRAM2 page write protection unlock prior to erase
   * @note   Writing a wrong key reactivates the write protection
@@ -411,11 +422,11 @@
   */
 #define __HAL_SYSCFG_FPU_INTERRUPT_ENABLE(__INTERRUPT__)    do {assert_param(IS_SYSCFG_FPU_INTERRUPT((__INTERRUPT__)));\
                                                                 SET_BIT(SYSCFG->FPUIMR, (__INTERRUPT__));\
-                                                            }while(0)
+                                                               }while(0)
 
 #define __HAL_SYSCFG_FPU_INTERRUPT_DISABLE(__INTERRUPT__)   do {assert_param(IS_SYSCFG_FPU_INTERRUPT((__INTERRUPT__)));\
                                                                 CLEAR_BIT(SYSCFG->FPUIMR, (__INTERRUPT__));\
-                                                            }while(0)
+                                                               }while(0)
 
 /** @brief  SYSCFG Break ECC lock.
   *         Enable and lock the connection of Flash ECC error connection to TIM1/8/15/16/17 Break input.
@@ -448,7 +459,8 @@
   *            @arg @ref SYSCFG_FLAG_SRAM2_BUSY SRAM2 Erase Ongoing
   * @retval The new state of __FLAG__ (TRUE or FALSE).
   */
-#define __HAL_SYSCFG_GET_FLAG(__FLAG__)      ((((((__FLAG__) == SYSCFG_SCSR_SRAM2BSY)? SYSCFG->SCSR : SYSCFG->CFGR2) & (__FLAG__))!= 0U) ? 1U : 0U)
+#define __HAL_SYSCFG_GET_FLAG(__FLAG__)      ((((((__FLAG__) == SYSCFG_SCSR_SRAM2BSY)? SYSCFG->SCSR : SYSCFG->CFGR2)\
+                                                & (__FLAG__))!= 0U) ? 1U : 0U)
 
 /** @brief  Set the SPF bit to clear the SRAM Parity Error Flag.
   */
@@ -473,17 +485,13 @@
   * @}
   */
 
+/**
+  * @}
+  */
+
 /* Private macros ------------------------------------------------------------*/
 /** @defgroup HAL_Private_Macros HAL Private Macros
   * @{
-  */
-
-#define IS_TICKFREQ(__FREQ__) (((__FREQ__) == HAL_TICK_FREQ_10HZ)  || \
-                               ((__FREQ__) == HAL_TICK_FREQ_100HZ) || \
-                               ((__FREQ__) == HAL_TICK_FREQ_1KHZ))
-
-/**
-  * @}
   */
 
 /** @defgroup SYSCFG_Private_Macros SYSCFG Private Macros
@@ -549,6 +557,10 @@
   * @}
   */
 
+/**
+  * @}
+  */
+
 /* Exported variables --------------------------------------------------------*/
 
 /** @addtogroup HAL_Exported_Variables
@@ -556,7 +568,7 @@
   */
 extern __IO uint32_t uwTick;
 extern uint32_t uwTickPrio;
-extern uint32_t uwTickFreq;
+extern HAL_TickFreqTypeDef uwTickFreq;
 /**
   * @}
   */
@@ -576,7 +588,7 @@ HAL_StatusTypeDef HAL_Init(void);
 HAL_StatusTypeDef HAL_DeInit(void);
 void              HAL_MspInit(void);
 void              HAL_MspDeInit(void);
-HAL_StatusTypeDef HAL_InitTick (uint32_t TickPriority);
+HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority);
 
 /**
   * @}
@@ -591,8 +603,8 @@ void               HAL_IncTick(void);
 void               HAL_Delay(uint32_t Delay);
 uint32_t           HAL_GetTick(void);
 uint32_t           HAL_GetTickPrio(void);
-HAL_StatusTypeDef  HAL_SetTickFreq(uint32_t Freq);
-uint32_t           HAL_GetTickFreq(void);
+HAL_StatusTypeDef  HAL_SetTickFreq(HAL_TickFreqTypeDef Freq);
+HAL_TickFreqTypeDef HAL_GetTickFreq(void);
 void               HAL_SuspendTick(void);
 void               HAL_ResumeTick(void);
 uint32_t           HAL_GetHalVersion(void);
@@ -611,8 +623,6 @@ uint32_t           HAL_GetUIDw2(void);
   */
 
 /* DBGMCU Peripheral Control functions  *****************************************/
-void              HAL_DBGMCU_EnableDBGSleepMode(void);
-void              HAL_DBGMCU_DisableDBGSleepMode(void);
 void              HAL_DBGMCU_EnableDBGStopMode(void);
 void              HAL_DBGMCU_DisableDBGStopMode(void);
 void              HAL_DBGMCU_EnableDBGStandbyMode(void);

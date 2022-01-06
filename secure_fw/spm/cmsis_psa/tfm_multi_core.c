@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,16 +8,11 @@
 #include "tfm_arch.h"
 #include "tfm_assert.h"
 #include "tfm_hal_multi_core.h"
-#include "tfm_spm_hal.h"
+#include "tfm_hal_platform.h"
 #include "tfm_spm_log.h"
 #include "tfm_multi_core.h"
 
 #define DEFAULT_NS_CLIENT_ID            (-1)
-
-int32_t tfm_nspm_get_current_client_id(void)
-{
-    return DEFAULT_NS_CLIENT_ID;
-}
 
 void tfm_nspm_thread_entry(void)
 {
@@ -25,7 +21,7 @@ void tfm_nspm_thread_entry(void)
     SPMLOG_DBGMSG("Enabling non-secure core...");
 #endif
 
-    tfm_hal_boot_ns_cpu(tfm_spm_hal_get_ns_VTOR());
+    tfm_hal_boot_ns_cpu(tfm_hal_get_ns_VTOR());
     tfm_hal_wait_for_ns_cpu_ready();
 
     tfm_inter_core_comm_init();

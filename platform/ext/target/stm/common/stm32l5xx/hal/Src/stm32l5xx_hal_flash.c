@@ -11,7 +11,7 @@
   *
  @verbatim
   ==============================================================================
-                        ##### FLASH peripheral features #####
+                        ##### Flash peripheral features #####
   ==============================================================================
 
   [..] The Flash memory interface manages CPU AHB C-Bus accesses
@@ -131,12 +131,12 @@ static void FLASH_Program_DoubleWord(uint32_t Address, uint64_t Data);
   * @{
   */
 
-/** @defgroup FLASH_Exported_Functions_Group1 Programming operation functions
- *  @brief   Programming operation functions
+/** @defgroup FLASH_Exported_Functions_Group1 Programming Operation functions
+ *  @brief   Programming Operation functions
  *
 @verbatim
  ===============================================================================
-                  ##### Programming operation functions #####
+                  ##### Programming Operation functions #####
  ===============================================================================
     [..]
     This subsection provides a set of functions allowing to manage the FLASH
@@ -231,7 +231,7 @@ HAL_StatusTypeDef HAL_FLASH_Program_IT(uint32_t TypeProgram, uint32_t Address, u
     /* Set internal variables used by the IRQ handler */
     pFlash.ProcedureOnGoing = TypeProgram;
     pFlash.Address = Address;
-
+    
     /* Access to SECCR or NSCR depends on operation type */
     reg_cr = IS_FLASH_SECURE_OPERATION() ? &(FLASH->SECCR) : &(FLASH_NS->NSCR);
 
@@ -356,11 +356,11 @@ void HAL_FLASH_IRQHandler(void)
 
 /**
   * @brief  FLASH end of operation interrupt callback.
-  * @param  ReturnValue The value saved in this parameter depends on the ongoing procedure
-  *                  Mass Erase: Bank number which has been requested to erase
-  *                  Page Erase: Page which has been erased
-  *                    (if 0xFFFFFFFF, it means that all the selected pages have been erased)
-  *                  Program: Address which was selected for data program
+  * @param  ReturnValue The value saved in this parameter depends on the ongoing procedure :
+  *                  @arg Mass Erase: Bank number which has been requested to erase
+  *                  @arg Page Erase: Page which has been erased
+  *                       (if 0xFFFFFFFF, it means that all the selected pages have been erased)
+  *                  @arg Program: Address which was selected for data program
   * @retval None
   */
 __weak void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue)
@@ -375,10 +375,10 @@ __weak void HAL_FLASH_EndOfOperationCallback(uint32_t ReturnValue)
 
 /**
   * @brief  FLASH operation error interrupt callback.
-  * @param  ReturnValue The value saved in this parameter depends on the ongoing procedure
-  *                 Mass Erase: Bank number which has been requested to erase
-  *                 Page Erase: Page number which returned an error
-  *                 Program: Address which was selected for data program
+  * @param  ReturnValue The value saved in this parameter depends on the ongoing procedure :
+  *                 @arg Mass Erase: Bank number which has been requested to erase
+  *                 @arg Page Erase: Page number which returned an error
+  *                 @arg Program: Address which was selected for data program
   * @retval None
   */
 __weak void HAL_FLASH_OperationErrorCallback(uint32_t ReturnValue)
@@ -613,7 +613,7 @@ HAL_StatusTypeDef FLASH_WaitForLastOperation(uint32_t Timeout)
       }
     }
   }
-
+  
   /* Access to SECSR or NSSR registers depends on operation type */
   reg_sr = IS_FLASH_SECURE_OPERATION() ? &(FLASH->SECSR) : &(FLASH_NS->NSSR);
 
@@ -621,7 +621,7 @@ HAL_StatusTypeDef FLASH_WaitForLastOperation(uint32_t Timeout)
   error = ((*reg_sr) & FLASH_FLAG_SR_ERRORS);
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   error |= (FLASH->NSSR & FLASH_FLAG_OPTWERR);
-#endif /* __ARM_FEATURE_CMSE */
+#endif /* __ARM_FEATURE_CMSE */ 
 
   if(error != 0u)
   {
@@ -663,7 +663,7 @@ static void FLASH_Program_DoubleWord(uint32_t Address, uint64_t Data)
   __IO uint32_t *reg;
   /* Check the parameters */
   assert_param(IS_FLASH_PROGRAM_ADDRESS(Address));
-
+  
   /* Access to SECCR or NSCR registers depends on operation type */
   reg = IS_FLASH_SECURE_OPERATION() ? &(FLASH->SECCR) : &(FLASH_NS->NSCR);
 

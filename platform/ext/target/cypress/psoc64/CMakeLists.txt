@@ -117,7 +117,6 @@ target_sources(platform_s
         ./Native_Driver/generated_source/cycfg_routing.c
         ./Native_Driver/generated_source/cycfg_system.c
         ./Native_Driver/generated_source/cycfg_qspi_memslot.c
-        ./spm_hal.c
         ./tfm_interrupts.c
         ./tfm_hal_multi_core.c
         ./tfm_hal_isolation.c
@@ -141,7 +140,6 @@ target_compile_definitions(platform_s
 
 target_link_libraries(platform_s
     PRIVATE
-        tfm_spm
         ${P64_UTILS_LIB_TARGET}
 )
 

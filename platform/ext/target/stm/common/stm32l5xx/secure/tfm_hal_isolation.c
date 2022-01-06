@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,23 +27,12 @@ static uint32_t n_configured_regions = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 #if TFM_LVL == 3
 static uint32_t idx_boundary_handle = 0;
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
 REGION_DECLARE(Image$$, PT_RO_START, $$Base);
 REGION_DECLARE(Image$$, PT_RO_END, $$Base);
 REGION_DECLARE(Image$$, PT_PRIV_RWZI_START, $$Base);
 REGION_DECLARE(Image$$, PT_PRIV_RWZI_END, $$Base);
 
 const static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
-        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-        MPU_ARMV8M_XN_EXEC_OK,
-        MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
-    },
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, PT_RO_START, $$Base),
@@ -68,16 +57,14 @@ const static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
 };
 #else /* TFM_LVL == 3 */
 
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+REGION_DECLARE(Image$$, ER_VENEER, $$Base);
+REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
 #ifdef TFM_SP_META_PTR_ENABLE
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
@@ -87,8 +74,8 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     /* Veneer region */
     {
         0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
@@ -102,16 +89,6 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE
-    },
-    /* NSPM PSP */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Limit),
-        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-        MPU_ARMV8M_XN_EXEC_NEVER,
-        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
         MPU_ARMV8M_SH_NONE
     },
     /* RO region */

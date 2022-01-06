@@ -29,9 +29,6 @@ MEMORY
 #if defined(S_CODE_SRAM_ALIAS_BASE)
   CODE_RAM (rwx) : ORIGIN = S_CODE_SRAM_ALIAS_BASE, LENGTH = TOTAL_CODE_SRAM_SIZE
 #endif
-#ifndef TFM_MULTI_CORE_TOPOLOGY
-  VENEERS  (rx)  : ORIGIN = CMSE_VENEER_REGION_START, LENGTH = CMSE_VENEER_REGION_SIZE
-#endif
 
 #if defined(PSA_PROXY_SHARED_MEMORY_BASE)
   PSA_PROXY_SHARED_MEMORY_RAM (rw) : ORIGIN = PSA_PROXY_SHARED_MEMORY_BASE, LENGTH = PSA_PROXY_SHARED_MEMORY_SIZE
@@ -55,9 +52,24 @@ SECTIONS
         __vectors_start__ = .;
         KEEP(*(.vectors))
         __vectors_end__ = .;
-        *startup*(.text*)
-        . = ALIGN(4);
     } > FLASH
+
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+    ASSERT(. <= ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE, ".TFM_VECTORS section size overflow.")
+    . = ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE;
+    /*
+     * Place the CMSE Veneers (containing the SG instruction) after the code, in
+     * a separate 32 bytes aligned region so that the SAU can programmed to just
+     * set this region as Non-Secure Callable.
+     */
+    .gnu.sgstubs ALIGN(32) : ALIGN(32)
+    {
+        *(.gnu.sgstubs*)
+        . = ALIGN(32);
+    } > FLASH
+    Image$$ER_VENEER$$Base = ADDR(.gnu.sgstubs);
+    Image$$VENEER_ALIGN$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
+#endif
 
     .copy.table : ALIGN(4)
     {
@@ -200,6 +212,7 @@ SECTIONS
 
     .ER_TFM_CODE : ALIGN(4)
     {
+        *startup*(.text*)
         *libplatform_s*:*(.text*)
         *libtfm_spm*:*(.text*)
 
@@ -251,19 +264,15 @@ SECTIONS
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
+# if !defined(TFM_PSA_API)
     /* PSP is unprivileged in single-core topology */
     .psp_stack : ALIGN(32)
     {
-# if !defined(TFM_PSA_API)
         . += (__psp_stack_size__ - 0x8); // reserve space for stack seal (8 bytes)
-# else
-        . += (__psp_stack_size__);
-# endif
     } > RAM
     Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
     Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 
-# if !defined(TFM_PSA_API)
     .psp_stack_seal_res :
     {
         . += 0x8;
@@ -402,14 +411,6 @@ SECTIONS
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
-
-    /* PSP is privileged in multi-core topology */
-    .psp_stack : ALIGN(32)
-    {
-        . += __psp_stack_size__;
-    } > RAM
-    Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 #endif
 
     /**** PSA RoT DATA start here */
@@ -554,21 +555,6 @@ SECTIONS
     {
         KEEP(*(.ramfunc))
     } > RAM AT> FLASH
-#endif
-
-#ifndef TFM_MULTI_CORE_TOPOLOGY
-    /*
-     * Place the CMSE Veneers (containing the SG instruction) after the code, in a
-     * separate 32 bytes aligned region so that the SAU can programmed to just set
-     * this region as Non-Secure Callable.
-     */
-    .gnu.sgstubs : ALIGN(32)
-    {
-        *(.gnu.sgstubs*)
-        . = ALIGN(32);
-    } > VENEERS AT> VENEERS
-    Load$$LR$$LR_VENEER$$Base = ADDR(.gnu.sgstubs);
-    Load$$LR$$LR_VENEER$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
 #endif
 
     Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;

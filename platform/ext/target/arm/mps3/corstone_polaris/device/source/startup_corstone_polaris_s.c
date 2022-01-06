@@ -177,8 +177,8 @@ DEFAULT_IRQ_HANDLER(UART5_Handler)
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-extern const pFunc __VECTOR_TABLE[496];
-       const pFunc __VECTOR_TABLE[496] __VECTOR_TABLE_ATTRIBUTE = {
+extern const pFunc __VECTOR_TABLE[];
+       const pFunc __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
   (pFunc)(&__MSP_INITIAL_SP),        /*      Initial Stack Pointer */
   Reset_Handler,                     /*      Reset Handler */
   NMI_Handler,                       /* -14: NMI Handler */

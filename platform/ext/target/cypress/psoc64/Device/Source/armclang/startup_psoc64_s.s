@@ -48,7 +48,7 @@ CY_CPU_VTOR_ADDR       EQU    0xE000ED08
                 IMPORT  HardFault_Handler
                 IMPORT  SVC_Handler
                 IMPORT  PendSV_Handler
-                IMPORT  NvicMux7_IRQHandler
+                IMPORT  tfm_mailbox_irq_handler
                 IMPORT  Cy_SysIpcPipeIsrCm0
 
 __Vectors       ;Core Interrupts
@@ -77,7 +77,7 @@ __Vectors       ;Core Interrupts
                 DCD     NvicMux4_IRQHandler                   ; CPU User Interrupt #4
                 DCD     NvicMux5_IRQHandler                   ; CPU User Interrupt #5
                 DCD     NvicMux6_IRQHandler                   ; CPU User Interrupt #6
-                DCD     NvicMux7_IRQHandler                   ; CPU User Interrupt #7
+                DCD     tfm_mailbox_irq_handler               ; CPU User Interrupt #7
                 DCD     Internal0_IRQHandler                  ; Internal SW Interrupt #0
                 DCD     Internal1_IRQHandler                  ; Internal SW Interrupt #1
                 DCD     Internal2_IRQHandler                  ; Internal SW Interrupt #2

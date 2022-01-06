@@ -54,8 +54,18 @@ struct arm_flash_dev_t {
     struct spi_n25q256a_dev_t *dev;         /*!< FLASH memory device structure */
     ARM_FLASH_INFO *data;         /*!< FLASH data */
 };
+struct arm_flash_se_dev_t {
+    struct spi_sst26vf064b_dev_t* dev;         /*!< FLASH memory device structure */
+    ARM_FLASH_INFO* data;         /*!< FLASH data */
+};
 /* Driver Capabilities */
 static const ARM_FLASH_CAPABILITIES N25Q256ADriverCapabilities = {
+    0, /* event_ready */
+    0, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
+    1  /* erase_chip */
+};
+/* Driver Capabilities */
+static const ARM_FLASH_CAPABILITIES SST26VF064BDriverCapabilities = {
     0, /* event_ready */
     0, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
     1  /* erase_chip */
@@ -154,6 +164,21 @@ static struct arm_flash_dev_t ARM_FLASH0_DEV = {
 };
 #endif /* RTE_FLASH0 */
 
+#if (RTE_FLASH1)
+static ARM_FLASH_INFO ARM_FLASH1_DEV_DATA = {
+    .sector_info    = NULL,     /* Uniform sector layout */
+    .sector_count   = SST26VF064B_FLASH_TOTAL_SIZE / SST26VF064B_FLASH_SECTOR_SIZE,
+    .sector_size    = SST26VF064B_FLASH_SECTOR_SIZE,
+    .page_size      = SST26VF064B_FLASH_PAGE_SIZE,
+    .program_unit   = SST26VF064B_FLASH_PROGRAM_UNIT,
+    .erased_value   = ARM_FLASH_DRV_ERASE_VALUE
+};
+
+static struct arm_flash_se_dev_t ARM_FLASH1_DEV = {
+    .dev    = &FLASH1_DEV,
+    .data   = &(ARM_FLASH1_DEV_DATA)
+};
+#endif /* RTE_FLASH1 */
 #endif /* PLATFORM_IS_FVP */
 
 
@@ -171,6 +196,11 @@ static int32_t ARM_Flash_Uninitialize(void)
 #if (RTE_FLASH0)
 
 int32_t Select_XIP_Mode_For_Shared_Flash(void)
+{
+    return ARM_DRIVER_OK;
+}
+
+int32_t Select_Write_Mode_For_Shared_Flash(void)
 {
     return ARM_DRIVER_OK;
 }
@@ -392,6 +422,12 @@ int32_t Select_XIP_Mode_For_Shared_Flash(void)
     return ARM_DRIVER_OK;
 }
 
+int32_t Select_Write_Mode_For_Shared_Flash(void)
+{
+    select_qspi_mode(&AXI_QSPI_DEV_S);
+    return ARM_DRIVER_OK;
+}
+
 static ARM_FLASH_CAPABILITIES N25Q256A_Driver_GetCapabilities(void)
 {
     return N25Q256ADriverCapabilities;
@@ -420,7 +456,6 @@ static int32_t N25Q256A_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 
 static int32_t N25Q256A_Flash_Uninitialize(void)
 {
-    /* Nothing to be done */
     spi_n25q256a_uninitialize(ARM_FLASH0_DEV.dev);
     return ARM_DRIVER_OK;
 }
@@ -498,5 +533,107 @@ ARM_DRIVER_FLASH Driver_FLASH0 = {
 };
 
 #endif /* RTE_FLASH0 */
+
+#if (RTE_FLASH1)
+
+static ARM_FLASH_CAPABILITIES SST26VF064B_Driver_GetCapabilities(void)
+{
+    return SST26VF064BDriverCapabilities;
+}
+
+static int32_t SST26VF064B_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
+{
+    ARG_UNUSED(cb_event);
+    enum sst26vf064b_error_t ret;
+    struct spi_sst26vf064b_dev_t* dev = ARM_FLASH1_DEV.dev;
+    ARM_FLASH_INFO* data = ARM_FLASH1_DEV.data;
+
+    dev->total_sector_cnt = data->sector_count;
+    dev->page_size = data->page_size;
+    dev->sector_size = data->sector_size;
+    dev->program_unit = data->program_unit;
+
+    ret = spi_sst26vf064b_initialize(ARM_FLASH1_DEV.dev);
+    if (ret != SST26VF064B_ERR_NONE) {
+        SPI_FLASH_LOG_MSG("%s: Initialization failed.\n\r", __func__);
+        return ARM_DRIVER_ERROR;
+    }
+    return ARM_DRIVER_OK;
+}
+
+static int32_t SST26VF064B_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
+{
+    enum sst26vf064b_error_t ret;
+
+    ret = spi_sst26vf064b_read(ARM_FLASH1_DEV.dev, addr, data, cnt);
+    if (ret != SST26VF064B_ERR_NONE) {
+        SPI_FLASH_LOG_MSG("%s: read failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
+        return ARM_DRIVER_ERROR;
+    }
+    return ARM_DRIVER_OK;
+}
+
+static int32_t SST26VF064B_Flash_ProgramData(uint32_t addr, const void *data,
+                                     uint32_t cnt)
+{
+    enum sst26vf064b_error_t ret;
+
+    ret = spi_sst26vf064b_program(ARM_FLASH1_DEV.dev, addr, data, cnt);
+    if (ret != SST26VF064B_ERR_NONE) {
+        SPI_FLASH_LOG_MSG("%s: program failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
+        return ARM_DRIVER_ERROR;
+    }
+    return ARM_DRIVER_OK;
+}
+
+static int32_t SST26VF064B_Flash_EraseSector(uint32_t addr)
+{
+    enum sst26vf064b_error_t ret;
+
+    ret = spi_sst26vf064b_erase_sector(ARM_FLASH1_DEV.dev, addr);
+    if (ret != SST26VF064B_ERR_NONE) {
+        SPI_FLASH_LOG_MSG("%s: erase failed: addr=0x%x\n\r", __func__, addr);
+        return ARM_DRIVER_ERROR;
+    }
+    return ARM_DRIVER_OK;
+}
+
+static int32_t SST26VF064B_Flash_EraseChip(void)
+{
+    enum sst26vf064b_error_t ret;
+
+    ret = spi_sst26vf064b_erase_chip(ARM_FLASH1_DEV.dev);
+    if (ret != SST26VF064B_ERR_NONE) {
+        SPI_FLASH_LOG_MSG("%s: erase chip failed\n\r", __func__);
+        return ARM_DRIVER_ERROR;
+    }
+    return ARM_DRIVER_OK;
+}
+
+static ARM_FLASH_INFO * SST26VF064B_Flash_GetInfo(void)
+{
+    return ARM_FLASH1_DEV.data;
+}
+
+static int32_t SST26VF064B_Uninitialize(void)
+{
+    /* Nothing to be done */
+    return ARM_DRIVER_OK;
+}
+
+ARM_DRIVER_FLASH Driver_FLASH1 = {
+    ARM_Flash_GetVersion,
+    SST26VF064B_Driver_GetCapabilities,
+    SST26VF064B_Flash_Initialize,
+    SST26VF064B_Uninitialize,
+    ARM_Flash_PowerControl,
+    SST26VF064B_Flash_ReadData,
+    SST26VF064B_Flash_ProgramData,
+    SST26VF064B_Flash_EraseSector,
+    SST26VF064B_Flash_EraseChip,
+    ARM_Flash_GetStatus,
+    SST26VF064B_Flash_GetInfo
+};
+#endif /* RTE_FLASH1 */
 
 #endif /* PLATFORM_IS_FVP */

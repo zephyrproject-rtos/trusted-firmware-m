@@ -6,13 +6,8 @@
 #
 #-------------------------------------------------------------------------------
 
-# Generate correct filename
-string(TOUPPER ${TFM_PLATFORM} TFM_PLATFORM_UPPERCASE)
-string(REGEX REPLACE "-" "_" TFM_PLATFORM_UPPERCASE_UNDERSCORE ${TFM_PLATFORM_UPPERCASE})
-string(REGEX REPLACE "^(\\.\\.([\\/\\\\]))+" "EXTERNAL\\2" TFM_PLATFORM_UPPERCASE_UNDERSCORE_NO_PARENT_DIR ${TFM_PLATFORM_UPPERCASE_UNDERSCORE})
-
 install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/
-        DESTINATION ${TFM_INSTALL_PATH}/outputs/${TFM_PLATFORM_UPPERCASE_UNDERSCORE_NO_PARENT_DIR}
+        DESTINATION ${TFM_INSTALL_PATH}/outputs
 )
 
 set(INTERFACE_INC_DIR ${CMAKE_SOURCE_DIR}/interface/include)

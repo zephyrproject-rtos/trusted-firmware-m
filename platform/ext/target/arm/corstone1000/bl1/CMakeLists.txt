@@ -238,6 +238,9 @@ target_sources(bl1_main
         ../Device/Source/system_core_init.c
         ../Native_Driver/firewall.c
         ../Native_Driver/uart_pl011_drv.c
+        ../fw_update_agent/fwu_agent.c
+        ../Native_Driver/arm_watchdog_drv.c
+        ../Native_Driver/watchdog.c
         bl1_boot_hal.c
         bl1_flash_map.c
         bl1_security_cnt.c
@@ -256,6 +259,7 @@ target_sources(bl1_main
     PRIVATE
         ../Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         ../Native_Driver/spi_n25q256a_flash_lib.c
+        ../Native_Driver/spi_sst26vf064b_flash_lib.c
 )
 endif()
 
@@ -267,6 +271,7 @@ target_include_directories(bl1_main
         ../CMSIS_Driver/Config
         ../Device/Config
         ../Native_Driver
+        ../fw_update_agent
 )
 
 ############################### SIGNING BL2 image ##################################

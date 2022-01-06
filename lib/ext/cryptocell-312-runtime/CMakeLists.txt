@@ -90,7 +90,6 @@ target_compile_definitions(${CC312_CDMPU_TARGET}
 
 ########################## DRIVER INTERFACE ####################################
 
-
 target_compile_definitions(${CC312_PSA_DRIVER_API_TARGET}
     PUBLIC
         MBEDTLS_PSA_CRYPTO_DRIVERS

@@ -18,8 +18,12 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
 #if !defined(__ICCARM__)
         ".syntax unified                        \n"
 #endif
-        "subs    r0, #8                         \n" /* SEAL room */
-        "msr     msp, r0                        \n"
+        "mov     sp, r0                         \n"
+
+        /* Seal Main Stack before using */
+        "ldr     r2, ="M2S(STACK_SEAL_PATTERN)" \n"
+        "ldr     r3, ="M2S(STACK_SEAL_PATTERN)" \n"
+        "push    {r2, r3}                       \n"
         "bx      r1                             \n"
     );
 }
