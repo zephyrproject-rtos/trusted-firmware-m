@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -1262,20 +1262,50 @@ psa_status_t psa_aead_finish(psa_aead_operation_t *operation,
         .op_handle = operation->handle,
     };
 
+    /* Sanitize the optional output */
+    if ((ciphertext == NULL) && (ciphertext_size != 0)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
     };
     psa_outvec out_vec[] = {
         {.base = &(operation->handle), .len = sizeof(uint32_t)},
-        {.base = ciphertext, .len = ciphertext_size},
-        {.base = tag, .len = tag_size}
+        {.base = tag, .len = tag_size},
+        {.base = ciphertext, .len = ciphertext_size}
     };
 
+#ifdef TFM_PSA_API
+    size_t out_len = ARRAY_SIZE(out_vec);
+    if (ciphertext == NULL || ciphertext_size == 0) {
+        out_len--;
+    }
+    if ((out_len == 3) && (ciphertext_length == NULL)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL,
+                      in_vec, ARRAY_SIZE(in_vec),
+                      out_vec, out_len);
+#else
     status = API_DISPATCH(tfm_crypto_aead_finish,
                           TFM_CRYPTO_AEAD_FINISH);
+#endif
 
-    *ciphertext_length = out_vec[1].len;
-    *tag_length = out_vec[2].len;
+    *tag_length = out_vec[1].len;
+
+#ifdef TFM_PSA_API
+    if (out_len == 3) {
+#endif
+        *ciphertext_length = out_vec[2].len;
+
+#ifdef TFM_PSA_API
+    } else {
+        *ciphertext_length = 0;
+    }
+#endif
+
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
@@ -1296,6 +1326,11 @@ psa_status_t psa_aead_verify(psa_aead_operation_t *operation,
         .op_handle = operation->handle,
     };
 
+    /* Sanitize the optional output */
+    if ((plaintext == NULL) && (plaintext_size != 0)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
         {.base = tag, .len = tag_length}
@@ -1305,10 +1340,32 @@ psa_status_t psa_aead_verify(psa_aead_operation_t *operation,
         {.base = plaintext, .len = plaintext_size}
     };
 
+#ifdef TFM_PSA_API
+    size_t out_len = ARRAY_SIZE(out_vec);
+    if (plaintext == NULL || plaintext_size == 0) {
+        out_len--;
+    }
+    if ((out_len == 2) && (plaintext_length == NULL)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL,
+                      in_vec, ARRAY_SIZE(in_vec),
+                      out_vec, out_len);
+#else
     status = API_DISPATCH(tfm_crypto_aead_verify,
                           TFM_CRYPTO_AEAD_VERIFY);
+#endif
 
-    *plaintext_length = out_vec[1].len;
+#ifdef TFM_PSA_API
+    if (out_len == 2) {
+#endif
+        *plaintext_length = out_vec[1].len;
+#ifdef TFM_PSA_API
+    } else {
+        *plaintext_length = 0;
+    }
+#endif
+
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }

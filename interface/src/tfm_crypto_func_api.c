@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -1059,15 +1059,15 @@ psa_status_t psa_aead_finish(psa_aead_operation_t *operation,
     };
     psa_outvec out_vec[] = {
         {.base = &(operation->handle), .len = sizeof(uint32_t)},
-        {.base = ciphertext, .len = ciphertext_size},
         {.base = tag, .len = tag_size},
+        {.base = ciphertext, .len = ciphertext_size}
     };
 
     status = API_DISPATCH(tfm_crypto_aead_finish,
                           TFM_CRYPTO_AEAD_FINISH);
 
-    *ciphertext_length = out_vec[1].len;
-    *tag_length = out_vec[2].len;
+    *ciphertext_length = out_vec[2].len;
+    *tag_length = out_vec[1].len;
     return status;
 }
 
