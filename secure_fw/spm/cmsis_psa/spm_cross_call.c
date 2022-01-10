@@ -11,6 +11,7 @@
 #include "spm_ipc.h"
 #include "tfm_arch.h"
 #include "ffm/backend.h"
+#include "ffm/psa_api.h"
 
 #ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 
