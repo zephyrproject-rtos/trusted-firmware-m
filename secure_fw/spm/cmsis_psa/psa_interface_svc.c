@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,8 +13,6 @@
 #include "psa/client.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
-
-#if defined(CONFIG_TFM_PSA_API_SUPERVISOR_CALL)
 
 __naked uint32_t psa_framework_version_svc(void)
 {
@@ -141,5 +139,3 @@ __naked uint32_t psa_rot_lifecycle_state_svc(void)
     __asm volatile("svc     "M2S(TFM_SVC_PSA_LIFECYCLE)"       \n"
                    "bx      lr                                 \n");
 }
-
-#endif /* CONFIG_TFM_PSA_API_SUPERVISOR_CALL */

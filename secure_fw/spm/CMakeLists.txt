@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -48,7 +48,7 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/arch/tfm_arch.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/main.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_ipc.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_cross_call.c>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:cmsis_psa/spm_cross_call.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_load.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/psa_api.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/backend.c>
@@ -117,6 +117,8 @@ target_compile_definitions(tfm_spm
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
         CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:CONFIG_TFM_SPM_BACKEND_IPC>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:CONFIG_TFM_SPM_BACKEND_SFN>
 )
 
 target_compile_options(tfm_spm

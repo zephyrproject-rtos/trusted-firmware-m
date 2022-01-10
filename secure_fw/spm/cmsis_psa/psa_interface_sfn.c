@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,8 +11,6 @@
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
 #include "psa/client.h"
-
-#ifdef CONFIG_TFM_PSA_API_SFN_CALL
 
 uint32_t psa_framework_version_sfn(void)
 {
@@ -137,5 +135,3 @@ void psa_panic_sfn(void)
 {
     tfm_spm_partition_psa_panic();
 }
-
-#endif /* CONFIG_TFM_PSA_API_SFN_CALL */

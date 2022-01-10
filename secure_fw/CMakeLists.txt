@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -113,9 +113,9 @@ set_source_files_properties(
 # into this target, also the SPE build indicator.
 target_sources(tfm_secure_api
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_cross.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_SUPERVISOR_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_cross.c>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_SFN_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c>
 )
 
 target_compile_definitions(tfm_secure_api

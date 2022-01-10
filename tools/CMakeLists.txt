@@ -143,6 +143,8 @@ execute_process(
     RESULT_VARIABLE RET
 )
 
-if(NOT RET EQUAL 0)
+if(RET EQUAL 0)
+    include(${CMAKE_BINARY_DIR}/generated/tools/config_impl.cmake)
+else()
     message(FATAL_ERROR "File generation failed")
 endif()

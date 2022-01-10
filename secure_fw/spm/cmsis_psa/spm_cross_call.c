@@ -13,8 +13,6 @@
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
 
-#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
-
 /* Customized ABI format */
 struct cross_call_abi_frame_t {
     uint32_t      a0;
@@ -55,5 +53,3 @@ void spm_interface_cross_dispatcher(uintptr_t fn_addr,
     spm_handle_programmer_errors(
                             ((struct cross_call_abi_frame_t *)frame_addr)->a0);
 }
-
-#endif /* CONFIG_TFM_PSA_API_CROSS_CALL */

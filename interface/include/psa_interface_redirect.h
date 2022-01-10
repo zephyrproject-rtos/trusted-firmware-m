@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -81,10 +81,6 @@
 #define psa_map_outvec           psa_map_outvec_sfn
 #define psa_unmap_outvec         psa_unmap_outvec_sfn
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
-
-#else
-
-#error "NO ABI is chosen, check configurations."
 
 #endif
 
