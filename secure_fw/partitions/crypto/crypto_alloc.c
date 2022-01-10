@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -106,7 +106,7 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
 
     /* Handle must be initialised before calling a setup function */
     if (*handle != TFM_CRYPTO_INVALID_HANDLE) {
-        return PSA_ERROR_BAD_STATE;
+        return PSA_ERROR_INVALID_HANDLE;
     }
 
     /* Init to invalid values */
