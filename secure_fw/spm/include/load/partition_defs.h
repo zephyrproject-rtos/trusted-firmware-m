@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -45,6 +45,11 @@
 
 #define PTR_TO_REFERENCE(x)                     (uintptr_t)(x)
 #define REFERENCE_TO_PTR(x, t)                  (t)(x)
+
+#define IS_PARTITION_PSA_ROT(pldi)              (!!((pldi)->flags \
+                                                     & PARTITION_MODEL_PSA_ROT))
+#define IS_PARTITION_IPC_MODEL(pldi)            (!!((pldi)->flags \
+                                                         & PARTITION_MODEL_IPC))
 
 /*
  * Common partition structure type, the extendable data is right after it.

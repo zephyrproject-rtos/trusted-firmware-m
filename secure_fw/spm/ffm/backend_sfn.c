@@ -98,7 +98,7 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
      * Built-in partitions still have thread instances: NS Agent (TZ) and
      * IDLE partition, and NS Agent (TZ) needs to be specific cared here.
      */
-    if (p_pldi->flags & PARTITION_MODEL_IPC) {
+    if (IS_PARTITION_IPC_MODEL(p_pldi)) {
         THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
                   TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
@@ -125,7 +125,7 @@ static void spm_thread_fn(void *p)
     p_curr = GET_CURRENT_COMPONENT();
     /* Call partition initialization routine one by one. */
     UNI_LIST_FOR_EACH(p_part, PARTITION_LIST_ADDR) {
-        if (p_part->p_ldinf->flags & PARTITION_MODEL_IPC) {
+        if (IS_PARTITION_IPC_MODEL(p_part->p_ldinf)) {
             continue;
         }
 

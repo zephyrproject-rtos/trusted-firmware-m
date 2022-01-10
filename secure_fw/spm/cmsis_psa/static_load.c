@@ -140,7 +140,7 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
         services[i].partition = p_partition;
         services[i].next = NULL;
 
-        if (p_ptldinf->flags & PARTITION_MODEL_IPC) {
+        if (IS_PARTITION_IPC_MODEL(p_ptldinf)) {
             service_setting |= p_servldinf[i].signal;
         }
 

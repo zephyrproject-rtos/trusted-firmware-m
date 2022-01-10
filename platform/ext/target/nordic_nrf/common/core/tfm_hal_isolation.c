@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -72,7 +72,7 @@ tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = !!(p_ldinf->flags & PARTITION_MODEL_PSA_ROT);
+    privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
     *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
