@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -151,9 +151,6 @@ struct tfm_conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
     p_handle->status = TFM_HANDLE_STATUS_IDLE;
     p_handle->client_id = client_id;
 
-    /* Add handle node to list for next psa functions */
-    BI_LIST_INSERT_BEFORE(&service->handle_list, &p_handle->list);
-
     return p_handle;
 }
 
@@ -187,8 +184,6 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
     conn_handle->internal_msg.magic = 0;
 
     CRITICAL_SECTION_ENTER(cs_assert);
-    /* Remove node from handle list */
-    BI_LIST_REMOVE_NODE(&conn_handle->list);
 
     /* Back handle buffer to pool */
     tfm_pool_free(conn_handle_pool, conn_handle);
