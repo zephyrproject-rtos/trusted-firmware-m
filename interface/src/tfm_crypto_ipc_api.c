@@ -1012,6 +1012,11 @@ psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
         .op_handle = operation->handle,
     };
 
+    /* Sanitize the optional input */
+    if ((input == NULL) && (input_length != 0)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
         {.base = input, .len = input_length}
@@ -1020,8 +1025,12 @@ psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
         {.base = &(operation->handle), .len = sizeof(uint32_t)}
     };
 
-    status = API_DISPATCH(tfm_crypto_aead_update_ad,
-                          TFM_CRYPTO_AEAD_UPDATE_AD);
+    size_t in_len = IOVEC_LEN(in_vec);
+    if (input == NULL) {
+        in_len--;
+    }
+    status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, in_len,
+                      out_vec, IOVEC_LEN(out_vec));
     return status;
 }
 
@@ -1038,6 +1047,11 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
         .op_handle = operation->handle,
     };
 
+    /* Sanitize the optional input */
+    if ((input == NULL) && (input_length != 0)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
         {.base = input, .len = input_length}
@@ -1047,8 +1061,12 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
         {.base  = output, .len = output_size},
     };
 
-    status = API_DISPATCH(tfm_crypto_aead_update,
-                          TFM_CRYPTO_AEAD_UPDATE);
+    size_t in_len = IOVEC_LEN(in_vec);
+    if (input == NULL) {
+        in_len--;
+    }
+    status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, in_len,
+                      out_vec, IOVEC_LEN(out_vec));
 
     *output_length = out_vec[1].len;
     return status;

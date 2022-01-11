@@ -468,7 +468,7 @@ psa_status_t tfm_crypto_aead_update(psa_invec in_vec[],
     psa_status_t status = PSA_SUCCESS;
     psa_aead_operation_t *operation = NULL;
 
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 2, 2, out_len, 2, 2);
+    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 2, 2);
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(uint32_t))) {
@@ -517,7 +517,7 @@ psa_status_t tfm_crypto_aead_update_ad(psa_invec in_vec[],
     psa_status_t status = PSA_SUCCESS;
     psa_aead_operation_t *operation = NULL;
 
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 2, 2, out_len, 1, 1);
+    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 1, 1);
 
     if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
         (out_vec[0].len != sizeof(uint32_t))) {
