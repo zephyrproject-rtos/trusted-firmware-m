@@ -160,6 +160,7 @@ if(BL2)
             $<TARGET_PROPERTY:bl2,BINARY_DIR>/ext/mcuboot
             ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2
+            ${CMAKE_SOURCE_DIR}/interface/include
     )
 
     target_sources(platform_bl2

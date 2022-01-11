@@ -82,6 +82,21 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         FLOW_CTRL_MPU_S_CH_R2,
 #endif /* FLOW_CONTROL */
     },
+    {
+      0, /* will be updated before using */
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base),
+        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
+        MPU_ARMV8M_XN_EXEC_NEVER,
+        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
+        MPU_ARMV8M_SH_NONE,
+#ifdef FLOW_CONTROL
+        FLOW_STEP_MPU_S_EN_R1,
+        FLOW_CTRL_MPU_S_EN_R1,
+        FLOW_STEP_MPU_S_CH_R1,
+        FLOW_CTRL_MPU_S_CH_R1,
+#endif /* FLOW_CONTROL */
+    },
     /* TFM_Core privileged data region   */
     {
         0, /* will be updated before using */

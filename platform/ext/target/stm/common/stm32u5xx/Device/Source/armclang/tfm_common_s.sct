@@ -114,7 +114,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * This empty, zero long execution region is here to mark the start address
      * of APP RoT RW and Stack.
      */
-    TFM_APP_RW_STACK_START +0 ALIGN 32 EMPTY 0x0 {
+    TFM_APP_RW_STACK_START +0 ALIGN GTZC_RAM_ALIGN EMPTY 0x0 {
     }
 
     TFM_APP_ROT_LINKER_DATA +0 ALIGN 32 {
