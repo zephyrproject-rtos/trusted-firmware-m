@@ -41,13 +41,17 @@
 #include "load/spm_load_api.h"
 #include "tfm_nspm.h"
 
+#if !(defined CONFIG_TFM_CONN_HANDLE_MAX_NUM) || (CONFIG_TFM_CONN_HANDLE_MAX_NUM == 0)
+#error "CONFIG_TFM_CONN_HANDLE_MAX_NUM must be defined and not zero."
+#endif
+
 /* Partition and service runtime data list head/runtime data table */
 static struct service_head_t services_listhead;
 struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
-                 TFM_CONN_HANDLE_MAX_NUM);
+                 CONFIG_TFM_CONN_HANDLE_MAX_NUM);
 
 extern uint32_t scheduler_lock;
 
@@ -559,7 +563,7 @@ uint32_t tfm_spm_init(void)
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
                   sizeof(struct tfm_conn_handle_t),
-                  TFM_CONN_HANDLE_MAX_NUM);
+                  CONFIG_TFM_CONN_HANDLE_MAX_NUM);
 
     UNI_LISI_INIT_HEAD(PARTITION_LIST_ADDR);
     UNI_LISI_INIT_HEAD(&services_listhead);

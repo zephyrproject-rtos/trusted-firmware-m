@@ -24,8 +24,6 @@
 #define TFM_HANDLE_STATUS_ACTIVE        1
 #define TFM_HANDLE_STATUS_CONNECT_ERROR 2
 
-#define TFM_CONN_HANDLE_MAX_NUM         16
-
 /* Privileged definitions for partition thread mode */
 #define TFM_PARTITION_UNPRIVILEGED_MODE         (0U)
 #define TFM_PARTITION_PRIVILEGED_MODE           (1U)
