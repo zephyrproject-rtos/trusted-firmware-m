@@ -959,6 +959,7 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key_id,
 
 #ifdef TFM_PSA_API
     size_t in_len = ARRAY_SIZE(in_vec);
+
     if (additional_data == NULL) {
         in_len--;
     }
@@ -1028,6 +1029,7 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key_id,
 
 #ifdef TFM_PSA_API
     size_t in_len = ARRAY_SIZE(in_vec);
+
     if (additional_data == NULL) {
         in_len--;
     }
@@ -1213,6 +1215,7 @@ psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
 
 #ifdef TFM_PSA_API
     size_t in_len = ARRAY_SIZE(in_vec);
+
     if (input == NULL) {
         in_len--;
     }
@@ -1259,6 +1262,7 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
 
 #ifdef TFM_PSA_API
     size_t in_len = ARRAY_SIZE(in_vec);
+
     if (input == NULL) {
         in_len--;
     }
@@ -1589,6 +1593,7 @@ psa_status_t psa_asymmetric_encrypt(psa_key_id_t key_id,
 
 #ifdef TFM_PSA_API
     size_t in_len = ARRAY_SIZE(in_vec);
+
     if (salt == NULL) {
         in_len--;
     }
@@ -1642,6 +1647,7 @@ psa_status_t psa_asymmetric_decrypt(psa_key_id_t key_id,
 
 #ifdef TFM_PSA_API
     size_t in_len = ARRAY_SIZE(in_vec);
+
     if (salt == NULL) {
         in_len--;
     }

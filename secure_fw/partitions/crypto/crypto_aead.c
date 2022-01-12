@@ -123,7 +123,7 @@ psa_status_t tfm_crypto_aead_encrypt_setup(psa_invec in_vec[],
 
     CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 1, out_len, 1, 1);
 
-    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
@@ -178,7 +178,7 @@ psa_status_t tfm_crypto_aead_decrypt_setup(psa_invec in_vec[],
 
     CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 1, out_len, 1, 1);
 
-    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;

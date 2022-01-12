@@ -810,6 +810,7 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key,
     in_vec[0].len = sizeof(struct tfm_crypto_pack_iovec);
 
     size_t in_len = IOVEC_LEN(in_vec);
+
     if (additional_data == NULL) {
         in_len--;
     }
@@ -870,6 +871,7 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key,
     in_vec[0].len = sizeof(struct tfm_crypto_pack_iovec);
 
     size_t in_len = IOVEC_LEN(in_vec);
+
     if (additional_data == NULL) {
         in_len--;
     }
@@ -1026,6 +1028,7 @@ psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
     };
 
     size_t in_len = IOVEC_LEN(in_vec);
+
     if (input == NULL) {
         in_len--;
     }
@@ -1062,6 +1065,7 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
     };
 
     size_t in_len = IOVEC_LEN(in_vec);
+
     if (input == NULL) {
         in_len--;
     }
@@ -1101,6 +1105,7 @@ psa_status_t psa_aead_finish(psa_aead_operation_t *operation,
     };
 
     size_t out_len = IOVEC_LEN(out_vec);
+
     if (ciphertext == NULL || ciphertext_size == 0) {
         out_len--;
     }
@@ -1149,6 +1154,7 @@ psa_status_t psa_aead_verify(psa_aead_operation_t *operation,
     };
 
     size_t out_len = IOVEC_LEN(out_vec);
+
     if (plaintext == NULL || plaintext_size == 0) {
         out_len--;
     }
@@ -1333,6 +1339,7 @@ psa_status_t psa_asymmetric_encrypt(psa_key_id_t key,
     };
 
     size_t in_len = IOVEC_LEN(in_vec);
+
     if (salt == NULL) {
         in_len--;
     }
@@ -1377,6 +1384,7 @@ psa_status_t psa_asymmetric_decrypt(psa_key_id_t key,
     };
 
     size_t in_len = IOVEC_LEN(in_vec);
+
     if (salt == NULL) {
         in_len--;
     }
