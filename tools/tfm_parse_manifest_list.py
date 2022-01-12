@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -141,10 +141,12 @@ def process_partition_manifests(manifest_lists):
 
     partition_list = []
     all_manifests = []
-    ipc_partition_num = 0
-    sfn_partition_num = 0
     pid_list = []
     no_pid_manifest_idx = []
+    partition_statistics = {
+        'ipc_partition_num': 0,
+        'sfn_partition_num': 0
+    }
 
     # Get all the manifests information as a dictionary
     for i, item in enumerate(manifest_lists):
@@ -214,9 +216,9 @@ def process_partition_manifests(manifest_lists):
         if pid == None or pid >= TFM_PID_BASE:
             # Count the number of IPC/SFN partitions
             if manifest['psa_framework_version'] == 1.1 and manifest['model'] == 'SFN':
-                sfn_partition_num += 1
+                partition_statistics['sfn_partition_num'] += 1
             else:
-                ipc_partition_num += 1
+                partition_statistics['ipc_partition_num'] += 1
 
         manifest_out_basename = os.path.splitext(os.path.basename(manifest_path))[0]
 
@@ -249,8 +251,7 @@ def process_partition_manifests(manifest_lists):
         pid_list.append(pid)
 
     context['partitions'] = partition_list
-    context['ipc_partition_num'] = ipc_partition_num
-    context['sfn_partition_num'] = sfn_partition_num
+    context['partition_statistics'] = partition_statistics
 
     context['stateless_services'] = process_stateless_services(partition_list)
 
