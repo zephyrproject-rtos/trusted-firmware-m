@@ -354,15 +354,11 @@ psa_status_t tfm_crypto_aead_generate_nonce(psa_invec in_vec[],
         return status;
     }
 
-    status = psa_aead_generate_nonce(operation,
-                                     nonce, nonce_size, &out_vec[1].len);
+    return psa_aead_generate_nonce(operation,
+                                   nonce,
+                                   nonce_size,
+                                   &out_vec[1].len);
 
-    if (status != PSA_SUCCESS) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
-
-    return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
@@ -400,14 +396,8 @@ psa_status_t tfm_crypto_aead_set_nonce(psa_invec in_vec[],
         return status;
     }
 
-    status = psa_aead_set_nonce(operation, nonce, nonce_size);
+    return psa_aead_set_nonce(operation, nonce, nonce_size);
 
-    if (status != PSA_SUCCESS) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
-
-    return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
@@ -444,16 +434,9 @@ psa_status_t tfm_crypto_aead_set_lengths(psa_invec in_vec[],
     if (status != PSA_SUCCESS) {
         return status;
     }
-    status = psa_aead_set_lengths(operation,
-                                  ad_length,
-                                  plaintext_length);
 
-    if (status != PSA_SUCCESS) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
+   return psa_aead_set_lengths(operation, ad_length, plaintext_length);
 
-    return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
@@ -493,16 +476,9 @@ psa_status_t tfm_crypto_aead_update(psa_invec in_vec[],
         return status;
     }
 
-    status = psa_aead_update(operation,
-                             input, input_length,
-                             output, output_size, &out_vec[1].len);
+    return psa_aead_update(operation, input, input_length,
+                           output, output_size, &out_vec[1].len);
 
-    if (status != PSA_SUCCESS) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
-
-    return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
@@ -540,14 +516,8 @@ psa_status_t tfm_crypto_aead_update_ad(psa_invec in_vec[],
         return status;
     }
 
-    status = psa_aead_update_ad(operation, input, input_length);
+    return psa_aead_update_ad(operation, input, input_length);
 
-    if (status != PSA_SUCCESS) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
-
-    return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
 }
 
