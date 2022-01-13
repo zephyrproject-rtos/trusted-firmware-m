@@ -1,5 +1,5 @@
-Corstone-300 Ethos-U55 FPGA and FVP
-===================================
+Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN552) and FVP
+==========================================================================
 
 Building TF-M
 -------------
@@ -17,7 +17,7 @@ Build instructions with platform name: arm/mps3/an552
 
    The built binaries can be run on both the Corstone-300 Ethos-U55 Ecosystem
    FVP (FVP_SSE300_MPS3) and Corstone SSE-300 with Ethos-U55 Example Subsystem
-   for MPS3 (AN552).
+   for MPS3 (AN552). For the FVP, at least version 11.16 is required.
 
 To run the example code on AN552
 --------------------------------
@@ -64,6 +64,11 @@ The MPS3 board tested is HBI0309C.
     [Crypto] Dummy Entropy NV Seed is not suitable for production!
     Non-Secure system starting...
 
+.. note::
+
+   Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
+   to ``Debug``.
+
 To run the example code on Corstone-300 Ethos-U55 Ecosystem FVP
 ---------------------------------------------------------------
 FVP is available to download `here <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`__
@@ -73,7 +78,7 @@ FVP is available to download `here <https://developer.arm.com/tools-and-software
    build dir to ``<FVP installation path>/models/Linux64_GCC-6.4/``
 #. Navigate to the same directory and execute the following command to start FVP::
 
-    $ ./FVP_MPS3_Corstone_SSE-300 -a cpu0*="bl2.axf" --data "tfm_s_ns_signed.bin"@0x01000000
+    $ ./FVP_Corstone_SSE-300_Ethos-U55 -a cpu0*="bl2.axf" --data "tfm_s_ns_signed.bin"@0x01000000
 
 #. After completing the procedure you should be able to visualize on the serial
    port the following messages::
@@ -91,6 +96,11 @@ FVP is available to download `here <https://developer.arm.com/tools-and-software
     [Crypto] Dummy Entropy NV Seed is not suitable for production!
     Non-Secure system starting...
 
+.. note::
+
+   Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
+   to ``Debug``.
+
 -------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*
