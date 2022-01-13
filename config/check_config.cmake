@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -19,11 +19,6 @@ function(tfm_invalid_config)
         message(FATAL_ERROR "INVALID CONFIG: ${ARGV_STRING}")
     endif()
 endfunction()
-
-tfm_invalid_config(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_LESS "7.3.1")
-
-# Incorrect behaviour of ArmClang v6.17 was identified during v1.5.0 release. The issue reported.
-tfm_invalid_config(CMAKE_C_COMPILER_ID STREQUAL "ARMClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "6.17.0")
 
 set (TFM_L3_PLATFORM_LISTS arm/mps2/an521 arm/musca_b1/sse_200 stm/stm32l562e_dk)
 set (VALID_ISOLATION_LEVELS 1 2 3)

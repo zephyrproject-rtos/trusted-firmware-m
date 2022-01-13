@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -177,6 +177,16 @@ macro(tfm_toolchain_reload_compiler)
     __compiler_armclang(C)
     include(Compiler/ARMCC-ASM)
     __compiler_armcc(ASM)
+
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 6.10.1)
+        message(FATAL_ERROR "Please select newer Arm compiler version starting from 6.10.1.")
+    endif()
+
+    if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.15)
+        message(FATAL_ERROR "Armclang starting from v6.15 may cause MemManage fault."
+                            " The root cause is still under analysis by Armclang."
+                            " Please use lower Armclang versions instead.")
+    endif()
 
     # Cmake's armclang support will set either mcpu or march, but march gives
     # better code size so we manually set it.

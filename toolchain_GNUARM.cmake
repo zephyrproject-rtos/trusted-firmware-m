@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -116,7 +116,14 @@ macro(tfm_toolchain_reload_compiler)
     tfm_toolchain_reset_compiler_flags()
     tfm_toolchain_reset_linker_flags()
 
-    if (CMAKE_C_COMPILER_VERSION VERSION_EQUAL 10.2.1)
+    # CMAKE_C_COMPILER_VERSION is not guaranteed to be defined.
+    EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION )
+
+    if (GCC_VERSION VERSION_LESS 7.3.1)
+        message(FATAL_ERROR "Please use newer GNU Arm compiler version starting from 7.3.1.")
+    endif()
+
+    if (GCC_VERSION VERSION_EQUAL 10.2.1)
         message(FATAL_ERROR "GNU Arm compiler version 10-2020-q4-major has an issue in CMSE support."
                             " Select other GNU Arm compiler versions instead."
                             " See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157 for the issue detail.")
