@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2022, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,6 +10,7 @@
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
 #include "runtime_defs.h"
+#include "ffm/stack_watermark.h"
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
@@ -165,6 +166,8 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
     ARCH_CTXCTRL_INIT(&p_pt->ctx_ctrl,
                       LOAD_ALLOCED_STACK_ADDR(p_pldi),
                       p_pldi->stack_size);
+
+    watermark_stack(p_pt);
 
     prv_process_metadata(p_pt);
 

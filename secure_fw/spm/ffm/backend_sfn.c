@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +12,7 @@
 #include "runtime_defs.h"
 #include "tfm_hal_platform.h"
 #include "ffm/backend.h"
+#include "ffm/stack_watermark.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/spm_load_api.h"
@@ -122,6 +124,8 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
     ARCH_CTXCTRL_INIT(&p_pt->ctx_ctrl,
                       LOAD_ALLOCED_STACK_ADDR(p_pldi),
                       p_pldi->stack_size);
+
+    watermark_stack(p_pt);
 
     /*
      * Built-in partitions still have thread instances: NS Agent (TZ) and
