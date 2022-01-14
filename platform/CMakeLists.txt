@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -145,9 +145,7 @@ if(BL2)
             platform_common_interface
             platform_region_defs
         PRIVATE
-            psa_interface
             bl2_hal
-            tfm_arch
     )
 
     target_compile_definitions(platform_bl2
