@@ -274,9 +274,13 @@ Image tool
 The ``imgtool.py`` tool is used to handle the tasks related to signing the
 binary. It requires the following definition:
 
-- ``IMAGE_LOAD_ADDRESS`` - Defines the address to where the image is loaded and
-  is executed from. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is configured to
-  be ``RAM_LOAD``.
+- ``S_IMAGE_LOAD_ADDRESS`` - Defines the address to where the Secure (or
+  combined Secure and Non-secure) image is loaded and is executed from. Only
+  used if ``MCUBOOT_UPGRADE_STRATEGY`` is configured to be ``RAM_LOAD``.
+
+- ``NS_IMAGE_LOAD_ADDRESS`` - Defines the address to where the Non-secure image
+  is loaded and is executed from. Only used if ``MCUBOOT_UPGRADE_STRATEGY`` is
+  configured to be ``RAM_LOAD`` and ``MCUBOOT_IMAGE_NUMBER`` is greater than 1.
 
 ***************************************
 Expose target support for HW components
@@ -291,6 +295,6 @@ HW components:
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
 *Copyright (c) 2020-2022 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

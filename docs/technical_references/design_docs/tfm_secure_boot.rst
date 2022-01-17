@@ -210,10 +210,6 @@ executing it in place, the newest image is copied to RAM for execution. The load
 address, the location in RAM where the image is copied to, is stored in the
 image header.
 
-.. Note::
-
-    Only single image boot is supported with ``RAM load`` upgrade mode.
-
 Summary of different modes for image upgrade
 ============================================
 Different implementations of the image upgrade operation (whether through
@@ -763,9 +759,11 @@ RAM loading firmware upgrade
 To enable RAM loading, please set ``MCUBOOT_UPGRADE_STRATEGY`` to "RAM_LOAD"
 (either in the configuration file or through the command line), and then specify
 a destination load address in RAM where the image can be copied to and executed
-from. The ``IMAGE_LOAD_ADDRESS`` macro must be specified in the target dependent
-files, for example with Musca-S, its ``flash_layout.h`` file in the ``platform``
-folder should include ``#define IMAGE_LOAD_ADDRESS #0xA0020000``
+from. The ``S_IMAGE_LOAD_ADDRESS`` macro must be specified in the target
+dependent files, and if multiple image boot is enabled then
+``NS_IMAGE_LOAD_ADDRESS`` must also be defined. For example with Musca-S, its
+``flash_layout.h`` file in the ``platform`` folder should include ``#define
+S_IMAGE_LOAD_ADDRESS #0xA0020000``
 
 Executing firmware upgrade on Musca-S board
 --------------------------------------------
