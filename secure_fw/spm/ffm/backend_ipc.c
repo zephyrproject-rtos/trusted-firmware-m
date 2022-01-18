@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -53,7 +53,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     if (!msg || !service || !service->p_ldinf || !service->partition) {
-        tfm_core_panic();
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     p_owner = service->partition;

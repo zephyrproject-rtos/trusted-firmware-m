@@ -287,6 +287,15 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
         return ret;
     }
 
+    /*
+     * check by chance if the previous reboot
+     * had a firmware data?. If yes, then don't initialize
+     * metadata
+     */
+    metadata_read(&_metadata);
+    if(_metadata.active_index ^ _metadata.previous_active_index)
+        return FWU_AGENT_SUCCESS;
+
     /* Provision FWU Agent Metadata */
 
     memset(&_metadata, 0, sizeof(struct fwu_metadata));
@@ -431,11 +440,13 @@ static enum fwu_agent_error_t flash_full_capsule(
     }
 
     if (size > BANK_PARTITION_SIZE) {
+        FWU_LOG_MSG("ERROR: %s: size error\n\r",__func__);
         return FWU_AGENT_ERROR;
     }
 
     if (version <=
             (metadata->img_entry[IMAGE_0].img_props[active_index].version)) {
+        FWU_LOG_MSG("ERROR: %s: version error\n\r",__func__);
         return FWU_AGENT_ERROR;
     }
 
@@ -446,6 +457,7 @@ static enum fwu_agent_error_t flash_full_capsule(
         previous_active_index = BANK_0;
         bank_offset = BANK_0_PARTITION_OFFSET;
     } else {
+        FWU_LOG_MSG("ERROR: %s: active_index %d\n\r",__func__,active_index);
         return FWU_AGENT_ERROR;
     }
 

@@ -11,16 +11,13 @@
   "type": "PSA-ROT",
   "priority": "LOW",
   "model": "IPC",
-  "entry_point": "tfm_nspm_thread_entry",
+  "entry_point": "ns_agent_mailbox_entry",
   "stack_size": "0x800",
-  "services": [
+  "irqs": [
     {
-      "name": "DUMMY_SERVICE",
-      "sid": "0x0000F200",
-      "connection_based": false,
-      "stateless_handle": "auto",
-      "non_secure_clients": false,
-      "version": 1,
-      "version_policy": "STRICT"
+      "source": "MAILBOX_IRQ",
+      "name": "MAILBOX",
+      "handling": "SLIH"
     }
-  ]}
+  ],
+}

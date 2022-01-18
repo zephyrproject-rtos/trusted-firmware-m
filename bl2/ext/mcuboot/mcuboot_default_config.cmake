@@ -1,11 +1,13 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
 ########################## MCUBoot #############################################
+
+set(TEST_BL2                            OFF         CACHE BOOL      "Whether to build bl2 tests")
 
 set(DEFAULT_MCUBOOT_SECURITY_COUNTERS   ON          CACHE BOOL      "Whether to use the default security counter configuration defined by TF-M project")
 set(DEFAULT_MCUBOOT_FLASH_MAP           ON          CACHE BOOL      "Whether to use the default flash map defined by TF-M project")

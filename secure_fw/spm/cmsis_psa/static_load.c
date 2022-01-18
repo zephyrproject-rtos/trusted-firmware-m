@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -143,8 +143,6 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
         if (p_ptldinf->flags & PARTITION_MODEL_IPC) {
             service_setting |= p_servldinf[i].signal;
         }
-
-        BI_LIST_INIT_NODE(&services[i].handle_list);
 
         /* Populate the stateless service reference table */
         serv_ldflags = p_servldinf[i].flags;

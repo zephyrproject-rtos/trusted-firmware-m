@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -8,6 +8,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include "aapcs_local.h"
 #include "bitops.h"
 #include "critical_section.h"
 #include "current.h"
@@ -151,9 +152,6 @@ struct tfm_conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
     p_handle->status = TFM_HANDLE_STATUS_IDLE;
     p_handle->client_id = client_id;
 
-    /* Add handle node to list for next psa functions */
-    BI_LIST_INSERT_BEFORE(&service->handle_list, &p_handle->list);
-
     return p_handle;
 }
 
@@ -187,8 +185,6 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
     conn_handle->internal_msg.magic = 0;
 
     CRITICAL_SECTION_ENTER(cs_assert);
-    /* Remove node from handle list */
-    BI_LIST_REMOVE_NODE(&conn_handle->list);
 
     /* Back handle buffer to pool */
     tfm_pool_free(conn_handle_pool, conn_handle);
@@ -549,10 +545,6 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
 bool tfm_spm_is_ns_caller(void)
 {
-#if defined(TFM_MULTI_CORE_TOPOLOGY)
-    /* Multi-core NS PSA API request is processed by pendSV. */
-    return (__get_active_exc_num() == EXC_NUM_PENDSV);
-#else
     struct partition_t *partition = tfm_spm_get_running_partition();
 
     if (!partition) {
@@ -560,22 +552,12 @@ bool tfm_spm_is_ns_caller(void)
     }
 
     return (partition->p_ldinf->pid == TFM_SP_NON_SECURE_ID);
-#endif
 }
 
 uint32_t tfm_spm_get_caller_privilege_mode(void)
 {
     struct partition_t *partition;
 
-#if defined(TFM_MULTI_CORE_TOPOLOGY) || defined(FORWARD_PROT_MSG)
-    /*
-     * In multi-core topology, if PSA request is from mailbox, the client
-     * is unprivileged.
-     */
-    if (__get_active_exc_num() == EXC_NUM_PENDSV) {
-        return TFM_PARTITION_UNPRIVILEGED_MODE;
-    }
-#endif
     partition = tfm_spm_get_running_partition();
     if (!partition) {
         tfm_core_panic();
@@ -664,31 +646,16 @@ uint32_t tfm_spm_init(void)
     return backend_instance.system_run();
 }
 
-/*
- * Return both current and next context to assembly via AAPCS trick:
- *   - Returning a 64 bit integer by 32-bit R0 and R1.
- *
- * This is architecture-specific, hence the scheduler entry and this
- * 'do_schedule' MAY be different on another architecture.
- */
-union returning_contexts_t {
-    struct {
-        uint32_t curr;
-        uint32_t next;
-    } ctx;
-
-    uint64_t curr_next_ctxs;
-};
-
 uint64_t do_schedule(void)
 {
-    union returning_contexts_t ret_ctx;
+    AAPCS_DUAL_U32_T ctx_ctrls;
     struct partition_t *p_part_curr, *p_part_next;
     struct thread_t *pth_next = thrd_next();
     struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
 
-    ret_ctx.ctx.curr = (uint32_t)CURRENT_THREAD->p_context_ctrl;
-    ret_ctx.ctx.next = (uint32_t)CURRENT_THREAD->p_context_ctrl;
+    AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)CURRENT_THREAD->p_context_ctrl,
+                                  (uint32_t)CURRENT_THREAD->p_context_ctrl);
+
     p_part_curr = GET_THRD_OWNER(CURRENT_THREAD);
     p_part_next = GET_THRD_OWNER(pth_next);
 
@@ -714,18 +681,13 @@ uint64_t do_schedule(void)
         }
         ARCH_FLUSH_FP_CONTEXT();
 
-        ret_ctx.ctx.next = (uint32_t)pth_next->p_context_ctrl;
+        AAPCS_DUAL_U32_SET_A1(ctx_ctrls, (uint32_t)pth_next->p_context_ctrl);
+
         CURRENT_THREAD = pth_next;
         CRITICAL_SECTION_LEAVE(cs);
     }
 
-    /*
-     * Handle pending mailbox message from NS in multi-core topology.
-     * Empty operation on single Armv8-M platform.
-     */
-    tfm_rpc_client_call_handler();
-
-    return ret_ctx.curr_next_ctxs;
+    return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }
 
 void update_caller_outvec_len(struct tfm_msg_body_t *msg)

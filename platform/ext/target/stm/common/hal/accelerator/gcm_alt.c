@@ -32,8 +32,8 @@
 extern psa_status_t tfm_crypto_get_caller_id(int32_t *id);
 #endif
 
-#define MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED        -0x0016  /**< API is NOT supported. */
-#define CC_UNUSED_PARAM(prm)  ((void)prm)
+/* API is NOT supported. */
+#define MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED -0x0016
 
 #include <string.h>
 #include "mbedtls/platform.h"
@@ -648,10 +648,10 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
                        const unsigned char *iv,
                        size_t iv_len)
 {
-    CC_UNUSED_PARAM(ctx);
-    CC_UNUSED_PARAM(mode);
-    CC_UNUSED_PARAM(iv);
-    CC_UNUSED_PARAM(iv_len);
+    UNUSED(ctx);
+    UNUSED(mode);
+    UNUSED(iv);
+    UNUSED(iv_len);
 
     return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
 }
@@ -663,12 +663,12 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
                        size_t output_size,
                        size_t *output_length)
 {
-    CC_UNUSED_PARAM(ctx);
-    CC_UNUSED_PARAM(input);
-    CC_UNUSED_PARAM(input_length);
-    CC_UNUSED_PARAM(output);
-    CC_UNUSED_PARAM(output_size);
-    CC_UNUSED_PARAM(output_length);
+    UNUSED(ctx);
+    UNUSED(input);
+    UNUSED(input_length);
+    UNUSED(output);
+    UNUSED(output_size);
+    UNUSED(output_length);
 
     return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
 }
@@ -680,12 +680,12 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
                        unsigned char *tag,
                        size_t tag_len)
 {
-    CC_UNUSED_PARAM(ctx);
-    CC_UNUSED_PARAM(output);
-    CC_UNUSED_PARAM(output_size);
-    CC_UNUSED_PARAM(output_length);
-    CC_UNUSED_PARAM(tag);
-    CC_UNUSED_PARAM(tag_len);
+    UNUSED(ctx);
+    UNUSED(output);
+    UNUSED(output_size);
+    UNUSED(output_length);
+    UNUSED(tag);
+    UNUSED(tag_len);
 
     return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
 }
@@ -694,9 +694,9 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
                           const unsigned char *add,
                           size_t add_len)
 {
-    CC_UNUSED_PARAM(ctx);
-    CC_UNUSED_PARAM(add);
-    CC_UNUSED_PARAM(add_len);
+    UNUSED(ctx);
+    UNUSED(add);
+    UNUSED(add_len);
 
     return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
 }

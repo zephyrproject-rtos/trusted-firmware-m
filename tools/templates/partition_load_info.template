@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,6 +11,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "region.h"
+#include "region_defs.h"
 #include "spm_ipc.h"
 #include "load/interrupt_defs.h"
 #include "load/partition_defs.h"

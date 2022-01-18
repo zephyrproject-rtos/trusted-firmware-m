@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -34,6 +34,7 @@ target_include_directories(bl2
 target_link_libraries(bl2
     PRIVATE
         tfm_boot_status
+        $<$<BOOL:${TEST_BL2}>:mcuboot_tests>
 )
 
 target_compile_options(bl2
@@ -52,6 +53,7 @@ target_compile_definitions(bl2
     PRIVATE
         $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
+        $<$<BOOL:${TEST_BL2}>:TEST_BL2>
 )
 
 add_convert_to_bin_target(bl2)

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -132,11 +132,6 @@ target_sources(platform_ns
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
-target_link_libraries(platform_ns
-    PRIVATE
-        tfm_fih # To expand include path
-)
-
 target_include_directories(platform_ns
     PUBLIC
         .
@@ -159,11 +154,6 @@ if(BL2)
             cmsis_drivers/Driver_Flash.c
             native_drivers/arm_uart_drv.c
             cmsis_drivers/Driver_USART.c
-    )
-
-    target_link_libraries(platform_bl2
-        PRIVATE
-            tfm_fih # To expand include path
     )
 
     target_include_directories(platform_bl2

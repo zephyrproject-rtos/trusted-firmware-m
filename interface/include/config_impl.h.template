@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,8 @@
 #ifndef __CONFIG_IMPL_H__
 #define __CONFIG_IMPL_H__
 
-{% if ipc_partition_num > 0 and sfn_partition_num == 0 %}
+{% if partition_statistics['ipc_partition_num'] > 0
+    and partition_statistics['sfn_partition_num'] == 0 %}
 /* IPC model */
 #define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_IPC")}} 1
 
@@ -27,7 +28,8 @@
             {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}}
 #endif /* TFM_LVL > 1 */
 
-{% elif sfn_partition_num > 0 and ipc_partition_num == 0 %}
+{% elif partition_statistics['sfn_partition_num'] > 0
+    and partition_statistics['ipc_partition_num'] == 0 %}
 /* SFN model */
 #define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_SFN")}} 1
 #define {{"%-56s"|format("CONFIG_TFM_PSA_API_SFN_CALL")}} 1
@@ -61,7 +63,8 @@
 #define {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}}  \
     ((({{"0x%x"|format(total_stk.size)}} >> CONFIG_TFM_NS_AGENT_TZ_STK_SIZE_SHIFT_FACTOR) + 0x7) & (~0x7))
 
-{% elif sfn_partition_num > 0 and ipc_partition_num > 0 %}
+{% elif partition_statistics['sfn_partition_num'] > 0
+    and partition_statistics['ipc_partition_num'] > 0 %}
 #error "IPC and SFN co-work not supported yet."
 {% else %}
 #error "Invalid partition number input, check configurations."

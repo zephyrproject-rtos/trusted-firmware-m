@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -121,7 +121,6 @@ struct partition_t {
 struct service_t {
     const struct service_load_info_t *p_ldinf;     /* Service load info      */
     struct partition_t *partition;                 /* Owner of the service   */
-    struct bi_list_node_t handle_list;             /* Service handle list    */
     struct service_t *next;                        /* For list operation     */
 };
 
@@ -142,7 +141,6 @@ struct tfm_conn_handle_t {
                                          *  - non secure client endpoint id.
                                          */
     struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
-    struct bi_list_node_t list;         /* list node                          */
 };
 
 enum tfm_memory_access_e {

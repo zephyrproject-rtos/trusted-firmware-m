@@ -432,10 +432,10 @@ const mbedtls_ecp_group_id *mbedtls_ecp_grp_id_list( void )
         const mbedtls_ecp_curve_info *curve_info;
 
         for( curve_info = mbedtls_ecp_curve_list();
-             curve_info->MBEDTLS_PRIVATE(grp_id) != MBEDTLS_ECP_DP_NONE;
+             curve_info->grp_id != MBEDTLS_ECP_DP_NONE;
              curve_info++ )
         {
-            ecp_supported_grp_id[i++] = curve_info->MBEDTLS_PRIVATE(grp_id);
+            ecp_supported_grp_id[i++] = curve_info->grp_id;
         }
         ecp_supported_grp_id[i] = MBEDTLS_ECP_DP_NONE;
 
@@ -453,10 +453,10 @@ const mbedtls_ecp_curve_info *mbedtls_ecp_curve_info_from_grp_id( mbedtls_ecp_gr
     const mbedtls_ecp_curve_info *curve_info;
 
     for( curve_info = mbedtls_ecp_curve_list();
-         curve_info->MBEDTLS_PRIVATE(grp_id) != MBEDTLS_ECP_DP_NONE;
+         curve_info->grp_id != MBEDTLS_ECP_DP_NONE;
          curve_info++ )
     {
-        if( curve_info->MBEDTLS_PRIVATE(grp_id) == grp_id )
+        if( curve_info->grp_id == grp_id )
             return( curve_info );
     }
 
@@ -471,10 +471,10 @@ const mbedtls_ecp_curve_info *mbedtls_ecp_curve_info_from_tls_id( uint16_t tls_i
     const mbedtls_ecp_curve_info *curve_info;
 
     for( curve_info = mbedtls_ecp_curve_list();
-         curve_info->MBEDTLS_PRIVATE(grp_id) != MBEDTLS_ECP_DP_NONE;
+         curve_info->grp_id != MBEDTLS_ECP_DP_NONE;
          curve_info++ )
     {
-        if( curve_info->MBEDTLS_PRIVATE(tls_id) == tls_id )
+        if( curve_info->tls_id == tls_id )
             return( curve_info );
     }
 
@@ -492,10 +492,10 @@ const mbedtls_ecp_curve_info *mbedtls_ecp_curve_info_from_name( const char *name
         return( NULL );
 
     for( curve_info = mbedtls_ecp_curve_list();
-         curve_info->MBEDTLS_PRIVATE(grp_id) != MBEDTLS_ECP_DP_NONE;
+         curve_info->grp_id != MBEDTLS_ECP_DP_NONE;
          curve_info++ )
     {
-        if( strcmp( curve_info->MBEDTLS_PRIVATE(name), name ) == 0 )
+        if( strcmp( curve_info->name, name ) == 0 )
             return( curve_info );
     }
 
@@ -1021,7 +1021,7 @@ int mbedtls_ecp_tls_read_group_id( mbedtls_ecp_group_id *grp,
     if( ( curve_info = mbedtls_ecp_curve_info_from_tls_id( tls_id ) ) == NULL )
         return( MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE );
 
-    *grp = curve_info->MBEDTLS_PRIVATE(grp_id);
+    *grp = curve_info->grp_id;
 
     return( 0 );
 }
@@ -1055,8 +1055,8 @@ int mbedtls_ecp_tls_write_group( const mbedtls_ecp_group *grp, size_t *olen,
     /*
      * Next two bytes are the namedcurve value
      */
-    buf[0] = curve_info->MBEDTLS_PRIVATE(tls_id) >> 8;
-    buf[1] = curve_info->MBEDTLS_PRIVATE(tls_id) & 0xFF;
+    buf[0] = curve_info->tls_id >> 8;
+    buf[1] = curve_info->tls_id & 0xFF;
 
     return( 0 );
 }
@@ -2478,7 +2478,7 @@ int mbedtls_ecp_self_test( int verbose )
 #if defined(MBEDTLS_ECP_DP_SECP192R1_ENABLED)
     MBEDTLS_MPI_CHK( mbedtls_ecp_group_load( &grp, MBEDTLS_ECP_DP_SECP192R1 ) );
 #else
-    MBEDTLS_MPI_CHK( mbedtls_ecp_group_load( &grp, mbedtls_ecp_curve_list()->MBEDTLS_PRIVATE(grp_id) ) );
+    MBEDTLS_MPI_CHK( mbedtls_ecp_group_load( &grp, mbedtls_ecp_curve_list()->grp_id ) );
 #endif
 
     if( verbose != 0 )

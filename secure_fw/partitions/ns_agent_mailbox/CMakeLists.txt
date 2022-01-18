@@ -15,6 +15,21 @@ cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_psa_rot_partition_ns_agent_mailbox STATIC)
 
+target_sources(tfm_psa_rot_partition_ns_agent_mailbox
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/tfm_rpc.c
+        $<$<NOT:$<BOOL:${TFM_PLAT_SPECIFIC_MULTI_CORE_COMM}>>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/tfm_spe_mailbox.c>
+        ns_agent_mailbox.c
+)
+
+target_link_libraries(tfm_psa_rot_partition_ns_agent_mailbox
+    PRIVATE
+        platform_common_interface
+        psa_interface
+        tfm_spm
+        tfm_sprt
+)
+
 # The generated sources
 target_sources(tfm_psa_rot_partition_ns_agent_mailbox
     PRIVATE

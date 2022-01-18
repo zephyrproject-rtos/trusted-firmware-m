@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -90,21 +90,26 @@ endif()
 add_subdirectory(lib/ext)
 add_subdirectory(lib/fih)
 add_subdirectory(tools)
+
 if(NS)
     # Set to ${TFM_TEST_REPO_PATH}/app by default
     add_subdirectory(${TFM_APP_PATH} ${CMAKE_CURRENT_BINARY_DIR}/app)
-    add_subdirectory(${TFM_NS_LOG_PATH} ${CMAKE_CURRENT_BINARY_DIR}/ns_log)
 endif()
+if(NS OR TEST_BL2)
+    add_subdirectory(${TFM_RAW_LOG_PATH} ${CMAKE_CURRENT_BINARY_DIR}/raw_log)
+endif()
+
 add_subdirectory(secure_fw)
+
 add_subdirectory(interface)
 if(BL2)
     add_subdirectory(bl2)
 endif()
+
 add_subdirectory(platform)
 
-if(TFM_NS_REG_TEST OR TFM_S_REG_TEST)
-    # Set to ${TFM_TEST_REPO_PATH}/test by default
-    add_subdirectory(${TFM_TEST_PATH} ${CMAKE_CURRENT_BINARY_DIR}/test)
+if(TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2)
+    add_subdirectory(${TFM_TEST_PATH} ${CMAKE_CURRENT_BINARY_DIR}/tests)
 endif()
 
 include(cmake/install.cmake)

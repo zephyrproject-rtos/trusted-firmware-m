@@ -191,4 +191,7 @@
 #define BOOT_TFM_SHARED_DATA_BASE (S_RAM_ALIAS(S_DATA_PRIV_OFFSET))
 #define BOOT_TFM_SHARED_DATA_SIZE 0x400
 
+/* NSPE-to-SPE interrupt */
+#define MAILBOX_IRQ NvicMux7_IRQn
+
 #endif /* __REGION_DEFS_H__ */

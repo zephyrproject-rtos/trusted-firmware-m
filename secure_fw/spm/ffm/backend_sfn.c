@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -42,7 +42,7 @@ static psa_status_t sfn_messaging(struct service_t *service,
     psa_status_t status;
 
     if (!msg || !service || !service->p_ldinf || !service->partition) {
-        tfm_core_panic();
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     msg->sfn_magic = TFM_MSG_MAGIC_SFN;
@@ -56,7 +56,7 @@ static psa_status_t sfn_messaging(struct service_t *service,
             status = ((sfn_init_fn_t)p_target->p_ldinf->entry)();
             /* Negative value indicates errors. */
             if (status < PSA_SUCCESS) {
-                tfm_core_panic();
+                return PSA_ERROR_PROGRAMMER_ERROR;
             }
         }
         p_target->state = SFN_PARTITION_STATE_INITED;
