@@ -79,6 +79,9 @@
 #define S_DATA_LIMIT            (S_DATA_START + S_DATA_SIZE - 1)
 #define S_DATA_PRIV_START       (S_DATA_START + S_UNPRIV_DATA_SIZE)
 
+/* Size of vector table: 47 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0xC0)
+
 /* Shared data area between bootloader and runtime firmware.
  * Shared data area is allocated at the beginning of the privileged data area,
  * it is overlapping with TF-M Secure code's MSP stack
