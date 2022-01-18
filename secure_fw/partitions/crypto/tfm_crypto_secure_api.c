@@ -1257,7 +1257,7 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
     };
     psa_outvec out_vec[] = {
         {.base = &(operation->handle), .len = sizeof(uint32_t)},
-        {.base  = output, .len = output_size},
+        {.base = output, .len = output_size},
     };
 
 #ifdef TFM_PSA_API

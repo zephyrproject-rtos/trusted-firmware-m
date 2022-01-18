@@ -1061,7 +1061,7 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
     };
     psa_outvec out_vec[] = {
         {.base = &(operation->handle), .len = sizeof(uint32_t)},
-        {.base  = output, .len = output_size},
+        {.base = output, .len = output_size},
     };
 
     size_t in_len = IOVEC_LEN(in_vec);
@@ -1113,7 +1113,8 @@ psa_status_t psa_aead_finish(psa_aead_operation_t *operation,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec),
+    status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL,
+                      in_vec, IOVEC_LEN(in_vec),
                       out_vec, out_len);
 
     *tag_length = out_vec[1].len;
@@ -1162,7 +1163,8 @@ psa_status_t psa_aead_verify(psa_aead_operation_t *operation,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec),
+    status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL,
+                      in_vec, IOVEC_LEN(in_vec),
                       out_vec, out_len);
 
     if (out_len == 2) {
