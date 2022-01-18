@@ -132,9 +132,7 @@ int main(void)
     }
 
 #ifdef TEST_BL2
-    if (run_mcuboot_testsuite() != TEST_SUITE_ERR_NO_ERROR) {
-        FIH_PANIC;
-    }
+    (void)run_mcuboot_testsuite();
 #endif /* TEST_BL2 */
 
     FIH_CALL(boot_go, fih_rc, &rsp);

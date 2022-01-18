@@ -90,16 +90,11 @@ endif()
 add_subdirectory(lib/ext)
 add_subdirectory(lib/fih)
 add_subdirectory(tools)
-
-if(NS)
-    # Set to ${TFM_TEST_REPO_PATH}/app by default
-    add_subdirectory(${TFM_APP_PATH} ${CMAKE_CURRENT_BINARY_DIR}/app)
-endif()
-if(NS OR TEST_BL2)
-    add_subdirectory(${TFM_RAW_LOG_PATH} ${CMAKE_CURRENT_BINARY_DIR}/raw_log)
-endif()
-
 add_subdirectory(secure_fw)
+
+if(NS OR TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2)
+    add_subdirectory(${TFM_TEST_REPO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/tf-m-tests)
+endif()
 
 add_subdirectory(interface)
 if(BL2)
@@ -107,10 +102,6 @@ if(BL2)
 endif()
 
 add_subdirectory(platform)
-
-if(TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2)
-    add_subdirectory(${TFM_TEST_PATH} ${CMAKE_CURRENT_BINARY_DIR}/tests)
-endif()
 
 include(cmake/install.cmake)
 
