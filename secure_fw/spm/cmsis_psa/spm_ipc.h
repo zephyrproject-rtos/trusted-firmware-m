@@ -103,7 +103,7 @@ struct tfm_msg_body_t {
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
     uint32_t iovec_status;             /* MM-IOVEC status                */
 #endif
-    struct bi_list_node_t msg_node;    /* For list operators             */
+    struct tfm_msg_body_t *p_messages; /* Message(s) link                */
 };
 
 /* Partition runtime type */
@@ -121,10 +121,7 @@ struct partition_t {
         struct thread_t                thrd;            /* IPC model */
         uint32_t                       state;           /* SFN model */
     };
-    union {
-        struct bi_list_node_t          msg_list;        /* IPC model */
-        struct tfm_msg_body_t          *p_msg;          /* SFN model */
-    };
+    struct tfm_msg_body_t              *p_messages;
     struct partition_t                 *next;
 };
 
@@ -209,21 +206,19 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
 
 /******************** Partition management functions *************************/
 
-/**
- * \brief                   Get the msg context by signal.
+/*
+ * Lookup and fetch the last spotted message in the partition messages
+ * by the given signal. Only ONE signal bit can be accepted in 'signal',
+ * multiple bits lead to 'no matched message found to that signal'.
  *
- * \param[in] partition     Partition context pointer
- *                          \ref partition_t structures
- * \param[in] signal        Signal associated with inputs to the Secure
- *                          Partition, \ref psa_signal_t
- *
- * \retval NULL             Failed
- * \retval "Not NULL"       Target service context pointer,
- *                          \ref tfm_msg_body_t structures
+ * Returns NULL if no message matched with the given signal.
+ * Returns an internal message instance if spotted, the instance
+ * is moved out of partition messages. Partition available signals
+ * also get updated based on the count of message with given signal
+ * still in the partition messages.
  */
-struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
-                                                 psa_signal_t signal);
-
+struct tfm_msg_body_t *spm_get_msg_with_signal(struct partition_t *p_ptn,
+                                               psa_signal_t signal);
 
 /**
  * \brief                   Get partition by Partition ID.

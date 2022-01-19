@@ -47,7 +47,7 @@ static psa_status_t sfn_messaging(struct service_t *service,
 
     msg->sfn_magic = TFM_MSG_MAGIC_SFN;
     p_target = service->partition;
-    p_target->p_msg = msg;
+    p_target->p_messages = msg;
 
     SET_CURRENT_COMPONENT(p_target);
 
@@ -89,7 +89,7 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
 
-    p_pt->p_msg = NULL;
+    p_pt->p_messages = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;
 
     THRD_SYNC_INIT(&p_pt->waitobj);
@@ -124,7 +124,7 @@ static void spm_thread_fn(void *p)
 
     p_curr = GET_CURRENT_COMPONENT();
     /* Call partition initialization routine one by one. */
-    UNI_LIST_FOR_EACH(p_part, PARTITION_LIST_ADDR) {
+    UNI_LIST_FOREACH(p_part, PARTITION_LIST_ADDR, next) {
         if (IS_PARTITION_IPC_MODEL(p_part->p_ldinf)) {
             continue;
         }

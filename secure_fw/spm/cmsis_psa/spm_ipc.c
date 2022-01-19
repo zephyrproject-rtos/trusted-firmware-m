@@ -234,50 +234,46 @@ static void *tfm_spm_get_rhandle(struct service_t *service,
 
 /* Partition management functions */
 
-struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
-                                                 psa_signal_t signal)
+struct tfm_msg_body_t *spm_get_msg_with_signal(struct partition_t *p_ptn,
+                                               psa_signal_t signal)
 {
-    struct bi_list_node_t *node, *head;
-    struct tfm_msg_body_t *tmp_msg, *msg = NULL;
+    struct tfm_msg_body_t *p_msg_iter;
+    struct tfm_msg_body_t **pr_msg_iter, **last_found_msg_holder = NULL;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+    uint32_t nr_found_msgs = 0;
 
-    TFM_CORE_ASSERT(partition);
-
-    head = &partition->msg_list;
-
-    if (BI_LIST_IS_EMPTY(head)) {
-        return NULL;
-    }
-
-    /*
-     * There may be multiple messages for this RoT Service signal, do not clear
-     * partition mask until no remaining message. Search may be optimized.
-     */
     CRITICAL_SECTION_ENTER(cs_assert);
-    BI_LIST_FOR_EACH(node, head) {
-        tmp_msg = TO_CONTAINER(node, struct tfm_msg_body_t, msg_node);
-        if (tmp_msg->service->p_ldinf->signal == signal && msg) {
-            CRITICAL_SECTION_LEAVE(cs_assert);
-            return msg;
-        } else if (tmp_msg->service->p_ldinf->signal == signal) {
-            msg = tmp_msg;
-            BI_LIST_REMOVE_NODE(node);
+
+    /* Return the last found message which applies a FIFO mechanism. */
+    UNI_LIST_FOREACH_NODE_PNODE(pr_msg_iter, p_msg_iter, p_ptn, p_messages) {
+        if (p_msg_iter->service->p_ldinf->signal == signal) {
+            last_found_msg_holder = pr_msg_iter;
+            nr_found_msgs++;
         }
     }
 
-    partition->signals_asserted &= ~signal;
+    if (last_found_msg_holder) {
+        p_msg_iter = *last_found_msg_holder;
+        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_msg_holder, p_messages);
+
+        /* Clear the signal bit since the only message is removed. */
+        if (nr_found_msgs == 1) {
+            p_ptn->signals_asserted &= ~signal;
+        }
+    }
+
     CRITICAL_SECTION_LEAVE(cs_assert);
 
-    return msg;
+    return p_msg_iter;
 }
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
     struct service_t *p_prev, *p_curr;
 
-    UNI_LIST_FOR_EACH_PREV(p_prev, p_curr, &services_listhead) {
+    UNI_LIST_FOREACH_NODE_PREV(p_prev, p_curr, &services_listhead, next) {
         if (p_curr->p_ldinf->sid == sid) {
-            UNI_LIST_MOVE_AFTER(&services_listhead, p_prev, p_curr);
+            UNI_LIST_MOVE_AFTER(&services_listhead, p_prev, p_curr, next);
             return p_curr;
         }
     }
@@ -298,7 +294,7 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 {
     struct partition_t *p_part;
 
-    UNI_LIST_FOR_EACH(p_part, PARTITION_LIST_ADDR) {
+    UNI_LIST_FOREACH(p_part, PARTITION_LIST_ADDR, next) {
         if (p_part->p_ldinf->pid == partition_id) {
             return p_part;
         }
@@ -565,8 +561,8 @@ uint32_t tfm_spm_init(void)
                   sizeof(struct tfm_conn_handle_t),
                   CONFIG_TFM_CONN_HANDLE_MAX_NUM);
 
-    UNI_LISI_INIT_HEAD(PARTITION_LIST_ADDR);
-    UNI_LISI_INIT_HEAD(&services_listhead);
+    UNI_LISI_INIT_NODE(PARTITION_LIST_ADDR, next);
+    UNI_LISI_INIT_NODE(&services_listhead, next);
 
     /* Init the nonsecure context. */
     tfm_nspm_ctx_init();

@@ -60,8 +60,8 @@ static psa_status_t ipc_messaging(struct service_t *service,
     signal = service->p_ldinf->signal;
 
     CRITICAL_SECTION_ENTER(cs_assert);
-    /* Add message to partition message list tail */
-    BI_LIST_INSERT_BEFORE(&p_owner->msg_list, &msg->msg_node);
+
+    UNI_LIST_INSERT_AFTER(p_owner, msg, p_messages);
 
     /* Messages put. Update signals */
     p_owner->signals_asserted |= signal;
@@ -110,7 +110,7 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
     p_pt->signals_allowed |= PSA_DOORBELL | service_setting;
 
     THRD_SYNC_INIT(&p_pt->waitobj);
-    BI_LIST_INIT_NODE(&p_pt->msg_list);
+    UNI_LISI_INIT_NODE(p_pt, p_messages);
 
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));

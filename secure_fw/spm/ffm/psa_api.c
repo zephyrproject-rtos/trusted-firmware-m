@@ -526,7 +526,7 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
      * Get message by signal from partition. It is a fatal error if getting
      * failed, which means the input signal is not correspond to an RoT service.
      */
-    tmp_msg = tfm_spm_get_msg_by_signal(partition, signal);
+    tmp_msg = spm_get_msg_with_signal(partition, signal);
     if (!tmp_msg) {
         return PSA_ERROR_DOES_NOT_EXIST;
     }

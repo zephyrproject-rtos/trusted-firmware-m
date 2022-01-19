@@ -108,7 +108,7 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
 
     ldinf_sa += LOAD_INFSZ_BYTES(p_ptldinf);
 
-    UNI_LIST_INSERT_AFTER(head, partition);
+    UNI_LIST_INSERT_AFTER(head, partition, next);
 
     return partition;
 }
@@ -163,7 +163,7 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
             stateless_services_ref_tbl[hidx] = &services[i];
         }
 
-        UNI_LIST_INSERT_AFTER(services_listhead, &services[i]);
+        UNI_LIST_INSERT_AFTER(services_listhead, &services[i], next);
     }
 
     return service_setting;
