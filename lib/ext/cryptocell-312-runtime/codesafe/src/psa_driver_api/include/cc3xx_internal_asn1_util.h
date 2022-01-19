@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -87,8 +87,8 @@ int cc3xx_asn1_write_tag(unsigned char **p, const unsigned char *start,
  *
  * \param p         The reference to the current position pointer.
  * \param start     The start of the buffer, for bounds-checking.
- * \param val       The integer value to write.
- *                  It must be non-negative.
+ * \param data      Buffer containing the integer to be written.
+ * \param data_size Size in bytes of the integer.
  *
  * \return          The number of bytes written to \p p on success.
  * \return          PSA_ERROR_BUFFER_TOO_SMALL if the buffer is too small.
@@ -175,3 +175,4 @@ psa_status_t cc3xx_asn1_get_int(unsigned char **p, const unsigned char *end, int
 }
 #endif
 #endif /* CC3XX_INTERNAL_ASN1_UTIL_H */
+

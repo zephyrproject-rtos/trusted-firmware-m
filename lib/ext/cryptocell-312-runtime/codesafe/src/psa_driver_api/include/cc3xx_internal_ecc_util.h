@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -113,3 +113,4 @@ psa_status_t cc3xx_ecc_psa_publ_to_cc_publ(CCEcpkiDomainID_t DomainId,
 }
 #endif
 #endif /* CC3XX_INTERNAL_ECC_UTIL_H */
+
