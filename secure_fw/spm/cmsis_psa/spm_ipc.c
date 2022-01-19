@@ -267,19 +267,6 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
     return msg;
 }
 
-uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
-{
-#if TFM_LVL == 1
-    return TFM_PARTITION_PRIVILEGED_MODE;
-#else /* TFM_LVL == 1 */
-    if (partition_flags & PARTITION_MODEL_PSA_ROT) {
-        return TFM_PARTITION_PRIVILEGED_MODE;
-    } else {
-        return TFM_PARTITION_UNPRIVILEGED_MODE;
-    }
-#endif /* TFM_LVL == 1 */
-}
-
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
     struct service_t *p_prev, *p_curr;
@@ -563,7 +550,7 @@ uint32_t tfm_spm_get_caller_privilege_mode(void)
         tfm_core_panic();
     }
 
-    return tfm_spm_partition_get_privileged_mode(partition->p_ldinf->flags);
+    return GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 }
 
 int32_t tfm_spm_get_client_id(bool ns_caller)

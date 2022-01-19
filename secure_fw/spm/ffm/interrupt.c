@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -144,7 +144,7 @@ void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
         flih_result = PSA_FLIH_SIGNAL;
     } else {
         /* FLIH Model Handling */
-        if (tfm_spm_partition_get_privileged_mode(p_part->p_ldinf->flags) ==
+        if (GET_PARTITION_PRIVILEGED_MODE(p_part->p_ldinf) ==
                                                 TFM_PARTITION_PRIVILEGED_MODE) {
             flih_result = p_ildi->flih_func();
         } else {

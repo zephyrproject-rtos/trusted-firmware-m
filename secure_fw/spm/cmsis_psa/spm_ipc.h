@@ -16,6 +16,7 @@
 #include "tfm_secure_api.h"
 #include "thread.h"
 #include "psa/service.h"
+#include "load/partition_defs.h"
 #include "load/interrupt_defs.h"
 
 #define TFM_HANDLE_STATUS_IDLE          0
@@ -27,6 +28,14 @@
 /* Privileged definitions for partition thread mode */
 #define TFM_PARTITION_UNPRIVILEGED_MODE         (0U)
 #define TFM_PARTITION_PRIVILEGED_MODE           (1U)
+
+#if TFM_LVL == 1
+#define GET_PARTITION_PRIVILEGED_MODE(p_ldinf)     TFM_PARTITION_PRIVILEGED_MODE
+#else
+#define GET_PARTITION_PRIVILEGED_MODE(p_ldinf)  \
+            (IS_PARTITION_PSA_ROT(p_ldinf) ? TFM_PARTITION_PRIVILEGED_MODE : \
+                                             TFM_PARTITION_UNPRIVILEGED_MODE)
+#endif
 
 /*
  * Set a number limit for stateless handle.
@@ -147,16 +156,6 @@ enum tfm_memory_access_e {
     TFM_MEMORY_ACCESS_RO = 1,
     TFM_MEMORY_ACCESS_RW = 2,
 };
-
-/**
- * \brief                   Get the privileged mode of Partition.
- *
- * \param[in] partition_flags               Flags of the Partition
- *
- * \retval TFM_PARTITION_PRIVILEGED_MODE    Privileged mode
- * \retval TFM_PARTITION_UNPRIVILEGED_MODE  Unprivileged mode
- */
-uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags);
 
 /**
  * \brief   Get the running partition ID.

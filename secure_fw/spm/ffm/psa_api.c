@@ -504,8 +504,7 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
     if (!partition) {
         tfm_core_panic();
     }
-    privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_ldinf->flags);
+    privileged = GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 
     /*
      * Write the message to the service buffer. It is a fatal error if the
@@ -555,8 +554,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
 {
     size_t bytes;
     struct tfm_msg_body_t *msg = NULL;
-    uint32_t privileged;
-    struct partition_t *partition = NULL;
+    uint32_t priv_mode;
 
     /* It is a fatal error if message handle is invalid */
     msg = tfm_spm_get_msg_from_handle(msg_handle);
@@ -564,9 +562,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
         tfm_core_panic();
     }
 
-    partition = msg->service->partition;
-    privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_ldinf->flags);
+    priv_mode = GET_PARTITION_PRIVILEGED_MODE(msg->service->partition->p_ldinf);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -606,7 +602,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
      * if the memory reference for buffer is invalid or not read-write.
      */
     if (tfm_memory_check(buffer, num_bytes, false,
-        TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
+        TFM_MEMORY_ACCESS_RW, priv_mode) != SPM_SUCCESS) {
         tfm_core_panic();
     }
 
@@ -686,8 +682,7 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
                                  const void *buffer, size_t num_bytes)
 {
     struct tfm_msg_body_t *msg = NULL;
-    uint32_t privileged;
-    struct partition_t *partition = NULL;
+    uint32_t priv_mode;
 
     /* It is a fatal error if message handle is invalid */
     msg = tfm_spm_get_msg_from_handle(msg_handle);
@@ -695,9 +690,7 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
         tfm_core_panic();
     }
 
-    partition = msg->service->partition;
-    privileged = tfm_spm_partition_get_privileged_mode(
-        partition->p_ldinf->flags);
+    priv_mode = GET_PARTITION_PRIVILEGED_MODE(msg->service->partition->p_ldinf);
 
     /*
      * It is a fatal error if message handle does not refer to a request
@@ -741,7 +734,7 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
      * if the memory reference for buffer is invalid or not readable.
      */
     if (tfm_memory_check(buffer, num_bytes, false,
-        TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
+        TFM_MEMORY_ACCESS_RO, priv_mode) != SPM_SUCCESS) {
         tfm_core_panic();
     }
 
@@ -1066,8 +1059,7 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
     }
 
     partition = msg->service->partition;
-    privileged = tfm_spm_partition_get_privileged_mode(
-                                                     partition->p_ldinf->flags);
+    privileged = GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 
     /*
      * It is a fatal error if MM-IOVEC has not been enabled for the RoT
@@ -1196,8 +1188,7 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
     }
 
     partition = msg->service->partition;
-    privileged = tfm_spm_partition_get_privileged_mode(
-                                                     partition->p_ldinf->flags);
+    privileged = GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 
     /*
      * It is a fatal error if MM-IOVEC has not been enabled for the RoT

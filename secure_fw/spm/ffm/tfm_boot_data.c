@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -176,8 +176,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     if (!partition) {
         tfm_core_panic();
     }
-    privileged =
-        tfm_spm_partition_get_privileged_mode(partition->p_ldinf->flags);
+    privileged = GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 
     if (tfm_memory_check(buf_start, buf_size, false, TFM_MEMORY_ACCESS_RW,
         privileged) != SPM_SUCCESS) {
