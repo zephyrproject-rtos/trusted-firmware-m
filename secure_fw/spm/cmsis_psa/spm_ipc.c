@@ -303,11 +303,6 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
     return NULL;
 }
 
-struct partition_t *tfm_spm_get_running_partition(void)
-{
-    return GET_CURRENT_COMPONENT();
-}
-
 int32_t tfm_spm_check_client_version(struct service_t *service,
                                      uint32_t version)
 {
@@ -345,7 +340,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
             return SPM_ERROR_GENERIC;
         }
     } else {
-        partition = tfm_spm_get_running_partition();
+        partition = GET_CURRENT_COMPONENT();
         if (!partition) {
             tfm_core_panic();
         }
@@ -477,7 +472,7 @@ int32_t tfm_spm_partition_get_running_partition_id(void)
 {
     struct partition_t *partition;
 
-    partition = tfm_spm_get_running_partition();
+    partition = GET_CURRENT_COMPONENT();
     if (partition && partition->p_ldinf) {
         return partition->p_ldinf->pid;
     } else {
@@ -532,25 +527,13 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 
 bool tfm_spm_is_ns_caller(void)
 {
-    struct partition_t *partition = tfm_spm_get_running_partition();
+    struct partition_t *partition = GET_CURRENT_COMPONENT();
 
     if (!partition) {
         tfm_core_panic();
     }
 
     return (partition->p_ldinf->pid == TFM_SP_NON_SECURE_ID);
-}
-
-uint32_t tfm_spm_get_caller_privilege_mode(void)
-{
-    struct partition_t *partition;
-
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
-
-    return GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 }
 
 int32_t tfm_spm_get_client_id(bool ns_caller)

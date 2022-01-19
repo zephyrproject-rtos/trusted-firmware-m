@@ -246,7 +246,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         }
     }
 
-    privileged = tfm_spm_get_caller_privilege_mode();
+    privileged = GET_CURRENT_PARTITION_PRIVILEGED_MODE();
 
     /*
      * Read client invecs from the wrap input vector. It is a PROGRAMMER ERROR
@@ -458,10 +458,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
      */
     timeout &= PSA_TIMEOUT_MASK;
 
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
+    partition = GET_CURRENT_COMPONENT();
 
     /*
      * It is a PROGRAMMER ERROR if the signal_mask does not include any assigned
@@ -500,10 +497,8 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
         tfm_core_panic();
     }
 
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
+    partition = GET_CURRENT_COMPONENT();
+
     privileged = GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 
     /*
@@ -884,10 +879,7 @@ void tfm_spm_partition_psa_clear(void)
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     struct partition_t *partition = NULL;
 
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
+    partition = GET_CURRENT_COMPONENT();
 
     /*
      * It is a fatal error if the Secure Partition's doorbell signal is not
@@ -908,10 +900,7 @@ void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
     struct irq_load_info_t *irq_info = NULL;
     struct partition_t *partition = NULL;
 
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
+    partition = GET_CURRENT_COMPONENT();
 
     irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
     /* It is a fatal error if passed signal is not an interrupt signal. */
@@ -951,10 +940,7 @@ void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
     struct partition_t *partition;
     struct irq_load_info_t *irq_info;
 
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
+    partition = GET_CURRENT_COMPONENT();
 
     irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
     if (!irq_info) {
@@ -969,10 +955,7 @@ psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal)
     struct partition_t *partition;
     struct irq_load_info_t *irq_info;
 
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
+    partition = GET_CURRENT_COMPONENT();
 
     irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
     if (!irq_info) {
@@ -990,10 +973,7 @@ void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
     struct irq_load_info_t *irq_info;
     struct partition_t *partition;
 
-    partition = tfm_spm_get_running_partition();
-    if (!partition) {
-        tfm_core_panic();
-    }
+    partition = GET_CURRENT_COMPONENT();
 
     irq_info = get_irq_info_for_signal(partition->p_ldinf, irq_signal);
     if (!irq_info) {

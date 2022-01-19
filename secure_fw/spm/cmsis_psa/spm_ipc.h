@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include "config_impl.h"
+#include "current.h"
 #include "tfm_arch.h"
 #include "lists.h"
 #include "tfm_secure_api.h"
@@ -36,6 +37,9 @@
             (IS_PARTITION_PSA_ROT(p_ldinf) ? TFM_PARTITION_PRIVILEGED_MODE : \
                                              TFM_PARTITION_UNPRIVILEGED_MODE)
 #endif
+#define GET_CURRENT_PARTITION_PRIVILEGED_MODE() \
+            (GET_PARTITION_PRIVILEGED_MODE( \
+                      ((struct partition_t *)GET_CURRENT_COMPONENT())->p_ldinf))
 
 /*
  * Set a number limit for stateless handle.
@@ -235,15 +239,6 @@ struct tfm_msg_body_t *tfm_spm_get_msg_by_signal(struct partition_t *partition,
 struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id);
 
 /**
- * \brief                   Get current running partition context.
- *
- * \retval NULL             Failed
- * \retval "Not NULL"       Return the parttion context pointer
- *                          \ref partition_t structures
- */
-struct partition_t *tfm_spm_get_running_partition(void);
-
-/**
  * \brief                   Get the service context by service ID.
  *
  * \param[in] sid           RoT Service identity
@@ -359,15 +354,6 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
  *                              - false: the PSA API caller is from secure
  */
 bool tfm_spm_is_ns_caller(void);
-
-/**
- * \brief                       Get the privilege mode of service caller.
- *
- * \retval                      Privilege mode of the service caller
- *                              \ref TFM_PARTITION_UNPRIVILEGED_MODE
- *                              \ref TFM_PARTITION_PRIVILEGED_MODE
- */
-uint32_t tfm_spm_get_caller_privilege_mode(void);
 
 /**
  * \brief               Get ID of current RoT Service client.
