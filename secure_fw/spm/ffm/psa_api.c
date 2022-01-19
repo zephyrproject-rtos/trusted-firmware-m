@@ -313,11 +313,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         }
     }
 
-    /*
-     * FixMe: Need to check if the message is unrecognized by the RoT
-     * Service or incorrectly formatted.
-     */
-    msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
+    msg = &(conn_handle->internal_msg);
 
     tfm_spm_fill_msg(msg, service, handle, type, client_id,
                      invecs, in_num, outvecs, out_num, outptr);
@@ -381,7 +377,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
         return PSA_ERROR_CONNECTION_BUSY;
     }
 
-    msg = tfm_spm_get_msg_buffer_from_conn_handle(connect_handle);
+    msg = &(connect_handle->internal_msg);
 
     handle = tfm_spm_to_user_handle(connect_handle);
     /* No input or output needed for connect message */
@@ -426,7 +422,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    msg = tfm_spm_get_msg_buffer_from_conn_handle(conn_handle);
+    msg = &(conn_handle->internal_msg);
 
     /*
      * It is a PROGRAMMER ERROR if the connection is currently handling a

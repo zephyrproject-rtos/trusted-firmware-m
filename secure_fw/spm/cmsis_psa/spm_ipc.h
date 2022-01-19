@@ -263,17 +263,6 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
 
 /**
- * \brief                   Get message context by connect handle.
- *
- * \param[in] conn_handle   Service connect handle.
- *
- * \return                  The message body context pointer
- *                          \ref msg_body_t structures
- */
-struct tfm_msg_body_t *
- tfm_spm_get_msg_buffer_from_conn_handle(struct tfm_conn_handle_t *conn_handle);
-
-/**
  * \brief                   Fill the message for PSA client call.
  *
  * \param[in] msg           Service Message Queue buffer pointer
