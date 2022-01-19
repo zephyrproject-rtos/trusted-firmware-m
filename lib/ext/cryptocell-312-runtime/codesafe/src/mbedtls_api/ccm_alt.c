@@ -22,7 +22,7 @@
 #include "mbedtls_ccm_internal.h"
 #include "mbedtls_ccm_common.h"
 
-#define MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED        -0x0020  /**< API is NOT supported. */
+#include "mbedtls/error.h"
 
 /************************ Public Functions **********************/
 /*
@@ -124,7 +124,7 @@ int mbedtls_ccm_starts( mbedtls_ccm_context *ctx,
     CC_UNUSED_PARAM(iv);
     CC_UNUSED_PARAM(iv_len);
 
-    return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_ccm_set_lengths( mbedtls_ccm_context *ctx,
@@ -137,7 +137,7 @@ int mbedtls_ccm_set_lengths( mbedtls_ccm_context *ctx,
     CC_UNUSED_PARAM(plaintext_len);
     CC_UNUSED_PARAM(tag_len);
 
-    return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_ccm_update_ad( mbedtls_ccm_context *ctx,
@@ -148,7 +148,7 @@ int mbedtls_ccm_update_ad( mbedtls_ccm_context *ctx,
     CC_UNUSED_PARAM(ad);
     CC_UNUSED_PARAM(ad_len);
 
-    return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_ccm_update( mbedtls_ccm_context *ctx,
@@ -163,7 +163,7 @@ int mbedtls_ccm_update( mbedtls_ccm_context *ctx,
     CC_UNUSED_PARAM(output_size);
     CC_UNUSED_PARAM(output_len);
 
-    return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_ccm_finish( mbedtls_ccm_context *ctx,
@@ -173,7 +173,7 @@ int mbedtls_ccm_finish( mbedtls_ccm_context *ctx,
     CC_UNUSED_PARAM(tag);
     CC_UNUSED_PARAM(tag_len);
 
-    return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 #endif /* defined(MBEDTLS_CCM_C) && defined (MBEDTLS_CCM_ALT) */

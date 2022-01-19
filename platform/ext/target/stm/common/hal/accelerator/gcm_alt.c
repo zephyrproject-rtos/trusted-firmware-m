@@ -32,9 +32,6 @@
 extern psa_status_t tfm_crypto_get_caller_id(int32_t *id);
 #endif
 
-/* API is NOT supported. */
-#define MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED -0x0016
-
 #include <string.h>
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
@@ -653,7 +650,7 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
     UNUSED(iv);
     UNUSED(iv_len);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
@@ -670,7 +667,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     UNUSED(output_size);
     UNUSED(output_length);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
@@ -687,7 +684,7 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
     UNUSED(tag);
     UNUSED(tag_len);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
@@ -698,7 +695,7 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
     UNUSED(add);
     UNUSED(add_len);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 #endif /* MBEDTLS_GCM_ALT */
 #endif /* MBEDTLS_GCM_C */

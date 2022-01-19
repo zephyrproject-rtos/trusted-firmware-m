@@ -45,9 +45,6 @@
 #define CCM_VALIDATE( cond ) \
     MBEDTLS_INTERNAL_VALIDATE( cond )
 
-/* API is NOT supported. */
-#define MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED -0x0020
-
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define ST_CCM_TIMEOUT   1000   /* timeout (in ms) for the crypto processor   */
@@ -479,7 +476,7 @@ int mbedtls_ccm_starts( mbedtls_ccm_context *ctx,
     UNUSED(iv);
     UNUSED(iv_len);
 
-    return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_ccm_set_lengths( mbedtls_ccm_context *ctx,
@@ -492,7 +489,7 @@ int mbedtls_ccm_set_lengths( mbedtls_ccm_context *ctx,
   UNUSED(plaintext_len);
   UNUSED(tag_len);
 
-  return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+  return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_ccm_update_ad( mbedtls_ccm_context *ctx,
@@ -503,7 +500,7 @@ int mbedtls_ccm_update_ad( mbedtls_ccm_context *ctx,
   UNUSED(ad);
   UNUSED(ad_len);
 
-  return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+  return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_ccm_update( mbedtls_ccm_context *ctx,
@@ -518,7 +515,7 @@ int mbedtls_ccm_update( mbedtls_ccm_context *ctx,
   UNUSED(output_size);
   UNUSED(output_len);
 
-  return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+  return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_ccm_finish( mbedtls_ccm_context *ctx,
@@ -528,7 +525,7 @@ int mbedtls_ccm_finish( mbedtls_ccm_context *ctx,
   UNUSED(tag);
   UNUSED(tag_len);
 
-  return (MBEDTLS_ERR_CCM_API_IS_NOT_SUPPORTED);
+  return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 #endif /*MBEDTLS_CCM_ALT*/
