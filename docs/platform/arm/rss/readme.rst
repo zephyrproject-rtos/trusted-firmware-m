@@ -17,9 +17,10 @@ is authenticated. BL2 loads and authenticates the TF-M runtime into RSS SRAM
 from host flash. BL2 is also responsible for loading initial boot code into
 other subsystems within the host.
 
-The RSS platform port supports the TF-M Crypto, TF-M Initial Attestation and
-TF-M Platform services along with the corresponding regression tests. It
-supports the IPC model in multi-core topology with Isolation Level 1 and 2.
+The RSS platform port supports the TF-M Crypto, TF-M Initial Attestation,
+Measured Boot and TF-M Platform services along with the corresponding
+regression tests. It supports the IPC model in multi-core topology with
+Isolation Level 1 and 2.
 
 Building TF-M
 -------------

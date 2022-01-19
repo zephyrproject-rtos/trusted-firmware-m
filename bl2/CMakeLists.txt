@@ -35,6 +35,7 @@ target_link_libraries(bl2
     PRIVATE
         tfm_boot_status
         $<$<BOOL:${TEST_BL2}>:mcuboot_tests>
+        platform_bl2
 )
 
 target_compile_options(bl2
@@ -54,6 +55,8 @@ target_compile_definitions(bl2
         $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
         $<$<BOOL:${TEST_BL2}>:TEST_BL2>
+        $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:TFM_PARTITION_FIRMWARE_UPDATE>
+        $<$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>:CONFIG_TFM_BOOT_STORE_MEASUREMENTS>
 )
 
 add_convert_to_bin_target(bl2)

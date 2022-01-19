@@ -12,7 +12,11 @@ add_library(mcuboot_config INTERFACE)
 
 set(MCUBOOT_KEY_ENC "${MCUBOOT_PATH}/enc-rsa2048-pub.pem" CACHE FILEPATH "Path to key with which to encrypt binary")
 
-if (CONFIG_TFM_BOOT_STORE_MEASUREMENTS)
+# Add/process CBOR encoded measured boot data (MCUBOOT_MEASURED_BOOT) only if
+# the store encoded measurements config is enabled. Otherwise, unencoded
+# measurements are stored in the shared data area and must be processed at
+# runtime.
+if (CONFIG_TFM_BOOT_STORE_MEASUREMENTS AND CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS)
     set(MCUBOOT_MEASURED_BOOT ON)
 endif()
 
