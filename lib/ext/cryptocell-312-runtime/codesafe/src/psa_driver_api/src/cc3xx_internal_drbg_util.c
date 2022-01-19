@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2021, Arm Limited. All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+/** \file cc3xx_internal_drbg_util.c
+ *
+ * This file contains the implementation of the internal functions to provide
+ * a DRBG, i.e. Deterministic Random Binary Generator based on algorithms as
+ * CTR and HMAC, plus to handle entropy contexts. This file has a direct
+ * dependency on mbedTLS related objects
+ *
+ */
+
 #include "cc3xx_internal_drbg_util.h"
 #include "cc_common.h"
 #include "cc_common_math.h"
@@ -11,15 +27,6 @@
 #include "mbedtls/hmac_drbg.h"
 
 #define CC3XX_CTR_DRBG_INITIALIZED 0x5A44A5A8
-
-/** \file cc3xx_internal_drbg_util.c
- *
- * This file contains the implementation of the internal functions to provide
- * a DRBG, i.e. Deterministic Random Binary Generator based on algorithms as
- * CTR and HMAC, plus to handle entropy contexts. This file has a direct
- * dependency on mbedTLS related objects
- *
- */
 
 /** \defgroup internal_drbg_util Internal DRBG objects
  *
