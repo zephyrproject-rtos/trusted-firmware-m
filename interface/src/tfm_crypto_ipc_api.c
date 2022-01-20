@@ -1631,9 +1631,6 @@ psa_status_t psa_cipher_encrypt(psa_key_id_t key,
                                 size_t output_size,
                                 size_t *output_length)
 {
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_ENCRYPT_SID,
@@ -1654,7 +1651,6 @@ psa_status_t psa_cipher_encrypt(psa_key_id_t key,
 
     *output_length = out_vec[0].len;
     return status;
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t psa_cipher_decrypt(psa_key_id_t key,
@@ -1665,9 +1661,6 @@ psa_status_t psa_cipher_decrypt(psa_key_id_t key,
                                 size_t output_size,
                                 size_t *output_length)
 {
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
         .sfn_id = TFM_CRYPTO_CIPHER_DECRYPT_SID,
@@ -1688,7 +1681,6 @@ psa_status_t psa_cipher_decrypt(psa_key_id_t key,
 
     *output_length = out_vec[0].len;
     return status;
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
 psa_status_t psa_raw_key_agreement(psa_algorithm_t alg,
