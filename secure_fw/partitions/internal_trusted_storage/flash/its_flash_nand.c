@@ -60,7 +60,7 @@ static psa_status_t its_flash_nand_read(const struct its_flash_fs_config_t *cfg,
     ARM_FLASH_CAPABILITIES DriverCapabilities;
 
     /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
+    const uint32_t data_width_byte[] = {
         sizeof(uint8_t),
         sizeof(uint16_t),
         sizeof(uint32_t),
@@ -180,7 +180,7 @@ static psa_status_t its_flash_nand_flush(
     ARM_FLASH_CAPABILITIES DriverCapabilities;
 
     /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
+    const uint32_t data_width_byte[] = {
         sizeof(uint8_t),
         sizeof(uint16_t),
         sizeof(uint32_t),

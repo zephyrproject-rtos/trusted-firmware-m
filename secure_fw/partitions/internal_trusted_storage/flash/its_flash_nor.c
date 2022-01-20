@@ -52,7 +52,7 @@ static psa_status_t flash_read_unaligned(
     ARM_FLASH_CAPABILITIES DriverCapabilities;
 
     /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
+    const uint32_t data_width_byte[] = {
         sizeof(uint8_t),
         sizeof(uint16_t),
         sizeof(uint32_t),
@@ -144,7 +144,7 @@ static psa_status_t its_flash_nor_write(const struct its_flash_fs_config_t *cfg,
     uint32_t addr;
 
     /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
+    const uint32_t data_width_byte[] = {
         sizeof(uint8_t),
         sizeof(uint16_t),
         sizeof(uint32_t),

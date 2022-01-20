@@ -192,7 +192,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
     uint8_t len_padding[FLASH_PROGRAM_UNIT - 1];
 #endif
     /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
+    const uint32_t data_width_byte[] = {
         sizeof(uint8_t),
         sizeof(uint16_t),
         sizeof(uint32_t),
