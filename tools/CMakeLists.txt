@@ -13,7 +13,7 @@ find_package(Python3)
 list(APPEND TEMP_MANIFEST_LISTS ${TFM_MANIFEST_LIST})
 
 if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
-    list(APPEND TEMP_MANIFEST_LISTS ${TFM_TEST_PATH}/secure_fw/test_services/tfm_test_manifest_list.yaml)
+    list(APPEND TEMP_MANIFEST_LISTS ${TFM_TEST_PATH}/secure_fw/tfm_test_manifest_list.yaml)
 endif()
 
 if ("${TEST_PSA_API}" STREQUAL "IPC")
