@@ -11,6 +11,13 @@
 #include "flash_fs/its_flash_fs.h"
 #include "tfm_memory_utils.h"
 
+/* Valid entries for data item width */
+static const uint32_t data_width_byte[] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
+
 /**
  * \brief Gets physical address of the given block ID.
  *
@@ -58,13 +65,6 @@ static psa_status_t its_flash_nand_read(const struct its_flash_fs_config_t *cfg,
     /* The max size of flash data_width is 4 bytes. */
     uint8_t temp_buffer[sizeof(uint32_t)];
     ARM_FLASH_CAPABILITIES DriverCapabilities;
-
-    /* Valid entries for data item width */
-    const uint32_t data_width_byte[] = {
-        sizeof(uint8_t),
-        sizeof(uint16_t),
-        sizeof(uint32_t),
-    };
     uint8_t data_width;
     int ret;
 
@@ -178,13 +178,6 @@ static psa_status_t its_flash_nand_flush(
         (struct its_flash_nand_dev_t *)cfg->flash_dev;
     uint32_t addr;
     ARM_FLASH_CAPABILITIES DriverCapabilities;
-
-    /* Valid entries for data item width */
-    const uint32_t data_width_byte[] = {
-        sizeof(uint8_t),
-        sizeof(uint16_t),
-        sizeof(uint32_t),
-    };
     uint8_t data_width;
 
     DriverCapabilities = flash_dev->driver->GetCapabilities();

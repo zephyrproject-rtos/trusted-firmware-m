@@ -30,6 +30,13 @@
 extern const struct flash_area flash_map[];
 extern const int flash_map_entry_num;
 
+/* Valid entries for data item width */
+static const uint32_t data_width_byte[] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
+
 /*
  * Check the target address in the flash_area_xxx operation.
  */
@@ -99,12 +106,6 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
     uint8_t data_width, i = 0, j;
     int ret = 0;
 
-    /* Valid entries for data item width */
-    const uint32_t data_width_byte[] = {
-        sizeof(uint8_t),
-        sizeof(uint16_t),
-        sizeof(uint32_t),
-    };
     ARM_FLASH_CAPABILITIES DriverCapabilities;
 
     BOOT_LOG_DBG("read area=%d, off=%#x, len=%#x", area->fa_id, off, len);
@@ -191,12 +192,6 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
 #else
     uint8_t len_padding[FLASH_PROGRAM_UNIT - 1];
 #endif
-    /* Valid entries for data item width */
-    const uint32_t data_width_byte[] = {
-        sizeof(uint8_t),
-        sizeof(uint16_t),
-        sizeof(uint32_t),
-    };
     ARM_FLASH_CAPABILITIES DriverCapabilities;
     uint8_t data_width;
     /* The PROGRAM_UNIT aligned value of `off` */

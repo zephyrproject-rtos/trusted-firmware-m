@@ -61,6 +61,12 @@ enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *dat
 #endif /* defined(OTP_WRITEABLE)*/
 
 #else /* OTP_NV_COUNTERS_RAM_EMULATION */
+/* Valid entries for data item width */
+static const uint32_t data_width_byte[] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
 
 #if defined(OTP_WRITEABLE)
 static enum tfm_plat_err_t make_backup(void);
@@ -121,12 +127,6 @@ enum tfm_plat_err_t read_otp_nv_counters_flash(uint32_t offset, void *data, uint
     enum tfm_plat_err_t err = TFM_PLAT_ERR_SUCCESS;
     ARM_FLASH_CAPABILITIES DriverCapabilities;
     uint8_t data_width;
-    /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
-        sizeof(uint8_t),
-        sizeof(uint16_t),
-        sizeof(uint32_t),
-    };
     uint32_t remaining_cnt, read_cnt;
     uint8_t temp_buffer[sizeof(uint32_t)];
 
@@ -259,12 +259,6 @@ static enum tfm_plat_err_t copy_flash_region(size_t from, size_t to, size_t size
     end = size;
     ARM_FLASH_CAPABILITIES DriverCapabilities;
     uint8_t data_width;
-    /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
-        sizeof(uint8_t),
-        sizeof(uint16_t),
-        sizeof(uint32_t),
-    };
 
     DriverCapabilities = OTP_NV_COUNTERS_FLASH_DEV.GetCapabilities();
     data_width = data_width_byte[DriverCapabilities.data_width];
@@ -316,12 +310,6 @@ enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *dat
     end = round_up(offset + cnt, TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
     ARM_FLASH_CAPABILITIES DriverCapabilities;
     uint8_t data_width;
-    /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
-        sizeof(uint8_t),
-        sizeof(uint16_t),
-        sizeof(uint32_t),
-    };
 
     DriverCapabilities = OTP_NV_COUNTERS_FLASH_DEV.GetCapabilities();
     data_width = data_width_byte[DriverCapabilities.data_width];
@@ -431,12 +419,6 @@ static enum tfm_plat_err_t create_or_restore_layout(void)
     size_t copy_size;
     ARM_FLASH_CAPABILITIES DriverCapabilities;
     uint8_t data_width;
-    /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
-        sizeof(uint8_t),
-        sizeof(uint16_t),
-        sizeof(uint32_t),
-    };
 
     DriverCapabilities = OTP_NV_COUNTERS_FLASH_DEV.GetCapabilities();
     data_width = data_width_byte[DriverCapabilities.data_width];
