@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -168,9 +168,16 @@ target_sources(${CC312_LIB_PREFIX}cc312
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
 )
 
+option(CC312_LEGACY_DRIVER_API_ENABLED "This variable controls whether the legacy driver interface is used for CC-312." ON)
+if (${CC312_LEGACY_DRIVER_API_ENABLED})
+    set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_mbedtls_api)
+else()
+    message(FATAL_ERROR "CC312_LEGACY_DRIVER_API_ENABLED must be ON")
+endif()
+
 # Adding two targets as link-time dependencies of each other seems bad, but
 # in reality it just means that they'll share headers and compile defs.
-target_link_libraries(${CC312_LIB_PREFIX}cc312_psa_driver_api
+target_link_libraries(${CC312_DRIVER_API_TARGET}
     PRIVATE
         crypto_service_mbedcrypto
     PUBLIC
@@ -178,7 +185,7 @@ target_link_libraries(${CC312_LIB_PREFIX}cc312_psa_driver_api
 )
 target_link_libraries(crypto_service_mbedcrypto
     PRIVATE
-        ${CC312_LIB_PREFIX}cc312_psa_driver_api
+        ${CC312_DRIVER_API_TARGET}
     PUBLIC
         crypto_service_crypto_hw
 )
