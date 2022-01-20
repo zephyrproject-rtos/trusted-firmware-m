@@ -75,7 +75,7 @@ target_link_libraries(platform_s
         tfm_partition_defs
         tfm_spm
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:tfm_sprt>
-        $<$<AND:$<BOOL:${TFM_PARTITION_CRYPTO}>,$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>>:crypto_service_mbedtls>
+        $<$<BOOL:${TFM_PARTITION_CRYPTO}>:crypto_service_mbedcrypto>
 )
 
 target_compile_definitions(platform_s

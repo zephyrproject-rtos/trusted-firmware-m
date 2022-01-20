@@ -180,6 +180,9 @@ target_include_directories(${MBEDTLS_TARGET_PREFIX}mbedcrypto
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
+# Fix platform_s and crypto_service_mbedcrypto libraries cyclic linking
+set_target_properties(${MBEDTLS_TARGET_PREFIX}mbedcrypto PROPERTIES LINK_INTERFACE_MULTIPLICITY 3)
+
 target_sources(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PRIVATE
         $<$<NOT:$<BOOL:${CRYPTO_HW_ACCELERATOR}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_mbedcrypto_alt.c>
