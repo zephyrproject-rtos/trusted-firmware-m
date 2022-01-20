@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
  */
 
+#include "nrf.h"
 #include <stdint.h>
 #include <tfm_platform_api.h>
 #include <tfm_ioctl_core_api.h>
