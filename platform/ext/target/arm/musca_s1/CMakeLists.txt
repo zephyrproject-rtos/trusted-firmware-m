@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -44,7 +44,16 @@ if(NS)
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
-            CMSIS_5_RTX_V8MMN
+            $<$<STREQUAL:${CONFIG_TFM_FP},hard>:CMSIS_5_RTX_V8MMFN>
+            $<$<STREQUAL:${CONFIG_TFM_FP},soft>:CMSIS_5_RTX_V8MMN>
+    )
+    target_compile_options(tfm_ns
+        PUBLIC
+            ${COMPILER_CP_FLAG}
+    )
+    target_link_options(tfm_ns
+        PUBLIC
+            ${LINKER_CP_OPTION}
     )
 endif()
 

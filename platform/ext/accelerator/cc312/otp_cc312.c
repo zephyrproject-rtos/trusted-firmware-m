@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -213,7 +213,7 @@ __PACKED_STRUCT plat_otp_layout_t {
 
         uint8_t boot_seed[32];
         uint8_t implementation_id[32];
-        uint8_t hw_version[18];
+        uint8_t hw_version[32];
         uint8_t verification_service_url[32];
         uint8_t profile_definition[32];
 

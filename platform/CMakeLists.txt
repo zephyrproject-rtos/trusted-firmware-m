@@ -83,8 +83,10 @@ target_compile_definitions(platform_s
         TFM_SPM_LOG_LEVEL=${TFM_SPM_LOG_LEVEL}
         $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:TFM_SPM_LOG_RAW_ENABLED>
         $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION>
-        CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
-        $<$<BOOL:${CONFIG_TFM_LAZY_STACKING_SPE}>:CONFIG_TFM_LAZY_STACKING_SPE>
+        # CONFIG_TFM_FP
+        $<$<STREQUAL:${CONFIG_TFM_FP},hard>:CONFIG_TFM_FP=2>
+        $<$<STREQUAL:${CONFIG_TFM_FP},soft>:CONFIG_TFM_FP=0>
+        $<$<BOOL:${CONFIG_TFM_LAZY_STACKING}>:CONFIG_TFM_LAZY_STACKING>
     PRIVATE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
         $<$<OR:$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>,$<STREQUAL:"${TEST_PSA_API}","IPC">>:CONFIG_TFM_ENABLE_MEMORY_PROTECT>
@@ -118,8 +120,17 @@ target_link_libraries(platform_ns
 )
 
 target_compile_definitions(platform_ns
+    PUBLIC
+        # CONFIG_TFM_FP
+        $<$<STREQUAL:${CONFIG_TFM_FP},hard>:CONFIG_TFM_FP=2>
+        $<$<STREQUAL:${CONFIG_TFM_FP},soft>:CONFIG_TFM_FP=0>
     PRIVATE
         $<$<BOOL:${TEST_NS_SLIH_IRQ}>:TEST_NS_SLIH_IRQ>
+)
+
+target_compile_options(platform_ns
+    PUBLIC
+        ${COMPILER_CP_FLAG}
 )
 
 #========================= Platform BL2 =======================================#

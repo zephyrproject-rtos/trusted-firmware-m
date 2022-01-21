@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 Arm Limited
+ * Copyright (c) 2013-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,12 @@ static const ARM_FLASH_CAPABILITIES DriverCapabilities =
   EVENT_READY_NOT_AVAILABLE,
   DATA_WIDTH_32BIT,
   CHIP_ERASE_SUPPORTED
+};
+
+static const uint32_t data_width_byte[] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
 };
 
 /**
@@ -348,6 +354,8 @@ static int32_t Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
   int32_t ret = ARM_DRIVER_ERROR_SPECIFIC;
   bool is_valid = true;
 
+  /* Conversion between data items and bytes */
+  cnt *= data_width_byte[DriverCapabilities.data_width];
   ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
 
   /* Check Flash memory boundaries */
@@ -396,8 +404,12 @@ static int32_t Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     ret = ARM_DRIVER_OK;
   }
   DoubleECC_Error_Counter = 0U;
-
-  return ret;
+  if (ret == ARM_DRIVER_OK) {
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
+  } else {
+    return ret;
+  }
 }
 
 static int32_t Flash_ProgramData(uint32_t addr,
@@ -416,6 +428,8 @@ static int32_t Flash_ProgramData(uint32_t addr,
 #if defined(CHECK_WRITE) || defined(DEBUG_FLASH_ACCESS)
   void *dest;
 #endif
+  /* Conversion between data items and bytes */
+  cnt *= data_width_byte[DriverCapabilities.data_width];
   ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   if (is_range_secure(&ARM_FLASH0_DEV, addr, cnt))
@@ -505,7 +519,8 @@ static int32_t Flash_ProgramData(uint32_t addr,
     printf("failed write %x n=%x \r\n", (uint32_t)(dest), cnt);
   }
 #endif /* DEBUG_FLASH_ACCESS */
-  return (err == HAL_OK) ? ARM_DRIVER_OK : ARM_DRIVER_ERROR;
+  cnt /= data_width_byte[DriverCapabilities.data_width];
+  return (err == HAL_OK) ? cnt : ARM_DRIVER_ERROR;
 }
 
 static int32_t Flash_EraseSector(uint32_t addr)

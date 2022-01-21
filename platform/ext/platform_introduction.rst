@@ -9,7 +9,12 @@ Platforms introduction
     - Cortex-M55 system:
 
         - `FPGA image loaded on MPS3 board (AN547).
-          <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps3>`_
+          <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`_
+        - `FPGA image loaded on MPS3 board (AN552).
+          <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`_
+        - `Corstone-300 Ethos-U55 Ecosystem FVP
+          <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`_
+
 
     - Cortex-M33 system:
 
@@ -57,4 +62,4 @@ lists the deprecated platforms planned to be removed from upstream.
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

@@ -44,7 +44,7 @@ target_sources(platform_s
     PRIVATE
         target_cfg.c
         tfm_interrupts.c
-        ../core/nrfx/mdk/system_nrf9160.c
+        ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf9160.c
 )
 
 target_compile_definitions(platform_s
@@ -61,7 +61,7 @@ target_include_directories(platform_ns
 
 target_sources(platform_ns
     PRIVATE
-        ../core/nrfx/mdk/system_nrf9160.c
+        ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf9160.c
 )
 
 target_compile_definitions(platform_ns
@@ -81,7 +81,7 @@ if(BL2)
 
     target_sources(platform_bl2
         PRIVATE
-            ../core/nrfx/mdk/system_nrf9160.c
+            ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf9160.c
     )
 
     target_compile_definitions(platform_bl2

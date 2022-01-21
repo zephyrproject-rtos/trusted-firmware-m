@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,7 +18,7 @@
 #include "tfm_secure_api.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"
-#if defined(__FPU_USED) && (__FPU_USED == 1U) && (CONFIG_TFM_SPE_FP >= 1)
+#if defined(__FPU_USED) && (__FPU_USED == 1U) && (CONFIG_TFM_FP >= 1)
 #include "core_ext.h"
 #endif
 
@@ -264,47 +264,42 @@ void tfm_arch_set_secure_exception_priorities(void)
 
 void tfm_arch_config_extensions(void)
 {
-#if defined(__FPU_PRESENT) && (__FPU_PRESENT == 1U)
-    /* Configure Secure access to the FPU only if the secure image is being
-     * built with the FPU in use. This avoids introducing extra interrupt
-     * latency when the FPU is not used by the SPE.
-     */
-#if defined(__FPU_USED) && (__FPU_USED == 1U)
-/* For secure uses FPU only */
-#if (CONFIG_TFM_SPE_FP >= 1)
+#if (CONFIG_TFM_FP >= 1)
 #ifdef __GNUC__
-    /* Enable Secure privileged and unprivilged access to the FP Extension */
+    /* Enable SPE privileged and unprivileged access to the FP Extension */
     SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
                   | (3U << 11U*2U);  /* enable CP11 full access */
 #endif
 
-#ifdef CONFIG_TFM_LAZY_STACKING_SPE
-    /* Enable lazy stacking */
+#ifdef CONFIG_TFM_LAZY_STACKING
+    /* Enable lazy stacking. */
     FPU->FPCCR |= FPU_FPCCR_LSPEN_Msk;
 #else
-    /* Disable lazy stacking */
+    /* Disable lazy stacking. */
     FPU->FPCCR &= ~FPU_FPCCR_LSPEN_Msk;
 #endif
+
     /* If the SPE will ever use the floating-point registers for sensitive
      * data, then FPCCR.ASPEN, FPCCR.TS, FPCCR.CLRONRET and FPCCR.CLRONRETS
      * must be set at initialisation and not changed again afterwards.
+     * Let SPE decide the S/NS shared setting (LSPEN and CLRONRET) to avoid the
+     * possible side-path brought by flexibility.
      */
     FPU->FPCCR |= FPU_FPCCR_ASPEN_Msk
                   | FPU_FPCCR_TS_Msk
                   | FPU_FPCCR_CLRONRET_Msk
-                  | FPU_FPCCR_CLRONRETS_Msk;
+                  | FPU_FPCCR_CLRONRETS_Msk
+                  | FPU_FPCCR_LSPENS_Msk;
 
-    /* If FPU is used by secure only, prevent non-secure from modifying FPU’s
-     * power setting.
+    /* Permit Non-secure access to the Floating-point Extension.
+     * Note: It is still necessary to set CPACR_NS to enable the FP Extension
+     * in the NSPE. This configuration is left to NS privileged software.
      */
+    SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
+
+    /* Prevent non-secure from modifying FPU’s power setting. */
     SCnSCB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
-
-    /* Disable Non-secure access to the Floating-point Extension.
-     */
-    SCB->NSACR &= ~(SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk);
-#endif /* CONFIG_TFM_SPE_FP >= 1 */
-#endif /* __FPU_USED */
-#endif /* __FPU_PRESENT */
+#endif /* CONFIG_TFM_FP >= 1 */
 
 #if defined(__ARM_ARCH_8_1M_MAIN__)
     SCB->CCR |= SCB_CCR_TRD_Msk;
@@ -322,7 +317,7 @@ __attribute__((naked, noinline)) void tfm_arch_clear_fp_status(void)
                   );
 }
 
-#if (CONFIG_TFM_SPE_FP >= 1)
+#if (CONFIG_TFM_FP >= 1)
 __attribute__((naked, noinline)) void tfm_arch_clear_fp_data(void)
 {
     __ASM volatile(

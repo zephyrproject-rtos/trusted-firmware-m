@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -52,6 +52,9 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
         $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
         $<$<BOOL:${TFM_SP_META_PTR_ENABLE}>:TFM_SP_META_PTR_ENABLE>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_SUPERVISOR_CALL}>:CONFIG_TFM_PSA_API_SUPERVISOR_CALL>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:CONFIG_TFM_PSA_API_CROSS_CALL>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_SFN_CALL}>:CONFIG_TFM_PSA_API_SFN_CALL>
 )
 
 ###################### PSA api (S lib) #########################################

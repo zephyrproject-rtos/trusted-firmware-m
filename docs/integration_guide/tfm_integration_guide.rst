@@ -33,6 +33,8 @@ The hardware platforms currently supported are:
 - Musca-S1 test chip board (Cortex-M33 SSE-200 subsystem)
 - CoreLink SSE-200 Subsystem for MPS3 (AN524)
 - Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN547)
+- Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN552)
+- Corstone-300 Ethos-U55 Ecosystem FVP (FVP_SSE300_MPS3)
 - STM32L5xx: Cortex-M33 based platform (STM32L562 and STM32L552 socs)
 - nRF9160 DK (Cortex-M33)
 - nRF5340 DK (Cortex-M33 Application MCU)
@@ -173,4 +175,4 @@ environment before the script will succeed when the script is not run via cmake.
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

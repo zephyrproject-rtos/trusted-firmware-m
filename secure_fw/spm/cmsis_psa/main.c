@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -101,16 +101,9 @@ static fih_int tfm_core_init(void)
 
     SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_LVL);
 
-#if (CONFIG_TFM_SPE_FP == 0)
-    SPMLOG_INFMSG("TF-M FP mode: Software\r\n");
-#elif (CONFIG_TFM_SPE_FP == 1)
-    SPMLOG_INFMSG("TF-M FP mode: Hybird\r\n");
-#elif (CONFIG_TFM_SPE_FP == 2)
+#if (CONFIG_TFM_FP == 2)
     SPMLOG_INFMSG("TF-M FP mode: Hardware\r\n");
-#endif
-
-#if (CONFIG_TFM_SPE_FP >= 1)
-#ifdef CONFIG_TFM_LAZY_STACKING_SPE
+#ifdef CONFIG_TFM_LAZY_STACKING
     SPMLOG_INFMSG("Lazy stacking enabled\r\n");
 #else
     SPMLOG_INFMSG("Lazy stacking disabled\r\n");
@@ -151,7 +144,7 @@ int main(void)
      */
     tfm_arch_set_secure_exception_priorities();
 
-#if (CONFIG_TFM_SPE_FP >= 1)
+#if (CONFIG_TFM_FP >= 1)
     tfm_arch_clear_fp_data();
 #endif
 

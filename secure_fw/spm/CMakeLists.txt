@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -48,7 +48,7 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/arch/tfm_arch.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/main.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_ipc.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_cross_call.c>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:cmsis_psa/spm_cross_call.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_load.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/psa_api.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/backend.c>
@@ -80,13 +80,16 @@ if (TEST_PSA_API STREQUAL IPC)
     target_include_directories(tfm_partitions INTERFACE ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests)
     target_sources(tfm_psa_rot_partition_driver_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_driver_partition_psa.c)
+    target_link_libraries(tfm_psa_rot_partition_driver_partition PRIVATE psa_interface)
     target_compile_definitions(tfm_psa_rot_partition_driver_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
     target_sources(tfm_app_rot_partition_client_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_client_partition_psa.c)
     target_compile_definitions(tfm_app_rot_partition_client_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
+    target_link_libraries(tfm_app_rot_partition_client_partition PRIVATE psa_interface)
     target_sources(tfm_app_rot_partition_server_partition PRIVATE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_server_partition_psa.c)
     target_compile_definitions(tfm_app_rot_partition_server_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
+    target_link_libraries(tfm_app_rot_partition_server_partition PRIVATE psa_interface)
     target_sources(tfm_partitions INTERFACE
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_driver_partition_psa.c
         ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_client_partition_psa.c
@@ -116,7 +119,11 @@ target_compile_definitions(tfm_spm
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${MCUBOOT_MEASURED_BOOT}>>:BOOT_DATA_AVAILABLE>
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
-        CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:CONFIG_TFM_SPM_BACKEND_IPC>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:CONFIG_TFM_SPM_BACKEND_SFN>
+        # CONFIG_TFM_FP
+        $<$<STREQUAL:${CONFIG_TFM_FP},hard>:CONFIG_TFM_FP=2>
+        $<$<STREQUAL:${CONFIG_TFM_FP},soft>:CONFIG_TFM_FP=0>
 )
 
 target_compile_options(tfm_spm

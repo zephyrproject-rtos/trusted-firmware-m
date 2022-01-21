@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,8 +14,6 @@
 #include "psa/client.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
-
-#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
 
 #if defined(__ICCARM__)
 
@@ -409,5 +407,3 @@ void psa_unmap_outvec_cross(psa_handle_t msg_handle, uint32_t outvec_idx,
 }
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
-
-#endif /* CONFIG_TFM_PSA_API_CROSS_CALL */

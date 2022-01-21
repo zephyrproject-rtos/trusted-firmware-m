@@ -34,6 +34,23 @@
 
 #if RTE_QSPI0
 
+/**
+ * Data width values for ARM_FLASH_CAPABILITIES::data_width
+ * \ref ARM_FLASH_CAPABILITIES
+ */
+enum {
+    DATA_WIDTH_8BIT = 0u,
+    DATA_WIDTH_16BIT,
+    DATA_WIDTH_32BIT,
+    DATA_WIDTH_ENUM_SIZE
+};
+
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
+
 static const ARM_DRIVER_VERSION DriverVersion = {
     ARM_FLASH_API_VERSION,
     ARM_FLASH_DRV_VERSION
@@ -41,7 +58,7 @@ static const ARM_DRIVER_VERSION DriverVersion = {
 
 static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
     .event_ready = 0,
-    .data_width  = 2, /* 32-bit */
+    .data_width  = DATA_WIDTH_32BIT,
     .erase_chip  = 0
 };
 
@@ -50,7 +67,7 @@ static ARM_FLASH_INFO FlashInfo = {
     .sector_count = QSPI_FLASH_TOTAL_SIZE / QSPI_FLASH_AREA_IMAGE_SECTOR_SIZE,
     .sector_size  = QSPI_FLASH_AREA_IMAGE_SECTOR_SIZE,
     .page_size    = 256,
-    .program_unit = 4, /* 32-bit word = 4 bytes */
+    .program_unit = sizeof(uint32_t), /* 32-bit word = 4 bytes */
     .erased_value = 0xFF
 };
 
@@ -138,6 +155,9 @@ static int32_t ARM_QSPI_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     uint32_t data_index = 0;
     uint8_t *buffer = (uint8_t *)data;
 
+    /* Conversion between data items and bytes */
+    uint32_t bytes = cnt * data_width_byte[DriverCapabilities.data_width];
+
     if ((addr % QSPI_READ_SIZE_ALIGNMENT) != 0)
     {
         /* Read beginning part prior to requested data which is before the word boundary */
@@ -153,18 +173,18 @@ static int32_t ARM_QSPI_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
         memcpy(&buffer[data_index], &baTmpRAMBuffer[off_by], needed);
         data_index += needed;
         addr += needed;
-        cnt -= needed;
+        bytes -= needed;
     }
 
-    while (cnt > 0)
+    while (bytes > 0)
     {
         /* Read in chunks of data to the temporary buffer and copy to the supplied buffer */
         uint32_t read_size = sizeof(baTmpRAMBuffer);
         uint32_t save_size = read_size;
-        if (cnt < read_size)
+        if (bytes < read_size)
         {
-            read_size = cnt;
-            save_size = cnt;
+            read_size = bytes;
+            save_size = bytes;
 
             if ((read_size % QSPI_READ_SIZE_ALIGNMENT) != 0)
             {
@@ -181,36 +201,39 @@ static int32_t ARM_QSPI_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
         memcpy(&buffer[data_index], baTmpRAMBuffer, save_size);
         data_index += save_size;
         addr += save_size;
-        cnt -= save_size;
+        bytes -= save_size;
     }
 
-    return ARM_DRIVER_OK;
+    return cnt;
 }
 
 static int32_t ARM_QSPI_Flash_ProgramData(uint32_t addr, const void *data,
-                                     uint32_t cnt)
+                                          uint32_t cnt)
 {
     uint32_t err;
 
+    /* Conversion between data items and bytes */
+    uint32_t bytes = cnt * data_width_byte[DriverCapabilities.data_width];
+
     /* Only aligned writes of full 32-bit words are allowed. */
-    if ((addr % sizeof(uint32_t)) || (cnt % sizeof(uint32_t))) {
+    if (addr % sizeof(uint32_t)) {
         return ARM_DRIVER_ERROR_PARAMETER;
     }
 
-    if (!is_range_valid(addr, cnt)) {
+    if (!is_range_valid(addr, bytes)) {
         return ARM_DRIVER_ERROR_PARAMETER;
     }
 
     if (!nrfx_is_in_ram(data))
     {
         /* Not in RAM, copy to RAM so it can be written to QSPI */
-        __ALIGN(4) uint8_t baRAMDataBuffer[cnt];
-        memcpy(baRAMDataBuffer, data, cnt);
-        err = nrfx_qspi_write(baRAMDataBuffer, cnt, addr);
+        __ALIGN(4) uint8_t baRAMDataBuffer[bytes];
+        memcpy(baRAMDataBuffer, data, bytes);
+        err = nrfx_qspi_write(baRAMDataBuffer, bytes, addr);
     }
     else
     {
-        err = nrfx_qspi_write(data, cnt, addr);
+        err = nrfx_qspi_write(data, bytes, addr);
     }
 
     if (err != NRFX_SUCCESS)
@@ -218,7 +241,7 @@ static int32_t ARM_QSPI_Flash_ProgramData(uint32_t addr, const void *data,
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    return cnt;
 }
 
 static int32_t ARM_QSPI_Flash_EraseSector(uint32_t addr)

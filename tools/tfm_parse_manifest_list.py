@@ -20,9 +20,7 @@ except ImportError as e:
     exit(1)
 
 donotedit_warning = \
-                    '/*********** ' + \
-                    'WARNING: This is an auto-generated file. Do not edit!' + \
-                    ' ***********/'
+                    '  WARNING: This is an auto-generated file. Do not edit!  '
 
 TFM_ROOT_DIR = os.path.join(sys.path[0], '..')
 OUT_DIR = None # The root directory that files are generated to
@@ -267,11 +265,8 @@ def gen_per_partition_files(context):
         context contains partition infos
     """
 
-    utilities = {}
-    utilities['donotedit_warning'] = donotedit_warning
-
     partition_context = {}
-    partition_context['utilities'] = utilities
+    partition_context['utilities'] = context['utilities']
 
     manifesttemplate = ENV.get_template(os.path.join(sys.path[0], 'templates/manifestfilename.template'))
     memorytemplate = ENV.get_template(os.path.join(sys.path[0], 'templates/partition_intermedia.template'))
@@ -337,7 +332,6 @@ def gen_summary_files(context, gen_file_lists):
         manifest_out_file = os.path.join(OUT_DIR, manifest_out_file)
 
         print ('Generating ' + manifest_out_file)
-
         outfile_path = os.path.dirname(manifest_out_file)
         if not os.path.exists(outfile_path):
             os.makedirs(outfile_path)

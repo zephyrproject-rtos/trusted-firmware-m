@@ -246,6 +246,8 @@ modes are supported by which platforms:
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | AN547               | No              | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
+| AN552               | No              | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
 | PSoC64              | Yes             | No            | No       | No             | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | STM_DISCO_L562QE    | No              | Yes           | No       | No             | No           |
@@ -808,4 +810,4 @@ bootutil_misc.c to control the image status.
     image. As a result, the firmware update service is not supported in
     direct-xip mode and ram-load mode.
 
-*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*

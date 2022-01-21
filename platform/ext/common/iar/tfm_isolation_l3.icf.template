@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-{{utilities.donotedit_warning}}
+/***********{{utilities.donotedit_warning}}***********/
 
 /*
  * Customized region name prefix abbreviation:
@@ -157,9 +157,6 @@ keep {block ER_PART_RT_POOL, block ER_SERV_RT_POOL};
 /**** block Position tag  PSA RoT RWZI ends definition  */
 define block PT_PRIV_RWZI_END with alignment = 32, size = 0 { };
 
-/* PSP is unprivileged in single-core topology */
-define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE { };
-
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
     /* Position  tag : start Block :*/
@@ -254,7 +251,6 @@ define block DATA with fixed order {
 {% endfor %}
 
     block PT_PRIV_RWZI_END,
-    block ER_INITIAL_PSP,
 
    /* place APP-ROT data  */
 {% for partition in partitions %}

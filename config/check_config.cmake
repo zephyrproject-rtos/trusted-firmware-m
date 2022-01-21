@@ -53,11 +53,11 @@ tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_PROTECT
 
 ########################## FPU ################################################
 
-tfm_invalid_config(CONFIG_TFM_SPE_FP LESS 0 OR CONFIG_TFM_SPE_FP GREATER 2)
-tfm_invalid_config(NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CONFIG_TFM_SPE_FP GREATER 0)
-tfm_invalid_config((NOT CONFIG_TFM_FP_ARCH) AND (CONFIG_TFM_SPE_FP GREATER 0))
-tfm_invalid_config((NOT TFM_PSA_API) AND (CONFIG_TFM_SPE_FP GREATER 0))
-tfm_invalid_config(CONFIG_TFM_SPE_FP STREQUAL "0" AND CONFIG_TFM_LAZY_STACKING_SPE)
+tfm_invalid_config(NOT (CONFIG_TFM_FP STREQUAL "soft" OR CONFIG_TFM_FP STREQUAL "hard"))
+tfm_invalid_config(NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CONFIG_TFM_FP STREQUAL "hard")
+tfm_invalid_config((NOT CONFIG_TFM_FP_ARCH) AND CONFIG_TFM_FP STREQUAL "hard")
+tfm_invalid_config((NOT TFM_PSA_API) AND CONFIG_TFM_FP STREQUAL "hard")
+tfm_invalid_config(CONFIG_TFM_FP STREQUAL "soft" AND CONFIG_TFM_LAZY_STACKING)
 
 ########################## BL2 #################################################
 
@@ -108,3 +108,7 @@ tfm_invalid_config(NOT CRYPTO_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
 if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
     include(${TFM_TEST_PATH}/config/check_config.cmake)
 endif()
+
+###################### Compiler check for FP support ###########################
+
+include(config/cp_check.cmake)

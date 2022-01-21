@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2021 Arm Limited
+; * Copyright (c) 2009-2022 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 ; * This file is derivative of CMSIS V5.00 gcc_arm.ld
 ; */
 
-{{utilities.donotedit_warning}}
+/***********{{utilities.donotedit_warning}}***********/
 
 /* Linker script to configure memory regions. */
 /* This file will be run trough the pre-processor. */
@@ -34,7 +34,6 @@ MEMORY
 }
 
 __heap_size__  = S_HEAP_SIZE;
-__psp_stack_size__ = S_PSP_STACK_SIZE;
 __msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
 
 /* Library configurations */

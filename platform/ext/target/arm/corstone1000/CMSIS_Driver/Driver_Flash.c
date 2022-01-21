@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2022 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -31,6 +31,24 @@
 /* Driver version */
 #define ARM_FLASH_DRV_VERSION      ARM_DRIVER_VERSION_MAJOR_MINOR(1, 1)
 #define ARM_FLASH_DRV_ERASE_VALUE  0xFF
+
+
+/**
+ * Data width values for ARM_FLASH_CAPABILITIES::data_width
+ * \ref ARM_FLASH_CAPABILITIES
+ */
+ enum {
+    DATA_WIDTH_8BIT   = 0u,
+    DATA_WIDTH_16BIT,
+    DATA_WIDTH_32BIT,
+    DATA_WIDTH_ENUM_SIZE
+};
+
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
 
 #if PLATFORM_IS_FVP
 /*
@@ -239,13 +257,19 @@ static int32_t STRATAFLASHJ3_Flash_ReadData(uint32_t addr, void *data, uint32_t 
 {
     enum strataflashj3_error_t ret;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     ret = cfi_strataflashj3_read(ARM_FLASH0_DEV.dev, addr, data, cnt);
     if (ret != STRATAFLASHJ3_ERR_NONE) {
         CFI_FLASH_LOG_MSG("%s: read failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    /* Conversion between bytes and data items */
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+
+    return cnt;
 }
 
 static int32_t STRATAFLASHJ3_Flash_ProgramData(uint32_t addr, const void *data,
@@ -253,13 +277,19 @@ static int32_t STRATAFLASHJ3_Flash_ProgramData(uint32_t addr, const void *data,
 {
     enum strataflashj3_error_t ret;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     ret = cfi_strataflashj3_program(ARM_FLASH0_DEV.dev, addr, data, cnt);
     if (ret != STRATAFLASHJ3_ERR_NONE) {
         CFI_FLASH_LOG_MSG("%s: program failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    /* Conversion between bytes and data items */
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+
+    return cnt;
 }
 
 static int32_t STRATAFLASHJ3_Flash_EraseSector(uint32_t addr)
@@ -342,13 +372,18 @@ static int32_t STRATAFLASHJ3_Flash_ReadData_SE(uint32_t addr, void *data, uint32
 {
     enum strataflashj3_error_t ret;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     ret = cfi_strataflashj3_read(ARM_FLASH1_DEV.dev, addr, data, cnt);
     if (ret != STRATAFLASHJ3_ERR_NONE) {
         CFI_FLASH_LOG_MSG("%s: read failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    /* Conversion between bytes and data items */
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t STRATAFLASHJ3_Flash_ProgramData_SE(uint32_t addr, const void *data,
@@ -356,13 +391,18 @@ static int32_t STRATAFLASHJ3_Flash_ProgramData_SE(uint32_t addr, const void *dat
 {
     enum strataflashj3_error_t ret;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     ret = cfi_strataflashj3_program(ARM_FLASH1_DEV.dev, addr, data, cnt);
     if (ret != STRATAFLASHJ3_ERR_NONE) {
         CFI_FLASH_LOG_MSG("%s: program failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    /* Conversion between bytes and data items */
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t STRATAFLASHJ3_Flash_EraseSector_SE(uint32_t addr)

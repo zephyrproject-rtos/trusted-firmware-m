@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corp. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -9,10 +9,10 @@
 #include "psa/service.h"
 #include "psa_manifest/ns_agent_mailbox.h"
 #include "tfm_hal_multi_core.h"
+#include "tfm_hal_platform.h"
 #include "tfm_multi_core.h"
 #include "tfm_rpc.h"
 #include "tfm_sp_log.h"
-#include "tfm_spm_hal.h"
 
 static void boot_ns_core(void)
 {
