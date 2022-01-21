@@ -26,6 +26,7 @@ target_sources(tfm_psa_rot_partition_attestation PRIVATE
     tfm_attest.c
     tfm_attest_req_mngr.c
     attest_core.c
+    attest_boot_data.c
     $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:attest_asymmetric_key.c>
     $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:attest_symmetric_key.c>
     attest_token_encode.c
