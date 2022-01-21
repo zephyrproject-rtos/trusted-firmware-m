@@ -168,11 +168,11 @@ target_sources(${CC312_LIB_PREFIX}cc312
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
 )
 
-option(CC312_LEGACY_DRIVER_API_ENABLED "This variable controls whether the legacy driver interface is used for CC-312." ON)
+option(CC312_LEGACY_DRIVER_API_ENABLED "This variable controls whether the legacy driver interface is used for CC-312." OFF)
 if (${CC312_LEGACY_DRIVER_API_ENABLED})
     set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_mbedtls_api)
 else()
-    message(FATAL_ERROR "CC312_LEGACY_DRIVER_API_ENABLED must be ON")
+    set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_psa_driver_api)
 endif()
 
 # Adding two targets as link-time dependencies of each other seems bad, but
