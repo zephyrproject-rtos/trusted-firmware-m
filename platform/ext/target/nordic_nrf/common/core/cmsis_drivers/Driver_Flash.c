@@ -97,6 +97,10 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
     ARG_UNUSED(cb_event);
 
+    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        return ARM_DRIVER_ERROR;
+    }
+
     return ARM_DRIVER_OK;
 }
 

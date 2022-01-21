@@ -163,7 +163,9 @@ static ARM_FLASH_CAPABILITIES ARM_Flash_GetCapabilities(void)
 static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
     ARG_UNUSED(cb_event);
-    if (FLASH0_PROGRAM_UNIT % data_width_byte[DriverCapabilities.data_width]) {
+
+    if (FLASH0_PROGRAM_UNIT % data_width_byte[DriverCapabilities.data_width] ||
+        DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
         return ARM_DRIVER_ERROR;
     }
     /* Nothing to be done */

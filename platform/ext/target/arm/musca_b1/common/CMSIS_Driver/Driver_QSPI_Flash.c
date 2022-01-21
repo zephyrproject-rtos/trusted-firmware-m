@@ -154,6 +154,9 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 
     ARG_UNUSED(cb_event);
 
+    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        return ARM_DRIVER_ERROR;
+    }
     qspi_ip6514e_enable(ARM_FLASH0_DEV.dev->controller);
 
     /* Configure QSPI Flash controller to operate in single SPI mode and

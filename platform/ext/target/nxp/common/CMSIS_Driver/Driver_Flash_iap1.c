@@ -153,6 +153,10 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
     ARG_UNUSED(cb_event);
     status_t status = kStatus_Success;
 
+    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        return ARM_DRIVER_ERROR;
+    }
+
     /* Call initialization from Flash API */
     status = FLASH_Init(&FLASH0_DEV->flashInstance);
 

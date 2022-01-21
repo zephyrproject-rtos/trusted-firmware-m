@@ -41,26 +41,33 @@ static const ARM_DRIVER_VERSION DriverVersion = {
 /* Flash Ready event generation capability values */
 #define EVENT_READY_NOT_AVAILABLE   (0u)
 #define EVENT_READY_AVAILABLE       (1u)
-/* Data access size values */
-#define DATA_WIDTH_8BIT             (0u)
-#define DATA_WIDTH_16BIT            (1u)
-#define DATA_WIDTH_32BIT            (2u)
+
 /* Chip erase capability values */
 #define CHIP_ERASE_NOT_SUPPORTED    (0u)
 #define CHIP_ERASE_SUPPORTED        (1u)
+
+/**
+ * Data width values for ARM_FLASH_CAPABILITIES::data_width
+ * \ref ARM_FLASH_CAPABILITIES
+ */
+ enum {
+    DATA_WIDTH_8BIT   = 0u,
+    DATA_WIDTH_16BIT,
+    DATA_WIDTH_32BIT,
+    DATA_WIDTH_ENUM_SIZE
+};
+
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
 
 /* Driver Capabilities */
 static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
     EVENT_READY_NOT_AVAILABLE,
     DATA_WIDTH_8BIT,
     CHIP_ERASE_SUPPORTED
-};
-
-/* Valid entries for data item width */
-static const uint32_t data_width_byte[] = {
-    sizeof(uint8_t),
-    sizeof(uint16_t),
-    sizeof(uint32_t),
 };
 
 /**
@@ -147,6 +154,10 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
     enum mt25ql_error_t err = MT25QL_ERR_NONE;
 
     ARG_UNUSED(cb_event);
+
+    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     qspi_ip6514e_enable(ARM_FLASH0_DEV.dev->controller);
 

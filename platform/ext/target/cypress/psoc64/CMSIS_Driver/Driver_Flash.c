@@ -60,13 +60,25 @@ static const ARM_DRIVER_VERSION DriverVersion = {
     ARM_FLASH_DRV_VERSION
 };
 
+/**
+ * Data width values for ARM_FLASH_CAPABILITIES::data_width
+ * \ref ARM_FLASH_CAPABILITIES
+ */
+ enum {
+    DATA_WIDTH_8BIT   = 0u,
+    DATA_WIDTH_16BIT,
+    DATA_WIDTH_32BIT,
+    DATA_WIDTH_ENUM_SIZE
+};
+
 /* Driver Capabilities */
 static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
     0, /* event_ready */
-    0, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
+    DATA_WIDTH_8BIT,
     1  /* erase_chip */
 };
-static const uint32_t data_width_byte[] = {
+
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
     sizeof(uint8_t),
     sizeof(uint16_t),
     sizeof(uint32_t),
@@ -107,6 +119,10 @@ static ARM_FLASH_CAPABILITIES ARM_Flash_GetCapabilities(void)
 static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
     ARG_UNUSED(cb_event);
+
+    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        return ARM_DRIVER_ERROR;
+    }
 
     return ARM_DRIVER_OK;
 }
