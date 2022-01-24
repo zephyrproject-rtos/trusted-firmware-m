@@ -168,6 +168,12 @@ target_sources(${CC312_LIB_PREFIX}cc312
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
 )
 
+# FixMe: For hardware FP, Debug builds and tests enabled in the S world, force override
+#        to the legacy driver as the flash consumption with the new driver goes over default
+if (TEST_S AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (${CONFIG_TFM_FP} STREQUAL "hard"))
+    set(CC312_LEGACY_DRIVER_API_ENABLED ON)
+endif()
+
 option(CC312_LEGACY_DRIVER_API_ENABLED "This variable controls whether the legacy driver interface is used for CC-312." OFF)
 if (${CC312_LEGACY_DRIVER_API_ENABLED})
     set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_mbedtls_api)
