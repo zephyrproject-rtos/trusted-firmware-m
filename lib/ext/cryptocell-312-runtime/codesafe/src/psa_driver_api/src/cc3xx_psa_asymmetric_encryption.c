@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -32,12 +32,29 @@
 #define mbedtls_free free
 #endif
 
+/* FixMe: Currently, some parts of the low-level driver are
+ *        are not built at all based on the mbed TLS configuration,
+ *        hence they can't be called from the interface code.
+ *        Eventually, the low level driver should be made
+ *        independent of the mbed TLS configuration and the
+ *        interface layer should be the only part that should
+ *        configured through defines
+ */
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
+
 static psa_status_t cc3xx_internal_rsa_encrypt(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *input,
     size_t input_length, const uint8_t *label, size_t label_len,
     uint8_t *output, size_t output_size, size_t *output_length)
 {
+#ifndef MBEDTLS_RSA_C
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     psa_key_type_t key_type = psa_get_key_type(attributes);
     CCError_t error = CC_FATAL_ERROR;
@@ -132,6 +149,7 @@ cleanup:
     }
 
     return cc3xx_rsa_cc_error_to_psa_error(error);
+#endif /* MBEDTLS_RSA_C */
 }
 
 static psa_status_t cc3xx_internal_rsa_decrypt(
@@ -140,6 +158,9 @@ static psa_status_t cc3xx_internal_rsa_decrypt(
     size_t input_length, const uint8_t *label, size_t label_length,
     uint8_t *output, size_t output_size, size_t *output_length)
 {
+#ifndef MBEDTLS_RSA_C
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t error = CC_FATAL_ERROR;
     CCRsaUserPrivKey_t *pUserPrivKey = NULL;
@@ -219,6 +240,7 @@ cleanup:
     }
 
     return cc3xx_rsa_cc_error_to_psa_error(error);
+#endif /* MBEDTLS_RSA_C */
 }
 
 /** \defgroup psa_asym_encrypt PSA driver entry points for asymmetric cipher

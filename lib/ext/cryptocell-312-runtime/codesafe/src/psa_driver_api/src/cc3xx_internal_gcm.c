@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,6 +19,30 @@
 
 #include "cc3xx_internal_gcm.h"
 #include "psa/crypto.h"
+
+/* FixMe: Currently, some parts of the low-level driver are
+ *        are not built at all based on the mbed TLS configuration,
+ *        hence they can't be called from the interface code.
+ *        Eventually, the low level driver should be made
+ *        independent of the mbed TLS configuration and the
+ *        interface layer should be the only part that should
+ *        configured through defines
+ */
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
+
+/* FixMe: Temporary way of bridging mbed TLS based configuration
+ *        with specific driver configuration defines
+ */
+#ifndef CC3XX_CONFIG_SUPPORT_GCM
+#define CC3XX_CONFIG_SUPPORT_GCM
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#ifndef MBEDTLS_GCM_C
+#undef CC3XX_CONFIG_SUPPORT_GCM
+#endif
 
 /*! AES GCM data in maximal size in bytes. */
 #define CC3XX_AESGCM_DATA_IN_MAX_SIZE_BYTES 0xFFFF // (64KB - 1)
@@ -45,6 +69,7 @@
 /*! AES GCM Tag size: 16 bytes. */
 #define CC3XX_AESGCM_TAG_SIZE_16_BYTES 16
 
+#ifdef CC3XX_CONFIG_SUPPORT_GCM
 static psa_status_t gcm_setkey(
         AesGcmContext_t *ctx,
         const uint8_t *key,
@@ -508,6 +533,7 @@ cleanup:
 
     return status;
 }
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
 
 /* TODO: Figure out best strategy for cc310 vs cc312 */
 
@@ -527,6 +553,7 @@ psa_status_t cc3xx_gcm_encrypt(
 {
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
 
+#ifdef CC3XX_CONFIG_SUPPORT_GCM
     psa_key_type_t key_type = psa_get_key_type(attributes);
     psa_key_bits_t key_bits = psa_get_key_bits(attributes);
     psa_algorithm_t key_alg = psa_get_key_algorithm(attributes);
@@ -543,6 +570,7 @@ psa_status_t cc3xx_gcm_encrypt(
         CRYPTO_DIRECTION_ENCRYPT, attributes, key_buffer, key_buffer_size, alg,
         nonce, nonce_length, additional_data, additional_data_length, tag,
         tag_length, plaintext, plaintext_length, ciphertext, ciphertext_length);
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
 
     return status;
 }
@@ -557,6 +585,7 @@ psa_status_t cc3xx_gcm_decrypt(
 {
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
 
+#ifdef CC3XX_CONFIG_SUPPORT_GCM
     uint8_t local_tag_buffer[PSA_AEAD_TAG_MAX_SIZE];
 
     psa_key_type_t key_type = psa_get_key_type(attributes);
@@ -575,7 +604,7 @@ psa_status_t cc3xx_gcm_decrypt(
         nonce, nonce_length, additional_data, additional_data_length,
         local_tag_buffer, tag_length, ciphertext, ciphertext_length_without_tag,
         plaintext, plaintext_length);
-
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
     return status;
 }
 
@@ -604,7 +633,11 @@ psa_status_t cc3xx_gcm_setkey_enc(
     const uint8_t *key,
     size_t key_bits)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_GCM
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     return gcm_setkey(ctx, key, key_bits, CRYPTO_DIRECTION_ENCRYPT);
+#endif
 }
 
 psa_status_t cc3xx_gcm_setkey_dec(
@@ -612,7 +645,11 @@ psa_status_t cc3xx_gcm_setkey_dec(
     const uint8_t *key,
     size_t key_bits)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_GCM
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     return gcm_setkey(ctx, key, key_bits, CRYPTO_DIRECTION_DECRYPT);
+#endif
 }
 
 psa_status_t cc3xx_gcm_set_nonce(
@@ -620,6 +657,9 @@ psa_status_t cc3xx_gcm_set_nonce(
     const uint8_t *nonce,
     size_t nonce_size)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_GCM
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
     if (NULL == ctx || NULL == nonce) {
@@ -642,6 +682,7 @@ psa_status_t cc3xx_gcm_set_nonce(
     }
 
     return PSA_SUCCESS;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
 }
 
 psa_status_t cc3xx_gcm_set_lengths(
@@ -649,6 +690,9 @@ psa_status_t cc3xx_gcm_set_lengths(
     size_t aadSize,
     size_t dataSize)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_GCM
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     if (NULL == ctx) {
         CC_PAL_LOG_ERR("ctx cannot be NULL\n");
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -668,6 +712,7 @@ psa_status_t cc3xx_gcm_set_lengths(
     ctx->dataSize = dataSize;
 
     return PSA_SUCCESS;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
 }
 
 psa_status_t cc3xx_gcm_update_ad(
@@ -675,6 +720,9 @@ psa_status_t cc3xx_gcm_update_ad(
     const uint8_t *add,
     size_t add_size)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_GCM
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
     if (NULL == ctx || NULL == add) {
@@ -691,6 +739,7 @@ psa_status_t cc3xx_gcm_update_ad(
     }
 
     return PSA_SUCCESS;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
 }
 
 psa_status_t cc3xx_gcm_update(
@@ -699,6 +748,9 @@ psa_status_t cc3xx_gcm_update(
     const uint8_t *input,
     uint8_t *output)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_GCM
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
     if (NULL == ctx || NULL == input || NULL == output) {
@@ -719,6 +771,7 @@ psa_status_t cc3xx_gcm_update(
     }
 
     return PSA_SUCCESS;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
 }
 
 psa_status_t cc3xx_gcm_finish(
@@ -726,6 +779,9 @@ psa_status_t cc3xx_gcm_finish(
     uint8_t *tag,
     size_t tag_size)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_GCM
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
     if (NULL == ctx || NULL == tag) {
@@ -742,5 +798,6 @@ psa_status_t cc3xx_gcm_finish(
     }
 
     return PSA_SUCCESS;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
 }
 /** @} */ // end of internal_gcm

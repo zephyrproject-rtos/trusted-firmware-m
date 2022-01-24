@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -49,6 +49,20 @@
 #define mbedtls_printf printf
 #define mbedtls_calloc calloc
 #define mbedtls_free free
+#endif
+
+/* FixMe: Currently, some parts of the low-level driver are
+ *        are not built at all based on the mbed TLS configuration,
+ *        hence they can't be called from the interface code.
+ *        Eventually, the low level driver should be made
+ *        independent of the mbed TLS configuration and the
+ *        interface layer should be the only part that should
+ *        configured through defines
+ */
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
 #endif
 
 /* Based on ecp_wrst_gen_keypair_base */
@@ -126,6 +140,9 @@ static psa_status_t
 cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
                                uint8_t *key_buffer, size_t key_buffer_size)
 {
+#ifndef MBEDTLS_RSA_C
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     CCError_t cc_err = CC_FAIL;
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
@@ -281,6 +298,7 @@ end:
     mbedtls_free(pCcPrivKey);
 
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
+#endif
 }
 
 /** \defgroup psa_key_generation PSA driver entry points for key handling

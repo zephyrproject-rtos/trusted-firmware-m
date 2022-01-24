@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -55,11 +55,16 @@
 #define CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
 
 /*!
- *  Used to enable support for SHA-1 algorithms in the driver layer. By default
- *  this is kept disabled as SHA-1 is deemed un-secure.
- *
+ *  Used to enable support for SHA-1 algorithms in the interface layer. By
+ *  default this is kept disabled as SHA-1 is deemed un-secure
  */
 #define CC3XX_CONFIG_SUPPORT_SHA1
+
+/*!
+ *  Used to enable support for the GCM AEAD algorithm in the interface layer.
+ *  By default this is kept enabled
+ */
+#define CC3XX_CONFIG_SUPPORT_GCM
 #endif /* __DOXYGEN_ONLY__ */
 
 #include "cc3xx_psa_cipher.h"
