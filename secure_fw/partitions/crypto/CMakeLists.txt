@@ -170,42 +170,33 @@ set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
 add_subdirectory(${MBEDCRYPTO_PATH} ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto EXCLUDE_FROM_ALL)
 set(CMAKE_BUILD_TYPE ${SAVED_BUILD_TYPE} CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 
-if(NOT TARGET crypto_service_mbedcrypto)
-    message(FATAL_ERROR "Target crypto_service_mbedcrypto does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?
+if(NOT TARGET ${MBEDTLS_TARGET_PREFIX}mbedcrypto)
+    message(FATAL_ERROR "Target ${MBEDTLS_TARGET_PREFIX}mbedcrypto does not exist. Have the patches in ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto been applied to the mbedcrypto repo at ${MBEDCRYPTO_PATH} ?
     Hint: The command might be `cd ${MBEDCRYPTO_PATH} && git apply ${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/*.patch`")
 endif()
 
-target_include_directories(crypto_service_mbedcrypto
+target_include_directories(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-target_sources(crypto_service_mbedcrypto
+target_sources(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PRIVATE
         $<$<NOT:$<BOOL:${CRYPTO_HW_ACCELERATOR}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_mbedcrypto_alt.c>
 )
 
-target_compile_options(crypto_service_mbedcrypto
+target_compile_options(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
 )
 
-target_link_libraries(crypto_service_mbedcrypto
+target_link_libraries(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PRIVATE
         psa_interface
-        tfm_secure_api
         platform_s
     PUBLIC
         crypto_service_mbedcrypto_config
-)
-
-target_link_libraries(crypto_service_mbedtls
-    PRIVATE
-        platform_s
-)
-
-target_link_libraries(crypto_service_mbedx509
-    PRIVATE
-        platform_s
+    INTERFACE
+        platform_common_interface
 )

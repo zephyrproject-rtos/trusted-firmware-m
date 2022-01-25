@@ -1146,10 +1146,7 @@ psa_status_t psa_sign_message(psa_key_id_t key,
     status = API_DISPATCH(tfm_crypto_sign_message,
                           TFM_CRYPTO_SIGN_MESSAGE);
 
-    if (status == PSA_SUCCESS) {
-        *signature_length = out_vec[0].len;
-    }
-
+    *signature_length = out_vec[0].len;
     return status;
 }
 
@@ -1511,10 +1508,7 @@ psa_status_t psa_mac_compute(psa_key_id_t key,
     status = API_DISPATCH(tfm_crypto_mac_compute,
                           TFM_CRYPTO_MAC_COMPUTE);
 
-    if (status == PSA_SUCCESS) {
-        *mac_length = out_vec[0].len;
-    }
-
+    *mac_length = out_vec[0].len;
     return status;
 }
 
@@ -1570,10 +1564,7 @@ psa_status_t psa_cipher_encrypt(psa_key_id_t key,
     status = API_DISPATCH(tfm_crypto_cipher_encrypt,
                           TFM_CRYPTO_CIPHER_ENCRYPT);
 
-    if (status == PSA_SUCCESS) {
-        *output_length = out_vec[0].len;
-    }
-
+    *output_length = out_vec[0].len;
     return status;
 }
 
@@ -1603,10 +1594,7 @@ psa_status_t psa_cipher_decrypt(psa_key_id_t key,
     status = API_DISPATCH(tfm_crypto_cipher_decrypt,
                           TFM_CRYPTO_CIPHER_DECRYPT);
 
-    if (status == PSA_SUCCESS) {
-        *output_length = out_vec[0].len;
-    }
-
+    *output_length = out_vec[0].len;
     return status;
 }
 

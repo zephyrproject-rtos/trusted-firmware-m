@@ -179,6 +179,10 @@ static int error_mapping_cc_to_mbedtls_rsa (CCError_t cc_error, CC_RSA_OP op)
 
     switch (cc_error)
     {
+        case CC_OK:
+            return 0;
+            break;
+
         case CC_RSA_BASE_MGF_MASK_TOO_LONG:
         case CC_RSA_BASE_OAEP_DECODE_MESSAGE_TOO_LONG:
         case CC_RSA_BASE_OAEP_DECODE_PARAMETER_STRING_TOO_LONG:
@@ -283,18 +287,15 @@ static int error_mapping_cc_to_mbedtls_rsa (CCError_t cc_error, CC_RSA_OP op)
             ret = -1;
             break;
 
-        case CC_OK:
-            ret = 0;
-            break;
         default:
             ret = -1;
-            CC_PAL_LOG_ERR("Unknown CC_ERROR %d (0x%08x)\n", cc_error, cc_error);
+            CC_PAL_LOG_ERR("Unknown CC_ERROR %d (0x%08x)\r\n", cc_error, cc_error);
             break;
     }
 
 
-    CC_PAL_LOG_INFO("Converted CC_ERROR %d (0x%08x) to MBEDTLS_ERR %d\n",
-                    cc_error, cc_error, ret);
+    CC_PAL_LOG_DEBUG("Converted CC_ERROR %d (0x%08x) to MBEDTLS_ERR %d\r\n",
+                     cc_error, cc_error, ret);
     return ret;
 }
 

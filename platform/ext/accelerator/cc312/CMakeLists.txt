@@ -168,11 +168,37 @@ target_sources(${CC312_LIB_PREFIX}cc312
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:${CMAKE_CURRENT_SOURCE_DIR}/cc312_log.c>
 )
 
-option(CC312_LEGACY_DRIVER_API_ENABLED "This variable controls whether the legacy driver interface is used for CC-312." ON)
+# FixMe: Secure tests enabled and Debug builds with FP support set to hardware
+#        need to fallback to the legacy driver as the new PSA driver overflows
+#        the available flash memory on Musca-S1 and Musca-B1
+if (TEST_S AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (${CONFIG_TFM_FP} STREQUAL "hard"))
+    set(CC312_LEGACY_DRIVER_API_ENABLED ON)
+    message(WARNING
+        "The CC-312 legacy driver interface fallback is forced to ${CC312_LEGACY_DRIVER_API_ENABLED}. \
+        The following parameters are not supported at the same time: \
+        (TEST_S: ${TEST_S}, \
+        CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}, \
+        CONFIG_TFM_FP: ${CONFIG_TFM_FP}) for the PSA Cryptoprocessor driver interface due to flash memory constraints.")
+endif()
+
+# FixMe: Secure tests enabled and Debug builds on Musca-B1 need to fallback to
+#        the legacy driver as the new PSA driver overflows the available flash
+#        memory of the SSE-200 subsystem
+if (TEST_S AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (${TFM_PLATFORM} STREQUAL "arm/musca_b1/sse_200"))
+    set(CC312_LEGACY_DRIVER_API_ENABLED ON)
+    message(WARNING
+        "The CC-312 legacy driver interface fallback is forced to ${CC312_LEGACY_DRIVER_API_ENABLED}. \
+        The following parameters are not supported at the same time: \
+        (TEST_S: ${TEST_S}, \
+        CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}, \
+        TFM_PLATFORM: ${TFM_PLATFORM}) for the PSA Cryptoprocessor driver interface due to flash memory constraints.")
+endif()
+
+option(CC312_LEGACY_DRIVER_API_ENABLED "This variable controls whether the legacy driver interface is used for CC-312." OFF)
 if (${CC312_LEGACY_DRIVER_API_ENABLED})
     set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_mbedtls_api)
 else()
-    message(FATAL_ERROR "CC312_LEGACY_DRIVER_API_ENABLED must be ON")
+    set(CC312_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_psa_driver_api)
 endif()
 
 # Adding two targets as link-time dependencies of each other seems bad, but

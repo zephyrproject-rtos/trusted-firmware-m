@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -16,6 +16,7 @@ set(CC312_LIB_TARGET            ${CC312_LIB_PREFIX}cc312)
 set(CC312_PAL_TARGET            ${CC312_LIB_PREFIX}cc312_pal)
 set(CC312_CDMPU_TARGET          ${CC312_LIB_PREFIX}cc312_cdmpu)
 set(CC312_MBEDTLS_API_TARGET    ${CC312_LIB_PREFIX}cc312_mbedtls_api)
+set(CC312_PSA_DRIVER_API_TARGET ${CC312_LIB_PREFIX}cc312_psa_driver_api)
 
 # Add library targets for this project
 add_library(${CC312_LIB_TARGET} STATIC EXCLUDE_FROM_ALL)
@@ -24,6 +25,7 @@ add_library(${CC312_CDMPU_TARGET} INTERFACE)
 
 # Library interface components
 add_library(${CC312_MBEDTLS_API_TARGET} STATIC EXCLUDE_FROM_ALL)
+add_library(${CC312_PSA_DRIVER_API_TARGET} STATIC EXCLUDE_FROM_ALL)
 
 add_subdirectory(codesafe)
 add_subdirectory(host)
@@ -87,6 +89,21 @@ target_compile_definitions(${CC312_CDMPU_TARGET}
 )
 
 ########################## DRIVER INTERFACE ####################################
+
+target_compile_definitions(${CC312_PSA_DRIVER_API_TARGET}
+    PUBLIC
+        MBEDTLS_PSA_CRYPTO_DRIVERS
+        PSA_CRYPTO_DRIVER_CC3XX
+)
+
+target_link_libraries(${CC312_PSA_DRIVER_API_TARGET}
+    PUBLIC
+        ${CC312_LIB_PREFIX}mbedcrypto
+    INTERFACE
+        ${CC312_LIB_TARGET}
+    PRIVATE
+        ${CC312_PLATFORM_DEPENDENCY}
+)
 
 target_link_libraries(${CC312_MBEDTLS_API_TARGET}
     PUBLIC
