@@ -65,6 +65,12 @@
  *  By default this is kept enabled
  */
 #define CC3XX_CONFIG_SUPPORT_GCM
+
+/*!
+ *  Used to enable support for RSA algorithm in the interface layer.
+ *  By default this is kept enabled. At the moment affects only the RSA utils
+ */
+#define CC3XX_CONFIG_SUPPORT_RSA
 #endif /* __DOXYGEN_ONLY__ */
 
 #include "cc3xx_psa_cipher.h"

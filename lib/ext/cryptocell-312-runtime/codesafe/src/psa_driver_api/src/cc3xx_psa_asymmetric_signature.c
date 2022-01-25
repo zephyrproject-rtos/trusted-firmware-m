@@ -52,7 +52,7 @@
  *        Eventually, the low level driver should be made
  *        independent of the mbed TLS configuration and the
  *        interface layer should be the only part that should
- *        configured through defines
+ *        be configured through defines
  */
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"

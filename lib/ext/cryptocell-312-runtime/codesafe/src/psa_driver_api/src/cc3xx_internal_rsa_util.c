@@ -32,6 +32,30 @@
 #define mbedtls_free free
 #endif
 
+/* FixMe: Currently, some parts of the low-level driver are
+ *        are not built at all based on the mbed TLS configuration,
+ *        hence they can't be called from the interface code.
+ *        Eventually, the low level driver should be made
+ *        independent of the mbed TLS configuration and the
+ *        interface layer should be the only part that should
+ *        be configured through defines
+ */
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
+
+/* FixMe: Temporary way of bridging mbed TLS based configuration
+ *        with specific driver configuration defines
+ */
+#ifndef CC3XX_CONFIG_SUPPORT_RSA
+#define CC3XX_CONFIG_SUPPORT_RSA
+#endif /* CC3XX_CONFIG_SUPPORT_RSA */
+#ifndef MBEDTLS_RSA_C
+#undef CC3XX_CONFIG_SUPPORT_RSA
+#endif
+
 /** \defgroup internal_rsa_util Internal RSA utility functions
  *
  *  Internal functions required to provide utilities for handling RSA type
@@ -44,6 +68,9 @@ psa_status_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
                                          CCRsaUserPubKey_t *UserPubKey_ptr)
 
 {
+#ifndef CC3XX_CONFIG_SUPPORT_RSA
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     uint8_t *pub_key_buffer_start_pnt = (uint8_t *)psa_pub_key_buffer;
     uint8_t **pub_key_buffer_start = &pub_key_buffer_start_pnt;
     uint8_t *pub_key_buffer_end =
@@ -94,6 +121,7 @@ psa_status_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
 
 end:
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
+#endif /* CC3XX_CONFIG_SUPPORT_RSA */
 }
 
 psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_priv_key_buffer,
@@ -101,6 +129,9 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_priv_key_buffer,
                                           CCRsaUserPubKey_t *UserPubKey_ptr)
 
 {
+#ifndef CC3XX_CONFIG_SUPPORT_RSA
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     uint8_t *priv_key_buffer_start_pnt = (uint8_t *)psa_priv_key_buffer;
     uint8_t **priv_key_buffer_start = &priv_key_buffer_start_pnt;
     uint8_t *priv_key_buffer_end =
@@ -158,6 +189,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_priv_key_buffer,
 
 end:
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
+#endif /* CC3XX_CONFIG_SUPPORT_RSA */
 }
 
 psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
@@ -165,6 +197,9 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
                                            CCRsaUserPrivKey_t *UserPrivKey_ptr)
 
 {
+#ifndef CC3XX_CONFIG_SUPPORT_RSA
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     uint8_t *p_ptr;
     size_t p_len;
     uint8_t *q_ptr;
@@ -299,6 +334,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
                                    qInv_len);
 end:
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
+#endif /* CC3XX_CONFIG_SUPPORT_RSA */
 }
 
 psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
@@ -306,6 +342,9 @@ psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
                                             uint8_t *publ_key_buffer,
                                             size_t publ_key_buffer_size)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_RSA
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     uint8_t *priv_key_buffer_start_pnt = priv_key_buffer;
     uint8_t **priv_key_buffer_start = &priv_key_buffer_start_pnt;
     uint8_t *priv_key_buffer_end = priv_key_buffer + priv_key_buffer_size;
@@ -414,6 +453,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
 
 end:
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
+#endif /* CC3XX_CONFIG_SUPPORT_RSA */
 }
 
 psa_status_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
@@ -422,6 +462,9 @@ psa_status_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
                                          uint32_t *q, uint32_t *dP, uint32_t *dQ,
                                          uint32_t *qInv, size_t d_size_bytes)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_RSA
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
     uint8_t *key_buffer_end_pnt = key_buffer + key_buffer_size;
     uint8_t **key_buffer_end = &key_buffer_end_pnt;
     CCError_t cc_err = CC_FAIL;
@@ -591,10 +634,14 @@ end:
     }
 
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
+#endif /* CC3XX_CONFIG_SUPPORT_RSA */
 }
 
 psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
 {
+#ifndef CC3XX_CONFIG_SUPPORT_RSA
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
 #ifndef CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
     return ((cc_error == CC_SUCCESS) ?
                     PSA_SUCCESS : PSA_ERROR_HARDWARE_FAILURE);
@@ -715,5 +762,6 @@ psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
                      cc_error, cc_error, err);
     return err;
 #endif /* CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION */
+#endif /* CC3XX_CONFIG_SUPPORT_RSA */
 }
 /** @} */ // end of internal_rsa_util
