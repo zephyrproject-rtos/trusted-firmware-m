@@ -45,29 +45,29 @@
 #endif
 
 /*! AES GCM data in maximal size in bytes. */
-#define CC3XX_AESGCM_DATA_IN_MAX_SIZE_BYTES 0xFFFF // (64KB - 1)
+#define CC3XX_GCM_DATA_IN_MAX_SIZE_BYTES 0xFFFF // (64KB - 1)
 /*! AES GCM IV maximal size in bytes. */
-#define CC3XX_AESGCM_IV_MAX_SIZE_BYTES 0xFFFF // (64KB - 1)
+#define CC3XX_GCM_IV_MAX_SIZE_BYTES 0xFFFF // (64KB - 1)
 /*! AES GCM AAD maximal size in bytes. */
-#define CC3XX_AESGCM_AAD_MAX_SIZE_BYTES 0xFFFF // (64KB - 1)
+#define CC3XX_GCM_AAD_MAX_SIZE_BYTES 0xFFFF // (64KB - 1)
 
 /*! AES GCM 96 bits size IV. */
-#define CC3XX_AESGCM_IV_96_BITS_SIZE_BYTES 12
+#define CC3XX_GCM_IV_96_BITS_SIZE_BYTES 12
 
 /*! AES GCM Tag size: 4 bytes. */
-#define CC3XX_AESGCM_TAG_SIZE_4_BYTES 4
+#define CC3XX_GCM_TAG_SIZE_4_BYTES 4
 /*! AES GCM Tag size: 8 bytes. */
-#define CC3XX_AESGCM_TAG_SIZE_8_BYTES 8
+#define CC3XX_GCM_TAG_SIZE_8_BYTES 8
 /*! AES GCM Tag size: 12 bytes. */
-#define CC3XX_AESGCM_TAG_SIZE_12_BYTES 12
+#define CC3XX_GCM_TAG_SIZE_12_BYTES 12
 /*! AES GCM Tag size: 13 bytes. */
-#define CC3XX_AESGCM_TAG_SIZE_13_BYTES 13
+#define CC3XX_GCM_TAG_SIZE_13_BYTES 13
 /*! AES GCM Tag size: 14 bytes. */
-#define CC3XX_AESGCM_TAG_SIZE_14_BYTES 14
+#define CC3XX_GCM_TAG_SIZE_14_BYTES 14
 /*! AES GCM Tag size: 15 bytes. */
-#define CC3XX_AESGCM_TAG_SIZE_15_BYTES 15
+#define CC3XX_GCM_TAG_SIZE_15_BYTES 15
 /*! AES GCM Tag size: 16 bytes. */
-#define CC3XX_AESGCM_TAG_SIZE_16_BYTES 16
+#define CC3XX_GCM_TAG_SIZE_16_BYTES 16
 
 #ifdef CC3XX_CONFIG_SUPPORT_GCM
 static psa_status_t gcm_setkey(
@@ -152,7 +152,7 @@ static psa_status_t gcm_init(AesGcmContext_t *context,
     }
 
     /* Check the data in size validity */
-    if (CC3XX_AESGCM_DATA_IN_MAX_SIZE_BYTES < dataSize) {
+    if (CC3XX_GCM_DATA_IN_MAX_SIZE_BYTES < dataSize) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -169,7 +169,7 @@ static psa_status_t gcm_init(AesGcmContext_t *context,
     }
 
     /* Check the IV size validity */
-    if ((CC3XX_AESGCM_IV_MAX_SIZE_BYTES < ivSize) || (0 == ivSize)) {
+    if ((CC3XX_GCM_IV_MAX_SIZE_BYTES < ivSize) || (0 == ivSize)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -179,7 +179,7 @@ static psa_status_t gcm_init(AesGcmContext_t *context,
     }
 
     /* Check the AAD size validity */
-    if (CC3XX_AESGCM_AAD_MAX_SIZE_BYTES < aadSize) {
+    if (CC3XX_GCM_AAD_MAX_SIZE_BYTES < aadSize) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -189,13 +189,13 @@ static psa_status_t gcm_init(AesGcmContext_t *context,
     }
 
     /* Check the Tag size validity */
-    if ((CC3XX_AESGCM_TAG_SIZE_4_BYTES != tagSize) &&
-        (CC3XX_AESGCM_TAG_SIZE_8_BYTES != tagSize) &&
-        (CC3XX_AESGCM_TAG_SIZE_12_BYTES != tagSize) &&
-        (CC3XX_AESGCM_TAG_SIZE_13_BYTES != tagSize) &&
-        (CC3XX_AESGCM_TAG_SIZE_14_BYTES != tagSize) &&
-        (CC3XX_AESGCM_TAG_SIZE_15_BYTES != tagSize) &&
-        (CC3XX_AESGCM_TAG_SIZE_16_BYTES != tagSize)) {
+    if ((CC3XX_GCM_TAG_SIZE_4_BYTES != tagSize) &&
+        (CC3XX_GCM_TAG_SIZE_8_BYTES != tagSize) &&
+        (CC3XX_GCM_TAG_SIZE_12_BYTES != tagSize) &&
+        (CC3XX_GCM_TAG_SIZE_13_BYTES != tagSize) &&
+        (CC3XX_GCM_TAG_SIZE_14_BYTES != tagSize) &&
+        (CC3XX_GCM_TAG_SIZE_15_BYTES != tagSize) &&
+        (CC3XX_GCM_TAG_SIZE_16_BYTES != tagSize)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -229,9 +229,9 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv)
     CCBuffInfo_t inBuffInfo;
     CCBuffInfo_t outBuffInfo;
 
-    if (CC3XX_AESGCM_IV_96_BITS_SIZE_BYTES == context->ivSize) {
+    if (CC3XX_GCM_IV_96_BITS_SIZE_BYTES == context->ivSize) {
         /* Concatenate IV||0(31)||1 */
-        CC_PalMemCopy(context->J0, pIv, CC3XX_AESGCM_IV_96_BITS_SIZE_BYTES);
+        CC_PalMemCopy(context->J0, pIv, CC3XX_GCM_IV_96_BITS_SIZE_BYTES);
         context->J0[3] = SWAP_ENDIAN(0x00000001);
     } else {
 
@@ -698,13 +698,8 @@ psa_status_t cc3xx_gcm_set_lengths(
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (CC3XX_AESGCM_AAD_MAX_SIZE_BYTES < aadSize) {
-        printf("aadSize > %d\r\n", CC3XX_AESGCM_AAD_MAX_SIZE_BYTES);
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (CC3XX_AESGCM_DATA_IN_MAX_SIZE_BYTES < dataSize) {
-        printf("dataSize < %d\r\n", CC3XX_AESGCM_DATA_IN_MAX_SIZE_BYTES);
+    if ((aadSize > CC3XX_GCM_AAD_MAX_SIZE_BYTES) ||
+        (dataSize > CC3XX_GCM_DATA_IN_MAX_SIZE_BYTES)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 

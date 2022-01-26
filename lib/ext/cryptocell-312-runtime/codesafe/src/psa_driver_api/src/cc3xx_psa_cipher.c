@@ -18,6 +18,7 @@
 #include "cc3xx_internal_aes.h"
 #include "cc3xx_internal_chacha20.h"
 #include "cc_pal_mem.h"
+#include "cc_pal_log.h"
 
 static psa_status_t add_pkcs_padding(
         uint8_t *output,
@@ -196,7 +197,8 @@ psa_status_t cc3xx_cipher_set_iv(
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
-    if (operation->key_type == PSA_KEY_TYPE_CHACHA20) {
+    switch (operation->key_type) {
+    case  PSA_KEY_TYPE_CHACHA20:
         /* When the IV is 16 bytes the first four bytes contain the counter in little endian.
          * When the IV is 12 bytes it contains only the IV and the counter should be set to 0.
          * More information in ChaCha20 section here:
@@ -223,15 +225,24 @@ psa_status_t cc3xx_cipher_set_iv(
                 ret = PSA_ERROR_NOT_SUPPORTED;
                 break;
             default:
-                ret = PSA_ERROR_NOT_SUPPORTED;
+                ret = PSA_ERROR_INVALID_ARGUMENT;
                 break;
         }
+        break;
 
-    } else {
+    case PSA_KEY_TYPE_AES:
+
+        if (iv_length != AES_IV_SIZE) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
 
         CC_PalMemCopy(operation->iv, iv, iv_length);
         operation->iv_size = iv_length;
         ret = PSA_SUCCESS;
+        break;
+
+    default:
+        ret = PSA_ERROR_NOT_SUPPORTED;
     }
 
     return ret;
@@ -441,7 +452,12 @@ psa_status_t cc3xx_cipher_finish(
             if (operation->dir == PSA_CRYPTO_DRIVER_ENCRYPT) {
                 if (operation->add_padding == NULL) {
                     if (operation->unprocessed_size != 0) {
-                        return PSA_ERROR_GENERIC_ERROR;
+                        /* Return PSA_ERROR_INVALID_ARGUMENT as this condition
+                         * implies that a previous call to psa_cipher_update()
+                         * has not been performed to completely align to a
+                         * block of data and mode is PSA_ALG_CBC_NO_PADDING
+                         */
+                        return PSA_ERROR_INVALID_ARGUMENT;
                     }
 
                     return PSA_SUCCESS;
@@ -461,7 +477,19 @@ psa_status_t cc3xx_cipher_finish(
                     return PSA_SUCCESS;
                 }
 
-                return PSA_ERROR_GENERIC_ERROR;
+                /* Return PSA_ERROR_INVALID_ARGUMENT as this condition implies
+                 * that a previous call to psa_cipher_update() has not been
+                 * performed to completely align to a block of data and mode is
+                 * PSA_ALG_CBC_NO_PADDING
+                 */
+                return PSA_ERROR_INVALID_ARGUMENT;
+            }
+
+            if (output_size % AES_BLOCK_SIZE) {
+                CC_PAL_LOG_ERR(
+                    "Output size %d not a multiple of the block size\n",
+                    output_size);
+                return PSA_ERROR_BUFFER_TOO_SMALL;
             }
 
             if (( ret = cc3xx_aes_crypt(
@@ -554,18 +582,21 @@ psa_status_t cc3xx_cipher_encrypt(
         return ret;
     }
 
-    if (operation.iv_size != iv_length) {
-        cc3xx_cipher_abort(&operation);
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
+    /* ECB doesn't not expect an IV */
+    if (alg != PSA_ALG_ECB_NO_PADDING) {
+        if (operation.iv_size != iv_length) {
+            cc3xx_cipher_abort(&operation);
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
 
-    if ( (ret = cc3xx_cipher_set_iv(
-            &operation,
-            iv,
-            iv_length) )
-         != PSA_SUCCESS) {
-        cc3xx_cipher_abort(&operation);
-        return ret;
+        if ( (ret = cc3xx_cipher_set_iv(
+                &operation,
+                iv,
+                iv_length) )
+             != PSA_SUCCESS) {
+            cc3xx_cipher_abort(&operation);
+            return ret;
+        }
     }
 
     if ( (ret = cc3xx_cipher_update(
@@ -625,13 +656,16 @@ psa_status_t cc3xx_cipher_decrypt(
         return ret;
     }
 
-    if ( (ret = cc3xx_cipher_set_iv(
-            &operation,
-            input,
-            operation.iv_size) )
-         != PSA_SUCCESS) {
-        cc3xx_cipher_abort(&operation);
-        return ret;
+    /* ECB doesn't not expect an IV */
+    if (alg != PSA_ALG_ECB_NO_PADDING) {
+        if ( (ret = cc3xx_cipher_set_iv(
+                &operation,
+                input,
+                operation.iv_size) )
+             != PSA_SUCCESS) {
+            cc3xx_cipher_abort(&operation);
+            return ret;
+        }
     }
 
     if ( (ret = cc3xx_cipher_update(

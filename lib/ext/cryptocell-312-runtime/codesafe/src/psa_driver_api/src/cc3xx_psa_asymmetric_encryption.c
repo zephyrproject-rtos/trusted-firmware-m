@@ -221,11 +221,6 @@ static psa_status_t cc3xx_internal_rsa_decrypt(
         };
     }
 
-    if (error == CC_OK && *output_length > output_size) {
-        error = CC_RSA_15_ERROR_IN_DECRYPTED_DATA_SIZE;
-        goto cleanup;
-    }
-
 cleanup:
     if (error != CC_OK) {
         CC_PalMemSetZero(output, *output_length);
@@ -237,6 +232,14 @@ cleanup:
     if (pPrimeData) {
         CC_PalMemSetZero(pPrimeData, sizeof(CCRsaPrimeData_t));
         mbedtls_free(pPrimeData);
+    }
+
+    /* This is a common error code so make sure it gets correctly decoded even
+     * if the detailed translation done by cc3xx_rsa_c_error_to_psa_error() is
+     * not enabled through CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
+     */
+    if (error == CC_RSA_15_ERROR_IN_DECRYPTED_DATA_SIZE) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
     return cc3xx_rsa_cc_error_to_psa_error(error);
@@ -267,7 +270,12 @@ psa_status_t cc3xx_asymmetric_encrypt(const psa_key_attributes_t *attributes,
             attributes, key_buffer, key_buffer_size, alg, input, input_length,
             salt, salt_length, output, output_size, output_length);
     } else {
-        status = PSA_ERROR_NOT_SUPPORTED;
+        if (PSA_ALG_IS_ASYMMETRIC_ENCRYPTION(alg) ||
+            alg == PSA_ALG_ECDSA_ANY) {
+            status = PSA_ERROR_NOT_SUPPORTED;
+        } else {
+            status = PSA_ERROR_INVALID_ARGUMENT;
+        }
     }
 
     return status;
@@ -292,7 +300,12 @@ psa_status_t cc3xx_asymmetric_decrypt(const psa_key_attributes_t *attributes,
             attributes, key_buffer, key_buffer_size, alg, input, input_length,
             salt, salt_length, output, output_size, output_length);
     } else {
-        status = PSA_ERROR_NOT_SUPPORTED;
+        if (PSA_ALG_IS_ASYMMETRIC_ENCRYPTION(alg) ||
+            alg == PSA_ALG_ECDSA_ANY) {
+            status = PSA_ERROR_NOT_SUPPORTED;
+        } else {
+            status = PSA_ERROR_INVALID_ARGUMENT;
+        }
     }
 
     return status;

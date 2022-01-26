@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -130,9 +130,8 @@ psa_status_t cc3xx_aes_crypt(
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (length % AES_BLOCK_SIZE) {
-        CC_PAL_LOG_ERR("Length not a multiple of the block size %d\n",
-                       AES_BLOCK_SIZE);
+    if (mode != CIPHER_CTR && length % AES_BLOCK_SIZE) {
+        CC_PAL_LOG_ERR("Length %d not a multiple of the block size\n", length);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 

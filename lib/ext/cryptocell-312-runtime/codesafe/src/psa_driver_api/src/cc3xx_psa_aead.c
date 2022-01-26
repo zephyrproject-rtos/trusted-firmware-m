@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -424,6 +424,11 @@ psa_status_t cc3xx_aead_update_ad(
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
+    /* There is no associated data */
+    if (input_size == 0) {
+        return PSA_SUCCESS;
+    }
+
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
@@ -476,6 +481,16 @@ psa_status_t cc3xx_aead_update(
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
     (void)output_size;
+    *output_length = 0;
+
+    /* There is no data to process */
+    if (input_length == 0) {
+        return PSA_SUCCESS;
+    }
+
+    if (output_size < input_length) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
 
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:

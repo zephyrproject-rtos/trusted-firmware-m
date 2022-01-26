@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -38,8 +38,16 @@
 psa_status_t cc3xx_ecc_cc_error_to_psa_error(CCError_t cc_error)
 {
 #ifndef CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
-    return ((cc_error == CC_SUCCESS) ?
-                    PSA_SUCCESS : PSA_ERROR_HARDWARE_FAILURE);
+    /* Limited coverage error code conversion routine */
+    switch (cc_error) {
+    case CC_SUCCESS:
+        return PSA_SUCCESS;
+    case CC_ECDSA_VERIFY_INCONSISTENT_VERIFY_ERROR:
+    case CC_EC_EDW_SIGN_VERIFY_FAILED_ERROR:
+        return PSA_ERROR_INVALID_SIGNATURE;
+    default:
+        return PSA_ERROR_HARDWARE_FAILURE;
+    }
 #else /* CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION */
     psa_status_t err;
 
@@ -80,7 +88,7 @@ psa_status_t cc3xx_ecc_cc_error_to_psa_error(CCError_t cc_error)
 
     case CC_ECDSA_VERIFY_INCONSISTENT_VERIFY_ERROR:
     case CC_EC_EDW_SIGN_VERIFY_FAILED_ERROR:
-        err = PSA_ERROR_GENERIC_ERROR;
+        err = PSA_ERROR_INVALID_SIGNATURE;
         break;
 
     case CC_ECPKI_DOMAIN_PTR_ERROR:

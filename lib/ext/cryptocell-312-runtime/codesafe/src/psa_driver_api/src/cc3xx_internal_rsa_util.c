@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -643,10 +643,22 @@ psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
     return PSA_ERROR_NOT_SUPPORTED;
 #else
 #ifndef CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
-    return ((cc_error == CC_SUCCESS) ?
-                    PSA_SUCCESS : PSA_ERROR_HARDWARE_FAILURE);
+    /* Limited coverage error code conversion routine */
+    switch (cc_error) {
+    case CC_SUCCESS:
+        return PSA_SUCCESS;
+    case CC_RSA_INVALID_SIGNATURE_BUFFER_SIZE:
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    case CC_RSA_ERROR_VER15_INCONSISTENT_VERIFY:
+    case CC_RSA_ERROR_PSS_INCONSISTENT_VERIFY:
+    case CC_RSA_INVALID_SIGNATURE_BUFFER_POINTER:
+        return PSA_ERROR_INVALID_SIGNATURE;
+    default:
+        return PSA_ERROR_HARDWARE_FAILURE;
+    }
 #else /* CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION */
     psa_status_t err;
+    /* Full coverage error code conversion routine */
     switch (cc_error) {
     case CC_SUCCESS:
         return PSA_SUCCESS;
@@ -704,7 +716,6 @@ psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
     case CC_RSA_INVALID_PTR_ERROR:
     case CC_RSA_INVALID_PUB_KEY_STRUCT_POINTER_ERROR:
     case CC_RSA_INVALID_SIGNATURE_BUFFER_POINTER:
-    case CC_RSA_INVALID_SIGNATURE_BUFFER_SIZE:
     case CC_RSA_INVALID_USER_CONTEXT_POINTER_ERROR:
     case CC_RSA_KEY_GEN_DATA_STRUCT_POINTER_INVALID:
     case CC_RSA_MGF_ILLEGAL_ARG_ERROR:
@@ -723,6 +734,7 @@ psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
         err = PSA_ERROR_INVALID_ARGUMENT;
         break;
 
+    case CC_RSA_INVALID_SIGNATURE_BUFFER_SIZE:
     case CC_RSA_15_ERROR_IN_DECRYPTED_DATA_SIZE:
         err = PSA_ERROR_BUFFER_TOO_SMALL;
         break;

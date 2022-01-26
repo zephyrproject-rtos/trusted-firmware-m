@@ -554,7 +554,7 @@ static psa_status_t ccm_finish(AesCcmContext_t *context, unsigned char *macBuf,
             /* if MAC results are different, return an Error */
             CC_PAL_LOG_ERR(
                 "calculated and decrypted MAC results are different \n");
-            return PSA_ERROR_DATA_INVALID;
+            return PSA_ERROR_INVALID_SIGNATURE;
         }
     }
 
@@ -646,6 +646,13 @@ psa_status_t cc3xx_encrypt_ccm(
 
     size_t tag_length = PSA_AEAD_TAG_LENGTH(key_type, key_bits, key_alg);
 
+    /* FixMe: The PSA Crypto core layer should eventually perform this kind of
+     *        checks, but for the moment, enforce them at driver level as well
+     */
+    if (ciphertext_size < tag_length + plaintext_length) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+
     uint32_t ccm_mode = AESCCM_MODE_CCM;
 
     return ccm_auth_crypt(key_buffer, key_buffer_size, plaintext_length, nonce,
@@ -672,6 +679,13 @@ psa_status_t cc3xx_decrypt_ccm(
 
     size_t ciphertext_length_without_tag = ciphertext_length - tag_length;
     const uint8_t *tag = ciphertext + ciphertext_length_without_tag;
+
+    /* FixMe: The PSA Crypto core layer should eventually perform this kind of
+     *        checks, but for the moment, enforce them at driver level as well
+     */
+    if (plaintext_size < ciphertext_length_without_tag) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
 
     uint8_t local_tag_buffer[PSA_AEAD_TAG_MAX_SIZE];
     CC_PalMemCopy(local_tag_buffer, tag, tag_length);
@@ -831,7 +845,6 @@ psa_status_t cc3xx_ccm_set_nonce(
     ctrStateBuf[15] = 1;
     CC_PalMemCopy((uint8_t *)ctx->ctrStateBuf, ctrStateBuf,
                   CC_AES_BLOCK_SIZE_IN_BYTES);
-
 
     return PSA_SUCCESS;
 }
