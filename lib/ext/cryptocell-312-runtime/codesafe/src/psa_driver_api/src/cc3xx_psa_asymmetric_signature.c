@@ -60,20 +60,14 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 
-/** \defgroup psa_asym_sign PSA driver entry points for asymmetric sign/verify
- *
- *  Entry points for asymmetric message signing and signature verification as
- *  described by the PSA Cryptoprocessor Driver interface specification
- *
- *  @{
- */
-psa_status_t cc3xx_internal_ecdsa_verify(const psa_key_attributes_t *attributes,
-                                         const uint8_t *key, size_t key_length,
-                                         psa_algorithm_t alg,
-                                         const uint8_t *input, size_t input_len,
-                                         const uint8_t *signature,
-                                         size_t signature_length,
-                                         bool do_hashing)
+static psa_status_t cc3xx_internal_ecdsa_verify(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key, size_t key_length,
+    psa_algorithm_t alg,
+    const uint8_t *input, size_t input_len,
+    const uint8_t *signature,
+    size_t signature_length,
+    bool do_hashing)
 {
     CCEcpkiHashOpMode_t hash_mode = CC_ECPKI_HASH_OpModeLast;
     CCEcdsaVerifyUserContext_t pVerifyUserContext;
@@ -146,7 +140,7 @@ psa_status_t cc3xx_internal_ecdsa_verify(const psa_key_attributes_t *attributes,
     return err;
 }
 
-psa_status_t cc3xx_internal_ecdsa_sign(
+static psa_status_t cc3xx_internal_ecdsa_sign(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
     size_t key_length, psa_algorithm_t alg, const uint8_t *input,
     size_t input_len, uint8_t *signature, size_t signature_size,
@@ -250,13 +244,14 @@ cleanup:
     return err;
 }
 
-psa_status_t cc3xx_internal_rsa_verify(const psa_key_attributes_t *attributes,
-                                       const uint8_t *key_buffer,
-                                       size_t key_length, psa_algorithm_t alg,
-                                       const uint8_t *input,
-                                       size_t input_length,
-                                       const uint8_t *signature,
-                                       size_t signature_length, bool do_hashing)
+static psa_status_t cc3xx_internal_rsa_verify(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer,
+    size_t key_length, psa_algorithm_t alg,
+    const uint8_t *input,
+    size_t input_length,
+    const uint8_t *signature,
+    size_t signature_length, bool do_hashing)
 
 {
 #ifndef MBEDTLS_RSA_C
@@ -319,13 +314,14 @@ cleanup:
 #endif /* MBEDTLS_RSA_C */
 }
 
-psa_status_t cc3xx_internal_rsa_sign(const psa_key_attributes_t *attributes,
-                                     const uint8_t *key_buffer,
-                                     size_t key_length, psa_algorithm_t alg,
-                                     const uint8_t *input, size_t input_length,
-                                     uint8_t *signature, size_t signature_size,
-                                     size_t *signature_length, bool do_hashing)
-
+static psa_status_t cc3xx_internal_rsa_sign(
+    const psa_key_attributes_t *attributes,
+    const uint8_t *key_buffer,
+    size_t key_length, psa_algorithm_t alg,
+    const uint8_t *input,
+    size_t input_length,
+    uint8_t *signature, size_t signature_size,
+    size_t *signature_length, bool do_hashing)
 {
 #ifndef MBEDTLS_RSA_C
     return PSA_ERROR_NOT_SUPPORTED;
@@ -418,6 +414,13 @@ cleanup:
 #endif /* MBEDTLS_RSA_C */
 }
 
+/** \defgroup psa_asym_sign PSA driver entry points for asymmetric sign/verify
+ *
+ *  Entry points for asymmetric message signing and signature verification as
+ *  described by the PSA Cryptoprocessor Driver interface specification
+ *
+ *  @{
+ */
 psa_status_t cc3xx_sign_hash(const psa_key_attributes_t *attributes,
                              const uint8_t *key, size_t key_length,
                              psa_algorithm_t alg, const uint8_t *input,
