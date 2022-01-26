@@ -33,7 +33,7 @@ if(TFM_PSA_API)
     message(FATAL_ERROR "Invalid partition number input, check configurations.")
 {% endif %}
 
-    if((CONFIG_TFM_SPE_FP GREATER 0) AND CONFIG_TFM_SPM_BACKEND_SFN)
+    if((CONFIG_TFM_FP GREATER 0) AND CONFIG_TFM_SPM_BACKEND_SFN)
         message(FATAL_ERROR "FP is not supported for SFN model.")
     endif()
 endif()

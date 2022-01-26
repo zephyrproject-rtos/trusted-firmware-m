@@ -76,8 +76,8 @@ macro(tfm_toolchain_set_processor_arch)
             endif()
         endif()
         if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
-            if (DEFINED CONFIG_TFM_SPE_FP)
-                if(CONFIG_TFM_SPE_FP STREQUAL "0" AND
+            if (DEFINED CONFIG_TFM_FP)
+                if(CONFIG_TFM_FP STREQUAL "0" AND
                    NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv6-m")
                     string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
                 endif()
