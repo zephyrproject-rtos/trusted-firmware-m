@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
+#include "runtime_defs.h"
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
@@ -40,6 +41,20 @@ struct context_ctrl_t *p_spm_thread_context;
 #endif
 
 #endif
+
+static void prv_process_metadata(struct partition_t *p_pt)
+{
+    struct runtime_metadata_t *p_rtmd = NULL;
+
+    if (p_pt->p_ldinf->entry) {
+        ARCH_CTXCTRL_ALLOCATE_STACK(&p_pt->ctx_ctrl, sizeof(*p_rtmd));
+        p_rtmd = (struct runtime_metadata_t *)ARCH_CTXCTRL_ALLOCATED_PTR(
+                                                            &p_pt->ctx_ctrl);
+        p_rtmd->entry = p_pt->p_ldinf->entry;
+    }
+
+    p_pt->p_metadata = p_rtmd;
+}
 
 /*
  * Send message and wake up the SP who is waiting on message queue, block the
@@ -101,6 +116,8 @@ static psa_status_t ipc_replying(struct conn_handle_t *handle, int32_t status)
     return PSA_SUCCESS;
 }
 
+extern void sprt_main(void);
+
 /* Parameters are treated as assuredly */
 static void ipc_comp_init_assuredly(struct partition_t *p_pt,
                                     uint32_t service_setting)
@@ -120,6 +137,8 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
                       LOAD_ALLOCED_STACK_ADDR(p_pldi),
                       p_pldi->stack_size);
 
+    prv_process_metadata(p_pt);
+
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
@@ -130,7 +149,7 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
 #endif
 
     thrd_start(&p_pt->thrd,
-               POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t),
+               POSITION_TO_ENTRY(sprt_main, thrd_fn_t),
                THRD_GENERAL_EXIT);
 }
 

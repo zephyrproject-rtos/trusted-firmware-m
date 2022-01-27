@@ -42,6 +42,9 @@
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
 #include "tfm_nspm.h"
+#if defined(CONFIG_TFM_PARTITION_META)
+#include "tfm_hal_memory_symbols.h"
+#endif
 
 #if !(defined CONFIG_TFM_CONN_HANDLE_MAX_NUM) || (CONFIG_TFM_CONN_HANDLE_MAX_NUM == 0)
 #error "CONFIG_TFM_CONN_HANDLE_MAX_NUM must be defined and not zero."
@@ -50,6 +53,11 @@
 /* Partition and service runtime data list head/runtime data table */
 static struct service_head_t services_listhead;
 struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
+
+#if defined(CONFIG_TFM_PARTITION_META)
+/* Indicator point to the partition meta */
+static uintptr_t *partition_meta_indicator_pos = NULL;
+#endif
 
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct conn_handle_t),
@@ -569,6 +577,10 @@ uint32_t tfm_spm_init(void)
         backend_instance.comp_init_assuredly(partition, service_setting);
     }
 
+#if defined(CONFIG_TFM_PARTITION_META)
+    partition_meta_indicator_pos = (uintptr_t *)hal_mem_sp_meta_start;
+#endif
+
     return backend_instance.system_run();
 }
 
@@ -614,6 +626,13 @@ uint64_t do_schedule(void)
         CURRENT_THREAD = pth_next;
         CRITICAL_SECTION_LEAVE(cs);
     }
+
+#if defined(CONFIG_TFM_PARTITION_META)
+    /* Update meta indicator */
+    if (partition_meta_indicator_pos && (p_part_next->p_metadata)) {
+        *partition_meta_indicator_pos = (uintptr_t)(p_part_next->p_metadata);
+    }
+#endif
 
     return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }

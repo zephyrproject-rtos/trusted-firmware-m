@@ -175,7 +175,7 @@ SECTIONS
     Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
 #endif
-   .dummy_empty :
+   .dummy_empty : ALIGH(32)
     {
         . += 0x0;
     } > RAM
@@ -206,14 +206,7 @@ SECTIONS
 
     /**** APPLICATION RoT DATA end here */
     Image$$TFM_APP_RW_STACK_END$$Base = .;
-#if defined(TFM_SP_META_PTR_ENABLE)
-    .TFM_SP_META_PTR : ALIGN(32)
-    {
-        *(SP_META_PTR_SPRTL_INST)
-    } > RAM
-    Image$$TFM_SP_META_PTR$$RW$$Base = ADDR(.TFM_SP_META_PTR);
-    Image$$TFM_SP_META_PTR$$RW$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
-#endif
+
 #ifdef CODE_SHARING
     /* The code sharing between bootloader and runtime requires to share the
      * global variables.

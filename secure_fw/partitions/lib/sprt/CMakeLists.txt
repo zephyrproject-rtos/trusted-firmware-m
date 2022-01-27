@@ -24,6 +24,7 @@ target_sources(tfm_sprt
         ./crt_strnlen.c
         ./service_api.c
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_partition_metadata_indicator.c>
+        $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_main.c>
 )
 
 target_link_libraries(tfm_sprt
@@ -38,6 +39,11 @@ target_compile_definitions(tfm_partition_defs
     INTERFACE
         TFM_PARTITION_LOG_LEVEL=${TFM_PARTITION_LOG_LEVEL}
         $<$<BOOL:${TFM_SP_LOG_RAW_ENABLED}>:TFM_SP_LOG_RAW_ENABLED>
+)
+
+target_include_directories(tfm_partitions
+    INTERFACE
+        $<BUILD_INTERFACE:$<$<BOOL:${CONFIG_TFM_PARTITION_META}>:${CMAKE_CURRENT_SOURCE_DIR}/include>>
 )
 
 # Create a dedicated tfm_sp_log_raw library for some regression test modules

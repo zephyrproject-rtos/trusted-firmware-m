@@ -407,6 +407,7 @@ VENEERS()
 #endif
 
     /**** APPLICATION RoT DATA start here */
+    . = ALIGN(32);
     Image$$TFM_APP_RW_STACK_START$$Base = .;
 
     .TFM_APP_ROT_LINKER_DATA : ALIGN(32)
