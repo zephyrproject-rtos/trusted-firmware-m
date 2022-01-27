@@ -70,7 +70,6 @@
 
 #define SPM_INVALID_PARTITION_IDX       (~0U)
 
-#define TFM_MSG_MAGIC                   0x15154343
 #define TFM_MSG_MAGIC_SFN               0x21216565
 
 /* Get partition by thread or context data */
@@ -79,7 +78,7 @@
 
 /* RoT connection handle list */
 struct conn_handle_t {
-    void *rhandle;                      /* Reverse handle value              */
+    void *rhandle;                      /* Reverse handle value           */
     uint32_t status;                    /*
                                          * Status of handle, three valid
                                          * options:
@@ -87,37 +86,30 @@ struct conn_handle_t {
                                          * TFM_HANDLE_STATUS_IDLE and
                                          * TFM_HANDLE_STATUS_CONNECT_ERROR
                                          */
-    int32_t client_id;                  /*
-                                         * Partition ID of the sender of the
-                                         * message:
-                                         *  - secure partition id;
-                                         *  - non secure client endpoint id.
-                                         */
-    int32_t magic;
-    struct partition_t *p_client;      /* Caller partition              */
-    struct service_t *service;         /* RoT service pointer           */
+    struct partition_t *p_client;       /* Caller partition               */
+    struct service_t *service;          /* RoT service pointer            */
     union {
-        struct sync_obj_t ack_evnt;    /* IPC - Ack response event       */
-        uint32_t sfn_magic;            /* SFN - Indicate a SFN message   */
+        struct sync_obj_t ack_evnt;     /* IPC - Ack response event       */
+        uint32_t sfn_magic;             /* SFN - Indicate a SFN message   */
     };
-    psa_msg_t msg;                     /* PSA message body               */
-    psa_invec invec[PSA_MAX_IOVEC];    /* Put in/out vectors in msg body */
+    psa_msg_t msg;                      /* PSA message body               */
+    psa_invec invec[PSA_MAX_IOVEC];     /* Put in/out vectors in msg body */
     psa_outvec outvec[PSA_MAX_IOVEC];
-    psa_outvec *caller_outvec;         /*
-                                        * Save caller outvec pointer for
-                                        * write length update
-                                        */
+    psa_outvec *caller_outvec;          /*
+                                         * Save caller outvec pointer for
+                                         * write length update
+                                         */
 #ifdef TFM_MULTI_CORE_TOPOLOGY
-    const void *caller_data;           /*
-                                        * Pointer to the private data of the
-                                        * caller. It identifies the NSPE PSA
-                                        * client calls in multi-core topology
-                                        */
+    const void *caller_data;            /*
+                                         * Pointer to the private data of the
+                                         * caller. It identifies the NSPE PSA
+                                         * client calls in multi-core topology
+                                         */
 #endif
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
-    uint32_t iovec_status;             /* MM-IOVEC status                */
+    uint32_t iovec_status;              /* MM-IOVEC status                */
 #endif
-    struct conn_handle_t *p_handles;   /* Handle(s) link                 */
+    struct conn_handle_t *p_handles;    /* Handle(s) link                 */
 };
 
 /* Partition runtime type */
@@ -163,31 +155,24 @@ int32_t tfm_spm_partition_get_running_partition_id(void);
 /**
  * \brief                   Create connection handle for client connect
  *
- * \param[in] service       Target service context pointer
- * \param[in] client_id     Partition ID of the sender
- *
  * \retval NULL             Create failed
  * \retval "Not NULL"       Service handle created
  */
-struct conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
-                                                 int32_t client_id);
+struct conn_handle_t *tfm_spm_create_conn_handle(void);
 
 /**
  * \brief                   Validate connection handle for client connect
  *
  * \param[in] conn_handle   Handle to be validated
- * \param[in] client_id     Partition ID of the sender
  *
  * \retval SPM_SUCCESS        Success
  * \retval SPM_ERROR_GENERIC  Invalid handle
  */
-int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle,
-                                     int32_t client_id);
+int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle);
 
 /**
  * \brief                   Free connection handle which not used anymore.
  *
- * \param[in] service       Target service context pointer
  * \param[in] conn_handle   Connection handle created by
  *                          tfm_spm_create_conn_handle()
  *
@@ -195,8 +180,7 @@ int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle,
  * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find service by handle
  */
-int32_t tfm_spm_free_conn_handle(struct service_t *service,
-                                 struct conn_handle_t *conn_handle);
+int32_t tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle);
 
 /******************** Partition management functions *************************/
 
@@ -243,17 +227,31 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 /************************ Message functions **********************************/
 
 /**
- * \brief                   Get spm work handle by given user handle.
+ * \brief                   Convert the given client handle to SPM recognised
+ *                          handle and verify it.
  *
- * \param[in] msg_handle    Message handle which is a reference generated
- *                          by the SPM to a specific message. A few
- *                          validations happen in this function before
- *                          the final result returns.
+ * \param[in] handle        A handle to an established connection that is
+ *                          returned by a prior psa_connect call.
  *
- * \return                  The spm work handle.
+ * \return                  A SPM recognised handle or NULL. It is NULL when
+ *                          verification of the converted SPM handle fails.
  *                          \ref conn_handle_t structures
  */
-struct conn_handle_t *spm_get_handle_by_user_handle(psa_handle_t msg_handle);
+struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
+                                                      int32_t client_id);
+
+/**
+ * \brief                   Convert the given message handle to SPM recognised
+ *                          handle and verify it.
+ *
+ * \param[in] msg_handle    Message handle which is a reference generated
+ *                          by the SPM to a specific message.
+ *
+ * \return                  A SPM recognised handle or NULL. It is NULL when
+ *                          verification of the converted SPM handle fails.
+ *                          \ref conn_handle_t structures
+ */
+struct conn_handle_t *spm_get_handle_by_msg_handle(psa_handle_t msg_handle);
 
 /**
  * \brief                   Fill the user message in handle.

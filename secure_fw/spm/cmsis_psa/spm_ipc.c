@@ -147,12 +147,9 @@ struct conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle)
 }
 
 /* Service handle management functions */
-struct conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
-                                                 int32_t client_id)
+struct conn_handle_t *tfm_spm_create_conn_handle(void)
 {
     struct conn_handle_t *p_handle;
-
-    TFM_CORE_ASSERT(service);
 
     /* Get buffer for handle list structure from handle pool */
     p_handle = (struct conn_handle_t *)tfm_pool_alloc(conn_handle_pool);
@@ -162,25 +159,17 @@ struct conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
 
     spm_memset(p_handle, 0, sizeof(*p_handle));
 
-    p_handle->service = service;
     p_handle->status = TFM_HANDLE_STATUS_IDLE;
-    p_handle->client_id = client_id;
 
     return p_handle;
 }
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle,
-                                     int32_t client_id)
+int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle)
 {
-    /* Check the handle address is validated */
+    /* Check the handle address is valid */
     if (is_valid_chunk_data_in_pool(conn_handle_pool,
                                     (uint8_t *)conn_handle) != true) {
-        return SPM_ERROR_GENERIC;
-    }
-
-    /* Check the handle caller is correct */
-    if (conn_handle->client_id != client_id) {
         return SPM_ERROR_GENERIC;
     }
 
@@ -188,19 +177,13 @@ int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle,
 }
 #endif
 
-int32_t tfm_spm_free_conn_handle(struct service_t *service,
-                                 struct conn_handle_t *conn_handle)
+int32_t tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
-    TFM_CORE_ASSERT(service);
     TFM_CORE_ASSERT(conn_handle != NULL);
 
-    /* Clear magic as the handler is not used anymore */
-    conn_handle->magic = 0;
-
     CRITICAL_SECTION_ENTER(cs_assert);
-
     /* Back handle buffer to pool */
     tfm_pool_free(conn_handle_pool, conn_handle);
     CRITICAL_SECTION_LEAVE(cs_assert);
@@ -342,7 +325,24 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 
 /* Message functions */
 
-struct conn_handle_t *spm_get_handle_by_user_handle(psa_handle_t msg_handle)
+struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
+                                                      int32_t client_id)
+{
+    struct conn_handle_t *p_conn_handle = tfm_spm_to_handle_instance(handle);
+
+    if (tfm_spm_validate_conn_handle(p_conn_handle) != SPM_SUCCESS) {
+        return NULL;
+    }
+
+    /* Validate the caller id in the connection handle equals client_id. */
+    if (p_conn_handle->msg.client_id != client_id) {
+        return NULL;
+    }
+
+    return p_conn_handle;
+}
+
+struct conn_handle_t *spm_get_handle_by_msg_handle(psa_handle_t msg_handle)
 {
     /*
      * The message handler passed by the caller is considered invalid in the
@@ -357,16 +357,7 @@ struct conn_handle_t *spm_get_handle_by_user_handle(psa_handle_t msg_handle)
     struct conn_handle_t *p_conn_handle =
                                     tfm_spm_to_handle_instance(msg_handle);
 
-    if (is_valid_chunk_data_in_pool(
-        conn_handle_pool, (uint8_t *)p_conn_handle) != true) {
-        return NULL;
-    }
-
-    /*
-     * Check that the magic number is correct. This proves that the message
-     * structure contains an active message.
-     */
-    if (p_conn_handle->magic != TFM_MSG_MAGIC) {
+    if (tfm_spm_validate_conn_handle(p_conn_handle) != SPM_SUCCESS) {
         return NULL;
     }
 
@@ -401,7 +392,6 @@ void spm_fill_message(struct conn_handle_t *conn_handle,
     spm_memset(&conn_handle->msg, 0, sizeof(psa_msg_t));
 
     THRD_SYNC_INIT(&conn_handle->ack_evnt);
-    conn_handle->magic = TFM_MSG_MAGIC;
     conn_handle->service = service;
     conn_handle->p_client = GET_CURRENT_COMPONENT();
     conn_handle->caller_outvec = caller_outvec;

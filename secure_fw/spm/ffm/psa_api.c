@@ -204,7 +204,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         }
 
         CRITICAL_SECTION_ENTER(cs_assert);
-        conn_handle = tfm_spm_create_conn_handle(service, client_id);
+        conn_handle = tfm_spm_create_conn_handle();
         CRITICAL_SECTION_LEAVE(cs_assert);
 
         if (!conn_handle) {
@@ -215,11 +215,9 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         handle = tfm_spm_to_user_handle(conn_handle);
     } else {
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-        conn_handle = tfm_spm_to_handle_instance(handle);
-
         /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
-        if (tfm_spm_validate_conn_handle(conn_handle, client_id)
-            != SPM_SUCCESS) {
+        conn_handle = spm_get_handle_by_client_handle(handle, client_id);
+        if (!conn_handle) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
@@ -372,7 +370,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
      * code to client when creation fails.
      */
     CRITICAL_SECTION_ENTER(cs_assert);
-    conn_handle = tfm_spm_create_conn_handle(service, client_id);
+    conn_handle = tfm_spm_create_conn_handle();
     CRITICAL_SECTION_LEAVE(cs_assert);
     if (!conn_handle) {
         return PSA_ERROR_CONNECTION_BUSY;
@@ -405,12 +403,12 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 
     client_id = tfm_spm_get_client_id(ns_caller);
 
-    conn_handle = tfm_spm_to_handle_instance(handle);
     /*
      * It is a PROGRAMMER ERROR if an invalid handle was provided that is not
      * the null handle.
      */
-    if (tfm_spm_validate_conn_handle(conn_handle, client_id) != SPM_SUCCESS) {
+    conn_handle = spm_get_handle_by_client_handle(handle, client_id);
+    if (!conn_handle) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -546,7 +544,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
     uint32_t priv_mode;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_user_handle(msg_handle);
+    handle = spm_get_handle_by_msg_handle(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -615,7 +613,7 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
     struct conn_handle_t *handle = NULL;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_user_handle(msg_handle);
+    handle = spm_get_handle_by_msg_handle(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -676,7 +674,7 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
     uint32_t priv_mode;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_user_handle(msg_handle);
+    handle = spm_get_handle_by_msg_handle(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -746,7 +744,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_user_handle(msg_handle);
+    handle = spm_get_handle_by_msg_handle(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -772,7 +770,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
             ret = msg_handle;
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
             /* Refuse the client connection, indicating a permanent error. */
-            tfm_spm_free_conn_handle(service, handle);
+            tfm_spm_free_conn_handle(handle);
             ret = PSA_ERROR_CONNECTION_REFUSED;
         } else if (status == PSA_ERROR_CONNECTION_BUSY) {
             /* Fail the client connection, indicating a transient error. */
@@ -783,7 +781,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         break;
     case PSA_IPC_DISCONNECT:
         /* Service handle is not used anymore */
-        tfm_spm_free_conn_handle(service, handle);
+        tfm_spm_free_conn_handle(handle);
 
         /*
          * If the message type is PSA_IPC_DISCONNECT, then the status code is
@@ -826,7 +824,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
              */
             update_caller_outvec_len(handle);
             if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
-                tfm_spm_free_conn_handle(service, handle);
+                tfm_spm_free_conn_handle(handle);
             }
         } else {
             tfm_core_panic();
@@ -909,7 +907,7 @@ void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
     struct conn_handle_t *handle;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_user_handle(msg_handle);
+    handle = spm_get_handle_by_msg_handle(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -1035,7 +1033,7 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
     struct partition_t *partition = NULL;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_user_handle(msg_handle);
+    handle = spm_get_handle_by_msg_handle(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -1110,7 +1108,7 @@ void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
     struct conn_handle_t *handle;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_user_handle(msg_handle);
+    handle = spm_get_handle_by_msg_handle(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -1166,7 +1164,7 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
     struct partition_t *partition = NULL;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_user_handle(msg_handle);
+    handle = spm_get_handle_by_msg_handle(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -1238,7 +1236,7 @@ void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
     struct conn_handle_t *handle;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_user_handle(msg_handle);
+    handle = spm_get_handle_by_msg_handle(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
