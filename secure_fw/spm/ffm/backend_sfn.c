@@ -104,7 +104,7 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
 
         thrd_start(&p_pt->thrd,
                POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t),
-               (void *)tfm_hal_get_ns_entry_point(),
+               NULL,
                LOAD_ALLOCED_STACK_ADDR(p_pldi),
                LOAD_ALLOCED_STACK_ADDR(p_pldi) + p_pldi->stack_size);
 

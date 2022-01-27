@@ -54,14 +54,12 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_PSA_API}>:ffm/backend.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/interrupt.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_core_svcalls_ipc.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>>:cmsis_psa/tfm_nspm_ipc.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_pools.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/thread.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/main.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/arch.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/spm_func.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_core_svcalls_func.c>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_nspm_func.c>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:ns_client_ext/tfm_ns_ctx.c>
         ns_client_ext/tfm_spm_ns_ctx.c
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_secure_api.c>

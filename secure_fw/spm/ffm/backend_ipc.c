@@ -106,7 +106,6 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
                                     uint32_t service_setting)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
-    void *p_param = NULL;
 
     p_pt->signals_allowed |= PSA_DOORBELL | service_setting;
 
@@ -116,19 +115,14 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
+#if defined(CONFIG_TFM_PSA_API_CROSS_CALL) && !defined(TFM_MULTI_CORE_TOPOLOGY)
     if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
-        p_param = (void *)tfm_hal_get_ns_entry_point();
-
-#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
-#ifndef TFM_MULTI_CORE_TOPOLOGY
         SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
-#endif
-#endif
-
     }
+#endif
 
     thrd_start(&p_pt->thrd,
-               POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t), p_param,
+               POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t), NULL,
                LOAD_ALLOCED_STACK_ADDR(p_pldi),
                LOAD_ALLOCED_STACK_ADDR(p_pldi) + p_pldi->stack_size);
 }

@@ -12,7 +12,6 @@
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
-#include "tfm_nspm.h"
 #include "tfm_spm_hal.h"
 #include "tfm_spm_log.h"
 #include "tfm_version.h"
@@ -111,8 +110,6 @@ static fih_int tfm_core_init(void)
 #endif
 
     tfm_core_validate_boot_data();
-
-    configure_ns_code();
 
     FIH_RET(fih_int_encode(TFM_SUCCESS));
 }
