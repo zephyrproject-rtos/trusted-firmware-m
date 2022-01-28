@@ -148,7 +148,7 @@ static enum fwu_agent_error_t private_metadata_read(
 
     ret = FWU_METADATA_FLASH_DEV.ReadData(FWU_PRIVATE_AREA_OFFSET, p_metadata,
                                           sizeof(struct fwu_private_metadata));
-    if (ret != ARM_DRIVER_OK) {
+    if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -177,7 +177,7 @@ static enum fwu_agent_error_t private_metadata_write(
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_PRIVATE_AREA_OFFSET,
                                 p_metadata, sizeof(struct fwu_private_metadata));
-    if (ret != ARM_DRIVER_OK) {
+    if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -198,7 +198,7 @@ static enum fwu_agent_error_t metadata_read(struct fwu_metadata *p_metadata)
 
     ret = FWU_METADATA_FLASH_DEV.ReadData(FWU_METADATA_REPLICA_1_OFFSET,
                                 p_metadata, sizeof(struct fwu_metadata));
-    if (ret != ARM_DRIVER_OK) {
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -227,7 +227,7 @@ static enum fwu_agent_error_t metadata_write(
 
     ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_METADATA_REPLICA_1_OFFSET,
                                 p_metadata, sizeof(struct fwu_metadata));
-    if (ret != ARM_DRIVER_OK) {
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
         return FWU_AGENT_ERROR;
     }
 
@@ -293,9 +293,10 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
      * metadata
      */
     metadata_read(&_metadata);
-    if(_metadata.active_index ^ _metadata.previous_active_index)
-        return FWU_AGENT_SUCCESS;
-
+    if(_metadata.active_index < 2 || _metadata.previous_active_index <2){
+    	if(_metadata.active_index ^ _metadata.previous_active_index)
+    		return FWU_AGENT_SUCCESS;
+    }
     /* Provision FWU Agent Metadata */
 
     memset(&_metadata, 0, sizeof(struct fwu_metadata));
@@ -468,7 +469,7 @@ static enum fwu_agent_error_t flash_full_capsule(
     FWU_LOG_MSG("%s: writing capsule to the flash at offset = %u...\n\r",
                       __func__, bank_offset);
     ret = FWU_METADATA_FLASH_DEV.ProgramData(bank_offset, images, size);
-    if (ret != ARM_DRIVER_OK) {
+    if (ret < 0 || ret != size) {
         return FWU_AGENT_ERROR;
     }
     FWU_LOG_MSG("%s: images are written to bank offset = %u\n\r", __func__,
@@ -734,7 +735,7 @@ void bl1_get_boot_bank(uint32_t *bank_offset)
     }
 
     priv_metadata.boot_index = boot_index;
-    if (private_metadata_write(&priv_metadata)) {
+    if (private_metadata_write(&priv_metadata) < 0) {
         FWU_ASSERT(0);
     }
 
