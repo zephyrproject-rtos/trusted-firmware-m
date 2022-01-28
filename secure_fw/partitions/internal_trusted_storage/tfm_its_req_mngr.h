@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,6 +16,7 @@
 extern "C" {
 #endif
 
+#ifndef TFM_PSA_API
 /**
  * \brief Handles the set request.
  *
@@ -79,6 +80,7 @@ psa_status_t tfm_its_get_info_req(psa_invec *in_vec, size_t in_len,
  */
 psa_status_t tfm_its_remove_req(psa_invec *in_vec, size_t in_len,
                                 psa_outvec *out_vec, size_t out_len);
+#endif /* NOT TFM_PSA_API */
 
 /**
  * \brief Reads asset data from the caller.
