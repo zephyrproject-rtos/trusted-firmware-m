@@ -257,8 +257,14 @@ static int32_t STRATAFLASHJ3_Flash_ReadData(uint32_t addr, void *data, uint32_t 
 {
     enum strataflashj3_error_t ret;
 
+    if (STRATAFLASHJ3DriverCapabilities.data_width > 2 || STRATAFLASHJ3DriverCapabilities.data_width < 0)
+    {
+        SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", __func__, addr);
+        return ARM_DRIVER_ERROR;
+    }
+
     /* Conversion between data items and bytes */
-    cnt *= data_width_byte[DriverCapabilities.data_width];
+    cnt *= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
 
     ret = cfi_strataflashj3_read(ARM_FLASH0_DEV.dev, addr, data, cnt);
     if (ret != STRATAFLASHJ3_ERR_NONE) {
@@ -267,7 +273,7 @@ static int32_t STRATAFLASHJ3_Flash_ReadData(uint32_t addr, void *data, uint32_t 
     }
 
     /* Conversion between bytes and data items */
-    cnt /= data_width_byte[DriverCapabilities.data_width];
+    cnt /= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
 
     return cnt;
 }
@@ -276,9 +282,15 @@ static int32_t STRATAFLASHJ3_Flash_ProgramData(uint32_t addr, const void *data,
                                      uint32_t cnt)
 {
     enum strataflashj3_error_t ret;
+    
+    if (STRATAFLASHJ3DriverCapabilities.data_width > 2 || STRATAFLASHJ3DriverCapabilities.data_width < 0)
+    {
+        SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", __func__, addr);
+        return ARM_DRIVER_ERROR;
+    }
 
     /* Conversion between data items and bytes */
-    cnt *= data_width_byte[DriverCapabilities.data_width];
+    cnt *= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
 
     ret = cfi_strataflashj3_program(ARM_FLASH0_DEV.dev, addr, data, cnt);
     if (ret != STRATAFLASHJ3_ERR_NONE) {
@@ -287,7 +299,7 @@ static int32_t STRATAFLASHJ3_Flash_ProgramData(uint32_t addr, const void *data,
     }
 
     /* Conversion between bytes and data items */
-    cnt /= data_width_byte[DriverCapabilities.data_width];
+    cnt /= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
 
     return cnt;
 }
@@ -372,8 +384,14 @@ static int32_t STRATAFLASHJ3_Flash_ReadData_SE(uint32_t addr, void *data, uint32
 {
     enum strataflashj3_error_t ret;
 
+    if (STRATAFLASHJ3DriverCapabilities.data_width > 2 || STRATAFLASHJ3DriverCapabilities.data_width < 0)
+    {
+        SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", __func__, addr);
+        return ARM_DRIVER_ERROR;
+    }
+
     /* Conversion between data items and bytes */
-    cnt *= data_width_byte[DriverCapabilities.data_width];
+    cnt *= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
 
     ret = cfi_strataflashj3_read(ARM_FLASH1_DEV.dev, addr, data, cnt);
     if (ret != STRATAFLASHJ3_ERR_NONE) {
@@ -382,7 +400,7 @@ static int32_t STRATAFLASHJ3_Flash_ReadData_SE(uint32_t addr, void *data, uint32
     }
 
     /* Conversion between bytes and data items */
-    cnt /= data_width_byte[DriverCapabilities.data_width];
+    cnt /= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
     return cnt;
 }
 
@@ -391,8 +409,14 @@ static int32_t STRATAFLASHJ3_Flash_ProgramData_SE(uint32_t addr, const void *dat
 {
     enum strataflashj3_error_t ret;
 
+    if (STRATAFLASHJ3DriverCapabilities.data_width > 2 || STRATAFLASHJ3DriverCapabilities.data_width < 0)
+    {
+        SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", __func__, addr);
+        return ARM_DRIVER_ERROR;
+    }
+
     /* Conversion between data items and bytes */
-    cnt *= data_width_byte[DriverCapabilities.data_width];
+    cnt *= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
 
     ret = cfi_strataflashj3_program(ARM_FLASH1_DEV.dev, addr, data, cnt);
     if (ret != STRATAFLASHJ3_ERR_NONE) {
@@ -401,7 +425,7 @@ static int32_t STRATAFLASHJ3_Flash_ProgramData_SE(uint32_t addr, const void *dat
     }
 
     /* Conversion between bytes and data items */
-    cnt /= data_width_byte[DriverCapabilities.data_width];
+    cnt /= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
     return cnt;
 }
 
@@ -504,13 +528,23 @@ static int32_t N25Q256A_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
     enum n25q256a_error_t ret;
 
+    if (N25Q256ADriverCapabilities.data_width > 2 || N25Q256ADriverCapabilities.data_width < 0)
+    {
+        SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", __func__, addr);
+        return ARM_DRIVER_ERROR;
+    }
+
+    cnt *= data_width_byte[N25Q256ADriverCapabilities.data_width];
+
     ret = spi_n25q256a_read(ARM_FLASH0_DEV.dev, addr, data, cnt);
     if (ret != N25Q256A_ERR_NONE) {
         SPI_FLASH_LOG_MSG("%s: read failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[N25Q256ADriverCapabilities.data_width];
+
+    return cnt;
 }
 
 static int32_t N25Q256A_Flash_ProgramData(uint32_t addr, const void *data,
@@ -518,13 +552,23 @@ static int32_t N25Q256A_Flash_ProgramData(uint32_t addr, const void *data,
 {
     enum n25q256a_error_t ret;
 
+    if (N25Q256ADriverCapabilities.data_width > 2 || N25Q256ADriverCapabilities.data_width < 0)
+    {
+        SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", __func__, addr);
+        return ARM_DRIVER_ERROR;
+    }
+
+    cnt *= data_width_byte[N25Q256ADriverCapabilities.data_width];
+
     ret = spi_n25q256a_program(ARM_FLASH0_DEV.dev, addr, data, cnt);
     if (ret != N25Q256A_ERR_NONE) {
         SPI_FLASH_LOG_MSG("%s: program failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[N25Q256ADriverCapabilities.data_width];
+
+    return cnt;
 }
 
 static int32_t N25Q256A_Flash_EraseSector(uint32_t addr)
@@ -605,12 +649,23 @@ static int32_t SST26VF064B_Flash_ReadData(uint32_t addr, void *data, uint32_t cn
 {
     enum sst26vf064b_error_t ret;
 
+    if (SST26VF064BDriverCapabilities.data_width > 2 || SST26VF064BDriverCapabilities.data_width < 0)
+    {
+        SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", __func__, addr);
+        return ARM_DRIVER_ERROR;
+    }
+
+    cnt *= data_width_byte[SST26VF064BDriverCapabilities.data_width];
+
     ret = spi_sst26vf064b_read(ARM_FLASH1_DEV.dev, addr, data, cnt);
     if (ret != SST26VF064B_ERR_NONE) {
         SPI_FLASH_LOG_MSG("%s: read failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
         return ARM_DRIVER_ERROR;
     }
-    return ARM_DRIVER_OK;
+
+    cnt /= data_width_byte[SST26VF064BDriverCapabilities.data_width];
+
+    return cnt;
 }
 
 static int32_t SST26VF064B_Flash_ProgramData(uint32_t addr, const void *data,
@@ -618,12 +673,23 @@ static int32_t SST26VF064B_Flash_ProgramData(uint32_t addr, const void *data,
 {
     enum sst26vf064b_error_t ret;
 
+    if (SST26VF064BDriverCapabilities.data_width > 2 || SST26VF064BDriverCapabilities.data_width < 0)
+    {
+        SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", __func__, addr);
+        return ARM_DRIVER_ERROR;
+    }
+
+    cnt *= data_width_byte[SST26VF064BDriverCapabilities.data_width];
+
     ret = spi_sst26vf064b_program(ARM_FLASH1_DEV.dev, addr, data, cnt);
     if (ret != SST26VF064B_ERR_NONE) {
         SPI_FLASH_LOG_MSG("%s: program failed: addr=0x%x, cnt=%u\n\r", __func__, addr, cnt);
         return ARM_DRIVER_ERROR;
     }
-    return ARM_DRIVER_OK;
+
+    cnt /= data_width_byte[SST26VF064BDriverCapabilities.data_width];
+
+    return cnt;
 }
 
 static int32_t SST26VF064B_Flash_EraseSector(uint32_t addr)
