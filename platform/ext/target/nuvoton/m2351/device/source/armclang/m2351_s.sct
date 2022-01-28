@@ -228,7 +228,7 @@ LR_CODE S_CODE_START {
 
 #if defined(CONFIG_TFM_PARTITION_META)
     TFM_SP_META_PTR +0 ALIGN 32 {
-        *(SP_META_PTR_SPRTL_INST)
+        *(.bss.SP_META_PTR_SPRTL_INST)
     }
 #endif
 

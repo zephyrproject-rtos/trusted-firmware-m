@@ -170,10 +170,10 @@ SECTIONS
 #if defined(CONFIG_TFM_PARTITION_META)
     .TFM_SP_META_PTR : ALIGN(32)
     {
-        *(SP_META_PTR_SPRTL_INST)
+        *(.bss.SP_META_PTR_SPRTL_INST)
     } > RAM
-    Image$$TFM_SP_META_PTR$$RW$$Base = ADDR(.TFM_SP_META_PTR);
-    Image$$TFM_SP_META_PTR$$RW$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
+    Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
+    Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
 #endif
 /**** APPLICATION RoT DATA start here */
     Image$$TFM_APP_RW_STACK_START$$Base = .;

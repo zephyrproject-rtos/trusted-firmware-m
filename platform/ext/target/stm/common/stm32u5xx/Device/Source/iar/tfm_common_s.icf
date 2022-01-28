@@ -95,8 +95,8 @@ keep {block TFM_SECURE_STACK};
 #endif /* !defined(TFM_PSA_API) */
 
 #if defined(CONFIG_TFM_PARTITION_META)
-define block CONFIG_TFM_PARTITION_META with alignment = 32 {
-       section SP_META_PTR_SPRTL_INST
+define block TFM_SP_META_PTR with alignment = 32 {
+    zi section .bss.SP_META_PTR_SPRTL_INST
        };
 #endif
 

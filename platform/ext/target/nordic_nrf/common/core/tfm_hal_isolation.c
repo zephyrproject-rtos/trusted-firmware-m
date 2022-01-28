@@ -25,8 +25,8 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 
 #ifdef CONFIG_TFM_PARTITION_META
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
 /* Get address of memory regions to configure MPU */
@@ -365,9 +365,9 @@ enum tfm_hal_status_t mpu_init_cfg(void)
     region_cfg.region_nr = n_configured_regions++;
 
     region_cfg.region_base =
-            (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Base);
+            (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
     region_cfg.region_limit =
-            (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
+            (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
