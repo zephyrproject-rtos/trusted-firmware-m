@@ -34,7 +34,7 @@ struct tfm_crypto_aead_pack_input {
  *
  */
 struct tfm_crypto_pack_iovec {
-    uint32_t sfn_id;             /*!< Secure function ID used to dispatch the
+    uint32_t srv_id;             /*!< Crypto service ID used to dispatch the
                                   *   request
                                   */
     uint16_t step;               /*!< Key derivation step */

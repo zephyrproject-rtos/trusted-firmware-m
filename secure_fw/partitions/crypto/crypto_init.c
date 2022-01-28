@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -111,9 +111,9 @@ void tfm_crypto_clear_scratch(void)
     scratch.alloc_index = 0;
 }
 
-static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
+static psa_status_t tfm_crypto_call_srv(psa_msg_t *msg,
                                         struct tfm_crypto_pack_iovec *iov,
-                                        const uint32_t sfn_id)
+                                        const uint32_t srv_id)
 {
     psa_status_t status = PSA_SUCCESS;
     size_t in_len = PSA_MAX_IOVEC, out_len = PSA_MAX_IOVEC, i;
@@ -170,7 +170,7 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
     (void)tfm_crypto_set_scratch_owner(msg->client_id);
 
     /* Call the uniform signature API */
-    status = sfid_func_table[sfn_id](in_vec, in_len, out_vec, out_len);
+    status = sfid_func_table[srv_id](in_vec, in_len, out_vec, out_len);
 
     /* Write into the IPC framework outputs from the scratch */
     for (i = 0; i < out_len; i++) {
@@ -185,7 +185,7 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
 
 static psa_status_t tfm_crypto_parse_msg(psa_msg_t *msg,
                                          struct tfm_crypto_pack_iovec *iov,
-                                         uint32_t *sfn_id_p)
+                                         uint32_t *srv_id_p)
 {
     size_t read_size;
 
@@ -199,12 +199,12 @@ static psa_status_t tfm_crypto_parse_msg(psa_msg_t *msg,
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    if (iov->sfn_id >= TFM_CRYPTO_SID_MAX) {
-        *sfn_id_p = TFM_CRYPTO_SID_INVALID;
+    if (iov->srv_id >= TFM_CRYPTO_SID_MAX) {
+        *srv_id_p = TFM_CRYPTO_SID_INVALID;
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    *sfn_id_p = iov->sfn_id;
+    *srv_id_p = iov->srv_id;
 
     return PSA_SUCCESS;
 }
@@ -214,7 +214,7 @@ static void tfm_crypto_ipc_handler(void)
     psa_signal_t signals;
     psa_msg_t msg;
     psa_status_t status = PSA_SUCCESS;
-    uint32_t sfn_id = TFM_CRYPTO_SID_INVALID;
+    uint32_t srv_id = TFM_CRYPTO_SID_INVALID;
     struct tfm_crypto_pack_iovec iov = {0};
 
     while (1) {
@@ -229,10 +229,10 @@ static void tfm_crypto_ipc_handler(void)
             switch (msg.type) {
             case PSA_IPC_CALL:
                 /* Parse the message */
-                status = tfm_crypto_parse_msg(&msg, &iov, &sfn_id);
+                status = tfm_crypto_parse_msg(&msg, &iov, &srv_id);
                 /* Call the dispatcher based on the SID passed as type */
                 if (status == PSA_SUCCESS) {
-                    status = tfm_crypto_call_sfn(&msg, &iov, sfn_id);
+                    status = tfm_crypto_call_srv(&msg, &iov, srv_id);
                 }
                 psa_reply(msg.handle, status);
                 break;

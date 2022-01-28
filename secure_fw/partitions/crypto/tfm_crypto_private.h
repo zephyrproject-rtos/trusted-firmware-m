@@ -33,12 +33,12 @@ static inline bool tfm_crypto_private_check_length(
 }
 
 /*
- * Validate the IOVEC[] lengths for IPC model. The tfm_crypto_call_sfn()
+ * Validate the IOVEC[] lengths for IPC model. The tfm_crypto_call_srv()
  * reduces the entries in IOVEC[] which are empty from `in_len` and `out_len`.
  * This means that Crypto service APIs need to ensure that the `in_len`
  * and `out_len` are within the expected range.
  *
- * Also tfm_crypto_call_sfn() ensures that all entries in IOVEC[] are
+ * Also tfm_crypto_call_srv() ensures that all entries in IOVEC[] are
  * initialised. Hence all entries in IOVEC[] can be accessed to
  * initialize internal variables even if they are outside `in_len`
  * and `out_len`.

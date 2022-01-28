@@ -11,13 +11,13 @@
 #include "psa/crypto.h"
 #include "tfm_ns_interface.h"
 
-#define API_DISPATCH(sfn_name, sfn_id)                               \
-        tfm_ns_interface_dispatch((veneer_fn)sfn_name##_veneer,      \
+#define API_DISPATCH(srv_name, srv_id)                               \
+        tfm_ns_interface_dispatch((veneer_fn)srv_name##_veneer,      \
         (uint32_t)in_vec, IOVEC_LEN(in_vec),                         \
         (uint32_t)out_vec, IOVEC_LEN(out_vec))
 
-#define API_DISPATCH_NO_OUTVEC(sfn_name, sfn_id)                     \
-        tfm_ns_interface_dispatch((veneer_fn)sfn_name##_veneer,      \
+#define API_DISPATCH_NO_OUTVEC(srv_name, srv_id)                     \
+        tfm_ns_interface_dispatch((veneer_fn)srv_name##_veneer,      \
         (uint32_t)in_vec, IOVEC_LEN(in_vec),                         \
         (uint32_t)NULL, 0)
 
@@ -33,7 +33,7 @@ psa_status_t psa_open_key(psa_key_id_t id,
                           psa_key_id_t *key)
 {
     const struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_OPEN_KEY_SID,
+        .srv_id = TFM_CRYPTO_OPEN_KEY_SID,
     };
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
@@ -50,7 +50,7 @@ psa_status_t psa_open_key(psa_key_id_t id,
 psa_status_t psa_close_key(psa_key_id_t key)
 {
     const struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CLOSE_KEY_SID,
+        .srv_id = TFM_CRYPTO_CLOSE_KEY_SID,
         .key_id = key,
     };
     psa_invec in_vec[] = {
@@ -68,7 +68,7 @@ psa_status_t psa_import_key(const psa_key_attributes_t *attributes,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_IMPORT_KEY_SID,
+        .srv_id = TFM_CRYPTO_IMPORT_KEY_SID,
     };
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
@@ -89,7 +89,7 @@ psa_status_t psa_destroy_key(psa_key_id_t key)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_DESTROY_KEY_SID,
+        .srv_id = TFM_CRYPTO_DESTROY_KEY_SID,
         .key_id = key,
     };
     psa_invec in_vec[] = {
@@ -107,7 +107,7 @@ psa_status_t psa_get_key_attributes(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_GET_KEY_ATTRIBUTES_SID,
+        .srv_id = TFM_CRYPTO_GET_KEY_ATTRIBUTES_SID,
         .key_id = key,
     };
     psa_invec in_vec[] = {
@@ -125,7 +125,7 @@ psa_status_t psa_get_key_attributes(psa_key_id_t key,
 void psa_reset_key_attributes(psa_key_attributes_t *attributes)
 {
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_RESET_KEY_ATTRIBUTES_SID,
+        .srv_id = TFM_CRYPTO_RESET_KEY_ATTRIBUTES_SID,
     };
     psa_invec in_vec[] = {
         {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
@@ -146,7 +146,7 @@ psa_status_t psa_export_key(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_EXPORT_KEY_SID,
+        .srv_id = TFM_CRYPTO_EXPORT_KEY_SID,
         .key_id = key,
     };
     psa_invec in_vec[] = {
@@ -171,7 +171,7 @@ psa_status_t psa_export_public_key(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_EXPORT_PUBLIC_KEY_SID,
+        .srv_id = TFM_CRYPTO_EXPORT_PUBLIC_KEY_SID,
         .key_id = key,
     };
 
@@ -194,7 +194,7 @@ psa_status_t psa_purge_key(psa_key_id_t key)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_PURGE_KEY_SID,
+        .srv_id = TFM_CRYPTO_PURGE_KEY_SID,
         .key_id = key,
     };
     psa_invec in_vec[] = {
@@ -212,7 +212,7 @@ psa_status_t psa_copy_key(psa_key_id_t source_key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_COPY_KEY_SID,
+        .srv_id = TFM_CRYPTO_COPY_KEY_SID,
         .key_id = source_key,
     };
 
@@ -238,7 +238,7 @@ psa_status_t psa_cipher_generate_iv(psa_cipher_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CIPHER_GENERATE_IV_SID,
+        .srv_id = TFM_CRYPTO_CIPHER_GENERATE_IV_SID,
         .op_handle = operation->handle,
     };
 
@@ -264,7 +264,7 @@ psa_status_t psa_cipher_set_iv(psa_cipher_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CIPHER_SET_IV_SID,
+        .srv_id = TFM_CRYPTO_CIPHER_SET_IV_SID,
         .op_handle = operation->handle,
     };
 
@@ -288,7 +288,7 @@ psa_status_t psa_cipher_encrypt_setup(psa_cipher_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SID,
+        .srv_id = TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SID,
         .key_id = key,
         .alg = alg,
         .op_handle = operation->handle,
@@ -313,7 +313,7 @@ psa_status_t psa_cipher_decrypt_setup(psa_cipher_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SID,
+        .srv_id = TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SID,
         .key_id = key,
         .alg = alg,
         .op_handle = operation->handle,
@@ -341,7 +341,7 @@ psa_status_t psa_cipher_update(psa_cipher_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CIPHER_UPDATE_SID,
+        .srv_id = TFM_CRYPTO_CIPHER_UPDATE_SID,
         .op_handle = operation->handle,
     };
 
@@ -366,7 +366,7 @@ psa_status_t psa_cipher_abort(psa_cipher_operation_t *operation)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CIPHER_ABORT_SID,
+        .srv_id = TFM_CRYPTO_CIPHER_ABORT_SID,
         .op_handle = operation->handle,
     };
 
@@ -390,7 +390,7 @@ psa_status_t psa_cipher_finish(psa_cipher_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CIPHER_FINISH_SID,
+        .srv_id = TFM_CRYPTO_CIPHER_FINISH_SID,
         .op_handle = operation->handle,
     };
 
@@ -415,7 +415,7 @@ psa_status_t psa_hash_setup(psa_hash_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_HASH_SETUP_SID,
+        .srv_id = TFM_CRYPTO_HASH_SETUP_SID,
         .alg = alg,
         .op_handle = operation->handle,
     };
@@ -439,7 +439,7 @@ psa_status_t psa_hash_update(psa_hash_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_HASH_UPDATE_SID,
+        .srv_id = TFM_CRYPTO_HASH_UPDATE_SID,
         .op_handle = operation->handle,
     };
 
@@ -464,7 +464,7 @@ psa_status_t psa_hash_finish(psa_hash_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_HASH_FINISH_SID,
+        .srv_id = TFM_CRYPTO_HASH_FINISH_SID,
         .op_handle = operation->handle,
     };
 
@@ -490,7 +490,7 @@ psa_status_t psa_hash_verify(psa_hash_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_HASH_VERIFY_SID,
+        .srv_id = TFM_CRYPTO_HASH_VERIFY_SID,
         .op_handle = operation->handle,
     };
 
@@ -512,7 +512,7 @@ psa_status_t psa_hash_abort(psa_hash_operation_t *operation)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_HASH_ABORT_SID,
+        .srv_id = TFM_CRYPTO_HASH_ABORT_SID,
         .op_handle = operation->handle,
     };
 
@@ -534,7 +534,7 @@ psa_status_t psa_hash_clone(const psa_hash_operation_t *source_operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_HASH_CLONE_SID,
+        .srv_id = TFM_CRYPTO_HASH_CLONE_SID,
         .op_handle = source_operation->handle,
     };
 
@@ -564,7 +564,7 @@ psa_status_t psa_hash_compute(psa_algorithm_t alg,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_HASH_COMPUTE_SID,
+        .srv_id = TFM_CRYPTO_HASH_COMPUTE_SID,
         .alg = alg,
     };
 
@@ -593,7 +593,7 @@ psa_status_t psa_hash_compare(psa_algorithm_t alg,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_HASH_COMPARE_SID,
+        .srv_id = TFM_CRYPTO_HASH_COMPARE_SID,
         .alg = alg,
     };
 
@@ -615,7 +615,7 @@ psa_status_t psa_mac_sign_setup(psa_mac_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_MAC_SIGN_SETUP_SID,
+        .srv_id = TFM_CRYPTO_MAC_SIGN_SETUP_SID,
         .key_id = key,
         .alg = alg,
         .op_handle = operation->handle,
@@ -640,7 +640,7 @@ psa_status_t psa_mac_verify_setup(psa_mac_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_MAC_VERIFY_SETUP_SID,
+        .srv_id = TFM_CRYPTO_MAC_VERIFY_SETUP_SID,
         .key_id = key,
         .alg = alg,
         .op_handle = operation->handle,
@@ -665,7 +665,7 @@ psa_status_t psa_mac_update(psa_mac_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_MAC_UPDATE_SID,
+        .srv_id = TFM_CRYPTO_MAC_UPDATE_SID,
         .op_handle = operation->handle,
     };
 
@@ -690,7 +690,7 @@ psa_status_t psa_mac_sign_finish(psa_mac_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_MAC_SIGN_FINISH_SID,
+        .srv_id = TFM_CRYPTO_MAC_SIGN_FINISH_SID,
         .op_handle = operation->handle,
     };
 
@@ -716,7 +716,7 @@ psa_status_t psa_mac_verify_finish(psa_mac_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_MAC_VERIFY_FINISH_SID,
+        .srv_id = TFM_CRYPTO_MAC_VERIFY_FINISH_SID,
         .op_handle = operation->handle,
     };
 
@@ -738,7 +738,7 @@ psa_status_t psa_mac_abort(psa_mac_operation_t *operation)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_MAC_ABORT_SID,
+        .srv_id = TFM_CRYPTO_MAC_ABORT_SID,
         .op_handle = operation->handle,
     };
 
@@ -769,7 +769,7 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_ENCRYPT_SID,
+        .srv_id = TFM_CRYPTO_AEAD_ENCRYPT_SID,
         .key_id = key,
         .alg = alg,
         .aead_in = {.nonce = {0}, .nonce_length = 0}
@@ -825,7 +825,7 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_DECRYPT_SID,
+        .srv_id = TFM_CRYPTO_AEAD_DECRYPT_SID,
         .key_id = key,
         .alg = alg,
         .aead_in = {.nonce = {0}, .nonce_length = 0}
@@ -873,7 +873,7 @@ psa_status_t psa_aead_encrypt_setup(psa_aead_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_ENCRYPT_SETUP_SID,
+        .srv_id = TFM_CRYPTO_AEAD_ENCRYPT_SETUP_SID,
         .key_id = key,
         .alg = alg,
         .op_handle = operation->handle,
@@ -897,7 +897,7 @@ psa_status_t psa_aead_decrypt_setup(psa_aead_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_DECRYPT_SETUP_SID,
+        .srv_id = TFM_CRYPTO_AEAD_DECRYPT_SETUP_SID,
         .key_id = key,
         .alg = alg,
         .op_handle = operation->handle,
@@ -922,7 +922,7 @@ psa_status_t psa_aead_generate_nonce(psa_aead_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_GENERATE_NONCE_SID,
+        .srv_id = TFM_CRYPTO_AEAD_GENERATE_NONCE_SID,
         .op_handle = operation->handle,
     };
 
@@ -947,7 +947,7 @@ psa_status_t psa_aead_set_nonce(psa_aead_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_SET_NONCE_SID,
+        .srv_id = TFM_CRYPTO_AEAD_SET_NONCE_SID,
         .op_handle = operation->handle,
     };
 
@@ -970,7 +970,7 @@ psa_status_t psa_aead_set_lengths(psa_aead_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_SET_LENGTHS_SID,
+        .srv_id = TFM_CRYPTO_AEAD_SET_LENGTHS_SID,
         .ad_length = ad_length,
         .plaintext_length = plaintext_length,
         .op_handle = operation->handle,
@@ -994,7 +994,7 @@ psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_UPDATE_AD_SID,
+        .srv_id = TFM_CRYPTO_AEAD_UPDATE_AD_SID,
         .op_handle = operation->handle,
     };
 
@@ -1020,7 +1020,7 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_UPDATE_SID,
+        .srv_id = TFM_CRYPTO_AEAD_UPDATE_SID,
         .op_handle = operation->handle,
     };
 
@@ -1050,7 +1050,7 @@ psa_status_t psa_aead_finish(psa_aead_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_FINISH_SID,
+        .srv_id = TFM_CRYPTO_AEAD_FINISH_SID,
         .op_handle = operation->handle,
     };
 
@@ -1080,7 +1080,7 @@ psa_status_t psa_aead_verify(psa_aead_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_VERIFY_SID,
+        .srv_id = TFM_CRYPTO_AEAD_VERIFY_SID,
         .op_handle = operation->handle,
     };
 
@@ -1104,7 +1104,7 @@ psa_status_t psa_aead_abort(psa_aead_operation_t *operation)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_AEAD_ABORT_SID,
+        .srv_id = TFM_CRYPTO_AEAD_ABORT_SID,
         .op_handle = operation->handle,
     };
 
@@ -1130,7 +1130,7 @@ psa_status_t psa_sign_message(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_SIGN_MESSAGE_SID,
+        .srv_id = TFM_CRYPTO_SIGN_MESSAGE_SID,
         .key_id = key,
         .alg = alg,
     };
@@ -1159,7 +1159,7 @@ psa_status_t psa_verify_message(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_VERIFY_MESSAGE_SID,
+        .srv_id = TFM_CRYPTO_VERIFY_MESSAGE_SID,
         .key_id = key,
         .alg = alg
     };
@@ -1186,7 +1186,7 @@ psa_status_t psa_sign_hash(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_SIGN_HASH_SID,
+        .srv_id = TFM_CRYPTO_SIGN_HASH_SID,
         .key_id = key,
         .alg = alg,
     };
@@ -1216,7 +1216,7 @@ psa_status_t psa_verify_hash(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_VERIFY_HASH_SID,
+        .srv_id = TFM_CRYPTO_VERIFY_HASH_SID,
         .key_id = key,
         .alg = alg
     };
@@ -1245,7 +1245,7 @@ psa_status_t psa_asymmetric_encrypt(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_ASYMMETRIC_ENCRYPT_SID,
+        .srv_id = TFM_CRYPTO_ASYMMETRIC_ENCRYPT_SID,
         .key_id = key,
         .alg = alg
     };
@@ -1285,7 +1285,7 @@ psa_status_t psa_asymmetric_decrypt(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_ASYMMETRIC_DECRYPT_SID,
+        .srv_id = TFM_CRYPTO_ASYMMETRIC_DECRYPT_SID,
         .key_id = key,
         .alg = alg
     };
@@ -1319,7 +1319,7 @@ psa_status_t psa_key_derivation_get_capacity(
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_GET_CAPACITY_SID,
+        .srv_id = TFM_CRYPTO_KEY_DERIVATION_GET_CAPACITY_SID,
         .op_handle = operation->handle,
     };
 
@@ -1344,7 +1344,7 @@ psa_status_t psa_key_derivation_output_bytes(
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_OUTPUT_BYTES_SID,
+        .srv_id = TFM_CRYPTO_KEY_DERIVATION_OUTPUT_BYTES_SID,
         .op_handle = operation->handle,
     };
 
@@ -1369,7 +1369,7 @@ psa_status_t psa_key_derivation_input_key(
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_INPUT_KEY_SID,
+        .srv_id = TFM_CRYPTO_KEY_DERIVATION_INPUT_KEY_SID,
         .key_id = key,
         .step = step,
         .op_handle = operation->handle,
@@ -1389,7 +1389,7 @@ psa_status_t psa_key_derivation_abort(psa_key_derivation_operation_t *operation)
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_ABORT_SID,
+        .srv_id = TFM_CRYPTO_KEY_DERIVATION_ABORT_SID,
         .op_handle = operation->handle,
     };
 
@@ -1416,7 +1416,7 @@ psa_status_t psa_key_derivation_key_agreement(
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_KEY_AGREEMENT_SID,
+        .srv_id = TFM_CRYPTO_KEY_DERIVATION_KEY_AGREEMENT_SID,
         .key_id = private_key,
         .step = step,
         .op_handle = operation->handle,
@@ -1438,7 +1438,7 @@ psa_status_t psa_generate_random(uint8_t *output,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_GENERATE_RANDOM_SID,
+        .srv_id = TFM_CRYPTO_GENERATE_RANDOM_SID,
     };
 
     psa_invec in_vec[] = {
@@ -1464,7 +1464,7 @@ psa_status_t psa_generate_key(const psa_key_attributes_t *attributes,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_GENERATE_KEY_SID,
+        .srv_id = TFM_CRYPTO_GENERATE_KEY_SID,
     };
 
     psa_invec in_vec[] = {
@@ -1492,7 +1492,7 @@ psa_status_t psa_mac_compute(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_MAC_COMPUTE_SID,
+        .srv_id = TFM_CRYPTO_MAC_COMPUTE_SID,
         .key_id = key,
         .alg = alg,
     };
@@ -1521,7 +1521,7 @@ psa_status_t psa_mac_verify(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_MAC_VERIFY_SID,
+        .srv_id = TFM_CRYPTO_MAC_VERIFY_SID,
         .key_id = key,
         .alg = alg,
     };
@@ -1548,7 +1548,7 @@ psa_status_t psa_cipher_encrypt(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CIPHER_ENCRYPT_SID,
+        .srv_id = TFM_CRYPTO_CIPHER_ENCRYPT_SID,
         .key_id = key,
         .alg = alg,
     };
@@ -1578,7 +1578,7 @@ psa_status_t psa_cipher_decrypt(psa_key_id_t key,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_CIPHER_DECRYPT_SID,
+        .srv_id = TFM_CRYPTO_CIPHER_DECRYPT_SID,
         .key_id = key,
         .alg = alg,
     };
@@ -1608,7 +1608,7 @@ psa_status_t psa_raw_key_agreement(psa_algorithm_t alg,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_RAW_KEY_AGREEMENT_SID,
+        .srv_id = TFM_CRYPTO_RAW_KEY_AGREEMENT_SID,
         .alg = alg,
         .key_id = private_key
     };
@@ -1635,7 +1635,7 @@ psa_status_t psa_key_derivation_setup(psa_key_derivation_operation_t *operation,
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_SETUP_SID,
+        .srv_id = TFM_CRYPTO_KEY_DERIVATION_SETUP_SID,
         .alg = alg,
         .op_handle = operation->handle,
     };
@@ -1658,7 +1658,7 @@ psa_status_t psa_key_derivation_set_capacity(
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_SET_CAPACITY_SID,
+        .srv_id = TFM_CRYPTO_KEY_DERIVATION_SET_CAPACITY_SID,
         .capacity = capacity,
         .op_handle = operation->handle,
     };
@@ -1680,7 +1680,7 @@ psa_status_t psa_key_derivation_input_bytes(
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_INPUT_BYTES_SID,
+        .srv_id = TFM_CRYPTO_KEY_DERIVATION_INPUT_BYTES_SID,
         .step = step,
         .op_handle = operation->handle,
     };
@@ -1702,7 +1702,7 @@ psa_status_t psa_key_derivation_output_key(
 {
     psa_status_t status;
     struct tfm_crypto_pack_iovec iov = {
-        .sfn_id = TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID,
+        .srv_id = TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID,
         .op_handle = operation->handle,
     };
 
