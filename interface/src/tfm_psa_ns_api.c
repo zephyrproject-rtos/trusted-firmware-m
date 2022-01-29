@@ -1,9 +1,11 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
+
+#include "config_impl.h"
 
 #include "psa/client.h"
 #include "tfm_ns_interface.h"
@@ -32,16 +34,6 @@ uint32_t psa_version(uint32_t sid)
                                 0);
 }
 
-psa_handle_t psa_connect(uint32_t sid, uint32_t version)
-{
-    return tfm_ns_interface_dispatch(
-                                (veneer_fn)tfm_psa_connect_veneer,
-                                sid,
-                                version,
-                                0,
-                                0);
-}
-
 psa_status_t psa_call(psa_handle_t handle, int32_t type,
                       const psa_invec *in_vec,
                       size_t in_len,
@@ -63,6 +55,18 @@ psa_status_t psa_call(psa_handle_t handle, int32_t type,
                                 (uint32_t)out_vec);
 }
 
+/* Following veneers are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+psa_handle_t psa_connect(uint32_t sid, uint32_t version)
+{
+    return tfm_ns_interface_dispatch(
+                                (veneer_fn)tfm_psa_connect_veneer,
+                                sid,
+                                version,
+                                0,
+                                0);
+}
+
 void psa_close(psa_handle_t handle)
 {
     (void)tfm_ns_interface_dispatch(
@@ -72,3 +76,4 @@ void psa_close(psa_handle_t handle)
                          0,
                          0);
 }
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
