@@ -23,9 +23,10 @@
 
 /*
  * Partition load data - flags
- * bit 7-0: priority
- * bit 8: 1 - PSA_ROT, 0 - APP_ROT
- * bit 9: 1 - IPC model, 0 - SFN model
+ * bit [7-0]: priority
+ * bit   [8]: '1' for PSA RoT domain; '0' for APP RoT domain.
+ * bit   [9]: '1' for IPC model partition; '0' for SFN model partition.
+ * bit  [10]: '1' indicates partition accesses NSPE; '0' for common partition.
  */
 #define PARTITION_PRI_HIGHEST                   (0x0)
 #define PARTITION_PRI_HIGH                      (0xF)
@@ -34,8 +35,10 @@
 #define PARTITION_PRI_LOWEST                    (0xFF)
 #define PARTITION_PRI_MASK                      (0xFF)
 
-#define PARTITION_MODEL_PSA_ROT                 (1U << 8)
+#define PARTITION_DOMAIN_PSA_ROT                (1U << 8)
 #define PARTITION_MODEL_IPC                     (1U << 9)
+
+#define PARTITION_NON_SECURE_AGENT              (1U << 10)
 
 #define PARTITION_PRIORITY(flag)                ((flag) & PARTITION_PRI_MASK)
 #define TO_THREAD_PRIORITY(x)                   (x)
@@ -47,9 +50,9 @@
 #define REFERENCE_TO_PTR(x, t)                  (t)(x)
 
 #define IS_PARTITION_PSA_ROT(pldi)              (!!((pldi)->flags \
-                                                     & PARTITION_MODEL_PSA_ROT))
+                                                   & PARTITION_DOMAIN_PSA_ROT))
 #define IS_PARTITION_IPC_MODEL(pldi)            (!!((pldi)->flags \
-                                                         & PARTITION_MODEL_IPC))
+                                                   & PARTITION_MODEL_IPC))
 
 /*
  * Common partition structure type, the extendable data is right after it.

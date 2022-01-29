@@ -109,7 +109,7 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
                LOAD_ALLOCED_STACK_ADDR(p_pldi) + p_pldi->stack_size);
 
         /* SPM reuses the ns agent stack, use once only at initialization. */
-        if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
+        if (p_pldi->flags & PARTITION_NON_SECURE_AGENT) {
             spm_stack_limit = p_pt->ctx_ctrl.sp_limit;
             spm_stack_base = p_pt->ctx_ctrl.sp;
         }
