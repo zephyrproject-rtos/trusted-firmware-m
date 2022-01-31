@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2016-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -260,5 +260,53 @@ void uart_cmsdk_clear_interrupt(struct uart_cmsdk_dev_t* dev,
             break;
         /* default: not defined to force all cases to be handled */
         }
+    }
+}
+
+enum uart_cmsdk_error_t uart_cmsdk_tx_enable(struct uart_cmsdk_dev_t* dev)
+{
+    struct _uart_cmsdk_reg_map_t* p_uart =
+                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+
+    if (!(dev->data->state & UART_CMSDK_INITIALIZED)) {
+        return UART_CMSDK_ERR_NOT_INIT;
+    }
+
+    p_uart->ctrl |= UART_CMSDK_TX_EN;
+
+    return UART_CMSDK_ERR_NONE;
+}
+
+void uart_cmsdk_tx_disable(struct uart_cmsdk_dev_t* dev)
+{
+    struct _uart_cmsdk_reg_map_t* p_uart =
+                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+
+    if (dev->data->state & UART_CMSDK_INITIALIZED ) {
+        p_uart->ctrl &= ~UART_CMSDK_TX_EN;
+    }
+}
+
+enum uart_cmsdk_error_t uart_cmsdk_rx_enable(struct uart_cmsdk_dev_t* dev)
+{
+    struct _uart_cmsdk_reg_map_t* p_uart =
+                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+
+    if (!(dev->data->state & UART_CMSDK_INITIALIZED)) {
+        return UART_CMSDK_ERR_NOT_INIT;
+    }
+
+    p_uart->ctrl |= UART_CMSDK_RX_EN;
+
+    return UART_CMSDK_ERR_NONE;
+}
+
+void uart_cmsdk_rx_disable(struct uart_cmsdk_dev_t* dev)
+{
+    struct _uart_cmsdk_reg_map_t* p_uart =
+                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+
+    if (dev->data->state & UART_CMSDK_INITIALIZED ) {
+        p_uart->ctrl &= ~UART_CMSDK_RX_EN;
     }
 }
