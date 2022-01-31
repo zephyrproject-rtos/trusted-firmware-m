@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -110,7 +110,8 @@ psa_status_t cc3xx_ccm_update(
 psa_status_t cc3xx_ccm_finish(
         AesCcmContext_t *ctx,
         uint8_t *macBuf,
-        size_t sizeOfT);
+        size_t sizeOfT,
+        size_t *tag_len);
 
 #ifdef __cplusplus
 }

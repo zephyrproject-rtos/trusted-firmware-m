@@ -188,14 +188,14 @@ static psa_status_t gcm_init(AesGcmContext_t *context,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    /* Check the Tag size validity */
-    if ((CC3XX_GCM_TAG_SIZE_4_BYTES != tagSize) &&
-        (CC3XX_GCM_TAG_SIZE_8_BYTES != tagSize) &&
-        (CC3XX_GCM_TAG_SIZE_12_BYTES != tagSize) &&
-        (CC3XX_GCM_TAG_SIZE_13_BYTES != tagSize) &&
-        (CC3XX_GCM_TAG_SIZE_14_BYTES != tagSize) &&
-        (CC3XX_GCM_TAG_SIZE_15_BYTES != tagSize) &&
-        (CC3XX_GCM_TAG_SIZE_16_BYTES != tagSize)) {
+    /* Check the tag size validity */
+    if ((tagSize != CC3XX_GCM_TAG_SIZE_4_BYTES) &&
+        (tagSize != CC3XX_GCM_TAG_SIZE_8_BYTES) &&
+        (tagSize != CC3XX_GCM_TAG_SIZE_12_BYTES) &&
+        (tagSize != CC3XX_GCM_TAG_SIZE_13_BYTES) &&
+        (tagSize != CC3XX_GCM_TAG_SIZE_14_BYTES) &&
+        (tagSize != CC3XX_GCM_TAG_SIZE_15_BYTES) &&
+        (tagSize != CC3XX_GCM_TAG_SIZE_16_BYTES)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -402,12 +402,21 @@ static psa_status_t gcm_process_lenA_lenC(AesGcmContext_t *context)
     }
 }
 
-static psa_status_t gcm_finish(AesGcmContext_t *context, uint8_t *pTag)
+static psa_status_t gcm_finish(AesGcmContext_t *context,
+                               uint8_t *pTag,
+                               size_t tag_size)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     int rc;
     CCBuffInfo_t inBuffInfo;
     CCBuffInfo_t outBuffInfo;
+
+    /* The context has tag size already set, we must check that the buffer
+     * size we have passed is big enough
+     */
+    if (tag_size < context->tagSize) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
 
     /* Set process mode to 'Process_GctrFinal' */
     context->processMode = DRV_AESGCM_Process_GctrFinal;
@@ -456,7 +465,6 @@ static psa_status_t gcm_crypt_and_tag(
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
     keySizeId_t temp_keySizeId;
 
-    /* TODO: Do we want this on the stack? */
     AesGcmContext_t context;
     cc3xx_gcm_init(&context);
 
@@ -500,7 +508,7 @@ static psa_status_t gcm_crypt_and_tag(
         goto cleanup;
     }
 
-    status = gcm_finish(&context, tag);
+    status = gcm_finish(&context, tag, tag_length);
     if (status != PSA_SUCCESS) {
         goto cleanup;
     }
@@ -560,6 +568,10 @@ psa_status_t cc3xx_gcm_encrypt(
 
     size_t tag_length = PSA_AEAD_TAG_LENGTH(key_type, key_bits, key_alg);
 
+    if (ciphertext_size < plaintext_length + tag_length) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+
     /*
      * The ciphertext will be of the same length as the plaintext input,
      * and the tag will be placed after that.
@@ -596,6 +608,10 @@ psa_status_t cc3xx_gcm_decrypt(
 
     size_t ciphertext_length_without_tag = ciphertext_length - tag_length;
     const uint8_t *tag = ciphertext + ciphertext_length_without_tag;
+
+    if (plaintext_size < ciphertext_length_without_tag) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
 
     CC_PalMemCopy(local_tag_buffer, tag, tag_length);
 
@@ -655,7 +671,8 @@ psa_status_t cc3xx_gcm_setkey_dec(
 psa_status_t cc3xx_gcm_set_nonce(
     AesGcmContext_t *ctx,
     const uint8_t *nonce,
-    size_t nonce_size)
+    size_t nonce_size,
+    size_t tag_size)
 {
 #ifndef CC3XX_CONFIG_SUPPORT_GCM
     return PSA_ERROR_NOT_SUPPORTED;
@@ -680,6 +697,18 @@ psa_status_t cc3xx_gcm_set_nonce(
         CC_PAL_LOG_ERR("gcm_process_j0 failed: %d", ret);
         return ret;
     }
+
+    /* Check the tag size validity */
+    if ((tag_size != CC3XX_GCM_TAG_SIZE_4_BYTES) &&
+        (tag_size != CC3XX_GCM_TAG_SIZE_8_BYTES) &&
+        (tag_size != CC3XX_GCM_TAG_SIZE_12_BYTES) &&
+        (tag_size != CC3XX_GCM_TAG_SIZE_13_BYTES) &&
+        (tag_size != CC3XX_GCM_TAG_SIZE_14_BYTES) &&
+        (tag_size != CC3XX_GCM_TAG_SIZE_15_BYTES) &&
+        (tag_size != CC3XX_GCM_TAG_SIZE_16_BYTES)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    ctx->tagSize = tag_size;
 
     return PSA_SUCCESS;
 #endif /* CC3XX_CONFIG_SUPPORT_GCM */
@@ -772,25 +801,28 @@ psa_status_t cc3xx_gcm_update(
 psa_status_t cc3xx_gcm_finish(
     AesGcmContext_t *ctx,
     uint8_t *tag,
-    size_t tag_size)
+    size_t tag_size,
+    size_t *tag_len)
 {
 #ifndef CC3XX_CONFIG_SUPPORT_GCM
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
+    *tag_len = 0;
+
     if (NULL == ctx || NULL == tag) {
         CC_PAL_LOG_ERR("Null pointer exception\n");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    ctx->tagSize = tag_size;
-
-    ret = gcm_finish(ctx, tag);
+    ret = gcm_finish(ctx, tag, tag_size);
     if (ret != PSA_SUCCESS) {
         CC_PAL_LOG_ERR("gcm_finish failed: %d", ret);
         return ret;
     }
+
+    *tag_len = ctx->tagSize;
 
     return PSA_SUCCESS;
 #endif /* CC3XX_CONFIG_SUPPORT_GCM */

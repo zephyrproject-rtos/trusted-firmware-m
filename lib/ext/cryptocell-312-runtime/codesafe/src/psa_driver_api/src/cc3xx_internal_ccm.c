@@ -747,7 +747,7 @@ psa_status_t cc3xx_ccm_set_lengths(
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    ctx->aadSize  = aadSize;
+    ctx->aadSize = aadSize;
     ctx->dataSize = dataSize;
 
     return PSA_SUCCESS;
@@ -895,9 +895,12 @@ psa_status_t cc3xx_ccm_update(
 psa_status_t cc3xx_ccm_finish(
         AesCcmContext_t *ctx,
         uint8_t *macBuf,
-        size_t sizeOfT)
+        size_t sizeOfT,
+        size_t *tag_len)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+
+    *tag_len = 0;
 
     if (NULL == ctx) {
         CC_PAL_LOG_ERR("ctx cannot be NULL\n");
@@ -909,6 +912,8 @@ psa_status_t cc3xx_ccm_finish(
         CC_PAL_LOG_ERR("ccm_finish failed: %d", ret);
         return ret;
     }
+
+    *tag_len = sizeOfT;
 
     return PSA_SUCCESS;
 }

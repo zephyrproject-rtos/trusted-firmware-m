@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -67,12 +67,13 @@ psa_status_t cc3xx_gcm_setkey_dec(
     const uint8_t *key,
     size_t key_bits);
 /**
- * \brief   Set the nonce
+ * \brief   Set the nonce and update the tag size of the context
  */
 psa_status_t cc3xx_gcm_set_nonce(
     AesGcmContext_t *ctx,
     const uint8_t *nonce,
-    size_t nonce_size);
+    size_t nonce_size,
+    size_t tag_size);
 /**
  * \brief   Set the message and additional data lengths
  */
@@ -101,7 +102,8 @@ psa_status_t cc3xx_gcm_update(
 psa_status_t cc3xx_gcm_finish(
     AesGcmContext_t *ctx,
     uint8_t *tag,
-    size_t tag_size);
+    size_t tag_size,
+    size_t *tag_len);
 
 #ifdef __cplusplus
 }
