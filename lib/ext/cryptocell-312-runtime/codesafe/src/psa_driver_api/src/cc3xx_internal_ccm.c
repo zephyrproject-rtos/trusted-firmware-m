@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -797,6 +797,7 @@ psa_status_t cc3xx_ccm_set_nonce(
 
     ctx->mode = CIPHER_CBC_MAC;
     ctx->sizeOfT = sizeOfT;
+    ctx->sizeOfN = sizeOfN;
 
     tempBuff = ctx->tempBuff;
 
