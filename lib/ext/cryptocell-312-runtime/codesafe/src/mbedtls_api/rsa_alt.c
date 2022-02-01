@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2021, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2022, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -2303,7 +2303,7 @@ int mbedtls_rsa_rsassa_pss_sign( mbedtls_rsa_context *ctx,
     }
     if ( MBEDTLS_MD_NONE == md_alg )
     {
-        mbedtls_printf( "\nERROR: MBEDTLS_MD_NONE is not supported! \n" );
+        mbedtls_printf( "ERROR: MBEDTLS_MD_NONE is not supported!\r\n" );
         GOTO_END(CC_RSA_HASH_ILLEGAL_OPERATION_MODE_ERROR); /* MD_NONE is not supported in cryptocell */
     }
         /* The hash_id in the RSA context is the one used for the
@@ -2410,7 +2410,7 @@ int mbedtls_rsa_rsassa_pkcs1_v15_sign( mbedtls_rsa_context *ctx,
     }
     if ( MBEDTLS_MD_NONE == md_alg )
     {
-        printf("\nDVIR: ERROR: MBEDTLS_MD_NONE is not supported! \n");
+        mbedtls_printf("DVIR: ERROR: MBEDTLS_MD_NONE is not supported!\r\n");
         GOTO_END(CC_RSA_HASH_ILLEGAL_OPERATION_MODE_ERROR); /* MD_NONE is not supported in cryptocell */
     }
     Error = convert_mbedtls_md_type_to_cc_rsa_hash_opmode(md_alg,
@@ -2628,6 +2628,7 @@ int mbedtls_rsa_rsassa_pkcs1_v15_verify( mbedtls_rsa_context *ctx,
 
     if ( MBEDTLS_MD_NONE == md_alg )
     {
+        mbedtls_printf("DVIR: ERROR: MBEDTLS_MD_NONE is not supported!\r\n");
         GOTO_END(CC_RSA_HASH_ILLEGAL_OPERATION_MODE_ERROR); /* MD_NONE is not supported in cryptocell */
     }
     Error = convert_mbedtls_md_type_to_cc_rsa_hash_opmode(md_alg,

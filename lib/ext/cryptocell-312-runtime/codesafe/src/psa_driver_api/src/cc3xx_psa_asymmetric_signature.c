@@ -261,7 +261,6 @@ static psa_status_t cc3xx_internal_rsa_verify(
     size_t hash_bytes = PSA_HASH_LENGTH(PSA_ALG_SIGN_GET_HASH(alg));
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t cc_err = CC_FAIL;
-
     CCRsaPubUserContext_t *pPubUserContext;
     CCRsaUserPubKey_t *pUserPubKey;
     CCRsaHashOpMode_t hash_mode = CC_RSA_HASH_OpModeLast;
@@ -329,7 +328,6 @@ static psa_status_t cc3xx_internal_rsa_sign(
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t cc_err = CC_FATAL_ERROR;
-
     CCRndContext_t rnd_ctx;
     CCRsaPrivUserContext_t *user_context_ptr;
     CCRsaUserPrivKey_t *user_priv_key_ptr;
@@ -427,7 +425,6 @@ psa_status_t cc3xx_sign_hash(const psa_key_attributes_t *attributes,
                              size_t input_length, uint8_t *signature,
                              size_t signature_size, size_t *signature_length)
 {
-
     if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_sign(
             attributes, key, key_length, alg, input, input_length, signature,
