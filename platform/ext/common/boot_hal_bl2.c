@@ -227,3 +227,13 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
 
     boot_jump_to_next_image(vt_cpy->reset);
 }
+
+__WEAK int boot_platform_pre_load(uint32_t image_id)
+{
+    return 0;
+}
+
+__WEAK int boot_platform_post_load(uint32_t image_id)
+{
+    return 0;
+}

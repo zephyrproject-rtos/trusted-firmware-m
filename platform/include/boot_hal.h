@@ -74,6 +74,26 @@ int32_t boot_platform_post_init(void);
  */
 void boot_platform_quit(struct boot_arm_vector_table *vt) __NO_RETURN;
 
+/**
+ * \brief Platform operation to perform steps required before image load.
+ *        Can be overridden for platform specific initialization.
+ *
+ * \param[in] image_id  The ID of the image that is about to be loaded.
+ *
+ * \return Returns 0 on success, non-zero otherwise
+ */
+int boot_platform_pre_load(uint32_t image_id);
+
+/**
+ * \brief Platform operation to perform steps required after image load.
+ *        Can be overridden for platform specific initialization.
+ *
+ * \param[in] image_id  The ID of the image that has just been loaded.
+ *
+ * \return Returns 0 on success, non-zero otherwise
+ */
+int boot_platform_post_load(uint32_t image_id);
+
 #ifdef __cplusplus
 }
 #endif

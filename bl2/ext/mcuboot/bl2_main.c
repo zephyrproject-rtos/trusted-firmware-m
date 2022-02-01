@@ -91,6 +91,7 @@ int main(void)
     struct boot_rsp rsp;
     fih_int fih_rc = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
+    int32_t image_id;
 
     /* Initialise the mbedtls static memory allocator so that mbedtls allocates
      * memory from the provided static buffer instead of from the heap.
@@ -141,10 +142,25 @@ int main(void)
     (void)run_mcuboot_testsuite();
 #endif /* TEST_BL2 */
 
-    FIH_CALL(boot_go, fih_rc, &rsp);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        BOOT_LOG_ERR("Unable to find bootable image");
-        FIH_PANIC;
+    /* Images are loaded in reverse order so that the last image loaded is the
+     * TF-M image, which means the response is filled correctly.
+     */
+    for (image_id = MCUBOOT_IMAGE_NUMBER - 1; image_id >= 0; image_id--) {
+        if (boot_platform_pre_load(image_id)) {
+            BOOT_LOG_ERR("Pre-load step for image %d failed", image_id);
+            FIH_PANIC;
+        }
+
+        FIH_CALL(boot_go_for_image_id, fih_rc, &rsp, image_id);
+        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            BOOT_LOG_ERR("Unable to find bootable image");
+            FIH_PANIC;
+        }
+
+        if (boot_platform_post_load(image_id)) {
+            BOOT_LOG_ERR("Post-load step for image %d failed", image_id);
+            FIH_PANIC;
+        }
     }
 
     BOOT_LOG_INF("Bootloader chainload address offset: 0x%x",
