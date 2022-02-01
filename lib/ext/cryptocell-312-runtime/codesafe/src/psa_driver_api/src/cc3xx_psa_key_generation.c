@@ -68,7 +68,8 @@
 /* Based on ecp_wrst_gen_keypair_base */
 static psa_status_t
 cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
-                                    uint8_t *key_buffer, size_t key_buffer_size)
+                                    uint8_t *key_buffer, size_t key_buffer_size,
+                                    size_t *key_buffer_length)
 {
     psa_key_type_t key_type = psa_get_key_type(attributes);
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
@@ -85,6 +86,12 @@ cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
     uint32_t pTempBuffsize =
         sizeof(CCEcpkiKgTempData_t) + sizeof(CCRndContext_t) +
         sizeof(CCEcpkiUserPrivKey_t) + sizeof(CCEcpkiUserPublKey_t);
+
+    *key_buffer_length = 0;
+
+    if (key_buffer_size < PSA_BITS_TO_BYTES(key_bits)) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
 
     err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
     if (err != PSA_SUCCESS) {
@@ -123,12 +130,12 @@ cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
         CC_PAL_LOG_ERR("Error - Key generation ended with result: %d\n", rc);
         err = cc3xx_ecc_cc_error_to_psa_error(rc);
         goto end;
+    } else {
+        CC_CommonReverseMemcpy(key_buffer, (uint8_t *)pPrivKey->PrivKey,
+                               PSA_BITS_TO_BYTES(key_bits));
+        err = PSA_SUCCESS;
+        *key_buffer_length = PSA_BITS_TO_BYTES(key_bits);
     }
-
-    CC_CommonReverseMemcpy(key_buffer, (uint8_t *)pPrivKey->PrivKey,
-                           PSA_BITS_TO_BYTES(key_bits));
-
-    err = PSA_SUCCESS;
 
 end:
     CC_PalMemSetZero(pTempBuff, pTempBuffsize);
@@ -138,7 +145,8 @@ end:
 
 static psa_status_t
 cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
-                               uint8_t *key_buffer, size_t key_buffer_size)
+                               uint8_t *key_buffer, size_t key_buffer_size,
+                               size_t *key_buffer_length)
 {
 #ifndef MBEDTLS_RSA_C
     return PSA_ERROR_NOT_SUPPORTED;
@@ -153,6 +161,9 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
     CCRsaKgData_t *pKeyGenData = NULL;
     uint32_t *d_buff = NULL;
 
+    /* Initialise the return value to 0 */
+    *key_buffer_length = 0;
+
     /* PSA apis states that the public exponent is 65537 */
     uint32_t pubExp = CC_RSA_KG_PUB_EXP_ALLOW_VAL_3;
 
@@ -162,7 +173,7 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
     if ((key_bits < CC3XX_RSA_MIN_VALID_KEYGEN_SIZE_VALUE_IN_BITS) ||
         (key_bits > CC3XX_RSA_MAX_VALID_KEYGEN_SIZE_VALUE_IN_BITS) ||
         (key_bits % CC_RSA_VALID_KEY_SIZE_MULTIPLE_VALUE_IN_BITS)) {
-        return PSA_ERROR_DATA_INVALID;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     pCcPubKey = (CCRsaPubKey_t *)mbedtls_calloc(1, sizeof(CCRsaPubKey_t));
@@ -225,9 +236,8 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
         }
 
         /* calculate modulus n and private nonCRT exponent d */
-        cc_err =
-            RsaCalculateNandD(pCcPubKey, pCcPrivKey, pKeyGenData, key_bits / 2);
-
+        cc_err = RsaCalculateNandD(pCcPubKey, pCcPrivKey, pKeyGenData,
+                                   key_bits/2);
         if (cc_err != CC_OK) {
             goto end;
         }
@@ -238,7 +248,6 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
     /* calculate Barr. tag for modulus N */
     cc_err = PkiCalcNp(((RsaPubKeyDb_t *)(pCcPubKey->ccRSAIntBuff))->NP, /*out*/
                        pCcPubKey->n, key_bits);                          /*in*/
-
     if (cc_err != CC_OK) {
         goto end;
     }
@@ -248,16 +257,17 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
      */
     CC_PalMemCopy(d_buff, pCcPrivKey->PriveKeyDb.NonCrt.d, keySizeBytes);
 
-    /* calculate Barrett tags for P,Q and set into context */
+    /* calculate Barrett tags for P first and set them into context */
     cc_err = PkiCalcNp(
         ((RsaPrivKeyDb_t *)(pCcPrivKey->ccRSAPrivKeyIntBuff))->Crt.PP, /*out*/
-        pKeyGenData->KGData.p, key_bits / 2);                          /*in*/
+        pKeyGenData->KGData.p, key_bits/2);                            /*in*/
     if (cc_err != CC_OK) {
         goto end;
     }
+    /* Do the same for Q */
     cc_err = PkiCalcNp(
         ((RsaPrivKeyDb_t *)(pCcPrivKey->ccRSAPrivKeyIntBuff))->Crt.QP, /*out*/
-        pKeyGenData->KGData.q, key_bits / 2);                          /*in*/
+        pKeyGenData->KGData.q, key_bits/2);                            /*in*/
     if (cc_err != CC_OK) {
         goto end;
     }
@@ -268,7 +278,6 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
         (uint32_t *)&pubExp, pubExpSizeBits, key_bits, pKeyGenData->KGData.p,
         pKeyGenData->KGData.q, pCcPrivKey->PriveKeyDb.Crt.dP,
         pCcPrivKey->PriveKeyDb.Crt.dQ, pCcPrivKey->PriveKeyDb.Crt.qInv);
-
     if (cc_err != CC_OK) {
         goto end;
     }
@@ -278,10 +287,11 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
         key_buffer, key_buffer_size, pCcPubKey->n, pCcPubKey->e, d_buff,
         pKeyGenData->KGData.p, pKeyGenData->KGData.q,
         pCcPrivKey->PriveKeyDb.Crt.dP, pCcPrivKey->PriveKeyDb.Crt.dQ,
-        pCcPrivKey->PriveKeyDb.Crt.qInv, keySizeBytes);
-
+        pCcPrivKey->PriveKeyDb.Crt.qInv, keySizeBytes,
+        key_buffer_length);
     if (err != PSA_SUCCESS) {
         cc_err = CC_FAIL;
+        *key_buffer_length = 0;
         CC_PalMemSetZero(key_buffer, key_buffer_size);
     }
 
@@ -314,12 +324,10 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
                                 size_t *key_buffer_length)
 {
     psa_key_type_t key_type = psa_get_key_type(attributes);
-    psa_key_type_t key_bits = psa_get_key_bits(attributes);
     psa_status_t err = PSA_ERROR_NOT_SUPPORTED;
 
-    if (key_buffer_size < PSA_BITS_TO_BYTES(key_bits)) {
-        return PSA_ERROR_BUFFER_TOO_SMALL;
-    }
+    /* Initialise the return value to 0 */
+    *key_buffer_length = 0;
 
     if (PSA_KEY_TYPE_IS_KEY_PAIR(key_type)) {
         if (PSA_KEY_TYPE_IS_ECC(key_type)) {
@@ -330,14 +338,17 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
                 PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) ==
                     PSA_ECC_FAMILY_SECP_R2) {
                 err = cc3xx_internal_gen_ecc_wstr_keypair(
-                    attributes, key_buffer, key_buffer_size);
+                    attributes, key_buffer, key_buffer_size, key_buffer_length);
             }
         } else if (PSA_KEY_TYPE_IS_RSA(key_type)) {
-            err = cc3xx_internal_gen_rsa_keypair(attributes, key_buffer,
-                                                 key_buffer_size);
+            err = cc3xx_internal_gen_rsa_keypair(
+                attributes, key_buffer, key_buffer_size, key_buffer_length);
         }
     } else if (PSA_KEY_TYPE_IS_UNSTRUCTURED(key_type)) {
         err = psa_generate_random(key_buffer, key_buffer_size);
+        if (err == PSA_SUCCESS) {
+            *key_buffer_length = key_buffer_size;
+        }
     }
 
     return err;
@@ -356,6 +367,9 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCEcpkiDomainID_t domainId;
 
+    /* Initialise the return value to 0 */
+    *data_length = 0;
+
     if (PSA_KEY_TYPE_IS_ECC(key_type)) {
         if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
             /* Revert to software driver when the requested key is a
@@ -364,6 +378,7 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
             err = PSA_ERROR_NOT_SUPPORTED;
 
         } else {
+            /* FixMe: Make sure that data_length is set correctly */
             err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
             if (err != PSA_SUCCESS) {
                 CC_PAL_LOG_ERR("Error - curve is not supported\n");
@@ -396,14 +411,8 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
              */
             err = PSA_ERROR_NOT_SUPPORTED;
         } else {
-            err = cc3xx_rsa_psa_priv_to_psa_publ(
-                (uint8_t *)key_buffer, key_buffer_size, data, data_size);
-
-            if (err != PSA_SUCCESS) {
-                return err;
-            }
-
-            *data_length = key_buffer_size;
+            err = cc3xx_rsa_psa_priv_to_psa_publ((uint8_t *)key_buffer,
+                            key_buffer_size, data, data_size, data_length);
         }
 
     } else {

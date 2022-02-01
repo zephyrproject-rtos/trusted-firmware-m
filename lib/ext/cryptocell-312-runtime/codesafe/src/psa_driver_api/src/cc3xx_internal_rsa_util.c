@@ -340,7 +340,8 @@ end:
 psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
                                             size_t priv_key_buffer_size,
                                             uint8_t *publ_key_buffer,
-                                            size_t publ_key_buffer_size)
+                                            size_t publ_key_buffer_size,
+                                            size_t *publ_key_buffer_length)
 {
 #ifndef CC3XX_CONFIG_SUPPORT_RSA
     return PSA_ERROR_NOT_SUPPORTED;
@@ -363,16 +364,18 @@ psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
     int ret;
     int dummy;
 
+    /* Initialise the return value to 0 */
+    *publ_key_buffer_length = 0;
+
     ret = cc3xx_asn1_get_tag(priv_key_buffer_start, priv_key_buffer_end, &len,
-                             CC3XX_TAG_ASN1_CONSTRUCTED |
-                                 CC3XX_TAG_ASN1_SEQUENCE);
+                        CC3XX_TAG_ASN1_CONSTRUCTED | CC3XX_TAG_ASN1_SEQUENCE);
     if (ret < 0) {
         cc_err = CC_FAIL;
         goto end;
     }
 
-    ret =
-        cc3xx_asn1_get_int(priv_key_buffer_start, priv_key_buffer_end, &dummy);
+    ret = cc3xx_asn1_get_int(priv_key_buffer_start, priv_key_buffer_end,
+                             &dummy);
     if (ret < 0) {
         cc_err = CC_FAIL;
         goto end;
@@ -416,8 +419,8 @@ psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
         goto end;
     }
 
-    bytes_written =
-        cc3xx_asn1_write_len(pub_key_buffer_end, publ_key_buffer, buffer_used);
+    bytes_written = cc3xx_asn1_write_len(pub_key_buffer_end, publ_key_buffer,
+                                         buffer_used);
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
@@ -425,8 +428,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
     }
 
     bytes_written = cc3xx_asn1_write_tag(pub_key_buffer_end, publ_key_buffer,
-                                         CC3XX_TAG_ASN1_SEQUENCE |
-                                             CC3XX_TAG_ASN1_CONSTRUCTED);
+                        CC3XX_TAG_ASN1_SEQUENCE | CC3XX_TAG_ASN1_CONSTRUCTED);
     buffer_used += bytes_written;
     if (bytes_written < 0) {
         cc_err = CC_OUT_OF_RESOURCE_ERROR;
@@ -435,21 +437,27 @@ psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
 
     /* The asn1 functions write to the end of the buffer.
      * Move the data to the beginning and erase remaining data
-     * at the original location. */
-
+     * at the original location.
+     */
     if (2 * buffer_used <= publ_key_buffer_size) {
         CC_PalMemMove(publ_key_buffer,
                       publ_key_buffer + publ_key_buffer_size - buffer_used,
                       buffer_used);
         CC_PalMemSetZero(publ_key_buffer + publ_key_buffer_size - buffer_used,
                          buffer_used);
+        cc_err = CC_OK;
     } else if ((size_t)buffer_used < publ_key_buffer_size) {
         CC_PalMemMove(publ_key_buffer,
                       publ_key_buffer + publ_key_buffer_size - buffer_used,
                       buffer_used);
         CC_PalMemSetZero(publ_key_buffer + buffer_used,
                          publ_key_buffer_size - buffer_used);
+        cc_err = CC_OK;
+    } else {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
     }
+
+    *publ_key_buffer_length = buffer_used;
 
 end:
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
@@ -460,7 +468,8 @@ psa_status_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
                                          size_t key_buffer_size, uint32_t *n,
                                          uint32_t *e, uint32_t *d, uint32_t *p,
                                          uint32_t *q, uint32_t *dP, uint32_t *dQ,
-                                         uint32_t *qInv, size_t d_size_bytes)
+                                         uint32_t *qInv, size_t d_size_bytes,
+                                         size_t *key_buffer_length)
 {
 #ifndef CC3XX_CONFIG_SUPPORT_RSA
     return PSA_ERROR_NOT_SUPPORTED;
@@ -471,6 +480,9 @@ psa_status_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
     uint8_t *temp_buff = NULL;
     int bytes_written;
     size_t buffer_used;
+
+    /* Initialise the return value to 0 */
+    *key_buffer_length = 0;
 
     temp_buff = (uint8_t *)mbedtls_calloc(1, d_size_bytes);
     if (temp_buff == NULL) {
@@ -625,6 +637,9 @@ psa_status_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
         CC_PalMemSetZero(key_buffer + buffer_used,
                          key_buffer_size - buffer_used);
     }
+
+    /* Reports as output the size in byte of the DER key just written */
+    *key_buffer_length = buffer_used;
 
 end:
     if (temp_buff) {

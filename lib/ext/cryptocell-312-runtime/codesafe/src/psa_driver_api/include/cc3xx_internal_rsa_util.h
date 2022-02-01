@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -67,14 +67,16 @@ psa_status_t cc3xx_rsa_save_der_priv_key(uint8_t *key_buffer,
                                          size_t key_buffer_size, uint32_t *n,
                                          uint32_t *e, uint32_t *d, uint32_t *p,
                                          uint32_t *q, uint32_t *dP, uint32_t *dQ,
-                                         uint32_t *qInv, size_t d_size_bytes);
+                                         uint32_t *qInv, size_t d_size_bytes,
+                                         size_t *key_buffer_length);
 /**
  * \brief Extract the public key from the private key in PSA format
  */
 psa_status_t cc3xx_rsa_psa_priv_to_psa_publ(uint8_t *priv_key_buffer,
                                             size_t priv_key_buffer_size,
                                             uint8_t *publ_key_buffer,
-                                            size_t publ_key_buffer_size);
+                                            size_t publ_key_buffer_size,
+                                            size_t *publ_key_buffer_length);
 /**
  * \brief Convert a private key in PSA format to the same key in CC format, i.e.
  *        the type specified by the low-level driver code, i.e.
