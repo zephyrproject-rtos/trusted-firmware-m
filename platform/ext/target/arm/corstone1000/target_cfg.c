@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef __TARGET_CFG_H__
-#define __TARGET_CFG_H__
+#include "target_cfg.h"
+#include "cmsis_driver_config.h"
 
-#include <stdint.h>
-#include <stddef.h>
-
-#define TFM_DRIVER_STDIO    Driver_USART0
-
-/**
- * \brief Holds the data necessary to do isolation for a specific peripheral.
- */
-struct platform_data_t {
-    uint32_t periph_start;
-    uint32_t periph_limit;
+struct platform_data_t tfm_peripheral_std_uart = {
+        CORSTONE1000_UART_BASE,
+        CORSTONE1000_UART_BASE + 0xFFF
 };
 
-#endif /* __TARGET_CFG_H__ */

@@ -16,6 +16,10 @@ target_include_directories(platform_region_defs
         cc312
 )
 
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        $<$<BOOL:${TEST_S}>:TEST_S>
+)
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.
@@ -67,10 +71,11 @@ target_sources(platform_s
         tfm_hal_multi_core.c
         tfm_hal_isolation.c
         tfm_hal_platform.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
+        ${PLATFORM_DIR}/ext/common/tfm_hal_nvic.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         fw_update_agent/uefi_capsule_parser.c
         fw_update_agent/fwu_agent.c
+        $<$<BOOL:${TEST_S}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
 )
 
 if (PLATFORM_IS_FVP)
@@ -91,6 +96,7 @@ endif()
 target_compile_definitions(platform_s
     PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
+        $<$<BOOL:${TEST_S}>:TEST_S>
 )
 
 #========================= Platform BL2 =======================================#
@@ -130,6 +136,7 @@ endif()
 target_compile_definitions(platform_bl2
     PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
+        $<$<BOOL:${TEST_S}>:TEST_S>
 )
 
 target_sources(bl2

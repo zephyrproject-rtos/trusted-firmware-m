@@ -292,6 +292,7 @@ target_compile_definitions(signing_layout_for_bl2
     PRIVATE
         MCUBOOT_IMAGE_NUMBER=${BL1_IMAGE_NUMBER}
         BL1
+        $<$<BOOL:${TEST_S}>:TEST_S>
 )
 
 target_include_directories(signing_layout_for_bl2
