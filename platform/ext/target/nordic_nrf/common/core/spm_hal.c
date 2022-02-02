@@ -15,25 +15,53 @@
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "region.h"
+#include "exception_info.h"
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
+static void log_spu_irq_debug_information(void)
+{
+    SPMLOG_ERRMSG("SPU IRQ triggered\r\n");
+
+#if TFM_SPM_LOG_LEVEL >= TFM_SPM_LOG_LEVEL_DEBUG
+    /* Report which type of violation occured */
+    if(NRF_SPU->EVENTS_RAMACCERR)
+    {
+        SPMLOG_DBGMSG("NRF_SPU->EVENTS_RAMACCERR triggered\r\n");
+    }
+    if(NRF_SPU->EVENTS_PERIPHACCERR)
+    {
+        SPMLOG_DBGMSG("NRF_SPU->EVENTS_PERIPHACCERR triggered\r\n");
+    }
+    if(NRF_SPU->EVENTS_FLASHACCERR)
+    {
+        SPMLOG_DBGMSG("NRF_SPU->EVENTS_FLASHACCERR triggered\r\n");
+    }
+
+#ifdef TFM_EXCEPTION_INFO_DUMP
+
+    /* None of the error types fit perfectly for an SPU_IRQ (not even
+     * SecureFault), so we use type 64 (which is unknown to
+     * exception_info). */
+    EXCEPTION_INFO(64);
+#else
+    SPMLOG_ERRMSG("Enable TFM_EXCEPTION_INFO_DUMP\r\n");
+#endif
+
+#else
+    SPMLOG_ERRMSG("Enable TFM_SPM_LOG_LEVEL_DEBUG\r\n");
+#endif
+}
+
 void SPU_IRQHandler(void)
 {
-    /*
-     * TODO
-     * Inspect RAMACCERR, FLASHACCERR,PERIPHACCERR to identify
-     * the source of access violation.
-     */
+    log_spu_irq_debug_information();
 
     /* Clear SPU interrupt flag and pending SPU IRQ */
     spu_clear_events();
 
     NVIC_ClearPendingIRQ(SPU_IRQn);
-
-    /* Print fault message and block execution */
-    ERROR_MSG("Oops... SPU fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
