@@ -86,8 +86,8 @@ psa_status_t cc3xx_gcm_set_lengths(
  */
 psa_status_t cc3xx_gcm_update_ad(
     AesGcmContext_t *ctx,
-    const uint8_t *add,
-    size_t add_size);
+    const uint8_t *aad,
+    size_t aad_size);
 /**
  * \brief   Encrypt or decrypt a message fragment.
  */

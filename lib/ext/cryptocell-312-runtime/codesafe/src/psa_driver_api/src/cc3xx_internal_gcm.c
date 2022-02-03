@@ -223,13 +223,22 @@ static psa_status_t gcm_init(AesGcmContext_t *context,
     return status;
 }
 
-static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv)
+static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv,
+                                   size_t iv_size)
 {
     drvError_t rc = 0;
     CCBuffInfo_t inBuffInfo;
     CCBuffInfo_t outBuffInfo;
 
-    if (CC3XX_GCM_IV_96_BITS_SIZE_BYTES == context->ivSize) {
+    /* Check the IV size validity */
+    if ((CC3XX_GCM_IV_MAX_SIZE_BYTES < iv_size) || (0 == iv_size)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* Init to default value */
+    context->ivSize = 0;
+
+    if (CC3XX_GCM_IV_96_BITS_SIZE_BYTES == iv_size) {
         /* Concatenate IV||0(31)||1 */
         CC_PalMemCopy(context->J0, pIv, CC3XX_GCM_IV_96_BITS_SIZE_BYTES);
         context->J0[3] = SWAP_ENDIAN(0x00000001);
@@ -242,7 +251,7 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv)
         context->processMode = DRV_AESGCM_Process_CalcJ0_FirstPhase;
 
         /* set data buffers structures */
-        rc = SetDataBuffersInfo(pIv, context->ivSize, &inBuffInfo, NULL, 0,
+        rc = SetDataBuffersInfo(pIv, iv_size, &inBuffInfo, NULL, 0,
                                 &outBuffInfo);
         if (rc != 0) {
             CC_PAL_LOG_ERR("illegal data buffers\n");
@@ -250,7 +259,7 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv)
         }
 
         /* Calculate J0 - First phase */
-        rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo, context->ivSize);
+        rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo, iv_size);
         if (rc != AES_DRV_OK) {
             CC_PAL_LOG_ERR(
                 "calculating J0 (phase 1) failed with error code 0x%X\n", rc);
@@ -261,7 +270,7 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv)
         /* Build & Calculate the second phase buffer */
         /*********************************************/
         CC_PalMemSetZero(context->tempBuf, sizeof(context->tempBuf));
-        context->tempBuf[3] = (context->ivSize << 3) & CC_32BIT_MAX_VALUE;
+        context->tempBuf[3] = (iv_size << 3) & CC_32BIT_MAX_VALUE;
         context->tempBuf[3] = SWAP_ENDIAN(context->tempBuf[3]);
 
         /* Set process mode to 'CalcJ0' */
@@ -290,21 +299,32 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv)
         CC_PAL_LOG_ERR("gcm process j0 failed with error code %d\n", rc);
         return PSA_ERROR_DATA_INVALID;
     } else {
+        /* On success set the iv_size of the context */
+        context->ivSize = iv_size;
         return PSA_SUCCESS;
     }
 }
 
 static psa_status_t gcm_process_aad(AesGcmContext_t *context,
-                                    const uint8_t *pAad)
+                                    const uint8_t *pAad, size_t aadSize)
 {
     drvError_t rc = 0;
     CCBuffInfo_t inBuffInfo;
     CCBuffInfo_t outBuffInfo;
 
+    /* Check the AAD size validity */
+    if (CC3XX_GCM_AAD_MAX_SIZE_BYTES < aadSize) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     /* Clear Ghash result buffer */
     CC_PalMemSetZero(context->ghashResBuf, sizeof(context->ghashResBuf));
 
-    if (0 == context->aadSize) {
+    /* Init to default value */
+    context->aadSize = 0;
+
+    if (aadSize == 0) {
+        /* Nothing to do */
         return PSA_SUCCESS;
     }
 
@@ -312,7 +332,7 @@ static psa_status_t gcm_process_aad(AesGcmContext_t *context,
     context->processMode = DRV_AESGCM_Process_A;
 
     /* set data buffers structures */
-    rc = SetDataBuffersInfo(pAad, context->aadSize, &inBuffInfo, NULL, 0,
+    rc = SetDataBuffersInfo(pAad, aadSize, &inBuffInfo, NULL, 0,
                             &outBuffInfo);
     if (rc != 0) {
         CC_PAL_LOG_ERR("illegal data buffers\n");
@@ -320,11 +340,13 @@ static psa_status_t gcm_process_aad(AesGcmContext_t *context,
     }
 
     /* Calculate GHASH(A) */
-    rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo, context->aadSize);
+    rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo, aadSize);
     if (rc != AES_DRV_OK) {
         CC_PAL_LOG_ERR("processing AAD failed with error code %d\n", rc);
         return PSA_ERROR_DATA_INVALID;
     } else {
+        /* Set aadSize on context only on success */
+        context->aadSize = aadSize;
         return PSA_SUCCESS;
     }
 }
@@ -453,7 +475,6 @@ static psa_status_t gcm_finish(AesGcmContext_t *context,
     return status;
 }
 
-/* TODO: Figure out best strategy for cc310 vs cc312 */
 static psa_status_t gcm_crypt_and_tag(
     cryptoDirection_t direction, const psa_key_attributes_t *attributes,
     const uint8_t *key_buffer, size_t key_buffer_size, psa_algorithm_t alg,
@@ -463,8 +484,6 @@ static psa_status_t gcm_crypt_and_tag(
     size_t *output_length)
 {
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
-    keySizeId_t temp_keySizeId;
-
     AesGcmContext_t context;
     cc3xx_gcm_init(&context);
 
@@ -485,13 +504,13 @@ static psa_status_t gcm_crypt_and_tag(
     }
 
     /* Aes-GCM Process J0 function */
-    status = gcm_process_j0(&context, nonce);
+    status = gcm_process_j0(&context, nonce, context.ivSize);
     if (status != PSA_SUCCESS) {
         goto cleanup;
     }
 
     /* Aes-GCM Process AAD function */
-    status = gcm_process_aad(&context, additional_data);
+    status = gcm_process_aad(&context, additional_data, context.aadSize);
     if (status != PSA_SUCCESS) {
         goto cleanup;
     }
@@ -513,7 +532,6 @@ static psa_status_t gcm_crypt_and_tag(
         goto cleanup;
     }
 
-    /* TODO: Is there any more "correct" place to put this? */
     if (CRYPTO_DIRECTION_ENCRYPT == context.dir) {
         /* Ciphertext length should include tag */
         *output_length = input_length + tag_length;
@@ -526,24 +544,11 @@ cleanup:
     if ((CRYPTO_DIRECTION_DECRYPT == context.dir) && (status != PSA_SUCCESS)) {
         CC_PalMemSetZero(output, context.dataSize);
     }
-
-    /* Clear working context, except for keyBuf and keySizeId*/
-    temp_keySizeId = context.keySizeId;
-    /* Key is the first thing in the context, erase the rest*/
-    CC_PalMemSetZero(context.H,
-                     (sizeof(AesGcmContext_t) - offsetof(AesGcmContext_t, H)));
-    /* copy back the key size */
-    context.keySizeId = temp_keySizeId;
-
-    /* TODO: We simply clear the context here, so is the above work necessary?
-     */
     cc3xx_gcm_free(&context);
 
     return status;
 }
 #endif /* CC3XX_CONFIG_SUPPORT_GCM */
-
-/* TODO: Figure out best strategy for cc310 vs cc312 */
 
 /** \defgroup internal_gcm Internal GCM functions
  *
@@ -684,15 +689,18 @@ psa_status_t cc3xx_gcm_set_nonce(
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
+    /* Check the IV size validity */
+    if ((CC3XX_GCM_IV_MAX_SIZE_BYTES < nonce_size) || (0 == nonce_size)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     ret = gcm_calc_h(ctx);
     if (ret != PSA_SUCCESS) {
         CC_PAL_LOG_ERR("gcm_calc_h failed: %d\n", ret);
         return ret;
     }
 
-    ctx->ivSize = nonce_size;
-
-    ret = gcm_process_j0(ctx, nonce);
+    ret = gcm_process_j0(ctx, nonce, nonce_size);
     if (ret != PSA_SUCCESS) {
         CC_PAL_LOG_ERR("gcm_process_j0 failed: %d", ret);
         return ret;
@@ -741,22 +749,20 @@ psa_status_t cc3xx_gcm_set_lengths(
 
 psa_status_t cc3xx_gcm_update_ad(
     AesGcmContext_t *ctx,
-    const uint8_t *add,
-    size_t add_size)
+    const uint8_t *aad,
+    size_t aad_size)
 {
 #ifndef CC3XX_CONFIG_SUPPORT_GCM
     return PSA_ERROR_NOT_SUPPORTED;
 #else
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
-    if (NULL == ctx || NULL == add) {
+    if (NULL == ctx || NULL == aad) {
         CC_PAL_LOG_ERR("Null pointer exception\n");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    ctx->aadSize = add_size;
-
-    ret = gcm_process_aad(ctx, add);
+    ret = gcm_process_aad(ctx, aad, aad_size);
     if (ret != PSA_SUCCESS) {
         CC_PAL_LOG_ERR("gcm_process_aad failed: %d", ret);
         return ret;
