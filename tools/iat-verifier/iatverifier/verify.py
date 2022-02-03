@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -57,7 +57,7 @@ def validate_instance_id(value, keep_going=False, strict=False):
         error(msg.format(value[0]), keep_going)
 
 
-def validate_challege(value, keep_going=False, strict=False):
+def validate_challenge(value, keep_going=False, strict=False):
     if not isinstance(value, bytes):
         msg = 'Invalid CHALLENGE; must be a bytes string.'
         error(msg, keep_going)
@@ -149,10 +149,6 @@ def validate_measurement_value(value, keep_going=False, strict=False):
 
 
 def validate_measurement_description(value, keep_going=False, strict=False):
-    pass
-
-
-def validate_challenge(value, keep_going=False, strict=False):
     pass
 
 
