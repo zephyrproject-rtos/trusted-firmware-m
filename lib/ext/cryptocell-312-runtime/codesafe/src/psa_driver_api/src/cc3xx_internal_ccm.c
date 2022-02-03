@@ -24,22 +24,17 @@
 #include <psa/crypto.h>
 
 /*! The size of the AES CCM star nonce in bytes. */
-#define AESCCM_STAR_NONCE_SIZE_BYTES 13
-
-/*! AES CCM mode: CCM. */
-#define AESCCM_MODE_CCM 0
-/*! AES CCM mode: CCM star. */
-#define AESCCM_MODE_STAR 1
+#define CC3XX_CCM_STAR_NONCE_SIZE_BYTES 13
 
 /* AES-CCM* Security levels (ieee-802.15.4-2011, Table 58) */
-#define AESCCM_STAR_SECURITY_LEVEL_NONE 0
-#define AESCCM_STAR_SECURITY_LEVEL_MIC_32 1
-#define AESCCM_STAR_SECURITY_LEVEL_MIC_64 2
-#define AESCCM_STAR_SECURITY_LEVEL_MIC_128 3
-#define AESCCM_STAR_SECURITY_LEVEL_ENC 4
-#define AESCCM_STAR_SECURITY_LEVEL_ENC_MIC_32 5
-#define AESCCM_STAR_SECURITY_LEVEL_ENC_MIC_64 6
-#define AESCCM_STAR_SECURITY_LEVEL_ENC_MIC_128 7
+#define CC3XX_CCM_STAR_SECURITY_LEVEL_NONE 0
+#define CC3XX_CCM_STAR_SECURITY_LEVEL_MIC_32 1
+#define CC3XX_CCM_STAR_SECURITY_LEVEL_MIC_64 2
+#define CC3XX_CCM_STAR_SECURITY_LEVEL_MIC_128 3
+#define CC3XX_CCM_STAR_SECURITY_LEVEL_ENC 4
+#define CC3XX_CCM_STAR_SECURITY_LEVEL_ENC_MIC_32 5
+#define CC3XX_CCM_STAR_SECURITY_LEVEL_ENC_MIC_64 6
+#define CC3XX_CCM_STAR_SECURITY_LEVEL_ENC_MIC_128 7
 
 static psa_status_t ccm_setkey(
         AesCcmContext_t *ctx,
@@ -93,16 +88,16 @@ static psa_status_t ccm_get_security_level(uint8_t SizeOfT,
     if (SecurityField < 4) {
         switch (SizeOfT) {
         case 0:
-            *pSecurityLevel = AESCCM_STAR_SECURITY_LEVEL_NONE;
+            *pSecurityLevel = CC3XX_CCM_STAR_SECURITY_LEVEL_NONE;
             break;
         case 4:
-            *pSecurityLevel = AESCCM_STAR_SECURITY_LEVEL_MIC_32;
+            *pSecurityLevel = CC3XX_CCM_STAR_SECURITY_LEVEL_MIC_32;
             break;
         case 8:
-            *pSecurityLevel = AESCCM_STAR_SECURITY_LEVEL_MIC_64;
+            *pSecurityLevel = CC3XX_CCM_STAR_SECURITY_LEVEL_MIC_64;
             break;
         case 16:
-            *pSecurityLevel = AESCCM_STAR_SECURITY_LEVEL_MIC_128;
+            *pSecurityLevel = CC3XX_CCM_STAR_SECURITY_LEVEL_MIC_128;
             break;
         default:
             return PSA_ERROR_INVALID_ARGUMENT;
@@ -110,16 +105,16 @@ static psa_status_t ccm_get_security_level(uint8_t SizeOfT,
     } else if (SecurityField < 8) {
         switch (SizeOfT) {
         case 0:
-            *pSecurityLevel = AESCCM_STAR_SECURITY_LEVEL_ENC;
+            *pSecurityLevel = CC3XX_CCM_STAR_SECURITY_LEVEL_ENC;
             break;
         case 4:
-            *pSecurityLevel = AESCCM_STAR_SECURITY_LEVEL_ENC_MIC_32;
+            *pSecurityLevel = CC3XX_CCM_STAR_SECURITY_LEVEL_ENC_MIC_32;
             break;
         case 8:
-            *pSecurityLevel = AESCCM_STAR_SECURITY_LEVEL_ENC_MIC_64;
+            *pSecurityLevel = CC3XX_CCM_STAR_SECURITY_LEVEL_ENC_MIC_64;
             break;
         case 16:
-            *pSecurityLevel = AESCCM_STAR_SECURITY_LEVEL_ENC_MIC_128;
+            *pSecurityLevel = CC3XX_CCM_STAR_SECURITY_LEVEL_ENC_MIC_128;
             break;
         default:
             return PSA_ERROR_INVALID_ARGUMENT;
@@ -156,13 +151,13 @@ static psa_status_t ccm_init(AesCcmContext_t *context,
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (ccmMode == AESCCM_MODE_CCM) {
+    if (ccmMode == CC3XX_CCM_MODE_CCM) {
         /* check CCM MAC size: [4,6,8,10,12,14,16] */
         if ((sizeOfT < 4) || (sizeOfT > 16) || ((sizeOfT & 1) != 0)) {
             return PSA_ERROR_INVALID_ARGUMENT;
         }
-    } else if (ccmMode == AESCCM_MODE_STAR) {
-        securityField = pNonce[AESCCM_STAR_NONCE_SIZE_BYTES - 1];
+    } else if (ccmMode == CC3XX_CCM_MODE_STAR) {
+        securityField = pNonce[CC3XX_CCM_STAR_NONCE_SIZE_BYTES - 1];
 
         /* check CCM STAR MAC size */
         if (ccm_get_security_level(sizeOfT, securityField,
@@ -171,12 +166,12 @@ static psa_status_t ccm_init(AesCcmContext_t *context,
         }
 
         /* check CCM STAR Nonce size. sizeOfN == 13 */
-        if (sizeOfN != AESCCM_STAR_NONCE_SIZE_BYTES) {
+        if (sizeOfN != CC3XX_CCM_STAR_NONCE_SIZE_BYTES) {
             return PSA_ERROR_INVALID_ARGUMENT;
         }
 
         /* check CCM STAR Security level field */
-        if (pNonce[AESCCM_STAR_NONCE_SIZE_BYTES - 1] != securityLevelField) {
+        if (pNonce[CC3XX_CCM_STAR_NONCE_SIZE_BYTES - 1] != securityLevelField) {
             return PSA_ERROR_INVALID_ARGUMENT;
         }
     } else {
@@ -653,7 +648,7 @@ psa_status_t cc3xx_encrypt_ccm(
         return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
-    uint32_t ccm_mode = AESCCM_MODE_CCM;
+    uint32_t ccm_mode = CC3XX_CCM_MODE_CCM;
 
     return ccm_auth_crypt(key_buffer, key_buffer_size, plaintext_length, nonce,
                           nonce_length, additional_data, additional_data_length,
@@ -690,7 +685,7 @@ psa_status_t cc3xx_decrypt_ccm(
     uint8_t local_tag_buffer[PSA_AEAD_TAG_MAX_SIZE];
     CC_PalMemCopy(local_tag_buffer, tag, tag_length);
 
-    uint32_t ccm_mode = AESCCM_MODE_CCM;
+    uint32_t ccm_mode = CC3XX_CCM_MODE_CCM;
 
     status = ccm_auth_crypt(key_buffer, key_buffer_size,
                             ciphertext_length_without_tag, nonce, nonce_length,
@@ -774,23 +769,23 @@ psa_status_t cc3xx_ccm_set_nonce(
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (ccmMode == AESCCM_MODE_CCM) {
+    if (ccmMode == CC3XX_CCM_MODE_CCM) {
         if ((sizeOfT < 4) || (sizeOfT > 16) || ((sizeOfT & 1) != 0)) {
             return PSA_ERROR_INVALID_ARGUMENT;
         }
-    } else if (ccmMode == AESCCM_MODE_STAR) {
-        securityField = pNonce[AESCCM_STAR_NONCE_SIZE_BYTES - 1];
+    } else if (ccmMode == CC3XX_CCM_MODE_STAR) {
+        securityField = pNonce[CC3XX_CCM_STAR_NONCE_SIZE_BYTES - 1];
 
         if (ccm_get_security_level(sizeOfT, securityField,
                                    &securityLevelField) != PSA_SUCCESS) {
             return PSA_ERROR_INVALID_ARGUMENT;
         }
 
-        if (sizeOfN != AESCCM_STAR_NONCE_SIZE_BYTES) {
+        if (sizeOfN != CC3XX_CCM_STAR_NONCE_SIZE_BYTES) {
             return PSA_ERROR_INVALID_ARGUMENT;
         }
 
-        if (pNonce[AESCCM_STAR_NONCE_SIZE_BYTES - 1] != securityLevelField) {
+        if (pNonce[CC3XX_CCM_STAR_NONCE_SIZE_BYTES - 1] != securityLevelField) {
             return PSA_ERROR_INVALID_ARGUMENT;
         }
     } else {

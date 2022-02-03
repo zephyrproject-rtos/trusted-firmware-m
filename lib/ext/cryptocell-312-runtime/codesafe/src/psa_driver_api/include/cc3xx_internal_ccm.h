@@ -21,6 +21,11 @@
 extern "C" {
 #endif
 
+/*! AES CCM mode: CCM. */
+#define CC3XX_CCM_MODE_CCM 0
+/*! AES CCM mode: CCM star. */
+#define CC3XX_CCM_MODE_STAR 1
+
 /**
  * \brief Encrypt and create auth tag with AES-CCM
  */

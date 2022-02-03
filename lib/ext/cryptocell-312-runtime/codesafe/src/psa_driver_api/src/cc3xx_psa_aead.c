@@ -344,7 +344,7 @@ psa_status_t cc3xx_aead_set_nonce(
                     nonce,
                     nonce_length,
                     operation->tag_length,
-                    0)) /* ccmMode is hardcoded */
+                    CC3XX_CCM_MODE_CCM)) /* FixMe: check support for CCM* */
                 != PSA_SUCCESS) {
                 return ret;
             }
