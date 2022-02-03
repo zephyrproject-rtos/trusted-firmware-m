@@ -93,7 +93,7 @@ static psa_status_t aead_setup(
     }
 
     if (!PSA_ALG_IS_AEAD(alg)) {
-        return PSA_ERROR_BAD_STATE;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Validate the algorithm first */

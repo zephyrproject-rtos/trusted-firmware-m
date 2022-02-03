@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -82,8 +82,8 @@ static psa_status_t cipher_setup(
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if (!PSA_ALG_IS_CIPHER(alg)) {
-        return PSA_ERROR_BAD_STATE;
+    if (!(PSA_ALG_IS_CIPHER(alg) || PSA_ALG_IS_BLOCK_CIPHER_MAC(alg))) {
+     return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     CC_PalMemSetZero(operation, sizeof(cc3xx_cipher_operation_t));
