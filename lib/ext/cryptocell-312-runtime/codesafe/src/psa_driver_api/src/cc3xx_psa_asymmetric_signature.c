@@ -99,16 +99,19 @@ static psa_status_t cc3xx_internal_ecdsa_verify(
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
+    /* Check if the signature buffer is not of the expected size */
+    if (signature_length != 2*CALC_FULL_BYTES(pDomain->ordSizeInBits)) {
+        return PSA_ERROR_INVALID_SIGNATURE;
+    }
+
     /* FIXME: From here the code is only applicable to weistrass and koblitz
      * curves, but needs to be extended to support Ed25519 when available
      */
     if (PSA_KEY_TYPE_IS_KEY_PAIR(key_type)) {
-        cc_err = cc3xx_ecc_psa_priv_to_cc_priv(domainId, key, key_length,
-                                               &pUserPrivKey);
-        err = cc3xx_ecc_cc_error_to_psa_error(cc_err);
+        err = cc3xx_ecc_psa_priv_to_cc_priv(domainId, key, key_length,
+                                            &pUserPrivKey);
         if (err == PSA_SUCCESS) {
-            cc_err = cc3xx_ecc_cc_priv_to_cc_publ(&pUserPrivKey, &pUserPublKey);
-            err = cc3xx_ecc_cc_error_to_psa_error(cc_err);
+            err = cc3xx_ecc_cc_priv_to_cc_publ(&pUserPrivKey, &pUserPublKey);
         }
     } else {
         cc_err = CC_EcpkiPublKeyBuildAndCheck(pDomain, (uint8_t *)key,
@@ -188,7 +191,7 @@ static psa_status_t cc3xx_internal_ecdsa_sign(
 
     /* The signature consists of two numbers with each having the length of the
      * private key */
-    if (signature_size < (2 * PSA_BITS_TO_BYTES(pDomain->ordSizeInBits))) {
+    if (signature_size < (2*PSA_BITS_TO_BYTES(pDomain->ordSizeInBits))) {
         return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -289,6 +292,12 @@ static psa_status_t cc3xx_internal_rsa_verify(
         err = cc3xx_rsa_psa_pub_to_cc_pub(key_buffer, key_length, pUserPubKey);
     }
     if (err != PSA_SUCCESS) {
+        goto cleanup;
+    }
+
+    CCRsaPubKey_t *pPubKey = (CCRsaPubKey_t *)pUserPubKey->PublicKeyDbBuff;
+    if (signature_length != CALC_FULL_BYTES(pPubKey->nSizeInBits)) {
+        err = PSA_ERROR_INVALID_SIGNATURE;
         goto cleanup;
     }
 
