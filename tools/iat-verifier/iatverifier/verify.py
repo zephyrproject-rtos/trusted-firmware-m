@@ -26,6 +26,13 @@ logger = logging.getLogger('iat-verify')
 seen_errors = False
 
 
+class Verifier:
+    def __init__(self, configuration):
+        self.config = configuration
+
+    def verify(self):
+        raise NotImplementedError
+
 def error(message, keep_going=False):
     global seen_errors
     seen_errors = True
@@ -48,113 +55,123 @@ def decode(value, key, keep_going=False):
 
 
 # ----------------------------------------------------------------------------
-# Validation functions
+# Validation classes
 #
-def validate_instance_id(value, keep_going=False, strict=False):
-    _validate_bytestring_length(value, 'INSTANCE_ID', 33, keep_going)
-    if value[0] != 0x01:
-        msg = 'Invalid INSTANCE_ID: first byte must be 0x01, found: 0x{}'
-        error(msg.format(value[0]), keep_going)
+class InstanceIdVerifier(Verifier):
+    def verify(self, value):
+        _validate_bytestring_length(value, 'INSTANCE_ID', 33, self.config.keep_going)
+        if value[0] != 0x01:
+            msg = 'Invalid INSTANCE_ID: first byte must be 0x01, found: 0x{}'
+            error(msg.format(value[0]), self.config.keep_going)
 
 
-def validate_challenge(value, keep_going=False, strict=False):
-    if not isinstance(value, bytes):
-        msg = 'Invalid CHALLENGE; must be a bytes string.'
-        error(msg, keep_going)
+class ChallengeVerifier(Verifier):
+    def verify(self, value):
+        if not isinstance(value, bytes):
+            msg = 'Invalid CHALLENGE; must be a bytes string.'
+            error(msg, self.config.keep_going)
 
-    value_len = len(value)
-    if value_len not in const.HASH_SIZES:
-        msg = 'Invalid CHALLENGE length; must one of {}, found {} bytes'
-        error(msg.format(const.HASH_SIZES, value_len), keep_going)
+        value_len = len(value)
+        if value_len not in const.HASH_SIZES:
+            msg = 'Invalid CHALLENGE length; must one of {}, found {} bytes'
+            error(msg.format(const.HASH_SIZES, value_len), self.config.keep_going)
 
 
-def validate_implementation_id(value, keep_going=False, strict=False):
+class AlwaysPassVerifier(Verifier):
+    def verify(self, value):
+        pass
+
+class ImplementationIdVerifier(AlwaysPassVerifier):
     pass
 
-
-def validate_hardware_id(value, keep_going=False, strict=False):
+class HardwareIdVerifier(AlwaysPassVerifier):
     pass
 
-
-def validate_originator(value, keep_going=False, strict=False):
+class OriginatorVerifier(AlwaysPassVerifier):
     pass
 
-
-def validate_sw_components(value, keep_going=False, strict=False):
-    if not isinstance(value, list):
-        msg = 'Invalid SW_COMPONENTS value (must be an array): {}'
-        error(msg.format(value), keep_going)
-        return
-
-    for sw_component in value:
-        if not isinstance(sw_component, dict):
-            msg = 'Invalid SW_COMPONENTS array entry (must be a map): {}'
-            error(msg.format(sw_component), keep_going)
+class SWComponentsVerifier(Verifier):
+    def verify(self, value):
+        if not isinstance(value, list):
+            msg = 'Invalid SW_COMPONENTS value (must be an array): {}'
+            error(msg.format(value), self.config.keep_going)
             return
 
-        for k, v in sw_component.items():
-            if k not in const.ALLOWED_SW_COMPONENT_CLAIMS:
-                if strict:
-                    msg = 'Unexpected SW_COMPONENT claim: {}'
-                    error(msg.format(k), keep_going)
-                else:
-                    continue
-            try:
-                validation_funcs[k](v, keep_going)
-            except Exception:
-                if not keep_going:
-                    raise
+        for sw_component in value:
+            if not isinstance(sw_component, dict):
+                msg = 'Invalid SW_COMPONENTS array entry (must be a map): {}'
+                error(msg.format(sw_component), self.config.keep_going)
+                return
 
+            for k, v in sw_component.items():
+                if k not in const.ALLOWED_SW_COMPONENT_CLAIMS:
+                    if self.config.strict:
+                        msg = 'Unexpected SW_COMPONENT claim: {}'
+                        error(msg.format(k), self.config.keep_going)
+                    else:
+                        continue
+                try:
+                    class Configuration:
+                        pass
+                    validator_obj = validation_classes[k](self.config)
+                    validator_obj.verify(v)
+                except Exception:
+                    if not self.config.keep_going:
+                        raise
 
-def validate_sw_component_type(value, keep_going=False, strict=False):
+class SWComponentTypeVerifier(AlwaysPassVerifier):
     pass
 
-
-def validate_no_measurements(vlaue, keep_going=False, strict=False):
+class NoMeasurementsVerifier(AlwaysPassVerifier):
     pass
 
+class ClientIdVerifier(Verifier):
+    def verify(self, value):
+        if not isinstance(value, int):
+            msg = 'Invalid CLIENT_ID, must be an int: {}'
+            error(msg.format(value), self.config.keep_going)
 
-def validate_client_id(value, keep_going=False, strict=False):
-    if not isinstance(value, int):
-        msg = 'Invalid CLIENT_ID, must be an int: {}'
-        error(msg.format(value), keep_going)
+class SecurityLifecycleVerifier(Verifier):
+    def verify(self, value):
+        if not isinstance(value, int):
+            msg = 'Invalid SECURITY_LIFECYCLE, must be an int: {}'
+            error(msg.format(value), self.config.keep_going)
 
-
-def validate_security_lifecycle(value, keep_going=False, strict=False):
-    if not isinstance(value, int):
-        msg = 'Invalid SECURITY_LIFECYCLE, must be an int: {}'
-        error(msg.format(value), keep_going)
-
-
-def validate_profile_id(value, keep_going=False, strict=False):
-    if not isinstance(value, str):
-        msg = 'Invalid PROFILE_ID (must be a string): {}'.format(value)
-        error(msg.format(value), keep_going)
-
-
-def validate_boot_seed(value, keep_going=False, strict=False):
-    _validate_bytestring_length(value, 'BOOT_SEED', 32, keep_going)
+class ProfileIdVerifier(Verifier):
+    def verify(self, value):
+        if not isinstance(value, str):
+            msg = 'Invalid PROFILE_ID (must be a string): {}'.format(value)
+            error(msg.format(value), self.config.keep_going)
 
 
-def validate_signer_id(value, keep_going=False, strict=False):
-    _validate_bytestring_length(value, 'SIGNER_ID', 32, keep_going)
+class BootSeedVerifier(Verifier):
+    def verify(self, value):
+        _validate_bytestring_length(value, 'BOOT_SEED', 32, self.config.keep_going)
 
 
-def validate_sw_component_version(value, keep_going=False, strict=False):
+class SignerIdVerifier(Verifier):
+    def verify(self, value):
+        _validate_bytestring_length(value, 'SIGNER_ID', 32, self.config.keep_going)
+
+
+class SwComponentVersionVerifier(AlwaysPassVerifier):
     pass
 
+class MeasurementValueVerifier(Verifier):
+    def verify(self, value):
+        _validate_bytestring_length(value, 'MEASUREMENT', 32, self.config.keep_going)
 
-def validate_measurement_value(value, keep_going=False, strict=False):
-    _validate_bytestring_length(value, 'MEASUREMENT', 32, keep_going)
-
-
-def validate_measurement_description(value, keep_going=False, strict=False):
+class MeasurementDescriptionVerifier(AlwaysPassVerifier):
     pass
 
-
-validation_funcs = {v: globals().get('validate_{}'.format(n.lower()))
+def get_verifier_classes():
+    lowercase_globals = {name.replace('_', '').lower():globals().get(name)
+                    for name in globals().keys()}
+    validation_classes = {v: lowercase_globals["{}verifier".format(n.replace('_', '').lower())]
                     for v, n in const.NAMES.items()}
+    return validation_classes
 
+validation_classes = get_verifier_classes()
 
 def validate_manadatory_claims(token, keep_going=False):
     for mand_claim in const.MANDATORY_CLAIMS:
@@ -233,7 +250,13 @@ def decode_and_validate_iat(encoded_iat, keep_going=False, strict=False):
             continue
 
         value = raw_token[entry]
-        validation_funcs[entry](value, keep_going, strict)
+        class Configuration:
+            pass
+        config = Configuration()
+        config.keep_going = keep_going
+        config.strict = strict
+        validator_obj = validation_classes[entry](config)
+        validator_obj.verify(value)
         if entry_name == 'SW_COMPONENTS':
             try:
                 token[entry_name] = []
