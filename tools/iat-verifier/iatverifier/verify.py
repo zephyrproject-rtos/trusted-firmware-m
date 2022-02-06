@@ -11,7 +11,7 @@ import logging
 import sys
 
 from iatverifier.util import extract_iat_from_cose, recursive_bytes_to_strings
-from iatverifier.verifiers import decode_and_validate_iat, seen_errors
+from iatverifier.verifiers import PSAIoTProfile1TokenVerifier, seen_errors
 
 
 def main():
@@ -60,7 +60,12 @@ def main():
         sys.exit(1)
 
     try:
-        token = decode_and_validate_iat(raw_iat, args.keep_going, args.strict)
+        class Configuration:
+            pass
+        config = Configuration()
+        config.keep_going = args.keep_going
+        config.strict = args.strict
+        token = PSAIoTProfile1TokenVerifier(config).decode_and_validate_iat(raw_iat)
         if not seen_errors:
             print('Token format OK')
     except ValueError as e:

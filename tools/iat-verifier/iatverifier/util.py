@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -14,12 +14,8 @@ import base64
 from ecdsa import SigningKey, VerifyingKey
 from pycose.sign1message import Sign1Message
 from pycose.mac0message import Mac0Message
-
-from iatverifier import const
-
-
-FIELD_NAMES = {v: k for k, v in const.NAMES.items()}
-
+import iatverifier.const as const
+from iatverifier.verifiers import SecurityLifecycleVerifier, get_field_names
 
 def sign_eat(token, key=None):
     signed_msg = Sign1Message()
@@ -181,18 +177,19 @@ def read_hmac_key(keyfile):
 
 def _parse_raw_token(raw):
     result = {}
+    field_names = get_field_names()
     for raw_key, raw_value in raw.items():
         if isinstance(raw_key, int):
             key = raw_key
         else:
             field_name = raw_key.upper()
             try:
-                key = FIELD_NAMES[field_name]
+                key = field_names[field_name]
             except KeyError:
                 msg = 'Unknown field "{}" in token.'.format(field_name)
                 raise ValueError(msg)
 
-        if key == const.SECURITY_LIFECYCLE:
+        if key == SecurityLifecycleVerifier(None).get_claim_key():
             name_idx = const.SL_NAMES.index(raw_value.upper())
             value = (name_idx + 1) << const.SL_SHIFT
         elif hasattr(raw_value, 'items'):
@@ -211,6 +208,7 @@ def _parse_raw_token(raw):
 
 def _relabel_keys(token_map):
     result = {}
+    names = {id:name for name, id in get_field_names().items()}
     for key, value in token_map.items():
         if hasattr(value, 'items'):
             value = _relabel_keys(value)
@@ -219,11 +217,11 @@ def _relabel_keys(token_map):
             # TODO  -- asumes dict elements
             value = [_relabel_keys(v) for v in value]
 
-        if key == const.SECURITY_LIFECYCLE:
+        if key == SecurityLifecycleVerifier(None).get_claim_name():
             value = (const.SL_NAMES[(value >> const.SL_SHIFT) - 1])
 
-        if key in const.NAMES:
-            new_key = const.NAMES[key].lower()
+        if key in names:
+            new_key = names[key].lower()
         else:
             new_key = key
         result[new_key] = value
