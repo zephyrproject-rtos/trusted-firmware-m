@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (c) 2019, Arm Limited. All rights reserved.
+# Copyright (c) 2019-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -10,8 +10,8 @@ import sys
 import tempfile
 import unittest
 
-from iatverifier.util import convert_map_to_token_files
-from iatverifier.verify import extract_iat_from_cose, decode_and_validate_iat
+from iatverifier.util import convert_map_to_token_files, extract_iat_from_cose
+from iatverifier.verifiers import decode_and_validate_iat
 
 
 THIS_DIR = os.path.dirname(__file__)
