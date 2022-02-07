@@ -35,10 +35,10 @@ REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
-#endif /* TFM_SP_META_PTR_ENABLE */
+#endif /* CONFIG_TFM_PARTITION_META */
 
 const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     /* Veneer region */
@@ -97,7 +97,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_PRIV_EXEC_NEVER
 #endif
     },
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
     /* TFM partition metadata pointer region */
     {
         0, /* will be updated before using */

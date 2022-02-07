@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -23,7 +23,7 @@ target_sources(tfm_sprt
         ./crt_memset.c
         ./crt_strnlen.c
         ./service_api.c
-        $<$<BOOL:${TFM_SP_META_PTR_ENABLE}>:./sprt_partition_metadata_indicator.c>
+        $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_partition_metadata_indicator.c>
 )
 
 target_link_libraries(tfm_sprt

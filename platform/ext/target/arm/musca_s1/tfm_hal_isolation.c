@@ -34,7 +34,7 @@ REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
 #endif
@@ -119,7 +119,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     }
     n_configured_regions++;
 
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
     /* TFM partition metadata pointer region */
     region_cfg.region_nr = n_configured_regions;
     region_cfg.region_base =

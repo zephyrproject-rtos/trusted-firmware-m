@@ -91,7 +91,7 @@ SECTIONS
         LONG (PSA_PROXY_SHARED_MEMORY_BASE)
         LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
 #endif
-#if defined(TFM_SP_META_PTR_ENABLE)
+#if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
         LONG (SIZEOF(.TFM_SP_META_PTR))
 #endif
@@ -167,7 +167,7 @@ SECTIONS
     Image$$ER_INITIAL_PSP_SEAL$$ZI$$Base = ADDR(.psp_stack_seal_res);
     Image$$ER_INITIAL_PSP_SEAL$$ZI$$Limit = ADDR(.psp_stack_seal_res) + SIZEOF(.psp_stack_seal_res);
 # endif
-#if defined(TFM_SP_META_PTR_ENABLE)
+#if defined(CONFIG_TFM_PARTITION_META)
     .TFM_SP_META_PTR : ALIGN(32)
     {
         *(SP_META_PTR_SPRTL_INST)

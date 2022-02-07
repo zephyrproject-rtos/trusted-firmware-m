@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,9 +21,9 @@
 #define MPU_REGION_NS_STACK             2
 #define PARTITION_REGION_RO             3
 #define PARTITION_REGION_RW_STACK       4
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
 #define MPU_REGION_SP_META_PTR          7
-#endif /* TFM_SP_META_PTR_ENABLE */
+#endif /* CONFIG_TFM_PARTITION_META */
 
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
@@ -33,10 +33,10 @@ REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
-#endif /* TFM_SP_META_PTR_ENABLE */
+#endif /* CONFIG_TFM_PARTITION_META */
 
 const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     /* Veneer region */
@@ -79,7 +79,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
         MPU_ARMV8M_SH_NONE
     },
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
     /* TFM partition metadata pointer region */
     {
         MPU_REGION_SP_META_PTR,

@@ -81,7 +81,7 @@ tfm_invalid_config(TFM_DUMMY_PROVISIONING AND  NOT PLATFORM_DEFAULT_OTP_WRITEABL
 
 ####################### SP META Pointer ########################################
 
-tfm_invalid_config(TFM_SP_META_PTR_ENABLE AND TFM_LIB_MODEL)
+tfm_invalid_config(CONFIG_TFM_PARTITION_META AND TFM_LIB_MODEL)
 
 ####################### Firmware Update Parttion ###############################
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
 extern uintptr_t hal_mem_sp_meta_start;
 extern uintptr_t hal_mem_sp_meta_end;
 #endif

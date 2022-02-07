@@ -20,10 +20,10 @@ REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
-#endif /* TFM_SP_META_PTR_ENABLE */
+#endif /* CONFIG_TFM_PARTITION_META */
 
 
 static void configure_mpu(uint32_t rnr, uint32_t base, uint32_t limit,
@@ -71,7 +71,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
 
     configure_mpu(rnr++, base, limit, XN_EXEC_NOT_OK, AP_RW_PRIV_UNPRIV);
 
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
     /* TFM partition metadata pointer region */
     base = (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Base);
     limit = (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Limit);

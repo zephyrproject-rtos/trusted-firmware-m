@@ -125,7 +125,7 @@ SECTIONS
         LONG (PSA_PROXY_SHARED_MEMORY_BASE)
         LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
 #endif
-#if defined(TFM_SP_META_PTR_ENABLE)
+#if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
         LONG (SIZEOF(.TFM_SP_META_PTR))
 #endif
@@ -304,7 +304,7 @@ SECTIONS
     } > RAM
 #endif /* TFM_LVL == 1 */
 
-#if defined(TFM_SP_META_PTR_ENABLE)
+#if defined(CONFIG_TFM_PARTITION_META)
     .TFM_SP_META_PTR : ALIGN(32)
     {
         *(SP_META_PTR_SPRTL_INST)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -97,10 +97,10 @@ void tfm_get_mem_region_security_attr(const void *p, size_t s,
 #if TFM_LVL == 2
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
-#endif /* TFM_SP_META_PTR_ENABLE */
+#endif /* CONFIG_TFM_PARTITION_META */
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
@@ -151,7 +151,7 @@ void tfm_get_secure_mem_region_attr(const void *p, size_t s,
         return;
     }
 
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
     /* TFM partition metadata pointer region */
     base = (uintptr_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Base);
     limit = (uintptr_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Limit) - 1;

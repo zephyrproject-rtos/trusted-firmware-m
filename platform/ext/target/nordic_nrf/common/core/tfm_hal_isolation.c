@@ -24,10 +24,10 @@ REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
-#endif /* TFM_SP_META_PTR_ENABLE */
+#endif /* CONFIG_TFM_PARTITION_META */
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
@@ -360,7 +360,7 @@ enum tfm_hal_status_t mpu_init_cfg(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
     /* TFM partition metadata poniter region */
     region_cfg.region_nr = n_configured_regions++;
 
@@ -378,7 +378,7 @@ enum tfm_hal_status_t mpu_init_cfg(void)
     if (err != MPU_ARMV8M_OK) {
         return TFM_HAL_ERROR_GENERIC;
     }
-#endif /* TFM_SP_META_PTR_ENABLE */
+#endif /* CONFIG_TFM_PARTITION_META */
 
     mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
                       HARDFAULT_NMI_ENABLE);
