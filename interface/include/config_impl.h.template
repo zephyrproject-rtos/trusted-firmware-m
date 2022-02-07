@@ -9,9 +9,18 @@
 #ifndef __CONFIG_IMPL_H__
 #define __CONFIG_IMPL_H__
 
-{% if partition_statistics['ipc_partition_num'] > 0
-    and partition_statistics['sfn_partition_num'] == 0 %}
-/* IPC model */
+/* Backends */
+#define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_IPC")}} {{config_impl['CONFIG_TFM_SPM_BACKEND_IPC']}}
+#define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_SFN")}} {{config_impl['CONFIG_TFM_SPM_BACKEND_SFN']}}
+
+/* API calls */
+#define {{"%-56s"|format("CONFIG_TFM_PSA_API_SFN_CALL")}} {{config_impl['CONFIG_TFM_PSA_API_SFN_CALL']}}
+#define {{"%-56s"|format("CONFIG_TFM_PSA_API_CROSS_CALL")}} {{config_impl['CONFIG_TFM_PSA_API_CROSS_CALL']}}
+#define {{"%-56s"|format("CONFIG_TFM_PSA_API_SUPERVISOR_CALL")}} {{config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL']}}
+
+#define {{"%-56s"|format("CONFIG_TFM_CONNECTION_BASED_SERVICE_API")}} {{config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API']}}
+
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 /* Trustzone NS agent working stack size. */
 #define {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}} 1024
 
@@ -19,10 +28,7 @@
 #define {{"%-56s"|format("CONFIG_TFM_SPM_THREAD_STACK_SIZE")}}     \
             {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}}
 
-{% elif partition_statistics['sfn_partition_num'] > 0
-    and partition_statistics['ipc_partition_num'] == 0 %}
-/* SFN model */
-
+#elif CONFIG_TFM_SPM_BACKEND_SFN == 1
     {% set total_stk = namespace(size=0) %}
     {% for partition in partitions %}
         {% if "0x" in partition.manifest.stack_size or "0X" in partition.manifest.stack_size %}
@@ -48,20 +54,10 @@
 #define {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}}  \
     ((({{"0x%x"|format(total_stk.size)}} >> CONFIG_TFM_NS_AGENT_TZ_STK_SIZE_SHIFT_FACTOR) + 0x7) & (~0x7))
 
-{% elif partition_statistics['sfn_partition_num'] > 0
-    and partition_statistics['ipc_partition_num'] > 0 %}
-#error "IPC and SFN co-work not supported yet."
-{% else %}
-#error "Invalid partition number input, check configurations."
-{% endif %}
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
 #if (CONFIG_TFM_FP > 0) && (CONFIG_TFM_SPM_BACKEND_SFN == 1)
 #error "FP is not supported for SFN model."
 #endif
-
-{% if partition_statistics['connection_based_srv_num'] > 0 %}
-/* Connection-based services exist, include the connection-specific API set. */
-#define {{"%-56s"|format("CONFIG_TFM_CONNECTION_BASED_SERVICE_API")}} 1
-{% endif %}
 
 #endif /* __CONFIG_IMPL_H__ */

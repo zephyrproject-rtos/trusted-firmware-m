@@ -133,6 +133,7 @@ add_custom_command(OUTPUT ${OUTPUT_FILES}
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tfm_parse_manifest_list.py
                                   -m ${COMBINED_LIST}
                                   -f ${GENERATED_FILE_LISTS}
+                                  -l ${TFM_ISOLATION_LEVEL}
                                   -o ${CMAKE_BINARY_DIR}/generated
                                   ${PARSE_MANIFEST_QUIET_FLAG}
     DEPENDS ${TEMPLATE_FILES} ${MANIFEST_FILES}
@@ -146,6 +147,7 @@ execute_process(
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tfm_parse_manifest_list.py
                                   -m ${COMBINED_LIST}
                                   -f ${GENERATED_FILE_LISTS}
+                                  -l ${TFM_ISOLATION_LEVEL}
                                   -o ${CMAKE_BINARY_DIR}/generated
                                   ${PARSE_MANIFEST_QUIET_FLAG}
     RESULT_VARIABLE RET

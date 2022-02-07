@@ -9,7 +9,7 @@
 
 #include "psa/framework_feature.h"
 
-#if defined(CONFIG_TFM_PSA_API_SUPERVISOR_CALL)
+#if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
 
 #define psa_framework_version    psa_framework_version_svc
 #define psa_version              psa_version_svc
@@ -35,7 +35,7 @@
 #define psa_set_rhandle          psa_set_rhandle_svc
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
-#elif defined(CONFIG_TFM_PSA_API_CROSS_CALL)
+#elif CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
 #define psa_framework_version    psa_framework_version_cross
 #define psa_version              psa_version_cross
@@ -68,7 +68,7 @@
 #define psa_unmap_outvec         psa_unmap_outvec_cross
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
-#elif defined(CONFIG_TFM_PSA_API_SFN_CALL)
+#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
 
 #define psa_framework_version    psa_framework_version_sfn
 #define psa_version              psa_version_sfn

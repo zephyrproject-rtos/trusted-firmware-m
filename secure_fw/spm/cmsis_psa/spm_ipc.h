@@ -392,7 +392,7 @@ void update_caller_outvec_len(struct conn_handle_t *msg);
  */
 void spm_assert_signal(void *p_pt, psa_signal_t signal);
 
-#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
 /*
  * SPM dispatcher to handle the API call under non-privileged model.

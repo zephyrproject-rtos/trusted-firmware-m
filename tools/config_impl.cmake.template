@@ -9,29 +9,12 @@
 ########{{utilities.donotedit_warning}}########
 
 if(TFM_PSA_API)
-{% if partition_statistics['ipc_partition_num'] > 0
-    and partition_statistics['sfn_partition_num'] == 0 %}
-    set(CONFIG_TFM_SPM_BACKEND_IPC ON PARENT_SCOPE)
+    set(CONFIG_TFM_SPM_BACKEND_SFN {{config_impl['CONFIG_TFM_SPM_BACKEND_SFN']}} PARENT_SCOPE)
+    set(CONFIG_TFM_SPM_BACKEND_IPC {{config_impl['CONFIG_TFM_SPM_BACKEND_IPC']}} PARENT_SCOPE)
 
-    if(TFM_ISOLATION_LEVEL GREATER 1)
-        set(CONFIG_TFM_PSA_API_SUPERVISOR_CALL ON PARENT_SCOPE)
-    else()
-        set(CONFIG_TFM_PSA_API_CROSS_CALL ON PARENT_SCOPE)
-    endif()
-{% elif partition_statistics['sfn_partition_num'] > 0
-    and partition_statistics['ipc_partition_num'] == 0 %}
-    set(CONFIG_TFM_SPM_BACKEND_SFN ON PARENT_SCOPE)
-    set(CONFIG_TFM_PSA_API_SFN_CALL ON PARENT_SCOPE)
-
-    if(TFM_ISOLATION_LEVEL GREATER 1)
-        message(FATAL_ERROR "High isolation level SFN model is not supported.")
-    endif()
-{% elif partition_statistics['sfn_partition_num'] > 0
-    and partition_statistics['ipc_partition_num'] > 0 %}
-    message(FATAL_ERROR "IPC and SFN co-work not supported yet.")
-{% else %}
-    message(FATAL_ERROR "Invalid partition number input, check configurations.")
-{% endif %}
+    set(CONFIG_TFM_PSA_API_SFN_CALL        {{config_impl['CONFIG_TFM_PSA_API_SFN_CALL']}}        PARENT_SCOPE)
+    set(CONFIG_TFM_PSA_API_CROSS_CALL      {{config_impl['CONFIG_TFM_PSA_API_CROSS_CALL']}}      PARENT_SCOPE)
+    set(CONFIG_TFM_PSA_API_SUPERVISOR_CALL {{config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL']}} PARENT_SCOPE)
 
     if((CONFIG_TFM_FP GREATER 0) AND CONFIG_TFM_SPM_BACKEND_SFN)
         message(FATAL_ERROR "FP is not supported for SFN model.")

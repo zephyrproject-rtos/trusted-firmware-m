@@ -117,7 +117,7 @@ def manifest_validation(partition_manifest, pid):
 
     return partition_manifest
 
-def process_partition_manifests(manifest_lists):
+def process_partition_manifests(manifest_lists, isolation_level):
     """
     Parse the input manifest lists, generate the data base for genereated files
     and generate manifest header files.
@@ -146,6 +146,14 @@ def process_partition_manifests(manifest_lists):
         'connection_based_srv_num': 0,
         'ipc_partition_num': 0,
         'sfn_partition_num': 0
+    }
+    config_impl = {
+        'CONFIG_TFM_SPM_BACKEND_SFN'              : '0',
+        'CONFIG_TFM_SPM_BACKEND_IPC'              : '0',
+        'CONFIG_TFM_PSA_API_SFN_CALL'             : '0',
+        'CONFIG_TFM_PSA_API_CROSS_CALL'           : '0',
+        'CONFIG_TFM_PSA_API_SUPERVISOR_CALL'      : '0',
+        'CONFIG_TFM_CONNECTION_BASED_SERVICE_API' : '0'
     }
 
     # Get all the manifests information as a dictionary
@@ -256,8 +264,34 @@ def process_partition_manifests(manifest_lists):
         all_manifests[idx]['pid'] = pid
         pid_list.append(pid)
 
+    # Set up configurations
+    if partition_statistics['ipc_partition_num'] == 0 and \
+        partition_statistics['sfn_partition_num'] > 0:
+        if isolation_level > 1:
+            print('High isolation level SFN model is not supported.')
+            exit(1)
+        config_impl['CONFIG_TFM_SPM_BACKEND_SFN'] = '1'
+        config_impl['CONFIG_TFM_PSA_API_SFN_CALL'] = '1'
+    elif partition_statistics['ipc_partition_num'] > 0 and \
+        partition_statistics['sfn_partition_num'] == 0:
+        config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] = '1'
+        if isolation_level > 1:
+            config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL'] = '1'
+        else:
+            config_impl['CONFIG_TFM_PSA_API_CROSS_CALL'] = '1'
+    elif partition_statistics['ipc_partition_num'] > 0 and \
+        partition_statistics['sfn_partition_num'] > 0:
+        print('IPC and SFN co-work not supported yet.')
+        exit(1)
+    else:
+        print('Invalid partition number input, check configurations.')
+        exit(1)
+
+    if partition_statistics['connection_based_srv_num'] > 0:
+        config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API'] = 1
+
     context['partitions'] = partition_list
-    context['partition_statistics'] = partition_statistics
+    context['config_impl'] = config_impl
     context['stateless_services'] = process_stateless_services(partition_list)
 
     return context
@@ -485,6 +519,14 @@ def parse_args():
                         , required=True
                         , metavar='file-list'
                         , help='These files descripe the file list to generate')
+
+    parser.add_argument('-l', '--isolation-level'
+                        , dest='isolation_level'
+                        , required=True
+                        , choices=['1', '2', '3']
+                        , metavar='isolation-level'
+                        , help='The isolation level')
+
     parser.add_argument('-q', '--quiet'
                         , dest='quiet'
                         , required=False
@@ -537,7 +579,7 @@ def main():
     """
     os.chdir(os.path.join(sys.path[0], '..'))
 
-    context = process_partition_manifests(manifest_lists)
+    context = process_partition_manifests(manifest_lists, int(args.isolation_level))
 
     utilities = {}
     utilities['donotedit_warning'] = donotedit_warning

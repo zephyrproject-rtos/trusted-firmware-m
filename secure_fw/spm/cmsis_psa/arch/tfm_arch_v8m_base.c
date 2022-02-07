@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -31,15 +31,15 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
-#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
 #pragma required = cross_call_execute_c
 
-#endif /* CONFIG_TFM_PSA_API_CROSS_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1 */
 
 #endif
 
-#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
 __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
                                        uint32_t stk_base, uint32_t stk_limit)
@@ -81,7 +81,7 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
     );
 }
 
-#endif /* CONFIG_TFM_PSA_API_CROSS_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1 */
 
 __attribute__((naked)) void PendSV_Handler(void)
 {

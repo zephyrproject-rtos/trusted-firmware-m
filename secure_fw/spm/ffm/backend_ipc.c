@@ -23,7 +23,7 @@
 /* Declare the global component list */
 struct partition_head_t partition_listhead;
 
-#ifdef CONFIG_TFM_PSA_API_CROSS_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
 /* TODO: To be checked when RPC design updates. */
@@ -115,7 +115,7 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
-#if defined(CONFIG_TFM_PSA_API_CROSS_CALL) && !defined(TFM_MULTI_CORE_TOPOLOGY)
+#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1) && !defined(TFM_MULTI_CORE_TOPOLOGY)
     if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
         SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
     }
@@ -132,7 +132,7 @@ static uint32_t ipc_system_run(void)
     uint32_t control;
     struct partition_t *p_cur_pt;
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#if CONFIG_TFM_PSA_API_THREAD_CALL == 1
     TFM_CORE_ASSERT(SPM_THREAD_CONTEXT);
 #endif
 
