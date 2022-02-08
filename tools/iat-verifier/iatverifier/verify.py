@@ -13,6 +13,7 @@ import sys
 from iatverifier.util import extract_iat_from_cose, recursive_bytes_to_strings
 from iatverifier.psa_iot_profile1_token_verifier import PSAIoTProfile1TokenVerifier
 from iatverifier.util import recursive_bytes_to_strings
+from iatverifier.verifiers import VerifierConfiguration, AttestationTokenVerifier
 
 logger = logging.getLogger('iat-verify')
 
@@ -52,9 +53,14 @@ def main():
 
     logging.basicConfig(level=logging.INFO)
 
+    config = VerifierConfiguration(keep_going=args.keep_going, strict=args.strict)
+    verifier = PSAIoTProfile1TokenVerifier.get_verifier(config)
+    if args.method == 'mac':
+        verifier.method = AttestationTokenVerifier.SIGN_METHOD_MAC0
+        verifier.cose_alg = AttestationTokenVerifier.COSE_ALG_HS256
+
     try:
-        raw_iat = extract_iat_from_cose(args.keyfile, args.tokenfile,
-                                        args.method)
+        raw_iat = extract_iat_from_cose(args.keyfile, args.tokenfile, verifier)
         if args.keyfile:
             print('Signature OK')
     except ValueError as e:
@@ -62,12 +68,6 @@ def main():
         sys.exit(1)
 
     try:
-        class Configuration:
-            pass
-        config = Configuration()
-        config.keep_going = args.keep_going
-        config.strict = args.strict
-        verifier = PSAIoTProfile1TokenVerifier.get_verifier(config)
         token = verifier.decode_and_validate_iat(raw_iat)
         if not verifier.seen_errors:
             print('Token format OK')

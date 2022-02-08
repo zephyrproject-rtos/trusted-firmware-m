@@ -25,16 +25,16 @@ def sign_eat(token, key=None):
     return signed_msg.encode()
 
 
-def hmac_eat(token, key=None):
+def hmac_eat(token, verifier, key=None):
     hmac_msg = Mac0Message(payload=token, key=key)
-    hmac_msg.compute_auth_tag('HS256')
+    hmac_msg.compute_auth_tag(verifier.cose_alg)
     return hmac_msg.encode()
 
 
-def convert_map_to_token_files(mapfile, keyfile, outfile, method='sign'):
+def convert_map_to_token_files(mapfile, keyfile, verifier, outfile):
     token_map = read_token_map(mapfile)
 
-    if method == 'sign':
+    if verifier.method == 'sign':
         with open(keyfile) as fh:
             signing_key = SigningKey.from_pem(fh.read())
     else:
@@ -42,18 +42,18 @@ def convert_map_to_token_files(mapfile, keyfile, outfile, method='sign'):
             signing_key = fh.read()
 
     with open(outfile, 'wb') as wfh:
-        convert_map_to_token(token_map, signing_key, wfh, method)
+        convert_map_to_token(token_map, signing_key, verifier, wfh,)
 
 
-def convert_map_to_token(token_map, signing_key, wfh, method='sign'):
+def convert_map_to_token(token_map, signing_key, verifier, wfh):
     token = cbor2.dumps(token_map)
 
-    if method == 'raw':
+    if verifier.method == AttestationTokenVerifier.SIGN_METHOD_RAW:
         signed_token = token
-    elif method == 'sign':
+    elif verifier.method == AttestationTokenVerifier.SIGN_METHOD_SIGN1:
         signed_token = sign_eat(token, signing_key)
-    elif method == 'mac':
-        signed_token = hmac_eat(token, signing_key)
+    elif verifier.method == AttestationTokenVerifier.SIGN_METHOD_MAC0:
+        signed_token = hmac_eat(token, verifier, signing_key)
     else:
         err_msg = 'Unexpected method "{}"; must be one of: raw, sign, mac'
         raise ValueError(err_msg.format(method))
@@ -61,8 +61,8 @@ def convert_map_to_token(token_map, signing_key, wfh, method='sign'):
     wfh.write(signed_token)
 
 
-def convert_token_to_map(raw_data):
-    payload = get_cose_payload(raw_data)
+def convert_token_to_map(raw_data, verifier):
+    payload = get_cose_payload(raw_data, verifier)
     token_map = cbor2.loads(payload)
     return _relabel_keys(token_map)
 
@@ -77,44 +77,44 @@ def read_token_map(f):
     return _parse_raw_token(raw)
 
 
-def extract_iat_from_cose(keyfile, tokenfile, method='sign'):
-    key = read_keyfile(keyfile, method)
+def extract_iat_from_cose(keyfile, tokenfile, verifier):
+    key = read_keyfile(keyfile, verifier.method)
 
     try:
         with open(tokenfile, 'rb') as wfh:
-            return get_cose_payload(wfh.read(), key, method)
+            return get_cose_payload(wfh.read(), verifier, key)
     except Exception as e:
         msg = 'Bad COSE file "{}": {}'
         raise ValueError(msg.format(tokenfile, e))
 
 
-def get_cose_payload(cose, key=None, method='sign'):
-    if method == 'sign':
-        return get_cose_sign1_payload(cose, key)
-    if method == 'mac':
-        return get_cose_mac0_pyload(cose, key)
+def get_cose_payload(cose, verifier, key=None):
+    if verifier.method == AttestationTokenVerifier.SIGN_METHOD_SIGN1:
+        return get_cose_sign1_payload(cose, verifier, key)
+    if verifier.method == AttestationTokenVerifier.SIGN_METHOD_MAC0:
+        return get_cose_mac0_pyload(cose, verifier, key)
     err_msg = 'Unexpected method "{}"; must be one of: sign, mac'
     raise ValueError(err_msg.format(method))
 
 
-def get_cose_sign1_payload(cose, key=None):
+def get_cose_sign1_payload(cose, verifier, key=None):
     msg = Sign1Message.decode(cose)
     if key:
         msg.key = key
         msg.signature = msg.signers
         try:
-            msg.verify_signature(alg='ES256')
+            msg.verify_signature(alg=verifier.cose_alg)
         except Exception as e:
             raise ValueError('Bad signature ({})'.format(e))
     return msg.payload
 
 
-def get_cose_mac0_pyload(cose, key=None):
+def get_cose_mac0_pyload(cose, verifier, key=None):
     msg = Mac0Message.decode(cose)
     if key:
         msg.key = key
         try:
-            msg.verify_auth_tag(alg='HS256')
+            msg.verify_auth_tag(alg=verifier.cose_alg)
         except Exception as e:
             raise ValueError('Bad signature ({})'.format(e))
     return msg.payload
@@ -138,11 +138,11 @@ def recursive_bytes_to_strings(d, in_place=False):
     return result
 
 
-def read_keyfile(keyfile, method='sign'):
+def read_keyfile(keyfile, method=AttestationTokenVerifier.SIGN_METHOD_SIGN1):
     if keyfile:
-        if method == 'sign':
+        if method == AttestationTokenVerifier.SIGN_METHOD_SIGN1:
             return read_sign1_key(keyfile)
-        if method == 'mac':
+        if method == AttestationTokenVerifier.SIGN_METHOD_MAC0:
             return read_hmac_key(keyfile)
         err_msg = 'Unexpected method "{}"; must be one of: sign, mac'
         raise ValueError(err_msg.format(method))
@@ -201,20 +201,31 @@ def _parse_raw_token(raw):
 
     return result
 
+def _format_value(names, key, value):
+    if key in names:
+        value = names[key].get_formatted_value(value)
+    return value
 
 def _relabel_keys(token_map):
     result = {}
+    while not hasattr(token_map, 'items'):
+        # TODO: token map is not a map. We are assuming that it is a tag
+        token_map = token_map.value
     names = {v.get_claim_key(): v for v in _get_known_claims()}
     for key, value in token_map.items():
         if hasattr(value, 'items'):
             value = _relabel_keys(value)
         elif (isinstance(value, Iterable) and
                 not isinstance(value, (str, bytes))):
-            # TODO  -- asumes dict elements
-            value = [_relabel_keys(v) for v in value]
+            new_value = []
+            for item in value:
+                if hasattr(item, 'items'):
+                    new_value.append(_relabel_keys(item))
+                else:
+                    new_value.append(_format_value(names, key, item))
+            value = new_value
         else:
-            if key in names:
-                value = names[key].get_formatted_value(value)
+            value = _format_value(names, key, value)
 
         if key in names:
             new_key = names[key].get_claim_name().lower()

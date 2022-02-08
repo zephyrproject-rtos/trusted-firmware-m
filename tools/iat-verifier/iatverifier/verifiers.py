@@ -78,11 +78,18 @@ class AttestationClaim:
     def is_utf_8(self):
         return False
 
+    def check_cross_claim_requirements(self):
+        pass
+
 
 # ----------------------------------------------------------------------------
 # Validation classes
 #
 class InstanceIdClaim(AttestationClaim):
+    def __init__(self, verifier, expected_len, mandatory=True):
+        super().__init__(verifier, mandatory)
+        self.expected_len = expected_len
+
     def get_claim_key(self=None):
         return ARM_RANGE - 9  # UEID
 
@@ -90,7 +97,7 @@ class InstanceIdClaim(AttestationClaim):
         return 'INSTANCE_ID'
 
     def verify(self, value):
-        self._validate_bytestring_length(value, 'INSTANCE_ID', 33)
+        self._validate_bytestring_length(value, 'INSTANCE_ID', self.expected_len)
         if value[0] != 0x01:
             msg = 'Invalid INSTANCE_ID: first byte must be 0x01, found: 0x{}'
             self.verifier.error(msg.format(value[0]))
@@ -160,6 +167,11 @@ class OriginatorClaim(NonVerifiedClaim):
 
 class SWComponentsClaim(AttestationClaim):
 
+    def __init__(self, verifier, claims, mandatory=True):
+        super().__init__(verifier, mandatory)
+        self.claims = claims
+
+
     def get_claim_key(self=None):
         return ARM_RANGE - 6
 
@@ -167,13 +179,7 @@ class SWComponentsClaim(AttestationClaim):
         return 'SW_COMPONENTS'
 
     def get_sw_component_claims(self):
-        return [
-            SWComponentTypeClaim(self.verifier, mandatory=False),
-            SwComponentVersionClaim(self.verifier, mandatory=False),
-            MeasurementValueClaim(self.verifier, mandatory=True),
-            MeasurementDescriptionClaim(self.verifier, mandatory=False),
-            SignerIdClaim(self.verifier, mandatory=False),
-        ]
+        return [claim(self.verifier, *args) for claim, args in self.claims]
 
     def get_contained_claim_key_list(self):
         ret = {}
@@ -352,6 +358,17 @@ class BootSeedClaim(AttestationClaim):
         self.verify_count += 1
 
 
+class VerificationServiceClaim(NonVerifiedClaim):
+    def get_claim_key(self=None):
+        return ARM_RANGE - 10
+
+    def get_claim_name(self=None):
+        return 'VERIFICATION_SERVICE'
+
+    def is_utf_8(self):
+        return True
+
+
 class SignerIdClaim(AttestationClaim):
     def get_claim_key(self=None):
         return SW_COMPONENT_RANGE + 5
@@ -400,13 +417,33 @@ class MeasurementDescriptionClaim(NonVerifiedClaim):
 
 # ----------------------------------------------------------------------------
 
+class VerifierConfiguration:
+    def __init__(self, keep_going=False, strict=False):
+        self.keep_going=keep_going
+        self.strict=strict
+
 class AttestationTokenVerifier:
 
     all_known_claims = {}
-    claims = []
 
-    def __init__(self, configuration):
-        self.config = configuration
+    SIGN_METHOD_SIGN1 = "sign"
+    SIGN_METHOD_MAC0 = "mac"
+    SIGN_METHOD_RAW = "raw"
+
+    COSE_ALG_ES256="ES256"
+    COSE_ALG_ES384="ES384"
+    COSE_ALG_ES512="ES512"
+    COSE_ALG_HS256_64="HS256/64"
+    COSE_ALG_HS256="HS256"
+    COSE_ALG_HS384="HS384"
+    COSE_ALG_HS512="HS512"
+
+    def __init__(self, method, cose_alg, configuration=None, ):
+        self.method = method
+        self.cose_alg = cose_alg
+        self.config = configuration if configuration is not None else VerifierConfiguration()
+        self.claims = []
+
         self.seen_errors = False
 
     def add_claims(self, claims):
@@ -418,6 +455,23 @@ class AttestationTokenVerifier:
             AttestationTokenVerifier.all_known_claims.update(claim.get_contained_claim_key_list())
         self.claims.extend(claims)
 
+    def check_cross_claim_requirements(self):
+        claims = {v.get_claim_key(): v for v in self.claims}
+
+        if SWComponentsClaim.get_claim_key() in claims:
+            sw_component_present = claims[SWComponentsClaim.get_claim_key()].verify_count > 0
+        else:
+            sw_component_present = False
+
+        if NoMeasurementsClaim.get_claim_key() in claims:
+            no_measurement_present = claims[NoMeasurementsClaim.get_claim_key()].verify_count > 0
+        else:
+            no_measurement_present = False
+
+        if not sw_component_present and not no_measurement_present:
+            self.error('Invalid IAT: no software measurements defined and '
+                  'NO_MEASUREMENTS claim is not present.')
+
     def decode_and_validate_iat(self, encoded_iat):
         try:
             raw_token = cbor2.loads(encoded_iat)
@@ -428,6 +482,9 @@ class AttestationTokenVerifier:
         claims = {v.get_claim_key(): v for v in self.claims}
 
         token = {}
+        while not hasattr(raw_token, 'items'):
+            # TODO: token map is not a map. We are assuming that it is a tag
+            raw_token = raw_token.value
         for entry in raw_token.keys():
             value = raw_token[entry]
 
@@ -442,20 +499,14 @@ class AttestationTokenVerifier:
             claim.verify(value)
             claim.add_tokens_to_dict(token, value)
 
-        sw_component_present = False
-        no_measurement_present = False
         for claim in claims.values():
-            if isinstance(claim, SWComponentsClaim) and claim.verify_count>0:
-                sw_component_present = True
-            if isinstance(claim, NoMeasurementsClaim) and claim.verify_count>0:
-                no_measurement_present = True
             if not claim.all_mandatory_found():
                 msg = 'Invalid IAT: missing MANDATORY claim "{}"'
                 self.error(msg.format(claim.get_claim_name()))
 
-        if not sw_component_present and not no_measurement_present:
-            self.error('Invalid IAT: no software measurements defined and '
-                  'NO_MEASUREMENTS claim is not present.')
+            claim.check_cross_claim_requirements()
+
+        self.check_cross_claim_requirements()
 
         return token
 

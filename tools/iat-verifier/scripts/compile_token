@@ -13,6 +13,7 @@ import sys
 from ecdsa import SigningKey
 from iatverifier.util import read_token_map, convert_map_to_token
 from iatverifier.psa_iot_profile1_token_verifier import PSAIoTProfile1TokenVerifier
+from iatverifier.verifiers import AttestationTokenVerifier
 
 
 if __name__ == '__main__':
@@ -36,30 +37,34 @@ if __name__ == '__main__':
     args = parser.parse_args()
     signing_key = None
 
+    cose_alg = None
     if args.hmac:
-        method = 'mac'
+        method = AttestationTokenVerifier.SIGN_METHOD_MAC0
+        cose_alg = AttestationTokenVerifier.COSE_ALG_HS256
+
         if args.keyfile:
             with open(args.keyfile, 'rb') as fh:
                 signing_key = fh.read()
     elif args.raw:
         if args.keyfile:
             raise ValueError('A keyfile cannot be specified with --raw.')
-        method = 'raw'
+        method = AttestationTokenVerifier.SIGN_METHOD_RAW
     else:
-        method = 'sign'
+        method = AttestationTokenVerifier.SIGN_METHOD_SIGN1
         if args.keyfile:
             with open(args.keyfile) as fh:
                 signing_key = SigningKey.from_pem(fh.read())
 
-    # TODO: Create a token verifier so that the verifiers in the
-    # AttestationTokenVerifier class are populated. This is not very nice,
-    # find a better way to solve this
-    PSAIoTProfile1TokenVerifier.get_verifier(None)
+    verifier = PSAIoTProfile1TokenVerifier.get_verifier()
+    if verifier.method != method:
+        verifier.method = method
+    if cose_alg is not None and verifier.cose_alg != cose_alg:
+        verifier.cose_alg = cose_alg
     token_map = read_token_map(args.source)
 
     if args.outfile:
         with open(args.outfile, 'wb') as wfh:
-            convert_map_to_token(token_map, signing_key, wfh, method)
+            convert_map_to_token(token_map, signing_key, verifier, wfh)
     else:
         with os.fdopen(sys.stdout.fileno(), 'wb') as wfh:
-            convert_map_to_token(token_map, signing_key, wfh, method)
+            convert_map_to_token(token_map, signing_key, verifier, wfh)

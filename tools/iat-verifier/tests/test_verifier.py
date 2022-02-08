@@ -11,6 +11,7 @@ import unittest
 
 from iatverifier.util import convert_map_to_token_files
 from iatverifier.verify import extract_iat_from_cose, PSAIoTProfile1TokenVerifier
+from iatverifier.verifiers import VerifierConfiguration
 
 
 THIS_DIR = os.path.dirname(__file__)
@@ -20,43 +21,39 @@ KEYFILE = os.path.join(DATA_DIR, 'key.pem')
 KEYFILE_ALT = os.path.join(DATA_DIR, 'key-alt.pem')
 
 
-def create_token(source_name, keyfile):
+def create_token(source_name, keyfile, verifier):
     source_path = os.path.join(DATA_DIR, source_name)
     fd, dest_path = tempfile.mkstemp()
     os.close(fd)
-    convert_map_to_token_files(source_path, keyfile, dest_path)
+    convert_map_to_token_files(source_path, keyfile, verifier, dest_path)
     return dest_path
 
 
 def read_iat(filename, keyfile, verifier):
     filepath = os.path.join(DATA_DIR, filename)
-    raw_iat = extract_iat_from_cose(keyfile, filepath)
+    raw_iat = extract_iat_from_cose(keyfile, filepath, verifier)
     return verifier.decode_and_validate_iat(raw_iat)
 
 
 def create_and_read_iat(source_name, keyfile, verifier):
-    token_file = create_token(source_name, keyfile)
+    token_file = create_token(source_name, keyfile, verifier)
     return read_iat(token_file, keyfile, verifier)
 
 
 class TestIatVerifier(unittest.TestCase):
 
     def setUp(self):
-        class Configuration:
-            pass
-        config = Configuration()
-        config.keep_going = False
-        config.strict = False
-        self.config = config
+        self.config = VerifierConfiguration()
 
     def test_validate_signature(self):
-        good_sig = create_token('valid-iat.yaml', KEYFILE)
-        bad_sig = create_token('valid-iat.yaml', KEYFILE_ALT)
+        verifier = PSAIoTProfile1TokenVerifier.get_verifier(self.config)
+        good_sig = create_token('valid-iat.yaml', KEYFILE, verifier)
+        bad_sig = create_token('valid-iat.yaml', KEYFILE_ALT, verifier)
 
-        raw_iat = extract_iat_from_cose(KEYFILE, good_sig)
+        raw_iat = extract_iat_from_cose(KEYFILE, good_sig, verifier)
 
         with self.assertRaises(ValueError) as cm:
-            raw_iat = extract_iat_from_cose(KEYFILE, bad_sig)
+            raw_iat = extract_iat_from_cose(KEYFILE, bad_sig, verifier)
 
         self.assertIn('Bad signature', cm.exception.args[0])
 
