@@ -15,11 +15,11 @@ from pycose.sign1message import Sign1Message
 
 from iatverifier.util import sign_eat
 
-from iatverifier.verifiers import InstanceIdVerifier, ImplementationIdVerifier, ChallengeVerifier
-from iatverifier.verifiers import ClientIdVerifier, SecurityLifecycleVerifier, ProfileIdVerifier
-from iatverifier.verifiers import BootSeedVerifier, SWComponentsVerifier, SWComponentTypeVerifier
-from iatverifier.verifiers import SignerIdVerifier, SwComponentVersionVerifier
-from iatverifier.verifiers import MeasurementValueVerifier, MeasurementDescriptionVerifier
+from iatverifier.verifiers import InstanceIdClaim, ImplementationIdClaim, ChallengeClaim
+from iatverifier.verifiers import ClientIdClaim, SecurityLifecycleClaim, ProfileIdClaim
+from iatverifier.verifiers import BootSeedClaim, SWComponentsClaim, SWComponentTypeClaim
+from iatverifier.verifiers import SignerIdClaim, SwComponentVersionClaim
+from iatverifier.verifiers import MeasurementValueClaim, MeasurementDescriptionClaim
 
 # First byte indicates "GUID"
 GUID = b'\x01' + struct.pack('QQQQ', 0x0001020304050607, 0x08090A0B0C0D0E0F,
@@ -36,42 +36,42 @@ MEASUREMENT = struct.pack('QQQQ', 0X0001020304050607, 0X08090A0B0C0D0E0F,
                           0X1011121314151617, 0X18191A1B1C1D1E1F)
 
 token_map = {
-  InstanceIdVerifier.get_claim_key(None): GUID,
-  ImplementationIdVerifier.get_claim_key(None): ORIGIN,
-  ChallengeVerifier.get_claim_key(None): NONCE,
-  ClientIdVerifier.get_claim_key(None): 2,
-  SecurityLifecycleVerifier.get_claim_key(None): SecurityLifecycleVerifier.SL_SECURED,
-  ProfileIdVerifier.get_claim_key(None): 'http://example.com',
-  BootSeedVerifier.get_claim_key(None): BOOT_SEED,
-  SWComponentsVerifier.get_claim_key(None): [
+  InstanceIdClaim.get_claim_key(): GUID,
+  ImplementationIdClaim.get_claim_key(): ORIGIN,
+  ChallengeClaim.get_claim_key(): NONCE,
+  ClientIdClaim.get_claim_key(): 2,
+  SecurityLifecycleClaim.get_claim_key(): SecurityLifecycleClaim.SL_SECURED,
+  ProfileIdClaim.get_claim_key(): 'http://example.com',
+  BootSeedClaim.get_claim_key(): BOOT_SEED,
+  SWComponentsClaim.get_claim_key(): [
         {
             # bootloader
-            SWComponentTypeVerifier.get_claim_key(None): 'BL',
-            SignerIdVerifier.get_claim_key(None): SIGNER_ID,
-            SwComponentVersionVerifier.get_claim_key(None): '3.4.2',
-            MeasurementValueVerifier.get_claim_key(None): MEASUREMENT,
-            MeasurementDescriptionVerifier.get_claim_key(None): 'TF-M_SHA256MemPreXIP',
+            SWComponentTypeClaim.get_claim_key(): 'BL',
+            SignerIdClaim.get_claim_key(): SIGNER_ID,
+            SwComponentVersionClaim.get_claim_key(): '3.4.2',
+            MeasurementValueClaim.get_claim_key(): MEASUREMENT,
+            MeasurementDescriptionClaim.get_claim_key(): 'TF-M_SHA256MemPreXIP',
         },
         {
             # mod1
-            SWComponentTypeVerifier.get_claim_key(None): 'M1',
-            SignerIdVerifier.get_claim_key(None): SIGNER_ID,
-            SwComponentVersionVerifier.get_claim_key(None): '3.4.2',
-            MeasurementValueVerifier.get_claim_key(None): MEASUREMENT,
+            SWComponentTypeClaim.get_claim_key(): 'M1',
+            SignerIdClaim.get_claim_key(): SIGNER_ID,
+            SwComponentVersionClaim.get_claim_key(): '3.4.2',
+            MeasurementValueClaim.get_claim_key(): MEASUREMENT,
         },
         {
             # mod2
-            SWComponentTypeVerifier.get_claim_key(None): 'M2',
-            SignerIdVerifier.get_claim_key(None): SIGNER_ID,
-            SwComponentVersionVerifier.get_claim_key(None): '3.4.2',
-            MeasurementValueVerifier.get_claim_key(None): MEASUREMENT,
+            SWComponentTypeClaim.get_claim_key(): 'M2',
+            SignerIdClaim.get_claim_key(): SIGNER_ID,
+            SwComponentVersionClaim.get_claim_key(): '3.4.2',
+            MeasurementValueClaim.get_claim_key(): MEASUREMENT,
         },
         {
             # mod3
-            SWComponentTypeVerifier.get_claim_key(None): 'M3',
-            SignerIdVerifier.get_claim_key(None): SIGNER_ID,
-            SwComponentVersionVerifier.get_claim_key(None): '3.4.2',
-            MeasurementValueVerifier.get_claim_key(None): MEASUREMENT,
+            SWComponentTypeClaim.get_claim_key(): 'M3',
+            SignerIdClaim.get_claim_key(): SIGNER_ID,
+            SwComponentVersionClaim.get_claim_key(): '3.4.2',
+            MeasurementValueClaim.get_claim_key(): MEASUREMENT,
         },
     ],
 }

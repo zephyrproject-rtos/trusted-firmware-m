@@ -11,8 +11,10 @@ import logging
 import sys
 
 from iatverifier.util import extract_iat_from_cose, recursive_bytes_to_strings
-from iatverifier.verifiers import seen_errors
 from iatverifier.psa_iot_profile1_token_verifier import PSAIoTProfile1TokenVerifier
+from iatverifier.util import recursive_bytes_to_strings
+
+logger = logging.getLogger('iat-verify')
 
 def main():
     parser = argparse.ArgumentParser(
@@ -52,8 +54,8 @@ def main():
 
     try:
         raw_iat = extract_iat_from_cose(args.keyfile, args.tokenfile,
-                                        args.keep_going, args.method)
-        if args.keyfile and not seen_errors:
+                                        args.method)
+        if args.keyfile:
             print('Signature OK')
     except ValueError as e:
         logger.error('Could not extract IAT from COSE:\n\t{}'.format(e))
@@ -65,8 +67,9 @@ def main():
         config = Configuration()
         config.keep_going = args.keep_going
         config.strict = args.strict
-        token = PSAIoTProfile1TokenVerifier(config).decode_and_validate_iat(raw_iat)
-        if not seen_errors:
+        verifier = PSAIoTProfile1TokenVerifier.get_verifier(config)
+        token = verifier.decode_and_validate_iat(raw_iat)
+        if not verifier.seen_errors:
             print('Token format OK')
     except ValueError as e:
         logger.error('Could not validate IAT:\n\t{}'.format(e))

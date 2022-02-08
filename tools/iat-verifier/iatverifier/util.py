@@ -8,9 +8,9 @@
 from collections.abc import Iterable
 from copy import deepcopy
 
+import base64
 import cbor2
 import yaml
-import base64
 from ecdsa import SigningKey, VerifyingKey
 from pycose.sign1message import Sign1Message
 from pycose.mac0message import Mac0Message
@@ -77,7 +77,7 @@ def read_token_map(f):
     return _parse_raw_token(raw)
 
 
-def extract_iat_from_cose(keyfile, tokenfile, keep_going=False, method='sign'):
+def extract_iat_from_cose(keyfile, tokenfile, method='sign'):
     key = read_keyfile(keyfile, method)
 
     try:
@@ -91,11 +91,10 @@ def extract_iat_from_cose(keyfile, tokenfile, keep_going=False, method='sign'):
 def get_cose_payload(cose, key=None, method='sign'):
     if method == 'sign':
         return get_cose_sign1_payload(cose, key)
-    elif method == 'mac':
+    if method == 'mac':
         return get_cose_mac0_pyload(cose, key)
-    else:
-        err_msg = 'Unexpected method "{}"; must be one of: sign, mac'
-        raise ValueError(err_msg.format(method))
+    err_msg = 'Unexpected method "{}"; must be one of: sign, mac'
+    raise ValueError(err_msg.format(method))
 
 
 def get_cose_sign1_payload(cose, key=None):
@@ -143,15 +142,12 @@ def read_keyfile(keyfile, method='sign'):
     if keyfile:
         if method == 'sign':
             return read_sign1_key(keyfile)
-        elif method == 'mac':
+        if method == 'mac':
             return read_hmac_key(keyfile)
-        else:
-            err_msg = 'Unexpected method "{}"; must be one of: sign, mac'
-            raise ValueError(err_msg.format(method))
-    else:  # no keyfile
-        key = None
+        err_msg = 'Unexpected method "{}"; must be one of: sign, mac'
+        raise ValueError(err_msg.format(method))
 
-    return key
+    return None
 
 
 def read_sign1_key(keyfile):
@@ -173,21 +169,21 @@ def read_sign1_key(keyfile):
 def read_hmac_key(keyfile):
     return open(keyfile, 'rb').read()
 
-def _get_known_verifiers():
-    for _, verifier_class in AttestationTokenVerifier.all_known_verifiers.items():
-        yield verifier_class(None)
+def _get_known_claims():
+    for _, claim_class in AttestationTokenVerifier.all_known_claims.items():
+        yield claim_class
 
 def _parse_raw_token(raw):
     result = {}
-    field_names = {v.get_claim_name(): v for v in _get_known_verifiers()}
+    field_names = {cc.get_claim_name(): cc for cc in _get_known_claims()}
     for raw_key, raw_value in raw.items():
         if isinstance(raw_key, int):
             key = raw_key
         else:
             field_name = raw_key.upper()
             try:
-                verifier = field_names[field_name]
-                key = verifier.get_claim_key()
+                claim_class = field_names[field_name]
+                key = claim_class.get_claim_key()
             except KeyError:
                 msg = 'Unknown field "{}" in token.'.format(field_name)
                 raise ValueError(msg)
@@ -199,7 +195,7 @@ def _parse_raw_token(raw):
             # TODO  -- asumes dict elements
             value = [_parse_raw_token(v) for v in raw_value]
         else:
-            value = verifier.parse_raw(raw_value)
+            value = claim_class.parse_raw(raw_value)
 
         result[key] = value
 
@@ -208,7 +204,7 @@ def _parse_raw_token(raw):
 
 def _relabel_keys(token_map):
     result = {}
-    names = {v.get_claim_key(): v for v in _get_known_verifiers()}
+    names = {v.get_claim_key(): v for v in _get_known_claims()}
     for key, value in token_map.items():
         if hasattr(value, 'items'):
             value = _relabel_keys(value)

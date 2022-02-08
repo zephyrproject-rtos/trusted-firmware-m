@@ -6,7 +6,6 @@
 # -----------------------------------------------------------------------------
 
 import os
-import sys
 import tempfile
 import unittest
 
@@ -62,33 +61,33 @@ class TestIatVerifier(unittest.TestCase):
         self.assertIn('Bad signature', cm.exception.args[0])
 
     def test_validate_iat_structure(self):
-        iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier(self.config))
+        iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
 
         with self.assertRaises(ValueError) as cm:
-            iat = create_and_read_iat('invalid-profile-id.yaml', KEYFILE, PSAIoTProfile1TokenVerifier(self.config))
+            iat = create_and_read_iat('invalid-profile-id.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
         self.assertIn('Invalid PROFILE_ID', cm.exception.args[0])
 
         with self.assertRaises(ValueError) as cm:
-            iat = read_iat('malformed.cbor', KEYFILE, PSAIoTProfile1TokenVerifier(self.config))
+            iat = read_iat('malformed.cbor', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
         self.assertIn('Bad COSE', cm.exception.args[0])
 
         with self.assertRaises(ValueError) as cm:
-            iat = create_and_read_iat('missing-claim.yaml', KEYFILE, PSAIoTProfile1TokenVerifier(self.config))
+            iat = create_and_read_iat('missing-claim.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
         self.assertIn('missing MANDATORY claim', cm.exception.args[0])
 
         with self.assertRaises(ValueError) as cm:
-            iat = create_and_read_iat('submod-missing-claim.yaml', KEYFILE, PSAIoTProfile1TokenVerifier(self.config))
+            iat = create_and_read_iat('submod-missing-claim.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
         self.assertIn('missing MANDATORY claim', cm.exception.args[0])
 
         with self.assertRaises(ValueError) as cm:
-            iat = create_and_read_iat('missing-sw-comps.yaml', KEYFILE, PSAIoTProfile1TokenVerifier(self.config))
+            iat = create_and_read_iat('missing-sw-comps.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
         self.assertIn('NO_MEASUREMENTS claim is not present',
                       cm.exception.args[0])
 
     def test_binary_string_decoding(self):
-        iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier(self.config))
+        iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
         self.assertEqual(iat['SECURITY_LIFECYCLE'], 'SL_SECURED')
 
     def test_security_lifecycle_decoding(self):
-        iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier(self.config))
+        iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
         self.assertEqual(iat['SECURITY_LIFECYCLE'], 'SL_SECURED')

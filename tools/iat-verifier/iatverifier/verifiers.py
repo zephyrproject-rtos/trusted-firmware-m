@@ -10,9 +10,7 @@ import logging
 import cbor2
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)8s: %(message)s')
-logger = logging.getLogger('iat-verify')
-
-seen_errors = False
+logger = logging.getLogger('iat-verifiers')
 
 # IAT custom claims
 ARM_RANGE = -75000
@@ -20,31 +18,24 @@ ARM_RANGE = -75000
 # SW component IDs
 SW_COMPONENT_RANGE = 0
 
-class Verifier:
-    def __init__(self, configuration, mandatory=True):
-        self.config = configuration
+class AttestationClaim:
+    def __init__(self, verifier, mandatory=True):
+        self.config = verifier.config
+        self.verifier = verifier
         self.mandatory = mandatory
         self.verify_count = 0
 
     def verify(self, value):
         raise NotImplementedError
 
-    def get_claim_key(self):
+    def get_claim_key(self=None):
         raise NotImplementedError
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         raise NotImplementedError
 
-    def get_claim_key_list(self):
+    def get_contained_claim_key_list(self):
         return {}
-
-    def error(self, message):
-        global seen_errors
-        seen_errors = True
-        if self.config.keep_going:
-            logger.error(message)
-        else:
-            raise ValueError(message)
 
     def decode(self, value):
         if self.is_utf_8():
@@ -52,7 +43,7 @@ class Verifier:
                 return value.decode()
             except UnicodeDecodeError as e:
                 msg = 'Error decodeing value for "{}": {}'
-                self.error(msg.format(self.get_claim_name(), e))
+                self.verifier.error(msg.format(self.get_claim_name(), e))
                 return str(value)[2:-1]
         else:  # not a UTF-8 value, i.e. a bytestring
             return value
@@ -69,17 +60,19 @@ class Verifier:
     def _validate_bytestring_length(self, value, name, expected_len):
         if not isinstance(value, bytes):
             msg = 'Invalid {}: must be a bytes string: found {}'
-            self.error(msg.format(name, type(value)))
+            self.verifier.error(msg.format(name, type(value)))
 
         value_len = len(value)
         if value_len != expected_len:
             msg = 'Invalid {} length: must be exactly {} bytes, found {} bytes'
-            self.error(msg.format(name, expected_len, value_len))
+            self.verifier.error(msg.format(name, expected_len, value_len))
 
-    def parse_raw(self, raw_value):
+    @staticmethod
+    def parse_raw(raw_value):
         return raw_value
 
-    def get_formatted_value(self, value):
+    @staticmethod
+    def get_formatted_value(value):
         return value
 
     def is_utf_8(self):
@@ -89,75 +82,75 @@ class Verifier:
 # ----------------------------------------------------------------------------
 # Validation classes
 #
-class InstanceIdVerifier(Verifier):
-    def get_claim_key(self):
+class InstanceIdClaim(AttestationClaim):
+    def get_claim_key(self=None):
         return ARM_RANGE - 9  # UEID
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'INSTANCE_ID'
 
     def verify(self, value):
         self._validate_bytestring_length(value, 'INSTANCE_ID', 33)
         if value[0] != 0x01:
             msg = 'Invalid INSTANCE_ID: first byte must be 0x01, found: 0x{}'
-            self.error(msg.format(value[0]))
+            self.verifier.error(msg.format(value[0]))
         self.verify_count += 1
 
 
-class ChallengeVerifier(Verifier):
+class ChallengeClaim(AttestationClaim):
 
     HASH_SIZES = [32, 48, 64]
 
-    def get_claim_key(self):
+    def get_claim_key(self=None):
         return ARM_RANGE - 8  # nonce
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'CHALLENGE'
 
     def verify(self, value):
         if not isinstance(value, bytes):
             msg = 'Invalid CHALLENGE; must be a bytes string.'
-            self.error(msg)
+            self.verifier.error(msg)
 
         value_len = len(value)
-        if value_len not in ChallengeVerifier.HASH_SIZES:
+        if value_len not in ChallengeClaim.HASH_SIZES:
             msg = 'Invalid CHALLENGE length; must one of {}, found {} bytes'
-            self.error(msg.format(ChallengeVerifier.HASH_SIZES, value_len))
+            self.verifier.error(msg.format(ChallengeClaim.HASH_SIZES, value_len))
         self.verify_count += 1
 
 
-class AlwaysPassVerifier(Verifier):
+class NonVerifiedClaim(AttestationClaim):
     def verify(self, value):
         self.verify_count += 1
 
-    def get_claim_key(self):
+    def get_claim_key(self=None):
         raise NotImplementedError
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         raise NotImplementedError
 
 
-class ImplementationIdVerifier(AlwaysPassVerifier):
-    def get_claim_key(self):
+class ImplementationIdClaim(NonVerifiedClaim):
+    def get_claim_key(self=None):
         return ARM_RANGE - 3
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'IMPLEMENTATION_ID'
 
 
-class HardwareIdVerifier(AlwaysPassVerifier):
-    def get_claim_key(self):
+class HardwareIdClaim(NonVerifiedClaim):
+    def get_claim_key(self=None):
         return ARM_RANGE - 5
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'HARDWARE_ID'
 
 
-class OriginatorVerifier(AlwaysPassVerifier):
-    def get_claim_key(self):
+class OriginatorClaim(NonVerifiedClaim):
+    def get_claim_key(self=None):
         return ARM_RANGE - 10  # originator
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'ORIGINATOR'
 
     def is_utf_8(self):
@@ -165,65 +158,65 @@ class OriginatorVerifier(AlwaysPassVerifier):
 
 
 
-class SWComponentsVerifier(Verifier):
+class SWComponentsClaim(AttestationClaim):
 
-    def get_claim_key(self):
+    def get_claim_key(self=None):
         return ARM_RANGE - 6
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'SW_COMPONENTS'
 
-    def get_sw_component_verifiers(self):
+    def get_sw_component_claims(self):
         return [
-            SWComponentTypeVerifier(self.config, mandatory=False),
-            SwComponentVersionVerifier(self.config, mandatory=False),
-            MeasurementValueVerifier(self.config, mandatory=True),
-            MeasurementDescriptionVerifier(self.config, mandatory=False),
-            SignerIdVerifier(self.config, mandatory=False),
+            SWComponentTypeClaim(self.verifier, mandatory=False),
+            SwComponentVersionClaim(self.verifier, mandatory=False),
+            MeasurementValueClaim(self.verifier, mandatory=True),
+            MeasurementDescriptionClaim(self.verifier, mandatory=False),
+            SignerIdClaim(self.verifier, mandatory=False),
         ]
 
-    def get_claim_key_list(self):
+    def get_contained_claim_key_list(self):
         ret = {}
-        for verifier in self.get_sw_component_verifiers():
-            ret[verifier.get_claim_key()] = verifier.__class__
+        for claim in self.get_sw_component_claims():
+            ret[claim.get_claim_key()] = claim.__class__
         return ret
 
     def verify(self, value):
         if not isinstance(value, list):
             msg = 'Invalid SW_COMPONENTS value (must be an array): {}'
-            self.error(msg.format(value))
+            self.verifier.error(msg.format(value))
             return
 
         for entry_number, sw_component in enumerate(value):
             if not isinstance(sw_component, dict):
                 msg = 'Invalid SW_COMPONENTS array entry (must be a map): {}'
-                self.error(msg.format(sw_component))
+                self.verifier.error(msg.format(sw_component))
                 return
 
-            verifiers = {v.get_claim_key(): v for v in self.get_sw_component_verifiers()}
+            claims = {v.get_claim_key(): v for v in self.get_sw_component_claims()}
             for k, v in sw_component.items():
-                if k not in verifiers.keys():
+                if k not in claims.keys():
                     if self.config.strict:
                         msg = 'Unexpected SW_COMPONENT claim: {}'
-                        self.error(msg.format(k))
+                        self.verifier.error(msg.format(k))
                     else:
                         continue
                 try:
-                    verifiers[k].verify(v)
+                    claims[k].verify(v)
                 except Exception:
                     if not self.config.keep_going:
                         raise
-            for verifier in verifiers.values():
-                if not verifier.all_mandatory_found():
+            for claim in claims.values():
+                if not claim.all_mandatory_found():
                     msg = ('Invalid IAT: missing MANDATORY claim "{}" '
                            'from sw_componentule at index {}')
-                    self.error(msg.format(verifier.get_claim_name(),
+                    self.verifier.error(msg.format(claim.get_claim_name(),
                                      entry_number))
         self.verify_count += 1
 
     def decode_sw_component(self, raw_sw_component):
         sw_component = {}
-        names = {verifier.get_claim_key(): verifier.get_claim_name() for verifier in self.get_sw_component_verifiers()}
+        names = {claim.get_claim_key(): claim.get_claim_name() for claim in self.get_sw_component_claims()}
         for k, v in raw_sw_component.items():
             if isinstance(v, bytes):
                 v = self.decode(v)
@@ -245,41 +238,41 @@ class SWComponentsVerifier(Verifier):
                 decoded_component = self.decode_sw_component(raw_sw_component)
                 token[entry_name].append(decoded_component)
         except TypeError:
-            self.error('Invalid SW_COMPONENT value: {}'.format(value))
+            self.verifier.error('Invalid SW_COMPONENT value: {}'.format(value))
 
-class SWComponentTypeVerifier(AlwaysPassVerifier):
-    def get_claim_key(self):
+class SWComponentTypeClaim(NonVerifiedClaim):
+    def get_claim_key(self=None):
         return SW_COMPONENT_RANGE + 1
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'SW_COMPONENT_TYPE'
 
     def is_utf_8(self):
         return True
 
 
-class NoMeasurementsVerifier(AlwaysPassVerifier):
-    def get_claim_key(self):
+class NoMeasurementsClaim(NonVerifiedClaim):
+    def get_claim_key(self=None):
         return ARM_RANGE - 7
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'NO_MEASUREMENTS'
 
 
-class ClientIdVerifier(Verifier):
-    def get_claim_key(self):
+class ClientIdClaim(AttestationClaim):
+    def get_claim_key(self=None):
         return ARM_RANGE - 1
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'CLIENT_ID'
 
     def verify(self, value):
         if not isinstance(value, int):
             msg = 'Invalid CLIENT_ID, must be an int: {}'
-            self.error(msg.format(value))
+            self.verifier.error(msg.format(value))
         self.verify_count += 1
 
-class SecurityLifecycleVerifier(Verifier):
+class SecurityLifecycleClaim(AttestationClaim):
 
     SL_SHIFT = 12
 
@@ -300,56 +293,58 @@ class SecurityLifecycleVerifier(Verifier):
     SL_RECOVERABLE_PSA_ROT_DEBUG = 0x5000
     SL_PSA_LIFECYCLE_DECOMMISSIONED = 0x6000
 
-    def get_claim_key(self):
+    def get_claim_key(self=None):
         return ARM_RANGE - 2
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'SECURITY_LIFECYCLE'
 
     def verify(self, value):
         if not isinstance(value, int):
             msg = 'Invalid SECURITY_LIFECYCLE, must be an int: {}'
-            self.error(msg.format(value))
+            self.verifier.error(msg.format(value))
         self.verify_count += 1
 
     def add_tokens_to_dict(self, token, value):
         entry_name = self.get_claim_name()
         try:
-            name_idx = (value >> SecurityLifecycleVerifier.SL_SHIFT) - 1
-            token[entry_name] = SecurityLifecycleVerifier.SL_NAMES[name_idx]
+            name_idx = (value >> SecurityLifecycleClaim.SL_SHIFT) - 1
+            token[entry_name] = SecurityLifecycleClaim.SL_NAMES[name_idx]
         except IndexError:
             token[entry_name] = 'CUSTOM({})'.format(value)
 
-    def parse_raw(self, raw_value):
-        name_idx = SecurityLifecycleVerifier.SL_NAMES.index(raw_value.upper())
-        return (name_idx + 1) << SecurityLifecycleVerifier.SL_SHIFT
+    @staticmethod
+    def parse_raw(raw_value):
+        name_idx = SecurityLifecycleClaim.SL_NAMES.index(raw_value.upper())
+        return (name_idx + 1) << SecurityLifecycleClaim.SL_SHIFT
 
-    def get_formatted_value(self, value):
-        return (SecurityLifecycleVerifier.SL_NAMES[(value >> SecurityLifecycleVerifier.SL_SHIFT) - 1])
+    @staticmethod
+    def get_formatted_value(value):
+        return SecurityLifecycleClaim.SL_NAMES[(value >> SecurityLifecycleClaim.SL_SHIFT) - 1]
 
 
-class ProfileIdVerifier(Verifier):
-    def get_claim_key(self):
+class ProfileIdClaim(AttestationClaim):
+    def get_claim_key(self=None):
         return ARM_RANGE
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'PROFILE_ID'
 
     def verify(self, value):
         if not isinstance(value, str):
             msg = 'Invalid PROFILE_ID (must be a string): {}'.format(value)
-            self.error(msg.format(value))
+            self.verifier.error(msg.format(value))
         self.verify_count += 1
 
     def is_utf_8(self):
         return True
 
 
-class BootSeedVerifier(Verifier):
-    def get_claim_key(self):
+class BootSeedClaim(AttestationClaim):
+    def get_claim_key(self=None):
         return ARM_RANGE - 4
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'BOOT_SEED'
 
     def verify(self, value):
@@ -357,11 +352,11 @@ class BootSeedVerifier(Verifier):
         self.verify_count += 1
 
 
-class SignerIdVerifier(Verifier):
-    def get_claim_key(self):
+class SignerIdClaim(AttestationClaim):
+    def get_claim_key(self=None):
         return SW_COMPONENT_RANGE + 5
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'SIGNER_ID'
 
     def verify(self, value):
@@ -369,22 +364,22 @@ class SignerIdVerifier(Verifier):
         self.verify_count += 1
 
 
-class SwComponentVersionVerifier(AlwaysPassVerifier):
-    def get_claim_key(self):
+class SwComponentVersionClaim(NonVerifiedClaim):
+    def get_claim_key(self=None):
         return SW_COMPONENT_RANGE + 4
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'SW_COMPONENT_VERSION'
 
     def is_utf_8(self):
         return True
 
 
-class MeasurementValueVerifier(Verifier):
-    def get_claim_key(self):
+class MeasurementValueClaim(AttestationClaim):
+    def get_claim_key(self=None):
         return SW_COMPONENT_RANGE + 2
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'MEASUREMENT_VALUE'
 
     def verify(self, value):
@@ -392,11 +387,11 @@ class MeasurementValueVerifier(Verifier):
         self.verify_count += 1
 
 
-class MeasurementDescriptionVerifier(AlwaysPassVerifier):
-    def get_claim_key(self):
+class MeasurementDescriptionClaim(NonVerifiedClaim):
+    def get_claim_key(self=None):
         return SW_COMPONENT_RANGE + 6
 
-    def get_claim_name(self):
+    def get_claim_name(self=None):
         return 'MEASUREMENT_DESCRIPTION'
 
     def is_utf_8(self):
@@ -407,16 +402,21 @@ class MeasurementDescriptionVerifier(AlwaysPassVerifier):
 
 class AttestationTokenVerifier:
 
-    all_known_verifiers = {}
+    all_known_claims = {}
+    claims = []
 
-    def __init__(self, verifiers):
-        for verifier in verifiers:
-            key = verifier.get_claim_key()
-            if key not in AttestationTokenVerifier.all_known_verifiers:
-                AttestationTokenVerifier.all_known_verifiers[key] = verifier.__class__
+    def __init__(self, configuration):
+        self.config = configuration
+        self.seen_errors = False
 
-            AttestationTokenVerifier.all_known_verifiers.update(verifier.get_claim_key_list())
-        self.verifiers = verifiers
+    def add_claims(self, claims):
+        for claim in claims:
+            key = claim.get_claim_key()
+            if key not in AttestationTokenVerifier.all_known_claims:
+                AttestationTokenVerifier.all_known_claims[key] = claim.__class__
+
+            AttestationTokenVerifier.all_known_claims.update(claim.get_contained_claim_key_list())
+        self.claims.extend(claims)
 
     def decode_and_validate_iat(self, encoded_iat):
         try:
@@ -425,38 +425,44 @@ class AttestationTokenVerifier:
             msg = 'Invalid CBOR: {}'
             raise ValueError(msg.format(e))
 
-        verifiers = {v.get_claim_key(): v for v in self.verifiers}
+        claims = {v.get_claim_key(): v for v in self.claims}
 
         token = {}
         for entry in raw_token.keys():
             value = raw_token[entry]
 
             try:
-                verifier = verifiers[entry]
+                claim = claims[entry]
             except KeyError:
                 if self.config.strict:
                     self.error('Invalid IAT claim: {}'.format(entry))
                 token[entry] = value
                 continue
 
-            verifier.verify(value)
-            verifier.add_tokens_to_dict(token, value)
-
-            config = verifier.config
+            claim.verify(value)
+            claim.add_tokens_to_dict(token, value)
 
         sw_component_present = False
         no_measurement_present = False
-        for verifier in verifiers.values():
-            if isinstance(verifier, SWComponentsVerifier) and verifier.verify_count>0:
+        for claim in claims.values():
+            if isinstance(claim, SWComponentsClaim) and claim.verify_count>0:
                 sw_component_present = True
-            if isinstance(verifier, NoMeasurementsVerifier) and verifier.verify_count>0:
+            if isinstance(claim, NoMeasurementsClaim) and claim.verify_count>0:
                 no_measurement_present = True
-            if not verifier.all_mandatory_found():
+            if not claim.all_mandatory_found():
                 msg = 'Invalid IAT: missing MANDATORY claim "{}"'
-                verifier.error(msg.format(verifier.get_claim_name()))
+                self.error(msg.format(claim.get_claim_name()))
 
         if not sw_component_present and not no_measurement_present:
-            Verifier(config).error('Invalid IAT: no software measurements defined and '
+            self.error('Invalid IAT: no software measurements defined and '
                   'NO_MEASUREMENTS claim is not present.')
 
         return token
+
+
+    def error(self, message):
+        self.seen_errors = True
+        if self.config.keep_going:
+            logger.error(message)
+        else:
+            raise ValueError(message)
