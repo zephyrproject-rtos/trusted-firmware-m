@@ -13,6 +13,7 @@ import sys
 import yaml
 from ecdsa import SigningKey
 from iatverifier.util import read_token_map, convert_map_to_token
+from iatverifier.psa_iot_profile1_token_verifier import PSAIoTProfile1TokenVerifier
 
 
 if __name__ == '__main__':
@@ -51,6 +52,10 @@ if __name__ == '__main__':
             with open(args.keyfile) as fh:
                 signing_key = SigningKey.from_pem(fh.read())
 
+    # TODO: Create a token verifier so that the verifiers in the
+    # AttestationTokenVerifier class are populated. This is not very nice,
+    # find a better way to solve this
+    PSAIoTProfile1TokenVerifier(None)
     token_map = read_token_map(args.source)
 
     if args.outfile:

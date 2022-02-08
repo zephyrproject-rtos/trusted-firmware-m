@@ -14,8 +14,7 @@ import base64
 from ecdsa import SigningKey, VerifyingKey
 from pycose.sign1message import Sign1Message
 from pycose.mac0message import Mac0Message
-import iatverifier.const as const
-from iatverifier.verifiers import SecurityLifecycleVerifier, get_field_names
+from iatverifier.verifiers import AttestationTokenVerifier
 
 def sign_eat(token, key=None):
     signed_msg = Sign1Message()
@@ -174,32 +173,33 @@ def read_sign1_key(keyfile):
 def read_hmac_key(keyfile):
     return open(keyfile, 'rb').read()
 
+def _get_known_verifiers():
+    for _, verifier_class in AttestationTokenVerifier.all_known_verifiers.items():
+        yield verifier_class(None)
 
 def _parse_raw_token(raw):
     result = {}
-    field_names = get_field_names()
+    field_names = {v.get_claim_name(): v for v in _get_known_verifiers()}
     for raw_key, raw_value in raw.items():
         if isinstance(raw_key, int):
             key = raw_key
         else:
             field_name = raw_key.upper()
             try:
-                key = field_names[field_name]
+                verifier = field_names[field_name]
+                key = verifier.get_claim_key()
             except KeyError:
                 msg = 'Unknown field "{}" in token.'.format(field_name)
                 raise ValueError(msg)
 
-        if key == SecurityLifecycleVerifier(None).get_claim_key():
-            name_idx = const.SL_NAMES.index(raw_value.upper())
-            value = (name_idx + 1) << const.SL_SHIFT
-        elif hasattr(raw_value, 'items'):
+        if hasattr(raw_value, 'items'):
             value = _parse_raw_token(raw_value)
         elif (isinstance(raw_value, Iterable) and
                 not isinstance(raw_value, (str, bytes))):
             # TODO  -- asumes dict elements
             value = [_parse_raw_token(v) for v in raw_value]
         else:
-            value = raw_value
+            value = verifier.parse_raw(raw_value)
 
         result[key] = value
 
@@ -208,7 +208,7 @@ def _parse_raw_token(raw):
 
 def _relabel_keys(token_map):
     result = {}
-    names = {id:name for name, id in get_field_names().items()}
+    names = {v.get_claim_key(): v for v in _get_known_verifiers()}
     for key, value in token_map.items():
         if hasattr(value, 'items'):
             value = _relabel_keys(value)
@@ -216,12 +216,12 @@ def _relabel_keys(token_map):
                 not isinstance(value, (str, bytes))):
             # TODO  -- asumes dict elements
             value = [_relabel_keys(v) for v in value]
-
-        if key == SecurityLifecycleVerifier(None).get_claim_name():
-            value = (const.SL_NAMES[(value >> const.SL_SHIFT) - 1])
+        else:
+            if key in names:
+                value = names[key].get_formatted_value(value)
 
         if key in names:
-            new_key = names[key].lower()
+            new_key = names[key].get_claim_name().lower()
         else:
             new_key = key
         result[new_key] = value

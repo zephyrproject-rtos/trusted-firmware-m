@@ -9,8 +9,6 @@ import logging
 
 import cbor2
 
-from iatverifier import const
-
 logging.basicConfig(level=logging.INFO, format='%(levelname)8s: %(message)s')
 logger = logging.getLogger('iat-verify')
 
@@ -38,7 +36,7 @@ class Verifier:
         raise NotImplementedError
 
     def get_claim_key_list(self):
-        return {self.get_claim_name(): self.get_claim_key()}
+        return {}
 
     def error(self, message):
         global seen_errors
@@ -48,14 +46,13 @@ class Verifier:
         else:
             raise ValueError(message)
 
-
-    def decode(self, value, key):
-        if key in const.IS_UTF_8:
+    def decode(self, value):
+        if self.is_utf_8():
             try:
                 return value.decode()
             except UnicodeDecodeError as e:
                 msg = 'Error decodeing value for "{}": {}'
-                self.error(msg.format(key, e))
+                self.error(msg.format(self.get_claim_name(), e))
                 return str(value)[2:-1]
         else:  # not a UTF-8 value, i.e. a bytestring
             return value
@@ -63,7 +60,7 @@ class Verifier:
     def add_tokens_to_dict(self, token, value):
         entry_name = self.get_claim_name()
         if isinstance(value, bytes):
-            value = self.decode(value, entry_name)
+            value = self.decode(value)
         token[entry_name] = value
 
     def all_mandatory_found(self):
@@ -79,6 +76,14 @@ class Verifier:
             msg = 'Invalid {} length: must be exactly {} bytes, found {} bytes'
             self.error(msg.format(name, expected_len, value_len))
 
+    def parse_raw(self, raw_value):
+        return raw_value
+
+    def get_formatted_value(self, value):
+        return value
+
+    def is_utf_8(self):
+        return False
 
 
 # ----------------------------------------------------------------------------
@@ -100,6 +105,9 @@ class InstanceIdVerifier(Verifier):
 
 
 class ChallengeVerifier(Verifier):
+
+    HASH_SIZES = [32, 48, 64]
+
     def get_claim_key(self):
         return ARM_RANGE - 8  # nonce
 
@@ -112,9 +120,9 @@ class ChallengeVerifier(Verifier):
             self.error(msg)
 
         value_len = len(value)
-        if value_len not in const.HASH_SIZES:
+        if value_len not in ChallengeVerifier.HASH_SIZES:
             msg = 'Invalid CHALLENGE length; must one of {}, found {} bytes'
-            self.error(msg.format(const.HASH_SIZES, value_len))
+            self.error(msg.format(ChallengeVerifier.HASH_SIZES, value_len))
         self.verify_count += 1
 
 
@@ -152,6 +160,10 @@ class OriginatorVerifier(AlwaysPassVerifier):
     def get_claim_name(self):
         return 'ORIGINATOR'
 
+    def is_utf_8(self):
+        return True
+
+
 
 class SWComponentsVerifier(Verifier):
 
@@ -171,9 +183,9 @@ class SWComponentsVerifier(Verifier):
         ]
 
     def get_claim_key_list(self):
-        ret = super().get_claim_key_list()
+        ret = {}
         for verifier in self.get_sw_component_verifiers():
-            ret.update(verifier.get_claim_key_list())
+            ret[verifier.get_claim_key()] = verifier.__class__
         return ret
 
     def verify(self, value):
@@ -214,7 +226,7 @@ class SWComponentsVerifier(Verifier):
         names = {verifier.get_claim_key(): verifier.get_claim_name() for verifier in self.get_sw_component_verifiers()}
         for k, v in raw_sw_component.items():
             if isinstance(v, bytes):
-                v = self.decode(v, k)
+                v = self.decode(v)
             try:
                 sw_component[names[k]] = v
             except KeyError:
@@ -242,6 +254,9 @@ class SWComponentTypeVerifier(AlwaysPassVerifier):
     def get_claim_name(self):
         return 'SW_COMPONENT_TYPE'
 
+    def is_utf_8(self):
+        return True
+
 
 class NoMeasurementsVerifier(AlwaysPassVerifier):
     def get_claim_key(self):
@@ -265,6 +280,26 @@ class ClientIdVerifier(Verifier):
         self.verify_count += 1
 
 class SecurityLifecycleVerifier(Verifier):
+
+    SL_SHIFT = 12
+
+    SL_NAMES = [
+        'SL_UNKNOWN',
+        'SL_PSA_ROT_PROVISIONING',
+        'SL_SECURED',
+        'SL_NON_PSA_ROT_DEBUG',
+        'SL_RECOVERABLE_PSA_ROT_DEBUG',
+        'SL_PSA_LIFECYCLE_DECOMMISSIONED',
+    ]
+
+    # Security Lifecycle claims
+    SL_UNKNOWN = 0x1000
+    SL_PSA_ROT_PROVISIONING = 0x2000
+    SL_SECURED = 0x3000
+    SL_NON_PSA_ROT_DEBUG = 0x4000
+    SL_RECOVERABLE_PSA_ROT_DEBUG = 0x5000
+    SL_PSA_LIFECYCLE_DECOMMISSIONED = 0x6000
+
     def get_claim_key(self):
         return ARM_RANGE - 2
 
@@ -280,10 +315,17 @@ class SecurityLifecycleVerifier(Verifier):
     def add_tokens_to_dict(self, token, value):
         entry_name = self.get_claim_name()
         try:
-            name_idx = (value >> const.SL_SHIFT) - 1
-            token[entry_name] = const.SL_NAMES[name_idx]
+            name_idx = (value >> SecurityLifecycleVerifier.SL_SHIFT) - 1
+            token[entry_name] = SecurityLifecycleVerifier.SL_NAMES[name_idx]
         except IndexError:
             token[entry_name] = 'CUSTOM({})'.format(value)
+
+    def parse_raw(self, raw_value):
+        name_idx = SecurityLifecycleVerifier.SL_NAMES.index(raw_value.upper())
+        return (name_idx + 1) << SecurityLifecycleVerifier.SL_SHIFT
+
+    def get_formatted_value(self, value):
+        return (SecurityLifecycleVerifier.SL_NAMES[(value >> SecurityLifecycleVerifier.SL_SHIFT) - 1])
 
 
 class ProfileIdVerifier(Verifier):
@@ -298,6 +340,9 @@ class ProfileIdVerifier(Verifier):
             msg = 'Invalid PROFILE_ID (must be a string): {}'.format(value)
             self.error(msg.format(value))
         self.verify_count += 1
+
+    def is_utf_8(self):
+        return True
 
 
 class BootSeedVerifier(Verifier):
@@ -331,6 +376,9 @@ class SwComponentVersionVerifier(AlwaysPassVerifier):
     def get_claim_name(self):
         return 'SW_COMPONENT_VERSION'
 
+    def is_utf_8(self):
+        return True
+
 
 class MeasurementValueVerifier(Verifier):
     def get_claim_key(self):
@@ -351,30 +399,24 @@ class MeasurementDescriptionVerifier(AlwaysPassVerifier):
     def get_claim_name(self):
         return 'MEASUREMENT_DESCRIPTION'
 
+    def is_utf_8(self):
+        return True
+
+
 # ----------------------------------------------------------------------------
 
-class PSAIoTProfile1TokenVerifier(Verifier):
-    def __init__(self, configuration, mandatory=True):
-        super().__init__(configuration, mandatory)
-        self.claims = [
-            ProfileIdVerifier(self.config, False),
-            ClientIdVerifier(self.config, True),
-            SecurityLifecycleVerifier(self.config, True),
-            ImplementationIdVerifier(self.config, True),
-            BootSeedVerifier(self.config, True),
-            HardwareIdVerifier(self.config, False),
-            SWComponentsVerifier(self.config, False),
-            NoMeasurementsVerifier(self.config, False),
-            ChallengeVerifier(self.config, True),
-            InstanceIdVerifier(self.config, True),
-            OriginatorVerifier(self.config, False),
-        ]
+class AttestationTokenVerifier:
 
-    def get_claim_key_list(self):
-        ret = {}
-        for verifier in self.claims:
-            ret.update(verifier.get_claim_key_list())
-        return ret
+    all_known_verifiers = {}
+
+    def __init__(self, verifiers):
+        for verifier in verifiers:
+            key = verifier.get_claim_key()
+            if key not in AttestationTokenVerifier.all_known_verifiers:
+                AttestationTokenVerifier.all_known_verifiers[key] = verifier.__class__
+
+            AttestationTokenVerifier.all_known_verifiers.update(verifier.get_claim_key_list())
+        self.verifiers = verifiers
 
     def decode_and_validate_iat(self, encoded_iat):
         try:
@@ -383,7 +425,7 @@ class PSAIoTProfile1TokenVerifier(Verifier):
             msg = 'Invalid CBOR: {}'
             raise ValueError(msg.format(e))
 
-        verifiers = {v.get_claim_key(): v for v in self.claims}
+        verifiers = {v.get_claim_key(): v for v in self.verifiers}
 
         token = {}
         for entry in raw_token.keys():
@@ -394,13 +436,13 @@ class PSAIoTProfile1TokenVerifier(Verifier):
             except KeyError:
                 if self.config.strict:
                     self.error('Invalid IAT claim: {}'.format(entry))
-                if isinstance(value, bytes):
-                    value = self.decode(value, entry)
                 token[entry] = value
                 continue
 
             verifier.verify(value)
             verifier.add_tokens_to_dict(token, value)
+
+            config = verifier.config
 
         sw_component_present = False
         no_measurement_present = False
@@ -411,34 +453,10 @@ class PSAIoTProfile1TokenVerifier(Verifier):
                 no_measurement_present = True
             if not verifier.all_mandatory_found():
                 msg = 'Invalid IAT: missing MANDATORY claim "{}"'
-                self.error(msg.format(verifier.get_claim_name()))
+                verifier.error(msg.format(verifier.get_claim_name()))
 
         if not sw_component_present and not no_measurement_present:
-            self.error('Invalid IAT: no software measurements defined and '
+            Verifier(config).error('Invalid IAT: no software measurements defined and '
                   'NO_MEASUREMENTS claim is not present.')
 
         return token
-
-    def verify(self, value):
-        return self.decode_and_validate_iat(value)
-
-
-def get_field_names():
-
-    field_names = {}
-    for sym in globals().values():
-        try:
-            issubclass(sym, globals().get('Verifier'))
-        except TypeError:
-            continue
-
-        verifier = sym(None)
-        try:
-            claim_key = verifier.get_claim_key()
-            claim_name = verifier.get_claim_name()
-        except NotImplementedError:
-            continue
-
-        field_names[claim_name] = claim_key
-
-    return field_names

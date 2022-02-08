@@ -13,7 +13,6 @@ import cbor2
 from ecdsa import SigningKey
 from pycose.sign1message import Sign1Message
 
-from iatverifier import const
 from iatverifier.util import sign_eat
 
 from iatverifier.verifiers import InstanceIdVerifier, ImplementationIdVerifier, ChallengeVerifier
@@ -41,7 +40,7 @@ token_map = {
   ImplementationIdVerifier.get_claim_key(None): ORIGIN,
   ChallengeVerifier.get_claim_key(None): NONCE,
   ClientIdVerifier.get_claim_key(None): 2,
-  SecurityLifecycleVerifier.get_claim_key(None): const.SL_SECURED,
+  SecurityLifecycleVerifier.get_claim_key(None): SecurityLifecycleVerifier.SL_SECURED,
   ProfileIdVerifier.get_claim_key(None): 'http://example.com',
   BootSeedVerifier.get_claim_key(None): BOOT_SEED,
   SWComponentsVerifier.get_claim_key(None): [

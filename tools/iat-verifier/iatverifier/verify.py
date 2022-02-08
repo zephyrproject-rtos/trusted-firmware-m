@@ -11,8 +11,8 @@ import logging
 import sys
 
 from iatverifier.util import extract_iat_from_cose, recursive_bytes_to_strings
-from iatverifier.verifiers import PSAIoTProfile1TokenVerifier, seen_errors
-
+from iatverifier.verifiers import seen_errors
+from iatverifier.psa_iot_profile1_token_verifier import PSAIoTProfile1TokenVerifier
 
 def main():
     parser = argparse.ArgumentParser(
