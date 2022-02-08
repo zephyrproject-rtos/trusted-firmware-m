@@ -140,6 +140,8 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle);
 psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
                                         uint32_t timeout);
 
+/* This API is only used in IPC backend. */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 /**
  * \brief Function body of \ref psa_get.
  *
@@ -160,6 +162,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
  *                                reference.
  */
 psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg);
+#endif
 
 /**
  * \brief Function body of \ref psa_read.

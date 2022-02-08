@@ -49,9 +49,6 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         break;
     case TFM_SVC_PSA_WAIT:
         return tfm_spm_partition_psa_wait((psa_signal_t)ctx[0], ctx[1]);
-    case TFM_SVC_PSA_GET:
-        return tfm_spm_partition_psa_get((psa_signal_t)ctx[0],
-                                         (psa_msg_t *)ctx[1]);
     case TFM_SVC_PSA_READ:
         return tfm_spm_partition_psa_read((psa_handle_t)ctx[0], ctx[1],
                                           (void *)ctx[2], (size_t)ctx[3]);
@@ -61,9 +58,6 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
     case TFM_SVC_PSA_WRITE:
         tfm_spm_partition_psa_write((psa_handle_t)ctx[0], ctx[1],
                                     (void *)ctx[2], (size_t)ctx[3]);
-        break;
-    case TFM_SVC_PSA_REPLY:
-        tfm_spm_partition_psa_reply((psa_handle_t)ctx[0], (psa_status_t)ctx[1]);
         break;
     case TFM_SVC_PSA_NOTIFY:
         tfm_spm_partition_psa_notify((int32_t)ctx[0]);
@@ -91,6 +85,15 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         tfm_spm_partition_psa_set_rhandle((psa_handle_t)ctx[0], (void *)ctx[1]);
         break;
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+/* These APIs are only used in IPC backend. */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+    case TFM_SVC_PSA_GET:
+        return tfm_spm_partition_psa_get((psa_signal_t)ctx[0],
+                                         (psa_msg_t *)ctx[1]);
+    case TFM_SVC_PSA_REPLY:
+        tfm_spm_partition_psa_reply((psa_handle_t)ctx[0], (psa_status_t)ctx[1]);
+        break;
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 #if TFM_SP_LOG_RAW_ENABLED
     case TFM_SVC_OUTPUT_UNPRIV_STRING:
         return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);

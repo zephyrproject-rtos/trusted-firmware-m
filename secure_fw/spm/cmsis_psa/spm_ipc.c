@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include "aapcs_local.h"
 #include "bitops.h"
+#include "config_impl.h"
 #include "critical_section.h"
 #include "current.h"
 #include "fih.h"
@@ -199,6 +200,8 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
 
 /* Partition management functions */
 
+/* This API is only used in IPC backend. */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
                                                psa_signal_t signal)
 {
@@ -230,6 +233,7 @@ struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
 
     return p_msg_iter;
 }
+#endif
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {

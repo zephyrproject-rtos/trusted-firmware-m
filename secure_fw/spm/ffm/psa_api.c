@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include "bitops.h"
+#include "config_impl.h"
 #include "critical_section.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
@@ -470,6 +471,8 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     return partition->signals_asserted & signal_mask;
 }
 
+/* This API is only used in IPC backend. */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 {
     struct conn_handle_t *tmp_msg = NULL;
@@ -528,6 +531,7 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 
     return PSA_SUCCESS;
 }
+#endif
 
 size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
                                   void *buffer, size_t num_bytes)
