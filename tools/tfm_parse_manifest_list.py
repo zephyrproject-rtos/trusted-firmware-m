@@ -260,12 +260,14 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
         load_info_file     = os.path.join(OUT_DIR, output_path, 'auto_generated',
                                           'load_info_{}.c'.format(manifest_out_basename))\
                                               .replace('\\', '/')
+        output_dir         = os.path.join(OUT_DIR, output_path).replace('\\', '/')
 
         partition_list.append({'manifest': manifest, 'attr': manifest_item,
                                'manifest_out_basename': manifest_out_basename,
                                'header_file': manifest_head_file,
                                'intermedia_file': intermedia_file,
-                               'loadinfo_file': load_info_file})
+                               'loadinfo_file': load_info_file,
+                               'output_dir':output_dir})
 
     # Automatically assign PIDs for partitions without 'pid' attribute
     pid = max(pid_list, default = TFM_PID_BASE - 1)
@@ -335,7 +337,8 @@ def gen_per_partition_files(context):
         partition_context['attr'] = one_partition['attr']
         partition_context['manifest_out_basename'] = one_partition['manifest_out_basename']
 
-        logging.info ("Generating Header: " + one_partition['header_file'])
+        logging.info ('Generating {} in {}'.format(one_partition['attr']['name'],
+                                            one_partition['output_dir']))
         outfile_path = os.path.dirname(one_partition['header_file'])
         if not os.path.exists(outfile_path):
             os.makedirs(outfile_path)
@@ -344,7 +347,6 @@ def gen_per_partition_files(context):
         headerfile.write(manifesttemplate.render(partition_context))
         headerfile.close()
 
-        logging.info ("Generating Intermedia: " + one_partition['intermedia_file'])
         intermediafile_path = os.path.dirname(one_partition['intermedia_file'])
         if not os.path.exists(intermediafile_path):
             os.makedirs(intermediafile_path)
@@ -352,7 +354,6 @@ def gen_per_partition_files(context):
         intermediafile.write(memorytemplate.render(partition_context))
         intermediafile.close()
 
-        logging.info ("Generating Loadinfo: " + one_partition['loadinfo_file'])
         infofile_path = os.path.dirname(one_partition['loadinfo_file'])
         if not os.path.exists(infofile_path):
             os.makedirs(infofile_path)
@@ -378,7 +379,6 @@ def gen_summary_files(context, gen_file_lists):
             file_list_yaml = yaml.safe_load(file_list_yaml_file)
             file_list.extend(file_list_yaml['file_list'])
 
-    logging.info("Start to generate file from the generated list:")
     for file in file_list:
         # Replace environment variables in the output filepath
         manifest_out_file = os.path.expandvars(file['output'])
@@ -386,8 +386,6 @@ def gen_summary_files(context, gen_file_lists):
         templatefile_name = os.path.expandvars(file['template'])
 
         manifest_out_file = os.path.join(OUT_DIR, manifest_out_file)
-
-        logging.info ("Generating " + manifest_out_file)
 
         outfile_path = os.path.dirname(manifest_out_file)
         if not os.path.exists(outfile_path):
@@ -398,8 +396,6 @@ def gen_summary_files(context, gen_file_lists):
         outfile = io.open(manifest_out_file, 'w', newline=None)
         outfile.write(template.render(context))
         outfile.close()
-
-    logging.info ("Generation of files done")
 
 def process_stateless_services(partitions):
     """
