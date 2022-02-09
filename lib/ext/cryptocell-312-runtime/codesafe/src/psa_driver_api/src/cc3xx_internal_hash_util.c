@@ -34,8 +34,8 @@ psa_status_t cc3xx_psa_hash_mode_to_cc_hash_mode(psa_algorithm_t alg,
     } else if (PSA_ALG_IS_HASH_AND_SIGN(alg)) {
         hash_alg = PSA_ALG_SIGN_GET_HASH(alg);
     } else if (alg == PSA_ALG_RSA_PKCS1V15_SIGN_RAW) {
-        /* Non-hashed signatures are not supported */
-        return PSA_ERROR_NOT_SUPPORTED;
+        *(CCRsaHashOpMode_t *)hash_mode = CC_RSA_HASH_NO_HASH_mode;
+        return PSA_SUCCESS;
     } else {
         CC_PAL_LOG_ERR("Algorithm 0x%x is not OAEP or HASH-AND-SIGN\r\n", alg);
         return PSA_ERROR_INVALID_ARGUMENT;
