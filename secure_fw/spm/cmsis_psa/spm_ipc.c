@@ -19,6 +19,7 @@
 #include "internal_errors.h"
 #include "tfm_spm_hal.h"
 #include "tfm_api.h"
+#include "tfm_arch.h"
 #include "tfm_secure_api.h"
 #include "tfm_memory_utils.h"
 #include "tfm_hal_defs.h"
@@ -612,20 +613,22 @@ uint64_t do_schedule(void)
 {
     AAPCS_DUAL_U32_T ctx_ctrls;
     struct partition_t *p_part_curr, *p_part_next;
+    struct context_ctrl_t *p_curr_ctx;
     struct thread_t *pth_next = thrd_next();
     struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
 
-    AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)CURRENT_THREAD->p_context_ctrl,
-                                  (uint32_t)CURRENT_THREAD->p_context_ctrl);
+    p_curr_ctx = (struct context_ctrl_t *)(CURRENT_THREAD->p_context_ctrl);
 
-    p_part_curr = GET_THRD_OWNER(CURRENT_THREAD);
+    AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)p_curr_ctx, (uint32_t)p_curr_ctx);
+
+    p_part_curr = GET_CURRENT_COMPONENT();
     p_part_next = GET_THRD_OWNER(pth_next);
 
     if (scheduler_lock != SCHEDULER_LOCKED && pth_next != NULL &&
         p_part_curr != p_part_next) {
         /* Check if there is enough room on stack to save more context */
-        if ((p_part_curr->ctx_ctrl.sp_limit +
-             sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
+        if ((p_curr_ctx->sp_limit +
+                sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
             tfm_core_panic();
         }
 
