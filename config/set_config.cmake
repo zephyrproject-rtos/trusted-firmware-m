@@ -54,7 +54,9 @@ endif()
 # Load TF-M model specific default config
 if (TFM_LIB_MODEL)
     include(config/tfm_library_config_default.cmake)
-else()
+elseif (CONFIG_TFM_SPM_BACKEND STREQUAL "SFN")
+    include(config/tfm_sfn_config_default.cmake)
+else() #The default backend is IPC
     include(config/tfm_ipc_config_default.cmake)
 endif()
 

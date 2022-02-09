@@ -26,6 +26,7 @@ set(PSA_FRAMEWORK_HAS_MM_IOVEC          OFF         CACHE BOOL      "Enable MM-I
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
 set(TFM_FIH_PROFILE                     OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 set(CONFIG_TFM_CONN_HANDLE_MAX_NUM      8           CACHE STRING    "The maximal number of secure services that are connected or requested at the same time")
+set(CONFIG_TFM_SPM_BACKEND              "IPC"       CACHE STRING    "The SPM backend [IPC, SFN]")
 
 # An NSPE client_id is provided by the NSPE OS via the SPM or directly by the SPM.
 # When `TFM_NS_MANAGE_NSID` is `ON`, TF-M supports NSPE OS providing NSPE client_id.

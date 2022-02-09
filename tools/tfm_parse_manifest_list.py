@@ -117,7 +117,7 @@ def manifest_validation(partition_manifest, pid):
 
     return partition_manifest
 
-def process_partition_manifests(manifest_lists, isolation_level):
+def process_partition_manifests(manifest_lists, isolation_level, backend):
     """
     Parse the input manifest lists, generate the data base for genereated files
     and generate manifest header files.
@@ -275,27 +275,27 @@ def process_partition_manifests(manifest_lists, isolation_level):
         pid_list.append(pid)
 
     # Set up configurations
-    if partition_statistics['ipc_partition_num'] == 0 and \
-        partition_statistics['sfn_partition_num'] > 0:
-        if isolation_level > 1:
-            print('High isolation level SFN model is not supported.')
+    if backend == 'SFN':
+        if partition_statistics['ipc_partition_num'] > 0:
+            logging.error('SFN backend does not support IPC Partitions.')
             exit(1)
+
+        if isolation_level > 1:
+            logging.error('SFN backend does not support high isolation levels.')
+            exit(1)
+
         config_impl['CONFIG_TFM_SPM_BACKEND_SFN'] = '1'
         config_impl['CONFIG_TFM_PSA_API_SFN_CALL'] = '1'
-    elif partition_statistics['ipc_partition_num'] > 0 and \
-        partition_statistics['sfn_partition_num'] == 0:
+    elif backend == 'IPC':
+        if partition_statistics['sfn_partition_num'] > 0:
+            logging.error('IPC backend does not support SFN Partitions.')
+            exit(1)
+
         config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] = '1'
         if isolation_level > 1:
             config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL'] = '1'
         else:
             config_impl['CONFIG_TFM_PSA_API_CROSS_CALL'] = '1'
-    elif partition_statistics['ipc_partition_num'] > 0 and \
-        partition_statistics['sfn_partition_num'] > 0:
-        print('IPC and SFN co-work not supported yet.')
-        exit(1)
-    else:
-        print('Invalid partition number input, check configurations.')
-        exit(1)
 
     if partition_statistics['connection_based_srv_num'] > 0:
         config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API'] = 1
@@ -539,7 +539,13 @@ def parse_args():
                         , dest='isolation_level'
                         , required=True
                         , choices=['1', '2', '3']
-                        , metavar='isolation-level'
+                        , metavar='isolation-level')
+
+    parser.add_argument('-b', '--backend'
+                        , dest='backend'
+                        , required=True
+                        , choices=['IPC', 'SFN']
+                        , metavar='spm-backend'
                         , help='The isolation level')
 
     parser.add_argument('-q', '--quiet'
@@ -594,7 +600,9 @@ def main():
     """
     os.chdir(os.path.join(sys.path[0], '..'))
 
-    context = process_partition_manifests(manifest_lists, int(args.isolation_level))
+    context = process_partition_manifests(manifest_lists,
+                                          int(args.isolation_level),
+                                          args.backend)
 
     utilities = {}
     utilities['donotedit_warning'] = donotedit_warning

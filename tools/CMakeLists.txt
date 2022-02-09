@@ -134,6 +134,7 @@ add_custom_command(OUTPUT ${OUTPUT_FILES}
                                   -m ${COMBINED_LIST}
                                   -f ${GENERATED_FILE_LISTS}
                                   -l ${TFM_ISOLATION_LEVEL}
+                                  -b ${CONFIG_TFM_SPM_BACKEND}
                                   -o ${CMAKE_BINARY_DIR}/generated
                                   ${PARSE_MANIFEST_QUIET_FLAG}
     DEPENDS ${TEMPLATE_FILES} ${MANIFEST_FILES}
@@ -148,6 +149,7 @@ execute_process(
                                   -m ${COMBINED_LIST}
                                   -f ${GENERATED_FILE_LISTS}
                                   -l ${TFM_ISOLATION_LEVEL}
+                                  -b ${CONFIG_TFM_SPM_BACKEND}
                                   -o ${CMAKE_BINARY_DIR}/generated
                                   ${PARSE_MANIFEST_QUIET_FLAG}
     RESULT_VARIABLE RET
