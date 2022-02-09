@@ -143,6 +143,19 @@ compile time:
 * ``CC3XX_CONFIG_SUPPORT_SHA1``: Enable the driver interface support for SHA-1
   algorithms in Hash and HMAC. As SHA-1 is deemed unsecure and its usage not
   recommended, this option is disabled by default to save code size.
+* ``CC3XX_CONFIG_SUPPORT_RSA``: Enable the driver interface support for RSA
+  algorithms. This option is enabled by default.
+* ``CC3XX_CONFIG_SUPPORT_GCM``: Enable the driver interface support for GCM
+  algorithm in AEAD. This option is enabled by default.
+
+.. Note::
+
+    The current status of the configuration option is still work in progress
+    and can be modified following updates in the specification and in the
+    reference implementation in mbed TLS. For simplicity, some of the options
+    described above are directly tied to the equivalent `mbedcrypto_config.h`
+    define in order to be controllable through the same mechanism at the
+    moment.
 
 
 Dependencies
@@ -196,4 +209,4 @@ standard doxygen flow using ``psa_driver_api`` (this directory) as the working
 directory, and setting ``RECURSIVE`` to ``YES`` in the Doxyfile.
 
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
