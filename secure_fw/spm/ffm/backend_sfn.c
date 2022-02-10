@@ -67,7 +67,7 @@ static psa_status_t sfn_messaging(struct service_t *service,
     return status;
 }
 
-static int32_t sfn_replying(struct conn_handle_t *hdl, int32_t status)
+static psa_status_t sfn_replying(struct conn_handle_t *hdl, int32_t status)
 {
     SET_CURRENT_COMPONENT(hdl->p_client);
 

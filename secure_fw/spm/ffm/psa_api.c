@@ -725,12 +725,12 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
     msg->outvec[outvec_idx].len += num_bytes;
 }
 
-int32_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
-                                    psa_status_t status)
+psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
+                                         psa_status_t status)
 {
     struct service_t *service;
     struct conn_handle_t *hdl;
-    int32_t ret = PSA_SUCCESS;
+    psa_status_t ret = PSA_SUCCESS;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     /* It is a fatal error if message handle is invalid */

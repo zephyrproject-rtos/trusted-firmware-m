@@ -85,7 +85,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
     return PSA_SUCCESS;
 }
 
-static int32_t ipc_replying(struct conn_handle_t *hdl, int32_t status)
+static psa_status_t ipc_replying(struct conn_handle_t *hdl, int32_t status)
 {
     if (is_tfm_rpc_msg(hdl)) {
         tfm_rpc_client_call_reply(hdl, status);

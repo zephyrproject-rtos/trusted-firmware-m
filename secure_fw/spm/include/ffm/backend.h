@@ -39,7 +39,7 @@ struct backend_ops_t {
      * Runtime model-specific message replying.
      * Return the connection handle or the acked status code.
      */
-    int32_t (*replying)(struct conn_handle_t *hdl, int32_t status);
+    psa_status_t (*replying)(struct conn_handle_t *hdl, int32_t status);
 };
 
 /* RUNTIME MODEL BACKENDS DECLARATION */
