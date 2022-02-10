@@ -380,6 +380,45 @@ enum tfm_hal_status_t mpu_init_cfg(void)
     }
 #endif /* CONFIG_TFM_PARTITION_META */
 
+#ifdef NULL_POINTER_EXCEPTION_DETECTION
+	if(MPU_ARMV8M_NUM_REGIONS - n_configured_regions < 2) {
+		// We have enabled null pointer detection, but we don't have
+		// enough regions for it.
+		//
+	    // NB: Enabling null-pointer detection can also
+		// cause tfm_hal_bind_boundaries to return an error due to
+		// insufficient memory regions
+		return TFM_HAL_ERROR_GENERIC;
+	}
+
+	// The armv8m MPU can not be configured to protect a memory region
+	// from priviliged reads. However, it is invalid to have two
+	// overlapping memory regions and when a memory access is made to
+	// such an overlapping area we will get a MemFault. We exploit
+	// this undefined behaviour to block priviliged reads to the first
+	// 256 bytes. The first 350 bytes on nRF platforms are used for
+	// the vector table but luckily the armv8m MPU does not affect
+	// exception vector fetches so these two regions we configure will
+	// not accidentally disturb any valid memory access.
+	for(int i = 0; i < 2; i++) {
+		region_cfg.region_nr = n_configured_regions++;
+
+		region_cfg.region_base = 0;
+		region_cfg.region_limit = 256 - 32; // The last protected address is limit + 31
+
+		// The region_attridx, attr_access, attr_sh and attr_exec
+		// have no effect when memory regions overlap as any
+		// access will trigger a MemFault so we just use the
+		// previously configured attributes.
+
+		err = mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg);
+
+		if (err != MPU_ARMV8M_OK) {
+			return TFM_HAL_ERROR_GENERIC;
+		}
+	}
+#endif /* NULL_POINTER_EXCEPTION_DETECTION */
+
     mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
                       HARDFAULT_NMI_ENABLE);
 
