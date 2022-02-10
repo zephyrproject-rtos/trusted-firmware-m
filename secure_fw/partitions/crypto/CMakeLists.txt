@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -79,8 +79,7 @@ target_compile_definitions(tfm_psa_rot_partition_crypto
 )
 
 ################ Display the configuration being applied #######################
-
-if (NOT TFM_CONFIG_PARTITION_QUIET)
+if (NOT CONFIG_TFM_PARTITION_QUIET)
     message(STATUS "---------- Display crypto configuration - start --------------")
 
     message(STATUS "CRYPTO_RNG_MODULE_DISABLED is set to ${CRYPTO_RNG_MODULE_DISABLED}")

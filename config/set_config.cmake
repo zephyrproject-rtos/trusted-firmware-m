@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,15 +12,6 @@
 # Load extra config
 if (TFM_EXTRA_CONFIG_PATH)
     include(${TFM_EXTRA_CONFIG_PATH})
-endif()
-
-# We usually don't need these messages, and they make it difficult to scan the
-# build log for error and warning messages, so we disable theme here.
-if(NOT TFM_BUILD_LOG_VERBOSE)
-    set(CMAKE_INSTALL_MESSAGE NEVER)
-    set(PARSE_MANIFEST_QUIET ON)
-    set(PARTITION_CONFIG_QUIET ON)
-    set(MEMORY_USAGE_QUIET ON)
 endif()
 
 # Load PSA config, setting options not already set
@@ -50,6 +41,8 @@ endif()
 if (TFM_PROFILE)
     include(config/profile/${TFM_PROFILE}.cmake)
 endif()
+
+include(${CMAKE_SOURCE_DIR}/config/tfm_build_log_config.cmake)
 
 # Load TF-M model specific default config
 if (TFM_LIB_MODEL)

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -82,7 +82,7 @@ target_compile_definitions(tfm_psa_rot_partition_its
 
 ################ Display the configuration being applied #######################
 
-if (NOT TFM_CONFIG_PARTITION_QUIET)
+if (NOT CONFIG_TFM_PARTITION_QUIET)
     message(STATUS "----------- Display storage configuration - start ------------")
 
     message(STATUS "PS_CREATE_FLASH_LAYOUT is set to ${PS_CREATE_FLASH_LAYOUT}")

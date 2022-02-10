@@ -123,7 +123,7 @@ add_custom_target(tfm_generated_files
     SOURCES ${OUTPUT_FILES}
 )
 
-if (PARSE_MANIFEST_QUIET)
+if (CONFIG_TFM_PARSE_MANIFEST_QUIET)
     set(PARSE_MANIFEST_QUIET_FLAG "-q")
 else()
     set(PARSE_MANIFEST_QUIET_FLAG "")

@@ -52,7 +52,7 @@ macro(tfm_toolchain_reset_compiler_flags)
     )
 endmacro()
 
-if(TFM_MEMORY_USAGE_QUIET)
+if(CONFIG_TFM_MEMORY_USAGE_QUIET)
     set(MEMORY_USAGE_FLAG "")
 else()
     set(MEMORY_USAGE_FLAG LINKER:--print-memory-usage)
