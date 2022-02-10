@@ -520,7 +520,12 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
 bool tfm_spm_is_ns_caller(void)
 {
     struct partition_t *partition = GET_CURRENT_COMPONENT();
-    return !!(partition->p_ldinf->flags & PARTITION_NON_SECURE_AGENT);
+
+    if (!partition) {
+        tfm_core_panic();
+    }
+
+    return (partition->p_ldinf->pid == TFM_SP_NON_SECURE_ID);
 }
 
 int32_t tfm_spm_get_client_id(bool ns_caller)

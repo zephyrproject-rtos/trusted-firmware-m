@@ -116,7 +116,7 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
 #if defined(CONFIG_TFM_PSA_API_CROSS_CALL) && !defined(TFM_MULTI_CORE_TOPOLOGY)
-    if (p_pldi->flags & PARTITION_NON_SECURE_AGENT) {
+    if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
         SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
     }
 #endif

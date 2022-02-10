@@ -52,8 +52,7 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
         .pid                        = TFM_SP_NON_SECURE_ID,
         .flags                      = (PARTITION_PRI_LOWEST - 1)
                                     | PARTITION_MODEL_IPC
-                                    | PARTITION_DOMAIN_PSA_ROT
-                                    | PARTITION_NON_SECURE_AGENT,
+                                    | PARTITION_MODEL_PSA_ROT,
         .entry                      = ENTRY_TO_POSITION(tfm_nspm_thread_entry),
         .stack_size                 = CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE,
         .heap_size                  = 0,
