@@ -278,27 +278,31 @@ void tfm_spm_partition_psa_notify(int32_t partition_id);
 void tfm_spm_partition_psa_clear(void);
 
 /**
- * \brief Function body of \ref psa_eoi.
- *
- * \param[in] irq_signal        The interrupt signal that has been processed.
- *
- * \retval void                 Success.
- * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
- *                              following are true:
- * \arg                           irq_signal is not an interrupt signal.
- * \arg                           irq_signal indicates more than one signal.
- * \arg                           irq_signal is not currently asserted.
- * \arg                           The interrupt is not using SLIH.
- */
-void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal);
-
-/**
  * \brief Function body of \ref psa_panic.
  *
  * \retval "Does not return"
  */
 void tfm_spm_partition_psa_panic(void);
 
+/* psa_set_rhandle is only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+/**
+ * \brief Function body of \ref psa_set_rhandle.
+ *
+ * \param[in] msg_handle        Handle for the client's message.
+ * \param[in] rhandle           Reverse handle allocated by the RoT Service.
+ *
+ * \retval void                 Success, rhandle will be provided with all
+ *                              subsequent messages delivered on this
+ *                              connection.
+ * \retval "PROGRAMMER ERROR"   msg_handle is invalid.
+ */
+void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle);
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
 /**
  * \brief Function body of \ref psa_irq_enable.
  *
@@ -332,6 +336,8 @@ void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal);
  */
 psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal);
 
+/* This API is only used for FLIH. */
+#if CONFIG_TFM_FLIH_API == 1
 /**
  * \brief Function body of \ref psa_reset_signal.
  *
@@ -349,24 +355,26 @@ psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal);
  * \arg                       \a irq_signal is not currently asserted.
  */
 void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal);
+#endif
 
-/* psa_set_rhandle is only needed by connection-based services */
-#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-
+/* This API is only used for SLIH. */
+#if CONFIG_TFM_SLIH_API == 1
 /**
- * \brief Function body of \ref psa_set_rhandle.
+ * \brief Function body of \ref psa_eoi.
  *
- * \param[in] msg_handle        Handle for the client's message.
- * \param[in] rhandle           Reverse handle allocated by the RoT Service.
+ * \param[in] irq_signal        The interrupt signal that has been processed.
  *
- * \retval void                 Success, rhandle will be provided with all
- *                              subsequent messages delivered on this
- *                              connection.
- * \retval "PROGRAMMER ERROR"   msg_handle is invalid.
+ * \retval void                 Success.
+ * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           irq_signal is not an interrupt signal.
+ * \arg                           irq_signal indicates more than one signal.
+ * \arg                           irq_signal is not currently asserted.
+ * \arg                           The interrupt is not using SLIH.
  */
-void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle);
-
-#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal);
+#endif
+#endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 

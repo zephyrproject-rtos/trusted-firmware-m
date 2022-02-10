@@ -145,7 +145,9 @@ def process_partition_manifests(manifest_lists, isolation_level):
     partition_statistics = {
         'connection_based_srv_num': 0,
         'ipc_partition_num': 0,
-        'sfn_partition_num': 0
+        'sfn_partition_num': 0,
+        'flih_num': 0,
+        'slih_num': 0
     }
     config_impl = {
         'CONFIG_TFM_SPM_BACKEND_SFN'              : '0',
@@ -153,7 +155,9 @@ def process_partition_manifests(manifest_lists, isolation_level):
         'CONFIG_TFM_PSA_API_SFN_CALL'             : '0',
         'CONFIG_TFM_PSA_API_CROSS_CALL'           : '0',
         'CONFIG_TFM_PSA_API_SUPERVISOR_CALL'      : '0',
-        'CONFIG_TFM_CONNECTION_BASED_SERVICE_API' : '0'
+        'CONFIG_TFM_CONNECTION_BASED_SERVICE_API' : '0',
+        'CONFIG_TFM_FLIH_API'                     : '0',
+        'CONFIG_TFM_SLIH_API'                     : '0'
     }
 
     # Get all the manifests information as a dictionary
@@ -234,6 +238,12 @@ def process_partition_manifests(manifest_lists, isolation_level):
             elif service['connection_based']:
                 partition_statistics['connection_based_srv_num'] += 1
 
+        for irq in manifest.get('irqs', []):
+            if irq.get('handling', None) == 'FLIH':
+                partition_statistics['flih_num'] += 1
+            else:
+                partition_statistics['slih_num'] += 1
+
         manifest_out_basename = os.path.splitext(os.path.basename(manifest_path))[0]
 
         if 'output_path' in manifest_item:
@@ -289,6 +299,11 @@ def process_partition_manifests(manifest_lists, isolation_level):
 
     if partition_statistics['connection_based_srv_num'] > 0:
         config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API'] = 1
+
+    if partition_statistics['flih_num'] > 0:
+        config_impl['CONFIG_TFM_FLIH_API'] = 1
+    elif partition_statistics['slih_num'] > 0:
+        config_impl['CONFIG_TFM_SLIH_API'] = 1
 
     context['partitions'] = partition_list
     context['config_impl'] = config_impl

@@ -210,21 +210,6 @@ void psa_clear_cross(void)
 
 __naked
 __section(".psa_interface_cross_call")
-void psa_eoi_cross(psa_signal_t irq_signal)
-{
-    __asm volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                                    \n"
-#endif
-        "push   {r0-r4, lr}                                 \n"
-        "ldr    r0, =tfm_spm_partition_psa_eoi              \n"
-        "mov    r1, sp                                      \n"
-        "b      psa_interface_cross_unified_entry           \n"
-    );
-}
-
-__naked
-__section(".psa_interface_cross_call")
 void psa_panic_cross(void)
 {
     __asm volatile(
@@ -233,51 +218,6 @@ void psa_panic_cross(void)
 #endif
         "push   {r0-r4, lr}                                 \n"
         "ldr    r0, =tfm_spm_partition_psa_panic            \n"
-        "mov    r1, sp                                      \n"
-        "b      psa_interface_cross_unified_entry           \n"
-    );
-}
-
-__naked
-__section(".psa_interface_cross_call")
-psa_irq_status_t psa_irq_disable_cross(psa_signal_t irq_signal)
-{
-    __asm volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                                    \n"
-#endif
-        "push   {r0-r4, lr}                                 \n"
-        "ldr    r0, =tfm_spm_partition_psa_irq_disable      \n"
-        "mov    r1, sp                                      \n"
-        "b      psa_interface_cross_unified_entry           \n"
-    );
-}
-
-__naked
-__section(".psa_interface_cross_call")
-void psa_irq_enable_cross(psa_signal_t irq_signal)
-{
-    __asm volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                                    \n"
-#endif
-        "push   {r0-r4, lr}                                 \n"
-        "ldr    r0, =tfm_spm_partition_psa_irq_enable       \n"
-        "mov    r1, sp                                      \n"
-        "b      psa_interface_cross_unified_entry           \n"
-    );
-}
-
-__naked
-__section(".psa_interface_cross_call")
-void psa_reset_signal_cross(psa_signal_t irq_signal)
-{
-    __asm volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                                    \n"
-#endif
-        "push   {r0-r4, lr}                                 \n"
-        "ldr    r0, =tfm_spm_partition_psa_reset_signal     \n"
         "mov    r1, sp                                      \n"
         "b      psa_interface_cross_unified_entry           \n"
     );
@@ -347,6 +287,74 @@ void psa_set_rhandle_cross(psa_handle_t msg_handle, void *rhandle)
 }
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+__naked
+__section(".psa_interface_cross_call")
+void psa_irq_enable_cross(psa_signal_t irq_signal)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_partition_psa_irq_enable       \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_cross_unified_entry           \n"
+    );
+}
+
+__naked
+__section(".psa_interface_cross_call")
+psa_irq_status_t psa_irq_disable_cross(psa_signal_t irq_signal)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_partition_psa_irq_disable      \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_cross_unified_entry           \n"
+    );
+}
+
+/* This API is only used for FLIH. */
+#if CONFIG_TFM_FLIH_API == 1
+__naked
+__section(".psa_interface_cross_call")
+void psa_reset_signal_cross(psa_signal_t irq_signal)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_partition_psa_reset_signal     \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_cross_unified_entry           \n"
+    );
+}
+#endif /* CONFIG_TFM_FLIH_API == 1 */
+
+/* This API is only used for SLIH. */
+#if CONFIG_TFM_SLIH_API == 1
+__naked
+__section(".psa_interface_cross_call")
+void psa_eoi_cross(psa_signal_t irq_signal)
+{
+    __asm volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                    \n"
+#endif
+        "push   {r0-r4, lr}                                 \n"
+        "ldr    r0, =tfm_spm_partition_psa_eoi              \n"
+        "mov    r1, sp                                      \n"
+        "b      psa_interface_cross_unified_entry           \n"
+    );
+}
+#endif /* CONFIG_TFM_SLIH_API */
+#endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 

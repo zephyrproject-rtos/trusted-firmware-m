@@ -86,33 +86,9 @@ __naked void psa_clear_svc(void)
                    "bx      lr                                 \n");
 }
 
-__naked void psa_eoi_svc(psa_signal_t irq_signal)
-{
-    __asm volatile("svc     "M2S(TFM_SVC_PSA_EOI)"             \n"
-                   "bx      lr                                 \n");
-}
-
 __naked void psa_panic_svc(void)
 {
     __asm volatile("svc     "M2S(TFM_SVC_PSA_PANIC)"           \n"
-                   "bx      lr                                 \n");
-}
-
-__naked void psa_irq_enable_svc(psa_signal_t irq_signal)
-{
-    __asm volatile("svc     "M2S(TFM_SVC_PSA_IRQ_ENABLE)"      \n"
-                   "bx      lr                                 \n");
-}
-
-__naked psa_irq_status_t psa_irq_disable_svc(psa_signal_t irq_signal)
-{
-    __asm volatile("svc     "M2S(TFM_SVC_PSA_IRQ_DISABLE)"     \n"
-                   "bx      lr                                 \n");
-}
-
-__naked void psa_reset_signal_svc(psa_signal_t irq_signal)
-{
-    __asm volatile("svc     "M2S(TFM_SVC_PSA_RESET_SIGNAL)"    \n"
                    "bx      lr                                 \n");
 }
 
@@ -144,3 +120,37 @@ __naked void psa_set_rhandle_svc(psa_handle_t msg_handle, void *rhandle)
 }
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+
+__naked void psa_irq_enable_svc(psa_signal_t irq_signal)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_PSA_IRQ_ENABLE)"      \n"
+                   "bx      lr                                 \n");
+}
+
+__naked psa_irq_status_t psa_irq_disable_svc(psa_signal_t irq_signal)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_PSA_IRQ_DISABLE)"     \n"
+                   "bx      lr                                 \n");
+}
+
+/* This API is only used for FLIH. */
+#if CONFIG_TFM_FLIH_API == 1
+__naked void psa_reset_signal_svc(psa_signal_t irq_signal)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_PSA_RESET_SIGNAL)"    \n"
+                   "bx      lr                                 \n");
+}
+#endif
+
+/* This API is only used for SLIH. */
+#if CONFIG_TFM_SLIH_API == 1
+__naked void psa_eoi_svc(psa_signal_t irq_signal)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_PSA_EOI)"             \n"
+                   "bx      lr                                 \n");
+}
+#endif
+
+#endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */

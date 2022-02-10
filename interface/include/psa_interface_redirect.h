@@ -22,11 +22,7 @@
 #define psa_reply                psa_reply_svc
 #define psa_notify               psa_notify_svc
 #define psa_clear                psa_clear_svc
-#define psa_eoi                  psa_eoi_svc
 #define psa_panic                psa_panic_svc
-#define psa_irq_enable           psa_irq_enable_svc
-#define psa_irq_disable          psa_irq_disable_svc
-#define psa_reset_signal         psa_reset_signal_svc
 #define psa_rot_lifecycle_state  psa_rot_lifecycle_state_svc
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
@@ -34,6 +30,19 @@
 #define psa_close                psa_close_svc
 #define psa_set_rhandle          psa_set_rhandle_svc
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#define psa_irq_enable           psa_irq_enable_svc
+#define psa_irq_disable          psa_irq_disable_svc
+/* This API is only used for FLIH. */
+#if CONFIG_TFM_FLIH_API == 1
+#define psa_reset_signal         psa_reset_signal_svc
+#endif
+/* This API is only used for SLIH. */
+#if CONFIG_TFM_SLIH_API == 1
+#define psa_eoi                  psa_eoi_svc
+#endif
+#endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
 
 #elif CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
@@ -48,11 +57,7 @@
 #define psa_reply                psa_reply_cross
 #define psa_notify               psa_notify_cross
 #define psa_clear                psa_clear_cross
-#define psa_eoi                  psa_eoi_cross
 #define psa_panic                psa_panic_cross
-#define psa_irq_enable           psa_irq_enable_cross
-#define psa_irq_disable          psa_irq_disable_cross
-#define psa_reset_signal         psa_reset_signal_cross
 #define psa_rot_lifecycle_state  psa_rot_lifecycle_state_cross
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
@@ -60,6 +65,19 @@
 #define psa_close                psa_close_cross
 #define psa_set_rhandle          psa_set_rhandle_cross
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+#define psa_irq_enable           psa_irq_enable_cross
+#define psa_irq_disable          psa_irq_disable_cross
+/* This API is only used for FLIH. */
+#if CONFIG_TFM_FLIH_API == 1
+#define psa_reset_signal         psa_reset_signal_cross
+#endif
+/* This API is only used for SLIH. */
+#if CONFIG_TFM_SLIH_API == 1
+#define psa_eoi                  psa_eoi_cross
+#endif
+#endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 #define psa_map_invec            psa_map_invec_cross

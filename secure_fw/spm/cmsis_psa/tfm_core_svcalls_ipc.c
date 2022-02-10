@@ -65,9 +65,6 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
     case TFM_SVC_PSA_CLEAR:
         tfm_spm_partition_psa_clear();
         break;
-    case TFM_SVC_PSA_EOI:
-        tfm_spm_partition_psa_eoi((psa_signal_t)ctx[0]);
-        break;
     case TFM_SVC_PSA_PANIC:
         tfm_spm_partition_psa_panic();
         break;
@@ -94,18 +91,31 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         tfm_spm_partition_psa_reply((psa_handle_t)ctx[0], (psa_status_t)ctx[1]);
         break;
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
-#if TFM_SP_LOG_RAW_ENABLED
-    case TFM_SVC_OUTPUT_UNPRIV_STRING:
-        return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
-#endif
+
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
     case TFM_SVC_PSA_IRQ_ENABLE:
         tfm_spm_partition_psa_irq_enable((psa_signal_t)ctx[0]);
         break;
     case TFM_SVC_PSA_IRQ_DISABLE:
         return tfm_spm_partition_psa_irq_disable((psa_signal_t)ctx[0]);
+/* This API is only used for FLIH. */
+#if CONFIG_TFM_FLIH_API == 1
     case TFM_SVC_PSA_RESET_SIGNAL:
         tfm_spm_partition_psa_reset_signal((psa_signal_t)ctx[0]);
         break;
+#endif
+/* This API is only used for SLIH. */
+#if CONFIG_TFM_SLIH_API == 1
+    case TFM_SVC_PSA_EOI:
+        tfm_spm_partition_psa_eoi((psa_signal_t)ctx[0]);
+        break;
+#endif
+#endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
+
+#if TFM_SP_LOG_RAW_ENABLED
+    case TFM_SVC_OUTPUT_UNPRIV_STRING:
+        return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
+#endif
     default:
 #ifdef PLATFORM_SVC_HANDLERS
         return (platform_svc_handlers(svc_num, ctx, lr));
