@@ -51,7 +51,7 @@ static struct service_head_t services_listhead;
 struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
 /* Pools */
-TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct tfm_conn_handle_t),
+TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct conn_handle_t),
                  CONFIG_TFM_CONN_HANDLE_MAX_NUM);
 
 extern uint32_t scheduler_lock;
@@ -94,7 +94,7 @@ static uint32_t loop_index;
  *  loop_index is used to promise same handle instance is converted into
  *  different user handles in short time.
  */
-psa_handle_t tfm_spm_to_user_handle(struct tfm_conn_handle_t *handle_instance)
+psa_handle_t tfm_spm_to_user_handle(struct conn_handle_t *handle_instance)
 {
     psa_handle_t user_handle;
 
@@ -122,15 +122,15 @@ psa_handle_t tfm_spm_to_user_handle(struct tfm_conn_handle_t *handle_instance)
  *  user_handle     in RANGE[CLIENT_HANDLE_VALUE_MIN, 0x3FFFFFFF]
  *  loop_index      in RANGE[0, CONVERSION_FACTOR_VALUE - 1]
  */
-struct tfm_conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle)
+struct conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle)
 {
-    struct tfm_conn_handle_t *handle_instance;
+    struct conn_handle_t *handle_instance;
 
     if (user_handle == PSA_NULL_HANDLE) {
         return NULL;
     }
 
-    handle_instance = (struct tfm_conn_handle_t *)((((uintptr_t)user_handle -
+    handle_instance = (struct conn_handle_t *)((((uintptr_t)user_handle -
                       CLIENT_HANDLE_VALUE_MIN) >> CONVERSION_FACTOR_BITOFFSET) +
                       (uintptr_t)conn_handle_pool);
 
@@ -138,31 +138,30 @@ struct tfm_conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle)
 }
 
 /* Service handle management functions */
-struct tfm_conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
-                                                     int32_t client_id)
+struct conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
+                                                 int32_t client_id)
 {
-    struct tfm_conn_handle_t *p_handle;
+    struct conn_handle_t *p_handle;
 
     TFM_CORE_ASSERT(service);
 
     /* Get buffer for handle list structure from handle pool */
-    p_handle = (struct tfm_conn_handle_t *)tfm_pool_alloc(conn_handle_pool);
+    p_handle = (struct conn_handle_t *)tfm_pool_alloc(conn_handle_pool);
     if (!p_handle) {
         return NULL;
     }
 
     spm_memset(p_handle, 0, sizeof(*p_handle));
 
-    p_handle->internal_msg.service = service;
+    p_handle->service = service;
     p_handle->status = TFM_HANDLE_STATUS_IDLE;
     p_handle->client_id = client_id;
 
     return p_handle;
 }
 
-int32_t tfm_spm_validate_conn_handle(
-                                    const struct tfm_conn_handle_t *conn_handle,
-                                    int32_t client_id)
+int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle,
+                                     int32_t client_id)
 {
     /* Check the handle address is validated */
     if (is_valid_chunk_data_in_pool(conn_handle_pool,
@@ -179,7 +178,7 @@ int32_t tfm_spm_validate_conn_handle(
 }
 
 int32_t tfm_spm_free_conn_handle(struct service_t *service,
-                                 struct tfm_conn_handle_t *conn_handle)
+                                 struct conn_handle_t *conn_handle)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
@@ -187,7 +186,7 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
     TFM_CORE_ASSERT(conn_handle != NULL);
 
     /* Clear magic as the handler is not used anymore */
-    conn_handle->internal_msg.magic = 0;
+    conn_handle->magic = 0;
 
     CRITICAL_SECTION_ENTER(cs_assert);
 
@@ -198,55 +197,20 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
     return SPM_SUCCESS;
 }
 
-int32_t tfm_spm_set_rhandle(struct service_t *service,
-                            struct tfm_conn_handle_t *conn_handle,
-                            void *rhandle)
-{
-    TFM_CORE_ASSERT(service);
-    /* Set reverse handle value only be allowed for a connected handle */
-    TFM_CORE_ASSERT(conn_handle != NULL);
-
-    conn_handle->rhandle = rhandle;
-    return SPM_SUCCESS;
-}
-
-/**
- * \brief                   Get reverse handle value from connection handle.
- *
- * \param[in] service       Target service context pointer
- * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle()
- *
- * \retval void *           Success
- * \retval "Does not return"  Panic for those:
- *                              service pointer are NULL
- *                              handle is \ref PSA_NULL_HANDLE
- *                              handle node does not be found
- */
-static void *tfm_spm_get_rhandle(struct service_t *service,
-                                 struct tfm_conn_handle_t *conn_handle)
-{
-    TFM_CORE_ASSERT(service);
-    /* Get reverse handle value only be allowed for a connected handle */
-    TFM_CORE_ASSERT(conn_handle != NULL);
-
-    return conn_handle->rhandle;
-}
-
 /* Partition management functions */
 
-struct tfm_msg_body_t *spm_get_msg_with_signal(struct partition_t *p_ptn,
+struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
                                                psa_signal_t signal)
 {
-    struct tfm_msg_body_t *p_msg_iter;
-    struct tfm_msg_body_t **pr_msg_iter, **last_found_msg_holder = NULL;
+    struct conn_handle_t *p_msg_iter;
+    struct conn_handle_t **pr_msg_iter, **last_found_msg_holder = NULL;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     uint32_t nr_found_msgs = 0;
 
     CRITICAL_SECTION_ENTER(cs_assert);
 
     /* Return the last found message which applies a FIFO mechanism. */
-    UNI_LIST_FOREACH_NODE_PNODE(pr_msg_iter, p_msg_iter, p_ptn, p_messages) {
+    UNI_LIST_FOREACH_NODE_PNODE(pr_msg_iter, p_msg_iter, p_ptn, p_handles) {
         if (p_msg_iter->service->p_ldinf->signal == signal) {
             last_found_msg_holder = pr_msg_iter;
             nr_found_msgs++;
@@ -255,9 +219,8 @@ struct tfm_msg_body_t *spm_get_msg_with_signal(struct partition_t *p_ptn,
 
     if (last_found_msg_holder) {
         p_msg_iter = *last_found_msg_holder;
-        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_msg_holder, p_messages);
+        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_msg_holder, p_handles);
 
-        /* Clear the signal bit since the only message is removed. */
         if (nr_found_msgs == 1) {
             p_ptn->signals_asserted &= ~signal;
         }
@@ -362,7 +325,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 
 /* Message functions */
 
-struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
+struct conn_handle_t *spm_get_handle_by_user_handle(psa_handle_t msg_handle)
 {
     /*
      * The message handler passed by the caller is considered invalid in the
@@ -373,36 +336,33 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle)
      *      unused, or owned by anither partition)
      * Check the conditions above
      */
-    struct tfm_msg_body_t *p_msg;
     int32_t partition_id;
-    struct tfm_conn_handle_t *p_conn_handle =
+    struct conn_handle_t *p_conn_handle =
                                     tfm_spm_to_handle_instance(msg_handle);
 
     if (is_valid_chunk_data_in_pool(
-        conn_handle_pool, (uint8_t *)p_conn_handle) != 1) {
+        conn_handle_pool, (uint8_t *)p_conn_handle) != true) {
         return NULL;
     }
-
-    p_msg = &p_conn_handle->internal_msg;
 
     /*
      * Check that the magic number is correct. This proves that the message
      * structure contains an active message.
      */
-    if (p_msg->magic != TFM_MSG_MAGIC) {
+    if (p_conn_handle->magic != TFM_MSG_MAGIC) {
         return NULL;
     }
 
     /* Check that the running partition owns the message */
     partition_id = tfm_spm_partition_get_running_partition_id();
-    if (partition_id != p_msg->service->partition->p_ldinf->pid) {
+    if (partition_id != p_conn_handle->service->partition->p_ldinf->pid) {
         return NULL;
     }
 
-    return p_msg;
+    return p_conn_handle;
 }
 
-void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
+void spm_fill_message(struct conn_handle_t *hdl,
                       struct service_t *service,
                       psa_handle_t handle,
                       int32_t type, int32_t client_id,
@@ -411,9 +371,8 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
                       psa_outvec *caller_outvec)
 {
     uint32_t i;
-    struct tfm_conn_handle_t *conn_handle;
 
-    TFM_CORE_ASSERT(msg);
+    TFM_CORE_ASSERT(hdl);
     TFM_CORE_ASSERT(service);
     TFM_CORE_ASSERT(!(invec == NULL && in_len != 0));
     TFM_CORE_ASSERT(!(outvec == NULL && out_len != 0));
@@ -422,42 +381,37 @@ void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
     TFM_CORE_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
-    spm_memset(&msg->msg, 0, sizeof(psa_msg_t));
+    spm_memset(&hdl->msg, 0, sizeof(psa_msg_t));
 
-    THRD_SYNC_INIT(&msg->ack_evnt);
-    msg->magic = TFM_MSG_MAGIC;
-    msg->service = service;
-    msg->p_client = GET_CURRENT_COMPONENT();
-    msg->caller_outvec = caller_outvec;
-    msg->msg.client_id = client_id;
+    THRD_SYNC_INIT(&hdl->ack_evnt);
+    hdl->magic = TFM_MSG_MAGIC;
+    hdl->service = service;
+    hdl->p_client = GET_CURRENT_COMPONENT();
+    hdl->caller_outvec = caller_outvec;
+    hdl->msg.client_id = client_id;
 
     /* Copy contents */
-    msg->msg.type = type;
+    hdl->msg.type = type;
 
     for (i = 0; i < in_len; i++) {
-        msg->msg.in_size[i] = invec[i].len;
-        msg->invec[i].base = invec[i].base;
+        hdl->msg.in_size[i] = invec[i].len;
+        hdl->invec[i].base = invec[i].base;
     }
 
     for (i = 0; i < out_len; i++) {
-        msg->msg.out_size[i] = outvec[i].len;
-        msg->outvec[i].base = outvec[i].base;
-        /* Out len is used to record the writed number, set 0 here again */
-        msg->outvec[i].len = 0;
+        hdl->msg.out_size[i] = outvec[i].len;
+        hdl->outvec[i].base = outvec[i].base;
+        /* Out len is used to record the wrote number, set 0 here again */
+        hdl->outvec[i].len = 0;
     }
 
     /* Use the user connect handle as the message handle */
-    msg->msg.handle = handle;
-
-    conn_handle = tfm_spm_to_handle_instance(handle);
-    /* For connected handle, set rhandle to every message */
-    if (conn_handle) {
-        msg->msg.rhandle = tfm_spm_get_rhandle(service, conn_handle);
-    }
+    hdl->msg.handle = handle;
+    hdl->msg.rhandle = hdl->rhandle;
 
     /* Set the private data of NSPE client caller in multi-core topology */
     if (TFM_CLIENT_ID_IS_NS(client_id)) {
-        tfm_rpc_set_caller_data(msg, client_id);
+        tfm_rpc_set_caller_data(hdl, client_id);
     }
 }
 
@@ -559,7 +513,7 @@ uint32_t tfm_spm_init(void)
 
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
-                  sizeof(struct tfm_conn_handle_t),
+                  sizeof(struct conn_handle_t),
                   CONFIG_TFM_CONN_HANDLE_MAX_NUM);
 
     UNI_LISI_INIT_NODE(PARTITION_LIST_ADDR, next);
@@ -655,7 +609,7 @@ uint64_t do_schedule(void)
     return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }
 
-void update_caller_outvec_len(struct tfm_msg_body_t *msg)
+void update_caller_outvec_len(struct conn_handle_t *hdl)
 {
     uint32_t i;
 
@@ -667,18 +621,18 @@ void update_caller_outvec_len(struct tfm_msg_body_t *msg)
      * If it is a NS request via RPC, the owner of this message is not set.
      * Or if it is a SFN message, it does not have owner thread state either.
      */
-    if ((!is_tfm_rpc_msg(msg)) && (msg->sfn_magic != TFM_MSG_MAGIC_SFN)) {
-        TFM_CORE_ASSERT(msg->ack_evnt.owner->state == THRD_STATE_BLOCK);
+    if ((!is_tfm_rpc_msg(hdl)) && (hdl->sfn_magic != TFM_MSG_MAGIC_SFN)) {
+        TFM_CORE_ASSERT(hdl->ack_evnt.owner->state == THRD_STATE_BLOCK);
     }
 
     for (i = 0; i < PSA_MAX_IOVEC; i++) {
-        if (msg->msg.out_size[i] == 0) {
+        if (hdl->msg.out_size[i] == 0) {
             continue;
         }
 
-        TFM_CORE_ASSERT(msg->caller_outvec[i].base == msg->outvec[i].base);
+        TFM_CORE_ASSERT(hdl->caller_outvec[i].base == hdl->outvec[i].base);
 
-        msg->caller_outvec[i].len = msg->outvec[i].len;
+        hdl->caller_outvec[i].len = hdl->outvec[i].len;
     }
 }
 

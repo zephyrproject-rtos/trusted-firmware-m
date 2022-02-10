@@ -435,7 +435,7 @@ the caller after PSA client call is completed.
 
 .. code-block:: c
 
-  void tfm_rpc_set_caller_data(struct tfm_msg_body_t *msg, int32_t client_id);
+  void tfm_rpc_set_caller_data(struct conn_handle_t *msg, int32_t client_id);
 
 **Parameters**
 

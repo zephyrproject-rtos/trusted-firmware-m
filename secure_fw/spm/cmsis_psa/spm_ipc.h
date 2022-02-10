@@ -77,8 +77,22 @@
 #define GET_THRD_OWNER(x)        TO_CONTAINER(x, struct partition_t, thrd)
 #define GET_CTX_OWNER(x)         TO_CONTAINER(x, struct partition_t, ctx_ctrl)
 
-/* Message struct to collect parameter from client */
-struct tfm_msg_body_t {
+/* RoT connection handle list */
+struct conn_handle_t {
+    void *rhandle;                      /* Reverse handle value              */
+    uint32_t status;                    /*
+                                         * Status of handle, three valid
+                                         * options:
+                                         * TFM_HANDLE_STATUS_ACTIVE,
+                                         * TFM_HANDLE_STATUS_IDLE and
+                                         * TFM_HANDLE_STATUS_CONNECT_ERROR
+                                         */
+    int32_t client_id;                  /*
+                                         * Partition ID of the sender of the
+                                         * message:
+                                         *  - secure partition id;
+                                         *  - non secure client endpoint id.
+                                         */
     int32_t magic;
     struct partition_t *p_client;      /* Caller partition              */
     struct service_t *service;         /* RoT service pointer           */
@@ -103,7 +117,7 @@ struct tfm_msg_body_t {
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
     uint32_t iovec_status;             /* MM-IOVEC status                */
 #endif
-    struct tfm_msg_body_t *p_messages; /* Message(s) link                */
+    struct conn_handle_t *p_handles;   /* Handle(s) link                 */
 };
 
 /* Partition runtime type */
@@ -121,7 +135,7 @@ struct partition_t {
         struct thread_t                thrd;            /* IPC model */
         uint32_t                       state;           /* SFN model */
     };
-    struct tfm_msg_body_t              *p_messages;
+    struct conn_handle_t               *p_handles;
     struct partition_t                 *next;
 };
 
@@ -130,25 +144,6 @@ struct service_t {
     const struct service_load_info_t *p_ldinf;     /* Service load info      */
     struct partition_t *partition;                 /* Owner of the service   */
     struct service_t *next;                        /* For list operation     */
-};
-
-/* RoT connection handle list */
-struct tfm_conn_handle_t {
-    void *rhandle;                      /* Reverse handle value              */
-    uint32_t status;                    /*
-                                         * Status of handle, three valid
-                                         * options:
-                                         * TFM_HANDLE_STATUS_ACTIVE,
-                                         * TFM_HANDLE_STATUS_IDLE and
-                                         * TFM_HANDLE_STATUS_CONNECT_ERROR
-                                         */
-    int32_t client_id;                  /*
-                                         * Partition ID of the sender of the
-                                         * message:
-                                         *  - secure partition id;
-                                         *  - non secure client endpoint id.
-                                         */
-    struct tfm_msg_body_t internal_msg; /* Internal message for message queue */
 };
 
 enum tfm_memory_access_e {
@@ -169,25 +164,25 @@ int32_t tfm_spm_partition_get_running_partition_id(void);
  * \brief                   Create connection handle for client connect
  *
  * \param[in] service       Target service context pointer
- * \param[in] client_id     Partition ID of the sender of the message
+ * \param[in] client_id     Partition ID of the sender
  *
  * \retval NULL             Create failed
  * \retval "Not NULL"       Service handle created
  */
-struct tfm_conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
+struct conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
                                                      int32_t client_id);
 
 /**
  * \brief                   Validate connection handle for client connect
  *
  * \param[in] conn_handle   Handle to be validated
- * \param[in] client_id     Partition ID of the sender of the message
+ * \param[in] client_id     Partition ID of the sender
  *
  * \retval SPM_SUCCESS        Success
  * \retval SPM_ERROR_GENERIC  Invalid handle
  */
 int32_t tfm_spm_validate_conn_handle(
-                                    const struct tfm_conn_handle_t *conn_handle,
+                                    const struct conn_handle_t *conn_handle,
                                     int32_t client_id);
 
 /**
@@ -202,22 +197,22 @@ int32_t tfm_spm_validate_conn_handle(
  * \retval "Does not return"  Panic for not find service by handle
  */
 int32_t tfm_spm_free_conn_handle(struct service_t *service,
-                                 struct tfm_conn_handle_t *conn_handle);
+                                 struct conn_handle_t *conn_handle);
 
 /******************** Partition management functions *************************/
 
 /*
- * Lookup and fetch the last spotted message in the partition messages
+ * Lookup and grab the last spotted handles containing the message
  * by the given signal. Only ONE signal bit can be accepted in 'signal',
- * multiple bits lead to 'no matched message found to that signal'.
+ * multiple bits lead to 'no matched handles found to that signal'.
  *
- * Returns NULL if no message matched with the given signal.
- * Returns an internal message instance if spotted, the instance
- * is moved out of partition messages. Partition available signals
- * also get updated based on the count of message with given signal
- * still in the partition messages.
+ * Returns NULL if no handles matched with the given signal.
+ * Returns an internal handle instance if spotted, the instance
+ * is moved out of partition handles. Partition available signals
+ * also get updated based on the count of handles with given signal
+ * still in the partition handles.
  */
-struct tfm_msg_body_t *spm_get_msg_with_signal(struct partition_t *p_ptn,
+struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
                                                psa_signal_t signal);
 
 /**
@@ -245,20 +240,22 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 /************************ Message functions **********************************/
 
 /**
- * \brief                   Get message context by message handle.
+ * \brief                   Get spm work handle by given user handle.
  *
  * \param[in] msg_handle    Message handle which is a reference generated
- *                          by the SPM to a specific message.
+ *                          by the SPM to a specific message. A few
+ *                          validations happen in this function before
+ *                          the final result returns.
  *
- * \return                  The message body context pointer
- *                          \ref tfm_msg_body_t structures
+ * \return                  The spm work handle.
+ *                          \ref conn_handle_t structures
  */
-struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
+struct conn_handle_t *spm_get_handle_by_user_handle(psa_handle_t msg_handle);
 
 /**
- * \brief                   Fill the message for PSA client call.
+ * \brief                   Fill the user message in handle.
  *
- * \param[in] msg           Service Message Queue buffer pointer
+ * \param[in] hdl           The 'handle' contains the user message.
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
  * \prarm[in] handle        Connect handle return by psa_connect().
@@ -271,7 +268,7 @@ struct tfm_msg_body_t *tfm_spm_get_msg_from_handle(psa_handle_t msg_handle);
  * \param[in] out_len       Number of output \ref psa_outvec structures
  * \param[in] caller_outvec Array of caller output \ref psa_outvec structures
  */
-void tfm_spm_fill_msg(struct tfm_msg_body_t *msg,
+void spm_fill_message(struct conn_handle_t *hdl,
                       struct service_t *service,
                       psa_handle_t handle,
                       int32_t type, int32_t client_id,
@@ -374,35 +371,19 @@ uint32_t tfm_spm_init(void);
 /**
  * \brief Converts a handle instance into a corresponded user handle.
  */
-psa_handle_t tfm_spm_to_user_handle(struct tfm_conn_handle_t *handle_instance);
+psa_handle_t tfm_spm_to_user_handle(struct conn_handle_t *handle_instance);
 
 /**
  * \brief Converts a user handle into a corresponded handle instance.
  */
-struct tfm_conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle);
+struct conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle);
 
 /**
  * \brief Move to handler mode by a SVC for specific purpose
  */
 void tfm_core_handler_mode(void);
 
-/**
- * \brief                   Set reverse handle value for connection.
- *
- * \param[in] service       Target service context pointer
- * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle()
- * \param[in] rhandle       rhandle need to save
- *
- * \retval SPM_SUCCESS      Success
- * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
- * \retval "Does not return"  Panic for not find handle node
- */
-int32_t tfm_spm_set_rhandle(struct service_t *service,
-                            struct tfm_conn_handle_t *conn_handle,
-                            void *rhandle);
-
-void update_caller_outvec_len(struct tfm_msg_body_t *msg);
+void update_caller_outvec_len(struct conn_handle_t *msg);
 
 /*
  * Set partition signal.

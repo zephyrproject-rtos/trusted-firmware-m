@@ -36,18 +36,18 @@ static uintptr_t spm_stack_base;
  * current component state and activate the next component.
  */
 static psa_status_t sfn_messaging(struct service_t *service,
-                                  struct tfm_msg_body_t *msg)
+                                  struct conn_handle_t *hdl)
 {
     struct partition_t *p_target;
     psa_status_t status;
 
-    if (!msg || !service || !service->p_ldinf || !service->partition) {
+    if (!hdl || !service || !service->p_ldinf || !service->partition) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    msg->sfn_magic = TFM_MSG_MAGIC_SFN;
+    hdl->sfn_magic = TFM_MSG_MAGIC_SFN;
     p_target = service->partition;
-    p_target->p_messages = msg;
+    p_target->p_handles = hdl;
 
     SET_CURRENT_COMPONENT(p_target);
 
@@ -62,14 +62,14 @@ static psa_status_t sfn_messaging(struct service_t *service,
         p_target->state = SFN_PARTITION_STATE_INITED;
     }
 
-    status = ((service_fn_t)service->p_ldinf->sfn)(&msg->msg);
+    status = ((service_fn_t)service->p_ldinf->sfn)(&hdl->msg);
 
     return status;
 }
 
-static int32_t sfn_replying(struct tfm_msg_body_t *p_msg, int32_t status)
+static int32_t sfn_replying(struct conn_handle_t *hdl, int32_t status)
 {
-    SET_CURRENT_COMPONENT(p_msg->p_client);
+    SET_CURRENT_COMPONENT(hdl->p_client);
 
     /*
      * Returning a value here is necessary, because 'psa_reply' is absent
@@ -89,7 +89,7 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
 
-    p_pt->p_messages = NULL;
+    p_pt->p_handles = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;
 
     THRD_SYNC_INIT(&p_pt->waitobj);

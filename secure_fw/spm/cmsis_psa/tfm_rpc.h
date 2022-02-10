@@ -168,7 +168,7 @@ void tfm_rpc_client_call_reply(const void *owner, int32_t ret);
  * \retval true             The message was allocated for a NS request via RPC.
  * \retval false            Otherwise.
  */
-__STATIC_INLINE bool is_tfm_rpc_msg(const struct tfm_msg_body_t *msg)
+__STATIC_INLINE bool is_tfm_rpc_msg(const struct conn_handle_t *msg)
 {
     /*
      * FIXME
@@ -194,7 +194,7 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct tfm_msg_body_t *msg)
  * \param[in] msg           The address of \ref msg_body_t structure
  * \param[in] client_id     The client ID of the NS caller.
  */
-void tfm_rpc_set_caller_data(struct tfm_msg_body_t *msg, int32_t client_id);
+void tfm_rpc_set_caller_data(struct conn_handle_t *msg, int32_t client_id);
 
 #else /* TFM_MULTI_CORE_TOPOLOGY */
 

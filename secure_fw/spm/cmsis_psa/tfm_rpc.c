@@ -115,12 +115,13 @@ void tfm_rpc_client_call_handler(void)
 
 void tfm_rpc_client_call_reply(const void *owner, int32_t ret)
 {
-    const struct tfm_msg_body_t *msg = (const struct tfm_msg_body_t *)owner;
+    const struct conn_handle_t *hdl =
+                                    (const struct conn_handle_t *)owner;
 
-    rpc_ops.reply(msg->caller_data, ret);
+    rpc_ops.reply(hdl->caller_data, ret);
 }
 
-void tfm_rpc_set_caller_data(struct tfm_msg_body_t *msg, int32_t client_id)
+void tfm_rpc_set_caller_data(struct conn_handle_t *hdl, int32_t client_id)
 {
-    msg->caller_data = rpc_ops.get_caller_data(client_id);
+    hdl->caller_data = rpc_ops.get_caller_data(client_id);
 }

@@ -46,13 +46,13 @@ struct context_ctrl_t *p_spm_thread_context;
  * current thread and trigger scheduler.
  */
 static psa_status_t ipc_messaging(struct service_t *service,
-                                  struct tfm_msg_body_t *msg)
+                                  struct conn_handle_t *hdl)
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
-    if (!msg || !service || !service->p_ldinf || !service->partition) {
+    if (!hdl || !service || !service->p_ldinf || !service->partition) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -61,7 +61,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
 
     CRITICAL_SECTION_ENTER(cs_assert);
 
-    UNI_LIST_INSERT_AFTER(p_owner, msg, p_messages);
+    UNI_LIST_INSERT_AFTER(p_owner, hdl, p_handles);
 
     /* Messages put. Update signals */
     p_owner->signals_asserted |= signal;
@@ -78,19 +78,19 @@ static psa_status_t ipc_messaging(struct service_t *service,
      * thread.
      */
 
-    if (!is_tfm_rpc_msg(msg)) {
-        thrd_wait_on(&msg->ack_evnt, CURRENT_THREAD);
+    if (!is_tfm_rpc_msg(hdl)) {
+        thrd_wait_on(&hdl->ack_evnt, CURRENT_THREAD);
     }
 
     return PSA_SUCCESS;
 }
 
-static int32_t ipc_replying(struct tfm_msg_body_t *p_msg, int32_t status)
+static int32_t ipc_replying(struct conn_handle_t *hdl, int32_t status)
 {
-    if (is_tfm_rpc_msg(p_msg)) {
-        tfm_rpc_client_call_reply(p_msg, status);
+    if (is_tfm_rpc_msg(hdl)) {
+        tfm_rpc_client_call_reply(hdl, status);
     } else {
-        thrd_wake_up(&p_msg->ack_evnt, status);
+        thrd_wake_up(&hdl->ack_evnt, status);
     }
 
     /*
@@ -110,7 +110,7 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
     p_pt->signals_allowed |= PSA_DOORBELL | service_setting;
 
     THRD_SYNC_INIT(&p_pt->waitobj);
-    UNI_LISI_INIT_NODE(p_pt, p_messages);
+    UNI_LISI_INIT_NODE(p_pt, p_handles);
 
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));

@@ -34,7 +34,7 @@ psa_status_t psa_call_pack_sfn(psa_handle_t handle, uint32_t ctrl_param,
 
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
-        stat = tfm_spm_partition_psa_reply(p_target->p_messages->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
                                            stat);
     }
 
@@ -85,7 +85,7 @@ psa_handle_t psa_connect_sfn(uint32_t sid, uint32_t version)
 
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
-        stat = tfm_spm_partition_psa_reply(p_target->p_messages->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
                                            stat);
     }
 
@@ -104,7 +104,7 @@ void psa_close_sfn(psa_handle_t handle)
 
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
-        stat = tfm_spm_partition_psa_reply(p_target->p_messages->msg.handle,
+        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
                                            PSA_SUCCESS);
     }
 
