@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited
+ * Copyright (c) 2019-2022 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -210,7 +210,7 @@
 #define DDR4_BLK_NUM    (0x8)        /* Number of DDR4 blocks */
 
 /* Defines for Driver MPC's */
-/* SRAM -- 2 MB */
+/* SRAM -- 1 MB */
 #define MPC_SRAM_RANGE_BASE_NS   (SRAM_BASE_NS)
 #define MPC_SRAM_RANGE_LIMIT_NS  (SRAM_BASE_NS + SRAM_SIZE-1)
 #define MPC_SRAM_RANGE_OFFSET_NS (0x0)
@@ -226,7 +226,7 @@
 #define MPC_QSPI_RANGE_LIMIT_S   (QSPI_SRAM_BASE_S + QSPI_SRAM_SIZE-1)
 #define MPC_QSPI_RANGE_OFFSET_S  (0x0)
 
-/* ISRAM0 -- 2 MB*/
+/* ISRAM0 -- 1 MB*/
 #define MPC_ISRAM0_RANGE_BASE_NS   (ISRAM0_BASE_NS)
 #define MPC_ISRAM0_RANGE_LIMIT_NS  (ISRAM0_BASE_NS + ISRAM0_SIZE-1)
 #define MPC_ISRAM0_RANGE_OFFSET_NS (0x0)
@@ -234,7 +234,7 @@
 #define MPC_ISRAM0_RANGE_LIMIT_S   (ISRAM0_BASE_S + ISRAM0_SIZE-1)
 #define MPC_ISRAM0_RANGE_OFFSET_S  (0x0)
 
-/* ISRAM1 -- 2 MB*/
+/* ISRAM1 -- 1 MB*/
 #define MPC_ISRAM1_RANGE_BASE_NS   (ISRAM1_BASE_NS)
 #define MPC_ISRAM1_RANGE_LIMIT_NS  (ISRAM1_BASE_NS + ISRAM1_SIZE-1)
 #define MPC_ISRAM1_RANGE_OFFSET_NS (0x0)
