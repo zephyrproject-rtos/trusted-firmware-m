@@ -50,30 +50,10 @@ __attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
     );
 }
 
-/*
- * Initializes the State Context. The Context is used to do Except Return to
- * Thread Mode to start a function.
- *
- * p_sctx[out] - pointer to the State Context to be initialized.
- * param [in]  - The parameter for the function to start
- * pfn   [in]  - Pointer to the function to excute
- * pfnlr [in]  - The Link Register of the State Context - the return address of
- *               the function
- */
-static void tfm_arch_init_state_context(struct tfm_state_context_t *p_sctx,
-                                        void *param,
-                                        uintptr_t pfn, uintptr_t pfnlr)
-{
-    p_sctx->r0 = (uint32_t)param;
-    p_sctx->ra = (uint32_t)pfn;
-    p_sctx->lr = (uint32_t)pfnlr;
-    p_sctx->xpsr = XPSR_T32;
-}
-
 void tfm_arch_init_context(void *p_ctx_ctrl,
-                           uintptr_t pfn, void *param, uintptr_t pfnlr,
-                           uintptr_t sp_limit, uintptr_t sp)
+                           uintptr_t pfn, void *param, uintptr_t pfnlr)
 {
+    uintptr_t sp = ((struct context_ctrl_t *)p_ctx_ctrl)->sp;
     struct full_context_t *p_tctx =
             (struct full_context_t *)arch_seal_thread_stack(sp);
 
@@ -81,10 +61,9 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
 
     spm_memset(p_tctx, 0, sizeof(*p_tctx));
 
-    tfm_arch_init_state_context(&p_tctx->stat_ctx, param, pfn, pfnlr);
+    ARCH_CTXCTRL_EXCRET_PATTERN(&p_tctx->stat_ctx, param, pfn, pfnlr);
 
     ((struct context_ctrl_t *)p_ctx_ctrl)->exc_ret  = EXC_RETURN_THREAD_S_PSP;
-    ((struct context_ctrl_t *)p_ctx_ctrl)->sp_limit = sp_limit;
     ((struct context_ctrl_t *)p_ctx_ctrl)->sp       = (uintptr_t)p_tctx;
 }
 

@@ -29,10 +29,10 @@ struct partition_head_t partition_listhead;
 /* TODO: To be checked when RPC design updates. */
 static uint8_t spm_stack_local[CONFIG_TFM_SPM_THREAD_STACK_SIZE] __aligned(8);
 struct context_ctrl_t spm_thread_context = {
-    .sp       = (uint32_t)&spm_stack_local[CONFIG_TFM_SPM_THREAD_STACK_SIZE],
-    .sp_limit = (uint32_t)spm_stack_local,
-    .reserved = 0,
-    .exc_ret  = 0,
+    .sp        = (uint32_t)&spm_stack_local[CONFIG_TFM_SPM_THREAD_STACK_SIZE],
+    .sp_limit  = (uint32_t)spm_stack_local,
+    .allocated = 0,
+    .exc_ret   = 0,
 };
 struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
 #else
@@ -112,6 +112,10 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
     THRD_SYNC_INIT(&p_pt->waitobj);
     UNI_LISI_INIT_NODE(p_pt, p_handles);
 
+    ARCH_CTXCTRL_INIT(&p_pt->ctx_ctrl,
+                      LOAD_ALLOCED_STACK_ADDR(p_pldi),
+                      p_pldi->stack_size);
+
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
@@ -122,9 +126,8 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
 #endif
 
     thrd_start(&p_pt->thrd,
-               POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t), NULL,
-               LOAD_ALLOCED_STACK_ADDR(p_pldi),
-               LOAD_ALLOCED_STACK_ADDR(p_pldi) + p_pldi->stack_size);
+               POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t),
+               THRD_GENERAL_EXIT);
 }
 
 static uint32_t ipc_system_run(void)

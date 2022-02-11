@@ -32,11 +32,14 @@
 /* Thread entry function type */
 typedef void (*thrd_fn_t)(void *);
 
+/* An address causes exceptions (invalid address and security bit). */
+#define THRD_GENERAL_EXIT  ((thrd_fn_t)(0xFFFFFFFE))
+
 /* Thread context */
 struct thread_t {
     uint8_t         priority;           /* Priority                          */
     uint8_t         state;              /* State                             */
-    uint16_t        flags;              /* Specific flags                    */
+    uint16_t        flags;              /* Flags and align, DO NOT REMOVE!   */
     void            *p_context_ctrl;    /* Context control (sp, splimit, lr) */
     struct thread_t *next;              /* Next thread in list               */
 };
@@ -108,18 +111,14 @@ void thrd_set_state(struct thread_t *p_thrd, uint32_t new_state);
  * Parameters :
  *  p_thrd         -     Pointer of thread_t struct
  *  fn             -     Thread entry function
- *  param          -     The single parameter for thread entry function
- *  sp_limit       -     Stack limit addr
- *  sp             -     Current stack pointer
+ *  exit_fn        -     The function to go when 'fn' exited
  *
  * Note :
  *  - thrd_fn_t does not have parameters but param is still set into R0 for some
  *    special usages, for example the NS agent.
  *  - The thread is not "started" immediately.
  */
-void thrd_start(struct thread_t *p_thrd,
-                thrd_fn_t fn, void *param,
-                uintptr_t sp_limit, uintptr_t sp);
+void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn);
 
 /*
  * Get the next thread to run in list.

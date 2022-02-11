@@ -94,6 +94,10 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
 
     THRD_SYNC_INIT(&p_pt->waitobj);
 
+    ARCH_CTXCTRL_INIT(&p_pt->ctx_ctrl,
+                      LOAD_ALLOCED_STACK_ADDR(p_pldi),
+                      p_pldi->stack_size);
+
     /*
      * Built-in partitions still have thread instances: NS Agent (TZ) and
      * IDLE partition, and NS Agent (TZ) needs to be specific cared here.
@@ -103,10 +107,7 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
                   TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
         thrd_start(&p_pt->thrd,
-               POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t),
-               NULL,
-               LOAD_ALLOCED_STACK_ADDR(p_pldi),
-               LOAD_ALLOCED_STACK_ADDR(p_pldi) + p_pldi->stack_size);
+            POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t), THRD_GENERAL_EXIT);
 
         /* SPM reuses the ns agent stack, use once only at initialization. */
         if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
@@ -159,7 +160,7 @@ uint32_t sfn_system_run(void)
     uintptr_t sp_base = spm_stack_base;
 
     THRD_INIT(p_thrd, p_ctxctrl, THRD_PRIOR_HIGHEST);
-    thrd_start(p_thrd, spm_thread_fn, NULL, sp_limit, sp_base);
+    thrd_start(p_thrd, spm_thread_fn, THRD_GENERAL_EXIT);
 
     return thrd_start_scheduler(&CURRENT_THREAD);
 }

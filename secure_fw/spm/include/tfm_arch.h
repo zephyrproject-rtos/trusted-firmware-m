@@ -56,7 +56,7 @@ struct full_context_t {
 struct context_ctrl_t {
     uint32_t                sp;        /* Stack pointer (higher address)   */
     uint32_t                sp_limit;  /* Stack limit (lower address)      */
-    uint32_t                reserved;  /* Reserved                         */
+    uint32_t                allocated; /* Stack alloced bytes (8-aligned)  */
     uint32_t                exc_ret;   /* EXC_RETURN pattern.              */
 };
 
@@ -71,6 +71,31 @@ struct context_flih_ret_t {
     uint32_t psplim;    /* PSPLIM when interrupt exception ocurrs when      */
     struct tfm_state_context_t state_ctx; /* ctx on SVC_PREPARE_DEPRIV_FLIH */
 };
+
+/* Assign stack and stack limit to the context control instance. */
+#define ARCH_CTXCTRL_INIT(x, buf, size) do {                              \
+            (x)->sp        = ((uint32_t)(buf) + (uint32_t)(size)) & ~0x7; \
+            (x)->sp_limit  = ((uint32_t)(buf) + 7) & ~0x7;                \
+            (x)->allocated = 0;                                           \
+            (x)->exc_ret   = 0;                                           \
+        } while (0)
+
+/* Allocate 'size' bytes in stack. */
+#define ARCH_CTXCTRL_ALLOCATE_STACK(x, size) do {                         \
+            (x)->allocated += ((size) + 7) & ~0x7;                        \
+            (x)->sp        -= (x)->allocated;                             \
+        } while (0)
+
+/* The latest allocated pointer. */
+#define ARCH_CTXCTRL_ALLOCATED_PTR(x)         ((x)->sp)
+
+/* Prepare a exception return pattern on the stack. */
+#define ARCH_CTXCTRL_EXCRET_PATTERN(x, param, pfn, pfnlr) do {            \
+            (x)->r0 = (uint32_t)(param);                                  \
+            (x)->ra = (uint32_t)(pfn);                                    \
+            (x)->lr = (uint32_t)(pfnlr);                                  \
+            (x)->xpsr = XPSR_T32;                                         \
+        } while (0)
 
 /**
  * \brief Get Link Register
@@ -159,14 +184,13 @@ void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uintptr_t ret_code);
 
 /* Init a thread context on thread stack and update the control context. */
 void tfm_arch_init_context(void *p_ctx_ctrl,
-                           uintptr_t pfn, void *param, uintptr_t pfnlr,
-                           uintptr_t sp_limit, uintptr_t sp);
+                           uintptr_t pfn, void *param, uintptr_t pfnlr);
 
 /*
  * Refresh the HW (sp, splimit) according to the given control context and
  * returns the EXC_RETURN payload (caller might need it for following codes).
  *
- * The p_ctx_ctrl must have been initialized by tfm_arch_init_context
+ * The p_ctx_ctrl must have been initialized by 'tfm_arch_init_context'.
  */
 uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl);
 
@@ -175,7 +199,6 @@ uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl);
  * SPM returns values by the context.
  */
 uint32_t tfm_arch_trigger_pendsv(void);
-
 
 /*
  * Switch to a new stack area, lock scheduler and call function.

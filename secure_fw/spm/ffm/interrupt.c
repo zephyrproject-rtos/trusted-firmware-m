@@ -87,10 +87,12 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
      */
     SET_CURRENT_COMPONENT(p_owner_sp);
 
+    flih_ctx_ctrl.sp_limit = sp_limit;
+    flih_ctx_ctrl.sp       = ctx_stack;
+
     tfm_arch_init_context(&flih_ctx_ctrl,
                           flih_func, NULL,
-                          (uintptr_t)tfm_flih_func_return,
-                          sp_limit, ctx_stack);
+                          (uintptr_t)tfm_flih_func_return);
 
     (void)tfm_arch_refresh_hardware_context(&flih_ctx_ctrl);
 

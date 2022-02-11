@@ -52,20 +52,18 @@ static void insert_by_prior(struct thread_t **head, struct thread_t *node)
     }
 }
 
-void thrd_start(struct thread_t *p_thrd,
-                thrd_fn_t fn, void *param,
-                uintptr_t sp_limit, uintptr_t sp)
+void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn)
 {
     TFM_CORE_ASSERT(p_thrd != NULL);
 
     /* Insert a new thread with priority */
     insert_by_prior(&LIST_HEAD, p_thrd);
 
+    tfm_arch_init_context(p_thrd->p_context_ctrl, (uintptr_t)fn, NULL,
+                          (uintptr_t)exit_fn);
+
     /* Mark it as RUNNABLE after insertion */
     thrd_set_state(p_thrd, THRD_STATE_RUNNABLE);
-
-    tfm_arch_init_context(p_thrd->p_context_ctrl, (uintptr_t)fn, param,
-                          (uintptr_t)fn&~1UL, sp_limit, sp);
 }
 
 void thrd_set_state(struct thread_t *p_thrd, uint32_t new_state)
