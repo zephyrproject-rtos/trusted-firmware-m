@@ -31,7 +31,10 @@ add_subdirectory(partitions/psa_proxy)
 add_subdirectory(partitions/firmware_update)
 add_subdirectory(partitions/ns_agent_tz)
 add_subdirectory(partitions/ns_agent_mailbox)
-add_subdirectory(partitions/idle_partition)
+if (CONFIG_TFM_SPM_BACKEND_IPC)
+    add_subdirectory(partitions/idle_partition)
+endif()
+
 if (TFM_EXTRA_PARTITION_PATHS)
     set(POSTFIX 1)
 
