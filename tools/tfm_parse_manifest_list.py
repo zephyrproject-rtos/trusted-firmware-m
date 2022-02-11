@@ -289,10 +289,6 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
         config_impl['CONFIG_TFM_SPM_BACKEND_SFN'] = '1'
         config_impl['CONFIG_TFM_PSA_API_SFN_CALL'] = '1'
     elif backend == 'IPC':
-        if partition_statistics['sfn_partition_num'] > 0:
-            logging.error('IPC backend does not support SFN Partitions.')
-            exit(1)
-
         config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] = '1'
         if isolation_level > 1:
             config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL'] = '1'

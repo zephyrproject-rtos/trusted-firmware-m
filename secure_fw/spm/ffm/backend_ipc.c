@@ -44,16 +44,43 @@ struct context_ctrl_t *p_spm_thread_context;
 
 static void prv_process_metadata(struct partition_t *p_pt)
 {
-    struct runtime_metadata_t *p_rtmd = NULL;
+    const struct partition_load_info_t *p_pt_ldi;
+    const struct service_load_info_t *p_srv_ldi;
+    struct context_ctrl_t *ctx_ctrl;
+    struct runtime_metadata_t *p_rt_meta;
+    service_fn_t *p_sfn_table;
+    uint32_t allocate_size;
 
-    if (p_pt->p_ldinf->entry) {
-        ARCH_CTXCTRL_ALLOCATE_STACK(&p_pt->ctx_ctrl, sizeof(*p_rtmd));
-        p_rtmd = (struct runtime_metadata_t *)ARCH_CTXCTRL_ALLOCATED_PTR(
-                                                            &p_pt->ctx_ctrl);
-        p_rtmd->entry = p_pt->p_ldinf->entry;
+    p_pt_ldi = p_pt->p_ldinf;
+    p_srv_ldi = (struct service_load_info_t *)LOAD_INFO_SERVICE(p_pt_ldi);
+    ctx_ctrl = &p_pt->ctx_ctrl;
+
+    /* common runtime metadata */
+    allocate_size = sizeof(*p_rt_meta);
+
+    if (!IS_PARTITION_IPC_MODEL(p_pt_ldi)) {
+        /* SFN specific metadata - SFN function table */
+        allocate_size += sizeof(service_fn_t) * p_pt_ldi->nservices;
     }
 
-    p_pt->p_metadata = p_rtmd;
+    ARCH_CTXCTRL_ALLOCATE_STACK(ctx_ctrl, allocate_size);
+    p_rt_meta = (struct runtime_metadata_t *)
+                                    ARCH_CTXCTRL_ALLOCATED_PTR(ctx_ctrl);
+
+    p_rt_meta->entry = p_pt_ldi->entry;
+    p_rt_meta->n_sfn = 0;
+    p_sfn_table = p_rt_meta->sfn_table;
+
+    if (!IS_PARTITION_IPC_MODEL(p_pt_ldi)) {
+        /* SFN table. The signal bit of the service is the same index of SFN. */
+        for (int i = 0; i < p_pt_ldi->nservices; i++) {
+            p_sfn_table[i] = (service_fn_t)p_srv_ldi[i].sfn;
+        }
+
+        p_rt_meta->n_sfn = p_pt_ldi->nservices;
+    }
+
+    p_pt->p_metadata = (void *)p_rt_meta;
 }
 
 /*

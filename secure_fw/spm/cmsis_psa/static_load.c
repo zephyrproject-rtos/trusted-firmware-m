@@ -6,6 +6,7 @@
  */
 #include <limits.h>
 #include <stdint.h>
+#include "config_impl.h"
 #include "lists.h"
 #include "region.h"
 #include "region_defs.h"
@@ -140,9 +141,9 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
         services[i].partition = p_partition;
         services[i].next = NULL;
 
-        if (IS_PARTITION_IPC_MODEL(p_ptldinf)) {
-            service_setting |= p_servldinf[i].signal;
-        }
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+        service_setting |= p_servldinf[i].signal;
+#endif
 
         /* Populate the stateless service reference table */
         serv_ldflags = p_servldinf[i].flags;

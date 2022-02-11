@@ -25,6 +25,7 @@ target_sources(tfm_sprt
         ./service_api.c
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_partition_metadata_indicator.c>
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_main.c>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:./sfn_common_thread.c>
 )
 
 target_link_libraries(tfm_sprt

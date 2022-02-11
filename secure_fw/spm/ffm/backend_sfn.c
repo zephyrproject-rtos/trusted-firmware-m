@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "compiler_ext_defs.h"
 #include "current.h"
+#include "runtime_defs.h"
 #include "tfm_hal_platform.h"
 #include "ffm/backend.h"
 #include "load/partition_defs.h"
@@ -20,9 +21,6 @@
 /* SFN Partition state */
 #define SFN_PARTITION_STATE_NOT_INITED        0
 #define SFN_PARTITION_STATE_INITED            1
-
-typedef psa_status_t (*service_fn_t)(psa_msg_t *msg);
-typedef psa_status_t (*sfn_init_fn_t)(void);
 
 /* Declare the global component list */
 struct partition_head_t partition_listhead;

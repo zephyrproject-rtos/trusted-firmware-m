@@ -14,9 +14,21 @@
 #pragma required = meta_init_c
 #endif
 
+extern void common_sfn_thread(void);
+
 __used static uintptr_t runtime_init_c(void)
 {
-    return PART_METADATA()->entry;
+    struct runtime_metadata_t *p_rt_meta;
+
+    p_rt_meta = PART_METADATA();
+
+    if (p_rt_meta->n_sfn == 0) {
+        /* IPC Partition */
+        return p_rt_meta->entry;
+    } else {
+        /* SFN Partition */
+        return (uintptr_t)common_sfn_thread;
+    }
 }
 
 __naked void sprt_main(void)
