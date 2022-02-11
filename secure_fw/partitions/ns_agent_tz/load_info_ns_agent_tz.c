@@ -24,7 +24,7 @@
 #endif
 
 /* Entrypoint function declaration */
-extern void tfm_nspm_thread_entry(void);
+extern void ns_agent_tz_main(void);
 
 /* Stack */
 uint8_t ns_agent_tz_stack[CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE] __aligned(0x20);
@@ -53,7 +53,7 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
         .flags                      = (PARTITION_PRI_LOWEST - 1)
                                     | PARTITION_MODEL_IPC
                                     | PARTITION_MODEL_PSA_ROT,
-        .entry                      = ENTRY_TO_POSITION(tfm_nspm_thread_entry),
+        .entry                      = ENTRY_TO_POSITION(ns_agent_tz_main),
         .stack_size                 = CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE,
         .heap_size                  = 0,
         .ndeps                      = TFM_SP_NS_AGENT_NDEPS,
