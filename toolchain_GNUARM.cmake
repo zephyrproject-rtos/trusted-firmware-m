@@ -176,10 +176,6 @@ macro(target_add_scatter_file target)
         -T $<TARGET_OBJECTS:${target}_scatter>
     )
 
-    add_dependencies(${target}
-        ${target}_scatter
-    )
-
     add_library(${target}_scatter OBJECT)
     foreach(scatter_file ${ARGN})
         target_sources(${target}_scatter
@@ -197,6 +193,12 @@ macro(target_add_scatter_file target)
             KEEP_EXTENSION True # Don't use .o extension for the preprocessed file
         )
     endforeach()
+
+    add_dependencies(${target}
+        ${target}_scatter
+    )
+
+    set_target_properties(${target} PROPERTIES LINK_DEPENDS $<TARGET_OBJECTS:${target}_scatter>)
 
     target_link_libraries(${target}_scatter
         platform_region_defs
