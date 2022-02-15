@@ -178,6 +178,7 @@ void psa_reply_cross(psa_handle_t msg_handle, psa_status_t status)
     );
 }
 
+#if CONFIG_TFM_DOORBELL_API == 1
 __naked
 __section(".psa_interface_cross_call")
 void psa_notify_cross(int32_t partition_id)
@@ -207,6 +208,7 @@ void psa_clear_cross(void)
         "b      psa_interface_cross_unified_entry           \n"
     );
 }
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
 __naked
 __section(".psa_interface_cross_call")

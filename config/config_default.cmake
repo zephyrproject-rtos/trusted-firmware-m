@@ -55,6 +55,8 @@ set(TFM_EXCEPTION_INFO_DUMP             OFF         CACHE BOOL      "On fatal er
 set(CONFIG_TFM_FP                       "soft"      CACHE STRING    "FP ABI type in SPE and NSPE: soft-Software ABI, hard-Hardware ABI")
 set(CONFIG_TFM_LAZY_STACKING            OFF         CACHE BOOL      "Enable/disable lazy stacking")
 
+set(CONFIG_TFM_DOORBELL_API             ON          CACHE BOOL      "Enable the doorbell APIs")
+
 ############################ Platform ##########################################
 
 set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")

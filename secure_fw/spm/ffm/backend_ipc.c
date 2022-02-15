@@ -107,7 +107,11 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
 
-    p_pt->signals_allowed |= PSA_DOORBELL | service_setting;
+#if CONFIG_TFM_DOORBELL_API == 1
+    p_pt->signals_allowed |= PSA_DOORBELL;
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
+
+    p_pt->signals_allowed |= service_setting;
 
     THRD_SYNC_INIT(&p_pt->waitobj);
     UNI_LISI_INIT_NODE(p_pt, p_handles);

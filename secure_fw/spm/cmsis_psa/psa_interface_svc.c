@@ -74,6 +74,7 @@ __naked void psa_reply_svc(psa_handle_t msg_handle, psa_status_t retval)
                    "bx      lr                                 \n");
 }
 
+#if CONFIG_TFM_DOORBELL_API == 1
 __naked void psa_notify_svc(int32_t partition_id)
 {
     __asm volatile("svc     "M2S(TFM_SVC_PSA_NOTIFY)"          \n"
@@ -85,6 +86,7 @@ __naked void psa_clear_svc(void)
     __asm volatile("svc     "M2S(TFM_SVC_PSA_CLEAR)"           \n"
                    "bx      lr                                 \n");
 }
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
 __naked void psa_panic_svc(void)
 {

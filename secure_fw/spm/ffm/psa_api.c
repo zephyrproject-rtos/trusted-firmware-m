@@ -435,6 +435,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 
 /* PSA Partition API function body */
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
                                         uint32_t timeout)
 {
@@ -471,8 +472,6 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     return partition->signals_asserted & signal_mask;
 }
 
-/* This API is only used in IPC backend. */
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 {
     struct conn_handle_t *tmp_msg = NULL;
@@ -850,6 +849,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
     return ret;
 }
 
+#if CONFIG_TFM_DOORBELL_API == 1
 void tfm_spm_partition_psa_notify(int32_t partition_id)
 {
     struct partition_t *p_pt = tfm_spm_get_partition_by_id(partition_id);
@@ -876,6 +876,7 @@ void tfm_spm_partition_psa_clear(void)
     partition->signals_asserted &= ~PSA_DOORBELL;
     CRITICAL_SECTION_LEAVE(cs_assert);
 }
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
 void tfm_spm_partition_psa_panic(void)
 {

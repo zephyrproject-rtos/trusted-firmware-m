@@ -124,6 +124,7 @@ target_sources(tfm_secure_api
 target_compile_definitions(tfm_secure_api
     INTERFACE
         CONFIG_TFM_BUILDING_SPE=1
+        $<$<BOOL:${CONFIG_TFM_DOORBELL_API}>:CONFIG_TFM_DOORBELL_API=1>
 )
 
 ############################# Secure veneers ###################################

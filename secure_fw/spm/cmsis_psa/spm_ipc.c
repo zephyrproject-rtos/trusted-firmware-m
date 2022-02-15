@@ -249,6 +249,7 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
     return NULL;
 }
 
+#if CONFIG_TFM_DOORBELL_API == 1
 /**
  * \brief                   Get the partition context by partition ID.
  *
@@ -270,6 +271,7 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 
     return NULL;
 }
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
 int32_t tfm_spm_check_client_version(struct service_t *service,
                                      uint32_t version)

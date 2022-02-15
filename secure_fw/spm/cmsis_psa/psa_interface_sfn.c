@@ -42,16 +42,6 @@ psa_status_t psa_call_pack_sfn(psa_handle_t handle, uint32_t ctrl_param,
     return (psa_status_t)stat;
 }
 
-psa_signal_t psa_wait_sfn(psa_signal_t signal_mask, uint32_t timeout)
-{
-    /*
-     * TODO:
-     *   Need to trigger scheduler here, when 'psa_wait'
-     *   is needed (interrupt case, e.g.).
-     */
-    return tfm_spm_partition_psa_wait(signal_mask, timeout);
-}
-
 size_t psa_read_sfn(psa_handle_t msg_handle, uint32_t invec_idx,
                     void *buffer, size_t num_bytes)
 {

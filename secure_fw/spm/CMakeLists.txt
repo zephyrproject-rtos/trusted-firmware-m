@@ -95,6 +95,7 @@ target_compile_definitions(tfm_spm
         # CONFIG_TFM_FP
         $<$<STREQUAL:${CONFIG_TFM_FP},hard>:CONFIG_TFM_FP=2>
         $<$<STREQUAL:${CONFIG_TFM_FP},soft>:CONFIG_TFM_FP=0>
+        $<$<BOOL:${CONFIG_TFM_DOORBELL_API}>:CONFIG_TFM_DOORBELL_API=1>
 )
 
 target_compile_options(tfm_spm

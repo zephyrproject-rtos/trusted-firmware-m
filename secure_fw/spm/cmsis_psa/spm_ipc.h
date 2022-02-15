@@ -215,6 +215,7 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
 struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
                                                psa_signal_t signal);
 
+#if CONFIG_TFM_DOORBELL_API == 1
 /**
  * \brief                   Get partition by Partition ID.
  *
@@ -225,6 +226,7 @@ struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
  *                          \ref partition_t structures
  */
 struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id);
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
 /**
  * \brief                   Get the service context by service ID.

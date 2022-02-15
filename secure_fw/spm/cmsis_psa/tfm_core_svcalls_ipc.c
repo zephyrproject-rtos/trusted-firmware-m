@@ -47,8 +47,6 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                          (const psa_invec *)ctx[2],
                                          (psa_outvec *)ctx[3]);
         break;
-    case TFM_SVC_PSA_WAIT:
-        return tfm_spm_partition_psa_wait((psa_signal_t)ctx[0], ctx[1]);
     case TFM_SVC_PSA_READ:
         return tfm_spm_partition_psa_read((psa_handle_t)ctx[0], ctx[1],
                                           (void *)ctx[2], (size_t)ctx[3]);
@@ -59,12 +57,14 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         tfm_spm_partition_psa_write((psa_handle_t)ctx[0], ctx[1],
                                     (void *)ctx[2], (size_t)ctx[3]);
         break;
+#if CONFIG_TFM_DOORBELL_API == 1
     case TFM_SVC_PSA_NOTIFY:
         tfm_spm_partition_psa_notify((int32_t)ctx[0]);
         break;
     case TFM_SVC_PSA_CLEAR:
         tfm_spm_partition_psa_clear();
         break;
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
     case TFM_SVC_PSA_PANIC:
         tfm_spm_partition_psa_panic();
         break;
@@ -90,6 +90,8 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
     case TFM_SVC_PSA_REPLY:
         tfm_spm_partition_psa_reply((psa_handle_t)ctx[0], (psa_status_t)ctx[1]);
         break;
+    case TFM_SVC_PSA_WAIT:
+        return tfm_spm_partition_psa_wait((psa_signal_t)ctx[0], ctx[1]);
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
 #if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1

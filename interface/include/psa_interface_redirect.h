@@ -20,10 +20,14 @@
 #define psa_skip                 psa_skip_svc
 #define psa_write                psa_write_svc
 #define psa_reply                psa_reply_svc
-#define psa_notify               psa_notify_svc
-#define psa_clear                psa_clear_svc
 #define psa_panic                psa_panic_svc
 #define psa_rot_lifecycle_state  psa_rot_lifecycle_state_svc
+
+#if CONFIG_TFM_DOORBELL_API == 1
+#define psa_notify               psa_notify_svc
+#define psa_clear                psa_clear_svc
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
+
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 #define psa_connect              psa_connect_svc
@@ -55,10 +59,14 @@
 #define psa_skip                 psa_skip_cross
 #define psa_write                psa_write_cross
 #define psa_reply                psa_reply_cross
-#define psa_notify               psa_notify_cross
-#define psa_clear                psa_clear_cross
 #define psa_panic                psa_panic_cross
 #define psa_rot_lifecycle_state  psa_rot_lifecycle_state_cross
+
+#if CONFIG_TFM_DOORBELL_API == 1
+#define psa_notify               psa_notify_cross
+#define psa_clear                psa_clear_cross
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
+
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 #define psa_connect              psa_connect_cross
@@ -91,7 +99,6 @@
 #define psa_framework_version    psa_framework_version_sfn
 #define psa_version              psa_version_sfn
 #define tfm_psa_call_pack        psa_call_pack_sfn
-#define psa_wait                 psa_wait_sfn
 #define psa_read                 psa_read_sfn
 #define psa_skip                 psa_skip_sfn
 #define psa_write                psa_write_sfn
