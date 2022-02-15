@@ -216,6 +216,12 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     {% endif %}
 {% endfor %}
 
+#if defined(CONFIG_TFM_PARTITION_META)
+    TFM_SP_META_PTR +0 ALIGN 32 {
+        *(.bss.SP_META_PTR_SPRTL_INST)
+    }
+#endif
+
     PT_SRAM_WATERMARK +0 EMPTY 0x0 {
         /* Position tag */
     }

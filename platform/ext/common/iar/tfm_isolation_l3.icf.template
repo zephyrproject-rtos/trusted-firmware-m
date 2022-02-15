@@ -182,6 +182,11 @@ define block PT_PRIV_RWZI_END with alignment = 32, size = 0 { };
     {% endif %}
 {% endfor %}
 
+#if defined(CONFIG_TFM_PARTITION_META)
+define block TFM_SP_META_PTR with alignment = 32 {
+    zi section .bss.SP_META_PTR_SPRTL_INST
+       };
+#endif
 
 define block PT_SRAM_WATERMARK with alignment = 32, size = 0 { };
 
@@ -260,6 +265,10 @@ define block DATA with fixed order {
     block PT_{{partition.manifest.name}}_PRIVATE_DATA_END,
    {% endif %}
 {% endfor %}
+
+#if defined(CONFIG_TFM_PARTITION_META)
+    block TFM_SP_META_PTR,
+#endif
 
     block PT_SRAM_WATERMARK,
  /* Make sure that the sections allocated in the SRAM does not exceed the

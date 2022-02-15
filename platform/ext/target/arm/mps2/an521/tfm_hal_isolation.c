@@ -25,6 +25,12 @@
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = {MPU_BASE};
+
+#ifdef CONFIG_TFM_PARTITION_META
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
+#endif /* CONFIG_TFM_PARTITION_META */
+
 #if TFM_LVL == 3
 static uint32_t idx_boundary_handle = 0;
 REGION_DECLARE(Image$$, PT_RO_START, $$Base);
@@ -54,6 +60,18 @@ const static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
         MPU_ARMV8M_AP_RW_PRIV_ONLY,
         MPU_ARMV8M_SH_NONE,
     },
+#ifdef CONFIG_TFM_PARTITION_META
+    /* TFM partition metadata pointer region */
+    {
+        0, /* will be updated before using */
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit),
+        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
+        MPU_ARMV8M_XN_EXEC_NEVER,
+        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
+        MPU_ARMV8M_SH_NONE
+    }
+#endif
 };
 #else /* TFM_LVL == 3 */
 
@@ -65,10 +83,6 @@ REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-#ifdef CONFIG_TFM_PARTITION_META
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
-#endif /* CONFIG_TFM_PARTITION_META */
 
 const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     /* Veneer region */

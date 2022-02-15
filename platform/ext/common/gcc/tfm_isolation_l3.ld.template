@@ -93,6 +93,10 @@ SECTIONS
     .zero.table : ALIGN(4)
     {
         __zero_table_start__ = .;
+#if defined(CONFIG_TFM_PARTITION_META)
+        LONG (ADDR(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR))
+#endif
         LONG (ADDR(.TFM_BSS))
         LONG (SIZEOF(.TFM_BSS))
 {% for partition in partitions %}
@@ -454,6 +458,15 @@ SECTIONS
     } > RAM AT> FLASH
     Image$$ER_TFM_DATA$$RW$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
+
+#if defined(CONFIG_TFM_PARTITION_META)
+    .TFM_SP_META_PTR : ALIGN(32)
+    {
+        *(.bss.SP_META_PTR_SPRTL_INST)
+    } > RAM AT> RAM
+    Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
+    Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
+#endif
 
     .TFM_BSS : ALIGN(4)
     {
