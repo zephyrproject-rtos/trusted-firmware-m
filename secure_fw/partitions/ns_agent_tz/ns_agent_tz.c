@@ -11,6 +11,7 @@
 #include "tfm_hal_platform.h"
 
 #if defined(__ICCARM__)
+static uint32_t ns_agent_tz_init_c(void);
 #pragma required = ns_agent_tz_init_c
 #endif
 
