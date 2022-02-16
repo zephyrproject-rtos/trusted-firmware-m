@@ -43,13 +43,6 @@ REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_END$$Base);
 #endif
 extern uint8_t {{manifest.name|lower}}_stack[];
 
-{% if manifest.entry_init and manifest.entry_point %}
-#error "Both manifest.entry_init and manifest.entry_point exist, unsupported!"
-{% elif (manifest.model == "IPC" or manifest.psa_framework_version == 1.0) and (not manifest.entry_point) %}
-#error "The entry_point attribute is required, it should not be empty!"
-{% elif manifest.model == "SFN" and manifest.entry_point %}
-#error "The entry_point attribute should not be exist in SFN mode!"
-{% endif %}
 /* Entrypoint function declaration */
 {% if manifest.entry_point %}
 extern void {{manifest.entry_point}}(void);
@@ -107,27 +100,17 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
 {% elif manifest.psa_framework_version == 1.1 %}
         .psa_ff_ver                 = 0x0101 | PARTITION_INFO_MAGIC,
-{% else %}
-#error "Unsupported ff version '{{manifest.psa_framework_version}}' for partition '{{manifest.name}}'!"
 {% endif %}
         .pid                        = {{manifest.name}},
         .flags                      = 0
-{% if (manifest.psa_framework_version == 1.1 and manifest.model == "IPC") or manifest.psa_framework_version == 1.0 %}
+{% if manifest.model == "IPC" %}
                                     | PARTITION_MODEL_IPC
 {% endif %}
 {% if manifest.type == "PSA-ROT" %}
                                     | PARTITION_MODEL_PSA_ROT
-{% elif manifest.type != "APPLICATION-ROT" %}
-#error "Unsupported type '{{manifest.type}}' for partition '{{manifest.name}}'!"
 {% endif %}
                                     | PARTITION_PRI_{{manifest.priority}},
-{% if manifest.entry_point %}
-        .entry                      = ENTRY_TO_POSITION({{manifest.entry_point}}),
-{% elif manifest.entry_init %}
-        .entry                      = ENTRY_TO_POSITION({{manifest.entry_init}}),
-{% else %}
-        .entry                      = 0,
-{% endif %}
+        .entry                      = ENTRY_TO_POSITION({{manifest.entry}}),
         .stack_size                 = {{manifest.stack_size}},
         .heap_size                  = 0,
         .ndeps                      = {{(manifest.name|upper + "_NDEPS")}},
@@ -150,19 +133,18 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
     },
 {% endif %}
 {% if counter.service_counter > 0 %}
-    {% set service_signal = namespace(bit=0) %}
     .services = {
     {% for service in manifest.services %}
         {
             .name_strid             = STRING_PTR_TO_STRID("{{service.name}}"),
-        {% if manifest.psa_framework_version == 1.1 and manifest.model == "SFN" %}
+        {% if manifest.model == "SFN" %}
             .sfn                    = ENTRY_TO_POSITION({{service.name|lower}}_sfn),
         {% else %}
             .sfn                    = 0,
         {% endif %}
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-        {% if manifest.psa_framework_version == 1.1 and manifest.model == "SFN" %}
-            .signal                 = (1U << {{"%d"|format(service_signal.bit)}}),
+        {% if manifest.model == "SFN" %}
+            .signal                 = {{service.signal_value}},
         {% else %}
             .signal                 = {{service.name}}_SIGNAL,
         {% endif %}
@@ -172,29 +154,17 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         {% if service.non_secure_clients is sameas true %}
                                     | SERVICE_FLAG_NS_ACCESSIBLE
         {% endif %}
-        {% if manifest.psa_framework_version > 1.0 and service.connection_based is sameas false %}
+        {% if service.connection_based is sameas false %}
                                     | SERVICE_FLAG_STATELESS | 0x{{"%x"|format(service.stateless_handle_index)}}
         {% endif %}
-        {% if manifest.psa_framework_version > 1.0 and service.mm_iovec == "enable" %}
+        {% if service.mm_iovec == "enable" %}
                                     | SERVICE_FLAG_MM_IOVEC
         {% endif %}
-        {% if service.version_policy %}
                                     | SERVICE_VERSION_POLICY_{{service.version_policy}},
-        {% else %}
-                                    | SERVICE_VERSION_POLICY_STRICT,
-        {% endif %}
-        {% if service.version %}
             .version                = {{service.version}},
-        {% else %}
-            .version                = 1,
-        {% endif %}
         },
-        {% set service_signal.bit = service_signal.bit + 1 %}
     {% endfor %}
     },
-    {% if service_signal.bit > 32 %}
-#error "Too many services!"
-    {% endif %}
 {% endif %}
 #if TFM_LVL == 3
     .assets                         = {

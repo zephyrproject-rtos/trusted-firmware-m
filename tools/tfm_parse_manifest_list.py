@@ -86,24 +86,60 @@ def get_single_macro_def_from_file(file_name, macro_name):
 
     return macro_def
 
-def manifest_validation(partition_manifest, pid):
+def manifest_validation(manifest, pid):
     """
     This function validates FF-M compliance for partition manifest, and sets
     default values for optional attributes.
     The validation is skipped for TF-M specific Partitions (PID < TFM_PID_BASE).
-    More validation items will be added.
     """
 
-    service_list = partition_manifest.get('services', [])
-    irq_list     = partition_manifest.get('irqs', [])
+    service_list = manifest.get('services', [])
+    irq_list     = manifest.get('irqs', [])
 
+    # "psa_framework_version" validation
+    if manifest['psa_framework_version'] not in [1.0, 1.1]:
+        raise Exception('Invalid psa_framework_version of {}'.format(manifest['name']))
+
+    # "type" validatoin
+    if manifest['type'] not in ['PSA-ROT', 'APPLICATION-ROT']:
+        raise Exception('Invalid type of {}'.format(manifest['name']))
+
+    # Every PSA Partition must have at least either a secure service or an IRQ
     if (pid == None or pid >= TFM_PID_BASE) \
        and len(service_list) == 0 and len(irq_list) == 0:
         raise Exception('{} must declare at least either a secure service or an IRQ!'
-                        .format(partition_manifest['name']))
+                        .format(manifest['name']))
+
+    if manifest['psa_framework_version'] == 1.0:
+        # For 1.0 Partition, the model is IPC
+        manifest['model'] = 'IPC'
+
+    # "model" validation:
+    model = manifest.get('model', None)
+    if model == None:
+        raise Exception('{} is missing the "model" attribute'.format(manifest['name']))
+
+    # Assign a unified 'entry' for templates
+    if model == 'IPC':
+        # entry_point is mandatory for IPC Partitions
+        if 'entry_point' not in manifest.keys():
+            raise Exception('{} is missing the "entry_point" attribute'.format(manifest['name']))
+        manifest['entry'] = manifest['entry_point']
+    elif model == 'SFN':
+        if 'entry_init' in manifest.keys():
+            manifest['entry'] = manifest['entry_init']
+        else:
+            manifest['entry'] = 0
+    else:
+        raise Exception('Invalid "model" of {}'.format(manifest['name']))
 
     # Service FF-M manifest validation
     for service in service_list:
+        if manifest['psa_framework_version'] == 1.0:
+            service['connection_based'] = True
+        elif 'connection_based' not in service:
+            raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
+
         if 'version' not in service.keys():
             service['version'] = 1
         if 'version_policy' not in service.keys():
@@ -115,7 +151,7 @@ def manifest_validation(partition_manifest, pid):
         else:
             sid_list.append(service['sid'])
 
-    return partition_manifest
+    return manifest
 
 def process_partition_manifests(manifest_lists, isolation_level, backend):
     """
@@ -232,17 +268,36 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
             else:
                 partition_statistics['ipc_partition_num'] += 1
 
-        for service in manifest.get('services', []):
-            if 'connection_based' not in service.keys():
+        # Set initial value to -1 to make (srv_idx + 1) reflect the correct
+        # number (0) when there are no services.
+        srv_idx = -1
+        for srv_idx, service in enumerate(manifest.get('services', [])):
+            if manifest['model'] == 'IPC':
+                # Assign signal value, the first 4 bits are reserved by FF-M
+                service['signal_value'] = (1 << (srv_idx + 4))
+            else:
+                # Signals of SFN Partitions are SPM internal only, does not
+                # need to reserve 4 bits.
+                service['signal_value'] = (1 << srv_idx)
+            if service['connection_based']:
                 partition_statistics['connection_based_srv_num'] += 1
-            elif service['connection_based']:
-                partition_statistics['connection_based_srv_num'] += 1
+        logging.debug('{} has {} services'.format(manifest['name'], srv_idx +1))
 
-        for irq in manifest.get('irqs', []):
+        # Set initial value to -1 to make (irq + 1) reflect the correct
+        # number (0) when there are no irqs.
+        irq_idx = -1
+        for irq_idx, irq in enumerate(manifest.get('irqs', [])):
+            # Assign signal value, from the most significant bit
+            irq['signal_value'] = (1 << (31 - irq_idx))
             if irq.get('handling', None) == 'FLIH':
                 partition_statistics['flih_num'] += 1
             else:
                 partition_statistics['slih_num'] += 1
+        logging.debug('{} has {} IRQS'.format(manifest['name'], irq_idx +1))
+
+        if ((srv_idx + 1) + (irq_idx + 1)) > 28:
+            raise Exception('Total number of Services and IRQs of {} exceeds the limit (28)'
+                            .format(manifest['name']))
 
         manifest_out_basename = os.path.splitext(os.path.basename(manifest_path))[0]
 
@@ -419,8 +474,6 @@ def process_stateless_services(partitions):
         service_list = partition['manifest'].get('services', [])
 
         for service in service_list:
-            if 'connection_based' not in service:
-                raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
             if service['connection_based'] is False:
                 collected_stateless_services.append(service)
 
