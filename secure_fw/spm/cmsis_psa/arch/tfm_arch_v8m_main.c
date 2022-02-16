@@ -7,7 +7,6 @@
 
 #include <inttypes.h>
 #include "compiler_ext_defs.h"
-#include "exception_info.h"
 #include "region_defs.h"
 #include "spm_ipc.h"
 #include "svc_num.h"
@@ -115,21 +114,6 @@ __attribute__((naked)) void PendSV_Handler(void)
     );
 }
 
-/**
- * \brief Overwrites default Secure fault handler.
- */
-__attribute__((naked)) void SecureFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_SECUREFAULT);
-
-    /* A SecureFault may indicate corruption of secure state, so it is essential
-     * that Non-secure code does not regain control after one is raised.
-     * Returning from this exception could allow a pending NS exception to be
-     * taken, so the current solution is not to return.
-     */
-    __ASM volatile("b    .");
-}
-
 #if defined(__ICCARM__)
 uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
                               uint32_t *psp);
@@ -174,49 +158,6 @@ __attribute__((naked)) void SVC_Handler(void)
     "POP     {r1, r2}                       \n" /* PSP PSPLIM */
     "BX      lr                             \n"
     );
-}
-
-/* Reserved for future usage */
-__attribute__((naked)) void HardFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
-
-    /* A HardFault may indicate corruption of secure state, so it is essential
-     * that Non-secure code does not regain control after one is raised.
-     * Returning from this exception could allow a pending NS exception to be
-     * taken, so the current solution is not to return.
-     */
-    __ASM volatile("b    .");
-}
-
-__attribute__((naked)) void MemManage_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_MEMFAULT);
-
-    /* A MemManage fault may indicate corruption of secure state, so it is
-     * essential that Non-secure code does not regain control after one is
-     * raised. Returning from this exception could allow a pending NS exception
-     * to be taken, so the current solution is not to return.
-     */
-    __ASM volatile("b    .");
-}
-
-__attribute__((naked)) void BusFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_BUSFAULT);
-
-    /* A BusFault may indicate corruption of secure state, so it is essential
-     * that Non-secure code does not regain control after one is raised.
-     * Returning from this exception could allow a pending NS exception to be
-     * taken, so the current solution is not to return.
-     */
-    __ASM volatile("b    .");
-}
-
-__attribute__((naked)) void UsageFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_USAGEFAULT);
-    __ASM volatile("b    .");
 }
 
 void tfm_arch_set_secure_exception_priorities(void)

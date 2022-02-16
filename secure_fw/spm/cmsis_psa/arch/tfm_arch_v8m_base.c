@@ -7,7 +7,6 @@
 
 #include <inttypes.h>
 #include "compiler_ext_defs.h"
-#include "exception_info.h"
 #include "spm_ipc.h"
 #include "svc_num.h"
 #include "tfm_hal_device_header.h"
@@ -129,29 +128,6 @@ __attribute__((naked)) void PendSV_Handler(void)
         "v8b_pendsv_exit:                               \n"
         "   bx      lr                                  \n"
     );
-}
-
-/**
- * \brief Overwrites default Hard fault handler.
- *
- * In case of a baseline implementation fault conditions that would generate a
- * SecureFault in a mainline implementation instead generate a Secure HardFault.
- */
-__attribute__((naked)) void HardFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
-
-    /* In a baseline implementation there is no way, to find out whether this is
-     * a hard fault triggered directly, or another fault that has been
-     * escalated.
-     */
-    /* A HardFault may indicate corruption of secure state, so it is essential
-     * that Non-secure code does not regain control after one is raised.
-     * Returning from this exception could allow a pending NS exception to be
-     * taken, so the current solution is not to return.
-     */
-
-    __ASM volatile("b    .");
 }
 
 __attribute__((naked)) void SVC_Handler(void)

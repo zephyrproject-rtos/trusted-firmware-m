@@ -41,7 +41,6 @@ target_sources(tfm_spm
         ffm/tfm_boot_data.c
         ffm/tfm_core_utils.c
         ffm/utilities.c
-        $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:cmsis_psa/exception_info.c>
         $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:ffm/spm_log.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core_mem_check.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:ffm/tfm_core_mem_check.c>
@@ -91,7 +90,6 @@ target_compile_definitions(tfm_spm
     PRIVATE
         $<$<CONFIG:Debug>:TFM_CORE_DEBUG>
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${MCUBOOT_MEASURED_BOOT}>>:BOOT_DATA_AVAILABLE>
-        $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
         $<$<BOOL:${TFM_PSA_API}>:CONFIG_TFM_CONN_HANDLE_MAX_NUM=${CONFIG_TFM_CONN_HANDLE_MAX_NUM}>
         # CONFIG_TFM_FP
