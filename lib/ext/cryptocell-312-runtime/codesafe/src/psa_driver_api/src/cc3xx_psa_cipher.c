@@ -544,7 +544,7 @@ psa_status_t cc3xx_cipher_abort(cc3xx_cipher_operation_t *operation)
         break;
     case PSA_KEY_TYPE_CHACHA20:
         cc3xx_chacha20_free(&operation->ctx.chacha);
-        return PSA_ERROR_NOT_SUPPORTED;
+        break;
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
