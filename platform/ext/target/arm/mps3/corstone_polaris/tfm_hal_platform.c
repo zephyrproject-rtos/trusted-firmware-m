@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -56,14 +56,6 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
     }
 
     return TFM_HAL_SUCCESS;
-}
-
-void tfm_hal_system_reset(void)
-{
-    __disable_irq();
-    mpc_revert_non_secure_to_secure_cfg();
-
-    NVIC_SystemReset();
 }
 
 uint32_t tfm_hal_get_ns_VTOR(void)
