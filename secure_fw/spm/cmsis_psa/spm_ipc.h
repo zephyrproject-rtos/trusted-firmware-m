@@ -170,7 +170,7 @@ int32_t tfm_spm_partition_get_running_partition_id(void);
  * \retval "Not NULL"       Service handle created
  */
 struct conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
-                                                     int32_t client_id);
+                                                 int32_t client_id);
 
 /**
  * \brief                   Validate connection handle for client connect
@@ -181,9 +181,8 @@ struct conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
  * \retval SPM_SUCCESS        Success
  * \retval SPM_ERROR_GENERIC  Invalid handle
  */
-int32_t tfm_spm_validate_conn_handle(
-                                    const struct conn_handle_t *conn_handle,
-                                    int32_t client_id);
+int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle,
+                                     int32_t client_id);
 
 /**
  * \brief                   Free connection handle which not used anymore.
@@ -201,6 +200,7 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
 
 /******************** Partition management functions *************************/
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 /*
  * Lookup and grab the last spotted handles containing the message
  * by the given signal. Only ONE signal bit can be accepted in 'signal',
@@ -214,6 +214,7 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
  */
 struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
                                                psa_signal_t signal);
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC */
 
 #if CONFIG_TFM_DOORBELL_API == 1
 /**
@@ -257,7 +258,7 @@ struct conn_handle_t *spm_get_handle_by_user_handle(psa_handle_t msg_handle);
 /**
  * \brief                   Fill the user message in handle.
  *
- * \param[in] hdl           The 'handle' contains the user message.
+ * \param[in] conn_handle   The 'conn_handle' contains the user message.
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
  * \prarm[in] handle        Connect handle return by psa_connect().
@@ -270,7 +271,7 @@ struct conn_handle_t *spm_get_handle_by_user_handle(psa_handle_t msg_handle);
  * \param[in] out_len       Number of output \ref psa_outvec structures
  * \param[in] caller_outvec Array of caller output \ref psa_outvec structures
  */
-void spm_fill_message(struct conn_handle_t *hdl,
+void spm_fill_message(struct conn_handle_t *conn_handle,
                       struct service_t *service,
                       psa_handle_t handle,
                       int32_t type, int32_t client_id,
@@ -385,7 +386,7 @@ struct conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle);
  */
 void tfm_core_handler_mode(void);
 
-void update_caller_outvec_len(struct conn_handle_t *msg);
+void update_caller_outvec_len(struct conn_handle_t *handle);
 
 /*
  * Set partition signal.

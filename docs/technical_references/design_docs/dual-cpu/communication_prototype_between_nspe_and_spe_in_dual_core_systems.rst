@@ -435,15 +435,15 @@ the caller after PSA client call is completed.
 
 .. code-block:: c
 
-  void tfm_rpc_set_caller_data(struct conn_handle_t *msg, int32_t client_id);
+  void tfm_rpc_set_caller_data(struct conn_handle_t *handle, int32_t client_id);
 
 **Parameters**
 
-+---------------+-----------------------------------------------------+
-| ``msg``       | TF-M message to be set with NS caller private data. |
-+---------------+-----------------------------------------------------+
-| ``client_id`` | The client ID of the NS caller.                     |
-+---------------+-----------------------------------------------------+
++---------------+--------------------------------------------------------------+
+| ``handle``    | The connection handle to be set with NS caller private data. |
++---------------+--------------------------------------------------------------+
+| ``client_id`` | The client ID of the NS caller.                              |
++---------------+--------------------------------------------------------------+
 
 **Usage**
 
@@ -703,6 +703,6 @@ Reference
 
 ----------------
 
-*Copyright (c) 2019-2021 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2019-2022 Arm Limited. All Rights Reserved.*
 
 *Copyright (c) 2020-2022 Cypress Semiconductor Corporation. All Rights Reserved.*

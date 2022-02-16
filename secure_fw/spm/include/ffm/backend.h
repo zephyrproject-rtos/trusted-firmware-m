@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,13 +33,13 @@ struct backend_ops_t {
 
     /* Runtime model-specific message handling mechanism. */
     psa_status_t (*messaging)(struct service_t *p_serv,
-                              struct conn_handle_t *hdl);
+                              struct conn_handle_t *handle);
 
     /*
      * Runtime model-specific message replying.
      * Return the connection handle or the acked status code.
      */
-    psa_status_t (*replying)(struct conn_handle_t *hdl, int32_t status);
+    psa_status_t (*replying)(struct conn_handle_t *handle, int32_t status);
 };
 
 /* RUNTIME MODEL BACKENDS DECLARATION */

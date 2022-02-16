@@ -32,18 +32,18 @@ struct partition_head_t partition_listhead;
  * current component state and activate the next component.
  */
 static psa_status_t sfn_messaging(struct service_t *service,
-                                  struct conn_handle_t *hdl)
+                                  struct conn_handle_t *handle)
 {
     struct partition_t *p_target;
     psa_status_t status;
 
-    if (!hdl || !service || !service->p_ldinf || !service->partition) {
+    if (!handle || !service || !service->p_ldinf || !service->partition) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    hdl->sfn_magic = TFM_MSG_MAGIC_SFN;
+    handle->sfn_magic = TFM_MSG_MAGIC_SFN;
     p_target = service->partition;
-    p_target->p_handles = hdl;
+    p_target->p_handles = handle;
 
     SET_CURRENT_COMPONENT(p_target);
 
@@ -58,14 +58,14 @@ static psa_status_t sfn_messaging(struct service_t *service,
         p_target->state = SFN_PARTITION_STATE_INITED;
     }
 
-    status = ((service_fn_t)service->p_ldinf->sfn)(&hdl->msg);
+    status = ((service_fn_t)service->p_ldinf->sfn)(&handle->msg);
 
     return status;
 }
 
-static psa_status_t sfn_replying(struct conn_handle_t *hdl, int32_t status)
+static psa_status_t sfn_replying(struct conn_handle_t *handle, int32_t status)
 {
-    SET_CURRENT_COMPONENT(hdl->p_client);
+    SET_CURRENT_COMPONENT(handle->p_client);
 
     /*
      * Returning a value here is necessary, because 'psa_reply' is absent

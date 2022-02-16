@@ -207,24 +207,25 @@ int32_t tfm_spm_free_conn_handle(struct service_t *service,
 struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
                                                psa_signal_t signal)
 {
-    struct conn_handle_t *p_msg_iter;
-    struct conn_handle_t **pr_msg_iter, **last_found_msg_holder = NULL;
+    struct conn_handle_t *p_handle_iter;
+    struct conn_handle_t **pr_handle_iter, **last_found_handle_holder = NULL;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     uint32_t nr_found_msgs = 0;
 
     CRITICAL_SECTION_ENTER(cs_assert);
 
     /* Return the last found message which applies a FIFO mechanism. */
-    UNI_LIST_FOREACH_NODE_PNODE(pr_msg_iter, p_msg_iter, p_ptn, p_handles) {
-        if (p_msg_iter->service->p_ldinf->signal == signal) {
-            last_found_msg_holder = pr_msg_iter;
+    UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, p_handle_iter,
+                                p_ptn, p_handles) {
+        if (p_handle_iter->service->p_ldinf->signal == signal) {
+            last_found_handle_holder = pr_handle_iter;
             nr_found_msgs++;
         }
     }
 
-    if (last_found_msg_holder) {
-        p_msg_iter = *last_found_msg_holder;
-        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_msg_holder, p_handles);
+    if (last_found_handle_holder) {
+        p_handle_iter = *last_found_handle_holder;
+        UNI_LIST_REMOVE_NODE_BY_PNODE(last_found_handle_holder, p_handles);
 
         if (nr_found_msgs == 1) {
             p_ptn->signals_asserted &= ~signal;
@@ -233,9 +234,9 @@ struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
 
     CRITICAL_SECTION_LEAVE(cs_assert);
 
-    return p_msg_iter;
+    return p_handle_iter;
 }
-#endif
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
 struct service_t *tfm_spm_get_service_by_sid(uint32_t sid)
 {
@@ -341,7 +342,7 @@ struct conn_handle_t *spm_get_handle_by_user_handle(psa_handle_t msg_handle)
      *   1. Not a valid message handle. (The address of a message is not the
      *      address of a possible handle from the pool
      *   2. Handle not belongs to the caller partition (The handle is either
-     *      unused, or owned by anither partition)
+     *      unused, or owned by another partition)
      * Check the conditions above
      */
     int32_t partition_id;
@@ -370,7 +371,7 @@ struct conn_handle_t *spm_get_handle_by_user_handle(psa_handle_t msg_handle)
     return p_conn_handle;
 }
 
-void spm_fill_message(struct conn_handle_t *hdl,
+void spm_fill_message(struct conn_handle_t *conn_handle,
                       struct service_t *service,
                       psa_handle_t handle,
                       int32_t type, int32_t client_id,
@@ -380,7 +381,7 @@ void spm_fill_message(struct conn_handle_t *hdl,
 {
     uint32_t i;
 
-    TFM_CORE_ASSERT(hdl);
+    TFM_CORE_ASSERT(conn_handle);
     TFM_CORE_ASSERT(service);
     TFM_CORE_ASSERT(!(invec == NULL && in_len != 0));
     TFM_CORE_ASSERT(!(outvec == NULL && out_len != 0));
@@ -389,37 +390,37 @@ void spm_fill_message(struct conn_handle_t *hdl,
     TFM_CORE_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
-    spm_memset(&hdl->msg, 0, sizeof(psa_msg_t));
+    spm_memset(&conn_handle->msg, 0, sizeof(psa_msg_t));
 
-    THRD_SYNC_INIT(&hdl->ack_evnt);
-    hdl->magic = TFM_MSG_MAGIC;
-    hdl->service = service;
-    hdl->p_client = GET_CURRENT_COMPONENT();
-    hdl->caller_outvec = caller_outvec;
-    hdl->msg.client_id = client_id;
+    THRD_SYNC_INIT(&conn_handle->ack_evnt);
+    conn_handle->magic = TFM_MSG_MAGIC;
+    conn_handle->service = service;
+    conn_handle->p_client = GET_CURRENT_COMPONENT();
+    conn_handle->caller_outvec = caller_outvec;
+    conn_handle->msg.client_id = client_id;
 
     /* Copy contents */
-    hdl->msg.type = type;
+    conn_handle->msg.type = type;
 
     for (i = 0; i < in_len; i++) {
-        hdl->msg.in_size[i] = invec[i].len;
-        hdl->invec[i].base = invec[i].base;
+        conn_handle->msg.in_size[i] = invec[i].len;
+        conn_handle->invec[i].base = invec[i].base;
     }
 
     for (i = 0; i < out_len; i++) {
-        hdl->msg.out_size[i] = outvec[i].len;
-        hdl->outvec[i].base = outvec[i].base;
+        conn_handle->msg.out_size[i] = outvec[i].len;
+        conn_handle->outvec[i].base = outvec[i].base;
         /* Out len is used to record the wrote number, set 0 here again */
-        hdl->outvec[i].len = 0;
+        conn_handle->outvec[i].len = 0;
     }
 
     /* Use the user connect handle as the message handle */
-    hdl->msg.handle = handle;
-    hdl->msg.rhandle = hdl->rhandle;
+    conn_handle->msg.handle = handle;
+    conn_handle->msg.rhandle = conn_handle->rhandle;
 
     /* Set the private data of NSPE client caller in multi-core topology */
     if (TFM_CLIENT_ID_IS_NS(client_id)) {
-        tfm_rpc_set_caller_data(hdl, client_id);
+        tfm_rpc_set_caller_data(conn_handle, client_id);
     }
 }
 
@@ -617,7 +618,7 @@ uint64_t do_schedule(void)
     return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }
 
-void update_caller_outvec_len(struct conn_handle_t *hdl)
+void update_caller_outvec_len(struct conn_handle_t *handle)
 {
     uint32_t i;
 
@@ -629,18 +630,19 @@ void update_caller_outvec_len(struct conn_handle_t *hdl)
      * If it is a NS request via RPC, the owner of this message is not set.
      * Or if it is a SFN message, it does not have owner thread state either.
      */
-    if ((!is_tfm_rpc_msg(hdl)) && (hdl->sfn_magic != TFM_MSG_MAGIC_SFN)) {
-        TFM_CORE_ASSERT(hdl->ack_evnt.owner->state == THRD_STATE_BLOCK);
+    if ((!is_tfm_rpc_msg(handle)) && (handle->sfn_magic != TFM_MSG_MAGIC_SFN)) {
+        TFM_CORE_ASSERT(handle->ack_evnt.owner->state == THRD_STATE_BLOCK);
     }
 
     for (i = 0; i < PSA_MAX_IOVEC; i++) {
-        if (hdl->msg.out_size[i] == 0) {
+        if (handle->msg.out_size[i] == 0) {
             continue;
         }
 
-        TFM_CORE_ASSERT(hdl->caller_outvec[i].base == hdl->outvec[i].base);
+        TFM_CORE_ASSERT(
+            handle->caller_outvec[i].base == handle->outvec[i].base);
 
-        hdl->caller_outvec[i].len = hdl->outvec[i].len;
+        handle->caller_outvec[i].len = handle->outvec[i].len;
     }
 }
 

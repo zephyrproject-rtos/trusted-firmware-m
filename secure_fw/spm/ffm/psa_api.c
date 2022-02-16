@@ -67,23 +67,23 @@ extern struct service_t *stateless_services_ref_tbl[];
 #define IOVEC_UNMAPPED_BIT             (1U << 1)
 #define IOVEC_ACCESSED_BIT             (1U << 2)
 
-#define IOVEC_IS_MAPPED(msg, iovec_idx)      \
-    ((((msg)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) & \
+#define IOVEC_IS_MAPPED(handle, iovec_idx)      \
+    ((((handle)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) &  \
                                IOVEC_MAPPED_BIT)
-#define IOVEC_IS_UNMAPPED(msg, iovec_idx)    \
-    ((((msg)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) & \
+#define IOVEC_IS_UNMAPPED(handle, iovec_idx)    \
+    ((((handle)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) &  \
                                IOVEC_UNMAPPED_BIT)
-#define IOVEC_IS_ACCESSED(msg, iovec_idx)    \
-    ((((msg)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) & \
+#define IOVEC_IS_ACCESSED(handle, iovec_idx)    \
+    ((((handle)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) &  \
                                IOVEC_ACCESSED_BIT)
-#define SET_IOVEC_MAPPED(msg, iovec_idx)     \
-    (((msg)->iovec_status) |= (IOVEC_MAPPED_BIT <<   \
+#define SET_IOVEC_MAPPED(handle, iovec_idx)     \
+    (((handle)->iovec_status) |= (IOVEC_MAPPED_BIT <<   \
                               ((iovec_idx) * IOVEC_STATUS_BITS)))
-#define SET_IOVEC_UNMAPPED(msg, iovec_idx)   \
-    (((msg)->iovec_status) |= (IOVEC_UNMAPPED_BIT << \
+#define SET_IOVEC_UNMAPPED(handle, iovec_idx)   \
+    (((handle)->iovec_status) |= (IOVEC_UNMAPPED_BIT << \
                               ((iovec_idx) * IOVEC_STATUS_BITS)))
-#define SET_IOVEC_ACCESSED(msg, iovec_idx)   \
-    (((msg)->iovec_status) |= (IOVEC_ACCESSED_BIT << \
+#define SET_IOVEC_ACCESSED(handle, iovec_idx)   \
+    (((handle)->iovec_status) |= (IOVEC_ACCESSED_BIT << \
                               ((iovec_idx) * IOVEC_STATUS_BITS)))
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
@@ -329,7 +329,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
 psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
 {
     struct service_t *service;
-    struct conn_handle_t *connect_handle;
+    struct conn_handle_t *conn_handle;
     int32_t client_id;
     psa_handle_t handle;
     bool ns_caller = tfm_spm_is_ns_caller();
@@ -372,18 +372,18 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
      * code to client when creation fails.
      */
     CRITICAL_SECTION_ENTER(cs_assert);
-    connect_handle = tfm_spm_create_conn_handle(service, client_id);
+    conn_handle = tfm_spm_create_conn_handle(service, client_id);
     CRITICAL_SECTION_LEAVE(cs_assert);
-    if (!connect_handle) {
+    if (!conn_handle) {
         return PSA_ERROR_CONNECTION_BUSY;
     }
 
-    handle = tfm_spm_to_user_handle(connect_handle);
+    handle = tfm_spm_to_user_handle(conn_handle);
     /* No input or output needed for connect message */
-    spm_fill_message(connect_handle, service, handle, PSA_IPC_CONNECT,
+    spm_fill_message(conn_handle, service, handle, PSA_IPC_CONNECT,
                      client_id, NULL, 0, NULL, 0, NULL);
 
-    return backend_instance.messaging(service, connect_handle);
+    return backend_instance.messaging(service, conn_handle);
 }
 
 psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
@@ -478,7 +478,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
 
 psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 {
-    struct conn_handle_t *tmp_msg = NULL;
+    struct conn_handle_t *handle = NULL;
     struct partition_t *partition = NULL;
     uint32_t privileged;
 
@@ -523,14 +523,14 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
      * Get message by signal from partition. It is a fatal error if getting
      * failed, which means the input signal is not correspond to an RoT service.
      */
-    tmp_msg = spm_get_handle_by_signal(partition, signal);
-    if (!tmp_msg) {
+    handle = spm_get_handle_by_signal(partition, signal);
+    if (!handle) {
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 
-    tmp_msg->status = TFM_HANDLE_STATUS_ACTIVE;
+    handle->status = TFM_HANDLE_STATUS_ACTIVE;
 
-    spm_memcpy(msg, &tmp_msg->msg, sizeof(psa_msg_t));
+    spm_memcpy(msg, &handle->msg, sizeof(psa_msg_t));
 
     return PSA_SUCCESS;
 }
@@ -540,22 +540,23 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
                                   void *buffer, size_t num_bytes)
 {
     size_t bytes;
-    struct conn_handle_t *msg = NULL;
+    struct conn_handle_t *handle = NULL;
     uint32_t priv_mode;
 
     /* It is a fatal error if message handle is invalid */
-    msg = spm_get_handle_by_user_handle(msg_handle);
-    if (!msg) {
+    handle = spm_get_handle_by_user_handle(msg_handle);
+    if (!handle) {
         tfm_core_panic();
     }
 
-    priv_mode = GET_PARTITION_PRIVILEGED_MODE(msg->service->partition->p_ldinf);
+    priv_mode = GET_PARTITION_PRIVILEGED_MODE(
+                                        handle->service->partition->p_ldinf);
 
     /*
      * It is a fatal error if message handle does not refer to a request
      * message
      */
-    if (msg->msg.type < PSA_IPC_CALL) {
+    if (handle->msg.type < PSA_IPC_CALL) {
         tfm_core_panic();
     }
 
@@ -568,7 +569,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
     }
 
     /* There was no remaining data in this input vector */
-    if (msg->msg.in_size[invec_idx] == 0) {
+    if (handle->msg.in_size[invec_idx] == 0) {
         return 0;
     }
 
@@ -577,11 +578,11 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
      * It is a fatal error if the input vector has already been mapped using
      * psa_map_invec().
      */
-    if (IOVEC_IS_MAPPED(msg, (invec_idx + INVEC_IDX_BASE))) {
+    if (IOVEC_IS_MAPPED(handle, (invec_idx + INVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
-    SET_IOVEC_ACCESSED(msg, (invec_idx + INVEC_IDX_BASE));
+    SET_IOVEC_ACCESSED(handle, (invec_idx + INVEC_IDX_BASE));
 #endif
 
     /*
@@ -593,14 +594,15 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
         tfm_core_panic();
     }
 
-    bytes = num_bytes > msg->msg.in_size[invec_idx] ?
-                        msg->msg.in_size[invec_idx] : num_bytes;
+    bytes = num_bytes > handle->msg.in_size[invec_idx] ?
+                        handle->msg.in_size[invec_idx] : num_bytes;
 
-    spm_memcpy(buffer, msg->invec[invec_idx].base, bytes);
+    spm_memcpy(buffer, handle->invec[invec_idx].base, bytes);
 
     /* There maybe some remaining data */
-    msg->invec[invec_idx].base = (char *)msg->invec[invec_idx].base + bytes;
-    msg->msg.in_size[invec_idx] -= bytes;
+    handle->invec[invec_idx].base =
+                                (char *)handle->invec[invec_idx].base + bytes;
+    handle->msg.in_size[invec_idx] -= bytes;
 
     return bytes;
 }
@@ -608,11 +610,11 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
 size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
                                   size_t num_bytes)
 {
-    struct conn_handle_t *msg = NULL;
+    struct conn_handle_t *handle = NULL;
 
     /* It is a fatal error if message handle is invalid */
-    msg = spm_get_handle_by_user_handle(msg_handle);
-    if (!msg) {
+    handle = spm_get_handle_by_user_handle(msg_handle);
+    if (!handle) {
         tfm_core_panic();
     }
 
@@ -620,7 +622,7 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
      * It is a fatal error if message handle does not refer to a request
      * message
      */
-    if (msg->msg.type < PSA_IPC_CALL) {
+    if (handle->msg.type < PSA_IPC_CALL) {
         tfm_core_panic();
     }
 
@@ -633,7 +635,7 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
     }
 
     /* There was no remaining data in this input vector */
-    if (msg->msg.in_size[invec_idx] == 0) {
+    if (handle->msg.in_size[invec_idx] == 0) {
         return 0;
     }
 
@@ -642,25 +644,25 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
      * It is a fatal error if the input vector has already been mapped using
      * psa_map_invec().
      */
-    if (IOVEC_IS_MAPPED(msg, (invec_idx + INVEC_IDX_BASE))) {
+    if (IOVEC_IS_MAPPED(handle, (invec_idx + INVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
-    SET_IOVEC_ACCESSED(msg, (invec_idx + INVEC_IDX_BASE));
+    SET_IOVEC_ACCESSED(handle, (invec_idx + INVEC_IDX_BASE));
 #endif
 
     /*
      * If num_bytes is greater than the remaining size of the input vector then
      * the remaining size of the input vector is used.
      */
-    if (num_bytes > msg->msg.in_size[invec_idx]) {
-        num_bytes = msg->msg.in_size[invec_idx];
+    if (num_bytes > handle->msg.in_size[invec_idx]) {
+        num_bytes = handle->msg.in_size[invec_idx];
     }
 
     /* There maybe some remaining data */
-    msg->invec[invec_idx].base = (char *)msg->invec[invec_idx].base +
-                                 num_bytes;
-    msg->msg.in_size[invec_idx] -= num_bytes;
+    handle->invec[invec_idx].base =
+                            (char *)handle->invec[invec_idx].base + num_bytes;
+    handle->msg.in_size[invec_idx] -= num_bytes;
 
     return num_bytes;
 }
@@ -668,22 +670,23 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
 void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
                                  const void *buffer, size_t num_bytes)
 {
-    struct conn_handle_t *msg = NULL;
+    struct conn_handle_t *handle = NULL;
     uint32_t priv_mode;
 
     /* It is a fatal error if message handle is invalid */
-    msg = spm_get_handle_by_user_handle(msg_handle);
-    if (!msg) {
+    handle = spm_get_handle_by_user_handle(msg_handle);
+    if (!handle) {
         tfm_core_panic();
     }
 
-    priv_mode = GET_PARTITION_PRIVILEGED_MODE(msg->service->partition->p_ldinf);
+    priv_mode = GET_PARTITION_PRIVILEGED_MODE(
+                                        handle->service->partition->p_ldinf);
 
     /*
      * It is a fatal error if message handle does not refer to a request
      * message
      */
-    if (msg->msg.type < PSA_IPC_CALL) {
+    if (handle->msg.type < PSA_IPC_CALL) {
         tfm_core_panic();
     }
 
@@ -699,8 +702,8 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
      * It is a fatal error if the call attempts to write data past the end of
      * the client output vector
      */
-    if (num_bytes > msg->msg.out_size[outvec_idx] -
-        msg->outvec[outvec_idx].len) {
+    if (num_bytes > handle->msg.out_size[outvec_idx] -
+        handle->outvec[outvec_idx].len) {
         tfm_core_panic();
     }
 
@@ -709,11 +712,11 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
      * It is a fatal error if the output vector has already been mapped using
      * psa_map_outvec().
      */
-    if (IOVEC_IS_MAPPED(msg, (outvec_idx + OUTVEC_IDX_BASE))) {
+    if (IOVEC_IS_MAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
-    SET_IOVEC_ACCESSED(msg, (outvec_idx + OUTVEC_IDX_BASE));
+    SET_IOVEC_ACCESSED(handle, (outvec_idx + OUTVEC_IDX_BASE));
 #endif
 
     /*
@@ -725,24 +728,24 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
         tfm_core_panic();
     }
 
-    spm_memcpy((char *)msg->outvec[outvec_idx].base +
-               msg->outvec[outvec_idx].len, buffer, num_bytes);
+    spm_memcpy((char *)handle->outvec[outvec_idx].base +
+               handle->outvec[outvec_idx].len, buffer, num_bytes);
 
     /* Update the write number */
-    msg->outvec[outvec_idx].len += num_bytes;
+    handle->outvec[outvec_idx].len += num_bytes;
 }
 
 psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
                                          psa_status_t status)
 {
     struct service_t *service;
-    struct conn_handle_t *hdl;
+    struct conn_handle_t *handle;
     psa_status_t ret = PSA_SUCCESS;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     /* It is a fatal error if message handle is invalid */
-    hdl = spm_get_handle_by_user_handle(msg_handle);
-    if (!hdl) {
+    handle = spm_get_handle_by_user_handle(msg_handle);
+    if (!handle) {
         tfm_core_panic();
     }
 
@@ -751,12 +754,12 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
      * body structure. Only two parameters are passed in this function: handle
      * and status, so it is useful and simply to do like this.
      */
-    service = hdl->service;
+    service = handle->service;
     if (!service) {
         tfm_core_panic();
     }
 
-    switch (hdl->msg.type) {
+    switch (handle->msg.type) {
     case PSA_IPC_CONNECT:
         /*
          * Reply to PSA_IPC_CONNECT message. Connect handle is returned if the
@@ -767,7 +770,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
             ret = msg_handle;
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
             /* Refuse the client connection, indicating a permanent error. */
-            tfm_spm_free_conn_handle(service, hdl);
+            tfm_spm_free_conn_handle(service, handle);
             ret = PSA_ERROR_CONNECTION_REFUSED;
         } else if (status == PSA_ERROR_CONNECTION_BUSY) {
             /* Fail the client connection, indicating a transient error. */
@@ -778,7 +781,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         break;
     case PSA_IPC_DISCONNECT:
         /* Service handle is not used anymore */
-        tfm_spm_free_conn_handle(service, hdl);
+        tfm_spm_free_conn_handle(service, handle);
 
         /*
          * If the message type is PSA_IPC_DISCONNECT, then the status code is
@@ -786,7 +789,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
          */
         break;
     default:
-        if (hdl->msg.type >= PSA_IPC_CALL) {
+        if (handle->msg.type >= PSA_IPC_CALL) {
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 
@@ -797,14 +800,15 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
             int i;
 
             for (i = 0; i < PSA_MAX_IOVEC * 2; i++) {
-                if (IOVEC_IS_MAPPED(hdl, i) && (!IOVEC_IS_UNMAPPED(hdl, i))) {
-                    SET_IOVEC_UNMAPPED(hdl, i);
+                if (IOVEC_IS_MAPPED(handle, i) &&
+                    (!IOVEC_IS_UNMAPPED(handle, i))) {
+                    SET_IOVEC_UNMAPPED(handle, i);
                     /*
                      * Any output vectors that are still mapped will report that
                      * zero bytes have been written.
                      */
                     if (i >= OUTVEC_IDX_BASE) {
-                        hdl->outvec[i - OUTVEC_IDX_BASE].len = 0;
+                        handle->outvec[i - OUTVEC_IDX_BASE].len = 0;
                     }
                 }
             }
@@ -818,9 +822,9 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
              * psa_outvec structure for the parameter before returning from
              * psa_call().
              */
-            update_caller_outvec_len(hdl);
+            update_caller_outvec_len(handle);
             if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
-                tfm_spm_free_conn_handle(service, hdl);
+                tfm_spm_free_conn_handle(service, handle);
             }
         } else {
             tfm_core_panic();
@@ -832,13 +836,13 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
          * If the source of the programmer error is a Secure Partition, the SPM
          * must panic the Secure Partition in response to a PROGRAMMER ERROR.
          */
-        if (TFM_CLIENT_ID_IS_NS(hdl->msg.client_id)) {
-            hdl->status = TFM_HANDLE_STATUS_CONNECT_ERROR;
+        if (TFM_CLIENT_ID_IS_NS(handle->msg.client_id)) {
+            handle->status = TFM_HANDLE_STATUS_CONNECT_ERROR;
         } else {
             tfm_core_panic();
         }
     } else {
-        hdl->status = TFM_HANDLE_STATUS_IDLE;
+        handle->status = TFM_HANDLE_STATUS_IDLE;
     }
 
     /*
@@ -847,7 +851,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
      * involved.
      */
     CRITICAL_SECTION_ENTER(cs_assert);
-    ret = backend_instance.replying(hdl, ret);
+    ret = backend_instance.replying(handle, ret);
     CRITICAL_SECTION_LEAVE(cs_assert);
 
     return ret;
@@ -896,21 +900,21 @@ void tfm_spm_partition_psa_panic(void)
 
 void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
 {
-    struct conn_handle_t *hdl;
+    struct conn_handle_t *handle;
 
     /* It is a fatal error if message handle is invalid */
-    hdl = spm_get_handle_by_user_handle(msg_handle);
-    if (!hdl) {
+    handle = spm_get_handle_by_user_handle(msg_handle);
+    if (!handle) {
         tfm_core_panic();
     }
 
     /* It is a PROGRAMMER ERROR if a stateless service sets rhandle. */
-    if (SERVICE_IS_STATELESS(hdl->service->p_ldinf->flags)) {
+    if (SERVICE_IS_STATELESS(handle->service->p_ldinf->flags)) {
         tfm_core_panic();
     }
 
-    hdl->msg.rhandle = rhandle;
-    hdl->rhandle = rhandle;
+    handle->msg.rhandle = rhandle;
+    handle->rhandle = rhandle;
 }
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
@@ -1020,24 +1024,24 @@ void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
 const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
                                             uint32_t invec_idx)
 {
-    struct conn_handle_t *hdl;
+    struct conn_handle_t *handle;
     uint32_t privileged;
     struct partition_t *partition = NULL;
 
     /* It is a fatal error if message handle is invalid */
-    hdl = spm_get_handle_by_user_handle(msg_handle);
-    if (!hdl) {
+    handle = spm_get_handle_by_user_handle(msg_handle);
+    if (!handle) {
         tfm_core_panic();
     }
 
-    partition = hdl->service->partition;
+    partition = handle->service->partition;
     privileged = GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 
     /*
      * It is a fatal error if MM-IOVEC has not been enabled for the RoT
      * Service that received the message.
      */
-    if (!SERVICE_ENABLED_MM_IOVEC(hdl->service->p_ldinf->flags)) {
+    if (!SERVICE_ENABLED_MM_IOVEC(handle->service->p_ldinf->flags)) {
         tfm_core_panic();
     }
 
@@ -1045,7 +1049,7 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
      * It is a fatal error if message handle does not refer to a request
      * message.
      */
-    if (hdl->msg.type < PSA_IPC_CALL) {
+    if (handle->msg.type < PSA_IPC_CALL) {
         tfm_core_panic();
     }
 
@@ -1058,7 +1062,7 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
     }
 
     /* It is a fatal error if the input vector has length zero. */
-    if (hdl->msg.in_size[invec_idx] == 0) {
+    if (handle->msg.in_size[invec_idx] == 0) {
         tfm_core_panic();
     }
 
@@ -1066,7 +1070,7 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
      * It is a fatal error if the input vector has already been mapped using
      * psa_map_invec().
      */
-    if (IOVEC_IS_MAPPED(hdl, (invec_idx + INVEC_IDX_BASE))) {
+    if (IOVEC_IS_MAPPED(handle, (invec_idx + INVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
@@ -1074,7 +1078,7 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
      * It is a fatal error if the input vector has already been accessed
      * using psa_read() or psa_skip().
      */
-    if (IOVEC_IS_ACCESSED(hdl, (invec_idx + INVEC_IDX_BASE))) {
+    if (IOVEC_IS_ACCESSED(handle, (invec_idx + INVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
@@ -1082,24 +1086,26 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
      * It is a fatal error if the memory reference for the wrap input vector is
      * invalid or not readable.
      */
-    if (tfm_memory_check(hdl->invec[invec_idx].base, hdl->invec[invec_idx].len,
-        false, TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
+    if (tfm_memory_check(handle->invec[invec_idx].base,
+                         handle->invec[invec_idx].len,
+                         false, TFM_MEMORY_ACCESS_RO,
+                         privileged) != SPM_SUCCESS) {
         tfm_core_panic();
     }
 
-    SET_IOVEC_MAPPED(hdl, (invec_idx + INVEC_IDX_BASE));
+    SET_IOVEC_MAPPED(handle, (invec_idx + INVEC_IDX_BASE));
 
-    return hdl->invec[invec_idx].base;
+    return handle->invec[invec_idx].base;
 }
 
 void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
                                        uint32_t invec_idx)
 {
-    struct conn_handle_t *hdl;
+    struct conn_handle_t *handle;
 
     /* It is a fatal error if message handle is invalid */
-    hdl = spm_get_handle_by_user_handle(msg_handle);
-    if (!hdl) {
+    handle = spm_get_handle_by_user_handle(msg_handle);
+    if (!handle) {
         tfm_core_panic();
     }
 
@@ -1107,7 +1113,7 @@ void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
      * It is a fatal error if MM-IOVEC has not been enabled for the RoT
      * Service that received the message.
      */
-    if (!SERVICE_ENABLED_MM_IOVEC(hdl->service->p_ldinf->flags)) {
+    if (!SERVICE_ENABLED_MM_IOVEC(handle->service->p_ldinf->flags)) {
         tfm_core_panic();
     }
 
@@ -1115,7 +1121,7 @@ void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
      * It is a fatal error if message handle does not refer to a request
      * message.
      */
-    if (hdl->msg.type < PSA_IPC_CALL) {
+    if (handle->msg.type < PSA_IPC_CALL) {
         tfm_core_panic();
     }
 
@@ -1131,7 +1137,7 @@ void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
      * It is a fatal error if The input vector has not been mapped by a call to
      * psa_map_invec().
      */
-    if (!IOVEC_IS_MAPPED(hdl, (invec_idx + INVEC_IDX_BASE))) {
+    if (!IOVEC_IS_MAPPED(handle, (invec_idx + INVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
@@ -1139,34 +1145,34 @@ void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
      * It is a fatal error if the input vector has already been unmapped by a
      * call to psa_unmap_invec().
      */
-    if (IOVEC_IS_UNMAPPED(hdl, (invec_idx + INVEC_IDX_BASE))) {
+    if (IOVEC_IS_UNMAPPED(handle, (invec_idx + INVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
-    SET_IOVEC_UNMAPPED(hdl, (invec_idx + INVEC_IDX_BASE));
+    SET_IOVEC_UNMAPPED(handle, (invec_idx + INVEC_IDX_BASE));
 }
 
 void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
                                        uint32_t outvec_idx)
 {
-    struct conn_handle_t *hdl;
+    struct conn_handle_t *handle;
     uint32_t privileged;
     struct partition_t *partition = NULL;
 
     /* It is a fatal error if message handle is invalid */
-    hdl = spm_get_handle_by_user_handle(msg_handle);
-    if (!hdl) {
+    handle = spm_get_handle_by_user_handle(msg_handle);
+    if (!handle) {
         tfm_core_panic();
     }
 
-    partition = hdl->service->partition;
+    partition = handle->service->partition;
     privileged = GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 
     /*
      * It is a fatal error if MM-IOVEC has not been enabled for the RoT
      * Service that received the message.
      */
-    if (!SERVICE_ENABLED_MM_IOVEC(hdl->service->p_ldinf->flags)) {
+    if (!SERVICE_ENABLED_MM_IOVEC(handle->service->p_ldinf->flags)) {
         tfm_core_panic();
     }
 
@@ -1174,7 +1180,7 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
      * It is a fatal error if message handle does not refer to a request
      * message.
      */
-    if (hdl->msg.type < PSA_IPC_CALL) {
+    if (handle->msg.type < PSA_IPC_CALL) {
         tfm_core_panic();
     }
 
@@ -1187,7 +1193,7 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
     }
 
     /* It is a fatal error if the output vector has length zero. */
-    if (hdl->msg.out_size[outvec_idx] == 0) {
+    if (handle->msg.out_size[outvec_idx] == 0) {
         tfm_core_panic();
     }
 
@@ -1195,7 +1201,7 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
      * It is a fatal error if the output vector has already been mapped using
      * psa_map_outvec().
      */
-    if (IOVEC_IS_MAPPED(hdl, (outvec_idx + OUTVEC_IDX_BASE))) {
+    if (IOVEC_IS_MAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
@@ -1203,31 +1209,31 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
      * It is a fatal error if the output vector has already been accessed
      * using psa_write().
      */
-    if (IOVEC_IS_ACCESSED(hdl, (outvec_idx + OUTVEC_IDX_BASE))) {
+    if (IOVEC_IS_ACCESSED(handle, (outvec_idx + OUTVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
     /*
      * It is a fatal error if the output vector is invalid or not read-write.
      */
-    if (tfm_memory_check(hdl->outvec[outvec_idx].base,
-                         hdl->outvec[outvec_idx].len, false,
+    if (tfm_memory_check(handle->outvec[outvec_idx].base,
+                         handle->outvec[outvec_idx].len, false,
                          TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
         tfm_core_panic();
     }
-    SET_IOVEC_MAPPED(hdl, (outvec_idx + OUTVEC_IDX_BASE));
+    SET_IOVEC_MAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE));
 
-    return hdl->outvec[outvec_idx].base;
+    return handle->outvec[outvec_idx].base;
 }
 
 void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
                                         uint32_t outvec_idx, size_t len)
 {
-    struct conn_handle_t *hdl;
+    struct conn_handle_t *handle;
 
     /* It is a fatal error if message handle is invalid */
-    hdl = spm_get_handle_by_user_handle(msg_handle);
-    if (!hdl) {
+    handle = spm_get_handle_by_user_handle(msg_handle);
+    if (!handle) {
         tfm_core_panic();
     }
 
@@ -1235,7 +1241,7 @@ void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
      * It is a fatal error if MM-IOVEC has not been enabled for the RoT
      * Service that received the message.
      */
-    if (!SERVICE_ENABLED_MM_IOVEC(hdl->service->p_ldinf->flags)) {
+    if (!SERVICE_ENABLED_MM_IOVEC(handle->service->p_ldinf->flags)) {
         tfm_core_panic();
     }
 
@@ -1243,7 +1249,7 @@ void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
      * It is a fatal error if message handle does not refer to a request
      * message.
      */
-    if (hdl->msg.type < PSA_IPC_CALL) {
+    if (handle->msg.type < PSA_IPC_CALL) {
         tfm_core_panic();
     }
 
@@ -1258,7 +1264,7 @@ void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
     /*
      * It is a fatal error if len is greater than the output vector size.
      */
-    if (len > hdl->msg.out_size[outvec_idx]) {
+    if (len > handle->msg.out_size[outvec_idx]) {
         tfm_core_panic();
     }
 
@@ -1266,7 +1272,7 @@ void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
      * It is a fatal error if The output vector has not been mapped by a call to
      * psa_map_outvec().
      */
-    if (!IOVEC_IS_MAPPED(hdl, (outvec_idx + OUTVEC_IDX_BASE))) {
+    if (!IOVEC_IS_MAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
@@ -1274,14 +1280,14 @@ void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
      * It is a fatal error if the output vector has already been unmapped by a
      * call to psa_unmap_outvec().
      */
-    if (IOVEC_IS_UNMAPPED(hdl, (outvec_idx + OUTVEC_IDX_BASE))) {
+    if (IOVEC_IS_UNMAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE))) {
         tfm_core_panic();
     }
 
-    SET_IOVEC_UNMAPPED(hdl, (outvec_idx + OUTVEC_IDX_BASE));
+    SET_IOVEC_UNMAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE));
 
     /* Update the write number */
-    hdl->outvec[outvec_idx].len = len;
+    handle->outvec[outvec_idx].len = len;
 }
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */

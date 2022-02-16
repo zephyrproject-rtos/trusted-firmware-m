@@ -46,13 +46,13 @@ struct context_ctrl_t *p_spm_thread_context;
  * current thread and trigger scheduler.
  */
 static psa_status_t ipc_messaging(struct service_t *service,
-                                  struct conn_handle_t *hdl)
+                                  struct conn_handle_t *handle)
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
-    if (!hdl || !service || !service->p_ldinf || !service->partition) {
+    if (!handle || !service || !service->p_ldinf || !service->partition) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -61,7 +61,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
 
     CRITICAL_SECTION_ENTER(cs_assert);
 
-    UNI_LIST_INSERT_AFTER(p_owner, hdl, p_handles);
+    UNI_LIST_INSERT_AFTER(p_owner, handle, p_handles);
 
     /* Messages put. Update signals */
     p_owner->signals_asserted |= signal;
@@ -78,19 +78,19 @@ static psa_status_t ipc_messaging(struct service_t *service,
      * thread.
      */
 
-    if (!is_tfm_rpc_msg(hdl)) {
-        thrd_wait_on(&hdl->ack_evnt, CURRENT_THREAD);
+    if (!is_tfm_rpc_msg(handle)) {
+        thrd_wait_on(&handle->ack_evnt, CURRENT_THREAD);
     }
 
     return PSA_SUCCESS;
 }
 
-static psa_status_t ipc_replying(struct conn_handle_t *hdl, int32_t status)
+static psa_status_t ipc_replying(struct conn_handle_t *handle, int32_t status)
 {
-    if (is_tfm_rpc_msg(hdl)) {
-        tfm_rpc_client_call_reply(hdl, status);
+    if (is_tfm_rpc_msg(handle)) {
+        tfm_rpc_client_call_reply(handle, status);
     } else {
-        thrd_wake_up(&hdl->ack_evnt, status);
+        thrd_wake_up(&handle->ack_evnt, status);
     }
 
     /*
