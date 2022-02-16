@@ -344,6 +344,8 @@ extern const pFunc __VECTOR_TABLE[];
 void Reset_Handler(void)
 {
   __set_MSPLIM((uint32_t)(&__MSP_STACK_LIMIT));
+  __set_PSP((uint32_t)(&__INITIAL_SP));
+  __set_PSPLIM((uint32_t)(&__STACK_LIMIT));
 
   SystemInit();                             /* CMSIS System Initialization */
   __ASM volatile("MRS     R0, control\n"    /* Get control value */
