@@ -441,6 +441,19 @@ psa_status_t cc3xx_cipher_finish(
         size_t *output_length)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+    /* Buffer for encypted/decrypted data if we have unprocessed data. This
+     * is neccesary when PKCS7 padding is used so that we don't write the
+     * actual padding data to the output buffer when performing decryption.
+     */
+    uint8_t temp_buff[AES_BLOCK_SIZE];
+    /* The length of the data without the padding, this is updated for PKCS7
+     * decryption only.
+     */
+    size_t data_len = operation->block_size;
+
+    if(data_len > AES_BLOCK_SIZE){
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
 
     *output_length = 0;
 
@@ -495,10 +508,10 @@ psa_status_t cc3xx_cipher_finish(
             if (( ret = cc3xx_aes_crypt(
                     &operation->ctx.aes,
                     CIPHER_CBC,
-                    output_size,
+                    operation->block_size,
                     operation->iv,
                     operation->unprocessed_data,
-                    output ))
+                    temp_buff))
                 != PSA_SUCCESS) {
                 return ret;
             }
@@ -510,13 +523,19 @@ psa_status_t cc3xx_cipher_finish(
                     return PSA_ERROR_CORRUPTION_DETECTED;
                 }
 
-                return(operation->get_padding(
-                            output,
+                ret = operation->get_padding(
+                            temp_buff,
                             operation->block_size,
-                            output_length));
+                            &data_len);
+
+                if (ret != PSA_SUCCESS){
+                    return ret;
+                }
+
             }
 
-            *output_length = operation->block_size;
+            CC_PalMemCopy(output, temp_buff, data_len);
+            *output_length = data_len;
 
             break;
         case PSA_ALG_ECB_NO_PADDING:
