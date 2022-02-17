@@ -47,8 +47,17 @@ if(NS)
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
             $<$<C_COMPILER_ID:ARMClang>:CMSIS_5_RTX_V8MMN>
-            $<$<C_COMPILER_ID:GNU>:CMSIS_5_RTX_V8MMN>
+            $<$<AND:$<C_COMPILER_ID:GNU>,$<STREQUAL:${CONFIG_TFM_FP},hard>>:CMSIS_5_RTX_V8MMFN>
+            $<$<AND:$<C_COMPILER_ID:GNU>,$<STREQUAL:${CONFIG_TFM_FP},soft>>:CMSIS_5_RTX_V8MMN>
             $<$<C_COMPILER_ID:IAR>:CMSIS_5_RTX_V81MMN>
+    )
+    target_compile_options(tfm_ns
+        PUBLIC
+            ${COMPILER_CP_FLAG}
+    )
+    target_link_options(tfm_ns
+        PUBLIC
+            ${LINKER_CP_OPTION}
     )
 endif()
 

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -13,4 +13,5 @@
 # Set architecture and CPU
 set(TFM_SYSTEM_PROCESSOR cortex-m55)
 set(TFM_SYSTEM_ARCHITECTURE armv8.1-m.main)
+set(CONFIG_TFM_FP_ARCH "fpv5-d16")
 set(TFM_SYSTEM_MVE OFF)
