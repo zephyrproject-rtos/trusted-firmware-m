@@ -562,7 +562,7 @@ enum tfm_plat_err_t spu_init_cfg(void)
 enum tfm_plat_err_t spu_periph_init_cfg(void)
 {
     /* Peripheral configuration */
-    spu_peripheral_config_non_secure((uint32_t)NRF_FPU, false);
+
     /* The following peripherals share ID:
      * - REGULATORS
      * - OSCILLATORS
