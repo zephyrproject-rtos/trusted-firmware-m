@@ -106,7 +106,7 @@ target_sources(platform_s
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         native_drivers/uart_cmsdk_drv.c
         spm_hal.c
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
+        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<NOT:$<BOOL:${TEST_NS_FPU}>>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         target_cfg.c
         tfm_peripherals_def.c
         tfm_hal_isolation.c
@@ -122,6 +122,20 @@ target_sources(tfm_sprt
         # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
         # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
+
+        # FPU client test partition access the timer as ARoT Partitions.
+        # Put the driver to SPRT so that FPU tests can access it.
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+)
+
+# Adding new defined handler function to the library where the weak handler
+# funtion symbol are, to override weak handler funtion.
+# Otherwise the weak handler funtion cannot be replaced by the new defined
+# hanlder function which symbol is in another library.
+target_sources(tfm_s
+    PRIVATE
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
 )
 
 target_link_libraries(platform_s
@@ -134,6 +148,12 @@ target_compile_options(platform_s
         ${COMPILER_CMSE_FLAG}
 )
 
+# To configure S and NS timer in S side for FP interrupt test
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
+)
+
 #========================= Platform Non-Secure ================================#
 
 target_sources(platform_ns
@@ -143,6 +163,7 @@ target_sources(platform_ns
         device/source/device_definition.c
         device/source/system_core_init.c
         native_drivers/uart_cmsdk_drv.c
+        native_drivers/systimer_armv8-m_drv.c
 )
 
 target_include_directories(platform_ns
@@ -158,6 +179,15 @@ target_include_directories(platform_ns
         device/source/armclang
         native_drivers
         partition
+)
+
+# Adding new defined handler function to the library where the weak handler
+# funtion symbol are, to override weak handler funtion.
+# Otherwise the weak handler funtion cannot be replaced by the new defined
+# hanlder function which symbol is in another library.
+target_sources(tfm_ns
+    PRIVATE
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_fp_test_interrupt.c>
 )
 
 #========================= Platform BL2 =======================================#

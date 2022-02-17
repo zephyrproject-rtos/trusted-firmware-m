@@ -11,6 +11,9 @@
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
 #include "device_definition.h"
+#if (CONFIG_TFM_FP == 2) && (TEST_NS_FPU == 1)
+#include "tfm_plat_test.h"
+#endif
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
@@ -55,6 +58,14 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return TFM_HAL_ERROR_GENERIC;
     }
+
+#if (CONFIG_TFM_FP == 2) && (TEST_NS_FPU == 1)
+    /* Configure secure timer */
+    tfm_plat_test_secure_timer_nvic_configure();
+
+    /* Configure non-secure timer */
+    tfm_plat_test_non_secure_timer_nvic_configure();
+#endif
 
     return TFM_HAL_SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -23,6 +23,7 @@ extern "C" {
 #define DEFAULT_IRQ_PRIORITY    (1UL << (__NVIC_PRIO_BITS - 2))
 
 #define TFM_TIMER0_IRQ           (TIMER0_IRQn)
+#define TFM_TIMER1_IRQ           (TIMER1_IRQn)
 
 extern struct platform_data_t tfm_peripheral_gpio0;
 extern struct platform_data_t tfm_peripheral_gpio1;
