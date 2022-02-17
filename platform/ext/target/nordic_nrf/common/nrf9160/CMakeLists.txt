@@ -50,6 +50,7 @@ target_sources(platform_s
 target_compile_definitions(platform_s
     PUBLIC
         NRF9160_XXAA
+        NRF_SKIP_FICR_NS_COPY_TO_RAM
 )
 
 #========================= Platform Non-Secure ================================#
@@ -87,6 +88,7 @@ if(BL2)
     target_compile_definitions(platform_bl2
         PUBLIC
             NRF9160_XXAA
+            NRF_SKIP_FICR_NS_COPY_TO_RAM
     )
 endif()
 
