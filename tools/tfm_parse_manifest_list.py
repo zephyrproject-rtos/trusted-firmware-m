@@ -259,7 +259,12 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
         manifest_path = os.path.join(manifest_item['list_path'], manifest_path).replace('\\', '/')
 
         with open(manifest_path) as manifest_file:
-            manifest = manifest_validation(yaml.safe_load(manifest_file), pid)
+            manifest = yaml.safe_load(manifest_file)
+            if manifest.get('model', None) == 'dual':
+                # If a Partition supports both models, it can set the "model" to "backend".
+                # The actual model used follows the backend being used.
+                manifest['model'] = backend
+            manifest = manifest_validation(manifest, pid)
 
         if pid == None or pid >= TFM_PID_BASE:
             # Count the number of IPC/SFN partitions

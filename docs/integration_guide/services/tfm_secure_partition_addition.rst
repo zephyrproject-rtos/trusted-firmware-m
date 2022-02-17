@@ -139,13 +139,6 @@ Here is a manifest reference example for the IPC model:
     ]
   }
 
-.. Note::
-    A TF-M regression test service calls other RoT services for test. But it
-    can still run other tests if some of the RoT services are disabled.
-    TF-M defines a ``"weak_dependencies"`` attribute in partition manifests of
-    regression test partitions to describe test service access to other RoT
-    services. It *shall* be only used for TF-M regression test services.
-
 Secure Partition ID Distribution
 --------------------------------
 Every Secure Partition has an identifier (ID). TF-M will generate a header file

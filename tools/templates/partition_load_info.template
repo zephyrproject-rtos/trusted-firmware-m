@@ -43,8 +43,8 @@ REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_END$$Base);
 #endif
 extern uint8_t {{manifest.name|lower}}_stack[];
 
+{% if manifest.model == "IPC" %}
 /* Entrypoint function declaration */
-{% if manifest.entry_point %}
 extern void {{manifest.entry_point}}(void);
 {% elif manifest.entry_init %}
 extern psa_status_t {{manifest.entry_init}}(void);

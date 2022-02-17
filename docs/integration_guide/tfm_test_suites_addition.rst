@@ -303,6 +303,36 @@ process can be referenced from the document
     their locations are different. Test service manifests shall be set in
     ``tf-m-tests/test/secure_fw/tfm_test_manifest_list.yaml``.
 
+Test Partition Specific Manifest Attributes
+===========================================
+There are some test purpose attributes in Secure Partition manifests that are
+**NOT** compatible with FF-M.
+They should be used in Test Partitions only.
+
+weak_dependencies
+-----------------
+A TF-M regression test Partition calls other RoT services for test. But it
+can still run other tests if some of the RoT services are disabled.
+TF-M defines a ``"weak_dependencies"`` attribute in partition manifests of
+regression test partitions to describe test service access to other RoT
+services. It *shall* be only used for TF-M regression test services.
+
+model
+-----
+A TF-M regression test Partition may support both the SFN and IPC model.
+The actual model being used follows the SPM backend enabled.
+
+The TF-M build system supports this by allowing Secure Partitions to set
+the ``model`` attribute to ``dual``.
+The manifest tool will then change it to the corresponding value according
+to the current backend selected.
+
+The Test Partitions use the following definitions to know what model is being
+built:
+
+- ``<<partition_name>>_MODEL_IPC``, ``1`` if IPC model is used.
+- ``<<partition_name>>_MODEL_SFN``, ``1`` if SFN model is used.
+
 Test service implementation
 ===========================
 
