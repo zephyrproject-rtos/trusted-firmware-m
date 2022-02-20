@@ -133,7 +133,7 @@ int main(void)
     FIH_LABEL_CRITICAL_POINT();
 
     /* Print the TF-M version */
-    SPMLOG_INFMSG("\033[1;34mBooting TFM v"VERSION_FULLSTR"\033[0m\r\n");
+    SPMLOG_INFMSG("\033[1;34mBooting TF-M "VERSION_FULLSTR"\033[0m\r\n");
 
     /*
      * Prioritise secure exceptions to avoid NS being able to pre-empt

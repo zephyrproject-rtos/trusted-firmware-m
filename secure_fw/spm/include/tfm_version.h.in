@@ -11,13 +11,13 @@
 /*
  * Defines for TFM version.
  */
-#cmakedefine TFM_VERSION   @TFM_VERSION@
-
-#define VERSION_STRING     ""
+#cmakedefine TFM_VERSION        @TFM_VERSION@
+#cmakedefine TFM_VERSION_FULL   @TFM_VERSION_FULL@
 
 #define VERSTR(x)          #x
 #define VERCON(x)          VERSTR(x)
 
-#define VERSION_FULLSTR    VERCON(TFM_VERSION)""VERSION_STRING
+#define VERSION_STR        VERCON(TFM_VERSION)
+#define VERSION_FULLSTR    VERCON(TFM_VERSION_FULL)
 
 #endif /* __TFM_VERSION_H__ */

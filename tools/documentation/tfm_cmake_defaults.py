@@ -128,6 +128,25 @@ if cmake_env is None:
     tfm_def_doxygen_loc = find_package("doxygen")
     tfm_def_doxygen_dot_loc = find_package("dot")
 
+    try:
+        vrex = re.compile(r'TF-M(?P<GIT_VERSION>v.+?)'
+                          r'(-[0-9]+-g)?(?P<GIT_SHA>[a-f0-9]{7,})?$')
+
+        tfm_def_tfm_version = check_output("git describe --tags --always",
+                                           shell = True, encoding = 'UTF-8')
+
+        _v = vrex.match(tfm_def_tfm_version)
+
+        tfm_def_tfm_version = _v.group("GIT_VERSION")
+        if _v.group("GIT_SHA"):
+            tfm_def_tfm_version += "+" + _v.group("GIT_SHA")[:7]
+
+    except Exception as E:
+        try:
+            tfm_def_tfm_version
+        except NameError:
+            tfm_def_tfm_version = "Unknown"
+
 else:
     # #################### Cmake Defaults ################################## #
     tfm_def_root_dir = os.path.abspath(cmake_env["TFM_ROOT_DIR"])
@@ -158,44 +177,6 @@ else:
     cmake_env["SPHINXCFG_COPY_FILES"] = "False"
     with open("tfm_env.py", "w", encoding='utf-8') as F:
         F.write("cmake_env =" + json.dumps(cmake_env))
-
-
-# Version will be retrieved in that order Git -> Cmake -> Boilerplate
-try:
-    vrex = re.compile(r'(?P<GIT_HASH>[a-f0-9]{40})'
-                      r'+\s+tag\s+refs\/tags\/TF-Mv(?P<VER_MAJ>\d+).'
-                      r'(?P<VER_MIN>\d+).?(?P<VER_HOT>\d+)(?P<RC>-RC\d+)?')
-
-    tfm_def_tfm_version = check_output("git for-each-ref refs/tags --sort=-taggerdate --count=1",
-                                        shell = True, encoding = 'UTF-8')
-
-    _v = vrex.search(tfm_def_tfm_version)
-    version  = [ _v.group("VER_MAJ"),
-                 _v.group("VER_MIN"),
-                 _v.group("VER_HOT"),
-                 _v.group("RC")]
-    git_hash  = _v.group("GIT_HASH")
-
-    # Sanitize the verison and remove empty entries
-    version = [i.replace("-","") for i in version if i]
-    tfm_def_tfm_version = "v"+".".join(version)
-
-    vlrex = re.compile(r'^(?P<GIT_HASH_LATEST>[a-f0-9]{40})')
-
-    git_hash_latest = check_output("git rev-parse HEAD",
-                                    shell = True, encoding = 'UTF-8')
-
-    git_hash_latest = vlrex.search(git_hash_latest).group('GIT_HASH_LATEST')
-
-    if git_hash != git_hash_latest:
-        git_hash_latest = git_hash_latest[:7]
-        tfm_def_tfm_version += "+ ({})".format(git_hash_latest)
-
-except Exception as E:
-    try:
-        tfm_def_tfm_version
-    except NameError:
-        tfm_def_tfm_version = "Unknown"
 
 # #################### User Defaults ######################################## #
 

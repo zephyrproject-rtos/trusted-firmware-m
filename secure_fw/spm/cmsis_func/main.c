@@ -183,7 +183,7 @@ int c_main(void)
     FIH_LABEL_CRITICAL_POINT();
 
     /* Print the TF-M version */
-    SPMLOG_INFMSG("\033[1;34mBooting TFM v"VERSION_FULLSTR"\033[0m\r\n");
+    SPMLOG_INFMSG("\033[1;34mBooting TF-M "VERSION_FULLSTR"\033[0m\r\n");
 
     spm_err = tfm_spm_db_init();
     if (spm_err != SPM_ERR_OK) {

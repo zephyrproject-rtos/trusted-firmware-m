@@ -23,7 +23,7 @@ find_package(LATEX COMPONENTS PDFLATEX)
 
 ################################## ENV #########################################
 
-include(../version.cmake)
+include(../cmake/version.cmake)
 
 project("Trusted Firmware M. Documentation" VERSION ${TFM_VERSION} LANGUAGES)
 
