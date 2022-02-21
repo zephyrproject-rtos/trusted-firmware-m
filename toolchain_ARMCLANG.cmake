@@ -189,7 +189,7 @@ macro(tfm_toolchain_reload_compiler)
     endif()
 
     if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.15)
-        message(FATAL_ERROR "Armclang starting from v6.15 may cause MemManage fault."
+        message(WARNING "Armclang starting from v6.15 may cause MemManage fault."
                             " The root cause is still under analysis by Armclang."
                             " Please use lower Armclang versions instead.")
     endif()
