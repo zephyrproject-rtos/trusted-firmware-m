@@ -81,6 +81,11 @@ class TestIatVerifier(unittest.TestCase):
         self.assertIn('NO_MEASUREMENTS claim is not present',
                       cm.exception.args[0])
 
+        with self.assertLogs() as cm:
+            iat = create_and_read_iat('missing-signer-id.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
+            self.assertIn('Missing RECOMMENDED claim "SIGNER_ID" from sw_component',
+                         cm.records[0].getMessage())
+
     def test_binary_string_decoding(self):
         iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
         self.assertEqual(iat['SECURITY_LIFECYCLE'], 'SL_SECURED')

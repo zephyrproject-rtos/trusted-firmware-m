@@ -19,10 +19,14 @@ ARM_RANGE = -75000
 SW_COMPONENT_RANGE = 0
 
 class AttestationClaim:
-    def __init__(self, verifier, mandatory=True):
+    MANDATORY = 0
+    RECOMMENDED = 1
+    OPTIONAL = 2
+
+    def __init__(self, verifier, necessity=MANDATORY):
         self.config = verifier.config
         self.verifier = verifier
-        self.mandatory = mandatory
+        self.necessity = necessity
         self.verify_count = 0
 
     def verify(self, value):
@@ -54,8 +58,8 @@ class AttestationClaim:
             value = self.decode(value)
         token[entry_name] = value
 
-    def all_mandatory_found(self):
-        return (not self.mandatory) or self.verify_count>0
+    def claim_found(self):
+        return self.verify_count>0
 
     def _validate_bytestring_length(self, value, name, expected_len):
         if not isinstance(value, bytes):
@@ -86,8 +90,8 @@ class AttestationClaim:
 # Validation classes
 #
 class InstanceIdClaim(AttestationClaim):
-    def __init__(self, verifier, expected_len, mandatory=True):
-        super().__init__(verifier, mandatory)
+    def __init__(self, verifier, expected_len, necessity=AttestationClaim.MANDATORY):
+        super().__init__(verifier, necessity)
         self.expected_len = expected_len
 
     def get_claim_key(self=None):
@@ -167,8 +171,8 @@ class OriginatorClaim(NonVerifiedClaim):
 
 class SWComponentsClaim(AttestationClaim):
 
-    def __init__(self, verifier, claims, mandatory=True):
-        super().__init__(verifier, mandatory)
+    def __init__(self, verifier, claims, necessity=AttestationClaim.MANDATORY):
+        super().__init__(verifier, necessity)
         self.claims = claims
 
 
@@ -212,12 +216,21 @@ class SWComponentsClaim(AttestationClaim):
                 except Exception:
                     if not self.config.keep_going:
                         raise
+
+            # Check claims' necessity
             for claim in claims.values():
-                if not claim.all_mandatory_found():
-                    msg = ('Invalid IAT: missing MANDATORY claim "{}" '
-                           'from sw_componentule at index {}')
-                    self.verifier.error(msg.format(claim.get_claim_name(),
-                                     entry_number))
+                if not claim.claim_found():
+                    if claim.necessity==AttestationClaim.MANDATORY:
+                        msg = ('Invalid IAT: missing MANDATORY claim "{}" '
+                            'from sw_component at index {}')
+                        self.verifier.error(msg.format(claim.get_claim_name(),
+                                        entry_number))
+                    elif claim.necessity==AttestationClaim.RECOMMENDED:
+                        msg = ('Missing RECOMMENDED claim "{}" '
+                            'from sw_component at index {}')
+                        self.verifier.warning(msg.format(claim.get_claim_name(),
+                                        entry_number))
+
         self.verify_count += 1
 
     def decode_sw_component(self, raw_sw_component):
@@ -499,10 +512,15 @@ class AttestationTokenVerifier:
             claim.verify(value)
             claim.add_tokens_to_dict(token, value)
 
+        # Check claims' necessity
         for claim in claims.values():
-            if not claim.all_mandatory_found():
-                msg = 'Invalid IAT: missing MANDATORY claim "{}"'
-                self.error(msg.format(claim.get_claim_name()))
+            if not claim.claim_found():
+                if claim.necessity==AttestationClaim.MANDATORY:
+                    msg = 'Invalid IAT: missing MANDATORY claim "{}"'
+                    self.error(msg.format(claim.get_claim_name()))
+                elif claim.necessity==AttestationClaim.RECOMMENDED:
+                    msg = 'Missing RECOMMENDED claim "{}"'
+                    self.warning(msg.format(claim.get_claim_name()))
 
             claim.check_cross_claim_requirements()
 
@@ -517,3 +535,6 @@ class AttestationTokenVerifier:
             logger.error(message)
         else:
             raise ValueError(message)
+
+    def warning(self, message):
+        logger.warning(message)
