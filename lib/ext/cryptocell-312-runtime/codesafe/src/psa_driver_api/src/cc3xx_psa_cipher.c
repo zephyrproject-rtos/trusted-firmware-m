@@ -498,13 +498,6 @@ psa_status_t cc3xx_cipher_finish(
                 return PSA_ERROR_INVALID_ARGUMENT;
             }
 
-            if (output_size % AES_BLOCK_SIZE) {
-                CC_PAL_LOG_ERR(
-                    "Output size %d not a multiple of the block size\n",
-                    output_size);
-                return PSA_ERROR_BUFFER_TOO_SMALL;
-            }
-
             if (( ret = cc3xx_aes_crypt(
                     &operation->ctx.aes,
                     CIPHER_CBC,
@@ -532,6 +525,10 @@ psa_status_t cc3xx_cipher_finish(
                     return ret;
                 }
 
+            }
+
+            if (output_size < data_len) {
+                return PSA_ERROR_BUFFER_TOO_SMALL;
             }
 
             CC_PalMemCopy(output, temp_buff, data_len);
