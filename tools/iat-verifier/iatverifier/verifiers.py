@@ -61,15 +61,28 @@ class AttestationClaim:
     def claim_found(self):
         return self.verify_count>0
 
-    def _validate_bytestring_length(self, value, name, expected_len):
-        if not isinstance(value, bytes):
-            msg = 'Invalid {}: must be a bytes string: found {}'
-            self.verifier.error(msg.format(name, type(value)))
+    def _check_type(self, name, value, expected_type):
+        if not isinstance(value, expected_type):
+            msg = 'Invalid {}: must be a(n) {}: found {}'
+            self.verifier.error(msg.format(name, expected_type, type(value)))
+            return False
+        return True
+
+    def _validate_bytestring_length_equals(self, value, name, expected_len):
+        self._check_type(name, value, bytes)
 
         value_len = len(value)
         if value_len != expected_len:
             msg = 'Invalid {} length: must be exactly {} bytes, found {} bytes'
             self.verifier.error(msg.format(name, expected_len, value_len))
+
+    def _validate_bytestring_length_is_at_least(self, value, name, minimal_length):
+        self._check_type(name, value, bytes)
+
+        value_len = len(value)
+        if value_len < minimal_length:
+            msg = 'Invalid {} length: must be at least {} bytes, found {} bytes'
+            self.verifier.error(msg.format(name, minimal_length, value_len))
 
     @staticmethod
     def parse_raw(raw_value):
@@ -101,7 +114,7 @@ class InstanceIdClaim(AttestationClaim):
         return 'INSTANCE_ID'
 
     def verify(self, value):
-        self._validate_bytestring_length(value, 'INSTANCE_ID', self.expected_len)
+        self._validate_bytestring_length_equals(value, 'INSTANCE_ID', self.expected_len)
         if value[0] != 0x01:
             msg = 'Invalid INSTANCE_ID: first byte must be 0x01, found: 0x{}'
             self.verifier.error(msg.format(value[0]))
@@ -119,9 +132,7 @@ class ChallengeClaim(AttestationClaim):
         return 'CHALLENGE'
 
     def verify(self, value):
-        if not isinstance(value, bytes):
-            msg = 'Invalid CHALLENGE; must be a bytes string.'
-            self.verifier.error(msg)
+        self._check_type('CHALLENGE', value, bytes)
 
         value_len = len(value)
         if value_len not in ChallengeClaim.HASH_SIZES:
@@ -192,15 +203,11 @@ class SWComponentsClaim(AttestationClaim):
         return ret
 
     def verify(self, value):
-        if not isinstance(value, list):
-            msg = 'Invalid SW_COMPONENTS value (must be an array): {}'
-            self.verifier.error(msg.format(value))
+        if not self._check_type('SW_COMPONENTS', value, list):
             return
 
         for entry_number, sw_component in enumerate(value):
-            if not isinstance(sw_component, dict):
-                msg = 'Invalid SW_COMPONENTS array entry (must be a map): {}'
-                self.verifier.error(msg.format(sw_component))
+            if not self._check_type('SW_COMPONENTS', sw_component, dict):
                 return
 
             claims = {v.get_claim_key(): v for v in self.get_sw_component_claims()}
@@ -286,9 +293,7 @@ class ClientIdClaim(AttestationClaim):
         return 'CLIENT_ID'
 
     def verify(self, value):
-        if not isinstance(value, int):
-            msg = 'Invalid CLIENT_ID, must be an int: {}'
-            self.verifier.error(msg.format(value))
+        self._check_type('CLIENT_ID', value, int)
         self.verify_count += 1
 
 class SecurityLifecycleClaim(AttestationClaim):
@@ -319,9 +324,7 @@ class SecurityLifecycleClaim(AttestationClaim):
         return 'SECURITY_LIFECYCLE'
 
     def verify(self, value):
-        if not isinstance(value, int):
-            msg = 'Invalid SECURITY_LIFECYCLE, must be an int: {}'
-            self.verifier.error(msg.format(value))
+        self._check_type('SECURITY_LIFECYCLE', value, int)
         self.verify_count += 1
 
     def add_tokens_to_dict(self, token, value):
@@ -350,9 +353,7 @@ class ProfileIdClaim(AttestationClaim):
         return 'PROFILE_ID'
 
     def verify(self, value):
-        if not isinstance(value, str):
-            msg = 'Invalid PROFILE_ID (must be a string): {}'.format(value)
-            self.verifier.error(msg.format(value))
+        self._check_type('PROFILE_ID', value, str)
         self.verify_count += 1
 
     def is_utf_8(self):
@@ -367,7 +368,7 @@ class BootSeedClaim(AttestationClaim):
         return 'BOOT_SEED'
 
     def verify(self, value):
-        self._validate_bytestring_length(value, 'BOOT_SEED', 32)
+        self._validate_bytestring_length_is_at_least(value, 'BOOT_SEED', 32)
         self.verify_count += 1
 
 
@@ -390,7 +391,7 @@ class SignerIdClaim(AttestationClaim):
         return 'SIGNER_ID'
 
     def verify(self, value):
-        self._validate_bytestring_length(value, 'SIGNER_ID', 32)
+        self._validate_bytestring_length_is_at_least(value, 'SIGNER_ID', 32)
         self.verify_count += 1
 
 
@@ -413,7 +414,7 @@ class MeasurementValueClaim(AttestationClaim):
         return 'MEASUREMENT_VALUE'
 
     def verify(self, value):
-        self._validate_bytestring_length(value, 'MEASUREMENT', 32)
+        self._validate_bytestring_length_is_at_least(value, 'MEASUREMENT', 32)
         self.verify_count += 1
 
 

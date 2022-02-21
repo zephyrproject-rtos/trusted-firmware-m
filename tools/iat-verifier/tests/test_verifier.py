@@ -86,6 +86,19 @@ class TestIatVerifier(unittest.TestCase):
             self.assertIn('Missing RECOMMENDED claim "SIGNER_ID" from sw_component',
                          cm.records[0].getMessage())
 
+        with self.assertLogs() as cm:
+            keep_going_conf = VerifierConfiguration(keep_going=True)
+            iat = create_and_read_iat('invalid-type-length.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(keep_going_conf))
+            self.assertIn("Invalid PROFILE_ID: must be a(n) <class 'str'>: found <class 'int'>",
+                         cm.records[0].getMessage())
+            self.assertIn("Invalid SIGNER_ID: must be a(n) <class 'bytes'>: found <class 'str'>",
+                         cm.records[1].getMessage())
+            self.assertIn("Invalid SIGNER_ID length: must be at least 32 bytes, found 12 bytes",
+                         cm.records[2].getMessage())
+            self.assertIn("Invalid MEASUREMENT length: must be at least 32 bytes, found 28 bytes",
+                         cm.records[3].getMessage())
+
+
     def test_binary_string_decoding(self):
         iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
         self.assertEqual(iat['SECURITY_LIFECYCLE'], 'SL_SECURED')
