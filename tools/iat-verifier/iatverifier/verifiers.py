@@ -149,12 +149,12 @@ class ImplementationIdClaim(NonVerifiedClaim):
         return 'IMPLEMENTATION_ID'
 
 
-class HardwareIdClaim(NonVerifiedClaim):
+class HardwareVersionClaim(NonVerifiedClaim):
     def get_claim_key(self=None):
         return ARM_RANGE - 5
 
     def get_claim_name(self=None):
-        return 'HARDWARE_ID'
+        return 'HARDWARE_VERSION'
 
 
 class OriginatorClaim(NonVerifiedClaim):
