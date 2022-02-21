@@ -44,6 +44,11 @@ enum tfm_hal_status_t tfm_hal_platform_init(void);
 void tfm_hal_system_reset(void);
 
 /**
+ * \brief System halt
+ */
+void tfm_hal_system_halt(void);
+
+/**
  * \brief Set up the RNG for use with random delays.
  *
  * \retval TFM_HAL_SUCCESS        Platform specific random number generation
