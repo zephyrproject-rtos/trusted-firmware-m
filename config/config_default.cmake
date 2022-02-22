@@ -48,8 +48,6 @@ set(TFM_INSTALL_PATH                    ${CMAKE_BINARY_DIR}/install CACHE PATH "
 set(TFM_DEBUG_SYMBOLS                   ON          CACHE BOOL      "Add debug symbols. Note that setting CMAKE_BUILD_TYPE to Debug or RelWithDebInfo will also add debug symbols.")
 set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to build the binary for lcov tools")
 
-set(CONFIG_TFM_PARTITION_META           OFF         CACHE BOOL      "Use Partition Metadata Pointer")
-
 set(TFM_PXN_ENABLE                      OFF         CACHE BOOL      "Use Privileged execute never (PXN)")
 
 set(TFM_EXCEPTION_INFO_DUMP             OFF         CACHE BOOL      "On fatal errors in the secure firmware, capture info about the exception. Print the info if the SPM log level is sufficient.")

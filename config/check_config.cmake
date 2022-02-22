@@ -79,10 +79,6 @@ tfm_invalid_config(OTP_NV_COUNTERS_RAM_EMULATION AND NOT (PLATFORM_DEFAULT_OTP O
 tfm_invalid_config(PLATFORM_DEFAULT_NV_COUNTERS AND  NOT PLATFORM_DEFAULT_OTP_WRITEABLE)
 tfm_invalid_config(TFM_DUMMY_PROVISIONING AND  NOT PLATFORM_DEFAULT_OTP_WRITEABLE)
 
-####################### SP META Pointer ########################################
-
-tfm_invalid_config(CONFIG_TFM_PARTITION_META AND TFM_LIB_MODEL)
-
 ####################### Firmware Update Parttion ###############################
 
 tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT TFM_PARTITION_PLATFORM)
