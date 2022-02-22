@@ -369,8 +369,8 @@ definitions is:
   object table is allocated statically as PS does not use dynamic memory
   allocation.
 - ``PS_TEST_NV_COUNTERS``- this flag enables the virtual implementation of the
-  PS NV counters interface in ``test/suites/ps/secure/nv_counters`` of the
-  ``tf-m-tests`` repo, which emulates NV counters in
+  PS NV counters interface in ``test/secure_fw/suites/ps/secure/nv_counters`` of
+  the ``tf-m-tests`` repo, which emulates NV counters in
   RAM, and disables the hardware implementation of NV counters provided by
   the secure service. This flag is enabled by default, but has no effect when
   the secure regression test is disabled. This flag can be
@@ -386,5 +386,5 @@ definitions is:
 
 --------------
 
-*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*
 *Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*

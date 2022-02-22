@@ -174,7 +174,7 @@ The Partition ID can be set to a fixed value or omitted to be auto allocated.
    ==================================== ======================
 
 Please refer to ``<TF-M base folder>/tools/tfm_manifest_list.yaml``,
-``<TF-M test repo>/test/test_services/tfm_test_manifest_list.yaml`` and
+``<TF-M test repo>/test/secure_fw/tfm_test_manifest_list.yaml`` and
 ``<TF-M base folder>/tools/tfm_psa_ff_test_manifest_list.yaml`` for the detailed
 PID allocations.
 
@@ -558,7 +558,7 @@ Test connection
 ---------------
 To test that the service has been implemented correctly, the user needs to call
 it from somewhere. One option is to create a new testsuite, such as
-``<TF-M-test base folder>/test/suites/example/non_secure/example_ns_
+``<TF-M-test base folder>/test/secure_fw/suites/example/non_secure/example_ns_
 interface_testsuite.c``.
 
 The process of adding test connection is explained in the specification
@@ -737,4 +737,4 @@ Reference
 
 --------------
 
-*Copyright (c) 2019-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2022, Arm Limited. All rights reserved.*

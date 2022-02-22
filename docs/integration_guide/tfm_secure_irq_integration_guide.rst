@@ -396,10 +396,10 @@ References
 
 .. [2] `FF-M v1.1 Extention <https://documentation-service.arm.com/static/600067c09b9c2d1bb22cd1c5?token=>`__
 
-.. [3] https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/test/test_services/tfm_flih_test_service
+.. [3] https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/test/secure_fw/suites/spm/irq/service/tfm_flih_test_service
 
-.. [4] https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/test/test_services/tfm_slih_test_service
+.. [4] https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/test/secure_fw/suites/spm/irq/service/tfm_slih_test_service
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

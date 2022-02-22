@@ -587,13 +587,13 @@ Regression test
 ===============
 
 The initial attestation token is verified by the attestation test suite in
-``test/suites/attestation``. The test suite is responsible for verifying the
-token signature and parsing the token to verify its encoding and the presence of
-the mandatory claims. This test suite can be executed on the device. It is part
-of the regression test suite. The test suite is configurable in the
-``test/suites/attestation/attest_token_test_values.h`` header file. In this file
-there are two attributes for each claim which are configurable (more details
-in the header file):
+``test/secure_fw/suites/attestation``. The test suite is responsible for
+verifying the token signature and parsing the token to verify its encoding and
+the presence of the mandatory claims. This test suite can be executed on the
+device. It is part of the regression test suite. The test suite is configurable
+in the ``test/secure_fw/suites/attestation/attest_token_test_values.h`` header
+file. In this file there are two attributes for each claim which are
+configurable (more details in the header file):
 
  - Requirements of presence: optional or mandatory
  - Expected value: Value check can be disabled or expected value can be provided
@@ -631,7 +631,7 @@ that user has license for DS-5 and FVP models:
    :doc:`tfm_build_instruction </docs/technical_references/instructions/tfm_build_instruction>`.
  - Lunch FVP model in DS-5. More info in
    :doc:`Run TF-M examples on Arm platforms </docs/technical_references/instructions/run_tfm_examples_on_arm_platforms>`.
- - Set a breakpoint in ``test/suites/attestation/attest_token_test.c``
+ - Set a breakpoint in ``test/secure_fw/suites/attestation/attest_token_test.c``
    in ``decode_test_internal(..)`` after the ``token_main_alt(..)`` returned,
    i.e. on line 859. Execute the code in the model until the breakpoint hits
    second time. At this point the console prints the test case name:
@@ -666,4 +666,4 @@ that user has license for DS-5 and FVP models:
 
 --------------
 
-*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*
