@@ -69,7 +69,7 @@ static psa_status_t check_alg(psa_algorithm_t alg, psa_algorithm_t *ref_alg)
     }
 
     if (i == VALID_TAG_LENGTH_SIZE) {
-        return PSA_ERROR_NOT_SUPPORTED;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     return PSA_SUCCESS;
