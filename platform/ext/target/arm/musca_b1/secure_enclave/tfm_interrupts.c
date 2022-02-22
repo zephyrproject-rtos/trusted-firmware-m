@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -12,6 +12,7 @@
 #include "load/interrupt_defs.h"
 #include "platform_multicore.h"
 #include "spm_ipc.h"
+#include "ffm/interrupt.h"
 
 static struct irq_t mbox_irq_info = {0};
 
