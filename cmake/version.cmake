@@ -6,6 +6,7 @@
 #-------------------------------------------------------------------------------
 
 execute_process(COMMAND git describe --tags --always
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE TFM_VERSION_FULL
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
