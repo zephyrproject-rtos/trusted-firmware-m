@@ -161,6 +161,7 @@ struct conn_handle_t *tfm_spm_create_conn_handle(struct service_t *service,
     return p_handle;
 }
 
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle,
                                      int32_t client_id)
 {
@@ -177,6 +178,7 @@ int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle,
 
     return SPM_SUCCESS;
 }
+#endif
 
 int32_t tfm_spm_free_conn_handle(struct service_t *service,
                                  struct conn_handle_t *conn_handle)

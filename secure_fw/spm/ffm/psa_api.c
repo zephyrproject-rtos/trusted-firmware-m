@@ -214,6 +214,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         conn_handle->rhandle = NULL;
         handle = tfm_spm_to_user_handle(conn_handle);
     } else {
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
         conn_handle = tfm_spm_to_handle_instance(handle);
 
         /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
@@ -244,6 +245,9 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
             /* FixMe: Need to implement a mechanism to resolve this failure. */
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
+#else
+        return PSA_ERROR_PROGRAMMER_ERROR;
+#endif
     }
 
     privileged = GET_CURRENT_PARTITION_PRIVILEGED_MODE();
