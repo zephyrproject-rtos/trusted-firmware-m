@@ -175,8 +175,8 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
         if (mpu_armv8m_region_enable(&dev_mpu_s, &localcfg) != MPU_ARMV8M_OK) {
             return TFM_HAL_ERROR_GENERIC;
         }
-    n_configured_regions = i;
     }
+    n_configured_regions = i;
 #else /* TFM_LVL == 3 */
     if (ARRAY_SIZE(region_cfg) > MPU_REGION_NUM) {
         return TFM_HAL_ERROR_GENERIC;
