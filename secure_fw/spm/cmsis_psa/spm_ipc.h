@@ -20,9 +20,9 @@
 #include "load/partition_defs.h"
 #include "load/interrupt_defs.h"
 
-#define TFM_HANDLE_STATUS_IDLE          0
-#define TFM_HANDLE_STATUS_ACTIVE        1
-#define TFM_HANDLE_STATUS_CONNECT_ERROR 2
+#define TFM_HANDLE_STATUS_IDLE          0 /* Handle created             */
+#define TFM_HANDLE_STATUS_ACTIVE        1 /* Handle in use              */
+#define TFM_HANDLE_STATUS_TO_FREE       2 /* Free the handle            */
 
 /* Privileged definitions for partition thread mode */
 #define TFM_PARTITION_UNPRIVILEGED_MODE         (0U)
@@ -84,7 +84,7 @@ struct conn_handle_t {
                                          * options:
                                          * TFM_HANDLE_STATUS_ACTIVE,
                                          * TFM_HANDLE_STATUS_IDLE and
-                                         * TFM_HANDLE_STATUS_CONNECT_ERROR
+                                         * TFM_HANDLE_STATUS_TO_FREE
                                          */
     struct partition_t *p_client;       /* Caller partition               */
     struct service_t *service;          /* RoT service pointer            */

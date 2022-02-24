@@ -58,6 +58,8 @@ static psa_status_t sfn_messaging(struct service_t *service,
 
     status = ((service_fn_t)service->p_ldinf->sfn)(&handle->msg);
 
+    handle->status = TFM_HANDLE_STATUS_ACTIVE;
+
     return status;
 }
 

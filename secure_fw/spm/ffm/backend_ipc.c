@@ -124,6 +124,8 @@ static psa_status_t ipc_messaging(struct service_t *service,
         thrd_set_wait(&handle->ack_evnt, CURRENT_THREAD);
     }
 
+    handle->status = TFM_HANDLE_STATUS_ACTIVE;
+
     return PSA_SUCCESS;
 }
 

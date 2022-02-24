@@ -225,15 +225,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
          * It is a PROGRAMMER ERROR if the connection is currently
          * handling a request.
          */
-        if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
-        }
-
-        /*
-         * Return PSA_ERROR_PROGRAMMER_ERROR immediately for the connection
-         * has been terminated by the RoT Service.
-         */
-        if (conn_handle->status == TFM_HANDLE_STATUS_CONNECT_ERROR) {
+        if (conn_handle->status != TFM_HANDLE_STATUS_IDLE) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
@@ -528,8 +520,6 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 
-    handle->status = TFM_HANDLE_STATUS_ACTIVE;
-
     spm_memcpy(msg, &handle->msg, sizeof(psa_msg_t));
 
     return PSA_SUCCESS;
@@ -770,8 +760,8 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
             ret = msg_handle;
         } else if (status == PSA_ERROR_CONNECTION_REFUSED) {
             /* Refuse the client connection, indicating a permanent error. */
-            tfm_spm_free_conn_handle(handle);
             ret = PSA_ERROR_CONNECTION_REFUSED;
+            handle->status = TFM_HANDLE_STATUS_TO_FREE;
         } else if (status == PSA_ERROR_CONNECTION_BUSY) {
             /* Fail the client connection, indicating a transient error. */
             ret = PSA_ERROR_CONNECTION_BUSY;
@@ -781,7 +771,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         break;
     case PSA_IPC_DISCONNECT:
         /* Service handle is not used anymore */
-        tfm_spm_free_conn_handle(handle);
+        handle->status = TFM_HANDLE_STATUS_TO_FREE;
 
         /*
          * If the message type is PSA_IPC_DISCONNECT, then the status code is
@@ -824,7 +814,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
              */
             update_caller_outvec_len(handle);
             if (SERVICE_IS_STATELESS(service->p_ldinf->flags)) {
-                tfm_spm_free_conn_handle(handle);
+                handle->status = TFM_HANDLE_STATUS_TO_FREE;
             }
         } else {
             tfm_core_panic();
@@ -836,13 +826,9 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
          * If the source of the programmer error is a Secure Partition, the SPM
          * must panic the Secure Partition in response to a PROGRAMMER ERROR.
          */
-        if (TFM_CLIENT_ID_IS_NS(handle->msg.client_id)) {
-            handle->status = TFM_HANDLE_STATUS_CONNECT_ERROR;
-        } else {
+        if (!TFM_CLIENT_ID_IS_NS(handle->msg.client_id)) {
             tfm_core_panic();
         }
-    } else {
-        handle->status = TFM_HANDLE_STATUS_IDLE;
     }
 
     /*
@@ -853,6 +839,12 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
     CRITICAL_SECTION_ENTER(cs_assert);
     ret = backend_instance.replying(handle, ret);
     CRITICAL_SECTION_LEAVE(cs_assert);
+
+    if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {
+        tfm_spm_free_conn_handle(handle);
+    } else {
+        handle->status = TFM_HANDLE_STATUS_IDLE;
+    }
 
     return ret;
 }
