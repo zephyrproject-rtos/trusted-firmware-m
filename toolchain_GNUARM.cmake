@@ -14,6 +14,7 @@ endif()
 set(CMAKE_SYSTEM_NAME Generic)
 
 find_program(CMAKE_C_COMPILER ${CROSS_COMPILE}-gcc)
+find_program(CMAKE_CXX_COMPILER ${CROSS_COMPILE}-g++)
 
 if(CMAKE_C_COMPILER STREQUAL "CMAKE_C_COMPILER-NOTFOUND")
     message(FATAL_ERROR "Could not find compiler: '${CROSS_COMPILE}-gcc'")
