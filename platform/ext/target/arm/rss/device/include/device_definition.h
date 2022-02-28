@@ -33,6 +33,12 @@ extern "C" {
 #endif
 
 /* ======= Defines peripheral configuration structures ======= */
+/* ATU driver structures */
+#ifdef ATU_S
+#include "atu_rss_drv.h"
+extern struct atu_dev_t ATU_DEV_S;
+#endif
+
 /* UART PL011 driver structures */
 #ifdef UART0_PL011_S
 #include "uart_pl011_drv.h"

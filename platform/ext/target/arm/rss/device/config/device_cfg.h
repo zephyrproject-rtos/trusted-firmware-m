@@ -41,6 +41,9 @@
 #define PPC_RSS_PERIPH_EXP2_S
 #define PPC_RSS_PERIPH_EXP3_S
 
+/* ARM ATU */
+#define ATU_S
+
 /* ARM UART PL011 */
 #define DEFAULT_UART_BAUDRATE  115200
 #define UART0_PL011_S

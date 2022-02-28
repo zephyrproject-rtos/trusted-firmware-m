@@ -26,6 +26,13 @@
 #include "device_definition.h"
 #include "platform_base_address.h"
 
+/* Arm ATU driver structures */
+#ifdef ATU_S
+static const struct atu_dev_cfg_t ATU_DEV_CFG_S = {
+    .base = ATU_BASE_S};
+struct atu_dev_t ATU_DEV_S = {&ATU_DEV_CFG_S};
+#endif
+
 /* Arm UART PL011 driver structures */
 #ifdef UART0_PL011_S
 static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_S = {

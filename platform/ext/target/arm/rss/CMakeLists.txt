@@ -96,6 +96,7 @@ target_sources(platform_s
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/system_core_init.c
+        native_drivers/atu_rss_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/mpc_sie_drv.c
         native_drivers/mpu_armv8m_drv.c
@@ -167,6 +168,7 @@ target_sources(platform_bl2
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/system_core_init.c
+        native_drivers/atu_rss_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/uart_pl011_drv.c
 )
@@ -202,6 +204,7 @@ target_sources(platform_bl1
         ./cmsis_drivers/Driver_USART.c
         ./device/source/device_definition.c
         ./device/source/system_core_init.c
+        ./native_drivers/atu_rss_drv.c
         ./native_drivers/uart_pl011_drv.c
 )
 
