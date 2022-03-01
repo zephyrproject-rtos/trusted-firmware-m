@@ -131,7 +131,8 @@ static psa_status_t cipher_setup(
 
         if (( ret = cc3xx_chacha20_setkey(
                 &operation->ctx.chacha,
-                key) )
+                key,
+                key_length) )
             != PSA_SUCCESS) {
             return ret;
         }
@@ -191,7 +192,7 @@ psa_status_t cc3xx_cipher_set_iv(
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
     uint8_t *iv_pnt = (uint8_t *)iv;
-    uint32_t counter = 0;
+    uint32_t counter = 0; /* Use zero as specified by PSA Crypto spec */
 
     if (iv_length > AES_IV_SIZE) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -199,29 +200,28 @@ psa_status_t cc3xx_cipher_set_iv(
 
     switch (operation->key_type) {
     case  PSA_KEY_TYPE_CHACHA20:
-        /* When the IV is 16 bytes the first four bytes contain the counter in little endian.
-         * When the IV is 12 bytes it contains only the IV and the counter should be set to 0.
-         * More information in ChaCha20 section here:
-         * https://armmbed.github.io/mbed-crypto/html/api/ops/ciphers.html
-         **/
-
+        /* When the IV is 16 bytes the first four bytes contain the counter in
+         * little endian. When the IV is 12 bytes it contains only the IV and
+         * the counter should be set to 0. More information in ChaCha20 section
+         * here: https://armmbed.github.io/mbed-crypto/html/api/ops/ciphers.html
+         */
         switch (iv_length) {
             case 16:
-                CC_PalMemCopy((uint8_t *)&counter, iv_pnt, 4);
-                iv_pnt+=4;
-                ret = cc3xx_chacha20_starts(
-                        &operation->ctx.chacha,
-                        iv_pnt,
-                        counter);
-                break;
+                /* Read the counter value in little endian */
+                counter = (iv[3] << 24) | (iv[2] << 16) | (iv[1] << 8) | iv[0];
+                iv_pnt += 4;
+                iv_length -= 4;
             case 12:
-                ret = cc3xx_chacha20_starts(
-                        &operation->ctx.chacha,
-                        iv_pnt,
-                        counter);
+                ret = cc3xx_chacha20_set_counter(&operation->ctx.chacha,
+                                                 counter);
+                if (ret == PSA_SUCCESS) {
+                    ret = cc3xx_chacha20_set_nonce(&operation->ctx.chacha,
+                                                   iv_pnt,
+                                                   iv_length);
+                }
                 break;
             case 8:
-                /* FixMe: Add support for IV length 8 cases */
+                /* Original Chacha, i.e. 64 bit nonce and 64 bit counter */
                 ret = PSA_ERROR_NOT_SUPPORTED;
                 break;
             default:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 /** \file cc3xx_internal_chacha20_poly1305.c
  *
  * This file contains the implementation of the internal functions to
- * perform AEAD using the Chacha20-Poly1305 algorithm
+ * perform AEAD using the Chacha20-Poly1305 algorithm as per RFC7539
  *
  */
 
@@ -24,115 +24,114 @@
 #include "cc3xx_internal_chacha20.h"
 #include "cc3xx_internal_chacha20_poly1305.h"
 
-static psa_status_t chacha20_poly1305_crypt(const unsigned char key[32],
-                                            const unsigned char nonce[12],
-                                            uint32_t counter, size_t data_len,
-                                            const unsigned char *input,
-                                            unsigned char *output)
+static psa_status_t chacha20_poly1305_gen_otk(ChachaContext_t *context,
+                                              uint8_t *otk,
+                                              size_t otk_size)
 {
-    ChachaContext_t context = {0};
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    uint8_t chachaInState[CHACHA_BLOCK_SIZE_BYTES] = {0};
+    uint8_t chachaOutState[CHACHA_BLOCK_SIZE_BYTES] = {0};
 
-    cc3xx_chacha20_init(&context);
+    if (otk_size < 32) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
 
-    status = cc3xx_chacha20_setkey(&context, key);
-    if (status != PSA_SUCCESS)
-        goto cleanup;
+    /* Generate polyKey */
+    status = cc3xx_chacha20_set_counter(context, 0);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
-    status = cc3xx_chacha20_starts(&context, nonce, counter);
-    if (status != PSA_SUCCESS)
-        goto cleanup;
+    /* Calling chacha20_update after setting the counter to 0 and using an all-
+     * zero input is equivalent in getting as output of the Chacha20 encryption
+     * stage the output of the chacha20_block stage only, i.e. otk as per RFC
+     */
+    status = cc3xx_chacha20_update(context, sizeof(chachaInState),
+                                   chachaInState, chachaOutState);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
-    status = cc3xx_chacha20_update(&context, data_len, input, output);
+    /* Copy generated key as result of previous step */
+    CC_PalMemCopy(otk, chachaOutState, 32);
 
-cleanup:
-    cc3xx_chacha20_free(&context);
-    return status;
+    return PSA_SUCCESS;
 }
 
 static psa_status_t chacha20_poly1305_crypt_and_tag(
     cryptoDirection_t direction, const uint8_t *key_buffer,
-    size_t key_buffer_size, size_t length, const unsigned char nonce[12],
-    const unsigned char *aad, size_t aad_len, const unsigned char *input,
-    unsigned char *output, size_t *output_length, unsigned char tag[16])
+    size_t key_buffer_size, size_t length, const uint8_t *nonce,
+    size_t nonce_size, const uint8_t *aad, size_t aad_len, const uint8_t *input,
+    uint8_t *output, size_t *output_length, uint8_t *tag, size_t tag_size)
 {
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
-
-    int rc = -1;
-    uint8_t chachaInState[CHACHA_BLOCK_SIZE_BYTES] = {0};
-    uint8_t chachaOutState[CHACHA_BLOCK_SIZE_BYTES] = {0};
+    CCError_t rc = CC_FAIL;
     mbedtls_poly_key polyKey = {0};
     mbedtls_poly_mac polyMac = {0};
-    const uint8_t *pCipherData = NULL;
+    /* RFC7539 specifies that initial value of the counter must be 1 during
+     * Chacha20 encryption/decryption
+     */
+    uint32_t counter = 1;
 
-    /* TODO: Do we want this on the stack? */
+    if (tag_size < 16) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    /* RFC7539 supports only 12 bytes nonce: It is the concatenation of a
+     * constant and a 64 bit IV - but we don't care here how it's been
+     * derived
+     */
+    if (nonce_size != CHACHA_IV_96_SIZE_BYTES) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     ChachaContext_t context = {0};
 
-    /* TODO: Must verify that this is true, but cryptocell code seems to expect
-     * this */
-    if (key_buffer_size != 32) {
-        status = PSA_ERROR_INVALID_ARGUMENT;
-        goto cleanup;
-    }
-    cc3xx_chacha20_setkey(&context, key_buffer);
+    cc3xx_chacha20_init(&context);
 
-    if (direction == CRYPTO_DIRECTION_ENCRYPT) {
-        pCipherData = output;
-    } else if (direction == CRYPTO_DIRECTION_DECRYPT) {
-        pCipherData = input;
-    } else {
-        status = PSA_ERROR_INVALID_ARGUMENT;
+    status = cc3xx_chacha20_setkey(&context, key_buffer, key_buffer_size);
+    if (status != PSA_SUCCESS) {
         goto cleanup;
     }
 
-    // 1. Generate poly key
-    rc = chacha20_poly1305_crypt((uint8_t *)context.keyBuf, nonce, 0,
-                                 sizeof(chachaInState), chachaInState,
-                                 chachaOutState);
-
-    if (rc != 0) {
-        status = PSA_ERROR_DATA_INVALID;
+    status = cc3xx_chacha20_set_nonce(&context, nonce, nonce_size);
+    if (status != PSA_SUCCESS) {
         goto cleanup;
     }
-    // poly key defined as the first 32 bytes of chacha output.
-    CC_PalMemCopy(polyKey, chachaOutState, sizeof(polyKey));
 
-    // 2. Encryption pDataIn
-    if (direction == CRYPTO_DIRECTION_ENCRYPT) {
-        rc = chacha20_poly1305_crypt((uint8_t *)context.keyBuf, nonce, 1,
-                                     length, input, output);
-
-        if (rc != 0) {
-            status = PSA_ERROR_DATA_INVALID;
-            goto cleanup;
-        }
+    status = cc3xx_chacha20_set_counter(&context, counter);
+    if (status != PSA_SUCCESS) {
+        goto cleanup;
     }
 
-    // 3. Authentication
-    rc = (int)PolyMacCalc(polyKey, aad, aad_len, pCipherData, length, polyMac,
-                          true);
-    if (rc != 0) {
-        status = PSA_ERROR_DATA_INVALID;
+    status = cc3xx_chacha20_update(&context, length, input, output);
+    if (status != PSA_SUCCESS) {
+        goto cleanup;
+    }
+
+    /* Generate polyKey */
+    status = chacha20_poly1305_gen_otk(&context,
+                                       (uint8_t *)&polyKey,
+                                       sizeof(polyKey));
+    if (status != PSA_SUCCESS) {
+        goto cleanup;
+    }
+
+    /* Authenticate using the generated key */
+    rc = PolyMacCalc(polyKey, aad, aad_len,
+                 (direction == CRYPTO_DIRECTION_ENCRYPT) ? output : input,
+                 length, polyMac, true);
+    if (rc != CC_OK) {
+        status = PSA_ERROR_HARDWARE_FAILURE;
         goto cleanup;
     }
 
     CC_PalMemCopy(tag, polyMac, sizeof(polyMac));
-
-    if (direction == CRYPTO_DIRECTION_DECRYPT) {
-        rc = chacha20_poly1305_crypt((uint8_t *)context.keyBuf, nonce, 1,
-                                     length, input, output);
-
-        if (rc != 0) {
-            status = PSA_ERROR_DATA_INVALID;
-            goto cleanup;
-        }
-    }
 cleanup:
     cc3xx_chacha20_free(&context);
 
-    if (rc == 0) {
+    if (rc == CC_OK) {
         status = PSA_SUCCESS;
-
         if (direction == CRYPTO_DIRECTION_ENCRYPT) {
             /*
              * Since tag must be 16, we hardcode it.
@@ -157,8 +156,6 @@ cleanup:
     return status;
 }
 
-/* TODO: Figure out best strategy for cc310 vs cc312 */
-
 /** \defgroup internal_chacha20_poly1305 Internal Chacha20-Poly1305 functions
  *
  *  Internal functions used by the driver to perform AEAD using Chacha20-Poly1305 mode
@@ -181,14 +178,10 @@ psa_status_t cc3xx_encrypt_chacha20_poly1305(
      */
     uint8_t *tag = ciphertext + plaintext_length;
 
-    if (nonce_length != CHACHA_IV_96_SIZE_BYTES){
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
     status = chacha20_poly1305_crypt_and_tag(
         CRYPTO_DIRECTION_ENCRYPT, key_buffer, key_buffer_size, plaintext_length,
-        nonce, additional_data, additional_data_length, plaintext, ciphertext,
-        ciphertext_length, tag);
+        nonce, nonce_length, additional_data, additional_data_length, plaintext, ciphertext,
+        ciphertext_length, tag, ciphertext_size - plaintext_length);
     return status;
 }
 
@@ -216,23 +209,17 @@ psa_status_t cc3xx_decrypt_chacha20_poly1305(
 
     CC_PalMemCopy(local_tag_buffer, tag, tag_length);
 
-    if (nonce_length != CHACHA_IV_96_SIZE_BYTES){
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
     status = chacha20_poly1305_crypt_and_tag(
         CRYPTO_DIRECTION_DECRYPT, key_buffer, key_buffer_size,
-        ciphertext_length_without_tag, nonce, additional_data,
+        ciphertext_length_without_tag, nonce, nonce_length, additional_data,
         additional_data_length, ciphertext, plaintext, plaintext_length,
-        local_tag_buffer);
+        local_tag_buffer, PSA_AEAD_TAG_MAX_SIZE);
 
     /* Check tag in "constant-time" */
     for (diff = 0, i = 0; i < sizeof(tag_length); i++)
         diff |= tag[i] ^ local_tag_buffer[i];
 
     if (diff != 0) {
-        /* TODO: Do we really want to zeroize the entire userbuffer, not the
-         * affected parts? */
         CC_PalMemSetZero(plaintext, plaintext_size);
         return (PSA_ERROR_INVALID_SIGNATURE);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -38,15 +38,21 @@ void cc3xx_chacha20_free(ChachaContext_t *ctx);
  */
 psa_status_t cc3xx_chacha20_setkey(
         ChachaContext_t *ctx,
-        const uint8_t key[CHACHA_256_BIT_KEY_SIZE]);
+        const uint8_t *key,
+        size_t key_size);
 
 /**
- * \brief   Set the nonce and initial counter value.
+ * \brief   Set the nonce.
  */
-psa_status_t cc3xx_chacha20_starts(
-        ChachaContext_t *ctx,
-        const uint8_t nonce[CHACHA_IV_96_SIZE_BYTES],
-        uint32_t counter);
+psa_status_t cc3xx_chacha20_set_nonce(ChachaContext_t *ctx,
+                                      const uint8_t *nonce,
+                                      size_t nonce_size);
+
+/**
+ * \brief   Set the initial counter value.
+ */
+psa_status_t cc3xx_chacha20_set_counter(ChachaContext_t *ctx,
+                                        uint32_t counter);
 
 /**
  * \brief   Encrypt/decrypt data.
@@ -55,7 +61,7 @@ psa_status_t cc3xx_chacha20_update(
         ChachaContext_t *ctx,
         size_t size,
         const uint8_t *input,
-        unsigned char *output);
+        uint8_t *output);
 
 #ifdef __cplusplus
 }

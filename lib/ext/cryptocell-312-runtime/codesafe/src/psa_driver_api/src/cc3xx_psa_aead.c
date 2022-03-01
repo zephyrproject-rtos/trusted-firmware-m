@@ -55,6 +55,8 @@ static psa_status_t check_alg(psa_algorithm_t alg, psa_algorithm_t *ref_alg)
     case PSA_ALG_CHACHA20_POLY1305:
         if (tag_length != 16) {
             return PSA_ERROR_NOT_SUPPORTED;
+        } else {
+            return PSA_SUCCESS;
         }
     default:
         return PSA_ERROR_NOT_SUPPORTED;

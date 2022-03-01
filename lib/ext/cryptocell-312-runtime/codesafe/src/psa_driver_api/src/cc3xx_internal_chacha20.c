@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,6 +33,8 @@ void cc3xx_chacha20_init(ChachaContext_t *ctx)
         return;
     }
 
+    CC_PalMemSet(ctx, 0, sizeof(ChachaContext_t));
+
     ctx->inputDataAddrType  = DLLI_ADDR;
     ctx->outputDataAddrType = DLLI_ADDR;
 }
@@ -49,15 +51,10 @@ void cc3xx_chacha20_free(ChachaContext_t *ctx)
 
 psa_status_t cc3xx_chacha20_setkey(
         ChachaContext_t *ctx,
-        const uint8_t key[CHACHA_256_BIT_KEY_SIZE])
+        const uint8_t *key,
+        size_t key_size)
 {
-    if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (NULL == key) {
-        CC_PAL_LOG_ERR("key cannot be NULL\n");
+    if (ctx == NULL || key == NULL || key_size != CHACHA_256_BIT_KEY_SIZE) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -66,25 +63,25 @@ psa_status_t cc3xx_chacha20_setkey(
     return PSA_SUCCESS;
 }
 
-psa_status_t cc3xx_chacha20_starts(
-        ChachaContext_t *ctx,
-        const uint8_t nonce[CHACHA_IV_96_SIZE_BYTES],
-        uint32_t counter)
+psa_status_t cc3xx_chacha20_set_nonce(ChachaContext_t *ctx,
+                                      const uint8_t *nonce,
+                                      size_t nonce_size)
 {
-    if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+    if (ctx == NULL || nonce == NULL || nonce_size != CHACHA_IV_96_SIZE_BYTES) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
-
-    if (nonce == NULL) {
-        CC_PAL_LOG_ERR("nonce cannot be NULL\n");
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
     ctx->nonceSize = NONCE_SIZE_96;
-
     CC_PalMemCopy(ctx->nonceBuf, nonce, CHACHA_IV_96_SIZE_BYTES);
 
+    return PSA_SUCCESS;
+}
+
+psa_status_t cc3xx_chacha20_set_counter(ChachaContext_t *ctx,
+                                        uint32_t counter)
+{
+    if (ctx == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
     ctx->blockCounterLsb = counter;
     ctx->blockCounterMsb = 0;
 
@@ -95,7 +92,7 @@ psa_status_t cc3xx_chacha20_update(
         ChachaContext_t *ctx,
         size_t size,
         const uint8_t *input,
-        unsigned char *output)
+        uint8_t *output)
 {
     drvError_t drvRc;
     CCBuffInfo_t inBuffInfo;
