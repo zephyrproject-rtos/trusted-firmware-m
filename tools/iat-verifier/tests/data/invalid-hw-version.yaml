@@ -9,7 +9,7 @@ instance_id: !!binary AQcGBQQDAgEADw4NDAsKCQgXFhUUExIREB8eHRwbGhkY
 implementation_id: !!binary BwYFBAMCAQAPDg0MCwoJCBcWFRQTEhEQHx4dHBsaGRg=
 challenge: !!binary BwYFBAMCAQAPDg0MCwoJCBcWFRQTEhEQHx4dHBsaGRg=
 client_id: 2
-hardware_version: '1234567890123'
+hardware_version: ' 23-56789a'
 security_lifecycle: sl_secured
 profile_id: http://example.com
 boot_seed: !!binary BwYFBAMCAQAPDg0MCwoJCBcWFRQTEhEQHx4dHBsaGRg=

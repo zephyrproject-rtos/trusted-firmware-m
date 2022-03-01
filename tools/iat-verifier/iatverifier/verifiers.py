@@ -6,6 +6,7 @@
 # -----------------------------------------------------------------------------
 
 import logging
+import string
 
 import cbor2
 
@@ -160,12 +161,30 @@ class ImplementationIdClaim(NonVerifiedClaim):
         return 'IMPLEMENTATION_ID'
 
 
-class HardwareVersionClaim(NonVerifiedClaim):
+class HardwareVersionClaim(AttestationClaim):
+    def verify(self, value):
+        self._check_type('HARDWARE_VERSION', value, str)
+
+        value_len = len(value)
+        expected_len = 13
+        if len(value) != expected_len:
+            msg = 'Invalid HARDWARE_VERSION length; must be {} digits, found {} characters'
+            self.verifier.error(msg.format(expected_len, value_len))
+        for idx, character in enumerate(value):
+            if character not in string.digits:
+                msg = 'Invalid digit {} at position {}'
+                self.verifier.error(msg.format(character, idx+1))
+
+        self.verify_count += 1
+
     def get_claim_key(self=None):
         return ARM_RANGE - 5
 
     def get_claim_name(self=None):
         return 'HARDWARE_VERSION'
+
+    def is_utf_8(self):
+        return True
 
 
 class OriginatorClaim(NonVerifiedClaim):

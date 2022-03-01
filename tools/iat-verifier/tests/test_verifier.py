@@ -58,6 +58,8 @@ class TestIatVerifier(unittest.TestCase):
         self.assertIn('Bad signature', cm.exception.args[0])
 
     def test_validate_iat_structure(self):
+        keep_going_conf = VerifierConfiguration(keep_going=True)
+
         iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
 
         with self.assertRaises(ValueError) as cm:
@@ -87,7 +89,6 @@ class TestIatVerifier(unittest.TestCase):
                          cm.records[0].getMessage())
 
         with self.assertLogs() as cm:
-            keep_going_conf = VerifierConfiguration(keep_going=True)
             iat = create_and_read_iat('invalid-type-length.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(keep_going_conf))
             self.assertIn("Invalid PROFILE_ID: must be a(n) <class 'str'>: found <class 'int'>",
                          cm.records[0].getMessage())
@@ -98,6 +99,16 @@ class TestIatVerifier(unittest.TestCase):
             self.assertIn("Invalid MEASUREMENT length: must be at least 32 bytes, found 28 bytes",
                          cm.records[3].getMessage())
 
+        with self.assertLogs() as cm:
+            iat = create_and_read_iat('invalid-hw-version.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(keep_going_conf))
+            self.assertIn("Invalid HARDWARE_VERSION length; must be 13 digits, found 10 characters",
+                         cm.records[0].getMessage())
+            self.assertIn("Invalid digit   at position 1",
+                         cm.records[1].getMessage())
+            self.assertIn("Invalid digit - at position 4",
+                         cm.records[2].getMessage())
+            self.assertIn("Invalid digit a at position 10",
+                         cm.records[3].getMessage())
 
     def test_binary_string_decoding(self):
         iat = create_and_read_iat('valid-iat.yaml', KEYFILE, PSAIoTProfile1TokenVerifier.get_verifier(self.config))
