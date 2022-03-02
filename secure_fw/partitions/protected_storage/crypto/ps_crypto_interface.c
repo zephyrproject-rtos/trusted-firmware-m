@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -62,14 +62,20 @@ psa_status_t ps_crypto_setkey(const uint8_t *key_label, size_t key_label_len)
     psa_set_key_type(&attributes, PS_KEY_TYPE);
     psa_set_key_bits(&attributes, PSA_BYTES_TO_BITS(PS_KEY_LEN_BYTES));
 
-    /* Set up a key derivation operation with HUK derivation as the alg */
-    status = psa_key_derivation_setup(&op, TFM_CRYPTO_ALG_HUK_DERIVATION);
+    status = psa_key_derivation_setup(&op, PSA_ALG_HKDF(PSA_ALG_SHA_256));
     if (status != PSA_SUCCESS) {
         return status;
     }
 
+    /* Set up a key derivation operation with HUK  */
+    status = psa_key_derivation_input_key(&op, PSA_KEY_DERIVATION_INPUT_SECRET,
+                                          TFM_BUILTIN_KEY_ID_HUK);
+    if (status != PSA_SUCCESS) {
+        goto err_release_op;
+    }
+
     /* Supply the PS key label as an input to the key derivation */
-    status = psa_key_derivation_input_bytes(&op, PSA_KEY_DERIVATION_INPUT_LABEL,
+    status = psa_key_derivation_input_bytes(&op, PSA_KEY_DERIVATION_INPUT_INFO,
                                             key_label,
                                             key_label_len);
     if (status != PSA_SUCCESS) {

@@ -23,9 +23,10 @@ code or Trusted hardware that acts on behalf of Trusted code. [TBSA-M]_
 Design description
 ==================
 Each time the system boots, PS will request that the Crypto service uses a key
-derivation function (KDF) to derive a storage key from the HUK. The storage key
-could be kept in on-chip volatile memory private to the Crypto partition, or it
-could remain inside a secure element. Either way it will not be returned to PS.
+derivation function (KDF) to derive a storage key from the HUK, by referring to
+the builtin key handle for the HUK. The storage key could be kept in on-chip
+volatile memory private to the Crypto partition, or it could remain inside a
+secure element. Either way it will not be returned to PS.
 
 For each call to the PSA Protected Storage APIs, PS will make requests to the
 Crypto service to perform AEAD encryption and/or decryption operations using the
@@ -42,48 +43,36 @@ required:
 
 .. code-block:: c
 
-    static psa_key_id_t ps_key;
+    status = psa_key_derivation_setup(&op, PSA_ALG_HKDF(PSA_ALG_SHA_256));
 
-    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-    psa_key_derivation_operation_t op = PSA_KEY_DERIVATION_OPERATION_INIT;
-
-    /* Set the key attributes for the storage key */
-    psa_set_key_usage_flags(&attributes, PS_KEY_USAGE);
-    psa_set_key_algorithm(&attributes,
-                          PSA_ALG_AEAD_WITH_SHORTENED_TAG(PS_CRYPTO_AEAD_ALG,
-                                                          PS_TAG_LEN_BYTES));
-    psa_set_key_type(&attributes, PSA_KEY_TYPE_AES);
-    psa_set_key_bits(&attributes, PSA_BYTES_TO_BITS(PS_KEY_LEN_BYTES));
-
-    /* Set up a key derivation operation with HUK derivation as the alg */
-    psa_key_derivation_setup(&op,
-                             TFM_CRYPTO_ALG_HUK_DERIVATION);
+    /* Set up a key derivation operation with HUK  */
+    status = psa_key_derivation_input_key(&op, PSA_KEY_DERIVATION_INPUT_SECRET,
+                                          TFM_BUILTIN_KEY_ID_HUK);
 
     /* Supply the PS key label as an input to the key derivation */
-    status = psa_key_derivation_input_bytes(&op,
-                                            PSA_KEY_DERIVATION_INPUT_LABEL,
+    status = psa_key_derivation_input_bytes(&op, PSA_KEY_DERIVATION_INPUT_INFO,
                                             key_label,
                                             key_label_len);
 
     /* Create the storage key from the key derivation operation */
-    status = psa_key_derivation_output_key(&attributes,
-                                           &op,
-                                           &ps_key);
+    status = psa_key_derivation_output_key(&attributes, &op, &ps_key);
 
 .. note::
-    ``key_label`` is combined with client ID and UID in the PS crypto ref
-    structure.
+    ``TFM_BUILTIN_KEY_ID_HUK`` is a static key ID that is used to identify the
+    HUK. It has an arbitrary value defined in ``tfm_crypto_defs.h``
 
-In the call to ``psa_key_derivation_setup()``, ``TFM_CRYPTO_ALG_HUK_DERIVATION``
-is supplied as the key derivation algorithm argument. The algorithm identifier
-refers to key derivation from the HUK and it can be implemented in a
-platform-defined way (e.g. using a crypto accelerator). The system integrator
-should choose the most optimal algorithm for the platform, or fall back to the
-software implementation if none is available.
+    ``ps_key`` is a PSA Crypto key handle to a volatile key, set by the
+    derivation operation. After the call to ``psa_key_derivation_output_key``,
+    it can be used to refer the storage key.
 
-When implemented in software, the key derivation function used by the crypto
-service to derive the storage key will be HKDF, with SHA-256 as the underlying
-hash function. HKDF is suitable because:
+    ``key_label`` can be any string that is independent of the input key
+    material and different to the label used in any other derivation from the
+    same input key. It prevents two different contexts from deriving the same
+    output key from the same input key.
+
+The key derivation function used by the crypto service to derive the storage key
+will be HKDF, with SHA-256 as the underlying hash function. HKDF is suitable
+because:
 
 - It is simple and efficient, requiring only two HMAC operations when the length
   of the output key material is less than or equal to the hash length (as is the
@@ -102,32 +91,12 @@ the family, SHA-256 is the simplest and provides more than enough output length.
 
 Keeping the storage key private to PS
 -------------------------------------
-The salt and label fields are not generally secret, so an Application RoT
-service could request the Crypto service to derive the same storage key from the
-HUK, which violates isolation between Application RoT partitions to some extent.
-This could be fixed in a number of ways:
 
-- Only PSA RoT partitions can request Crypto to derive keys from the HUK.
-
-  - But then either PS has to be in the PSA RoT or request a service in the PSA
-    RoT to do the derivation on its behalf.
-
-- PS has a secret (pseudo)random salt, accessible only to it, that it uses to
-  derive the storage key.
-
-  - Where would this salt be stored? It cannot be generated fresh each boot
-    because the storage key must stay the same across reboots.
-
-- The Crypto service appends the partition ID to the label, so that no two
-  partitions can derive the same key.
-
-  - Still need to make sure only PSA RoT partitions can directly access the HUK
-    or Secure Enclave. The label is not secret, so any actor that can access the
-    HUK could simply perform the derivation itself, rather than making a request
-    to the Crypto service.
-
-The third option would solve the issue with the fewest drawbacks, so this option
-is the one that is proposed.
+The Crypto service derives a platform key from the HUK, using the partition ID
+as the input to that derivation, and that platform key is used for the key
+derivation by PS. This happens transparently, and to PS is indistinguishable
+from deriving from the HUK except that other partitions cannot derive the
+storage key even if they know the derivation parameters.
 
 Key use
 =======
