@@ -22,9 +22,9 @@ static psa_flih_result_t tfm_flih_deprivileged_handling(void *p_pt,
                                                         uintptr_t fn_flih,
                                                         void *curr_component)
 {
-    __ASM volatile("SVC %0           \n"
-                   "BX LR            \n"
-                   : : "I" (TFM_SVC_PREPARE_DEPRIV_FLIH));
+    __ASM volatile("SVC "M2S(TFM_SVC_PREPARE_DEPRIV_FLIH)"           \n"
+                   "BX LR                                            \n"
+                   );
 }
 
 struct irq_load_info_t *get_irq_info_for_signal(
