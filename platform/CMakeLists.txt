@@ -25,6 +25,10 @@ if (BL1 AND PLATFORM_DEFAULT_BL1)
     add_library(platform_bl1_interface INTERFACE)
 endif()
 
+if (TFM_PARTITION_CRYPTO)
+    add_library(platform_crypto_keys STATIC)
+endif()
+
 set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 add_subdirectory(ext/target/${TFM_PLATFORM} target)
@@ -58,7 +62,6 @@ target_sources(platform_s
         ext/common/tfm_hal_memory_symbols.c
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:ext/common/template/attest_hal.c>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
-        $<$<AND:$<BOOL:${TFM_PARTITION_CRYPTO}>,$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>>:ext/common/template/crypto_keys.c>
         $<$<BOOL:${PLATFORM_DEFAULT_ROTPK}>:ext/common/template/tfm_rotpk.c>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_SEED}>:ext/common/template/crypto_nv_seed.c>
         $<$<AND:$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${TEST_S_ATTESTATION}>>:ext/common/template/tfm_initial_attest_pub_key.c>
@@ -88,6 +91,7 @@ target_link_libraries(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:tfm_sprt>
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:crypto_service_mbedcrypto>
         $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:tfm_attestation_defs>
+        platform_crypto_keys
 )
 
 target_compile_definitions(platform_s
@@ -103,6 +107,7 @@ target_compile_definitions(platform_s
         $<$<STREQUAL:${CONFIG_TFM_FP},soft>:CONFIG_TFM_FP=0>
         $<$<BOOL:${CONFIG_TFM_LAZY_STACKING}>:CONFIG_TFM_LAZY_STACKING>
         $<$<BOOL:${CONFIG_TFM_ENABLE_FPU}>:CONFIG_TFM_ENABLE_FPU>
+        $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
     PRIVATE
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
@@ -117,6 +122,35 @@ target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CP_FLAG}
 )
+
+#========================= Platform Crypto Keys ===============================#
+
+
+if(TFM_PARTITION_CRYPTO)
+    target_sources(platform_crypto_keys
+        PRIVATE
+            $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:ext/common/template/crypto_keys.c>
+    )
+
+    target_link_libraries(platform_crypto_keys
+        PRIVATE
+            crypto_service_mbedcrypto
+            tfm_psa_rot_partition_crypto
+            platform_region_defs
+            tfm_partition_defs
+    )
+
+    target_include_directories(platform_crypto_keys
+        PRIVATE
+            $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:${CMAKE_SOURCE_DIR}/interface/include/crypto_keys>
+            $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:${CMAKE_BINARY_DIR}/generated/interface/include>
+    )
+
+    target_compile_definitions(platform_crypto_keys
+        PRIVATE
+            $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
+    )
+endif()
 
 #========================= Platform BL2 =======================================#
 if(BL2)

@@ -16,6 +16,11 @@ extern "C" {
 #include <limits.h>
 #include "tfm_api.h"
 #include "psa/crypto.h"
+#ifdef PLATFORM_DEFAULT_CRYPTO_KEYS
+#include "crypto_keys/tfm_builtin_key_ids.h"
+#else
+#include "tfm_builtin_key_ids.h"
+#endif /* PLATFORM_DEFAULT_CRYPTO_KEYS */
 
 /**
  * \brief This type is used to overcome a limitation in the number of maximum
@@ -262,19 +267,6 @@ enum tfm_crypto_func_sid {
  *
  */
 #define TFM_CRYPTO_INVALID_HANDLE (0x0u)
-
-/**
- * \brief The persistent key identifier that refers to the hardware unique key.
- *
- */
-#define TFM_CRYPTO_KEY_ID_HUK (0xFFFF815Bu)
-
-/**
- * \brief The algorithm identifier that refers to key derivation from the
- *        hardware unique key.
- *
- */
-#define TFM_CRYPTO_ALG_HUK_DERIVATION ((psa_algorithm_t)0xB0000F00)
 
 /**
  * \brief Define miscellaneous literal constants that are used in the service

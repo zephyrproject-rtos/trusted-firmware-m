@@ -216,8 +216,6 @@ Service interface definitions
 - **Crypto interface**:
     - ``t_cose_crypto.h``: Expose an API to bind the ``t_cose`` implementation
       to any cryptographic library.
-    - ``tfm_plat_crypto_keys.h``: Expose an API to get the attestation key from
-      platform layer.
 
 PSA interface
 =============
@@ -440,20 +438,10 @@ Key handling
 ^^^^^^^^^^^^
 The provisioning of the initial attestation key is out of scope of the service
 and this document. It is assumed that device maker provisions the unique
-asymmetric key pair during the manufacturing process. The following API is
-defined to retrieve the attestation key pair from platform layer. Software
-integrators **must** port this interface according to their SoC design and make
-sure that key pair is available by Crypto service:
-
-- ``tfm_plat_get_initial_attest_key()``: Retrieve the initial attestation key
-  pair from platform layer.
-
-In TF-M project the attestation key is retrieved by initial attestation service.
-The key is registered and unregistered to the Crypto service by attestation
-service with ``psa_import_key()`` and ``psa_destroy_key()`` API calls for
-further usage. See in ``attestation_key.c``. In other implementation if the
-attestation key is directly retrieved by the Crypto service then this key
-handling is not necessary.
+asymmetric key pair during the manufacturing process. Software integrators
+**must** make sure that ``TFM_BUILTIN_KEY_SLOT_IAK`` is available via the Crypto
+service, which will then be used by the Attestation partition to perform the
+required signing operations via the PSA crypto interface.
 
 Symmetric key algorithm based attestation
 -----------------------------------------

@@ -27,6 +27,8 @@ target_sources(tfm_psa_rot_partition_crypto
         crypto_key_derivation.c
         crypto_key_management.c
         crypto_rng.c
+        tfm_mbedcrypto_builtin_keys.c
+        $<$<BOOL:CRYPTO_TFM_BUILTIN_KEYS_DRIVER>:psa_driver_api/tfm_builtin_key_loader.c>
 )
 
 # The generated sources
@@ -72,6 +74,9 @@ target_compile_definitions(tfm_psa_rot_partition_crypto
         $<$<BOOL:${CRYPTO_ASYM_SIGN_MODULE_DISABLED}>:TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED>
         $<$<BOOL:${CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED}>:TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED>
         $<$<BOOL:${CRYPTO_KEY_DERIVATION_MODULE_DISABLED}>:TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED>
+        MBEDTLS_PSA_CRYPTO_DRIVERS
+        MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
+        $<$<BOOL:CRYPTO_BUILTIN_KEYS>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY>
     PRIVATE
         $<$<BOOL:${CRYPTO_ENGINE_BUF_SIZE}>:TFM_CRYPTO_ENGINE_BUF_SIZE=${CRYPTO_ENGINE_BUF_SIZE}>
         $<$<BOOL:${CRYPTO_CONC_OPER_NUM}>:TFM_CRYPTO_CONC_OPER_NUM=${CRYPTO_CONC_OPER_NUM}>
@@ -142,6 +147,10 @@ target_compile_definitions(crypto_service_mbedcrypto_config
         $<$<OR:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>
         $<$<BOOL:${CRYPTO_NV_SEED}>:CRYPTO_NV_SEED>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_SEED}>:PLATFORM_DEFAULT_NV_SEED>
+        $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
+        MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
+        MBEDTLS_PSA_CRYPTO_DRIVERS
+        $<$<BOOL:CRYPTO_TFM_BUILTIN_KEYS_DRIVER>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY_LOADER>
 )
 cmake_policy(SET CMP0079 NEW)
 
@@ -175,6 +184,7 @@ endif()
 target_include_directories(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/psa_driver_api
 )
 
 # Fix platform_s and crypto_service_mbedcrypto libraries cyclic linking

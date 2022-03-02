@@ -39,6 +39,7 @@ target_compile_definitions(platform_ns
         $<$<STREQUAL:${CONFIG_TFM_FP},soft>:CONFIG_TFM_FP=0>
         $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
         $<$<BOOL:${CONFIG_TFM_ENABLE_FPU}>:CONFIG_TFM_ENABLE_FPU>
+        $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
     PRIVATE
         $<$<BOOL:${TEST_NS_SLIH_IRQ}>:TEST_NS_SLIH_IRQ>
 )

@@ -12,6 +12,7 @@
 #include "tfm_crypto_defs.h"
 #include "tfm_sp_log.h"
 #include "crypto_check_config.h"
+#include "tfm_plat_crypto_keys.h"
 
 /*
  * \brief This Mbed TLS include is needed to initialise the memory allocator
@@ -345,6 +346,7 @@ static psa_status_t tfm_crypto_module_init(void)
 psa_status_t tfm_crypto_init(void)
 {
     psa_status_t status;
+    enum tfm_plat_err_t plat_err;
 
     /* Initialise other modules of the service */
     status = tfm_crypto_module_init();
@@ -353,7 +355,17 @@ psa_status_t tfm_crypto_init(void)
     }
 
     /* Initialise the engine layer */
-    return tfm_crypto_engine_init();
+    status =  tfm_crypto_engine_init();
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    plat_err = tfm_plat_load_builtin_keys();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+
+    return PSA_SUCCESS;
 }
 
 #ifdef TFM_PSA_API
