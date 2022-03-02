@@ -176,9 +176,8 @@ Service source files
       of APIs, retrieval of claims and token creation.
     - ``attest_token_encode.c``: Implements the token creation functions such as
       start and finish token creation and adding claims to the token.
-    - ``attest_asymmetric_key.c``: Get the asymmetric attestation key from
-      platform layer and register it to the TF-M Crypto service for further
-      usage.
+    - ``attest_asymmetric_key.c``: Calculate the Instance ID value based on
+      asymmetric initial attestation key.
     - ``tfm_attest.c``: Implements the SPM abstraction layer, and bind the
       attestation service to the SPM implementation in TF-M project.
     - ``tfm_attest_secure_api.c``: Implements the secure API layer to allow
@@ -187,10 +186,8 @@ Service source files
     - ``tfm_attest_req_mngr.c``: Includes the initialization entry of
       attestation service and handles attestation service requests in IPC
       model.
-    - ``attest_symmetric_key.c``: Get the symmetric initial attestation key
-      from platform layer and register it into TF-M Crypto service for further
-      usage. Also calculate the Instance ID value based on symmetric initial
-      attestation key.
+    - ``attest_symmetric_key.c``: Calculate the Instance ID value based on
+      symmetric initial attestation key.
 
 Service interface definitions
 =============================

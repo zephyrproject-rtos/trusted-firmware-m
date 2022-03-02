@@ -19,16 +19,9 @@
 #include "attest_token.h"
 #include "attest_iat_defines.h"
 #include "t_cose_common.h"
-#include "tfm_plat_crypto_keys.h"
+#include "tfm_crypto_defs.h"
 
 #define ARRAY_LENGTH(array) (sizeof(array) / sizeof(*(array)))
-
-/* The algorithm used in COSE */
-#ifdef SYMMETRIC_INITIAL_ATTESTATION
-#define T_COSE_ALGORITHM              T_COSE_ALGORITHM_HMAC256
-#else
-#define T_COSE_ALGORITHM              T_COSE_ALGORITHM_ES256
-#endif
 
 /*!
  * \brief Static function to map return values between \ref psa_attest_err_t
@@ -574,6 +567,60 @@ static void attest_get_option_flags(struct q_useful_buf_c *challenge,
     };
 #endif
 
+static enum psa_attest_err_t attest_get_t_cose_algorithm(
+        int32_t *cose_algorithm_id)
+{
+    psa_status_t status;
+    psa_key_attributes_t attr;
+    psa_key_handle_t handle = TFM_BUILTIN_KEY_ID_IAK;
+    psa_key_type_t key_type;
+
+    status = psa_get_key_attributes(handle, &attr);
+    if (status != PSA_SUCCESS) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    key_type = psa_get_key_type(&attr);
+    if (status != PSA_SUCCESS) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    if (PSA_KEY_TYPE_IS_ECC(key_type) &&
+        PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_FAMILY_SECP_R1) {
+        switch (psa_get_key_bits(&attr)) {
+        case 256:
+            *cose_algorithm_id = T_COSE_ALGORITHM_ES256;
+            break;
+        case 384:
+            *cose_algorithm_id = T_COSE_ALGORITHM_ES384;
+            break;
+        case 512:
+            *cose_algorithm_id = T_COSE_ALGORITHM_ES512;
+            break;
+        default:
+            return PSA_ATTEST_ERR_GENERAL;
+        }
+    } else if (key_type == PSA_KEY_TYPE_HMAC) {
+        switch (psa_get_key_bits(&attr)) {
+        case 256:
+            *cose_algorithm_id = T_COSE_ALGORITHM_HMAC256;
+            break;
+        case 384:
+            *cose_algorithm_id = T_COSE_ALGORITHM_HMAC384;
+            break;
+        case 512:
+            *cose_algorithm_id = T_COSE_ALGORITHM_HMAC512;
+            break;
+        default:
+            return PSA_ATTEST_ERR_GENERAL;
+        }
+    } else {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
 /*!
  * \brief Static function to create the initial attestation token
  *
@@ -597,23 +644,24 @@ attest_create_token(struct q_useful_buf_c *challenge,
     int32_t key_select = 0;
     uint32_t option_flags = 0;
     int i;
-
-    attest_err = attest_register_initial_attestation_key();
-    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-        goto error;
-    }
+    int32_t cose_algorithm_id;
 
 #ifdef INCLUDE_TEST_CODE /* Remove them from release build */
     attest_get_option_flags(challenge, &option_flags, &key_select);
 #endif
 
+    attest_err = attest_get_t_cose_algorithm(&cose_algorithm_id);
+    if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+        return attest_err;
+    }
+
     /* Get started creating the token. This sets up the CBOR and COSE contexts
      * which causes the COSE headers to be constructed.
      */
     token_err = attest_token_encode_start(&attest_token_ctx,
-                                          option_flags,     /* option_flags */
-                                          key_select,       /* key_select   */
-                                          T_COSE_ALGORITHM, /* alg_select   */
+                                          option_flags,      /* option_flags */
+                                          key_select,        /* key_select   */
+                                          cose_algorithm_id, /* alg_select   */
                                           token);
 
     if (token_err != ATTEST_TOKEN_ERR_SUCCESS) {
@@ -641,20 +689,9 @@ attest_create_token(struct q_useful_buf_c *challenge,
      * is generated. This finishes up the CBOR encoding too.
      */
     token_err = attest_token_encode_finish(&attest_token_ctx, completed_token);
-    if (token_err) {
-        attest_err = error_mapping_to_psa_attest_err_t(token_err);
-        goto error;
-    }
+    attest_err = error_mapping_to_psa_attest_err_t(token_err);
 
 error:
-    if (attest_err == PSA_ATTEST_ERR_SUCCESS) {
-        /* We got here normally and therefore care about error codes. */
-        attest_err = attest_unregister_initial_attestation_key();
-    }
-    else {
-        /* Error handler: just remove they key and preserve error. */
-        (void)attest_unregister_initial_attestation_key();
-    }
     return attest_err;
 }
 
