@@ -102,6 +102,7 @@ target_sources(platform_s
         device/source/system_core_init.c
         native_drivers/atu_rss_drv.c
         native_drivers/mhu_v2_x.c
+        native_drivers/mhu_wrapper_v2_x.c
         native_drivers/mpc_sie_drv.c
         native_drivers/mpu_armv8m_drv.c
         native_drivers/ppc_rss_drv.c
