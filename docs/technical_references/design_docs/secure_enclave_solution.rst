@@ -66,11 +66,12 @@ point of view all Host images, Host's RAM and shared memory between Host and
 Secure Enclave if present are treated as non-secure. (Just like in the Dual CPU
 solution.) But the clients need to be distinguished, otherwise some
 functionalities are not working, for example:
+
 - Protected Storage partition shall run on Host, but the PS area is handled by
-Internal Trusted Storage partition (running on Secure Enclave). ITS partition
-decides whether it should work on PS or ITS assets by checking the client ID.
+  Internal Trusted Storage partition (running on Secure Enclave). ITS partition
+  decides whether it should work on PS or ITS assets by checking the client ID.
 - If a secure partition on host creates a crypto key, no other client shall be
-able to destroy it.
+  able to destroy it.
 
 Communication
 =============
@@ -118,4 +119,4 @@ PSA Proxy partition.
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*
