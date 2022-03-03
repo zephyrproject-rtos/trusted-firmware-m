@@ -10,7 +10,6 @@ import string
 
 import cbor2
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)8s: %(message)s')
 logger = logging.getLogger('iat-verifiers')
 
 # IAT custom claims
@@ -471,7 +470,7 @@ class AttestationTokenVerifier:
     COSE_ALG_HS384="HS384"
     COSE_ALG_HS512="HS512"
 
-    def __init__(self, method, cose_alg, configuration=None, ):
+    def __init__(self, method, cose_alg, configuration=None):
         self.method = method
         self.cose_alg = cose_alg
         self.config = configuration if configuration is not None else VerifierConfiguration()
@@ -548,6 +547,13 @@ class AttestationTokenVerifier:
 
         return token
 
+
+    def get_wrapping_tag(self=None):
+        """The value of the tag that the token is wrapped in.
+
+        The function should return None if the token is not wrapped.
+        """
+        return None
 
     def error(self, message):
         self.seen_errors = True

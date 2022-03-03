@@ -7,6 +7,7 @@
 
 from collections.abc import Iterable
 from copy import deepcopy
+import logging
 
 import base64
 import cbor2
@@ -15,6 +16,9 @@ from ecdsa import SigningKey, VerifyingKey
 from pycose.sign1message import Sign1Message
 from pycose.mac0message import Mac0Message
 from iatverifier.verifiers import AttestationTokenVerifier
+from cbor2 import CBORTag
+
+_logger = logging.getLogger("util")
 
 def sign_eat(token, key=None):
     signed_msg = Sign1Message()
@@ -42,11 +46,15 @@ def convert_map_to_token_files(mapfile, keyfile, verifier, outfile):
             signing_key = fh.read()
 
     with open(outfile, 'wb') as wfh:
-        convert_map_to_token(token_map, signing_key, verifier, wfh,)
+        convert_map_to_token(token_map, signing_key, verifier, wfh)
 
 
 def convert_map_to_token(token_map, signing_key, verifier, wfh):
-    token = cbor2.dumps(token_map)
+    wrapping_tag = verifier.get_wrapping_tag()
+    if wrapping_tag is not None:
+        token = cbor2.dumps(CBORTag(wrapping_tag, token_map))
+    else:
+        token = cbor2.dumps(token_map)
 
     if verifier.method == AttestationTokenVerifier.SIGN_METHOD_RAW:
         signed_token = token
@@ -170,6 +178,10 @@ def read_hmac_key(keyfile):
     return open(keyfile, 'rb').read()
 
 def _get_known_claims():
+    if logging.DEBUG >= logging.root.level:
+        _logger.debug("Known claims are:")
+        for _, claim_class in AttestationTokenVerifier.all_known_claims.items():
+            _logger.debug(f"    {claim_class.get_claim_key():8} '{claim_class.get_claim_name()}'")
     for _, claim_class in AttestationTokenVerifier.all_known_claims.items():
         yield claim_class
 
