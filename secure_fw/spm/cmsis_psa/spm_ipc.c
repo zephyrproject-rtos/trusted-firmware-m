@@ -164,18 +164,18 @@ struct conn_handle_t *tfm_spm_create_conn_handle(void)
     return p_handle;
 }
 
-int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle)
+psa_status_t tfm_spm_validate_conn_handle(const struct conn_handle_t *handle)
 {
     /* Check the handle address is valid */
     if (is_valid_chunk_data_in_pool(conn_handle_pool,
-                                    (uint8_t *)conn_handle) != true) {
+                                    (uint8_t *)handle) != true) {
         return SPM_ERROR_GENERIC;
     }
 
-    return SPM_SUCCESS;
+    return PSA_SUCCESS;
 }
 
-int32_t tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle)
+void tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
@@ -185,8 +185,6 @@ int32_t tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle)
     /* Back handle buffer to pool */
     tfm_pool_free(conn_handle_pool, conn_handle);
     CRITICAL_SECTION_LEAVE(cs_assert);
-
-    return SPM_SUCCESS;
 }
 
 /* Partition management functions */
@@ -284,7 +282,7 @@ int32_t tfm_spm_check_client_version(struct service_t *service,
     default:
         return SPM_ERROR_VERSION;
     }
-    return SPM_SUCCESS;
+    return PSA_SUCCESS;
 }
 
 int32_t tfm_spm_check_authorization(uint32_t sid,
@@ -318,7 +316,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
             return SPM_ERROR_GENERIC;
         }
     }
-    return SPM_SUCCESS;
+    return PSA_SUCCESS;
 }
 
 /* Message functions */
@@ -328,7 +326,7 @@ struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
 {
     struct conn_handle_t *p_conn_handle = tfm_spm_to_handle_instance(handle);
 
-    if (tfm_spm_validate_conn_handle(p_conn_handle) != SPM_SUCCESS) {
+    if (tfm_spm_validate_conn_handle(p_conn_handle) != PSA_SUCCESS) {
         return NULL;
     }
 
@@ -356,7 +354,7 @@ struct conn_handle_t *spm_get_handle_by_msg_handle(psa_handle_t msg_handle)
     struct conn_handle_t *p_conn_handle =
                                     tfm_spm_to_handle_instance(msg_handle);
 
-    if (tfm_spm_validate_conn_handle(p_conn_handle) != SPM_SUCCESS) {
+    if (tfm_spm_validate_conn_handle(p_conn_handle) != PSA_SUCCESS) {
         return NULL;
     }
 
@@ -433,16 +431,16 @@ int32_t tfm_spm_partition_get_running_partition_id(void)
     }
 }
 
-int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
-                         enum tfm_memory_access_e access,
-                         uint32_t privileged)
+psa_status_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
+                              enum tfm_memory_access_e access,
+                              uint32_t privileged)
 {
     enum tfm_hal_status_t err;
     uint32_t attr = 0;
 
     /* If len is zero, this indicates an empty buffer and base is ignored */
     if (len == 0) {
-        return SPM_SUCCESS;
+        return PSA_SUCCESS;
     }
 
     if (!buffer) {
@@ -472,7 +470,7 @@ int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
     err = tfm_hal_memory_has_access((uintptr_t)buffer, len, attr);
 
     if (err == TFM_HAL_SUCCESS) {
-        return SPM_SUCCESS;
+        return PSA_SUCCESS;
     }
 
     return SPM_ERROR_MEMORY_CHECK;

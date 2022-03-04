@@ -165,10 +165,10 @@ struct conn_handle_t *tfm_spm_create_conn_handle(void);
  *
  * \param[in] conn_handle   Handle to be validated
  *
- * \retval SPM_SUCCESS        Success
+ * \retval PSA_SUCCESS        Success
  * \retval SPM_ERROR_GENERIC  Invalid handle
  */
-int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle);
+psa_status_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle);
 
 /**
  * \brief                   Free connection handle which not used anymore.
@@ -176,11 +176,9 @@ int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle);
  * \param[in] conn_handle   Connection handle created by
  *                          tfm_spm_create_conn_handle()
  *
- * \retval SPM_SUCCESS      Success
- * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find service by handle
  */
-int32_t tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle);
+void tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle);
 
 /******************** Partition management functions *************************/
 
@@ -287,7 +285,7 @@ void spm_fill_message(struct conn_handle_t *conn_handle,
  *                          by partition management functions
  * \param[in] version       Client support version
  *
- * \retval SPM_SUCCESS      Success
+ * \retval PSA_SUCCESS      Success
  * \retval SPM_ERROR_BAD_PARAMETERS Bad parameters input
  * \retval SPM_ERROR_VERSION Check failed
  */
@@ -302,7 +300,7 @@ int32_t tfm_spm_check_client_version(struct service_t *service,
  *                          by partition management functions
  * \param[in] ns_caller     Whether from NS caller
  *
- * \retval SPM_SUCCESS      Success
+ * \retval PSA_SUCCESS      Success
  * \retval SPM_ERROR_GENERIC Authorization check failed
  */
 int32_t tfm_spm_check_authorization(uint32_t sid,
@@ -321,13 +319,13 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
  *                             \ref TFM_PARTITION_UNPRIVILEGED_MODE
  *                             \ref TFM_PARTITION_PRIVILEGED_MODE
  *
- * \retval SPM_SUCCESS               Success
+ * \retval PSA_SUCCESS               Success
  * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval SPM_ERROR_MEMORY_CHECK    Check failed
  */
-int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
-                         enum tfm_memory_access_e access,
-                         uint32_t privileged);
+psa_status_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
+                              enum tfm_memory_access_e access,
+                              uint32_t privileged);
 
 /**
  * \brief                       Get the ns_caller info from runtime context.

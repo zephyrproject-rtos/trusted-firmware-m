@@ -22,7 +22,6 @@
 #include "utilities.h"
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
-#include "ffm/spm_error_base.h"
 #include "tfm_rpc.h"
 #include "tfm_spm_hal.h"
 #include "tfm_hal_interrupt.h"
@@ -132,7 +131,7 @@ uint32_t tfm_spm_client_psa_version(uint32_t sid)
      * It should return PSA_VERSION_NONE if the caller is not authorized
      * to access the RoT Service.
      */
-    if (tfm_spm_check_authorization(sid, service, ns_caller) != SPM_SUCCESS) {
+    if (tfm_spm_check_authorization(sid, service, ns_caller) != PSA_SUCCESS) {
         return PSA_VERSION_NONE;
     }
 
@@ -197,13 +196,13 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
          * the RoT Service.
          */
         if (tfm_spm_check_authorization(sid, service, ns_caller)
-            != SPM_SUCCESS) {
+            != PSA_SUCCESS) {
             return PSA_ERROR_CONNECTION_REFUSED;
         }
 
         version = GET_VERSION_FROM_STATIC_HANDLE(handle);
 
-        if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
+        if (tfm_spm_check_client_version(service, version) != PSA_SUCCESS) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
@@ -252,7 +251,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      * readable.
      */
     if (tfm_memory_check(inptr, in_num * sizeof(psa_invec), ns_caller,
-        TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
+        TFM_MEMORY_ACCESS_RO, privileged) != PSA_SUCCESS) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -262,7 +261,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      * the wrap output vector is invalid or not read-write.
      */
     if (tfm_memory_check(outptr, out_num * sizeof(psa_outvec), ns_caller,
-        TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
+        TFM_MEMORY_ACCESS_RW, privileged) != PSA_SUCCESS) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -279,7 +278,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      */
     for (i = 0; i < in_num; i++) {
         if (tfm_memory_check(invecs[i].base, invecs[i].len, ns_caller,
-            TFM_MEMORY_ACCESS_RO, privileged) != SPM_SUCCESS) {
+            TFM_MEMORY_ACCESS_RO, privileged) != PSA_SUCCESS) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
     }
@@ -306,7 +305,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      */
     for (i = 0; i < out_num; i++) {
         if (tfm_memory_check(outvecs[i].base, outvecs[i].len,
-            ns_caller, TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
+            ns_caller, TFM_MEMORY_ACCESS_RW, privileged) != PSA_SUCCESS) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
     }
@@ -347,7 +346,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
      * It is a PROGRAMMER ERROR if the caller is not authorized to access the
      * RoT Service.
      */
-    if (tfm_spm_check_authorization(sid, service, ns_caller) != SPM_SUCCESS) {
+    if (tfm_spm_check_authorization(sid, service, ns_caller) != PSA_SUCCESS) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
 
@@ -355,7 +354,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
      * It is a PROGRAMMER ERROR if the version of the RoT Service requested is
      * not supported on the platform.
      */
-    if (tfm_spm_check_client_version(service, version) != SPM_SUCCESS) {
+    if (tfm_spm_check_client_version(service, version) != PSA_SUCCESS) {
         return PSA_ERROR_CONNECTION_REFUSED;
     }
 
@@ -495,7 +494,7 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
      * input msg pointer is not a valid memory reference or not read-write.
      */
     if (tfm_memory_check(msg, sizeof(psa_msg_t), false, TFM_MEMORY_ACCESS_RW,
-        privileged) != SPM_SUCCESS) {
+        privileged) != PSA_SUCCESS) {
         tfm_core_panic();
     }
 
@@ -584,7 +583,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
      * if the memory reference for buffer is invalid or not read-write.
      */
     if (tfm_memory_check(buffer, num_bytes, false,
-        TFM_MEMORY_ACCESS_RW, priv_mode) != SPM_SUCCESS) {
+        TFM_MEMORY_ACCESS_RW, priv_mode) != PSA_SUCCESS) {
         tfm_core_panic();
     }
 
@@ -718,7 +717,7 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
      * if the memory reference for buffer is invalid or not readable.
      */
     if (tfm_memory_check(buffer, num_bytes, false,
-        TFM_MEMORY_ACCESS_RO, priv_mode) != SPM_SUCCESS) {
+        TFM_MEMORY_ACCESS_RO, priv_mode) != PSA_SUCCESS) {
         tfm_core_panic();
     }
 
@@ -1089,7 +1088,7 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
     if (tfm_memory_check(handle->invec[invec_idx].base,
                          handle->invec[invec_idx].len,
                          false, TFM_MEMORY_ACCESS_RO,
-                         privileged) != SPM_SUCCESS) {
+                         privileged) != PSA_SUCCESS) {
         tfm_core_panic();
     }
 
@@ -1218,7 +1217,7 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
      */
     if (tfm_memory_check(handle->outvec[outvec_idx].base,
                          handle->outvec[outvec_idx].len, false,
-                         TFM_MEMORY_ACCESS_RW, privileged) != SPM_SUCCESS) {
+                         TFM_MEMORY_ACCESS_RW, privileged) != PSA_SUCCESS) {
         tfm_core_panic();
     }
     SET_IOVEC_MAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE));

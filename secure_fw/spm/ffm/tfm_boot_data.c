@@ -174,7 +174,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     privileged = GET_CURRENT_PARTITION_PRIVILEGED_MODE();
 
     if (tfm_memory_check(buf_start, buf_size, false, TFM_MEMORY_ACCESS_RW,
-        privileged) != SPM_SUCCESS) {
+        privileged) != PSA_SUCCESS) {
         /* Not in accessible range, return error */
         args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
         return;
