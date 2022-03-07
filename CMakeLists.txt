@@ -11,20 +11,8 @@ include(cmake/version.cmake)
 
 ############################ CONFIGURATION #####################################
 
-if (IS_ABSOLUTE "${TFM_PLATFORM}")
-    file(RELATIVE_PATH TFM_PLATFORM_RELATIVE_PATH
-        "${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target"
-        ${TFM_PLATFORM})
-    set(TFM_PLATFORM "${TFM_PLATFORM_RELATIVE_PATH}" CACHE STRING "Target platform set as an absolute path." FORCE)
-endif()
-
-# Some compiler flags depend on the CPU / platform config. This include should
-# be run before the toolchain file so the compiler can be configured properly.
-if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
-    Message(FATAL_ERROR "Unsupported TFM_PLATFORM ${TFM_PLATFORM}")
-else()
-    include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
-endif()
+# Configure TFM_PLATFORM
+include(${CMAKE_SOURCE_DIR}/config/tfm_platform.cmake)
 
 if(TFM_SYSTEM_MVE)
     message(FATAL_ERROR "Hardware MVE is currently not supported in TF-M")
