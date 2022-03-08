@@ -151,6 +151,12 @@ SECTIONS
         *libtfm_spm*:*(.rodata*)
     } > FLASH
     /* unpriv data is placed 1st */
+    .dummy_empty : ALIGN(32)
+    {
+        . += 0x0;
+    } > RAM
+/**** Unpriv  DATA start here */
+    Image$$TFM_APP_RW_STACK_START$$Base = ADDR(.dummy_empty);
 # if !defined(TFM_PSA_API)
     /* PSP is unprivileged in single-core topology */
     .psp_stack : ALIGN(32)
@@ -174,13 +180,7 @@ SECTIONS
     } > RAM
     Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
-#endif
-   .dummy_empty : ALIGH(32)
-    {
-        . += 0x0;
-    } > RAM
-/**** APPLICATION RoT DATA start here */
-    Image$$TFM_APP_RW_STACK_START$$Base = ADDR(.dummy_empty);
+#endif 
 
     .TFM_APP_ROT_LINKER_DATA : ALIGN(32)
     {
@@ -206,16 +206,6 @@ SECTIONS
 
     /**** APPLICATION RoT DATA end here */
     Image$$TFM_APP_RW_STACK_END$$Base = .;
-
-#ifdef CODE_SHARING
-    /* The code sharing between bootloader and runtime requires to share the
-     * global variables.
-     */
-    .TFM_SHARED_SYMBOLS : ALIGN(32)
-    {
-        . += SHARED_SYMBOL_AREA_SIZE;
-    } > RAM
-#endif
 
     /* shared_data and msp_stack are overlapping on purpose when
      * msp_stack is extended until the beginning of RAM, when shared_date
