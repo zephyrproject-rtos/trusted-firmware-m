@@ -37,7 +37,8 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-#pragma required = cross_call_execute_c
+#pragma required = cross_call_entering_c
+#pragma required = cross_call_exiting_c
 
 #endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1*/
 
@@ -45,8 +46,8 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-__naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                                       uint32_t stk_base, uint32_t stk_limit)
+__naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                                   uint32_t stk_base, uint32_t stk_limit)
 {
     __asm volatile(
 #if !defined(__ICCARM__)
@@ -67,8 +68,11 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_LOCKED)"     \n"
         "   str    r3, [r2, #0]                     \n"
         "   cpsie  i                                \n"
-        "   bl     cross_call_execute_c             \n"
+        "   mov    r6, r1                           \n"
+        "   bl     cross_call_entering_c            \n"
         "   cpsid  i                                \n"
+        "   mov    r1, r6                           \n"
+        "   bl     cross_call_exiting_c             \n"
         "   movs   r12, #0                          \n"
         "   cmp    r4, #0                           \n"
         "   ittt   ne                               \n" /* To caller stack */

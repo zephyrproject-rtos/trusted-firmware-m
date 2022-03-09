@@ -412,7 +412,10 @@ void spm_interface_cross_dispatcher(uintptr_t fn_addr,
                                     uint32_t  switch_stack);
 
 /* Execute a customized ABI function in C */
-void cross_call_execute_c(uintptr_t fn_addr, uintptr_t frame_addr);
+psa_status_t cross_call_entering_c(uintptr_t fn_addr, uintptr_t frame_addr);
+
+/* Execute a customized ABI function in C */
+void cross_call_exiting_c(psa_status_t status, uintptr_t frame_addr);
 
 #endif
 

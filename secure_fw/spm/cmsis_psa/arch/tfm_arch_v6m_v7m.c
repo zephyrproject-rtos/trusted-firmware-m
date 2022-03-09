@@ -31,7 +31,8 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-#pragma required = cross_call_execute_c
+#pragma required = cross_call_entering_c
+#pragma required = cross_call_exiting_c
 
 #endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1*/
 
@@ -39,8 +40,8 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-__naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                                       uint32_t stk_base, uint32_t stk_limit)
+__naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                                   uint32_t stk_base, uint32_t stk_limit)
 {
     __asm volatile(
 #if !defined(__ICCARM__)
@@ -58,13 +59,14 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r4, #"M2S(SCHEDULER_LOCKED)"         \n"/* Do not touch   */
         "   str    r4, [r3, #0]                         \n"
         "   cpsie  i                                    \n"
-        "   push   {r2, r3}                             \n"
-        "   bl     cross_call_execute_c                 \n"
-        "   pop    {r2, r3}                             \n"
+        "   push   {r1, r2}                             \n"
+        "   bl     cross_call_entering_c                \n"
+        "   pop    {r1, r4}                             \n"
         "   cpsid  i                                    \n"
-        "   cmp    r2, #0                               \n"
+        "   bl     cross_call_exiting_c                 \n"
+        "   cmp    r4, #0                               \n"
         "   beq    v6v7_release_sched                   \n"
-        "   mov    sp, r2                               \n"/* switch stack   */
+        "   mov    sp, r4                               \n"/* switch stack   */
         "v6v7_release_sched:                            \n"
         "   ldr    r2, =scheduler_lock                  \n"/* release pendsv */
         "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"

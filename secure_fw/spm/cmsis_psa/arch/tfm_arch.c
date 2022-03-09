@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,10 +28,21 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
     );
 }
 
-void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uintptr_t ret_code)
+void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
 {
-    ((struct full_context_t *)(((struct context_ctrl_t *)p_ctx_ctrl)->sp))
-                                                       ->stat_ctx.r0 = ret_code;
+    struct context_ctrl_t *ctx_ctrl = (struct context_ctrl_t *)p_ctx_ctrl;
+
+    /*
+     * If a cross call is pending (cross_frame != CROSS_RETCODE_EMPTY), write
+     * return value to the frame position.
+     * Otherwise, write the return value to the state context on stack.
+     */
+    if (ctx_ctrl->cross_frame) {
+        ((struct cross_call_abi_frame_t *)ctx_ctrl->cross_frame)->a0 = ret_code;
+        ctx_ctrl->retcode_status = CROSS_RETCODE_UPDATED;
+    } else {
+        ((struct full_context_t *)ctx_ctrl->sp)->stat_ctx.r0 = ret_code;
+    }
 }
 
 /* Caution: Keep 'uint32_t' always for collecting thread return values! */
