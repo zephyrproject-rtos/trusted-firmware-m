@@ -12,35 +12,35 @@
 #include "tfm_plat_boot_seed.h"
 #include "tfm_plat_device_id.h"
 #include "tfm_plat_otp.h"
+#include "tfm_strnlen.h"
 
-#ifdef PLAT_HAS_BOOT_SEED /* Platform has boot seed register */
-#include "fsl_common.h"
-#endif
-
-static size_t strnlen(const char *s, size_t maxlen)
-{
-    size_t idx;
-
-    for (idx = 0; idx < maxlen; idx++) {
-        if (s[idx] == '\0') {
-            return idx;
-        }
+static enum tfm_security_lifecycle_t map_otp_lcs_to_tfm_slc(enum plat_otp_lcs_t lcs) {
+    switch (lcs) {
+        case PLAT_OTP_LCS_ASSEMBLY_AND_TEST:
+            return TFM_SLC_ASSEMBLY_AND_TEST;
+        case PLAT_OTP_LCS_PSA_ROT_PROVISIONING:
+            return TFM_SLC_PSA_ROT_PROVISIONING;
+        case PLAT_OTP_LCS_SECURED:
+            return TFM_SLC_SECURED;
+        case PLAT_OTP_LCS_DECOMMISSIONED:
+            return TFM_SLC_DECOMMISSIONED;
+        case PLAT_OTP_LCS_UNKNOWN:
+        default:
+            return TFM_SLC_UNKNOWN;
     }
-
-    return idx;
 }
 
 enum tfm_security_lifecycle_t tfm_attest_hal_get_security_lifecycle(void)
 {
-    uint32_t lcs;
+    enum plat_otp_lcs_t otp_lcs;
     enum tfm_plat_err_t err;
 
-    err = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t*)&lcs);
+    err = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(otp_lcs), (uint8_t*)&otp_lcs);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return TFM_SLC_UNKNOWN;
     }
 
-    return (enum tfm_security_lifecycle_t) lcs;
+    return map_otp_lcs_to_tfm_slc(otp_lcs);
 }
 
 enum tfm_plat_err_t

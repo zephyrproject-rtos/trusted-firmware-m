@@ -129,6 +129,13 @@ target_sources(platform_s
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/str/fsl_str.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/services/src/tfm_platform_system.c>
+        ${NXP_HAL_FILE_PATH}/common/plat_attest_hal.c
+)
+
+target_link_libraries(platform_s
+    PRIVATE
+    # For attest HAL strnlen
+        tfm_sprt
 )
 
 target_compile_options(platform_s
