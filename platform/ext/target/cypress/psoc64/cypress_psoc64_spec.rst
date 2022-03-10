@@ -183,9 +183,8 @@ listed above.
 Signing
 *******
 
-############
 Signing keys
-############
+============
 
 Copy secure keys used in the board provisioning process to
 platform/ext/target/cypress/psoc64/security/keys:
@@ -236,9 +235,8 @@ Re-provision the new keys to the board:
 
     cysecuretools -t cy8ckit-064s0s2-4343w -p policy/policy_multi_CM0_CM4_tfm.json re-provision-device
 
-##################
 Signing the images
-##################
+==================
 
 Sign the images using CySecureTools CLI tool.
 Note: the tool overwrites unsigned file with a signed one, it also creates an
