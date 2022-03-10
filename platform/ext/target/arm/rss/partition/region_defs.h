@@ -142,4 +142,7 @@
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
 
+/* AP to RSS MHU receiver interrupt */
+#define MAILBOX_IRQ CMU_MHU0_Receiver_IRQn
+
 #endif /* __REGION_DEFS_H__ */

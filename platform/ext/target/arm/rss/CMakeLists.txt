@@ -112,6 +112,7 @@ target_sources(platform_s
         spm_hal.c
         target_cfg.c
         tfm_hal_isolation.c
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_multi_core.c>
         tfm_hal_platform.c
         tfm_interrupts.c
         tfm_peripherals_def.c
@@ -148,6 +149,7 @@ target_sources(platform_ns
         device/source/system_core_init.c
         native_drivers/systimer_armv8-m_drv.c
         native_drivers/uart_pl011_drv.c
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_ns_mailbox.c>
 )
 
 target_include_directories(platform_ns

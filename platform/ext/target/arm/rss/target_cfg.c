@@ -28,8 +28,10 @@
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
+#ifndef TFM_MULTI_CORE_TOPOLOGY
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
+#endif
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -43,8 +45,10 @@ const struct memory_region_limits memory_regions = {
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
         NS_PARTITION_SIZE - 1,
 
+#ifndef TFM_MULTI_CORE_TOPOLOGY
     .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
     .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+#endif
 };
 
 /* Configures the RAM region to NS callable in sacfg block's nsccfg register */
@@ -259,11 +263,13 @@ void sau_and_idau_cfg(void)
     SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (NS_DATA_LIMIT & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 
+#ifndef TFM_MULTI_CORE_TOPOLOGY
     /* Configures veneers region to be non-secure callable */
     SAU->RNR  = 2;
     SAU->RBAR = (memory_regions.veneer_base & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.veneer_limit & SAU_RLAR_LADDR_Msk)
                  | SAU_RLAR_ENABLE_Msk | SAU_RLAR_NSC_Msk;
+#endif
 
     /* Configure the peripherals space */
     SAU->RNR  = 3;
