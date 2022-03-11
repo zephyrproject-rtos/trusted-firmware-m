@@ -56,6 +56,31 @@
 #undef CC3XX_CONFIG_SUPPORT_RSA
 #endif
 
+
+/*  This function checks if the first byte of a pointer is zero and
+ *  skips it when it is. We need this when we convert a PSA RSA key
+ *  to the CryptoCell internal type because the PSA key will use the
+ *  DER encoding to store its value. The DER encoding is using 2's
+ *  complement representation when storing integeters which will add
+ *  a leading zero byte when the MSB of a number is 1. CryptoCell
+ *  does not allows this form so the leading zero needs to be removed.
+ */
+static void skip_leading_zero(uint8_t **ptr, size_t *ptr_size)
+{
+    if (ptr == NULL || ptr_size == NULL) {
+        return;
+    }
+
+    if (*ptr == NULL) {
+        return;
+    }
+
+    if (*ptr[0] == 0 && (*ptr[1] & 0x80)) {
+        *ptr += 1;
+        *ptr_size -= 1;
+    }
+}
+
 /** \defgroup internal_rsa_util Internal RSA utility functions
  *
  *  Internal functions required to provide utilities for handling RSA type
@@ -102,6 +127,7 @@ psa_status_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
 
     n_ptr = *pub_key_buffer_start;
     n_len = len;
+    skip_leading_zero(&n_ptr, &n_len);
 
     *pub_key_buffer_start += len;
 
@@ -115,6 +141,8 @@ psa_status_t cc3xx_rsa_psa_pub_to_cc_pub(const uint8_t *psa_pub_key_buffer,
 
     e_ptr = *pub_key_buffer_start;
     e_len = len;
+    skip_leading_zero(&e_ptr, &e_len);
+
     *pub_key_buffer_start += len;
 
     cc_err = CC_RsaPubKeyBuild(UserPubKey_ptr, e_ptr, e_len, n_ptr, n_len);
@@ -171,6 +199,8 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_priv_key_buffer,
 
     n_ptr = *priv_key_buffer_start;
     n_len = len;
+    skip_leading_zero(&n_ptr, &n_len);
+
     *priv_key_buffer_start += len;
 
     /* Get the exponent e */
@@ -183,6 +213,8 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_pub(const uint8_t *psa_priv_key_buffer,
 
     e_ptr = *priv_key_buffer_start;
     e_len = len;
+    skip_leading_zero(&e_ptr, &e_len);
+
     *priv_key_buffer_start += len;
 
     cc_err = CC_RsaPubKeyBuild(UserPubKey_ptr, e_ptr, e_len, n_ptr, n_len);
@@ -274,6 +306,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
 
     p_ptr = *priv_key_buffer_start;
     p_len = len;
+    skip_leading_zero(&p_ptr, &p_len);
 
     *priv_key_buffer_start += len;
 
@@ -287,6 +320,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
 
     q_ptr = *priv_key_buffer_start;
     q_len = len;
+    skip_leading_zero(&q_ptr, &q_len);
 
     *priv_key_buffer_start += len;
 
@@ -300,6 +334,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
 
     dP_ptr = *priv_key_buffer_start;
     dP_len = len;
+    skip_leading_zero(&dP_ptr, &dP_len);
 
     *priv_key_buffer_start += len;
 
@@ -313,6 +348,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
 
     dQ_ptr = *priv_key_buffer_start;
     dQ_len = len;
+    skip_leading_zero(&dQ_ptr, &dQ_len);
 
     *priv_key_buffer_start += len;
 
@@ -326,6 +362,7 @@ psa_status_t cc3xx_rsa_psa_priv_to_cc_priv(const uint8_t *psa_priv_key_buffer,
 
     qInv_ptr = *priv_key_buffer_start;
     qInv_len = len;
+    skip_leading_zero(&qInv_ptr, &qInv_len);
 
     *priv_key_buffer_start += len;
 
