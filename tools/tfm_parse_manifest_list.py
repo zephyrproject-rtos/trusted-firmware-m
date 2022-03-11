@@ -180,8 +180,7 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
     no_pid_manifest_idx = []
     partition_statistics = {
         'connection_based_srv_num': 0,
-        'ipc_partition_num': 0,
-        'sfn_partition_num': 0,
+        'ipc_partitions': [],
         'flih_num': 0,
         'slih_num': 0
     }
@@ -268,10 +267,8 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
 
         if pid == None or pid >= TFM_PID_BASE:
             # Count the number of IPC/SFN partitions
-            if manifest['psa_framework_version'] == 1.1 and manifest['model'] == 'SFN':
-                partition_statistics['sfn_partition_num'] += 1
-            else:
-                partition_statistics['ipc_partition_num'] += 1
+            if manifest['model'] == 'IPC':
+                partition_statistics['ipc_partitions'].append(manifest['name'])
 
         # Set initial value to -1 to make (srv_idx + 1) reflect the correct
         # number (0) when there are no services.
@@ -338,8 +335,9 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
 
     # Set up configurations
     if backend == 'SFN':
-        if partition_statistics['ipc_partition_num'] > 0:
-            logging.error('SFN backend does not support IPC Partitions.')
+        if len(partition_statistics['ipc_partitions']) > 0:
+            logging.error('SFN backend does not support IPC Partitions:')
+            logging.error(partition_statistics['ipc_partitions'])
             exit(1)
 
         if isolation_level > 1:
