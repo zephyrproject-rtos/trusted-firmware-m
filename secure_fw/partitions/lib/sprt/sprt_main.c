@@ -10,10 +10,6 @@
 #include "sprt_partition_metadata_indicator.h"
 #include "sprt_main.h"
 
-#if defined(__ICCARM__)
-#pragma required = meta_init_c
-#endif
-
 extern void common_sfn_thread(void);
 
 __used static uintptr_t runtime_init_c(void)
@@ -30,6 +26,10 @@ __used static uintptr_t runtime_init_c(void)
         return (uintptr_t)common_sfn_thread;
     }
 }
+
+#if defined(__ICCARM__)
+#pragma required = runtime_init_c
+#endif
 
 __naked void sprt_main(void)
 {
