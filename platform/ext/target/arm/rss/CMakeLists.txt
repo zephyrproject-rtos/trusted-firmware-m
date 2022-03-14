@@ -164,6 +164,7 @@ target_include_directories(platform_ns
 
 target_sources(platform_bl2
     PRIVATE
+        bl2/boot_hal_bl2.c
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
