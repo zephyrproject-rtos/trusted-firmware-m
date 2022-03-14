@@ -417,16 +417,16 @@ psa_status_t cc3xx_cipher_update(
     case PSA_KEY_TYPE_CHACHA20:
         if (( ret = cc3xx_chacha20_update(
                 &operation->ctx.chacha,
-                input_length,
                 input,
-                output) )
+                input_length,
+                output,
+                output_size,
+                output_length) )
             != PSA_SUCCESS) {
             return ret;
         }
-
-        *output_length = input_length;
-
         break;
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -543,8 +543,13 @@ psa_status_t cc3xx_cipher_finish(
             return PSA_ERROR_NOT_SUPPORTED;
         }
         break;
+
     case PSA_KEY_TYPE_CHACHA20:
-        return PSA_SUCCESS;
+        ret = cc3xx_chacha20_finish(&operation->ctx.chacha, output,
+                                    output_size, output_length);
+        cc3xx_chacha20_free(&operation->ctx.chacha);
+        break;
+
     default:
         ret = PSA_ERROR_NOT_SUPPORTED;
     }

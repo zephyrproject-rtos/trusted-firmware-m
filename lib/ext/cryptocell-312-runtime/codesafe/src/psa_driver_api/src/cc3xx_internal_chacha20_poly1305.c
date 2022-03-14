@@ -31,6 +31,7 @@ static psa_status_t chacha20_poly1305_gen_otk(ChachaContext_t *context,
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     uint8_t chachaInState[CHACHA_BLOCK_SIZE_BYTES] = {0};
     uint8_t chachaOutState[CHACHA_BLOCK_SIZE_BYTES] = {0};
+    size_t out_size = 0;
 
     if (otk_size < 32) {
         return PSA_ERROR_BUFFER_TOO_SMALL;
@@ -46,10 +47,16 @@ static psa_status_t chacha20_poly1305_gen_otk(ChachaContext_t *context,
      * zero input is equivalent in getting as output of the Chacha20 encryption
      * stage the output of the chacha20_block stage only, i.e. otk as per RFC
      */
-    status = cc3xx_chacha20_update(context, sizeof(chachaInState),
-                                   chachaInState, chachaOutState);
+    status = cc3xx_chacha20_update(context,
+                                   chachaInState, sizeof(chachaInState),
+                                   chachaOutState, sizeof(chachaOutState),
+                                   &out_size);
     if (status != PSA_SUCCESS) {
         return status;
+    }
+
+    if (out_size < 32) {
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Copy generated key as result of previous step */
@@ -104,7 +111,13 @@ static psa_status_t chacha20_poly1305_crypt_and_tag(
         goto cleanup;
     }
 
-    status = cc3xx_chacha20_update(&context, length, input, output);
+    /* Assumes that upper layers have checked that output is at least the
+     * size of the input
+     */
+    size_t output_size = length;
+    size_t update_length = 0;
+    status = cc3xx_chacha20_update(&context, input, length,
+                                   output, output_size, &update_length);
     if (status != PSA_SUCCESS) {
         goto cleanup;
     }

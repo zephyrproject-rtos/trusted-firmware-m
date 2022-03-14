@@ -59,9 +59,19 @@ psa_status_t cc3xx_chacha20_set_counter(ChachaContext_t *ctx,
  */
 psa_status_t cc3xx_chacha20_update(
         ChachaContext_t *ctx,
-        size_t size,
         const uint8_t *input,
-        uint8_t *output);
+        size_t input_len,
+        uint8_t *output,
+        size_t output_size,
+        size_t *output_len);
+/**
+ * \brief   Finalize encryption/decryption.
+ */
+psa_status_t cc3xx_chacha20_finish(
+        ChachaContext_t *ctx,
+        uint8_t *output,
+        size_t output_size,
+        size_t *output_length);
 
 #ifdef __cplusplus
 }
