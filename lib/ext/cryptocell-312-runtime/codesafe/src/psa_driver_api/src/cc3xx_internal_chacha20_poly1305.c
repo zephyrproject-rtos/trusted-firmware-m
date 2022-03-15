@@ -24,6 +24,14 @@
 #include "cc3xx_internal_chacha20.h"
 #include "cc3xx_internal_chacha20_poly1305.h"
 
+/* This function implements the block which generates the one time key
+ * to be used for Poly1305 as part of RFC7539 to be generated through
+ * Chacha20, i.e.
+ *     poly1305_key_gen(key, nonce):
+ *         counter = 0;
+ *         block = chacha_block(key, counter, nonce)
+ *         return block[0..31]
+ */
 static psa_status_t chacha20_poly1305_gen_otk(ChachaContext_t *context,
                                               uint8_t *otk,
                                               size_t otk_size)
@@ -43,9 +51,10 @@ static psa_status_t chacha20_poly1305_gen_otk(ChachaContext_t *context,
         return status;
     }
 
-    /* Calling chacha20_update after setting the counter to 0 and using an all-
-     * zero input is equivalent in getting as output of the Chacha20 encryption
-     * stage the output of the chacha20_block stage only, i.e. otk as per RFC
+    /* Calling chacha20_update using an all-zero input is equivalent in getting
+     * the output of the chacha_block() function only, i.e. the keystream. The
+     * size will be a 64 byte block but we need to take only the first 32 as
+     * output and they will represent the OTK (256 bit key (r,s))
      */
     status = cc3xx_chacha20_update(context,
                                    chachaInState, sizeof(chachaInState),

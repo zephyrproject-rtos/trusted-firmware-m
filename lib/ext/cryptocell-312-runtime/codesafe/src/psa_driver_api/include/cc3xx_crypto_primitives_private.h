@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,6 +27,13 @@
 #include "aesgcm_driver.h"
 #include "aesccm_driver.h"
 #include "chacha_driver.h"
+
+/* Include the internal layer defines for Chacha20-Poly1305 because it is there
+ * that the Chacha20-Poly1305 context is defined. This is due to the fact that
+ * the low-level driver contexts don't support Chacha20-Poly1305 as a combined
+ * operation with a requirement for state support (i.e. to support multipart)
+ */
+#include "cc3xx_internal_chacha20_poly1305.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,9 +103,9 @@ struct cc3xx_aead_operation_s {
     size_t tag_length;            /*!< Size of the authentication tag */
 
     union {
-        AesGcmContext_t gcm;      /*!< Low-level GCM context */
-        AesCcmContext_t ccm;      /*!< Low-level CCM context */
-        ChachaContext_t chacha;   /*!< Low-level Chacha context */
+        AesGcmContext_t gcm;            /*!< Low-level GCM context */
+        AesCcmContext_t ccm;            /*!< Low-level CCM context */
+        ChachaPolyContext_t chachapoly; /*!< Low-level Chacha20-Poly1305 ctx */
     } ctx;
 };
 
