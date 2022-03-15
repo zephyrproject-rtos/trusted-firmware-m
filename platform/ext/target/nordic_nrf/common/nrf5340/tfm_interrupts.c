@@ -237,7 +237,7 @@ static struct irq_t gpiote0_irq = {0};
 
 void GPIOTE0_IRQHandler(void)
 {
-    spm_handle_interrupt(gpiote0_irq.p_pt, gpiote0.p_ildi);
+    spm_handle_interrupt(gpiote0_irq.p_pt, gpiote0_irq.p_ildi);
 }
 
 enum tfm_hal_status_t tfm_gpiote0_irq_init(void *p_pt,
