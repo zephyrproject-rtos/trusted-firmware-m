@@ -140,12 +140,12 @@ uint32_t sfn_system_run(void)
     return thrd_start_scheduler(&CURRENT_THREAD);
 }
 
-static void sfn_wait(struct partition_t *p_pt, psa_signal_t signals)
+static psa_signal_t sfn_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
 {
-    while (!(p_pt->signals_waiting & p_pt->signals_asserted))
+    while (!(p_pt->signals_asserted & signal_mask))
         ;
 
-    p_pt->signals_waiting &= ~signals;
+    return p_pt->signals_asserted & signal_mask;
 }
 
 static void sfn_wake_up(struct partition_t *p_pt, psa_signal_t signals)

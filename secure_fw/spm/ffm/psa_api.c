@@ -463,15 +463,14 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     }
 
     /*
-     * thrd_wait_on() blocks the caller thread if no signals are available.
-     * In this case, the return value of this function is temporary set into
-     * runtime context. After new signal(s) are available, the return value
-     * is updated with the available signal(s) and blocked thread gets to run.
+     * backend_instance.wait() blocks the caller thread if no signals are
+     * available. In this case, the return value of this function is temporary
+     * set into runtime context. After new signal(s) are available, the return
+     * value is updated with the available signal(s) and blocked thread gets
+     * to run.
      */
-    if (timeout == PSA_BLOCK &&
-        (partition->signals_asserted & signal_mask) == 0) {
-        partition->signals_waiting = signal_mask;
-        backend_instance.wait(partition, signal_mask);
+    if (timeout == PSA_BLOCK) {
+        return backend_instance.wait(partition, signal_mask);
     }
 
     return partition->signals_asserted & signal_mask;

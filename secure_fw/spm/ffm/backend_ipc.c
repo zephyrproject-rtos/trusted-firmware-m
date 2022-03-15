@@ -202,11 +202,28 @@ static uint32_t ipc_system_run(void)
     return control;
 }
 
-static void ipc_wait(struct partition_t *p_pt, psa_signal_t signals)
+static psa_signal_t ipc_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
 {
-    (void)signals;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+    psa_signal_t ret_signal;
 
-    thrd_wait_on(&p_pt->waitobj, CURRENT_THREAD);
+    /*
+     * 'ipc_wait()' sets the waiting signal mask for partition, and
+     * blocks the partition thread state to wait for signals.
+     * These changes should be inside the ciritical section to avoid
+     * 'signal_waiting' or the thread state to be changed by interrupts
+     * while this function is reading or writing values.
+     */
+    CRITICAL_SECTION_ENTER(cs_assert);
+
+    ret_signal = p_pt->signals_asserted & signal_mask;
+    if (ret_signal == 0) {
+        p_pt->signals_waiting = signal_mask;
+        thrd_wait_on(&p_pt->waitobj, CURRENT_THREAD);
+    }
+    CRITICAL_SECTION_LEAVE(cs_assert);
+
+    return ret_signal;
 }
 
 static void ipc_wake_up(struct partition_t *p_pt, psa_signal_t signals)

@@ -45,7 +45,7 @@ struct backend_ops_t {
      * Runtime model-specific Partition wait operation.
      * Put the Partition to a status that waits for signals.
      */
-    void (*wait)(struct partition_t *p_pt, psa_signal_t signals);
+    psa_signal_t (*wait)(struct partition_t *p_pt, psa_signal_t signal_mask);
 
     /*
      * Runtime model-specific Partition wake up operation.
