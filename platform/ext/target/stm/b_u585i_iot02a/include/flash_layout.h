@@ -16,7 +16,11 @@
 
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
+/* new field for OSPI */
 
+#define OSPI_FLASH_TOTAL_SIZE           (0x4000000)  /* 64 MB same as MX25LM51245G_FLASH_SIZE */
+#define OSPI_FLASH_BASE_ADDRESS         (0x70000000) /* same as OCTOSPI1_BASE  */
+#define EXTERNAL_FLASH
 /* This header file is included from linker scatter file as well, where only a
  * limited C constructs are allowed. Therefore it is not possible to include
  * here the platform_retarget.h to access flash related defines. To resolve this
@@ -151,7 +155,11 @@
 /* Secure image secondary slot */
 #define FLASH_AREA_2_ID                 (FLASH_AREA_1_ID + 1)
 #define FLASH_AREA_2_DEVICE_ID          (FLASH_AREA_1_DEVICE_ID)
+#if defined(EXTERNAL_FLASH)
+#define FLASH_AREA_2_OFFSET             (0x000000000)
+#else
 #define FLASH_AREA_2_OFFSET             (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
+#endif /* EXTERNAL FLASH */
 /* Control  Secure image secondary slot */
 #if (FLASH_AREA_2_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
 #error "FLASH_AREA_2_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
@@ -161,8 +169,12 @@
 /* Non-secure image secondary slot */
 #define FLASH_AREA_3_ID                 (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_3_DEVICE_ID          (FLASH_AREA_2_DEVICE_ID)
+#if defined(EXTERNAL_FLASH)
+/* Add 0x8000 to fix tools issue on external flash */
+#define FLASH_AREA_3_OFFSET             (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE + 0x8000)
+#else
 #define FLASH_AREA_3_OFFSET             (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
-
+#endif /* EXTERNAL FLASH */
 #if (FLASH_AREA_3_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
 #error "FLASH_AREA_3_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
 #endif /*  (FLASH_AREA_3_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
@@ -172,6 +184,16 @@
 #define FLASH_AREA_SCRATCH_ID           (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_SCRATCH_DEVICE_ID    (FLASH_AREA_3_DEVICE_ID)
 
+
+#if defined(EXTERNAL_FLASH)
+/* Config for Area Using External flash driver */
+#define OSPI_FLASH_DEV_ID          (FLASH_DEVICE_ID+1)
+#define FLASH_DEVICE_ID_2          (OSPI_FLASH_DEV_ID)
+#define FLASH_DEVICE_ID_3          (OSPI_FLASH_DEV_ID)
+#define OSPI_FLASH_DEV_NAME   TFM_Driver_OSPI_FLASH0
+#define FLASH_DEV_NAME_2 OSPI_FLASH_DEV_NAME
+#define FLASH_DEV_NAME_3 OSPI_FLASH_DEV_NAME
+#endif /* defined(EXTERNAL_FLASH) */
 /*
  * The maximum number of status entries supported by the bootloader.
  */

@@ -24,11 +24,6 @@ SCRIPTPATH=`dirname $SCRIPT`
 BINPATH="$SCRIPTPATH/bin"
 PATH="/C/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/":$PATH
 stm32programmercli="STM32_Programmer_CLI"
-external_loader="C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32L562E-DK.stldr"
-connect_no_reset="-c port=SWD "$sn_option" mode=UR -el $external_loader"
-connect="-c port=SWD "$sn_option" mode=UR --hardRst -el $external_loader"
-
-echo "Write TFM_Appli Secure"
 # part ot be updated according to flash_layout.h
 slot0=
 slot1=
@@ -42,6 +37,20 @@ boot=
 nvmcnt=
 prov=
 unused=
+#select external flash according to slot2 value
+u5=0x70000000
+l5=0x90000000
+if [ $slot2 == $u5 ]; then
+external_loader="C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32U585I-IOT02A.stldr"
+fi
+if [ $slot2 == $l5 ]; then
+external_loader="C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32L562E-DK.stldr"
+fi
+connect_no_reset="-c port=SWD "$sn_option" mode=UR -el $external_loader"
+connect="-c port=SWD "$sn_option" mode=UR --hardRst -el $external_loader"
+
+echo "Write TFM_Appli Secure"
+# part ot be updated according to flash_layout.h
 
 $stm32programmercli $connect -d $BINPATH/tfm_s_signed.bin $slot0 -v
 echo "TFM_Appli Secure Written"

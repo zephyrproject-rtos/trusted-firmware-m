@@ -85,7 +85,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg_init_s[] = {
            {
                1,
                FLASH_BASE_S + S_IMAGE_PRIMARY_PARTITION_OFFSET + FLASH_S_PARTITION_SIZE,
-#ifndef MCUBOOT_PRIMARY_ONLY
+#if !defined(MCUBOOT_PRIMARY_ONLY) && !defined(EXTERNAL_FLASH)
                FLASH_BASE_S + NS_IMAGE_SECONDARY_PARTITION_OFFSET + FLASH_NS_PARTITION_SIZE,
 #else
                FLASH_BASE_S + S_IMAGE_PRIMARY_PARTITION_OFFSET + FLASH_S_PARTITION_SIZE + FLASH_NS_PARTITION_SIZE,
@@ -200,7 +200,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg_init_ns[] = {
                FLOW_CTRL_MPU_NS_I_CH_R0,
 #endif /* FLOW_CONTROL */
            },
-#if !defined(MCUBOOT_PRIMARY_ONLY)
+#if !defined(MCUBOOT_PRIMARY_ONLY) && !defined(EXTERNAL_FLASH)
            {
                1,
                FLASH_BASE_NS + S_IMAGE_SECONDARY_PARTITION_OFFSET,
@@ -335,11 +335,11 @@ const struct sau_cfg_t sau_init_cfg[] = {
     {
         2,
         ((uint32_t)FLASH_BASE_NS + NS_IMAGE_PRIMARY_PARTITION_OFFSET),
-#if !defined(MCUBOOT_PRIMARY_ONLY)
-        ((uint32_t)FLASH_BASE_NS + S_IMAGE_SECONDARY_PARTITION_OFFSET + FLASH_PARTITION_SIZE),
-#else
+#if defined(MCUBOOT_PRIMARY_ONLY) || defined(EXTERNAL_FLASH)
         ((uint32_t)FLASH_BASE_NS + NS_IMAGE_PRIMARY_PARTITION_OFFSET + FLASH_NS_PARTITION_SIZE),
-#endif /* MCUBOOT_PRIMARY_ONLY */
+#else
+        ((uint32_t)FLASH_BASE_NS + S_IMAGE_SECONDARY_PARTITION_OFFSET + FLASH_PARTITION_SIZE),
+#endif /* MCUBOOT_PRIMARY_ONLY || EXTERNAL_FLASH */
         TFM_FALSE,
 #ifdef FLOW_CONTROL
         FLOW_STEP_SAU_I_EN_R2,
