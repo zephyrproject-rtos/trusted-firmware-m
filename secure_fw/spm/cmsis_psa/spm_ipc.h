@@ -129,7 +129,7 @@ struct partition_t {
     struct context_ctrl_t              ctx_ctrl;
     uint32_t                           signals_allowed;
     uint32_t                           signals_waiting;
-    uint32_t                           signals_asserted;
+    volatile uint32_t                  signals_asserted;
     struct sync_obj_t                  waitobj;
     union {
         struct thread_t                thrd;            /* IPC model */
