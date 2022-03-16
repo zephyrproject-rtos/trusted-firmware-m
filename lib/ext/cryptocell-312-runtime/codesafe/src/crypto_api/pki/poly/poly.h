@@ -11,13 +11,12 @@
  * All the includes that are needed for code using this module to
  * compile correctly should be #included here.
  */
-
+#include <stdint.h>
 #include "cc_error.h"
 #include "mbedtls_cc_poly.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 /*! The POLY block size in 32-bit words */
@@ -62,15 +61,62 @@ typedef struct PolyState {
 /**
  * @brief Generates the POLY mac according to RFC 7539 section 2.5.1
  *
+ * @param[in]  key            Pointer to 256 bits of KEY.
+ * @param[in]  pAddData       Optional - pointer to additional data if any
+ * @param[in]  addDataSize    The size of the additional data
+ * @param[in]  pDataIn        Pointer to data buffer to calculate MAC on
+ * @param[in]  dataInSize     The size of the additional data
+ * @param[out] macRes         The calculated MAC
+ * @param[in]  isPolyAeadMode Boolean indicating if the Poly MAC operation is
+ *                            part of AEAD or just poly
+ *
  * @return  CC_OK On success, otherwise indicates failure
  */
-CCError_t PolyMacCalc(mbedtls_poly_key  key,        /*!< [in] Poniter to 256 bits of KEY. */
-            const uint8_t       *pAddData,  /*!< [in] Optional - pointer to additional data if any */
-            size_t          addDataSize,    /*!< [in] The size of the additional data */
-            const uint8_t       *pDataIn,   /*!< [in] Pointer to data buffer to calculate MAC on */
-            size_t          dataInSize, /*!< [in] The size of the additional data */
-            mbedtls_poly_mac        macRes,     /*!< [out] The calculated MAC */
-            bool     isPolyAeadMode);  /*!< [in] Boolean indicating if the Poly MAC operation is part of AEAD or just poly */
+CCError_t PolyMacCalc(mbedtls_poly_key key,
+                      const uint8_t *pAddData,
+                      size_t addDataSize,
+                      const uint8_t *pDataIn,
+                      size_t dataInSize,
+                      mbedtls_poly_mac macRes,
+                      bool isPolyAeadMode);
+
+/**
+ * @brief Initialises a multipart authentication. The key gets clamped
+ *        as per RFC7539 in place, so the key buffer must be writable.
+ *
+ * @param[in,out] state    Pointer to the state associated to the operation.
+ * @param[in,out] key      Buffer containing the (r,s) keypair. It will be
+ *                         clamped as specified by RFC7539.
+ * @param[in]     key_size Size in bytes of the key. Must be 32 bytes.
+ *
+ * @return It returns CC_OK on success, or an error code otherwise
+ */
+CCError_t PolyInit(PolyState_t *state, uint8_t *key, size_t key_size);
+
+/**
+ * @brief Updates a pre-initialised multipart authentication with a new
+ *        chunk of data to be authenticated.
+ *
+ * @param[in,out] state     Pointer to the state associated to the operation.
+ * @param[in]     data      Buffer containing the data to be authenticated.
+ * @param[in]     data_size Size in bytes of the data to be authenticated.
+ *
+ * @return It returns CC_OK on success, or an error code otherwise
+ */
+CCError_t PolyUpdate(PolyState_t *state, const uint8_t *data, size_t data_size);
+
+/**
+ * @brief Finalises a pre-initialised multipart authentication outputting
+ *        the 16 bytes that make the Poly1305 tag.
+ *
+ * @param[in,out] state    Pointer to the state associated to the operation.
+ * @param[out]    tag      Buffer that will contain the 16 bytes of the tag.
+ * @param[in]     tag_size Size in bytes ot the tag buffer. It needs to be
+ *                         at least 16 bytes, i.e. CC_POLY_BLOCK_SIZE_IN_BYTES
+ *
+ * @return It returns CC_OK on success, or an error code otherwise
+ */
+CCError_t PolyFinish(PolyState_t *state, uint8_t *tag, size_t tag_size);
 
 #ifdef __cplusplus
 }
