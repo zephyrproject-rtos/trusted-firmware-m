@@ -20,8 +20,9 @@
 
 #include "cc3xx_psa_aead.h"
 #include "cc3xx_internal_ccm.h"
-#include "cc3xx_internal_chacha20_poly1305.h"
 #include "cc3xx_internal_gcm.h"
+#include "cc3xx_internal_chacha20.h"
+#include "cc3xx_internal_chacha20_poly1305.h"
 
 /* Number of valid tag lengths sizes both for CCM and GCM modes */
 #define VALID_TAG_LENGTH_SIZE 7
@@ -141,8 +142,8 @@ static psa_status_t aead_setup(
             default:
                 return PSA_ERROR_NOT_SUPPORTED;
             }
-
             break;
+
         case PSA_ALG_CCM:
             cc3xx_ccm_init(&operation->ctx.ccm);
 
@@ -170,8 +171,8 @@ static psa_status_t aead_setup(
             default:
                 return PSA_ERROR_NOT_SUPPORTED;
             }
-
             break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -180,9 +181,28 @@ static psa_status_t aead_setup(
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
         case PSA_ALG_CHACHA20_POLY1305:
+            /* The setup operation just sets up the object for Chacha20
+             * multipart and then sets the key on the Chacha context
+             */
+            cc3xx_chacha20_init(&operation->ctx.chachapoly.chacha);
+            ret = cc3xx_chacha20_setkey(&operation->ctx.chachapoly.chacha,
+                                        key,
+                                        key_length);
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+            if (operation->dir == PSA_CRYPTO_DRIVER_ENCRYPT) {
+                operation->ctx.chachapoly.bAuthenticateInput = false;
+            } else { /* PSA_CRYPTO_DRIVER_DECRYPT */
+                operation->ctx.chachapoly.bAuthenticateInput = true;
+            }
+            break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
+    break;
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -360,9 +380,53 @@ psa_status_t cc3xx_aead_set_nonce(
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
         case PSA_ALG_CHACHA20_POLY1305:
+        {
+            uint32_t otk[32/sizeof(uint32_t)] = {0};
+            ret = cc3xx_chacha20_set_nonce(&operation->ctx.chachapoly.chacha,
+                                           nonce,
+                                           nonce_length);
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+            /* After successfully setting the nonce, we can also setup the OTK
+             * to be used in the associated Poly1305 algorithm. Internally this
+             * will set the counter to 0 as specified by RFC7539
+             */
+            ret = cc3xx_chacha20_poly1305_gen_otk(
+                                            &operation->ctx.chachapoly.chacha,
+                                            (uint8_t *)otk,
+                                            sizeof(otk));
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+            /* Set the counter back to 1 as per RFC7539. For the time being the
+             * implementation does not support nonce lengths different that 12.
+             * If support for nonce length equal to 16 is enabled, the first 4
+             * bytes can be used to specify a counter value.
+             */
+            ret = cc3xx_chacha20_set_counter(&operation->ctx.chachapoly.chacha,
+                                             1);
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+
+            /* Once we have an OTK, initialise the Poly1305 context with that */
+            ret = cc3xx_chacha20_poly1305_set_otk(
+                                            &operation->ctx.chachapoly.poly,
+                                            (const uint8_t *)otk,
+                                            sizeof(otk));
+            CC_PalMemSetZero(otk, sizeof(otk));
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+        }
+        break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
+    break;
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -388,8 +452,8 @@ psa_status_t cc3xx_aead_set_lengths(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_set_lengths(
                     &operation->ctx.ccm,
@@ -398,19 +462,30 @@ psa_status_t cc3xx_aead_set_lengths(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
-
         break;
+
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
         case PSA_ALG_CHACHA20_POLY1305:
+            ret = cc3xx_chacha20_poly1305_set_lengths(
+                                            &operation->ctx.chachapoly,
+                                            ad_length,
+                                            plaintext_length);
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+            break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
+    break;
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -441,8 +516,8 @@ psa_status_t cc3xx_aead_update_ad(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_update_ad(
                     &operation->ctx.ccm,
@@ -451,19 +526,30 @@ psa_status_t cc3xx_aead_update_ad(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
-
         break;
+
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
         case PSA_ALG_CHACHA20_POLY1305:
+            ret = cc3xx_chacha20_poly1305_update_ad(
+                    &operation->ctx.chachapoly,
+                    input,
+                    input_size);
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+            break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
+        break;
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -481,7 +567,9 @@ psa_status_t cc3xx_aead_update(
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
-    (void)output_size;
+    if (output_length == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
     *output_length = 0;
 
     /* There is no data to process */
@@ -505,10 +593,9 @@ psa_status_t cc3xx_aead_update(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             *output_length = input_length;
-
             break;
+
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_update(
                     &operation->ctx.ccm,
@@ -518,21 +605,31 @@ psa_status_t cc3xx_aead_update(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             *output_length = input_length;
-
             break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
-
         break;
+
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
         case PSA_ALG_CHACHA20_POLY1305:
+            ret = cc3xx_chacha20_poly1305_update(
+                    &operation->ctx.chachapoly,
+                    input, input_length,
+                    output, output_size, output_length);
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+            break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
+        break;
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -562,23 +659,15 @@ psa_status_t cc3xx_aead_finish(
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
         case PSA_ALG_GCM:
-            if (( ret = cc3xx_gcm_finish(
-                    &operation->ctx.gcm,
-                    tag,
-                    tag_size,
-                    tag_length))
-                != PSA_SUCCESS) {
+            if (( ret = cc3xx_gcm_finish(&operation->ctx.gcm,
+                            tag, tag_size, tag_length)) != PSA_SUCCESS) {
                 return ret;
             }
             break;
 
         case PSA_ALG_CCM:
-            if (( ret = cc3xx_ccm_finish(
-                    &operation->ctx.ccm,
-                    tag,
-                    tag_size,
-                    tag_length))
-                != PSA_SUCCESS) {
+            if (( ret = cc3xx_ccm_finish(&operation->ctx.ccm,
+                            tag, tag_size, tag_length)) != PSA_SUCCESS) {
                 return ret;
             }
             break;
@@ -586,14 +675,23 @@ psa_status_t cc3xx_aead_finish(
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
-
         break;
+
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
         case PSA_ALG_CHACHA20_POLY1305:
+            ret = cc3xx_chacha20_poly1305_finish(&operation->ctx.chachapoly,
+                                                 tag, tag_size, tag_length);
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+            break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
+        break;
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -628,8 +726,8 @@ psa_status_t cc3xx_aead_verify(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_finish(
                     &operation->ctx.ccm,
@@ -638,19 +736,28 @@ psa_status_t cc3xx_aead_verify(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
-
         break;
+
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
         case PSA_ALG_CHACHA20_POLY1305:
+            ret = cc3xx_chacha20_poly1305_verify(&operation->ctx.chachapoly,
+                                                 tag, tag_size);
+            if (ret != PSA_SUCCESS) {
+                return ret;
+            }
+            break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
+        break;
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -672,14 +779,21 @@ psa_status_t cc3xx_aead_abort(cc3xx_aead_operation_t *operation)
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
-
         break;
+
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
         case PSA_ALG_CHACHA20_POLY1305:
+            cc3xx_chacha20_free(&operation->ctx.chachapoly.chacha);
+            /* Nothing specific for the Poly1305 state, it just gets set to
+             * zero when memory is cleared before leaving this function
+             */
+            break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
+        break;
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
