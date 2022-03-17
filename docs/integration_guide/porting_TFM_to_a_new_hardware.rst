@@ -69,9 +69,9 @@ File architecture
 The platform selection when building TF-M is set via the CMake
 variable TFM_PLATFORM. This variable holds part of the path to the platform.
 
-When using -DTFM_PLATFORM="``arm/mps2/an521``" (as in the build instruction example)
+When using ``-DTFM_PLATFORM=arm/mps2/an521`` or ``-DTFM_PLATFORM=an521``
 TF-M build system will look for the platform in
-<TF-M ROOT>/platform/ext/target/``arm/mps2/an521``.
+<TF-M ROOT>/platform/ext/target/arm/mps2/an521.
 
 Therefore all hardware dependent code for your platform should go to
 <TF-M ROOT>/platform/ext/target/.

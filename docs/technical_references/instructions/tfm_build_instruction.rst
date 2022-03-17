@@ -77,12 +77,13 @@ config that has already been set at any of the prior stages.
 Required cmake parameters for building TF-M
 -------------------------------------------
 
-+----------------------+-------------------------------------------------------+
-| Parameter            | Description                                           |
-+======================+=======================================================+
-| TFM_PLATFORM         | The target platform as a path from the base directory |
-|                      | ``/platform/ext/target``, or as an absolute path.     |
-+----------------------+-------------------------------------------------------+
+``TFM_PLATFORM`` is required to select the target platform, it can be:
+ - A relative path under ``<TF-M_root>/platform/ext/target``,
+   for example ``arm/mps2/an521``.
+ - An absolute path of target platform, mainly used for out-of-tree platform
+   build.
+ - A target platform name that is supported under
+   <TF-M_root>/platform/ext/target, for example ``an521``.
 
 Build type
 ----------
@@ -531,5 +532,5 @@ Alternately using traditional cmake syntax
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
 *Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.*
