@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021 STMicroelectronics. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -56,7 +56,6 @@ target_sources(crypto_service_crypto_hw
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha1_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha256_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/stm.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/huk.c
 )
 
 target_include_directories(crypto_service_crypto_hw
