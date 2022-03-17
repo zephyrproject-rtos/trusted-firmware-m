@@ -55,11 +55,11 @@ __Vectors:
     .long   CLOCK_POWER_IRQHandler
     .long   0                           /* Reserved */
     .long   0                           /* Reserved */
-    .long   SPIM0_SPIS0_TWIM0_TWIS0_UARTE0_IRQHandler
-    .long   SPIM1_SPIS1_TWIM1_TWIS1_UARTE1_IRQHandler
+    .long   SERIAL0_IRQHandler
+    .long   SERIAL1_IRQHandler
     .long   SPIM4_IRQHandler
-    .long   SPIM2_SPIS2_TWIM2_TWIS2_UARTE2_IRQHandler
-    .long   SPIM3_SPIS3_TWIM3_TWIS3_UARTE3_IRQHandler
+    .long   SERIAL2_IRQHandler
+    .long   SERIAL3_IRQHandler
     .long   GPIOTE0_IRQHandler
     .long   SAADC_IRQHandler
     .long   TIMER0_IRQHandler
@@ -287,11 +287,11 @@ Default_Handler:
     def_irq_handler      CACHE_IRQHandler
     def_irq_handler      SPU_IRQHandler
     def_irq_handler      CLOCK_POWER_IRQHandler
-    def_irq_handler      SPIM0_SPIS0_TWIM0_TWIS0_UARTE0_IRQHandler
-    def_irq_handler      SPIM1_SPIS1_TWIM1_TWIS1_UARTE1_IRQHandler
+    def_irq_handler      SERIAL0_IRQHandler
+    def_irq_handler      SERIAL1_IRQHandler
     def_irq_handler      SPIM4_IRQHandler
-    def_irq_handler      SPIM2_SPIS2_TWIM2_TWIS2_UARTE2_IRQHandler
-    def_irq_handler      SPIM3_SPIS3_TWIM3_TWIS3_UARTE3_IRQHandler
+    def_irq_handler      SERIAL2_IRQHandler
+    def_irq_handler      SERIAL3_IRQHandler
     def_irq_handler      GPIOTE0_IRQHandler
     def_irq_handler      SAADC_IRQHandler
     def_irq_handler      TIMER0_IRQHandler
