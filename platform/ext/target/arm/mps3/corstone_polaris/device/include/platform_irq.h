@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,10 @@ typedef enum _IRQn_Type {
     SPI_ADC_IRQn                       = 53,   /* SPI ADC Interrupt */
     SPI_SHIELD0_IRQn                   = 54,   /* SPI (Shield 0) Interrupt */
     SPI_SHIELD1_IRQn                   = 55,   /* SPI (Shield 1) Interrupt */
-    /* Reserved                        = 56:68    Reserved */
+    /* Reserved                        = 56,      Reserved */
+    DMA_CHANNEL_0_IRQn                 = 57,   /* DMA Channel 0 Interrupt */
+    DMA_CHANNEL_1_IRQn                 = 58,   /* DMA Channel 1 Interrupt */
+    /* Reserved                        = 59:68    Reserved */
     GPIO0_Combined_IRQn                = 69,   /* GPIO 0 Combined Interrupt */
     GPIO1_Combined_IRQn                = 70,   /* GPIO 1 Combined Interrupt */
     GPIO2_Combined_IRQn                = 71,   /* GPIO 2 Combined Interrupt */

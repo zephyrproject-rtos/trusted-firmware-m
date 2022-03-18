@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,9 +91,9 @@
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
-/* Secure Data stored in DTCM */
-#define S_DATA_START    (DTCM0_BASE_S)
-#define S_DATA_SIZE     (DTCM_BLK_SIZE * DTCM_BLK_NUM)
+/* Secure Data stored in first half of ISRAM0 */
+#define S_DATA_START    (ISRAM0_BASE_S)
+#define S_DATA_SIZE     (ISRAM0_SIZE / 2)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 /* Size of vector table: 146 interrupt handlers + 4 bytes MPS initial value */
@@ -107,9 +107,9 @@
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-/* Non-Secure Data stored in ISRAM0 */
-#define NS_DATA_START   (ISRAM0_BASE_NS)
-#define NS_DATA_SIZE    (ISRAM0_SIZE)
+/* Non-Secure Data stored in second half of ISRAM0 */
+#define NS_DATA_START   (ISRAM0_BASE_NS + S_DATA_SIZE)
+#define NS_DATA_SIZE    (ISRAM0_SIZE / 2)
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for MPC and SAU configuration */
@@ -125,9 +125,9 @@
 
 #ifdef BL2
 /* Bootloader regions */
-/* Use ITCM to store Bootloader */
-#define BL2_CODE_START    (ITCM_BASE_S)
-#define BL2_CODE_SIZE     (ITCM_SIZE)
+/* Use SRAM to store Bootloader */
+#define BL2_CODE_START    (SRAM_BASE_S)
+#define BL2_CODE_SIZE     (FLASH_AREA_BL2_SIZE)
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
 /* Bootloader uses same memory as for secure image */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,12 +79,12 @@
  * swapping.
  */
 #define FLASH_AREA_BL2_OFFSET      (0x0)
-#define FLASH_AREA_BL2_SIZE        (ITCM_SIZE) /* 256 KB */
+#define FLASH_AREA_BL2_SIZE        (0x40000) /* 256 KB */
 
 #if !defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)
 /* Secure + Non-secure image primary slot */
 #define FLASH_AREA_0_ID            (1)
-#define FLASH_AREA_0_OFFSET        (0)
+#define FLASH_AREA_0_OFFSET        (FLASH_AREA_BL2_SIZE)
 #define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE + \
                                     FLASH_NS_PARTITION_SIZE)
 /* Secure + Non-secure secondary slot */
@@ -95,7 +95,7 @@
 /* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (FLASH_MAX_PARTITION_SIZE)
+#define FLASH_AREA_SCRATCH_SIZE    (FLASH_MAX_PARTITION_SIZE / 2)
 /* The maximum number of status entries supported by the bootloader. */
 #define MCUBOOT_STATUS_MAX_ENTRIES ((FLASH_S_PARTITION_SIZE + \
                                      FLASH_NS_PARTITION_SIZE) / \
@@ -107,7 +107,7 @@
 #elif (MCUBOOT_IMAGE_NUMBER == 2)
 /* Secure image primary slot */
 #define FLASH_AREA_0_ID            (1)
-#define FLASH_AREA_0_OFFSET        (0)
+#define FLASH_AREA_0_OFFSET        (FLASH_AREA_BL2_SIZE)
 #define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE)
 /* Non-secure image primary slot */
 #define FLASH_AREA_1_ID            (FLASH_AREA_0_ID + 1)
@@ -124,7 +124,7 @@
 /* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (FLASH_MAX_PARTITION_SIZE)
+#define FLASH_AREA_SCRATCH_SIZE    (FLASH_MAX_PARTITION_SIZE / 2)
 /* The maximum number of status entries supported by the bootloader. */
 #define MCUBOOT_STATUS_MAX_ENTRIES (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_SCRATCH_SIZE)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,15 +309,15 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
 
-    /* ISRAM0 is allocated for NS data, so whole range is set to non-secure
-     * accesible. */
+    /* The second half of ISRAM0 is allocated for NS data,
+     * so it's set to non-secure accesible. */
     ret = Driver_ISRAM0_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Initialize MPC for ISRAM0!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_ISRAM0_MPC.ConfigRegion(MPC_ISRAM0_RANGE_BASE_NS,
-                                      MPC_ISRAM0_RANGE_LIMIT_NS,
+    ret = Driver_ISRAM0_MPC.ConfigRegion(NS_DATA_START,
+                                      NS_DATA_LIMIT,
                                       ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Configure MPC for ISRAM0!");
