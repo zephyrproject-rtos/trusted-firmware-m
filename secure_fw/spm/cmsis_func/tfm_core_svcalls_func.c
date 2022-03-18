@@ -17,6 +17,7 @@
 #include "tfm_peripherals_def.h"
 #include "tfm_irq_list.h"
 #include "ffm/tfm_boot_data.h"
+#include "tfm_hal_platform.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(uint8_t svc_num,
@@ -109,7 +110,5 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t *psp, uint32_t exc_return)
 
 void tfm_access_violation_handler(void)
 {
-    while (1) {
-        ;
-    }
+    tfm_hal_system_halt();
 }
