@@ -300,6 +300,7 @@ Default_Handler:
     def_irq_handler      SERIAL1_IRQHandler
     def_irq_handler      SPIM4_IRQHandler
     def_irq_handler      SERIAL2_IRQHandler
+    def_irq_handler      SERIAL3_IRQHandler
     def_irq_handler      GPIOTE0_IRQHandler
     def_irq_handler      SAADC_IRQHandler
     def_irq_handler      TIMER0_IRQHandler
