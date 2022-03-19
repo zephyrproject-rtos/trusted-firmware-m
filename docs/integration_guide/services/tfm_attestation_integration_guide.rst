@@ -611,12 +611,17 @@ iat-verifier
 There is another possibility to verify the attestation token. This addresses
 the off-device testing when the token is already retrieved from the device and
 verification is done on the requester side. There is a Python script for this
-purpose in ``tools/iat-verifier``. It does the same checking as the
-attestation test suite. The following steps describe how to simulate an
-off-device token verification on a host computer. It is described how to
-retrieve an initial attestation token when TF-M code is executed on FVP
-and how to use the iat_verifier script to check the token. This example assumes
+purpose in the `tf-m-tools`_ repo called `iat-verifier`_. It does the same
+checking as the attestation test suite. The following steps describe how to
+simulate an off-device token verification on a host computer. It is described
+how to retrieve an initial attestation token when TF-M code is executed on FVP
+and how to use the iat-verifier script to check the token. This example assumes
 that user has license for DS-5 and FVP models:
+
+.. _tf-m-tools: https://git.trustedfirmware.org/TF-M/tf-m-tools.git
+
+.. _iat-verifier: https://git.trustedfirmware.org/TF-M/tf-m-tools.git/tree/
+  iat-verifier
 
  - Build TF-M with any of the ``ConfigRegression*.cmake`` build configurations
    for MPS2 AN521 platform. More info in
@@ -653,8 +658,11 @@ that user has license for DS-5 and FVP models:
    - For symmetric initial attestation
      ``check_iat -m mac -p -K -k platform/ext/common/template/tfm_symmetric_iak.key <PATH>/iat_hmac_02.cbor``
 
- - Documentation of the iat-verifier can be found
-   :doc:`here </tools/iat-verifier/README>`.
+ - Documentation of the iat-verifier can be found in the
+   `tf-m-tools-iat-verifer-readme`_ .
+
+.. _tf-m-tools-iat-verifer-readme: https://git.trustedfirmware.org/TF-M/
+  tf-m-tools.git/tree/iat-verifier/README.rst
 
 --------------
 
