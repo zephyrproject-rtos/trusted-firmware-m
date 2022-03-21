@@ -81,6 +81,8 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
             return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_1), out_len, out);
         case PLAT_OTP_ID_BL2_ROTPK_2:
             return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_2), out_len, out);
+        case PLAT_OTP_ID_BL2_ROTPK_3:
+            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_3), out_len, out);
 
         case PLAT_OTP_ID_NV_COUNTER_BL2_0:
             return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_0), out_len, out);
@@ -88,6 +90,9 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
             return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_1), out_len, out);
         case PLAT_OTP_ID_NV_COUNTER_BL2_2:
             return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_2), out_len, out);
+        case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_3), out_len, out);
+
 #endif /* BL2 */
 
 #ifdef BL1
@@ -184,6 +189,8 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_1), in_len, in);
     case PLAT_OTP_ID_BL2_ROTPK_2:
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_2), in_len, in);
+    case PLAT_OTP_ID_BL2_ROTPK_3:
+        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_3), in_len, in);
 
     case PLAT_OTP_ID_NV_COUNTER_BL2_0:
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_0), in_len, in);
@@ -191,6 +198,8 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_1), in_len, in);
     case PLAT_OTP_ID_NV_COUNTER_BL2_2:
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_2), in_len, in);
+    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_3), in_len, in);
 #endif /* Bl2 */
 
 #ifdef BL1
@@ -271,6 +280,9 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         case PLAT_OTP_ID_BL2_ROTPK_2:
             *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_2);
             break;
+        case PLAT_OTP_ID_BL2_ROTPK_3:
+            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_3);
+            break;
 
         case PLAT_OTP_ID_NV_COUNTER_BL2_0:
             *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_0);
@@ -280,6 +292,9 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
             break;
         case PLAT_OTP_ID_NV_COUNTER_BL2_2:
             *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_2);
+            break;
+        case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_3);
             break;
 #endif /* BL2 */
 

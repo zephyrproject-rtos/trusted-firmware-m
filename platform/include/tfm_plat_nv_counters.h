@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -34,6 +34,7 @@ enum tfm_nv_counter_t {
     PLAT_NV_COUNTER_BL2_0,     /* Used by bootloader */
     PLAT_NV_COUNTER_BL2_1,     /* Used by bootloader */
     PLAT_NV_COUNTER_BL2_2,     /* Used by bootloader */
+    PLAT_NV_COUNTER_BL2_3,     /* Used by bootloader */
 
     PLAT_NV_COUNTER_BL1_0,     /* Used by bootloader */
 

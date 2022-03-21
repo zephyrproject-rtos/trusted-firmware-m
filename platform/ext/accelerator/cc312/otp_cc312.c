@@ -203,7 +203,7 @@ __PACKED_STRUCT plat_otp_layout_t {
             uint16_t iak_len_zero_bits;
             uint16_t iak_type_zero_bits;
             uint16_t iak_id_zero_bits;
-            uint16_t bl2_rotpk_zero_bits[3];
+            uint16_t bl2_rotpk_zero_bits[4];
 #ifdef BL1
             uint16_t bl1_rotpk_0_zero_bits;
 #ifdef PLATFORM_DEFAULT_BL1
@@ -225,8 +225,8 @@ __PACKED_STRUCT plat_otp_layout_t {
         uint8_t verification_service_url[32];
         uint8_t profile_definition[32];
 
-        uint8_t bl2_rotpk[3][32];
-        uint8_t bl2_nv_counter[3][64];
+        uint8_t bl2_rotpk[4][32];
+        uint8_t bl2_nv_counter[4][64];
 
 #ifdef BL1
         uint8_t bl1_rotpk_0[32];
@@ -504,7 +504,7 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
     }
 #endif /* ATTEST_INCLUDE_COSE_KEY_ID */
 
-    for(idx = 0; idx < 3; idx++) {
+    for(idx = 0; idx < 4; idx++) {
         err = verify_zero_bits_count(otp->bl2_rotpk[idx],
                                      sizeof(otp->bl2_rotpk[idx]),
                                      (uint8_t*)&otp->bl2_rotpk_zero_bits[idx]);
@@ -695,6 +695,13 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_NV_COUNTER_BL2_2:
         return otp_read(otp->bl2_nv_counter[2],
                         sizeof(otp->bl2_nv_counter[2]), out_len, out);
+
+    case PLAT_OTP_ID_BL2_ROTPK_3:
+        return otp_read(otp->bl2_rotpk[3], sizeof(otp->bl2_rotpk[3]), out_len,
+                        out);
+    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+        return otp_read(otp->bl2_nv_counter[3],
+                        sizeof(otp->bl2_nv_counter[3]), out_len, out);
 
 #ifdef BL1
     case PLAT_OTP_ID_BL1_ROTPK_0:
@@ -907,6 +914,13 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(otp->bl2_nv_counter[2],
                          sizeof(otp->bl2_nv_counter[2]), in_len, in, NULL);
 
+    case PLAT_OTP_ID_BL2_ROTPK_3:
+        return otp_write(otp->bl2_rotpk[3], sizeof(otp->bl2_rotpk[3]), in_len,
+                         in, (uint8_t*)&otp->bl2_rotpk_zero_bits[3]);
+    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+        return otp_write(otp->bl2_nv_counter[3],
+                         sizeof(otp->bl2_nv_counter[3]), in_len, in, NULL);
+
 #ifdef BL1
     case PLAT_OTP_ID_BL1_ROTPK_0:
         return otp_write(otp->bl1_rotpk_0, sizeof(otp->bl1_rotpk_0), in_len, in,
@@ -1009,6 +1023,13 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         break;
     case PLAT_OTP_ID_NV_COUNTER_BL2_2:
         *size = sizeof(otp->bl2_nv_counter[2]);
+        break;
+
+    case PLAT_OTP_ID_BL2_ROTPK_3:
+        *size = sizeof(otp->bl2_rotpk[3]);
+        break;
+    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+        *size = sizeof(otp->bl2_nv_counter[3]);
         break;
 
 #ifdef BL1

@@ -27,10 +27,14 @@
  * 0x310C_0000 Non-secure image primary slot (512 KB)
  * 0x3114_0000 Secure image     secondary slot (512 KB)
  * 0x311C_0000 Non-secure image secondary slot (512 KB)
- * 0x3124_0000 Protected Storage Area (20 KB)
- * 0x3124_5000 Internal Trusted Storage Area (16 KB)
- * 0x3124_9000 OTP / NV counters  area (8 KB)
- * 0x3124_B000 Unused
+ * 0x3124_0000 AP BL1 primary slot (512 KB)
+ * 0x312C_0000 SCP BL1 primary slot (512 KB)
+ * 0x3134_0000 AP BL1 secondary slot (512 KB)
+ * 0x313C_0000 SCP BL1 secondary slot (512 KB)
+ * 0x3144_0000 Protected Storage Area (20 KB)
+ * 0x3144_5000 Internal Trusted Storage Area (16 KB)
+ * 0x3144_9000 OTP / NV counters  area (8 KB)
+ * 0x3144_B000 Unused
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -44,6 +48,8 @@
 #define FLASH_BL2_PARTITION_SIZE        (0x20000) /* BL2 partition: 128 KB */
 #define FLASH_S_PARTITION_SIZE          (0x80000) /* S   partition: 512 KB */
 #define FLASH_NS_PARTITION_SIZE         (0x80000) /* NS  partition: 512 KB */
+#define FLASH_AP_PARTITION_SIZE         (0x80000) /* AP  partition: 512 KB */
+#define FLASH_SCP_PARTITION_SIZE        (0x80000) /* SCP partition: 512 KB */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
@@ -90,28 +96,49 @@
 #define FLASH_AREA_5_OFFSET        (FLASH_AREA_4_OFFSET + FLASH_AREA_4_SIZE)
 #define FLASH_AREA_5_SIZE          (FLASH_NS_PARTITION_SIZE)
 
+/* AP image primary slot */
+#define FLASH_AREA_6_ID            (FLASH_AREA_5_ID + 1)
+#define FLASH_AREA_6_OFFSET        (FLASH_AREA_5_OFFSET + FLASH_AREA_5_SIZE)
+#define FLASH_AREA_6_SIZE          (FLASH_AP_PARTITION_SIZE)
+/* SCP image primary slot */
+#define FLASH_AREA_7_ID            (FLASH_AREA_6_ID + 1)
+#define FLASH_AREA_7_OFFSET        (FLASH_AREA_6_OFFSET + FLASH_AREA_6_SIZE)
+#define FLASH_AREA_7_SIZE          (FLASH_SCP_PARTITION_SIZE)
+/* AP image secondary slot */
+#define FLASH_AREA_8_ID            (FLASH_AREA_7_ID + 1)
+#define FLASH_AREA_8_OFFSET        (FLASH_AREA_7_OFFSET + FLASH_AREA_7_SIZE)
+#define FLASH_AREA_8_SIZE          (FLASH_AP_PARTITION_SIZE)
+/* SCP image secondary slot */
+#define FLASH_AREA_9_ID            (FLASH_AREA_8_ID + 1)
+#define FLASH_AREA_9_OFFSET        (FLASH_AREA_8_OFFSET + FLASH_AREA_8_SIZE)
+#define FLASH_AREA_9_SIZE          (FLASH_SCP_PARTITION_SIZE)
+
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Check that all the images can fit in the Flash area. */
-#if (FLASH_AREA_5_OFFSET + FLASH_AREA_5_SIZE > FLASH_TOTAL_SIZE)
+#if (FLASH_AREA_9_OFFSET + FLASH_AREA_9_SIZE > FLASH_TOTAL_SIZE)
 #error "Out of Flash memory!"
 #endif
 
 #define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_2_ID : \
                                          ((x) == 1) ? FLASH_AREA_3_ID : \
+                                         ((x) == 2) ? FLASH_AREA_6_ID : \
+                                         ((x) == 3) ? FLASH_AREA_7_ID : \
                                                       255)
 #define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_4_ID : \
                                          ((x) == 1) ? FLASH_AREA_5_ID : \
+                                         ((x) == 2) ? FLASH_AREA_8_ID : \
+                                         ((x) == 3) ? FLASH_AREA_9_ID : \
                                                       255)
 
 /* Scratch area is not used with RAM loading firmware upgrade */
 #define FLASH_AREA_IMAGE_SCRATCH        255
 
 /* Protected Storage (PS) Service definitions */
-#define FLASH_PS_AREA_OFFSET            (FLASH_AREA_5_OFFSET + \
-                                         FLASH_AREA_5_SIZE)
+#define FLASH_PS_AREA_OFFSET            (FLASH_AREA_9_OFFSET + \
+                                         FLASH_AREA_9_SIZE)
 #define FLASH_PS_AREA_SIZE              (0x5000)   /* 20 KB */
 
 /* Internal Trusted Storage (ITS) Service definitions */

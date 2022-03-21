@@ -49,6 +49,34 @@ const struct flash_area flash_map[] = {
         .fa_off = FLASH_AREA_5_OFFSET,
         .fa_size = FLASH_AREA_5_SIZE,
     },
+    {
+        .fa_id = FLASH_AREA_6_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_6_OFFSET,
+        .fa_size = FLASH_AREA_6_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_7_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_7_OFFSET,
+        .fa_size = FLASH_AREA_7_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_8_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_8_OFFSET,
+        .fa_size = FLASH_AREA_8_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_9_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_9_OFFSET,
+        .fa_size = FLASH_AREA_9_SIZE,
+    },
 };
 
 const int flash_map_entry_num = ARRAY_SIZE(flash_map);

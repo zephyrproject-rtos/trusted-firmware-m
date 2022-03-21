@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,10 +33,12 @@ enum tfm_otp_element_id_t {
     PLAT_OTP_ID_BL2_ROTPK_0,
     PLAT_OTP_ID_BL2_ROTPK_1,
     PLAT_OTP_ID_BL2_ROTPK_2,
+    PLAT_OTP_ID_BL2_ROTPK_3,
 
     PLAT_OTP_ID_NV_COUNTER_BL2_0,
     PLAT_OTP_ID_NV_COUNTER_BL2_1,
     PLAT_OTP_ID_NV_COUNTER_BL2_2,
+    PLAT_OTP_ID_NV_COUNTER_BL2_3,
 
     PLAT_OTP_ID_KEY_BL2_ENCRYPTION,
     PLAT_OTP_ID_BL1_2_IMAGE,

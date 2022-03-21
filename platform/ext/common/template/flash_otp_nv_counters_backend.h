@@ -43,9 +43,11 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
 
         uint8_t bl2_nv_counter_0[64];
         uint8_t bl2_nv_counter_1[64];
-
         uint8_t bl2_nv_counter_2[64];
+        uint8_t bl2_nv_counter_3[64];
+
         uint8_t bl2_rotpk_2[32];
+        uint8_t bl2_rotpk_3[32];
 #endif /* BL2 */
 
 #ifdef BL1
