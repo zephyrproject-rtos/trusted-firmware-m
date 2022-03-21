@@ -29,11 +29,13 @@ target_sources(tfm_sprt
 )
 
 target_link_libraries(tfm_sprt
-    platform_s
-    psa_interface
-    tfm_boot_status
-    tfm_secure_api
-    $<$<BOOL:${TFM_SP_LOG_RAW_ENABLED}>:tfm_sp_log_raw>
+    PUBLIC
+        tfm_boot_status
+        $<$<BOOL:${TFM_SP_LOG_RAW_ENABLED}>:tfm_sp_log_raw>
+    PRIVATE
+        platform_s
+        tfm_secure_api
+        psa_interface
 )
 
 target_compile_definitions(tfm_partition_defs

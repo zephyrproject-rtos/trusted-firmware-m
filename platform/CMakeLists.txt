@@ -78,7 +78,6 @@ target_link_libraries(platform_s
     PRIVATE
         psa_interface
         tfm_secure_api
-        tfm_arch
         tfm_partition_defs
         tfm_spm
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:tfm_sprt>

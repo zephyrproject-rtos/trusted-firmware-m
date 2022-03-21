@@ -116,12 +116,6 @@ set_source_files_properties(tfm_crypto_secure_api.c
             $<$<C_COMPILER_ID:IAR>:>
 )
 
-# Pick up configuration definitions
-target_link_libraries(tfm_secure_api
-    INTERFACE
-        tfm_psa_rot_partition_crypto
-)
-
 ############################ Partition Defs ####################################
 
 target_link_libraries(tfm_partitions

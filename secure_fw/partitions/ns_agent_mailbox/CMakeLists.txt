@@ -28,6 +28,8 @@ target_link_libraries(tfm_psa_rot_partition_ns_agent_mailbox
         psa_interface
         tfm_spm
         tfm_sprt
+        platform_s
+        tfm_secure_api
 )
 
 # The generated sources

@@ -33,6 +33,7 @@ target_link_libraries(tfm_s
         platform_s
         psa_interface
         tfm_sprt
+        tfm_secure_api
 )
 
 set_target_properties(tfm_s
