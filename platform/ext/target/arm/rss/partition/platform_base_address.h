@@ -123,6 +123,10 @@
 #define HOST_ACCESS_BASE_S               0x70000000 /* Can access the Host region based on ATU config */
 #define HOST_ACCESS_LIMIT_S              (HOST_ACCESS_BASE_S + HOST_ACCESS_SIZE - 1)
 #define UART0_BASE_S                     (HOST_ACCESS_BASE_S + 0x0A400000) /* UART 0 Secure base address */
+#define SCP_SRAM_BASE_S                  HOST_ACCESS_BASE_S
+#define SCP_BL1_SIZE                     0x10000
+#define AP_SRAM_BASE_S                   (SCP_SRAM_BASE_S + SCP_BL1_SIZE)
+#define AP_BL1_SIZE                      0x20000
 
 /* Memory map addresses exempt from memory attribution by both the SAU and IDAU */
 #define RSS_EWIC_BASE                    0xE0047000 /* External Wakeup Interrupt Controller

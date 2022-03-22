@@ -200,6 +200,7 @@ target_sources(bl2
 
 target_sources(platform_bl1
     PRIVATE
+        ./bl1/boot_hal_bl1.c
         ./cmsis_drivers/Driver_Flash.c
         ./cmsis_drivers/Driver_USART.c
         ./device/source/device_definition.c
