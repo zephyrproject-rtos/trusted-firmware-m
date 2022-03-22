@@ -114,6 +114,7 @@ target_sources(platform_s
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         native_drivers/systimer_armv8-m_drv.c
         native_drivers/uart_pl011_drv.c
+        crypto_keys.c
         tfm_peripherals_def.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>

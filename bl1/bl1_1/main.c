@@ -15,9 +15,10 @@
 #include "image.h"
 #include "fih.h"
 
+uint8_t computed_bl1_2_hash[BL1_2_HASH_SIZE];
+
 fih_int validate_image_at_addr(uint8_t *image)
 {
-    uint8_t computed_bl1_2_hash[BL1_2_HASH_SIZE];
     uint8_t stored_bl1_2_hash[BL1_2_HASH_SIZE];
     fih_int fih_rc = FIH_FAILURE;
 

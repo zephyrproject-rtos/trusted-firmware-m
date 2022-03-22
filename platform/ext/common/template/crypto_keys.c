@@ -81,14 +81,16 @@ enum tfm_plat_err_t tfm_plat_builtin_key_get_lifetime_and_slot(
     switch (MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key_id)) {
     case TFM_BUILTIN_KEY_ID_HUK:
         *slot_number = TFM_BUILTIN_KEY_SLOT_HUK;
-        *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_LIFETIME_PERSISTENT,
-                                                                   TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
+        *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
+                        PSA_KEY_LIFETIME_PERSISTENT,
+                        TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
         break;
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
     case TFM_BUILTIN_KEY_ID_IAK:
         *slot_number = TFM_BUILTIN_KEY_SLOT_IAK;
-        *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_LIFETIME_PERSISTENT,
-                                                                   TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
+        *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
+                        PSA_KEY_LIFETIME_PERSISTENT,
+                        TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
 #endif /* TFM_PARTITION_INITIAL_ATTESTATION */
         break;
     default:
