@@ -164,6 +164,9 @@ macro(tfm_toolchain_reload_compiler)
         set(COMPILER_CP_FLAG -mfloat-abi=soft)
         set(LINKER_CP_OPTION -mfloat-abi=soft)
     endif()
+
+    # For GNU Arm Embedded Toolchain doesn't emit __ARM_ARCH_8_1M_MAIN__, adding this macro manually.
+    add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__>)
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first
