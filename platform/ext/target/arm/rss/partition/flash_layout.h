@@ -138,11 +138,6 @@
 #define NS_IMAGE_LOAD_ADDRESS           (S_IMAGE_LOAD_ADDRESS + \
                                          SECURE_IMAGE_MAX_SIZE)
 
-/* Define where executable memory for the images starts and ends */
-#define IMAGE_EXECUTABLE_RAM_START      (S_IMAGE_LOAD_ADDRESS)
-#define IMAGE_EXECUTABLE_RAM_SIZE       (SECURE_IMAGE_MAX_SIZE + \
-                                         NON_SECURE_IMAGE_MAX_SIZE)
-
 /* Flash device name used by BL2
  * Name is defined in flash driver file: Driver_Flash.c
  */

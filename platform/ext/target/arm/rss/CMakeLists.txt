@@ -51,6 +51,10 @@ target_add_scatter_file(bl2
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/rss_bl2.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/rss_bl2.ld>
 )
+target_compile_definitions(bootutil
+    PRIVATE
+        MULTIPLE_EXECUTABLE_RAM_REGIONS
+)
 
 target_sources(bl1_1
     PRIVATE

@@ -52,3 +52,30 @@ const struct flash_area flash_map[] = {
 };
 
 const int flash_map_entry_num = ARRAY_SIZE(flash_map);
+
+int boot_get_image_exec_ram_info(uint32_t image_id,
+                                 uint32_t *exec_ram_start,
+                                 uint32_t *exec_ram_size)
+{
+    int rc = -1;
+
+    if (image_id == 0) {
+        *exec_ram_start = S_IMAGE_LOAD_ADDRESS;
+        *exec_ram_size  = SECURE_IMAGE_MAX_SIZE;
+        rc = 0;
+    } else if (image_id == 1) {
+        *exec_ram_start = NS_IMAGE_LOAD_ADDRESS;
+        *exec_ram_size  = NON_SECURE_IMAGE_MAX_SIZE;
+        rc = 0;
+    } else if (image_id == 2) {
+        *exec_ram_start = AP_SRAM_BASE_S;
+        *exec_ram_size  = AP_BL1_SIZE;
+        rc = 0;
+    } else if (image_id == 3) {
+        *exec_ram_start = SCP_SRAM_BASE_S;
+        *exec_ram_size  = SCP_BL1_SIZE;
+        rc = 0;
+    }
+
+    return rc;
+}
