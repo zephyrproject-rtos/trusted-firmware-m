@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -170,7 +170,7 @@ struct sync_obj_t {
  *  pth         -    The thread_t which waits on p_sync_obj.
  *
  */
-void thrd_wait_on(struct sync_obj_t *p_sync_obj, struct thread_t *pth);
+void thrd_set_wait(struct sync_obj_t *p_sync_obj, struct thread_t *pth);
 
 /*
  * Wake up the sync object owner thread and set the return value of the function

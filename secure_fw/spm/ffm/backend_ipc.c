@@ -121,7 +121,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
      */
 
     if (!is_tfm_rpc_msg(handle)) {
-        thrd_wait_on(&handle->ack_evnt, CURRENT_THREAD);
+        thrd_set_wait(&handle->ack_evnt, CURRENT_THREAD);
     }
 
     return PSA_SUCCESS;
@@ -219,7 +219,7 @@ static psa_signal_t ipc_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
     ret_signal = p_pt->signals_asserted & signal_mask;
     if (ret_signal == 0) {
         p_pt->signals_waiting = signal_mask;
-        thrd_wait_on(&p_pt->waitobj, CURRENT_THREAD);
+        thrd_set_wait(&p_pt->waitobj, CURRENT_THREAD);
     }
     CRITICAL_SECTION_LEAVE(cs_assert);
 

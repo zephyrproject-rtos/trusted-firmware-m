@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -97,7 +97,7 @@ uint32_t thrd_start_scheduler(struct thread_t **ppth)
     return tfm_arch_refresh_hardware_context(pth->p_context_ctrl);
 }
 
-void thrd_wait_on(struct sync_obj_t *p_sync_obj, struct thread_t *pth)
+void thrd_set_wait(struct sync_obj_t *p_sync_obj, struct thread_t *pth)
 {
     TFM_CORE_ASSERT(p_sync_obj && p_sync_obj->magic == THRD_SYNC_MAGIC);
 
