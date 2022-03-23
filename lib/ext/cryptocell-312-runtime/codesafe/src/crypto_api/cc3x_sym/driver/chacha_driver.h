@@ -9,6 +9,11 @@
 
 #include "driver_defs.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /******************************************************************************
 *               TYPE DEFINITIONS
 ******************************************************************************/
@@ -39,7 +44,6 @@ typedef struct ChachaContext {
     ChachaState_t state;
 } ChachaContext_t;
 
-
 /******************************************************************************
 *               FUNCTION PROTOTYPES
 ******************************************************************************/
@@ -55,6 +59,8 @@ typedef struct ChachaContext {
  */
 drvError_t ProcessChacha(ChachaContext_t *chachaCtx, CCBuffInfo_t *pInputBuffInfo, CCBuffInfo_t *pOutputBuffInfo, uint32_t inDataSize);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _CHACHA_DRIVER_H */
-

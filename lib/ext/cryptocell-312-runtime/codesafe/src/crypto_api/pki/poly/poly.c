@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2022, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -279,9 +279,8 @@ CCError_t PolyMacCalc(mbedtls_poly_key  key,        /*!< [in] Poniter to 256 bit
     //7. copy acc into macRes
     PkaCopyDataFromPkaReg(macRes, CC_POLY_MAC_SIZE_IN_WORDS, ACC_REG);
 
-    end_func:
+end_func:
     PkaFinishAndMutexUnlock(pkaRegsNum);
     return rc;
-
 }
 

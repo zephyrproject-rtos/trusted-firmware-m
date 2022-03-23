@@ -1,9 +1,8 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2022, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
 
 #ifndef POLY_H
 #define POLY_H
@@ -15,7 +14,6 @@
 
 #include "cc_error.h"
 #include "mbedtls_cc_poly.h"
-
 
 #ifdef __cplusplus
 extern "C"
@@ -34,6 +32,32 @@ extern "C"
 #define CC_POLY_PKA_REG_SIZE_IN_WORDS  (CC_POLY_PKA_REG_SIZE_IN_PKA_WORDS * (CALC_FULL_32BIT_WORDS(CC_PKA_WORD_SIZE_IN_BITS)))
 #define CC_POLY_PKA_REG_SIZE_IN_BYTES  (CC_POLY_PKA_REG_SIZE_IN_WORDS*CC_32BIT_WORD_SIZE)
 
+/**
+ * PKA register contexts. Between multipart calls, the PKA engine needs to save
+ * and restore the register context. It's composed of the clamped key pair
+ * (r,s) 256 bit long and the value of the accumulator register which is mod P,
+ * where P is 2^130-5, which in full words is 160 bit long, 5 32-bit words.
+ */
+typedef struct PolyPkaContext {
+    uint32_t key[8]; /*!< (r,s) concatenated with r already clamped */
+    uint32_t acc[5]; /*!< Value of the accumulator modulus P, i.e. [0,2^130-5)*/
+} PolyPkaContext_t;
+
+/**
+ * State information required to support multipart APIs in AEAD for MAC
+ * computation. As Poly1305 operates on CC_POLY_BLOCK_SIZE_IN BYTES of data
+ * it needs to cache up to CC_POLY_BLOCK_SIZE_IN_BYTES-1 of the input. But
+ * for practical reasons (i.e. working on 4-byte aligned buffers) we store an
+ * entire block of 16 bytes that can be processed in one go without additional
+ * copies
+ */
+typedef struct PolyState {
+    uint32_t msg_state[CC_POLY_BLOCK_SIZE_IN_WORDS]; /*!< Equals 16 bytes of
+                                                      *   data
+                                                      */
+    uint8_t msg_state_size;  /*!< Size of the message buffered in msg_state */
+    PolyPkaContext_t context; /*!< PKA registers context (clamped key, acc) */
+} PolyState_t;
 
 /**
  * @brief Generates the POLY mac according to RFC 7539 section 2.5.1
@@ -52,4 +76,4 @@ CCError_t PolyMacCalc(mbedtls_poly_key  key,        /*!< [in] Poniter to 256 bit
 }
 #endif
 
-#endif  //POLY_H
+#endif  /* POLY_H */
