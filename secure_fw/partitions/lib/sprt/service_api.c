@@ -26,7 +26,7 @@ int32_t tfm_core_get_boot_data(uint8_t major_type,
         );
 }
 
-#ifdef TFM_PSA_API
+#if defined TFM_PSA_API && TFM_LVL != 1
 /* Entry point when Partition FLIH functions return */
 __attribute__((naked))
 void tfm_flih_func_return(psa_flih_result_t result)
@@ -35,4 +35,4 @@ void tfm_flih_func_return(psa_flih_result_t result)
                    "BX  r0                                        \n"
                    );
 }
-#endif /* TFM_PSA_API */
+#endif /* TFM_PSA_API && TFM_LVL != 1 */

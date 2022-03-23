@@ -176,6 +176,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);
         break;
+#if TFM_LVL != 1
     case TFM_SVC_PREPARE_DEPRIV_FLIH:
         exc_return = tfm_flih_prepare_depriv_flih(
                                             (struct partition_t *)svc_args[0],
@@ -185,6 +186,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         exc_return = tfm_flih_return_to_isr(svc_args[0],
                                             (struct context_flih_ret_t *)msp);
         break;
+#endif
     default:
         if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
                                      - (uint32_t)msp) > TFM_STACK_SEALED_SIZE) {
