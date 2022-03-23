@@ -379,6 +379,7 @@ def gen_per_partition_files(context):
 
     partition_context = {}
     partition_context['utilities'] = context['utilities']
+    partition_context['config_impl'] = context['config_impl']
 
     manifesttemplate = ENV.get_template(os.path.join(sys.path[0], 'templates/manifestfilename.template'))
     memorytemplate = ENV.get_template(os.path.join(sys.path[0], 'templates/partition_intermedia.template'))

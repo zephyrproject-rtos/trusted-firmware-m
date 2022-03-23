@@ -41,7 +41,10 @@
 REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_START$$Base);
 REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_END$$Base);
 #endif
+
+{% if config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] == '1' or manifest.model == "IPC" %}
 extern uint8_t {{manifest.name|lower}}_stack[];
+{% endif %}
 
 {% if manifest.model == "IPC" %}
 /* Entrypoint function declaration */
@@ -111,14 +114,22 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
 {% endif %}
                                     | PARTITION_PRI_{{manifest.priority}},
         .entry                      = ENTRY_TO_POSITION({{manifest.entry}}),
+{% if config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] == '1' or manifest.model == "IPC" %}
         .stack_size                 = {{manifest.stack_size}},
+{% else %}
+        .stack_size                 = 0,
+{% endif %}
         .heap_size                  = 0,
         .ndeps                      = {{(manifest.name|upper + "_NDEPS")}},
         .nservices                  = {{(manifest.name|upper + "_NSERVS")}},
         .nassets                    = {{(manifest.name|upper + "_NASSETS")}},
         .nirqs                      = {{(manifest.name|upper + "_NIRQS")}},
     },
+{% if config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] == '1' or manifest.model == "IPC" %}
     .stack_addr                     = (uintptr_t){{manifest.name|lower}}_stack,
+{% else %}
+    .stack_addr                     = 0,
+{% endif %}
     .heap_addr                      = 0,
 {% if counter.dep_counter > 0 %}
     .deps = {
@@ -142,13 +153,14 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         {% else %}
             .sfn                    = 0,
         {% endif %}
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+{% if config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] == '1' %}
         {% if manifest.model == "SFN" %}
             .signal                 = {{service.signal_value}},
         {% else %}
             .signal                 = {{service.name}}_SIGNAL,
         {% endif %}
-#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
+{% endif %}
+
             .sid                    = {{service.sid}},
             .flags                  = 0
         {% if service.non_secure_clients is sameas true %}
