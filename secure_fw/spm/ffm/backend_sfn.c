@@ -148,10 +148,9 @@ static psa_signal_t sfn_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
     return p_pt->signals_asserted & signal_mask;
 }
 
-static void sfn_wake_up(struct partition_t *p_pt, psa_signal_t signals)
+static void sfn_wake_up(struct partition_t *p_pt)
 {
     (void)p_pt;
-    (void)signals;
 }
 
 const struct backend_ops_t backend_instance = {

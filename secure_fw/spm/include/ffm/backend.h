@@ -49,9 +49,9 @@ struct backend_ops_t {
 
     /*
      * Runtime model-specific Partition wake up operation.
-     * Wakes up the Partition with the give signals.
+     * Wakes up the Partition with the asserted signals in 'p_pt'.
      */
-    void (*wake_up)(struct partition_t *p_pt, psa_signal_t signals);
+    void (*wake_up)(struct partition_t *p_pt);
 };
 
 /* RUNTIME MODEL BACKENDS DECLARATION */

@@ -226,11 +226,11 @@ static psa_signal_t ipc_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
     return ret_signal;
 }
 
-static void ipc_wake_up(struct partition_t *p_pt, psa_signal_t signals)
+static void ipc_wake_up(struct partition_t *p_pt)
 {
     thrd_wake_up(&p_pt->waitobj,
                  p_pt->signals_asserted & p_pt->signals_waiting);
-    p_pt->signals_waiting &= ~signals;
+    p_pt->signals_waiting = 0;
 }
 
 const struct backend_ops_t backend_instance = {
