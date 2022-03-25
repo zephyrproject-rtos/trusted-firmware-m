@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited
+ * Copyright (c) 2017-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -309,6 +309,12 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
 }
 
 /*------------------- SAU/IDAU configuration functions -----------------------*/
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
+#define DEV_APIS_TEST_NVMEM_REGION_START (NS_DATA_LIMIT + 1)
+#define DEV_APIS_TEST_NVMEM_REGION_LIMIT \
+    (DEV_APIS_TEST_NVMEM_REGION_START + DEV_APIS_TEST_NVMEM_REGION_SIZE - 1)
+#endif
+
 struct sau_cfg_t {
     uint32_t RBAR;
     uint32_t RLAR;
@@ -361,6 +367,13 @@ const struct sau_cfg_t sau_cfg[] = {
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
         SECONDARY_PARTITION_SIZE - 1,
+        false,
+    },
+#endif
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
+    {
+        DEV_APIS_TEST_NVMEM_REGION_START,
+        DEV_APIS_TEST_NVMEM_REGION_LIMIT,
         false,
     },
 #endif
@@ -429,6 +442,11 @@ int32_t mpc_init_cfg(void)
 
     ret = Driver_SRAM2_MPC.ConfigRegion(NS_DATA_START, NS_DATA_LIMIT,
                                         ARM_MPC_ATTR_NONSECURE);
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
+    ret = Driver_SRAM2_MPC.ConfigRegion(DEV_APIS_TEST_NVMEM_REGION_START,
+                                        DEV_APIS_TEST_NVMEM_REGION_LIMIT,
+                                        ARM_MPC_ATTR_NONSECURE);
+#endif
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }

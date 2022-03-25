@@ -1,0 +1,30 @@
+From e0ea3211a8bd1c71366e0d6aac31829ecb4130a2 Mon Sep 17 00:00:00 2001
+From: Summer Qin <summer.qin@arm.com>
+Date: Thu, 24 Mar 2022 12:03:47 +0800
+Subject: [PATCH] Correct nvmem.0.start for an521 dev apis
+
+Current nvmem.0.start address is conflict with tfm.
+Reserve 0x400 bytes for an521 psa arch dev apis test
+and update the nvmem.0.start address.
+
+Signed-off-by: Summer Qin <summer.qin@arm.com>
+---
+ api-tests/platform/targets/tgt_dev_apis_tfm_an521/target.cfg | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_an521/target.cfg b/api-tests/platform/targets/tgt_dev_apis_tfm_an521/target.cfg
+index 247a73c..23533cd 100644
+--- a/api-tests/platform/targets/tgt_dev_apis_tfm_an521/target.cfg
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_an521/target.cfg
+@@ -36,6 +36,6 @@ watchdog.0.timeout_in_micro_sec_crypto = 0x1312D00; //18.0 sec : 18 * 1000 * 100
+ 
+ // Range of 1KB Non-volatile memory to preserve data over reset. Ex, NVRAM and FLASH
+ nvmem.num =1;
+-nvmem.0.start = 0x28100000;
+-nvmem.0.end = 0x281003FF;
++nvmem.0.start = 0x281FFC00;
++nvmem.0.end = 0x281FFFFF;
+ nvmem.0.permission = TYPE_READ_WRITE;
+-- 
+2.17.1
+
