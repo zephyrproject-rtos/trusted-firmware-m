@@ -61,7 +61,8 @@ Target of Evaluation
 A typical TF-M system diagram from a high-level overview is shown below. TF-M is
 running in the Secure Processing Environment (SPE) and NS software is running in
 Non-secure Processing Environment (NSPE). For more details, please refer to
-Platform Security Architecture Firmware Framework for M (FF-M) [FF-M]_.
+Platform Security Architecture Firmware Framework for M (FF-M) [FF-M]_ and
+FF-M 1.1 Extensions [FF-M 1.1 Extensions]_.
 
 .. figure:: TF-M-block-diagram.png
 
@@ -709,11 +710,11 @@ RoT services read and write NS data
 
 This section identifies threats on ``DF3`` defined in `Data Flow Diagram`_.
 
-According to [FF-M]_, in TF-M IPC model, RoT services should rely on TF-M SPM to
-obtain NS input data and send response data back to NS memory.
+In Library model, RoT services directly read and write NS memory to simplify
+the implementation and decrease latency.
 
-In Library model, RoT services directly read and write NS memory to simplify the
-implementation and decrease latency.
+In TF-M IPC model, RoT services can either directly access NS memory or rely on
+TF-M SPM to obtain NS input data and send response data back to NS memory.
 
 .. _TFM-GENERIC-SECURE-SERVICE-RW-T-1:
 
@@ -737,19 +738,18 @@ implementation and decrease latency.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | In TF-M IPC model, RoT services request SPM to read and    |
+  | Mitigation    | In TF-M IPC model, if RoT services request SPM to read and |
   |               | write NS data. TF-M SPM follows [FF-M]_ to copy the NS     |
   |               | input data into SPE memory region owned by the RoT         |
   |               | service, before the RoT service processes the data.        |
   |               | Therefore, the NS input data is protected during the RoT   |
   |               | service execution from being tampered.                     |
   |               |                                                            |
-  |               | In TF-M Library model, RoT services can directly access NS |
-  |               | memory. If a RoT service accesses NS input data multiple   |
-  |               | times during data processing, it is required to review and |
-  |               | confirm Library model implementation of the RoT service    |
-  |               | copies NS input data into SPE memory area before it        |
-  |               | processes the data.                                        |
+  |               | If RoT services can directly access NS memory and read NS  |
+  |               | input data multiple times during data processing, it is    |
+  |               | required to review and confirm the implementation of the   |
+  |               | RoT service copies NS input data into SPE memory area      |
+  |               | before it processes the data.                              |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 3.2 (Low)                                                  |
   +---------------+------------------------------------------------------------+
@@ -795,14 +795,13 @@ implementation and decrease latency.
   |               | service calls and therefore each service call requires no  |
   |               | more than 4 input/output vectors.                          |
   |               |                                                            |
-  |               | In TF-M IPC model, RoT services request SPM to read and    |
+  |               | In TF-M IPC model, if RoT services request SPM to read and |
   |               | write NS data. SPM will validate the target addresses and  |
   |               | can detect the invalid addresses to mitigate this threat.  |
   |               |                                                            |
-  |               | In TF-M Library model, RoT services can directly access NS |
-  |               | memory. It is required to review and confirm Library model |
-  |               | implementation of RoT service request doesn't embed memory |
-  |               | addresses.                                                 |
+  |               | If RoT services can directly access NS memory, it is       |
+  |               | required to review and confirm the implementation of RoT   |
+  |               | service request doesn't embed memory addresses.            |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 7.1 (High)                                                 |
   +---------------+------------------------------------------------------------+
@@ -839,14 +838,13 @@ implementation and decrease latency.
   |               | service calls and therefore each service call requires no  |
   |               | more than 4 input/output vectors.                          |
   |               |                                                            |
-  |               | In TF-M IPC model, RoT services request SPM to read and    |
+  |               | In TF-M IPC model, if RoT services request SPM to read and |
   |               | write NS data. SPM will validate the target addresses and  |
   |               | can detect the invalid addresses to mitigate this threat.  |
   |               |                                                            |
-  |               | In TF-M Library model, RoT services can directly access NS |
-  |               | memory. It is required to review and confirm Library model |
-  |               | implementation of RoT service request doesn't embed memory |
-  |               | addresses.                                                 |
+  |               | If RoT services can directly access NS memory, it is       |
+  |               | required to review and confirm the implementation of RoT   |
+  |               | service request doesn't embed memory addresses.            |
   +---------------+------------------------------------------------------------+
   | CVSS Score    | 7.1 (High)                                                 |
   +---------------+------------------------------------------------------------+
@@ -1145,6 +1143,8 @@ Reference
 
 .. [FF-M] `Arm® Platform Security Architecture Firmware Framework 1.0 <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf?revision=2d1429fa-4b5b-461a-a60e-4ef3d8f7f4b4>`_
 
+.. [FF-M 1.1 Extensions] `Arm® Firmware Framework for M 1.1 Extensions <https://documentation-service.arm.com/static/600067c09b9c2d1bb22cd1c5?token=>`_
+
 .. [DUAL-CPU-BOOT] :doc:`Booting a dual core system </docs/technical_references/design_docs/dual-cpu/booting_a_dual_core_system>`
 
 .. [CVSS] `Common Vulnerability Scoring System Version 3.1 Calculator <https://www.first.org/cvss/calculator/3.1>`_
@@ -1169,4 +1169,4 @@ Reference
 
 --------------------
 
-*Copyright (c) 2020-2021 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2020-2022 Arm Limited. All Rights Reserved.*
