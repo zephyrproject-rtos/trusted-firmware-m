@@ -43,7 +43,7 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         target_cfg.c
-        $<$<BOOL:${TFM_PSA_API}>:tfm_interrupts.c>
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf5340_application.c
 )
 
