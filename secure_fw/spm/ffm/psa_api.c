@@ -171,6 +171,11 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
+    /* It is a PROGRAMMER ERROR if the handle is a null handle. */
+    if (handle == PSA_NULL_HANDLE) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
     client_id = tfm_spm_get_client_id(ns_caller);
 
     /* Allocate space from handle pool for static handle. */
