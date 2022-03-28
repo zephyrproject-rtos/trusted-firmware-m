@@ -20,6 +20,30 @@
 #include "cc_pal_mem.h"
 #include "cc_pal_log.h"
 
+/**
+ * \brief By default, the driver interface enables Chacha20
+ */
+#ifndef CC3XX_CONFIG_SUPPORT_CHACHA20
+#define CC3XX_CONFIG_SUPPORT_CHACHA20
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
+
+/* FixMe: The strategy to configure the CC3XX driver layer is not finalised,
+ *        so for the time being we just use the mbed TLS config file to
+ *        understand if we need to set CC3XX specific config defines.
+ */
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
+
+/* FixMe: Temporary way of bridging mbed TLS based configuration
+ *        with specific CC3XX driver configuration defines
+ */
+#ifndef MBEDTLS_CHACHA20_C
+#undef CC3XX_CONFIG_SUPPORT_CHACHA20
+#endif
+
 static psa_status_t add_pkcs_padding(
         uint8_t *output,
         size_t output_size,
@@ -126,6 +150,7 @@ static psa_status_t cipher_setup(
         }
 
         break;
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
     case PSA_KEY_TYPE_CHACHA20:
         cc3xx_chacha20_init(&operation->ctx.chacha);
 
@@ -136,8 +161,9 @@ static psa_status_t cipher_setup(
             != PSA_SUCCESS) {
             return ret;
         }
-
         break;
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
+
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -191,44 +217,48 @@ psa_status_t cc3xx_cipher_set_iv(
         const uint8_t *iv, size_t iv_length)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
-    uint8_t *iv_pnt = (uint8_t *)iv;
-    uint32_t counter = 0; /* Use zero as specified by PSA Crypto spec */
 
     if (iv_length > AES_IV_SIZE) {
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
     switch (operation->key_type) {
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
     case  PSA_KEY_TYPE_CHACHA20:
+    {
+        uint8_t *iv_pnt = (uint8_t *)iv;
+        uint32_t counter = 0; /* Use zero as specified by PSA Crypto spec */
         /* When the IV is 16 bytes the first four bytes contain the counter in
          * little endian. When the IV is 12 bytes it contains only the IV and
          * the counter should be set to 0. More information in ChaCha20 section
          * here: https://armmbed.github.io/mbed-crypto/html/api/ops/ciphers.html
          */
         switch (iv_length) {
-            case 16:
-                /* Read the counter value in little endian */
-                counter = (iv[3] << 24) | (iv[2] << 16) | (iv[1] << 8) | iv[0];
-                iv_pnt += 4;
-                iv_length -= 4;
-            case 12:
-                ret = cc3xx_chacha20_set_counter(&operation->ctx.chacha,
-                                                 counter);
-                if (ret == PSA_SUCCESS) {
-                    ret = cc3xx_chacha20_set_nonce(&operation->ctx.chacha,
-                                                   iv_pnt,
-                                                   iv_length);
-                }
-                break;
-            case 8:
-                /* Original Chacha, i.e. 64 bit nonce and 64 bit counter */
-                ret = PSA_ERROR_NOT_SUPPORTED;
-                break;
-            default:
-                ret = PSA_ERROR_INVALID_ARGUMENT;
-                break;
+        case 16:
+            /* Read the counter value in little endian */
+            counter = (iv[3] << 24) | (iv[2] << 16) | (iv[1] << 8) | iv[0];
+            iv_pnt += 4;
+            iv_length -= 4;
+        case 12:
+            ret = cc3xx_chacha20_set_counter(&operation->ctx.chacha,
+                                             counter);
+            if (ret == PSA_SUCCESS) {
+                ret = cc3xx_chacha20_set_nonce(&operation->ctx.chacha,
+                                               iv_pnt,
+                                               iv_length);
+            }
+            break;
+        case 8:
+            /* Original Chacha, i.e. 64 bit nonce and 64 bit counter */
+            ret = PSA_ERROR_NOT_SUPPORTED;
+            break;
+        default:
+            ret = PSA_ERROR_INVALID_ARGUMENT;
+            break;
         }
-        break;
+    }
+    break;
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
 
     case PSA_KEY_TYPE_AES:
 
@@ -407,13 +437,14 @@ psa_status_t cc3xx_cipher_update(
             break;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
-        }
+        } /* operation->alg */
 
         if (*output_length > output_size) {
             return PSA_ERROR_CORRUPTION_DETECTED;
         }
-
         break;
+
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
     case PSA_KEY_TYPE_CHACHA20:
         if (( ret = cc3xx_chacha20_update(
                 &operation->ctx.chacha,
@@ -426,6 +457,7 @@ psa_status_t cc3xx_cipher_update(
             return ret;
         }
         break;
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
 
     default:
         return PSA_ERROR_NOT_SUPPORTED;
@@ -541,14 +573,16 @@ psa_status_t cc3xx_cipher_finish(
             return PSA_SUCCESS;
         default:
             return PSA_ERROR_NOT_SUPPORTED;
-        }
+        } /* operation->alg */
         break;
 
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
     case PSA_KEY_TYPE_CHACHA20:
         ret = cc3xx_chacha20_finish(&operation->ctx.chacha, output,
                                     output_size, output_length);
         cc3xx_chacha20_free(&operation->ctx.chacha);
         break;
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
 
     default:
         ret = PSA_ERROR_NOT_SUPPORTED;
@@ -563,9 +597,11 @@ psa_status_t cc3xx_cipher_abort(cc3xx_cipher_operation_t *operation)
     case PSA_KEY_TYPE_AES:
         cc3xx_aes_free(&operation->ctx.aes);
         break;
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
     case PSA_KEY_TYPE_CHACHA20:
         cc3xx_chacha20_free(&operation->ctx.chacha);
         break;
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }

@@ -24,6 +24,50 @@
 #include "cc3xx_internal_chacha20.h"
 #include "cc3xx_internal_chacha20_poly1305.h"
 
+/**
+ * \brief By default, the driver interface enables Chacha20-Poly1305
+ */
+#ifndef CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305
+#define CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
+
+/**
+ * \brief By default, the driver interface enables GCM
+ */
+#ifndef CC3XX_CONFIG_SUPPORT_GCM
+#define CC3XX_CONFIG_SUPPORT_GCM
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+
+/**
+ * \brief By default, the driver interface enables CCM
+ */
+#ifndef CC3XX_CONFIG_SUPPORT_CCM
+#define CC3XX_CONFIG_SUPPORT_CCM
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+
+/* FixMe: The strategy to configure the CC3XX driver layer is not finalised,
+ *        so for the time being we just use the mbed TLS config file to
+ *        understand if we need to set CC3XX specific config defines.
+ */
+#if !defined(MBEDTLS_CONFIG_FILE)
+#include "mbedtls/config.h"
+#else
+#include MBEDTLS_CONFIG_FILE
+#endif
+
+/* FixMe: Temporary way of bridging mbed TLS based configuration
+ *        with specific CC3XX driver configuration defines
+ */
+#ifndef MBEDTLS_CHACHAPOLY_C
+#undef CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305
+#endif
+#ifndef MBEDTLS_GCM_C
+#undef CC3XX_CONFIG_SUPPORT_GCM
+#endif
+#ifndef MBEDTLS_CCM_C
+#undef CC3XX_CONFIG_SUPPORT_CCM
+#endif
+
 /* Number of valid tag lengths sizes both for CCM and GCM modes */
 #define VALID_TAG_LENGTH_SIZE 7
 
@@ -35,6 +79,7 @@ static psa_status_t check_alg(psa_algorithm_t alg, psa_algorithm_t *ref_alg)
 
     *ref_alg = default_alg;
     switch (default_alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
     case PSA_ALG_CCM:
         valid_tag_lengths[0] = 4;
         valid_tag_lengths[1] = 6;
@@ -44,6 +89,8 @@ static psa_status_t check_alg(psa_algorithm_t alg, psa_algorithm_t *ref_alg)
         valid_tag_lengths[5] = 14;
         valid_tag_lengths[6] = 16;
         break;
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
     case PSA_ALG_GCM:
         valid_tag_lengths[0] = 4;
         valid_tag_lengths[1] = 8;
@@ -53,12 +100,16 @@ static psa_status_t check_alg(psa_algorithm_t alg, psa_algorithm_t *ref_alg)
         valid_tag_lengths[5] = 15;
         valid_tag_lengths[6] = 16;
         break;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
     case PSA_ALG_CHACHA20_POLY1305:
         if (tag_length != 16) {
             return PSA_ERROR_NOT_SUPPORTED;
         } else {
             return PSA_SUCCESS;
         }
+        break;
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -115,6 +166,7 @@ static psa_status_t aead_setup(
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
             cc3xx_gcm_init(&operation->ctx.gcm);
 
@@ -143,7 +195,8 @@ static psa_status_t aead_setup(
                 return PSA_ERROR_NOT_SUPPORTED;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
         case PSA_ALG_CCM:
             cc3xx_ccm_init(&operation->ctx.ccm);
 
@@ -172,7 +225,7 @@ static psa_status_t aead_setup(
                 return PSA_ERROR_NOT_SUPPORTED;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -180,6 +233,7 @@ static psa_status_t aead_setup(
         break;
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
         case PSA_ALG_CHACHA20_POLY1305:
             /* The setup operation just sets up the object for Chacha20
              * multipart and then sets the key on the Chacha context
@@ -197,11 +251,11 @@ static psa_status_t aead_setup(
                 operation->ctx.chachapoly.bAuthenticateInput = true;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
-    break;
+        break;
 
     default:
         return PSA_ERROR_NOT_SUPPORTED;
@@ -236,27 +290,30 @@ cc3xx_aead_encrypt(const psa_key_attributes_t *attributes,
     }
 
     switch (ref_alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
     case PSA_ALG_CCM:
         status = cc3xx_encrypt_ccm(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, plaintext,
             plaintext_length, ciphertext, ciphertext_size, ciphertext_length);
         break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
     case PSA_ALG_GCM:
         status = cc3xx_gcm_encrypt(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, plaintext,
             plaintext_length, ciphertext, ciphertext_size, ciphertext_length);
         break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
     case PSA_ALG_CHACHA20_POLY1305:
         status = cc3xx_encrypt_chacha20_poly1305(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, plaintext,
             plaintext_length, ciphertext, ciphertext_size, ciphertext_length);
         break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
     default:
         status = PSA_ERROR_NOT_SUPPORTED;
         break;
@@ -284,27 +341,30 @@ psa_status_t cc3xx_aead_decrypt(
     }
 
     switch (ref_alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
     case PSA_ALG_CCM:
         status = cc3xx_decrypt_ccm(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, ciphertext,
             ciphertext_length, plaintext, plaintext_size, plaintext_length);
         break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
     case PSA_ALG_GCM:
         status = cc3xx_gcm_decrypt(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, ciphertext,
             ciphertext_length, plaintext, plaintext_size, plaintext_length);
         break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
     case PSA_ALG_CHACHA20_POLY1305:
         status = cc3xx_decrypt_chacha20_poly1305(
             attributes, key_buffer, key_buffer_size, alg, nonce, nonce_length,
             additional_data, additional_data_length, ciphertext,
             ciphertext_length, plaintext, plaintext_size, plaintext_length);
         break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
     default:
         status = PSA_ERROR_NOT_SUPPORTED;
         break;
@@ -349,6 +409,7 @@ psa_status_t cc3xx_aead_set_nonce(
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
             if ((ret = cc3xx_gcm_set_nonce(
                     &operation->ctx.gcm,
@@ -358,8 +419,9 @@ psa_status_t cc3xx_aead_set_nonce(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
         case PSA_ALG_CCM:
             if ((ret = cc3xx_ccm_set_nonce(
                     &operation->ctx.ccm,
@@ -370,8 +432,8 @@ psa_status_t cc3xx_aead_set_nonce(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -379,6 +441,7 @@ psa_status_t cc3xx_aead_set_nonce(
         break;
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
         case PSA_ALG_CHACHA20_POLY1305:
         {
             uint32_t otk[32/sizeof(uint32_t)] = {0};
@@ -421,7 +484,7 @@ psa_status_t cc3xx_aead_set_nonce(
             }
         }
         break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -444,6 +507,7 @@ psa_status_t cc3xx_aead_set_lengths(
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_set_lengths(
                     &operation->ctx.gcm,
@@ -453,7 +517,8 @@ psa_status_t cc3xx_aead_set_lengths(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_set_lengths(
                     &operation->ctx.ccm,
@@ -463,7 +528,7 @@ psa_status_t cc3xx_aead_set_lengths(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -471,6 +536,7 @@ psa_status_t cc3xx_aead_set_lengths(
 
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
         case PSA_ALG_CHACHA20_POLY1305:
             ret = cc3xx_chacha20_poly1305_set_lengths(
                                             &operation->ctx.chachapoly,
@@ -480,7 +546,7 @@ psa_status_t cc3xx_aead_set_lengths(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -508,6 +574,7 @@ psa_status_t cc3xx_aead_update_ad(
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_update_ad(
                     &operation->ctx.gcm,
@@ -517,7 +584,8 @@ psa_status_t cc3xx_aead_update_ad(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_update_ad(
                     &operation->ctx.ccm,
@@ -527,7 +595,7 @@ psa_status_t cc3xx_aead_update_ad(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -535,6 +603,7 @@ psa_status_t cc3xx_aead_update_ad(
 
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
         case PSA_ALG_CHACHA20_POLY1305:
             ret = cc3xx_chacha20_poly1305_update_ad(
                     &operation->ctx.chachapoly,
@@ -544,7 +613,7 @@ psa_status_t cc3xx_aead_update_ad(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -584,6 +653,7 @@ psa_status_t cc3xx_aead_update(
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_update(
                     &operation->ctx.gcm,
@@ -595,7 +665,8 @@ psa_status_t cc3xx_aead_update(
             }
             *output_length = input_length;
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_update(
                     &operation->ctx.ccm,
@@ -607,7 +678,7 @@ psa_status_t cc3xx_aead_update(
             }
             *output_length = input_length;
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -615,6 +686,7 @@ psa_status_t cc3xx_aead_update(
 
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
         case PSA_ALG_CHACHA20_POLY1305:
             ret = cc3xx_chacha20_poly1305_update(
                     &operation->ctx.chachapoly,
@@ -624,7 +696,7 @@ psa_status_t cc3xx_aead_update(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -658,20 +730,22 @@ psa_status_t cc3xx_aead_finish(
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_finish(&operation->ctx.gcm,
                             tag, tag_size, tag_length)) != PSA_SUCCESS) {
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_finish(&operation->ctx.ccm,
                             tag, tag_size, tag_length)) != PSA_SUCCESS) {
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -679,6 +753,7 @@ psa_status_t cc3xx_aead_finish(
 
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
         case PSA_ALG_CHACHA20_POLY1305:
             ret = cc3xx_chacha20_poly1305_finish(&operation->ctx.chachapoly,
                                                  tag, tag_size, tag_length);
@@ -686,7 +761,7 @@ psa_status_t cc3xx_aead_finish(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -718,6 +793,7 @@ psa_status_t cc3xx_aead_verify(
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
             if (( ret = cc3xx_gcm_finish(
                     &operation->ctx.gcm,
@@ -727,7 +803,8 @@ psa_status_t cc3xx_aead_verify(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
         case PSA_ALG_CCM:
             if (( ret = cc3xx_ccm_finish(
                     &operation->ctx.ccm,
@@ -737,7 +814,7 @@ psa_status_t cc3xx_aead_verify(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -745,6 +822,7 @@ psa_status_t cc3xx_aead_verify(
 
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
         case PSA_ALG_CHACHA20_POLY1305:
             ret = cc3xx_chacha20_poly1305_verify(&operation->ctx.chachapoly,
                                                  tag, tag_size);
@@ -752,7 +830,7 @@ psa_status_t cc3xx_aead_verify(
                 return ret;
             }
             break;
-
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -770,12 +848,16 @@ psa_status_t cc3xx_aead_abort(cc3xx_aead_operation_t *operation)
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
             cc3xx_gcm_free(&operation->ctx.gcm);
             break;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
         case PSA_ALG_CCM:
             cc3xx_ccm_free(&operation->ctx.ccm);
             break;
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -783,12 +865,14 @@ psa_status_t cc3xx_aead_abort(cc3xx_aead_operation_t *operation)
 
     case PSA_KEY_TYPE_CHACHA20:
         switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305)
         case PSA_ALG_CHACHA20_POLY1305:
             cc3xx_chacha20_free(&operation->ctx.chachapoly.chacha);
             /* Nothing specific for the Poly1305 state, it just gets set to
              * zero when memory is cleared before leaving this function
              */
             break;
+#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305 */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }

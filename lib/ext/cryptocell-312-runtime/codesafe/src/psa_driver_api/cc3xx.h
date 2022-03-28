@@ -71,6 +71,20 @@
  *  By default this is kept enabled. At the moment affects only the RSA utils
  */
 #define CC3XX_CONFIG_SUPPORT_RSA
+
+/*!
+ *  Used to enable support for the Chacha20 algorithm in the interface layer.
+ *  By default it's kept enabled
+ */
+#define CC3XX_CONFIG_SUPPORT_CHACHA20
+
+/*!
+ *  Used to enable support for the Poly1305 algorithm in the interface layer.
+ *  by default it's kept enabled. Note that there isn't a separate interface
+ *  to exercise the Poly1305 algorithm other than through the combination with
+ *  Chacha20 in an AEAD scheme.
+ */
+#define CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305
 #endif /* __DOXYGEN_ONLY__ */
 
 #include "cc3xx_psa_cipher.h"
