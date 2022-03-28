@@ -129,8 +129,13 @@ static CCError_t PolyAccCalcFullBlocks(const uint8_t *pSrc, size_t size)
     blocksCount = size / CC_POLY_BLOCK_SIZE_IN_BYTES;
     /* remining data: count of bytes in not full 32-bit word */
     remSize = size % CC_POLY_BLOCK_SIZE_IN_BYTES;
+    /* Calling this function for not an integer number of blocks is an error */
     if (remSize) {
         return CC_POLY_DATA_INVALID_ERROR;
+    }
+    /* Calling this function for zero input size, do nothing and return */
+    if (!blocksCount) {
+        return CC_OK;
     }
 
     /* count of non aligned bytes and aligned pointer */
@@ -453,7 +458,7 @@ end_func:
     return rc;
 }
 
-CCError_t PolyInit(PolyState_t *state, uint8_t *key, size_t key_size)
+CCError_t PolyInit(PolyState_t *state, const uint8_t *key, size_t key_size)
 {
     if ((key == NULL) || (key_size != CC_POLY_KEY_SIZE_IN_BYTES)) {
         return CC_POLY_DATA_INVALID_ERROR;
@@ -475,7 +480,11 @@ CCError_t PolyInit(PolyState_t *state, uint8_t *key, size_t key_size)
     return CC_OK;
 }
 
-CCError_t PolyUpdate(PolyState_t *state, const uint8_t *data, size_t data_size)
+CCError_t PolyUpdate(
+    PolyState_t *state,
+    const uint8_t *data,
+    size_t data_size,
+    bool isPolyAeadMode)
 {
     size_t data_to_add = 0;
     uint8_t *pStateByte = NULL;
@@ -492,17 +501,34 @@ CCError_t PolyUpdate(PolyState_t *state, const uint8_t *data, size_t data_size)
         return CC_OK;
     }
 
-    if (data_size + state->msg_state_size < CC_POLY_BLOCK_SIZE_IN_BYTES) {
-        for (int i=0; i<data_size; i++) {
-            pStateByte[i + state->msg_state_size] = data[i];
+    /* If we don't need to pad to a block for this call, it's fine to just
+     * cache the bytes received and leave the accumulation to a later call
+     */
+    if (!isPolyAeadMode) {
+        if (data_size + state->msg_state_size < CC_POLY_BLOCK_SIZE_IN_BYTES) {
+            for (int i=0; i<data_size; i++) {
+                pStateByte[i + state->msg_state_size] = data[i];
+            }
+            state->msg_state_size += data_size;
+            return CC_OK;
         }
-        state->msg_state_size += data_size;
-        return CC_OK;
     }
 
     if (state->msg_state_size != 0) {
         /* Fill one block of cached data */
         data_to_add = CC_POLY_BLOCK_SIZE_IN_BYTES - state->msg_state_size;
+        if (data_to_add > data_size) {
+            /* This can happen only when isPolyAeadMode is set, and the
+             * difference between data_to_add and data_size must be padded with
+             * zeros in the cached data state
+             */
+            size_t num_of_zeros = data_to_add - data_size;
+            for (int i = num_of_zeros; i != 0; i--) {
+                pStateByte[CC_POLY_BLOCK_SIZE_IN_BYTES-i] = 0;
+            }
+            /* Copy all the available data in this case, but no more */
+            data_to_add = data_size;
+        }
         CC_PalMemCopy(&pStateByte[state->msg_state_size], data, data_to_add);
 
         data += data_to_add;
@@ -529,10 +555,15 @@ CCError_t PolyUpdate(PolyState_t *state, const uint8_t *data, size_t data_size)
         state->msg_state_size = 0;
     }
 
-    if (data_size < CC_POLY_BLOCK_SIZE_IN_BYTES) {
-        CC_PalMemCopy(&pStateByte[0], data, data_size);
-        state->msg_state_size = data_size;
-        goto store_and_cleanup;
+    /* Again if we don't need to pad to a block for this call, just cache the
+     * remaining data and leave the accumulation to a later call
+     */
+    if (!isPolyAeadMode) {
+        if (data_size < CC_POLY_BLOCK_SIZE_IN_BYTES) {
+            CC_PalMemCopy(&pStateByte[0], data, data_size);
+            state->msg_state_size = data_size;
+            goto store_and_cleanup;
+        }
     }
 
     rc = PolyAccCalcFullBlocks(data, GET_FULL_DATA_BLOCKS_SIZE(data_size));
@@ -544,8 +575,16 @@ CCError_t PolyUpdate(PolyState_t *state, const uint8_t *data, size_t data_size)
     data_size -= GET_FULL_DATA_BLOCKS_SIZE(data_size);
 
     if (data_size) {
-        CC_PalMemCopy(&pStateByte[0], data, data_size);
-        state->msg_state_size = data_size;
+        if (!isPolyAeadMode) {
+            CC_PalMemCopy(&pStateByte[0], data, data_size);
+            state->msg_state_size = data_size;
+        } else {
+            /* If isPolyAeadMode is true, that means we need to pad the block
+             * to 16 bytes with zeros. This should happen only when the AD
+             * data or the payload data authentication get to its last call
+             */
+            PolyAccRemainBlock(data, data_size, true);
+        }
     }
 
 store_and_cleanup:

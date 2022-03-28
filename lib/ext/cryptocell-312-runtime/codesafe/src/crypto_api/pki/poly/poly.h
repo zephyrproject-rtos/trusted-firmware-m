@@ -68,7 +68,10 @@ typedef struct PolyState {
  * @param[in]  dataInSize     The size of the additional data
  * @param[out] macRes         The calculated MAC
  * @param[in]  isPolyAeadMode Boolean indicating if the Poly MAC operation is
- *                            part of AEAD or just poly
+ *                            part of AEAD or just poly. In AEAD mode, the
+ *                            last block of AddData and DataIn accumulation
+ *                            will be padded with zeros up to 16 bytes as per
+ *                            the AEAD spec construction on RFC7539.
  *
  * @return  CC_OK On success, otherwise indicates failure
  */
@@ -81,29 +84,34 @@ CCError_t PolyMacCalc(mbedtls_poly_key key,
                       bool isPolyAeadMode);
 
 /**
- * @brief Initialises a multipart authentication. The key gets clamped
- *        as per RFC7539 in place, so the key buffer must be writable.
+ * @brief Initialises a multipart authentication.
  *
  * @param[in,out] state    Pointer to the state associated to the operation.
- * @param[in,out] key      Buffer containing the (r,s) keypair. It will be
- *                         clamped as specified by RFC7539.
+ * @param[in,out] key      Buffer containing the (r,s) keypair.
  * @param[in]     key_size Size in bytes of the key. Must be 32 bytes.
  *
  * @return It returns CC_OK on success, or an error code otherwise
  */
-CCError_t PolyInit(PolyState_t *state, uint8_t *key, size_t key_size);
+CCError_t PolyInit(PolyState_t *state, const uint8_t *key, size_t key_size);
 
 /**
  * @brief Updates a pre-initialised multipart authentication with a new
  *        chunk of data to be authenticated.
  *
- * @param[in,out] state     Pointer to the state associated to the operation.
- * @param[in]     data      Buffer containing the data to be authenticated.
- * @param[in]     data_size Size in bytes of the data to be authenticated.
+ * @param[in,out] state      Pointer to the state associated to the operation.
+ * @param[in]     data       Buffer containing the data to be authenticated.
+ * @param[in]     data_size  Size in bytes of the data to be authenticated.
+ * @param[in] isPolyAeadMode Boolean indicating if the update is the last
+ *                           of an AEAD operation. In that case, it will pad
+ *                           the last partial block with zeros to make a
+ *                           full block as specified on RFC7539.
  *
  * @return It returns CC_OK on success, or an error code otherwise
  */
-CCError_t PolyUpdate(PolyState_t *state, const uint8_t *data, size_t data_size);
+CCError_t PolyUpdate(PolyState_t *state,
+                     const uint8_t *data,
+                     size_t data_size,
+                     bool isPolyAeadMode);
 
 /**
  * @brief Finalises a pre-initialised multipart authentication outputting
