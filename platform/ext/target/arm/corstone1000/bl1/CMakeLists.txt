@@ -188,7 +188,6 @@ target_include_directories(bl1_main
 
 target_sources(bl1_main
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/boot_hal_bl2.c
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_SOURCE_DIR}/platform/ext/common/uart_stdout.c>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/nv_counters.c>
         $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/flash_otp_nv_counters_backend.c>
