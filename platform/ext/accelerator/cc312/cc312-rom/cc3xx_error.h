@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,6 +24,7 @@ enum cc3xx_error {
     CC3XX_ERR_NOT_IMPLEMENTED,
     CC3XX_ERR_GENERIC_ERROR,
     CC3XX_ERR_ENGINE_IN_USE,
+    CC3XX_ERR_KEY_IMPORT_FAILED,
 };
 
 #ifdef __cplusplus
