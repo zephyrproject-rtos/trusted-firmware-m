@@ -105,6 +105,7 @@ target_sources(platform_s
         device/source/device_definition.c
         device/source/system_core_init.c
         native_drivers/atu_rss_drv.c
+        native_drivers/kmu_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/mhu_wrapper_v2_x.c
         native_drivers/mpc_sie_drv.c
@@ -169,6 +170,7 @@ target_sources(platform_bl2
         device/source/device_definition.c
         device/source/system_core_init.c
         native_drivers/atu_rss_drv.c
+        native_drivers/kmu_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/uart_pl011_drv.c
         ./otp_cc312.c
@@ -217,6 +219,7 @@ target_sources(platform_bl1
         ./device/source/device_definition.c
         ./device/source/system_core_init.c
         ./native_drivers/atu_rss_drv.c
+        ./native_drivers/kmu_drv.c
         ./native_drivers/uart_pl011_drv.c
         ./otp_cc312.c
 )

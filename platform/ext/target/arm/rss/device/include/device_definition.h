@@ -195,6 +195,11 @@ extern struct mhu_v2_x_dev_t MHU_SCP_TO_RSS_DEV;
 extern struct mhu_v2_x_dev_t MHU_RSS_TO_SCP_DEV;
 #endif
 
+#ifdef KMU_S
+#include "kmu_drv.h"
+extern struct kmu_dev_t KMU_DEV_S;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

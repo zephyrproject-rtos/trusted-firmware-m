@@ -487,3 +487,12 @@ struct mhu_v2_x_dev_t MHU_RSS_TO_SCP_DEV = {
     MHU2_SENDER_BASE_S,
     MHU_V2_X_SENDER_FRAME};
 #endif
+
+#ifdef KMU_S
+static struct kmu_dev_cfg_t KMU_DEV_CFG_S = {
+    .base = KMU_BASE_S
+};
+struct kmu_dev_t KMU_DEV_S = {
+    .cfg = &(KMU_DEV_CFG_S)
+};
+#endif

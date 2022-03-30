@@ -73,4 +73,7 @@
 #define MHU_SCP_TO_RSS
 #define MHU_RSS_TO_SCP
 
+/* Arm KMU */
+#define KMU_S
+
 #endif  /* __DEVICE_CFG_H__ */

@@ -83,6 +83,7 @@
 #define RSS_SACFG_BASE_S                 0x50080000 /* RSS Secure Access Configuration Register Secure base address */
 #define MPC_VM0_BASE_S                   0x50083000 /* VM0 Memory Protection Controller Secure base address */
 #define MPC_VM1_BASE_S                   0x50084000 /* VM1 Memory Protection Controller Secure base address */
+#define KMU_BASE_S                       0x5009E000 /* KMU Secure base address */
 #define GPIO0_CMSDK_BASE_S               0x50100000 /* GPIO 0 Secure base address */
 #define GPIO1_CMSDK_BASE_S               0x50101000 /* GPIO 1 Secure base address */
 #define ATU_BASE_S                       0x50150000 /* ATU Secure base address */
