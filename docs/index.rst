@@ -1,13 +1,3 @@
-:Page authors: Gyorgy Szing <gyorgy.szing@arm.com>
-
-..
-   The build-system will copy all documents into a temporary directory tree
-   before the documentation is built.
-   This file will be copied to the top level and thus please use relative paths
-   as if this file would be in <TFM_ROOT_DIR>.
-
-   The values between @ characters will be filled in by CMake.
-
 Trusted Firmware-M Documentation
 ================================
 
