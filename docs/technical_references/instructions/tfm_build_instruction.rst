@@ -2,7 +2,7 @@
 Build instructions
 ##################
 Please make sure you have all required software installed as explained in the
-:doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`.
+:doc:`TF-M getting started </getting_started/tfm_getting_started>`.
 
 ****************
 TF-M build steps
@@ -25,13 +25,13 @@ To simplify documentation commands, the new created repository under
 ``trusted-firmware-m`` would be referenced as ``<TF-M base folder>`` and
 its parent, the ``<base folder>``. Dependency management is now handled by
 cmake. If you wish to alter this behaviour, see
-:ref:`docs/technical_references/instructions/tfm_build_instruction:Manual
+:ref:`technical_references/instructions/tfm_build_instruction:Manual
 dependency management`
 
 .. Note::
 
  - For building with Armclang compiler version 6.10.0+, please follow the note
-   in :doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`.
+   in :doc:`TF-M getting started </getting_started/tfm_getting_started>`.
  - For building with the IAR toolchain, please see the notes in
    :doc:`IAR software requirements <tfm_build_instruction_iar>`
 

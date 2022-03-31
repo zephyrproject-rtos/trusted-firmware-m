@@ -555,7 +555,7 @@ it from somewhere. One option is to create a new testsuite, such as
 interface_testsuite.c``.
 
 The process of adding test connection is explained in the specification
-:doc:`Adding TF-M Regression Test Suite </docs/integration_guide/tfm_test_suites_addition>`
+:doc:`Adding TF-M Regression Test Suite </integration_guide/tfm_test_suites_addition>`
 
 .. code-block:: c
 

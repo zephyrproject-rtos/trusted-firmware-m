@@ -94,7 +94,7 @@ components, which are listed below:
    |                             | The prefix used for the PSA API symbols of the Mbed Crypto    |                                                                      |
    |                             | library is chosen to be ``mbedcrypto__``.                     |                                                                      |
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
-   | Documentation               | The integration guide contains the description of the TF-M    | ``./docs/user_guides/services/tfm_crypto_integration_guide.rst``     |
+   | Documentation               | The integration guide contains the description of the TF-M    | ``./user_guides/services/tfm_crypto_integration_guide.rst``          |
    |                             | Crypto service modules and interfaces.                        |                                                                      |
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
 

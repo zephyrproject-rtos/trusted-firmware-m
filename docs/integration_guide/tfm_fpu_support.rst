@@ -105,7 +105,7 @@ Reference
 
 .. [5] `Arm® Platform Security Architecture Firmware Framework 1.0 <https://armkeil.blob.core.windows.net/developer/Files/pdf/PlatformSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf>`_
 
-.. [6] :doc:`Secure Interrupt Integration Guide </docs/integration_guide/tfm_secure_irq_integration_guide>`
+.. [6] :doc:`Secure Interrupt Integration Guide </integration_guide/tfm_secure_irq_integration_guide>`
 
 .. [7] `Musca-S1 Test Chip Board <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
 

@@ -83,7 +83,7 @@ To prepare your building environment execute the following steps:
 Build TF-M Reference Manual
 ***************************
 
-The Reference Manual will be generated in the ``build_docs/docs/reference_manual``.
+The Reference Manual will be generated in the ``build_docs/reference_manual``.
 
 .. tabs::
 
@@ -107,7 +107,7 @@ The Reference Manual will be generated in the ``build_docs/docs/reference_manual
 Build TF-M User Guide
 *********************
 
-The User Manual will be available under the directory ``build_docs/docs/user_guide``.
+The User Manual will be available under the directory ``build_docs/user_guide``.
 
 .. tabs::
 

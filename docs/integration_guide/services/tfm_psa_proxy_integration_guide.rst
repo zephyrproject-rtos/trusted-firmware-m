@@ -9,7 +9,7 @@ TF-M PSA Proxy partition is responsible for forwarding all the PSA RoT messages
 to a Secure Enclave, this way virtually providing all the PSA RoT services.
 Proxy can only be used in IPC model, for context and design details please
 check the
-:doc:`Secure Enclave design document </docs/technical_references/design_docs/secure_enclave_solution>`.
+:doc:`Secure Enclave design document </technical_references/design_docs/secure_enclave_solution>`.
 
 Currently to forward the PSA Client call parameters Proxy must read them with
 ``psa_read`` into a memory area shared with the Secure Enclave. (Similarily

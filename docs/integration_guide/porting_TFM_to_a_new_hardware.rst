@@ -10,7 +10,7 @@ exist on the platform for TF-M (S and NS) to run on this new platform.
 ******************
 TF-M in a nutshell
 ******************
-For an overview please refer to :doc:`Introduction </docs/introduction/readme>`.
+For an overview please refer to :doc:`Introduction </introduction/readme>`.
 
 *************
 Prerequisites
@@ -19,12 +19,12 @@ Building environnement
 ======================
 Make sure you have a working build environnement and that you can build
 TF-M on AN521 following the
-:doc:`Build instructions </docs/technical_references/instructions/tfm_build_instruction>`.
+:doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
 
 Toolchains and software requirements
 ====================================
 
-Please follow the :doc:`Getting started guide </docs/getting_started/tfm_getting_started>`.
+Please follow the :doc:`Getting started guide </getting_started/tfm_getting_started>`.
 
 CMSIS Drivers
 =============
@@ -59,7 +59,7 @@ In a nutshell, this should be a 6 iterative steps process:
 
     #. Running the regression tests
 
-        - See :doc:`Running TF-M on Arm platforms </docs/technical_references/instructions/run_tfm_examples_on_arm_platforms>`
+        - See :doc:`Running TF-M on Arm platforms </technical_references/instructions/run_tfm_examples_on_arm_platforms>`
           as an example
 
 

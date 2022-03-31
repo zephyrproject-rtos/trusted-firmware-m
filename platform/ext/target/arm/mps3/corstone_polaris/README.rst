@@ -15,7 +15,7 @@ with Isolation Level 1 and 2, but building without BL2 is not supported.
 Building TF-M
 -------------
 
-Follow the instructions in :doc:`Building instructions </docs/technical_references/instructions/tfm_build_instruction>`.
+Follow the instructions in :doc:`Building instructions </technical_references/instructions/tfm_build_instruction>`.
 Build instructions with platform name: arm/mps3/corstone_polaris (-DTFM_PLATFORM=arm/mps3/corstone_polaris).
 
 *Copyright (c) 2021, Arm Limited. All rights reserved.*

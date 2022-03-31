@@ -171,7 +171,7 @@ else:
 
     # Documentation base path
     tfm_def_doc_root = os.path.join(tfm_def_root_dir, "docs")
-    tfm_def_copy_doc_root = os.path.join(tfm_def_copy_dir, "docs")
+    tfm_def_copy_doc_root = tfm_def_copy_dir
 
     # Disable copyfiles for next invocation
     cmake_env["SPHINXCFG_COPY_FILES"] = "False"

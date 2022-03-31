@@ -19,6 +19,16 @@ from glob import glob
 from tfm_cmake_defaults import *
 from subprocess import call
 
+def copytree_overwrite(src, dest):
+    if os.path.isdir(src):
+        if not os.path.isdir(dest):
+            os.makedirs(dest)
+        files = os.listdir(src)
+        for f in files:
+            copytree_overwrite(os.path.join(src, f),
+                               os.path.join(dest, f))
+    else:
+        copy2(src, dest)
 
 def tfm_copy_files():
     doc_files = []
@@ -51,11 +61,7 @@ def tfm_copy_files():
             rmtree(f)
 
     # Copy the documentation folder as is
-    copytree(tfm_def_doc_root, tfm_def_copy_doc_root)
-
-    # Move the index to the intermediate build directory
-    # docs/index.rst --> ./index.rst
-    move(os.path.join(tfm_def_copy_doc_root, "index.rst"), tfm_def_copy_dir)
+    copytree_overwrite(tfm_def_doc_root, tfm_def_copy_doc_root)
 
     for df in list(doc_files):
         # Set the target filename to be cwd + relative to root path of origin

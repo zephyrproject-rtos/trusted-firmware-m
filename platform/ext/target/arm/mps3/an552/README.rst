@@ -4,7 +4,7 @@ Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN552) and FVP
 Building TF-M
 -------------
 
-Follow the instructions in :doc:`Building instructions </docs/technical_references/instructions/tfm_build_instruction>`.
+Follow the instructions in :doc:`Building instructions </technical_references/instructions/tfm_build_instruction>`.
 Build instructions with platform name: arm/mps3/an552
 ``-DTFM_PLATFORM=arm/mps3/an552``
 

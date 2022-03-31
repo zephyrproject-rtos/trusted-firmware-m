@@ -415,10 +415,10 @@ Next steps
 
 Here are some next steps for exploring TF-M:
 
-    - Detailed :doc:`Build instructions </docs/technical_references/instructions/tfm_build_instruction>`.
-    - :doc:`IAR Build instructions </docs/technical_references/instructions/tfm_build_instruction_iar>`.
-    - Try other :doc:`Samples and Demos </docs/technical_references/instructions/run_tfm_examples_on_arm_platforms>`.
-    - :doc:`Documentation generation </docs/technical_references/instructions/documentation_generation>`.
+    - Detailed :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
+    - :doc:`IAR Build instructions </technical_references/instructions/tfm_build_instruction_iar>`.
+    - Try other :doc:`Samples and Demos </technical_references/instructions/run_tfm_examples_on_arm_platforms>`.
+    - :doc:`Documentation generation </technical_references/instructions/documentation_generation>`.
 
 --------------
 

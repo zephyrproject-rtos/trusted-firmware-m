@@ -6,7 +6,7 @@ New major features
 ==================
 
   - MCUboot updated to v1.8.0.
-  - :doc:`Floating-Point(FP) support in SPE only </docs/integration_guide/tfm_fpu_support>`.
+  - :doc:`Floating-Point(FP) support in SPE only </integration_guide/tfm_fpu_support>`.
   - Thread mode SPM.
   - Add Non-secure Client Extension (NSCE) for non-secure client ID management
     support.
@@ -24,7 +24,7 @@ New major features
   - Support to select/deselect single or multiple TF-M regression test cases.
   - Decouple regression test flag configuration from TF-M.
   - New platforms added.
-    See :ref:`docs/releases/1.5.0:New platforms supported` for details.
+    See :ref:`releases/1.5.0:New platforms supported` for details.
 
 New security advisories
 =======================
@@ -34,7 +34,7 @@ Profile Small key ID encoding vulnerability
 
 NSPE may access secure keys stored in TF-M Crypto service in Profile Small with
 Crypto key ID encoding disabled.
-Refer to :doc:`Advisory TFMV-4 </docs/security/security_advisories/profile_small_key_id_encoding_vulnerability>`
+Refer to :doc:`Advisory TFMV-4 </security/security_advisories/profile_small_key_id_encoding_vulnerability>`
 for more details.
 The mitigation is included in this release.
 

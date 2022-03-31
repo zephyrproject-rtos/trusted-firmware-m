@@ -7,18 +7,18 @@ with other hardware platforms and operating systems.
 *****************
 How to build TF-M
 *****************
-Follow the :doc:`Build instructions </docs/technical_references/instructions/tfm_build_instruction>`.
+Follow the :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
 
 ********************************************************
 How to export files for building non-secure applications
 ********************************************************
-Explained in the :doc:`Build instructions </docs/technical_references/instructions/tfm_build_instruction>`.
+Explained in the :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
 
 *************************
 How to add a new platform
 *************************
 
-:doc:`Porting TF-M to a New Hardware </docs/integration_guide/porting_TFM_to_a_new_hardware>`
+:doc:`Porting TF-M to a New Hardware </integration_guide/porting_TFM_to_a_new_hardware>`
 contains guidance on how to add a new platform.
 
 ***************************
@@ -58,7 +58,7 @@ See ``interface/src/tfm_ns_interface.c.example`` for more details.
 
 TF-M provides a reference implementation of NS mailbox on multi-core platforms,
 under folder ``interface/src/multi_core``.
-See :doc:`Mailbox design </docs/technical_references/design_docs/dual-cpu/mailbox_design_on_dual_core_system>`
+See :doc:`Mailbox design </technical_references/design_docs/dual-cpu/mailbox_design_on_dual_core_system>`
 for TF-M multi-core mailbox design.
 
 Interface with non-secure world regression tests
@@ -86,7 +86,7 @@ If SPM manages the NSID (default option), then the same NSID (-1) will be used
 for all connections from NS clients.
 For the case that NSPE RTOS manages the NSID and/or different NSIDs should be
 used for different NS clients. See
-:doc:`Non-secure Client Extension Integration Guide </docs/integration_guide/non-secure_client_extension_integration_guide>`.
+:doc:`Non-secure Client Extension Integration Guide </integration_guide/non-secure_client_extension_integration_guide>`.
 
 *********************
 Non-secure interrupts

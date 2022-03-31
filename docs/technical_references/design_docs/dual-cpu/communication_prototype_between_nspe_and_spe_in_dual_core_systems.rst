@@ -699,7 +699,7 @@ Reference
 *********
 
 .. [1] :doc:`Mailbox Design in TF-M on Dual-core System <./mailbox_design_on_dual_core_system>`
-.. [2] :doc:`Secure Interrupt Integration Guide </docs/integration_guide/tfm_secure_irq_integration_guide>`
+.. [2] :doc:`Secure Interrupt Integration Guide </integration_guide/tfm_secure_irq_integration_guide>`
 
 ----------------
 

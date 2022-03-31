@@ -438,9 +438,9 @@ instruction guide [9]_.
 Reference
 *********
 
-.. [1] :doc:`Trusted Firmware-M Profile Small Design </docs/technical_references/design_docs/profiles/tfm_profile_small>`
+.. [1] :doc:`Trusted Firmware-M Profile Small Design </technical_references/design_docs/profiles/tfm_profile_small>`
 
-.. [2] :doc:`Trusted Firmware-M Profile Medium Design </docs/technical_references/design_docs/profiles/tfm_profile_medium>`
+.. [2] :doc:`Trusted Firmware-M Profile Medium Design </technical_references/design_docs/profiles/tfm_profile_medium>`
 
 .. [3] `PSA Certified Level 3 Lightweight Protection Profile <https://www.psacertified.org/app/uploads/2020/12/JSADEN009-PSA_Certified_Level_3_LW_PP-1.0-BET02.pdf>`_
 
@@ -448,13 +448,13 @@ Reference
 
 .. [5] `The Transport Layer Security (TLS) Protocol Version 1.2 <https://tools.ietf.org/html/rfc5246>`_
 
-.. [6] :doc:`Physical attack mitigation in Trusted Firmware-M </docs/technical_references/design_docs/tfm_physical_attack_mitigation>`
+.. [6] :doc:`Physical attack mitigation in Trusted Firmware-M </technical_references/design_docs/tfm_physical_attack_mitigation>`
 
-.. [7] :doc:`Crypto design </docs/technical_references/design_docs/tfm_crypto_design>`
+.. [7] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
 
-.. [8] :doc:`ITS integration guide </docs/integration_guide/services/tfm_its_integration_guide>`
+.. [8] :doc:`ITS integration guide </integration_guide/services/tfm_its_integration_guide>`
 
-.. [9] :doc:`TF-M build instruction </docs/technical_references/instructions/tfm_build_instruction>`
+.. [9] :doc:`TF-M build instruction </technical_references/instructions/tfm_build_instruction>`
 
 --------------
 

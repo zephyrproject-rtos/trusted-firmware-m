@@ -17,7 +17,7 @@ SSE-200 subsystem used. But if the ``FORWARD_PROT_MSG`` cmake flag is turned
 on, the TF-M instance running on SSE-200 will communicate with the SE.
 
 For more information you can check the
-:doc:`Secure Enclave design document </docs/technical_references/design_docs/secure_enclave_solution>`.
+:doc:`Secure Enclave design document </technical_references/design_docs/secure_enclave_solution>`.
 
 ***********
 System boot

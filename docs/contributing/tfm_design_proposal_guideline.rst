@@ -111,7 +111,7 @@ Reference
 
 .. [3] `TF-M gerrit <https://review.trustedfirmware.org/q/project:TF-M/trusted-firmware-m>`_
 
-.. [4] :doc:`Contributing process </docs/contributing/contributing_process>`
+.. [4] :doc:`Contributing process </contributing/contributing_process>`
 
 -------------------
 

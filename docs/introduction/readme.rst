@@ -37,15 +37,15 @@ the platform. TF-M is supported on several Cortex-M based
 Systems (RTOS).
 
 Terms ``TFM`` and ``TF-M`` are commonly used in documents and code and both
-refer to ``Trusted Firmware M.`` :doc:`Glossary </docs/glossary>` has the list
+refer to ``Trusted Firmware M.`` :doc:`Glossary </glossary>` has the list
 of terms and abbreviations.
 
 #######
 License
 #######
-The software is provided under a BSD-3-Clause :doc:`License </docs/contributing/lic>`.
+The software is provided under a BSD-3-Clause :doc:`License </contributing/lic>`.
 Contributions to this project are accepted under the same license with developer
-sign-off as described in the :doc:`Contributing Guidelines </docs/contributing/contributing_process>`.
+sign-off as described in the :doc:`Contributing Guidelines </contributing/contributing_process>`.
 
 This project contains code from other projects as listed below. The code from
 external projects is limited to ``app``, ``bl2``, ``lib`` and ``platform``
@@ -84,18 +84,18 @@ Trusted Firmware M source code is available on
 
 To build & run TF-M:
 
-    - Follow the :doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`
+    - Follow the :doc:`TF-M getting started </getting_started/tfm_getting_started>`
       to set up your environment.
     - Follow the
-      :doc:`Build instructions </docs/technical_references/instructions/tfm_build_instruction>`
+      :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`
       to compile and build the TF-M source.
-    - Follow the :doc:`Run TF-M examples on Arm platforms </docs/technical_references/instructions/run_tfm_examples_on_arm_platforms>`
+    - Follow the :doc:`Run TF-M examples on Arm platforms </technical_references/instructions/run_tfm_examples_on_arm_platforms>`
       for information on running the example.
 
 To port TF-M to a another system or OS, follow the
-:doc:`OS Integration Guide </docs/integration_guide/tfm_integration_guide>`
+:doc:`OS Integration Guide </integration_guide/tfm_integration_guide>`
 
-:doc:`Contributing Guidelines </docs/contributing/contributing_process>` contains guidance on how to
+:doc:`Contributing Guidelines </contributing/contributing_process>` contains guidance on how to
 contribute to this project.
 
 ###################
@@ -106,10 +106,10 @@ The document :doc:`Supported Platforms </platform/ext/index>` lists the details.
 #########################
 Release Notes and Process
 #########################
-The :doc:`Release Cadence and Process </docs/releases/release_process>` provides
+The :doc:`Release Cadence and Process </releases/release_process>` provides
 release cadence and process information.
 
-The :doc:`Releases </docs/releases/index>` provides details of
+The :doc:`Releases </releases/index>` provides details of
 major features of the release and platforms supported.
 
 ####################

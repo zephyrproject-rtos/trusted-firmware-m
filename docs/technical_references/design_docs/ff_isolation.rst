@@ -10,7 +10,7 @@ isolation and introduces the reference implementation in TF-M, which
 complies the rules by operating the hardware and software resources.
 
 .. note::
-  Reference the document :doc:`Glossary </docs/glossary>` for terms
+  Reference the document :doc:`Glossary </glossary>` for terms
   and abbreviations.
 
 ************

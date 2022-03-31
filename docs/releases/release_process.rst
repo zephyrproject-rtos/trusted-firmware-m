@@ -5,7 +5,7 @@ Project Release Cadence
 -----------------------
 
 The project aims to do a release once every 6 months around April and November
-time and are listed in the :ref:`docs/releases/index:Future release plans`.
+time and are listed in the :ref:`releases/index:Future release plans`.
 The releases are to be performed and tagged on a dedicated release branch.
 The release process is initiated by an announcement in
 `TF-M mailing list <https://lists.trustedfirmware.org/mailman/listinfo/tf-m>`_
@@ -14,7 +14,7 @@ Normal development on the main branch is not blocked and can be continued.
 The testing will be performed on release candidates and depending on
 issues found, additional candidates may be created to fix and retest the issues.
 
-:doc:`The Platform owners </docs/contributing/maintainers>` are expected to
+:doc:`The Platform owners </contributing/maintainers>` are expected to
 verify their platforms and confirm the correct operations or provide fixes
 in a timely manner to include in the release. The release notes will list
 all verified platforms. The platforms in Trusted Firmware OpenCI is

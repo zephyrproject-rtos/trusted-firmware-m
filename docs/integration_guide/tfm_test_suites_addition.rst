@@ -40,7 +40,7 @@ Test configuration
 ==================
 
 A test configuration controls whether one or multiple test suites are enabled.
-The doc :doc:`TF-M Build Instructions </docs/technical_references/instructions/tfm_build_instruction>`
+The doc :doc:`TF-M Build Instructions </technical_references/instructions/tfm_build_instruction>`
 shows some test configurations which are already supported in current TF-M.
 An example usage of test configuration shows below.
 
@@ -295,7 +295,7 @@ Steps
 
 Adding a test service is same as adding a secure partition, generally the
 process can be referenced from the document
-:doc:`Adding Secure Partition </docs/integration_guide/services/tfm_secure_partition_addition>`
+:doc:`Adding Secure Partition </integration_guide/services/tfm_secure_partition_addition>`
 
 .. Note::
     Each test service must have resource requirements declared in a manifest
