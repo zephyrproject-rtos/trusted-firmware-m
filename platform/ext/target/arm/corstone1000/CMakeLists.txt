@@ -76,6 +76,7 @@ target_sources(platform_s
         fw_update_agent/uefi_capsule_parser.c
         fw_update_agent/fwu_agent.c
         $<$<BOOL:${TFM_S_REG_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
+        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
 )
 
 if (PLATFORM_IS_FVP)
@@ -116,6 +117,7 @@ target_sources(platform_bl2
         fip_parser/fip_parser.c
         fw_update_agent/fwu_agent.c
         bl2_security_cnt.c
+        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
 )
 
 if (PLATFORM_IS_FVP)

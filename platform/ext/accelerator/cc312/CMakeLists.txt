@@ -20,20 +20,6 @@ if(BL2)
     )
 endif()
 
-################################ OTP ###########################################
-
-target_sources(platform_s
-    PRIVATE
-        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${CMAKE_CURRENT_SOURCE_DIR}/otp_cc312.c>
-)
-
-if(BL2)
-    target_sources(platform_bl2
-        PRIVATE
-        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${CMAKE_CURRENT_SOURCE_DIR}/otp_cc312.c>
-    )
-endif()
-
 ################################ BL1 ###########################################
 
 if(BL1 AND PLATFORM_DEFAULT_BL1)
@@ -44,7 +30,6 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             ./cc312_rom_crypto_hw.c
             $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_crypto.c>
             $<$<NOT:$<BOOL:${TFM_BL1_DUMMY_TRNG}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_trng.c>
-            $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${CMAKE_CURRENT_SOURCE_DIR}/otp_cc312.c>
     )
 
     target_link_libraries(bl1_crypto_hw
