@@ -7,7 +7,6 @@ Technical References
     :glob:
 
     */index
-    /tools/index
 
 --------------
 
