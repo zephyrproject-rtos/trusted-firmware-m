@@ -16,6 +16,14 @@
 #define HOST_CPU_PE0_CONFIG_OFFSET 0x010
 #define AA64nAA32_MASK (1 << 3)
 
+void tfm_external_system_boot()
+{
+    volatile uint32_t *ext_sys_reset_ctl_reg = (uint32_t *)(CORSTONE1000_EXT_SYS_RESET_REG);
+
+    /* de-assert CPU_WAIT signal*/
+    *ext_sys_reset_ctl_reg = 0x0;
+}
+
 void tfm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
     /* Switch the shared flash to XiP mode for the host */
@@ -53,6 +61,9 @@ void tfm_hal_boot_ns_cpu(uintptr_t start_addr)
     *reset_ctl_reg = 0;
 
     (void) start_addr;
+
+    /*release EXT SYS out of reset*/
+    tfm_external_system_boot();
 }
 
 void tfm_hal_wait_for_ns_cpu_ready(void)
