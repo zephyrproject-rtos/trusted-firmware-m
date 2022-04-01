@@ -25,6 +25,14 @@
 #include "cc3xx_internal_chacha20_poly1305.h"
 
 /**
+ * \brief By default, the driver interface implements the single part API using
+ *        the multipart functions thus enabling some saving in code size
+ */
+#ifndef CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART
+#define CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART
+#endif /* CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART */
+
+/**
  * \brief By default, the driver interface enables Chacha20-Poly1305
  */
 #ifndef CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305
@@ -264,6 +272,119 @@ static psa_status_t aead_setup(
     return ret;
 }
 
+#ifdef CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART
+static psa_status_t aead_one_shot_with_multipart(
+                    const psa_key_attributes_t *attributes,
+                    const uint8_t *key_buffer, size_t key_buffer_size,
+                    psa_algorithm_t alg, const uint8_t *nonce,
+                    size_t nonce_length, const uint8_t *additional_data,
+                    size_t additional_data_length, const uint8_t *input,
+                    size_t input_length, uint8_t *output,
+                    size_t output_size, size_t *output_length,
+                    psa_encrypt_or_decrypt_t dir)
+{
+    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    cc3xx_aead_operation_t operation = {0};
+    uint8_t local_tag_buffer[PSA_AEAD_TAG_MAX_SIZE] = {0};
+    size_t tag_length = 0;
+    size_t expected_tag_length = PSA_AEAD_TAG_LENGTH(
+                                                 psa_get_key_type(attributes),
+                                                 psa_get_key_bits(attributes),
+                                                 alg);
+    size_t update_length = (dir == PSA_CRYPTO_DRIVER_ENCRYPT) ? input_length :
+                                           input_length - expected_tag_length;
+
+    size_t finalisation_length = 0; /* Length produced in the final step */
+    if (output_length == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    *output_length = 0;
+
+    /* Check buffer sizes */
+    if (dir == PSA_CRYPTO_DRIVER_ENCRYPT) {
+        if (output_size < input_length + expected_tag_length) {
+            return PSA_ERROR_BUFFER_TOO_SMALL;
+        }
+    } else {
+        if (output_size < input_length - expected_tag_length) {
+            return PSA_ERROR_BUFFER_TOO_SMALL;
+        }
+    }
+
+    /* Setup the operation in the required direction */
+    if (dir == PSA_CRYPTO_DRIVER_ENCRYPT) {
+        status = cc3xx_aead_encrypt_setup(&operation, attributes, key_buffer,
+                                          key_buffer_size, alg);
+    } else {
+        status = cc3xx_aead_decrypt_setup(&operation, attributes, key_buffer,
+                                          key_buffer_size, alg);
+    }
+    if (status != PSA_SUCCESS) {
+        goto abort;
+    }
+
+    /* Set lengths and nonce */
+    status = cc3xx_aead_set_lengths(&operation, additional_data_length,
+                                    update_length);
+    if (status != PSA_SUCCESS) {
+        goto abort;
+    }
+    status = cc3xx_aead_set_nonce(&operation, nonce, nonce_length);
+    if (status != PSA_SUCCESS) {
+        goto abort;
+    }
+
+    /* Update ad and input data */
+    status = cc3xx_aead_update_ad(&operation, additional_data,
+                                  additional_data_length);
+    if (status != PSA_SUCCESS) {
+        goto abort;
+    }
+    status = cc3xx_aead_update(&operation, input, update_length,
+                               output, output_size, output_length);
+    if (status != PSA_SUCCESS) {
+        goto abort;
+    }
+
+    /* Finalisation step */
+    if (dir == PSA_CRYPTO_DRIVER_ENCRYPT) {
+        status = cc3xx_aead_finish(&operation,
+                                   &output[*output_length],
+                                   output_size - *output_length,
+                                   &finalisation_length,
+                                   local_tag_buffer,
+                                   sizeof(local_tag_buffer),
+                                   &tag_length);
+    } else { /* PSA_CRYPTO_DRIVER_DECRYPT */
+        status = cc3xx_aead_verify(&operation,
+                                   &output[*output_length],
+                                   output_size - *output_length,
+                                   &finalisation_length,
+                                   &input[update_length],
+                                   input_length - update_length);
+    }
+    if (status != PSA_SUCCESS) {
+        goto abort;
+    }
+
+    *output_length += finalisation_length;
+    /* Append the tag during encryption */
+    if (dir == PSA_CRYPTO_DRIVER_ENCRYPT) {
+        CC_PalMemCopy(&output[*output_length], local_tag_buffer, tag_length);
+        *output_length += tag_length;
+    }
+
+abort:
+    if (status != PSA_SUCCESS) {
+        CC_PalMemSetZero(output, output_size);
+        *output_length = 0;
+        (void)cc3xx_aead_abort(&operation);
+    }
+
+    return status;
+}
+#endif /* CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART */
+
 /** \defgroup psa_aead PSA driver entry points for AEAD
  *
  *  Entry points for AEAD encryption and decryption as described by the PSA
@@ -281,6 +402,7 @@ cc3xx_aead_encrypt(const psa_key_attributes_t *attributes,
                    size_t ciphertext_size, size_t *ciphertext_length)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+#ifndef CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART
     psa_algorithm_t ref_alg;
 
     /* Validate the algorithm first */
@@ -318,7 +440,16 @@ cc3xx_aead_encrypt(const psa_key_attributes_t *attributes,
         status = PSA_ERROR_NOT_SUPPORTED;
         break;
     }
-
+#else /* CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART */
+    status = aead_one_shot_with_multipart(attributes,
+                    key_buffer, key_buffer_size,
+                    alg, nonce,
+                    nonce_length, additional_data,
+                    additional_data_length, plaintext,
+                    plaintext_length, ciphertext,
+                    ciphertext_size, ciphertext_length,
+                    PSA_CRYPTO_DRIVER_ENCRYPT);
+#endif /* CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART */
     return status;
 }
 
@@ -332,6 +463,7 @@ psa_status_t cc3xx_aead_decrypt(
         uint8_t *plaintext, size_t plaintext_size, size_t *plaintext_length)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+#ifndef CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART
     psa_algorithm_t ref_alg;
 
     /* Validate the algorithm first */
@@ -370,6 +502,17 @@ psa_status_t cc3xx_aead_decrypt(
         break;
     }
 
+    return status;
+#else /* CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART */
+    status = aead_one_shot_with_multipart(attributes,
+                    key_buffer, key_buffer_size,
+                    alg, nonce,
+                    nonce_length, additional_data,
+                    additional_data_length, ciphertext,
+                    ciphertext_length, plaintext,
+                    plaintext_size, plaintext_length,
+                    PSA_CRYPTO_DRIVER_DECRYPT);
+#endif /* CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART */
     return status;
 }
 
