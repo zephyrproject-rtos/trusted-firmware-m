@@ -68,6 +68,8 @@
 #define SYSTIMER0_ARMV8M_DEFAULT_FREQ_HZ    (32000000ul)
 
 /* MHU */
+#define MHU_AP_TO_RSS
+#define MHU_RSS_TO_AP
 #define MHU_SCP_TO_RSS
 #define MHU_RSS_TO_SCP
 

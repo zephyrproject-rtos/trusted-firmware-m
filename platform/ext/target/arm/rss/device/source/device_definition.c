@@ -464,6 +464,18 @@ struct mpc_sie_dev_t MPC_VM1_DEV_S = {
 #endif
 
 /* Message Handling Units (MHU) */
+#ifdef MHU_AP_TO_RSS
+struct mhu_v2_x_dev_t MHU_AP_TO_RSS_DEV = {
+    MHU0_RECEIVER_BASE_S,
+    MHU_V2_X_RECEIVER_FRAME};
+#endif
+
+#ifdef MHU_RSS_TO_AP
+struct mhu_v2_x_dev_t MHU_RSS_TO_AP_DEV = {
+    MHU0_SENDER_BASE_S,
+    MHU_V2_X_SENDER_FRAME};
+#endif
+
 #ifdef MHU_SCP_TO_RSS
 struct mhu_v2_x_dev_t MHU_SCP_TO_RSS_DEV = {
     MHU2_RECEIVER_BASE_S,

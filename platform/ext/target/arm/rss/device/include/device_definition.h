@@ -175,6 +175,16 @@ extern struct mpc_sie_dev_t MPC_VM1_DEV_S;
 #endif
 
 /* Message Handling Units (MHU) */
+#ifdef MHU_AP_TO_RSS
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_AP_TO_RSS_DEV;
+#endif
+
+#ifdef MHU_RSS_TO_AP
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_RSS_TO_AP_DEV;
+#endif
+
 #ifdef MHU_SCP_TO_RSS
 #include "mhu_v2_x.h"
 extern struct mhu_v2_x_dev_t MHU_SCP_TO_RSS_DEV;
