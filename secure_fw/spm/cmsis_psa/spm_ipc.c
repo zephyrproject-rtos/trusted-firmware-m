@@ -164,7 +164,6 @@ struct conn_handle_t *tfm_spm_create_conn_handle(void)
     return p_handle;
 }
 
-#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle)
 {
     /* Check the handle address is valid */
@@ -175,7 +174,6 @@ int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle)
 
     return SPM_SUCCESS;
 }
-#endif
 
 int32_t tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle)
 {
@@ -324,7 +322,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 }
 
 /* Message functions */
-
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
                                                       int32_t client_id)
 {
@@ -341,6 +339,7 @@ struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
 
     return p_conn_handle;
 }
+#endif
 
 struct conn_handle_t *spm_get_handle_by_msg_handle(psa_handle_t msg_handle)
 {

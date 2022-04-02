@@ -226,6 +226,7 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 
 /************************ Message functions **********************************/
 
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 /**
  * \brief                   Convert the given client handle to SPM recognised
  *                          handle and verify it.
@@ -239,6 +240,7 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
  */
 struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
                                                       int32_t client_id);
+#endif
 
 /**
  * \brief                   Convert the given message handle to SPM recognised
