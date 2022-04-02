@@ -29,9 +29,9 @@ psa_initial_attest_get_token(const uint8_t *auth_challenge,
     };
 
     res = tfm_ns_interface_dispatch(
-                               (veneer_fn)tfm_initial_attest_get_token_veneer,
-                               (uint32_t)in_vec,  IOVEC_LEN(in_vec),
-                               (uint32_t)out_vec, IOVEC_LEN(out_vec));
+                            (veneer_fn)tfm_initial_attest_get_token_req_veneer,
+                            (uint32_t)in_vec,  IOVEC_LEN(in_vec),
+                            (uint32_t)out_vec, IOVEC_LEN(out_vec));
 
     if (res == (int32_t)PSA_SUCCESS) {
         *token_size = out_vec[0].len;
@@ -52,7 +52,7 @@ psa_initial_attest_get_token_size(size_t  challenge_size,
     };
 
     return tfm_ns_interface_dispatch(
-                            (veneer_fn)tfm_initial_attest_get_token_size_veneer,
-                            (uint32_t)in_vec,  IOVEC_LEN(in_vec),
-                            (uint32_t)out_vec, IOVEC_LEN(out_vec));
+                        (veneer_fn)tfm_initial_attest_get_token_size_req_veneer,
+                        (uint32_t)in_vec,  IOVEC_LEN(in_vec),
+                        (uint32_t)out_vec, IOVEC_LEN(out_vec));
 }

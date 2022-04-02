@@ -838,18 +838,19 @@ error:
 }
 
 psa_status_t
-initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
-                               psa_outvec *out_vec, uint32_t num_outvec)
+initial_attest_get_token(const void *challenge_buf, size_t challenge_size,
+                         void *token_buf, size_t token_buf_size,
+                         size_t *token_size)
 {
     enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
     struct q_useful_buf_c challenge;
     struct q_useful_buf token;
     struct q_useful_buf_c completed_token;
 
-    challenge.ptr = in_vec[0].base;
-    challenge.len = in_vec[0].len;
-    token.ptr = out_vec[0].base;
-    token.len = out_vec[0].len;
+    challenge.ptr = challenge_buf;
+    challenge.len = challenge_size;
+    token.ptr = token_buf;
+    token.len = token_buf_size;
 
     attest_err = attest_verify_challenge_size(challenge.len);
     if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
@@ -866,20 +867,17 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
         goto error;
     }
 
-    out_vec[0].base = (void *)completed_token.ptr;
-    out_vec[0].len  = completed_token.len;
+    *token_size  = completed_token.len;
 
 error:
     return error_mapping_to_psa_status_t(attest_err);
 }
 
 psa_status_t
-initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
-                                    psa_outvec *out_vec, uint32_t num_outvec)
+initial_attest_get_token_size(const size_t challenge_size,
+                              size_t *token_size)
 {
     enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
-    uint32_t  challenge_size = *(uint32_t *)in_vec[0].base;
-    uint32_t *token_buf_size = (uint32_t *)out_vec[0].base;
     struct q_useful_buf_c challenge;
     struct q_useful_buf token;
     struct q_useful_buf_c completed_token;
@@ -892,11 +890,6 @@ initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
     token.ptr = NULL;
     token.len = INT32_MAX;
 
-    if (out_vec[0].len < sizeof(uint32_t)) {
-        attest_err = PSA_ATTEST_ERR_INVALID_INPUT;
-        goto error;
-    }
-
     attest_err = attest_verify_challenge_size(challenge_size);
     if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         goto error;
@@ -907,7 +900,7 @@ initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
         goto error;
     }
 
-    *token_buf_size = completed_token.len;
+    *token_size = completed_token.len;
 
 error:
     return error_mapping_to_psa_status_t(attest_err);

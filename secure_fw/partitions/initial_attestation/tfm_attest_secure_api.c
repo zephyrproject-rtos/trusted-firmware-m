@@ -40,7 +40,7 @@ psa_initial_attest_get_token(const uint8_t *auth_challenge,
                       out_vec, IOVEC_LEN(out_vec));
 #else
 
-    status = tfm_initial_attest_get_token_veneer(in_vec, IOVEC_LEN(in_vec),
+    status = tfm_initial_attest_get_token_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                                  out_vec, IOVEC_LEN(out_vec));
 #endif
     if (status == PSA_SUCCESS) {
@@ -69,7 +69,8 @@ psa_initial_attest_get_token_size(size_t challenge_size,
                       out_vec, IOVEC_LEN(out_vec));
 #else
 
-    status = tfm_initial_attest_get_token_size_veneer(in_vec, IOVEC_LEN(in_vec),
+    status = tfm_initial_attest_get_token_size_req_veneer(
+                                                   in_vec, IOVEC_LEN(in_vec),
                                                    out_vec, IOVEC_LEN(out_vec));
 #endif
 
