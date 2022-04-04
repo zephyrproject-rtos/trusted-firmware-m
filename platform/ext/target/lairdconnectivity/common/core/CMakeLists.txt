@@ -43,7 +43,6 @@ target_include_directories(platform_s
         ${NRF_FOLDER_PATH}/nrfx
         ${NRF_FOLDER_PATH}/nrfx/mdk
         ${NRF_FOLDER_PATH}/nrfx/drivers/include
-        ${NRF_FOLDER_PATH}/common
         ${PLATFORM_DIR}/..
 )
 
@@ -60,7 +59,7 @@ target_sources(platform_s
         ${NRF_FOLDER_PATH}/native_drivers/spu.c
         ${NRF_FOLDER_PATH}/spm_hal.c
         ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
-        ${NRF_FOLDER_PATH}/tfm_hal_platform_common.c
+        ${NRF_FOLDER_PATH}/tfm_hal_platform.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
     PUBLIC
         plat_test.c
