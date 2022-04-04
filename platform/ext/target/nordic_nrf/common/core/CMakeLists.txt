@@ -119,7 +119,6 @@ target_include_directories(platform_ns
         nrfx
         nrfx/mdk
         nrfx/drivers/include
-        common
         ${PLATFORM_DIR}/..
         services/include
     PRIVATE
@@ -150,7 +149,6 @@ if(BL2)
             nrfx
             nrfx/mdk
             nrfx/drivers/include
-            common
         PRIVATE
             ${PLATFORM_DIR}/..
     )
