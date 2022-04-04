@@ -64,7 +64,7 @@ __Vectors:
     .long   SPIM3_SPIS3_TWIM3_TWIS3_UARTE3_IRQHandler
     .long   GPIOTE0_IRQHandler
     .long   SAADC_IRQHandler
-    .long   TIMER0_IRQHandler
+    .long   TFM_TIMER0_IRQ_Handler
     .long   TIMER1_IRQHandler
     .long   TIMER2_IRQHandler
     .long   0                           /* Reserved */
@@ -303,7 +303,7 @@ Default_Handler:
     def_irq_handler      SPIM3_SPIS3_TWIM3_TWIS3_UARTE3_IRQHandler
     def_irq_handler      GPIOTE0_IRQHandler
     def_irq_handler      SAADC_IRQHandler
-    def_irq_handler      TIMER0_IRQHandler
+    def_irq_handler      TFM_TIMER0_IRQ_Handler
     def_irq_handler      TIMER1_IRQHandler
     def_irq_handler      TIMER2_IRQHandler
     def_irq_handler      RTC0_IRQHandler
