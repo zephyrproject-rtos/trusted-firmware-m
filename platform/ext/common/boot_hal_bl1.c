@@ -31,67 +31,54 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
 uint32_t platform_code_is_bl1_2 = 0;
 
-static const uint32_t bl1_1_data_start = BL1_1_DATA_START;
-static const uint32_t bl1_1_data_limit = BL1_1_DATA_START + BL1_1_DATA_SIZE;
-static const uint32_t bl1_2_data_start = BL1_2_DATA_START;
-static const uint32_t bl1_2_data_limit = BL1_2_DATA_START + BL1_2_DATA_SIZE;
+REGION_DECLARE(Image$$, BL1_1_ER_DATA_START, $$Base)[];
+REGION_DECLARE(Image$$, BL1_1_ER_DATA_LIMIT, $$Base)[];
+REGION_DECLARE(Image$$, BL1_2_ER_DATA_START, $$Base)[];
+REGION_DECLARE(Image$$, BL1_2_ER_DATA_LIMIT, $$Base)[];
 
-/* Erase both sections at the end of BL1_2 */
+/* Erase both BL1 data sections at the end of BL1_2
+ * At the point this function is called, the SP has been set to the next image's
+ * initial SP and this function itself will wipe the executing image's data
+ * region. Therefore, to avoid using any stack or static memory, this function
+ * is implemented as a naked function using only assembly.
+ */
 __WEAK __attribute__((naked)) void boot_clear_ram_area(void)
 {
     __ASM volatile(
 #if !defined(__ICCARM__)
-        ".syntax unified                             \n"
+        ".syntax unified                               \n"
 #endif
         /* If platform_code_is_bl1_2 isn't set, don't clear anything to allow
          * code-sharing to work correctly.
          */
-        "ldr     r0, %0                              \n"
-        "cmp     r0, #0                              \n"
-        "beq     Clear_done_1                        \n"
-        /* Clear the entire data section */
-        "movs    r0, #0                              \n"
-        "ldr     r1, %1                              \n"
-        "ldr     r2, %2                              \n"
-        "subs    r2, r2, r1                          \n"
-        "Loop_1:                                     \n"
-        "subs    r2, #4                              \n"
-        "blt     Clear_done_1                        \n"
-        "str     r0, [r1, r2]                        \n"
-        "b       Loop_1                              \n"
-        "Clear_done_1:                               \n"
-        "nop \n"
+        "ldr     r0, %0                                \n"
+        "cmp     r0, #0                                \n"
+        "beq     Clear_done_2                          \n"
+        /* Clear the entire BL1_1 data section */
+        "movs    r0, #0                                \n"
+        "ldr     r1, =Image$$BL1_1_ER_DATA_START$$Base \n"
+        "ldr     r2, =Image$$BL1_1_ER_DATA_LIMIT$$Base \n"
+        "subs    r2, r2, r1                            \n"
+        "Loop_1:                                       \n"
+        "subs    r2, #4                                \n"
+        "blt     Clear_done_1                          \n"
+        "str     r0, [r1, r2]                          \n"
+        "b       Loop_1                                \n"
+        "Clear_done_1:                                 \n"
+        /* Clear the entire BL1_2 data section */
+        "movs    r0, #0                                \n"
+        "ldr     r1, =Image$$BL1_2_ER_DATA_START$$Base \n"
+        "ldr     r2, =Image$$BL1_2_ER_DATA_LIMIT$$Base \n"
+        "subs    r2, r2, r1                            \n"
+        "Loop_2:                                       \n"
+        "subs    r2, #4                                \n"
+        "blt     Clear_done_2                          \n"
+        "str     r0, [r1, r2]                          \n"
+        "b       Loop_2                                \n"
+        "Clear_done_2:                                 \n"
+        "bx lr                                         \n"
          :
-         : "m" (platform_code_is_bl1_2),
-           "m" (bl1_1_data_start), "m" (bl1_1_data_limit)
-         : "r0" , "r1" , "r2" , "memory"
-    );
-
-    __ASM volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                             \n"
-#endif
-        /* If platform_code_is_bl1_2 isn't set, don't clear anything to allow
-         * code-sharing to work correctly.
-         */
-        "ldr     r0, %0                              \n"
-        "cmp     r0, #0                              \n"
-        "beq     Clear_done_2                        \n"
-        /* Clear the entire data section */
-        "movs    r0, #0                              \n"
-        "ldr     r1, %1                              \n"
-        "ldr     r2, %2                              \n"
-        "subs    r2, r2, r1                          \n"
-        "Loop_2:                                     \n"
-        "subs    r2, #4                              \n"
-        "blt     Clear_done_2                        \n"
-        "str     r0, [r1, r2]                        \n"
-        "b       Loop_2                              \n"
-        "Clear_done_2:                               \n"
-        "bx lr                                       \n"
-         :
-         : "m" (platform_code_is_bl1_2),
-           "m" (bl1_2_data_start), "m" (bl1_2_data_limit)
+         : "m" (platform_code_is_bl1_2)
          : "r0" , "r1" , "r2" , "memory"
     );
 }
