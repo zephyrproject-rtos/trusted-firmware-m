@@ -6,6 +6,6 @@
 #
 #-------------------------------------------------------------------------------
 
-set(PLATFORM_PATH platform/ext/target/${TFM_PLATFORM}/..)
+set(NRF_PATH platform/ext/target/${TFM_PLATFORM}/..)
 
-include(${PLATFORM_PATH}/common/bl5340/preload.cmake)
+include(${NRF_PATH}/common/bl5340/preload.cmake)
