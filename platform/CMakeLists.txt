@@ -149,6 +149,7 @@ if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/accelerator/interface>
+            $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${MCUBOOT_PATH}/boot/bootutil/include>
     )
 
     target_sources(platform_bl2
@@ -167,6 +168,7 @@ if(BL2)
             platform_region_defs
         PRIVATE
             bl2_hal
+            mcuboot_config
     )
 
     target_compile_definitions(platform_bl2
