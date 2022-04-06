@@ -39,7 +39,8 @@
       "connection_based": false,
       "stateless_handle": 4,
       "version": 1,
-      "version_policy": "STRICT"
+      "version_policy": "STRICT",
+      "mm_iovec": "enable",
     }
   ],
   "dependencies": [

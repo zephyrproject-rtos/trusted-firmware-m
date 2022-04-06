@@ -15,6 +15,7 @@
 
 #ifdef TFM_PSA_API
 #include "array.h"
+#include "psa/framework_feature.h"
 #include "psa/service.h"
 #include "psa_manifest/tfm_initial_attestation.h"
 #include "region_defs.h"
@@ -26,22 +27,57 @@ typedef psa_status_t (*attest_func_t)(const psa_msg_t *msg);
 
 int32_t g_attest_caller_id;
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
+{
+    psa_status_t status;
+    const void *challenge_buff;
+    void *token_buff;
+    size_t challenge_size;
+    size_t token_buff_size;
+    size_t token_size;
+
+    token_buff_size = msg->out_size[0];
+    challenge_size = msg->in_size[0];
+
+    if (challenge_size > PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64
+        || challenge_size == 0 || token_buff_size == 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* store the client ID here for later use in service */
+    g_attest_caller_id = msg->client_id;
+
+    challenge_buff = psa_map_invec(msg->handle, 0);
+    token_buff = psa_map_outvec(msg->handle, 0);
+
+    status = initial_attest_get_token(challenge_buff, challenge_size,
+                                      token_buff, token_buff_size, &token_size);
+    if (status == PSA_SUCCESS) {
+        psa_unmap_outvec(msg->handle, 0, token_size);
+    }
+
+    return status;
+}
+#else /* PSA_FRAMEWORK_HAS_MM_IOVEC == 1 */
 static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
 {
     psa_status_t status = PSA_SUCCESS;
     uint8_t challenge_buff[PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64];
     uint8_t token_buff[PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE];
     uint32_t bytes_read = 0;
-    size_t challenge_size = msg->in_size[0];
+    size_t challenge_size;
     size_t token_buff_size;
     size_t token_size;
 
-    if (challenge_size > PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
+    challenge_size = msg->in_size[0];
     token_buff_size = msg->out_size[0] < sizeof(token_buff) ?
                                           msg->out_size[0] : sizeof(token_buff);
+
+    if (challenge_size > PSA_INITIAL_ATTEST_CHALLENGE_SIZE_64
+        || challenge_size == 0 || token_buff_size == 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
 
     /* store the client ID here for later use in service */
     g_attest_caller_id = msg->client_id;
@@ -59,6 +95,7 @@ static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
 
     return status;
 }
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC == 1 */
 
 static psa_status_t psa_attest_get_token_size(const psa_msg_t *msg)
 {
