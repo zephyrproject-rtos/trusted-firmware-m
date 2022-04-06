@@ -24,6 +24,7 @@
 #define EXCEPTION_TYPE_MEMFAULT    2
 #define EXCEPTION_TYPE_BUSFAULT    3
 #define EXCEPTION_TYPE_USAGEFAULT  4
+#define EXCEPTION_TYPE_PLATFORM    5
 
 /* This level of indirection is needed to fully resolve exception info when it's
  * a macro
