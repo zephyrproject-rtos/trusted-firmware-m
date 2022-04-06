@@ -11,6 +11,7 @@
 #include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "utilities.h"
+#include "exception_info.h"
 #include "tfm_hal_platform.h"
 
 /* Import MPC driver */
@@ -20,7 +21,7 @@ extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC;
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
-void MPC_Handler(void)
+void C_MPC_Handler(void)
 {
     /* Clear MPC interrupt flags and pending MPC IRQ */
     Driver_EFLASH0_MPC.ClearInterrupt();
@@ -28,13 +29,23 @@ void MPC_Handler(void)
     NVIC_ClearPendingIRQ(S_MPC_COMBINED_IRQn);
 
     /* Print fault message and block execution */
-    ERROR_MSG("Oops... MPC fault!!!");
+    ERROR_MSG("Platform Exception: MPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
 }
 
-void PPC_Handler(void)
+__attribute__((naked)) void MPC_Handler(void)
+{
+    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+
+    __ASM volatile(
+        "BL        C_MPC_Handler           \n"
+        "B         .                       \n"
+    );
+}
+
+void C_PPC_Handler(void)
 {
     /*
      * Due to an issue on the FVP, the PPC fault doesn't trigger a
@@ -47,13 +58,23 @@ void PPC_Handler(void)
     NVIC_ClearPendingIRQ(S_PPC_COMBINED_IRQn);
 
     /* Print fault message*/
-    ERROR_MSG("Oops... PPC fault!!!");
+    ERROR_MSG("Platform Exception: PPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
 }
 
-void NMI_Handler(void)
+__attribute__((naked)) void PPC_Handler(void)
+{
+    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+
+    __ASM volatile(
+        "BL        C_PPC_Handler           \n"
+        "B         .                       \n"
+    );
+}
+
+void C_NMI_Handler(void)
 {
     /*
      * FixMe: Due to the issue on the MUSCA_B1 board: secure watchdog is not
@@ -61,10 +82,20 @@ void NMI_Handler(void)
      * warm reset as part of watchdog interrupt (Take place in NMI).
      */
     /* Print fault message*/
-    ERROR_MSG("Oops... NMI fault!!!");
+    ERROR_MSG("Platform Exception: NMI fault!!!");
 
     /* Trigger warm-reset */
     tfm_hal_system_reset();
+}
+
+__attribute__((naked)) void NMI_Handler(void)
+{
+    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+
+    __ASM volatile(
+        "BL        C_NMI_Handler           \n"
+        "B         .                       \n"
+    );
 }
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)

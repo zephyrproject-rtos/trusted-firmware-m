@@ -14,6 +14,7 @@
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "utilities.h"
+#include "exception_info.h"
 
 /* Import MPC driver */
 extern ARM_DRIVER_MPC Driver_SRAM1_MPC;
@@ -43,30 +44,60 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-void SCU_IRQHandler(void)
+void C_SCU_IRQHandler(void)
 {
-    ERROR_MSG("Oops... secure violation fault!!!");
+    ERROR_MSG("Platform Exception: secure violation fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
 }
 
-void MPC_Handler(void)
+__attribute__((naked)) void SCU_IRQHandler(void)
+{
+    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+
+    __ASM volatile(
+        "BL        C_SCU_Handler           \n"
+        "B         .                       \n"
+    );
+}
+
+void C_MPC_Handler(void)
 {
     /* Print fault message and block execution */
-    ERROR_MSG("Oops... Unexpected fault!!!");
+    ERROR_MSG("Platform Exception: MPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
 }
 
-void PPC_Handler(void)
+__attribute__((naked)) void MPC_Handler(void)
+{
+    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+
+    __ASM volatile(
+        "BL        C_MPC_Handler           \n"
+        "B         .                       \n"
+    );
+}
+
+void C_PPC_Handler(void)
 {
     /* Print fault message and block execution */
-    ERROR_MSG("Oops... Unexpected fault!!!");
+    ERROR_MSG("Platform Exception: PPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
+}
+
+__attribute__((naked)) void PPC_Handler(void)
+{
+    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+
+    __ASM volatile(
+        "BL        C_PPC_Handler           \n"
+        "B         .                       \n"
+    );
 }
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)

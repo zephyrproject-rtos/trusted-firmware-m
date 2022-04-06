@@ -18,16 +18,26 @@
 extern const struct memory_region_limits memory_regions;
 
 
-void SEC_VIO_IRQHandler(void)
+void C_SEC_VIO_IRQHandler(void)
 {
 	/* Clear interrupt flag and pending IRQ */
     NVIC_ClearPendingIRQ(SEC_VIO_IRQn);
 
     /* Print fault message and block execution */
-    ERROR_MSG("Oops... MPC fault!!!");
+    ERROR_MSG("Platform Exception: MPC fault!!!");
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
+}
+
+__attribute__((naked)) void SEC_VIO_IRQHandler(void)
+{
+    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+
+    __ASM volatile(
+        "BL        C_SEC_VIO_IRQHandler    \n"
+        "B         .                       \n"
+    );
 }
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
