@@ -75,8 +75,8 @@ static void skip_leading_zero(uint8_t **ptr, size_t *ptr_size)
         return;
     }
 
-    if ((*ptr)[0] == 0 && ((*ptr)[1] & 0x80)) {
-        *ptr++;
+    if (*ptr[0] == 0 && (*ptr[1] & 0x80)) {
+        *ptr += 1;
         *ptr_size -= 1;
     }
 }
