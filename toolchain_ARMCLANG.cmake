@@ -188,10 +188,12 @@ macro(tfm_toolchain_reload_compiler)
         message(FATAL_ERROR "Please select newer Arm compiler version starting from 6.10.1.")
     endif()
 
-    if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.15)
-        message(WARNING "Armclang starting from v6.15 may cause MemManage fault."
-                            " The root cause is still under analysis by Armclang."
-                            " Please use lower Armclang versions instead.")
+    if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.15 AND
+        CMAKE_C_COMPILER_VERSION VERSION_LESS 6.18)
+        message(WARNING "Armclang 6.15~6.17 may cause MemManage fault."
+                        " This defect has been fixed since Armclang 6.18."
+                        " See [SDCOMP-59788] in Armclang 6.18 release note for details."
+                        " Please use other Armclang versions instead.")
     endif()
 
     # Cmake's armclang support will set either mcpu or march, but march gives
