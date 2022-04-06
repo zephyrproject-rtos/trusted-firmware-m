@@ -20,43 +20,28 @@
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
 
-static void log_spu_irq_debug_information(void)
+static void spu_dump_context(void)
 {
-    SPMLOG_ERRMSG("SPU IRQ triggered\r\n");
+    SPMLOG_ERRMSG("Platform Exception: SPU Fault\r\n");
 
-#if TFM_SPM_LOG_LEVEL >= TFM_SPM_LOG_LEVEL_DEBUG
     /* Report which type of violation occured */
     if(NRF_SPU->EVENTS_RAMACCERR)
     {
-        SPMLOG_DBGMSG("NRF_SPU->EVENTS_RAMACCERR triggered\r\n");
+        SPMLOG_DBGMSG("  RAMACCERR\r\n");
     }
     if(NRF_SPU->EVENTS_PERIPHACCERR)
     {
-        SPMLOG_DBGMSG("NRF_SPU->EVENTS_PERIPHACCERR triggered\r\n");
+        SPMLOG_DBGMSG("  PERIPHACCERR\r\n");
     }
     if(NRF_SPU->EVENTS_FLASHACCERR)
     {
-        SPMLOG_DBGMSG("NRF_SPU->EVENTS_FLASHACCERR triggered\r\n");
+        SPMLOG_DBGMSG("  FLASHACCERR\r\n");
     }
-
-#ifdef TFM_EXCEPTION_INFO_DUMP
-
-    /* None of the error types fit perfectly for an SPU_IRQ (not even
-     * SecureFault), so we use type 64 (which is unknown to
-     * exception_info). */
-    EXCEPTION_INFO(64);
-#else
-    SPMLOG_ERRMSG("Enable TFM_EXCEPTION_INFO_DUMP\r\n");
-#endif
-
-#else
-    SPMLOG_ERRMSG("Enable TFM_SPM_LOG_LEVEL_DEBUG\r\n");
-#endif
 }
 
-void SPU_IRQHandler(void)
+void SPU_Handler(void)
 {
-    log_spu_irq_debug_information();
+    spu_dump_context();
 
     /* Clear SPU interrupt flag and pending SPU IRQ */
     spu_clear_events();
@@ -65,6 +50,16 @@ void SPU_IRQHandler(void)
 
     /* Inform TF-M core that isolation boundary has been violated */
     tfm_access_violation_handler();
+}
+
+__attribute__((naked)) void SPU_IRQHandler(void)
+{
+    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
+
+    __ASM volatile(
+        "BL        SPU_Handler             \n"
+        "B         .                       \n"
+    );
 }
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
