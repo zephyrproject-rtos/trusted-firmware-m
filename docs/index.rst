@@ -92,7 +92,7 @@ Trusted Firmware-M Documentation
     API Reference <https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/reference_manual/html/index.html>
     Security Center <https://developer.trustedfirmware.org/w/collaboration/security_center>
     Platform Security Architecture <https://developer.arm.com/architectures/security-architectures/platform-security-architecture>
-    glossary
+    Glossary <glossary>
 
 --------------
 

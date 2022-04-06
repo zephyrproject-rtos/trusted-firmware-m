@@ -106,7 +106,15 @@ html_theme = 'sphinx_rtd_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_theme_options = {'collapse_navigation': False}
+html_theme_options = {
+    'collapse_navigation': False,
+    'prev_next_buttons_location' : None   # Hide Prev and Next buttons
+#    'display_version': True,    # Show version under logo
+}
+
+# Remove the "View page source" link from the top of docs pages
+html_show_sourcelink = False
+
 #
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to configuration directory. They are copied after the builtin static
@@ -115,6 +123,9 @@ html_static_path = ['_static']
 
 # Set the documentation logo relative to configuration directory
 html_logo = '_static/images/tf_logo_white.png'
+
+# Set the documentation favicon
+html_favicon = '_static/images/favicon.ico'
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -128,6 +139,10 @@ html_logo = '_static/images/tf_logo_white.png'
 
 #Disable adding conf.py copyright notice to HTML output
 html_show_copyright = False
+
+# Disable showing Sphinx footer message:
+# "Built with Sphinx using a theme provided by Read the Docs. "
+html_show_sphinx = False
 
 #Add custom css for HTML. Used to allow full page width rendering
 def setup(app):
