@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
+#include <stdbool.h>
 
 #include "tfm_mbedcrypto_include.h"
 
@@ -13,7 +14,7 @@
 
 /*
  * \brief This Mbed TLS include is needed to initialise the memory allocator
- *        inside the Mbed TLS layer of Mbed Crypto
+ *        of the library used for internal allocations
  */
 #include "mbedtls/memory_buffer_alloc.h"
 
@@ -29,21 +30,45 @@
 #include "crypto_hw.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
 
+#ifndef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
+#endif
+
+/**
+ * \brief Type describing the properties of each function identifier, i.e. the
+ *        group ID and the function type
+ */
+struct tfm_crypto_api_descriptor {
+    uint8_t group_id     : 6; /*!< Value from \ref tfm_crypto_group_id */
+    uint8_t function_type: 2; /*!< Value from \ref tfm_crypto_function_type */
+};
+
+/**
+ * \brief This table contains the description of each of the function IDs
+ *        defined by \ref tfm_crypto_function_id
+ */
+#define X(_function_id, _group_id, _function_type) \
+    [_function_id] = {.group_id = _group_id, .function_type = _function_type},
+static const struct tfm_crypto_api_descriptor tfm_crypto_api_descriptor[] = {
+    TFM_CRYPTO_SERVICE_API_DESCRIPTION
+};
+#undef X
+
+enum tfm_crypto_function_type get_function_type_from_descriptor(enum tfm_crypto_function_id func)
+{
+    return tfm_crypto_api_descriptor[func].function_type;
+}
+
+enum tfm_crypto_group_id get_group_id_from_descriptor(enum tfm_crypto_function_id func)
+{
+    return tfm_crypto_api_descriptor[func].group_id;
+}
+
 #ifdef TFM_PSA_API
 #include <string.h>
 #include "psa/framework_feature.h"
 #include "psa/service.h"
 #include "psa_manifest/tfm_crypto.h"
-
-/**
- * \brief Table containing all the Uniform Signature API exposed
- *        by the TF-M Crypto partition
- */
-static const tfm_crypto_us_t sfid_func_table[TFM_CRYPTO_SID_MAX] = {
-#define X(api_name) api_name,
-LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API
-#undef X
-};
 
 /**
  * \brief Aligns a value x up to an alignment a.
@@ -235,10 +260,6 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    if (iov.srv_id >= TFM_CRYPTO_SID_MAX) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
     /* Initialise the first iovec with the IOV read when parsing */
     in_vec[0].base = &iov;
     in_vec[0].len = sizeof(struct tfm_crypto_pack_iovec);
@@ -250,8 +271,8 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
 
     tfm_crypto_set_caller_id(msg->client_id);
 
-    /* Call the uniform signature API */
-    status = sfid_func_table[iov.srv_id](in_vec, in_len, out_vec, out_len);
+    /* Call the dispatcher to the functions that implement the PSA Crypto API */
+    status = tfm_crypto_api_dispatcher(in_vec, in_len, out_vec, out_len);
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
     for (i = 0; i < out_len; i++) {
@@ -301,33 +322,34 @@ static uint8_t mbedtls_mem_buf[TFM_CRYPTO_ENGINE_BUF_SIZE] = {0};
 
 static psa_status_t tfm_crypto_engine_init(void)
 {
-
 #ifdef CRYPTO_NV_SEED
+    LOG_INFFMT("[INF][Crypto] ");
 #ifdef TFM_PSA_API
+    LOG_INFFMT("Provisioning entropy seed... ");
     if (tfm_plat_crypto_provision_entropy_seed() != TFM_CRYPTO_NV_SEED_SUCCESS) {
         return PSA_ERROR_GENERIC_ERROR;
     }
+    LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
 #else
-    LOG_INFFMT("\033[1;31m[Crypto] ");
     LOG_INFFMT("TF-M in library mode uses a dummy NV seed. ");
     LOG_INFFMT("This is not suitable for production! ");
-    LOG_INFFMT("This device is \033[1;1mNOT SECURE");
-    LOG_INFFMT("\033[0m\r\n");
+    LOG_INFFMT("This device is \033[1;31mNOT SECURE\033[0m\r\n");
 #endif /* TFM_PSA_API */
 #endif /* CRYPTO_NV_SEED */
 
-    /* Initialise the Mbed Crypto memory allocator to use static
-     * memory allocation from the provided buffer instead of using
-     * the heap
+    /* Initialise the Mbed Crypto memory allocator to use static memory
+     * allocation from the provided buffer instead of using the heap
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
                                      TFM_CRYPTO_ENGINE_BUF_SIZE);
 
     /* Initialise the crypto accelerator if one is enabled */
 #ifdef CRYPTO_HW_ACCELERATOR
+    LOG_INFFMT("[INF][Crypto] Initialising HW accelerator... ");
     if (crypto_hw_accelerator_init() != 0) {
         return PSA_ERROR_HARDWARE_FAILURE;
     }
+    LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
 #endif /* CRYPTO_HW_ACCELERATOR */
 
     /* Previous function does not return any value, so just call the
@@ -370,3 +392,79 @@ psa_status_t tfm_crypto_sfn(const psa_msg_t *msg)
     return PSA_ERROR_GENERIC_ERROR;
 }
 #endif
+
+psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
+                                       size_t in_len,
+                                       psa_outvec out_vec[],
+                                       size_t out_len)
+{
+    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    int32_t caller_id = 0;
+    mbedtls_svc_key_id_t encoded_key = MBEDTLS_SVC_KEY_ID_INIT;
+    bool is_key_required = false;
+
+    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    is_key_required = !(TFM_CRYPTO_IS_GROUP_ID(
+                            iov->function_id, TFM_CRYPTO_GROUP_ID_HASH) ||
+                        (iov->function_id == TFM_CRYPTO_GENERATE_RANDOM_SID));
+
+    if (is_key_required) {
+        status = tfm_crypto_get_caller_id(&caller_id);
+        if (status != PSA_SUCCESS) {
+            return status;
+        }
+        /* The caller_id being set in the owner field is the partition ID
+         * of the calling partition
+         */
+        encoded_key = mbedtls_svc_key_id_make(caller_id, iov->key_id);
+    }
+
+    /* Dispatch to each sub-module based on the Group ID */
+    if (TFM_CRYPTO_IS_GROUP_ID(
+            iov->function_id, TFM_CRYPTO_GROUP_ID_KEY_MANAGEMENT)) {
+        status = tfm_crypto_key_management_interface(in_vec,
+                                                     out_vec,
+                                                     &encoded_key);
+    } else if (TFM_CRYPTO_IS_GROUP_ID(
+                   iov->function_id, TFM_CRYPTO_GROUP_ID_HASH)) {
+        status = tfm_crypto_hash_interface(in_vec, out_vec);
+    } else if (TFM_CRYPTO_IS_GROUP_ID(
+                   iov->function_id, TFM_CRYPTO_GROUP_ID_MAC)) {
+        status = tfm_crypto_mac_interface(in_vec,
+                                          out_vec,
+                                          &encoded_key);
+    } else if (TFM_CRYPTO_IS_GROUP_ID(
+                   iov->function_id, TFM_CRYPTO_GROUP_ID_CIPHER)) {
+        status = tfm_crypto_cipher_interface(in_vec,
+                                             out_vec,
+                                             &encoded_key);
+    } else if (TFM_CRYPTO_IS_GROUP_ID(
+                   iov->function_id, TFM_CRYPTO_GROUP_ID_AEAD)) {
+        status = tfm_crypto_aead_interface(in_vec,
+                                           out_vec,
+                                           &encoded_key);
+    } else if (TFM_CRYPTO_IS_GROUP_ID(
+                   iov->function_id, TFM_CRYPTO_GROUP_ID_ASYM_SIGN) ||
+               TFM_CRYPTO_IS_GROUP_ID(
+                   iov->function_id, TFM_CRYPTO_GROUP_ID_ASYM_ENCRYPT)) {
+        status = tfm_crypto_asymmetric_interface(in_vec,
+                                                 out_vec,
+                                                 &encoded_key);
+    } else if (TFM_CRYPTO_IS_GROUP_ID(
+                   iov->function_id, TFM_CRYPTO_GROUP_ID_KEY_DERIVATION)) {
+        status = tfm_crypto_key_derivation_interface(in_vec,
+                                                     out_vec,
+                                                     &encoded_key);
+    } else if (iov->function_id == TFM_CRYPTO_GENERATE_RANDOM_SID) {
+        status = tfm_crypto_random_interface(in_vec, out_vec);
+    } else {
+        LOG_ERRFMT("[ERR][Crypto] Unsupported request!\r\n");
+        status = PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    return status;
+}

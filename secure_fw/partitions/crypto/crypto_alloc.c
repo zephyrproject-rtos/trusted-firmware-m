@@ -83,8 +83,9 @@ static void memset_operation_context(uint32_t index)
 }
 
 /*!
- * \defgroup public Public functions
- *
+ * \defgroup alloc Function that implement allocation and deallocation of
+ *                 contexts to be stored in the secure world for multipart
+ *                 operations
  */
 
 /*!@{*/
@@ -190,5 +191,36 @@ psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
     }
 
     return PSA_ERROR_BAD_STATE;
+}
+
+psa_status_t tfm_crypto_operation_handling(enum tfm_crypto_operation_type type,
+                                    enum tfm_crypto_function_type function_type,
+                                    uint32_t *handle,
+                                    void **ctx)
+{
+    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+
+    /* Multipart context retrieving and handling if required */
+    switch (function_type) {
+    case TFM_CRYPTO_FUNCTION_TYPE_SETUP:
+        /* Allocate the operation context in the secure world */
+        status = tfm_crypto_operation_alloc(type,
+                                            handle,
+                                            ctx);
+        break;
+    case TFM_CRYPTO_FUNCTION_TYPE_LOOKUP:
+        /* Look up the corresponding operation context */
+        status = tfm_crypto_operation_lookup(type,
+                                             *handle,
+                                             ctx);
+        break;
+    /* All the other APIs don't deal with multipart */
+    case TFM_CRYPTO_FUNCTION_TYPE_NON_MULTIPART:
+        status = PSA_ERROR_INVALID_ARGUMENT;
+    default:
+        break;
+    }
+
+    return status;
 }
 /*!@}*/

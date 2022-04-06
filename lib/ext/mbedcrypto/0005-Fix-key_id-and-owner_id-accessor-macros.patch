@@ -1,0 +1,31 @@
+From e76fe5287bdd23eb67ec45cb0c629a178733b0cc Mon Sep 17 00:00:00 2001
+From: Antonio de Angelis <Antonio.deAngelis@arm.com>
+Date: Thu, 5 May 2022 14:11:32 +0100
+Subject: [PATCH 1/1] Fix key_id and owner_id accessor macros
+
+The accessor macros for key_id and owner_id in the mbedtls_svc_key_id_t
+need to have the MBEDTLS_PRIVATE() specifier as these fields are private
+
+Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
+---
+ include/psa/crypto_values.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/psa/crypto_values.h b/include/psa/crypto_values.h
+index 5a903f86a..2d39625de 100644
+--- a/include/psa/crypto_values.h
++++ b/include/psa/crypto_values.h
+@@ -2242,8 +2242,8 @@ static inline int mbedtls_svc_key_id_is_null( mbedtls_svc_key_id_t key )
+ #else /* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
+ 
+ #define MBEDTLS_SVC_KEY_ID_INIT ( (mbedtls_svc_key_id_t){ 0, 0 } )
+-#define MBEDTLS_SVC_KEY_ID_GET_KEY_ID( id ) ( ( id ).key_id )
+-#define MBEDTLS_SVC_KEY_ID_GET_OWNER_ID( id ) ( ( id ).owner )
++#define MBEDTLS_SVC_KEY_ID_GET_KEY_ID( id ) ( ( id ).MBEDTLS_PRIVATE(key_id) )
++#define MBEDTLS_SVC_KEY_ID_GET_OWNER_ID( id ) ( ( id ).MBEDTLS_PRIVATE(owner) )
+ 
+ /** Utility to initialize a key identifier at runtime.
+  *
+-- 
+2.25.1
+
