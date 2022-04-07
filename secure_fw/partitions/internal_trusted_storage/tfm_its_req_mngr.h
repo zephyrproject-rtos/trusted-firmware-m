@@ -82,24 +82,6 @@ psa_status_t tfm_its_remove_req(psa_invec *in_vec, size_t in_len,
                                 psa_outvec *out_vec, size_t out_len);
 #endif /* NOT TFM_PSA_API */
 
-/**
- * \brief Reads asset data from the caller.
- *
- * \param[out] buf        Buffer to copy the data to
- * \param[in]  num_bytes  Number of bytes to copy
- *
- * \return Number of bytes copied
- */
-size_t its_req_mngr_read(uint8_t *buf, size_t num_bytes);
-
-/**
- * \brief Writes asset data to the caller.
- *
- * \param[in] buf        Buffer to copy the data from
- * \param[in] num_bytes  Number of bytes to copy
- */
-void its_req_mngr_write(const uint8_t *buf, size_t num_bytes);
-
 #ifdef __cplusplus
 }
 #endif
