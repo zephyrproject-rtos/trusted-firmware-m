@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited
+ * Copyright (c) 2021-2022 Arm Limited
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -10,6 +10,7 @@
 #if defined (PSA_ADAC_RSA3072) || defined (PSA_ADAC_RSA4096)
 #include "cc_rsa_build.h"
 #include "rsa/cc_rsa_local.h"
+#include "cc_rsa_schemes.h"
 #endif
 
 #if defined (PSA_ADAC_EC_P256) || defined (PSA_ADAC_EC_P521)
@@ -51,21 +52,24 @@ psa_status_t psa_adac_verify_signature(uint8_t key_type, uint8_t *key,
             (hash_algo == PSA_ALG_SHA_256) ? CC_RSA_After_SHA256_mode :
             ((hash_algo == PSA_ALG_SHA_512) ? CC_RSA_After_SHA512_mode :
                             CC_RSA_HASH_NO_HASH_mode);
-        PSA_ADAC_LOG_TRACE("cc312", "psa_adac_verify_signature Rsa%d\n", key_size);
-        error = CC_RsaPubKeyBuild(&pubKey, F4, sizeof(F4), key, key_size);
 
-        if (CC_OK != error) {
-            PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaPubKeyBuild %lx\n", error);
-        } else if (CC_OK != (error = CC_RsaVerifyInit(&rsaPubUserContext, &pubKey,
-                        hashOpMode, CC_PKCS1_MGF1, 32, CC_PKCS1_VER21))) {
-            PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaVerifyInit %lx\n", error);
-        } else if (CC_OK != (error = CC_RsaVerifyUpdate(&rsaPubUserContext, hash,
-                        hash_size))) {
-            PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaVerifyUpdate %lx\n", error);
-        } else if (CC_OK != (error = CC_RsaVerifyFinish(&rsaPubUserContext, sig)))
-        {
-            PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaVerifyFinish %lx\n", error);
+        PSA_ADAC_LOG_TRACE("cc312", "psa_adac_verify_signature Rsa%d\n",
+                           key_size);
+
+        error = CC_RsaPubKeyBuild(&pubKey, F4, sizeof(F4), key, key_size);
+        if (error != CC_OK) {
+            PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaPubKeyBuild %lx\n",
+                             error);
+        } else {
+            error = CC_RsaPssVerify(&rsaPubUserContext, &pubKey, hashOpMode,
+                                    CC_PKCS1_MGF1, 32, (uint8_t *)hash,
+                                    hash_size, (uint8_t *)sig);
+            if (error != CC_OK) {
+                PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaPssVerify %lx\n",
+                                 error);
+            }
         }
+
 #else
         return PSA_ERROR_NOT_SUPPORTED;
 #endif
