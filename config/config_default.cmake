@@ -176,6 +176,8 @@ set(MCUBOOT_VERSION                     "v1.9.0"  CACHE STRING    "The version o
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
 set(PSA_ARCH_TESTS_VERSION              "f7e8495"   CACHE STRING    "The version of PSA arch tests to use")
 
+set(NS_EVALUATION_APP_PATH              ""          CACHE PATH      "Path to TFM NS Evaluation Application")
+
 ################################################################################
 ################################################################################
 
