@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  * The file derives from the implementation of CMSIS compiler
- * GCC header (cmsis_gcc.h) version V5.4.1. These changes were also applied to
+ * GCC header (cmsis_gcc.h) version V5.8.1. These changes were also applied to
  * the previous version of this file in TF-M.
  * Changes:
  * - INITIAL_SP and STACK_LIMIT renamed to match Armclang naming convention
