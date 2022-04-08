@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ extern "C" {
 
 
 /* ========  Configuration of Core Peripherals  ================================== */
+#define __CM85_REV                0x0000U   /* Core revision r0p0 */
 #define __SAUREGION_PRESENT       1U        /* SAU regions present */
 #define __MPU_PRESENT             1U        /* MPU present */
 #define __VTOR_PRESENT            1U        /* VTOR present */
@@ -59,7 +60,7 @@ extern "C" {
 #define __DCACHE_PRESENT          1U        /* Data Cache present */
 
 #include "platform_irq.h"
-#include "core_armv81mml.h"                 /* Architecture and core peripherals */
+#include "core_cm85.h"                      /* Processor and core peripherals */
 #include "platform_base_address.h"
 #include "platform_regs.h"
 #include "platform_pins.h"
