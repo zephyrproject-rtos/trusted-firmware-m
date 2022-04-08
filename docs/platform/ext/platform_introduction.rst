@@ -2,9 +2,10 @@
 Supported Platforms
 ###################
 
-    - Olympus system
+    - Cortex-M85 system:
 
-        - Corstone-Polaris Ethos-U55 FVP (Olympus CPU plus Ethos-U55)
+        - `Corstone-310 Ethos-U55 FVP.
+          <https://arm-software.github.io/AVH/main/simulation/html/Using.html>`_
 
     - Cortex-M55 system:
 
@@ -12,7 +13,7 @@ Supported Platforms
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`_
         - `FPGA image loaded on MPS3 board (AN552).
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`_
-        - `Corstone-300 Ethos-U55 Ecosystem FVP
+        - `Corstone-300 Ethos-U55 Ecosystem FVP.
           <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`_
 
 
