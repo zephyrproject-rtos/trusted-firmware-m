@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -64,6 +64,7 @@ target_link_libraries(tfm_psa_rot_partition_attestation
         secure_fw
         psa_interface
         tfm_sprt
+        tfm_boot_status
 )
 
 target_compile_definitions(tfm_psa_rot_partition_attestation

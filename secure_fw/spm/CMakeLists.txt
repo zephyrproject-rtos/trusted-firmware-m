@@ -76,6 +76,7 @@ target_include_directories(tfm_spm_defs
     INTERFACE
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/boot>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/interface>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/arch/include>
@@ -134,7 +135,7 @@ target_include_directories(tfm_arch
 
 target_include_directories(tfm_boot_status
     INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/boot>
 )
 
 ############################ TFM utilities #####################################

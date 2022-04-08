@@ -30,12 +30,12 @@ target_sources(tfm_sprt
 
 target_link_libraries(tfm_sprt
     PUBLIC
-        tfm_boot_status
         $<$<BOOL:${TFM_SP_LOG_RAW_ENABLED}>:tfm_sp_log_raw>
     PRIVATE
         platform_s
         tfm_secure_api
         psa_interface
+        tfm_boot_status
 )
 
 target_compile_definitions(tfm_partition_defs
