@@ -30,6 +30,7 @@
 #endif /* CRYPTO_HW_ACCELERATOR */
 
 #ifdef TFM_PSA_API
+#include "psa/framework_feature.h"
 #include "psa/service.h"
 #include "psa_manifest/tfm_crypto.h"
 #include "tfm_memory_utils.h"
@@ -55,6 +56,50 @@ LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API
  */
 #define TFM_CRYPTO_IOVEC_ALIGNMENT (4u)
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+static int32_t g_client_id;
+
+static void tfm_crypto_set_caller_id(int32_t id)
+{
+    g_client_id = id;
+}
+
+psa_status_t tfm_crypto_get_caller_id(int32_t *id)
+{
+    *id = g_client_id;
+    return PSA_SUCCESS;
+}
+
+static psa_status_t tfm_crypto_init_iovecs(const psa_msg_t *msg,
+                                           psa_invec in_vec[],
+                                           size_t in_len,
+                                           psa_outvec out_vec[],
+                                           size_t out_len)
+{
+    uint32_t i;
+
+    /* Map from the second element as the first is read when parsing */
+    for (i = 1; i < in_len; i++) {
+        in_vec[i].len = msg->in_size[i];
+        if (in_vec[i].len != 0) {
+            in_vec[i].base = psa_map_invec(msg->handle, i);
+        } else {
+            in_vec[i].base = NULL;
+        }
+    }
+
+    for (i = 0; i < out_len; i++) {
+        out_vec[i].len = msg->out_size[i];
+        if (out_vec[i].len != 0) {
+            out_vec[i].base = psa_map_outvec(msg->handle, i);
+        } else {
+            out_vec[i].base = NULL;
+        }
+    }
+
+    return PSA_SUCCESS;
+}
+#else /* PSA_FRAMEWORK_HAS_MM_IOVEC == 1 */
 /**
  * \brief Default size of the internal scratch buffer used for IOVec allocations
  *        in bytes
@@ -104,12 +149,64 @@ static psa_status_t tfm_crypto_alloc_scratch(size_t requested_size, void **buf)
     return PSA_SUCCESS;
 }
 
-void tfm_crypto_clear_scratch(void)
+static void tfm_crypto_clear_scratch(void)
 {
     scratch.owner = 0;
     (void)tfm_memset(scratch.buf, 0, scratch.alloc_index);
     scratch.alloc_index = 0;
 }
+
+static void tfm_crypto_set_caller_id(int32_t id)
+{
+    /* Set the owner of the data in the scratch */
+    (void)tfm_crypto_set_scratch_owner(id);
+}
+
+psa_status_t tfm_crypto_get_caller_id(int32_t *id)
+{
+    return tfm_crypto_get_scratch_owner(id);
+}
+
+static psa_status_t tfm_crypto_init_iovecs(const psa_msg_t *msg,
+                                           psa_invec in_vec[],
+                                           size_t in_len,
+                                           psa_outvec out_vec[],
+                                           size_t out_len)
+{
+    uint32_t i;
+    void *alloc_buf_ptr = NULL;
+    psa_status_t status;
+
+    /* Alloc/read from the second element as the first is read when parsing */
+    for (i = 1; i < in_len; i++) {
+        /* Allocate necessary space in the internal scratch */
+        status = tfm_crypto_alloc_scratch(msg->in_size[i], &alloc_buf_ptr);
+        if (status != PSA_SUCCESS) {
+            tfm_crypto_clear_scratch();
+            return status;
+        }
+        /* Read from the IPC framework inputs into the scratch */
+        in_vec[i].len =
+                       psa_read(msg->handle, i, alloc_buf_ptr, msg->in_size[i]);
+        /* Populate the fields of the input to the secure function */
+        in_vec[i].base = alloc_buf_ptr;
+    }
+
+    for (i = 0; i < out_len; i++) {
+        /* Allocate necessary space for the output in the internal scratch */
+        status = tfm_crypto_alloc_scratch(msg->out_size[i], &alloc_buf_ptr);
+        if (status != PSA_SUCCESS) {
+            tfm_crypto_clear_scratch();
+            return status;
+        }
+        /* Populate the fields of the output to the secure function */
+        out_vec[i].base = alloc_buf_ptr;
+        out_vec[i].len = msg->out_size[i];
+    }
+
+    return PSA_SUCCESS;
+}
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC == 1 */
 
 static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
 {
@@ -118,11 +215,15 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
     psa_invec in_vec[PSA_MAX_IOVEC] = { {NULL, 0} };
     psa_outvec out_vec[PSA_MAX_IOVEC] = { {NULL, 0} };
     struct tfm_crypto_pack_iovec iov = {0};
-    void *alloc_buf_ptr = NULL;
 
     /* Check the number of in_vec filled */
     while ((in_len > 0) && (msg->in_size[in_len - 1] == 0)) {
         in_len--;
+    }
+
+    /* Check the number of out_vec filled */
+    while ((out_len > 0) && (msg->out_size[out_len - 1] == 0)) {
+        out_len--;
     }
 
     /* There will always be a tfm_crypto_pack_iovec in the first iovec */
@@ -142,44 +243,23 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
     in_vec[0].base = &iov;
     in_vec[0].len = sizeof(struct tfm_crypto_pack_iovec);
 
-    /* Alloc/read from the second element as the first is read when parsing */
-    for (i = 1; i < in_len; i++) {
-        /* Allocate necessary space in the internal scratch */
-        status = tfm_crypto_alloc_scratch(msg->in_size[i], &alloc_buf_ptr);
-        if (status != PSA_SUCCESS) {
-            tfm_crypto_clear_scratch();
-            return status;
-        }
-        /* Read from the IPC framework inputs into the scratch */
-        in_vec[i].len =
-                       psa_read(msg->handle, i, alloc_buf_ptr, msg->in_size[i]);
-        /* Populate the fields of the input to the secure function */
-        in_vec[i].base = alloc_buf_ptr;
+    status = tfm_crypto_init_iovecs(msg, in_vec, in_len, out_vec, out_len);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
-    /* Check the number of out_vec filled */
-    while ((out_len > 0) && (msg->out_size[out_len - 1] == 0)) {
-        out_len--;
-    }
-
-    for (i = 0; i < out_len; i++) {
-        /* Allocate necessary space for the output in the internal scratch */
-        status = tfm_crypto_alloc_scratch(msg->out_size[i], &alloc_buf_ptr);
-        if (status != PSA_SUCCESS) {
-            tfm_crypto_clear_scratch();
-            return status;
-        }
-        /* Populate the fields of the output to the secure function */
-        out_vec[i].base = alloc_buf_ptr;
-        out_vec[i].len = msg->out_size[i];
-    }
-
-    /* Set the owner of the data in the scratch */
-    (void)tfm_crypto_set_scratch_owner(msg->client_id);
+    tfm_crypto_set_caller_id(msg->client_id);
 
     /* Call the uniform signature API */
     status = sfid_func_table[iov.srv_id](in_vec, in_len, out_vec, out_len);
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+    for (i = 0; i < out_len; i++) {
+        if (out_vec[i].base != NULL) {
+            psa_unmap_outvec(msg->handle, i, out_vec[i].len);
+        }
+    }
+#else
     /* Write into the IPC framework outputs from the scratch */
     for (i = 0; i < out_len; i++) {
         psa_write(msg->handle, i, out_vec[i].base, out_vec[i].len);
@@ -187,10 +267,22 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
 
     /* Clear the allocated internal scratch before returning */
     tfm_crypto_clear_scratch();
+#endif
 
     return status;
 }
+#else /* TFM_PSA_API */
+psa_status_t tfm_crypto_get_caller_id(int32_t *id)
+{
+    int32_t res;
 
+    res = tfm_core_get_caller_client_id(id);
+    if (res != TFM_SUCCESS) {
+        return PSA_ERROR_NOT_PERMITTED;
+    } else {
+        return PSA_SUCCESS;
+    }
+}
 #endif /* TFM_PSA_API */
 
 /**
@@ -248,22 +340,6 @@ static psa_status_t tfm_crypto_module_init(void)
 {
     /* Init the Alloc module */
     return tfm_crypto_init_alloc();
-}
-
-psa_status_t tfm_crypto_get_caller_id(int32_t *id)
-{
-#ifdef TFM_PSA_API
-    return tfm_crypto_get_scratch_owner(id);
-#else
-    int32_t res;
-
-    res = tfm_core_get_caller_client_id(id);
-    if (res != TFM_SUCCESS) {
-        return PSA_ERROR_NOT_PERMITTED;
-    } else {
-        return PSA_SUCCESS;
-    }
-#endif
 }
 
 psa_status_t tfm_crypto_init(void)
