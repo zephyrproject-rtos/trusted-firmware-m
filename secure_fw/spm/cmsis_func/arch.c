@@ -10,6 +10,7 @@
 #include "tfm_secure_api.h"
 
 #if defined(__ICCARM__)
+#include "cmsis_psa/tfm_svcalls.h"
 #pragma required = tfm_core_svc_handler
 #endif
 
