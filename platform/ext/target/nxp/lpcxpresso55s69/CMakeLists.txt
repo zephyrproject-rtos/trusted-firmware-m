@@ -225,7 +225,6 @@ if(BL2)
     )
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             project_template/bl2/board.c
             project_template/bl2/clock_config.c
             project_template/bl2/pin_mux.c

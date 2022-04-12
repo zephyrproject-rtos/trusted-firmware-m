@@ -712,6 +712,9 @@ HAL_StatusTypeDef HAL_DMA_PollForTransfer(DMA_HandleTypeDef *hdma, HAL_DMA_Level
     /* Clear the transfer complete flag */
     hdma->DmaBaseAddress->IFCR = (DMA_FLAG_TC1 << (hdma->ChannelIndex& 0x1CU));
 
+    /* Process unlocked */
+    __HAL_UNLOCK(hdma);
+
     /* The selected Channelx EN bit is cleared (DMA is disabled and
     all transfers are complete) */
     hdma->State = HAL_DMA_STATE_READY;
@@ -721,9 +724,6 @@ HAL_StatusTypeDef HAL_DMA_PollForTransfer(DMA_HandleTypeDef *hdma, HAL_DMA_Level
     /* Clear the half transfer complete flag */
     hdma->DmaBaseAddress->IFCR = (DMA_FLAG_HT1 << (hdma->ChannelIndex & 0x1CU));
   }
-
-  /* Process unlocked */
-  __HAL_UNLOCK(hdma);
 
   return HAL_OK;
 }
@@ -876,7 +876,7 @@ void HAL_DMA_IRQHandler(DMA_HandleTypeDef *hdma)
   * @brief  Register callbacks
   * @param  hdma                 pointer to a DMA_HandleTypeDef structure that contains
   *                               the configuration information for the specified DMA Channel.
-  * @param  CallbackID           User Callback identifer
+  * @param  CallbackID           User Callback identifier
   *                               a HAL_DMA_CallbackIDTypeDef ENUM as parameter.
   * @param  pCallback            pointer to private callbacsk function which has pointer to
   *                               a DMA_HandleTypeDef structure as parameter.
@@ -937,7 +937,7 @@ HAL_StatusTypeDef HAL_DMA_RegisterCallback(DMA_HandleTypeDef *hdma, HAL_DMA_Call
   * @brief  UnRegister callbacks
   * @param  hdma                 pointer to a DMA_HandleTypeDef structure that contains
   *                               the configuration information for the specified DMA Channel.
-  * @param  CallbackID           User Callback identifer
+  * @param  CallbackID           User Callback identifier
   *                               a HAL_DMA_CallbackIDTypeDef ENUM as parameter.
   * @retval HAL status
   */
@@ -1091,7 +1091,7 @@ HAL_StatusTypeDef HAL_DMA_ConfigChannelAttributes(DMA_HandleTypeDef *hdma, uint3
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   uint32_t ccr_SECM;
 #endif
-
+  
   /* Check the DMA peripheral handle */
   if(hdma == NULL)
   {
@@ -1239,11 +1239,11 @@ HAL_StatusTypeDef HAL_DMA_GetConfigChannelAttributes(DMA_HandleTypeDef *hdma, ui
 
   /* Get security attributes of the destination */
   attributes |= ((read_attributes & DMA_CCR_DSEC) == 0U) ? DMA_CHANNEL_DEST_NSEC : DMA_CHANNEL_DEST_SEC;
-
+  
 #else
   /* Get secure or non-secure attributes */
   read_attributes = READ_BIT(hdma->Instance->CCR, DMA_CCR_PRIV);
-
+    
   attributes = ((read_attributes & DMA_CCR_PRIV) == 0U) ? DMA_CHANNEL_NPRIV : DMA_CHANNEL_PRIV;
 #endif /* __ARM_FEATURE_CMSE */
 

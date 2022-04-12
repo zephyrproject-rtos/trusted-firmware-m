@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -19,11 +20,6 @@ function(tfm_invalid_config)
     endif()
 endfunction()
 
-tfm_invalid_config(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_LESS "7.3.1")
-
-# Incorrect behaviour of ArmClang v6.17 was identified during v1.5.0 release. The issue reported.
-tfm_invalid_config(CMAKE_C_COMPILER_ID STREQUAL "ARMClang" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "6.17.0")
-
 set (TFM_L3_PLATFORM_LISTS arm/mps2/an521 arm/musca_b1/sse_200 stm/stm32l562e_dk)
 set (VALID_ISOLATION_LEVELS 1 2 3)
 
@@ -36,6 +32,7 @@ tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND PSA_FRAMEWORK_HAS_MM_IOVEC)
 tfm_invalid_config(TFM_LIB_MODEL AND PSA_FRAMEWORK_HAS_MM_IOVEC)
 
 tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND TFM_LIB_MODEL)
+tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND TFM_NS_MANAGE_NSID)
 tfm_invalid_config(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM AND NOT TFM_MULTI_CORE_TOPOLOGY)
 
 tfm_invalid_config((TFM_S_REG_TEST OR TFM_NS_REG_TEST) AND TEST_PSA_API)
@@ -56,11 +53,11 @@ tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_PROTECT
 
 ########################## FPU ################################################
 
-tfm_invalid_config(CONFIG_TFM_SPE_FP LESS 0 OR CONFIG_TFM_SPE_FP GREATER 2)
-tfm_invalid_config(NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CONFIG_TFM_SPE_FP GREATER 0)
-tfm_invalid_config((NOT CONFIG_TFM_FP_ARCH) AND (CONFIG_TFM_SPE_FP GREATER 0))
-tfm_invalid_config((NOT TFM_PSA_API) AND (CONFIG_TFM_SPE_FP GREATER 0))
-tfm_invalid_config(CONFIG_TFM_SPE_FP STREQUAL "0" AND CONFIG_TFM_LAZY_STACKING_SPE)
+tfm_invalid_config(NOT (CONFIG_TFM_FP STREQUAL "soft" OR CONFIG_TFM_FP STREQUAL "hard"))
+tfm_invalid_config(NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CONFIG_TFM_FP STREQUAL "hard")
+tfm_invalid_config((NOT CONFIG_TFM_FP_ARCH) AND CONFIG_TFM_FP STREQUAL "hard")
+tfm_invalid_config((NOT TFM_PSA_API) AND CONFIG_TFM_FP STREQUAL "hard")
+tfm_invalid_config(CONFIG_TFM_FP STREQUAL "soft" AND CONFIG_TFM_LAZY_STACKING)
 
 ########################## BL2 #################################################
 
@@ -69,22 +66,20 @@ tfm_invalid_config(BL2 AND (NOT MCUBOOT_UPGRADE_STRATEGY IN_LIST MCUBOOT_STRATEG
 
 tfm_invalid_config(MCUBOOT_IMAGE_NUMBER GREATER 3)
 
+get_property(MCUBOOT_ALIGN_VAL_LIST CACHE MCUBOOT_ALIGN_VAL PROPERTY STRINGS)
+tfm_invalid_config(BL2 AND (NOT MCUBOOT_ALIGN_VAL IN_LIST MCUBOOT_ALIGN_VAL_LIST))
+
 ####################### Code sharing ###########################################
 
 set(TFM_CODE_SHARING_PLATFORM_LISTS arm/mps2/an521 arm/musca_b1/sse_200) # Without crypto hw acceleration
 tfm_invalid_config(NOT TFM_CODE_SHARING STREQUAL "OFF" AND NOT TFM_PLATFORM IN_LIST TFM_CODE_SHARING_PLATFORM_LISTS)
 tfm_invalid_config(NOT TFM_CODE_SHARING STREQUAL "OFF" AND CRYPTO_HW_ACCELERATOR)
-tfm_invalid_config(TFM_CODE_SHARING STREQUAL "OFF" AND TFM_CODE_SHARING_PATH)
 
 ########################## Platform ############################################
 
 tfm_invalid_config(OTP_NV_COUNTERS_RAM_EMULATION AND NOT (PLATFORM_DEFAULT_OTP OR PLATFORM_DEFAULT_NV_COUNTERS))
 tfm_invalid_config(PLATFORM_DEFAULT_NV_COUNTERS AND  NOT PLATFORM_DEFAULT_OTP_WRITEABLE)
 tfm_invalid_config(TFM_DUMMY_PROVISIONING AND  NOT PLATFORM_DEFAULT_OTP_WRITEABLE)
-
-####################### SP META Pointer ########################################
-
-tfm_invalid_config(TFM_SP_META_PTR_ENABLE AND TFM_LIB_MODEL)
 
 ####################### Firmware Update Parttion ###############################
 
@@ -106,8 +101,16 @@ tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND NOT TFM_LIB_MODEL)
 tfm_invalid_config(CRYPTO_NV_SEED AND CRYPTO_HW_ACCELERATOR)
 tfm_invalid_config(NOT CRYPTO_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
 
+######################## TF-M Porfile config check #############################
+
+tfm_invalid_config(TFM_PROFILE STREQUAL "profile_small" AND CONFIG_TFM_SPM_BACKEND_IPC)
+
 ########################### Test check config ##################################
 
 if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
     include(${TFM_TEST_PATH}/config/check_config.cmake)
 endif()
+
+###################### Compiler check for FP support ###########################
+
+include(config/cp_check.cmake)

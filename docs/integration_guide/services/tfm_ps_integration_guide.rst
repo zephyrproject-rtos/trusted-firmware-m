@@ -7,17 +7,17 @@ Introduction
 ************
 TF-M Protected Storage (PS) service implements PSA Protected Storage APIs.
 
-The service is backed by hardware isolation of the flash access domain and, in
-the current version, relies on hardware to isolate the flash area from
-non-secure access. In absence of hardware level isolation, the secrecy and
-integrity of data is still maintained.
+The service is usually backed by hardware isolation of the flash
+access domain and, in the current version, relies on hardware to
+isolate the flash area from non-secure access. In absence of hardware
+isolation, the secrecy and integrity of data is still maintained.
 
 The PS service implements an AES-GCM based AEAD encryption policy, as a
 reference, to protect data integrity and authenticity.
 
-PS reuses the non-hierarchical filesystem provided by the TF-M Internal Trusted
-Storage service to store encrypted, authenticated objects on the external flash
-device.
+The PS reuses the non-hierarchical filesystem provided by the TF-M
+Internal Trusted Storage service to store encrypted, authenticated
+objects.
 
 The design addresses the following high level requirements as well:
 
@@ -45,19 +45,17 @@ The design addresses the following high level requirements as well:
 ******************************
 Current PS Service Limitations
 ******************************
-- **Fragmentation** - The current design does not support fragmentation, as an
-  asset is stored in a contiguous space in a block. This means that the maximum
-  asset size can only be up-to a block size. Detailed information about the
-  maximum asset size can be found in the section `Maximum asset size` below.
-  Each block can potentially store multiple assets.
-  A delete operation implicitly moves all the assets towards the top of the block
-  to avoid fragmentation within block. However, this may also result in
-  unutilized space at the end of each block.
-
 - **Asset size limitation** - An asset is stored in a contiguous space in a
   block/sector. Hence, the maximum asset size can be up-to the size of the
   data block/sector. Detailed information about the maximum asset size can be
   found in the section `Maximum asset size` below.
+
+- **Fragmentation** - The current design does not support fragmentation, as an
+  asset is stored in a contiguous space in a block.
+  Each block can potentially store multiple assets.
+  A delete operation implicitly moves all the assets towards the top of the block
+  to avoid fragmentation within block. However, this may also result in
+  unutilized space at the end of each block.
 
 - **Non-hierarchical storage model** - The current design uses a
   non-hierarchical storage model, as a filesystem, where all the assets are
@@ -146,12 +144,12 @@ Core Files
 
 Flash Filesystem and Flash Interfaces
 =====================================
-The PS service reuses the non-hierarchical filesystem and flash interfaces
-provided by the TF-M Internal Trusted Storage service. It stores encrypted,
-authenticated objects on the external flash device by making service calls to
-the ITS service. When the ITS service receives requests from the PS partition,
-it handles the request by using a separate filesystem context initialised to use
-the external flash device.
+The PS service reuses the non-hierarchical filesystem and flash
+interfaces provided by the TF-M Internal Trusted Storage service. It
+stores encrypted, authenticated objects by making service calls to the
+ITS service. When the ITS service receives requests from the PS
+partition, it handles the request by using a separate filesystem
+context.
 
 The ITS filesystem and flash interfaces and their implementation can be found in
 ``secure_fw/partitions/internal_trusted_storage/flash_fs`` and
@@ -371,8 +369,8 @@ definitions is:
   object table is allocated statically as PS does not use dynamic memory
   allocation.
 - ``PS_TEST_NV_COUNTERS``- this flag enables the virtual implementation of the
-  PS NV counters interface in ``test/suites/ps/secure/nv_counters`` of the
-  ``tf-m-tests`` repo, which emulates NV counters in
+  PS NV counters interface in ``test/secure_fw/suites/ps/secure/nv_counters`` of
+  the ``tf-m-tests`` repo, which emulates NV counters in
   RAM, and disables the hardware implementation of NV counters provided by
   the secure service. This flag is enabled by default, but has no effect when
   the secure regression test is disabled. This flag can be
@@ -388,5 +386,5 @@ definitions is:
 
 --------------
 
-*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*
 *Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*

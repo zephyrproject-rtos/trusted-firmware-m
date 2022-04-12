@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,26 +41,33 @@ static const ARM_DRIVER_VERSION DriverVersion = {
 /* Flash Ready event generation capability values */
 #define EVENT_READY_NOT_AVAILABLE   (0u)
 #define EVENT_READY_AVAILABLE       (1u)
-/* Data access size values */
-#define DATA_WIDTH_8BIT             (0u)
-#define DATA_WIDTH_16BIT            (1u)
-#define DATA_WIDTH_32BIT            (2u)
+
 /* Chip erase capability values */
 #define CHIP_ERASE_NOT_SUPPORTED    (0u)
 #define CHIP_ERASE_SUPPORTED        (1u)
 
-/* Driver Capabilities */
-static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
-    EVENT_READY_NOT_AVAILABLE,
+/**
+ * Data width values for ARM_FLASH_CAPABILITIES::data_width
+ * \ref ARM_FLASH_CAPABILITIES
+ */
+ enum {
+    DATA_WIDTH_8BIT   = 0u,
+    DATA_WIDTH_16BIT,
     DATA_WIDTH_32BIT,
-    CHIP_ERASE_SUPPORTED
+    DATA_WIDTH_ENUM_SIZE
 };
 
-/* Valid entries for data item width */
-static const uint32_t data_width_byte[] = {
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
     sizeof(uint8_t),
     sizeof(uint16_t),
     sizeof(uint32_t),
+};
+
+/* Driver Capabilities */
+static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
+    EVENT_READY_NOT_AVAILABLE,
+    DATA_WIDTH_8BIT,
+    CHIP_ERASE_SUPPORTED
 };
 
 /**
@@ -148,6 +155,10 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 
     ARG_UNUSED(cb_event);
 
+    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        return ARM_DRIVER_ERROR;
+    }
+
     qspi_ip6514e_enable(ARM_FLASH0_DEV.dev->controller);
 
     /* Configure QSPI Flash controller to operate in single SPI mode and
@@ -197,6 +208,9 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     uint32_t extra_bytes = 0;
     uint32_t extra_word = 0;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
 
     /* Check Flash memory boundaries */
@@ -228,13 +242,16 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_ProgramData(uint32_t addr,
                                      const void *data, uint32_t cnt)
 {
     enum mt25ql_error_t err = MT25QL_ERR_NONE;
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
 
     ARM_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
 
@@ -260,7 +277,8 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr,
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_EraseSector(uint32_t addr)

@@ -10,6 +10,12 @@
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+set(NRF_FOLDER_PATH ${NRF_PLATFORM_PATH}/common/core)
+
+#========================= Platform dependencies ===============================#
+
+include(${NRF_FOLDER_PATH}/hal_nordic.cmake)
+
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.
@@ -40,36 +46,51 @@ target_include_directories(platform_s
     PUBLIC
         .
         ${NRF_FOLDER_PATH}/native_drivers
-        ${NRF_FOLDER_PATH}/nrfx
-        ${NRF_FOLDER_PATH}/nrfx/mdk
-        ${NRF_FOLDER_PATH}/nrfx/drivers/include
+        ${HAL_NORDIC_PATH}/nrfx
+        ${HAL_NORDIC_PATH}/nrfx/mdk
+        ${HAL_NORDIC_PATH}/nrfx/drivers/include
+        ${NRF_FOLDER_PATH}/common
+        ${NRF_FOLDER_PATH}/services/include
         ${PLATFORM_DIR}/..
 )
 
 target_sources(platform_s
     PRIVATE
-        cmsis_drivers/Driver_Flash.c
+        ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_QSPI.c
-        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_nvmc.c
-        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twim.c
-        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
-        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_qspi.c
+        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_twim.c
+        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
+        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_qspi.c
         ${NRF_FOLDER_PATH}/nrfx_glue.c
         ${NRF_FOLDER_PATH}/native_drivers/mpu_armv8m_drv.c
         ${NRF_FOLDER_PATH}/native_drivers/spu.c
         ${NRF_FOLDER_PATH}/spm_hal.c
         ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
-        ${NRF_FOLDER_PATH}/tfm_hal_platform.c
+        ${NRF_FOLDER_PATH}/tfm_hal_platform_common.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
     PUBLIC
         plat_test.c
 )
 
+if(TFM_PARTITION_PLATFORM)
+    target_sources(platform_s
+        PRIVATE
+            ${NRF_FOLDER_PATH}/services/src/tfm_platform_hal_ioctl.c
+            ${NRF_FOLDER_PATH}/services/src/tfm_ioctl_core_s_api.c
+    )
+
+    target_sources(platform_ns
+        PRIVATE
+            ${NRF_FOLDER_PATH}/services/src/tfm_ioctl_core_ns_api.c
+    )
+endif()
+
 if(SECURE_UART1)
     target_sources(platform_s
         PRIVATE
-            cmsis_drivers/Driver_USART.c
-            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
+            ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_USART.c
+            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
     )
 endif()
 
@@ -88,20 +109,22 @@ target_compile_definitions(platform_s
 target_include_directories(platform_ns
     PUBLIC
         .
-        ${NRF_FOLDER_PATH}/nrfx
-        ${NRF_FOLDER_PATH}/nrfx/mdk
-        ${NRF_FOLDER_PATH}/nrfx/drivers/include
+        ${HAL_NORDIC_PATH}/nrfx
+        ${HAL_NORDIC_PATH}/nrfx/mdk
+        ${HAL_NORDIC_PATH}/nrfx/drivers/include
+        ${NRF_FOLDER_PATH}/common
         ${PLATFORM_DIR}/..
+        ${NRF_FOLDER_PATH}/services/include
     PRIVATE
         ${PLATFORM_DIR}/../interface/include
 )
 
 target_sources(platform_ns
     PRIVATE
-        cmsis_drivers/Driver_USART.c
-        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
-        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twim.c
-        ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
+        ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_USART.c
+        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
+        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_twim.c
+        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
         ${NRF_FOLDER_PATH}/nrfx_glue.c
         plat_test.c
 )
@@ -112,24 +135,30 @@ if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
             .
-            ${NRF_FOLDER_PATH}/nrfx
-            ${NRF_FOLDER_PATH}/nrfx/mdk
-            ${NRF_FOLDER_PATH}/nrfx/drivers/include
+            ${HAL_NORDIC_PATH}/nrfx
+            ${HAL_NORDIC_PATH}/nrfx/mdk
+            ${HAL_NORDIC_PATH}/nrfx/drivers/include
+            ${NRF_FOLDER_PATH}/common
         PRIVATE
             ${PLATFORM_DIR}/..
     )
 
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
-            cmsis_drivers/Driver_Flash.c
+            ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_Flash.c
             cmsis_drivers/Driver_QSPI.c
-            cmsis_drivers/Driver_USART.c
-            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
-            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_nvmc.c
-            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twim.c
-            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
-            ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_qspi.c
+            ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_USART.c
+            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
+            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_twim.c
+            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
+            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_qspi.c
             ${NRF_FOLDER_PATH}/nrfx_glue.c
     )
+endif()
+
+if (TFM_PARTITION_PLATFORM)
+install(FILES       ${NRF_FOLDER_PATH}/services/include/tfm_ioctl_core_api.h
+        DESTINATION ${TFM_INSTALL_PATH}/interface/include)
+
 endif()

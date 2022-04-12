@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 ARM Limited. All rights reserved.
+ * Copyright (c) 2017-2022 ARM Limited. All rights reserved.
  * Copyright (c) 2019-2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +36,6 @@
 #define S_HEAP_SIZE             0x0001000
 #define S_MSP_STACK_SIZE_INIT   0x0000400
 #define S_MSP_STACK_SIZE        0x0000800
-#define S_PSP_STACK_SIZE        0x0000800
 
 #define NS_HEAP_SIZE            0x0001000
 #define NS_MSP_STACK_SIZE       (0x0000200)
@@ -140,6 +139,9 @@
 #define S_RAM_CODE_OFFSET    (S_DATA_PRIV_OFFSET + S_PRIV_DATA_SIZE)
 #define S_RAM_CODE_START     S_RAM_ALIAS(S_RAM_CODE_OFFSET)
 
+/* Size of vector table: 31 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0x80)
+
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
                         (NS_IMAGE_PRIMARY_PARTITION_OFFSET + CYBL_HEADER_SIZE)
@@ -187,5 +189,8 @@
  */
 #define BOOT_TFM_SHARED_DATA_BASE (S_RAM_ALIAS(S_DATA_PRIV_OFFSET))
 #define BOOT_TFM_SHARED_DATA_SIZE 0x400
+
+/* NSPE-to-SPE interrupt */
+#define MAILBOX_IRQ NvicMux7_IRQn
 
 #endif /* __REGION_DEFS_H__ */

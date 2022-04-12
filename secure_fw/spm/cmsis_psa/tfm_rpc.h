@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -162,13 +162,13 @@ void tfm_rpc_client_call_reply(const void *owner, int32_t ret);
 /*
  * Check if the message was allocated for a non-secure request via RPC
  *
- * \param[in] msg           The message body context pointer
- *                          \ref msg_body_t structures
+ * \param[in] handle        The connection handle context pointer
+ *                          \ref conn_handle_t structures
  *
  * \retval true             The message was allocated for a NS request via RPC.
  * \retval false            Otherwise.
  */
-__STATIC_INLINE bool is_tfm_rpc_msg(const struct tfm_msg_body_t *msg)
+__STATIC_INLINE bool is_tfm_rpc_msg(const struct conn_handle_t *handle)
 {
     /*
      * FIXME
@@ -180,7 +180,7 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct tfm_msg_body_t *msg)
      * This condition check should be improved after TF-M non-secure client ID
      * management is implemented.
      */
-    if (msg && (msg->msg.client_id <= 0) && !msg->ack_evnt.owner) {
+    if (handle && (handle->msg.client_id <= 0) && !handle->ack_evnt.owner) {
         return true;
     }
 
@@ -188,13 +188,13 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct tfm_msg_body_t *msg)
 }
 
 /*
- * \brief Set the private data of the NS caller in \ref msg_body_t, to identify
- *        the caller after PSA client call is compeleted.
+ * \brief Set the private data of the NS caller in \ref conn_handle_t, to
+ *        identify the caller after PSA client call is compeleted.
  *
- * \param[in] msg           The address of \ref msg_body_t structure
+ * \param[in] handle        The address of \ref conn_handle_t structure
  * \param[in] client_id     The client ID of the NS caller.
  */
-void tfm_rpc_set_caller_data(struct tfm_msg_body_t *msg, int32_t client_id);
+void tfm_rpc_set_caller_data(struct conn_handle_t *handle, int32_t client_id);
 
 #else /* TFM_MULTI_CORE_TOPOLOGY */
 

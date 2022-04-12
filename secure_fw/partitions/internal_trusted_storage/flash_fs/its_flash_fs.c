@@ -249,7 +249,7 @@ psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
                                      const uint8_t *data)
 {
     struct its_block_meta_t block_meta;
-    struct its_file_meta_t file_meta;
+    struct its_file_meta_t file_meta = {0};
     uint32_t cur_phys_block;
     psa_status_t err;
     uint32_t idx;

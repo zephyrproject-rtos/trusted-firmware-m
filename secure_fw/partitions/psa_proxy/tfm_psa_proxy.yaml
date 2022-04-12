@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -14,6 +14,20 @@
   "entry_point": "psa_proxy_sp_init",
   "stack_size": "0x0A00",
   "services": [
+    {
+      # If there is not any connection-based service being built,
+      # The psa_set_rhandle API will be excluded in building as it's for
+      # connection-based serivce only.
+      # But this Partition requires this API to save handles.
+      # So to avoid the psa_set_rhandle API beening excluded, a dummy
+      # connection-based services is added here.
+      "name": "TFM_PROXY_DUMMY",
+      "sid": "0xFFFFFFFF",
+      "non_secure_clients": false,
+      "connection_based": true,
+      "version": 1,
+      "version_policy": "STRICT"
+    },
     {
       "name": "TFM_CRYPTO",
       "sid": "0x00000080",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -111,14 +111,13 @@ void tfm_crypto_clear_scratch(void)
     scratch.alloc_index = 0;
 }
 
-static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
-                                        struct tfm_crypto_pack_iovec *iov,
-                                        const uint32_t sfn_id)
+static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
 {
     psa_status_t status = PSA_SUCCESS;
     size_t in_len = PSA_MAX_IOVEC, out_len = PSA_MAX_IOVEC, i;
     psa_invec in_vec[PSA_MAX_IOVEC] = { {NULL, 0} };
     psa_outvec out_vec[PSA_MAX_IOVEC] = { {NULL, 0} };
+    struct tfm_crypto_pack_iovec iov = {0};
     void *alloc_buf_ptr = NULL;
 
     /* Check the number of in_vec filled */
@@ -130,8 +129,17 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
     if (in_len < 1) {
         return PSA_ERROR_GENERIC_ERROR;
     }
+
+    if (psa_read(msg->handle, 0, &iov, sizeof(iov)) != sizeof(iov)) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+
+    if (iov.srv_id >= TFM_CRYPTO_SID_MAX) {
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+
     /* Initialise the first iovec with the IOV read when parsing */
-    in_vec[0].base = iov;
+    in_vec[0].base = &iov;
     in_vec[0].len = sizeof(struct tfm_crypto_pack_iovec);
 
     /* Alloc/read from the second element as the first is read when parsing */
@@ -143,10 +151,10 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
             return status;
         }
         /* Read from the IPC framework inputs into the scratch */
-        (void) psa_read(msg->handle, i, alloc_buf_ptr, msg->in_size[i]);
+        in_vec[i].len =
+                       psa_read(msg->handle, i, alloc_buf_ptr, msg->in_size[i]);
         /* Populate the fields of the input to the secure function */
         in_vec[i].base = alloc_buf_ptr;
-        in_vec[i].len = msg->in_size[i];
     }
 
     /* Check the number of out_vec filled */
@@ -170,7 +178,7 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
     (void)tfm_crypto_set_scratch_owner(msg->client_id);
 
     /* Call the uniform signature API */
-    status = sfid_func_table[sfn_id](in_vec, in_len, out_vec, out_len);
+    status = sfid_func_table[iov.srv_id](in_vec, in_len, out_vec, out_len);
 
     /* Write into the IPC framework outputs from the scratch */
     for (i = 0; i < out_len; i++) {
@@ -183,81 +191,6 @@ static psa_status_t tfm_crypto_call_sfn(psa_msg_t *msg,
     return status;
 }
 
-static psa_status_t tfm_crypto_parse_msg(psa_msg_t *msg,
-                                         struct tfm_crypto_pack_iovec *iov,
-                                         uint32_t *sfn_id_p)
-{
-    size_t read_size;
-
-    /* Read the in_vec[0] which holds the IOVEC always */
-    read_size = psa_read(msg->handle,
-                         0,
-                         iov,
-                         sizeof(struct tfm_crypto_pack_iovec));
-
-    if (read_size != sizeof(struct tfm_crypto_pack_iovec)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    if (iov->sfn_id >= TFM_CRYPTO_SID_MAX) {
-        *sfn_id_p = TFM_CRYPTO_SID_INVALID;
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    *sfn_id_p = iov->sfn_id;
-
-    return PSA_SUCCESS;
-}
-
-static void tfm_crypto_ipc_handler(void)
-{
-    psa_signal_t signals = 0;
-    psa_msg_t msg;
-    psa_status_t status = PSA_SUCCESS;
-    uint32_t sfn_id = TFM_CRYPTO_SID_INVALID;
-    struct tfm_crypto_pack_iovec iov = {0};
-
-    while (1) {
-        signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & TFM_CRYPTO_SIGNAL) {
-            /* Extract the message */
-            if (psa_get(TFM_CRYPTO_SIGNAL, &msg) != PSA_SUCCESS) {
-                /* FIXME: Should be replaced by TF-M error handling */
-                while (1) {
-                    ;
-                }
-            }
-
-            /* Process the message type */
-            switch (msg.type) {
-            case PSA_IPC_CALL:
-                /* Parse the message */
-                status = tfm_crypto_parse_msg(&msg, &iov, &sfn_id);
-                /* Call the dispatcher based on the SID passed as type */
-                if (sfn_id != TFM_CRYPTO_SID_INVALID) {
-                    status = tfm_crypto_call_sfn(&msg, &iov, sfn_id);
-                } else {
-                    status = PSA_ERROR_GENERIC_ERROR;
-                }
-                psa_reply(msg.handle, status);
-                break;
-            default:
-                /* FIXME: Should be replaced by TF-M error handling */
-                while (1) {
-                    ;
-                }
-            }
-        } else {
-            /* FIXME: Should be replaced by TF-M error handling */
-            while (1) {
-               ;
-            }
-        }
-    }
-
-    /* NOTREACHED */
-    return;
-}
 #endif /* TFM_PSA_API */
 
 /**
@@ -344,15 +277,20 @@ psa_status_t tfm_crypto_init(void)
     }
 
     /* Initialise the engine layer */
-    status = tfm_crypto_engine_init();
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
+    return tfm_crypto_engine_init();
+}
 
 #ifdef TFM_PSA_API
-    /* Should not return in normal operations */
-    tfm_crypto_ipc_handler();
-#endif
+psa_status_t tfm_crypto_sfn(const psa_msg_t *msg)
+{
+    /* Process the message type */
+    switch (msg->type) {
+    case PSA_IPC_CALL:
+        return tfm_crypto_call_srv(msg);
+    default:
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
 
-    return status;
+    return PSA_ERROR_GENERIC_ERROR;
 }
+#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,6 @@
 #include "tfm_hal_device_header.h"
 #include "tfm_svcalls.h"
 #include "svc_num.h"
-#include "exception_info.h"
 
 #if !defined(__ARM_ARCH_6M__) && !defined(__ARM_ARCH_7M__) && \
     !defined(__ARM_ARCH_7EM__)
@@ -30,18 +29,19 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-#pragma required = spcall_execute_c
+#pragma required = cross_call_entering_c
+#pragma required = cross_call_exiting_c
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1*/
 
 #endif
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-__naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                                       uint32_t stk_base, uint32_t stk_limit)
+__naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                                   uint32_t stk_base, uint32_t stk_limit)
 {
     __asm volatile(
 #if !defined(__ICCARM__)
@@ -59,13 +59,14 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r4, #"M2S(SCHEDULER_LOCKED)"         \n"/* Do not touch   */
         "   str    r4, [r3, #0]                         \n"
         "   cpsie  i                                    \n"
-        "   push   {r2, r3}                             \n"
-        "   bl     spcall_execute_c                     \n"
-        "   pop    {r2, r3}                             \n"
+        "   push   {r1, r2}                             \n"
+        "   bl     cross_call_entering_c                \n"
+        "   pop    {r1, r4}                             \n"
         "   cpsid  i                                    \n"
-        "   cmp    r2, #0                               \n"
+        "   bl     cross_call_exiting_c                 \n"
+        "   cmp    r4, #0                               \n"
         "   beq    v6v7_release_sched                   \n"
-        "   mov    sp, r2                               \n"/* switch stack   */
+        "   mov    sp, r4                               \n"/* switch stack   */
         "v6v7_release_sched:                            \n"
         "   ldr    r2, =scheduler_lock                  \n"/* release pendsv */
         "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"
@@ -75,7 +76,7 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
     );
 }
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1*/
 
 __attribute__((naked)) void PendSV_Handler(void)
 {
@@ -89,6 +90,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   mov     lr, r3                  \n"
         "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
         "   beq     v6v7_pendsv_exit        \n" /* No schedule if curr = next */
+        "   cpsid   i                       \n"
         "   mrs     r2, psp                 \n"
         "   subs    r2, #32                 \n" /* Make room for r4-r11 */
         "   stm     r2!, {r4-r7}            \n" /* Save callee registers */
@@ -112,6 +114,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   ldm     r2!, {r4-r7}            \n"
         "   adds    r2, #16                 \n" /* End of popping r4-r11 */
         "   msr     psp, r2                 \n"
+        "   cpsie   i                       \n"
         "v6v7_pendsv_exit:                  \n"
         "   bx      lr                      \n"
     );
@@ -126,19 +129,21 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"
-    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "PUSH    {r2, r3}                       \n" /* PSP dummy */
+    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "BL      tfm_core_svc_handler           \n"
     "MOV     lr, r0                         \n"
-    "LDR     r1, [sp]                       \n" /* Original EXC_RETURN */
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "MOVS    r2, #8                         \n"
     "ANDS    r0, r2                         \n" /* Mode bit */
     "ANDS    r1, r2                         \n"
+    "POP     {r2, r3}                       \n" /* PSP dummy */
     "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
     "BGT     to_flih_func                   \n"
     "BLT     from_flih_func                 \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BX      lr                             \n"
     "to_flih_func:                          \n"
+    "PUSH    {r2, r3}                       \n" /* PSP dummy */
     "PUSH    {r4-r7}                        \n"
     "MOV     r4, r8                         \n"
     "MOV     r5, r9                         \n"
@@ -156,7 +161,6 @@ __attribute__((naked)) void SVC_Handler(void)
     "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
     "BX      lr                             \n"
     "from_flih_func:                        \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "POP     {r4, r5}                       \n" /* Seal stack */
     "POP     {r4-r7}                        \n"
     "MOV     r8, r4                         \n"
@@ -164,50 +168,9 @@ __attribute__((naked)) void SVC_Handler(void)
     "MOV     r10, r6                        \n"
     "MOV     r11, r7                        \n"
     "POP     {r4-r7}                        \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "POP     {r1, r2}                       \n" /* PSP dummy */
     "BX      lr                             \n"
     );
-}
-
-/**
- * \brief Overwrites default Hard fault handler.
- */
-#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-void HardFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
-    /* HFSR can be read to provide further information of cause of HardFault */
-     __ASM volatile("b    .");
-}
-#elif defined(__ARM_ARCH_6M__)
-void HardFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
-    /* In a baseline implementation there is no way, to find out whether this is
-     * a hard fault triggered directly, or another fault that has been
-     * escalated.
-     */
-     __ASM volatile("b    .");
-}
-#endif
-
-/* Reserved for future usage */
-__attribute__((naked)) void MemManage_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_MEMFAULT);
-    __ASM volatile("b    .");
-}
-
-__attribute__((naked)) void BusFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_BUSFAULT);
-    __ASM volatile("b    .");
-}
-
-__attribute__((naked)) void UsageFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_USAGEFAULT);
-    __ASM volatile("b    .");
 }
 
 void tfm_arch_set_secure_exception_priorities(void)

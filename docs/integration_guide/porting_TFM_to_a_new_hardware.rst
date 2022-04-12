@@ -69,9 +69,9 @@ File architecture
 The platform selection when building TF-M is set via the CMake
 variable TFM_PLATFORM. This variable holds part of the path to the platform.
 
-When using -DTFM_PLATFORM="``arm/mps2/an521``" (as in the build instruction example)
+When using ``-DTFM_PLATFORM=arm/mps2/an521`` or ``-DTFM_PLATFORM=an521``
 TF-M build system will look for the platform in
-<TF-M ROOT>/platform/ext/target/``arm/mps2/an521``.
+<TF-M ROOT>/platform/ext/target/arm/mps2/an521.
 
 Therefore all hardware dependent code for your platform should go to
 <TF-M ROOT>/platform/ext/target/.
@@ -331,7 +331,7 @@ region_defs.h:
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |S_MSP_STACK_SIZE                  | Size of the Secure (S) world Main stack                           | yes                                           |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
-    |S_PSP_STACK_SIZE                  | Size of the Secure (S) world Process stack                        | yes                                           |
+    |S_PSP_STACK_SIZE                  | Size of the Secure (S) world Process stack                        | no for IPC model                              |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |NS_HEAP_SIZE                      | Size of the Non-Secure (NS) world Heap                            | if tfm_ns is built                            |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
@@ -408,10 +408,6 @@ CMSIS_Driver/Driver_Flash.c:
 
     Refer to the CMSIS `FLASH <https://www.keil.com/pack/doc/CMSIS/Driver/html/group__flash__interface__gr.html>`_
     documentation.
-
-    Note: there is a known misalignment with the current CMSIS Flash interface
-    in TF-M. Currently TF-M expects and returns the size whereas CMSIS Flash
-    specifies the number of elements.
 
 CMSIS_Driver/Driver_USART.c:
 ----------------------------
@@ -771,4 +767,4 @@ Annex
     # Requires armclang >= 6.10.1
     tfm_invalid_config((CMAKE_C_COMPILER_ID STREQUAL "ARMClang") AND (CMAKE_C_COMPILER_VERSION VERSION_LESS "6.10.1"))
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

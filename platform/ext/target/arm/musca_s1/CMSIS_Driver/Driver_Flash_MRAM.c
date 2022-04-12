@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,10 +52,27 @@ static const ARM_DRIVER_VERSION DriverVersion = {
     ARM_FLASH_DRV_VERSION
 };
 
+/**
+ * Data width values for ARM_FLASH_CAPABILITIES::data_width
+ * \ref ARM_FLASH_CAPABILITIES
+ */
+ enum {
+    DATA_WIDTH_8BIT   = 0u,
+    DATA_WIDTH_16BIT,
+    DATA_WIDTH_32BIT,
+    DATA_WIDTH_ENUM_SIZE
+};
+
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
+
 /* Driver Capabilities */
 static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
     0, /* event_ready */
-    2, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
+    0, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
     1  /* erase_chip */
 };
 
@@ -147,6 +164,11 @@ static ARM_FLASH_CAPABILITIES ARM_Flash_GetCapabilities(void)
 static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
     ARG_UNUSED(cb_event);
+
+    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        return ARM_DRIVER_ERROR;
+    }
+
     /* Nothing to be done */
     return ARM_DRIVER_OK;
 }
@@ -177,6 +199,9 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     uint32_t start_addr = FLASH0_DEV->memory_base + addr;
     int32_t rc = 0;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     /* Check flash memory boundaries */
     rc = is_range_valid(FLASH0_DEV, addr + cnt);
     if (rc != 0) {
@@ -185,7 +210,8 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 
     /* Flash interface just emulated over MRAM, use memcpy */
     memcpy(data, (void *)start_addr, cnt);
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
@@ -195,6 +221,9 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
     int32_t rc;
     bool cache_is_used = false;
     bool mram_fast_read_is_used = false;
+
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
 
     /* Check flash memory boundaries and alignment with minimal write size */
     rc  = is_range_valid(FLASH0_DEV, addr + cnt);
@@ -234,7 +263,8 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
         arm_cache_enable_blocking(&SSE_200_CACHE_DEV);
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_EraseSector(uint32_t addr)

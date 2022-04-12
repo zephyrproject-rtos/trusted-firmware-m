@@ -234,6 +234,38 @@ This API performs a system reset.
 
 The platform can uninitialize some resources before reset.
 
+When ``CONFIG_TFM_HALT_ON_PANIC`` is disabled this function is called to reset
+the system when a fatal error occurs.
+
+**Parameter**
+
+- ``void`` - None
+
+**Return Values**
+
+- ``void`` - None
+
+**Note**
+
+This API should not return.
+
+tfm_hal_system_halt()
+^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  void tfm_hal_system_halt(void)
+
+**Description**
+
+This API enters the CPU into an infinite loop.
+
+The platform can uninitialize some resources before looping forever.
+
+When ``CONFIG_TFM_HALT_ON_PANIC`` is enabled this function is called to halt the
+system when a fatal error occurs.
+
 **Parameter**
 
 - ``void`` - None
@@ -832,4 +864,4 @@ compromise.
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

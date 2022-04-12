@@ -128,14 +128,32 @@ if cmake_env is None:
     tfm_def_doxygen_loc = find_package("doxygen")
     tfm_def_doxygen_dot_loc = find_package("dot")
 
+    try:
+        vrex = re.compile(r'TF-M(?P<GIT_VERSION>v.+?)'
+                          r'(-[0-9]+-g)?(?P<GIT_SHA>[a-f0-9]{7,})?$')
+
+        tfm_def_tfm_version = check_output("git describe --tags --always",
+                                           shell = True, encoding = 'UTF-8')
+
+        _v = vrex.match(tfm_def_tfm_version)
+
+        tfm_def_tfm_version = _v.group("GIT_VERSION")
+        if _v.group("GIT_SHA"):
+            tfm_def_tfm_version += "+" + _v.group("GIT_SHA")[:7]
+
+    except Exception as E:
+        try:
+            tfm_def_tfm_version
+        except NameError:
+            tfm_def_tfm_version = "Unknown"
+
 else:
     # #################### Cmake Defaults ################################## #
     tfm_def_root_dir = os.path.abspath(cmake_env["TFM_ROOT_DIR"])
     tfm_def_copy_dir = os.path.abspath(cmake_env["SPHINX_TMP_DOC_DIR"])
     tfm_def_plantum_loc = os.path.abspath(cmake_env["PLANTUML_JAR_PATH"])
     tfm_def_java_binary = os.path.abspath(cmake_env["Java_JAVA_EXECUTABLE"])
-    tfm_def_tfm_ver_shrt = cmake_env["SPHINXCFG_TFM_VERSION"]
-    tfm_def_tfm_ver_full = cmake_env["SPHINXCFG_TFM_VERSION_FULL"]
+    tfm_def_tfm_version = cmake_env["SPHINXCFG_TFM_VERSION"]
     tfm_def_conf_in_file = cmake_env["SPHINXCFG_TEMPLATE_FILE"]
 
     tfm_def_copy_files = True if cmake_env["SPHINXCFG_COPY_FILES"] == "True" \
@@ -159,48 +177,6 @@ else:
     cmake_env["SPHINXCFG_COPY_FILES"] = "False"
     with open("tfm_env.py", "w", encoding='utf-8') as F:
         F.write("cmake_env =" + json.dumps(cmake_env))
-
-
-# Version will be retrieved in that order Git -> Cmake -> Boilerplate
-try:
-    vrex = re.compile(r'TF-Mv(?P<VER_MAJ>\d{1,2}).(?P<VER_MIN>\d{1,2}).?'
-                      r'(?P<VER_HOT>\d{0,2})(?P<RC>\-RC\d)?-'
-                      r'(?P<PATCH_NO>\d+)-(?P<GIT_HASH>[a-g0-9]+)')
-    tfm_def_tfm_ver_full = check_output(["git",
-                                         "describe",
-                                         "--tags",
-                                         "--long"]).decode('UTF-8').strip()
-
-    _v = vrex.search(tfm_def_tfm_ver_full)
-    proj = "TF-M"
-    version  = [ _v.group("VER_MAJ"),
-                 _v.group("VER_MIN"),
-                 _v.group("VER_HOT"),
-                 _v.group("RC")]
-    commit_no  = _v.group("PATCH_NO")
-    git_hash  = _v.group("GIT_HASH")
-
-    # Sanitize the verison and remove empty entries
-    version = [i.replace("-","") for i in version if i]
-    tfm_def_tfm_ver_full = ".".join(version)
-    tfm_def_tfm_ver_shrt = ".".join(version[:2])
-
-    if (int(commit_no) > 0):
-        tfm_def_tfm_ver_full = "%s+ ( %s )" % (tfm_def_tfm_ver_full, git_hash)
-        tfm_def_tfm_ver_shrt = "%s+ ( %s )" % (tfm_def_tfm_ver_shrt, git_hash)
-
-    tfm_def_tfm_ver_shrt = tfm_def_tfm_ver_full
-
-
-except Exception as E:
-    try:
-        tfm_def_tfm_ver_shrt
-    except NameError:
-        tfm_def_tfm_ver_shrt = "v1.0.0-B"
-    try:
-        tfm_def_tfm_ver_full
-    except NameError:
-        tfm_def_tfm_ver_full = "v1.0.0-B"
 
 # #################### User Defaults ######################################## #
 
@@ -226,13 +202,11 @@ if cmake_env is None:
                  "DOXYGEN_EXECUTABLE": tfm_def_doxygen_loc,
                  "DOXYGEN_DOT_EXECUTABLE": tfm_def_doxygen_dot_loc,
                  "PLANTUML_JAR_PATH": tfm_def_plantum_loc,
-                 "SPHINXCFG_TFM_VERSION": tfm_def_tfm_ver_shrt,
-                 "SPHINXCFG_TFM_VERSION_FULL": tfm_def_tfm_ver_full,
+                 "SPHINXCFG_TFM_VERSION": tfm_def_tfm_version,
                  "Java_JAVA_EXECUTABLE": tfm_def_java_binary,
                  "DOXYCFG_OUTPUT_PATH": tfm_def_doxy_output_dir,
-                 "DOXYCFG_TFM_VERSION": tfm_def_tfm_ver_full,
+                 "DOXYCFG_TFM_VERSION": tfm_def_tfm_version,
                  }
 # Only Override the version
 else:
-    cmake_env["SPHINXCFG_TFM_VERSION"] = tfm_def_tfm_ver_shrt
-    cmake_env["SPHINXCFG_TFM_VERSION_FULL"] = tfm_def_tfm_ver_full
+    cmake_env["SPHINXCFG_TFM_VERSION"] = tfm_def_tfm_version

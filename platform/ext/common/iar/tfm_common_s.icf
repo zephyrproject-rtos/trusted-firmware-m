@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  * Copyright (c) 2020-2021 IAR Systems AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,26 +19,31 @@
 
 #include "region_defs.h"
 
-define block ER_TFM_CODE with fixed order, alignment = 8, maximum size = S_CODE_SIZE {
-       readonly section .intvec,
-#ifndef S_RAM_CODE_START
-       rw section .textrw object *.o,           /* place __ramfunc in ROM if no TFM_RAM_CODE block */
+define block ER_VECTORS with size = S_CODE_VECTOR_TABLE_SIZE {
+       readonly section .intvec
+};
+
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+    /*
+     * Place the CMSE Veneers (containing the SG instruction) in a separate
+     * 32 bytes aligned region so that the SAU can be programmed to
+     * just set this region as Non-Secure Callable.
+     */
+define block ER_VENEER with alignment = 0x20 {section Veneer$$CMSE};
+
+define block VENEER_ALIGN with alignment = 0x20, size = 0 { };
 #endif
+
+define block ER_TFM_CODE with fixed order, alignment = 8, maximum size = S_CODE_SIZE {
+       ro section .text  object *startup*,
        ro section .text  object *libplatform_s*,
        ro section .rodata object *libplatform_s*,
        ro object *libtfm_spm*,
-       readonly
 };
 
 define block TFM_UNPRIV_CODE with alignment = 32 {
        section SFN,
-       ro section .rodata object tfm_*_secure_api.o,
-       ro object *6M_tl*.a,
-       ro object *7M_tl*.a,
-       ro object *libtfm_sprt.a,
-       ro object psa_interface_*.o,
-       ro object tfm_psa_call_pack.o,
-       ro object tfm_log_raw.o
+       readonly
        };
 
     /**** Section for holding partition RO load data */
@@ -53,8 +58,10 @@ define block TFM_SP_LOAD_LIST with alignment = 4 {
      */
 define block TFM_PSA_CODE_START with alignment = 32, size = 0 { };
 
-    define block TFM_PSA_ROT_LINKER with alignment = 32 {
-        ro object *tfm_psa_rot_partition*,
+define block TFM_PSA_ROT_LINKER with alignment = 32 {
+       ro object *tfm_psa_rot_partition*,
+       section TFM_*_PSA-ROT_ATTR_FN object *libplatform_s*,
+       section TFM_*_PSA-ROT_ATTR_FN object *.o,
     };
 
     /*
@@ -110,8 +117,6 @@ define overlay STACK_DATA {block ARM_LIB_STACK};
     /* Reserve space for stack seal (8 bytes) */
 define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE - 0x8 { };
 define block ER_INITIAL_PSP_SEAL with size = 0x8 { };
-# else
-define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE { };
 # endif
 keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 #endif
@@ -121,16 +126,18 @@ define block TFM_SECURE_STACK   with size = 0x2000, alignment = 128 {};
 keep {block TFM_SECURE_STACK};
 #endif /* !defined(TFM_PSA_API) */
 
-#if defined(TFM_SP_META_PTR_ENABLE)
-define block TFM_SP_META_PTR_ENABLE with alignment = 32 {
-       section SP_META_PTR_SPRTL_INST
+#if defined(CONFIG_TFM_PARTITION_META)
+define block TFM_SP_META_PTR with alignment = 32 {
+    zi section .bss.SP_META_PTR_SPRTL_INST
        };
 #endif
 
 define block TFM_APP_RW_STACK_START with alignment = 32, size = 0 { };
 
-    define block TFM_APP_ROT_LINKER_DATA with alignment = 32 {
-        rw object *tfm_app_rot_partition*,
+define block TFM_APP_ROT_LINKER_DATA with alignment = 32 {
+       rw object *tfm_app_rot_partition*,
+       section TFM_*_APP-ROT_ATTR_RW object *.o,
+       section TFM_*_APP-ROT_ATTR_ZI object *.o,
     };
 
 
@@ -159,15 +166,11 @@ define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE { };
 define overlay STACK_DATA {block TFM_SHARED_DATA};
 define overlay STACK_DATA {block ARM_LIB_STACK};
 
-    /* PSP is privileged in multi-core topology */
-define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE { };
 keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 #endif
 
 define block HEAP         with alignment = 8, size = S_HEAP_SIZE { };
-define block ARM_LIB_HEAP with alignment = 8, size = S_HEAP_SIZE { };
-define overlay HEAP_OVL {block HEAP};
-define overlay HEAP_OVL {block ARM_LIB_HEAP};
+define block ARM_LIB_HEAP {block HEAP};
 keep {block HEAP, block ARM_LIB_HEAP};
 
 define block ER_TFM_DATA          with alignment = 8 {readwrite};
@@ -189,9 +192,11 @@ keep {block ER_PART_RT_POOL, block ER_SERV_RT_POOL};
      */
 define block TFM_PSA_RW_STACK_START with alignment = 32, size = 0 { };
 
-    define block TFM_PSA_ROT_LINKER_DATA with alignment = 32 {
-        rw object *tfm_psa_rot_partition*,
-    };
+define block TFM_PSA_ROT_LINKER_DATA with alignment = 32 {
+       rw object *tfm_psa_rot_partition*,
+       section TFM_*_PSA-ROT_ATTR_RW object *.o,
+       section TFM_*_PSA-ROT_ATTR_ZI object *.o,
+};
 
 
     /*
@@ -216,7 +221,12 @@ place at address S_RAM_CODE_START      { block TFM_RAM_CODE };
      */
 define block SRAM_WATERMARK with size = 0 { };
 
-define block LR_CODE with fixed order {
+define block LR_CODE with fixed order, maximum size = S_CODE_SIZE {
+       block ER_VECTORS,
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+       block ER_VENEER,
+       block VENEER_ALIGN,
+#endif
        block ER_TFM_CODE,
        block TFM_UNPRIV_CODE,
 
@@ -279,9 +289,9 @@ define block DATA with fixed order {
 #ifndef TFM_MULTI_CORE_TOPOLOGY
     /* Shared area between BL2 and runtime to exchange data */
     overlay STACK_DATA,
+# if !defined(TFM_PSA_API)
     /* PSP is unprivileged in single-core topology */
     block ER_INITIAL_PSP,
-# if !defined(TFM_PSA_API)
     /* Define stack seal block for Library mode */
     block ER_INITIAL_PSP_SEAL,
 # endif
@@ -291,7 +301,7 @@ define block DATA with fixed order {
     block TFM_SECURE_STACK,
 #endif /* !defined(TFM_PSA_API) */
 
-#if defined(TFM_SP_META_PTR_ENABLE)
+#if defined(CONFIG_TFM_PARTITION_META)
     block TFM_SP_META_PTR,
 #endif
 
@@ -324,11 +334,9 @@ define block PRIV_DATA with fixed order {
      */
     /* Shared area between BL2 and runtime to exchange data */
     overlay STACK_DATA,
-    /* PSP is privileged in multi-core topology */
-    block ER_INITIAL_PSP,
 #endif
 
-    overlay HEAP_OVL,
+    block ARM_LIB_HEAP,
 
     block ER_TFM_DATA,
 
@@ -367,16 +375,6 @@ define block PRIV_DATA with fixed order {
 place at address S_DATA_START          { block DATA };
 #if defined(TFM_MULTI_CORE_TOPOLOGY) && defined(S_DATA_PRIV_START)
 place at address S_DATA_PRIV_START     { block PRIV_DATA };
-#endif
-
-#ifndef TFM_MULTI_CORE_TOPOLOGY
-    /*
-     * Place the CMSE Veneers (containing the SG instruction) in a separate
-     * 32 bytes aligned region so that the SAU can be programmed to
-     * just set this region as Non-Secure Callable.
-     */
-define block LR_VENEER with alignment = 0x20, size = CMSE_VENEER_REGION_SIZE {section Veneer$$CMSE};
-place at address CMSE_VENEER_REGION_START {block LR_VENEER};
 #endif
 
     /* Reserved place for NS application.

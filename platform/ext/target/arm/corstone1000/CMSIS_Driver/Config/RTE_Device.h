@@ -29,7 +29,8 @@
 #define   RTE_FLASH0                     1
 // </e> FLASH (Flash Memory) [Driver_FLASH0]
 
+// <e> FLASH (Flash Memory) [Driver_FLASH1]
+// <i> Configuration settings for Driver_FLASH1 in component ::Drivers:FLASH
 #define   RTE_FLASH1                     1
-// </e> FLASH (Flash Memory) [Driver_FLASH1]
 
 #endif  /* __RTE_DEVICE_H */

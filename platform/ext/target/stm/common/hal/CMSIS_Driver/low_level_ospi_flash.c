@@ -68,6 +68,11 @@ static const ARM_FLASH_CAPABILITIES DriverCapabilities =
   CHIP_ERASE_SUPPORTED
 };
 
+static const uint32_t data_width_byte[] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
 /**
   * \brief Flash status macro definitions \ref ARM_FLASH_STATUS
   */
@@ -266,7 +271,8 @@ static int32_t Ospi_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
   int32_t err = BSP_ERROR_NONE;
   uint8_t data_tmp[2];
-
+  /* Conversion between data items and bytes */
+  cnt *= data_width_byte[DriverCapabilities.data_width];
   ARM_OSPI_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
 
 #ifdef DEBUG_OSPI_FLASH_ACCESS
@@ -365,7 +371,8 @@ static int32_t Ospi_Flash_ProgramData(uint32_t addr,
   int32_t err;
 
   ARM_OSPI_FLASH0_STATUS.error = DRIVER_STATUS_NO_ERROR;
-
+  /* Conversion between data items and bytes */
+  cnt *= data_width_byte[DriverCapabilities.data_width];
 #ifdef DEBUG_OSPI_FLASH_ACCESS
   printf("write ospi 0x%x n=%x \r\n", (addr + OSPI_FLASH_BASE_ADDRESS), cnt);
 #endif /* DEBUG_OSPI_FLASH_ACCESS */

@@ -13,6 +13,21 @@ void tfm_core_panic(void)
 {
     fih_delay();
 
+#ifdef CONFIG_TFM_HALT_ON_CORE_PANIC
+
+    /*
+     * Halt instead of reboot to retain the backtrace that triggered
+     * the fault and thereby make it easier to debug.
+     */
+    tfm_hal_system_halt();
+
+#ifdef TFM_FIH_PROFILE_ON
+    fih_delay();
+
+    tfm_hal_system_halt();
+#endif
+
+#else /* CONFIG_TFM_HALT_ON_CORE_PANIC */
     /*
      * FixMe: In the first stage, the SPM will restart the entire system when a
      * programmer error is detected in either the SPE or NSPE.
@@ -28,4 +43,6 @@ void tfm_core_panic(void)
 
     tfm_hal_system_reset();
 #endif
+
+#endif /* CONFIG_TFM_HALT_ON_CORE_PANIC */
 }

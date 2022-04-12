@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -8,6 +9,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 add_library(tfm_spm STATIC)
+add_library(tfm_spm_defs INTERFACE)
 add_library(tfm_boot_status INTERFACE)
 add_library(tfm_arch INTERFACE)
 add_library(tfm_utilities INTERFACE)
@@ -40,31 +42,27 @@ target_sources(tfm_spm
         ffm/tfm_boot_data.c
         ffm/tfm_core_utils.c
         ffm/utilities.c
-        $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:cmsis_psa/exception_info.c>
         $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:ffm/spm_log.c>
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_multi_core_mem_check.c>
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:cmsis_psa/tfm_rpc.c>
-        $<$<AND:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>,$<NOT:$<BOOL:${TFM_PLAT_SPECIFIC_MULTI_CORE_COMM}>>>:cmsis_psa/tfm_spe_mailbox.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:ffm/tfm_core_mem_check.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/arch/tfm_arch.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/main.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_ipc.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_thread_call.c>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:cmsis_psa/spm_cross_call.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_load.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/psa_api.c>
-        $<$<BOOL:${TFM_PSA_API}>:ffm/backend.c>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:ffm/backend_ipc.c>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:ffm/backend_sfn.c>
+        $<$<BOOL:${TFM_PSA_API}>:ffm/interrupt.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_core_svcalls_ipc.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>>:cmsis_psa/tfm_nspm_ipc.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_pools.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/thread.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/main.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/arch.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/spm_func.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_core_svcalls_func.c>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_nspm_func.c>
-        $<$<AND:$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>,$<BOOL:${TFM_NS_MANAGE_NSID}>>:ns_client_ext/tfm_ns_ctx.c>
-        $<$<NOT:$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>:ns_client_ext/tfm_spm_ns_ctx.c>
+        $<$<BOOL:${TFM_NS_MANAGE_NSID}>:ns_client_ext/tfm_ns_ctx.c>
+        ns_client_ext/tfm_spm_ns_ctx.c
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_secure_api.c>
         #TODO add other arches
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
@@ -74,40 +72,26 @@ target_sources(tfm_spm
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
 )
 
-target_include_directories(tfm_partitions INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa)
-
-#workaround for arch-test
-if (TEST_PSA_API STREQUAL IPC)
-    target_include_directories(tfm_partitions INTERFACE ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests)
-    target_sources(tfm_psa_rot_partition_driver_partition PRIVATE
-        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_driver_partition_psa.c)
-    target_compile_definitions(tfm_psa_rot_partition_driver_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
-    target_sources(tfm_app_rot_partition_client_partition PRIVATE
-        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_client_partition_psa.c)
-    target_compile_definitions(tfm_app_rot_partition_client_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
-    target_sources(tfm_app_rot_partition_server_partition PRIVATE
-        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/intermedia_server_partition_psa.c)
-    target_compile_definitions(tfm_app_rot_partition_server_partition PRIVATE CONFIG_TFM_BUILDING_SPE=1 TFM_LVL=${TFM_ISOLATION_LEVEL})
-    target_sources(tfm_partitions INTERFACE
-        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_driver_partition_psa.c
-        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_client_partition_psa.c
-        ${CMAKE_BINARY_DIR}/generated/api-tests/platform/manifests/auto_generated/load_info_server_partition_psa.c
-    )
-endif()
+target_include_directories(tfm_spm_defs
+    INTERFACE
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/interface>
+        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/arch/include>
+)
 
 target_link_libraries(tfm_spm
     PUBLIC
         tfm_arch
+        tfm_spm_defs
     PRIVATE
         psa_interface
         platform_s
         tfm_boot_status
         tfm_secure_api
         tfm_partitions
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_psa_rot_partition_driver_partition>
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_client_partition>
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:tfm_app_rot_partition_server_partition>
-        tfm_fih
+        tfm_fih_headers
         tfm_sprt
 )
 
@@ -115,9 +99,13 @@ target_compile_definitions(tfm_spm
     PRIVATE
         $<$<CONFIG:Debug>:TFM_CORE_DEBUG>
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${MCUBOOT_MEASURED_BOOT}>>:BOOT_DATA_AVAILABLE>
-        $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
+        $<$<BOOL:${CONFIG_TFM_HALT_ON_CORE_PANIC}>:CONFIG_TFM_HALT_ON_CORE_PANIC>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
-        CONFIG_TFM_SPE_FP=${CONFIG_TFM_SPE_FP}
+        $<$<BOOL:${TFM_PSA_API}>:CONFIG_TFM_CONN_HANDLE_MAX_NUM=${CONFIG_TFM_CONN_HANDLE_MAX_NUM}>
+        # CONFIG_TFM_FP
+        $<$<STREQUAL:${CONFIG_TFM_FP},hard>:CONFIG_TFM_FP=2>
+        $<$<STREQUAL:${CONFIG_TFM_FP},soft>:CONFIG_TFM_FP=0>
+        $<$<BOOL:${CONFIG_TFM_DOORBELL_API}>:CONFIG_TFM_DOORBELL_API=1>
 )
 
 target_compile_options(tfm_spm
@@ -133,13 +121,6 @@ set_source_files_properties(tfm_secure_api.c
             $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
             $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
             $<$<C_COMPILER_ID:IAR>:>
-)
-
-############################ Partition Defs ####################################
-
-target_compile_definitions(tfm_partition_defs
-    INTERFACE
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:PSA_API_TEST_IPC>
 )
 
 ############################ TFM arch ##########################################
@@ -167,15 +148,7 @@ target_include_directories(tfm_utilities
 
 target_link_libraries(tfm_secure_api
     INTERFACE
-        tfm_partitions
-)
-
-target_include_directories(tfm_secure_api
-    INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/interface>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/arch/include>
+        tfm_spm_defs
 )
 
 ############################# Secure veneers ###################################

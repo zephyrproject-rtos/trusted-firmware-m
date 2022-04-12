@@ -20,6 +20,5 @@ cmake_env = { "SPHINX_TMP_DOC_DIR"         : "@SPHINX_TMP_DOC_DIR@",
               "SPHINXCFG_TEMPLATE_FILE"    : "@SPHINXCFG_TEMPLATE_FILE@",
               "SPHINXCFG_COPY_FILES"       : "@SPHINXCFG_COPY_FILES@",
               "SPHINXCFG_RENDER_CONF"      : "@SPHINXCFG_RENDER_CONF@",
-              "SPHINXCFG_TFM_VERSION"      : "v@CMAKE_PROJECT_VERSION@",
-              "SPHINXCFG_TFM_VERSION_FULL" : "Version @CMAKE_PROJECT_VERSION@"
+              "SPHINXCFG_TFM_VERSION"      : "@TFM_VERSION_FULL@",
             }

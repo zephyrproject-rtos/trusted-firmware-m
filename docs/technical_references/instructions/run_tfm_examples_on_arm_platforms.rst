@@ -224,6 +224,11 @@ Execute TF-M example and regression tests on Musca test chip boards
     :doc:`target platform readme </platform/ext/target/arm/musca_b1/sse_200/readme>`
     to have the correct setup.
 
+    Install SRecord for Musca test chip boards.
+
+    - Windows: `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__
+    - Linux: sudo apt-get install -y srecord
+
 Example application with BL2 bootloader
 =======================================
 
@@ -573,4 +578,4 @@ upgrade is described in :doc:`secure boot </docs/technical_references/design_doc
 .. _Keil MDK: http://www2.keil.com/mdk5
 .. _Keil MDK Documentation: https://www2.keil.com/mdk5/docs
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

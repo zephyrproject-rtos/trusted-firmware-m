@@ -26,6 +26,12 @@
         "short_name": "isolation_l3_ld",
         "template": "platform/ext/common/gcc/tfm_isolation_l3.ld.template",
         "output": "platform/ext/common/gcc/tfm_isolation_l3.ld"
+    },
+    {
+        "name": "isolation l3 linker script",
+        "short_name": "isolation_l3_icf",
+        "template": "platform/ext/common/iar/tfm_isolation_l3.icf.template",
+        "output": "platform/ext/common/iar/tfm_isolation_l3.icf"
     }
   ]
 }

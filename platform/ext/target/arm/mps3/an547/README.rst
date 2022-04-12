@@ -1,11 +1,12 @@
-Corstone-300 Ethos-U55 FPGA and FVP
-===================================
+Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN547)
+==================================================================
 
 Building TF-M
 -------------
 
 Follow the instructions in :doc:`Building instructions </docs/technical_references/instructions/tfm_build_instruction>`.
-Build instructions with platform name: arm/mps3/an547 (-DTFM_PLATFORM=arm/mps3/an547).
+Build instructions with platform name: arm/mps3/an547
+``-DTFM_PLATFORM=arm/mps3/an547``
 
 .. note::
 
@@ -14,9 +15,12 @@ Build instructions with platform name: arm/mps3/an547 (-DTFM_PLATFORM=arm/mps3/a
 
 .. note::
 
-   The built binaries can be run on both the Corstone-300 Ethos-U55 Ecosystem
-   FVP (FVP_SSE300_MPS3) and Corstone SSE-300 with Ethos-U55 Example Subsystem
-   for MPS3 (AN547).
+   The built binaries can be run on the Corstone SSE-300 with Ethos-U55
+   Example Subsystem for MPS3 (AN547).
+   They can also be run on the Corstone-300 Ethos-U55 Ecosystem FVP
+   (FVP_SSE300_MPS3) up until version 11.15. From version 11.16, the FVP
+   is aligned with the AN552 FPGA platform. For build information check
+   :doc:`AN552 platform </platform/ext/target/arm/mps3/an552/README>`.
 
 To run the example code on Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN547)
 ---------------------------------------------------------------------------------------------
@@ -63,9 +67,18 @@ The MPS3 board tested is HBI0309C.
     [Crypto] Dummy Entropy NV Seed is not suitable for production!
     Non-Secure system starting...
 
+.. note::
+
+   Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
+   to ``Debug``.
+
 To run the example code on Corstone-300 Ethos-U55 Ecosystem FVP
 ---------------------------------------------------------------
-FVP is available to download `here <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`__
+.. note::
+
+   The built binaries can be run on the Corstone-300 Ethos-U55 Ecosystem FVP
+   (FVP_SSE300_MPS3) up until version 11.15. This version is no longer
+   available to download.
 
 #. Install the FVP
 #. Copy ``bl2.axf`` and ``tfm_s_ns_signed.bin`` files from
@@ -90,6 +103,11 @@ FVP is available to download `here <https://developer.arm.com/tools-and-software
     [Crypto] Dummy Entropy NV Seed is not suitable for production!
     Non-Secure system starting...
 
+.. note::
+
+   Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
+   to ``Debug``.
+
 -------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

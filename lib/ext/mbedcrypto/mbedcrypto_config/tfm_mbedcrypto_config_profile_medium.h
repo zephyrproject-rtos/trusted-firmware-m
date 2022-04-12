@@ -26,8 +26,8 @@
  *  This file is part of mbed TLS (https://tls.mbed.org)
  */
 
-#ifndef PROFILE_S_MBEDTLS_CONFIG_H
-#define PROFILE_S_MBEDTLS_CONFIG_H
+#ifndef PROFILE_M_MBEDTLS_CONFIG_H
+#define PROFILE_M_MBEDTLS_CONFIG_H
 
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_DEPRECATE)
 #define _CRT_SECURE_NO_DEPRECATE 1
@@ -615,7 +615,7 @@
  *
  * Enable padding modes in the cipher layer.
  */
-#define MBEDTLS_CIPHER_PADDING_PKCS7
+//#define MBEDTLS_CIPHER_PADDING_PKCS7
 //#define MBEDTLS_CIPHER_PADDING_ONE_AND_ZEROS
 //#define MBEDTLS_CIPHER_PADDING_ZEROS_AND_LEN
 //#define MBEDTLS_CIPHER_PADDING_ZEROS
@@ -2027,4 +2027,4 @@
 
 #include "mbedtls/check_config.h"
 
-#endif /* PROFILE_S_MBEDTLS_CONFIG_H */
+#endif /* PROFILE_M_MBEDTLS_CONFIG_H */

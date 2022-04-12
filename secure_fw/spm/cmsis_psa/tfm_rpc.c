@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -47,13 +47,6 @@ uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params)
     return tfm_spm_client_psa_version(params->sid);
 }
 
-psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params)
-{
-    TFM_CORE_ASSERT(params != NULL);
-
-    return tfm_spm_client_psa_connect(params->sid, params->version);
-}
-
 psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
 {
     TFM_CORE_ASSERT(params != NULL);
@@ -65,12 +58,24 @@ psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
                                    params->in_vec, params->out_vec);
 }
 
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params)
+{
+    TFM_CORE_ASSERT(params != NULL);
+
+    return tfm_spm_client_psa_connect(params->sid, params->version);
+}
+
 void tfm_rpc_psa_close(const struct client_call_params_t *params)
 {
     TFM_CORE_ASSERT(params != NULL);
 
     tfm_spm_client_psa_close(params->handle);
 }
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 int32_t tfm_rpc_register_ops(const struct tfm_rpc_ops_t *ops_ptr)
 {
@@ -110,12 +115,12 @@ void tfm_rpc_client_call_handler(void)
 
 void tfm_rpc_client_call_reply(const void *owner, int32_t ret)
 {
-    const struct tfm_msg_body_t *msg = (const struct tfm_msg_body_t *)owner;
+    const struct conn_handle_t *handle = (const struct conn_handle_t *)owner;
 
-    rpc_ops.reply(msg->caller_data, ret);
+    rpc_ops.reply(handle->caller_data, ret);
 }
 
-void tfm_rpc_set_caller_data(struct tfm_msg_body_t *msg, int32_t client_id)
+void tfm_rpc_set_caller_data(struct conn_handle_t *handle, int32_t client_id)
 {
-    msg->caller_data = rpc_ops.get_caller_data(client_id);
+    handle->caller_data = rpc_ops.get_caller_data(client_id);
 }

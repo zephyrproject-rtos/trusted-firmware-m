@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -34,7 +34,7 @@ struct tfm_crypto_aead_pack_input {
  *
  */
 struct tfm_crypto_pack_iovec {
-    uint32_t sfn_id;             /*!< Secure function ID used to dispatch the
+    uint32_t srv_id;             /*!< Crypto service ID used to dispatch the
                                   *   request
                                   */
     uint16_t step;               /*!< Key derivation step */
@@ -44,6 +44,8 @@ struct tfm_crypto_pack_iovec {
                                   *   multipart operation
                                   */
     size_t capacity;             /*!< Key derivation capacity */
+    size_t ad_length;            /*!< Additional Data length for multipart AEAD */
+    size_t plaintext_length;     /*!< Plaintext length for multipart AEAD */
 
     struct tfm_crypto_aead_pack_input aead_in; /*!< FixMe: Temporarily used for
                                                 *   AEAD until the API is
@@ -53,7 +55,9 @@ struct tfm_crypto_pack_iovec {
 
 /**
  * \brief Define a progressive numerical value for each SID which can be used
- *        when dispatching the requests to the service
+ *        when dispatching the requests to the service. Note: This has to
+ *        match exactly with the list of APIs defined in tfm_crypto_api.h by
+ *        the LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API X macro.
  */
 enum {
     TFM_CRYPTO_GET_KEY_ATTRIBUTES_SID = (0u),

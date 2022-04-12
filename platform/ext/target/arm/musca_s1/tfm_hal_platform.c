@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,6 +13,11 @@
 #include "tfm_hal_platform.h"
 #include "tfm_plat_defs.h"
 #include "uart_stdout.h"
+#if (CONFIG_TFM_FP == 2) && (TEST_NS_FPU == 1)
+#include "tfm_plat_test.h"
+#endif
+
+extern const struct memory_region_limits memory_regions;
 
 enum tfm_hal_status_t tfm_hal_platform_init(void)
 {
@@ -50,5 +55,34 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
+#if (CONFIG_TFM_FP == 2) && (TEST_NS_FPU == 1)
+    /* Configure secure timer */
+    tfm_plat_test_secure_timer_nvic_configure();
+    if (!timer_cmsdk_is_initialized(&CMSDK_TIMER0_DEV_S)) {
+        timer_cmsdk_init(&CMSDK_TIMER0_DEV_S);
+    }
+
+    /* Configure non-secure timer */
+    tfm_plat_test_non_secure_timer_nvic_configure();
+    if (!timer_cmsdk_is_initialized(&CMSDK_TIMER1_DEV_NS)) {
+        timer_cmsdk_init(&CMSDK_TIMER1_DEV_NS);
+    }
+#endif
+
     return TFM_HAL_SUCCESS;
+}
+
+uint32_t tfm_hal_get_ns_VTOR(void)
+{
+    return memory_regions.non_secure_code_start;
+}
+
+uint32_t tfm_hal_get_ns_MSP(void)
+{
+    return *((uint32_t *)memory_regions.non_secure_code_start);
+}
+
+uint32_t tfm_hal_get_ns_entry_point(void)
+{
+    return *((uint32_t *)(memory_regions.non_secure_code_start + 4));
 }

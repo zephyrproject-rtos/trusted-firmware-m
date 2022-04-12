@@ -1,15 +1,17 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-{{utilities.donotedit_warning}}
+/***********{{utilities.donotedit_warning}}***********/
 
 #include <stdint.h>
 #include <stddef.h>
 #include "region.h"
+#include "region_defs.h"
 #include "spm_ipc.h"
 #include "load/interrupt_defs.h"
 #include "load/partition_defs.h"
@@ -39,17 +41,13 @@
 REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_START$$Base);
 REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_END$$Base);
 #endif
-extern uint8_t {{manifest.name|lower}}_stack[];
 
-{% if manifest.entry_init and manifest.entry_point %}
-#error "Both manifest.entry_init and manifest.entry_point exist, unsupported!"
-{% elif (manifest.model == "IPC" or manifest.psa_framework_version == 1.0) and (not manifest.entry_point) %}
-#error "The entry_point attribute is required, it should not be empty!"
-{% elif manifest.model == "SFN" and manifest.entry_point %}
-#error "The entry_point attribute should not be exist in SFN mode!"
+{% if config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] == '1' or manifest.model == "IPC" %}
+extern uint8_t {{manifest.name|lower}}_stack[];
 {% endif %}
+
+{% if manifest.model == "IPC" %}
 /* Entrypoint function declaration */
-{% if manifest.entry_point %}
 extern void {{manifest.entry_point}}(void);
 {% elif manifest.entry_init %}
 extern psa_status_t {{manifest.entry_init}}(void);
@@ -105,35 +103,33 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
 {% elif manifest.psa_framework_version == 1.1 %}
         .psa_ff_ver                 = 0x0101 | PARTITION_INFO_MAGIC,
-{% else %}
-#error "Unsupported ff version '{{manifest.psa_framework_version}}' for partition '{{manifest.name}}'!"
 {% endif %}
         .pid                        = {{manifest.name}},
         .flags                      = 0
-{% if (manifest.psa_framework_version == 1.1 and manifest.model == "IPC") or manifest.psa_framework_version == 1.0 %}
+{% if manifest.model == "IPC" %}
                                     | PARTITION_MODEL_IPC
 {% endif %}
 {% if manifest.type == "PSA-ROT" %}
                                     | PARTITION_MODEL_PSA_ROT
-{% elif manifest.type != "APPLICATION-ROT" %}
-#error "Unsupported type '{{manifest.type}}' for partition '{{manifest.name}}'!"
 {% endif %}
                                     | PARTITION_PRI_{{manifest.priority}},
-{% if manifest.entry_point %}
-        .entry                      = ENTRY_TO_POSITION({{manifest.entry_point}}),
-{% elif manifest.entry_init %}
-        .entry                      = ENTRY_TO_POSITION({{manifest.entry_init}}),
-{% else %}
-        .entry                      = 0,
-{% endif %}
+        .entry                      = ENTRY_TO_POSITION({{manifest.entry}}),
+{% if config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] == '1' or manifest.model == "IPC" %}
         .stack_size                 = {{manifest.stack_size}},
+{% else %}
+        .stack_size                 = 0,
+{% endif %}
         .heap_size                  = 0,
         .ndeps                      = {{(manifest.name|upper + "_NDEPS")}},
         .nservices                  = {{(manifest.name|upper + "_NSERVS")}},
         .nassets                    = {{(manifest.name|upper + "_NASSETS")}},
         .nirqs                      = {{(manifest.name|upper + "_NIRQS")}},
     },
+{% if config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] == '1' or manifest.model == "IPC" %}
     .stack_addr                     = (uintptr_t){{manifest.name|lower}}_stack,
+{% else %}
+    .stack_addr                     = 0,
+{% endif %}
     .heap_addr                      = 0,
 {% if counter.dep_counter > 0 %}
     .deps = {
@@ -152,32 +148,32 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
     {% for service in manifest.services %}
         {
             .name_strid             = STRING_PTR_TO_STRID("{{service.name}}"),
-{% if manifest.psa_framework_version == 1.1 and manifest.model == "SFN" %}
+        {% if manifest.model == "SFN" %}
             .sfn                    = ENTRY_TO_POSITION({{service.name|lower}}_sfn),
-{% else %}
+        {% else %}
+            .sfn                    = 0,
+        {% endif %}
+{% if config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] == '1' %}
+        {% if manifest.model == "SFN" %}
+            .signal                 = {{service.signal_value}},
+        {% else %}
             .signal                 = {{service.name}}_SIGNAL,
+        {% endif %}
 {% endif %}
+
             .sid                    = {{service.sid}},
             .flags                  = 0
         {% if service.non_secure_clients is sameas true %}
                                     | SERVICE_FLAG_NS_ACCESSIBLE
         {% endif %}
-        {% if manifest.psa_framework_version > 1.0 and service.connection_based is sameas false %}
+        {% if service.connection_based is sameas false %}
                                     | SERVICE_FLAG_STATELESS | 0x{{"%x"|format(service.stateless_handle_index)}}
         {% endif %}
-        {% if manifest.psa_framework_version > 1.0 and service.mm_iovec == "enable" %}
+        {% if service.mm_iovec == "enable" %}
                                     | SERVICE_FLAG_MM_IOVEC
         {% endif %}
-        {% if service.version_policy %}
                                     | SERVICE_VERSION_POLICY_{{service.version_policy}},
-        {% else %}
-                                    | SERVICE_VERSION_POLICY_STRICT,
-        {% endif %}
-        {% if service.version %}
             .version                = {{service.version}},
-        {% else %}
-            .version                = 1,
-        {% endif %}
         },
     {% endfor %}
     },

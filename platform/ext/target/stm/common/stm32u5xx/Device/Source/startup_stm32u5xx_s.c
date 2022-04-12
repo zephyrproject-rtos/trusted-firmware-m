@@ -402,7 +402,12 @@ void Reset_Handler(void)
   NVIC_EnableIRQ(TAMP_IRQn);
   __set_MSPLIM((uint32_t)(&__MSP_STACK_LIMIT));
   SCB->VTOR = (uint32_t) &__VECTOR_TABLE[0];
-  /* Lock Secure Vector Table */
+  /* Program AIRCR with PRIS = 1*/
+  tmp = SCB->AIRCR;
+  SCB->AIRCR = (~tmp & SCB_AIRCR_VECTKEYSTAT_Msk) |
+  SCB_AIRCR_PRIS_Msk | (tmp & ~SCB_AIRCR_VECTKEY_Msk);
+
+  /* Lock Secure Vector Table and AIRCR*/
   /* Enable SYSCFG interface clock */
   RCC->APB3ENR |= RCC_APB3ENR_SYSCFGEN;
   /* Delay after an RCC peripheral clock enabling */

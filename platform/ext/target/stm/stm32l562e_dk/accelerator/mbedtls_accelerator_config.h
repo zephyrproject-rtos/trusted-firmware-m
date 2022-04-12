@@ -20,7 +20,6 @@ extern "C" {
 #undef MBEDTLS_ECP_NIST_OPTIM
 #define MBEDTLS_PLATFORM_ENTROPY
 #define MBEDTLS_ENTROPY_C
-#define MBEDTLS_CTR_DRBG_C
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
 
 
@@ -29,10 +28,6 @@ extern "C" {
 #ifdef MBEDTLS_ECDSA_C
 #define MBEDTLS_ECDSA_VERIFY_ALT
 #define MBEDTLS_ECDSA_SIGN_ALT
-
-#ifndef CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING
-#define MBEDTLS_ECDSA_GENKEY_ALT
-#endif
 #endif /* MBEDTLS_ECDSA_C */
 
 #ifdef MBEDTLS_RSA_C
@@ -48,14 +43,19 @@ extern "C" {
 #define MBEDTLS_SHA256_ALT
 #endif /* MBEDTLS_SHA256_C */
 
-#if defined(MBEDTLS_ECP_C) && defined(MBEDTLS_MD_C)
+#if defined(MBEDTLS_ECP_C)
 #define MBEDTLS_ECP_ALT
-#define MBEDTLS_MD5_ALT
 #endif /* MBEDTLS_ECP_C && MBEDTLS_MD_C */
 
 #undef MBEDTLS_AES_SETKEY_DEC_ALT
 #undef MBEDTLS_AES_DECRYPT_ALT
 
+#ifdef MBEDTLS_CCM_C
+#define MBEDTLS_CCM_ALT
+#endif
+#ifdef MBEDTLS_AES_C
+#define MBEDTLS_AES_ALT
+#endif
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

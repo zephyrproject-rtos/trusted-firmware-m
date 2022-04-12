@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -80,8 +80,8 @@ target_include_directories(${P64_UTILS_LIB_TARGET}
     PRIVATE
         ${CY_PSOC64_DIR}/Device/Include
         ${CY_CORE_LIB_PATH}/include
-        ${CY_PDL_LIB_PATH}/cmsis/include
-        ${CY_PDL_LIB_PATH}/devices/COMPONENT_CAT1A/include
-        ${CY_PDL_LIB_PATH}/drivers/include
+        ${CY_MTB_PDL_CAT1_LIB_PATH}/cmsis/include
+        ${CY_MTB_PDL_CAT1_LIB_PATH}/devices/COMPONENT_CAT1A/include
+        ${CY_MTB_PDL_CAT1_LIB_PATH}/drivers/include
 )
 

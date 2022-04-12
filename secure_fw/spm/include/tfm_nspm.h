@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -52,24 +52,5 @@ void tfm_nspm_ctx_init(void);
  *         returned in case of error.
  */
 int32_t tfm_nspm_get_current_client_id(void);
-
-#ifdef TFM_PSA_API
-/**
- * \brief NSPM thread main entry function
- *
- * Note: This function should not return back.
- */
-void tfm_nspm_thread_entry(void);
-#endif
-
-#ifdef TFM_MULTI_CORE_TOPOLOGY
-/* Unnecessary to configure Non-secure side code */
-#define configure_ns_code()               do {} while (0)
-#else
-/*
- * \brief Configure Non-secure code, such as vector table, MSP and entry point.
- */
-void configure_ns_code(void);
-#endif
 
 #endif /* __TFM_NSPM_H__ */

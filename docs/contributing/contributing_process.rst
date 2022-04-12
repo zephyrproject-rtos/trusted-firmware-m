@@ -19,7 +19,7 @@ Contributions to the TF-M project need to follow the process below.
   <https://developer.trustedfirmware.org/maniphest>`_, put as many details as
   possible in the description. Add 'Trusted Firmware M' in the 'Tags' field.
 - For non-trivial changes, need to follow the design proposal process
-  :doc:`Design Proposal Process </docs/contributing/tfm_design_proposal_process>`
+  :doc:`Design Proposal Guideline </docs/contributing/tfm_design_proposal_guideline>`
   for the TF-M project.
 - After the design has been accepted by the maintainer(s), a corresponding
   patch should be posted; follow guidelines below:
@@ -77,4 +77,4 @@ Contributions to the TF-M project need to follow the process below.
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

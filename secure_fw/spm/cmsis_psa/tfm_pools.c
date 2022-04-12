@@ -38,11 +38,11 @@ int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
     spm_memset(pool, 0, poolsz);
 
     /* Chain pool chunks */
-    BI_LIST_INIT_NODE(&pool->chunks_list);
+    UNI_LISI_INIT_NODE(pool, next);
 
     pchunk = (struct tfm_pool_chunk_t *)pool->chunks;
     for (i = 0; i < num; i++) {
-        BI_LIST_INSERT_BEFORE(&pool->chunks_list, &pchunk->list);
+        UNI_LIST_INSERT_AFTER(pool, pchunk, next);
         pchunk = (struct tfm_pool_chunk_t *)&pchunk->data[chunksz];
     }
 
@@ -55,24 +55,20 @@ int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
 
 void *tfm_pool_alloc(struct tfm_pool_instance_t *pool)
 {
-    struct bi_list_node_t *node;
-    struct tfm_pool_chunk_t *pchunk;
+    struct tfm_pool_chunk_t *node;
 
     if (!pool) {
         return NULL;
     }
 
-    if (BI_LIST_IS_EMPTY(&pool->chunks_list)) {
+    if (UNI_LIST_IS_EMPTY(pool, next)) {
         return NULL;
     }
 
-    node = BI_LIST_NEXT_NODE(&pool->chunks_list);
-    pchunk = TO_CONTAINER(node, struct tfm_pool_chunk_t, list);
+    node = UNI_LIST_NEXT_NODE(pool, next);
+    UNI_LIST_REMOVE_NODE(pool, node, next);
 
-    /* Remove node from list node, it will be added when pool free */
-    BI_LIST_REMOVE_NODE(node);
-
-    return &pchunk->data;
+    return &(((struct tfm_pool_chunk_t *)node)->data);
 }
 
 void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr)
@@ -80,7 +76,8 @@ void tfm_pool_free(struct tfm_pool_instance_t *pool, void *ptr)
     struct tfm_pool_chunk_t *pchunk;
 
     pchunk = TO_CONTAINER(ptr, struct tfm_pool_chunk_t, data);
-    BI_LIST_INSERT_BEFORE(&pool->chunks_list, &pchunk->list);
+
+    UNI_LIST_INSERT_AFTER(pool, pchunk, next);
 }
 
 bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,

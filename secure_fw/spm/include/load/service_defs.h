@@ -9,6 +9,7 @@
 #define __SERVICE_DEFS_H__
 
 #include <stdint.h>
+#include "config_impl.h"
 #include "psa/service.h"
 
 /*
@@ -45,13 +46,13 @@
 /* Common service structure type */
 struct service_load_info_t {
     uintptr_t       name_strid;         /* String ID for name               */
-    union {
-        psa_signal_t    signal;         /* Service signal                   */
-        uintptr_t       sfn;            /* Secure Function                  */
-    };
     uint32_t        sid;                /* Service ID                       */
     uint32_t        flags;              /* Flags                            */
     uint32_t        version;            /* Service version                  */
+    uintptr_t       sfn;                /* Secure Function                  */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+    psa_signal_t    signal;             /* Service signal                   */
+#endif
 } __attribute__((aligned(4)));
 
 #endif /* __SERVICE_DEFS_H__ */

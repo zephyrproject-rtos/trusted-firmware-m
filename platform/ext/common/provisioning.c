@@ -33,7 +33,7 @@ __PACKED_STRUCT tfm_psa_rot_provisioning_data_t {
 
     uint8_t boot_seed[32];
     uint8_t implementation_id[32];
-    uint8_t hw_version[18];
+    uint8_t hw_version[32];
     uint8_t verification_service_url[32];
     uint8_t profile_definition[32];
 

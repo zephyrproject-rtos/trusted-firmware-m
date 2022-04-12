@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,6 +12,6 @@ if (NOT DEFINED CONFIG_TFM_FP_ARCH)
     return()
 endif()
 
-if (CONFIG_TFM_SPE_FP STREQUAL "1" OR CONFIG_TFM_SPE_FP STREQUAL "2")
-    set(CONFIG_TFM_LAZY_STACKING_SPE     ON          CACHE BOOL      "Enable lazy stacking from SPE")
+if (CONFIG_TFM_FP STREQUAL "hard")
+    set(CONFIG_TFM_LAZY_STACKING         ON          CACHE BOOL      "Enable lazy stacking")
 endif()

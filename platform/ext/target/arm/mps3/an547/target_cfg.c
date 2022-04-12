@@ -31,8 +31,8 @@
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+REGION_DECLARE(Image$$, ER_VENEER, $$Base);
+REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -46,8 +46,8 @@ const struct memory_region_limits memory_regions = {
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
         NS_PARTITION_SIZE - 1,
 
-    .veneer_base = (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-    .veneer_limit = (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+    .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
+    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
 };
 
 /* Configures the RAM region to NS callable in sacfg block's nsccfg register */

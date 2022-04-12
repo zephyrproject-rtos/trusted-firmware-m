@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2018 Nordic Semiconductor ASA
  * Copyright (c) 2015 Runtime Inc
- * Copyright (c) 2019-2020 Arm Limited.
+ * Copyright (c) 2019-2022 Arm Limited.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -85,8 +85,7 @@ int flash_area_read_is_empty(const struct flash_area *fa, uint32_t off,
 
     BOOT_LOG_DBG("read_is_empty area=%d, off=%#x, len=%#x",
                  fa->fa_id, off, len);
-
-    rc = DRV_FLASH_AREA(fa)->ReadData(fa->fa_off + off, dst, len);
+    rc = flash_area_read(fa, off, dst, len);
     if (rc) {
         return -1;
     }

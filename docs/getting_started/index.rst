@@ -3,7 +3,6 @@ Getting Started Guides
 .. toctree::
     :maxdepth: 1
     :glob:
-    :numbered:
 
     tfm_getting_started
 

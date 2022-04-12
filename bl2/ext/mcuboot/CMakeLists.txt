@@ -63,6 +63,12 @@ target_link_libraries(bl2
 set(MCUBOOT_ALLOWED_LOG_LEVELS OFF ERROR WARNING INFO DEBUG)
 list(FIND MCUBOOT_ALLOWED_LOG_LEVELS ${MCUBOOT_LOG_LEVEL} LOG_LEVEL_ID)
 
+if (MCUBOOT_ALIGN_VAL GREATER 8)
+set (MCUBOOT_BOOT_MAX_ALIGN ${MCUBOOT_ALIGN_VAL})
+else()
+set (MCUBOOT_BOOT_MAX_ALIGN 8)
+endif()
+
 configure_file(include/mcuboot_config/mcuboot_config.h.in
                ${CMAKE_CURRENT_BINARY_DIR}/mcuboot_config/mcuboot_config.h
                @ONLY)
@@ -71,8 +77,8 @@ configure_file(include/mcuboot_config/mcuboot_config.h.in
 
 find_package(Python3)
 
-set(FLASH_AREA_NUM 0)
 set(IMAGE_TYPE "S_IMAGE")
+set(FLASH_AREA_NUM ${MCUBOOT_S_IMAGE_FLASH_AREA_NUM})
 if (MCUBOOT_IMAGE_NUMBER GREATER 1)
     configure_file(signing_layout.c.in signing_layout_s.c @ONLY)
     add_library(signing_layout_s OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_s.c)
@@ -133,7 +139,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
         --layout $<TARGET_OBJECTS:signing_layout_s>
         -k ${MCUBOOT_KEY_S}
         --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
-        --align 1
+        --align ${MCUBOOT_ALIGN_VAL}
         --pad
         --pad-header
         -H ${BL2_HEADER_SIZE}
@@ -147,8 +153,8 @@ add_custom_command(OUTPUT tfm_s_signed.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_signed.bin $<TARGET_FILE_DIR:bl2>
 )
 
-set(FLASH_AREA_NUM 1)
 set(IMAGE_TYPE "NS_IMAGE")
+set(FLASH_AREA_NUM ${MCUBOOT_NS_IMAGE_FLASH_AREA_NUM})
 configure_file(signing_layout.c.in signing_layout_ns.c @ONLY)
 
 add_library(signing_layout_ns OBJECT ${CMAKE_CURRENT_BINARY_DIR}/signing_layout_ns.c)
@@ -184,7 +190,7 @@ if(NS)
             --layout $<TARGET_OBJECTS:signing_layout_ns>
             -k ${MCUBOOT_KEY_NS}
             --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
-            --align 1
+            --align ${MCUBOOT_ALIGN_VAL}
             --pad
             --pad-header
             -H ${BL2_HEADER_SIZE}
@@ -234,7 +240,7 @@ if(NS)
             --layout $<TARGET_OBJECTS:signing_layout_s>
             -k $<IF:$<BOOL:${FORWARD_PROT_MSG}>,${MCUBOOT_KEY_NS},${MCUBOOT_KEY_S}>
             --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
-            --align 1
+            --align ${MCUBOOT_ALIGN_VAL}
             --pad
             --pad-header
             -H ${BL2_HEADER_SIZE}

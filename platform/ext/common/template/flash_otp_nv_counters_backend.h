@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,7 +33,7 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
         uint8_t boot_seed[32];
         uint8_t lcs[4];
         uint8_t implementation_id[32];
-        uint8_t hw_version[24];
+        uint8_t hw_version[32];
         uint8_t verification_service_url[32];
         uint8_t profile_definition[32];
 
@@ -54,6 +54,8 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
 #endif /* BL1 */
 
         uint8_t entropy_seed[64];
+
+        uint8_t secure_debug_pk[32];
     };
 #endif /* PLATFORM_DEFAULT_OTP */
 

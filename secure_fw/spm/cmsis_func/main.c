@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,7 +14,6 @@
 #include "tfm_hal_platform.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_irq_list.h"
-#include "tfm_nspm.h"
 #include "tfm_spm_hal.h"
 #include "tfm_spm_log.h"
 #include "tfm_version.h"
@@ -38,6 +37,25 @@ __asm("  .global __ARM_use_no_argv\n");
 REGION_DECLARE(Image$$, ARM_LIB_STACK,  $$ZI$$Base);
 REGION_DECLARE(Image$$, ARM_LIB_STACK,  $$ZI$$Limit)[];
 REGION_DECLARE(Image$$, ER_INITIAL_PSP,  $$ZI$$Limit)[];
+
+static void configure_ns_code(void)
+{
+    /* SCB_NS.VTOR points to the Non-secure vector table base address */
+    SCB_NS->VTOR = tfm_spm_hal_get_ns_VTOR();
+
+    /* Setups Main stack pointer of the non-secure code */
+    uint32_t ns_msp = tfm_spm_hal_get_ns_MSP();
+
+    __TZ_set_MSP_NS(ns_msp);
+
+    /* Get the address of non-secure code entry point to jump there */
+    uint32_t entry_ptr = tfm_spm_hal_get_ns_entry_point();
+
+    /* Clears LSB of the function address to indicate the function-call
+     * will perform the switch from secure to non-secure
+     */
+    ns_entry = (nsfptr_t)cmse_nsfptr_create(entry_ptr);
+}
 
 static fih_int tfm_core_init(void)
 {
@@ -165,7 +183,7 @@ int c_main(void)
     FIH_LABEL_CRITICAL_POINT();
 
     /* Print the TF-M version */
-    SPMLOG_INFMSG("\033[1;34mBooting TFM v"VERSION_FULLSTR"\033[0m\r\n");
+    SPMLOG_INFMSG("\033[1;34mBooting TF-M "VERSION_FULLSTR"\033[0m\r\n");
 
     spm_err = tfm_spm_db_init();
     if (spm_err != SPM_ERR_OK) {

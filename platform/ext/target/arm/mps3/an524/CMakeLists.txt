@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -91,7 +91,7 @@ target_sources(platform_s
         native_drivers/uart_cmsdk_drv.c
         native_drivers/timer_cmsdk_drv.c
         spm_hal.c
-        tfm_interrupts.c
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         tfm_hal_isolation.c
         tfm_hal_platform.c
         target_cfg.c
@@ -134,7 +134,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             device/source/system_core_init.c
             device/source/device_definition.c
             cmsis_drivers/Driver_Flash.c

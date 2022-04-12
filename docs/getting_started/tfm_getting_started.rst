@@ -115,7 +115,7 @@ To compile TF-M code, at least one of the supported compiler toolchains have to
 be available in the build environment. The currently supported compiler
 versions are:
 
-    - Arm Compiler v6.10.1+
+    - Arm Compiler v6.10.1 ~ v6.14.1
 
       .. tabs::
 
@@ -126,8 +126,10 @@ versions are:
 
                 .. code-block:: bash
 
-                    export PATH=<ARM_CLANG_PATH>/sw/ARMCompiler6.10.1/bin:$PATH
+                    export PATH=<ARM_CLANG_PATH>/bin:$PATH
                     export ARM_PRODUCT_PATH=<ARM_CLANG_PATH>/sw/mappings
+
+              - Configure proper tool variant and license.
 
           .. group-tab:: Windows
 
@@ -136,13 +138,16 @@ versions are:
 
                 .. code-block:: bash
 
-                    set PATH=<ARM_CLANG_PATH>\sw\ARMCompiler6.10.1\bin;$PATH
+                    set PATH=<ARM_CLANG_PATH>\bin;$PATH
                     set ARM_PRODUCT_PATH=<ARM_CLANG_PATH>\sw\mappings
+
+              - Configure proper tool variant and license.
 
       .. note::
 
-          ArmClang compiler *v6.17* may cause MemManage fault in TF-M higher level isolations.
-          The issue is under investigation and recommended to avoid using this version.
+          Arm compiler starting from *v6.15* may cause MemManage fault in TF-M
+          higher isolation levels. The issue is under investigation and
+          recommended to using versions prior to v6.15.
 
     - GNU Arm compiler v7.3.1+
 
@@ -238,6 +243,20 @@ as an example:
             cd cmake_build
             cmake -G"Unix Makefiles" .. -DTFM_PLATFORM=arm/mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake -DTEST_S=ON -DTEST_NS=ON
             make install
+
+
+        .. note::
+           The latest Windows support long paths, but if you are less lucky
+           then you can reduce paths by moving the build directory closer to
+           the root, using the 'out of tree' build.
+           For example to build in ``C:\build`` folder you can:
+
+           .. code-block:: bash
+
+               cd trusted-firmware-m
+               cmake -G"Unix Makefiles" -S . -B C:/build -DTFM_PLATFORM=arm/mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DCMAKE_BUILD_TYPE=Debug -DTEST_S=ON -DTEST_NS=ON
+               cmake --build C:/build -- install
+
 
 ###########################
 Run AN521 regression sample
@@ -403,4 +422,4 @@ Here are some next steps for exploring TF-M:
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

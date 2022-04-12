@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -52,12 +52,24 @@ struct full_context_t {
     struct tfm_state_context_t      stat_ctx;
 };
 
+/*
+ * Under cross call ABI, SPM can be preempted by interrupts, the interrupt
+ * handling can set SPM API return value and makes the initial SPM API
+ * return code invalid. Use one flag to indicate if the return code has been
+ * force updated by interrupts, then SPM return code can be discarded as it
+ * is out of date.
+ */
+#define CROSS_RETCODE_EMPTY         0xEEEEEEED
+#define CROSS_RETCODE_UPDATED       0xEEEEEEEE
+
 /* Context control */
 struct context_ctrl_t {
-    uint32_t                sp;        /* Stack pointer (higher address)   */
-    uint32_t                sp_limit;  /* Stack limit (lower address)      */
-    uint32_t                reserved;  /* Reserved                         */
-    uint32_t                exc_ret;   /* EXC_RETURN pattern.              */
+    uint32_t                sp;           /* Stack pointer (higher address)  */
+    uint32_t                sp_limit;     /* Stack limit (lower address)     */
+    uint32_t                allocated;    /* Stack alloced bytes (8-aligned) */
+    uint32_t                exc_ret;      /* EXC_RETURN pattern.             */
+    uint32_t                cross_frame;  /* Cross call frame position.      */
+    uint32_t                retcode_status; /* Cross call retcode status.    */
 };
 
 /*
@@ -67,10 +79,47 @@ struct context_ctrl_t {
 struct context_flih_ret_t {
     uint64_t stack_seal;    /* Two words stack seal */
     struct tfm_additional_context_t addi_ctx;
-    uint32_t exc_ret;   /* EXC_RETURN value when interrupt exception ocurrs */
     uint32_t psp;       /* PSP when interrupt exception ocurrs              */
+    uint32_t psplim;    /* PSPLIM when interrupt exception ocurrs when      */
     struct tfm_state_context_t state_ctx; /* ctx on SVC_PREPARE_DEPRIV_FLIH */
 };
+
+/* A customized ABI format. */
+struct cross_call_abi_frame_t {
+    uint32_t      a0;
+    uint32_t      a1;
+    uint32_t      a2;
+    uint32_t      a3;
+    uint32_t      unused0;
+    uint32_t      unused1;
+};
+
+/* Assign stack and stack limit to the context control instance. */
+#define ARCH_CTXCTRL_INIT(x, buf, size) do {                                   \
+            (x)->sp             = ((uint32_t)(buf) + (uint32_t)(size)) & ~0x7; \
+            (x)->sp_limit       = ((uint32_t)(buf) + 7) & ~0x7;                \
+            (x)->allocated      = 0;                                           \
+            (x)->exc_ret        = 0;                                           \
+            (x)->cross_frame    = 0;                                           \
+            (x)->retcode_status = CROSS_RETCODE_EMPTY;                         \
+        } while (0)
+
+/* Allocate 'size' bytes in stack. */
+#define ARCH_CTXCTRL_ALLOCATE_STACK(x, size) do {                         \
+            (x)->allocated += ((size) + 7) & ~0x7;                        \
+            (x)->sp        -= (x)->allocated;                             \
+        } while (0)
+
+/* The latest allocated pointer. */
+#define ARCH_CTXCTRL_ALLOCATED_PTR(x)         ((x)->sp)
+
+/* Prepare a exception return pattern on the stack. */
+#define ARCH_CTXCTRL_EXCRET_PATTERN(x, param, pfn, pfnlr) do {            \
+            (x)->r0 = (uint32_t)(param);                                  \
+            (x)->ra = (uint32_t)(pfn);                                    \
+            (x)->lr = (uint32_t)(pfnlr);                                  \
+            (x)->xpsr = XPSR_T32;                                         \
+        } while (0)
 
 /**
  * \brief Get Link Register
@@ -121,7 +170,7 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
     __ISB();
 }
 
-#if (CONFIG_TFM_SPE_FP >= 1) && CONFIG_TFM_LAZY_STACKING_SPE
+#if (CONFIG_TFM_FP >= 1) && CONFIG_TFM_LAZY_STACKING
 #define ARCH_FLUSH_FP_CONTEXT()  __asm volatile("vmov  s0, s0 \n":::"memory")
 #else
 #define ARCH_FLUSH_FP_CONTEXT()
@@ -136,7 +185,7 @@ void tfm_arch_config_extensions(void);
 /* Clear float point status. */
 void tfm_arch_clear_fp_status(void);
 
-#if (CONFIG_TFM_SPE_FP >= 1)
+#if (CONFIG_TFM_FP >= 1)
 /*
  * Clear float point data.
  */
@@ -155,18 +204,17 @@ void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base, uint32_t exc_return);
  * psa_wait(), by manipulating the control context - this is usaully setting the
  * R0 register of the thread context.
  */
-void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uintptr_t ret_code);
+void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code);
 
 /* Init a thread context on thread stack and update the control context. */
 void tfm_arch_init_context(void *p_ctx_ctrl,
-                           uintptr_t pfn, void *param, uintptr_t pfnlr,
-                           uintptr_t sp_limit, uintptr_t sp);
+                           uintptr_t pfn, void *param, uintptr_t pfnlr);
 
 /*
  * Refresh the HW (sp, splimit) according to the given control context and
  * returns the EXC_RETURN payload (caller might need it for following codes).
  *
- * The p_ctx_ctrl must have been initialized by tfm_arch_init_context
+ * The p_ctx_ctrl must have been initialized by 'tfm_arch_init_context'.
  */
 uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl);
 
@@ -176,12 +224,11 @@ uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl);
  */
 uint32_t tfm_arch_trigger_pendsv(void);
 
-
 /*
  * Switch to a new stack area, lock scheduler and call function.
  * If 'stk_base' is ZERO, stack won't be switched and re-use caller stack.
  */
-uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                               uint32_t stk_base, uint32_t stk_limit);
+void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                           uint32_t stk_base, uint32_t stk_limit);
 
 #endif

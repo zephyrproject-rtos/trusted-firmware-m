@@ -6,6 +6,8 @@
 #
 #-------------------------------------------------------------------------------
 
-set(NRF_PATH platform/ext/target/${TFM_PLATFORM}/..)
+# Relative path to nordic platform files from scope of the lairdconnectivity/common/core folder
+set(NRF_PLATFORM_PATH "../../../nordic_nrf")
+set(PLATFORM_PATH platform/ext/target/${TFM_PLATFORM}/..)
 
-include(${NRF_PATH}/common/bl5340/config.cmake)
+include(${PLATFORM_PATH}/common/bl5340/config.cmake)

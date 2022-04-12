@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,13 +33,25 @@ struct backend_ops_t {
 
     /* Runtime model-specific message handling mechanism. */
     psa_status_t (*messaging)(struct service_t *p_serv,
-                              struct tfm_msg_body_t *p_msg);
+                              struct conn_handle_t *handle);
 
     /*
      * Runtime model-specific message replying.
      * Return the connection handle or the acked status code.
      */
-    int32_t (*replying)(struct tfm_msg_body_t *p_msg, int32_t status);
+    psa_status_t (*replying)(struct conn_handle_t *handle, int32_t status);
+
+    /*
+     * Runtime model-specific Partition wait operation.
+     * Put the Partition to a status that waits for signals.
+     */
+    psa_signal_t (*wait)(struct partition_t *p_pt, psa_signal_t signal_mask);
+
+    /*
+     * Runtime model-specific Partition wake up operation.
+     * Wakes up the Partition with the asserted signals in 'p_pt'.
+     */
+    void (*wake_up)(struct partition_t *p_pt);
 };
 
 /* RUNTIME MODEL BACKENDS DECLARATION */

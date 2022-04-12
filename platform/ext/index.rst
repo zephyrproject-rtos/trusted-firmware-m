@@ -16,7 +16,7 @@ Supported Platforms
     :caption: arm
     :glob:
 
-    target/arm/**
+    target/arm/index
 
 .. toctree::
     :maxdepth: 1
@@ -30,7 +30,7 @@ Supported Platforms
     :caption: Cypress
     :glob:
 
-    target/cypress/**
+    target/cypress/psoc64/index
 
 .. toctree::
     :maxdepth: 1

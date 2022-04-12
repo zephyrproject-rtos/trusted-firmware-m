@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,14 @@ enum {
  enum {
     DATA_WIDTH_8BIT   = 0u,
     DATA_WIDTH_16BIT,
-    DATA_WIDTH_32BIT
+    DATA_WIDTH_32BIT,
+    DATA_WIDTH_ENUM_SIZE
+};
+
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
 };
 
 /**
@@ -165,6 +172,9 @@ static int32_t ARM_Flashx_ReadData(ARM_FLASHx_Resources *ARM_FLASHx_DEV,
     enum gfc100_error_t err = GFC100_ERROR_NONE;
     uint32_t flash_size = gfc100_get_eflash_size(ARM_FLASHx_DEV->dev);
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     ARM_FLASHx_DEV->status.error = DRIVER_STATUS_NO_ERROR;
 
     /* Check if range is valid */
@@ -184,7 +194,10 @@ static int32_t ARM_Flashx_ReadData(ARM_FLASHx_Resources *ARM_FLASHx_DEV,
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    /* Conversion between bytes and data items */
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+
+    return cnt;
 }
 
 static int32_t ARM_Flashx_ProgramData(ARM_FLASHx_Resources *ARM_FLASHx_DEV,
@@ -192,6 +205,9 @@ static int32_t ARM_Flashx_ProgramData(ARM_FLASHx_Resources *ARM_FLASHx_DEV,
                                       uint32_t cnt)
 {
     enum gfc100_error_t err = GFC100_ERROR_NONE;
+
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
 
     ARM_FLASHx_DEV->status.error = DRIVER_STATUS_NO_ERROR;
     ARM_FLASHx_DEV->status.busy = DRIVER_STATUS_BUSY;
@@ -216,7 +232,10 @@ static int32_t ARM_Flashx_ProgramData(ARM_FLASHx_Resources *ARM_FLASHx_DEV,
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    /* Conversion between bytes and data items */
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+
+    return cnt;
 }
 
 static int32_t ARM_Flashx_EraseSector(ARM_FLASHx_Resources *ARM_FLASHx_DEV,

@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2018 ARM Limited
+; * Copyright (c) 2009-2021 ARM Limited
 ; * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
 
 ; * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@
     .syntax    unified
     .arch    armv8-m.base
 
-    .section .vectors
+    .section .vectors, "a"
     .align 2
     .globl    __Vectors
 __Vectors:

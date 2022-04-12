@@ -57,7 +57,7 @@
 #define CORSTONE1000_BASE_SCR_BASE                 (0x5008E000U) /* SE Base System Control Register   */
 #define CORSTONE1000_SOC_WATCHDOG_BASE             (0x5008F000U) /* SoC Watchdog                      */
 #define CORSTONE1000_UART_BASE                     (0x50090000U) /* UART                              */
-#define CORSTONE1000_FIREWALL_BASE                 (0x50200000U) /* SE Firewall                       */
+#define CORSTONE1000_SE_FIREWALL_BASE              (0x50200000U) /* SE Firewall                       */
 #define CORSTONE1000_HOST_ACCESS_REGION_BASE       (0x60000000U) /* Host Access Region                */
 #define CORSTONE1000_PPB_BASE                      (0xE0000000U) /* Private Peripheral Bus (PPB)      */
 #define CORSTONE1000_CS_ROM_BASE                   (0xF0000000U) /* SE CS ROM                         */
@@ -65,13 +65,17 @@
 
 /* Host base addresses from the SE perspective - partial list, only the ones
  * required by the SE are defined here */
+#define CORSTONE1000_HOST_ADDRESS_SPACE_BASE       (0x60000000U) /* Host Address Space                */
 #define CORSTONE1000_HOST_BIR_BASE                 (0x60000000U) /* Boot Instruction Register         */
 #define CORSTONE1000_HOST_SHARED_RAM_BASE          (0x62000000U) /* Shared RAM                        */
 #define CORSTONE1000_HOST_XNVM_BASE                (0x68000000U) /* XNVM                              */
 #define CORSTONE1000_HOST_BASE_SYSTEM_CONTROL_BASE (0x7A010000U) /* Host SCB                          */
 #define CORSTONE1000_HOST_FIREWALL_BASE            (0x7A800000U) /* Host Firewall                     */
+#define CORSTONE1000_HOST_INT_APBCOM_BASE          (0x7B900000U) /* Internal APBCOM                   */
 #define CORSTONE1000_HOST_FPGA_SCC_REGISTERS       (0x80000000U) /* FPGA SCC Registers                */
-#define CORSTONE1000_AXI_QSPI_CTRL_REG_BASE        (0x80050000U) /* AXI QSPI Controller               */
-#define CORSTONE1000_SE_SECURE_FLASH_BASE_FVP      (0x80010000U) /* SE Flash                          */
+#define CORSTONE1000_HOST_SE_SECURE_FLASH_BASE_FVP (0x80010000U) /* SE Flash                          */
+#define CORSTONE1000_HOST_AXI_QSPI_CTRL_REG_BASE   (0x80050000U) /* AXI QSPI Controller               */
+#define CORSTONE1000_HOST_AXI_QSPI_CTRL_REG_BASE_SE_SECURE_FLASH (0x90010000U) /* AXI QSPI Controller for SE FLash  */
+#define CORSTONE1000_HOST_DRAM_UEFI_CAPSULE        (0xA0000000U) /* 1.5 GB DDR                        */
 
 #endif  /* __PLATFORM_BASE_ADDRESS_H__ */

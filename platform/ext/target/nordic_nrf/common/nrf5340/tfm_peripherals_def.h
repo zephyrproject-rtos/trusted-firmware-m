@@ -16,8 +16,67 @@
 extern "C" {
 #endif
 
-#define TFM_TIMER0_IRQ    (TIMER0_IRQn)
-#define TFM_TIMER1_IRQ    (TIMER1_IRQn)
+#define TFM_FPU_IRQ            (FPU_IRQn)
+#define TFM_CACHE_IRQ          (CACHE_IRQn)
+#define TFM_POWER_IRQ          (CLOCK_POWER_IRQn)
+#define TFM_CLOCK_IRQ          (CLOCK_POWER_IRQn)
+#define TFM_CLOCK_POWER_IRQ    (CLOCK_POWER_IRQn)
+#define TFM_SPIM0_IRQ          (SERIAL0_IRQn)
+#define TFM_SPIS0_IRQ          (SERIAL0_IRQn)
+#define TFM_TWIM0_IRQ          (SERIAL0_IRQn)
+#define TFM_TWIS0_IRQ          (SERIAL0_IRQn)
+#define TFM_UARTE0_IRQ         (SERIAL0_IRQn)
+#define TFM_SERIAL0_IRQ        (SERIAL0_IRQn)
+#define TFM_SPIM1_IRQ          (SERIAL1_IRQn)
+#define TFM_SPIS1_IRQ          (SERIAL1_IRQn)
+#define TFM_TWIM1_IRQ          (SERIAL1_IRQn)
+#define TFM_TWIS1_IRQ          (SERIAL1_IRQn)
+#define TFM_UARTE1_IRQ         (SERIAL1_IRQn)
+#define TFM_SERIAL1_IRQ        (SERIAL1_IRQn)
+#define TFM_SPIM4_IRQ          (SPIM4_IRQn)
+#define TFM_SPIM2_IRQ          (SERIAL2_IRQn)
+#define TFM_SPIS2_IRQ          (SERIAL2_IRQn)
+#define TFM_TWIM2_IRQ          (SERIAL2_IRQn)
+#define TFM_TWIS2_IRQ          (SERIAL2_IRQn)
+#define TFM_UARTE2_IRQ         (SERIAL2_IRQn)
+#define TFM_SERIAL2_IRQ        (SERIAL2_IRQn)
+#define TFM_SPIM3_IRQ          (SERIAL3_IRQn)
+#define TFM_SPIS3_IRQ          (SERIAL3_IRQn)
+#define TFM_TWIM3_IRQ          (SERIAL3_IRQn)
+#define TFM_TWIS3_IRQ          (SERIAL3_IRQn)
+#define TFM_UARTE3_IRQ         (SERIAL3_IRQn)
+#define TFM_SERIAL3_IRQ        (SERIAL3_IRQn)
+#define TFM_SAADC_IRQ          (SAADC_IRQn)
+#define TFM_TIMER0_IRQ         (TIMER0_IRQn)
+#define TFM_TIMER1_IRQ         (TIMER1_IRQn)
+#define TFM_TIMER2_IRQ         (TIMER2_IRQn)
+#define TFM_RTC0_IRQ           (RTC0_IRQn)
+#define TFM_RTC1_IRQ           (RTC1_IRQn)
+#define TFM_WDT0_IRQ           (WDT0_IRQn)
+#define TFM_WDT1_IRQ           (WDT1_IRQn)
+#define TFM_COMP_IRQ           (COMP_LPCOMP_IRQn)
+#define TFM_LPCOMP_IRQ         (COMP_LPCOMP_IRQn)
+#define TFM_COMP_LPCOMP_IRQ    (COMP_LPCOMP_IRQn)
+#define TFM_EGU0_IRQ           (EGU0_IRQn)
+#define TFM_EGU1_IRQ           (EGU1_IRQn)
+#define TFM_EGU2_IRQ           (EGU2_IRQn)
+#define TFM_EGU3_IRQ           (EGU3_IRQn)
+#define TFM_EGU4_IRQ           (EGU4_IRQn)
+#define TFM_EGU5_IRQ           (EGU5_IRQn)
+#define TFM_PWM0_IRQ           (PWM0_IRQn)
+#define TFM_PWM1_IRQ           (PWM1_IRQn)
+#define TFM_PWM2_IRQ           (PWM2_IRQn)
+#define TFM_PWM3_IRQ           (PWM3_IRQn)
+#define TFM_PDM0_IRQ           (PDM0_IRQn)
+#define TFM_I2S0_IRQ           (I2S0_IRQn)
+#define TFM_IPC_IRQ            (IPC_IRQn)
+#define TFM_QSPI_IRQ           (QSPI_IRQn)
+#define TFM_NFCT_IRQ           (NFCT_IRQn)
+#define TFM_GPIOTE0_IRQ        (GPIOTE0_IRQn)
+#define TFM_QDEC0_IRQ          (QDEC0_IRQn)
+#define TFM_QDEC1_IRQ          (QDEC1_IRQn)
+#define TFM_USBD_IRQ           (USBD_IRQn)
+#define TFM_USBREG_IRQ         (USBREGULATOR_IRQn)
 
 struct platform_data_t;
 
@@ -55,7 +114,7 @@ extern struct platform_data_t tfm_peripheral_timer1;
 extern struct platform_data_t tfm_peripheral_timer2;
 extern struct platform_data_t tfm_peripheral_rtc0;
 extern struct platform_data_t tfm_peripheral_rtc1;
-extern struct platform_data_t tfm_peripheral_dppic;
+extern struct platform_data_t tfm_peripheral_dppi;
 extern struct platform_data_t tfm_peripheral_wdt0;
 extern struct platform_data_t tfm_peripheral_wdt1;
 extern struct platform_data_t tfm_peripheral_comp;
@@ -79,10 +138,10 @@ extern struct platform_data_t tfm_peripheral_mutex;
 extern struct platform_data_t tfm_peripheral_qdec0;
 extern struct platform_data_t tfm_peripheral_qdec1;
 extern struct platform_data_t tfm_peripheral_usbd;
-extern struct platform_data_t tfm_peripheral_usbregulator;
+extern struct platform_data_t tfm_peripheral_usbreg;
 extern struct platform_data_t tfm_peripheral_nvmc;
-extern struct platform_data_t tfm_peripheral_p0;
-extern struct platform_data_t tfm_peripheral_p1;
+extern struct platform_data_t tfm_peripheral_gpio0;
+extern struct platform_data_t tfm_peripheral_gpio1;
 extern struct platform_data_t tfm_peripheral_vmc;
 
 #define TFM_PERIPHERAL_DCNF         (&tfm_peripheral_dcnf)
@@ -119,7 +178,7 @@ extern struct platform_data_t tfm_peripheral_vmc;
 #define TFM_PERIPHERAL_TIMER2       (&tfm_peripheral_timer2)
 #define TFM_PERIPHERAL_RTC0         (&tfm_peripheral_rtc0)
 #define TFM_PERIPHERAL_RTC1         (&tfm_peripheral_rtc1)
-#define TFM_PERIPHERAL_DPPIC        (&tfm_peripheral_dppic)
+#define TFM_PERIPHERAL_DPPI         (&tfm_peripheral_dppi)
 #define TFM_PERIPHERAL_WDT0         (&tfm_peripheral_wdt0)
 #define TFM_PERIPHERAL_WDT1         (&tfm_peripheral_wdt1)
 #define TFM_PERIPHERAL_COMP         (&tfm_peripheral_comp)
@@ -143,10 +202,10 @@ extern struct platform_data_t tfm_peripheral_vmc;
 #define TFM_PERIPHERAL_QDEC0        (&tfm_peripheral_qdec0)
 #define TFM_PERIPHERAL_QDEC1        (&tfm_peripheral_qdec1)
 #define TFM_PERIPHERAL_USBD         (&tfm_peripheral_usbd)
-#define TFM_PERIPHERAL_USBREGULATOR (&tfm_peripheral_usbregulator)
+#define TFM_PERIPHERAL_USBREG       (&tfm_peripheral_usbreg)
 #define TFM_PERIPHERAL_NVMC         (&tfm_peripheral_nvmc)
-#define TFM_PERIPHERAL_P0           (&tfm_peripheral_p0)
-#define TFM_PERIPHERAL_P1           (&tfm_peripheral_p1)
+#define TFM_PERIPHERAL_GPIO0        (&tfm_peripheral_gpio0)
+#define TFM_PERIPHERAL_GPIO1        (&tfm_peripheral_gpio1)
 #define TFM_PERIPHERAL_VMC          (&tfm_peripheral_vmc)
 
 #define TFM_PERIPHERAL_STD_UART     TFM_PERIPHERAL_UARTE1
