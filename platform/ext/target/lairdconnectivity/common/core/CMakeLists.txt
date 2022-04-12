@@ -69,7 +69,7 @@ target_sources(platform_s
 if(SECURE_UART1)
     target_sources(platform_s
         PRIVATE
-            ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_USART.c
+            cmsis_drivers/Driver_USART.c
             ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
     )
 endif()
@@ -92,7 +92,6 @@ target_include_directories(platform_ns
         ${NRF_FOLDER_PATH}/nrfx
         ${NRF_FOLDER_PATH}/nrfx/mdk
         ${NRF_FOLDER_PATH}/nrfx/drivers/include
-        ${NRF_FOLDER_PATH}/common
         ${PLATFORM_DIR}/..
     PRIVATE
         ${PLATFORM_DIR}/../interface/include
@@ -100,7 +99,7 @@ target_include_directories(platform_ns
 
 target_sources(platform_ns
     PRIVATE
-        ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_USART.c
+        cmsis_drivers/Driver_USART.c
         ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
         ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twim.c
         ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
@@ -117,7 +116,6 @@ if(BL2)
             ${NRF_FOLDER_PATH}/nrfx
             ${NRF_FOLDER_PATH}/nrfx/mdk
             ${NRF_FOLDER_PATH}/nrfx/drivers/include
-            ${NRF_FOLDER_PATH}/common
         PRIVATE
             ${PLATFORM_DIR}/..
     )
@@ -127,7 +125,7 @@ if(BL2)
             boot_hal.c
             cmsis_drivers/Driver_Flash.c
             cmsis_drivers/Driver_QSPI.c
-            ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_USART.c
+            cmsis_drivers/Driver_USART.c
             ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_uarte.c
             ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_nvmc.c
             ${NRF_FOLDER_PATH}/nrfx/drivers/src/nrfx_twim.c
