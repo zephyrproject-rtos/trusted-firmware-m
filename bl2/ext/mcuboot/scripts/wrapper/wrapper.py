@@ -79,7 +79,7 @@ os.environ['LANG'] = 'C.UTF-8'
               help='Specify the value of encrypt key length. Default 128.')
 @click.option('-v', '--version', callback=imgtool.main.validate_version,
               required=True)
-@click.option('--align', type=click.Choice(['1', '2', '4', '8', '16', '32']),
+@click.option('--align', type=click.Choice(['1', '2', '4', '8']),
               required=True)
 @click.option('--public-key-format', type=click.Choice(['hash', 'full']),
               default='hash', help='In what format to add the public key to '
@@ -103,13 +103,6 @@ def wrap(key, align, version, header_size, pad_header, layout, pad, confirm,
     else:
         boot_record = "NSPE_SPE"
 
-    if int(align) <= 8 :
-        #default behaviour for max_align
-        max_align=8
-    else:
-        #max_align must be set to align
-        max_align=align
-
     img = imgtool.image.Image(version=imgtool.version.decode_version(version),
                               header_size=header_size, pad_header=pad_header,
                               pad=pad, confirm=confirm, align=int(align),
@@ -118,8 +111,7 @@ def wrap(key, align, version, header_size, pad_header, layout, pad, confirm,
                               load_addr=load_addr, rom_fixed=rom_fixed,
                               erased_val=erased_val,
                               save_enctlv=save_enctlv,
-                              security_counter=security_counter,
-                              max_align=max_align)
+                              security_counter=security_counter)
 
     img.load(infile)
     key = imgtool.main.load_key(key) if key else None
