@@ -324,9 +324,9 @@ enum tfm_plat_err_t mpc_init_cfg(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* Configuring primary and secondary non-secure partition.
-     * It is ensured in flash_layout.h that these memory regions are located in
-     * SRAM SRAM device. */
+    /* Configuring primary non-secure partition.
+     * It is ensured in flash_layout.h that this memory region is located in
+     * SRAM device. */
     ret = Driver_SRAM_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Initialize MPC for SRAM!");
@@ -341,13 +341,11 @@ enum tfm_plat_err_t mpc_init_cfg(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* Lock down not used MPC's */
+    /* Lock down the MPCs */
     Driver_QSPI_MPC.LockDown();
+    Driver_ISRAM0_MPC.LockDown();
     Driver_ISRAM1_MPC.LockDown();
-
-    /* SRAM and ISRAM0 MPCs left unlocked as they are not reset if NVIC system
-     * reset asserted.
-     */
+    Driver_SRAM_MPC.LockDown();
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
@@ -356,23 +354,6 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     __ISB();
 
     return TFM_PLAT_ERR_SUCCESS;
-}
-
-void mpc_revert_non_secure_to_secure_cfg(void)
-{
-    Driver_ISRAM0_MPC.ConfigRegion(MPC_ISRAM0_RANGE_BASE_S,
-                                   MPC_ISRAM0_RANGE_LIMIT_S,
-                                   ARM_MPC_ATTR_SECURE);
-
-    Driver_SRAM_MPC.ConfigRegion(MPC_SRAM_RANGE_BASE_S,
-                                 MPC_SRAM_RANGE_LIMIT_S,
-                                 ARM_MPC_ATTR_SECURE);
-
-    /* Add barriers to assure the MPC configuration is done before continue
-     * the execution.
-     */
-    __DSB();
-    __ISB();
 }
 
 void mpc_clear_irq(void)

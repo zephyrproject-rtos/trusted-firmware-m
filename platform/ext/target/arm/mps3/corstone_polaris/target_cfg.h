@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,11 +152,5 @@ void ppc_clear_irq(void);
  * \brief Configures SAU and IDAU.
  */
 void sau_and_idau_cfg(void);
-
-/**
- * \brief Sets to secure the initialized non-secure regions of
- *        the Memory Protection Controller.
- */
-void mpc_revert_non_secure_to_secure_cfg(void);
 
 #endif /* __TARGET_CFG_H__ */
