@@ -52,7 +52,6 @@ target_include_directories(platform_s
         nrfx
         nrfx/mdk
         nrfx/drivers/include
-        common
         ${PLATFORM_DIR}/..
         services/include
 )
@@ -66,7 +65,7 @@ target_sources(platform_s
         native_drivers/spu.c
         spm_hal.c
         tfm_hal_isolation.c
-        tfm_hal_platform_common.c
+        tfm_hal_platform.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
     PUBLIC
         plat_test.c
