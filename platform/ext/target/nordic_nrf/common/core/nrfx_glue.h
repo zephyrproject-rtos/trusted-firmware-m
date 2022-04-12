@@ -35,6 +35,7 @@
 #include <assert.h>
 
 #include <soc/nrfx_coredep.h>
+#include <soc/nrfx_irqs.h>
 
 #ifdef __cplusplus
 extern "C" {

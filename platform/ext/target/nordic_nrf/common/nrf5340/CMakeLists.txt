@@ -43,7 +43,6 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         target_cfg.c
-        tfm_interrupts.c
         ../core/nrfx/mdk/system_nrf5340_application.c
 )
 

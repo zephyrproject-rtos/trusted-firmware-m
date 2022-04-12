@@ -18,7 +18,6 @@
 #include "target_cfg.h"
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
-#include "tfm_peripherals_config.h"
 #include "region.h"
 
 #include <spu.h>
@@ -170,7 +169,7 @@ struct platform_data_t tfm_peripheral_rtc1 = {
     NRF_RTC1_S_BASE + (sizeof(NRF_RTC_Type) - 1),
 };
 
-struct platform_data_t tfm_peripheral_dppi = {
+struct platform_data_t tfm_peripheral_dppic = {
     NRF_DPPIC_S_BASE,
     NRF_DPPIC_S_BASE + (sizeof(NRF_DPPIC_Type) - 1),
 };
@@ -260,7 +259,7 @@ struct platform_data_t tfm_peripheral_vmc = {
     NRF_VMC_S_BASE + (sizeof(NRF_VMC_Type) - 1),
 };
 
-struct platform_data_t tfm_peripheral_gpio0 = {
+struct platform_data_t tfm_peripheral_p0 = {
     NRF_P0_S_BASE,
     NRF_P0_S_BASE + (sizeof(NRF_GPIO_Type) - 1),
 };
@@ -520,10 +519,10 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_P0, false);
 
     /* DPPI channel configuration */
-    spu_dppi_config_non_secure(TFM_PERIPHERAL_DPPI_CHANNEL_SECURE_MASK, true);
+    spu_dppi_config_non_secure(false);
 
     /* GPIO pin configuration */
-    spu_gpio_config_non_secure(0, TFM_PERIPHERAL_GPIO0_PIN_MASK_SECURE, true);
+    spu_gpio_config_non_secure(0, false);
 
     /* Enable the instruction cache (this can be done only from secure code;
      * that's why it is placed here).
