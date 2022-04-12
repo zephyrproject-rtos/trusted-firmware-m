@@ -50,7 +50,6 @@ target_include_directories(platform_s
         ${HAL_NORDIC_PATH}/nrfx/mdk
         ${HAL_NORDIC_PATH}/nrfx/drivers/include
         ${NRF_FOLDER_PATH}/common
-        ${NRF_FOLDER_PATH}/services/include
         ${PLATFORM_DIR}/..
 )
 
@@ -72,19 +71,6 @@ target_sources(platform_s
     PUBLIC
         plat_test.c
 )
-
-if(TFM_PARTITION_PLATFORM)
-    target_sources(platform_s
-        PRIVATE
-            ${NRF_FOLDER_PATH}/services/src/tfm_platform_hal_ioctl.c
-            ${NRF_FOLDER_PATH}/services/src/tfm_ioctl_core_s_api.c
-    )
-
-    target_sources(platform_ns
-        PRIVATE
-            ${NRF_FOLDER_PATH}/services/src/tfm_ioctl_core_ns_api.c
-    )
-endif()
 
 if(SECURE_UART1)
     target_sources(platform_s
@@ -114,7 +100,6 @@ target_include_directories(platform_ns
         ${HAL_NORDIC_PATH}/nrfx/drivers/include
         ${NRF_FOLDER_PATH}/common
         ${PLATFORM_DIR}/..
-        ${NRF_FOLDER_PATH}/services/include
     PRIVATE
         ${PLATFORM_DIR}/../interface/include
 )
@@ -156,10 +141,4 @@ if(BL2)
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_qspi.c
             ${NRF_FOLDER_PATH}/nrfx_glue.c
     )
-endif()
-
-if (TFM_PARTITION_PLATFORM)
-install(FILES       ${NRF_FOLDER_PATH}/services/include/tfm_ioctl_core_api.h
-        DESTINATION ${TFM_INSTALL_PATH}/interface/include)
-
 endif()

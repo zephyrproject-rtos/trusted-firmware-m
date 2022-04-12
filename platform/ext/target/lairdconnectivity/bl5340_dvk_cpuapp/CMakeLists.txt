@@ -28,7 +28,6 @@ target_include_directories(platform_s
     PUBLIC
         .
         ../common/bl5340/partition
-        services/include
 )
 
 target_include_directories(platform_ns
@@ -43,9 +42,4 @@ if(BL2)
         PRIVATE
             .
     )
-endif()
-
-if (TFM_PARTITION_PLATFORM)
-install(FILES       services/include/tfm_ioctl_api.h
-        DESTINATION ${TFM_INSTALL_PATH}/interface/include)
 endif()
