@@ -19,10 +19,6 @@ if (NOT NRF_BOARD_SELECTED)
         "Instead of '${TFM_PLATFORM}', choose e.g. '${hint}'.")
 endif()
 
-#========================= Platform dependencies ===============================#
-
-include(hal_nordic.cmake)
-
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.
@@ -53,9 +49,9 @@ target_include_directories(platform_s
     PUBLIC
         .
         native_drivers
-        ${HAL_NORDIC_PATH}/nrfx
-        ${HAL_NORDIC_PATH}/nrfx/mdk
-        ${HAL_NORDIC_PATH}/nrfx/drivers/include
+        nrfx
+        nrfx/mdk
+        nrfx/drivers/include
         common
         ${PLATFORM_DIR}/..
         services/include
@@ -64,7 +60,7 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_Flash.c
-        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+        nrfx/drivers/src/nrfx_nvmc.c
         nrfx_glue.c
         native_drivers/mpu_armv8m_drv.c
         native_drivers/spu.c
@@ -93,7 +89,7 @@ if(TFM_SPM_LOG_RAW_ENABLED)
     target_sources(platform_s
         PRIVATE
             cmsis_drivers/Driver_USART.c
-            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
+            nrfx/drivers/src/nrfx_uarte.c
     )
 endif()
 
@@ -112,7 +108,7 @@ target_compile_definitions(platform_s
 target_sources(platform_ns
     PRIVATE
         cmsis_drivers/Driver_USART.c
-        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
+        nrfx/drivers/src/nrfx_uarte.c
         nrfx_glue.c
         plat_test.c
 )
@@ -120,9 +116,9 @@ target_sources(platform_ns
 target_include_directories(platform_ns
     PUBLIC
         .
-        ${HAL_NORDIC_PATH}/nrfx
-        ${HAL_NORDIC_PATH}/nrfx/mdk
-        ${HAL_NORDIC_PATH}/nrfx/drivers/include
+        nrfx
+        nrfx/mdk
+        nrfx/drivers/include
         common
         ${PLATFORM_DIR}/..
         services/include
@@ -143,17 +139,17 @@ if(BL2)
             boot_hal.c
             cmsis_drivers/Driver_Flash.c
             cmsis_drivers/Driver_USART.c
-            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
-            ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
+            nrfx/drivers/src/nrfx_uarte.c
+            nrfx/drivers/src/nrfx_nvmc.c
             nrfx_glue.c
     )
 
     target_include_directories(platform_bl2
         PUBLIC
             .
-            ${HAL_NORDIC_PATH}/nrfx
-            ${HAL_NORDIC_PATH}/nrfx/mdk
-            ${HAL_NORDIC_PATH}/nrfx/drivers/include
+            nrfx
+            nrfx/mdk
+            nrfx/drivers/include
             common
         PRIVATE
             ${PLATFORM_DIR}/..
