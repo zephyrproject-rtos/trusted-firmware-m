@@ -85,7 +85,7 @@ if(TFM_PARTITION_PLATFORM)
     )
 endif()
 
-if(TFM_SPM_LOG_RAW_ENABLED)
+if(SECURE_UART1)
     target_sources(platform_s
         PRIVATE
             cmsis_drivers/Driver_USART.c
