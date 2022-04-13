@@ -59,6 +59,18 @@
 #define SYSCOUNTER_ARMV8_M_DEFAULT_SCALE1_INT           1u
 #define SYSCOUNTER_ARMV8_M_DEFAULT_SCALE1_FRACT         0u
 
+/* DMA350 */
+#define DMA350_DMA0_S
+#define DMA350_DMA0_DEV             DMA350_DMA0_DEV_S
+
+#define DMA350_DMA0_CH0_S
+
+#ifdef PLATFORM_SVC_HANDLERS
+/* Required for DMA350 checker layer even if some channels are configured NS by
+ * default
+ */
+#define DMA350_DMA0_CH1_S
+#endif
 
 /* System Timer Armv8-M */
 #define SYSTIMER0_ARMV8_M_S

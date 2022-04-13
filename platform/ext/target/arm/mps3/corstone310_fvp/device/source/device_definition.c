@@ -692,3 +692,62 @@ struct arm_mps3_io_dev_t MPS3_IO_DEV_NS = {
     .cfg = &(MPS3_IO_DEV_CFG_NS)
 };
 #endif
+
+/* DMA350 driver structures */
+#ifdef DMA350_DMA0_S
+static const struct dma350_dev_cfg_t DMA350_DMA0_DEV_CFG_S = {
+    .dma_sec_cfg =   (DMASECCFG_TypeDef*)   (DMA_350_BASE_S + 0x0UL),
+    .dma_sec_ctrl =  (DMASECCTRL_TypeDef*)  (DMA_350_BASE_S + 0x100UL),
+    .dma_nsec_ctrl = (DMANSECCTRL_TypeDef*) (DMA_350_BASE_S + 0x200UL),
+    .dma_info =      (DMAINFO_TypeDef*)     (DMA_350_BASE_S + 0xF00UL)
+};
+static struct dma350_dev_data_t DMA350_DMA0_DEV_DATA_S = {
+    .state = 0
+};
+struct dma350_dev_t DMA350_DMA0_DEV_S = {
+    &(DMA350_DMA0_DEV_CFG_S),
+    &(DMA350_DMA0_DEV_DATA_S)
+};
+
+#ifdef DMA350_DMA0_CH0_S
+struct dma350_ch_dev_t DMA350_DMA0_CH0_DEV_S = {
+    .cfg = {.ch_base = (DMACH_TypeDef *)(DMA_350_BASE_S + 0x1000UL),
+            .channel = 0},
+    .data = {0}};
+#endif /* DMA350_DMA0_CH0_S */
+
+#ifdef DMA350_DMA0_CH1_S
+struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_S = {
+    .cfg = {.ch_base = (DMACH_TypeDef *)(DMA_350_BASE_S + 0x1100UL),
+            .channel = 1},
+    .data = {0}};
+#endif /* DMA350_DMA0_CH1_S */
+
+#ifdef DMA350_DMA0_CH0_NS
+struct dma350_ch_dev_t DMA350_DMA0_CH0_DEV_NS = {
+    .cfg = {.ch_base = (DMACH_TypeDef *)(DMA_350_BASE_NS + 0x1000UL),
+            .channel = 0},
+    .data = {0}};
+#endif /* DMA350_DMA0_CH0_NS */
+
+#ifdef DMA350_DMA0_CH1_NS
+struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_NS = {
+    .cfg = {.ch_base = (DMACH_TypeDef *)(DMA_350_BASE_NS + 0x1100UL),
+            .channel = 1},
+    .data = {0}};
+#endif /* DMA350_DMA0_CH1_NS */
+
+#endif  /* DMA350_DMA0_S */
+
+#if defined(DMA350_DMA0_S)
+/* ADA DMA checker layer has to know the TCM remaps */
+const struct dma350_remap_range_t dma350_address_remap_list[] = {
+    {.begin = 0x00000000, .end = 0x00007FFF, .offset = 0x0A000000},
+    {.begin = 0x10000000, .end = 0x10007FFF, .offset = 0x0A000000},
+    {.begin = 0x20000000, .end = 0x20007FFF, .offset = 0x04000000},
+    {.begin = 0x30000000, .end = 0x30007FFF, .offset = 0x04000000}};
+const struct dma350_remap_list_t dma350_address_remap = {
+    .size = sizeof(dma350_address_remap_list) /
+            sizeof(dma350_address_remap_list[0]),
+    .map = dma350_address_remap_list};
+#endif

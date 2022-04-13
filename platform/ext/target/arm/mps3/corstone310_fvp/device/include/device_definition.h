@@ -242,6 +242,35 @@ extern struct arm_mps3_io_dev_t MPS3_IO_DEV_S;
 extern struct arm_mps3_io_dev_t MPS3_IO_DEV_NS;
 #endif
 
+/* DMA350 driver structures */
+#ifdef DMA350_DMA0_S
+#include "dma350_drv.h"
+#include "dma350_ch_drv.h"
+extern struct dma350_dev_t DMA350_DMA0_DEV_S;
+
+#ifdef DMA350_DMA0_CH0_S
+extern struct dma350_ch_dev_t DMA350_DMA0_CH0_DEV_S;
+#endif
+
+#ifdef DMA350_DMA0_CH1_S
+extern struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_S;
+#endif
+
+#ifdef DMA350_DMA0_CH0_NS
+extern struct dma350_ch_dev_t DMA350_DMA0_CH0_DEV_NS;
+#endif
+
+#ifdef DMA350_DMA0_CH1_NS
+extern struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_NS;
+#endif
+
+#endif /* DMA350_DMA0_S */
+
+#if defined(DMA350_DMA0_S)
+#include "dma350_lib.h"
+extern const struct dma350_remap_list_t dma350_address_remap;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

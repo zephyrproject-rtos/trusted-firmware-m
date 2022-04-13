@@ -75,6 +75,7 @@ target_include_directories(platform_s
         device/config
         device/include
         device/source/armclang
+        libraries
         native_drivers
         partition
         services/src
@@ -94,6 +95,9 @@ target_sources(platform_s
         native_drivers/ppc_corstone310_drv.c
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         native_drivers/uart_cmsdk_drv.c
+        native_drivers/dma350_ch_drv.c
+        native_drivers/dma350_drv.c
+        libraries/dma350_lib.c
         spm_hal.c
         $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         target_cfg.c
@@ -103,6 +107,17 @@ target_sources(platform_s
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_checker_layer.c>
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_checker_device_defs.c>
+        )
+
+target_compile_definitions(platform_s
+    PRIVATE
+        # Needed for DMA-350 library
+        CMSIS_DEVICE_HEADER=<corstone310.h>
+
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
 )
 
 target_sources(tfm_sprt
@@ -144,6 +159,7 @@ target_include_directories(platform_ns
         device/config
         device/include
         device/source/armclang
+        libraries
         native_drivers
         partition
 )
@@ -168,6 +184,7 @@ if(BL2)
             device/config
             device/include
             device/source/armclang
+            libraries
             native_drivers
             partition
             services/src

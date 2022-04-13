@@ -23,12 +23,18 @@ extern "C" {
 #define DEFAULT_IRQ_PRIORITY    (1UL << (__NVIC_PRIO_BITS - 2))
 
 #define TFM_TIMER0_IRQ           (TIMER0_IRQn)
+#define TFM_DMA0_CH0_IRQ         (DMA_CHANNEL_0_IRQn)
+#define TFM_DMA0_CH1_IRQ         (DMA_CHANNEL_1_IRQn)
 
 extern struct platform_data_t tfm_peripheral_std_uart;
 extern struct platform_data_t tfm_peripheral_timer0;
+extern struct platform_data_t tfm_peripheral_dma0_ch0;
+extern struct platform_data_t tfm_peripheral_dma0_ch1;
 
 #define TFM_PERIPHERAL_STD_UART  (&tfm_peripheral_std_uart)
 #define TFM_PERIPHERAL_TIMER0    (&tfm_peripheral_timer0)
+#define TFM_PERIPHERAL_DMA0_CH0  (&tfm_peripheral_dma0_ch0)
+#define TFM_PERIPHERAL_DMA0_CH1  (&tfm_peripheral_dma0_ch1)
 
 #ifdef __cplusplus
 }
