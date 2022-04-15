@@ -560,11 +560,6 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
         tfm_core_panic();
     }
 
-    /* There was no remaining data in this input vector */
-    if (handle->msg.in_size[invec_idx] == 0) {
-        return 0;
-    }
-
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
     /*
      * It is a fatal error if the input vector has already been mapped using
@@ -576,6 +571,11 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
 
     SET_IOVEC_ACCESSED(handle, (invec_idx + INVEC_IDX_BASE));
 #endif
+
+    /* There was no remaining data in this input vector */
+    if (handle->msg.in_size[invec_idx] == 0) {
+        return 0;
+    }
 
     /*
      * Copy the client data to the service buffer. It is a fatal error
@@ -626,11 +626,6 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
         tfm_core_panic();
     }
 
-    /* There was no remaining data in this input vector */
-    if (handle->msg.in_size[invec_idx] == 0) {
-        return 0;
-    }
-
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
     /*
      * It is a fatal error if the input vector has already been mapped using
@@ -642,6 +637,11 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
 
     SET_IOVEC_ACCESSED(handle, (invec_idx + INVEC_IDX_BASE));
 #endif
+
+    /* There was no remaining data in this input vector */
+    if (handle->msg.in_size[invec_idx] == 0) {
+        return 0;
+    }
 
     /*
      * If num_bytes is greater than the remaining size of the input vector then
