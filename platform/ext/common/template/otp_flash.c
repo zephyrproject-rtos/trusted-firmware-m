@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -89,6 +89,14 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         case PLAT_OTP_ID_NV_COUNTER_BL2_2:
             return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_2), out_len, out);
 #endif /* BL2 */
+
+#ifdef BL1
+        case PLAT_OTP_ID_BL1_ROTPK_0:
+            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl1_rotpk_0), out_len, out);
+
+        case PLAT_OTP_ID_NV_COUNTER_BL1_0:
+            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl1_nv_counter_0), out_len, out);
+#endif /* BL1 */
 
         case PLAT_OTP_ID_ENTROPY_SEED:
             return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, entropy_seed), out_len, out);
@@ -185,6 +193,14 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_2), in_len, in);
 #endif /* Bl2 */
 
+#ifdef BL1
+    case PLAT_OTP_ID_BL1_ROTPK_0:
+        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl1_rotpk_0), in_len, in);
+
+    case PLAT_OTP_ID_NV_COUNTER_BL1_0:
+        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl1_nv_counter_0), in_len, in);
+#endif /* BL1 */
+
     case PLAT_OTP_ID_ENTROPY_SEED:
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, entropy_seed), in_len, in);
 
@@ -266,6 +282,16 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
             *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_2);
             break;
 #endif /* BL2 */
+
+#ifdef BL1
+        case PLAT_OTP_ID_BL1_ROTPK_0:
+            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl1_rotpk_0);
+            break;
+
+        case PLAT_OTP_ID_NV_COUNTER_BL1_0:
+            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl1_nv_counter_0);
+            break;
+#endif /* BL1 */
 
         case PLAT_OTP_ID_ENTROPY_SEED:
             *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->entropy_seed);

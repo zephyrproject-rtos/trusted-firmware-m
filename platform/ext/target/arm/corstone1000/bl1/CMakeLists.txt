@@ -116,7 +116,7 @@ set(BL2_SOURCE ${CMAKE_SOURCE_DIR}/bl2)
 target_sources(bl1_main
     PRIVATE
         ${BL2_SOURCE}/src/flash_map.c
-        ${BL2_SOURCE}/src/provisioning.c
+        ./provisioning.c
 )
 
 target_include_directories(bl1_main
