@@ -1,3 +1,8 @@
+# Note: this file is modified from upstream to directly include the  version.
+# We have decided to do it manually so that it is easier to test a PR, as
+# we won't have to have a tag for that PR.
+# Further, this message might create a merge conflict which would inform future
+# version updaters to correct the version in this file.
 #-------------------------------------------------------------------------------
 # Copyright (c) 2021-2022, Arm Limited. All rights reserved.
 #
@@ -5,12 +10,5 @@
 #
 #-------------------------------------------------------------------------------
 
-execute_process(COMMAND git describe --tags --always
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    OUTPUT_VARIABLE TFM_VERSION_FULL
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-string(REGEX REPLACE "TF-M" "" TFM_VERSION_FULL ${TFM_VERSION_FULL})
-# remove a commit number
-string(REGEX REPLACE "-[0-9]+-g" "+" TFM_VERSION_FULL ${TFM_VERSION_FULL})
-string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" TFM_VERSION ${TFM_VERSION_FULL})
+set(TFM_VERSION_FULL "v1.6.0+8cffe127")
+set(TFM_VERSION "1.6.0")
