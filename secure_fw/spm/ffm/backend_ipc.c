@@ -7,11 +7,13 @@
  */
 
 #include <stdint.h>
+#include "aapcs_local.h"
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
 #include "runtime_defs.h"
 #include "ffm/stack_watermark.h"
 #include "spm_ipc.h"
+#include "tfm_hal_memory_symbols.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
 #include "tfm_rpc.h"
@@ -42,6 +44,11 @@ struct context_ctrl_t *p_spm_thread_context;
 #endif
 
 #endif
+
+/* Indicator point to the partition meta */
+uintptr_t *partition_meta_indicator_pos;
+
+extern uint32_t scheduler_lock;
 
 static void prv_process_metadata(struct partition_t *p_pt)
 {
@@ -194,6 +201,7 @@ static uint32_t ipc_system_run(void)
     TFM_CORE_ASSERT(SPM_THREAD_CONTEXT);
 #endif
 
+    partition_meta_indicator_pos = (uintptr_t *)hal_mem_sp_meta_start;
     control = thrd_start_scheduler(&CURRENT_THREAD);
 
     p_cur_pt = TO_CONTAINER(CURRENT_THREAD->p_context_ctrl,
@@ -236,6 +244,56 @@ static void ipc_wake_up(struct partition_t *p_pt)
     thrd_wake_up(&p_pt->waitobj,
                  p_pt->signals_asserted & p_pt->signals_waiting);
     p_pt->signals_waiting = 0;
+}
+
+uint64_t ipc_schedule(void)
+{
+    AAPCS_DUAL_U32_T ctx_ctrls;
+    struct partition_t *p_part_curr, *p_part_next;
+    struct context_ctrl_t *p_curr_ctx;
+    struct thread_t *pth_next = thrd_next();
+    struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
+
+    p_curr_ctx = (struct context_ctrl_t *)(CURRENT_THREAD->p_context_ctrl);
+
+    AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)p_curr_ctx, (uint32_t)p_curr_ctx);
+
+    p_part_curr = GET_CURRENT_COMPONENT();
+    p_part_next = GET_THRD_OWNER(pth_next);
+
+    if (scheduler_lock != SCHEDULER_LOCKED && pth_next != NULL &&
+        p_part_curr != p_part_next) {
+        /* Check if there is enough room on stack to save more context */
+        if ((p_curr_ctx->sp_limit +
+                sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
+            tfm_core_panic();
+        }
+
+        CRITICAL_SECTION_ENTER(cs);
+        /*
+         * If required, let the platform update boundary based on its
+         * implementation. Change privilege, MPU or other configurations.
+         */
+        if (p_part_curr->p_boundaries != p_part_next->p_boundaries) {
+            if (tfm_hal_update_boundaries(p_part_next->p_ldinf,
+                                          p_part_next->p_boundaries)
+                                                        != TFM_HAL_SUCCESS) {
+                tfm_core_panic();
+            }
+        }
+        ARCH_FLUSH_FP_CONTEXT();
+
+        AAPCS_DUAL_U32_SET_A1(ctx_ctrls, (uint32_t)pth_next->p_context_ctrl);
+
+        CURRENT_THREAD = pth_next;
+        CRITICAL_SECTION_LEAVE(cs);
+    }
+
+    /* Update meta indicator */
+    if (partition_meta_indicator_pos && (p_part_next->p_metadata)) {
+        *partition_meta_indicator_pos = (uintptr_t)(p_part_next->p_metadata);
+    }
+    return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }
 
 const struct backend_ops_t backend_instance = {

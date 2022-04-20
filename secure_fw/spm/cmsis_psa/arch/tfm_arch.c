@@ -9,6 +9,7 @@
 #include "security_defs.h"
 #include "tfm_arch.h"
 #include "utilities.h"
+#include "config_impl.h"
 
 __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
                                            uint32_t exc_return)
@@ -26,7 +27,7 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
         "bx      r1                             \n"
     );
 }
-
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
 {
     struct context_ctrl_t *ctx_ctrl = (struct context_ctrl_t *)p_ctx_ctrl;
@@ -59,6 +60,7 @@ __naked uint32_t tfm_arch_trigger_pendsv(void)
         "bx      lr                                    \n"
     );
 }
+#endif
 
 void tfm_arch_init_context(void *p_ctx_ctrl,
                            uintptr_t pfn, void *param, uintptr_t pfnlr)

@@ -27,6 +27,9 @@
 /* Declare the global component list */
 struct partition_head_t partition_listhead;
 
+/* Current running partition. */
+struct partition_t *p_current_partition;
+
 /*
  * Send message and wake up the SP who is waiting on message queue, block the
  * current component state and activate the next component.
@@ -115,15 +118,9 @@ static void spm_thread_fn(void)
 void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
-
+    struct context_ctrl_t ns_agent_ctrl;
     p_pt->p_handles = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;
-
-    THRD_SYNC_INIT(&p_pt->waitobj);
-
-    ARCH_CTXCTRL_INIT(&p_pt->ctx_ctrl,
-                      LOAD_ALLOCED_STACK_ADDR(p_pldi),
-                      p_pldi->stack_size);
 
     watermark_stack(p_pt);
 
@@ -132,18 +129,19 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
      * IDLE partition, and NS Agent (TZ) needs to be specific cared here.
      */
     if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
-        THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
-                  TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
-
-        thrd_start(&p_pt->thrd,
-                   POSITION_TO_ENTRY(spm_thread_fn, thrd_fn_t),
-                   POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t));
+        ARCH_CTXCTRL_INIT(&ns_agent_ctrl,
+                          LOAD_ALLOCED_STACK_ADDR(p_pldi),
+                          p_pldi->stack_size);
+        tfm_arch_init_context(&ns_agent_ctrl, (uintptr_t)spm_thread_fn,
+                              NULL, p_pldi->entry);
+        tfm_arch_refresh_hardware_context(&ns_agent_ctrl);
+        SET_CURRENT_COMPONENT(p_pt);
     }
 }
 
 uint32_t sfn_system_run(void)
 {
-    return thrd_start_scheduler(&CURRENT_THREAD);
+    return EXC_RETURN_THREAD_S_PSP;
 }
 
 static psa_signal_t sfn_wait(struct partition_t *p_pt, psa_signal_t signal_mask)

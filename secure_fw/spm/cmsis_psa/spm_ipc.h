@@ -118,15 +118,16 @@ struct partition_t {
     void                               *p_boundaries;
     void                               *p_interrupts;
     void                               *p_metadata;
-    struct context_ctrl_t              ctx_ctrl;
     uint32_t                           signals_allowed;
     uint32_t                           signals_waiting;
     volatile uint32_t                  signals_asserted;
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+    struct context_ctrl_t              ctx_ctrl;
     struct sync_obj_t                  waitobj;
-    union {
-        struct thread_t                thrd;            /* IPC model */
-        uint32_t                       state;           /* SFN model */
-    };
+    struct thread_t                    thrd;            /* IPC model */
+#else
+    uint32_t                           state;           /* SFN model */
+#endif
     struct conn_handle_t               *p_handles;
     struct partition_t                 *next;
 };
@@ -357,7 +358,7 @@ int32_t tfm_spm_get_client_id(bool ns_caller);
  *  Each takes 32 bits. The context control is used by PendSV_Handler to do
  *  context switch.
  */
-uint64_t do_schedule(void);
+uint64_t ipc_schedule(void);
 
 /**
  * \brief                      SPM initialization implementation

@@ -25,7 +25,7 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 /* IAR Specific */
 #if defined(__ICCARM__)
 
-#pragma required = do_schedule
+#pragma required = ipc_schedule
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
@@ -85,6 +85,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
 
 #endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1 */
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
@@ -96,7 +97,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   tst     r0, r1                              \n" /* NS interrupted */
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
         "   push    {r0, lr}                            \n" /* Save R0, LR */
-        "   bl      do_schedule                         \n"
+        "   bl      ipc_schedule                         \n"
         "   pop     {r2, r3}                            \n"
         "   mov     lr, r3                              \n"
         "   cmp     r0, r1                              \n" /* curr, next ctx */
@@ -132,6 +133,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   bx      lr                                  \n"
     );
 }
+#endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {

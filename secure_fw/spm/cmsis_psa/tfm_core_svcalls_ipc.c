@@ -32,6 +32,7 @@ extern int32_t platform_svc_handlers(uint8_t svc_num,
                                      uint32_t *ctx, uint32_t lr);
 #endif
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
@@ -129,6 +130,7 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
     spm_handle_programmer_errors(status);
     return status;
 }
+#endif
 
 uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
                               uint32_t *psp)
@@ -187,17 +189,25 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         break;
 #endif
     default:
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
         if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
                                      - (uint32_t)msp) > TFM_STACK_SEALED_SIZE) {
             /* The Main Stack has contents, not calling from Partition thread */
             tfm_core_panic();
         }
         svc_args[0] = SVC_Handler_IPC(svc_number, svc_args, exc_return);
-
         if (THRD_EXPECTING_SCHEDULE()) {
             tfm_arch_trigger_pendsv();
         }
-
+#else
+#ifdef PLATFORM_SVC_HANDLERS
+        svc_args[0] = (platform_svc_handlers(svc_number, svc_args, exc_return));
+#else
+        SPMLOG_ERRMSG("Unknown SVC number requested!\r\n");
+        svc_args[0] = PSA_ERROR_GENERIC_ERROR;
+#endif
+        spm_handle_programmer_errors(svc_args[0]);
+#endif
         break;
     }
 

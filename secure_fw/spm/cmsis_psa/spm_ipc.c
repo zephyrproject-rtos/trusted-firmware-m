@@ -9,7 +9,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include "aapcs_local.h"
 #include "bitops.h"
 #include "config_impl.h"
 #include "critical_section.h"
@@ -42,9 +41,6 @@
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
 #include "tfm_nspm.h"
-#if defined(CONFIG_TFM_PARTITION_META)
-#include "tfm_hal_memory_symbols.h"
-#endif
 
 #if !(defined CONFIG_TFM_CONN_HANDLE_MAX_NUM) || (CONFIG_TFM_CONN_HANDLE_MAX_NUM == 0)
 #error "CONFIG_TFM_CONN_HANDLE_MAX_NUM must be defined and not zero."
@@ -54,16 +50,9 @@
 static struct service_head_t services_listhead;
 struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
-#if defined(CONFIG_TFM_PARTITION_META)
-/* Indicator point to the partition meta */
-static uintptr_t *partition_meta_indicator_pos = NULL;
-#endif
-
 /* Pools */
 TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct conn_handle_t),
                  CONFIG_TFM_CONN_HANDLE_MAX_NUM);
-
-extern uint32_t scheduler_lock;
 
 /*********************** Connection handle conversion APIs *******************/
 
@@ -563,64 +552,7 @@ uint32_t tfm_spm_init(void)
         backend_instance.comp_init_assuredly(partition, service_setting);
     }
 
-#if defined(CONFIG_TFM_PARTITION_META)
-    partition_meta_indicator_pos = (uintptr_t *)hal_mem_sp_meta_start;
-#endif
-
     return backend_instance.system_run();
-}
-
-uint64_t do_schedule(void)
-{
-    AAPCS_DUAL_U32_T ctx_ctrls;
-    struct partition_t *p_part_curr, *p_part_next;
-    struct context_ctrl_t *p_curr_ctx;
-    struct thread_t *pth_next = thrd_next();
-    struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
-
-    p_curr_ctx = (struct context_ctrl_t *)(CURRENT_THREAD->p_context_ctrl);
-
-    AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)p_curr_ctx, (uint32_t)p_curr_ctx);
-
-    p_part_curr = GET_CURRENT_COMPONENT();
-    p_part_next = GET_THRD_OWNER(pth_next);
-
-    if (scheduler_lock != SCHEDULER_LOCKED && pth_next != NULL &&
-        p_part_curr != p_part_next) {
-        /* Check if there is enough room on stack to save more context */
-        if ((p_curr_ctx->sp_limit +
-                sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
-            tfm_core_panic();
-        }
-
-        CRITICAL_SECTION_ENTER(cs);
-        /*
-         * If required, let the platform update boundary based on its
-         * implementation. Change privilege, MPU or other configurations.
-         */
-        if (p_part_curr->p_boundaries != p_part_next->p_boundaries) {
-            if (tfm_hal_update_boundaries(p_part_next->p_ldinf,
-                                          p_part_next->p_boundaries)
-                                                        != TFM_HAL_SUCCESS) {
-                tfm_core_panic();
-            }
-        }
-        ARCH_FLUSH_FP_CONTEXT();
-
-        AAPCS_DUAL_U32_SET_A1(ctx_ctrls, (uint32_t)pth_next->p_context_ctrl);
-
-        CURRENT_THREAD = pth_next;
-        CRITICAL_SECTION_LEAVE(cs);
-    }
-
-#if defined(CONFIG_TFM_PARTITION_META)
-    /* Update meta indicator */
-    if (partition_meta_indicator_pos && (p_part_next->p_metadata)) {
-        *partition_meta_indicator_pos = (uintptr_t)(p_part_next->p_metadata);
-    }
-#endif
-
-    return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }
 
 void update_caller_outvec_len(struct conn_handle_t *handle)

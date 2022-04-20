@@ -56,7 +56,7 @@ target_sources(tfm_spm
         $<$<BOOL:${CONFIG_TFM_STACK_WATERMARKS}>:ffm/stack_watermark.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_core_svcalls_ipc.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_pools.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/thread.c>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:cmsis_psa/thread.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/main.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/arch.c>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/spm_func.c>
