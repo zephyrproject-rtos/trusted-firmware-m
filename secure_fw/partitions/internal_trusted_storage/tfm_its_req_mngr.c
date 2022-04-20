@@ -16,17 +16,20 @@
 #include "its_utils.h"
 
 #ifdef TFM_PSA_API
+#include "psa/framework_feature.h"
 #include "psa/service.h"
 #include "psa_manifest/tfm_internal_trusted_storage.h"
 #include "tfm_its_defs.h"
+#if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
 #include "flash/its_flash.h"
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC != 1 */
 #else
 #include <stdbool.h>
 #include "tfm_secure_api.h"
 #include "tfm_api.h"
 #endif
 
-#if defined(TFM_PSA_API)
+#if defined(TFM_PSA_API) && PSA_FRAMEWORK_HAS_MM_IOVEC != 1
 #ifndef ITS_BUF_SIZE
 /* By default, set the ITS buffer size to the max asset size so that all
  * requests can be handled in one iteration.
@@ -243,6 +246,17 @@ static psa_status_t tfm_its_set_req(const psa_msg_t *msg)
     size_remaining = msg->in_size[1];
     offset = 0;
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+    if (size_remaining != 0) {
+        data_buf = (uint8_t *)psa_map_invec(msg->handle, 1);
+    } else {
+        /* zero-size asset is supported */
+        data_buf = NULL;
+    }
+
+    status = tfm_its_set(&asset_info, data_buf, size_remaining,
+                         size_remaining, offset);
+#else
     data_buf = asset_data;
     do {
         num = psa_read(msg->handle, 1, asset_data,
@@ -257,8 +271,9 @@ static psa_status_t tfm_its_set_req(const psa_msg_t *msg)
         size_remaining -= num;
         offset += num;
     } while (size_remaining);
+#endif
 
-    return PSA_SUCCESS;
+    return status;
 }
 
 static psa_status_t tfm_its_get_req(const psa_msg_t *msg)
@@ -295,6 +310,21 @@ static psa_status_t tfm_its_get_req(const psa_msg_t *msg)
     out_size = msg->out_size[0];
     first_get = true;
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+    size_to_read = msg->out_size[0];
+    if (size_to_read != 0) {
+        data_buf = (uint8_t *)psa_map_outvec(msg->handle, 0);
+    } else {
+        data_buf = NULL;
+    }
+
+    status = tfm_its_get(&asset_info, data_buf, size_to_read,
+                         data_offset, &size_read, first_get);
+    if (status == PSA_SUCCESS && size_to_read != 0) {
+        /* Unmap to update caller’s outvec with the number of bytes written  */
+        psa_unmap_outvec(msg->handle, 0, size_read);
+    }
+#else
     /* Fill in the outvec unless no data left */
     data_buf = asset_data;
     do {
@@ -315,8 +345,9 @@ static psa_status_t tfm_its_get_req(const psa_msg_t *msg)
         out_size -= size_read;
         data_offset += size_read;
     } while (out_size > 0);
+#endif
 
-    return PSA_SUCCESS;
+    return status;
 }
 
 static psa_status_t tfm_its_get_info_req(const psa_msg_t *msg)
