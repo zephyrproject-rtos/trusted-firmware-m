@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -42,11 +42,11 @@ struct partition_tfm_sp_ns_agent_tz_load_info_t {
 
 /* Partition load, deps, service load data. Put to a dedicated section. */
 #if defined(__ICCARM__)
-#pragma location = ".part_load"
+#pragma location = ".part_load_priority_lowest"
 __root
 #endif
 const struct partition_tfm_sp_ns_agent_tz_load_info_t
-    tfm_sp_ns_agent_tz_load __attribute__((used, section(".part_load"))) = {
+    tfm_sp_ns_agent_tz_load __attribute__((used, section(".part_load_priority_lowest"))) = {
     .load_info = {
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
         .pid                        = TFM_SP_NON_SECURE_ID,
@@ -77,9 +77,9 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
 #endif
 };
 #if defined(__ICCARM__)
-#pragma location = ".bss.part_runtime"
+#pragma location = ".bss.part_runtime_priority_lowest}"
 __root
 #endif
 /* Placeholder for partition runtime space. Do not reference it. */
 static struct partition_t tfm_sp_ns_agent_tz_partition_runtime_item
-    __attribute__((used, section(".bss.part_runtime")));
+    __attribute__((used, section(".bss.part_runtime_priority_lowest")));

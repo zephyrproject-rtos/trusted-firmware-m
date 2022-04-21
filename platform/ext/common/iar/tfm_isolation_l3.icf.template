@@ -53,8 +53,15 @@ define block ER_TFM_CODE with fixed order, alignment = 8 {
     ro object *libtfm_spm*
 };
     /**** Section for holding partition RO load data */
+    /*
+     * Sort the partition info by priority to guarantee the initing order.
+     * The first loaded partition will be inited at last in SFN model.
+     */
 define block TFM_SP_LOAD_LIST with alignment = 4 {
-    ro section .part_load object load_info_*.o,
+    ro section .part_load_priority_lowest object load_info_*.o,
+    ro section .part_load_priority_low object load_info_*.o,
+    ro section .part_load_priority_normal object load_info_*.o,
+    ro section .part_load_priority_high object load_info_*.o,
 };
 
 #if defined(S_CODE_SRAM_ALIAS_BASE)
@@ -118,12 +125,20 @@ keep {block HEAP, block ARM_LIB_HEAP};
 
 define block ER_TFM_DATA          with alignment = 8 {readwrite};
 
+/* The runtime partition placed order is same as load partition */
 define block ER_PART_RT_POOL      with alignment = 4 {
-    zi section .bss.part_runtime
+    zi section .bss.part_runtime_priority_lowest,
+    zi section .bss.part_runtime_priority_low,
+    zi section .bss.part_runtime_priority_normal,
+    zi section .bss.part_runtime_priority_high,
 };
 
+/* The runtime service placed order is same as load partition */
 define block ER_SERV_RT_POOL      with alignment = 4 {
-    zi section .bss.serv_runtime
+    zi section .bss.serv_runtime_priority_lowest,
+    zi section .bss.serv_runtime_priority_low,
+    zi section .bss.serv_runtime_priority_normal,
+    zi section .bss.serv_runtime_priority_high,
 };
 
 keep {block ER_PART_RT_POOL, block ER_SERV_RT_POOL};

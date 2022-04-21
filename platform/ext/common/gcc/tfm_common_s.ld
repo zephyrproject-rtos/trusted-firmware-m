@@ -133,9 +133,16 @@ SECTIONS
     } > FLASH
 
     /**** Section for holding partition RO load data */
+    /*
+     * Sort the partition info by priority to guarantee the initing order.
+     * The first loaded partition will be inited at last in SFN model.
+     */
     .TFM_SP_LOAD_LIST : ALIGN(4)
     {
-       KEEP(*(.part_load))
+       KEEP(*(.part_load_priority_lowest))
+       KEEP(*(.part_load_priority_low))
+       KEEP(*(.part_load_priority_normal))
+       KEEP(*(.part_load_priority_high))
     } > FLASH
     Image$$TFM_SP_LOAD_LIST$$RO$$Base = ADDR(.TFM_SP_LOAD_LIST);
     Image$$TFM_SP_LOAD_LIST$$RO$$Limit = ADDR(.TFM_SP_LOAD_LIST) + SIZEOF(.TFM_SP_LOAD_LIST);
@@ -518,12 +525,22 @@ SECTIONS
     .TFM_BSS : ALIGN(4)
     {
         __bss_start__ = .;
+
+        /* The runtime partition placed order is same as load partition */
         __partition_runtime_start__ = .;
-        KEEP(*(.bss.part_runtime))
+        KEEP(*(.bss.part_runtime_priority_lowest))
+        KEEP(*(.bss.part_runtime_priority_low))
+        KEEP(*(.bss.part_runtime_priority_normal))
+        KEEP(*(.bss.part_runtime_priority_high))
         __partition_runtime_end__ = .;
         . = ALIGN(4);
+
+        /* The runtime service placed order is same as load partition */
         __service_runtime_start__ = .;
-        KEEP(*(.bss.serv_runtime))
+        KEEP(*(.bss.serv_runtime_priority_lowest))
+        KEEP(*(.bss.serv_runtime_priority_low))
+        KEEP(*(.bss.serv_runtime_priority_normal))
+        KEEP(*(.bss.serv_runtime_priority_high))
         __service_runtime_end__ = .;
         *(.bss*)
         *(COMMON)
