@@ -72,3 +72,23 @@ enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
     return TFM_HAL_SUCCESS;
 }
 #endif /* TFM_MULTI_CORE_TOPOLOGY */
+
+static struct irq_t dma0_ch0_irq = {0};
+
+void DMA_Combined_S_Handler(void)
+{
+    spm_handle_interrupt(dma0_ch0_irq.p_pt, dma0_ch0_irq.p_ildi);
+}
+
+enum tfm_hal_status_t tfm_dma0_combined_s_irq_init(void *p_pt,
+                                          struct irq_load_info_t *p_ildi)
+{
+    dma0_ch0_irq.p_ildi = p_ildi;
+    dma0_ch0_irq.p_pt = p_pt;
+
+    NVIC_SetPriority(TFM_DMA0_COMBINED_S_IRQ, DEFAULT_IRQ_PRIORITY);
+    NVIC_ClearTargetState(TFM_DMA0_COMBINED_S_IRQ);
+    NVIC_DisableIRQ(TFM_DMA0_COMBINED_S_IRQ);
+
+    return TFM_HAL_SUCCESS;
+}

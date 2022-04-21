@@ -50,9 +50,9 @@ typedef enum _IRQn_Type {
     NPU3_IRQn                          = 19,   /* NPU3 Interrupt */
     KMU_S_IRQn                         = 20,   /* KMU (Secure) Interrupt */
     /* Reserved                        = 21:23,   Reserved */
-    DMA_Combined_S_IRQn                = 24,   /* DMA Combined (Secure) Interrupt */
-    DMA_Combined_NS_IRQn               = 25,   /* DMA Combined (Non-Secure) Interrupt */
-    DMA_Security_Violation_IRQn        = 26,   /* DMA Security Violation Interrupt */
+    DMA_Combined_S_IRQn                = 24,   /* DMA350 Combined (Secure) Interrupt */
+    DMA_Combined_NS_IRQn               = 25,   /* DMA350 Combined (Non-Secure) Interrupt */
+    DMA_Security_Violation_IRQn        = 26,   /* DMA350 Security Violation Interrupt */
     TIMER3_AON_IRQn                    = 27,   /* TIMER 3 AON Interrupt */
     CPU0_CTI_0_IRQn                    = 28,   /* CPU0 CTI IRQ 0 Interrupt */
     CPU0_CTI_1_IRQn                    = 29,   /* CPU0 CTI IRQ 1 Interrupt */

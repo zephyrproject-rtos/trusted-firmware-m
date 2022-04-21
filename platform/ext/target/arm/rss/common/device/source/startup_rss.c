@@ -162,9 +162,9 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   0,                                 /*  21: Reserved */
   0,                                 /*  22: Reserved */
   0,                                 /*  23: Reserved */
-  DMA_Combined_S_Handler,            /*  24: DMA Combined (Secure) Handler */
-  DMA_Combined_NS_Handler,           /*  25: DMA Combined (Non-Secure) Handler */
-  DMA_Security_Violation_Handler,    /*  26: DMA Security Violation Handler */
+  DMA_Combined_S_Handler,            /*  24: DMA350 Combined (Secure) Handler */
+  DMA_Combined_NS_Handler,           /*  25: DMA350 Combined (Non-Secure) Handler */
+  DMA_Security_Violation_Handler,    /*  26: DMA350 Security Violation Handler */
   TIMER3_AON_Handler,                /*  27: TIMER 3 AON Handler */
   CPU0_CTI_0_Handler,                /*  28: CPU0 CTI IRQ 0 Handler */
   CPU0_CTI_1_Handler,                /*  29: CPU0 CTI IRQ 1 Handler */

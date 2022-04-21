@@ -22,6 +22,8 @@
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
+#include "dma350_lib.h"
+#include "device_definition.h"
 
 /* Throw out bus error when an access causes security violation */
 #define CMSDK_SECRESPCFG_BUS_ERR_MASK   (1UL)
@@ -49,6 +51,37 @@ const struct memory_region_limits memory_regions = {
     .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
     .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
 #endif
+};
+
+/* DMA350 checker layer has to know the TCM remaps */
+/* Subordinate TCM Interface provides system access only to TCM internal to each
+ * CPU. The memory map presented on the interface for TCM access are defined by
+ * TRM. Below address remaps by adding offset provides access to respective
+ * CPU instruction and data TCM.
+ */
+
+/* TCM memories addresses from perspective of cpu0
+ * 0x0000_0000 .. 0x00ff_ffff    NS ITCM
+ * 0x1000_0000 .. 0x10ff_ffff    S ITCM
+ * 0x2000_0000 .. 0x20ff_ffff    NS DTCM
+ * 0x3000_0000 .. 0x30ff_ffff    S DTCM
+*/
+
+const struct dma350_remap_range_t dma350_address_remap_list[] = {
+    /* Non-secure CPU ITCM */
+    {.begin = 0x00000000, .end = 0x00FFFFFF, .offset = 0x0A000000},
+    /* Secure CPU ITCM */
+    {.begin = 0x10000000, .end = 0x10FFFFFF, .offset = 0x0A000000},
+    /* Non-secure CPU DTCM */
+    {.begin = 0x20000000, .end = 0x20FFFFFF, .offset = 0x04000000},
+    /* Secure CPU DTCM */
+    {.begin = 0x30000000, .end = 0x30FFFFFF, .offset = 0x04000000}
+};
+
+const struct dma350_remap_list_t dma350_address_remap = {
+    .size = sizeof(dma350_address_remap_list)/
+            sizeof(dma350_address_remap_list[0]),
+    .map = dma350_address_remap_list
 };
 
 /* Configures the RAM region to NS callable in sacfg block's nsccfg register */
@@ -285,6 +318,10 @@ void sau_and_idau_cfg(void)
 
     /* Allows SAU to define the RAM region as a NSC */
     sacfg->nsccfg |= RAMNSC;
+
+    /* Configure MSC to enable secure accesses for the DMA */
+    sacfg->nsmscexp = 0x0;
+
 }
 
 /*------------------- Memory configuration functions -------------------------*/
@@ -444,4 +481,55 @@ void ppc_clear_irq(void)
     for (i = 0; i < PPC_BANK_COUNT; i++) {
         ppc_bank_drivers[i]->ClearInterrupt();
     }
+}
+
+static struct dma350_ch_dev_t *const dma350_channel_list[DMA350_DMA0_CHANNEL_COUNT] = {
+    &DMA350_DMA0_CH0_DEV_S,
+    &DMA350_DMA0_CH1_DEV_S,
+    &DMA350_DMA0_CH2_DEV_S,
+    &DMA350_DMA0_CH3_DEV_S
+};
+
+/*------------------- DMA configuration functions -------------------------*/
+enum tfm_plat_err_t dma_init_cfg(void)
+{
+    enum dma350_error_t dma_err;
+    enum dma350_ch_error_t ch_err;
+    struct dma350_ch_dev_t *dma_ch_ptr;
+    int32_t i;
+
+    dma_err = dma350_init(&DMA350_DMA0_DEV_S);
+    if(dma_err != DMA350_ERR_NONE) {
+        ERROR_MSG("DMA350_DMA0_DEV_S init failed!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* Initialise and set all available DMA channels to privilege and secure */
+    for (i = 0; i < DMA350_DMA0_CHANNEL_COUNT; i++) {
+        dma_ch_ptr = dma350_channel_list[i];
+
+        ch_err = dma350_ch_init(dma_ch_ptr);
+        if(ch_err != DMA350_CH_ERR_NONE) {
+            ERROR_MSG("DMA350 channel init failed");
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
+
+        dma_err = dma350_set_ch_privileged(&DMA350_DMA0_DEV_S, i);
+        if(dma_err != DMA350_ERR_NONE) {
+            ERROR_MSG("Failed to set DMA350 channel privileged!");
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
+
+        dma_err = dma350_set_ch_secure(&DMA350_DMA0_DEV_S, i);
+        if(dma_err != DMA350_ERR_NONE) {
+            ERROR_MSG("Failed to set DMA350 channel secure!");
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
+    }
+
+    /* FIXME: Use combined secure interrupt because there are no channel IRQs */
+    DMA350_DMA0_DEV_S.cfg->dma_sec_ctrl->SEC_CTRL |= 0x1UL; /* INTREN_ANYCHINTR */
+    DMA350_DMA0_DEV_S.cfg->dma_nsec_ctrl->NSEC_CTRL |= 0x1UL; /* INTREN_ANYCHINTR */
+
+    return TFM_PLAT_ERR_SUCCESS;
 }

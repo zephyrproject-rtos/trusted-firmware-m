@@ -25,4 +25,3 @@ enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
     /* Not needed for this platform */
     return TFM_PLATFORM_ERR_NOT_SUPPORTED;
 }
-

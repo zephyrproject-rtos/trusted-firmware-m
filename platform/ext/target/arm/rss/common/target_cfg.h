@@ -153,4 +153,11 @@ void ppc_clear_irq(void);
  */
 void sau_and_idau_cfg(void);
 
+/**
+ * \brief Initialize the DMA devices and channels.
+ *
+ * \return Returns values as specified by the \ref tfm_plat_err_t
+ */
+enum tfm_plat_err_t dma_init_cfg(void);
+
 #endif /* __TARGET_CFG_H__ */

@@ -21,3 +21,10 @@ struct platform_data_t tfm_peripheral_timer0 = {
         PPC_SP_PERIPH0,
         SYSTEM_TIMER0_PERIPH_PPC0_POS_MASK
 };
+
+struct platform_data_t tfm_peripheral_dma0_ch0 = {
+        DMA_350_BASE_S + 0x1000UL, /* The DMA0 CH0 starts at 0x1000 offset */
+        DMA_350_BASE_S + 0x1FFFUL, /* and its size is 0x1000.              */
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};

@@ -46,6 +46,11 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
+    plat_err = dma_init_cfg();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_HAL_ERROR_GENERIC;
+    }
+
     return TFM_HAL_SUCCESS;
 }
 

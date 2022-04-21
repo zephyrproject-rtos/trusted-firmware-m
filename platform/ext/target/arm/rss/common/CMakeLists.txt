@@ -97,6 +97,7 @@ target_include_directories(platform_s
         device/include
         device/source/armclang
         native_drivers
+        libraries
         partition
         services/src
         ${PLATFORM_DIR}/..
@@ -110,7 +111,10 @@ target_sources(platform_s
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/system_core_init.c
+        libraries/dma350_lib.c
         native_drivers/atu_rss_drv.c
+        native_drivers/dma350_drv.c
+        native_drivers/dma350_ch_drv.c
         native_drivers/kmu_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/mhu_wrapper_v2_x.c
@@ -129,6 +133,9 @@ target_sources(platform_s
         attest_hal.c
         tfm_hal_platform_reset.c
         provisioning.c
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_checker_layer.c>
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_checker_device_defs.c>
 )
 
 target_link_libraries(platform_s
@@ -146,6 +153,10 @@ target_sources(tfm_sprt
 target_compile_definitions(platform_s
     INTERFACE
         ATTEST_KEY_BITS=${ATTEST_KEY_BITS}
+    PRIVATE
+        # Needed for DMA-350 library
+        CMSIS_device_header="rss.h"
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
 )
 
 target_compile_options(platform_s

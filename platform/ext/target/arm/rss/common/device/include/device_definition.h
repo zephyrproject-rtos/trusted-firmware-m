@@ -205,6 +205,28 @@ extern struct kmu_dev_t KMU_DEV_S;
 extern struct lcm_dev_t LCM_DEV_S;
 #endif
 
+#ifdef DMA350_DMA0_S
+#include "dma350_drv.h"
+#include "dma350_ch_drv.h"
+extern struct dma350_dev_t DMA350_DMA0_DEV_S;
+#endif
+
+#ifdef DMA350_DMA0_CH0_S
+extern struct dma350_ch_dev_t DMA350_DMA0_CH0_DEV_S;
+#endif
+
+#ifdef DMA350_DMA0_CH1_S
+extern struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_S;
+#endif
+
+#ifdef DMA350_DMA0_CH2_S
+extern struct dma350_ch_dev_t DMA350_DMA0_CH2_DEV_S;
+#endif
+
+#ifdef DMA350_DMA0_CH3_S
+extern struct dma350_ch_dev_t DMA350_DMA0_CH3_DEV_S;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

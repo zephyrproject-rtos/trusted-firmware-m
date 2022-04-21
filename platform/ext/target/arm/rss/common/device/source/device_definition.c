@@ -505,3 +505,51 @@ struct lcm_dev_t LCM_DEV_S = {
     .cfg = &(LCM_DEV_CFG_S)
 };
 #endif
+
+#ifdef DMA350_DMA0_S
+static const struct dma350_dev_cfg_t DMA350_DMA0_DEV_CFG_S = {
+    .dma_sec_cfg =   (DMASECCFG_TypeDef*)   (DMA_350_BASE_S + 0x0UL),
+    .dma_sec_ctrl =  (DMASECCTRL_TypeDef*)  (DMA_350_BASE_S + 0x100UL),
+    .dma_nsec_ctrl = (DMANSECCTRL_TypeDef*) (DMA_350_BASE_S + 0x200UL),
+    .dma_info =      (DMAINFO_TypeDef*)     (DMA_350_BASE_S + 0xF00UL)
+};
+static struct dma350_dev_data_t DMA350_DMA0_DEV_DATA_S = {
+    .state = 0
+};
+struct dma350_dev_t DMA350_DMA0_DEV_S = {
+    &(DMA350_DMA0_DEV_CFG_S),
+    &(DMA350_DMA0_DEV_DATA_S)
+};
+#endif
+
+#ifdef DMA350_DMA0_CH0_S
+struct dma350_ch_dev_t DMA350_DMA0_CH0_DEV_S = {
+    .cfg = {.ch_base = (DMACH_TypeDef*) (DMA_350_BASE_S + 0x1000UL),
+            .channel = 0},
+    .data = {0}
+};
+#endif
+
+#ifdef DMA350_DMA0_CH1_S
+struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_S = {
+    .cfg = {.ch_base = (DMACH_TypeDef*) (DMA_350_BASE_S + 0x1100UL),
+            .channel = 1},
+    .data = {0}
+};
+#endif
+
+#ifdef DMA350_DMA0_CH2_S
+struct dma350_ch_dev_t DMA350_DMA0_CH2_DEV_S = {
+    .cfg = {.ch_base = (DMACH_TypeDef*) (DMA_350_BASE_S + 0x1200UL),
+            .channel = 2},
+    .data = {0}
+};
+#endif
+
+#ifdef DMA350_DMA0_CH3_S
+struct dma350_ch_dev_t DMA350_DMA0_CH3_DEV_S = {
+    .cfg = {.ch_base = (DMACH_TypeDef*) (DMA_350_BASE_S + 0x1300UL),
+            .channel = 3},
+    .data = {0}
+};
+#endif

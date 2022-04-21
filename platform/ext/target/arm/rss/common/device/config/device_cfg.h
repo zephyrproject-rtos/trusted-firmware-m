@@ -79,4 +79,12 @@
 /* Arm LCM */
 #define LCM_S
 
+/* DMA350 defines */
+#define DMA350_DMA0_S
+#define DMA350_DMA0_CHANNEL_COUNT 4
+#define DMA350_DMA0_CH0_S
+#define DMA350_DMA0_CH1_S
+#define DMA350_DMA0_CH2_S
+#define DMA350_DMA0_CH3_S
+
 #endif  /* __DEVICE_CFG_H__ */

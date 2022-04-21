@@ -32,7 +32,7 @@
 #define CPU0_PWRCTRL_BASE_NS             0x40012000 /* CPU 0 Power Control Block Non-Secure base address */
 #define CPU0_IDENTITY_BASE_NS            0x4001F000 /* CPU 0 Identity Block Non-Secure base address */
 /* Non-Secure Peripheral region */
-#define DMA_0_BASE_NS                    0x40002000 /* DMA 0 Non-Secure base address */
+#define DMA_350_BASE_NS                  0x40002000 /* DMA350 Non-Secure base address */
 #define RSS_NSACFG_BASE_NS               0x40080000 /* RSS Non-Secure Access Configuration Register Block Non-Secure base address */
 #define GPIO0_CMSDK_BASE_NS              0x40100000 /* GPIO 0 Non-Secure base address */
 #define GPIO1_CMSDK_BASE_NS              0x40101000 /* GPIO 1 Non-Secure base address */
@@ -79,7 +79,7 @@
 #define CPU0_PWRCTRL_BASE_S              0x50012000 /* CPU 0 Power Control Block Secure base address */
 #define CPU0_IDENTITY_BASE_S             0x5001F000 /* CPU 0 Identity Block Secure base address */
 /* Secure Peripheral region */
-#define DMA_0_BASE_S                     0x50002000 /* DMA 0 Secure base address */
+#define DMA_350_BASE_S                   0x50002000 /* DMA350 Secure base address */
 #define RSS_SACFG_BASE_S                 0x50080000 /* RSS Secure Access Configuration Register Secure base address */
 #define MPC_VM0_BASE_S                   0x50083000 /* VM0 Memory Protection Controller Secure base address */
 #define MPC_VM1_BASE_S                   0x50084000 /* VM1 Memory Protection Controller Secure base address */
