@@ -94,7 +94,7 @@
 
 /* Protected Storage (PS) Service definitions */
 #define FLASH_PS_AREA_OFFSET            (0x10000)
-#define FLASH_PS_AREA_SIZE              (0x7000)
+#define FLASH_PS_AREA_SIZE              (0x8000)
 
 /* Internal Trusted Storage (ITS) Service definitions */
 #define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET + \

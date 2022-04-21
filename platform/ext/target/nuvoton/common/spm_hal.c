@@ -81,6 +81,8 @@ uint32_t tfm_spm_hal_get_ns_MSP(void)
 
 uint32_t tfm_spm_hal_get_ns_entry_point(void)
 {
+    printf("ns entry point = 0x%08x\r\n", memory_regions.non_secure_code_start + 4);
+
     return *((uint32_t *)(memory_regions.non_secure_code_start+ 4));
 }
 

@@ -14,6 +14,7 @@ Build TF-M with M2354 by following commands:
             -G"Unix Makefiles" \
             -DTFM_PLATFORM=nuvoton/m2354 \
             -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake \
+            -DMCUBOOT_FIH_PROFILE=MEDIUM \
             -DTEST_S=ON \
             -DTEST_NS=ON \
             -DTFM_ISOLATION_LEVEL=2 \
@@ -45,4 +46,4 @@ The commands are as follows:
 
 --------------
 
-*Copyright (c) 2021, Nuvoton Technology Corp. All rights reserved.*
+*Copyright (c) 2021-2022, Nuvoton Technology Corp. All rights reserved.*

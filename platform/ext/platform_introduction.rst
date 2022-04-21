@@ -49,6 +49,8 @@ Platforms introduction
           <https://developer.arm.com/products/system-design/development-boards/cortex-m-prototyping-systems/mps2>`_
         - `M2351.
           <https://www.nuvoton.com/products/iot-solution/iot-platform/numaker-pfm-m2351/>`_
+        - `M2354.
+          <https://www.nuvoton.com/board/numaker-m2354/>`_
 
     - Dual Core Cortex-M system:
 
