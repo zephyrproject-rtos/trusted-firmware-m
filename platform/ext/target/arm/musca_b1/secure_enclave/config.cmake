@@ -26,3 +26,6 @@ set(CRYPTO_HW_ACCELERATOR               ON           CACHE BOOL      "Whether to
 set(CRYPTO_NV_SEED                      OFF          CACHE BOOL      "Use stored NV seed to provide entropy")
 
 set(PSA_API_TEST_TARGET                 "musca_b1"   CACHE STRING    "Target to use when building the PSA API tests")
+
+# Secure Enclave topology does not require more than 3 connenction handles
+set(CONFIG_TFM_CONN_HANDLE_MAX_NUM      3           CACHE STRING    "The maximal number of secure services that are connected or requested at the same time" FORCE)
