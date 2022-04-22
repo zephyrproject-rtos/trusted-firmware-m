@@ -98,8 +98,10 @@ Prototype
 
 Description
 ^^^^^^^^^^^
-Bootloader related initialization for the firmware update, such as reading
-some necessary shared data from the memory if needed.
+Bootloader related initialization for the firmware update. It reads
+some necessary shared data from the memory if needed. It initializes
+the flash drivers defined in FLASH_DRIVER_LIST. Platform can define
+FLASH_DRIVER_LIST in flash_layout.h to overload the default driver list.
 
 Parameters
 ^^^^^^^^^^

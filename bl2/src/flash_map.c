@@ -30,6 +30,9 @@
 extern const struct flash_area flash_map[];
 extern const int flash_map_entry_num;
 
+extern const ARM_DRIVER_FLASH  *flash_driver[];
+extern const int flash_driver_entry_num;
+
 /* Valid entries for data item width */
 static const uint32_t data_width_byte[] = {
     sizeof(uint8_t),
@@ -60,7 +63,17 @@ static bool is_range_valid(const struct flash_area *area,
 
     return true;
 }
+int flash_area_driver_init(void)
+{
+    int i;
 
+    for (i = 0; i < flash_driver_entry_num; i++) {
+        if (flash_driver[i]->Initialize(NULL) != ARM_DRIVER_OK)
+            return -1;
+    }
+
+    return 0;
+}
 /*
  * `open` a flash area.  The `area` in this case is not the individual
  * sectors, but describes the particular flash area in question.

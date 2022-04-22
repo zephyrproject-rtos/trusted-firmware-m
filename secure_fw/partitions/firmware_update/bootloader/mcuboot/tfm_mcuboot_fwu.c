@@ -179,7 +179,8 @@ psa_status_t fwu_bootloader_init(void)
     if (fwu_bootloader_get_shared_data() != TFM_SUCCESS) {
         return PSA_ERROR_GENERIC_ERROR;
     }
-
+    /* add Init of specific flash driver */
+    flash_area_driver_init();
     return PSA_SUCCESS;
 }
 
