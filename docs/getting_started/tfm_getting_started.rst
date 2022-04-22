@@ -1,6 +1,44 @@
-####################################
-Select and set up build environments
-####################################
+##################
+First Things First
+##################
+
+************
+Prerequisite
+************
+Trusted Firmware M provides a reference implementation of platform security
+architecture  reference implementation aligning with PSA Certified guidelines.
+It is assumed that the reader is familiar with specifications can be found at
+`Platform Security Architecture Resources <https://developer.arm.com/architectures/security-architectures/platform-security-architecture>`__.
+
+The current TF-M implementation specifically targets TrustZone for ARMv8-M so a
+good understanding of the v8-M architecture is also necessary. A good place to
+get started with ARMv8-M is
+`developer.arm.com <https://developer.arm.com/architectures/cpu-architecture/m-profile>`__.
+
+**************************
+Build and run instructions
+**************************
+Trusted Firmware M source code is available on
+`git.trustedfirmware.org <https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/>`__.
+
+To build & run TF-M:
+
+    - Follow the this guide to set up and check your environment.
+    - Follow the
+      :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`
+      to compile and build the TF-M source.
+    - Follow the :doc:`Run TF-M examples on Arm platforms </technical_references/instructions/run_tfm_examples_on_arm_platforms>`
+      for information on running the example.
+
+To port TF-M to a another system or OS, follow the
+:doc:`OS Integration Guide </integration_guide/index>`
+
+:doc:`Contributing Guidelines </contributing/contributing_process>` contains guidance on how to
+contribute to this project.
+
+#########################
+Set up build environments
+#########################
 
 TF-M officially supports a limited set of build environments and setups. In
 this context, official support means that the environments listed below
@@ -369,8 +407,9 @@ To build the TF-M firmware the following tools are needed:
    - Python v3.x
    - a set of python modules listed in ``tools/requiremtns.txt``
 
+****************
 Dependency chain
-----------------
+****************
 
 .. uml::
 
@@ -409,9 +448,7 @@ Dependency chain
     imgtool --> python
    @enduml
 
-##########
-Next steps
-##########
+.. rubric:: Next steps
 
 Here are some next steps for exploring TF-M:
 

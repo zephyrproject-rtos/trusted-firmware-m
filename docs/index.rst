@@ -67,32 +67,44 @@ Trusted Firmware-M Documentation
     </ul>
 
 .. toctree::
-    :caption: Table of Contents
-    :name: mastertoc
-    :titlesonly:
+    :caption: Overview
     :maxdepth: 1
     :hidden:
 
-    Home<self>
     introduction/index
-    getting_started/index
-    platform/ext/index
-    contributing/index
-    integration_guide/index
-    technical_references/index
+    Getting Started <getting_started/index>
     security/index
     releases/index
+    Glossary <glossary>
 
+.. toctree::
+    :caption: Development
+    :maxdepth: 1
+    :hidden:
+
+    Platform Selection<platform/ext/index>
+    Building <technical_references/instructions/tfm_build_instruction>
+    integration_guide/index
+    technical_references/design_docs/index
+    Tools <tools/index>
+
+.. toctree::
+    :caption: Contribution
+    :titlesonly:
+    :hidden:
+
+    Guidelines <contributing/index>
+    contributing/lic
+    DCO <contributing/dco>
 
 .. toctree::
     :maxdepth: 2
     :hidden:
-    :caption: Quick Links
+    :caption: Links
 
     API Reference <https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/reference_manual/html/index.html>
     Security Center <https://developer.trustedfirmware.org/w/collaboration/security_center>
-    Platform Security Architecture <https://developer.arm.com/architectures/security-architectures/platform-security-architecture>
-    Glossary <glossary>
+    PSA <https://www.arm.com/architecture/security-features/platform-security>
 
 --------------
 

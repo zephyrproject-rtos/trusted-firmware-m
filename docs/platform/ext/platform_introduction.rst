@@ -1,6 +1,6 @@
-######################
-Platforms introduction
-######################
+###################
+Supported Platforms
+###################
 
     - Olympus system
 
@@ -63,7 +63,3 @@ Platforms introduction
 
 The document :doc:`Platform Deprecation and Removal </platform/ext/platform_deprecation>`
 lists the deprecated platforms planned to be removed from upstream.
-
---------------
-
-*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

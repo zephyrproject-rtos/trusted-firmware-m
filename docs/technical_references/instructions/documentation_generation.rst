@@ -154,9 +154,9 @@ The direct build will build both user_guide and reference_manual.
 
             # Command line tools is yet not available for Windows
 
-############
+************
 Dependencies
-############
+************
 
 .. uml::
 

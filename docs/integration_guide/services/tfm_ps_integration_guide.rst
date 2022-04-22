@@ -298,7 +298,7 @@ PS service uses that TF-M core API to retrieve the client ID and associate it
 as the owner of an asset. Only the owner can read, write or delete that asset
 based on the creation flags.
 
-The :doc:`integration guide </integration_guide/tfm_integration_guide>`
+The :doc:`integration guide </integration_guide/index>`
 provides further details of non-secure implementation requirements for TF-M.
 
 Cryptographic Interface

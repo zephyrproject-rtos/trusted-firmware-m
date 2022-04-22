@@ -107,9 +107,11 @@ html_theme = 'sphinx_rtd_theme'
 # documentation.
 #
 html_theme_options = {
-    'collapse_navigation': False,
-    'prev_next_buttons_location' : None   # Hide Prev and Next buttons
+    'collapse_navigation' : False,
+    'prev_next_buttons_location' : None,   # Hide Prev and Next buttons
 #    'display_version': True,    # Show version under logo
+    'sticky_navigation': True,
+    'navigation_depth': 2,
 }
 
 # Remove the "View page source" link from the top of docs pages

@@ -3,6 +3,14 @@ Build instructions
 ##################
 Please make sure you have all required software installed as explained in the
 :doc:`TF-M getting started </getting_started/tfm_getting_started>`.
+The additional building materials you can find in the following links:
+
+.. toctree::
+    :maxdepth: 1
+
+    IAR toolchain <tfm_build_instruction_iar>
+    Run TF-M examples <run_tfm_examples_on_arm_platforms>
+    Building documentation <documentation_generation>
 
 ****************
 TF-M build steps

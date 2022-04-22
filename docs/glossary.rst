@@ -49,7 +49,7 @@ Glossary of terms and abbreviations
         permitted.
 
     SP
-        Secure Partition:
+    Secure Partition
         A logical container for secure services.
 
     SPE
@@ -57,7 +57,7 @@ Glossary of terms and abbreviations
         `PSA term`_. In TF-M this means the secure domain protected by TF-M.
 
     SPM
-        Secure Partition Manager
+    Secure Partition Manager
         The TF-M component responsible for enumeration, management and isolation
         of multiple Secure Partitions within the TEE.
 
@@ -76,10 +76,12 @@ Glossary of terms and abbreviations
         view, i.e. which is viewed as a single entity from a TF-M point of view.
 
     PS
-        Protected Storage service provided by TF-M.
+    Protected Storage
+       One of PSA services provided by TF-M.
 
     ITS
-        Internal Trusted Storage service provided by TF-M.
+    Internal Trusted Storage
+       One of PSA services provided by TF-M.
 
     TFM
     TF-M

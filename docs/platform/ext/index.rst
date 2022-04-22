@@ -1,18 +1,8 @@
-Supported Platforms
-===================
+TF-M Platforms
+==============
 
 .. toctree::
-    :maxdepth: 1
-    :caption: Information
-
-    /platform/readme
-    readme
-    /platform/ext/platform_introduction.rst
-    /platform/ext/platform_deprecation.rst
-    /platform/ext/platform_provisioning.rst
-
-.. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :caption: arm
     :glob:
 
@@ -33,21 +23,21 @@ Supported Platforms
     target/cypress/psoc64/index
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :caption: STM
     :glob:
 
     target/stm/index
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :caption: Nordic
     :glob:
 
     target/nordic_nrf/**
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
     :caption: Laird Connectivity
     :glob:
 
@@ -59,6 +49,13 @@ Supported Platforms
     :glob:
 
     target/nuvoton/**
+
+.. toctree::
+    :maxdepth: 1
+    :caption: Rules and processes
+
+    platform_deprecation.rst
+    platform_provisioning.rst
 
 --------------
 

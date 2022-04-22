@@ -20,7 +20,7 @@ The following short-list provides a quick summary of the rules.
 
 - If the patch modifies a present file, the file's style should be followed
 - If creating a new file,
-  :doc:`integration guide </integration_guide/tfm_integration_guide>` can be used as a reference.
+  :doc:`integration guide </integration_guide/index>` can be used as a reference.
 - When a new style is to be expressed, consult the `Python Documentation Guidelines`_
 
 *************

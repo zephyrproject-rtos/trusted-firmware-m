@@ -59,48 +59,8 @@ folders. The original license text is included in those source files.
 - The ``platform`` folder currently contains platforms support imported from
   the external project and the files may have different licenses.
 
-###############
-Getting Started
-###############
+.. include:: /platform/ext/platform_introduction.rst
 
-************
-Prerequisite
-************
-Trusted Firmware M provides a reference implementation of platform security
-architecture  reference implementation aligning with PSA Certified guidelines.
-It is assumed that the reader is familiar with specifications can be found at
-`Platform Security Architecture Resources <https://developer.arm.com/architectures/security-architectures/platform-security-architecture>`__.
-
-The current TF-M implementation specifically targets TrustZone for ARMv8-M so a
-good understanding of the v8-M architecture is also necessary. A good place to
-get started with ARMv8-M is
-`developer.arm.com <https://developer.arm.com/architectures/cpu-architecture/m-profile>`__.
-
-**************************
-Build and run instructions
-**************************
-Trusted Firmware M source code is available on
-`git.trustedfirmware.org <https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git/>`__.
-
-To build & run TF-M:
-
-    - Follow the :doc:`TF-M getting started </getting_started/tfm_getting_started>`
-      to set up your environment.
-    - Follow the
-      :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`
-      to compile and build the TF-M source.
-    - Follow the :doc:`Run TF-M examples on Arm platforms </technical_references/instructions/run_tfm_examples_on_arm_platforms>`
-      for information on running the example.
-
-To port TF-M to a another system or OS, follow the
-:doc:`OS Integration Guide </integration_guide/tfm_integration_guide>`
-
-:doc:`Contributing Guidelines </contributing/contributing_process>` contains guidance on how to
-contribute to this project.
-
-###################
-Platforms supported
-###################
 The document :doc:`Supported Platforms </platform/ext/index>` lists the details.
 
 #########################
@@ -113,7 +73,7 @@ The :doc:`Releases </releases/index>` provides details of
 major features of the release and platforms supported.
 
 ####################
-Feedback and support
+Feedback and Support
 ####################
 For this release, feedback is requested via email to
 `tf-m@lists.trustedfirmware.org <tf-m@lists.trustedfirmware.org>`__.
