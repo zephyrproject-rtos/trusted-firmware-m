@@ -42,10 +42,12 @@ if(NS)
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_corstone310_ns.c
     )
-    target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/corstone310_ns.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/corstone310_ns.ld>
-    )
+    if(DEFAULT_NS_SCATTER)
+        target_add_scatter_file(tfm_ns
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/corstone310_ns.sct>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/corstone310_ns.ld>
+        )
+    endif()
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
             CMSIS_5_RTX_V8MMN
