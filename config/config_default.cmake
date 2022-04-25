@@ -57,8 +57,10 @@ set(TFM_EXCEPTION_INFO_DUMP             OFF         CACHE BOOL      "On fatal er
 
 set(CONFIG_TFM_HALT_ON_CORE_PANIC       OFF         CACHE BOOL       "On fatal errors in the secure firmware, halt instead of rebooting.")
 
-set(CONFIG_TFM_FP                       "soft"      CACHE STRING    "FP ABI type in SPE and NSPE: soft-Software ABI, hard-Hardware ABI")
+set(CONFIG_TFM_FP                       "soft"      CACHE STRING    "FP ABI type in SPE and NSPE: soft-Software ABI, hard-Hardware ABI. This configuration applies to both SPE and TF-M tests NSPE, and needs to be hard when enabling TF-M S/NS FPU tests.")
 set(CONFIG_TFM_LAZY_STACKING            OFF         CACHE BOOL      "Enable/disable lazy stacking")
+
+set(CONFIG_TFM_ENABLE_FPU               OFF         CACHE BOOL      "Make FPU operational when SPE and/or NSPE require FPU usage. This alone only enables the FPU coprocessors, whereas CONFIG_TFM_FP=hard compiles the code with hardware FP instructions and ABI.")
 
 set(CONFIG_TFM_DOORBELL_API             ON          CACHE BOOL      "Enable the doorbell APIs")
 

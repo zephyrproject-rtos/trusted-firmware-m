@@ -14,4 +14,5 @@ endif()
 
 if (CONFIG_TFM_FP STREQUAL "hard")
     set(CONFIG_TFM_LAZY_STACKING         ON          CACHE BOOL      "Enable lazy stacking")
+    set(CONFIG_TFM_ENABLE_FPU            ON          CACHE BOOL      "Permit TrustZone NSPE access to FPU")
 endif()

@@ -24,6 +24,12 @@ Environment (NSPE).
 Please refer to Arm musca S1 [7]_ platform as a reference implementation when
 you enable FP support on your platforms.
 
+.. Note::
+    Alternatively, if you intend to use FP in your own NSPE application but the
+    TF-M SPE services that you enable do not require FP, you can set the CMake
+    configuration ``CONFIG_TFM_ENABLE_FPU`` to ``ON`` and **ignore** any
+    configurations described below.
+
 ============================
 FP ABI type for SPE and NSPE
 ============================
@@ -64,6 +70,12 @@ The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
   +-------------------+---------------------------+
 
   FP software ABI type is default in TF-M.
+
+.. Note::
+    If you build TF-M SPE with ``CONFIG_TFM_FP=hard`` and provide your own NSPE
+    application, your own NSPE **must** take care of enabling floating point
+    coprocessors CP10 and CP11 on the NS side to avoid aforementioned NOCP usage
+    fault.
 
 * ``CONFIG_TFM_LAZY_STACKING`` is used to enable/disable lazy stacking
   feature. This feature is only valid for FP hardware ABI type.

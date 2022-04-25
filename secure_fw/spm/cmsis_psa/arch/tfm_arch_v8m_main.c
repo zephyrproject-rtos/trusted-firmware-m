@@ -210,12 +210,27 @@ void tfm_arch_set_secure_exception_priorities(void)
 
 void tfm_arch_config_extensions(void)
 {
-#if (CONFIG_TFM_FP >= 1)
-#ifdef __GNUC__
-    /* Enable SPE privileged and unprivileged access to the FP Extension */
+#if defined(CONFIG_TFM_ENABLE_FPU)
+    /*
+     * Enable SPE privileged and unprivileged access to the FP Extension.
+     * Note: On Armv8-M, if Non-secure access to the FPU is needed, Secure
+     * access to the FPU must be enabled first in order to avoid No Coprocessor
+     * (NOCP) usage fault when a Non-secure to Secure service call is
+     * interrupted while CONTROL.FPCA=1 is set by Non-secure. This is needed
+     * even if SPE will not use the FPU directly.
+     */
     SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
                   | (3U << 11U*2U);  /* enable CP11 full access */
+
+    /*
+     * Permit Non-secure access to the Floating-point Extension.
+     * Note: It is still necessary to set CPACR_NS to enable the FP Extension
+     * in the NSPE. This configuration is left to NS privileged software.
+     */
+    SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
 #endif
+
+#if (CONFIG_TFM_FP >= 1)
 
 #ifdef CONFIG_TFM_LAZY_STACKING
     /* Enable lazy stacking. */
@@ -225,23 +240,20 @@ void tfm_arch_config_extensions(void)
     FPU->FPCCR &= ~FPU_FPCCR_LSPEN_Msk;
 #endif
 
-    /* If the SPE will ever use the floating-point registers for sensitive
+    /*
+     * If the SPE will ever use the floating-point registers for sensitive
      * data, then FPCCR.ASPEN, FPCCR.TS, FPCCR.CLRONRET and FPCCR.CLRONRETS
      * must be set at initialisation and not changed again afterwards.
      * Let SPE decide the S/NS shared setting (LSPEN and CLRONRET) to avoid the
-     * possible side-path brought by flexibility.
+     * possible side-path brought by flexibility. This is not needed
+     * if the SPE will never use floating-point but enables the FPU only for
+     * avoiding NOCP faults during interrupted NSPE to SPE calls.
      */
     FPU->FPCCR |= FPU_FPCCR_ASPEN_Msk
                   | FPU_FPCCR_TS_Msk
                   | FPU_FPCCR_CLRONRET_Msk
                   | FPU_FPCCR_CLRONRETS_Msk
                   | FPU_FPCCR_LSPENS_Msk;
-
-    /* Permit Non-secure access to the Floating-point Extension.
-     * Note: It is still necessary to set CPACR_NS to enable the FP Extension
-     * in the NSPE. This configuration is left to NS privileged software.
-     */
-    SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
 
     /* Prevent non-secure from modifying FPU’s power setting. */
     SCnSCB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
