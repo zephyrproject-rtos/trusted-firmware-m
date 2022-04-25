@@ -16,6 +16,7 @@
 #define HOST_CPU_PE0_CONFIG_OFFSET 0x010
 #define AA64nAA32_MASK (1 << 3)
 
+#ifdef EXTERNAL_SYSTEM_SUPPORT
 void tfm_external_system_boot()
 {
     volatile uint32_t *ext_sys_reset_ctl_reg = (uint32_t *)(CORSTONE1000_EXT_SYS_RESET_REG);
@@ -23,6 +24,7 @@ void tfm_external_system_boot()
     /* de-assert CPU_WAIT signal*/
     *ext_sys_reset_ctl_reg = 0x0;
 }
+#endif
 
 void tfm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
@@ -62,8 +64,10 @@ void tfm_hal_boot_ns_cpu(uintptr_t start_addr)
 
     (void) start_addr;
 
+#ifdef EXTERNAL_SYSTEM_SUPPORT
     /*release EXT SYS out of reset*/
     tfm_external_system_boot();
+#endif
 }
 
 void tfm_hal_wait_for_ns_cpu_ready(void)

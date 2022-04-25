@@ -21,6 +21,7 @@ set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to en
 set(CRYPTO_NV_SEED                      OFF        CACHE BOOL     "Use stored NV seed to provide entropy")
 set(TFM_CRYPTO_TEST_ALG_CFB             OFF        CACHE BOOL     "Test CFB cryptography mode")
 set(NS                                  FALSE      CACHE BOOL     "Whether to build NS app")
+set(EXTERNAL_SYSTEM_SUPPORT             OFF        CACHE BOOL     "Whether to include external system support.")
 
 # FVP is not integrated/tested with CC312.
 if (${PLATFORM_IS_FVP})

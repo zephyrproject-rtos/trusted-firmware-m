@@ -97,6 +97,7 @@ target_compile_definitions(platform_s
     PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
         $<$<BOOL:${TEST_S}>:TEST_S>
+        $<$<BOOL:${EXTERNAL_SYSTEM_SUPPORT}>:EXTERNAL_SYSTEM_SUPPORT>
 )
 
 #========================= Platform BL2 =======================================#
