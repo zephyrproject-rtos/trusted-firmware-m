@@ -13,8 +13,15 @@ set(DEFAULT_MCUBOOT_FLASH_MAP           OFF        CACHE BOOL     "Whether to us
 set(MCUBOOT_UPGRADE_STRATEGY            "RAM_LOAD" CACHE STRING   "Upgrade strategy when multiple boot images are loaded")
 set(MCUBOOT_SECURITY_COUNTER_S          "1"      CACHE STRING    "Security counter for S image. auto sets it to IMAGE_VERSION_S")
 
-set(TFM_ISOLATION_LEVEL                 2          CACHE STRING   "Isolation level")
-set(MCUBOOT_IMAGE_NUMBER                2          CACHE STRING   "Whether to combine S and NS into either 1 image, or sign each separately")
+if (TEST_S OR TEST_S_ATTESTATION OR TEST_S_AUDIT OR TEST_S_CRYPTO OR TEST_S_ITS OR TEST_S_PS OR TEST_S_PLATFORM OR EXTRA_S_TEST_SUITES_PATHS)
+  # Test configuration: host images are not needed and work only with isolation level 1
+  set(MCUBOOT_IMAGE_NUMBER                1          CACHE STRING   "Whether to combine S and NS into either 1 image, or sign each separately")
+  set(TFM_ISOLATION_LEVEL                 1          CACHE STRING   "Isolation level")
+else()
+  set(MCUBOOT_IMAGE_NUMBER                2          CACHE STRING   "Whether to combine S and NS into either 1 image, or sign each separately")
+  set(TFM_ISOLATION_LEVEL                 2          CACHE STRING   "Isolation level")
+endif()
+
 set(TFM_MULTI_CORE_TOPOLOGY             ON         CACHE BOOL     "Whether to build for a dual-cpu architecture")
 set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to use a platform specific inter core communication instead of mailbox in dual-cpu topology")
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")

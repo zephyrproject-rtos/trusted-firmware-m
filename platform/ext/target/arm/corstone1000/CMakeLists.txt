@@ -18,7 +18,7 @@ target_include_directories(platform_region_defs
 
 target_compile_definitions(platform_region_defs
     INTERFACE
-        $<$<BOOL:${TEST_S}>:TEST_S>
+        $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
 )
 #========================= Platform common defs ===============================#
 
@@ -75,7 +75,7 @@ target_sources(platform_s
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         fw_update_agent/uefi_capsule_parser.c
         fw_update_agent/fwu_agent.c
-        $<$<BOOL:${TEST_S}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
+        $<$<BOOL:${TFM_S_REG_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
 )
 
 if (PLATFORM_IS_FVP)
@@ -96,7 +96,7 @@ endif()
 target_compile_definitions(platform_s
     PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
-        $<$<BOOL:${TEST_S}>:TEST_S>
+        $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
         $<$<BOOL:${EXTERNAL_SYSTEM_SUPPORT}>:EXTERNAL_SYSTEM_SUPPORT>
 )
 
@@ -136,7 +136,7 @@ endif()
 target_compile_definitions(platform_bl2
     PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
-        $<$<BOOL:${TEST_S}>:TEST_S>
+        $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
 )
 
 # boot_hal_bl2.c is compiled as part of 'bl2' target and not inside

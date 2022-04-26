@@ -31,6 +31,7 @@ void tfm_hal_boot_ns_cpu(uintptr_t start_addr)
     /* Switch the shared flash to XiP mode for the host */
     Select_XIP_Mode_For_Shared_Flash();
 
+#ifndef TFM_S_REG_TEST
     volatile uint32_t *bir_base = (uint32_t *)CORSTONE1000_HOST_BIR_BASE;
 
     /* Program Boot Instruction Register to jump to BL2 (TF-A) base address
@@ -68,6 +69,7 @@ void tfm_hal_boot_ns_cpu(uintptr_t start_addr)
     /*release EXT SYS out of reset*/
     tfm_external_system_boot();
 #endif
+#endif /* !TFM_S_REG_TEST */
 }
 
 void tfm_hal_wait_for_ns_cpu_ready(void)

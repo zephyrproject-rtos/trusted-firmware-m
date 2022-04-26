@@ -119,7 +119,7 @@
  *
  */
 #define SE_BL2_PARTITION_SIZE           (0x19000)    /* 100 KB */
-#ifdef TEST_S
+#ifdef TFM_S_REG_TEST
 #define TFM_PARTITION_SIZE              (0x61C00)    /* 391 KB */
 #else
 #define TFM_PARTITION_SIZE              (0x5E000)    /* 376 KB */
