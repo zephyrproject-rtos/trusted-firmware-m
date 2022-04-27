@@ -36,7 +36,7 @@ Bootloader and FWU
 
 Tamas Ban
     :email: `Tamas.Ban@arm.com <Tamas.Ban@arm.com>`__
-    :github: `tamban01 <https://github.com/tamban01>`__
+    :github: `tamasban <https://github.com/tamasban>`__
 
 Sherry Zhang
     :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__

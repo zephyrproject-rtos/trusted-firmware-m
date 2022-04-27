@@ -8,9 +8,9 @@ Contributions to the TF-M project need to follow the process below.
    Please contact :doc:`maintainers </contributing/maintainers>` for any
    questions.
 
-- Subscribe to `TF-M development
-  <https://lists.trustedfirmware.org/mailman/listinfo/tf-m>`_ if not subscribed
-  already.
+- Subscribe to `TF-M development mailing list
+  <https://lists.trustedfirmware.org/mailman3/lists/tf-m.lists.trustedfirmware.org>`_
+  if not subscribed already.
 - Refer to the `Roadmap
   <https://developer.trustedfirmware.org/w/tf_m/planning>`_ or send a mail to
   the tf-m@lists.trustedfirmware.org to check if this work is already

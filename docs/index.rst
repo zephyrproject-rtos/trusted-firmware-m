@@ -43,7 +43,7 @@ Trusted Firmware-M Documentation
             <p>Guidelines for integration with TF-M.</p>
         </li>
         <li class="grid-item">
-            <a href="technical_references/index.html">
+            <a href="technical_references/design_docs/index.html">
                 <img alt="" src="_static/images/tfm-reference.png"/>
                 <h2>References</h2>
             </a>
