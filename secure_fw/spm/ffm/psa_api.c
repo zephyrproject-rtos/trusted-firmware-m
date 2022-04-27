@@ -163,8 +163,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     }
 
     /* It is a PROGRAMMER ERROR if in_len + out_len > PSA_MAX_IOVEC. */
-    if ((in_num > PSA_MAX_IOVEC) ||
-        (out_num > PSA_MAX_IOVEC) ||
+    if ((in_num > SIZE_MAX - out_num) ||
         (in_num + out_num > PSA_MAX_IOVEC)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }

@@ -8,6 +8,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "aapcs_local.h"
 #include "bitops.h"
 #include "config_impl.h"
@@ -381,8 +382,7 @@ void spm_fill_message(struct conn_handle_t *conn_handle,
     TFM_CORE_ASSERT(service);
     TFM_CORE_ASSERT(!(invec == NULL && in_len != 0));
     TFM_CORE_ASSERT(!(outvec == NULL && out_len != 0));
-    TFM_CORE_ASSERT(in_len <= PSA_MAX_IOVEC);
-    TFM_CORE_ASSERT(out_len <= PSA_MAX_IOVEC);
+    TFM_CORE_ASSERT(in_len <= SIZE_MAX - out_len);
     TFM_CORE_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */

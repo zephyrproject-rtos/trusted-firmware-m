@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -213,8 +213,7 @@ static enum tfm_status_e tfm_core_check_sfn_parameters(
     }
 
     /* The number of vectors are within range. Extra checks to avoid overflow */
-    if ((in_len > PSA_MAX_IOVEC) || (out_len > PSA_MAX_IOVEC) ||
-        (in_len + out_len > PSA_MAX_IOVEC)) {
+    if ((in_len > SIZE_MAX - out_len) || (in_len + out_len > PSA_MAX_IOVEC)) {
         return TFM_ERROR_INVALID_PARAMETER;
     }
 
