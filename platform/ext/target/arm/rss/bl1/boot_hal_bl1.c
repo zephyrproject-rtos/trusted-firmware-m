@@ -11,6 +11,7 @@
 #include "Driver_Flash.h"
 #include "flash_layout.h"
 #include "host_base_address.h"
+#include "region_defs.h"
 #include "platform_base_address.h"
 #include "uart_stdout.h"
 #include "otp.h"
@@ -28,6 +29,7 @@
 #include "cmsis_compiler.h"
 
 extern uint8_t computed_bl1_2_hash[];
+extern uint32_t platform_code_is_bl1_2;
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
@@ -87,6 +89,11 @@ int32_t boot_platform_init(void)
     result = kmu_init(&KMU_DEV_S, prbg_seed);
     if (result != KMU_ERROR_NONE) {
         return result;
+    }
+
+    if(!platform_code_is_bl1_2) {
+        /* Clear boot data area */
+        memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
     }
 
     return 0;

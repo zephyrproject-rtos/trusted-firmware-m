@@ -154,6 +154,11 @@ __WEAK int32_t boot_platform_init(void)
         return 1;
     }
 
+    if(!platform_code_is_bl1_2) {
+        /* Clear boot data area */
+        memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
+    }
+
     return 0;
 }
 
