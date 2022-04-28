@@ -1145,7 +1145,7 @@ Reference
 
 .. [FF-M 1.1 Extensions] `Arm® Firmware Framework for M 1.1 Extensions <https://documentation-service.arm.com/static/600067c09b9c2d1bb22cd1c5?token=>`_
 
-.. [DUAL-CPU-BOOT] :doc:`Booting a dual core system </docs/technical_references/design_docs/dual-cpu/booting_a_dual_core_system>`
+.. [DUAL-CPU-BOOT] :doc:`Booting a dual core system </technical_references/design_docs/dual-cpu/booting_a_dual_core_system>`
 
 .. [CVSS] `Common Vulnerability Scoring System Version 3.1 Calculator <https://www.first.org/cvss/calculator/3.1>`_
 
@@ -1153,17 +1153,17 @@ Reference
 
 .. [STRIDE] `The STRIDE Threat Model <https://docs.microsoft.com/en-us/previous-versions/commerce-server/ee823878(v=cs.20)?redirectedfrom=MSDN>`_
 
-.. [SECURE-BOOT] :doc:`Secure boot </docs/technical_references/design_docs/tfm_secure_boot>`
+.. [SECURE-BOOT] :doc:`Secure boot </technical_references/design_docs/tfm_secure_boot>`
 
-.. [ROLLBACK-PROTECT] :doc:`Rollback protection in TF-M secure boot </docs/technical_references/design_docs/secure_boot_rollback_protection>`
+.. [ROLLBACK-PROTECT] :doc:`Rollback protection in TF-M secure boot </technical_references/design_docs/secure_boot_rollback_protection>`
 
 .. [ARM arm] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
 
 .. [STACK-SEAL] `Armv8-M processor Secure software Stack Sealing vulnerability <https://developer.arm.com/support/arm-security-updates/armv8-m-stack-sealing>`_
 
-.. [ADVISORY-TFMV-1] :doc:`Advisory TFMV-1 </docs/security/security_advisories/stack_seal_vulnerability>`
+.. [ADVISORY-TFMV-1] :doc:`Advisory TFMV-1 </security/security_advisories/stack_seal_vulnerability>`
 
-.. [ADVISORY-TFMV-2] :doc:`Advisory TFMV-2 </docs/security/security_advisories/svc_caller_sp_fetching_vulnerability>`
+.. [ADVISORY-TFMV-2] :doc:`Advisory TFMV-2 </security/security_advisories/svc_caller_sp_fetching_vulnerability>`
 
 .. [VLLDM Vulnerability] : `VLLDM instruction Security Vulnerability <https://developer.arm.com/support/arm-security-updates/vlldm-instruction-security-vulnerability>`_
 

@@ -14,7 +14,7 @@ New major features
   - PSA Crypto API interface updated to be based on `Stateless Handle`.
   - MCUboot updated to version 'TF-Mv1.4-integ' to support multiple images in RAM_LOAD and DIRECT_XIP upgrade strategies.
   - New platforms added.
-    See :ref:`docs/releases/1.4.0:New platforms supported` for details.
+    See :ref:`releases/1.4.0:New platforms supported` for details.
 
 New security advisories
 =======================
@@ -22,7 +22,7 @@ New security advisories
 'abort' function may not take effect in some TF-M Crypto multi-part operations
 ------------------------------------------------------------------------------
 
-Refer to :doc:`Advisory TFMV-3 </docs/security/security_advisories/crypto_multi_part_ops_abort_fail>`
+Refer to :doc:`Advisory TFMV-3 </security/security_advisories/crypto_multi_part_ops_abort_fail>`
 for more details.
 The mitigation is included in this release.
 

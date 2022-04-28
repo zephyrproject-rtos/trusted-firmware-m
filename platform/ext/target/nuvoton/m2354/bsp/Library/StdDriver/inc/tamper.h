@@ -68,6 +68,20 @@ extern "C"
 #define TAMPER_REF_SEED                  0x1UL     /*!< The new reference pattern is repeated from SEED (TAMPER_SEED[31:0]) when the reference pattern run out */
 
 #define TAMPER_VG_192M_SAMPLE            0x0UL     /*!< Select voltage glitch 192M sampleing rate */
+#define TAMPER_VG_96M_SAMPLE             0x1UL     /*!< Select voltage glitch 96M sampleing rate */
+#define TAMPER_VG_48M_SAMPLE             0x2UL     /*!< Select voltage glitch 48M sampleing rate */
+
+#define TAMPER_LBSTRIM_TLVDSEL_1_25V     0x0UL     /*!< Select the trim value of the under-shoot detection level as 1.25V */
+#define TAMPER_LBSTRIM_TLVDSEL_1_20V     0x1UL     /*!< Select the trim value of the under-shoot detection level as 1.2V */
+#define TAMPER_LBSTRIM_TLVDSEL_1_15V     0x2UL     /*!< Select the trim value of the under-shoot detection level as 1.15V */
+#define TAMPER_LBSTRIM_TLVDSEL_1_10V     0x3UL     /*!< Select the trim value of the under-shoot detection level as 1.1V */
+#define TAMPER_LBSTRIM_TLVDSEL_1_05V     0x4UL     /*!< Select the trim value of the under-shoot detection level as 1.05V */
+#define TAMPER_LBSTRIM_TLVDSEL_1_00V     0x5UL     /*!< Select the trim value of the under-shoot detection level as 1.0V */
+#define TAMPER_LBSTRIM_TLVDSEL_0_95V     0x6UL     /*!< Select the trim value of the under-shoot detection level as 0.95V */
+#define TAMPER_LBSTRIM_TLVDSEL_0_90V     0x7UL     /*!< Select the trim value of the under-shoot detection level as 0.9V */
+
+#define TAMPER_LBSTRIM_TOVDSEL_1_35V     0x0UL     /*!< Select the trim value of the over-shoot detection level as 1.35V */
+#define TAMPER_LBSTRIM_TOVDSEL_1_40V     0x1UL     /*!< Select the trim value of the over-shoot detection level as 1.4V */
 
 /**@}*/ /* end of group TAMPER_EXPORTED_CONSTANTS */
 
@@ -79,10 +93,6 @@ extern "C"
 /**
   * @brief      Reset Tamper Coreblock
   *
-  * @param      None
-  *
-  * @return     None
-  *
   * @details    To set TAMPER INIT control register to reset the tamper coreblock.
   *
   */
@@ -91,10 +101,6 @@ extern "C"
 /**
   * @brief      Release Tamper Coreblock
   *
-  * @param      None
-  *
-  * @return     None
-  *
   * @details    To set TAMPER INIT control register to release the tamper coreblock.
   *
   */
@@ -102,8 +108,6 @@ extern "C"
 
 /**
   * @brief      Get the Voltage Regulator Power Ready Status
-  *
-  * @param      None
   *
   * @retval     0   The power status of voltage regulator is not ready.
   * @retval     1   The power status of voltage regulator is ready.
@@ -116,10 +120,6 @@ extern "C"
 /**
   * @brief      Enable LXT Clock Detection
   *
-  * @param      None
-  *
-  * @return     None
-  *
   * @details    To set TAMPER FUNEN control register to enable LXT clock detection.
   *
   */
@@ -127,10 +127,6 @@ extern "C"
 
 /**
   * @brief      Disable LXT Clock Detection
-  *
-  * @param      None
-  *
-  * @return     None
   *
   * @details    To set TAMPER FUNEN control register to disable LXT clock detection.
   *
@@ -147,8 +143,6 @@ extern "C"
   *                               - \ref TAMPER_TAMPER3_SELECT
   *                               - \ref TAMPER_TAMPER4_SELECT
   *                               - \ref TAMPER_TAMPER5_SELECT
-  *
-  * @return     None
   *
   * @details    To set TAMPER FUNEN control register to select tamper I/O 0~5 and its function is detected through TAMPER block.
   *
@@ -177,8 +171,6 @@ __STATIC_INLINE void TAMPER_IOSEL_TAMPER(uint32_t u32TamperSelect)
   *                               - \ref TAMPER_TAMPER4_SELECT
   *                               - \ref TAMPER_TAMPER5_SELECT
   *
-  * @return     None
-  *
   * @details    To set TAMPER FUNEN control register to select tamper I/O 0~5 and its function is detected through RTC block.
   *
   */
@@ -198,10 +190,6 @@ __STATIC_INLINE void TAMPER_IOSEL_RTC(uint32_t u32TamperSelect)
 /**
   * @brief      Enable HIRC48M
   *
-  * @param      None
-  *
-  * @return     None
-  *
   * @details    To set TAMPER FUNEN control register to enable HIRC48M.
   *
   */
@@ -209,10 +197,6 @@ __STATIC_INLINE void TAMPER_IOSEL_RTC(uint32_t u32TamperSelect)
 
 /**
   * @brief      Disable HIRC48M
-  *
-  * @param      None
-  *
-  * @return     None
   *
   * @details    To set TAMPER FUNEN control register to disable HIRC48M.
   *
@@ -222,10 +206,10 @@ __STATIC_INLINE void TAMPER_IOSEL_RTC(uint32_t u32TamperSelect)
 /**
   * @brief      Voltage Glitch Sampling Rate Selection
   *
-  * @param[in]  u32VGSampleRate Voltage Glitch sampling rate select. Possible option is
+  * @param[in]  u32VGSampleRate Voltage glitch sampling rate select. Possible options are
   *                             - \ref TAMPER_VG_192M_SAMPLE
-  *
-  * @return     None
+  *                             - \ref TAMPER_VG_96M_SAMPLE
+  *                             - \ref TAMPER_VG_48M_SAMPLE
   *
   * @details    To set TAMPER FUNEN control register to enable voltage glitch channel 0~3 to select voltage glitch sampling rate.
   *
@@ -238,14 +222,75 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
     {
         TAMPER->FUNEN |= TAMPER_FUNEN_VGCHEN0_Msk | TAMPER_FUNEN_VGCHEN1_Msk | TAMPER_FUNEN_VGCHEN2_Msk | TAMPER_FUNEN_VGCHEN3_Msk;
     }
+    else if(u32VGSampleRate == TAMPER_VG_96M_SAMPLE)
+    {
+        TAMPER->FUNEN |= TAMPER_FUNEN_VGCHEN0_Msk | TAMPER_FUNEN_VGCHEN1_Msk;
+    }
+    else if(u32VGSampleRate == TAMPER_VG_48M_SAMPLE)
+    {
+        TAMPER->FUNEN |= TAMPER_FUNEN_VGCHEN0_Msk;
+    }
 }
 
 /**
+  * @brief      Voltage Glitch Reference Trim Value Initialization
+  *
+  * @details    To set TAMPER VG or VG2 control register to initialize a reference trim value that provides voltage glitch detection
+  *             error tolerance within 15%.
+  *
+  */
+__STATIC_INLINE void TAMPER_VG_TRIM_INIT()
+{
+    if(SYS->PLSTS & SYS_PLSTS_PLSTATUS_PL0)
+    {
+        TAMPER->VG = (TAMPER->VG & ~0xFFFFUL) | 0x8CC8UL;
+    }
+    else if(SYS->PLSTS & SYS_PLSTS_PLSTATUS_PL1)
+    {
+        TAMPER->VG = (TAMPER->VG & ~0xFFFF0000UL) | 0x7CC90000UL;
+    }
+    else if(SYS->PLSTS & SYS_PLSTS_PLSTATUS_PL2)
+    {
+        TAMPER->VG2 = (TAMPER->VG2 & ~0xFFFFUL) | 0x5CCBUL;
+    }
+    else if(SYS->PLSTS & SYS_PLSTS_PLSTATUS_PL3)
+    {
+        TAMPER->VG2 = (TAMPER->VG2 & ~0xFFFF0000UL) | 0x2CCD0000UL;
+    }
+}
+
+/**
+  * @brief      Under-shoot Detection Level Trim Value Initialization
+  *
+  * @param[in]  u32TLVDTrim Under-shoot detect level trim value select. Possible options are
+  *                         - \ref TAMPER_LBSTRIM_TLVDSEL_1_25V
+  *                         - \ref TAMPER_LBSTRIM_TLVDSEL_1_20V
+  *                         - \ref TAMPER_LBSTRIM_TLVDSEL_1_15V
+  *                         - \ref TAMPER_LBSTRIM_TLVDSEL_1_10V
+  *                         - \ref TAMPER_LBSTRIM_TLVDSEL_1_05V
+  *                         - \ref TAMPER_LBSTRIM_TLVDSEL_1_00V
+  *                         - \ref TAMPER_LBSTRIM_TLVDSEL_0_95V
+  *                         - \ref TAMPER_LBSTRIM_TLVDSEL_0_90V
+  *
+  * @details    To set TAMPER LBSTRIM control register to select under-shoot detection level trim value.
+  *
+  */
+#define TAMPER_TLVD_TRIM_INIT(u32TLVDTrim)   ((uint32_t)(TAMPER->LBSTRIM = (TAMPER->LBSTRIM & (~TAMPER_LBSTRIM_TLVDSEL_Msk)) | (u32TLVDTrim << TAMPER_LBSTRIM_TLVDSEL_Pos)))
+
+/**
+  * @brief      Over-shoot Detection Level Trim Value Initialization
+  *
+  * @param[in]  u32TOVDTrim Over-shoot detect level trim value select. Possible options are
+  *                         - \ref TAMPER_LBSTRIM_TOVDSEL_1_35V
+  *                         - \ref TAMPER_LBSTRIM_TOVDSEL_1_40V
+  *
+  * @details    To set TAMPER LBSTRIM control register to select over-shoot detection level trim value.
+  *
+  */
+#define TAMPER_TOVD_TRIM_INIT(u32TOVDTrim)   ((uint32_t)(TAMPER->LBSTRIM = (TAMPER->LBSTRIM & (~TAMPER_LBSTRIM_TOVDSEL_Msk)) | (u32TOVDTrim << TAMPER_LBSTRIM_TOVDSEL_Pos)))
+
+/**
   * @brief      Enable to Trigger Key Store
-  *
-  * @param      None
-  *
-  * @return     None
   *
   * @details    Set KSTRIGEN bit of TAMPER TRIEN control register to trigger Key Store when Tamper event is detected.
   *
@@ -255,10 +300,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 /**
   * @brief      Disable to Trigger Key Store
   *
-  * @param      None
-  *
-  * @return     None
-  *
   * @details    Clear KSTRIGEN bit of TAMPER TRIEN control register to not trigger Key Store when Tamper event is detected.
   *
   */
@@ -266,10 +307,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 
 /**
   * @brief      Enable Wake-up Function
-  *
-  * @param      None
-  *
-  * @return     None
   *
   * @details    Set WAKEUPEN bit of TAMPER TRIEN control register to wake-up the system when Tamper event is detected.
   *
@@ -279,10 +316,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 /**
   * @brief      Disable Wake-up Function
   *
-  * @param      None
-  *
-  * @return     None
-  *
   * @details    Clear WAKEUPEN bit of TAMPER TRIEN control register to not wake-up the system when Tamper event is detected.
   *
   */
@@ -290,10 +323,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 
 /**
   * @brief      Enable to Clear Crypto Function
-  *
-  * @param      None
-  *
-  * @return     None
   *
   * @details    Set CRYPTOEN bit of TAMPER TRIEN control register to reset Crypto when Tamper event is detected.
   *
@@ -303,10 +332,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 /**
   * @brief      Disable to Clear Crypto Function
   *
-  * @param      None
-  *
-  * @return     None
-  *
   * @details    Clear CRYPTOEN bit of TAMPER TRIEN control register to not reset Crypto when Tamper event is detected.
   *
   */
@@ -314,10 +339,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 
 /**
   * @brief      Enable to Trigger Chip Reset
-  *
-  * @param      None
-  *
-  * @return     None
   *
   * @details    Set CHIPRSTEN bit of TAMPER TRIEN control register to reset the system when Tamper event is detected.
   *
@@ -327,10 +348,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 /**
   * @brief      Disable to Trigger Chip Reset
   *
-  * @param      None
-  *
-  * @return     None
-  *
   * @details    Clear CHIPRSTEN bit of TAMPER TRIEN control register to not reset the system when Tamper event is detected.
   *
   */
@@ -338,10 +355,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 
 /**
   * @brief      Enable to Clear RTC Spare Register
-  *
-  * @param      None
-  *
-  * @return     None
   *
   * @details    Set RTCSPCLREN bit of TAMPER TRIEN control register to reset RTC spare register when Tamper event is detected.
   *
@@ -351,10 +364,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 /**
   * @brief      Disable to Clear RTC Spare Register
   *
-  * @param      None
-  *
-  * @return     None
-  *
   * @details    Clear RTCSPCLREN bit of TAMPER TRIEN control register to not reset RTC spare register when Tamper event is detected.
   *
   */
@@ -363,15 +372,13 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 /**
   * @brief      Get Tamper Interrupt Flag
   *
-  * @param      None
-  *
   * @retval     0   Tamper event Interrupt did not occur
   * @retval     1   Tamper event Interrupt occurred
   *
   * @details    This macro indicates Tamper event intertupt occurred or not.
   *
   */
-#define TAMPER_GET_INT_FLAG()      ((TAMPER->INTSTS & (0xAA7FAFFF))? 1:0)
+#define TAMPER_GET_INT_FLAG()      ((TAMPER->INTSTS & (0xAA77AFFF))? 1:0)
 
 /**
   * @brief      Clear Tamper Interrupt Status
@@ -391,13 +398,13 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
   *                             - \ref TAMPER_INTSTS_ACTSEIF_Msk
   *                             - \ref TAMPER_INTSTS_ACTST5IF_Msk
   *                             - \ref TAMPER_INTSTS_ACTST25IF_Msk
+  *                             - \ref TAMPER_INTSTS_VBATLOSSIF_Msk
+  *                             - \ref TAMPER_INTSTS_SECWDTIF_Msk
   *                             - \ref TAMPER_INTSTS_BODIF_Msk
   *                             - \ref TAMPER_INTSTS_ACTST1IF_Msk
   *                             - \ref TAMPER_INTSTS_ACTST3IF_Msk
   *                             - \ref TAMPER_INTSTS_ACTST21IF_Msk
   *                             - \ref TAMPER_INTSTS_ACTST23IF_Msk
-  *
-  * @return     None
   *
   * @details    This macro is used to clear Tamper event flag.
   *
@@ -406,8 +413,6 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
 
 /**
   * @brief      Get Tamper Interrupt Status
-  *
-  * @param      None
   *
   * @retval     TAMPER_INTSTS_TAMP0IF_Msk
   * @retval     TAMPER_INTSTS_TAMP1IF_Msk
@@ -426,6 +431,8 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
   * @retval     TAMPER_INTSTS_RTCLVRIF_Msk
   * @retval     TAMPER_INTSTS_RIOTRIGIF_Msk
   * @retval     TAMPER_INTSTS_RCLKTRIGIF_Msk
+  * @retval     TAMPER_INTSTS_VBATLOSSIF_Msk
+  * @retval     TAMPER_INTSTS_SECWDTIF_Msk
   * @retval     TAMPER_INTSTS_BODIF_Msk
   * @retval     TAMPER_INTSTS_ACTST1IF_Msk
   * @retval     TAMPER_INTSTS_ACTST3IF_Msk
@@ -435,7 +442,7 @@ __STATIC_INLINE void TAMPER_VG_SAMPLE_SEL(uint32_t u32VGSampleRate)
   * @details    This macro indicates Tamper event status.
   *
   */
-#define TAMPER_GET_INT_STATUS()    ((TAMPER->INTSTS & (0xAA7FAFFF)))
+#define TAMPER_GET_INT_STATUS()    ((TAMPER->INTSTS & (0xAA77AFFF)))
 
 void TAMPER_EnableInt(uint32_t u32IntFlagMask);
 void TAMPER_DisableInt(uint32_t u32IntFlagMask);
@@ -461,3 +468,4 @@ void TAMPER_ActiveShieldDynamicTamperConfig(uint32_t u32ChangeRate1, uint32_t u3
 #endif
 
 #endif /* __TAMPER_H__ */
+

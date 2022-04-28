@@ -10,7 +10,7 @@ isolation and introduces the reference implementation in TF-M, which
 complies the rules by operating the hardware and software resources.
 
 .. note::
-  Reference the document :doc:`Glossary </docs/glossary>` for terms
+  Reference the document :doc:`Glossary </glossary>` for terms
   and abbreviations.
 
 ************
@@ -390,11 +390,13 @@ Appendix
 ========
 | `PSA Firmware_Framework for M`_
 
-.. _PSA Firmware_Framework for M: https://pages.arm.com/psa-resources-ff.html
+.. _PSA Firmware_Framework for M:
+  https://www.arm.com/architecture/security-features/platform-security
 
 | `Trusted Base System Architecture for Armv6-M, Armv7-M and Armv8-M`_
 
-.. _Trusted Base System Architecture for Armv6-M, Armv7-M and Armv8-M: https://pages.arm.com/psa-resources-tbsa-m.html
+.. _Trusted Base System Architecture for Armv6-M, Armv7-M and Armv8-M:
+   https://www.arm.com/architecture/security-features/platform-security
 
 --------------
 

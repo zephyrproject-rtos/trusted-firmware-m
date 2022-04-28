@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -113,7 +113,6 @@ target_sources(platform_bl2
         Native_Driver/watchdog.c
         Native_Driver/arm_watchdog_drv.c
         fip_parser/fip_parser.c
-        boot_hal_bl2.c
         fw_update_agent/fwu_agent.c
         bl2_security_cnt.c
 )
@@ -139,11 +138,27 @@ target_compile_definitions(platform_bl2
         $<$<BOOL:${TEST_S}>:TEST_S>
 )
 
+# boot_hal_bl2.c is compiled as part of 'bl2' target and not inside
+# 'platform_bl2' where it suppose to be. This is due to
+# platform_init/quit* apis symbol collision in bl1.
 target_sources(bl2
     PRIVATE
         bl2_flash_map.c
+        boot_hal_bl2.c
 )
 
+target_link_libraries(bl2
+    PRIVATE
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:trusted-firmware-m-psa-adac>
+)
+
+target_compile_definitions(bl2
+    PRIVATE
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
+
+)
 target_compile_definitions(bootutil
     PRIVATE
         MULTIPLE_EXECUTABLE_RAM_REGIONS
@@ -153,18 +168,18 @@ target_include_directories(platform_bl2
     PUBLIC
         partition
         Device/Include
+        fip_parser
+        Native_Driver
+        fw_update_agent
     INTERFACE
         cc312
     PRIVATE
         .
         CMSIS_Driver/Config
         Device/Config
-        Native_Driver
-        fip_parser
         ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
         ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
         $<BUILD_INTERFACE:${BL2_SOURCE}/ext/mcuboot/include>
-        fw_update_agent
 )
 
 #========================= BL1 component =======================================#

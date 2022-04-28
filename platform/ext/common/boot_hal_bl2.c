@@ -37,14 +37,25 @@ REGION_DECLARE(Image$$, ARM_LIB_HEAP, $$ZI$$Limit)[];
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 #endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
        || defined(__ARM_ARCH_8_1M_MAIN__) */
+#if defined(__ICCARM__)
+#pragma required = ER_DATA$$Base
+#pragma required = ARM_LIB_HEAP$$Limit
+#endif
 
 __WEAK __attribute__((naked)) void boot_clear_ram_area(void)
 {
     __ASM volatile(
+#if !defined(__ICCARM__)
         ".syntax unified                             \n"
+#endif
         "movs    r0, #0                              \n"
+#if !defined(__ICCARM__)
         "ldr     r1, =Image$$ER_DATA$$Base           \n"
         "ldr     r2, =Image$$ARM_LIB_HEAP$$ZI$$Limit \n"
+#else
+        "ldr     r1, =ER_DATA$$Base                  \n"
+        "ldr     r2, =ARM_LIB_HEAP$$Limit            \n"
+#endif
         "subs    r2, r2, r1                          \n"
         "Loop:                                       \n"
         "subs    r2, #4                              \n"

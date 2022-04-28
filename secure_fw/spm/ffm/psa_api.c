@@ -91,8 +91,7 @@ extern struct service_t *stateless_services_ref_tbl[];
 void spm_handle_programmer_errors(psa_status_t status)
 {
     if (status == PSA_ERROR_PROGRAMMER_ERROR ||
-        status == PSA_ERROR_CONNECTION_REFUSED ||
-        status == PSA_ERROR_CONNECTION_BUSY) {
+        status == PSA_ERROR_CONNECTION_REFUSED) {
         if (!tfm_spm_is_ns_caller()) {
             tfm_core_panic();
         }

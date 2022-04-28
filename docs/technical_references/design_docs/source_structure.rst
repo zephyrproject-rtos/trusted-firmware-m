@@ -6,7 +6,7 @@ Trusted Firmware-M Source Structure
 :Contact: tf-m@lists.trustedfirmware.org
 
 .. note::
-  Reference the document :doc:`Glossary </docs/glossary>` for terms
+  Reference the document :doc:`Glossary </glossary>` for terms
   and abbreviations.
 
 ************

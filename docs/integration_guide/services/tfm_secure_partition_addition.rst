@@ -555,7 +555,7 @@ it from somewhere. One option is to create a new testsuite, such as
 interface_testsuite.c``.
 
 The process of adding test connection is explained in the specification
-:doc:`Adding TF-M Regression Test Suite </docs/integration_guide/tfm_test_suites_addition>`
+:doc:`Adding TF-M Regression Test Suite </integration_guide/tfm_test_suites_addition>`
 
 .. code-block:: c
 
@@ -722,8 +722,8 @@ Reference
 | `PSA Firmware Framework specification`_
 | `Firmware Framework for M 1.1 Extensions`_
 
-.. _PSA Firmware Framework specification: https://pages.arm.com/psa-
-  resources-ff.html?_ga=2.156169596.61580709.1542617040-1290528876.1541647333
+.. _PSA Firmware Framework specification:
+  https://www.arm.com/architecture/security-features/platform-security
 
 .. _Firmware Framework for M 1.1 Extensions: https://developer.arm.com/
   documentation/aes0039/latest

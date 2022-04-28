@@ -665,15 +665,15 @@ Reference
 
 .. [8] `Transitioning the Use of Cryptographic Algorithms and Key Lengths <https://www.nist.gov/publications/transitioning-use-cryptographic-algorithms-and-key-lengths>`_
 
-.. [9] :doc:`ITS integration guide </docs/integration_guide/services/tfm_its_integration_guide>`
+.. [9] :doc:`ITS integration guide </integration_guide/services/tfm_its_integration_guide>`
 
 .. [10] `PSA Attestation API 1.0 (ARM IHI 0085) <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Implement/IHI0085-PSA_Attestation_API-1.0.2.pdf?revision=eef78753-c77e-4b24-bcf0-65596213b4c1&la=en&hash=E5E0353D612077AFDCE3F2F3708A50C77A74B2A3>`_
 
-.. [11] :doc:`Secure boot </docs/technical_references/design_docs/tfm_secure_boot>`
+.. [11] :doc:`Secure boot </technical_references/design_docs/tfm_secure_boot>`
 
-.. [12] :doc:`Crypto design </docs/technical_references/design_docs/tfm_crypto_design>`
+.. [12] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
 
-.. [13] :doc:`TF-M build instruction </docs/technical_references/instructions/tfm_build_instruction>`
+.. [13] :doc:`TF-M build instruction </technical_references/instructions/tfm_build_instruction>`
 
 --------------
 

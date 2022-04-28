@@ -54,7 +54,7 @@ else() #The default backend is IPC
 endif()
 
 # Load bl1 config
-if (BL1)
+if (BL1 AND PLATFORM_DEFAULT_BL1)
     include(${CMAKE_SOURCE_DIR}/bl1/config/bl1_config_default.cmake)
 endif()
 

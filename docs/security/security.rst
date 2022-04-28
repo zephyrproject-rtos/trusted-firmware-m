@@ -61,11 +61,11 @@ Security Advisories
 .. _issue tracker: https://developer.trustedfirmware.org/project/view/2/
 .. _mailing list: https://lists.trustedfirmware.org/mailman/listinfo/tf-m
 
-.. |TFMV-1| replace:: :ref:`docs/security/security_advisories/stack_seal_vulnerability:Advisory TFMV-1`
-.. |TFMV-2| replace:: :ref:`docs/security/security_advisories/svc_caller_sp_fetching_vulnerability:Advisory TFMV-2`
-.. |TFMV-3| replace:: :ref:`docs/security/security_advisories/crypto_multi_part_ops_abort_fail:Advisory TFMV-3`
-.. |TFMV-4| replace:: :ref:`docs/security/security_advisories/profile_small_key_id_encoding_vulnerability:Advisory TFMV-4`
-.. |TFMV-5| replace:: :ref:`docs/security/security_advisories/fwu_write_vulnerability:Advisory TFMV-5`
+.. |TFMV-1| replace:: :ref:`security/security_advisories/stack_seal_vulnerability:Advisory TFMV-1`
+.. |TFMV-2| replace:: :ref:`security/security_advisories/svc_caller_sp_fetching_vulnerability:Advisory TFMV-2`
+.. |TFMV-3| replace:: :ref:`security/security_advisories/crypto_multi_part_ops_abort_fail:Advisory TFMV-3`
+.. |TFMV-4| replace:: :ref:`security/security_advisories/profile_small_key_id_encoding_vulnerability:Advisory TFMV-4`
+.. |TFMV-5| replace:: :ref:`security/security_advisories/fwu_write_vulnerability:Advisory TFMV-5`
 
 .. _TrustedFirmware.org security incident process: https://developer.trustedfirmware.org/w/collaboration/security_center/
 
