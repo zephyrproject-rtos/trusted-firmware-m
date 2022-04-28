@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,11 +15,6 @@
 extern "C" {
 #endif
 
-/* FIXME: The following functions are wrappers around standard C library
- *        functions: memcpy, memcmp, memset
- *        In long term standard C library might be removed from TF-M project or
- *        replaced with a secure implementation due to security concerns.
- */
 __attribute__ ((always_inline)) __STATIC_INLINE
 void *tfm_memcpy(void *dest, const void *src, size_t num)
 {
