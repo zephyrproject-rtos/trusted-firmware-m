@@ -39,7 +39,7 @@ extern "C" {
  * attestation service. Used to configure buffers for services that verify the
  * produced tokens.
  */
-#define PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE (0x400)
+#define PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE (0x800)
 
 /**
  * The list of fixed claims in the initial attestation token is still evolving,
