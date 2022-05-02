@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2021 ARM Limited. All rights reserved.
+ * Copyright (c) 2013-2022 ARM Limited. All rights reserved.
  * Copyright 2019-2020 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -63,6 +63,23 @@
 
 /* Driver version */
 #define ARM_FLASH_DRV_VERSION    ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0)
+
+/**
+ * Data width values for ARM_FLASH_CAPABILITIES::data_width
+ * \ref ARM_FLASH_CAPABILITIES
+ */
+ enum {
+    DATA_WIDTH_8BIT   = 0u,
+    DATA_WIDTH_16BIT,
+    DATA_WIDTH_32BIT,
+    DATA_WIDTH_ENUM_SIZE
+};
+
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
 
 /* ARM FLASH device structure */
 struct arm_flash_dev_t {
@@ -136,6 +153,10 @@ static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
     ARG_UNUSED(cb_event);
     status_t status = kStatus_Success;
 
+    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        return ARM_DRIVER_ERROR;
+    }
+
     /* Call initialization from Flash API */
     status = FLASH_Init(&FLASH0_DEV->flashInstance);
 
@@ -181,6 +202,9 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
     static uint32_t status;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     /* Check Flash memory boundaries */
     status = is_range_valid(FLASH0_DEV, addr + cnt);
     if(status != kStatus_Success) {
@@ -198,13 +222,16 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 #else /* Bus fault when reading erased memory */
     (void)memcpy(data, (uint8_t *)addr, cnt);
 #endif
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t cnt)
 {
     static uint32_t status;
     uint32_t failedAddress, failedData;
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
 
     /* Check Flash memory boundaries */
     status = is_range_valid(FLASH0_DEV, addr);
@@ -225,7 +252,8 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
         return ARM_DRIVER_ERROR;
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_EraseSector(uint32_t addr)

@@ -14,16 +14,16 @@
 #include "tfm_core_trustzone.h"
 #include "utilities.h"
 
-#define EXC_RETURN_INDICATOR                    (0xFF << 24)
-#define EXC_RETURN_RES1                         (0x1FFFF << 7)
-#define EXC_RETURN_SECURE_STACK                 (1 << 6)
-#define EXC_RETURN_STACK_RULE                   (1 << 5)
-#define EXC_RETURN_FPU_FRAME_BASIC              (1 << 4)
-#define EXC_RETURN_MODE_THREAD                  (1 << 3)
-#define EXC_RETURN_STACK_PROCESS                (1 << 2)
-#define EXC_RETURN_STACK_MAIN                   (0 << 2)
-#define EXC_RETURN_RES0                         (0 << 1)
-#define EXC_RETURN_EXC_SECURE                   (1)
+#define EXC_RETURN_INDICATOR                    (0xFFUL << 24)
+#define EXC_RETURN_RES1                         (0x1FFFFUL << 7)
+#define EXC_RETURN_SECURE_STACK                 (1UL << 6)
+#define EXC_RETURN_STACK_RULE                   (1UL << 5)
+#define EXC_RETURN_FPU_FRAME_BASIC              (1UL << 4)
+#define EXC_RETURN_MODE_THREAD                  (1UL << 3)
+#define EXC_RETURN_STACK_PROCESS                (1UL << 2)
+#define EXC_RETURN_STACK_MAIN                   (0UL << 2)
+#define EXC_RETURN_RES0                         (0UL << 1)
+#define EXC_RETURN_EXC_SECURE                   (1UL)
 
 /* Initial EXC_RETURN value in LR when a thread is loaded at the first time */
 #define EXC_RETURN_THREAD_S_PSP                                 \
@@ -37,6 +37,13 @@
         EXC_RETURN_INDICATOR | EXC_RETURN_RES1 |                \
         EXC_RETURN_SECURE_STACK | EXC_RETURN_STACK_RULE |       \
         EXC_RETURN_FPU_FRAME_BASIC | EXC_RETURN_MODE_THREAD |   \
+        EXC_RETURN_STACK_MAIN | EXC_RETURN_RES0 |               \
+        EXC_RETURN_EXC_SECURE
+
+#define EXC_RETURN_HANDLER_S_MSP                                \
+        EXC_RETURN_INDICATOR | EXC_RETURN_RES1 |                \
+        EXC_RETURN_SECURE_STACK | EXC_RETURN_STACK_RULE |       \
+        EXC_RETURN_FPU_FRAME_BASIC |                            \
         EXC_RETURN_STACK_MAIN | EXC_RETURN_RES0 |               \
         EXC_RETURN_EXC_SECURE
 

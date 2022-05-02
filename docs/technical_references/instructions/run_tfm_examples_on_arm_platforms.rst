@@ -4,7 +4,7 @@ Run TF-M examples on Arm platforms
 Instructions for how to run TF-M and example test application on Arm platforms.
 
 Follow :doc:`build instruction <tfm_build_instruction>` to build the binaries.
-Follow :doc:`secure boot </docs/technical_references/design_docs/tfm_secure_boot>` to build the
+Follow :doc:`secure boot </technical_references/design_docs/tfm_secure_boot>` to build the
 binaries with or without BL2 bootloader.
 
 ****************************************************************
@@ -223,6 +223,11 @@ Execute TF-M example and regression tests on Musca test chip boards
     Before executing any images on Musca-B1 board, please check the
     :doc:`target platform readme </platform/ext/target/arm/musca_b1/sse_200/readme>`
     to have the correct setup.
+
+    Install SRecord for Musca test chip boards.
+
+    - Windows: `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__
+    - Linux: sudo apt-get install -y srecord
 
 Example application with BL2 bootloader
 =======================================
@@ -562,7 +567,7 @@ port (baud 115200 8n1) the following messages::
 Firmware upgrade and image validation with BL2 bootloader
 =========================================================
 High level operation of BL2 bootloader and instructions for testing firmware
-upgrade is described in :doc:`secure boot </docs/technical_references/design_docs/tfm_secure_boot>`.
+upgrade is described in :doc:`secure boot </technical_references/design_docs/tfm_secure_boot>`.
 
 --------------
 
@@ -573,4 +578,4 @@ upgrade is described in :doc:`secure boot </docs/technical_references/design_doc
 .. _Keil MDK: http://www2.keil.com/mdk5
 .. _Keil MDK Documentation: https://www2.keil.com/mdk5/docs
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

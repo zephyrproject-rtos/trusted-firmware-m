@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2009-2021 ARM Limited. All rights reserved.
- * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -31,7 +31,7 @@
     .syntax    unified
     .arch    armv6-m
 
-    .section .vectors
+    .section .vectors, "a"
     .align 2
     .globl    __Vectors
 __Vectors:
@@ -60,7 +60,7 @@ __Vectors:
     .long    NvicMux4_IRQHandler                     /* CM0 + NVIC Mux input 4 */
     .long    NvicMux5_IRQHandler                     /* CM0 + NVIC Mux input 5 */
     .long    NvicMux6_IRQHandler                     /* CM0 + NVIC Mux input 6 */
-    .long    NvicMux7_IRQHandler                     /* CM0 + NVIC Mux input 7 */
+    .long    tfm_mailbox_irq_handler                 /* CM0 + NVIC Mux input 7 */
     .long    Internal0_IRQHandler                    /* Internal SW Interrupt #0 */
     .long    Internal1_IRQHandler                    /* Internal SW Interrupt #1 */
     .long    Internal2_IRQHandler                    /* Internal SW Interrupt #2 */
@@ -334,7 +334,6 @@ Fault_Handler:
     def_irq_handler  NvicMux4_IRQHandler                     /* CPU User Interrupt #4 */
     def_irq_handler  NvicMux5_IRQHandler                     /* CPU User Interrupt #5 */
     def_irq_handler  NvicMux6_IRQHandler                     /* CPU User Interrupt #6 */
-    def_irq_handler  NvicMux7_IRQHandler                     /* CPU User Interrupt #7 */
     def_irq_handler  Internal0_IRQHandler                    /* Internal SW Interrupt #0 */
     def_irq_handler  Internal1_IRQHandler                    /* Internal SW Interrupt #1 */
     def_irq_handler  Internal2_IRQHandler                    /* Internal SW Interrupt #2 */

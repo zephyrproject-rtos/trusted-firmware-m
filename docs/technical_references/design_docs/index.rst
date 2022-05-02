@@ -1,4 +1,4 @@
-Design documents
+Design Documents
 ================
 
 .. toctree::

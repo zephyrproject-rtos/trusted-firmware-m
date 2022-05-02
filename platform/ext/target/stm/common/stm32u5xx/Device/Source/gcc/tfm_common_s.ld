@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2021 Arm Limited
+; * Copyright (c) 2009-2022 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -35,7 +35,9 @@ MEMORY
 }
 
 __heap_size__  = S_HEAP_SIZE;
+#if !defined(TFM_PSA_API)
 __psp_stack_size__ = S_PSP_STACK_SIZE;
+#endif
 __msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
 
 /* Library configurations */
@@ -89,8 +91,7 @@ SECTIONS
         LONG (PSA_PROXY_SHARED_MEMORY_BASE)
         LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
 #endif
-#if defined(TFM_SP_META_PTR_ENABLE)
-        LONG (LOADADDR(.TFM_SP_META_PTR))
+#if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
         LONG (SIZEOF(.TFM_SP_META_PTR))
 #endif
@@ -150,18 +151,21 @@ SECTIONS
         *libtfm_spm*:*(.rodata*)
     } > FLASH
     /* unpriv data is placed 1st */
+    .dummy_empty : ALIGN(32)
+    {
+        . += 0x0;
+    } > RAM
+/**** Unpriv  DATA start here */
+    Image$$TFM_APP_RW_STACK_START$$Base = ADDR(.dummy_empty);
+# if !defined(TFM_PSA_API)
     /* PSP is unprivileged in single-core topology */
     .psp_stack : ALIGN(32)
     {
-# if !defined(TFM_PSA_API)
         . += (__psp_stack_size__ - 0x8); // reserve space for stack seal (8 bytes)
-# else
-        . += (__psp_stack_size__);
-# endif
     } > RAM
     Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
     Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-# if !defined(TFM_PSA_API)
+
     .psp_stack_seal_res :
     {
         . += 0x8;
@@ -169,16 +173,14 @@ SECTIONS
     Image$$ER_INITIAL_PSP_SEAL$$ZI$$Base = ADDR(.psp_stack_seal_res);
     Image$$ER_INITIAL_PSP_SEAL$$ZI$$Limit = ADDR(.psp_stack_seal_res) + SIZEOF(.psp_stack_seal_res);
 # endif
-#if defined(TFM_SP_META_PTR_ENABLE)
+#if defined(CONFIG_TFM_PARTITION_META)
     .TFM_SP_META_PTR : ALIGN(32)
     {
-        *(SP_META_PTR_SPRTL_INST)
+        *(.bss.SP_META_PTR_SPRTL_INST)
     } > RAM
-    Image$$TFM_SP_META_PTR$$RW$$Base = ADDR(.TFM_SP_META_PTR);
-    Image$$TFM_SP_META_PTR$$RW$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
-#endif
-/**** APPLICATION RoT DATA start here */
-    Image$$TFM_APP_RW_STACK_START$$Base = .;
+    Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
+    Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
+#endif 
 
     .TFM_APP_ROT_LINKER_DATA : ALIGN(32)
     {
@@ -204,15 +206,6 @@ SECTIONS
 
     /**** APPLICATION RoT DATA end here */
     Image$$TFM_APP_RW_STACK_END$$Base = .;
-#ifdef CODE_SHARING
-    /* The code sharing between bootloader and runtime requires to share the
-     * global variables.
-     */
-    .TFM_SHARED_SYMBOLS : ALIGN(32)
-    {
-        . += SHARED_SYMBOL_AREA_SIZE;
-    } > RAM
-#endif
 
     /* shared_data and msp_stack are overlapping on purpose when
      * msp_stack is extended until the beginning of RAM, when shared_date

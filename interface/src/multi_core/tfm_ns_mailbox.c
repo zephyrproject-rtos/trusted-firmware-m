@@ -8,6 +8,9 @@
 #include <string.h>
 
 #include "tfm_ns_mailbox.h"
+#ifdef TFM_MULTI_CORE_TEST
+#include "tfm_ns_mailbox_test.h"
+#endif
 
 /* The pointer to NSPE mailbox queue */
 static struct ns_mailbox_queue_t *mailbox_queue_ptr = NULL;
@@ -67,9 +70,9 @@ static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
     uint8_t idx;
     mailbox_queue_status_t status;
 
-    ns_mailbox_spin_lock();
+    tfm_ns_mailbox_os_spin_lock();
     status = queue->empty_slots;
-    ns_mailbox_spin_unlock();
+    tfm_ns_mailbox_os_spin_unlock();
 
     if (!status) {
         /* No empty slot */
@@ -82,9 +85,9 @@ static uint8_t acquire_empty_slot(struct ns_mailbox_queue_t *queue)
         }
     }
 
-    ns_mailbox_spin_lock();
+    tfm_ns_mailbox_os_spin_lock();
     clear_queue_slot_empty(queue, idx);
-    ns_mailbox_spin_unlock();
+    tfm_ns_mailbox_os_spin_unlock();
 
     return idx;
 }
@@ -146,14 +149,14 @@ static int32_t mailbox_rx_client_reply(uint8_t idx, int32_t *reply)
     /* Clear up the owner field */
     set_msg_owner(idx, NULL);
 
-    ns_mailbox_spin_lock();
+    tfm_ns_mailbox_os_spin_lock();
     clear_queue_slot_woken(idx);
     /*
      * Make sure that the empty flag is set after all the other status flags are
      * re-initialized.
      */
     set_queue_slot_empty(idx);
-    ns_mailbox_spin_unlock();
+    tfm_ns_mailbox_os_spin_unlock();
 
     return MAILBOX_SUCCESS;
 }
@@ -250,14 +253,14 @@ static inline bool mailbox_wait_reply_signal(uint8_t idx)
 {
     bool is_set = false;
 
-    ns_mailbox_spin_lock();
+    tfm_ns_mailbox_os_spin_lock();
 
     if (is_queue_slot_woken(idx)) {
         clear_queue_slot_woken(idx);
         is_set = true;
     }
 
-    ns_mailbox_spin_unlock();
+    tfm_ns_mailbox_os_spin_unlock();
 
     return is_set;
 }

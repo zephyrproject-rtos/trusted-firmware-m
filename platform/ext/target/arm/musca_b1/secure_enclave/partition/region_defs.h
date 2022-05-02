@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +26,6 @@
 #define S_HEAP_SIZE             (0x0000200)
 #define S_MSP_STACK_SIZE_INIT   (0x0000400)
 #define S_MSP_STACK_SIZE        (0x0000800)
-#define S_PSP_STACK_SIZE        (0x0000800)
 
 /* This size of buffer is big enough to store an attestation
  * token produced by initial attestation service
@@ -79,6 +79,9 @@
 #define S_DATA_LIMIT            (S_DATA_START + S_DATA_SIZE - 1)
 #define S_DATA_PRIV_START       (S_DATA_START + S_UNPRIV_DATA_SIZE)
 
+/* Size of vector table: 47 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0xC0)
+
 /* Shared data area between bootloader and runtime firmware.
  * Shared data area is allocated at the beginning of the privileged data area,
  * it is overlapping with TF-M Secure code's MSP stack
@@ -124,6 +127,8 @@
 #define BL2_DATA_SIZE     (S_DATA_SIZE)
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
+/* NSPE-to-SPE interrupt */
+#define MAILBOX_IRQ MHU0_MSG_0_IRQn
 
 #endif /* __REGION_DEFS_H__ */
 

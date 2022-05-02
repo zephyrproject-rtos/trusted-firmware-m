@@ -20,8 +20,8 @@
 #define EXC_RETURN_FPU_FRAME_BASIC              (1 << 4)
 #endif
 
-/* Initial EXC_RETURN value in LR when a thread is loaded at the first time */
 #define EXC_RETURN_THREAD_S_PSP                 0xFFFFFFFD
+#define EXC_RETURN_HANDLER_S_MSP                0xFFFFFFF1
 
 /* Exception return behavior */
 

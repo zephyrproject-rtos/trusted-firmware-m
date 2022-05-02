@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,13 +9,15 @@ set(TFM_TOOLCHAIN_FILE                  ${CMAKE_SOURCE_DIR}/toolchain_GNUARM.cma
 set(TFM_PLATFORM                        ""          CACHE STRING    "Platform to build TF-M for. Must be either a relative path from [TF-M]/platform/ext/target, or an absolute path.")
 set(CROSS_COMPILE                       arm-none-eabi CACHE STRING  "Cross-compilation triplet")
 
-set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "Header size")
-set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "Trailer size")
+set(BL1                                 OFF         CACHE BOOL      "Whether to build BL1")
+set(BL2                                 ON          CACHE BOOL      "Whether to build BL2")
 set(NS                                  ON          CACHE BOOL      "Whether to build NS app")
 
 set(TEST_S                              OFF         CACHE BOOL      "Whether to build S regression tests")
 set(TEST_NS                             OFF         CACHE BOOL      "Whether to build NS regression tests")
 set(TEST_PSA_API                        ""          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
+set(TEST_BL1_1                          OFF         CACHE BOOL      "Whether to build BL1_1 tests")
+set(TEST_BL1_2                          OFF         CACHE BOOL      "Whether to build BL1_2 tests")
 
 # TFM_LIB_MODEL is the only user configuration for Library Model selection.
 # TFM_PSA_API becomes an internal variable. Please do NOT use it in build command line.
@@ -24,6 +26,8 @@ set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation l
 set(PSA_FRAMEWORK_HAS_MM_IOVEC          OFF         CACHE BOOL      "Enable MM-IOVEC")
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
 set(TFM_FIH_PROFILE                     OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
+set(CONFIG_TFM_CONN_HANDLE_MAX_NUM      8           CACHE STRING    "The maximal number of secure services that are connected or requested at the same time")
+set(CONFIG_TFM_SPM_BACKEND              "IPC"       CACHE STRING    "The SPM backend [IPC, SFN]")
 
 # An NSPE client_id is provided by the NSPE OS via the SPM or directly by the SPM.
 # When `TFM_NS_MANAGE_NSID` is `ON`, TF-M supports NSPE OS providing NSPE client_id.
@@ -40,21 +44,22 @@ set(TFM_SPM_LOG_LEVEL                   TFM_SPM_LOG_LEVEL_INFO          CACHE ST
 set(TFM_PARTITION_LOG_LEVEL             TFM_PARTITION_LOG_LEVEL_INFO    CACHE STRING    "Set default Secure Partition log level as INFO level")
 
 set(TFM_CODE_SHARING                    OFF         CACHE PATH      "Enable code sharing between MCUboot and secure firmware")
-set(TFM_CODE_SHARING_PATH               ""          CACHE PATH      "Path to repo which shares code with secure firmware")
 
 set(TFM_INSTALL_PATH                    ${CMAKE_BINARY_DIR}/install CACHE PATH "Path to which to install TF-M files")
 
 set(TFM_DEBUG_SYMBOLS                   ON          CACHE BOOL      "Add debug symbols. Note that setting CMAKE_BUILD_TYPE to Debug or RelWithDebInfo will also add debug symbols.")
 set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to build the binary for lcov tools")
 
-set(TFM_SP_META_PTR_ENABLE              OFF         CACHE BOOL      "Use Partition Metadata Pointer")
-
 set(TFM_PXN_ENABLE                      OFF         CACHE BOOL      "Use Privileged execute never (PXN)")
 
 set(TFM_EXCEPTION_INFO_DUMP             OFF         CACHE BOOL      "On fatal errors in the secure firmware, capture info about the exception. Print the info if the SPM log level is sufficient.")
 
-set(CONFIG_TFM_SPE_FP                   0           CACHE STRING    "FP ABI type in SPE: 0-software, 1-hybird, 2-hardware")
-set(CONFIG_TFM_LAZY_STACKING_SPE        OFF         CACHE BOOL      "Disable lazy stacking from SPE")
+set(CONFIG_TFM_HALT_ON_CORE_PANIC       OFF         CACHE BOOL       "On fatal errors in the secure firmware, halt instead of rebooting.")
+
+set(CONFIG_TFM_FP                       "soft"      CACHE STRING    "FP ABI type in SPE and NSPE: soft-Software ABI, hard-Hardware ABI")
+set(CONFIG_TFM_LAZY_STACKING            OFF         CACHE BOOL      "Enable/disable lazy stacking")
+
+set(CONFIG_TFM_DOORBELL_API             ON          CACHE BOOL      "Enable the doorbell APIs")
 
 ############################ Platform ##########################################
 
@@ -68,6 +73,8 @@ set(SECURE_UART1                        OFF         CACHE BOOL      "Enable secu
 set(CRYPTO_HW_ACCELERATOR               OFF         CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
 
 set(OTP_NV_COUNTERS_RAM_EMULATION       OFF         CACHE BOOL      "Enable OTP/NV_COUNTERS emulation in RAM. Has no effect on non-default implementations of the OTP and NV_COUNTERS")
+
+set(PLATFORM_DEFAULT_BL1                ON          CACHE STRING    "Whether to use default BL1 or platform-specific one")
 
 set(PLATFORM_DEFAULT_ATTEST_HAL         ON          CACHE BOOL      "Use default attest hal implementation.")
 set(PLATFORM_DEFAULT_NV_COUNTERS        ON          CACHE BOOL      "Use default nv counter implementation.")
@@ -83,8 +90,17 @@ set(PLATFORM_DEFAULT_PROVISIONING       ON          CACHE BOOL      "Use default
 set(TFM_DUMMY_PROVISIONING              ON          CACHE BOOL      "Provision with dummy values. NOT to be used in production")
 set(PLATFORM_IS_FVP                     FALSE       CACHE BOOL      "Whether to enable FVP or FPGA build of the platform.")
 
-############################ Partitions ########################################
+set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE       CACHE BOOL      "Whether to use psa-adac secure debug.")
+set(PLATFORM_PSA_ADAC_SOURCE_PATH       "DOWNLOAD"  CACHE PATH      "Path to source dir of psa-adac.")
+set(PLATFORM_PSA_ADAC_VERSION           "427923cc0152578d536fb2065154d5d0dd874910" CACHE STRING "The version of psa-adac to use.")
 
+set(BL1_HEADER_SIZE                     0x000       CACHE STRING    "BL1 Header size")
+set(BL1_TRAILER_SIZE                    0x000       CACHE STRING    "BL1 Trailer size")
+
+set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "BL2 Header size")
+set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer size")
+
+############################ Partitions ########################################
 set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Protected Storage partition")
 set(PS_CREATE_FLASH_LAYOUT              ON          CACHE BOOL      "Create flash FS if it doesn't exist for Protected Storage partition")
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
@@ -133,12 +149,14 @@ set(TFM_PARTITION_PSA_PROXY             OFF         CACHE BOOL      "Enable PSA 
 set(FORWARD_PROT_MSG                    OFF         CACHE BOOL      "Whether to forward all PSA RoT messages to a Secure Enclave")
 set(TFM_PARTITION_FIRMWARE_UPDATE       OFF         CACHE BOOL      "Enable firmware update partition")
 set(TFM_FWU_BOOTLOADER_LIB              "mcuboot"   CACHE STRING    "Bootloader configure file for Firmware Update partition")
+set(PSA_FWU_MAX_BLOCK_SIZE              1024        CACHE STRING    "The maximum permitted size for block in psa_fwu_write, in bytes.")
+set(TFM_FWU_BUF_SIZE                    ""          CACHE STRING    "Size of the FWU internal data transfer buffer (defaults to PSA_FWU_MAX_BLOCK_SIZE if not set)")
 
 ################################## Dependencies ################################
 
 set(MBEDCRYPTO_PATH                     "DOWNLOAD"  CACHE PATH      "Path to Mbed Crypto (or DOWNLOAD to fetch automatically")
-set(MBEDCRYPTO_VERSION                  "mbedtls-3.0.0" CACHE STRING "The version of Mbed Crypto to use")
-set(MBEDCRYPTO_GIT_REMOTE               "https://github.com/ARMmbed/mbedtls.git" CACHE STRING "The URL (or path) to retrieve MbedTLS from.")
+set(MBEDCRYPTO_VERSION                  "mbedtls-3.1.0" CACHE STRING "The version of Mbed Crypto to use")
+set(MBEDCRYPTO_GIT_REMOTE               "https://github.com/Mbed-TLS/mbedtls.git" CACHE STRING "The URL (or path) to retrieve MbedTLS from.")
 set(MBEDCRYPTO_BUILD_TYPE               "${CMAKE_BUILD_TYPE}" CACHE STRING "Build type of Mbed Crypto library")
 set(TFM_MBEDCRYPTO_CONFIG_PATH
   "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h" CACHE PATH
@@ -150,10 +168,10 @@ to the include path of mbedtls.")
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH "" CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
 set(MCUBOOT_PATH                        "DOWNLOAD"        CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "v1.8.0"  CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_VERSION                     "v1.9.0"  CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
-set(PSA_ARCH_TESTS_VERSION              "v21.10_API1.3_ADAC_ALPHA-1"   CACHE STRING    "The version of PSA arch tests to use")
+set(PSA_ARCH_TESTS_VERSION              "f7e8495"   CACHE STRING    "The version of PSA arch tests to use")
 
 ################################################################################
 ################################################################################
@@ -167,4 +185,4 @@ set_property(CACHE TFM_FIH_PROFILE PROPERTY STRINGS "OFF;LOW;MEDIUM;HIGH")
 
 ########################## FP #################################################
 
-set_property(CACHE CONFIG_TFM_SPE_FP PROPERTY STRINGS "0;1;2")
+set_property(CACHE CONFIG_TFM_FP PROPERTY STRINGS "soft;hard")

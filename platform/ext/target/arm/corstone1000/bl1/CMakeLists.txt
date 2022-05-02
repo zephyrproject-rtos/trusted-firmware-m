@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -116,7 +116,7 @@ set(BL2_SOURCE ${CMAKE_SOURCE_DIR}/bl2)
 target_sources(bl1_main
     PRIVATE
         ${BL2_SOURCE}/src/flash_map.c
-        ${BL2_SOURCE}/src/provisioning.c
+        ./provisioning.c
 )
 
 target_include_directories(bl1_main
@@ -188,7 +188,6 @@ target_include_directories(bl1_main
 
 target_sources(bl1_main
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/boot_hal.c
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_SOURCE_DIR}/platform/ext/common/uart_stdout.c>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/nv_counters.c>
         $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/template/flash_otp_nv_counters_backend.c>
@@ -238,6 +237,9 @@ target_sources(bl1_main
         ../Device/Source/system_core_init.c
         ../Native_Driver/firewall.c
         ../Native_Driver/uart_pl011_drv.c
+        ../fw_update_agent/fwu_agent.c
+        ../Native_Driver/arm_watchdog_drv.c
+        ../Native_Driver/watchdog.c
         bl1_boot_hal.c
         bl1_flash_map.c
         bl1_security_cnt.c
@@ -256,6 +258,7 @@ target_sources(bl1_main
     PRIVATE
         ../Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
         ../Native_Driver/spi_n25q256a_flash_lib.c
+        ../Native_Driver/spi_sst26vf064b_flash_lib.c
 )
 endif()
 
@@ -267,6 +270,7 @@ target_include_directories(bl1_main
         ../CMSIS_Driver/Config
         ../Device/Config
         ../Native_Driver
+        ../fw_update_agent
 )
 
 ############################### SIGNING BL2 image ##################################
@@ -287,6 +291,7 @@ target_compile_definitions(signing_layout_for_bl2
     PRIVATE
         MCUBOOT_IMAGE_NUMBER=${BL1_IMAGE_NUMBER}
         BL1
+        $<$<BOOL:${TEST_S}>:TEST_S>
 )
 
 target_include_directories(signing_layout_for_bl2
@@ -304,7 +309,7 @@ add_custom_command(OUTPUT bl2_signed.bin
     WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
     #Sign secure binary image with provided secret key
-    COMMAND ${PYTHON_EXECUTABLE} ${BL2_SOURCE}/ext/mcuboot/scripts/wrapper/wrapper.py
+    COMMAND ${Python3_EXECUTABLE} ${BL2_SOURCE}/ext/mcuboot/scripts/wrapper/wrapper.py
         -v ${BL2_IMAGE_VERSION}
         --layout $<TARGET_OBJECTS:signing_layout_for_bl2>
         -k ${MCUBOOT_KEY_S}

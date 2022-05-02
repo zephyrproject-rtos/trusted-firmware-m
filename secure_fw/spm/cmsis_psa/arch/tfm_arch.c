@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,16 +18,31 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
 #if !defined(__ICCARM__)
         ".syntax unified                        \n"
 #endif
-        "subs    r0, #8                         \n" /* SEAL room */
-        "msr     msp, r0                        \n"
+        "mov     sp, r0                         \n"
+
+        /* Seal Main Stack before using */
+        "ldr     r2, ="M2S(STACK_SEAL_PATTERN)" \n"
+        "ldr     r3, ="M2S(STACK_SEAL_PATTERN)" \n"
+        "push    {r2, r3}                       \n"
         "bx      r1                             \n"
     );
 }
 
-void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uintptr_t ret_code)
+void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
 {
-    ((struct full_context_t *)(((struct context_ctrl_t *)p_ctx_ctrl)->sp))
-                                                       ->stat_ctx.r0 = ret_code;
+    struct context_ctrl_t *ctx_ctrl = (struct context_ctrl_t *)p_ctx_ctrl;
+
+    /*
+     * If a cross call is pending (cross_frame != CROSS_RETCODE_EMPTY), write
+     * return value to the frame position.
+     * Otherwise, write the return value to the state context on stack.
+     */
+    if (ctx_ctrl->cross_frame) {
+        ((struct cross_call_abi_frame_t *)ctx_ctrl->cross_frame)->a0 = ret_code;
+        ctx_ctrl->retcode_status = CROSS_RETCODE_UPDATED;
+    } else {
+        ((struct full_context_t *)ctx_ctrl->sp)->stat_ctx.r0 = ret_code;
+    }
 }
 
 /* Caution: Keep 'uint32_t' always for collecting thread return values! */
@@ -46,30 +61,10 @@ __attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
     );
 }
 
-/*
- * Initializes the State Context. The Context is used to do Except Return to
- * Thread Mode to start a function.
- *
- * p_sctx[out] - pointer to the State Context to be initialized.
- * param [in]  - The parameter for the function to start
- * pfn   [in]  - Pointer to the function to excute
- * pfnlr [in]  - The Link Register of the State Context - the return address of
- *               the function
- */
-static void tfm_arch_init_state_context(struct tfm_state_context_t *p_sctx,
-                                        void *param,
-                                        uintptr_t pfn, uintptr_t pfnlr)
-{
-    p_sctx->r0 = (uint32_t)param;
-    p_sctx->ra = (uint32_t)pfn;
-    p_sctx->lr = (uint32_t)pfnlr;
-    p_sctx->xpsr = XPSR_T32;
-}
-
 void tfm_arch_init_context(void *p_ctx_ctrl,
-                           uintptr_t pfn, void *param, uintptr_t pfnlr,
-                           uintptr_t sp_limit, uintptr_t sp)
+                           uintptr_t pfn, void *param, uintptr_t pfnlr)
 {
+    uintptr_t sp = ((struct context_ctrl_t *)p_ctx_ctrl)->sp;
     struct full_context_t *p_tctx =
             (struct full_context_t *)arch_seal_thread_stack(sp);
 
@@ -77,10 +72,9 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
 
     spm_memset(p_tctx, 0, sizeof(*p_tctx));
 
-    tfm_arch_init_state_context(&p_tctx->stat_ctx, param, pfn, pfnlr);
+    ARCH_CTXCTRL_EXCRET_PATTERN(&p_tctx->stat_ctx, param, pfn, pfnlr);
 
     ((struct context_ctrl_t *)p_ctx_ctrl)->exc_ret  = EXC_RETURN_THREAD_S_PSP;
-    ((struct context_ctrl_t *)p_ctx_ctrl)->sp_limit = sp_limit;
     ((struct context_ctrl_t *)p_ctx_ctrl)->sp       = (uintptr_t)p_tctx;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited
+ * Copyright (c) 2018-2021 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+REGION_DECLARE(Image$$, ER_VENEER, $$Base);
+REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 
 
@@ -48,10 +48,10 @@ const struct memory_region_limits memory_regions =
   (uint32_t)(FLASH_BASE_NS + FLASH_AREA_1_OFFSET + FLASH_NS_PARTITION_SIZE - 1),
 #endif /* 0 */
   .veneer_base =
-  (uint32_t) &REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
+  (uint32_t) &REGION_NAME(Image$$, ER_VENEER, $$Base),
 
   .veneer_limit =
-  (uint32_t) &REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+  (uint32_t) &REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
 };
 
 

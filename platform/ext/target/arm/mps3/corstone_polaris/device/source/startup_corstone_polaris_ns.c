@@ -180,8 +180,8 @@ DEFAULT_IRQ_HANDLER(UART5_Handler)
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-extern const pFunc __VECTOR_TABLE[496];
-       const pFunc __VECTOR_TABLE[496] __VECTOR_TABLE_ATTRIBUTE = {
+extern const pFunc __VECTOR_TABLE[];
+       const pFunc __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
   (pFunc)(&__MSP_INITIAL_SP),        /*      Initial Stack Pointer */
   Reset_Handler,                     /*      Reset Handler */
   NMI_Handler,                       /* -14: NMI Handler */
@@ -344,6 +344,8 @@ extern const pFunc __VECTOR_TABLE[496];
 void Reset_Handler(void)
 {
   __set_MSPLIM((uint32_t)(&__MSP_STACK_LIMIT));
+  __set_PSP((uint32_t)(&__INITIAL_SP));
+  __set_PSPLIM((uint32_t)(&__STACK_LIMIT));
 
   SystemInit();                             /* CMSIS System Initialization */
   __ASM volatile("MRS     R0, control\n"    /* Get control value */

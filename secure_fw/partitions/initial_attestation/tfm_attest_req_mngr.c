@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -86,7 +86,7 @@ static psa_status_t psa_attest_get_token_size(const psa_msg_t *msg)
 
     bytes_read = psa_read(msg->handle, 0,
                           &challenge_size, msg->in_size[0]);
-    if (bytes_read != msg->in_size[0]) {
+    if (bytes_read != sizeof(challenge_size)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -99,56 +99,22 @@ static psa_status_t psa_attest_get_token_size(const psa_msg_t *msg)
     return status;
 }
 
-/*
- * Fixme: Temporarily implement abort as infinite loop,
- * will replace it later.
- */
-static void tfm_abort(void)
+psa_status_t tfm_attestation_service_sfn(const psa_msg_t *msg)
 {
-    while (1)
-        ;
-}
-
-static void attest_signal_handle(psa_signal_t signal)
-{
-    psa_msg_t msg;
-    psa_status_t status;
-
-    status = psa_get(signal, &msg);
-    switch (msg.type) {
+    switch (msg->type) {
     case TFM_ATTEST_GET_TOKEN:
-        status = psa_attest_get_token(&msg);
-        psa_reply(msg.handle, status);
-        break;
+        return psa_attest_get_token(msg);
     case TFM_ATTEST_GET_TOKEN_SIZE:
-        status = psa_attest_get_token_size(&msg);
-        psa_reply(msg.handle, status);
-        break;
+        return psa_attest_get_token_size(msg);
     default:
-        tfm_abort();
+        return PSA_ERROR_NOT_SUPPORTED;
     }
+
+    return PSA_ERROR_GENERIC_ERROR;
 }
-#endif
+#endif /* TFM_PSA_API */
 
 psa_status_t attest_partition_init(void)
 {
-    psa_status_t err = attest_init();
-#ifdef TFM_PSA_API
-    psa_signal_t signals;
-
-    if (err != PSA_SUCCESS) {
-        tfm_abort();
-    }
-
-    while (1) {
-        signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & TFM_ATTESTATION_SERVICE_SIGNAL) {
-            attest_signal_handle(TFM_ATTESTATION_SERVICE_SIGNAL);
-        } else {
-            tfm_abort();
-        }
-    }
-#else
-    return err;
-#endif
+    return attest_init();
 }

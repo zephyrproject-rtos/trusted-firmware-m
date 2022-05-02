@@ -2,7 +2,15 @@
 Build instructions
 ##################
 Please make sure you have all required software installed as explained in the
-:doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`.
+:doc:`TF-M getting started </getting_started/tfm_getting_started>`.
+The additional building materials you can find in the following links:
+
+.. toctree::
+    :maxdepth: 1
+
+    IAR toolchain <tfm_build_instruction_iar>
+    Run TF-M examples <run_tfm_examples_on_arm_platforms>
+    Building documentation <documentation_generation>
 
 ****************
 TF-M build steps
@@ -25,13 +33,13 @@ To simplify documentation commands, the new created repository under
 ``trusted-firmware-m`` would be referenced as ``<TF-M base folder>`` and
 its parent, the ``<base folder>``. Dependency management is now handled by
 cmake. If you wish to alter this behaviour, see
-:ref:`docs/technical_references/instructions/tfm_build_instruction:Manual
+:ref:`technical_references/instructions/tfm_build_instruction:Manual
 dependency management`
 
 .. Note::
 
  - For building with Armclang compiler version 6.10.0+, please follow the note
-   in :doc:`TF-M getting started </docs/getting_started/tfm_getting_started>`.
+   in :doc:`TF-M getting started </getting_started/tfm_getting_started>`.
  - For building with the IAR toolchain, please see the notes in
    :doc:`IAR software requirements <tfm_build_instruction_iar>`
 
@@ -77,20 +85,19 @@ config that has already been set at any of the prior stages.
 Required cmake parameters for building TF-M
 -------------------------------------------
 
-+----------------------+-------------------------------------------------------+
-| Parameter            | Description                                           |
-+======================+=======================================================+
-| TFM_PLATFORM         | The target platform as a path from the base directory |
-|                      | ``/platform/ext/target``, or as an absolute path.     |
-+----------------------+-------------------------------------------------------+
-
-By default release configuration builds. Alternate build types can be controlled
-by the CMAKE_BUILD_TYPE variable.
+``TFM_PLATFORM`` is required to select the target platform, it can be:
+ - A relative path under ``<TF-M_root>/platform/ext/target``,
+   for example ``arm/mps2/an521``.
+ - An absolute path of target platform, mainly used for out-of-tree platform
+   build.
+ - A target platform name that is supported under
+   <TF-M_root>/platform/ext/target, for example ``an521``.
 
 Build type
 ----------
 
-Build type is controlled by the ``CMAKE_BUILD_TYPE`` variable. The possible
+By default, a release configuration is built. Alternate build types can be
+specified with the ``CMAKE_BUILD_TYPE`` variable. The possible
 types are:
 
  - ``Debug``
@@ -195,15 +202,15 @@ them are disabled by default.
 | TEST_S_IPC          | Build secure regression IPC tests.                                 |
 +---------------------+--------------------------------------------------------------------+
 
-The single test suite can be opened when their dependencies like partitions or
+Individual test suites can be enabled when their dependencies like partitions or
 other specific configurations are set. On the one hand, some test suites depend
-on other test suites. On the other hand, some test suites have confict with
+on other test suites. On the other hand, some test suites conflict with
 other test suites. Test configurations and dependencies will be
 checked in ``${TFM_TEST_REPO_PATH}/test/config/check_config.cmake``.
 
-If regression testing is enabled, it will then enable all tests for the enabled
-secure partitions.
-Multicore tests will be enabled if ``TFM_MULTI_CORE_TOPOLOGY`` is enabled.
+If regression testing is enabled by ``TEST_NS`` or ``TEST_S``, individual
+test suites will be enabled or disabled as appropriate for the TF-M
+configuration (i.e. all enabled secure partitions will be tested).
 
 Some cryptographic tests can be enabled and disabled. This is done to prevent
 false failures from being reported when a smaller Mbed Crypto config is being
@@ -310,11 +317,11 @@ variables, in the format of cmake command line parameters.
 +------------------------------------------+---------------------------------------+
 
 There has also been some changes to the PSA manifest file generation. The files
-are now generated into a seperate tree in the ``<tfm build dir>/generated``
+are now generated into a separate tree in the ``<tfm build dir>/generated``
 directory. Therefore they have been removed from the source tree. Any changes
 should be made only to the template files.
 
-The api for the ``tools/tfm_parse_manifest_list.py`` script has also changed
+The API for the ``tools/tfm_parse_manifest_list.py`` script has also changed
 slightly. It is no longer required to be run manually as it is run as part of
 cmake.
 
@@ -322,16 +329,12 @@ cmake.
 TF-M build examples
 *******************
 
-.. Note::
-   By default, CMAKE_BUILD_TYPE is set to Release, for debug support change
-   this to Debug. See below for an example.
-
 Example: building TF-M for AN521 platform using GCC:
 ====================================================
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_GNUARM.cmake -DCMAKE_BUILD_TYPE=Debug
+    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521
     cmake --build cmake_build -- install
 
 Alternately using traditional cmake syntax
@@ -341,27 +344,23 @@ Alternately using traditional cmake syntax
     cd <TF-M base folder>
     mkdir cmake_build
     cd cmake_build
-    cmake .. -DTFM_PLATFORM=arm/mps2/an521 -DTFM_TOOLCHAIN_FILE=../toolchain_GNUARM.cmake
+    cmake .. -DTFM_PLATFORM=arm/mps2/an521
     make install
-
-.. Note::
-   Unix Makefiles is the default generator. Ninja is also supported by setting
-   -GNinja
 
 .. Note::
 
     It is recommended to build each different build configuration in a separate
     build directory.
 
-As seen above, the toolchain can be set using the -DTFM_TOOLCHAIN_FILE parameter. Without
-it, the build command takes the GNU ARM toolchain as default, so there is no need
-to explicitly include it. In case other toolchain is required, i.e. ARM Clang, simply
-specify in the command line
+The default build uses Unix Makefiles. The ``-G`` option can be used to change
+this. The default build uses the GNU ARM toolchain and creates a Release build.
+These options can be overridden using the ``TFM_TOOLCHAIN_FILE`` and
+``CMAKE_BUILD_TYPE`` parameters, as shown below
 
 .. code-block:: bash
 
     cd <TF-M base folder>
-    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -DTFM_TOOLCHAIN_FILE=toolchain_ARMCLANG.cmake -DTEST_S=ON -DTEST_NS=ON
+    cmake -S . -B cmake_build -DTFM_PLATFORM=arm/mps2/an521 -GNinja -DTFM_TOOLCHAIN_FILE=toolchain_ARMCLANG.cmake -DCMAKE_BUILD_TYPE=Debug
     cmake --build cmake_build -- install
 
 Regression Tests for the AN521 target platform
@@ -541,4 +540,5 @@ Alternately using traditional cmake syntax
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.*

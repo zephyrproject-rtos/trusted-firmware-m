@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -49,7 +49,7 @@ endif()
 # The conditiions are actually overlapped but it can make the logic more clear.
 # Besides, the dependencies between NS app and regression tests will be
 # optimized later.
-if (NS OR TFM_S_REG_TEST OR TFM_NS_REG_TEST)
+if (NS OR TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2 OR TEST_BL1_1 OR TEST_BL1_2)
     # Set tf-m-tests repo config
     include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/repo_config_default.cmake)
     # Fetch tf-m-tests repo

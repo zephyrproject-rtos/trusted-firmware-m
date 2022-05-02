@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-{{utilities.donotedit_warning}}
+/***********{{utilities.donotedit_warning}}***********/
 
 #ifndef __TFM_SPM_DB_FUNC_INC__
 #define __TFM_SPM_DB_FUNC_INC__
@@ -34,8 +34,11 @@
 /** Declarations of partition init functions */
 /**************************************************************************/
 {% for partition in partitions %}
+    {% if partition.manifest.entry_point %}
 extern void {{partition.manifest.entry_point}}(void);
-
+    {% elif partition.manifest.entry_init %}
+extern void {{partition.manifest.entry_init}}(void);
+    {% endif %}
 {% endfor %}
 /**************************************************************************/
 /** Context stacks for IRQ handling */
@@ -120,7 +123,13 @@ const struct spm_partition_static_data_t static_data_list[] =
     {% endif %}
                               ,
         .partition_priority   = TFM_PRIORITY({{partition.manifest.priority}}),
+    {% if partition.manifest.entry_point %}
         .partition_init       = {{partition.manifest.entry_point}},
+    {% elif partition.manifest.entry_init %}
+        .partition_init       = {{partition.manifest.entry_init}},
+    {% else %}
+        .partition_init       = NULL,
+    {% endif %}
         .dependencies_num     = {{partition.manifest.dependencies | length()}},
     {% if partition.manifest.dependencies %}
         .p_dependencies       = dependencies_{{partition.manifest.name}},

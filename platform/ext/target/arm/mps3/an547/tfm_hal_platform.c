@@ -12,6 +12,8 @@
 #include "uart_stdout.h"
 #include "device_definition.h"
 
+extern const struct memory_region_limits memory_regions;
+
 enum tfm_hal_status_t tfm_hal_platform_init(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
@@ -62,4 +64,19 @@ void tfm_hal_system_reset(void)
     mpc_revert_non_secure_to_secure_cfg();
 
     NVIC_SystemReset();
+}
+
+uint32_t tfm_hal_get_ns_VTOR(void)
+{
+    return memory_regions.non_secure_code_start;
+}
+
+uint32_t tfm_hal_get_ns_MSP(void)
+{
+    return *((uint32_t *)memory_regions.non_secure_code_start);
+}
+
+uint32_t tfm_hal_get_ns_entry_point(void)
+{
+    return *((uint32_t *)(memory_regions.non_secure_code_start + 4));
 }

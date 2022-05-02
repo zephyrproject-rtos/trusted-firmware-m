@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,6 +33,7 @@ target_add_scatter_file(tfm_s
     $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
     $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_isolation_l3.sct>
     $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_isolation_l3.ld>
+    $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_isolation_l3.icf>
 )
 
 if(NS)
@@ -94,7 +95,7 @@ target_sources(platform_s
         native_drivers/mpu_armv8m_drv.c
         native_drivers/ppc_sse200_drv.c
         spm_hal.c
-        tfm_interrupts.c
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         tfm_hal_isolation.c
         tfm_hal_platform.c
         target_cfg.c
@@ -131,11 +132,6 @@ target_sources(platform_ns
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
-target_link_libraries(platform_ns
-    PRIVATE
-        tfm_fih # To expand include path
-)
-
 target_include_directories(platform_ns
     PUBLIC
         .
@@ -152,17 +148,11 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             retarget/platform_retarget_dev.c
             cmsis_core/system_cmsdk_mps2_an521.c
             cmsis_drivers/Driver_Flash.c
             native_drivers/arm_uart_drv.c
             cmsis_drivers/Driver_USART.c
-    )
-
-    target_link_libraries(platform_bl2
-        PRIVATE
-            tfm_fih # To expand include path
     )
 
     target_include_directories(platform_bl2

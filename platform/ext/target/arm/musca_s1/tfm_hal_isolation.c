@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,9 +15,11 @@
 #include "tfm_hal_isolation.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_core_utils.h"
+#ifdef TFM_PSA_API
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
+#endif /* TFM_PSA_API */
 
 /* It can be retrieved from the MPU_TYPE register. */
 #define MPU_REGION_NUM                  8
@@ -26,30 +28,19 @@
 static uint32_t n_configured_regions = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
-#define MPU_REGION_VENEERS           0
-#define MPU_REGION_TFM_UNPRIV_CODE   1
-#define MPU_REGION_NS_STACK          2
-#define PARTITION_REGION_RO          3
-#define PARTITION_REGION_RW_STACK    4
-#define PARTITION_REGION_PERIPH      5
-#ifdef TFM_SP_META_PTR_ENABLE
-#define MPU_REGION_SP_META_PTR       7
-#endif /* TFM_SP_META_PTR_ENABLE */
-
+REGION_DECLARE(Image$$, ER_VENEER, $$Base);
+REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
-#ifdef TFM_SP_META_PTR_ENABLE
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
+#ifdef CONFIG_TFM_PARTITION_META
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 #endif
 
-extern const struct memory_region_limits memory_regions;
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
@@ -72,9 +63,10 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     mpu_armv8m_clean(&dev_mpu_s);
 
     /* Veneer region */
-    region_cfg.region_nr = MPU_REGION_VENEERS;
-    region_cfg.region_base = memory_regions.veneer_base;
-    region_cfg.region_limit = memory_regions.veneer_limit;
+    region_cfg.region_nr = n_configured_regions;
+    region_cfg.region_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base);
+    region_cfg.region_limit =
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit);
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_CODE_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -85,7 +77,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     n_configured_regions++;
 
     /* TFM Core unprivileged code region */
-    region_cfg.region_nr = MPU_REGION_TFM_UNPRIV_CODE;
+    region_cfg.region_nr = n_configured_regions;
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
     region_cfg.region_limit =
@@ -99,23 +91,8 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     }
     n_configured_regions++;
 
-    /* NSPM PSP */
-    region_cfg.region_nr = MPU_REGION_NS_STACK;
-    region_cfg.region_base =
-        (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-    region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
-    region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-    region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-    region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
-    region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
-    if (mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg) != MPU_ARMV8M_OK) {
-        return TFM_HAL_ERROR_GENERIC;
-    }
-    n_configured_regions++;
-
     /* RO region */
-    region_cfg.region_nr = PARTITION_REGION_RO;
+    region_cfg.region_nr = n_configured_regions;
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base);
     region_cfg.region_limit =
@@ -130,7 +107,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     n_configured_regions++;
 
     /* RW, ZI and stack as one region */
-    region_cfg.region_nr = PARTITION_REGION_RW_STACK;
+    region_cfg.region_nr = n_configured_regions;
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base);
     region_cfg.region_limit =
@@ -144,13 +121,13 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     }
     n_configured_regions++;
 
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
     /* TFM partition metadata pointer region */
-    region_cfg.region_nr = MPU_REGION_SP_META_PTR;
+    region_cfg.region_nr = n_configured_regions;
     region_cfg.region_base =
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Base);
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -168,6 +145,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     return TFM_HAL_SUCCESS;
 }
 
+#ifdef TFM_PSA_API
 /*
  * Implementation of tfm_hal_bind_boundaries() on MUSCA_S1:
  *
@@ -196,7 +174,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = !!(p_ldinf->flags & PARTITION_MODEL_PSA_ROT);
+    privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
     p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
@@ -279,3 +257,4 @@ enum tfm_hal_status_t tfm_hal_update_boundaries(
 
     return TFM_HAL_SUCCESS;
 }
+#endif /* TFM_PSA_API */

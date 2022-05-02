@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,13 +12,13 @@
 #include <stdint.h>
 
 #include "psa/error.h"
+#include "psa/fwu_config.h"
 #include "tfm_fwu_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define PSA_FWU_MAX_BLOCK_SIZE               1024
 #define TFM_FWU_INVALID_IMAGE_ID             0
 
 /* The maximum size of an image digest in bytes. This is dependent

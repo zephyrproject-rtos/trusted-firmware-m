@@ -32,9 +32,6 @@
 extern psa_status_t tfm_crypto_get_caller_id(int32_t *id);
 #endif
 
-#define MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED        -0x0016  /**< API is NOT supported. */
-#define CC_UNUSED_PARAM(prm)  ((void)prm)
-
 #include <string.h>
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
@@ -107,12 +104,10 @@ void mbedtls_gcm_init( mbedtls_gcm_context *ctx )
 #if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
    /* Enable SAES clock */
     __HAL_RCC_SAES_CLK_ENABLE();
-
 #endif
     memset( ctx, 0, sizeof( mbedtls_gcm_context ) );
 }
 
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
 /*
  * Precompute small multiples of H, that is set
  *      HH[i] || HL[i] = H times i,
@@ -181,7 +176,6 @@ static int gcm_gen_table( mbedtls_gcm_context *ctx )
 
     return( 0 );
 }
-#endif /* HW_CRYPTO_DPA_GCM */
 
 int mbedtls_gcm_setkey( mbedtls_gcm_context *ctx,
                         mbedtls_cipher_id_t cipher,
@@ -227,6 +221,9 @@ int mbedtls_gcm_setkey( mbedtls_gcm_context *ctx,
 #endif
 #if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
     ctx->hcryp_gcm.Instance = SAES;
+#else
+    ctx->hcryp_gcm.Instance = AES;
+#endif
     ctx->hcryp_gcm.Init.Algorithm  = CRYP_AES_ECB;
 #if BUILD_CRYPTO_TFM
     tfm_crypto_get_caller_id(&id);
@@ -260,34 +257,21 @@ int mbedtls_gcm_setkey( mbedtls_gcm_context *ctx,
         ret = MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         goto exit;
     }
-
+#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
     /* Enable SAES clock */
     __HAL_RCC_SAES_CLK_ENABLE();
 #else
-    ctx->hcryp_gcm.Instance = AES;
-    ctx->hcryp_gcm.Init.Algorithm  = CRYP_AES_GCM_GMAC;
-
-    /* Deinitializes the CRYP peripheral */
-    if (HAL_CRYP_DeInit(&ctx->hcryp_gcm) != HAL_OK)
-    {
-        ret = MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
-        goto exit;
-    }
-
-    /* Enable AES clock */
     __HAL_RCC_AES_CLK_ENABLE();
-#endif /* HW_CRYPTO_DPA_GCM */
-
+#endif
     if (HAL_CRYP_Init(&ctx->hcryp_gcm) != HAL_OK)
     {
         ret = MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         goto exit;
     }
 
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
+
     if( ( ret = gcm_gen_table( ctx ) ) != 0 )
         goto exit;
-#endif
 
     /* allow multi-instance of CRYP use: save context for CRYP HW module CR */
     ctx->ctx_save_cr = ctx->hcryp_gcm.Instance->CR;
@@ -296,7 +280,7 @@ exit :
     return( ret );
 }
 
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
+
 /*
  * Shoup's method for multiplication use this table with
  *      last4[x] = x times P^128
@@ -355,7 +339,7 @@ static void gcm_mult( mbedtls_gcm_context *ctx, const unsigned char x[16],
     PUT_UINT32_BE( zl >> 32, output, 8 );
     PUT_UINT32_BE( zl, output, 12 );
 }
-#endif /* HW_CRYPTO_DPA_GCM */
+
 
 int gcm_starts( mbedtls_gcm_context *ctx,
                 int mode,
@@ -365,12 +349,9 @@ int gcm_starts( mbedtls_gcm_context *ctx,
                 size_t add_len )
 {
     size_t i;
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
+
     const unsigned char *p;
     size_t use_len;
-#else
-    static uint32_t iv_32B[4];
-#endif
 
     GCM_VALIDATE_RET( ctx != NULL );
     GCM_VALIDATE_RET( mode != MBEDTLS_GCM_ENCRYPT || mode != MBEDTLS_GCM_DECRYPT);
@@ -403,7 +384,6 @@ int gcm_starts( mbedtls_gcm_context *ctx,
     ctx->mode = mode;
     ctx->len = 0;
 
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
     ctx->add_len = 0;
 
     /* generate pre-counter block (Y = IV || 0exp(31) || 1) */
@@ -435,41 +415,6 @@ int gcm_starts( mbedtls_gcm_context *ctx,
         add_len -= use_len;
         p += use_len;
     }
-#else
-    /* Set IV with invert endianness */
-    for( i=0; i < 3; i++ )
-        GET_UINT32_BE( iv_32B[i], iv, 4*i );
-
-    /* counter value must be set to 2 when processing the first block of payload */
-    iv_32B[3] = 0x00000002;
-
-    ctx->hcryp_gcm.Init.pInitVect = iv_32B;
-
-    if (add_len != 0)
-    {
-      ctx->hcryp_gcm.Init.Header = (uint32_t *)add;
-      /* header buffer in byte length */
-      ctx->hcryp_gcm.Init.HeaderSize = (uint32_t)add_len;
-    }
-    else
-    {
-      ctx->hcryp_gcm.Init.Header = NULL;
-      ctx->hcryp_gcm.Init.HeaderSize = 0;
-    }
-
-    /* Additional Authentication Data in bytes unit */
-    ctx->hcryp_gcm.Init.HeaderWidthUnit = CRYP_HEADERWIDTHUNIT_BYTE;
-
-    /* Do not Allow IV reconfiguration at every gcm update */
-    ctx->hcryp_gcm.Init.KeyIVConfigSkip = CRYP_KEYIVCONFIG_ONCE;
-
-    /* reconfigure the CRYP */
-    if ( HAL_CRYP_SetConfig( &ctx->hcryp_gcm, &ctx->hcryp_gcm.Init ) != HAL_OK )
-    {
-        return( MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED );
-    }
-#endif /* HW_CRYPTO_DPA_GCM */
-
     /* allow multi-context of CRYP : save context */
     ctx->ctx_save_cr = ctx->hcryp_gcm.Instance->CR;
 
@@ -481,13 +426,11 @@ int gcm_update( mbedtls_gcm_context *ctx,
                 const unsigned char *input,
                 unsigned char *output )
 {
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
     unsigned char ectr[16];
     size_t i;
     const unsigned char *p;
     unsigned char *out_p = output;
     size_t use_len;
-#endif
 
     GCM_VALIDATE_RET( ctx != NULL );
     GCM_VALIDATE_RET( length == 0 || input != NULL );
@@ -509,7 +452,6 @@ int gcm_update( mbedtls_gcm_context *ctx,
 
     ctx->len += length;
 
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
     p = input;
     while( length > 0 )
     {
@@ -547,30 +489,6 @@ int gcm_update( mbedtls_gcm_context *ctx,
         p += use_len;
         out_p += use_len;
     }
-#else
-    if( ctx->mode == MBEDTLS_GCM_DECRYPT )
-    {
-         if (HAL_CRYP_Decrypt(&ctx->hcryp_gcm,
-                              (uint32_t *)input,
-                              length,
-                              (uint32_t *)output,
-                              ST_GCM_TIMEOUT) != HAL_OK)
-         {
-            return( MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED );
-         }
-    }
-    else
-    {
-         if (HAL_CRYP_Encrypt(&ctx->hcryp_gcm,
-                              (uint32_t *)input,
-                              length,
-                              (uint32_t *)output,
-                              ST_GCM_TIMEOUT) != HAL_OK)
-         {
-            return( MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED );
-         }
-    }
-#endif /* HW_CRYPTO_DPA_GCM */
 
     /* allow multi-context of CRYP : save context */
     ctx->ctx_save_cr = ctx->hcryp_gcm.Instance->CR;
@@ -582,14 +500,12 @@ int gcm_finish( mbedtls_gcm_context *ctx,
                 unsigned char *tag,
                 size_t tag_len )
 {
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
+
     unsigned char work_buf[16];
     size_t i;
     uint64_t orig_len;
     uint64_t orig_add_len;
-#else
-    __ALIGN_BEGIN uint8_t mac[16]      __ALIGN_END; /* temporary mac */
-#endif
+
 
     GCM_VALIDATE_RET( ctx != NULL );
     GCM_VALIDATE_RET( tag != NULL );
@@ -597,7 +513,6 @@ int gcm_finish( mbedtls_gcm_context *ctx,
     if( tag_len > 16 || tag_len < 4 )
         return( MBEDTLS_ERR_GCM_BAD_INPUT );
 
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED) && defined(HW_CRYPTO_DPA_GCM)
     orig_len = ctx->len * 8;
     orig_add_len = ctx->add_len * 8;
 
@@ -620,30 +535,6 @@ int gcm_finish( mbedtls_gcm_context *ctx,
         for( i = 0; i < tag_len; i++ )
             tag[i] ^= ctx->buf[i];
     }
-#else
-    /* implementation restrict support to a 16 bytes tag buffer */
-    if( tag_len != 16 )
-        return( MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED );
-
-    /* allow multi-context of CRYP use: restore context */
-    ctx->hcryp_gcm.Instance->CR = ctx->ctx_save_cr;
-
-    /* Tag has a variable length */
-    memset(mac, 0, sizeof(mac));
-
-    /* Generate the authentication TAG */
-    if (HAL_CRYPEx_AESGCM_GenerateAuthTAG(&ctx->hcryp_gcm,
-                                          (uint32_t *)mac,
-                                          ST_GCM_TIMEOUT)!= HAL_OK)
-    {
-        return (MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
-    }
-
-    memcpy( tag, mac, tag_len );
-
-    /* allow multi-context of CRYP : save context */
-    ctx->ctx_save_cr = ctx->hcryp_gcm.Instance->CR;
-#endif /* HW_CRYPTO_DPA_GCM */
 
     return( 0 );
 }
@@ -694,14 +585,9 @@ int mbedtls_gcm_auth_decrypt( mbedtls_gcm_context *ctx,
 {
     int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     unsigned char check_tag[16];
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED)
     size_t i, j;
     unsigned char diff = 0;
     volatile unsigned char inv_diff = 0xFF;
-#else
-    size_t i;
-    int diff;
-#endif
 
     GCM_VALIDATE_RET( ctx != NULL );
     GCM_VALIDATE_RET( iv != NULL );
@@ -717,7 +603,6 @@ int mbedtls_gcm_auth_decrypt( mbedtls_gcm_context *ctx,
         return( ret );
     }
 
-#if defined(GENERATOR_HW_CRYPTO_DPA_SUPPORTED)
     j = tag_len;
 
     /* Check tag in "constant-time" */
@@ -742,19 +627,7 @@ int mbedtls_gcm_auth_decrypt( mbedtls_gcm_context *ctx,
     }
 
     return( (diff ^ inv_diff) + j );
-#else
-    /* Check tag in "constant-time" */
-    for( diff = 0, i = 0; i < tag_len; i++ )
-        diff |= tag[i] ^ check_tag[i];
 
-    if( diff != 0 )
-    {
-        mbedtls_platform_zeroize( output, length );
-        return( MBEDTLS_ERR_GCM_AUTH_FAILED );
-    }
-
-    return( 0 );
-#endif
 }
 
 void mbedtls_gcm_free( mbedtls_gcm_context *ctx )
@@ -772,12 +645,12 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
                        const unsigned char *iv,
                        size_t iv_len)
 {
-    CC_UNUSED_PARAM(ctx);
-    CC_UNUSED_PARAM(mode);
-    CC_UNUSED_PARAM(iv);
-    CC_UNUSED_PARAM(iv_len);
+    UNUSED(ctx);
+    UNUSED(mode);
+    UNUSED(iv);
+    UNUSED(iv_len);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
@@ -787,14 +660,14 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
                        size_t output_size,
                        size_t *output_length)
 {
-    CC_UNUSED_PARAM(ctx);
-    CC_UNUSED_PARAM(input);
-    CC_UNUSED_PARAM(input_length);
-    CC_UNUSED_PARAM(output);
-    CC_UNUSED_PARAM(output_size);
-    CC_UNUSED_PARAM(output_length);
+    UNUSED(ctx);
+    UNUSED(input);
+    UNUSED(input_length);
+    UNUSED(output);
+    UNUSED(output_size);
+    UNUSED(output_length);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
@@ -804,25 +677,25 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
                        unsigned char *tag,
                        size_t tag_len)
 {
-    CC_UNUSED_PARAM(ctx);
-    CC_UNUSED_PARAM(output);
-    CC_UNUSED_PARAM(output_size);
-    CC_UNUSED_PARAM(output_length);
-    CC_UNUSED_PARAM(tag);
-    CC_UNUSED_PARAM(tag_len);
+    UNUSED(ctx);
+    UNUSED(output);
+    UNUSED(output_size);
+    UNUSED(output_length);
+    UNUSED(tag);
+    UNUSED(tag_len);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
                           const unsigned char *add,
                           size_t add_len)
 {
-    CC_UNUSED_PARAM(ctx);
-    CC_UNUSED_PARAM(add);
-    CC_UNUSED_PARAM(add_len);
+    UNUSED(ctx);
+    UNUSED(add);
+    UNUSED(add_len);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 #endif /* MBEDTLS_GCM_ALT */
 #endif /* MBEDTLS_GCM_C */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +11,7 @@
 #include "dx_reg_base_host.h"
 #include "tfm_attest_hal.h"
 #include "uart_stdout.h"
+#include "region_defs.h"
 #include "cmsis.h"
 
 /* Define some offsets from the CC312 base address, to access particular
@@ -202,7 +203,15 @@ __PACKED_STRUCT plat_otp_layout_t {
             uint16_t iak_type_zero_bits;
             uint16_t iak_id_zero_bits;
             uint16_t bl2_rotpk_zero_bits[3];
-            uint16_t bl1_rotpk_zero_bits;
+#ifdef BL1
+            uint16_t bl1_rotpk_0_zero_bits;
+#ifdef PLATFORM_DEFAULT_BL1
+            uint16_t bl2_encryption_key_zero_bits;
+            uint16_t bl1_2_image_hash_zero_bits;
+            uint16_t bl2_image_hash_zero_bits;
+#endif /* PLATFORM_DEFAULT_BL1 */
+#endif /* BL1 */
+            uint16_t secure_debug_pk_zero_bits;
         };
 
         uint8_t iak_len[4];
@@ -211,15 +220,26 @@ __PACKED_STRUCT plat_otp_layout_t {
 
         uint8_t boot_seed[32];
         uint8_t implementation_id[32];
-        uint8_t hw_version[18];
+        uint8_t hw_version[32];
         uint8_t verification_service_url[32];
         uint8_t profile_definition[32];
 
         uint8_t bl2_rotpk[3][32];
         uint8_t bl2_nv_counter[3][64];
 
-        uint8_t bl1_rotpk[32];
+#ifdef BL1
+        uint8_t bl1_rotpk_0[32];
         uint8_t bl1_nv_counter[16];
+#ifdef PLATFORM_DEFAULT_BL1
+        uint8_t bl2_encryption_key[32];
+        uint8_t bl1_2_image_hash[32];
+        uint8_t bl2_image_hash[32];
+
+        uint8_t bl1_2_image[BL1_2_CODE_SIZE];
+#endif /* PLATFORM_DEFAULT_BL1 */
+#endif /* BL1 */
+
+        uint8_t secure_debug_pk[32];
     };
 };
 
@@ -492,12 +512,47 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         }
     }
 
-    err = verify_zero_bits_count(otp->bl1_rotpk,
-                                 sizeof(otp->bl1_rotpk),
-                                 (uint8_t*)&otp->bl1_rotpk_zero_bits);
+#ifdef BL1
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    err = verify_zero_bits_count(otp->secure_debug_pk,
+                                 sizeof(otp->secure_debug_pk),
+                                 (uint8_t*)&otp->secure_debug_pk_zero_bits);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
+#endif
+
+    err = verify_zero_bits_count(otp->bl1_rotpk_0,
+                                 sizeof(otp->bl1_rotpk_0),
+                                 (uint8_t*)&otp->bl1_rotpk_0_zero_bits);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+#ifdef PLATFORM_DEFAULT_BL1
+    err = verify_zero_bits_count(otp->bl2_encryption_key,
+                                 sizeof(otp->bl2_encryption_key),
+                                 (uint8_t*)&otp->bl2_encryption_key_zero_bits);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    err = verify_zero_bits_count(otp->bl1_2_image_hash,
+                                 sizeof(otp->bl1_2_image_hash),
+                                 (uint8_t*)&otp->bl1_2_image_hash_zero_bits);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    err = verify_zero_bits_count(otp->bl2_image_hash,
+                                 sizeof(otp->bl2_image_hash),
+                                 (uint8_t*)&otp->bl2_image_hash_zero_bits);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+#endif /* PLATFORM_DEFAULT_BL1 */
+#endif /* BL1 */
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -640,15 +695,35 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         return otp_read(otp->bl2_nv_counter[2],
                         sizeof(otp->bl2_nv_counter[2]), out_len, out);
 
+#ifdef BL1
     case PLAT_OTP_ID_BL1_ROTPK_0:
-        return otp_read(otp->bl1_rotpk, sizeof(otp->bl1_rotpk), out_len,
-                        out);
+        return otp_read(otp->bl1_rotpk_0,
+                        sizeof(otp->bl1_rotpk_0), out_len, out);
     case PLAT_OTP_ID_NV_COUNTER_BL1_0:
         return otp_read(otp->bl1_nv_counter,
                         sizeof(otp->bl1_nv_counter), out_len, out);
+#ifdef PLATFORM_DEFAULT_BL1
+    case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
+        return otp_read(otp->bl2_encryption_key,
+                        sizeof(otp->bl2_encryption_key), out_len, out);
+    case PLAT_OTP_ID_BL1_2_IMAGE_HASH:
+        return otp_read(otp->bl1_2_image_hash,
+                        sizeof(otp->bl1_2_image_hash), out_len, out);
+    case PLAT_OTP_ID_BL2_IMAGE_HASH:
+        return otp_read(otp->bl2_image_hash,
+                        sizeof(otp->bl2_image_hash), out_len, out);
+    case PLAT_OTP_ID_BL1_2_IMAGE:
+        return otp_read(otp->bl1_2_image,
+                        sizeof(otp->bl1_2_image), out_len, out);
+#endif /* PLATFORM_DEFAULT_BL1 */
+#endif /* BL1 */
 
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
+
+    case PLAT_OTP_ID_SECURE_DEBUG_PK:
+        return otp_read(otp->secure_debug_pk,
+                        sizeof(otp->secure_debug_pk), out_len, out);
 
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
@@ -831,15 +906,39 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(otp->bl2_nv_counter[2],
                          sizeof(otp->bl2_nv_counter[2]), in_len, in, NULL);
 
+#ifdef BL1
     case PLAT_OTP_ID_BL1_ROTPK_0:
-        return otp_write(otp->bl1_rotpk, sizeof(otp->bl1_rotpk), in_len,
-                         in, (uint8_t*)&otp->bl1_rotpk_zero_bits);
+        return otp_write(otp->bl1_rotpk_0, sizeof(otp->bl1_rotpk_0), in_len, in,
+                         (uint8_t*)&otp->bl1_rotpk_0_zero_bits);
     case PLAT_OTP_ID_NV_COUNTER_BL1_0:
         return otp_write(otp->bl1_nv_counter,
                          sizeof(otp->bl1_nv_counter), in_len, in, NULL);
+#ifdef PLATFORM_DEFAULT_BL1
+    case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
+        return otp_write(otp->bl2_encryption_key,
+                         sizeof(otp->bl2_encryption_key), in_len, in,
+                         (uint8_t*)&otp->bl2_encryption_key_zero_bits);
+    case PLAT_OTP_ID_BL1_2_IMAGE_HASH:
+        return otp_write(otp->bl1_2_image_hash,
+                         sizeof(otp->bl1_2_image_hash), in_len, in,
+                         (uint8_t*)&otp->bl1_2_image_hash_zero_bits);
+    case PLAT_OTP_ID_BL2_IMAGE_HASH:
+        return otp_write(otp->bl2_image_hash,
+                         sizeof(otp->bl2_image_hash), in_len, in,
+                         (uint8_t*)&otp->bl2_image_hash_zero_bits);
+    case PLAT_OTP_ID_BL1_2_IMAGE:
+        return otp_write(otp->bl1_2_image,
+                         sizeof(otp->bl1_2_image), in_len, in, NULL);
+#endif /* PLATFORM_DEFAULT_BL1 */
+#endif /* BL1 */
 
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
+
+    case PLAT_OTP_ID_SECURE_DEBUG_PK:
+        return otp_write(otp->secure_debug_pk,
+                         sizeof(otp->secure_debug_pk), in_len, in,
+                         (uint8_t*)&otp->secure_debug_pk_zero_bits);
 
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
@@ -911,15 +1010,35 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         *size = sizeof(otp->bl2_nv_counter[2]);
         break;
 
+#ifdef BL1
     case PLAT_OTP_ID_BL1_ROTPK_0:
-        *size = sizeof(otp->bl1_rotpk);
+        *size = sizeof(otp->bl1_rotpk_0);
         break;
     case PLAT_OTP_ID_NV_COUNTER_BL1_0:
         *size = sizeof(otp->bl1_nv_counter);
         break;
+#ifdef PLATFORM_DEFAULT_BL1
+    case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
+        *size = sizeof(otp->bl2_encryption_key);
+        break;
+    case PLAT_OTP_ID_BL1_2_IMAGE_HASH:
+        *size = sizeof(otp->bl1_2_image_hash);
+        break;
+    case PLAT_OTP_ID_BL2_IMAGE_HASH:
+        *size = sizeof(otp->bl2_image_hash);
+        break;
+    case PLAT_OTP_ID_BL1_2_IMAGE:
+        *size = sizeof(otp->bl1_2_image);
+        break;
+#endif /* PLATFORM_DEFAULT_BL1 */
+#endif
 
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
+
+    case PLAT_OTP_ID_SECURE_DEBUG_PK:
+        *size = sizeof(otp->secure_debug_pk);
+        break;
 
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;

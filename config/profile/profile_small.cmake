@@ -1,12 +1,11 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
 set(TFM_PROFILE                         profile_small CACHE STRING  "Profile to use")
-set(TFM_LIB_MODEL                       ON          CACHE BOOL      "Use secure library model instead of PSA API (IPC model)")
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
 
 ########################## BL2 #################################################
@@ -40,3 +39,9 @@ set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audi
 
 set(TFM_MBEDCRYPTO_CONFIG_PATH          "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_small.h" CACHE PATH "Config to use for Mbed Crypto")
 
+# If it is specified to select SFN model in build command, enable SFN model in
+# Profile Small.
+# Otherwise, enable Library model in Profile Small by default.
+if (NOT DEFINED CONFIG_TFM_SPM_BACKEND)
+    set(TFM_LIB_MODEL                   ON          CACHE BOOL      "Use secure library model instead of IPC model")
+endif()

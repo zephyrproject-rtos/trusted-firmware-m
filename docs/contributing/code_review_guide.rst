@@ -4,7 +4,7 @@ Code Review Guideline
 The purpose of this document is to clarify design items to be reviewed during
 the code review process.
 
-Please contact :doc:`maintainers </docs/contributing/maintainers>` or write an e-mail
+Please contact :doc:`maintainers </contributing/maintainers>` or write an e-mail
 thread on the `TF-M mailing list <mailto:tf-m@lists.trustedfirmware.org>`_ for
 any questions.
 
@@ -13,9 +13,9 @@ List of the guidelines
 **********************
 The prerequisites before going to the review stage:
 
-- Read the :doc:`Contributing Process </docs/contributing/contributing_process>`
+- Read the :doc:`Contributing Process </contributing/contributing_process>`
   to know basic concepts.
-- Read the :doc:`Source Structure </docs/technical_references/design_docs/source_structure>`
+- Read the :doc:`Source Structure </technical_references/design_docs/source_structure>`
   for structure related reference.
 
 The review guidelines consist of these items:

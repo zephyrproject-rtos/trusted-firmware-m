@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +11,9 @@
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
 #include "device_definition.h"
+
+/* Get address of memory regions to configure MPU */
+extern const struct memory_region_limits memory_regions;
 
 enum tfm_hal_status_t tfm_hal_platform_init(void)
 {
@@ -55,10 +58,17 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
     return TFM_HAL_SUCCESS;
 }
 
-void tfm_hal_system_reset(void)
+uint32_t tfm_hal_get_ns_VTOR(void)
 {
-    __disable_irq();
-    mpc_revert_non_secure_to_secure_cfg();
+    return memory_regions.non_secure_code_start;
+}
 
-    NVIC_SystemReset();
+uint32_t tfm_hal_get_ns_MSP(void)
+{
+    return *((uint32_t *)memory_regions.non_secure_code_start);
+}
+
+uint32_t tfm_hal_get_ns_entry_point(void)
+{
+    return *((uint32_t *)(memory_regions.non_secure_code_start+ 4));
 }

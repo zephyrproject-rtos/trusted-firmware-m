@@ -22,23 +22,25 @@ Source structure
 TF-M tests source code are located in
 `tf-m-tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git/>`__.
 
-+----------------+-------------------------------------------------------------+
-| Folder name    | Description                                                 |
-+================+=============================================================+
-| test/config    | The CMAKE test configurations files.                        |
-+----------------+-------------------------------------------------------------+
-| test/framework | Source code for test framework code, managing test suites.  |
-+----------------+-------------------------------------------------------------+
-| test/suites    | Test suites divided into subdirectories.                    |
-+----------------+-------------------------------------------------------------+
-| test/services  | Test services divided into subdirectories.                  |
-+----------------+-------------------------------------------------------------+
++---------------------------------------+---------------------------------------------------------------+
+| Folder name                           | Description                                                   |
++=======================================+===============================================================+
+| test/config                           | The CMAKE test configurations files.                          |
++---------------------------------------+---------------------------------------------------------------+
+| test/framework                        | Source code for test framework code, managing test suites.    |
++---------------------------------------+---------------------------------------------------------------+
+| test/secure_fw/suites                 | Test suites divided into subdirectories.                      |
++---------------------------------------+---------------------------------------------------------------+
+| test/secure_fw/suites/<suite>/service | Test service divided into corresponding suite subdirectories. |
++---------------------------------------+---------------------------------------------------------------+
+| test/secure_fw/common_test_services   | Common test services.                                         |
++---------------------------------------+---------------------------------------------------------------+
 
 Test configuration
 ==================
 
 A test configuration controls whether one or multiple test suites are enabled.
-The doc :doc:`TF-M Build Instructions </docs/technical_references/instructions/tfm_build_instruction>`
+The doc :doc:`TF-M Build Instructions </technical_references/instructions/tfm_build_instruction>`
 shows some test configurations which are already supported in current TF-M.
 An example usage of test configuration shows below.
 
@@ -61,10 +63,11 @@ with a test configuration in ``tf-m-tests`` repository.
 Source code
 ===========
 
-The test suite example subdirectory named ``<test_name>`` is located under the path
-``tf-m-tests/test/suites``. If the new test suite includes both non-secure and
-secure parts, the source code shall be divided shared code and specific code.
-An example test suite folder can be organized as the figure below.
+The test suite example subdirectory named ``<test_name>`` is located under the
+path ``tf-m-tests/test/secure_fw/suites``. If the new test suite includes both
+non-secure and secure parts, the source code shall be divided shared code and
+specific code. An example test suite folder can be organized as the figure
+below.
 
 .. code-block:: bash
 
@@ -143,7 +146,7 @@ Applicating test configurations
 ===============================
 
 The mission of test configurations is to control the build. They are applied
-in ``test/suites/<test_name>/CMakeLists.txt`` like the example below.
+in ``test/secure_fw/suites/<test_name>/CMakeLists.txt`` like the example below.
 
 .. code-block:: cmake
 
@@ -218,7 +221,7 @@ registered if the macro is defined.
     On most platforms non-secure tests and secure tests run on the same CPU
     core, but dual-core platform is an exception. So secure test library and
     secure sevices shall be linked together in the file
-    ``tf-m-tests/test/test_services/CMakeLists.txt``. Thus they can be built on
+    ``tf-m-tests/test/secure_fw/secure_tests.cmake``. Thus they can be built on
     secure CPU core and non-secure tests library and RTOS are built on
     non-secure CPU core.
 
@@ -245,7 +248,6 @@ into an array with structure type called ``test_t`` defined in
         TEST_FUN * const test;         /*!< Test function to call */
         const char *name;              /*!< Test name */
         const char *desc;              /*!< Test description */
-        struct test_result_t ret;      /*!< Test result */
     };
 
 For example, a new test case called ``TFM_NS_<TEST_NAME>_TEST_1001`` is created
@@ -262,7 +264,7 @@ into the array which will be quoted in function
     /* Append test cases */
     static struct test_t <test_name>_tests[] = {
         {&tfm_<test_name>_test_1001, "TFM_NS_<TEST_NAME>_TEST_1001",
-        "Example test case", {TEST_PASSED}},
+        "Example test case"},
     };
 
     /* Register test case into test suites */
@@ -293,26 +295,64 @@ Steps
 
 Adding a test service is same as adding a secure partition, generally the
 process can be referenced from the document
-:doc:`Adding Secure Partition </docs/integration_guide/services/tfm_secure_partition_addition>`
+:doc:`Adding Secure Partition </integration_guide/services/tfm_secure_partition_addition>`
 
 .. Note::
     Each test service must have resource requirements declared in a manifest
-    file, the contents of test services are the same as secure partitions,but
+    file, the contents of test services are the same as secure partitions, but
     their locations are different. Test service manifests shall be set in
-    ``tf-m-tests/test/test_services/tfm_test_manifest_list.yaml``.
+    ``tf-m-tests/test/secure_fw/tfm_test_manifest_list.yaml``.
 
-Configuration
-=============
+Test Partition Specific Manifest Attributes
+===========================================
+There are some test purpose attributes in Secure Partition manifests that are
+**NOT** compatible with FF-M.
+They should be used in Test Partitions only.
 
-If the new test service names ``tfm_<test_name>_test_service`` only supports for the
-example test, the configuration in
-``tf-m-tests/test/test_services/CMakeLists.txt`` forms like below.
+weak_dependencies
+-----------------
+A TF-M regression test Partition calls other RoT services for test. But it
+can still run other tests if some of the RoT services are disabled.
+TF-M defines a ``"weak_dependencies"`` attribute in partition manifests of
+regression test partitions to describe test service access to other RoT
+services. It *shall* be only used for TF-M regression test services.
 
-.. code-block:: cmake
+model
+-----
+A TF-M regression test Partition may support both the SFN and IPC model.
+The actual model being used follows the SPM backend enabled.
 
-    if (TEST_S_<TEST_NAME> OR TEST_NS_<TEST_NAME>)
-        add_subdirectory(tfm_<test_name>_test_service)
-    endif()
+The TF-M build system supports this by allowing Secure Partitions to set
+the ``model`` attribute to ``dual``.
+The manifest tool will then change it to the corresponding value according
+to the current backend selected.
+
+The Test Partitions use the following definitions to know what model is being
+built:
+
+- ``<<partition_name>>_MODEL_IPC``, ``1`` if IPC model is used.
+- ``<<partition_name>>_MODEL_SFN``, ``1`` if SFN model is used.
+
+Test service implementation
+===========================
+
+Test service of individual test
+-------------------------------
+
+An individual test dedicated test service should be put under the corresponding
+test folder ``test/secure_fw/suites/<test_name>``.
+
+``add_subdirectory(suites/<test_name>/<service_dir>)`` shall be added into
+``tf-m-tests/test/secure_fw/secure_tests.cmake`` to make sure that the test
+service is built with secure side configuration.
+
+Common test service
+-------------------
+
+If a new test service is required by multiple test suites, the code should be
+put under ``test/secure_fw/common_test_services``. If the new test suite relies
+on a common test service, please make sure that the build implementation of the
+test service is linked correctly, including the header files and libraries.
 
 **********************************
 Out-of-tree regression test suites
@@ -458,4 +498,4 @@ another configuration file, a new one can be ignored.
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

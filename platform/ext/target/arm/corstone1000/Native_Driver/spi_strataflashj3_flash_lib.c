@@ -234,12 +234,7 @@ enum strataflashj3_error_t cfi_strataflashj3_initialize(struct cfi_strataflashj3
         return STRATAFLASHJ3_ERR_NONE;
     }
 
-    /* Verify device id */
-    flash_ret = cfi_strataflashj3_verify_id(dev);
-    if (flash_ret != STRATAFLASHJ3_ERR_NONE) {
-        return flash_ret;
-    }
-
+    dev->is_initialized = true;
 
     CFI_FLASH_LOG_MSG("%s: CFI Flash Lib is initialized.\n\r", __func__);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+REGION_DECLARE(Image$$, ER_VENEER, $$Base);
+REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 
 const struct memory_region_limits memory_regions = {
@@ -46,10 +46,10 @@ const struct memory_region_limits memory_regions = {
         NS_PARTITION_SIZE - 1,
 
     .veneer_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
 
     .veneer_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
 };
 
 /* Allows software, via SAU, to define the code region as a NSC */
@@ -124,6 +124,13 @@ struct platform_data_t tfm_peripheral_timer0 = {
         MUSCA_S1_CMSDK_TIMER1_S_BASE - 1,
         PPC_SP_APB_PPC0,
         CMSDK_TIMER0_APB_PPC_POS
+};
+
+struct platform_data_t tfm_peripheral_timer1 = {
+        MUSCA_S1_CMSDK_TIMER1_NS_BASE,
+        MUSCA_S1_CMSDK_DUALTIMER_NS_BASE - 1,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
 };
 
 #ifdef PSA_API_TEST_IPC
@@ -514,15 +521,27 @@ int32_t ppc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
+#ifdef TEST_NS_FPU
+    ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER0_APB_PPC_POS,
+                                 ARM_PPC_SECURE_ONLY,
+                                 ARM_PPC_PRIV_AND_NONPRIV);
+#else
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER0_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
+#endif
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
+#ifdef TEST_NS_FPU
+    ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER1_APB_PPC_POS,
+                                 ARM_PPC_NONSECURE_ONLY,
+                                 ARM_PPC_PRIV_AND_NONPRIV);
+#else
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER1_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
+#endif
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }

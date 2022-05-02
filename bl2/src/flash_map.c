@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -29,6 +29,13 @@
 
 extern const struct flash_area flash_map[];
 extern const int flash_map_entry_num;
+
+/* Valid entries for data item width */
+static const uint32_t data_width_byte[] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
 
 /*
  * Check the target address in the flash_area_xxx operation.
@@ -90,18 +97,15 @@ void flash_area_close(const struct flash_area *area)
 int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
                     uint32_t len)
 {
-    uint32_t remaining_len;
+    uint32_t remaining_len, read_length;
     uint32_t aligned_off;
+    uint32_t item_number;
+
+    /* The maximum value of data_width is 4 bytes. */
     uint8_t temp_buffer[sizeof(uint32_t)];
-    uint8_t align_unit, i = 0;
+    uint8_t data_width, i = 0, j;
     int ret = 0;
 
-    /* Valid entries for data item width */
-    uint32_t data_width_byte[] = {
-        sizeof(uint8_t),
-        sizeof(uint16_t),
-        sizeof(uint32_t),
-    };
     ARM_FLASH_CAPABILITIES DriverCapabilities;
 
     BOOT_LOG_DBG("read area=%d, off=%#x, len=%#x", area->fa_id, off, len);
@@ -115,30 +119,55 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
      * Data type size is specified by the data_width in ARM_FLASH_CAPABILITIES.
      */
     DriverCapabilities = DRV_FLASH_AREA(area)->GetCapabilities();
-    align_unit = data_width_byte[DriverCapabilities.data_width];
-    aligned_off = FLOOR_ALIGN(off, align_unit);
+    data_width = data_width_byte[DriverCapabilities.data_width];
+    aligned_off = FLOOR_ALIGN(off, data_width);
 
-    /* Read the first align_unit long data if `off` is not aligned. */
+    /* Read the first data_width long data if `off` is not aligned. */
     if (aligned_off != off) {
         ret = DRV_FLASH_AREA(area)->ReadData(area->fa_off + aligned_off,
                                              temp_buffer,
-                                             align_unit);
+                                             1);
         if (ret < 0) {
             return ret;
         }
 
+        /* Record how many target data have been read. */
+        read_length = off - aligned_off + len >= data_width ?
+                                        data_width - (off - aligned_off) : len;
+
         /* Copy the read data from off. */
-        for (i = 0; i + off - aligned_off < align_unit; i++) {
+        for (i = 0; i < read_length; i++) {
             ((uint8_t *)dst)[i] = temp_buffer[i + off - aligned_off];
         }
-        remaining_len -= align_unit - (off - aligned_off);
+        remaining_len -= read_length;
     }
 
-    /* CMSIS ARM_FLASH_ReadData does not require the alignment of `cnt`.*/
+    /* The `cnt` parameter in CMSIS ARM_FLASH_ReadData indicates number of data
+     * items to read.
+     */
     if (remaining_len) {
-        ret = DRV_FLASH_AREA(area)->ReadData(area->fa_off + off + i,
-                                             (uint8_t *)dst + i,
-                                             remaining_len);
+        item_number = remaining_len / data_width;
+        if (item_number) {
+            ret = DRV_FLASH_AREA(area)->ReadData(area->fa_off + off + i,
+                                                (uint8_t *)dst + i,
+                                                item_number);
+            if (ret < 0) {
+                return ret;
+            }
+            remaining_len -= item_number * data_width;
+        }
+    }
+    if (remaining_len) {
+        ret = DRV_FLASH_AREA(area)->ReadData(
+                            area->fa_off + off + i + item_number * data_width,
+                            temp_buffer,
+                            1);
+        if (ret < 0) {
+            return ret;
+        }
+        for (j = 0; j < remaining_len; j++) {
+            ((uint8_t *)dst)[i + item_number * data_width + j] = temp_buffer[j];
+        }
     }
 
     /* CMSIS ARM_FLASH_ReadData can return the number of data items read or
@@ -163,7 +192,8 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
 #else
     uint8_t len_padding[FLASH_PROGRAM_UNIT - 1];
 #endif
-
+    ARM_FLASH_CAPABILITIES DriverCapabilities;
+    uint8_t data_width;
     /* The PROGRAM_UNIT aligned value of `off` */
     uint32_t aligned_off;
 
@@ -175,7 +205,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
     uint32_t src_written_idx = 0;
     uint32_t add_padding_size, len_padding_size;
     uint32_t write_size;
-    uint32_t last_unit_start_off = 0;
+    uint32_t last_unit_start_off;
     /*
      *    aligned_off           off           last_unit_start_off
      *        |                  |                     |
@@ -197,6 +227,10 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
         return -1;
     }
 
+    DriverCapabilities = DRV_FLASH_AREA(area)->GetCapabilities();
+    data_width = data_width_byte[DriverCapabilities.data_width];
+
+    if (FLASH_PROGRAM_UNIT)
     /* Read the bytes from aligned_off to off. */
     if (flash_area_read(area, aligned_off, add_padding, add_padding_size)) {
         return -1;
@@ -241,8 +275,8 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
             return -1;
         }
         if (DRV_FLASH_AREA(area)->ProgramData(area->fa_off + aligned_off,
-                                              add_padding,
-                                              FLASH_PROGRAM_UNIT)) {
+                                        add_padding,
+                                        FLASH_PROGRAM_UNIT / data_width) < 0) {
             return -1;
         }
     }
@@ -263,7 +297,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
             if (DRV_FLASH_AREA(area)->ProgramData(
                                            area->fa_off + off + src_written_idx,
                                            src,
-                                           write_size)) {
+                                           write_size / data_width) < 0) {
                 return -1;
             }
             src_written_idx += write_size;
@@ -295,7 +329,7 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
             if (DRV_FLASH_AREA(area)->ProgramData(
                                 area->fa_off + off + last_unit_start_off,
                                 add_padding,
-                                FLASH_PROGRAM_UNIT)) {
+                                FLASH_PROGRAM_UNIT / data_width) < 0) {
                 return -1;
             }
         }

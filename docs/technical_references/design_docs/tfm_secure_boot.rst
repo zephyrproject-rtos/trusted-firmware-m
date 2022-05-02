@@ -246,6 +246,8 @@ modes are supported by which platforms:
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | AN547               | No              | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
+| AN552               | No              | Yes           | Yes      | Yes            | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
 | PSoC64              | Yes             | No            | No       | No             | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | STM_DISCO_L562QE    | No              | Yes           | No       | No             | No           |
@@ -266,9 +268,10 @@ modes are supported by which platforms:
 .. [3] The image executes in-place (XIP) and is in Overwrite mode for image
     update by default
 
-.. [4] To enable XIP Swap mode, assign the "SWAP" string to the
-    ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
-    configuration file, or include this macro definition in the command line
+.. [4] To enable XIP Swap mode, assign the "SWAP_USING_SCRATCH" or
+    "SWAP_USING_MOVE" string to the ``MCUBOOT_UPGRADE_STRATEGY``
+    configuration variable in the build configuration file, or include this
+    macro definition in the command line
 
 .. [5] To enable direct-xip, assign the "DIRECT_XIP" string to the
     ``MCUBOOT_UPGRADE_STRATEGY`` configuration variable in the build
@@ -344,7 +347,10 @@ MCUBoot related compile time switches can be set by cmake variables.
       then using any of the further compile time switches is invalid.
 - MCUBOOT_UPGRADE_STRATEGY (default: "OVERWRITE_ONLY"):
     - **"OVERWRITE_ONLY":** Default firmware upgrade operation with overwrite.
-    - **"SWAP":** Activate swapping firmware upgrade operation.
+    - **"SWAP_USING_SCRATCH":** Activate swapping firmware upgrade operation
+      with a scratch area in flash
+    - **"SWAP_USING_MOVE":** Activate swapping firmware upgrade operation
+      without a scratch area in flash
     - **"DIRECT_XIP":** Activate direct execute-in-place firmware upgrade
       operation.
     - **"RAM_LOAD":** Activate RAM loading firmware upgrade operation, where
@@ -409,8 +415,8 @@ MCUBoot related compile time switches can be set by cmake variables.
         can be done by using MCUBoot, putting an image in the secondary image
         area, and setting ``MCUBOOT_ENCRYPT_RSA`` to ``ON``. When using the
         ``OVERWRITE_ONLY`` upgrade strategy, this is enough. When using
-        ``SWAP``, an image is needed in the primary image area as well, to
-        trigger the update.
+        ``SWAP_USING_SCRATCH`` or ``SWAP_USING_MOVE``, an image is needed in
+        the primary image area as well, to trigger the update.
 
     .. Warning::
         DO NOT use the ``enc-rsa2048-pub.pem`` key in production code, it is
@@ -808,4 +814,4 @@ bootutil_misc.c to control the image status.
     image. As a result, the firmware update service is not supported in
     direct-xip mode and ram-load mode.
 
-*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*

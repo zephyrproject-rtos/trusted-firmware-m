@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -22,6 +22,9 @@ extern "C" {
 /* Allowed named MMIO of this platform */
 const uintptr_t partition_named_mmio_list[] = {
     (uintptr_t)TFM_PERIPHERAL_TIMER0,
+#ifdef TEST_NS_FPU
+    (uintptr_t)TFM_PERIPHERAL_TIMER1,
+#endif
     (uintptr_t)TFM_PERIPHERAL_STD_UART,
 #ifdef PSA_API_TEST_IPC
     (uintptr_t)FF_TEST_UART_REGION,

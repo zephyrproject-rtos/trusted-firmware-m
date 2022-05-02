@@ -657,7 +657,7 @@ void LL_SECU_CheckStaticProtections(void)
 #endif /* TFM_NSBOOT_CHECK_ENABLE */
 
   /* Check bank1 secure flash protection */
-  start = FLASH_BL2_NVCNT_AREA_OFFSET / PAGE_SIZE;
+  start = FLASH_AREA_SCRATCH_OFFSET / PAGE_SIZE;
   end = (S_IMAGE_PRIMARY_PARTITION_OFFSET  + FLASH_S_PARTITION_SIZE - 1) / PAGE_SIZE;
   if (end > PAGE_MAX_NUMBER_IN_BANK)
   {

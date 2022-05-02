@@ -1,11 +1,12 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 #include <limits.h>
 #include <stdint.h>
+#include "config_impl.h"
 #include "lists.h"
 #include "region.h"
 #include "region_defs.h"
@@ -108,7 +109,7 @@ struct partition_t *load_a_partition_assuredly(struct partition_head_t *head)
 
     ldinf_sa += LOAD_INFSZ_BYTES(p_ptldinf);
 
-    UNI_LIST_INSERT_AFTER(head, partition);
+    UNI_LIST_INSERT_AFTER(head, partition, next);
 
     return partition;
 }
@@ -140,11 +141,9 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
         services[i].partition = p_partition;
         services[i].next = NULL;
 
-        if (p_ptldinf->flags & PARTITION_MODEL_IPC) {
-            service_setting |= p_servldinf[i].signal;
-        }
-
-        BI_LIST_INIT_NODE(&services[i].handle_list);
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+        service_setting |= p_servldinf[i].signal;
+#endif
 
         /* Populate the stateless service reference table */
         serv_ldflags = p_servldinf[i].flags;
@@ -165,7 +164,7 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
             stateless_services_ref_tbl[hidx] = &services[i];
         }
 
-        UNI_LIST_INSERT_AFTER(services_listhead, &services[i]);
+        UNI_LIST_INSERT_AFTER(services_listhead, &services[i], next);
     }
 
     return service_setting;
@@ -185,17 +184,17 @@ void load_irqs_assuredly(struct partition_t *p_partition)
     p_irq_info = (struct irq_load_info_t *)LOAD_INFO_IRQ(p_ldinf);
 
     for (i = 0; i < p_ldinf->nirqs; i++) {
-        p_partition->signals_allowed |= p_irq_info[i].signal;
+        p_partition->signals_allowed |= p_irq_info->signal;
 
-        if (p_irq_info[i].init(p_partition, p_irq_info) != TFM_HAL_SUCCESS) {
+        if (p_irq_info->init(p_partition, p_irq_info) != TFM_HAL_SUCCESS) {
             tfm_core_panic();
         }
 
         if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK) == 0x0100) {
-            tfm_hal_irq_enable(p_irq_info[i].source);
+            tfm_hal_irq_enable(p_irq_info->source);
         } else if ((p_ldinf->psa_ff_ver & PARTITION_INFO_VERSION_MASK)
                                                                     == 0x0101) {
-            tfm_hal_irq_disable(p_irq_info[i].source);
+            tfm_hal_irq_disable(p_irq_info->source);
         }
         p_irq_info++;
     }

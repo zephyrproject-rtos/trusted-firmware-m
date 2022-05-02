@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,8 +14,10 @@
 #include "tfm_hal_isolation.h"
 #include "tfm_spm_hal.h"
 #include "mmio_defs.h"
-#include "load/spm_load_api.h"
 #include "array.h"
+#ifdef TFM_PSA_API
+#include "load/spm_load_api.h"
+#endif /* TFM_PSA_API */
 
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
@@ -23,13 +25,11 @@ REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
 
-#ifdef TFM_SP_META_PTR_ENABLE
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
-#endif /* TFM_SP_META_PTR_ENABLE */
+#ifdef CONFIG_TFM_PARTITION_META
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
+#endif /* CONFIG_TFM_PARTITION_META */
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
@@ -61,6 +61,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     return TFM_HAL_SUCCESS;
 }
 
+#ifdef TFM_PSA_API
 enum tfm_hal_status_t
 tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
                         void **pp_boundaries)
@@ -74,7 +75,7 @@ tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = !!(p_ldinf->flags & PARTITION_MODEL_PSA_ROT);
+    privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
     *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
@@ -155,6 +156,7 @@ tfm_hal_update_boundaries(const struct partition_load_info_t *p_ldinf,
 
     return TFM_HAL_SUCCESS;
 }
+#endif /* TFM_PSA_API */
 
 #if !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0)
 static bool accessible_to_region(const void *p, size_t s, int flags)
@@ -326,24 +328,6 @@ enum tfm_hal_status_t mpu_init_cfg(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
-    /* NSPM PSP */
-    region_cfg.region_nr = n_configured_regions++;
-
-    region_cfg.region_base =
-            (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
-    region_cfg.region_limit =
-            (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Limit);
-    region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
-    region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-    region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
-    region_cfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
-
-    err = mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg);
-
-    if (err != MPU_ARMV8M_OK) {
-        return TFM_HAL_ERROR_GENERIC;
-    }
-
     /* RO region */
     region_cfg.region_nr = n_configured_regions++;
 
@@ -380,14 +364,14 @@ enum tfm_hal_status_t mpu_init_cfg(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
-#ifdef TFM_SP_META_PTR_ENABLE
+#ifdef CONFIG_TFM_PARTITION_META
     /* TFM partition metadata poniter region */
     region_cfg.region_nr = n_configured_regions++;
 
     region_cfg.region_base =
-            (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Base);
+            (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
     region_cfg.region_limit =
-            (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$RW$$Limit);
+            (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -398,7 +382,46 @@ enum tfm_hal_status_t mpu_init_cfg(void)
     if (err != MPU_ARMV8M_OK) {
         return TFM_HAL_ERROR_GENERIC;
     }
-#endif /* TFM_SP_META_PTR_ENABLE */
+#endif /* CONFIG_TFM_PARTITION_META */
+
+#ifdef NULL_POINTER_EXCEPTION_DETECTION
+	if(MPU_ARMV8M_NUM_REGIONS - n_configured_regions < 2) {
+		// We have enabled null pointer detection, but we don't have
+		// enough regions for it.
+		//
+	    // NB: Enabling null-pointer detection can also
+		// cause tfm_hal_bind_boundaries to return an error due to
+		// insufficient memory regions
+		return TFM_HAL_ERROR_GENERIC;
+	}
+
+	// The armv8m MPU can not be configured to protect a memory region
+	// from priviliged reads. However, it is invalid to have two
+	// overlapping memory regions and when a memory access is made to
+	// such an overlapping area we will get a MemFault. We exploit
+	// this undefined behaviour to block priviliged reads to the first
+	// 256 bytes. The first 350 bytes on nRF platforms are used for
+	// the vector table but luckily the armv8m MPU does not affect
+	// exception vector fetches so these two regions we configure will
+	// not accidentally disturb any valid memory access.
+	for(int i = 0; i < 2; i++) {
+		region_cfg.region_nr = n_configured_regions++;
+
+		region_cfg.region_base = 0;
+		region_cfg.region_limit = 256 - 32; // The last protected address is limit + 31
+
+		// The region_attridx, attr_access, attr_sh and attr_exec
+		// have no effect when memory regions overlap as any
+		// access will trigger a MemFault so we just use the
+		// previously configured attributes.
+
+		err = mpu_armv8m_region_enable(&dev_mpu_s, &region_cfg);
+
+		if (err != MPU_ARMV8M_OK) {
+			return TFM_HAL_ERROR_GENERIC;
+		}
+	}
+#endif /* NULL_POINTER_EXCEPTION_DETECTION */
 
     mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
                       HARDFAULT_NMI_ENABLE);

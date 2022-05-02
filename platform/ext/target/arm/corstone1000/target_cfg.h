@@ -17,6 +17,17 @@
 #ifndef __TARGET_CFG_H__
 #define __TARGET_CFG_H__
 
+#include <stdint.h>
+#include <stddef.h>
+
 #define TFM_DRIVER_STDIO    Driver_USART0
+
+/**
+ * \brief Holds the data necessary to do isolation for a specific peripheral.
+ */
+struct platform_data_t {
+    uint32_t periph_start;
+    uint32_t periph_limit;
+};
 
 #endif /* __TARGET_CFG_H__ */

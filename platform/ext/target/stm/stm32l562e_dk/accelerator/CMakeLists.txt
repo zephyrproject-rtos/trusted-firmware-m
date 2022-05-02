@@ -13,9 +13,9 @@ if(BL2)
         PUBLIC
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/rsa_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecdsa_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/aes_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_curves_alt.c
-            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/md5_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha1_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha256_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/stm.c
@@ -60,9 +60,11 @@ target_sources(crypto_service_crypto_hw
     PRIVATE
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/rsa_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecdsa_alt.c
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/aes_alt.c
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/gcm_alt.c
+        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ccm_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_curves_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/md5_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha1_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha256_alt.c
         ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/stm.c

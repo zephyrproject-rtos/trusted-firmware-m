@@ -61,7 +61,7 @@ Here lists a minimal set of necessary functionalities:
   - There is a non-secure :term:`HAL` that focuses on the mailbox operation API
     for Dual-core topology. For more information about it, please refer to
     :doc:`Mailbox Design in TF-M on Dual-core System
-    </docs/technical_references/design_docs/dual-cpu/mailbox_design_on_dual_core_system>`.
+    </technical_references/design_docs/dual-cpu/mailbox_design_on_dual_core_system>`.
   - The minimal set of :term:`TF-M` :term:`HAL` is sufficient for Secure
     Partitions by using customized peripheral interfaces. To provide easier
     portability for the Secure Partitions, a Secure Partition :term:`HAL` is
@@ -233,6 +233,38 @@ tfm_hal_system_reset()
 This API performs a system reset.
 
 The platform can uninitialize some resources before reset.
+
+When ``CONFIG_TFM_HALT_ON_PANIC`` is disabled this function is called to reset
+the system when a fatal error occurs.
+
+**Parameter**
+
+- ``void`` - None
+
+**Return Values**
+
+- ``void`` - None
+
+**Note**
+
+This API should not return.
+
+tfm_hal_system_halt()
+^^^^^^^^^^^^^^^^^^^^^
+**Prototype**
+
+.. code-block:: c
+
+  void tfm_hal_system_halt(void)
+
+**Description**
+
+This API enters the CPU into an infinite loop.
+
+The platform can uninitialize some resources before looping forever.
+
+When ``CONFIG_TFM_HALT_ON_PANIC`` is enabled this function is called to halt the
+system when a fatal error occurs.
 
 **Parameter**
 
@@ -832,4 +864,4 @@ compromise.
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

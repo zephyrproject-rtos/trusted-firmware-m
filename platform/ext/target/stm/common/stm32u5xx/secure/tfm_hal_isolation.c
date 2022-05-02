@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,10 +17,13 @@
 #include "region_defs.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_core_utils.h"
+#include "low_level_rng.h"
+
+#ifdef TFM_PSA_API
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
-#include "low_level_rng.h"
+#endif /* TFM_PSA_API */
 
 #ifdef FLOW_CONTROL
 #include "target_flowcontrol.h"
@@ -46,9 +49,8 @@ REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$ZI$$Limit);
 
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
-REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base);
 
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+REGION_DECLARE(Image$$, ER_VENEER, $$Limit);
 
 const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     /* TFM Core unprivileged code region */
@@ -67,22 +69,6 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         FLOW_CTRL_MPU_S_CH_R0,
 #endif /* FLOW_CONTROL */
     },
-    /* TFM Core unprivileged data region */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, ER_INITIAL_PSP, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base),
-        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-        MPU_ARMV8M_XN_EXEC_NEVER,
-        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
-#ifdef FLOW_CONTROL
-        FLOW_STEP_MPU_S_EN_R1,
-        FLOW_CTRL_MPU_S_EN_R1,
-        FLOW_STEP_MPU_S_CH_R1,
-        FLOW_CTRL_MPU_S_CH_R1,
-#endif /* FLOW_CONTROL */
-    },
     /* TFM_Core privileged code region   */
     {
         0, /* will be updated before using */
@@ -97,6 +83,21 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
         FLOW_CTRL_MPU_S_EN_R2,
         FLOW_STEP_MPU_S_CH_R2,
         FLOW_CTRL_MPU_S_CH_R2,
+#endif /* FLOW_CONTROL */
+    },
+    {
+      0, /* will be updated before using */
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base),
+        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
+        MPU_ARMV8M_XN_EXEC_NEVER,
+        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
+        MPU_ARMV8M_SH_NONE,
+#ifdef FLOW_CONTROL
+        FLOW_STEP_MPU_S_EN_R1,
+        FLOW_CTRL_MPU_S_EN_R1,
+        FLOW_STEP_MPU_S_CH_R1,
+        FLOW_CTRL_MPU_S_CH_R1,
 #endif /* FLOW_CONTROL */
     },
     /* TFM_Core privileged data region   */
@@ -297,6 +298,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     return TFM_HAL_SUCCESS;
 }
 
+#ifdef TFM_PSA_API
 /*
  * Implementation of tfm_hal_bind_boundaries() on STM:
  *
@@ -349,7 +351,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = !!(p_ldinf->flags & PARTITION_MODEL_PSA_ROT);
+    privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
     p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
@@ -416,3 +418,4 @@ enum tfm_hal_status_t tfm_hal_update_boundaries(
 
     return TFM_HAL_SUCCESS;
 }
+#endif /* TFM_PSA_API */

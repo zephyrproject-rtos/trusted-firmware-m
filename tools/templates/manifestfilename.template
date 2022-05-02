@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-{{utilities.donotedit_warning}}
+/***********{{utilities.donotedit_warning}}***********/
 
 #ifndef __PSA_MANIFEST_{{manifest_out_basename.upper()}}_H__
 #define __PSA_MANIFEST_{{manifest_out_basename.upper()}}_H__
@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-{% if manifest.psa_framework_version == 1.1 and manifest.model == "SFN" %}
+{% if manifest.model == "SFN" %}
 #define {{"%-55s"|format(manifest.name + "_MODEL_IPC")}} 0
 #define {{"%-55s"|format(manifest.name + "_MODEL_SFN")}} 1
 {% else %}
@@ -22,51 +22,27 @@ extern "C" {
 #define {{"%-55s"|format(manifest.name + "_MODEL_SFN")}} 0
 {% endif %}
 
-{# Service and IRQ at least one must be declared. #}
-{% if (manifest.services | length) == 0 and (manifest.irqs | length) == 0 %}
-#error "Service and IRQ at least one must be declared!"
-{% endif %}
-
-{% set service_signal = namespace(bit=4) %}
 {% if manifest.services %}
     {% for service in manifest.services %}
-        {% if manifest.psa_framework_version == 1.1 and manifest.model == "SFN" %}
+        {% if manifest.model == "SFN" %}
 psa_status_t {{service.name|lower}}_sfn(const psa_msg_t* msg);
         {% else %}
-#define {{"%-55s"|format(service.name + "_SIGNAL")}} (1U << {{"%d"|format(service_signal.bit)}})
-            {% set service_signal.bit = service_signal.bit + 1 %}
+#define {{"%-55s"|format(service.name + "_SIGNAL")}} ({{"0x%x"|format(service.signal_value)}})
         {% endif %}
     {% endfor %}
-{% endif %}
-{% if service_signal.bit > 32 %}
-#error "Too many services!"
 {% endif %}
 
-{% set irq_signal = namespace(bit=31) %}
 {% if manifest.irqs %}
     {% for irq in manifest.irqs %}
-        {% set irq_data = namespace() %}
         {% if manifest.psa_framework_version == 1.0 %}
-            {% set irq_data.signal = irq.signal %}
+#define {{"%-55s"|format(irq.signal)}} ({{"0x%x"|format(irq.signal_value)}})
         {% else %}
-            {% set irq_data.signal = irq.name + "_SIGNAL" %}
-        {% endif %}
-#define {{"%-55s"|format(irq_data.signal)}} (1U << {{"%d"|format(irq_signal.bit)}})
-        {% set irq_signal.bit = irq_signal.bit - 1 %}
-    {% endfor %}
-    {% if manifest.psa_framework_version == 1.1 %}
-        {% for irq in manifest.irqs %}
+#define {{"%-55s"|format(irq.name + "_SIGNAL")}} ({{"0x%x"|format(irq.signal_value)}})
             {% if irq.handling == "FLIH" %}
 psa_flih_result_t {{irq.name|lower}}_flih(void);
             {% endif %}
-        {% endfor %}
-    {% endif %}
-{% endif %}
-{% if (irq_signal.bit + 1) < 4 %}
-#error "Too many IRQ signals!"
-{% endif %}
-{% if (service_signal.bit - 1) >= (irq_signal.bit + 1) %}
-#error "Total number of services and irqs exceeds 28."
+        {% endif %}
+    {% endfor %}
 {% endif %}
 
 #ifdef __cplusplus

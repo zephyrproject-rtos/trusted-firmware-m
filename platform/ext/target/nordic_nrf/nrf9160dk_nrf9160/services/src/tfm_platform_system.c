@@ -7,21 +7,28 @@
 
 #include "platform/include/tfm_platform_system.h"
 #include "cmsis.h"
+#include "tfm_platform_hal_ioctl.h"
+#include "tfm_ioctl_core_api.h"
 
 void tfm_platform_hal_system_reset(void)
 {
-    /* Reset the system */
-    NVIC_SystemReset();
+	/* Reset the system */
+	NVIC_SystemReset();
 }
 
 enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
                                                psa_invec  *in_vec,
                                                psa_outvec *out_vec)
 {
-    (void)request;
-    (void)in_vec;
-    (void)out_vec;
+	/* Core IOCTL services */
+	switch (request) {
+	case TFM_PLATFORM_IOCTL_READ_SERVICE:
+		return tfm_platform_hal_read_service(in_vec, out_vec);
 
-    /* Not needed for this platform */
-    return TFM_PLATFORM_ERR_NOT_SUPPORTED;
+	/* Board specific IOCTL services */
+
+	/* Not a supported IOCTL service.*/
+	default:
+		return TFM_PLATFORM_ERR_NOT_SUPPORTED;
+	}
 }

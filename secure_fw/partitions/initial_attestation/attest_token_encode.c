@@ -2,7 +2,7 @@
  * attest_token_encode.c
  *
  * Copyright (c) 2018-2019, Laurence Lundblade. All rights reserved.
- * Copyright (c) 2020, Arm Limited.
+ * Copyright (c) 2020-2022, Arm Limited.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -376,9 +376,9 @@ void attest_token_encode_add_tstr(struct attest_token_encode_ctx *me,
 /*
  * Public function. See attest_token.h
  */
-void attest_token_encode_add_encoded(struct attest_token_encode_ctx *me,
-                                      int32_t label,
-                                      const struct q_useful_buf_c *encoded)
+void attest_token_encode_add_cbor(struct attest_token_encode_ctx *me,
+                                  int32_t label,
+                                  const struct q_useful_buf_c *encoded)
 {
     QCBOREncode_AddEncodedToMapN(&(me->cbor_enc_ctx), label, *encoded);
 }

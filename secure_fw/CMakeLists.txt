@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -10,38 +11,9 @@ cmake_minimum_required(VERSION 3.15)
 add_executable(tfm_s)
 add_library(secure_fw INTERFACE)
 add_library(tfm_secure_api INTERFACE)
-add_library(tfm_partitions INTERFACE)
-# Lots of seperate things need to know which partitions are enabled, so this
-# meta-target is provided so the related compile definitions can be collected in
-# such a way that they don't cause issues with linking to the full spm (which is
-# the other place these could be collected) Actual definitions are placed in the
-# directories of the partitions
-add_library(tfm_partition_defs INTERFACE)
 
 add_subdirectory(spm)
-add_subdirectory(partitions/lib/sprt)
-add_subdirectory(partitions/audit_logging)
-add_subdirectory(partitions/crypto)
-add_subdirectory(partitions/initial_attestation)
-add_subdirectory(partitions/protected_storage)
-add_subdirectory(partitions/internal_trusted_storage)
-add_subdirectory(partitions/platform)
-add_subdirectory(partitions/psa_proxy)
-add_subdirectory(partitions/firmware_update)
-add_subdirectory(partitions/ns_agent)
-add_subdirectory(partitions/idle_partition)
-if (TFM_EXTRA_PARTITION_PATHS)
-    set(POSTFIX 1)
-
-    foreach(EXTRA_PARTITION IN LISTS TFM_EXTRA_PARTITION_PATHS)
-        get_filename_component(EXTRA_PARTITION_NAME ${EXTRA_PARTITION} NAME_WLE)
-        set(TEMP_BINARY_EXTRA_PARTITION
-            ${CMAKE_CURRENT_BINARY_DIR}/partitions/${EXTRA_PARTITION_NAME}_${POSTFIX})
-        add_subdirectory(${EXTRA_PARTITION} ${TEMP_BINARY_EXTRA_PARTITION})
-
-        math(EXPR POSTFIX "${POSTFIX} + 1")
-    endforeach()
-endif()
+add_subdirectory(partitions)
 
 target_include_directories(secure_fw
     INTERFACE
@@ -61,6 +33,7 @@ target_link_libraries(tfm_s
         platform_s
         psa_interface
         tfm_sprt
+        tfm_secure_api
 )
 
 set_target_properties(tfm_s
@@ -100,7 +73,7 @@ target_link_libraries(tfm_secure_api
 
 set_source_files_properties(
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c
-    ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_thread.c
+    ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_cross.c
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c
     PROPERTIES
     COMPILE_FLAGS $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
@@ -111,14 +84,15 @@ set_source_files_properties(
 # into this target, also the SPE build indicator.
 target_sources(tfm_secure_api
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_thread.c>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_SUPERVISOR_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_cross.c>
+        $<$<BOOL:${CONFIG_TFM_PSA_API_SFN_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c>
 )
 
 target_compile_definitions(tfm_secure_api
     INTERFACE
         CONFIG_TFM_BUILDING_SPE=1
+        $<$<BOOL:${CONFIG_TFM_DOORBELL_API}>:CONFIG_TFM_DOORBELL_API=1>
 )
 
 ############################# Secure veneers ###################################
@@ -154,30 +128,38 @@ endif()
 
 ############################### CODE SHARING ###################################
 if (TFM_CODE_SHARING)
-    set(LIB_LIST mbedcrypto
-                 crypto_service_cc312
-                 platform_s
-                 tfm_psa_rot_partition_crypto
-                 tfm_psa_rot_partition_audit
-                 tfm_psa_rot_partition_attestation
-                 tfm_app_rot_partition_ps
-                 tfm_psa_rot_partition_its
-                 tfm_psa_rot_partition_platform
-                 platform_s
-                 tfm_sprt
-                 tfm_spm
+    target_link_shared_code(tfm_s
+        bl2
     )
-    if (TFM_CODE_SHARING_PATH)
-        compiler_link_shared_code(tfm_s
-                                  ${TFM_CODE_SHARING_PATH} # Path to shared code
-                                  EXTERNAL_TARGET # Not produced by tf-m build
-                                  "${LIB_LIST}"
-        )
-    else()
-        compiler_link_shared_code(tfm_s
-                                  ${CMAKE_CURRENT_BINARY_DIR}/../bl2
-                                  bl2
-                                  "${LIB_LIST}"
-        )
-    endif()
+
+    # mbedtls is build outside of tree, so we have to use the _from_dependency
+    # version of this function to attach the custom_command to the tfm_s target.
+    # It's also picky about stripping the symbols, so we just make them weak
+    # instead.
+    target_weaken_symbols_from_dependency(tfm_s crypto_service_mbedcrypto
+        mbedtls_asn1*
+        mbedtls_mpi*
+        mbedtls_platform*
+        mbedtls_rsa*
+
+        #This group is only relevant if BL2 image encryption is on
+        mbedtls_md*
+
+        #This group has two functions that cause runtime errors when shared, so the
+        #error-free ones are listed piece by piece
+        mbedtls_internal_sha256*
+        mbedtls_sha256_free
+        mbedtls_sha256_init
+        mbedtls_sha256_finish
+        mbedtls_sha256_starts
+
+        #Symbols necessary to make sharing additional functions possible
+        mbedtls_calloc*
+        mbedtls_free*
+
+        #Miscellaneous functions
+        mbedtls_exit*
+        memset_func*
+    )
+
 endif()

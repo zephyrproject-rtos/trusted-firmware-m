@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2018 ARM Limited. All rights reserved.
+ * Copyright (c) 2013-2022 ARM Limited. All rights reserved.
  * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -32,6 +32,23 @@
 /* Driver version */
 #define ARM_FLASH_DRV_VERSION    ARM_DRIVER_VERSION_MAJOR_MINOR(1, 0)
 
+/**
+ * Data width values for ARM_FLASH_CAPABILITIES::data_width
+ * \ref ARM_FLASH_CAPABILITIES
+ */
+ enum {
+    DATA_WIDTH_8BIT   = 0u,
+    DATA_WIDTH_16BIT,
+    DATA_WIDTH_32BIT,
+    DATA_WIDTH_ENUM_SIZE
+};
+
+static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
+    sizeof(uint8_t),
+    sizeof(uint16_t),
+    sizeof(uint32_t),
+};
+
 /*
  * ARM FLASH device structure
  */
@@ -62,13 +79,12 @@ static const ARM_FLASH_CAPABILITIES DriverCapabilities =
 static int32_t is_range_valid(struct arm_flash_dev_t *flash_dev,
                               uint32_t offset)
 {
-    uint32_t flash_limit = 0;
+    uint32_t flash_size = 0;
     int32_t rc = 0;
 
-    flash_limit = (flash_dev->data->sector_count * flash_dev->data->sector_size)
-                  - 1;
+    flash_size = (flash_dev->data->sector_count * flash_dev->data->sector_size);
 
-    if(offset > flash_limit)
+    if(offset >= flash_size)
     {
         rc = -1;
     }
@@ -139,6 +155,11 @@ static ARM_FLASH_CAPABILITIES ARM_Flash_GetCapabilities(void)
 static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
 {
     ARG_UNUSED(cb_event);
+
+    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
+        return ARM_DRIVER_ERROR;
+    }
+
     /* Nothing to be done */
 
     FMC_Open();
@@ -178,8 +199,11 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     uint8_t* pu8;
     uint32_t i, taddr;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     /* Check flash memory boundaries */
-    rc = is_range_valid(FLASH0_DEV, addr + cnt - 1);
+    rc = is_range_valid(FLASH0_DEV, addr + cnt);
     if (rc != 0) {
         return ARM_DRIVER_ERROR_PARAMETER;
     }
@@ -189,12 +213,13 @@ static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
     for(i = 0; i < cnt; i++)
     {
         taddr = start_addr + i;
-        if(taddr >= (FLASH_AREA_0_OFFSET+FLASH_S_PARTITION_SIZE))
+        if(taddr >= SCU->FNSADDR)
             taddr += NS_OFFSET;
         pu8[i] = *(uint8_t*)taddr;
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t cnt)
@@ -204,8 +229,11 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
     int32_t rc = 0;
     int32_t i,j;
 
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[DriverCapabilities.data_width];
+
     /* Check flash memory boundaries and alignment with minimal write size */
-    rc  = is_range_valid(FLASH0_DEV, addr + cnt - 1);
+    rc  = is_range_valid(FLASH0_DEV, addr + cnt);
     rc |= is_write_aligned(FLASH0_DEV, addr);
     rc |= is_write_aligned(FLASH0_DEV, cnt);
     if(rc != 0)
@@ -229,8 +257,15 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
             if(j>=4)
             {
                 FMC_Write(start_addr+(i+1-4), u32Data);
+                // verify
+                if(M32(start_addr + i - 3) != u32Data)
+                {
+                    printf("flash write verify fail @ %08x W:%08x R:%08x\r\n", start_addr + i - 3, u32Data, M32(start_addr + i - 3));
+                }
+
                 j = 0;
                 u32Data = 0;
+
             }
         }
 
@@ -242,7 +277,8 @@ static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data, uint32_t c
 
     }
 
-    return ARM_DRIVER_OK;
+    cnt /= data_width_byte[DriverCapabilities.data_width];
+    return cnt;
 }
 
 static int32_t ARM_Flash_EraseSector(uint32_t addr)

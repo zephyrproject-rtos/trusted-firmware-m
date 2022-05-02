@@ -448,9 +448,9 @@ which mailbox message is completed according to the handle and write the result
 to corresponding NSPE mailbox queue slot.
 
 Platform specific Inter-Processor Communication interrupt handler in SPE should
-call ``tfm_mailbox_msg_irq_handler()`` to notify SPE mailbox to deal with
-received PSA Client call(s) from NSPE. ``tfm_mailbox_msg_irq_handler()`` will
-assert PendSV. Please refer to `tfm_mailbox_msg_irq_handler()`_ for details.
+call ``spm_handle_interrupt()`` to notify SPM of the interrupt. SPM will then
+send the ``SIGNAL_MAILBOX`` signal to the ``ns_agent_mailbox`` partition, which
+will call ``tfm_rpc_client_call_handler()``.
 
 **********************
 Mailbox initialization
@@ -1357,20 +1357,6 @@ This function initializes SPE mailbox.
 ``tfm_mailbox_init()`` invokes ``tfm_mailbox_hal_init()`` to execute platform
 specific initialization.
 
-``tfm_mailbox_msg_irq_handler()``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-A general IRQ handler to deal with notification from NSPE mailbox.
-
-.. code-block:: c
-
-  void tfm_mailbox_msg_irq_handler(void);
-
-**Usage**
-
-``tfm_mailbox_msg_irq_handler()`` is called in platform-specific Inter-Processor
-Communication interrupt handler when a notification from NSPE mailbox arrives.
-
 SPE mailbox HAL APIs
 --------------------
 
@@ -1473,3 +1459,4 @@ Reference
 --------------------
 
 *Copyright (c) 2019-2021 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2022 Cypress Semiconductor Corporation. All rights reserved.*

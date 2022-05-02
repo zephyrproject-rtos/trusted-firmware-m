@@ -36,7 +36,7 @@ Bootloader and FWU
 
 Tamas Ban
     :email: `Tamas.Ban@arm.com <Tamas.Ban@arm.com>`__
-    :github: `tamban01 <https://github.com/tamban01>`__
+    :github: `tamasban <https://github.com/tamasban>`__
 
 Sherry Zhang
     :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__
@@ -158,21 +158,9 @@ Jamie McCrae
 Nordic Semiconductor Platforms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Ioannis Glaropoulos
-    :email: `ioannis.glaropoulos@nordicsemi.no <ioannis.glaropoulos@nordicsemi.no>`__
-    :github: `ioannisg <https://github.com/ioannisg>`__
-
-Andrzej Głąbek
-    :email: `andrzej.glabek@nordicsemi.no <andrzej.glabek@nordicsemi.no>`__
-    :github: `anangl <https://github.com/anangl>`__
-
-Øyvind Rønningstad
-    :email: `oyvind.ronningstad@nordicsemi.no <oyvind.ronningstad@nordicsemi.no>`__
-    :github: `oyvindronningstad <https://github.com/oyvindronningstad>`__
-
-Sebastian Bøe
-    :email: `sebastian.boe@nordicsemi.no <sebastian.boe@nordicsemi.no>`__
-    :github: `SebastianBoe <https://github.com/SebastianBoe>`__
+Joakim Andersson
+    :email: `joakim.andersson@nordicsemi.no <joakim.andersson@nordicsemi.no>`__
+    :github: `joerchan <https://github.com/joerchan>`__
 
 
 Nuvoton Platform:

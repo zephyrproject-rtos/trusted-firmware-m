@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -101,6 +101,9 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         case PLAT_OTP_ID_ENTROPY_SEED:
             return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, entropy_seed), out_len, out);
 
+        case PLAT_OTP_ID_SECURE_DEBUG_PK:
+            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, secure_debug_pk), out_len, out);
+
         default:
             return TFM_PLAT_ERR_UNSUPPORTED;
     }
@@ -201,6 +204,9 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_ENTROPY_SEED:
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, entropy_seed), in_len, in);
 
+    case PLAT_OTP_ID_SECURE_DEBUG_PK:
+        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, secure_debug_pk), in_len, in);
+
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
@@ -289,6 +295,10 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
 
         case PLAT_OTP_ID_ENTROPY_SEED:
             *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->entropy_seed);
+            break;
+
+        case PLAT_OTP_ID_SECURE_DEBUG_PK:
+            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->secure_debug_pk);
             break;
 
         default:

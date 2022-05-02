@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,6 +18,7 @@
 #ifndef PSA_CRYPTO_EXTRA_H
 #define PSA_CRYPTO_EXTRA_H
 
+#include "psa/crypto_types.h"
 #include "psa/crypto_compat.h"
 
 #ifdef __cplusplus

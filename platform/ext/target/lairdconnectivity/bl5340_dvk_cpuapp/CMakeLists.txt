@@ -9,8 +9,6 @@
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(NRF_BOARD_SELECTED True)
-# Relative path to core nordic files from scope of the lairdconnectivity/common/core folder
-set(NRF_FOLDER_PATH "../../../nordic_nrf/common/core")
 
 add_subdirectory(../common/bl5340 bl5340)
 
@@ -21,7 +19,7 @@ target_include_directories(platform_region_defs
 
 target_sources(platform_s
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
+        tfm_hal_platform.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
@@ -29,6 +27,7 @@ target_include_directories(platform_s
     PUBLIC
         .
         ../common/bl5340/partition
+        services/include
 )
 
 target_include_directories(platform_ns
@@ -43,4 +42,9 @@ if(BL2)
         PRIVATE
             .
     )
+endif()
+
+if (TFM_PARTITION_PLATFORM)
+install(FILES       services/include/tfm_ioctl_api.h
+        DESTINATION ${TFM_INSTALL_PATH}/interface/include)
 endif()

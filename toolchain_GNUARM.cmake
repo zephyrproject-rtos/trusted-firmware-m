@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -14,6 +14,7 @@ endif()
 set(CMAKE_SYSTEM_NAME Generic)
 
 find_program(CMAKE_C_COMPILER ${CROSS_COMPILE}-gcc)
+find_program(CMAKE_CXX_COMPILER ${CROSS_COMPILE}-g++)
 
 if(CMAKE_C_COMPILER STREQUAL "CMAKE_C_COMPILER-NOTFOUND")
     message(FATAL_ERROR "Could not find compiler: '${CROSS_COMPILE}-gcc'")
@@ -52,6 +53,12 @@ macro(tfm_toolchain_reset_compiler_flags)
     )
 endmacro()
 
+if(CONFIG_TFM_MEMORY_USAGE_QUIET)
+    set(MEMORY_USAGE_FLAG "")
+else()
+    set(MEMORY_USAGE_FLAG LINKER:--print-memory-usage)
+endif()
+
 macro(tfm_toolchain_reset_linker_flags)
     set_property(DIRECTORY PROPERTY LINK_OPTIONS "")
 
@@ -62,7 +69,7 @@ macro(tfm_toolchain_reset_linker_flags)
         LINKER:-fatal-warnings
         LINKER:--gc-sections
         LINKER:--no-wchar-size-warning
-        LINKER:--print-memory-usage
+        ${MEMORY_USAGE_FLAG}
     )
 endmacro()
 
@@ -76,8 +83,9 @@ macro(tfm_toolchain_set_processor_arch)
             endif()
         endif()
         if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
-            if (DEFINED CONFIG_TFM_SPE_FP)
-                if(CONFIG_TFM_SPE_FP STREQUAL "0")
+            if (DEFINED CONFIG_TFM_FP)
+                if(CONFIG_TFM_FP STREQUAL "0" AND
+                   NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv6-m")
                     string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
                 endif()
             endif()
@@ -103,8 +111,8 @@ macro(tfm_toolchain_set_processor_arch)
     endif()
 
     if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
-        if (DEFINED CONFIG_TFM_SPE_FP)
-            if(CONFIG_TFM_SPE_FP STRGREATER 0)
+        if (DEFINED CONFIG_TFM_FP)
+            if(CONFIG_TFM_FP STREQUAL "hard")
                 string(APPEND CMAKE_SYSTEM_ARCH "+fp")
             endif()
         endif()
@@ -116,7 +124,14 @@ macro(tfm_toolchain_reload_compiler)
     tfm_toolchain_reset_compiler_flags()
     tfm_toolchain_reset_linker_flags()
 
-    if (CMAKE_C_COMPILER_VERSION VERSION_EQUAL 10.2.1)
+    # CMAKE_C_COMPILER_VERSION is not guaranteed to be defined.
+    EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION )
+
+    if (GCC_VERSION VERSION_LESS 7.3.1)
+        message(FATAL_ERROR "Please use newer GNU Arm compiler version starting from 7.3.1.")
+    endif()
+
+    if (GCC_VERSION VERSION_EQUAL 10.2.1)
         message(FATAL_ERROR "GNU Arm compiler version 10-2020-q4-major has an issue in CMSE support."
                             " Select other GNU Arm compiler versions instead."
                             " See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157 for the issue detail.")
@@ -142,16 +157,16 @@ macro(tfm_toolchain_reload_compiler)
 
     set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
 
-    if (CONFIG_TFM_SPE_FP STREQUAL "2")
+    if (CONFIG_TFM_FP STREQUAL "hard")
         set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
         set(LINKER_CP_OPTION -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
-    elseif (CONFIG_TFM_SPE_FP STREQUAL "1")
-        set(COMPILER_CP_FLAG -mfloat-abi=softfp -mfpu=${CONFIG_TFM_FP_ARCH})
-        set(LINKER_CP_OPTION -mfloat-abi=softfp -mfpu=${CONFIG_TFM_FP_ARCH})
     else()
         set(COMPILER_CP_FLAG -mfloat-abi=soft)
         set(LINKER_CP_OPTION -mfloat-abi=soft)
     endif()
+
+    # For GNU Arm Embedded Toolchain doesn't emit __ARM_ARCH_8_1M_MAIN__, adding this macro manually.
+    add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__>)
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first
@@ -163,10 +178,6 @@ macro(target_add_scatter_file target)
     target_link_options(${target}
         PRIVATE
         -T $<TARGET_OBJECTS:${target}_scatter>
-    )
-
-    add_dependencies(${target}
-        ${target}_scatter
     )
 
     add_library(${target}_scatter OBJECT)
@@ -186,6 +197,12 @@ macro(target_add_scatter_file target)
             KEEP_EXTENSION True # Don't use .o extension for the preprocessed file
         )
     endforeach()
+
+    add_dependencies(${target}
+        ${target}_scatter
+    )
+
+    set_target_properties(${target} PROPERTIES LINK_DEPENDS $<TARGET_OBJECTS:${target}_scatter>)
 
     target_link_libraries(${target}_scatter
         platform_region_defs
@@ -242,95 +259,85 @@ macro(add_convert_to_bin_target target)
     )
 endmacro()
 
-# Macro for sharing code among independent binaries. This function extracts
-# some parts of the code based on a symbol template file and creates a text
-# file, which contains the symbols with their absolute addresses, which can be
-# picked up by the linker when linking the other target.
-# INPUTS:
-#     TARGET -                -  Target to extract the symbols/objects from
-#     SHARED_SYMBOL_TEMPLATE  -  Template with names of symbols to share
-macro(compiler_create_shared_code TARGET SHARED_SYMBOL_TEMPLATE)
-    # Create a temporary file, which contains all extracted symbols from 'TARGET'
-    set(ALL_SYMBOLS ${CMAKE_CURRENT_BINARY_DIR}/all_symbols.txt)
-
-    # Find the CMake script doing the symbol filtering.
-    find_file(FILTER_SYMBOLS_SCRIPT "FilterSharedSymbols.cmake" PATHS ${CMAKE_MODULE_PATH} PATH_SUFFIXES Common NO_DEFAULT_PATH)
-    find_file(STRIP_UNSHARED_CODE   "StripUnsharedCode.cmake"   PATHS ${CMAKE_MODULE_PATH} PATH_SUFFIXES Common NO_DEFAULT_PATH)
-
-    find_program(GNUARM_NM arm-none-eabi-nm)
-    if (GNUARM_NM STREQUAL "GNUARM_NM-NOTFOUND")
-        message(FATAL_ERROR "toolchain_GNUARM.cmake: mandatory tool '${GNUARM_NM}' is missing.")
+macro(target_share_symbols target symbol_name_file)
+    get_target_property(TARGET_TYPE ${target} TYPE)
+    if (NOT TARGET_TYPE STREQUAL "EXECUTABLE")
+        message(FATAL_ERROR "${target} is not an executable. Symbols cannot be shared from libraries.")
     endif()
 
-    # Multiple steps are required:
-    #   - Extract all symbols from sharing target
-    #   - Filter the unwanted symbols from all_symbols.txt
-    #   - Create a stripped shared_code.axf file which contains only the symbols which are meant to be shared
-    add_custom_command(TARGET ${TARGET}
-                        POST_BUILD
+    FILE(STRINGS ${symbol_name_file} KEEP_SYMBOL_LIST
+        LENGTH_MINIMUM 1
+    )
 
-                        COMMAND ${GNUARM_NM}
-                        ARGS
-                            ${CMAKE_BINARY_DIR}/bin/${TARGET}.axf > ${ALL_SYMBOLS}
-                        COMMENT "Dumping all symbols"
 
-                        COMMAND ${CMAKE_COMMAND}
-                            -DSHARED_SYMBOL_TEMPLATE=${SHARED_SYMBOL_TEMPLATE}
-                            -DALL_SYMBOLS=${ALL_SYMBOLS}
-                            -P ${FILTER_SYMBOLS_SCRIPT}
-                        BYPRODUCTS
-                            ${CMAKE_CURRENT_BINARY_DIR}/shared_symbols_name.txt
-                            ${CMAKE_CURRENT_BINARY_DIR}/shared_symbols_addr.txt
-                        COMMENT "Filtering shared symbols"
-
-                        COMMAND ${CMAKE_COMMAND}
-                            -E copy ${CMAKE_BINARY_DIR}/bin/${TARGET}.axf ${CMAKE_CURRENT_BINARY_DIR}/shared_code.axf
-                        COMMENT "Copy and rename ${TARGET} to strip"
-
-                        COMMAND ${CMAKE_COMMAND}
-                            -DSHARED_SYMBOLS_FILE=${CMAKE_CURRENT_BINARY_DIR}/shared_symbols_name.txt
-                            -DEXECUTABLE_TO_STRIP=${CMAKE_CURRENT_BINARY_DIR}/shared_code.axf
-                            -P ${STRIP_UNSHARED_CODE}
-                        COMMENT "Stripping unshared code from ${CMAKE_CURRENT_BINARY_DIR}/shared_code.axf"
+    list(TRANSFORM KEEP_SYMBOL_LIST PREPEND  --keep-symbol=)
+    # strip all the symbols except those proveded as arguments
+    add_custom_command(
+        TARGET ${target}
+        POST_BUILD
+        COMMAND ${CROSS_COMPILE}-objcopy
+        ARGS $<TARGET_FILE:${target}> --wildcard ${KEEP_SYMBOL_LIST} --strip-all $<TARGET_FILE_DIR:${target}>/${target}_shared_symbols.axf
     )
 endmacro()
 
-macro(compiler_weaken_symbols TARGET SHARED_CODE_PATH ORIG_TARGET LIB_LIST)
-    # Find the CMake scripts
-    find_file(WEAKEN_SYMBOLS_SCRIPT "WeakenSymbols.cmake" PATHS ${CMAKE_MODULE_PATH} PATH_SUFFIXES Common NO_DEFAULT_PATH)
+macro(target_link_shared_code target)
+    foreach(symbol_provider ${ARGN})
+        if (TARGET ${symbol_provider})
+            get_target_property(SYMBOL_PROVIDER_TYPE ${symbol_provider} TYPE)
+            if (NOT SYMBOL_PROVIDER_TYPE STREQUAL "EXECUTABLE")
+                message(FATAL_ERROR "${symbol_provider} is not an executable. Symbols cannot be shared from libraries.")
+            endif()
+        endif()
 
-    add_custom_command(TARGET ${TARGET}
-                        PRE_LINK
-
-                        COMMAND ${CMAKE_COMMAND}
-                            -DLIB_LIST='${LIB_LIST}'
-                            -DSHARED_CODE_PATH=${SHARED_CODE_PATH}
-                            -P ${WEAKEN_SYMBOLS_SCRIPT}
-                        COMMENT "Set conflicting symbols to be weak in the original libraries to avoid collision")
-
-    # If sharing target is defined by TF-M build then setup dependency
-    if(NOT ${ORIG_TARGET} STREQUAL "EXTERNAL_TARGET")
-        add_dependencies(${TARGET} ${ORIG_TARGET})
-    endif()
+        add_dependencies(${target} ${symbol_provider})
+        target_link_options(${target} PRIVATE LINKER:-R$<TARGET_FILE_DIR:${symbol_provider}>/${symbol_provider}_shared_symbols.axf)
+    endforeach()
 endmacro()
 
-# Macro for linking shared code to given target. Location of shared code could
-# be outside of the TF-M project. Its location can be defined with the CMake
-# command line argument "SHARED_CODE_PATH". The file containing the shared objects
-# must be named "shared_symbols_addr.txt".
-# INPUTS:
-#     TARGET            Target to link the shared code to
-#     SHARED_CODE_PATH  Shared code located in this folder
-#     ORIG_TARGET       Target that shared code was extraced from <TARGET | "EXTERNAL_TARGET">
-#     LIB_LIST          List of libraries which are linked to top level target
-macro(compiler_link_shared_code TARGET SHARED_CODE_PATH ORIG_TARGET LIB_LIST)
-    # GNUARM requires to link a stripped version (only containing the shared symbols) of the
-    # original executable to the executable which want to rely on the shared symbols.
-    target_link_options(${TARGET} PRIVATE -Wl,-R${SHARED_CODE_PATH}/shared_code.axf)
+macro(target_strip_symbols target)
+    set(SYMBOL_LIST "${ARGN}")
+    list(TRANSFORM SYMBOL_LIST PREPEND  --strip-symbol=)
 
-    compiler_weaken_symbols(${TARGET}
-                            ${SHARED_CODE_PATH}
-                            ${ORIG_TARGET}
-                            "${LIB_LIST}"
+    add_custom_command(
+        TARGET ${target}
+        POST_BUILD
+        COMMAND ${CROSS_COMPILE}-objcopy
+        ARGS $<TARGET_FILE:${target}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${target}>
+    )
+endmacro()
+
+macro(target_strip_symbols_from_dependency target dependency)
+    set(SYMBOL_LIST "${ARGN}")
+    list(TRANSFORM SYMBOL_LIST PREPEND  --strip-symbol=)
+
+    add_custom_command(
+        TARGET ${target}
+        PRE_LINK
+        COMMAND ${CROSS_COMPILE}-objcopy
+        ARGS $<TARGET_FILE:${dependency}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${dependency}>
+    )
+endmacro()
+
+macro(target_weaken_symbols target)
+    set(SYMBOL_LIST "${ARGN}")
+    list(TRANSFORM SYMBOL_LIST PREPEND  --weaken-symbol=)
+
+    add_custom_command(
+        TARGET ${target}
+        POST_BUILD
+        COMMAND ${CROSS_COMPILE}-objcopy
+        ARGS $<TARGET_FILE:${target}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${target}>
+    )
+endmacro()
+
+macro(target_weaken_symbols_from_dependency target dependency)
+    set(SYMBOL_LIST "${ARGN}")
+    list(TRANSFORM SYMBOL_LIST PREPEND  --weaken-symbol=)
+
+    add_custom_command(
+        TARGET ${target}
+        PRE_LINK
+        COMMAND ${CROSS_COMPILE}-objcopy
+        ARGS $<TARGET_FILE:${dependency}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${dependency}>
     )
 endmacro()

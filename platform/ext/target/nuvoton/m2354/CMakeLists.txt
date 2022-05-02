@@ -25,7 +25,7 @@ target_sources(tfm_s
         $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/startup_cmsdk_m2354_s.s>
 )
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/m2354_s.sct>
+    $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
     $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
     $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
 )
@@ -88,17 +88,17 @@ target_sources(platform_s
         device/source/device_definition.c
         ../common/cmsis_drivers/Driver_Flash.c
         ../common/cmsis_drivers/Driver_USART.c
-        ../common/native_drivers/uart_cmsdk_drv.c
+        ../common/native_drivers/arm_uart_drv.c
         ../common/native_drivers/mpu_armv8m_drv.c
         ../common/native_drivers/timer_cmsdk_drv.c
         bsp/Library/StdDriver/src/timer.c
         bsp/Library/StdDriver/src/fmc.c
+        bsp/Library/StdDriver/src/tamper.c
         ../common/services/src/tfm_platform_system.c
         target_cfg.c
         ../common/spm_hal.c
         ../common/tfm_hal_isolation.c
         ../common/tfm_hal_platform.c
-        ../common/boot_hal.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
         ${PLATFORM_DIR}/ext/common/tfm_platform.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
@@ -115,7 +115,7 @@ target_compile_options(platform_s
 
 target_sources(platform_ns
     PRIVATE
-        ../common/native_drivers/uart_cmsdk_drv.c
+        ../common/native_drivers/arm_uart_drv.c
         ../common/cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/system_core_init.c
@@ -142,13 +142,13 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            ../common/boot_hal.c
             device/source/device_definition.c
             device/source/system_core_init.c
             ../common/cmsis_drivers/Driver_Flash.c
-            ../common/native_drivers/uart_cmsdk_drv.c
+            ../common/native_drivers/arm_uart_drv.c
             ../common/cmsis_drivers/Driver_USART.c
             bsp/Library/StdDriver/src/fmc.c
+            bsp/Library/StdDriver/src/tamper.c
     )
     target_include_directories(platform_bl2
         PUBLIC

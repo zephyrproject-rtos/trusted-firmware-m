@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2016-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,6 +214,46 @@ uint32_t uart_cmsdk_rx_ready(struct uart_cmsdk_dev_t* dev);
  */
 void uart_cmsdk_clear_interrupt(struct uart_cmsdk_dev_t* dev,
                               enum uart_cmsdk_irq_t irq);
+
+/**
+ * \brief Enables TX
+ *
+ * \param[in] dev  UART device struct \ref uart_cmsdk_dev_t
+ *
+ * \return Returns error code as specified in \ref uart_cmsdk_error_t
+ *
+ * \note This function doesn't check if dev is NULL.
+ */
+enum uart_cmsdk_error_t uart_cmsdk_tx_enable(struct uart_cmsdk_dev_t* dev);
+
+/**
+ * \brief Disables TX
+ *
+ * \param[in] dev  UART device struct \ref uart_cmsdk_dev_t
+ *
+ * \note This function doesn't check if dev is NULL.
+ */
+void uart_cmsdk_tx_disable(struct uart_cmsdk_dev_t* dev);
+
+/**
+ * \brief Enables RX
+ *
+ * \param[in] dev  UART device struct \ref uart_cmsdk_dev_t
+ *
+ * \return Returns error code as specified in \ref uart_cmsdk_error_t
+ *
+ * \note This function doesn't check if dev is NULL.
+ */
+enum uart_cmsdk_error_t uart_cmsdk_rx_enable(struct uart_cmsdk_dev_t* dev);
+
+/**
+ * \brief Disables RX
+ *
+ * \param[in] dev  UART device struct \ref uart_cmsdk_dev_t
+ *
+ * \note This function doesn't check if dev is NULL.
+ */
+void uart_cmsdk_rx_disable(struct uart_cmsdk_dev_t* dev);
 
 #ifdef __cplusplus
 }

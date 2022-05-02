@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited
+ * Copyright (c) 2017-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,9 @@
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+REGION_DECLARE(Image$$, ER_VENEER, $$Base);
+REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
+
 #ifdef BL2
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 #endif /* BL2 */
@@ -48,8 +49,8 @@ const struct memory_region_limits memory_regions = {
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
         NS_PARTITION_SIZE - 1,
 
-    .veneer_base = (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-    .veneer_limit = (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+    .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
+    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
 
 #ifdef BL2
     .secondary_partition_base =
@@ -308,6 +309,12 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
 }
 
 /*------------------- SAU/IDAU configuration functions -----------------------*/
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
+#define DEV_APIS_TEST_NVMEM_REGION_START (NS_DATA_LIMIT + 1)
+#define DEV_APIS_TEST_NVMEM_REGION_LIMIT \
+    (DEV_APIS_TEST_NVMEM_REGION_START + DEV_APIS_TEST_NVMEM_REGION_SIZE - 1)
+#endif
+
 struct sau_cfg_t {
     uint32_t RBAR;
     uint32_t RLAR;
@@ -327,8 +334,8 @@ const struct sau_cfg_t sau_cfg[] = {
         false,
     },
     {
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
         true,
     },
     {
@@ -360,6 +367,13 @@ const struct sau_cfg_t sau_cfg[] = {
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
         SECONDARY_PARTITION_SIZE - 1,
+        false,
+    },
+#endif
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
+    {
+        DEV_APIS_TEST_NVMEM_REGION_START,
+        DEV_APIS_TEST_NVMEM_REGION_LIMIT,
         false,
     },
 #endif
@@ -428,6 +442,11 @@ int32_t mpc_init_cfg(void)
 
     ret = Driver_SRAM2_MPC.ConfigRegion(NS_DATA_START, NS_DATA_LIMIT,
                                         ARM_MPC_ATTR_NONSECURE);
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
+    ret = Driver_SRAM2_MPC.ConfigRegion(DEV_APIS_TEST_NVMEM_REGION_START,
+                                        DEV_APIS_TEST_NVMEM_REGION_LIMIT,
+                                        ARM_MPC_ATTR_NONSECURE);
+#endif
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }

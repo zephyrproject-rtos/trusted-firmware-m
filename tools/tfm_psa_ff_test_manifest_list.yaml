@@ -19,7 +19,7 @@
       "conditional": "@TFM_PARTITION_FF_TEST@",
       "version_major": 0,
       "version_minor": 1,
-      "pid": 512,
+      "pid": 5000,
       "linker_pattern": {
         "library_list":[
           "*client_partition.a"
@@ -37,7 +37,7 @@
       "conditional": "@TFM_PARTITION_FF_TEST@",
       "version_major": 0,
       "version_minor": 1,
-      "pid": 513,
+      "pid": 5001,
       "linker_pattern": {
         "library_list":[
           "*server_partition.a"
@@ -55,7 +55,7 @@
       "conditional": "@TFM_PARTITION_FF_TEST@",
       "version_major": 0,
       "version_minor": 1,
-      "pid": 514,
+      "pid": 5002,
       "linker_pattern": {
         "library_list":[
           "*driver_partition.a"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -36,6 +36,7 @@ struct tfm_crypto_operation_s {
         psa_mac_operation_t mac;          /*!< MAC operation context */
         psa_hash_operation_t hash;        /*!< Hash operation context */
         psa_key_derivation_operation_t key_deriv; /*!< Key derivation operation context */
+        psa_aead_operation_t aead;        /*!< AEAD operation context */
     } operation;
 };
 
@@ -67,6 +68,9 @@ static void memset_operation_context(uint32_t index)
         break;
     case TFM_CRYPTO_KEY_DERIVATION_OPERATION:
         mem_size = sizeof(psa_key_derivation_operation_t);
+        break;
+    case TFM_CRYPTO_AEAD_OPERATION:
+        mem_size = sizeof(psa_aead_operation_t);
         break;
     case TFM_CRYPTO_OPERATION_NONE:
     default:
@@ -106,7 +110,14 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
 
     /* Handle must be initialised before calling a setup function */
     if (*handle != TFM_CRYPTO_INVALID_HANDLE) {
-        return PSA_ERROR_BAD_STATE;
+        if ((*handle <= TFM_CRYPTO_CONC_OPER_NUM) &&
+            (operation[*handle - 1].in_use == TFM_CRYPTO_IN_USE) &&
+            (operation[*handle - 1].owner == partition_id)) {
+            /* The handle is a valid one for already in progress operation */
+            return PSA_ERROR_BAD_STATE;
+        }
+
+        return PSA_ERROR_INVALID_HANDLE;
     }
 
     /* Init to invalid values */
