@@ -547,57 +547,18 @@ sends a message "Hello World" when called.
         }
     }
 
-Test connection
----------------
-To test that the service has been implemented correctly, the user needs to call
-it from somewhere. One option is to create a new testsuite, such as
-``<TF-M-test base folder>/test/secure_fw/suites/example/non_secure/example_ns_
-interface_testsuite.c``.
+Test suites and test partitions
+-------------------------------
 
-The process of adding test connection is explained in the specification
-:doc:`Adding TF-M Regression Test Suite </integration_guide/tfm_test_suites_addition>`
+A regression test suite can be added to verify whether the new secure partition
+works as expected. Refer to
+`Adding TF-M Regression Test Suite <https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/docs/tfm_test_suites_addition.rst>`_
+for the details of adding a regression test suite.
 
-.. code-block:: c
-
-    #include "psa_manifest/sid.h"
-    #include "psa/client.h"
-
-    #include "test_framework.h"
-    #include "test_log.h"
-
-    static void tfm_example_test_1001(struct test_result_t *ret)
-    {
-        char str1[] = "str1";
-        char str2[] = "str2";
-        char str3[128], str4[128];
-        struct psa_invec invecs[2] = {{str1, sizeof(str1)},
-                                      {str2, sizeof(str2)}};
-        struct psa_outvec outvecs[2] = {{str3, sizeof(str3)},
-                                        {str4, sizeof(str4)}};
-        psa_handle_t handle;
-        psa_status_t status;
-        uint32_t version;
-
-        version = psa_version(ROT_A_SID);
-        TEST_LOG("TFM service support version is %d.\r\n", version);
-        handle = psa_connect(ROT_A_SID, ROT_A_VERSION);
-        status = psa_call(handle, PSA_IPC_CALL, invecs, 2, outvecs, 2);
-        if (status >= 0) {
-            TEST_LOG("psa_call is successful!\r\n");
-        } else {
-            TEST_FAIL("psa_call is failed!\r\n");
-            return;
-        }
-
-        TEST_LOG("outvec1 is: %s\r\n", outvecs[0].base);
-        TEST_LOG("outvec2 is: %s\r\n", outvecs[1].base);
-        psa_close(handle);
-        ret->val = TEST_PASSED;
-    }
-
-Once the test and service has been implemented, the project can be built and
-executed. The user should see the "Hello World" message in the console as
-received by the testsuite.
+Some regression tests require a dedicated RoT service. The implementations of
+the RoT service for test are similar to secure partition addition. Refer to
+`Adding partitions for regression tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/docs/tfm_test_services_addition.rst>`_
+to get more information.
 
 Out-of-tree Secure Partition build
 ----------------------------------

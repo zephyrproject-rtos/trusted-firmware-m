@@ -12,7 +12,6 @@ with other hardware platforms and operating systems.
     OS migration to Armv8-M <os_migration_guide_armv8m.rst>
     tfm_fpu_support.rst
     tfm_secure_irq_integration_guide.rst
-    Adding a Test Suite <tfm_test_suites_addition.rst>
     How to add a partition <services/tfm_secure_partition_addition>
 
 .. toctree::
