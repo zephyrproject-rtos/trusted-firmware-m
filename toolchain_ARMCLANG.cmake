@@ -9,6 +9,7 @@ cmake_minimum_required(VERSION 3.15)
 SET(CMAKE_SYSTEM_NAME Generic)
 
 set(CMAKE_C_COMPILER armclang)
+set(CMAKE_CXX_COMPILER armclang)
 set(CMAKE_ASM_COMPILER armasm)
 
 set(LINKER_VENEER_OUTPUT_FLAG --import_cmse_lib_out=)
@@ -24,25 +25,27 @@ macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
 
     add_compile_options(
-        $<$<COMPILE_LANGUAGE:C>:-Wno-ignored-optimization-argument>
-        $<$<COMPILE_LANGUAGE:C>:-Wno-unused-command-line-argument>
-        $<$<COMPILE_LANGUAGE:C>:-Wall>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-Wno-ignored-optimization-argument>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-Wno-unused-command-line-argument>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-Wall>
         # Don't error when the MBEDTLS_NULL_ENTROPY warning is shown
-        $<$<COMPILE_LANGUAGE:C>:-Wno-error=cpp>
-        $<$<COMPILE_LANGUAGE:C>:-c>
-        $<$<COMPILE_LANGUAGE:C>:-fdata-sections>
-        $<$<COMPILE_LANGUAGE:C>:-ffunction-sections>
-        $<$<COMPILE_LANGUAGE:C>:-fno-builtin>
-        $<$<COMPILE_LANGUAGE:C>:-fshort-enums>
-        $<$<COMPILE_LANGUAGE:C>:-fshort-wchar>
-        $<$<COMPILE_LANGUAGE:C>:-funsigned-char>
-        $<$<COMPILE_LANGUAGE:C>:-masm=auto>
-        $<$<COMPILE_LANGUAGE:C>:-nostdlib>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-Wno-error=cpp>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-c>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fdata-sections>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-ffunction-sections>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fno-builtin>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fshort-enums>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fshort-wchar>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-funsigned-char>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-masm=auto>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-nostdlib>
         $<$<COMPILE_LANGUAGE:C>:-std=c99>
-        $<$<COMPILE_LANGUAGE:C>:-mfpu=none>
+        $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-mfpu=none>
         $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
         $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
         $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
     )
 endmacro()
 
@@ -116,6 +119,7 @@ macro(tfm_toolchain_set_processor_arch)
     set(CMAKE_SYSTEM_ARCH            ${TFM_SYSTEM_ARCHITECTURE})
 
     set(CMAKE_C_COMPILER_TARGET      arm-${CROSS_COMPILE})
+    set(CMAKE_CXX_COMPILER_TARGET    arm-${CROSS_COMPILE})
     set(CMAKE_ASM_COMPILER_TARGET    arm-${CROSS_COMPILE})
 
     # MVE is currently not supported in case of armclang
@@ -135,6 +139,8 @@ macro(tfm_toolchain_set_processor_arch)
     include(Compiler/ARMClang)
     set(CMAKE_C_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
     set(CMAKE_C_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_ARCH})
+    set(CMAKE_CXX_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
+    set(CMAKE_CXX_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_ARCH})
     set(CMAKE_ASM_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
     set(CMAKE_ASM_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_ARCH})
 endmacro()
@@ -145,6 +151,7 @@ macro(tfm_toolchain_reload_compiler)
     tfm_toolchain_reset_linker_flags()
 
     unset(CMAKE_C_FLAGS_INIT)
+    unset(CMAKE_CXX_FLAGS_INIT)
     unset(CMAKE_C_LINK_FLAGS)
     unset(CMAKE_ASM_FLAGS_INIT)
     unset(CMAKE_ASM_LINK_FLAGS)
@@ -173,18 +180,23 @@ macro(tfm_toolchain_reload_compiler)
     if (DEFINED TFM_SYSTEM_PROCESSOR)
         set(CMAKE_C_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_CXX_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         # But armlink doesn't support this +dsp syntax
         string(REGEX REPLACE "\\+nodsp" "" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nodsp" "" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
         string(REGEX REPLACE "\\+nodsp" "" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
         # And uses different syntax for +nofp
         string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
         string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
 
         string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
         string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
     else()
         set(CMAKE_C_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_CXX_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
     endif()
 
     # Workaround for issues with --depend-single-line with armasm and Ninja

@@ -14,6 +14,10 @@ if(CMAKE_C_COMPILER STREQUAL "CMAKE_C_COMPILER-NOTFOUND")
     message(FATAL_ERROR "Could not find compiler: '${CROSS_COMPILE}-gcc'")
 endif()
 
+if(CMAKE_CXX_COMPILER STREQUAL "CMAKE_CXX_COMPILER-NOTFOUND")
+    message(FATAL_ERROR "Could not find compiler: '${CROSS_COMPILE}-g++'")
+endif()
+
 set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
 
 set(LINKER_VENEER_OUTPUT_FLAG -Wl,--cmse-implib,--out-implib=)
@@ -48,7 +52,8 @@ macro(tfm_toolchain_reset_compiler_flags)
         -funsigned-char
         -mthumb
         -nostdlib
-        -std=c99
+        $<$<COMPILE_LANGUAGE:C>:-std=c99>
+        $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
         $<$<OR:$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<BOOL:${TFM_CODE_COVERAGE}>>:-g>
     )
 endmacro()
@@ -166,21 +171,25 @@ macro(tfm_toolchain_reload_compiler)
     endif()
 
     unset(CMAKE_C_FLAGS_INIT)
+    unset(CMAKE_CXX_FLAGS_INIT)
     unset(CMAKE_ASM_FLAGS_INIT)
 
     if (CMAKE_SYSTEM_PROCESSOR)
         set(CMAKE_C_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_CXX_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_C_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     else()
         set(CMAKE_C_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_CXX_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
         set(CMAKE_ASM_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
         set(CMAKE_C_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
         set(CMAKE_ASM_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
     endif()
 
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
     set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
