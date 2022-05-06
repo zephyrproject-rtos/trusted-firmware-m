@@ -151,6 +151,7 @@ int main(void)
         "movs    r1, #2                                \n"
         "orrs    r0, r0, r1                            \n" /* Switch to PSP */
         "msr     control, r0                           \n"
+        "isb                                           \n"
         "bl      c_main                                \n"
         :
         : "r" (REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)),

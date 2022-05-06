@@ -89,6 +89,7 @@ uint32_t tfm_psa_framework_version_veneer(void)
 #endif
         "   pop    {r2, r3}                                   \n"
         "   msr    control, r3                                \n"
+        "   isb                                               \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic1:                                        \n"
@@ -133,6 +134,7 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
 #endif
         "   pop    {r2, r3}                                   \n"
         "   msr    control, r3                                \n"
+        "   isb                                               \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic2:                                        \n"
@@ -184,6 +186,7 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
 #endif
         "   pop    {r2, r3}                                   \n"
         "   msr    control, r3                                \n"
+        "   isb                                               \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic4:                                        \n"
@@ -232,6 +235,7 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
 #endif
         "   pop    {r2, r3}                                   \n"
         "   msr    control, r3                                \n"
+        "   isb                                               \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic3:                                        \n"
@@ -276,6 +280,7 @@ void tfm_psa_close_veneer(psa_handle_t handle)
 #endif
         "   pop    {r2, r3}                                   \n"
         "   msr    control, r3                                \n"
+        "   isb                                               \n"
         "   bxns   lr                                         \n"
 #if !defined(__ARM_ARCH_8_1M_MAIN__)
         "reent_panic5:                                        \n"
