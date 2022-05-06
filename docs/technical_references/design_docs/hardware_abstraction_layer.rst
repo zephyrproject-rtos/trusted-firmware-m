@@ -338,6 +338,9 @@ an example, assigning PRoT and ARoT domain boundaries to respective partitions
 can make execution more efficient, because switching two partitions in the
 same domain does not need to change the activated boundary.
 
+The boundary contains the partition's memory accessibility information, hence
+memory access check shall be performed based on boundary.
+
 Memory Access Attributes
 ------------------------
 The memory access attributes are encoded as bit fields, you can logic OR them to
@@ -478,29 +481,31 @@ The access permissions outside the boundary is platform-dependent.
 - ``TFM_HAL_SUCCESS`` - the isolation boundary has been set up.
 - ``TFM_HAL_ERROR_GENERIC`` - failed to set upthe isolation boundary.
 
-tfm_hal_memory_has_access()
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tfm_hal_memory_check()
+^^^^^^^^^^^^^^^^^^^^^^
 **Prototype**
 
 .. code-block:: c
 
-  tfm_hal_status_t tfm_hal_memory_has_access(const uintptr_t base,
-                                             size_t size,
-                                             uint32_t attr)
+  tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
+                                        uintptr_t base,
+                                        size_t size,
+                                        uint32_t access_type)
 
 **Description**
 
-This API checks if the memory region defined by ``base`` and ``size`` has the
-given access atrributes - ``attr``.
-
-The Attributes include :term:`NSPE` access, privileged mode, and read-write
-permissions.
+This API checks if a given range of memory can be accessed with specified
+access types in boundary. The boundary belongs to a partition which
+contains asset info.
 
 **Parameter**
 
+- ``boundary`` - Boundary of a Secure Partition.
+  Check `tfm_hal_bind_boundary` for details.
 - ``base`` - The base address of the region.
 - ``size`` - The size of the region.
-- ``attr`` - The `Memory Access Attributes`_.
+- ``access_type`` - The memory access types to be checked between given memory
+  and boundaries. The `Memory Access Attributes`_.
 
 **Return Values**
 
@@ -509,6 +514,12 @@ permissions.
   permissions.
 - ``TFM_HAL_ERROR_INVALID_INPUT`` - Invalid inputs.
 - ``TFM_HAL_ERROR_GENERIC`` - An error occurred.
+
+**Note**
+
+If the implementation chooses to encode a pointer as the boundary,
+a platform-specific pointer validation needs to be considered before
+referencing the content in this pointer.
 
 Log API
 =======

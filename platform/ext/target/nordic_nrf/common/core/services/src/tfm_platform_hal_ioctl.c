@@ -18,6 +18,12 @@
 
 #include <hal/nrf_gpio.h>
 
+/* Boundary handle binding macros. */
+#define HANDLE_ATTR_PRIV_POS            1U
+#define HANDLE_ATTR_PRIV_MASK           (0x1UL << HANDLE_ATTR_PRIV_POS)
+#define HANDLE_ATTR_NS_POS              0U
+#define HANDLE_ATTR_NS_MASK             (0x1UL << HANDLE_ATTR_NS_POS)
+
 enum tfm_platform_err_t
 tfm_platform_hal_read_service(const psa_invec  *in_vec,
 			      const psa_outvec *out_vec)
@@ -26,9 +32,9 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 	struct tfm_read_service_out_t *out;
 	enum tfm_hal_status_t status;
 	enum tfm_platform_err_t err;
-	uint32_t attr = TFM_HAL_ACCESS_WRITABLE |
-			TFM_HAL_ACCESS_READABLE |
-			TFM_HAL_ACCESS_NS;
+	uintptr_t boundary = (1 << HANDLE_ATTR_NS_POS) &
+	                      HANDLE_ATTR_NS_MASK;
+	uint32_t attr = TFM_HAL_ACCESS_READWRITE;
 
 	if (in_vec->len != sizeof(struct tfm_read_service_args_t) ||
 	    out_vec->len != sizeof(struct tfm_read_service_out_t)) {
@@ -46,9 +52,8 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 		return TFM_PLATFORM_ERR_INVALID_PARAM;
 	}
 
-	status = tfm_hal_memory_has_access((uintptr_t)args->destination,
-					    args->len,
-					    attr);
+	status = tfm_hal_memory_check(boundary, (uintptr_t)args->destination,
+	                              args->len, attr);
 	if (status != TFM_HAL_SUCCESS) {
 		return TFM_PLATFORM_ERR_INVALID_PARAM;
 	}

@@ -10,9 +10,9 @@
 #include "tfm_multi_core.h"
 #include "tfm_hal_isolation.h"
 #include "mpu_config.h"
+#include "mmio_defs.h"
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
-
 
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
@@ -25,9 +25,8 @@ REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
-
 static void configure_mpu(uint32_t rnr, uint32_t base, uint32_t limit,
-                                uint32_t is_xn_exec, uint32_t ap_permissions)
+                          uint32_t is_xn_exec, uint32_t ap_permissions)
 {
     uint32_t size; /* region size */
     uint32_t rasr; /* region attribute and size register */
@@ -85,13 +84,31 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     return TFM_HAL_SUCCESS;
 }
 
-enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
-                                                size_t size,
-                                                uint32_t attr)
+enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
+                                           uintptr_t base,
+                                           size_t size,
+                                           uint32_t access_type)
 {
     enum tfm_status_e status;
+    uint32_t flags = 0;
 
-    status = tfm_has_access_to_region((const void *)base, size, attr);
+    if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
+        flags |= MEM_CHECK_MPU_READWRITE;
+    } else if (access_type & TFM_HAL_ACCESS_READABLE) {
+        flags |= MEM_CHECK_MPU_READ;
+    } else {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
+        flags |= MEM_CHECK_MPU_UNPRIV;
+    }
+
+    if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
+        flags |= MEM_CHECK_NONSECURE;
+    }
+
+    status = tfm_has_access_to_region((const void *)base, size, flags);
     if (status != TFM_SUCCESS) {
          return TFM_HAL_ERROR_MEM_FAULT;
     }
@@ -115,31 +132,34 @@ enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
  *
  * The encoding format assignment:
  * - For isolation level 3
- *      BIT | 31        24 | 23         20 | ... | 7           4 | 3        0 |
- *          | Unique Index | Region Attr 5 | ... | Region Attr 1 | Privileged |
+ *      BIT | 31        24 | 23         20 | ... | 7           4 | 3       0 |
+ *          | Unique Index | Region Attr 5 | ... | Region Attr 1 | Base Attr |
  *
  *      In which the "Region Attr i" is:
  *      BIT |       3      | 2        0 |
  *          | 1: RW, 0: RO | MMIO Index |
  *
- * - For isolation level 1/2
- *      BIT | 31                           0 |
- *          | 1: privileged, 0: unprivileged |
+ *      In which the "Base Attr" is:
+ *      BIT |               1                |                           0                     |
+ *          | 1: privileged, 0: unprivileged | 1: Trustzone-specific NSPE, 0: Secure partition |
  *
- * This is a reference implementation on AN521, and may have some limitations.
+ * - For isolation level 1/2
+ *      BIT | 31     2 |              1                |                           0                     |
+ *          | Reserved |1: privileged, 0: unprivileged | 1: Trustzone-specific NSPE, 0: Secure partition |
+ *
+ * This is a reference implementation on Corstone1000, and may have some limitations.
  * 1. The maximum number of allowed MMIO regions is 5.
  * 2. Highest 8 bits are for index. It supports 256 unique handles at most.
  *
  */
-
-#define HANDLE_PER_ATTR_BITS            (0x4)
-#define HANDLE_ATTR_PRIV_MASK           ((1 << HANDLE_PER_ATTR_BITS) - 1)
 
 enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
                                     uintptr_t *p_boundary)
 {
     bool privileged;
+    bool ns_agent;
+    uint32_t partition_attrs = 0;
 
     if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
@@ -151,7 +171,12 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
-    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    ns_agent = (p_ldinf->pid == TFM_SP_NON_SECURE_ID);
+    partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
+                        HANDLE_ATTR_PRIV_MASK;
+    partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
+                        HANDLE_ATTR_NS_MASK;
+    *p_boundary = (uintptr_t)partition_attrs;
 
     /* NOTE: Need to add validation of numbered MMIO if platform requires. */
     /* Platform does not have a need for MMIO yet. */

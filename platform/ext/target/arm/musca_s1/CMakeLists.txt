@@ -113,7 +113,6 @@ target_sources(platform_s
         $<$<NOT:$<BOOL:${TEST_NS_FPU}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
         Libraries/mt25ql_flash_lib.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<NOT:$<BOOL:${TEST_NS_FPU}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )

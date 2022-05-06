@@ -20,6 +20,7 @@
 #include "tfm_spm_hal.h"
 #include "spm_ipc.h"
 #include "load/partition_defs.h"
+#include "tfm_hal_isolation.h"
 #else
 #include "spm_func.h"
 #endif
@@ -152,7 +153,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
                 tfm_spm_partition_get_running_partition_idx();
     uint32_t res;
 #else
-    uint32_t privileged;
+    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
 #endif
 
 #ifndef TFM_PSA_API
@@ -170,10 +171,10 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
         return;
     }
 #else
-    privileged = GET_CURRENT_PARTITION_PRIVILEGED_MODE();
 
-    if (tfm_memory_check(buf_start, buf_size, false, TFM_MEMORY_ACCESS_RW,
-        privileged) != PSA_SUCCESS) {
+    if (tfm_hal_memory_check(curr_partition->boundary,
+                             (uintptr_t)buf_start, buf_size,
+                             TFM_HAL_ACCESS_READWRITE) != PSA_SUCCESS) {
         /* Not in accessible range, return error */
         args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
         return;

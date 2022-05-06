@@ -418,51 +418,6 @@ int32_t tfm_spm_partition_get_running_partition_id(void)
     }
 }
 
-psa_status_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
-                              enum tfm_memory_access_e access,
-                              uint32_t privileged)
-{
-    enum tfm_hal_status_t err;
-    uint32_t attr = 0;
-
-    /* If len is zero, this indicates an empty buffer and base is ignored */
-    if (len == 0) {
-        return PSA_SUCCESS;
-    }
-
-    if (!buffer) {
-        return SPM_ERROR_BAD_PARAMETERS;
-    }
-
-    if ((uintptr_t)buffer > (UINTPTR_MAX - len)) {
-        return SPM_ERROR_MEMORY_CHECK;
-    }
-
-    if (access == TFM_MEMORY_ACCESS_RW) {
-        attr |= (TFM_HAL_ACCESS_READABLE | TFM_HAL_ACCESS_WRITABLE);
-    } else {
-        attr |= TFM_HAL_ACCESS_READABLE;
-    }
-
-    if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
-        attr |= TFM_HAL_ACCESS_UNPRIVILEGED;
-    } else {
-        attr &= ~TFM_HAL_ACCESS_UNPRIVILEGED;
-    }
-
-    if (ns_caller) {
-        attr |= TFM_HAL_ACCESS_NS;
-    }
-
-    err = tfm_hal_memory_has_access((uintptr_t)buffer, len, attr);
-
-    if (err == TFM_HAL_SUCCESS) {
-        return PSA_SUCCESS;
-    }
-
-    return SPM_ERROR_MEMORY_CHECK;
-}
-
 bool tfm_spm_is_ns_caller(void)
 {
     struct partition_t *partition = GET_CURRENT_COMPONENT();

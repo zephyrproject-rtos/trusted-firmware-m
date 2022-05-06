@@ -423,11 +423,15 @@ static enum tfm_status_e mem_attr_check(struct mem_attr_info_t attr,
     return secure_mem_attr_check(attr, flags);
 }
 
-int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr)
+int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t flags)
 {
     struct security_attr_info_t security_attr;
     struct mem_attr_info_t mem_attr;
-    uint8_t flags = 0;
+
+    /* If size is zero, this indicates an empty buffer and base is ignored */
+    if (s == 0) {
+        return TFM_SUCCESS;
+    }
 
     if (!p) {
         return (int32_t)TFM_ERROR_GENERIC;
@@ -440,22 +444,6 @@ int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr)
     /* Abort if current check doesn't run in PSA RoT */
     if (!tfm_arch_is_priv()) {
         tfm_core_panic();
-    }
-
-    if (attr & TFM_HAL_ACCESS_UNPRIVILEGED) {
-        flags |= MEM_CHECK_MPU_UNPRIV;
-    }
-
-    if (attr & TFM_HAL_ACCESS_NS) {
-        flags |= MEM_CHECK_NONSECURE;
-    }
-
-    if ((attr & TFM_HAL_ACCESS_WRITABLE) && (attr & TFM_HAL_ACCESS_READABLE)) {
-        flags |= MEM_CHECK_MPU_READWRITE;
-    } else if (attr & TFM_HAL_ACCESS_READABLE) {
-        flags |= MEM_CHECK_MPU_READ;
-    } else {
-        return TFM_HAL_ERROR_INVALID_INPUT;
     }
 
     security_attr_init(&security_attr);

@@ -5,6 +5,9 @@
  *
  */
 
+#include <arm_cmse.h>
+#include <stddef.h>
+#include <stdint.h>
 #include "array.h"
 #include "cmsis.h"
 #include "Driver_Common.h"
@@ -12,6 +15,7 @@
 #include "mpu_armv8m_drv.h"
 #include "region.h"
 #include "target_cfg.h"
+#include "tfm_hal_defs.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_peripherals_def.h"
 #ifdef TFM_PSA_API
@@ -157,6 +161,8 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 {
     uint32_t i, j;
     bool privileged;
+    bool ns_agent;
+    uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
     struct platform_data_t *plat_data_ptr;
 #if TFM_LVL == 2
@@ -172,6 +178,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
+    ns_agent = (p_ldinf->pid == TFM_SP_NON_SECURE_ID);
     p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
 
     /*
@@ -217,7 +224,11 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 #endif
     }
 
-    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
+                        HANDLE_ATTR_PRIV_MASK;
+    partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
+                        HANDLE_ATTR_NS_MASK;
+    *p_boundary = (uintptr_t)partition_attrs;
 
     return TFM_HAL_SUCCESS;
 }
@@ -237,3 +248,47 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
     return TFM_HAL_SUCCESS;
 }
 #endif /* TFM_PSA_API */
+
+enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
+                                           size_t size, uint32_t access_type)
+{
+    int flags = 0;
+
+    /* If size is zero, this indicates an empty buffer and base is ignored */
+    if (size == 0) {
+        return TFM_HAL_SUCCESS;
+    }
+
+    if (!base) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
+        flags |= CMSE_MPU_READWRITE;
+    } else if (access_type & TFM_HAL_ACCESS_READABLE) {
+        flags |= CMSE_MPU_READ;
+    } else {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
+        flags |= CMSE_MPU_UNPRIV;
+    }
+
+    if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
+        CONTROL_Type ctrl;
+        ctrl.w = __TZ_get_CONTROL_NS();
+        if (ctrl.b.nPRIV == 1) {
+            flags |= CMSE_MPU_UNPRIV;
+        } else {
+            flags &= ~CMSE_MPU_UNPRIV;
+        }
+        flags |= CMSE_NONSECURE;
+    }
+
+    if (cmse_check_address_range((void *)base, size, flags) != NULL) {
+        return TFM_HAL_SUCCESS;
+    } else {
+        return TFM_HAL_ERROR_MEM_FAULT;
+    }
+}

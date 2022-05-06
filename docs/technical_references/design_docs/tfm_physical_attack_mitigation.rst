@@ -418,9 +418,10 @@ harden it against physical attacks.
 
 .. code-block:: c
 
-  tfm_hal_status_t tfm_hal_memory_has_access(const uintptr_t base,
-                                             size_t size,
-                                             uint32_t attr);
+  tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
+                                        uintptr_t base,
+                                        size_t size,
+                                        uint32_t access_type);
 
 .. _tf-m-against-physical-attacks:
 
@@ -635,4 +636,4 @@ Reference
 
 --------------------------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

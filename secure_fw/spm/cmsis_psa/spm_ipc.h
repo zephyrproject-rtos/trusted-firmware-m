@@ -35,9 +35,6 @@
             (IS_PARTITION_PSA_ROT(p_ldinf) ? TFM_PARTITION_PRIVILEGED_MODE : \
                                              TFM_PARTITION_UNPRIVILEGED_MODE)
 #endif
-#define GET_CURRENT_PARTITION_PRIVILEGED_MODE() \
-            (GET_PARTITION_PRIVILEGED_MODE( \
-                      ((struct partition_t *)GET_CURRENT_COMPONENT())->p_ldinf))
 
 /*
  * Set a number limit for stateless handle.
@@ -137,11 +134,6 @@ struct service_t {
     const struct service_load_info_t *p_ldinf;     /* Service load info      */
     struct partition_t *partition;                 /* Owner of the service   */
     struct service_t *next;                        /* For list operation     */
-};
-
-enum tfm_memory_access_e {
-    TFM_MEMORY_ACCESS_RO = 1,
-    TFM_MEMORY_ACCESS_RW = 2,
 };
 
 /**
@@ -307,26 +299,6 @@ int32_t tfm_spm_check_client_version(struct service_t *service,
 int32_t tfm_spm_check_authorization(uint32_t sid,
                                     struct service_t *service,
                                     bool ns_caller);
-
-/**
- * \brief                      Check the memory reference is valid.
- *
- * \param[in] buffer           Pointer of memory reference
- * \param[in] len              Length of memory reference in bytes
- * \param[in] ns_caller        From non-secure caller
- * \param[in] access           Type of access specified by the
- *                             \ref tfm_memory_access_e
- * \param[in] privileged       Privileged mode or unprivileged mode:
- *                             \ref TFM_PARTITION_UNPRIVILEGED_MODE
- *                             \ref TFM_PARTITION_PRIVILEGED_MODE
- *
- * \retval PSA_SUCCESS               Success
- * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
- * \retval SPM_ERROR_MEMORY_CHECK    Check failed
- */
-psa_status_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
-                              enum tfm_memory_access_e access,
-                              uint32_t privileged);
 
 /**
  * \brief                       Get the ns_caller info from runtime context.

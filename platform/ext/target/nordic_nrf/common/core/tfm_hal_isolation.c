@@ -71,6 +71,8 @@ tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
     }
 
     bool privileged;
+    bool ns_agent;
+    uint32_t partition_attrs = 0;
 
 #if TFM_LVL == 1
     privileged = true;
@@ -78,7 +80,12 @@ tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
-    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    ns_agent = (p_ldinf->pid == TFM_SP_NON_SECURE_ID);
+    partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
+                       HANDLE_ATTR_PRIV_MASK;
+    partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
+                        HANDLE_ATTR_NS_MASK;
+    *p_boundary = (uintptr_t)partition_attrs;
 
     for (uint32_t i = 0; i < p_ldinf->nassets; i++) {
         const struct asset_desc_t *p_asset =
@@ -226,30 +233,30 @@ static bool accessible_to_region(const void *p, size_t s, int flags)
 }
 #endif /* !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0) */
 
-enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base, size_t size,
-                                                uint32_t attr)
+enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
+                                           size_t size, uint32_t access_type)
 {
     int flags = 0;
     int32_t range_access_allowed_by_mpu;
 
-    if (attr & TFM_HAL_ACCESS_NS) {
+    if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
+        flags |= CMSE_MPU_UNPRIV;
+    }
+
+    if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
         CONTROL_Type ctrl;
         ctrl.w = __TZ_get_CONTROL_NS();
         if (ctrl.b.nPRIV == 1) {
-            attr |= TFM_HAL_ACCESS_UNPRIVILEGED;
+            flags |= CMSE_MPU_UNPRIV;
         } else {
-            attr &= ~TFM_HAL_ACCESS_UNPRIVILEGED;
+            flags &= ~CMSE_MPU_UNPRIV;
         }
         flags |= CMSE_NONSECURE;
     }
 
-    if (attr & TFM_HAL_ACCESS_UNPRIVILEGED) {
-        flags |= CMSE_MPU_UNPRIV;
-    }
-
-    if ((attr & TFM_HAL_ACCESS_READABLE) && (attr & TFM_HAL_ACCESS_WRITABLE)) {
+    if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
         flags |= CMSE_MPU_READWRITE;
-    } else if (attr & TFM_HAL_ACCESS_READABLE) {
+    } else if (access_type & TFM_HAL_ACCESS_READABLE) {
         flags |= CMSE_MPU_READ;
     } else {
         return TFM_HAL_ERROR_INVALID_INPUT;

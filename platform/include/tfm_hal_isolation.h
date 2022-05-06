@@ -26,6 +26,9 @@ extern "C" {
 #define TFM_HAL_ACCESS_DEVICE           (1UL << 4)
 #define TFM_HAL_ACCESS_NS               (1UL << 5)
 
+#define TFM_HAL_ACCESS_READWRITE  \
+        (TFM_HAL_ACCESS_READABLE | TFM_HAL_ACCESS_WRITABLE)
+
 #ifdef TFM_FIH_PROFILE_ON
 #include "fih.h"
 /**
@@ -87,14 +90,16 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
 #endif /* TFM_FIH_PROFILE_ON */
 
 /**
- * \brief  This API checks if the memory region defined by base and size
- *         matches the given attributes - attr.
- *         The attributes can include NSPE access, privileged mode, and
- *         read-write permissions.
+ * \brief  This API checks if a given range of memory can be accessed with
+ *         specified access types in boundary. The boundary belongs to
+ *         a partition which contains all asset info.
  *
- * \param[in]   base    The base address of the region.
- * \param[in]   size    The size of the region.
- * \param[in]   attr    The memory access attributes.
+ * \param[in]   boundary      The boundary that the given memory is to be
+ *                            checked with.
+ * \param[in]   base          The base address of the region.
+ * \param[in]   size          The size of the region.
+ * \param[in]   access_type   The memory access types to be checked between
+ *                            given memory and boundaries.
  *
  * \return TFM_HAL_SUCCESS - The memory region has the access permissions.
  *         TFM_HAL_ERROR_MEM_FAULT - The memory region has not the access
@@ -102,9 +107,8 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
  *         TFM_HAL_ERROR_INVALID_INPUT - Invalid inputs.
  *         TFM_HAL_ERROR_GENERIC - An error occurred.
  */
-enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
-                                                size_t size,
-                                                uint32_t attr);
+enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
+                                           size_t size, uint32_t access_type);
 
 /**
  * \brief  This API binds partition boundaries with the platform. The platform

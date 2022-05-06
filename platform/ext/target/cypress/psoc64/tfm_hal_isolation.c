@@ -16,6 +16,7 @@
 #include "tfm_peripherals_def.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
+#include "tfm_hal_isolation.h"
 
 enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
 {
@@ -36,13 +37,31 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     return TFM_HAL_SUCCESS;
 }
 
-enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
-                                                size_t size,
-                                                uint32_t attr)
+enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
+                                           uintptr_t base,
+                                           size_t size,
+                                           uint32_t access_type)
 {
     enum tfm_status_e status;
+    uint32_t flags = 0;
 
-    status = tfm_has_access_to_region((const void *)base, size, attr);
+    if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
+        flags |= MEM_CHECK_MPU_READWRITE;
+    } else if (access_type & TFM_HAL_ACCESS_READABLE) {
+        flags |= MEM_CHECK_MPU_READ;
+    } else {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
+        flags |= MEM_CHECK_MPU_UNPRIV;
+    }
+
+    if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
+        flags |= MEM_CHECK_NONSECURE;
+    }
+
+    status = tfm_has_access_to_region((const void *)base, size, flags);
     if (status != TFM_SUCCESS) {
          return TFM_HAL_ERROR_MEM_FAULT;
     }
@@ -66,6 +85,8 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 {
     uint32_t i, j;
     bool privileged;
+    bool ns_agent;
+    uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
 
     if (!p_ldinf || !p_boundary) {
@@ -78,6 +99,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
+    ns_agent = (p_ldinf->pid == TFM_SP_NON_SECURE_ID);
     p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
 
     /*
@@ -100,7 +122,11 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
             return TFM_HAL_ERROR_GENERIC;
         }
     }
-    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
+                        HANDLE_ATTR_PRIV_MASK;
+    partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
+                        HANDLE_ATTR_NS_MASK;
+    *p_boundary = (uintptr_t)partition_attrs;
 
     return TFM_HAL_SUCCESS;
 }
