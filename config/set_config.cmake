@@ -25,6 +25,11 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.c
     include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
 endif()
 
+# Parse tf-m-tests config prior to platform specific config.cmake
+# Some platforms select different configuration according when regression tests
+# are enabled.
+include(lib/ext/tf-m-tests/pre_parse.cmake)
+
 # Load platform config, setting options not already set
 if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/config.cmake)
     include(platform/ext/target/${TFM_PLATFORM}/config.cmake)
@@ -72,12 +77,7 @@ include(config/config_default.cmake)
 # Fetch tf-m-tests repo during config, if NS or regression test is required.
 # Therefore tf-m-tests configs can be set with TF-M configs since their configs
 # are coupled.
-include(lib/ext/tf-m-tests/tf-m-tests.cmake)
-
-# Load TF-M regression test suites setting
-if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
-    include(${TFM_TEST_PATH}/config/set_config.cmake)
-endif()
+include(lib/ext/tf-m-tests/fetch_repo.cmake)
 
 # Set secure log configs
 # It also depends on regression test config.

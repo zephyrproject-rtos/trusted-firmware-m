@@ -43,15 +43,3 @@ endif()
 if (EXTRA_S_TEST_SUITES_PATHS)
     set(TFM_S_REG_TEST ON)
 endif()
-
-# If NS app, secure regression test or non-secure regression test is enabled,
-# fetch tf-m-tests repo.
-# The conditiions are actually overlapped but it can make the logic more clear.
-# Besides, the dependencies between NS app and regression tests will be
-# optimized later.
-if (NS OR TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2 OR TEST_BL1_1 OR TEST_BL1_2)
-    # Set tf-m-tests repo config
-    include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/repo_config_default.cmake)
-    # Fetch tf-m-tests repo
-    include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/fetch_repo.cmake)
-endif()
