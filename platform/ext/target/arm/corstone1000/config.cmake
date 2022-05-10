@@ -13,7 +13,7 @@ set(DEFAULT_MCUBOOT_FLASH_MAP           OFF        CACHE BOOL     "Whether to us
 set(MCUBOOT_UPGRADE_STRATEGY            "RAM_LOAD" CACHE STRING   "Upgrade strategy when multiple boot images are loaded")
 set(MCUBOOT_SECURITY_COUNTER_S          "1"      CACHE STRING    "Security counter for S image. auto sets it to IMAGE_VERSION_S")
 
-if (TEST_S OR TEST_S_ATTESTATION OR TEST_S_AUDIT OR TEST_S_CRYPTO OR TEST_S_ITS OR TEST_S_PS OR TEST_S_PLATFORM OR EXTRA_S_TEST_SUITES_PATHS)
+if (TFM_S_REG_TEST)
   # Test configuration: host images are not needed and work only with isolation level 1
   set(MCUBOOT_IMAGE_NUMBER                1          CACHE STRING   "Whether to combine S and NS into either 1 image, or sign each separately")
   set(TFM_ISOLATION_LEVEL                 1          CACHE STRING   "Isolation level")
