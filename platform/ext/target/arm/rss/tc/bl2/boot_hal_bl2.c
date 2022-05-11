@@ -9,11 +9,15 @@
 
 #include <string.h>
 
+#ifdef PLATFORM_HAS_BOOT_DMA
+#include "boot_dma.h"
+#endif /* PLATFORM_HAS_BOOT_DMA */
 #include "bootutil/bootutil_log.h"
 #include "device_definition.h"
 #include "host_base_address.h"
-#include "platform_regs.h"
 #include "platform_base_address.h"
+#include "platform_regs.h"
+
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #include "fih.h"
@@ -22,6 +26,10 @@
 int32_t boot_platform_post_init(void)
 {
     enum mhu_v2_x_error_t status;
+#ifdef PLATFORM_HAS_BOOT_DMA
+    enum tfm_plat_err_t plat_err;
+#endif /* PLATFORM_HAS_BOOT_DMA */
+
 #ifdef CRYPTO_HW_ACCELERATOR
     int32_t result;
 
@@ -46,6 +54,15 @@ int32_t boot_platform_post_init(void)
         return 1;
     }
     BOOT_LOG_INF("RSS->SCP MHU driver initialized successfully");
+
+#ifdef PLATFORM_HAS_BOOT_DMA
+    plat_err = boot_dma_init_cfg();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        BOOT_LOG_ERR("DMA driver initialization failed: ", plat_err);
+        return 1;
+    }
+    BOOT_LOG_INF("DMA350 driver initialized successfully.");
+#endif /* PLATFORM_HAS_BOOT_DMA */
 
     return 0;
 }

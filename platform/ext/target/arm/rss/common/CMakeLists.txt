@@ -48,11 +48,19 @@ endif()
 target_sources(bl2
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss.c
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/boot_dma.c>
 )
+
 target_add_scatter_file(bl2
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_bl2.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_bl2.ld>
 )
+
+target_compile_options(bl2_scatter
+    PRIVATE
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${COMPILER_CMSE_FLAG}>
+)
+
 target_compile_definitions(bootutil
     PRIVATE
         MULTIPLE_EXECUTABLE_RAM_REGIONS
@@ -221,7 +229,10 @@ target_sources(platform_bl2
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/system_core_init.c
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_lib.c>
         native_drivers/atu_rss_drv.c
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_ch_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_drv.c>
         native_drivers/kmu_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/uart_pl011_drv.c
@@ -242,10 +253,22 @@ target_include_directories(platform_bl2
         native_drivers
         partition
         services/src
+        libraries
 
     PRIVATE
         ${PLATFORM_DIR}/..
         native_drivers
+)
+
+target_compile_definitions(platform_bl2
+    PRIVATE
+        # Needed for DMA-350 library
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:CMSIS_device_header="rss.h">
+)
+
+target_compile_options(platform_bl2
+    PUBLIC
+        $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${COMPILER_CMSE_FLAG}>
 )
 
 target_link_libraries(platform_bl2
