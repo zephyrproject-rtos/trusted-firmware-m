@@ -562,7 +562,7 @@ enum tfm_plat_err_t spu_init_cfg(void)
 enum tfm_plat_err_t spu_periph_init_cfg(void)
 {
     /* Peripheral configuration */
-    spu_peripheral_config_non_secure((uint32_t)NRF_FPU, false);
+
     /* The following peripherals share ID:
      * - REGULATORS
      * - OSCILLATORS
@@ -616,7 +616,7 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_P0, false);
 
     /* DPPI channel configuration */
-    spu_dppi_config_non_secure(TFM_PERIPHERAL_DPPI_CHANNEL_SECURE_MASK, true);
+    spu_dppi_config_non_secure(TFM_PERIPHERAL_DPPI_CHANNEL_MASK_SECURE, true);
 
     /* GPIO pin configuration */
     spu_gpio_config_non_secure(0, TFM_PERIPHERAL_GPIO0_PIN_MASK_SECURE, true);

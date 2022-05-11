@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -39,6 +39,7 @@ target_add_scatter_file(tfm_s
     $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
     $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_isolation_l3.sct>
     $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_isolation_l3.ld>
+    $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_isolation_l3.icf>
 )
 
 if(NS)
@@ -92,6 +93,7 @@ target_include_directories(platform_s
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
         $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox>
+    INTERFACE
         ${CMAKE_MUSCA_B1_COMMON_DIR}/cc312
 )
 
@@ -114,7 +116,7 @@ target_sources(platform_s
         $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c>
         Native_Driver/musca_b1_scc_drv.c
         spm_hal.c
-        tfm_interrupts.c
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         tfm_hal_isolation.c
         tfm_hal_platform.c
         target_cfg.c
@@ -163,6 +165,8 @@ target_sources(platform_ns
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_ioctl_ns_api.c>
+        $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_gpled_api.c>
 )
 
 target_include_directories(platform_ns
@@ -182,7 +186,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
             ${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c
@@ -200,6 +203,7 @@ if(BL2)
         PUBLIC
             partition
             Device/Include
+        INTERFACE
             ${CMAKE_MUSCA_B1_COMMON_DIR}/cc312
         PRIVATE
             .

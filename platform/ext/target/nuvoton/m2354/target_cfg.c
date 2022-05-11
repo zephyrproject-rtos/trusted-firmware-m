@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited
- * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited
+ * Copyright (c) 2021 Nuvoton Technology Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,24 @@
  * limitations under the License.
  */
 
-#include "partition_M2354.h"
 #include "cmsis.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
-#include "platform_description.h"
-#include "device_definition.h"
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
-#include "tfm_secure_api.h"
+#include "NuMicro.h"
+
+#ifdef PSA_API_TEST_IPC
+#define PSA_FF_TEST_SECURE_UART2
+#endif
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+REGION_DECLARE(Image$$, ER_VENEER, $$Base);
+REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 #ifdef BL2
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 #endif /* BL2 */
@@ -48,11 +49,8 @@ const struct memory_region_limits memory_regions = {
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
         NS_PARTITION_SIZE - 1,
 
-    .veneer_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-
-    .veneer_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+    .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
+    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
 
 #ifdef BL2
     .secondary_partition_base =
@@ -96,8 +94,8 @@ extern ARM_DRIVER_MPC Driver_SRAM1_MPC, Driver_SRAM2_MPC;
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
 
 struct platform_data_t tfm_peripheral_std_uart = {
-        UART0_BASE + NS_OFFSET,
-        UART0_BASE + NS_OFFSET + 0xFFF,
+        UART0_BASE+NS_OFFSET,
+        UART0_BASE+NS_OFFSET+0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
@@ -116,12 +114,66 @@ struct platform_data_t tfm_peripheral_timer0 = {
         -1
 };
 
+#ifdef PSA_API_TEST_IPC
+
+/* Below data structure are only used for PSA FF tests, and this pattern is
+ * definitely not to be followed for real life use cases, as it can break
+ * security.
+ */
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_UART_REGION = {
+        UART2_BASE_S,
+        UART2_BASE_S + 0xFFF,
+        PPC_SP_APB_PPC_EXP2,
+        CMSDK_UART2_APB_PPC_POS
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_WATCHDOG_REGION = {
+        APB_WATCHDOG_BASE_S,
+        APB_WATCHDOG_BASE_S + 0xFFF,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+#define FF_TEST_NVMEM_REGION_START            0x102FFC00
+#define FF_TEST_NVMEM_REGION_END              0x102FFFFF
+#define FF_TEST_SERVER_PARTITION_MMIO_START   0x3801FC00
+#define FF_TEST_SERVER_PARTITION_MMIO_END     0x3801FD00
+#define FF_TEST_DRIVER_PARTITION_MMIO_START   0x3801FE00
+#define FF_TEST_DRIVER_PARTITION_MMIO_END     0x3801FF00
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_NVMEM_REGION = {
+        FF_TEST_NVMEM_REGION_START,
+        FF_TEST_NVMEM_REGION_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO = {
+        FF_TEST_SERVER_PARTITION_MMIO_START,
+        FF_TEST_SERVER_PARTITION_MMIO_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO = {
+        FF_TEST_DRIVER_PARTITION_MMIO_START,
+        FF_TEST_DRIVER_PARTITION_MMIO_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+#endif
+
 enum tfm_plat_err_t enable_fault_handlers(void)
 {
-    /* Secure fault is not present in the Baseline implementation. */
-    /* Fault handler enable registers are not present in a Baseline
-     * implementation.
-     */
+    /* Explicitly set secure fault priority to the highest */
+    NVIC_SetPriority(SCU_IRQn, 0);
+
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -132,7 +184,7 @@ enum tfm_plat_err_t system_reset_cfg(void)
     /* Clear SCB_AIRCR_VECTKEY value */
     reg_value &= ~(uint32_t)(SCB_AIRCR_VECTKEY_Msk);
 
-    /* Enable system reset request for the secure world only */
+    /* Enable system reset request only to the secure world */
     reg_value |= (uint32_t)(SCB_AIRCR_WRITE_MASK | SCB_AIRCR_SYSRESETREQS_Msk);
 
     SCB->AIRCR = reg_value;
@@ -142,12 +194,36 @@ enum tfm_plat_err_t system_reset_cfg(void)
 
 enum tfm_plat_err_t init_debug(void)
 {
-    /* Set UART0 to NS for debug message */
-    SCU_SET_PNSSET(UART0_Attr);
+
+#if defined(DAUTH_NONE)
+
+    /* Disable secure and non-secure debug */
+    DPM->NSCTL = 0x5a000000 | DPM_NSCTL_DBGDIS_Msk;
+
+#elif defined(DAUTH_NS_ONLY)
+
+    /* Disable secure debug */
+    DPM->CTL = 0x5a000000 | DPM_CTL_DBGDIS_Msk;
+
+#elif defined(DAUTH_FULL)
+    /* By default, all debug is available */
+    /* If secure or all debug is disable, it may need erase whole chip to alow debug again. */
+#else
+
+#if !defined(DAUTH_CHIP_DEFAULT)
+#error "No debug authentication setting is provided."
+#endif
+
+    /* Set all the debug enable selector bits to 0 */
+
+
+    /* No need to set any enable bits because the value depends on
+     * input signals.
+     */
+#endif
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-
 
 /*----------------- NVIC interrupt target state to NS configuration ----------*/
 enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
@@ -157,10 +233,11 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
         NVIC->ITNS[i] = 0xFFFFFFFF;
     }
 
+    /* Make sure that SCU are targeted to S state */
+    NVIC_ClearTargetState(SCU_IRQn);
+
 #ifdef SECURE_UART1
     /* UART1 is a secure peripheral, so its IRQs have to target S state */
-    NVIC_ClearTargetState(UARTRX1_IRQn);
-    NVIC_ClearTargetState(UARTTX1_IRQn);
     NVIC_ClearTargetState(UART1_IRQn);
 #endif
 
@@ -170,6 +247,11 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
 /*----------------- NVIC interrupt enabling for S peripherals ----------------*/
 enum tfm_plat_err_t nvic_interrupt_enable(void)
 {
+    NVIC_EnableIRQ(SCU_IRQn);
+
+#ifdef PSA_FF_TEST_SECURE_UART2
+# error "Not support PSA_FF_TEST_SECURE_UART2 in M2354"    
+#endif
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -194,16 +276,13 @@ const struct sau_cfg_t sau_cfg[] = {
         false,
     },
     {
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
         true,
-    },
-    {
-        (PERIPH_BASE + NS_OFFSET),
-        (PERIPH_BASE + NS_OFFSET + 0x10000000 - 1),
-        false,
     }
 };
+
+#define NR_SAU_INIT_STEP                 3
 
 void sau_and_idau_cfg(void)
 {
@@ -212,19 +291,24 @@ void sau_and_idau_cfg(void)
     /* Enables SAU */
     TZ_SAU_Enable();
 
-    for(i = 0; i < ARRAY_SIZE(sau_cfg); i++) {
+    for (i = 0; i < ARRAY_SIZE(sau_cfg); i++) {
         SAU->RNR = i;
         SAU->RBAR = sau_cfg[i].RBAR & SAU_RBAR_BADDR_Msk;
         SAU->RLAR = (sau_cfg[i].RLAR & SAU_RLAR_LADDR_Msk) |
-            (sau_cfg[i].nsc ? SAU_RLAR_NSC_Msk : 0U) |
-            SAU_RLAR_ENABLE_Msk;
+                    (sau_cfg[i].nsc ? SAU_RLAR_NSC_Msk : 0U) |
+                    SAU_RLAR_ENABLE_Msk;
     }
 
 }
 
 /*------------------- Memory configuration functions -------------------------*/
+#ifdef BL2
+#define NR_MPC_INIT_STEP                 7
+#else
+#define NR_MPC_INIT_STEP                 6
+#endif
 
-enum tfm_plat_err_t mpc_init_cfg(void)
+int32_t mpc_init_cfg(void)
 {
     int32_t i;
 
@@ -333,22 +417,27 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     /* Set TIMER2 for Non-secure */
     SCU_SET_PNSSET(TMR23_Attr);
 
-    return TFM_PLAT_ERR_SUCCESS;
-}
+    /* Add barriers to assure the MPC configuration is done before continue
+     * the execution.
+     */
+    __DSB();
+    __ISB();
 
+    return ARM_DRIVER_OK;
+}
 
 /*---------------------- PPC configuration functions -------------------------*/
+#define NR_PPC_INIT_STEP                 4
 
-enum tfm_plat_err_t ppc_init_cfg(void)
-{
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
-void ppc_configure_to_secure(enum ppc_bank_e bank, uint32_t pos)
+void ppc_init_cfg(void)
 {
 }
 
-void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint32_t pos)
+void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
+{
+}
+
+void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
 {
 }
 

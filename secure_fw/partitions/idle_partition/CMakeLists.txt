@@ -1,11 +1,12 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021, Cypress Semiconductor Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-if (NOT TFM_PSA_API OR TFM_MULTI_CORE_TOPOLOGY)
+if (NOT TFM_PSA_API)
     return()
 endif()
 

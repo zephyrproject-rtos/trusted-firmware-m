@@ -1,41 +1,36 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-
-{{utilities.donotedit_warning}}
+/***********{{utilities.donotedit_warning}}***********/
 
 #ifndef __CONFIG_IMPL_H__
 #define __CONFIG_IMPL_H__
 
-{% if ipc_partition_num > 0 and sfn_partition_num == 0 %}
-/* IPC model */
-#define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_IPC")}} 1
+/* Backends */
+#define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_IPC")}} {{config_impl['CONFIG_TFM_SPM_BACKEND_IPC']}}
+#define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_SFN")}} {{config_impl['CONFIG_TFM_SPM_BACKEND_SFN']}}
 
+/* API calls */
+#define {{"%-56s"|format("CONFIG_TFM_PSA_API_SFN_CALL")}} {{config_impl['CONFIG_TFM_PSA_API_SFN_CALL']}}
+#define {{"%-56s"|format("CONFIG_TFM_PSA_API_CROSS_CALL")}} {{config_impl['CONFIG_TFM_PSA_API_CROSS_CALL']}}
+#define {{"%-56s"|format("CONFIG_TFM_PSA_API_SUPERVISOR_CALL")}} {{config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL']}}
+
+#define {{"%-56s"|format("CONFIG_TFM_CONNECTION_BASED_SERVICE_API")}} {{config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API']}}
+#define {{"%-56s"|format("CONFIG_TFM_FLIH_API")}} {{config_impl['CONFIG_TFM_FLIH_API']}}
+#define {{"%-56s"|format("CONFIG_TFM_SLIH_API")}} {{config_impl['CONFIG_TFM_SLIH_API']}}
+
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 /* Trustzone NS agent working stack size. */
 #define {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}} 1024
-
-#if TFM_LVL > 1
-#define {{"%-56s"|format("CONFIG_TFM_PSA_API_SUPERVISOR_CALL")}} 1
-#else /* TFM_LVL > 1 */
-#define {{"%-56s"|format("CONFIG_TFM_PSA_API_THREAD_CALL")}} 1
 
 /* SPM re-uses Trustzone NS agent stack. */
 #define {{"%-56s"|format("CONFIG_TFM_SPM_THREAD_STACK_SIZE")}}     \
             {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}}
-#endif /* TFM_LVL > 1 */
 
-{% elif sfn_partition_num > 0 and ipc_partition_num == 0 %}
-/* SFN model */
-#define {{"%-56s"|format("CONFIG_TFM_SPM_BACKEND_SFN")}} 1
-#define {{"%-56s"|format("CONFIG_TFM_PSA_API_SFN_CALL")}} 1
-
-#if TFM_LVL > 1
-#error "High isolation level SFN model is not supported."
-#endif
-
+#elif CONFIG_TFM_SPM_BACKEND_SFN == 1
     {% set total_stk = namespace(size=0) %}
     {% for partition in partitions %}
         {% if "0x" in partition.manifest.stack_size or "0X" in partition.manifest.stack_size %}
@@ -61,16 +56,10 @@
 #define {{"%-56s"|format("CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE")}}  \
     ((({{"0x%x"|format(total_stk.size)}} >> CONFIG_TFM_NS_AGENT_TZ_STK_SIZE_SHIFT_FACTOR) + 0x7) & (~0x7))
 
-{% elif sfn_partition_num > 0 and ipc_partition_num > 0 %}
-#error "IPC and SFN co-work not supported yet."
-{% else %}
-#error "Invalid partition number input, check configurations."
-{% endif %}
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
-#if (CONFIG_TFM_SPE_FP > 0) && (CONFIG_TFM_SPM_BACKEND_SFN == 1)
+#if (CONFIG_TFM_FP > 0) && (CONFIG_TFM_SPM_BACKEND_SFN == 1)
 #error "FP is not supported for SFN model."
 #endif
-
-#include "psa_interface_redirect.h"
 
 #endif /* __CONFIG_IMPL_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -163,9 +163,19 @@ static inline psa_key_lifetime_t psa_get_key_lifetime(
     return( attributes->lifetime );
 }
 
+static inline void psa_extend_key_usage_flags(psa_key_usage_t *usage_flags)
+{
+    if (*usage_flags & PSA_KEY_USAGE_SIGN_HASH)
+        *usage_flags |= PSA_KEY_USAGE_SIGN_MESSAGE;
+
+    if (*usage_flags & PSA_KEY_USAGE_VERIFY_HASH)
+        *usage_flags |= PSA_KEY_USAGE_VERIFY_MESSAGE;
+}
+
 static inline void psa_set_key_usage_flags(psa_key_attributes_t *attributes,
                                            psa_key_usage_t usage_flags)
 {
+    psa_extend_key_usage_flags(&usage_flags);
     attributes->usage = usage_flags;
 }
 

@@ -45,52 +45,66 @@ struct bi_list_node_t {
 /* Is the head empty? */
 #define BI_LIST_IS_EMPTY(head)      ((head)->bnext == (head))
 
-/* The node's next node */
+/* The node's next node. */
 #define BI_LIST_NEXT_NODE(node)     ((node)->bnext)
 
-/* Go through each node of a list */
+/* Go through each node of a list. */
 #define BI_LIST_FOR_EACH(node, head)              \
     for (node = (head)->bnext; node != head; node = (node)->bnext)
 
 /********* Uni-directional list operations ********/
-/*
- * To use these single linked list operations, a head node must have been
- * defined already, and the "next" pointer initialized to "NULL". Like:
- * struct head_t {
- *      uint32_t data;
- *      User_Type *next;
- * } head;
- */
-
-/* Initialize the head node */
-#define UNI_LISI_INIT_HEAD(head) do {             \
-    if ((head) != NULL) {                         \
-        (head)->next = NULL;                      \
-    }                                             \
+/* Initialize the head node. */
+#define UNI_LISI_INIT_NODE(head, link) do {             \
+    if ((head) != NULL) {                               \
+        (head)->link = NULL;                            \
+    }                                                   \
 } while (0)
 
-/* Insert a node after current node */
-#define UNI_LIST_INSERT_AFTER(curr, node) do {    \
-    (node)->next = (curr)->next;                  \
-    (curr)->next = node;                          \
+/* Insert a new node after given position node. */
+#define UNI_LIST_INSERT_AFTER(posi, node, link) do {    \
+    (node)->link = (posi)->link;                        \
+    (posi)->link = node;                                \
 } while (0)
 
-/* Move a node after posi node */
-#define UNI_LIST_MOVE_AFTER(posi, prev, node) do {\
-    if (prev != NULL) {                           \
-        (prev)->next = (node)->next;              \
-        (node)->next = (posi)->next;              \
-        (posi)->next = node;                      \
-    }                                             \
+/* Is list empty? */
+#define UNI_LIST_IS_EMPTY(node, link)                   \
+    ((node == NULL) || ((node)->link == NULL))
+
+/* Pick the next node. */
+#define UNI_LIST_NEXT_NODE(node, link) ((node)->link)
+
+/* Remove one node from the list. */
+#define UNI_LIST_REMOVE_NODE(prev, node, link) do {     \
+    (prev)->link = (node)->link;                        \
+    (node)->link = NULL;                                \
 } while (0)
 
-/* Go through each node of a list */
-#define UNI_LIST_FOR_EACH(node, head)             \
-    for (node = (head)->next; node != NULL; node = (node)->next)
+/* Remove node by its pointer ('pointer = &prev_of_node->link'). */
+#define UNI_LIST_REMOVE_NODE_BY_PNODE(pnode, link)      \
+    *(pnode) = (*(pnode))->link
 
-/* Go through each node of a list with prev node */
-#define UNI_LIST_FOR_EACH_PREV(prev, node, head)  \
-    for (prev = NULL, node = (head)->next;        \
-                 node != NULL; prev = node, node = (prev)->next)
+/* Move a node after posi node. */
+#define UNI_LIST_MOVE_AFTER(posi, prev, node, link) do {\
+    if (prev != NULL) {                                 \
+        (prev)->link = (node)->link;                    \
+        (node)->link = (posi)->link;                    \
+        (posi)->link = node;                            \
+    }                                                   \
+} while (0)
+
+/* Go through each node of a list. */
+#define UNI_LIST_FOREACH(node, head, link)              \
+    for (node = (head)->link; node != NULL; node = (node)->link)
+
+/* Go through each node of a list with prev node recorded. */
+#define UNI_LIST_FOREACH_NODE_PREV(prev, node, head, link)   \
+    for (prev = NULL, node = (head)->link;                   \
+                 node != NULL; prev = node, node = (prev)->link)
+
+/* Go through each node of a list with recording node and its holder. */
+#define UNI_LIST_FOREACH_NODE_PNODE(pnode, node, head, link) \
+    for (pnode = &(head)->link, node = (head)->link;         \
+         node != NULL;                                       \
+         pnode = &(node)->link, node = (node)->link)
 
 #endif /* __LISTS_H__ */

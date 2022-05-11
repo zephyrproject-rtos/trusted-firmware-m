@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,8 +87,6 @@
 #define IMAGE_NS_CODE_SIZE \
             (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
-#define CMSE_VENEER_REGION_SIZE     (0x340)
-
 /* Alias definitions for secure and non-secure areas*/
 #define S_ROM_ALIAS(x)  (S_ROM_ALIAS_BASE + (x))
 #define NS_ROM_ALIAS(x) (NS_ROM_ALIAS_BASE + (x))
@@ -100,15 +98,15 @@
 #define S_IMAGE_PRIMARY_AREA_OFFSET \
              (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 #define S_CODE_START    (S_ROM_ALIAS(S_IMAGE_PRIMARY_AREA_OFFSET))
-#define S_CODE_SIZE     (IMAGE_S_CODE_SIZE - CMSE_VENEER_REGION_SIZE)
+#define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
+
+/* Size of vector table: 139 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0x230)
 
 #define S_DATA_START    (S_RAM_ALIAS(0x0))
 #define S_DATA_SIZE     (TOTAL_RAM_SIZE / 2)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
-
-/* CMSE Veneers region */
-#define CMSE_VENEER_REGION_START  (S_CODE_LIMIT + 1)
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
@@ -118,7 +116,12 @@
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
 #define NS_DATA_START   (NS_RAM_ALIAS(TOTAL_RAM_SIZE / 2))
+#if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
+#define DEV_APIS_TEST_NVMEM_REGION_SIZE  0x400
+#define NS_DATA_SIZE    (TOTAL_RAM_SIZE / 2 - DEV_APIS_TEST_NVMEM_REGION_SIZE)
+#else
 #define NS_DATA_SIZE    (TOTAL_RAM_SIZE / 2)
+#endif
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for MPC and SAU configuration */

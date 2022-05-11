@@ -48,7 +48,7 @@ TF-M Profile Small defines the following features:
 
     - Lightweight framework
 
-        - Library model
+        - Library model or Secure Function (SFN) model [2]_
         - Level 1 isolation
         - Buffer sharing allowed
         - Single secure context
@@ -91,35 +91,35 @@ More details of TF-M Profile Small design are discussed in following sections.
 Lightweight framework
 =====================
 
-Library model
--------------
+TF-M framework model
+--------------------
 
-Profile Small selects Library model in TF-M. Library model implements secure
-function calls, via which clients directly call secure services. It provides a
-more simple implementation of TF-M framework and may reduce memory footprint,
-compared with Inter-Process Communication (IPC) model [2]_.
+Library model is selected by default in Profile Small implementation.
+Library model implements secure function calls, via which clients directly call
+secure services. It provides a more simple implementation of TF-M framework and
+may reduce memory footprint, compared with Inter-Process Communication (IPC)
+model [3]_.
 
-.. note ::
+As Library model is TF-M specific implementation, please check some of its
+dedicated implementation details as described in `Appendix`_, before adopting
+Library model on your platforms.
 
-    **Implementation note**
-
-    Please note that there is no public dedicated specification for Library
-    model.
-    The design, interfaces and implementation of Library model in TF-M may
-    change.
+You can select SFN model instead of Library model in Profile Small.
+SFN model is defined in FF-M 1.1 extensions [2]_. It is a more simple
+implementation of TF-M framework and may also reduce memory footprint, compared
+with Inter-Process Communication (IPC) model [3]_.
 
 Level 1 isolation
 -----------------
 
-So far, TF-M Library model only supports level 1 isolation [2]_, which isolates
-Secure Processing Environment (SPE) from Non-secure Processing Environment
-(NSPE). Neither level 2 nor level 3 isolation [2]_ is implemented in TF-M
-Library model.
+PSA Security Model [4]_ defines 3 levels of isolation.
 
-PSA Root of Trust (PSA RoT) and Application Root of Trust (ARoT) are isolated
-from each other in level 2 isolation.
-Individual secure partitions are isolated from each other even within a
-particular security domain (PSA RoT, ARoT), in level 3 isolation.
+  - Level 1 isolation isolates Secure Processing Environment (SPE) from
+    Non-secure Processing Environment (NSPE).
+  - PSA Root of Trust (PSA RoT) and Application Root of Trust (ARoT) are
+    isolated from each other in level 2 isolation.
+  - Individual secure partitions are isolated from each other even within a
+    particular security domain (PSA RoT, ARoT), in level 3 isolation.
 
 Profile Small dedicated use cases with simple service model may not require
 level 2 or level 3 isolation. Devices which Profile Small aims at may be unable
@@ -134,46 +134,6 @@ of software for management.
 
     If a device or a use case enforces level 2 or level 3 isolation, it is
     suggested to apply other configurations, other than TF-M Profile Small.
-
-Buffer sharing allowed
-----------------------
-
-To simplify interface and reduce memory footprint, TF-M Library model directly
-handles client call input vectors from non-secure client buffers and later
-writes results back to those buffers, without keeping a copy in a transient
-buffer inside TF-M.
-
-.. note ::
-
-    **Security note**
-
-    There can be security vulnerabilities if non-secure client buffers are
-    directly shared between NSPE and SPE, such as Time-of-check to time-of-use
-    (TOCTOU) attack.
-
-    Developers need to check if this can meet the Security Functional
-    Requirements (SFR) of the integration of their devices.
-    Some SFRs are listed in a set of example Threat Models and Security Analyses
-    (TMSA) offered by PSA for common IoT use cases. [3]_
-
-Single secure context
----------------------
-
-TF-M Library model only supports single secure context.
-
-It cannot support multiple contexts or the scheduling implemented in IPC model.
-It neither can support multiple outstanding PSA client calls.
-
-But correspondingly, it can save memory footprint and runtime complexity in
-context management and scheduling.
-
-.. note ::
-
-    **Security note**
-
-    Non-secure software should prevent triggering multiple outstanding PSA
-    client calls concurrently. Otherwise, it may crash current running secure
-    context.
 
 Crypto service
 ==============
@@ -194,7 +154,7 @@ TLS-PSK, to support symmetric key algorithms based protocols.
     capabilities as defined in TLS-PSK, such as one symmetric cipher algorithm
     and one hash function.
 
-TF-M Profile Small selects TLS-PSK cipher suite TLS_PSK_WITH_AES_128_CCM [4]_
+TF-M Profile Small selects TLS-PSK cipher suite TLS_PSK_WITH_AES_128_CCM [6]_
 as reference, which requires:
 
     - AES-128-CCM (AES CCM mode with 128-bit key) as symmetric crypto algorithm
@@ -223,7 +183,7 @@ hardware capabilities, while keeping enough level of security.
     **Security note**
 
     It is recommended not to use MD5 or SHA-1 for message digests as they are
-    subject to collision attacks [5]_ [6]_.
+    subject to collision attacks [7]_ [8]_.
 
 Secure Storage
 ==============
@@ -246,7 +206,7 @@ cryptographic protection.
 Internal transient buffer
 -------------------------
 
-ITS implements a internal transient buffer [7]_ to hold the data read
+ITS implements a internal transient buffer [9]_ to hold the data read
 from/written to storage, especially for flash, to solve the alignment and
 security issues.
 
@@ -276,7 +236,7 @@ Initial Attestation
 ===================
 
 Profile Small requires an Initial Attestation secure service based on symmetric
-key algorithms. Refer to PSA Attestation API document [8]_ for details of
+key algorithms. Refer to PSA Attestation API document [10]_ for details of
 Initial Attestation based on symmetric key algorithms.
 
 It can heavily increase memory footprint to support Initial Attestation based on
@@ -286,7 +246,7 @@ asymmetric key algorithms, due to asymmetric ciphers and related PKI modules.
 
     **Implementation note**
 
-    As pointed out by PSA Attestation API document [8]_, the use cases of
+    As pointed out by PSA Attestation API document [10]_, the use cases of
     Initial Attestation based on symmetric key algorithms can be limited due to
     the associated infrastructure costs for key management and operational
     complexities. It may also restrict the ability to interoperate with
@@ -307,7 +267,7 @@ asymmetric key algorithms, due to asymmetric ciphers and related PKI modules.
 Lightweight boot
 ================
 
-If MCUBoot provided by TF-M is enabled, single image boot [9]_ is selected by
+If MCUBoot provided by TF-M is enabled, single image boot [11]_ is selected by
 default in Profile Small.
 In case of single image boot, secure and non-secure images are handled as a
 single blob and signed together during image generation.
@@ -344,7 +304,7 @@ Profile Small default setting and append other configurations.
 This configuration extension file can be added via parameter
 ``TFM_EXTRA_CONFIG_PATH`` in build command line.
 
-The behaviour of the Profile Small build flow (particularly the order of
+The behavior of the Profile Small build flow (particularly the order of
 configuration loading and overriding) can be found at
 :ref:`tfm_cmake_configuration`
 
@@ -404,44 +364,6 @@ shown below.
     setting.
     Dedicated optimization on memory footprint is not covered in this document.
 
-Test configuration
-^^^^^^^^^^^^^^^^^^
-
-Standard regression test configuration applies. This means that enabling
-regression testing via
-
-``-DTEST_S=ON -DTEST_NS=ON``
-
-Will enable testing for all enabled partitions. See above for details of enabled
-partitions. Because Profile Small does not enable IPC mode, the IPC tests are
-not enabled.
-
-Some cryptography tests are disabled due to the reduced Mbed Crypto config.
-
-.. table:: TFM options in Profile Small top-level CMake config file
-   :widths: auto
-   :align: center
-
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | Configs                                    | Default value                                                                                       | Descriptions                        |
-   +============================================+=====================================================================================================+=====================================+
-   | ``TFM_CRYPTO_TEST_ALG_CBC``                | ``OFF``                                                                                             | Test CBC cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CCM``                | ``ON``                                                                                              | Test CCM cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``                                                                                             | Test CFB cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``                                                                                             | Test CTR cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``                                                                                             | Test GCM cryptography mode          |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``                                                                                             | Test SHA-512 cryptography algorithm |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``                                                                                             | Test HKDF key derivation algorithm  |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_CRYPTO_TEST_ECDH``                   | ``OFF``                                                                                             | Test ECDH key agreement algorithm   |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-
 Device configuration extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -455,6 +377,9 @@ TF-M framework setting
 The top-level Profile Small CMake config file selects Library model and level 1
 isolation.
 
+Users can set ``-DCONFIG_TFM_SPM_BACKEND=SFN`` in build command to select SFN
+model instead.
+
 Crypto service configuration
 ----------------------------
 
@@ -467,7 +392,7 @@ The disabled modules are shown below.
 
     - Disable asymmetric cipher
 
-Other modules and configurations [10]_ are kept as default values.
+Other modules and configurations [12]_ are kept as default values.
 
 Additional configuration flags with more fine granularity can be added to
 control building of specific crypto algorithms and corresponding test cases.
@@ -478,7 +403,7 @@ Mbed Crypto configurations
 TF-M Profile Small adds a dedicated Mbed Crypto config file
 ``tfm_mbedcrypto_config_profile_small.h`` at
 ``/lib/ext/mbedcrypto/mbedcrypto_config``
-file, instead of the common one ``tfm_mbedcrypto_config_default.h`` [10]_.
+file, instead of the common one ``tfm_mbedcrypto_config_default.h`` [12]_.
 
 Major Mbed Crypto configurations are set as listed below:
 
@@ -505,13 +430,13 @@ Internal Trusted Storage configurations
 
 ITS service is enabled in top-level Profile Small CMake config file.
 
-The internal transient buffer size ``ITS_BUF_SIZE`` [7]_ is set to 32 bytes by
+The internal transient buffer size ``ITS_BUF_SIZE`` [9]_ is set to 32 bytes by
 default. A platform/use case can overwrite the buffer size in its specific
 configuration extension according to its actual requirement of assets and Flash
 attributes.
 
 Profile Small CMake config file won't touch the configurations of device
-specific Flash hardware attributes [7]_.
+specific Flash hardware attributes [9]_.
 
 Initial Attestation secure service
 ----------------------------------
@@ -519,7 +444,7 @@ Initial Attestation secure service
 TF-M Profile Small provides a reference implementation of symmetric key
 algorithms based Initial Attestation, using HMAC SHA-256 as MAC algorithm in
 ``COSE_Mac0`` structure. The implementation follows PSA Attestation API document
-[8]_.
+[10]_.
 
 Profile Small top-level config file enables Initial Attestation secure service
 and selects symmetric key algorithms based Initial Attestation by default.
@@ -541,6 +466,36 @@ Disabled secure services
 
 Audit logging, Protected Storage, and Platform Service are disabled by default
 in Profile Small top-level CMake config file.
+
+Test configuration
+------------------
+
+Some cryptography tests are disabled due to the reduced Mbed Crypto config.
+Some of them are shown in the table below.
+
+.. table:: TFM options in Profile Small top-level CMake config file
+   :widths: auto
+   :align: center
+
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | Configs                                    | Default value                                                                                       | Descriptions                        |
+   +============================================+=====================================================================================================+=====================================+
+   | ``TFM_CRYPTO_TEST_ALG_CBC``                | ``OFF``                                                                                             | Test CBC cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CCM``                | ``ON``                                                                                              | Test CCM cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``                                                                                             | Test CFB cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``                                                                                             | Test CTR cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``                                                                                             | Test GCM cryptography mode          |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``                                                                                             | Test SHA-512 cryptography algorithm |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``                                                                                             | Test HKDF key derivation algorithm  |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_CRYPTO_TEST_ECDH``                   | ``OFF``                                                                                             | Test ECDH key agreement algorithm   |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
 
 BL2 setting
 -----------
@@ -581,6 +536,7 @@ Take AN521 as an example.
 
 The following commands build Profile Small without test cases on **AN521** with
 build type **MinSizeRel**, built by **Armclang**.
+Library model is selected by default.
 
 .. code-block:: bash
 
@@ -593,8 +549,9 @@ build type **MinSizeRel**, built by **Armclang**.
          ../
    cmake --build ./ -- install
 
-The following commands build Profile Small with regression test cases on **AN521**
-with build type **MinSizeRel**, built by **Armclang**.
+The following commands build Profile Small with regression test cases on
+**AN521** with build type **MinSizeRel**, built by **Armclang**.
+Library model is selected by default.
 
 .. code-block:: bash
 
@@ -604,19 +561,89 @@ with build type **MinSizeRel**, built by **Armclang**.
          -DTFM_TOOLCHAIN_FILE=../toolchain_ARMCLANG.cmake \
          -DTFM_PROFILE=profile_small \
          -DCMAKE_BUILD_TYPE=MinSizeRel \
-         -DTEST_S=ON -DTEST_NS=ON \
+         -DTEST_NS=ON \
          ../
    cmake --build ./ -- install
 
 .. Note::
 
- - For devices with more contrained memory and flash requirements, it is
+ - For devices with more constrained memory and flash requirements, it is
    possible to build with either only TEST_S enabled or only TEST_NS enabled.
    This will decrease the size of the test images. Note that both test suites
    must still be run to ensure correct operation.
 
+The following commands build Profile Small with SFN model on **AN521** with
+build type **MinSizeRel**, built by **GNU Arm compiler**.
+
+.. code-block:: bash
+
+   cd <TFM root dir>
+   mkdir build && cd build
+   cmake -DTFM_PLATFORM=arm/mps2/an521 \
+         -DTFM_PROFILE=profile_small \
+         -DCMAKE_BUILD_TYPE=MinSizeRel \
+         -DCONFIG_TFM_SPM_BACKEND=SFN \
+         ../
+   cmake --build ./ -- install
+
 More details of building instructions and parameters can be found TF-M build
-instruction guide [11]_.
+instruction guide [13]_.
+
+********
+Appendix
+********
+
+TF-M Library model implementation details
+=========================================
+
+.. note ::
+
+    **Implementation note**
+
+    Please note that there is no public dedicated specification for Library
+    model.
+    The design, interfaces and implementation of Library model in TF-M may
+    change.
+
+Buffer sharing allowed
+----------------------
+
+To simplify interface and reduce memory footprint, TF-M Library model directly
+handles client call input vectors from non-secure client buffers and later
+writes results back to those buffers, without keeping a copy in a transient
+buffer inside TF-M.
+
+.. note ::
+
+    **Security note**
+
+    There can be security vulnerabilities if non-secure client buffers are
+    directly shared between NSPE and SPE, such as Time-of-check to time-of-use
+    (TOCTOU) attack.
+
+    Developers need to check if this can meet the Security Functional
+    Requirements (SFR) of the integration of their devices.
+    Some SFRs are listed in a set of example Threat Models and Security Analyses
+    (TMSA) offered by PSA for common IoT use cases. [5]_
+
+Single secure context
+---------------------
+
+TF-M Library model only supports single secure context.
+
+It cannot support multiple contexts or the scheduling implemented in IPC model.
+It neither can support multiple outstanding PSA client calls.
+
+But correspondingly, it can save memory footprint and runtime complexity in
+context management and scheduling.
+
+.. note ::
+
+    **Security note**
+
+    Non-secure software should prevent triggering multiple outstanding PSA
+    client calls concurrently. Otherwise, it may crash current running secure
+    context.
 
 *********
 Reference
@@ -624,26 +651,30 @@ Reference
 
 .. [1] `Pre-Shared Key Ciphersuites for Transport Layer Security (TLS) <https://tools.ietf.org/html/rfc4279>`_
 
-.. [2] `DEN0063 Arm Platform Security Architecture Firmware Framework 1.0 <https://developer.arm.com/-/media/Files/pdf/DeviceSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf?revision=2d1429fa-4b5b-461a-a60e-4ef3d8f7f4b4>`_
+.. [2] `Arm Firmware Framework for M 1.1 Extensions <https://developer.arm.com/documentation/aes0039/latest>`_
 
-.. [3] `PSA analyze stage <https://developer.arm.com/architectures/security-architectures/platform-security-architecture#analyze>`_
+.. [3] `Arm Platform Security Architecture Firmware Framework 1.0 <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf?revision=2d1429fa-4b5b-461a-a60e-4ef3d8f7f4b4&hash=3BFD6F3E687F324672F18E5BE9F08EDC48087C93>`_
 
-.. [4] `AES-CCM Cipher Suites for Transport Layer Security (TLS) <https://tools.ietf.org/html/rfc6655>`_
+.. [4] `Platform Security Model 1.1 <https://developer.arm.com/documentation/den0128/latest>`_
 
-.. [5] `Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms <https://tools.ietf.org/html/rfc6151>`_
+.. [5] `PSA analyze stage <https://developer.arm.com/architectures/security-architectures/platform-security-architecture#analyze>`_
 
-.. [6] `Transitioning the Use of Cryptographic Algorithms and Key Lengths <https://www.nist.gov/publications/transitioning-use-cryptographic-algorithms-and-key-lengths>`_
+.. [6] `AES-CCM Cipher Suites for Transport Layer Security (TLS) <https://tools.ietf.org/html/rfc6655>`_
 
-.. [7] :doc:`ITS integration guide </docs/integration_guide/services/tfm_its_integration_guide>`
+.. [7] `Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms <https://tools.ietf.org/html/rfc6151>`_
 
-.. [8] `PSA Attestation API 1.0 (ARM IHI 0085) <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Implement/IHI0085-PSA_Attestation_API-1.0.2.pdf?revision=eef78753-c77e-4b24-bcf0-65596213b4c1&la=en&hash=E5E0353D612077AFDCE3F2F3708A50C77A74B2A3>`_
+.. [8] `Transitioning the Use of Cryptographic Algorithms and Key Lengths <https://www.nist.gov/publications/transitioning-use-cryptographic-algorithms-and-key-lengths>`_
 
-.. [9] :doc:`Secure boot </docs/technical_references/design_docs/tfm_secure_boot>`
+.. [9] :doc:`ITS integration guide </integration_guide/services/tfm_its_integration_guide>`
 
-.. [10] :doc:`Crypto design </docs/technical_references/design_docs/tfm_crypto_design>`
+.. [10] `PSA Attestation API 1.0 (ARM IHI 0085) <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Implement/IHI0085-PSA_Attestation_API-1.0.2.pdf?revision=eef78753-c77e-4b24-bcf0-65596213b4c1&la=en&hash=E5E0353D612077AFDCE3F2F3708A50C77A74B2A3>`_
 
-.. [11] :doc:`TF-M build instruction </docs/technical_references/instructions/tfm_build_instruction>`
+.. [11] :doc:`Secure boot </technical_references/design_docs/tfm_secure_boot>`
+
+.. [12] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
+
+.. [13] :doc:`TF-M build instruction </technical_references/instructions/tfm_build_instruction>`
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

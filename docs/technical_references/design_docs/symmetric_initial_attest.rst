@@ -588,9 +588,9 @@ Reference
 
 .. [1] `PSA Attestation API 1.0 (ARM IHI 0085) <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Implement/IHI0085-PSA_Attestation_API-1.0.2.pdf?revision=eef78753-c77e-4b24-bcf0-65596213b4c1&la=en&hash=E5E0353D612077AFDCE3F2F3708A50C77A74B2A3>`_
 
-.. [2] :doc:`Trusted Firmware-M Profile Small Design </docs/technical_references/design_docs/profiles/tfm_profile_small>`
+.. [2] :doc:`Trusted Firmware-M Profile Small Design </technical_references/design_docs/profiles/tfm_profile_small>`
 
-.. [3] :doc:`Initial Attestation Service Integration Guide </docs/integration_guide/services/tfm_attestation_integration_guide>`
+.. [3] :doc:`Initial Attestation Service Integration Guide </integration_guide/services/tfm_attestation_integration_guide>`
 
 .. [4] `HMAC: Keyed-Hashing for Message Authentication <https://tools.ietf.org/html/rfc2104>`_
 

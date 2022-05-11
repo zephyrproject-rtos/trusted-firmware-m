@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -10,8 +10,8 @@
   "name": "TFM_SP_INITIAL_ATTESTATION",
   "type": "PSA-ROT",
   "priority": "NORMAL",
-  "model": "IPC",
-  "entry_point": "attest_partition_init",
+  "model": "SFN",
+  "entry_init": "attest_partition_init",
   "stack_size": "0x0A80",
   "secure_functions": [
     {

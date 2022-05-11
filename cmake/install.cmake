@@ -1,18 +1,13 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-# Generate correct filename
-string(TOUPPER ${TFM_PLATFORM} TFM_PLATFORM_UPPERCASE)
-string(REGEX REPLACE "-" "_" TFM_PLATFORM_UPPERCASE_UNDERSCORE ${TFM_PLATFORM_UPPERCASE})
-string(REGEX REPLACE "^(\\.\\.([\\/\\\\]))+" "EXTERNAL\\2" TFM_PLATFORM_UPPERCASE_UNDERSCORE_NO_PARENT_DIR ${TFM_PLATFORM_UPPERCASE_UNDERSCORE})
-
 install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/
-        DESTINATION ${TFM_INSTALL_PATH}/outputs/${TFM_PLATFORM_UPPERCASE_UNDERSCORE_NO_PARENT_DIR}
+        DESTINATION ${TFM_INSTALL_PATH}/outputs
 )
 
 set(INTERFACE_INC_DIR ${CMAKE_SOURCE_DIR}/interface/include)
@@ -54,6 +49,7 @@ if (TFM_MULTI_CORE_TOPOLOGY)
     install(FILES       ${INTERFACE_INC_DIR}/multi_core/tfm_multi_core_api.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox.h
+                        ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox_test.h
                         ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_mailbox_config.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 elseif (NOT TFM_PSA_API)
@@ -110,6 +106,7 @@ endif()
 
 if(TFM_PARTITION_FIRMWARE_UPDATE)
     install(FILES       ${INTERFACE_INC_DIR}/psa/update.h
+                        ${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_fwu_defs.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})

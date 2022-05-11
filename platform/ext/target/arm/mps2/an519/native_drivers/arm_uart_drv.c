@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 ARM Limited
+ * Copyright (c) 2016-2022 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -254,5 +254,53 @@ void arm_uart_clear_interrupt(struct arm_uart_dev_t* dev,
             break;
         /* default: not defined to force all cases to be handled */
         }
+    }
+}
+
+enum arm_uart_error_t arm_uart_tx_enable(struct arm_uart_dev_t* dev)
+{
+    struct _arm_uart_reg_map_t* p_uart =
+                                    (struct _arm_uart_reg_map_t*)dev->cfg->base;
+
+    if (!(dev->data->state & ARM_UART_INITIALIZED)) {
+        return ARM_UART_ERR_NOT_INIT;
+    }
+
+    p_uart->ctrl |= ARM_UART_TX_EN;
+
+    return ARM_UART_ERR_NONE;
+}
+
+void arm_uart_tx_disable(struct arm_uart_dev_t* dev)
+{
+    struct _arm_uart_reg_map_t* p_uart =
+                                    (struct _arm_uart_reg_map_t*)dev->cfg->base;
+
+    if (dev->data->state & ARM_UART_INITIALIZED ) {
+        p_uart->ctrl &= ~ARM_UART_TX_EN;
+    }
+}
+
+enum arm_uart_error_t arm_uart_rx_enable(struct arm_uart_dev_t* dev)
+{
+    struct _arm_uart_reg_map_t* p_uart =
+                                    (struct _arm_uart_reg_map_t*)dev->cfg->base;
+
+    if (!(dev->data->state & ARM_UART_INITIALIZED)) {
+        return ARM_UART_ERR_NOT_INIT;
+    }
+
+    p_uart->ctrl |= ARM_UART_RX_EN;
+
+    return ARM_UART_ERR_NONE;
+}
+
+void arm_uart_rx_disable(struct arm_uart_dev_t* dev)
+{
+    struct _arm_uart_reg_map_t* p_uart =
+                                    (struct _arm_uart_reg_map_t*)dev->cfg->base;
+
+    if (dev->data->state & ARM_UART_INITIALIZED ) {
+        p_uart->ctrl &= ~ARM_UART_RX_EN;
     }
 }

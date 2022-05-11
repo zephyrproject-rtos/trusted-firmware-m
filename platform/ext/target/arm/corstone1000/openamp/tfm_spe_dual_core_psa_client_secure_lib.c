@@ -1,9 +1,12 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
+
+#include "config_impl.h"
 
 #include "tfm_spe_dual_core_psa_client_secure_lib.h"
 #include "tfm_rpc.h"
@@ -12,6 +15,8 @@
 #include "tfm_spe_psa_client_lib_unordered_map.h"
 #include "psa/error.h"
 #include "utilities.h"
+#include "thread.h"
+#include "tfm_core_utils.h"
 
 /**
  * In linux environment and for psa_call type client api,
@@ -30,7 +35,7 @@ static void prepare_and_send_output_msg(int32_t reply, int32_t request_id)
     msg.request_id = request_id;
     msg.reply = reply;
 
-    msg.params.out_vec = NULL;
+    msg.params.out_vec = 0;
     msg.params.out_len = 0;
 
     tfm_to_openamp_reply_back(&msg, sizeof(msg));
@@ -39,14 +44,15 @@ static void prepare_and_send_output_msg(int32_t reply, int32_t request_id)
 static void prepare_and_send_preallocated_output_msg(int32_t reply,
         const unordered_map_entry_t* s_map_entry)
 {
-    size_t out_len = s_map_entry->msg.params.psa_call_params.out_len;
+    uint32_t out_len = s_map_entry->msg.params.psa_call_params.out_len;
     output_buffer_with_payload_t *output_msg = (output_buffer_with_payload_t*)s_map_entry->output_buffer;
 
     output_msg->header.request_id = s_map_entry->msg.request_id;
     output_msg->header.reply = reply;
 
-    output_msg->header.params.out_vec = tfm_to_openamp_translate_secure_to_non_secure_ptr(
-                                        output_msg->outvec);
+    output_msg->header.params.out_vec =
+                   (uint32_t)tfm_to_openamp_translate_secure_to_non_secure_ptr(
+                                   output_msg->outvec);
     output_msg->header.params.out_len = out_len;
 
     for (int i = 0; i < out_len; i++) {
@@ -83,11 +89,11 @@ void send_service_reply_to_non_secure(int32_t reply, void *private)
 
 static psa_invec * prepare_in_vecs(unordered_map_entry_t* s_map_entry)
 {
-    size_t in_len = s_map_entry->msg.params.psa_call_params.in_len;
+    uint32_t in_len = s_map_entry->msg.params.psa_call_params.in_len;
     TFM_CORE_ASSERT(in_len <= PSA_MAX_IOVEC);
 
     psa_invec *input_buffer_in_vec = (psa_invec*)tfm_to_openamp_translate_non_secure_to_secure_ptr(
-                                                s_map_entry->msg.params.psa_call_params.in_vec);
+                                         (void*)s_map_entry->msg.params.psa_call_params.in_vec);
     for (int i = 0; i < in_len; i++) {
         input_buffer_in_vec[i].base = tfm_to_openamp_translate_non_secure_to_secure_ptr(
                                                 input_buffer_in_vec[i].base);
@@ -106,6 +112,7 @@ static void * alloc_outout_buffer_in_shared_mem(size_t length,
     TFM_CORE_ASSERT((s_map_entry->output_buffer != NULL) && (buffer_sz >= length));
     s_map_entry->is_output_buffer = true;
     s_map_entry->output_buffer_len = length;
+    spm_memset(s_map_entry->output_buffer, 0x0, length);
 
     return s_map_entry->output_buffer;
 }
@@ -118,7 +125,7 @@ static psa_status_t alloc_and_prepare_out_vecs(psa_outvec **out_vec_start_ptr,
     size_t current_outdata_len = 0;
     output_buffer_with_payload_t *out_buffer = NULL;
     int max_shared_mem_buffer_size = 0;
-    size_t out_len = s_map_entry->msg.params.psa_call_params.out_len;
+    uint32_t out_len = s_map_entry->msg.params.psa_call_params.out_len;
 
     TFM_CORE_ASSERT(out_len <= PSA_MAX_IOVEC);
     *out_vec_start_ptr = NULL;
@@ -128,7 +135,7 @@ static psa_status_t alloc_and_prepare_out_vecs(psa_outvec **out_vec_start_ptr,
     }
 
     input_buffer_outvec = (psa_outvec*)tfm_to_openamp_translate_non_secure_to_secure_ptr(
-                                                s_map_entry->msg.params.psa_call_params.out_vec);
+                                          (void*)s_map_entry->msg.params.psa_call_params.out_vec);
 
     /* calculate and validate out data len */
     output_buffer_len = sizeof(output_buffer_with_payload_t);
@@ -257,14 +264,6 @@ void deliver_msg_to_tfm_spe(void *private)
             psa_ret = tfm_rpc_psa_version(&spm_params);
             send_service_reply_to_non_secure(psa_ret, s_map_entry);
             break;
-        case OPENAMP_PSA_CONNECT:
-            spm_params.sid = s_map_entry->msg.params.psa_connect_params.sid;
-            spm_params.version = s_map_entry->msg.params.psa_connect_params.version;
-            psa_ret = tfm_rpc_psa_connect(&spm_params);
-            if (psa_ret != PSA_SUCCESS) {
-                send_service_reply_to_non_secure(psa_ret, s_map_entry);
-            }
-            break;
         case OPENAMP_PSA_CALL:
             psa_ret = prepare_params_for_psa_call(&spm_params, s_map_entry);
             if (psa_ret != PSA_SUCCESS) {
@@ -277,10 +276,20 @@ void deliver_msg_to_tfm_spe(void *private)
                 break;
             }
             break;
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+        case OPENAMP_PSA_CONNECT:
+            spm_params.sid = s_map_entry->msg.params.psa_connect_params.sid;
+            spm_params.version = s_map_entry->msg.params.psa_connect_params.version;
+            psa_ret = tfm_rpc_psa_connect(&spm_params);
+            if (psa_ret != PSA_SUCCESS) {
+                send_service_reply_to_non_secure(psa_ret, s_map_entry);
+            }
+            break;
         case OPENAMP_PSA_CLOSE:
             spm_params.handle = s_map_entry->msg.params.psa_close_params.handle;
             tfm_rpc_psa_close(&spm_params);
             break;
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
         default:
             SPMLOG_ERRMSG("msg type did not recognized\r\n");
             send_error_to_non_secure(OPENAMP_INVAL_PARAMS, s_map_entry->msg.request_id);

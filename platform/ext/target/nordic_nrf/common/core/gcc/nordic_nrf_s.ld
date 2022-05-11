@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2021 Arm Limited
+; * Copyright (c) 2009-2022 Arm Limited
 ; * Copyright (c) 2020 Nordic Semiconductor ASA
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
@@ -94,7 +94,9 @@ MEMORY
 #endif
 
 __heap_size__  = S_HEAP_SIZE;
+#if !defined(TFM_PSA_API)
 __psp_stack_size__ = S_PSP_STACK_SIZE;
+#endif
 __msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
 
 /* Library configurations */
@@ -109,6 +111,16 @@ SECTIONS
         __vectors_start__ = .;
         KEEP(*(.vectors))
         __vectors_end__ = .;
+
+        /* If this image is placed at the beginning of flash make sure we
+         * don't put any code in the first 256 bytes of flash as that area might
+         * be used for null-pointer dereference detection. It is believed that on
+         * nordic platforms the __Vectors_Size will always be greater than 256,
+         * but we (potentially) adjust the location pointer anyway just to be safe. */
+#if S_CODE_START == 0
+        . = MAX(., 256);
+#endif
+
         *startup*(.text*)
         . = ALIGN(4);
     } > FLASH
@@ -165,8 +177,7 @@ SECTIONS
         LONG (PSA_PROXY_SHARED_MEMORY_BASE)
         LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
 #endif
-#if defined(TFM_SP_META_PTR_ENABLE)
-        LONG (LOADADDR(.TFM_SP_META_PTR))
+#if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
         LONG (SIZEOF(.TFM_SP_META_PTR))
 #endif
@@ -357,19 +368,15 @@ VENEERS()
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
+# if !defined(TFM_PSA_API)
     /* PSP is unprivileged in single-core topology */
     .psp_stack : ALIGN(32)
     {
-# if !defined(TFM_PSA_API)
         . += (__psp_stack_size__ - 0x8); // reserve space for stack seal (8 bytes)
-# else
-        . += (__psp_stack_size__);
-# endif
     } > RAM
     Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
     Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 
-# if !defined(TFM_PSA_API)
     .psp_stack_seal_res :
     {
         . += 0x8;
@@ -400,16 +407,17 @@ VENEERS()
     } > RAM
 #endif /* TFM_LVL == 1 */
 
-#if defined(TFM_SP_META_PTR_ENABLE)
+#if defined(CONFIG_TFM_PARTITION_META)
     .TFM_SP_META_PTR : ALIGN(32)
     {
-        *(SP_META_PTR_SPRTL_INST)
+        *(.bss.SP_META_PTR_SPRTL_INST)
     } > RAM
-    Image$$TFM_SP_META_PTR$$RW$$Base = ADDR(.TFM_SP_META_PTR);
-    Image$$TFM_SP_META_PTR$$RW$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
+    Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
+    Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
 #endif
 
     /**** APPLICATION RoT DATA start here */
+    . = ALIGN(32);
     Image$$TFM_APP_RW_STACK_START$$Base = .;
 
     .TFM_APP_ROT_LINKER_DATA : ALIGN(32)
@@ -508,14 +516,6 @@ VENEERS()
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
-
-    /* PSP is privileged in multi-core topology */
-    .psp_stack : ALIGN(32)
-    {
-        . += __psp_stack_size__;
-    } > RAM
-    Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
 #endif
 
     /**** PSA RoT DATA start here */
@@ -646,5 +646,5 @@ VENEERS()
     Load$$LR$$LR_NRF_NS_STORAGE_PARTITION$$Base = NRF_NS_STORAGE_PARTITION_START;
 #endif /* NRF_NS_STORAGE */
 
-    PROVIDE(__stack = Image$$ER_INITIAL_PSP$$ZI$$Limit);
+    PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
 }

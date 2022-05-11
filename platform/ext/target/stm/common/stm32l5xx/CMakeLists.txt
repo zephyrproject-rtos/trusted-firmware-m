@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021 STMicroelectronics. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -29,6 +29,7 @@ target_add_scatter_file(tfm_s
     $<$<AND:$<VERSION_LESS:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
     $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:ARMClang>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/armclang/tfm_isolation_l3.sct>
     $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:GNU>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/gcc/tfm_isolation_l3.ld>
+    $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_isolation_l3.icf>
 )
 
 if(NS)
@@ -77,6 +78,7 @@ target_sources(platform_s
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cortex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_flash.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_flash_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_dma.c
@@ -97,6 +99,8 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pka.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cryp.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cryp_ex.c
         ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
 )
 
@@ -156,7 +160,7 @@ if(BL2)
     target_sources(platform_bl2
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/Templates/system_stm32l5xx.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/bl2/boot_hal.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/bl2/boot_hal_bl2.c
             ${STM_COMMON_DIR}/hal/Native_Driver/mpu_armv8m_drv.c
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/tfm_low_level_security.c
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/low_level_device.c
@@ -178,6 +182,8 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_hash_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_pka.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cryp.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_cryp_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng_ex.c
             ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c

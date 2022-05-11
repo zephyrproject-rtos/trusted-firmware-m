@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2022 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -139,6 +139,10 @@ static int32_t ARM_USARTx_Send(UARTx_Resources* uart_dev, const void *data,
         p_data++;
     }
 
+    if (uart_dev->cb_event != NULL) {
+        uart_dev->cb_event(ARM_USART_EVENT_SEND_COMPLETE);
+    }
+
     /* Waits until character is transmited */
     while (!uart_pl011_is_writable(uart_dev->dev)){};
 
@@ -170,6 +174,10 @@ static int32_t ARM_USARTx_Receive(UARTx_Resources* uart_dev,
         p_data++;
     }
 
+    if (uart_dev->cb_event != NULL) {
+        uart_dev->cb_event(ARM_USART_EVENT_RECEIVE_COMPLETE);
+    }
+
     return ARM_DRIVER_OK;
 }
 
@@ -187,6 +195,26 @@ static int32_t ARM_USARTx_Control(UARTx_Resources* uart_dev, uint32_t control,
                                   uint32_t arg)
 {
     switch (control & ARM_USART_CONTROL_Msk) {
+#ifdef UART_TX_RX_CONTROL_ENABLED
+        case ARM_USART_CONTROL_TX:
+            if (arg == 0) {
+                uart_pl011_disable_transmit(uart_dev->dev);
+            } else if (arg == 1) {
+                uart_pl011_enable_transmit(uart_dev->dev);
+            } else {
+                return ARM_DRIVER_ERROR_PARAMETER;
+            }
+            break;
+        case ARM_USART_CONTROL_RX:
+            if (arg == 0) {
+                uart_pl011_disable_receive(uart_dev->dev);
+            } else if (arg == 1) {
+                uart_pl011_enable_receive(uart_dev->dev);
+            } else {
+                return ARM_DRIVER_ERROR_PARAMETER;
+            }
+            break;
+#endif
         case ARM_USART_MODE_ASYNCHRONOUS:
             if(uart_pl011_set_baudrate(uart_dev->dev, arg) !=
                 UART_PL011_ERR_NONE) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -217,6 +217,10 @@ psa_status_t psa_proxy_sp_init(void)
     while (1) {
         /* Control is given back to SPM */
         signal = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
+        if (signal == TFM_PROXY_DUMMY_SIGNAL) {
+            psa_panic();
+        }
+
         handle_signal(signal);
     }
 

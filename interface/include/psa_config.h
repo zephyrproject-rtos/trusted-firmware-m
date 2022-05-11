@@ -24,8 +24,12 @@
  */
 #if defined(CONFIG_TFM_BUILDING_SPE)
 
+#ifdef TFM_PSA_API
 /* SPE has specific configurations. */
 #include "config_impl.h"
+#endif /* TFM_PSA_API */
+
+#include "psa_interface_redirect.h"
 
 #endif
 

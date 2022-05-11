@@ -56,7 +56,7 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        cmsis_drivers/Driver_Flash.c
+        ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_QSPI.c
         ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
         ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_twim.c
@@ -145,8 +145,7 @@ if(BL2)
 
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
-            cmsis_drivers/Driver_Flash.c
+            ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_Flash.c
             cmsis_drivers/Driver_QSPI.c
             ${NRF_FOLDER_PATH}/cmsis_drivers/Driver_USART.c
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c

@@ -13,6 +13,7 @@
 #include "tfm_peripherals_def.h"
 #include "tfm_peripherals_config.h"
 #include "load/interrupt_defs.h"
+#include "ffm/interrupt.h"
 #include "tfm_spm_hal.h"
 
 
@@ -73,7 +74,7 @@ __attribute__((alias("tfm_clock_power_irq_init")));
     TFM_PERIPHERAL_UARTE0_SECURE
 static struct irq_t serial0_irq = {0};
 
-void SPIM0_SPIS0_TWIM0_TWIS0_UARTE0_IRQHandler(void)
+void SERIAL0_IRQHandler(void)
 {
     spm_handle_interrupt(serial0.p_pt, serial0.p_ildi);
 }
@@ -110,7 +111,7 @@ __attribute__((alias("tfm_serial0_init")));
     TFM_PERIPHERAL_UARTE1_SECURE
 static struct irq_t serial1_irq = {0};
 
-void SPIM1_SPIS1_TWIM1_TWIS1_UARTE1_IRQHandler(void)
+void SERIAL1_IRQHandler(void)
 {
     spm_handle_interrupt(serial1_irq.p_pt, serial1_irq.p_ildi);
 }
@@ -147,7 +148,7 @@ __attribute__((alias("tfm_serial1_init")));
     TFM_PERIPHERAL_UARTE2_SECURE
 static struct irq_t serial2_irq = {0};
 
-void SPIM2_SPIS2_TWIM2_TWIS2_UARTE2_IRQHandler(void)
+void SERIAL2_IRQHandler(void)
 {
     spm_handle_interrupt(serial2_irq.p_pt, serial2_irq.p_ildi);
 }
@@ -184,7 +185,7 @@ __attribute__((alias("tfm_serial2_init")));
     TFM_PERIPHERAL_UARTE3_SECURE
 static struct irq_t serial3_irq = {0};
 
-void SPIM3_SPIS3_TWIM3_TWIS3_UARTE3_IRQHandler(void)
+void SERIAL3_IRQHandler(void)
 {
     spm_handle_interrupt(serial3_irq.p_pt, serial3_irq.p_ildi);
 }
@@ -236,7 +237,7 @@ static struct irq_t gpiote0_irq = {0};
 
 void GPIOTE0_IRQHandler(void)
 {
-    spm_handle_interrupt(gpiote0_irq.p_pt, gpiote0.p_ildi);
+    spm_handle_interrupt(gpiote0_irq.p_pt, gpiote0_irq.p_ildi);
 }
 
 enum tfm_hal_status_t tfm_gpiote0_irq_init(void *p_pt,

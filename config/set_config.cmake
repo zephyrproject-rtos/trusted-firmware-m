@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -42,17 +42,24 @@ if (TFM_PROFILE)
     include(config/profile/${TFM_PROFILE}.cmake)
 endif()
 
+include(${CMAKE_SOURCE_DIR}/config/tfm_build_log_config.cmake)
+
 # Load TF-M model specific default config
 if (TFM_LIB_MODEL)
     include(config/tfm_library_config_default.cmake)
-else()
+elseif (CONFIG_TFM_SPM_BACKEND STREQUAL "SFN")
+    include(config/tfm_sfn_config_default.cmake)
+else() #The default backend is IPC
     include(config/tfm_ipc_config_default.cmake)
 endif()
 
+# Load bl1 config
+if (BL1 AND PLATFORM_DEFAULT_BL1)
+    include(${CMAKE_SOURCE_DIR}/bl1/config/bl1_config_default.cmake)
+endif()
+
 # Load MCUboot specific default.cmake
-# Set BL2 to ON by default, OFF if the platform specifically defines this property
-set(BL2 ON CACHE BOOL "Whether to build BL2")
-if (BL2)
+if (NOT DEFINED BL2 OR BL2)
     include(${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/mcuboot_default_config.cmake)
 endif()
 

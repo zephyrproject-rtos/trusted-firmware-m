@@ -13,7 +13,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "cmsis_compiler.h"
 #include "tfm_mailbox.h"
 
 #ifdef __cplusplus
@@ -22,22 +21,6 @@ extern "C" {
 
 #if !defined(TFM_MULTI_CORE_NS_OS) && (NUM_MAILBOX_QUEUE_SLOT > 1)
 #error "NUM_MAILBOX_QUEUE_SLOT should be set to 1 for NS bare metal environment"
-#endif
-
-#ifdef TFM_MULTI_CORE_TEST
-/**
- * \brief The structure to hold the statistics result of NSPE mailbox
- */
-struct ns_mailbox_stats_res_t {
-    uint8_t avg_nr_slots;               /* The value before the decimal point
-                                         * in the average number of NSPE
-                                         * mailbox slots in use.
-                                         */
-    uint8_t avg_nr_slots_tenths;        /* The first digit value after the
-                                         * decimal point in the average
-                                         * number of NSPE mailbox slots in use.
-                                         */
-};
 #endif
 
 /**
@@ -69,26 +52,6 @@ int32_t tfm_ns_mailbox_client_call(uint32_t call_type,
                                    const struct psa_client_params_t *params,
                                    int32_t client_id,
                                    int32_t *reply);
-
-#ifdef TFM_MULTI_CORE_NS_OS
-/**
- * \brief Go through mailbox messages already replied by SPE mailbox and
- *        wake up the owner tasks of replied mailbox messages.
- *        This function is intended to be called inside platform specific
- *        notification IRQ handler.
- *
- * \return MAILBOX_SUCCESS       The tasks of replied mailbox messages
- *                               were found and wake-up signals were sent.
- * \return MAILBOX_NO_PEND_EVENT No replied mailbox message is found.
- * \return Other return code     Failed with an error code
- */
-int32_t tfm_ns_mailbox_wake_reply_owner_isr(void);
-#else
-static inline int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
-{
-    return MAILBOX_NO_PEND_EVENT;
-}
-#endif
 
 #ifdef TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD
 /**
@@ -259,6 +222,31 @@ int32_t tfm_ns_mailbox_os_mq_send(void *mq_handle, const void *msg_ptr);
  *       queue, unless a fatal error occurs.
  */
 int32_t tfm_ns_mailbox_os_mq_receive(void *mq_handle, void *msg_ptr);
+
+/**
+ * \brief Go through mailbox messages already replied by SPE mailbox and
+ *        wake up the owner tasks of replied mailbox messages.
+ *        This function is intended to be called inside platform specific
+ *        notification IRQ handler.
+ *
+ * \return MAILBOX_SUCCESS       The tasks of replied mailbox messages
+ *                               were found and wake-up signals were sent.
+ * \return MAILBOX_NO_PEND_EVENT No replied mailbox message is found.
+ * \return Other return code     Failed with an error code
+ */
+int32_t tfm_ns_mailbox_wake_reply_owner_isr(void);
+
+/**
+ * \brief NSPE local mailbox spin lock.
+ *        Implemented by NS RTOS specific implementation.
+ */
+void tfm_ns_mailbox_os_spin_lock(void);
+
+/**
+ * \brief NSPE local mailbox spin unlock.
+ *        Implemented by NS RTOS specific implementation.
+ */
+void tfm_ns_mailbox_os_spin_unlock(void);
 #else /* TFM_MULTI_CORE_NS_OS */
 #define tfm_ns_mailbox_os_wait_reply()         do {} while (0)
 
@@ -283,77 +271,19 @@ static inline const void *tfm_ns_mailbox_os_get_task_handle(void)
 {
     return NULL;
 }
-#endif /* TFM_MULTI_CORE_NS_OS */
 
-#ifdef TFM_MULTI_CORE_TEST
-/**
- * \brief Initialize the statistics module in TF-M NSPE mailbox.
- *
- * \note This function is only available when multi-core tests are enabled.
- *
- * \param[in] ns_queue          The NSPE mailbox queue to be tracked.
- */
-void tfm_ns_mailbox_tx_stats_init(struct ns_mailbox_queue_t *ns_queue);
-
-/**
- * \brief Re-initialize the statistics module in TF-M NSPE mailbox.
- *        Clean up statistics data.
- *
- * \note This function is only available when multi-core tests are enabled.
- *
- * \return \ref MAILBOX_SUCCESS if the operation succeeded, or other return code
-           in case of error
- */
-int32_t tfm_ns_mailbox_tx_stats_reinit(void);
-
-/**
- * \brief Update the statistics result of NSPE mailbox message transmission.
- *
- * \note This function is only available when multi-core tests are enabled.
- */
-void tfm_ns_mailbox_tx_stats_update(void);
-
-/**
- * \brief Calculate the average number of used NS mailbox queue slots each time
- *        NS task requires a queue slot to submit mailbox message, which is
- *        recorded in NS mailbox statisitics module.
- *
- * \note This function is only available when multi-core tests are enabled.
- *
- * \param[in] stats_res         The buffer to be written with
- *                              \ref ns_mailbox_stats_res_t.
- *
- * \return Return the calculation result.
- */
-void tfm_ns_mailbox_stats_avg_slot(struct ns_mailbox_stats_res_t *stats_res);
-#endif
-
-#ifdef TFM_MULTI_CORE_NS_OS
-/*
- * When NSPE mailbox only covers a single non-secure core, spinlock only
- * requires to disable IRQ.
- */
-static inline void ns_mailbox_spin_lock(void)
+static inline int32_t tfm_ns_mailbox_wake_reply_owner_isr(void)
 {
-    __disable_irq();
+    return MAILBOX_NO_PEND_EVENT;
 }
 
-/*
- * It is assumed that IRQ is always enabled when spinlock is acquired.
- * Otherwise, the waiting thread won't be woken up.
- */
-static inline void ns_mailbox_spin_unlock(void)
-{
-    __enable_irq();
-}
-#else /* TFM_MULTI_CORE_NS_OS */
 /*
  * Local spinlock is implemented as a dummy one when integrating with NS bare
  * metal environment since interrupt is not required in NS mailbox.
  */
-#define ns_mailbox_spin_lock()   do {} while (0)
+#define tfm_ns_mailbox_os_spin_lock()   do {} while (0)
 
-#define ns_mailbox_spin_unlock() do {} while (0)
+#define tfm_ns_mailbox_os_spin_unlock() do {} while (0)
 #endif /* TFM_MULTI_CORE_NS_OS */
 
 /* The following inline functions configure non-secure mailbox queue status */

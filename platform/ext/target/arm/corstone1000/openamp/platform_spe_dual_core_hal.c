@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,6 +8,7 @@
 #include "tfm_spe_openamp_platform_interface.h"
 #include "device_cfg.h"
 #include "device_definition.h"
+#include "load/interrupt_defs.h"
 #include "mhu_v2_x.h"
 #include "tfm_plat_defs.h"
 #include "tfm_spm_log.h"
@@ -45,17 +47,23 @@ static enum tfm_plat_err_t initialize_host_to_secure_enclave_mhu(void)
    return TFM_PLAT_ERR_SUCCESS;
 }
 
-__STATIC_INLINE void tfm_trigger_pendsv(void)
-{
-   SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
-}
+static struct irq_t mbox_irq_info = {0};
 
 void HSE1_RECEIVER_COMBINED_IRQHandler(void)
 {
-   tfm_trigger_pendsv();
+   spm_handle_interrupt(mbox_irq_info.p_pt, mbox_irq_info.p_ildi);
 
    mhu_v2_x_channel_clear(&MHU1_HOST_TO_SE_DEV, 0);
    NVIC_ClearPendingIRQ(HSE1_RECEIVER_COMBINED_IRQn);
+}
+
+enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
+                                       struct irq_load_info_t *p_ildi)
+{
+    mbox_irq_info.p_pt = p_pt;
+    mbox_irq_info.p_ildi = p_ildi;
+
+    return TFM_HAL_SUCCESS;
 }
 
 enum tfm_plat_err_t tfm_dual_core_hal_init(void)

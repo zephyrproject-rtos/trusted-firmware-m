@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,8 +72,6 @@
 #define IMAGE_S_CODE_SIZE    (FLASH_S_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 #define IMAGE_NS_CODE_SIZE   (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
-#define CMSE_VENEER_REGION_SIZE     (0x340)
-
 /* Alias definitions for secure and non-secure areas*/
 #define S_ROM_ALIAS(x)  (S_ROM_ALIAS_BASE + (x))
 #define NS_ROM_ALIAS(x) (NS_ROM_ALIAS_BASE + (x))
@@ -85,15 +83,15 @@
 #define S_IMAGE_PRIMARY_AREA_OFFSET \
                         (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)       /* 0x8400 */
 #define S_CODE_START    (S_ROM_ALIAS(S_IMAGE_PRIMARY_AREA_OFFSET))                 /* 0x8400 */
-#define S_CODE_SIZE     (IMAGE_S_CODE_SIZE - CMSE_VENEER_REGION_SIZE)
+#define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 #define S_DATA_START    (S_RAM_ALIAS(0x0))
 #define S_DATA_SIZE     (80 * 1024)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
-/* CMSE Veneers region */
-#define CMSE_VENEER_REGION_START  (S_CODE_LIMIT + 1)
+/* Size of vector table: 117 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0x1D8)
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \

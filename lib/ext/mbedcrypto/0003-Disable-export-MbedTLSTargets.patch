@@ -1,7 +1,7 @@
-From e109c8ed57457a2bd62afcf21b5b99dd2a30edea Mon Sep 17 00:00:00 2001
+From 0eac701c20e719599e5f30e260b7b0420d92af49 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
-Date: Tue, 13 Jul 2021 17:46:47 +0800
-Subject: [PATCH] Disable export MbedTLSTargets
+Date: Wed, 5 Jan 2022 15:00:49 +0800
+Subject: [PATCH 3/3] Disable export MbedTLSTargets
 
 Disable install MbedTLSConfig.cmake, MbedTLSConfigVersion.cmake and
 MbedTLSTargets.cmake. And Disable export MbedTLSTargets since this
@@ -13,10 +13,10 @@ Signed-off-by: Summer Qin <summer.qin@arm.com>
  1 file changed, 26 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3eef42ec..5ad56c81 100644
+index fd1c07ca..3f32a8f3 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -307,32 +307,6 @@ if(ENABLE_TESTING)
+@@ -328,32 +328,6 @@ if(ENABLE_TESTING)
      endif()
  endif()
  
@@ -28,7 +28,7 @@ index 3eef42ec..5ad56c81 100644
 -write_basic_package_version_file(
 -    "cmake/MbedTLSConfigVersion.cmake"
 -        COMPATIBILITY SameMajorVersion
--        VERSION 3.0.0)
+-        VERSION 3.1.0)
 -
 -install(
 -    FILES "${CMAKE_CURRENT_BINARY_DIR}/cmake/MbedTLSConfig.cmake"
@@ -46,7 +46,7 @@ index 3eef42ec..5ad56c81 100644
 -    DESTINATION "cmake"
 -    FILE "MbedTLSTargets.cmake")
 -
- if(CMAKE_VERSION VERSION_GREATER 3.14)
+ if(CMAKE_VERSION VERSION_GREATER 3.15 OR CMAKE_VERSION VERSION_EQUAL 3.15)
      # Do not export the package by default
      cmake_policy(SET CMP0090 NEW)
 -- 

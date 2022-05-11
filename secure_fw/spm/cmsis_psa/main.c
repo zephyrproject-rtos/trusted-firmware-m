@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,7 +12,6 @@
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
-#include "tfm_nspm.h"
 #include "tfm_spm_hal.h"
 #include "tfm_spm_log.h"
 #include "tfm_version.h"
@@ -101,16 +100,9 @@ static fih_int tfm_core_init(void)
 
     SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_LVL);
 
-#if (CONFIG_TFM_SPE_FP == 0)
-    SPMLOG_INFMSG("TF-M FP mode: Software\r\n");
-#elif (CONFIG_TFM_SPE_FP == 1)
-    SPMLOG_INFMSG("TF-M FP mode: Hybird\r\n");
-#elif (CONFIG_TFM_SPE_FP == 2)
+#if (CONFIG_TFM_FP == 2)
     SPMLOG_INFMSG("TF-M FP mode: Hardware\r\n");
-#endif
-
-#if (CONFIG_TFM_SPE_FP >= 1)
-#ifdef CONFIG_TFM_LAZY_STACKING_SPE
+#ifdef CONFIG_TFM_LAZY_STACKING
     SPMLOG_INFMSG("Lazy stacking enabled\r\n");
 #else
     SPMLOG_INFMSG("Lazy stacking disabled\r\n");
@@ -119,23 +111,10 @@ static fih_int tfm_core_init(void)
 
     tfm_core_validate_boot_data();
 
-    configure_ns_code();
-
     FIH_RET(fih_int_encode(TFM_SUCCESS));
 }
 
-__attribute__((naked))
 int main(void)
-{
-    __ASM volatile(
-        "ldr    r0, =0xFEF5EDA5     \n" /* Seal Main Stack before using */
-        "ldr    r1, =0xFEF5EDA5     \n"
-        "push   {r0, r1}            \n"
-        "bl     c_main              \n"
-    );
-}
-
-int c_main(void)
 {
     fih_int fih_rc = FIH_FAILURE;
 
@@ -154,7 +133,7 @@ int c_main(void)
     FIH_LABEL_CRITICAL_POINT();
 
     /* Print the TF-M version */
-    SPMLOG_INFMSG("\033[1;34mBooting TFM v"VERSION_FULLSTR"\033[0m\r\n");
+    SPMLOG_INFMSG("\033[1;34mBooting TF-M "VERSION_FULLSTR"\033[0m\r\n");
 
     /*
      * Prioritise secure exceptions to avoid NS being able to pre-empt
@@ -162,7 +141,7 @@ int c_main(void)
      */
     tfm_arch_set_secure_exception_priorities();
 
-#if (CONFIG_TFM_SPE_FP >= 1)
+#if (CONFIG_TFM_FP >= 1)
     tfm_arch_clear_fp_data();
 #endif
 

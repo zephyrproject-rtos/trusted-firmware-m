@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -25,7 +26,7 @@ target_sources(tfm_s
     $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_musca_b1_secure_enclave_s.S>
     # This file contains an IRQ handler. Linking it from a different library to
     # overwrite the default weak function would require intrusive cmake hacks.
-    mailbox/mailbox_ipc_intr.c
+    tfm_interrupts.c
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -59,6 +60,7 @@ target_include_directories(platform_s
         mailbox
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
+    INTERFACE
         ${CMAKE_MUSCA_B1_COMMON_DIR}/cc312
 )
 
@@ -75,7 +77,6 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         mailbox/platform_multicore.c
         mailbox/platform_spe_mailbox.c
-        spm_hal.c
         target_cfg.c
         tfm_hal_isolation.c
         tfm_hal_multi_core.c
@@ -85,10 +86,6 @@ target_sources(platform_s
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
-target_link_libraries(platform_s
-    PUBLIC
-        tfm_spm
-)
 #========================= Platform Non-Secure ================================#
 
 # FIXME: platform_ns must have at least 1 source, even if it is not used
@@ -107,7 +104,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
             uart_stdout.c
@@ -120,6 +116,7 @@ if(BL2)
         PUBLIC
             partition
             Device/Include
+        INTERFACE
             ${CMAKE_MUSCA_B1_COMMON_DIR}/cc312
         PRIVATE
             .

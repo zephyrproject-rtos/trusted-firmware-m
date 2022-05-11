@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Wind River Systems, Inc.
- * Copyright (c) 2017-2021 Arm Limited.
+ * Copyright (c) 2017-2022 Arm Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@
 #include "uart_stdout.h"
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
+#ifdef TEST_BL2
+#include "mcuboot_suites.h"
+#endif /* TEST_BL2 */
 
 /* Avoids the semihosting issue */
 #if defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
@@ -73,7 +76,7 @@ static void do_boot(struct boot_rsp *rsp)
                                          rsp->br_hdr->ih_hdr_size);
     }
 
-#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF
+#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF || TEST_BL2
     stdio_uninit();
 #endif
 
@@ -94,7 +97,7 @@ int main(void)
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf, BL2_MBEDTLS_MEM_BUF_LEN);
 
-#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF
+#if MCUBOOT_LOG_LEVEL > MCUBOOT_LOG_LEVEL_OFF || TEST_BL2
     stdio_init();
 #endif
 
@@ -127,6 +130,16 @@ int main(void)
         BOOT_LOG_ERR("Error while initializing the security counter");
         FIH_PANIC;
     }
+
+    /* Perform platform specific post-initialization */
+    if (boot_platform_post_init() != 0) {
+        BOOT_LOG_ERR("Platform post init failed");
+        FIH_PANIC;
+    }
+
+#ifdef TEST_BL2
+    (void)run_mcuboot_testsuite();
+#endif /* TEST_BL2 */
 
     FIH_CALL(boot_go, fih_rc, &rsp);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {

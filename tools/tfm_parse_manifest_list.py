@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -7,23 +7,27 @@
 
 import os
 import io
+import re
 import sys
 import argparse
+import logging
 from jinja2 import Environment, BaseLoader, select_autoescape, TemplateNotFound
 
 try:
     import yaml
 except ImportError as e:
-    print (str(e) + ' To install it, type:')
-    print ('pip install PyYAML')
+    logging.error (str(e) + " To install it, type:")
+    logging.error ("pip install PyYAML")
     exit(1)
 
 donotedit_warning = \
-                    '/*********** ' + \
-                    'WARNING: This is an auto-generated file. Do not edit!' + \
-                    ' ***********/'
+                    '  WARNING: This is an auto-generated file. Do not edit!  '
 
+TFM_ROOT_DIR = os.path.join(sys.path[0], '..')
 OUT_DIR = None # The root directory that files are generated to
+
+# PID[0, TFM_PID_BASE - 1] are reserved for TF-M SPM and test usages
+TFM_PID_BASE = 256
 
 # variable for checking for duplicated sid
 sid_list = []
@@ -52,18 +56,90 @@ class TemplateLoader(BaseLoader):
             source = f.read()
         return source, template, False
 
-def manifest_validation(partition_manifest):
+def get_single_macro_def_from_file(file_name, macro_name):
+    """
+    This function parses the given file_name to get the definition of the given
+    C Macro (macro_name).
+
+    It assumes that the target Macro has no multiple definitions in different
+    build configurations.
+
+    It supports Macros defined in multi-line, for example:
+    #define SOME_MACRO          \
+                            the_macro_value
+
+    Inputs:
+        - file_name: the file to get the Macro from
+        - macro_name: the name of the Macro to get
+    Returns:
+        - The Macro definition with '()' stripped, or Exception if not found
+    """
+
+    with open(file_name, 'r') as f:
+        pattern = re.compile(r'#define\s+{}[\\\s]+.*'.format(macro_name))
+        result = pattern.findall(f.read())
+
+        if len(result) != 1:
+            raise Exception('{} not defined or has multiple definitions'.format(macro_name))
+
+    macro_def = result[0].split()[-1].strip('()')
+
+    return macro_def
+
+def manifest_validation(manifest, pid):
     """
     This function validates FF-M compliance for partition manifest, and sets
     default values for optional attributes.
-    More validation items will be added.
+    The validation is skipped for TF-M specific Partitions (PID < TFM_PID_BASE).
     """
 
-    # Service FF-M manifest validation
-    if 'services' not in partition_manifest.keys():
-        return partition_manifest
+    service_list = manifest.get('services', [])
+    irq_list     = manifest.get('irqs', [])
 
-    for service in partition_manifest['services']:
+    # "psa_framework_version" validation
+    if manifest['psa_framework_version'] not in [1.0, 1.1]:
+        raise Exception('Invalid psa_framework_version of {}'.format(manifest['name']))
+
+    # "type" validatoin
+    if manifest['type'] not in ['PSA-ROT', 'APPLICATION-ROT']:
+        raise Exception('Invalid type of {}'.format(manifest['name']))
+
+    # Every PSA Partition must have at least either a secure service or an IRQ
+    if (pid == None or pid >= TFM_PID_BASE) \
+       and len(service_list) == 0 and len(irq_list) == 0:
+        raise Exception('{} must declare at least either a secure service or an IRQ!'
+                        .format(manifest['name']))
+
+    if manifest['psa_framework_version'] == 1.0:
+        # For 1.0 Partition, the model is IPC
+        manifest['model'] = 'IPC'
+
+    # "model" validation:
+    model = manifest.get('model', None)
+    if model == None:
+        raise Exception('{} is missing the "model" attribute'.format(manifest['name']))
+
+    # Assign a unified 'entry' for templates
+    if model == 'IPC':
+        # entry_point is mandatory for IPC Partitions
+        if 'entry_point' not in manifest.keys():
+            raise Exception('{} is missing the "entry_point" attribute'.format(manifest['name']))
+        manifest['entry'] = manifest['entry_point']
+    elif model == 'SFN':
+        if 'entry_init' in manifest.keys():
+            manifest['entry'] = manifest['entry_init']
+        else:
+            manifest['entry'] = 0
+    else:
+        raise Exception('Invalid "model" of {}'.format(manifest['name']))
+
+    # Service FF-M manifest validation
+    for service in service_list:
+        if manifest['psa_framework_version'] == 1.0:
+            service['connection_based'] = True
+        elif 'connection_based' not in service:
+            raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
+
         if 'version' not in service.keys():
             service['version'] = 1
         if 'version_policy' not in service.keys():
@@ -75,19 +151,21 @@ def manifest_validation(partition_manifest):
         else:
             sid_list.append(service['sid'])
 
-    return partition_manifest
+    return manifest
 
-def process_partition_manifests(manifest_list_files, extra_manifests_list):
+def process_partition_manifests(manifest_lists, isolation_level, backend):
     """
-    Parse the input manifest, generate the data base for genereated files
+    Parse the input manifest lists, generate the data base for genereated files
     and generate manifest header files.
 
     Parameters
     ----------
-    manifest_list_files:
-        The manifest lists to parse.
-    extra_manifests_list:
-        The extra manifest list to parse and its original path.
+    manifest_lists:
+        A list of Secure Partition manifest lists and their original paths.
+        The manifest lists might be processed by CMake and the paths might be
+        different to the original ones. Original paths are needed to handle
+        relative paths in the lists.
+        The format must be [list A, orignal path A, list B, orignal path B, ...]
 
     Returns
     -------
@@ -97,43 +175,57 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
     context = {}
 
     partition_list = []
-    manifest_list = []
-    ipc_partition_num = 0
-    sfn_partition_num = 0
+    all_manifests = []
     pid_list = []
     no_pid_manifest_idx = []
+    partition_statistics = {
+        'connection_based_srv_num': 0,
+        'ipc_partitions': [],
+        'flih_num': 0,
+        'slih_num': 0
+    }
+    config_impl = {
+        'CONFIG_TFM_SPM_BACKEND_SFN'              : '0',
+        'CONFIG_TFM_SPM_BACKEND_IPC'              : '0',
+        'CONFIG_TFM_PSA_API_SFN_CALL'             : '0',
+        'CONFIG_TFM_PSA_API_CROSS_CALL'           : '0',
+        'CONFIG_TFM_PSA_API_SUPERVISOR_CALL'      : '0',
+        'CONFIG_TFM_CONNECTION_BASED_SERVICE_API' : '0',
+        'CONFIG_TFM_FLIH_API'                     : '0',
+        'CONFIG_TFM_SLIH_API'                     : '0'
+    }
 
-    for f in manifest_list_files:
-        with open(f) as manifest_list_yaml_file:
-            manifest_dic = yaml.safe_load(manifest_list_yaml_file)
-            manifest_list.extend(manifest_dic['manifest_list'])
-            manifest_list_yaml_file.close()
+    # Get all the manifests information as a dictionary
+    for i, item in enumerate(manifest_lists):
+        if i % 2 == 0 and not os.path.isfile(item):
+            logging.error('Manifest list item [{}] must be a file'.format(i))
+            exit(1)
 
-    # Out-of-tree secure partition build
-    if extra_manifests_list is not None:
-        for i, item in enumerate(extra_manifests_list):
-            # Skip if current item is the original manifest path
-            if os.path.isdir(item):
-                continue
+        if i % 2 == 1:
+            if not os.path.isdir(item):
+                logging.error('Manifest list item [{}] must be a directory'.format(i))
+                exit(1)
 
-            # The manifest list file generated by configure_file()
-            with open(item) as manifest_list_yaml_file:
-                manifest_dic = yaml.safe_load(manifest_list_yaml_file)
-                extra_manifest_dic = manifest_dic['manifest_list']
-                for dict in extra_manifest_dic:
-                    # Append original directory of out-of-tree partition's
-                    # manifest list source code
-                    dict['extra_path'] = extra_manifests_list[i + 1]
-                    manifest_list.append(dict)
-                manifest_list_yaml_file.close()
+            # Skip original manifest paths
+            continue
 
-    for i, manifest_item in enumerate(manifest_list):
+        # The manifest list file generated by configure_file()
+        with open(item) as manifest_list_yaml_file:
+            manifest_dic = yaml.safe_load(manifest_list_yaml_file)['manifest_list']
+            for dict in manifest_dic:
+                # Add original path of manifest list.
+                # The validation will be done in the next loop.
+                dict['list_path'] = manifest_lists[i + 1]
+                all_manifests.append(dict)
+
+    # Parse the manifests
+    for i, manifest_item in enumerate(all_manifests):
         valid_enabled_conditions  = ['on',  'true',  'enabled']
-        valid_disabled_conditions = ['off', 'false', 'disabled']
+        valid_disabled_conditions = ['off', 'false', 'disabled', '']
         is_enabled = ''
 
         if 'conditional' in manifest_item.keys():
-            is_enabled = manifest_item['conditional'].lower()
+            is_enabled = str(manifest_item['conditional']).lower()
         else:
             # Partitions without 'conditional' is alwasy on
             is_enabled = 'on'
@@ -150,43 +242,71 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
         # Check if partition ID is manually set
         if 'pid' not in manifest_item.keys():
             no_pid_manifest_idx.append(i)
-        # Check if partition ID is duplicated
-        elif manifest_item['pid'] in pid_list:
-            raise Exception('PID No. {pid} has already been used!'.format(pid=manifest_item['pid']))
+            pid = None
         else:
-            pid_list.append(manifest_item['pid'])
+            pid = manifest_item['pid']
+
+            # Check if partition ID is duplicated
+            if pid in pid_list:
+                raise Exception('PID No. {pid} has already been used!'.format(pid))
+            else:
+                pid_list.append(pid)
 
         # Replace environment variables in the manifest path
         manifest_path = os.path.expandvars(manifest_item['manifest'])
-
-        # Handle out-of-tree secure partition manifest file path
-        if 'extra_path' in manifest_item:
-            if not os.path.isabs(manifest_path):
-                # manifest file path provided by manifest list is relative to
-                # manifest list path
-                manifest_path = os.path.join(manifest_item['extra_path'], manifest_path).replace('\\', '/')
+        # Convert to absolute path. If it's already abspath, the path will not be changed.
+        manifest_path = os.path.join(manifest_item['list_path'], manifest_path).replace('\\', '/')
 
         with open(manifest_path) as manifest_file:
-            manifest = manifest_validation(yaml.safe_load(manifest_file))
+            manifest = yaml.safe_load(manifest_file)
+            if manifest.get('model', None) == 'dual':
+                # If a Partition supports both models, it can set the "model" to "backend".
+                # The actual model used follows the backend being used.
+                manifest['model'] = backend
+            manifest = manifest_validation(manifest, pid)
 
-        # Count the number of IPC partitions
-        if manifest['psa_framework_version'] == 1.1 and manifest['model'] == 'IPC':
-            ipc_partition_num += 1
-        elif manifest['psa_framework_version'] == 1.1 and manifest['model'] == 'SFN':
-            sfn_partition_num += 1
-        elif 'services' in manifest.keys() or 'irqs' in manifest.keys():
-            # This is only to skip Library Model Partitions
-            ipc_partition_num += 1
+        if pid == None or pid >= TFM_PID_BASE:
+            # Count the number of IPC/SFN partitions
+            if manifest['model'] == 'IPC':
+                partition_statistics['ipc_partitions'].append(manifest['name'])
 
-        manifest_dir, manifest_name = os.path.split(manifest_path)
-        manifest_out_basename = manifest_name.replace('.yaml', '').replace('.json', '')
+        # Set initial value to -1 to make (srv_idx + 1) reflect the correct
+        # number (0) when there are no services.
+        srv_idx = -1
+        for srv_idx, service in enumerate(manifest.get('services', [])):
+            if manifest['model'] == 'IPC':
+                # Assign signal value, the first 4 bits are reserved by FF-M
+                service['signal_value'] = (1 << (srv_idx + 4))
+            else:
+                # Signals of SFN Partitions are SPM internal only, does not
+                # need to reserve 4 bits.
+                service['signal_value'] = (1 << srv_idx)
+            if service['connection_based']:
+                partition_statistics['connection_based_srv_num'] += 1
+        logging.debug('{} has {} services'.format(manifest['name'], srv_idx +1))
+
+        # Set initial value to -1 to make (irq + 1) reflect the correct
+        # number (0) when there are no irqs.
+        irq_idx = -1
+        for irq_idx, irq in enumerate(manifest.get('irqs', [])):
+            # Assign signal value, from the most significant bit
+            irq['signal_value'] = (1 << (31 - irq_idx))
+            if irq.get('handling', None) == 'FLIH':
+                partition_statistics['flih_num'] += 1
+            else:
+                partition_statistics['slih_num'] += 1
+        logging.debug('{} has {} IRQS'.format(manifest['name'], irq_idx +1))
+
+        if ((srv_idx + 1) + (irq_idx + 1)) > 28:
+            raise Exception('Total number of Services and IRQs of {} exceeds the limit (28)'
+                            .format(manifest['name']))
+
+        manifest_out_basename = os.path.splitext(os.path.basename(manifest_path))[0]
 
         if 'output_path' in manifest_item:
-            # Build up generated files directory accroding to the relative
-            # path specified in output_path by the partition
             output_path = os.path.expandvars(manifest_item['output_path'])
         else:
-            output_path = manifest_dir
+            output_path = ''
 
         manifest_head_file = os.path.join(OUT_DIR, output_path, 'psa_manifest',
                                           '{}.h'.format(manifest_out_basename))\
@@ -197,26 +317,53 @@ def process_partition_manifests(manifest_list_files, extra_manifests_list):
         load_info_file     = os.path.join(OUT_DIR, output_path, 'auto_generated',
                                           'load_info_{}.c'.format(manifest_out_basename))\
                                               .replace('\\', '/')
+        output_dir         = os.path.join(OUT_DIR, output_path).replace('\\', '/')
 
         partition_list.append({'manifest': manifest, 'attr': manifest_item,
                                'manifest_out_basename': manifest_out_basename,
                                'header_file': manifest_head_file,
                                'intermedia_file': intermedia_file,
-                               'loadinfo_file': load_info_file})
+                               'loadinfo_file': load_info_file,
+                               'output_dir':output_dir})
 
     # Automatically assign PIDs for partitions without 'pid' attribute
-    pid = 256
+    pid = max(pid_list, default = TFM_PID_BASE - 1)
     for idx in no_pid_manifest_idx:
-        while pid in pid_list:
-            pid += 1
-        manifest_list[idx]['pid'] = pid
+        pid += 1
+        all_manifests[idx]['pid'] = pid
         pid_list.append(pid)
 
-    context['partitions'] = partition_list
-    context['ipc_partition_num'] = ipc_partition_num
-    context['sfn_partition_num'] = sfn_partition_num
+    # Set up configurations
+    if backend == 'SFN':
+        if len(partition_statistics['ipc_partitions']) > 0:
+            logging.error('SFN backend does not support IPC Partitions:')
+            logging.error(partition_statistics['ipc_partitions'])
+            exit(1)
 
-    context['stateless_services'] = process_stateless_services(partition_list, 32)
+        if isolation_level > 1:
+            logging.error('SFN backend does not support high isolation levels.')
+            exit(1)
+
+        config_impl['CONFIG_TFM_SPM_BACKEND_SFN'] = '1'
+        config_impl['CONFIG_TFM_PSA_API_SFN_CALL'] = '1'
+    elif backend == 'IPC':
+        config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] = '1'
+        if isolation_level > 1:
+            config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL'] = '1'
+        else:
+            config_impl['CONFIG_TFM_PSA_API_CROSS_CALL'] = '1'
+
+    if partition_statistics['connection_based_srv_num'] > 0:
+        config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API'] = 1
+
+    if partition_statistics['flih_num'] > 0:
+        config_impl['CONFIG_TFM_FLIH_API'] = 1
+    elif partition_statistics['slih_num'] > 0:
+        config_impl['CONFIG_TFM_SLIH_API'] = 1
+
+    context['partitions'] = partition_list
+    context['config_impl'] = config_impl
+    context['stateless_services'] = process_stateless_services(partition_list)
 
     return context
 
@@ -230,24 +377,23 @@ def gen_per_partition_files(context):
         context contains partition infos
     """
 
-    utilities = {}
-    utilities['donotedit_warning'] = donotedit_warning
-
     partition_context = {}
-    partition_context['utilities'] = utilities
+    partition_context['utilities'] = context['utilities']
+    partition_context['config_impl'] = context['config_impl']
 
     manifesttemplate = ENV.get_template(os.path.join(sys.path[0], 'templates/manifestfilename.template'))
     memorytemplate = ENV.get_template(os.path.join(sys.path[0], 'templates/partition_intermedia.template'))
     infotemplate = ENV.get_template(os.path.join(sys.path[0], 'templates/partition_load_info.template'))
 
-    print ('Start to generate partition files:')
+    logging.info ("Start to generate partition files:")
 
     for one_partition in context['partitions']:
         partition_context['manifest'] = one_partition['manifest']
         partition_context['attr'] = one_partition['attr']
         partition_context['manifest_out_basename'] = one_partition['manifest_out_basename']
 
-        print ('Generating Header: ' + one_partition['header_file'])
+        logging.info ('Generating {} in {}'.format(one_partition['attr']['name'],
+                                            one_partition['output_dir']))
         outfile_path = os.path.dirname(one_partition['header_file'])
         if not os.path.exists(outfile_path):
             os.makedirs(outfile_path)
@@ -256,7 +402,6 @@ def gen_per_partition_files(context):
         headerfile.write(manifesttemplate.render(partition_context))
         headerfile.close()
 
-        print ('Generating Intermedia: ' + one_partition['intermedia_file'])
         intermediafile_path = os.path.dirname(one_partition['intermedia_file'])
         if not os.path.exists(intermediafile_path):
             os.makedirs(intermediafile_path)
@@ -264,7 +409,6 @@ def gen_per_partition_files(context):
         intermediafile.write(memorytemplate.render(partition_context))
         intermediafile.close()
 
-        print ('Generating Loadinfo: ' + one_partition['loadinfo_file'])
         infofile_path = os.path.dirname(one_partition['loadinfo_file'])
         if not os.path.exists(infofile_path):
             os.makedirs(infofile_path)
@@ -272,7 +416,7 @@ def gen_per_partition_files(context):
         infooutfile.write(infotemplate.render(partition_context))
         infooutfile.close()
 
-    print ('Per-partition files done:')
+    logging.info ("Per-partition files done:")
 
 def gen_summary_files(context, gen_file_lists):
     """
@@ -290,7 +434,6 @@ def gen_summary_files(context, gen_file_lists):
             file_list_yaml = yaml.safe_load(file_list_yaml_file)
             file_list.extend(file_list_yaml['file_list'])
 
-    print('Start to generate file from the generated list:')
     for file in file_list:
         # Replace environment variables in the output filepath
         manifest_out_file = os.path.expandvars(file['output'])
@@ -298,8 +441,6 @@ def gen_summary_files(context, gen_file_lists):
         templatefile_name = os.path.expandvars(file['template'])
 
         manifest_out_file = os.path.join(OUT_DIR, manifest_out_file)
-
-        print ('Generating ' + manifest_out_file)
 
         outfile_path = os.path.dirname(manifest_out_file)
         if not os.path.exists(outfile_path):
@@ -311,9 +452,7 @@ def gen_summary_files(context, gen_file_lists):
         outfile.write(template.render(context))
         outfile.close()
 
-    print ('Generation of files done')
-
-def process_stateless_services(partitions, stateless_index_max_num):
+def process_stateless_services(partitions):
     """
     This function collects all stateless services together, and allocates
     stateless handles for them.
@@ -323,16 +462,22 @@ def process_stateless_services(partitions, stateless_index_max_num):
     Framework puts each service into a reordered stateless service list at
     position of "index". Other unused positions are left None.
     """
+
+    STATIC_HANDLE_CONFIG_FILE = 'secure_fw/spm/cmsis_psa/spm_ipc.h'
+
     collected_stateless_services = []
+    stateless_index_max_num = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_NUM_LIMIT'), base = 10)
 
     # Collect all stateless services first.
     for partition in partitions:
         # Skip the FF-M 1.0 partitions
         if partition['manifest']['psa_framework_version'] < 1.1:
             continue
-        for service in partition['manifest']['services']:
-            if 'connection_based' not in service:
-                raise Exception("'connection_based' is mandatory in FF-M 1.1 service!")
+
+        service_list = partition['manifest'].get('services', [])
+
+        for service in service_list:
             if service['connection_based'] is False:
                 collected_stateless_services.append(service)
 
@@ -373,6 +518,20 @@ def process_stateless_services(partitions, stateless_index_max_num):
         else:
             raise Exception('Invalid stateless_handle setting: {handle}.'.format(handle=service['stateless_handle']))
 
+    STATIC_HANDLE_IDX_BIT_WIDTH = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_IDX_BIT_WIDTH'), base = 10)
+    STATIC_HANDLE_IDX_MASK = (1 << STATIC_HANDLE_IDX_BIT_WIDTH) - 1
+
+    STATIC_HANDLE_INDICATOR_OFFSET = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_INDICATOR_OFFSET'), base = 10)
+
+    STATIC_HANDLE_VER_OFFSET = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_VER_OFFSET'), base = 10)
+
+    STATIC_HANDLE_VER_BIT_WIDTH = \
+        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_VER_BIT_WIDTH'), base = 10)
+    STATIC_HANDLE_VER_MASK = (1 << STATIC_HANDLE_VER_BIT_WIDTH) - 1
+
     # Auto-allocate stateless handle and encode the stateless handle
     for i in range(0, stateless_index_max_num):
         service = reordered_stateless_services[i]
@@ -382,17 +541,14 @@ def process_stateless_services(partitions, stateless_index_max_num):
 
         """
         Encode stateless flag and version into stateless handle
-        bit 30: stateless handle indicator
-        bit 15-8: stateless service version
-        bit 7-0: stateless handle index
+        Check STATIC_HANDLE_CONFIG_FILE for details
         """
         stateless_handle_value = 0
         if service != None:
-            stateless_index = (i & 0xFF)
+            stateless_index = (i & STATIC_HANDLE_IDX_MASK)
             stateless_handle_value |= stateless_index
-            stateless_flag = 1 << 30
-            stateless_handle_value |= stateless_flag
-            stateless_version = (service['version'] & 0xFF) << 8
+            stateless_handle_value |= (1 << STATIC_HANDLE_INDICATOR_OFFSET)
+            stateless_version = (service['version'] & STATIC_HANDLE_VER_MASK) << STATIC_HANDLE_VER_OFFSET
             stateless_handle_value |= stateless_version
             service['stateless_handle_value'] = '0x{0:08x}'.format(stateless_handle_value)
             service['stateless_handle_index'] = stateless_index
@@ -415,8 +571,11 @@ def parse_args():
                         , nargs='+'
                         , dest='manifest_lists'
                         , required=True
-                        , metavar='manifest-lists'
-                        , help='A set of secure partition manifest lists to parse')
+                        , metavar='manifest list'
+                        , help='A list of Secure Partition manifest lists and their original paths.\n\
+                                The manifest lists might be processed by CMake and\n\
+                                the path might be different to the original one\n\
+                                The format must be [list A, orignal path A, list B, orignal path B, ...]')
 
     parser.add_argument('-f', '--file-list'
                         , nargs='+'
@@ -425,15 +584,32 @@ def parse_args():
                         , metavar='file-list'
                         , help='These files descripe the file list to generate')
 
-    parser.add_argument('-e', '--extra-manifest'
-                        , nargs='*'
-                        , dest='extra_manifests_args'
+    parser.add_argument('-l', '--isolation-level'
+                        , dest='isolation_level'
+                        , required=True
+                        , choices=['1', '2', '3']
+                        , metavar='isolation-level')
+
+    parser.add_argument('-b', '--backend'
+                        , dest='backend'
+                        , required=True
+                        , choices=['IPC', 'SFN']
+                        , metavar='spm-backend'
+                        , help='The isolation level')
+
+    parser.add_argument('-q', '--quiet'
+                        , dest='quiet'
                         , required=False
-                        , default=None
-                        , metavar='out-of-tree-manifest-list'
-                        , help='Optional. Manifest lists and original paths for out-of-tree secure partitions.')
+                        , default=False
+                        , action='store_true'
+                        , help='Reduce log messages')
 
     args = parser.parse_args()
+
+    if len(args.manifest_lists) % 2 != 0:
+        logging.error('Invalid structure in manifest lists.\n'
+              'Each element shall consist of a manifest list and its original path')
+        exit(1)
 
     return args
 
@@ -456,16 +632,13 @@ def main():
 
     args = parse_args()
 
-    extra_manifests_args = args.extra_manifests_args
+    logging.basicConfig(format='%(message)s'
+                        , level=logging.WARNING if args.quiet else logging.INFO)
+
     OUT_DIR = os.path.abspath(args.outdir)
 
     manifest_lists = [os.path.abspath(x) for x in args.manifest_lists]
     gen_file_lists = [os.path.abspath(x) for x in args.gen_file_args]
-
-    if extra_manifests_args is not None:
-        extra_manifests_lists = [os.path.abspath(x) for x in extra_manifests_args]
-    else:
-        extra_manifests_lists = None
 
     """
     Relative path to TF-M root folder is supported in the manifests
@@ -476,7 +649,9 @@ def main():
     """
     os.chdir(os.path.join(sys.path[0], '..'))
 
-    context = process_partition_manifests(manifest_lists, extra_manifests_lists)
+    context = process_partition_manifests(manifest_lists,
+                                          int(args.isolation_level),
+                                          args.backend)
 
     utilities = {}
     utilities['donotedit_warning'] = donotedit_warning

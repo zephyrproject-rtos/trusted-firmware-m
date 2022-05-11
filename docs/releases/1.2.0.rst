@@ -1,3 +1,4 @@
+:orphan:
 *************
 Version 1.2.0
 *************
@@ -12,7 +13,7 @@ New features
   - Add Profile Medium.
   - Migrate support to Mbed TLS v2.24.
   - New platforms added.
-    See :ref:`docs/releases/1.2.0:New platforms supported` for
+    See :ref:`releases/1.2.0:New platforms supported` for
     details.
   - New SPM HAL APIs including isolation API and logging API.
   - Update MCUboot version to 1.7.0-rc1.
@@ -25,7 +26,7 @@ New security advisories
 Stack sealing
 -------------
 
-Refer to :doc:`Advisory TFMV-1</docs/security/security_advisories/stack_seal_vulnerability>`
+Refer to :doc:`Advisory TFMV-1</security/security_advisories/stack_seal_vulnerability>`
 for more details.
 A common mitigation is included in this release.
 

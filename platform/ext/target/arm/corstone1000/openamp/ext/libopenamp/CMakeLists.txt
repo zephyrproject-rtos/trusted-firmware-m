@@ -16,7 +16,7 @@ endif()
 if ("${LIBOPENAMP_SRC_PATH}" STREQUAL "DOWNLOAD")
     FetchContent_Declare(libopenamp
         GIT_REPOSITORY https://github.com/OpenAMP/open-amp.git
-        GIT_TAG ${OEPNAMP_VERSION}
+        GIT_TAG ${OPENAMP_VERSION}
     )
 
     FetchContent_GetProperties(libopenamp)

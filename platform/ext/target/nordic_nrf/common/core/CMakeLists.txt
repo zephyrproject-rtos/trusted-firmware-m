@@ -105,6 +105,7 @@ target_compile_options(platform_s
 target_compile_definitions(platform_s
     PUBLIC
         $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
+        $<$<BOOL:${NULL_POINTER_EXCEPTION_DETECTION}>:NULL_POINTER_EXCEPTION_DETECTION>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -140,7 +141,6 @@ target_compile_definitions(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            boot_hal.c
             cmsis_drivers/Driver_Flash.c
             cmsis_drivers/Driver_USART.c
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -143,9 +144,9 @@ struct ns_mailbox_queue_t {
                                                  * NS thread requests a mailbox
                                                  * queue slot.
                                                  */
+#endif
 
     bool                     is_full;           /* Queue if full */
-#endif
 };
 
 #ifdef __cplusplus

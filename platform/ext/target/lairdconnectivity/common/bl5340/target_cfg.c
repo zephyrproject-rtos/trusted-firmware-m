@@ -728,7 +728,6 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_QSPI, false);
 #endif
     spu_peripheral_config_non_secure((uint32_t)NRF_NFCT, false);
-    spu_peripheral_config_non_secure((uint32_t)NRF_GPIOTE1_NS, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_MUTEX, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_QDEC0, false);
     spu_peripheral_config_non_secure((uint32_t)NRF_QDEC1, false);
@@ -740,7 +739,7 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_VMC, false);
 
     /* DPPI channel configuration */
-    spu_dppi_config_non_secure(TFM_PERIPHERAL_DPPI_CHANNEL_SECURE_MASK, true);
+    spu_dppi_config_non_secure(TFM_PERIPHERAL_DPPI_CHANNEL_MASK_SECURE, true);
 
     /* GPIO pin configuration (P0 and P1 ports) */
     spu_gpio_config_non_secure(0, TFM_PERIPHERAL_GPIO0_PIN_MASK_SECURE, true);

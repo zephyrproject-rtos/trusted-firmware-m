@@ -9,6 +9,7 @@
 #include "flash_common.h"
 #include "platform_base_address.h"
 #include "tfm_hal_multi_core.h"
+#include "fwu_agent.h"
 
 #define HOST_SYS_RST_CTRL_OFFSET 0x0
 #define HOST_CPU_CORE0_WAKEUP_OFFSET 0x308
@@ -56,7 +57,10 @@ void tfm_hal_boot_ns_cpu(uintptr_t start_addr)
 
 void tfm_hal_wait_for_ns_cpu_ready(void)
 {
-    /* Synchronization between Host and SE is done by OpenAMP */
+#if !(PLATFORM_IS_FVP)
+    /* start the reset timer if firwmare update process is ongoing */
+    host_acknowledgement_timer_to_reset();
+#endif
 }
 
 void tfm_hal_get_mem_security_attr(const void *p, size_t s,

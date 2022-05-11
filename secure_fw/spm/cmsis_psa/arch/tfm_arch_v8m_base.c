@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,6 @@
 
 #include <inttypes.h>
 #include "compiler_ext_defs.h"
-#include "exception_info.h"
 #include "spm_ipc.h"
 #include "svc_num.h"
 #include "tfm_hal_device_header.h"
@@ -31,18 +30,19 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-#pragma required = spcall_execute_c
+#pragma required = cross_call_entering_c
+#pragma required = cross_call_exiting_c
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1 */
 
 #endif
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-__naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                                       uint32_t stk_base, uint32_t stk_limit)
+__naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                                   uint32_t stk_base, uint32_t stk_limit)
 {
     __asm volatile(
 #if !defined(__ICCARM__)
@@ -64,8 +64,11 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_LOCKED)"         \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
-        "   bl     spcall_execute_c                     \n"
+        "   mov    r6, r1                               \n"
+        "   bl     cross_call_entering_c                \n"
         "   cpsid  i                                    \n"
+        "   mov    r1, r6                               \n"
+        "   bl     cross_call_exiting_c                 \n"
         "   cmp    r4, #0                               \n"
         "   beq    v8b_release_sched                    \n"
         "   movs   r3, #0                               \n"/* To callee stack */
@@ -81,7 +84,7 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
     );
 }
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1 */
 
 __attribute__((naked)) void PendSV_Handler(void)
 {
@@ -99,6 +102,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   mov     lr, r3                              \n"
         "   cmp     r0, r1                              \n" /* curr, next ctx */
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
+        "   cpsid   i                                   \n"
         "   mrs     r2, psp                             \n"
         "   mrs     r3, psplim                          \n"
         "   subs    r2, #32                             \n" /* For r4-r7 */
@@ -124,32 +128,10 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   adds    r2, #16                             \n" /* Pop r4-r11 end */
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
+        "   cpsie   i                                   \n"
         "v8b_pendsv_exit:                               \n"
         "   bx      lr                                  \n"
     );
-}
-
-/**
- * \brief Overwrites default Hard fault handler.
- *
- * In case of a baseline implementation fault conditions that would generate a
- * SecureFault in a mainline implementation instead generate a Secure HardFault.
- */
-__attribute__((naked)) void HardFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
-
-    /* In a baseline implementation there is no way, to find out whether this is
-     * a hard fault triggered directly, or another fault that has been
-     * escalated.
-     */
-    /* A HardFault may indicate corruption of secure state, so it is essential
-     * that Non-secure code does not regain control after one is raised.
-     * Returning from this exception could allow a pending NS exception to be
-     * taken, so the current solution is not to return.
-     */
-
-    __ASM volatile("b    .");
 }
 
 __attribute__((naked)) void SVC_Handler(void)
@@ -161,19 +143,22 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"
-    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "MRS     r3, PSPLIM                     \n"
+    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
+    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "BL      tfm_core_svc_handler           \n"
     "MOV     lr, r0                         \n"
-    "LDR     r1, [sp]                       \n" /* Original EXC_RETURN */
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "MOVS    r2, #8                         \n"
     "ANDS    r0, r2                         \n" /* Mode bit */
     "ANDS    r1, r2                         \n"
+    "POP     {r2, r3}                       \n" /* PSP PSPLIM */
     "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
     "BGT     to_flih_func                   \n"
     "BLT     from_flih_func                 \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "BX      lr                             \n"
     "to_flih_func:                          \n"
+    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
     "PUSH    {r4-r7}                        \n"
     "MOV     r4, r8                         \n"
     "MOV     r5, r9                         \n"
@@ -191,7 +176,6 @@ __attribute__((naked)) void SVC_Handler(void)
     "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
     "BX      lr                             \n"
     "from_flih_func:                        \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
     "POP     {r4, r5}                       \n" /* Seal stack */
     "POP     {r4-r7}                        \n"
     "MOV     r8, r4                         \n"
@@ -199,7 +183,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "MOV     r10, r6                        \n"
     "MOV     r11, r7                        \n"
     "POP     {r4-r7}                        \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "POP     {r1, r2}                       \n" /* PSP PSPLIM */
     "BX      lr                             \n"
     );
 }

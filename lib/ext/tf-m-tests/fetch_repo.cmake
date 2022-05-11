@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,14 +33,6 @@ if ("${CMSIS_5_PATH}" STREQUAL DOWNLOAD)
     set(CMSIS_5_PATH ${TFM_TEST_REPO_PATH}/CMSIS CACHE PATH "Path to CMSIS_5 (or DOWNLOAD to fetch automatically" FORCE)
 endif()
 
-if (NOT TFM_APP_PATH)
-    set(TFM_APP_PATH ${TFM_TEST_REPO_PATH}/app CACHE PATH "Path to TFM NS app" FORCE)
-endif()
-
 if (NOT TFM_TEST_PATH)
     set(TFM_TEST_PATH ${TFM_TEST_REPO_PATH}/test CACHE PATH "Path to TFM tests" FORCE)
-endif()
-
-if (NOT TFM_NS_LOG_PATH)
-    set(TFM_NS_LOG_PATH ${TFM_TEST_REPO_PATH}/log CACHE PATH "Path to NS log" FORCE)
 endif()

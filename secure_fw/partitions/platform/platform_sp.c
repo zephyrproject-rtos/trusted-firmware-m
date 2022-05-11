@@ -42,7 +42,7 @@ static const int32_t nv_counter_access_map[NV_COUNTER_MAP_SIZE] = {
 #define OUTPUT_BUFFER_SIZE 64
 
 typedef enum tfm_platform_err_t (*plat_func_t)(const psa_msg_t *msg);
-#endif
+#endif /* TFM_PSA_API */
 
 /*
  * \brief Verifies ownership of a nv_counter resource to a partition id.
@@ -58,8 +58,12 @@ static bool nv_counter_access_grant(int32_t client_id,
     int32_t req_id;
 
     /* Boundary check the input argument */
-    if (nv_counter_no >= NV_COUNTER_MAP_SIZE ||
-        (int32_t)nv_counter_no < 0 || nv_counter_no >= PLAT_NV_COUNTER_MAX) {
+    const uint32_t bounds[] = {PLAT_NV_COUNTER_MAX, NV_COUNTER_MAP_SIZE};
+    const uint32_t lower_bound_check = bounds[0] < bounds[1] ?
+                                       bounds[0] : bounds[1];
+
+    /* Check that nv_counter no is in [0; lower_bound_check-1] */
+    if (!((uint32_t)nv_counter_no < lower_bound_check)) {
         return false;
     }
 
@@ -226,6 +230,9 @@ platform_sp_nv_counter_ipc(const psa_msg_t *msg)
         }
 
         num = psa_read(msg->handle, 0, &counter_id, msg->in_size[0]);
+        if (num != msg->in_size[0]) {
+            return TFM_PLATFORM_ERR_SYSTEM_ERROR;
+        }
 
         if (!nv_counter_access_grant(msg->client_id, counter_id)) {
            return TFM_PLATFORM_ERR_SYSTEM_ERROR;
@@ -353,7 +360,7 @@ enum tfm_platform_err_t platform_sp_init(void)
 #endif
     }
 #ifdef TFM_PSA_API
-    psa_signal_t signals = 0;
+    psa_signal_t signals;
 
     while (1) {
         signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);

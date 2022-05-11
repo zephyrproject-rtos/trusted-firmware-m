@@ -46,6 +46,15 @@ SECTIONS
         __Vectors_Size = __Vectors_End - __Vectors;
         __end__ = .;
 
+        /* If this image is placed at the beginning of flash make sure we
+         * don't put any code in the first 256 bytes of flash as that area might
+         * be used for null-pointer dereference detection. It is believed that on
+         * nordic platforms the __Vectors_Size will always be greater than 256,
+         * but we (potentially) adjust the location pointer anyway just to be safe. */
+#if BL2_CODE_START == 0
+        . = MAX(., 256);
+#endif
+
         *(.text*)
 
         KEEP(*(.init))

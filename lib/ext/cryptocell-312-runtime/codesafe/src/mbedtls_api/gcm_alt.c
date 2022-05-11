@@ -26,8 +26,7 @@
 #include "aesgcm_driver.h"
 #include "mbedtls_common.h"
 #include "mbedtls/gcm.h"
-
-#define MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED        -0x0016  /**< API is NOT supported. */
+#include "mbedtls/error.h"
 
 /*! AES GCM data in maximal size in bytes. */
 #define MBEDTLS_AESGCM_DATA_IN_MAX_SIZE_BYTES       0xFFFF // (64KB - 1)
@@ -587,7 +586,7 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
     CC_UNUSED_PARAM(iv);
     CC_UNUSED_PARAM(iv_len);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
@@ -604,7 +603,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     CC_UNUSED_PARAM(output_size);
     CC_UNUSED_PARAM(output_length);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
@@ -621,7 +620,7 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
     CC_UNUSED_PARAM(tag);
     CC_UNUSED_PARAM(tag_len);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 
 int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
@@ -632,7 +631,7 @@ int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
     CC_UNUSED_PARAM(add);
     CC_UNUSED_PARAM(add_len);
 
-    return (MBEDTLS_ERR_GCM_API_IS_NOT_SUPPORTED);
+    return (MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
 }
 /**************************************************************************************************/
 #endif

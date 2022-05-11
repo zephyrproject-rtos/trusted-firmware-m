@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Nordic Semiconductor ASA.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -43,7 +43,7 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         target_cfg.c
-        tfm_interrupts.c
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf5340_application.c
 )
 
@@ -88,6 +88,7 @@ if(BL2)
     target_compile_definitions(platform_bl2
         PUBLIC
             NRF5340_XXAA_APPLICATION
+            NRF_SKIP_FICR_NS_COPY_TO_RAM
     )
 endif()
 

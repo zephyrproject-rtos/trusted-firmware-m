@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021 STMicroelectronics. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -160,12 +160,13 @@ if(BL2)
             $<TARGET_PROPERTY:bl2,BINARY_DIR>/ext/mcuboot
             ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2
+            ${CMAKE_SOURCE_DIR}/interface/include
     )
 
     target_sources(platform_bl2
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/Templates/system_stm32u5xx.c
-            ${CMAKE_CURRENT_SOURCE_DIR}/bl2/boot_hal.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/bl2/boot_hal_bl2.c
             ${STM_COMMON_DIR}/hal/Native_Driver/mpu_armv8m_drv.c
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/low_level_security.c
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/low_level_device.c

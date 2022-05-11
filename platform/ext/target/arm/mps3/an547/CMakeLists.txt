@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -17,10 +17,6 @@ target_include_directories(platform_region_defs
 
 #========================= Platform common defs ===============================#
 
-if (${CMAKE_C_COMPILER_ID} STREQUAL IAR)
-    message(FATAL_ERROR "IAR is currently not supported on the mps3/an547 due to a lack of scatter files")
-endif()
-
 if (${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
     if (${CMAKE_C_COMPILER_VERSION} VERSION_LESS "6.14")
         message(FATAL_ERROR "CPU (Cortex-M55) is only supported in ARMCLANG version 6.14 or newer.")
@@ -35,6 +31,7 @@ target_sources(tfm_s
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
     $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
+    $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
 )
 
 if(NS)
@@ -45,10 +42,13 @@ if(NS)
     target_add_scatter_file(tfm_ns
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an547_ns.sct>
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/an547_ns.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/an547_ns.icf>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
-            CMSIS_5_RTX_V8MMN
+            $<$<C_COMPILER_ID:ARMClang>:CMSIS_5_RTX_V8MMN>
+            $<$<C_COMPILER_ID:GNU>:CMSIS_5_RTX_V8MMN>
+            $<$<C_COMPILER_ID:IAR>:CMSIS_5_RTX_V81MMN>
     )
 endif()
 
@@ -60,6 +60,7 @@ if(BL2)
     target_add_scatter_file(bl2
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an547_bl2.sct>
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/an547_bl2.ld>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/an547_bl2.icf>
     )
 endif()
 
@@ -95,7 +96,7 @@ target_sources(platform_s
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         native_drivers/uart_cmsdk_drv.c
         spm_hal.c
-        tfm_interrupts.c
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         target_cfg.c
         tfm_peripherals_def.c
         tfm_hal_isolation.c
@@ -159,7 +160,6 @@ if(BL2)
             device/source/device_definition.c
             device/source/system_core_init.c
             native_drivers/uart_cmsdk_drv.c
-            boot_hal.c
     )
 
     target_include_directories(platform_bl2

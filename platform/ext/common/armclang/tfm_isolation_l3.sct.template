@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-{{utilities.donotedit_warning}}
+/***********{{utilities.donotedit_warning}}***********/
 
 /*
  * Customized region name prefix abbreviation:
@@ -28,17 +28,39 @@
 
 #include "region_defs.h"
 
-LR_CODE S_CODE_START {
-
-    PT_RO_START S_CODE_START ALIGN 32 EMPTY 0x0 {
+LR_CODE S_CODE_START S_CODE_SIZE {
+    PT_RO_START +0 ALIGN 32 EMPTY 0x0 {
         /* Position tag: code + RO-data */
     }
 
     /**** This initial section contains mainly the SPM code and RO-data */
-    ER_TFM_CODE +0 ALIGN 32 {
+    ER_VECTORS +0 ALIGN 32 S_CODE_VECTOR_TABLE_SIZE {
         *.o (RESET +First)
-        *libtfm_spm* (+RO)
+    }
+#ifndef TFM_MULTI_CORE_TOPOLOGY
+    ER_VECTORS_FILL +0 EMPTY (S_CODE_VECTOR_TABLE_SIZE - ImageLength(ER_VECTORS)) {
+    }
+
+    /*
+     * Place the CMSE Veneers (containing the SG instruction) in a separate
+     * 32 bytes aligned region so that the SAU can be programmed to
+     * just set this region as Non-Secure Callable.
+     */
+    ER_VENEER +0 FIXED ALIGN 32 {
+        *(Veneer$$CMSE)
+    }
+    /*
+     * The Limit of the VENEER_ALIGN region should be 32 bytes aligned  so that
+     * the SAU can set this region as Non-Secure Callable.
+     */
+    VENEER_ALIGN +0 ALIGN 32 EMPTY 0x0 {
+    }
+#endif
+
+    ER_TFM_CODE +0 {
+        *startup*(.text*)
         *libplatform_s* (+RO)
+        *libtfm_spm* (+RO)
     }
 
     /**** Section for holding partition RO load data */
@@ -165,10 +187,6 @@ LR_CODE S_CODE_START {
         /* Position tag */
     }
 
-    /* PSP is unprivileged in single-core topology */
-    ER_INITIAL_PSP +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE {
-    }
-
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
 
@@ -198,6 +216,12 @@ LR_CODE S_CODE_START {
     {% endif %}
 {% endfor %}
 
+#if defined(CONFIG_TFM_PARTITION_META)
+    TFM_SP_META_PTR +0 ALIGN 32 {
+        *(.bss.SP_META_PTR_SPRTL_INST)
+    }
+#endif
+
     PT_SRAM_WATERMARK +0 EMPTY 0x0 {
         /* Position tag */
     }
@@ -215,17 +239,6 @@ LR_CODE S_CODE_START {
         musca_b1_eflash_drv.o (+RO-CODE, +RO-DATA)
     }
 #endif
-}
-
-LR_VENEER CMSE_VENEER_REGION_START {
-    /*
-     * Place the CMSE Veneers (containing the SG instruction) in a separate
-     * 32 bytes aligned region so that the SAU can be programmed to
-     * just set this region as Non-Secure Callable.
-     */
-    CMSE_VENEER CMSE_VENEER_REGION_START CMSE_VENEER_REGION_SIZE {
-        *(Veneer$$CMSE)
-    }
 }
 
 LR_NS_PARTITION NS_PARTITION_START {

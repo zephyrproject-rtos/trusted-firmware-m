@@ -35,6 +35,9 @@
 /*External Intel Strata Flash Device*/
 #define SPI_STRATAFLASHJ3_S
 
+/* External SST26VF064B Flash Device */
+#define SPI_SST26VF064B_S
+
 /* AXI QSPI Controller */
 #define AXI_QSPI_S
 

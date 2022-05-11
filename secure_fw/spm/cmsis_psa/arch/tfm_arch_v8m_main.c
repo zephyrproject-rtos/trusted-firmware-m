@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,6 @@
 
 #include <inttypes.h>
 #include "compiler_ext_defs.h"
-#include "exception_info.h"
 #include "region_defs.h"
 #include "spm_ipc.h"
 #include "svc_num.h"
@@ -18,7 +17,7 @@
 #include "tfm_secure_api.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"
-#if defined(__FPU_USED) && (__FPU_USED == 1U) && (CONFIG_TFM_SPE_FP >= 1)
+#if defined(__FPU_USED) && (__FPU_USED == 1U) && (CONFIG_TFM_FP >= 1)
 #include "core_ext.h"
 #endif
 
@@ -36,18 +35,19 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-#pragma required = spcall_execute_c
+#pragma required = cross_call_entering_c
+#pragma required = cross_call_exiting_c
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1*/
 
 #endif
 
-#ifdef CONFIG_TFM_PSA_API_THREAD_CALL
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-__naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                                       uint32_t stk_base, uint32_t stk_limit)
+__naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
+                                   uint32_t stk_base, uint32_t stk_limit)
 {
     __asm volatile(
 #if !defined(__ICCARM__)
@@ -68,8 +68,11 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_LOCKED)"     \n"
         "   str    r3, [r2, #0]                     \n"
         "   cpsie  i                                \n"
-        "   bl     spcall_execute_c                 \n"
+        "   mov    r6, r1                           \n"
+        "   bl     cross_call_entering_c            \n"
         "   cpsid  i                                \n"
+        "   mov    r1, r6                           \n"
+        "   bl     cross_call_exiting_c             \n"
         "   movs   r12, #0                          \n"
         "   cmp    r4, #0                           \n"
         "   ittt   ne                               \n" /* To caller stack */
@@ -84,7 +87,7 @@ __naked uint32_t arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
     );
 }
 
-#endif /* CONFIG_TFM_PSA_API_THREAD_CALL */
+#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1*/
 
 __attribute__((naked)) void PendSV_Handler(void)
 {
@@ -100,6 +103,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   pop     {r2, lr}                            \n"
         "   cmp     r0, r1                              \n" /* curr, next ctx */
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
+        "   cpsid   i                                   \n"
         "   mrs     r2, psp                             \n"
         "   mrs     r3, psplim                          \n"
         "   stmdb   r2!, {r4-r11}                       \n" /* Save callee */
@@ -108,24 +112,10 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   ldmia   r2!, {r4-r11}                       \n" /* Restore callee */
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
+        "   cpsie   i                                   \n"
         "v8m_pendsv_exit:                               \n"
         "   bx      lr                                  \n"
     );
-}
-
-/**
- * \brief Overwrites default Secure fault handler.
- */
-__attribute__((naked)) void SecureFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_SECUREFAULT);
-
-    /* A SecureFault may indicate corruption of secure state, so it is essential
-     * that Non-secure code does not regain control after one is raised.
-     * Returning from this exception could allow a pending NS exception to be
-     * taken, so the current solution is not to return.
-     */
-    __ASM volatile("b    .");
 }
 
 #if defined(__ICCARM__)
@@ -140,18 +130,21 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"
-    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "MRS     r3, PSPLIM                     \n"
+    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
+    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "BL      tfm_core_svc_handler           \n"
     "MOV     lr, r0                         \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "POP     {r1, r2}                       \n" /* Orig_exc_return, dummy */
+    "POP     {r2, r3}                       \n" /* PSP PSPLIM */
     "AND     r0, #8                         \n" /* Mode bit */
-    "AND     r3, r1, #8                     \n"
-    "SUBS    r0, r3                         \n" /* Compare EXC_RETURN values */
+    "AND     r1, #8                         \n"
+    "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
     "BGT     to_flih_func                   \n"
     "BLT     from_flih_func                 \n"
     "BX      lr                             \n"
     "to_flih_func:                          \n"
-    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
     "PUSH    {r4-r11}                       \n"
     "LDR     r4, =0xFEF5EDA5                \n" /* clear r4-r11 */
     "MOV     r5, r4                         \n"
@@ -166,52 +159,9 @@ __attribute__((naked)) void SVC_Handler(void)
     "from_flih_func:                        \n"
     "POP     {r4, r5}                       \n" /* Seal stack */
     "POP     {r4-r11}                       \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, PSP */
+    "POP     {r1, r2}                       \n" /* PSP PSPLIM */
     "BX      lr                             \n"
     );
-}
-
-/* Reserved for future usage */
-__attribute__((naked)) void HardFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_HARDFAULT);
-
-    /* A HardFault may indicate corruption of secure state, so it is essential
-     * that Non-secure code does not regain control after one is raised.
-     * Returning from this exception could allow a pending NS exception to be
-     * taken, so the current solution is not to return.
-     */
-    __ASM volatile("b    .");
-}
-
-__attribute__((naked)) void MemManage_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_MEMFAULT);
-
-    /* A MemManage fault may indicate corruption of secure state, so it is
-     * essential that Non-secure code does not regain control after one is
-     * raised. Returning from this exception could allow a pending NS exception
-     * to be taken, so the current solution is not to return.
-     */
-    __ASM volatile("b    .");
-}
-
-__attribute__((naked)) void BusFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_BUSFAULT);
-
-    /* A BusFault may indicate corruption of secure state, so it is essential
-     * that Non-secure code does not regain control after one is raised.
-     * Returning from this exception could allow a pending NS exception to be
-     * taken, so the current solution is not to return.
-     */
-    __ASM volatile("b    .");
-}
-
-__attribute__((naked)) void UsageFault_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_USAGEFAULT);
-    __ASM volatile("b    .");
 }
 
 void tfm_arch_set_secure_exception_priorities(void)
@@ -259,50 +209,45 @@ void tfm_arch_set_secure_exception_priorities(void)
 
 void tfm_arch_config_extensions(void)
 {
-#if defined(__FPU_PRESENT) && (__FPU_PRESENT == 1U)
-    /* Configure Secure access to the FPU only if the secure image is being
-     * built with the FPU in use. This avoids introducing extra interrupt
-     * latency when the FPU is not used by the SPE.
-     */
-#if defined(__FPU_USED) && (__FPU_USED == 1U)
-/* For secure uses FPU only */
-#if (CONFIG_TFM_SPE_FP >= 1)
+#if (CONFIG_TFM_FP >= 1)
 #ifdef __GNUC__
-    /* Enable Secure privileged and unprivilged access to the FP Extension */
+    /* Enable SPE privileged and unprivileged access to the FP Extension */
     SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
                   | (3U << 11U*2U);  /* enable CP11 full access */
 #endif
 
-#ifdef CONFIG_TFM_LAZY_STACKING_SPE
-    /* Enable lazy stacking */
+#ifdef CONFIG_TFM_LAZY_STACKING
+    /* Enable lazy stacking. */
     FPU->FPCCR |= FPU_FPCCR_LSPEN_Msk;
 #else
-    /* Disable lazy stacking */
+    /* Disable lazy stacking. */
     FPU->FPCCR &= ~FPU_FPCCR_LSPEN_Msk;
 #endif
+
     /* If the SPE will ever use the floating-point registers for sensitive
      * data, then FPCCR.ASPEN, FPCCR.TS, FPCCR.CLRONRET and FPCCR.CLRONRETS
      * must be set at initialisation and not changed again afterwards.
+     * Let SPE decide the S/NS shared setting (LSPEN and CLRONRET) to avoid the
+     * possible side-path brought by flexibility.
      */
     FPU->FPCCR |= FPU_FPCCR_ASPEN_Msk
                   | FPU_FPCCR_TS_Msk
                   | FPU_FPCCR_CLRONRET_Msk
-                  | FPU_FPCCR_CLRONRETS_Msk;
+                  | FPU_FPCCR_CLRONRETS_Msk
+                  | FPU_FPCCR_LSPENS_Msk;
 
-    /* If FPU is used by secure only, prevent non-secure from modifying FPU’s
-     * power setting.
+    /* Permit Non-secure access to the Floating-point Extension.
+     * Note: It is still necessary to set CPACR_NS to enable the FP Extension
+     * in the NSPE. This configuration is left to NS privileged software.
      */
+    SCB->NSACR |= SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk;
+
+    /* Prevent non-secure from modifying FPU’s power setting. */
     SCnSCB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
-
-    /* Disable Non-secure access to the Floating-point Extension.
-     */
-    SCB->NSACR &= ~(SCB_NSACR_CP10_Msk | SCB_NSACR_CP11_Msk);
-#endif /* CONFIG_TFM_SPE_FP >= 1 */
-#endif /* __FPU_USED */
-#endif /* __FPU_PRESENT */
 
 #if defined(__ARM_ARCH_8_1M_MAIN__)
     SCB->CCR |= SCB_CCR_TRD_Msk;
+#endif
 #endif
 }
 
@@ -317,7 +262,7 @@ __attribute__((naked, noinline)) void tfm_arch_clear_fp_status(void)
                   );
 }
 
-#if (CONFIG_TFM_SPE_FP >= 1)
+#if (CONFIG_TFM_FP >= 1)
 __attribute__((naked, noinline)) void tfm_arch_clear_fp_data(void)
 {
     __ASM volatile(

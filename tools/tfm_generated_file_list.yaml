@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -56,6 +56,12 @@
         "short_name": "config_impl.h",
         "template": "interface/include/config_impl.h.template",
         "output": "interface/include/config_impl.h"
+    },
+    {
+        "name": "CMake variables generated",
+        "short_name": "config_impl.cmake",
+        "template": "tools/config_impl.cmake.template",
+        "output": "tools/config_impl.cmake"
     }
   ]
 }

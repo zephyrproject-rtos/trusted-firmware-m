@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,15 +13,18 @@
 #include "psa/client.h"
 #include "psa/service.h"
 
-#define PROGRAMMER_ERROR_NULL
-#define TFM_PROGRAMMER_ERROR(ns_caller, error_status) \
-        do { \
-            if (ns_caller) { \
-                return error_status; \
-             } else { \
-                tfm_core_panic(); \
-             } \
-        } while (0)
+/**
+ * \brief This function handles the specific programmer error cases.
+ *
+ * \param[in] status            Standard error codes for the SPM.
+ *
+ * \retval void                 Status will not cause SPM panic
+ * \retval "SPM panic"          Following programmer errors are triggered by SP:
+ * \arg                           PSA_ERROR_PROGRAMMER_ERROR
+ * \arg                           PSA_ERROR_CONNECTION_REFUSED
+ * \arg                           PSA_ERROR_CONNECTION_BUSY
+ */
+void spm_handle_programmer_errors(psa_status_t status);
 
 /**
  * \brief This function get the current PSA RoT lifecycle state.
@@ -56,23 +59,6 @@ uint32_t tfm_spm_client_psa_framework_version(void);
 uint32_t tfm_spm_client_psa_version(uint32_t sid);
 
 /**
- * \brief handler for \ref psa_connect.
- *
- * \param[in] sid               RoT Service identity.
- * \param[in] version           The version of the RoT Service.
- *
- * \retval PSA_SUCCESS          Success.
- * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
- *                              connection.
- * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
- *                              connection at the moment.
- * \retval "Does not return"    The RoT Service ID and version are not
- *                              supported, or the caller is not permitted to
- *                              access the service.
- */
-psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version);
-
-/**
  * \brief handler for \ref psa_call.
  *
  * \param[in] handle            Service handle to the established connection,
@@ -99,23 +85,48 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
                                      const psa_invec *inptr,
                                      psa_outvec *outptr);
 
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+/**
+ * \brief handler for \ref psa_connect.
+ *
+ * \param[in] sid               RoT Service identity.
+ * \param[in] version           The version of the RoT Service.
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
+ *                              connection.
+ * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
+ *                              connection at the moment.
+ * \retval "Does not return"    The RoT Service ID and version are not
+ *                              supported, or the caller is not permitted to
+ *                              access the service.
+ */
+psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version);
+
 /**
  * \brief handler for \ref psa_close.
  *
  * \param[in] handle            Service handle to the connection to be closed,
  *                              \ref psa_handle_t
  *
- * \retval void                 Success.
- * \retval "Does not return"    The call is invalid, one or more of the
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_PROGRAMMER_ERROR The call is invalid, one or more of the
  *                              following are true:
+ * \arg                           Called with a stateless handle.
  * \arg                           An invalid handle was provided that is not
  *                                the null handle.
  * \arg                           The connection is handling a request.
  */
-void tfm_spm_client_psa_close(psa_handle_t handle);
+psa_status_t tfm_spm_client_psa_close(psa_handle_t handle);
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 /* PSA Partition API function body, for privileged use only. */
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1 \
+    || CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
 /**
  * \brief Function body of \ref psa_wait.
  *
@@ -130,7 +141,10 @@ void tfm_spm_client_psa_close(psa_handle_t handle);
  */
 psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
                                         uint32_t timeout);
+#endif
 
+/* This API is only used in IPC backend. */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 /**
  * \brief Function body of \ref psa_get.
  *
@@ -151,19 +165,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
  *                                reference.
  */
 psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg);
-
-/**
- * \brief Function body of \ref psa_set_rhandle.
- *
- * \param[in] msg_handle        Handle for the client's message.
- * \param[in] rhandle           Reverse handle allocated by the RoT Service.
- *
- * \retval void                 Success, rhandle will be provided with all
- *                              subsequent messages delivered on this
- *                              connection.
- * \retval "PROGRAMMER ERROR"   msg_handle is invalid.
- */
-void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle);
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
 /**
  * \brief Function body of \ref psa_read.
@@ -258,6 +260,7 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
 int32_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
                                     psa_status_t status);
 
+#if CONFIG_TFM_DOORBELL_API == 1
 /**
  * \brief Function body of \ref psa_norify.
  *
@@ -277,21 +280,7 @@ void tfm_spm_partition_psa_notify(int32_t partition_id);
  *                              currently asserted.
  */
 void tfm_spm_partition_psa_clear(void);
-
-/**
- * \brief Function body of \ref psa_eoi.
- *
- * \param[in] irq_signal        The interrupt signal that has been processed.
- *
- * \retval void                 Success.
- * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
- *                              following are true:
- * \arg                           irq_signal is not an interrupt signal.
- * \arg                           irq_signal indicates more than one signal.
- * \arg                           irq_signal is not currently asserted.
- * \arg                           The interrupt is not using SLIH.
- */
-void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal);
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
 /**
  * \brief Function body of \ref psa_panic.
@@ -300,6 +289,25 @@ void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal);
  */
 void tfm_spm_partition_psa_panic(void);
 
+/* psa_set_rhandle is only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+/**
+ * \brief Function body of \ref psa_set_rhandle.
+ *
+ * \param[in] msg_handle        Handle for the client's message.
+ * \param[in] rhandle           Reverse handle allocated by the RoT Service.
+ *
+ * \retval void                 Success, rhandle will be provided with all
+ *                              subsequent messages delivered on this
+ *                              connection.
+ * \retval "PROGRAMMER ERROR"   msg_handle is invalid.
+ */
+void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle);
+
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
 /**
  * \brief Function body of \ref psa_irq_enable.
  *
@@ -313,7 +321,7 @@ void tfm_spm_partition_psa_panic(void);
  * \arg                       \a irq_signal is not an interrupt signal.
  * \arg                       \a irq_signal indicates more than one signal.
  */
-void tfm_spm_partition_irq_enable(psa_signal_t irq_signal);
+void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal);
 
 /**
  * \brief Function body of psa_irq_disable.
@@ -331,8 +339,10 @@ void tfm_spm_partition_irq_enable(psa_signal_t irq_signal);
  *
  * \note The current implementation always return 1. Do not use the return.
  */
-psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal);
+psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal);
 
+/* This API is only used for FLIH. */
+#if CONFIG_TFM_FLIH_API == 1
 /**
  * \brief Function body of \ref psa_reset_signal.
  *
@@ -350,6 +360,26 @@ psa_irq_status_t tfm_spm_partition_irq_disable(psa_signal_t irq_signal);
  * \arg                       \a irq_signal is not currently asserted.
  */
 void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal);
+#endif
+
+/* This API is only used for SLIH. */
+#if CONFIG_TFM_SLIH_API == 1
+/**
+ * \brief Function body of \ref psa_eoi.
+ *
+ * \param[in] irq_signal        The interrupt signal that has been processed.
+ *
+ * \retval void                 Success.
+ * \retval "PROGRAMMER ERROR"   The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           irq_signal is not an interrupt signal.
+ * \arg                           irq_signal indicates more than one signal.
+ * \arg                           irq_signal is not currently asserted.
+ * \arg                           The interrupt is not using SLIH.
+ */
+void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal);
+#endif
+#endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 
