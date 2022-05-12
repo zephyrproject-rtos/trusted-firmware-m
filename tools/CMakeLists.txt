@@ -8,62 +8,31 @@
 cmake_minimum_required(VERSION 3.15)
 find_package(Python3)
 
-############################### Manifest declaration ###########################
-
-list(APPEND TEMP_MANIFEST_LISTS ${TFM_MANIFEST_LIST})
+############################### Manifest lists declaration #####################
+list(APPEND MANIFEST_LISTS ${TFM_MANIFEST_LIST})
 
 if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
-    list(APPEND TEMP_MANIFEST_LISTS ${TFM_TEST_PATH}/secure_fw/tfm_test_manifest_list.yaml)
+    list(APPEND MANIFEST_LISTS ${TFM_TEST_PATH}/secure_fw/tfm_test_manifest_list.yaml)
 endif()
 
 if ("${TEST_PSA_API}" STREQUAL "IPC")
-    list(APPEND TEMP_MANIFEST_LISTS ${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_ff_test_manifest_list.yaml)
+    # The manifest tool does not recognize CMake varibles. Do configure_file() first.
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_ff_test_manifest_list.yaml
+                   ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
+    list(APPEND MANIFEST_LISTS ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
 endif()
 
 if (TFM_EXTRA_MANIFEST_LIST_FILES)
-    list(APPEND TEMP_MANIFEST_LISTS ${TFM_EXTRA_MANIFEST_LIST_FILES})
+    list(APPEND MANIFEST_LISTS ${TFM_EXTRA_MANIFEST_LIST_FILES})
 endif()
 
-# Build up the manifest list arrays:
-# - CONFIGURED_MANIFEST_LISTS:
-#       Array of Manifest lists under build directory which are the output of configure_file().
-# - MANIFEST_LIST_PATHS:
-#       Array of paths of the input manifest lists of configure_file().
-#       They are NOT the paths of CONFIGURED_MANIFEST_LISTS.
-#       They can be used to build up manifest file paths if manifest file paths are
-#       relative ones in the manifest lists.
-# - COMBINED_LIST:
-#       A combined list of the above two, with the following format:
-#           [configured_list_a, path_of_list_a, configured_list_b, path_of_list_b ... ]
-set(POSTFIX 1)
-
-foreach(MANIFEST_LIST IN LISTS TEMP_MANIFEST_LISTS)
-    if (NOT EXISTS ${MANIFEST_LIST})
-        message(FATAL_ERROR "Manifest list ${MANIFEST_LIST} doesn't exist")
-    endif()
-
-    get_filename_component(MANIFEST_LIST_NAME ${MANIFEST_LIST} NAME_WLE)
-    set(CONFIGURED_LIST
-        ${CMAKE_CURRENT_BINARY_DIR}/${MANIFEST_LIST_NAME}_${POSTFIX}.yaml)
-
-    configure_file(${MANIFEST_LIST} ${CONFIGURED_LIST})
-    list(APPEND CONFIGURED_MANIFEST_LISTS ${CONFIGURED_LIST})
-    list(APPEND COMBINED_LIST             ${CONFIGURED_LIST})
-
-    get_filename_component(MANIFEST_LIST_PATH ${MANIFEST_LIST} DIRECTORY)
-    list(APPEND MANIFEST_LIST_PATHS ${MANIFEST_LIST_PATH})
-    list(APPEND COMBINED_LIST       ${MANIFEST_LIST_PATH})
-
-    math(EXPR POSTFIX "${POSTFIX} + 1")
-endforeach()
-
 ############################### File list declaration ##########################
-
 set(GENERATED_FILE_LISTS ${CMAKE_CURRENT_SOURCE_DIR}/tfm_generated_file_list.yaml)
 set(GENERATED_FILE_LISTS ${GENERATED_FILE_LISTS} ${TFM_EXTRA_GENERATED_FILE_LIST_PATH})
 
-############################### Dependency generation ##########################
-
+############################### Functions declaration ##########################
+# Parses the given YAML "files" to find out all the items of the given "field"
+# and put them to the "output_variable" as a list.
 function(parse_field_from_yaml files field output_variable)
     set(local_variable "")
     foreach(yaml_file ${files})
@@ -80,6 +49,28 @@ function(parse_field_from_yaml files field output_variable)
     set(${output_variable} ${local_variable} PARENT_SCOPE)
 endfunction()
 
+############################### Dependency generation ##########################
+# Get all the manifest files from manifest lists
+foreach(MANIFEST_LIST ${MANIFEST_LISTS})
+    if (NOT EXISTS ${MANIFEST_LIST})
+        message(FATAL_ERROR "Manifest list ${MANIFEST_LIST} doesn't exist")
+    endif()
+
+    # Get the path of the manifest list
+    get_filename_component(MANIFEST_LIST_PATH ${MANIFEST_LIST} DIRECTORY)
+
+    # Get all the "manifest"
+    parse_field_from_yaml(${MANIFEST_LIST} manifest MANIFESTS)
+
+    foreach(MANIFEST ${MANIFESTS})
+        # Convert to absolute paths
+        if (NOT IS_ABSOLUTE ${MANIFEST})
+            get_filename_component(MANIFEST "${MANIFEST_LIST_PATH}/${MANIFEST}" ABSOLUTE)
+        endif()
+        list(APPEND MANIFEST_FILES ${MANIFEST})
+    endforeach()
+endforeach()
+
 parse_field_from_yaml("${GENERATED_FILE_LISTS}" template TEMPLATE_FILES)
 # Replace relative paths with absolute paths
 # Paths used in GENERATED_FILE_LISTS are all relative to TF-M root (${CMAKE_SOURCE_DIR})
@@ -90,24 +81,31 @@ parse_field_from_yaml("${GENERATED_FILE_LISTS}" output OUTPUT_FILES)
 # Paths used in GENERATED_FILE_LISTS are all relative to TF-M root (${CMAKE_SOURCE_DIR})
 list(TRANSFORM OUTPUT_FILES REPLACE "^([^/\\][^:].*)" "${CMAKE_BINARY_DIR}/generated/\\1")
 
-# Each manifest list may have different original path
-# Parse them one by one
-set(INDEX 0)
-foreach(CONFIGURED_LIST ${CONFIGURED_MANIFEST_LISTS})
-    list(GET MANIFEST_LIST_PATHS ${INDEX} PATH_OF_LIST)
+############################### Generate Manifest config header ################
+parse_field_from_yaml("${MANIFEST_LISTS}" conditional CONDITIONS)
 
-    parse_field_from_yaml(${CONFIGURED_LIST} manifest MANIFESTS)
-    foreach(MANIFEST ${MANIFESTS})
-        # The path of each manifest must be absolute path or relative path to
-        # the path of manifest list that holds it
-        if (NOT IS_ABSOLUTE ${MANIFEST})
-            set(MANIFEST "${PATH_OF_LIST}/${MANIFEST}")
-        endif()
-        list(APPEND MANIFEST_FILES ${MANIFEST})
-    endforeach()
+# Isolation level and backend are required by the manifest tool
+string(APPEND MANIFEST_CONFIG_H_CONTENT
+       "#cmakedefine TFM_ISOLATION_LEVEL  @TFM_ISOLATION_LEVEL@\r\n")
+string(APPEND MANIFEST_CONFIG_H_CONTENT
+       "#cmakedefine CONFIG_TFM_SPM_BACKEND @CONFIG_TFM_SPM_BACKEND@\r\n")
 
-    math(EXPR INDEX "${INDEX} + 1")
+foreach(CON ${CONDITIONS})
+    # Secure Partitions may share the same conditions, perform duplication check here
+    string(FIND ${MANIFEST_CONFIG_H_CONTENT} ${CON} CON_EXISTS)
+    if (${CON_EXISTS} EQUAL -1) # Not found
+        string(APPEND MANIFEST_CONFIG_H_CONTENT
+               "#cmakedefine01 ${CON}\r\n")
+    endif()
 endforeach()
+
+# Generate the config header
+file(WRITE
+     ${CMAKE_CURRENT_BINARY_DIR}/manifest_config.h.in
+     ${MANIFEST_CONFIG_H_CONTENT})
+
+configure_file(${CMAKE_CURRENT_BINARY_DIR}/manifest_config.h.in
+               ${CMAKE_CURRENT_BINARY_DIR}/manifest_config.h)
 
 ############################### Command declaration ############################
 
@@ -131,17 +129,16 @@ endif()
 
 set(MANIFEST_COMMAND
     ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tfm_parse_manifest_list.py
-    -m ${COMBINED_LIST}
+    -m ${MANIFEST_LISTS}
     -f ${GENERATED_FILE_LISTS}
-    -l ${TFM_ISOLATION_LEVEL}
-    -b ${CONFIG_TFM_SPM_BACKEND}
+    -c ${CMAKE_CURRENT_BINARY_DIR}/manifest_config.h
     -o ${CMAKE_BINARY_DIR}/generated
     ${PARSE_MANIFEST_QUIET_FLAG})
 
 add_custom_command(OUTPUT ${OUTPUT_FILES}
     COMMAND ${MANIFEST_COMMAND}
     DEPENDS ${TEMPLATE_FILES} ${MANIFEST_FILES}
-    DEPENDS ${TEMP_MANIFEST_LISTS} ${CONFIGURED_MANIFEST_LISTS} ${GENERATED_FILE_LISTS}
+    DEPENDS ${MANIFEST_LISTS} ${GENERATED_FILE_LISTS}
 )
 
 # The files need to be generated before cmake will allow them to be used as
@@ -155,5 +152,5 @@ execute_process(
 if(RET EQUAL 0)
     include(${CMAKE_BINARY_DIR}/generated/tools/config_impl.cmake)
 else()
-    message(FATAL_ERROR "File generation failed")
+    message(FATAL_ERROR "Manifest tool failed to generate files!")
 endif()
