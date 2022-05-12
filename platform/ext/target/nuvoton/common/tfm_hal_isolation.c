@@ -5,6 +5,7 @@
  *
  */
 
+#include <string.h>
 #include "array.h"
 #include "cmsis.h"
 #include "Driver_Common.h"
@@ -168,7 +169,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
         return TFM_HAL_ERROR_GENERIC;
     }
     for (i = 0; i < ARRAY_SIZE(isolation_regions); i++) {
-        spm_memcpy(&localcfg, &isolation_regions[i], sizeof(localcfg));
+        memcpy(&localcfg, &isolation_regions[i], sizeof(localcfg));
         /* Update region number */
         localcfg.region_nr = i;
         /* Enable regions */
@@ -182,7 +183,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
         return TFM_HAL_ERROR_GENERIC;
     }
     for (i = 0; i < ARRAY_SIZE(region_cfg); i++) {
-        spm_memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
+        memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
         localcfg.region_nr = i;
         if (mpu_armv8m_region_enable(&dev_mpu_s,
             (struct mpu_armv8m_region_cfg_t *)&localcfg)

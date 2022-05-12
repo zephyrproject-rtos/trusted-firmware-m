@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include "tfm_fwu_req_mngr.h"
 #include "tfm_fwu.h"
 #include "psa/update.h"
@@ -16,7 +17,6 @@
 #ifdef TFM_PSA_API
 #include "psa/service.h"
 #include "psa_manifest/tfm_firmware_update.h"
-#include "tfm_memory_utils.h"
 #endif
 
 typedef struct tfm_fwu_ctx_s {
@@ -329,7 +329,7 @@ static psa_status_t tfm_fwu_write_ipc(void)
         }
     }
 
-    tfm_memset(data_block, 0, sizeof(data_block));
+    memset(data_block, 0, sizeof(data_block));
     data_length = msg.in_size[2];
     while (data_length > 0) {
         write_size = sizeof(data_block) <= data_length ?

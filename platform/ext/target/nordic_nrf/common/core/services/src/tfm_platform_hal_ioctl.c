@@ -12,7 +12,6 @@
 #include <arm_cmse.h>
 #include <array.h>
 #include <tfm_hal_isolation.h>
-#include <tfm_memory_utils.h>
 
 /* This contains the user provided allowed ranges */
 #include <tfm_read_ranges.h>
@@ -60,9 +59,9 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 
 		if (args->addr >= start &&
 		    args->addr + args->len <= start + size) {
-			tfm_memcpy(args->destination,
-				   (const void *)args->addr,
-				   args->len);
+			memcpy(args->destination,
+			       (const void *)args->addr,
+			       args->len);
 			out->result = 0;
 			err = TFM_PLATFORM_ERR_SUCCESS;
 			break;

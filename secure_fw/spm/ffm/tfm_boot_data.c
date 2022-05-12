@@ -6,10 +6,10 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 #include "array.h"
 #include "tfm_boot_status.h"
 #include "region_defs.h"
-#include "tfm_memory_utils.h"
 #include "tfm_api.h"
 #include "psa_manifest/pid.h"
 #ifdef TFM_PSA_API

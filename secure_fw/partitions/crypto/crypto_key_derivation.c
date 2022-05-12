@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "tfm_mbedcrypto_include.h"
 
@@ -15,7 +16,6 @@
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
-#include "tfm_memory_utils.h"
 
 #include "tfm_plat_crypto_keys.h"
 #include "tfm_crypto_private.h"
@@ -73,10 +73,10 @@ static psa_status_t tfm_crypto_huk_derivation_input_bytes(
     if (tls12_prf->MBEDTLS_PRIVATE(label) == NULL) {
         return PSA_ERROR_INSUFFICIENT_MEMORY;
     }
-    (void)tfm_memcpy(tls12_prf->MBEDTLS_PRIVATE(label), &partition_id,
-                     sizeof(partition_id));
-    (void)tfm_memcpy(tls12_prf->MBEDTLS_PRIVATE(label) + sizeof(partition_id),
-                     data, data_length);
+    (void)memcpy(tls12_prf->MBEDTLS_PRIVATE(label), &partition_id,
+                 sizeof(partition_id));
+    (void)memcpy(tls12_prf->MBEDTLS_PRIVATE(label) + sizeof(partition_id),
+                 data, data_length);
     tls12_prf->MBEDTLS_PRIVATE(label_length) = sizeof(partition_id) +
                                                data_length;
 
@@ -118,12 +118,12 @@ static psa_status_t tfm_crypto_huk_derivation_abort(
                 &(operation->MBEDTLS_PRIVATE(ctx).MBEDTLS_PRIVATE(tls12_prf));
 
     if (tls12_prf->MBEDTLS_PRIVATE(label) != NULL) {
-        (void)tfm_memset(tls12_prf->MBEDTLS_PRIVATE(label), 0,
-                         tls12_prf->MBEDTLS_PRIVATE(label_length));
+        (void)memset(tls12_prf->MBEDTLS_PRIVATE(label), 0,
+                     tls12_prf->MBEDTLS_PRIVATE(label_length));
         mbedtls_free(tls12_prf->MBEDTLS_PRIVATE(label));
     }
 
-    (void)tfm_memset(operation, 0, sizeof(*operation));
+    (void)memset(operation, 0, sizeof(*operation));
 
     return PSA_SUCCESS;
 }

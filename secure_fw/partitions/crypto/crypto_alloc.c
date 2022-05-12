@@ -7,12 +7,12 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
-#include "tfm_memory_utils.h"
 
 /**
  * \def TFM_CRYPTO_CONC_OPER_NUM
@@ -79,7 +79,7 @@ static void memset_operation_context(uint32_t index)
     }
 
     /* Clear the contents of the backend context */
-    (void)tfm_memset(mem_ptr, 0, mem_size);
+    (void)memset(mem_ptr, 0, mem_size);
 }
 
 /*!
@@ -91,7 +91,7 @@ static void memset_operation_context(uint32_t index)
 psa_status_t tfm_crypto_init_alloc(void)
 {
     /* Clear the contents of the local contexts */
-    (void)tfm_memset(operation, 0, sizeof(operation));
+    (void)memset(operation, 0, sizeof(operation));
     return PSA_SUCCESS;
 }
 

@@ -5,10 +5,10 @@
  *
  */
 
-#include "its_flash_fs_mblock.h"
+#include <string.h>
 
+#include "its_flash_fs_mblock.h"
 #include "psa/storage_common.h"
-#include "tfm_memory_utils.h"
 
 #ifndef ITS_MAX_BLOCK_DATA_COPY
 #define ITS_MAX_BLOCK_DATA_COPY 256
@@ -892,7 +892,7 @@ static psa_status_t its_mblock_reserve_file(struct its_flash_fs_ctx_t *fs_ctx,
             file_meta->data_idx = fs_ctx->cfg->block_size
                                   - block_meta->free_size;
             file_meta->max_size = size;
-            tfm_memcpy(file_meta->id, fid, ITS_FILE_ID_SIZE);
+            memcpy(file_meta->id, fid, ITS_FILE_ID_SIZE);
             file_meta->cur_size = 0;
             file_meta->flags = flags;
 
@@ -1008,7 +1008,7 @@ psa_status_t its_flash_fs_mblock_get_file_idx(struct its_flash_fs_ctx_t *fs_ctx,
         }
 
         /* ID with value 0x00 means end of file meta section */
-        if (!tfm_memcmp(tmp_metadata.id, fid, ITS_FILE_ID_SIZE)) {
+        if (!memcmp(tmp_metadata.id, fid, ITS_FILE_ID_SIZE)) {
             /* Found */
             *idx = i;
             return PSA_SUCCESS;
@@ -1296,8 +1296,8 @@ psa_status_t its_flash_fs_mblock_reset_metablock(
     }
 
     /* Initialize file metadata table */
-    (void)tfm_memset(&file_metadata, ITS_DEFAULT_EMPTY_BUFF_VAL,
-                     ITS_FILE_METADATA_SIZE);
+    (void)memset(&file_metadata, ITS_DEFAULT_EMPTY_BUFF_VAL,
+                 ITS_FILE_METADATA_SIZE);
     for (i = 0; i < fs_ctx->cfg->max_num_files; i++) {
         /* In the beginning phys id is same as logical id */
         /* Update file metadata to reflect new attributes */

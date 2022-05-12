@@ -12,7 +12,6 @@
 #include "tfm_attest_hal.h"
 #include "psa/crypto.h"
 #include "tfm_spm_log.h"
-#include "tfm_memory_utils.h"
 
 #include <string.h>
 
@@ -122,7 +121,7 @@ void tfm_plat_provisioning_check_for_dummy_keys(void)
         SPMLOG_ERRMSG("\033[0m\r\n");
     }
 
-    tfm_memset(&iak_start, 0, sizeof(iak_start));
+    memset(&iak_start, 0, sizeof(iak_start));
 }
 
 int tfm_plat_provisioning_is_required(void)

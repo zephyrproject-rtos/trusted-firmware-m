@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-
+#include <string.h>
 #include "tfm_internal_trusted_storage.h"
 
 #include "tfm_hal_its.h"
@@ -12,7 +12,6 @@
 #include "flash/its_flash.h"
 #include "flash_fs/its_flash_fs.h"
 #include "psa_manifest/pid.h"
-#include "tfm_memory_utils.h"
 #include "tfm_its_defs.h"
 #include "tfm_its_req_mngr.h"
 #include "its_utils.h"
@@ -78,8 +77,8 @@ static void tfm_its_get_fid(int32_t client_id,
                             psa_storage_uid_t uid,
                             uint8_t *fid)
 {
-    tfm_memcpy(fid, (const void *)&client_id, sizeof(client_id));
-    tfm_memcpy(fid + sizeof(client_id), (const void *)&uid, sizeof(uid));
+    memcpy(fid, (const void *)&client_id, sizeof(client_id));
+    memcpy(fid + sizeof(client_id), (const void *)&uid, sizeof(uid));
 }
 
 /**

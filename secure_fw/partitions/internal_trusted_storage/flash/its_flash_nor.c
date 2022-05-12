@@ -5,12 +5,11 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-
+#include <string.h>
 #include "its_flash_nor.h"
 
 #include "flash_fs/its_flash_fs.h"
 #include "driver/Driver_Flash.h"
-#include "tfm_memory_utils.h"
 
 /* Valid entries for data item width */
 static const uint32_t data_width_byte[] = {
@@ -85,7 +84,7 @@ static psa_status_t flash_read_unaligned(
          (data_width - (addr - aligned_addr)) : size);
 
         /* Copy the read data. */
-        tfm_memcpy(buff, temp_buffer + addr - aligned_addr, read_length);
+        memcpy(buff, temp_buffer + addr - aligned_addr, read_length);
         remaining_len -= read_length;
     }
 
@@ -117,7 +116,7 @@ static psa_status_t flash_read_unaligned(
             return PSA_ERROR_STORAGE_FAILURE;
         }
         /* Copy the read data. */
-        tfm_memcpy(buff + read_length, temp_buffer, remaining_len);
+        memcpy(buff + read_length, temp_buffer, remaining_len);
     }
 
     return PSA_SUCCESS;

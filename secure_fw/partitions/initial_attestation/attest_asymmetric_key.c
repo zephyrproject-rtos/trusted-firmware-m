@@ -15,7 +15,6 @@
 #include "t_cose_standard_constants.h"
 #include "q_useful_buf.h"
 #include "qcbor.h"
-#include "tfm_memory_utils.h"
 
 #define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)
 

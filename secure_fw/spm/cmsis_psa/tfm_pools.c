@@ -7,6 +7,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include "thread.h"
 #include "psa/client.h"
 #include "psa/service.h"
@@ -15,7 +16,6 @@
 #include "utilities.h"
 #include "lists.h"
 #include "tfm_pools.h"
-#include "tfm_memory_utils.h"
 
 psa_status_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
                            size_t chunksz, size_t num)

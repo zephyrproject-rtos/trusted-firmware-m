@@ -19,7 +19,6 @@
 #include "attest_token.h"
 #include "attest_eat_defines.h"
 #include "t_cose_common.h"
-#include "tfm_memory_utils.h"
 #include "tfm_plat_crypto_keys.h"
 
 #define MAX_BOOT_STATUS 512
@@ -157,12 +156,12 @@ static inline int32_t get_uint(const void *int_ptr,
         break;
     case 2:
         /* Avoid unaligned access */
-        (void)tfm_memcpy(&uint16, int_ptr, sizeof(uint16));
+        (void)memcpy(&uint16, int_ptr, sizeof(uint16));
         *value = (uint32_t)uint16;
         break;
     case 4:
         /* Avoid unaligned access */
-        (void)tfm_memcpy(value, int_ptr, sizeof(uint32_t));
+        (void)memcpy(value, int_ptr, sizeof(uint32_t));
         break;
     default:
         return -1;
@@ -208,7 +207,7 @@ static int32_t attest_get_tlv_by_module(uint8_t    module,
         tlv_curr = boot_data.data;
     } else {
         /* Any subsequent call set to the next TLV entry */
-        (void)tfm_memcpy(&tlv_entry, *tlv_ptr, SHARED_DATA_ENTRY_HEADER_SIZE);
+        (void)memcpy(&tlv_entry, *tlv_ptr, SHARED_DATA_ENTRY_HEADER_SIZE);
 
         tlv_curr  = (*tlv_ptr) + SHARED_DATA_ENTRY_HEADER_SIZE
                     + tlv_entry.tlv_len;
@@ -219,7 +218,7 @@ static int32_t attest_get_tlv_by_module(uint8_t    module,
      */
     while (tlv_curr < tlv_end) {
         /* Create local copy to avoid unaligned access */
-        (void)tfm_memcpy(&tlv_entry, tlv_curr, SHARED_DATA_ENTRY_HEADER_SIZE);
+        (void)memcpy(&tlv_entry, tlv_curr, SHARED_DATA_ENTRY_HEADER_SIZE);
         if (GET_IAS_MODULE(tlv_entry.tlv_type) == module) {
             *claim   = GET_IAS_CLAIM(tlv_entry.tlv_type);
             *tlv_ptr = tlv_curr;
@@ -702,7 +701,7 @@ static void attest_get_option_flags(struct q_useful_buf_c *challenge,
     }
 
     if (found_option_flags) {
-        (void)tfm_memcpy(option_flags, challenge->ptr, option_flags_size);
+        (void)memcpy(option_flags, challenge->ptr, option_flags_size);
 
         /* Lower three bits are the key select */
         *key_select = *option_flags & 0x7;

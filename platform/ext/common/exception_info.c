@@ -218,8 +218,7 @@ void store_and_dump_context(uint32_t LR_in, uint32_t MSP_in, uint32_t PSP_in,
     ctx->MSP = MSP_in;
     ctx->PSP = PSP_in;
     ctx->EXC_FRAME = get_exception_frame(ctx->EXC_RETURN, ctx->MSP, ctx->PSP);
-    spm_memcpy(ctx->EXC_FRAME_COPY, ctx->EXC_FRAME,
-               sizeof(ctx->EXC_FRAME_COPY));
+    memcpy(ctx->EXC_FRAME_COPY, ctx->EXC_FRAME, sizeof(ctx->EXC_FRAME_COPY));
 
 #ifdef FAULT_STATUS_PRESENT
     ctx->CFSR = SCB->CFSR;

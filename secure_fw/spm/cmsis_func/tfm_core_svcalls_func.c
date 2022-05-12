@@ -5,14 +5,11 @@
  *
  */
 
-#include <string.h>
-
 #include "tfm_secure_api.h"
 #include "region_defs.h"
 #include "spm_func.h"
 #include "spm_partition_defs.h"
 #include "tfm_api.h"
-#include "tfm_memory_utils.h"
 #include "tfm_arch.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_irq_list.h"

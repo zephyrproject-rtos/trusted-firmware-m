@@ -8,10 +8,10 @@
 #include "ps_object_system.h"
 
 #include <stddef.h>
+#include <string.h>
 
 #include "cmsis_compiler.h"
 #include "psa/internal_trusted_storage.h"
-#include "tfm_memory_utils.h"
 #ifdef PS_ENCRYPTION
 #include "ps_encrypted_object.h"
 #endif
@@ -45,7 +45,7 @@ __STATIC_INLINE void ps_init_empty_object(
                                         struct ps_object_t *obj)
 {
     /* Set all object data to 0 */
-    (void)tfm_memset(obj, PS_DEFAULT_EMPTY_BUFF_VAL, PS_MAX_OBJECT_SIZE);
+    (void)memset(obj, PS_DEFAULT_EMPTY_BUFF_VAL, PS_MAX_OBJECT_SIZE);
 
 #ifndef PS_ENCRYPTION
     /* Initialize object version */
@@ -216,8 +216,8 @@ psa_status_t ps_object_read(psa_storage_uid_t uid, int32_t client_id,
 
 clear_data_and_return:
     /* Remove data stored in the object before leaving the function */
-    (void)tfm_memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL,
-                     PS_MAX_OBJECT_SIZE);
+    (void)memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL,
+                 PS_MAX_OBJECT_SIZE);
 
     return err;
 }
@@ -337,8 +337,7 @@ psa_status_t ps_object_create(psa_storage_uid_t uid, int32_t client_id,
 
 clear_data_and_return:
     /* Remove data stored in the object before leaving the function */
-    (void)tfm_memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL,
-                     PS_MAX_OBJECT_SIZE);
+    (void)memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL, PS_MAX_OBJECT_SIZE);
 
     return err;
 }
@@ -448,8 +447,8 @@ psa_status_t ps_object_write(psa_storage_uid_t uid, int32_t client_id,
 
 clear_data_and_return:
     /* Remove data stored in the object before leaving the function */
-    (void)tfm_memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL,
-                     PS_MAX_OBJECT_SIZE);
+    (void)memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL,
+                 PS_MAX_OBJECT_SIZE);
 
     return err;
 }
@@ -485,8 +484,8 @@ psa_status_t ps_object_get_info(psa_storage_uid_t uid, int32_t client_id,
 
 clear_data_and_return:
     /* Remove data stored in the object before leaving the function */
-    (void)tfm_memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL,
-                     PS_MAX_OBJECT_SIZE);
+    (void)memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL,
+                 PS_MAX_OBJECT_SIZE);
 
     return err;
 }
@@ -534,8 +533,8 @@ psa_status_t ps_object_delete(psa_storage_uid_t uid, int32_t client_id)
 
 clear_data_and_return:
     /* Remove data stored in the object before leaving the function */
-    (void)tfm_memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL,
-                     PS_MAX_OBJECT_SIZE);
+    (void)memset(&g_ps_object, PS_DEFAULT_EMPTY_BUFF_VAL,
+                 PS_MAX_OBJECT_SIZE);
 
     return err;
 }

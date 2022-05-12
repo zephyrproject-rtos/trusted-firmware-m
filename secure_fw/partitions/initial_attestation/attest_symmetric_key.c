@@ -8,11 +8,11 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "attest_key.h"
 #include "tfm_plat_crypto_keys.h"
 #include "psa/crypto.h"
-#include "tfm_memory_utils.h"
 
 /* Only support HMAC as MAC algorithm in COSE_Mac0 so far */
 #define SYMMETRIC_IAK_MAX_SIZE        PSA_MAC_MAX_SIZE
@@ -116,7 +116,7 @@ static psa_status_t calc_instance_id(uint8_t *iak_buf, size_t iak_len)
      * instance_id_len = SHA-256 block size < key_len <= key_buf size
      * It should be safe to directly copy without boundary check.
      */
-    tfm_memcpy(iak_buf, id_ptr, instance_id_len);
+    memcpy(iak_buf, id_ptr, instance_id_len);
 
     status = symmetric_iak_hash(iak_buf, instance_id_len, id_ptr, id_len,
                                 &instance_id_len);

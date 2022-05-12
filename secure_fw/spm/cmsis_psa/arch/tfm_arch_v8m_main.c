@@ -6,13 +6,13 @@
  */
 
 #include <inttypes.h>
+
 #include "compiler_ext_defs.h"
 #include "region_defs.h"
 #include "spm_ipc.h"
 #include "svc_num.h"
 #include "tfm_arch.h"
 #include "tfm_hal_device_header.h"
-#include "tfm_memory_utils.h"
 #include "tfm_secure_api.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"

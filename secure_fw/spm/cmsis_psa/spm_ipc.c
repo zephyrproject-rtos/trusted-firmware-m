@@ -22,7 +22,6 @@
 #include "tfm_api.h"
 #include "tfm_arch.h"
 #include "tfm_secure_api.h"
-#include "tfm_memory_utils.h"
 #include "tfm_hal_defs.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_hal_isolation.h"

@@ -9,9 +9,9 @@
 #include "its_flash_fs.h"
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "its_flash_fs_dblock.h"
-#include "tfm_memory_utils.h"
 #include "its_utils.h"
 
 /* Filesystem-internal flags, which cannot be passed by the caller */
@@ -154,7 +154,7 @@ psa_status_t its_flash_fs_init_ctx(its_flash_fs_ctx_t *fs_ctx,
     }
 
     /* Zero the context */
-    tfm_memset(fs_ctx, 0, sizeof(*fs_ctx));
+    memset(fs_ctx, 0, sizeof(*fs_ctx));
 
     /* Associate the filesystem config and operations with the context */
     fs_ctx->cfg = fs_cfg;
@@ -229,7 +229,7 @@ psa_status_t its_flash_fs_file_get_info(struct its_flash_fs_ctx_t *fs_ctx,
     }
 
     /* Check if index is still referring to same file */
-    if (tfm_memcmp(fid, tmp_metadata.id, ITS_FILE_ID_SIZE)) {
+    if (memcmp(fid, tmp_metadata.id, ITS_FILE_ID_SIZE)) {
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 
@@ -588,7 +588,7 @@ psa_status_t its_flash_fs_file_read(struct its_flash_fs_ctx_t *fs_ctx,
     }
 
     /* Check if index is still referring to same file */
-    if (tfm_memcmp(fid, tmp_metadata.id, ITS_FILE_ID_SIZE)) {
+    if (memcmp(fid, tmp_metadata.id, ITS_FILE_ID_SIZE)) {
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 

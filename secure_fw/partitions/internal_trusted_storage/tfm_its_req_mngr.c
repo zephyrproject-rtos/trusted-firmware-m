@@ -8,6 +8,7 @@
 #include "tfm_its_req_mngr.h"
 
 #include <stdint.h>
+#include <string.h>
 
 #include "psa/storage_common.h"
 #include "tfm_internal_trusted_storage.h"
@@ -20,7 +21,6 @@
 #else
 #include <stdbool.h>
 #include "tfm_secure_api.h"
-#include "tfm_memory_utils.h"
 #include "tfm_api.h"
 #endif
 
@@ -326,7 +326,7 @@ size_t its_req_mngr_read(uint8_t *buf, size_t num_bytes)
 #ifdef TFM_PSA_API
     return psa_read(p_msg->handle, 1, buf, num_bytes);
 #else
-    (void)tfm_memcpy(buf, p_data, num_bytes);
+    (void)memcpy(buf, p_data, num_bytes);
     p_data += num_bytes;
     return num_bytes;
 #endif
@@ -337,7 +337,7 @@ void its_req_mngr_write(const uint8_t *buf, size_t num_bytes)
 #ifdef TFM_PSA_API
     psa_write(p_msg->handle, 0, buf, num_bytes);
 #else
-    (void)tfm_memcpy(p_data, buf, num_bytes);
+    (void)memcpy(p_data, buf, num_bytes);
     p_data += num_bytes;
 #endif
 }

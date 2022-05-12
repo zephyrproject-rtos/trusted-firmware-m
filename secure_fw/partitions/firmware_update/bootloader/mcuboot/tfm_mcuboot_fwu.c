@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-
+#include <string.h>
 #include "psa/crypto.h"
 #include "tfm_sp_log.h"
 #include "bootutil_priv.h"
@@ -16,7 +16,6 @@
 #include "tfm_fwu_req_mngr.h"
 #include "tfm_boot_status.h"
 #include "service_api.h"
-#include "tfm_memory_utils.h"
 #include "tfm_secure_api.h"
 
 #if (MCUBOOT_IMAGE_NUMBER == 1)
@@ -615,7 +614,7 @@ static psa_status_t get_secondary_image_info(uint8_t image_id,
 
     if (util_img_hash(fap, data_size, hash, (size_t)PSA_FWU_MAX_DIGEST_SIZE,
                       &hash_size) == PSA_SUCCESS) {
-        tfm_memcpy(info->digest, hash, hash_size);
+        memcpy(info->digest, hash, hash_size);
         ret = PSA_SUCCESS;
     } else {
         ret = PSA_ERROR_GENERIC_ERROR;

@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "psa/protected_storage.h"
 #include "tfm_secure_api.h"
@@ -21,7 +22,6 @@
 #endif
 
 #ifndef TFM_PSA_API
-#include "tfm_memory_utils.h"
 
 static void *p_data;
 
@@ -405,7 +405,7 @@ psa_status_t ps_req_mngr_read_asset_data(uint8_t *out_data, uint32_t size)
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 #else /* TFM_PSA_API */
-    (void)tfm_memcpy(out_data, p_data, size);
+    (void)memcpy(out_data, p_data, size);
 #endif
     return PSA_SUCCESS;
 }
@@ -415,6 +415,6 @@ void ps_req_mngr_write_asset_data(const uint8_t *in_data, uint32_t size)
 #ifdef TFM_PSA_API
     psa_write(p_msg->handle, 0, in_data, size);
 #else /* TFM_PSA_API */
-    (void)tfm_memcpy(p_data, in_data, size);
+    (void)memcpy(p_data, in_data, size);
 #endif
 }

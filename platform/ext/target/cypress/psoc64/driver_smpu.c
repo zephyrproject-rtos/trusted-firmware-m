@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <string.h>
 #include "driver_smpu.h"
 #include "nv_counters.h"
 #include "pc_config.h"
@@ -24,7 +25,6 @@
 #include "tfm_spm_log.h"
 #include "tfm_hal_its.h"
 #include "tfm_hal_ps.h"
-#include "tfm_memory_utils.h"
 #include "flash_layout.h"
 
 #include "cy_prot.h"
@@ -366,9 +366,7 @@ cy_en_prot_status_t SMPU_Configure(const SMPU_Resources *smpu_dev)
         cy_stc_smpu_cfg_t slave_config;
 
         /* Start with a verbatim copy of the slave config */
-        tfm_memcpy(&slave_config,
-                   &smpu_dev->slave_config,
-                   sizeof(slave_config));
+        memcpy(&slave_config, &smpu_dev->slave_config, sizeof(slave_config));
 
         ret = populate_region(smpu_dev->smpu, &slave_config);
         if (ret != CY_PROT_SUCCESS) {

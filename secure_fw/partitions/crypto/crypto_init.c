@@ -30,10 +30,10 @@
 #endif /* CRYPTO_HW_ACCELERATOR */
 
 #ifdef TFM_PSA_API
+#include <string.h>
 #include "psa/framework_feature.h"
 #include "psa/service.h"
 #include "psa_manifest/tfm_crypto.h"
-#include "tfm_memory_utils.h"
 
 /**
  * \brief Table containing all the Uniform Signature API exposed
@@ -152,7 +152,7 @@ static psa_status_t tfm_crypto_alloc_scratch(size_t requested_size, void **buf)
 static void tfm_crypto_clear_scratch(void)
 {
     scratch.owner = 0;
-    (void)tfm_memset(scratch.buf, 0, scratch.alloc_index);
+    (void)memset(scratch.buf, 0, scratch.alloc_index);
     scratch.alloc_index = 0;
 }
 

@@ -5,6 +5,7 @@
  *
  */
 
+#include <string.h>
 #include "array.h"
 #include "cmsis.h"
 #include "Driver_Common.h"
@@ -193,7 +194,7 @@ static enum tfm_hal_status_t mpu_init(void)
         /* configure secure MPU regions */
         for (i = 0; i < ARRAY_SIZE(region_cfg); i++)
         {
-            spm_memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
+            memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
             localcfg.region_nr = i;
 
             if (mpu_armv8m_region_enable(&dev_mpu_s,
@@ -220,7 +221,7 @@ static enum tfm_hal_status_t mpu_init(void)
         /* check secure MPU regions */
         for (i = 0; i < ARRAY_SIZE(region_cfg); i++)
         {
-            spm_memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
+            memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
             localcfg.region_nr = i;
 
             if (mpu_armv8m_region_enable_check(&dev_mpu_s,

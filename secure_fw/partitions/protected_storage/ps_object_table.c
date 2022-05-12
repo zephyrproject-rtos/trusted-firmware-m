@@ -8,12 +8,12 @@
 #include "ps_object_table.h"
 
 #include <stddef.h>
+#include <string.h>
 
 #include "cmsis_compiler.h"
 #include "crypto/ps_crypto_interface.h"
 #include "nv_counters/ps_nv_counters.h"
 #include "psa/internal_trusted_storage.h"
-#include "tfm_memory_utils.h"
 #include "ps_utils.h"
 #include "tfm_ps_defs.h"
 
@@ -345,9 +345,9 @@ __STATIC_INLINE psa_status_t ps_object_table_nvc_generate_auth_tag(
     }
 
     assoc_data.nv_counter = nvc_1;
-    (void)tfm_memcpy(assoc_data.obj_table_data,
-                     PS_CRYPTO_ASSOCIATED_DATA(crypto),
-                     PS_OBJ_TABLE_AUTH_DATA_SIZE);
+    (void)memcpy(assoc_data.obj_table_data,
+                 PS_CRYPTO_ASSOCIATED_DATA(crypto),
+                 PS_OBJ_TABLE_AUTH_DATA_SIZE);
 
     return ps_crypto_generate_auth_tag(crypto, (const uint8_t *)&assoc_data,
                                        PS_CRYPTO_ASSOCIATED_DATA_LEN);
@@ -369,9 +369,9 @@ static void ps_object_table_authenticate(uint8_t table_idx,
 
     /* Init associated data with NVC 1 */
     assoc_data.nv_counter = init_ctx->nvc_1;
-    (void)tfm_memcpy(assoc_data.obj_table_data,
-                     PS_CRYPTO_ASSOCIATED_DATA(crypto),
-                     PS_OBJ_TABLE_AUTH_DATA_SIZE);
+    (void)memcpy(assoc_data.obj_table_data,
+                 PS_CRYPTO_ASSOCIATED_DATA(crypto),
+                 PS_OBJ_TABLE_AUTH_DATA_SIZE);
 
     err = ps_crypto_authenticate(crypto, (const uint8_t *)&assoc_data,
                                  PS_CRYPTO_ASSOCIATED_DATA_LEN);
@@ -653,9 +653,9 @@ static psa_status_t ps_set_active_object_table(
           /* As table 1 is the active object, load the content into the
            * PS object table context.
            */
-          (void)tfm_memcpy(&ps_obj_table_ctx.obj_table,
-                           init_ctx->p_table[PS_OBJ_TABLE_IDX_1],
-                           PS_OBJ_TABLE_SIZE);
+          (void)memcpy(&ps_obj_table_ctx.obj_table,
+                       init_ctx->p_table[PS_OBJ_TABLE_IDX_1],
+                       PS_OBJ_TABLE_SIZE);
 
           return PSA_SUCCESS;
     } else if (init_ctx->table_state[PS_OBJ_TABLE_IDX_1] ==
@@ -725,9 +725,9 @@ static psa_status_t ps_set_active_object_table(
      * PS object table context.
      */
     if (ps_obj_table_ctx.active_table == PS_OBJ_TABLE_IDX_1) {
-        (void)tfm_memcpy(&ps_obj_table_ctx.obj_table,
-                         init_ctx->p_table[PS_OBJ_TABLE_IDX_1],
-                         PS_OBJ_TABLE_SIZE);
+        (void)memcpy(&ps_obj_table_ctx.obj_table,
+                     init_ctx->p_table[PS_OBJ_TABLE_IDX_1],
+                     PS_OBJ_TABLE_SIZE);
     }
 
     return PSA_SUCCESS;
@@ -811,8 +811,8 @@ __STATIC_INLINE psa_status_t ps_table_free_idx(uint32_t idx_num,
 static void ps_table_delete_entry(uint32_t idx)
 {
     /* Initialise object table entry structure */
-    (void)tfm_memset(&ps_obj_table_ctx.obj_table.obj_db[idx],
-                     PS_DEFAULT_EMPTY_BUFF_VAL, PS_OBJECTS_TABLE_ENTRY_SIZE);
+    (void)memset(&ps_obj_table_ctx.obj_table.obj_db[idx],
+                 PS_DEFAULT_EMPTY_BUFF_VAL, PS_OBJECTS_TABLE_ENTRY_SIZE);
 }
 
 psa_status_t ps_object_table_create(void)
@@ -820,8 +820,8 @@ psa_status_t ps_object_table_create(void)
     struct ps_obj_table_t *p_table = &ps_obj_table_ctx.obj_table;
 
     /* Initialize object structure */
-    (void)tfm_memset(&ps_obj_table_ctx, PS_DEFAULT_EMPTY_BUFF_VAL,
-                     sizeof(struct ps_obj_table_ctx_t));
+    (void)memset(&ps_obj_table_ctx, PS_DEFAULT_EMPTY_BUFF_VAL,
+                 sizeof(struct ps_obj_table_ctx_t));
 
     /* Invert the other in the context as ps_object_table_save_table will
      * use the scratch index to create and store the current table.
@@ -968,8 +968,8 @@ psa_status_t ps_object_table_set_obj_tbl_info(psa_storage_uid_t uid,
         /* If an entry exists for this UID, it creates a backup copy in case
          * an error happens while updating the new table in the filesystem.
          */
-        (void)tfm_memcpy(&backup_entry, &p_table->obj_db[backup_idx],
-                         PS_OBJECTS_TABLE_ENTRY_SIZE);
+        (void)memcpy(&backup_entry, &p_table->obj_db[backup_idx],
+                     PS_OBJECTS_TABLE_ENTRY_SIZE);
 
         /* Deletes old object information if it exist in the table */
         ps_table_delete_entry(backup_idx);
@@ -981,8 +981,8 @@ psa_status_t ps_object_table_set_obj_tbl_info(psa_storage_uid_t uid,
 
     /* Add new object information */
 #ifdef PS_ENCRYPTION
-    (void)tfm_memcpy(p_table->obj_db[idx].tag, obj_tbl_info->tag,
-                     PS_TAG_LEN_BYTES);
+    (void)memcpy(p_table->obj_db[idx].tag, obj_tbl_info->tag,
+                 PS_TAG_LEN_BYTES);
 #else
     p_table->obj_db[idx].version = obj_tbl_info->version;
 #endif
@@ -991,8 +991,8 @@ psa_status_t ps_object_table_set_obj_tbl_info(psa_storage_uid_t uid,
     if (err != PSA_SUCCESS) {
         if (backup_entry.uid != TFM_PS_INVALID_UID) {
             /* Rollback the change in the table */
-            (void)tfm_memcpy(&p_table->obj_db[backup_idx], &backup_entry,
-                             PS_OBJECTS_TABLE_ENTRY_SIZE);
+            (void)memcpy(&p_table->obj_db[backup_idx], &backup_entry,
+                         PS_OBJECTS_TABLE_ENTRY_SIZE);
         }
 
         ps_table_delete_entry(idx);
@@ -1017,8 +1017,8 @@ psa_status_t ps_object_table_get_obj_tbl_info(psa_storage_uid_t uid,
     obj_tbl_info->fid = PS_OBJECT_FS_ID(idx);
 
 #ifdef PS_ENCRYPTION
-    (void)tfm_memcpy(obj_tbl_info->tag, p_table->obj_db[idx].tag,
-                     PS_TAG_LEN_BYTES);
+    (void)memcpy(obj_tbl_info->tag, p_table->obj_db[idx].tag,
+                 PS_TAG_LEN_BYTES);
 #else
     obj_tbl_info->version = p_table->obj_db[idx].version;
 #endif
@@ -1047,16 +1047,16 @@ psa_status_t ps_object_table_delete_object(psa_storage_uid_t uid,
         return err;
     }
 
-    (void)tfm_memcpy(&backup_entry, &p_table->obj_db[backup_idx],
-                     PS_OBJECTS_TABLE_ENTRY_SIZE);
+    (void)memcpy(&backup_entry, &p_table->obj_db[backup_idx],
+                 PS_OBJECTS_TABLE_ENTRY_SIZE);
 
     ps_table_delete_entry(backup_idx);
 
     err = ps_object_table_save_table(p_table);
     if (err != PSA_SUCCESS) {
        /* Rollback the change in the table */
-       (void)tfm_memcpy(&p_table->obj_db[backup_idx], &backup_entry,
-                        PS_OBJECTS_TABLE_ENTRY_SIZE);
+       (void)memcpy(&p_table->obj_db[backup_idx], &backup_entry,
+                    PS_OBJECTS_TABLE_ENTRY_SIZE);
     }
 
     return err;
