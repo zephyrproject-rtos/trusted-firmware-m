@@ -5,10 +5,10 @@
  *
  */
 
-#ifndef __SPRT_MAIN_H__
-#define __SPRT_MAIN_H__
+#ifndef __RT_MAIN_H__
+#define __RT_MAIN_H__
 
 /* Common partition runtime entry - 'sprt_main' */
 void sprt_main(void);
 
-#endif /* __SPRT_MAIN_H__ */
+#endif /* __RT_MAIN_H__ */

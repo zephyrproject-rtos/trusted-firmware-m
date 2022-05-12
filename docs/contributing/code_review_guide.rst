@@ -223,7 +223,7 @@ Partition Name Specific partition related changes.
 Service        Multiple service related changes.
 Service Name   Specific service related changes.
 SPM            secure_fw/spm/*
-SPRTL          secure-fw/partitions/lib/sprt/*
+SPRTL          secure-fw/partitions/lib/runtime/*
 ============== ====================================================
 
 .. note::

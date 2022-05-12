@@ -102,7 +102,7 @@ static int _tfm_sp_log_vprintf(const char *fmt, va_list ap)
 
     outputbuf.pos = 0;
 
-    if(fmt == NULL) {
+    if (fmt == NULL) {
         return TFM_HAL_ERROR_INVALID_INPUT;
     }
 

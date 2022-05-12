@@ -20,7 +20,7 @@ target_link_libraries(tfm_partitions
 # directories of the partitions
 add_library(tfm_partition_defs INTERFACE)
 
-add_subdirectory(lib/sprt)
+add_subdirectory(lib/runtime)
 add_subdirectory(audit_logging)
 add_subdirectory(crypto)
 add_subdirectory(initial_attestation)

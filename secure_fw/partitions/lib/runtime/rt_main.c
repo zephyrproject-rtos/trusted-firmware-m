@@ -8,7 +8,7 @@
 #include "compiler_ext_defs.h"
 #include "runtime_defs.h"
 #include "sprt_partition_metadata_indicator.h"
-#include "sprt_main.h"
+#include "rt_main.h"
 
 extern void common_sfn_thread(void);
 
