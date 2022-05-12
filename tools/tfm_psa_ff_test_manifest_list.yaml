@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -16,7 +16,7 @@
       "short_name": "PSA_FF_TEST_CLIENT",
       "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/client_partition_psa.json",
       "output_path": "api-tests/platform/manifests",
-      "conditional": "@TFM_PARTITION_FF_TEST@",
+      "conditional": "TFM_PARTITION_FF_TEST",
       "version_major": 0,
       "version_minor": 1,
       "pid": 5000,
@@ -34,7 +34,7 @@
       "short_name": "PSA_FF_TEST_SERVER",
       "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/server_partition_psa.json",
       "output_path": "api-tests/platform/manifests",
-      "conditional": "@TFM_PARTITION_FF_TEST@",
+      "conditional": "TFM_PARTITION_FF_TEST",
       "version_major": 0,
       "version_minor": 1,
       "pid": 5001,
@@ -52,7 +52,7 @@
       "short_name": "PSA_FF_TEST_DRIVER",
       "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/driver_partition_psa.json",
       "output_path": "api-tests/platform/manifests",
-      "conditional": "@TFM_PARTITION_FF_TEST@",
+      "conditional": "TFM_PARTITION_FF_TEST",
       "version_major": 0,
       "version_minor": 1,
       "pid": 5002,
