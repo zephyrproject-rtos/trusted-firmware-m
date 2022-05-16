@@ -153,9 +153,63 @@ def manifest_validation(manifest, pid):
 
     return manifest
 
+def check_circular_dependency(partitions, service_partition_map):
+    """
+    This function detects if there is any circular partition dependency chain.
+    If a circular dependency is detected, the script exits with error.
+
+    Inputs:
+        - partitions:            dict of partition manifests
+        - service_partition_map: map between services and their owner Partitions
+    """
+
+    dependency_table = {}
+    for partition in partitions:
+        manifest = partition['manifest']
+        dependencies = manifest['dependencies'].copy() \
+                       if 'dependencies' in manifest else []
+        dependencies += manifest['weak_dependencies'].copy() \
+                        if 'weak_dependencies' in manifest else []
+        dependency_table[manifest['name']] = {
+            'dependencies': [service_partition_map[dependency]
+                             for dependency in dependencies
+                             if dependency in service_partition_map],
+            'validated': False
+        }
+
+    for partition in dependency_table.keys():
+        validate_dependency_chain(partition, dependency_table, [])
+
+def validate_dependency_chain(partition,
+                              dependency_table,
+                              dependency_chain):
+    """
+    Recursively validate if the given partition and its dependencies
+    have a circular dependency with the given dependency_chain.
+    Exit with error code once any circular is detected.
+
+    Inputs:
+        - partition:        next partition to be checked
+        - dependency_table: dict of partitions and their dependencies
+        - dependency_chain: list of dependencies in current chain
+    """
+
+    dependency_chain.append(partition)
+    if partition in dependency_chain[:-1]:
+        logging.error(
+            'Circular dependency exists in chain: {}'.format(
+                ', '.join(dependency_chain)))
+        exit(1)
+    for dependency in dependency_table[partition]['dependencies']:
+        if dependency_table[dependency]['validated']:
+            continue
+        validate_dependency_chain(dependency, dependency_table, dependency_chain)
+    dependency_table[partition]['validated'] = True
+
 def process_partition_manifests(manifest_lists, isolation_level, backend):
     """
-    Parse the input manifest lists, generate the data base for genereated files
+    Parse the input manifest lists, check if manifest settings are valid,
+    generate the data base for genereated files
     and generate manifest header files.
 
     Parameters
@@ -178,6 +232,7 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
     all_manifests = []
     pid_list = []
     no_pid_manifest_idx = []
+    service_partition_map = {}
     partition_statistics = {
         'connection_based_srv_num': 0,
         'ipc_partitions': [],
@@ -274,6 +329,7 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
         # number (0) when there are no services.
         srv_idx = -1
         for srv_idx, service in enumerate(manifest.get('services', [])):
+            service_partition_map[service['name']] = manifest['name']
             if manifest['model'] == 'IPC':
                 # Assign signal value, the first 4 bits are reserved by FF-M
                 service['signal_value'] = (1 << (srv_idx + 4))
@@ -325,6 +381,8 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
                                'intermedia_file': intermedia_file,
                                'loadinfo_file': load_info_file,
                                'output_dir':output_dir})
+
+    check_circular_dependency(partition_list, service_partition_map)
 
     # Automatically assign PIDs for partitions without 'pid' attribute
     pid = max(pid_list, default = TFM_PID_BASE - 1)
