@@ -153,7 +153,7 @@ To compile TF-M code, at least one of the supported compiler toolchains have to
 be available in the build environment. The currently supported compiler
 versions are:
 
-    - Arm Compiler v6.10.1 ~ v6.14.1
+    - Arm Compiler v6.10.1 ~ v6.14, v6.18+
 
       .. tabs::
 
@@ -183,9 +183,11 @@ versions are:
 
       .. note::
 
-          Arm compiler starting from *v6.15* may cause MemManage fault in TF-M
-          higher isolation levels. The issue is under investigation and
-          recommended to using versions prior to v6.15.
+          Arm compiler v6.15 ~ v6.17 may cause MemManage fault.
+          This defect has been fixed since Arm compiler v6.18.
+          See [SDCOMP-59788] in Armclang v6.18 `release note`__ for details.
+
+          .. __: https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/Arm%20Compiler%20for%20Embedded/6-18/Release%20notes%20for%20Arm%20Compiler%20for%20Embedded%206.pdf
 
     - GNU Arm compiler v7.3.1+
 
