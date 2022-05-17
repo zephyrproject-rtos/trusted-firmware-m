@@ -71,7 +71,14 @@ if (TFM_SP_LOG_RAW_ENABLED)
     target_link_libraries(tfm_sp_log_raw
         INTERFACE
             platform_s
-            tfm_partition_defs
+            psa_interface
             tfm_secure_api
+    )
+
+    target_compile_definitions(tfm_sp_log_raw
+        INTERFACE
+            $<$<BOOL:${TFM_PSA_API}>:TFM_PSA_API>
+            TFM_PARTITION_LOG_LEVEL=${TFM_PARTITION_LOG_LEVEL}
+            TFM_SP_LOG_RAW_ENABLED
     )
 endif()

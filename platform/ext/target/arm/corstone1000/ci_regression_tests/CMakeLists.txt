@@ -30,7 +30,7 @@ target_include_directories(corstone1000_test_s
 target_link_libraries(corstone1000_test_s
     PRIVATE
         tfm_test_suite_extra_common
-        tfm_log
+        tfm_sp_log_raw
 )
 
 target_compile_definitions(corstone1000_test_s

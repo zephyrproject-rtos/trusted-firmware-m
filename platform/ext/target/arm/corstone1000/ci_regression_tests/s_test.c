@@ -8,7 +8,7 @@
 #include "s_test.h"
 #include "platform_base_address.h"
 #include "firewall.h"
-#include "tfm_log_raw.h"
+#include "tfm_sp_log.h"
 
 #define DISABLED_TEST 0
 
@@ -43,11 +43,11 @@ static int test_host_firewall_status(void)
     fc_select((void *)CORSTONE1000_HOST_FIREWALL_BASE, any_component_id);
     status = fw_get_lockdown_status();
     if (status != FW_LOCKED) {
-        tfm_log_printf("FAIL: %s.\n\r", __func__);
+        LOG_INFFMT("FAIL: %s.\n\r", __func__);
         return EXTRA_TEST_FAILED;
     }
 
-    tfm_log_printf("PASS: %s\n\r", __func__);
+    LOG_INFFMT("PASS: %s\n\r", __func__);
     return EXTRA_TEST_SUCCESS;
 }
 
@@ -64,7 +64,7 @@ static int test_host_firewall_external_flash_configurations(void)
     expected_rights = (RGN_MPL_ANY_MST_MASK | RGN_MPL_SECURE_READ_MASK |
                                               RGN_MPL_SECURE_WRITE_MASK);
     if (mpl_rights != expected_rights) {
-        tfm_log_printf("FAIL1: %s.\n\r", __func__);
+        LOG_INFFMT("FAIL1: %s.\n\r", __func__);
         return EXTRA_TEST_FAILED;
     }
     /* XIP Permissions */
@@ -75,7 +75,7 @@ static int test_host_firewall_external_flash_configurations(void)
                               RGN_MPL_SECURE_READ_MASK |
                               RGN_MPL_NONSECURE_READ_MASK);
     if (mpl_rights != expected_rights) {
-        tfm_log_printf("FAIL2: %s.\n\r", __func__);
+        LOG_INFFMT("FAIL2: %s.\n\r", __func__);
         return EXTRA_TEST_FAILED;
     }
 #else
@@ -97,7 +97,7 @@ static int test_host_firewall_external_flash_configurations(void)
     */
 #endif
 
-    tfm_log_printf("PASS: %s\n\r", __func__);
+    LOG_INFFMT("PASS: %s\n\r", __func__);
     return EXTRA_TEST_SUCCESS;
 }
 
@@ -114,12 +114,12 @@ static int test_host_firewall_secure_flash_configurations(void)
     expected_rights = (RGN_MPL_ANY_MST_MASK | RGN_MPL_SECURE_READ_MASK |
                                               RGN_MPL_SECURE_WRITE_MASK);
     if (mpl_rights != expected_rights) {
-        tfm_log_printf("FAIL: %s.\n\r", __func__);
+        LOG_INFFMT("FAIL: %s.\n\r", __func__);
         return EXTRA_TEST_FAILED;
     }
 #endif
 
-    tfm_log_printf("PASS: %s\n\r", __func__);
+    LOG_INFFMT("PASS: %s\n\r", __func__);
     return EXTRA_TEST_SUCCESS;
 }
 
@@ -132,11 +132,11 @@ static int test_bir_programming(void)
     bir_base[0] = 0x1;
     bir_base[0] = 0x2;
     if (bir_base[0] != 0x1) {
-        tfm_log_printf("FAIL: %s : (%u)\n\r", __func__, bir_base[0]);
+        LOG_INFFMT("FAIL: %s : (%u)\n\r", __func__, bir_base[0]);
         return EXTRA_TEST_FAILED;
     }
 
-    tfm_log_printf("PASS: %s\n\r", __func__);
+    LOG_INFFMT("PASS: %s\n\r", __func__);
     return EXTRA_TEST_SUCCESS;
 }
 
@@ -170,11 +170,11 @@ int32_t s_test(void)
 #endif
 
     if (failures) {
-        tfm_log_printf("Not all platform test could pass: failures=%d\n\r", failures);
+        LOG_INFFMT("Not all platform test could pass: failures=%d\n\r", failures);
         return EXTRA_TEST_FAILED;
     }
 
-    tfm_log_printf("ALL_PASS: corstone1000 platform test cases passed.\n\r");
+    LOG_INFFMT("ALL_PASS: corstone1000 platform test cases passed.\n\r");
     return EXTRA_TEST_SUCCESS;
 }
 
