@@ -12,7 +12,7 @@
   "priority": "NORMAL",
   "model": "SFN",
   "entry_init": "tfm_crypto_init",
-  "stack_size": "0x2000",
+  "stack_size": "0x1B00",
   "secure_functions": [
     {
       "name": "TFM_CRYPTO_GET_KEY_ATTRIBUTES",
