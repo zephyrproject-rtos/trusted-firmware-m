@@ -34,8 +34,8 @@ struct partition_t *p_current_partition;
  * Send message and wake up the SP who is waiting on message queue, block the
  * current component state and activate the next component.
  */
-static psa_status_t sfn_messaging(struct service_t *service,
-                                  struct conn_handle_t *handle)
+psa_status_t backend_messaging(struct service_t *service,
+                               struct conn_handle_t *handle)
 {
     struct partition_t *p_target;
     psa_status_t status;
@@ -68,7 +68,7 @@ static psa_status_t sfn_messaging(struct service_t *service,
     return status;
 }
 
-static psa_status_t sfn_replying(struct conn_handle_t *handle, int32_t status)
+psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
 {
     SET_CURRENT_COMPONENT(handle->p_client);
 
@@ -115,7 +115,8 @@ static void spm_thread_fn(void)
 }
 
 /* Parameters are treated as assuredly */
-void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
+void backend_init_comp_assuredly(struct partition_t *p_pt,
+                                 uint32_t service_set)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
     struct context_ctrl_t ns_agent_ctrl;
@@ -139,12 +140,12 @@ void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
     }
 }
 
-uint32_t sfn_system_run(void)
+uint32_t backend_system_run(void)
 {
     return EXC_RETURN_THREAD_S_PSP;
 }
 
-static psa_signal_t sfn_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
+psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
 {
     while (!(p_pt->signals_asserted & signal_mask))
         ;
@@ -152,16 +153,7 @@ static psa_signal_t sfn_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
     return p_pt->signals_asserted & signal_mask;
 }
 
-static void sfn_wake_up(struct partition_t *p_pt)
+void backend_wake_up(struct partition_t *p_pt)
 {
     (void)p_pt;
 }
-
-const struct backend_ops_t backend_instance = {
-    .comp_init_assuredly = sfn_comp_init_assuredly,
-    .system_run          = sfn_system_run,
-    .messaging           = sfn_messaging,
-    .replying            = sfn_replying,
-    .wait                = sfn_wait,
-    .wake_up             = sfn_wake_up,
-};

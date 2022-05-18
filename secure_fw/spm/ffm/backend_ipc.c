@@ -95,8 +95,8 @@ static void prv_process_metadata(struct partition_t *p_pt)
  * Send message and wake up the SP who is waiting on message queue, block the
  * current thread and trigger scheduler.
  */
-static psa_status_t ipc_messaging(struct service_t *service,
-                                  struct conn_handle_t *handle)
+psa_status_t backend_messaging(struct service_t *service,
+                               struct conn_handle_t *handle)
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
@@ -137,7 +137,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
     return PSA_SUCCESS;
 }
 
-static psa_status_t ipc_replying(struct conn_handle_t *handle, int32_t status)
+psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
 {
     if (is_tfm_rpc_msg(handle)) {
         tfm_rpc_client_call_reply(handle, status);
@@ -156,8 +156,8 @@ static psa_status_t ipc_replying(struct conn_handle_t *handle, int32_t status)
 extern void sprt_main(void);
 
 /* Parameters are treated as assuredly */
-static void ipc_comp_init_assuredly(struct partition_t *p_pt,
-                                    uint32_t service_setting)
+void backend_init_comp_assuredly(struct partition_t *p_pt,
+                                 uint32_t service_setting)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
 
@@ -192,7 +192,7 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
                THRD_GENERAL_EXIT);
 }
 
-static uint32_t ipc_system_run(void)
+uint32_t backend_system_run(void)
 {
     uint32_t control;
     struct partition_t *p_cur_pt;
@@ -215,13 +215,13 @@ static uint32_t ipc_system_run(void)
     return control;
 }
 
-static psa_signal_t ipc_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
+psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     psa_signal_t ret_signal;
 
     /*
-     * 'ipc_wait()' sets the waiting signal mask for partition, and
+     * 'backend_wait()' sets the waiting signal mask for partition, and
      * blocks the partition thread state to wait for signals.
      * These changes should be inside the ciritical section to avoid
      * 'signal_waiting' or the thread state to be changed by interrupts
@@ -239,7 +239,7 @@ static psa_signal_t ipc_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
     return ret_signal;
 }
 
-static void ipc_wake_up(struct partition_t *p_pt)
+void backend_wake_up(struct partition_t *p_pt)
 {
     thrd_wake_up(&p_pt->waitobj,
                  p_pt->signals_asserted & p_pt->signals_waiting);
@@ -295,12 +295,3 @@ uint64_t ipc_schedule(void)
     }
     return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }
-
-const struct backend_ops_t backend_instance = {
-    .comp_init_assuredly = ipc_comp_init_assuredly,
-    .system_run          = ipc_system_run,
-    .messaging           = ipc_messaging,
-    .replying            = ipc_replying,
-    .wait                = ipc_wait,
-    .wake_up             = ipc_wake_up,
-};

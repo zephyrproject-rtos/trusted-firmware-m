@@ -311,7 +311,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     spm_fill_message(conn_handle, service, handle, type, client_id,
                      invecs, in_num, outvecs, out_num, outptr);
 
-    return backend_instance.messaging(service, conn_handle);
+    return backend_messaging(service, conn_handle);
 }
 
 /* Following PSA APIs are only needed by connection-based services */
@@ -374,7 +374,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
     spm_fill_message(conn_handle, service, handle, PSA_IPC_CONNECT,
                      client_id, NULL, 0, NULL, 0, NULL);
 
-    return backend_instance.messaging(service, conn_handle);
+    return backend_messaging(service, conn_handle);
 }
 
 psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
@@ -423,7 +423,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
     spm_fill_message(conn_handle, service, handle, PSA_IPC_DISCONNECT,
                      client_id, NULL, 0, NULL, 0, NULL);
 
-    return backend_instance.messaging(service, conn_handle);
+    return backend_messaging(service, conn_handle);
 }
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
@@ -454,14 +454,14 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     }
 
     /*
-     * backend_instance.wait() blocks the caller thread if no signals are
+     * backend_wake_up() blocks the caller thread if no signals are
      * available. In this case, the return value of this function is temporary
      * set into runtime context. After new signal(s) are available, the return
      * value is updated with the available signal(s) and blocked thread gets
      * to run.
      */
     if (timeout == PSA_BLOCK) {
-        return backend_instance.wait(partition, signal_mask);
+        return backend_wait(partition, signal_mask);
     }
 
     return partition->signals_asserted & signal_mask;
@@ -838,7 +838,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
      * involved.
      */
     CRITICAL_SECTION_ENTER(cs_assert);
-    ret = backend_instance.replying(handle, ret);
+    ret = backend_replying(handle, ret);
     CRITICAL_SECTION_LEAVE(cs_assert);
 
     if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {

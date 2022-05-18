@@ -548,10 +548,10 @@ uint32_t tfm_spm_init(void)
         }
 #endif /* TFM_FIH_PROFILE_ON */
 
-        backend_instance.comp_init_assuredly(partition, service_setting);
+        backend_init_comp_assuredly(partition, service_setting);
     }
 
-    return backend_instance.system_run();
+    return backend_system_run();
 }
 
 void update_caller_outvec_len(struct conn_handle_t *handle)
@@ -596,7 +596,7 @@ void spm_assert_signal(void *p_pt, psa_signal_t signal)
     partition->signals_asserted |= signal;
 
     if (partition->signals_waiting & signal) {
-        backend_instance.wake_up(partition);
+        backend_wake_up(partition);
     }
 
     CRITICAL_SECTION_LEAVE(cs_assert);
