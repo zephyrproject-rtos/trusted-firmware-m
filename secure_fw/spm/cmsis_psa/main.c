@@ -5,9 +5,9 @@
  *
  */
 
+#include "build_config_check.h"
 #include "fih.h"
 #include "ffm/tfm_boot_data.h"
-#include "compile_check_defs.h"
 #include "region.h"
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
@@ -17,20 +17,6 @@
 #include "tfm_version.h"
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
-
-/*
- * Avoids the semihosting issue
- * FixMe: describe 'semihosting issue'
- */
-#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
-__asm("  .global __ARM_use_no_argv\n");
-#endif
-
-#ifndef TFM_LVL
-#error TFM_LVL is not defined!
-#elif (TFM_LVL != 1) && (TFM_LVL != 2) && (TFM_LVL != 3)
-#error Invalid TFM_LVL value. Only TFM_LVL 1, 2 and 3 are supported in IPC model!
-#endif
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
