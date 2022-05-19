@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2021-2022, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -38,10 +39,6 @@ tfm_invalid_config(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM AND NOT TFM_MULTI_CORE_TOPO
 tfm_invalid_config(TFM_ISOLATION_LEVEL EQUAL 3 AND CONFIG_TFM_STACK_WATERMARKS)
 
 tfm_invalid_config((TFM_S_REG_TEST OR TFM_NS_REG_TEST) AND TEST_PSA_API)
-
-tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-tfm_invalid_config((TFM_PARTITION_PROTECTED_STORAGE AND PS_ROLLBACK_PROTECTION) AND NOT TFM_PARTITION_PLATFORM)
-tfm_invalid_config(PS_ROLLBACK_PROTECTION AND NOT PS_ENCRYPTION)
 
 tfm_invalid_config(SUITE STREQUAL "IPC" AND NOT TEST_PSA_API STREQUAL "IPC")
 
@@ -90,6 +87,12 @@ tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT TFM_PARTITION_PLATFORM)
 tfm_invalid_config((MCUBOOT_UPGRADE_STRATEGY STREQUAL "DIRECT_XIP" OR MCUBOOT_UPGRADE_STRATEGY STREQUAL "RAM_LOAD") AND TFM_PARTITION_FIRMWARE_UPDATE)
 tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT MCUBOOT_DATA_SHARING)
 
+####################### Protected Storage Parttion ###############################
+
+tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
+tfm_invalid_config((TFM_PARTITION_PROTECTED_STORAGE AND PS_ROLLBACK_PROTECTION) AND NOT TFM_PARTITION_PLATFORM)
+tfm_invalid_config(PS_ROLLBACK_PROTECTION AND NOT PS_ENCRYPTION)
+
 ########################## FIH #################################################
 
 get_property(TFM_FIH_PROFILE_LIST CACHE TFM_FIH_PROFILE PROPERTY STRINGS)
@@ -104,7 +107,7 @@ tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND NOT TFM_LIB_MODEL)
 tfm_invalid_config(CRYPTO_NV_SEED AND CRYPTO_HW_ACCELERATOR)
 tfm_invalid_config(NOT CRYPTO_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
 
-######################## TF-M Porfile config check #############################
+######################## TF-M Profile config check #############################
 
 tfm_invalid_config(TFM_PROFILE STREQUAL "profile_small" AND CONFIG_TFM_SPM_BACKEND_IPC)
 
