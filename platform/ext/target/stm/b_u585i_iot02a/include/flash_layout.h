@@ -36,10 +36,10 @@
  * 0x0002_8000 NV counters area (16 KB)
  * 0x0002_c000 Secure Storage Area (16 KB)
  * 0x0003_0000 Internal Trusted Storage Area (16 KB)
- * 0x0003_4000 Secure image     primary slot (256 KB)
- * 0x0007_4000 Non-secure image primary slot (512 KB)
- * 0x000f_4000 Secure image     secondary slot (256 KB)
- * 0x0013_4000 Non-secure image secondary slot (512 KB)
+ * 0x0003_4000 Secure image     primary slot (384 KB)
+ * 0x0009_4000 Non-secure image primary slot (512 KB)
+ * 0x0011_4000 Secure image     secondary slot (384 KB)
+ * 0x0017_4000 Non-secure image secondary slot (512 KB)
  *
  * Bl2 binary is written at 0x1_2000:
  * it contains bl2_counter init value, OTP write protect, NV counters area init.
@@ -123,7 +123,7 @@
 #error "FLASH_ITS_AREA_OFFSET not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
 #endif /*  (FLASH_ITS_AREA_OFFSET % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
 
-#define FLASH_S_PARTITION_SIZE          (0x40000) /* 256 KB for S partition */
+#define FLASH_S_PARTITION_SIZE          (0x60000) /* 384 KB for S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x80000) /* 512 KB for NS partition */
 
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
