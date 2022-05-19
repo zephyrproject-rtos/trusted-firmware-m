@@ -4,9 +4,10 @@ Trusted Firmware M
 
 Trusted Firmware-M (TF-M) implements the Secure Processing Environment (SPE)
 for Armv8-M, Armv8.1-M architectures (e.g. the `Cortex-M33`_, `Cortex-M23`_,
-`Cortex-M55`_ processors) and dual-core platforms. It is the platform security
-architecture reference implementation aligning with PSA Certified guidelines,
-enabling chips, Real Time Operating Systems and devices to become PSA Certified.
+`Cortex-M55`_, `Cortex-M85`_ processors) and dual-core platforms.
+It is the platform security architecture reference implementation aligning with
+PSA Certified guidelines, enabling chips, Real Time Operating Systems and
+devices to become PSA Certified.
 
 TF-M relies on an isolation boundary between the Non-secure Processing
 Environment (NSPE) and the Secure Processing Environment (SPE). It can but is
@@ -78,9 +79,10 @@ Feedback and Support
 For this release, feedback is requested via email to
 `tf-m@lists.trustedfirmware.org <tf-m@lists.trustedfirmware.org>`__.
 
-.. _Cortex-M33: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m33
-.. _Cortex-M23: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m23
-.. _Cortex-M55: https://developer.arm.com/ip-products/processors/cortex-m/cortex-m55
+.. _Cortex-M33: https://developer.arm.com/Processors/Cortex-M33
+.. _Cortex-M23: https://developer.arm.com/Processors/Cortex-M23
+.. _Cortex-M55: https://developer.arm.com/Processors/Cortex-M55
+.. _Cortex-M85: https://developer.arm.com/Processors/Cortex-M85
 .. _PSA Certified: https://www.psacertified.org/about/developing-psa-certified/
 .. _Arm TrustZone technology: https://developer.arm.com/ip-products/security-ip/trustzone/trustzone-for-cortex-m
 
