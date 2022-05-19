@@ -378,7 +378,9 @@ The top-level Profile Small CMake config file selects Library model and level 1
 isolation.
 
 Users can set ``-DCONFIG_TFM_SPM_BACKEND=SFN`` in build command to select SFN
-model instead.
+model instead. In SFN model, ``-DPSA_FRAMEWORK_HAS_MM_IOVEC`` is enabled by
+default. It reduces memory footprint by avoiding the transient copy from input
+vectors and copy to output vectors.
 
 Crypto service configuration
 ----------------------------

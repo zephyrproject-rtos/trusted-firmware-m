@@ -45,5 +45,6 @@ set(TFM_MBEDCRYPTO_CONFIG_PATH          "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/
 if (NOT DEFINED CONFIG_TFM_SPM_BACKEND)
     set(TFM_LIB_MODEL                   ON          CACHE BOOL      "Use secure library model instead of IPC model")
 elseif (CONFIG_TFM_SPM_BACKEND STREQUAL "SFN")
+    set(PSA_FRAMEWORK_HAS_MM_IOVEC      ON          CACHE BOOL      "Enable MM-IOVEC")
     set(CONFIG_TFM_CONN_HANDLE_MAX_NUM  3           CACHE STRING    "The maximal number of secure services that are connected or requested at the same time")
 endif()
