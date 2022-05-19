@@ -164,7 +164,7 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
     }
 
     rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, key_buf,
-                                 image_to_decrypt->header.ctr_iv,
+                                 image_after_decrypt->header.ctr_iv,
                                  (uint8_t *)&image_to_decrypt->protected_values.encrypted_data,
                                  sizeof(image_after_decrypt->protected_values.encrypted_data),
                                  (uint8_t *)&image_after_decrypt->protected_values.encrypted_data);
