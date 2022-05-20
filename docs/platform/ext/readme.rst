@@ -164,10 +164,10 @@ primarily consists of the following:
 preload_ns.cmake
 ^^^^^^^^^^^^^^^^
 
-This optional 4th cmake file is required only if the target is utilising
-``TFM_MULTI_CORE_TOPOLOGY``. This file has the same format as ``preload.cmake``,
-but instead details the hardware of the NS core that is **not** running the main
-TF-M secure code.
+This optional cmake file is required only if the target runs the NSPE on a
+core that requires different compiler options than the SPE core. This file has
+the same format as ``preload.cmake``, but instead details the hardware of the
+NS core that is **not** running the main TF-M secure code.
 
 Flash layout header file
 ------------------------
@@ -292,4 +292,5 @@ HW components:
 --------------
 
 *Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
-*Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.*
+*Copyright (c) 2020-2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

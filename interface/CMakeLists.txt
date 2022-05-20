@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -15,9 +17,12 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/psa/framework_feature.h.in
                ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
                @ONLY)
 
-if (TFM_MULTI_CORE_TOPOLOGY)
+if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
     include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
     tfm_toolchain_reload_compiler()
+endif()
+
+if (TFM_MULTI_CORE_TOPOLOGY)
     # The platform target is created in this directory/file so that it has the
     # same settings as the main ns target.
     add_library(platform_ns STATIC EXCLUDE_FROM_ALL)
