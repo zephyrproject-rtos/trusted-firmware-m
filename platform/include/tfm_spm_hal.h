@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,9 +14,6 @@
 #include "cmsis.h"
 #include "fih.h"
 #include "tfm_secure_api.h"
-#ifdef TFM_MULTI_CORE_TOPOLOGY
-#include "tfm_multi_core.h"
-#endif
 #include "tfm_plat_defs.h"
 
 /*
