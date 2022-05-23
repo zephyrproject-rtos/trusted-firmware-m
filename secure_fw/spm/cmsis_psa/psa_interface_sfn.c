@@ -49,11 +49,14 @@ psa_status_t psa_call_pack_sfn(psa_handle_t handle, uint32_t ctrl_param,
 
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
+        /* Execution is returned from RoT Service */
         stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
                                            stat);
+    } else {
+        /* Execution is returned from SPM */
+        spm_handle_programmer_errors(stat);
     }
 
-    spm_handle_programmer_errors(stat);
     return (psa_status_t)stat;
 }
 
@@ -120,11 +123,14 @@ psa_handle_t psa_connect_sfn(uint32_t sid, uint32_t version)
 
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
+        /* Execution is returned from RoT Service */
         stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
                                            stat);
+    } else {
+        /* Execution is returned from SPM */
+        spm_handle_programmer_errors(stat);
     }
 
-    spm_handle_programmer_errors(stat);
     return (psa_handle_t)stat;
 }
 
@@ -144,11 +150,13 @@ void psa_close_sfn(psa_handle_t handle)
 
     p_target = GET_CURRENT_COMPONENT();
     if (p_client != p_target) {
+        /* Execution is returned from RoT Service */
         stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
                                            PSA_SUCCESS);
+    } else {
+        /* Execution is returned from SPM */
+        spm_handle_programmer_errors(stat);
     }
-
-    spm_handle_programmer_errors(stat);
 }
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
