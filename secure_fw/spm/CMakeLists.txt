@@ -48,7 +48,7 @@ target_sources(tfm_spm
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/main.c>
         $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_ipc.c>
         $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:cmsis_psa/spm_cross_call.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_load.c>
+        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_loader.c>
         $<$<BOOL:${TFM_PSA_API}>:ffm/psa_api.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:ffm/backend_ipc.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:ffm/backend_sfn.c>

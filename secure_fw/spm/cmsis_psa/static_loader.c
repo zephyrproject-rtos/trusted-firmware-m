@@ -15,6 +15,7 @@
 #include "tfm_plat_defs.h"
 #include "tfm_spm_hal.h"
 #include "utilities.h"
+#include "ffm/backend.h"
 #include "load/partition_defs.h"
 #include "load/spm_load_api.h"
 #include "load/service_defs.h"
@@ -141,9 +142,7 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
         services[i].partition = p_partition;
         services[i].next = NULL;
 
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
-        service_setting |= p_servldinf[i].signal;
-#endif
+        BACKEND_SERVICE_SET(service_setting, &p_servldinf[i]);
 
         /* Populate the stateless service reference table */
         serv_ldflags = p_servldinf[i].flags;

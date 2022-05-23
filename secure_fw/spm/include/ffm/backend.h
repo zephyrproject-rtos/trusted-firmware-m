@@ -14,6 +14,14 @@
 #include "load/spm_load_api.h"
 #include "psa/error.h"
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+#include "backend_ipc.h"
+#elif CONFIG_TFM_SPM_BACKEND_SFN == 1
+#include "backend_sfn.h"
+#else
+#error "No backend selected, check configurations."
+#endif
+
 /*
  * Runtime model-specific component initialization routine. This
  * is an `assuredly` function, would panic if any error occurred.
