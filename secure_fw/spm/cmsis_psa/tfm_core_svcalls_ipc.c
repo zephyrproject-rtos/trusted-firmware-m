@@ -114,11 +114,6 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         break;
 #endif
 #endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
-
-#if TFM_SP_LOG_RAW_ENABLED
-    case TFM_SVC_OUTPUT_UNPRIV_STRING:
-        return tfm_hal_output_spm_log((const char *)ctx[0], ctx[1]);
-#endif
     default:
 #ifdef PLATFORM_SVC_HANDLERS
         return (platform_svc_handlers(svc_num, ctx, lr));
@@ -186,6 +181,12 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
     case TFM_SVC_FLIH_FUNC_RETURN:
         exc_return = tfm_flih_return_to_isr(svc_args[0],
                                             (struct context_flih_ret_t *)msp);
+        break;
+#endif
+#if TFM_SP_LOG_RAW_ENABLED
+    case TFM_SVC_OUTPUT_UNPRIV_STRING:
+        svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0],
+                                             svc_args[1]);
         break;
 #endif
     default:
