@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,7 @@
 #include "attest_boot_data.h"
 #include "tfm_boot_status.h"
 #include "tfm_attest_iat_defs.h"
-#include "q_useful_buf.h"
+#include "t_cose/q_useful_buf.h"
 #ifdef TFM_PARTITION_MEASURED_BOOT
 #include "measured_boot_api.h"
 #include "boot_measurement.h"

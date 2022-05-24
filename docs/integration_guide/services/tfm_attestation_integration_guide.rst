@@ -166,13 +166,15 @@ Service source files
     - ``lib/ext/t_cose``: This library is used to sign a CBOR token and create
       the COSE header and signature around the initial attestation token. Only
       a subset of the `COSE <https://tools.ietf.org/html/rfc8152>`__ standard
-      is implemented. The COSE_Sign1 and COSE_Mac0 (only available in TF-M fork)
-      signature schemas are supported.
-    - It is a fork of this external `t_cose library <https://github.com/laurencelundblade/t_cose>`__.
-    - ``lib/ext/t_cose/src/t_cose_crypto.h``: Expose an API to bind ``t_cose``
+      is implemented. The COSE_Sign, COSE_Sign1, COSE_Mac0 signature and the
+      COSE_Encrypt, COSE_Encrypt0 encryption schemes are supported.
+      Its source code is fetched automatically during the build configuration
+      step from an external repository: `t_cose library <https://github.com/laurencelundblade/t_cose>`__.
+    - ``<t_cose_src>/src/t_cose_crypto.h``: Expose an API to bind ``t_cose``
       library with available crypto library in the device.
-    - ``lib/ext/t_cose/crypto_adapters/t_cose_psa_crypto.c``: Implements the
+    - ``<t_cose_src>/crypto_adapters/t_cose_psa_crypto.c``: Implements the
       exposed API and ports ``t_cose`` to the PSA Crypto API.
+
 - Initial Attestation Service:
     - ``attest_core.c`` : Implements core functionalities such as implementation
       of APIs, retrieval of claims and token creation.

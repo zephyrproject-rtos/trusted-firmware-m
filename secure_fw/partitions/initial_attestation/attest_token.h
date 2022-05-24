@@ -2,7 +2,7 @@
  * attest_token.h
  *
  * Copyright (c) 2018-2019, Laurence Lundblade.
- * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,9 +15,9 @@
 #include <stdint.h>
 #include "qcbor/qcbor.h"
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
-#include "t_cose_mac0_sign.h"
+#include "t_cose/t_cose_mac_compute.h"
 #else
-#include "t_cose_sign1_sign.h"
+#include "t_cose/t_cose_sign1_sign.h"
 #endif
 
 #ifdef __cplusplus
@@ -128,9 +128,9 @@ struct attest_token_encode_ctx {
     uint32_t                     opt_flags;
     int32_t                      key_select;
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
-    struct t_cose_mac0_sign_ctx  mac_ctx;
+    struct t_cose_mac_calculate_ctx  mac_ctx;
 #else
-    struct t_cose_sign1_sign_ctx signer_ctx;
+    struct t_cose_sign1_sign_ctx     signer_ctx;
 #endif
 };
 

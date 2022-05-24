@@ -11,9 +11,9 @@
 #include "attest_key.h"
 #include "config_tfm.h"
 #include "psa/crypto.h"
-#include "qcbor/UsefulBuf.h"
-#include "t_cose_common.h"
-#include "t_cose_key.h"
+#include "t_cose/q_useful_buf.h"
+#include "t_cose/t_cose_common.h"
+#include "t_cose/t_cose_key.h"
 #include "tfm_crypto_defs.h"
 
 /**
@@ -57,8 +57,8 @@ static enum psa_attest_err_t compute_attest_key_hash(void)
     psa_status_t psa_res;
     enum t_cose_err_t cose_res;
 
-    attest_key.crypto_lib = T_COSE_CRYPTO_LIB_PSA;
-    attest_key.k.key_handle = TFM_BUILTIN_KEY_ID_IAK;
+    attest_key.key.handle = TFM_BUILTIN_KEY_ID_IAK;
+
     cose_res = t_cose_key_encode(attest_key,
                                  public_key_buf,
                                  &cose_key);

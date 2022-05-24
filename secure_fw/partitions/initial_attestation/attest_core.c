@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,7 +19,7 @@
 #include "tfm_plat_boot_seed.h"
 #include "tfm_attest_hal.h"
 #include "tfm_attest_iat_defs.h"
-#include "t_cose_common.h"
+#include "t_cose/t_cose_common.h"
 #include "tfm_crypto_defs.h"
 #include "tfm_sp_log.h"
 
