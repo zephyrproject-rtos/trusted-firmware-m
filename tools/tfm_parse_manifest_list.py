@@ -303,7 +303,7 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
 
             # Check if partition ID is duplicated
             if pid in pid_list:
-                raise Exception('PID No. {pid} has already been used!'.format(pid))
+                raise Exception('PID No. {} has already been used!'.format(pid))
             else:
                 pid_list.append(pid)
 
