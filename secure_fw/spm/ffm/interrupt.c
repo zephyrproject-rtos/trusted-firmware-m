@@ -56,9 +56,9 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
                  ((struct context_ctrl_t *)p_owner_sp->thrd.p_context_ctrl)->sp;
     }
 
-    if (p_owner_sp->p_boundaries != p_curr_sp->p_boundaries) {
-        tfm_hal_update_boundaries(p_owner_sp->p_ldinf,
-                                  p_owner_sp->p_boundaries);
+    if (p_owner_sp->boundary != p_curr_sp->boundary) {
+        tfm_hal_activate_boundary(p_owner_sp->p_ldinf,
+                                  p_owner_sp->boundary);
     }
 
     /*
@@ -88,9 +88,9 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     p_prev_sp = (struct partition_t *)(p_ctx_flih_ret->state_ctx.r2);
     p_owner_sp = GET_CURRENT_COMPONENT();
 
-    if (p_owner_sp->p_boundaries != p_prev_sp->p_boundaries) {
-        tfm_hal_update_boundaries(p_prev_sp->p_ldinf,
-                                  p_prev_sp->p_boundaries);
+    if (p_owner_sp->boundary != p_prev_sp->boundary) {
+        tfm_hal_activate_boundary(p_prev_sp->p_ldinf,
+                                  p_prev_sp->boundary);
     }
 
     /* Restore current component */

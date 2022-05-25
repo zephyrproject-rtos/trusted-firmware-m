@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,28 +33,28 @@ enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
 }
 
 /*
- * Implementation of tfm_hal_bind_boundaries() on Secure enclave:
+ * Implementation of tfm_hal_bind_boundary() on Secure enclave:
  */
-enum tfm_hal_status_t tfm_hal_bind_boundaries(
+enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
-                                    void **pp_boundaries)
+                                    uintptr_t *p_boundary)
 {
     bool privileged = true;
 
-    if (!p_ldinf || !pp_boundaries) {
+    if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
-    *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
 
     return TFM_HAL_SUCCESS;
 }
 
-enum tfm_hal_status_t tfm_hal_update_boundaries(
+enum tfm_hal_status_t tfm_hal_activate_boundary(
                              const struct partition_load_info_t *p_ldinf,
-                             void *p_boundaries)
+                             uintptr_t boundary)
 {
     (void)p_ldinf;
-    (void)p_boundaries;
+    (void)boundary;
     return TFM_HAL_SUCCESS;
 }

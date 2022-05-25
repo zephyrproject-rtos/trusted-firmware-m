@@ -535,14 +535,14 @@ uint32_t tfm_spm_init(void)
 
         /* Bind the partition with platform. */
 #if TFM_FIH_PROFILE_ON
-        FIH_CALL(tfm_hal_bind_boundaries, fih_rc, partition->p_ldinf,
-                 &partition->p_boundaries);
+        FIH_CALL(tfm_hal_bind_boundary, fih_rc, partition->p_ldinf,
+                 &partition->boundary);
         if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
             tfm_core_panic();
         }
 #else /* TFM_FIH_PROFILE_ON */
-        if (tfm_hal_bind_boundaries(partition->p_ldinf,
-                                    &partition->p_boundaries)
+        if (tfm_hal_bind_boundary(partition->p_ldinf,
+                                    &partition->boundary)
                 != TFM_HAL_SUCCESS) {
             tfm_core_panic();
         }

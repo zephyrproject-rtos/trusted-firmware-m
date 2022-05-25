@@ -115,9 +115,9 @@ struct conn_handle_t {
 /* Partition runtime type */
 struct partition_t {
     const struct partition_load_info_t *p_ldinf;
-    void                               *p_boundaries;
     void                               *p_interrupts;
     void                               *p_metadata;
+    uintptr_t                          boundary;
     uint32_t                           signals_allowed;
     uint32_t                           signals_waiting;
     volatile uint32_t                  signals_asserted;

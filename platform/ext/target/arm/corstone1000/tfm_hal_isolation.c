@@ -100,7 +100,7 @@ enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
 }
 
 /*
- * Implementation of tfm_hal_bind_boundaries() on Corstone1000:
+ * Implementation of tfm_hal_bind_boundary() on Corstone1000:
  *
  * The API encodes some attributes into a handle and returns it to SPM.
  * The attributes include isolation boundaries, privilege, and MMIO information.
@@ -135,13 +135,13 @@ enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
 #define HANDLE_PER_ATTR_BITS            (0x4)
 #define HANDLE_ATTR_PRIV_MASK           ((1 << HANDLE_PER_ATTR_BITS) - 1)
 
-enum tfm_hal_status_t tfm_hal_bind_boundaries(
+enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
-                                    void **pp_boundaries)
+                                    uintptr_t *p_boundary)
 {
     bool privileged;
 
-    if (!p_ldinf || !pp_boundaries) {
+    if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
@@ -151,7 +151,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
-    *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
 
     /* NOTE: Need to add validation of numbered MMIO if platform requires. */
     /* Platform does not have a need for MMIO yet. */
@@ -159,12 +159,12 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
     return TFM_HAL_SUCCESS;
 }
 
-enum tfm_hal_status_t tfm_hal_update_boundaries(
+enum tfm_hal_status_t tfm_hal_activate_boundary(
                              const struct partition_load_info_t *p_ldinf,
-                             void *p_boundaries)
+                             uintptr_t boundary)
 {
     CONTROL_Type ctrl;
-    uint32_t local_handle = (uint32_t)p_boundaries;
+    uint32_t local_handle = (uint32_t)boundary;
     bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
 
     /* Privileged level is required to be set always */

@@ -298,7 +298,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
 
 #ifdef TFM_PSA_API
 /*
- * Implementation of tfm_hal_bind_boundaries() on STM:
+ * Implementation of tfm_hal_bind_boundary() on STM:
  *
  * The API encodes some attributes into a handle and returns it to SPM.
  * The attributes include isolation boundaries, privilege, and MMIO information.
@@ -329,10 +329,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
  * 2. Highest 8 bits are for index. It supports 256 unique handles at most.
  */
 
-enum tfm_hal_status_t tfm_hal_bind_boundaries(
-
+enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
-                                    void **pp_boundaries)
+                                    uintptr_t *p_boundary)
 {
     uint32_t i, j;
     bool privileged;
@@ -342,7 +341,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
 
-    if (!p_ldinf || !pp_boundaries) {
+    if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
@@ -397,16 +396,16 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
         }
 #endif
     }
-    *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
     return TFM_HAL_SUCCESS;
 }
 
-enum tfm_hal_status_t tfm_hal_update_boundaries(
+enum tfm_hal_status_t tfm_hal_activate_boundary(
                              const struct partition_load_info_t *p_ldinf,
-                             void *p_boundaries)
+                             uintptr_t boundary)
 {
     CONTROL_Type ctrl;
-    uint32_t local_handle = (uint32_t)p_boundaries;
+    uint32_t local_handle = (uint32_t)boundary;
     bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
 
     /* Privileged level is required to be set always */

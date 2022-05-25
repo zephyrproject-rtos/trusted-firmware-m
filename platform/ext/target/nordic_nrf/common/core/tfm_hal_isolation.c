@@ -63,10 +63,10 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
 
 #ifdef TFM_PSA_API
 enum tfm_hal_status_t
-tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
-                        void **pp_boundaries)
+tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
+                        uintptr_t *p_boundary)
 {
-    if (!p_ldinf || !pp_boundaries) {
+    if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
@@ -78,7 +78,7 @@ tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
-    *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
 
     for (uint32_t i = 0; i < p_ldinf->nassets; i++) {
         const struct asset_desc_t *p_asset =
@@ -143,14 +143,14 @@ tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
 }
 
 enum tfm_hal_status_t
-tfm_hal_update_boundaries(const struct partition_load_info_t *p_ldinf,
-                          void *p_boundaries)
+tfm_hal_activate_boundary(const struct partition_load_info_t *p_ldinf,
+                          uintptr_t boundary)
 {
     /* Privileged level is required to be set always */
     CONTROL_Type ctrl;
     ctrl.w = __get_CONTROL();
 
-    ctrl.b.nPRIV = ((uint32_t)p_boundaries & HANDLE_ATTR_PRIV_MASK) ? 0 : 1;
+    ctrl.b.nPRIV = ((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK) ? 0 : 1;
 
     __set_CONTROL(ctrl.w);
 
@@ -390,7 +390,7 @@ enum tfm_hal_status_t mpu_init_cfg(void)
 		// enough regions for it.
 		//
 	    // NB: Enabling null-pointer detection can also
-		// cause tfm_hal_bind_boundaries to return an error due to
+		// cause tfm_hal_bind_boundary to return an error due to
 		// insufficient memory regions
 		return TFM_HAL_ERROR_GENERIC;
 	}

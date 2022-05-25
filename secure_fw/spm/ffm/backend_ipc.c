@@ -207,7 +207,7 @@ uint32_t backend_system_run(void)
     p_cur_pt = TO_CONTAINER(CURRENT_THREAD->p_context_ctrl,
                             struct partition_t, ctx_ctrl);
 
-    if (tfm_hal_update_boundaries(p_cur_pt->p_ldinf, p_cur_pt->p_boundaries)
+    if (tfm_hal_activate_boundary(p_cur_pt->p_ldinf, p_cur_pt->boundary)
             != TFM_HAL_SUCCESS) {
         tfm_core_panic();
     }
@@ -274,9 +274,9 @@ uint64_t ipc_schedule(void)
          * If required, let the platform update boundary based on its
          * implementation. Change privilege, MPU or other configurations.
          */
-        if (p_part_curr->p_boundaries != p_part_next->p_boundaries) {
-            if (tfm_hal_update_boundaries(p_part_next->p_ldinf,
-                                          p_part_next->p_boundaries)
+        if (p_part_curr->boundary != p_part_next->boundary) {
+            if (tfm_hal_activate_boundary(p_part_next->p_ldinf,
+                                          p_part_next->boundary)
                                                         != TFM_HAL_SUCCESS) {
                 tfm_core_panic();
             }

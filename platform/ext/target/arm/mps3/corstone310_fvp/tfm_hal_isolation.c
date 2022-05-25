@@ -167,9 +167,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
  * SPM passes the handle to platform to do platform settings and update
  * isolation boundaries.
  */
-enum tfm_hal_status_t tfm_hal_bind_boundaries(
+enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
-                                    void **pp_boundaries)
+                                    uintptr_t *p_boundary)
 {
     uint32_t i, j;
     bool privileged;
@@ -178,7 +178,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
 #if TFM_LVL == 2
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
-    if (!p_ldinf || !pp_boundaries) {
+    if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
@@ -250,17 +250,17 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
 #endif
     }
 
-    *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
 
     return TFM_HAL_SUCCESS;
 }
 
-enum tfm_hal_status_t tfm_hal_update_boundaries(
+enum tfm_hal_status_t tfm_hal_activate_boundary(
                              const struct partition_load_info_t *p_ldinf,
-                             void *p_boundaries)
+                             uintptr_t boundary)
 {
     CONTROL_Type ctrl;
-    bool privileged = !!((uint32_t)p_boundaries & HANDLE_ATTR_PRIV_MASK);
+    bool privileged = !!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK);
 
     /* Privileged level is required to be set always */
     ctrl.w = __get_CONTROL();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -48,10 +48,10 @@ fih_int tfm_hal_set_up_static_boundaries(void);
 fih_int tfm_hal_verify_static_boundaries(void);
 
 /**
- * \brief  Update the isolation boundaries.
+ * \brief  Activate one Secure Partition boundary.
  *
  * \param[in]   p_ldinf         Partition load information.
- * \param[in]   p_boundaries    Platform boundary handle for partition.
+ * \param[in]   boundary        Platform boundary value for partition.
  *
  * \return TFM_HAL_SUCCESS          The isolation boundaries update succeeded.
  *         TFM_HAL_ERROR_GENERIC    Failed to update the isolation boundaries.
@@ -59,8 +59,8 @@ fih_int tfm_hal_verify_static_boundaries(void);
  * \note   When FIH_ENABLE_DOUBLE_VARS is enabled, the return code will be
  *         wrapped and protected in \ref fih_int structure.
  */
-fih_int tfm_hal_update_boundaries(const struct partition_load_info_t *p_ldinf,
-                                  void *p_boundaries);
+fih_int tfm_hal_activate_boundary(const struct partition_load_info_t *p_ldinf,
+                                  uintptr_t boundary);
 #else /* TFM_FIH_PROFILE_ON */
 /**
  * \brief  Sets up the static isolation boundaries which are constant throughout
@@ -73,17 +73,17 @@ fih_int tfm_hal_update_boundaries(const struct partition_load_info_t *p_ldinf,
 enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void);
 
 /**
- * \brief  Update the isolation boundaries.
+ * \brief  Activate one Secure Partition boundary.
  *
  * \param[in]   p_ldinf         Partition load information.
- * \param[in]   p_boundaries    Platform boundary handle for partition.
+ * \param[in]   boundary        Platform boundary value for partition.
  *
  * \return TFM_HAL_SUCCESS          The isolation boundaries update succeeded.
  *         TFM_HAL_ERROR_GENERIC    Failed to update the isolation boundaries.
  */
-enum tfm_hal_status_t tfm_hal_update_boundaries(
+enum tfm_hal_status_t tfm_hal_activate_boundary(
                             const struct partition_load_info_t *p_ldinf,
-                            void *p_boundaries);
+                            uintptr_t boundary);
 #endif /* TFM_FIH_PROFILE_ON */
 
 /**
@@ -109,24 +109,24 @@ enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
 /**
  * \brief  This API binds partition boundaries with the platform. The platform
  *         maintains the platform-specific settings for SPM further
- *         usage, such as update partition hardware boundaries or
+ *         usage, such as update partition boundaries or
  *         check resource accessibility. The platform needs to manage
- *         the settings with internal mechanism, and return a handle
- *         to SPM. SPM delivers this handle back to platform when
- *         necessary. And SPM checks this handle to decide if the
+ *         the settings with internal mechanism, and return a value
+ *         to SPM. SPM delivers this value back to platform when
+ *         necessary. And SPM checks this value to decide if the
  *         platform-specific settings need to be updated. Hence
- *         multiple partitions can have the same handle if they have
+ *         multiple partitions can have the same value if they have
  *         the same platform-specific settings, depending on isolation level.
  *
  * \param[in]   p_ldinf           Partition load information.
- * \param[in]   pp_boundaries     Pointer of the boundary handle
+ * \param[in]   p_boundary        Pointer of the boundary value
  *
- * \return TFM_HAL_SUCCESS          - A platform handle binding success.
- *         TFM_HAL_ERROR_GENERIC    - Error occured while binding.
+ * \return TFM_HAL_SUCCESS          - A platform value bound successfully.
+ *         TFM_HAL_ERROR_GENERIC    - Error occurred while binding.
  */
-enum tfm_hal_status_t tfm_hal_bind_boundaries(
+enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
-                                    void **pp_boundaries);
+                                    uintptr_t *p_boundary);
 
 #ifdef __cplusplus
 }

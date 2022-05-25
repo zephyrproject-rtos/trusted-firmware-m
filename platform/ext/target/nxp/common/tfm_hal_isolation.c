@@ -251,7 +251,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
 
 #ifdef TFM_PSA_API
 /*
- * Implementation of tfm_hal_bind_boundaries() on LPCXpresso55s69:
+ * Implementation of tfm_hal_bind_boundary() on LPCXpresso55s69:
  *
  * The API encodes some attributes into a handle and returns it to SPM.
  * The attributes include isolation boundaries, privilege, and MMIO information.
@@ -282,9 +282,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
  * 1. The maximum number of allowed MMIO regions is 5.
  * 2. Highest 8 bits are for index. It supports 256 unique handles at most.
  */
-enum tfm_hal_status_t tfm_hal_bind_boundaries(
+enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
-                                    void **pp_boundaries)
+                                    uintptr_t *p_boundary)
 {
     uint32_t i, j;
     bool privileged;
@@ -295,7 +295,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
 #elif TFM_LVL == 3
     uint32_t partition_attrs = 0;
 #endif
-    if (!p_ldinf || !pp_boundaries) {
+    if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
@@ -367,19 +367,19 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
         return TFM_HAL_ERROR_GENERIC;
     }
     HANDLE_ENCODE_INDEX(partition_attrs, idx_boundary_handle);
-    *pp_boundaries = (void *)partition_attrs;
+    *p_boundary = (uintptr_t)partition_attrs;
 #else
-    *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    *p_boundary = (uintptr_t)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
 #endif
 
     return TFM_HAL_SUCCESS;
 }
-enum tfm_hal_status_t tfm_hal_update_boundaries(
+enum tfm_hal_status_t tfm_hal_activate_boundary(
                              const struct partition_load_info_t *p_ldinf,
-                             void *p_boundaries)
+                             uintptr_t boundary)
 {
     CONTROL_Type ctrl;
-    uint32_t local_handle = (uint32_t)p_boundaries;
+    uint32_t local_handle = (uint32_t)boundary;
     bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
 #if TFM_LVL == 3
     struct mpu_armv8m_region_cfg_t localcfg;
