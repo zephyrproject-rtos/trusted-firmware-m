@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -201,11 +203,9 @@ void tfm_rpc_set_caller_data(struct conn_handle_t *handle, int32_t client_id);
 /* RPC is only available in multi-core scenario */
 #define is_tfm_rpc_msg(x)                       (false)
 
-#define tfm_rpc_client_call_handler()           do {} while (0)
-
 #define tfm_rpc_client_call_reply(owner, ret)   do {} while (0)
 
-#define tfm_rpc_set_caller_data(msg, client_id) do {} while (0)
+#define tfm_rpc_set_caller_data(hdl, client_id) do {} while (0)
 
 #endif /* TFM_MULTI_CORE_TOPOLOGY */
 #endif /* __TFM_RPC_H__ */
