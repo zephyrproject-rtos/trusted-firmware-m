@@ -271,6 +271,17 @@ extern struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_NS;
 extern const struct dma350_remap_list_t dma350_address_remap;
 #endif
 
+/* TGU driver structure */
+#ifdef TGU_ARMV8_M_ITCM_S
+#include "tgu_armv8_m_drv.h"
+extern struct tgu_armv8_m_dev_t TGU_ARMV8_M_ITCM_DEV_S;
+#endif
+
+#ifdef TGU_ARMV8_M_DTCM_S
+#include "tgu_armv8_m_drv.h"
+extern struct tgu_armv8_m_dev_t TGU_ARMV8_M_DTCM_DEV_S;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

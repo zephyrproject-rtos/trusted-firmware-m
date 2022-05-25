@@ -179,6 +179,14 @@
 #define DDR4_BLK5_BASE_S                 0xB0000000 /* DDR4 block 5 Secure base address */
 #define DDR4_BLK7_BASE_S                 0xD0000000 /* DDR4 block 7 Secure base address */
 
+/* TCM Security Gate register addresses */
+#define ITGU_CTRL_BASE                   0xE001E500 /* TGU control register for ITCM */
+#define ITGU_CFG_BASE                    0xE001E504 /* TGU configuration register for ITCM */
+#define ITGU_LUTn_BASE                   0xE001E510 /* TGU Look Up Table  register for ITCM */
+#define DTGU_CTRL_BASE                   0xE001E600 /* TGU control register for DTCM */
+#define DTGU_CFG_BASE                    0xE001E604 /* TGU configuration register for DTCM */
+#define DTGU_LUTn_BASE                   0xE001E610 /* TGU Look Up Table  register for DTCM */
+
 /* Memory map addresses exempt from memory attribution by both the SAU and IDAU */
 #define CORSTONE310_EWIC_BASE            0xE0047000 /* External Wakeup Interrupt Controller
                                                      * Access from Non-secure software is only allowed

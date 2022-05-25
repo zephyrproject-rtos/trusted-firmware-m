@@ -751,3 +751,77 @@ const struct dma350_remap_list_t dma350_address_remap = {
             sizeof(dma350_address_remap_list[0]),
     .map = dma350_address_remap_list};
 #endif
+
+/* TGU driver structures */
+#ifdef TGU_ARMV8_M_ITCM_S
+static const struct tgu_armv8_m_mem_range_t TGU_ITCM_RANGE_S = {
+    .base         = ITCM_BASE_S,
+    .limit        = ITCM_BASE_S + ITCM_SIZE - 1,
+    .range_offset = 0x0,
+    .attr         = TGU_SEC_ATTR_SECURE
+};
+
+static const struct tgu_armv8_m_mem_range_t TGU_ITCM_RANGE_NS = {
+    .base         = ITCM_BASE_NS,
+    .limit        = ITCM_BASE_NS + ITCM_SIZE - 1,
+    .range_offset = 0x0,
+    .attr         = TGU_SEC_ATTR_NONSECURE
+};
+
+#define TGU_ITCM_RANGE_LIST_LEN  2u
+static const struct tgu_armv8_m_mem_range_t*
+    TGU_ITCM_RANGE_LIST[TGU_ITCM_RANGE_LIST_LEN] = {
+        &TGU_ITCM_RANGE_S,
+        &TGU_ITCM_RANGE_NS
+    };
+
+static struct tgu_armv8_m_dev_cfg_t TGU_ARMV8_M_ITCM_DEV_CFG_S = {
+    .base = ITGU_CTRL_BASE
+};
+static struct tgu_armv8_m_dev_data_t TGU_ARMV8_M_ITCM_DEV_DATA_S = {
+    .range_list = TGU_ITCM_RANGE_LIST,
+    .nbr_of_ranges = TGU_ITCM_RANGE_LIST_LEN,
+    .is_initialized = true
+};
+struct tgu_armv8_m_dev_t TGU_ARMV8_M_ITCM_DEV_S = {
+    &(TGU_ARMV8_M_ITCM_DEV_CFG_S),
+    &(TGU_ARMV8_M_ITCM_DEV_DATA_S),
+};
+#endif
+
+#ifdef TGU_ARMV8_M_DTCM_S
+
+static const struct tgu_armv8_m_mem_range_t TGU_DTCM_RANGE_S = {
+    .base         = DTCM0_BASE_S,
+    .limit        = DTCM3_BASE_S + DTCM_BLK_SIZE -1,
+    .range_offset = 0x0,
+    .attr         = TGU_SEC_ATTR_SECURE
+};
+
+static const struct tgu_armv8_m_mem_range_t TGU_DTCM_RANGE_NS = {
+    .base         = DTCM0_BASE_NS,
+    .limit        = DTCM3_BASE_NS + DTCM_BLK_SIZE -1,
+    .range_offset = 0x0,
+    .attr         = TGU_SEC_ATTR_NONSECURE
+};
+
+#define TGU_DTCM_RANGE_LIST_LEN  2u
+static const struct tgu_armv8_m_mem_range_t*
+    TGU_DTCM_RANGE_LIST[TGU_DTCM_RANGE_LIST_LEN] = {
+        &TGU_DTCM_RANGE_S,
+        &TGU_DTCM_RANGE_NS
+    };
+
+static struct tgu_armv8_m_dev_cfg_t TGU_ARMV8_M_DTCM_DEV_CFG_S = {
+    .base = DTGU_CTRL_BASE
+};
+static struct tgu_armv8_m_dev_data_t TGU_ARMV8_M_DTCM_DEV_DATA_S = {
+    .range_list = TGU_DTCM_RANGE_LIST,
+    .nbr_of_ranges = TGU_DTCM_RANGE_LIST_LEN,
+    .is_initialized = true,
+};
+struct tgu_armv8_m_dev_t TGU_ARMV8_M_DTCM_DEV_S = {
+    &(TGU_ARMV8_M_DTCM_DEV_CFG_S),
+    &(TGU_ARMV8_M_DTCM_DEV_DATA_S),
+};
+#endif
