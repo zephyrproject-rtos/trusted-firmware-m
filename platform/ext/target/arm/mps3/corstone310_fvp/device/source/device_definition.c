@@ -741,7 +741,7 @@ struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_NS = {
 
 #if defined(DMA350_DMA0_S)
 /* ADA DMA checker layer has to know the TCM remaps */
-const struct dma350_remap_range_t dma350_address_remap_list[] = {
+static const struct dma350_remap_range_t dma350_address_remap_list[] = {
     {.begin = 0x00000000, .end = 0x00007FFF, .offset = 0x0A000000},
     {.begin = 0x10000000, .end = 0x10007FFF, .offset = 0x0A000000},
     {.begin = 0x20000000, .end = 0x20007FFF, .offset = 0x04000000},

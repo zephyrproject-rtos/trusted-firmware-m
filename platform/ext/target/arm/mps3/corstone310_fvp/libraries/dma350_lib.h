@@ -198,14 +198,14 @@ enum dma350_lib_error_t dma350_get_status(struct dma350_ch_dev_t* dev,
 __STATIC_INLINE
 enum dma350_lib_error_t dma350_clear_done_irq(struct dma350_ch_dev_t* dev)
 {
-    enum dma350_ch_error_t ch_err;
-    ch_err = verify_dma350_ch_dev_init(dev);
-    if(ch_err != DMA350_CH_ERR_NONE) {
-        return ch_err;
+    enum dma350_lib_error_t lib_err;
+    lib_err = verify_dma350_ch_dev_init(dev);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
     dma350_ch_clear_stat(dev, DMA350_CH_STAT_DONE);
 
-    return DMA350_CH_ERR_NONE;
+    return DMA350_LIB_ERR_NONE;
 }
 
 __STATIC_INLINE
@@ -227,26 +227,26 @@ enum dma350_lib_error_t verify_dma350_ch_dev_init(struct dma350_ch_dev_t* dev)
 __STATIC_INLINE
 enum dma350_lib_error_t verify_dma350_ch_dev_ready(struct dma350_ch_dev_t* dev)
 {
-    enum dma350_ch_error_t ch_err;
-    ch_err = verify_dma350_ch_dev_init(dev);
-    if(ch_err != DMA350_CH_ERR_NONE) {
-        return ch_err;
+    enum dma350_lib_error_t lib_err;
+    lib_err = verify_dma350_ch_dev_init(dev);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
     if(!dma350_ch_is_ready(dev)) {
        return DMA350_LIB_ERR_CH_NOT_READY;
     }
 
-    return DMA350_CH_ERR_NONE;
+    return DMA350_LIB_ERR_NONE;
 }
 
 __STATIC_INLINE
 enum dma350_lib_error_t dma350_get_status(struct dma350_ch_dev_t* dev,
                                           union dma350_ch_status_t *status)
 {
-    enum dma350_ch_error_t ch_err;
-    ch_err = verify_dma350_ch_dev_init(dev);
-    if(ch_err != DMA350_CH_ERR_NONE) {
-        return ch_err;
+    enum dma350_lib_error_t lib_err;
+    lib_err = verify_dma350_ch_dev_init(dev);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
     *status = dma350_ch_get_status(dev);
     return DMA350_LIB_ERR_NONE;

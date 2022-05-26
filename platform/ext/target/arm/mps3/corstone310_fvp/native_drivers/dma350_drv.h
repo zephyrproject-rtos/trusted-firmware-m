@@ -304,8 +304,9 @@ enum dma350_error_t dma350_set_ch_unprivileged(struct dma350_dev_t *dev,
 __STATIC_INLINE
 uint8_t dma350_get_num_ch(const struct dma350_dev_t *dev)
 {
-    return ((union dma350_dmainfo_buildcfg0_t)dev->cfg->dma_info->DMA_BUILDCFG0)
-        .b.NUM_CHANNELS;
+    return (union dma350_dmainfo_buildcfg0_t) {
+        .w = dev->cfg->dma_info->DMA_BUILDCFG0
+    }.b.NUM_CHANNELS;
 }
 
 __STATIC_INLINE

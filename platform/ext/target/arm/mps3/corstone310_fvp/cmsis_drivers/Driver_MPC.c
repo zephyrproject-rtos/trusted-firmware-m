@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2016-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,12 @@
 
 /* Driver version */
 #define ARM_MPC_DRV_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(2, 0)
+
+#if (defined (RTE_SRAM_MPC) && (RTE_SRAM_MPC == 1)) || \
+    (defined (RTE_ISRAM0_MPC) && (RTE_ISRAM0_MPC == 1)) || \
+    (defined (RTE_ISRAM1_MPC) && (RTE_ISRAM1_MPC == 1)) || \
+    (defined (RTE_QSPI_MPC) && (RTE_QSPI_MPC == 1)) || \
+    (defined (RTE_DDR4_MPC) && (RTE_DDR4_MPC == 1))
 
 /* Driver Version */
 static const ARM_DRIVER_VERSION DriverVersion = {
@@ -58,12 +64,14 @@ static int32_t error_trans(enum mpc_sie_error_t err)
         return ARM_MPC_ERR_INVALID_RANGE;
     case MPC_SIE_ERR_RANGE_SEC_ATTR_NON_COMPATIBLE:
         return ARM_MPC_ERR_RANGE_SEC_ATTR_NON_COMPATIBLE;
+    case MPC_SIE_UNSUPPORTED_HARDWARE_VERSION:
+    case MPC_SIE_ERR_GATING_NOT_PRESENT:
     default:
         return ARM_MPC_ERR_UNSPECIFIED;
     }
 }
 
-#if (RTE_SRAM_MPC)
+#if (defined (RTE_SRAM_MPC) && (RTE_SRAM_MPC == 1))
 /* Ranges controlled by this SRAM_MPC */
 static const struct mpc_sie_memory_range_t MPC_SRAM_RANGE_S = {
     .base         = MPC_SRAM_RANGE_BASE_S,
@@ -203,7 +211,7 @@ ARM_DRIVER_MPC Driver_SRAM_MPC = {
 };
 #endif /* RTE_SRAM_MPC */
 
-#if (RTE_ISRAM0_MPC)
+#if (defined (RTE_ISRAM0_MPC) && (RTE_ISRAM0_MPC == 1))
 /* Ranges controlled by this ISRAM0_MPC */
 static const struct mpc_sie_memory_range_t MPC_ISRAM0_RANGE_S = {
     .base         = MPC_ISRAM0_RANGE_BASE_S,
@@ -343,7 +351,7 @@ ARM_DRIVER_MPC Driver_ISRAM0_MPC = {
 };
 #endif /* RTE_ISRAM0_MPC */
 
-#if (RTE_ISRAM1_MPC)
+#if (defined (RTE_ISRAM1_MPC) && (RTE_ISRAM1_MPC == 1))
 /* Ranges controlled by this ISRAM1_MPC */
 static const struct mpc_sie_memory_range_t MPC_ISRAM1_RANGE_S = {
     .base         = MPC_ISRAM1_RANGE_BASE_S,
@@ -483,7 +491,7 @@ ARM_DRIVER_MPC Driver_ISRAM1_MPC = {
 };
 #endif /* RTE_ISRAM1_MPC */
 
-#if (RTE_QSPI_MPC)
+#if (defined (RTE_QSPI_MPC) && (RTE_QSPI_MPC == 1))
 /* Ranges controlled by this QSPI_MPC */
 static const struct mpc_sie_memory_range_t MPC_QSPI_RANGE_S = {
     .base         = MPC_QSPI_RANGE_BASE_S,
@@ -623,7 +631,7 @@ ARM_DRIVER_MPC Driver_QSPI_MPC = {
 };
 #endif /* RTE_QSPI_MPC */
 
-#if (RTE_DDR4_MPC)
+#if (defined (RTE_DDR4_MPC) && (RTE_DDR4_MPC == 1))
 /* Ranges controlled by this DDR4_MPC */
 static const struct mpc_sie_memory_range_t MPC_DDR4_RANGE_S = {
     .base         = MPC_DDR4_RANGE_BASE_S,
@@ -762,3 +770,4 @@ ARM_DRIVER_MPC Driver_DDR4_MPC = {
     .LockDown         = DDR4_MPC_LockDown,
 };
 #endif /* RTE_DDR4_MPC */
+#endif

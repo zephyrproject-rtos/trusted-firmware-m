@@ -141,6 +141,7 @@ static enum dma350_lib_error_t dma350_get_memattr(struct dma350_ch_dev_t* dev,
     uint8_t mpu_attr_idx;
     memattr->mpu_attribute = 0;
     memattr->mpu_shareability = 0;
+    (void)dev;
 #if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
     /* Check if address is readable by non-secure, then if by unprivileged */
     /* Secure state - alternate (NS) MPU alias availabe */
@@ -238,16 +239,16 @@ enum dma350_lib_error_t dma350_ch_lib_set_src(struct dma350_ch_dev_t* dev,
                                               void* src)
 {
     struct dma350_memattr memattr;
-    enum dma350_lib_error_t addr_err;
-    enum dma350_ch_error_t ch_err;
-    ch_err = verify_dma350_ch_dev_ready(dev);
-    if(ch_err != DMA350_CH_ERR_NONE) {
-        return ch_err;
+    enum dma350_lib_error_t lib_err;
+
+    lib_err = verify_dma350_ch_dev_ready(dev);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
 
-    addr_err = dma350_get_memattr(dev, src, &memattr, false);
-    if(addr_err != DMA350_LIB_ERR_NONE) {
-        return addr_err;
+    lib_err = dma350_get_memattr(dev, src, &memattr, false);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
 
     if(memattr.nonsecure) {
@@ -271,16 +272,16 @@ enum dma350_lib_error_t dma350_ch_lib_set_des(struct dma350_ch_dev_t* dev,
                                               void* des)
 {
     struct dma350_memattr memattr;
-    enum dma350_lib_error_t addr_err;
-    enum dma350_ch_error_t ch_err;
-    ch_err = verify_dma350_ch_dev_ready(dev);
-    if(ch_err != DMA350_CH_ERR_NONE) {
-        return ch_err;
+    enum dma350_lib_error_t lib_err;
+
+    lib_err = verify_dma350_ch_dev_ready(dev);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
 
-    addr_err = dma350_get_memattr(dev, des, &memattr, true);
-    if(addr_err != DMA350_LIB_ERR_NONE) {
-        return addr_err;
+    lib_err = dma350_get_memattr(dev, des, &memattr, true);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
 
     if(memattr.nonsecure) {
@@ -305,11 +306,11 @@ enum dma350_lib_error_t dma350_ch_lib_set_src_des(struct dma350_ch_dev_t* dev,
                                                   uint32_t src_size,
                                                   uint32_t des_size)
 {
-    enum dma350_lib_error_t addr_err;
-    enum dma350_ch_error_t ch_err;
-    ch_err = verify_dma350_ch_dev_ready(dev);
-    if(ch_err != DMA350_CH_ERR_NONE) {
-        return ch_err;
+    enum dma350_lib_error_t lib_err;
+
+    lib_err = verify_dma350_ch_dev_ready(dev);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
     if(NULL == cmse_check_address_range(src, src_size, CMSE_MPU_READ)) {
         return DMA350_LIB_ERR_RANGE_NOT_ACCESSIBLE;
@@ -317,13 +318,13 @@ enum dma350_lib_error_t dma350_ch_lib_set_src_des(struct dma350_ch_dev_t* dev,
     if(NULL == cmse_check_address_range(des, des_size, CMSE_MPU_READWRITE)) {
         return DMA350_LIB_ERR_RANGE_NOT_ACCESSIBLE;
     }
-    addr_err = dma350_ch_lib_set_src(dev, src);
-    if(addr_err != DMA350_LIB_ERR_NONE) {
-        return addr_err;
+    lib_err = dma350_ch_lib_set_src(dev, src);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
-    addr_err = dma350_ch_lib_set_des(dev, des);
-    if(addr_err != DMA350_LIB_ERR_NONE) {
-        return addr_err;
+    lib_err = dma350_ch_lib_set_des(dev, des);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
     return DMA350_LIB_ERR_NONE;
 }
@@ -332,16 +333,16 @@ enum dma350_lib_error_t dma350_memcpy(struct dma350_ch_dev_t* dev, void* src,
                                       void* des, uint32_t size,
                                       enum dma350_lib_exec_type_t exec_type)
 {
-    enum dma350_lib_error_t addr_err;
-    enum dma350_ch_error_t ch_err;
-    ch_err = verify_dma350_ch_dev_ready(dev);
-    if(ch_err != DMA350_CH_ERR_NONE) {
-        return ch_err;
+    enum dma350_lib_error_t lib_err;
+
+    lib_err = verify_dma350_ch_dev_ready(dev);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
 
-    addr_err = dma350_ch_lib_set_src_des(dev, src, des, size, size);
-    if(addr_err != DMA350_LIB_ERR_NONE) {
-        return addr_err;
+    lib_err = dma350_ch_lib_set_src_des(dev, src, des, size, size);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
     dma350_ch_set_xaddr_inc(dev, 1, 1);
 
@@ -349,7 +350,7 @@ enum dma350_lib_error_t dma350_memcpy(struct dma350_ch_dev_t* dev, void* src,
         dma350_ch_set_xsize32(dev, size, size);
     }
     else {
-        dma350_ch_set_xsize16(dev, size, size);
+        dma350_ch_set_xsize16(dev, (uint16_t)size, (uint16_t)size);
     }
     dma350_ch_set_transize(dev, DMA350_CH_TRANSIZE_8BITS);
     dma350_ch_set_xtype(dev, DMA350_CH_XTYPE_CONTINUE);
@@ -362,32 +363,32 @@ enum dma350_lib_error_t dma350_memmove(struct dma350_ch_dev_t* dev, void* src,
                                        void* des, uint32_t size,
                                        enum dma350_lib_exec_type_t exec_type)
 {
-    enum dma350_lib_error_t addr_err;
-    enum dma350_ch_error_t ch_err;
-    ch_err = verify_dma350_ch_dev_ready(dev);
-    if(ch_err != DMA350_CH_ERR_NONE) {
-        return ch_err;
+    enum dma350_lib_error_t lib_err;
+
+    lib_err = verify_dma350_ch_dev_ready(dev);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
 
     if (src < des && (((uint8_t*)src) + size) > (uint8_t*)des) {
-        addr_err = dma350_ch_lib_set_src(dev, (((uint8_t*)src) + size - 1));
-        if(addr_err != DMA350_LIB_ERR_NONE) {
-            return addr_err;
+        lib_err = dma350_ch_lib_set_src(dev, (((uint8_t*)src) + size - 1));
+        if(lib_err != DMA350_LIB_ERR_NONE) {
+            return lib_err;
         }
-        addr_err = dma350_ch_lib_set_des(dev, (((uint8_t*)des) + size - 1));
-        if(addr_err != DMA350_LIB_ERR_NONE) {
-            return addr_err;
+        lib_err = dma350_ch_lib_set_des(dev, (((uint8_t*)des) + size - 1));
+        if(lib_err != DMA350_LIB_ERR_NONE) {
+            return lib_err;
         }
         dma350_ch_set_xaddr_inc(dev, -1, -1);
     }
     else {
-        addr_err = dma350_ch_lib_set_src(dev, src);
-        if(addr_err != DMA350_LIB_ERR_NONE) {
-            return addr_err;
+        lib_err = dma350_ch_lib_set_src(dev, src);
+        if(lib_err != DMA350_LIB_ERR_NONE) {
+            return lib_err;
         }
-        addr_err = dma350_ch_lib_set_des(dev, des);
-        if(addr_err != DMA350_LIB_ERR_NONE) {
-            return addr_err;
+        lib_err = dma350_ch_lib_set_des(dev, des);
+        if(lib_err != DMA350_LIB_ERR_NONE) {
+            return lib_err;
         }
         dma350_ch_set_xaddr_inc(dev, 1, 1);
     }
@@ -396,7 +397,7 @@ enum dma350_lib_error_t dma350_memmove(struct dma350_ch_dev_t* dev, void* src,
         dma350_ch_set_xsize32(dev, size, size);
     }
     else {
-        dma350_ch_set_xsize16(dev, size, size);
+        dma350_ch_set_xsize16(dev, (uint16_t)size, (uint16_t)size);
     }
     dma350_ch_set_transize(dev, DMA350_CH_TRANSIZE_8BITS);
     dma350_ch_set_xtype(dev, DMA350_CH_XTYPE_CONTINUE);
@@ -409,24 +410,25 @@ enum dma350_lib_error_t dma350_endian_swap(struct dma350_ch_dev_t* dev,
                                            void* src, void* des, uint8_t size,
                                            uint32_t count)
 {
-    enum dma350_lib_error_t addr_err;
-    enum dma350_ch_error_t ch_err;
+    uint32_t remaining = 0;
+    enum dma350_lib_error_t lib_err;
     uint8_t *ptr8 = (uint8_t*) src;
-    ch_err = verify_dma350_ch_dev_ready(dev);
-    if(ch_err != DMA350_CH_ERR_NONE) {
-        return ch_err;
+
+    lib_err = verify_dma350_ch_dev_ready(dev);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
 
-    addr_err = dma350_ch_lib_set_des(dev, des);
-    if(addr_err != DMA350_LIB_ERR_NONE) {
-        return addr_err;
+    lib_err = dma350_ch_lib_set_des(dev, des);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
     /* First copy will always start at size - 1 offset, memory attributes are
      * expected to be constant whole the whole affected memory, so it is enough
      * to set the memory attributes once, then only update the src address. */
-    addr_err = dma350_ch_lib_set_src(dev, &ptr8[size - 1]);
-    if(addr_err != DMA350_LIB_ERR_NONE) {
-        return addr_err;
+    lib_err = dma350_ch_lib_set_src(dev, &ptr8[size - 1]);
+    if(lib_err != DMA350_LIB_ERR_NONE) {
+        return lib_err;
     }
     dma350_ch_set_ytype(dev, DMA350_CH_YTYPE_CONTINUE);
     dma350_ch_set_transize(dev, DMA350_CH_TRANSIZE_8BITS);
@@ -437,10 +439,11 @@ enum dma350_lib_error_t dma350_endian_swap(struct dma350_ch_dev_t* dev,
     /* Split up the image into smaller parts to fit the ysize into 16 bits. */
     /* FIXME: command restart cannot be used, because of a bug: at the end of
      *        the command, srcaddr is not updated if yaddrstride is negative */
-    uint32_t remaining = count;
+    remaining = count;
     while(remaining)
     {
-        uint16_t copy_count = remaining > UINT16_MAX ? UINT16_MAX : remaining;
+        union dma350_ch_status_t status;
+        uint16_t copy_count = remaining > UINT16_MAX ? UINT16_MAX : (uint16_t)remaining;
         /* Start at last byte: size - 1,
          * then start at copy_count * size higher.
          * Total copied count = count - remaining */
@@ -455,7 +458,7 @@ enum dma350_lib_error_t dma350_endian_swap(struct dma350_ch_dev_t* dev,
         /* Blocking until done as the whole operation is split into multiple
          * DMA commands.
          * Can be updated to non-blocking when FIXME above is fixed. */
-        union dma350_ch_status_t status = dma350_ch_wait_status(dev);
+        status = dma350_ch_wait_status(dev);
         if (!status.b.STAT_DONE || status.b.STAT_ERR) {
             return DMA350_LIB_ERR_CMD_ERR;
         }

@@ -307,6 +307,7 @@ enum ppc_corstone310_error_t ppc_corstone310_init(struct ppc_corstone310_dev_t* 
             dev->data->nsacfg_nsp_ppc = &p_nsacfg->periphnspppcexp3;
             dev->data->int_bit_mask    = PERIPH_PPCEXP3_INT_POS_MASK;
             break;
+        case CORSTONE310_PPC_MAX_NUM:
         default:
             return PPC_CORSTONE310_ERR_INVALID_PARAM;
         }

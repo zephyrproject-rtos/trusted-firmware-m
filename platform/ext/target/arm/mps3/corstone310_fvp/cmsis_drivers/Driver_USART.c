@@ -28,6 +28,13 @@
 /* Driver version */
 #define ARM_USART_DRV_VERSION  ARM_DRIVER_VERSION_MAJOR_MINOR(2, 2)
 
+
+#if (defined (RTE_USART0) && (RTE_USART0 == 1)) || \
+    (defined (RTE_USART1) && (RTE_USART1 == 1)) || \
+    (defined (RTE_USART2) && (RTE_USART2 == 1)) || \
+    (defined (RTE_USART3) && (RTE_USART3 == 1)) || \
+    (defined (RTE_USART4) && (RTE_USART4 == 1))
+
 /* Driver Version */
 static const ARM_DRIVER_VERSION DriverVersion = {
     ARM_USART_API_VERSION,
@@ -119,7 +126,7 @@ static int32_t ARM_USARTx_Send(UARTx_Resources *uart_dev, const void *data,
     while (uart_dev->tx_nbr_bytes != num) {
         /* Waits until UART is ready to transmit */
         while (!uart_cmsdk_tx_ready(uart_dev->dev)) {
-        };
+        }
 
         /* As UART is ready to transmit at this point, the write function can
          * not return any transmit error */
@@ -135,7 +142,7 @@ static int32_t ARM_USARTx_Send(UARTx_Resources *uart_dev, const void *data,
 
     /* Waits until character is transmited */
     while (!uart_cmsdk_tx_ready(uart_dev->dev)) {
-    };
+    }
 
     return ARM_DRIVER_OK;
 }
@@ -155,7 +162,8 @@ static int32_t ARM_USARTx_Receive(UARTx_Resources *uart_dev,
 
     while (uart_dev->rx_nbr_bytes != num) {
         /* Waits until one character is received */
-        while (!uart_cmsdk_rx_ready(uart_dev->dev)){};
+        while (!uart_cmsdk_rx_ready(uart_dev->dev)){
+        }
 
         /* As UART has received one byte, the read can not
          * return any receive error at this point */
@@ -243,7 +251,7 @@ static int32_t ARM_USARTx_Control(UARTx_Resources *uart_dev, uint32_t control,
     return ARM_DRIVER_OK;
 }
 
-#if (RTE_USART0)
+#if (defined (RTE_USART0) && (RTE_USART0 == 1))
 /* USART0 Driver wrapper functions */
 static UARTx_Resources USART0_DEV = {
     .dev = &UART0_CMSDK_DEV,
@@ -341,7 +349,7 @@ ARM_DRIVER_USART Driver_USART0 = {
 };
 #endif /* RTE_USART0 */
 
-#if (RTE_USART1)
+#if (defined (RTE_USART1) && (RTE_USART1 == 1))
 /* USART1 Driver wrapper functions */
 static UARTx_Resources USART1_DEV = {
     .dev = &UART1_CMSDK_DEV,
@@ -439,7 +447,7 @@ ARM_DRIVER_USART Driver_USART1 = {
 };
 #endif /* RTE_USART1 */
 
-#if (RTE_USART2)
+#if (defined (RTE_USART2) && (RTE_USART2 == 1))
 /* USART2 Driver wrapper functions */
 static UARTx_Resources USART2_DEV = {
     .dev = &UART2_CMSDK_DEV,
@@ -537,7 +545,7 @@ ARM_DRIVER_USART Driver_USART2 = {
 };
 #endif /* RTE_USART2 */
 
-#if (RTE_USART3)
+#if (defined (RTE_USART3) && (RTE_USART3 == 1))
 /* USART3 Driver wrapper functions */
 static UARTx_Resources USART3_DEV = {
     .dev = &UART3_CMSDK_DEV,
@@ -635,7 +643,7 @@ ARM_DRIVER_USART Driver_USART3 = {
 };
 #endif /* RTE_USART3 */
 
-#if (RTE_USART4)
+#if (defined (RTE_USART4) && (RTE_USART4 == 1))
 /* USART4 Driver wrapper functions */
 static UARTx_Resources USART4_DEV = {
     .dev = &UART4_CMSDK_DEV,
@@ -732,3 +740,4 @@ ARM_DRIVER_USART Driver_USART4 = {
     ARM_USART4_GetModemStatus
 };
 #endif /* RTE_USART4 */
+#endif

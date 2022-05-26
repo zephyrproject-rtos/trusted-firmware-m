@@ -79,8 +79,8 @@ uint8_t dma350_get_secaccvio_irq(struct dma350_dev_t *dev)
 
 uint8_t dma350_get_secaccvio_status(struct dma350_dev_t *dev)
 {
-    return dev->cfg->dma_sec_cfg->SCFG_CTRL &
-           DMA_SCFG_INTRSTATUS_STAT_SECACCVIO_Msk;
+    return (uint8_t)(dev->cfg->dma_sec_cfg->SCFG_CTRL &
+           DMA_SCFG_INTRSTATUS_STAT_SECACCVIO_Msk);
 }
 
 void dma350_clear_secaccvio_status(struct dma350_dev_t *dev)

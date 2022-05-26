@@ -948,7 +948,7 @@ void dma350_ch_set_xaddr_inc(struct dma350_ch_dev_t *dev, int16_t src_xaddr_inc,
  * \note This function doesn't check if dev is NULL or if it has been init.
  */
 __STATIC_INLINE
-void dma350_ch_set_fill_value(struct dma350_ch_dev_t *dev, int32_t fill_value);
+void dma350_ch_set_fill_value(struct dma350_ch_dev_t *dev, uint32_t fill_value);
 
 /**
  * \brief Commands a channel of DMA350 DMA.
@@ -2731,7 +2731,7 @@ void dma350_ch_set_src_xaddr_inc(struct dma350_ch_dev_t *dev,
 {
     dev->cfg.ch_base->CH_XADDRINC =
         (dev->cfg.ch_base->CH_XADDRINC & (~DMA_CH_XADDRINC_SRCXADDRINC_Msk)) |
-        (src_xaddr_inc & 0x0000FFFFUL);
+        ((uint32_t)src_xaddr_inc & 0x0000FFFFUL);
 }
 
 __STATIC_INLINE
@@ -2740,7 +2740,7 @@ void dma350_ch_set_des_xaddr_inc(struct dma350_ch_dev_t *dev,
 {
     dev->cfg.ch_base->CH_XADDRINC =
         (dev->cfg.ch_base->CH_XADDRINC & (~DMA_CH_XADDRINC_DESXADDRINC_Msk)) |
-        ((des_xaddr_inc & 0x0000FFFFUL) << DMA_CH_XADDRINC_DESXADDRINC_Pos);
+        (((uint32_t)des_xaddr_inc & 0x0000FFFFUL) << DMA_CH_XADDRINC_DESXADDRINC_Pos);
 }
 
 __STATIC_INLINE
@@ -2748,12 +2748,12 @@ void dma350_ch_set_xaddr_inc(struct dma350_ch_dev_t *dev, int16_t src_xaddr_inc,
                              int16_t des_xaddr_inc)
 {
     dev->cfg.ch_base->CH_XADDRINC =
-        ((des_xaddr_inc & 0x0000FFFFUL) << DMA_CH_XADDRINC_DESXADDRINC_Pos) |
-        (src_xaddr_inc & 0x0000FFFFUL);
+        (((uint32_t)des_xaddr_inc & 0x0000FFFFUL) << DMA_CH_XADDRINC_DESXADDRINC_Pos) |
+        ((uint32_t)src_xaddr_inc & 0x0000FFFFUL);
 }
 
 __STATIC_INLINE
-void dma350_ch_set_fill_value(struct dma350_ch_dev_t *dev, int32_t fill_value)
+void dma350_ch_set_fill_value(struct dma350_ch_dev_t *dev, uint32_t fill_value)
 {
     dev->cfg.ch_base->CH_FILLVAL = fill_value;
 }
@@ -3636,7 +3636,9 @@ bool dma350_ch_is_ready(struct dma350_ch_dev_t *dev)
 __STATIC_INLINE
 union dma350_ch_status_t dma350_ch_get_status(struct dma350_ch_dev_t *dev)
 {
-    return (union dma350_ch_status_t)dev->cfg.ch_base->CH_STATUS;
+    return (union dma350_ch_status_t) {
+        .w = (dev->cfg.ch_base->CH_STATUS)
+    };
 }
 
 __STATIC_INLINE
