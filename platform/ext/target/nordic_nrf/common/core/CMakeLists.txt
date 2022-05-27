@@ -71,6 +71,18 @@ target_sources(platform_s
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
+if (NRF_HW_INIT_RESET_ON_BOOT)
+    target_sources(platform_s
+        PRIVATE
+            hw_init.c
+    )
+
+    target_compile_definitions(platform_s
+        PUBLIC
+            NRF_HW_INIT_RESET_ON_BOOT
+    )
+endif()
+
 if(TFM_PARTITION_PLATFORM)
     target_sources(platform_s
         PRIVATE
