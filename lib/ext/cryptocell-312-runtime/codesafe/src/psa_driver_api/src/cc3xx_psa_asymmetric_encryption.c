@@ -260,8 +260,15 @@ psa_status_t cc3xx_asymmetric_encrypt(const psa_key_attributes_t *attributes,
                                       size_t *output_length)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    size_t key_bits = psa_get_key_bits(attributes);
+    psa_key_type_t type = psa_get_key_type(attributes);
 
     if ((alg == PSA_ALG_RSA_PKCS1V15_CRYPT) || PSA_ALG_IS_RSA_OAEP(alg)) {
+        /* Check that the output buffer is large enough */
+        if (output_size <
+                PSA_ASYMMETRIC_ENCRYPT_OUTPUT_SIZE(type, key_bits, alg)) {
+            return PSA_ERROR_BUFFER_TOO_SMALL;
+        }
         status = cc3xx_internal_rsa_encrypt(
             attributes, key_buffer, key_buffer_size, alg, input, input_length,
             salt, salt_length, output, output_size, output_length);
@@ -291,7 +298,12 @@ psa_status_t cc3xx_asymmetric_decrypt(const psa_key_attributes_t *attributes,
 
     *output_length = 0;
 
-    if (alg == PSA_ALG_RSA_PKCS1V15_CRYPT || PSA_ALG_IS_RSA_OAEP(alg)) {
+    if ((alg == PSA_ALG_RSA_PKCS1V15_CRYPT) || PSA_ALG_IS_RSA_OAEP(alg)) {
+        /* We don't perform a check on the output buffer size in the decrypt
+         * case because the PSA_ASYMMETRIC_DECRYPT_OUTPUT_SIZE would return
+         * only a sufficient value, while the necessary value could be smaller
+         * hence too restrictive on the implementation.
+         */
         status = cc3xx_internal_rsa_decrypt(
             attributes, key_buffer, key_buffer_size, alg, input, input_length,
             salt, salt_length, output, output_size, output_length);
