@@ -23,12 +23,12 @@ static psa_status_t message_dispatch(struct client_request_t *req)
 {
     /* Create the call parameters */
     struct client_call_params_t spm_params = {
-        .handle = req->msg.handle,
-        .type = PARAM_UNPACK_TYPE(req->msg.ctrl_param),
+        .handle = req->handle,
+        .type = req->type,
         .in_vec = req->in_vec,
-        .in_len = PARAM_UNPACK_IN_LEN(req->msg.ctrl_param),
+        .in_len = req->in_len,
         .out_vec = req->out_vec,
-        .out_len = PARAM_UNPACK_OUT_LEN(req->msg.ctrl_param),
+        .out_len = req->out_len,
     };
 
     SPMLOG_DBGMSG("[RSS-COMMS] Dispatching message\r\n");
@@ -66,29 +66,19 @@ static psa_status_t message_dispatch(struct client_request_t *req)
 
 static void rss_comms_reply(const void *owner, int32_t ret)
 {
-    uint32_t i;
     struct client_request_t *req = (struct client_request_t *)owner;
 
-    /* Create reply message */
-    req->reply.protocol_ver = req->msg.protocol_ver;
-    req->reply.seq_num = req->msg.seq_num;
-    req->reply.client_id = req->msg.client_id;
-    req->reply.return_val = ret;
-
-    /* Populate outvec sizes with values returned from service */
-    for (i = 0; i < PARAM_UNPACK_OUT_LEN(req->msg.ctrl_param); ++i) {
-        req->reply.out_size[i] = req->out_vec[i].len;
-    }
+    req->return_val = ret;
 
     SPMLOG_DBGMSG("[RSS-COMMS] Sending reply\r\n");
-    SPMLOG_DBGMSGVAL("protocol_ver=", req->reply.protocol_ver);
-    SPMLOG_DBGMSGVAL("seq_num=", req->reply.seq_num);
-    SPMLOG_DBGMSGVAL("client_id=", req->reply.client_id);
-    SPMLOG_DBGMSGVAL("return_val=", req->reply.return_val);
-    SPMLOG_DBGMSGVAL("out_size[0]=", req->reply.out_size[0]);
-    SPMLOG_DBGMSGVAL("out_size[1]=", req->reply.out_size[1]);
-    SPMLOG_DBGMSGVAL("out_size[2]=", req->reply.out_size[2]);
-    SPMLOG_DBGMSGVAL("out_size[3]=", req->reply.out_size[3]);
+    SPMLOG_DBGMSGVAL("protocol_ver=", req->protocol_ver);
+    SPMLOG_DBGMSGVAL("seq_num=", req->seq_num);
+    SPMLOG_DBGMSGVAL("client_id=", req->client_id);
+    SPMLOG_DBGMSGVAL("return_val=", req->return_val);
+    SPMLOG_DBGMSGVAL("out_vec[0].len=", req->out_vec[0].len);
+    SPMLOG_DBGMSGVAL("out_vec[1].len=", req->out_vec[1].len);
+    SPMLOG_DBGMSGVAL("out_vec[2].len=", req->out_vec[2].len);
+    SPMLOG_DBGMSGVAL("out_vec[3].len=", req->out_vec[3].len);
 
     if (tfm_multi_core_hal_reply(req) != TFM_PLAT_ERR_SUCCESS) {
         SPMLOG_DBGMSG("[RSS-COMMS] Sending reply failed!\r\n");

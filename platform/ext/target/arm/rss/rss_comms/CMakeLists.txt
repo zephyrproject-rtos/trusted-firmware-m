@@ -15,11 +15,14 @@ target_sources(platform_s
         rss_comms.c
         rss_comms_hal.c
         rss_comms_queue.c
+        rss_comms_protocol.c
+        rss_comms_protocol_embed.c
 )
 
 target_compile_definitions(platform_s
     PRIVATE
         RSS_COMMS_MAX_CONCURRENT_REQ=2
+        RSS_COMMS_PROTOCOL_EMBED_ENABLED
 )
 
 # For spm_log_msgval
