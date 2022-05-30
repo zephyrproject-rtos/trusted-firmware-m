@@ -40,11 +40,7 @@
  *        interface layer should be the only part that should
  *        be configured through defines
  */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 /* FixMe: Temporary way of bridging mbed TLS based configuration
  *        with specific driver configuration defines

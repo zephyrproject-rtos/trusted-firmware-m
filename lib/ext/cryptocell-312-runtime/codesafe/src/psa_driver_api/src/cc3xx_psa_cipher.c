@@ -31,11 +31,7 @@
  *        so for the time being we just use the mbed TLS config file to
  *        understand if we need to set CC3XX specific config defines.
  */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 /* FixMe: Temporary way of bridging mbed TLS based configuration
  *        with specific CC3XX driver configuration defines

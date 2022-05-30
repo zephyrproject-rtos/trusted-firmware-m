@@ -59,11 +59,7 @@
  *        interface layer should be the only part that should
  *        be configured through defines
  */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 /* Based on ecp_wrst_gen_keypair_base */
 static psa_status_t

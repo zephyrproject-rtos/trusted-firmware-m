@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2021, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2022, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -25,11 +25,7 @@
  *     <http://eprint.iacr.org/2004/342.pdf>
  */
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 #if defined(MBEDTLS_ECP_C)
 

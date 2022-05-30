@@ -1,7 +1,7 @@
 /*
  *  The RSA public-key cryptosystem
  *
- *  Copyright (C) 2006-2021, ARM Limited, All Rights Reserved
+ *  Copyright (C) 2006-2022, ARM Limited, All Rights Reserved
  *  Copyright (C) 2020, STMicroelectronics, All Rights Reserved
  *  SPDX-License-Identifier: Apache-2.0
  *
@@ -41,11 +41,7 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 #if defined(MBEDTLS_RSA_C)
 

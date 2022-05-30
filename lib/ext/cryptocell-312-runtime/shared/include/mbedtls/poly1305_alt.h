@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2019, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2022, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -7,9 +7,7 @@
 #ifndef _MBEDTLS_POLY1305_ALT_H
 #define _MBEDTLS_POLY1305_ALT_H
 
-#if defined(MBEDTLS_CONFIG_FILE)
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 #ifdef __cplusplus
 extern "C"

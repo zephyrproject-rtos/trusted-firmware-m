@@ -54,11 +54,7 @@
  *        interface layer should be the only part that should
  *        be configured through defines
  */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 static psa_status_t cc3xx_internal_ecdsa_verify(
     const psa_key_attributes_t *attributes,
