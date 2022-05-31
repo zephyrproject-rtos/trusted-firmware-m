@@ -22,12 +22,6 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cm
     tfm_toolchain_reload_compiler()
 endif()
 
-if (TFM_MULTI_CORE_TOPOLOGY)
-    # The platform target is created in this directory/file so that it has the
-    # same settings as the main ns target.
-    add_library(platform_ns STATIC EXCLUDE_FROM_ALL)
-endif()
-
 ###################### PSA interface (header only) #############################
 
 add_library(psa_interface INTERFACE)
