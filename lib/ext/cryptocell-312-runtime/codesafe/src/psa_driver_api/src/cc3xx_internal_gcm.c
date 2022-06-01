@@ -443,7 +443,7 @@ static psa_status_t gcm_finish(AesGcmContext_t *context,
         if (CC_PalMemCmp(context->preTagBuf, pTag, context->tagSize) == 0) {
             status = PSA_SUCCESS;
         } else {
-            status = PSA_ERROR_INVALID_ARGUMENT;
+            status = PSA_ERROR_INVALID_SIGNATURE;
         }
     }
 
