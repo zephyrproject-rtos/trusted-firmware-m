@@ -39,7 +39,8 @@ enum tfm_plat_err_t rss_protocol_embed_serialize_reply(
         size_t *reply_size);
 
 enum tfm_plat_err_t rss_protocol_embed_serialize_error(
-        psa_status_t err, struct rss_embed_reply_t *reply, size_t *reply_size);
+        struct client_request_t *req, psa_status_t err,
+        struct rss_embed_reply_t *reply, size_t *reply_size);
 
 
 #ifdef __cplusplus

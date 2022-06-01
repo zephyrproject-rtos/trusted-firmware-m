@@ -17,6 +17,10 @@
 #include "rss_comms_protocol_embed.h"
 #endif /* RSS_COMMS_PROTOCOL_EMBED_ENABLED */
 
+#ifdef RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
+#include "rss_comms_protocol_pointer_access.h"
+#endif /* RSS_MHU_PROTOCOL_V0_ENABLED */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,6 +29,9 @@ enum rss_comms_protocol_version_t {
 #ifdef RSS_COMMS_PROTOCOL_EMBED_ENABLED
     RSS_COMMS_PROTOCOL_EMBED = 0,
 #endif /* RSS_COMMS_PROTOCOL_EMBED_ENABLED */
+#ifdef RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
+    RSS_COMMS_PROTOCOL_POINTER_ACCESS = 1,
+#endif /* RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED */
 };
 
 
@@ -41,6 +48,9 @@ __PACKED_STRUCT serialized_psa_msg_t {
 #ifdef RSS_COMMS_PROTOCOL_EMBED_ENABLED
         struct rss_embed_msg_t embed;
 #endif /* RSS_COMMS_PROTOCOL_EMBED_ENABLED */
+#ifdef RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
+        struct rss_pointer_access_msg_t pointer_access;
+#endif /* RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED */
     } msg;
 };
 
@@ -51,6 +61,9 @@ __PACKED_STRUCT serialized_psa_reply_t {
 #ifdef RSS_COMMS_PROTOCOL_EMBED_ENABLED
         struct rss_embed_reply_t embed;
 #endif /* RSS_COMMS_PROTOCOL_EMBED_ENABLED */
+#ifdef RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
+        struct rss_pointer_access_reply_t pointer_access;
+#endif /* RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED */
     } reply;
 };
 
@@ -85,6 +98,11 @@ enum tfm_plat_err_t rss_protocol_serialize_reply(struct client_request_t *req,
  *        Intended to for the RSS to notify the AP of errors during the message
  *        deserialization phase.
  *
+ * \param[in]  req               The client_request_t to serialize data from. If
+ *                               the error occured in allocation this pointer
+ *                               may be NULL. This may not contain message
+ *                               header information if the message
+ *                               deserialize failed.
  * \param[in]  header            The header of the received
  *                               serialized_psa_msg_t whose deserialization
  *                               caused the error.
@@ -96,6 +114,7 @@ enum tfm_plat_err_t rss_protocol_serialize_reply(struct client_request_t *req,
  * \retval Other return code     Operation failed with an error code.
  */
 enum tfm_plat_err_t rss_protocol_serialize_error(
+        struct client_request_t *req,
         struct serialized_rss_comms_header_t *header, psa_status_t error,
         struct serialized_psa_reply_t *reply, size_t *reply_size);
 

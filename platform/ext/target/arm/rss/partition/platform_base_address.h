@@ -128,6 +128,8 @@
 /* ATU regions open in BL2 */
 #define HOST_BOOT0_LOAD_BASE_S           HOST_ACCESS_BASE_S               /* Host boot image 0 base address */
 #define HOST_BOOT1_LOAD_BASE_S           (HOST_ACCESS_BASE_S + 0x100000)  /* Host boot image 1 base address */
+/* Regions open at runtime */
+#define HOST_COMMS_MAPPABLE_BASE_S       HOST_ACCESS_BASE_S
 
 /* Memory map addresses exempt from memory attribution by both the SAU and IDAU */
 #define RSS_EWIC_BASE                    0xE0047000 /* External Wakeup Interrupt Controller

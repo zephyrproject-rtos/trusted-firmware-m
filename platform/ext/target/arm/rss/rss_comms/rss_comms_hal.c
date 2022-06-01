@@ -97,7 +97,8 @@ out_free_req:
 
 out_return_err:
     /* Attempt to respond with a failure message */
-    if (rss_protocol_serialize_error(&msg.header, PSA_ERROR_CONNECTION_BUSY,
+    if (rss_protocol_serialize_error(req, &msg.header,
+                                     PSA_ERROR_CONNECTION_BUSY,
                                      &reply, &reply_size)
         == TFM_PLAT_ERR_SUCCESS) {
         mhu_send_data(&MHU_RSS_TO_AP_DEV, (uint8_t *)&reply, reply_size);

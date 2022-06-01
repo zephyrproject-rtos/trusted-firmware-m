@@ -10,6 +10,7 @@
 
 #include "psa/client.h"
 #include "cmsis_compiler.h"
+#include "rss_comms_atu.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,7 +37,9 @@ struct client_request_t {
     psa_invec in_vec[PSA_MAX_IOVEC];
     psa_outvec out_vec[PSA_MAX_IOVEC];
     int32_t return_val;
+    uint64_t out_vec_host_addr[PSA_MAX_IOVEC];
     uint8_t param_copy_buf[RSS_COMMS_PAYLOAD_MAX_SIZE];
+    comms_atu_region_set_t atu_regions;
 };
 
 #ifdef __cplusplus
