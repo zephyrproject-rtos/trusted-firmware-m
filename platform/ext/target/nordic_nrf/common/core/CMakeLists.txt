@@ -80,6 +80,7 @@ if (NRF_HW_INIT_RESET_ON_BOOT)
     target_compile_definitions(platform_s
         PUBLIC
             NRF_HW_INIT_RESET_ON_BOOT
+            $<$<BOOL:${NRF_HW_INIT_NRF_PERIPHERALS}>:NRF_HW_INIT_NRF_PERIPHERALS>
     )
 endif()
 

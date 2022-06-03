@@ -28,3 +28,10 @@ set(PLATFORM_FLIH_IRQ_TEST_SUPPORT      ON          CACHE BOOL    "Platform supp
 
 # Required if MCUBoot has been built without CONFIG_MCUBOOT_CLEANUP_ARM_CORE enabled
 set(NRF_HW_INIT_RESET_ON_BOOT OFF CACHE BOOL "Initialize internal architecture state at boot")
+
+# Required if MCUboot has been built without CONFIG_MCUBOOT_NRF_CLEANUP_PERIPHERAL enabled.
+set(NRF_HW_INIT_NRF_PERIPHERALS OFF CACHE BOOL "Initialize nRF peripherals at boot")
+
+if (NRF_HW_INIT_NRF_PERIPHERALS AND NOT NRF_HW_INIT_RESET_ON_BOOT)
+        message(FATAL_ERROR "NRF_HW_INIT_NRF_PERIPHERALS depends on NRF_HW_INIT_RESET_ON_BOOT")
+endif()
