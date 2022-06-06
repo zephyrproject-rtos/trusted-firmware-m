@@ -35,3 +35,8 @@ target_sources(tfm_s
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_api_veneers.c
 )
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        TFM_PARTITION_NS_AGENT_TZ
+)

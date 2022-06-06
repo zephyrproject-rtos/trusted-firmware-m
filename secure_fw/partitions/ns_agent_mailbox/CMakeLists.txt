@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2021, Arm Limited. All rights reserved.
-# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -55,4 +56,9 @@ target_include_directories(tfm_psa_rot_partition_ns_agent_mailbox
 target_link_libraries(tfm_partitions
     INTERFACE
         tfm_psa_rot_partition_ns_agent_mailbox
+)
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        TFM_PARTITION_NS_AGENT_MAILBOX
 )
