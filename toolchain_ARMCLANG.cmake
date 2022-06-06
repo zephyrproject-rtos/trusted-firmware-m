@@ -45,8 +45,8 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<COMPILE_LANGUAGE:C>:-masm=auto>
         $<$<COMPILE_LANGUAGE:C>:-nostdlib>
         $<$<COMPILE_LANGUAGE:C>:-std=c99>
-        $<$<AND:$<COMPILE_LANGUAGE:C>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:-mfpu=none>
-        $<$<AND:$<COMPILE_LANGUAGE:ASM>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:--fpu=none>
+        $<$<COMPILE_LANGUAGE:C>:-mfpu=none>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
         $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
         $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
     )
@@ -78,7 +78,7 @@ macro(tfm_toolchain_reset_linker_flags)
         --diag_suppress=6304
         # Pattern only matches removed unused sections.
         --diag_suppress=6329
-        $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:--fpu=softvfp>
+        --fpu=softvfp
     )
 endmacro()
 
@@ -89,12 +89,6 @@ macro(tfm_toolchain_set_processor_arch)
         if (DEFINED TFM_SYSTEM_MVE)
             if(NOT TFM_SYSTEM_MVE)
                 string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
-            endif()
-        endif()
-
-        if (DEFINED TFM_SYSTEM_FP)
-            if(NOT TFM_SYSTEM_FP)
-                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
             endif()
         endif()
 
@@ -119,10 +113,6 @@ macro(tfm_toolchain_set_processor_arch)
             if (TFM_SYSTEM_MVE)
                 string(APPEND CMAKE_ASM_CPU_FLAG ".mve")
             endif()
-
-            if (TFM_SYSTEM_FP)
-                string(APPEND CMAKE_ASM_CPU_FLAG ".fp")
-            endif()
         endif()
     endif()
 
@@ -142,12 +132,6 @@ macro(tfm_toolchain_set_processor_arch)
     if (DEFINED TFM_SYSTEM_MVE)
         if(NOT TFM_SYSTEM_MVE)
             string(APPEND CMAKE_SYSTEM_ARCH "+nomve")
-        endif()
-    endif()
-
-    if (DEFINED TFM_SYSTEM_FP)
-        if(NOT TFM_SYSTEM_FP)
-            string(APPEND CMAKE_SYSTEM_ARCH "+nofp")
         endif()
     endif()
 

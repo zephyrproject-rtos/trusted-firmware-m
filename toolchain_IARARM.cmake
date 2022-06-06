@@ -49,7 +49,7 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<COMPILE_LANGUAGE:C,CXX>:-DNO_TYPEOF>
         $<$<COMPILE_LANGUAGE:C,CXX>:-D_NO_DEFINITIONS_IN_HEADER_FILES>
         $<$<COMPILE_LANGUAGE:C,CXX>:--diag_suppress=Pe546,Pe940,Pa082,Pa084>
-        $<$<AND:$<COMPILE_LANGUAGE:C,CXX,ASM>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:--fpu=none>
+        $<$<COMPILE_LANGUAGE:C,CXX,ASM>:--fpu=none>
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX,ASM>,$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<CONFIG:Release,MinSizeRel>>:-r>
     )
 endmacro()
@@ -61,7 +61,7 @@ macro(tfm_toolchain_reset_linker_flags)
       --silent
       --semihosting
       --redirect __write=__write_buffered
-      $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:--fpu=none>
+      --fpu=none
     )
 endmacro()
 
