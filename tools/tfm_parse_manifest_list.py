@@ -273,6 +273,8 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
                 dict['list_path'] = manifest_lists[i + 1]
                 all_manifests.append(dict)
 
+    logging.info("------------ Display partition configuration - start ------------")
+
     # Parse the manifests
     for i, manifest_item in enumerate(all_manifests):
         valid_enabled_conditions  = ['on',  'true',  'enabled']
@@ -282,12 +284,15 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
         if 'conditional' in manifest_item.keys():
             is_enabled = str(manifest_item['conditional']).lower()
         else:
-            # Partitions without 'conditional' is alwasy on
+            # Partitions without 'conditional' are always on
             is_enabled = 'on'
 
         if is_enabled in valid_disabled_conditions:
+            logging.info("{} partition is disabled".format(manifest_item['name']))
             continue
-        elif is_enabled not in valid_enabled_conditions:
+        elif is_enabled in valid_enabled_conditions:
+            logging.info("{} partition is enabled".format(manifest_item['name']))
+        else:
             raise Exception('Invalid "conditional" attribute: "{}" for {}. '
                             'Please set to one of {} or {}, case-insensitive.'\
                             .format(manifest_item['conditional'],
@@ -381,6 +386,8 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
                                'intermedia_file': intermedia_file,
                                'loadinfo_file': load_info_file,
                                'output_dir':output_dir})
+
+    logging.info("------------ Display partition configuration - end ------------")
 
     check_circular_dependency(partition_list, service_partition_map)
 
