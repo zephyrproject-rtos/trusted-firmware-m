@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
+; * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -121,6 +121,8 @@ __Vectors:
     .long    PWM_1_IRQHandler                /* 74: PWM1 interrupt */
     .long    PWM_2_IRQHandler                /* 75: PWM2 interrupt */
     .long    IOMUX_IRQHandler                /* 76: IOMUX interrupt */
+    .long    TFM_FPU_S_TEST_Handler          /* 77: TFM FPU Secure Test Interrupt */
+    .long    TFM_FPU_NS_TEST_Handler         /* 78: TFM FPU Non-Secure Test Interrupt */
 
     .size    __Vectors, . - __Vectors
 
@@ -351,5 +353,7 @@ Reset_Handler:
     def_irq_handler     PWM_1_IRQHandler                /* 74: PWM1 interrupt */
     def_irq_handler     PWM_2_IRQHandler                /* 75: PWM2 interrupt */
     def_irq_handler     IOMUX_IRQHandler                /* 76: IOMUX interrupt */
+    def_irq_handler     TFM_FPU_S_TEST_Handler          /* 77: TFM FPU Secure Test Interrupt */
+    def_irq_handler     TFM_FPU_NS_TEST_Handler         /* 78: TFM FPU Non-Secure Test Interrupt */
 
     .end

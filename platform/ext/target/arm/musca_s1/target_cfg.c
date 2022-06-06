@@ -126,13 +126,6 @@ struct platform_data_t tfm_peripheral_timer0 = {
         CMSDK_TIMER0_APB_PPC_POS
 };
 
-struct platform_data_t tfm_peripheral_timer1 = {
-        MUSCA_S1_CMSDK_TIMER1_NS_BASE,
-        MUSCA_S1_CMSDK_DUALTIMER_NS_BASE - 1,
-        PPC_SP_DO_NOT_CONFIGURE,
-        -1
-};
-
 #ifdef PSA_API_TEST_IPC
 
 /* Below data structure are only used for PSA FF tests, and this pattern is
@@ -521,27 +514,15 @@ int32_t ppc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
-#ifdef TEST_NS_FPU
-    ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER0_APB_PPC_POS,
-                                 ARM_PPC_SECURE_ONLY,
-                                 ARM_PPC_PRIV_AND_NONPRIV);
-#else
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER0_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
-#endif
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
-#ifdef TEST_NS_FPU
-    ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER1_APB_PPC_POS,
-                                 ARM_PPC_NONSECURE_ONLY,
-                                 ARM_PPC_PRIV_AND_NONPRIV);
-#else
     ret = Driver_APB_PPC0.ConfigPeriph(CMSDK_TIMER1_APB_PPC_POS,
                                  ARM_PPC_NONSECURE_ONLY,
                                  ARM_PPC_PRIV_ONLY);
-#endif
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }

@@ -25,6 +25,9 @@ extern "C" {
 #define TFM_TIMER0_IRQ           (TIMER0_IRQn)
 #define TFM_TIMER1_IRQ           (TIMER1_IRQn)
 
+#define TFM_FPU_S_TEST_IRQ       (GPIO0_0_IRQn)
+#define TFM_FPU_NS_TEST_IRQ      (GPIO0_1_IRQn)
+
 extern struct platform_data_t tfm_peripheral_gpio0;
 extern struct platform_data_t tfm_peripheral_gpio1;
 extern struct platform_data_t tfm_peripheral_gpio2;

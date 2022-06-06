@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@
 #include "device_cfg.h"
 #include "device_definition.h"
 #include "platform_base_address.h"
-#include "tfm_plat_defs.h"
 
 /* ======= Peripheral configuration structure definitions ======= */
 
@@ -309,24 +308,12 @@ struct i2c_ip6510_dev_t I2C1_IP6510_DEV_NS = {
 
 /* CMSDK Timers driver structures */
 #ifdef CMSDK_TIMER0_S
-#ifdef TEST_NS_FPU
-static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER0_DEV_CFG_S
-    TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-    = {.base = MUSCA_S1_CMSDK_TIMER0_S_BASE};
-static struct timer_cmsdk_dev_data_t CMSDK_TIMER0_DEV_DATA_S
-    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-    = {.is_initialized = 0};
-struct timer_cmsdk_dev_t CMSDK_TIMER0_DEV_S
-    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-    = {&(CMSDK_TIMER0_DEV_CFG_S), &(CMSDK_TIMER0_DEV_DATA_S)};
-#else
 static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER0_DEV_CFG_S = {
     .base = MUSCA_S1_CMSDK_TIMER0_S_BASE};
 static struct timer_cmsdk_dev_data_t CMSDK_TIMER0_DEV_DATA_S = {
     .is_initialized = 0};
 struct timer_cmsdk_dev_t CMSDK_TIMER0_DEV_S = {&(CMSDK_TIMER0_DEV_CFG_S),
                                                &(CMSDK_TIMER0_DEV_DATA_S)};
-#endif /* TEST_NS_FPU */
 #endif
 #ifdef CMSDK_TIMER0_NS
 static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER0_DEV_CFG_NS = {
@@ -346,24 +333,12 @@ struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_S = {&(CMSDK_TIMER1_DEV_CFG_S),
                                                &(CMSDK_TIMER1_DEV_DATA_S)};
 #endif
 #ifdef CMSDK_TIMER1_NS
-#ifdef TEST_NS_FPU
-static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER1_DEV_CFG_NS
-    TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-    = {.base = MUSCA_S1_CMSDK_TIMER1_NS_BASE};
-static struct timer_cmsdk_dev_data_t CMSDK_TIMER1_DEV_DATA_NS
-    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-    = {.is_initialized = 0};
-struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS
-    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-    = {&(CMSDK_TIMER1_DEV_CFG_NS), &(CMSDK_TIMER1_DEV_DATA_NS)};
-#else
 static const struct timer_cmsdk_dev_cfg_t CMSDK_TIMER1_DEV_CFG_NS = {
     .base = MUSCA_S1_CMSDK_TIMER1_NS_BASE};
 static struct timer_cmsdk_dev_data_t CMSDK_TIMER1_DEV_DATA_NS = {
     .is_initialized = 0};
 struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS = {&(CMSDK_TIMER1_DEV_CFG_NS),
                                                 &(CMSDK_TIMER1_DEV_DATA_NS)};
-#endif /* TEST_NS_FPU */
 #endif
 
 /* CMSDK Dualtimer driver structures */

@@ -65,6 +65,7 @@ target_sources(platform_s
         $<$<OR:$<AND:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
         $<$<BOOL:${PLATFORM_DEFAULT_PROVISIONING}>:ext/common/provisioning.c>
+        $<$<OR:$<BOOL:${TEST_S_FPU}>,$<BOOL:${TEST_NS_FPU}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/test_interrupt.c>
 )
 
 # If this is not added to the tfm_s it will not correctly override the weak
