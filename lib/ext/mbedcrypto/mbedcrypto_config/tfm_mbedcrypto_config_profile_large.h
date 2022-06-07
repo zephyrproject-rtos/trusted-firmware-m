@@ -541,9 +541,7 @@
 #include "tfm_mbedcrypto_config_extra_nv_seed.h"
 #endif /* CRYPTO_NV_SEED */
 
-#ifdef CRYPTO_HW_ACCELERATOR
-#include "mbedtls_accelerator_config.h"
-#elif defined(MBEDTLS_ENTROPY_NV_SEED)
+#if !defined(CRYPTO_HW_ACCELERATOR) && defined(MBEDTLS_ENTROPY_NV_SEED)
 #include "mbedtls_entropy_nv_seed_config.h"
 #endif
 

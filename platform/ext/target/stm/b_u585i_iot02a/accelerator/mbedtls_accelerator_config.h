@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2021 STMicroelectronics. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -13,13 +13,73 @@
 extern "C" {
 #endif /* __cplusplus */
 
-
 /* RNG Config */
 #undef MBEDTLS_ENTROPY_NV_SEED
 #undef MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
-#define MBEDTLS_PLATFORM_ENTROPY
 #define MBEDTLS_ENTROPY_C
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
+
+#undef MBEDTLS_AES_SETKEY_DEC_ALT
+#undef MBEDTLS_AES_DECRYPT_ALT
+
+/* specific Define for platform hardware accelerator */
+#define GENERATOR_HW_PKA_EXTENDED_API
+#define GENERATOR_HW_CRYPTO_DPA_SUPPORTED
+#define HW_CRYPTO_DPA_AES
+#define HW_CRYPTO_DPA_GCM
+
+/****************************************************************/
+/* Require built-in implementations based on PSA requirements */
+/****************************************************************/
+#if defined(MBEDTLS_PSA_CRYPTO_CONFIG)
+
+#ifdef PSA_WANT_ALG_SHA_1
+#define MBEDTLS_SHA1_ALT
+#endif /* PSA_WANT_ALG_SHA_1 */
+
+#ifdef PSA_WANT_ALG_SHA_256
+#define MBEDTLS_SHA256_ALT
+#endif /* PSA_WANT_ALG_SHA_256 */
+
+#if defined(PSA_WANT_ALG_RSA_OAEP)           ||     \
+    defined(PSA_WANT_ALG_RSA_PKCS1V15_CRYPT) ||     \
+    defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN)  ||     \
+    defined(PSA_WANT_ALG_RSA_PSS)            ||     \
+    defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR)  ||     \
+    defined(PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY)
+#define MBEDTLS_RSA_ALT
+#endif
+
+#if defined(PSA_WANT_ALG_ECDH)              ||  \
+    defined(PSA_WANT_ALG_ECDSA)             ||  \
+    defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR) ||  \
+    defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)
+#define MBEDTLS_ECP_ALT
+#undef MBEDTLS_ECP_NIST_OPTIM
+#endif
+
+#ifdef PSA_WANT_ALG_CCM
+#define MBEDTLS_CCM_ALT
+#endif /* PSA_WANT_ALG_CCM */
+
+#ifdef PSA_WANT_KEY_TYPE_AES
+#define MBEDTLS_AES_ALT
+#endif /* PSA_WANT_KEY_TYPE_AES */
+
+#ifdef PSA_WANT_ALG_GCM
+#define MBEDTLS_GCM_ALT
+#endif /* PSA_WANT_ALG_GCM */
+
+#if defined(PSA_WANT_ALG_ECDSA)  ||  \
+    defined(PSA_WANT_ALG_DETERMINISTIC_ECDSA)
+#define MBEDTLS_ECDSA_VERIFY_ALT
+#define MBEDTLS_ECDSA_SIGN_ALT
+#endif
+
+#else /* MBEDTLS_PSA_CRYPTO_CONFIG */
+/****************************************************************/
+/* Infer PSA requirements from Mbed TLS capabilities */
+/****************************************************************/
 
 #ifdef MBEDTLS_SHA1_C
 #define MBEDTLS_SHA1_ALT
@@ -28,9 +88,6 @@ extern "C" {
 #ifdef MBEDTLS_SHA256_C
 #define MBEDTLS_SHA256_ALT
 #endif /* MBEDTLS_SHA256_C */
-
-#undef MBEDTLS_AES_SETKEY_DEC_ALT
-#undef MBEDTLS_AES_DECRYPT_ALT
 
 #ifdef MBEDTLS_RSA_C
 #define MBEDTLS_RSA_ALT
@@ -44,22 +101,23 @@ extern "C" {
 
 #ifdef MBEDTLS_CCM_C
 #define MBEDTLS_CCM_ALT
-#endif
+#endif /* MBEDTLS_CCM_C */
+
 #ifdef MBEDTLS_AES_C
 #define MBEDTLS_AES_ALT
-#endif
+#endif /* MBEDTLS_AES_C */
+
 #ifdef MBEDTLS_GCM_C
 #define MBEDTLS_GCM_ALT
-#endif
+#endif /* MBEDTLS_GCM_C */
+
 #ifdef MBEDTLS_ECDSA_C
 #define MBEDTLS_ECDSA_VERIFY_ALT
 #define MBEDTLS_ECDSA_SIGN_ALT
-#endif
-/* specific Define for platform hardware accelerator */
-#define GENERATOR_HW_PKA_EXTENDED_API
-#define GENERATOR_HW_CRYPTO_DPA_SUPPORTED
-#define HW_CRYPTO_DPA_AES
-#define HW_CRYPTO_DPA_GCM
+#endif /* MBEDTLS_ECDSA_C */
+
+#endif /* MBEDTLS_PSA_CRYPTO_CONFIG */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
