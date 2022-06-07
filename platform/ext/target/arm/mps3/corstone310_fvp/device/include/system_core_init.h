@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2020 Arm Limited
+ * Copyright (c) 2009-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 /*
- * This file is derivative of CMSIS V5.6.0 system_ARMv81MML.h
- * Git SHA: b5f0603d6a584d1724d952fd8b0737458b90d62b
+ * This file is derivative of CMSIS system_ARMCM85.h
+ * Git SHA: 61ad1303bc50450130cfb540caa384875a260b91
  */
 
 #ifndef __SYSTEM_CORE_INIT_H__
@@ -30,6 +30,11 @@ extern "C" {
 
 extern uint32_t SystemCoreClock;  /*!< System Clock Frequency (Core Clock)  */
 extern uint32_t PeripheralClock;  /*!< Peripheral Clock Frequency */
+
+/**
+  \brief Exception / Interrupt Handler Function Prototype
+*/
+typedef void(*VECTOR_TABLE_Type)(void);
 
 /**
  * \brief  Initializes the system
