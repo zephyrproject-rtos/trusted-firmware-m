@@ -9,6 +9,7 @@
 
 #include "tfm_secure_api.h"
 #include "spm_partition_defs.h"
+#include "security_defs.h"
 
 {% for partition in partitions %}
 /******** {{partition.manifest.name}} ********/
@@ -19,7 +20,7 @@ psa_status_t {{sec_func.signal.lower()}}(psa_invec *, size_t, psa_outvec *, size
 {% endfor %}
 
 #define TFM_VENEER_FUNCTION(partition_name, func_name, sfn_name) \
-    __tfm_secure_gateway_attributes__ \
+    __tz_c_veneer \
     psa_status_t func_name##_veneer(psa_invec *in_vec, \
                                     size_t in_len, \
                                     psa_outvec *out_vec, \

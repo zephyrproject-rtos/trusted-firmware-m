@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -22,44 +22,6 @@
 #include "svc_num.h"
 #else
 #include "tfm_core_svc.h"
-#endif /* TFM_PSA_API */
-
-#ifdef TFM_PSA_API
-#ifndef TFM_MULTI_CORE_TOPOLOGY
-/*!
- * \def __tfm_psa_secure_gateway_attributes__
- *
- * \brief Attributes for psa api secure gateway functions
- */
-#if defined(__GNUC__) && !defined(__ARMCC_VERSION)
-/*
- * GNUARM requires noclone attribute to protect gateway function symbol from
- * being renamed and cloned
- */
-#define __tfm_psa_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry, noclone, naked, section("SFN")))
-#else
-#define __tfm_psa_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry, naked, section("SFN")))
-#endif /* __GNUC__ && !__ARMCC_VERSION */
-#endif /* TFM_MULTI_CORE_TOPOLOGY */
-#else /* TFM_PSA_API */
-/*!
- * \def __tfm_secure_gateway_attributes__
- *
- * \brief Attributes for secure gateway functions
- */
-#if defined(__GNUC__) && !defined(__ARMCC_VERSION)
-/*
- * GNUARM requires noclone attribute to protect gateway function symbol from
- * being renamed and cloned
- */
-#define __tfm_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry, noclone, section("SFN")))
-#else
-#define __tfm_secure_gateway_attributes__ \
-        __attribute__((cmse_nonsecure_entry, section("SFN")))
-#endif /* __GNUC__ && !__ARMCC_VERSION */
 #endif /* TFM_PSA_API */
 
 /* Hide specific errors if not debugging */

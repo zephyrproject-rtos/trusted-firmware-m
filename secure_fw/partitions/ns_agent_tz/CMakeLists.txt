@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021-2022 Cypress Semiconductor Corporationn (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -31,9 +31,11 @@ target_sources(tfm_partitions
 # If this is added to the spm, it is discarded as it is not used. Since the
 # spm is a static library it can't generate veneers under all compilers so
 # instead this single file is added to the tfm_s target.
+set(ARM_V80M_ARCH armv8-m.base armv8-m.main)
 target_sources(tfm_s
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_api_veneers.c
+        "$<$<IN_LIST:${TFM_SYSTEM_ARCHITECTURE},${ARM_V80M_ARCH}>:${CMAKE_CURRENT_SOURCE_DIR}/psa_api_veneers_v80m.c>"
+        "$<$<NOT:$<IN_LIST:${TFM_SYSTEM_ARCHITECTURE},${ARM_V80M_ARCH}>>:${CMAKE_CURRENT_SOURCE_DIR}/psa_api_veneers.c>"
 )
 
 target_compile_definitions(tfm_partition_defs
