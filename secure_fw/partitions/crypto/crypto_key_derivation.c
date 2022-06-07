@@ -115,7 +115,6 @@ static psa_status_t tfm_crypto_huk_derivation_output_key(
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return PSA_ERROR_HARDWARE_FAILURE;
     }
-    LOG_DBGFMT("\033[0;32mcomplete.\033[0m\r\n");
 
     return psa_import_key(attributes, tls12_prf->MBEDTLS_PRIVATE(output_block),
                           bytes, key_id);
