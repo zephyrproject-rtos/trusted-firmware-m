@@ -2113,7 +2113,7 @@ int mbedtls_rsa_rsaes_oaep_decrypt( mbedtls_rsa_context *ctx,
 Cleanup:
     if ( Error != CC_OK )
     {
-        mbedtls_zeroize_internal(output, ctx->MBEDTLS_PRIVATE(len));
+        mbedtls_zeroize_internal(output, output_max_len);
     }
     mbedtls_zeroize_internal(UserPrivKey_ptr, sizeof(CCRsaUserPrivKey_t));
     mbedtls_zeroize_internal(PrimeData_ptr, sizeof(CCRsaPrimeData_t));
@@ -2218,7 +2218,7 @@ int mbedtls_rsa_rsaes_pkcs1_v15_decrypt( mbedtls_rsa_context *ctx,
 Cleanup:
     if ( Error != CC_OK )
     {
-        mbedtls_zeroize_internal(output, ctx->MBEDTLS_PRIVATE(len));
+        mbedtls_zeroize_internal(output, output_max_len);
     }
     mbedtls_zeroize_internal(UserPrivKey_ptr, sizeof(CCRsaUserPrivKey_t));
     mbedtls_zeroize_internal(PrimeData_ptr, sizeof(CCRsaPrimeData_t));
