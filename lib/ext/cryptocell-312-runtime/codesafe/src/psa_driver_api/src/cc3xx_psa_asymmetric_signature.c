@@ -76,7 +76,7 @@ static psa_status_t cc3xx_internal_ecdsa_verify(
     const CCEcpkiDomain_t *pDomain;
     CCEcpkiBuildTempData_t temp_data;
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
-    CCError_t cc_err;
+    CCError_t cc_err = CC_FAIL;
 
     err = cc3xx_psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
     if (err != PSA_SUCCESS) {
