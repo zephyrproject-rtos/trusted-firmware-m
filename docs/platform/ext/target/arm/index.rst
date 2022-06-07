@@ -8,6 +8,7 @@ Arm platforms
     corstone1000/index
     mps3/**
     musca_b1/**
+    rss/**
 
 --------------
 
