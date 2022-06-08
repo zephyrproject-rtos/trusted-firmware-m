@@ -93,6 +93,15 @@
  *  enabled.
  */
 #define CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART
+
+/*!
+ *  Enables the AEAD module to support cached operations for AES based modes,
+ *  CCM and GCM. Cached operations make sure that multipart flows are always
+ *  accepting any length of the input data, and not restrict the input blocks
+ *  to be aligned to multiples of the AES block size. It's kept disabled by
+ *  default as it requires around 0.5 KB of flash.
+ */
+#define CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE
 #endif /* __DOXYGEN_ONLY__ */
 
 #include "cc3xx_psa_cipher.h"

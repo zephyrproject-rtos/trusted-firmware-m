@@ -774,23 +774,103 @@ psa_status_t cc3xx_aead_update(
         size_t *output_length)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+#if defined(CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE)
+    /* The following quantities are required to manage cached mode */
+    uint8_t *cache_ptr = operation->cache_buf;
+    size_t curr_cache_size = operation->curr_cache_size;
+    size_t size_to_cache = 0;
+#endif /* CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE */
 
     if (output_length == NULL) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
     *output_length = 0;
 
+#if defined(CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE)
+    /* Cached mode is required only for AES modes */
+    if (operation->key_type == PSA_KEY_TYPE_AES) {
+        /* Just update the cache if not enough for a single block */
+        if (input_length + curr_cache_size < AES_BLOCK_SIZE) {
+            /* Just cache the data and return with no output */
+            CC_PalMemCopy(&cache_ptr[curr_cache_size], input, input_length);
+            operation->curr_cache_size += input_length;
+            return PSA_SUCCESS;
+        }
+
+        /* There is something cached with enough input for at least a block */
+        if (curr_cache_size) {
+            /* Check the output can accomodate at least a block */
+            if (output_size < AES_BLOCK_SIZE) {
+                return PSA_ERROR_BUFFER_TOO_SMALL;
+            }
+            size_t sizeToCache = AES_BLOCK_SIZE - curr_cache_size;
+            /* Complete one block and process it */
+            CC_PalMemCopy(&cache_ptr[curr_cache_size], input, sizeToCache);
+            /* Process the cached block now */
+            switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
+            case PSA_ALG_GCM:
+                if (( ret = cc3xx_gcm_update(
+                        &operation->ctx.gcm,
+                        AES_BLOCK_SIZE,
+                        cache_ptr,
+                        output ))
+                    != PSA_SUCCESS) {
+                    return ret;
+                }
+                break;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
+            case PSA_ALG_CCM:
+                if (( ret = cc3xx_ccm_update(
+                        &operation->ctx.ccm,
+                        AES_BLOCK_SIZE,
+                        cache_ptr,
+                        output ))
+                    != PSA_SUCCESS) {
+                    return ret;
+                }
+                break;
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
+            default:
+                return PSA_ERROR_NOT_SUPPORTED;
+            }
+            /* Update the state quantities and input/output pointers*/
+            operation->curr_cache_size = 0;
+            input += sizeToCache;
+            input_length -= sizeToCache;
+            output_size -= AES_BLOCK_SIZE;
+            *output_length += AES_BLOCK_SIZE;
+        }
+
+        size_to_cache = input_length % AES_BLOCK_SIZE;
+        input_length = AES_BLOCK_SIZE*(input_length/AES_BLOCK_SIZE);
+
+        if (size_to_cache) {
+            CC_PalMemCopy(cache_ptr, &input[input_length], size_to_cache);
+            operation->curr_cache_size = size_to_cache;
+        }
+    } /* PSA_KEY_TYPE_AES */
+#endif /* CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE */
+
     /* There is no data to process */
     if (input_length == 0) {
         return PSA_SUCCESS;
     }
 
-    if (output_size < input_length) {
-        return PSA_ERROR_BUFFER_TOO_SMALL;
-    }
-
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
+        /* The internal API does not check for the output buffer size */
+        if (output_size < input_length) {
+            return PSA_ERROR_BUFFER_TOO_SMALL;
+        }
+        /* FixMe: The low level driver at the moment supports calls only
+         * aligned to the AES block size. If the low level driver is reworked
+         * this limitation can be removed
+         */
+        if (input_length % AES_BLOCK_SIZE) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
         switch (operation->alg) {
 #if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
@@ -802,7 +882,6 @@ psa_status_t cc3xx_aead_update(
                 != PSA_SUCCESS) {
                 return ret;
             }
-            *output_length = input_length;
             break;
 #endif /* CC3XX_CONFIG_SUPPORT_GCM */
 #if defined(CC3XX_CONFIG_SUPPORT_CCM)
@@ -815,12 +894,13 @@ psa_status_t cc3xx_aead_update(
                 != PSA_SUCCESS) {
                 return ret;
             }
-            *output_length = input_length;
             break;
 #endif /* CC3XX_CONFIG_SUPPORT_CCM */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
+        /* Update the output_length */
+        *output_length += input_length;
         break;
 
     case PSA_KEY_TYPE_CHACHA20:
@@ -858,13 +938,56 @@ psa_status_t cc3xx_aead_finish(
         size_t *tag_length)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
+#if defined(CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE)
+    /* Quantities required for cached operation */
+    uint8_t *cache_ptr = operation->cache_buf;
+    size_t curr_cache_size = operation->curr_cache_size;
 
-    (void)ciphertext;
-    (void)ciphertext_size;
-    *ciphertext_length = 0;
+    if (ciphertext_size < curr_cache_size) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+#endif /* CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE */
+
     if (operation->tag_length > tag_size) {
         return PSA_ERROR_BUFFER_TOO_SMALL;
     }
+
+#if defined(CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE)
+    /* This can be non zero only for AES */
+    if (curr_cache_size) {
+        /* Process the cached block now */
+        switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
+        case PSA_ALG_GCM:
+            if (( ret = cc3xx_gcm_update(
+                    &operation->ctx.gcm,
+                    curr_cache_size,
+                    cache_ptr,
+                    ciphertext ))
+                != PSA_SUCCESS) {
+                return ret;
+            }
+            break;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
+        case PSA_ALG_CCM:
+            if (( ret = cc3xx_ccm_update(
+                    &operation->ctx.ccm,
+                    curr_cache_size,
+                    cache_ptr,
+                    ciphertext ))
+                != PSA_SUCCESS) {
+                return ret;
+            }
+            break;
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
+        default:
+            return PSA_ERROR_NOT_SUPPORTED;
+        }
+        /* Update the output length with the flushed encrypted data */
+        *ciphertext_length = curr_cache_size;
+    } /* curr_cache_size */
+#endif /* CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE */
 
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
@@ -922,12 +1045,51 @@ psa_status_t cc3xx_aead_verify(
         size_t tag_size)
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
-
-    (void)plaintext;
-    (void)plaintext_size;
-    *plaintext_length = 0;
-
     size_t tag_length = 0;
+#if defined(CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE)
+    /* Quantities required for cached operation */
+    uint8_t *cache_ptr = operation->cache_buf;
+    size_t curr_cache_size = operation->curr_cache_size;
+
+    if (plaintext_size < curr_cache_size) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    /* This can be non zero only for AES */
+    if (curr_cache_size) {
+        /* Process the cached block now */
+        switch (operation->alg) {
+#if defined(CC3XX_CONFIG_SUPPORT_GCM)
+        case PSA_ALG_GCM:
+            if (( ret = cc3xx_gcm_update(
+                    &operation->ctx.gcm,
+                    curr_cache_size,
+                    cache_ptr,
+                    plaintext))
+                != PSA_SUCCESS) {
+                return ret;
+            }
+            break;
+#endif /* CC3XX_CONFIG_SUPPORT_GCM */
+#if defined(CC3XX_CONFIG_SUPPORT_CCM)
+        case PSA_ALG_CCM:
+            if (( ret = cc3xx_ccm_update(
+                    &operation->ctx.ccm,
+                    curr_cache_size,
+                    cache_ptr,
+                    plaintext ))
+                != PSA_SUCCESS) {
+                return ret;
+            }
+            break;
+#endif /* CC3XX_CONFIG_SUPPORT_CCM */
+        default:
+            return PSA_ERROR_NOT_SUPPORTED;
+        }
+        /* Update the output length with the flushed decrypted data */
+        *plaintext_length = curr_cache_size;
+    } /* curr_cache_size */
+#endif /* CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE */
 
     switch (operation->key_type) {
     case PSA_KEY_TYPE_AES:
