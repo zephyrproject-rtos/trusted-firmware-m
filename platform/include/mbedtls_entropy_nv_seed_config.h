@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#undef MBEDTLS_PLATFORM_NO_STD_FUNCTIONS
 #undef MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
 
 #define MBEDTLS_ENTROPY_NV_SEED

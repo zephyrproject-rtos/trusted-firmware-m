@@ -33,7 +33,6 @@ MEMORY
 #endif
 }
 
-__heap_size__  = S_HEAP_SIZE;
 __msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
 
 /* Library configurations */
@@ -275,6 +274,19 @@ SECTIONS
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
+#if defined(ENABLE_HEAP)
+    __heap_size__ = S_HEAP_SIZE;
+    .heap : ALIGN(8)
+    {
+        __end__ = .;
+        PROVIDE(end = .);
+        __HeapBase = .;
+        . += __heap_size__;
+        __HeapLimit = .;
+        __heap_limit = .; /* Add for _sbrk */
+    } > RAM
+#endif
+
     /**** PSA RoT DATA start here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
@@ -393,47 +405,6 @@ SECTIONS
     /* Position tag */
     . = ALIGN(32);
     Image$$PT_APP_RWZI_END$$Base = .;
-
-#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-    .TFM_SP_SECURE_TEST_PARTITION_LINKER_DATA : ALIGN(32)
-    {
-        *libc_nano*:*(.data*)
-        . = ALIGN(32);
-    } > RAM AT> FLASH
-
-    .TFM_SP_SECURE_TEST_PARTITION_LINKER_BSS : ALIGN(32)
-    {
-        /* FixMe:
-         * Test framework use printf to print out test result. Implementation of
-         * printf in GCC libc use static data and heap as well. To be able to
-         * execute test suites with TFM_LVL=3 this workaround is needed to
-         * allocate libc static data and heap within the data section of secure
-         * test partition. This can be removed if test service will be executed
-         * in privileged mode.
-         */
-        *libc_nano*:*(.bss*)
-        *libc_nano*:*(COMMON)
-
-        __end__ = .;
-        PROVIDE(end = .);
-        __HeapBase = .;
-        . += __heap_size__;
-        __HeapLimit = .;
-        __heap_limit = .; /* Add for _sbrk */
-
-        . = ALIGN(32);
-    } > RAM AT> RAM
-#else /* TFM_PARTITION_TEST_SECURE_SERVICES */
-    .heap : ALIGN(8)
-    {
-        __end__ = .;
-        PROVIDE(end = .);
-        __HeapBase = .;
-        . += __heap_size__;
-        __HeapLimit = .;
-        __heap_limit = .; /* Add for _sbrk */
-    } > RAM AT> RAM
-#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 
     .TFM_DATA : ALIGN(4)
     {

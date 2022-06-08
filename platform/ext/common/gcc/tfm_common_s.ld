@@ -36,7 +36,6 @@ MEMORY
 
 }
 
-__heap_size__  = S_HEAP_SIZE;
 #if !defined(TFM_PSA_API)
 __psp_stack_size__ = S_PSP_STACK_SIZE;
 #endif
@@ -299,7 +298,8 @@ SECTIONS
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
 #endif /* !defined(TFM_PSA_API) */
 
-#if (TFM_LVL == 1)
+#if defined(ENABLE_HEAP)
+    __heap_size__ = S_HEAP_SIZE;
     .heap : ALIGN(8)
     {
         __end__ = .;
@@ -309,7 +309,7 @@ SECTIONS
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
-#endif /* TFM_LVL == 1 */
+#endif
 
 #if defined(CONFIG_TFM_PARTITION_META)
     .TFM_SP_META_PTR : ALIGN(32)
@@ -347,49 +347,6 @@ SECTIONS
 
     /**** APPLICATION RoT DATA end here */
     Image$$TFM_APP_RW_STACK_END$$Base = .;
-
-#if TFM_LVL != 1
-#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
-    .TFM_SP_SECURE_TEST_PARTITION_LINKER_DATA : ALIGN(32)
-    {
-        *libc_nano*:*(.data*)
-        . = ALIGN(32);
-    } > RAM AT> FLASH
-
-    .TFM_SP_SECURE_TEST_PARTITION_LINKER_BSS : ALIGN(32)
-    {
-        /* FixMe:
-         * Test framework use printf to print out test result. Implementation of
-         * printf in GCC libc use static data and heap as well. To be able to
-         * execute test suites with TFM_LVL=3 this workaround is needed to
-         * allocate libc static data and heap within the data section of secure
-         * test partition. This can be removed if test service will be executed
-         * in privileged mode.
-         */
-        *libc_nano*:*(.bss*)
-        *libc_nano*:*(COMMON)
-
-        __end__ = .;
-        PROVIDE(end = .);
-        __HeapBase = .;
-        . += __heap_size__;
-        __HeapLimit = .;
-        __heap_limit = .; /* Add for _sbrk */
-
-        . = ALIGN(32);
-    } > RAM AT> RAM
-#else /* TFM_PARTITION_TEST_SECURE_SERVICES */
-    .heap : ALIGN(8)
-    {
-        __end__ = .;
-        PROVIDE(end = .);
-        __HeapBase = .;
-        . += __heap_size__;
-        __HeapLimit = .;
-        __heap_limit = .; /* Add for _sbrk */
-    } > RAM AT> RAM
-#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-#endif /* TFM_LVL != 1 */
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
 #ifdef S_DATA_PRIV_START

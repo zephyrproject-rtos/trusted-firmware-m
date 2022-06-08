@@ -24,7 +24,10 @@
 #define BL2_HEAP_SIZE           (0x00001000)
 #define BL2_MSP_STACK_SIZE      (0x00002000)
 
-#define S_HEAP_SIZE             (0x00001000)
+#ifdef ENABLE_HEAP
+    #define S_HEAP_SIZE             (0x0000200)
+#endif
+
 #define S_MSP_STACK_SIZE_INIT   (0x00000400)
 #define S_MSP_STACK_SIZE        (0x00000800)
 #define S_PSP_STACK_SIZE        (0x00000800)

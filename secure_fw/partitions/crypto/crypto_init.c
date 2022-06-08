@@ -18,6 +18,8 @@
  */
 #include "mbedtls/memory_buffer_alloc.h"
 
+#include "mbedtls/platform.h"
+
 #ifdef CRYPTO_NV_SEED
 #include "tfm_plat_crypto_nv_seed.h"
 #endif /* CRYPTO_NV_SEED */
@@ -342,6 +344,11 @@ static psa_status_t tfm_crypto_engine_init(void)
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
                                      TFM_CRYPTO_ENGINE_BUF_SIZE);
+
+    /* mbedtls_printf is used to print messages including error information. */
+#if (TFM_PARTITION_LOG_LEVEL >= TFM_PARTITION_LOG_LEVEL_ERROR)
+    mbedtls_platform_set_printf(tfm_sp_log_printf);
+#endif
 
     /* Initialise the crypto accelerator if one is enabled */
 #ifdef CRYPTO_HW_ACCELERATOR

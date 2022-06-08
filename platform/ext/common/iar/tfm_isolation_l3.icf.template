@@ -119,9 +119,11 @@ define block PT_PRIV_RWZI_START with alignment = 32, size = 0 { };
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
 define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE { };
 
-define block HEAP         with alignment = 8, size = S_HEAP_SIZE { };
-define block ARM_LIB_HEAP {block HEAP};
-keep {block HEAP, block ARM_LIB_HEAP};
+#if defined(ENABLE_HEAP)
+    define block HEAP         with alignment = 8, size = S_HEAP_SIZE { };
+    define block ARM_LIB_HEAP {block HEAP};
+    keep {block HEAP, block ARM_LIB_HEAP};
+#endif
 
 define block ER_TFM_DATA          with alignment = 8 {readwrite};
 
@@ -257,7 +259,9 @@ define block DATA with fixed order {
     block PT_PRIV_RWZI_START,
     block TFM_SHARED_DATA,
     block ARM_LIB_STACK,
+#if defined(ENABLE_HEAP)
     block ARM_LIB_HEAP,
+#endif
     block ER_TFM_DATA,
     block ER_PART_RT_POOL,
     block ER_SERV_RT_POOL,

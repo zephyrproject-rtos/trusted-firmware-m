@@ -33,7 +33,10 @@
    system allocation */
 #define TOTAL_RAM_SIZE (0x000E8000) /* CY_SRAM_SIZE - 96KB */
 
-#define S_HEAP_SIZE             0x0001000
+#ifdef ENABLE_HEAP
+    #define S_HEAP_SIZE             (0x0000200)
+#endif
+
 #define S_MSP_STACK_SIZE_INIT   0x0000400
 #define S_MSP_STACK_SIZE        0x0000800
 

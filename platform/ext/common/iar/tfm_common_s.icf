@@ -176,9 +176,11 @@ define overlay STACK_DATA {block ARM_LIB_STACK};
 keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 #endif
 
-define block HEAP         with alignment = 8, size = S_HEAP_SIZE { };
-define block ARM_LIB_HEAP {block HEAP};
-keep {block HEAP, block ARM_LIB_HEAP};
+#if defined(ENABLE_HEAP)
+    define block HEAP         with alignment = 8, size = S_HEAP_SIZE { };
+    define block ARM_LIB_HEAP {block HEAP};
+    keep {block HEAP, block ARM_LIB_HEAP};
+#endif
 
 define block ER_TFM_DATA          with alignment = 8 {readwrite};
 
@@ -351,7 +353,9 @@ define block PRIV_DATA with fixed order {
     overlay STACK_DATA,
 #endif
 
+#if defined(ENABLE_HEAP)
     block ARM_LIB_HEAP,
+#endif
 
     block ER_TFM_DATA,
 

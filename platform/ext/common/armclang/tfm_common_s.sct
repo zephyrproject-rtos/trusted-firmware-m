@@ -210,9 +210,6 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     }
 #endif
 
-    ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
-    }
-
     ER_TFM_DATA +0 {
         * (+RW +ZI)
     }
