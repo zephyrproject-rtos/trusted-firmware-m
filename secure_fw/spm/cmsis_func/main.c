@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -191,7 +193,9 @@ int c_main(void)
         tfm_core_panic();
     }
 
-    tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_RUNNING);
+    tfm_spm_partition_set_state(
+            tfm_spm_partition_get_partition_idx(TFM_SP_CORE_ID),
+            SPM_PARTITION_STATE_RUNNING);
 
     REGION_DECLARE(Image$$, ER_INITIAL_PSP, $$ZI$$Base)[];
     uint32_t psp_stack_bottom =
@@ -215,9 +219,12 @@ int c_main(void)
     /* We close the TFM_SP_CORE_ID partition, because its only purpose is
      * to be able to pass the state checks for the tests started from secure.
      */
-    tfm_spm_partition_set_state(TFM_SP_CORE_ID, SPM_PARTITION_STATE_CLOSED);
-    tfm_spm_partition_set_state(TFM_SP_NON_SECURE_ID,
-                                SPM_PARTITION_STATE_RUNNING);
+    tfm_spm_partition_set_state(
+            tfm_spm_partition_get_partition_idx(TFM_SP_CORE_ID),
+            SPM_PARTITION_STATE_CLOSED);
+    tfm_spm_partition_set_state(
+            tfm_spm_partition_get_partition_idx(TFM_SP_NON_SECURE_ID),
+            SPM_PARTITION_STATE_RUNNING);
 
 #ifdef TFM_FIH_PROFILE_ON
     FIH_CALL(tfm_hal_verify_static_boundaries, fih_rc);

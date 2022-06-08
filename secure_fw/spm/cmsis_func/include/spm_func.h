@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -355,6 +357,16 @@ void tfm_spm_psa_eoi(uint32_t *svc_args);
  * \note This function doesn't check if partition_idx is valid.
  */
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx);
+
+/**
+ * \brief Get the index of the partition with the specified ID
+ *
+ * \param[in] partition_id      Partition ID
+ *
+ * \return Partition index for that partition
+ *         SPM_INVALID_PARTITION_IDX if not found
+ */
+uint32_t tfm_spm_partition_get_partition_idx(uint32_t partition_idx);
 
 /**
  * \brief Initialize partition database

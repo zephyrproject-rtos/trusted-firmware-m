@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -392,31 +394,6 @@ static struct iovec_args_t *get_iovec_args_stack_address(uint32_t partition_idx)
 }
 
 /**
- * \brief Returns the index of the partition with the given partition ID.
- *
- * \param[in] partition_id     Partition id
- *
- * \return the partition idx if partition_id is valid,
- *         \ref SPM_INVALID_PARTITION_IDX othervise
- */
-static uint32_t get_partition_idx(uint32_t partition_id)
-{
-    uint32_t i;
-
-    if (partition_id == INVALID_PARTITION_ID) {
-        return SPM_INVALID_PARTITION_IDX;
-    }
-
-    for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
-        if (g_spm_partition_db.partitions[i].static_data->partition_id ==
-            partition_id) {
-            return i;
-        }
-    }
-    return SPM_INVALID_PARTITION_IDX;
-}
-
-/**
  * \brief Set the iovec parameters for the partition
  *
  * \param[in] partition_idx  Partition index
@@ -485,7 +462,7 @@ static enum tfm_status_e tfm_start_partition(
         return TFM_SECURE_LOCK_FAILED;
     }
 
-    partition_idx = get_partition_idx(desc_ptr->sp_id);
+    partition_idx = tfm_spm_partition_get_partition_idx(desc_ptr->sp_id);
 
     curr_part_data = tfm_spm_partition_get_runtime_data(partition_idx);
     caller_part_data = tfm_spm_partition_get_runtime_data(caller_partition_idx);
@@ -571,7 +548,7 @@ static enum tfm_status_e tfm_start_partition_for_irq_handling(
     const struct spm_partition_runtime_data_t *handler_part_data;
     uint32_t handler_partition_idx;
 
-    handler_partition_idx = get_partition_idx(handler_partition_id);
+    handler_partition_idx = tfm_spm_partition_get_partition_idx(handler_partition_id);
     handler_part_data = tfm_spm_partition_get_runtime_data(
                                                          handler_partition_idx);
     handler_partition_state = handler_part_data->partition_state;
@@ -765,6 +742,23 @@ uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
 {
     return g_spm_partition_db.partitions[partition_idx].static_data->
            partition_id;
+}
+
+uint32_t tfm_spm_partition_get_partition_idx(uint32_t partition_id)
+{
+    uint32_t i;
+
+    if (partition_id == INVALID_PARTITION_ID) {
+        return SPM_INVALID_PARTITION_IDX;
+    }
+
+    for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
+        if (g_spm_partition_db.partitions[i].static_data->partition_id ==
+            partition_id) {
+            return i;
+        }
+    }
+    return SPM_INVALID_PARTITION_IDX;
 }
 
 uint32_t tfm_spm_partition_get_privileged_mode(uint32_t partition_flags)
