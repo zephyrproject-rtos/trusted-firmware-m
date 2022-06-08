@@ -150,6 +150,7 @@ if(BL2)
         PUBLIC
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/accelerator/interface>
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${MCUBOOT_PATH}/boot/bootutil/include>
+            ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include
     )
 
     target_sources(platform_bl2
