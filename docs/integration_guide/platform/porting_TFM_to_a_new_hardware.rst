@@ -368,6 +368,8 @@ region_defs.h:
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE | Size of the buffer that will store the initial attestation        | used by initial attestation partition         |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
+    |TFM_ATTEST_BOOT_RECORDS_MAX_SIZE  | Size of buffer that can store the encoded list of boot records    | used by delegated attestation partition       |
+    +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |BL2_HEADER_SIZE                   | Size of the Header for the Bootloader (MCUboot)                   | if bl2 is built                               |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |BL2_TRAILER_SIZE                  | Size of the Trailer for the Bootloader (MCUboot)                  | if bl2 is built                               |
