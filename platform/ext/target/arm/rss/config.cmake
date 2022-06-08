@@ -45,6 +45,7 @@ set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_
 set(TFM_PARTITION_DELEGATED_ATTESTATION ON         CACHE BOOL     "Enable Delegated Attestation partition")
 
 set(ATTEST_TOKEN_PROFILE                "ARM_CCA"  CACHE STRING   "Set the initial attestation token profile")
+set(ATTEST_KEY_BITS                     384        CACHE STRING   "The size of the initial attestation key in bits")
 
 set(TFM_NS_NV_COUNTER_AMOUNT            3          CACHE STRING   "How many NS NV counters are enabled")
 

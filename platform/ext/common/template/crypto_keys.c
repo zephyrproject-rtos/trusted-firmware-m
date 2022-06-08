@@ -144,6 +144,10 @@ static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
     }
     *key_bits = *key_len * 8;
 
+    if (buf_len < *key_len) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
     err = tfm_plat_otp_read(PLAT_OTP_ID_IAK_TYPE,
                             sizeof(psa_algorithm_t), (uint8_t*)algorithm);

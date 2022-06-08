@@ -65,6 +65,7 @@ target_compile_definitions(tfm_psa_rot_partition_attestation
         $<$<BOOL:${ATTEST_INCLUDE_COSE_KEY_ID}>:INCLUDE_COSE_KEY_ID>
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>>:CLAIM_VALUE_CHECK>
         ATTEST_TOKEN_PROFILE_${ATTEST_TOKEN_PROFILE}
+        $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:ATTEST_KEY_BITS=${ATTEST_KEY_BITS}>
 )
 
 ########################### Attest defs ########################################

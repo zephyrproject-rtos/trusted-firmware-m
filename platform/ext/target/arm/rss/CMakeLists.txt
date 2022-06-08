@@ -131,6 +131,11 @@ target_sources(tfm_sprt
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
 )
 
+target_compile_definitions(platform_s
+    INTERFACE
+        ATTEST_KEY_BITS=${ATTEST_KEY_BITS}
+)
+
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}

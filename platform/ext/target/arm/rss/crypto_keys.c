@@ -148,7 +148,7 @@ static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
     psa_key_handle_t transient_key = PSA_KEY_HANDLE_INIT;
     psa_key_derivation_operation_t op = PSA_KEY_DERIVATION_OPERATION_INIT;
 
-    if (buf_len < 48) {
+    if (buf_len < PSA_KEY_EXPORT_ECC_KEY_PAIR_MAX_SIZE(ATTEST_KEY_BITS)) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
@@ -184,7 +184,7 @@ static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
         goto err_release_op;
     }
 
-    *key_bits = 384;
+    *key_bits = ATTEST_KEY_BITS;
     *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
     *type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
 

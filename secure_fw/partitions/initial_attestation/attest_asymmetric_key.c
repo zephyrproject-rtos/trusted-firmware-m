@@ -16,7 +16,8 @@
 #include "qcbor.h"
 #include "tfm_crypto_defs.h"
 
-#define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)
+#define ATTEST_ECC_PUBLIC_KEY_SIZE \
+             PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(ATTEST_KEY_BITS)
 
 /**
  * The size of X and Y coordinate in 2 parameter style EC public
@@ -28,7 +29,7 @@
  */
 #define ECC_P256_COORD_SIZE PSA_BITS_TO_BYTES(256) /* 256 bits -> 32 bytes */
 
-static uint8_t  attestation_public_key[ECC_P256_PUBLIC_KEY_SIZE]; /* 65bytes */
+static uint8_t  attestation_public_key[ATTEST_ECC_PUBLIC_KEY_SIZE];
 static size_t   attestation_public_key_len = 0;
 static psa_ecc_family_t attestation_key_curve;
 
