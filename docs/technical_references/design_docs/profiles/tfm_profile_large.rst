@@ -248,6 +248,8 @@ shown below.
    +--------------------------------------------+------------------------------------+----------------------------------------------------------------------------------------------------+
    | ``TFM_MBEDCRYPTO_CONFIG_PATH``             | MbedTLS config file path           | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_large.h`` |
    +--------------------------------------------+------------------------------------+----------------------------------------------------------------------------------------------------+
+   | ``TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH``  | MbedTLS PSA config file path       | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_profile_large.h``         |
+   +--------------------------------------------+------------------------------------+----------------------------------------------------------------------------------------------------+
    | ``TFM_PARTITION_INITIAL_ATTESTATION``      | Enable Initial Attestation service | ``ON``                                                                                             |
    +--------------------------------------------+------------------------------------+----------------------------------------------------------------------------------------------------+
    | ``TFM_PARTITION_PROTECTED_STORAGE`` [a]_   | Enable PS service                  | ``ON``                                                                                             |
@@ -274,9 +276,10 @@ MbedTLS configurations
 ^^^^^^^^^^^^^^^^^^^^^^
 
 TF-M Profile Large adds a dedicated MbedTLS config file
-``tfm_mbedcrypto_config_profile_large.h`` under
+``tfm_mbedcrypto_config_profile_large.h`` and MbedTLS PSA config file
+``crypto_config_profile_large.h`` under
 ``/lib/ext/mbedcrypto/mbedcrypto_config`` folder, instead of the common one
-``tfm_mbedcrypto_config_default.h`` [7]_.
+``tfm_mbedcrypto_config_default.h`` and ``crypto_config_default.h`` [7]_.
 
 Major MbedTLS configurations are set as listed below:
 
@@ -360,7 +363,7 @@ Test configuration
 
 Some cryptography tests are disabled due to the reduced MbedTLS config.
 Profile Large specific test configurations are also specified in Profile Large
-top-level CMake config file ``config/profile/profile_large``.
+top-level CMake config file ``config/profile/profile_large_test.cmake``.
 
 .. table:: Profile Large crypto test configuration
    :widths: auto
@@ -373,17 +376,25 @@ top-level CMake config file ``config/profile/profile_large``.
    +--------------------------------------------+---------------+-----------------------------------------+
    | ``TFM_CRYPTO_TEST_ALG_CCM``                | ``ON``        | Test CCM cryptography mode              |
    +--------------------------------------------+---------------+-----------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``       | Test CFB cryptography mode              |
+   +--------------------------------------------+---------------+-----------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_ECB``                | ``OFF``       | Test ECB cryptography mode              |
+   +--------------------------------------------+---------------+-----------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``       | Test CTR cryptography mode              |
+   +--------------------------------------------+---------------+-----------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_OFB``                | ``OFF``       | Test OFB cryptography mode              |
+   +--------------------------------------------+---------------+-----------------------------------------+
    | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``ON``        | Test GCM cryptography mode              |
    +--------------------------------------------+---------------+-----------------------------------------+
    | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``ON``        | Test SHA-512 cryptography algorithm     |
    +--------------------------------------------+---------------+-----------------------------------------+
    | ``TFM_CRYPTO_TEST_HKDF``                   | ``ON``        | Test HMAC-based key derivation function |
    +--------------------------------------------+---------------+-----------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``       | Test CFB cryptography mode              |
-   +--------------------------------------------+---------------+-----------------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``       | Test CTR cryptography mode              |
-   +--------------------------------------------+---------------+-----------------------------------------+
    | ``TFM_CRYPTO_TEST_ECDH``                   | ``ON``        | Test ECDH key agreement algorithm       |
+   +--------------------------------------------+---------------+-----------------------------------------+
+   | ``TFM_CRYPTO_TEST_CHACHA20``               | ``OFF``       | Test ChaCha20 stream cipher             |
+   +--------------------------------------------+---------------+-----------------------------------------+
+   | ``TFM_CRYPTO_TEST_CHACHA20_POLY1305``      | ``OFF``       | Test ChaCha20-Poly1305 AEAD algorithm   |
    +--------------------------------------------+---------------+-----------------------------------------+
 
 ****************
@@ -458,4 +469,4 @@ Reference
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

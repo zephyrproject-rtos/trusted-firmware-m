@@ -259,6 +259,8 @@ shown below.
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_MBEDCRYPTO_CONFIG_PATH``             | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_medium.h`` | Mbed Crypto config file path        |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
+   | ``TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH``  | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_profile_medium.h``         | Mbed Crypto PSA config file path    |
+   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_PARTITION_INITIAL_ATTESTATION``      | ``ON``                                                                                              | Enable Initial Attestation service  |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_PARTITION_PROTECTED_STORAGE`` [1]_   | ``ON``                                                                                              | Enable PS service                   |
@@ -296,25 +298,33 @@ Some cryptography tests are disabled due to the reduced Mbed Crypto config.
    :widths: auto
    :align: center
 
-   +--------------------------------------------+---------------+--------------------------------+
-   | Configs                                    | Default value | Descriptions                   |
-   +============================================+===============+================================+
-   | ``TFM_CRYPTO_TEST_ALG_CBC``                | ``OFF``       | Disable CBC mode test          |
-   +--------------------------------------------+---------------+--------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CCM``                | ``ON``        | Enable CCM mode test           |
-   +--------------------------------------------+---------------+--------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``       | Disable CFB mode test          |
-   +--------------------------------------------+---------------+--------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``       | Disable CTR mode test          |
-   +--------------------------------------------+---------------+--------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``       | Disable GCM mode test          |
-   +--------------------------------------------+---------------+--------------------------------+
-   | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``       | Disable SHA-512 algorithm test |
-   +--------------------------------------------+---------------+--------------------------------+
-   | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``       | Disable HKDF algorithm test    |
-   +--------------------------------------------+---------------+--------------------------------+
-   | ``TFM_CRYPTO_TEST_ECDH``                   | ``ON``        | Enable ECDH key agreement test |
-   +--------------------------------------------+---------------+--------------------------------+
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | Configs                                    | Default value | Descriptions                                  |
+   +============================================+===============+===============================================+
+   | ``TFM_CRYPTO_TEST_ALG_CBC``                | ``OFF``       | Disable CBC mode test                         |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CCM``                | ``ON``        | Enable CCM mode test                          |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CFB``                | ``OFF``       | Disable CFB mode test                         |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_ECB``                | ``OFF``       | Disable ECB mode test                         |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_CTR``                | ``OFF``       | Disable CTR mode test                         |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_OFB``                | ``OFF``       | Disable OFB mode test                         |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``       | Disable GCM mode test                         |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``       | Disable SHA-512 algorithm test                |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``       | Disable HKDF algorithm test                   |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_ECDH``                   | ``ON``        | Enable ECDH key agreement test                |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_CHACHA20``               | ``OFF``       | Disable ChaCha20 stream cipher test           |
+   +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_CHACHA20_POLY1305``      | ``OFF``       | Disable ChaCha20-Poly1305 AEAD algorithm test |
+   +--------------------------------------------+---------------+-----------------------------------------------+
 
 Device configuration extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -344,9 +354,10 @@ Mbed Crypto configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 TF-M Profile Medium adds a dedicated Mbed Crypto config file
-``tfm_mbedcrypto_config_profile_medium.h`` at
-``/lib/ext/mbedcrypto/mbedcrypto_config`` folder, instead of the common one
-``tfm_mbedcrypto_config_default.h`` [CRYPTO-DESIGN]_.
+``tfm_mbedcrypto_config_profile_medium.h`` and Mbed Crypto PSA config file
+``crypto_config_profile_medium.h`` at ``/lib/ext/mbedcrypto/mbedcrypto_config``
+folder, instead of the common one ``tfm_mbedcrypto_config_default.h`` and
+``crypto_config_default.h`` [CRYPTO-DESIGN]_.
 
 Major Mbed Crypto configurations are set as listed below:
 
@@ -488,4 +499,4 @@ Reference
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

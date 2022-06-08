@@ -71,7 +71,7 @@
 //#define PSA_WANT_ALG_SHA_1                      1
 #define PSA_WANT_ALG_SHA_224                    1
 #define PSA_WANT_ALG_SHA_256                    1
-#define PSA_WANT_ALG_SHA_384                    1
+//#define PSA_WANT_ALG_SHA_384                    1
 #define PSA_WANT_ALG_SHA_512                    1
 //#define PSA_WANT_ALG_STREAM_CIPHER              1
 #define PSA_WANT_ALG_TLS12_PRF                  1
@@ -83,8 +83,8 @@
 //#define PSA_WANT_ECC_BRAINPOOL_P_R1_256         1
 //#define PSA_WANT_ECC_BRAINPOOL_P_R1_384         1
 //#define PSA_WANT_ECC_BRAINPOOL_P_R1_512         1
-#define PSA_WANT_ECC_MONTGOMERY_255             1
-#define PSA_WANT_ECC_MONTGOMERY_448             1
+//#define PSA_WANT_ECC_MONTGOMERY_255             1
+//#define PSA_WANT_ECC_MONTGOMERY_448             1
 //#define PSA_WANT_ECC_SECP_K1_192                1
 /*
  * SECP224K1 is buggy via the PSA API in Mbed TLS
@@ -92,12 +92,12 @@
  * default.
  */
 //#define PSA_WANT_ECC_SECP_K1_224                1
-#define PSA_WANT_ECC_SECP_K1_256                1
+//#define PSA_WANT_ECC_SECP_K1_256                1
 //#define PSA_WANT_ECC_SECP_R1_192                1
 //#define PSA_WANT_ECC_SECP_R1_224                1
 #define PSA_WANT_ECC_SECP_R1_256                1
 #define PSA_WANT_ECC_SECP_R1_384                1
-#define PSA_WANT_ECC_SECP_R1_521                1
+//#define PSA_WANT_ECC_SECP_R1_521                1
 
 #define PSA_WANT_KEY_TYPE_DERIVE                1
 #define PSA_WANT_KEY_TYPE_HMAC                  1
