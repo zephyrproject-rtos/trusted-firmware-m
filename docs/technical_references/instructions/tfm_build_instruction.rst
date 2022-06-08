@@ -216,29 +216,35 @@ Some cryptographic tests can be enabled and disabled. This is done to prevent
 false failures from being reported when a smaller Mbed Crypto config is being
 used which does not support all features.
 
-+-----------------------------+-------------------------------------+---------------+
-| Parameter                   | Description                         | Default value |
-+=============================+=====================================+===============+
-| TFM_CRYPTO_TEST_ALG_CBC     | Test CBC cryptography mode          | ON            |
-+-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_ALG_CCM     | Test CCM cryptography mode          | ON            |
-+-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_ALG_CFB     | Test CFB cryptography mode          | ON            |
-+-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_ALG_ECB     | Test ECB cryptography mode          | ON            |
-+-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_ALG_CTR     | Test CTR cryptography mode          | ON            |
-+-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_ALG_OFB     | Test OFB cryptography mode          | ON            |
-+-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_ALG_GCM     | Test GCM cryptography mode          | ON            |
-+-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_ALG_SHA_512 | Test SHA-512 cryptography algorithm | ON            |
-+-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_HKDF        | Test HKDF key derivation algorithm  | ON            |
-+-----------------------------+-------------------------------------+---------------+
-| TFM_CRYPTO_TEST_ECDH        | Test ECDH key agreement algorithm   | ON            |
-+-----------------------------+-------------------------------------+---------------+
++---------------------------------------+---------------------------------------+---------------+
+| Parameter                             | Description                           | Default value |
++=======================================+=======================================+===============+
+| TFM_CRYPTO_TEST_ALG_CBC               | Test CBC cryptography mode            | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_CCM               | Test CCM cryptography mode            | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_CFB               | Test CFB cryptography mode            | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_ECB               | Test ECB cryptography mode            | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_CTR               | Test CTR cryptography mode            | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_OFB               | Test OFB cryptography mode            | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_GCM               | Test GCM cryptography mode            | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_SHA_384           | Test SHA-384 cryptography algorithm   | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_SHA_512           | Test SHA-512 cryptography algorithm   | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_HKDF                  | Test HKDF key derivation algorithm    | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ECDH                  | Test ECDH key agreement algorithm     | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_CHACHA20              | Test ChaCha20 stream cipher           | ON            |
++---------------------------------------+---------------------------------------+---------------+
+| TFM_CRYPTO_TEST_ALG_CHACHA20_POLY1305 | Test ChaCha20-Poly1305 AEAD algorithm | ON            |
++---------------------------------------+---------------------------------------+---------------+
 
 TF-M Profiles
 -------------

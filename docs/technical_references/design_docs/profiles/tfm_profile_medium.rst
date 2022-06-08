@@ -315,6 +315,8 @@ Some cryptography tests are disabled due to the reduced Mbed Crypto config.
    +--------------------------------------------+---------------+-----------------------------------------------+
    | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``       | Disable GCM mode test                         |
    +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_SHA_384``            | ``OFF``       | Disable SHA-384 algorithm test                |
+   +--------------------------------------------+---------------+-----------------------------------------------+
    | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``       | Disable SHA-512 algorithm test                |
    +--------------------------------------------+---------------+-----------------------------------------------+
    | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``       | Disable HKDF algorithm test                   |

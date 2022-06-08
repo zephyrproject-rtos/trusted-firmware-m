@@ -386,6 +386,8 @@ top-level CMake config file ``config/profile/profile_large_test.cmake``.
    +--------------------------------------------+---------------+-----------------------------------------+
    | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``ON``        | Test GCM cryptography mode              |
    +--------------------------------------------+---------------+-----------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_SHA_384``            | ``OFF``       | Test SHA-384 cryptography algorithm     |
+   +--------------------------------------------+---------------+-----------------------------------------+
    | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``ON``        | Test SHA-512 cryptography algorithm     |
    +--------------------------------------------+---------------+-----------------------------------------+
    | ``TFM_CRYPTO_TEST_HKDF``                   | ``ON``        | Test HMAC-based key derivation function |

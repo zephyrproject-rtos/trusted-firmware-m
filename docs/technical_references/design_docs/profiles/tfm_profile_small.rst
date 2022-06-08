@@ -499,6 +499,8 @@ Some of them are shown in the table below.
    +--------------------------------------------+---------------+----------------------------------------+
    | ``TFM_CRYPTO_TEST_ALG_GCM``                | ``OFF``       | Test GCM cryptography mode             |
    +--------------------------------------------+---------------+----------------------------------------+
+   | ``TFM_CRYPTO_TEST_ALG_SHA_384``            | ``OFF``       | Test SHA-384 cryptography algorithm    |
+   +--------------------------------------------+---------------+----------------------------------------+
    | ``TFM_CRYPTO_TEST_ALG_SHA_512``            | ``OFF``       | Test SHA-512 cryptography algorithm    |
    +--------------------------------------------+---------------+----------------------------------------+
    | ``TFM_CRYPTO_TEST_HKDF``                   | ``OFF``       | Test HKDF key derivation algorithm     |
