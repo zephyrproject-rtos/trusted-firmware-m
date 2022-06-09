@@ -72,8 +72,7 @@ target_sources(platform_s
         tfm_hal_isolation.c
         tfm_hal_platform_common.c
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
-    PUBLIC
-        plat_test.c
+        $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
 if(TFM_PARTITION_PLATFORM)
@@ -115,7 +114,7 @@ target_sources(platform_ns
         cmsis_drivers/Driver_USART.c
         ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
         nrfx_glue.c
-        plat_test.c
+        $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
 target_include_directories(platform_ns
