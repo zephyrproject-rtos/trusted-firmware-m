@@ -231,6 +231,7 @@ listed are not applied to stateless mechanism yet.
    TFM_SP_PS                       2
    TFM_SP_ITS                      3
    TFM_SP_INITIAL_ATTESTATION      4
+   TFM_SP_FWU                      5
    =============================== =======================
 
 mmio_regions

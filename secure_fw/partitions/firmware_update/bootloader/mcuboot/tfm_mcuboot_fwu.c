@@ -49,7 +49,7 @@ typedef struct tfm_fwu_mcuboot_ctx_s {
 } tfm_fwu_mcuboot_ctx_t;
 
 static tfm_fwu_mcuboot_ctx_t mcuboot_ctx[TFM_FWU_MAX_IMAGES];
-static fwu_image_info_data_t boot_shared_data;
+static fwu_image_info_data_t __attribute__((aligned(4))) boot_shared_data;
 
 static int convert_id_from_bl_to_mcuboot(bl_image_id_t bl_image_id,
                                          uint8_t *mcuboot_image_id)

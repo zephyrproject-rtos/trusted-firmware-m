@@ -22,10 +22,6 @@ psa_status_t psa_fwu_write(uint32_t image_id,
                            size_t block_size)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
-
     psa_invec in_vec[] = {
         { .base = &image_id, .len = sizeof(image_id) },
         { .base = &block_offset, .len = sizeof(block_offset) },
@@ -33,17 +29,10 @@ psa_status_t psa_fwu_write(uint32_t image_id,
     };
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_FWU_WRITE_SID, TFM_FWU_WRITE_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), NULL, 0);
-
-    psa_close(handle);
+    status = psa_call(TFM_FIRMWARE_UPDATE_SERVICE_HANDLE, TFM_FWU_WRITE,
+                      in_vec, IOVEC_LEN(in_vec), NULL, 0);
 #else
     status = tfm_fwu_write_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
-#endif
 
     /* A parameter with a buffer pointer where its data length is longer than
      * maximum permitted, it is treated as a secure violation.
@@ -54,6 +43,7 @@ psa_status_t psa_fwu_write(uint32_t image_id,
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#endif
 
     return status;
 }
@@ -63,10 +53,6 @@ psa_status_t psa_fwu_install(psa_image_id_t image_id,
                              psa_image_version_t *dependency_version)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
-
     psa_invec in_vec[] = {
         { .base = &image_id, .len = sizeof(image_id) }
     };
@@ -81,19 +67,11 @@ psa_status_t psa_fwu_install(psa_image_id_t image_id,
     }
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_FWU_INSTALL_SID, TFM_FWU_INSTALL_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec),
-                      out_vec, IOVEC_LEN(out_vec));
-
-    psa_close(handle);
+    status = psa_call(TFM_FIRMWARE_UPDATE_SERVICE_HANDLE, TFM_FWU_INSTALL,
+                      in_vec, IOVEC_LEN(in_vec), out_vec, IOVEC_LEN(out_vec));
 #else
     status = tfm_fwu_install_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                         out_vec, IOVEC_LEN(out_vec));
-#endif
 
     /* A parameter with a buffer pointer where its data length is longer than
      * maximum permitted, it is treated as a secure violation.
@@ -104,6 +82,7 @@ psa_status_t psa_fwu_install(psa_image_id_t image_id,
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#endif
 
     return status;
 }
@@ -111,28 +90,16 @@ psa_status_t psa_fwu_install(psa_image_id_t image_id,
 psa_status_t psa_fwu_abort(psa_image_id_t image_id)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
-
     psa_invec in_vec[] = {
         { .base = &image_id, .len = sizeof(image_id) }
     };
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_FWU_ABORT_SID, TFM_FWU_ABORT_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec),
-                      NULL, 0);
-
-    psa_close(handle);
+    status = psa_call(TFM_FIRMWARE_UPDATE_SERVICE_HANDLE, TFM_FWU_ABORT,
+                      in_vec, IOVEC_LEN(in_vec), NULL, 0);
 #else
     status = tfm_fwu_abort_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                       NULL, 0);
-#endif
 
     /* A parameter with a buffer pointer where its data length is longer than
      * maximum permitted, it is treated as a secure violation.
@@ -143,6 +110,7 @@ psa_status_t psa_fwu_abort(psa_image_id_t image_id)
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#endif
 
     return status;
 }
@@ -150,10 +118,6 @@ psa_status_t psa_fwu_abort(psa_image_id_t image_id)
 psa_status_t psa_fwu_query(psa_image_id_t image_id, psa_image_info_t *info)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
-
     psa_invec in_vec[] = {
         { .base = &image_id, .len = sizeof(image_id) }
     };
@@ -162,23 +126,15 @@ psa_status_t psa_fwu_query(psa_image_id_t image_id, psa_image_info_t *info)
     };
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_FWU_QUERY_SID, TFM_FWU_QUERY_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec),
-                      out_vec, IOVEC_LEN(out_vec));
-
-    psa_close(handle);
+    status = psa_call(TFM_FIRMWARE_UPDATE_SERVICE_HANDLE, TFM_FWU_QUERY,
+                      in_vec, IOVEC_LEN(in_vec), out_vec, IOVEC_LEN(out_vec));
 #else
     status = tfm_fwu_query_req_veneer(in_vec, IOVEC_LEN(in_vec),
                                       out_vec, IOVEC_LEN(out_vec));
-#endif
-
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#endif
 
     return status;
 }
@@ -186,27 +142,16 @@ psa_status_t psa_fwu_query(psa_image_id_t image_id, psa_image_info_t *info)
 psa_status_t psa_fwu_request_reboot(void)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_FWU_REQUEST_REBOOT_SID,
-                         TFM_FWU_REQUEST_REBOOT_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    status = psa_call(handle, PSA_IPC_CALL, NULL, 0, NULL, 0);
-
-    psa_close(handle);
+    status = psa_call(TFM_FIRMWARE_UPDATE_SERVICE_HANDLE, TFM_FWU_REQUEST_REBOOT,
+                      NULL, 0, NULL, 0);
 #else
     status = tfm_fwu_request_reboot_req_veneer(NULL, 0, NULL, 0);
-#endif
-
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#endif
 
     return status;
 }
@@ -214,30 +159,19 @@ psa_status_t psa_fwu_request_reboot(void)
 psa_status_t psa_fwu_accept(psa_image_id_t image_id)
 {
     psa_status_t status;
-#ifdef TFM_PSA_API
-    psa_handle_t handle;
-#endif
     psa_invec in_vec[] = {
         { .base = &image_id, .len = sizeof(image_id) }
     };
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_FWU_ACCEPT_SID,
-                         TFM_FWU_ACCEPT_VERSION);
-    if (!PSA_HANDLE_IS_VALID(handle)) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    status = psa_call(handle, PSA_IPC_CALL, in_vec, IOVEC_LEN(in_vec), NULL, 0);
-
-    psa_close(handle);
+    status = psa_call(TFM_FIRMWARE_UPDATE_SERVICE_HANDLE, TFM_FWU_ACCEPT,
+                      in_vec, IOVEC_LEN(in_vec), NULL, 0);
 #else
     status = tfm_fwu_accept_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
-#endif
-
     if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#endif
 
     return status;
 }

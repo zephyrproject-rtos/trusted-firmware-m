@@ -19,6 +19,7 @@ extern "C" {
 /* The maxinum of images that TF-M support to update concurrently. */
 #define TFM_FWU_MAX_IMAGES    2
 
+#ifndef TFM_PSA_API
 /**
  * \brief Handles the write request.
  *
@@ -86,7 +87,7 @@ psa_status_t tfm_fwu_query_req(psa_invec *in_vec, size_t in_len,
 
 psa_status_t tfm_fwu_request_reboot_req(psa_invec *in_vec, size_t in_len,
                                psa_outvec *out_vec, size_t out_len);
-
+#endif
 #ifdef __cplusplus
 }
 #endif
