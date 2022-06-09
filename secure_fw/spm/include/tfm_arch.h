@@ -66,7 +66,7 @@ struct full_context_t {
 struct context_ctrl_t {
     uint32_t                sp;           /* Stack pointer (higher address)  */
     uint32_t                sp_limit;     /* Stack limit (lower address)     */
-    uint32_t                allocated;    /* Stack alloced bytes (8-aligned) */
+    uint32_t                sp_base;      /* Stack usage start (higher addr) */
     uint32_t                exc_ret;      /* EXC_RETURN pattern.             */
     uint32_t                cross_frame;  /* Cross call frame position.      */
     uint32_t                retcode_status; /* Cross call retcode status.    */
@@ -95,22 +95,20 @@ struct cross_call_abi_frame_t {
 };
 
 /* Assign stack and stack limit to the context control instance. */
-#define ARCH_CTXCTRL_INIT(x, buf, size) do {                                   \
-            (x)->sp             = ((uint32_t)(buf) + (uint32_t)(size)) & ~0x7; \
-            (x)->sp_limit       = ((uint32_t)(buf) + 7) & ~0x7;                \
-            (x)->allocated      = 0;                                           \
-            (x)->exc_ret        = 0;                                           \
-            (x)->cross_frame    = 0;                                           \
-            (x)->retcode_status = CROSS_RETCODE_EMPTY;                         \
+#define ARCH_CTXCTRL_INIT(x, buf, sz) do {                                   \
+            (x)->sp             = ((uint32_t)(buf) + (uint32_t)(sz)) & ~0x7; \
+            (x)->sp_limit       = ((uint32_t)(buf) + 7) & ~0x7;              \
+            (x)->sp_base        = (x)->sp;                                   \
+            (x)->exc_ret        = 0;                                         \
+            (x)->cross_frame    = 0;                                         \
+            (x)->retcode_status = CROSS_RETCODE_EMPTY;                       \
         } while (0)
 
 /* Allocate 'size' bytes in stack. */
-#define ARCH_CTXCTRL_ALLOCATE_STACK(x, size) do {                         \
-            (x)->allocated += ((size) + 7) & ~0x7;                        \
-            (x)->sp        -= (x)->allocated;                             \
-        } while (0)
+#define ARCH_CTXCTRL_ALLOCATE_STACK(x, size)                                 \
+            ((x)->sp             -= ((size) + 7) & ~0x7)
 
-/* The latest allocated pointer. */
+/* The last allocated pointer. */
 #define ARCH_CTXCTRL_ALLOCATED_PTR(x)         ((x)->sp)
 
 /* Prepare a exception return pattern on the stack. */
@@ -120,6 +118,19 @@ struct cross_call_abi_frame_t {
             (x)->lr = (uint32_t)(pfnlr);                                  \
             (x)->xpsr = XPSR_T32;                                         \
         } while (0)
+
+/*
+ * Claim a statically initialized context control instance.
+ * Make the start stack pointer at 'stack_buf[stack_size]' because
+ * the hardware acts in a 'Decrease-then-store' behaviour.
+ */
+#define ARCH_CLAIM_CTXCTRL_INSTANCE(name, stack_buf, stack_size)          \
+            struct context_ctrl_t name = {                                \
+                .sp        = (uint32_t)&stack_buf[stack_size],            \
+                .sp_base   = (uint32_t)&stack_buf[stack_size],            \
+                .sp_limit  = (uint32_t)stack_buf,                         \
+                .exc_ret   = 0,                                           \
+            }
 
 /**
  * \brief Get Link Register

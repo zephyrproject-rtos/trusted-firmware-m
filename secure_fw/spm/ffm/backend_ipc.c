@@ -28,16 +28,15 @@
 struct partition_head_t partition_listhead;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
+/* Instance for SPM_THREAD_CONTEXT */
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
-/* TODO: To be checked when RPC design updates. */
-static uint8_t spm_stack_local[CONFIG_TFM_SPM_THREAD_STACK_SIZE] __aligned(8);
-struct context_ctrl_t spm_thread_context = {
-    .sp        = (uint32_t)&spm_stack_local[CONFIG_TFM_SPM_THREAD_STACK_SIZE],
-    .sp_limit  = (uint32_t)spm_stack_local,
-    .allocated = 0,
-    .exc_ret   = 0,
-};
+
+static uint8_t spm_thread_stack[CONFIG_TFM_SPM_THREAD_STACK_SIZE] __aligned(8);
+ARCH_CLAIM_CTXCTRL_INSTANCE(spm_thread_context,
+                            spm_thread_stack,
+                            sizeof(spm_thread_stack));
+
 struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
 #else
 struct context_ctrl_t *p_spm_thread_context;

@@ -31,7 +31,6 @@ static uint32_t psa_interface_cross_unified_entry(uint32_t a0)
 #if !defined(__ICCARM__)
         ".syntax unified                                    \n"
 #endif
-        "movs   r2, #1                                      \n"
         "bl     spm_interface_cross_dispatcher              \n"
         "pop    {r0-r4, pc}                                 \n"
     );

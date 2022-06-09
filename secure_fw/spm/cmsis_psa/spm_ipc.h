@@ -403,12 +403,11 @@ void spm_assert_signal(void *p_pt, psa_signal_t signal);
  * to the caller.
  *
  * fn_addr      - the target function to be called.
- * frame_addr   - customized ABI frame type for the function call.
- * switch_stack - indicator if need to switch stack.
+ * frame_addr   - Address of the customized ABI frame. The frame must be
+ *                stored in the caller's stack (which means the frame variable
+ *                must be a local variable).
  */
-void spm_interface_cross_dispatcher(uintptr_t fn_addr,
-                                    uintptr_t frame_addr,
-                                    uint32_t  switch_stack);
+void spm_interface_cross_dispatcher(uintptr_t fn_addr, uintptr_t frame_addr);
 
 /* Execute a customized ABI function in C */
 psa_status_t cross_call_entering_c(uintptr_t fn_addr, uintptr_t frame_addr);
