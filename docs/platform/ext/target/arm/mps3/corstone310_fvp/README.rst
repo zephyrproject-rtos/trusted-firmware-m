@@ -30,6 +30,9 @@ Build instructions with platform name: arm/mps3/corstone310_fvp
    The built binaries can be run on the Corstone-310 Arm Virtual Hardware
    (VHT_Corstone_SSE-310). At least VHT version 11.17 is required.
 
+.. note::
+
+   For Armclang compiler v6.18 or later version is required.
 
 To run the example code on Corstone-310 Ethos-U55 Arm Virtual Hardware
 ----------------------------------------------------------------------
