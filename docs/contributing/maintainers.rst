@@ -151,9 +151,9 @@ Raymond Ngun
 Laird Connectivity Platforms:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Jamie McCrae
-    :email: `Jamie.McCrae@lairdconnect.com <jamie.mccrae@lairdconnect.com>`__
-    :github: `thedjnk <https://github.com/thedjnk>`__
+Greg Leach
+    :email: `Greg.Leach@lairdconnect.com <greg.leach@lairdconnect.com>`__
+    :github: `greg-leach <https://github.com/greg-leach>`__
 
 Nordic Semiconductor Platforms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
