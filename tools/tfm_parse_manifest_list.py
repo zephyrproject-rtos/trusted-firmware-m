@@ -423,7 +423,7 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
 
     if partition_statistics['flih_num'] > 0:
         config_impl['CONFIG_TFM_FLIH_API'] = 1
-    elif partition_statistics['slih_num'] > 0:
+    if partition_statistics['slih_num'] > 0:
         config_impl['CONFIG_TFM_SLIH_API'] = 1
 
     context['partitions'] = partition_list
