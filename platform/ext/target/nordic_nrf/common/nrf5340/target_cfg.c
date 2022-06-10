@@ -502,9 +502,9 @@ REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
 #ifdef BL2
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
 #endif /* BL2 */
-#ifdef NRF_NS_STORAGE
+#ifdef NRF_NS_STORAGE_PARTITION_START
 REGION_DECLARE(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base);
-#endif /* NRF_NS_STORAGE */
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -533,13 +533,13 @@ const struct memory_region_limits memory_regions = {
         SECONDARY_PARTITION_SIZE - 1,
 #endif /* BL2 */
 
-#ifdef NRF_NS_STORAGE
+#ifdef NRF_NS_STORAGE_PARTITION_START
     .non_secure_storage_partition_base =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base),
     .non_secure_storage_partition_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base) +
         NRF_NS_STORAGE_PARTITION_SIZE - 1,
-#endif /* NRF_NS_STORAGE */
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 };
 
 /* To write into AIRCR register, 0x5FA value must be write to the VECTKEY field,
@@ -674,12 +674,12 @@ enum tfm_plat_err_t spu_init_cfg(void)
         memory_regions.secondary_partition_limit);
 #endif /* BL2 */
 
-#ifdef NRF_NS_STORAGE
+#ifdef NRF_NS_STORAGE_PARTITION_START
     /* Configures storage partition to be non-secure */
     spu_regions_flash_config_non_secure(
         memory_regions.non_secure_storage_partition_base,
         memory_regions.non_secure_storage_partition_limit);
-#endif /* NRF_NS_STORAGE */
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 
     return TFM_PLAT_ERR_SUCCESS;
 }
