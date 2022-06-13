@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,27 +10,10 @@
 #include "tfm_platform_system.h"
 #include "tfm_plat_nv_counters.h"
 #include "tfm_secure_api.h"
-#include "psa_manifest/pid.h"
 #include "load/partition_defs.h"
+#include "psa_manifest/pid.h"
 
 #define NV_COUNTER_ID_SIZE  sizeof(enum tfm_nv_counter_t)
-
-#ifdef TFM_PARTITION_PROTECTED_STORAGE
-#define NV_COUNTER_MAP_SIZE   3
-#else /* TFM_PARTITION_PROTECTED_STORAGE */
-#define NV_COUNTER_MAP_SIZE   1
-#endif /* TFM_PARTITION_PROTECTED_STORAGE */
-
-/* Access map using NVCOUNTER_IDX -> tfm_partition-id key-value pairs */
-static const int32_t nv_counter_access_map[NV_COUNTER_MAP_SIZE] = {
-#ifdef TFM_PARTITION_PROTECTED_STORAGE
-                                          [PLAT_NV_COUNTER_PS_0] = TFM_SP_PS,
-                                          [PLAT_NV_COUNTER_PS_1] = TFM_SP_PS,
-                                          [PLAT_NV_COUNTER_PS_2] = TFM_SP_PS
-#else
-                                          [0] = INVALID_PARTITION_ID
-#endif
-              };
 
 #ifdef TFM_PSA_API
 #include "psa_manifest/tfm_platform.h"
@@ -44,40 +27,6 @@ static const int32_t nv_counter_access_map[NV_COUNTER_MAP_SIZE] = {
 typedef enum tfm_platform_err_t (*plat_func_t)(const psa_msg_t *msg);
 #endif /* TFM_PSA_API */
 
-/*
- * \brief Verifies ownership of a nv_counter resource to a partition id.
- *
- * \param[in] nv_counter_no  Number of nv_counter as assigned in platform.
- *
- * \return true if the calling partition is allowed to access this counter id
- */
-
-static bool nv_counter_access_grant(int32_t client_id,
-                                    enum tfm_nv_counter_t nv_counter_no)
-{
-    int32_t req_id;
-
-    /* Boundary check the input argument */
-    const uint32_t bounds[] = {PLAT_NV_COUNTER_MAX, NV_COUNTER_MAP_SIZE};
-    const uint32_t lower_bound_check = bounds[0] < bounds[1] ?
-                                       bounds[0] : bounds[1];
-
-    /* Check that nv_counter no is in [0; lower_bound_check-1] */
-    if (!((uint32_t)nv_counter_no < lower_bound_check)) {
-        return false;
-    }
-
-    req_id = nv_counter_access_map[nv_counter_no];
-
-    /* NV Counters are indexed from 0 and incremented. A gap in the platform
-     *  counter sequence is assigned a zero( invalid ) partition id
-     */
-    if (client_id == req_id && req_id != 0) {
-       return true;
-    }
-    return false;
-}
-
 enum tfm_platform_err_t platform_sp_system_reset(void)
 {
     /* FIXME: The system reset functionality is only supported in isolation
@@ -87,6 +36,30 @@ enum tfm_platform_err_t platform_sp_system_reset(void)
     tfm_platform_hal_system_reset();
 
     return TFM_PLATFORM_ERR_SUCCESS;
+}
+
+static enum tfm_platform_err_t nv_counter_permissions_check(
+        int32_t client_id,
+        enum tfm_nv_counter_t nv_counter_no,
+        bool is_read)
+{
+    /* Not used currently */
+    (void)is_read;
+
+    switch (nv_counter_no) {
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+    case PLAT_NV_COUNTER_PS_0:
+    case PLAT_NV_COUNTER_PS_1:
+    case PLAT_NV_COUNTER_PS_2:
+        if (client_id == TFM_SP_PS) {
+            return TFM_PLATFORM_ERR_SUCCESS;
+        } else {
+            return TFM_PLATFORM_ERR_NOT_SUPPORTED;
+        }
+#endif
+    default:
+        return TFM_PLATFORM_ERR_NOT_SUPPORTED;
+    }
 }
 
 #ifndef TFM_PSA_API
@@ -133,7 +106,8 @@ platform_sp_nv_counter_read(psa_invec  *in_vec,  uint32_t num_invec,
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
 
-    if (!nv_counter_access_grant(client_id, counter_id)) {
+    if (nv_counter_permissions_check(client_id, counter_id, true)
+        != TFM_PLAT_ERR_SUCCESS) {
        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
     err = tfm_plat_read_nv_counter(counter_id, counter_size,
@@ -165,7 +139,8 @@ platform_sp_nv_counter_increment(psa_invec  *in_vec,  uint32_t num_invec,
 
     counter_id = *((enum tfm_nv_counter_t *)in_vec[0].base);
 
-    if (!nv_counter_access_grant(client_id, counter_id)) {
+    if (nv_counter_permissions_check(client_id, counter_id, false)
+        != TFM_PLAT_ERR_SUCCESS) {
        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
     err = tfm_plat_increment_nv_counter(counter_id);
@@ -217,7 +192,8 @@ platform_sp_nv_counter_ipc(const psa_msg_t *msg)
             return TFM_PLATFORM_ERR_SYSTEM_ERROR;
         }
 
-        if (!nv_counter_access_grant(msg->client_id, counter_id)) {
+        if (nv_counter_permissions_check(msg->client_id, counter_id, false)
+            != TFM_PLATFORM_ERR_SUCCESS) {
            return TFM_PLATFORM_ERR_SYSTEM_ERROR;
         }
 
@@ -234,7 +210,8 @@ platform_sp_nv_counter_ipc(const psa_msg_t *msg)
             return TFM_PLATFORM_ERR_SYSTEM_ERROR;
         }
 
-        if (!nv_counter_access_grant(msg->client_id, counter_id)) {
+        if (nv_counter_permissions_check(msg->client_id, counter_id, true)
+            != TFM_PLATFORM_ERR_SUCCESS) {
            return TFM_PLATFORM_ERR_SYSTEM_ERROR;
         }
 
