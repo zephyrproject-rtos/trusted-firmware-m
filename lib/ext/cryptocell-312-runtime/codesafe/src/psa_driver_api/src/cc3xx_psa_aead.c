@@ -864,13 +864,6 @@ psa_status_t cc3xx_aead_update(
         if (output_size < input_length) {
             return PSA_ERROR_BUFFER_TOO_SMALL;
         }
-        /* FixMe: The low level driver at the moment supports calls only
-         * aligned to the AES block size. If the low level driver is reworked
-         * this limitation can be removed
-         */
-        if (input_length % AES_BLOCK_SIZE) {
-            return PSA_ERROR_INVALID_ARGUMENT;
-        }
         switch (operation->alg) {
 #if defined(CC3XX_CONFIG_SUPPORT_GCM)
         case PSA_ALG_GCM:
