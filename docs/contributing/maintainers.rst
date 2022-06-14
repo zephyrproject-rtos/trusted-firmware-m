@@ -144,10 +144,6 @@ Chris Brand
     :email: `Chris Brand@cypress.com <chris.brand@cypress.com>`__
     :github: `UEWBot <https://github.com/UEWBot>`__
 
-Raymond Ngun
-    :email: `Raymond.Ngunn@cypress.com <raymond.ngunn@cypress.com>`__
-    :github: `RaymondNgun <https://github.com/RaymondNgun>`__
-
 Laird Connectivity Platforms:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
