@@ -446,10 +446,14 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     partition = GET_CURRENT_COMPONENT();
 
     /*
+     * signals_allowed can be 0 for TF-M internal partitions for special usages.
+     * Regular Secure Partitions should have at least one signal.
+     * This is gauranteed by the manifest tool.
      * It is a PROGRAMMER ERROR if the signal_mask does not include any assigned
      * signals.
      */
-    if ((partition->signals_allowed & signal_mask) == 0) {
+    if ((partition->signals_allowed) &&
+        (partition->signals_allowed & signal_mask) == 0) {
         tfm_core_panic();
     }
 
