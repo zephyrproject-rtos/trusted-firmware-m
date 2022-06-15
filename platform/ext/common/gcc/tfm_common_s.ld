@@ -237,14 +237,15 @@ SECTIONS
      * MPU on Armv6-M/v7-M core in multi-core topology may require more strict
      * alignment that MPU region base address must align with the MPU region
      * size.
-     * As a result, in multi-core topology, to save memory resource and MPU
+     * As a result, on Armv6-M/v7-M cores, to save memory resource and MPU
      * regions, unprivileged data sections and privileged data sections are
      * separated and gathered in unprivileged/privileged data area respectively.
      * Keep BL2 shared data and MSP stack at the beginning of the secure data
-     * area in single Armv8-M topology, while move the two areas to the
-     * beginning of privileged data region in multi-core topology.
+     * area on Armv8-M cores, while move the two areas to the beginning of
+     * privileged data region on Armv6-M/v7-M cores.
      */
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) || \
+    defined(__ARM_ARCH_8_1M_MAIN__)
 #ifdef CODE_SHARING
     /* The code sharing between bootloader and runtime requires to share the
      * global variables.
@@ -287,7 +288,8 @@ SECTIONS
     Image$$ER_INITIAL_PSP_SEAL$$ZI$$Base = ADDR(.psp_stack_seal_res);
     Image$$ER_INITIAL_PSP_SEAL$$ZI$$Limit = ADDR(.psp_stack_seal_res) + SIZEOF(.psp_stack_seal_res);
 # endif
-#endif
+#endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) || \
+        * defined(__ARM_ARCH_8_1M_MAIN__) */
 
 #if !defined(TFM_PSA_API)
     .TFM_SECURE_STACK : ALIGN(128)
@@ -348,9 +350,10 @@ SECTIONS
     /**** APPLICATION RoT DATA end here */
     Image$$TFM_APP_RW_STACK_END$$Base = .;
 
-#ifdef TFM_MULTI_CORE_TOPOLOGY
+#if defined(__ARM_ARCH_6M__) || defined(__ARM_ARCH_7M__) || \
+    defined(__ARM_ARCH_7EM__)
 #ifdef S_DATA_PRIV_START
-    /**** Privileged data area base address specified by multi-core platform */
+    /**** Privileged data area base address specified by Armv6-M/v7-M platform */
     .tfm_secure_priv_data_boundary :
     {
         . = ABSOLUTE(S_DATA_PRIV_START) ;
@@ -359,7 +362,7 @@ SECTIONS
 
     /*
      * Move BL2 shared area and MSP stack to the beginning of privileged data
-     * area in multi-core topology.
+     * area on Armv6-M/v7-M platforms.
      */
 
     /* shared_data and msp_stack are overlapping on purpose when
@@ -377,7 +380,8 @@ SECTIONS
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
-#endif
+#endif /* defined(__ARM_ARCH_6M__) || defined(__ARM_ARCH_7M__) || \
+        * defined(__ARM_ARCH_7EM__) */
 
     /**** PSA RoT DATA start here */
 

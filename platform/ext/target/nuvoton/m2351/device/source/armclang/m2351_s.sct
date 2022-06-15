@@ -191,18 +191,6 @@ LR_CODE S_CODE_START {
     TFM_SECURE_DATA_START S_DATA_START {
     }
 
-    /*
-     * MPU on Armv6-M/v7-M core in multi-core topology may require more strict
-     * alignment that MPU region base address must align with the MPU region
-     * size.
-     * As a result, in multi-core topology, to save memory resource and MPU
-     * regions, unprivileged data sections and privileged data sections are
-     * separated and gathered in unprivileged/privileged data area respectively.
-     * Keep BL2 shared data and MSP stack at the beginning of the secure data
-     * area in single Armv8-M topology, while move the two areas to the
-     * beginning of privileged data region in multi-core topology.
-     */
-#ifndef TFM_MULTI_CORE_TOPOLOGY
     /* Shared area between BL2 and runtime to exchange data */
     TFM_SHARED_DATA +0 ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
     }
@@ -219,7 +207,6 @@ LR_CODE S_CODE_START {
     ER_INITIAL_PSP_SEAL +0 EMPTY 0x8 {
     }
 # endif /* !defined(TFM_PSA_API) */
-#endif
 
 #if !defined(TFM_PSA_API)
     TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x2000 {
@@ -326,26 +313,6 @@ LR_CODE S_CODE_START {
      */
     TFM_APP_RW_STACK_END +0 ALIGN 32 EMPTY 0x0 {
     }
-
-#ifdef TFM_MULTI_CORE_TOPOLOGY
-#ifdef S_DATA_PRIV_START
-    /**** Privileged data area base address specified by multi-core platform */
-    TFM_SECURE_PRIV_DATA_BOUNDARY S_DATA_PRIV_START {
-    }
-#endif
-
-    /*
-     * Move BL2 shared area and MSP stack to the beginning of privileged data
-     * area in multi-core topology.
-     */
-    /* Shared area between BL2 and runtime to exchange data */
-    TFM_SHARED_DATA +0 ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
-    }
-
-    /* MSP */
-    ARM_LIB_STACK +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
-    }
-#endif
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
     }
@@ -513,7 +480,6 @@ LR_CODE S_CODE_START {
     ScatterAssert(ImageLimit(SRAM_WATERMARK) <= S_DATA_START + S_DATA_SIZE)
 }
 
-#ifndef TFM_MULTI_CORE_TOPOLOGY
 LR_VENEER CMSE_VENEER_REGION_START {
     /*
      * Place the CMSE Veneers (containing the SG instruction) in a separate
@@ -524,7 +490,6 @@ LR_VENEER CMSE_VENEER_REGION_START {
         *(Veneer$$CMSE)
     }
 }
-#endif
 
 LR_NS_PARTITION NS_PARTITION_START {
     /* Reserved place for NS application.
