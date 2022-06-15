@@ -495,8 +495,7 @@ int32_t tfm_spm_get_client_id(bool ns_caller)
 uint32_t tfm_spm_init(void)
 {
     struct partition_t *partition;
-    const struct partition_load_info_t *p_pldi;
-    uint32_t service_setting = 0;
+    uint32_t service_setting;
 
 #ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
@@ -519,19 +518,13 @@ uint32_t tfm_spm_init(void)
             break;
         }
 
-        p_pldi = partition->p_ldinf;
-
-        if (p_pldi->nservices) {
-            service_setting = load_services_assuredly(
+        service_setting = load_services_assuredly(
                                 partition,
                                 &services_listhead,
                                 stateless_services_ref_tbl,
                                 sizeof(stateless_services_ref_tbl));
-        }
 
-        if (p_pldi->nirqs) {
-            load_irqs_assuredly(partition);
-        }
+        load_irqs_assuredly(partition);
 
         /* Bind the partition with platform. */
 #if TFM_FIH_PROFILE_ON
