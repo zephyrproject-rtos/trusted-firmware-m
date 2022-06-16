@@ -80,6 +80,7 @@ set(SECURE_UART1                        OFF         CACHE BOOL      "Enable secu
 set(CRYPTO_HW_ACCELERATOR               OFF         CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
 
 set(OTP_NV_COUNTERS_RAM_EMULATION       OFF         CACHE BOOL      "Enable OTP/NV_COUNTERS emulation in RAM. Has no effect on non-default implementations of the OTP and NV_COUNTERS")
+set(TFM_NS_NV_COUNTER_AMOUNT            0           CACHE STRING    "How many NS NV counters are enabled")
 
 set(PLATFORM_DEFAULT_BL1                ON          CACHE STRING    "Whether to use default BL1 or platform-specific one")
 

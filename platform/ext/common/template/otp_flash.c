@@ -50,67 +50,80 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
                                       size_t out_len, uint8_t *out)
 {
     switch (id) {
-        case PLAT_OTP_ID_HUK:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, huk), out_len, out);
-        case PLAT_OTP_ID_IAK:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, iak), out_len, out);
-        case PLAT_OTP_ID_IAK_LEN:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, iak_len), out_len, out);
-        case PLAT_OTP_ID_IAK_TYPE:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, iak_type), out_len, out);
-        case PLAT_OTP_ID_IAK_ID:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, iak_id), out_len, out);
+    case PLAT_OTP_ID_HUK:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, huk), out_len, out);
+    case PLAT_OTP_ID_IAK:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, iak), out_len, out);
+    case PLAT_OTP_ID_IAK_LEN:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, iak_len), out_len, out);
+    case PLAT_OTP_ID_IAK_TYPE:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, iak_type), out_len, out);
+    case PLAT_OTP_ID_IAK_ID:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, iak_id), out_len, out);
 
-        case PLAT_OTP_ID_BOOT_SEED:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, boot_seed), out_len, out);
-        case PLAT_OTP_ID_LCS:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, lcs), out_len, out);
-        case PLAT_OTP_ID_IMPLEMENTATION_ID:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, implementation_id), out_len, out);
-        case PLAT_OTP_ID_HW_VERSION:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, hw_version), out_len, out);
-        case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, verification_service_url), out_len, out);
-        case PLAT_OTP_ID_PROFILE_DEFINITION:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, profile_definition), out_len, out);
+    case PLAT_OTP_ID_BOOT_SEED:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, boot_seed), out_len, out);
+    case PLAT_OTP_ID_LCS:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, lcs), out_len, out);
+    case PLAT_OTP_ID_IMPLEMENTATION_ID:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, implementation_id), out_len, out);
+    case PLAT_OTP_ID_HW_VERSION:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, hw_version), out_len, out);
+    case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, verification_service_url), out_len, out);
+    case PLAT_OTP_ID_PROFILE_DEFINITION:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, profile_definition), out_len, out);
 
 #ifdef BL2
-        case PLAT_OTP_ID_BL2_ROTPK_0:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_0), out_len, out);
-        case PLAT_OTP_ID_BL2_ROTPK_1:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_1), out_len, out);
-        case PLAT_OTP_ID_BL2_ROTPK_2:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_2), out_len, out);
-        case PLAT_OTP_ID_BL2_ROTPK_3:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_3), out_len, out);
+    case PLAT_OTP_ID_BL2_ROTPK_0:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_0), out_len, out);
+    case PLAT_OTP_ID_BL2_ROTPK_1:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_1), out_len, out);
+    case PLAT_OTP_ID_BL2_ROTPK_2:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_2), out_len, out);
+    case PLAT_OTP_ID_BL2_ROTPK_3:
+       return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_rotpk_3), out_len, out);
 
-        case PLAT_OTP_ID_NV_COUNTER_BL2_0:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_0), out_len, out);
-        case PLAT_OTP_ID_NV_COUNTER_BL2_1:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_1), out_len, out);
-        case PLAT_OTP_ID_NV_COUNTER_BL2_2:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_2), out_len, out);
-        case PLAT_OTP_ID_NV_COUNTER_BL2_3:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_3), out_len, out);
+    case PLAT_OTP_ID_NV_COUNTER_BL2_0:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_0), out_len, out);
+    case PLAT_OTP_ID_NV_COUNTER_BL2_1:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_1), out_len, out);
+    case PLAT_OTP_ID_NV_COUNTER_BL2_2:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_2), out_len, out);
+    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl2_nv_counter_3), out_len, out);
 
 #endif /* BL2 */
 
 #ifdef BL1
-        case PLAT_OTP_ID_BL1_ROTPK_0:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl1_rotpk_0), out_len, out);
+    case PLAT_OTP_ID_BL1_ROTPK_0:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl1_rotpk_0), out_len, out);
 
-        case PLAT_OTP_ID_NV_COUNTER_BL1_0:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl1_nv_counter_0), out_len, out);
+    case PLAT_OTP_ID_NV_COUNTER_BL1_0:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, bl1_nv_counter_0), out_len, out);
 #endif /* BL1 */
 
-        case PLAT_OTP_ID_ENTROPY_SEED:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, entropy_seed), out_len, out);
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+    case PLAT_OTP_ID_NV_COUNTER_NS_0:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, ns_nv_counter_0), out_len, out);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+    case PLAT_OTP_ID_NV_COUNTER_NS_1:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, ns_nv_counter_1), out_len, out);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+    case PLAT_OTP_ID_NV_COUNTER_NS_2:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, ns_nv_counter_2), out_len, out);
+#endif
 
-        case PLAT_OTP_ID_SECURE_DEBUG_PK:
-            return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, secure_debug_pk), out_len, out);
+    case PLAT_OTP_ID_ENTROPY_SEED:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, entropy_seed), out_len, out);
 
-        default:
-            return TFM_PLAT_ERR_UNSUPPORTED;
+    case PLAT_OTP_ID_SECURE_DEBUG_PK:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, secure_debug_pk), out_len, out);
+
+    default:
+        return TFM_PLAT_ERR_UNSUPPORTED;
     }
 }
 
@@ -210,6 +223,19 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, bl1_nv_counter_0), in_len, in);
 #endif /* BL1 */
 
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+    case PLAT_OTP_ID_NV_COUNTER_NS_0:
+        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, ns_nv_counter_0), in_len, in);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+    case PLAT_OTP_ID_NV_COUNTER_NS_1:
+        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, ns_nv_counter_1), in_len, in);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+    case PLAT_OTP_ID_NV_COUNTER_NS_2:
+        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, ns_nv_counter_2), in_len, in);
+#endif
+
     case PLAT_OTP_ID_ENTROPY_SEED:
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, entropy_seed), in_len, in);
 
@@ -235,89 +261,105 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
                                           size_t *size)
 {
     switch (id) {
-        case PLAT_OTP_ID_HUK:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->huk);
-            break;
-        case PLAT_OTP_ID_IAK:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->iak);
-            break;
-        case PLAT_OTP_ID_IAK_LEN:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->iak_len);
-            break;
-        case PLAT_OTP_ID_IAK_TYPE:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->iak_type);
-            break;
-        case PLAT_OTP_ID_IAK_ID:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->iak_id);
-            break;
+    case PLAT_OTP_ID_HUK:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->huk);
+        break;
+    case PLAT_OTP_ID_IAK:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->iak);
+        break;
+    case PLAT_OTP_ID_IAK_LEN:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->iak_len);
+        break;
+    case PLAT_OTP_ID_IAK_TYPE:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->iak_type);
+        break;
+    case PLAT_OTP_ID_IAK_ID:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->iak_id);
+        break;
 
-        case PLAT_OTP_ID_BOOT_SEED:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->boot_seed);
-            break;
-        case PLAT_OTP_ID_LCS:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->lcs);
-            break;
-        case PLAT_OTP_ID_IMPLEMENTATION_ID:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->implementation_id);
-            break;
-        case PLAT_OTP_ID_HW_VERSION:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->hw_version);
-            break;
-        case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->verification_service_url);
-            break;
-        case PLAT_OTP_ID_PROFILE_DEFINITION:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->profile_definition);
-            break;
+    case PLAT_OTP_ID_BOOT_SEED:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->boot_seed);
+        break;
+    case PLAT_OTP_ID_LCS:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->lcs);
+        break;
+    case PLAT_OTP_ID_IMPLEMENTATION_ID:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->implementation_id);
+        break;
+    case PLAT_OTP_ID_HW_VERSION:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->hw_version);
+        break;
+    case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->verification_service_url);
+        break;
+    case PLAT_OTP_ID_PROFILE_DEFINITION:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->profile_definition);
+        break;
 
 #ifdef BL2
-        case PLAT_OTP_ID_BL2_ROTPK_0:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_0);
-            break;
-        case PLAT_OTP_ID_BL2_ROTPK_1:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_1);
-            break;
-        case PLAT_OTP_ID_BL2_ROTPK_2:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_2);
-            break;
-        case PLAT_OTP_ID_BL2_ROTPK_3:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_3);
-            break;
+    case PLAT_OTP_ID_BL2_ROTPK_0:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_0);
+        break;
+    case PLAT_OTP_ID_BL2_ROTPK_1:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_1);
+        break;
+    case PLAT_OTP_ID_BL2_ROTPK_2:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_2);
+        break;
+    case PLAT_OTP_ID_BL2_ROTPK_3:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_rotpk_3);
+        break;
 
-        case PLAT_OTP_ID_NV_COUNTER_BL2_0:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_0);
-            break;
-        case PLAT_OTP_ID_NV_COUNTER_BL2_1:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_1);
-            break;
-        case PLAT_OTP_ID_NV_COUNTER_BL2_2:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_2);
-            break;
-        case PLAT_OTP_ID_NV_COUNTER_BL2_3:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_3);
-            break;
+    case PLAT_OTP_ID_NV_COUNTER_BL2_0:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_0);
+        break;
+    case PLAT_OTP_ID_NV_COUNTER_BL2_1:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_1);
+        break;
+    case PLAT_OTP_ID_NV_COUNTER_BL2_2:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_2);
+        break;
+    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl2_nv_counter_3);
+        break;
 #endif /* BL2 */
 
 #ifdef BL1
-        case PLAT_OTP_ID_BL1_ROTPK_0:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl1_rotpk_0);
-            break;
+    case PLAT_OTP_ID_BL1_ROTPK_0:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl1_rotpk_0);
+        break;
 
-        case PLAT_OTP_ID_NV_COUNTER_BL1_0:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl1_nv_counter_0);
-            break;
+    case PLAT_OTP_ID_NV_COUNTER_BL1_0:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->bl1_nv_counter_0);
+        break;
 #endif /* BL1 */
 
-        case PLAT_OTP_ID_ENTROPY_SEED:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->entropy_seed);
-            break;
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+    case PLAT_OTP_ID_NV_COUNTER_NS_0:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->ns_nv_counter_0);
+        break;
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+    case PLAT_OTP_ID_NV_COUNTER_NS_1:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->ns_nv_counter_1);
+        break;
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+    case PLAT_OTP_ID_NV_COUNTER_NS_2:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->ns_nv_counter_2);
+        break;
+#endif
 
-        case PLAT_OTP_ID_SECURE_DEBUG_PK:
-            *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->secure_debug_pk);
-            break;
+    case PLAT_OTP_ID_ENTROPY_SEED:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->entropy_seed);
+        break;
 
-        default:
-            return TFM_PLAT_ERR_UNSUPPORTED;
+    case PLAT_OTP_ID_SECURE_DEBUG_PK:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->secure_debug_pk);
+        break;
+
+    default:
+        return TFM_PLAT_ERR_UNSUPPORTED;
     }
 
     return TFM_PLAT_ERR_SUCCESS;

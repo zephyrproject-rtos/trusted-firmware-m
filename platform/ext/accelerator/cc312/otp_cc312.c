@@ -240,6 +240,16 @@ __PACKED_STRUCT plat_otp_layout_t {
 #endif /* PLATFORM_DEFAULT_BL1 */
 #endif /* BL1 */
 
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+        uint8_t ns_nv_counter_0[64];
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+        uint8_t ns_nv_counter_1[64];
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+        uint8_t ns_nv_counter_2[64];
+#endif
+
         uint8_t secure_debug_pk[32];
     };
 };
@@ -726,6 +736,22 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
 #endif /* PLATFORM_DEFAULT_BL1 */
 #endif /* BL1 */
 
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+    case PLAT_OTP_ID_NV_COUNTER_NS_0:
+        return otp_read(otp->ns_nv_counter_0,
+                        sizeof(otp->ns_nv_counter_0), out_len, out);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+    case PLAT_OTP_ID_NV_COUNTER_NS_1:
+        return otp_read(otp->ns_nv_counter_1,
+                        sizeof(otp->ns_nv_counter_1), out_len, out);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+    case PLAT_OTP_ID_NV_COUNTER_NS_2:
+        return otp_read(otp->ns_nv_counter_2,
+                        sizeof(otp->ns_nv_counter_2), out_len, out);
+#endif
+
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
 
@@ -947,6 +973,22 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
 #endif /* PLATFORM_DEFAULT_BL1 */
 #endif /* BL1 */
 
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+    case PLAT_OTP_ID_NV_COUNTER_NS_0:
+        return otp_write(otp->ns_nv_counter_0,
+                         sizeof(otp->ns_nv_counter_0), in_len, in, NULL);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+    case PLAT_OTP_ID_NV_COUNTER_NS_1:
+        return otp_write(otp->ns_nv_counter_1,
+                         sizeof(otp->ns_nv_counter_1), in_len, in, NULL);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+    case PLAT_OTP_ID_NV_COUNTER_NS_2:
+        return otp_write(otp->ns_nv_counter_2,
+                         sizeof(otp->ns_nv_counter_2), in_len, in, NULL);
+#endif
+
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
 
@@ -1053,6 +1095,22 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         *size = sizeof(otp->bl1_2_image);
         break;
 #endif /* PLATFORM_DEFAULT_BL1 */
+#endif
+
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+    case PLAT_OTP_ID_NV_COUNTER_NS_0:
+        *size = sizeof(otp->ns_nv_counter_0);
+        break;
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+    case PLAT_OTP_ID_NV_COUNTER_NS_1:
+        *size = sizeof(otp->ns_nv_counter_1);
+        break;
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+    case PLAT_OTP_ID_NV_COUNTER_NS_2:
+        *size = sizeof(otp->ns_nv_counter_2);
+        break;
 #endif
 
     case PLAT_OTP_ID_ENTROPY_SEED:

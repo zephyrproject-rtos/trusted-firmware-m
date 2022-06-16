@@ -57,6 +57,15 @@ static enum tfm_platform_err_t nv_counter_permissions_check(
             return TFM_PLATFORM_ERR_NOT_SUPPORTED;
         }
 #endif
+    case PLAT_NV_COUNTER_NS_0:
+    case PLAT_NV_COUNTER_NS_1:
+    case PLAT_NV_COUNTER_NS_2:
+        /* TODO how does this interact with the ns_ctx extension? */
+        if (client_id < 0) {
+            return TFM_PLATFORM_ERR_SUCCESS;
+        } else {
+            return TFM_PLATFORM_ERR_NOT_SUPPORTED;
+        }
     default:
         return TFM_PLATFORM_ERR_NOT_SUPPORTED;
     }
@@ -105,6 +114,9 @@ platform_sp_nv_counter_read(psa_invec  *in_vec,  uint32_t num_invec,
     if (status != (int32_t)TFM_SUCCESS) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
+    if (client_id < 0) {
+        counter_id += PLAT_NV_COUNTER_NS_0;
+    }
 
     if (nv_counter_permissions_check(client_id, counter_id, true)
         != TFM_PLAT_ERR_SUCCESS) {
@@ -138,14 +150,17 @@ platform_sp_nv_counter_increment(psa_invec  *in_vec,  uint32_t num_invec,
     }
 
     counter_id = *((enum tfm_nv_counter_t *)in_vec[0].base);
+    if (client_id < 0) {
+        counter_id += PLAT_NV_COUNTER_NS_0;
+    }
 
     if (nv_counter_permissions_check(client_id, counter_id, false)
         != TFM_PLAT_ERR_SUCCESS) {
-       return TFM_PLATFORM_ERR_SYSTEM_ERROR;
+        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
     err = tfm_plat_increment_nv_counter(counter_id);
     if (err != TFM_PLAT_ERR_SUCCESS) {
-       return TFM_PLATFORM_ERR_SYSTEM_ERROR;
+        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
 
     return TFM_PLATFORM_ERR_SUCCESS;
@@ -187,9 +202,12 @@ platform_sp_nv_counter_ipc(const psa_msg_t *msg)
         }
 
         num = psa_read(msg->handle, 0, &counter_id, msg->in_size[0]);
-
         if (num != msg->in_size[0]) {
             return TFM_PLATFORM_ERR_SYSTEM_ERROR;
+        }
+
+        if (msg->client_id < 0) {
+            counter_id += PLAT_NV_COUNTER_NS_0;
         }
 
         if (nv_counter_permissions_check(msg->client_id, counter_id, false)
@@ -208,6 +226,10 @@ platform_sp_nv_counter_ipc(const psa_msg_t *msg)
         num = psa_read(msg->handle, 0, &counter_id, msg->in_size[0]);
         if (num != msg->in_size[0]) {
             return TFM_PLATFORM_ERR_SYSTEM_ERROR;
+        }
+
+        if (msg->client_id < 0) {
+            counter_id += PLAT_NV_COUNTER_NS_0;
         }
 
         if (nv_counter_permissions_check(msg->client_id, counter_id, true)

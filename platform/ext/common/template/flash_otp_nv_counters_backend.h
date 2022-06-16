@@ -55,6 +55,16 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
         uint8_t bl1_nv_counter_0[16];
 #endif /* BL1 */
 
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+        uint8_t ns_nv_counter_0[64];
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+        uint8_t ns_nv_counter_1[64];
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+        uint8_t ns_nv_counter_2[64];
+#endif
+
         uint8_t entropy_seed[64];
 
         uint8_t secure_debug_pk[32];

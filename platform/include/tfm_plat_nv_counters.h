@@ -26,6 +26,10 @@
 #include <stdint.h>
 #include "tfm_plat_defs.h"
 
+#ifndef PLATFORM_NS_NV_COUNTERS
+#define PLATFORM_NS_NV_COUNTERS 0
+#endif
+
 enum tfm_nv_counter_t {
     PLAT_NV_COUNTER_PS_0 = 0,  /* Used by PS service */
     PLAT_NV_COUNTER_PS_1,      /* Used by PS service */
@@ -37,6 +41,11 @@ enum tfm_nv_counter_t {
     PLAT_NV_COUNTER_BL2_3,     /* Used by bootloader */
 
     PLAT_NV_COUNTER_BL1_0,     /* Used by bootloader */
+
+    /* NS counters must be contiguous */
+    PLAT_NV_COUNTER_NS_0,      /* Used by NS */
+    PLAT_NV_COUNTER_NS_1,      /* Used by NS */
+    PLAT_NV_COUNTER_NS_2,      /* Used by NS */
 
     PLAT_NV_COUNTER_MAX,
     PLAT_NV_COUNTER_BOUNDARY = UINT32_MAX  /* Fix  tfm_nv_counter_t size
