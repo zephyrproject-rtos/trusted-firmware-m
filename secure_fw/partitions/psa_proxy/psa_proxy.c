@@ -69,6 +69,10 @@ static psa_status_t forward_message_to_secure_enclave(psa_signal_t signal,
         params.psa_call_params.handle = TFM_ATTESTATION_SERVICE_HANDLE;
         params.psa_call_params.type = msg->type;
         break;
+    case TFM_PLATFORM_SERVICE_SIGNAL:
+        params.psa_call_params.handle = TFM_PLATFORM_SERVICE_HANDLE;
+        params.psa_call_params.type = msg->type;
+        break;
     default:
         params.psa_call_params.handle = *((psa_handle_t *)msg->rhandle);
         params.psa_call_params.type = PSA_IPC_CALL;
@@ -94,96 +98,15 @@ static psa_status_t forward_message_to_secure_enclave(psa_signal_t signal,
     return status;
 }
 
-static void psa_disconnect_from_secure_enclave(psa_msg_t *msg)
-{
-    psa_handle_t *forward_handle_ptr = (psa_handle_t *)msg->rhandle;
-    struct psa_client_params_t params;
-    int32_t reply;
-
-    params.psa_close_params.handle = *forward_handle_ptr;
-
-    (void)tfm_ns_mailbox_client_call(MAILBOX_PSA_CLOSE, &params,
-                                     NON_SECURE_CLIENT_ID, &reply);
-
-    deallocate_forward_handle(forward_handle_ptr);
-}
-
-static void get_sid_and_version_for_signal(psa_signal_t signal, uint32_t *sid,
-                                           uint32_t *version)
-{
-    switch (signal) {
-    case TFM_SP_PLATFORM_SYSTEM_RESET_SIGNAL:
-        *sid = TFM_SP_PLATFORM_SYSTEM_RESET_SID;
-        *version = TFM_SP_PLATFORM_SYSTEM_RESET_VERSION;
-        break;
-    case TFM_SP_PLATFORM_IOCTL_SIGNAL:
-        *sid = TFM_SP_PLATFORM_IOCTL_SID;
-        *version = TFM_SP_PLATFORM_IOCTL_VERSION;
-        break;
-    case TFM_SP_PLATFORM_NV_COUNTER_SIGNAL:
-        *sid = TFM_SP_PLATFORM_NV_COUNTER_SID;
-        *version = TFM_SP_PLATFORM_NV_COUNTER_VERSION;
-        break;
-    default:
-        psa_panic();
-        break;
-    }
-}
-
-static psa_status_t psa_connect_to_secure_enclave(psa_signal_t signal,
-                                                  psa_msg_t *msg)
-{
-    psa_handle_t *forward_handle_ptr;
-    struct psa_client_params_t params;
-    int32_t ret;
-
-    forward_handle_ptr = allocate_forward_handle();
-
-    if (forward_handle_ptr != NULL) {
-
-        get_sid_and_version_for_signal(signal, &params.psa_connect_params.sid,
-                                       &params.psa_connect_params.version);
-
-        /* Fixme: All messages sent with the same client id */
-        ret = tfm_ns_mailbox_client_call(MAILBOX_PSA_CONNECT, &params,
-                                         NON_SECURE_CLIENT_ID,
-                                         (int32_t *)forward_handle_ptr);
-        if (ret != MAILBOX_SUCCESS) {
-            *forward_handle_ptr = PSA_NULL_HANDLE;
-        }
-
-        if ( *forward_handle_ptr > 0) {
-            psa_set_rhandle(msg->handle, (void *)forward_handle_ptr);
-            return PSA_SUCCESS;
-        } else {
-            deallocate_forward_handle(forward_handle_ptr);
-            return *forward_handle_ptr;
-        }
-    } else {
-        return PSA_ERROR_INSUFFICIENT_MEMORY;
-    }
-}
-
 static void handle_signal(psa_signal_t signal)
 {
     psa_msg_t msg;
     psa_status_t status;
 
     status = psa_get(signal, &msg);
-    switch (msg.type) {
-    case PSA_IPC_CONNECT:
-        status = psa_connect_to_secure_enclave(signal, &msg);
-        psa_reply(msg.handle, status);
-        break;
-    case PSA_IPC_DISCONNECT:
-        psa_disconnect_from_secure_enclave(&msg);
-        psa_reply(msg.handle, PSA_SUCCESS);
-        break;
-    default:
-        status = forward_message_to_secure_enclave(signal, &msg);
-        psa_reply(msg.handle, status);
-        break;
-    }
+
+    status = forward_message_to_secure_enclave(signal, &msg);
+    psa_reply(msg.handle, status);
 }
 
 static psa_status_t psa_proxy_init(void)

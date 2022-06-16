@@ -6,34 +6,23 @@
 #-------------------------------------------------------------------------------
 
 {
-  "psa_framework_version": 1.0,
+  "psa_framework_version": 1.1,
   "name": "TFM_SP_PLATFORM",
   "type": "PSA-ROT",
   "priority": "NORMAL",
-  "entry_point": "platform_sp_init",
+  "model": "SFN",
+  "entry_init": "platform_sp_init",
   "stack_size": "0x0500",
   "services": [
     {
-      "name": "TFM_SP_PLATFORM_SYSTEM_RESET",
+      "name": "TFM_PLATFORM_SERVICE",
       "sid": "0x00000040",
       "non_secure_clients": true,
+      "connection_based": false,
+      "stateless_handle": 6,
       "minor_version": 1,
       "minor_policy": "STRICT"
     },
-    {
-      "name": "TFM_SP_PLATFORM_IOCTL",
-      "sid": "0x00000041",
-      "non_secure_clients": true,
-      "minor_version": 1,
-      "minor_policy": "STRICT"
-     },
-     {
-       "name": "TFM_SP_PLATFORM_NV_COUNTER",
-       "sid": "0x00000042",
-       "non_secure_clients": true,
-       "version": 1,
-       "version_policy": "STRICT"
-     }
   ],
   "secure_functions": [
     {

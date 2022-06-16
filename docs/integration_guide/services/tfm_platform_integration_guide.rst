@@ -77,7 +77,8 @@ Non-Volatile counters
 =====================
 
 The Platform Service provides an abstracted service for exposing the NV counters
-to the secure world. The following operations are supported:
+to secure partitions or non-secure callers. The following operations are
+supported:
 
 - Increment a counter.
 - Read a counter value to a preallocated buffer.
@@ -95,7 +96,7 @@ The range of counters id is defined in :
 ``platform/include/tfm_plat_nv_counters.h``
 
 For Level 2,3 isolation implementations, secure partitions in the
-Application Root of Trust, should have ``TFM_SP_PLATFORM_NV_COUNTER`` set as a
+Application Root of Trust, should have ``TFM_PLATFORM_SERVICE`` set as a
 dependency for access to the NV counter API.
 
 ***************************
@@ -110,4 +111,4 @@ Current Service Limitations
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*

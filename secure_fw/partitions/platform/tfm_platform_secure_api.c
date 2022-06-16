@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,17 +16,10 @@ enum tfm_platform_err_t tfm_platform_system_reset(void)
 {
 #ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
-    psa_handle_t handle = PSA_NULL_HANDLE;
 
-    handle = psa_connect(TFM_SP_PLATFORM_SYSTEM_RESET_SID,
-                         TFM_SP_PLATFORM_SYSTEM_RESET_VERSION);
-    if (handle <= 0) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
-    status = psa_call(handle, PSA_IPC_CALL,
+    status = psa_call(TFM_PLATFORM_SERVICE_HANDLE,
+                      TFM_PLATFORM_API_ID_SYSTEM_RESET,
                       NULL, 0, NULL, 0);
-    psa_close(handle);
 
     if (status < PSA_SUCCESS) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;
@@ -48,7 +41,6 @@ tfm_platform_ioctl(tfm_platform_ioctl_req_t request,
     size_t inlen, outlen;
 #ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
-    psa_handle_t handle = PSA_NULL_HANDLE;
 #endif /* TFM_PSA_API */
 
     in_vec[0].base = &req;
@@ -67,16 +59,10 @@ tfm_platform_ioctl(tfm_platform_ioctl_req_t request,
         outlen = 0;
     }
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_SP_PLATFORM_IOCTL_SID,
-                         TFM_SP_PLATFORM_IOCTL_VERSION);
-    if (handle <= 0) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
-    status = psa_call(handle, PSA_IPC_CALL,
+    status = psa_call(TFM_PLATFORM_SERVICE_HANDLE,
+                      TFM_PLATFORM_API_ID_IOCTL,
                       in_vec, inlen,
                       output, outlen);
-    psa_close(handle);
 
     if (status < PSA_SUCCESS) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;
@@ -94,7 +80,6 @@ tfm_platform_nv_counter_increment(uint32_t counter_id)
 {
 #ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
-    psa_handle_t handle = PSA_NULL_HANDLE;
 #endif
     struct psa_invec in_vec[1];
 
@@ -102,16 +87,9 @@ tfm_platform_nv_counter_increment(uint32_t counter_id)
     in_vec[0].len = sizeof(counter_id);
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_SP_PLATFORM_NV_COUNTER_SID,
-                         TFM_SP_PLATFORM_NV_COUNTER_VERSION);
-    if (handle <= 0) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
-    status = psa_call(handle, TFM_PLATFORM_API_ID_NV_INCREMENT,
+    status = psa_call(TFM_PLATFORM_SERVICE_HANDLE,
+                      TFM_PLATFORM_API_ID_NV_INCREMENT,
                       in_vec, 1, (psa_outvec *)NULL, 0);
-
-    psa_close(handle);
 
     if (status < PSA_SUCCESS) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;
@@ -131,7 +109,6 @@ tfm_platform_nv_counter_read(uint32_t counter_id,
 {
 #ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
-    psa_handle_t handle = PSA_NULL_HANDLE;
 #endif
     struct psa_invec in_vec[1];
     struct psa_outvec out_vec[1];
@@ -143,16 +120,9 @@ tfm_platform_nv_counter_read(uint32_t counter_id,
     out_vec[0].len = size;
 
 #ifdef TFM_PSA_API
-    handle = psa_connect(TFM_SP_PLATFORM_NV_COUNTER_SID,
-                         TFM_SP_PLATFORM_NV_COUNTER_VERSION);
-    if (handle <= 0) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
-    status = psa_call(handle, TFM_PLATFORM_API_ID_NV_READ,
+    status = psa_call(TFM_PLATFORM_SERVICE_HANDLE,
+                      TFM_PLATFORM_API_ID_NV_READ,
                       in_vec, 1, out_vec, 1);
-
-    psa_close(handle);
 
     if (status < PSA_SUCCESS) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;

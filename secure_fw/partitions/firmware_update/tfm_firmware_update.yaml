@@ -71,6 +71,6 @@
   ],
   "dependencies": [
     "TFM_CRYPTO",
-    "TFM_SP_PLATFORM_SYSTEM_RESET"
+    "TFM_PLATFORM_SERVICE"
   ]
 }
