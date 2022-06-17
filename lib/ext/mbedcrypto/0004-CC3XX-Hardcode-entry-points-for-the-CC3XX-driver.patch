@@ -1,7 +1,7 @@
-From bff99675493709b07508b88fbc311d34fbb5d3cc Mon Sep 17 00:00:00 2001
+From fc5fd24aa2e287ed57ecf8dd9b85d871d369d871 Mon Sep 17 00:00:00 2001
 From: Salome Thirot <salome.thirot@arm.com>
 Date: Wed, 7 Jul 2021 10:24:43 +0100
-Subject: [PATCH 2/2] CC3XX: Hardcode entry points for the CC3XX driver
+Subject: [PATCH 4/7] CC3XX: Hardcode entry points for the CC3XX driver
 
 Signed-off-by: Salome Thirot <salome.thirot@arm.com>
 Signed-off-by: Abbas Bracken Ziad <abbas.brackenziad@arm.com>
@@ -16,7 +16,7 @@ Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
  5 files changed, 644 insertions(+), 4 deletions(-)
 
 diff --git a/include/psa/crypto_driver_contexts_composites.h b/include/psa/crypto_driver_contexts_composites.h
-index 3f1c8af4b..2fdf9561f 100644
+index 3f1c8af4..2fdf9561 100644
 --- a/include/psa/crypto_driver_contexts_composites.h
 +++ b/include/psa/crypto_driver_contexts_composites.h
 @@ -41,6 +41,9 @@
@@ -50,7 +50,7 @@ index 3f1c8af4b..2fdf9561f 100644
  
  #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_COMPOSITES_H */
 diff --git a/include/psa/crypto_driver_contexts_primitives.h b/include/psa/crypto_driver_contexts_primitives.h
-index 2bb01ed43..2bc0bda70 100644
+index 2bb01ed4..2bc0bda7 100644
 --- a/include/psa/crypto_driver_contexts_primitives.h
 +++ b/include/psa/crypto_driver_contexts_primitives.h
 @@ -40,6 +40,9 @@
@@ -84,7 +84,7 @@ index 2bb01ed43..2bc0bda70 100644
  
  #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_PRIMITIVES_H */
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index 829ed452b..48377ffe4 100644
+index 829ed452..48377ffe 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
 @@ -3073,6 +3073,25 @@ psa_status_t psa_asymmetric_encrypt( mbedtls_svc_key_id_t key,
@@ -175,7 +175,7 @@ index 829ed452b..48377ffe4 100644
      if( status != PSA_SUCCESS )
      {
 diff --git a/library/psa_crypto_driver_wrappers.c b/library/psa_crypto_driver_wrappers.c
-index 8d8647862..eed2ce402 100644
+index 8d864786..eed2ce40 100644
 --- a/library/psa_crypto_driver_wrappers.c
 +++ b/library/psa_crypto_driver_wrappers.c
 @@ -44,6 +44,16 @@
@@ -999,7 +999,7 @@ index 8d8647862..eed2ce402 100644
 +}
  #endif /* MBEDTLS_PSA_CRYPTO_C */
 diff --git a/library/psa_crypto_driver_wrappers.h b/library/psa_crypto_driver_wrappers.h
-index e09e4ed70..9ebdb366e 100644
+index e09e4ed7..9ebdb366 100644
 --- a/library/psa_crypto_driver_wrappers.h
 +++ b/library/psa_crypto_driver_wrappers.h
 @@ -329,6 +329,35 @@ psa_status_t psa_driver_wrapper_mac_verify_finish(
@@ -1039,5 +1039,5 @@ index e09e4ed70..9ebdb366e 100644
  
  /* End of automatically generated file. */
 -- 
-2.25.1
+2.17.1
 
