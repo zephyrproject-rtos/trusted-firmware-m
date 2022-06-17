@@ -86,7 +86,7 @@ Trusted Firmware-M Documentation
     :hidden:
 
     Platform Selection<platform/ext/index>
-    Building <technical_references/instructions/tfm_build_instruction>
+    building/tfm_build_instruction
     integration_guide/index
     technical_references/design_docs/index
     Tools <tools/index>

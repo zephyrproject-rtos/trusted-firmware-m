@@ -15,7 +15,7 @@ with Isolation Level 1 and 2.
 Building TF-M
 -------------
 
-Follow the instructions in :doc:`Building instructions </technical_references/instructions/tfm_build_instruction>`.
+Follow the instructions in :doc:`Building instructions </building/tfm_build_instruction>`.
 Build instructions with platform name: arm/mps3/corstone310_fvp
 
 ``-DTFM_PLATFORM=arm/mps3/corstone310_fvp``

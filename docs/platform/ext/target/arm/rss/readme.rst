@@ -23,7 +23,7 @@ Non-secure) using the IPC model with Isolation Level 1 and 2.
 Building TF-M
 -------------
 
-Follow the instructions in :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
+Follow the instructions in :doc:`Build instructions </building/tfm_build_instruction>`.
 Build TF-M with platform name: `arm/rss`
 
 ``-DTFM_PLATFORM=arm/rss``

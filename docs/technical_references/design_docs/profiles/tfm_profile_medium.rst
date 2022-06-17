@@ -500,7 +500,7 @@ Reference
 
 .. [ITS-INTEGRATE] :doc:`ITS integration guide </integration_guide/services/tfm_its_integration_guide>`
 
-.. [TFM-BUILD] :doc:`TF-M build instruction </technical_references/instructions/tfm_build_instruction>`
+.. [TFM-BUILD] :doc:`TF-M build instruction </building/tfm_build_instruction>`
 
 --------------
 

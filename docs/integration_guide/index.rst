@@ -23,12 +23,12 @@ with other hardware platforms and operating systems.
 *****************
 How to build TF-M
 *****************
-Follow the :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
+Follow the :doc:`Build instructions </building/tfm_build_instruction>`.
 
 ********************************************************
 How to export files for building non-secure applications
 ********************************************************
-Explained in the :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
+Explained in the :doc:`Build instructions </building/tfm_build_instruction>`.
 
 *************************
 How to add a new platform

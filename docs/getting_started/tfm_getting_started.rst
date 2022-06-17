@@ -25,9 +25,9 @@ To build & run TF-M:
 
     - Follow the this guide to set up and check your environment.
     - Follow the
-      :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`
+      :doc:`Build instructions </building/tfm_build_instruction>`
       to compile and build the TF-M source.
-    - Follow the :doc:`Run TF-M examples on Arm platforms </technical_references/instructions/run_tfm_examples_on_arm_platforms>`
+    - Follow the :doc:`Run TF-M examples on Arm platforms </building/run_tfm_examples_on_arm_platforms>`
       for information on running the example.
 
 To port TF-M to a another system or OS, follow the
@@ -454,10 +454,10 @@ Dependency chain
 
 Here are some next steps for exploring TF-M:
 
-    - Detailed :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
-    - :doc:`IAR Build instructions </technical_references/instructions/tfm_build_instruction_iar>`.
-    - Try other :doc:`Samples and Demos </technical_references/instructions/run_tfm_examples_on_arm_platforms>`.
-    - :doc:`Documentation generation </technical_references/instructions/documentation_generation>`.
+    - Detailed :doc:`Build instructions </building/tfm_build_instruction>`.
+    - :doc:`IAR Build instructions </building/tfm_build_instruction_iar>`.
+    - Try other :doc:`Samples and Demos </building/run_tfm_examples_on_arm_platforms>`.
+    - :doc:`Documentation generation </building/documentation_generation>`.
 
 --------------
 

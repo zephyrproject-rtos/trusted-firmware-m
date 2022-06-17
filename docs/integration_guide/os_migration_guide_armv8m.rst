@@ -17,7 +17,7 @@ List of requirements
 - If the OS manipulates directly the Link Register, the default Link Register
   value used in Handler mode transitions needs to be differentiated between
   Secure and Non Secure builds, i.e. ``0xFD`` and ``0xBC``, respectively.
-- If the OS manages the non-secure client identification, pelase check the
+- If the OS manages the non-secure client identification, please check the
   :doc:`Non-secure Client Extension Integration Guide </integration_guide/non-secure_client_extension_integration_guide>`.
 
 --------------

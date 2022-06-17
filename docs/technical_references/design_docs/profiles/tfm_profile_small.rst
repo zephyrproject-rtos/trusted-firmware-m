@@ -715,7 +715,7 @@ Reference
 
 .. [12] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
 
-.. [13] :doc:`TF-M build instruction </technical_references/instructions/tfm_build_instruction>`
+.. [13] :doc:`TF-M build instruction </building/tfm_build_instruction>`
 
 .. [14] `PSA Cryptography API 1.0 <https://developer.arm.com/documentation/ihi0086/a/?lang=en>`_
 
