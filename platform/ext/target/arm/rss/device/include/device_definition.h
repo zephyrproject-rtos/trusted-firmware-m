@@ -200,6 +200,11 @@ extern struct mhu_v2_x_dev_t MHU_RSS_TO_SCP_DEV;
 extern struct kmu_dev_t KMU_DEV_S;
 #endif
 
+#ifdef LCM_S
+#include "lcm_drv.h"
+extern struct lcm_dev_t LCM_DEV_S;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

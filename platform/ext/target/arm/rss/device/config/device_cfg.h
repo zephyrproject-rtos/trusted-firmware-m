@@ -76,4 +76,7 @@
 /* Arm KMU */
 #define KMU_S
 
+/* Arm LCM */
+#define LCM_S
+
 #endif  /* __DEVICE_CFG_H__ */

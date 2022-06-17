@@ -496,3 +496,12 @@ struct kmu_dev_t KMU_DEV_S = {
     .cfg = &(KMU_DEV_CFG_S)
 };
 #endif
+
+#ifdef LCM_S
+static struct lcm_dev_cfg_t LCM_DEV_CFG_S = {
+    .base = LCM_BASE_S
+};
+struct lcm_dev_t LCM_DEV_S = {
+    .cfg = &(LCM_DEV_CFG_S)
+};
+#endif
