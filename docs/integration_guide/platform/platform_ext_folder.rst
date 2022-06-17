@@ -1,6 +1,7 @@
 ###################################
 Details for the platform/ext folder
 ###################################
+
 This folder has code that has been imported from other projects. This means the
 files in this folder and subfolders have Apache 2.0 license which is different
 to BSD 3.0 license applied to the parent TF-M project.

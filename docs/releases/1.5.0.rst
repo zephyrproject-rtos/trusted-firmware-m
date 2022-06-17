@@ -54,7 +54,7 @@ The following platform has been removed from TF-M code base.
 
   - arm/mps2/fvp_sse300
 
-See :doc:`Platform deprecation and removal </platform/ext/platform_deprecation>`
+See :doc:`/integration_guide/platform/platform_deprecation`
 for other platforms under deprecation process.
 
 Tested platforms

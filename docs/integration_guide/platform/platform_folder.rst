@@ -95,7 +95,7 @@ ext
 This folder contains code that has been imported from other projects so it may
 have licenses other than the BSD 3.0 used by the TF-M project.
 
-Please see the :doc:`readme file the ext folder <ext/readme>` for details.
+Please see the :doc:`platform_ext_folder` for details.
 
 --------------
 

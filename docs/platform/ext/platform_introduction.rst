@@ -66,5 +66,5 @@ Supported Platforms
 
         - :doc:`RSS. </platform/ext/target/arm/rss/readme>`
 
-The document :doc:`Platform Deprecation and Removal </platform/ext/platform_deprecation>`
-lists the deprecated platforms planned to be removed from upstream.
+The document :doc:`Platform Deprecation and Removal </integration_guide/platform/platform_deprecation>`
+lists the deprecated platforms, removed from the upstream.

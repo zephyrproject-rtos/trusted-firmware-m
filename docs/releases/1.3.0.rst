@@ -60,7 +60,7 @@ The following platforms have been removed from TF-M code base.
   - SSE-200_AWS
   - AN539
 
-See :doc:`Platform deprecation and removal </platform/ext/platform_deprecation>`
+See :doc:`/integration_guide/platform/platform_deprecation`
 for other platforms under deprecation process.
 
 Tested platforms

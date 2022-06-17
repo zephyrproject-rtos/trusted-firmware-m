@@ -1,5 +1,6 @@
+################################
 Trusted Firmware-M Documentation
-================================
+################################
 
 .. raw:: html
 
@@ -68,6 +69,7 @@ Trusted Firmware-M Documentation
 
 .. toctree::
     :caption: Overview
+    :titlesonly:
     :maxdepth: 1
     :hidden:
 
@@ -79,6 +81,7 @@ Trusted Firmware-M Documentation
 
 .. toctree::
     :caption: Development
+    :titlesonly:
     :maxdepth: 1
     :hidden:
 

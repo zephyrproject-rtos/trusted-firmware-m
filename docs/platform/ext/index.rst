@@ -50,13 +50,6 @@ TF-M Platforms
 
     target/nuvoton/**
 
-.. toctree::
-    :maxdepth: 1
-    :caption: Rules and processes
-
-    platform_deprecation.rst
-    platform_provisioning.rst
-
 --------------
 
 *Copyright (c) 2020-2021, Arm Limited. All rights reserved.*

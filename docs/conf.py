@@ -97,7 +97,7 @@ html_theme_options = {
     'prev_next_buttons_location' : None,   # Hide Prev and Next buttons
     'display_version': True,    # Show version under logo
     'sticky_navigation': True,
-    'navigation_depth': 2,
+    'navigation_depth': 3,
 }
 
 # Remove the "View page source" link from the top of docs pages

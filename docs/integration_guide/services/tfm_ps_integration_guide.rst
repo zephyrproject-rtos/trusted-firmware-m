@@ -260,8 +260,8 @@ The following optional platform definitions may be defined in
   the NAND flash implementation. The buffer must be at least as large as a
   logical filesystem block.
 
-More information about the ``flash_layout.h`` content, not PS related, is
-available in :doc:`platform readme </platform/ext/readme>` along with other
+More information about the ``flash_layout.h`` content, not ITS related, is
+available in :doc:`../platform/platform_ext_folder` along with other
 platform information.
 
 TF-M NV Counter Interface
