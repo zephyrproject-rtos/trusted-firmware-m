@@ -16,6 +16,8 @@
  */
 #define STACK_SEAL_PATTERN    0xFEF5EDA5
 
+#if (defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3))
+
 /* Attributes for psa api secure gateway functions */
 #if defined(__GNUC__) && !defined(__ARMCC_VERSION)
 /*
@@ -26,11 +28,16 @@
         __attribute__((cmse_nonsecure_entry, noclone, section("SFN")))
 #define __tz_naked_veneer \
         __attribute__((cmse_nonsecure_entry, noclone, naked, section("SFN")))
+
 #else /* __GNUC__ && !__ARMCC_VERSION */
+
 #define __tz_c_veneer \
         __attribute__((cmse_nonsecure_entry, section("SFN")))
 #define __tz_naked_veneer \
         __attribute__((cmse_nonsecure_entry, naked, section("SFN")))
+
 #endif /* __GNUC__ && !__ARMCC_VERSION */
+
+#endif /* __ARM_FEATURE_CMSE */
 
 #endif /* __SECURITY_DEFS_H__ */
