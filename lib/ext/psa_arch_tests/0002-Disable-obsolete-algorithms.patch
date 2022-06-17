@@ -1,7 +1,7 @@
-From 95e75d02190282825be4c5e9e73a8c4cc71bb042 Mon Sep 17 00:00:00 2001
+From 534d847765c669f307c93b03384bad7e1cb919b3 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
 Date: Fri, 10 Jun 2022 10:13:43 +0800
-Subject: [PATCH 2/2] Disable obsolete algorithms
+Subject: [PATCH 2/3] Disable obsolete algorithms
 
 curves of size <255 are obsolete algorithms, should be disabled.
 
