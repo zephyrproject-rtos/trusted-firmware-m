@@ -16,6 +16,7 @@
 #include "fih.h"
 #include "cc3xx_aes.h"
 #include "cc3xx_hash.h"
+#include "cmsis_compiler.h"
 
 #define KEY_DERIVATION_MAX_BUF_SIZE 128
 
@@ -141,7 +142,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
                                 uint8_t *plaintext)
 {
     cc3xx_aes_key_id_t cc3xx_key_type;
-    uint8_t key_buf[32];
+    uint8_t  __ALIGNED(4) key_buf[32];
     int32_t rc = 0;
     size_t idx = 0;
     const uint8_t *input_key = key_buf;
@@ -187,7 +188,7 @@ static int32_t aes_256_ecb_encrypt(enum tfm_bl1_key_id_t key_id,
                                    uint8_t *ciphertext)
 {
     cc3xx_aes_key_id_t cc3xx_key_type;
-    uint8_t key_buf[32];
+    uint8_t __ALIGNED(4) key_buf[32];
     int32_t rc = 0;
 
     if (ciphertext_length == 0) {

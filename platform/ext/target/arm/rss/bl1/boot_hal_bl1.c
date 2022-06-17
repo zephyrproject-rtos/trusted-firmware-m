@@ -61,6 +61,10 @@ int32_t boot_platform_init(void)
 
     __set_MSPLIM(msp_stack_bottom);
 
+    /* Enable system reset for the RSS */
+    struct rss_sysctrl_t *rss_sysctrl = (void *)RSS_SYSCTRL_BASE_S;
+    rss_sysctrl->reset_mask |= (1U << 8U);
+
     result = init_atu_regions();
     if (result) {
         return result;

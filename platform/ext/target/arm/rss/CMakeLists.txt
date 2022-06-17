@@ -114,11 +114,14 @@ target_sources(platform_s
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         native_drivers/systimer_armv8-m_drv.c
         native_drivers/uart_pl011_drv.c
-        crypto_keys.c
         tfm_peripherals_def.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
-        ./otp_cc312.c
+        native_drivers/lcm_drv.c
+        otp_lcm.c
+        nv_counters.c
+        attest_hal.c
+        tfm_hal_platform_reset.c
 )
 
 target_sources(tfm_sprt
@@ -131,6 +134,13 @@ target_sources(tfm_sprt
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+#========================= Platform Crypto Keys ===============================#
+
+target_sources(platform_crypto_keys
+    PRIVATE
+        crypto_keys.c
 )
 
 #========================= Platform Non-Secure ================================#
@@ -165,6 +175,7 @@ target_include_directories(platform_ns
 
 target_sources(platform_bl2
     PRIVATE
+        tfm_hal_platform_reset.c
         bl2/boot_hal_bl2.c
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_USART.c
@@ -174,7 +185,9 @@ target_sources(platform_bl2
         native_drivers/kmu_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/uart_pl011_drv.c
-        ./otp_cc312.c
+        native_drivers/lcm_drv.c
+        otp_lcm.c
+        nv_counters.c
 )
 
 target_include_directories(platform_bl2
@@ -222,7 +235,10 @@ target_sources(platform_bl1
         ./native_drivers/atu_rss_drv.c
         ./native_drivers/kmu_drv.c
         ./native_drivers/uart_pl011_drv.c
-        ./otp_cc312.c
+        ./native_drivers/lcm_drv.c
+        ./otp_lcm.c
+        ./nv_counters.c
+        ./tfm_hal_platform_reset.c
 )
 
 target_include_directories(platform_bl1_interface
