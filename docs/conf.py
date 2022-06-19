@@ -82,7 +82,7 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'readme.rst',
-                    'platform/ext/target/cypress/psoc64/security/keys/readme.rst',
+                    'platform/cypress/psoc64/security/keys/readme.rst',
                     'lib/ext/**']
 
 # The name of the Pygments (syntax highlighting) style to use.

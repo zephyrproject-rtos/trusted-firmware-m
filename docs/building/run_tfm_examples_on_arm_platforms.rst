@@ -221,7 +221,7 @@ Execute TF-M example and regression tests on Musca test chip boards
 .. Note::
 
     Before executing any images on Musca-B1 board, please check the
-    :doc:`target platform readme </platform/ext/target/arm/musca_b1/sse_200/readme>`
+    :doc:`target platform readme </platform/arm/musca_b1/sse_200/readme>`
     to have the correct setup.
 
     Install SRecord for Musca test chip boards.
@@ -418,7 +418,7 @@ Example application or regression tests on Musca-B1 using the Secure Enclave
 ============================================================================
 
 Follow the above procedures, but to create a unified hex please check the
-:doc:`Musca-B1 Secure Enclave readme </platform/ext/target/arm/musca_b1/secure_enclave/readme>`.
+:doc:`Musca-B1 Secure Enclave readme </platform/arm/musca_b1/secure_enclave/readme>`.
 
 ********************************************************
 Execute TF-M example and regression tests on MPS3 boards

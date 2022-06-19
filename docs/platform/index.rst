@@ -1,54 +1,54 @@
+##############
 TF-M Platforms
-==============
+##############
 
 .. toctree::
     :maxdepth: 2
     :caption: arm
-    :glob:
 
-    target/arm/index
+    arm/index
 
 .. toctree::
     :maxdepth: 1
     :caption: NXP
     :glob:
 
-    target/nxp/**
+    nxp/**
 
 .. toctree::
     :maxdepth: 1
     :caption: Cypress
     :glob:
 
-    target/cypress/psoc64/index
+    cypress/psoc64/index
 
 .. toctree::
     :maxdepth: 2
     :caption: STM
     :glob:
 
-    target/stm/index
+    stm/index
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: Nordic
     :glob:
 
-    target/nordic_nrf/**
+    nordic_nrf/**
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: Laird Connectivity
     :glob:
 
-    target/lairdconnectivity/**
+    lairdconnectivity/**
 
 .. toctree::
     :maxdepth: 1
     :caption: Nuvoton
     :glob:
 
-    target/nuvoton/**
+    nuvoton/**
 
 --------------
 

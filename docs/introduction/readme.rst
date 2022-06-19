@@ -34,7 +34,7 @@ Applications running on Cortex-M devices can leverage TF-M services to ensure
 secure connection with edge gateways and IoT cloud services. It also protects
 the critical security assets such as sensitive data, keys and certificates on
 the platform. TF-M is supported on several Cortex-M based
-:doc:`Microcontrollers </platform/ext/index>` and Real Time Operating
+:doc:`Microcontrollers </platform/index>` and Real Time Operating
 Systems (RTOS).
 
 Terms ``TFM`` and ``TF-M`` are commonly used in documents and code and both
@@ -60,9 +60,9 @@ folders. The original license text is included in those source files.
 - The ``platform`` folder currently contains platforms support imported from
   the external project and the files may have different licenses.
 
-.. include:: /platform/ext/platform_introduction.rst
+.. include:: /platform/platform_introduction.rst
 
-The document :doc:`Supported Platforms </platform/ext/index>` lists the details.
+The document :doc:`Supported Platforms </platform/index>` lists the details.
 
 #########################
 Release Notes and Process

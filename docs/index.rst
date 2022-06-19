@@ -85,7 +85,7 @@ Trusted Firmware-M Documentation
     :maxdepth: 1
     :hidden:
 
-    Platform Selection<platform/ext/index>
+    Platform Selection<platform/index>
     building/tfm_build_instruction
     integration_guide/index
     technical_references/design_docs/index

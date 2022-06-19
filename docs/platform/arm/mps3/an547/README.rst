@@ -20,7 +20,7 @@ Build instructions with platform name: arm/mps3/an547
    They can also be run on the Corstone-300 Ethos-U55 Ecosystem FVP
    (FVP_SSE300_MPS3) up until version 11.15. From version 11.16, the FVP
    is aligned with the AN552 FPGA platform. For build information check
-   :doc:`AN552 platform </platform/ext/target/arm/mps3/an552/README>`.
+   :doc:`AN552 platform </platform/arm/mps3/an552/README>`.
 
 To run the example code on Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN547)
 ---------------------------------------------------------------------------------------------

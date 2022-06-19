@@ -1,6 +1,6 @@
-##################
-ARM: Corstone-1000
-##################
+#############
+Corstone-1000
+#############
 
 ************
 Introduction
@@ -20,6 +20,12 @@ services, TF-A, Secure Partitions and Optee.
 
 The communication between NSPE and SPE is based on PSA IPC protocol running on
 top of FF-A/OpenAMP.
+
+.. toctree::
+    :maxdepth: 1
+    :glob:
+
+    openamp/**
 
 The secure enclave subsystem has ARM's CC-312 (Crypto Cell) hardware to
 accelerate cryptographic operations. Additionaly, platform supports Secure Debug

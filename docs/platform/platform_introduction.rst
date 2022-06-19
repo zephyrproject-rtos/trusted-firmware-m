@@ -60,11 +60,11 @@ Supported Platforms
 
     - Secure Enclave system:
 
-        - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/arm/musca_b1/secure_enclave/readme>`
+        - :doc:`Musca-B1 Secure Enclave. </platform/arm/musca_b1/secure_enclave/readme>`
 
     - Runtime Security Subsystem (RSS):
 
-        - :doc:`RSS. </platform/ext/target/arm/rss/readme>`
+        - :doc:`RSS. </platform/arm/rss/readme>`
 
 The document :doc:`Platform Deprecation and Removal </integration_guide/platform/platform_deprecation>`
 lists the deprecated platforms, removed from the upstream.
