@@ -99,7 +99,7 @@ The following environments are supported:
 
         .. code-block:: bash
 
-            set PATH=<CMake_Path>\bin;$PATH
+            set PATH=<CMake_Path>\bin;%PATH%
 
 ###########################
 Install python dependencies
@@ -176,7 +176,7 @@ versions are:
 
                 .. code-block:: bash
 
-                    set PATH=<ARM_CLANG_PATH>\bin;$PATH
+                    set PATH=<ARM_CLANG_PATH>\bin;%PATH%
                     set ARM_PRODUCT_PATH=<ARM_CLANG_PATH>\sw\mappings
 
               - Configure proper tool variant and license.
@@ -209,7 +209,7 @@ versions are:
 
                 .. code-block:: bash
 
-                    export PATH=<GNU_ARM_PATH>\bin;$PATH
+                    set PATH=<GNU_ARM_PATH>\bin;%PATH%
 
       .. note::
 
@@ -237,7 +237,7 @@ versions are:
 
                 .. code-block:: bash
 
-                    export PATH=<IAR_COMPILER_PATH>\bin;$PATH
+                    set PATH=<IAR_COMPILER_PATH>\bin;%PATH%
 
 #############################
 Build AN521 regression sample
