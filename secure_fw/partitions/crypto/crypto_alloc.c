@@ -111,14 +111,7 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
 
     /* Handle must be initialised before calling a setup function */
     if (*handle != TFM_CRYPTO_INVALID_HANDLE) {
-        if ((*handle <= TFM_CRYPTO_CONC_OPER_NUM) &&
-            (operation[*handle - 1].in_use == TFM_CRYPTO_IN_USE) &&
-            (operation[*handle - 1].owner == partition_id)) {
-            /* The handle is a valid one for already in progress operation */
-            return PSA_ERROR_BAD_STATE;
-        }
-
-        return PSA_ERROR_INVALID_HANDLE;
+        return PSA_ERROR_BAD_STATE;
     }
 
     /* Init to invalid values */
