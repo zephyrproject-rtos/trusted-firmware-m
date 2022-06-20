@@ -30,6 +30,9 @@ __PACKED_STRUCT plat_user_area_layout_t {
     uint32_t bl2_image_hash_zero_bits;
     uint32_t bl1_rotpk_0_zero_bits;
     uint32_t secure_debug_pk_zero_bits;
+    uint32_t host_rotpk_s_zero_bits;
+    uint32_t host_rotpk_ns_zero_bits;
+    uint32_t host_rotpk_cca_zero_bits;
 
     uint32_t iak_len;
     uint32_t iak_type;
@@ -54,6 +57,11 @@ __PACKED_STRUCT plat_user_area_layout_t {
     uint32_t host_nv_counter[3][128];
 
     uint32_t bl1_rotpk_0[14];
+
+    uint32_t host_rotpk_s[24];
+    uint32_t host_rotpk_ns[24];
+    uint32_t host_rotpk_cca[24];
+
     uint32_t bl1_2_image[BL1_2_CODE_SIZE / sizeof(uint32_t)];
 };
 
@@ -199,29 +207,6 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
-    err = verify_zero_bits_count(USER_AREA_OFFSET(iak_len),
-                                 USER_AREA_SIZE(iak_len),
-                                 USER_AREA_OFFSET(iak_len_zero_bits));
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = verify_zero_bits_count(USER_AREA_OFFSET(iak_type),
-                                 USER_AREA_SIZE(iak_type),
-                                 USER_AREA_OFFSET(iak_type_zero_bits));
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
-    err = verify_zero_bits_count(USER_AREA_OFFSET(iak_id),
-                                 USER_AREA_SIZE(iak_id),
-                                 USER_AREA_OFFSET(iak_id_zero_bits));
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-#endif /* ATTEST_INCLUDE_COSE_KEY_ID */
-
     /* The rotpk (used as the ROTPK for the RSS rutime) is special as it's zero
      * count is stored in the cm_config_2 field, but it's not checked so we
      * still need to do it manually
@@ -283,6 +268,27 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 #endif /* BL1 */
+
+    err = verify_zero_bits_count(USER_AREA_OFFSET(host_rotpk_s),
+                                 USER_AREA_SIZE(host_rotpk_s),
+                                 USER_AREA_OFFSET(host_rotpk_s_zero_bits));
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    err = verify_zero_bits_count(USER_AREA_OFFSET(host_rotpk_ns),
+                                 USER_AREA_SIZE(host_rotpk_ns),
+                                 USER_AREA_OFFSET(host_rotpk_ns_zero_bits));
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    err = verify_zero_bits_count(USER_AREA_OFFSET(host_rotpk_cca),
+                                 USER_AREA_SIZE(host_rotpk_cca),
+                                 USER_AREA_OFFSET(host_rotpk_cca_zero_bits));
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -407,8 +413,6 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         return otp_read(OTP_OFFSET(huk), OTP_SIZE(huk), out_len, out);
     case PLAT_OTP_ID_GUK:
         return otp_read(OTP_OFFSET(guk), OTP_SIZE(guk), out_len, out);
-    case PLAT_OTP_ID_IAK:
-        return 0;
 
     case PLAT_OTP_ID_BOOT_SEED:
         return otp_read(USER_AREA_OFFSET(boot_seed), USER_AREA_SIZE(boot_seed),
@@ -428,16 +432,6 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_PROFILE_DEFINITION:
         return otp_read(USER_AREA_OFFSET(profile_definition),
                         USER_AREA_SIZE(profile_definition), out_len, out);
-
-    case PLAT_OTP_ID_IAK_LEN:
-        return otp_read(USER_AREA_OFFSET(iak_len),
-                        USER_AREA_SIZE(iak_len), out_len, out);
-    case PLAT_OTP_ID_IAK_TYPE:
-        return otp_read(USER_AREA_OFFSET(iak_type),
-                        USER_AREA_SIZE(iak_type), out_len, out);
-    case PLAT_OTP_ID_IAK_ID:
-        return otp_read(USER_AREA_OFFSET(iak_id),
-                        USER_AREA_SIZE(iak_id), out_len, out);
 
     case PLAT_OTP_ID_BL2_ROTPK_0:
         return otp_read(OTP_OFFSET(rotpk), OTP_SIZE(rotpk), out_len, out);
@@ -504,6 +498,16 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         return otp_read(USER_AREA_OFFSET(secure_debug_pk),
                         USER_AREA_SIZE(secure_debug_pk), out_len, out);
 
+    case PLAT_OTP_ID_HOST_ROTPK_S:
+        return otp_read(USER_AREA_OFFSET(host_rotpk_s),
+                        USER_AREA_SIZE(host_rotpk_s), out_len, out);
+    case PLAT_OTP_ID_HOST_ROTPK_NS:
+        return otp_read(USER_AREA_OFFSET(host_rotpk_ns),
+                        USER_AREA_SIZE(host_rotpk_ns), out_len, out);
+    case PLAT_OTP_ID_HOST_ROTPK_CCA:
+        return otp_read(USER_AREA_OFFSET(host_rotpk_cca),
+                        USER_AREA_SIZE(host_rotpk_cca), out_len, out);
+
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
@@ -543,8 +547,6 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_GUK:
         return otp_write(OTP_OFFSET(guk), OTP_SIZE(guk), in_len, in,
                          0);
-    case PLAT_OTP_ID_IAK:
-        return 0;
 
     case PLAT_OTP_ID_BOOT_SEED:
         return otp_write(USER_AREA_OFFSET(boot_seed), USER_AREA_SIZE(boot_seed),
@@ -567,19 +569,6 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(USER_AREA_OFFSET(profile_definition),
                          USER_AREA_SIZE(profile_definition), in_len,
                          in, USER_AREA_OFFSET(profile_definition_zero_bits));
-
-    case PLAT_OTP_ID_IAK_LEN:
-        return otp_write(USER_AREA_OFFSET(iak_len),
-                         USER_AREA_SIZE(iak_len), in_len,
-                         in, USER_AREA_OFFSET(iak_len_zero_bits));
-    case PLAT_OTP_ID_IAK_TYPE:
-        return otp_write(USER_AREA_OFFSET(iak_type),
-                         USER_AREA_SIZE(iak_type), in_len,
-                         in, USER_AREA_OFFSET(iak_type_zero_bits));
-    case PLAT_OTP_ID_IAK_ID:
-        return otp_write(USER_AREA_OFFSET(iak_id),
-                         USER_AREA_SIZE(iak_id), in_len,
-                         in, USER_AREA_OFFSET(iak_id_zero_bits));
 
     case PLAT_OTP_ID_BL2_ROTPK_0:
         return otp_write(OTP_OFFSET(rotpk), OTP_SIZE(rotpk), in_len, in, 0);
@@ -654,6 +643,19 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
                          USER_AREA_SIZE(secure_debug_pk), in_len, in,
                          USER_AREA_OFFSET(secure_debug_pk_zero_bits));
 
+    case PLAT_OTP_ID_HOST_ROTPK_S:
+        return otp_write(USER_AREA_OFFSET(host_rotpk_s),
+                         USER_AREA_SIZE(host_rotpk_s), in_len, in,
+                         USER_AREA_OFFSET(host_rotpk_s_zero_bits));
+    case PLAT_OTP_ID_HOST_ROTPK_NS:
+        return otp_write(USER_AREA_OFFSET(host_rotpk_ns),
+                         USER_AREA_SIZE(host_rotpk_ns), in_len, in,
+                         USER_AREA_OFFSET(host_rotpk_ns_zero_bits));
+    case PLAT_OTP_ID_HOST_ROTPK_CCA:
+        return otp_write(USER_AREA_OFFSET(host_rotpk_cca),
+                         USER_AREA_SIZE(host_rotpk_cca), in_len, in,
+                         USER_AREA_OFFSET(host_rotpk_cca_zero_bits));
+
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
@@ -670,8 +672,6 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_GUK:
         *size = OTP_SIZE(guk);
         break;
-    case PLAT_OTP_ID_IAK:
-        return 0;
 
     case PLAT_OTP_ID_BOOT_SEED:
         *size = USER_AREA_SIZE(boot_seed);
@@ -690,16 +690,6 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         break;
     case PLAT_OTP_ID_PROFILE_DEFINITION:
         *size = USER_AREA_SIZE(profile_definition);
-        break;
-
-    case PLAT_OTP_ID_IAK_LEN:
-        *size = USER_AREA_SIZE(iak_len);
-        break;
-    case PLAT_OTP_ID_IAK_TYPE:
-        *size = USER_AREA_SIZE(iak_type);
-        break;
-    case PLAT_OTP_ID_IAK_ID:
-        *size = USER_AREA_SIZE(iak_id);
         break;
 
     case PLAT_OTP_ID_BL2_ROTPK_0:
@@ -766,6 +756,16 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
 
     case PLAT_OTP_ID_SECURE_DEBUG_PK:
         *size = USER_AREA_SIZE(secure_debug_pk);
+        break;
+
+    case PLAT_OTP_ID_HOST_ROTPK_S:
+        *size = USER_AREA_SIZE(host_rotpk_s);
+        break;
+    case PLAT_OTP_ID_HOST_ROTPK_NS:
+        *size = USER_AREA_SIZE(host_rotpk_ns);
+        break;
+    case PLAT_OTP_ID_HOST_ROTPK_CCA:
+        *size = USER_AREA_SIZE(host_rotpk_cca);
         break;
 
     default:

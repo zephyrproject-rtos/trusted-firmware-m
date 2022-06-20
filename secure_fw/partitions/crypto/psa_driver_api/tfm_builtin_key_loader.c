@@ -16,8 +16,13 @@
 
 #include <string.h>
 
+#ifndef TFM_BUILTIN_MAX_KEY_LEN
 #define TFM_BUILTIN_MAX_KEY_LEN 48
+#endif /* TFM_BUILTIN_MAX_KEY_LEN */
+
+#ifndef TFM_BUILTIN_MAX_KEYS
 #define TFM_BUILTIN_MAX_KEYS 8
+#endif /* TFM_BUILTIN_MAX_KEYS */
 
 struct tfm_builtin_key_t {
     uint8_t key[TFM_BUILTIN_MAX_KEY_LEN];

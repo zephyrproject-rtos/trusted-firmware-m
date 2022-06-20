@@ -76,6 +76,10 @@ target_add_scatter_file(bl1_2
         $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/rss_bl1_2.ld>
 )
 
+
+install(FILES       platform_builtin_key_ids.h
+        DESTINATION ${TFM_INSTALL_PATH}/interface/include)
+
 #========================= Platform Secure ====================================#
 
 add_subdirectory(rss_comms)
@@ -122,6 +126,7 @@ target_sources(platform_s
         nv_counters.c
         attest_hal.c
         tfm_hal_platform_reset.c
+        provisioning.c
 )
 
 target_sources(tfm_sprt
@@ -146,6 +151,14 @@ target_compile_options(platform_s
 target_sources(platform_crypto_keys
     PRIVATE
         crypto_keys.c
+)
+
+target_include_directories(platform_crypto_keys
+    PUBLIC
+        .
+        ./native_drivers
+        ./device/include
+        ./device/config
 )
 
 #========================= Platform Non-Secure ================================#
@@ -181,6 +194,8 @@ target_include_directories(platform_ns
 target_sources(platform_bl2
     PRIVATE
         tfm_hal_platform_reset.c
+        bl2/flash_map_bl2.c
+        bl2/provisioning.c
         bl2/boot_hal_bl2.c
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_USART.c
@@ -211,11 +226,6 @@ target_include_directories(platform_bl2
     PRIVATE
         ${PLATFORM_DIR}/..
         native_drivers
-)
-
-target_sources(bl2
-    PRIVATE
-        bl2/flash_map_bl2.c
 )
 
 target_link_libraries(platform_bl2

@@ -91,7 +91,7 @@ enum tfm_plat_err_t comms_permissions_service_check(psa_handle_t handle,
                                                     size_t in_len,
                                                     int32_t type)
 {
-    uint32_t function_id;
+    uint32_t function_id = 0;
 
     switch(handle) {
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION
@@ -115,7 +115,7 @@ enum tfm_plat_err_t comms_permissions_service_check(psa_handle_t handle,
 #endif /* TFM_PARTITION_MEASURED_BOOT */
 #ifdef TFM_PARTITION_CRYPTO
     case TFM_CRYPTO_HANDLE:
-        if (in_len > 1) {
+        if (in_len >= 1) {
             function_id = ((struct tfm_crypto_pack_iovec *)in_vec[0].base)->function_id;
             switch(function_id) {
             case (TFM_CRYPTO_EXPORT_PUBLIC_KEY_SID):

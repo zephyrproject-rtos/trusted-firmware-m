@@ -19,6 +19,7 @@
 #include "tfm_builtin_key_loader.h"
 #include "kmu_drv.h"
 #include "device_definition.h"
+#include "tfm_plat_otp.h"
 
 #define TFM_NS_PARTITION_ID -1
 
@@ -71,6 +72,33 @@ enum tfm_plat_err_t tfm_plat_builtin_key_get_usage(psa_key_id_t key_id,
         }
         break;
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
+    case TFM_BUILTIN_KEY_ID_HOST_S_ROTPK:
+        switch(owner) {
+        case TFM_NS_PARTITION_ID:
+            *usage = PSA_KEY_USAGE_VERIFY_HASH;
+            break;
+        default:
+            return TFM_PLAT_ERR_NOT_PERMITTED;
+        }
+        break;
+    case TFM_BUILTIN_KEY_ID_HOST_NS_ROTPK:
+        switch(owner) {
+        case TFM_NS_PARTITION_ID:
+            *usage = PSA_KEY_USAGE_VERIFY_HASH;
+            break;
+        default:
+            return TFM_PLAT_ERR_NOT_PERMITTED;
+        }
+        break;
+    case TFM_BUILTIN_KEY_ID_HOST_CCA_ROTPK:
+        switch(owner) {
+        case TFM_NS_PARTITION_ID:
+            *usage = PSA_KEY_USAGE_VERIFY_HASH;
+            break;
+        default:
+            return TFM_PLAT_ERR_NOT_PERMITTED;
+        }
+        break;
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
@@ -101,6 +129,21 @@ enum tfm_plat_err_t tfm_plat_builtin_key_get_lifetime_and_slot(
                                                                    TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
         break;
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
+    case TFM_BUILTIN_KEY_ID_HOST_S_ROTPK:
+        *slot_number = TFM_BUILTIN_KEY_SLOT_HOST_S_ROTPK;
+        *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_LIFETIME_PERSISTENT,
+                                                                   TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
+        break;
+    case TFM_BUILTIN_KEY_ID_HOST_NS_ROTPK:
+        *slot_number = TFM_BUILTIN_KEY_SLOT_HOST_NS_ROTPK;
+        *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_LIFETIME_PERSISTENT,
+                                                                   TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
+        break;
+    case TFM_BUILTIN_KEY_ID_HOST_CCA_ROTPK:
+        *slot_number = TFM_BUILTIN_KEY_SLOT_HOST_CCA_ROTPK;
+        *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_LIFETIME_PERSISTENT,
+                                                                   TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
+        break;
     default:
         return PSA_ERROR_DOES_NOT_EXIST;
     }
@@ -259,6 +302,63 @@ static enum tfm_plat_err_t tfm_plat_get_dak_seed(uint8_t *buf, size_t buf_len,
 }
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
 
+static enum tfm_plat_err_t tfm_plat_get_host_s_rotpk(uint8_t *buf, size_t buf_len,
+                                                     size_t *key_len,
+                                                     size_t *key_bits,
+                                                     psa_algorithm_t *algorithm,
+                                                     psa_key_type_t *type)
+{
+    if (buf_len < 96) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* P384 public keys are 96 bytes in length */
+    *key_len = 96;
+    *key_bits = 384;
+    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
+    *type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+
+    return tfm_plat_otp_read(PLAT_OTP_ID_HOST_ROTPK_S, buf_len, buf);
+}
+
+static enum tfm_plat_err_t tfm_plat_get_host_ns_rotpk(uint8_t *buf, size_t buf_len,
+                                                      size_t *key_len,
+                                                      size_t *key_bits,
+                                                      psa_algorithm_t *algorithm,
+                                                      psa_key_type_t *type)
+{
+    if (buf_len < 96) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* P384 public keys are 96 bytes in length */
+    *key_len = 96;
+    *key_bits = 384;
+    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
+    *type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+
+    return tfm_plat_otp_read(PLAT_OTP_ID_HOST_ROTPK_NS, buf_len, buf);
+}
+
+static enum tfm_plat_err_t tfm_plat_get_host_cca_rotpk(uint8_t *buf, size_t buf_len,
+                                                       size_t *key_len,
+                                                       size_t *key_bits,
+                                                       psa_algorithm_t *algorithm,
+                                                       psa_key_type_t *type)
+{
+    if (buf_len < 96) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* P384 public keys are 96 bytes in length */
+    *key_len = 96;
+    *key_bits = 384;
+    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
+    *type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1);
+
+    return tfm_plat_otp_read(PLAT_OTP_ID_HOST_ROTPK_CCA, buf_len, buf);
+}
+
 enum tfm_plat_err_t tfm_plat_load_builtin_keys(void)
 {
     psa_status_t err;
@@ -266,7 +366,7 @@ enum tfm_plat_err_t tfm_plat_load_builtin_keys(void)
     psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
     enum tfm_plat_err_t plat_err;
     /* The KMU requires word alignment */
-    uint8_t __ALIGNED(4) buf[48];
+    uint8_t __ALIGNED(4) buf[96];
     size_t key_len;
     size_t key_bits;
     psa_algorithm_t algorithm;
@@ -324,6 +424,57 @@ enum tfm_plat_err_t tfm_plat_load_builtin_keys(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 #endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
+
+    /* HOST S ROTPK */
+    plat_err = tfm_plat_get_host_s_rotpk(buf, sizeof(buf), &key_len, &key_bits,
+                                         &algorithm, &type);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
+    }
+    key_id.MBEDTLS_PRIVATE(key_id) = TFM_BUILTIN_KEY_ID_HOST_S_ROTPK;
+    key_id.MBEDTLS_PRIVATE(owner) = 0;
+    psa_set_key_id(&attr, key_id);
+    psa_set_key_bits(&attr, key_bits);
+    psa_set_key_algorithm(&attr, algorithm);
+    psa_set_key_type(&attr, type);
+    err = tfm_builtin_key_loader_load_key(buf, key_len, &attr);
+    if (err != PSA_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* HOST NS ROTPK */
+    plat_err = tfm_plat_get_host_ns_rotpk(buf, sizeof(buf), &key_len, &key_bits,
+                                         &algorithm, &type);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
+    }
+    key_id.MBEDTLS_PRIVATE(key_id) = TFM_BUILTIN_KEY_ID_HOST_NS_ROTPK;
+    key_id.MBEDTLS_PRIVATE(owner) = 0;
+    psa_set_key_id(&attr, key_id);
+    psa_set_key_bits(&attr, key_bits);
+    psa_set_key_algorithm(&attr, algorithm);
+    psa_set_key_type(&attr, type);
+    err = tfm_builtin_key_loader_load_key(buf, key_len, &attr);
+    if (err != PSA_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* HOST CCA ROTPK */
+    plat_err = tfm_plat_get_host_cca_rotpk(buf, sizeof(buf), &key_len, &key_bits,
+                                         &algorithm, &type);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
+    }
+    key_id.MBEDTLS_PRIVATE(key_id) = TFM_BUILTIN_KEY_ID_HOST_CCA_ROTPK;
+    key_id.MBEDTLS_PRIVATE(owner) = 0;
+    psa_set_key_id(&attr, key_id);
+    psa_set_key_bits(&attr, key_bits);
+    psa_set_key_algorithm(&attr, algorithm);
+    psa_set_key_type(&attr, type);
+    err = tfm_builtin_key_loader_load_key(buf, key_len, &attr);
+    if (err != PSA_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
 
     return TFM_PLAT_ERR_SUCCESS;
 }

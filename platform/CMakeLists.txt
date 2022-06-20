@@ -142,7 +142,7 @@ if(TFM_PARTITION_CRYPTO)
     target_include_directories(platform_crypto_keys
         PRIVATE
             $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:${CMAKE_SOURCE_DIR}/interface/include/crypto_keys>
-            $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:${CMAKE_BINARY_DIR}/generated/interface/include>
+            ${CMAKE_BINARY_DIR}/generated/interface/include
     )
 
     target_compile_definitions(platform_crypto_keys
