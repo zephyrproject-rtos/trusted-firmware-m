@@ -30,7 +30,7 @@ typedef struct tfm_fwu_ctx_s {
  */
 static tfm_fwu_ctx_t fwu_ctx[TFM_FWU_MAX_IMAGES];
 
-#ifdef TFM_PSA_API
+#if defined(TFM_PSA_API) && PSA_FRAMEWORK_HAS_MM_IOVEC != 1
 #ifndef TFM_FWU_BUF_SIZE
 #define TFM_FWU_BUF_SIZE PSA_FWU_MAX_BLOCK_SIZE
 #endif
@@ -305,9 +305,14 @@ static psa_status_t tfm_fwu_write_req(const psa_msg_t *msg)
 {
     psa_image_id_t image_id;
     size_t block_offset;
-    size_t data_length, write_size, num;
+    size_t data_length, num;
     psa_status_t status = PSA_SUCCESS;
     uint8_t image_index;
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+    uint8_t *data_block;
+#else
+    size_t write_size;
+#endif
 
     /* Check input parameters. */
     if (msg->in_size[2] > PSA_FWU_MAX_BLOCK_SIZE) {
@@ -350,9 +355,17 @@ static psa_status_t tfm_fwu_write_req(const psa_msg_t *msg)
             return PSA_ERROR_INSUFFICIENT_MEMORY;
         }
     }
-
-    memset(data_block, 0, sizeof(data_block));
     data_length = msg->in_size[2];
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+    data_block = (uint8_t *)psa_map_invec(msg->handle, 2);
+    if (data_length > 0) {
+        status = tfm_internal_fwu_write(image_id,
+                                        block_offset,
+                                        data_block,
+                                        data_length);
+    }
+#else
+    memset(data_block, 0, sizeof(data_block));
     while (data_length > 0) {
         write_size = sizeof(data_block) <= data_length ?
                      sizeof(data_block) : data_length;
@@ -371,6 +384,7 @@ static psa_status_t tfm_fwu_write_req(const psa_msg_t *msg)
         data_length -= write_size;
         block_offset += write_size;
     }
+#endif
     return PSA_SUCCESS;
 }
 

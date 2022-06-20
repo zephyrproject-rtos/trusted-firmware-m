@@ -66,7 +66,7 @@
       "stateless_handle": 5,
       "version": 1,
       "version_policy": "STRICT",
-      "mm_iovec": "disable",
+      "mm_iovec": "enable",
     }
   ],
   "dependencies": [
