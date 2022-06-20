@@ -153,6 +153,7 @@ set(MBEDTLS_FATAL_WARNINGS OFF)
 set(ENABLE_DOCS OFF)
 set(INSTALL_MBEDTLS_HEADERS OFF)
 set(LIB_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto/install)
+set(GEN_FILES OFF)
 
 # Set the prefix to be used by mbedTLS targets
 set(MBEDTLS_TARGET_PREFIX crypto_service_)
