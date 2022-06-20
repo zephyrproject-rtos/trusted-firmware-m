@@ -173,10 +173,10 @@ target_include_directories(platform_bl2
         fip_parser
         Native_Driver
         fw_update_agent
+        .
     INTERFACE
         cc312
     PRIVATE
-        .
         CMSIS_Driver/Config
         Device/Config
         ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only

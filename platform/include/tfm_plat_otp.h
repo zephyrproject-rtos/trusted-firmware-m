@@ -16,6 +16,7 @@
 extern "C" {
 #endif
 
+#ifdef PLATFORM_DEFAULT_OTP
 enum tfm_otp_element_id_t {
     PLAT_OTP_ID_HUK = 0,
     PLAT_OTP_ID_GUK,
@@ -59,6 +60,9 @@ enum tfm_otp_element_id_t {
 
     PLAT_OTP_ID_MAX = UINT32_MAX,
 };
+#else
+#include "platform_otp_ids.h"
+#endif /* PLATFORM_DEFAULT_OTP */
 
 /* These are separate from the tfm_security_lifecycle_t definitions because here
  * the possible transitions are encoded by using the property that OTP bits can
