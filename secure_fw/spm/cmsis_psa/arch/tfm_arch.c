@@ -11,6 +11,10 @@
 #include "utilities.h"
 #include "config_impl.h"
 
+#if defined(__ICCARM__)
+#pragma required = tfm_arch_clear_fp_data
+#endif
+
 __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
                                            uint32_t exc_return)
 {
@@ -18,13 +22,17 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
 #if !defined(__ICCARM__)
         ".syntax unified                        \n"
 #endif
-        "mov     sp, r0                         \n"
-
+        "mov     r4, r0                         \n"
+        "mov     r5, r1                         \n"
+#if defined(CONFIG_TFM_ENABLE_FPU)
+        "bl      tfm_arch_clear_fp_data         \n"
+#endif
+        "mov     sp, r4                         \n"
         /* Seal Main Stack before using */
         "ldr     r2, ="M2S(STACK_SEAL_PATTERN)" \n"
         "ldr     r3, ="M2S(STACK_SEAL_PATTERN)" \n"
         "push    {r2, r3}                       \n"
-        "bx      r1                             \n"
+        "bx      r5                             \n"
     );
 }
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1

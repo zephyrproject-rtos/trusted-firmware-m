@@ -264,19 +264,8 @@ void tfm_arch_config_extensions(void)
 #endif
 }
 
-__attribute__((naked, noinline)) void tfm_arch_clear_fp_status(void)
-{
-    __ASM volatile(
-                   "mrs  r0, control         \n"
-                   "bics r0, r0, #4          \n"
-                   "msr  control, r0         \n"
-                   "isb                      \n"
-                   "bx   lr                  \n"
-                  );
-}
-
-#if (CONFIG_TFM_FP >= 1)
-__attribute__((naked, noinline)) void tfm_arch_clear_fp_data(void)
+#if defined(CONFIG_TFM_ENABLE_FPU)
+__attribute__((naked, noinline, used)) void tfm_arch_clear_fp_data(void)
 {
     __ASM volatile(
                     "eor  r0, r0, r0         \n"

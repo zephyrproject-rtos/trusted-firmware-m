@@ -229,8 +229,3 @@ void tfm_arch_set_secure_exception_priorities(void)
 void tfm_arch_config_extensions(void)
 {
 }
-
-/* There is no FPCA in baseline. */
-void tfm_arch_clear_fp_status(void)
-{
-}

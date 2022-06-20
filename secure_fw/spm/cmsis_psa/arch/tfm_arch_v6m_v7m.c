@@ -199,22 +199,3 @@ void tfm_arch_config_extensions(void)
 #endif
 #endif
 }
-
-/* There is no FPCA in v6m */
-#ifndef __ARM_ARCH_6M__
-__attribute__((naked, noinline)) void tfm_arch_clear_fp_status(void)
-{
-    __ASM volatile(
-                   ".syntax unified          \n"
-                   "mrs  r0, control         \n"
-                   "bics r0, r0, #4          \n"
-                   "msr  control, r0         \n"
-                   "isb                      \n"
-                   "bx   lr                  \n"
-                  );
-}
-#else
-void tfm_arch_clear_fp_status(void)
-{
-}
-#endif
