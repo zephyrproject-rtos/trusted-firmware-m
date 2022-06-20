@@ -39,6 +39,7 @@ psa_status_t cc3xx_key_agreement(
     cc3xx_ecdh_context_t ctx;
 
     switch (alg) {
+#if defined(PSA_WANT_ALG_ECDH)
     case PSA_ALG_ECDH:
         /* CC-312 only supports the X25519 function w/bit size m = 256 */
         if (curve == PSA_ECC_FAMILY_MONTGOMERY && key_bits == 256) {
@@ -96,6 +97,7 @@ psa_status_t cc3xx_key_agreement(
         *output_length = output_size;
 
         break;
+#endif /* PSA_WANT_ALG_ECDH */
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }

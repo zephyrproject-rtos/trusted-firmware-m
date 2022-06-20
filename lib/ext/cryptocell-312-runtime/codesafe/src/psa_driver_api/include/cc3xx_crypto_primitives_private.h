@@ -19,7 +19,7 @@
 
 /* Include the public header first as it contains the typedefs */
 #include "cc3xx_crypto_primitives.h"
-
+#include "cc3xx_config.h"
 #include "psa/crypto.h"
 
 #include "hash_driver.h"

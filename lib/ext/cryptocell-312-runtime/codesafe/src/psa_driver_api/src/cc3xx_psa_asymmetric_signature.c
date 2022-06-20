@@ -253,9 +253,6 @@ static psa_status_t cc3xx_internal_rsa_verify(
     size_t signature_length, bool do_hashing)
 
 {
-#ifndef MBEDTLS_RSA_C
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
     psa_key_type_t key_type = psa_get_key_type(attributes);
     size_t hash_bytes = PSA_HASH_LENGTH(PSA_ALG_SIGN_GET_HASH(alg));
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
@@ -315,7 +312,6 @@ cleanup:
     mbedtls_free(pPubUserContext);
     mbedtls_free(pUserPubKey);
     return err;
-#endif /* MBEDTLS_RSA_C */
 }
 
 static psa_status_t cc3xx_internal_rsa_sign(
@@ -327,9 +323,6 @@ static psa_status_t cc3xx_internal_rsa_sign(
     uint8_t *signature, size_t signature_size,
     size_t *signature_length, bool do_hashing)
 {
-#ifndef MBEDTLS_RSA_C
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t cc_err = CC_FATAL_ERROR;
@@ -414,7 +407,6 @@ cleanup:
     mbedtls_free(user_context_ptr);
 
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
-#endif /* MBEDTLS_RSA_C */
 }
 
 /** \defgroup psa_asym_sign PSA driver entry points for asymmetric sign/verify
@@ -439,15 +431,20 @@ psa_status_t cc3xx_sign_hash(const psa_key_attributes_t *attributes,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
+#if defined(PSA_WANT_ALG_ECDSA)
     if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_sign(
             attributes, key, key_length, alg, input, input_length, signature,
             signature_size, signature_length, false);
-    } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_ECDSA */
+#if defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN) || defined(PSA_WANT_ALG_RSA_PSS)
+    if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
         return cc3xx_internal_rsa_sign(attributes, key, key_length, alg, input,
                                        input_length, signature, signature_size,
                                        signature_length, false);
-    }
+    } else
+#endif /* PSA_WANT_ALG_RSA_PKCS1V15_SIGN || PSA_WANT_ALG_RSA_PSS */
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
@@ -467,15 +464,20 @@ psa_status_t cc3xx_verify_hash(const psa_key_attributes_t *attributes,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
+#if defined(PSA_WANT_ALG_ECDSA)
     if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_verify(attributes, key, key_length, alg,
                                            hash, hash_length, signature,
                                            signature_length, false);
-    } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_ECDSA */
+#if defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN) || defined(PSA_WANT_ALG_RSA_PSS)
+    if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
         return cc3xx_internal_rsa_verify(attributes, key, key_length, alg, hash,
                                          hash_length, signature,
                                          signature_length, false);
-    }
+    } else
+#endif /* PSA_WANT_ALG_RSA_PKCS1V15_SIGN || PSA_WANT_ALG_RSA_PSS */
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
@@ -494,6 +496,7 @@ psa_status_t cc3xx_sign_message(const psa_key_attributes_t *attributes,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
+#if defined(PSA_WANT_ALG_DETERMINISTIC_ECDSA)
     if (PSA_ALG_ECDSA_IS_DETERMINISTIC(alg)) {
         ret = cc3xx_hash_compute(PSA_ALG_SIGN_GET_HASH(alg), input,
                                  input_length, hash, sizeof(hash), &hash_len);
@@ -504,15 +507,22 @@ psa_status_t cc3xx_sign_message(const psa_key_attributes_t *attributes,
         return cc3xx_internal_ecdsa_sign(attributes, key, key_length, alg, hash,
                                          hash_len, signature, signature_size,
                                          signature_length, false);
-    } else if (PSA_ALG_IS_ECDSA(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_DETERMINISTIC_ECDSA */
+#if defined(PSA_WANT_ALG_ECDSA)
+    if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_sign(
             attributes, key, key_length, alg, input, input_length, signature,
             signature_size, signature_length, true);
-    } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_ECDSA */
+#if defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN) || defined(PSA_WANT_ALG_RSA_PSS)
+    if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
         return cc3xx_internal_rsa_sign(attributes, key, key_length, alg, input,
                                        input_length, signature, signature_size,
                                        signature_length, true);
-    }
+    } else
+#endif /* PSA_WANT_ALG_RSA_PKCS1V15_SIGN || PSA_WANT_ALG_RSA_PSS */
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
@@ -527,15 +537,20 @@ psa_status_t cc3xx_verify_message(const psa_key_attributes_t *attributes,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
+#if defined(PSA_WANT_ALG_ECDSA)
     if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_verify(attributes, key, key_length, alg,
                                            input, input_length, signature,
                                            signature_length, true);
-    } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_ECDSA */
+#if defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN) || defined(PSA_WANT_ALG_RSA_PSS)
+    if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
         return cc3xx_internal_rsa_verify(attributes, key, key_length, alg,
                                          input, input_length, signature,
                                          signature_length, true);
-    }
+    } else
+#endif /* PSA_WANT_ALG_RSA_PKCS1V15_SIGN || PSA_WANT_ALG_RSA_PSS */
 
     return PSA_ERROR_NOT_SUPPORTED;
 }

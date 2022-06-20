@@ -27,7 +27,7 @@
  * \note This file must be included by psa_crypto_driver_wrappers.c. The
  * definition of the context types used in the implementation is provided
  * through \ref cc3xx_crypto_primitives_private.h which is included, when
- * \ref PSA_CRYPTO_DRIVER_CC3XX is defined, in turn by psa/crypto.h, then
+ * \ref PSA_CRYPTO_DRIVER_CC3XX is defined, in turn by \ref psa/crypto.h, then
  * psa/crypto_struct.h and finally by psa/crypto_driver_context_primitives.h
  * and by psa/crypto_driver_context_composites.h from the mbedTLS module.
  * When \ref PSA_CRYPTO_DRIVER_CC3XX is not defined, the implementation
@@ -40,8 +40,7 @@
 /*!
  *  Enables the cc3xx driver in the PSA Driver Core layer. When this is
  *  defined, the \ref cc3xx_crypto_primitives_private.h type definitions are
- *  also visible through including psa/crypto.h
- *
+ *  also visible through including \ref psa/crypto.h
  */
 #define PSA_CRYPTO_DRIVER_CC3XX
 
@@ -49,42 +48,10 @@
  *  Enables fine grained type conversion from CCError_t to psa_status_t when
  *  translating error codes from CC format to PSA format in ECC and RSA
  *  modules. The translation functions occupy ~1KB of flash hence keep them
- *  disabled by default. By default any CC low-level failure is treated as
- *  PSA_ERROR_HARDWARE_FAILURE
+ *  disabled by default. By default only a minimum set of CC errors is
+ *  translated to PSA errors just to comply with PSA ACK negative tests.
  */
 #define CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
-
-/*!
- *  Enables support for SHA-1 algorithms in the interface layer. By
- *  default this is kept disabled as SHA-1 is deemed un-secure
- */
-#define CC3XX_CONFIG_SUPPORT_SHA1
-
-/*!
- *  Enables support for the GCM AEAD algorithm in the interface layer.
- *  By default this is kept enabled
- */
-#define CC3XX_CONFIG_SUPPORT_GCM
-
-/*!
- *  Enables support for RSA algorithm in the interface layer.
- *  By default this is kept enabled. At the moment affects only the RSA utils
- */
-#define CC3XX_CONFIG_SUPPORT_RSA
-
-/*!
- *  Enables support for the Chacha20 algorithm in the interface layer.
- *  By default it's kept enabled
- */
-#define CC3XX_CONFIG_SUPPORT_CHACHA20
-
-/*!
- *  Enables support for the Poly1305 algorithm in the interface layer.
- *  by default it's kept enabled. Note that there isn't a separate interface
- *  to exercise the Poly1305 algorithm other than through the combination with
- *  Chacha20 in an AEAD scheme.
- */
-#define CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305
 
 /*!
  *  Enables the implementation of the one-shot AEAD API functions to be
