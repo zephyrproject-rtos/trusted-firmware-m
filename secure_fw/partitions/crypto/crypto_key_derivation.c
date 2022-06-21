@@ -150,29 +150,40 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
                                             mbedtls_svc_key_id_t *encoded_key)
 {
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
     psa_key_derivation_operation_t *operation = NULL;
-    uint32_t handle = iov->op_handle;
-    uint32_t *handle_out = NULL;
-    enum tfm_crypto_function_type function_type =
-                        TFM_CRYPTO_GET_FUNCTION_TYPE(iov->function_id);
+    uint32_t *p_handle = NULL;
+    uint16_t sid = iov->function_id;
 
-    if (function_type != TFM_CRYPTO_FUNCTION_TYPE_NON_MULTIPART) {
-        handle_out = (out_vec && out_vec[0].base != NULL) ?
-                                                out_vec[0].base : &handle;
-        *handle_out = handle;
-        status = tfm_crypto_operation_handling(
-                                        TFM_CRYPTO_KEY_DERIVATION_OPERATION,
-                                        function_type,
-                                        handle_out,
-                                        (void **)&operation);
-        if (status != PSA_SUCCESS) {
-            return (iov->function_id == TFM_CRYPTO_KEY_DERIVATION_ABORT_SID) ?
-                    PSA_SUCCESS : status;
-        }
+    if (sid == TFM_CRYPTO_RAW_KEY_AGREEMENT_SID) {
+        uint8_t *output = out_vec[0].base;
+        size_t output_size = out_vec[0].len;
+        const uint8_t *peer_key = in_vec[1].base;
+        size_t peer_key_length = in_vec[1].len;
+
+        return psa_raw_key_agreement(iov->alg, *encoded_key,
+                                     peer_key, peer_key_length,
+                                     output, output_size, &out_vec[0].len);
     }
 
-    switch (iov->function_id) {
+    if (sid == TFM_CRYPTO_KEY_DERIVATION_SETUP_SID) {
+        p_handle = out_vec[0].base;
+        *p_handle = iov->op_handle;
+        status = tfm_crypto_operation_alloc(TFM_CRYPTO_KEY_DERIVATION_OPERATION,
+                                            out_vec[0].base,
+                                            (void **)&operation);
+    } else {
+        status = tfm_crypto_operation_lookup(
+                                            TFM_CRYPTO_KEY_DERIVATION_OPERATION,
+                                            iov->op_handle,
+                                            (void **)&operation);
+    }
+    if ((status != PSA_SUCCESS) &&
+        (sid != TFM_CRYPTO_KEY_DERIVATION_ABORT_SID)) {
+        return status;
+    }
+
+    switch (sid) {
     case TFM_CRYPTO_KEY_DERIVATION_SETUP_SID:
     {
         if (iov->alg == TFM_CRYPTO_ALG_HUK_DERIVATION) {
@@ -190,44 +201,39 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     {
         size_t *capacity = out_vec[0].base;
 
-        status = psa_key_derivation_get_capacity(operation, capacity);
+        return psa_key_derivation_get_capacity(operation, capacity);
     }
-    break;
     case TFM_CRYPTO_KEY_DERIVATION_SET_CAPACITY_SID:
     {
-        status = psa_key_derivation_set_capacity(operation, iov->capacity);
+        return psa_key_derivation_set_capacity(operation, iov->capacity);
     }
-    break;
     case TFM_CRYPTO_KEY_DERIVATION_INPUT_BYTES_SID:
     {
         const uint8_t *data = in_vec[1].base;
         size_t data_length = in_vec[1].len;
 
         if (operation->MBEDTLS_PRIVATE(alg) == TFM_CRYPTO_ALG_HUK_DERIVATION) {
-            status = tfm_crypto_huk_derivation_input_bytes(operation,
-                                                           iov->step, data,
-                                                           data_length);
+            return tfm_crypto_huk_derivation_input_bytes(operation,
+                                                         iov->step, data,
+                                                         data_length);
         } else {
-            status = psa_key_derivation_input_bytes(operation, iov->step, data,
-                                                    data_length);
+            return psa_key_derivation_input_bytes(operation, iov->step, data,
+                                                  data_length);
         }
     }
-    break;
     case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_BYTES_SID:
     {
         uint8_t *output = out_vec[0].base;
         size_t output_length = out_vec[0].len;
 
-        status = psa_key_derivation_output_bytes(operation,
-                                                 output, output_length);
+        return psa_key_derivation_output_bytes(operation,
+                                               output, output_length);
     }
-    break;
     case TFM_CRYPTO_KEY_DERIVATION_INPUT_KEY_SID:
     {
-         status = psa_key_derivation_input_key(operation,
-                                               iov->step, *encoded_key);
+         return psa_key_derivation_input_key(operation,
+                                             iov->step, *encoded_key);
     }
-    break;
     case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID:
     {
         const struct psa_client_key_attributes_s *client_key_attr =
@@ -256,50 +262,47 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     break;
     case TFM_CRYPTO_KEY_DERIVATION_ABORT_SID:
     {
+        p_handle = out_vec[0].base;
+        *p_handle = iov->op_handle;
+        if (status != PSA_SUCCESS) {
+            /*
+             * If lookup() failed to find out a valid operation, it is unable to
+             * determine whether the key is derived from HUK or not.
+             * Return PSA_SUCCESS directly as lookup() failure is ignored by
+             * psa_key_derivation_abort() error code list and
+             * psa_key_derivation_abort() can be called mulitple times.
+             */
+            return PSA_SUCCESS;
+        }
+
         if (operation->MBEDTLS_PRIVATE(alg) == TFM_CRYPTO_ALG_HUK_DERIVATION) {
             status = tfm_crypto_huk_derivation_abort(operation);
         } else {
             status = psa_key_derivation_abort(operation);
         }
 
-        if (status != PSA_SUCCESS) {
-            goto release_operation_and_return;
-        } else {
-            status = tfm_crypto_operation_release(handle_out);
-        }
+        goto release_operation_and_return;
     }
-    break;
     case TFM_CRYPTO_KEY_DERIVATION_KEY_AGREEMENT_SID:
     {
         const uint8_t *peer_key = in_vec[1].base;
         size_t peer_key_length = in_vec[1].len;
 
-        status = psa_key_derivation_key_agreement(operation, iov->step,
-                                                  *encoded_key,
-                                                  peer_key,
-                                                  peer_key_length);
-    }
-    break;
-    case TFM_CRYPTO_RAW_KEY_AGREEMENT_SID:
-    {
-        uint8_t *output = out_vec[0].base;
-        size_t output_size = out_vec[0].len;
-        const uint8_t *peer_key = in_vec[1].base;
-        size_t peer_key_length = in_vec[1].len;
-
-        status = psa_raw_key_agreement(iov->alg, *encoded_key,
-                                       peer_key, peer_key_length,
-                                       output, output_size, &out_vec[0].len);
+        return psa_key_derivation_key_agreement(operation, iov->step,
+                                                *encoded_key,
+                                                peer_key,
+                                                peer_key_length);
     }
     break;
     default:
-        status = PSA_ERROR_NOT_SUPPORTED;
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
     return status;
+
 release_operation_and_return:
     /* Release the operation context, ignore if the operation fails. */
-    (void)tfm_crypto_operation_release(handle_out);
+    (void)tfm_crypto_operation_release(p_handle);
     return status;
 }
 #else /* !TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */

@@ -469,16 +469,19 @@ psa_status_t psa_hash_clone(const psa_hash_operation_t *source_operation,
         .op_handle = source_operation->handle,
     };
 
-    psa_invec in_vec[] = {
-        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
-    };
-    psa_outvec out_vec[] = {
-        {.base = target_operation, .len = sizeof(psa_hash_operation_t)},
-    };
-
     if (target_operation && (target_operation->handle != 0)) {
         return PSA_ERROR_BAD_STATE;
     }
+
+    psa_invec in_vec[] = {
+        {.base = &iov, .len = sizeof(struct tfm_crypto_pack_iovec)},
+        {.base = &(target_operation->handle),
+         .len = sizeof(target_operation->handle)},
+    };
+    psa_outvec out_vec[] = {
+        {.base = &(target_operation->handle),
+         .len = sizeof(target_operation->handle)},
+    };
 
     return API_DISPATCH(in_vec, out_vec);
 }

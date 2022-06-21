@@ -25,28 +25,80 @@ psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
                                       mbedtls_svc_key_id_t *encoded_key)
 {
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
     psa_mac_operation_t *operation = NULL;
-    uint32_t handle = iov->op_handle;
-    uint32_t *handle_out = NULL;
-    enum tfm_crypto_function_type function_type =
-                        TFM_CRYPTO_GET_FUNCTION_TYPE(iov->function_id);
+    uint32_t *p_handle = NULL;
+    uint16_t sid = iov->function_id;
 
-    if (function_type != TFM_CRYPTO_FUNCTION_TYPE_NON_MULTIPART) {
-        handle_out = (out_vec && out_vec[0].base != NULL) ?
-                                                out_vec[0].base : &handle;
-        *handle_out = handle;
-        status = tfm_crypto_operation_handling(TFM_CRYPTO_MAC_OPERATION,
-                                               function_type,
-                                               handle_out,
-                                               (void **)&operation);
-        if (status != PSA_SUCCESS) {
-            return (iov->function_id == TFM_CRYPTO_MAC_ABORT_SID) ?
-                    PSA_SUCCESS : status;
-        }
+    if (sid == TFM_CRYPTO_MAC_COMPUTE_SID) {
+#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+        return PSA_ERROR_NOT_SUPPORTED;
+#else
+        const uint8_t *input = in_vec[1].base;
+        size_t input_length = in_vec[1].len;
+        uint8_t *mac = out_vec[0].base;
+        size_t mac_size = out_vec[0].len;
+
+        return psa_mac_compute(*encoded_key, iov->alg, input, input_length,
+                               mac, mac_size, &out_vec[0].len);
+#endif
     }
 
-    switch (iov->function_id) {
+    if (sid == TFM_CRYPTO_MAC_VERIFY_SID) {
+#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+        return PSA_ERROR_NOT_SUPPORTED;
+#else
+        const uint8_t *input = in_vec[1].base;
+        size_t input_length = in_vec[1].len;
+        const uint8_t *mac = in_vec[2].base;
+        size_t mac_length = in_vec[2].len;
+
+        return psa_mac_verify(*encoded_key, iov->alg, input, input_length,
+                              mac, mac_length);
+#endif
+    }
+
+    if ((sid == TFM_CRYPTO_MAC_SIGN_SETUP_SID) ||
+        (sid == TFM_CRYPTO_MAC_VERIFY_SETUP_SID)) {
+        p_handle = out_vec[0].base;
+        *p_handle = iov->op_handle;
+        status = tfm_crypto_operation_alloc(TFM_CRYPTO_MAC_OPERATION,
+                                            out_vec[0].base,
+                                            (void **)&operation);
+    } else {
+        status = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
+                                             iov->op_handle,
+                                             (void **)&operation);
+        if ((sid == TFM_CRYPTO_MAC_SIGN_FINISH_SID) ||
+            (sid == TFM_CRYPTO_MAC_VERIFY_FINISH_SID) ||
+            (sid == TFM_CRYPTO_MAC_ABORT_SID)) {
+            /*
+             * finish()/abort() interface put handle in out_vec[0].
+             * Therefore, out_vec[0] shall be specially set to original handle
+             * value. Otherwise, the garbage data in message out_vec[0] may
+             * override the original handle value in client, after lookup fails.
+             */
+            p_handle = out_vec[0].base;
+            *p_handle = iov->op_handle;
+        }
+    }
+    if (status != PSA_SUCCESS) {
+        if (sid == TFM_CRYPTO_MAC_ABORT_SID) {
+            /*
+             * Mbed TLS psa_mac_abort() will return a misleading error code
+             * if it is called with invalid operation content, since it
+             * doesn't validate the operation handle.
+             * It is neither necessary to call tfm_crypto_operation_release()
+             * with an invalid handle.
+             * Therefore return PSA_SUCCESS directly as psa_mac_abort() can be
+             * called multiple times.
+             */
+            return PSA_SUCCESS;
+        }
+        return status;
+    }
+
+    switch (sid) {
     case TFM_CRYPTO_MAC_SIGN_SETUP_SID:
     {
         status = psa_mac_sign_setup(operation, *encoded_key, iov->alg);
@@ -68,9 +120,8 @@ psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
         const uint8_t *input = in_vec[1].base;
         size_t input_length = in_vec[1].len;
 
-        status = psa_mac_update(operation, input, input_length);
+        return psa_mac_update(operation, input, input_length);
     }
-    break;
     case TFM_CRYPTO_MAC_SIGN_FINISH_SID:
     {
         uint8_t *mac = out_vec[1].base;
@@ -99,52 +150,17 @@ psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
     case TFM_CRYPTO_MAC_ABORT_SID:
     {
         status = psa_mac_abort(operation);
-
-        if (status != PSA_SUCCESS) {
-            goto release_operation_and_return;
-        } else {
-            status = tfm_crypto_operation_release(handle_out);
-        }
-    }
-    break;
-    case TFM_CRYPTO_MAC_COMPUTE_SID:
-    {
-#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
-        return PSA_ERROR_NOT_SUPPORTED;
-#else
-        const uint8_t *input = in_vec[1].base;
-        size_t input_length = in_vec[1].len;
-        uint8_t *mac = out_vec[0].base;
-        size_t mac_size = out_vec[0].len;
-
-        status = psa_mac_compute(*encoded_key, iov->alg, input, input_length,
-                                 mac, mac_size, &out_vec[0].len);
-        break;
-#endif
-    }
-    case TFM_CRYPTO_MAC_VERIFY_SID:
-    {
-#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
-        return PSA_ERROR_NOT_SUPPORTED;
-#else
-        const uint8_t *input = in_vec[1].base;
-        size_t input_length = in_vec[1].len;
-        const uint8_t *mac = in_vec[2].base;
-        size_t mac_length = in_vec[2].len;
-
-        status = psa_mac_verify(*encoded_key, iov->alg, input, input_length,
-                                mac, mac_length);
-        break;
-#endif
+        goto release_operation_and_return;
     }
     default:
-        status = PSA_ERROR_NOT_SUPPORTED;
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
     return status;
+
 release_operation_and_return:
     /* Release the operation context, ignore if the operation fails. */
-    (void)tfm_crypto_operation_release(handle_out);
+    (void)tfm_crypto_operation_release(p_handle);
     return status;
 }
 #else /* !TFM_CRYPTO_MAC_MODULE_DISABLED */

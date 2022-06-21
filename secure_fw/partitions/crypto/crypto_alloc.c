@@ -40,7 +40,7 @@ struct tfm_crypto_operation_s {
     } operation;
 };
 
-static struct tfm_crypto_operation_s operation[TFM_CRYPTO_CONC_OPER_NUM] ={{0}};
+static struct tfm_crypto_operation_s operations[TFM_CRYPTO_CONC_OPER_NUM] = {{0}};
 
 /*
  * \brief Function used to clear the memory associated to a backend context
@@ -52,34 +52,9 @@ static struct tfm_crypto_operation_s operation[TFM_CRYPTO_CONC_OPER_NUM] ={{0}};
  */
 static void memset_operation_context(uint32_t index)
 {
-    uint32_t mem_size;
-
-    uint8_t *mem_ptr = (uint8_t *) &(operation[index].operation);
-
-    switch(operation[index].type) {
-    case TFM_CRYPTO_CIPHER_OPERATION:
-        mem_size = sizeof(psa_cipher_operation_t);
-        break;
-    case TFM_CRYPTO_MAC_OPERATION:
-        mem_size = sizeof(psa_mac_operation_t);
-        break;
-    case TFM_CRYPTO_HASH_OPERATION:
-        mem_size = sizeof(psa_hash_operation_t);
-        break;
-    case TFM_CRYPTO_KEY_DERIVATION_OPERATION:
-        mem_size = sizeof(psa_key_derivation_operation_t);
-        break;
-    case TFM_CRYPTO_AEAD_OPERATION:
-        mem_size = sizeof(psa_aead_operation_t);
-        break;
-    case TFM_CRYPTO_OPERATION_NONE:
-    default:
-        mem_size = 0;
-        break;
-    }
-
     /* Clear the contents of the backend context */
-    (void)memset(mem_ptr, 0, mem_size);
+    (void)memset((uint8_t *)&(operations[index].operation), 0,
+                 sizeof(operations[index].operation));
 }
 
 /*!
@@ -92,7 +67,7 @@ static void memset_operation_context(uint32_t index)
 psa_status_t tfm_crypto_init_alloc(void)
 {
     /* Clear the contents of the local contexts */
-    (void)memset(operation, 0, sizeof(operation));
+    (void)memset(operations, 0, sizeof(operations));
     return PSA_SUCCESS;
 }
 
@@ -103,11 +78,6 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
     uint32_t i = 0;
     int32_t partition_id = 0;
     psa_status_t status;
-
-    status = tfm_crypto_get_caller_id(&partition_id);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
 
     /* Handle must be initialised before calling a setup function */
     if (*handle != TFM_CRYPTO_INVALID_HANDLE) {
@@ -120,13 +90,18 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
     }
     *ctx = NULL;
 
-    for (i=0; i<TFM_CRYPTO_CONC_OPER_NUM; i++) {
-        if (operation[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
-            operation[i].in_use = TFM_CRYPTO_IN_USE;
-            operation[i].owner = partition_id;
-            operation[i].type = type;
+    status = tfm_crypto_get_caller_id(&partition_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    for (i = 0; i < TFM_CRYPTO_CONC_OPER_NUM; i++) {
+        if (operations[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
+            operations[i].in_use = TFM_CRYPTO_IN_USE;
+            operations[i].owner = partition_id;
+            operations[i].type = type;
             *handle = i + 1;
-            *ctx = (void *) &(operation[i].operation);
+            *ctx = (void *) &(operations[i].operation);
             return PSA_SUCCESS;
         }
     }
@@ -140,21 +115,27 @@ psa_status_t tfm_crypto_operation_release(uint32_t *handle)
     int32_t partition_id = 0;
     psa_status_t status;
 
+    /* Handle shall be cleaned up always at first */
+    *handle = TFM_CRYPTO_INVALID_HANDLE;
+
+    if ((h_val == TFM_CRYPTO_INVALID_HANDLE) ||
+        (h_val > TFM_CRYPTO_CONC_OPER_NUM)) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     status = tfm_crypto_get_caller_id(&partition_id);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    if ( (h_val != TFM_CRYPTO_INVALID_HANDLE) &&
-         (h_val <= TFM_CRYPTO_CONC_OPER_NUM) &&
-         (operation[h_val - 1].in_use == TFM_CRYPTO_IN_USE) &&
-         (operation[h_val - 1].owner == partition_id)) {
+    if ((operations[h_val - 1].in_use == TFM_CRYPTO_IN_USE) &&
+        (operations[h_val - 1].owner == partition_id)) {
 
         memset_operation_context(h_val - 1);
-        operation[h_val - 1].in_use = TFM_CRYPTO_NOT_IN_USE;
-        operation[h_val - 1].type = TFM_CRYPTO_OPERATION_NONE;
-        operation[h_val - 1].owner = 0;
-        *handle = TFM_CRYPTO_INVALID_HANDLE;
+        operations[h_val - 1].in_use = TFM_CRYPTO_NOT_IN_USE;
+        operations[h_val - 1].type = TFM_CRYPTO_OPERATION_NONE;
+        operations[h_val - 1].owner = 0;
+
         return PSA_SUCCESS;
     }
 
@@ -168,52 +149,27 @@ psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
     int32_t partition_id = 0;
     psa_status_t status;
 
+    if ((handle == TFM_CRYPTO_INVALID_HANDLE) ||
+        (handle > TFM_CRYPTO_CONC_OPER_NUM)) {
+        return PSA_ERROR_BAD_STATE;
+    }
+
+    if (ctx == NULL) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
     status = tfm_crypto_get_caller_id(&partition_id);
     if (status != PSA_SUCCESS) {
         return status;
     }
 
-    if ( (handle != TFM_CRYPTO_INVALID_HANDLE) &&
-         (handle <= TFM_CRYPTO_CONC_OPER_NUM) &&
-         (operation[handle - 1].in_use == TFM_CRYPTO_IN_USE) &&
-         (operation[handle - 1].type == type) &&
-         (operation[handle - 1].owner == partition_id)) {
-
-        *ctx = (void *) &(operation[handle - 1].operation);
+    if ((operations[handle - 1].in_use == TFM_CRYPTO_IN_USE) &&
+        (operations[handle - 1].type == type) &&
+        (operations[handle - 1].owner == partition_id)) {
+        *ctx = (void *) &(operations[handle - 1].operation);
         return PSA_SUCCESS;
     }
 
     return PSA_ERROR_BAD_STATE;
-}
-
-psa_status_t tfm_crypto_operation_handling(enum tfm_crypto_operation_type type,
-                                    enum tfm_crypto_function_type function_type,
-                                    uint32_t *handle,
-                                    void **ctx)
-{
-    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-
-    /* Multipart context retrieving and handling if required */
-    switch (function_type) {
-    case TFM_CRYPTO_FUNCTION_TYPE_SETUP:
-        /* Allocate the operation context in the secure world */
-        status = tfm_crypto_operation_alloc(type,
-                                            handle,
-                                            ctx);
-        break;
-    case TFM_CRYPTO_FUNCTION_TYPE_LOOKUP:
-        /* Look up the corresponding operation context */
-        status = tfm_crypto_operation_lookup(type,
-                                             *handle,
-                                             ctx);
-        break;
-    /* All the other APIs don't deal with multipart */
-    case TFM_CRYPTO_FUNCTION_TYPE_NON_MULTIPART:
-        status = PSA_ERROR_INVALID_ARGUMENT;
-    default:
-        break;
-    }
-
-    return status;
 }
 /*!@}*/

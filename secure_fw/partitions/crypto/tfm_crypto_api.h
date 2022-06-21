@@ -34,67 +34,12 @@ enum tfm_crypto_operation_type {
     TFM_CRYPTO_OPERATION_TYPE_MAX = INT_MAX
 };
 
-/**
- * \brief Type associated to a function for the TF-M Crypto service
- *        API. It describes if an API is multipart related or not, i.e. and
- *        which multipart operation it requires (i.e. setup or lookup)
+/*
+ * Macro to determine the group_id corresponding to a function_id by
+ * accessing the tfm_crypto_func_sid table
  */
-enum tfm_crypto_function_type {
-    TFM_CRYPTO_FUNCTION_TYPE_NON_MULTIPART = 0x0,
-    TFM_CRYPTO_FUNCTION_TYPE_SETUP,
-    TFM_CRYPTO_FUNCTION_TYPE_LOOKUP
-};
-
-/**
- * \brief Type associated to the group of a function encoding. There can be
- *        nine groups (Random, Key management, Hash, MAC, Cipher, AEAD,
- *        Asym sign, Asym encrypt, Key derivation).
- */
-enum tfm_crypto_group_id {
-    TFM_CRYPTO_GROUP_ID_RANDOM = 0x0,
-    TFM_CRYPTO_GROUP_ID_KEY_MANAGEMENT,
-    TFM_CRYPTO_GROUP_ID_HASH,
-    TFM_CRYPTO_GROUP_ID_MAC,
-    TFM_CRYPTO_GROUP_ID_CIPHER,
-    TFM_CRYPTO_GROUP_ID_AEAD,
-    TFM_CRYPTO_GROUP_ID_ASYM_SIGN,
-    TFM_CRYPTO_GROUP_ID_ASYM_ENCRYPT,
-    TFM_CRYPTO_GROUP_ID_KEY_DERIVATION,
-};
-
-/**
- * \brief Accessor to the API descriptor table that returns function_type of the API
- *
- * \param[in] func Function ID for the API to retrieve the associated group
- *
- * \return Return values as described in \ref enum tfm_crypto_function_type
- */
-enum tfm_crypto_function_type
-    get_function_type_from_descriptor(enum tfm_crypto_function_id func);
-
-/**
- * \brief Accessor to the API descriptor table that returns function_type of the API
- *
- * \param[in] id Pointer to hold the ID of the caller
- *
- * \return Return values as described in \ref enum tfm_crypto_group_id
- */
-enum tfm_crypto_group_id
-    get_group_id_from_descriptor(enum tfm_crypto_function_id func);
-
-/**
- * \brief Macro to determine the group_id corresponding to a function_id by
- *        accessing the tfm_crypto_api_descriptor table
- */
-#define TFM_CRYPTO_IS_GROUP_ID(_function_id, _group_id) \
-    (get_group_id_from_descriptor((_function_id)) == (_group_id))
-
-/**
- * \brief Macro to get the function_type associated to a function_id by
- *        accessing the tfm_crypto_api_descriptor table
- */
-#define TFM_CRYPTO_GET_FUNCTION_TYPE(_function_id) \
-    (get_function_type_from_descriptor((_function_id)))
+#define TFM_CRYPTO_GET_GROUP_ID(_function_id)    \
+                        ((enum tfm_crypto_group_id)((_function_id) & 0xFF))
 
 /**
  * \brief Initialise the service
@@ -160,7 +105,7 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
 /**
  * \brief Release an operation context in the backend
  *
- * \param[in] handle Pointer to the handle of the context to release
+ * \param[in/out] handle Pointer to the handle of the context to release
  *
  * \return Return values as described in \ref psa_status_t
  */
@@ -178,24 +123,7 @@ psa_status_t tfm_crypto_operation_release(uint32_t *handle);
 psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
                                          uint32_t handle,
                                          void **ctx);
-/**
- * \brief This function handles the operations to allocate or retrieve a
- *        multipart context. It receives a operation and function type as
- *        inputs and then returns the looked or allocated context using
- *        the provided handle. If a context is allocated in a setup call
- *        the returned handle is then updated with the allocated value
- *
- * \param[in]      type          Type of the operation context to look up
- * \param[in]      function_type Type of the function
- * \param[in, out] handle        Pointer to the handle
- * \param[out]     ctx           Double pointer to the context
- *
- * \return Return values as described in \ref psa_status_t
- */
-psa_status_t tfm_crypto_operation_handling(enum tfm_crypto_operation_type type,
-                                    enum tfm_crypto_function_type function_type,
-                                    uint32_t *handle,
-                                    void **ctx);
+
 /**
  * \brief This function acts as interface from the framework dispatching
  *        calls to the set of functions that implement the PSA Crypto APIs.

@@ -37,36 +37,6 @@
 #error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
 #endif
 
-/**
- * \brief Type describing the properties of each function identifier, i.e. the
- *        group ID and the function type
- */
-struct tfm_crypto_api_descriptor {
-    uint8_t group_id     : 6; /*!< Value from \ref tfm_crypto_group_id */
-    uint8_t function_type: 2; /*!< Value from \ref tfm_crypto_function_type */
-};
-
-/**
- * \brief This table contains the description of each of the function IDs
- *        defined by \ref tfm_crypto_function_id
- */
-#define X(_function_id, _group_id, _function_type) \
-    [_function_id] = {.group_id = _group_id, .function_type = _function_type},
-static const struct tfm_crypto_api_descriptor tfm_crypto_api_descriptor[] = {
-    TFM_CRYPTO_SERVICE_API_DESCRIPTION
-};
-#undef X
-
-enum tfm_crypto_function_type get_function_type_from_descriptor(enum tfm_crypto_function_id func)
-{
-    return tfm_crypto_api_descriptor[func].function_type;
-}
-
-enum tfm_crypto_group_id get_group_id_from_descriptor(enum tfm_crypto_function_id func)
-{
-    return tfm_crypto_api_descriptor[func].group_id;
-}
-
 #ifdef TFM_PSA_API
 #include <string.h>
 #include "psa/framework_feature.h"
@@ -411,14 +381,16 @@ psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
     int32_t caller_id = 0;
     mbedtls_svc_key_id_t encoded_key = MBEDTLS_SVC_KEY_ID_INIT;
     bool is_key_required = false;
+    enum tfm_crypto_group_id group_id;
 
     if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    is_key_required = !(TFM_CRYPTO_IS_GROUP_ID(
-                            iov->function_id, TFM_CRYPTO_GROUP_ID_HASH) ||
-                        (iov->function_id == TFM_CRYPTO_GENERATE_RANDOM_SID));
+    group_id = TFM_CRYPTO_GET_GROUP_ID(iov->function_id);
+
+    is_key_required = !((group_id == TFM_CRYPTO_GROUP_ID_HASH) ||
+                        (group_id == TFM_CRYPTO_GROUP_ID_RANDOM));
 
     if (is_key_required) {
         status = tfm_crypto_get_caller_id(&caller_id);
@@ -432,50 +404,33 @@ psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
     }
 
     /* Dispatch to each sub-module based on the Group ID */
-    if (TFM_CRYPTO_IS_GROUP_ID(
-            iov->function_id, TFM_CRYPTO_GROUP_ID_KEY_MANAGEMENT)) {
-        status = tfm_crypto_key_management_interface(in_vec,
-                                                     out_vec,
-                                                     &encoded_key);
-    } else if (TFM_CRYPTO_IS_GROUP_ID(
-                   iov->function_id, TFM_CRYPTO_GROUP_ID_HASH)) {
-        status = tfm_crypto_hash_interface(in_vec, out_vec);
-    } else if (TFM_CRYPTO_IS_GROUP_ID(
-                   iov->function_id, TFM_CRYPTO_GROUP_ID_MAC)) {
-        status = tfm_crypto_mac_interface(in_vec,
-                                          out_vec,
-                                          &encoded_key);
-    } else if (TFM_CRYPTO_IS_GROUP_ID(
-                   iov->function_id, TFM_CRYPTO_GROUP_ID_CIPHER)) {
-        status = tfm_crypto_cipher_interface(in_vec,
-                                             out_vec,
-                                             &encoded_key);
-    } else if (TFM_CRYPTO_IS_GROUP_ID(
-                   iov->function_id, TFM_CRYPTO_GROUP_ID_AEAD)) {
-        status = tfm_crypto_aead_interface(in_vec,
-                                           out_vec,
-                                           &encoded_key);
-    } else if (TFM_CRYPTO_IS_GROUP_ID(
-                   iov->function_id, TFM_CRYPTO_GROUP_ID_ASYM_SIGN)) {
-        status = tfm_crypto_asymmetric_sign_interface(in_vec,
-                                                      out_vec,
-                                                      &encoded_key);
-    } else if (TFM_CRYPTO_IS_GROUP_ID(
-                   iov->function_id, TFM_CRYPTO_GROUP_ID_ASYM_ENCRYPT)) {
-        status = tfm_crypto_asymmetric_encrypt_interface(in_vec,
-                                                         out_vec,
-                                                         &encoded_key);
-    } else if (TFM_CRYPTO_IS_GROUP_ID(
-                   iov->function_id, TFM_CRYPTO_GROUP_ID_KEY_DERIVATION)) {
-        status = tfm_crypto_key_derivation_interface(in_vec,
-                                                     out_vec,
-                                                     &encoded_key);
-    } else if (iov->function_id == TFM_CRYPTO_GENERATE_RANDOM_SID) {
-        status = tfm_crypto_random_interface(in_vec, out_vec);
-    } else {
+    switch (group_id) {
+    case TFM_CRYPTO_GROUP_ID_KEY_MANAGEMENT:
+        return tfm_crypto_key_management_interface(in_vec, out_vec,
+                                                   &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_HASH:
+        return tfm_crypto_hash_interface(in_vec, out_vec);
+    case TFM_CRYPTO_GROUP_ID_MAC:
+        return tfm_crypto_mac_interface(in_vec, out_vec, &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_CIPHER:
+        return tfm_crypto_cipher_interface(in_vec, out_vec, &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_AEAD:
+        return tfm_crypto_aead_interface(in_vec, out_vec, &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_ASYM_SIGN:
+        return tfm_crypto_asymmetric_sign_interface(in_vec, out_vec,
+                                                    &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_ASYM_ENCRYPT:
+        return tfm_crypto_asymmetric_encrypt_interface(in_vec, out_vec,
+                                                       &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_KEY_DERIVATION:
+        return tfm_crypto_key_derivation_interface(in_vec, out_vec,
+                                                   &encoded_key);
+    case TFM_CRYPTO_GROUP_ID_RANDOM:
+        return tfm_crypto_random_interface(in_vec, out_vec);
+    default:
         LOG_ERRFMT("[ERR][Crypto] Unsupported request!\r\n");
-        status = PSA_ERROR_NOT_SUPPORTED;
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
-    return status;
+    return PSA_ERROR_NOT_SUPPORTED;
 }
