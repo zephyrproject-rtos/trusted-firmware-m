@@ -31,10 +31,7 @@
  * 0x312C_0000 SCP BL1 primary slot (512 KB)
  * 0x3134_0000 AP BL1 secondary slot (512 KB)
  * 0x313C_0000 SCP BL1 secondary slot (512 KB)
- * 0x3144_0000 Protected Storage Area (20 KB)
- * 0x3144_5000 Internal Trusted Storage Area (16 KB)
- * 0x3144_9000 OTP / NV counters  area (8 KB)
- * 0x3144_B000 Unused
+ * 0x3144_0000 Unused
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -136,22 +133,6 @@
 /* Scratch area is not used with RAM loading firmware upgrade */
 #define FLASH_AREA_IMAGE_SCRATCH        255
 
-/* Protected Storage (PS) Service definitions */
-#define FLASH_PS_AREA_OFFSET            (FLASH_AREA_9_OFFSET + \
-                                         FLASH_AREA_9_SIZE)
-#define FLASH_PS_AREA_SIZE              (0x5000)   /* 20 KB */
-
-/* Internal Trusted Storage (ITS) Service definitions */
-#define FLASH_ITS_AREA_OFFSET           (FLASH_PS_AREA_OFFSET + \
-                                         FLASH_PS_AREA_SIZE)
-#define FLASH_ITS_AREA_SIZE             (0x4000)   /* 16 KB */
-
-/* OTP_definitions */
-#define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_ITS_AREA_OFFSET + \
-                                           FLASH_ITS_AREA_SIZE)
-#define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
-#define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
-
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
 #define SECURE_IMAGE_MAX_SIZE           FLASH_S_PARTITION_SIZE
@@ -171,52 +152,5 @@
 #define FLASH_DEV_NAME Driver_FLASH0
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_FLASH_PROGRAM_UNIT      (0x1)
-
-/* Protected Storage (PS) Service definitions
- * Note: Further documentation of these definitions can be found in the
- * TF-M PS Integration Guide.
- */
-#define TFM_HAL_PS_FLASH_DRIVER Driver_FLASH0
-
-/* In this target the CMSIS driver requires only the offset from the base
- * address instead of the full memory address.
- */
-/* Base address of dedicated flash area for PS */
-#define TFM_HAL_PS_FLASH_AREA_ADDR    FLASH_PS_AREA_OFFSET
-/* Size of dedicated flash area for PS */
-#define TFM_HAL_PS_FLASH_AREA_SIZE    FLASH_PS_AREA_SIZE
-#define PS_RAM_FS_SIZE                TFM_HAL_PS_FLASH_AREA_SIZE
-/* Number of physical erase sectors per logical FS block */
-#define TFM_HAL_PS_SECTORS_PER_BLOCK  (1)
-/* Smallest flash programmable unit in bytes */
-#define TFM_HAL_PS_PROGRAM_UNIT       (0x1)
-
-/* Internal Trusted Storage (ITS) Service definitions
- * Note: Further documentation of these definitions can be found in the
- * TF-M ITS Integration Guide. The ITS should be in the internal flash, but is
- * allocated in the external flash just for development platforms that don't
- * have internal flash available.
- */
-#define TFM_HAL_ITS_FLASH_DRIVER Driver_FLASH0
-
-/* In this target the CMSIS driver requires only the offset from the base
- * address instead of the full memory address.
- */
-/* Base address of dedicated flash area for ITS */
-#define TFM_HAL_ITS_FLASH_AREA_ADDR    FLASH_ITS_AREA_OFFSET
-/* Size of dedicated flash area for ITS */
-#define TFM_HAL_ITS_FLASH_AREA_SIZE    FLASH_ITS_AREA_SIZE
-#define ITS_RAM_FS_SIZE                TFM_HAL_ITS_FLASH_AREA_SIZE
-/* Number of physical erase sectors per logical FS block */
-#define TFM_HAL_ITS_SECTORS_PER_BLOCK  (1)
-/* Smallest flash programmable unit in bytes */
-#define TFM_HAL_ITS_PROGRAM_UNIT       (0x1)
-
-/* OTP / NV counter definitions */
-#define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
-#define TFM_OTP_NV_COUNTERS_AREA_ADDR   FLASH_OTP_NV_COUNTERS_AREA_OFFSET
-#define TFM_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_OTP_NV_COUNTERS_SECTOR_SIZE
-#define TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR (TFM_OTP_NV_COUNTERS_AREA_ADDR + \
-                                              TFM_OTP_NV_COUNTERS_AREA_SIZE)
 
 #endif /* __FLASH_LAYOUT_H__ */
