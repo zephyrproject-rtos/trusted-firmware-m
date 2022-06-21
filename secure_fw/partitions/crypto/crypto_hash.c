@@ -126,6 +126,9 @@ psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
     break;
     case TFM_CRYPTO_HASH_COMPUTE_SID:
     {
+#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+    return PSA_ERROR_NOT_SUPPORTED;
+#else
         const uint8_t *input = in_vec[1].base;
         size_t input_length = in_vec[1].len;
         uint8_t *hash = out_vec[0].base;
@@ -135,10 +138,14 @@ psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
 
         status = psa_hash_compute(iov->alg, input, input_length,
                                   hash, hash_size, &out_vec[0].len);
+        break;
+#endif
     }
-    break;
     case TFM_CRYPTO_HASH_COMPARE_SID:
     {
+#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+        return PSA_ERROR_NOT_SUPPORTED;
+#else
         const uint8_t *input = in_vec[1].base;
         size_t input_length = in_vec[1].len;
         const uint8_t *hash = in_vec[2].base;
@@ -146,8 +153,9 @@ psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
 
         status = psa_hash_compare(iov->alg, input, input_length,
                                   hash, hash_length);
+        break;
+#endif
     }
-    break;
     default:
         status = PSA_ERROR_NOT_SUPPORTED;
     }

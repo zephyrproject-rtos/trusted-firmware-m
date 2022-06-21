@@ -398,6 +398,9 @@ top-level CMake config file ``config/profile/profile_large_test.cmake``.
    +--------------------------------------------+---------------+-----------------------------------------+
    | ``TFM_CRYPTO_TEST_CHACHA20_POLY1305``      | ``OFF``       | Test ChaCha20-Poly1305 AEAD algorithm   |
    +--------------------------------------------+---------------+-----------------------------------------+
+   | ``TFM_CRYPTO_TEST_SINGLE_PART_FUNCS``      | ``OFF``       | Test single-part operations in hash,    |
+   |                                            |               | MAC, AEAD and symmetric ciphers         |
+   +--------------------------------------------+---------------+-----------------------------------------+
 
 ****************
 Platform support

@@ -54,6 +54,9 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
     switch (iov->function_id) {
     case TFM_CRYPTO_AEAD_ENCRYPT_SID:
     {
+#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+        return PSA_ERROR_NOT_SUPPORTED;
+#else
         const struct tfm_crypto_aead_pack_input *aead_pack_input =
                                                                  &iov->aead_in;
         const uint8_t *nonce = aead_pack_input->nonce;
@@ -71,10 +74,14 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
                             additional_data, additional_data_length,
                             plaintext, plaintext_length,
                             ciphertext, ciphertext_size, &out_vec[0].len);
+        break;
+#endif
     }
-    break;
     case TFM_CRYPTO_AEAD_DECRYPT_SID:
     {
+#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+        return PSA_ERROR_NOT_SUPPORTED;
+#else
         const struct tfm_crypto_aead_pack_input *aead_pack_input =
                                                                  &iov->aead_in;
         const uint8_t *nonce = aead_pack_input->nonce;
@@ -92,8 +99,9 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
                             additional_data, additional_data_length,
                             ciphertext, ciphertext_length,
                             plaintext, plaintext_size, &out_vec[0].len);
+        break;
+#endif
     }
-    break;
     case TFM_CRYPTO_AEAD_ENCRYPT_SETUP_SID:
     {
         status = psa_aead_encrypt_setup(operation, *encoded_key, iov->alg);

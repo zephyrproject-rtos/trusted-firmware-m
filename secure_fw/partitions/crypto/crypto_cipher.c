@@ -123,6 +123,9 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
     break;
     case TFM_CRYPTO_CIPHER_ENCRYPT_SID:
     {
+#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+        return PSA_ERROR_NOT_SUPPORTED;
+#else
         const uint8_t *input = in_vec[1].base;
         size_t input_length = in_vec[1].len;
         uint8_t *output = out_vec[0].base;
@@ -130,10 +133,14 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
 
         status = psa_cipher_encrypt(*encoded_key, iov->alg, input, input_length,
                                     output, output_size, &out_vec[0].len);
+        break;
+#endif
     }
-    break;
     case TFM_CRYPTO_CIPHER_DECRYPT_SID:
     {
+#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+        return PSA_ERROR_NOT_SUPPORTED;
+#else
         const uint8_t *input = in_vec[1].base;
         size_t input_length = in_vec[1].len;
         uint8_t *output = out_vec[0].base;
@@ -141,8 +148,9 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
 
         status = psa_cipher_decrypt(*encoded_key, iov->alg, input, input_length,
                                     output, output_size, &out_vec[0].len);
+        break;
+#endif
     }
-    break;
     default:
         status = PSA_ERROR_NOT_SUPPORTED;
     }

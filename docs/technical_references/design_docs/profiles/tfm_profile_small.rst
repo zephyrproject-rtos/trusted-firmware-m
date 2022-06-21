@@ -62,6 +62,9 @@ TF-M Profile Small defines the following features:
             - Advanced Encryption Standard (AES) as symmetric crypto algorithm
             - SHA256 as Hash function
             - HMAC as Message Authentication Code algorithm
+        - Only enable multi-part functions in hash, symmetric ciphers,
+          Message Authentication Code (MAC) and Authenticated Encryption with
+          Associated Data (AEAD) operations.
 
     - Internal Trusted Storage (ITS)
 
@@ -184,6 +187,25 @@ hardware capabilities, while keeping enough level of security.
 
     It is recommended not to use MD5 or SHA-1 for message digests as they are
     subject to collision attacks [7]_ [8]_.
+
+By default, Profile Small only enables multi-part functions defined in PSA
+Cryptography API [14]_ in hash, symmetric ciphers, MAC and AEAD operations.
+Disabling single-part functions optimizes the code size of TF-M crypto service.
+Multi-part operations allows the message data to be processed in fragments
+instead of all at once. In static memory allocation, single-part operation may
+require to allocate a large memory space to support long message with unknown
+length. Therefore single-part operations can help users optimize memory
+footprint, especially while dealing with streaming data on IoT devices.
+
+It may slightly increase the code size in applications to replace single-part
+implementation with mulit-part implementation. Althgouth the code size increment
+can be qaulified, if users are concerned about the code size increment, they can
+enable single-part operations by toggling Profile Small default configuration.
+
+It may increase latency and overall time cost to implement cryptography
+functionality with single-part operations, compared to with multi-part ones.
+Users can enable single-part operations if the usage scenario requires
+single-part opreations to meet its perfermance metrics.
 
 Secure Storage
 ==============
@@ -392,9 +414,11 @@ Crypto Secure Partition
 
 TF-M Profile Small enables Crypto Secure Partition (SP) in its top-level CMake
 config file. Crypto SP modules not supported in TF-M Profile Small are disabled.
-The disabled modules are shown below.
+The disabled modules/features are shown below.
 
     - Disable asymmetric cipher
+    - Disable single-part operations in Hash, MAC, AEAD and symmetric ciphers
+      via selecting ``CRYPTO_SINGLE_PART_FUNCS_DISABLED``
 
 Other modules and configurations [12]_ are kept as default values.
 
@@ -510,6 +534,9 @@ Some of them are shown in the table below.
    | ``TFM_CRYPTO_TEST_CHACHA20``               | ``OFF``       | Test ChaCha20 stream cipher            |
    +--------------------------------------------+---------------+----------------------------------------+
    | ``TFM_CRYPTO_TEST_CHACHA20_POLY1305``      | ``OFF``       | Test ChaCha20-Poly1305 AEAD algorithm  |
+   +--------------------------------------------+---------------+----------------------------------------+
+   | ``TFM_CRYPTO_TEST_SINGLE_PART_FUNCS``      | ``OFF``       | Test single-part operations in hash,   |
+   |                                            |               | MAC, AEAD and symmetric ciphers        |
    +--------------------------------------------+---------------+----------------------------------------+
 
 BL2 setting
@@ -689,6 +716,8 @@ Reference
 .. [12] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
 
 .. [13] :doc:`TF-M build instruction </technical_references/instructions/tfm_build_instruction>`
+
+.. [14] `PSA Cryptography API 1.0 <https://developer.arm.com/documentation/ihi0086/a/?lang=en>`_
 
 --------------
 

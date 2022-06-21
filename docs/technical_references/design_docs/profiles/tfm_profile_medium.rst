@@ -327,6 +327,9 @@ Some cryptography tests are disabled due to the reduced Mbed Crypto config.
    +--------------------------------------------+---------------+-----------------------------------------------+
    | ``TFM_CRYPTO_TEST_CHACHA20_POLY1305``      | ``OFF``       | Disable ChaCha20-Poly1305 AEAD algorithm test |
    +--------------------------------------------+---------------+-----------------------------------------------+
+   | ``TFM_CRYPTO_TEST_SINGLE_PART_FUNCS``      | ``OFF``       | Test single-part operations in hash, MAC,     |
+   |                                            |               | AEAD and symmetric ciphers                    |
+   +--------------------------------------------+---------------+-----------------------------------------------+
 
 Device configuration extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

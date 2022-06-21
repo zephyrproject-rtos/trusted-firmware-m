@@ -20,12 +20,14 @@ set(ITS_BUF_SIZE                        32          CACHE STRING    "Size of the
 
 set(CRYPTO_CONC_OPER_NUM                4           CACHE STRING    "The max number of concurrent operations that can be active (allocated) at any time in Crypto")
 # Profile Small assigns a much smller heap size for backend crypto library as
-# asymmetric cryptography is not enabled.
-# Assign 0x200 bytes for each operation and totally 0x800 byets for max 4
+# asymmetric cryptography is not enabled and multi-part operations are enabled
+# only.
+# Assign 0x100 bytes for each operation and totally 0x800 byets for max 4
 # concurrent operation as set in CRYPTO_CONC_OPER_NUM above
-set(CRYPTO_ENGINE_BUF_SIZE              0x800       CACHE STRING    "Heap size for the crypto backend")
+set(CRYPTO_ENGINE_BUF_SIZE              0x400       CACHE STRING    "Heap size for the crypto backend")
 set(CRYPTO_ASYM_SIGN_MODULE_DISABLED    ON          CACHE BOOL      "Disable PSA Crypto asymmetric key signature module")
 set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED ON          CACHE BOOL      "Disable PSA Crypto asymmetric key encryption module")
+set(CRYPTO_SINGLE_PART_FUNCS_DISABLED   ON          CACHE BOOL      "Only enable multi-part operations in Hash, MAC, AEAD and symmetric ciphers, to optimize memory footprint in resource-constrained devices")
 
 set(SYMMETRIC_INITIAL_ATTESTATION       ON          CACHE BOOL      "Use symmetric crypto for inital attestation")
 

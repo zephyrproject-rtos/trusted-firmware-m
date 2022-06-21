@@ -76,6 +76,7 @@ target_compile_definitions(tfm_psa_rot_partition_crypto
         $<$<BOOL:${CRYPTO_ENGINE_BUF_SIZE}>:TFM_CRYPTO_ENGINE_BUF_SIZE=${CRYPTO_ENGINE_BUF_SIZE}>
         $<$<BOOL:${CRYPTO_CONC_OPER_NUM}>:TFM_CRYPTO_CONC_OPER_NUM=${CRYPTO_CONC_OPER_NUM}>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<BOOL:${CRYPTO_IOVEC_BUFFER_SIZE}>>:TFM_CRYPTO_IOVEC_BUFFER_SIZE=${CRYPTO_IOVEC_BUFFER_SIZE}>
+        $<$<BOOL:${CRYPTO_SINGLE_PART_FUNCS_DISABLED}>:CRYPTO_SINGLE_PART_FUNCS_DISABLED>
 )
 
 ################ Display the configuration being applied #######################

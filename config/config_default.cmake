@@ -139,6 +139,7 @@ set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED FALSE       CACHE BOOL      "Disable PSA
 set(CRYPTO_KEY_DERIVATION_MODULE_DISABLED FALSE     CACHE BOOL      "Disable PSA Crypto key derivation module")
 set(CRYPTO_IOVEC_BUFFER_SIZE            5120        CACHE STRING    "Default size of the internal scratch buffer used for PSA FF IOVec allocations")
 set(CRYPTO_NV_SEED                      ON          CACHE BOOL      "Use stored NV seed to provide entropy")
+set(CRYPTO_SINGLE_PART_FUNCS_DISABLED   OFF         CACHE BOOL      "Only enable multi-part operations in Hash, MAC, AEAD and symmetric ciphers, to optimize memory footprint in resource-constrained devices")
 
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Initial Attestation partition")
 set(SYMMETRIC_INITIAL_ATTESTATION       OFF         CACHE BOOL      "Use symmetric crypto for inital attestation")
