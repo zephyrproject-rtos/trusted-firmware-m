@@ -53,6 +53,9 @@ int main(void)
     BL1_LOG("[INF] Starting TF-M BL1_1\r\n");
 
     fih_rc = bl1_otp_init();
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_PANIC;
+    }
 
     if (tfm_plat_provisioning_is_required()) {
         if (tfm_plat_provisioning_perform()) {
