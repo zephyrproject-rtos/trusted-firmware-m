@@ -18,27 +18,35 @@
 #include "flash_layout.h"
 #include "tfm_plat_otp.h"
 #include "cmsis_compiler.h"
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "flash_otp_nv_counters_backend.h"
+#endif
 
 #include <string.h>
 
 #define OTP_COUNTER_MAX_SIZE    128u
 #define NV_COUNTER_SIZE         4
 
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
 enum flash_nv_counter_id_t {
     FLASH_NV_COUNTER_ID_PS_0 = 0,
     FLASH_NV_COUNTER_ID_PS_1,
     FLASH_NV_COUNTER_ID_PS_2,
     FLASH_NV_COUNTER_ID_MAX,
 };
+#endif
 
 enum tfm_plat_err_t tfm_plat_init_nv_counter(void)
 {
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     if (FLASH_NV_COUNTER_ID_MAX > FLASH_NV_COUNTER_AM) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
     return init_otp_nv_counters_flash();
+#else
+    return TFM_PLAT_ERR_SUCCESS;
+#endif
 }
 
 #if defined(BL2) || defined(BL1)
