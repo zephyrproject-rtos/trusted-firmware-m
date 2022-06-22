@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef __PPC_CORSTONE310_DRIVER_H__
-#define __PPC_CORSTONE310_DRIVER_H__
+#ifndef __DRIVER_PPC_H__
+#define __DRIVER_PPC_H__
 
 #include "Driver_Common.h"
 
@@ -27,17 +27,17 @@ extern "C" {
 #define ARM_PPC_API_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(1,0)
 
 /* Security attribute used to configure the peripheral */
-typedef enum _PPC_CORSTONE310_SecAttr {
-    PPC_CORSTONE310_SECURE_CONFIG = 0,    /*!< Secure access */
-    PPC_CORSTONE310_NONSECURE_CONFIG,     /*!< Non-secure access */
-} PPC_CORSTONE310_SecAttr;
+typedef enum _ARM_PPC_CORSTONE310_SecAttr {
+    ARM_PPC_CORSTONE310_SECURE_CONFIG = 0,    /*!< Secure access */
+    ARM_PPC_CORSTONE310_NONSECURE_CONFIG,     /*!< Non-secure access */
+} ARM_PPC_CORSTONE310_SecAttr;
 
 /* Privilege attribute used to configure the peripheral */
-typedef enum _PPC_CORSTONE310_PrivAttr {
-    PPC_CORSTONE310_PRIV_AND_NONPRIV_CONFIG = 0, /*!< Privilege and non-privilege
+typedef enum _ARM_PPC_CORSTONE310_PrivAttr {
+    ARM_PPC_CORSTONE310_PRIV_AND_NONPRIV_CONFIG = 0, /*!< Privilege and non-privilege
                                              * access */
-    PPC_CORSTONE310_PRIV_CONFIG,                 /*!< Privilege only access */
-} PPC_CORSTONE310_PrivAttr;
+    ARM_PPC_CORSTONE310_PRIV_CONFIG,                 /*!< Privilege only access */
+} ARM_PPC_CORSTONE310_PrivAttr;
 
 /* Function descriptions */
 /**
@@ -57,8 +57,8 @@ typedef enum _PPC_CORSTONE310_PrivAttr {
   \return      Returns Corstone-310 PPC error code.
 
   \fn          int32_t PPC_CORSTONE310_ConfigPrivilege(uint32_t periph,
-                                                  PPC_CORSTONE310_SecAttr sec_attr,
-                                                  PPC_CORSTONE310_PrivAttr priv_attr)
+                                                  ARM_PPC_CORSTONE310_SecAttr sec_attr,
+                                                  ARM_PPC_CORSTONE310_PrivAttr priv_attr)
   \brief       Configures privilege level with privileged and unprivileged
                access or privileged access only in the given security domain
                for a peripheral controlled by the given PPC.
@@ -78,7 +78,7 @@ typedef enum _PPC_CORSTONE310_PrivAttr {
   Secure only functions:
 
   \fn          int32_t PPC_CORSTONE310_ConfigSecurity(uint32_t periph,
-                                                 PPC_CORSTONE310_SecAttr sec_attr)
+                                                 ARM_PPC_CORSTONE310_SecAttr sec_attr)
   \brief       Configures security level for a peripheral controlled by the
                given PPC with secure or non-secure access only.
   \param[in]   periph:     Peripheral mask for SACFG and NSACFG registers.
@@ -109,23 +109,23 @@ typedef enum _PPC_CORSTONE310_PrivAttr {
 /**
  * \brief Access structure of the PPC Driver.
  */
-typedef struct _DRIVER_PPC_CORSTONE310 {
+typedef struct _ARM_DRIVER_PPC_CORSTONE310 {
   ARM_DRIVER_VERSION  (*GetVersion)       (void);            ///< Pointer to \ref ARM_PPC_GetVersion   : Get driver version.
   int32_t             (*Initialize)       (void);            ///< Pointer to \ref ARM_PPC_Initialize   : Initialize the PPC Interface.
   int32_t             (*Uninitialize)     (void);            ///< Pointer to \ref ARM_PPC_Uninitialize : De-initialize the PPC Interface.
-  int32_t             (*ConfigPrivilege)  (uint32_t periph, PPC_CORSTONE310_SecAttr sec_attr, PPC_CORSTONE310_PrivAttr priv_attr);  ///< Pointer to \ref ARM_PPC_ConfigPeriph : Configure a peripheral controlled by the PPC.
+  int32_t             (*ConfigPrivilege)  (uint32_t periph, ARM_PPC_CORSTONE310_SecAttr sec_attr, ARM_PPC_CORSTONE310_PrivAttr priv_attr);  ///< Pointer to \ref ARM_PPC_ConfigPeriph : Configure a peripheral controlled by the PPC.
   bool                (*IsPeriphPrivOnly) (uint32_t periph);  ///< Pointer to \ref IsPeriphPrivOnly : Check if the peripheral is configured to be privilege only.
 #if (defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U))
-  int32_t             (*ConfigSecurity)   (uint32_t periph, PPC_CORSTONE310_SecAttr sec_attr);  ///< Pointer to \ref ARM_PPC_ConfigPeriph : Configure a peripheral controlled by the PPC.
+  int32_t             (*ConfigSecurity)   (uint32_t periph, ARM_PPC_CORSTONE310_SecAttr sec_attr);  ///< Pointer to \ref ARM_PPC_ConfigPeriph : Configure a peripheral controlled by the PPC.
   bool                (*IsPeriphSecure)   (uint32_t periph);  ///< Pointer to \ref IsPeriphSecure :   Check if the peripheral is configured to be secure.
   int32_t             (*EnableInterrupt)  (void);            ///< Pointer to \ref ARM_PPC_EnableInterrupt  : Enable PPC interrupt.
   void                (*DisableInterrupt) (void);            ///< Pointer to \ref ARM_PPC_DisableInterrupt : Disable PPC interrupt.
   void                (*ClearInterrupt)   (void);            ///< Pointer to \ref ARM_PPC_ClearInterrupt   : Clear PPC interrupt.
   bool                (*InterruptState)   (void);            ///< Pointer to \ref ARM_PPC_InterruptState   : PPC interrupt State.
 #endif /* (defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)) */
-} const DRIVER_PPC_CORSTONE310;
+} const ARM_DRIVER_PPC_CORSTONE310;
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* __PPC_CORSTONE310_DRIVER_H__ */
+#endif /* __DRIVER_PPC_H__ */

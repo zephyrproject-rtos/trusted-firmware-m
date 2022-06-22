@@ -21,74 +21,74 @@
 
 // <q> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::Drivers:USART
-#define   RTE_USART0                     1
+#define   RTE_USART0                                1
 
 // <q> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART1]
 // <i> Configuration settings for Driver_USART1 in component ::Drivers:USART
-#define   RTE_USART1                     0
+#define   RTE_USART1                                0
 
 // <q> MPC (Memory Protection Controller) [Driver_ISRAM0_MPC]
 // <i> Configuration settings for Driver_ISRAM0_MPC in component ::Drivers:MPC
-#define   RTE_ISRAM0_MPC                 1
+#define   RTE_ISRAM0_MPC                            1
 
 // <q> MPC (Memory Protection Controller) [Driver_ISRAM1_MPC]
 // <i> Configuration settings for Driver_ISRAM1_MPC in component ::Drivers:MPC
-#define   RTE_ISRAM1_MPC                 1
+#define   RTE_ISRAM1_MPC                            1
 
 // <q> MPC (Memory Protection Controller) [Driver_SRAM_MPC]
 // <i> Configuration settings for Driver_SRAM_MPC in component ::Drivers:MPC
-#define   RTE_SRAM_MPC                   1
+#define   RTE_SRAM_MPC                              1
 
 // <q> MPC (Memory Protection Controller) [Driver_QSPI_MPC]
 // <i> Configuration settings for Driver_QSPI_MPC in component ::Drivers:MPC
-#define   RTE_QSPI_MPC                   1
+#define   RTE_QSPI_MPC                              1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_MAIN0]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_MAIN0 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_MAIN0             1
+// <q> PPC (Peripheral Protection Controller) [Driver_MAIN0_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_MAIN0_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_MAIN0_PPC_CORSTONE310                 1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_MAIN_EXP0]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_MAIN_EXP0 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_MAIN_EXP0             1
+// <q> PPC (Peripheral Protection Controller) [Driver_MAIN_EXP0_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_MAIN_EXP0_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_MAIN_EXP0_PPC_CORSTONE310             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_MAIN_EXP1]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_MAIN_EXP1 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_MAIN_EXP1             1
+// <q> PPC (Peripheral Protection Controller) [Driver_MAIN_EXP1_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_MAIN_EXP1_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_MAIN_EXP1_PPC_CORSTONE310             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_MAIN_EXP2]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_MAIN_EXP2 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_MAIN_EXP2             1
+// <q> PPC (Peripheral Protection Controller) [Driver_MAIN_EXP2_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_MAIN_EXP2_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_MAIN_EXP2_PPC_CORSTONE310             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_MAIN_EXP3]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_MAIN_EXP3 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_MAIN_EXP3             1
+// <q> PPC (Peripheral Protection Controller) [Driver_MAIN_EXP3_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_MAIN_EXP3_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_MAIN_EXP3_PPC_CORSTONE310             1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_PERIPH0]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_PERIPH0 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_PERIPH0             1
+// <q> PPC (Peripheral Protection Controller) [Driver_PERIPH0_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_PERIPH0_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_PERIPH0_PPC_CORSTONE310               1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_PERIPH1]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_PERIPH1 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_PERIPH1             1
+// <q> PPC (Peripheral Protection Controller) [Driver_PERIPH1_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_PERIPH1_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_PERIPH1_PPC_CORSTONE310               1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_PERIPH_EXP0]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_PERIPH_EXP0 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_PERIPH_EXP0             1
+// <q> PPC (Peripheral Protection Controller) [Driver_PERIPH_EXP0_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_PERIPH_EXP0_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_PERIPH_EXP0_PPC_CORSTONE310           1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_PERIPH_EXP1]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_PERIPH_EXP1 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_PERIPH_EXP1             1
+// <q> PPC (Peripheral Protection Controller) [Driver_PERIPH_EXP1_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_PERIPH_EXP1_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_PERIPH_EXP1_PPC_CORSTONE310           1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_PERIPH_EXP2]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_PERIPH_EXP2 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_PERIPH_EXP2             1
+// <q> PPC (Peripheral Protection Controller) [Driver_PERIPH_EXP2_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_PERIPH_EXP2_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_PERIPH_EXP2_PPC_CORSTONE310           1
 
-// <q> PPC (Peripheral Protection Controller) [PPC_CORSTONE310_PERIPH_EXP3]
-// <i> Configuration settings for Driver_PPC_CORSTONE310_PERIPH_EXP3 in component ::Drivers:PPC
-#define   RTE_PPC_CORSTONE310_PERIPH_EXP3             1
+// <q> PPC (Peripheral Protection Controller) [Driver_PERIPH_EXP3_PPC_CORSTONE310]
+// <i> Configuration settings for Driver_PERIPH_EXP3_PPC_CORSTONE310 in component ::Drivers:PPC
+#define   RTE_PERIPH_EXP3_PPC_CORSTONE310           1
 
 // <q> Flash device emulated by SRAM [Driver_Flash0]
 // <i> Configuration settings for Driver_Flash0 in component ::Drivers:Flash
-#define   RTE_FLASH0                     1
+#define   RTE_FLASH0                                1
 
 #endif  /* __RTE_DEVICE_H */
