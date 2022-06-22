@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,7 +17,7 @@
 #include "tfm_plat_boot_seed.h"
 #include "tfm_attest_hal.h"
 #include "attest_token.h"
-#include "attest_eat_defines.h"
+#include "attest_iat_defines.h"
 #include "t_cose_common.h"
 #include "tfm_plat_crypto_keys.h"
 
@@ -314,7 +314,7 @@ attest_add_all_sw_components(struct attest_token_encode_ctx *token_ctx)
             if (cnt == 1) {
                 /* Open array which stores SW components claims */
                 QCBOREncode_OpenArrayInMapN(cbor_encode_ctx,
-                                            EAT_CBOR_ARM_LABEL_SW_COMPONENTS);
+                                            IAT_SW_COMPONENTS);
             }
 
             encoded.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
@@ -331,7 +331,7 @@ attest_add_all_sw_components(struct attest_token_encode_ctx *token_ctx)
          * then include this claim to indicate that this state is intentional
          */
         attest_token_encode_add_integer(token_ctx,
-                                        EAT_CBOR_ARM_LABEL_NO_SW_COMPONENTS,
+                                        IAT_NO_SW_COMPONENTS,
                                         (int64_t)NO_SW_COMPONENT_FIXED_VALUE);
     }
 
@@ -373,7 +373,7 @@ attest_add_boot_seed_claim(struct attest_token_encode_ctx *token_ctx)
     }
 
     attest_token_encode_add_bstr(token_ctx,
-                                 EAT_CBOR_ARM_LABEL_BOOT_SEED,
+                                 IAT_BOOT_SEED,
                                  &claim_value);
 
     return PSA_ATTEST_ERR_SUCCESS;
@@ -402,7 +402,7 @@ attest_add_instance_id_claim(struct attest_token_encode_ctx *token_ctx)
     }
 
     attest_token_encode_add_bstr(token_ctx,
-                                 EAT_CBOR_ARM_LABEL_UEID,
+                                 IAT_UEID,
                                  &claim_value);
 
     return PSA_ATTEST_ERR_SUCCESS;
@@ -431,7 +431,7 @@ attest_add_implementation_id_claim(struct attest_token_encode_ctx *token_ctx)
     claim_value.ptr = implementation_id;
     claim_value.len  = size;
     attest_token_encode_add_bstr(token_ctx,
-                                 EAT_CBOR_ARM_LABEL_IMPLEMENTATION_ID,
+                                 IAT_IMPLEMENTATION_ID,
                                  &claim_value);
 
     return PSA_ATTEST_ERR_SUCCESS;
@@ -456,7 +456,7 @@ attest_add_caller_id_claim(struct attest_token_encode_ctx *token_ctx)
     }
 
     attest_token_encode_add_integer(token_ctx,
-                                    EAT_CBOR_ARM_LABEL_CLIENT_ID,
+                                    IAT_CLIENT_ID,
                                     (int64_t)caller_id);
 
     return PSA_ATTEST_ERR_SUCCESS;
@@ -505,7 +505,7 @@ attest_add_security_lifecycle_claim(struct attest_token_encode_ctx *token_ctx)
     }
 
     attest_token_encode_add_integer(token_ctx,
-                                    EAT_CBOR_ARM_LABEL_SECURITY_LIFECYCLE,
+                                    IAT_SECURITY_LIFECYCLE,
                                     (int64_t)security_lifecycle);
 
     return PSA_ATTEST_ERR_SUCCESS;
@@ -524,7 +524,7 @@ attest_add_challenge_claim(struct attest_token_encode_ctx   *token_ctx,
                            const struct q_useful_buf_c      *challenge)
 {
     attest_token_encode_add_bstr(token_ctx,
-                                 EAT_CBOR_ARM_LABEL_CHALLENGE,
+                                 IAT_CHALLENGE,
                                  challenge);
 
     return PSA_ATTEST_ERR_SUCCESS;
@@ -555,7 +555,7 @@ attest_add_verification_service(struct attest_token_encode_ctx *token_ctx)
     service.ptr = &buf;
     service.len = size;
     attest_token_encode_add_tstr(token_ctx,
-                                 EAT_CBOR_ARM_LABEL_ORIGINATION,
+                                 IAT_ORIGINATION,
                                  &service);
 
     return PSA_ATTEST_ERR_SUCCESS;
@@ -584,7 +584,7 @@ attest_add_profile_definition(struct attest_token_encode_ctx *token_ctx)
     profile.ptr = &buf;
     profile.len = size;
     attest_token_encode_add_tstr(token_ctx,
-                                 EAT_CBOR_ARM_LABEL_PROFILE_DEFINITION,
+                                 IAT_PROFILE_DEFINITION,
                                  &profile);
 
     return PSA_ATTEST_ERR_SUCCESS;
@@ -628,7 +628,7 @@ attest_add_hw_version_claim(struct attest_token_encode_ctx *token_ctx)
     }
 
     attest_token_encode_add_tstr(token_ctx,
-                                 EAT_CBOR_ARM_LABEL_HW_VERSION,
+                                 IAT_HW_VERSION,
                                  &claim_value);
 
     return PSA_ATTEST_ERR_SUCCESS;
