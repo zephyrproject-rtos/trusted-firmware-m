@@ -15,6 +15,7 @@ set(BL1                                 ON         CACHE BOOL     "Whether to bu
 set(PLATFORM_DEFAULT_BL1                ON         CACHE STRING   "Whether to use default BL1 or platform-specific one")
 set(TFM_BL1_SOFTWARE_CRYPTO             OFF        CACHE BOOL     "Whether BL1_1 will use software crypto")
 set(TFM_BL1_MEMORY_MAPPED_FLASH         ON         CACHE BOOL     "Whether BL1 can directly access flash content")
+set(TFM_BL1_PQ_CRYPTO                   ON         CACHE BOOL     "Enable LMS PQ crypto for BL2 verification. This is experimental and should not yet be used in production")
 
 set(BL2                                 ON         CACHE BOOL     "Whether to build BL2")
 set(BL2_HEADER_SIZE                     0x1000     CACHE STRING   "BL2 Header size")

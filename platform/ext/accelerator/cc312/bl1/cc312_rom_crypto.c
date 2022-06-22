@@ -17,6 +17,56 @@
 #include "cc3xx_aes.h"
 #include "cc3xx_hash.h"
 
+fih_int bl1_sha256_init(void)
+{
+    fih_int fih_rc = FIH_FAILURE;
+
+    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_init());
+    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(FIH_FAILURE);
+    }
+
+    return FIH_SUCCESS;
+}
+
+fih_int bl1_sha256_finish(uint8_t *hash)
+{
+    fih_int fih_rc = FIH_FAILURE;
+
+    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_finish(hash, 32));
+    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(FIH_FAILURE);
+    }
+
+    return FIH_SUCCESS;
+}
+
+fih_int bl1_sha256_update(uint8_t *data, size_t data_length)
+{
+    size_t idx;
+    fih_int fih_rc = FIH_FAILURE;
+
+    for (idx = 0; idx + 0x8000 < data_length; idx += 0x8000) {
+        fih_rc = FIH_FAILURE;
+        fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_update(data + idx,
+                                                                       0x8000));
+        if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
+            FIH_RET(FIH_FAILURE);
+        }
+    }
+    if (idx != (data_length - (data_length % 0x8000))) {
+        FIH_RET(FIH_FAILURE);
+    }
+
+    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_update(data + idx,
+                                                                   data_length - idx));
+    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(FIH_FAILURE);
+    }
+
+    return FIH_SUCCESS;
+}
+
 fih_int bl1_sha256_compute(const uint8_t *data,
                            size_t data_length,
                            uint8_t *hash)

@@ -20,6 +20,13 @@
 extern "C" {
 #endif
 
+/* Calculates a hash in stages. Note, there is no context here so only one hash
+ * operation can be run at once.
+ */
+fih_int bl1_sha256_init(void);
+fih_int bl1_sha256_update(uint8_t *data, size_t data_length);
+fih_int bl1_sha256_finish(uint8_t *hash);
+
 /* Calculates a SHA-256 hash of the input data */
 fih_int bl1_sha256_compute(const uint8_t *data,
                            size_t data_length,

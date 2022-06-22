@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -26,6 +26,7 @@ extern "C" {
  enum tfm_bl1_key_id_t {
     TFM_BL1_KEY_HUK,
     TFM_BL1_KEY_BL2_ENCRYPTION,
+    TFM_BL1_KEY_ROTPK_0,
 #ifdef TEST_BL1_1
     TFM_BL1_KEY_TEST_1,
     TFM_BL1_KEY_TEST_2,

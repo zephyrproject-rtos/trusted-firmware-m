@@ -96,6 +96,7 @@ add_custom_command(OUTPUT bl1_provisioning_bundle.bin
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_provisioning_bundle.py
     COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_provisioning_bundle.py
                     --bl2_encryption_key_input_file ${TFM_BL2_ENCRYPTION_KEY_PATH}
+                    --bl2_signing_key_input_file ${TFM_BL2_SIGNING_KEY_PATH}
                     --bl1_2_padded_hash_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
                     --bl2_signed_hash_input_file $<TARGET_FILE_DIR:bl2>/bl2_signed_hash.bin
                     --bl1_2_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin

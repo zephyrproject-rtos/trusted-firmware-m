@@ -14,9 +14,11 @@
 #include "log.h"
 #include "image.h"
 #include "region_defs.h"
+#include "pq_crypto.h"
 
 extern uint32_t platform_code_is_bl1_2;
 
+#ifndef TFM_BL1_PQ_CRYPTO
 static fih_int image_hash_check(struct bl1_2_image_t *img)
 {
     uint8_t computed_bl2_hash[BL2_HASH_SIZE];
@@ -39,6 +41,7 @@ static fih_int image_hash_check(struct bl1_2_image_t *img)
                                        BL2_HASH_SIZE);
     FIH_RET(fih_rc);
 }
+#endif /* !TFM_BL1_PQ_CRYPTO */
 
 static fih_int is_image_security_counter_valid(struct bl1_2_image_t *img)
 {
@@ -62,7 +65,15 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
     fih_int fih_rc = FIH_FAILURE;
 
 #ifdef TFM_BL1_PQ_CRYPTO
-    /* TODO */
+    #warning PQ crypto is experimental, and should not be used in production
+    BL1_LOG("\033[1;31m[WRN] ");
+    BL1_LOG("PQ crypto is experimental, and should not be used in production");
+    BL1_LOG("\033[0m\r\n");
+    FIH_CALL(pq_crypto_verify, fih_rc, TFM_BL1_KEY_ROTPK_0,
+                                       (uint8_t *)&img->protected_values,
+                                       sizeof(img->protected_values),
+                                       img->header.sig,
+                                       sizeof(img->header.sig));
 #else
     FIH_CALL(image_hash_check, fih_rc, img);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {

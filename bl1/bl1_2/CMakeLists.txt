@@ -41,6 +41,7 @@ target_compile_definitions(bl1_2
     PRIVATE
         $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
         $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>
+        $<$<BOOL:${TFM_BL1_PQ_CRYPTO}>:TFM_BL1_PQ_CRYPTO>
 )
 
 target_link_shared_code(bl1_2
@@ -88,6 +89,7 @@ add_custom_command(OUTPUT bl2_signed.bin bl2_signed_hash.bin
                     --img_output_file bl2_signed.bin
                     --hash_output_file bl2_signed_hash.bin
                     --encrypt_key_file ${TFM_BL2_ENCRYPTION_KEY_PATH}
+                    --sign_key_file ${TFM_BL2_SIGNING_KEY_PATH}
                     --signing_layout_file $<TARGET_OBJECTS:signing_layout_bl2>
                     --img_version ${TFM_BL1_IMAGE_VERSION_BL2}
                     --img_security_counter ${TFM_BL1_IMAGE_SECURITY_COUNTER_BL2}
