@@ -318,7 +318,7 @@ in the claims in the initial attestation token paragraph.
   number during a boot cycle.
 - ``tfm_plat_get_implementation_id``: Get the implementation ID of the
   device.
-- ``tfm_plat_get_hw_version``: Get the hardware version of the device.
+- ``tfm_plat_get_cert_ref``: Get the hardware version of the device.
 
 Boot loader interface
 =====================

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -32,7 +32,7 @@ __PACKED_STRUCT tfm_psa_rot_provisioning_data_t {
 
     uint8_t boot_seed[32];
     uint8_t implementation_id[32];
-    uint8_t hw_version[32];
+    uint8_t cert_ref[32];
     uint8_t verification_service_url[32];
     uint8_t profile_definition[32];
 
@@ -85,8 +85,8 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
         0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC,
         0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD,
     },
-    /* hw version */
-    "0604565272829100",
+    /* certification reference */
+    "0604565272829",
     /* verification_service_url */
     "www.trustedfirmware.org",
     /* attestation_profile_definition */
@@ -204,9 +204,9 @@ enum tfm_plat_err_t provision_psa_rot(void)
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
-    err = tfm_plat_otp_write(PLAT_OTP_ID_HW_VERSION,
-                             sizeof(psa_rot_prov_data.hw_version),
-                             psa_rot_prov_data.hw_version);
+    err = tfm_plat_otp_write(PLAT_OTP_ID_CERT_REF,
+                             sizeof(psa_rot_prov_data.cert_ref),
+                             psa_rot_prov_data.cert_ref);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

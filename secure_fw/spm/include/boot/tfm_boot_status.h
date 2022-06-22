@@ -96,7 +96,7 @@ extern "C" {
  * component. But they might be part of the boot status.
  */
 #define BOOT_SEED          0x00
-#define HW_VERSION         0x01
+#define CERT_REF           0x01
 #define SECURITY_LIFECYCLE 0x02
 
 /* General macros to handle TLV type */

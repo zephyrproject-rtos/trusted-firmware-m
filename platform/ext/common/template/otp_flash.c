@@ -67,8 +67,8 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, lcs), out_len, out);
     case PLAT_OTP_ID_IMPLEMENTATION_ID:
         return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, implementation_id), out_len, out);
-    case PLAT_OTP_ID_HW_VERSION:
-        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, hw_version), out_len, out);
+    case PLAT_OTP_ID_CERT_REF:
+        return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, cert_ref), out_len, out);
     case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
         return write_to_output(id, offsetof(struct flash_otp_nv_counters_region_t, verification_service_url), out_len, out);
     case PLAT_OTP_ID_PROFILE_DEFINITION:
@@ -188,8 +188,8 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, lcs), in_len, in);
     case PLAT_OTP_ID_IMPLEMENTATION_ID:
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, implementation_id), in_len, in);
-    case PLAT_OTP_ID_HW_VERSION:
-        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, hw_version), in_len, in);
+    case PLAT_OTP_ID_CERT_REF:
+        return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, cert_ref), in_len, in);
     case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
         return read_from_input(id, offsetof(struct flash_otp_nv_counters_region_t, verification_service_url), in_len, in);
     case PLAT_OTP_ID_PROFILE_DEFINITION:
@@ -286,8 +286,8 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_IMPLEMENTATION_ID:
         *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->implementation_id);
         break;
-    case PLAT_OTP_ID_HW_VERSION:
-        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->hw_version);
+    case PLAT_OTP_ID_CERT_REF:
+        *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->cert_ref);
         break;
     case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
         *size = sizeof(((struct flash_otp_nv_counters_region_t*)0)->verification_service_url);

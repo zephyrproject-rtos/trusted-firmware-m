@@ -20,7 +20,7 @@ then TF-M will attempt to provision the:
 - IAK
 - boot seed
 - implementation id
-- hw version
+- certification reference
 - bl2 ROTPKs (of which there are up to 4)
 - entropy seed
 
@@ -86,4 +86,4 @@ described in ``tfm_plat_otp.h``.
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

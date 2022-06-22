@@ -36,7 +36,7 @@
                   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  \
                   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
 #if defined(__ICCARM__)
-__root 
+__root
 #endif
 #if defined(__ICCARM__)
 #pragma default_function_attributes = @ ".BL2_OTP_Const"
@@ -65,7 +65,7 @@ const struct flash_otp_nv_counters_region_t otp_stm_provision = {
         0xEA, 0x31, 0x19, 0x35, 0x64, 0xCB, 0xA9, 0x1F,
         0xEC, 0x6F, 0x9A, 0x00, 0x2A, 0x7D, 0xC0, 0x50,
         0x4B, 0x92, 0xA1, 0x93, 0x71, 0x34, 0x58, 0x5F
-    },  
+    },
 #endif
     /* IAK len */
     .iak_len = { INT2LE(32) },
@@ -95,9 +95,9 @@ const struct flash_otp_nv_counters_region_t otp_stm_provision = {
         0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC,
         0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD,
     },
-    /* hw version */
-    .hw_version = { '0','6','0','4','5','6','5','2',
-                    '7','2','8','2','9','1','0','0'},
+    /* certification reference */
+    .cert_ref = { '0','6','0','4','5','6','5','2','7',
+                  '2','8','2','9','1','0','0','1','0'},
     /* verification_service_url */
     .verification_service_url = "www.trustedfirmware.org",
     /* attestation_profile_definition */

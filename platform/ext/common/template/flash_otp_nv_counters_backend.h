@@ -33,7 +33,7 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
         uint8_t boot_seed[32];
         uint8_t lcs[4];
         uint8_t implementation_id[32];
-        uint8_t hw_version[32];
+        uint8_t cert_ref[32];
         uint8_t verification_service_url[32];
         uint8_t profile_definition[32];
 

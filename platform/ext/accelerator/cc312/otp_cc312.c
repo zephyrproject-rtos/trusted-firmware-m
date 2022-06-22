@@ -128,9 +128,9 @@ static inline uint32_t cc_read_reg(uint32_t offset) {
  *  This field is implemented in the CC312 user-area. It is used in TF-M to
  *  store the implementation_id
  *
- *  @var plat_otp_layout_t::hw_version
+ *  @var plat_otp_layout_t::cert_ref
  *  This field is implemented in the CC312 user-area. It is used in TF-M to
- *  store the hw version
+ *  store the certification reference.
  *
  *  @var plat_otp_layout_t::verification_service_url
  *  This field is implemented in the CC312 user-area. It is used in TF-M to
@@ -197,7 +197,7 @@ __PACKED_STRUCT plat_otp_layout_t {
         __PACKED_STRUCT{
             uint16_t boot_seed_zero_bits;
             uint16_t implementation_id_zero_bits;
-            uint16_t hw_version_zero_bits;
+            uint16_t cert_ref_zero_bits;
             uint16_t verification_service_url_zero_bits;
             uint16_t profile_definition_zero_bits;
             uint16_t iak_len_zero_bits;
@@ -221,7 +221,7 @@ __PACKED_STRUCT plat_otp_layout_t {
 
         uint8_t boot_seed[32];
         uint8_t implementation_id[32];
-        uint8_t hw_version[32];
+        uint8_t cert_ref[32];
         uint8_t verification_service_url[32];
         uint8_t profile_definition[32];
 
@@ -470,9 +470,9 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
-    err = verify_zero_bits_count(otp->hw_version,
-                                 sizeof(otp->hw_version),
-                                 (uint8_t*)&otp->hw_version_zero_bits);
+    err = verify_zero_bits_count(otp->cert_ref,
+                                 sizeof(otp->cert_ref),
+                                 (uint8_t*)&otp->cert_ref_zero_bits);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
@@ -664,8 +664,8 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_IMPLEMENTATION_ID:
         return otp_read(otp->implementation_id,
                         sizeof(otp->implementation_id), out_len, out);
-    case PLAT_OTP_ID_HW_VERSION:
-        return otp_read(otp->hw_version, sizeof(otp->hw_version), out_len,
+    case PLAT_OTP_ID_CERT_REF:
+        return otp_read(otp->cert_ref, sizeof(otp->cert_ref), out_len,
                         out);
     case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
         return otp_read(otp->verification_service_url,
@@ -894,9 +894,9 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(otp->implementation_id,
                          sizeof(otp->implementation_id), in_len, in,
                          (uint8_t*)&otp->implementation_id_zero_bits);
-    case PLAT_OTP_ID_HW_VERSION:
-        return otp_write(otp->hw_version, sizeof(otp->hw_version), in_len,
-                         in, (uint8_t*)&otp->hw_version_zero_bits);
+    case PLAT_OTP_ID_CERT_REF:
+        return otp_write(otp->cert_ref, sizeof(otp->cert_ref), in_len,
+                         in, (uint8_t*)&otp->cert_ref_zero_bits);
     case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
         return otp_write(otp->verification_service_url,
                          sizeof(otp->verification_service_url), in_len, in,
@@ -1026,8 +1026,8 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_IMPLEMENTATION_ID:
         *size = sizeof(otp->implementation_id);
         break;
-    case PLAT_OTP_ID_HW_VERSION:
-        *size = sizeof(otp->hw_version);
+    case PLAT_OTP_ID_CERT_REF:
+        *size = sizeof(otp->cert_ref);
         break;
     case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
         *size = sizeof(otp->verification_service_url);

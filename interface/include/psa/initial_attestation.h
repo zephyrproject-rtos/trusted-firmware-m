@@ -115,11 +115,11 @@ extern "C" {
  *                 represents non-secure caller, positive numbers represents
  *                 secure callers, zero is invalid.
  *
- *  - HW version:  Optional claim. Globally unique number in EAN-13 format
- *                 identifying the GDSII that went to fabrication, HW and ROM.
- *                 It can be used to reference the security level of the PSA-ROT
- *                 via a certification website. Custom claim with a value is
- *                 encoded as text string.
+ *  - Certification Reference: Optional claim. Globally unique number in EAN-13
+ *                 format identifying the GDSII that went to fabrication, HW and
+ *                 ROM. It can be used to reference the security level of the
+ *                 PSA-ROTvia a certification website. Custom claim with a value
+ *                 is encoded as text string.
 
  *  - Boot seed:   It represents a random value created at system boot time that
  *                 will allow differentiation of reports from different system

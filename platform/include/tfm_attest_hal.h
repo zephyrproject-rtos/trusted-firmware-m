@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -59,9 +59,9 @@ enum tfm_security_lifecycle_t tfm_attest_hal_get_security_lifecycle(void);
  * URL specifying the address of the service.
  *
  * \param[in/out] size  As an input value it indicates the size of the caller
- *                      allocated buffer (in bytes) to store the HW version. At
- *                      return its value is updated with the exact size of the
- *                      verification service URL.
+ *                      allocated buffer (in bytes) to store the verification
+ *                      service indicator. At return its value is updated with
+ *                      the exact size of the verification service URL.
  * \param[out]    buf   Pointer to the buffer to store the verification service
  *                      URL.
  *
@@ -79,9 +79,9 @@ tfm_attest_hal_get_verification_service(uint32_t *size, uint8_t *buf);
  *  token signing.
  *
  * \param[in/out] size  As an input value it indicates the size of the caller
- *                      allocated buffer (in bytes) to store the HW version. At
- *                      return its value is updated with the exact size of the
- *                      profile definition.
+ *                      allocated buffer (in bytes) to store the profile
+ *                      definition. At return its value is updated with the
+ *                      exact size of the profile definition.
  * \param[out]    buf   Pointer to the buffer to store the profile definition.
  *
  * \return  Returns error code specified in \ref tfm_plat_err_t
