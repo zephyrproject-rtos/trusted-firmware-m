@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,6 +27,7 @@ extern "C" {
  * - sum out_vec size
  */
 struct client_request_t {
+    void *mhu_sender_dev; /* Pointer to MHU sender device to reply on */
     uint8_t protocol_ver;
     uint8_t seq_num;
     uint16_t client_id;
