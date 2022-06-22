@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2016-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,8 +122,8 @@ static uint32_t is_ctrl_by_range_list(
     uint32_t i;
     const struct mpc_sie_memory_range_t* range;
 
-    for(i = 0; i < dev->data->nbr_of_ranges; i++) {
-        range = dev->data->range_list[i];
+    for(i = 0; i < dev->cfg->nbr_of_ranges; i++) {
+        range = dev->cfg->range_list[i];
         if(addr >= range->base && addr <= range->limit) {
             *addr_range = range;
             return 1;
@@ -263,23 +263,14 @@ static enum mpc_sie_intern_error_t get_lut_masks(
     return MPC_SIE_INTERN_ERR_NONE;
 }
 
-enum mpc_sie_error_t mpc_sie_init(struct mpc_sie_dev_t* dev,
-                            const struct mpc_sie_memory_range_t** range_list,
-                            uint8_t nbr_of_ranges)
+enum mpc_sie_error_t mpc_sie_init(struct mpc_sie_dev_t* dev)
 {
-    if((range_list == NULL) || (nbr_of_ranges == 0)) {
-        return MPC_SIE_INVALID_ARG;
-    }
-
     dev->data->sie_version = get_sie_version(dev);
 
     if ((dev->data->sie_version != SIE200) &&
         (dev->data->sie_version != SIE300)) {
         return MPC_SIE_UNSUPPORTED_HARDWARE_VERSION;
     }
-
-    dev->data->range_list = range_list;
-    dev->data->nbr_of_ranges = nbr_of_ranges;
     dev->data->is_initialized = true;
 
     return MPC_SIE_ERR_NONE;

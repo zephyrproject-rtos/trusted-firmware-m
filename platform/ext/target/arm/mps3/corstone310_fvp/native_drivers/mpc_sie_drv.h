@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2016-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,13 +97,13 @@ struct mpc_sie_memory_range_t {
 /* ARM MPC SIE device configuration structure */
 struct mpc_sie_dev_cfg_t {
     const uint32_t base;  /*!< MPC base address */
+    /*!< Array of pointers to memory ranges controlled by the MPC */
+    const struct mpc_sie_memory_range_t** range_list;
+    uint8_t nbr_of_ranges;  /*!< Number of memory ranges in the list */
 };
 
 /* ARM MPC SIE device data structure */
 struct mpc_sie_dev_data_t {
-    /*!< Array of pointers to memory ranges controlled by the MPC */
-    const struct mpc_sie_memory_range_t** range_list;
-    uint8_t nbr_of_ranges;  /*!< Number of memory ranges in the list */
     bool is_initialized;    /*!< Indicates if the MPC driver
                              *   is initialized and enabled
                              */
@@ -120,18 +120,12 @@ struct mpc_sie_dev_t {
  * \brief Initializes a MPC device.
  *
  * \param[in] dev            MPC device \ref mpc_sie_dev_t
- * \param[in] range_list     List of memory ranges controller by the MPC
- *                           (\ref mpc_sie_memory_range_t). This list can not
- *                           freed after the initializations.
- * \param[in] nbr_of_ranges  Number of memory ranges
  *
  * \return Returns error code as specified in \ref mpc_sie_error_t
  *
  * \note This function doesn't check if dev is NULL.
  */
-enum mpc_sie_error_t mpc_sie_init(struct mpc_sie_dev_t* dev,
-                                  const struct mpc_sie_memory_range_t** range_list,
-                                  uint8_t nbr_of_ranges);
+enum mpc_sie_error_t mpc_sie_init(struct mpc_sie_dev_t* dev);
 
 /**
  * \brief Gets MPC block size. All regions must be aligned on this block
