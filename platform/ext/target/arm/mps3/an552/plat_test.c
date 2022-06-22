@@ -18,6 +18,7 @@
 #else
 /* Interrupt interval is set to 1 ms */
 #define TIMER0_RELOAD_VALUE          (SYSTIMER0_ARMV8M_DEFAULT_FREQ_HZ / 1000)
+#define TIMER1_RELOAD_VALUE          (SYSTIMER1_ARMV8M_DEFAULT_FREQ_HZ / 1000)
 #endif
 
 void tfm_plat_test_secure_timer_start(void)
