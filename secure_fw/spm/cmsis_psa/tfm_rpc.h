@@ -15,7 +15,7 @@
 #ifndef __TFM_RPC_H__
 #define __TFM_RPC_H__
 
-#ifdef TFM_MULTI_CORE_TOPOLOGY
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -198,7 +198,7 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct conn_handle_t *handle)
  */
 void tfm_rpc_set_caller_data(struct conn_handle_t *handle, int32_t client_id);
 
-#else /* TFM_MULTI_CORE_TOPOLOGY */
+#else /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
 /* RPC is only available in multi-core scenario */
 #define is_tfm_rpc_msg(x)                       (false)
@@ -207,5 +207,5 @@ void tfm_rpc_set_caller_data(struct conn_handle_t *handle, int32_t client_id);
 
 #define tfm_rpc_set_caller_data(hdl, client_id) do {} while (0)
 
-#endif /* TFM_MULTI_CORE_TOPOLOGY */
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 #endif /* __TFM_RPC_H__ */

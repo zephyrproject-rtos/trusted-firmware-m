@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -84,13 +86,13 @@ uint32_t tfm_hal_get_ns_VTOR(void);
  */
 uint32_t tfm_hal_get_ns_entry_point(void);
 
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef TFM_PARTITION_NS_AGENT_TZ
 /**
  * \brief Get the initial address of non-secure image main stack
  *
  * \return Returns the initial non-secure MSP
  */
 uint32_t tfm_hal_get_ns_MSP(void);
-#endif /* TFM_MULTI_CORE_TOPOLOGY */
+#endif /* TFM_PARTITION_NS_AGENT_TZ */
 
 #endif /* __TFM_HAL_PLATFORM_H__ */

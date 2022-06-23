@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -96,7 +98,7 @@ struct conn_handle_t {
                                          * Save caller outvec pointer for
                                          * write length update
                                          */
-#ifdef TFM_MULTI_CORE_TOPOLOGY
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
     const void *caller_data;            /*
                                          * Pointer to the private data of the
                                          * caller. It identifies the NSPE PSA
