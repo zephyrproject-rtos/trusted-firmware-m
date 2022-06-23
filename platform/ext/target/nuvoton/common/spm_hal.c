@@ -44,7 +44,7 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-void C_SCU_IRQHandler(void)
+void C_SCU_Handler(void)
 {
     ERROR_MSG("Platform Exception: secure violation fault!!!");
 
