@@ -1,6 +1,8 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2021-2022, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+# company) or an affiliate of Cypress Semiconductor Corporation. All rights
+# reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -156,7 +158,7 @@ target_link_libraries(tfm_secure_api
 
 ############################# Secure veneers ###################################
 
-if(NOT TFM_MULTI_CORE_TOPOLOGY)
+if(TFM_CONFIG_USE_TRUSTZONE)
     # If this is added to the spm, it is discarded as it is not used. Since the
     # spm is a static library it can't generate veneers under all compilers so
     # instead this single file is added to the tfm_s target.

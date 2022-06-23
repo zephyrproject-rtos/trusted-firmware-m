@@ -7,7 +7,7 @@
 #
 #-------------------------------------------------------------------------------
 
-if (TFM_MULTI_CORE_TOPOLOGY)
+if (NOT TFM_CONFIG_USE_TRUSTZONE)
     return()
 endif()
 

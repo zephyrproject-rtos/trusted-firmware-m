@@ -1,6 +1,8 @@
 ;/*
 ; * Copyright (c) 2009-2022 Arm Limited
 ; * Copyright (c) 2020 Nordic Semiconductor ASA
+; * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+; * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.

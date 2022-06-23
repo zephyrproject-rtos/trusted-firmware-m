@@ -1,6 +1,8 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+# company) or an affiliate of Cypress Semiconductor Corporation. All rights
+# reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -97,7 +99,7 @@ target_compile_definitions(tfm_secure_api
 
 ############################# Secure veneers ###################################
 
-if(NOT (TFM_PSA_API AND TFM_MULTI_CORE_TOPOLOGY))
+if(TFM_CONFIG_USE_TRUSTZONE)
     add_library(tfm_s_veneers STATIC)
 
     target_sources(tfm_s_veneers

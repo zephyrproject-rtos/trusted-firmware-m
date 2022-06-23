@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -18,7 +19,7 @@ set(INSTALL_INTERFACE_SRC_DIR    ${TFM_INSTALL_PATH}/interface/src)
 set(INSTALL_INTERFACE_LIB_DIR    ${TFM_INSTALL_PATH}/interface/lib)
 
 # export veneer lib
-if (NOT TFM_MULTI_CORE_TOPOLOGY)
+if (TFM_CONFIG_USE_TRUSTZONE)
     install(FILES       ${CMAKE_BINARY_DIR}/secure_fw/s_veneers.o
             DESTINATION ${INSTALL_INTERFACE_LIB_DIR})
 endif()

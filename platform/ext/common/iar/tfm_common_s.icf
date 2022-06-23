@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  * Copyright (c) 2020-2021 IAR Systems AB
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +25,7 @@ define block ER_VECTORS with size = S_CODE_VECTOR_TABLE_SIZE {
        readonly section .intvec
 };
 
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef TFM_CONFIG_USE_TRUSTZONE
     /*
      * Place the CMSE Veneers (containing the SG instruction) in a separate
      * 32 bytes aligned region so that the SAU can be programmed to
@@ -244,7 +246,7 @@ define block SRAM_WATERMARK with size = 0 { };
 
 define block LR_CODE with fixed order, maximum size = S_CODE_SIZE {
        block ER_VECTORS,
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef TFM_CONFIG_USE_TRUSTZONE
        block ER_VENEER,
        block VENEER_ALIGN,
 #endif

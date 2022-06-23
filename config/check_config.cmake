@@ -24,6 +24,7 @@ endfunction()
 set (TFM_L3_PLATFORM_LISTS arm/mps2/an521 arm/musca_b1/sse_200 stm/stm32l562e_dk)
 set (VALID_ISOLATION_LEVELS 1 2 3)
 
+tfm_invalid_config(TFM_LIB_MODEL AND NOT TFM_CONFIG_USE_TRUSTZONE)
 tfm_invalid_config(TFM_LIB_MODEL AND TFM_PSA_API)
 tfm_invalid_config(NOT TFM_LIB_MODEL AND NOT TFM_PSA_API)
 tfm_invalid_config(NOT TFM_ISOLATION_LEVEL IN_LIST VALID_ISOLATION_LEVELS)

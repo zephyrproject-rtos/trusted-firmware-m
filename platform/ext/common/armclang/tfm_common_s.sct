@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +24,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     ER_VECTORS S_CODE_START S_CODE_VECTOR_TABLE_SIZE {
         *.o (RESET +First)
     }
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef TFM_CONFIG_USE_TRUSTZONE
     ER_VECTORS_FILL +0 EMPTY (S_CODE_VECTOR_TABLE_SIZE - ImageLength(ER_VECTORS)) {
     }
     /*
