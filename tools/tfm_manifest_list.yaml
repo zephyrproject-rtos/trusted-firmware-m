@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2018-2021, Arm Limited. All rights reserved.
-# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -26,7 +27,7 @@
       "short_name": "TFM_NS_AGENT_MAILBOX",
       "manifest": "${CMAKE_SOURCE_DIR}/secure_fw/partitions/ns_agent_mailbox/ns_agent_mailbox.yaml",
       "output_path": "secure_fw/partitions/ns_agent_mailbox",
-      "conditional": "@TFM_MULTI_CORE_TOPOLOGY@",
+      "conditional": "@TFM_PARTITION_NS_AGENT_MAILBOX@",
       "version_major": 0,
       "version_minor": 1,
       "pid": 0,

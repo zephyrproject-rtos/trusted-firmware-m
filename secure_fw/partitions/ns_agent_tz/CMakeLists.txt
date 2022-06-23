@@ -7,16 +7,12 @@
 #
 #-------------------------------------------------------------------------------
 
-if (NOT CONFIG_TFM_USE_TRUSTZONE)
+if (NOT TFM_PARTITION_NS_AGENT_TZ)
     return()
 endif()
 
 cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
-
-if(NOT TFM_PSA_API)
-    return()
-endif()
 
 target_sources(tfm_partitions
     INTERFACE

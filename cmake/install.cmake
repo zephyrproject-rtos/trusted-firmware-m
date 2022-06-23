@@ -46,14 +46,16 @@ if (TFM_PSA_API)
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
-if (TFM_MULTI_CORE_TOPOLOGY)
+if (TFM_PARTITION_NS_AGENT_MAILBOX)
     install(FILES       ${INTERFACE_INC_DIR}/multi_core/tfm_multi_core_api.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox_test.h
                         ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_mailbox_config.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
-elseif (NOT TFM_PSA_API)
+endif()
+
+if (NOT TFM_PSA_API)
     install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_veneers.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/tfm/veneers)
 endif()
@@ -115,18 +117,20 @@ endif()
 
 ####################### export sources #########################################
 
-if (TFM_MULTI_CORE_TOPOLOGY)
+if (TFM_PARTITION_NS_AGENT_MAILBOX)
     install(FILES       ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox.c
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox_thread.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-else()
-    if(TFM_PSA_API)
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    endif()
+endif()
 
+if (TFM_PARTITION_NS_AGENT_TZ)
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
+endif()
+
+if (CONFIG_TFM_USE_TRUSTZONE)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c.example
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()

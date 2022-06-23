@@ -24,7 +24,6 @@ set(TEST_BL1_2                          OFF         CACHE BOOL      "Whether to 
 # TFM_LIB_MODEL is the only user configuration for Library Model selection.
 # TFM_PSA_API becomes an internal variable. Please do NOT use it in build command line.
 set(TFM_LIB_MODEL                       OFF         CACHE BOOL      "Use secure library model instead of PSA API (IPC model)")
-set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
 set(PSA_FRAMEWORK_HAS_MM_IOVEC          OFF         CACHE BOOL      "Enable MM-IOVEC")
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
@@ -70,7 +69,6 @@ set(CONFIG_TFM_STACK_WATERMARKS         OFF         CACHE BOOL      "Whether to 
 
 ############################ Platform ##########################################
 
-set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
 set(NUM_MAILBOX_QUEUE_SLOT              1           CACHE BOOL      "Number of mailbox queue slots")
 set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   OFF         CACHE BOOL      "Whether to use a platform specific inter-core communication instead of mailbox in dual-cpu topology")
 

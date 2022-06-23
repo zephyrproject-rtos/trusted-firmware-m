@@ -1,10 +1,15 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, Arm Limited. All rights reserved.
 # Copyright (c) 2021, NXP Semiconductors. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+set(CONFIG_TFM_USE_TRUSTZONE            ON              CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
+set(TFM_MULTI_CORE_TOPOLOGY             OFF             CACHE BOOL      "Whether to build for a dual-cpu architecture")
 
 ################################## Dependencies ################################
 set(TFM_PLATFORM_NXP_HAL_FILE_PATH      "DOWNLOAD"      CACHE STRING    "Path to the NXP SDK hal (or DOWNLOAD to fetch automatically)")

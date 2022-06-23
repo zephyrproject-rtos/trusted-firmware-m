@@ -7,7 +7,7 @@
 #
 #-------------------------------------------------------------------------------
 
-if (NOT TFM_MULTI_CORE_TOPOLOGY)
+if (NOT TFM_PARTITION_NS_AGENT_MAILBOX)
     return()
 endif()
 

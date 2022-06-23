@@ -148,6 +148,14 @@ Questions to be answered:
       This optional Non-Secure world is set-up via the tfm_ns target in the
       CMakelists.txt file (see below).
 
+    - How does the non-secure world communicate with the secure world?
+
+      TF-M supports running the non-secure world on the same CPU as the secure
+      world, communicating via TrustZone or running the non-secure world on
+      a separate CPU, communicating via a mailbox.
+
+      The architecture is configured in the config.cmake file (see below).
+
     - How does the FLASH need to be split between worlds?
 
       The flash split is very dependent on the support of BL2 and NS world.
@@ -217,6 +225,9 @@ preload_ns.cmake:
 
     If the platform is single core, this file should not be present.
 
+    If the platform is dual core but both cores have the same architecture,
+    this file is optional.
+
     [preload_cmake_]
 
 config.cmake:
@@ -224,9 +235,20 @@ config.cmake:
 
     (MANDATORY)
 
-    This file is use to setup default build configuration for TF-M, see example
-    below. [config_cmake_]
+    This file is use to setup default build configuration for TF-M.
 
+    It must specify the values below, and should also specify other
+    configuration values that are fixed for the platform.
+
+    +------------------------------+-------------------------------------------------------------------+
+    |    name                      |        description                                                |
+    +==============================+===================================================================+
+    |CONFIG_TFM_USE_TRUSTZONE      | Use TrustZone to transition between NSPE and SPE on the same CPU  |
+    +------------------------------+-------------------------------------------------------------------+
+    |TFM_MULTI_CORE_TOPOLOGY       | NSPE runs on a separate CPU to SPE                                |
+    +------------------------------+-------------------------------------------------------------------+
+
+    [config_cmake_]
 
 startup files:
 ---------------
@@ -741,6 +763,8 @@ Annex
 ::
 
     [config_cmake]
+    set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
+    set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
     set(BL2                                 OFF         CACHE BOOL      "Whether to build BL2")
     set(NS                                  FALSE       CACHE BOOL      "Whether to build NS app" FORCE)
 
@@ -768,3 +792,5 @@ Annex
     tfm_invalid_config((CMAKE_C_COMPILER_ID STREQUAL "ARMClang") AND (CMAKE_C_COMPILER_VERSION VERSION_LESS "6.10.1"))
 
 *Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*
