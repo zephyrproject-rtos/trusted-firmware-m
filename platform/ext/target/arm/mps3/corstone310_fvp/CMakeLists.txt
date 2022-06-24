@@ -88,6 +88,7 @@ target_sources(platform_s
     PRIVATE
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_MPC.c
+        cmsis_drivers/Driver_TGU.c
         cmsis_drivers/Driver_PPC.c
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c

@@ -30,6 +30,10 @@
 #define MPC_SRAM_S
 #define MPC_QSPI_S
 
+/* ARM TCM Gating Unit (TGU) */
+#define TGU_ARMV8_M_ITCM_S
+#define TGU_ARMV8_M_DTCM_S
+
 /* ARM Peripheral Protection Controllers (PPC) */
 #define PPC_CORSTONE310_MAIN0_S
 #define PPC_CORSTONE310_MAIN_EXP0_S
