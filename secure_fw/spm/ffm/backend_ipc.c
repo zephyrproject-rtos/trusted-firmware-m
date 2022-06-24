@@ -196,7 +196,7 @@ uint32_t backend_system_run(void)
     uint32_t control;
     struct partition_t *p_cur_pt;
 
-#if CONFIG_TFM_PSA_API_THREAD_CALL == 1
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
     TFM_CORE_ASSERT(SPM_THREAD_CONTEXT);
 #endif
 
