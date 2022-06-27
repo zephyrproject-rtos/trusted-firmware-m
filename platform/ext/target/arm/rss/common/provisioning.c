@@ -34,6 +34,7 @@ __PACKED_STRUCT tfm_psa_rot_provisioning_data_t {
     uint8_t cert_ref[32];
     uint8_t verification_service_url[32];
     uint8_t profile_definition[32];
+    uint32_t cca_system_properties;
 };
 
 #ifdef TFM_DUMMY_PROVISIONING
@@ -127,6 +128,8 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
     "UNDEFINED",
 #endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 #endif
+    /* CCA system properties placeholder */
+    0xDEADBEEF,
 };
 #else
 static struct tfm_assembly_and_test_provisioning_data_t assembly_and_test_prov_data;
@@ -242,6 +245,12 @@ enum tfm_plat_err_t provision_psa_rot(void)
         return err;
     }
 
+    err = tfm_plat_otp_write(PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES,
+                             sizeof(psa_rot_prov_data.cca_system_properties),
+                             (uint8_t*)&psa_rot_prov_data.cca_system_properties);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
     new_lcs = PLAT_OTP_LCS_SECURED;
     err = tfm_plat_otp_write(PLAT_OTP_ID_LCS,
                              sizeof(new_lcs),

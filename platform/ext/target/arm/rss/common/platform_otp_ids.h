@@ -59,6 +59,8 @@ enum tfm_otp_element_id_t {
     PLAT_OTP_ID_HOST_ROTPK_NS,
     PLAT_OTP_ID_HOST_ROTPK_CCA,
 
+    PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES,
+
     PLAT_OTP_ID_MAX = UINT32_MAX,
 };
 

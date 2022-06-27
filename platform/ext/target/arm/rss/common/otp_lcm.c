@@ -33,6 +33,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
     uint32_t host_rotpk_s_zero_bits;
     uint32_t host_rotpk_ns_zero_bits;
     uint32_t host_rotpk_cca_zero_bits;
+    uint32_t cca_system_properties_zero_bits;
 
     uint32_t iak_len;
     uint32_t iak_type;
@@ -61,6 +62,8 @@ __PACKED_STRUCT plat_user_area_layout_t {
     uint32_t host_rotpk_s[24];
     uint32_t host_rotpk_ns[24];
     uint32_t host_rotpk_cca[24];
+
+    uint32_t cca_system_properties;
 
     uint32_t bl1_2_image[BL1_2_CODE_SIZE / sizeof(uint32_t)];
 };
@@ -290,6 +293,13 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
+    err = verify_zero_bits_count(USER_AREA_OFFSET(cca_system_properties),
+                                 USER_AREA_SIZE(cca_system_properties),
+                                 USER_AREA_OFFSET(cca_system_properties_zero_bits));
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -508,6 +518,10 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         return otp_read(USER_AREA_OFFSET(host_rotpk_cca),
                         USER_AREA_SIZE(host_rotpk_cca), out_len, out);
 
+    case PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES:
+        return otp_read(USER_AREA_OFFSET(cca_system_properties),
+                        USER_AREA_SIZE(cca_system_properties), out_len, out);
+
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
@@ -656,6 +670,11 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
                          USER_AREA_SIZE(host_rotpk_cca), in_len, in,
                          USER_AREA_OFFSET(host_rotpk_cca_zero_bits));
 
+    case PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES:
+        return otp_write(USER_AREA_OFFSET(cca_system_properties),
+                         USER_AREA_SIZE(cca_system_properties), in_len, in,
+                         USER_AREA_OFFSET(cca_system_properties_zero_bits));
+
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
@@ -766,6 +785,10 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         break;
     case PLAT_OTP_ID_HOST_ROTPK_CCA:
         *size = USER_AREA_SIZE(host_rotpk_cca);
+        break;
+
+    case PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES:
+        *size = USER_AREA_SIZE(cca_system_properties);
         break;
 
     default:
