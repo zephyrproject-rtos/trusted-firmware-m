@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -95,24 +95,4 @@ uint32_t thrd_start_scheduler(struct thread_t **ppth)
     }
 
     return tfm_arch_refresh_hardware_context(pth->p_context_ctrl);
-}
-
-void thrd_set_wait(struct sync_obj_t *p_sync_obj, struct thread_t *pth)
-{
-    SPM_ASSERT(p_sync_obj && p_sync_obj->magic == THRD_SYNC_MAGIC);
-
-    p_sync_obj->owner = pth;
-    thrd_set_state(pth, THRD_STATE_BLOCK);
-}
-
-void thrd_wake_up(struct sync_obj_t *p_sync_obj, uint32_t ret_val)
-{
-    SPM_ASSERT(p_sync_obj && p_sync_obj->magic == THRD_SYNC_MAGIC);
-
-    if (p_sync_obj->owner && p_sync_obj->owner->state == THRD_STATE_BLOCK) {
-        thrd_set_state(p_sync_obj->owner, THRD_STATE_RUNNABLE);
-        tfm_arch_set_context_ret_code(p_sync_obj->owner->p_context_ctrl,
-                                      ret_val);
-        p_sync_obj->owner = NULL;
-    }
 }

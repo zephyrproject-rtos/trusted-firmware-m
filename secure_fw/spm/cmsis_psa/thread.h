@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -137,49 +137,5 @@ struct thread_t *thrd_next(void);
  *  The EXC_RETURN payload of the first runnable thread for caller usage.
  */
 uint32_t thrd_start_scheduler(struct thread_t **ppth);
-
-/* Sync object */
-
-/* A magic for corruption detecting */
-#ifndef NDEBUG
-#define THRD_SYNC_MAGIC                0x736f626a   /* 'sobj' */
-#endif
-
-struct sync_obj_t {
-#ifndef NDEBUG
-    uint32_t magic;             /* The magic for corruption detecting */
-#endif
-    struct thread_t *owner;     /* The owner thread of the sync object */
-};
-
-#ifndef NDEBUG
-#define THRD_SYNC_INIT(p_sync_obj) do {                            \
-                            (p_sync_obj)->magic = THRD_SYNC_MAGIC; \
-                            (p_sync_obj)->owner = NULL;            \
-                        } while (0)
-#else
-#define THRD_SYNC_INIT(p_sync_obj) (p_sync_obj)->owner = NULL
-#endif
-
-/*
- * Block the thread to wait on an sync object. The thread becomes the onwer of
- * sync object.
- *
- * Parameters:
- *  p_sync_obj  -    The pointer of sync object allocated by the caller
- *  pth         -    The thread_t which waits on p_sync_obj.
- *
- */
-void thrd_set_wait(struct sync_obj_t *p_sync_obj, struct thread_t *pth);
-
-/*
- * Wake up the sync object owner thread and set the return value of the function
- * that caused the "waiting".
- *
- * Parameters :
- *  p_sync_obj   -   The sync object that the thread is waiting on
- *  ret_val      -   Value to be returned to owner
- */
-void thrd_wake_up(struct sync_obj_t *p_sync_obj, uint32_t ret_val);
 
 #endif /* __M_THREAD_H__ */

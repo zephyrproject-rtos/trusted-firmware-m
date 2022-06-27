@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -182,7 +182,7 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct conn_handle_t *handle)
      * This condition check should be improved after TF-M non-secure client ID
      * management is implemented.
      */
-    if (handle && (handle->msg.client_id <= 0) && !handle->ack_evnt.owner) {
+    if (handle && (handle->msg.client_id <= 0)) {
         return true;
     }
 

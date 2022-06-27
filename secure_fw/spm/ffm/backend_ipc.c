@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -119,11 +119,13 @@ psa_status_t backend_messaging(struct service_t *service,
     p_owner->signals_asserted |= signal;
 
     if (p_owner->signals_waiting & signal) {
-        thrd_wake_up(&p_owner->waitobj,
-                     (p_owner->signals_asserted & p_owner->signals_waiting));
+        if (p_owner->thrd.state == THRD_STATE_BLOCK) {
+            thrd_set_state(&p_owner->thrd, THRD_STATE_RUNNABLE);
+            tfm_arch_set_context_ret_code(p_owner->thrd.p_context_ctrl,
+                        (p_owner->signals_asserted & p_owner->signals_waiting));
+        }
         p_owner->signals_waiting &= ~signal;
     }
-    CRITICAL_SECTION_LEAVE(cs_assert);
 
     /*
      * If it is a NS request via RPC, it is unnecessary to block current
@@ -131,8 +133,10 @@ psa_status_t backend_messaging(struct service_t *service,
      */
 
     if (!is_tfm_rpc_msg(handle)) {
-        thrd_set_wait(&handle->ack_evnt, CURRENT_THREAD);
+        thrd_set_state(&handle->p_client->thrd, THRD_STATE_BLOCK);
+        handle->p_client->signals_asserted |= TFM_IPC_REPLY_SIGNAL;
     }
+    CRITICAL_SECTION_LEAVE(cs_assert);
 
     handle->status = TFM_HANDLE_STATUS_ACTIVE;
 
@@ -141,11 +145,21 @@ psa_status_t backend_messaging(struct service_t *service,
 
 psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
 {
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+
+    CRITICAL_SECTION_ENTER(cs_assert);
+
     if (is_tfm_rpc_msg(handle)) {
         tfm_rpc_client_call_reply(handle, status);
     } else {
-        thrd_wake_up(&handle->ack_evnt, status);
+        if (handle->p_client->signals_asserted & TFM_IPC_REPLY_SIGNAL) {
+            thrd_set_state(&handle->p_client->thrd, THRD_STATE_RUNNABLE);
+            tfm_arch_set_context_ret_code(handle->p_client->thrd.p_context_ctrl,
+                                        status);
+            handle->p_client->signals_asserted &= ~TFM_IPC_REPLY_SIGNAL;
+        }
     }
+    CRITICAL_SECTION_LEAVE(cs_assert);
 
     /*
      * 'psa_reply' exists in IPC model only and returns 'void'. Return
@@ -169,7 +183,6 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 
     p_pt->signals_allowed |= service_setting;
 
-    THRD_SYNC_INIT(&p_pt->waitobj);
     UNI_LISI_INIT_NODE(p_pt, p_handles);
 
     ARCH_CTXCTRL_INIT(&p_pt->ctx_ctrl,
@@ -238,7 +251,7 @@ psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
     ret_signal = p_pt->signals_asserted & signal_mask;
     if (ret_signal == 0) {
         p_pt->signals_waiting = signal_mask;
-        thrd_set_wait(&p_pt->waitobj, CURRENT_THREAD);
+        thrd_set_state(&p_pt->thrd, THRD_STATE_BLOCK);
     }
     CRITICAL_SECTION_LEAVE(cs_assert);
 
@@ -247,8 +260,11 @@ psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
 
 void backend_wake_up(struct partition_t *p_pt)
 {
-    thrd_wake_up(&p_pt->waitobj,
-                 p_pt->signals_asserted & p_pt->signals_waiting);
+    if (p_pt->thrd.state == THRD_STATE_BLOCK) {
+        thrd_set_state(&p_pt->thrd, THRD_STATE_RUNNABLE);
+        tfm_arch_set_context_ret_code(p_pt->thrd.p_context_ctrl,
+                            (p_pt->signals_asserted & p_pt->signals_waiting));
+    }
     p_pt->signals_waiting = 0;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -376,7 +376,6 @@ void spm_fill_message(struct conn_handle_t *conn_handle,
     /* Clear message buffer before using it */
     spm_memset(&conn_handle->msg, 0, sizeof(psa_msg_t));
 
-    THRD_SYNC_INIT(&conn_handle->ack_evnt);
     conn_handle->service = service;
     conn_handle->p_client = GET_CURRENT_COMPONENT();
     conn_handle->caller_outvec = caller_outvec;
@@ -495,18 +494,6 @@ uint32_t tfm_spm_init(void)
 void update_caller_outvec_len(struct conn_handle_t *handle)
 {
     uint32_t i;
-
-    /*
-     * FixeMe: abstract these part into dedicated functions to avoid
-     * accessing thread context in psa layer
-     */
-    /*
-     * If it is a NS request via RPC, the owner of this message is not set.
-     * Or if it is a SFN message, it does not have owner thread state either.
-     */
-    if ((!is_tfm_rpc_msg(handle)) && (handle->sfn_magic != TFM_MSG_MAGIC_SFN)) {
-        SPM_ASSERT(handle->ack_evnt.owner->state == THRD_STATE_BLOCK);
-    }
 
     for (i = 0; i < PSA_MAX_IOVEC; i++) {
         if (handle->msg.out_size[i] == 0) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -88,7 +88,6 @@ struct conn_handle_t {
     struct partition_t *p_client;       /* Caller partition               */
     struct service_t *service;          /* RoT service pointer            */
     union {
-        struct sync_obj_t ack_evnt;     /* IPC - Ack response event       */
         uint32_t sfn_magic;             /* SFN - Indicate a SFN message   */
     };
     psa_msg_t msg;                      /* PSA message body               */
@@ -122,7 +121,6 @@ struct partition_t {
     volatile uint32_t                  signals_asserted;
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
     struct context_ctrl_t              ctx_ctrl;
-    struct sync_obj_t                  waitobj;
     struct thread_t                    thrd;            /* IPC model */
 #else
     uint32_t                           state;           /* SFN model */

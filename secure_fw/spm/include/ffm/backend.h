@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,6 +21,12 @@
 #else
 #error "No backend selected, check configurations."
 #endif
+
+/**
+ * The signal number for the Secure Partition thread message and reply in IPC
+ * mode.
+ */
+#define TFM_IPC_REPLY_SIGNAL     (0x00000002u)
 
 /*
  * Runtime model-specific component initialization routine. This
