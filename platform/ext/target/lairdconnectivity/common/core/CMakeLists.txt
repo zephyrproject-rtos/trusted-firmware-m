@@ -125,7 +125,7 @@ target_sources(platform_ns
         ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_twim.c
         ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_twi_twim.c
         ${NRF_FOLDER_PATH}/nrfx_glue.c
-        $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        plat_test.c
 )
 
 #========================= Platform BL2 =======================================#
