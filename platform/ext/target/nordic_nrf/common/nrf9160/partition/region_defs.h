@@ -156,9 +156,11 @@
                                   FLASH_NS_PARTITION_SIZE)
 
 /* Non-secure storage region */
+#ifdef NRF_NS_STORAGE
 #define NRF_NS_STORAGE_PARTITION_START \
             (NS_ROM_ALIAS(NRF_FLASH_NS_STORAGE_AREA_OFFSET))
 #define NRF_NS_STORAGE_PARTITION_SIZE (NRF_FLASH_NS_STORAGE_AREA_SIZE)
+#endif /* NRF_NS_STORAGE */
 
 #ifdef BL2
 /* Bootloader regions */
