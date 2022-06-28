@@ -23,9 +23,7 @@
 
 #define MAX_BOOT_STATUS 512
 
-/* Indicates how to encode SW components' measurements in the CBOR map */
-#define EAT_SW_COMPONENT_NESTED     1  /* Nested map */
-#define EAT_SW_COMPONENT_NOT_NESTED 0  /* Flat structure */
+#define ARRAY_LENGTH(array) (sizeof(array) / sizeof(*(array)))
 
 /* The algorithm used in COSE */
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
@@ -713,6 +711,24 @@ static void attest_get_option_flags(struct q_useful_buf_c *challenge,
 }
 #endif /* INCLUDE_TEST_CODE */
 
+#if defined(ATTEST_TOKEN_PROFILE_PSA_IOT_1) || \
+    defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
+    static enum psa_attest_err_t
+    (*claim_query_funcs[])(struct attest_token_encode_ctx *) = {
+        &attest_add_boot_seed_claim,
+        &attest_add_instance_id_claim,
+        &attest_add_implementation_id_claim,
+        &attest_add_caller_id_claim,
+        &attest_add_security_lifecycle_claim,
+        &attest_add_all_sw_components,
+#ifdef INCLUDE_OPTIONAL_CLAIMS
+        &attest_add_verification_service,
+        &attest_add_profile_definition,
+        &attest_add_cert_ref_claim
+#endif
+    };
+#endif
+
 /*!
  * \brief Static function to create the initial attestation token
  *
@@ -735,6 +751,7 @@ attest_create_token(struct q_useful_buf_c *challenge,
     struct attest_token_encode_ctx attest_token_ctx;
     int32_t key_select = 0;
     uint32_t option_flags = 0;
+    int i;
 
     attest_err = attest_register_initial_attestation_key();
     if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
@@ -766,54 +783,13 @@ attest_create_token(struct q_useful_buf_c *challenge,
     }
 
     if (!(option_flags & TOKEN_OPT_OMIT_CLAIMS)) {
-        /* Mandatory claims in IAT token */
-        attest_err = attest_add_boot_seed_claim(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
+        for (i = 0; i < ARRAY_LENGTH(claim_query_funcs); ++i) {
+            /* Calling the attest_add_XXX_claim functions */
+            attest_err = claim_query_funcs[i](&attest_token_ctx);
+            if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
+                goto error;
+            }
         }
-
-        attest_err = attest_add_instance_id_claim(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
-        attest_err = attest_add_implementation_id_claim(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
-        attest_err = attest_add_caller_id_claim(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
-        attest_err = attest_add_security_lifecycle_claim(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
-        attest_err = attest_add_all_sw_components(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
-#ifdef INCLUDE_OPTIONAL_CLAIMS
-        /* Optional claims in IAT token, remove them from release build */
-        attest_err = attest_add_verification_service(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
-        attest_err = attest_add_profile_definition(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-
-        attest_err = attest_add_cert_ref_claim(&attest_token_ctx);
-        if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
-            goto error;
-        }
-#endif /* INCLUDE_OPTIONAL_CLAIMS */
     }
 
     /* Finish up creating the token. This is where the actual signature

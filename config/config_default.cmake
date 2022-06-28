@@ -147,6 +147,7 @@ set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Init
 set(SYMMETRIC_INITIAL_ATTESTATION       OFF         CACHE BOOL      "Use symmetric crypto for inital attestation")
 set(ATTEST_INCLUDE_OPTIONAL_CLAIMS      ON          CACHE BOOL      "Include optional claims in initial attestation token")
 set(ATTEST_INCLUDE_COSE_KEY_ID          OFF         CACHE BOOL      "Include COSE key-id in initial attestation token")
+set(ATTEST_TOKEN_PROFILE                "PSA_IOT_1" CACHE STRING    "Set the initial attestation token profile. Options: PSA_IOT_1, PSA_2_0_0")
 
 set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Platform partition")
 

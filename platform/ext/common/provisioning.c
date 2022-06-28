@@ -90,7 +90,13 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
     /* verification_service_url */
     "www.trustedfirmware.org",
     /* attestation_profile_definition */
+#if defined(ATTEST_TOKEN_PROFILE_PSA_IOT_1)
     "PSA_IOT_PROFILE_1",
+#elif defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
+    "http://arm.com/psa/2.0.0",
+#else
+#error "Attestation token profile is incorrect"
+#endif
     /* Entropy seed */
     {
         0x12, 0x13, 0x23, 0x34, 0x0a, 0x05, 0x89, 0x78,
