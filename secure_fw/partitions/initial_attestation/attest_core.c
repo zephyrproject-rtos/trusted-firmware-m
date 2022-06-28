@@ -325,12 +325,18 @@ attest_add_all_sw_components(struct attest_token_encode_ctx *token_ctx)
         /* Close array which stores SW components claims*/
         QCBOREncode_CloseArray(cbor_encode_ctx);
     } else {
-        /* If there is not any SW components' measurement in the boot status
-         * then include this claim to indicate that this state is intentional
+#ifdef ATTEST_TOKEN_PROFILE_PSA_IOT_1
+        /* Allowed to not have SW components claim, but it must be indicated
+         * that this state is intentional. In this case, include the
+         * IAT_NO_SW_COMPONENTS claim with a fixed value.
          */
         attest_token_encode_add_integer(token_ctx,
                                         IAT_NO_SW_COMPONENTS,
                                         (int64_t)NO_SW_COMPONENT_FIXED_VALUE);
+#else
+        /* Mandatory to have SW components claim in the token */
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+#endif
     }
 
     return PSA_ATTEST_ERR_SUCCESS;
