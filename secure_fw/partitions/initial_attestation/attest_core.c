@@ -298,6 +298,74 @@ attest_add_caller_id_claim(struct attest_token_encode_ctx *token_ctx)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
+#ifdef ATTEST_TOKEN_PROFILE_ARM_CCA
+/*!
+ * \brief Static function to add the platform hash algorithm identifier
+ *        claim to the attestation token. This hash algo is used for extending
+ *        the boot measurements.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ * \param[in]  challenge  Pointer to buffer which stores the hash algo.
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_hash_algo_claim(struct attest_token_encode_ctx *token_ctx)
+{
+    struct q_useful_buf_c hash_algo;
+    uint8_t buf[PLATFORM_HASH_ALGO_ID_MAX_SIZE];
+    uint32_t size = sizeof(buf);
+    enum tfm_plat_err_t err;
+
+    err = tfm_attest_hal_get_platform_hash_algo(&size, buf);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    hash_algo.ptr = &buf;
+    hash_algo.len = size;
+    attest_token_encode_add_tstr(token_ctx,
+                                 IAT_PLATFORM_HASH_ALGO_ID,
+                                 &hash_algo);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+/*!
+ * \brief Static function to add the platform hash algorithm identifier
+ *        claim to the attestation token. This hash algo is used for extending
+ *        the boot measurements.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ * \param[in]  challenge  Pointer to buffer which stores the hash algo.
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_platform_config_claim(struct attest_token_encode_ctx *token_ctx)
+{
+
+    uint8_t plat_config[PLATFORM_CONFIG_MAX_SIZE];
+    enum tfm_plat_err_t res;
+    uint32_t size = sizeof(plat_config);
+    struct q_useful_buf_c claim_value;
+
+    res = tfm_attest_hal_get_platform_config(&size, plat_config);
+    if (res != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    claim_value.ptr = plat_config;
+    claim_value.len = size;
+
+    attest_token_encode_add_bstr(token_ctx,
+                                 IAT_PLATFORM_CONFIG,
+                                 &claim_value);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+#endif
+
 /*!
  * \brief Static function to add security lifecycle claim to attestation token.
  *
@@ -366,7 +434,6 @@ attest_add_nonce_claim(struct attest_token_encode_ctx   *token_ctx,
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-#ifdef INCLUDE_OPTIONAL_CLAIMS /* Remove them from release build */
 /*!
  * \brief Static function to add the verification service indicator claim
  *        to the attestation token.
@@ -470,7 +537,6 @@ attest_add_cert_ref_claim(struct attest_token_encode_ctx *token_ctx)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
-#endif /* INCLUDE_OPTIONAL_CLAIMS */
 
 /*!
  * \brief Static function to verify the input challenge size
@@ -549,24 +615,6 @@ static void attest_get_option_flags(struct q_useful_buf_c *challenge,
 }
 #endif /* INCLUDE_TEST_CODE */
 
-#if defined(ATTEST_TOKEN_PROFILE_PSA_IOT_1) || \
-    defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
-    static enum psa_attest_err_t
-    (*claim_query_funcs[])(struct attest_token_encode_ctx *) = {
-        &attest_add_boot_seed_claim,
-        &attest_add_instance_id_claim,
-        &attest_add_implementation_id_claim,
-        &attest_add_caller_id_claim,
-        &attest_add_security_lifecycle_claim,
-        &attest_add_all_sw_components,
-#ifdef INCLUDE_OPTIONAL_CLAIMS
-        &attest_add_verification_service,
-        &attest_add_profile_definition,
-        &attest_add_cert_ref_claim
-#endif
-    };
-#endif
-
 static enum psa_attest_err_t attest_get_t_cose_algorithm(
         int32_t *cose_algorithm_id)
 {
@@ -620,6 +668,39 @@ static enum psa_attest_err_t attest_get_t_cose_algorithm(
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
+
+#if defined(ATTEST_TOKEN_PROFILE_PSA_IOT_1) || \
+    defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
+    static enum psa_attest_err_t
+    (*claim_query_funcs[])(struct attest_token_encode_ctx *) = {
+        &attest_add_boot_seed_claim,
+        &attest_add_instance_id_claim,
+        &attest_add_implementation_id_claim,
+        &attest_add_caller_id_claim,
+        &attest_add_security_lifecycle_claim,
+        &attest_add_all_sw_components,
+#ifdef INCLUDE_OPTIONAL_CLAIMS
+        &attest_add_verification_service,
+        &attest_add_profile_definition,
+        &attest_add_cert_ref_claim
+#endif
+    };
+#elif defined(ATTEST_TOKEN_PROFILE_ARM_CCA)
+
+    static enum psa_attest_err_t
+    (*claim_query_funcs[])(struct attest_token_encode_ctx *) = {
+        &attest_add_instance_id_claim,
+        &attest_add_implementation_id_claim,
+        &attest_add_security_lifecycle_claim,
+        &attest_add_all_sw_components,
+        &attest_add_profile_definition,
+        &attest_add_hash_algo_claim,
+        &attest_add_platform_config_claim,
+#ifdef INCLUDE_OPTIONAL_CLAIMS
+        &attest_add_verification_service,
+#endif
+    };
+#endif
 
 /*!
  * \brief Static function to create the initial attestation token

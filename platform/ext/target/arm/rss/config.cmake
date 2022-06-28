@@ -34,6 +34,8 @@ set(TFM_PARTITION_MEASURED_BOOT         ON         CACHE BOOL     "Enable Measur
 set(MEASURED_BOOT_HASH_ALG              PSA_ALG_SHA_256 CACHE STRING "Hash algorithm used by Measured boot services")
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_extra_config.h CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
+set(ATTEST_TOKEN_PROFILE                "ARM_CCA"  CACHE STRING   "Set the initial attestation token profile")
+
 set(CONFIG_TFM_USE_TRUSTZONE            OFF        CACHE BOOL     "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY             ON         CACHE BOOL     "Whether to build for a dual-cpu architecture")
 set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to use a platform specific inter-core communication instead of mailbox in dual-cpu topology")

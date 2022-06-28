@@ -94,6 +94,8 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
     "PSA_IOT_PROFILE_1",
 #elif defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
     "http://arm.com/psa/2.0.0",
+#elif defined(ATTEST_TOKEN_PROFILE_ARM_CCA)
+    "http://arm.com/CCA-SSD/1.0.0",
 #else
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
 #error "Attestation token profile is incorrect"
