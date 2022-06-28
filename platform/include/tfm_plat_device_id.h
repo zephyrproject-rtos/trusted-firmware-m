@@ -48,10 +48,10 @@ extern "C" {
  *
  * \brief Maximum size of hardware version in bytes
  *
- * Recommended to use the European Article Number format: EAN-13
+ * Recommended to use the European Article Number format: EAN-13 + '-' + 5
  * https://www.ietf.org/archive/id/draft-tschofenig-rats-psa-token-09.html#name-certification-reference
  */
-#define CERTIFICATION_REF_MAX_SIZE (18u)
+#define CERTIFICATION_REF_MAX_SIZE (19u)
 
 /**
  * \brief Get the Implementation ID of the device.

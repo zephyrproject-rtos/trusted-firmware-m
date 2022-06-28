@@ -86,7 +86,7 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
         0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD,
     },
     /* certification reference */
-    "0604565272829",
+    "0604565272829-10010",
     /* verification_service_url */
     "www.trustedfirmware.org",
     /* attestation_profile_definition */
