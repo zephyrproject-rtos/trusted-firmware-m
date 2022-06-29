@@ -117,6 +117,7 @@ target_sources(platform_s
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
+        ./otp_cc312.c
 )
 
 target_sources(tfm_sprt
@@ -175,6 +176,7 @@ target_sources(platform_bl2
         native_drivers/atu_rss_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/uart_pl011_drv.c
+        ./otp_cc312.c
 )
 
 target_include_directories(platform_bl2
@@ -211,6 +213,7 @@ target_sources(platform_bl1
         ./device/source/system_core_init.c
         ./native_drivers/atu_rss_drv.c
         ./native_drivers/uart_pl011_drv.c
+        ./otp_cc312.c
 )
 
 target_include_directories(platform_bl1_interface
