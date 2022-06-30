@@ -30,10 +30,15 @@ you enable FP support on your platforms.
     configuration ``CONFIG_TFM_ENABLE_FPU`` to ``ON`` and **ignore** any
     configurations described below.
 
+.. Note::
+    ``GNU Arm Embedded Toolchain 10.3-2021.10`` may have issue that reports
+    ``'-mcpu=cortex-m55' conflicts with '-march=armv8.1-m.main'`` warning [8]_.
+    This issue has been fixed in the later version.
+
 ============================
 FP ABI type for SPE and NSPE
 ============================
-FP design in Armv8.0-M [8]_ architecture requires consistent FP ABI types
+FP design in Armv8.0-M [9]_ architecture requires consistent FP ABI types
 between SPE and NSPE. Furthermore, both sides shall set up CPACR individually
 when FPU is used. Otherwise, No Coprocessor (NOCP) usage fault will be asserted
 during FP context switch between security states.
@@ -121,8 +126,10 @@ Reference
 
 .. [7] `Musca-S1 Test Chip Board <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
 
-.. [8] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
+.. [8] `GCC Issue on '-mcpu=cortex-m55' conflicts with '-march=armv8.1-m.main' Warning <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97327>`_
+
+.. [9] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
