@@ -16,4 +16,7 @@ if(TFM_PSA_API)
     if((CONFIG_TFM_FP GREATER 0) AND CONFIG_TFM_SPM_BACKEND_SFN)
         message(FATAL_ERROR "FP is not supported for SFN model.")
     endif()
+
+    set(CONFIG_TFM_FLIH_API     {{config_impl['CONFIG_TFM_FLIH_API']}}    PARENT_SCOPE)
+    set(CONFIG_TFM_SLIH_API     {{config_impl['CONFIG_TFM_SLIH_API']}}    PARENT_SCOPE)
 endif()

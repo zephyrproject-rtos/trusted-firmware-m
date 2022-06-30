@@ -172,7 +172,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);
         break;
-#if TFM_LVL != 1
+#if (TFM_LVL != 1) && (CONFIG_TFM_FLIH_API == 1)
     case TFM_SVC_PREPARE_DEPRIV_FLIH:
         exc_return = tfm_flih_prepare_depriv_flih(
                                             (struct partition_t *)svc_args[0],
