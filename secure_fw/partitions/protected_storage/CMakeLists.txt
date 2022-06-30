@@ -65,7 +65,7 @@ target_link_libraries(tfm_app_rot_partition_ps
         psa_interface
         secure_fw
         platform_s
-        tfm_psa_rot_partition_its
+        tfm_sprt
 )
 
 ############################ Secure API ########################################

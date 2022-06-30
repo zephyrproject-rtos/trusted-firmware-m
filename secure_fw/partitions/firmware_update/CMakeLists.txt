@@ -62,7 +62,7 @@ target_compile_definitions(tfm_psa_rot_partition_fwu
 
 ############################ Secure API ########################################
 
-target_sources(tfm_secure_api
+target_sources(tfm_sprt
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_fwu_secure_api.c
 )
