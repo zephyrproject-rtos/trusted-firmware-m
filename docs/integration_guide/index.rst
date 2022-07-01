@@ -8,6 +8,7 @@ with other hardware platforms and operating systems.
 .. toctree::
     :maxdepth: 1
 
+    SPM Backends <spm_backends.rst>
     NS client integration <non-secure_client_extension_integration_guide.rst>
     OS migration to Armv8-M <os_migration_guide_armv8m.rst>
     tfm_fpu_support
