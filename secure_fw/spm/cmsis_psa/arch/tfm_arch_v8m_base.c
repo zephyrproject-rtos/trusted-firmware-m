@@ -112,11 +112,12 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   mov     r6, r10                             \n"
         "   mov     r7, r11                             \n"
         "   stm     r2!, {r4-r7}                        \n"
-        "   mov     r5, lr                              \n"
+        "   mov     r3, lr                              \n"
         "   subs    r2, #32                             \n" /* set SP to top */
-        "   stm     r0!, {r2, r3, r4, r5}               \n" /* Save curr ctx */
-        "   ldm     r1!, {r2, r3, r4, r5}               \n" /* Load next ctx */
-        "   mov     lr, r5                              \n"
+        "   stm     r0!, {r2, r3}                       \n" /* Save curr ctx */
+        "   ldm     r1!, {r2, r3}                       \n" /* Load next ctx */
+        "   mov     lr, r3                              \n"
+        "   ldr     r3, [r1]                            \n"
         "   adds    r2, #16                             \n" /* Pop r4-r11 */
         "   ldm     r2!, {r4-r7}                        \n"
         "   mov     r8, r4                              \n"

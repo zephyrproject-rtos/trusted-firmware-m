@@ -62,12 +62,22 @@ struct full_context_t {
 #define CROSS_RETCODE_EMPTY         0xEEEEEEED
 #define CROSS_RETCODE_UPDATED       0xEEEEEEEE
 
-/* Context control */
+/* Context control.
+ * CAUTION: Assembly references this structure. DO CHECK the below functions
+ * before changing the structure:
+       'PendSV_Handler'
+ */
 struct context_ctrl_t {
-    uint32_t                sp;           /* Stack pointer (higher address)  */
+    uint32_t                sp;           /* Stack pointer (higher address).
+                                           * THIS MUST BE THE FIRST MEMBER OF
+                                           * THE STRUCT.
+                                           */
+    uint32_t                exc_ret;      /* EXC_RETURN pattern.
+                                           * THIS MUST BE THE SECOND MEMBER OF
+                                           * THE STRUCT.
+                                           */
     uint32_t                sp_limit;     /* Stack limit (lower address)     */
     uint32_t                sp_base;      /* Stack usage start (higher addr) */
-    uint32_t                exc_ret;      /* EXC_RETURN pattern.             */
     uint32_t                cross_frame;  /* Cross call frame position.      */
     uint32_t                retcode_status; /* Cross call retcode status.    */
 };

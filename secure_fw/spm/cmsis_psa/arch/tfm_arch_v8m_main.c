@@ -105,10 +105,14 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
         "   cpsid   i                                   \n"
         "   mrs     r2, psp                             \n"
-        "   mrs     r3, psplim                          \n"
         "   stmdb   r2!, {r4-r11}                       \n" /* Save callee */
-        "   stmia   r0, {r2, r3, r4, lr}                \n" /* Save curr ctx */
-        "   ldmia   r1, {r2, r3, r4, lr}                \n" /* Load next ctx */
+        "   stmia   r0, {r2, lr}                        \n" /* Save curr ctx:
+                                                             * PSP, LR
+                                                             */
+        "   ldmia   r1!, {r2, lr}                       \n" /* Load next ctx:
+                                                             * PSP, LR
+                                                             */
+        "   ldr     r3, [r1]                            \n" /* Load sp_limit */
         "   ldmia   r2!, {r4-r11}                       \n" /* Restore callee */
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
