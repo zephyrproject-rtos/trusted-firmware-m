@@ -18,7 +18,9 @@ if(POLICY CMP0123)
     cmake_policy(SET CMP0123 NEW)
 endif()
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(cmake/version.cmake)
+include(remote_library)
 
 ############################ CONFIGURATION #####################################
 
@@ -35,8 +37,6 @@ if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
    NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
     Message(FATAL_ERROR "Unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
 endif()
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 ############################### Compiler configuration #########################
 
