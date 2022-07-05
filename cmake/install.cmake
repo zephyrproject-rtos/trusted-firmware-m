@@ -228,3 +228,9 @@ if(TFM_PARTITION_FIRMWARE_UPDATE)
                 DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
     endif()
 endif()
+
+##################### Platform-specific installation ###########################
+
+if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/install.cmake)
+    include(platform/ext/target/${TFM_PLATFORM}/install.cmake)
+endif()

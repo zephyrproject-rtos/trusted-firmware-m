@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -69,10 +71,6 @@ endif()
 
 include(${CMAKE_SOURCE_DIR}/config/check_config.cmake)
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
-    include(platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
-endif()
-
 ################################################################################
 
 add_subdirectory(lib/ext)
@@ -98,8 +96,8 @@ endif()
 
 add_subdirectory(platform)
 
-include(cmake/install.cmake)
-
 if(CRYPTO_HW_ACCELERATOR)
     add_subdirectory(platform/ext/accelerator)
 endif()
+
+include(cmake/install.cmake)

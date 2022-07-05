@@ -170,6 +170,12 @@ core that requires different compiler options than the SPE core. This file has
 the same format as ``preload.cmake``, but instead details the hardware of the
 NS core that is **not** running the main TF-M secure code.
 
+install.cmake
+^^^^^^^^^^^^^
+
+This optional cmake file is required only if additional files need to be
+installed for the platform.
+
 Flash layout header file
 ------------------------
 Target must provide a header file, called ``flash_layout.h``, which defines the

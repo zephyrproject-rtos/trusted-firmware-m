@@ -250,6 +250,13 @@ config.cmake:
 
     [config_cmake_]
 
+install.cmake:
+--------------
+
+    If there are platform-specific files that need to be installed, this file
+    can be provided to do that.
+
+
 startup files:
 ---------------
 

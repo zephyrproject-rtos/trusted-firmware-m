@@ -127,3 +127,9 @@ endif()
 ###################### Compiler check for FP support ###########################
 
 include(config/cp_check.cmake)
+
+###################### Platform-specific checks ################################
+
+if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
+    include(platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
+endif()
