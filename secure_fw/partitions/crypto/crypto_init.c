@@ -455,12 +455,15 @@ psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
                                            out_vec,
                                            &encoded_key);
     } else if (TFM_CRYPTO_IS_GROUP_ID(
-                   iov->function_id, TFM_CRYPTO_GROUP_ID_ASYM_SIGN) ||
-               TFM_CRYPTO_IS_GROUP_ID(
+                   iov->function_id, TFM_CRYPTO_GROUP_ID_ASYM_SIGN)) {
+        status = tfm_crypto_asymmetric_sign_interface(in_vec,
+                                                      out_vec,
+                                                      &encoded_key);
+    } else if (TFM_CRYPTO_IS_GROUP_ID(
                    iov->function_id, TFM_CRYPTO_GROUP_ID_ASYM_ENCRYPT)) {
-        status = tfm_crypto_asymmetric_interface(in_vec,
-                                                 out_vec,
-                                                 &encoded_key);
+        status = tfm_crypto_asymmetric_encrypt_interface(in_vec,
+                                                         out_vec,
+                                                         &encoded_key);
     } else if (TFM_CRYPTO_IS_GROUP_ID(
                    iov->function_id, TFM_CRYPTO_GROUP_ID_KEY_DERIVATION)) {
         status = tfm_crypto_key_derivation_interface(in_vec,

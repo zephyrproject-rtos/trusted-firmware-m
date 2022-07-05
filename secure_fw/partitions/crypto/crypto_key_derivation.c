@@ -144,13 +144,11 @@ static psa_status_t tfm_crypto_huk_derivation_abort(
  */
 
 /*!@{*/
+#ifndef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
 psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
                                             psa_outvec out_vec[],
                                             mbedtls_svc_key_id_t *encoded_key)
 {
-#ifdef TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#endif
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     psa_key_derivation_operation_t *operation = NULL;
@@ -304,4 +302,16 @@ release_operation_and_return:
     (void)tfm_crypto_operation_release(handle_out);
     return status;
 }
+#else /* !TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
+psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
+                                            psa_outvec out_vec[],
+                                            mbedtls_svc_key_id_t *encoded_key)
+{
+    (void)in_vec;
+    (void)out_vec;
+    (void)encoded_key;
+
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+#endif /* !TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED */
 /*!@}*/

@@ -24,11 +24,15 @@ psa_status_t tfm_crypto_random_interface(psa_invec in_vec[],
                                          psa_outvec out_vec[])
 {
 #ifdef TFM_CRYPTO_RNG_MODULE_DISABLED
+    (void)in_vec;
+    (void)out_vec;
+
     return PSA_ERROR_NOT_SUPPORTED;
-#endif
+#else
     uint8_t *output = out_vec[0].base;
     size_t output_size = out_vec[0].len;
 
     return psa_generate_random(output, output_size);
+#endif
 }
 /*!@}*/

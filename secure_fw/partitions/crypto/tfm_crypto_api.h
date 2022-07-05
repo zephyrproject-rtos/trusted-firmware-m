@@ -260,8 +260,9 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
 psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
                                        psa_outvec out_vec[],
                                        mbedtls_svc_key_id_t *encoded_key);
+
 /**
- * \brief This function acts as interface for the Asymmetric module
+ * \brief This function acts as interface for the Asymmetric signing module
  *
  * \param[in]  in_vec   Array of invec parameters
  * \param[out] out_vec  Array of outvec parameters
@@ -269,9 +270,23 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
  *
  * \return Return values as described in \ref psa_status_t
  */
-psa_status_t tfm_crypto_asymmetric_interface(psa_invec in_vec[],
-                                             psa_outvec out_vec[],
+psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
+                                                  psa_outvec out_vec[],
                                              mbedtls_svc_key_id_t *encoded_key);
+
+/**
+ * \brief This function acts as interface for the Asymmetric encryption module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ * \param[in]  encoded_key Key encoded with partition_id and key_id
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
+                                                     psa_outvec out_vec[],
+                                             mbedtls_svc_key_id_t *encoded_key);
+
 /**
  * \brief This function acts as interface for the Key derivation module
  *

@@ -22,13 +22,11 @@
  */
 
 /*!@{*/
+#ifndef TFM_CRYPTO_KEY_MODULE_DISABLED
 psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
                                             psa_outvec out_vec[],
                                             mbedtls_svc_key_id_t *encoded_key)
 {
-#ifdef TFM_CRYPTO_KEY_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#endif
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     int32_t partition_id = MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(*encoded_key);
@@ -178,4 +176,16 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
 
     return status;
 }
+#else /* !TFM_CRYPTO_KEY_MODULE_DISABLED */
+psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
+                                            psa_outvec out_vec[],
+                                            mbedtls_svc_key_id_t *encoded_key)
+{
+    (void)in_vec;
+    (void)out_vec;
+    (void)encoded_key;
+
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+#endif /* !TFM_CRYPTO_KEY_MODULE_DISABLED */
 /*!@}*/
