@@ -212,7 +212,7 @@ preload.cmake :
 preload_ns.cmake:
 -----------------
 
-    If platform is a dual core then it must provide a preload_ns.cmake, which is
+    If platform is a dual core then it may provide a preload_ns.cmake, which is
     the equivalent of preload.cmake but for the second core.
 
     If the platform is single core, this file should not be present.
