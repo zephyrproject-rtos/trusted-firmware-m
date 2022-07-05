@@ -1,7 +1,7 @@
-From d205709b36671c774b996de1dab815108dc74f8f Mon Sep 17 00:00:00 2001
+From 1f7a61b48ec3c6ac8cbefc1c4a49e40477f3ae00 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
 Date: Fri, 17 Jun 2022 15:42:55 +0800
-Subject: [PATCH 3/3] Fix 2 issues in FF test
+Subject: [PATCH 3/4] Fix 2 issues in FF test
 
 - Disable secure test when testing version policy. Otherwise, the
 received signal is not matched.

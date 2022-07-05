@@ -1,7 +1,7 @@
-From 5234b70e4604e0af6bd148feb37e775c1614cb06 Mon Sep 17 00:00:00 2001
+From 5be6ef47c3ad2e8befc1882d362a1ee66918796c Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Thu, 5 May 2022 14:11:32 +0100
-Subject: [PATCH 6/7] Fix key_id and owner_id accessor macros
+Subject: [PATCH 6/8] Fix key_id and owner_id accessor macros
 
 The accessor macros for key_id and owner_id in the mbedtls_svc_key_id_t
 need to have the MBEDTLS_PRIVATE() specifier as these fields are private

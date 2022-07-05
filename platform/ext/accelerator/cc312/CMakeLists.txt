@@ -239,6 +239,7 @@ target_compile_definitions(crypto_service_mbedcrypto
     PUBLIC
         CRYPTO_HW_ACCELERATOR
         MBEDTLS_ECDH_LEGACY_CONTEXT
+        $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:CC312_LEGACY_DRIVER_API_ENABLED>
 )
 
 target_compile_options(crypto_service_cc312

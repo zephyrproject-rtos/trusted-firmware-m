@@ -1,7 +1,7 @@
-From 072755e80839bbeb47d60ce29e67516471793016 Mon Sep 17 00:00:00 2001
+From 72d36ceab1854403646db0f1d1d8d39431806bb6 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
 Date: Wed, 18 May 2022 18:13:12 +0800
-Subject: [PATCH 5/7] Add MBEDTLS_PSA_CRYPTO_CONFIG_FILE
+Subject: [PATCH 5/8] Add MBEDTLS_PSA_CRYPTO_CONFIG_FILE
 
 Signed-off-by: Summer Qin <summer.qin@arm.com>
 ---

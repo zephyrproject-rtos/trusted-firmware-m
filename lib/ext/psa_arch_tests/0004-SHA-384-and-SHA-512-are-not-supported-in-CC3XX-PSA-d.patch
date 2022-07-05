@@ -1,0 +1,66 @@
+From 3a624e3ed4d87498d750908b840ad471319b52b9 Mon Sep 17 00:00:00 2001
+From: Summer Qin <summer.qin@arm.com>
+Date: Wed, 13 Jul 2022 10:29:26 +0800
+Subject: [PATCH 4/4] SHA-384 and SHA-512 are not supported in CC3XX PSA driver
+
+For psa arch crypto test, SHA-384 and SHA-512 are not supported
+in CC3XX PSA driver.
+
+Signed-off-by: Summer Qin <summer.qin@arm.com>
+---
+ api-tests/CMakeLists.txt                                       | 3 +++
+ .../targets/tgt_dev_apis_tfm_musca_b1/nspe/pal_crypto_config.h | 2 ++
+ .../targets/tgt_dev_apis_tfm_musca_s1/nspe/pal_crypto_config.h | 2 ++
+ 3 files changed, 7 insertions(+)
+
+diff --git a/api-tests/CMakeLists.txt b/api-tests/CMakeLists.txt
+index 55c456b..618a775 100644
+--- a/api-tests/CMakeLists.txt
++++ b/api-tests/CMakeLists.txt
+@@ -641,6 +641,9 @@ endif()
+ if(${SP_HEAP_MEM_SUPP} EQUAL 1)
+ 	add_definitions(-DSP_HEAP_MEM_SUPP)
+ endif()
++if(${CC312_LEGACY_DRIVER_API_ENABLED})
++	add_definitions(-DCC312_LEGACY_DRIVER_API_ENABLED)
++endif()
+ 
+ # Build PAL NSPE LIB
+ include(${PSA_ROOT_DIR}/platform/targets/${TARGET}/target.cmake)
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/nspe/pal_crypto_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/nspe/pal_crypto_config.h
+index 10ee013..1ec1e0c 100644
+--- a/api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/nspe/pal_crypto_config.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_musca_b1/nspe/pal_crypto_config.h
+@@ -271,10 +271,12 @@
+ #define ARCH_TEST_SHA256
+ #ifndef TF_M_PROFILE_SMALL
+ #ifndef TF_M_PROFILE_MEDIUM
++#ifdef CC312_LEGACY_DRIVER_API_ENABLED
+ #define ARCH_TEST_SHA384
+ #define ARCH_TEST_SHA512
+ #endif
+ #endif
++#endif
+ //#define ARCH_TEST_SHA512_224
+ //#define ARCH_TEST_SHA512_256
+ //#define ARCH_TEST_SHA3_224
+diff --git a/api-tests/platform/targets/tgt_dev_apis_tfm_musca_s1/nspe/pal_crypto_config.h b/api-tests/platform/targets/tgt_dev_apis_tfm_musca_s1/nspe/pal_crypto_config.h
+index 92f73d9..bc38f16 100644
+--- a/api-tests/platform/targets/tgt_dev_apis_tfm_musca_s1/nspe/pal_crypto_config.h
++++ b/api-tests/platform/targets/tgt_dev_apis_tfm_musca_s1/nspe/pal_crypto_config.h
+@@ -271,10 +271,12 @@
+ #define ARCH_TEST_SHA256
+ #ifndef TF_M_PROFILE_SMALL
+ #ifndef TF_M_PROFILE_MEDIUM
++#ifdef CC312_LEGACY_DRIVER_API_ENABLED
+ #define ARCH_TEST_SHA384
+ #define ARCH_TEST_SHA512
+ #endif
+ #endif
++#endif
+ //#define ARCH_TEST_SHA512_224
+ //#define ARCH_TEST_SHA512_256
+ //#define ARCH_TEST_SHA3_224
+-- 
+2.17.1
+

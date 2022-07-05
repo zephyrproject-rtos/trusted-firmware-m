@@ -23,7 +23,7 @@ extern "C" {
 #define MBEDTLS_ENTROPY_FORCE_SHA256
 
 /* Main Config */
-
+#ifdef CC312_LEGACY_DRIVER_API_ENABLED
 #ifdef MBEDTLS_DHM_C
 #define MBEDTLS_DHM_ALT
 #endif /* MBEDTLS_DHM_C */
@@ -35,6 +35,7 @@ extern "C" {
 #ifdef MBEDTLS_POLY1305_C
 #define MBEDTLS_POLY1305_ALT
 #endif /* MBEDTLS_POLY1305_C */
+#endif /* CC312_LEGACY_DRIVER_API_ENABLED */
 
 /****************************************************************/
 /* Require built-in implementations based on PSA requirements */
@@ -47,6 +48,8 @@ extern "C" {
 #ifdef PSA_WANT_ALG_CFB
 #undef PSA_WANT_ALG_CFB
 #endif /* PSA_WANT_ALG_CFB */
+
+#ifdef CC312_LEGACY_DRIVER_API_ENABLED
 
 #ifdef PSA_WANT_KEY_TYPE_AES
 #define MBEDTLS_AES_ALT
@@ -93,17 +96,6 @@ extern "C" {
 #define MBEDTLS_GCM_ALT
 #endif /* PSA_WANT_ALG_GCM */
 
-#if defined(PSA_WANT_ALG_RSA_OAEP)           ||     \
-    defined(PSA_WANT_ALG_RSA_PKCS1V15_CRYPT) ||     \
-    defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN)  ||     \
-    defined(PSA_WANT_ALG_RSA_PSS)            ||     \
-    defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR)  ||     \
-    defined(PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY)
-#define MBEDTLS_RSA_ALT
-#define MBEDTLS_PK_RSA_ALT_SUPPORT
-#define MBEDTLS_GENPRIME
-#endif
-
 #ifdef PSA_WANT_ALG_SHA_1
 #define MBEDTLS_SHA1_ALT
 #define MBEDTLS_SHA1_PROCESS_ALT
@@ -125,6 +117,21 @@ extern "C" {
 #define MBEDTLS_ECJPAKE_ALT
 #endif
 
+#endif /* CC312_LEGACY_DRIVER_API_ENABLED */
+
+#if defined(PSA_WANT_ALG_RSA_OAEP)           ||     \
+    defined(PSA_WANT_ALG_RSA_PKCS1V15_CRYPT) ||     \
+    defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN)  ||     \
+    defined(PSA_WANT_ALG_RSA_PSS)            ||     \
+    defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR)  ||     \
+    defined(PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY)
+#ifdef CC312_LEGACY_DRIVER_API_ENABLED
+#define MBEDTLS_RSA_ALT
+#define MBEDTLS_PK_RSA_ALT_SUPPORT
+#endif /* CC312_LEGACY_DRIVER_API_ENABLED */
+#define MBEDTLS_GENPRIME
+#endif
+
 #else /* MBEDTLS_PSA_CRYPTO_CONFIG */
 /****************************************************************/
 /* Infer PSA requirements from Mbed TLS capabilities */
@@ -135,6 +142,8 @@ extern "C" {
 #ifdef MBEDTLS_CIPHER_MODE_CFB
 #undef MBEDTLS_CIPHER_MODE_CFB
 #endif /* MBEDTLS_CIPHER_MODE_CFB */
+
+#ifdef CC312_LEGACY_DRIVER_API_ENABLED
 
 #ifdef MBEDTLS_AES_C
 #define MBEDTLS_AES_ALT
@@ -182,12 +191,6 @@ extern "C" {
 #define MBEDTLS_GCM_ALT
 #endif /* MBEDTLS_GCM_C */
 
-#ifdef MBEDTLS_RSA_C
-#define MBEDTLS_RSA_ALT
-#define MBEDTLS_PK_RSA_ALT_SUPPORT
-#define MBEDTLS_GENPRIME
-#endif /* MBEDTLS_RSA_C */
-
 #ifdef MBEDTLS_SHA1_C
 #define MBEDTLS_SHA1_ALT
 #define MBEDTLS_SHA1_PROCESS_ALT
@@ -201,6 +204,16 @@ extern "C" {
 #if defined(MBEDTLS_ECP_C) && defined(MBEDTLS_MD_C)
 #define MBEDTLS_ECJPAKE_ALT
 #endif /* MBEDTLS_ECP_C && MBEDTLS_MD_C */
+
+#endif /* CC312_LEGACY_DRIVER_API_ENABLED */
+
+#ifdef MBEDTLS_RSA_C
+#ifdef CC312_LEGACY_DRIVER_API_ENABLED
+#define MBEDTLS_RSA_ALT
+#define MBEDTLS_PK_RSA_ALT_SUPPORT
+#endif /* CC312_LEGACY_DRIVER_API_ENABLED */
+#define MBEDTLS_GENPRIME
+#endif /* MBEDTLS_RSA_C */
 
 #endif /* MBEDTLS_PSA_CRYPTO_CONFIG */
 
