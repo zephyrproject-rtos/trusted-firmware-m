@@ -646,14 +646,26 @@ attest_create_token(struct q_useful_buf_c *challenge,
     int i;
     int32_t cose_algorithm_id;
 
-#ifdef INCLUDE_TEST_CODE /* Remove them from release build */
-    attest_get_option_flags(challenge, &option_flags, &key_select);
-#endif
-
     attest_err = attest_get_t_cose_algorithm(&cose_algorithm_id);
     if (attest_err != PSA_ATTEST_ERR_SUCCESS) {
         return attest_err;
     }
+
+#ifdef INCLUDE_TEST_CODE /* Remove them from release build */
+    attest_get_option_flags(challenge, &option_flags, &key_select);
+    if (option_flags) {
+        /* If any option flags are provided (TOKEN_OPT_OMIT_CLAIMS or
+         * TOKEN_OPT_SHORT_CIRCUIT_SIGN) then force the cose_algorithm_id
+         * to be either:
+         *  - T_COSE_ALGORITHM_ES256 or  (SYMMETRIC_INITIAL_ATTESTATION=OFF)
+         *  - T_COSE_ALGORITHM_HMAC256   (SYMMETRIC_INITIAL_ATTESTATION=ON)
+         * for testing purposes to match with expected minimal token.
+         */
+        /* ESxxx range is smaller than 0; HMACxxx range is greater than 0 */
+        cose_algorithm_id = cose_algorithm_id < 0 ? T_COSE_ALGORITHM_ES256 :
+                                                    T_COSE_ALGORITHM_HMAC256;
+    }
+#endif
 
     /* Get started creating the token. This sets up the CBOR and COSE contexts
      * which causes the COSE headers to be constructed.
