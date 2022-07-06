@@ -71,6 +71,7 @@ target_sources(platform_s
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         fw_update_agent/uefi_capsule_parser.c
         fw_update_agent/fwu_agent.c
+        fw_update_agent/uefi_fmp.c
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
 )
 

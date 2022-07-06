@@ -53,7 +53,9 @@ else()
     set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE        CACHE BOOL      "Whether to use psa-adac secure debug.")
 endif()
 
-set(DEFAULT_MCUBOOT_SECURITY_COUNTERS   OFF          CACHE BOOL      "Whether to use the default security counter configuration defined by TF-M project")
+set(DEFAULT_MCUBOOT_SECURITY_COUNTERS       OFF          CACHE BOOL      "Whether to use the default security counter configuration defined by TF-M project")
 
-set(PS_ENCRYPTION                       OFF          CACHE BOOL      "Enable encryption for Protected Storage partition")
-set(PS_ROLLBACK_PROTECTION              OFF          CACHE BOOL      "Enable rollback protection for Protected Storage partition")
+set(PS_ENCRYPTION                           OFF          CACHE BOOL      "Enable encryption for Protected Storage partition")
+set(PS_ROLLBACK_PROTECTION                  OFF          CACHE BOOL      "Enable rollback protection for Protected Storage partition")
+
+set(PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE     256          CACHE STRING    "Size of output buffer in platform service.")

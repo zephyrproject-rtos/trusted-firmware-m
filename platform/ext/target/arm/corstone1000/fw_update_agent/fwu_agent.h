@@ -30,6 +30,9 @@ enum fwu_agent_error_t {
                 }                                                              \
 
 
+/* Version used for the very first image of the device. */
+#define FWU_IMAGE_INITIAL_VERSION 0
+
 enum fwu_agent_error_t fwu_metadata_provision(void);
 enum fwu_agent_error_t fwu_metadata_init(void);
 
