@@ -9,6 +9,12 @@
 # docs/getting_started/tfm_build_instructions.rst under Cmake Configuration. If
 # the sequence is updated here the docs must also be updated.
 
+# The default build type is MinSizeRel. If debug symbols are needed then
+# -DCMAKE_BUILD_TYPE=debug should be used (likewise with other build types)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "MinSizeRel" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
+endif()
+
 # Load extra config
 if (TFM_EXTRA_CONFIG_PATH)
     include(${TFM_EXTRA_CONFIG_PATH})

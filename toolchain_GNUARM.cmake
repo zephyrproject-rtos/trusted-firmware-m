@@ -171,6 +171,11 @@ macro(tfm_toolchain_reload_compiler)
 
     # For GNU Arm Embedded Toolchain doesn't emit __ARM_ARCH_8_1M_MAIN__, adding this macro manually.
     add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__>)
+
+    # CMAKE_BUILD_TYPE=MinSizeRel default parameter is -Os.
+    # In ARMCLANG we redefined this variable to use -Oz level, but GCC still using -Os!
+    # GCC 11 not supports -Oz level, version 12 will.
+    # When this option will be available in GNUARM, set -Oz flag for both toolchains.
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first

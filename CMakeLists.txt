@@ -23,12 +23,6 @@ if(TFM_SYSTEM_DSP)
     message(FATAL_ERROR "Hardware DSP is currently not supported in TF-M")
 endif()
 
-# The default build type is release. If debug symbols are needed then
-# -DCMAKE_BUILD_TYPE=debug should be used (likewise with other build types)
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
-endif()
-
 include(config/set_config.cmake)
 
 if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND

@@ -180,12 +180,10 @@ macro(tfm_toolchain_reload_compiler)
                             " Please use other Armclang versions instead.")
     endif()
 
-    # Cmake's armclang support will set either mcpu or march, but march gives
-    # better code size so we manually set it.
-    set(CMAKE_C_FLAGS   "-march=${CMAKE_SYSTEM_ARCH}")
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
     if (DEFINED TFM_SYSTEM_PROCESSOR)
+        set(CMAKE_C_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         # But armlink doesn't support this +dsp syntax
@@ -197,6 +195,8 @@ macro(tfm_toolchain_reload_compiler)
 
         string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
         string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+    else()
+        set(CMAKE_C_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
     endif()
 
     # Workaround for issues with --depend-single-line with armasm and Ninja

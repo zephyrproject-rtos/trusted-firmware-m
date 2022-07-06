@@ -96,7 +96,7 @@ Required cmake parameters for building TF-M
 Build type
 ----------
 
-By default, a release configuration is built. Alternate build types can be
+By default, a MinSizeRel configuration is built. Alternate build types can be
 specified with the ``CMAKE_BUILD_TYPE`` variable. The possible
 types are:
 
@@ -105,7 +105,7 @@ types are:
  - ``Release``
  - ``MinSizeRel``
 
-``Release`` is default.
+``MinSizeRel`` is default.
 
 Debug symbols are added by default to all builds, but can be removed
 from ``Release`` and ``MinSizeRel`` builds by setting
