@@ -172,5 +172,6 @@ psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
     (void)out_vec;
 
     return PSA_ERROR_NOT_SUPPORTED;
+}
 #endif /* !TFM_CRYPTO_HASH_MODULE_DISABLED */
 /*!@}*/
