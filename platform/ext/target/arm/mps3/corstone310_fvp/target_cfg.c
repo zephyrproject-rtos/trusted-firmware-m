@@ -63,17 +63,17 @@ extern ARM_DRIVER_MPC Driver_SRAM_MPC;
 extern ARM_DRIVER_MPC Driver_QSPI_MPC;
 
 /* Import PPC drivers */
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_MAIN0_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_MAIN_EXP0_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_MAIN_EXP1_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_MAIN_EXP2_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_MAIN_EXP3_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH0_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH1_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH_EXP0_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH_EXP1_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH_EXP2_PPC_CORSTONE310;
-extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH_EXP3_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_MAIN0_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_MAIN_EXP0_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_MAIN_EXP1_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_MAIN_EXP2_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_MAIN_EXP3_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_PERIPH0_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_PERIPH1_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_PERIPH_EXP0_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_PERIPH_EXP1_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_PERIPH_EXP2_PPC_CORSTONE310;
+extern ARM_DRIVER_PPC Driver_PERIPH_EXP3_PPC_CORSTONE310;
 
 /* Define Peripherals NS address range for the platform */
 #define PERIPHERALS_BASE_NS_START      (0x40000000)
@@ -128,7 +128,7 @@ struct platform_data_t tfm_peripheral_dma0_ch1 = {
         0
 };
 
-static ARM_DRIVER_PPC_CORSTONE310 *const ppc_bank_drivers[] = {
+static ARM_DRIVER_PPC *const ppc_bank_drivers[] = {
         &Driver_MAIN0_PPC_CORSTONE310,
         &Driver_MAIN_EXP0_PPC_CORSTONE310,
         &Driver_MAIN_EXP1_PPC_CORSTONE310,
@@ -377,103 +377,157 @@ void mpc_clear_irq(void)
     Driver_SRAM_MPC.ClearInterrupt();
 }
 
+static ARM_PPC_PrivAttr get_privattr(ARM_DRIVER_PPC ppc_driver,
+                                    uint8_t pos)
+{
+    if (ppc_driver.IsPeriphPrivOnly(pos))
+        return ARM_PPC_PRIV_ONLY;
+    return ARM_PPC_PRIV_AND_NONPRIV;
+}
+
 /*------------------- PPC configuration functions -------------------------*/
 enum tfm_plat_err_t ppc_init_cfg(void)
 {
     struct corstone310_sacfg_t *sacfg =
                                 (struct corstone310_sacfg_t*)CORSTONE310_SACFG_BASE_S;
     int32_t err = ARM_DRIVER_OK;
+    ARM_PPC_PrivAttr privattr;
 
     /* Grant non-secure access to peripherals on MAIN EXP0 */
     err |= Driver_MAIN_EXP0_PPC_CORSTONE310.Initialize();
-    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigSecurity(
+    privattr = get_privattr(Driver_MAIN_EXP0_PPC_CORSTONE310, GPIO0_MAIN_PPCEXP0_POS_MASK);
+    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigPeriph(
                                         GPIO0_MAIN_PPCEXP0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_MAIN_EXP0_PPC_CORSTONE310, GPIO1_MAIN_PPCEXP0_POS_MASK);
+    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigPeriph(
                                         GPIO1_MAIN_PPCEXP0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_MAIN_EXP0_PPC_CORSTONE310, GPIO2_MAIN_PPCEXP0_POS_MASK);
+    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigPeriph(
                                         GPIO2_MAIN_PPCEXP0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_MAIN_EXP0_PPC_CORSTONE310, GPIO3_MAIN_PPCEXP0_POS_MASK);
+    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigPeriph(
                                         GPIO3_MAIN_PPCEXP0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_MAIN_EXP0_PPC_CORSTONE310, USB_AND_ETHERNET_MAIN_PPCEXP0_POS_MASK);
+    err |= Driver_MAIN_EXP0_PPC_CORSTONE310.ConfigPeriph(
                                         USB_AND_ETHERNET_MAIN_PPCEXP0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
 
     /* Grant non-secure access to peripherals on MAIN EXP1 */
     err |= Driver_MAIN_EXP1_PPC_CORSTONE310.Initialize();
-    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.ConfigSecurity(
+    privattr = get_privattr(Driver_MAIN_EXP1_PPC_CORSTONE310, DMA1_MAIN_PPCEXP1_POS_MASK);
+    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.ConfigPeriph(
                                         DMA1_MAIN_PPCEXP1_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_MAIN_EXP1_PPC_CORSTONE310, DMA2_MAIN_PPCEXP1_POS_MASK);
+    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.ConfigPeriph(
                                         DMA2_MAIN_PPCEXP1_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_MAIN_EXP1_PPC_CORSTONE310, DMA3_MAIN_PPCEXP1_POS_MASK);
+    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.ConfigPeriph(
                                         DMA3_MAIN_PPCEXP1_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
+                                        ARM_PPC_PRIV_AND_NONPRIV,
+                                        ARM_PPC_NONSECURE_ONLY);
 
     /* Grant non-secure access to peripherals on PERIPH0 */
     err |= Driver_PERIPH0_PPC_CORSTONE310.Initialize();
-    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigSecurity(
+    privattr = get_privattr(Driver_PERIPH0_PPC_CORSTONE310, SYSTEM_TIMER0_PERIPH_PPC0_POS_MASK);
+    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigPeriph(
                                         SYSTEM_TIMER0_PERIPH_PPC0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH0_PPC_CORSTONE310, SYSTEM_TIMER1_PERIPH_PPC0_POS_MASK);
+    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigPeriph(
                                         SYSTEM_TIMER1_PERIPH_PPC0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH0_PPC_CORSTONE310, SYSTEM_TIMER2_PERIPH_PPC0_POS_MASK);
+    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigPeriph(
                                         SYSTEM_TIMER2_PERIPH_PPC0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH0_PPC_CORSTONE310, SYSTEM_TIMER3_PERIPH_PPC0_POS_MASK);
+    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigPeriph(
                                         SYSTEM_TIMER3_PERIPH_PPC0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH0_PPC_CORSTONE310, WATCHDOG_PERIPH_PPC0_POS_MASK);
+    err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigPeriph(
                                         WATCHDOG_PERIPH_PPC0_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
 
     /* Grant non-secure access to peripherals on PERIPH1 */
     err |= Driver_PERIPH1_PPC_CORSTONE310.Initialize();
-    err |= Driver_PERIPH1_PPC_CORSTONE310.ConfigSecurity(
+    privattr = get_privattr(Driver_PERIPH1_PPC_CORSTONE310, SLOWCLK_TIMER_PERIPH_PPC1_POS_MASK);
+    err |= Driver_PERIPH1_PPC_CORSTONE310.ConfigPeriph(
                                         SLOWCLK_TIMER_PERIPH_PPC1_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
 
     /* Grant non-secure access to peripherals on PERIPH EXP2 */
     err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.Initialize();
-
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+    privattr = get_privattr(Driver_PERIPH_EXP2_PPC_CORSTONE310, FPGA_I2S_PERIPH_PPCEXP2_POS_MASK);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         FPGA_I2S_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH_EXP2_PPC_CORSTONE310, FPGA_IO_PERIPH_PPCEXP2_POS_MASK);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         FPGA_IO_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH_EXP2_PPC_CORSTONE310, UART0_PERIPH_PPCEXP2_POS_MASK);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         UART0_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH_EXP2_PPC_CORSTONE310, UART1_PERIPH_PPCEXP2_POS_MASK);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         UART1_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH_EXP2_PPC_CORSTONE310, UART2_PERIPH_PPCEXP2_POS_MASK);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         UART2_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH_EXP2_PPC_CORSTONE310, UART3_PERIPH_PPCEXP2_POS_MASK);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         UART3_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH_EXP2_PPC_CORSTONE310, UART4_PERIPH_PPCEXP2_POS_MASK);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         UART4_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH_EXP2_PPC_CORSTONE310, UART5_PERIPH_PPCEXP2_POS_MASK);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         UART5_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
+    privattr = get_privattr(Driver_PERIPH_EXP2_PPC_CORSTONE310, CLCD_PERIPH_PPCEXP2_POS_MASK);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         CLCD_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        privattr);
 
     /* Grant un-privileged access for UART0 in NS domain */
-    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPrivilege(
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPeriph(
                                         UART0_PERIPH_PPCEXP2_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG,
-                                        ARM_PPC_CORSTONE310_PRIV_AND_NONPRIV_CONFIG);
+                                        ARM_PPC_NONSECURE_ONLY,
+                                        ARM_PPC_PRIV_AND_NONPRIV);
 
     /* Initialize not used PPC drivers */
     err |= Driver_MAIN0_PPC_CORSTONE310.Initialize();
@@ -498,35 +552,43 @@ enum tfm_plat_err_t ppc_init_cfg(void)
 
 void ppc_configure_to_secure(enum ppc_bank_e bank, uint32_t pos)
 {
-    ARM_DRIVER_PPC_CORSTONE310 *ppc_driver;
+    ARM_DRIVER_PPC *ppc_driver;
+    ARM_PPC_PrivAttr priv_attr;
 
     if (bank >= PPC_BANK_COUNT) {
         return;
     }
 
     ppc_driver = ppc_bank_drivers[bank];
+    priv_attr = get_privattr(ppc_driver[0], pos);
     if (ppc_driver) {
-        ppc_driver->ConfigSecurity(pos, ARM_PPC_CORSTONE310_SECURE_CONFIG);
+        ppc_driver->ConfigPeriph(pos,
+                                ARM_PPC_SECURE_ONLY,
+                                priv_attr);
     }
 }
 
 void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint32_t pos)
 {
-    ARM_DRIVER_PPC_CORSTONE310 *ppc_driver;
+    ARM_DRIVER_PPC *ppc_driver;
+    ARM_PPC_PrivAttr priv_attr;
 
     if (bank >= PPC_BANK_COUNT) {
         return;
     }
 
     ppc_driver = ppc_bank_drivers[bank];
+    priv_attr = get_privattr(ppc_driver[0], pos);
     if (ppc_driver) {
-        ppc_driver->ConfigSecurity(pos, ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
+        ppc_driver->ConfigPeriph(pos,
+                                ARM_PPC_NONSECURE_ONLY,
+                                priv_attr);
     }
 }
 
 void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint32_t pos)
 {
-    ARM_DRIVER_PPC_CORSTONE310 *ppc_driver;
+    ARM_DRIVER_PPC *ppc_driver;
 
     if (bank >= PPC_BANK_COUNT) {
         return;
@@ -534,15 +596,15 @@ void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint32_t pos)
 
     ppc_driver = ppc_bank_drivers[bank];
     if (ppc_driver) {
-        ppc_driver->ConfigPrivilege(pos,
-                                    ARM_PPC_CORSTONE310_SECURE_CONFIG,
-                                    ARM_PPC_CORSTONE310_PRIV_AND_NONPRIV_CONFIG);
+        ppc_driver->ConfigPeriph(pos,
+                                ARM_PPC_SECURE_ONLY,
+                                ARM_PPC_PRIV_AND_NONPRIV);
     }
 }
 
 void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint32_t pos)
 {
-    ARM_DRIVER_PPC_CORSTONE310 *ppc_driver;
+    ARM_DRIVER_PPC *ppc_driver;
 
     if (bank >= PPC_BANK_COUNT) {
         return;
@@ -550,9 +612,9 @@ void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint32_t pos)
 
     ppc_driver = ppc_bank_drivers[bank];
     if (ppc_driver) {
-        ppc_driver->ConfigPrivilege(pos,
-                                    ARM_PPC_CORSTONE310_SECURE_CONFIG,
-                                    ARM_PPC_CORSTONE310_PRIV_CONFIG);
+        ppc_driver->ConfigPeriph(pos,
+                                ARM_PPC_SECURE_ONLY,
+                                ARM_PPC_PRIV_ONLY);
     }
 }
 
