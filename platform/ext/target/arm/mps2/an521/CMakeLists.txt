@@ -50,7 +50,18 @@ if(NS)
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
-            CMSIS_5_RTX_V8MBN
+            $<$<AND:$<C_COMPILER_ID:GNU>,$<STREQUAL:${CONFIG_TFM_FP},hard>>:CMSIS_5_RTX_V8MMFN>
+            $<$<AND:$<C_COMPILER_ID:GNU>,$<STREQUAL:${CONFIG_TFM_FP},soft>>:CMSIS_5_RTX_V8MBN>
+            $<$<C_COMPILER_ID:ARMClang>:CMSIS_5_RTX_V8MBN>
+            $<$<C_COMPILER_ID:IAR>:CMSIS_5_RTX_V8MBN>
+    )
+    target_compile_options(tfm_ns
+        PUBLIC
+            ${COMPILER_CP_FLAG}
+    )
+    target_link_options(tfm_ns
+        PUBLIC
+            ${LINKER_CP_OPTION}
     )
 endif()
 
@@ -119,6 +130,12 @@ target_compile_options(platform_s
         ${COMPILER_CMSE_FLAG}
 )
 
+target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
+        $<$<BOOL:${TEST_S_FPU}>:TEST_S_FPU>
+)
+
 #========================= Platform Non-Secure ================================#
 
 target_sources(platform_ns
@@ -129,6 +146,8 @@ target_sources(platform_ns
         retarget/platform_retarget_dev.c
         cmsis_core/system_cmsdk_mps2_an521.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+    INTERFACE
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/an521_ns_init.c>
 )
 
 target_include_directories(platform_ns
