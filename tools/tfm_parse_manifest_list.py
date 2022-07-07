@@ -288,10 +288,10 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
             is_enabled = 'on'
 
         if is_enabled in valid_disabled_conditions:
-            logging.info("{} partition is disabled".format(manifest_item['name']))
+            logging.info("   {:40s}  OFF".format(manifest_item['name']))
             continue
         elif is_enabled in valid_enabled_conditions:
-            logging.info("{} partition is enabled".format(manifest_item['name']))
+            logging.info("   {:40s}  ON".format(manifest_item['name']))
         else:
             raise Exception('Invalid "conditional" attribute: "{}" for {}. '
                             'Please set to one of {} or {}, case-insensitive.'\

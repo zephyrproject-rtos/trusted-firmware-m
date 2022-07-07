@@ -80,25 +80,24 @@ target_compile_definitions(tfm_psa_rot_partition_crypto
 )
 
 ################ Display the configuration being applied #######################
-if (NOT CONFIG_TFM_PARTITION_QUIET)
-    message(STATUS "---------- Display crypto configuration - start --------------")
 
-    message(STATUS "CRYPTO_RNG_MODULE_DISABLED is set to ${CRYPTO_RNG_MODULE_DISABLED}")
-    message(STATUS "CRYPTO_KEY_MODULE_DISABLED is set to ${CRYPTO_KEY_MODULE_DISABLED}")
-    message(STATUS "CRYPTO_AEAD_MODULE_DISABLED is set to ${CRYPTO_AEAD_MODULE_DISABLED}")
-    message(STATUS "CRYPTO_MAC_MODULE_DISABLED is set to ${CRYPTO_MAC_MODULE_DISABLED}")
-    message(STATUS "CRYPTO_CIPHER_MODULE_DISABLED is set to ${CRYPTO_CIPHER_MODULE_DISABLED}")
-    message(STATUS "CRYPTO_HASH_MODULE_DISABLED is set to ${CRYPTO_HASH_MODULE_DISABLED}")
-    message(STATUS "CRYPTO_KEY_DERIVATION_MODULE_DISABLED is set to ${CRYPTO_KEY_DERIVATION_MODULE_DISABLED}")
-    message(STATUS "CRYPTO_ASYM_SIGN_MODULE_DISABLED is set to ${CRYPTO_ASYM_SIGN_MODULE_DISABLED}")
-    message(STATUS "CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED is set to ${CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED}")
-    message(STATUS "CRYPTO_ENGINE_BUF_SIZE is set to ${CRYPTO_ENGINE_BUF_SIZE}")
-    message(STATUS "CRYPTO_CONC_OPER_NUM is set to ${CRYPTO_CONC_OPER_NUM}")
-    if (${TFM_PSA_API})
-        message(STATUS "CRYPTO_IOVEC_BUFFER_SIZE is set to ${CRYPTO_IOVEC_BUFFER_SIZE}")
-    endif()
-    message(STATUS "---------- Display crypto configuration - stop ---------------")
-endif()
+include(utils)
+    dump_options("Crypto config"
+    "
+        CRYPTO_RNG_MODULE_DISABLED;
+        CRYPTO_KEY_MODULE_DISABLED;
+        CRYPTO_AEAD_MODULE_DISABLED;
+        CRYPTO_MAC_MODULE_DISABLED;
+        CRYPTO_CIPHER_MODULE_DISABLED;
+        CRYPTO_HASH_MODULE_DISABLED;
+        CRYPTO_KEY_DERIVATION_MODULE_DISABLED;
+        CRYPTO_ASYM_SIGN_MODULE_DISABLED;
+        CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED;
+        CRYPTO_ENGINE_BUF_SIZE;
+        CRYPTO_CONC_OPER_NUM;
+        CRYPTO_IOVEC_BUFFER_SIZE;
+    "
+    )
 
 ############################ Secure API ########################################
 
