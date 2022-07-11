@@ -40,11 +40,6 @@
 #define SPM_PART_FLAG_PSA_ROT           0x02
 #define SPM_PART_FLAG_IPC               0x04
 
-#define TFM_PRIORITY_HIGH               0
-#define TFM_PRIORITY_NORMAL             0x7F
-#define TFM_PRIORITY_LOW                0xFF
-#define TFM_PRIORITY(LEVEL)             TFM_PRIORITY_##LEVEL
-
 enum spm_err_t {
     SPM_ERR_OK = 0,
     SPM_ERR_PARTITION_DB_NOT_INIT = 0x3A5C,
@@ -110,7 +105,6 @@ struct spm_partition_runtime_data_t {
 struct spm_partition_static_data_t {
     uint32_t partition_id;
     uint32_t partition_flags;
-    uint32_t partition_priority;
     sp_entry_point partition_init;
     uint32_t dependencies_num;
     int32_t *p_dependencies;

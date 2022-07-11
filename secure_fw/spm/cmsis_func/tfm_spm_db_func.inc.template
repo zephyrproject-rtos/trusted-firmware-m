@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -122,7 +124,6 @@ const struct spm_partition_static_data_t static_data_list[] =
 #error "Unsupported type '{{partition.manifest.type}}' for partition '{{partition.manifest.name}}'!"
     {% endif %}
                               ,
-        .partition_priority   = TFM_PRIORITY({{partition.manifest.priority}}),
     {% if partition.manifest.entry_point %}
         .partition_init       = {{partition.manifest.entry_point}},
     {% elif partition.manifest.entry_init %}
