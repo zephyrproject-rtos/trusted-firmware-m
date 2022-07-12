@@ -86,12 +86,12 @@ static int32_t TGU_NAME##_EnableInterrupt(void) \
  \
 static void TGU_NAME##_DisableInterrupt(void) \
 { \
-   return ARM_DRIVER_ERROR_UNSUPPORTED; \
+   /* Nothing to be done: Unsupported operation */ \
 } \
  \
 static void TGU_NAME##_ClearInterrupt(void) \
 { \
-   return ARM_DRIVER_ERROR_UNSUPPORTED; \
+   /* Nothing to be done: Unsupported operation */ \
 } \
  \
 static uint32_t TGU_NAME##_InterruptState(void) \
