@@ -8,6 +8,7 @@
 #include "flash_map/flash_map.h"
 #include "target.h"
 #include "Driver_Flash.h"
+#include "host_base_address.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 
@@ -96,11 +97,11 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
         *exec_ram_size  = NON_SECURE_IMAGE_MAX_SIZE;
         rc = 0;
     } else if (image_id == 2) {
-        *exec_ram_start = AP_SRAM_BASE_S;
+        *exec_ram_start = HOST_BOOT0_LOAD_BASE_S;
         *exec_ram_size  = AP_BL1_SIZE;
         rc = 0;
     } else if (image_id == 3) {
-        *exec_ram_start = SCP_SRAM_BASE_S;
+        *exec_ram_start = HOST_BOOT1_LOAD_BASE_S;
         *exec_ram_size  = SCP_BL1_SIZE;
         rc = 0;
     }

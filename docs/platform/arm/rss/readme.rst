@@ -56,9 +56,13 @@ key distributed with TF-M, use the following command::
         <binary infile> \
         <signed binary outfile>
 
-The ``load address`` is the address to which BL2 will load the image. The RSS
-ATU should be configured to map this logical address to the physical address in
-the host system that the image needs to be loaded to.
+The ``load address`` is the logical address in the RSS memory map to which BL2
+will load the image. RSS FW expects the first host image to be loaded to address
+``0x70000000`` (the beginning of the RSS ATU host access region), and each
+subsequent host image to be loaded at an offset of ``0x100000`` from the
+previous image. The RSS ATU should be configured to map these logical addresses
+to the physical addresses in the host system that the images need to be loaded
+to.
 
 For more information on the ``imgtool`` parameters, see the MCUBoot
 `imgtool documentation <https://docs.mcuboot.com/imgtool.html>`_.

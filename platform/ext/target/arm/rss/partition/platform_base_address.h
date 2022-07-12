@@ -65,7 +65,8 @@
 /* Non-Secure Host region */
 #define HOST_ACCESS_BASE_NS              0x60000000 /* Can access the Host region based on ATU config */
 #define HOST_ACCESS_LIMIT_NS             (HOST_ACCESS_BASE_NS + HOST_ACCESS_SIZE - 1)
-#define UART0_BASE_NS                    (HOST_ACCESS_BASE_NS + 0x0A400000) /* UART 0 Non-Secure base address */
+/* ATU regions open in bootloader and runtime */
+#define UART0_BASE_NS                    (HOST_ACCESS_BASE_NS + 0xFF00000) /* UART 0 Non-Secure base address */
 
 /* Secure memory map addresses */
 #define ITCM_BASE_S                      0x10000000 /* Instruction TCM Secure base address */
@@ -122,11 +123,11 @@
 /* Secure Host region */
 #define HOST_ACCESS_BASE_S               0x70000000 /* Can access the Host region based on ATU config */
 #define HOST_ACCESS_LIMIT_S              (HOST_ACCESS_BASE_S + HOST_ACCESS_SIZE - 1)
-#define UART0_BASE_S                     (HOST_ACCESS_BASE_S + 0x0A400000) /* UART 0 Secure base address */
-#define SCP_SRAM_BASE_S                  HOST_ACCESS_BASE_S
-#define SCP_BL1_SIZE                     0x10000
-#define AP_SRAM_BASE_S                   (SCP_SRAM_BASE_S + SCP_BL1_SIZE)
-#define AP_BL1_SIZE                      0x20000
+/* ATU regions open in bootloader and runtime */
+#define UART0_BASE_S                     (HOST_ACCESS_BASE_S + 0xFF00000) /* UART 0 Secure base address */
+/* ATU regions open in BL2 */
+#define HOST_BOOT0_LOAD_BASE_S           HOST_ACCESS_BASE_S               /* Host boot image 0 base address */
+#define HOST_BOOT1_LOAD_BASE_S           (HOST_ACCESS_BASE_S + 0x100000)  /* Host boot image 1 base address */
 
 /* Memory map addresses exempt from memory attribution by both the SAU and IDAU */
 #define RSS_EWIC_BASE                    0xE0047000 /* External Wakeup Interrupt Controller
