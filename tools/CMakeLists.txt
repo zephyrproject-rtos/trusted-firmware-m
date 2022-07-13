@@ -129,14 +129,17 @@ else()
     set(PARSE_MANIFEST_QUIET_FLAG "")
 endif()
 
+set(MANIFEST_COMMAND
+    ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tfm_parse_manifest_list.py
+    -m ${COMBINED_LIST}
+    -f ${GENERATED_FILE_LISTS}
+    -l ${TFM_ISOLATION_LEVEL}
+    -b ${CONFIG_TFM_SPM_BACKEND}
+    -o ${CMAKE_BINARY_DIR}/generated
+    ${PARSE_MANIFEST_QUIET_FLAG})
+
 add_custom_command(OUTPUT ${OUTPUT_FILES}
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tfm_parse_manifest_list.py
-                                  -m ${COMBINED_LIST}
-                                  -f ${GENERATED_FILE_LISTS}
-                                  -l ${TFM_ISOLATION_LEVEL}
-                                  -b ${CONFIG_TFM_SPM_BACKEND}
-                                  -o ${CMAKE_BINARY_DIR}/generated
-                                  ${PARSE_MANIFEST_QUIET_FLAG}
+    COMMAND ${MANIFEST_COMMAND}
     DEPENDS ${TEMPLATE_FILES} ${MANIFEST_FILES}
     DEPENDS ${TEMP_MANIFEST_LISTS} ${CONFIGURED_MANIFEST_LISTS} ${GENERATED_FILE_LISTS}
 )
@@ -145,13 +148,7 @@ add_custom_command(OUTPUT ${OUTPUT_FILES}
 # sources. Due to issue with custom_command scoping the easiest way to do this
 # is to run the script at cmake-time.
 execute_process(
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tfm_parse_manifest_list.py
-                                  -m ${COMBINED_LIST}
-                                  -f ${GENERATED_FILE_LISTS}
-                                  -l ${TFM_ISOLATION_LEVEL}
-                                  -b ${CONFIG_TFM_SPM_BACKEND}
-                                  -o ${CMAKE_BINARY_DIR}/generated
-                                  ${PARSE_MANIFEST_QUIET_FLAG}
+    COMMAND ${MANIFEST_COMMAND}
     RESULT_VARIABLE RET
 )
 
