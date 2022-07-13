@@ -1,7 +1,7 @@
-From 9bbe4b0c89e2f92f8e661955b91d06c80cde7b77 Mon Sep 17 00:00:00 2001
+From 37bad45c56543a289be7854a8723d9b29c0b8cb2 Mon Sep 17 00:00:00 2001
 From: Raef Coles <raef.coles@arm.com>
 Date: Wed, 21 Jul 2021 12:42:15 +0100
-Subject: [PATCH 7/8] Add LMS implementation
+Subject: [PATCH 5/5] Add LMS implementation
 
 Also an LM-OTS implementation as one is required for LMS.
 
@@ -21,8 +21,8 @@ Signed-off-by: Raef Coles <raef.coles@arm.com>
  tests/suites/test_suite_lmots.data     |  29 +
  tests/suites/test_suite_lmots.function | 108 ++++
  tests/suites/test_suite_lms.data       |  32 ++
- tests/suites/test_suite_lms.function   |  85 +++
- 15 files changed, 2287 insertions(+), 1 deletion(-)
+ tests/suites/test_suite_lms.function   |  84 +++
+ 15 files changed, 2286 insertions(+), 1 deletion(-)
  create mode 100644 ChangeLog.d/LMS.txt
  create mode 100644 include/mbedtls/lmots.h
  create mode 100644 include/mbedtls/lms.h
@@ -35,7 +35,7 @@ Signed-off-by: Raef Coles <raef.coles@arm.com>
 
 diff --git a/ChangeLog.d/LMS.txt b/ChangeLog.d/LMS.txt
 new file mode 100644
-index 00000000..0f09f018
+index 000000000..0f09f0186
 --- /dev/null
 +++ b/ChangeLog.d/LMS.txt
 @@ -0,0 +1,12 @@
@@ -52,10 +52,10 @@ index 00000000..0f09f018
 +      required for LMS. This can be used independently, but each key can only be
 +      used to sign one message so is impractical for most circumstances.
 diff --git a/include/mbedtls/check_config.h b/include/mbedtls/check_config.h
-index ce97f6a3..96a89a63 100644
+index 5fe984984..c3017aef3 100644
 --- a/include/mbedtls/check_config.h
 +++ b/include/mbedtls/check_config.h
-@@ -291,6 +291,16 @@
+@@ -333,6 +333,16 @@
  #error "!MBEDTLS_SSL_KEEP_PEER_CERTIFICATE requires MBEDTLS_SHA512_C, MBEDTLS_SHA256_C or MBEDTLS_SHA1_C"
  #endif
  
@@ -73,7 +73,7 @@ index ce97f6a3..96a89a63 100644
      ( !defined(MBEDTLS_PLATFORM_C) || !defined(MBEDTLS_PLATFORM_MEMORY) )
  #error "MBEDTLS_MEMORY_BUFFER_ALLOC_C defined, but not all prerequisites"
 diff --git a/include/mbedtls/error.h b/include/mbedtls/error.h
-index 8b2b9ea5..73d61dbc 100644
+index 8b2b9ea58..73d61dbc6 100644
 --- a/include/mbedtls/error.h
 +++ b/include/mbedtls/error.h
 @@ -82,6 +82,8 @@
@@ -87,7 +87,7 @@ index 8b2b9ea5..73d61dbc 100644
   * Name      ID  Nr of Errors
 diff --git a/include/mbedtls/lmots.h b/include/mbedtls/lmots.h
 new file mode 100644
-index 00000000..c98f3bfd
+index 000000000..c98f3bfd7
 --- /dev/null
 +++ b/include/mbedtls/lmots.h
 @@ -0,0 +1,303 @@
@@ -396,7 +396,7 @@ index 00000000..c98f3bfd
 +#endif /* MBEDTLS_LMOTS_H */
 diff --git a/include/mbedtls/lms.h b/include/mbedtls/lms.h
 new file mode 100644
-index 00000000..77559e24
+index 000000000..77559e24b
 --- /dev/null
 +++ b/include/mbedtls/lms.h
 @@ -0,0 +1,271 @@
@@ -672,10 +672,10 @@ index 00000000..77559e24
 +
 +#endif /* MBEDTLS_LMS_H */
 diff --git a/include/mbedtls/mbedtls_config.h b/include/mbedtls/mbedtls_config.h
-index 0558ee00..3c886ebd 100644
+index 1c60ec8e4..dd2841459 100644
 --- a/include/mbedtls/mbedtls_config.h
 +++ b/include/mbedtls/mbedtls_config.h
-@@ -2361,6 +2361,34 @@
+@@ -2405,6 +2405,34 @@
   */
  #define MBEDTLS_HMAC_DRBG_C
  
@@ -711,7 +711,7 @@ index 0558ee00..3c886ebd 100644
   * \def MBEDTLS_NIST_KW_C
   *
 diff --git a/library/CMakeLists.txt b/library/CMakeLists.txt
-index 07599f5d..aea6c2e7 100644
+index 0884f57ae..f52195be3 100644
 --- a/library/CMakeLists.txt
 +++ b/library/CMakeLists.txt
 @@ -40,6 +40,8 @@ set(src_crypto
@@ -724,7 +724,7 @@ index 07599f5d..aea6c2e7 100644
      md5.c
      memory_buffer_alloc.c
 diff --git a/library/Makefile b/library/Makefile
-index 5c23aebf..cca9556c 100644
+index f5ff474ec..dfe76c139 100644
 --- a/library/Makefile
 +++ b/library/Makefile
 @@ -105,6 +105,8 @@ OBJS_CRYPTO= \
@@ -738,7 +738,7 @@ index 5c23aebf..cca9556c 100644
  	     memory_buffer_alloc.o \
 diff --git a/library/lmots.c b/library/lmots.c
 new file mode 100644
-index 00000000..7319d29b
+index 000000000..7319d29be
 --- /dev/null
 +++ b/library/lmots.c
 @@ -0,0 +1,684 @@
@@ -1428,7 +1428,7 @@ index 00000000..7319d29b
 +#endif /* MBEDTLS_LMOTS_C */
 diff --git a/library/lms.c b/library/lms.c
 new file mode 100644
-index 00000000..e1ac7b93
+index 000000000..e1ac7b935
 --- /dev/null
 +++ b/library/lms.c
 @@ -0,0 +1,718 @@
@@ -2151,7 +2151,7 @@ index 00000000..e1ac7b93
 +
 +#endif /* MBEDTLS_LMS_C */
 diff --git a/scripts/generate_errors.pl b/scripts/generate_errors.pl
-index 0a03f02e..d333f659 100755
+index 0a03f02e9..d333f6590 100755
 --- a/scripts/generate_errors.pl
 +++ b/scripts/generate_errors.pl
 @@ -47,7 +47,7 @@ my $error_format_file = $data_dir.'/error.fmt';
@@ -2165,7 +2165,7 @@ index 0a03f02e..d333f659 100755
  my @high_level_modules = qw( CIPHER DHM ECP MD
 diff --git a/tests/suites/test_suite_lmots.data b/tests/suites/test_suite_lmots.data
 new file mode 100644
-index 00000000..ed192bf7
+index 000000000..ed192bf7d
 --- /dev/null
 +++ b/tests/suites/test_suite_lmots.data
 @@ -0,0 +1,29 @@
@@ -2200,7 +2200,7 @@ index 00000000..ed192bf7
 +lmots_reuse_test:"cfcd1e81193e310c9d931d1b00818d14"
 diff --git a/tests/suites/test_suite_lmots.function b/tests/suites/test_suite_lmots.function
 new file mode 100644
-index 00000000..6de94d12
+index 000000000..6de94d124
 --- /dev/null
 +++ b/tests/suites/test_suite_lmots.function
 @@ -0,0 +1,108 @@
@@ -2314,7 +2314,7 @@ index 00000000..6de94d12
 +/* END_CASE */
 diff --git a/tests/suites/test_suite_lms.data b/tests/suites/test_suite_lms.data
 new file mode 100644
-index 00000000..b17fddc1
+index 000000000..b17fddc15
 --- /dev/null
 +++ b/tests/suites/test_suite_lms.data
 @@ -0,0 +1,32 @@
@@ -2352,10 +2352,10 @@ index 00000000..b17fddc1
 +lms_import_export_test:"00000006000000046B0927585C8547228D495361D73B970C287A2254BF8F1B170E55ACC9520A56CE5D2C711B6617718B49247D28CCC6D11D"
 diff --git a/tests/suites/test_suite_lms.function b/tests/suites/test_suite_lms.function
 new file mode 100644
-index 00000000..b19d074f
+index 000000000..c3ebb9214
 --- /dev/null
 +++ b/tests/suites/test_suite_lms.function
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,84 @@
 +/* BEGIN_HEADER */
 +#include "mbedtls/lms.h"
 +#include "mbedtls/entropy.h"
@@ -2440,7 +2440,6 @@ index 00000000..b19d074f
 +    mbedtls_lms_free( &ctx );
 +}
 +/* END_CASE */
-+
 -- 
-2.17.1
+2.25.1
 
