@@ -121,6 +121,9 @@ static int32_t bl1_key_to_cc3xx_key(enum tfm_bl1_key_id_t key_id,
     case TFM_BL1_KEY_HUK:
         *cc3xx_key_type = CC3XX_AES_KEY_ID_HUK;
         break;
+    case TFM_BL1_KEY_GUK:
+        *cc3xx_key_type = CC3XX_AES_KEY_ID_GUK;
+        break;
     default:
         *cc3xx_key_type = CC3XX_AES_KEY_ID_USER_KEY;
         rc = bl1_otp_read_key(key_id, key_buf);
