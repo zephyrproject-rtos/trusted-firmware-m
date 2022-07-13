@@ -373,7 +373,7 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
          * informs the caller that no export operation is supported
          * in the hardware
          */
-        err = PSA_ERROR_NOT_SUPPORTED;
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
 #if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)
