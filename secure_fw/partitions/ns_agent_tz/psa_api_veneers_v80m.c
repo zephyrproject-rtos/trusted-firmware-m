@@ -58,7 +58,7 @@ __attribute__((naked, used))
 static void clear_caller_context(void)
 {
     __ASM volatile(
-#if defined(CONFIG_TFM_ENABLE_FPU)
+#if (CONFIG_TFM_FP >= 1)
         "   vmov.f32   s0, #1.0                               \n"
         "   vmov.f32   s1, #1.0                               \n"
         "   vmov.f32   s2, #1.0                               \n"

@@ -24,7 +24,7 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
 #endif
         "mov     r4, r0                         \n"
         "mov     r5, r1                         \n"
-#if defined(CONFIG_TFM_ENABLE_FPU)
+#if (CONFIG_TFM_FP >= 1)
         "bl      tfm_arch_clear_fp_data         \n"
 #endif
         "mov     sp, r4                         \n"

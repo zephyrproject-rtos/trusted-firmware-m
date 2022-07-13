@@ -268,7 +268,7 @@ void tfm_arch_config_extensions(void)
 #endif
 }
 
-#if defined(CONFIG_TFM_ENABLE_FPU)
+#if (CONFIG_TFM_FP >= 1)
 __attribute__((naked, noinline, used)) void tfm_arch_clear_fp_data(void)
 {
     __ASM volatile(

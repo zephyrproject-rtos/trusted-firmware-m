@@ -203,7 +203,7 @@ void tfm_arch_set_secure_exception_priorities(void);
 /* Configure various extensions. */
 void tfm_arch_config_extensions(void);
 
-#if defined(CONFIG_TFM_ENABLE_FPU)
+#if (CONFIG_TFM_FP >= 1)
 /* Clear float point data. */
 void tfm_arch_clear_fp_data(void);
 #endif
