@@ -82,6 +82,9 @@ enum kmu_error_t kmu_init(struct kmu_dev_t *dev, uint8_t *prbg_seed)
     /* The lock can be done on any of the kmuksc registers, so we choose #0 */
     p_kmu->kmuksc[0] |= KMU_KMUKSC_L_KMUPRBGSI_MASK;
 
+    /* TODO FIXME enable more selectively */
+    p_kmu->kmuie = 0xFFFFFFFFu;
+
     return KMU_ERROR_NONE;
 }
 
@@ -333,6 +336,9 @@ enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot)
 
     /* Trigger the key ready operation */
     p_kmu->kmuksc[slot] |= KMU_KMUKSC_VKS_MASK;
+
+    /* Wait for the ready operation to complete */
+    while (p_kmu->kmuksc[slot] & KMU_KMUKSC_VKS_MASK) {}
 
     /* Check that key readying succeeded, if not return the right error */
     if (!(p_kmu->kmuksc[slot] & KMU_KMUKSC_KSR_MASK)) {
