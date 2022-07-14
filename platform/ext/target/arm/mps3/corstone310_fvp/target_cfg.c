@@ -22,7 +22,7 @@
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
-#include "device_definition.h"
+#include "platform_s_device_definition.h"
 #include "syscounter_armv8-m_cntrl_drv.h"
 #include "uart_stdout.h"
 #include "dma350_ch_drv.h"

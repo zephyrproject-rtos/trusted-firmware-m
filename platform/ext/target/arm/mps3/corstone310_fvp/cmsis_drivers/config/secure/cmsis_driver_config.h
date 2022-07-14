@@ -18,7 +18,7 @@
 #define __CMSIS_DRIVER_CONFIG_H__
 
 #include "cmsis.h"
-#include "device_definition.h"
+#include "platform_s_device_definition.h"
 #include "RTE_Device.h"
 
 #define UART0_CMSDK_DEV     UART0_CMSDK_DEV_NS

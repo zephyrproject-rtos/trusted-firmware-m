@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,7 +8,7 @@
 #include "platform_description.h"
 #include "systimer_armv8-m_drv.h"
 #include "tfm_plat_test.h"
-#include "device_definition.h"
+#include "platform_s_device_definition.h"
 
 /* Interrupt interval is set to 1 ms */
 #define TIMER_RELOAD_VALUE          (SYSTIMER0_ARMV8M_DEFAULT_FREQ_HZ / 1000)

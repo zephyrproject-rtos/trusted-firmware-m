@@ -10,7 +10,7 @@
 #include "tfm_hal_platform.h"
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
-#include "device_definition.h"
+#include "platform_s_device_definition.h"
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;

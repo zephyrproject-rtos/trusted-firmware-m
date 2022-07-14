@@ -72,7 +72,7 @@ target_include_directories(platform_s
         .
         ../common
         cmsis_drivers
-        cmsis_drivers/config
+        cmsis_drivers/config/secure
         device
         device/config
         device/include
@@ -91,7 +91,8 @@ target_sources(platform_s
         cmsis_drivers/Driver_TGU.c
         cmsis_drivers/Driver_PPC.c
         cmsis_drivers/Driver_USART.c
-        device/source/device_definition.c
+        $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_address_remap.c>
+        device/source/platform_s_device_definition.c
         device/source/system_core_init.c
         native_drivers/mpc_sie_drv.c
         native_drivers/mpu_armv8m_drv.c
@@ -134,7 +135,7 @@ target_sources(platform_ns
     PRIVATE
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_USART.c
-        device/source/device_definition.c
+        device/source/platform_ns_device_definition.c
         device/source/system_core_init.c
         native_drivers/uart_cmsdk_drv.c
 )
@@ -145,7 +146,7 @@ target_include_directories(platform_ns
         ../common
         ${PLATFORM_DIR}/..
         cmsis_drivers
-        cmsis_drivers/config
+        cmsis_drivers/config/non_secure
         device
         device/config
         device/include
@@ -162,7 +163,7 @@ if(BL2)
         PRIVATE
             cmsis_drivers/Driver_Flash.c
             cmsis_drivers/Driver_USART.c
-            device/source/device_definition.c
+            device/source/platform_s_device_definition.c
             device/source/system_core_init.c
             native_drivers/uart_cmsdk_drv.c
     )
@@ -170,7 +171,7 @@ if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
             cmsis_drivers
-            cmsis_drivers/config
+            cmsis_drivers/config/secure
             device
             device/config
             device/include

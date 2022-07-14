@@ -6,7 +6,7 @@
  */
 
 #include "dma350_checker_layer.h"
-#include "device_definition.h"
+#include "platform_s_device_definition.h"
 
 struct dma350_ch_dev_t* const DMA350_DMA0_CHANNELS[] = {
     &DMA350_DMA0_CH0_DEV_S,

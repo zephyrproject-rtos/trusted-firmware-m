@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-#ifndef __DEVICE_CFG_H__
-#define __DEVICE_CFG_H__
-
 /**
- * \file device_cfg.h
- * \brief Configurations for peripherals defined in
- * platform's device definition
+ * \file platform_ns_device_definition.h
+ * \brief Definitions for peripherals used on the
+ * non-secure side of application.
  */
 
-#define DEFAULT_UART_BAUDRATE  115200
+#ifndef __PLATFORM_NS_DEVICE_DEFINITION_H__
+#define __PLATFORM_NS_DEVICE_DEFINITION_H__
 
-/**
- * Arbitrary scaling values for test purposes
- */
-#define SYSCOUNTER_ARMV8_M_DEFAULT_SCALE0_INT           1u
-#define SYSCOUNTER_ARMV8_M_DEFAULT_SCALE0_FRACT         0u
-#define SYSCOUNTER_ARMV8_M_DEFAULT_SCALE1_INT           1u
-#define SYSCOUNTER_ARMV8_M_DEFAULT_SCALE1_FRACT         0u
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#define SYSTIMER0_ARMV8M_DEFAULT_FREQ_HZ    (32000000ul)
+#include "device_cfg.h"
 
-#endif  /* __DEVICE_CFG_H__ */
+/* ======= Defines peripheral configuration structures ======= */
+
+/* UART CMSDK driver structures */
+#include "uart_cmsdk_drv.h"
+extern struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS;
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  /* __PLATFORM_NS_DEVICE_DEFINITION_H__ */
