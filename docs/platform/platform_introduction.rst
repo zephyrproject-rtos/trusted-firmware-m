@@ -24,7 +24,7 @@ Supported Platforms
         - `Fast model FVP_MPS2_AEMv8M (AN521).
           <https://developer.arm.com/products/system-design/fixed-virtual-platforms>`_
         - `Musca-B1 test chip board.
-          <https://developer.arm.com/products/system-design/development-boards/iot-test-chips-and-boards/musca-b-test-chip-board>`_
+          <https://developer.arm.com/Tools%20and%20Software/Musca-B1%20Test%20Chip%20Board>`_
         - `Musca-S1 test chip board.
           <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
         - `FPGA image loaded on MPS3 board (AN524).
