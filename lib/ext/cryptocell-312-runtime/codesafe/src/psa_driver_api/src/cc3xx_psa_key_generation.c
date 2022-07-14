@@ -351,6 +351,21 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
     return err;
 }
 
+static psa_status_t cc3xx_export_key_buffer_internal(const uint8_t *key_buffer,
+                                                     size_t key_buffer_size,
+                                                     uint8_t *data,
+                                                     size_t data_size,
+                                                     size_t *data_length )
+{
+    if(key_buffer_size > data_size) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+    CC_PalMemCopy(data, key_buffer, key_buffer_size);
+    CC_PalMemSetZero(data + key_buffer_size, data_size - key_buffer_size);
+    *data_length = key_buffer_size;
+    return PSA_SUCCESS;
+}
+
 psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
                                      const uint8_t *key_buffer,
                                      size_t key_buffer_size, uint8_t *data,
@@ -368,12 +383,9 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
     *data_length = 0;
 
     if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
-        /* If this is already a public key there is no conversion
-         * required to be assisted from the hardware so this API
-         * informs the caller that no export operation is supported
-         * in the hardware
-         */
-        return PSA_ERROR_NOT_SUPPORTED;
+        /* Exporting public -> public */
+        return(cc3xx_export_key_buffer_internal(key_buffer, key_buffer_size,
+                                                data, data_size, data_length));
     }
 
 #if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)
