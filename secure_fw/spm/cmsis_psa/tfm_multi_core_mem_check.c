@@ -423,7 +423,8 @@ static enum tfm_status_e mem_attr_check(struct mem_attr_info_t attr,
     return secure_mem_attr_check(attr, flags);
 }
 
-int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t flags)
+enum tfm_status_e tfm_has_access_to_region(const void *p, size_t s,
+                                           uint32_t flags)
 {
     struct security_attr_info_t security_attr;
     struct mem_attr_info_t mem_attr;
@@ -434,11 +435,11 @@ int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t flags)
     }
 
     if (!p) {
-        return (int32_t)TFM_ERROR_GENERIC;
+        return TFM_ERROR_GENERIC;
     }
 
     if ((uintptr_t)p > (UINTPTR_MAX - s)) {
-        return (int32_t)TFM_ERROR_GENERIC;
+        return TFM_ERROR_GENERIC;
     }
 
     /* Abort if current check doesn't run in PSA RoT */
@@ -452,7 +453,7 @@ int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t flags)
     tfm_hal_get_mem_security_attr(p, s, &security_attr);
 
     if (security_attr_check(security_attr, flags) != TFM_SUCCESS) {
-        return (int32_t)TFM_ERROR_GENERIC;
+        return TFM_ERROR_GENERIC;
     }
 
     mem_attr_init(&mem_attr);
@@ -472,5 +473,5 @@ int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t flags)
         tfm_hal_get_ns_access_attr(p, s, &mem_attr);
     }
 
-    return (int32_t)mem_attr_check(mem_attr, flags);
+    return mem_attr_check(mem_attr, flags);
 }

@@ -97,7 +97,8 @@ void tfm_get_ns_mem_region_attr(const void *p, size_t s,
  * \return TFM_SUCCESS if the access is allowed,
  *         TFM_ERROR_GENERIC otherwise.
  */
-int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t flags);
+enum tfm_status_e tfm_has_access_to_region(const void *p, size_t s,
+                                           uint32_t flags);
 
 /**
  * \brief Initialization of the multi core communication.
