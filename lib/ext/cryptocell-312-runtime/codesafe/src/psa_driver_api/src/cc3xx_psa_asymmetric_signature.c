@@ -148,7 +148,7 @@ static psa_status_t cc3xx_internal_ecdsa_sign(
 {
     psa_key_type_t key_type = psa_get_key_type(attributes);
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
-    psa_ecc_family_t curve = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
+    psa_ecc_family_t curve;
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t cc_err;
     CCEcpkiDomainID_t domainId;
@@ -171,6 +171,12 @@ static psa_status_t cc3xx_internal_ecdsa_sign(
     /* FixMe: 521 bits keys are not producing the correct result with CC3XX */
     if (key_bits == 521) {
         return PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    if (PSA_KEY_TYPE_IS_ECC(key_type)) {
+        curve = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
+    } else {
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
