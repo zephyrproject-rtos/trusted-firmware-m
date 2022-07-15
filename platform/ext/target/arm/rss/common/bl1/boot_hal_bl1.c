@@ -99,8 +99,8 @@ int32_t boot_platform_init(void)
     return 0;
 }
 
-static int derive_key_from_guk(uint8_t *label, size_t label_len, uint8_t *out,
-                               uint32_t lcs)
+static int rss_derive_key(enum tfm_bl1_key_id_t key_id, uint8_t *label,
+                          size_t label_len, uint8_t *out, uint32_t lcs)
 {
     int rc;
     uint8_t context[BL1_2_HASH_SIZE + sizeof(uint32_t) * 2] = {0};
@@ -115,7 +115,7 @@ static int derive_key_from_guk(uint8_t *label, size_t label_len, uint8_t *out,
     memcpy(context + BL1_2_HASH_SIZE + sizeof(uint32_t), &reprovisioning_bits,
            sizeof(uint32_t));
 
-    rc = bl1_derive_key(TFM_BL1_KEY_GUK, label, label_len, context,
+    rc = bl1_derive_key(key_id, label, label_len, context,
                         sizeof(context), out, 32);
 
     return rc;
@@ -197,50 +197,60 @@ int boot_platform_post_load(uint32_t image_id)
 
     (void)image_id;
 
-    /* Derive a Virtual HUK that can be used by TF-M without exposing the real
-     * HUK. This allows hardware protection of the HUK, and reprovisioning of
-     * the device. This key is the same in all LCSes.
-     */
-    rc = derive_key_from_guk(vhuk_label, sizeof(vhuk_label), tmp_buf, 0);
-    if (rc) {
-        return rc;
-    }
-    rc = kmu_set_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 0, tmp_buf, sizeof(tmp_buf));
-    if (rc) {
-        return rc;
-    }
-
-    memset(tmp_buf, 0, sizeof(tmp_buf));
-
     rc = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t *)&lcs);
     if (rc) {
         return rc;
     }
 
-    rc = derive_key_from_guk(cpak_seed_label, sizeof(cpak_seed_label), tmp_buf,
-                             lcs);
-    if (rc) {
-        return rc;
+    /* In PLAT_OTP_LCS_ASSEMBLY_AND_TEST the HUK and GUK may not have yet been
+     * provisioned, and therefore the key derivation will fail, so skip it.
+     */
+    if (lcs != PLAT_OTP_LCS_ASSEMBLY_AND_TEST) {
+        /* Derive a Virtual HUK that can be used by TF-M without exposing the
+         * real HUK. This allows hardware protection of the HUK, and
+         * reprovisioning of the device. This key is the same in all LCSes.
+         */
+        rc = rss_derive_key(TFM_BL1_KEY_HUK, vhuk_label, sizeof(vhuk_label),
+                            tmp_buf, 0);
+        if (rc) {
+            return rc;
+        }
+        rc = kmu_set_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 0, tmp_buf,
+                         sizeof(tmp_buf));
+        if (rc) {
+            return rc;
+        }
+
+        memset(tmp_buf, 0, sizeof(tmp_buf));
+
+        rc = rss_derive_key(TFM_BL1_KEY_GUK, cpak_seed_label,
+                            sizeof(cpak_seed_label), tmp_buf, lcs);
+        if (rc) {
+            return rc;
+        }
+
+        rc = kmu_set_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 1, tmp_buf,
+                         sizeof(tmp_buf));
+        if (rc) {
+            return rc;
+        }
+
+        memset(tmp_buf, 0, sizeof(tmp_buf));
+
+        rc = rss_derive_key(TFM_BL1_KEY_GUK, dak_seed_label,
+                            sizeof(dak_seed_label), tmp_buf, lcs);
+        if (rc) {
+            return rc;
+        }
+
+        rc = kmu_set_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 2, tmp_buf,
+                         sizeof(tmp_buf));
+        if (rc) {
+            return rc;
+        }
+
+        memset(tmp_buf, 0, sizeof(tmp_buf));
     }
-
-    rc = kmu_set_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 1, tmp_buf, sizeof(tmp_buf));
-    if (rc) {
-        return rc;
-    }
-
-    memset(tmp_buf, 0, sizeof(tmp_buf));
-
-    rc = derive_key_from_guk(dak_seed_label, sizeof(dak_seed_label), tmp_buf, lcs);
-    if (rc) {
-        return rc;
-    }
-
-    rc = kmu_set_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 2, tmp_buf, sizeof(tmp_buf));
-    if (rc) {
-        return rc;
-    }
-
-    memset(tmp_buf, 0, sizeof(tmp_buf));
 
     return 0;
 }
