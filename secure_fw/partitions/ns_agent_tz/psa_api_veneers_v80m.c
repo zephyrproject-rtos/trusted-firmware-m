@@ -54,6 +54,39 @@
 
 #endif
 
+__attribute__((naked, used))
+static void clear_caller_context(void)
+{
+    __ASM volatile(
+#if defined(CONFIG_TFM_ENABLE_FPU)
+        "   vmov.f32   s0, #1.0                               \n"
+        "   vmov.f32   s1, #1.0                               \n"
+        "   vmov.f32   s2, #1.0                               \n"
+        "   vmov.f32   s3, #1.0                               \n"
+        "   vmov.f32   s4, #1.0                               \n"
+        "   vmov.f32   s5, #1.0                               \n"
+        "   vmov.f32   s6, #1.0                               \n"
+        "   vmov.f32   s7, #1.0                               \n"
+        "   vmov.f32   s8, #1.0                               \n"
+        "   vmov.f32   s9, #1.0                               \n"
+        "   vmov.f32   s10, #1.0                              \n"
+        "   vmov.f32   s11, #1.0                              \n"
+        "   vmov.f32   s12, #1.0                              \n"
+        "   vmov.f32   s13, #1.0                              \n"
+        "   vmov.f32   s14, #1.0                              \n"
+        "   vmov.f32   s15, #1.0                              \n"
+        "   vmrs   r12, fpscr                                 \n"
+        "   movw   r1, #0x009f                                \n"
+        "   movt   r1, #0xf000                                \n"
+        "   bics   r12, r1                                    \n"
+        "   vmsr   fpscr, r12                                 \n"
+#endif
+        "   movs    r3, #0x0                                  \n"
+        "   msr    APSR_nzcvq, r3                             \n"
+        "   bx     lr                                         \n"
+    );
+}
+
 __tz_naked_veneer
 uint32_t tfm_psa_framework_version_veneer(void)
 {
@@ -66,28 +99,23 @@ uint32_t tfm_psa_framework_version_veneer(void)
         "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic1                               \n"
+        "   push   {r4, lr}                                   \n"
 
-        "   mrs    r3, control                                \n"
-        "   push   {r2, r3}                                   \n"
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r4, lr}                                \n"
+        "   push   {r0-r3}                                    \n"
         "   ldr    r0, =tfm_spm_client_psa_framework_version  \n"
         "   mov    r1, sp                                     \n"
         "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   push   {r4, lr}                                   \n"
         "   bl     psa_framework_version_sfn                  \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_FRAMEWORK_VERSION)"       \n"
 #endif
-        "   pop    {r2, r3}                                   \n"
-        "   msr    control, r3                                \n"
-        "   isb                                               \n"
+        "   bl     clear_caller_context                       \n"
+        "   pop    {r1, r2}                                   \n"
+        "   mov    lr, r2                                     \n"
+        "   mov    r4, r1                                     \n"
         "   bxns   lr                                         \n"
 
         "reent_panic1:                                        \n"
@@ -109,27 +137,22 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic2                               \n"
 
-        "   mrs    r3, control                                \n"
-        "   push   {r2, r3}                                   \n"
+        "   push   {r4, lr}                                   \n"
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r4, lr}                                \n"
+        "   push   {r0-r3}                                    \n"
         "   ldr    r0, =tfm_spm_client_psa_version            \n"
         "   mov    r1, sp                                     \n"
         "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   push   {r4, lr}                                   \n"
         "   bl     psa_version_sfn                            \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_VERSION)"                 \n"
 #endif
-        "   pop    {r2, r3}                                   \n"
-        "   msr    control, r3                                \n"
-        "   isb                                               \n"
+        "   bl     clear_caller_context                       \n"
+        "   pop    {r1, r2}                                   \n"
+        "   mov    lr, r2                                     \n"
+        "   mov    r4, r1                                     \n"
         "   bxns   lr                                         \n"
 
         "reent_panic2:                                        \n"
@@ -155,30 +178,22 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic4                               \n"
         "   pop    {r2, r3}                                   \n"
-
-        "   mov    r12, r3                                    \n"
-        "   mrs    r3, control                                \n"
-        "   push   {r2, r3}                                   \n"
-        "   mov    r3, r12                                    \n"
+        "   push   {r4, lr}                                   \n"
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r4, lr}                                \n"
+        "   push   {r0-r3}                                    \n"
         "   ldr    r0, =tfm_spm_client_psa_call               \n"
         "   mov    r1, sp                                     \n"
         "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   push   {r4, lr}                                   \n"
         "   bl     psa_call_pack_sfn                          \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_CALL)"                    \n"
 #endif
-        "   pop    {r2, r3}                                   \n"
-        "   msr    control, r3                                \n"
-        "   isb                                               \n"
+        "   bl     clear_caller_context                       \n"
+        "   pop    {r1, r2}                                   \n"
+        "   mov    lr, r2                                     \n"
+        "   mov    r4, r1                                     \n"
         "   bxns   lr                                         \n"
 
         "reent_panic4:                                        \n"
@@ -203,28 +218,22 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic3                               \n"
 
-        "   mrs    r3, control                                \n"
-        "   push   {r2, r3}                                   \n"
-        "   mov    r3, r12                                    \n"
+        "   push   {r4, lr}                                   \n"
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r4, lr}                                \n"
+        "   push   {r0-r3}                                    \n"
         "   ldr    r0, =tfm_spm_client_psa_connect            \n"
         "   mov    r1, sp                                     \n"
         "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   push   {r4, lr}                                   \n"
         "   bl     psa_connect_sfn                            \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_CONNECT)"                 \n"
 #endif
-        "   pop    {r2, r3}                                   \n"
-        "   msr    control, r3                                \n"
-        "   isb                                               \n"
+        "   bl     clear_caller_context                       \n"
+        "   pop    {r1, r2}                                   \n"
+        "   mov    lr, r2                                     \n"
+        "   mov    r4, r1                                     \n"
         "   bxns   lr                                         \n"
 
         "reent_panic3:                                        \n"
@@ -246,27 +255,22 @@ void tfm_psa_close_veneer(psa_handle_t handle)
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic5                               \n"
 
-        "   mrs    r3, control                                \n"
-        "   push   {r2, r3}                                   \n"
+        "   push   {r4, lr}                                   \n"
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r4, lr}                                \n"
+        "   push   {r0-r3}                                    \n"
         "   ldr    r0, =tfm_spm_client_psa_close              \n"
         "   mov    r1, sp                                     \n"
         "   bl     spm_interface_cross_dispatcher             \n"
         "   pop    {r0-r3}                                    \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   push   {r4, lr}                                   \n"
         "   bl     psa_close_sfn                              \n"
-        "   pop    {r2, r3}                                   \n"
-        "   mov    lr, r3                                     \n"
 #else
         "   svc    "M2S(TFM_SVC_PSA_CLOSE)"                   \n"
 #endif
-        "   pop    {r2, r3}                                   \n"
-        "   msr    control, r3                                \n"
-        "   isb                                               \n"
+        "   bl     clear_caller_context                       \n"
+        "   pop    {r1, r2}                                   \n"
+        "   mov    lr, r2                                     \n"
+        "   mov    r4, r1                                     \n"
         "   bxns   lr                                         \n"
 
         "reent_panic5:                                        \n"
