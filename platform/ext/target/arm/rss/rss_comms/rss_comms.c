@@ -16,11 +16,14 @@
 #include "tfm_multi_core.h"
 #include "tfm_psa_call_pack.h"
 #include "tfm_spm_log.h"
+#include "rss_comms_permissions_hal.h"
 
 static struct client_request_t *req_to_process;
 
 static psa_status_t message_dispatch(struct client_request_t *req)
 {
+    enum tfm_plat_err_t plat_err;
+
     /* Create the call parameters */
     struct client_call_params_t spm_params = {
         .handle = req->handle,
@@ -59,6 +62,15 @@ static psa_status_t message_dispatch(struct client_request_t *req)
     }
     if (spm_params.out_len > 3) {
         SPMLOG_DBGMSGVAL("out_vec[3].len=", spm_params.out_vec[3].len);
+    }
+
+    plat_err = comms_permissions_service_check(spm_params.handle,
+                                               spm_params.in_vec,
+                                               spm_params.in_len,
+                                               spm_params.type);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        SPMLOG_ERRMSG("[RSS-COMMS] Call not permitted\r\n");
+        return PSA_ERROR_NOT_PERMITTED;
     }
 
     return tfm_rpc_psa_call(&spm_params);

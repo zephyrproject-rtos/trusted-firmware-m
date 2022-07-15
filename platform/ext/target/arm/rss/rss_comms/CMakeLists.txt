@@ -19,6 +19,7 @@ target_sources(platform_s
         rss_comms_protocol_embed.c
         rss_comms_protocol_pointer_access.c
         rss_comms_atu.c
+        rss_comms_permissions_hal.c
 )
 
 target_compile_definitions(platform_s
@@ -26,11 +27,13 @@ target_compile_definitions(platform_s
         RSS_COMMS_MAX_CONCURRENT_REQ=2
         RSS_COMMS_PROTOCOL_EMBED_ENABLED
         RSS_COMMS_PROTOCOL_POINTER_ACCESS_ENABLED
+        $<$<BOOL:${CONFIG_TFM_HALT_ON_CORE_PANIC}>:CONFIG_TFM_HALT_ON_CORE_PANIC>
 )
 
 # For spm_log_msgval
 target_link_libraries(platform_s
     PRIVATE
         tfm_spm
+        tfm_sprt
 )
 

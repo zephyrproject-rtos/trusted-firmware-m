@@ -8,6 +8,7 @@
 #include "rss_comms_protocol_pointer_access.h"
 
 #include "tfm_psa_call_pack.h"
+#include "rss_comms_permissions_hal.h"
 
 enum tfm_plat_err_t rss_protocol_pointer_access_deserialize_msg(
         struct client_request_t *req,
@@ -34,6 +35,12 @@ enum tfm_plat_err_t rss_protocol_pointer_access_deserialize_msg(
 
     /* Invecs */
     for (idx = 0; idx < req->in_len; idx++) {
+        err = comms_permissions_memory_check(msg->host_ptrs[idx],
+                                             msg->io_sizes[idx], false);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
+
         err = comms_atu_alloc_region(msg->host_ptrs[idx],
                                      msg->io_sizes[idx],
                                      &atu_region);
@@ -59,6 +66,13 @@ enum tfm_plat_err_t rss_protocol_pointer_access_deserialize_msg(
 
     /* Outvecs */
     for (idx = 0; idx < req->out_len; idx++) {
+        err = comms_permissions_memory_check(msg->host_ptrs[idx + req->in_len],
+                                             msg->io_sizes[idx + req->in_len],
+                                             true);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
+
         err = comms_atu_alloc_region(msg->host_ptrs[idx + req->in_len],
                                      msg->io_sizes[idx + req->in_len],
                                      &atu_region);
