@@ -63,8 +63,8 @@ get_target_property(bin_dir bl1_2 RUNTIME_OUTPUT_DIRECTORY)
 
 add_custom_target(bl1_2_padded_bin
     ALL
-    SOURCES bl1_2_padded.bin
-    SOURCES bl1_2_padded_hash.bin
+    SOURCES bl1_2_padded.bin ${bin_dir}/bl1_2_padded.bin
+    SOURCES bl1_2_padded_hash.bin ${bin_dir}/bl1_2_padded_hash.bin
 )
 
 add_custom_command(OUTPUT bl1_2_padded.bin bl1_2_padded_hash.bin
