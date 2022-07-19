@@ -11,6 +11,7 @@ Arm platforms
     Corstone-310 FVP <mps3/corstone310_fvp/README.rst>
     Musca-B1 <musca_b1/sse_200/readme.rst>
     Musca-B1 Secure Enclave <musca_b1/secure_enclave/readme.rst>
+    Musca-S1 <musca_s1/readme.rst>
     Runtime Security Subsystem <rss/readme.rst>
 
 --------------

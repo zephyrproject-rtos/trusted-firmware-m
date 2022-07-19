@@ -26,7 +26,7 @@ Supported Platforms
         - `Musca-B1 test chip board.
           <https://developer.arm.com/Tools%20and%20Software/Musca-B1%20Test%20Chip%20Board>`_
         - `Musca-S1 test chip board.
-          <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
+          <https://developer.arm.com/Tools%20and%20Software/Musca-S1%20Test%20Chip%20Board>`_
         - `FPGA image loaded on MPS3 board (AN524).
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`_
         - `LPC55S69.
