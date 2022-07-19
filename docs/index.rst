@@ -22,7 +22,7 @@ Trusted Firmware-M Documentation
                system, and then build and run a sample application.</p>
         </li>
         <li class="grid-item">
-            <a href="platform/ext/index.html">
+            <a href="platform/index.html">
                 <img alt="" src="_static/images/tfm-platform.png"/>
                 <h2>Supported Platforms</h2>
             </a>
@@ -111,4 +111,4 @@ Trusted Firmware-M Documentation
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
