@@ -26,6 +26,15 @@ if (TFM_EXTRA_MANIFEST_LIST_FILES)
     list(APPEND MANIFEST_LISTS ${TFM_EXTRA_MANIFEST_LIST_FILES})
 endif()
 
+if (TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST)
+    set(TMP_MANIFEST_LISTS ${TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST})
+    list(TRANSFORM TMP_MANIFEST_LISTS PREPEND ${TFM_EXTRAS_REPO_PATH}/)
+    list(APPEND MANIFEST_LISTS ${TMP_MANIFEST_LISTS})
+endif()
+
+# Remove any duplicate entries to prevent same path appended twice in case of mulitiple runs
+list(REMOVE_DUPLICATES MANIFEST_LISTS)
+
 ############################### File list declaration ##########################
 set(GENERATED_FILE_LISTS ${CMAKE_CURRENT_SOURCE_DIR}/tfm_generated_file_list.yaml)
 set(GENERATED_FILE_LISTS ${GENERATED_FILE_LISTS} ${TFM_EXTRA_GENERATED_FILE_LIST_PATH})
