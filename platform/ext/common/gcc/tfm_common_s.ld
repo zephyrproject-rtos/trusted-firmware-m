@@ -57,7 +57,7 @@ SECTIONS
         __vectors_end__ = .;
     } > FLASH
 
-#ifdef TFM_CONFIG_USE_TRUSTZONE
+#ifdef CONFIG_TFM_USE_TRUSTZONE
     ASSERT(. <= ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE, ".TFM_VECTORS section size overflow.")
     . = ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE;
     /*

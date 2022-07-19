@@ -24,7 +24,7 @@ set(TEST_BL1_2                          OFF         CACHE BOOL      "Whether to 
 # TFM_LIB_MODEL is the only user configuration for Library Model selection.
 # TFM_PSA_API becomes an internal variable. Please do NOT use it in build command line.
 set(TFM_LIB_MODEL                       OFF         CACHE BOOL      "Use secure library model instead of PSA API (IPC model)")
-set(TFM_CONFIG_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
+set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
 set(PSA_FRAMEWORK_HAS_MM_IOVEC          OFF         CACHE BOOL      "Enable MM-IOVEC")
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")

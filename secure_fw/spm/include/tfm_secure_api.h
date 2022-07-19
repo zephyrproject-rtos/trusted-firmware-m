@@ -10,7 +10,7 @@
 #ifndef __TFM_SECURE_API_H__
 #define __TFM_SECURE_API_H__
 
-#ifdef TFM_CONFIG_USE_TRUSTZONE
+#ifdef CONFIG_TFM_USE_TRUSTZONE
 #include <arm_cmse.h>
 #endif
 #include "tfm_arch.h"

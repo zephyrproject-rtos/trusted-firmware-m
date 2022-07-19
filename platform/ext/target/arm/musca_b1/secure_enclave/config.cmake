@@ -9,7 +9,7 @@
 set(BL2_TRAILER_SIZE                    0x800        CACHE STRING    "Trailer size")
 
 # Configuration values forced due to the Secure Enclave topology
-set(TFM_CONFIG_USE_TRUSTZONE            OFF          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
+set(CONFIG_TFM_USE_TRUSTZONE            OFF          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY             ON           CACHE BOOL      "Whether to build for a dual-cpu architecture" FORCE)
 set(NS                                  FALSE        CACHE BOOL      "Whether to build NS app" FORCE)
 set(TEST_NS                             OFF          CACHE BOOL      "Whether to build NS regression tests" FORCE)

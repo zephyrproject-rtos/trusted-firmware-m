@@ -29,7 +29,7 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL IAR)
     set_target_properties(CMSIS_5_RTX_V8MMFN PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V8MMFN.a)
     set_target_properties(CMSIS_5_RTX_V8MBN PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V8MBN.a)
     set_target_properties(CMSIS_5_RTX_CM3   PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_CM3.a)
-    if (TFM_CONFIG_USE_TRUSTZONE)
+    if (CONFIG_TFM_USE_TRUSTZONE)
         target_link_libraries(CMSIS_5_RTX_V81MMN
             INTERFACE
                 tfm_s_veneers
@@ -39,7 +39,7 @@ else()
     message(FATAL_ERROR "${CMAKE_C_COMPILER_ID} does not have CMSIS RTX static libraries set up")
 endif()
 
-if (TFM_CONFIG_USE_TRUSTZONE)
+if (CONFIG_TFM_USE_TRUSTZONE)
     target_link_libraries(CMSIS_5_RTX_V8MMN
         INTERFACE
             tfm_s_veneers

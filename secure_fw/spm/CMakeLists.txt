@@ -158,7 +158,7 @@ target_link_libraries(tfm_secure_api
 
 ############################# Secure veneers ###################################
 
-if(TFM_CONFIG_USE_TRUSTZONE)
+if(CONFIG_TFM_USE_TRUSTZONE)
     # If this is added to the spm, it is discarded as it is not used. Since the
     # spm is a static library it can't generate veneers under all compilers so
     # instead this single file is added to the tfm_s target.

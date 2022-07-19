@@ -7,7 +7,7 @@
 #
 #-------------------------------------------------------------------------------
 
-if (NOT TFM_CONFIG_USE_TRUSTZONE)
+if (NOT CONFIG_TFM_USE_TRUSTZONE)
     return()
 endif()
 

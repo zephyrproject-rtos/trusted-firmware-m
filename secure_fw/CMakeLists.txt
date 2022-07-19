@@ -99,7 +99,7 @@ target_compile_definitions(tfm_secure_api
 
 ############################# Secure veneers ###################################
 
-if(TFM_CONFIG_USE_TRUSTZONE)
+if(CONFIG_TFM_USE_TRUSTZONE)
     add_library(tfm_s_veneers STATIC)
 
     target_sources(tfm_s_veneers

@@ -14,7 +14,7 @@
 
 #define TFM_NS_CLIENT_INVALID_ID            ((int32_t)0)
 
-#ifdef TFM_CONFIG_USE_TRUSTZONE
+#ifdef CONFIG_TFM_USE_TRUSTZONE
 /*
  * The macro cmse_nsfptr_create defined in the gcc library uses the non-standard
  * gcc C lanuage extension 'typeof'. TF-M is built with '-std=c99' so typeof
@@ -40,7 +40,7 @@
 #define __tfm_nspm_secure_gateway_attributes__ \
         __attribute__((cmse_nonsecure_entry))
 #endif /* !__ARMCC_VERSION */
-#endif /* TFM_CONFIG_USE_TRUSTZONE */
+#endif /* CONFIG_TFM_USE_TRUSTZONE */
 
 /**
  * \brief initialise the NS context database

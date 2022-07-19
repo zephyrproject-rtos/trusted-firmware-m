@@ -19,7 +19,7 @@ set(INSTALL_INTERFACE_SRC_DIR    ${TFM_INSTALL_PATH}/interface/src)
 set(INSTALL_INTERFACE_LIB_DIR    ${TFM_INSTALL_PATH}/interface/lib)
 
 # export veneer lib
-if (TFM_CONFIG_USE_TRUSTZONE)
+if (CONFIG_TFM_USE_TRUSTZONE)
     install(FILES       ${CMAKE_BINARY_DIR}/secure_fw/s_veneers.o
             DESTINATION ${INSTALL_INTERFACE_LIB_DIR})
 endif()

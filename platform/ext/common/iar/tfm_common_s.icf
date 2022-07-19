@@ -25,7 +25,7 @@ define block ER_VECTORS with size = S_CODE_VECTOR_TABLE_SIZE {
        readonly section .intvec
 };
 
-#ifdef TFM_CONFIG_USE_TRUSTZONE
+#ifdef CONFIG_TFM_USE_TRUSTZONE
     /*
      * Place the CMSE Veneers (containing the SG instruction) in a separate
      * 32 bytes aligned region so that the SAU can be programmed to
@@ -246,7 +246,7 @@ define block SRAM_WATERMARK with size = 0 { };
 
 define block LR_CODE with fixed order, maximum size = S_CODE_SIZE {
        block ER_VECTORS,
-#ifdef TFM_CONFIG_USE_TRUSTZONE
+#ifdef CONFIG_TFM_USE_TRUSTZONE
        block ER_VENEER,
        block VENEER_ALIGN,
 #endif
