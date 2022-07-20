@@ -16,7 +16,7 @@ if (NOT IS_ABSOLUTE "${TFM_PLATFORM}" AND NOT IS_DIRECTORY "${TARGET_PATH}/${TFM
     file(GLOB_RECURSE PLATFORM_PATHS ${TARGET_PATH} "preload.cmake")
 
     # Search the list with platform name and store the result in PLATFORM_PATHS
-    list(FILTER PLATFORM_PATHS INCLUDE REGEX "${TFM_PLATFORM}")
+    list(FILTER PLATFORM_PATHS INCLUDE REGEX "/${TFM_PLATFORM}/")
 
     # Get the length of list PLATFORM_PATHS
     list(LENGTH PLATFORM_PATHS _PLATFORM_NUM)
