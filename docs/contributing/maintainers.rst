@@ -42,6 +42,13 @@ Sherry Zhang
     :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__
     :github: `sherryzhang <https://github.com/sherryzhang>`__
 
+BL1 immutable bootloader
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Raef Coles
+    :email: `Raef.Coles@arm.com <Raef.Coles@arm.com>`__
+    :github: `RcColes <https://github.com/RcColes>`__
+
 Secure Storage
 ~~~~~~~~~~~~~~
 
@@ -133,6 +140,12 @@ Satish Kumar
     :email: `Satish.Kumar01@arm.com <satish.kumar01@arm.com>`__
     :github: `kr-satish <https://github.com/kr-satish>`__
 
+RSS
+^^^
+
+Jamie Fox
+    :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
+    :github: `jf549 <https://github.com/jf549>`__
 
 NXP Platforms
 ~~~~~~~~~~~~~
@@ -180,4 +193,4 @@ WS Chang
 
 =============
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
