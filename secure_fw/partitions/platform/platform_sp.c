@@ -333,7 +333,6 @@ static psa_status_t platform_sp_ioctl_psa_api(const psa_msg_t *msg)
 
     return ret;
 }
-#endif /* TFM_PSA_API */
 
 psa_status_t tfm_platform_service_sfn(const psa_msg_t *msg)
 {
@@ -352,6 +351,7 @@ psa_status_t tfm_platform_service_sfn(const psa_msg_t *msg)
 
     return PSA_ERROR_GENERIC_ERROR;
 }
+#endif /* TFM_PSA_API */
 
 psa_status_t platform_sp_init(void)
 {
