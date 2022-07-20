@@ -175,6 +175,7 @@ if(BL2)
             CMSIS_Driver/Config
             Device/Config
             Native_Driver
+            ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include # for fih.h interop only
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
             Native_Driver

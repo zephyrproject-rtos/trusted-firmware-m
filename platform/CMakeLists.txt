@@ -180,7 +180,6 @@ if(BL2)
         PUBLIC
             platform_common_interface
             platform_region_defs
-            tfm_fih_headers
         PRIVATE
             bl2_hal
             mcuboot_config

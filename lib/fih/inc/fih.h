@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __FAULT_INJECTION_HARDENING_H__
-#define __FAULT_INJECTION_HARDENING_H__
+#ifndef __TFM_FIH_H__
+#define __TFM_FIH_H__
 
 #include <stddef.h>
 #include <stdint.h>
@@ -541,4 +541,4 @@ typedef int32_t fih_int;
 }
 #endif /* __cplusplus */
 
-#endif /* __FAULT_INJECTION_HARDENING_H__ */
+#endif /* __TFM_FIH_H__ */

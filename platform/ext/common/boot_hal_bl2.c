@@ -13,7 +13,7 @@
 #include "flash_layout.h"
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
-#include "bootutil/fault_injection_hardening.h"
+#include "fih.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
 
 #ifdef MEASURED_BOOT_API

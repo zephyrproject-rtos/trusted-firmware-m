@@ -16,7 +16,7 @@
 #include "platform_base_address.h"
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
-#include "bootutil/fault_injection_hardening.h"
+#include "fih.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
 
 int32_t boot_platform_post_init(void)

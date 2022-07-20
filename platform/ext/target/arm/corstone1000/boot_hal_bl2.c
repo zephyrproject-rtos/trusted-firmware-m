@@ -11,7 +11,7 @@
 #include "boot_hal.h"
 #include "Driver_Flash.h"
 #include "flash_layout.h"
-#include "bootutil/fault_injection_hardening.h"
+#include "fih.h"
 #include "bootutil/bootutil_log.h"
 #include "fip_parser.h"
 #include "flash_map/flash_map.h"
