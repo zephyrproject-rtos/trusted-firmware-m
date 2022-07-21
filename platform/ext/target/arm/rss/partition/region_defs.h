@@ -114,7 +114,7 @@
 
 /* BL1_2 executes from VM1 */
 #define BL1_2_CODE_START  (NS_IMAGE_LOAD_ADDRESS + NON_SECURE_IMAGE_MAX_SIZE)
-#define BL1_2_CODE_SIZE   (0x1C00) /* 7 KB */
+#define BL1_2_CODE_SIZE   (0x1B00) /* 6.5 KB */
 #define BL1_2_CODE_LIMIT  (BL1_2_CODE_START + BL1_2_CODE_SIZE - 1)
 
 /* BL2 executes from VM1, and is positioned directly after BL1_2 */
