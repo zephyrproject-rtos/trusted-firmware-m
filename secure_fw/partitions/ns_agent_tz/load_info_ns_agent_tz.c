@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -49,10 +51,11 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
     tfm_sp_ns_agent_tz_load __attribute__((used, section(".part_load_priority_lowest"))) = {
     .load_info = {
         .psa_ff_ver                 = 0x0100 | PARTITION_INFO_MAGIC,
-        .pid                        = TFM_SP_NON_SECURE_ID,
+        .pid                        = 0,
         .flags                      = (PARTITION_PRI_LOWEST - 1)
                                     | PARTITION_MODEL_IPC
-                                    | PARTITION_MODEL_PSA_ROT,
+                                    | PARTITION_MODEL_PSA_ROT
+                                    | PARTITION_NS_AGENT,
         .entry                      = ENTRY_TO_POSITION(ns_agent_tz_main),
         .stack_size                 = CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE,
         .heap_size                  = 0,

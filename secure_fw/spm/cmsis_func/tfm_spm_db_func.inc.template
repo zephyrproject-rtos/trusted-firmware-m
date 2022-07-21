@@ -103,8 +103,8 @@ static int32_t dependencies_{{partition.manifest.name}}[] =
 const struct spm_partition_static_data_t static_data_list[] =
 {
     {
-        .partition_id         = TFM_SP_NON_SECURE_ID,
-        .partition_flags      = 0,
+        .partition_id         = 0,
+        .partition_flags      = SPM_PART_FLAG_NS_AGENT,
     },
 
     {

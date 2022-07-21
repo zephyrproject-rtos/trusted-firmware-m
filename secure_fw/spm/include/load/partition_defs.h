@@ -15,7 +15,6 @@
 #include <stdint.h>
 
 /* TF-M internal partition ID */
-#define TFM_SP_NON_SECURE_ID                    (0)
 #define TFM_SP_IDLE_ID                          (1)
 #define INVALID_PARTITION_ID                    (~0U)
 
@@ -40,6 +39,8 @@
 #define PARTITION_MODEL_PSA_ROT                 (1U << 8)
 #define PARTITION_MODEL_IPC                     (1U << 9)
 
+#define PARTITION_NS_AGENT                      (1U << 10)
+
 #define PARTITION_PRIORITY(flag)                ((flag) & PARTITION_PRI_MASK)
 #define TO_THREAD_PRIORITY(x)                   (x)
 
@@ -53,7 +54,8 @@
                                                      & PARTITION_MODEL_PSA_ROT))
 #define IS_PARTITION_IPC_MODEL(pldi)            (!!((pldi)->flags \
                                                          & PARTITION_MODEL_IPC))
-#define IS_PARTITION_NS_AGENT(pldi)             ((pldi)->pid == TFM_SP_NON_SECURE_ID)
+#define IS_PARTITION_NS_AGENT(pldi)             (!!((pldi)->flags \
+                                                         & PARTITION_NS_AGENT))
 
 /*
  * Common partition structure type, the extendable data is right after it.

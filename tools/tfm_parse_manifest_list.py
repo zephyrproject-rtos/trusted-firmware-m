@@ -141,6 +141,9 @@ def manifest_validation(manifest, pid):
     if manifest['priority'] not in ['HIGH', 'NORMAL', 'LOW']:
         raise Exception('Invalid priority of {}'.format(manifest['name']))
 
+    if 'ns_agent' not in manifest:
+        manifest['ns_agent'] = False
+
     # Every PSA Partition must have at least either a secure service or an IRQ
     if (pid == None or pid >= TFM_PID_BASE) \
        and len(service_list) == 0 and len(irq_list) == 0:

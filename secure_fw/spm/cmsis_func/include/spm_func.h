@@ -39,9 +39,10 @@
 #define SPM_PART_FLAG_APP_ROT           0x01
 #define SPM_PART_FLAG_PSA_ROT           0x02
 #define SPM_PART_FLAG_IPC               0x04
+#define SPM_PART_FLAG_NS_AGENT          0x08
 
-#define IS_PARTITION_NS_AGENT(static_data)  ((static_data)->partition_id \
-                                                  == TFM_SP_NON_SECURE_ID)
+#define IS_PARTITION_NS_AGENT(static_data)  (!!((static_data)->partition_flags \
+                                                  & SPM_PART_FLAG_NS_AGENT))
 
 enum spm_err_t {
     SPM_ERR_OK = 0,

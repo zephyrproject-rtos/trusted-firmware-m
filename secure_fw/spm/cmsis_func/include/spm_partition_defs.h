@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,12 +21,6 @@
 
 /* ***** partition ID-s internal to the TFM ***** */
 #define TFM_INTERNAL_PARTITIONS (2)
-
-/* From the SPM point of view the non secure processing environment is handled
- * as a special secure partition. This simplifies the context switch
- * operations.
- */
-#define TFM_SP_NON_SECURE_ID (0)
 
 /* A dummy partition for TFM_SP_CORE is created to handle secure partition
  * calls done directly from the core, before NS execution started.
