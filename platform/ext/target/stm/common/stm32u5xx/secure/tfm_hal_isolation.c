@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -361,7 +364,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
-    ns_agent = (p_ldinf->pid == TFM_SP_NON_SECURE_ID);
+    ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
     p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
 
     /*

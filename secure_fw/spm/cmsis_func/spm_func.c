@@ -744,6 +744,18 @@ uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx)
            partition_id;
 }
 
+uint32_t tfm_spm_partition_get_ns_agent_idx(void)
+{
+    uint32_t i;
+
+    for (i = 0; i < g_spm_partition_db.partition_count; ++i) {
+        if (IS_PARTITION_NS_AGENT(g_spm_partition_db.partitions[i].static_data)) {
+            return i;
+        }
+    }
+    return SPM_INVALID_PARTITION_IDX;
+}
+
 uint32_t tfm_spm_partition_get_partition_idx(uint32_t partition_id)
 {
     uint32_t i;

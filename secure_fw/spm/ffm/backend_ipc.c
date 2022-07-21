@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2022, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -181,7 +183,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
 #if (CONFIG_TFM_PSA_API_CROSS_CALL == 1) && !defined(TFM_MULTI_CORE_TOPOLOGY)
-    if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
+    if (IS_PARTITION_NS_AGENT(p_pldi)) {
         SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
     }
 #endif

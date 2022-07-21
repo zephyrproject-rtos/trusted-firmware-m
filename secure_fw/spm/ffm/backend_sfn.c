@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -129,7 +131,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
      * Built-in partitions still have thread instances: NS Agent (TZ) and
      * IDLE partition, and NS Agent (TZ) needs to be specific cared here.
      */
-    if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
+    if (IS_PARTITION_NS_AGENT(p_pldi)) {
         ARCH_CTXCTRL_INIT(&ns_agent_ctrl,
                           LOAD_ALLOCED_STACK_ADDR(p_pldi),
                           p_pldi->stack_size);

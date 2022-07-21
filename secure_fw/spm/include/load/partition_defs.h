@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -50,6 +53,7 @@
                                                      & PARTITION_MODEL_PSA_ROT))
 #define IS_PARTITION_IPC_MODEL(pldi)            (!!((pldi)->flags \
                                                          & PARTITION_MODEL_IPC))
+#define IS_PARTITION_NS_AGENT(pldi)             ((pldi)->pid == TFM_SP_NON_SECURE_ID)
 
 /*
  * Common partition structure type, the extendable data is right after it.

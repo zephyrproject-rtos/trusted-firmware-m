@@ -40,6 +40,9 @@
 #define SPM_PART_FLAG_PSA_ROT           0x02
 #define SPM_PART_FLAG_IPC               0x04
 
+#define IS_PARTITION_NS_AGENT(static_data)  ((static_data)->partition_id \
+                                                  == TFM_SP_NON_SECURE_ID)
+
 enum spm_err_t {
     SPM_ERR_OK = 0,
     SPM_ERR_PARTITION_DB_NOT_INIT = 0x3A5C,
@@ -351,6 +354,14 @@ void tfm_spm_psa_eoi(uint32_t *svc_args);
  * \note This function doesn't check if partition_idx is valid.
  */
 uint32_t tfm_spm_partition_get_partition_id(uint32_t partition_idx);
+
+/**
+ * \brief Get the index of an ns_agent partition
+ *
+ * \return Partition index for ns_agent partition
+ *         SPM_INVALID_PARTITION_IDX if not found
+ */
+uint32_t tfm_spm_partition_get_ns_agent_idx(void);
 
 /**
  * \brief Get the index of the partition with the specified ID

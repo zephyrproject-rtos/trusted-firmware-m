@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -426,7 +428,7 @@ bool tfm_spm_is_ns_caller(void)
         tfm_core_panic();
     }
 
-    return (partition->p_ldinf->pid == TFM_SP_NON_SECURE_ID);
+    return IS_PARTITION_NS_AGENT(partition->p_ldinf);
 }
 
 int32_t tfm_spm_get_client_id(bool ns_caller)
