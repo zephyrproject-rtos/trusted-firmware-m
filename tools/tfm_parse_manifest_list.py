@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -100,9 +102,13 @@ def manifest_validation(manifest, pid):
     if manifest['psa_framework_version'] not in [1.0, 1.1]:
         raise Exception('Invalid psa_framework_version of {}'.format(manifest['name']))
 
-    # "type" validatoin
+    # "type" validation
     if manifest['type'] not in ['PSA-ROT', 'APPLICATION-ROT']:
         raise Exception('Invalid type of {}'.format(manifest['name']))
+
+    # "priority" validation
+    if manifest['priority'] not in ['HIGH', 'NORMAL', 'LOW']:
+        raise Exception('Invalid priority of {}'.format(manifest['name']))
 
     # Every PSA Partition must have at least either a secure service or an IRQ
     if (pid == None or pid >= TFM_PID_BASE) \
@@ -209,7 +215,7 @@ def validate_dependency_chain(partition,
 def process_partition_manifests(manifest_lists, isolation_level, backend):
     """
     Parse the input manifest lists, check if manifest settings are valid,
-    generate the data base for genereated files
+    generate the data base for generated files
     and generate manifest header files.
 
     Parameters
@@ -219,7 +225,7 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
         The manifest lists might be processed by CMake and the paths might be
         different to the original ones. Original paths are needed to handle
         relative paths in the lists.
-        The format must be [list A, orignal path A, list B, orignal path B, ...]
+        The format must be [list A, original path A, list B, orignal path B, ...]
 
     Returns
     -------
@@ -647,7 +653,7 @@ def parse_args():
                         , dest='gen_file_args'
                         , required=True
                         , metavar='file-list'
-                        , help='These files descripe the file list to generate')
+                        , help='These files describe the file list to generate')
 
     parser.add_argument('-l', '--isolation-level'
                         , dest='isolation_level'
