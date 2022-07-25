@@ -98,10 +98,6 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        target_cfg.c
-        ../common/spm_hal.c
-        ../common/tfm_hal_isolation.c
-        ../common/tfm_hal_platform.c
         ../common/CMSIS_Driver/Driver_Flash_iap1.c
         ../common/CMSIS_Driver/Driver_USART.c
         ../common/Native_Driver/mpu_armv8m_drv.c
@@ -131,7 +127,6 @@ target_sources(platform_s
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_sbrk.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/debug_console/fsl_debug_console.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/str/fsl_str.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/services/src/tfm_platform_system.c>
 )
@@ -260,3 +255,13 @@ if(BL2)
         project_template/bl2/hardware_init.c
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        target_cfg.c
+        ../common/spm_hal.c
+        ../common/tfm_hal_isolation.c
+        ../common/tfm_hal_platform.c
+)

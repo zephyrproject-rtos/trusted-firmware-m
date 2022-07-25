@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2020-2022, Cypress Semiconductor Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -103,18 +103,12 @@ target_sources(platform_s
         ./Native_Driver/generated_source/cycfg_routing.c
         ./Native_Driver/generated_source/cycfg_system.c
         ./Native_Driver/generated_source/cycfg_qspi_memslot.c
-        ./tfm_interrupts.c
-        ./tfm_hal_multi_core.c
-        ./tfm_hal_isolation.c
-        ./tfm_hal_platform.c
         ./CMSIS_Driver/Driver_Flash.c
         ./CMSIS_Driver/Driver_USART.c
-        ./target_cfg.c
         ./driver_smpu.c
         ./driver_ppu.c
         ./driver_dap.c
         ./Device/Source/device_definition.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -125,7 +119,7 @@ target_compile_definitions(platform_s
 )
 
 target_link_libraries(platform_s
-    PRIVATE
+    PUBLIC
         ${MTB_PDL_CAT1_LIB_S_TARGET}
         ${P64_UTILS_LIB_TARGET}
 )
@@ -207,3 +201,14 @@ install(FILES       partition/flash_layout.h
 
 install(FILES       security/policy/policy_multi_CM0_CM4_tfm_dev_certs.json
         DESTINATION ${INSTALL_IMAGE_SIGNING_DIR})
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        ./target_cfg.c
+        ./tfm_interrupts.c
+        ./tfm_hal_multi_core.c
+        ./tfm_hal_isolation.c
+        ./tfm_hal_platform.c
+)

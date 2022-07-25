@@ -731,6 +731,13 @@ Annex
     target_sources(platform_ns
         PRIVATE
     )
+    target_sources(tfm_spm
+        PRIVATE
+            spm_hal.c
+            target_cfg.c
+            tfm_hal_isolation.c
+            tfm_hal_platform.c
+    )
 
 ------------
 

@@ -68,14 +68,9 @@ target_sources(platform_s
         Native_Driver/mhu_v2_x.c
         Native_Driver/watchdog.c
         Native_Driver/arm_watchdog_drv.c
-        tfm_hal_multi_core.c
-        tfm_hal_isolation.c
-        tfm_hal_platform.c
-        ${PLATFORM_DIR}/ext/common/tfm_hal_nvic.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         fw_update_agent/uefi_capsule_parser.c
         fw_update_agent/fwu_agent.c
-        $<$<BOOL:${TFM_S_REG_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
 )
 
@@ -95,10 +90,11 @@ target_sources(platform_s
 endif()
 
 target_compile_definitions(platform_s
+    PUBLIC
+        $<$<BOOL:${EXTERNAL_SYSTEM_SUPPORT}>:EXTERNAL_SYSTEM_SUPPORT>
     PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
         $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
-        $<$<BOOL:${EXTERNAL_SYSTEM_SUPPORT}>:EXTERNAL_SYSTEM_SUPPORT>
 )
 
 #========================= Platform BL2 =======================================#
@@ -188,3 +184,13 @@ target_include_directories(platform_bl2
 #========================= BL1 component =======================================#
 
 add_subdirectory(bl1)
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        tfm_hal_multi_core.c
+        tfm_hal_isolation.c
+        tfm_hal_platform.c
+        $<$<BOOL:${TFM_S_REG_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
+)

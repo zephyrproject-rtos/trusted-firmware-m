@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -94,13 +94,8 @@ target_sources(platform_s
         bsp/Library/StdDriver/src/timer.c
         bsp/Library/StdDriver/src/fmc.c
         ../common/services/src/tfm_platform_system.c
-        ../common/spm_hal.c
-        ../common/tfm_hal_isolation.c
-        ../common/tfm_hal_platform.c
-        target_cfg.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
         ${PLATFORM_DIR}/ext/common/tfm_platform.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
@@ -167,3 +162,13 @@ if(BL2)
             ${COMPILER_CMSE_FLAG}
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        target_cfg.c
+        ../common/spm_hal.c
+        ../common/tfm_hal_isolation.c
+        ../common/tfm_hal_platform.c
+)

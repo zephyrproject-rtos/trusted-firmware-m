@@ -105,14 +105,8 @@ target_sources(platform_s
         Native_Driver/musca_s1_scc_drv.c
         Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/cache_drv.c
-        spm_hal.c
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
-        tfm_hal_isolation.c
-        tfm_hal_platform.c
-        target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c
         Libraries/mt25ql_flash_lib.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         ${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -189,3 +183,14 @@ if(BL2)
             ${BL2_COMPILER_CP_FLAG}
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        spm_hal.c
+        target_cfg.c
+        tfm_hal_isolation.c
+        tfm_hal_platform.c
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
+)

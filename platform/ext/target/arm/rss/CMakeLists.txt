@@ -111,14 +111,7 @@ target_sources(platform_s
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         native_drivers/systimer_armv8-m_drv.c
         native_drivers/uart_pl011_drv.c
-        spm_hal.c
-        target_cfg.c
-        tfm_hal_isolation.c
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_multi_core.c>
-        tfm_hal_platform.c
-        tfm_interrupts.c
         tfm_peripherals_def.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         ./otp_cc312.c
@@ -129,11 +122,6 @@ target_sources(tfm_sprt
         # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
         # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
-)
-
-target_link_libraries(platform_s
-    PRIVATE
-        tfm_utilities
 )
 
 target_compile_options(platform_s
@@ -244,4 +232,16 @@ target_include_directories(platform_bl1_interface
 target_compile_definitions(platform_bl1
     PUBLIC
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
+)
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        spm_hal.c
+        target_cfg.c
+        tfm_hal_isolation.c
+        tfm_hal_platform.c
+        tfm_interrupts.c
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_multi_core.c>
 )

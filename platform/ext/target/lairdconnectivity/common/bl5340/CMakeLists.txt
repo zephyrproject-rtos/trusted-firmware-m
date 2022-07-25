@@ -45,8 +45,6 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        target_cfg.c
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/${NRF_FOLDER_PATH}/tfm_interrupts.c>
         ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf5340_application.c
 )
 
@@ -101,4 +99,12 @@ endif()
 target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${NRF_NS_STORAGE}>:NRF_NS_STORAGE>
+)
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        target_cfg.c
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/${NRF_FOLDER_PATH}/tfm_interrupts.c>
 )

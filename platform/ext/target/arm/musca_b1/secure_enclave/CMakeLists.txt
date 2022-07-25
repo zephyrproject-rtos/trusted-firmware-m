@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -77,12 +77,7 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         mailbox/platform_multicore.c
         mailbox/platform_spe_mailbox.c
-        target_cfg.c
-        tfm_hal_isolation.c
-        tfm_hal_multi_core.c
-        tfm_hal_platform.c
         uart_stdout.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
@@ -129,3 +124,13 @@ if(BL2)
             ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        target_cfg.c
+        tfm_hal_multi_core.c
+        tfm_hal_isolation.c
+        tfm_hal_platform.c
+)

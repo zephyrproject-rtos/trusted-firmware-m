@@ -264,7 +264,7 @@ name is ``timer_1_irq_init``.
 
 The function will be called by the Framework automatically during
 initialization. The function can be put in any source file that belongs to SPM,
-for example a ``tfm_interrupts.c`` added to the ``platform_s`` CMake target.
+for example a ``tfm_interrupts.c`` added to the ``tfm_spm`` CMake target.
 
 The initialization of an interrupt must include:
 

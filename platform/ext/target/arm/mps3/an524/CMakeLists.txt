@@ -90,13 +90,7 @@ target_sources(platform_s
         native_drivers/ppc_sse200_drv.c
         native_drivers/uart_cmsdk_drv.c
         native_drivers/timer_cmsdk_drv.c
-        spm_hal.c
-        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
-        tfm_hal_isolation.c
-        tfm_hal_platform.c
-        target_cfg.c
         native_drivers/ppc_sse200_drv.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -152,3 +146,14 @@ if(BL2)
             native_drivers
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        spm_hal.c
+        target_cfg.c
+        tfm_hal_isolation.c
+        tfm_hal_platform.c
+        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
+)

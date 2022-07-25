@@ -14,7 +14,6 @@ add_library(tfm_spm STATIC)
 add_library(tfm_spm_defs INTERFACE)
 add_library(tfm_boot_status INTERFACE)
 add_library(tfm_arch INTERFACE)
-add_library(tfm_utilities INTERFACE)
 
 set(TFM_PARTITION_PLATFORM ON CACHE BOOL "Enable the TF-M Platform partition")
 
@@ -72,6 +71,7 @@ target_sources(tfm_spm
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
         $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
+        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
 )
 
 target_include_directories(tfm_spm_defs
@@ -140,13 +140,6 @@ target_include_directories(tfm_arch
 target_include_directories(tfm_boot_status
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/boot>
-)
-
-############################ TFM utilities #####################################
-
-target_include_directories(tfm_utilities
-    INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
 ############################ Secure API ########################################

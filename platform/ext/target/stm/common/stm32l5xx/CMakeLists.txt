@@ -70,10 +70,6 @@ target_sources(platform_s
         ${STM_COMMON_DIR}/hal/Native_Driver/tick.c
         ${STM_COMMON_DIR}/hal/Native_Driver/mpu_armv8m_drv.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_platform.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/low_level_device.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
@@ -90,7 +86,6 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rcc.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rcc_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_gtzc.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_platform_system>
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng_ex.c
@@ -203,6 +198,16 @@ if(BL2)
             ${STM_COMMON_DIR}/hal/Native_Driver/tick.c
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_platform.c
+)
 
 install(FILES
         ${STM_COMMON_DIR}/scripts/stm_tool.py

@@ -101,12 +101,6 @@ target_sources(platform_s
         native_drivers/dma350_ch_drv.c
         native_drivers/dma350_drv.c
         libraries/dma350_lib.c
-        spm_hal.c
-        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
-        target_cfg.c
-        tfm_hal_isolation.c
-        tfm_hal_platform.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
@@ -127,11 +121,6 @@ target_sources(tfm_sprt
         # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
         # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
-)
-
-target_link_libraries(platform_s
-    PRIVATE
-        tfm_utilities
 )
 
 target_compile_options(platform_s
@@ -197,3 +186,14 @@ if(BL2)
             native_drivers
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        spm_hal.c
+        target_cfg.c
+        tfm_hal_isolation.c
+        tfm_hal_platform.c
+        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
+)

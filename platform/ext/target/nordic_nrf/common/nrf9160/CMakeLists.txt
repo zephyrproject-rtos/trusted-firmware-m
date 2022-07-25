@@ -42,8 +42,6 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        target_cfg.c
-        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
         ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf9160.c
 )
 
@@ -97,4 +95,12 @@ endif()
 target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${NRF_NS_STORAGE}>:NRF_NS_STORAGE>
+)
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        target_cfg.c
+        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
 )
