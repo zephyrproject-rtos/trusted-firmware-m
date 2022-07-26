@@ -115,12 +115,24 @@ Kevin Peng
     :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
     :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
 
-Arm Platforms: MPS2, MPS3, Musca(A,B1,S1)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Arm Platforms
+~~~~~~~~~~~~~
+
+MPS2, MPS3, Musca(A,B1,S1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Mark Horvath
     :email: `Mark.Horvath@arm.com <mark.horvath@arm.com>`__
     :github: `mark-horvath-arm <https://github.com/mark-horvath-arm>`__
+
+Corstone1000
+^^^^^^^^^^^^
+
+Satish Kumar
+    :email: `Satish.Kumar01@arm.com <satish.kumar01@arm.com>`__
+    :github: `kr-satish <https://github.com/kr-satish>`__
+
 
 NXP Platforms
 ~~~~~~~~~~~~~
