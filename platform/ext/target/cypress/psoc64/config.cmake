@@ -19,6 +19,7 @@ set(CONFIG_TFM_USE_TRUSTZONE            OFF         CACHE BOOL      "Enable use 
 set(TFM_MULTI_CORE_TOPOLOGY             ON          CACHE BOOL      "Whether to build for a dual-cpu architecture")
 set(NUM_MAILBOX_QUEUE_SLOT              4           CACHE BOOL      "Number of mailbox queue slots")
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT      ON          CACHE BOOL      "Platform supports SLIH IRQ tests")
+set(PLATFORM_FLIH_IRQ_TEST_SUPPORT      ON          CACHE BOOL      "Platform supports FLIH IRQ tests")
 
 ################################## Dependencies ################################
 
