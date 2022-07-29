@@ -7,9 +7,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(cmake/version.cmake)
-include(remote_library)
 
 ############################ CONFIGURATION #####################################
 
@@ -35,6 +33,8 @@ if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
    NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
     Message(FATAL_ERROR "Unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
 endif()
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 ############################### Compiler configuration #########################
 

@@ -1,20 +1,31 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2021, Arm Limited. All rights reserved.
-# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
-# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-fetch_remote_library(
-    LIB_NAME                libpsaadac
-    LIB_SOURCE_PATH_VAR     PLATFORM_PSA_ADAC_SOURCE_PATH
-    LIB_BINARY_PATH_VAR     PLATFORM_PSA_ADAC_BUILD_PATH
-    FETCH_CONTENT_ARGS
-        GIT_REPOSITORY      https://git.trustedfirmware.org/shared/psa-adac.git
-        GIT_TAG             ${PLATFORM_PSA_ADAC_VERSION}
-)
+include(FetchContent)
+set(FETCHCONTENT_QUIET FALSE)
+
+# Set to not download submodules if that option is available
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
+    cmake_policy(SET CMP0097 NEW)
+endif()
+
+if ("${PLATFORM_PSA_ADAC_SOURCE_PATH}" STREQUAL "DOWNLOAD")
+    FetchContent_Declare(libpsaadac
+        GIT_REPOSITORY https://git.trustedfirmware.org/shared/psa-adac.git
+        GIT_TAG ${PLATFORM_PSA_ADAC_VERSION}
+    )
+
+    FetchContent_GetProperties(libpsaadac)
+    if (NOT libpsaadac_POPULATED)
+        FetchContent_Populate(libpsaadac)
+        set(PLATFORM_PSA_ADAC_SOURCE_PATH ${libpsaadac_SOURCE_DIR} CACHE PATH "Path to source directory of psa-adac." FORCE)
+        set(PLATFORM_PSA_ADAC_BUILD_PATH ${libpsaadac_BINARY_DIR} CACHE PATH "Path to build directory of psa-adac.")
+    endif ()
+endif ()
 
 
 set(PSA_ADAC_TARGET "trusted-firmware-m")
