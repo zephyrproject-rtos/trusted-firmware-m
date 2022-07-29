@@ -95,7 +95,11 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
 #elif defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
     "http://arm.com/psa/2.0.0",
 #else
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
 #error "Attestation token profile is incorrect"
+#else
+    "UNDEFINED",
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 #endif
     /* Entropy seed */
     {
