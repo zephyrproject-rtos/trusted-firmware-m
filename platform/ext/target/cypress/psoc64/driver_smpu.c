@@ -313,7 +313,9 @@ static void dump_smpu(const PROT_SMPU_SMPU_STRUCT_Type *smpu)
     }
 
     if (_FLD2BOOL(PROT_SMPU_SMPU_STRUCT_ATT0_ENABLED, reg)) {
+#if (TFM_SPM_LOG_LEVEL >= TFM_SPM_LOG_LEVEL_INFO)
         uint32_t size = _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ATT0_REGION_SIZE, reg);
+#endif
         uint32_t subregions;
 
         reg = smpu->ADDR0;
