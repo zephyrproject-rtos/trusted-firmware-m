@@ -95,6 +95,7 @@ endif()
 target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${NRF_NS_STORAGE}>:NRF_NS_STORAGE>
+        $<$<BOOL:${NRF_NS_SECONDARY}>:NRF_NS_SECONDARY>
 )
 
 #========================= tfm_spm ============================================#

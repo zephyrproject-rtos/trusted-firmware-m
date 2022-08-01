@@ -392,9 +392,9 @@ struct platform_data_t
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
-#endif /* BL2 */
+#endif /* NRF_NS_SECONDARY */
 #ifdef NRF_NS_STORAGE_PARTITION_START
 REGION_DECLARE(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base);
 #endif /* NRF_NS_STORAGE_PARTITION_START */
@@ -417,14 +417,14 @@ const struct memory_region_limits memory_regions = {
     .veneer_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
 
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
     .secondary_partition_base =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
 
     .secondary_partition_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
         SECONDARY_PARTITION_SIZE - 1,
-#endif /* BL2 */
+#endif /* NRF_NS_SECONDARY */
 
 #ifdef NRF_NS_STORAGE_PARTITION_START
     .non_secure_storage_partition_base =
@@ -525,7 +525,8 @@ enum tfm_plat_err_t spu_init_cfg(void)
      * Configure SPU Regions for Non-Secure Code and SRAM (Data)
      * Configure SPU for Peripheral Security
      * Configure Non-Secure Callable Regions
-     * Configure Secondary Image Partition for BL2
+     * Configure Secondary Image Partition
+     * Configure Non-Secure Storage Partition
      */
 
     /* Explicitly reset Flash and SRAM configuration to all-Secure,
@@ -543,11 +544,11 @@ enum tfm_plat_err_t spu_init_cfg(void)
     spu_regions_flash_config_non_secure_callable(memory_regions.veneer_base,
                                                  memory_regions.veneer_limit - 1);
 
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
     /* Secondary image partition */
     spu_regions_flash_config_non_secure(memory_regions.secondary_partition_base,
                                         memory_regions.secondary_partition_limit);
-#endif /* BL2 */
+#endif /* NRF_NS_SECONDARY */
 
 #ifdef NRF_NS_STORAGE_PARTITION_START
     /* Configures storage partition to be non-secure */

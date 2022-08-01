@@ -47,7 +47,7 @@
  * SPU flash region granularity is 16 KB on nRF5340. Alignment
  * of partitions is defined in accordance with this constraint.
  */
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
 #ifndef LINK_TO_SECONDARY_PARTITION
 #define S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_0_OFFSET)
 #define S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_2_OFFSET)
@@ -57,7 +57,7 @@
 #endif /* !LINK_TO_SECONDARY_PARTITION */
 #else
 #define S_IMAGE_PRIMARY_PARTITION_OFFSET (0x0)
-#endif /* BL2 */
+#endif /* NRF_NS_SECONDARY */
 
 #ifndef LINK_TO_SECONDARY_PARTITION
 #define NS_IMAGE_PRIMARY_PARTITION_OFFSET (FLASH_AREA_0_OFFSET \
