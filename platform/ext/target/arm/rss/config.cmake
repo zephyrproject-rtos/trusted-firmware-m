@@ -32,12 +32,10 @@ set(TFM_PARTITION_PROTECTED_STORAGE     OFF        CACHE BOOL     "Enable Protec
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF     CACHE BOOL     "Enable Internal Trusted Storage partition")
 set(TFM_PARTITION_MEASURED_BOOT         ON         CACHE BOOL     "Enable Measured boot partition")
 set(MEASURED_BOOT_HASH_ALG              PSA_ALG_SHA_256 CACHE STRING "Hash algorithm used by Measured boot services")
+set(TFM_MANIFEST_LIST                   ${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml CACHE FILEPATH "TF-M native Secure Partition manifests list file")
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_extra_config.h CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
 set(CONFIG_TFM_USE_TRUSTZONE            OFF        CACHE BOOL     "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY             ON         CACHE BOOL     "Whether to build for a dual-cpu architecture")
 set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to use a platform specific inter-core communication instead of mailbox in dual-cpu topology")
 set(TEST_NS_MULTI_CORE                  OFF        CACHE BOOL     "Whether to build NS regression multi-core tests")
-
-configure_file(${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml ${CMAKE_BINARY_DIR}/tools/tfm_manifest_list.yaml)
-set(TFM_MANIFEST_LIST                   ${CMAKE_BINARY_DIR}/tools/tfm_manifest_list.yaml CACHE FILEPATH "TF-M native Secure Partition manifests list file")
