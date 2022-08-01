@@ -299,6 +299,10 @@ target_include_directories(signing_layout_for_bl2
         ../partition
 )
 
+if (CONFIG_TFM_BOOT_STORE_MEASUREMENTS)
+    set(MCUBOOT_MEASURED_BOOT ON)
+endif()
+
 add_custom_target(bl2_signed_bin
     ALL
     SOURCES bl2_signed.bin
@@ -322,6 +326,7 @@ add_custom_command(OUTPUT bl2_signed.bin
         -d \"\(0,${MCUBOOT_S_IMAGE_MIN_VER}\)\"
         $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
         $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+        $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
         $<TARGET_FILE_DIR:bl2>/bl2.bin
         ${CMAKE_CURRENT_BINARY_DIR}/bl2_signed.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl2_signed.bin $<TARGET_FILE_DIR:bl2>
