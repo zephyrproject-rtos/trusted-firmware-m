@@ -246,6 +246,29 @@ def validate_dependency_chain(partition,
         validate_dependency_chain(dependency, dependency_table, dependency_chain)
     dependency_table[partition]['validated'] = True
 
+def manifest_attribute_to_int(manifest, attribute, configs):
+    """
+    This method tries to convert the value of the given `attribute` in the given
+    `manifest` to an integer.
+    If the value is a decimal/hexadecimal int, return it directly.
+    Otherwise, treat it as a configuration and find the value in the given `configs`.
+    If the configuration is not found, exit script with error.
+    """
+
+    value = manifest[attribute]
+    try:
+        # base 16 works for both decimal and hexadecimal
+        int(value, base=16)
+    except ValueError:
+        # Not an int, find the value in configs
+        if value not in configs.keys():
+            logging.error('{} is not defined in configurations'.format(value))
+            exit(1)
+
+        value = configs[value]
+
+    return value
+
 def process_partition_manifests(manifest_lists, configs):
     """
     Parse the input manifest lists, check if manifest settings are valid,
@@ -362,6 +385,12 @@ def process_partition_manifests(manifest_lists, configs):
             # Count the number of IPC/SFN partitions
             if manifest['model'] == 'IPC':
                 partition_statistics['ipc_partitions'].append(manifest['name'])
+
+        # Convert stack_size and heap_size to int. They might be configurations.
+        manifest['stack_size'] = manifest_attribute_to_int(manifest, 'stack_size', configs)
+
+        if 'heap_size' in manifest.keys():
+            manifest['heap_size'] = manifest_attribute_to_int(manifest, 'heap_size', configs)
 
         # Set initial value to -1 to make (srv_idx + 1) reflect the correct
         # number (0) when there are no services.

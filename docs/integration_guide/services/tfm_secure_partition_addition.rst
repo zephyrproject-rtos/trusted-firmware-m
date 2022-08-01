@@ -244,6 +244,21 @@ Secure Partitions.
 For the indexes of other Secure Partitions, please refer to their manifests or
 documentations.
 
+stack_size
+----------
+The ``stack_size`` is required to indicate the stack memory usage of the Secure
+Partition.
+The value of this attribute must be a decimal or hexadecimal value in bytes.
+It can also be a build configurable with default value defined in
+``config_default.cmake``.
+The value of the configuration can be overridden to fit different use cases.
+
+heap_size
+---------
+This attribute is optional. The default value is 0.
+It indicates the heap memory usage of the Secure Partition.
+The allowed values are the same as the ``stack_size``.
+
 mmio_regions
 ------------
 This attribute is a list of MMIO region objects which the Secure Partition

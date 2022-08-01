@@ -82,20 +82,58 @@ parse_field_from_yaml("${GENERATED_FILE_LISTS}" output OUTPUT_FILES)
 list(TRANSFORM OUTPUT_FILES REPLACE "^([^/\\][^:].*)" "${CMAKE_BINARY_DIR}/generated/\\1")
 
 ############################### Generate Manifest config header ################
+
+# The function appends the given `config` to the `out_var` variable.
+# Supported `type` are [BOOL, STRING].
+# The format of contents appended is
+#   #cmakedefine01 config      for BOOL types
+#   #cmakedefine config @config@    for STRING types
+function(append_manifest_config out_var config type)
+    # Operate on a local var and write back to the out_var later
+    set(local_var ${${out_var}})
+
+    # Avoid duplications of configs
+    string(FIND "${local_var}" ${config} config_exists)
+    if(${config_exists} EQUAL -1)   # Not found
+        if (${type} STREQUAL "BOOL")
+            string(APPEND local_var "#cmakedefine01 ${config}\r\n")
+        elseif(${type} STREQUAL "STRING")
+            string(APPEND local_var "#cmakedefine ${config} @${config}@\r\n")
+        else()
+            message(FATAL_ERROR "Unsupported config type: ${type}")
+        endif()
+    endif()
+
+    set(${out_var} ${local_var} PARENT_SCOPE)
+endfunction()
+
+# The following build configurations are required to pass to manifest tool via the config header
+#   - The isolation level
+#   - The SPM backend
+#   - "conditional" attributes for every Secure Partition in manifest lists
+#   - "stack_size" in manifests
+#   - "heap_size" in manifests
+append_manifest_config(MANIFEST_CONFIG_H_CONTENT TFM_ISOLATION_LEVEL STRING)
+append_manifest_config(MANIFEST_CONFIG_H_CONTENT CONFIG_TFM_SPM_BACKEND STRING)
+
 parse_field_from_yaml("${MANIFEST_LISTS}" conditional CONDITIONS)
-
-# Isolation level and backend are required by the manifest tool
-string(APPEND MANIFEST_CONFIG_H_CONTENT
-       "#cmakedefine TFM_ISOLATION_LEVEL  @TFM_ISOLATION_LEVEL@\r\n")
-string(APPEND MANIFEST_CONFIG_H_CONTENT
-       "#cmakedefine CONFIG_TFM_SPM_BACKEND @CONFIG_TFM_SPM_BACKEND@\r\n")
-
 foreach(CON ${CONDITIONS})
-    # Secure Partitions may share the same conditions, perform duplication check here
-    string(FIND ${MANIFEST_CONFIG_H_CONTENT} ${CON} CON_EXISTS)
-    if (${CON_EXISTS} EQUAL -1) # Not found
-        string(APPEND MANIFEST_CONFIG_H_CONTENT
-               "#cmakedefine01 ${CON}\r\n")
+    append_manifest_config(MANIFEST_CONFIG_H_CONTENT ${CON} BOOL)
+endforeach()
+
+parse_field_from_yaml("${MANIFEST_FILES}" stack_size STACK_SIZES)
+foreach(STK_SIZE ${STACK_SIZES})
+    if (NOT STK_SIZE GREATER 0)
+        # The "stack_size" might not be a valid number. Treat it as a configuration
+        append_manifest_config(MANIFEST_CONFIG_H_CONTENT ${STK_SIZE} STRING)
+    endif()
+endforeach()
+
+parse_field_from_yaml("${MANIFEST_FILES}" heap_size HEAP_SIZES)
+foreach(HEAP_SIZE ${HEAP_SIZES})
+    if (NOT HEAP_SIZE GREATER 0)
+        # The "heap_size" might not be a valid number. Treat it as a configuration
+        append_manifest_config(MANIFEST_CONFIG_H_CONTENT ${HEAP_SIZE} STRING)
     endif()
 endforeach()
 
