@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2016-2020 ARM Limited
+; * Copyright (c) 2016-2022 ARM Limited
 ; * Copyright (c) 2020-2021 IAR Systems AB
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
@@ -166,6 +166,8 @@ __Vectors_Size  EQU     __Vectors_End - __Vectors
 ; Reset Handler
 
 Reset_Handler
+                LDR     R0, =SystemInit
+                BLX     R0
                 MRS     R0, control    ; Get control value
                 MOVS    R1, #2
                 ORRS    R0, R0, R1     ; Select switch to PSP

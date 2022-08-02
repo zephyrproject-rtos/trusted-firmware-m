@@ -250,6 +250,8 @@ Reset_Handler:
     blt    .L_loop3
 #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
 
+    bl      SystemInit
+
     mrs     r0, control    /* Get control value */
     orr     r0, r0, #2     /* Select switch to PSP */
     msr     control, r0

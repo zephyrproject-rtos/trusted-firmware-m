@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2020 ARM Limited
+; * Copyright (c) 2009-2022 ARM Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -304,6 +304,8 @@ Reset_Handler:
     bgt    .L_loop3
 .L_loop3_done:
 #endif /* __STARTUP_CLEAR_BSS_MULTIPLE || __STARTUP_CLEAR_BSS */
+
+    bl      SystemInit
 
     mrs     r0, control    /* Get control value */
     movs    r1, #2
