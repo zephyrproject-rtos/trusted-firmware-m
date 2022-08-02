@@ -118,6 +118,7 @@ set(PS_VALIDATE_METADATA_FROM_FLASH     ON          CACHE BOOL      "Validate fi
 set(PS_MAX_ASSET_SIZE                   "2048"      CACHE STRING    "The maximum asset size to be stored in the Protected Storage area")
 set(PS_NUM_ASSETS                       "10"        CACHE STRING    "The maximum number of assets to be stored in the Protected Storage area")
 set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in Protected Storage")
+set(PS_STACK_SIZE                       "0x700"     CACHE STRING    "The stack size of the Protected Storage Secure Partition")
 
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
 set(ITS_CREATE_FLASH_LAYOUT             ON          CACHE BOOL      "Create flash FS if it doesn't exist for Internal Trusted Storage partition")
@@ -126,6 +127,7 @@ set(ITS_VALIDATE_METADATA_FROM_FLASH    ON          CACHE BOOL      "Validate fi
 set(ITS_MAX_ASSET_SIZE                  "512"       CACHE STRING    "The maximum asset size to be stored in the Internal Trusted Storage area")
 set(ITS_NUM_ASSETS                      "10"        CACHE STRING    "The maximum number of assets to be stored in the Internal Trusted Storage area")
 set(ITS_BUF_SIZE                        ""          CACHE STRING    "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
+set(ITS_STACK_SIZE                      "0x720"     CACHE STRING    "The stack size of the Internal Trusted Storage Secure Partition")
 
 set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
 # CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
@@ -144,16 +146,19 @@ set(CRYPTO_IOVEC_BUFFER_SIZE            5120        CACHE STRING    "Default siz
 set(CRYPTO_NV_SEED                      ON          CACHE BOOL      "Use stored NV seed to provide entropy")
 set(CRYPTO_SINGLE_PART_FUNCS_DISABLED   OFF         CACHE BOOL      "Only enable multi-part operations in Hash, MAC, AEAD and symmetric ciphers, to optimize memory footprint in resource-constrained devices")
 set(CRYPTO_TFM_BUILTIN_KEYS_DRIVER      ON          CACHE BOOL      "Whether to allow crypto service to store builtin keys. Without this, ALL builtin keys must be stored in a platform-specific location")
+set(CRYPTO_STACK_SIZE                   "0x1B00"    CACHE STRING    "The stack size of the Crypto Secure Partition")
 
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Initial Attestation partition")
 set(SYMMETRIC_INITIAL_ATTESTATION       OFF         CACHE BOOL      "Use symmetric crypto for inital attestation")
 set(ATTEST_INCLUDE_OPTIONAL_CLAIMS      ON          CACHE BOOL      "Include optional claims in initial attestation token")
 set(ATTEST_INCLUDE_COSE_KEY_ID          OFF         CACHE BOOL      "Include COSE key-id in initial attestation token")
 set(ATTEST_TOKEN_PROFILE                "PSA_IOT_1" CACHE STRING    "Set the initial attestation token profile. Options: PSA_IOT_1, PSA_2_0_0")
+set(ATTEST_STACK_SIZE                   "0xA20"     CACHE STRING    "The stack size of the Initial Attestation Secure Partition")
 
 set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Platform partition")
 set(PLATFORM_SERVICE_INPUT_BUFFER_SIZE  64          CACHE STRING    "Size of input buffer in platform service.")
 set(PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE 64          CACHE STRING    "Size of output buffer in platform service.")
+set(PLATFORM_SP_STACK_SIZE              "0x500"     CACHE STRING    "The stack size of the TF-M Platform Secure Partition")
 
 set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audit Log partition")
 
@@ -164,6 +169,7 @@ set(TFM_PARTITION_FIRMWARE_UPDATE       OFF         CACHE BOOL      "Enable firm
 set(TFM_FWU_BOOTLOADER_LIB              "mcuboot"   CACHE STRING    "Bootloader configure file for Firmware Update partition")
 set(PSA_FWU_MAX_BLOCK_SIZE              1024        CACHE STRING    "The maximum permitted size for block in psa_fwu_write, in bytes.")
 set(TFM_FWU_BUF_SIZE                    ""          CACHE STRING    "Size of the FWU internal data transfer buffer (defaults to PSA_FWU_MAX_BLOCK_SIZE if not set)")
+set(FWU_STACK_SIZE                      "0x600"     CACHE STRING    "The stack size of the Firmware Update Secure Partition")
 
 ################################## Dependencies ################################
 

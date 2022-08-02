@@ -12,7 +12,7 @@
   "priority": "NORMAL",
   "model": "SFN",
   "entry_init": "tfm_its_entry",
-  "stack_size": "0x720",
+  "stack_size": "ITS_STACK_SIZE",
   "secure_functions": [
     {
       "sfid": "TFM_ITS_SET",

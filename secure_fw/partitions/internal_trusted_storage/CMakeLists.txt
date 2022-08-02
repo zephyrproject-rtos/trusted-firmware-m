@@ -91,13 +91,15 @@ include(utils)
         PS_MAX_ASSET_SIZE;
         PS_NUM_ASSETS;
         PS_CRYPTO_AEAD_ALG;
+        PS_STACK_SIZE;
 
         ITS_CREATE_FLASH_LAYOUT;
         ITS_RAM_FS;
         ITS_VALIDATE_METADATA_FROM_FLASH;
         ITS_MAX_ASSET_SIZE;
         ITS_NUM_ASSETS;
-        ITS_BUF_SIZE
+        ITS_BUF_SIZE;
+        ITS_STACK_SIZE
     "
     )
 

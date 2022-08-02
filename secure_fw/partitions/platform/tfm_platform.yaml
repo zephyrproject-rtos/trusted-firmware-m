@@ -12,7 +12,7 @@
   "priority": "NORMAL",
   "model": "SFN",
   "entry_init": "platform_sp_init",
-  "stack_size": "0x0500",
+  "stack_size": "PLATFORM_SP_STACK_SIZE",
   "services": [
     {
       "name": "TFM_PLATFORM_SERVICE",

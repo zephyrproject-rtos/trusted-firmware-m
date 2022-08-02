@@ -99,6 +99,7 @@ include(utils)
         CRYPTO_ENGINE_BUF_SIZE;
         CRYPTO_CONC_OPER_NUM;
         CRYPTO_IOVEC_BUFFER_SIZE;
+        CRYPTO_STACK_SIZE;
     "
     )
 

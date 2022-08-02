@@ -79,3 +79,12 @@ target_compile_definitions(tfm_partition_defs
     INTERFACE
         TFM_PARTITION_PLATFORM
 )
+
+################ Display the configuration being applied #######################
+
+include(utils)
+dump_options("Platform Partition config"
+"
+    PLATFORM_SP_STACK_SIZE
+"
+)

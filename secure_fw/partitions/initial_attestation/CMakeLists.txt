@@ -118,3 +118,12 @@ target_compile_definitions(tfm_partition_defs
     INTERFACE
     TFM_PARTITION_INITIAL_ATTESTATION
 )
+
+################ Display the configuration being applied #######################
+
+include(utils)
+dump_options("Initial Attestation config"
+"
+    ATTEST_STACK_SIZE
+"
+)

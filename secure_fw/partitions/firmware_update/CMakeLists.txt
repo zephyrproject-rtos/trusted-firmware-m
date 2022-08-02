@@ -90,3 +90,12 @@ target_compile_definitions(tfm_partition_defs
 configure_file(${CMAKE_SOURCE_DIR}/interface/include/psa/fwu_config.h.in
                ${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h
                @ONLY)
+
+################ Display the configuration being applied #######################
+
+include(utils)
+dump_options("Firmware Update Partition config"
+"
+    FWU_STACK_SIZE
+"
+)

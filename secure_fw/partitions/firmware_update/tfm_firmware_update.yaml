@@ -10,9 +10,9 @@
   "name": "TFM_SP_FWU",
   "type": "PSA-ROT",
   "priority": "NORMAL",
-  "model": "SFN",  
+  "model": "SFN",
   "entry_init": "tfm_fwu_entry",
-  "stack_size": "0x600",
+  "stack_size": "FWU_STACK_SIZE",
   "secure_functions": [
     {
       "name": "TFM_FWU_WRITE",
