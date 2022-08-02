@@ -1,7 +1,7 @@
 From 37bad45c56543a289be7854a8723d9b29c0b8cb2 Mon Sep 17 00:00:00 2001
 From: Raef Coles <raef.coles@arm.com>
 Date: Wed, 21 Jul 2021 12:42:15 +0100
-Subject: [PATCH 5/5] Add LMS implementation
+Subject: [PATCH 5/6] Add LMS implementation
 
 Also an LM-OTS implementation as one is required for LMS.
 

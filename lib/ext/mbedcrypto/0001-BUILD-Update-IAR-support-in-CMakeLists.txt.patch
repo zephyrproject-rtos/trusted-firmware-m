@@ -1,7 +1,7 @@
 From c0e88bba61a814023032be4f1fabe8aff3deb00c Mon Sep 17 00:00:00 2001
 From: TTornblom <thomas.tornblom@iar.com>
 Date: Thu, 16 Apr 2020 13:53:38 +0200
-Subject: [PATCH 1/5] BUILD: Update IAR support in CMakeLists.txt
+Subject: [PATCH 1/6] BUILD: Update IAR support in CMakeLists.txt
 
 Applied the same change as in mbed-crypto for using this as a sub
 project with the IAR toolchain.
