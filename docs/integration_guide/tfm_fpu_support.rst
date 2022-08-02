@@ -21,7 +21,7 @@ Environment (NSPE).
 * Does not support use FPU in First-Level Interrupt Handling (FLIH) [6]_ at
   current stage.
 
-Please refer to Arm musca S1 [7]_ platform as a reference implementation when
+Please refer to Arm AN521 or AN552 platform as a reference implementation when
 you enable FP support on your platforms.
 
 .. Note::
@@ -29,6 +29,11 @@ you enable FP support on your platforms.
     TF-M SPE services that you enable do not require FP, you can set the CMake
     configuration ``CONFIG_TFM_ENABLE_CP10CP11`` to ``ON`` and **ignore** any
     configurations described below.
+
+.. Note::
+    FPU test issue has not been fixed yet on Musca-S1 [7]_. When running FPU
+    tests on Musca-S1, secure thread fails to trigger secure interrupt. FPU test
+    is disabled by default on Musca-S1 until the issue is fixed.
 
 .. Note::
     ``GNU Arm Embedded Toolchain 10.3-2021.10`` may have issue that reports

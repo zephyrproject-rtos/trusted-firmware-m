@@ -63,6 +63,13 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_platform_init(void)
 #if defined(TEST_NS_FPU)
     /* Set IRQn in non-secure mode */
     NVIC_SetTargetState(TFM_FPU_NS_TEST_IRQ);
+#if (TFM_LVL >= 2)
+    /* On isolation level 2, FPU test ARoT service runs in unprivileged mode.
+     * Set SCB.CCR.USERSETMPEND as 1 to enable FPU test service to access STIR
+     * register.
+     */
+    SCB->CCR |= SCB_CCR_USERSETMPEND_Msk;
+#endif
 #endif
 
     FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
