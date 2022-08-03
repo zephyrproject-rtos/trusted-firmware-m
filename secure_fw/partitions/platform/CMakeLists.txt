@@ -47,6 +47,12 @@ target_link_libraries(tfm_psa_rot_partition_platform
         tfm_spm
 )
 
+target_compile_definitions(tfm_psa_rot_partition_platform
+    PRIVATE
+        INPUT_BUFFER_SIZE=${PLATFORM_SERVICE_INPUT_BUFFER_SIZE}
+        OUTPUT_BUFFER_SIZE=${PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE}
+)
+
 ############################ Secure API ########################################
 
 target_sources(tfm_sprt

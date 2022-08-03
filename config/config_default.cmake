@@ -152,6 +152,8 @@ set(ATTEST_INCLUDE_COSE_KEY_ID          OFF         CACHE BOOL      "Include COS
 set(ATTEST_TOKEN_PROFILE                "PSA_IOT_1" CACHE STRING    "Set the initial attestation token profile. Options: PSA_IOT_1, PSA_2_0_0")
 
 set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Platform partition")
+set(PLATFORM_SERVICE_INPUT_BUFFER_SIZE  64          CACHE STRING    "Size of input buffer in platform service.")
+set(PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE 64          CACHE STRING    "Size of output buffer in platform service.")
 
 set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audit Log partition")
 

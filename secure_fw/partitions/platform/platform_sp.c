@@ -21,8 +21,13 @@
 #include "psa/service.h"
 #include "region_defs.h"
 
-#define INPUT_BUFFER_SIZE  64
-#define OUTPUT_BUFFER_SIZE 64
+#ifndef INPUT_BUFFER_SIZE
+#define INPUT_BUFFER_SIZE      64
+#endif
+
+#ifndef OUTPUT_BUFFER_SIZE
+#define OUTPUT_BUFFER_SIZE     64
+#endif
 
 typedef enum tfm_platform_err_t (*plat_func_t)(const psa_msg_t *msg);
 #endif /* TFM_PSA_API */
