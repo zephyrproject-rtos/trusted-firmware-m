@@ -218,8 +218,14 @@ is set for indexing stateless services. It must be either ``"auto"`` or a
 number in the range [1, 32] in current implementation and may extend. Also the
 ``connection-based`` attribute must be set to ``false`` for stateless services.
 
-Here is the stateless handle allocation for partitions in TF-M. Partitions not
-listed are not applied to stateless mechanism yet.
+The indexes of stateless handles are divided into two ranges for different
+usages.
+Indexes [1, 16] are assigned to TF-M Secure Partitions.
+The rest indexes [17, 32] are reserved for any other Secure Partitions, for
+example Secure Partitions in ``tf-m-tests`` and ``tf-m-extras``.
+
+The following table summaries the stateless handle allocation for the TF-M
+Secure Partitions.
 
 .. table:: Stateless Handle table
    :widths: auto
@@ -234,6 +240,9 @@ listed are not applied to stateless mechanism yet.
    TFM_SP_FWU                      5
    TFM_SP_PLATFORM                 6
    =============================== =======================
+
+For the indexes of other Secure Partitions, please refer to their manifests or
+documentations.
 
 mmio_regions
 ------------
