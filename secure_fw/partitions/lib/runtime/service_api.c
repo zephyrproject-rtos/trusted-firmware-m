@@ -32,7 +32,6 @@ __attribute__((naked))
 void tfm_flih_func_return(psa_flih_result_t result)
 {
     __ASM volatile("SVC "M2S(TFM_SVC_FLIH_FUNC_RETURN)"           \n"
-                   "BX  r0                                        \n"
                    );
 }
 #endif /* TFM_PSA_API && TFM_LVL != 1 */
