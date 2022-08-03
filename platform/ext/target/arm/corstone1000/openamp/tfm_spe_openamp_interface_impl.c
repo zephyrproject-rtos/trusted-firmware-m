@@ -36,6 +36,11 @@ static struct metal_device shm_device = {
     .irq_info = NULL
 };
 
+/* Space to be used by virtqueues */
+#define VQ_STATIC_SIZE  (sizeof(struct virtqueue) + (VRING_SIZE * sizeof(struct vq_desc_extra)))
+uint8_t vq1_static_space[VQ_STATIC_SIZE];
+uint8_t vq2_static_space[VQ_STATIC_SIZE];
+
 static struct virtio_vring_info rvrings[2];
 
 static struct virtio_device vdev;
@@ -206,16 +211,12 @@ int32_t tfm_to_openamp_init(openamp_to_tfm_callback cb,
     }
 
     /* setup vdev */
-    vq[0] = virtqueue_allocate(VRING_SIZE);
-    if (vq[0] == NULL) {
-        SPMLOG_ERRMSG("virtqueue_allocate failed to alloc vq[0]\r\n");
-        return ERROR;
-    }
-    vq[1] = virtqueue_allocate(VRING_SIZE);
-    if (vq[1] == NULL) {
-        SPMLOG_ERRMSG("virtqueue_allocate failed to alloc vq[1]\r\n");
-        return ERROR;
-    }
+
+    memset(vq1_static_space, 0x0, VQ_STATIC_SIZE);
+    vq[0] = (struct virtqueue *)vq1_static_space;
+
+    memset(vq2_static_space, 0x0, VQ_STATIC_SIZE);
+    vq[1] = (struct virtqueue *)vq2_static_space;
 
     vdev.role = RPMSG_MASTER;
     vdev.vrings_num = VRING_COUNT;
