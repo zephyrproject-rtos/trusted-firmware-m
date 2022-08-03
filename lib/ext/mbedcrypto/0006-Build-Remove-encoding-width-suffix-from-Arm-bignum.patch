@@ -13,7 +13,7 @@ index 962d7a97..9cc84d06 100644
 --- a/library/bn_mul.h
 +++ b/library/bn_mul.h
 @@ -717,10 +717,10 @@
-
+ 
  #define MULADDC_X1_CORE                                         \
             ".p2align  2                                 \n\t"   \
 -            "ldr.w    %[a], [%[in]], #4                 \n\t"   \
@@ -23,7 +23,7 @@ index 962d7a97..9cc84d06 100644
              "umaal    %[b], %[carry], %[scalar], %[a]   \n\t"   \
 -            "str.w    %[b], [%[acc]], #4                \n\t"
 +            "str      %[b], [%[acc]], #4                \n\t"
-
+ 
  #define MULADDC_X1_STOP                                      \
              : [a]      "=&r" (tmp_a),                        \
 @@ -751,14 +751,14 @@
@@ -44,9 +44,9 @@ index 962d7a97..9cc84d06 100644
 -            "str.w    %[b1], [%[acc], #-4]                \n\t"
 +            "str      %[b0], [%[acc], #-8]                \n\t"   \
 +            "str      %[b1], [%[acc], #-4]                \n\t"
-
+ 
  #define MULADDC_X2_STOP                                      \
              : [a0]     "=&r" (tmp_a0),                       \
---
+-- 
 2.34.1
 
