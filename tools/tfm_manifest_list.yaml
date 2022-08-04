@@ -38,7 +38,7 @@
       }
     },
     {
-      "name": "Protected Storage Service",
+      "name": "Protected Storage Partition",
       "short_name": "TFM_SP_PS",
       "manifest": "../secure_fw/partitions/protected_storage/tfm_protected_storage.yaml",
       "output_path": "secure_fw/partitions/protected_storage",
@@ -53,7 +53,7 @@
       }
     },
     {
-      "name": "TF-M Internal Trusted Storage Service",
+      "name": "TF-M Internal Trusted Storage Partition",
       "short_name": "TFM_SP_ITS",
       "manifest": "../secure_fw/partitions/internal_trusted_storage/tfm_internal_trusted_storage.yaml",
       "output_path": "secure_fw/partitions/internal_trusted_storage",
@@ -68,7 +68,7 @@
       }
     },
     {
-      "name": "TFM Audit Log Service",
+      "name": "TFM Audit Log Partition",
       "short_name": "TFM_SP_AUDIT_LOG",
       "manifest": "../secure_fw/partitions/audit_logging/tfm_audit_logging.yaml",
       "output_path": "secure_fw/partitions/audit_logging",
@@ -83,7 +83,7 @@
       }
     },
     {
-      "name": "TFM Crypto Service",
+      "name": "TFM Crypto Partition",
       "short_name": "TFM_SP_CRYPTO",
       "manifest": "../secure_fw/partitions/crypto/tfm_crypto.yaml",
       "output_path": "secure_fw/partitions/crypto",
@@ -98,7 +98,7 @@
       }
     },
     {
-      "name": "TFM Platform Service",
+      "name": "TFM Platform Partition",
       "short_name": "TFM_SP_PLATFORM",
       "manifest": "../secure_fw/partitions/platform/tfm_platform.yaml",
       "output_path": "secure_fw/partitions/platform",
@@ -113,7 +113,7 @@
       }
     },
     {
-      "name": "TFM Initial Attestation Service",
+      "name": "TFM Initial Attestation Partition",
       "short_name": "TFM_SP_INITIAL_ATTESTATION",
       "manifest": "../secure_fw/partitions/initial_attestation/tfm_initial_attestation.yaml",
       "output_path": "secure_fw/partitions/initial_attestation",
@@ -128,7 +128,7 @@
       }
     },
     {
-      "name": "TF-M PSA Proxy Service",
+      "name": "TF-M PSA Proxy Partition",
       "short_name": "TFM_SP_PSA_PROXY",
       "manifest": "../secure_fw/partitions/psa_proxy/tfm_psa_proxy.yaml",
       "output_path": "secure_fw/partitions/psa_proxy",
@@ -143,7 +143,7 @@
       }
     },
     {
-      "name": "TFM Firmware Update Service",
+      "name": "TFM Firmware Update Partition",
       "short_name": "TFM_SP_FWU",
       "manifest": "../secure_fw/partitions/firmware_update/tfm_firmware_update.yaml",
       "output_path": "secure_fw/partitions/firmware_update",

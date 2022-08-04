@@ -331,7 +331,7 @@ Reference configuration example:
 .. code-block:: yaml
 
     {
-      "name": "TFM Example Service",
+      "name": "TFM Example Partition",
       "short_name": "TFM_SP_EXAMPLE",
       "manifest": "secure_fw/partitions/example/tfm_example_partition.yaml",
       "conditional": "@TFM_PARTITION_EXAMPLE@",
@@ -655,3 +655,5 @@ Reference
 --------------
 
 *Copyright (c) 2019-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*
