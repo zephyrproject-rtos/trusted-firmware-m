@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 ARM Limited
+ * Copyright (c) 2016 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef __DRIVER_PPC_H__
-#define __DRIVER_PPC_H__
+#ifndef __CMSIS_PPC_DRV_H__
+#define __CMSIS_PPC_DRV_H__
 
 #include "Driver_Common.h"
 
 /* API version */
 #define ARM_PPC_API_VERSION ARM_DRIVER_VERSION_MAJOR_MINOR(1,0)
-
-/* Error code returned by the driver functions */
-#define ARM_PPC_ERR_NOT_INIT        (ARM_DRIVER_ERROR_SPECIFIC - 1)
-                                          ///< PPC not initialized */
-#define ARM_PPC_ERR_NOT_PERMITTED   (ARM_DRIVER_ERROR_SPECIFIC - 2)
-                                          ///< PPC operation not permitted */
-#define ARM_PPC_ERR_UNSPECIFIED     (ARM_DRIVER_ERROR_SPECIFIC - 3)
-                                          ///< Unspecified error */
 
 /* Security attribute used to configure the peripheral */
 typedef enum _ARM_PPC_SecAttr {
@@ -53,7 +45,7 @@ typedef enum _ARM_PPC_PrivAttr {
   \return      Returns ARM error code.
 
   \fn          int32_t ARM_PPC_Uninitialize (void)
-  \brief       De-initialize PPC Interface.
+  \brief       De-initialize MPC Interface.
   \return      Returns ARM error code.
 
   \fn          int32_t ARM_PPC_ConfigPeriph (uint8_t periph,
@@ -105,7 +97,7 @@ typedef enum _ARM_PPC_PrivAttr {
 */
 
 /**
- * \brief Access structure of the PPC Driver.
+ * \brief Access structure of the MPC Driver.
  */
 typedef struct _ARM_DRIVER_PPC {
   ARM_DRIVER_VERSION  (*GetVersion)       (void);            ///< Pointer to \ref ARM_PPC_GetVersion   : Get driver version.
@@ -120,4 +112,5 @@ typedef struct _ARM_DRIVER_PPC {
   uint32_t            (*InterruptState)   (void);            ///< Pointer to \ref ARM_PPC_InterruptState   : PPC interrupt State.
 } const ARM_DRIVER_PPC;
 
-#endif /* __DRIVER_PPC_H__ */
+#endif /* __CMSIS_PPC_DRV_H__ */
+

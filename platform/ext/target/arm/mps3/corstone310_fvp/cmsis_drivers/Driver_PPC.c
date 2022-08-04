@@ -43,32 +43,9 @@ static const ARM_DRIVER_VERSION DriverVersion = {
     ARM_PPC_DRV_VERSION
 };
 
-static ARM_DRIVER_VERSION ARM_PPC_GetVersion(void)
+static ARM_DRIVER_VERSION PPC_CORSTONE310_GetVersion(void)
 {
     return DriverVersion;
-}
-
-/*
- * \brief Translates error codes from native API to CMSIS API.
- *
- * \param[in] err  Error code to translate (\ref ppc_corstone310_error_t).
- *
- * \return Returns CMSIS error code.
- */
-static int32_t error_trans(enum ppc_corstone310_error_t err)
-{
-    switch(err) {
-    case PPC_CORSTONE310_ERR_NONE:
-        return ARM_DRIVER_OK;
-    case PPC_CORSTONE310_ERR_INVALID_PARAM:
-        return ARM_DRIVER_ERROR_PARAMETER;
-    case PPC_CORSTONE310_ERR_NOT_INIT:
-        return ARM_PPC_ERR_NOT_INIT;
-    case PPC_CORSTONE310_ERR_NOT_PERMITTED:
-        return ARM_PPC_ERR_NOT_PERMITTED;
-    default:
-        return ARM_PPC_ERR_UNSPECIFIED;
-    }
 }
 
 #if (defined (RTE_MAIN0_PPC_CORSTONE310) && (RTE_MAIN0_PPC_CORSTONE310 == 1))
