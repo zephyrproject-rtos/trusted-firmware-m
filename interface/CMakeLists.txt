@@ -57,9 +57,14 @@ target_compile_definitions(psa_interface
 
 ###################### PSA api (S lib) #########################################
 
-target_sources(tfm_secure_api
-    INTERFACE
-    $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c>
+target_sources(tfm_sprt
+    PRIVATE
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c>
+)
+
+target_compile_definitions(tfm_sprt
+    PUBLIC
+        CONFIG_TFM_BUILDING_SPE=1
 )
 
 ###################### Export configurations to NS #############################

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -26,11 +26,9 @@ target_sources(tfm_psa_rot_partition_ns_agent_mailbox
 target_link_libraries(tfm_psa_rot_partition_ns_agent_mailbox
     PRIVATE
         platform_common_interface
-        psa_interface
         tfm_spm
         tfm_sprt
         platform_s
-        tfm_secure_api
 )
 
 # The generated sources

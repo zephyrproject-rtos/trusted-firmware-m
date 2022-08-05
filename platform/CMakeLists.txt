@@ -86,7 +86,6 @@ target_link_libraries(platform_s
         tfm_fih_headers
     PRIVATE
         psa_interface
-        tfm_secure_api
         tfm_partition_defs
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:tfm_sprt>
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:crypto_service_mbedcrypto>

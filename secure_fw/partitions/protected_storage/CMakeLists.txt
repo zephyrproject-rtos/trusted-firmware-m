@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -61,8 +61,6 @@ target_sources(tfm_partitions
 
 target_link_libraries(tfm_app_rot_partition_ps
     PRIVATE
-        tfm_secure_api
-        psa_interface
         secure_fw
         platform_s
         tfm_sprt

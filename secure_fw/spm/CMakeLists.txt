@@ -81,7 +81,7 @@ target_include_directories(tfm_spm_defs
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/boot>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/interface>
         $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func/include>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/arch/include>
+        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa/arch>
 )
 
 target_link_libraries(tfm_spm
@@ -89,10 +89,8 @@ target_link_libraries(tfm_spm
         tfm_arch
         tfm_spm_defs
     PRIVATE
-        psa_interface
         platform_s
         tfm_boot_status
-        tfm_secure_api
         tfm_partitions
         tfm_fih_headers
         tfm_sprt
@@ -140,13 +138,6 @@ target_include_directories(tfm_arch
 target_include_directories(tfm_boot_status
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/boot>
-)
-
-############################ Secure API ########################################
-
-target_link_libraries(tfm_secure_api
-    INTERFACE
-        tfm_spm_defs
 )
 
 ############################# Secure veneers ###################################

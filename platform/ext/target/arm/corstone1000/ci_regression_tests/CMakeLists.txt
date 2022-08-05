@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-22, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -30,7 +30,7 @@ target_include_directories(corstone1000_test_s
 target_link_libraries(corstone1000_test_s
     PRIVATE
         tfm_test_suite_extra_common
-        tfm_sp_log_raw
+        tfm_sprt
 )
 
 target_compile_definitions(corstone1000_test_s

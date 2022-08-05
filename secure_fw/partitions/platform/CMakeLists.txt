@@ -42,9 +42,7 @@ target_include_directories(tfm_partitions
 target_link_libraries(tfm_psa_rot_partition_platform
     PRIVATE
         platform_s
-        psa_interface
-        tfm_secure_api
-        tfm_spm
+        tfm_sprt
 )
 
 target_compile_definitions(tfm_psa_rot_partition_platform

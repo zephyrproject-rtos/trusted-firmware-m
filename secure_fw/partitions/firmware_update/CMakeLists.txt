@@ -47,8 +47,6 @@ add_subdirectory(bootloader/${TFM_FWU_BOOTLOADER_LIB})
 
 target_link_libraries(tfm_psa_rot_partition_fwu
     PRIVATE
-        tfm_secure_api
-        psa_interface
         platform_s
         tfm_sprt
 )

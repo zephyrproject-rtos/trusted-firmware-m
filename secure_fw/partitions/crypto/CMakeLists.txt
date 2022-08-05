@@ -57,10 +57,8 @@ target_include_directories(tfm_partitions
 # Linking to external interfaces
 target_link_libraries(tfm_psa_rot_partition_crypto
     PRIVATE
-        tfm_secure_api
         platform_s
         crypto_service_mbedcrypto
-        psa_interface
         tfm_sprt
 )
 target_compile_definitions(tfm_psa_rot_partition_crypto
