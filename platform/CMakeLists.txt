@@ -150,6 +150,11 @@ if(TFM_PARTITION_CRYPTO)
         PRIVATE
             $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
     )
+
+    target_compile_options(platform_crypto_keys
+        PUBLIC
+            ${COMPILER_CP_FLAG}
+    )
 endif()
 
 #========================= Platform BL2 =======================================#
