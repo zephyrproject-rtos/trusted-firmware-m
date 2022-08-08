@@ -6,7 +6,8 @@
 #
 #-------------------------------------------------------------------------------
 
-if (NOT CONFIG_TFM_FLIH_API AND NOT CONFIG_TFM_SLIH_API)
+if (NOT CONFIG_TFM_FLIH_API AND NOT CONFIG_TFM_SLIH_API AND
+    NOT TFM_MULTI_CORE_TOPOLOGY)
     return()
 endif()
 
