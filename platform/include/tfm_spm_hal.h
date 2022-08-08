@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -11,9 +11,9 @@
 #define __TFM_SPM_HAL_H__
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "cmsis.h"
 #include "fih.h"
-#include "tfm_secure_api.h"
 #include "tfm_plat_defs.h"
 
 /*

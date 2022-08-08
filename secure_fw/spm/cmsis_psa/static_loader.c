@@ -13,7 +13,6 @@
 #include "spm_ipc.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_plat_defs.h"
-#include "tfm_spm_hal.h"
 #include "utilities.h"
 #include "ffm/backend.h"
 #include "load/partition_defs.h"

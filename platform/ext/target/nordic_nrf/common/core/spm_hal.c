@@ -1,13 +1,15 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Nordic Semiconductor ASA. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include <arm_cmse.h>
 #include <stdio.h>
 #include "cmsis.h"
+#include "tfm_spm_log.h"
 #include "tfm_spm_hal.h"
 #include "tfm_platform_core_api.h"
 #include "target_cfg.h"

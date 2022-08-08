@@ -13,7 +13,6 @@
 #include "svc_num.h"
 #include "tfm_arch.h"
 #include "tfm_hal_device_header.h"
-#include "tfm_secure_api.h"
 #include "tfm_svcalls.h"
 #include "utilities.h"
 #if defined(__FPU_USED) && (__FPU_USED == 1U) && (CONFIG_TFM_FP >= 1)

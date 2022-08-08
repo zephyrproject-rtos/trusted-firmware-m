@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
  * Copyright (c) 2019-2020 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,6 @@
 #include "platform_description.h"
 #include "device_definition.h"
 #include "region_defs.h"
-#include "tfm_secure_api.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
 #include "tfm_assert.h"

@@ -8,7 +8,6 @@
 
 #include "array.h"
 #include "psa/initial_attestation.h"
-#include "tfm_secure_api.h"
 #ifdef TFM_PSA_API
 #include "psa/client.h"
 #include "psa_manifest/sid.h"

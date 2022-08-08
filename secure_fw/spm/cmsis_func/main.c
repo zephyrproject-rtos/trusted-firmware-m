@@ -7,6 +7,8 @@
  *
  */
 
+#include <arm_cmse.h>
+
 #include "arch.h"
 #include "fih.h"
 #include "ffm/tfm_boot_data.h"

@@ -9,6 +9,7 @@
 
 #include "bitops.h"
 #include "current.h"
+#include "svc_num.h"
 #include "tfm_arch.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_hal_isolation.h"

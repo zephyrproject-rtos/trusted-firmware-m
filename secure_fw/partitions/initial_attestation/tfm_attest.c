@@ -1,18 +1,19 @@
 /*
- * Copyright (c) 2019-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "tfm_api.h"
-#include "tfm_secure_api.h"
 #include "service_api.h"
 #include "attest.h"
 #include "psa/initial_attestation.h"
 #include "tfm_boot_status.h"
 
-#ifdef TFM_PSA_API
+#ifndef TFM_PSA_API
+#include "tfm_secure_api.h"
+#else
 extern int32_t g_attest_caller_id;
 #endif
 

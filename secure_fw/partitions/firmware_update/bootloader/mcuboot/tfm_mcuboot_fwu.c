@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,7 +16,9 @@
 #include "tfm_fwu_req_mngr.h"
 #include "tfm_boot_status.h"
 #include "service_api.h"
+#ifndef TFM_PSA_API
 #include "tfm_secure_api.h"
+#endif
 
 #if (MCUBOOT_IMAGE_NUMBER == 1)
 #define MAX_IMAGE_INFO_LENGTH    (sizeof(struct image_version) + \

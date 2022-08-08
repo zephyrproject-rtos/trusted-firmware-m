@@ -22,7 +22,7 @@
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
 #include "tfm_rpc.h"
-#include "tfm_spm_hal.h"
+#include "tfm_api.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_hal_platform.h"
 #include "tfm_psa_call_pack.h"

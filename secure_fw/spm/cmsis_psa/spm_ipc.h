@@ -16,7 +16,6 @@
 #include "current.h"
 #include "tfm_arch.h"
 #include "lists.h"
-#include "tfm_secure_api.h"
 #include "thread.h"
 #include "psa/service.h"
 #include "load/partition_defs.h"

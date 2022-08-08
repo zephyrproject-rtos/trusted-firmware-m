@@ -12,13 +12,15 @@
 #include <string.h>
 
 #include "psa/protected_storage.h"
-#include "tfm_secure_api.h"
+
 #include "tfm_api.h"
 #include "tfm_protected_storage.h"
 #ifdef TFM_PSA_API
 #include "psa/service.h"
 #include "psa_manifest/tfm_protected_storage.h"
 #include "tfm_ps_defs.h"
+#else
+#include "tfm_secure_api.h"
 #endif
 
 #ifndef TFM_PSA_API

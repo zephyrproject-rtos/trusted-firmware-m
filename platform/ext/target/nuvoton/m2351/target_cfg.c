@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited
+ * Copyright (c) 2018-2022 Arm Limited
  * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@
 #include "region_defs.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
-#include "tfm_secure_api.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof(arr[0]))
 

@@ -11,7 +11,7 @@
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_multi_core.h"
 #include "tfm_multi_core.h"
-#include "tfm_secure_api.h"
+#include "tfm_api.h"
 #include "utilities.h"
 #include "region.h"
 

@@ -12,7 +12,7 @@
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
-#include "tfm_spm_hal.h"
+#include "tfm_api.h"
 #include "tfm_spm_log.h"
 #include "tfm_version.h"
 #include "tfm_plat_otp.h"

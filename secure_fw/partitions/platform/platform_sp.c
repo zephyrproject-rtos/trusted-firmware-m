@@ -9,17 +9,16 @@
 
 #include "tfm_platform_system.h"
 #include "tfm_plat_nv_counters.h"
-#include "tfm_secure_api.h"
 #include "load/partition_defs.h"
 #include "psa_manifest/pid.h"
 
 #define NV_COUNTER_ID_SIZE  sizeof(enum tfm_nv_counter_t)
 
 #ifdef TFM_PSA_API
-#include "psa_manifest/tfm_platform.h"
 #include "psa/client.h"
 #include "psa/service.h"
 #include "region_defs.h"
+#include "psa_manifest/tfm_platform.h"
 
 #ifndef INPUT_BUFFER_SIZE
 #define INPUT_BUFFER_SIZE      64
@@ -30,6 +29,8 @@
 #endif
 
 typedef enum tfm_platform_err_t (*plat_func_t)(const psa_msg_t *msg);
+#else
+#include "tfm_secure_api.h"
 #endif /* TFM_PSA_API */
 
 enum tfm_platform_err_t platform_sp_system_reset(void)

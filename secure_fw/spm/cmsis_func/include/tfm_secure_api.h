@@ -10,32 +10,14 @@
 #ifndef __TFM_SECURE_API_H__
 #define __TFM_SECURE_API_H__
 
-#ifdef CONFIG_TFM_USE_TRUSTZONE
 #include <arm_cmse.h>
-#endif
 #include "tfm_arch.h"
 #include "tfm_api.h"
 #include "utilities.h"
 #include "tfm_boot_status.h"
 #include "psa/service.h"
-#ifdef TFM_PSA_API
-#include "svc_num.h"
-#else
 #include "tfm_core_svc.h"
-#endif /* TFM_PSA_API */
 
-/* Hide specific errors if not debugging */
-#ifdef TFM_CORE_DEBUG
-#define TFM_ERROR_STATUS(status) (status)
-#else
-#define TFM_ERROR_STATUS(status) (TFM_PARTITION_BUSY)
-#endif
-
-#ifndef TFM_LVL
-#error TFM_LVL is not defined!
-#endif
-
-#ifndef TFM_PSA_API
 extern void tfm_secure_api_error_handler(void);
 
 typedef int32_t(*sfn_t)(int32_t, int32_t, int32_t, int32_t);
@@ -90,6 +72,5 @@ bool tfm_core_is_ns_client(void)
     return (cmse_nonsecure_caller() != 0) ? true : false;
 #endif /* Check for GCC compiler version smaller than 7.3.1 */
 }
-#endif
 
 #endif /* __TFM_SECURE_API_H__ */
