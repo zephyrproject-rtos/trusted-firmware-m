@@ -48,8 +48,9 @@ next reset.
 A default RSA key pair is stored in the repository, public key is in ``keys.c``
 and private key is in ``root-RSA-3072.pem``.
 
-.. Warning::
-    DO NOT use them in production code, they are exclusively for testing!
+.. Danger::
+    DO NOT use the default keys in a production code, they are exclusively
+    for testing!
 
 The private key must be stored in a safe place outside of the repository.
 ``imgtool.py`` (found in the ``scripts`` directory in the MCUBoot repository,
@@ -416,7 +417,7 @@ MCUBoot related compile time switches can be set by cmake variables.
         ``SWAP_USING_SCRATCH`` or ``SWAP_USING_MOVE``, an image is needed in
         the primary image area as well, to trigger the update.
 
-    .. Warning::
+    .. Danger::
         DO NOT use the ``enc-rsa2048-pub.pem`` key in production code, it is
         exclusively for testing!
 

@@ -275,62 +275,6 @@ The Firmware Framework test suites are:
 Note that these map directly to the ``SUITE`` cmake variable used in the
 psa-arch-tests documentation.
 
-.. _Migration from legacy buildsystem:
-
-Migration from legacy buildsystem
----------------------------------
-
-The previous (legacy) cmake buildsystem made use of separate configuration
-files, where now build options are controlled by variables. For ease of
-transition, a table below is provided that maps the legacy files to the current
-variables, in the format of cmake command line parameters.
-
-+------------------------------------------+---------------------------------------+
-| File                                     | Cmake command line                    |
-+==========================================+=======================================+
-| ConfigDefault.cmake                      | -DTFM_LIB_MODEL=ON                    |
-+------------------------------------------+---------------------------------------+
-| ConfigCoreIPC.cmake                      | <no options>                          |
-+------------------------------------------+---------------------------------------+
-| ConfigCoreIPCTfmLevel2.cmake             | -DTFM_ISOLATION_LEVEL=2               |
-+------------------------------------------+---------------------------------------+
-| ConfigDefaultProfileS.cmake              | -DTFM_PROFILE=profile_small           |
-+------------------------------------------+---------------------------------------+
-| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium          |
-+------------------------------------------+---------------------------------------+
-| ConfigRegression.cmake                   | -DTEST_NS=ON -DTEST_S=ON              |
-+------------------------------------------+---------------------------------------+
-| ConfigRegressionIPC.cmake                | -DTEST_NS=ON -DTEST_S=ON              |
-+------------------------------------------+---------------------------------------+
-| ConfigRegressionIPCTfmLevel2.cmake       | -DTEST_NS=ON -DTEST_S=ON              |
-|                                          | -DTFM_ISOLATION_LEVEL=2               |
-+------------------------------------------+---------------------------------------+
-| ConfigRegressionProfileS.cmake           | -DTFM_PROFILE=profile_small           |
-|                                          | -DTEST_NS=ON -DTEST_S=ON              |
-+------------------------------------------+---------------------------------------+
-| ConfigRegressionProfileM.cmake           | -DTFM_PROFILE=profile_medium          |
-|                                          | -DTEST_NS=ON -DTEST_S=ON              |
-+------------------------------------------+---------------------------------------+
-| ConfigPsaApiTest.cmake                   | -DTEST_PSA_API=<test_suite>           |
-+------------------------------------------+---------------------------------------+
-| ConfigPsaApiTestIPC.cmake                | -DTEST_PSA_API=<test_suite>           |
-+------------------------------------------+---------------------------------------+
-| ConfigPsaApiTestIPCTfmLevel2.cmake       | -DTEST_PSA_API=<test_suite>           |
-|                                          | -DTFM_ISOLATION_LEVEL=2               |
-+------------------------------------------+---------------------------------------+
-| ConfigDefaultProfileM.cmake              | -DTFM_PROFILE=profile_medium          |
-| + profile_m_config_ext_ps_disabled.cmake | -DTFM_PARTITION_PROTECTED_STORAGE=OFF |
-+------------------------------------------+---------------------------------------+
-
-There has also been some changes to the PSA manifest file generation. The files
-are now generated into a separate tree in the ``<tfm build dir>/generated``
-directory. Therefore they have been removed from the source tree. Any changes
-should be made only to the template files.
-
-The API for the ``tools/tfm_parse_manifest_list.py`` script has also changed
-slightly. It is no longer required to be run manually as it is run as part of
-cmake.
-
 *******************
 TF-M build examples
 *******************

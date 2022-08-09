@@ -189,7 +189,7 @@ configuration of the Mbed Crypto library.
 References
 ----------
 
-.. [1] ``mbed-crypto`` repository which holds the PSA Crypto API specification and the Mbed Crypto reference implementation: \ https://github.com/ARMmbed/mbed-crypto
+.. [1] ``mbed-crypto`` repository which holds the PSA Crypto API specification and the Mbed Crypto reference implementation: \ https://github.com/Mbed-TLS
 
 
 --------------

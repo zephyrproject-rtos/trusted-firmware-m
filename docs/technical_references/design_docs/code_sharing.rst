@@ -183,7 +183,7 @@ addresses of public functions and global variables, and extraction of addresses
 is a requirement to share them among binaries. Therefore, a short patch was
 created for the mbed-crypto library, which "globalises" these function pointers:
 
-`lib/ext/mbedcrypto/0005-Enable-crypto-code-sharing-between-independent-binar.patch`
+`lib/ext/mbedcrypto/0002-Enable-crypto-code-sharing-between-independent-binar.patch`
 
 The patch need to manually applied in the mbedtls repo, if code sharing is
 enabled. The patch has no effect on the functional behaviour of the
@@ -202,7 +202,7 @@ are needed:
    to not need to list all the shared symbols by name. Only a simple pattern
    has to be provided, which matches the beginning of the symbol's name.
    Matching symbols will be shared. Examples are in :
-   `bl2/src/shared_symbol_template.txt`
+   `bl2/shared_symbol_template.txt`
  - Provision of the addresses of shared symbols to the linker during the SPE
    build process.
  - The resolution of symbol collisions during SPE linking. Because mbed-crypto
@@ -218,9 +218,9 @@ The above functionalities are implemented in the toolchain specific CMake files:
 
 By the following two functions:
 
- - `compiler_create_shared_code()`: Extract and filter shared symbol addresses
+ - `target_share_symbols()`: Extract and filter shared symbol addresses
    from MCUboot.
- - `compiler_link_shared_code()`: Link shared code to the SPE and resolve symbol
+ - `target_link_shared_code()`: Link shared code to the SPE and resolve symbol
    conflict issues.
 
 ARMCLANG
@@ -263,11 +263,11 @@ MCUboot image encryption support is disabled.
 +------------------+----------+--------+----------+--------+----------+--------+
 |                  | ARMCLANG | GNUARM | ARMCLANG | GNUARM | ARMCLANG | GNUARM |
 +------------------+----------+--------+----------+--------+----------+--------+
-| CODE_SHARING=OFF |   122268 | 124572 |   75936 |   75996 |    50336 |  50224 |
+| CODE_SHARING=OFF |   122268 | 124572 |   75936  |  75996 |    50336 |  50224 |
 +------------------+----------+--------+----------+--------+----------+--------+
-| CODE_SHARING=ON  |   113264 | 115500 |   70400 |   70336 |    48840 |  48988 |
+| CODE_SHARING=ON  |   113264 | 115500 |   70400  |  70336 |    48840 |  48988 |
 +------------------+----------+--------+----------+--------+----------+--------+
-| Difference       |     9004 |   9072 |    5536 |    5660 |     1496 |   1236 |
+| Difference       |     9004 |   9072 |    5536  |   5660 |     1496 |   1236 |
 +------------------+----------+--------+----------+--------+----------+--------+
 
 If MCUboot image encryption support is enabled then saving could be up to
@@ -364,4 +364,4 @@ could be shared as well. Some possibilities:
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

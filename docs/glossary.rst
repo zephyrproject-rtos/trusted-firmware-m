@@ -90,9 +90,8 @@ Glossary of terms and abbreviations
         for ARMv8-M.
 
     TBSA-M
-        Trusted Base System Architecture for Armv6-M, Armv7-M and Armv8-M.
-        TBSA term. See `Trusted Base System Architecture for Armv6-M, Armv7-M
-        and Armv8-M`_
+        Trusted Base System Architecture for M.
+        TBSA term. See `Trusted Base System Architecture for M`_
 
     MPC
         Memory Protection Controller:
@@ -127,16 +126,18 @@ Glossary of terms and abbreviations
 
 .. rubric:: Reference
 
-| `PSA Firmware_Framework for M`_
+| `Firmware Framework for M (FF-M)`_
 
-.. _PSA Firmware_Framework for M: https://pages.arm.com/psa-resources-ff.html
+.. _Firmware Framework for M (FF-M):
+   https://www.arm.com/architecture/security-features/platform-security
 
-.. _PSA term: `PSA Firmware_Framework for M`_
+.. _PSA term: `Firmware Framework for M (FF-M)`_
 
-| `Trusted Base System Architecture for Armv6-M, Armv7-M and Armv8-M`_
+| `Trusted Base System Architecture for M`_
 
-.. _Trusted Base System Architecture for Armv6-M, Armv7-M and Armv8-M: https://pages.arm.com/psa-resources-tbsa-m.html
+.. _Trusted Base System Architecture for M:
+   https://www.arm.com/architecture/security-features/platform-security
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

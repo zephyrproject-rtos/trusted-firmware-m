@@ -699,7 +699,7 @@ Reference
 
 .. [4] `Platform Security Model 1.1 <https://developer.arm.com/documentation/den0128/latest>`_
 
-.. [5] `PSA analyze stage <https://developer.arm.com/architectures/security-architectures/platform-security-architecture#analyze>`_
+.. [5] `PSA analyze stage <https://www.arm.com/architecture/security-features#analyze>`_
 
 .. [6] `AES-CCM Cipher Suites for Transport Layer Security (TLS) <https://tools.ietf.org/html/rfc6655>`_
 

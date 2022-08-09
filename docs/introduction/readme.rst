@@ -79,6 +79,9 @@ Feedback and Support
 For this release, feedback is requested via email to
 `tf-m@lists.trustedfirmware.org <tf-m@lists.trustedfirmware.org>`__.
 
+A bi-weekly technical forum is available for discussion on any technical topics
+online. Welcome to join `TF-M Forum <https://www.trustedfirmware.org/meetings/tf-m-technical-forum>`__.
+
 .. _Cortex-M33: https://developer.arm.com/Processors/Cortex-M33
 .. _Cortex-M23: https://developer.arm.com/Processors/Cortex-M23
 .. _Cortex-M55: https://developer.arm.com/Processors/Cortex-M55
@@ -88,4 +91,4 @@ For this release, feedback is requested via email to
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
