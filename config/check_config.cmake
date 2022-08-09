@@ -101,6 +101,10 @@ tfm_invalid_config(PS_ROLLBACK_PROTECTION AND NOT PS_ENCRYPTION)
 get_property(TFM_FIH_PROFILE_LIST CACHE TFM_FIH_PROFILE PROPERTY STRINGS)
 tfm_invalid_config(NOT TFM_FIH_PROFILE IN_LIST TFM_FIH_PROFILE_LIST)
 
+########################### TF-M initial attestation #####################################
+
+tfm_invalid_config(ATTEST_INCLUDE_TEST_CODE AND NOT (TEST_NS_ATTESTATION OR TEST_S_ATTESTATION))
+
 ########################### TF-M audit log #####################################
 
 tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND NOT TFM_LIB_MODEL)

@@ -28,7 +28,7 @@ target_compile_definitions(tfm_t_cose_defs
         $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_SIGN_VERIFY_TESTS>
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:T_COSE_DISABLE_SIGN1>
         $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_MAC0>
-        $<$<NOT:$<CONFIG:Debug>>:T_COSE_DISABLE_SHORT_CIRCUIT_SIGN>
+        $<$<NOT:$<BOOL:${ATTEST_INCLUDE_TEST_CODE}>>:T_COSE_DISABLE_SHORT_CIRCUIT_SIGN>
 )
 
 ############################### t_cose common ##################################

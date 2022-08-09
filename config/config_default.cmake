@@ -149,6 +149,7 @@ set(ATTEST_INCLUDE_OPTIONAL_CLAIMS      ON          CACHE BOOL      "Include opt
 set(ATTEST_INCLUDE_COSE_KEY_ID          OFF         CACHE BOOL      "Include COSE key-id in initial attestation token")
 set(ATTEST_TOKEN_PROFILE                "PSA_IOT_1" CACHE STRING    "Set the initial attestation token profile. Options: PSA_IOT_1, PSA_2_0_0, ARM_CCA")
 set(ATTEST_STACK_SIZE                   "0x700"     CACHE STRING    "The stack size of the Initial Attestation Secure Partition")
+set(ATTEST_INCLUDE_TEST_CODE            OFF         CACHE BOOL      "Include minimal development tests in the initial attestation regression test suite")
 
 set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Platform partition")
 set(PLATFORM_SERVICE_INPUT_BUFFER_SIZE  64          CACHE STRING    "Size of input buffer in platform service.")

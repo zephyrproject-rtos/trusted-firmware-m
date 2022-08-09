@@ -498,10 +498,6 @@ those flags. The list of flags are:
 
 - ``ATTEST_INCLUDE_OPTIONAL_CLAIMS``: Include also the optional claims to the
   attestation token. Default value: ON.
-- ``ATTEST_INCLUDE_TEST_CODE``: Test code is removed from COSE library and from
-  attestation test suite if it is OFF. Its default value depends on the build
-  type. It is ON if build type is ``Debug``, otherwise OFF (different kinds
-  of ``Release`` builds).
 - ``ATTEST_INCLUDE_COSE_KEY_ID``: COSE key-id is an optional field in the COSE
   unprotected header. Key-id is calculated and added to the COSE header based
   on the value of this flag. Default value: OFF.
@@ -510,6 +506,15 @@ those flags. The list of flags are:
   is OFF. Set to ON in a platform's CMake file if the attest HAL is not yet
   properly ported to it.
 - ``SYMMETRIC_INITIAL_ATTESTATION``: Select symmetric initial attestation.
+  Default value: OFF.
+- ``ATTEST_INCLUDE_TEST_CODE``: The initial attestation implementation is
+  instrumented with additional test code. This is required in order to run
+  some of the initial attestation regression tests.
+  These tests are not required to be run by platform integrators, and are
+  only meant to be used for development or modification of the initial
+  attestation implementation.
+  Enabling this option enables T_COSE_DISABLE_SHORT_CIRCUIT_SIGN which will
+  short circuit the signing operation.
   Default value: OFF.
 
 Related compile time options

@@ -561,7 +561,7 @@ static enum psa_attest_err_t attest_verify_challenge_size(size_t challenge_size)
     return PSA_ATTEST_ERR_INVALID_INPUT;
 }
 
-#ifdef INCLUDE_TEST_CODE /* Remove them from release build */
+#ifdef INCLUDE_TEST_CODE
 /*!
  * \brief Static function to get the option flags from challenge object
  *
@@ -732,7 +732,7 @@ attest_create_token(struct q_useful_buf_c *challenge,
         return attest_err;
     }
 
-#ifdef INCLUDE_TEST_CODE /* Remove them from release build */
+#ifdef INCLUDE_TEST_CODE
     attest_get_option_flags(challenge, &option_flags, &key_select);
     if (option_flags) {
         /* If any option flags are provided (TOKEN_OPT_OMIT_CLAIMS or

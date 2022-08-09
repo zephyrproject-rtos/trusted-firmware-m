@@ -67,7 +67,7 @@ target_link_libraries(tfm_psa_rot_partition_attestation
 
 target_compile_definitions(tfm_psa_rot_partition_attestation
     PRIVATE
-        $<$<CONFIG:Debug>:INCLUDE_TEST_CODE>
+        $<$<BOOL:${ATTEST_INCLUDE_TEST_CODE}>:INCLUDE_TEST_CODE>
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
         $<$<BOOL:${ATTEST_INCLUDE_OPTIONAL_CLAIMS}>:INCLUDE_OPTIONAL_CLAIMS>
         $<$<BOOL:${ATTEST_INCLUDE_COSE_KEY_ID}>:INCLUDE_COSE_KEY_ID>
