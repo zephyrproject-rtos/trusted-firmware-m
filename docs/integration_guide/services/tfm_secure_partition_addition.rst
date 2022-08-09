@@ -332,7 +332,6 @@ Reference configuration example:
 
     {
       "name": "TFM Example Partition",
-      "short_name": "TFM_SP_EXAMPLE",
       "manifest": "secure_fw/partitions/example/tfm_example_partition.yaml",
       "conditional": "@TFM_PARTITION_EXAMPLE@",
       "output_path": "partitions/example",

@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -13,7 +15,6 @@
   "manifest_list": [
    {
       "name": "PSA FF Test Client Partition",
-      "short_name": "PSA_FF_TEST_CLIENT",
       "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/client_partition_psa.json",
       "output_path": "api-tests/platform/manifests",
       "conditional": "TFM_PARTITION_FF_TEST",
@@ -31,7 +32,6 @@
     },
     {
       "name": "PSA FF Test Server Partition",
-      "short_name": "PSA_FF_TEST_SERVER",
       "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/server_partition_psa.json",
       "output_path": "api-tests/platform/manifests",
       "conditional": "TFM_PARTITION_FF_TEST",
@@ -49,7 +49,6 @@
     },
     {
       "name": "PSA FF Test Driver Partition",
-      "short_name": "PSA_FF_TEST_DRIVER",
       "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/driver_partition_psa.json",
       "output_path": "api-tests/platform/manifests",
       "conditional": "TFM_PARTITION_FF_TEST",
