@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -97,3 +97,15 @@ end:
     return status;
 }
 /** @} */ // end of psa_entropy
+
+/*
+ * FixMe: This function is required to integrate into Mbed TLS as the PSA
+ * subsystem does not yet support entropy entry points. See the header
+ * entropy_poll.h for details. This needs to be revised once Mbed TLS adds
+ * support for entropy.
+ */
+int mbedtls_hardware_poll(void *data, unsigned char *output, size_t len, size_t *olen)
+{
+    CC_UNUSED_PARAM(data);
+    return cc3xx_get_entropy(0, olen, output, len);
+}
