@@ -372,7 +372,7 @@ uint32_t tfm_spm_partition_get_ns_agent_idx(void);
  * \return Partition index for that partition
  *         SPM_INVALID_PARTITION_IDX if not found
  */
-uint32_t tfm_spm_partition_get_partition_idx(uint32_t partition_idx);
+uint32_t tfm_spm_partition_get_partition_idx(uint32_t partition_id);
 
 /**
  * \brief Initialize partition database
