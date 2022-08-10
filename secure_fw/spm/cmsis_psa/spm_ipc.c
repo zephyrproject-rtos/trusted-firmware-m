@@ -451,10 +451,7 @@ uint32_t tfm_spm_init(void)
 {
     struct partition_t *partition;
     uint32_t service_setting;
-
-#ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
-#endif
 
     tfm_pool_init(conn_handle_pool,
                   POOL_BUFFER_SIZE(conn_handle_pool),
@@ -482,19 +479,11 @@ uint32_t tfm_spm_init(void)
         load_irqs_assuredly(partition);
 
         /* Bind the partition with platform. */
-#if TFM_FIH_PROFILE_ON
         FIH_CALL(tfm_hal_bind_boundary, fih_rc, partition->p_ldinf,
                  &partition->boundary);
         if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
             tfm_core_panic();
         }
-#else /* TFM_FIH_PROFILE_ON */
-        if (tfm_hal_bind_boundary(partition->p_ldinf,
-                                    &partition->boundary)
-                != TFM_HAL_SUCCESS) {
-            tfm_core_panic();
-        }
-#endif /* TFM_FIH_PROFILE_ON */
 
         backend_init_comp_assuredly(partition, service_setting);
     }

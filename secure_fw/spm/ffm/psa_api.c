@@ -156,6 +156,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     int32_t type = (int32_t)(int16_t)((ctrl_param & TYPE_MASK) >> TYPE_OFFSET);
     size_t in_num = (size_t)((ctrl_param & IN_LEN_MASK) >> IN_LEN_OFFSET);
     size_t out_num = (size_t)((ctrl_param & OUT_LEN_MASK) >> OUT_LEN_OFFSET);
+    fih_int fih_rc = FIH_FAILURE;
 
     /* The request type must be zero or positive. */
     if (type < 0) {
@@ -247,9 +248,10 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      * if the memory reference for the wrap input vector is invalid or not
      * readable.
      */
-    if (tfm_hal_memory_check(curr_partition->boundary,
-                             (uintptr_t)inptr, in_num * sizeof(psa_invec),
-                             TFM_HAL_ACCESS_READABLE) != PSA_SUCCESS) {
+    FIH_CALL(tfm_hal_memory_check, fih_rc,
+             curr_partition->boundary, (uintptr_t)inptr,
+             in_num * sizeof(psa_invec), TFM_HAL_ACCESS_READABLE);
+    if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -258,8 +260,10 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      * actual length later. It is a PROGRAMMER ERROR if the memory reference for
      * the wrap output vector is invalid or not read-write.
      */
-    if (tfm_hal_memory_check(curr_partition->boundary, (uintptr_t)outptr,
-      out_num * sizeof(psa_outvec), TFM_HAL_ACCESS_READWRITE) != PSA_SUCCESS) {
+    FIH_CALL(tfm_hal_memory_check, fih_rc,
+             curr_partition->boundary, (uintptr_t)outptr,
+             out_num * sizeof(psa_outvec), TFM_HAL_ACCESS_READWRITE);
+    if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
@@ -275,9 +279,10 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      * memory reference was invalid or not readable.
      */
     for (i = 0; i < in_num; i++) {
-        if (tfm_hal_memory_check(curr_partition->boundary,
-                                 (uintptr_t)invecs[i].base, invecs[i].len,
-                                 TFM_HAL_ACCESS_READABLE) != PSA_SUCCESS) {
+        FIH_CALL(tfm_hal_memory_check, fih_rc,
+                 curr_partition->boundary, (uintptr_t)invecs[i].base,
+                 invecs[i].len, TFM_HAL_ACCESS_READABLE);
+        if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
     }
@@ -303,9 +308,10 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
      * payload memory reference was invalid or not read-write.
      */
     for (i = 0; i < out_num; i++) {
-        if (tfm_hal_memory_check(curr_partition->boundary,
-                                 (uintptr_t)outvecs[i].base, outvecs[i].len,
-                                 TFM_HAL_ACCESS_READWRITE) != PSA_SUCCESS) {
+        FIH_CALL(tfm_hal_memory_check, fih_rc,
+                 curr_partition->boundary, (uintptr_t)outvecs[i].base,
+                 outvecs[i].len, TFM_HAL_ACCESS_READWRITE);
+        if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
     }
@@ -479,6 +485,7 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 {
     struct conn_handle_t *handle = NULL;
     struct partition_t *partition = NULL;
+    fih_int fih_rc = FIH_FAILURE;
 
     /*
      * Only one message could be retrieved every time for psa_get(). It is a
@@ -494,8 +501,10 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
      * Write the message to the service buffer. It is a fatal error if the
      * input msg pointer is not a valid memory reference or not read-write.
      */
-    if (tfm_hal_memory_check(partition->boundary, (uintptr_t)msg,
-        sizeof(psa_msg_t), TFM_HAL_ACCESS_READWRITE) != PSA_SUCCESS) {
+    FIH_CALL(tfm_hal_memory_check, fih_rc,
+             partition->boundary, (uintptr_t)msg,
+             sizeof(psa_msg_t), TFM_HAL_ACCESS_READWRITE);
+    if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         tfm_core_panic();
     }
 
@@ -536,6 +545,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
     size_t bytes;
     struct conn_handle_t *handle = NULL;
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
     handle = spm_get_handle_by_msg_handle(msg_handle);
@@ -580,8 +590,10 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
      * Copy the client data to the service buffer. It is a fatal error
      * if the memory reference for buffer is invalid or not read-write.
      */
-    if (tfm_hal_memory_check(curr_partition->boundary, (uintptr_t)buffer,
-                         num_bytes, TFM_HAL_ACCESS_READWRITE) != PSA_SUCCESS) {
+    FIH_CALL(tfm_hal_memory_check, fih_rc,
+             curr_partition->boundary, (uintptr_t)buffer,
+             num_bytes, TFM_HAL_ACCESS_READWRITE);
+    if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         tfm_core_panic();
     }
 
@@ -663,6 +675,7 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
 {
     struct conn_handle_t *handle = NULL;
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
     handle = spm_get_handle_by_msg_handle(msg_handle);
@@ -711,8 +724,10 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
      * Copy the service buffer to client outvecs. It is a fatal error
      * if the memory reference for buffer is invalid or not readable.
      */
-    if (tfm_hal_memory_check(curr_partition->boundary,
-       (uintptr_t)buffer, num_bytes, TFM_HAL_ACCESS_READABLE) != PSA_SUCCESS) {
+    FIH_CALL(tfm_hal_memory_check, fih_rc,
+             curr_partition->boundary, (uintptr_t)buffer,
+             num_bytes, TFM_HAL_ACCESS_READABLE);
+    if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         tfm_core_panic();
     }
 
@@ -1020,6 +1035,7 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
 {
     struct conn_handle_t *handle;
     struct partition_t *partition = NULL;
+    fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
     handle = spm_get_handle_by_msg_handle(msg_handle);
@@ -1078,10 +1094,10 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
      * It is a fatal error if the memory reference for the wrap input vector is
      * invalid or not readable.
      */
-    if (tfm_hal_memory_check(partition->boundary,
-                             (uintptr_t)handle->invec[invec_idx].base,
-                             handle->invec[invec_idx].len,
-                             TFM_HAL_ACCESS_READABLE) != PSA_SUCCESS) {
+    FIH_CALL(tfm_hal_memory_check, fih_rc,
+             partition->boundary, (uintptr_t)handle->invec[invec_idx].base,
+             handle->invec[invec_idx].len, TFM_HAL_ACCESS_READABLE);
+    if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         tfm_core_panic();
     }
 
@@ -1150,6 +1166,7 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
     struct conn_handle_t *handle;
     uint32_t privileged;
     struct partition_t *partition = NULL;
+    fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
     handle = spm_get_handle_by_msg_handle(msg_handle);
@@ -1208,10 +1225,10 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
     /*
      * It is a fatal error if the output vector is invalid or not read-write.
      */
-    if (tfm_hal_memory_check(partition->boundary,
-           (uintptr_t)handle->outvec[outvec_idx].base,
-           handle->outvec[outvec_idx].len,
-           TFM_HAL_ACCESS_READWRITE) != PSA_SUCCESS) {
+    FIH_CALL(tfm_hal_memory_check, fih_rc,
+             partition->boundary, (uintptr_t)handle->outvec[outvec_idx].base,
+             handle->outvec[outvec_idx].len, TFM_HAL_ACCESS_READWRITE);
+    if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         tfm_core_panic();
     }
     SET_IOVEC_MAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE));

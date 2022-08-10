@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -483,6 +483,13 @@ void fih_cfi_decrement(void);
         return ret; \
     } while (0)
 
+/*
+ * FIH return type macro changes the function return types to fih_int.
+ * All functions that need to be protected by FIH and called via FIH_CALL must
+ * return a fih_int type.
+ */
+#define FIH_RET_TYPE(type)    fih_int
+
 #else /* TFM_FIH_PROFILE_ON */
 typedef int32_t fih_int;
 
@@ -515,6 +522,8 @@ typedef int32_t fih_int;
     do { \
         return ret; \
     } while (0)
+
+#define FIH_RET_TYPE(type)    type
 
 #define FIH_PANIC do { \
         while(1) {}; \

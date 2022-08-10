@@ -15,6 +15,7 @@
  */
 
 #include "cmsis.h"
+#include "fih.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "platform_retarget_dev.h"
@@ -203,7 +204,7 @@ enum tfm_plat_err_t system_reset_cfg(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t init_debug(void)
+FIH_RET_TYPE(enum tfm_plat_err_t) init_debug(void)
 {
     volatile struct sysctrl_t *sys_ctrl =
                                        (struct sysctrl_t *)CMSDK_SYSCTRL_BASE_S;
@@ -240,7 +241,7 @@ enum tfm_plat_err_t init_debug(void)
      */
 #endif
 
-    return TFM_PLAT_ERR_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_PLAT_ERR_SUCCESS));
 }
 
 /*----------------- NVIC interrupt target state to NS configuration ----------*/
@@ -381,7 +382,7 @@ const struct sau_cfg_t sau_cfg[] = {
 
 #define NR_SAU_INIT_STEP                 3
 
-void sau_and_idau_cfg(void)
+FIH_RET_TYPE(int32_t) sau_and_idau_cfg(void)
 {
     struct spctrl_def *spctrl = CMSDK_SPCTRL;
     uint32_t i;
@@ -399,6 +400,8 @@ void sau_and_idau_cfg(void)
 
     /* Allows SAU to define the code region as a NSC */
     spctrl->nsccfg |= NSCCFG_CODENSC;
+
+    FIH_RET(fih_int_encode(ARM_DRIVER_OK));
 }
 
 /*------------------- Memory configuration functions -------------------------*/
@@ -408,13 +411,13 @@ void sau_and_idau_cfg(void)
 #define NR_MPC_INIT_STEP                 6
 #endif
 
-int32_t mpc_init_cfg(void)
+FIH_RET_TYPE(int32_t) mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
 
     ret = Driver_SRAM1_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        FIH_RET(fih_int_encode(ret));
     }
 
     ret = Driver_SRAM1_MPC.ConfigRegion(
@@ -422,7 +425,7 @@ int32_t mpc_init_cfg(void)
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        FIH_RET(fih_int_encode(ret));
     }
 
 #ifdef BL2
@@ -431,13 +434,13 @@ int32_t mpc_init_cfg(void)
                                   memory_regions.secondary_partition_limit,
                                   ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        FIH_RET(fih_int_encode(ret));
     }
 #endif /* BL2 */
 
     ret = Driver_SRAM2_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        FIH_RET(fih_int_encode(ret));
     }
 
     ret = Driver_SRAM2_MPC.ConfigRegion(NS_DATA_START, NS_DATA_LIMIT,
@@ -448,18 +451,18 @@ int32_t mpc_init_cfg(void)
                                         ARM_MPC_ATTR_NONSECURE);
 #endif
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        FIH_RET(fih_int_encode(ret));
     }
 
     /* Lock down the MPC configuration */
     ret = Driver_SRAM1_MPC.LockDown();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        FIH_RET(fih_int_encode(ret));
     }
 
     ret = Driver_SRAM2_MPC.LockDown();
     if (ret != ARM_DRIVER_OK) {
-        return ret;
+        FIH_RET(fih_int_encode(ret));
     }
 
     /* Add barriers to assure the MPC configuration is done before continue
@@ -468,13 +471,13 @@ int32_t mpc_init_cfg(void)
     __DSB();
     __ISB();
 
-    return ARM_DRIVER_OK;
+    FIH_RET(fih_int_encode(ARM_DRIVER_OK));
 }
 
 /*---------------------- PPC configuration functions -------------------------*/
 #define NR_PPC_INIT_STEP                 4
 
-void ppc_init_cfg(void)
+FIH_RET_TYPE(int32_t) ppc_init_cfg(void)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     struct nspctrl_def* nspctrl = CMSDK_NSPCTRL;
@@ -543,6 +546,8 @@ void ppc_init_cfg(void)
      * bus error instead of RAZ/WI
      */
     spctrl->secrespcfg |= 1U;
+
+    FIH_RET(fih_int_encode(ARM_DRIVER_OK));
 }
 
 void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
@@ -552,23 +557,29 @@ void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
     ((uint32_t*)&(spctrl->ahbnsppc0))[bank] |= (1U << pos);
 }
 
-void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
+FIH_RET_TYPE(int32_t) ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
 {
     /* Clear NS flag for peripheral to prevent NS access */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbnsppc0))[bank] &= ~(1U << pos);
+
+    FIH_RET(fih_int_encode(ARM_DRIVER_OK));
 }
 
-void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
+FIH_RET_TYPE(int32_t) ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbspppc0))[bank] |= (1U << pos);
+
+    FIH_RET(fih_int_encode(ARM_DRIVER_OK));
 }
 
-void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
+FIH_RET_TYPE(int32_t) ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
 {
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     ((uint32_t*)&(spctrl->ahbspppc0))[bank] &= ~(1U << pos);
+
+    FIH_RET(fih_int_encode(ARM_DRIVER_OK));
 }
 
 void ppc_clear_irq(void)

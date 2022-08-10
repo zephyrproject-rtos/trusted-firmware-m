@@ -37,6 +37,7 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
     struct partition_t *p_curr_sp;
     uintptr_t sp_base, sp_limit, curr_stack, ctx_stack;
     struct context_ctrl_t flih_ctx_ctrl;
+    fih_int fih_rc = FIH_FAILURE;
 
     /* Come too early before runtime setup, should not happen. */
     if (!CURRENT_THREAD) {
@@ -58,8 +59,8 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
     }
 
     if (p_owner_sp->boundary != p_curr_sp->boundary) {
-        tfm_hal_activate_boundary(p_owner_sp->p_ldinf,
-                                  p_owner_sp->boundary);
+        FIH_CALL(tfm_hal_activate_boundary, fih_rc,
+                 p_owner_sp->p_ldinf, p_owner_sp->boundary);
     }
 
     /*
@@ -85,13 +86,14 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
                                 struct context_flih_ret_t *p_ctx_flih_ret)
 {
     struct partition_t *p_prev_sp, *p_owner_sp;
+    fih_int fih_rc = FIH_FAILURE;
 
     p_prev_sp = (struct partition_t *)(p_ctx_flih_ret->state_ctx.r2);
     p_owner_sp = GET_CURRENT_COMPONENT();
 
     if (p_owner_sp->boundary != p_prev_sp->boundary) {
-        tfm_hal_activate_boundary(p_prev_sp->p_ldinf,
-                                  p_prev_sp->boundary);
+        FIH_CALL(tfm_hal_activate_boundary, fih_rc,
+                 p_prev_sp->p_ldinf, p_prev_sp->boundary);
     }
 
     /* Restore current component */

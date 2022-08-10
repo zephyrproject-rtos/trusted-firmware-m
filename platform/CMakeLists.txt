@@ -87,10 +87,11 @@ target_link_libraries(platform_s
     PRIVATE
         psa_interface
         tfm_partition_defs
+        platform_crypto_keys
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:tfm_sprt>
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:crypto_service_mbedcrypto>
         $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:tfm_attestation_defs>
-        platform_crypto_keys
+        $<$<NOT:$<STREQUAL:${TFM_FIH_PROFILE},OFF>>:tfm_fih>
 )
 
 target_compile_definitions(platform_s
@@ -179,6 +180,7 @@ if(BL2)
         PUBLIC
             platform_common_interface
             platform_region_defs
+            tfm_fih_headers
         PRIVATE
             bl2_hal
             mcuboot_config
@@ -243,7 +245,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
         PUBLIC
             platform_bl1_interface
         PRIVATE
-            tfm_fih_implementation
+            tfm_fih
             tfm_fih_headers
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:bl1_crypto_hw>
             tfm_boot_status

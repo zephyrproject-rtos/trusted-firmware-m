@@ -10,6 +10,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "fih.h"
 #include "tfm_hal_defs.h"
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
@@ -30,16 +31,6 @@ extern "C" {
         (TFM_HAL_ACCESS_READABLE | TFM_HAL_ACCESS_WRITABLE)
 
 #ifdef TFM_FIH_PROFILE_ON
-#include "fih.h"
-/**
- * \brief  Sets up the static isolation boundaries which are constant throughout
- *         the runtime of the system, including the SPE/NSPE and partition
- *         boundaries.
- *
- * \return TFM_HAL_SUCCESS - the isolation boundaries have been set up.
- *         TFM_HAL_ERROR_GENERIC - failed to set up the isolation boundaries.
- */
-fih_int tfm_hal_set_up_static_boundaries(void);
 
 /**
  * \brief This function is responsible for checking all critical isolation
@@ -50,21 +41,7 @@ fih_int tfm_hal_set_up_static_boundaries(void);
  */
 fih_int tfm_hal_verify_static_boundaries(void);
 
-/**
- * \brief  Activate one Secure Partition boundary.
- *
- * \param[in]   p_ldinf         Partition load information.
- * \param[in]   boundary        Platform boundary value for partition.
- *
- * \return TFM_HAL_SUCCESS          The isolation boundaries update succeeded.
- *         TFM_HAL_ERROR_GENERIC    Failed to update the isolation boundaries.
- *
- * \note   When FIH_ENABLE_DOUBLE_VARS is enabled, the return code will be
- *         wrapped and protected in \ref fih_int structure.
- */
-fih_int tfm_hal_activate_boundary(const struct partition_load_info_t *p_ldinf,
-                                  uintptr_t boundary);
-#else /* TFM_FIH_PROFILE_ON */
+#endif /* TFM_FIH_PROFILE_ON */
 /**
  * \brief  Sets up the static isolation boundaries which are constant throughout
  *         the runtime of the system, including the SPE/NSPE and partition
@@ -73,7 +50,7 @@ fih_int tfm_hal_activate_boundary(const struct partition_load_info_t *p_ldinf,
  * \return TFM_HAL_SUCCESS - the isolation boundaries have been set up.
  *         TFM_HAL_ERROR_GENERIC - failed to set up the isolation boundaries.
  */
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void);
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(void);
 
 /**
  * \brief  Activate one Secure Partition boundary.
@@ -84,10 +61,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void);
  * \return TFM_HAL_SUCCESS          The isolation boundaries update succeeded.
  *         TFM_HAL_ERROR_GENERIC    Failed to update the isolation boundaries.
  */
-enum tfm_hal_status_t tfm_hal_activate_boundary(
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
                             const struct partition_load_info_t *p_ldinf,
                             uintptr_t boundary);
-#endif /* TFM_FIH_PROFILE_ON */
 
 /**
  * \brief  This API checks if a given range of memory can be accessed with
@@ -107,7 +83,8 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
  *         TFM_HAL_ERROR_INVALID_INPUT - Invalid inputs.
  *         TFM_HAL_ERROR_GENERIC - An error occurred.
  */
-enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_memory_check(
+                                           uintptr_t boundary, uintptr_t base,
                                            size_t size, uint32_t access_type);
 
 /**
@@ -128,7 +105,7 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
  * \return TFM_HAL_SUCCESS          - A platform value bound successfully.
  *         TFM_HAL_ERROR_GENERIC    - Error occurred while binding.
  */
-enum tfm_hal_status_t tfm_hal_bind_boundary(
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
                                     uintptr_t *p_boundary);
 

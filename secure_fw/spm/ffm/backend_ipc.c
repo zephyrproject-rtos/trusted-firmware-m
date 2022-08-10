@@ -197,6 +197,7 @@ uint32_t backend_system_run(void)
 {
     uint32_t control;
     struct partition_t *p_cur_pt;
+    fih_int fih_rc = FIH_FAILURE;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
     TFM_CORE_ASSERT(SPM_THREAD_CONTEXT);
@@ -208,8 +209,8 @@ uint32_t backend_system_run(void)
     p_cur_pt = TO_CONTAINER(CURRENT_THREAD->p_context_ctrl,
                             struct partition_t, ctx_ctrl);
 
-    if (tfm_hal_activate_boundary(p_cur_pt->p_ldinf, p_cur_pt->boundary)
-            != TFM_HAL_SUCCESS) {
+    FIH_CALL(tfm_hal_activate_boundary, fih_rc, p_cur_pt->p_ldinf, p_cur_pt->boundary);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         tfm_core_panic();
     }
 
@@ -249,6 +250,7 @@ void backend_wake_up(struct partition_t *p_pt)
 
 uint64_t ipc_schedule(void)
 {
+    fih_int fih_rc = FIH_FAILURE;
     AAPCS_DUAL_U32_T ctx_ctrls;
     struct partition_t *p_part_curr, *p_part_next;
     struct context_ctrl_t *p_curr_ctx;
@@ -276,9 +278,9 @@ uint64_t ipc_schedule(void)
          * implementation. Change privilege, MPU or other configurations.
          */
         if (p_part_curr->boundary != p_part_next->boundary) {
-            if (tfm_hal_activate_boundary(p_part_next->p_ldinf,
-                                          p_part_next->boundary)
-                                                        != TFM_HAL_SUCCESS) {
+            FIH_CALL(tfm_hal_activate_boundary, fih_rc,
+                     p_part_next->p_ldinf, p_part_next->boundary);
+            if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
                 tfm_core_panic();
             }
         }

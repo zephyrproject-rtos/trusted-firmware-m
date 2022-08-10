@@ -23,27 +23,16 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 static fih_int tfm_core_init(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
-#ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
-#else
-    enum tfm_hal_status_t hal_status = TFM_HAL_ERROR_GENERIC;
-#endif
 
     /*
      * Access to any peripheral should be performed after programming
      * the necessary security components such as PPC/SAU.
      */
-#ifdef TFM_FIH_PROFILE_ON
     FIH_CALL(tfm_hal_set_up_static_boundaries, fih_rc);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
-#else /* TFM_FIH_PROFILE_ON */
-    hal_status = tfm_hal_set_up_static_boundaries();
-    if (hal_status != TFM_HAL_SUCCESS) {
-        return TFM_ERROR_GENERIC;
-    }
-#endif /* TFM_FIH_PROFILE_ON */
 
 #ifdef TFM_FIH_PROFILE_ON
     FIH_CALL(tfm_hal_verify_static_boundaries, fih_rc);
@@ -52,21 +41,14 @@ static fih_int tfm_core_init(void)
     }
 #endif
 
-#ifdef TFM_FIH_PROFILE_ON
     FIH_CALL(tfm_hal_platform_init, fih_rc);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
-#else /* TFM_FIH_PROFILE_ON */
-    hal_status = tfm_hal_platform_init();
-    if (hal_status != TFM_HAL_SUCCESS) {
-        return TFM_ERROR_GENERIC;
-    }
-#endif /* TFM_FIH_PROFILE_ON */
 
     plat_err = tfm_plat_otp_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
 
     /* Perform provisioning. */

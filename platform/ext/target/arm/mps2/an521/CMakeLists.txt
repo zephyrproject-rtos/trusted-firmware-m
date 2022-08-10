@@ -15,6 +15,11 @@ target_include_directories(platform_region_defs
         partition
 )
 
+target_link_libraries(platform_region_defs
+    INTERFACE
+        tfm_fih_headers
+)
+
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.

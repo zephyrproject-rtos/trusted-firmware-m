@@ -93,6 +93,7 @@ target_link_libraries(tfm_spm
         tfm_partitions
         tfm_fih_headers
         tfm_sprt
+        $<$<NOT:$<STREQUAL:${TFM_FIH_PROFILE},OFF>>:tfm_fih>
 )
 
 target_compile_definitions(tfm_spm

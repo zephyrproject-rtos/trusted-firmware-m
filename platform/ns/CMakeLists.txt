@@ -29,6 +29,7 @@ target_link_libraries(platform_ns
     PUBLIC
         platform_common_interface
         platform_region_defs
+        tfm_fih_headers
         tfm_ns_interface
 )
 

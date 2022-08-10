@@ -156,6 +156,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     uint32_t res;
 #else
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    fih_int fih_rc = FIH_FAILURE;
 #endif
 
 #ifndef TFM_PSA_API
@@ -174,10 +175,10 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     }
 #else
 
-    if (tfm_hal_memory_check(curr_partition->boundary,
-                             (uintptr_t)buf_start, buf_size,
-                             TFM_HAL_ACCESS_READWRITE) != PSA_SUCCESS) {
-        /* Not in accessible range, return error */
+    FIH_CALL(tfm_hal_memory_check, fih_rc,
+             curr_partition->boundary, (uintptr_t)buf_start,
+             buf_size, TFM_HAL_ACCESS_READWRITE);
+    if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
         return;
     }

@@ -23,10 +23,14 @@
 #define BL2_MSP_STACK_SIZE      (0x0001800)
 
 #ifdef ENABLE_HEAP
-    #define S_HEAP_SIZE             (0x0000200)
+#define S_HEAP_SIZE             (0x0000200)
 #endif
 
+#ifdef TFM_FIH_PROFILE_ON
+#define S_MSP_STACK_SIZE        (0x00009C0)
+#else
 #define S_MSP_STACK_SIZE        (0x0000800)
+#endif
 #define S_PSP_STACK_SIZE        (0x0000800)
 
 #define NS_HEAP_SIZE            (0x0001000)

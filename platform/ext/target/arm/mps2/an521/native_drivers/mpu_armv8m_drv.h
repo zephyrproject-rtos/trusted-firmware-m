@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #include "cmsis.h"
+#include "fih.h"
 
 #define PRIVILEGED_DEFAULT_ENABLE 1
 #define HARDFAULT_NMI_ENABLE      1
@@ -79,8 +80,8 @@ struct mpu_armv8m_region_cfg_raw_t {
  *
  * \note This function doesn't check if dev is NULL.
  */
-
-enum mpu_armv8m_error_t mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
+FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_enable(
+                                          struct mpu_armv8m_dev_t *dev,
                                           uint32_t privdef_en,
                                           uint32_t hfnmi_en);
 
@@ -116,7 +117,7 @@ enum mpu_armv8m_error_t mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev);
  *
  * \note This function doesn't check if dev is NULL.
  */
-enum mpu_armv8m_error_t mpu_armv8m_region_enable(
+FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_region_enable(
                                 struct mpu_armv8m_dev_t *dev,
                                 struct mpu_armv8m_region_cfg_t *region_cfg);
 
@@ -130,7 +131,8 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
  *
  * \note This function doesn't check if dev is NULL.
  */
-enum mpu_armv8m_error_t mpu_armv8m_region_disable(struct mpu_armv8m_dev_t *dev,
+FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_region_disable(
+                                                  struct mpu_armv8m_dev_t *dev,
                                                   uint32_t region_nr);
 
 #endif /* __MPU_ARMV8M_DRV_H__ */
