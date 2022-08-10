@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited
+ * Copyright (c) 2019-2021 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@
  *        - When counter scaling is enabled, ScaleVal is the amount added to the
  *          Counter Count Value for every period of the counter as determined
  *          by 1/Frequency from the current operating frequency of the system
- *          counter (the “counter tick”).
+ *          counter (the "counter tick").
  *        - ScaleVal is expressed as an unsigned fixed-point number with
  *          a 8 bit integer value and a 24-bit fractional value
  *   - Interrupt for error detection
@@ -46,6 +46,7 @@
  */
 
 #include "syscounter_armv8-m_cntrl_drv.h"
+#include "syscounter_armv8-m_cntrl_reg_map.h"
 
 /** Setter bit manipulation macro */
 #define SET_BIT(WORD, BIT_INDEX) ((WORD) |= (1U << (BIT_INDEX)))
@@ -61,59 +62,6 @@
             ((WORD & BIT_MASK) >> BIT_OFFSET)
 /** Bit mask for given width bit-field manipulation macro */
 #define BITMASK(width) ((1u<<(width))-1)
-
-/**
- * \brief CNTControlBase Register map structure
- */
-struct cnt_control_base_reg_map_t {
-    volatile uint32_t cntcr;
-        /*!< Offset: 0x000 (R/W) Counter Control Register */
-    volatile const uint32_t cntsr;
-        /*!< Offset: 0x004 (RO) Counter Status Register */
-    volatile uint32_t cntcv_low;
-        /*!< Offset: 0x008 (R/W) Counter Count Value [31:0] Register */
-    volatile uint32_t cntcv_high;
-        /*!< Offset: 0x00C (R/W) Counter Count Value [63:32] Register */
-    volatile uint32_t cntscr;
-        /*!< Offset: 0x010 (R/W) Counter Scale Register
-         *   Aliased with CNTSCR0, meaning that either addresses of CNTSCR and
-         *   CNTSCR0 will physically access a single register
-         */
-    volatile const uint32_t reserved0[2];
-        /*!< Offset: 0x014-0x018 Reserved (RAZWI) */
-    volatile const uint32_t cntid;
-        /*!< Offset: 0x01C (RO) Counter ID Register */
-    volatile const uint32_t reserved1[40];
-        /*!< Offset: 0x020-0x0BC Reserved (RAZWI) */
-    volatile const uint32_t reserved2[4];
-        /*!< Offset: 0x0C0-0x0CC Reserved (RAZWI) */
-    volatile uint32_t cntscr0;
-        /*!< Offset: 0x0D0 (R/W) Counter Scale Register 0 */
-    volatile uint32_t cntscr1;
-        /*!< Offset: 0x0D4 (R/W) Counter Scale Register 1 */
-    volatile const uint32_t reserved3[958];
-        /*!< Offset: 0x0D8-0xFCC Reserved (RAZWI) */
-    volatile const uint32_t cntpidr4;
-        /*!< Offset: 0xFD0 (RO) Peripheral ID Register */
-    volatile const uint32_t reserved4[3];
-        /*!< Offset: 0xFD4-0xFDC Reserved (RAZWI) */
-    volatile const uint32_t cntpidr0;
-        /*!< Offset: 0xFE0 (RO) Peripheral ID Register */
-    volatile const uint32_t cntpidr1;
-        /*!< Offset: 0xFE4 (RO) Peripheral ID Register */
-    volatile const uint32_t cntpidr2;
-        /*!< Offset: 0xFE8 (RO) Peripheral ID Register */
-    volatile const uint32_t cntpidr3;
-        /*!< Offset: 0xFEC (RO) Peripheral ID Register */
-    volatile const uint32_t cntcidr0;
-        /*!< Offset: 0xFF0 (RO) Component ID Register */
-    volatile const uint32_t cntcidr1;
-        /*!< Offset: 0xFF4 (RO) Component ID Register */
-    volatile const uint32_t cntcidr2;
-        /*!< Offset: 0xFF8 (RO) Component ID Register */
-    volatile const uint32_t cntcidr3;
-        /*!< Offset: 0xFFC (RO) Component ID Register */
-};
 
 /**
  * \brief Counter Control Register bit fields

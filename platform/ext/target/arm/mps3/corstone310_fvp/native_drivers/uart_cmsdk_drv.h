@@ -16,7 +16,17 @@
 
 /**
  * \file uart_cmsdk_drv.h
- * \brief Generic driver for ARM UART.
+ * \brief Generic driver for ARM CMSDK UART.
+ *      Features of the driver:
+ *          1. Initialize UART
+ *          2. Set/Get UART baudrate
+ *          3. Set system clock
+ *          4. Read/Write UART data
+ *          5. Enable/Disable TX interrupt
+ *          6. Enable/Disable RX interrupt
+ *          7. Clear interrupts
+ *          8. Verifies if RX has data
+ *          9. Verifies if TX is ready to send more data
  */
 
 #ifndef __UART_CMSDK_DRV_H__

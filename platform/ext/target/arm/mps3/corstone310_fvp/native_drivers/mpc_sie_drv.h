@@ -18,6 +18,20 @@
  * \file mpc_sie_drv.h
  * \brief Generic driver for ARM SIE Memory Protection
  *        Controllers (MPC).
+ *        Features of ARM MPC driver:
+ *          1. Get MPC block size
+ *          2. Configure memory region
+ *          3. Get memory region configuration
+ *          4. Get/Set MPC control value
+ *          5. Get configured secure response
+ *          6. Set secure response type
+ *          7. Enable/Disable/Clear MPC interrupt
+ *          8. Get MPC interrupt state
+ *          9. Lock down MPC configuration
+ *          10. Check if gating is present in hardware
+ *          11. Get ID register value
+ *          12. Check ack for gating incoming transfers
+ *          13. Request/Release for gating incoming transfers
  */
 
 #ifndef __MPC_SIE_DRV_H__

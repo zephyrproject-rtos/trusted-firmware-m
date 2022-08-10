@@ -15,26 +15,9 @@
  */
 
 #include "uart_cmsdk_drv.h"
+#include "uart_cmsdk_reg_map.h"
 
 #include <stddef.h>
-
-/* UART register map structure */
-struct _uart_cmsdk_reg_map_t {
-    volatile uint32_t data;   /* Offset: 0x000 (R/W) data register    */
-    volatile uint32_t state;  /* Offset: 0x004 (R/W) status register  */
-    volatile uint32_t ctrl;   /* Offset: 0x008 (R/W) control register */
-    union {
-        volatile uint32_t intrstatus;  /* Offset: 0x00c (R/ ) interrupt status
-                                        *                     register
-                                        */
-        volatile uint32_t intrclear;   /* Offset: 0x00c ( /W) interrupt clear
-                                        *                     register
-                                        */
-    }intr_reg;
-    volatile uint32_t bauddiv;        /* Offset: 0x010 (R/W) Baudrate divider
-                                       *                     register
-                                       */
-};
 
 /* CTRL Register */
 #define UART_CMSDK_TX_EN       (1ul << 0)
@@ -56,8 +39,8 @@ struct _uart_cmsdk_reg_map_t {
 enum uart_cmsdk_error_t uart_cmsdk_init(struct uart_cmsdk_dev_t* dev,
                                     uint32_t system_clk)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
     if(system_clk == 0) {
         return UART_CMSDK_ERR_INVALID_ARG;
     }
@@ -81,8 +64,8 @@ enum uart_cmsdk_error_t uart_cmsdk_set_baudrate(struct uart_cmsdk_dev_t* dev,
                                             uint32_t baudrate)
 {
     uint32_t bauddiv;
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(baudrate == 0) {
         return UART_CMSDK_ERR_INVALID_BAUD;
@@ -114,8 +97,8 @@ uint32_t uart_cmsdk_get_baudrate(struct uart_cmsdk_dev_t* dev)
 enum uart_cmsdk_error_t uart_cmsdk_set_clock(struct uart_cmsdk_dev_t* dev,
                                          uint32_t system_clk)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(system_clk == 0) {
         return UART_CMSDK_ERR_INVALID_ARG;
@@ -138,8 +121,8 @@ enum uart_cmsdk_error_t uart_cmsdk_set_clock(struct uart_cmsdk_dev_t* dev,
 enum uart_cmsdk_error_t uart_cmsdk_read(struct uart_cmsdk_dev_t* dev,
                                                                  uint8_t* byte)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(!(p_uart->state & UART_CMSDK_RX_BF)) {
         return UART_CMSDK_ERR_NOT_READY;
@@ -154,8 +137,8 @@ enum uart_cmsdk_error_t uart_cmsdk_read(struct uart_cmsdk_dev_t* dev,
 enum uart_cmsdk_error_t uart_cmsdk_write(struct uart_cmsdk_dev_t* dev,
                                                                   uint8_t byte)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(p_uart->state & UART_CMSDK_TX_BF) {
         return UART_CMSDK_ERR_NOT_READY;
@@ -169,8 +152,8 @@ enum uart_cmsdk_error_t uart_cmsdk_write(struct uart_cmsdk_dev_t* dev,
 
 enum uart_cmsdk_error_t uart_cmsdk_irq_tx_enable(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(!(dev->data->state & UART_CMSDK_INITIALIZED)) {
         return UART_CMSDK_ERR_NOT_INIT;
@@ -183,8 +166,8 @@ enum uart_cmsdk_error_t uart_cmsdk_irq_tx_enable(struct uart_cmsdk_dev_t* dev)
 
 void uart_cmsdk_irq_tx_disable(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(dev->data->state & UART_CMSDK_INITIALIZED ) {
         p_uart->ctrl &= ~UART_CMSDK_TX_INTR_EN;
@@ -193,8 +176,8 @@ void uart_cmsdk_irq_tx_disable(struct uart_cmsdk_dev_t* dev)
 
 uint32_t uart_cmsdk_tx_ready(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(!(dev->data->state & UART_CMSDK_INITIALIZED)) {
         return 0;
@@ -205,8 +188,8 @@ uint32_t uart_cmsdk_tx_ready(struct uart_cmsdk_dev_t* dev)
 
 enum uart_cmsdk_error_t uart_cmsdk_irq_rx_enable(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(!(dev->data->state & UART_CMSDK_INITIALIZED)) {
         return UART_CMSDK_ERR_NOT_INIT;
@@ -219,8 +202,8 @@ enum uart_cmsdk_error_t uart_cmsdk_irq_rx_enable(struct uart_cmsdk_dev_t* dev)
 
 void uart_cmsdk_irq_rx_disable(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(dev->data->state & UART_CMSDK_INITIALIZED) {
         p_uart->ctrl &= ~UART_CMSDK_RX_INTR_EN;
@@ -229,8 +212,8 @@ void uart_cmsdk_irq_rx_disable(struct uart_cmsdk_dev_t* dev)
 
 uint32_t uart_cmsdk_rx_ready(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                  (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                  (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(!(dev->data->state & UART_CMSDK_INITIALIZED)) {
         return 0;
@@ -242,8 +225,8 @@ uint32_t uart_cmsdk_rx_ready(struct uart_cmsdk_dev_t* dev)
 void uart_cmsdk_clear_interrupt(struct uart_cmsdk_dev_t* dev,
                               enum uart_cmsdk_irq_t irq)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if(dev->data->state & UART_CMSDK_INITIALIZED) {
         /* Clears pending interrupts */
@@ -265,8 +248,8 @@ void uart_cmsdk_clear_interrupt(struct uart_cmsdk_dev_t* dev,
 
 enum uart_cmsdk_error_t uart_cmsdk_tx_enable(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if (!(dev->data->state & UART_CMSDK_INITIALIZED)) {
         return UART_CMSDK_ERR_NOT_INIT;
@@ -279,8 +262,8 @@ enum uart_cmsdk_error_t uart_cmsdk_tx_enable(struct uart_cmsdk_dev_t* dev)
 
 void uart_cmsdk_tx_disable(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if (dev->data->state & UART_CMSDK_INITIALIZED ) {
         p_uart->ctrl &= ~UART_CMSDK_TX_EN;
@@ -289,8 +272,8 @@ void uart_cmsdk_tx_disable(struct uart_cmsdk_dev_t* dev)
 
 enum uart_cmsdk_error_t uart_cmsdk_rx_enable(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if (!(dev->data->state & UART_CMSDK_INITIALIZED)) {
         return UART_CMSDK_ERR_NOT_INIT;
@@ -303,8 +286,8 @@ enum uart_cmsdk_error_t uart_cmsdk_rx_enable(struct uart_cmsdk_dev_t* dev)
 
 void uart_cmsdk_rx_disable(struct uart_cmsdk_dev_t* dev)
 {
-    struct _uart_cmsdk_reg_map_t* p_uart =
-                                 (struct _uart_cmsdk_reg_map_t*)dev->cfg->base;
+    struct uart_cmsdk_reg_map_t* p_uart =
+                                 (struct uart_cmsdk_reg_map_t*)dev->cfg->base;
 
     if (dev->data->state & UART_CMSDK_INITIALIZED ) {
         p_uart->ctrl &= ~UART_CMSDK_RX_EN;
