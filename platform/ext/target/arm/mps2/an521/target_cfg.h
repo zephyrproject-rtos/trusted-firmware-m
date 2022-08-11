@@ -158,4 +158,13 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void);
  */
 enum tfm_plat_err_t nvic_interrupt_enable(void);
 
+/* Function for FIH to verify that SAU & IDAU are correctly configured. */
+fih_int fih_verify_sau_and_idau_cfg(void);
+
+/* Function for FIH to verify that MPC is correctly configured. */
+fih_int fih_verify_mpc_cfg(void);
+
+/* Function for FIH to verify that PPC is correctly configured. */
+fih_int fih_verify_ppc_cfg(void);
+
 #endif /* __TARGET_CFG_H__ */

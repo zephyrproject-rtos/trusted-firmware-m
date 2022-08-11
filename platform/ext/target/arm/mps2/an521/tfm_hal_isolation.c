@@ -155,6 +155,136 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
 #endif /* TFM_LVL == 3 */
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
+#ifdef TFM_FIH_PROFILE_ON
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
+static fih_int fih_verify_mpu_armv8m_region_enabled(
+                                const struct mpu_armv8m_dev_t *dev,
+                                const struct mpu_armv8m_region_cfg_t *region_cfg,
+                                uint32_t region_nr)
+{
+    MPU_Type *mpu = (MPU_Type *)dev->base;
+
+    uint32_t base_cfg;
+    uint32_t limit_cfg;
+
+    if ((region_cfg->region_base & ~MPU_RBAR_BASE_Msk) != 0) {
+        FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
+    }
+
+    mpu->RNR  = region_nr & MPU_RNR_REGION_Msk;
+
+    base_cfg = region_cfg->region_base & MPU_RBAR_BASE_Msk;
+    base_cfg |= (region_cfg->attr_sh << MPU_RBAR_SH_Pos) & MPU_RBAR_SH_Msk;
+    base_cfg |= (region_cfg->attr_access << MPU_RBAR_AP_Pos) & MPU_RBAR_AP_Msk;
+    base_cfg |= (region_cfg->attr_exec << MPU_RBAR_XN_Pos) & MPU_RBAR_XN_Msk;
+    if (mpu->RBAR != base_cfg) {
+        FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
+    }
+
+    limit_cfg = (region_cfg->region_limit-1) & MPU_RLAR_LIMIT_Msk;
+    limit_cfg |= (region_cfg->region_attridx << MPU_RLAR_AttrIndx_Pos) &
+                 MPU_RLAR_AttrIndx_Msk;
+    limit_cfg |= MPU_RLAR_EN_Msk;
+    if (mpu->RLAR != limit_cfg) {
+        FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
+    }
+
+    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
+}
+
+static fih_int fih_verify_mpu_armv8m_enabled(struct mpu_armv8m_dev_t *dev,
+                                             uint32_t privdef_en,
+                                             uint32_t hfnmi_en)
+{
+    MPU_Type *mpu = (MPU_Type *)dev->base;
+
+    if (mpu->MAIR0 != ((MPU_ARMV8M_MAIR_ATTR_DEVICE_VAL << MPU_MAIR0_Attr0_Pos) |
+                       (MPU_ARMV8M_MAIR_ATTR_CODE_VAL << MPU_MAIR0_Attr1_Pos) |
+                       (MPU_ARMV8M_MAIR_ATTR_DATA_VAL << MPU_MAIR0_Attr2_Pos))) {
+        FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
+    }
+
+    if (mpu->CTRL != (MPU_CTRL_ENABLE_Msk |
+                      (privdef_en ? MPU_CTRL_PRIVDEFENA_Msk : 0) |
+                      (hfnmi_en   ? MPU_CTRL_HFNMIENA_Msk   : 0))) {
+        FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
+    }
+
+    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
+}
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
+
+fih_int tfm_hal_verify_static_boundaries(void)
+{
+    fih_int fih_rc = FIH_FAILURE;
+
+    /* Verify isolation boundaries between SPE and NSPE */
+    FIH_CALL(fih_verify_sau_and_idau_cfg, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(ARM_DRIVER_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+    FIH_CALL(fih_verify_mpc_cfg, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(ARM_DRIVER_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+    FIH_CALL(fih_verify_ppc_cfg, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(ARM_DRIVER_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+
+    /* Repeat the verification to mitigate instruction skip */
+    FIH_CALL(fih_verify_sau_and_idau_cfg, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(ARM_DRIVER_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+    FIH_CALL(fih_verify_mpc_cfg, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(ARM_DRIVER_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+    FIH_CALL(fih_verify_ppc_cfg, fih_rc);
+    if (fih_not_eq(fih_rc, fih_int_encode(ARM_DRIVER_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+
+    /* Verify static isolation boundaries inside SPE */
+#ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
+    uint32_t region_nr;
+
+    if ((ARRAY_SIZE(region_cfg) + MIN_NR_PRIVATE_DATA_REGION) > MPU_REGION_NUM) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+
+    for (region_nr = 0; region_nr < ARRAY_SIZE(region_cfg); region_nr++) {
+        /* Verify regions are correctly enabled */
+        FIH_CALL(fih_verify_mpu_armv8m_region_enabled, fih_rc, &dev_mpu_s, &region_cfg[region_nr], region_nr);
+        if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+            FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+        }
+        /* Repeat the verification to mitigate instruction skip */
+        FIH_CALL(fih_verify_mpu_armv8m_region_enabled, fih_rc, &dev_mpu_s, &region_cfg[region_nr], region_nr);
+        if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+            FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+        }
+    }
+
+    /* Verify MPU is correctly enabled */
+    FIH_CALL(fih_verify_mpu_armv8m_enabled, fih_rc, &dev_mpu_s,
+                PRIVILEGED_DEFAULT_ENABLE, HARDFAULT_NMI_ENABLE);
+    if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+    /* Repeat the verification to mitigate instruction skip */
+    FIH_CALL(fih_verify_mpu_armv8m_enabled, fih_rc, &dev_mpu_s,
+                PRIVILEGED_DEFAULT_ENABLE, HARDFAULT_NMI_ENABLE);
+    if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
+    }
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
+
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
+}
+#endif /* TFM_FIH_PROFILE_ON */
+
 FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(void)
 {
     fih_int fih_rc = FIH_FAILURE;
@@ -380,8 +510,8 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
     uint32_t i, mmio_index;
     struct platform_data_t *plat_data_ptr;
     struct asset_desc_t *rt_mem;
-#endif /* TFM_LVL == 3 */
     fih_int fih_rc = FIH_FAILURE;
+#endif /* TFM_LVL == 3 */
 
     /* Privileged level is required to be set always */
     ctrl.w = __get_CONTROL();
