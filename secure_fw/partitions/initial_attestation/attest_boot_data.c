@@ -372,49 +372,6 @@ attest_encode_sw_components_array(QCBOREncodeContext *encode_ctx,
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-enum psa_attest_err_t
-attest_get_encoded_boot_records(uint8_t *boot_record_buf,
-                                size_t   boot_record_len,
-                                size_t  *encoded_length)
-{
-    QCBOREncodeContext encode_context;
-    struct q_useful_buf encoded = NULL_Q_USEFUL_BUF;
-    struct q_useful_buf_c encoded_const = NULL_Q_USEFUL_BUF_C;
-    QCBORError encode_error;
-    uint32_t component_cnt;
-    enum psa_attest_err_t err;
-
-    if ((boot_record_buf == NULL) || (boot_record_len == 0)) {
-        return PSA_ATTEST_ERR_INVALID_INPUT;
-    }
-
-    /* Set up encoding context with output buffer. */
-    encoded.ptr = boot_record_buf;
-    encoded.len = boot_record_len;
-    QCBOREncode_Init(&encode_context, encoded);
-
-    *encoded_length = 0;
-    err = attest_encode_sw_components_array(&encode_context,
-                                            NULL,
-                                            &component_cnt);
-    if (err != PSA_ATTEST_ERR_SUCCESS) {
-        return err;
-    }
-
-    encode_error = QCBOREncode_Finish(&encode_context, &encoded_const);
-    /* Check for any encoding errors. */
-    if (encode_error == QCBOR_ERR_BUFFER_TOO_SMALL) {
-        return PSA_ATTEST_ERR_BUFFER_OVERFLOW;
-    } else if (encode_error != QCBOR_SUCCESS) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    /* Length of CBOR encoded data in the buffer. */
-    *encoded_length = encoded_const.len;
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
 enum psa_attest_err_t attest_boot_data_init(void)
 {
     return attest_get_boot_data(TLV_MAJOR_IAS,

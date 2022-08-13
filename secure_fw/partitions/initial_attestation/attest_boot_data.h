@@ -56,25 +56,6 @@ attest_encode_sw_components_array(QCBOREncodeContext *encode_ctx,
                                   uint32_t *cnt);
 
 /*!
- * \brief Returns the boot records/measurements in CBOR encoded format
- *
- * Creates a CBOR encoded array if at least 1 software measurement is found,
- * otherwise the \p boot_record_len is set to 0 on return.
- *
- * \param[out]     boot_record_buf  Pointer to the buffer to store the
- *                                  encoded boot record information
- * \param[in]      boot_record_len  Size of the \p boot_record_buf buffer in
- *                                  bytes.
- * \param[out]     encoded_length   Size of the encoded data in bytes on return.
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-enum psa_attest_err_t
-attest_get_encoded_boot_records(uint8_t *boot_record_buf,
-                                size_t   boot_record_len,
-                                size_t  *encoded_length);
-
-/*!
  * \brief Gets the IAS TLV entries (boot data coming from boot loader) from
  *        shared memory area to service memory area
  *
