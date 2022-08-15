@@ -38,7 +38,7 @@ __heap_size__  = S_HEAP_SIZE;
 #if !defined(TFM_PSA_API)
 __psp_stack_size__ = S_PSP_STACK_SIZE;
 #endif
-__msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
+__msp_stack_size__ = S_MSP_STACK_SIZE;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
@@ -225,7 +225,7 @@ SECTIONS
 
     .msp_stack : ALIGN(32)
     {
-        . += __msp_init_stack_size__;
+        . += __msp_stack_size__;
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);

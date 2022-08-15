@@ -27,7 +27,6 @@
     #define S_HEAP_SIZE             (0x0000200)
 #endif
 
-#define S_MSP_STACK_SIZE_INIT   (0x0000400)
 #define S_MSP_STACK_SIZE        (0x0000800)
 #define S_PSP_STACK_SIZE        (0x0000800)
 
