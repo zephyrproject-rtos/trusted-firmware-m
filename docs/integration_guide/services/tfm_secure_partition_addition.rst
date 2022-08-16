@@ -621,7 +621,7 @@ below. Please note those input shall be wrapped with double quotes.
 
 .. code-block:: bash
 
-  -DTFM_EXTRA_MANIFEST_LIST_FILES="<Absolute-path-part-1-folder/manifes_list.yaml>;<Absolute-path-part-2-folder/manifes_list.yaml>"
+  -DTFM_EXTRA_MANIFEST_LIST_FILES="<Absolute-path-part-1-folder/manifest_list.yaml>;<Absolute-path-part-2-folder/manifest_list.yaml>"
   -DTFM_EXTRA_PARTITION_PATHS="<Absolute-path-part-1-folder>;<Absolute-path-part-2-folder>"
 
 .. Note::

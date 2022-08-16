@@ -97,7 +97,7 @@ Following are the supported attributes of in the manifest lists.
 
   The manifest file of the Secure Partition.
   Both absolute path and relative path to the manifest list are supported.
-  Enviroment variables are supported.
+  Environment variables are supported.
 
 - ``output_path``
 
@@ -108,7 +108,7 @@ Following are the supported attributes of in the manifest lists.
 
   Both absolute path and relative path to the directory specified by
   ``-o/--outdir`` are supported.
-  Enviroment variables are supported.
+  Environment variables are supported.
 
   It is set to the directory specified by ``-o/--outdir`` if omitted.
 
@@ -170,14 +170,14 @@ Each item in the ``file_list`` must contain the following attributes.
   This attribute is the file path of a Jinja2 [6]_ template.
   The TF-M manifest tool uses Jinja2 template engine for file generations.
   It can be a relative path to TF-M root directory or an absolute path.
-  Enviroment variables are supported.
+  Environment variables are supported.
 
 - ``output``
 
   The output file of the ``template``.
   Both absolute path and relative path to the directory specified by
   ``-o/--outdir`` are supported.
-  Enviroment variables are supported.
+  Environment variables are supported.
 
 **The tfm_generated_file_list.yaml is essential to build TF-M.**
 
@@ -222,7 +222,7 @@ The following format is also supported for boolean type configurations.
 
     #define CONFIG_NAME
 
-The configurations can be divided into two categaries.
+The configurations can be divided into two categories.
 
 - Generic configurations:
 
@@ -267,7 +267,7 @@ It can be also overridden or appended with other file lists.
 
 The ``-q`` argument is appended if ``PARSE_MANIFEST_QUIET_FLAG`` is enabled.
 
-Paths in manifest lists and generated file lists can have CMake varibles as
+Paths in manifest lists and generated file lists can have CMake variables as
 long as the are absolute paths.
 The lists then must be processed by the CMake command ``configure_file()`` [7]_
 before passing to the manifest tool.
@@ -280,7 +280,7 @@ References
 
 .. [1] `FF-M v1.0 Specification <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf?revision=2d1429fa-4b5b-461a-a60e-4ef3d8f7f4b4>`__
 
-.. [2] `FF-M v1.1 Extention <https://documentation-service.arm.com/static/600067c09b9c2d1bb22cd1c5?token=>`__
+.. [2] `FF-M v1.1 Extension <https://documentation-service.arm.com/static/600067c09b9c2d1bb22cd1c5?token=>`__
 
 .. [3] `YAML <https://yaml.org/>`__
 
