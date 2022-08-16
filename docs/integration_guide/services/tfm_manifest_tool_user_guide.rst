@@ -84,7 +84,7 @@ Each manifest list must contain a ``manifest_list`` attribute which collects the
 descriptions of Secure Partition manifests.
 Following are the supported attributes of in the manifest lists.
 
-- ``name``
+- ``description``
 
   Required.
 
@@ -295,3 +295,5 @@ References
 --------------
 
 *Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

@@ -340,7 +340,7 @@ Reference configuration example:
 .. code-block:: yaml
 
     {
-      "name": "TFM Example Partition",
+      "description": "TFM Example Partition",
       "manifest": "secure_fw/partitions/example/tfm_example_partition.yaml",
       "conditional": "@TFM_PARTITION_EXAMPLE@",
       "output_path": "partitions/example",

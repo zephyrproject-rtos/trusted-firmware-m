@@ -8,13 +8,13 @@
 #-------------------------------------------------------------------------------
 
 {
-  "name": "PSA FF Test secure partition manifests",
+  "description": "PSA FF Test secure partition manifests",
   "type": "manifest_list",
   "version_major": 0,
   "version_minor": 1,
   "manifest_list": [
    {
-      "name": "PSA FF Test Client Partition",
+      "description": "PSA FF Test Client Partition",
       "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/client_partition_psa.json",
       "output_path": "api-tests/platform/manifests",
       "conditional": "TFM_PARTITION_FF_TEST",
@@ -31,7 +31,7 @@
       }
     },
     {
-      "name": "PSA FF Test Server Partition",
+      "description": "PSA FF Test Server Partition",
       "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/server_partition_psa.json",
       "output_path": "api-tests/platform/manifests",
       "conditional": "TFM_PARTITION_FF_TEST",
@@ -48,7 +48,7 @@
       }
     },
     {
-      "name": "PSA FF Test Driver Partition",
+      "description": "PSA FF Test Driver Partition",
       "manifest": "${PSA_ARCH_TESTS_PATH}/api-tests/platform/manifests/driver_partition_psa.json",
       "output_path": "api-tests/platform/manifests",
       "conditional": "TFM_PARTITION_FF_TEST",

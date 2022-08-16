@@ -10,20 +10,20 @@
 # The "manifest" field must be relative path to this file or absolute path.
 #
 # Files per Secure Partition are generated to:
-#   - "output_path", if it is a absolute path - not recommanded
+#   - "output_path", if it is a absolute path - not recommended
 #   - generated_file_root/"output_path", if "output_path" is relative path
 #   - generated_file_root/, if "output_path" is not specified
 #       * generated_file_root is the path passed to tfm_parse_manifest_list.py
 #         by -o/--outdir
 
 {
-  "name": "TF-M secure partition manifests",
+  "description": "TF-M secure partition manifests",
   "type": "manifest_list",
   "version_major": 0,
   "version_minor": 1,
   "manifest_list": [
     {
-      "name": "Non-Secure Mailbox Agent",
+      "description": "Non-Secure Mailbox Agent",
       "manifest": "${CMAKE_SOURCE_DIR}/secure_fw/partitions/ns_agent_mailbox/ns_agent_mailbox.yaml",
       "output_path": "secure_fw/partitions/ns_agent_mailbox",
       "conditional": "TFM_MULTI_CORE_TOPOLOGY",
@@ -37,7 +37,7 @@
       }
     },
     {
-      "name": "TFM Crypto Service",
+      "description": "TFM Crypto Service",
       "manifest": "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/rss/manifest/tfm_crypto.yaml",
       "output_path": "secure_fw/partitions/crypto",
       "conditional": "TFM_PARTITION_CRYPTO",
@@ -51,7 +51,7 @@
       }
     },
     {
-      "name": "TFM Platform Service",
+      "description": "TFM Platform Service",
       "manifest": "${CMAKE_SOURCE_DIR}/secure_fw/partitions/platform/tfm_platform.yaml",
       "output_path": "secure_fw/partitions/platform",
       "conditional": "TFM_PARTITION_PLATFORM",
@@ -65,7 +65,7 @@
       }
     },
     {
-      "name": "TFM Initial Attestation Service",
+      "description": "TFM Initial Attestation Service",
       "manifest": "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/rss/manifest/tfm_initial_attestation.yaml",
       "output_path": "secure_fw/partitions/initial_attestation",
       "conditional": "TFM_PARTITION_INITIAL_ATTESTATION",

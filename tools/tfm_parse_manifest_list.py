@@ -325,15 +325,15 @@ def process_partition_manifests(manifest_lists, configs):
             is_enabled = '1'
 
         if is_enabled in valid_disabled_conditions:
-            logging.info("   {:40s}  OFF".format(manifest_item['name']))
+            logging.info("   {:40s}  OFF".format(manifest_item['description']))
             continue
         elif is_enabled in valid_enabled_conditions:
-            logging.info("   {:40s}  ON".format(manifest_item['name']))
+            logging.info("   {:40s}  ON".format(manifest_item['description']))
         else:
             raise Exception('Invalid "conditional" attribute: "{}" for {}. '
                             'Please set to one of {} or {}, case-insensitive.'\
                             .format(manifest_item['conditional'],
-                                    manifest_item['name'],
+                                    manifest_item['description'],
                                     valid_enabled_conditions, valid_disabled_conditions))
 
         # Check if partition ID is manually set
@@ -490,7 +490,7 @@ def gen_per_partition_files(context):
         partition_context['attr'] = one_partition['attr']
         partition_context['manifest_out_basename'] = one_partition['manifest_out_basename']
 
-        logging.info ('Generating {} in {}'.format(one_partition['attr']['name'],
+        logging.info ('Generating {} in {}'.format(one_partition['attr']['description'],
                                             one_partition['output_dir']))
         outfile_path = os.path.dirname(one_partition['header_file'])
         if not os.path.exists(outfile_path):
