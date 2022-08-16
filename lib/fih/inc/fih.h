@@ -41,9 +41,9 @@
  * or JOP attacks.
  *
  * FIH_ENABLE_DELAY causes random delays. This makes it hard to cause faults
- * precisely. It requires an RNG. An mbedtls integration is provided in
- * fault_injection_hardening_delay_mbedtls.h, but any RNG that has an entropy
- * source can be used by implementing the fih_delay_random_uchar function.
+ * precisely. It requires an RNG. A simple example using SysTick as entropy
+ * source is provided in tfm_fih_rng.h, but any RNG that has an entropy
+ * source can be used by implementing the fih_delay_random function.
  *
  * The basic call pattern is:
  *

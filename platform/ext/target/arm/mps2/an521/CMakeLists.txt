@@ -100,6 +100,8 @@ target_include_directories(platform_s
 )
 
 target_sources(platform_s
+    INTERFACE
+        $<$<STREQUAL:"${TFM_FIH_PROFILE}","HIGH">:${PLATFORM_DIR}/ext/common/template/tfm_fih_rng.c>
     PRIVATE
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_MPC.c
