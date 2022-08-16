@@ -71,6 +71,7 @@ extern struct mpc_sie_dev_t MPC_ISRAM1_DEV_S;
 #include "dma350_drv.h"
 extern struct dma350_dev_t DMA350_DMA0_DEV_S;
 #define DMA350_DMA0_DEV             DMA350_DMA0_DEV_S
+#define DMA350_TRIGIN_NUMBER        (8u)
 
 #ifdef PLATFORM_SVC_HANDLERS
 /* Required for DMA350 checker layer even if some channels are configured NS by

@@ -568,6 +568,7 @@ void ppc_clear_irq(void)
 /*------------------- DMA configuration functions -------------------------*/
 enum tfm_plat_err_t dma_init_cfg(void)
 {
+    uint32_t i = 0;
     enum dma350_error_t dma_err;
 
     dma_err = dma350_init(&DMA350_DMA0_DEV_S);
@@ -602,6 +603,17 @@ enum tfm_plat_err_t dma_init_cfg(void)
     {
         ERROR_MSG("Failed to set DMA350_DMA0_DEV_S, channel 1 privileged!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* Configure every Trigger input to NS by default */
+    for(i = 0; i < DMA350_TRIGIN_NUMBER; i++)
+    {
+        dma_err = dma350_set_trigin_nonsecure(&DMA350_DMA0_DEV_S, i);
+        if(dma_err != DMA350_ERR_NONE)
+        {
+            SPMLOG_ERRMSGVAL("Failed to set the following Trigger input of DMA350_DMA0_DEV_S to NS: ", i);
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
     }
 
     return TFM_PLAT_ERR_SUCCESS;
