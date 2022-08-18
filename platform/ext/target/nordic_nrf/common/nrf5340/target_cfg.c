@@ -24,6 +24,7 @@
 #include <spu.h>
 #include <nrfx.h>
 #include <hal/nrf_gpio.h>
+#include <hal/nrf_spu.h>
 
 #define PIN_XL1 0
 #define PIN_XL2 1
@@ -783,6 +784,14 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
      * code; that's why it is placed here).
      */
     NRF_CACHE->ENABLE = CACHE_ENABLE_ENABLE_Enabled;
+
+    /* Enforce that the nRF5340 Network MCU is in the Non-Secure
+     * domain. Non-secure is the HW reset value for the network core
+     * so configuring this should not be necessary, but we want to
+     * make sure that the bootloader has not accidentally configured
+     * it to be secure.
+     */
+    nrf_spu_extdomain_set(NRF_SPU, 0, false, false);
 
     return TFM_PLAT_ERR_SUCCESS;
 }
