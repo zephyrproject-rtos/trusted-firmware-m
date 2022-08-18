@@ -42,6 +42,8 @@ set(TFM_EXTRAS_REPO_EXTRA_PARTITIONS    "measured_boot" CACHE STRING "List of ex
 # Below TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST path is relative to tf-m-extras repo
 set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_manifest_list.yaml" CACHE STRING "List of extra secure partition manifests")
 
+set(TFM_PARTITION_DELEGATED_ATTESTATION ON         CACHE BOOL     "Enable Delegated Attestation partition")
+
 set(ATTEST_TOKEN_PROFILE                "ARM_CCA"  CACHE STRING   "Set the initial attestation token profile")
 
 set(TFM_NS_NV_COUNTER_AMOUNT            3          CACHE STRING   "How many NS NV counters are enabled")

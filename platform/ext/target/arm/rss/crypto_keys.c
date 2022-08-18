@@ -63,7 +63,7 @@ enum tfm_plat_err_t tfm_plat_builtin_key_get_usage(psa_key_id_t key_id,
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION
     case TFM_BUILTIN_KEY_ID_DAK_SEED:
         switch(owner) {
-        case TFM_SP_INITIAL_ATTESTATION:
+        case TFM_SP_DELEGATED_ATTESTATION:
             *usage = PSA_KEY_USAGE_DERIVE;
             break;
         default:
