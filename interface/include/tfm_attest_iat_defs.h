@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef __ATTEST_IAT_DEFINES_H__
-#define __ATTEST_IAT_DEFINES_H__
+#ifndef __TFM_ATTEST_IAT_DEFS_H__
+#define __TFM_ATTEST_IAT_DEFS_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,4 +64,4 @@ extern "C" {
 }
 #endif
 
-#endif /* __ATTEST_IAT_DEFINES_H__ */
+#endif /* __TFM_ATTEST_IAT_DEFS_H__ */

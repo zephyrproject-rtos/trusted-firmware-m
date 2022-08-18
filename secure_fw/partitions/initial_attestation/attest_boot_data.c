@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include "attest_boot_data.h"
 #include "tfm_boot_status.h"
-#include "attest_iat_defines.h"
+#include "tfm_attest_iat_defs.h"
 #include "q_useful_buf.h"
 #ifdef TFM_PARTITION_MEASURED_BOOT
 #include "measured_boot_api.h"
