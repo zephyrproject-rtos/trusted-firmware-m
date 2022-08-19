@@ -91,7 +91,6 @@ MEMORY
 #define VENEER_POS 2
 #endif
 
-__heap_size__  = S_HEAP_SIZE;
 #if !defined(TFM_PSA_API)
 __psp_stack_size__ = S_PSP_STACK_SIZE;
 #endif
@@ -391,7 +390,8 @@ VENEERS()
     Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
 #endif /* !defined(TFM_PSA_API) */
 
-#if (TFM_LVL == 1)
+#if defined(ENABLE_HEAP)
+    __heap_size = S_HEAP_SIZE;
     .heap : ALIGN(8)
     {
         __end__ = .;
@@ -401,7 +401,7 @@ VENEERS()
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
-#endif /* TFM_LVL == 1 */
+#endif /* defined(ENABLE_HEAP) */
 
 #if defined(CONFIG_TFM_PARTITION_META)
     .TFM_SP_META_PTR : ALIGN(32)
