@@ -242,6 +242,11 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
     int flags = 0;
     int32_t range_access_allowed_by_mpu;
 
+    /* If size is zero, this indicates an empty buffer, we can ignore base. */
+    if (size == 0) {
+        return TFM_HAL_SUCCESS;
+    }
+
     if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
         flags |= CMSE_MPU_UNPRIV;
     }
