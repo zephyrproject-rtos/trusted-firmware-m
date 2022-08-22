@@ -1,4 +1,4 @@
-From 98d7c4bc36ed72190926e3c8c045b5ce7e8c0a6f Mon Sep 17 00:00:00 2001
+From ebcada5c2c30c41247cf317f6ae6df6488fbd739 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?D=C3=A1vid=20H=C3=A1zi?= <david.hazi@arm.com>
 Date: Tue, 2 Aug 2022 14:38:32 +0200
 Subject: [PATCH 7/9] Build: Remove encoding width suffix from Arm bignum

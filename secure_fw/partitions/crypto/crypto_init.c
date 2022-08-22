@@ -100,14 +100,6 @@ static psa_status_t tfm_crypto_init_iovecs(const psa_msg_t *msg,
 }
 #else /* PSA_FRAMEWORK_HAS_MM_IOVEC == 1 */
 /**
- * \brief Default size of the internal scratch buffer used for IOVec allocations
- *        in bytes
- */
-#ifndef TFM_CRYPTO_IOVEC_BUFFER_SIZE
-#error TFM_CRYPTO_IOVEC_BUFFER_SIZE is not defined
-#endif
-
-/**
  * \brief Internal scratch used for IOVec allocations
  *
  */
@@ -281,14 +273,6 @@ psa_status_t tfm_crypto_get_caller_id(int32_t *id)
 #endif /* TFM_PSA_API */
 
 /**
- * \brief Default value for the size of the static buffer used by Mbed
- *        Crypto for its dynamic allocations
- */
-#ifndef TFM_CRYPTO_ENGINE_BUF_SIZE
-#error TFM_CRYPTO_ENGINE_BUF_SIZE is not defined
-#endif
-
-/**
  * \brief Static buffer to be used by Mbed Crypto for memory allocations
  *
  */
@@ -322,8 +306,12 @@ static psa_status_t tfm_crypto_engine_init(void)
     mbedtls_platform_set_printf(tfm_sp_log_printf);
 #endif
 
-    /* Initialise the crypto accelerator if one is enabled */
-#ifdef CRYPTO_HW_ACCELERATOR
+    /* Initialise the crypto accelerator if one is enabled. If the driver API is
+     * the one defined by the PSA Unified Driver interface, the initialisation is
+     * performed directly through psa_crypto_init() while the PSA subsystem is
+     * initialised
+     */
+#if defined(CRYPTO_HW_ACCELERATOR) && defined(CC312_LEGACY_DRIVER_API_ENABLED)
     LOG_INFFMT("[INF][Crypto] Initialising HW accelerator... ");
     if (crypto_hw_accelerator_init() != 0) {
         return PSA_ERROR_HARDWARE_FAILURE;
@@ -331,8 +319,9 @@ static psa_status_t tfm_crypto_engine_init(void)
     LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-    /* Previous function does not return any value, so just call the
-     * initialisation function of the Mbed Crypto layer
+    /* Perform the initialisation of the PSA subsystem in the Mbed Crypto
+     * library. If a driver is built using the PSA Driver interface, the function
+     * below will perform also the same operations as crypto_hw_accelerator_init()
      */
     return psa_crypto_init();
 }

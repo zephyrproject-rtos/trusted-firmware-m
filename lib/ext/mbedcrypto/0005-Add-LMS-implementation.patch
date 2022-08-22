@@ -1,4 +1,4 @@
-From afc821070e7b7a6c634707f1d847b1445101bdd7 Mon Sep 17 00:00:00 2001
+From 99a390b1a71005db8b6c92956a2c86cc3182a6f3 Mon Sep 17 00:00:00 2001
 From: Raef Coles <raef.coles@arm.com>
 Date: Wed, 21 Jul 2021 12:42:15 +0100
 Subject: [PATCH 5/9] Add LMS implementation

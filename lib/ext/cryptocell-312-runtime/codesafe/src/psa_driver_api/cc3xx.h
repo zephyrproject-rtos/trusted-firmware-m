@@ -71,6 +71,7 @@
 #define CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE
 #endif /* __DOXYGEN_ONLY__ */
 
+#include "cc3xx_psa_init.h"
 #include "cc3xx_psa_cipher.h"
 #include "cc3xx_psa_entropy.h"
 #include "cc3xx_psa_hash.h"
