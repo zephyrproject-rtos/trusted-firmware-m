@@ -391,7 +391,7 @@ VENEERS()
 #endif /* !defined(TFM_PSA_API) */
 
 #if defined(ENABLE_HEAP)
-    __heap_size = S_HEAP_SIZE;
+    __heap_size__ = S_HEAP_SIZE;
     .heap : ALIGN(8)
     {
         __end__ = .;
