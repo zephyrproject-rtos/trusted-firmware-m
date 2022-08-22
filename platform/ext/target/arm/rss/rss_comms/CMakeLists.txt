@@ -21,3 +21,10 @@ target_compile_definitions(platform_s
     PRIVATE
         RSS_COMMS_MAX_CONCURRENT_REQ=2
 )
+
+# For spm_log_msgval
+target_link_libraries(platform_s
+    PRIVATE
+        tfm_spm
+)
+
