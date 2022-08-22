@@ -136,9 +136,13 @@ Mark Horvath
 Corstone1000
 ^^^^^^^^^^^^
 
-Satish Kumar
-    :email: `Satish.Kumar01@arm.com <satish.kumar01@arm.com>`__
-    :github: `kr-satish <https://github.com/kr-satish>`__
+Vishnu Banavath
+    :email: `Vishnu.Banavath@arm.com <vishnu.banavath@arm.com>`__
+    :github: `vishnu-banavath <https://github.com/vishnu-banavath>`__
+
+Mohamed Omar Asaker
+    :email: `Mohamed.OmarAsaker@arm.com <mohamed.omarasaker@arm.com>`__
+    :github: `mohamedasaker-arm <https://github.com/mohamedasaker-arm>`__
 
 RSS
 ^^^
