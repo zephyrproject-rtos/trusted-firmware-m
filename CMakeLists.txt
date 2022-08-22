@@ -9,6 +9,15 @@
 
 cmake_minimum_required(VERSION 3.15)
 
+# CMake 3.21 and above requests projects to specify cpu/arch compile and link flags explicitly in
+# Armclang. Link: https://cmake.org/cmake/help/latest/policy/CMP0123.html
+# It is aligned with current Armclang toolchain implementation.
+# Explictly set this policy to NEW behavior to eliminate long warnings. It shall be set in root
+# CMakeLists.txt otherwise project() will throw out the warnings.
+if(POLICY CMP0123)
+    cmake_policy(SET CMP0123 NEW)
+endif()
+
 include(cmake/version.cmake)
 
 ############################ CONFIGURATION #####################################
