@@ -518,7 +518,7 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
     }
 #endif /* ATTEST_INCLUDE_COSE_KEY_ID */
 
-    for(idx = 0; idx < 4; idx++) {
+    for(idx = 0; idx < MCUBOOT_IMAGE_NUMBER; idx++) {
         err = verify_zero_bits_count(otp->bl2_rotpk[idx],
                                      sizeof(otp->bl2_rotpk[idx]),
                                      (uint8_t*)&otp->bl2_rotpk_zero_bits[idx]);
