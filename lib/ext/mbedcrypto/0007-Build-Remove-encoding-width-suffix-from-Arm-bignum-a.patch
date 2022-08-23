@@ -1,7 +1,11 @@
-From 1698af1aa6a8cbf4ca59dd5dbd756418e58273d5 Mon Sep 17 00:00:00 2001
-From: Dávid Házi <david.hazi@arm.com>
+From 98d7c4bc36ed72190926e3c8c045b5ce7e8c0a6f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?D=C3=A1vid=20H=C3=A1zi?= <david.hazi@arm.com>
 Date: Tue, 2 Aug 2022 14:38:32 +0200
-Subject: [PATCH 6/6] Build: Remove encoding width suffix from Arm bignum assembly
+Subject: [PATCH 7/9] Build: Remove encoding width suffix from Arm bignum
+ assembly
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 Signed-off-by: Dávid Házi <david.hazi@arm.com>
 ---
@@ -9,7 +13,7 @@ Signed-off-by: Dávid Házi <david.hazi@arm.com>
  1 file changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/library/bn_mul.h b/library/bn_mul.h
-index 962d7a97..9cc84d06 100644
+index 962d7a97b..20e0e53dc 100644
 --- a/library/bn_mul.h
 +++ b/library/bn_mul.h
 @@ -717,10 +717,10 @@
@@ -48,5 +52,5 @@ index 962d7a97..9cc84d06 100644
  #define MULADDC_X2_STOP                                      \
              : [a0]     "=&r" (tmp_a0),                       \
 -- 
-2.34.1
+2.25.1
 

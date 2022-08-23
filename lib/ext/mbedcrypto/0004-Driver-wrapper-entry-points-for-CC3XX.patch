@@ -1,7 +1,7 @@
-From 5dc86b266f0372a733f03db6d91003f134e1f51f Mon Sep 17 00:00:00 2001
+From 2f96bf29956d2b65c1416ba5bfc02233a17ee3dc Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Fri, 15 Jul 2022 12:41:34 +0100
-Subject: [PATCH 4/6] Driver wrapper entry points for CC3XX
+Subject: [PATCH 4/9] Driver wrapper entry points for CC3XX
 
 Manually hardcode PSA driver entry points for the CC3XX driver
 into psa_crypto_driver_wrappers.c (and provide missing entry point
@@ -1066,5 +1066,5 @@ index 12c649da3..ac0cd1d89 100644
  
  /* End of automatically generated file. */
 -- 
-2.34.1
+2.25.1
 
