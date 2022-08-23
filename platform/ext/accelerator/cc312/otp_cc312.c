@@ -229,14 +229,18 @@ __PACKED_STRUCT plat_otp_layout_t {
         uint8_t bl2_nv_counter[4][64];
 
 #ifdef BL1
+#ifdef PLATFORM_DEFAULT_BL1
         uint8_t bl1_rotpk_0[56];
         uint8_t bl1_nv_counter[16];
-#ifdef PLATFORM_DEFAULT_BL1
+
         uint8_t bl2_encryption_key[32];
         uint8_t bl1_2_image_hash[32];
         uint8_t bl2_image_hash[32];
 
         uint8_t bl1_2_image[BL1_2_CODE_SIZE];
+#else /* PLATFORM_DEFAULT_BL1 */
+        uint8_t bl1_rotpk_0[32];
+        uint8_t bl1_nv_counter[16];
 #endif /* PLATFORM_DEFAULT_BL1 */
 #endif /* BL1 */
 
