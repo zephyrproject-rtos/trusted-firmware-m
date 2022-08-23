@@ -11,6 +11,9 @@
 #include "utilities.h"
 #include "config_impl.h"
 
+#if defined(__ICCARM__) && (CONFIG_TFM_FP >= 1)
+#pragma required = tfm_arch_clear_fp_data
+#endif
 
 __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
                                            uint32_t exc_return)

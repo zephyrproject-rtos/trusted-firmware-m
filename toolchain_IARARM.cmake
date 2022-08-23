@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, IAR Systems AB. All rights reserved.
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -50,7 +50,7 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<COMPILE_LANGUAGE:C,CXX>:-D_NO_DEFINITIONS_IN_HEADER_FILES>
         $<$<COMPILE_LANGUAGE:C,CXX>:--diag_suppress=Pe546,Pe940,Pa082,Pa084>
         $<$<COMPILE_LANGUAGE:C,CXX>:--no_path_in_file_macros>
-        $<$<COMPILE_LANGUAGE:C,CXX,ASM>:--fpu=none>
+        "$<$<COMPILE_LANGUAGE:C,CXX,ASM>:SHELL:--fpu none>"
         $<$<AND:$<COMPILE_LANGUAGE:C,CXX,ASM>,$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<CONFIG:Release,MinSizeRel>>:-r>
     )
 endmacro()
@@ -62,7 +62,7 @@ macro(tfm_toolchain_reset_linker_flags)
       --silent
       --semihosting
       --redirect __write=__write_buffered
-      --fpu=none
+      "SHELL:--fpu none"
     )
 endmacro()
 
