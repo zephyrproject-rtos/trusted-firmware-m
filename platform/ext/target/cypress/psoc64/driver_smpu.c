@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2019-2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  * Copyright (c) 2021, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -299,11 +301,39 @@ static void print_smpu_config(const cy_stc_smpu_cfg_t *slave_config)
     }
 }
 
+static cy_en_prot_status_t SMPU_Read_Region(const PROT_SMPU_SMPU_STRUCT_Type *smpu,
+                                            uint32_t *address,
+                                            uint32_t *size,
+                                            uint32_t *subregions,
+                                            uint32_t *att0_reg)
+{
+    uint32_t reg = smpu->ATT0;
+
+    /* Return a copy of ATT0 if requested */
+    if (att0_reg) {
+        *att0_reg = reg;
+    }
+
+    if (!_FLD2BOOL(PROT_SMPU_SMPU_STRUCT_ATT0_ENABLED, reg)) {
+        /* Disabled SMPU */
+        return CY_PROT_FAILURE;
+    }
+
+    *size = REGIONSIZE_TO_BYTES(_FLD2VAL(PROT_SMPU_SMPU_STRUCT_ATT0_REGION_SIZE, reg));
+    reg = smpu->ADDR0;
+    *subregions = _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ADDR0_SUBREGION_DISABLE, reg);
+    *address = _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ADDR0_ADDR24, reg) << 8;
+    /* Some address bits may be ignored */
+    *address -= *address % *size;
+    return CY_PROT_SUCCESS;
+}
+
 static void dump_smpu(const PROT_SMPU_SMPU_STRUCT_Type *smpu)
 {
     uint32_t base;
     size_t size;
-    uint32_t reg = smpu->ATT0;
+    uint32_t size32;
+    uint32_t subregions;
 
     if (CY_PROT_SUCCESS == get_region(smpu, &base, &size)) {
         SPMLOG_INFMSGVAL(" Wanted address = ", base);
@@ -312,22 +342,14 @@ static void dump_smpu(const PROT_SMPU_SMPU_STRUCT_Type *smpu)
         SPMLOG_ERRMSG(" Unsupported dynamic SMPU region\r\n");
     }
 
-    if (_FLD2BOOL(PROT_SMPU_SMPU_STRUCT_ATT0_ENABLED, reg)) {
-#if (TFM_SPM_LOG_LEVEL >= TFM_SPM_LOG_LEVEL_INFO)
-        uint32_t size = _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ATT0_REGION_SIZE, reg);
-#endif
-        uint32_t subregions;
+    if (SMPU_Read_Region(smpu, &base, &size32, &subregions, NULL) == CY_PROT_SUCCESS) {
+        SPMLOG_INFMSGVAL(" Configured address = ", base);
+        SPMLOG_INFMSGVAL(" Configured size (bytes) = ", size32);
 
-        reg = smpu->ADDR0;
-        subregions = _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ADDR0_SUBREGION_DISABLE, reg);
-        SPMLOG_INFMSGVAL(" Configured address = ",
-                _FLD2VAL(PROT_SMPU_SMPU_STRUCT_ADDR0_ADDR24, reg) << 8);
-        SPMLOG_INFMSGVAL(" Configured size (bytes) = ", REGIONSIZE_TO_BYTES(size));
         if (subregions == ALL_ENABLED) {
             SPMLOG_INFMSG(" All subregions enabled\r\n");
         } else {
-            SPMLOG_INFMSGVAL("\tsubregion size (bytes) = ",
-                REGIONSIZE_TO_BYTES(size)/8);
+            SPMLOG_INFMSGVAL("\tsubregion size (bytes) = ", size32/8);
             for (int i=0; i<8; i++) {
                 if (subregions & (1<<i)) {
                     SPMLOG_INFMSGVAL("\tDisabled subregion ", i);
