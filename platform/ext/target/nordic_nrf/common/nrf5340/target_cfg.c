@@ -776,8 +776,8 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
      * This configuration can be done only from secure code, as otherwise those
      * register fields are not accessible.  That's why it is placed here.
      */
-    nrf_gpio_pin_mcu_select(PIN_XL1, NRF_GPIO_PIN_MCUSEL_PERIPHERAL);
-    nrf_gpio_pin_mcu_select(PIN_XL2, NRF_GPIO_PIN_MCUSEL_PERIPHERAL);
+    nrf_gpio_pin_control_select(PIN_XL1, NRF_GPIO_PIN_SEL_PERIPHERAL);
+    nrf_gpio_pin_control_select(PIN_XL2, NRF_GPIO_PIN_SEL_PERIPHERAL);
 
     /* Enable the instruction and data cache (this can be done only from secure
      * code; that's why it is placed here).
