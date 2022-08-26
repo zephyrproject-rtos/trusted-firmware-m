@@ -110,4 +110,20 @@ enum tfm_status_e tfm_has_access_to_region(const void *p, size_t s,
  */
 int32_t tfm_inter_core_comm_init(void);
 
+/**
+ * \brief Check whether a memory range is inside a memory region.
+ *
+ * \param[in] p             The start address of the range to check
+ * \param[in] s             The size of the range to check
+ * \param[in] region_start  The start address of the region, which should
+ *                          contain the range
+ * \param[in] region_limit  The end address of the region, which should contain
+ *                          the range
+ *
+ * \return TFM_SUCCESS if the region contains the range,
+ *         TFM_ERROR_GENERIC otherwise.
+ */
+enum tfm_status_e check_address_range(const void *p, size_t s,
+                                      uintptr_t region_start,
+                                      uintptr_t region_limit);
 #endif /* __TFM_MULTI_CORE_H__ */
