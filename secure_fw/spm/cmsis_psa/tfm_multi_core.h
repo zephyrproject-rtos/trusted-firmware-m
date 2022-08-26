@@ -10,6 +10,8 @@
 
 #include <stdbool.h>
 
+#include "tfm_api.h"
+
 /* Follow CMSE flag definitions */
 #define MEM_CHECK_MPU_READWRITE         (1 << 0x0)
 #define MEM_CHECK_AU_NONSECURE          (1 << 0x1)
