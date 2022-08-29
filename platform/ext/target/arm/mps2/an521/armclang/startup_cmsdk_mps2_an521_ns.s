@@ -164,9 +164,6 @@ Reset_Handler   PROC
                 IMPORT  __main
                 LDR     R0, =SystemInit
                 BLX     R0
-                MRS     R0, control    ; Get control value
-                ORR     R0, R0, #2     ; Select switch to PSP
-                MSR     control, R0
                 LDR     R0, =__main
                 BX      R0
                 ENDP
