@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,6 +13,7 @@
 #include "Driver_Common.h"
 #include "region.h"
 #include "exception_info.h"
+#include "utilities.h"
 
 /* Debug configuration flags */
 #define SPNIDEN_SEL_STATUS (0x01u << 7)
