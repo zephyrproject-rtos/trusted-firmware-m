@@ -12,6 +12,7 @@
 #include "bootutil/image.h"
 #include "flash_map_backend/flash_map_backend.h"
 #include "sysflash/sysflash.h"
+#include "tfm_api.h"
 #include "tfm_bootloader_fwu_abstraction.h"
 #include "tfm_fwu_req_mngr.h"
 #include "tfm_boot_status.h"
