@@ -12,7 +12,9 @@
 #include "ffm/interrupt.h"
 #include "load/interrupt_defs.h"
 #include "platform_irq.h"
+#ifdef TFM_MULTI_CORE_TOPOLOGY
 #include "rss_comms_hal.h"
+#endif
 
 static struct irq_t timer0_irq = {0};
 
@@ -34,6 +36,7 @@ enum tfm_hal_status_t tfm_timer0_irq_init(void *p_pt,
     return TFM_HAL_SUCCESS;
 }
 
+#ifdef TFM_MULTI_CORE_TOPOLOGY
 static struct irq_t mbox_irq_info = {0};
 
 /* Platform specific inter-processor communication interrupt handler. */
@@ -65,3 +68,4 @@ enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
 
     return TFM_HAL_SUCCESS;
 }
+#endif /* TFM_MULTI_CORE_TOPOLOGY */

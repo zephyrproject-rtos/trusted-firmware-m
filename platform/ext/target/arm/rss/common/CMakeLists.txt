@@ -82,7 +82,9 @@ install(FILES       platform_builtin_key_ids.h
 
 #========================= Platform Secure ====================================#
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rss_comms rss_comms)
+if (TFM_MULTI_CORE_TOPOLOGY)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rss_comms rss_comms)
+endif()
 
 target_include_directories(platform_s
     PUBLIC
