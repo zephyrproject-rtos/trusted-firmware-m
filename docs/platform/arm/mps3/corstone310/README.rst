@@ -16,19 +16,19 @@ Building TF-M
 -------------
 
 Follow the instructions in :doc:`Building instructions </building/tfm_build_instruction>`.
-Build instructions with platform name: arm/mps3/corstone310_fvp
+Build instructions with platform name: arm/mps3/corstone310/fvp
 
-``-DTFM_PLATFORM=arm/mps3/corstone310_fvp``
-
-.. note::
-
-   This platform support does not provide software for Ethos-U55 IP, only
-   contains base address and interrupt number for it.
+``-DTFM_PLATFORM=arm/mps3/corstone310/fvp``
 
 .. note::
 
    The built binaries can be run on the Corstone-310 Arm Virtual Hardware
    (VHT_Corstone_SSE-310). At least VHT version 11.17 is required.
+
+.. note::
+
+   This platform support does not provide software for Ethos-U55 IP, only
+   contains base address and interrupt number for it.
 
 .. note::
 
@@ -97,6 +97,6 @@ To run the built binaries:
    Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
    to ``Debug``.
 
--------------
+--------------
 
 *Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

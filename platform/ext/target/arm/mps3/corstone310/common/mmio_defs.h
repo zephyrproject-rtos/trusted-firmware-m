@@ -25,8 +25,10 @@ extern "C" {
 const uintptr_t partition_named_mmio_list[] = {
     (uintptr_t)TFM_PERIPHERAL_TIMER0,
     (uintptr_t)TFM_PERIPHERAL_STD_UART,
+#if defined(CORSTONE310_FVP)
     (uintptr_t)TFM_PERIPHERAL_DMA0_CH0,
     (uintptr_t)TFM_PERIPHERAL_DMA0_CH1
+#endif
 };
 
 /*

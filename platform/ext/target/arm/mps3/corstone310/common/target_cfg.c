@@ -25,7 +25,6 @@
 #include "platform_s_device_definition.h"
 #include "syscounter_armv8-m_cntrl_drv.h"
 #include "uart_stdout.h"
-#include "dma350_ch_drv.h"
 
 /* Throw out bus error when an access causes security violation */
 #define CMSDK_SECRESPCFG_BUS_ERR_MASK   (1UL << 0)
@@ -112,20 +111,6 @@ struct platform_data_t tfm_peripheral_timer0 = {
         SYSTIMER0_ARMV8_M_BASE_S + 0xFFF,
         PPC_SP_PERIPH0,
         SYSTEM_TIMER0_PERIPH_PPC0_POS_MASK
-};
-
-struct platform_data_t tfm_peripheral_dma0_ch0 = {
-        DMA_350_BASE_S + 0x1000,
-        DMA_350_BASE_S + 0x10FF,
-        PPC_SP_DO_NOT_CONFIGURE,
-        0
-};
-
-struct platform_data_t tfm_peripheral_dma0_ch1 = {
-        DMA_350_BASE_S + 0x1100,
-        DMA_350_BASE_S + 0x11FF,
-        PPC_SP_DO_NOT_CONFIGURE,
-        0
 };
 
 static ARM_DRIVER_PPC_CORSTONE310 *const ppc_bank_drivers[] = {
@@ -552,58 +537,4 @@ void ppc_clear_irq(void)
     for (i = 0; i < PPC_BANK_COUNT; i++) {
         ppc_bank_drivers[i]->ClearInterrupt();
     }
-}
-
-/*------------------- DMA configuration functions -------------------------*/
-enum tfm_plat_err_t dma_init_cfg(void)
-{
-    uint32_t i = 0;
-    enum dma350_error_t dma_err;
-
-    dma_err = dma350_init(&DMA350_DMA0_DEV_S);
-    if(dma_err != DMA350_ERR_NONE) {
-        ERROR_MSG("DMA350_DMA0_DEV_S init failed!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    /* Configure Channel 0 */
-    dma_err = dma350_set_ch_secure(&DMA350_DMA0_DEV_S, 0);
-    if(dma_err != DMA350_ERR_NONE)
-    {
-        ERROR_MSG("Failed to set DMA350_DMA0_DEV_S, channel 0 secure!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    dma_err = dma350_set_ch_privileged(&DMA350_DMA0_DEV_S, 0);
-    if(dma_err != DMA350_ERR_NONE)
-    {
-        ERROR_MSG("Failed to set DMA350_DMA0_DEV_S, channel 0 privileged!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    /* Configure Channel 1 */
-    dma_err = dma350_set_ch_nonsecure(&DMA350_DMA0_DEV_S, 1);
-    if(dma_err != DMA350_ERR_NONE)
-    {
-        ERROR_MSG("Failed to set DMA350_DMA0_DEV_S, channel 1 nonsecure!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    dma_err = dma350_set_ch_privileged(&DMA350_DMA0_DEV_S, 1);
-    if(dma_err != DMA350_ERR_NONE)
-    {
-        ERROR_MSG("Failed to set DMA350_DMA0_DEV_S, channel 1 privileged!");
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    /* Configure every Trigger input to NS by default */
-    for(i = 0; i < DMA350_TRIGIN_NUMBER; i++)
-    {
-        dma_err = dma350_set_trigin_nonsecure(&DMA350_DMA0_DEV_S, i);
-        if(dma_err != DMA350_ERR_NONE)
-        {
-            SPMLOG_ERRMSGVAL("Failed to set the following Trigger input of DMA350_DMA0_DEV_S to NS: ", i);
-            return TFM_PLAT_ERR_SYSTEM_ERR;
-        }
-    }
-
-    return TFM_PLAT_ERR_SUCCESS;
 }

@@ -25,7 +25,6 @@ int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
                     (enum dma350_config_type_t)svc_args[0], (uint8_t)svc_args[1],
                     (void *)svc_args[2]);
             break;
-
         default:
             retval = PSA_ERROR_GENERIC_ERROR;
             break;

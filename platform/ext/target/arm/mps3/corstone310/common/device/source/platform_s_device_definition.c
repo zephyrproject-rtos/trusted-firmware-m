@@ -390,6 +390,7 @@ struct mpc_sie_dev_t MPC_ISRAM1_DEV_S = {
     &(MPC_ISRAM1_DEV_CFG_S),
     &(MPC_ISRAM1_DEV_DATA_S)};
 
+#ifdef CORSTONE310_FVP
 /* DMA350 driver structures */
 static const struct dma350_dev_cfg_t DMA350_DMA0_DEV_CFG_S = {
     .dma_sec_cfg =   (DMASECCFG_TypeDef*)   (DMA_350_BASE_S + 0x0UL),
@@ -416,6 +417,7 @@ struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_S = {
             .channel = 1},
     .data = {0}};
 #endif /* PLATFORM_SVC_HANDLERS */
+#endif /* CORSTONE310_FVP */
 
 /* TGU driver structures */
 static const struct tgu_armv8_m_mem_range_t TGU_ITCM_RANGE_S = {

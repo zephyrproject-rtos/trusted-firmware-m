@@ -67,6 +67,7 @@ extern struct mpc_sie_dev_t MPC_QSPI_DEV_S;
 extern struct mpc_sie_dev_t MPC_ISRAM0_DEV_S;
 extern struct mpc_sie_dev_t MPC_ISRAM1_DEV_S;
 
+#ifdef CORSTONE310_FVP
 /* DMA350 driver structures */
 #include "dma350_drv.h"
 extern struct dma350_dev_t DMA350_DMA0_DEV_S;
@@ -84,6 +85,7 @@ extern struct dma350_ch_dev_t DMA350_DMA0_CH1_DEV_S;
 #include "dma350_lib.h"
 extern const struct dma350_remap_list_t dma350_address_remap;
 #endif /* PLATFORM_SVC_HANDLERS */
+#endif /* CORSTONE310_FVP */
 
 /* TGU driver structure */
 #include "tgu_armv8_m_drv.h"

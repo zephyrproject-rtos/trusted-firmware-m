@@ -100,8 +100,10 @@ DEFAULT_IRQ_HANDLER(USB_Handler)
 DEFAULT_IRQ_HANDLER(SPI_ADC_Handler)
 DEFAULT_IRQ_HANDLER(SPI_SHIELD0_Handler)
 DEFAULT_IRQ_HANDLER(SPI_SHIELD1_Handler)
+#ifdef CORSTONE310_FVP
 DEFAULT_IRQ_HANDLER(DMA_Channel_0_Handler)
 DEFAULT_IRQ_HANDLER(DMA_Channel_1_Handler)
+#endif
 DEFAULT_IRQ_HANDLER(ETHOS_U55_Handler)
 DEFAULT_IRQ_HANDLER(GPIO0_Combined_Handler)
 DEFAULT_IRQ_HANDLER(GPIO1_Combined_Handler)
@@ -250,8 +252,13 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   SPI_SHIELD0_Handler,               /*  54: SPI (Shield 0) Handler */
   SPI_SHIELD1_Handler,               /*  55: SPI (Shield 0) Handler */
   0,                                 /*  56: Reserved */
+#ifdef CORSTONE310_FVP
   DMA_Channel_0_Handler,             /*  57: DMA (DMA350) Channel 0 Handler */
   DMA_Channel_1_Handler,             /*  58: DMA (DMA350) Channel 1 Handler */
+#else
+  0,                                 /*  57: Reserved */
+  0,                                 /*  58: Reserved */
+#endif
   0,                                 /*  59: Reserved */
   0,                                 /*  60: Reserved */
   0,                                 /*  61: Reserved */

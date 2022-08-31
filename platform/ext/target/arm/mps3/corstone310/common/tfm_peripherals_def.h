@@ -28,13 +28,17 @@ extern "C" {
 
 extern struct platform_data_t tfm_peripheral_std_uart;
 extern struct platform_data_t tfm_peripheral_timer0;
-extern struct platform_data_t tfm_peripheral_dma0_ch0;
-extern struct platform_data_t tfm_peripheral_dma0_ch1;
 
 #define TFM_PERIPHERAL_STD_UART  (&tfm_peripheral_std_uart)
 #define TFM_PERIPHERAL_TIMER0    (&tfm_peripheral_timer0)
+
+#if defined(CORSTONE310_FVP)
+extern struct platform_data_t tfm_peripheral_dma0_ch0;
+extern struct platform_data_t tfm_peripheral_dma0_ch1;
+
 #define TFM_PERIPHERAL_DMA0_CH0  (&tfm_peripheral_dma0_ch0)
 #define TFM_PERIPHERAL_DMA0_CH1  (&tfm_peripheral_dma0_ch1)
+#endif
 
 #ifdef __cplusplus
 }

@@ -34,7 +34,9 @@
 #define ISRAM1_BASE_NS                   0x21200000 /* Internal SRAM Area Non-Secure base address */
 #define QSPI_SRAM_BASE_NS                0x28000000 /* QSPI SRAM Non-Secure base address */
 /* Non-Secure Subsystem peripheral region */
+#ifdef CORSTONE310_FVP
 #define DMA_350_BASE_NS                  0x40002000 /* DMA350 register block Non-Secure base address */
+#endif
 #define ETHOS_U55_APB_BASE_NS            0x40004000 /* Ethos-U55 APB Non-Secure base address */
 #define CPU0_PWRCTRL_BASE_NS             0x40012000 /* CPU 0 Power Control Block Non-Secure base address */
 #define CPU0_IDENTITY_BASE_NS            0x4001F000 /* CPU 0 Identity Block Non-Secure base address */
@@ -105,7 +107,9 @@
 #define ISRAM1_BASE_S                    0x31200000 /* Internal SRAM Area Secure base address */
 #define QSPI_SRAM_BASE_S                 0x38000000 /* QSPI SRAM Secure base address */
 /* Secure Subsystem peripheral region */
+#ifdef CORSTONE310_FVP
 #define DMA_350_BASE_S                   0x50002000 /* DMA350 register block Secure base address */
+#endif
 #define ETHOS_U55_APB_BASE_S             0x50004000 /* Ethos-U55 APB Secure base address */
 #define CPU0_SECCTRL_BASE_S              0x50011000 /* CPU 0 Local Security Control Block Secure base address */
 #define CPU0_PWRCTRL_BASE_S              0x50012000 /* CPU 0 Power Control Block Secure base address */

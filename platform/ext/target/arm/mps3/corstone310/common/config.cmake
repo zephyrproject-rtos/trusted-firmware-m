@@ -12,7 +12,6 @@ set(TFM_MULTI_CORE_TOPOLOGY           OFF   CACHE BOOL    "Whether to build for 
 
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON    CACHE BOOL    "Platform supports SLIH IRQ tests")
 set(PLATFORM_FLIH_IRQ_TEST_SUPPORT    ON    CACHE BOOL    "Platform supports FLIH IRQ tests")
-set(PLATFORM_SVC_HANDLERS             ON    CACHE BOOL    "Platform specific SVC handlers")
 set(DEFAULT_NS_SCATTER                ON    CACHE BOOL    "Use default NS scatter files for target")
 
 # Make FLIH IRQ test as the default IRQ test on Corstone-310

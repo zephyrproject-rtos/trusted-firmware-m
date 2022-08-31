@@ -17,6 +17,8 @@
 #ifndef __DEVICE_CFG_H__
 #define __DEVICE_CFG_H__
 
+#include "device_cfg_platform.h"
+
 /**
  * \file device_cfg.h
  * \brief Configurations for peripherals defined in
