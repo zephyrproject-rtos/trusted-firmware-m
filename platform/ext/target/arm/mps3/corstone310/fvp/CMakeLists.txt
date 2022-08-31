@@ -38,7 +38,6 @@ target_include_directories(platform_fvp
         ${PLATFORM_DIR}/ext/driver
         ${CORSTONE310_COMMON_DIR}/device/include
         ${CORSTONE310_COMMON_DIR}/partition
-        ${CORSTONE310_COMMON_DIR}/device/config
         ${CORSTONE310_COMMON_DIR}/native_drivers
 )
 

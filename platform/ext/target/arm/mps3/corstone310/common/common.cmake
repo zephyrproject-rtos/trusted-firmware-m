@@ -68,7 +68,6 @@ target_include_directories(platform_s
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
         ${CORSTONE310_COMMON_DIR}/device
-        ${CORSTONE310_COMMON_DIR}/device/config
         ${CORSTONE310_COMMON_DIR}/device/include
         ${CORSTONE310_COMMON_DIR}/device/source/armclang
         ${CORSTONE310_COMMON_DIR}/native_drivers
@@ -127,7 +126,6 @@ target_include_directories(platform_ns
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure
         ${CORSTONE310_COMMON_DIR}/device
-        ${CORSTONE310_COMMON_DIR}/device/config
         ${CORSTONE310_COMMON_DIR}/device/include
         ${CORSTONE310_COMMON_DIR}/device/source/armclang
         ${CORSTONE310_COMMON_DIR}/native_drivers
@@ -152,7 +150,6 @@ if(BL2)
             ${CORSTONE310_COMMON_DIR}/cmsis_drivers
             ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
             ${CORSTONE310_COMMON_DIR}/device
-            ${CORSTONE310_COMMON_DIR}/device/config
             ${CORSTONE310_COMMON_DIR}/device/include
             ${CORSTONE310_COMMON_DIR}/device/source/armclang
             ${CORSTONE310_COMMON_DIR}/native_drivers
