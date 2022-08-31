@@ -3618,7 +3618,7 @@ void dma350_ch_cmd(struct dma350_ch_dev_t *dev, enum dma350_ch_cmd_t cmd)
 __STATIC_INLINE
 enum dma350_ch_cmd_t dma350_ch_get_cmd(struct dma350_ch_dev_t *dev)
 {
-    return dev->cfg.ch_base->CH_CMD;
+    return (enum dma350_ch_cmd_t)dev->cfg.ch_base->CH_CMD;
 }
 
 __STATIC_INLINE

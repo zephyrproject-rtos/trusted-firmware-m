@@ -28,6 +28,7 @@ extern "C" {
 enum dma350_config_type_t {
     DMA_CALL_MEMMOVE = 0,
     DMA_CALL_MEMCPY,
+    DMA_CALL_DRAW_FROM_CANVAS,
     DMA_CLEAR_DONE_IRQ,
     DMA_GET_STATUS,
     DMA_NUMBER_OF_COMMANDS
@@ -36,7 +37,7 @@ enum dma350_config_type_t {
 /* Structure for the memcpy setup */
 struct dma350_memcpy_config {
     enum dma350_lib_exec_type_t   exec_type;      /*!< The execution type of the command */
-    void*                         src;            /*!< Source start address */
+    const void*                   src;            /*!< Source start address */
     void*                         dst;            /*!< Destination start address */
     uint32_t                      size;           /*!< Number of bytes to copy */
 };
@@ -44,9 +45,24 @@ struct dma350_memcpy_config {
 /* Structure for the memmove setup */
 struct dma350_memmove_config {
     enum dma350_lib_exec_type_t   exec_type;      /*!< The execution type of the command */
-    void*                         src;            /*!< Source start address */
+    const void*                   src;            /*!< Source start address */
     void*                         dst;            /*!< Destination start address */
     uint32_t                      size;           /*!< Number of bytes to move */
+};
+
+/* Structure for the draw setup */
+struct dma350_draw_config {
+    enum dma350_lib_exec_type_t   exec_type;      /*!< The execution type of the command */
+    const void*                   src;            /*!< Source start address */
+    void*                         des;            /*!< Destination start address */
+    uint32_t                      src_width;      /*!< Source width */
+    uint16_t                      src_height;     /*!< Source height */
+    uint16_t                      src_line_width; /*!< Source line width */
+    uint32_t                      des_width;      /*!< Destination width */
+    uint16_t                      des_height;     /*!< Destination height */
+    uint16_t                      des_line_width; /*!< Destination line width */
+    enum dma350_ch_transize_t     pixelsize;      /*!< Size of a pixel as in \ref dma350_ch_transize_t */
+    enum dma350_lib_transform_t   transform;      /*!< Transform type as in \ref dma350_lib_transform_t */
 };
 
 /* These definitions are used to verify the incoming channel number and map it

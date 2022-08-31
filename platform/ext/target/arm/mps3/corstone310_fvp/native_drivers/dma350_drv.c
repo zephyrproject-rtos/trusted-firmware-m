@@ -178,3 +178,83 @@ enum dma350_error_t dma350_set_ch_unprivileged(struct dma350_dev_t *dev,
         }
     }
 }
+
+enum dma350_error_t dma350_set_trigin_secure(struct dma350_dev_t *dev,
+                                             uint8_t trigger)
+{
+    if (!dma350_is_init(dev)) {
+        return DMA350_ERR_NOT_INIT;
+    }
+
+    if(trigger >= 32) {
+        return DMA350_ERR_INVALID_PARAM;
+    }
+
+    dev->cfg->dma_sec_cfg->SCFG_TRIGINSEC0 =
+        dev->cfg->dma_sec_cfg->SCFG_TRIGINSEC0 & ~(0x1UL << trigger);
+    if (dev->cfg->dma_sec_cfg->SCFG_TRIGINSEC0 & (0x1UL << trigger)) {
+        return DMA350_ERR_CANNOT_SET_NOW;
+    } else {
+        return DMA350_ERR_NONE;
+    }
+}
+
+enum dma350_error_t dma350_set_trigin_nonsecure(struct dma350_dev_t *dev,
+                                                uint8_t trigger)
+{
+    if (!dma350_is_init(dev)) {
+        return DMA350_ERR_NOT_INIT;
+    }
+
+    if(trigger >= 32) {
+        return DMA350_ERR_INVALID_PARAM;
+    }
+
+    dev->cfg->dma_sec_cfg->SCFG_TRIGINSEC0 =
+        dev->cfg->dma_sec_cfg->SCFG_TRIGINSEC0 | (0x1UL << trigger);
+    if (dev->cfg->dma_sec_cfg->SCFG_TRIGINSEC0 & (0x1UL << trigger)) {
+        return DMA350_ERR_NONE;
+    } else {
+        return DMA350_ERR_CANNOT_SET_NOW;
+    }
+}
+
+enum dma350_error_t dma350_set_trigout_secure(struct dma350_dev_t *dev,
+                                              uint8_t trigger)
+{
+    if (!dma350_is_init(dev)) {
+        return DMA350_ERR_NOT_INIT;
+    }
+
+    if(trigger >= 32) {
+        return DMA350_ERR_INVALID_PARAM;
+    }
+
+    dev->cfg->dma_sec_cfg->SCFG_TRIGOUTSEC0 =
+        dev->cfg->dma_sec_cfg->SCFG_TRIGOUTSEC0 & ~(0x1UL << trigger);
+    if (dev->cfg->dma_sec_cfg->SCFG_TRIGOUTSEC0 & (0x1UL << trigger)) {
+        return DMA350_ERR_CANNOT_SET_NOW;
+    } else {
+        return DMA350_ERR_NONE;
+    }
+}
+
+enum dma350_error_t dma350_set_trigout_nonsecure(struct dma350_dev_t *dev,
+                                                 uint8_t trigger)
+{
+    if (!dma350_is_init(dev)) {
+        return DMA350_ERR_NOT_INIT;
+    }
+
+    if(trigger >= 32) {
+        return DMA350_ERR_INVALID_PARAM;
+    }
+
+    dev->cfg->dma_sec_cfg->SCFG_TRIGOUTSEC0 =
+        dev->cfg->dma_sec_cfg->SCFG_TRIGOUTSEC0 | (0x1UL << trigger);
+    if (dev->cfg->dma_sec_cfg->SCFG_TRIGOUTSEC0 & (0x1UL << trigger)) {
+        return DMA350_ERR_NONE;
+    } else {
+        return DMA350_ERR_CANNOT_SET_NOW;
+    }
+}

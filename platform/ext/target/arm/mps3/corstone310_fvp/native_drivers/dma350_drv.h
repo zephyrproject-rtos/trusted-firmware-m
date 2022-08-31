@@ -61,6 +61,7 @@ enum dma350_error_t {
                                 *   architecture revision */
     DMA350_ERR_NOT_INIT,       /*!< Error: DMA350 not initialized */
     DMA350_ERR_CANNOT_SET_NOW, /*!< Error: config cannot be set currently */
+    DMA350_ERR_INVALID_PARAM,  /*!< Error: requested parameter is not valid */
 };
 
 /* ARM DMA350 DMA INFO register BUILDCFG0 field Type */
@@ -300,6 +301,62 @@ enum dma350_error_t dma350_set_ch_privileged(struct dma350_dev_t *dev,
  */
 enum dma350_error_t dma350_set_ch_unprivileged(struct dma350_dev_t *dev,
                                                uint8_t channel);
+
+/**
+ * \brief Set DMA350 DMA Trigger input to secure.
+ *
+ * \param[in] dev         DMA350 device struct \ref dma350_dev_t
+ * \param[in] trigger     Trigger input number to be updated
+ *
+ * \return Returns error code as specified in \ref dma350_error_t
+ *
+ * \note This function doesn't check if dev is NULL.
+ *       Operation will fail if channel is enabled.
+ */
+enum dma350_error_t dma350_set_trigin_secure(struct dma350_dev_t *dev,
+                                             uint8_t trigger);
+
+/**
+ * \brief Set DMA350 DMA Trigger input to non-secure.
+ *
+ * \param[in] dev         DMA350 device struct \ref dma350_dev_t
+ * \param[in] trigger     Trigger input number to be updated
+ *
+ * \return Returns error code as specified in \ref dma350_error_t
+ *
+ * \note This function doesn't check if dev is NULL.
+ *       Operation will fail if channel is enabled.
+ */
+enum dma350_error_t dma350_set_trigin_nonsecure(struct dma350_dev_t *dev,
+                                                uint8_t trigger);
+
+/**
+ * \brief Set DMA350 DMA Trigger output to secure.
+ *
+ * \param[in] dev         DMA350 device struct \ref dma350_dev_t
+ * \param[in] trigger     Trigger output number to be updated
+ *
+ * \return Returns error code as specified in \ref dma350_error_t
+ *
+ * \note This function doesn't check if dev is NULL.
+ *       Operation will fail if channel is enabled.
+ */
+enum dma350_error_t dma350_set_trigout_secure(struct dma350_dev_t *dev,
+                                              uint8_t trigger);
+
+/**
+ * \brief Set DMA350 DMA Trigger output to non-secure.
+ *
+ * \param[in] dev         DMA350 device struct \ref dma350_dev_t
+ * \param[in] trigger     Trigger output number to be updated
+ *
+ * \return Returns error code as specified in \ref dma350_error_t
+ *
+ * \note This function doesn't check if dev is NULL.
+ *       Operation will fail if channel is enabled.
+ */
+enum dma350_error_t dma350_set_trigout_nonsecure(struct dma350_dev_t *dev,
+                                                 uint8_t trigger);
 
 __STATIC_INLINE
 uint8_t dma350_get_num_ch(const struct dma350_dev_t *dev)

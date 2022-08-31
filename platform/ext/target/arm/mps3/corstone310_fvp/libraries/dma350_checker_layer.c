@@ -23,15 +23,35 @@
 #include "cmsis.h"
 #endif
 
-static enum dma350_lib_error_t dma350_check_src_dst_unpriv_access(void* src, void* dst, uint32_t size)
+__STATIC_INLINE
+enum dma350_lib_error_t dma350_check_src_unpriv_access(const void* src, uint32_t size)
 {
-    if(NULL == cmse_check_address_range(src, size, CMSE_MPU_UNPRIV | CMSE_MPU_READ)) {
+    if(NULL == cmse_check_address_range((void*)src, size, CMSE_MPU_UNPRIV | CMSE_MPU_READ)) {
         return DMA350_LIB_ERR_RANGE_NOT_ACCESSIBLE;
     }
-    if(NULL == cmse_check_address_range(dst, size, CMSE_MPU_UNPRIV | CMSE_MPU_READWRITE)) {
-        return DMA350_LIB_ERR_RANGE_NOT_ACCESSIBLE;
-    }
+    return DMA350_LIB_ERR_NONE;
+}
 
+__STATIC_INLINE
+enum dma350_lib_error_t dma350_check_dst_unpriv_access(const void* dst, uint32_t size)
+{
+    if(NULL == cmse_check_address_range((void*)dst, size, CMSE_MPU_UNPRIV | CMSE_MPU_READWRITE)) {
+        return DMA350_LIB_ERR_RANGE_NOT_ACCESSIBLE;
+    }
+    return DMA350_LIB_ERR_NONE;
+}
+
+static enum dma350_lib_error_t dma350_check_src_dst_unpriv_access(const void* src, const void* dst, uint32_t size)
+{
+    enum dma350_lib_error_t lib_error;
+    lib_error = dma350_check_src_unpriv_access(src, size);
+    if(lib_error != DMA350_LIB_ERR_NONE) {
+        return lib_error;
+    }
+    lib_error = dma350_check_dst_unpriv_access(dst, size);
+    if(lib_error != DMA350_LIB_ERR_NONE) {
+        return lib_error;
+    }
     return DMA350_LIB_ERR_NONE;
 }
 
@@ -106,6 +126,35 @@ static enum dma350_lib_error_t dma350_call_memmove(struct dma350_memmove_config 
     return ret_val;
 }
 
+static enum dma350_lib_error_t dma350_call_draw(struct dma350_draw_config *config, struct dma350_ch_dev_t* ch_dev)
+{
+    enum dma350_lib_error_t ret_val;
+    uint32_t src_size, des_size;
+
+    ret_val = check_blocking(config->exec_type);
+    if(ret_val != DMA350_LIB_ERR_NONE) {
+        return ret_val;
+    }
+
+    src_size = config->src_line_width * (config->src_height - 1) + config->src_width;
+    ret_val = dma350_check_src_unpriv_access(config->src, src_size);
+    if(ret_val != DMA350_LIB_ERR_NONE) {
+        return ret_val;
+    }
+    des_size = config->des_line_width * (config->des_height - 1) + config->des_width;;
+    ret_val = dma350_check_dst_unpriv_access(config->des, des_size);
+    if(ret_val != DMA350_LIB_ERR_NONE) {
+        return ret_val;
+    }
+
+    ret_val = dma350_draw_from_canvas(ch_dev, config->src, config->des,
+                config->src_width, config->src_height, config->src_line_width,
+                config->des_width, config->des_height, config->des_line_width,
+                config->pixelsize, config->transform, config->exec_type);
+
+    return ret_val;
+}
+
 enum dma350_lib_error_t config_dma350_for_unprivileged_actor(enum dma350_config_type_t config_type, uint8_t channel, void* config)
 {
     struct dma350_ch_dev_t* ch_dev;
@@ -128,6 +177,9 @@ enum dma350_lib_error_t config_dma350_for_unprivileged_actor(enum dma350_config_
         break;
     case DMA_CALL_MEMMOVE:
         ret_val = dma350_call_memmove((struct dma350_memmove_config *)config, ch_dev);
+        break;
+    case DMA_CALL_DRAW_FROM_CANVAS:
+        ret_val = dma350_call_draw((struct dma350_draw_config *)config, ch_dev);
         break;
     case DMA_CLEAR_DONE_IRQ:
         ret_val = dma350_clear_done_irq(ch_dev);
