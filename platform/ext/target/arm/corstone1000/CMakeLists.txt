@@ -195,3 +195,17 @@ target_sources(tfm_spm
         tfm_hal_platform.c
         $<$<BOOL:${TFM_S_REG_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
 )
+
+#========================= tfm_adac ============================================#
+
+if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
+    target_compile_definitions(platform_bl2
+        PRIVATE
+            PLATFORM_PSA_ADAC_SECURE_DEBUG
+    )
+
+    target_link_libraries(trusted-firmware-m-psa-adac
+        PRIVATE
+            platform_bl2
+    )
+endif()

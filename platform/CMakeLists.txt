@@ -201,20 +201,6 @@ if(BL2)
             $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
     )
 
-    if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
-
-        target_link_libraries(platform_bl2
-            PRIVATE
-                trusted-firmware-m-psa-adac
-        )
-
-        target_compile_definitions(platform_bl2
-            PRIVATE
-                PLATFORM_PSA_ADAC_SECURE_DEBUG
-        )
-
-    endif()
-
 endif()
 
 #========================= Platform BL1_1 =====================================#

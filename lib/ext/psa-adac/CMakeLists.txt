@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -27,14 +27,8 @@ if ("${PLATFORM_PSA_ADAC_SOURCE_PATH}" STREQUAL "DOWNLOAD")
     endif ()
 endif ()
 
-
 set(PSA_ADAC_TARGET "trusted-firmware-m")
 set(PSA_ADAC_MBEDTLS_INCLUDE "${MBEDCRYPTO_PATH}/include")
 set(PSA_ADAC_TOOLCHAIN    FALSE    CACHE BOOL "Whether to use psa-adac toolchain." FORCE)
 
 add_subdirectory(${PLATFORM_PSA_ADAC_SOURCE_PATH} ${PLATFORM_PSA_ADAC_BUILD_PATH})
-
-target_link_libraries(trusted-firmware-m-psa-adac
-    PRIVATE
-        platform_bl2
-)
