@@ -1,19 +1,22 @@
 /*
  * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 
+#include "region.h"
 #include "region_defs.h"
-#include "spm_ipc.h"
-#include "tfm_hal_isolation.h"
 #include "tfm_hal_multi_core.h"
 #include "tfm_multi_core.h"
-#include "tfm_api.h"
+#include "tfm_arch.h"
 #include "utilities.h"
-#include "region.h"
 
 #ifndef TFM_LVL
 #error TFM_LVL is not defined!
