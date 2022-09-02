@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -125,12 +126,18 @@ if(BL2)
     )
 endif()
 
+#========================= ns_agent_mailbox ===================================#
+
+target_sources(tfm_psa_rot_partition_ns_agent_mailbox
+    PRIVATE
+        tfm_hal_multi_core.c
+)
+
 #========================= tfm_spm ============================================#
 
 target_sources(tfm_spm
     PRIVATE
         target_cfg.c
-        tfm_hal_multi_core.c
         tfm_hal_isolation.c
         tfm_hal_platform.c
 )

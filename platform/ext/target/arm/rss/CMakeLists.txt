@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -234,6 +236,15 @@ target_compile_definitions(platform_bl1
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
 )
 
+#========================= ns_agent_mailbox ===================================#
+
+if(TFM_MULTI_CORE_TOPOLOGY)
+    target_sources(tfm_psa_rot_partition_ns_agent_mailbox
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_multi_core.c
+    )
+endif()
+
 #========================= tfm_spm ============================================#
 
 target_sources(tfm_spm
@@ -243,5 +254,4 @@ target_sources(tfm_spm
         tfm_hal_isolation.c
         tfm_hal_platform.c
         tfm_interrupts.c
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_multi_core.c>
 )

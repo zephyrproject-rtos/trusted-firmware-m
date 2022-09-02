@@ -180,13 +180,19 @@ if (NS)
     )
 endif()
 
+#========================= ns_agent_mailbox ===================================#
+
+target_sources(tfm_psa_rot_partition_ns_agent_mailbox
+    PRIVATE
+        tfm_hal_multi_core.c
+)
+
 #========================= tfm_spm ============================================#
 
 target_sources(tfm_spm
     PRIVATE
         ./target_cfg.c
         ./tfm_interrupts.c
-        ./tfm_hal_multi_core.c
         ./tfm_hal_isolation.c
         ./tfm_hal_platform.c
 )
