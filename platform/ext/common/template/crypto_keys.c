@@ -168,7 +168,7 @@ static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
 enum tfm_plat_err_t tfm_plat_load_builtin_keys(void)
 {
     psa_status_t err;
-    mbedtls_svc_key_id_t key_id;
+    mbedtls_svc_key_id_t key_id = MBEDTLS_SVC_KEY_ID_INIT;
     psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
     enum tfm_plat_err_t plat_err;
     uint8_t buf[32];
