@@ -10,6 +10,9 @@ This document introduces a generic threat model of Trusted Firmware-M (TF-M).
 This generic threat model provides an overall analysis of TF-M implementation
 and identifies general threats and mitigation.
 
+There is also a dedicated document for physical attacks mitigations which can be found
+:doc:`here </technical_references/design_docs/tfm_physical_attack_mitigation>`.
+
 .. note::
 
   If you think a security vulnerability is found, please follow
