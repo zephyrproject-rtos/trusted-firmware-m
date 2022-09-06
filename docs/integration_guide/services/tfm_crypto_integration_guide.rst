@@ -91,6 +91,13 @@ config changes due to TFM Profile.
     it can also select a hardware entropy source via
     MBEDTLS_ENTROPY_HARDWARE_ALT
 
+**************************************
+Other Crypto Service Build Definitions
+**************************************
+- ``CRYPTO_STACK_SIZE``- Defines the stack size of the Crypto Secure Partition. This
+  value mainly depends on other crypto service configurations, the build type(debug,
+  release and minisizerel) and compiler.
+
 **************************
 Crypto service integration
 **************************

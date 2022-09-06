@@ -383,6 +383,9 @@ definitions is:
   which cannot be decreased again.
   Overriding this flag from its default value of ``OFF`` when not
   building the regression tests is not currently supported.
+- ``PS_STACK_SIZE``- Defines the stack size of the Protected Storage Secure
+  Partition. This value mainly depends on the build type(debug, release and
+  minisizerel) and compiler.
 
 --------------
 
