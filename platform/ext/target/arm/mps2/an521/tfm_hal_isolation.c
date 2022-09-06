@@ -407,6 +407,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
      *
      * NOTE: Need to add validation of numbered MMIO if platform requires.
      */
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
     for (i = 0; i < p_ldinf->nassets; i++) {
         if (!(p_asset[i].attr & ASSET_ATTR_NAMED_MMIO)) {
             continue;
@@ -476,6 +477,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
         }
 #endif
     }
+#endif /* CONFIG_TFM_MMIO_REGION_ENABLE == 1 */
 
 #if TFM_LVL == 3
     partition_attrs <<= HANDLE_PER_ATTR_BITS;
@@ -551,6 +553,9 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
         }
     }
 
+    i = n_configured_regions + i;
+
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
     /* Named MMIO part */
     local_handle = local_handle & (~HANDLE_INDEX_MASK);
     local_handle >>= HANDLE_PER_ATTR_BITS;
@@ -558,7 +563,6 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
 
     localcfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DEVICE_IDX;
 
-    i = n_configured_regions + i;
     while (mmio_index && i < MPU_REGION_NUM) {
         plat_data_ptr =
           (struct platform_data_t *)partition_named_mmio_list[mmio_index - 1];
@@ -577,6 +581,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
         local_handle >>= HANDLE_PER_ATTR_BITS;
         mmio_index = local_handle & HANDLE_ATTR_INDEX_MASK;
     }
+#endif
 
     /* Disable unused regions */
     while (i < MPU_REGION_NUM) {
@@ -588,7 +593,6 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
 #endif /* TFM_LVL == 3 */
     FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
-#endif /* TFM_PSA_API */
 
 FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_memory_check(
                                            uintptr_t boundary, uintptr_t base,
@@ -634,3 +638,4 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_memory_check(
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_MEM_FAULT));
     }
 }
+#endif /* TFM_PSA_API */

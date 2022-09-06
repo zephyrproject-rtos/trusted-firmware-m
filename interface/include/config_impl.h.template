@@ -19,6 +19,7 @@
 #define {{"%-56s"|format("CONFIG_TFM_PSA_API_SUPERVISOR_CALL")}} {{config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL']}}
 
 #define {{"%-56s"|format("CONFIG_TFM_CONNECTION_BASED_SERVICE_API")}} {{config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API']}}
+#define {{"%-56s"|format("CONFIG_TFM_MMIO_REGION_ENABLE")}} {{config_impl['CONFIG_TFM_MMIO_REGION_ENABLE']}}
 #define {{"%-56s"|format("CONFIG_TFM_FLIH_API")}} {{config_impl['CONFIG_TFM_FLIH_API']}}
 #define {{"%-56s"|format("CONFIG_TFM_SLIH_API")}} {{config_impl['CONFIG_TFM_SLIH_API']}}
 

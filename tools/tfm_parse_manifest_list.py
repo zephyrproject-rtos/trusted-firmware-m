@@ -295,6 +295,7 @@ def process_partition_manifests(manifest_lists, configs):
     partition_statistics = {
         'connection_based_srv_num': 0,
         'ipc_partitions': [],
+        'mmio_region_num': 0,
         'flih_num': 0,
         'slih_num': 0
     }
@@ -305,6 +306,7 @@ def process_partition_manifests(manifest_lists, configs):
         'CONFIG_TFM_PSA_API_CROSS_CALL'           : '0',
         'CONFIG_TFM_PSA_API_SUPERVISOR_CALL'      : '0',
         'CONFIG_TFM_CONNECTION_BASED_SERVICE_API' : '0',
+        'CONFIG_TFM_MMIO_REGION_ENABLE'           : '0',
         'CONFIG_TFM_FLIH_API'                     : '0',
         'CONFIG_TFM_SLIH_API'                     : '0'
     }
@@ -408,6 +410,10 @@ def process_partition_manifests(manifest_lists, configs):
                 partition_statistics['connection_based_srv_num'] += 1
         logging.debug('{} has {} services'.format(manifest['name'], srv_idx +1))
 
+        # Calculate the number of mmio region
+        mmio_region_list = manifest.get('mmio_regions', [])
+        partition_statistics['mmio_region_num'] += len(mmio_region_list)
+
         # Set initial value to -1 to make (irq + 1) reflect the correct
         # number (0) when there are no irqs.
         irq_idx = -1
@@ -482,6 +488,9 @@ def process_partition_manifests(manifest_lists, configs):
 
     if partition_statistics['connection_based_srv_num'] > 0:
         config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API'] = 1
+
+    if partition_statistics['mmio_region_num'] > 0:
+        config_impl['CONFIG_TFM_MMIO_REGION_ENABLE'] = 1
 
     if partition_statistics['flih_num'] > 0:
         config_impl['CONFIG_TFM_FLIH_API'] = 1
