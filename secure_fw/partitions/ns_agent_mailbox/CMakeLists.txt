@@ -21,7 +21,7 @@ target_sources(tfm_psa_rot_partition_ns_agent_mailbox
         ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/tfm_rpc.c
         $<$<NOT:$<BOOL:${TFM_PLAT_SPECIFIC_MULTI_CORE_COMM}>>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/tfm_spe_mailbox.c>
         ns_agent_mailbox.c
-        ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/tfm_multi_core_mem_check.c
+        tfm_multi_core_mem_check.c
 )
 
 target_link_libraries(tfm_psa_rot_partition_ns_agent_mailbox
