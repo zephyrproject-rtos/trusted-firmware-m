@@ -44,7 +44,7 @@ function(dump_options title options)
     foreach (option ${options})
         string(STRIP ${option} option)
         # avoid errors on empty strings to tolerate ';' at the end of list
-        if (option)
+        if((DEFINED ${option}) AND NOT ${option} STREQUAL "")
             format_string(option_name ${option} 40 " ")
             message(STATUS "${option_name} ${${option}}")
         endif()
