@@ -41,13 +41,16 @@ REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
 #if TFM_LVL == 3
+/* Isolation level 3 needs to reserve at lease one MPU region for private data asset. */
+#define MIN_NR_PRIVATE_DATA_REGION    1
+
 static uint32_t idx_boundary_handle = 0;
 REGION_DECLARE(Image$$, PT_RO_START, $$Base);
 REGION_DECLARE(Image$$, PT_RO_END, $$Base);
 REGION_DECLARE(Image$$, PT_PRIV_RWZI_START, $$Base);
 REGION_DECLARE(Image$$, PT_PRIV_RWZI_END, $$Base);
 
-const static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
+const static struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, PT_RO_START, $$Base),
@@ -83,6 +86,8 @@ const static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
 #endif
 };
 #else /* TFM_LVL == 3 */
+/* Isolation level 1&2 do not need to reserve MPU region for private data asset. */
+#define MIN_NR_PRIVATE_DATA_REGION    0
 
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
@@ -166,17 +171,13 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
 
     mpu_armv8m_clean(&dev_mpu_s);
 
-#if TFM_LVL == 3
-    /*
-     * Update MPU region numbers. The numbers start from 0 and are continuous.
-     * Under isolation level3, at lease one MPU region is reserved for private
-     * data asset.
-     */
-    if (ARRAY_SIZE(isolation_regions) >= MPU_REGION_NUM) {
+    if ((ARRAY_SIZE(region_cfg) + MIN_NR_PRIVATE_DATA_REGION) > MPU_REGION_NUM) {
         return TFM_HAL_ERROR_GENERIC;
     }
-    for (i = 0; i < ARRAY_SIZE(isolation_regions); i++) {
-        memcpy(&localcfg, &isolation_regions[i], sizeof(localcfg));
+
+    /* Update MPU region numbers. The numbers start from 0 and are continuous. */
+    for (i = 0; i < ARRAY_SIZE(region_cfg); i++) {
+        memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
         /* Update region number */
         localcfg.region_nr = i;
         /* Enable regions */
@@ -185,21 +186,6 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
         }
     }
     n_configured_regions = i;
-#else /* TFM_LVL == 3 */
-    if (ARRAY_SIZE(region_cfg) > MPU_REGION_NUM) {
-        return TFM_HAL_ERROR_GENERIC;
-    }
-    for (i = 0; i < ARRAY_SIZE(region_cfg); i++) {
-        memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
-        localcfg.region_nr = i;
-        if (mpu_armv8m_region_enable(&dev_mpu_s,
-            (struct mpu_armv8m_region_cfg_t *)&localcfg)
-            != MPU_ARMV8M_OK) {
-            return TFM_HAL_ERROR_GENERIC;
-        }
-    }
-    n_configured_regions = i;
-#endif /* TFM_LVL == 3 */
 
     /* Enable MPU */
     if (mpu_armv8m_enable(&dev_mpu_s,
