@@ -244,7 +244,7 @@ attest_encode_sw_components_array(QCBOREncodeContext *encode_ctx,
 #ifdef TFM_PARTITION_MEASURED_BOOT
     uint8_t slot_index;
 
-    Q_USEFUL_BUF_MAKE_STACK_UB(measurement_buf, MEASUREMENT_VALUE_SIZE);
+    Q_USEFUL_BUF_MAKE_STACK_UB(measurement_buf, MEASUREMENT_VALUE_MAX_SIZE);
     Q_USEFUL_BUF_MAKE_STACK_UB(signer_id_buf, SIGNER_ID_MAX_SIZE);
     Q_USEFUL_BUF_MAKE_STACK_UB(sw_version_buf, VERSION_MAX_SIZE);
     Q_USEFUL_BUF_MAKE_STACK_UB(sw_type_buf, SW_TYPE_MAX_SIZE);
@@ -264,7 +264,7 @@ attest_encode_sw_components_array(QCBOREncodeContext *encode_ctx,
      * which are accessible to the Attestation partition.
      */
     for (slot_index = 0; slot_index < NUM_OF_MEASUREMENT_SLOTS; slot_index++) {
-        measurement_buf.len = MEASUREMENT_VALUE_SIZE;
+        measurement_buf.len = MEASUREMENT_VALUE_MAX_SIZE;
         signer_id_buf.len   = SIGNER_ID_MAX_SIZE;
         sw_version_buf.len  = VERSION_MAX_SIZE;
         sw_type_buf.len     = SW_TYPE_MAX_SIZE;
