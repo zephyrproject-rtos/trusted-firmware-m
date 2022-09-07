@@ -14,7 +14,7 @@
   "priority": "NORMAL",
   "model": "SFN",
   "entry_init": "attest_partition_init",
-  "stack_size": "0x0A20",
+  "stack_size": "ATTEST_STACK_SIZE",
   "secure_functions": [
     {
       "name": "TFM_ATTEST_GET_TOKEN",
