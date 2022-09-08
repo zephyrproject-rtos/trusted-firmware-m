@@ -13,9 +13,9 @@
 #ifdef TFM_PARTITION_MEASURED_BOOT
 #include "measured_boot_defs.h"
 #endif /* TFM_PARTITION_MEASURED_BOOT */
-#ifdef TFM_PARTITION_INITIAL_ATTESTATION
-#include "tfm_attest_defs.h"
-#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
+#ifdef TFM_PARTITION_DELEGATED_ATTESTATION
+#include "tfm_delegated_attest_defs.h"
+#endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
 #ifdef TFM_PARTITION_CRYPTO
 #include "tfm_crypto_defs.h"
 #endif /*TFM_PARTITION_CRYPTO */
@@ -94,16 +94,16 @@ enum tfm_plat_err_t comms_permissions_service_check(psa_handle_t handle,
     uint32_t function_id;
 
     switch(handle) {
-#ifdef TFM_PARTITION_INITIAL_ATTESTATION
-    case TFM_ATTESTATION_SERVICE_HANDLE:
+#ifdef TFM_PARTITION_DELEGATED_ATTESTATION
+    case TFM_DELEGATED_ATTESTATION_HANDLE:
         switch(type) {
-        case TFM_ATTEST_GET_TOKEN:
-        case TFM_ATTEST_GET_TOKEN_SIZE:
+        case DELEGATED_ATTEST_GET_DELEGATED_KEY:
+        case DELEGATED_ATTEST_GET_PLATFORM_TOKEN:
             return TFM_PLAT_ERR_SUCCESS;
         default:
             goto out_err;
         }
-#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
+#endif /* TFM_PARTITION_DELEGATED_ATTESTATION */
 #ifdef TFM_PARTITION_MEASURED_BOOT
     case TFM_MEASURED_BOOT_HANDLE:
         switch(type) {
