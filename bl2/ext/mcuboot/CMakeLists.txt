@@ -242,13 +242,10 @@ if(NS)
             DEPENDS tfm_s_ns_bin tfm_s_ns.bin
             DEPENDS signing_layout_s
 
-        # Use the non-secure key to sign the combined image if FORWARD_PROT_MSG is set.
-        # In such a configuration there is a subsystem with higher privileges controlling the
-        # the boot process and current implementation requires to use the non-secure key here.
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
             -v ${MCUBOOT_IMAGE_VERSION_S}
             --layout $<TARGET_OBJECTS:signing_layout_s>
-            -k $<IF:$<BOOL:${FORWARD_PROT_MSG}>,${MCUBOOT_KEY_NS},${MCUBOOT_KEY_S}>
+            -k ${MCUBOOT_KEY_S}
             --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
             --align ${MCUBOOT_ALIGN_VAL}
             --pad

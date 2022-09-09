@@ -30,7 +30,7 @@ target_include_directories(psa_interface
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_BINARY_DIR}/generated/interface/include
-        $<$<OR:$<BOOL:${FORWARD_PROT_MSG}>,$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>>:${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core>
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core>
 )
 
 # PSA interface files are generated from a template
@@ -50,7 +50,6 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${TFM_ISOLATION_LEVEL}>:TFM_LVL=${TFM_ISOLATION_LEVEL}>
         $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:CONFIG_TFM_USE_TRUSTZONE>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:CONFIG_TFM_PARTITION_META>
         $<$<BOOL:${CONFIG_TFM_DOORBELL_API}>:CONFIG_TFM_DOORBELL_API=1>
 )
@@ -69,7 +68,7 @@ target_compile_definitions(tfm_sprt
 
 ###################### Export configurations to NS #############################
 
-if (TFM_MULTI_CORE_TOPOLOGY OR FORWARD_PROT_MSG)
+if (TFM_MULTI_CORE_TOPOLOGY)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core/tfm_mailbox_config.h.in
                    ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_mailbox_config.h
                    NEWLINE_STYLE UNIX

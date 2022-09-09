@@ -19,10 +19,6 @@ target_include_directories(platform_region_defs
 
 #========================= Platform common defs ===============================#
 
-if (${CMAKE_C_COMPILER_ID} STREQUAL IAR AND FORWARD_PROT_MSG)
-    message(FATAL_ERROR "IAR is currently not supported if FORWARD_PROT_MSG is set.")
-endif()
-
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
@@ -74,10 +70,6 @@ if(BL2)
     )
 endif()
 
-if(BL0)
-    add_subdirectory(bl0)
-endif()
-
 #========================= Platform Secure ====================================#
 
 target_include_directories(platform_s
@@ -92,15 +84,14 @@ target_include_directories(platform_s
         services/include
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries
         ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver
-        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox>
     INTERFACE
         ${CMAKE_MUSCA_B1_COMMON_DIR}/cc312
 )
 
 target_sources(platform_s
     PRIVATE
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_QSPI_Flash.c>
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c>
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_QSPI_Flash.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/CMSIS_Driver/Driver_GFC100_EFlash.c
         CMSIS_Driver/Driver_MPC.c
         CMSIS_Driver/Driver_PPC.c
         CMSIS_Driver/Driver_USART.c
@@ -110,22 +101,16 @@ target_sources(platform_s
         Native_Driver/mpu_armv8m_drv.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/gpio_cmsdk_drv.c
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries/mt25ql_flash_lib.c>
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/qspi_ip6514e_drv.c>
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/gfc100_eflash_drv.c>
-        $<$<NOT:$<BOOL:${FORWARD_PROT_MSG}>>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c>
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Libraries/mt25ql_flash_lib.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/qspi_ip6514e_drv.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/gfc100_eflash_drv.c
+        ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c
         Native_Driver/musca_b1_scc_drv.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/uart_pl011_drv.c
         $<$<NOT:$<BOOL:${TEST_NS_SLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_multicore.c>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/mailbox/platform_ns_mailbox.c>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/mhu_v2_x.c>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_nv_counters.c>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_otp.c>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_provisioning.c>
 )
 
 target_compile_options(platform_s
@@ -138,14 +123,6 @@ target_sources(tfm_sprt
         # The SLIH test Partition accesses the timer as ARoT Partitions.
         # Put the driver to SPRT so that the SLIH tests can access it.
         $<$<BOOL:${TEST_NS_SLIH_IRQ}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
-)
-
-target_compile_definitions(platform_s
-    PUBLIC
-        $<$<BOOL:${FORWARD_PROT_MSG}>:FORWARD_PROT_MSG=${FORWARD_PROT_MSG}>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:PSA_PROXY_ADDR_TRANSLATION=1>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:LINK_TO_EFLASH1=1>
-        $<$<BOOL:${FORWARD_PROT_MSG}>:USE_SECURE_ENCLAVE_MAILBOX=1>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -187,9 +164,6 @@ if(BL2)
             ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/gfc100_eflash_drv.c
             ${CMAKE_MUSCA_B1_COMMON_DIR}/Native_Driver/musca_b1_eflash_drv.c
             Native_Driver/musca_b1_scc_drv.c
-            $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_nv_counters.c>
-            $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_otp.c>
-            $<$<BOOL:${FORWARD_PROT_MSG}>:${CMAKE_CURRENT_SOURCE_DIR}/dummy_provisioning.c>
     )
 
     target_include_directories(platform_bl2

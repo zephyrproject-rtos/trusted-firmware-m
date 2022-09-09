@@ -18,11 +18,7 @@
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
 
-#ifndef FORWARD_PROT_MSG
-/* Flash layouts if FORWARD_PROT_MSG is OFF
- *
- *
- * Flash layout on Musca-B1 with BL2 (multiple image boot, boot from eFlash 0):
+/* Flash layout on Musca-B1 with BL2 (multiple image boot, boot from eFlash 0):
  *
  * 0x0A00_0000 BL2 - MCUBoot (128 KB)
  * 0x0A02_0000 Secure image     primary slot (384 KB)
@@ -234,77 +230,5 @@
 
 #define TOTAL_ROM_SIZE FLASH_TOTAL_SIZE
 #define TOTAL_RAM_SIZE (0x80000)     /* 512 KB */
-
-#else /* FORWARD_PROT_MSG */
-
-/* Flash layout information if FORWARD_PROT_MSG is ON.
- * For information you can check Musca-B1 Secure Enclave's flash_layout.h
- */
-
-#define FLASH_S_PARTITION_SIZE          (0x30000) /* S partition: 192 KB */
-#define FLASH_NS_PARTITION_SIZE         (0x50000) /* NS partition: 320 KB */
-
-/* Offset and size definition in flash area used by assemble.py */
-#define SECURE_IMAGE_OFFSET             (0x0)
-#define SECURE_IMAGE_MAX_SIZE           FLASH_S_PARTITION_SIZE
-
-#define NON_SECURE_IMAGE_OFFSET         (SECURE_IMAGE_OFFSET + \
-                                         SECURE_IMAGE_MAX_SIZE)
-#define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
-
-/* Image placed in eFlash 1 */
-#define FLASH_BASE_ADDRESS              (0x1A200000)
-
-#if (MCUBOOT_IMAGE_NUMBER != 1)
-#error "If FORWARD_PROT_MSG is ON MCUBOOT_IMAGE_NUMBER must be 1"
-#endif
-
-/* Secure + Non-secure image primary slot */
-#define FLASH_AREA_0_ID            (1)
-#define FLASH_AREA_0_OFFSET        (0x60000) /* Address comes from SE */
-#define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE + \
-                                    FLASH_NS_PARTITION_SIZE)
-/* Secure + Non-secure secondary slot */
-#define FLASH_AREA_2_ID            (FLASH_AREA_0_ID + 1)
-#define FLASH_AREA_2_OFFSET        (0x160000) /* Address comes from SE */
-#define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE + \
-                                    FLASH_NS_PARTITION_SIZE)
-
-/* Image placed in eFlash 1 */
-#define S_ROM_ALIAS_BASE    (0x1A200000)
-#define NS_ROM_ALIAS_BASE   (0x0A200000)
-
-#define S_RAM_ALIAS_BASE    (0x30000000)
-#define NS_RAM_ALIAS_BASE   (0x20000000)
-
-#define TOTAL_RAM_SIZE      (0x80000)     /* 512 KB */
-
-/* Macros needed for BL2 build with dummy values.
- * This BL2 instance is not used, but the BL2 macro needs to be set, and this
- * macro and BL2 build is entangled. If this is fixed the following macros can
- * be deleted.
- */
-#define FLASH_AREA_IMAGE_SECTOR_SIZE    0
-
-#define MCUBOOT_STATUS_MAX_ENTRIES      0
-#define MCUBOOT_MAX_IMG_SECTORS         32
-
-#define FLASH_AREA_SCRATCH_ID           0
-#define FLASH_AREA_SCRATCH_OFFSET       0
-#define FLASH_AREA_SCRATCH_SIZE         0
-
-#define FLASH_DEV_NAME                  Driver_EFLASH0
-/* Smallest flash programmable unit in bytes */
-#define TFM_HAL_FLASH_PROGRAM_UNIT       (0x4)
-
-#define FLASH_AREA_BL2_OFFSET           0
-#define FLASH_AREA_BL2_SIZE             0x20000
-
-#define TFM_NV_COUNTERS_AREA_ADDR       0
-#define TFM_NV_COUNTERS_AREA_SIZE       8
-#define TFM_NV_COUNTERS_SECTOR_ADDR     0
-#define TFM_NV_COUNTERS_SECTOR_SIZE     8
-
-#endif /* FORWARD_PROT_MSG */
 
 #endif /* __FLASH_LAYOUT_H__ */

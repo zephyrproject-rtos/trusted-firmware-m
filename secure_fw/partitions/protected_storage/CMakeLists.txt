@@ -6,14 +6,6 @@
 #-------------------------------------------------------------------------------
 
 if (NOT TFM_PARTITION_PROTECTED_STORAGE)
-    if(TFM_PARTITION_PSA_PROXY)
-        add_library(tfm_app_rot_partition_ps INTERFACE)
-
-        target_include_directories(tfm_app_rot_partition_ps
-            INTERFACE
-                $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        )
-    endif()
     return()
 endif()
 

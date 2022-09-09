@@ -11,7 +11,6 @@ Services
     Internal Storage <tfm_its_integration_guide>
     Platform <tfm_platform_integration_guide>
     Protected Storage <tfm_ps_integration_guide>
-    PSA Proxy <tfm_psa_proxy_integration_guide>
     Adding a New Service <tfm_secure_partition_addition>
     The manifest tool <tfm_manifest_tool_user_guide>
 

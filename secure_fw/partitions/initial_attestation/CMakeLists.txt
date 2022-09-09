@@ -6,14 +6,6 @@
 #-------------------------------------------------------------------------------
 
 if (NOT TFM_PARTITION_INITIAL_ATTESTATION)
-    if(TFM_PARTITION_PSA_PROXY)
-        add_library(tfm_attestation_defs INTERFACE)
-
-        target_include_directories(tfm_attestation_defs
-            INTERFACE
-                .
-        )
-    endif()
     return()
 endif()
 

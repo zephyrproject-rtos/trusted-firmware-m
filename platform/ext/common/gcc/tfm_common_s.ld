@@ -31,11 +31,6 @@ MEMORY
 #if defined(S_CODE_SRAM_ALIAS_BASE)
   CODE_RAM (rwx) : ORIGIN = S_CODE_SRAM_ALIAS_BASE, LENGTH = TOTAL_CODE_SRAM_SIZE
 #endif
-
-#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
-  PSA_PROXY_SHARED_MEMORY_RAM (rw) : ORIGIN = PSA_PROXY_SHARED_MEMORY_BASE, LENGTH = PSA_PROXY_SHARED_MEMORY_SIZE
-#endif
-
 }
 
 #if !defined(TFM_PSA_API)
@@ -122,10 +117,6 @@ SECTIONS
 
         LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
         LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS))
-#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
-        LONG (PSA_PROXY_SHARED_MEMORY_BASE)
-        LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
-#endif
 #if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
         LONG (SIZEOF(.TFM_SP_META_PTR))
@@ -519,17 +510,6 @@ SECTIONS
 
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
-
-#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
-    /* If a variable defined with __attribute__((section())) keyword the
-     * variable is treated like an initialized variable. To not waste memory
-     * NOLOAD attribute used here. The whole section is zero initialized by
-     * adding section information to .zero.table */
-    .PSA_PROXY_SHARED_MEMORY (NOLOAD) :
-    {
-        KEEP(*(PSA_PROXY_SHARED_MEMORY_SECTION))
-    } > PSA_PROXY_SHARED_MEMORY_RAM
-#endif
 
 #if defined (S_RAM_CODE_START)
     /* Code executed from RAM */

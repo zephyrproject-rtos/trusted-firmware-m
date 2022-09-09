@@ -121,20 +121,6 @@
       }
     },
     {
-      "description": "TF-M PSA Proxy Partition",
-      "manifest": "../secure_fw/partitions/psa_proxy/tfm_psa_proxy.yaml",
-      "output_path": "secure_fw/partitions/psa_proxy",
-      "conditional": "TFM_PARTITION_PSA_PROXY",
-      "version_major": 0,
-      "version_minor": 1,
-      "pid": 270,
-      "linker_pattern": {
-        "library_list": [
-           "*tfm_*partition_psa_proxy.*"
-         ]
-      }
-    },
-    {
       "description": "TFM Firmware Update Partition",
       "manifest": "../secure_fw/partitions/firmware_update/tfm_firmware_update.yaml",
       "output_path": "secure_fw/partitions/firmware_update",
