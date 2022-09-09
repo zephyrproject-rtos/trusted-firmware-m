@@ -50,7 +50,7 @@ New platforms supported
 
   - Secure Enclave system:
 
-    - :doc:`Musca-B1 Secure Enclave. </platform/arm/musca_b1/secure_enclave/readme>`
+    - Musca-B1 Secure Enclave (deprecated after TF-M v1.6.0).
 
 Deprecated platforms
 ====================

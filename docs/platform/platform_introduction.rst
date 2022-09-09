@@ -58,10 +58,6 @@ Supported Platforms
         - `PSoc64.
           <https://www.cypress.com/documentation/product-brochures/cypress-psoc-64-secure-microcontrollers>`_
 
-    - Secure Enclave system:
-
-        - :doc:`Musca-B1 Secure Enclave. </platform/arm/musca_b1/secure_enclave/readme>`
-
     - Runtime Security Subsystem (RSS):
 
         - :doc:`RSS. </platform/arm/rss/readme>`
