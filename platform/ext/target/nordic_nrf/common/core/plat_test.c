@@ -32,12 +32,16 @@
 #endif
 
 #define TIMER_RELOAD_VALUE (1*1000*1000)
+#define TIMER_FREQ_HZ      (1000000)
 
 static void timer_init(NRF_TIMER_Type * TIMER, uint32_t ticks)
 {
     nrf_timer_mode_set(TIMER, NRF_TIMER_MODE_TIMER);
     nrf_timer_bit_width_set(TIMER, NRF_TIMER_BIT_WIDTH_32);
-    nrf_timer_prescaler_set(TIMER, NRF_TIMER_FREQ_1MHz);
+    nrf_timer_prescaler_set(TIMER,
+                            NRF_TIMER_PRESCALER_CALCULATE(
+                                NRF_TIMER_BASE_FREQUENCY_GET(TIMER),
+                                TIMER_FREQ_HZ));
     nrf_timer_cc_set(TIMER, NRF_TIMER_CC_CHANNEL0, ticks);
     /* Clear the timer once event is generated. */
     nrf_timer_shorts_enable(TIMER, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
