@@ -34,7 +34,7 @@ else()
 endif()
 
 if(PLATFORM_GPLED_ENABLED)
-    #If required, Musca_b1_sse_200 platform supports GPLED services
+    #If required, Musca_b1 platform supports GPLED services
     set(PLATFORM_GPLED_SUPPORTED        ON          CACHE BOOL      "Whether to enable the gpled functionality on supported platforms")
 else()
     #By default, GPLED support is disabled

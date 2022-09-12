@@ -204,7 +204,7 @@ endif()
 #        the legacy driver as the new PSA driver overflows the available flash
 #        memory of the SSE-200 subsystem
 if ((NOT ${CC312_LEGACY_DRIVER_API_ENABLED}) AND
-    TEST_S AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (${TFM_PLATFORM} STREQUAL "arm/musca_b1/sse_200"))
+    TEST_S AND (${CMAKE_BUILD_TYPE} STREQUAL "Debug") AND (${TFM_PLATFORM} STREQUAL "arm/musca_b1"))
     set(CC312_LEGACY_DRIVER_API_ENABLED ON)
     message(WARNING
         "The CC-312 legacy driver interface fallback is forced to ${CC312_LEGACY_DRIVER_API_ENABLED}. \

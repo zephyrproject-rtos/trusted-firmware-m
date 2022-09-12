@@ -11,7 +11,7 @@
 #include "platform_pins.h"
 
 /*
- * Musca-B1 sse_200 Platform specific GPLED pin defs
+ * Musca-B1 Platform specific GPLED pin defs
  */
 #define RED_LED     AHB_GPIO0_2
 #define GREEN_LED   AHB_GPIO0_3
