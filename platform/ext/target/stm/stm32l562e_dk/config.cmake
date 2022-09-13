@@ -8,6 +8,8 @@
 #
 #-------------------------------------------------------------------------------
 
+set(PLATFORM_HAS_ISOLATION_L3_SUPPORT   ON          CACHE BOOL      "Platform supports Isolation level 3")
+
 ########################## BL2 #################################################
 
 set(MCUBOOT_IMAGE_NUMBER                2           CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")

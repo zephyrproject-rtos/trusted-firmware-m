@@ -12,6 +12,7 @@ set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext
 set(CONFIG_TFM_USE_TRUSTZONE          ON    CACHE BOOL    "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY           OFF   CACHE BOOL    "Whether to build for a dual-cpu architecture")
 
+set(PLATFORM_HAS_ISOLATION_L3_SUPPORT ON    CACHE BOOL    "Platform supports Isolation level 3")
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON    CACHE BOOL    "Platform supports SLIH IRQ tests")
 set(PLATFORM_FLIH_IRQ_TEST_SUPPORT    ON    CACHE BOOL    "Platform supports FLIH IRQ tests")
 

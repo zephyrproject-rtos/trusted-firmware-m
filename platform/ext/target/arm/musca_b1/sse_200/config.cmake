@@ -45,6 +45,7 @@ set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_SOURCE_DIR}/platform/ext/target/
 
 set(PSA_API_TEST_TARGET                 "musca_b1"   CACHE STRING    "Target to use when building the PSA API tests")
 
+set(PLATFORM_HAS_ISOLATION_L3_SUPPORT ON    CACHE BOOL    "Platform supports Isolation level 3")
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON    CACHE BOOL    "Platform supports SLIH IRQ tests")
 
 if(BL2)
