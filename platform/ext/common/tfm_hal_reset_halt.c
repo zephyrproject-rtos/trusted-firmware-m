@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,12 +8,12 @@
 #include "cmsis.h"
 #include "tfm_hal_platform.h"
 
-__WEAK void tfm_hal_system_reset(void)
+void tfm_hal_system_reset(void)
 {
     NVIC_SystemReset();
 }
 
-__WEAK void tfm_hal_system_halt(void)
+void tfm_hal_system_halt(void)
 {
     /*
      * Disable IRQs to stop all threads, not just the thread that
