@@ -54,6 +54,5 @@ set(MCUBOOT_SECURITY_COUNTER_S          1           CACHE STRING    "Security co
 set(MCUBOOT_SECURITY_COUNTER_NS         1           CACHE STRING    "Security counter for NS image. auto sets it to IMAGE_VERSION_NS")
 set(MCUBOOT_S_IMAGE_MIN_VER             0.0.0+0     CACHE STRING    "Minimum version of secure image required by the non-secure image for upgrade to this non-secure image. If MCUBOOT_IMAGE_NUMBER == 1 this option has no effect")
 set(MCUBOOT_NS_IMAGE_MIN_VER            0.0.0+0     CACHE STRING    "Minimum version of non-secure image required by the secure image for upgrade to this secure image. If MCUBOOT_IMAGE_NUMBER == 1 this option has no effect")
-set(MCUBOOT_ENC_KEY_LEN_S               128         CACHE STRING    "Length of the AES key for encrypt S image")
-set(MCUBOOT_ENC_KEY_LEN_NS              128         CACHE STRING    "Length of the AES key for encrypt NS image")
+set(MCUBOOT_ENC_KEY_LEN                 128         CACHE STRING    "Length of the AES key for encrypting images")
 set(MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH  "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/config/mcuboot-mbedtls-cfg.h" CACHE FILEPATH "Mbedtls config file to use with MCUboot")
