@@ -10,25 +10,6 @@ Trusted Firmware-M Profile Small Design
 Introduction
 ************
 
-The capabilities and resources may dramatically vary on different IoT devices.
-Some IoT devices may have very limited memory resource. The program on those
-devices should keep small memory footprint and basic functionalities.
-On the other hand, some devices may consist of more memory and extended storage,
-to support stronger software capabilities.
-
-Diverse IoT use cases also require different levels of security and requirements
-on device resource. For example, use cases require different cipher
-capabilities. Selecting cipher suites can be sensitive to memory footprint on
-devices with constrained resource.
-
-Trusted Firmware-M (TF-M) defines 3 general profiles, Profile Small,
-Profile Medium and Profile Large, to provide different levels of security to fit
-diverse device capabilities and use cases.
-Each profile specifies a predefined list of features, targeting typical use
-cases with specific hardware constraints. Profiles can serve as reference
-designs, based on which developers can continue further development and
-configurations, according to use case.
-
 As one of the TF-M Profiles, TF-M Profile Small (Profile S) consists of
 lightweight TF-M framework and basic Secure Services to keep smallest memory
 footprint, supporting fundamental security features on devices with ultra

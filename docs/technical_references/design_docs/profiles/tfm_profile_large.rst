@@ -10,11 +10,6 @@ Trusted Firmware-M Profile Large Design
 Introduction
 ************
 
-TF-M Profiles defines 3 profiles: Profile Small, Profile Medium and Profile
-Large. Each profile provides a predefined list of TF-M configurations to meet
-the security requirement of typical use cases with device hardware constraints.
-TF-M Profiles align with PSA specifications and certification requirements.
-
 As one of TF-M Profiles, Profile Large protects less resource-constrained Arm
 Cortex-M devices.
 

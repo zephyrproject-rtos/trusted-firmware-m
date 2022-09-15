@@ -15,9 +15,6 @@ Cloud services with asymmetric cipher support.
 Profile Medium target devices need more resources for more cipher algorithms
 and higher isolation levels.
 
-For more descriptions and background of TF-M Profile, please refer to Profile
-Small design document [PROFILE-S]_.
-
 **************
 Overall design
 **************
