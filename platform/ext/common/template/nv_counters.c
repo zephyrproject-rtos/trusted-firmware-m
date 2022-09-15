@@ -233,48 +233,80 @@ static enum tfm_plat_err_t set_nv_counter_flash(enum flash_nv_counter_id_t count
 enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
                                             uint32_t value)
 {
+    uint32_t new_value;
+    enum tfm_plat_err_t err;
+
     switch(counter_id) {
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
     case (PLAT_NV_COUNTER_PS_0):
-        return set_nv_counter_flash(FLASH_NV_COUNTER_ID_PS_0, value);
+        err = set_nv_counter_flash(FLASH_NV_COUNTER_ID_PS_0, value);
+        break;
     case (PLAT_NV_COUNTER_PS_1):
-        return set_nv_counter_flash(FLASH_NV_COUNTER_ID_PS_1, value);
+        err = set_nv_counter_flash(FLASH_NV_COUNTER_ID_PS_1, value);
+        break;
     case (PLAT_NV_COUNTER_PS_2):
-        return set_nv_counter_flash(FLASH_NV_COUNTER_ID_PS_2, value);
+        err = set_nv_counter_flash(FLASH_NV_COUNTER_ID_PS_2, value);
+        break;
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 #ifdef BL2
     case (PLAT_NV_COUNTER_BL2_0):
-        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_0, value);
+        err = set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_0, value);
+        break;
     case (PLAT_NV_COUNTER_BL2_1):
-        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_1, value);
+        err = set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_1, value);
+        break;
     case (PLAT_NV_COUNTER_BL2_2):
-        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_2, value);
+        err = set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_2, value);
+        break;
     case (PLAT_NV_COUNTER_BL2_3):
-        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_3, value);
+        err = set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_3, value);
+        break;
 #endif /* BL2 */
 
 #ifdef BL1
     case (PLAT_NV_COUNTER_BL1_0):
-        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL1_0, value);
+        err = set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL1_0, value);
+        break;
 #endif /* BL1 */
 
 #if (PLATFORM_NS_NV_COUNTERS > 0)
     case (PLAT_NV_COUNTER_NS_0):
-        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_NS_0, value);
+        err = set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_NS_0, value);
+        break;
 #endif
 #if (PLATFORM_NS_NV_COUNTERS > 1)
     case (PLAT_NV_COUNTER_NS_1):
-        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_NS_1, value);
+        err = set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_NS_1, value);
+        break;
 #endif
 #if (PLATFORM_NS_NV_COUNTERS > 2)
     case (PLAT_NV_COUNTER_NS_2):
-        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_NS_2, value);
+        err = set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_NS_2, value);
+        break;
 #endif
 
     default:
         return TFM_PLAT_ERR_UNSUPPORTED;
     }
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    /* Check that the NV counter write hasn't failed (in case the driver doesn't
+     * have a check.
+     */
+    err = tfm_plat_read_nv_counter(counter_id, sizeof(new_value),
+                                   (uint8_t *)&new_value);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    if(new_value != value) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
 enum tfm_plat_err_t tfm_plat_increment_nv_counter(
