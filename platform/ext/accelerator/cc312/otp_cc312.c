@@ -426,6 +426,10 @@ static enum tfm_plat_err_t otp_write(uint8_t *addr, size_t size,
         *word_ptr = word;
         wait_until_otp_programming_completes();
 
+        if (*word_ptr != word) {
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
+
         in_done += copy_size;
     }
 
