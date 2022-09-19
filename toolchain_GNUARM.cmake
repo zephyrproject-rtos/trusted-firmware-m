@@ -34,6 +34,12 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extension
 macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
 
+    if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.0.0)
+        add_compile_options(
+            -fmacro-prefix-map=${TFM_TEST_REPO_PATH}=TFM_TEST_REPO_PATH
+        )
+    endif()
+
     add_compile_options(
         --specs=nano.specs
         -Wall
