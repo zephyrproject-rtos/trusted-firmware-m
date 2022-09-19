@@ -357,10 +357,20 @@ enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *dat
             input_idx += input_copy_size;
         }
 
+        uint32_t num_items = copy_size / data_width;
+
         err = (enum tfm_plat_err_t)OTP_NV_COUNTERS_FLASH_DEV.ProgramData(TFM_OTP_NV_COUNTERS_AREA_ADDR + idx,
                                                     block,
-                                                    copy_size / data_width);
+                                                    num_items);
         if (err < 0) {
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
+
+        /* When err is positive it contains the number of data items
+         * successfully programmed. Check that every byte of
+         * programming succeeded.
+         */
+        if (err > 0 && err != num_items) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
 
