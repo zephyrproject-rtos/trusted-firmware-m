@@ -268,9 +268,6 @@ struct corstone310_nsacfg_t {
 /* End MAIN PPCEXP0 peripherals definition */
 
 /* MAIN PPCEXP1 peripherals definition */
-#define DMA1_MAIN_PPCEXP1_POS_MASK                 (1UL << 1)
-#define DMA2_MAIN_PPCEXP1_POS_MASK                 (1UL << 2)
-#define DMA3_MAIN_PPCEXP1_POS_MASK                 (1UL << 3)
 /* End MAIN PPCEXP1 peripherals definition */
 
 /* MAIN PPCEXP2 peripherals definition */
@@ -298,9 +295,6 @@ struct corstone310_nsacfg_t {
 #define USER_MEM_APB1_PERIPH_PPCEXP0_POS_MASK      (1UL << 1)
 #define NPU_APB0_PERIPH_PPCEXP0_POS_MASK           (1UL << 4)
 #define NPU_APB1_PERIPH_PPCEXP0_POS_MASK           (1UL << 5)
-#define MPC_SRAM_PERIPH_PPCEXP0_POS_MASK           (1UL << 13)
-#define MPC_QSPI_PERIPH_PPCEXP0_POS_MASK           (1UL << 14)
-#define MPC_DDR4_PERIPH_PPCEXP0_POS_MASK           (1UL << 15)
 /* End PERIPH PPCEXP0 peripherals definition */
 
 /* PERIPH PPCEXP1 peripherals definition */
