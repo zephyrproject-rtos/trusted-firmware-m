@@ -135,9 +135,10 @@ static ARM_FLASH_INFO ARM_FLASH0_DEV_INFO = {
 
 static struct emulated_flash_dev_t ARM_FLASH0_DEV = {
 #if (defined (__DOMAIN_NS) && (__DOMAIN_NS == 1))
-    .memory_base = FLASH0_BASE_NS,
+    .memory_base_ns = FLASH0_BASE_NS,
 #else
-    .memory_base = FLASH0_BASE_S,
+    .memory_base_ns = FLASH0_BASE_NS,
+    .memory_base_s = FLASH0_BASE_S,
 #endif /* __DOMAIN_NS == 1 */
     .data        = &(ARM_FLASH0_DEV_INFO)};
 
@@ -242,9 +243,10 @@ static ARM_FLASH_INFO ARM_FLASH1_DEV_INFO = {
 
 static struct emulated_flash_dev_t ARM_FLASH1_DEV = {
 #if (defined (__DOMAIN_NS) && (__DOMAIN_NS == 1))
-    .memory_base = FLASH1_BASE_NS,
+    .memory_base_ns = FLASH1_BASE_NS,
 #else
-    .memory_base = FLASH1_BASE_S,
+    .memory_base_ns = FLASH1_BASE_NS,
+    .memory_base_s = FLASH1_BASE_S,
 #endif /* __DOMAIN_NS == 1 */
     .data        = &(ARM_FLASH1_DEV_INFO)};
 
