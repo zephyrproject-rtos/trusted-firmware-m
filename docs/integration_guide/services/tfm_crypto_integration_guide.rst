@@ -42,7 +42,7 @@ Service source files
 - ``crypto_asymmetric.c`` : This module handles requests for asymmetric
   cryptographic operations
 - ``crypto_init.c`` : This module provides basic functions to initialise the
-  secure service during TF-M boot. When the service is built for IPC mode
+  secure service during TF-M boot. When the service is built for IPC model
   compatibility, this layer handles as well the connection requests and the
   proper dispatching of requests to the corresponding functions, and it holds
   the internal buffer used to allocate temporarily the IOVECs needed. The size

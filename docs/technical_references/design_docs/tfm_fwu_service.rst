@@ -42,7 +42,7 @@ The structure of the TF-M Firmware Update service is listed below:
    |                             | the NSPE(i.e. to the applications).                           | ``./interface/src/tfm_firmware_update_ipc_api.c``                                     |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
    | Manifest                    | The manifest file is a description of the service components  | ``./secure_fw/partitions/firmware_update/tfm_firmware_update.yaml``                   |
-   |                             | for both library mode and IPC mode.                           |                                                                                       |
+   |                             | for both library mode and IPC model.                          |                                                                                       |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
    | Secure functions and IPC    | This module handles all the secure function requests in       | ``./secure_fw/partitions/firmware_update/tfm_fwu_req_mngr.c``                         |
    | request handlers            | library model and all the service requests in IPC model.      |                                                                                       |

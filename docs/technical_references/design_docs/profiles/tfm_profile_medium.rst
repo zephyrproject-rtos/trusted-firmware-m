@@ -289,7 +289,7 @@ regression testing via
 ``-DTEST_S=ON -DTEST_NS=ON``
 
 Will enable testing for all enabled partitions. See above for details of enabled
-partitions. Because Profile Medium enables IPC mode, the IPC tests are also
+partitions. Because Profile Medium enables IPC model, the IPC tests are also
 enabled.
 
 Some cryptography tests are disabled due to the reduced Mbed Crypto config.
