@@ -274,6 +274,11 @@ The system integrators **may** implement this interface based on the target
 capabilities and set the ``PS_ROLLBACK_PROTECTION`` flag to compile in
 the rollback protection code.
 
+  .. Note::
+    If this flag is enabled, the lifecycle of the PS service depends on the
+    shorter write endurance of the assets storage device and the NV counters
+    storage device.
+
 Secret Platform Unique Key
 ==========================
 The encryption policy relies on a secret hardware unique key (HUK) per device.
