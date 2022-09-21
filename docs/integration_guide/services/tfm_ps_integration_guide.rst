@@ -326,6 +326,15 @@ definitions is:
 
 - ``PS_ENCRYPTION``- this flag allows to enable/disable encryption
   option to encrypt the protected storage data.
+
+- ``PS_CRYPTO_AEAD_ALG`` - this flag indicates the AEAD algorithm to use for
+  authenticated encryption in Protected Storage.
+
+  .. Note::
+    For GCM/CCM it is essential that IV doesn't get repeated. If this flag is set to
+    ``PSA_ALG_GCM`` or ``PSA_ALG_CCM``, ``PS_ROLLBACK_PROTECTION`` must be enabled
+    to protect against IV rollback.
+
 - ``PS_CREATE_FLASH_LAYOUT``- this flag indicates that it is required
   to create a PS flash layout. If this flag is set, PS service will
   generate an empty and valid PS flash layout to store assets. It will

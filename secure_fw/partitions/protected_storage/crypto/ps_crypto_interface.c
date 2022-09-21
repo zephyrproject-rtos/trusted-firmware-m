@@ -40,9 +40,16 @@ static uint8_t ps_crypto_iv_buf[PS_IV_LEN_BYTES];
 
 psa_status_t ps_crypto_init(void)
 {
-    /* Currently, no initialisation is required. This may change if key
-     * handling is changed.
+    /* For GCM and CCM it is essential that nonce doesn't get repeated. If there
+     * is no rollback protection, an attacker could try to rollback the storage and
+     * encrypt another plaintext block with same IV/Key pair; this breaks GCM and CCM
+     * usage rules.
      */
+#ifndef PS_ROLLBACK_PROTECTION
+    if (PS_CRYPTO_AEAD_ALG == PSA_ALG_GCM || PS_CRYPTO_AEAD_ALG == PSA_ALG_CCM) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+#endif
     return PSA_SUCCESS;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -853,6 +853,11 @@ psa_status_t ps_object_table_init(uint8_t *obj_data)
     ps_object_table_fs_read_table(&init_ctx);
 
 #ifdef PS_ENCRYPTION
+    err = ps_crypto_init();
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
+
     /* Set object table key */
     err = ps_crypto_setkey(ps_table_key_label, sizeof(ps_table_key_label));
     if (err != PSA_SUCCESS) {
