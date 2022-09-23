@@ -31,11 +31,6 @@ platform/include/tfm_spm_hal.h
 This file contains the declarations of functions that a platform implementation
 has to provide for TF-M's SPM. For details see the comments in the file.
 
-secure_fw/core/include/tfm_platform_core_api.h
-==============================================
-This file contains declarations of functions that can be or have to be called
-from platform implementations. For details see the comments in the file.
-
 platform/include/tfm_platform_system.h
 ======================================
 This file contains the declarations of functions that a platform implementation
@@ -99,4 +94,4 @@ Please see the :doc:`platform_ext_folder` for details.
 
 --------------
 
-*Copyright (c) 2017-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

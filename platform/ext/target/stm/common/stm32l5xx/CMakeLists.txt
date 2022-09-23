@@ -203,7 +203,7 @@ endif()
 
 target_sources(tfm_spm
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c
+        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c>
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_platform.c

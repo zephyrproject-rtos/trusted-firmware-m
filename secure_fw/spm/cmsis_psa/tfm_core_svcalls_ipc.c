@@ -221,8 +221,3 @@ __attribute__ ((naked)) void tfm_core_handler_mode(void)
                    "BX LR            \n"
                    : : "I" (TFM_SVC_SPM_INIT));
 }
-
-void tfm_access_violation_handler(void)
-{
-    tfm_hal_system_halt();
-}

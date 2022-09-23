@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include "tfm_spm_hal.h"
-#include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "mpu_armv8m_drv.h"
@@ -73,8 +72,6 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     }
 }
 
-#ifndef TFM_PSA_API
-
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   bool privileged,
                   const struct platform_data_t *platform_data)
@@ -82,5 +79,3 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
     /* plat data are ignored */
     return TFM_PLAT_ERR_SUCCESS;
 }
-
-#endif /* TFM_PSA_API */

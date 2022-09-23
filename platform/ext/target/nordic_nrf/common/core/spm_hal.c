@@ -11,7 +11,6 @@
 #include "cmsis.h"
 #include "tfm_spm_log.h"
 #include "tfm_spm_hal.h"
-#include "tfm_platform_core_api.h"
 #include "target_cfg.h"
 #include "spu.h"
 #include "mpu_armv8m_drv.h"
@@ -21,48 +20,6 @@
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
-
-static void spu_dump_context(void)
-{
-    SPMLOG_ERRMSG("Platform Exception: SPU Fault\r\n");
-
-    /* Report which type of violation occured */
-    if(NRF_SPU->EVENTS_RAMACCERR)
-    {
-        SPMLOG_DBGMSG("  RAMACCERR\r\n");
-    }
-    if(NRF_SPU->EVENTS_PERIPHACCERR)
-    {
-        SPMLOG_DBGMSG("  PERIPHACCERR\r\n");
-    }
-    if(NRF_SPU->EVENTS_FLASHACCERR)
-    {
-        SPMLOG_DBGMSG("  FLASHACCERR\r\n");
-    }
-}
-
-void SPU_Handler(void)
-{
-    spu_dump_context();
-
-    /* Clear SPU interrupt flag and pending SPU IRQ */
-    spu_clear_events();
-
-    NVIC_ClearPendingIRQ(SPU_IRQn);
-
-    /* Inform TF-M core that isolation boundary has been violated */
-    tfm_access_violation_handler();
-}
-
-__attribute__((naked)) void SPU_IRQHandler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
-
-    __ASM volatile(
-        "BL        SPU_Handler             \n"
-        "B         .                       \n"
-    );
-}
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
 {
@@ -184,7 +141,6 @@ bool tfm_spm_hal_has_access_to_region(const void *p, size_t s,
     return true;
 }
 
-#ifndef TFM_PSA_API
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         bool privileged, const struct platform_data_t *platform_data)
 {
@@ -204,4 +160,3 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif /* TFM_PSA_API */

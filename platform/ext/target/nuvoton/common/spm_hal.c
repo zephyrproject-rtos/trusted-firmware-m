@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,16 +8,11 @@
 #include <stdio.h>
 #include "cmsis.h"
 #include "tfm_spm_hal.h"
-#include "tfm_platform_core_api.h"
 #include "target_cfg.h"
-#include "Driver_MPC.h"
 #include "mpu_armv8m_drv.h"
 #include "region_defs.h"
 #include "utilities.h"
 #include "exception_info.h"
-
-/* Import MPC driver */
-extern ARM_DRIVER_MPC Driver_SRAM1_MPC;
 
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
@@ -42,62 +37,6 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
         }
     }
     return TFM_PLAT_ERR_SUCCESS;
-}
-
-void C_SCU_Handler(void)
-{
-    ERROR_MSG("Platform Exception: secure violation fault!!!");
-
-    /* Inform TF-M core that isolation boundary has been violated */
-    tfm_access_violation_handler();
-}
-
-__attribute__((naked)) void SCU_IRQHandler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
-
-    __ASM volatile(
-        "BL        C_SCU_Handler           \n"
-        "B         .                       \n"
-    );
-}
-
-void C_MPC_Handler(void)
-{
-    /* Print fault message and block execution */
-    ERROR_MSG("Platform Exception: MPC fault!!!");
-
-    /* Inform TF-M core that isolation boundary has been violated */
-    tfm_access_violation_handler();
-}
-
-__attribute__((naked)) void MPC_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
-
-    __ASM volatile(
-        "BL        C_MPC_Handler           \n"
-        "B         .                       \n"
-    );
-}
-
-void C_PPC_Handler(void)
-{
-    /* Print fault message and block execution */
-    ERROR_MSG("Platform Exception: PPC fault!!!");
-
-    /* Inform TF-M core that isolation boundary has been violated */
-    tfm_access_violation_handler();
-}
-
-__attribute__((naked)) void PPC_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
-
-    __ASM volatile(
-        "BL        C_PPC_Handler           \n"
-        "B         .                       \n"
-    );
 }
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)

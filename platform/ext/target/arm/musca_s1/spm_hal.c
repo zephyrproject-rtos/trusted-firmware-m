@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,69 +7,12 @@
 
 #include "cmsis.h"
 #include "tfm_spm_hal.h"
-#include "tfm_platform_core_api.h"
 #include "target_cfg.h"
-#include "Driver_MPC.h"
 #include "utilities.h"
 #include "exception_info.h"
 
-/* Import MPC driver */
-extern ARM_DRIVER_MPC Driver_CODE_SRAM_MPC;
-
 /* Get address of memory regions to configure MPU */
 extern const struct memory_region_limits memory_regions;
-
-void C_MPC_Handler(void)
-{
-    /* Clear MPC interrupt flag and pending MPC IRQ */
-    Driver_CODE_SRAM_MPC.ClearInterrupt();
-    NVIC_ClearPendingIRQ(S_MPC_COMBINED_IRQn);
-
-    /* Print fault message and block execution */
-    ERROR_MSG("Platform Exception: MPC fault!!!");
-
-    /* Inform TF-M core that isolation boundary has been violated */
-    tfm_access_violation_handler();
-}
-
-__attribute__((naked)) void MPC_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
-
-    __ASM volatile(
-        "BL        C_MPC_Handler           \n"
-        "B         .                       \n"
-    );
-}
-
-void C_PPC_Handler(void)
-{
-    /*
-     * Due to an issue on the FVP, the PPC fault doesn't trigger a
-     * PPC IRQ which is handled by the PPC_handler.
-     * In the FVP execution, this code is not execute.
-     */
-
-    /* Clear PPC interrupt flag and pending PPC IRQ */
-    ppc_clear_irq();
-    NVIC_ClearPendingIRQ(S_PPC_COMBINED_IRQn);
-
-    /* Print fault message*/
-    ERROR_MSG("Platform Exception: PPC fault!!!");
-
-    /* Inform TF-M core that isolation boundary has been violated */
-    tfm_access_violation_handler();
-}
-
-__attribute__((naked)) void PPC_Handler(void)
-{
-    EXCEPTION_INFO(EXCEPTION_TYPE_PLATFORM);
-
-    __ASM volatile(
-        "BL        C_PPC_Handler           \n"
-        "B         .                       \n"
-    );
-}
 
 uint32_t tfm_spm_hal_get_ns_VTOR(void)
 {
@@ -126,8 +69,6 @@ enum irq_target_state_t tfm_spm_hal_set_irq_target_state(
     }
 }
 
-#ifndef TFM_PSA_API
-
 enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
                   bool privileged,
                   const struct platform_data_t *platform_data)
@@ -149,5 +90,3 @@ enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
     }
     return TFM_PLAT_ERR_SUCCESS;
 }
-
-#endif /* TFM_PSA_API */

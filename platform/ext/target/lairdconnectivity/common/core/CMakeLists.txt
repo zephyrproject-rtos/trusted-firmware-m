@@ -165,7 +165,8 @@ endif()
 
 target_sources(tfm_spm
     PRIVATE
-        ${NRF_FOLDER_PATH}/spm_hal.c
+        ${NRF_FOLDER_PATH}/faults.c
+        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${NRF_FOLDER_PATH}/spm_hal.c>
         ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
         ${NRF_FOLDER_PATH}/tfm_hal_platform_common.c
 )
