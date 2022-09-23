@@ -8,6 +8,7 @@
 #include "compiler_ext_defs.h"
 #include "security_defs.h"
 #include "tfm_arch.h"
+#include "tfm_core_trustzone.h"
 #include "utilities.h"
 #include "config_impl.h"
 
@@ -74,8 +75,14 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
                            uintptr_t pfn, void *param, uintptr_t pfnlr)
 {
     uintptr_t sp = ((struct context_ctrl_t *)p_ctx_ctrl)->sp;
+    uintptr_t sp_limit = ((struct context_ctrl_t *)p_ctx_ctrl)->sp_limit;
     struct full_context_t *p_tctx =
             (struct full_context_t *)arch_seal_thread_stack(sp);
+
+    /* Check if enough space on stack */
+    if ((uintptr_t)p_tctx - sizeof(struct full_context_t) < sp_limit) {
+        tfm_core_panic();
+    }
 
     p_tctx--;
 
