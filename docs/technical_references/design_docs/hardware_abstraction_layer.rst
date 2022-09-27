@@ -235,7 +235,7 @@ This API performs a system reset.
 
 The platform can uninitialize some resources before reset.
 
-When ``CONFIG_TFM_HALT_ON_PANIC`` is disabled this function is called to reset
+When ``CONFIG_TFM_HALT_ON_CORE_PANIC`` is disabled this function is called to reset
 the system when a fatal error occurs.
 
 **Parameter**
@@ -264,7 +264,7 @@ This API enters the CPU into an infinite loop.
 
 The platform can uninitialize some resources before looping forever.
 
-When ``CONFIG_TFM_HALT_ON_PANIC`` is enabled this function is called to halt the
+When ``CONFIG_TFM_HALT_ON_CORE_PANIC`` is enabled this function is called to halt the
 system when a fatal error occurs.
 
 **Parameter**
