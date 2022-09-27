@@ -41,9 +41,14 @@ install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
 install(FILES       ${INTERFACE_INC_DIR}/tfm_ns_client_ext.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
+install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/config_impl.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+
 if (TFM_PSA_API)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_pack.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+    install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
 endif()
 
 if (TFM_PARTITION_NS_AGENT_MAILBOX)
@@ -93,6 +98,7 @@ if (TFM_PARTITION_INITIAL_ATTESTATION)
     install(FILES       ${INTERFACE_INC_DIR}/psa/initial_attestation.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_attest_defs.h
+                        ${INTERFACE_INC_DIR}/tfm_attest_iat_defs.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
@@ -115,6 +121,11 @@ if(TFM_PARTITION_FIRMWARE_UPDATE)
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
+if(PLATFORM_DEFAULT_CRYPTO_KEYS)
+    install(DIRECTORY   ${INTERFACE_INC_DIR}/crypto_keys
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+endif()
+
 ####################### export sources #########################################
 
 if (TFM_PARTITION_NS_AGENT_MAILBOX)
@@ -122,7 +133,7 @@ if (TFM_PARTITION_NS_AGENT_MAILBOX)
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c
                         ${INTERFACE_SRC_DIR}/multi_core/tfm_ns_mailbox_thread.c
-            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR}/multi_core)
 endif()
 
 if (TFM_PARTITION_NS_AGENT_TZ)
