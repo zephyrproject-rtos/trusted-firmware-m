@@ -162,7 +162,7 @@ if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/accelerator/interface>
-            $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${MCUBOOT_PATH}/boot/bootutil/include>
+            ${MCUBOOT_PATH}/boot/bootutil/include
             ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include
     )
 
