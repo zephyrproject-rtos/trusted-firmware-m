@@ -303,7 +303,7 @@ static psa_status_t tfm_crypto_engine_init(void)
 
     /* mbedtls_printf is used to print messages including error information. */
 #if (TFM_PARTITION_LOG_LEVEL >= TFM_PARTITION_LOG_LEVEL_ERROR)
-    mbedtls_platform_set_printf(tfm_sp_log_printf);
+    mbedtls_platform_set_printf(printf);
 #endif
 
     /* Initialise the crypto accelerator if one is enabled. If the driver API is

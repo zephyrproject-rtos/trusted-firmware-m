@@ -162,7 +162,7 @@ static int _tfm_sp_log_vprintf(const char *fmt, va_list ap)
     return count;
 }
 
-int tfm_sp_log_printf(const char *fmt, ...)
+int printf(const char *fmt, ...)
 {
     int count = 0;
     va_list ap;
