@@ -402,18 +402,6 @@ enum tfm_plat_err_t ppc_init_cfg(void)
                                         USB_AND_ETHERNET_MAIN_PPCEXP0_POS_MASK,
                                         ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
 
-    /* Grant non-secure access to peripherals on MAIN EXP1 */
-    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.Initialize();
-    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.ConfigSecurity(
-                                        DMA1_MAIN_PPCEXP1_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.ConfigSecurity(
-                                        DMA2_MAIN_PPCEXP1_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.ConfigSecurity(
-                                        DMA3_MAIN_PPCEXP1_POS_MASK,
-                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
-
     /* Grant non-secure access to peripherals on PERIPH0 */
     err |= Driver_PERIPH0_PPC_CORSTONE310.Initialize();
     err |= Driver_PERIPH0_PPC_CORSTONE310.ConfigSecurity(
@@ -477,6 +465,7 @@ enum tfm_plat_err_t ppc_init_cfg(void)
 
     /* Initialize not used PPC drivers */
     err |= Driver_MAIN0_PPC_CORSTONE310.Initialize();
+    err |= Driver_MAIN_EXP1_PPC_CORSTONE310.Initialize();
     err |= Driver_MAIN_EXP2_PPC_CORSTONE310.Initialize();
     err |= Driver_MAIN_EXP3_PPC_CORSTONE310.Initialize();
     err |= Driver_PERIPH_EXP0_PPC_CORSTONE310.Initialize();
