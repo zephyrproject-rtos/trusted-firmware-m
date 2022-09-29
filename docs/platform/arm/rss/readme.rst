@@ -26,9 +26,10 @@ Building TF-M
 -------------
 
 Follow the instructions in :doc:`Build instructions </building/tfm_build_instruction>`.
-Build TF-M with platform name: `arm/rss`
+Build TF-M with platform name: `arm/rss/<rss platform name>`
 
-``-DTFM_PLATFORM=arm/rss``
+For example for building RSS for Total Compute platforms:
+``-DTFM_PLATFORM=arm/rss/tc``
 
 Signing host images
 -------------------

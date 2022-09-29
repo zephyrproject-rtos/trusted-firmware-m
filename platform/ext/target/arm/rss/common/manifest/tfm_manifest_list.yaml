@@ -38,7 +38,7 @@
     },
     {
       "description": "TFM Crypto Service",
-      "manifest": "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/rss/manifest/tfm_crypto.yaml",
+      "manifest": "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/rss/common/manifest/tfm_crypto.yaml",
       "output_path": "secure_fw/partitions/crypto",
       "conditional": "TFM_PARTITION_CRYPTO",
       "version_major": 0,
@@ -66,7 +66,7 @@
     },
     {
       "description": "TFM Initial Attestation Service",
-      "manifest": "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/rss/manifest/tfm_initial_attestation.yaml",
+      "manifest": "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/rss/common/manifest/tfm_initial_attestation.yaml",
       "output_path": "secure_fw/partitions/initial_attestation",
       "conditional": "TFM_PARTITION_INITIAL_ATTESTATION",
       "version_major": 0,

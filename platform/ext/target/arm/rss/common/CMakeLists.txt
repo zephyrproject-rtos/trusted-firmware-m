@@ -82,7 +82,7 @@ install(FILES       platform_builtin_key_ids.h
 
 #========================= Platform Secure ====================================#
 
-add_subdirectory(rss_comms)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rss_comms rss_comms)
 
 target_include_directories(platform_s
     PUBLIC
@@ -194,9 +194,7 @@ target_include_directories(platform_ns
 target_sources(platform_bl2
     PRIVATE
         tfm_hal_platform_reset.c
-        bl2/flash_map_bl2.c
         bl2/provisioning.c
-        bl2/boot_hal_bl2.c
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
