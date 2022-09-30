@@ -10,6 +10,9 @@
   *
   * <h2><center>&copy; Copyright (c) 2020-2021 STMicroelectronics.
   * All rights reserved.</center></h2>
+  * <h2><center>&copy; Copyright (c) 2022 Cypress Semiconductor Corporation
+  * (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.
+  * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
   * the "License"; You may not use this file except in compliance with the
@@ -118,7 +121,7 @@ const struct flash_otp_nv_counters_region_t otp_stm_provision = {
     }
     .bl2_nv_counter_0 = { INT64NULL },
     .bl2_nv_counter_1 = { INT64NULL },
-    .bl2_nv_counter_2 = [ INT64NULL },
+    .bl2_nv_counter_2 = { INT64NULL },
     .bl2_rotpk_2 =  {
         0xe1, 0x80, 0x15, 0x99, 0x3d, 0x6d, 0x27, 0x60,
         0xb4, 0x99, 0x27, 0x4b, 0xae, 0xf2, 0x64, 0xb8,
