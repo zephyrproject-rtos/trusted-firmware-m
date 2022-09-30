@@ -80,7 +80,7 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
 #endif
 };
 #if defined(__ICCARM__)
-#pragma location = ".bss.part_runtime_priority_lowest}"
+#pragma location = ".bss.part_runtime_priority_lowest"
 __root
 #endif
 /* Placeholder for partition runtime space. Do not reference it. */
