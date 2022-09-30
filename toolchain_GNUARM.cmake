@@ -54,6 +54,9 @@ macro(tfm_toolchain_reset_compiler_flags)
         -nostdlib
         $<$<COMPILE_LANGUAGE:C>:-std=c99>
         $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
+        # Force DWARF version 4 for zephyr as pyelftools does not support version 5 at present
+        -gdwarf-4
+        -std=c99
         $<$<OR:$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<BOOL:${TFM_CODE_COVERAGE}>>:-g>
     )
 endmacro()
