@@ -93,9 +93,17 @@ macro(tfm_toolchain_set_processor_arch)
                     string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
                 endif()
             endif()
+            # GCC specifies that '+nofp' is available on following M-profile cpus: 'cortex-m4',
+            # 'cortex-m7', 'cortex-m33', 'cortex-m35p' and 'cortex-m55'.
+            # Build fails if other M-profile cpu, such as 'cortex-m23', is added with '+nofp'.
+            # Explicitly list those cpu to align with GCC description.
             if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
                 if(NOT CONFIG_TFM_ENABLE_FP AND
-                    NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv6-m")
+                   (TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m4"
+                    OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m7"
+                    OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m33"
+                    OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m35p"
+                    OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"))
                         string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
                 endif()
             endif()
