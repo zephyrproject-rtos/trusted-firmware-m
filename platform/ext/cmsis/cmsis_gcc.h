@@ -20,8 +20,6 @@
  * the previous version of this file in TF-M.
  * Changes:
  * - INITIAL_SP and STACK_LIMIT renamed to match Armclang naming convention
- * - Copy table copy size interpreted as bytes instead of words to keep it
- *   aligned with ld files
  */
 
 #ifndef __CMSIS_GCC_H
@@ -151,13 +149,13 @@ __STATIC_FORCEINLINE __NO_RETURN void __cmsis_start(void)
   extern const __zero_table_t __zero_table_end__;
 
   for (__copy_table_t const* pTable = &__copy_table_start__; pTable < &__copy_table_end__; ++pTable) {
-    for(uint32_t i=0u; i<(pTable->wlen/sizeof(pTable->dest)); ++i) {
+    for(uint32_t i=0u; i<pTable->wlen; ++i) {
       pTable->dest[i] = pTable->src[i];
     }
   }
 
   for (__zero_table_t const* pTable = &__zero_table_start__; pTable < &__zero_table_end__; ++pTable) {
-    for(uint32_t i=0u; i<(pTable->wlen/sizeof(pTable->dest)); ++i) {
+    for(uint32_t i=0u; i<pTable->wlen; ++i) {
       pTable->dest[i] = 0u;
     }
   }

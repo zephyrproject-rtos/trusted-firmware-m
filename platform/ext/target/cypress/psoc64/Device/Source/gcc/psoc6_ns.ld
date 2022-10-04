@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited
+ * Copyright (c) 2018-2022 ARM Limited
  * Copyright (c) 2016-2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -167,12 +167,12 @@ SECTIONS
         /* Copy interrupt vectors from flash to RAM */
         LONG (__Vectors)                                    /* From */
         LONG (__ram_vectors_start__)                        /* To   */
-        LONG (__Vectors_End - __Vectors)                    /* Size */
+        LONG ((__Vectors_End - __Vectors) / 4)              /* Size */
 #endif
         /* Copy data section to RAM */
         LONG (__etext)                                      /* From */
         LONG (__data_start__)                               /* To   */
-        LONG (__data_end__ - __data_start__)                /* Size */
+        LONG ((__data_end__ - __data_start__) / 4)          /* Size */
 
         __copy_table_end__ = .;
     } > flash
@@ -186,11 +186,11 @@ SECTIONS
         . = ALIGN(4);
         __zero_table_start__ = .;
         LONG (__bss_start__)
-        LONG (__bss_end__ - __bss_start__)
+        LONG ((__bss_end__ - __bss_start__) / 4)
         __zero_table_end__ = .;
     } > flash
 
-    __etext =  . ;
+    __etext =  ALIGN(4);
 
 
 #ifdef RAM_VECTORS_SUPPORT

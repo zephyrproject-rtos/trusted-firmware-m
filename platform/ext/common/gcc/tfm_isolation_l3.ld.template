@@ -77,16 +77,16 @@ SECTIONS
         __copy_table_start__ = .;
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA))
+        LONG (SIZEOF(.TFM_DATA) / 4)
 {% for partition in partitions %}
         LONG (LOADADDR(.ER_{{partition.manifest.name}}_RWZI))
         LONG (ADDR(.ER_{{partition.manifest.name}}_RWZI))
-        LONG (SIZEOF(.ER_{{partition.manifest.name}}_RWZI))
+        LONG (SIZEOF(.ER_{{partition.manifest.name}}_RWZI) / 4)
 {% endfor %}
 #if defined(S_CODE_SRAM_ALIAS_BASE)
         LONG (LOADADDR(.ER_EFLASH_DRIVER_RO))
         LONG (ADDR(.ER_EFLASH_DRIVER_RO))
-        LONG (SIZEOF(.ER_EFLASH_DRIVER_RO))
+        LONG (SIZEOF(.ER_EFLASH_DRIVER_RO) / 4)
 #endif
         __copy_table_end__ = .;
     } > FLASH
@@ -96,13 +96,13 @@ SECTIONS
         __zero_table_start__ = .;
 #if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
-        LONG (SIZEOF(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
 #endif
         LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS))
+        LONG (SIZEOF(.TFM_BSS) / 4)
 {% for partition in partitions %}
         LONG (ADDR(.{{partition.manifest.name}}_RWZI_BSS))
-        LONG (SIZEOF(.{{partition.manifest.name}}_RWZI_BSS))
+        LONG (SIZEOF(.{{partition.manifest.name}}_RWZI_BSS) / 4)
 {% endfor %}
         __zero_table_end__ = .;
     } > FLASH
@@ -443,6 +443,7 @@ SECTIONS
     .TFM_SP_META_PTR : ALIGN(32)
     {
         *(.bss.SP_META_PTR_SPRTL_INST)
+        . = ALIGN(32);
     } > RAM AT> RAM
     Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);

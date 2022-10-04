@@ -107,6 +107,7 @@ SECTIONS
     {
         __vectors_start__ = .;
         KEEP(*(.vectors))
+        . = ALIGN(4);
         __vectors_end__ = .;
 
         /* If this image is placed at the beginning of flash make sure we
@@ -129,29 +130,29 @@ SECTIONS
         /* Copy interrupt vectors from flash to RAM */
         LONG (__vectors_start__)                            /* From */
         LONG (__ram_vectors_start__)                        /* To   */
-        LONG (__vectors_end__ - __vectors_start__)          /* Size */
+        LONG ((__vectors_end__ - __vectors_start__) / 4)    /* Size */
 #endif
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA))
+        LONG (SIZEOF(.TFM_DATA) / 4)
 
         LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
         LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA) / 4)
 
         LONG (LOADADDR(.TFM_APP_ROT_LINKER_DATA))
         LONG (ADDR(.TFM_APP_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA) / 4)
 
 #if defined (S_RAM_CODE_START)
         LONG (LOADADDR(.TFM_RAM_CODE))
         LONG (ADDR(.TFM_RAM_CODE))
-        LONG (SIZEOF(.TFM_RAM_CODE))
+        LONG (SIZEOF(.TFM_RAM_CODE) / 4)
 #endif
 #if defined(S_CODE_SRAM_ALIAS_BASE)
         LONG (LOADADDR(.ER_CODE_SRAM))
         LONG (ADDR(.ER_CODE_SRAM))
-        LONG (SIZEOF(.ER_CODE_SRAM))
+        LONG (SIZEOF(.ER_CODE_SRAM) / 4)
 #endif
         __copy_table_end__ = .;
     } > FLASH
@@ -160,23 +161,23 @@ SECTIONS
     {
         __zero_table_start__ = .;
         LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS))
+        LONG (SIZEOF(.TFM_BSS) / 4)
 #if !defined(TFM_PSA_API)
         LONG (ADDR(.TFM_SECURE_STACK))
-        LONG (SIZEOF(.TFM_SECURE_STACK))
+        LONG (SIZEOF(.TFM_SECURE_STACK) / 4)
 #endif /* !defined(TFM_PSA_API) */
         LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
 
         LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS) / 4)
 #if defined(PSA_PROXY_SHARED_MEMORY_BASE)
         LONG (PSA_PROXY_SHARED_MEMORY_BASE)
-        LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
+        LONG (PSA_PROXY_SHARED_MEMORY_SIZE / 4)
 #endif
 #if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
-        LONG (SIZEOF(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
 #endif
         __zero_table_end__ = .;
     } > FLASH
@@ -407,6 +408,7 @@ VENEERS()
     .TFM_SP_META_PTR : ALIGN(32)
     {
         *(.bss.SP_META_PTR_SPRTL_INST)
+        . = ALIGN(32);
     } > RAM
     Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
@@ -593,18 +595,22 @@ VENEERS()
      * variable is treated like an initialized variable. To not waste memory
      * NOLOAD attribute used here. The whole section is zero initialized by
      * adding section information to .zero.table */
-    .PSA_PROXY_SHARED_MEMORY (NOLOAD) :
+    .PSA_PROXY_SHARED_MEMORY (NOLOAD) : ALIGN(4)
     {
         KEEP(*(PSA_PROXY_SHARED_MEMORY_SECTION))
+        .= ALIGN(4);
     } > PSA_PROXY_SHARED_MEMORY_RAM
 #endif
 
 #if defined (S_RAM_CODE_START)
     /* Code executed from RAM */
-    .TFM_RAM_CODE S_RAM_CODE_START :
+    .TFM_RAM_CODE S_RAM_CODE_START : ALIGN(4)
     {
         KEEP(*(.ramfunc))
+        . = ALIGN(4);
     } > RAM AT> FLASH
+
+    ASSERT(S_RAM_CODE_START % 4 == 0, "S_RAM_CODE_START must be divisible by 4")
 #endif
 
 #if VENEER_POS == 3

@@ -61,15 +61,15 @@ SECTIONS
         __copy_table_start__ = .;
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA))
+        LONG (SIZEOF(.TFM_DATA) / 4)
 
         LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
         LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA) / 4)
 
         LONG (LOADADDR(.TFM_APP_ROT_LINKER_DATA))
         LONG (ADDR(.TFM_APP_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA) / 4)
         __copy_table_end__ = .;
     } > FLASH
 
@@ -77,23 +77,23 @@ SECTIONS
     {
         __zero_table_start__ = .;
         LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS))
+        LONG (SIZEOF(.TFM_BSS) / 4)
 #if !defined(TFM_PSA_API)
         LONG (ADDR(.TFM_SECURE_STACK))
-        LONG (SIZEOF(.TFM_SECURE_STACK))
+        LONG (SIZEOF(.TFM_SECURE_STACK) / 4)
 #endif /* !defined(TFM_PSA_API) */
         LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
 
         LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS) / 4)
 #if defined(PSA_PROXY_SHARED_MEMORY_BASE)
         LONG (PSA_PROXY_SHARED_MEMORY_BASE)
-        LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
+        LONG (PSA_PROXY_SHARED_MEMORY_SIZE / 4)
 #endif
 #if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
-        LONG (SIZEOF(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
 #endif
         __zero_table_end__ = .;
     } > FLASH
@@ -184,10 +184,11 @@ SECTIONS
     .TFM_SP_META_PTR : ALIGN(32)
     {
         *(.bss.SP_META_PTR_SPRTL_INST)
+        . = ALIGN(32);
     } > RAM
     Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
-#endif 
+#endif
 
     .TFM_APP_ROT_LINKER_DATA : ALIGN(32)
     {
@@ -207,6 +208,9 @@ SECTIONS
         . += (. - start_of_TFM_APP_ROT_LINKER) ? 0 : 4;
         . = ALIGN(GTZC_RAM_ALIGN);
     } > RAM AT> RAM
+
+    ASSERT(GTZC_RAM_ALIGN % 4 == 0, "GTZC_RAM_ALIGN must be divisible by 4")
+
     Image$$TFM_APP_ROT_LINKER_DATA$$ZI$$Base = ADDR(.TFM_APP_ROT_LINKER_BSS);
     Image$$TFM_APP_ROT_LINKER_DATA$$ZI$$Limit = ADDR(.TFM_APP_ROT_LINKER_BSS) + SIZEOF(.TFM_APP_ROT_LINKER_BSS);
 
@@ -319,7 +323,7 @@ SECTIONS
     Image$$TFM_PSA_ROT_LINKER_DATA$$ZI$$Base = ADDR(.TFM_PSA_ROT_LINKER_BSS);
     Image$$TFM_PSA_ROT_LINKER_DATA$$ZI$$Limit = ADDR(.TFM_PSA_ROT_LINKER_BSS) + SIZEOF(.TFM_PSA_ROT_LINKER_BSS);
 
-      .TFM_DATA : ALIGN(4)
+    .TFM_DATA : ALIGN(4)
     {
         *(.data*)
 
@@ -442,9 +446,10 @@ SECTIONS
      * variable is treated like an initialized variable. To not waste memory
      * NOLOAD attribute used here. The whole section is zero initialized by
      * adding section information to .zero.table */
-    .PSA_PROXY_SHARED_MEMORY (NOLOAD) :
+    .PSA_PROXY_SHARED_MEMORY (NOLOAD) : ALIGN(4)
     {
         KEEP(*(PSA_PROXY_SHARED_MEMORY_SECTION))
+        . = ALIGN(4);
     } > PSA_PROXY_SHARED_MEMORY_RAM
 #endif
 

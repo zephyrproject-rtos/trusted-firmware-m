@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2018 ARM Limited
+; * Copyright (c) 2009-2022 ARM Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -92,10 +92,10 @@ SECTIONS
         __copy_table_start__ = .;
         LONG (__etext)
         LONG (__data_start__)
-        LONG (__data_end__ - __data_start__)
+        LONG ((__data_end__ - __data_start__) / 4)
         LONG (DEFINED(__etext2) ? __etext2 : 0)
         LONG (DEFINED(__data2_start__) ? __data2_start__ : 0)
-        LONG (DEFINED(__data2_start__) ? __data2_end__ - __data2_start__ : 0)
+        LONG (DEFINED(__data2_start__) ? ((__data2_end__ - __data2_start__) / 4) : 0)
         __copy_table_end__ = .;
     } > FLASH
 
@@ -107,13 +107,13 @@ SECTIONS
         . = ALIGN(4);
         __zero_table_start__ = .;
         LONG (__bss_start__)
-        LONG (__bss_end__ - __bss_start__)
+        LONG ((__bss_end__ - __bss_start__) / 4)
         LONG (DEFINED(__bss2_start__) ? __bss2_start__ : 0)
-        LONG (DEFINED(__bss2_start__) ? __bss2_end__ - __bss2_start__ : 0)
+        LONG (DEFINED(__bss2_start__) ? ((__bss2_end__ - __bss2_start__) / 4) : 0)
         __zero_table_end__ = .;
     } > FLASH
 
-    __etext = .;
+    __etext = ALIGN(4);
 
     .data : AT (__etext)
     {

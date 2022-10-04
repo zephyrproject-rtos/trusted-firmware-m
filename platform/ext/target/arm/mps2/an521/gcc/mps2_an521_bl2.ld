@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2017-2020 Arm Limited
+; * Copyright (c) 2017-2022 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -92,11 +92,11 @@ SECTIONS
 #ifdef CODE_SHARING
         LONG (LOADADDR(.tfm_shared_symbols))
         LONG (ADDR(.tfm_shared_symbols))
-        LONG (SIZEOF(.tfm_shared_symbols))
+        LONG (SIZEOF(.tfm_shared_symbols) / 4)
 #endif
         LONG (LOADADDR(.data))
         LONG (ADDR(.data))
-        LONG (SIZEOF(.data))
+        LONG (SIZEOF(.data) / 4)
         __copy_table_end__ = .;
     } > FLASH
 
@@ -108,7 +108,7 @@ SECTIONS
         . = ALIGN(4);
         __zero_table_start__ = .;
         LONG (ADDR(.bss))
-        LONG (SIZEOF(.bss))
+        LONG (SIZEOF(.bss) / 4)
         __zero_table_end__ = .;
     } > FLASH
 
@@ -117,7 +117,7 @@ SECTIONS
      * share the global variables. Section size must be equal with
      * SHARED_SYMBOL_AREA_SIZE defined in region_defs.h
      */
-    .tfm_shared_symbols :
+    .tfm_shared_symbols : ALIGN(4)
     {
         *(.data.mbedtls_calloc_func)
         *(.data.mbedtls_free_func)
@@ -125,6 +125,8 @@ SECTIONS
         *(.data.memset_func)
         . = ALIGN(SHARED_SYMBOL_AREA_SIZE);
     } > RAM AT > FLASH
+
+    ASSERT(SHARED_SYMBOL_AREA_SIZE % 4 == 0, "SHARED_SYMBOL_AREA_SIZE must be divisible by 4")
 #endif
 
     .tfm_bl2_shared_data :
