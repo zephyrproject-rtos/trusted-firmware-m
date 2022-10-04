@@ -314,6 +314,11 @@ enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *dat
     DriverCapabilities = OTP_NV_COUNTERS_FLASH_DEV.GetCapabilities();
     data_width = data_width_byte[DriverCapabilities.data_width];
 
+    if (end > TFM_OTP_NV_COUNTERS_AREA_SIZE) {
+        /* Erase is beyond the TFM_OTP_NV_COUNTERS_AREA */
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
     /* If it's not part of the sectors  that are being erased, first erase the
      * sector with the is_valid flag.
      */
