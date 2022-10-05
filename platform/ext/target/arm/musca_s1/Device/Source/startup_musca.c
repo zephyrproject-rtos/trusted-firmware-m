@@ -28,6 +28,9 @@
  *----------------------------------------------------------------------------*/
 extern uint32_t __INITIAL_SP;
 extern uint32_t __STACK_LIMIT;
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+extern uint32_t __STACK_SEAL;
+#endif
 
 extern void __PROGRAM_START(void) __NO_RETURN;
 
@@ -258,6 +261,10 @@ void Reset_Handler(void)
 
     __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
     __set_PSPLIM((uint32_t)(&__STACK_LIMIT));
+
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+    __TZ_set_STACKSEAL_S((uint32_t *)(&__STACK_SEAL));
+#endif
 
     SystemInit();                             /* CMSIS System Initialization */
     __PROGRAM_START();                        /* Enter PreMain (C library entry point) */

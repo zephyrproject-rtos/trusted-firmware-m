@@ -127,16 +127,9 @@ __STATIC_INLINE uintptr_t arch_seal_thread_stack(uintptr_t stk)
 }
 
 /**
- * \brief Secure the MSP
- *
- * \param[in] msplim        MSP limit value to be written.
+ * \brief Check MSP sealing.
  */
-__STATIC_INLINE void tfm_arch_init_secure_msp(uint32_t msplim)
+__STATIC_INLINE void tfm_arch_check_msp_sealing(void)
 {
-    /*
-     * Defined as an empty function now.
-     * The MSP limit value can be used in more strict memory check.
-     */
-    (void)msplim;
 }
 #endif /* __TFM_ARCH_V6M_V7M_H__ */

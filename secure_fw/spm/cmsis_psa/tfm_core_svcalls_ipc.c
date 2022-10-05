@@ -164,6 +164,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
     switch (svc_number) {
     case TFM_SVC_SPM_INIT:
         exc_return = tfm_spm_init();
+        tfm_arch_check_msp_sealing();
         /* The following call does not return */
         tfm_arch_free_msp_and_exc_ret(
             (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit),
@@ -192,7 +193,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
     default:
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
         if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
-                                     - (uint32_t)msp) > TFM_STACK_SEALED_SIZE) {
+                                     - (uint32_t)msp) > 0) {
             /* The Main Stack has contents, not calling from Partition thread */
             tfm_core_panic();
         }

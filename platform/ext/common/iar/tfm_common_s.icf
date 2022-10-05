@@ -120,9 +120,11 @@ define block TFM_SECURE_DATA_START with size = 0 { };
      (defined(__ARM8EM_MAINLINE__) && (__CORE__ == __ARM8EM_MAINLINE__)))
     /* Shared area between BL2 and runtime to exchange data */
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
-define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE { };
+define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE - 0x8 { };
 define overlay STACK_DATA {block TFM_SHARED_DATA};
 define overlay STACK_DATA {block ARM_LIB_STACK};
+
+define block STACKSEAL with size = 0x8 { };
 
 keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 #endif /* (defined(__ARM8M_MAINLINE__) && (__CORE__ == __ARM8M_MAINLINE__)) || \
@@ -308,6 +310,7 @@ define block DATA with fixed order {
      (defined(__ARM8EM_MAINLINE__) && (__CORE__ == __ARM8EM_MAINLINE__)))
     /* Shared area between BL2 and runtime to exchange data */
     overlay STACK_DATA,
+    block STACKSEAL,
 #endif /* (defined(__ARM8M_MAINLINE__) && (__CORE__ == __ARM8M_MAINLINE__)) || \
         * (defined(__ARM8M_BASELINE__) && (__CORE__ == __ARM8M_BASELINE__)) || \
         * (defined(__ARM8EM_MAINLINE__) && (__CORE__ == __ARM8EM_MAINLINE__)) */

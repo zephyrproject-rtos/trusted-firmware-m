@@ -254,10 +254,16 @@ SECTIONS
 
     .msp_stack : ALIGN(32)
     {
-        . += __msp_stack_size__;
+        . += __msp_stack_size__ - 0x8;
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+
+    .msp_stack_seal_res :
+    {
+        . += 0x8;
+    } > RAM
+    __StackSeal = ADDR(.msp_stack_seal_res);
 
 #endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) || \
         * defined(__ARM_ARCH_8_1M_MAIN__) */

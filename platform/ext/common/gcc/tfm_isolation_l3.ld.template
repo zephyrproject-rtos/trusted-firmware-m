@@ -277,10 +277,16 @@ SECTIONS
 
     .msp_stack : ALIGN(32)
     {
-        . += __msp_stack_size__;
+        . += __msp_stack_size__ - 0x8;
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+
+    .msp_stack_seal_res :
+    {
+        . += 0x8;
+    } > RAM
+    __StackSeal = ADDR(.msp_stack_seal_res);
 
 #if defined(ENABLE_HEAP)
     __heap_size__ = S_HEAP_SIZE;

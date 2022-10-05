@@ -60,6 +60,8 @@
 /* Enable NS exceptions by setting NS PRIMASK to 0 */
 #define TFM_NS_EXC_ENABLE()     __TZ_set_PRIMASK_NS(0)
 
+extern uint32_t __STACK_SEAL;
+
 /**
  * \brief Check whether Secure or Non-secure stack is used to restore stack
  *        frame on exception return.
@@ -131,30 +133,16 @@ __STATIC_INLINE uintptr_t arch_seal_thread_stack(uintptr_t stk)
 }
 
 /**
- * \brief Set MSPLIM register and seal the MSP.
+ * \brief Check MSP sealing.
  *
- * This function assumes that the caller is using PSP when calling this
- * function.
+ * Sealing must be done in the Reset_Handler() on a 8 byte region
+ * (__STACK_SEAL) defined in the linker scripts.
+ * (It is a CMSIS recommendation)
  *
- * \param[in] msplim        Register value to be written into MSPLIM.
  */
-__STATIC_INLINE void tfm_arch_init_secure_msp(uint32_t msplim)
+__STATIC_INLINE void tfm_arch_check_msp_sealing(void)
 {
-    uint32_t mstk_adr = __get_MSP();
-
-    /*
-     * Seal the main stack and update MSP to point below the stack seal.
-     * Set MSPLIM. As the initial 'main()' code is running under privileged PSP
-     * manipulating MSP works here.
-     */
-    SPM_ASSERT((mstk_adr & 0x7) == 0);
-    mstk_adr -= TFM_STACK_SEALED_SIZE;
-
-    *((uint32_t *)mstk_adr)       = TFM_STACK_SEAL_VALUE;
-    *((uint32_t *)(mstk_adr + 4)) = TFM_STACK_SEAL_VALUE;
-
-    __set_MSP(mstk_adr);
-    __set_MSPLIM(msplim);
+    SPM_ASSERT(*(uint64_t *)(&__STACK_SEAL) == __TZ_STACK_SEAL_VALUE);
 }
 
 #endif

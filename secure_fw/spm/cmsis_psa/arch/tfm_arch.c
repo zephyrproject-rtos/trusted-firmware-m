@@ -29,10 +29,6 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
         "bl      tfm_arch_clear_fp_data         \n"
 #endif
         "mov     sp, r4                         \n"
-        /* Seal Main Stack before using */
-        "ldr     r2, ="M2S(STACK_SEAL_PATTERN)" \n"
-        "ldr     r3, ="M2S(STACK_SEAL_PATTERN)" \n"
-        "push    {r2, r3}                       \n"
         "bx      r5                             \n"
     );
 }

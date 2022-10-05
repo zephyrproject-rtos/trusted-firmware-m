@@ -10,6 +10,7 @@
 
 #include <inttypes.h>
 #include "compiler_ext_defs.h"
+#include "security_defs.h"
 #include "spm_ipc.h"
 #include "svc_num.h"
 #include "tfm_hal_device_header.h"
@@ -169,7 +170,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "MOV     r6, r10                        \n"
     "MOV     r7, r11                        \n"
     "PUSH    {r4-r7}                        \n"
-    "LDR     r4, =0xFEF5EDA5                \n" /* clear r4-r11 */
+    "LDR     r4, ="M2S(STACK_SEAL_PATTERN)" \n" /* clear r4-r11 */
     "MOV     r5, r4                         \n"
     "MOV     r6, r4                         \n"
     "MOV     r7, r4                         \n"
