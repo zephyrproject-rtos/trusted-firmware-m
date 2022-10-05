@@ -15,8 +15,6 @@ add_library(tfm_spm_defs INTERFACE)
 add_library(tfm_boot_status INTERFACE)
 add_library(tfm_arch INTERFACE)
 
-set(TFM_PARTITION_PLATFORM ON CACHE BOOL "Enable the TF-M Platform partition")
-
 # Generate TF-M version
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/tfm_version.h.in
                ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include/tfm_version.h)
