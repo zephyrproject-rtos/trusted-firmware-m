@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2019 ARM Limited. All rights reserved.
+; * Copyright (c) 2009-2022 ARM Limited. All rights reserved.
 ; * Copyright (c) 2019-2020, Cypress Semiconductor Corporation. All rights reserved.
 ; * Copyright (c) 2020-2021 IAR Systems AB
 ; *
@@ -30,7 +30,7 @@ CY_CPU_VTOR_ADDR EQU    0xE000ED08
 ; Vector Table Mapped to Address 0 at Reset
 
                 ;; Forward declaration of sections.
-                SECTION  ARM_LIB_STACK:DATA:NOROOT(3)
+                SECTION  CSTACK:DATA:NOROOT(3)
 
                 SECTION  .intvec:CODE:NOROOT(2)
 
@@ -47,7 +47,7 @@ CY_CPU_VTOR_ADDR EQU    0xE000ED08
                 DATA
 
 __vector_table
-                DCD     sfe(ARM_LIB_STACK)        ; Top of Stack
+                DCD     sfe(CSTACK)               ; Top of Stack
                 DCD     Reset_Handler             ; Reset Handler
                 DCD     NMI_Handler               ; NMI Handler
                 DCD     HardFault_Handler         ; Hard Fault Handler

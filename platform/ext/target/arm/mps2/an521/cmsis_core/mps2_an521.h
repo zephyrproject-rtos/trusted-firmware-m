@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 ARM Limited
+ * Copyright (c) 2016-2022 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@
 
 #include "platform_irq.h"         /* Platform IRQ numbers */
 
-#include "cmsis_cpu.h"                 /* Processor and core peripherals */
-#include "system_cmsdk_mps2_an521.h"   /* System Header */
+#include "cmsis_cpu.h"            /* Processor and core peripherals */
+#include "system_core_init.h"     /* System Header */
 
 #include "platform_regs.h"        /* Platform registers */
 #include "platform_retarget.h"    /* Peripherals base addresses */

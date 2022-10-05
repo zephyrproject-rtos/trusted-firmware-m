@@ -25,9 +25,7 @@ target_link_libraries(platform_region_defs
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/armclang/startup_cmsdk_mps2_an521_s.s>
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_cmsdk_mps2_an521_s.S>
-    $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/iar/startup_cmsdk_mps2_an521_s.s>
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/startup_an521.c
 )
 
 # Use a common scatter file for Isolation L1 and L2, a dedicated one for Isolation L3
@@ -44,9 +42,7 @@ target_add_scatter_file(tfm_s
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/armclang/startup_cmsdk_mps2_an521_ns.s>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_cmsdk_mps2_an521_ns.S>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/iar/startup_cmsdk_mps2_an521_ns.s>
+         ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/startup_an521.c
     )
     target_add_scatter_file(tfm_ns
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/armclang/mps2_an521_ns.sct>
@@ -73,9 +69,7 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/armclang/startup_cmsdk_mps2_an521_bl2.s>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_cmsdk_mps2_an521_bl2.S>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/iar/startup_cmsdk_mps2_an521_bl2.s>
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/startup_an521.c
     )
     target_add_scatter_file(bl2
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/armclang/mps2_an521_bl2.sct>
@@ -108,7 +102,7 @@ target_sources(platform_s
         cmsis_drivers/Driver_PPC.c
         cmsis_drivers/Driver_USART.c
         retarget/platform_retarget_dev.c
-        cmsis_core/system_cmsdk_mps2_an521.c
+        cmsis_core/system_core_init.c
         native_drivers/mpc_sie200_drv.c
         native_drivers/mpu_armv8m_drv.c
         native_drivers/ppc_sse200_drv.c
@@ -145,7 +139,7 @@ target_sources(platform_ns
         native_drivers/timer_cmsdk/timer_cmsdk.c
         cmsis_drivers/Driver_USART.c
         retarget/platform_retarget_dev.c
-        cmsis_core/system_cmsdk_mps2_an521.c
+        cmsis_core/system_core_init.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
     INTERFACE
         $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/an521_ns_init.c>
@@ -168,7 +162,7 @@ if(BL2)
     target_sources(platform_bl2
         PRIVATE
             retarget/platform_retarget_dev.c
-            cmsis_core/system_cmsdk_mps2_an521.c
+            cmsis_core/system_core_init.c
             cmsis_drivers/Driver_Flash.c
             native_drivers/arm_uart_drv.c
             cmsis_drivers/Driver_USART.c

@@ -32,7 +32,7 @@
     .align 2
     .globl    __Vectors
 __Vectors:
-    .long    Image$$ARM_LIB_STACK$$ZI$$Limit /* Top of Stack */
+    .long    __StackTop            /* Top of Stack */
     .long    Reset_Handler         /* Reset Handler */
     .long    NMI_Handler           /* NMI Handler */
     .long    HardFault_Handler     /* Hard Fault Handler */

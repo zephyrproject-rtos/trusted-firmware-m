@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,10 +22,6 @@
  */
 
 #include "stm32u5xx.h"
-/*----------------------------------------------------------------------------
-  Exception / Interrupt Handler Function Prototype
- *----------------------------------------------------------------------------*/
-typedef void( *pFunc )( void );
 
 /*----------------------------------------------------------------------------
   External References
@@ -34,7 +30,6 @@ extern uint32_t __INITIAL_SP;
 extern uint32_t __STACK_LIMIT;
 
 extern void __PROGRAM_START(void) __NO_RETURN;
-
 
 /*----------------------------------------------------------------------------
   Internal References
@@ -45,8 +40,8 @@ void Reset_Handler  (void) __NO_RETURN;
   Exception / Interrupt Handler
  *----------------------------------------------------------------------------*/
 #define DEFAULT_IRQ_HANDLER(handler_name)  \
-void handler_name(void); \
-__WEAK void handler_name(void) { \
+void __WEAK handler_name(void) __NO_RETURN; \
+void handler_name(void) { \
     while(1); \
 }
 
@@ -207,9 +202,9 @@ DEFAULT_IRQ_HANDLER(FMAC_IRQHandler)
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-extern const pFunc __VECTOR_TABLE[];
-       const pFunc __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
-  (pFunc)(&__INITIAL_SP),           /*      Initial Stack Pointer */
+extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
+       const VECTOR_TABLE_Type __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
+  (VECTOR_TABLE_Type)(&__INITIAL_SP),/*      Initial Stack Pointer */
   Reset_Handler,                    /*      Reset Handler */
   NMI_Handler,                      /* -14: NMI Handler */
   HardFault_Handler,                /* -13: Hard Fault Handler */
@@ -377,19 +372,20 @@ extern const pFunc __VECTOR_TABLE[];
  *----------------------------------------------------------------------------*/
 void Reset_Handler(void)
 {
+    __set_PSP((uint32_t)(&__INITIAL_SP));
+
+    __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
+    __set_PSPLIM((uint32_t)(&__STACK_LIMIT));
+
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   __IO uint32_t tmp;
 
-#endif
-#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
   /* disable IRQ is removed */
   /*__disable_irq();*/
   /* Tamp IRQ prio is set to highest , and IRQ is enabled */
   NVIC_SetPriority(TAMP_IRQn, 0);
   NVIC_EnableIRQ(TAMP_IRQn);
-#endif
-  __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
-#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+
   SCB->VTOR = (uint32_t) &__VECTOR_TABLE[0];
   /* Lock Secure Vector Table */
   /* Enable SYSCFG interface clock */

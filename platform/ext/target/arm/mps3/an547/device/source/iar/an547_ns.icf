@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited
+ * Copyright (c) 2020-2022 Arm Limited
  * Copyright (c) 2021 IAR Systems AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,12 +30,10 @@ define block LR_CODE with fixed order {block ER_CODE};
 place at address NS_CODE_START {block LR_CODE};
 
 define block ER_DATA	        with alignment = 8 {readwrite};
-define block ARM_LIB_STACK_MSP  with alignment = 32, size = NS_MSP_STACK_SIZE { };
-define block ARM_LIB_STACK      with alignment = 32, size = NS_PSP_STACK_SIZE { };
+define block CSTACK             with alignment = 32, size = NS_STACK_SIZE { };
 define block HEAP               with alignment = 8, size = NS_HEAP_SIZE { };
 define block ARM_LIB_HEAP       {block HEAP};
-keep {block ARM_LIB_STACK_MSP, block ARM_LIB_STACK,
-      block HEAP, block ARM_LIB_HEAP};
+keep {block CSTACK, block HEAP, block ARM_LIB_HEAP};
 
 do not initialize  { section .noinit };
 initialize by copy { readwrite };
@@ -47,8 +45,7 @@ if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 
 define block DATA with fixed order, maximum size = NS_DATA_SIZE  {
        block ER_DATA,
-       block ARM_LIB_STACK_MSP,
-       block ARM_LIB_STACK,
+       block CSTACK,
        block ARM_LIB_HEAP
 };
 place at address NS_DATA_START {block DATA};

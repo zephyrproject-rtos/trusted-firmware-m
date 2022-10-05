@@ -266,15 +266,6 @@ startup files:
     files. The reset handler should call SystemInit and then should end up
     calling __START which should be defined as _start if not defined elsewhere.
 
-.. Note::
-
-   The startup files for the Secure and None-secure world and for the current
-   supported toolchains (GNUARM, ARMClang and IAR) must switch to the PSP stack
-   before calling start.
-
-   The startup file for BL2, when using the provided BL2 (MCUboot), must stay on
-   MSP.
-
 .. _flash_layout.h:
 
 flash_layout.h:
@@ -362,9 +353,7 @@ region_defs.h:
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |NS_HEAP_SIZE                      | Size of the Non-Secure (NS) world Heap                            | if tfm_ns is built                            |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
-    |NS_MSP_STACK_SIZE                 | Size of the Non-Secure (NS) world Main stack                      | if tfm_ns is built                            |
-    +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
-    |NS_PSP_STACK_SIZE                 | Size of the Non-Secure (NS) world Process stack                   | if tfm_ns is built                            |
+    |NS_STACK_SIZE                     | Size of the Non-Secure (NS) world stack                           | if tfm_ns is built                            |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE | Size of the buffer that will store the initial attestation        | used by initial attestation partition         |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+

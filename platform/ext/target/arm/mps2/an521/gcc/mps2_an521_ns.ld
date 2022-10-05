@@ -29,8 +29,7 @@ MEMORY
 }
 
 __heap_size__  = NS_HEAP_SIZE;
-__psp_stack_size__ = NS_PSP_STACK_SIZE;
-__msp_stack_size__ = NS_MSP_STACK_SIZE;
+__stack_size__ = NS_STACK_SIZE;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a)
@@ -161,19 +160,12 @@ SECTIONS
 
     bss_size = __bss_end__ - __bss_start__;
 
-    .msp_stack : ALIGN(32)
+    .stack : ALIGN(32)
     {
-        . += __msp_stack_size__;
+        . += __stack_size__;
     } > RAM
-    Image$$ARM_LIB_STACK_MSP$$ZI$$Base = ADDR(.msp_stack);
-    Image$$ARM_LIB_STACK_MSP$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
-
-    .psp_stack : ALIGN(32)
-    {
-        . += __psp_stack_size__;
-    } > RAM
-    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
+    __StackLimit = ADDR(.stack);
+    __StackTop = ADDR(.stack) + SIZEOF(.stack);
 
     .heap : ALIGN(8)
     {
@@ -185,5 +177,5 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
 
-    PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
+    PROVIDE(__stack = __StackTop);
 }

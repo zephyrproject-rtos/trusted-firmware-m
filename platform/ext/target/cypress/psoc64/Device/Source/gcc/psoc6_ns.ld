@@ -27,7 +27,7 @@ ENTRY(Reset_Handler)
 #include "region_defs.h"
 
 __heap_size__  = NS_HEAP_SIZE;
-__msp_stack_size__ = NS_MSP_STACK_SIZE;
+__stack_size__ = NS_STACK_SIZE;
 
 /* Force symbol to be entered in the output file as an undefined symbol. Doing
 * this may, for example, trigger linking of additional modules from standard
@@ -285,13 +285,14 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > ram
 
-    .msp_stack : ALIGN(32)
+    .stack : ALIGN(32)
     {
-        . += __msp_stack_size__;
+        . += __stack_size__;
     } > ram
-    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
+    __StackLimit = ADDR(.stack);
+    __StackTop = ADDR(.stack) + SIZEOF(.stack);
 
-    PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
+    PROVIDE(__stack = __StackTop);
 
     Image$$ER_TFM_DATA$$RW$$Base = ADDR(.data);
     Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.data) + SIZEOF(.data);

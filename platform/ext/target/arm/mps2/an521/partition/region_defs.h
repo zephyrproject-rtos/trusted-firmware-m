@@ -34,8 +34,7 @@
 #define S_PSP_STACK_SIZE        (0x0000800)
 
 #define NS_HEAP_SIZE            (0x0001000)
-#define NS_MSP_STACK_SIZE       (0x00000A0)
-#define NS_PSP_STACK_SIZE       (0x0000140)
+#define NS_STACK_SIZE           (0x00001E0)
 
 /* This size of buffer is big enough to store an attestation
  * token produced by initial attestation service

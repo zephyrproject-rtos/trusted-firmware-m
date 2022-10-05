@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * This file is derivative of CMSIS V5.01 \Device\ARM\ARMCM0plus\Include\system_ARMCM0plus.h
- * Git SHA: 8a1d9d6ee18b143ae5befefa14d89fb5b3f99c75
- *
+ */
+
+/*
+ * This file is derivative of CMSIS V5.9.0 system_ARMCM0plus.h
+ * Git SHA: 2b7495b8535bdcb306dac29b9ded4cfb679d7e5c
  */
 
 #ifndef __SYSTEM_CORE_INIT_H__
@@ -31,19 +32,19 @@ extern uint32_t SystemCoreClock;     /*!< System Clock Frequency (Core Clock) */
 extern uint32_t PeripheralClock;     /*!< Peripheral Clock Frequency */
 
 /**
-  \brief Setup the microcontroller system.
+  \brief Exception / Interrupt Handler Function Prototype
+*/
+typedef void(*VECTOR_TABLE_Type)(void);
 
+/**
+  \brief Setup the microcontroller system.
    Initialize the System and update the SystemCoreClock variable.
-   It should be called from Reset Handler within the first few steps.
-   The minimal feature set should be initialised for successful exit
-   from Reset Handler to main entry point.
  */
 extern void SystemInit (void);
 
 
 /**
   \brief  Update SystemCoreClock variable.
-
    Updates the SystemCoreClock with current core Clock retrieved from cpu registers.
  */
 extern void SystemCoreClockUpdate (void);

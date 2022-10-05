@@ -30,7 +30,7 @@ endif()
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_corstone310_s.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_corstone310.c
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -40,7 +40,7 @@ target_add_scatter_file(tfm_s
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_corstone310_ns.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_corstone310.c
     )
     if(DEFAULT_NS_SCATTER)
         target_add_scatter_file(tfm_ns
@@ -57,7 +57,7 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_corstone310_bl2.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_corstone310.c
     )
     target_add_scatter_file(bl2
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/corstone310_bl2.sct>

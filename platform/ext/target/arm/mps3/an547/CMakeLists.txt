@@ -26,7 +26,7 @@ endif()
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547_s.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547.c
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -37,7 +37,7 @@ target_add_scatter_file(tfm_s
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547_ns.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547.c
     )
     target_add_scatter_file(tfm_ns
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an547_ns.sct>
@@ -55,7 +55,7 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547_bl2.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547.c
     )
     target_add_scatter_file(bl2
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an547_bl2.sct>

@@ -33,6 +33,22 @@ set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 add_subdirectory(ext/target/${TFM_PLATFORM} target)
 
+#====================== CMSIS stack override interface ========================#
+
+# NS linker scripts using the default CMSIS style naming conventions, while the
+# secure and bl2 linker scripts remain untouched (region.h compatibility).
+# To be compatible with the untouched files (which using ARMCLANG naming style),
+# we have to override __INITIAL_SP and __STACK_LIMIT labels.
+
+add_library(cmsis_stack_override INTERFACE)
+target_compile_definitions(cmsis_stack_override
+    INTERFACE
+        $<$<C_COMPILER_ID:GNU>:__INITIAL_SP=Image$$ARM_LIB_STACK$$ZI$$Limit>
+        $<$<C_COMPILER_ID:GNU>:__STACK_LIMIT=Image$$ARM_LIB_STACK$$ZI$$Base>
+        $<$<C_COMPILER_ID:IAR>:__INITIAL_SP=ARM_LIB_STACK$$Limit>
+        $<$<C_COMPILER_ID:IAR>:__STACK_LIMIT=ARM_LIB_STACK$$Base>
+)
+
 #========================= Platform Common interface ==========================#
 
 target_include_directories(platform_common_interface
@@ -84,6 +100,7 @@ target_link_libraries(platform_s
         platform_common_interface
         platform_region_defs
         tfm_fih_headers
+        cmsis_stack_override
     PRIVATE
         psa_interface
         tfm_partition_defs
@@ -181,6 +198,7 @@ if(BL2)
         PUBLIC
             platform_common_interface
             platform_region_defs
+            cmsis_stack_override
         PRIVATE
             bl2_hal
             mcuboot_config
@@ -219,6 +237,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
         INTERFACE
             platform_region_defs
             platform_common_interface
+            cmsis_stack_override
     )
 
     target_compile_definitions(platform_bl1_interface

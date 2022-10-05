@@ -23,7 +23,7 @@ target_include_directories(platform_region_defs
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss_s.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss.c
 )
 target_add_scatter_file(tfm_s
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -33,7 +33,7 @@ target_add_scatter_file(tfm_s
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss_ns.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss.c
     )
     target_add_scatter_file(tfm_ns
             $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/rss_ns.sct>
@@ -47,7 +47,7 @@ endif()
 
 target_sources(bl2
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss_bl2.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss.c
 )
 target_add_scatter_file(bl2
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/rss_bl2.sct>
@@ -60,7 +60,7 @@ target_compile_definitions(bootutil
 
 target_sources(bl1_1
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss_bl2.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss.c
 )
 target_add_scatter_file(bl1_1
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/rss_bl1_1.sct>
@@ -69,7 +69,7 @@ target_add_scatter_file(bl1_1
 
 target_sources(bl1_2
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss_bl2.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_rss.c
 )
 target_add_scatter_file(bl1_2
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/rss_bl1_2.sct>

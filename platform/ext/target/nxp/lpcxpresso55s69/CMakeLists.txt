@@ -39,8 +39,7 @@ target_include_directories(platform_region_defs
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/startup_LPC55S69_cm33_core0_s.S>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_LPC55S69_cm33_core0_s.s>
+        ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_lpcxpresso55s69.c
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
@@ -50,8 +49,7 @@ target_add_scatter_file(tfm_s
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/startup_LPC55S69_cm33_core0_ns.S>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_LPC55S69_cm33_core0_ns.s>
+            ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_lpcxpresso55s69.c
     )
     target_add_scatter_file(tfm_ns
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/LPC55S69_cm33_core0_ns.ld>
@@ -66,7 +64,7 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/startup_LPC55S69_cm33_core0_bl2.S>
+            ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_lpcxpresso55s69.c
     )
     target_add_scatter_file(bl2
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/LPC55S69_cm33_core0_bl2.ld>

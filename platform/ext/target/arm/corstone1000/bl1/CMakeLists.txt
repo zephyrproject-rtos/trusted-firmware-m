@@ -39,6 +39,7 @@ target_link_libraries(bl1
     PRIVATE
         bl1_main
         bl2_mbedcrypto
+        cmsis_stack_override
 )
 
 # add_convert_to_bin_target(bl1) requires at least one source file added to bl1. This sources will
@@ -46,13 +47,14 @@ target_link_libraries(bl1
 # added here, as those not use this image number macro.
 target_sources(bl1
     PRIVATE
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/../Device/Source/gcc/startup_corstone1000_bl.S>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/../Device/Source/startup_corstone1000.c>
 )
 
 # Needed for the GCC startup files
 target_include_directories(bl1
     PRIVATE
         ${CMAKE_SOURCE_DIR}/platform/include
+        ../Device/Include
 )
 
 # target_add_scatter_file(bl1) cannot be used as it would add the platform_region_defs dependency

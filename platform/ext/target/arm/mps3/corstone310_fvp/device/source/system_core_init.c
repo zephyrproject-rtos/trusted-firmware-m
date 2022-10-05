@@ -17,8 +17,8 @@
  */
 
 /*
- * This file is derivative of CMSIS system_ARMCM85.c
- * Git SHA: 61ad1303bc50450130cfb540caa384875a260b91
+ * This file is derivative of CMSIS V5.9.0 system_ARMCM85.c
+ * Git SHA: 2b7495b8535bdcb306dac29b9ded4cfb679d7e5c
  */
 
 #include "cmsis.h"
@@ -88,4 +88,7 @@ void SystemInit (void)
 
     __DSB();
     __ISB();
+
+    SystemCoreClock = SYSTEM_CLOCK;
+    PeripheralClock = PERIPHERAL_CLOCK;
 }
