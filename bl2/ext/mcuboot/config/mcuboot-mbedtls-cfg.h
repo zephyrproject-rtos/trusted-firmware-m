@@ -28,13 +28,29 @@
  */
 
 /*
- * Minimal configuration for using TLS in the bootloader
+ * Minimal configuration for using mbed TLS in the bootloader
  *
  * - RSA signature verification
+ * - Optionally, enable support for PSA Crypto APIs
  */
 
 #ifndef __MCUBOOT_MBEDTLS_CFG__
 #define __MCUBOOT_MBEDTLS_CFG__
+
+#if defined(MCUBOOT_USE_PSA_CRYPTO)
+/* Enable PSA Crypto Core without support for the permanent storage
+ * Don't define MBEDTLS_PSA_CRYPTO_STORAGE_C to make sure that support
+ * for permanent keys is not enabled, as it is not available during boot
+ */
+#define MBEDTLS_PSA_CRYPTO_C
+#define MBEDTLS_PK_PARSE_C
+#define MBEDTLS_PK_WRITE_C
+#define MBEDTLS_PK_C
+#define MBEDTLS_CTR_DRBG_C
+#define MBEDTLS_CIPHER_C
+#define MBEDTLS_ENTROPY_C
+#define MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
+#endif /* MCUBOOT_USE_PSA_CRYPTO */
 
 /* System support */
 #define MBEDTLS_PLATFORM_C
@@ -73,7 +89,9 @@
 #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
 
 #ifdef CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING
+#ifndef MBEDTLS_CIPHER_C
 #define MBEDTLS_CIPHER_C
+#endif
 #define MBEDTLS_CCM_C
 #define MBEDTLS_ECDSA_C
 #define MBEDTLS_ECP_C
