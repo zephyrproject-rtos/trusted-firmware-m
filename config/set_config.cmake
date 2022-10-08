@@ -15,6 +15,11 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "MinSizeRel" CACHE STRING "Build type: [Debug, Release, RelWithDebInfo, MinSizeRel]" FORCE)
 endif()
 
+if (TFM_LIB_MODEL)
+    message(FATAL_ERROR "Library Model is deprecated, please DO NOT use TFM_LIB_MODEL anymore."
+                        "SFN model is a replacement for Library Model. You can use -DCONFIG_TFM_SPM_BACKEND=SFN to select SFN model.")
+endif()
+
 # Load extra config
 if (TFM_EXTRA_CONFIG_PATH)
     include(${TFM_EXTRA_CONFIG_PATH})
@@ -56,9 +61,7 @@ endif()
 include(${CMAKE_SOURCE_DIR}/config/tfm_build_log_config.cmake)
 
 # Load TF-M model specific default config
-if (TFM_LIB_MODEL)
-    include(config/tfm_library_config_default.cmake)
-elseif (CONFIG_TFM_SPM_BACKEND STREQUAL "SFN")
+if (CONFIG_TFM_SPM_BACKEND STREQUAL "SFN")
     include(config/tfm_sfn_config_default.cmake)
 else() #The default backend is IPC
     include(config/tfm_ipc_config_default.cmake)

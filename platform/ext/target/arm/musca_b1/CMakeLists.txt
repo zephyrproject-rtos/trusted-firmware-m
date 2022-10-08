@@ -191,6 +191,5 @@ target_sources(tfm_spm
         tfm_hal_isolation.c
         tfm_hal_platform.c
         faults.c
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/spm_hal.c>
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
 )

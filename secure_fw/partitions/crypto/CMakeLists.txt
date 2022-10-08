@@ -48,13 +48,11 @@ target_sources(tfm_psa_rot_partition_crypto
 # The generated sources
 target_sources(tfm_psa_rot_partition_crypto
     PRIVATE
-        $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto/auto_generated/intermedia_tfm_crypto.c>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto/auto_generated/intermedia_tfm_crypto.c
 )
 target_sources(tfm_partitions
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto/auto_generated/load_info_tfm_crypto.c>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/crypto/auto_generated/load_info_tfm_crypto.c
 )
 
 # Set include directory
@@ -84,7 +82,7 @@ target_compile_definitions(tfm_psa_rot_partition_crypto
     PRIVATE
         $<$<BOOL:${CRYPTO_ENGINE_BUF_SIZE}>:TFM_CRYPTO_ENGINE_BUF_SIZE=${CRYPTO_ENGINE_BUF_SIZE}>
         $<$<BOOL:${CRYPTO_CONC_OPER_NUM}>:TFM_CRYPTO_CONC_OPER_NUM=${CRYPTO_CONC_OPER_NUM}>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<BOOL:${CRYPTO_IOVEC_BUFFER_SIZE}>>:TFM_CRYPTO_IOVEC_BUFFER_SIZE=${CRYPTO_IOVEC_BUFFER_SIZE}>
+        $<$<BOOL:${CRYPTO_IOVEC_BUFFER_SIZE}>:TFM_CRYPTO_IOVEC_BUFFER_SIZE=${CRYPTO_IOVEC_BUFFER_SIZE}>
         $<$<BOOL:${CRYPTO_SINGLE_PART_FUNCS_DISABLED}>:CRYPTO_SINGLE_PART_FUNCS_DISABLED>
 )
 

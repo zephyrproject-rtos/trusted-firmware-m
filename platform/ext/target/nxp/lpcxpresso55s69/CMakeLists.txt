@@ -271,5 +271,4 @@ target_sources(tfm_spm
         ../common/faults.c
         ../common/tfm_hal_isolation.c
         ../common/tfm_hal_platform.c
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/../common/spm_hal.c>
 )

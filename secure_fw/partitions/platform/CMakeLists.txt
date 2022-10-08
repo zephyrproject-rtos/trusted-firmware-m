@@ -19,13 +19,11 @@ add_library(tfm_psa_rot_partition_platform STATIC
 # The generated sources
 target_sources(tfm_psa_rot_partition_platform
     PRIVATE
-        $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/platform/auto_generated/intermedia_tfm_platform.c>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/platform/auto_generated/intermedia_tfm_platform.c
 )
 target_sources(tfm_partitions
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/platform/auto_generated/load_info_tfm_platform.c>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/platform/auto_generated/load_info_tfm_platform.c
 )
 
 # Set include directory

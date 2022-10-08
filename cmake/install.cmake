@@ -44,12 +44,10 @@ install(FILES       ${INTERFACE_INC_DIR}/tfm_ns_client_ext.h
 install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/config_impl.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
-if (TFM_PSA_API)
-    install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_pack.h
-            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
-    install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
-            DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
-endif()
+install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_pack.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
 
 if (TFM_PARTITION_NS_AGENT_MAILBOX)
     install(FILES       ${INTERFACE_INC_DIR}/multi_core/tfm_multi_core_api.h
@@ -58,11 +56,6 @@ if (TFM_PARTITION_NS_AGENT_MAILBOX)
                         ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox_test.h
                         ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_mailbox_config.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
-endif()
-
-if (NOT TFM_PSA_API)
-    install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_veneers.h
-            DESTINATION ${INSTALL_INTERFACE_INC_DIR}/tfm/veneers)
 endif()
 
 if (TFM_PARTITION_PROTECTED_STORAGE)
@@ -147,43 +140,23 @@ if (CONFIG_TFM_USE_TRUSTZONE)
 endif()
 
 if (TFM_PARTITION_PROTECTED_STORAGE)
-    if (TFM_PSA_API)
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_ipc_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    else()
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_func_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    endif()
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_ipc_api.c
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-    if (TFM_PSA_API)
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_its_ipc_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    else()
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_its_func_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    endif()
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_its_ipc_api.c
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if (TFM_PARTITION_CRYPTO)
-    if (TFM_PSA_API)
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_ipc_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    else()
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_func_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    endif()
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_ipc_api.c
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if (TFM_PARTITION_INITIAL_ATTESTATION)
-    if (TFM_PSA_API)
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_initial_attestation_ipc_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    else()
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_initial_attestation_func_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    endif()
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_initial_attestation_ipc_api.c
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if(TFM_PARTITION_AUDIT_LOG)
@@ -192,13 +165,8 @@ if(TFM_PARTITION_AUDIT_LOG)
 endif()
 
 if(TFM_PARTITION_PLATFORM)
-    if(TFM_PSA_API)
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_ipc_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    else()
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_func_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    endif()
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_ipc_api.c
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 
@@ -231,13 +199,8 @@ if(BL2)
 endif()
 
 if(TFM_PARTITION_FIRMWARE_UPDATE)
-    if(TFM_PSA_API)
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_firmware_update_ipc_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    else()
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_firmware_update_func_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    endif()
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_firmware_update_ipc_api.c
+            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 ##################### Platform-specific installation ###########################

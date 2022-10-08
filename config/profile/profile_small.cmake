@@ -42,12 +42,7 @@ set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audi
 set(TFM_MBEDCRYPTO_CONFIG_PATH              "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_small.h" CACHE PATH "Config to use for Mbed Crypto")
 set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH   "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_profile_small.h" CACHE PATH "Config to use psa crypto setting for Mbed Crypto.")
 
-# If it is specified to select SFN model in build command, enable SFN model in
-# Profile Small.
-# Otherwise, enable Library model in Profile Small by default.
-if (NOT DEFINED CONFIG_TFM_SPM_BACKEND)
-    set(TFM_LIB_MODEL                   ON          CACHE BOOL      "Use secure library model instead of IPC model")
-elseif (CONFIG_TFM_SPM_BACKEND STREQUAL "SFN")
-    set(PSA_FRAMEWORK_HAS_MM_IOVEC      ON          CACHE BOOL      "Enable MM-IOVEC")
-    set(CONFIG_TFM_CONN_HANDLE_MAX_NUM  3           CACHE STRING    "The maximal number of secure services that are connected or requested at the same time")
-endif()
+# Enable SFN model in Profile Small by default.
+set(CONFIG_TFM_SPM_BACKEND          "SFN"       CACHE STRING    "The SPM backend [IPC, SFN]")
+set(PSA_FRAMEWORK_HAS_MM_IOVEC      ON          CACHE BOOL      "Enable MM-IOVEC")
+set(CONFIG_TFM_CONN_HANDLE_MAX_NUM  3           CACHE STRING    "The maximal number of secure services that are connected or requested at the same time")

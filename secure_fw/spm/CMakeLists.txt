@@ -23,17 +23,14 @@ target_include_directories(tfm_spm
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/include
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa/include>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func/include>
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa/include
     PRIVATE
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/secure_fw/include
         ${CMAKE_BINARY_DIR}/generated
         ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/include
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_psa>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_func>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_psa
 )
 
 target_sources(tfm_spm
@@ -41,44 +38,37 @@ target_sources(tfm_spm
         ffm/tfm_boot_data.c
         ffm/utilities.c
         $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:ffm/spm_log.c>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:ffm/tfm_core_mem_check.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/arch/tfm_arch.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/main.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/spm_ipc.c>
+        cmsis_psa/arch/tfm_arch.c
+        cmsis_psa/main.c
+        cmsis_psa/spm_ipc.c
         $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:cmsis_psa/spm_cross_call.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/static_loader.c>
-        $<$<BOOL:${TFM_PSA_API}>:ffm/psa_api.c>
+        cmsis_psa/static_loader.c
+        ffm/psa_api.c
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:ffm/backend_ipc.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:ffm/backend_sfn.c>
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:ffm/interrupt.c>
         $<$<BOOL:${CONFIG_TFM_STACK_WATERMARKS}>:ffm/stack_watermark.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_core_svcalls_ipc.c>
-        $<$<BOOL:${TFM_PSA_API}>:cmsis_psa/tfm_pools.c>
+        cmsis_psa/tfm_core_svcalls_ipc.c
+        cmsis_psa/tfm_pools.c
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:cmsis_psa/thread.c>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/main.c>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/arch.c>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/spm_func.c>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_core_svcalls_func.c>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:ns_client_ext/tfm_ns_ctx.c>
         ns_client_ext/tfm_spm_ns_ctx.c
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:cmsis_func/tfm_secure_api.c>
         #TODO add other arches
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>>:cmsis_psa/arch/tfm_arch_v8m_base.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>>:cmsis_psa/arch/tfm_arch_v8m_main.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:cmsis_psa/arch/tfm_arch_v8m_main.c>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>:cmsis_psa/arch/tfm_arch_v8m_base.c>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.main>:cmsis_psa/arch/tfm_arch_v8m_main.c>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
+        $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv7-m>:cmsis_psa/arch/tfm_arch_v6m_v7m.c>
         ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
 )
 
 target_include_directories(tfm_spm_defs
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa>
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/boot>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/interface>
-        $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_func/include>
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa/arch>
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_psa/arch
 )
 
 target_link_libraries(tfm_spm
@@ -101,7 +91,7 @@ target_compile_definitions(tfm_spm
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>>:BOOT_DATA_AVAILABLE>
         $<$<BOOL:${CONFIG_TFM_HALT_ON_CORE_PANIC}>:CONFIG_TFM_HALT_ON_CORE_PANIC>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
-        $<$<BOOL:${TFM_PSA_API}>:CONFIG_TFM_CONN_HANDLE_MAX_NUM=${CONFIG_TFM_CONN_HANDLE_MAX_NUM}>
+        CONFIG_TFM_CONN_HANDLE_MAX_NUM=${CONFIG_TFM_CONN_HANDLE_MAX_NUM}
         $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},hard>:CONFIG_TFM_FLOAT_ABI=2>
         $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},soft>:CONFIG_TFM_FLOAT_ABI=0>
         $<$<BOOL:${CONFIG_TFM_DOORBELL_API}>:CONFIG_TFM_DOORBELL_API=1>
@@ -145,7 +135,6 @@ if(CONFIG_TFM_USE_TRUSTZONE)
     # instead this single file is added to the tfm_s target.
     target_sources(tfm_s
         PRIVATE
-            $<$<NOT:$<BOOL:${TFM_PSA_API}>>:${CMAKE_BINARY_DIR}/generated/secure_fw/spm/cmsis_func/tfm_veneers.c>
             $<$<BOOL:${TFM_NS_MANAGE_NSID}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_client_ext/tfm_ns_client_ext.c>
     )
 endif()

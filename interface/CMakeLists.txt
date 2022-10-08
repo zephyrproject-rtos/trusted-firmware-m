@@ -45,7 +45,7 @@ target_link_libraries(psa_interface
 
 target_compile_definitions(psa_interface
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:TFM_PSA_API>
+        TFM_PSA_API
         $<$<BOOL:${CONFIG_TFM_ENABLE_CTX_MGMT}>:CONFIG_TFM_ENABLE_CTX_MGMT>
         $<$<BOOL:${TFM_ISOLATION_LEVEL}>:TFM_LVL=${TFM_ISOLATION_LEVEL}>
         $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:CONFIG_TFM_USE_TRUSTZONE>
@@ -58,7 +58,7 @@ target_compile_definitions(psa_interface
 
 target_sources(tfm_sprt
     PRIVATE
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c>
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c
 )
 
 target_compile_definitions(tfm_sprt

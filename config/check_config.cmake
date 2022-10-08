@@ -23,16 +23,10 @@ endfunction()
 
 set (VALID_ISOLATION_LEVELS 1 2 3)
 
-tfm_invalid_config(TFM_LIB_MODEL AND NOT CONFIG_TFM_USE_TRUSTZONE)
-tfm_invalid_config(TFM_LIB_MODEL AND TFM_PSA_API)
-tfm_invalid_config(NOT TFM_LIB_MODEL AND NOT TFM_PSA_API)
 tfm_invalid_config(NOT TFM_ISOLATION_LEVEL IN_LIST VALID_ISOLATION_LEVELS)
 tfm_invalid_config(TFM_ISOLATION_LEVEL EQUAL 3 AND NOT PLATFORM_HAS_ISOLATION_L3_SUPPORT)
-tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND TFM_LIB_MODEL)
 tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND PSA_FRAMEWORK_HAS_MM_IOVEC)
-tfm_invalid_config(TFM_LIB_MODEL AND PSA_FRAMEWORK_HAS_MM_IOVEC)
 
-tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND TFM_LIB_MODEL)
 tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND TFM_NS_MANAGE_NSID)
 tfm_invalid_config(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM AND NOT TFM_MULTI_CORE_TOPOLOGY)
 
@@ -42,7 +36,6 @@ tfm_invalid_config((TFM_S_REG_TEST OR TFM_NS_REG_TEST) AND TEST_PSA_API)
 
 tfm_invalid_config(SUITE STREQUAL "IPC" AND NOT TEST_PSA_API STREQUAL "IPC")
 
-tfm_invalid_config(TEST_PSA_API STREQUAL "IPC" AND TFM_LIB_MODEL)
 tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND NOT TFM_PARTITION_CRYPTO)
 tfm_invalid_config(TEST_PSA_API STREQUAL "INITIAL_ATTESTATION" AND NOT TFM_PARTITION_INITIAL_ATTESTATION)
 tfm_invalid_config(TEST_PSA_API STREQUAL "INTERNAL_TRUSTED_STORAGE" AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
@@ -106,7 +99,8 @@ tfm_invalid_config(ATTEST_INCLUDE_TEST_CODE AND NOT (TEST_NS_ATTESTATION OR TEST
 
 ########################### TF-M audit log #####################################
 
-tfm_invalid_config(TFM_PARTITION_AUDIT_LOG AND NOT TFM_LIB_MODEL)
+#Audit log is not supported in IPC model, disable it by default
+tfm_invalid_config(TFM_PARTITION_AUDIT_LOG)
 
 ########################### TF-M crypto ########################################
 
