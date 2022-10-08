@@ -1,0 +1,221 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2022, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+menu "TF-M regression tests"
+
+config TEST_S
+    bool "Enable default secure test cases"
+    default n
+    imply TEST_S_ATTESTATION
+    imply TEST_S_CRYPTO
+    imply TEST_S_ITS
+    imply TEST_S_PS
+    imply TEST_S_PLATFORM
+    imply TEST_S_FWU
+    imply TEST_S_SFN_BACKEND
+
+config TEST_NS
+    bool "Enable default non-secure test cases"
+    depends on NS
+    default n
+    imply TEST_NS_ATTESTATION
+    imply TEST_NS_T_COSE
+    imply TEST_NS_QCBOR
+    imply TEST_NS_CRYPTO
+    imply TEST_NS_PS
+    imply TEST_NS_ITS
+    imply TEST_NS_PLATFORM
+    imply TEST_NS_FWU
+    imply TEST_NS_MULTI_CORE
+    imply TEST_NS_MANAGE_NSID
+    imply TEST_NS_IPC
+    imply TEST_NS_SFN_BACKEND
+
+################################# Secure test ##################################
+
+menu "Secure regression tests"
+
+config TEST_S_ATTESTATION
+    bool "Attestation"
+    depends on TFM_PARTITION_INITIAL_ATTESTATION
+
+config TEST_S_CRYPTO
+    bool "Crypto"
+    depends on TFM_PARTITION_CRYPTO
+
+config TEST_S_ITS
+    bool "ITS"
+    depends on TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+
+config TEST_S_PS
+    bool "PS"
+    depends on TFM_PARTITION_PROTECTED_STORAGE
+
+config TEST_S_PLATFORM
+    bool "Platform"
+    depends on TFM_PARTITION_PLATFORM
+
+config TEST_S_FWU
+    bool "FWU"
+    depends on TFM_PARTITION_FIRMWARE_UPDATE
+
+config TEST_S_IPC
+    bool "IPC"
+    depends on TFM_SPM_BACKEND_IPC
+
+config TEST_S_SFN_BACKEND
+    bool "SFN backend"
+    depends on TFM_SPM_BACKEND_SFN
+
+config TEST_S_FPU
+    bool "FPU"
+    default n
+endmenu
+
+################################# Non-secure test ##############################
+
+menu "Non-Secure regression tests"
+    depends on NS
+
+config TEST_NS_ATTESTATION
+    bool "Attestation"
+    depends on TFM_PARTITION_INITIAL_ATTESTATION
+
+config TEST_NS_T_COSE
+    bool "t_cose"
+    depends on TFM_PARTITION_INITIAL_ATTESTATION && !SYMMETRIC_INITIAL_ATTESTATION
+
+config TEST_NS_QCBOR
+    bool "QCBOR"
+    depends on TFM_PARTITION_INITIAL_ATTESTATION
+
+config TEST_NS_CRYPTO
+    bool "Crypto"
+    depends on TFM_PARTITION_CRYPTO
+
+comment "PS NS test depends on partition ITS and PS, and NS ITS test"
+    depends on !(TFM_PARTITION_PROTECTED_STORAGE && TEST_NS_ITS)
+
+config TEST_NS_PS
+    bool "PS"
+    depends on TFM_PARTITION_PROTECTED_STORAGE && TEST_NS_ITS
+
+config TEST_NS_ITS
+    bool "ITS"
+    depends on TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+
+config TEST_NS_PLATFORM
+    bool "Platform"
+    depends on TFM_PARTITION_PLATFORM
+
+config TEST_NS_FWU
+    bool "FWU"
+    depends on TFM_PARTITION_FIRMWARE_UPDATE
+
+config TEST_NS_MULTI_CORE
+    bool "Multi-core"
+    depends on TFM_MULTI_CORE_TOPOLOGY
+
+config TEST_NS_MANAGE_NSID
+    bool "NSID management"
+    depends on TFM_NS_MANAGE_NSID
+
+choice TEST_NS_IRQ
+    prompt "IRQ test type"
+    default TEST_NS_NONE_IRQ
+
+    config TEST_NS_NONE_IRQ
+        bool "None IRQ test"
+
+    # Make FLIH IRQ test as the default IRQ test
+    config TEST_NS_FLIH_IRQ
+        bool "First-Level Interrupt Handling"
+
+    config TEST_NS_SLIH_IRQ
+        bool "Second-Level Interrupt Handling"
+
+endchoice
+
+config TEST_NS_FPU
+    bool "FPU"
+    default n
+
+config TEST_NS_IPC
+    bool "IPC"
+    depends on CONFIG_TFM_SPM_BACKEND_IPC
+
+config TEST_NS_SFN_BACKEND
+    bool "SFN backend"
+    depends on CONFIG_TFM_SPM_BACKEND_SFN
+
+endmenu
+
+################################# Crypto tests #################################
+
+if TEST_NS_CRYPTO || TEST_S_CRYPTO
+
+menu "Crypto Test Configs"
+
+config TFM_CRYPTO_TEST_ALG_CBC
+    bool "Test CBC cryptography mode"
+    default y
+
+config TFM_CRYPTO_TEST_ALG_CCM
+    bool "Test CCM cryptography mode"
+    default y
+
+config TFM_CRYPTO_TEST_ALG_CFB
+    bool "Test CFB cryptography mode"
+    default y
+
+config TFM_CRYPTO_TEST_ALG_ECB
+    bool "Test ECB cryptography mode"
+    default y
+
+config TFM_CRYPTO_TEST_ALG_CTR
+    bool "Test CTR cryptography mode"
+    default y
+
+config TFM_CRYPTO_TEST_ALG_OFB
+    bool "Test OFB cryptography mode"
+    default y
+
+config TFM_CRYPTO_TEST_ALG_GCM
+    bool "Test GCM cryptography mode"
+    default y
+
+config TFM_CRYPTO_TEST_ALG_SHA_384
+    bool "Test SHA-384 cryptography algorithm"
+    default y
+
+config TFM_CRYPTO_TEST_ALG_SHA_512
+    bool "Test SHA-512 cryptography algorithm"
+    default y
+
+config TFM_CRYPTO_TEST_HKDF
+    bool "Test the HKDF key derivation algorithm"
+    default y
+
+config TFM_CRYPTO_TEST_ECDH
+    bool "Test the ECDH key agreement algorithm"
+    default y
+
+config TFM_CRYPTO_TEST_CHACHA20
+    bool "Test the ChaCha20 stream cipher"
+    default n
+
+config TFM_CRYPTO_TEST_ALG_CHACHA20_POLY1305
+    bool "Test ChaCha20-Poly1305 AEAD algorithm"
+    default n
+
+config TFM_CRYPTO_TEST_SINGLE_PART_FUNCS
+    bool "Test single-part operations in hash, MAC, AEAD and symmetric ciphers"
+    default y
+
+endmenu
+endif
+endmenu
