@@ -51,7 +51,6 @@ target_link_libraries(tfm_psa_rot_partition_fwu
 
 target_compile_definitions(tfm_psa_rot_partition_fwu
     PRIVATE
-        TFM_PSA_API
         $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
         $<$<BOOL:${TFM_FWU_BUF_SIZE}>:TFM_FWU_BUF_SIZE=${TFM_FWU_BUF_SIZE}>
 )

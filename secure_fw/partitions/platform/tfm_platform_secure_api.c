@@ -6,15 +6,10 @@
  */
 
 #include "tfm_platform_api.h"
-#ifdef TFM_PSA_API
 #include "psa_manifest/sid.h"
-#else
-#include "tfm_veneers.h"
-#endif
 
 enum tfm_platform_err_t tfm_platform_system_reset(void)
 {
-#ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
 
     status = psa_call(TFM_PLATFORM_SERVICE_HANDLE,
@@ -26,10 +21,6 @@ enum tfm_platform_err_t tfm_platform_system_reset(void)
     } else {
         return (enum tfm_platform_err_t) status;
     }
-#else /* TFM_PSA_API */
-    return (enum tfm_platform_err_t) tfm_platform_sp_system_reset_veneer(
-                                                              NULL, 0, NULL, 0);
-#endif /* TFM_PSA_API */
 }
 
 enum tfm_platform_err_t
@@ -39,9 +30,7 @@ tfm_platform_ioctl(tfm_platform_ioctl_req_t request,
     tfm_platform_ioctl_req_t req = request;
     struct psa_invec in_vec[2];
     size_t inlen, outlen;
-#ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
-#endif /* TFM_PSA_API */
 
     in_vec[0].base = &req;
     in_vec[0].len = sizeof(req);
@@ -58,7 +47,6 @@ tfm_platform_ioctl(tfm_platform_ioctl_req_t request,
     } else {
         outlen = 0;
     }
-#ifdef TFM_PSA_API
     status = psa_call(TFM_PLATFORM_SERVICE_HANDLE,
                       TFM_PLATFORM_API_ID_IOCTL,
                       in_vec, inlen,
@@ -69,24 +57,17 @@ tfm_platform_ioctl(tfm_platform_ioctl_req_t request,
     } else {
         return (enum tfm_platform_err_t) status;
     }
-#else /* TFM_PSA_API */
-    return (enum tfm_platform_err_t) tfm_platform_sp_ioctl_veneer(
-                                                in_vec, inlen, output, outlen);
-#endif /* TFM_PSA_API */
 }
 
 enum tfm_platform_err_t
 tfm_platform_nv_counter_increment(uint32_t counter_id)
 {
-#ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
-#endif
     struct psa_invec in_vec[1];
 
     in_vec[0].base = &counter_id;
     in_vec[0].len = sizeof(counter_id);
 
-#ifdef TFM_PSA_API
     status = psa_call(TFM_PLATFORM_SERVICE_HANDLE,
                       TFM_PLATFORM_API_ID_NV_INCREMENT,
                       in_vec, 1, (psa_outvec *)NULL, 0);
@@ -96,20 +77,13 @@ tfm_platform_nv_counter_increment(uint32_t counter_id)
     } else {
         return (enum tfm_platform_err_t) status;
     }
-#else /* TFM_PSA_API */
-    return
-        (enum tfm_platform_err_t) tfm_platform_sp_nv_counter_increment_veneer(
-                                              in_vec, 1, (psa_outvec *)NULL, 0);
-#endif /* TFM_PSA_API */
 }
 
 enum tfm_platform_err_t
 tfm_platform_nv_counter_read(uint32_t counter_id,
                              uint32_t size, uint8_t *val)
 {
-#ifdef TFM_PSA_API
     psa_status_t status = PSA_ERROR_CONNECTION_REFUSED;
-#endif
     struct psa_invec in_vec[1];
     struct psa_outvec out_vec[1];
 
@@ -119,7 +93,6 @@ tfm_platform_nv_counter_read(uint32_t counter_id,
     out_vec[0].base = val;
     out_vec[0].len = size;
 
-#ifdef TFM_PSA_API
     status = psa_call(TFM_PLATFORM_SERVICE_HANDLE,
                       TFM_PLATFORM_API_ID_NV_READ,
                       in_vec, 1, out_vec, 1);
@@ -129,8 +102,4 @@ tfm_platform_nv_counter_read(uint32_t counter_id,
     } else {
         return (enum tfm_platform_err_t) status;
     }
-#else /* TFM_PSA_API */
-    return (enum tfm_platform_err_t) tfm_platform_sp_nv_counter_read_veneer(
-                                                        in_vec, 1, out_vec, 1);
-#endif /* TFM_PSA_API */
 }

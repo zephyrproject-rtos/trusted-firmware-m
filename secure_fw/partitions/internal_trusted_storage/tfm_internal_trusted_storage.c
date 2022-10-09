@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,7 +12,6 @@
 #include "flash_fs/its_flash_fs.h"
 #include "psa_manifest/pid.h"
 #include "tfm_its_defs.h"
-#include "tfm_its_req_mngr.h"
 #include "its_utils.h"
 #include "tfm_sp_log.h"
 

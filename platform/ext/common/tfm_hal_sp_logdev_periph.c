@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,11 +7,7 @@
 
 #include "tfm_hal_sp_logdev.h"
 #include "uart_stdout.h"
-#ifdef TFM_PSA_API
 #include "svc_num.h"
-#else
-#include "tfm_core_svc.h"
-#endif /* TFM_PSA_API */
 #include "tfm_hal_device_header.h"
 
 __attribute__((naked))

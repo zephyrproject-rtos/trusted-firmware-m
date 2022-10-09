@@ -21,11 +21,9 @@
 #include "tfm_hal_defs.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_peripherals_def.h"
-#ifdef TFM_PSA_API
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
-#endif /* TFM_PSA_API */
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
@@ -147,7 +145,6 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     return TFM_HAL_SUCCESS;
 }
 
-#ifdef TFM_PSA_API
 /*
  * Implementation of tfm_hal_bind_boundary() on AN524:
  *
@@ -250,7 +247,6 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
 
     return TFM_HAL_SUCCESS;
 }
-#endif /* TFM_PSA_API */
 
 enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
                                            size_t size, uint32_t access_type)

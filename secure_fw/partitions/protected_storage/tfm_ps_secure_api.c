@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,13 +7,9 @@
 
 #include "array.h"
 #include "psa/protected_storage.h"
-#ifdef TFM_PSA_API
 #include "psa/client.h"
 #include "psa_manifest/sid.h"
 #include "tfm_ps_defs.h"
-#else
-#include "tfm_veneers.h"
-#endif
 
 psa_status_t psa_ps_set(psa_storage_uid_t uid,
                         size_t data_length,
@@ -28,21 +24,8 @@ psa_status_t psa_ps_set(psa_storage_uid_t uid,
         { .base = &create_flags, .len = sizeof(create_flags) }
     };
 
-#ifdef TFM_PSA_API
     status = psa_call(TFM_PROTECTED_STORAGE_SERVICE_HANDLE, TFM_PS_SET, in_vec,
                       IOVEC_LEN(in_vec), NULL, 0);
-
-#else
-    status = tfm_ps_set_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
-
-    /* A parameter with a buffer pointer pointer that has data length longer
-     * than maximum permitted is treated as a secure violation.
-     * TF-M framework rejects the request with TFM_ERROR_INVALID_PARAMETER.
-     */
-    if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-#endif
 
     return status;
 }
@@ -67,22 +50,9 @@ psa_status_t psa_ps_get(psa_storage_uid_t uid,
     if (p_data_length == NULL) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
-#ifdef TFM_PSA_API
     status = psa_call(TFM_PROTECTED_STORAGE_SERVICE_HANDLE, TFM_PS_GET, in_vec,
                       IOVEC_LEN(in_vec), out_vec, IOVEC_LEN(out_vec));
 
-#else
-    status = tfm_ps_get_req_veneer(in_vec, IOVEC_LEN(in_vec),
-                                   out_vec, IOVEC_LEN(out_vec));
-
-   /* A parameter with a buffer pointer pointer that has data length longer
-    * than maximum permitted is treated as a secure violation.
-    * TF-M framework rejects the request with TFM_ERROR_INVALID_PARAMETER.
-    */
-    if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-#endif
     *p_data_length = out_vec[0].len;
 
     return status;
@@ -101,17 +71,8 @@ psa_status_t psa_ps_get_info(psa_storage_uid_t uid,
         { .base = p_info, .len = sizeof(*p_info) }
     };
 
-#ifdef TFM_PSA_API
     status = psa_call(TFM_PROTECTED_STORAGE_SERVICE_HANDLE, TFM_PS_GET_INFO,
                       in_vec, IOVEC_LEN(in_vec), out_vec, IOVEC_LEN(out_vec));
-
-#else
-    status = tfm_ps_get_info_req_veneer(in_vec, IOVEC_LEN(in_vec),
-                                        out_vec, IOVEC_LEN(out_vec));
-    if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-#endif
 
     return status;
 }
@@ -124,16 +85,8 @@ psa_status_t psa_ps_remove(psa_storage_uid_t uid)
         { .base = &uid, .len = sizeof(uid) }
     };
 
-#ifdef TFM_PSA_API
     status = psa_call(TFM_PROTECTED_STORAGE_SERVICE_HANDLE, TFM_PS_REMOVE,
                       in_vec, IOVEC_LEN(in_vec), NULL, 0);
-
-#else
-    status = tfm_ps_remove_req_veneer(in_vec, IOVEC_LEN(in_vec), NULL, 0);
-    if (status == (psa_status_t)TFM_ERROR_INVALID_PARAMETER) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-#endif
 
     return status;
 }
@@ -173,12 +126,8 @@ uint32_t psa_ps_get_support(void)
     /* The PSA API does not return an error, so any error from TF-M is
      * ignored.
      */
-#ifdef TFM_PSA_API
     (void)psa_call(TFM_PROTECTED_STORAGE_SERVICE_HANDLE, TFM_PS_GET_SUPPORT,
                    NULL, 0, out_vec, IOVEC_LEN(out_vec));
-#else
-    (void)tfm_ps_get_support_req_veneer(NULL, 0, out_vec, IOVEC_LEN(out_vec));
-#endif
 
     return support_flags;
 }

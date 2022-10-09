@@ -24,36 +24,4 @@
       "minor_policy": "STRICT"
     },
   ],
-  "secure_functions": [
-    {
-      "name": "TFM_SP_PLATFORM_SYSTEM_RESET",
-      "signal": "PLATFORM_SP_SYSTEM_RESET",
-      "sid": "0x00000040",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_SP_PLATFORM_IOCTL",
-      "signal": "PLATFORM_SP_IOCTL",
-      "sid": "0x00000041",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-     },
-     {
-       "name": "TFM_SP_PLATFORM_NV_COUNTER_READ",
-       "signal": "PLATFORM_SP_NV_COUNTER_READ",
-       "non_secure_clients": true,
-       "minor_version": 1,
-       "minor_policy": "STRICT"
-      },
-      {
-        "name": "TFM_SP_PLATFORM_NV_COUNTER_INCREMENT",
-        "signal": "PLATFORM_SP_NV_COUNTER_INCREMENT",
-        "non_secure_clients": true,
-        "minor_version": 1,
-        "minor_policy": "STRICT"
-       }
-  ]
 }

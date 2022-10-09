@@ -45,7 +45,6 @@ target_link_libraries(psa_interface
 
 target_compile_definitions(psa_interface
     INTERFACE
-        TFM_PSA_API
         $<$<BOOL:${CONFIG_TFM_ENABLE_CTX_MGMT}>:CONFIG_TFM_ENABLE_CTX_MGMT>
         $<$<BOOL:${TFM_ISOLATION_LEVEL}>:TFM_LVL=${TFM_ISOLATION_LEVEL}>
         $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:CONFIG_TFM_USE_TRUSTZONE>

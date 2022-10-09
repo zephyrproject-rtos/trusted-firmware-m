@@ -91,9 +91,6 @@ MEMORY
 #define VENEER_POS 2
 #endif
 
-#if !defined(TFM_PSA_API)
-__psp_stack_size__ = S_PSP_STACK_SIZE;
-#endif
 __msp_stack_size__ = S_MSP_STACK_SIZE;
 
 /* Library configurations */
@@ -162,10 +159,6 @@ SECTIONS
         __zero_table_start__ = .;
         LONG (ADDR(.TFM_BSS))
         LONG (SIZEOF(.TFM_BSS) / 4)
-#if !defined(TFM_PSA_API)
-        LONG (ADDR(.TFM_SECURE_STACK))
-        LONG (SIZEOF(.TFM_SECURE_STACK) / 4)
-#endif /* !defined(TFM_PSA_API) */
         LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
         LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
 
@@ -364,32 +357,6 @@ VENEERS()
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
-
-# if !defined(TFM_PSA_API)
-    /* PSP is unprivileged in single-core topology */
-    .psp_stack : ALIGN(32)
-    {
-        . += (__psp_stack_size__ - 0x8); // reserve space for stack seal (8 bytes)
-    } > RAM
-    Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-
-    .psp_stack_seal_res :
-    {
-        . += 0x8;
-    } > RAM
-    Image$$ER_INITIAL_PSP_SEAL$$ZI$$Base = ADDR(.psp_stack_seal_res);
-    Image$$ER_INITIAL_PSP_SEAL$$ZI$$Limit = ADDR(.psp_stack_seal_res) + SIZEOF(.psp_stack_seal_res);
-# endif
-
-#if !defined(TFM_PSA_API)
-    .TFM_SECURE_STACK : ALIGN(128)
-    {
-        . += 0x2000;
-    } > RAM
-    Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
-    Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
-#endif /* !defined(TFM_PSA_API) */
 
 #if defined(ENABLE_HEAP)
     __heap_size__ = S_HEAP_SIZE;

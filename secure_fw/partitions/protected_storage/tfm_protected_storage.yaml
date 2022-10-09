@@ -13,43 +13,6 @@
   "model": "SFN",
   "entry_init": "tfm_ps_entry",
   "stack_size": "PS_STACK_SIZE",
-  "secure_functions": [
-    {
-      "name": "TFM_PS_SET",
-      "signal": "TFM_PS_SET_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_PS_GET",
-      "signal": "TFM_PS_GET_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_PS_GET_INFO",
-      "signal": "TFM_PS_GET_INFO_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_PS_REMOVE",
-      "signal": "TFM_PS_REMOVE_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_PS_GET_SUPPORT",
-      "signal": "TFM_PS_GET_SUPPORT_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    }
-  ],
   "services" : [
     {
       "name": "TFM_PROTECTED_STORAGE_SERVICE",

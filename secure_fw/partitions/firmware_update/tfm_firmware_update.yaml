@@ -13,50 +13,6 @@
   "model": "SFN",
   "entry_init": "tfm_fwu_entry",
   "stack_size": "FWU_STACK_SIZE",
-  "secure_functions": [
-    {
-      "name": "TFM_FWU_WRITE",
-      "signal": "TFM_FWU_WRITE_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_FWU_INSTALL",
-      "signal": "TFM_FWU_INSTALL_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_FWU_ABORT",
-      "signal": "TFM_FWU_ABORT_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_FWU_QUERY",
-      "signal": "TFM_FWU_QUERY_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_FWU_REQUEST_REBOOT",
-      "signal": "TFM_FWU_REQUEST_REBOOT_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_FWU_ACCEPT",
-      "signal": "TFM_FWU_ACCEPT_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-  ],
   "services" : [
     {
       "name": "TFM_FIRMWARE_UPDATE_SERVICE",

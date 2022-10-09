@@ -26,10 +26,6 @@
 #include "tfm_plat_crypto_nv_seed.h"
 #endif /* CRYPTO_NV_SEED */
 
-#ifndef TFM_PSA_API
-#include "tfm_secure_api.h"
-#endif
-
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
@@ -38,7 +34,6 @@
 #error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
 #endif
 
-#ifdef TFM_PSA_API
 #include <string.h>
 #include "psa/framework_feature.h"
 #include "psa/service.h"
@@ -258,19 +253,6 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
 
     return status;
 }
-#else /* TFM_PSA_API */
-psa_status_t tfm_crypto_get_caller_id(int32_t *id)
-{
-    int32_t res;
-
-    res = tfm_core_get_caller_client_id(id);
-    if (res != TFM_SUCCESS) {
-        return PSA_ERROR_NOT_PERMITTED;
-    } else {
-        return PSA_SUCCESS;
-    }
-}
-#endif /* TFM_PSA_API */
 
 /**
  * \brief Static buffer to be used by Mbed Crypto for memory allocations
@@ -282,17 +264,11 @@ static psa_status_t tfm_crypto_engine_init(void)
 {
 #ifdef CRYPTO_NV_SEED
     LOG_INFFMT("[INF][Crypto] ");
-#ifdef TFM_PSA_API
     LOG_INFFMT("Provisioning entropy seed... ");
     if (tfm_plat_crypto_provision_entropy_seed() != TFM_CRYPTO_NV_SEED_SUCCESS) {
         return PSA_ERROR_GENERIC_ERROR;
     }
     LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
-#else
-    LOG_INFFMT("TF-M in library mode uses a dummy NV seed. ");
-    LOG_INFFMT("This is not suitable for production! ");
-    LOG_INFFMT("This device is \033[1;31mNOT SECURE\033[0m\r\n");
-#endif /* TFM_PSA_API */
 #endif /* CRYPTO_NV_SEED */
 
     /* Initialise the Mbed Crypto memory allocator to use static memory
@@ -357,7 +333,6 @@ psa_status_t tfm_crypto_init(void)
     return PSA_SUCCESS;
 }
 
-#ifdef TFM_PSA_API
 psa_status_t tfm_crypto_sfn(const psa_msg_t *msg)
 {
     /* Process the message type */
@@ -370,7 +345,6 @@ psa_status_t tfm_crypto_sfn(const psa_msg_t *msg)
 
     return PSA_ERROR_GENERIC_ERROR;
 }
-#endif
 
 psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
                                        size_t in_len,

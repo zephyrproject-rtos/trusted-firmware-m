@@ -13,7 +13,6 @@
 #include "psa/crypto.h"
 #include "attest.h"
 
-#ifdef TFM_PSA_API
 #include "array.h"
 #include "psa/framework_feature.h"
 #include "psa/service.h"
@@ -141,28 +140,6 @@ psa_status_t tfm_attestation_service_sfn(const psa_msg_t *msg)
 
     return PSA_ERROR_GENERIC_ERROR;
 }
-#else
-psa_status_t
-initial_attest_get_token_req(const psa_invec *in_vec, uint32_t num_invec,
-                             psa_outvec *out_vec, uint32_t num_outvec_t)
-{
-    return initial_attest_get_token(in_vec[0].base, in_vec[0].len,
-                                    out_vec[0].base, out_vec[0].len,
-                                    &out_vec[0].len);
-}
-
-psa_status_t
-initial_attest_get_token_size_req(const psa_invec *in_vec, uint32_t num_invec,
-                                  psa_outvec *out_vec, uint32_t num_outvec_t)
-{
-    if (out_vec[0].len < sizeof(uint32_t)) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    return initial_attest_get_token_size(*(size_t *)in_vec[0].base,
-                                         out_vec[0].base);
-}
-#endif /* TFM_PSA_API */
 
 psa_status_t attest_partition_init(void)
 {

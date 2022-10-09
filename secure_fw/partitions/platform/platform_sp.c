@@ -14,7 +14,6 @@
 
 #define NV_COUNTER_ID_SIZE  sizeof(enum tfm_nv_counter_t)
 
-#ifdef TFM_PSA_API
 #include "psa/client.h"
 #include "psa/service.h"
 #include "region_defs.h"
@@ -29,9 +28,6 @@
 #endif
 
 typedef enum tfm_platform_err_t (*plat_func_t)(const psa_msg_t *msg);
-#else
-#include "tfm_secure_api.h"
-#endif /* TFM_PSA_API */
 
 enum tfm_platform_err_t platform_sp_system_reset(void)
 {
@@ -76,103 +72,6 @@ static enum tfm_platform_err_t nv_counter_permissions_check(
         return TFM_PLATFORM_ERR_NOT_SUPPORTED;
     }
 }
-
-#ifndef TFM_PSA_API
-
-enum tfm_platform_err_t
-platform_sp_ioctl(psa_invec  *in_vec,  uint32_t num_invec,
-                  psa_outvec *out_vec, uint32_t num_outvec)
-{
-    void *input, *output;
-    tfm_platform_ioctl_req_t request;
-
-    if ((num_invec < 1) || (num_invec > 2) ||
-        (num_outvec > 1) ||
-        (in_vec[0].base == NULL) ||
-        (in_vec[0].len != sizeof(tfm_platform_ioctl_req_t))) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
-    input = (num_invec == 1) ? NULL : &in_vec[1];
-    output = out_vec;
-    request = *((tfm_platform_ioctl_req_t *)in_vec[0].base);
-
-    return tfm_platform_hal_ioctl(request, input, output);
-}
-
-enum tfm_platform_err_t
-platform_sp_nv_counter_read(psa_invec  *in_vec,  uint32_t num_invec,
-                            psa_outvec *out_vec, uint32_t num_outvec)
-{
-    enum tfm_plat_err_t err;
-    enum tfm_nv_counter_t counter_id;
-    uint32_t counter_size;
-    int32_t status, client_id;
-
-    if (in_vec[0].len != NV_COUNTER_ID_SIZE ||
-        num_invec != 1 || num_outvec != 1) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-    counter_id = *((enum tfm_nv_counter_t *)in_vec[0].base);
-    counter_size = out_vec[0].len;
-
-    status = tfm_core_get_caller_client_id(&client_id);
-    if (status != (int32_t)TFM_SUCCESS) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-    if (client_id < 0) {
-        counter_id += PLAT_NV_COUNTER_NS_0;
-    }
-
-    if (nv_counter_permissions_check(client_id, counter_id, true)
-        != TFM_PLATFORM_ERR_SUCCESS) {
-       return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-    err = tfm_plat_read_nv_counter(counter_id, counter_size,
-                                   (uint8_t *)out_vec[0].base);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-       return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
-    return TFM_PLATFORM_ERR_SUCCESS;
-}
-
-enum tfm_platform_err_t
-platform_sp_nv_counter_increment(psa_invec  *in_vec,  uint32_t num_invec,
-                                 psa_outvec *out_vec, uint32_t num_outvec)
-{
-    enum tfm_plat_err_t err;
-    enum tfm_nv_counter_t counter_id;
-    int32_t client_id, status;
-
-    if (in_vec[0].len != NV_COUNTER_ID_SIZE ||
-        num_invec != 1 || num_outvec != 0) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
-    status = tfm_core_get_caller_client_id(&client_id);
-    if (status != (int32_t)TFM_SUCCESS) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
-    counter_id = *((enum tfm_nv_counter_t *)in_vec[0].base);
-    if (client_id < 0) {
-        counter_id += PLAT_NV_COUNTER_NS_0;
-    }
-
-    if (nv_counter_permissions_check(client_id, counter_id, false)
-        != TFM_PLATFORM_ERR_SUCCESS) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-    err = tfm_plat_increment_nv_counter(counter_id);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
-    }
-
-    return TFM_PLATFORM_ERR_SUCCESS;
-}
-
-#else /* TFM_PSA_API */
 
 static psa_status_t platform_sp_system_reset_psa_api(const psa_msg_t *msg)
 {
@@ -357,7 +256,6 @@ psa_status_t tfm_platform_service_sfn(const psa_msg_t *msg)
 
     return PSA_ERROR_GENERIC_ERROR;
 }
-#endif /* TFM_PSA_API */
 
 psa_status_t platform_sp_init(void)
 {

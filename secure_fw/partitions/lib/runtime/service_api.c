@@ -7,12 +7,8 @@
 
 #include "cmsis_compiler.h"
 #include "service_api.h"
-#ifdef TFM_PSA_API
 #include "psa/service.h"
 #include "svc_num.h"
-#else
-#include "tfm_core_svc.h"
-#endif /* TFM_PSA_API */
 #include "utilities.h"
 
 __attribute__((naked))
@@ -26,7 +22,7 @@ int32_t tfm_core_get_boot_data(uint8_t major_type,
         );
 }
 
-#if defined TFM_PSA_API && TFM_LVL != 1
+#if TFM_LVL != 1
 /* Entry point when Partition FLIH functions return */
 __attribute__((naked))
 void tfm_flih_func_return(psa_flih_result_t result)
@@ -34,4 +30,4 @@ void tfm_flih_func_return(psa_flih_result_t result)
     __ASM volatile("SVC "M2S(TFM_SVC_FLIH_FUNC_RETURN)"           \n"
                    );
 }
-#endif /* TFM_PSA_API && TFM_LVL != 1 */
+#endif /* TFM_LVL != 1 */

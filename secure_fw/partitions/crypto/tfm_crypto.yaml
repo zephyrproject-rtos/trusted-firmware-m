@@ -13,15 +13,6 @@
   "model": "SFN",
   "entry_init": "tfm_crypto_init",
   "stack_size": "CRYPTO_STACK_SIZE",
-  "secure_functions": [
-    {
-      "name": "TFM_CRYPTO_API_DISPATCHER",
-      "signal": "TFM_CRYPTO_API_DISPATCHER",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    }
-  ],
   "services" : [
     {
       "name": "TFM_CRYPTO",

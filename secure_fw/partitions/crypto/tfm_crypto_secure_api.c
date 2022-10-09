@@ -7,14 +7,9 @@
 
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
-#ifdef TFM_PSA_API
 #include "psa/client.h"
 #include "psa_manifest/sid.h"
-#else
-#include "tfm_veneers.h"
-#endif
 
-#ifdef TFM_PSA_API
 #define API_DISPATCH(in_vec, out_vec)          \
     psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL,  \
              in_vec, IOVEC_LEN(in_vec),        \
@@ -23,16 +18,6 @@
     psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL,  \
              in_vec, IOVEC_LEN(in_vec),        \
              (psa_outvec *)NULL, 0)
-#else
-#define API_DISPATCH(in_vec, out_vec)          \
-    tfm_crypto_api_dispatcher_veneer(  \
-                in_vec, IOVEC_LEN(in_vec),     \
-                out_vec, IOVEC_LEN(out_vec))
-#define API_DISPATCH_NO_OUTVEC(in_vec)         \
-    tfm_crypto_api_dispatcher_veneer(  \
-                in_vec, IOVEC_LEN(in_vec),     \
-                NULL, 0)
-#endif /* TFM_PSA_API */
 
 psa_status_t psa_crypto_init(void)
 {
@@ -847,7 +832,6 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key,
     in_vec[0].base = &iov;
     in_vec[0].len = sizeof(struct tfm_crypto_pack_iovec);
 
-#ifdef TFM_PSA_API
     size_t in_len = IOVEC_LEN(in_vec);
 
     if (additional_data == NULL) {
@@ -855,9 +839,6 @@ psa_status_t psa_aead_encrypt(psa_key_id_t key,
     }
     status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, IOVEC_LEN(out_vec));
-#else
-    status = API_DISPATCH(in_vec, out_vec);
-#endif
 
     *ciphertext_length = out_vec[0].len;
 
@@ -916,7 +897,6 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key,
     in_vec[0].base = &iov;
     in_vec[0].len = sizeof(struct tfm_crypto_pack_iovec);
 
-#ifdef TFM_PSA_API
     size_t in_len = IOVEC_LEN(in_vec);
 
     if (additional_data == NULL) {
@@ -924,9 +904,6 @@ psa_status_t psa_aead_decrypt(psa_key_id_t key,
     }
     status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, IOVEC_LEN(out_vec));
-#else
-    status = API_DISPATCH(in_vec, out_vec);
-#endif
 
     *plaintext_length = out_vec[0].len;
 
@@ -1087,7 +1064,6 @@ psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
         {.base = input, .len = input_length}
     };
 
-#ifdef TFM_PSA_API
     size_t in_len = IOVEC_LEN(in_vec);
 
     if (input == NULL) {
@@ -1095,9 +1071,6 @@ psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
     }
     status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, in_len,
                       NULL, 0);
-#else
-    status = API_DISPATCH_NO_OUTVEC(in_vec);
-#endif
 
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
@@ -1132,7 +1105,6 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
         {.base = output, .len = output_size},
     };
 
-#ifdef TFM_PSA_API
     size_t in_len = IOVEC_LEN(in_vec);
 
     if (input == NULL) {
@@ -1140,9 +1112,6 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
     }
     status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, IOVEC_LEN(out_vec));
-#else
-    status = API_DISPATCH(in_vec, out_vec);
-#endif
 
     *output_length = out_vec[0].len;
     return status;
@@ -1180,7 +1149,6 @@ psa_status_t psa_aead_finish(psa_aead_operation_t *operation,
         {.base = ciphertext, .len = ciphertext_size}
     };
 
-#ifdef TFM_PSA_API
     size_t out_len = IOVEC_LEN(out_vec);
 
     if (ciphertext == NULL || ciphertext_size == 0) {
@@ -1199,11 +1167,6 @@ psa_status_t psa_aead_finish(psa_aead_operation_t *operation,
     } else {
         *ciphertext_length = 0;
     }
-#else
-    status = API_DISPATCH(in_vec, out_vec);
-
-    *ciphertext_length = out_vec[2].len;
-#endif
 
     *tag_length = out_vec[1].len;
 
@@ -1241,7 +1204,6 @@ psa_status_t psa_aead_verify(psa_aead_operation_t *operation,
         {.base = plaintext, .len = plaintext_size}
     };
 
-#ifdef TFM_PSA_API
     size_t out_len = IOVEC_LEN(out_vec);
 
     if (plaintext == NULL || plaintext_size == 0) {
@@ -1260,12 +1222,6 @@ psa_status_t psa_aead_verify(psa_aead_operation_t *operation,
     } else {
         *plaintext_length = 0;
     }
-
-#else
-    status = API_DISPATCH(in_vec, out_vec);
-
-    *plaintext_length = out_vec[1].len;
-#endif
 
     return status;
 #endif /* TFM_CRYPTO_AEAD_MODULE_DISABLED */
@@ -1446,7 +1402,6 @@ psa_status_t psa_asymmetric_encrypt(psa_key_id_t key,
         {.base = output, .len = output_size},
     };
 
-#ifdef TFM_PSA_API
     size_t in_len = IOVEC_LEN(in_vec);
 
     if (salt == NULL) {
@@ -1454,9 +1409,6 @@ psa_status_t psa_asymmetric_encrypt(psa_key_id_t key,
     }
     status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, IOVEC_LEN(out_vec));
-#else
-    status = API_DISPATCH(in_vec, out_vec);
-#endif
 
     *output_length = out_vec[0].len;
 
@@ -1499,7 +1451,6 @@ psa_status_t psa_asymmetric_decrypt(psa_key_id_t key,
         {.base = output, .len = output_size},
     };
 
-#ifdef TFM_PSA_API
     size_t in_len = IOVEC_LEN(in_vec);
 
     if (salt == NULL) {
@@ -1507,9 +1458,6 @@ psa_status_t psa_asymmetric_decrypt(psa_key_id_t key,
     }
     status = psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL, in_vec, in_len,
                       out_vec, IOVEC_LEN(out_vec));
-#else
-    status = API_DISPATCH(in_vec, out_vec);
-#endif
 
     *output_length = out_vec[0].len;
 

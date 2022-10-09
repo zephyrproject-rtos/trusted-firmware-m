@@ -24,11 +24,9 @@
 #include "tfm_plat_defs.h"
 #include "region_defs.h"
 #include "tfm_peripherals_def.h"
-#if TFM_PSA_API
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
-#endif /* TFM_PSA_API */
 
 #ifdef FLOW_CONTROL
 #include "target_flowcontrol.h"
@@ -303,7 +301,6 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     return TFM_HAL_SUCCESS;
 }
 
-#ifdef TFM_PSA_API
 /*
  * Implementation of tfm_hal_bind_boundary() on STM:
  *
@@ -434,7 +431,6 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
 
     return TFM_HAL_SUCCESS;
 }
-#endif /* TFM_PSA_API */
 
 enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
                                            size_t size, uint32_t access_type)
