@@ -15,7 +15,7 @@ Environment (NSPE).
   2021.10`` and later version shall be used to mitigate VLLDM instruction
   security vulnerability [4]_.
 * Support Inter-Process Communication (IPC) [5]_ model in TF-M, and doesn't
-  support LIBRARY or SFN model.
+  support SFN model.
 * Support Armv8-M mainline.
 * Support isolation level 1,2,3.
 * Does not support use FPU in First-Level Interrupt Handling (FLIH) [6]_ at

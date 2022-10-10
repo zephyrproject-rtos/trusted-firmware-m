@@ -396,10 +396,6 @@ region_defs.h:
     +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
     |TOTAL_CODE_SRAM_SIZE              | Size of the S code                                                    | if no XIP on flash                |
     +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
-    |CMSE_VENEER_REGION_START          | Start of the veneer Code                                              | if library mode and not multicore |
-    +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
-    |CMSE_VENEER_REGION_SIZE           | Size of the veneer Code                                               | if library mode and not multicore |
-    +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
 
 CMSIS_Driver/Config/cmsis_driver_config.h:
 ------------------------------------------
@@ -445,14 +441,6 @@ CMSIS_Driver/Driver_USART.c:
 
     Refer to the CMSIS `USART <https://www.keil.com/pack/doc/CMSIS/Driver/html/group__usart__interface__gr.html>`_
     documentation.
-
-spm_hal.c:
-----------
-
-    (location as defined in CMakeLists.txt)
-
-    This file should contain all the functions required by the SPM component.
-    Refer to Functions_ for each of them
 
 target_cfg.[ch]:
 ----------------
@@ -544,33 +532,6 @@ tfm_platform_hal_ioctl:
 
     enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request, psa_invec  *in_vec, psa_outvec *out_vec);
 
-tfm_spm_hal_configure_default_isolation:
-----------------------------------------
-
-    This function is called by SPM to setup the isolation level, it's called
-    during the partition initialisation but before calling the init of each
-    partition.
-
-.. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(bool privileged, const struct platform_data_t *platform_data);
-
-.. Note::
-
-   When Fault Injection Hardening (FIH) is enabled this function will return
-   fih_int.
-
-tfm_spm_hal_set_secure_irq_priority:
-------------------------------------
-
-    This function sets the priority for the IRQ passed in the parameter.
-    The precision of the priority value might be adjusted to match the
-    available priority bits in the underlying target platform.
-
-.. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line, uint32_t priority);
-
 tfm_spm_hal_get_mem_security_attr:
 ----------------------------------
 
@@ -627,15 +588,6 @@ tfm_hal_irq_disable:
 .. code-block:: c
 
     void tfm_hal_irq_disable(uint32_t irq_num);
-
-tfm_spm_hal_set_irq_target_state:
----------------------------------
-
-    This function sets the target_state for the IRQ.
-
-.. code-block:: c
-
-    enum irq_target_state_t tfm_spm_hal_set_irq_target_state(IRQn_Type irq_line, enum irq_target_state_t target_state);
 
 Annex
 =====
@@ -735,7 +687,6 @@ Annex
     )
     target_sources(tfm_spm
         PRIVATE
-            spm_hal.c
             target_cfg.c
             tfm_hal_isolation.c
             tfm_hal_platform.c

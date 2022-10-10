@@ -150,7 +150,6 @@ ffm/\*                              SPM logic complies with PSA-FF-M and
                                     such as the runtime API and the thread
                                     operation, etc.
 cmsis_psa/\*                        CMSIS implementation for PSA-FF-M SPM. [1]
-cmsis_func/\*                       The library model implementation. [2]
 \*                                  Implementation sources.
 =================================== ===========================================
 
@@ -162,4 +161,4 @@ cmsis_func/\*                       The library model implementation. [2]
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

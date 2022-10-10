@@ -130,9 +130,6 @@ important options are listed below.
 +---------------------+----------------------------------------+---------------+
 | NS                  | Build NS app. Required for test code.  | ON            |
 +---------------------+----------------------------------------+---------------+
-| TFM_LIB_MODEL       | Use secure library model instead of    | OFF           |
-|                     | PSA api (IPC model).                   |               |
-+---------------------+----------------------------------------+---------------+
 | TFM_ISOLATION_LEVEL | Set TFM isolation level.               | 1             |
 +---------------------+----------------------------------------+---------------+
 | TFM_PROFILE         | Set TFM profile.                       |               |
@@ -162,8 +159,6 @@ them are disabled by default.
 | TEST_NS_T_COSE      | Build non-secure regression t_cose tests.                          |
 +---------------------+--------------------------------------------------------------------+
 | TEST_NS_QCBOR       | Build non-secure regression QCBOR tests.                           |
-+---------------------+--------------------------------------------------------------------+
-| TEST_NS_CORE        | Build non-secure regression Core tests.                            |
 +---------------------+--------------------------------------------------------------------+
 | TEST_NS_CRYPTO      | Build non-secure regression Crypto tests.                          |
 +---------------------+--------------------------------------------------------------------+

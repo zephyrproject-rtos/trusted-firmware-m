@@ -138,9 +138,8 @@ More details of data flows are listed below.
   +-----------+----------------------------------------------------------------+
   | ``DF2``   | NSPE requests TF-M RoT services.                               |
   |           |                                                                |
-  |           | - In TF-M Library model, NS invokes Secure Function calls      |
-  |           | - In TF-M IPC model, NS invokes PSA Client calls based on IPC  |
-  |           |   protocol defined in [FF-M]_.                                 |
+  |           | In TF-M IPC model, NS invokes PSA Client calls based on IPC    |
+  |           | protocol defined in [FF-M]_.                                   |
   |           |                                                                |
   |           | In single Armv8-M core scenarios, SG instruction is executed   |
   |           | in Non-secure Callable region to trigger a transition from     |
@@ -712,9 +711,6 @@ RoT services read and write NS data
 -----------------------------------
 
 This section identifies threats on ``DF3`` defined in `Data Flow Diagram`_.
-
-In Library model, RoT services directly read and write NS memory to simplify
-the implementation and decrease latency.
 
 In TF-M IPC model, RoT services can either directly access NS memory or rely on
 TF-M SPM to obtain NS input data and send response data back to NS memory.

@@ -48,7 +48,7 @@ TF-M Profile Small defines the following features:
 
     - Lightweight framework
 
-        - Library model or Secure Function (SFN) model [2]_
+        - Secure Function (SFN) model [2]_
         - Level 1 isolation
         - Buffer sharing allowed
         - Single secure context
@@ -97,17 +97,7 @@ Lightweight framework
 TF-M framework model
 --------------------
 
-Library model is selected by default in Profile Small implementation.
-Library model implements secure function calls, via which clients directly call
-secure services. It provides a more simple implementation of TF-M framework and
-may reduce memory footprint, compared with Inter-Process Communication (IPC)
-model [3]_.
-
-As Library model is TF-M specific implementation, please check some of its
-dedicated implementation details as described in `Appendix`_, before adopting
-Library model on your platforms.
-
-You can select SFN model instead of Library model in Profile Small.
+SFN model is selected by default in Profile Small implementation.
 SFN model is defined in FF-M 1.1 extensions [2]_. It is a more simple
 implementation of TF-M framework and may also reduce memory footprint, compared
 with Inter-Process Communication (IPC) model [3]_.
@@ -157,7 +147,7 @@ TLS-PSK, to support symmetric key algorithms based protocols.
     capabilities as defined in TLS-PSK, such as one symmetric cipher algorithm
     and one hash function.
 
-TF-M Profile Small selects TLS-PSK cipher suite TLS_PSK_WITH_AES_128_CCM [6]_
+TF-M Profile Small selects TLS-PSK cipher suite TLS_PSK_WITH_AES_128_CCM [5]_
 as reference, which requires:
 
     - AES-128-CCM (AES CCM mode with 128-bit key) as symmetric crypto algorithm
@@ -186,10 +176,10 @@ hardware capabilities, while keeping enough level of security.
     **Security note**
 
     It is recommended not to use MD5 or SHA-1 for message digests as they are
-    subject to collision attacks [7]_ [8]_.
+    subject to collision attacks [6]_ [7]_.
 
 By default, Profile Small only enables multi-part functions defined in PSA
-Cryptography API [14]_ in hash, symmetric ciphers, MAC and AEAD operations.
+Cryptography API [13]_ in hash, symmetric ciphers, MAC and AEAD operations.
 Disabling single-part functions optimizes the code size of TF-M crypto service.
 Multi-part operations allows the message data to be processed in fragments
 instead of all at once. In static memory allocation, single-part operation may
@@ -228,7 +218,7 @@ cryptographic protection.
 Internal transient buffer
 -------------------------
 
-ITS implements a internal transient buffer [9]_ to hold the data read
+ITS implements a internal transient buffer [8]_ to hold the data read
 from/written to storage, especially for flash, to solve the alignment and
 security issues.
 
@@ -258,7 +248,7 @@ Initial Attestation
 ===================
 
 Profile Small requires an Initial Attestation secure service based on symmetric
-key algorithms. Refer to PSA Attestation API document [10]_ for details of
+key algorithms. Refer to PSA Attestation API document [9]_ for details of
 Initial Attestation based on symmetric key algorithms.
 
 It can heavily increase memory footprint to support Initial Attestation based on
@@ -268,7 +258,7 @@ asymmetric key algorithms, due to asymmetric ciphers and related PKI modules.
 
     **Implementation note**
 
-    As pointed out by PSA Attestation API document [10]_, the use cases of
+    As pointed out by PSA Attestation API document [9]_, the use cases of
     Initial Attestation based on symmetric key algorithms can be limited due to
     the associated infrastructure costs for key management and operational
     complexities. It may also restrict the ability to interoperate with
@@ -289,7 +279,7 @@ asymmetric key algorithms, due to asymmetric ciphers and related PKI modules.
 Lightweight boot
 ================
 
-If MCUBoot provided by TF-M is enabled, single image boot [11]_ is selected by
+If MCUBoot provided by TF-M is enabled, single image boot [10]_ is selected by
 default in Profile Small.
 In case of single image boot, secure and non-secure images are handled as a
 single blob and signed together during image generation.
@@ -353,8 +343,6 @@ shown below.
    +============================================+=====================================================================================================+=====================================+
    | ``TFM_ISOLATION_LEVEL``                    | ``1``                                                                                               | Select level 2 isolation            |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_LIB_MODEL``                          | ``ON``                                                                                              | Select Library model                |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE`` | ``ON``                                                                                              | Enable ITS SP                       |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``ITS_BUF_SIZE``                           | ``32``                                                                                              | ITS internal transient buffer size  |
@@ -396,12 +384,11 @@ a platform can add a platform configuration file at
 TF-M framework setting
 ----------------------
 
-The top-level Profile Small CMake config file selects Library model and level 1
+The top-level Profile Small CMake config file selects SFN model and level 1
 isolation.
 
-Users can set ``-DCONFIG_TFM_SPM_BACKEND=SFN`` in build command to select SFN
-model instead. In SFN model, ``-DPSA_FRAMEWORK_HAS_MM_IOVEC`` is enabled by
-default. It reduces memory footprint by avoiding the transient copy from input
+In SFN model, ``-DPSA_FRAMEWORK_HAS_MM_IOVEC`` is enabled by default.
+It reduces memory footprint by avoiding the transient copy from input
 vectors and copy to output vectors.
 
 Crypto service configuration
@@ -418,7 +405,7 @@ The disabled modules/features are shown below.
     - Disable single-part operations in Hash, MAC, AEAD and symmetric ciphers
       via selecting ``CRYPTO_SINGLE_PART_FUNCS_DISABLED``
 
-Other modules and configurations [12]_ are kept as default values.
+Other modules and configurations [11]_ are kept as default values.
 
 Additional configuration flags with more fine granularity can be added to
 control building of specific crypto algorithms and corresponding test cases.
@@ -430,7 +417,7 @@ TF-M Profile Small adds a dedicated Mbed Crypto config file
 ``tfm_mbedcrypto_config_profile_small.h`` and Mbed Crypto PSA config file
 ``crypto_config_profile_small.h`` at ``/lib/ext/mbedcrypto/mbedcrypto_config``
 folder, instead of the common one ``tfm_mbedcrypto_config_default.h`` and
-``crypto_config_default.h`` [12]_.
+``crypto_config_default.h`` [11]_.
 
 Major Mbed Crypto configurations are set as listed below:
 
@@ -457,13 +444,13 @@ Internal Trusted Storage configurations
 
 ITS service is enabled in top-level Profile Small CMake config file.
 
-The internal transient buffer size ``ITS_BUF_SIZE`` [9]_ is set to 32 bytes by
+The internal transient buffer size ``ITS_BUF_SIZE`` [8]_ is set to 32 bytes by
 default. A platform/use case can overwrite the buffer size in its specific
 configuration extension according to its actual requirement of assets and Flash
 attributes.
 
 Profile Small CMake config file won't touch the configurations of device
-specific Flash hardware attributes [9]_.
+specific Flash hardware attributes [8]_.
 
 Initial Attestation secure service
 ----------------------------------
@@ -471,7 +458,7 @@ Initial Attestation secure service
 TF-M Profile Small provides a reference implementation of symmetric key
 algorithms based Initial Attestation, using HMAC SHA-256 as MAC algorithm in
 ``COSE_Mac0`` structure. The implementation follows PSA Attestation API document
-[10]_.
+[9]_.
 
 Profile Small top-level config file enables Initial Attestation secure service
 and selects symmetric key algorithms based Initial Attestation by default.
@@ -576,7 +563,7 @@ Take AN521 as an example.
 
 The following commands build Profile Small without test cases on **AN521** with
 build type **MinSizeRel**, built by **Armclang**.
-Library model is selected by default.
+SFN model is selected by default.
 
 .. code-block:: bash
 
@@ -591,7 +578,7 @@ Library model is selected by default.
 
 The following commands build Profile Small with regression test cases on
 **AN521** with build type **MinSizeRel**, built by **Armclang**.
-Library model is selected by default.
+SFN model is selected by default.
 
 .. code-block:: bash
 
@@ -612,78 +599,8 @@ Library model is selected by default.
    This will decrease the size of the test images. Note that both test suites
    must still be run to ensure correct operation.
 
-The following commands build Profile Small with SFN model on **AN521** with
-build type **MinSizeRel**, built by **GNU Arm compiler**.
-
-.. code-block:: bash
-
-   cd <TFM root dir>
-   mkdir build && cd build
-   cmake -DTFM_PLATFORM=arm/mps2/an521 \
-         -DTFM_PROFILE=profile_small \
-         -DCMAKE_BUILD_TYPE=MinSizeRel \
-         -DCONFIG_TFM_SPM_BACKEND=SFN \
-         ../
-   cmake --build ./ -- install
-
 More details of building instructions and parameters can be found TF-M build
-instruction guide [13]_.
-
-********
-Appendix
-********
-
-TF-M Library model implementation details
-=========================================
-
-.. note ::
-
-    **Implementation note**
-
-    Please note that there is no public dedicated specification for Library
-    model.
-    The design, interfaces and implementation of Library model in TF-M may
-    change.
-
-Buffer sharing allowed
-----------------------
-
-To simplify interface and reduce memory footprint, TF-M Library model directly
-handles client call input vectors from non-secure client buffers and later
-writes results back to those buffers, without keeping a copy in a transient
-buffer inside TF-M.
-
-.. note ::
-
-    **Security note**
-
-    There can be security vulnerabilities if non-secure client buffers are
-    directly shared between NSPE and SPE, such as Time-of-check to time-of-use
-    (TOCTOU) attack.
-
-    Developers need to check if this can meet the Security Functional
-    Requirements (SFR) of the integration of their devices.
-    Some SFRs are listed in a set of example Threat Models and Security Analyses
-    (TMSA) offered by PSA for common IoT use cases. [5]_
-
-Single secure context
----------------------
-
-TF-M Library model only supports single secure context.
-
-It cannot support multiple contexts or the scheduling implemented in IPC model.
-It neither can support multiple outstanding PSA client calls.
-
-But correspondingly, it can save memory footprint and runtime complexity in
-context management and scheduling.
-
-.. note ::
-
-    **Security note**
-
-    Non-secure software should prevent triggering multiple outstanding PSA
-    client calls concurrently. Otherwise, it may crash current running secure
-    context.
+instruction guide [12]_.
 
 *********
 Reference
@@ -697,25 +614,23 @@ Reference
 
 .. [4] `Platform Security Model 1.1 <https://developer.arm.com/documentation/den0128/latest>`_
 
-.. [5] `PSA analyze stage <https://www.arm.com/architecture/security-features#analyze>`_
+.. [5] `AES-CCM Cipher Suites for Transport Layer Security (TLS) <https://tools.ietf.org/html/rfc6655>`_
 
-.. [6] `AES-CCM Cipher Suites for Transport Layer Security (TLS) <https://tools.ietf.org/html/rfc6655>`_
+.. [6] `Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms <https://tools.ietf.org/html/rfc6151>`_
 
-.. [7] `Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms <https://tools.ietf.org/html/rfc6151>`_
+.. [7] `Transitioning the Use of Cryptographic Algorithms and Key Lengths <https://www.nist.gov/publications/transitioning-use-cryptographic-algorithms-and-key-lengths>`_
 
-.. [8] `Transitioning the Use of Cryptographic Algorithms and Key Lengths <https://www.nist.gov/publications/transitioning-use-cryptographic-algorithms-and-key-lengths>`_
+.. [8] :doc:`ITS integration guide </integration_guide/services/tfm_its_integration_guide>`
 
-.. [9] :doc:`ITS integration guide </integration_guide/services/tfm_its_integration_guide>`
+.. [9] `PSA Attestation API 1.0 (ARM IHI 0085) <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Implement/IHI0085-PSA_Attestation_API-1.0.2.pdf?revision=eef78753-c77e-4b24-bcf0-65596213b4c1&la=en&hash=E5E0353D612077AFDCE3F2F3708A50C77A74B2A3>`_
 
-.. [10] `PSA Attestation API 1.0 (ARM IHI 0085) <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Implement/IHI0085-PSA_Attestation_API-1.0.2.pdf?revision=eef78753-c77e-4b24-bcf0-65596213b4c1&la=en&hash=E5E0353D612077AFDCE3F2F3708A50C77A74B2A3>`_
+.. [10] :doc:`Secure boot </technical_references/design_docs/tfm_secure_boot>`
 
-.. [11] :doc:`Secure boot </technical_references/design_docs/tfm_secure_boot>`
+.. [11] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
 
-.. [12] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
+.. [12] :doc:`TF-M build instruction </building/tfm_build_instruction>`
 
-.. [13] :doc:`TF-M build instruction </building/tfm_build_instruction>`
-
-.. [14] `PSA Cryptography API 1.0 <https://developer.arm.com/documentation/ihi0086/a/?lang=en>`_
+.. [13] `PSA Cryptography API 1.0 <https://developer.arm.com/documentation/ihi0086/a/?lang=en>`_
 
 --------------
 

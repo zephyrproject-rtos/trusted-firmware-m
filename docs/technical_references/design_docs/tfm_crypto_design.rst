@@ -68,8 +68,7 @@ components, which are listed below:
    |                             | functionality.                                                | ``./secure_fw/partitions/crypto/crypto_mac.c``                       |
    |                             |                                                               | ''./secure_fw/partitions/crypto/crypto_key_management.c''            |
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
-   | Manifest                    | The manifest file is a description of the service components  | ``./secure_fw/partitions/crypto/manifest.yaml``                      |
-   |                             | for both library model and IPC model.                         |                                                                      |
+   | Manifest                    | The manifest file is a description of the service components. | ``./secure_fw/partitions/crypto/manifest.yaml``                      |
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
    | CMake files and headers     | The CMake files are used by the TF-M CMake build system to    | ``./secure_fw/partitions/crypto/CMakeLists.inc``                     |
    |                             | build the service as part of the Secure FW build. The service | ``./secure_fw/partitions/crypto/CMakeLists.txt``                     |

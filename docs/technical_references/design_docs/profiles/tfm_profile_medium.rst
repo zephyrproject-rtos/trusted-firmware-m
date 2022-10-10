@@ -86,7 +86,7 @@ IPC model
 
 Profile Medium enables IPC model by default. IPC model can achieve a more
 flexible framework and higher levels of isolation, but may require more memory
-footprint and bring in longer latency, compared to Library model.
+footprint and bring in longer latency, compared to SFN model.
 
 TF-M IPC model implementation follows the PSA Firmware Framework for M
 (PSA-FF-M) [PSA-FF-M]_.
@@ -228,8 +228,6 @@ shown below.
    +============================================+=====================================================================================================+=====================================+
    | ``TFM_ISOLATION_LEVEL``                    | ``2``                                                                                               | Select level 2 isolation            |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_LIB_MODEL``                          | ``OFF``                                                                                             | Select IPC model                    |
-   +--------------------------------------------+------------------------------------+------------------------------------------------------------------------------------------------------+
    | ``TFM_PARTITION_INTERNAL_TRUSTED_STORAGE`` | ``ON``                                                                                              | Enable ITS SP                       |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``ITS_BUF_SIZE``                           | ``32``                                                                                              | ITS internal transient buffer size  |

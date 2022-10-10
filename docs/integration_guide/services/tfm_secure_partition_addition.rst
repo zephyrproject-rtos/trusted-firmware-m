@@ -18,7 +18,6 @@ This document uses the following terms and abbreviations.
    IPC                Interprocess communication
    IPC model          The secure IPC framework
    irqs               Interrupt requests
-   Library model      The secure function call framework
    MMIO               Memory Mapped I/O
    PSA                Platform Security Architecture
    RoT                Root of Trust
@@ -47,8 +46,7 @@ focuses on the configuration, manifest, implement rules. The actual
 source-level implementation is not included in this document.
 
 .. Note::
-   If not otherwise specified, the steps are identical for Library, IPC and SFN
-   model.
+   If not otherwise specified, the steps are identical for IPC and SFN model.
 
    The IPC and SFN model conforms to the *PSA Firmware Framework for M (FF-M) v
    1.1* changes. Refer to `PSA Firmware Framework specification`_ and
@@ -196,8 +194,6 @@ Here is the RoT Service ID table used in TF-M.
    crypto                      0x00000                0x080-0x09F
    firmware_update             0x00000                0x0A0-0x0BF
    tfm_secure_client           0x0000F                0x000-0x01F
-   core_test                   0x0000F                0x020-0x03F
-   core_test_2                 0x0000F                0x040-0x05F
    tfm_ipc_client              0x0000F                0x060-0x07F
    tfm_ipc_service             0x0000F                0x080-0x09F
    tfm_slih_test_service       0x0000F                0x0A0-0x0AF
@@ -288,26 +284,6 @@ Here is an example for it:
    struct platform_data_t tfm_peripheral_A;
    #define TFM_PERIPHERAL_A                 (&tfm_peripheral_A)
 
-
-Library model support
----------------------
-For the library model, the user needs to add a ``secure_functions`` item. The
-main difference between ``secure_function`` and ``services`` is the extra
-``signal`` key for secure function entry. This is not required in FF-M v1.0.
-
-The ``signal`` must be the upper case of the secure function name.
-
-.. code-block:: yaml
-
-  "secure_functions": [
-    {
-      "name": "TFM_EXAMPLE_A",
-      "signal": "EXAMPLE_A_FUNC",
-      "sid": "0x00000000",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
 
 Add configuration
 =================

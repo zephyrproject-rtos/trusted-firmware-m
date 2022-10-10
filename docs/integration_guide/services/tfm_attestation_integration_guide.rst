@@ -242,8 +242,6 @@ System integrators might need to port these interfaces to a custom secure
 partition manager implementation (SPM). Implementations in TF-M project can be
 found here:
 
--  ``interface/src/tfm_initial_attestation_func_api.c``: non-secure interface
-   implementation for library model
 -  ``interface/src/tfm_initial_attestation_ipc_api.c``: non-secure interface
    implementation for IPC model
 -  ``secure_fw/partitions/initial_attestation/tfm_attestation_secure_api.c``:

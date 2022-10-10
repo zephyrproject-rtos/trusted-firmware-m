@@ -35,17 +35,12 @@ The structure of the TF-M Firmware Update service is listed below:
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
    | **Component name**          | **Description**                                               | **Location**                                                                          |
    +=============================+===============================================================+=======================================================================================+
-   | SPE client API interface    | This module exports the client API of PSA Firmware Update to  | ``./secure_fw/partitions/firmware_update/tfm_fwu_secure_api.c``                       |
-   |                             | the other services available in TF-M.                         |                                                                                       |
+   | Client API interface        | This module exports the client API of PSA Firmware Update to  | ``./interface/src/tfm_fwu_api.c``                                                     |
+   |                             | the users.                                                    |                                                                                       |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
-   | NSPE client API interface   | This module exports the client API of PSA Firmware Update to  | ``./interface/src/tfm_firmware_update_func_api.c``                                    |
-   |                             | the NSPE(i.e. to the applications).                           | ``./interface/src/tfm_firmware_update_ipc_api.c``                                     |
+   | Manifest                    | The manifest file is a description of the service components. | ``./secure_fw/partitions/firmware_update/tfm_firmware_update.yaml``                   |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
-   | Manifest                    | The manifest file is a description of the service components  | ``./secure_fw/partitions/firmware_update/tfm_firmware_update.yaml``                   |
-   |                             | for both library mode and IPC model.                          |                                                                                       |
-   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
-   | Secure functions and IPC    | This module handles all the secure function requests in       | ``./secure_fw/partitions/firmware_update/tfm_fwu_req_mngr.c``                         |
-   | request handlers            | library model and all the service requests in IPC model.      |                                                                                       |
+   | IPC request handlers        | This module handles all the secure requests in IPC model.     | ``./secure_fw/partitions/firmware_update/tfm_fwu_req_mngr.c``                         |
    |                             | It maitains the image state context and calls the image ID    |                                                                                       |
    |                             | converter to achieve the firmware update functionalities.     |                                                                                       |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
@@ -268,8 +263,7 @@ Benefits Analysis on this Partition
 Implement the FWU functionality in the non-secure side
 ======================================================
 The APIs listed in PSA Firmware Update API spec [1]_ can also be implemented in
-the non-secure side. The library model implementation can be referred to for the
-non-secure side implementation.
+the non-secure side.
 
 Pros and Cons for Implementing FWU APIs in Secure Side
 ======================================================
@@ -314,4 +308,4 @@ Reference
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
