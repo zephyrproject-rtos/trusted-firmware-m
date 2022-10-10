@@ -15,7 +15,6 @@
 #include "spu.h"
 #include "target_cfg.h"
 #include "tfm_hal_isolation.h"
-#include "tfm_spm_hal.h"
 #include "mmio_defs.h"
 #include "array.h"
 #include "load/spm_load_api.h"

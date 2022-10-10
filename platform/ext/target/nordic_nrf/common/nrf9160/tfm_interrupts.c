@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,8 +14,6 @@
 #include "tfm_peripherals_config.h"
 #include "load/interrupt_defs.h"
 #include "ffm/interrupt.h"
-#include "tfm_spm_hal.h"
-
 
 static enum tfm_hal_status_t irq_init(struct irq_t *irq, IRQn_Type irqn,
                                       void * p_pt,

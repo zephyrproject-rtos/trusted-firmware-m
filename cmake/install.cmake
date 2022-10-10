@@ -159,11 +159,6 @@ if (TFM_PARTITION_INITIAL_ATTESTATION)
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
-if(TFM_PARTITION_AUDIT_LOG)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_audit_func_api.c
-            DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-endif()
-
 if(TFM_PARTITION_PLATFORM)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_ipc_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})

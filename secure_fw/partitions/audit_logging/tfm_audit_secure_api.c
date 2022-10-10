@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,7 +7,6 @@
 
 #include "array.h"
 #include "psa_audit_api.h"
-#include "tfm_veneers.h"
 
 #define API_DISPATCH(sfn_name)                               \
     tfm_##sfn_name##_veneer(                                 \

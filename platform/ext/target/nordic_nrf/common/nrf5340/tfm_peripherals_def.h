@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  * Copyright (c) 2020, Nordic Semiconductor ASA. All rights reserved.
  *
@@ -224,6 +224,12 @@ extern struct platform_data_t tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO;
 #define FF_TEST_SERVER_PARTITION_MMIO (&tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO)
 #define FF_TEST_DRIVER_PARTITION_MMIO (&tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO)
 #endif /* PSA_API_TEST_IPC */
+
+/*
+ * Quantized default IRQ priority, the value is:
+ * (Number of configurable priority) / 4: (1UL << __NVIC_PRIO_BITS) / 4
+ */
+#define DEFAULT_IRQ_PRIORITY    (1UL << (__NVIC_PRIO_BITS - 2))
 
 #ifdef __cplusplus
 }
