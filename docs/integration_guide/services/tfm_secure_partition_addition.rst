@@ -189,7 +189,6 @@ Here is the RoT Service ID table used in TF-M.
    =========================== ====================== ========================
    **Partitions**              **Vendor ID(20 bits)** **Function ID(12 bits)**
    =========================== ====================== ========================
-   audit_logging               0x00000                0x000-0x01F
    initial_attestation         0x00000                0x020-0x03F
    platform                    0x00000                0x040-0x05F
    protected_storage           0x00000                0x060-0x06F

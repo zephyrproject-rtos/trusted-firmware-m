@@ -163,8 +163,6 @@ them are disabled by default.
 +---------------------+--------------------------------------------------------------------+
 | TEST_NS_QCBOR       | Build non-secure regression QCBOR tests.                           |
 +---------------------+--------------------------------------------------------------------+
-| TEST_NS_AUDIT       | Build non-secure regression Audit log tests.                       |
-+---------------------+--------------------------------------------------------------------+
 | TEST_NS_CORE        | Build non-secure regression Core tests.                            |
 +---------------------+--------------------------------------------------------------------+
 | TEST_NS_CRYPTO      | Build non-secure regression Crypto tests.                          |
@@ -186,8 +184,6 @@ them are disabled by default.
 | TEST_NS_MULTI_CORE  | Build non-secure regression multi-core tests.                      |
 +---------------------+--------------------------------------------------------------------+
 | TEST_S_ATTESTATION  | Build secure regression Attestation tests.                         |
-+---------------------+--------------------------------------------------------------------+
-| TEST_S_AUDIT        | Build secure regression Audit log tests.                           |
 +---------------------+--------------------------------------------------------------------+
 | TEST_S_CRYPTO       | Build secure regression Crypto tests.                              |
 +---------------------+--------------------------------------------------------------------+

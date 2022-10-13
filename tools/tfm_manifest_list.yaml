@@ -65,20 +65,6 @@
       }
     },
     {
-      "description": "TFM Audit Log Partition",
-      "manifest": "../secure_fw/partitions/audit_logging/tfm_audit_logging.yaml",
-      "output_path": "secure_fw/partitions/audit_logging",
-      "conditional": "TFM_PARTITION_AUDIT_LOG",
-      "version_major": 0,
-      "version_minor": 1,
-      "pid": 255,
-      "linker_pattern": {
-        "library_list": [
-           "*tfm_*partition_audit.*"
-         ]
-      }
-    },
-    {
       "description": "TFM Crypto Partition",
       "manifest": "../secure_fw/partitions/crypto/tfm_crypto.yaml",
       "output_path": "secure_fw/partitions/crypto",

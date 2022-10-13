@@ -95,12 +95,6 @@ if (TFM_PARTITION_INITIAL_ATTESTATION)
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 endif()
 
-if(TFM_PARTITION_AUDIT_LOG)
-    install(FILES       ${INTERFACE_INC_DIR}/psa_audit_api.h
-                        ${INTERFACE_INC_DIR}/psa_audit_defs.h
-            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
-endif()
-
 if(TFM_PARTITION_PLATFORM)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_platform_api.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})

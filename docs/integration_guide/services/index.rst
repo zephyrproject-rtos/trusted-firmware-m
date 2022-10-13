@@ -6,7 +6,6 @@ Services
     :maxdepth: 1
 
     Initial Attestation <tfm_attestation_integration_guide>
-    Audit Log <tfm_audit_integration_guide>
     Crypto <tfm_crypto_integration_guide>
     Internal Storage <tfm_its_integration_guide>
     Platform <tfm_platform_integration_guide>

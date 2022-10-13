@@ -156,8 +156,6 @@ set(PLATFORM_SERVICE_INPUT_BUFFER_SIZE  64          CACHE STRING    "Size of inp
 set(PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE 64          CACHE STRING    "Size of output buffer in platform service.")
 set(PLATFORM_SP_STACK_SIZE              "0x500"     CACHE STRING    "The stack size of the TF-M Platform Secure Partition")
 
-set(TFM_PARTITION_AUDIT_LOG             OFF         CACHE BOOL      "Enable Audit Log partition")
-
 set(TFM_PARTITION_FIRMWARE_UPDATE       OFF         CACHE BOOL      "Enable firmware update partition")
 set(TFM_FWU_BOOTLOADER_LIB              "mcuboot"   CACHE STRING    "Bootloader configure file for Firmware Update partition")
 set(PSA_FWU_MAX_BLOCK_SIZE              1024        CACHE STRING    "The maximum permitted size for block in psa_fwu_write, in bytes.")

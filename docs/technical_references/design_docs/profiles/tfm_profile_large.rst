@@ -142,24 +142,6 @@ the platform.
 Anti-rollback protection in PS relies on non-volatile counter(s) provided by
 TF-M Platform :term:`Secure Partition` (SP).
 
-TF-M audit logging service
-==========================
-
-TF-M audit logging service allows secure services in the system to log TF-M
-events and information.
-
-TF-M audit logging service is not enabled in Profile Large since its IPC model
-dedicated interface is not ready yet.
-
-.. note ::
-
-    **Implementation note**
-
-    Please note that there is no dedicated PSA specification for Audit Logging
-    yet.
-    The design, interfaces and implementation of TF-M audit logging service may
-    change.
-
 Software countermeasures against physical attacks
 =================================================
 
@@ -255,8 +237,6 @@ shown below.
    | ``TFM_PARTITION_PROTECTED_STORAGE`` [a]_   | Enable PS service                  | ``ON``                                                                                             |
    +--------------------------------------------+------------------------------------+----------------------------------------------------------------------------------------------------+
    | ``TFM_PARTITION_PLATFORM``                 | Enable TF-M Platform SP            | ``ON``                                                                                             |
-   +--------------------------------------------+------------------------------------+----------------------------------------------------------------------------------------------------+
-   | ``TFM_PARTITION_AUDIT_LOG``                | Disable TF-M audit logging service | ``OFF``                                                                                            |
    +--------------------------------------------+------------------------------------+----------------------------------------------------------------------------------------------------+
 
 .. [a] PS service is enabled by default. Platforms without off-chip storage

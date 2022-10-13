@@ -107,7 +107,6 @@ The above configuration disable build of -DTEST_S_PS and -DTEST_S_PLATFORM.
 Other test configurations are:
 
 - -DTEST_S_ATTESTATION=ON/OFF
-- -DTEST_S_AUDIT=ON/OFF
 - -DTEST_S_CRYPTO=ON/OFF
 - -DTEST_S_ITS=ON/OFF
 - -DTEST_S_PS=ON/OFF

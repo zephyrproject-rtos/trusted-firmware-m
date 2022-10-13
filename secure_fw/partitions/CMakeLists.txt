@@ -21,7 +21,6 @@ target_link_libraries(tfm_partitions
 add_library(tfm_partition_defs INTERFACE)
 
 add_subdirectory(lib/runtime)
-add_subdirectory(audit_logging)
 add_subdirectory(crypto)
 add_subdirectory(initial_attestation)
 add_subdirectory(protected_storage)

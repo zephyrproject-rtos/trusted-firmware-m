@@ -82,13 +82,6 @@ Kevin Peng
     :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
     :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
 
-Audit Log
-~~~~~~~~~
-
-Jamie Fox
-    :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
-    :github: `jf549 <https://github.com/jf549>`__
-
 Attestation
 ~~~~~~~~~~~
 

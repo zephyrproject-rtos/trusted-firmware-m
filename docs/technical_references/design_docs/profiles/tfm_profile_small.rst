@@ -82,7 +82,7 @@ TF-M Profile Small defines the following features:
         - Anti-rollback protection is enabled
 
 
-Protected Storage, audit logging and other Secure Services provided by TF-M are
+Protected Storage, firmware update and other Secure Services provided by TF-M are
 disabled by default.
 
 **************
@@ -377,8 +377,6 @@ shown below.
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_PARTITION_PLATFORM``                 | ``OFF``                                                                                             | Enable TF-M Platform SP             |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``TFM_PARTITION_AUDIT_LOG``                | ``OFF``                                                                                             | Disable TF-M audit logging service  |
-   +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
 
 .. note ::
 
@@ -493,7 +491,7 @@ covered in a dedicated document.
 Disabled secure services
 ------------------------
 
-Audit logging, Protected Storage, and Platform Service are disabled by default
+Protected Storage and Platform Service are disabled by default
 in Profile Small top-level CMake config file.
 
 Test configuration
