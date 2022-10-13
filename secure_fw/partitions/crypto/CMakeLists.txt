@@ -13,6 +13,20 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_psa_rot_partition_crypto STATIC)
+add_library(crypto_module_flags INTERFACE)
+
+target_compile_definitions(crypto_module_flags
+    INTERFACE
+        $<$<BOOL:${CRYPTO_RNG_MODULE_DISABLED}>:TFM_CRYPTO_RNG_MODULE_DISABLED>
+        $<$<BOOL:${CRYPTO_KEY_MODULE_DISABLED}>:TFM_CRYPTO_KEY_MODULE_DISABLED>
+        $<$<BOOL:${CRYPTO_AEAD_MODULE_DISABLED}>:TFM_CRYPTO_AEAD_MODULE_DISABLED>
+        $<$<BOOL:${CRYPTO_MAC_MODULE_DISABLED}>:TFM_CRYPTO_MAC_MODULE_DISABLED>
+        $<$<BOOL:${CRYPTO_CIPHER_MODULE_DISABLED}>:TFM_CRYPTO_CIPHER_MODULE_DISABLED>
+        $<$<BOOL:${CRYPTO_HASH_MODULE_DISABLED}>:TFM_CRYPTO_HASH_MODULE_DISABLED>
+        $<$<BOOL:${CRYPTO_ASYM_SIGN_MODULE_DISABLED}>:TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED>
+        $<$<BOOL:${CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED}>:TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED>
+        $<$<BOOL:${CRYPTO_KEY_DERIVATION_MODULE_DISABLED}>:TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED>
+)
 
 target_sources(tfm_psa_rot_partition_crypto
     PRIVATE
@@ -60,18 +74,10 @@ target_link_libraries(tfm_psa_rot_partition_crypto
         platform_s
         crypto_service_mbedcrypto
         tfm_sprt
+        crypto_module_flags
 )
 target_compile_definitions(tfm_psa_rot_partition_crypto
     PUBLIC
-        $<$<BOOL:${CRYPTO_RNG_MODULE_DISABLED}>:TFM_CRYPTO_RNG_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_KEY_MODULE_DISABLED}>:TFM_CRYPTO_KEY_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_AEAD_MODULE_DISABLED}>:TFM_CRYPTO_AEAD_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_MAC_MODULE_DISABLED}>:TFM_CRYPTO_MAC_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_CIPHER_MODULE_DISABLED}>:TFM_CRYPTO_CIPHER_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_HASH_MODULE_DISABLED}>:TFM_CRYPTO_HASH_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_ASYM_SIGN_MODULE_DISABLED}>:TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED}>:TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_KEY_DERIVATION_MODULE_DISABLED}>:TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED>
         MBEDTLS_PSA_CRYPTO_DRIVERS
         MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
         $<$<BOOL:CRYPTO_BUILTIN_KEYS>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY>
@@ -108,6 +114,12 @@ include(utils)
 target_sources(tfm_sprt
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_crypto_secure_api.c
+)
+
+# tfm_crypto_secure_api.c requires Crypto configs
+target_link_libraries(tfm_sprt
+    PRIVATE
+        crypto_module_flags
 )
 
 # The veneers give warnings about not being properly declared so they get hidden
