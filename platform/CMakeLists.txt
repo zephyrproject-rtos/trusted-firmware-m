@@ -88,6 +88,7 @@ target_link_libraries(platform_s
         psa_interface
         tfm_partition_defs
         platform_crypto_keys
+        tfm_spm_defs # For tfm_spm_log.h
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:tfm_sprt>
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:crypto_service_mbedcrypto>
         $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:tfm_attestation_defs>
