@@ -23,8 +23,10 @@ set(NULL_POINTER_EXCEPTION_DETECTION    FALSE       CACHE BOOL
    May require more MPU regions than are available depending on the configuration."
   )
 
-# Optional IAT claims, such as hw_version, are not supported by Nordic yet
-set(ATTEST_INCLUDE_OPTIONAL_CLAIMS OFF CACHE BOOL "")
+
+# Not supported for nRF platforms.
+set(ATTEST_INCLUDE_OPTIONAL_CLAIMS      OFF         CACHE BOOL "")
+set(CRYPTO_NV_SEED                      OFF         CACHE BOOL "Use stored NV seed to provide entropy")
 
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT      ON          CACHE BOOL    "Platform supports SLIH IRQ tests")
 set(PLATFORM_FLIH_IRQ_TEST_SUPPORT      ON          CACHE BOOL    "Platform supports FLIH IRQ tests")
