@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,16 @@ LR_CODE BL2_CODE_START {
         *.o (RESET +First)
         * (+RO)
     }
+
+#ifdef CODE_SHARING
+    /* The code sharing between bootloader and runtime firmware requires to
+     * share the global variables.
+     */
+    TFM_SHARED_SYMBOLS S_DATA_START ALIGN 32 SHARED_SYMBOL_AREA_SIZE {
+       *platform.* (+RW)
+       *(.rodata.memset_func)
+    }
+#endif
 
     TFM_SHARED_DATA BOOT_TFM_SHARED_DATA_BASE ALIGN 32 EMPTY BOOT_TFM_SHARED_DATA_SIZE {
     }

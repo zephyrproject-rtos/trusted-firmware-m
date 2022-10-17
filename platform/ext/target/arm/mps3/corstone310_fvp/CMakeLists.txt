@@ -44,8 +44,8 @@ if(NS)
     )
     if(DEFAULT_NS_SCATTER)
         target_add_scatter_file(tfm_ns
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/corstone310_ns.sct>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/corstone310_ns.ld>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_ns.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_ns.ld>
         )
     endif()
     target_link_libraries(CMSIS_5_tfm_ns
@@ -60,8 +60,8 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_corstone310.c
     )
     target_add_scatter_file(bl2
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/corstone310_bl2.sct>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/corstone310_bl2.ld>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_bl2.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_bl2.ld>
     )
 endif()
 

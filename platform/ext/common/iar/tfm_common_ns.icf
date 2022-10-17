@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Arm Limited
+ * Copyright (c) 2022 Arm Limited
  * Copyright (c) 2021 IAR Systems AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *
- * This file is derivative of ../armclang/mps3_an524_ns.sct
  */
 
 /* Linker script to configure memory regions. */
@@ -32,7 +30,9 @@ place at address NS_CODE_START {block LR_CODE};
 define block ER_DATA	        with alignment = 8 {readwrite};
 define block CSTACK             with alignment = 32, size = NS_STACK_SIZE { };
 define block HEAP               with alignment = 8, size = NS_HEAP_SIZE { };
-define block ARM_LIB_HEAP       {block HEAP};
+define block ARM_LIB_HEAP       with alignment = 8, size = NS_HEAP_SIZE { };
+define overlay HEAP_OVL         {block HEAP};
+define overlay HEAP_OVL         {block ARM_LIB_HEAP};
 keep {block CSTACK, block HEAP, block ARM_LIB_HEAP};
 
 do not initialize  { section .noinit };
@@ -46,6 +46,6 @@ if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 define block DATA with fixed order, maximum size = NS_DATA_SIZE  {
        block ER_DATA,
        block CSTACK,
-       block ARM_LIB_HEAP
+       overlay HEAP_OVL
 };
 place at address NS_DATA_START {block DATA};

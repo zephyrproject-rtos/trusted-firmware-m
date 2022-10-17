@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+; * Copyright (c) 2022 Arm Limited. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -82,37 +82,46 @@ SECTIONS
     } > FLASH
     __exidx_end = .;
 
-    /* To copy multiple ROM to RAM sections,
-     * define etext2/data2_start/data2_end and
-     * define __STARTUP_COPY_MULTIPLE in startup file */
     .copy.table :
     {
         . = ALIGN(4);
         __copy_table_start__ = .;
-        LONG (__etext)
-        LONG (__data_start__)
-        LONG ((__data_end__ - __data_start__) / 4)
-        LONG (DEFINED(__etext2) ? __etext2 : 0)
-        LONG (DEFINED(__data2_start__) ? __data2_start__ : 0)
-        LONG (DEFINED(__data2_start__) ? ((__data2_end__ - __data2_start__) / 4) : 0)
+#ifdef CODE_SHARING
+        LONG (LOADADDR(.tfm_shared_symbols))
+        LONG (ADDR(.tfm_shared_symbols))
+        LONG (SIZEOF(.tfm_shared_symbols) / 4)
+#endif
+        LONG (LOADADDR(.data))
+        LONG (ADDR(.data))
+        LONG (SIZEOF(.data) / 4)
         __copy_table_end__ = .;
     } > FLASH
 
-    /* To clear multiple BSS sections,
-     * uncomment .zero.table section and,
-     * define __STARTUP_CLEAR_BSS_MULTIPLE in startup file */
     .zero.table :
     {
         . = ALIGN(4);
         __zero_table_start__ = .;
-        LONG (__bss_start__)
-        LONG ((__bss_end__ - __bss_start__) / 4)
-        LONG (DEFINED(__bss2_start__) ? __bss2_start__ : 0)
-        LONG (DEFINED(__bss2_start__) ? ((__bss2_end__ - __bss2_start__) / 4) : 0)
+        LONG (ADDR(.bss))
+        LONG (SIZEOF(.bss) / 4)
         __zero_table_end__ = .;
     } > FLASH
 
-    __etext = ALIGN(4);
+#ifdef CODE_SHARING
+    /* The code sharing between bootloader and runtime firmware requires to
+     * share the global variables. Section size must be equal with
+     * SHARED_SYMBOL_AREA_SIZE defined in region_defs.h
+     */
+    .tfm_shared_symbols : ALIGN(4)
+    {
+        *(.data.mbedtls_calloc_func)
+        *(.data.mbedtls_free_func)
+        *(.data.mbedtls_exit)
+        *(.data.memset_func)
+        . = ALIGN(SHARED_SYMBOL_AREA_SIZE);
+    } > RAM AT > FLASH
+
+    ASSERT(SHARED_SYMBOL_AREA_SIZE % 4 == 0, "SHARED_SYMBOL_AREA_SIZE must be divisible by 4")
+#endif
 
     .tfm_bl2_shared_data : ALIGN(32)
     {
@@ -121,9 +130,8 @@ SECTIONS
     Image$$SHARED_DATA$$RW$$Base = ADDR(.tfm_bl2_shared_data);
     Image$$SHARED_DATA$$RW$$Limit = ADDR(.tfm_bl2_shared_data) + SIZEOF(.tfm_bl2_shared_data);
 
-    .data : AT (__etext)
+    .data : ALIGN(4)
     {
-        __data_start__ = .;
         *(vtable)
         *(.data*)
 
@@ -150,13 +158,11 @@ SECTIONS
 
         KEEP(*(.jcr*))
         . = ALIGN(4);
-        /* All data end */
-        __data_end__ = .;
 
-    } > RAM
+    } > RAM AT > FLASH
     Image$$ER_DATA$$Base = ADDR(.data);
 
-    .bss :
+    .bss : ALIGN(4)
     {
         . = ALIGN(4);
         __bss_start__ = .;
@@ -166,16 +172,14 @@ SECTIONS
         __bss_end__ = .;
     } > RAM
 
-    bss_size = __bss_end__ - __bss_start__;
-
-    .msp_stack : ALIGN(32)
+    .msp_stack (NOLOAD) : ALIGN(32)
     {
         . += __msp_stack_size__;
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
-    .heap : ALIGN(8)
+    .heap (NOLOAD): ALIGN(8)
     {
         . = ALIGN(8);
         __end__ = .;

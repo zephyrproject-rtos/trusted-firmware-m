@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2020-2021 Arm Limited
- * Copyright (c) 2020-2021 IAR Systems AB
+ * Copyright (c) 2022 Arm Limited
+ * Copyright (c) 2021 IAR Systems AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- *
- * This file is derivative of ../armclang/musca_bl2.sct
  */
 
 /* Linker script to configure memory regions. */
@@ -55,4 +53,4 @@ define block DATA with fixed order, maximum size = BL2_DATA_SIZE {
        block ARM_LIB_STACK,
        overlay HEAP_OVL
 };
-place at address BL2_DATA_START {block DATA};
+place at address BOOT_TFM_SHARED_DATA_BASE {block DATA};

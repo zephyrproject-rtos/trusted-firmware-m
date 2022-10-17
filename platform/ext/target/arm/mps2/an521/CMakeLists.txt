@@ -45,9 +45,9 @@ if(NS)
          ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/startup_an521.c
     )
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/armclang/mps2_an521_ns.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/mps2_an521_ns.ld>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/iar/mps2_an521_ns.icf>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_ns.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_ns.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_ns.icf>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
@@ -72,9 +72,9 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/startup_an521.c
     )
     target_add_scatter_file(bl2
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/armclang/mps2_an521_bl2.sct>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/mps2_an521_bl2.ld>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/iar/mps2_an521_bl2.icf>
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_bl2.sct>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_bl2.ld>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_bl2.icf>
     )
 endif()
 

@@ -90,7 +90,7 @@ platform/ext/common
 ===================
 This folder contains files and folder commons to the platforms, such as the
 shims to the CMSIS drivers. It also contains the scatter files that can be
-used for the tfm_s partition.
+used for the bl2, tfm_s, tfm_ns partitions.
 
 This folder also contains another folder named template. The latter contains
 example implementations that are used for platforms by default, but which can be
@@ -200,7 +200,7 @@ CMakeLists.txt :
 
         - Add scatter files to the bl2, tfm_s, and/or tfm_ns target. [SCATTER_]
 
-            Please note that TF-M provides a common scatter file, for the tfm_s target, which can be used in most cases. [SCATTER_COMMON_]
+            Please note that TF-M provides a common scatter file, for the bl2, tfm_s, tfm_ns targets, which can be used in most cases. [SCATTER_COMMON_]
 
         - Add startup files to the bl2, tfm_s, and/or tfm_ns target. [STARTUP_]
         - Add required sources and includes for the bl2, tfm_s and tfm_ns target (if supported) [SOURCES_INCLUDES_]
@@ -599,9 +599,9 @@ Annex
 
     [SCATTER]
     target_add_scatter_file(bl2
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/tfm_bl2.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/<folder to gcc specifics>/tfm_bl2.ld>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/tfm_ns_bl2.icf>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_bl2.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_bl2.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_bl2.icf>
     )
     target_add_scatter_file(tfm_s
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -609,9 +609,9 @@ Annex
         $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
     )
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/tfm_ns.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to gcc specifics>/tfm_ns.ld>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/tfm_ns_ns.icf>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_ns.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_ns.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_ns.icf>
     )
 
 ------------
@@ -631,21 +631,15 @@ Annex
     [STARTUP]
     target_sources(bl2
         PRIVATE
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/startup_bl2.s>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to gcc specifics>/startup_bl2.S>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/startup_bl2.s>
+        ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/<folder to platform>/device/source/startup_<platform name>.c
     )
     target_sources(tfm_s
         PRIVATE
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/startup_tfm_s.s>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to gcc specifics>/startup_bl2.S>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/startup_bl2.s>
+        ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/<folder to platform>/device/source/startup_<platform name>.c
     )
     target_sources(tfm_ns
         PRIVATE
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/startup_tfm_ns.s>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to gcc specifics>/startup_tfm_ns.S>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/startup_tfm_ns.s>
+        ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/<folder to platform>/device/source/startup_<platform name>.c
     )
 
 ------------
