@@ -15,13 +15,12 @@
 
 #include <arm_cmse.h>
 
-/* Header for target specific SCB register definition */
-#ifdef CMSIS_device_header
-#include CMSIS_device_header
-#else
-/* Default device header in TF-M */
-#include "cmsis.h"
+/* Header for target specific SCB register definitions */
+#ifndef CMSIS_device_header
+/* CMSIS pack default header, containing the CMSIS_device_header definition */
+#include "RTE_Components.h"
 #endif
+#include CMSIS_device_header
 
 __STATIC_INLINE
 enum dma350_lib_error_t dma350_check_src_unpriv_access(const void* src, uint32_t size)

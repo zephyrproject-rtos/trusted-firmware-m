@@ -14,15 +14,11 @@
 #include <stddef.h>
 
 /* Header for target specific MPU definitions */
-#ifdef CMSIS_device_header
-#include CMSIS_device_header
-#else
-/* Default device header in TF-M */
-#include "cmsis.h"
+#ifndef CMSIS_device_header
+/* CMSIS pack default header, containing the CMSIS_device_header definition */
+#include "RTE_Components.h"
 #endif
-
-extern const struct dma350_remap_list_t dma350_address_remap;
-
+#include CMSIS_device_header
 
 /**********************************************/
 /************** Static Functions **************/
@@ -370,11 +366,11 @@ enum dma350_lib_error_t dma350_memmove(struct dma350_ch_dev_t* dev,
         return lib_err;
     }
 
-    if (src < des && (((uint8_t*)src) + size) > (uint8_t*)des) {
+    if (src < des && (((const uint8_t*)src) + size) > (uint8_t*)des) {
         /* Start from the end if the end of the source overlaps with
            the start of the destination */
-        src = (uint32_t*) (((uint8_t*)src) + size - 1);
-        des = (uint32_t*) (((uint8_t*)des) + size - 1);
+        src = (const uint8_t*) (((const uint8_t*)src) + size - 1);
+        des = (uint8_t*) (((uint8_t*)des) + size - 1);
         dma350_ch_set_xaddr_inc(dev, -1, -1);
     }
     else {
@@ -403,7 +399,7 @@ enum dma350_lib_error_t dma350_endian_swap(struct dma350_ch_dev_t* dev,
 {
     uint32_t remaining = 0;
     enum dma350_lib_error_t lib_err;
-    uint8_t *ptr8 = (uint8_t*) src;
+    const uint8_t *ptr8 = (const uint8_t*) src;
 
     lib_err = verify_dma350_ch_dev_ready(dev);
     if(lib_err != DMA350_LIB_ERR_NONE) {
@@ -440,7 +436,7 @@ enum dma350_lib_error_t dma350_endian_swap(struct dma350_ch_dev_t* dev,
         /* Start at last byte: size - 1,
          * then start at copy_count * size higher.
          * Total copied count = count - remaining */
-        uint8_t *ptr_start = &ptr8[(1 + count - remaining) * size - 1];
+        const uint8_t *ptr_start = &ptr8[(1 + count - remaining) * size - 1];
         dma350_ch_set_src(dev, (uint32_t) ptr_start);
         dma350_ch_set_ysize16(dev, copy_count, 1);
         dma350_ch_set_xsize32(dev, size, size * copy_count);
@@ -512,9 +508,9 @@ enum dma350_lib_error_t dma350_draw_from_canvas(struct dma350_ch_dev_t* dev,
             /* Bottom right */
             des_offset = (des_height-1) * des_line_width + des_width - 1;
             des_xsize = des_height;
-            des_ysize = des_width;
-            des_xaddrinc = -des_line_width;
-            des_yaddrstride = -1;
+            des_ysize = (uint16_t)des_width;
+            des_xaddrinc = (int16_t)(-des_line_width);
+            des_yaddrstride = (uint16_t)-1;
             break;
         case DMA350_LIB_TRANSFORM_MIRROR_TRBL:
             if(des_width > UINT16_MAX) {
@@ -522,8 +518,8 @@ enum dma350_lib_error_t dma350_draw_from_canvas(struct dma350_ch_dev_t* dev,
             }
             des_offset = 0;
             des_xsize = des_height;
-            des_ysize = des_width;
-            des_xaddrinc = des_line_width;
+            des_ysize = (uint16_t)des_width;
+            des_xaddrinc = (int16_t)des_line_width;
             des_yaddrstride = 1;
             break;
         case DMA350_LIB_TRANSFORM_ROTATE_90:
@@ -533,9 +529,9 @@ enum dma350_lib_error_t dma350_draw_from_canvas(struct dma350_ch_dev_t* dev,
             /* Top right */
             des_offset = des_width - 1;
             des_xsize = des_height;
-            des_ysize = des_width;
-            des_xaddrinc = des_line_width;
-            des_yaddrstride = -1;
+            des_ysize = (uint16_t)des_width;
+            des_xaddrinc = (int16_t)des_line_width;
+            des_yaddrstride = (uint16_t)-1;
             break;
         case DMA350_LIB_TRANSFORM_ROTATE_180:
             /* Bottom right */
@@ -552,13 +548,12 @@ enum dma350_lib_error_t dma350_draw_from_canvas(struct dma350_ch_dev_t* dev,
             /* Bottom left */
             des_offset = (des_height - 1) * des_line_width;
             des_xsize = des_height;
-            des_ysize = des_width;
-            des_xaddrinc = -des_line_width;
+            des_ysize = (uint16_t)des_width;
+            des_xaddrinc = (int16_t)(-des_line_width);
             des_yaddrstride = 1;
             break;
         default:
             return DMA350_LIB_ERR_CFG_ERR;
-            break;
     }
 
     /* Up until this point, offset was set as number of pixels. It needs to be

@@ -112,7 +112,7 @@ target_sources(platform_s
 target_compile_definitions(platform_s
     PRIVATE
         # Needed for DMA-350 library
-        CMSIS_DEVICE_HEADER=<corstone310.h>
+        CMSIS_device_header=<corstone310.h>
 
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
 )

@@ -64,6 +64,9 @@ struct dma350_remap_list_t {
     const struct dma350_remap_range_t* const map;
 };
 
+/* DMA350 lib needs an externally defined, device specific remap struct */
+extern const struct dma350_remap_list_t dma350_address_remap;
+
 /**
  * \brief Set src address with memory attributes based on MPU
  *
@@ -373,7 +376,7 @@ enum dma350_lib_error_t dma350_draw_from_bitmap(struct dma350_ch_dev_t* dev,
                                     enum dma350_lib_exec_type_t exec_type)
 {
     return dma350_draw_from_canvas(dev, src, des,
-                        src_width, src_height, src_width,
+                        src_width, src_height, (uint16_t)src_width,
                         des_width, des_height, des_line_width,
                         pixelsize, transform, exec_type);
 }
@@ -388,8 +391,8 @@ enum dma350_lib_error_t dma350_2d_copy(
                                     enum dma350_lib_exec_type_t exec_type)
 {
     return dma350_draw_from_canvas(dev, src, des,
-                        width, height, width,
-                        width, height, width,
+                        width, height, (uint16_t)width,
+                        width, height, (uint16_t)width,
                         pixelsize, transform, exec_type);
 }
 
