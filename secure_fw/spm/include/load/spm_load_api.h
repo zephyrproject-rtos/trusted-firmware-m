@@ -35,9 +35,10 @@
 #define LOAD_ALLOCED_STACK_ADDR(pldinf)    (*((uintptr_t *)(pldinf + 1)))
 
 #define LOAD_INFO_DEPS(pldinf)                                         \
-    ((uintptr_t)(pldinf + 1) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t))
+    ((const uint32_t *)((uintptr_t)(pldinf + 1) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t)))
 #define LOAD_INFO_SERVICE(pldinf)                                      \
-    ((uintptr_t)LOAD_INFO_DEPS(pldinf) + (pldinf)->ndeps * sizeof(uint32_t))
+    ((const struct service_load_info_t *)((uintptr_t)LOAD_INFO_DEPS(pldinf) + \
+     (pldinf)->ndeps * sizeof(uint32_t)))
 #define LOAD_INFO_ASSET(pldinf)                                        \
     ((const struct asset_desc_t *)((uintptr_t)LOAD_INFO_SERVICE(pldinf) + \
      (pldinf)->nservices * sizeof(struct service_load_info_t)))

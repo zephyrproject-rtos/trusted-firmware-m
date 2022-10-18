@@ -61,7 +61,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
     uint32_t allocate_size;
 
     p_pt_ldi = p_pt->p_ldinf;
-    p_srv_ldi = (struct service_load_info_t *)LOAD_INFO_SERVICE(p_pt_ldi);
+    p_srv_ldi = LOAD_INFO_SERVICE(p_pt_ldi);
     ctx_ctrl = &p_pt->ctx_ctrl;
 
     /* common runtime metadata */

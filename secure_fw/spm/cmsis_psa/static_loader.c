@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -129,7 +132,7 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
     }
 
     p_ptldinf = p_partition->p_ldinf;
-    p_servldinf = (struct service_load_info_t *)LOAD_INFO_SERVICE(p_ptldinf);
+    p_servldinf = LOAD_INFO_SERVICE(p_ptldinf);
 
     /*
      * 'services' CAN be NULL when no services, which is a rational result.

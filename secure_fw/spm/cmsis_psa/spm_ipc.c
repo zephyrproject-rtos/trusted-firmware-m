@@ -278,7 +278,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
                                     bool ns_caller)
 {
     struct partition_t *partition = NULL;
-    uint32_t *dep;
+    const uint32_t *dep;
     int32_t i;
 
     SPM_ASSERT(service);
@@ -293,7 +293,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
             tfm_core_panic();
         }
 
-        dep = (uint32_t *)LOAD_INFO_DEPS(partition->p_ldinf);
+        dep = LOAD_INFO_DEPS(partition->p_ldinf);
         for (i = 0; i < partition->p_ldinf->ndeps; i++) {
             if (dep[i] == sid) {
                 break;
