@@ -40,6 +40,7 @@ set(MCUBOOT_ENC_IMAGES                  OFF         CACHE BOOL      "Enable encr
 set(MCUBOOT_BOOTSTRAP                   OFF         CACHE BOOL      "Support initial state with empty primary slot and images installed from secondary slots")
 set(MCUBOOT_ENCRYPT_RSA                 OFF         CACHE BOOL      "Use RSA for encrypted image upgrade support")
 set(MCUBOOT_FIH_PROFILE                 OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
+set(MCUBOOT_USE_PSA_CRYPTO              OFF         CACHE BOOL      "Enable the cryptographic abstraction layer to use PSA Crypto")
 
 # Note - If either SIGNATURE_TYPE or KEY_LEN are changed, the entries for KEY_S
 # and KEY_NS will either have to be updated manually or removed from the cache.
