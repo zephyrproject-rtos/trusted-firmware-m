@@ -33,11 +33,6 @@ target_include_directories(psa_interface
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core>
 )
 
-# PSA interface files are generated from a template
-add_dependencies(psa_interface
-    tfm_generated_files
-)
-
 target_link_libraries(psa_interface
     INTERFACE
         tfm_partition_defs

@@ -164,10 +164,6 @@ if ("${TEST_PSA_API}" STREQUAL "IPC")
     )
 endif()
 
-add_custom_target(tfm_generated_files
-    SOURCES ${OUTPUT_FILES}
-)
-
 if (CONFIG_TFM_PARSE_MANIFEST_QUIET)
     set(PARSE_MANIFEST_QUIET_FLAG "-q")
 else()
@@ -181,12 +177,6 @@ set(MANIFEST_COMMAND
     -c ${CMAKE_CURRENT_BINARY_DIR}/manifest_config.h
     -o ${CMAKE_BINARY_DIR}/generated
     ${PARSE_MANIFEST_QUIET_FLAG})
-
-add_custom_command(OUTPUT ${OUTPUT_FILES}
-    COMMAND ${MANIFEST_COMMAND}
-    DEPENDS ${TEMPLATE_FILES} ${MANIFEST_FILES}
-    DEPENDS ${MANIFEST_LISTS} ${GENERATED_FILE_LISTS}
-)
 
 # The files need to be generated before cmake will allow them to be used as
 # sources. Due to issue with custom_command scoping the easiest way to do this
