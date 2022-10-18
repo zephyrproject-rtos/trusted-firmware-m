@@ -125,7 +125,7 @@ platform_sp_nv_counter_read(psa_invec  *in_vec,  uint32_t num_invec,
     }
 
     if (nv_counter_permissions_check(client_id, counter_id, true)
-        != TFM_PLAT_ERR_SUCCESS) {
+        != TFM_PLATFORM_ERR_SUCCESS) {
        return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
     err = tfm_plat_read_nv_counter(counter_id, counter_size,
@@ -161,7 +161,7 @@ platform_sp_nv_counter_increment(psa_invec  *in_vec,  uint32_t num_invec,
     }
 
     if (nv_counter_permissions_check(client_id, counter_id, false)
-        != TFM_PLAT_ERR_SUCCESS) {
+        != TFM_PLATFORM_ERR_SUCCESS) {
         return TFM_PLATFORM_ERR_SYSTEM_ERROR;
     }
     err = tfm_plat_increment_nv_counter(counter_id);
