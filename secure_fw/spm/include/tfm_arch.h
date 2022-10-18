@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -28,6 +31,26 @@
 #define SCHEDULER_UNLOCKED  0
 
 #define XPSR_T32            0x01000000
+
+/* The lowest secure interrupt priority */
+#ifdef CONFIG_TFM_USE_TRUSTZONE
+/* IMPORTANT NOTE:
+ *
+ * Although the priority of the secure PendSV must be the lowest possible
+ * among other interrupts in the Secure state, it must be ensured that
+ * PendSV is not preempted nor masked by Non-Secure interrupts to ensure
+ * the integrity of the Secure operation.
+ * When AIRCR.PRIS is set, the Non-Secure execution can act on
+ * FAULTMASK_NS, PRIMASK_NS or BASEPRI_NS register to boost its priority
+ * number up to the value 0x80.
+ * For this reason, set the priority of the PendSV interrupt to the next
+ * priority level configurable on the platform, just below 0x80.
+ */
+#define PENDSV_PRIO_FOR_SCHED ((1 << (__NVIC_PRIO_BITS - 1)) - 1)
+#else
+/* If TZ is not in use, we have the full priority range available */
+#define PENDSV_PRIO_FOR_SCHED ((1 << __NVIC_PRIO_BITS) - 1)
+#endif
 
 /* State context defined by architecture */
 struct tfm_state_context_t {
