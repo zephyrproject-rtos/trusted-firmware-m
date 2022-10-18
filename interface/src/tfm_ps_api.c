@@ -1,13 +1,12 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "array.h"
-#include "psa/protected_storage.h"
 #include "psa/client.h"
+#include "psa/protected_storage.h"
 #include "psa_manifest/sid.h"
 #include "tfm_ps_defs.h"
 
@@ -50,6 +49,7 @@ psa_status_t psa_ps_get(psa_storage_uid_t uid,
     if (p_data_length == NULL) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+
     status = psa_call(TFM_PROTECTED_STORAGE_SERVICE_HANDLE, TFM_PS_GET, in_vec,
                       IOVEC_LEN(in_vec), out_vec, IOVEC_LEN(out_vec));
 

@@ -57,6 +57,12 @@ target_compile_definitions(psa_interface
 
 target_sources(tfm_sprt
     PRIVATE
+        $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_attest_api.c>
+        $<$<BOOL:${TFM_PARTITION_CRYPTO}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_crypto_api.c>
+        $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_fwu_api.c>
+        $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_its_api.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_platform_api.c>
+        $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_ps_api.c>
         ${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c
 )
 

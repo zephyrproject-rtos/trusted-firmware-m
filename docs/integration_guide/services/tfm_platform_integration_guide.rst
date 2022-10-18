@@ -32,7 +32,7 @@ The Platform service interfaces and types are defined and documented in
 
 - ``platform_sp.h/c`` : These files define and implement functionalities related
   to the platform service
-- ``tfm_platform_secure_api.c`` : This file implements ``tfm_platform_api.h``
+- ``tfm_platform_api.c`` : This file implements ``tfm_platform_api.h``
   functions to be called from the secure partitions. This is the entry point
   when the secure partitions request an action to the Platform service
   (e.g system reset).

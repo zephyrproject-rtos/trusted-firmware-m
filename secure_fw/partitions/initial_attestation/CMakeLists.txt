@@ -80,23 +80,6 @@ target_compile_definitions(tfm_attestation_defs
         ATTEST_TOKEN_PROFILE_${ATTEST_TOKEN_PROFILE}
 )
 
-############################ Secure API ########################################
-
-target_sources(tfm_sprt
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_attest_secure_api.c
-)
-
-# The veneers give warnings about not being properly declared so they get hidden
-# to not overshadow _real_ warnings.
-set_source_files_properties(tfm_attest_secure_api.c
-    PROPERTIES
-        COMPILE_FLAGS
-            $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
-            $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
-            $<$<C_COMPILER_ID:IAR>:>
-)
-
 ############################ Partition Defs ####################################
 
 target_link_libraries(tfm_partitions

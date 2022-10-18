@@ -9,7 +9,6 @@
 #include "psa/crypto.h"
 #include "psa/client.h"
 #include "psa_manifest/sid.h"
-#include "tfm_ns_interface.h"
 
 #define API_DISPATCH(in_vec, out_vec)          \
     psa_call(TFM_CRYPTO_HANDLE, PSA_IPC_CALL,  \

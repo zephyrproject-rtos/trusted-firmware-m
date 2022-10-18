@@ -107,29 +107,6 @@ include(utils)
     "
     )
 
-############################ Secure API ########################################
-
-target_sources(tfm_sprt
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_crypto_secure_api.c
-)
-
-# tfm_crypto_secure_api.c requires Crypto configs
-target_link_libraries(tfm_sprt
-    PRIVATE
-        crypto_module_flags
-)
-
-# The veneers give warnings about not being properly declared so they get hidden
-# to not overshadow _real_ warnings.
-set_source_files_properties(tfm_crypto_secure_api.c
-    PROPERTIES
-        COMPILE_FLAGS
-            $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
-            $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
-            $<$<C_COMPILER_ID:IAR>:>
-)
-
 ############################ Partition Defs ####################################
 
 target_link_libraries(tfm_partitions

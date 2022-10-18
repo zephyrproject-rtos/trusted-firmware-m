@@ -134,27 +134,27 @@ if (CONFIG_TFM_USE_TRUSTZONE)
 endif()
 
 if (TFM_PARTITION_PROTECTED_STORAGE)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_ipc_api.c
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_ps_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if (TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_its_ipc_api.c
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_its_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if (TFM_PARTITION_CRYPTO)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_ipc_api.c
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_crypto_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if (TFM_PARTITION_INITIAL_ATTESTATION)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_initial_attestation_ipc_api.c
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_attest_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
 if(TFM_PARTITION_PLATFORM)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_ipc_api.c
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_platform_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
@@ -188,7 +188,7 @@ if(BL2)
 endif()
 
 if(TFM_PARTITION_FIRMWARE_UPDATE)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_firmware_update_ipc_api.c
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_fwu_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 

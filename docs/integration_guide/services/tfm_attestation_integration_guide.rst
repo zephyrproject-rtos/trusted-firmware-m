@@ -180,9 +180,6 @@ Service source files
       asymmetric initial attestation key.
     - ``tfm_attest.c``: Implements the SPM abstraction layer, and bind the
       attestation service to the SPM implementation in TF-M project.
-    - ``tfm_attest_secure_api.c``: Implements the secure API layer to allow
-      other services in the secure domain to request functionalities
-      from the attestation service using the PSA API interface.
     - ``tfm_attest_req_mngr.c``: Includes the initialization entry of
       attestation service and handles attestation service requests in IPC
       model.
@@ -242,10 +239,7 @@ System integrators might need to port these interfaces to a custom secure
 partition manager implementation (SPM). Implementations in TF-M project can be
 found here:
 
--  ``interface/src/tfm_initial_attestation_ipc_api.c``: non-secure interface
-   implementation for IPC model
--  ``secure_fw/partitions/initial_attestation/tfm_attestation_secure_api.c``:
-   secure interface implementation
+-  ``interface/src/tfm_attest_api.c``: interface implementation.
 
 Secure Partition Manager (SPM) interface
 ========================================

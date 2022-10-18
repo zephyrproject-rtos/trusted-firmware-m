@@ -38,11 +38,7 @@ components, which are listed below:
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
    | **Component name**          | **Description**                                               | **Location**                                                         |
    +=============================+===============================================================+======================================================================+
-   | SPE client API interface    | This module exports the client API of PSA Crypto to the other | ``./secure_fw/partitions/crypto/tfm_crypto_secure_api.c``            |
-   |                             | services available in TF-M.                                   |                                                                      |
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
-   | NSPE client API interface   | This module exports the client API of PSA Crypto to the NSPE  | ``./interface/src/tfm_crypto_api.c``                                 |
-   |                             | (i.e. to the applications).                                   |                                                                      |
+   | Client API interface        | This module exports the client API of PSA Crypto to the users.| ``./interface/src/tfm_crypto_api.c``                                 |
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
    | Mbed Crypto                 | The Mbed Crypto library is used in the service as a           | Needed as dependency at the same level of the TF-M folder,           |
    |                             | cryptographic library exposing the PSA Crypto API interface.  | i.e. ``../mbed-crypto``                                              |

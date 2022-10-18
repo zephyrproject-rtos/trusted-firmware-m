@@ -57,8 +57,8 @@ Service source files
   cipher/hash/MAC/generator operations, a context is associated to the handle
   provided during the setup phase, and is explicitly cleared only following a
   termination or an abort
-- ``tfm_crypto_secure_api.c`` : This module implements the PSA Crypto API
-  client interface exposed to the Secure Processing Environment
+- ``tfm_crypto_api.c`` : This module implements the PSA Crypto API
+  client interface exposed to users.
 - ``tfm_crypto_api.c`` :  This module is contained in ``interface/src`` and
   implements the PSA Crypto API client interface exposed to the  Non-Secure
   Processing Environment.
