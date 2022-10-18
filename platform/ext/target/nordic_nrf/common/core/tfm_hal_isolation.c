@@ -88,7 +88,7 @@ tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
 
     for (uint32_t i = 0; i < p_ldinf->nassets; i++) {
         const struct asset_desc_t *p_asset =
-                (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
+                LOAD_INFO_ASSET(p_ldinf);
 
         if (!(p_asset[i].attr & ASSET_ATTR_NAMED_MMIO)) {
             // Skip numbered MMIO. NB: Need to add validation if it

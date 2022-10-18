@@ -179,7 +179,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 #endif
 
     ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
-    p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
+    p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     /*
      * Validate if the named MMIO of partition is allowed by the platform.

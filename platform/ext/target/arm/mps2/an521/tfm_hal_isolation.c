@@ -396,7 +396,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
 #endif
 
     ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
-    p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
+    p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     /*
      * Validate if the named MMIO of partition is allowed by the platform.
@@ -508,7 +508,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
     struct mpu_armv8m_region_cfg_t localcfg;
     uint32_t i, mmio_index;
     struct platform_data_t *plat_data_ptr;
-    struct asset_desc_t *rt_mem;
+    const struct asset_desc_t *rt_mem;
     fih_int fih_rc = FIH_FAILURE;
 #endif /* TFM_LVL == 3 */
 
@@ -532,7 +532,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
     localcfg.attr_sh = MPU_ARMV8M_SH_NONE;
     localcfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     localcfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-    rt_mem = (struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
+    rt_mem = LOAD_INFO_ASSET(p_ldinf);
     /*
      * AN521 shortcut: The first item is the only runtime memory asset.
      * Platforms with many memory assets please check this part.
