@@ -175,6 +175,179 @@ attest_add_all_sw_components(struct attest_token_encode_ctx *token_ctx)
 }
 
 /*!
+ * \brief Static function to add implementation id claim to attestation token.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_implementation_id_claim(struct attest_token_encode_ctx *token_ctx)
+{
+    uint8_t implementation_id[IMPLEMENTATION_ID_MAX_SIZE];
+    enum tfm_plat_err_t res_plat;
+    uint32_t size = sizeof(implementation_id);
+    struct q_useful_buf_c claim_value;
+
+    res_plat = tfm_plat_get_implementation_id(&size, implementation_id);
+    if (res_plat != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    }
+
+    claim_value.ptr = implementation_id;
+    claim_value.len  = size;
+    attest_token_encode_add_bstr(token_ctx,
+                                 IAT_IMPLEMENTATION_ID,
+                                 &claim_value);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+/*!
+ * \brief Static function to add instance id claim to attestation token.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \note This mandatory claim represents the unique identifier of the instance.
+ *       So far, only GUID type is supported.
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_instance_id_claim(struct attest_token_encode_ctx *token_ctx)
+{
+    struct q_useful_buf_c claim_value;
+    enum psa_attest_err_t err;
+
+    /* Leave the first byte for UEID type byte */
+    err = attest_get_instance_id(&claim_value);
+    if (err != PSA_ATTEST_ERR_SUCCESS) {
+        return err;
+    }
+
+    attest_token_encode_add_bstr(token_ctx,
+                                 IAT_INSTANCE_ID,
+                                 &claim_value);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+/*!
+ * \brief Static function to add security lifecycle claim to attestation token.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_security_lifecycle_claim(struct attest_token_encode_ctx *token_ctx)
+{
+    enum tfm_security_lifecycle_t security_lifecycle;
+    uint32_t slc_value;
+    int32_t res;
+    struct q_useful_buf_c claim_value = {0};
+    uint16_t tlv_len;
+    uint8_t *tlv_ptr = NULL;
+    int32_t found = 0;
+
+    /* First look up lifecycle state in boot status, it might comes
+     * from bootloader
+     */
+    found = attest_get_tlv_by_id(SECURITY_LIFECYCLE, &tlv_len, &tlv_ptr);
+    if (found == 1) {
+        claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
+        claim_value.len = tlv_len;
+        res = get_uint(claim_value.ptr, claim_value.len, &slc_value);
+        if (res) {
+            return PSA_ATTEST_ERR_GENERAL;
+        }
+        security_lifecycle = (enum tfm_security_lifecycle_t)slc_value;
+    } else {
+        /* If not found in boot status then use callback function to get it
+         * from runtime SW
+         */
+        security_lifecycle = tfm_attest_hal_get_security_lifecycle();
+    }
+
+    /* Sanity check */
+    if (security_lifecycle > TFM_SLC_MAX_VALUE) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    attest_token_encode_add_integer(token_ctx,
+                                    IAT_SECURITY_LIFECYCLE,
+                                    (int64_t)security_lifecycle);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+/*!
+ * \brief Static function to add the name of the profile definition document
+ *
+ * \note This function would be optional for PSA IoT 1/2 profiles but we keep it
+ *       as mandatory for both CCA and PSA IoT for simplicity
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_profile_definition(struct attest_token_encode_ctx *token_ctx)
+{
+    struct q_useful_buf_c profile;
+    uint8_t buf[PROFILE_DEFINITION_MAX_SIZE];
+    uint32_t size = sizeof(buf);
+    enum tfm_plat_err_t err;
+
+    err = tfm_attest_hal_get_profile_definition(&size, buf);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    profile.ptr = &buf;
+    profile.len = size;
+    attest_token_encode_add_tstr(token_ctx,
+                                 IAT_PROFILE_DEFINITION,
+                                 &profile);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+
+#if defined(INCLUDE_OPTIONAL_CLAIMS)
+/*!
+ * \brief Static function to add the verification service indicator claim
+ *        to the attestation token.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_verification_service(struct attest_token_encode_ctx *token_ctx)
+{
+    struct q_useful_buf_c service;
+    uint8_t buf[VERIFICATION_URL_MAX_SIZE];
+    uint32_t size = sizeof(buf);
+    enum tfm_plat_err_t err;
+
+    err = tfm_attest_hal_get_verification_service(&size, buf);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_ATTEST_ERR_GENERAL;
+    }
+
+    service.ptr = &buf;
+    service.len = size;
+    attest_token_encode_add_tstr(token_ctx,
+                                 IAT_VERIFICATION_SERVICE,
+                                 &service);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+#endif /* INCLUDE_OPTIONAL_CLAIMS */
+
+#if defined(ATTEST_TOKEN_PROFILE_PSA_IOT_1) || \
+    defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
+/*!
  * \brief Static function to add boot seed claim to attestation token.
  *
  * \param[in]  token_ctx  Token encoding context
@@ -216,64 +389,6 @@ attest_add_boot_seed_claim(struct attest_token_encode_ctx *token_ctx)
 }
 
 /*!
- * \brief Static function to add instance id claim to attestation token.
- *
- * \param[in]  token_ctx  Token encoding context
- *
- * \note This mandatory claim represents the unique identifier of the instance.
- *       So far, only GUID type is supported.
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_instance_id_claim(struct attest_token_encode_ctx *token_ctx)
-{
-    struct q_useful_buf_c claim_value;
-    enum psa_attest_err_t err;
-
-    /* Leave the first byte for UEID type byte */
-    err = attest_get_instance_id(&claim_value);
-    if (err != PSA_ATTEST_ERR_SUCCESS) {
-        return err;
-    }
-
-    attest_token_encode_add_bstr(token_ctx,
-                                 IAT_INSTANCE_ID,
-                                 &claim_value);
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-/*!
- * \brief Static function to add implementation id claim to attestation token.
- *
- * \param[in]  token_ctx  Token encoding context
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_implementation_id_claim(struct attest_token_encode_ctx *token_ctx)
-{
-    uint8_t implementation_id[IMPLEMENTATION_ID_MAX_SIZE];
-    enum tfm_plat_err_t res_plat;
-    uint32_t size = sizeof(implementation_id);
-    struct q_useful_buf_c claim_value;
-
-    res_plat = tfm_plat_get_implementation_id(&size, implementation_id);
-    if (res_plat != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-    }
-
-    claim_value.ptr = implementation_id;
-    claim_value.len  = size;
-    attest_token_encode_add_bstr(token_ctx,
-                                 IAT_IMPLEMENTATION_ID,
-                                 &claim_value);
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-/*!
  * \brief Static function to add caller id claim to attestation token.
  *
  * \param[in]  token_ctx  Token encoding context
@@ -297,6 +412,54 @@ attest_add_caller_id_claim(struct attest_token_encode_ctx *token_ctx)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
+
+#if defined(INCLUDE_OPTIONAL_CLAIMS)
+/*!
+ * \brief Static function to add certification reference claim to attestation
+ *        token.
+ *
+ * \param[in]  token_ctx  Token encoding context
+ *
+ * \return Returns error code as specified in \ref psa_attest_err_t
+ */
+static enum psa_attest_err_t
+attest_add_cert_ref_claim(struct attest_token_encode_ctx *token_ctx)
+{
+    uint8_t buf[CERTIFICATION_REF_MAX_SIZE];
+    enum tfm_plat_err_t res_plat;
+    uint32_t size = sizeof(buf);
+    struct q_useful_buf_c claim_value = {0};
+    uint16_t tlv_len;
+    uint8_t *tlv_ptr = NULL;
+    int32_t found = 0;
+
+    /* First look up the certification reference in the boot status, it might
+     * comes from the bootloader.
+     */
+    found = attest_get_tlv_by_id(CERT_REF, &tlv_len, &tlv_ptr);
+    if (found == 1) {
+        claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
+        claim_value.len = tlv_len;
+    } else {
+        /* If not found in boot status then use callback function to get it
+         * from runtime SW
+         */
+        res_plat = tfm_plat_get_cert_ref(&size, buf);
+        if (res_plat != TFM_PLAT_ERR_SUCCESS) {
+            return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+        }
+        claim_value.ptr = buf;
+        claim_value.len = size;
+    }
+
+    attest_token_encode_add_tstr(token_ctx,
+                                 IAT_CERTIFICATION_REFERENCE,
+                                 &claim_value);
+
+    return PSA_ATTEST_ERR_SUCCESS;
+}
+#endif /* INCLUDE_OPTIONAL_CLAIMS */
+#endif /* ATTEST_TOKEN_PROFILE_PSA_IOT_1 || ATTEST_TOKEN_PROFILE_PSA_2_0_0 */
 
 #ifdef ATTEST_TOKEN_PROFILE_ARM_CCA
 /*!
@@ -364,56 +527,7 @@ attest_add_platform_config_claim(struct attest_token_encode_ctx *token_ctx)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
-#endif
-
-/*!
- * \brief Static function to add security lifecycle claim to attestation token.
- *
- * \param[in]  token_ctx  Token encoding context
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_security_lifecycle_claim(struct attest_token_encode_ctx *token_ctx)
-{
-    enum tfm_security_lifecycle_t security_lifecycle;
-    uint32_t slc_value;
-    int32_t res;
-    struct q_useful_buf_c claim_value = {0};
-    uint16_t tlv_len;
-    uint8_t *tlv_ptr = NULL;
-    int32_t found = 0;
-
-    /* First look up lifecycle state in boot status, it might comes
-     * from bootloader
-     */
-    found = attest_get_tlv_by_id(SECURITY_LIFECYCLE, &tlv_len, &tlv_ptr);
-    if (found == 1) {
-        claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
-        claim_value.len = tlv_len;
-        res = get_uint(claim_value.ptr, claim_value.len, &slc_value);
-        if (res) {
-            return PSA_ATTEST_ERR_GENERAL;
-        }
-        security_lifecycle = (enum tfm_security_lifecycle_t)slc_value;
-    } else {
-        /* If not found in boot status then use callback function to get it
-         * from runtime SW
-         */
-        security_lifecycle = tfm_attest_hal_get_security_lifecycle();
-    }
-
-    /* Sanity check */
-    if (security_lifecycle > TFM_SLC_MAX_VALUE) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    attest_token_encode_add_integer(token_ctx,
-                                    IAT_SECURITY_LIFECYCLE,
-                                    (int64_t)security_lifecycle);
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
+#endif /* ATTEST_TOKEN_PROFILE_ARM_CCA */
 
 /*!
  * \brief Static function to add the nonce claim to attestation token.
@@ -430,110 +544,6 @@ attest_add_nonce_claim(struct attest_token_encode_ctx   *token_ctx,
     attest_token_encode_add_bstr(token_ctx,
                                  IAT_NONCE,
                                  nonce);
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-/*!
- * \brief Static function to add the verification service indicator claim
- *        to the attestation token.
- *
- * \param[in]  token_ctx  Token encoding context
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_verification_service(struct attest_token_encode_ctx *token_ctx)
-{
-    struct q_useful_buf_c service;
-    uint8_t buf[VERIFICATION_URL_MAX_SIZE];
-    uint32_t size = sizeof(buf);
-    enum tfm_plat_err_t err;
-
-    err = tfm_attest_hal_get_verification_service(&size, buf);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    service.ptr = &buf;
-    service.len = size;
-    attest_token_encode_add_tstr(token_ctx,
-                                 IAT_VERIFICATION_SERVICE,
-                                 &service);
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-/*!
- * \brief Static function to add the name of the profile definition document
- *
- * \param[in]  token_ctx  Token encoding context
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_profile_definition(struct attest_token_encode_ctx *token_ctx)
-{
-    struct q_useful_buf_c profile;
-    uint8_t buf[PROFILE_DEFINITION_MAX_SIZE];
-    uint32_t size = sizeof(buf);
-    enum tfm_plat_err_t err;
-
-    err = tfm_attest_hal_get_profile_definition(&size, buf);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    profile.ptr = &buf;
-    profile.len = size;
-    attest_token_encode_add_tstr(token_ctx,
-                                 IAT_PROFILE_DEFINITION,
-                                 &profile);
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-/*!
- * \brief Static function to add certification reference claim to attestation
- *        token.
- *
- * \param[in]  token_ctx  Token encoding context
- *
- * \return Returns error code as specified in \ref psa_attest_err_t
- */
-static enum psa_attest_err_t
-attest_add_cert_ref_claim(struct attest_token_encode_ctx *token_ctx)
-{
-    uint8_t buf[CERTIFICATION_REF_MAX_SIZE];
-    enum tfm_plat_err_t res_plat;
-    uint32_t size = sizeof(buf);
-    struct q_useful_buf_c claim_value = {0};
-    uint16_t tlv_len;
-    uint8_t *tlv_ptr = NULL;
-    int32_t found = 0;
-
-    /* First look up the certification reference in the boot status, it might
-     * comes from the bootloader.
-     */
-    found = attest_get_tlv_by_id(CERT_REF, &tlv_len, &tlv_ptr);
-    if (found == 1) {
-        claim_value.ptr = tlv_ptr + SHARED_DATA_ENTRY_HEADER_SIZE;
-        claim_value.len = tlv_len;
-    } else {
-        /* If not found in boot status then use callback function to get it
-         * from runtime SW
-         */
-        res_plat = tfm_plat_get_cert_ref(&size, buf);
-        if (res_plat != TFM_PLAT_ERR_SUCCESS) {
-            return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
-        }
-        claim_value.ptr = buf;
-        claim_value.len = size;
-    }
-
-    attest_token_encode_add_tstr(token_ctx,
-                                 IAT_CERTIFICATION_REFERENCE,
-                                 &claim_value);
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
@@ -679,9 +689,9 @@ static enum psa_attest_err_t attest_get_t_cose_algorithm(
         &attest_add_caller_id_claim,
         &attest_add_security_lifecycle_claim,
         &attest_add_all_sw_components,
+        &attest_add_profile_definition,
 #ifdef INCLUDE_OPTIONAL_CLAIMS
         &attest_add_verification_service,
-        &attest_add_profile_definition,
         &attest_add_cert_ref_claim
 #endif
     };
