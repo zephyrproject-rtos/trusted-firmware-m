@@ -183,7 +183,7 @@ void load_irqs_assuredly(struct partition_t *p_partition)
     }
 
     p_ldinf = p_partition->p_ldinf;
-    p_irq_info = (struct irq_load_info_t *)LOAD_INFO_IRQ(p_ldinf);
+    p_irq_info = LOAD_INFO_IRQ(p_ldinf);
 
     for (i = 0; i < p_ldinf->nirqs; i++) {
         p_partition->signals_allowed |= p_irq_info->signal;

@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -120,7 +123,7 @@ struct irq_load_info_t *get_irq_info_for_signal(
         return NULL;
     }
 
-    irq_info = (struct irq_load_info_t *)LOAD_INFO_IRQ(p_ldinf);
+    irq_info = LOAD_INFO_IRQ(p_ldinf);
     for (i = 0; i < p_ldinf->nirqs; i++) {
         if (irq_info[i].signal == signal) {
             return &irq_info[i];
