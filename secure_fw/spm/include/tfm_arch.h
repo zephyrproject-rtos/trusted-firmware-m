@@ -191,6 +191,31 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
     __ISB();
 }
 
+
+/**
+ * \brief Whether in privileged level
+ *
+ * \retval true             If current execution runs in privileged level.
+ * \retval false            If current execution runs in unprivileged level.
+ */
+__STATIC_INLINE bool tfm_arch_is_priv(void)
+{
+    CONTROL_Type ctrl;
+
+    /* If in Handler mode */
+    if (__get_IPSR()) {
+        return true;
+    }
+
+    /* If in privileged Thread mode */
+    ctrl.w = __get_CONTROL();
+    if (!ctrl.b.nPRIV) {
+        return true;
+    }
+
+    return false;
+}
+
 #if (CONFIG_TFM_FLOAT_ABI >= 1) && CONFIG_TFM_LAZY_STACKING
 #define ARCH_FLUSH_FP_CONTEXT()  __asm volatile("vmov  s0, s0 \n":::"memory")
 #else
