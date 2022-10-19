@@ -5,6 +5,7 @@
  *
  */
 
+#include <string.h>
 #include "target_cfg.h"
 #include "region.h"
 #include "cmsis.h"

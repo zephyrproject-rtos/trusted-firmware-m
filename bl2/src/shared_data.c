@@ -231,16 +231,22 @@ int boot_save_shared_data(const struct image_header *hdr,
 
     switch (slot_id) {
     case BOOT_MEASUREMENT_SLOT_RT_0:
-        strlcpy(metadata.sw_type, "RT_0",
-                sizeof(metadata.sw_type));
+        if (sizeof(metadata.sw_type) < sizeof("RT_0")) {
+            return 1;
+        }
+        memcpy(metadata.sw_type, "RT_0", sizeof("RT_0"));
         break;
     case BOOT_MEASUREMENT_SLOT_RT_1:
-        strlcpy(metadata.sw_type, "RT_1",
-                sizeof(metadata.sw_type));
+        if (sizeof(metadata.sw_type) < sizeof("RT_1")) {
+            return 1;
+        }
+        memcpy(metadata.sw_type, "RT_1", sizeof("RT_1"));
         break;
     case BOOT_MEASUREMENT_SLOT_RT_2:
-        strlcpy(metadata.sw_type, "RT_2",
-                sizeof(metadata.sw_type));
+        if (sizeof(metadata.sw_type) < sizeof("RT_2")) {
+            return 1;
+        }
+        memcpy(metadata.sw_type, "RT_2", sizeof("RT_2"));
         break;
     default:
         /* Proceed without this piece of data. */
