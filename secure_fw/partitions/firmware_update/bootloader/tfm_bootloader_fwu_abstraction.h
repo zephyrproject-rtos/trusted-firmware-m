@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,8 +15,6 @@
 extern "C" {
 #endif
 
-typedef uint8_t bl_image_id_t;
-
 /**
  * Bootloader related initialization for firmware update, such as reading
  * some necessary shared data from the memory if needed.
@@ -27,37 +25,45 @@ typedef uint8_t bl_image_id_t;
 psa_status_t fwu_bootloader_init(void);
 
 /**
- * \brief Initialize the staging area of the image with given ID.
+ * \brief Initialize the staging area of the component.
  *
- * Prepare the staging area of the image with given ID for image download.
+ * The component is in READY state. Prepare the staging area of the component
+ * for image download.
  * For example, initialize the staging area, open the flash area, and so on.
  * The image will be written into the staging area later.
  *
- * \param[in] bootloader_image_id The identifier of the target image in
- *                                bootloader
+ * \param[in] component The identifier of the target component in bootloader.
+ * \param[in] manifest  A pointer to a buffer containing a detached manifest for
+ *                      the update. If the manifest is bundled with the firmware
+ *                      image, manifest must be NULL.
+ * \param[in] manifest_size  Size of the manifest buffer in bytes.
  *
  * \return PSA_SUCCESS                  On success
+ *         PSA_ERROR_INVALID_SIGNATURE  A signature or integrity check on the
+ *                                      manifest has failed.
  *         PSA_ERROR_INVALID_ARGUMENT   Invalid input parameter
- *         PSA_ERROR_GENERIC_ERROR      A fatal error occurred
+ *         PSA_ERROR_INSUFFICIENT_MEMORY
+ *         PSA_ERROR_INSUFFICIENT_STORAGE
+ *         PSA_ERROR_COMMUNICATION_FAILURE
+ *         PSA_ERROR_STORAGE_FAILURE
  *
  */
-psa_status_t fwu_bootloader_staging_area_init(bl_image_id_t
-                                              bootloader_image_id);
+psa_status_t fwu_bootloader_staging_area_init(psa_fwu_component_t component,
+                                              const void *manifest,
+                                              size_t manifest_size);
 
 /**
- * \brief Load the image into the target device.
+ * \brief Load the image into the target component.
  *
- * Prepare the staging area of the image with given ID for image download.
- * For example, initialize the staging area, open the flash area, and so on.
- * The image will be written into the staging area later.
+ * The component is in WRITING state. Write the image data into the target
+ * component.
  *
- * \param[in] bootloader_image_id The identifier of the target image in
- *                                bootloader
- * \param[in] block_offset        The offset of the image being passed into
- *                                block, in bytes
- * \param[in] block               A buffer containing a block of image data.
- *                                This might be a complete image or a subset.
- * \param[in] block_size          Size of block.
+ * \param[in] component The identifier of the target component in bootloader.
+ * \param[in] image_offset  The offset of the image being passed into block, in
+ *                          bytes
+ * \param[in] block         A buffer containing a block of image data. This
+ *                          might be a complete image or a subset.
+ * \param[in] block_size    Size of block.
  *
  * \return PSA_SUCCESS                     On success
  *         PSA_ERROR_INVALID_ARGUMENT      Invalid input parameter
@@ -68,25 +74,22 @@ psa_status_t fwu_bootloader_staging_area_init(bl_image_id_t
  *         PSA_ERROR_GENERIC_ERROR         A fatal error occurred
  *
  */
-psa_status_t fwu_bootloader_load_image(bl_image_id_t bootloader_image_id,
-                                       size_t block_offset,
+psa_status_t fwu_bootloader_load_image(psa_fwu_component_t component,
+                                       size_t image_offset,
                                        const void *block,
                                        size_t block_size);
 
 /**
  * \brief Starts the installation of an image.
  *
- * Check the authenticity and integrity of the image.
+ * The components are in CANDIDATE state. Check the authenticity and integrity of
+ * the staged image in the components. If a reboot is required to complete the
+ * check, then mark this image as a candidate so that the next time bootloader
+ * runs it will take this image as a candidate one to bootup. Return the error
+ * code PSA_SUCCESS_REBOOT.
  *
- * If a reboot is required to complete the check, then mark this image as a
- * candidate so that the next time bootloader runs it will take this image
- * as a candidate one to bootup. Return the error code PSA_SUCCESS_REBOOT.
- *
- * \param[in] bootloader_image_id The identifier of the target image in
- *                                bootloader
- * \param[out] dependency         Bootloader image ID of dependency if needed
- * \param[out] dependency_version Bootloader image version of dependency if
- *                                needed
+ * \param[in] candidates A list of components in CANDIDATE state.
+ * \param[in] number Number of components in CANDIDATE state.
  *
  * \return PSA_SUCCESS         On success
  *         PSA_SUCCESS_REBOOT  A system reboot is needed to finish installation
@@ -102,54 +105,84 @@ psa_status_t fwu_bootloader_load_image(bl_image_id_t bootloader_image_id,
  *                                       timestamp and it has expired, then
  *                                       this error is also returned.
  */
-psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
-                                          bl_image_id_t *dependency,
-                                      psa_image_version_t *dependency_version);
+psa_status_t fwu_bootloader_install_image(const psa_fwu_component_t *candidates,
+                                          uint8_t number);
 
 /**
- * \brief Marks the image in the primary slot as confirmed.
+ * \brief Mark the TRIAL(running) image in component as confirmed.
  *
  * Call this API to mark the running images as permanent/accepted to avoid
  * revert when next time bootup. Usually, this API is called after the running
  * images have been verified as valid.
  *
+ * \param[in] candidates A list of components in TRIAL state.
+ * \param[in] number Number of components in TRIAL state.
+ *
  * \return PSA_SUCCESS         On success
- *         PSA_ERROR_GENERIC_ERROR       A fatal error occurred
+ *         PSA_ERROR_INSUFFICIENT_MEMORY
+ *         PSA_ERROR_INSUFFICIENT_STORAGE
+ *         PSA_ERROR_COMMUNICATION_FAILURE
+ *         PSA_ERROR_STORAGE_FAILURE
  */
-psa_status_t fwu_bootloader_mark_image_accepted(
-                                             bl_image_id_t bootloader_image_id);
+psa_status_t fwu_bootloader_mark_image_accepted(const psa_fwu_component_t *trials,
+                                                uint8_t number);
 
 /**
- * \brief Abort the current image download process.
+ * \brief Uninstall the staged image in the component.
+ *
+ * The component is in STAGED state. Uninstall the staged image in the component
+ * so that this image will not be treated as a candidate next time bootup.
+ *
+ * \return PSA_SUCCESS         On success
+ *         PSA_ERROR_INSUFFICIENT_MEMORY
+ *         PSA_ERROR_INSUFFICIENT_STORAGE
+ *         PSA_ERROR_COMMUNICATION_FAILURE
+ *         PSA_ERROR_STORAGE_FAILURE
+ */
+psa_status_t fwu_bootloader_reject_staged_image(psa_fwu_component_t component);
+
+/**
+ * \brief Reject the trial image in the component.
+ *
+ * The component is in TRIAL state. Mark the running image in the component as
+ * rejected.
+ *
+ * \return PSA_SUCCESS         On success
+ *         PSA_ERROR_INSUFFICIENT_MEMORY
+ *         PSA_ERROR_INSUFFICIENT_STORAGE
+ *         PSA_ERROR_COMMUNICATION_FAILURE
+ *         PSA_ERROR_STORAGE_FAILURE
+ */
+psa_status_t fwu_bootloader_reject_trial_image(psa_fwu_component_t component);
+
+/**
+ * \brief The component is in FAILED or UPDATED state. Clean the staging area of the component.
  *
  * \return PSA_SUCCESS         On success
  *         PSA_ERROR_INVALID_ARGUMENT    Invalid input parameter
- *         PSA_ERROR_GENERIC_ERROR       A fatal error occurred
+ *         PSA_ERROR_STORAGE_FAILURE
  */
-psa_status_t fwu_bootloader_abort(bl_image_id_t bootloader_image_id);
+psa_status_t fwu_bootloader_clean_component(psa_fwu_component_t component);
 
 /**
  * \brief Get the image information.
  *
- * Get the image information of the given bootloader_image_id in staging area
+ * Get the image information of the given component in staging area
  * or the running area.
  *
- * \param[in] bootloader_image_id  The identifier of the target image in
- *                                 bootloader
- * \param[in] active_image         Indicates image location
- *                                 True: the running image.
- *                                 False: the image in the passive(or staging)
- *                                 slot.
- * \param[out] info                Buffer containing return the image
- *                                 information
- *
+ * \param[in] component  The identifier of the target component in bootloader.
+ * \param[in] query_state  Query 'state' field.
+ * \param[in] query_impl_info  Query 'impl' field.
+ * \param[out] info      Buffer containing return the component information.
+
  * \return PSA_SUCCESS         On success
  *         PSA_ERROR_INVALID_ARGUMENT    Invalid input parameter
  *         PSA_ERROR_GENERIC_ERROR       A fatal error occurred
  */
-psa_status_t fwu_bootloader_get_image_info(bl_image_id_t bootloader_image_id,
-                                           bool active_image,
-                                           psa_image_info_t *info);
+psa_status_t fwu_bootloader_get_image_info(psa_fwu_component_t component,
+                                           bool query_state,
+                                           bool query_impl_info,
+                                           psa_fwu_component_info_t *info);
 #ifdef __cplusplus
 }
 #endif

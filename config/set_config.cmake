@@ -77,6 +77,9 @@ if (NOT DEFINED BL2 OR BL2)
     include(${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/mcuboot_default_config.cmake)
 endif()
 
+# Include FWU partition configs.
+include(config/tfm_fwu_config.cmake)
+
 # Include coprocessor configs
 include(config/cp_config_default.cmake)
 

@@ -29,7 +29,6 @@ target_include_directories(tfm_partitions
 target_sources(tfm_psa_rot_partition_fwu
     PRIVATE
         tfm_fwu_req_mngr.c
-        tfm_fwu.c
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/intermedia_tfm_firmware_update.c
 )
 target_sources(tfm_partitions
@@ -49,10 +48,28 @@ target_link_libraries(tfm_psa_rot_partition_fwu
         tfm_sprt
 )
 
+
+# Generate firmware update feature
+if (NOT FWU_DEVICE_CONFIG_FILE)
+    configure_file(${CMAKE_SOURCE_DIR}/interface/include/psa/fwu_config.h.in
+                   ${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h
+                   @ONLY)
+    set(FWU_DEVICE_CONFIG_FILE "${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h")
+else()
+    # FWU_DEVICE_CONFIG_FILE exists and is a file
+    if(NOT EXISTS ${FWU_DEVICE_CONFIG_FILE})
+        message(FATAL_ERROR "FWU_DEVICE_CONFIG_FILE:${FWU_DEVICE_CONFIG_FILE} does not exist.")
+    elseif(IS_DIRECTORY ${FWU_DEVICE_CONFIG_FILE})
+        message(FATAL_ERROR "FWU_DEVICE_CONFIG_FILE:${FWU_DEVICE_CONFIG_FILE} is a folder while a file is expected.")
+    endif()
+endif()
+
+
 target_compile_definitions(tfm_psa_rot_partition_fwu
     PRIVATE
         $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
         $<$<BOOL:${TFM_FWU_BUF_SIZE}>:TFM_FWU_BUF_SIZE=${TFM_FWU_BUF_SIZE}>
+        FWU_DEVICE_CONFIG_FILE="${FWU_DEVICE_CONFIG_FILE}"
 )
 
 ############################ Partition Defs ####################################
@@ -66,16 +83,14 @@ target_compile_definitions(tfm_partition_defs
     INTERFACE
     TFM_PARTITION_FIRMWARE_UPDATE
 )
-# Generate firmware update feature
-configure_file(${CMAKE_SOURCE_DIR}/interface/include/psa/fwu_config.h.in
-               ${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h
-               @ONLY)
 
 ################ Display the configuration being applied #######################
 
 include(utils)
 dump_options("Firmware Update Partition config"
 "
-    FWU_STACK_SIZE
+    TFM_FWU_BOOTLOADER_LIB;
+    FWU_STACK_SIZE;
+    FWU_DEVICE_CONFIG_FILE
 "
 )
