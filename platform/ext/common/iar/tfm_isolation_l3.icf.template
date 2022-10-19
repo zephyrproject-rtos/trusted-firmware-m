@@ -207,6 +207,10 @@ define block TFM_SP_META_PTR with alignment = 32 {
        };
 #endif
 
+#ifdef RAM_VECTORS_SUPPORT
+define block ER_RAM_VECTORS      with alignment = 256 { section .ramvec };
+#endif
+
 define block PT_SRAM_WATERMARK with alignment = 32, size = 0 { };
 
 /* Define Flash content */
@@ -289,6 +293,10 @@ define block DATA with fixed order {
 
 #if defined(CONFIG_TFM_PARTITION_META)
     block TFM_SP_META_PTR,
+#endif
+
+#ifdef RAM_VECTORS_SUPPORT
+    block ER_RAM_VECTORS,
 #endif
 
     block PT_SRAM_WATERMARK,

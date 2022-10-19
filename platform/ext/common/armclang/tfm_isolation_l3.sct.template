@@ -236,6 +236,12 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     }
 #endif
 
+#ifdef RAM_VECTORS_SUPPORT
+    ER_RAM_VECTORS +0 ALIGN 256 UNINIT {
+        * (RESET_RAM)
+    }
+#endif
+
     PT_SRAM_WATERMARK +0 EMPTY 0x0 {
         /* Position tag */
     }
