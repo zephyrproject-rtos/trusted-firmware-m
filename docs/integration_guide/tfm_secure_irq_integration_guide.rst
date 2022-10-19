@@ -288,7 +288,7 @@ Different platforms may have different values for those priorities.
 But if you use the ``NVIC_SetPriority`` function provided by CMSIS to set
 priorities, you can pass the values directly.
 
-Platforms have the fexibilities on the assignment of priorities.
+Platforms have the flexibilities on the assignment of priorities.
 
 Targeting Interrupts to Secure
 ------------------------------
@@ -316,8 +316,8 @@ TF-M provides a struct for saving the information:
 .. code-block:: c
 
   struct irq_t {
-      void                   *p_pt;
-      struct irq_load_info_t *p_ildi;
+      void                         *p_pt;
+      const struct irq_load_info_t *p_ildi;
   };
 
 Integrating the Interrupt Handling Function
@@ -327,7 +327,7 @@ TF-M provides an interrupt handling entry for Secure interrupts:
 
 .. code-block:: c
 
-  void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
+  void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
 
 The ``p_pt`` and ``p_ildi`` are the information passed to interrupt
 initialization functions and saved by platforms.
@@ -403,3 +403,5 @@ References
 --------------
 
 *Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

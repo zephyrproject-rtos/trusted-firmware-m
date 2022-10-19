@@ -112,12 +112,12 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
 }
 #endif
 
-struct irq_load_info_t *get_irq_info_for_signal(
+const struct irq_load_info_t *get_irq_info_for_signal(
                                     const struct partition_load_info_t *p_ldinf,
                                     psa_signal_t signal)
 {
     size_t i;
-    struct irq_load_info_t *irq_info;
+    const struct irq_load_info_t *irq_info;
 
     if (!IS_ONLY_ONE_BIT_IN_UINT32(signal)) {
         return NULL;
@@ -133,7 +133,7 @@ struct irq_load_info_t *get_irq_info_for_signal(
     return NULL;
 }
 
-void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi)
+void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
 {
     psa_flih_result_t flih_result;
     struct partition_t *p_part;

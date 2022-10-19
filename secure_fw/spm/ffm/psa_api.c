@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -932,7 +935,7 @@ void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
 void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
 {
     struct partition_t *partition;
-    struct irq_load_info_t *irq_info;
+    const struct irq_load_info_t *irq_info;
 
     partition = GET_CURRENT_COMPONENT();
 
@@ -947,7 +950,7 @@ void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
 psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal)
 {
     struct partition_t *partition;
-    struct irq_load_info_t *irq_info;
+    const struct irq_load_info_t *irq_info;
 
     partition = GET_CURRENT_COMPONENT();
 
@@ -966,7 +969,7 @@ psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal)
 void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
-    struct irq_load_info_t *irq_info;
+    const struct irq_load_info_t *irq_info;
     struct partition_t *partition;
 
     partition = GET_CURRENT_COMPONENT();
@@ -997,7 +1000,7 @@ void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
 void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
-    struct irq_load_info_t *irq_info = NULL;
+    const struct irq_load_info_t *irq_info = NULL;
     struct partition_t *partition = NULL;
 
     partition = GET_CURRENT_COMPONENT();

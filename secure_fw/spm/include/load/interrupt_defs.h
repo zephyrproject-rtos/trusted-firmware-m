@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,8 +30,8 @@ struct irq_load_info_t {
 
 /* IRQ runtime data */
 struct irq_t {
-    void                   *p_pt;   /* The owner Partition struct partition_t */
-    struct irq_load_info_t *p_ildi; /* The interrupt load info                */
+    void                         *p_pt;       /* The owner Partition     */
+    const struct irq_load_info_t *p_ildi;     /* The interrupt load info */
 };
 
 #endif /* __INTERRUPT_DEFS_H__ */
