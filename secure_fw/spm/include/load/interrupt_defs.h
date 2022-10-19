@@ -21,7 +21,7 @@ struct irq_load_info_t {
      * Initialization function per interrupt.
      * args:  owner Partition, irq_load_info
      */
-    enum tfm_hal_status_t (*init)(void *pt, struct irq_load_info_t *pildi);
+    enum tfm_hal_status_t (*init)(void *pt, const struct irq_load_info_t *pildi);
     psa_flih_result_t (*flih_func)(void);     /* FLIH function, NULL for SLIH */
     int32_t      pid;                         /* Owner Partition ID           */
     uint32_t     source;                      /* IRQ source (number/index)    */

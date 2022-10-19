@@ -249,7 +249,7 @@ The prototype of the function is:
 .. code-block:: c
 
   enum tfm_hal_status_t {source_symbol}_init(void *p_pt,
-                                             struct irq_load_info_t *p_ildi)
+                                             const struct irq_load_info_t *p_ildi)
 
 The ``{source_symbol}`` is:
 

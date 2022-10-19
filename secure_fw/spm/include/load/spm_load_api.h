@@ -43,7 +43,7 @@
     ((const struct asset_desc_t *)((uintptr_t)LOAD_INFO_SERVICE(pldinf) + \
      (pldinf)->nservices * sizeof(struct service_load_info_t)))
 #define LOAD_INFO_IRQ(pldinf)                                          \
-    ((struct irq_load_info_t *)((uintptr_t)LOAD_INFO_ASSET(pldinf) +   \
+    ((const struct irq_load_info_t *)((uintptr_t)LOAD_INFO_ASSET(pldinf) + \
      (pldinf)->nassets * sizeof(struct asset_desc_t)))
 
 /* Runtime partition struct list head node type */

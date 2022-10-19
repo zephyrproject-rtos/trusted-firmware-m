@@ -60,10 +60,10 @@ extern psa_status_t {{manifest.entry_init}}(void);
     {% for irq in manifest.irqs %}
         {% if irq.source is number %}}
 extern enum tfm_hal_status_t {{"irq_" + irq.source|string + "_init"}}(void *p_pt,
-                                                                      struct irq_load_info_t *p_ildi);
+                                                                      const struct irq_load_info_t *p_ildi);
         {% else %}
 extern enum tfm_hal_status_t {{irq.source|lower + "_init"}}(void *p_pt,
-                                                            struct irq_load_info_t *p_ildi);
+                                                            const struct irq_load_info_t *p_ildi);
         {% endif %}
     {% endfor %}
 {% endif %}

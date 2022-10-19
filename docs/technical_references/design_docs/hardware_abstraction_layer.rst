@@ -680,7 +680,7 @@ Initializations
 .. code-block:: c
 
   enum tfm_hal_status_t {source_symbol}_init(void *p_pt,
-                                             struct irq_load_info_t *p_ildi)
+                                             const struct irq_load_info_t *p_ildi)
 
 The ``{source_symbol}`` is:
 
@@ -917,3 +917,5 @@ compromise.
 --------------
 
 *Copyright (c) 2020-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

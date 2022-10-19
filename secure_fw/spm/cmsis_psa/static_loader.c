@@ -174,7 +174,7 @@ uint32_t load_services_assuredly(struct partition_t *p_partition,
 void load_irqs_assuredly(struct partition_t *p_partition)
 {
 #if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
-    struct irq_load_info_t *p_irq_info;
+    const struct irq_load_info_t *p_irq_info;
     const struct partition_load_info_t *p_ldinf;
     uint32_t i;
 
