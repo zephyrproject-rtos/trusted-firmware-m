@@ -54,7 +54,7 @@ static void insert_by_prior(struct thread_t **head, struct thread_t *node)
 
 void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn)
 {
-    TFM_CORE_ASSERT(p_thrd != NULL);
+    SPM_ASSERT(p_thrd != NULL);
 
     /* Insert a new thread with priority */
     insert_by_prior(&LIST_HEAD, p_thrd);
@@ -68,7 +68,7 @@ void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn)
 
 void thrd_set_state(struct thread_t *p_thrd, uint32_t new_state)
 {
-    TFM_CORE_ASSERT(p_thrd != NULL);
+    SPM_ASSERT(p_thrd != NULL);
 
     p_thrd->state = new_state;
 
@@ -99,7 +99,7 @@ uint32_t thrd_start_scheduler(struct thread_t **ppth)
 
 void thrd_set_wait(struct sync_obj_t *p_sync_obj, struct thread_t *pth)
 {
-    TFM_CORE_ASSERT(p_sync_obj && p_sync_obj->magic == THRD_SYNC_MAGIC);
+    SPM_ASSERT(p_sync_obj && p_sync_obj->magic == THRD_SYNC_MAGIC);
 
     p_sync_obj->owner = pth;
     thrd_set_state(pth, THRD_STATE_BLOCK);
@@ -107,7 +107,7 @@ void thrd_set_wait(struct sync_obj_t *p_sync_obj, struct thread_t *pth)
 
 void thrd_wake_up(struct sync_obj_t *p_sync_obj, uint32_t ret_val)
 {
-    TFM_CORE_ASSERT(p_sync_obj && p_sync_obj->magic == THRD_SYNC_MAGIC);
+    SPM_ASSERT(p_sync_obj && p_sync_obj->magic == THRD_SYNC_MAGIC);
 
     if (p_sync_obj->owner && p_sync_obj->owner->state == THRD_STATE_BLOCK) {
         thrd_set_state(p_sync_obj->owner, THRD_STATE_RUNNABLE);

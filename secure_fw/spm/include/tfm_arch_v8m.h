@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -121,7 +121,7 @@ __STATIC_INLINE void tfm_arch_set_msplim(uint32_t msplim)
  */
 __STATIC_INLINE uintptr_t arch_seal_thread_stack(uintptr_t stk)
 {
-    TFM_CORE_ASSERT((stk & 0x7) == 0);
+    SPM_ASSERT((stk & 0x7) == 0);
     stk -= TFM_STACK_SEALED_SIZE;
 
     *((uint32_t *)stk)       = TFM_STACK_SEAL_VALUE;
@@ -147,7 +147,7 @@ __STATIC_INLINE void tfm_arch_init_secure_msp(uint32_t msplim)
      * Set MSPLIM. As the initial 'main()' code is running under privileged PSP
      * manipulating MSP works here.
      */
-    TFM_CORE_ASSERT((mstk_adr & 0x7) == 0);
+    SPM_ASSERT((mstk_adr & 0x7) == 0);
     mstk_adr -= TFM_STACK_SEALED_SIZE;
 
     *((uint32_t *)mstk_adr)       = TFM_STACK_SEAL_VALUE;

@@ -200,7 +200,7 @@ uint32_t backend_system_run(void)
     fih_int fih_rc = FIH_FAILURE;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-    TFM_CORE_ASSERT(SPM_THREAD_CONTEXT);
+    SPM_ASSERT(SPM_THREAD_CONTEXT);
 #endif
 
     partition_meta_indicator_pos = (uintptr_t *)hal_mem_sp_meta_start;

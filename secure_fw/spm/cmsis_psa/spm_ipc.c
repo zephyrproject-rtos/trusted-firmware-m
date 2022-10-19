@@ -167,7 +167,7 @@ void tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
-    TFM_CORE_ASSERT(conn_handle != NULL);
+    SPM_ASSERT(conn_handle != NULL);
 
     CRITICAL_SECTION_ENTER(cs_assert);
     /* Back handle buffer to pool */
@@ -254,7 +254,7 @@ struct partition_t *tfm_spm_get_partition_by_id(int32_t partition_id)
 int32_t tfm_spm_check_client_version(struct service_t *service,
                                      uint32_t version)
 {
-    TFM_CORE_ASSERT(service);
+    SPM_ASSERT(service);
 
     switch (SERVICE_GET_VERSION_POLICY(service->p_ldinf->flags)) {
     case SERVICE_VERSION_POLICY_RELAXED:
@@ -281,7 +281,7 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
     uint32_t *dep;
     int32_t i;
 
-    TFM_CORE_ASSERT(service);
+    SPM_ASSERT(service);
 
     if (ns_caller) {
         if (!SERVICE_IS_NS_ACCESSIBLE(service->p_ldinf->flags)) {
@@ -365,12 +365,12 @@ void spm_fill_message(struct conn_handle_t *conn_handle,
 {
     uint32_t i;
 
-    TFM_CORE_ASSERT(conn_handle);
-    TFM_CORE_ASSERT(service);
-    TFM_CORE_ASSERT(!(invec == NULL && in_len != 0));
-    TFM_CORE_ASSERT(!(outvec == NULL && out_len != 0));
-    TFM_CORE_ASSERT(in_len <= SIZE_MAX - out_len);
-    TFM_CORE_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
+    SPM_ASSERT(conn_handle);
+    SPM_ASSERT(service);
+    SPM_ASSERT(!(invec == NULL && in_len != 0));
+    SPM_ASSERT(!(outvec == NULL && out_len != 0));
+    SPM_ASSERT(in_len <= SIZE_MAX - out_len);
+    SPM_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
     spm_memset(&conn_handle->msg, 0, sizeof(psa_msg_t));
@@ -504,7 +504,7 @@ void update_caller_outvec_len(struct conn_handle_t *handle)
      * Or if it is a SFN message, it does not have owner thread state either.
      */
     if ((!is_tfm_rpc_msg(handle)) && (handle->sfn_magic != TFM_MSG_MAGIC_SFN)) {
-        TFM_CORE_ASSERT(handle->ack_evnt.owner->state == THRD_STATE_BLOCK);
+        SPM_ASSERT(handle->ack_evnt.owner->state == THRD_STATE_BLOCK);
     }
 
     for (i = 0; i < PSA_MAX_IOVEC; i++) {
@@ -512,8 +512,7 @@ void update_caller_outvec_len(struct conn_handle_t *handle)
             continue;
         }
 
-        TFM_CORE_ASSERT(
-            handle->caller_outvec[i].base == handle->outvec[i].base);
+        SPM_ASSERT(handle->caller_outvec[i].base == handle->outvec[i].base);
 
         handle->caller_outvec[i].len = handle->outvec[i].len;
     }

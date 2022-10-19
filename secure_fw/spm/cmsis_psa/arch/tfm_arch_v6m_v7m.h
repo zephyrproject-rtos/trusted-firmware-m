@@ -122,7 +122,7 @@ __STATIC_INLINE void tfm_arch_set_msplim(uint32_t msplim)
  */
 __STATIC_INLINE uintptr_t arch_seal_thread_stack(uintptr_t stk)
 {
-    TFM_CORE_ASSERT((stk & 0x7) == 0);
+    SPM_ASSERT((stk & 0x7) == 0);
     return stk;
 }
 
