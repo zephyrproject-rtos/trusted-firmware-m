@@ -155,6 +155,7 @@ add_custom_command(OUTPUT tfm_s_signed.bin
         -L ${MCUBOOT_ENC_KEY_LEN}
         -d \"\(1,${MCUBOOT_NS_IMAGE_MIN_VER}\)\"
         $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
+        $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
         $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
         $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
         $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
@@ -208,6 +209,7 @@ if(NS)
             -d \"\(0, ${MCUBOOT_S_IMAGE_MIN_VER}\)\"
             $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
+            $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
             $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_ns_signed.bin
@@ -254,6 +256,7 @@ if(NS)
             -s ${MCUBOOT_SECURITY_COUNTER_S}
             -L ${MCUBOOT_ENC_KEY_LEN}
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
+            $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
             $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns.bin

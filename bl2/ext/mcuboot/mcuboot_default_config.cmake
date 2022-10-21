@@ -23,6 +23,7 @@ set(MCUBOOT_UPGRADE_STRATEGY            "OVERWRITE_ONLY" CACHE STRING "Upgrade s
 set(BL2_HEADER_SIZE                     0x400       CACHE STRING    "Header size")
 set(BL2_TRAILER_SIZE                    0x400       CACHE STRING    "Trailer size")
 set(MCUBOOT_ALIGN_VAL                   1           CACHE STRING    "align option for mcuboot and build image with imgtool [1, 2, 4, 8, 16, 32]")
+set(MCUBOOT_CONFIRM_IMAGE               OFF         CACHE BOOL      "Whether to confirm the image if REVERT is supported in MCUboot")
 
 # Specifying a scope of the accepted values of MCUBOOT_UPGRADE_STRATEGY for
 # platforms to choose a specific upgrade strategy for images. These certain
