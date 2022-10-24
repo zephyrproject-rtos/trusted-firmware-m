@@ -183,7 +183,6 @@ if(BL2)
             cmsis_drivers/Driver_USART.c
             device/source/device_definition.c
             device/source/system_core_init.c
-            boot_hal_bl2.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
     )
