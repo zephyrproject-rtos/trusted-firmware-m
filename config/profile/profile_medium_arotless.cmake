@@ -5,7 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
-set(TFM_PROFILE                         profile_medium_arotless CACHE STRING    "Profile to use")
+set(TFM_PROFILE                profile_medium_arotless CACHE STRING    "Profile to use")
+set(PROJECT_CONFIG_HEADER_FILE "${CMAKE_SOURCE_DIR}/config/profile/config_profile_medium_arotless.h" CACHE FILEPATH "User defined header file for TF-M config")
 
 ############################ SPM CONFIGURATION  ################################
 

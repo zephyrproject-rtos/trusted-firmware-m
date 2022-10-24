@@ -62,6 +62,8 @@ set(CONFIG_TFM_DOORBELL_API             ON          CACHE BOOL      "Enable the 
 
 set(CONFIG_TFM_STACK_WATERMARKS         OFF         CACHE BOOL      "Whether to pre-fill partition stacks with a set value to help determine stack usage")
 
+set(PROJECT_CONFIG_HEADER_FILE          "${CMAKE_SOURCE_DIR}/config/config_base.h" CACHE FILEPATH "User defined header file for TF-M config")
+
 ############################ Platform ##########################################
 
 set(NUM_MAILBOX_QUEUE_SLOT              1           CACHE BOOL      "Number of mailbox queue slots")

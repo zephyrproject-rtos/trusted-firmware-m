@@ -5,12 +5,13 @@
 #
 #-------------------------------------------------------------------------------
 
-set(TFM_PROFILE                   profile_medium CACHE STRING "Configuration profile")
+set(TFM_PROFILE                profile_medium CACHE STRING "Configuration profile")
+set(PROJECT_CONFIG_HEADER_FILE "${CMAKE_SOURCE_DIR}/config/profile/config_profile_medium.h" CACHE FILEPATH "User defined header file for TF-M config")
 
 ############################ SPM CONFIGURATION  ################################
 
 set(TFM_ISOLATION_LEVEL                    2     CACHE STRING "Isolation level")
-set(CONFIG_TFM_SPM_BACKEND                "IPC"  CACHE STRING "The SPM backend [IPC, SFN]")
+set(CONFIG_TFM_SPM_BACKEND                 "IPC" CACHE STRING "The SPM backend [IPC, SFN]")
 
 ############################ PARTITION CONFIGURATION  ##########################
 
@@ -24,9 +25,9 @@ set(TFM_PARTITION_FIRMWARE_UPDATE          OFF   CACHE BOOL "Enable firmware upd
 
 ################################## Advanced options #############################
 
-set(ITS_BUF_SIZE                           32    CACHE STRING "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
-set(PS_CRYPTO_AEAD_ALG               PSA_ALG_CCM CACHE STRING "The AEAD algorithm to use for authenticated encryption in protected storage")
-set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED    ON    CACHE BOOL "Disable PSA Crypto asymmetric key encryption module")
+set(ITS_BUF_SIZE                           32          CACHE STRING "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
+set(PS_CRYPTO_AEAD_ALG                     PSA_ALG_CCM CACHE STRING "The AEAD algorithm to use for authenticated encryption in protected storage")
+set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED    ON          CACHE BOOL   "Disable PSA Crypto asymmetric key encryption module")
 
 ################################## Dependencies ################################
 

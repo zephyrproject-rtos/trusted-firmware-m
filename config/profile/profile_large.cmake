@@ -5,12 +5,13 @@
 #
 #-------------------------------------------------------------------------------
 
-set(TFM_PROFILE                    profile_large CACHE STRING "Configuration profile")
+set(TFM_PROFILE                profile_large CACHE STRING "Configuration profile")
+set(PROJECT_CONFIG_HEADER_FILE "${CMAKE_SOURCE_DIR}/config/profile/config_profile_large.h" CACHE FILEPATH "User defined header file for TF-M config")
 
 ############################ SPM CONFIGURATION  ################################
 
 set(TFM_ISOLATION_LEVEL                    3     CACHE STRING "Isolation level")
-set(CONFIG_TFM_SPM_BACKEND                "IPC"  CACHE STRING "The SPM backend [IPC, SFN]")
+set(CONFIG_TFM_SPM_BACKEND                 "IPC" CACHE STRING "The SPM backend [IPC, SFN]")
 
 ############################ PARTITION CONFIGURATION  ##########################
 
@@ -24,9 +25,9 @@ set(TFM_PARTITION_FIRMWARE_UPDATE          OFF   CACHE BOOL "Enable firmware upd
 
 ################################## Advanced options #############################
 
-set(MCUBOOT_FIH_PROFILE                   MEDIUM CACHE STRING "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
-set(ITS_BUF_SIZE                           ""    CACHE STRING "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
-set(PS_CRYPTO_AEAD_ALG               PSA_ALG_CCM CACHE STRING "The AEAD algorithm to use for authenticated encryption in protected storage")
+set(MCUBOOT_FIH_PROFILE                    MEDIUM      CACHE STRING "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
+set(ITS_BUF_SIZE                           ""          CACHE STRING "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
+set(PS_CRYPTO_AEAD_ALG                     PSA_ALG_CCM CACHE STRING "The AEAD algorithm to use for authenticated encryption in protected storage")
 
 ################################## Dependencies ################################
 

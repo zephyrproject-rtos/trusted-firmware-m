@@ -16,6 +16,18 @@ add_library(secure_fw INTERFACE)
 add_subdirectory(spm)
 add_subdirectory(partitions)
 
+target_include_directories(tfm_config
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/crypto
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/firmware_update
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/initial_attestation
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/internal_trusted_storage
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/platform
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/protected_storage
+        ${CMAKE_CURRENT_SOURCE_DIR}/spm/include
+)
+
 target_include_directories(secure_fw
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

@@ -108,3 +108,25 @@ include(lib/ext/tf-m-tests/fetch_repo.cmake)
 # Set secure log configs
 # It also depends on regression test config.
 include(config/tfm_secure_log.cmake)
+
+add_library(tfm_config INTERFACE)
+
+# Set user defined TF-M config header file
+if(PROJECT_CONFIG_HEADER_FILE)
+    if(NOT EXISTS ${PROJECT_CONFIG_HEADER_FILE})
+        message(FATAL_ERROR "${PROJECT_CONFIG_HEADER_FILE} does not exist! Please use absolute path.")
+    endif()
+    target_compile_definitions(tfm_config
+        INTERFACE
+            PROJECT_CONFIG_HEADER_FILE="${PROJECT_CONFIG_HEADER_FILE}"
+    )
+endif()
+
+# Set platform defined TF-M config header file
+set(TARGET_CONFIG_HEADER_FILE "${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/config_tfm_target.h")
+if(EXISTS ${TARGET_CONFIG_HEADER_FILE})
+    target_compile_definitions(tfm_config
+        INTERFACE
+            TARGET_CONFIG_HEADER_FILE="${TARGET_CONFIG_HEADER_FILE}"
+    )
+endif()
