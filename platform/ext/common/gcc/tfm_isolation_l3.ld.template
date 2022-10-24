@@ -63,7 +63,7 @@ SECTIONS
      * a separate 32 bytes aligned region so that the SAU can programmed to just
      * set this region as Non-Secure Callable.
      */
-    .gnu.sgstubs ALIGN(32) : ALIGN(32)
+    .gnu.sgstubs ALIGN(32) :
     {
         *(.gnu.sgstubs*)
         . = ALIGN(32);
