@@ -129,6 +129,11 @@ target_sources(platform_s
         provisioning.c
 )
 
+target_link_libraries(platform_s
+    PRIVATE
+        tfm_sprt # For tfm_strnlen in attest HAL
+)
+
 target_sources(tfm_sprt
     PRIVATE
         # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
