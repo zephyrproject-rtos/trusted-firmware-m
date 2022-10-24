@@ -105,7 +105,7 @@ set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "BL2 Header 
 set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer size")
 
 ############################ Partitions ########################################
-set(TFM_PARTITION_PROTECTED_STORAGE     OFF          CACHE BOOL      "Enable Protected Storage partition")
+set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Protected Storage partition")
 set(PS_CREATE_FLASH_LAYOUT              ON          CACHE BOOL      "Create flash FS if it doesn't exist for Protected Storage partition")
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
 set(PS_RAM_FS                           OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Protected Storage partition")
@@ -116,7 +116,7 @@ set(PS_NUM_ASSETS                       "10"        CACHE STRING    "The maximum
 set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in Protected Storage")
 set(PS_STACK_SIZE                       "0x700"     CACHE STRING    "The stack size of the Protected Storage Secure Partition")
 
-set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF       CACHE BOOL      "Enable Internal Trusted Storage partition")
+set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF      CACHE BOOL      "Enable Internal Trusted Storage partition")
 set(ITS_CREATE_FLASH_LAYOUT             ON          CACHE BOOL      "Create flash FS if it doesn't exist for Internal Trusted Storage partition")
 set(ITS_RAM_FS                          OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Internal Trusted Storage partition")
 set(ITS_VALIDATE_METADATA_FROM_FLASH    ON          CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
@@ -125,7 +125,7 @@ set(ITS_NUM_ASSETS                      "10"        CACHE STRING    "The maximum
 set(ITS_BUF_SIZE                        ""          CACHE STRING    "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
 set(ITS_STACK_SIZE                      "0x720"     CACHE STRING    "The stack size of the Internal Trusted Storage Secure Partition")
 
-set(TFM_PARTITION_CRYPTO                OFF          CACHE BOOL      "Enable Crypto partition")
+set(TFM_PARTITION_CRYPTO                OFF         CACHE BOOL      "Enable Crypto partition")
 # CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
 set(CRYPTO_ENGINE_BUF_SIZE              0x2080      CACHE STRING    "Heap size for the crypto backend")
 set(CRYPTO_CONC_OPER_NUM                8           CACHE STRING    "The max number of concurrent operations that can be active (allocated) at any time in Crypto")
@@ -144,7 +144,7 @@ set(CRYPTO_SINGLE_PART_FUNCS_DISABLED   OFF         CACHE BOOL      "Only enable
 set(CRYPTO_TFM_BUILTIN_KEYS_DRIVER      ON          CACHE BOOL      "Whether to allow crypto service to store builtin keys. Without this, ALL builtin keys must be stored in a platform-specific location")
 set(CRYPTO_STACK_SIZE                   "0x1B00"    CACHE STRING    "The stack size of the Crypto Secure Partition")
 
-set(TFM_PARTITION_INITIAL_ATTESTATION   OFF          CACHE BOOL      "Enable Initial Attestation partition")
+set(TFM_PARTITION_INITIAL_ATTESTATION   OFF         CACHE BOOL      "Enable Initial Attestation partition")
 set(SYMMETRIC_INITIAL_ATTESTATION       OFF         CACHE BOOL      "Use symmetric crypto for inital attestation")
 set(ATTEST_INCLUDE_OPTIONAL_CLAIMS      ON          CACHE BOOL      "Include optional claims in initial attestation token")
 set(ATTEST_INCLUDE_COSE_KEY_ID          OFF         CACHE BOOL      "Include COSE key-id in initial attestation token")
@@ -153,11 +153,7 @@ set(ATTEST_STACK_SIZE                   "0x700"     CACHE STRING    "The stack s
 set(ATTEST_INCLUDE_TEST_CODE            OFF         CACHE BOOL      "Include minimal development tests in the initial attestation regression test suite")
 set(ATTEST_KEY_BITS                     256         CACHE STRING    "The size of the initial attestation key in bits")
 
-set(TFM_PARTITION_PLATFORM              OFF          CACHE BOOL      "Enable Platform partition")
-set(PLATFORM_SERVICE_INPUT_BUFFER_SIZE  64          CACHE STRING    "Size of input buffer in platform service.")
-set(PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE 64          CACHE STRING    "Size of output buffer in platform service.")
-set(PLATFORM_SP_STACK_SIZE              "0x500"     CACHE STRING    "The stack size of the TF-M Platform Secure Partition")
-set(PLATFORM_NV_COUNTER_MODULE_DISABLED FALSE       CACHE BOOL      "Disable Non-volatile counter module")
+set(TFM_PARTITION_PLATFORM              OFF         CACHE BOOL      "Enable Platform partition")
 
 ################################## Dependencies ################################
 
@@ -173,10 +169,10 @@ the command line. E.g. '-DTFM_MBEDCRYPTO_CONFIG_PATH:STRING=some_file_which_is_g
 This can be useful if the config file is generated and placed inside a directory already added \
 to the include path of mbedtls.")
 set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH   "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h" CACHE PATH "Config to use psa crypto setting for Mbed Crypto.")
-set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH "" CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
+set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ""    CACHE PATH      "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
-set(MCUBOOT_PATH                        "DOWNLOAD"        CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "v1.9.0"  CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
+set(MCUBOOT_VERSION                     "v1.9.0"    CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
 set(PSA_ARCH_TESTS_VERSION              "cf8bd71"   CACHE STRING    "The version of PSA arch tests to use")

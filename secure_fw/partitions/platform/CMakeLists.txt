@@ -16,11 +16,6 @@ add_library(tfm_psa_rot_partition_platform STATIC
     platform_sp.c
 )
 
-target_compile_definitions(tfm_psa_rot_partition_platform
-    PUBLIC
-        $<$<BOOL:${PLATFORM_NV_COUNTER_MODULE_DISABLED}>:TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED>
-)
-
 # The generated sources
 target_sources(tfm_psa_rot_partition_platform
     PRIVATE
@@ -45,13 +40,8 @@ target_include_directories(tfm_partitions
 target_link_libraries(tfm_psa_rot_partition_platform
     PRIVATE
         platform_s
+        tfm_config
         tfm_sprt
-)
-
-target_compile_definitions(tfm_psa_rot_partition_platform
-    PRIVATE
-        INPUT_BUFFER_SIZE=${PLATFORM_SERVICE_INPUT_BUFFER_SIZE}
-        OUTPUT_BUFFER_SIZE=${PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE}
 )
 
 ############################ Partition Defs ####################################
@@ -64,14 +54,4 @@ target_link_libraries(tfm_partitions
 target_compile_definitions(tfm_partition_defs
     INTERFACE
         TFM_PARTITION_PLATFORM
-)
-
-################ Display the configuration being applied #######################
-
-include(utils)
-dump_options("Platform Partition config"
-"
-    PLATFORM_SP_STACK_SIZE;
-    PLATFORM_NV_COUNTER_MODULE_DISABLED;
-"
 )

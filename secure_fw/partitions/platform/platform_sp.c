@@ -5,32 +5,25 @@
  *
  */
 
+#include "config_platform.h"
 #include "platform_sp.h"
 
 #include "tfm_platform_system.h"
 #include "load/partition_defs.h"
 #include "psa_manifest/pid.h"
 
-#if !defined(TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED)
+#if !PLATFORM_NV_COUNTER_MODULE_DISABLED
 #include "tfm_plat_nv_counters.h"
-#endif /* !defined(TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED) */
+#endif /* !PLATFORM_NV_COUNTER_MODULE_DISABLED */
 
 #include "psa/client.h"
 #include "psa/service.h"
 #include "region_defs.h"
 #include "psa_manifest/tfm_platform.h"
 
-#if !defined(TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED)
+#if !PLATFORM_NV_COUNTER_MODULE_DISABLED
 #define NV_COUNTER_ID_SIZE  sizeof(enum tfm_nv_counter_t)
-#endif /* !defined(TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED) */
-
-#ifndef INPUT_BUFFER_SIZE
-#define INPUT_BUFFER_SIZE      64
-#endif
-
-#ifndef OUTPUT_BUFFER_SIZE
-#define OUTPUT_BUFFER_SIZE     64
-#endif
+#endif /* !PLATFORM_NV_COUNTER_MODULE_DISABLED */
 
 typedef enum tfm_platform_err_t (*plat_func_t)(const psa_msg_t *msg);
 
@@ -85,7 +78,7 @@ static psa_status_t platform_sp_system_reset_psa_api(const psa_msg_t *msg)
     return platform_sp_system_reset();
 }
 
-#if !defined(TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED)
+#if !PLATFORM_NV_COUNTER_MODULE_DISABLED
 static psa_status_t platform_sp_nv_read_psa_api(const psa_msg_t *msg)
 {
     enum tfm_plat_err_t err = TFM_PLAT_ERR_SYSTEM_ERR;
@@ -179,7 +172,7 @@ static psa_status_t platform_sp_nv_increment_psa_api(const psa_msg_t *msg)
 
     return TFM_PLATFORM_ERR_SUCCESS;
 }
-#endif /* !defined(TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED)*/
+#endif /* !PLATFORM_NV_COUNTER_MODULE_DISABLED*/
 
 static psa_status_t platform_sp_ioctl_psa_api(const psa_msg_t *msg)
 {
@@ -187,8 +180,8 @@ static psa_status_t platform_sp_ioctl_psa_api(const psa_msg_t *msg)
     void *output = NULL;
     psa_invec invec = {0};
     psa_outvec outvec = {0};
-    uint8_t input_buffer[INPUT_BUFFER_SIZE] = {0};
-    uint8_t output_buffer[OUTPUT_BUFFER_SIZE] = {0};
+    uint8_t input_buffer[PLATFORM_SERVICE_INPUT_BUFFER_SIZE] = {0};
+    uint8_t output_buffer[PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE] = {0};
     tfm_platform_ioctl_req_t request = 0;
     enum tfm_platform_err_t ret = TFM_PLATFORM_ERR_SYSTEM_ERROR;
     int num = 0;
@@ -216,7 +209,7 @@ static psa_status_t platform_sp_ioctl_psa_api(const psa_msg_t *msg)
 
     if (in_len > 1) {
         input_size = msg->in_size[1];
-        if (input_size > INPUT_BUFFER_SIZE) {
+        if (input_size > PLATFORM_SERVICE_INPUT_BUFFER_SIZE) {
             return (enum tfm_platform_err_t) PSA_ERROR_BUFFER_TOO_SMALL;
         }
         num = psa_read(msg->handle, 1, &input_buffer, msg->in_size[1]);
@@ -229,7 +222,7 @@ static psa_status_t platform_sp_ioctl_psa_api(const psa_msg_t *msg)
     }
 
     if (out_len > 0) {
-        if (msg->out_size[0] > OUTPUT_BUFFER_SIZE) {
+        if (msg->out_size[0] > PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE) {
             return (enum tfm_platform_err_t) PSA_ERROR_PROGRAMMER_ERROR;
         }
         outvec.base = output_buffer;
@@ -249,12 +242,12 @@ static psa_status_t platform_sp_ioctl_psa_api(const psa_msg_t *msg)
 psa_status_t tfm_platform_service_sfn(const psa_msg_t *msg)
 {
     switch (msg->type) {
-#ifndef TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED
+#if !PLATFORM_NV_COUNTER_MODULE_DISABLED
     case TFM_PLATFORM_API_ID_NV_READ:
         return platform_sp_nv_read_psa_api(msg);
     case TFM_PLATFORM_API_ID_NV_INCREMENT:
         return platform_sp_nv_increment_psa_api(msg);
-#endif /* TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED */
+#endif /* PLATFORM_NV_COUNTER_MODULE_DISABLED */
     case TFM_PLATFORM_API_ID_SYSTEM_RESET:
         return platform_sp_system_reset_psa_api(msg);
     case TFM_PLATFORM_API_ID_IOCTL:
@@ -268,7 +261,7 @@ psa_status_t tfm_platform_service_sfn(const psa_msg_t *msg)
 
 psa_status_t platform_sp_init(void)
 {
-#if !defined(TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED)
+#if !PLATFORM_NV_COUNTER_MODULE_DISABLED
     /* Initialise the non-volatile counters */
     enum tfm_plat_err_t err;
 
@@ -276,7 +269,7 @@ psa_status_t platform_sp_init(void)
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return PSA_ERROR_HARDWARE_FAILURE;
     }
-#endif /* TFM_PLATFORM_NV_COUNTER_MODULE_DISABLED */
+#endif /* PLATFORM_NV_COUNTER_MODULE_DISABLED */
 
     return PSA_SUCCESS;
 }
