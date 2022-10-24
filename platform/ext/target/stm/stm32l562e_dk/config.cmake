@@ -18,7 +18,10 @@ set(BL2_TRAILER_SIZE                    0x2000      CACHE STRING    "Trailer siz
 ################################## Dependencies ################################
 set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
-set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
-set(CRYPTO_NV_SEED                      OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
-set(MBEDCRYPTO_BUILD_TYPE               minsizerel  CACHE STRING "Build type of Mbed Crypto library")
+
+if(TFM_PARTITION_CRYPTO)
+    set(CRYPTO_HW_ACCELERATOR           ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
+    set(CRYPTO_NV_SEED                  OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
+    set(MBEDCRYPTO_BUILD_TYPE           minsizerel  CACHE STRING "Build type of Mbed Crypto library")
+endif()
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/stm/common/generated_file_list.yaml  CACHE PATH "Path to extra generated file list. Appended to stardard TFM generated file list." FORCE)

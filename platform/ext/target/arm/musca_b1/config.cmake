@@ -14,11 +14,14 @@ set(PLATFORM_GPLED_ENABLED              OFF         CACHE BOOL      "Use the gen
 set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
 
-set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
-set(CRYPTO_NV_SEED                      OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
 set(MCUBOOT_DATA_SHARING                ON         CACHE BOOL      "Add sharing of application specific data using the same shared data area as for the measured boot")
 set(PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT ON        CACHE BOOL      "Platform supports firmware update, such as network connectivities and bootloader support")
 set(TFM_PARTITION_FIRMWARE_UPDATE       ON         CACHE BOOL      "Enable firmware update partition")
+
+if(TFM_PARTITION_CRYPTO)
+    set(CRYPTO_HW_ACCELERATOR           ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
+    set(CRYPTO_NV_SEED                  OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
+endif()
 
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_SOURCE_DIR}/platform/ext/target/arm/musca_b1/generated_file_list.yaml  CACHE PATH "Path to extra generated file list. Appended to stardard TFM generated file list." FORCE)
 

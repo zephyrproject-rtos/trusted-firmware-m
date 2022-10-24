@@ -60,13 +60,6 @@ endif()
 
 include(${CMAKE_SOURCE_DIR}/config/tfm_build_log_config.cmake)
 
-# Load TF-M model specific default config
-if (CONFIG_TFM_SPM_BACKEND STREQUAL "SFN")
-    include(config/tfm_sfn_config_default.cmake)
-else() #The default backend is IPC
-    include(config/tfm_ipc_config_default.cmake)
-endif()
-
 # Load bl1 config
 if (BL1 AND PLATFORM_DEFAULT_BL1)
     include(${CMAKE_SOURCE_DIR}/bl1/config/bl1_config_default.cmake)
@@ -85,6 +78,13 @@ include(config/cp_config_default.cmake)
 
 # Load defaults, setting options not already set
 include(config/config_default.cmake)
+
+# Load TF-M model specific default config
+if (CONFIG_TFM_SPM_BACKEND STREQUAL "SFN")
+    include(config/tfm_sfn_config_default.cmake)
+else() #The default backend is IPC
+    include(config/tfm_ipc_config_default.cmake)
+endif()
 
 # Fetch tf-m-tests repo during config, if NS or regression test is required.
 # Therefore tf-m-tests configs can be set with TF-M configs since their configs

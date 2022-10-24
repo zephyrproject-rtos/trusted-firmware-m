@@ -55,12 +55,6 @@ else()
     set(TFM_INSTALL_PATH  ${CMAKE_INSTALL_PREFIX} CACHE PATH  "Path to which to install TF-M files" FORCE)
 endif()
 
-############################ Config Check ######################################
-
-include(${CMAKE_SOURCE_DIR}/config/check_config.cmake)
-
-################################################################################
-
 add_subdirectory(lib/ext)
 add_subdirectory(lib/fih)
 add_subdirectory(tools)
@@ -87,5 +81,11 @@ add_subdirectory(platform)
 if(CRYPTO_HW_ACCELERATOR)
     add_subdirectory(platform/ext/accelerator)
 endif()
+
+############################ Config Check ######################################
+
+include(${CMAKE_SOURCE_DIR}/config/check_config.cmake)
+
+################################################################################
 
 include(cmake/install.cmake)

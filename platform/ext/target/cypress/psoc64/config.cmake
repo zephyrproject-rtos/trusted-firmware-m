@@ -20,6 +20,10 @@ set(TFM_MULTI_CORE_TOPOLOGY             ON          CACHE BOOL      "Whether to 
 set(NUM_MAILBOX_QUEUE_SLOT              4           CACHE BOOL      "Number of mailbox queue slots")
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT      ON          CACHE BOOL      "Platform supports SLIH IRQ tests")
 set(PLATFORM_FLIH_IRQ_TEST_SUPPORT      ON          CACHE BOOL      "Platform supports FLIH IRQ tests")
+set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
+set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Protected Storage partition")
+set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Platform partition")
+set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
 
 ################################## Dependencies ################################
 

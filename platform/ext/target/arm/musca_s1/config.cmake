@@ -7,8 +7,11 @@
 #
 #-------------------------------------------------------------------------------
 
-set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
-set(CRYPTO_NV_SEED                      OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
+if(TFM_PARTITION_CRYPTO)
+    set(CRYPTO_HW_ACCELERATOR           ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
+    set(CRYPTO_NV_SEED                  OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
+endif()
+
 set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cryptography mode")
 set(PLATFORM_GPLED_ENABLED              OFF         CACHE BOOL      "Use the general purpose LEDs on the platform board")
 

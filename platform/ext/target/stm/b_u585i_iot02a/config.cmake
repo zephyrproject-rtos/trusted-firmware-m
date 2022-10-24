@@ -22,6 +22,8 @@ set(MCUBOOT_BOOTSTRAP                   ON          CACHE BOOL      "Allow initi
 set(MCUBOOT_ENC_IMAGES                  ON          CACHE BOOL      "Enable encrypted image upgrade support")
 set(MCUBOOT_ENCRYPT_RSA                 ON          CACHE BOOL      "Use RSA for encrypted image upgrade support")
 ################################## Dependencies ################################
+set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
+set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
 set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
 set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")

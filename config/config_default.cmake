@@ -27,7 +27,13 @@ set(PSA_FRAMEWORK_HAS_MM_IOVEC          OFF         CACHE BOOL      "Enable MM-I
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
 set(TFM_FIH_PROFILE                     OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 set(CONFIG_TFM_CONN_HANDLE_MAX_NUM      8           CACHE STRING    "The maximal number of secure services that are connected or requested at the same time")
+
+# If isolation level is overwritten in the command line
+if (TFM_ISOLATION_LEVEL EQUAL 1)
+set(CONFIG_TFM_SPM_BACKEND              "SFN"       CACHE STRING    "The SPM backend [IPC, SFN]")
+else()
 set(CONFIG_TFM_SPM_BACKEND              "IPC"       CACHE STRING    "The SPM backend [IPC, SFN]")
+endif()
 
 # An NSPE client_id is provided by the NSPE OS via the SPM or directly by the SPM.
 # When `TFM_NS_MANAGE_NSID` is `ON`, TF-M supports NSPE OS providing NSPE client_id.
@@ -40,8 +46,8 @@ set(TFM_EXTRA_MANIFEST_LIST_FILES       ""          CACHE FILEPATH  "Extra manif
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ""          CACHE PATH      "Path to extra generated file list. Appended to stardard TFM generated file list.")
 set(TFM_EXTRA_PARTITION_PATHS           ""          CACHE PATH      "List of extra Secure Partitions directories. An extra Secure Parition folder contains source code, CMakeLists.txt and manifest files")
 
-set(TFM_SPM_LOG_LEVEL                   TFM_SPM_LOG_LEVEL_INFO          CACHE STRING    "Set default SPM log level as INFO level")
-set(TFM_PARTITION_LOG_LEVEL             TFM_PARTITION_LOG_LEVEL_INFO    CACHE STRING    "Set default Secure Partition log level as INFO level")
+set(TFM_SPM_LOG_LEVEL                   TFM_SPM_LOG_LEVEL_SILENCE       CACHE STRING    "Set default SPM log level as INFO level")
+set(TFM_PARTITION_LOG_LEVEL             TFM_PARTITION_LOG_LEVEL_SILENCE   CACHE STRING    "Set default Secure Partition log level as INFO level")
 
 set(TFM_CODE_SHARING                    OFF         CACHE PATH      "Enable code sharing between MCUboot and secure firmware")
 set(CONFIG_TFM_BOOT_STORE_MEASUREMENTS  ON          CACHE BOOL      "Store measurement values from all the boot stages. Used for initial attestation token.")
@@ -103,7 +109,7 @@ set(BL2_HEADER_SIZE                     0x000       CACHE STRING    "BL2 Header 
 set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer size")
 
 ############################ Partitions ########################################
-set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Protected Storage partition")
+set(TFM_PARTITION_PROTECTED_STORAGE     OFF          CACHE BOOL      "Enable Protected Storage partition")
 set(PS_CREATE_FLASH_LAYOUT              ON          CACHE BOOL      "Create flash FS if it doesn't exist for Protected Storage partition")
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
 set(PS_RAM_FS                           OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Protected Storage partition")
@@ -114,7 +120,7 @@ set(PS_NUM_ASSETS                       "10"        CACHE STRING    "The maximum
 set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in Protected Storage")
 set(PS_STACK_SIZE                       "0x700"     CACHE STRING    "The stack size of the Protected Storage Secure Partition")
 
-set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
+set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF       CACHE BOOL      "Enable Internal Trusted Storage partition")
 set(ITS_CREATE_FLASH_LAYOUT             ON          CACHE BOOL      "Create flash FS if it doesn't exist for Internal Trusted Storage partition")
 set(ITS_RAM_FS                          OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Internal Trusted Storage partition")
 set(ITS_VALIDATE_METADATA_FROM_FLASH    ON          CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
@@ -123,7 +129,7 @@ set(ITS_NUM_ASSETS                      "10"        CACHE STRING    "The maximum
 set(ITS_BUF_SIZE                        ""          CACHE STRING    "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
 set(ITS_STACK_SIZE                      "0x720"     CACHE STRING    "The stack size of the Internal Trusted Storage Secure Partition")
 
-set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
+set(TFM_PARTITION_CRYPTO                OFF          CACHE BOOL      "Enable Crypto partition")
 # CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
 set(CRYPTO_ENGINE_BUF_SIZE              0x2080      CACHE STRING    "Heap size for the crypto backend")
 set(CRYPTO_CONC_OPER_NUM                8           CACHE STRING    "The max number of concurrent operations that can be active (allocated) at any time in Crypto")
@@ -142,7 +148,7 @@ set(CRYPTO_SINGLE_PART_FUNCS_DISABLED   OFF         CACHE BOOL      "Only enable
 set(CRYPTO_TFM_BUILTIN_KEYS_DRIVER      ON          CACHE BOOL      "Whether to allow crypto service to store builtin keys. Without this, ALL builtin keys must be stored in a platform-specific location")
 set(CRYPTO_STACK_SIZE                   "0x1B00"    CACHE STRING    "The stack size of the Crypto Secure Partition")
 
-set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Initial Attestation partition")
+set(TFM_PARTITION_INITIAL_ATTESTATION   OFF          CACHE BOOL      "Enable Initial Attestation partition")
 set(SYMMETRIC_INITIAL_ATTESTATION       OFF         CACHE BOOL      "Use symmetric crypto for inital attestation")
 set(ATTEST_INCLUDE_OPTIONAL_CLAIMS      ON          CACHE BOOL      "Include optional claims in initial attestation token")
 set(ATTEST_INCLUDE_COSE_KEY_ID          OFF         CACHE BOOL      "Include COSE key-id in initial attestation token")
@@ -151,7 +157,7 @@ set(ATTEST_STACK_SIZE                   "0x700"     CACHE STRING    "The stack s
 set(ATTEST_INCLUDE_TEST_CODE            OFF         CACHE BOOL      "Include minimal development tests in the initial attestation regression test suite")
 set(ATTEST_KEY_BITS                     256         CACHE STRING    "The size of the initial attestation key in bits")
 
-set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Platform partition")
+set(TFM_PARTITION_PLATFORM              OFF          CACHE BOOL      "Enable Platform partition")
 set(PLATFORM_SERVICE_INPUT_BUFFER_SIZE  64          CACHE STRING    "Size of input buffer in platform service.")
 set(PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE 64          CACHE STRING    "Size of output buffer in platform service.")
 set(PLATFORM_SP_STACK_SIZE              "0x500"     CACHE STRING    "The stack size of the TF-M Platform Secure Partition")
