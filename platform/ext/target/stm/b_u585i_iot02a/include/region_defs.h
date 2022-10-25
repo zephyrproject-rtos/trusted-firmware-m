@@ -32,6 +32,8 @@
 
 #ifdef ENABLE_HEAP
     #define S_HEAP_SIZE             (0x0000200)
+#else
+    #define S_HEAP_SIZE             (0x0000000)
 #endif
 
 #define S_MSP_STACK_SIZE        0x0000800
