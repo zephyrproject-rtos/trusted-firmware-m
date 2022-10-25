@@ -319,7 +319,7 @@ PS Service Build Definitions
 The PS service uses a set of C definitions to compile in/out certain features,
 as well as to configure certain service parameters. When using the TF-M build
 system, these definitions are controlled by build flags of the same name. The
-``config/config_default.cmake`` file sets the default values of those flags, but
+``config/config_base.cmake`` file sets the default values of those flags, but
 they can be overwritten based on platform capabilities by setting them in
 ``platform/ext/target/<TARGET_NAME>/config.cmake``. The list of PS service build
 definitions is:

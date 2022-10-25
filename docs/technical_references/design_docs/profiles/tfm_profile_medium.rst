@@ -252,7 +252,7 @@ shown below.
 .. Note::
 
    Where a configuration is the same as the default in
-   ``config/config_default.cmake``, it is omitted from the profile configuration
+   ``config/config_base.cmake``, it is omitted from the profile configuration
    file.
 
 Test configuration

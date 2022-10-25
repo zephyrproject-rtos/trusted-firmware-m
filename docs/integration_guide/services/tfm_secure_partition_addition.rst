@@ -245,7 +245,7 @@ The ``stack_size`` is required to indicate the stack memory usage of the Secure
 Partition.
 The value of this attribute must be a decimal or hexadecimal value in bytes.
 It can also be a build configurable with default value defined in
-``config_default.cmake``.
+``config_base.cmake``.
 The value of the configuration can be overridden to fit different use cases.
 
 heap_size
@@ -309,7 +309,7 @@ Here is a reference example for `CMakeLists.txt`_
    - ``tfm_app_rot_partition*`` in case of an Application RoT partition
 
 The current CMake configuration should also be updated, by updating
-``<TF-M base folder>/config/config_default.cmake``
+``<TF-M base folder>/config/config_base.cmake``
 to include the CMake configuration variable of the newly added Secure
 Partition, e.g, TFM_PARTITION_EXAMPLE and adding the relevant
 subdirectory in ``<TF-M base folder>/secure_fw/CMakeLists.txt``, e.g.

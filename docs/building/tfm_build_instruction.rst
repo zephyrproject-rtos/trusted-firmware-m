@@ -49,7 +49,7 @@ Cmake configuration
 ===================
 
 All configuration options are provided by cmake variables, and their default
-values, with docstrings, can be found in ``config/config_default.cmake``.
+values, with docstrings, can be found in ``config/config_base.cmake``.
 
 Configuration is provided in multiple stages. Each stage will not override any
 config that has already been set at any of the prior stages.
@@ -67,7 +67,7 @@ config that has already been set at any of the prior stages.
       accelerator type is applied if it exists.
    7. If it exists, TFM Profile specific config is applied from
       ``config/profile/<tfm_profile>.cmake``.
-   8. ``config/config_default.cmake`` is loaded.
+   8. ``config/config_base.cmake`` is loaded.
    9. If ``TEST_S`` or ``TEST_NS`` or other single test suite config like
       ``TEST_NS_ATTESTATION`` (see `Regression test configuration`_)is set, then
       config from ``${TFM_TEST_REPO_PATH}/test/config/set_config.cmake`` and
@@ -119,7 +119,7 @@ hence is often a good idea on RAM or flash constrained systems.
 Other cmake parameters
 ----------------------
 
-The full list of default options is in ``config/config_default.cmake``. Several
+The full list of default options is in ``config/config_base.cmake``. Several
 important options are listed below.
 
 
@@ -402,7 +402,7 @@ will disable the automatic downloading for that dependency.
 | psa-arch-tests | PSA_ARCH_TESTS_PATH | https://github.com/ARM-software/psa-arch-tests      |
 +----------------+---------------------+-----------------------------------------------------+
 
-For required versions of the dependencies, refer to ``config/config_default.cmake``.
+For required versions of the dependencies, refer to ``config/config_base.cmake``.
 
 .. Note::
  - Some patches are required to the mbedtls repo to allow building it as part of
@@ -420,7 +420,7 @@ TF-M Tests
 Dependency auto downloading is used by default.
 The TF-M build system downloads the tf-m-tests repo with a fixed version
 specified by ``TFM_TEST_REPO_VERSION`` in
-:file:`lib/ext/tf-m-tests/repo_config_default.cmake`.
+:file:`lib/ext/tf-m-tests/repo_config_base.cmake`.
 The version can be a release tag or a commit hash.
 
 Developers who want a different version of tf-m-tests can override
@@ -451,7 +451,7 @@ cloning the repo and checking out the correct branch.
     cd <Mbed Crypto base folder>
     git clone https://github.com/ARMmbed/mbedtls
     cd mbedtls
-    git checkout <MBEDCRYPTO_VERSION from config_default.cmake>
+    git checkout <MBEDCRYPTO_VERSION from config_base.cmake>
     git apply <TF-M base folder>/trusted-firmware-m/lib/ext/mbedcrypo/*.patch
 
 .. Note::

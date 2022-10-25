@@ -141,8 +141,8 @@ config.cmake
 
 This file collects platform-specific overrides to the configuration options.
 This should only contain cmake options that are included in
-``config_default.cmake``. These options should be set as ``CACHE`` variables, as
-they are in ``config_default.cmake``.
+``config_base.cmake``. These options should be set as ``CACHE`` variables, as
+they are in ``config_base.cmake``.
 
 CMakeLists.txt
 ^^^^^^^^^^^^^^

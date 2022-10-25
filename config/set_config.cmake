@@ -77,7 +77,7 @@ include(config/tfm_fwu_config.cmake)
 include(config/cp_config_default.cmake)
 
 # Load defaults, setting options not already set
-include(config/config_default.cmake)
+include(config/config_base.cmake)
 
 # Load TF-M model specific default config
 if (CONFIG_TFM_SPM_BACKEND STREQUAL "SFN")
