@@ -15,8 +15,6 @@ set(BL2_TRAILER_SIZE                    0x2000      CACHE STRING    "Trailer siz
 set(MCUBOOT_ALIGN_VAL                   16          CACHE STRING    "Align option to build image with imgtool")
 set(MCUBOOT_UPGRADE_STRATEGY            "SWAP_USING_SCRATCH"      CACHE STRING    "Upgrade strategy for images")
 set(PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT ON         CACHE BOOL      "Platform supports firmware update, such as network connectivities and bootloader support")
-set(TFM_PARTITION_FIRMWARE_UPDATE       ON          CACHE BOOL      "Enable firmware update partition")
-set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable platform partition")
 set(MCUBOOT_DATA_SHARING                ON          CACHE BOOL      "Enable Data Sharing")
 set(MCUBOOT_BOOTSTRAP                   ON          CACHE BOOL      "Allow initial state with images in secondary slots(empty primary slots)")
 set(MCUBOOT_ENC_IMAGES                  ON          CACHE BOOL      "Enable encrypted image upgrade support")

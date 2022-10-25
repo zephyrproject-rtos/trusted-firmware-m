@@ -16,7 +16,6 @@ set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to 
 
 set(MCUBOOT_DATA_SHARING                ON         CACHE BOOL      "Add sharing of application specific data using the same shared data area as for the measured boot")
 set(PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT ON        CACHE BOOL      "Platform supports firmware update, such as network connectivities and bootloader support")
-set(TFM_PARTITION_FIRMWARE_UPDATE       ON         CACHE BOOL      "Enable firmware update partition")
 
 if(TFM_PARTITION_CRYPTO)
     set(CRYPTO_HW_ACCELERATOR           ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
