@@ -103,13 +103,6 @@ tfm_invalid_config(NOT TFM_FIH_PROFILE IN_LIST TFM_FIH_PROFILE_LIST)
 
 tfm_invalid_config(ATTEST_INCLUDE_TEST_CODE AND NOT (TEST_NS_ATTESTATION OR TEST_S_ATTESTATION))
 
-########################### TF-M crypto ########################################
-
-if (${TFM_PARTITION_CRYPTO})
-    tfm_invalid_config(CRYPTO_NV_SEED AND CRYPTO_HW_ACCELERATOR)
-    tfm_invalid_config(NOT CRYPTO_NV_SEED AND NOT CRYPTO_HW_ACCELERATOR)
-endif()
-
 ######################## TF-M Profile config check #############################
 
 tfm_invalid_config(TFM_PROFILE STREQUAL "profile_small" AND CONFIG_TFM_SPM_BACKEND_IPC)

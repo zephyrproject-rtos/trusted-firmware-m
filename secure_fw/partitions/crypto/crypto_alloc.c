@@ -9,21 +9,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "config_crypto.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
 
-/**
- * \def TFM_CRYPTO_CONC_OPER_NUM
- *
- * \brief This is the default value for the maximum number of concurrent
- *        operations that can be active (allocated) at any time, supported
- *        by the implementation
- */
-#ifndef TFM_CRYPTO_CONC_OPER_NUM
-#define TFM_CRYPTO_CONC_OPER_NUM (8)
-#endif
 
 struct tfm_crypto_operation_s {
     uint32_t in_use;                /*!< Indicates if the operation is in use */
@@ -40,7 +31,7 @@ struct tfm_crypto_operation_s {
     } operation;
 };
 
-static struct tfm_crypto_operation_s operations[TFM_CRYPTO_CONC_OPER_NUM] = {{0}};
+static struct tfm_crypto_operation_s operations[CRYPTO_CONC_OPER_NUM] = {{0}};
 
 /*
  * \brief Function used to clear the memory associated to a backend context
@@ -95,7 +86,7 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
         return status;
     }
 
-    for (i = 0; i < TFM_CRYPTO_CONC_OPER_NUM; i++) {
+    for (i = 0; i < CRYPTO_CONC_OPER_NUM; i++) {
         if (operations[i].in_use == TFM_CRYPTO_NOT_IN_USE) {
             operations[i].in_use = TFM_CRYPTO_IN_USE;
             operations[i].owner = partition_id;
@@ -119,7 +110,7 @@ psa_status_t tfm_crypto_operation_release(uint32_t *handle)
     *handle = TFM_CRYPTO_INVALID_HANDLE;
 
     if ((h_val == TFM_CRYPTO_INVALID_HANDLE) ||
-        (h_val > TFM_CRYPTO_CONC_OPER_NUM)) {
+        (h_val > CRYPTO_CONC_OPER_NUM)) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -150,7 +141,7 @@ psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
     psa_status_t status;
 
     if ((handle == TFM_CRYPTO_INVALID_HANDLE) ||
-        (handle > TFM_CRYPTO_CONC_OPER_NUM)) {
+        (handle > CRYPTO_CONC_OPER_NUM)) {
         return PSA_ERROR_BAD_STATE;
     }
 

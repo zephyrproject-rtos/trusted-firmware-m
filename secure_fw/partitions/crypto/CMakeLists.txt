@@ -13,20 +13,6 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_psa_rot_partition_crypto STATIC)
-add_library(crypto_module_flags INTERFACE)
-
-target_compile_definitions(crypto_module_flags
-    INTERFACE
-        $<$<BOOL:${CRYPTO_RNG_MODULE_DISABLED}>:TFM_CRYPTO_RNG_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_KEY_MODULE_DISABLED}>:TFM_CRYPTO_KEY_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_AEAD_MODULE_DISABLED}>:TFM_CRYPTO_AEAD_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_MAC_MODULE_DISABLED}>:TFM_CRYPTO_MAC_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_CIPHER_MODULE_DISABLED}>:TFM_CRYPTO_CIPHER_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_HASH_MODULE_DISABLED}>:TFM_CRYPTO_HASH_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_ASYM_SIGN_MODULE_DISABLED}>:TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED}>:TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED>
-        $<$<BOOL:${CRYPTO_KEY_DERIVATION_MODULE_DISABLED}>:TFM_CRYPTO_KEY_DERIVATION_MODULE_DISABLED>
-)
 
 target_sources(tfm_psa_rot_partition_crypto
     PRIVATE
@@ -71,41 +57,15 @@ target_link_libraries(tfm_psa_rot_partition_crypto
     PRIVATE
         platform_s
         crypto_service_mbedcrypto
+        tfm_config
         tfm_sprt
-        crypto_module_flags
 )
 target_compile_definitions(tfm_psa_rot_partition_crypto
     PUBLIC
         MBEDTLS_PSA_CRYPTO_DRIVERS
         MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
         $<$<BOOL:CRYPTO_BUILTIN_KEYS>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY>
-    PRIVATE
-        $<$<BOOL:${CRYPTO_ENGINE_BUF_SIZE}>:TFM_CRYPTO_ENGINE_BUF_SIZE=${CRYPTO_ENGINE_BUF_SIZE}>
-        $<$<BOOL:${CRYPTO_CONC_OPER_NUM}>:TFM_CRYPTO_CONC_OPER_NUM=${CRYPTO_CONC_OPER_NUM}>
-        $<$<BOOL:${CRYPTO_IOVEC_BUFFER_SIZE}>:TFM_CRYPTO_IOVEC_BUFFER_SIZE=${CRYPTO_IOVEC_BUFFER_SIZE}>
-        $<$<BOOL:${CRYPTO_SINGLE_PART_FUNCS_DISABLED}>:CRYPTO_SINGLE_PART_FUNCS_DISABLED>
 )
-
-################ Display the configuration being applied #######################
-
-include(utils)
-    dump_options("Crypto config"
-    "
-        CRYPTO_RNG_MODULE_DISABLED;
-        CRYPTO_KEY_MODULE_DISABLED;
-        CRYPTO_AEAD_MODULE_DISABLED;
-        CRYPTO_MAC_MODULE_DISABLED;
-        CRYPTO_CIPHER_MODULE_DISABLED;
-        CRYPTO_HASH_MODULE_DISABLED;
-        CRYPTO_KEY_DERIVATION_MODULE_DISABLED;
-        CRYPTO_ASYM_SIGN_MODULE_DISABLED;
-        CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED;
-        CRYPTO_ENGINE_BUF_SIZE;
-        CRYPTO_CONC_OPER_NUM;
-        CRYPTO_IOVEC_BUFFER_SIZE;
-        CRYPTO_STACK_SIZE;
-    "
-    )
 
 ############################ Partition Defs ####################################
 
@@ -131,13 +91,18 @@ target_compile_definitions(crypto_service_mbedcrypto_config
         PSA_CRYPTO_SECURE
         # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077
         $<$<OR:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>
-        $<$<BOOL:${CRYPTO_NV_SEED}>:CRYPTO_NV_SEED>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_SEED}>:PLATFORM_DEFAULT_NV_SEED>
         $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
         MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
         MBEDTLS_PSA_CRYPTO_DRIVERS
         $<$<BOOL:CRYPTO_TFM_BUILTIN_KEYS_DRIVER>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY_LOADER>
 )
+
+target_link_libraries(crypto_service_mbedcrypto_config
+    INTERFACE
+        tfm_config
+)
+
 cmake_policy(SET CMP0079 NEW)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)

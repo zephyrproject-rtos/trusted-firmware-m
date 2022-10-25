@@ -1,16 +1,11 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #------------------------------------------------------------------------------
 
 ############ Override defaults for PSA API tests ##############################
-
-# CRYPTO_ENGINE_BUF_SIZE needs to be much larger for PSA API tests.
-if(NOT (CRYPTO_ENGINE_BUF_SIZE GREATER 0x5000))
-    set(CRYPTO_ENGINE_BUF_SIZE              0x5000      CACHE STRING    "Heap size for the crypto backend")
-endif()
 
 # When building for the PSA Crypto API tests, ensure the ITS max asset size is
 # set to at least the size of the largest asset created by the tests
@@ -45,3 +40,5 @@ if ("${TEST_PSA_API}" STREQUAL "STORAGE")
     set(TFM_PARTITION_CRYPTO                   ON       CACHE BOOL      "Enable Crypto partition")
     set(TFM_PARTITION_PLATFORM                 ON       CACHE BOOL      "Enable Platform partition")
 endif()
+
+set(PROJECT_CONFIG_HEADER_FILE  "${CMAKE_SOURCE_DIR}/config/tests/config_test_psa_api.h" CACHE FILEPATH "User defined header file for TF-M config")

@@ -6,6 +6,7 @@
  */
 #include <stdbool.h>
 
+#include "config_crypto.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
@@ -22,7 +23,7 @@
 
 #include "mbedtls/platform.h"
 
-#ifdef CRYPTO_NV_SEED
+#if CRYPTO_NV_SEED
 #include "tfm_plat_crypto_nv_seed.h"
 #endif /* CRYPTO_NV_SEED */
 
@@ -100,7 +101,7 @@ static psa_status_t tfm_crypto_init_iovecs(const psa_msg_t *msg,
  */
 static struct tfm_crypto_scratch {
     __attribute__((__aligned__(TFM_CRYPTO_IOVEC_ALIGNMENT)))
-    uint8_t buf[TFM_CRYPTO_IOVEC_BUFFER_SIZE];
+    uint8_t buf[CRYPTO_IOVEC_BUFFER_SIZE];
     uint32_t alloc_index;
     int32_t owner;
 } scratch = {.buf = {0}, .alloc_index = 0};
@@ -258,11 +259,11 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
  * \brief Static buffer to be used by Mbed Crypto for memory allocations
  *
  */
-static uint8_t mbedtls_mem_buf[TFM_CRYPTO_ENGINE_BUF_SIZE] = {0};
+static uint8_t mbedtls_mem_buf[CRYPTO_ENGINE_BUF_SIZE] = {0};
 
 static psa_status_t tfm_crypto_engine_init(void)
 {
-#ifdef CRYPTO_NV_SEED
+#if CRYPTO_NV_SEED
     LOG_INFFMT("[INF][Crypto] ");
     LOG_INFFMT("Provisioning entropy seed... ");
     if (tfm_plat_crypto_provision_entropy_seed() != TFM_CRYPTO_NV_SEED_SUCCESS) {
@@ -275,7 +276,7 @@ static psa_status_t tfm_crypto_engine_init(void)
      * allocation from the provided buffer instead of using the heap
      */
     mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
-                                     TFM_CRYPTO_ENGINE_BUF_SIZE);
+                                     CRYPTO_ENGINE_BUF_SIZE);
 
     /* mbedtls_printf is used to print messages including error information. */
 #if (TFM_PARTITION_LOG_LEVEL >= TFM_PARTITION_LOG_LEVEL_ERROR)

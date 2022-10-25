@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "config_crypto.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
@@ -23,7 +24,7 @@
 psa_status_t tfm_crypto_random_interface(psa_invec in_vec[],
                                          psa_outvec out_vec[])
 {
-#ifdef TFM_CRYPTO_RNG_MODULE_DISABLED
+#if CRYPTO_RNG_MODULE_DISABLED
     (void)in_vec;
     (void)out_vec;
 

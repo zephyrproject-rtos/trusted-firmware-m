@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "config_crypto.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
@@ -19,7 +20,7 @@
  */
 
 /*!@{*/
-#ifndef TFM_CRYPTO_CIPHER_MODULE_DISABLED
+#if (!CRYPTO_CIPHER_MODULE_DISABLED)
 psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
                                          psa_outvec out_vec[],
                                          mbedtls_svc_key_id_t *encoded_key)
@@ -31,7 +32,7 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
     uint16_t sid = iov->function_id;
 
     if (sid == TFM_CRYPTO_CIPHER_ENCRYPT_SID) {
-#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+#if CRYPTO_SINGLE_PART_FUNCS_DISABLED
         return PSA_ERROR_NOT_SUPPORTED;
 #else
         const uint8_t *input = in_vec[1].base;
@@ -49,7 +50,7 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
     }
 
     if (sid == TFM_CRYPTO_CIPHER_DECRYPT_SID) {
-#ifdef CRYPTO_SINGLE_PART_FUNCS_DISABLED
+#if CRYPTO_SINGLE_PART_FUNCS_DISABLED
         return PSA_ERROR_NOT_SUPPORTED;
 #else
         const uint8_t *input = in_vec[1].base;
@@ -185,7 +186,7 @@ release_operation_and_return:
     (void)tfm_crypto_operation_release(p_handle);
     return status;
 }
-#else /* !TFM_CRYPTO_CIPHER_MODULE_DISABLED */
+#else /* !CRYPTO_CIPHER_MODULE_DISABLED */
 psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
                                          psa_outvec out_vec[],
                                          mbedtls_svc_key_id_t *encoded_key)
@@ -196,5 +197,5 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
-#endif /* !TFM_CRYPTO_CIPHER_MODULE_DISABLED */
+#endif /* !CRYPTO_CIPHER_MODULE_DISABLED */
 /*!@}*/

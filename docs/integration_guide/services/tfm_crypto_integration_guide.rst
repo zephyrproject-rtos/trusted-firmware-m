@@ -46,12 +46,12 @@ Service source files
   compatibility, this layer handles as well the connection requests and the
   proper dispatching of requests to the corresponding functions, and it holds
   the internal buffer used to allocate temporarily the IOVECs needed. The size
-  of this buffer is controlled by the ``TFM_CRYPTO_IOVEC_BUFFER_SIZE`` define.
+  of this buffer is controlled by the ``CRYPTO_IOVEC_BUFFER_SIZE`` define.
   This module also provides a static buffer which is used by the Mbed Crypto
   library for its own allocations. The size of this buffer is controlled by
-  the ``TFM_CRYPTO_ENGINE_BUF_SIZE`` define
+  the ``CRYPTO_ENGINE_BUF_SIZE`` define
 - ``crypto_alloc.c`` : This module is required for the allocation and release of
-  crypto operation contexts in the SPE. The ``TFM_CRYPTO_CONC_OPER_NUM``,
+  crypto operation contexts in the SPE. The ``CRYPTO_CONC_OPER_NUM``,
   defined in this file, determines how many concurrent contexts are supported
   for multipart operations (8 for the current implementation). For multipart
   cipher/hash/MAC/generator operations, a context is associated to the handle

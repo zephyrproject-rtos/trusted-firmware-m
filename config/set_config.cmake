@@ -46,13 +46,6 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/config.cmake)
     include(platform/ext/target/${TFM_PLATFORM}/config.cmake)
 endif()
 
-# Load accelerator config, setting options not already set
-if (CRYPTO_HW_ACCELERATOR)
-    if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/accelerator/${CRYPTO_HW_ACCELERATOR_TYPE}/config.cmake)
-        include(${CMAKE_SOURCE_DIR}/platform/ext/accelerator/${CRYPTO_HW_ACCELERATOR_TYPE}/config.cmake)
-    endif()
-endif()
-
 # Load profile config, setting options not already set
 if (TFM_PROFILE)
     include(config/profile/${TFM_PROFILE}.cmake)

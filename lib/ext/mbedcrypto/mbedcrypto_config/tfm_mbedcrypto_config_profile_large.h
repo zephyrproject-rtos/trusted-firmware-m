@@ -29,6 +29,8 @@
 #ifndef PROFILE_L_MBEDTLS_CONFIG_H
 #define PROFILE_L_MBEDTLS_CONFIG_H
 
+#include "config_crypto.h"
+
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_DEPRECATE)
 #define _CRT_SECURE_NO_DEPRECATE 1
 #endif
@@ -547,7 +549,7 @@
 
 /* \} name SECTION: Customisation configuration options */
 
-#ifdef CRYPTO_NV_SEED
+#if CRYPTO_NV_SEED
 #include "tfm_mbedcrypto_config_extra_nv_seed.h"
 #endif /* CRYPTO_NV_SEED */
 

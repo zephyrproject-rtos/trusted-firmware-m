@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -18,6 +18,13 @@ add_library(crypto_service_crypto_hw STATIC)
 endif()
 
 add_subdirectory(${CRYPTO_HW_ACCELERATOR_TYPE})
+
+############################ Project Config ####################################
+
+target_compile_definitions(tfm_config
+    INTERFACE
+        CRYPTO_HW_ACCELERATOR
+)
 
 ################################ BL1 ###########################################
 

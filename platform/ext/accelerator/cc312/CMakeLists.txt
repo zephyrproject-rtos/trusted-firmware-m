@@ -20,6 +20,13 @@ if(BL2)
     )
 endif()
 
+############################ Project Config ####################################
+
+target_compile_definitions(tfm_config
+    INTERFACE
+        CRYPTO_HW_ACCELERATOR_CC312
+)
+
 ################################ BL1 ###########################################
 
 if(BL1 AND PLATFORM_DEFAULT_BL1)

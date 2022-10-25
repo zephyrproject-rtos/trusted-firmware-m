@@ -22,4 +22,57 @@
 /* Disable Non-volatile counter module */
 #define PLATFORM_NV_COUNTER_MODULE_DISABLED    0
 
+/* Crypto Partition Configs */
+
+/*
+ * Heap size for the crypto backend
+ * CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
+ */
+#define CRYPTO_ENGINE_BUF_SIZE                 0x2080
+
+/* The max number of concurrent operations that can be active (allocated) at any time in Crypto */
+#define CRYPTO_CONC_OPER_NUM                   8
+
+/* Disable PSA Crypto random number generator module */
+#define CRYPTO_RNG_MODULE_DISABLED             0
+
+/* Disable PSA Crypto Key module */
+#define CRYPTO_KEY_MODULE_DISABLED             0
+
+/* Disable PSA Crypto AEAD module */
+#define CRYPTO_AEAD_MODULE_DISABLED            0
+
+/* Disable PSA Crypto MAC module */
+#define CRYPTO_MAC_MODULE_DISABLED             0
+
+/* Disable PSA Crypto Hash module */
+#define CRYPTO_HASH_MODULE_DISABLED            0
+
+/* Disable PSA Crypto Cipher module */
+#define CRYPTO_CIPHER_MODULE_DISABLED          0
+
+/* Disable PSA Crypto asymmetric key signature module */
+#define CRYPTO_ASYM_SIGN_MODULE_DISABLED       0
+
+/* Disable PSA Crypto asymmetric key encryption module */
+#define CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED    0
+
+/* Disable PSA Crypto key derivation module */
+#define CRYPTO_KEY_DERIVATION_MODULE_DISABLED  0
+
+/* Default size of the internal scratch buffer used for PSA FF IOVec allocations */
+#define CRYPTO_IOVEC_BUFFER_SIZE               5120
+
+/* Use stored NV seed to provide entropy */
+#define CRYPTO_NV_SEED                         1
+
+/*
+ * Only enable multi-part operations in Hash, MAC, AEAD and symmetric ciphers,
+ * to optimize memory footprint in resource-constrained devices.
+ */
+#define CRYPTO_SINGLE_PART_FUNCS_DISABLED      0
+
+/* The stack size of the Crypto Secure Partition */
+#define CRYPTO_STACK_SIZE                      0x1B00
+
 #endif /* __CONFIG_BASE_H__ */

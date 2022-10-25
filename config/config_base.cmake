@@ -126,23 +126,7 @@ set(ITS_BUF_SIZE                        ""          CACHE STRING    "Size of the
 set(ITS_STACK_SIZE                      "0x720"     CACHE STRING    "The stack size of the Internal Trusted Storage Secure Partition")
 
 set(TFM_PARTITION_CRYPTO                OFF         CACHE BOOL      "Enable Crypto partition")
-# CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
-set(CRYPTO_ENGINE_BUF_SIZE              0x2080      CACHE STRING    "Heap size for the crypto backend")
-set(CRYPTO_CONC_OPER_NUM                8           CACHE STRING    "The max number of concurrent operations that can be active (allocated) at any time in Crypto")
-set(CRYPTO_RNG_MODULE_DISABLED          FALSE       CACHE BOOL      "Disable PSA Crypto random number generator module")
-set(CRYPTO_KEY_MODULE_DISABLED          FALSE       CACHE BOOL      "Disable PSA Crypto Key module")
-set(CRYPTO_AEAD_MODULE_DISABLED         FALSE       CACHE BOOL      "Disable PSA Crypto AEAD module")
-set(CRYPTO_MAC_MODULE_DISABLED          FALSE       CACHE BOOL      "Disable PSA Crypto MAC module")
-set(CRYPTO_HASH_MODULE_DISABLED         FALSE       CACHE BOOL      "Disable PSA Crypto Hash module")
-set(CRYPTO_CIPHER_MODULE_DISABLED       FALSE       CACHE BOOL      "Disable PSA Crypto Cipher module")
-set(CRYPTO_ASYM_SIGN_MODULE_DISABLED    FALSE       CACHE BOOL      "Disable PSA Crypto asymmetric key signature module")
-set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED FALSE       CACHE BOOL      "Disable PSA Crypto asymmetric key encryption module")
-set(CRYPTO_KEY_DERIVATION_MODULE_DISABLED FALSE     CACHE BOOL      "Disable PSA Crypto key derivation module")
-set(CRYPTO_IOVEC_BUFFER_SIZE            5120        CACHE STRING    "Default size of the internal scratch buffer used for PSA FF IOVec allocations")
-set(CRYPTO_NV_SEED                      ON          CACHE BOOL      "Use stored NV seed to provide entropy")
-set(CRYPTO_SINGLE_PART_FUNCS_DISABLED   OFF         CACHE BOOL      "Only enable multi-part operations in Hash, MAC, AEAD and symmetric ciphers, to optimize memory footprint in resource-constrained devices")
 set(CRYPTO_TFM_BUILTIN_KEYS_DRIVER      ON          CACHE BOOL      "Whether to allow crypto service to store builtin keys. Without this, ALL builtin keys must be stored in a platform-specific location")
-set(CRYPTO_STACK_SIZE                   "0x1B00"    CACHE STRING    "The stack size of the Crypto Secure Partition")
 
 set(TFM_PARTITION_INITIAL_ATTESTATION   OFF         CACHE BOOL      "Enable Initial Attestation partition")
 set(SYMMETRIC_INITIAL_ATTESTATION       OFF         CACHE BOOL      "Use symmetric crypto for inital attestation")
