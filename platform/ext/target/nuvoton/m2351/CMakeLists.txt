@@ -89,7 +89,7 @@ target_sources(platform_s
         bsp/Library/StdDriver/src/fmc.c
         ../common/services/src/tfm_platform_system.c
         ${PLATFORM_DIR}/ext/common/uart_stdout.c
-        ${PLATFORM_DIR}/ext/common/tfm_platform.c
+        ${PLATFORM_DIR}/ext/common/tfm_hal_reset_halt.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
