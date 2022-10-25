@@ -41,6 +41,7 @@ endif()
 target_include_directories(platform_s
     PUBLIC
         .
+        ${NRF_PLATFORM_PATH}/common/core
 )
 
 target_sources(platform_s
