@@ -379,18 +379,18 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
                                     uintptr_t *p_boundary)
 {
-#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
-    uint32_t i, j;
-    struct platform_data_t *plat_data_ptr;
-    fih_int fih_rc = FIH_FAILURE;
-#endif /* CONFIG_TFM_MMIO_REGION_ENABLE == 1 */
     bool privileged;
     bool ns_agent;
     uint32_t partition_attrs = 0;
-    const struct asset_desc_t *p_asset;
 #if TFM_LVL == 2
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
+    uint32_t i, j;
+    const struct asset_desc_t *p_asset;
+    struct platform_data_t *plat_data_ptr;
+    fih_int fih_rc = FIH_FAILURE;
+#endif /* CONFIG_TFM_MMIO_REGION_ENABLE == 1 */
 
     if (!p_ldinf || !p_boundary) {
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
@@ -403,7 +403,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
 #endif
 
     ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
-    p_asset = LOAD_INFO_ASSET(p_ldinf);
+
 
     /*
      * Validate if the named MMIO of partition is allowed by the platform.
@@ -412,6 +412,8 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
      * NOTE: Need to add validation of numbered MMIO if platform requires.
      */
 #if CONFIG_TFM_MMIO_REGION_ENABLE == 1
+    p_asset = LOAD_INFO_ASSET(p_ldinf);
+
     for (i = 0; i < p_ldinf->nassets; i++) {
         if (!(p_asset[i].attr & ASSET_ATTR_NAMED_MMIO)) {
             continue;
