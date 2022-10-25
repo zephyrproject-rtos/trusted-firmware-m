@@ -56,57 +56,55 @@ if(BL2)
 endif()
 ############################ Crypto Service ####################################
 
-target_sources(crypto_service_crypto_hw
-    PRIVATE
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/rsa_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecdsa_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/aes_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/gcm_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ccm_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_curves_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha1_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha256_alt.c
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/stm.c
-)
+if(TFM_PARTITION_CRYPTO)
+    target_sources(crypto_service_crypto_hw
+        PRIVATE
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/rsa_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecdsa_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/aes_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/gcm_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ccm_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_curves_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha1_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha256_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/stm.c
+    )
 
-target_include_directories(crypto_service_crypto_hw
-    PRIVATE
-        ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
-        ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
-        ${PLATFORM_DIR}/ext/cmsis
-        ${PLATFORM_DIR}/include
-)
+    target_include_directories(crypto_service_crypto_hw
+        PRIVATE
+            ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
+            ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
+            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
+            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
+            ${PLATFORM_DIR}/ext/cmsis
+            ${PLATFORM_DIR}/include
+    )
 
-target_include_directories(crypto_service_mbedcrypto
-    PUBLIC
-        ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
-        ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
-        ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
-        ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
-        ${PLATFORM_DIR}/ext/cmsis
-)
+    target_include_directories(crypto_service_mbedcrypto
+        PUBLIC
+            ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/
+            ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/include/
+            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/hal/Inc/
+            ${PLATFORM_DIR}/ext/target/stm/common/stm32l5xx/Device/Include/
+            ${PLATFORM_DIR}/ext/cmsis
+    )
 
-target_compile_definitions(crypto_service_crypto_hw
-    PRIVATE
-        ST_HW_CONTEXT_SAVING
-)
+    target_compile_definitions(crypto_service_crypto_hw
+        PRIVATE
+            ST_HW_CONTEXT_SAVING
+    )
 
-target_link_libraries(crypto_service_crypto_hw
-    PRIVATE
-        crypto_service_mbedcrypto
-        platform_s
-)
+    target_link_libraries(crypto_service_crypto_hw
+        PRIVATE
+            crypto_service_mbedcrypto
+            platform_s
+    )
 
-target_link_libraries(platform_s
-    PRIVATE
-        crypto_service_crypto_hw
-)
-
-
-
-
+    target_link_libraries(platform_s
+        PRIVATE
+            crypto_service_crypto_hw
+    )
+endif()
