@@ -222,7 +222,7 @@ void sau_and_idau_cfg(void)
 
 /*------------------- Memory configuration functions -------------------------*/
 
-enum tfm_plat_err_t mpc_init_cfg(void)
+int32_t mpc_init_cfg(void)
 {
     /* Secure COnfiguration Setup */
     SCU_Setup();
@@ -233,20 +233,19 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     /* Set TIMER2 for Non-secure */
     SCU_SET_PNSSET(TMR23_Attr);
 
-    return TFM_PLAT_ERR_SUCCESS;
+    return 0;
 }
 /*---------------------- PPC configuration functions -------------------------*/
 
-enum tfm_plat_err_t ppc_init_cfg(void)
-{
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
-void ppc_configure_to_secure(enum ppc_bank_e bank, uint32_t pos)
+void ppc_init_cfg(void)
 {
 }
 
-void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint32_t pos)
+void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t pos)
+{
+}
+
+void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t pos)
 {
 }
 
