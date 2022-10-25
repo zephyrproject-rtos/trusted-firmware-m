@@ -28,7 +28,7 @@ to only include the required secure services and features. Project provides
 ‘TF-M base’ build with just TF-M core and platform drivers and 4 predefined
 configurations known as :ref:`tf-m_profiles`. TF-M Profiles or TF-M base can
 be configured to include required services and features as described in the
-'Configuration' section.
+:ref:`tf-m_configuration` section.
 
 .. figure:: readme_tfm_v8.png
    :scale: 65 %
