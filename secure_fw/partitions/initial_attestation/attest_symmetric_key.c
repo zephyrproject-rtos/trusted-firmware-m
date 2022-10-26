@@ -27,7 +27,7 @@
 static uint8_t instance_id_buf[PSA_HASH_LENGTH(INSTANCE_ID_HASH_ALG) + 1];
 static size_t instance_id_len = 0;
 
-#ifdef INCLUDE_COSE_KEY_ID
+#ifdef ATTEST_INCLUDE_COSE_KEY_ID
 /* kid buffer */
 static uint8_t kid_buf[KID_BUF_LEN];
 /* Actual kid length */
@@ -145,7 +145,7 @@ attest_get_instance_id(struct q_useful_buf_c *id_buf)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-#ifdef INCLUDE_COSE_KEY_ID
+#ifdef ATTEST_INCLUDE_COSE_KEY_ID
 enum psa_attest_err_t
 attest_get_initial_attestation_key_id(struct q_useful_buf_c *attest_key_id)
 {
@@ -184,4 +184,4 @@ attest_get_initial_attestation_key_id(struct q_useful_buf_c *attest_key_id)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
-#endif /* INCLUDE_COSE_KEY_ID */
+#endif /* ATTEST_INCLUDE_COSE_KEY_ID */

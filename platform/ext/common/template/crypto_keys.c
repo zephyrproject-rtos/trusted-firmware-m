@@ -54,13 +54,17 @@ enum tfm_plat_err_t tfm_plat_builtin_key_get_usage(psa_key_id_t key_id,
             *usage |= PSA_KEY_USAGE_EXPORT;
 #endif /* SYMMETRIC_INITIAL_ATTESTATION */
             break;
-#ifdef TFM_PARTITION_TEST_SECURE_SERVICES
+#if defined(TEST_S_ATTESTATION) || defined(TEST_NS_ATTESTATION)
         /* So that the tests can validate created tokens */
+#ifdef TEST_S_ATTESTATION
         case TFM_SP_SECURE_TEST_PARTITION:
+#endif /* TEST_S_ATTESTATION */
+#ifdef TEST_NS_ATTESTATION
         case TFM_NS_PARTITION_ID:
+#endif /* TEST_NS_ATTESTATION */
             *usage = PSA_KEY_USAGE_VERIFY_HASH;
             break;
-#endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
+#endif /* TEST_S_ATTESTATION || TEST_NS_ATTESTATION */
 #endif /* TFM_PARTITION_INITIAL_ATTESTATION */
         default:
             return TFM_PLAT_ERR_NOT_PERMITTED;
