@@ -127,9 +127,9 @@ SECTIONS
     } > FLASH
     Image$$TFM_SP_LOAD_LIST$$RO$$Base = ADDR(.TFM_SP_LOAD_LIST);
     Image$$TFM_SP_LOAD_LIST$$RO$$Limit = ADDR(.TFM_SP_LOAD_LIST) + SIZEOF(.TFM_SP_LOAD_LIST);
-    . = ALIGN(32);
 
     /**** PSA RoT RO CODE + RO-data starts here */
+    . = ALIGN(32);
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
     .{{partition.manifest.name}}_RO : ALIGN(32)
@@ -322,12 +322,12 @@ SECTIONS
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_PSA-ROT_ATTR_RW)
-        . = ALIGN(32);
+        . = ALIGN(4);
     } > RAM AT> FLASH
     Image$$ER_{{partition.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{partition.manifest.name}}_RWZI);
     Image$$ER_{{partition.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{partition.manifest.name}}_RWZI) + SIZEOF(.ER_{{partition.manifest.name}}_RWZI);
 
-    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(32)
+    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(4)
     {
         start_of_{{partition.manifest.name}}_RWZI = .;
     {% if partition.attr.linker_pattern.library_list %}
@@ -381,12 +381,12 @@ SECTIONS
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_APP-ROT_ATTR_RW)
-        . = ALIGN(32);
+        . = ALIGN(4);
     } > RAM AT> FLASH
     Image$$.ER_{{partition.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{partition.manifest.name}}_RWZI);
     Image$$.ER_{{partition.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{partition.manifest.name}}_RWZI) + SIZEOF(.ER_{{partition.manifest.name}}_RWZI);
 
-    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(32)
+    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(4)
     {
         start_of_{{partition.manifest.name}}_RWZI = .;
     {% if partition.attr.linker_pattern.library_list %}

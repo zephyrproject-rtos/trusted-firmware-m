@@ -132,9 +132,9 @@ SECTIONS
     } > FLASH
     Image$$TFM_SP_LOAD_LIST$$RO$$Base = ADDR(.TFM_SP_LOAD_LIST);
     Image$$TFM_SP_LOAD_LIST$$RO$$Limit = ADDR(.TFM_SP_LOAD_LIST) + SIZEOF(.TFM_SP_LOAD_LIST);
-    . = ALIGN(32);
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
+    . = ALIGN(32);
     Image$$TFM_PSA_CODE_START$$Base = .;
 
     .TFM_PSA_ROT_LINKER : ALIGN(32)
@@ -299,12 +299,12 @@ SECTIONS
     {
         *tfm_app_rot_partition*:*(.data*)
         *(TFM_*_APP-ROT_ATTR_RW)
-        . = ALIGN(32);
+        . = ALIGN(4);
     } > RAM AT> FLASH
     Image$$TFM_APP_ROT_LINKER_DATA$$RW$$Base = ADDR(.TFM_APP_ROT_LINKER_DATA);
     Image$$TFM_APP_ROT_LINKER_DATA$$RW$$Limit = ADDR(.TFM_APP_ROT_LINKER_DATA) + SIZEOF(.TFM_APP_ROT_LINKER_DATA);
 
-    .TFM_APP_ROT_LINKER_BSS : ALIGN(32)
+    .TFM_APP_ROT_LINKER_BSS : ALIGN(4)
     {
         start_of_TFM_APP_ROT_LINKER = .;
         *tfm_app_rot_partition*:*(.bss*)
@@ -360,12 +360,12 @@ SECTIONS
     {
         *tfm_psa_rot_partition*:*(.data*)
         *(TFM_*_PSA-ROT_ATTR_RW)
-        . = ALIGN(32);
+        . = ALIGN(4);
     } > RAM AT> FLASH
     Image$$TFM_PSA_ROT_LINKER_DATA$$RW$$Base = ADDR(.TFM_PSA_ROT_LINKER_DATA);
     Image$$TFM_PSA_ROT_LINKER_DATA$$RW$$Limit = ADDR(.TFM_PSA_ROT_LINKER_DATA) + SIZEOF(.TFM_PSA_ROT_LINKER_DATA);
 
-    .TFM_PSA_ROT_LINKER_BSS : ALIGN(32)
+    .TFM_PSA_ROT_LINKER_BSS : ALIGN(4)
     {
         start_of_TFM_PSA_ROT_LINKER = .;
         *tfm_psa_rot_partition*:*(.bss*)
