@@ -76,7 +76,7 @@ static struct irq_t serial0_irq = {0};
 
 void SERIAL0_IRQHandler(void)
 {
-    spm_handle_interrupt(serial0.p_pt, serial0.p_ildi);
+    spm_handle_interrupt(serial0_irq.p_pt, serial0_irq.p_ildi);
 }
 
 enum tfm_hal_status_t tfm_serial0_init(void *p_pt,
