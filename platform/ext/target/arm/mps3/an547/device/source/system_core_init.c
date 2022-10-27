@@ -23,7 +23,6 @@
 
 #include <stdint.h>
 #include "cmsis.h"
-#include "platform_description.h"
 
  /* Define clocks */
 #define  XTAL             (32000000UL)

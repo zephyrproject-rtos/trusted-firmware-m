@@ -21,6 +21,5 @@
 #include "platform_base_address.h"
 #include "platform_regs.h"
 #include "platform_pins.h"
-#include "system_core_init.h"
 
 #endif  /* __PLATFORM_DESCRIPTION_H__ */
