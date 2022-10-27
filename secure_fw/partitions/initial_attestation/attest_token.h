@@ -2,7 +2,7 @@
  * attest_token.h
  *
  * Copyright (c) 2018-2019, Laurence Lundblade.
- * Copyright (c) 2020, Arm Limited.
+ * Copyright (c) 2020-2022, Arm Limited.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,7 +24,6 @@
 extern "C" {
 #endif
 
-
 /**
  * \file attest_token.h
  *
@@ -42,7 +41,6 @@ extern "C" {
  *   -# Call attest_token_encode_finish() to create the signature and finish
  *   formatting the COSE signed output.
  */
-
 
 /**
  Error codes returned from attestation token creation.
@@ -96,8 +94,6 @@ enum attest_token_err_t {
     ATTEST_TOKEN_ERR_SW_COMPONENTS_MISSING
 };
 
-
-
 /**
  * Request that the claims internally generated not be added to the
  * token.  This is a test mode that results in a static token that
@@ -105,7 +101,6 @@ enum attest_token_err_t {
  * the callers control unlike the other claims.
  */
 #define TOKEN_OPT_OMIT_CLAIMS        0x40000000
-
 
 /**
  * A special test mode where a proper signature is not produced. In
@@ -115,7 +110,6 @@ enum attest_token_err_t {
  * token has no security value in this mode because anyone can
  * replicate it. */
 #define TOKEN_OPT_SHORT_CIRCUIT_SIGN 0x80000000
-
 
 /**
  * The context for creating an attestation token.  The caller of
@@ -139,7 +133,6 @@ struct attest_token_encode_ctx {
     struct t_cose_sign1_sign_ctx signer_ctx;
 #endif
 };
-
 
 /**
  * \brief Initialize a token creation context.
@@ -176,8 +169,6 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
                           int32_t key_select,
                           int32_t cose_alg_id,
                           const struct q_useful_buf *out_buffer);
-
-
 
 /**
  * \brief Get a copy of the CBOR encoding context
@@ -244,7 +235,6 @@ void attest_token_encode_add_cbor(struct attest_token_encode_ctx *me,
                                   int32_t label,
                                   const struct q_useful_buf_c *encoded);
 
-
 /**
  * \brief Finish the token, complete the signing and get the result
  *
@@ -260,7 +250,6 @@ void attest_token_encode_add_cbor(struct attest_token_encode_ctx *me,
 enum attest_token_err_t
 attest_token_encode_finish(struct attest_token_encode_ctx *me,
                            struct q_useful_buf_c *completed_token);
-    
 
 #ifdef __cplusplus
 }

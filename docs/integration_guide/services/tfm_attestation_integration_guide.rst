@@ -147,7 +147,6 @@ to use functions from the PSA API is ``psa/initial_attestation.h``.
 
 The TF-M Initial Attestation Service source files are located in
 ``secure_fw/partitions/initial_attestation``.
-The CBOR library is located in ``lib/ext/qcbor`` folder.
 
 Service source files
 ====================
@@ -156,9 +155,12 @@ Service source files
       It can be used on 32-bit and 64-bit machines. It was designed to suite
       constrained devices with low memory usage and without dynamic memory
       allocation.
-      It is a fork of this external `QCBOR library <https://github.com/laurencelundblade/QCBOR>`__.
-    - ``lib/ext/qcbor/inc/qcbor.h``: Public API documentation of CBOR
-      library.
+      Its source code is fetched automatically during the build configuration
+      step from an external repository: `QCBOR library <https://github.com/laurencelundblade/QCBOR>`__.
+    - ``<qcbor_src>/inc/qcbor/qcbor_encode.h``: Public API documentation of
+      CBOR library (encoding).
+    - ``<qcbor_src>/inc/qcbor/qcbor_decode.h``: Public API documentation of
+      CBOR library (decoding).
 
 - COSE library:
     - ``lib/ext/t_cose``: This library is used to sign a CBOR token and create
