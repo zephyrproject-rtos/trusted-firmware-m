@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "attest_key.h"
+#include "config_attest.h"
 #include "psa/crypto.h"
 #include "tfm_crypto_defs.h"
 
@@ -27,7 +28,7 @@
 static uint8_t instance_id_buf[PSA_HASH_LENGTH(INSTANCE_ID_HASH_ALG) + 1];
 static size_t instance_id_len = 0;
 
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
 /* kid buffer */
 static uint8_t kid_buf[KID_BUF_LEN];
 /* Actual kid length */
@@ -145,7 +146,7 @@ attest_get_instance_id(struct q_useful_buf_c *id_buf)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
 enum psa_attest_err_t
 attest_get_initial_attestation_key_id(struct q_useful_buf_c *attest_key_id)
 {

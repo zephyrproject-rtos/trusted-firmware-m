@@ -9,6 +9,7 @@
 #define __ATTEST_KEY_H__
 
 #include "attest.h"
+#include "config_attest.h"
 #include "psa/initial_attestation.h"
 #include "psa/crypto.h"
 #include "q_useful_buf.h"
@@ -30,7 +31,7 @@ extern "C" {
 enum psa_attest_err_t
 attest_get_instance_id(struct q_useful_buf_c *id_buf);
 
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
 /**
  * \brief Get the attestation key ID.
  *        In asymmetric key algorithm based Initial Attestation, it is the hash

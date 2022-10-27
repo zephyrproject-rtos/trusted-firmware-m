@@ -83,4 +83,18 @@
 /* The stack size of the Firmware Update Secure Partition */
 #define FWU_STACK_SIZE                         0x600
 
+/* Attest Partition Configs */
+
+/* Include optional claims in initial attestation token */
+#define ATTEST_INCLUDE_OPTIONAL_CLAIMS         1
+
+/* Include COSE key-id in initial attestation token */
+#define ATTEST_INCLUDE_COSE_KEY_ID             0
+
+/* The stack size of the Initial Attestation Secure Partition */
+#define ATTEST_STACK_SIZE                      0x700
+
+/* Set the initial attestation token profile */
+#define ATTEST_TOKEN_PROFILE_PSA_IOT_1         1
+
 #endif /* __CONFIG_TEST_PSA_API_H__ */

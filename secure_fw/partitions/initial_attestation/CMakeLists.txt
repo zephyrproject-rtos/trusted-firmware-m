@@ -49,6 +49,7 @@ target_include_directories(tfm_partitions
 target_link_libraries(tfm_psa_rot_partition_attestation
     PRIVATE
         platform_s
+        tfm_config
         tfm_qcbor_s
         tfm_t_cose_s
         tfm_sprt
@@ -59,10 +60,7 @@ target_compile_definitions(tfm_psa_rot_partition_attestation
     PRIVATE
         $<$<BOOL:${ATTEST_INCLUDE_TEST_CODE}>:INCLUDE_TEST_CODE>
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
-        $<$<BOOL:${ATTEST_INCLUDE_OPTIONAL_CLAIMS}>:INCLUDE_OPTIONAL_CLAIMS>
-        $<$<BOOL:${ATTEST_INCLUDE_COSE_KEY_ID}>:ATTEST_INCLUDE_COSE_KEY_ID>
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>>:CLAIM_VALUE_CHECK>
-        ATTEST_TOKEN_PROFILE_${ATTEST_TOKEN_PROFILE}
         $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:ATTEST_KEY_BITS=${ATTEST_KEY_BITS}>
 )
 
@@ -75,9 +73,9 @@ target_include_directories(tfm_attestation_defs
         .
 )
 
-target_compile_definitions(tfm_attestation_defs
+target_link_libraries(tfm_attestation_defs
     INTERFACE
-        ATTEST_TOKEN_PROFILE_${ATTEST_TOKEN_PROFILE}
+        tfm_config
 )
 
 ############################ Partition Defs ####################################
@@ -91,13 +89,4 @@ target_link_libraries(tfm_partitions
 target_compile_definitions(tfm_partition_defs
     INTERFACE
     TFM_PARTITION_INITIAL_ATTESTATION
-)
-
-################ Display the configuration being applied #######################
-
-include(utils)
-dump_options("Initial Attestation config"
-"
-    ATTEST_STACK_SIZE
-"
 )

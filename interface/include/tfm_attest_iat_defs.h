@@ -12,7 +12,9 @@
 extern "C" {
 #endif
 
-#if defined(ATTEST_TOKEN_PROFILE_PSA_IOT_1)
+#include "config_attest.h"
+
+#if ATTEST_TOKEN_PROFILE_PSA_IOT_1
 
 /* In case of the original PSA_IOT_PROFILE_1 */
 #define IAT_ARM_RANGE_BASE                 (-75000)
@@ -34,7 +36,7 @@ extern "C" {
  */
 #define NO_SW_COMPONENT_FIXED_VALUE 1
 
-#elif defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
+#elif ATTEST_TOKEN_PROFILE_PSA_2_0_0
 
 /* In case of PSA_2_0_0 (updated PSA profile ) */
 #define IAT_NONCE                          10  /* EAT nonce */
@@ -49,7 +51,7 @@ extern "C" {
 #define IAT_SW_COMPONENTS                  (IAT_ARM_RANGE_BASE + 6)
 #define IAT_VERIFICATION_SERVICE           (IAT_ARM_RANGE_BASE + 7)
 
-#elif defined(ATTEST_TOKEN_PROFILE_ARM_CCA)
+#elif ATTEST_TOKEN_PROFILE_ARM_CCA
 
 /* In case of  ARM_CCA profile */
 #define IAT_NONCE                          10  /* EAT nonce*/

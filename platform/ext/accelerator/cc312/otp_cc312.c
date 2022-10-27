@@ -5,6 +5,7 @@
  *
  */
 
+#include "config_attest.h"
 #include "tfm_plat_otp.h"
 
 #include "cmsis_compiler.h"
@@ -513,7 +514,7 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
     err = verify_zero_bits_count(otp->iak_id,
                                  sizeof(otp->iak_id),
                                  (uint8_t*)&otp->iak_id_zero_bits);

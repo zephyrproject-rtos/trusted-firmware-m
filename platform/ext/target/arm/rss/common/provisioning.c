@@ -8,6 +8,7 @@
 #include "tfm_plat_provisioning.h"
 
 #include "cmsis_compiler.h"
+#include "config_attest.h"
 #include "tfm_plat_otp.h"
 #include "tfm_attest_hal.h"
 #include "psa/crypto.h"
@@ -115,11 +116,11 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
     /* verification_service_url */
     "www.trustedfirmware.org",
     /* attestation_profile_definition */
-#if defined(ATTEST_TOKEN_PROFILE_PSA_IOT_1)
+#if ATTEST_TOKEN_PROFILE_PSA_IOT_1
     "PSA_IOT_PROFILE_1",
-#elif defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
+#elif ATTEST_TOKEN_PROFILE_PSA_2_0_0
     "http://arm.com/psa/2.0.0",
-#elif defined(ATTEST_TOKEN_PROFILE_ARM_CCA)
+#elif ATTEST_TOKEN_PROFILE_ARM_CCA
     "http://arm.com/CCA-SSD/1.0.0",
 #else
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION

@@ -130,10 +130,6 @@ set(CRYPTO_TFM_BUILTIN_KEYS_DRIVER      ON          CACHE BOOL      "Whether to 
 
 set(TFM_PARTITION_INITIAL_ATTESTATION   OFF         CACHE BOOL      "Enable Initial Attestation partition")
 set(SYMMETRIC_INITIAL_ATTESTATION       OFF         CACHE BOOL      "Use symmetric crypto for inital attestation")
-set(ATTEST_INCLUDE_OPTIONAL_CLAIMS      ON          CACHE BOOL      "Include optional claims in initial attestation token")
-set(ATTEST_INCLUDE_COSE_KEY_ID          OFF         CACHE BOOL      "Include COSE key-id in initial attestation token")
-set(ATTEST_TOKEN_PROFILE                "PSA_IOT_1" CACHE STRING    "Set the initial attestation token profile. Options: PSA_IOT_1, PSA_2_0_0, ARM_CCA")
-set(ATTEST_STACK_SIZE                   "0x700"     CACHE STRING    "The stack size of the Initial Attestation Secure Partition")
 set(ATTEST_INCLUDE_TEST_CODE            OFF         CACHE BOOL      "Include minimal development tests in the initial attestation regression test suite")
 set(ATTEST_KEY_BITS                     256         CACHE STRING    "The size of the initial attestation key in bits")
 

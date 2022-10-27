@@ -114,6 +114,7 @@ if(BL2)
     target_link_libraries(platform_bl2
         PRIVATE
             bl2_crypto_hw
+            tfm_config
     )
 
     target_link_libraries(${CC312_LIB_PREFIX}cc312_cdmpu

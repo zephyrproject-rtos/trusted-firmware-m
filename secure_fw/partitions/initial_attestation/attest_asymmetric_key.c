@@ -9,6 +9,7 @@
 #include "attest_key.h"
 #include <stdint.h>
 #include <stddef.h>
+#include "config_attest.h"
 #include "tfm_plat_defs.h"
 #include "tfm_plat_device_id.h"
 #include "t_cose_standard_constants.h"
@@ -33,7 +34,7 @@ static uint8_t  attestation_public_key[ATTEST_ECC_PUBLIC_KEY_SIZE];
 static size_t   attestation_public_key_len = 0;
 static psa_ecc_family_t attestation_key_curve;
 
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
 /* 32bytes */
 static uint8_t attestation_key_id[PSA_HASH_LENGTH(PSA_ALG_SHA_256)];
 #endif
@@ -128,7 +129,7 @@ attest_get_instance_id(struct q_useful_buf_c *id_buf)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
 
 #define MAX_ENCODED_COSE_KEY_SIZE \
     1 + /* 1 byte to encode map */ \

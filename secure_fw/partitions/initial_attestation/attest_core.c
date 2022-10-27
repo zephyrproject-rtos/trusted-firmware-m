@@ -13,6 +13,7 @@
 #include "attest_boot_data.h"
 #include "attest_key.h"
 #include "attest_token.h"
+#include "config_attest.h"
 #include "tfm_plat_defs.h"
 #include "tfm_plat_device_id.h"
 #include "tfm_plat_boot_seed.h"
@@ -157,7 +158,7 @@ attest_add_all_sw_components(struct attest_token_encode_ctx *token_ctx)
     }
 
     if (component_cnt == 0) {
-#ifdef ATTEST_TOKEN_PROFILE_PSA_IOT_1
+#if ATTEST_TOKEN_PROFILE_PSA_IOT_1
         /* Allowed to not have SW components claim, but it must be indicated
          * that this state is intentional. In this case, include the
          * IAT_NO_SW_COMPONENTS claim with a fixed value.
@@ -313,7 +314,7 @@ attest_add_profile_definition(struct attest_token_encode_ctx *token_ctx)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-#if defined(INCLUDE_OPTIONAL_CLAIMS)
+#if ATTEST_INCLUDE_OPTIONAL_CLAIMS
 /*!
  * \brief Static function to add the verification service indicator claim
  *        to the attestation token.
@@ -343,10 +344,9 @@ attest_add_verification_service(struct attest_token_encode_ctx *token_ctx)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
-#endif /* INCLUDE_OPTIONAL_CLAIMS */
+#endif /* ATTEST_INCLUDE_OPTIONAL_CLAIMS */
 
-#if defined(ATTEST_TOKEN_PROFILE_PSA_IOT_1) || \
-    defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
+#if ATTEST_TOKEN_PROFILE_PSA_IOT_1 || ATTEST_TOKEN_PROFILE_PSA_2_0_0
 /*!
  * \brief Static function to add boot seed claim to attestation token.
  *
@@ -413,7 +413,7 @@ attest_add_caller_id_claim(struct attest_token_encode_ctx *token_ctx)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-#if defined(INCLUDE_OPTIONAL_CLAIMS)
+#if ATTEST_INCLUDE_OPTIONAL_CLAIMS
 /*!
  * \brief Static function to add certification reference claim to attestation
  *        token.
@@ -458,10 +458,10 @@ attest_add_cert_ref_claim(struct attest_token_encode_ctx *token_ctx)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
-#endif /* INCLUDE_OPTIONAL_CLAIMS */
+#endif /* ATTEST_INCLUDE_OPTIONAL_CLAIMS */
 #endif /* ATTEST_TOKEN_PROFILE_PSA_IOT_1 || ATTEST_TOKEN_PROFILE_PSA_2_0_0 */
 
-#ifdef ATTEST_TOKEN_PROFILE_ARM_CCA
+#if ATTEST_TOKEN_PROFILE_ARM_CCA
 /*!
  * \brief Static function to add the platform hash algorithm identifier
  *        claim to the attestation token. This hash algo is used for extending
@@ -679,8 +679,7 @@ static enum psa_attest_err_t attest_get_t_cose_algorithm(
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-#if defined(ATTEST_TOKEN_PROFILE_PSA_IOT_1) || \
-    defined(ATTEST_TOKEN_PROFILE_PSA_2_0_0)
+#if ATTEST_TOKEN_PROFILE_PSA_IOT_1 || ATTEST_TOKEN_PROFILE_PSA_2_0_0
     static enum psa_attest_err_t
     (*claim_query_funcs[])(struct attest_token_encode_ctx *) = {
         &attest_add_boot_seed_claim,
@@ -690,12 +689,12 @@ static enum psa_attest_err_t attest_get_t_cose_algorithm(
         &attest_add_security_lifecycle_claim,
         &attest_add_all_sw_components,
         &attest_add_profile_definition,
-#ifdef INCLUDE_OPTIONAL_CLAIMS
+#if ATTEST_INCLUDE_OPTIONAL_CLAIMS
         &attest_add_verification_service,
         &attest_add_cert_ref_claim
 #endif
     };
-#elif defined(ATTEST_TOKEN_PROFILE_ARM_CCA)
+#elif ATTEST_TOKEN_PROFILE_ARM_CCA
 
     static enum psa_attest_err_t
     (*claim_query_funcs[])(struct attest_token_encode_ctx *) = {
@@ -706,7 +705,7 @@ static enum psa_attest_err_t attest_get_t_cose_algorithm(
         &attest_add_profile_definition,
         &attest_add_hash_algo_claim,
         &attest_add_platform_config_claim,
-#ifdef INCLUDE_OPTIONAL_CLAIMS
+#if ATTEST_INCLUDE_OPTIONAL_CLAIMS
         &attest_add_verification_service,
 #endif
     };

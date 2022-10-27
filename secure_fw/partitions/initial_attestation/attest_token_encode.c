@@ -10,6 +10,7 @@
  */
 
 #include "attest_token.h"
+#include "config_attest.h"
 #include "qcbor.h"
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
 #include "t_cose_mac0_sign.h"
@@ -244,7 +245,7 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     if (opt_flags & TOKEN_OPT_SHORT_CIRCUIT_SIGN) {
         t_cose_options |= T_COSE_OPT_SHORT_CIRCUIT_SIG;
     } else {
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
         attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);
         if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
             return ATTEST_TOKEN_ERR_GENERAL;
