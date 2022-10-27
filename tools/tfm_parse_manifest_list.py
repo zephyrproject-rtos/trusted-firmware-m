@@ -58,36 +58,6 @@ class TemplateLoader(BaseLoader):
             source = f.read()
         return source, template, False
 
-def get_single_macro_def_from_file(file_name, macro_name):
-    """
-    This function parses the given file_name to get the definition of the given
-    C Macro (macro_name).
-
-    It assumes that the target Macro has no multiple definitions in different
-    build configurations.
-
-    It supports Macros defined in multi-line, for example:
-    #define SOME_MACRO          \
-                            the_macro_value
-
-    Inputs:
-        - file_name: the file to get the Macro from
-        - macro_name: the name of the Macro to get
-    Returns:
-        - The Macro definition with '()' stripped, or Exception if not found
-    """
-
-    with open(file_name, 'r') as f:
-        pattern = re.compile(r'#define\s+{}[\\\s]+.*'.format(macro_name))
-        result = pattern.findall(f.read())
-
-        if len(result) != 1:
-            raise Exception('{} not defined or has multiple definitions'.format(macro_name))
-
-    macro_def = result[0].split()[-1].strip('()')
-
-    return macro_def
-
 def parse_configurations(file_paths):
     """
     Parses the given config files and return a dict whose key-values are build
@@ -597,13 +567,14 @@ def process_stateless_services(partitions):
     valid index for the service.
     Framework puts each service into a reordered stateless service list at
     position of "index". Other unused positions are left None.
+
+    Keep the variable names start with upper case 'STATIC_HANDLE_' the same
+    as the preprocessors in C sources. This could easier the upcomping
+    modification when developer searches these definitions for modification.
     """
 
-    STATIC_HANDLE_CONFIG_FILE = 'secure_fw/spm/cmsis_psa/spm_ipc.h'
-
     collected_stateless_services = []
-    stateless_index_max_num = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_NUM_LIMIT'), base = 10)
+    STATIC_HANDLE_NUM_LIMIT = 32
 
     # Collect all stateless services first.
     for partition in partitions:
@@ -620,15 +591,15 @@ def process_stateless_services(partitions):
     if len(collected_stateless_services) == 0:
         return []
 
-    if len(collected_stateless_services) > stateless_index_max_num:
-        raise Exception('Stateless service numbers range exceed {number}.'.format(number=stateless_index_max_num))
+    if len(collected_stateless_services) > STATIC_HANDLE_NUM_LIMIT:
+        raise Exception('Stateless service numbers range exceed {number}.'.format(number=STATIC_HANDLE_NUM_LIMIT))
 
     """
     Allocate an empty stateless service list to store services.
     Use "handle - 1" as the index for service, since handle value starts from
     1 and list index starts from 0.
     """
-    reordered_stateless_services = [None] * stateless_index_max_num
+    reordered_stateless_services = [None] * STATIC_HANDLE_NUM_LIMIT
     auto_alloc_services = []
 
     for service in collected_stateless_services:
@@ -641,7 +612,7 @@ def process_stateless_services(partitions):
 
         # Fill in service list with specified stateless handle, otherwise skip
         if isinstance(service_handle, int):
-            if service_handle < 1 or service_handle > stateless_index_max_num:
+            if service_handle < 1 or service_handle > STATIC_HANDLE_NUM_LIMIT:
                 raise Exception('Invalid stateless_handle setting: {handle}.'.format(handle=service['stateless_handle']))
             # Convert handle index to reordered service list index
             service_handle = service_handle - 1
@@ -654,22 +625,15 @@ def process_stateless_services(partitions):
         else:
             raise Exception('Invalid stateless_handle setting: {handle}.'.format(handle=service['stateless_handle']))
 
-    STATIC_HANDLE_IDX_BIT_WIDTH = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_IDX_BIT_WIDTH'), base = 10)
+    STATIC_HANDLE_IDX_BIT_WIDTH = 8
     STATIC_HANDLE_IDX_MASK = (1 << STATIC_HANDLE_IDX_BIT_WIDTH) - 1
-
-    STATIC_HANDLE_INDICATOR_OFFSET = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_INDICATOR_OFFSET'), base = 10)
-
-    STATIC_HANDLE_VER_OFFSET = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_VER_OFFSET'), base = 10)
-
-    STATIC_HANDLE_VER_BIT_WIDTH = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_VER_BIT_WIDTH'), base = 10)
+    STATIC_HANDLE_INDICATOR_OFFSET = 30
+    STATIC_HANDLE_VER_OFFSET = 8
+    STATIC_HANDLE_VER_BIT_WIDTH = 8
     STATIC_HANDLE_VER_MASK = (1 << STATIC_HANDLE_VER_BIT_WIDTH) - 1
 
     # Auto-allocate stateless handle and encode the stateless handle
-    for i in range(0, stateless_index_max_num):
+    for i in range(0, STATIC_HANDLE_NUM_LIMIT):
         service = reordered_stateless_services[i]
 
         if service == None and len(auto_alloc_services) > 0:
@@ -677,7 +641,6 @@ def process_stateless_services(partitions):
 
         """
         Encode stateless flag and version into stateless handle
-        Check STATIC_HANDLE_CONFIG_FILE for details
         """
         stateless_handle_value = 0
         if service != None:
