@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include "config_fwu.h"
 #include "tfm_platform_api.h"
 #include "tfm_bootloader_fwu_abstraction.h"
 #include "psa/update.h"
@@ -32,9 +33,6 @@ typedef struct tfm_fwu_ctx_s {
 static tfm_fwu_ctx_t fwu_ctx[FWU_COMPONENT_NUMBER];
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
-#ifndef TFM_FWU_BUF_SIZE
-#define TFM_FWU_BUF_SIZE PSA_FWU_MAX_WRITE_SIZE
-#endif
 static uint8_t block[TFM_FWU_BUF_SIZE] __aligned(4);
 #endif
 

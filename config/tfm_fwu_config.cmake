@@ -10,8 +10,6 @@ set(TFM_PARTITION_FIRMWARE_UPDATE         OFF         CACHE BOOL      "Enable fi
 set(TFM_FWU_BOOTLOADER_LIB                "mcuboot"   CACHE STRING    "Bootloader configure file for Firmware Update partition")
 set(TFM_CONFIG_FWU_MAX_WRITE_SIZE         1024        CACHE STRING    "The maximum permitted size for block in psa_fwu_write, in bytes.")
 set(TFM_CONFIG_FWU_MAX_MANIFEST_SIZE      0           CACHE STRING    "The maximum permitted size for manifest in psa_fwu_start(), in bytes.")
-set(TFM_FWU_BUF_SIZE                      ""          CACHE STRING    "Size of the FWU internal data transfer buffer (defaults to PSA_FWU_MAX_BLOCK_SIZE if not set)")
-set(FWU_STACK_SIZE                        "0x600"     CACHE STRING    "The stack size of the Firmware Update Secure Partition")
 set(FWU_DEVICE_CONFIG_FILE                ""          CACHE STRING    "The device configuration file for Firmware Update partition")
 if (DEFINED MCUBOOT_UPGRADE_STRATEGY)
     if(${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "SWAP_USING_SCRATCH" OR ${MCUBOOT_UPGRADE_STRATEGY} STREQUAL "SWAP_USING_MOVE")

@@ -72,4 +72,12 @@
 /* The stack size of the Crypto Secure Partition */
 #define CRYPTO_STACK_SIZE                      0x1B00
 
+/* FWU Partition Configs */
+
+/* Size of the FWU internal data transfer buffer */
+#define TFM_FWU_BUF_SIZE                       PSA_FWU_MAX_WRITE_SIZE
+
+/* The stack size of the Firmware Update Secure Partition */
+#define FWU_STACK_SIZE                         0x600
+
 #endif /* __CONFIG_PROFILE_SMALL_H__ */

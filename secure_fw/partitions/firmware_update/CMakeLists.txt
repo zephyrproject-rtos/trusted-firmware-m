@@ -45,6 +45,7 @@ add_subdirectory(bootloader/${TFM_FWU_BOOTLOADER_LIB})
 target_link_libraries(tfm_psa_rot_partition_fwu
     PRIVATE
         platform_s
+        tfm_config
         tfm_sprt
 )
 
@@ -68,7 +69,6 @@ endif()
 target_compile_definitions(tfm_psa_rot_partition_fwu
     PRIVATE
         $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
-        $<$<BOOL:${TFM_FWU_BUF_SIZE}>:TFM_FWU_BUF_SIZE=${TFM_FWU_BUF_SIZE}>
         FWU_DEVICE_CONFIG_FILE="${FWU_DEVICE_CONFIG_FILE}"
 )
 
@@ -90,7 +90,6 @@ include(utils)
 dump_options("Firmware Update Partition config"
 "
     TFM_FWU_BOOTLOADER_LIB;
-    FWU_STACK_SIZE;
     FWU_DEVICE_CONFIG_FILE
 "
 )
