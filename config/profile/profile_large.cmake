@@ -5,28 +5,31 @@
 #
 #-------------------------------------------------------------------------------
 
-set(TFM_PROFILE                         profile_large CACHE STRING    "Profile to use")
-set(TFM_ISOLATION_LEVEL                 3           CACHE STRING    "Isolation level")
+set(TFM_PROFILE                    profile_large CACHE STRING "Configuration profile")
 
-############################ Partitions ########################################
+############################ SPM CONFIGURATION  ################################
 
-set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
+set(TFM_ISOLATION_LEVEL                    3     CACHE STRING "Isolation level")
+set(CONFIG_TFM_SPM_BACKEND                "IPC"  CACHE STRING "The SPM backend [IPC, SFN]")
 
-set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Protected Storage partition")
-set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_CCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in protected storage")
+############################ PARTITION CONFIGURATION  ##########################
 
-set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
+set(TFM_PARTITION_CRYPTO                   ON    CACHE BOOL "Enable Crypto partition")
+set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON    CACHE BOOL "Enable Internal Trusted Storage partition")
+set(TFM_PARTITION_PLATFORM                 ON    CACHE BOOL "Enable the TF-M Platform partition")
+set(TFM_PARTITION_PROTECTED_STORAGE        ON    CACHE BOOL "Enable Protected Storage partition")
+set(TFM_PARTITION_INITIAL_ATTESTATION      ON    CACHE BOOL "Enable Initial Attestation partition")
+set(SYMMETRIC_INITIAL_ATTESTATION          ON    CACHE BOOL "Use symmetric crypto for inital attestation")
+set(TFM_PARTITION_FIRMWARE_UPDATE          OFF   CACHE BOOL "Enable firmware update partition")
 
-set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Initial Attestation partition")
+################################## Advanced options #############################
 
-set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Platform partition")
-
-####################### Fault Injection Hardening ##############################
-set(MCUBOOT_FIH_PROFILE                 MEDIUM      CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
+set(MCUBOOT_FIH_PROFILE                   MEDIUM CACHE STRING "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
+set(ITS_BUF_SIZE                           ""    CACHE STRING "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
+set(PS_CRYPTO_AEAD_ALG               PSA_ALG_CCM CACHE STRING "The AEAD algorithm to use for authenticated encryption in protected storage")
+set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED    ON    CACHE BOOL "Disable PSA Crypto asymmetric key encryption module")
 
 ################################## Dependencies ################################
 
 set(TFM_MBEDCRYPTO_CONFIG_PATH              "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_large.h" CACHE PATH "Config to use for Mbed Crypto")
 set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH   "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_profile_large.h" CACHE PATH "Config to use psa crypto setting for Mbed Crypto.")
-
-set(CONFIG_TFM_SPM_BACKEND          "IPC"       CACHE STRING    "The SPM backend [IPC, SFN]")
