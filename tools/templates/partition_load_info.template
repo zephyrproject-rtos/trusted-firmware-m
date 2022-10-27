@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "config_tfm.h"
 #include "region.h"
 #include "region_defs.h"
 #include "spm_ipc.h"
