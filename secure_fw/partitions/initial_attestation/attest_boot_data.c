@@ -218,12 +218,10 @@ attest_encode_sw_component(QCBOREncodeContext *encode_ctx,
                               IAT_SW_COMPONENT_MEASUREMENT_TYPE,
                               *sw_type);
 
-#ifdef ATTEST_TOKEN_PROFILE_PSA_2_0_0
     /* Encode measurement description as text string. */
     QCBOREncode_AddTextToMapN(encode_ctx,
                               IAT_SW_COMPONENT_MEASUREMENT_DESC,
                               *measurement_desc);
-#endif /* ATTEST_TOKEN_PROFILE_PSA_2_0_0 */
 
     /* Encode measurement value as byte string. */
     QCBOREncode_AddBytesToMapN(encode_ctx,
@@ -298,12 +296,10 @@ attest_encode_sw_components_array(QCBOREncodeContext *encode_ctx,
             }
         }
 
-#ifdef ATTEST_TOKEN_PROFILE_PSA_2_0_0
         err = get_measurement_description(measurement_algo, &measurement_desc);
         if (err != PSA_ATTEST_ERR_SUCCESS) {
             return PSA_ATTEST_ERR_GENERAL;
         }
-#endif /* ATTEST_TOKEN_PROFILE_PSA_2_0_0 */
 
         err = attest_encode_sw_component(
                             encode_ctx,
