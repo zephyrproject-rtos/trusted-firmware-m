@@ -10,6 +10,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "fih.h"
 #include "tfm_hal_defs.h"
 #include "load/partition_defs.h"
@@ -47,10 +48,13 @@ fih_int tfm_hal_verify_static_boundaries(void);
  *         the runtime of the system, including the SPE/NSPE and partition
  *         boundaries.
  *
+ * \param[out]   p_spm_boundary    Pointer of the boundary value
+ *
  * \return TFM_HAL_SUCCESS - the isolation boundaries have been set up.
  *         TFM_HAL_ERROR_GENERIC - failed to set up the isolation boundaries.
  */
-FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(void);
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
+                                                uintptr_t *p_spm_boundary);
 
 /**
  * \brief  Activate one Secure Partition boundary.
@@ -108,6 +112,18 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_memory_check(
 FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
                                     uintptr_t *p_boundary);
+
+/**
+ * \brief  This API let the platform decide if a boundary switch is needed.
+ *
+ * \param[in]   boundary_from  The current boundary to be switched.
+ * \param[in]   boundary_to    The target boundary to be switched to.
+ *
+ * \return true  - a switching is needed.
+ *         false - do not need a switch.
+ */
+bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                  uintptr_t boundary_to);
 
 #ifdef __cplusplus
 }

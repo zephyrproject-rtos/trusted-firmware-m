@@ -21,7 +21,11 @@
 #include "load/spm_load_api.h"
 #include "tfm_hal_isolation.h"
 
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
+#define PROT_BOUNDARY_VAL \
+    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+
+enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
+                                            uintptr_t *p_spm_boundary)
 {
     Cy_PDL_Init(CY_DEVICE_CFG);
 
@@ -36,6 +40,8 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     if (bus_masters_cfg() != TFM_PLAT_ERR_SUCCESS) {
         return TFM_HAL_ERROR_GENERIC;
     }
+
+    *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
 
     return TFM_HAL_SUCCESS;
 }
@@ -147,4 +153,18 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
     __set_CONTROL(ctrl.w);
 
     return TFM_HAL_SUCCESS;
+}
+
+bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                  uintptr_t boundary_to)
+{
+    if (boundary_from == boundary_to) {
+        return false;
+    }
+
+    if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
+        ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
+        return false;
+    }
+    return true;
 }

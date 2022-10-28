@@ -277,7 +277,8 @@ uint64_t ipc_schedule(void)
          * If required, let the platform update boundary based on its
          * implementation. Change privilege, MPU or other configurations.
          */
-        if (p_part_curr->boundary != p_part_next->boundary) {
+        if (tfm_hal_boundary_need_switch(p_part_curr->boundary,
+                                         p_part_next->boundary)) {
             FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                      p_part_next->p_ldinf, p_part_next->boundary);
             if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {

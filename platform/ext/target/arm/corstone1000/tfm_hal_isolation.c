@@ -15,6 +15,9 @@
 #include "mpu_config.h"
 #include "mmio_defs.h"
 
+#define PROT_BOUNDARY_VAL \
+    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
@@ -46,7 +49,8 @@ static void configure_mpu(uint32_t rnr, uint32_t base, uint32_t limit,
 
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
+enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
+                                            uintptr_t *p_spm_boundary)
 {
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
     uint32_t rnr = TFM_ISOLATION_REGION_START_NUMBER; /* current region number */
@@ -84,6 +88,9 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     arm_mpu_enable();
 
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
+
+    *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
+
     return TFM_HAL_SUCCESS;
 }
 
@@ -201,4 +208,18 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
     __set_CONTROL(ctrl.w);
 
     return TFM_HAL_SUCCESS;
+}
+
+bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                  uintptr_t boundary_to)
+{
+    if (boundary_from == boundary_to) {
+        return false;
+    }
+
+    if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
+        ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
+        return false;
+    }
+    return true;
 }

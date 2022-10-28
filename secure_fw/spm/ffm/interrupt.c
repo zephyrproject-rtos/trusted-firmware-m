@@ -21,6 +21,8 @@
 
 #include "load/spm_load_api.h"
 
+extern uintptr_t spm_boundary;
+
 #if TFM_LVL != 1
 extern void tfm_flih_func_return(psa_flih_result_t result);
 
@@ -61,7 +63,8 @@ uint32_t tfm_flih_prepare_depriv_flih(struct partition_t *p_owner_sp,
                  ((struct context_ctrl_t *)p_owner_sp->thrd.p_context_ctrl)->sp;
     }
 
-    if (p_owner_sp->boundary != p_curr_sp->boundary) {
+    if (tfm_hal_boundary_need_switch(p_curr_sp->boundary,
+                                     p_owner_sp->boundary)) {
         FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                  p_owner_sp->p_ldinf, p_owner_sp->boundary);
     }
@@ -94,7 +97,8 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     p_prev_sp = (struct partition_t *)(p_ctx_flih_ret->state_ctx.r2);
     p_owner_sp = GET_CURRENT_COMPONENT();
 
-    if (p_owner_sp->boundary != p_prev_sp->boundary) {
+    if (tfm_hal_boundary_need_switch(p_owner_sp->boundary,
+                                     p_prev_sp->boundary)) {
         FIH_CALL(tfm_hal_activate_boundary, fih_rc,
                  p_prev_sp->p_ldinf, p_prev_sp->boundary);
     }
@@ -157,8 +161,8 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
 #if TFM_LVL == 1
         flih_result = p_ildi->flih_func();
 #else
-        if (GET_PARTITION_PRIVILEGED_MODE(p_part->p_ldinf) ==
-                                                TFM_PARTITION_PRIVILEGED_MODE) {
+        if (tfm_hal_boundary_need_switch(spm_boundary,
+                                         p_part->boundary)) {
             flih_result = p_ildi->flih_func();
         } else {
             flih_result = tfm_flih_deprivileged_handling(

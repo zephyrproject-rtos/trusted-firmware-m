@@ -19,6 +19,7 @@
 #include "tfm_plat_provisioning.h"
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+uintptr_t spm_boundary = (uintptr_t)NULL;
 
 static fih_int tfm_core_init(void)
 {
@@ -29,11 +30,10 @@ static fih_int tfm_core_init(void)
      * Access to any peripheral should be performed after programming
      * the necessary security components such as PPC/SAU.
      */
-    FIH_CALL(tfm_hal_set_up_static_boundaries, fih_rc);
+    FIH_CALL(tfm_hal_set_up_static_boundaries, fih_rc, &spm_boundary);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
-
 #ifdef TFM_FIH_PROFILE_ON
     FIH_CALL(tfm_hal_verify_static_boundaries, fih_rc);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {

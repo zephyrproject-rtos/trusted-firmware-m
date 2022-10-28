@@ -19,6 +19,9 @@
 #include "array.h"
 #include "load/spm_load_api.h"
 
+#define PROT_BOUNDARY_VAL \
+    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
@@ -41,7 +44,8 @@ struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 static uint32_t n_configured_regions = 0;
 enum tfm_hal_status_t mpu_init_cfg(void);
 
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
+enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
+                                            uintptr_t *p_spm_boundary)
 {
     /* Set up isolation boundaries between SPE and NSPE */
     sau_and_idau_cfg();
@@ -57,6 +61,8 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     if (mpu_init_cfg() != TFM_HAL_SUCCESS) {
         return TFM_HAL_ERROR_GENERIC;
     }
+
+    *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
 
     return TFM_HAL_SUCCESS;
 }
@@ -81,7 +87,7 @@ tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
 
     ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
     partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
-                       HANDLE_ATTR_PRIV_MASK;
+                    HANDLE_ATTR_PRIV_MASK;
     partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
                         HANDLE_ATTR_NS_MASK;
     *p_boundary = (uintptr_t)partition_attrs;
@@ -437,4 +443,18 @@ enum tfm_hal_status_t mpu_init_cfg(void)
                       HARDFAULT_NMI_ENABLE);
 
     return TFM_HAL_SUCCESS;
+}
+
+bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                  uintptr_t boundary_to)
+{
+    if (boundary_from == boundary_to) {
+        return false;
+    }
+
+    if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
+        ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
+        return false;
+    }
+    return true;
 }

@@ -28,6 +28,8 @@
 
 /* It can be retrieved from the MPU_TYPE register. */
 #define MPU_REGION_NUM                  8
+#define PROT_BOUNDARY_VAL \
+    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
@@ -148,7 +150,8 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
 #endif /* TFM_LVL == 3 */
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
+enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
+                                            uintptr_t *p_spm_boundary)
 {
     /* Set up isolation boundaries between SPE and NSPE */
     sau_and_idau_cfg();
@@ -206,6 +209,8 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
+
+    *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
 
     return TFM_HAL_SUCCESS;
 }
@@ -486,4 +491,18 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
     } else {
         return TFM_HAL_ERROR_MEM_FAULT;
     }
+}
+
+bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                  uintptr_t boundary_to)
+{
+    if (boundary_from == boundary_to) {
+        return false;
+    }
+
+    if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
+        ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
+        return false;
+    }
+    return true;
 }
