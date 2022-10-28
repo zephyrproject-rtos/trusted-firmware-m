@@ -16,7 +16,6 @@
 extern "C" {
 #endif
 #define OTP_NV_COUNTERS_INITIALIZED 0xC0DE8112U
-#define OTP_NV_COUNTERS_IS_VALID    0x3072C0DEU
 
 __PACKED_STRUCT flash_otp_nv_counters_region_t {
     /* Must be the first item */
@@ -80,7 +79,7 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
     /* Must be last item, so that it can be written separately after the main
      * write operation has succeeded
      */
-    uint32_t is_valid;
+    uint32_t swap_count;
 };
 
 /**
