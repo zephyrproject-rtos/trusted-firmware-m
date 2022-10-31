@@ -40,13 +40,12 @@ add_subdirectory(ext/target/${TFM_PLATFORM} target)
 # To be compatible with the untouched files (which using ARMCLANG naming style),
 # we have to override __INITIAL_SP and __STACK_LIMIT labels.
 
+set(CMSIS_OVERRIDE_HEADER "${CMAKE_CURRENT_LIST_DIR}/include/cmsis_override.h")
 add_library(cmsis_stack_override INTERFACE)
-target_compile_definitions(cmsis_stack_override
+target_compile_options(cmsis_stack_override
     INTERFACE
-        $<$<C_COMPILER_ID:GNU>:__INITIAL_SP=Image$$ARM_LIB_STACK$$ZI$$Limit>
-        $<$<C_COMPILER_ID:GNU>:__STACK_LIMIT=Image$$ARM_LIB_STACK$$ZI$$Base>
-        $<$<C_COMPILER_ID:IAR>:__INITIAL_SP=ARM_LIB_STACK$$Limit>
-        $<$<C_COMPILER_ID:IAR>:__STACK_LIMIT=ARM_LIB_STACK$$Base>
+        "$<$<C_COMPILER_ID:GNU>:SHELL:-include ${CMSIS_OVERRIDE_HEADER}>"
+        "$<$<C_COMPILER_ID:IAR>:SHELL:--preinclude ${CMSIS_OVERRIDE_HEADER}>"
 )
 
 #========================= Platform Common interface ==========================#
