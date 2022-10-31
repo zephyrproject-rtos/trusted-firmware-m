@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,7 @@
 
 #include <string.h>
 
+#include "config_its.h"
 #include "its_flash_fs_mblock.h"
 #include "psa/storage_common.h"
 
@@ -212,7 +213,7 @@ static uint8_t its_mblock_latest_meta_block(
     return cur_meta;
 }
 
-#ifdef ITS_VALIDATE_METADATA_FROM_FLASH
+#if ITS_VALIDATE_METADATA_FROM_FLASH
 /**
  * \brief Validates file metadata in order to guarantee that a corruption or
  *        malicious change in stored metadata doesn't result in an invalid
@@ -729,7 +730,7 @@ static psa_status_t its_mblock_validate_header_meta(
         if (err != PSA_SUCCESS) {
             return err;
         }
-#ifdef ITS_VALIDATE_METADATA_FROM_FLASH
+#if ITS_VALIDATE_METADATA_FROM_FLASH
         err = its_mblock_validate_metadata_xor(fs_ctx, h_meta, block_id);
 #endif
     }
@@ -757,7 +758,7 @@ static psa_status_t its_mblock_write_scratch_meta_header(
         /* Increment again to avoid using the erase val as the swap count */
         fs_ctx->meta_block_header.active_swap_count++;
     }
-#ifdef ITS_VALIDATE_METADATA_FROM_FLASH
+#if ITS_VALIDATE_METADATA_FROM_FLASH
     /* Calculate metadata XOR value. */
     err = its_mblock_calculate_metadata_xor(fs_ctx,
                                        fs_ctx->scratch_metablock,
@@ -1135,7 +1136,7 @@ psa_status_t its_flash_fs_mblock_read_file_meta(
                             (uint8_t *)file_meta, offset,
                             ITS_FILE_METADATA_SIZE);
 
-#ifdef ITS_VALIDATE_METADATA_FROM_FLASH
+#if ITS_VALIDATE_METADATA_FROM_FLASH
     if (err == PSA_SUCCESS) {
         err = its_mblock_validate_file_meta(fs_ctx, file_meta);
     }
@@ -1157,7 +1158,7 @@ psa_status_t its_flash_fs_mblock_read_block_metadata(
                             (uint8_t *)block_meta, pos,
                             ITS_BLOCK_METADATA_SIZE);
 
-#ifdef ITS_VALIDATE_METADATA_FROM_FLASH
+#if ITS_VALIDATE_METADATA_FROM_FLASH
     if (err == PSA_SUCCESS) {
         err = its_mblock_validate_block_meta(fs_ctx, block_meta);
     }
@@ -1181,7 +1182,7 @@ psa_status_t its_flash_fs_mblock_read_block_metadata_comp(
                             (uint8_t *)block_meta, pos,
                             ITS_BLOCK_METADATA_SIZE);
 
-#ifdef ITS_VALIDATE_METADATA_FROM_FLASH
+#if ITS_VALIDATE_METADATA_FROM_FLASH
     if (err == PSA_SUCCESS) {
         err = its_mblock_validate_block_meta_comp(fs_ctx, block_meta);
     }

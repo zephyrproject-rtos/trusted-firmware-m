@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "config_its.h"
 #include "psa/storage_common.h"
 #include "tfm_internal_trusted_storage.h"
 #include "its_utils.h"
@@ -22,13 +23,6 @@
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC != 1 */
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
-#ifndef ITS_BUF_SIZE
-/* By default, set the ITS buffer size to the max asset size so that all
- * requests can be handled in one iteration.
- */
-#define ITS_BUF_SIZE ITS_MAX_ASSET_SIZE
-#endif
-
 /* Buffer to store asset data from the caller.
  * Note: size must be aligned to the max flash program unit to meet the
  * alignment requirement of the filesystem.

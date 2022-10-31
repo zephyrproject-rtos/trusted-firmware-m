@@ -97,4 +97,27 @@
 /* Set the initial attestation token profile */
 #define ATTEST_TOKEN_PROFILE_PSA_IOT_1         1
 
+/* ITS Partition Configs */
+
+/* Create flash FS if it doesn't exist for Internal Trusted Storage partition */
+#define ITS_CREATE_FLASH_LAYOUT                1
+
+/* Enable emulated RAM FS for platforms that don't have flash for Internal Trusted Storage partition */
+#define ITS_RAM_FS                             0
+
+/* Validate filesystem metadata every time it is read from flash */
+#define ITS_VALIDATE_METADATA_FROM_FLASH       1
+
+/* The maximum asset size to be stored in the Internal Trusted Storage */
+#define ITS_MAX_ASSET_SIZE                     512
+
+/* Size of the ITS internal data transfer buffer */
+#define ITS_BUF_SIZE                           32
+
+/* The maximum number of assets to be stored in the Internal Trusted Storage */
+#define ITS_NUM_ASSETS                         10
+
+/* The stack size of the Internal Trusted Storage Secure Partition */
+#define ITS_STACK_SIZE                         0x720
+
 #endif /* __CONFIG_PROFILE_MEDIUM_AROTLESS_H__ */

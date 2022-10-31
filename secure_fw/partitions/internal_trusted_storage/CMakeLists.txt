@@ -54,6 +54,7 @@ target_sources(tfm_partitions
 target_link_libraries(tfm_psa_rot_partition_its
     PRIVATE
         platform_s
+        tfm_config
         tfm_sprt
 )
 
@@ -67,13 +68,6 @@ target_compile_definitions(tfm_psa_rot_partition_its
         PS_MAX_ASSET_SIZE=${PS_MAX_ASSET_SIZE}
         PS_NUM_ASSETS=${PS_NUM_ASSETS}
         PS_CRYPTO_AEAD_ALG=${PS_CRYPTO_AEAD_ALG}
-    PRIVATE
-        $<$<BOOL:${ITS_CREATE_FLASH_LAYOUT}>:ITS_CREATE_FLASH_LAYOUT>
-        $<$<BOOL:${ITS_RAM_FS}>:ITS_RAM_FS>
-        $<$<OR:$<BOOL:${ITS_VALIDATE_METADATA_FROM_FLASH}>,$<BOOL:${PS_VALIDATE_METADATA_FROM_FLASH}>>:ITS_VALIDATE_METADATA_FROM_FLASH>
-        ITS_MAX_ASSET_SIZE=${ITS_MAX_ASSET_SIZE}
-        ITS_NUM_ASSETS=${ITS_NUM_ASSETS}
-        $<$<BOOL:${ITS_BUF_SIZE}>:ITS_BUF_SIZE=${ITS_BUF_SIZE}>
 )
 
 ################ Display the configuration being applied #######################
@@ -90,14 +84,6 @@ include(utils)
         PS_NUM_ASSETS;
         PS_CRYPTO_AEAD_ALG;
         PS_STACK_SIZE;
-
-        ITS_CREATE_FLASH_LAYOUT;
-        ITS_RAM_FS;
-        ITS_VALIDATE_METADATA_FROM_FLASH;
-        ITS_MAX_ASSET_SIZE;
-        ITS_NUM_ASSETS;
-        ITS_BUF_SIZE;
-        ITS_STACK_SIZE
     "
     )
 

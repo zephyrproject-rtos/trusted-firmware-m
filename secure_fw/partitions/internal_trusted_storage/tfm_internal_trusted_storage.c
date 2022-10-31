@@ -5,6 +5,7 @@
  *
  */
 #include <string.h>
+#include "config_its.h"
 #include "tfm_internal_trusted_storage.h"
 
 #include "tfm_hal_its.h"
@@ -140,8 +141,8 @@ psa_status_t tfm_its_init(void)
 
     /* Prepare the ITS filesystem */
     status = its_flash_fs_prepare(&fs_ctx_its);
-#ifdef ITS_CREATE_FLASH_LAYOUT
-    /* If ITS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
+#if ITS_CREATE_FLASH_LAYOUT
+    /* If ITS_CREATE_FLASH_LAYOUT is set to 1, it indicates that it is required to
      * create a ITS flash layout. ITS service will generate an empty and valid
      * ITS flash layout to store assets. It will erase all data located in the
      * assigned ITS memory area before generating the ITS layout.
