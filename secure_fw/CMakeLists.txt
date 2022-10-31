@@ -26,6 +26,7 @@ target_include_directories(tfm_config
         ${CMAKE_CURRENT_SOURCE_DIR}/partitions/platform
         ${CMAKE_CURRENT_SOURCE_DIR}/partitions/protected_storage
         ${CMAKE_CURRENT_SOURCE_DIR}/spm/include
+        ${CMAKE_BINARY_DIR}/generated/interface/include
 )
 
 target_compile_definitions(tfm_config

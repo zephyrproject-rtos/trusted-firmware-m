@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include "config_spm.h"
 #include "region.h"
 #include "spm_ipc.h"
 #include "svc_num.h"

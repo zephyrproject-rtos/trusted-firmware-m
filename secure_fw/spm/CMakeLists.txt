@@ -78,6 +78,7 @@ target_link_libraries(tfm_spm
     PRIVATE
         platform_s
         tfm_boot_status
+        tfm_config
         tfm_partitions
         tfm_fih_headers
         tfm_sprt
@@ -91,10 +92,8 @@ target_compile_definitions(tfm_spm
         $<$<AND:$<BOOL:${BL2}>,$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>>:BOOT_DATA_AVAILABLE>
         $<$<BOOL:${CONFIG_TFM_HALT_ON_CORE_PANIC}>:CONFIG_TFM_HALT_ON_CORE_PANIC>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:TFM_NS_MANAGE_NSID>
-        CONFIG_TFM_CONN_HANDLE_MAX_NUM=${CONFIG_TFM_CONN_HANDLE_MAX_NUM}
         $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},hard>:CONFIG_TFM_FLOAT_ABI=2>
         $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},soft>:CONFIG_TFM_FLOAT_ABI=0>
-        $<$<BOOL:${CONFIG_TFM_DOORBELL_API}>:CONFIG_TFM_DOORBELL_API=1>
         $<$<BOOL:${CONFIG_TFM_STACK_WATERMARKS}>:CONFIG_TFM_STACK_WATERMARKS>
 )
 

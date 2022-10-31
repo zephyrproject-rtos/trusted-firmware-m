@@ -10,7 +10,6 @@
 ############################ Partitions ########################################
 
 set(CONFIG_TFM_SPM_BACKEND      "SFN"       CACHE STRING    "The SPM backend [IPC, SFN]")
-set(CONFIG_TFM_DOORBELL_API     OFF         CACHE BOOL      "Enable the doorbell APIs")
 set(CONFIG_TFM_SPM_BACKEND_IPC  OFF)
 set(CONFIG_TFM_SPM_BACKEND_SFN  ON)
 set(CONFIG_TFM_PARTITION_META   OFF)

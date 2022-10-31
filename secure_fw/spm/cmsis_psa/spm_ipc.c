@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include "bitops.h"
 #include "config_impl.h"
+#include "config_spm.h"
 #include "critical_section.h"
 #include "current.h"
 #include "fih.h"

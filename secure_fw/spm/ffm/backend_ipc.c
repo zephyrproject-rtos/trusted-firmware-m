@@ -12,6 +12,7 @@
 #include "aapcs_local.h"
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
+#include "config_spm.h"
 #include "runtime_defs.h"
 #include "ffm/stack_watermark.h"
 #include "spm_ipc.h"

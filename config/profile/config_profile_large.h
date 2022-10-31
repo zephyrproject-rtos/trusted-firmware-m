@@ -146,4 +146,12 @@
 /* The stack size of the Protected Storage Secure Partition */
 #define PS_STACK_SIZE                          0x700
 
+/* SPM Partition Configs */
+
+/* The maximal number of secure services that are connected or requested at the same time */
+#define CONFIG_TFM_CONN_HANDLE_MAX_NUM         8
+
+/* Enable the doorbell APIs */
+#define CONFIG_TFM_DOORBELL_API                1
+
 #endif /* __CONFIG_PROFILE_LARGE_H__ */

@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include "bitops.h"
 #include "config_impl.h"
+#include "config_spm.h"
 #include "critical_section.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"

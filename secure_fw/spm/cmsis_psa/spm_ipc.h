@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include "config_impl.h"
+#include "config_spm.h"
 #include "current.h"
 #include "tfm_arch.h"
 #include "lists.h"

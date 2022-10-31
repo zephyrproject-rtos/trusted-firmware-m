@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include "compiler_ext_defs.h"
+#include "config_spm.h"
 #include "ffm/psa_api.h"
 #include "spm_ipc.h"
 #include "svc_num.h"

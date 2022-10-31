@@ -35,6 +35,7 @@ target_include_directories(psa_interface
 
 target_link_libraries(psa_interface
     INTERFACE
+        tfm_config
         tfm_partition_defs
 )
 
@@ -45,7 +46,6 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:CONFIG_TFM_USE_TRUSTZONE>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:CONFIG_TFM_PARTITION_META>
-        $<$<BOOL:${CONFIG_TFM_DOORBELL_API}>:CONFIG_TFM_DOORBELL_API=1>
 )
 
 ###################### PSA api (S lib) #########################################

@@ -26,7 +26,6 @@ set(TFM_PARTITION_FIRMWARE_UPDATE          OFF   CACHE BOOL "Enable firmware upd
 ################################## Advanced options #############################
 
 set(PSA_FRAMEWORK_HAS_MM_IOVEC             ON    CACHE BOOL      "Enable MM-IOVEC")
-set(CONFIG_TFM_CONN_HANDLE_MAX_NUM         3     CACHE STRING    "The maximal number of secure services that are connected or requested at the same time")
 set(MCUBOOT_IMAGE_NUMBER                   1     CACHE STRING    "Whether to combine S and NS into either 1 image, or sign each seperately")
 
 ################################## Dependencies ################################
