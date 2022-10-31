@@ -26,6 +26,11 @@
 
 #include "region_defs.h"
 
+/* Include file with definitions for section alignments.
+ * Note: it should be included after region_defs.h to let platform define
+ * default values if needed. */
+#include "tfm_s_linker_alignments.h"
+
 MEMORY
 {
   FLASH    (rx)  : ORIGIN = S_CODE_START, LENGTH = S_CODE_SIZE
@@ -60,13 +65,13 @@ SECTIONS
     . = ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE;
     /*
      * Place the CMSE Veneers (containing the SG instruction) after the code, in
-     * a separate 32 bytes aligned region so that the SAU can programmed to just
-     * set this region as Non-Secure Callable.
+     * a separate at least 32 bytes aligned region so that the SAU can
+     * programmed to just set this region as Non-Secure Callable.
      */
-    .gnu.sgstubs ALIGN(32) :
+    .gnu.sgstubs ALIGN(TFM_LINKER_VENEERS_ALIGNMENT) :
     {
         *(.gnu.sgstubs*)
-        . = ALIGN(32);
+        . = ALIGN(TFM_LINKER_VENEERS_ALIGNMENT);
     } > FLASH
     Image$$ER_VENEER$$Base = ADDR(.gnu.sgstubs);
     Image$$VENEER_ALIGN$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
@@ -129,10 +134,10 @@ SECTIONS
     Image$$TFM_SP_LOAD_LIST$$RO$$Limit = ADDR(.TFM_SP_LOAD_LIST) + SIZEOF(.TFM_SP_LOAD_LIST);
 
     /**** PSA RoT RO CODE + RO-data starts here */
-    . = ALIGN(32);
+    . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT);
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
-    .{{partition.manifest.name}}_RO : ALIGN(32)
+    .{{partition.manifest.name}}_RO : ALIGN(TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT)
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -147,7 +152,7 @@ SECTIONS
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_PSA-ROT_ATTR_FN)
-        . = ALIGN(32);
+        . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT);
     } > FLASH
     Image$${{partition.manifest.name}}_RO$$Base = ADDR(.{{partition.manifest.name}}_RO);
     Image$${{partition.manifest.name}}_RO$$Limit = ADDR(.{{partition.manifest.name}}_RO) + SIZEOF(.{{partition.manifest.name}}_RO);
@@ -159,7 +164,7 @@ SECTIONS
     /**** APPLICATION RoT RO CODE + data starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
-    .{{partition.manifest.name}}_RO : ALIGN(32)
+    .{{partition.manifest.name}}_RO : ALIGN(TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT)
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -174,7 +179,7 @@ SECTIONS
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_APP-ROT_ATTR_FN)
-        . = ALIGN(32);
+        . = ALIGN(TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT);
     } > FLASH
     Image$${{partition.manifest.name}}_CODE$$Base = ADDR(.{{partition.manifest.name}}_RO);
     Image$${{partition.manifest.name}}_CODE$$Limit = ADDR(.{{partition.manifest.name}}_RO) + SIZEOF(.{{partition.manifest.name}}_RO);
@@ -209,7 +214,7 @@ SECTIONS
     } > FLASH
 
     /**** Unprivileged Secure code starts here */
-    .ER_UNPRIV_CODE : ALIGN(32)
+    .ER_UNPRIV_CODE : ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT)
     {
         *(SFN)
         *(.text*)
@@ -235,13 +240,13 @@ SECTIONS
 
         KEEP(*(.eh_frame*))
 
-        . = ALIGN(32);
+        . = ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT);
     } > FLASH
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.ER_UNPRIV_CODE);
     Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.ER_UNPRIV_CODE) + SIZEOF(.ER_UNPRIV_CODE);
 
     /* Position tag */
-    . = ALIGN(32);
+    . = ALIGN(TFM_LINKER_PT_RO_ALIGNMENT);
     Image$$PT_RO_END$$Base = .;
 
     .ARM.extab :
@@ -263,19 +268,19 @@ SECTIONS
     } > RAM
 
    /* Position tag */
-    . = ALIGN(32);
+    . = ALIGN(TFM_LINKER_PT_PRIV_RWZI_ALIGNMENT);
     Image$$PT_PRIV_RWZI_START$$Base = .;
 
     /* shared_data and msp_stack are overlapping on purpose when
      * msp_stack is extended until the beginning of RAM, when shared_date
      * was read out by partitions
      */
-    .tfm_bl2_shared_data : ALIGN(32)
+    .tfm_bl2_shared_data : ALIGN(TFM_LINKER_BL2_SHARED_DATA_ALIGNMENT)
     {
         . += BOOT_TFM_SHARED_DATA_SIZE;
     } > RAM
 
-    .msp_stack : ALIGN(32)
+    .msp_stack : ALIGN(TFM_LINKER_MSP_STACK_ALIGNMENT)
     {
         . += __msp_stack_size__ - 0x8;
     } > RAM
@@ -306,10 +311,10 @@ SECTIONS
     {% if partition.manifest.type == 'PSA-ROT' %}
 
     /* Position tag */
-    . = ALIGN(32);
+    . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_START$$Base = .;
 
-    .ER_{{partition.manifest.name}}_RWZI : ALIGN(32)
+    .ER_{{partition.manifest.name}}_RWZI : ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT)
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -344,19 +349,19 @@ SECTIONS
     {% endif %}
         *({{partition.manifest.name}}_PSA-ROT_ATTR_ZI)
         . += (. - start_of_{{partition.manifest.name}}_RWZI) ? 0 : 4;
-        . = ALIGN(32);
+        . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT);
     } > RAM AT> RAM
     Image$$ER_{{partition.manifest.name}}_RWZI$$ZI$$Base = ADDR(.{{partition.manifest.name}}_RWZI_BSS);
     Image$$ER_{{partition.manifest.name}}_RWZI$$ZI$$Limit = ADDR(.{{partition.manifest.name}}_RWZI_BSS) + SIZEOF(.{{partition.manifest.name}}_RWZI_BSS);
 
     /* Position tag */
-    . = ALIGN(32);
+    . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_END$$Base = .;
 
     {% endif %}
 {% endfor %}
     /**** PSA RoT DATA end here */
-    . = ALIGN(32);
+    . = ALIGN(TFM_LINKER_PT_PRIV_RWZI_ALIGNMENT);
 
     /* Position tag */
     Image$$PT_PRIV_RWZI_END$$Base = .;
@@ -365,10 +370,10 @@ SECTIONS
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
     /* Position tag */
-    . = ALIGN(32);
+    . = ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_START$$Base = .;
 
-    .ER_{{partition.manifest.name}}_RWZI : ALIGN(32)
+    .ER_{{partition.manifest.name}}_RWZI : ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT)
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -403,13 +408,13 @@ SECTIONS
     {% endif %}
         *({{partition.manifest.name}}_APP-ROT_ATTR_ZI)
         . += (. - start_of_{{partition.manifest.name}}_RWZI) ? 0 : 4;
-        . = ALIGN(32);
+        . = ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT);
     } > RAM AT> RAM
     Image$$ER_{{partition.manifest.name}}_RWZI$$ZI$$Base = ADDR(.{{partition.manifest.name}}_RWZI_BSS);
     Image$$ER_{{partition.manifest.name}}_RWZI$$ZI$$Limit = ADDR(.{{partition.manifest.name}}_RWZI_BSS) + SIZEOF(.{{partition.manifest.name}}_RWZI_BSS);
 
     /* Position tag */
-    . = ALIGN(32);
+    . = ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_END$$Base = .;
 
     {% endif %}
@@ -417,11 +422,11 @@ SECTIONS
     /**** APPLICATION RoT DATA end here */
 
     /* Position tag */
-    . = ALIGN(32);
+    . = ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT);
     Image$$PT_APP_RWZI_END$$Base = .;
 
 #ifdef RAM_VECTORS_SUPPORT
-    .ramVectors (NOLOAD) : ALIGN(256)
+    .ramVectors (NOLOAD) : ALIGN(TFM_LINKER_RAM_VECTORS_ALIGNMENT)
     {
         __ram_vectors_start__ = .;
         KEEP(*(.ram_vectors))
@@ -463,10 +468,10 @@ SECTIONS
     Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
 
 #if defined(CONFIG_TFM_PARTITION_META)
-    .TFM_SP_META_PTR : ALIGN(32)
+    .TFM_SP_META_PTR : ALIGN(TFM_LINKER_SP_META_PTR_ALIGNMENT)
     {
         *(.bss.SP_META_PTR_SPRTL_INST)
-        . = ALIGN(32);
+        . = ALIGN(TFM_LINKER_SP_META_PTR_ALIGNMENT);
     } > RAM AT> RAM
     Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);

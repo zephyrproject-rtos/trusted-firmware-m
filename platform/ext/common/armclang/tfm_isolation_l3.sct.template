@@ -30,8 +30,13 @@
 
 #include "region_defs.h"
 
+/* Include file with definitions for section alignments.
+ * Note: it should be included after region_defs.h to let platform define
+ * default values if needed. */
+#include "tfm_s_linker_alignments.h"
+
 LR_CODE S_CODE_START S_CODE_SIZE {
-    PT_RO_START +0 ALIGN 32 EMPTY 0x0 {
+    PT_RO_START +0 ALIGN TFM_LINKER_PT_RO_ALIGNMENT EMPTY 0x0 {
         /* Position tag: code + RO-data */
     }
 
@@ -48,14 +53,14 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * 32 bytes aligned region so that the SAU can be programmed to
      * just set this region as Non-Secure Callable.
      */
-    ER_VENEER +0 FIXED ALIGN 32 {
+    ER_VENEER +0 FIXED ALIGN TFM_LINKER_VENEERS_ALIGNMENT {
         *(Veneer$$CMSE)
     }
     /*
-     * The Limit of the VENEER_ALIGN region should be 32 bytes aligned  so that
-     * the SAU can set this region as Non-Secure Callable.
+     * The Limit of the VENEER_ALIGN region should be at least 32 bytes aligned
+     * so that the SAU can set this region as Non-Secure Callable.
      */
-    VENEER_ALIGN +0 ALIGN 32 EMPTY 0x0 {
+    VENEER_ALIGN +0 ALIGN TFM_LINKER_VENEERS_ALIGNMENT EMPTY 0x0 {
     }
 #endif
 
@@ -80,7 +85,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     /**** PSA RoT CODE + RO-data starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
-    ER_{{partition.manifest.name}}_RO +0 ALIGN 32 {
+    ER_{{partition.manifest.name}}_RO +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}} (+RO-CODE, +RO-DATA)
@@ -101,7 +106,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     /**** APPLICATION RoT CODE + RO-data starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
-    ER_{{partition.manifest.name}}_RO +0 ALIGN 32 {
+    ER_{{partition.manifest.name}}_RO +0 ALIGN TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}} (+RO-CODE, +RO-DATA)
@@ -120,12 +125,12 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     /**** APPLICATION RoT CODE + RO-data ends here */
 
     /**** Unprivileged Secure code + RO-data starts here */
-    TFM_UNPRIV_CODE +0 ALIGN 32 {
+    TFM_UNPRIV_CODE +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
         *(SFN)
         * (+RO)
     }
 
-    PT_RO_END +0 ALIGN 32 EMPTY 0x0 {
+    PT_RO_END +0 ALIGN TFM_LINKER_PT_RO_ALIGNMENT EMPTY 0x0 {
         /* Position tag */
     }
 
@@ -134,16 +139,16 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         /* Position tag */
     }
 
-    PT_PRIV_RWZI_START +0 ALIGN 32 EMPTY 0x0 {
+    PT_PRIV_RWZI_START +0 ALIGN TFM_LINKER_PT_PRIV_RWZI_ALIGNMENT EMPTY 0x0 {
         /* Position tag */
     }
 
     /* Shared area between BL2 and runtime to exchange data */
-    TFM_SHARED_DATA +0 ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    TFM_SHARED_DATA +0 ALIGN TFM_LINKER_BL2_SHARED_DATA_ALIGNMENT OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
     }
 
     /* MSP */
-    ARM_LIB_STACK +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE - 0x8 {
+    ARM_LIB_STACK +0 ALIGN TFM_LINKER_MSP_STACK_ALIGNMENT OVERLAY EMPTY S_MSP_STACK_SIZE - 0x8 {
     }
 
     STACKSEAL +0 EMPTY 0x8 {
@@ -173,11 +178,11 @@ LR_CODE S_CODE_START S_CODE_SIZE {
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
 
-    PT_{{partition.manifest.name}}_PRIVATE_DATA_START +0 ALIGN 32 {
+    PT_{{partition.manifest.name}}_PRIVATE_DATA_START +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT {
         /* Position tag */
     }
 
-    ER_{{partition.manifest.name}}_RWZI +0 ALIGN 32 {
+    ER_{{partition.manifest.name}}_RWZI +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}} (+RW +ZI)
@@ -192,7 +197,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         *({{partition.manifest.name}}_PSA-ROT_ATTR_ZI)
     }
 
-    PT_{{partition.manifest.name}}_PRIVATE_DATA_END +0 ALIGN 32 {
+    PT_{{partition.manifest.name}}_PRIVATE_DATA_END +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT {
         /* Position tag */
     }
 
@@ -200,18 +205,18 @@ LR_CODE S_CODE_START S_CODE_SIZE {
 {% endfor %}
 
     /**** PSA RoT RWZI ends here */
-    PT_PRIV_RWZI_END +0 ALIGN 32 EMPTY 0x0 {
+    PT_PRIV_RWZI_END +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT EMPTY 0x0 {
         /* Position tag */
     }
 
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
 
-    PT_{{partition.manifest.name}}_PRIVATE_DATA_START +0 ALIGN 32 {
+    PT_{{partition.manifest.name}}_PRIVATE_DATA_START +0 ALIGN TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT {
         /* Position tag */
     }
 
-    ER_{{partition.manifest.name}}_RWZI +0 ALIGN 32 {
+    ER_{{partition.manifest.name}}_RWZI +0 ALIGN TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
         {{pattern}} (+RW +ZI)
@@ -226,7 +231,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         *({{partition.manifest.name}}_APP-ROT_ATTR_ZI)
     }
 
-    PT_{{partition.manifest.name}}_PRIVATE_DATA_END +0 ALIGN 32 {
+    PT_{{partition.manifest.name}}_PRIVATE_DATA_END +0 ALIGN TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT {
         /* Position tag */
     }
 
@@ -234,13 +239,13 @@ LR_CODE S_CODE_START S_CODE_SIZE {
 {% endfor %}
 
 #if defined(CONFIG_TFM_PARTITION_META)
-    TFM_SP_META_PTR +0 ALIGN 32 {
+    TFM_SP_META_PTR +0 ALIGN TFM_LINKER_SP_META_PTR_ALIGNMENT {
         *(.bss.SP_META_PTR_SPRTL_INST)
     }
 #endif
 
 #ifdef RAM_VECTORS_SUPPORT
-    ER_RAM_VECTORS +0 ALIGN 256 UNINIT {
+    ER_RAM_VECTORS +0 ALIGN TFM_LINKER_RAM_VECTORS_ALIGNMENT UNINIT {
         * (RESET_RAM)
     }
 #endif

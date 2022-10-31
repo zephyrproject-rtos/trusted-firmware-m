@@ -296,3 +296,8 @@ target_compile_definitions(platform_region_defs
         $<$<OR:$<CONFIG:Debug>,$<CONFIG:relwithdebinfo>>:ENABLE_HEAP>
         PLATFORM_NS_NV_COUNTERS=${TFM_NS_NV_COUNTER_AMOUNT}
 )
+
+target_include_directories(platform_region_defs
+    INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}/ext/common
+)

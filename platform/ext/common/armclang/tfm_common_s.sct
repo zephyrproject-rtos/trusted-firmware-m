@@ -18,6 +18,11 @@
 
 #include "region_defs.h"
 
+/* Include file with definitions for section alignments.
+ * Note: it should be included after region_defs.h to let platform define
+ * default values if needed. */
+#include "tfm_s_linker_alignments.h"
+
 LR_CODE S_CODE_START S_CODE_SIZE {
 
     /****  This initial section contains common code for secure binary */
@@ -32,14 +37,14 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * 32 bytes aligned region so that the SAU can be programmed to
      * just set this region as Non-Secure Callable.
      */
-    ER_VENEER +0 FIXED ALIGN 32 {
+    ER_VENEER +0 FIXED ALIGN TFM_LINKER_VENEERS_ALIGNMENT {
         *(Veneer$$CMSE)
     }
     /*
-     * The Limit of the VENEER_ALIGN region should be 32 bytes aligned  so that
-     * the SAU can set this region as Non-Secure Callable.
+     * The Limit of the VENEER_ALIGN region should be at least 32 bytes aligned
+     * so that the SAU can set this region as Non-Secure Callable.
      */
-    VENEER_ALIGN +0 ALIGN 32 EMPTY 0x0 {
+    VENEER_ALIGN +0 ALIGN TFM_LINKER_VENEERS_ALIGNMENT EMPTY 0x0 {
     }
 #endif
 
@@ -50,7 +55,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     }
 
     /**** Unprivileged Secure code start here */
-    TFM_UNPRIV_CODE +0 ALIGN 32 {
+    TFM_UNPRIV_CODE +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
         *(SFN)
         * (+RO)
     }
@@ -72,10 +77,10 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * This empty, zero long execution region is here to mark the start address
      * of PSA RoT code.
      */
-    TFM_PSA_CODE_START +0 ALIGN 32 EMPTY 0x0 {
+    TFM_PSA_CODE_START +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT EMPTY 0x0 {
     }
 
-    TFM_PSA_ROT_LINKER +0 ALIGN 32 {
+    TFM_PSA_ROT_LINKER +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT {
         *tfm_psa_rot_partition* (+RO-CODE, +RO-DATA)
         *libplatform_s* (TFM_*_PSA-ROT_ATTR_FN)
         *.o (TFM_*_PSA-ROT_ATTR_FN)
@@ -85,7 +90,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT code.
      */
-    TFM_PSA_CODE_END +0 ALIGN 32 EMPTY 0x0 {
+    TFM_PSA_CODE_END +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT EMPTY 0x0 {
     }
 
     /**** APPLICATION RoT RO part (CODE + RODATA) start here */
@@ -93,10 +98,10 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * This empty, zero long execution region is here to mark the start address
      * of APP RoT code.
      */
-    TFM_APP_CODE_START +0 ALIGN 32 EMPTY 0x0 {
+    TFM_APP_CODE_START +0 ALIGN TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT EMPTY 0x0 {
     }
 
-    TFM_APP_ROT_LINKER +0 ALIGN 32 {
+    TFM_APP_ROT_LINKER +0 ALIGN TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT {
         *tfm_app_rot_partition* (+RO-CODE, +RO-DATA)
         *libplatform_s* (TFM_*_APP-ROT_ATTR_FN)
         *.o (TFM_*_APP-ROT_ATTR_FN)
@@ -106,7 +111,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT code.
      */
-    TFM_APP_CODE_END +0 ALIGN 32 EMPTY 0x0 {
+    TFM_APP_CODE_END +0 ALIGN TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT EMPTY 0x0 {
     }
 
 #if defined(S_CODE_SRAM_ALIAS_BASE)
@@ -139,16 +144,16 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     /* The code sharing between bootloader and runtime requires to share the
      * global variables.
      */
-    TFM_SHARED_SYMBOLS +0 ALIGN 32 EMPTY SHARED_SYMBOL_AREA_SIZE {
+    TFM_SHARED_SYMBOLS +0 ALIGN TFM_LINKER_SHARED_SYMBOLS_ALIGNMENT EMPTY SHARED_SYMBOL_AREA_SIZE {
     }
 #endif
 
     /* Shared area between BL2 and runtime to exchange data */
-    TFM_SHARED_DATA +0 ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    TFM_SHARED_DATA +0 ALIGN TFM_LINKER_BL2_SHARED_DATA_ALIGNMENT OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
     }
 
     /* MSP */
-    ARM_LIB_STACK +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE - 0x8 {
+    ARM_LIB_STACK +0 ALIGN TFM_LINKER_MSP_STACK_ALIGNMENT OVERLAY EMPTY S_MSP_STACK_SIZE - 0x8 {
     }
 
     STACKSEAL +0 EMPTY 0x8 {
@@ -158,7 +163,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         * defined(__ARM_ARCH_8_1M_MAIN__) */
 
 #if defined(CONFIG_TFM_PARTITION_META)
-    TFM_SP_META_PTR +0 ALIGN 32 {
+    TFM_SP_META_PTR +0 ALIGN TFM_LINKER_SP_META_PTR_ALIGNMENT {
         *(.bss.SP_META_PTR_SPRTL_INST)
     }
 #endif
@@ -168,10 +173,10 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * This empty, zero long execution region is here to mark the start address
      * of APP RoT RW and Stack.
      */
-    TFM_APP_RW_STACK_START +0 ALIGN 32 EMPTY 0x0 {
+    TFM_APP_RW_STACK_START +0 ALIGN TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT EMPTY 0x0 {
     }
 
-    TFM_APP_ROT_LINKER_DATA +0 ALIGN 32 {
+    TFM_APP_ROT_LINKER_DATA +0 ALIGN TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT {
         *tfm_app_rot_partition* (+RW +ZI)
         *.o(TFM_*_APP-ROT_ATTR_RW)
         *.o(TFM_*_APP-ROT_ATTR_ZI)
@@ -181,7 +186,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * This empty, zero long execution region is here to mark the end address
      * of APP RoT RW and Stack.
      */
-    TFM_APP_RW_STACK_END +0 ALIGN 32 EMPTY 0x0 {
+    TFM_APP_RW_STACK_END +0 ALIGN TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT EMPTY 0x0 {
     }
 
 #if defined(__ARM_ARCH_6M__) || defined(__ARM_ARCH_7M__) || \
@@ -197,11 +202,11 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * area on Armv6-M/v7-M platforms.
      */
     /* Shared area between BL2 and runtime to exchange data */
-    TFM_SHARED_DATA +0 ALIGN 32 OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
+    TFM_SHARED_DATA +0 ALIGN TFM_LINKER_BL2_SHARED_DATA_ALIGNMENT OVERLAY EMPTY BOOT_TFM_SHARED_DATA_SIZE {
     }
 
     /* MSP */
-    ARM_LIB_STACK +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    ARM_LIB_STACK +0 ALIGN TFM_LINKER_MSP_STACK_ALIGNMENT OVERLAY EMPTY S_MSP_STACK_SIZE {
     }
 #endif /* defined(__ARM_ARCH_6M__) || defined(__ARM_ARCH_7M__) || \
         * defined(__ARM_ARCH_7EM__) */
@@ -231,10 +236,10 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * This empty, zero long execution region is here to mark the start address
      * of PSA RoT RW and Stack.
      */
-    TFM_PSA_RW_STACK_START +0 ALIGN 32 EMPTY 0x0 {
+    TFM_PSA_RW_STACK_START +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT EMPTY 0x0 {
     }
 
-    TFM_PSA_ROT_LINKER_DATA +0 ALIGN 32 {
+    TFM_PSA_ROT_LINKER_DATA +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT {
         *tfm_psa_rot_partition* (+RW +ZI)
         *.o(TFM_*_PSA-ROT_ATTR_RW)
         *.o(TFM_*_PSA-ROT_ATTR_ZI)
@@ -244,11 +249,11 @@ LR_CODE S_CODE_START S_CODE_SIZE {
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT RW and Stack.
      */
-    TFM_PSA_RW_STACK_END +0 ALIGN 32 EMPTY 0x0 {
+    TFM_PSA_RW_STACK_END +0 ALIGN TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT EMPTY 0x0 {
     }
 
 #ifdef RAM_VECTORS_SUPPORT
-    ER_RAM_VECTORS +0 ALIGN 256 UNINIT {
+    ER_RAM_VECTORS +0 ALIGN TFM_LINKER_RAM_VECTORS_ALIGNMENT UNINIT {
         * (RESET_RAM)
     }
 #endif
