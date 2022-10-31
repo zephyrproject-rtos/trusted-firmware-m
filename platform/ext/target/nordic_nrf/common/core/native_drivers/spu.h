@@ -40,14 +40,14 @@ void spu_enable_interrupts(void);
 void spu_clear_events(void);
 
 /**
- * \brief Reset all memory regions to being Secure
+ * \brief Reset TF-M memory regions to being Secure.
  *
- * Reset all (Flash or SRAM) memory regions to being Secure
- * and have default (i.e. Read-Write-Execute allow) access policy
+ * Reset all (Flash or SRAM, but excluding the regions owned by the bootloader(s)) memory region permissions
+ to be Secure and have default (i.e. Read-Write-Execute allow) access policy.
  *
  * \note region lock is not applied to allow modifying the configuration.
  */
-void spu_regions_reset_all_secure(void);
+void spu_regions_reset_unlocked_secure(void);
 
 /**
  * \brief Configure Flash memory regions as Non-Secure
@@ -57,7 +57,7 @@ void spu_regions_reset_all_secure(void);
  * \note region lock is applied to prevent further modification during
  * the current reset cycle.
  */
-void spu_regions_flash_config_non_secure( uint32_t start_addr, uint32_t limit_addr);
+void spu_regions_flash_config_non_secure(uint32_t start_addr, uint32_t limit_addr);
 
 /**
  * \brief Configure SRAM memory regions as Non-Secure
@@ -67,7 +67,7 @@ void spu_regions_flash_config_non_secure( uint32_t start_addr, uint32_t limit_ad
  * \note region lock is applied to prevent further modification during
  * the current reset cycle.
  */
-void spu_regions_sram_config_non_secure( uint32_t start_addr, uint32_t limit_addr);
+void spu_regions_sram_config_non_secure(uint32_t start_addr, uint32_t limit_addr);
 
 /**
  * \brief Configure Non-Secure Callable area
