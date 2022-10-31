@@ -106,15 +106,8 @@ set(BL2_TRAILER_SIZE                    0x000       CACHE STRING    "BL2 Trailer
 
 ############################ Partitions ########################################
 set(TFM_PARTITION_PROTECTED_STORAGE     OFF         CACHE BOOL      "Enable Protected Storage partition")
-set(PS_CREATE_FLASH_LAYOUT              ON          CACHE BOOL      "Create flash FS if it doesn't exist for Protected Storage partition")
 set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encryption for Protected Storage partition")
-set(PS_RAM_FS                           OFF         CACHE BOOL      "Enable emulated RAM FS for platforms that don't have flash for Protected Storage partition")
-set(PS_ROLLBACK_PROTECTION              ON          CACHE BOOL      "Enable rollback protection for Protected Storage partition")
-set(PS_VALIDATE_METADATA_FROM_FLASH     ON          CACHE BOOL      "Validate filesystem metadata every time it is read from flash")
-set(PS_MAX_ASSET_SIZE                   "2048"      CACHE STRING    "The maximum asset size to be stored in the Protected Storage area")
-set(PS_NUM_ASSETS                       "10"        CACHE STRING    "The maximum number of assets to be stored in the Protected Storage area")
 set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in Protected Storage")
-set(PS_STACK_SIZE                       "0x700"     CACHE STRING    "The stack size of the Protected Storage Secure Partition")
 
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF      CACHE BOOL      "Enable Internal Trusted Storage partition")
 

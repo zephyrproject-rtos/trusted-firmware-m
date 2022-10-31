@@ -182,8 +182,8 @@ psa_status_t tfm_its_init(void)
 
     /* Prepare the PS filesystem */
     status = its_flash_fs_prepare(&fs_ctx_ps);
-#ifdef PS_CREATE_FLASH_LAYOUT
-    /* If PS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
+#if PS_CREATE_FLASH_LAYOUT
+    /* If PS_CREATE_FLASH_LAYOUT is set to 1, it indicates that it is required to
      * create a PS flash layout. PS service will generate an empty and valid
      * PS flash layout to store assets. It will erase all data located in the
      * assigned PS memory area before generating the PS layout.

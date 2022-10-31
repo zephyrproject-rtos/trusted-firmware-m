@@ -45,7 +45,7 @@ extern struct its_flash_nand_dev_t its_flash_nand_dev;
 
 /* Include the correct flash interface implementation for PS */
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-#ifdef PS_RAM_FS
+#if PS_RAM_FS
 /* RAM FS: use a buffer to emulate storage in RAM */
 #include "its_flash_ram.h"
 extern uint8_t ps_block_data[];

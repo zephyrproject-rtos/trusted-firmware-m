@@ -60,13 +60,6 @@ target_link_libraries(tfm_psa_rot_partition_its
 
 target_compile_definitions(tfm_psa_rot_partition_its
     PUBLIC
-        $<$<BOOL:${PS_CREATE_FLASH_LAYOUT}>:PS_CREATE_FLASH_LAYOUT>
-        $<$<BOOL:${PS_ENCRYPTION}>:PS_ENCRYPTION>
-        $<$<BOOL:${PS_RAM_FS}>:PS_RAM_FS>
-        $<$<BOOL:${PS_ROLLBACK_PROTECTION}>:PS_ROLLBACK_PROTECTION>
-        $<$<BOOL:${PS_VALIDATE_METADATA_FROM_FLASH}>:PS_VALIDATE_METADATA_FROM_FLASH>
-        PS_MAX_ASSET_SIZE=${PS_MAX_ASSET_SIZE}
-        PS_NUM_ASSETS=${PS_NUM_ASSETS}
         PS_CRYPTO_AEAD_ALG=${PS_CRYPTO_AEAD_ALG}
 )
 
@@ -75,15 +68,7 @@ target_compile_definitions(tfm_psa_rot_partition_its
 include(utils)
     dump_options("Storage config"
     "
-        PS_CREATE_FLASH_LAYOUT;
-        PS_ENCRYPTION;
-        PS_RAM_FS;
-        PS_ROLLBACK_PROTECTION;
-        PS_VALIDATE_METADATA_FROM_FLASH;
-        PS_MAX_ASSET_SIZE;
-        PS_NUM_ASSETS;
         PS_CRYPTO_AEAD_ALG;
-        PS_STACK_SIZE;
     "
     )
 

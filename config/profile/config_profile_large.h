@@ -123,4 +123,27 @@
 /* The stack size of the Internal Trusted Storage Secure Partition */
 #define ITS_STACK_SIZE                         0x720
 
+/* PS Partition Configs */
+
+/* Create flash FS if it doesn't exist for Protected Storage partition */
+#define PS_CREATE_FLASH_LAYOUT                 1
+
+/* Enable emulated RAM FS for platforms that don't have flash for Protected Storage partition */
+#define PS_RAM_FS                              0
+
+/* Enable rollback protection for Protected Storage partition */
+#define PS_ROLLBACK_PROTECTION                 1
+
+/* Validate filesystem metadata every time it is read from flash */
+#define PS_VALIDATE_METADATA_FROM_FLASH        1
+
+/* The maximum asset size to be stored in the Protected Storage */
+#define PS_MAX_ASSET_SIZE                      2048
+
+/* The maximum number of assets to be stored in the Protected Storage */
+#define PS_NUM_ASSETS                          10
+
+/* The stack size of the Protected Storage Secure Partition */
+#define PS_STACK_SIZE                          0x700
+
 #endif /* __CONFIG_PROFILE_LARGE_H__ */

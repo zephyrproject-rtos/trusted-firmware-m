@@ -53,6 +53,7 @@ target_link_libraries(tfm_app_rot_partition_ps
     PRIVATE
         secure_fw
         platform_s
+        tfm_config
         tfm_sprt
 )
 

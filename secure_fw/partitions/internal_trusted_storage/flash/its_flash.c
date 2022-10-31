@@ -33,7 +33,7 @@ struct its_flash_nand_dev_t its_flash_nand_dev = {
 #endif
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-#ifdef PS_RAM_FS
+#if PS_RAM_FS
 #ifndef PS_RAM_FS_SIZE
 #error "PS_RAM_FS_SIZE must be defined by the target in flash_layout.h"
 #endif

@@ -28,6 +28,13 @@ target_include_directories(tfm_config
         ${CMAKE_CURRENT_SOURCE_DIR}/spm/include
 )
 
+target_compile_definitions(tfm_config
+    INTERFACE
+        $<$<STREQUAL:${PS_CRYPTO_AEAD_ALG},PSA_ALG_GCM>:PS_CRYPTO_AEAD_ALG_GCM>
+        $<$<STREQUAL:${PS_CRYPTO_AEAD_ALG},PSA_ALG_CCM>:PS_CRYPTO_AEAD_ALG_CCM>
+        $<$<BOOL:${PS_ENCRYPTION}>:PS_ENCRYPTION>
+)
+
 target_include_directories(secure_fw
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
