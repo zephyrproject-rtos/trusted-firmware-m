@@ -1,14 +1,21 @@
 /*
  * Copyright (c) 2021-22, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "s_test.h"
+#include "extra_s_tests.h"
 #include "platform_base_address.h"
 #include "firewall.h"
 #include "tfm_sp_log.h"
+
+/* TODO: if needed each test function can be made as a separate test case, in
+ * such case EXTRA_TEST_XX definitions can be removed */
+#define EXTRA_TEST_SUCCESS 0
+#define EXTRA_TEST_FAILED -1
 
 #define DISABLED_TEST 0
 
@@ -28,11 +35,6 @@ enum host_firewall_host_comp_id_t {
   COMP_EXPMST1,
   COMP_OCVM,
   COMP_DEBUG,
-};
-
-const struct extra_tests_t plat_s_t = {
-    .test_entry = s_test,
-    .expected_ret = EXTRA_TEST_SUCCESS
 };
 
 static int test_host_firewall_status(void)
@@ -140,7 +142,7 @@ static int test_bir_programming(void)
     return EXTRA_TEST_SUCCESS;
 }
 
-int32_t s_test(void)
+void s_test(struct test_result_t *ret)
 {
     int status;
     int failures = 0;
@@ -171,16 +173,27 @@ int32_t s_test(void)
 
     if (failures) {
         LOG_INFFMT("Not all platform test could pass: failures=%d\n\r", failures);
-        return EXTRA_TEST_FAILED;
+        ret->val = TEST_FAILED;
+        return;
     }
 
     LOG_INFFMT("ALL_PASS: corstone1000 platform test cases passed.\n\r");
-    return EXTRA_TEST_SUCCESS;
+    ret->val = TEST_PASSED;
 }
 
-int32_t extra_tests_init(struct extra_tests_t *internal_test_t)
-{
-    /* Add platform init code here. */
+static struct test_t plat_s_t[] = {
+    {&s_test, "TFM_S_EXTRA_TEST_1001",
+     "Extra Secure test"},
+};
 
-    return register_extra_tests(internal_test_t, &plat_s_t);
+void register_testsuite_extra_s_interface(struct test_suite_t *p_test_suite)
+{
+    uint32_t list_size;
+
+    list_size = (sizeof(plat_s_t) /
+                 sizeof(plat_s_t[0]));
+
+    set_testsuite("Extra Secure interface tests"
+                  "(TFM_S_EXTRA_TEST_1XXX)",
+                  plat_s_t, list_size, p_test_suite);
 }
