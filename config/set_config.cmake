@@ -36,15 +36,18 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.c
     include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
 endif()
 
-# Parse tf-m-tests config prior to platform specific config.cmake
-# Some platforms select different configuration according when regression tests
-# are enabled.
-include(lib/ext/tf-m-tests/pre_parse.cmake)
-
 # Load platform config, setting options not already set
 if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/config.cmake)
     include(platform/ext/target/${TFM_PLATFORM}/config.cmake)
 endif()
+
+# Load configs generated from Kconfig
+include(${CMAKE_SOURCE_DIR}/config/kconfig.cmake)
+
+# Parse tf-m-tests config prior to platform specific config.cmake
+# Some platforms select different configuration according when regression tests
+# are enabled.
+include(lib/ext/tf-m-tests/reg_parse.cmake)
 
 # Load profile config, setting options not already set
 if (TFM_PROFILE)

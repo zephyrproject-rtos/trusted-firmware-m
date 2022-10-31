@@ -15,14 +15,8 @@ set(DEFAULT_MCUBOOT_FLASH_MAP           OFF        CACHE BOOL     "Whether to us
 set(MCUBOOT_UPGRADE_STRATEGY            "RAM_LOAD" CACHE STRING   "Upgrade strategy when multiple boot images are loaded")
 set(MCUBOOT_SECURITY_COUNTER_S          "1"      CACHE STRING    "Security counter for S image. auto sets it to IMAGE_VERSION_S")
 
-if (TFM_S_REG_TEST)
-  # Test configuration: host images are not needed and work only with isolation level 1
-  set(MCUBOOT_IMAGE_NUMBER                1          CACHE STRING   "Whether to combine S and NS into either 1 image, or sign each separately")
-  set(TFM_ISOLATION_LEVEL                 1          CACHE STRING   "Isolation level")
-else()
-  set(MCUBOOT_IMAGE_NUMBER                2          CACHE STRING   "Whether to combine S and NS into either 1 image, or sign each separately")
-  set(TFM_ISOLATION_LEVEL                 2          CACHE STRING   "Isolation level")
-endif()
+set(MCUBOOT_IMAGE_NUMBER                2          CACHE STRING   "Whether to combine S and NS into either 1 image, or sign each separately")
+set(TFM_ISOLATION_LEVEL                 2          CACHE STRING   "Isolation level")
 
 set(CONFIG_TFM_USE_TRUSTZONE            OFF        CACHE BOOL     "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY             ON         CACHE BOOL     "Whether to build for a dual-cpu architecture")
