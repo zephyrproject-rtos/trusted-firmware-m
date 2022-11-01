@@ -2,10 +2,6 @@
 Trusted Firmware-M Profile Large Design
 #######################################
 
-:Author: David Hu
-:Organization: Arm Limited
-:Contact: david.hu@arm.com
-
 ************
 Introduction
 ************
@@ -62,7 +58,6 @@ TF-M Profile Large defines the following feature set:
         - Asymmetric key algorithm based Initial Attestation
 
     - Secure boot
-
         - Anti-rollback protection
         - Multiple image boot
 
@@ -427,9 +422,9 @@ instruction guide [9]_.
 Reference
 *********
 
-.. [1] :doc:`Trusted Firmware-M Profile Small Design </technical_references/design_docs/profiles/tfm_profile_small>`
+.. [1] :doc:`Trusted Firmware-M Profile Small Design </configuration/profiles/tfm_profile_small>`
 
-.. [2] :doc:`Trusted Firmware-M Profile Medium Design </technical_references/design_docs/profiles/tfm_profile_medium>`
+.. [2] :doc:`Trusted Firmware-M Profile Medium Design </configuration/profiles/tfm_profile_medium>`
 
 .. [3] `PSA Certified Level 3 Lightweight Protection Profile <https://www.psacertified.org/app/uploads/2020/12/JSADEN009-PSA_Certified_Level_3_LW_PP-1.0-BET02.pdf>`_
 

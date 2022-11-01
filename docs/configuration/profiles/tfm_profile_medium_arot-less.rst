@@ -227,7 +227,7 @@ Reference
 
 .. [1] `SESIP Profile for PSA Certified ARoT-less Level 2 <https://www.psacertified.org/app/uploads/2022/10/JSADEN019-PSA_Certified_Level_2_PP_SESIP_ARoT-less_REL-01.pdf>`_
 
-.. [2] :doc:`Trusted Firmware-M Profile Medium Design </technical_references/design_docs/profiles/tfm_profile_medium>`
+.. [2] :doc:`Trusted Firmware-M Profile Medium Design </configuration/profiles/tfm_profile_medium>`
 
 .. [3] `SESIP Profile for PSA Certified Level 2 <https://www.psacertified.org/app/uploads/2021/03/JSADEN012-PSA_Certified_Level_2_PP_SESIP-BETA02.pdf>`_
 

@@ -87,6 +87,7 @@ Trusted Firmware-M Documentation
 
     Platform Selection<platform/index>
     building/tfm_build_instruction
+    configuration/index
     integration_guide/index
     technical_references/design_docs/index
     Tools <tools/index>

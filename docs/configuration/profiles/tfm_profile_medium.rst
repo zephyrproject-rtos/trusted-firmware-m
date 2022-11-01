@@ -2,10 +2,6 @@
 Trusted Firmware-M Profile Medium Design
 ########################################
 
-:Author: David Hu
-:Organization: Arm Limited
-:Contact: david.hu@arm.com
-
 ************
 Introduction
 ************
@@ -463,7 +459,7 @@ Reference
 
 .. [RFC7925] `Transport Layer Security (TLS) / Datagram Transport Layer Security (DTLS) Profiles for the Internet of Things <https://tools.ietf.org/html/rfc7925>`_
 
-.. [PROFILE-S] :doc:`Trusted Firmware-M Profile Small Design </technical_references/design_docs/profiles/tfm_profile_small>`
+.. [PROFILE-S] :doc:`Trusted Firmware-M Profile Small Design </configuration/profiles/tfm_profile_small>`
 
 .. [RFC7252] `The Constrained Application Protocol (CoAP) <https://tools.ietf.org/html/rfc7252>`_
 
