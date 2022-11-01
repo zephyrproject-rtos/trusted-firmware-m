@@ -176,12 +176,14 @@ if(BL2)
                 DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
     endif()
 
-    install(FILES $<TARGET_OBJECTS:signing_layout_s>
+    if (PLATFORM_DEFAULT_IMAGE_SIGNING)
+        install(FILES $<TARGET_OBJECTS:signing_layout_s>
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
 
-    if(MCUBOOT_IMAGE_NUMBER GREATER 1)
-        install(FILES $<TARGET_OBJECTS:signing_layout_ns>
-                DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
+        if(MCUBOOT_IMAGE_NUMBER GREATER 1)
+            install(FILES $<TARGET_OBJECTS:signing_layout_ns>
+                    DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
+    endif()
 
         install(FILES ${MCUBOOT_KEY_NS}
                 DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
