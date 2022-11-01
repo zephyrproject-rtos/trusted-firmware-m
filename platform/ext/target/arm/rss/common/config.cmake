@@ -6,7 +6,6 @@
 #-------------------------------------------------------------------------------
 
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")
-set(CRYPTO_NV_SEED                      OFF        CACHE BOOL     "Use stored NV seed to provide entropy")
 set(PLATFORM_DEFAULT_OTP                OFF        CACHE BOOL     "Use trusted on-chip flash to implement OTP memory")
 set(PLATFORM_DEFAULT_CRYPTO_KEYS        OFF        CACHE BOOL     "Use default crypto keys implementation.")
 set(PLATFORM_DEFAULT_PROVISIONING       OFF        CACHE BOOL     "Use default provisioning implementation")
@@ -50,7 +49,6 @@ set(TFM_EXTRAS_REPO_EXTRA_MANIFEST_LIST "partitions/measured_boot/measured_boot_
 
 set(TFM_PARTITION_DELEGATED_ATTESTATION ON         CACHE BOOL     "Enable Delegated Attestation partition")
 
-set(ATTEST_TOKEN_PROFILE                "ARM_CCA"  CACHE STRING   "Set the initial attestation token profile")
 set(ATTEST_KEY_BITS                     384        CACHE STRING   "The size of the initial attestation key in bits")
 
 set(TFM_NS_NV_COUNTER_AMOUNT            3          CACHE STRING   "How many NS NV counters are enabled")
