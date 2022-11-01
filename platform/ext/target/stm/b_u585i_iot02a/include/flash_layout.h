@@ -193,6 +193,8 @@
 #define OSPI_FLASH_DEV_NAME   TFM_Driver_OSPI_FLASH0
 #define FLASH_DEV_NAME_2 OSPI_FLASH_DEV_NAME
 #define FLASH_DEV_NAME_3 OSPI_FLASH_DEV_NAME
+
+#define FLASH_DRIVER_LIST {&TFM_Driver_OSPI_FLASH0, &TFM_Driver_FLASH0}
 #endif /* defined(EXTERNAL_FLASH) */
 /*
  * The maximum number of status entries supported by the bootloader.
