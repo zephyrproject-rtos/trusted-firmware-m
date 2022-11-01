@@ -13,6 +13,7 @@ if(BL2)
         PUBLIC
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/rsa_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecdsa_alt.c
+            ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/aes_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/ecp_curves_alt.c
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/sha1_alt.c

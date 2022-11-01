@@ -37,9 +37,17 @@ boot=
 nvmcnt=
 prov=
 unused=
+encrypted=
 #select external flash according to slot2 value
 u5=0x70000000
 l5=0x90000000
+slot_s=$slot0
+slot_ns=$slot1
+#when image are encrypted, image are not installed in place (mcuboot installs the image from download slot)
+if [ $encrypted == "0x1" ]; then
+slot_s=$slot2
+slot_ns=$slot3
+fi
 if [ $slot2 == $u5 ]; then
 external_loader="C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32U585I-IOT02A.stldr"
 fi
@@ -52,10 +60,10 @@ connect="-c port=SWD "$sn_option" mode=UR --hardRst -el $external_loader"
 echo "Write TFM_Appli Secure"
 # part ot be updated according to flash_layout.h
 
-$stm32programmercli $connect -d $BINPATH/tfm_s_signed.bin $slot0 -v
+$stm32programmercli $connect -d $BINPATH/tfm_s_signed.bin $slot_s -v
 echo "TFM_Appli Secure Written"
 echo "Write TFM_Appli NonSecure"
-$stm32programmercli $connect -d $BINPATH/tfm_ns_signed.bin $slot1 -v
+$stm32programmercli $connect -d $BINPATH/tfm_ns_signed.bin $slot_ns -v
 echo "TFM_Appli NonSecure Written"
 echo "Write TFM_SBSFU_Boot"
 $stm32programmercli $connect -d $BINPATH/bl2.bin $boot -v
