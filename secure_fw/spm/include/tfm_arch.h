@@ -14,6 +14,7 @@
 
 #include <stddef.h>
 #include <inttypes.h>
+#include "fih.h"
 #include "tfm_hal_device_header.h"
 #include "cmsis_compiler.h"
 
@@ -31,6 +32,23 @@
 #define SCHEDULER_UNLOCKED  0
 
 #define XPSR_T32            0x01000000
+
+/* Define IRQ level */
+#if defined(__ARM_ARCH_8_1M_MAIN__) || defined(__ARM_ARCH_8M_MAIN__)
+#define SecureFault_IRQnLVL      (0)
+#define MemoryManagement_IRQnLVL (0)
+#define BusFault_IRQnLVL         (0)
+#define SVCall_IRQnLVL           (0)
+#elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+#define MemoryManagement_IRQnLVL (0)
+#define BusFault_IRQnLVL         (0)
+#define SVCall_IRQnLVL           (0)
+#elif defined(__ARM_ARCH_6M__) || defined(__ARM_ARCH_8M_BASE__)
+#define SVCall_IRQnLVL           (0)
+#else
+#error "Unsupported ARM Architecture."
+#endif
+
 
 /* The lowest secure interrupt priority */
 #ifdef CONFIG_TFM_USE_TRUSTZONE
@@ -247,6 +265,11 @@ __STATIC_INLINE bool tfm_arch_is_priv(void)
 
 /* Set secure exceptions priority. */
 void tfm_arch_set_secure_exception_priorities(void);
+
+#ifdef TFM_FIH_PROFILE_ON
+/* Check secure exception priority */
+FIH_RET_TYPE(int32_t) tfm_arch_verify_secure_exception_priorities(void);
+#endif
 
 /* Configure various extensions. */
 void tfm_arch_config_extensions(void);

@@ -186,16 +186,52 @@ void tfm_arch_set_secure_exception_priorities(void)
      * Non-secure from pre-empting faults that may indicate corruption of Secure
      * state.
      */
-    NVIC_SetPriority(MemoryManagement_IRQn, 0);
-    NVIC_SetPriority(BusFault_IRQn, 0);
-    NVIC_SetPriority(SecureFault_IRQn, 0);
+    NVIC_SetPriority(MemoryManagement_IRQn, MemoryManagement_IRQnLVL);
+    NVIC_SetPriority(BusFault_IRQn, BusFault_IRQnLVL);
+    NVIC_SetPriority(SecureFault_IRQn, SecureFault_IRQnLVL);
 
-    NVIC_SetPriority(SVCall_IRQn, 0);
+    NVIC_SetPriority(SVCall_IRQn, SVCall_IRQnLVL);
     /*
      * Set secure PendSV priority to the lowest in SECURE state.
      */
     NVIC_SetPriority(PendSV_IRQn, PENDSV_PRIO_FOR_SCHED);
 }
+
+#ifdef TFM_FIH_PROFILE_ON
+FIH_RET_TYPE(int32_t) tfm_arch_verify_secure_exception_priorities(void)
+{
+    SCB_Type *scb = SCB;
+
+    if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) != SCB_AIRCR_PRIS_Msk) {
+        FIH_RET(FIH_FAILURE);
+    }
+    fih_delay();
+    if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) != SCB_AIRCR_PRIS_Msk) {
+        FIH_RET(FIH_FAILURE);
+    }
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(MemoryManagement_IRQn)),
+                  fih_int_encode(MemoryManagement_IRQnLVL))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(BusFault_IRQn)),
+                  fih_int_encode(BusFault_IRQnLVL))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(SecureFault_IRQn)),
+                  fih_int_encode(SecureFault_IRQnLVL))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(SVCall_IRQn)),
+                  fih_int_encode(SVCall_IRQnLVL))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(PendSV_IRQn)),
+                  fih_int_encode(PENDSV_PRIO_FOR_SCHED))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    FIH_RET(FIH_SUCCESS);
+}
+#endif
 
 void tfm_arch_config_extensions(void)
 {

@@ -180,13 +180,40 @@ void tfm_arch_set_secure_exception_priorities(void)
 {
     /* Set fault priority to the highest */
 #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-    NVIC_SetPriority(MemoryManagement_IRQn, 0);
-    NVIC_SetPriority(BusFault_IRQn, 0);
+    NVIC_SetPriority(MemoryManagement_IRQn, MemoryManagement_IRQnLVL);
+    NVIC_SetPriority(BusFault_IRQn, BusFault_IRQnLVL);
 #endif
 
-    NVIC_SetPriority(SVCall_IRQn, 0);
-    NVIC_SetPriority(PendSV_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
+    NVIC_SetPriority(SVCall_IRQn, SVCall_IRQnLVL);
+    NVIC_SetPriority(PendSV_IRQn, PENDSV_PRIO_FOR_SCHED);
 }
+
+#ifdef TFM_FIH_PROFILE_ON
+FIH_RET_TYPE(int32_t) tfm_arch_verify_secure_exception_priorities(void)
+{
+    /* Set fault priority to the highest */
+#if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(MemoryManagement_IRQn)),
+                  fih_int_encode(MemoryManagement_IRQnLVL))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(BusFault_IRQn)),
+                  fih_int_encode(BusFault_IRQnLVL))) {
+        FIH_RET(FIH_FAILURE);
+    }
+#endif
+
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(SVCall_IRQn)),
+                  fih_int_encode(SVCall_IRQnLVL))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(PendSV_IRQn)),
+                  fih_int_encode(PENDSV_PRIO_FOR_SCHED))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    FIH_RET(FIH_SUCCESS);
+}
+#endif
 
 void tfm_arch_config_extensions(void)
 {

@@ -206,12 +206,36 @@ void tfm_arch_set_secure_exception_priorities(void)
                  VECTKEY |
                  (AIRCR & ~SCB_AIRCR_VECTKEY_Msk);
 
-    NVIC_SetPriority(SVCall_IRQn, 0);
+    NVIC_SetPriority(SVCall_IRQn, SVCall_IRQnLVL);
     /*
      * Set secure PendSV priority to the lowest in SECURE state.
      */
     NVIC_SetPriority(PendSV_IRQn, PENDSV_PRIO_FOR_SCHED);
 }
+
+#ifdef TFM_FIH_PROFILE_ON
+FIH_RET_TYPE(int32_t) tfm_arch_verify_secure_exception_priorities(void)
+{
+    SCB_Type *scb = SCB;
+
+    if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) !=  SCB_AIRCR_PRIS_Msk) {
+        FIH_RET(FIH_FAILURE);
+    }
+    fih_delay();
+    if ((scb->AIRCR & SCB_AIRCR_PRIS_Msk) !=  SCB_AIRCR_PRIS_Msk) {
+        FIH_RET(FIH_FAILURE);
+    }
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(SVCall_IRQn)),
+                  fih_int_encode(SVCall_IRQnLVL))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    if (fih_not_eq(fih_int_encode(NVIC_GetPriority(PendSV_IRQn)),
+                  fih_int_encode(PENDSV_PRIO_FOR_SCHED))) {
+        FIH_RET(FIH_FAILURE);
+    }
+    FIH_RET(FIH_SUCCESS);
+}
+#endif
 
 /* There are no coprocessors in Armv8-M Baseline implementations */
 void tfm_arch_config_extensions(void)

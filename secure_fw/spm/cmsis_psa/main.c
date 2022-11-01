@@ -109,6 +109,14 @@ int main(void)
      */
     tfm_arch_set_secure_exception_priorities();
 
+#ifdef TFM_FIH_PROFILE_ON
+    /* Check secure exception priority */
+    FIH_CALL(tfm_arch_verify_secure_exception_priorities, fih_rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+         tfm_core_panic();
+    }
+#endif
+
     /* Move to handler mode for further SPM initialization. */
     tfm_core_handler_mode();
 
