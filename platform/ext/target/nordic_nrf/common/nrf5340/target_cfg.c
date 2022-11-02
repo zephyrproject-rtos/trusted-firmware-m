@@ -790,9 +790,10 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
      * domain. Non-secure is the HW reset value for the network core
      * so configuring this should not be necessary, but we want to
      * make sure that the bootloader has not accidentally configured
-     * it to be secure.
+     * it to be secure. Additionally we lock the register to make sure
+     * it doesn't get changed by accident.
      */
-    nrf_spu_extdomain_set(NRF_SPU, 0, false, false);
+    nrf_spu_extdomain_set(NRF_SPU, 0, false, true);
 
     return TFM_PLAT_ERR_SUCCESS;
 }

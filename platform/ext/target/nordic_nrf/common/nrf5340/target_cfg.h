@@ -80,7 +80,7 @@ enum tfm_plat_err_t spu_init_cfg(void);
  * - grants Non-Secure access to nRF peripherals that are not Secure-only
  * - grants Non-Secure access to DDPI channels
  * - grants Non-Secure access to GPIO pins
- * - enforces that the external domain is still at the HW reset value of non-secure
+ * - enforces that the external domain is still at the HW reset value of non-secure and locking it
  *
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
