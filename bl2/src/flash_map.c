@@ -243,10 +243,11 @@ int flash_area_write(const struct flash_area *area, uint32_t off,
     DriverCapabilities = DRV_FLASH_AREA(area)->GetCapabilities();
     data_width = data_width_byte[DriverCapabilities.data_width];
 
-    if (FLASH_PROGRAM_UNIT)
-    /* Read the bytes from aligned_off to off. */
-    if (flash_area_read(area, aligned_off, add_padding, add_padding_size)) {
-        return -1;
+    if (FLASH_PROGRAM_UNIT) {
+        /* Read the bytes from aligned_off to off. */
+        if (flash_area_read(area, aligned_off, add_padding, add_padding_size)) {
+            return -1;
+        }
     }
 
     /* Align the write size */
