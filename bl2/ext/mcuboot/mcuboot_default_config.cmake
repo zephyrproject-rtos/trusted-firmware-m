@@ -36,6 +36,7 @@ set_property(CACHE MCUBOOT_ALIGN_VAL PROPERTY STRINGS "1;2;4;8;16;32")
 set(MCUBOOT_DIRECT_XIP_REVERT           ON          CACHE BOOL      "Enable the revert mechanism in direct-xip mode")
 set(MCUBOOT_HW_ROLLBACK_PROT            ON          CACHE BOOL      "Enable security counter validation against non-volatile HW counters")
 set(MCUBOOT_ENC_IMAGES                  OFF         CACHE BOOL      "Enable encrypted image upgrade support")
+set(MCUBOOT_BOOTSTRAP                   OFF         CACHE BOOL      "Support initial state with empty primary slot and images installed from secondary slots")
 set(MCUBOOT_ENCRYPT_RSA                 OFF         CACHE BOOL      "Use RSA for encrypted image upgrade support")
 set(MCUBOOT_FIH_PROFILE                 OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 

@@ -37,6 +37,7 @@ extern "C" {
 #cmakedefine MCUBOOT_MEASURED_BOOT
 #cmakedefine MCUBOOT_DATA_SHARING
 
+#cmakedefine MCUBOOT_BOOTSTRAP
 /*
  * Maximum size of the measured boot record.
  *
