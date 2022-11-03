@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -449,6 +449,7 @@ static psa_status_t its_flash_fs_delete_idx(struct its_flash_fs_ctx_t *fs_ctx,
     size_t nbr_bytes_to_move = 0;
     uint32_t idx;
     struct its_file_meta_t file_meta;
+    struct its_block_meta_t block_meta;
 
     err = its_flash_fs_mblock_read_file_meta(fs_ctx, del_file_idx, &file_meta);
     if (err != PSA_SUCCESS) {
@@ -520,24 +521,42 @@ static psa_status_t its_flash_fs_delete_idx(struct its_flash_fs_ctx_t *fs_ctx,
         }
     }
 
-    /* Compact data block */
-    err = its_flash_fs_dblock_compact_block(fs_ctx, del_file_lblock,
-                                            del_file_max_size,
-                                            src_offset, del_file_data_idx,
-                                            nbr_bytes_to_move);
+    if (del_file_max_size == 0) {
+        /* If the asset max size is 0, there is no need to compact the data block.
+         * Copy the block metadata and the block data to scratch metadata block.
+         */
+        err = its_flash_fs_mblock_read_block_metadata(fs_ctx, ITS_LOGICAL_DBLOCK0, &block_meta);
+        if (err != PSA_SUCCESS) {
+            return err;
+        }
+        err = its_flash_fs_mblock_update_scratch_block_meta(fs_ctx, ITS_LOGICAL_DBLOCK0,
+                                                            &block_meta);
+    } else {
+        /* Compact data block */
+        err = its_flash_fs_dblock_compact_block(fs_ctx, del_file_lblock,
+                                                del_file_max_size,
+                                                src_offset, del_file_data_idx,
+                                                nbr_bytes_to_move);
+    }
+
     if (err != PSA_SUCCESS) {
         return err;
     }
 
-    /* The file data in the logical block 0 is stored in same physical block
+    /* If the max size of file to delete is not 0:
+     * The file data in the logical block 0 is stored in same physical block
      * where the metadata is stored. A change in the metadata requires a
      * swap of physical blocks. So, the file data stored in the current
      * metadata block needs to be copied in the scratch block, if the data
      * of the file processed is not located in the logical block 0. When an
      * file data is located in the logical block 0, that copy has been done
      * while processing the file data.
+     * If the max size of file to delete is 0:
+     * The file metadata and block metadata has been updated into the scratch
+     * metadata block, copy the file data to the scratch block.
      */
-    if (del_file_lblock != ITS_LOGICAL_DBLOCK0) {
+    if ((del_file_max_size != 0 && del_file_lblock != ITS_LOGICAL_DBLOCK0) ||
+        (del_file_max_size == 0)) {
         err = its_flash_fs_mblock_migrate_lb0_data_to_scratch(fs_ctx);
         if (err != PSA_SUCCESS) {
             return PSA_ERROR_GENERIC_ERROR;
