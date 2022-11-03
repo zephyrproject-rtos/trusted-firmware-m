@@ -185,7 +185,9 @@ target_sources(${MBEDTLS_TARGET_PREFIX}mbedcrypto
 
 target_compile_options(${MBEDTLS_TARGET_PREFIX}mbedcrypto
     PRIVATE
+        $<$<C_COMPILER_ID:GNU>:-Wno-unused-const-variable>
         $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
+        $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-const-variable>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
 )
 
