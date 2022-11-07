@@ -188,6 +188,12 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
+    ret = Driver_QSPI_MPC.EnableInterrupt();
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Enable MPC interrupt for QSPI!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
     NVIC_ClearPendingIRQ(MPC_IRQn);
     NVIC_EnableIRQ(MPC_IRQn);
 
@@ -281,8 +287,8 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                   | SAU_RLAR_ENABLE_Msk;
 
-    /* Allows SAU to define the CODE region as a NSC */
-    sacfg->nsccfg |= CODENSC;
+    /* Allows SAU to define the RAM region as a NSC */
+    sacfg->nsccfg |= RAMNSC;
 }
 
 /*------------------- Memory configuration functions -------------------------*/
@@ -307,18 +313,31 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 
     /* Configuring primary non-secure partition.
      * It is ensured in flash_layout.h that this memory region is located in
-     * SRAM device. */
-    ret = Driver_SRAM_MPC.Initialize();
+     * QSPI device. */
+    ret = Driver_QSPI_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Initialize MPC for SRAM!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_SRAM_MPC.ConfigRegion(
+    ret = Driver_QSPI_MPC.ConfigRegion(
                                       memory_regions.non_secure_partition_base,
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Configure MPC for SRAM!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* Unused MPCs */
+    ret = Driver_SRAM_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Initialize MPC for SRAM!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    ret = Driver_ISRAM1_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Initialize MPC for ISRAM0!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 

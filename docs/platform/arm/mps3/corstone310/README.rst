@@ -66,11 +66,11 @@ To run the built binaries:
 
 #. Execute the following command to start VHT::
 
-    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x01040000
+    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x38000000
 
 #. The  serial port's output can be redirected to a file with::
 
-    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x01040000 -C mps3_board.uart0.unbuffered_output=1 -C mps3_board.uart0.out_file="output.log"
+    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x38000000 -C mps3_board.uart0.unbuffered_output=1 -C mps3_board.uart0.out_file="output.log"
 
    The output should contain the following messages::
 
@@ -99,4 +99,4 @@ To run the built binaries:
 
 --------------
 
-*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*

@@ -56,9 +56,41 @@ target_link_libraries(platform_s
         platform_fvp
 )
 
+target_include_directories(platform_bl2
+    PRIVATE
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+)
+
+target_sources(platform_bl2
+    PRIVATE
+        cmsis_drivers/Driver_Flash.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+)
+
+target_include_directories(platform_ns
+    PRIVATE
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+)
+
+target_sources(platform_ns
+    PRIVATE
+        cmsis_drivers/Driver_Flash.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+)
+
+target_include_directories(platform_s
+    PRIVATE
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+)
+
 target_sources(platform_s
     PRIVATE
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
+        cmsis_drivers/Driver_Flash.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
 )
 
 target_compile_definitions(platform_s

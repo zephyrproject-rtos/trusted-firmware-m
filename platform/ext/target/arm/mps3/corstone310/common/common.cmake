@@ -76,14 +76,10 @@ target_include_directories(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
         ${PLATFORM_DIR}/ext/common
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
 )
 
 target_sources(platform_s
     PRIVATE
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_Flash.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_MPC.c
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_TGU.c
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_PPC.c
@@ -115,8 +111,6 @@ target_compile_options(platform_s
 
 target_sources(platform_ns
     PRIVATE
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_Flash.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
         ${CORSTONE310_COMMON_DIR}/device/source/platform_ns_device_definition.c
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
@@ -137,8 +131,6 @@ target_include_directories(platform_ns
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${PLATFORM_DIR}/ext/common
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
 )
 
 #========================= Platform BL2 =======================================#
@@ -146,8 +138,6 @@ target_include_directories(platform_ns
 if(BL2)
     target_sources(platform_bl2
         PRIVATE
-            ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_Flash.c
-            ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
             ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
             ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
             ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
@@ -165,8 +155,6 @@ if(BL2)
             ${CORSTONE310_COMMON_DIR}/partition
             ${CORSTONE310_COMMON_DIR}/services/src
             ${CMAKE_CURRENT_SOURCE_DIR}/device/config
-            ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
-            ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
 
         PRIVATE
             ${CORSTONE310_COMMON_DIR}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,29 +22,29 @@
 /* Flash layout on Corstone-310 with BL2 (multiple image boot):
  *
  * 0x0000_0000 Secure image     primary slot (384 KB)
- * 0x0006_0000 Non-secure image primary slot (384 KB)
- * 0x000C_0000 Secure image     secondary slot (384 KB)
- * 0x0012_0000 Non-secure image secondary slot (384 KB)
- * 0x0018_0000 Scratch area (384 KB)
- * 0x001E_0000 Protected Storage Area (20 KB)
- * 0x001E_5000 Internal Trusted Storage Area (16 KB)
- * 0x001E_9000 OTP / NV counters  area (8 KB)
- * 0x001E_B000 Unused
+ * 0x0006_0000 Non-secure image primary slot (3.125 MB)
+ * 0x0038_0000 Secure image     secondary slot (384 KB)
+ * 0x003E_0000 Non-secure image secondary slot (3.125 MB)
+ * 0x0070_0000 Scratch area (384 KB)
+ * 0x0076_0000 Protected Storage Area (20 KB)
+ * 0x0076_5000 Internal Trusted Storage Area (16 KB)
+ * 0x0076_9000 OTP / NV counters  area (8 KB)
+ * 0x0076_B000 Unused
  *
  * Flash layout on Corstone-310 with BL2 (single image boot):
  *
  * 0x0000_0000 Primary image area (768 KB):
  *    0x0000_0000 Secure     image primary (384 KB)
- *    0x0006_0000 Non-secure image primary (384 KB)
- * 0x000C_0000 Secondary image area (768 KB):
- *    0x000C_0000 Secure     image secondary (384 KB)
- *    0x0012_0000 Non-secure image secondary (384 KB)
- * 0x0018_0000 Scratch area (384 KB)
- * 0x001C_0000 Protected Storage Area (20 KB)
- * 0x001C_5000 Internal Trusted Storage Area (16 KB)
- * 0x001C_9000 NV counters area (4 KB)
- * 0x001E_9000 OTP / NV counters  area (8 KB)
- * 0x001E_B000 Unused
+ *    0x0006_0000 Non-secure image primary (3.125 MB)
+ * 0x0038_0000 Secondary image area (768 KB):
+ *    0x0038_0000 Secure     image secondary (384 KB)
+ *    0x003E_0000 Non-secure image secondary (3.125 MB)
+ * 0x0070_0000 Scratch area (384 KB)
+ * 0x0076_0000 Protected Storage Area (20 KB)
+ * 0x0076_5000 Internal Trusted Storage Area (16 KB)
+ * 0x0076_9000 NV counters area (4 KB)
+ * 0x0076_A000 OTP / NV counters  area (8 KB)
+ * 0x0076_C000 Unused
  */
 
 
@@ -57,8 +57,8 @@
  */
 
 /* Size of a Secure and of a Non-secure image */
-#define FLASH_S_PARTITION_SIZE          (0x60000) /* S  partition: 384 KB */
-#define FLASH_NS_PARTITION_SIZE         (0x60000) /* NS partition: 384 KB */
+#define FLASH_S_PARTITION_SIZE          (0x60000) /* S  partition:  384 KB */
+#define FLASH_NS_PARTITION_SIZE         (0x320000) /* NS partition:  3.125 MB */
 
 #if (FLASH_S_PARTITION_SIZE > FLASH_NS_PARTITION_SIZE)
 #define FLASH_MAX_PARTITION_SIZE FLASH_S_PARTITION_SIZE
@@ -68,11 +68,11 @@
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)     /* 4 KB */
 /* Same as FLASH0_SIZE */
-#define FLASH_TOTAL_SIZE                (SRAM_SIZE)  /* 2 MB */
+#define FLASH_TOTAL_SIZE                (QSPI_SRAM_SIZE)  /* 8 MB */
 
 /* Flash layout info for BL2 bootloader */
 /* Same as FLASH0_BASE_S */
-#define FLASH_BASE_ADDRESS              (SRAM_BASE_S)
+#define FLASH_BASE_ADDRESS              (QSPI_SRAM_BASE_S)
 
 /* Offset and size definitions of the flash partitions that are handled by the
  * bootloader. The image swapping is done between IMAGE_PRIMARY and
@@ -80,12 +80,12 @@
  * swapping.
  */
 #define FLASH_AREA_BL2_OFFSET      (0x0)
-#define FLASH_AREA_BL2_SIZE        (0x40000) /* 256 KB */
+#define FLASH_AREA_BL2_SIZE        (SRAM_SIZE) /* 2 MB */
 
 #if !defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)
 /* Secure + Non-secure image primary slot */
 #define FLASH_AREA_0_ID            (1)
-#define FLASH_AREA_0_OFFSET        (FLASH_AREA_BL2_SIZE)
+#define FLASH_AREA_0_OFFSET        (0)
 #define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE + \
                                     FLASH_NS_PARTITION_SIZE)
 /* Secure + Non-secure secondary slot */
@@ -96,7 +96,7 @@
 /* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (FLASH_MAX_PARTITION_SIZE / 2)
+#define FLASH_AREA_SCRATCH_SIZE    (FLASH_S_PARTITION_SIZE)
 /* The maximum number of status entries supported by the bootloader. */
 #define MCUBOOT_STATUS_MAX_ENTRIES ((FLASH_S_PARTITION_SIZE + \
                                      FLASH_NS_PARTITION_SIZE) / \
@@ -108,7 +108,7 @@
 #elif (MCUBOOT_IMAGE_NUMBER == 2)
 /* Secure image primary slot */
 #define FLASH_AREA_0_ID            (1)
-#define FLASH_AREA_0_OFFSET        (FLASH_AREA_BL2_SIZE)
+#define FLASH_AREA_0_OFFSET        (0)
 #define FLASH_AREA_0_SIZE          (FLASH_S_PARTITION_SIZE)
 /* Non-secure image primary slot */
 #define FLASH_AREA_1_ID            (FLASH_AREA_0_ID + 1)
@@ -125,7 +125,7 @@
 /* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (FLASH_MAX_PARTITION_SIZE / 2)
+#define FLASH_AREA_SCRATCH_SIZE    (FLASH_S_PARTITION_SIZE)
 /* The maximum number of status entries supported by the bootloader. */
 #define MCUBOOT_STATUS_MAX_ENTRIES (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_SCRATCH_SIZE)
@@ -138,7 +138,7 @@
 
 /* mpc_init_cfg function in target_cfg.c expects that all the images can fit
  * in SRAM area. */
-#if ( FLASH_AREA_SCRATCH_OFFSET + FLASH_AREA_SCRATCH_SIZE > SRAM_SIZE)
+#if ( FLASH_AREA_SCRATCH_OFFSET + FLASH_AREA_SCRATCH_SIZE > QSPI_SRAM_SIZE)
 #error "Out of SRAM memory!"
 #endif
 
