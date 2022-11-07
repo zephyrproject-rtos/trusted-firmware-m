@@ -5,12 +5,6 @@
 #
 #-------------------------------------------------------------------------------
 
-# Don't load this file if it is specified as a cmake toolchain file
-if(NOT TFM_TOOLCHAIN_FILE)
-    message(DEPRECATION "SETTING CMAKE_TOOLCHAIN_FILE is deprecated. It has been replaced with TFM_TOOLCHAIN_FILE.")
-    return()
-endif()
-
 set(CMAKE_SYSTEM_NAME Generic)
 
 find_program(CMAKE_C_COMPILER ${CROSS_COMPILE}-gcc)

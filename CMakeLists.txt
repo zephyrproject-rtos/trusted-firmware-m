@@ -40,18 +40,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 ############################### Compiler configuration #########################
 
-#Legacy compat option - load CMAKE_TOOLCHAIN_FILE as a TFM_TOOLCHAIN_FILE
-if (CMAKE_TOOLCHAIN_FILE)
-    message(DEPRECATION "SETTING CMAKE_TOOLCHAIN_FILE is deprecated. It has been replaced with TFM_TOOLCHAIN_FILE.")
-    message(DEPRECATION "INTERPRETING -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE} as -DTFM_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
-    set(TFM_TOOLCHAIN_FILE ${CMAKE_TOOLCHAIN_FILE})
-    unset(CMAKE_TOOLCHAIN_FILE)
-endif()
-
-if (NOT IS_ABSOLUTE ${TFM_TOOLCHAIN_FILE})
-    message(FATAL_ERROR "SETTING CMAKE_TOOLCHAIN_FILE no longer accepts relative paths. Please supply an absolute path or instead use TFM_TOOLCHAIN_FILE (which does accept relative paths)")
-endif()
-
 include(${TFM_TOOLCHAIN_FILE})
 set(CMAKE_PROJECT_INCLUDE_BEFORE ${CMAKE_SOURCE_DIR}/cmake/disable_compiler_detection.cmake)
 

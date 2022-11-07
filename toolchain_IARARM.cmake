@@ -9,12 +9,6 @@
 cmake_minimum_required(VERSION 3.22)
 cmake_policy(SET CMP0115 NEW)
 
-# Don't load this file if it is specified as a cmake toolchain file
-if(NOT TFM_TOOLCHAIN_FILE)
-    message(DEPRECATION "SETTING CMAKE_TOOLCHAIN_FILE is deprecated. It has been replaced with TFM_TOOLCHAIN_FILE.")
-    return()
-endif()
-
 SET(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR       ${TFM_SYSTEM_PROCESSOR})
 
