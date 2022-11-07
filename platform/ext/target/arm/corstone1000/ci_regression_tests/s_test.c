@@ -11,6 +11,7 @@
 #include "platform_base_address.h"
 #include "firewall.h"
 #include "tfm_sp_log.h"
+#include "s_io_storage_test.h"
 
 /* TODO: if needed each test function can be made as a separate test case, in
  * such case EXTRA_TEST_XX definitions can be removed */
@@ -18,6 +19,8 @@
 #define EXTRA_TEST_FAILED -1
 
 #define DISABLED_TEST 0
+
+int test_io_storage_multiple_flash_simultaneous(void);
 
 enum host_firewall_host_comp_id_t {
   HOST_FCTRL = (0x00u),
@@ -184,6 +187,8 @@ void s_test(struct test_result_t *ret)
 static struct test_t plat_s_t[] = {
     {&s_test, "TFM_S_EXTRA_TEST_1001",
      "Extra Secure test"},
+    {&s_test_io_storage_multiple_flash_simultaneous, "TFM_S_EXTRA_TEST_1002",
+     "Extra Secure test: io storage access multiple flash simultaneous"},
 };
 
 void register_testsuite_extra_s_interface(struct test_suite_t *p_test_suite)
