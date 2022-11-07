@@ -125,6 +125,9 @@ target_sources(platform_bl2
         fw_update_agent/fwu_agent.c
         bl2_security_cnt.c
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
+        io/io_block.c
+        io/io_flash.c
+        io/io_storage.c
 )
 
 if (PLATFORM_IS_FVP)
@@ -182,6 +185,7 @@ target_include_directories(platform_bl2
         fip_parser
         Native_Driver
         fw_update_agent
+        io
         .
     INTERFACE
         cc312
