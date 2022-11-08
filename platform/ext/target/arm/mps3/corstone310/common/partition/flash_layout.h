@@ -18,8 +18,9 @@
 #define __FLASH_LAYOUT_H__
 
 #include "platform_base_address.h"
+#include "config_tfm_target.h"
 
-/* Flash layout on Corstone-310 with BL2 (multiple image boot):
+/* Default Flash layout on Corstone-310 with BL2 (multiple image boot):
  *
  * 0x0000_0000 Secure image     primary slot (384 KB)
  * 0x0006_0000 Non-secure image primary slot (3.125 MB)
@@ -31,7 +32,7 @@
  * 0x0076_9000 OTP / NV counters  area (8 KB)
  * 0x0076_B000 Unused
  *
- * Flash layout on Corstone-310 with BL2 (single image boot):
+ * Default Flash layout on Corstone-310 with BL2 (single image boot):
  *
  * 0x0000_0000 Primary image area (768 KB):
  *    0x0000_0000 Secure     image primary (384 KB)
@@ -56,10 +57,7 @@
  * with comment.
  */
 
-/* Size of a Secure and of a Non-secure image */
-#define FLASH_S_PARTITION_SIZE          (0x60000) /* S  partition:  384 KB */
-#define FLASH_NS_PARTITION_SIZE         (0x320000) /* NS partition:  3.125 MB */
-
+/* Size of a Secure and of a Non-secure image is set in platform config_tfm_target.h */
 #if (FLASH_S_PARTITION_SIZE > FLASH_NS_PARTITION_SIZE)
 #define FLASH_MAX_PARTITION_SIZE FLASH_S_PARTITION_SIZE
 #else
@@ -80,7 +78,7 @@
  * swapping.
  */
 #define FLASH_AREA_BL2_OFFSET      (0x0)
-#define FLASH_AREA_BL2_SIZE        (SRAM_SIZE) /* 2 MB */
+#define FLASH_AREA_BL2_SIZE        (0x20000) /* 128 KB */
 
 #if !defined(MCUBOOT_IMAGE_NUMBER) || (MCUBOOT_IMAGE_NUMBER == 1)
 /* Secure + Non-secure image primary slot */

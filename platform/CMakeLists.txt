@@ -300,3 +300,8 @@ target_include_directories(platform_region_defs
     INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/ext/common
 )
+
+target_link_libraries(platform_region_defs
+    INTERFACE
+        tfm_config
+)

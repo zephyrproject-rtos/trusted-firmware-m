@@ -12,6 +12,7 @@ cmake_policy(SET CMP0076 NEW)
 target_include_directories(platform_region_defs
     INTERFACE
         ${CORSTONE310_COMMON_DIR}/partition
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 #========================= Platform common defs ===============================#
