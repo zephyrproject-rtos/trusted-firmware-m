@@ -39,8 +39,12 @@ psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
         uint8_t *mac = out_vec[0].base;
         size_t mac_size = out_vec[0].len;
 
-        return psa_mac_compute(*encoded_key, iov->alg, input, input_length,
-                               mac, mac_size, &out_vec[0].len);
+        status = psa_mac_compute(*encoded_key, iov->alg, input, input_length,
+                                 mac, mac_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
 #endif
     }
 
@@ -126,13 +130,13 @@ psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
     {
         uint8_t *mac = out_vec[1].base;
         size_t mac_size = out_vec[1].len;
-        /* Initialise mac_length to zero */
-        out_vec[1].len = 0;
 
         status = psa_mac_sign_finish(operation, mac, mac_size, &out_vec[1].len);
         if (status == PSA_SUCCESS) {
             /* In case of success automatically release the operation */
             goto release_operation_and_return;
+        } else {
+            out_vec[1].len = 0;
         }
     }
     break;

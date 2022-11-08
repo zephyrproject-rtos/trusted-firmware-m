@@ -39,8 +39,12 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
         uint8_t *output = out_vec[0].base;
         size_t output_size = out_vec[0].len;
 
-        return psa_cipher_encrypt(*encoded_key, iov->alg, input, input_length,
-                                  output, output_size, &out_vec[0].len);
+        status = psa_cipher_encrypt(*encoded_key, iov->alg, input, input_length,
+                                    output, output_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
 #endif
     }
 
@@ -53,8 +57,12 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
         uint8_t *output = out_vec[0].base;
         size_t output_size = out_vec[0].len;
 
-        return psa_cipher_decrypt(*encoded_key, iov->alg, input, input_length,
-                                  output, output_size, &out_vec[0].len);
+        status = psa_cipher_decrypt(*encoded_key, iov->alg, input, input_length,
+                                    output, output_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
 #endif
     }
 
@@ -103,7 +111,11 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
         unsigned char *iv = out_vec[0].base;
         size_t iv_size = out_vec[0].len;
 
-        return psa_cipher_generate_iv(operation, iv, iv_size, &out_vec[0].len);
+        status = psa_cipher_generate_iv(operation, iv, iv_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
     }
     case TFM_CRYPTO_CIPHER_SET_IV_SID:
     {
@@ -134,24 +146,26 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
         size_t input_length = in_vec[1].len;
         unsigned char *output = out_vec[0].base;
         size_t output_size = out_vec[0].len;
-        /* Initialise the output_length to zero */
-        out_vec[0].len = 0;
 
-        return psa_cipher_update(operation, input, input_length,
-                                 output, output_size, &out_vec[0].len);
+        status = psa_cipher_update(operation, input, input_length,
+                                   output, output_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
     }
     case TFM_CRYPTO_CIPHER_FINISH_SID:
     {
         uint8_t *output = out_vec[1].base;
         size_t output_size = out_vec[1].len;
-        /* Initialise the output_length to zero */
-        out_vec[1].len = 0;
 
         status = psa_cipher_finish(operation,
                                    output, output_size, &out_vec[1].len);
         if (status == PSA_SUCCESS) {
             /* In case of success automatically release the operation */
             goto release_operation_and_return;
+        } else {
+            out_vec[1].len = 0;
         }
     }
     break;

@@ -25,6 +25,7 @@ psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
                                              mbedtls_svc_key_id_t *encoded_key)
 {
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
 
     switch (iov->function_id) {
     case TFM_CRYPTO_ASYMMETRIC_SIGN_MESSAGE_SID:
@@ -34,8 +35,12 @@ psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
         uint8_t *signature = out_vec[0].base;
         size_t signature_size = out_vec[0].len;
 
-        return psa_sign_message(*encoded_key, iov->alg, input, input_length,
-                                signature, signature_size, &(out_vec[0].len));
+        status = psa_sign_message(*encoded_key, iov->alg, input, input_length,
+                                  signature, signature_size, &(out_vec[0].len));
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
     }
     case TFM_CRYPTO_ASYMMETRIC_VERIFY_MESSAGE_SID:
     {
@@ -54,8 +59,12 @@ psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
         uint8_t *signature = out_vec[0].base;
         size_t signature_size = out_vec[0].len;
 
-        return psa_sign_hash(*encoded_key, iov->alg, hash, hash_length,
-                             signature, signature_size, &(out_vec[0].len));
+        status = psa_sign_hash(*encoded_key, iov->alg, hash, hash_length,
+                               signature, signature_size, &(out_vec[0].len));
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
     }
     case TFM_CRYPTO_ASYMMETRIC_VERIFY_HASH_SID:
     {
@@ -92,6 +101,7 @@ psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
                                              mbedtls_svc_key_id_t *encoded_key)
 {
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
 
     switch (iov->function_id) {
     case TFM_CRYPTO_ASYMMETRIC_ENCRYPT_SID:
@@ -103,11 +113,15 @@ psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
         uint8_t *output = out_vec[0].base;
         size_t output_size = out_vec[0].len;
 
-        return psa_asymmetric_encrypt(*encoded_key, iov->alg,
-                                      input, input_length,
-                                      salt, salt_length,
-                                      output, output_size,
-                                      &(out_vec[0].len));
+        status = psa_asymmetric_encrypt(*encoded_key, iov->alg,
+                                        input, input_length,
+                                        salt, salt_length,
+                                        output, output_size,
+                                        &(out_vec[0].len));
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
     }
     case TFM_CRYPTO_ASYMMETRIC_DECRYPT_SID:
     {
@@ -118,11 +132,15 @@ psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
         uint8_t *output = out_vec[0].base;
         size_t output_size = out_vec[0].len;
 
-        return psa_asymmetric_decrypt(*encoded_key, iov->alg,
-                                      input, input_length,
-                                      salt, salt_length,
-                                      output, output_size,
-                                      &(out_vec[0].len));
+        status = psa_asymmetric_decrypt(*encoded_key, iov->alg,
+                                        input, input_length,
+                                        salt, salt_length,
+                                        output, output_size,
+                                        &(out_vec[0].len));
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
     }
     default:
         return PSA_ERROR_NOT_SUPPORTED;

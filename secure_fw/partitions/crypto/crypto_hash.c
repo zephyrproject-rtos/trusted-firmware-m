@@ -38,11 +38,12 @@ psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
         uint8_t *hash = out_vec[0].base;
         size_t hash_size = out_vec[0].len;
 
-        /* Initialize hash_length to zero */
-        out_vec[0].len = 0;
-
-        return psa_hash_compute(iov->alg, input, input_length,
-                                hash, hash_size, &out_vec[0].len);
+        status = psa_hash_compute(iov->alg, input, input_length,
+                                  hash, hash_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
 #endif
     }
 
@@ -119,12 +120,12 @@ psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
     {
         uint8_t *hash = out_vec[1].base;
         size_t hash_size = out_vec[1].len;
-        /* Initialise the output_length to zero */
-        out_vec[1].len = 0;
 
         status = psa_hash_finish(operation, hash, hash_size, &out_vec[1].len);
         if (status == PSA_SUCCESS) {
             goto release_operation_and_return;
+        } else {
+            out_vec[1].len = 0;
         }
     }
     break;

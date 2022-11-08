@@ -109,6 +109,9 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
 
         status = psa_export_key(*encoded_key, data, data_size,
                                 &(out_vec[0].len));
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
     }
     break;
     case TFM_CRYPTO_EXPORT_PUBLIC_KEY_SID:
@@ -118,6 +121,9 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
 
         status = psa_export_public_key(*encoded_key, data, data_size,
                                        &(out_vec[0].len));
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
     }
     break;
     case TFM_CRYPTO_PURGE_KEY_SID:
