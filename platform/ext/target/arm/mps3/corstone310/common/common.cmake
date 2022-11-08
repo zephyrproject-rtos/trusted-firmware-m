@@ -262,3 +262,10 @@ target_sources(tfm_spm
         ${CMAKE_CURRENT_SOURCE_DIR}/dma_init.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${PLATFORM_DIR}/ext/common/tfm_interrupts.c>
 )
+
+#========================= platform_region_defs ===============================#
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        FLASH_S_PARTITION_SIZE=${FLASH_S_PARTITION_SIZE}
+        FLASH_NS_PARTITION_SIZE=${FLASH_NS_PARTITION_SIZE}
+)

@@ -12,6 +12,9 @@ set(PSA_API_TEST_TARGET          "cs3x0"    CACHE STRING  "PSA_API_TARGET name")
 # Make FLIH IRQ test as the default IRQ test on Corstone-310
 set(TEST_NS_SLIH_IRQ                  OFF   CACHE BOOL    "Whether to build NS regression Second-Level Interrupt Handling tests")
 
+set(FLASH_S_PARTITION_SIZE   "0x80000"    CACHE STRING    "Secure code size")
+set(FLASH_NS_PARTITION_SIZE  "0x300000"   CACHE STRING    "Non-secure code size")
+
 if(BL2)
     set(BL2_TRAILER_SIZE 0x800 CACHE STRING "Trailer size")
 else()
