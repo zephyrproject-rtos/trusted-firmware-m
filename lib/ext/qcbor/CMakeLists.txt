@@ -42,6 +42,7 @@ target_include_directories(tfm_qcbor_s
     PUBLIC
         $<BUILD_INTERFACE:${QCBOR_PATH}/inc>
     INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<BUILD_INTERFACE:${QCBOR_PATH}/inc/qcbor>
 )
 
