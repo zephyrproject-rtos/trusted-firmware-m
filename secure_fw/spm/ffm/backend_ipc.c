@@ -33,16 +33,16 @@ struct partition_head_t partition_listhead;
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 /* Instance for SPM_THREAD_CONTEXT */
 
-#ifdef TFM_MULTI_CORE_TOPOLOGY
-
+#ifdef CONFIG_TFM_USE_TRUSTZONE
+struct context_ctrl_t *p_spm_thread_context;
+#else
+/* If ns_agent_tz isn't used, we need to provide a stack for SPM to use */
 static uint8_t spm_thread_stack[CONFIG_TFM_SPM_THREAD_STACK_SIZE] __aligned(8);
 ARCH_CLAIM_CTXCTRL_INSTANCE(spm_thread_context,
                             spm_thread_stack,
                             sizeof(spm_thread_stack));
 
 struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
-#else
-struct context_ctrl_t *p_spm_thread_context;
 #endif
 
 #endif
@@ -183,9 +183,12 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
-#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1) && !defined(TFM_MULTI_CORE_TOPOLOGY)
+#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
     if (IS_PARTITION_NS_AGENT(p_pldi)) {
-        SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
+        /* Get the context from ns_agent_tz */
+        if (p_pldi->pid == 0) {
+            SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
+        }
     }
 #endif
 
