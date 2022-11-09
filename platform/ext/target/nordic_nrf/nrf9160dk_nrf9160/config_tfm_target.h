@@ -12,8 +12,4 @@
 #undef ATTEST_INCLUDE_OPTIONAL_CLAIMS
 #define ATTEST_INCLUDE_OPTIONAL_CLAIMS    0
 
-/* Use stored NV seed to provide entropy */
-#undef CRYPTO_NV_SEED
-#define CRYPTO_NV_SEED                    0
-
 #endif /* __CONFIG_TFM_TARGET_H__ */
