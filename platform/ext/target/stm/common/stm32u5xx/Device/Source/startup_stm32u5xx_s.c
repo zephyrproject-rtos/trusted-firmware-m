@@ -29,7 +29,7 @@
 extern uint32_t __INITIAL_SP;
 extern uint32_t __STACK_LIMIT;
 #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
-extern uint32_t __STACK_SEAL;
+extern uint64_t __STACK_SEAL;
 #endif
 
 extern void Error_Handler(void);

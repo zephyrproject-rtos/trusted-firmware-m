@@ -60,7 +60,7 @@
 /* Enable NS exceptions by setting NS PRIMASK to 0 */
 #define TFM_NS_EXC_ENABLE()     __TZ_set_PRIMASK_NS(0)
 
-extern uint32_t __STACK_SEAL;
+extern uint64_t __STACK_SEAL;
 
 /**
  * \brief Check whether Secure or Non-secure stack is used to restore stack
