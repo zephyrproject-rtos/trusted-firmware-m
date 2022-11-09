@@ -52,7 +52,7 @@
 
 #define S_DATA_START            (SRAM_BASE + TFM_PARTITION_SIZE)
 #define S_DATA_SIZE             (SRAM_SIZE - TFM_PARTITION_SIZE)
-#define S_UNPRIV_DATA_SIZE      (0x2000)
+#define S_UNPRIV_DATA_SIZE      (0x2160)
 #define S_DATA_LIMIT            (S_DATA_START + S_DATA_SIZE - 1)
 #define S_DATA_PRIV_START       (S_DATA_START + S_UNPRIV_DATA_SIZE)
 
