@@ -38,6 +38,11 @@ target_sources(tfm_qcbor_s
         ${QCBOR_PATH}/src/UsefulBuf.c
 )
 
+target_compile_definitions(tfm_qcbor_s
+    PRIVATE
+        QCBOR_DISABLE_FLOAT_HW_USE
+)
+
 target_include_directories(tfm_qcbor_s
     PUBLIC
         $<BUILD_INTERFACE:${QCBOR_PATH}/inc>
