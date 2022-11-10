@@ -40,6 +40,12 @@ extern "C" {
 extern struct atu_dev_t ATU_DEV_S;
 #endif
 
+/* SIC driver structures */
+#ifdef SIC_S
+#include "sic_drv.h"
+extern struct sic_dev_t SIC_DEV_S;
+#endif
+
 /* UART PL011 driver structures */
 #ifdef UART0_PL011_S
 #include "uart_pl011_drv.h"

@@ -46,6 +46,10 @@
 /* ARM ATU */
 #define ATU_S
 
+#ifdef RSS_XIP
+/* ARM SIC */
+#define SIC_S
+#endif
 
 /** System Counter Armv8-M */
 #define SYSCOUNTER_CNTRL_ARMV8_M_S

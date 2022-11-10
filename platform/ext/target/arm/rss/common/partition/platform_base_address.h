@@ -27,6 +27,7 @@
 /* ======= Defines peripherals memory map addresses ======= */
 /* Non-secure memory map addresses */
 #define ITCM_BASE_NS                     0x00000000 /* Instruction TCM Non-Secure base address */
+#define SIC_HOST_BASE_NS                 0x02000000 /* Secure I-Cache Non-Secure mapping base address */
 #define DTCM_BASE_NS                     0x20000000 /* Data TCM Non-Secure base address */
 #define VM0_BASE_NS                      0x21000000 /* Volatile Memory 0 Non-Secure base address */
 #define VM1_BASE_NS                      (VM0_BASE_NS + VM0_SIZE) /* Volatile Memory 1 Secure base address */
@@ -72,6 +73,7 @@
 
 /* Secure memory map addresses */
 #define ITCM_BASE_S                      0x10000000 /* Instruction TCM Secure base address */
+#define SIC_HOST_BASE_S                  0x12000000 /* Secure I-Cache Secure mapping base address */
 #define ROM_BASE_S                       0x11000000 /* CODE ROM Secure base address. No NS alias for ROM */
 #define DTCM_BASE_S                      0x30000000 /* Data TCM Secure base address */
 #define VM0_BASE_S                       0x31000000 /* Volatile Memory 0 Secure base address */
@@ -89,6 +91,7 @@
 #define LCM_BASE_S                       0x500A0000 /* LCM Secure base address */
 #define GPIO0_CMSDK_BASE_S               0x50100000 /* GPIO 0 Secure base address */
 #define GPIO1_CMSDK_BASE_S               0x50101000 /* GPIO 1 Secure base address */
+#define SIC_BASE_S                       0x50140000 /* SIC Secure base address */
 #define ATU_BASE_S                       0x50150000 /* ATU Secure base address */
 #define SYSCNTR_CNTRL_BASE_S             0x5015A000 /* System Counter Control Secure base address */
 #define SYSCNTR_READ_BASE_S              0x5015B000 /* System Counter Read Secure base address */
@@ -151,6 +154,7 @@
 #define ROM_SIZE                         0x00020000 /* 128 kB */
 #define DTCM_SIZE                        0x00008000 /* 32 kB */
 #define HOST_ACCESS_SIZE                 0x10000000 /* 256 MB */
+#define SIC_MAPPABLE_SIZE                0x01000000 /* 16 MB */
 
 /* Defines for Driver MPC's */
 /* VM0 -- 8 MB */

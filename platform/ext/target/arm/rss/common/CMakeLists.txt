@@ -127,6 +127,7 @@ target_sources(platform_s
         native_drivers/dma350_drv.c
         native_drivers/dma350_ch_drv.c
         native_drivers/kmu_drv.c
+        native_drivers/sic_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/mhu_wrapper_v2_x.c
         native_drivers/mpc_sie_drv.c
@@ -243,6 +244,7 @@ target_sources(platform_bl2
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_ch_drv.c>
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_drv.c>
         native_drivers/kmu_drv.c
+        native_drivers/sic_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/uart_pl011_drv.c
         native_drivers/lcm_drv.c

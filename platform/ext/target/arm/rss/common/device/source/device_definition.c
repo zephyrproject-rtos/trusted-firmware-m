@@ -33,6 +33,12 @@ static const struct atu_dev_cfg_t ATU_DEV_CFG_S = {
 struct atu_dev_t ATU_DEV_S = {&ATU_DEV_CFG_S};
 #endif
 
+/* Arm SIC driver structures */
+#ifdef SIC_S
+static const struct sic_dev_cfg_t SIC_DEV_CFG_S = {
+    .base = SIC_BASE_S};
+struct sic_dev_t SIC_DEV_S = {&SIC_DEV_CFG_S};
+#endif
 
 /* RSS PPC driver structures */
 #ifdef PPC_RSS_MAIN0_S
