@@ -2,7 +2,7 @@
  * attest_token.h
  *
  * Copyright (c) 2018-2019, Laurence Lundblade.
- * Copyright (c) 2020-2022, Arm Limited.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,7 @@
 #define __ATTEST_TOKEN_H__
 
 #include <stdint.h>
-#include "qcbor.h"
+#include "qcbor/qcbor.h"
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
 #include "t_cose_mac0_sign.h"
 #else

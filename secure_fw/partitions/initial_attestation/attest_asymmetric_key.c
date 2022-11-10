@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2018-2019, Laurence Lundblade.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -14,7 +14,7 @@
 #include "tfm_plat_device_id.h"
 #include "t_cose_standard_constants.h"
 #include "q_useful_buf.h"
-#include "qcbor.h"
+#include "qcbor/qcbor.h"
 #include "tfm_crypto_defs.h"
 
 #define ATTEST_ECC_PUBLIC_KEY_SIZE \
