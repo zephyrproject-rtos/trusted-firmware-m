@@ -88,14 +88,23 @@ run the following ``srec_cat`` commands::
 
     srec_cat \
         bl2_signed.bin -Binary -offset 0x0 \
-        bl2_signed.bin -Binary -offset 0x20000 \
-        tfm_s_ns_signed.bin -Binary -offset 0x40000 \
-        tfm_s_ns_signed.bin -Binary -offset 0x140000 \
-        <Host AP BL1 image> -Binary -offset 0x240000 \
-        <SCP BL1 image> -Binary -offset 0x2C0000 \
-        <Host AP BL1 image>  -Binary -offset 0x340000 \
-        <SCP BL1 image> -Binary -offset 0x3C0000 \
+        bl2_signed.bin -Binary -offset 0x10000 \
+        tfm_s_ns_signed.bin -Binary -offset 0x020000 \
+        tfm_s_ns_signed.bin -Binary -offset 0x0E0000 \
+        <Host AP BL1 image> -Binary -offset 0x1A0000 \
+        <SCP BL1 image> -Binary -offset 0x220000 \
+        <Host AP BL1 image>  -Binary -offset 0x2A0000 \
+        <SCP BL1 image> -Binary -offset 0x320000 \
         -o flash.bin -Binary
+
+
+Once the flash image is created, it can be combined with the host FIP to create
+a combined host flash image::
+
+    srec_cat \
+            fip-tc.bin -Binary -offset 0x0\
+            flash.bin -Binary -offset 0x00400000 \
+            -o host_flash.bin -Binary
 
 For development purposes, the OTP image is included as a provisioning bundle in
 the ROM image and provisioned into OTP by BL1_1. The flash image should include
@@ -103,8 +112,9 @@ the signed host images from the previous section. For each boot image, there is
 a primary and secondary image; if these are different then BL2 will load the one
 with the higher version number.
 
-The ROM binary should be placed in RSS ROM at ``0x11000000`` and the flash
-binary should be placed at ``0x31000000``.
+The ROM binary should be placed in RSS ROM at ``0x11000000`` and the host flash
+binary should be placed at the base of the host flash. For the TC platform,
+this is at ``0x84000000``.
 
 --------------
 

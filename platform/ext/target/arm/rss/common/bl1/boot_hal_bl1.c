@@ -50,6 +50,26 @@ static int32_t init_atu_regions(void)
         return 1;
     }
 
+    /* Initialize BL2 slot 0 region */
+    err = atu_initialize_region(&ATU_DEV_S,
+                                0,
+                                HOST_FLASH0_BASE_S + FLASH_AREA_0_OFFSET,
+                                HOST_FLASH0_BASE + FLASH_AREA_0_OFFSET,
+                                FLASH_AREA_0_SIZE);
+    if (err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    /* Initialize BL2 slot 1 region */
+    err = atu_initialize_region(&ATU_DEV_S,
+                                1,
+                                HOST_FLASH0_BASE_S + FLASH_AREA_1_OFFSET,
+                                HOST_FLASH0_BASE + FLASH_AREA_1_OFFSET,
+                                FLASH_AREA_1_SIZE);
+    if (err != ATU_ERR_NONE) {
+        return 1;
+    }
+
     return 0;
 }
 

@@ -12,6 +12,7 @@
 #ifdef PLATFORM_HAS_BOOT_DMA
 #include "boot_dma.h"
 #endif /* PLATFORM_HAS_BOOT_DMA */
+#include "flash_layout.h"
 #include "bootutil/bootutil_log.h"
 #include "device_definition.h"
 #include "host_base_address.h"
@@ -24,6 +25,7 @@
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include "bl2_image_id.h"
 #include "Driver_Flash.h"
+#include "host_flash_atu.h"
 
 #ifdef FLASH_DEV_NAME
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
@@ -75,26 +77,7 @@ int32_t boot_platform_post_init(void)
 
 int boot_platform_pre_load(uint32_t image_id)
 {
-    enum atu_error_t err;
-
-    if (image_id == RSS_BL2_IMAGE_SCP) {
-        /* Initialize SCP ATU region */
-        err = atu_initialize_region(&ATU_DEV_S, 0, HOST_BOOT1_LOAD_BASE_S,
-                                    SCP_BL1_SRAM_BASE, SCP_BL1_SIZE);
-        if (err != ATU_ERR_NONE) {
-            return 1;
-        }
-
-    } else if (image_id == RSS_BL2_IMAGE_AP) {
-        /* Initialize AP ATU region */
-        err = atu_initialize_region(&ATU_DEV_S, 0, HOST_BOOT0_LOAD_BASE_S,
-                                    AP_BL1_SRAM_BASE, AP_BL1_SIZE);
-        if (err != ATU_ERR_NONE) {
-            return 1;
-        }
-    }
-
-    return 0;
+    return host_flash_atu_pre_load(image_id);
 }
 
 int boot_platform_post_load(uint32_t image_id)
@@ -109,18 +92,12 @@ int boot_platform_post_load(uint32_t image_id)
         /* Remove the image header and move the image to the start of SCP memory
          * FIXME: Would be better to set SCP VTOR, but not currently possible
          */
-        memmove((void *)HOST_BOOT1_LOAD_BASE_S,
-                (void *)(HOST_BOOT1_LOAD_BASE_S + BL2_HEADER_SIZE),
-                SCP_BL1_SIZE - BL2_HEADER_SIZE);
+        memmove((void *)HOST_BOOT_IMAGE1_LOAD_BASE_S,
+                (void *)(HOST_BOOT_IMAGE1_LOAD_BASE_S + 0x1000),
+                SCP_BL1_SIZE - 0x1000);
 
         /* Release SCP CPU from wait */
         sysctrl->gretreg = 0x1;
-
-        /* Close SCP ATU region */
-        err = atu_uninitialize_region(&ATU_DEV_S, 0);
-        if (err != ATU_ERR_NONE) {
-            return 1;
-        }
 
         /* Wait for SCP to finish its startup */
         BOOT_LOG_INF("Waiting for SCP BL1 started event");
@@ -130,16 +107,15 @@ int boot_platform_post_load(uint32_t image_id)
         BOOT_LOG_INF("Got SCP BL1 started event");
 
     } else if (image_id == RSS_BL2_IMAGE_AP) {
-        /* Close AP ATU region */
-        err = atu_uninitialize_region(&ATU_DEV_S, 0);
-        if (err != ATU_ERR_NONE) {
-            return 1;
-        }
-
         BOOT_LOG_INF("Telling SCP to start AP cores");
         mhu_v2_x_initiate_transfer(&MHU_RSS_TO_SCP_DEV);
         /* Slot 0 is used in the SCP protocol */
         mhu_v2_x_channel_send(&MHU_RSS_TO_SCP_DEV, 0, 1);
+    }
+
+    err = host_flash_atu_post_load(image_id);
+    if (err) {
+        return err;
     }
 
     return 0;

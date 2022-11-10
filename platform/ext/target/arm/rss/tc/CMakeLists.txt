@@ -23,6 +23,7 @@ target_sources(platform_bl2
     PRIVATE
         bl2/boot_hal_bl2.c
         bl2/flash_map_bl2.c
+        bl2/host_flash_atu.c
 )
 
 target_compile_definitions(platform_bl2

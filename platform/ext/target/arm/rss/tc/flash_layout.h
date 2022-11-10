@@ -19,19 +19,19 @@
 
 #include "host_base_address.h"
 
-/* Flash layout on RSS with BL2 (multiple image boot):
+/* Flash layout on RSS with XIP mode disabled:
  *
- * 0x3100_0000 BL2 - MCUBoot (128 KB)
- * 0x3102_0000 BL2 - MCUBoot (128 KB)
- * 0x3104_0000 Secure image     primary slot (512 KB)
- * 0x310C_0000 Non-secure image primary slot (512 KB)
- * 0x3114_0000 Secure image     secondary slot (512 KB)
- * 0x311C_0000 Non-secure image secondary slot (512 KB)
- * 0x3124_0000 AP BL1 primary slot (512 KB)
- * 0x312C_0000 SCP BL1 primary slot (512 KB)
- * 0x3134_0000 AP BL1 secondary slot (512 KB)
- * 0x313C_0000 SCP BL1 secondary slot (512 KB)
- * 0x3144_0000 Unused
+ * 0x8400_0000 BL2 - MCUBoot (128 KiB)
+ * 0x8401_0000 BL2 - MCUBoot (128 KiB)
+ * 0x8402_0000 Secure image     primary slot (384 KiB)
+ * 0x8408_0000 Non-secure image primary slot (384 KiB)
+ * 0x840E_0000 Secure image     secondary slot (384 KiB)
+ * 0x8414_0000 Non-secure image secondary slot (384 KiB)
+ * 0x841A_0000 AP BL1  primary slot (512 KiB)
+ * 0x8422_0000 SCP BL1 primary slot (512 KiB)
+ * 0x842A_0000 AP BL1  secondary slot (512 KiB)
+ * 0x8432_0000 SCP BL1 secondary slot (512 KiB)
+ * 0x843A_0000 Unused
  */
 
 /* This header file is included from linker scatter file as well, where only a

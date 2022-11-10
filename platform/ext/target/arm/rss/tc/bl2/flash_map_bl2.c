@@ -98,11 +98,11 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
         *exec_ram_size  = NON_SECURE_IMAGE_MAX_SIZE;
         rc = 0;
     } else if (image_id == RSS_BL2_IMAGE_AP) {
-        *exec_ram_start = HOST_BOOT0_LOAD_BASE_S;
+        *exec_ram_start = HOST_BOOT_IMAGE0_LOAD_BASE_S;
         *exec_ram_size  = AP_BL1_SIZE;
         rc = 0;
     } else if (image_id == RSS_BL2_IMAGE_SCP) {
-        *exec_ram_start = HOST_BOOT1_LOAD_BASE_S;
+        *exec_ram_start = HOST_BOOT_IMAGE1_LOAD_BASE_S;
         *exec_ram_size  = SCP_BL1_SIZE;
         rc = 0;
     }
