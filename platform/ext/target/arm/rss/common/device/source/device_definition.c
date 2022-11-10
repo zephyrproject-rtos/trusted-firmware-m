@@ -33,35 +33,6 @@ static const struct atu_dev_cfg_t ATU_DEV_CFG_S = {
 struct atu_dev_t ATU_DEV_S = {&ATU_DEV_CFG_S};
 #endif
 
-/* Arm UART PL011 driver structures */
-#ifdef UART0_PL011_S
-static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_S = {
-    .base = UART0_BASE_S,
-    .def_baudrate = DEFAULT_UART_BAUDRATE,
-    .def_wlen = UART_PL011_WLEN_8,
-    .def_parity = UART_PL011_PARITY_DISABLED,
-    .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_S = {
-    .state = 0,
-    .uart_clk = 0,
-    .baudrate = 0};
-struct uart_pl011_dev_t UART0_PL011_DEV_S = {&(UART0_PL011_DEV_CFG_S),
-                                             &(UART0_PL011_DEV_DATA_S)};
-#endif
-#ifdef UART0_PL011_NS
-static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_NS = {
-    .base = UART0_BASE_NS,
-    .def_baudrate = DEFAULT_UART_BAUDRATE,
-    .def_wlen = UART_PL011_WLEN_8,
-    .def_parity = UART_PL011_PARITY_DISABLED,
-    .def_stopbit = UART_PL011_STOPBIT_1};
-static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_NS = {
-    .state = 0,
-    .uart_clk = 0,
-    .baudrate = 0};
-struct uart_pl011_dev_t UART0_PL011_DEV_NS = {&(UART0_PL011_DEV_CFG_NS),
-                                              &(UART0_PL011_DEV_DATA_NS)};
-#endif
 
 /* RSS PPC driver structures */
 #ifdef PPC_RSS_MAIN0_S

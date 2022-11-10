@@ -7,7 +7,7 @@
  * not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an AS IS BASIS, WITHOUT
@@ -21,21 +21,18 @@
 #include "Driver_Flash.h"
 #include "RTE_Device.h"
 #include "platform_base_address.h"
+#include "host_base_address.h"
+#include "flash_layout.h"
+#include "cmsis_driver_config.h"
 
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  ((void)arg)
 #endif
 
-#define FLASH0_BASE_S         VM0_BASE_S
-#define FLASH0_BASE_NS        VM0_BASE_NS
-#define FLASH0_SIZE           VM0_SIZE
-#define FLASH0_SECTOR_SIZE    0x00001000 /* 4 kB */
-#define FLASH0_PAGE_SIZE      0x00001000 /* 4 kB */
-#define FLASH0_PROGRAM_UNIT   0x1        /* Minimum write size */
-
 /* Driver version */
 #define ARM_FLASH_DRV_VERSION      ARM_DRIVER_VERSION_MAJOR_MINOR(1, 1)
 #define ARM_FLASH_DRV_ERASE_VALUE  0xFF
+
 
 /**
  * Data width values for ARM_FLASH_CAPABILITIES::data_width
@@ -56,13 +53,16 @@ static const uint32_t data_width_byte[DATA_WIDTH_ENUM_SIZE] = {
 
 /*
  * ARM FLASH device structure
- *
- * This driver just emulates a flash interface and behaviour on top of the SRAM
- * memory.
  */
 struct arm_flash_dev_t {
-    const uint32_t memory_base;   /*!< FLASH memory base address */
+    struct cfi_strataflashj3_dev_t *dev;         /*!< FLASH memory device structure */
     ARM_FLASH_INFO *data;         /*!< FLASH data */
+};
+/* Driver Capabilities */
+static const ARM_FLASH_CAPABILITIES STRATAFLASHJ3DriverCapabilities = {
+    0, /* event_ready */
+    0, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
+    1  /* erase_chip */
 };
 
 /* Flash Status */
@@ -74,86 +74,9 @@ static const ARM_DRIVER_VERSION DriverVersion = {
     ARM_FLASH_DRV_VERSION
 };
 
-/* Driver Capabilities */
-static const ARM_FLASH_CAPABILITIES DriverCapabilities = {
-    0, /* event_ready */
-    0, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
-    1  /* erase_chip */
-};
-
-static int32_t is_range_valid(struct arm_flash_dev_t *flash_dev,
-                              uint32_t offset)
-{
-    uint32_t flash_limit = 0;
-    int32_t rc = 0;
-
-    flash_limit = (flash_dev->data->sector_count * flash_dev->data->sector_size)
-                   - 1;
-
-    if (offset > flash_limit) {
-        rc = -1;
-    }
-    return rc;
-}
-
-static int32_t is_write_aligned(struct arm_flash_dev_t *flash_dev,
-                                uint32_t param)
-{
-    int32_t rc = 0;
-
-    if ((param % flash_dev->data->program_unit) != 0) {
-        rc = -1;
-    }
-    return rc;
-}
-
-static int32_t is_sector_aligned(struct arm_flash_dev_t *flash_dev,
-                                 uint32_t offset)
-{
-    int32_t rc = 0;
-
-    if ((offset % flash_dev->data->sector_size) != 0) {
-        rc = -1;
-    }
-    return rc;
-}
-
-static int32_t is_flash_ready_to_write(const uint8_t *start_addr, uint32_t cnt)
-{
-    int32_t rc = 0;
-    uint32_t i;
-
-    for (i = 0; i < cnt; i++) {
-        if(start_addr[i] != ARM_FLASH_DRV_ERASE_VALUE) {
-            rc = -1;
-            break;
-        }
-    }
-
-    return rc;
-}
-
-#if (RTE_FLASH0)
-static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA = {
-    .sector_info  = NULL,                  /* Uniform sector layout */
-    .sector_count = FLASH0_SIZE / FLASH0_SECTOR_SIZE,
-    .sector_size  = FLASH0_SECTOR_SIZE,
-    .page_size    = FLASH0_PAGE_SIZE,
-    .program_unit = FLASH0_PROGRAM_UNIT,
-    .erased_value = ARM_FLASH_DRV_ERASE_VALUE};
-
-static struct arm_flash_dev_t ARM_FLASH0_DEV = {
-#if (__DOMAIN_NS == 1)
-    .memory_base = FLASH0_BASE_NS,
-#else
-    .memory_base = FLASH0_BASE_S,
-#endif /* __DOMAIN_NS == 1 */
-    .data        = &(ARM_FLASH0_DEV_DATA)};
-
-struct arm_flash_dev_t *FLASH0_DEV = &ARM_FLASH0_DEV;
 
 /*
- * Functions
+ * Common interface functions
  */
 
 static ARM_DRIVER_VERSION ARM_Flash_GetVersion(void)
@@ -161,27 +84,9 @@ static ARM_DRIVER_VERSION ARM_Flash_GetVersion(void)
     return DriverVersion;
 }
 
-static ARM_FLASH_CAPABILITIES ARM_Flash_GetCapabilities(void)
+static ARM_FLASH_STATUS ARM_Flash_GetStatus(void)
 {
-    return DriverCapabilities;
-}
-
-static int32_t ARM_Flash_Initialize(ARM_Flash_SignalEvent_t cb_event)
-{
-    ARG_UNUSED(cb_event);
-
-    if (DriverCapabilities.data_width >= DATA_WIDTH_ENUM_SIZE) {
-        return ARM_DRIVER_ERROR;
-    }
-
-    /* Nothing to be done */
-    return ARM_DRIVER_OK;
-}
-
-static int32_t ARM_Flash_Uninitialize(void)
-{
-    /* Nothing to be done */
-    return ARM_DRIVER_OK;
+    return FlashStatus;
 }
 
 static int32_t ARM_Flash_PowerControl(ARM_POWER_STATE state)
@@ -199,121 +104,155 @@ static int32_t ARM_Flash_PowerControl(ARM_POWER_STATE state)
     }
 }
 
-static int32_t ARM_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
+
+#if (RTE_FLASH0)
+static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA = {
+    .sector_info    = NULL,     /* Uniform sector layout */
+    .sector_count   = HOST_FLASH0_SIZE / 0x1000,
+    .sector_size    = 0x1000,
+    .page_size      = 256U,
+    .program_unit   = 1U,
+    .erased_value   = ARM_FLASH_DRV_ERASE_VALUE
+};
+
+static struct arm_flash_dev_t ARM_FLASH0_DEV = {
+    .dev    = &FLASH0_DEV,
+    .data   = &(ARM_FLASH0_DEV_DATA)
+};
+#endif /* RTE_FLASH0 */
+
+/*
+ * Functions
+ */
+static int32_t ARM_Flash_Uninitialize(void)
 {
-    uint32_t start_addr = FLASH0_DEV->memory_base + addr;
-    int32_t rc = 0;
-
-    /* Conversion between data items and bytes */
-    cnt *= data_width_byte[DriverCapabilities.data_width];
-
-    /* Check flash memory boundaries */
-    rc = is_range_valid(FLASH0_DEV, addr + cnt);
-    if (rc != 0) {
-        return ARM_DRIVER_ERROR_PARAMETER;
-    }
-
-    /* Flash interface just emulated over SRAM, use memcpy */
-    memcpy(data, (void *)start_addr, cnt);
-
-    /* Conversion between bytes and data items */
-    cnt /= data_width_byte[DriverCapabilities.data_width];
-
-    return cnt;
-}
-
-static int32_t ARM_Flash_ProgramData(uint32_t addr, const void *data,
-                                     uint32_t cnt)
-{
-    uint32_t start_addr = FLASH0_DEV->memory_base + addr;
-    int32_t rc = 0;
-
-    /* Conversion between data items and bytes */
-    cnt *= data_width_byte[DriverCapabilities.data_width];
-
-    /* Check flash memory boundaries and alignment with minimal write size */
-    rc  = is_range_valid(FLASH0_DEV, addr + cnt);
-    rc |= is_write_aligned(FLASH0_DEV, addr);
-    rc |= is_write_aligned(FLASH0_DEV, cnt);
-    if (rc != 0) {
-        return ARM_DRIVER_ERROR_PARAMETER;
-    }
-
-    /* Check if the flash area to write the data was erased previously */
-    rc = is_flash_ready_to_write((const uint8_t*)start_addr, cnt);
-    if (rc != 0) {
-        return ARM_DRIVER_ERROR;
-    }
-
-    /* Flash interface just emulated over SRAM, use memcpy */
-    memcpy((void *)start_addr, data, cnt);
-
-    /* Conversion between bytes and data items */
-    cnt /= data_width_byte[DriverCapabilities.data_width];
-
-    return cnt;
-}
-
-static int32_t ARM_Flash_EraseSector(uint32_t addr)
-{
-    uint32_t start_addr = FLASH0_DEV->memory_base + addr;
-    uint32_t rc = 0;
-
-    rc  = is_range_valid(FLASH0_DEV, addr);
-    rc |= is_sector_aligned(FLASH0_DEV, addr);
-    if (rc != 0) {
-        return ARM_DRIVER_ERROR_PARAMETER;
-    }
-
-    /* Flash interface just emulated over SRAM, use memset */
-    memset((void *)start_addr,
-           FLASH0_DEV->data->erased_value,
-           FLASH0_DEV->data->sector_size);
+    /* Nothing to be done */
     return ARM_DRIVER_OK;
 }
 
-static int32_t ARM_Flash_EraseChip(void)
+int32_t Select_XIP_Mode_For_Shared_Flash(void)
 {
-    uint32_t i;
-    uint32_t addr = FLASH0_DEV->memory_base;
-    int32_t rc = ARM_DRIVER_ERROR_UNSUPPORTED;
+    return ARM_DRIVER_OK;
+}
 
-    /* Check driver capability erase_chip bit */
-    if (DriverCapabilities.erase_chip == 1) {
-        for (i = 0; i < FLASH0_DEV->data->sector_count; i++) {
-            /* Flash interface just emulated over SRAM, use memset */
-            memset((void *)addr,
-                   FLASH0_DEV->data->erased_value,
-                   FLASH0_DEV->data->sector_size);
+int32_t Select_Write_Mode_For_Shared_Flash(void)
+{
+    return ARM_DRIVER_OK;
+}
 
-            addr += FLASH0_DEV->data->sector_size;
-            rc = ARM_DRIVER_OK;
-        }
+static int32_t STRATAFLASHJ3_Initialize(ARM_Flash_SignalEvent_t cb_event)
+{
+    ARG_UNUSED(cb_event);
+    enum strataflashj3_error_t ret;
+    struct cfi_strataflashj3_dev_t* dev = ARM_FLASH0_DEV.dev;
+    ARM_FLASH_INFO* data = ARM_FLASH0_DEV.data;
+
+    dev->total_sector_cnt = data->sector_count;
+    dev->page_size = data->page_size;
+    dev->sector_size = data->sector_size;
+    dev->program_unit = data->program_unit;
+
+
+    ret = cfi_strataflashj3_initialize(ARM_FLASH0_DEV.dev);
+
+    if (ret != STRATAFLASHJ3_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
     }
-    return rc;
+
+    return ARM_DRIVER_OK;
 }
 
-static ARM_FLASH_STATUS ARM_Flash_GetStatus(void)
+static ARM_FLASH_CAPABILITIES STRATAFLASHJ3_Driver_GetCapabilities(void)
 {
-    return FlashStatus;
+    return STRATAFLASHJ3DriverCapabilities;
 }
 
-static ARM_FLASH_INFO * ARM_Flash_GetInfo(void)
+static int32_t STRATAFLASHJ3_Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
 {
-    return FLASH0_DEV->data;
+    enum strataflashj3_error_t ret;
+
+    if (STRATAFLASHJ3DriverCapabilities.data_width > 2 || STRATAFLASHJ3DriverCapabilities.data_width < 0)
+    {
+        return ARM_DRIVER_ERROR;
+    }
+
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
+
+    ret = cfi_strataflashj3_read(ARM_FLASH0_DEV.dev, addr, data, cnt);
+    if (ret != STRATAFLASHJ3_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
+
+    /* Conversion between bytes and data items */
+    cnt /= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
+
+    return cnt;
+}
+
+static int32_t STRATAFLASHJ3_Flash_ProgramData(uint32_t addr, const void *data,
+                                     uint32_t cnt)
+{
+    enum strataflashj3_error_t ret;
+    
+    if (STRATAFLASHJ3DriverCapabilities.data_width > 2 || STRATAFLASHJ3DriverCapabilities.data_width < 0)
+    {
+        return ARM_DRIVER_ERROR;
+    }
+
+    /* Conversion between data items and bytes */
+    cnt *= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
+
+    ret = cfi_strataflashj3_program(ARM_FLASH0_DEV.dev, addr, data, cnt);
+    if (ret != STRATAFLASHJ3_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
+
+    /* Conversion between bytes and data items */
+    cnt /= data_width_byte[STRATAFLASHJ3DriverCapabilities.data_width];
+
+    return cnt;
+}
+
+static int32_t STRATAFLASHJ3_Flash_EraseSector(uint32_t addr)
+{
+    enum strataflashj3_error_t ret;
+
+    ret = cfi_strataflashj3_erase(ARM_FLASH0_DEV.dev, addr);
+    if (ret != STRATAFLASHJ3_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
+
+    return ARM_DRIVER_OK;
+}
+
+static int32_t STRATAFLASHJ3_Flash_EraseChip(void)
+{
+    enum strataflashj3_error_t ret;
+
+    ret = cfi_strataflashj3_erase_chip(ARM_FLASH0_DEV.dev);
+    if (ret != STRATAFLASHJ3_ERR_NONE) {
+        return ARM_DRIVER_ERROR;
+    }
+
+    return ARM_DRIVER_OK;
+}
+
+static ARM_FLASH_INFO * STRATAFLASHJ3_Flash_GetInfo(void)
+{
+    return &ARM_FLASH0_DEV_DATA;
 }
 
 ARM_DRIVER_FLASH Driver_FLASH0 = {
     ARM_Flash_GetVersion,
-    ARM_Flash_GetCapabilities,
-    ARM_Flash_Initialize,
+    STRATAFLASHJ3_Driver_GetCapabilities,
+    STRATAFLASHJ3_Initialize,
     ARM_Flash_Uninitialize,
     ARM_Flash_PowerControl,
-    ARM_Flash_ReadData,
-    ARM_Flash_ProgramData,
-    ARM_Flash_EraseSector,
-    ARM_Flash_EraseChip,
+    STRATAFLASHJ3_Flash_ReadData,
+    STRATAFLASHJ3_Flash_ProgramData,
+    STRATAFLASHJ3_Flash_EraseSector,
+    STRATAFLASHJ3_Flash_EraseChip,
     ARM_Flash_GetStatus,
-    ARM_Flash_GetInfo
+    STRATAFLASHJ3_Flash_GetInfo
 };
-#endif /* RTE_FLASH0 */

@@ -23,6 +23,11 @@
 #include "fih.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include "bl2_image_id.h"
+#include "Driver_Flash.h"
+
+#ifdef FLASH_DEV_NAME
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+#endif /* FLASH_DEV_NAME */
 
 int32_t boot_platform_post_init(void)
 {

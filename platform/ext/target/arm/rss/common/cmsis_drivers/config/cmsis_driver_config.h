@@ -23,6 +23,8 @@
 
 #define UART0_DEV                    UART0_PL011_DEV_NS
 
+#define FLASH0_DEV                   SPI_STRATAFLASHJ3_DEV
+
 #define MPC_VM0_DEV                  MPC_VM0_DEV_S
 #define MPC_VM1_DEV                  MPC_VM1_DEV_S
 

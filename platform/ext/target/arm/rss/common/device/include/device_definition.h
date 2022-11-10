@@ -27,6 +27,7 @@
 #define __DEVICE_DEFINITION_H__
 
 #include "device_cfg.h"
+#include "host_device_definition.h"
 
 #ifdef __cplusplus
 extern "C" {

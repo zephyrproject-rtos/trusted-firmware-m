@@ -118,8 +118,11 @@ target_sources(platform_s
         cmsis_drivers/Driver_PPC.c
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
+        device/source/host_device_definition.c
         device/source/system_core_init.c
         libraries/dma350_lib.c
+        native_drivers/cfi_drv.c
+        native_drivers/spi_strataflashj3_flash_lib.c
         native_drivers/atu_rss_drv.c
         native_drivers/dma350_drv.c
         native_drivers/dma350_ch_drv.c
@@ -198,9 +201,12 @@ target_sources(platform_ns
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
+        device/source/host_device_definition.c
         device/source/system_core_init.c
         native_drivers/systimer_armv8-m_drv.c
         native_drivers/uart_pl011_drv.c
+        native_drivers/cfi_drv.c
+        native_drivers/spi_strataflashj3_flash_lib.c
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_ns_mailbox.c>
 )
 
@@ -228,8 +234,11 @@ target_sources(platform_bl2
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
+        device/source/host_device_definition.c
         device/source/system_core_init.c
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_lib.c>
+        native_drivers/cfi_drv.c
+        native_drivers/spi_strataflashj3_flash_lib.c
         native_drivers/atu_rss_drv.c
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_ch_drv.c>
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_drv.c>
@@ -286,13 +295,16 @@ target_compile_definitions(platform_bl2
 target_sources(platform_bl1
     PRIVATE
         ./bl1/boot_hal_bl1.c
-        ./cmsis_drivers/Driver_Flash.c
-        ./cmsis_drivers/Driver_USART.c
+        $<$<BOOL:${TFM_BL1_LOGGING}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
+        $<$<BOOL:${TFM_BL1_LOGGING}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_pl011_drv.c>
+        $<$<NOT:$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c>
+        $<$<NOT:$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/cfi_drv.c>
+        $<$<NOT:$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/spi_strataflashj3_flash_lib.c>
         ./device/source/device_definition.c
+        ./device/source/host_device_definition.c
         ./device/source/system_core_init.c
         ./native_drivers/atu_rss_drv.c
         ./native_drivers/kmu_drv.c
-        ./native_drivers/uart_pl011_drv.c
         ./native_drivers/lcm_drv.c
         ./otp_lcm.c
         ./nv_counters.c

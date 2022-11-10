@@ -17,6 +17,8 @@
 #ifndef __DEVICE_CFG_H__
 #define __DEVICE_CFG_H__
 
+#include "host_device_cfg.h"
+
 /**
  * \file device_cfg.h
  * \brief
@@ -44,10 +46,6 @@
 /* ARM ATU */
 #define ATU_S
 
-/* ARM UART PL011 */
-#define DEFAULT_UART_BAUDRATE  115200
-#define UART0_PL011_S
-#define UART0_PL011_NS
 
 /** System Counter Armv8-M */
 #define SYSCOUNTER_CNTRL_ARMV8_M_S
