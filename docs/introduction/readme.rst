@@ -22,10 +22,10 @@ architectures. In pre-Armv8-M architectures physical core isolation is required.
 - Crypto, Internal Trusted Storage (ITS), Protected Storage (PS),
   Firmware Update and Attestation secure services
 
-TF-M implements PSA-FF-M defined IPC and SFN mechanisms to allow communication
+TF-M implements `PSA-FF-M`_ defined IPC and SFN mechanisms to allow communication
 between isolated firmware partitions. TF-M is highly configurable allowing users
 to only include the required secure services and features. Project provides
-‘TF-M base’ build with just TF-M core and platform drivers and 4 predefined
+:ref:`Base_configuration` build with just TF-M core and platform drivers and 4 predefined
 configurations known as :ref:`tf-m_profiles`. TF-M Profiles or TF-M base can
 be configured to include required services and features as described in the
 :ref:`tf-m_configuration` section.
@@ -96,6 +96,7 @@ online. Welcome to join `TF-M Forum <https://www.trustedfirmware.org/meetings/tf
 .. _Cortex-M85: https://developer.arm.com/Processors/Cortex-M85
 .. _PSA Certified: https://www.psacertified.org/about/developing-psa-certified/
 .. _Arm TrustZone technology: https://developer.arm.com/ip-products/security-ip/trustzone/trustzone-for-cortex-m
+.. _PSA-FF-M: https://www.arm.com/architecture/security-features/platform-security
 
 --------------
 

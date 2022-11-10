@@ -2,10 +2,6 @@
 Trusted Firmware-M Profile Medium-ARoT-less
 ###########################################
 
-:Author: David Hu
-:Organization: Arm Limited
-:Contact: david.hu@arm.com
-
 ************
 Introduction
 ************
