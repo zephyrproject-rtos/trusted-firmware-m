@@ -126,6 +126,11 @@ image = struct_pack([
     ciphertext,
     ])
 
+if len(image) > bl2_partition_size:
+    print("Error: Signed image size {} exceeds BL2 partition size {}"
+          .format(len(image), bl2_partition_size))
+    exit(1)
+
 with open(args.img_output_file, "wb") as img_out_file:
     img_out_file.write(image)
 
