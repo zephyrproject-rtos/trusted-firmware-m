@@ -338,6 +338,12 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
+#ifdef RSS_XIP
+    ret = Driver_SIC_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+#endif /* RSS_XIP */
 
     /* Configuring primary non-secure partition.
      * It is ensured in flash_layout.h that these memory regions are located in
@@ -349,9 +355,16 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
+
+#ifdef RSS_XIP
+    ret = Driver_SIC_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
+                                      memory_regions.non_secure_partition_limit,
+                                      ARM_MPC_ATTR_NONSECURE);
+#else
     ret = Driver_VM1_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
+#endif /* !RSS_XIP */
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -366,6 +379,12 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
+#ifdef RSS_XIP
+    ret = Driver_SIC_MPC.LockDown();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+#endif /* RSS_XIP */
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
@@ -380,6 +399,9 @@ void mpc_clear_irq(void)
 {
     Driver_VM0_MPC.ClearInterrupt();
     Driver_VM1_MPC.ClearInterrupt();
+#ifdef RSS_XIP
+    Driver_SIC_MPC.ClearInterrupt();
+#endif /* RSS_XIP */
 }
 
 /*------------------- PPC configuration functions -------------------------*/

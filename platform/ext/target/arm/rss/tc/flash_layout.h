@@ -32,6 +32,14 @@
  * 0x842A_0000 AP BL1  secondary slot (512 KiB)
  * 0x8432_0000 SCP BL1 secondary slot (512 KiB)
  * 0x843A_0000 Unused
+ *
+ * If XIP mode is enabled, 4 more flash regions are defined:
+ *
+ * 0x843A_0000 Secure image SIC tables     primary slot (10 KiB)
+ * 0x843A_A000 Non-secure image SIC tables primary slot (10 KiB)
+ * 0x843B_4000 Secure image SIC tables     secondary slot (10 KiB)
+ * 0x843B_E000 Non-secure image SIC tables secondary slot (10 KiB)
+ * 0x843C_8000 Unused
  */
 
 /* This header file is included from linker scatter file as well, where only a
@@ -52,6 +60,13 @@
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
                                          FLASH_NS_PARTITION_SIZE)
+
+#ifdef RSS_XIP
+/* Each table contains a bit less that 8KiB of HTR and 2KiB of mcuboot headers.
+ * The spare space in the 8KiB is used for decryption IVs.
+ */
+#define FLASH_SIC_TABLE_SIZE            (0xA000) /* 10KiB */
+#endif /* RSS_XIP */
 
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)    /* 4 KB */
@@ -109,6 +124,25 @@
 #define FLASH_AREA_9_OFFSET        (FLASH_AREA_8_OFFSET + FLASH_AREA_8_SIZE)
 #define FLASH_AREA_9_SIZE          (FLASH_SCP_PARTITION_SIZE)
 
+#ifdef RSS_XIP
+/* Secure image SIC tables primary slot */
+#define FLASH_AREA_10_ID            (FLASH_AREA_9_ID + 1)
+#define FLASH_AREA_10_OFFSET        (FLASH_AREA_9_OFFSET + FLASH_AREA_9_SIZE)
+#define FLASH_AREA_10_SIZE          (FLASH_SIC_TABLE_SIZE)
+/* Non-secure image SIC tables primary slot */
+#define FLASH_AREA_11_ID            (FLASH_AREA_10_ID + 1)
+#define FLASH_AREA_11_OFFSET        (FLASH_AREA_10_OFFSET + FLASH_AREA_10_SIZE)
+#define FLASH_AREA_11_SIZE          (FLASH_SIC_TABLE_SIZE)
+/* Secure image SIC tables secondary slot */
+#define FLASH_AREA_12_ID            (FLASH_AREA_11_ID + 1)
+#define FLASH_AREA_12_OFFSET        (FLASH_AREA_11_OFFSET + FLASH_AREA_11_SIZE)
+#define FLASH_AREA_12_SIZE          (FLASH_SIC_TABLE_SIZE)
+/* Non-secure image SIC tables secondary slot */
+#define FLASH_AREA_13_ID            (FLASH_AREA_12_ID + 1)
+#define FLASH_AREA_13_OFFSET        (FLASH_AREA_12_OFFSET + FLASH_AREA_12_SIZE)
+#define FLASH_AREA_13_SIZE          (FLASH_SIC_TABLE_SIZE)
+#endif /* RSS_XIP */
+
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
@@ -119,6 +153,19 @@
 #error "Out of Flash memory!"
 #endif
 
+#ifdef RSS_XIP
+#define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_10_ID : \
+                                         ((x) == 1) ? FLASH_AREA_11_ID : \
+                                         ((x) == 2) ? FLASH_AREA_6_ID : \
+                                         ((x) == 3) ? FLASH_AREA_7_ID : \
+                                                      255)
+#define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_12_ID : \
+                                         ((x) == 1) ? FLASH_AREA_13_ID : \
+                                         ((x) == 2) ? FLASH_AREA_8_ID : \
+                                         ((x) == 3) ? FLASH_AREA_9_ID : \
+                                                      255)
+
+#else
 #define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_2_ID : \
                                          ((x) == 1) ? FLASH_AREA_3_ID : \
                                          ((x) == 2) ? FLASH_AREA_6_ID : \
@@ -129,6 +176,7 @@
                                          ((x) == 2) ? FLASH_AREA_8_ID : \
                                          ((x) == 3) ? FLASH_AREA_9_ID : \
                                                       255)
+#endif /* RSS_XIP */
 
 /* Scratch area is not used with RAM loading firmware upgrade */
 #define FLASH_AREA_IMAGE_SCRATCH        255
@@ -141,12 +189,23 @@
                                          SECURE_IMAGE_MAX_SIZE)
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
 
+#ifdef RSS_XIP
+#define S_DATA_SIZE                     (0x18000) /* 96KiB */
+#define NS_DATA_SIZE                    (0x08000) /* 32KiB */
+#else
 #define S_DATA_SIZE                     (0x20000) /* 128KiB */
 #define NS_DATA_SIZE                    (0x20000) /* 128KiB */
+#endif /* RSS_XIP */
 
 /* Image load addresses used by imgtool.py */
+#ifdef RSS_XIP
+#define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S + BOOT_TFM_SHARED_DATA_SIZE)
+#define NS_IMAGE_LOAD_ADDRESS           (S_IMAGE_LOAD_ADDRESS + \
+                                         FLASH_SIC_TABLE_SIZE)
+#else
 #define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S + S_DATA_SIZE)
 #define NS_IMAGE_LOAD_ADDRESS           (VM1_BASE_S + NS_DATA_SIZE)
+#endif
 
 /* Flash device name used by BL2
  * Name is defined in flash driver file: Driver_Flash.c

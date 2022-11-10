@@ -97,13 +97,32 @@ run the following ``srec_cat`` commands::
         <SCP BL1 image> -Binary -offset 0x320000 \
         -o flash.bin -Binary
 
+If XIP mode is enabled, the following ``srec_cat`` command should be run to
+create the flash image::
+
+    srec_cat \
+        bl2_signed.bin -Binary -offset 0x0 \
+        bl2_signed.bin -Binary -offset 0x10000 \
+        tfm_s.bin -Binary -offset 0x020000 \
+        tfm_ns.bin -Binary -offset 0x080000 \
+        tfm_s.bin -Binary -offset 0x0E0000 \
+        tfm_ns.bin -Binary -offset 0x140000 \
+        <Host AP BL1 image> -Binary -offset 0x1A0000 \
+        <SCP BL1 image> -Binary -offset 0x220000 \
+        <Host AP BL1 image>  -Binary -offset 0x2A0000 \
+        <SCP BL1 image> -Binary -offset 0x320000 \
+        tfm_s_sic_tables_signed.bin -Binary -offset 0x3A0000 \
+        tfm_ns_sic_tables_signed.bin -Binary -offset 0x3AA000 \
+        tfm_s_sic_tables_signed.bin -Binary -offset 0x3B4000 \
+        tfm_ns_sic_tables_signed.bin -Binary -offset 0x3BE000 \
+        -o flash.bin -Binary
 
 Once the flash image is created, it can be combined with the host FIP to create
 a combined host flash image::
 
     srec_cat \
             fip-tc.bin -Binary -offset 0x0\
-            flash.bin -Binary -offset 0x00400000 \
+            flash.bin -Binary -offset 0x02200000 \
             -o host_flash.bin -Binary
 
 For development purposes, the OTP image is included as a provisioning bundle in
@@ -114,8 +133,8 @@ with the higher version number.
 
 The ROM binary should be placed in RSS ROM at ``0x11000000`` and the host flash
 binary should be placed at the base of the host flash. For the TC platform,
-this is at ``0x84000000``.
+this is at ``0x08000000``.
 
 --------------
 
-*Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*

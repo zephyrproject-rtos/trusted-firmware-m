@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,9 +107,14 @@
             (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
 /* Secure regions */
-/* Secure Code executes from VM0 */
+/* Secure Code executes from VM0, or XIP from flash via the SIC */
+#ifdef RSS_XIP
+#define S_CODE_START    (RSS_RUNTIME_S_XIP_BASE_S)
+#define S_CODE_SIZE     (FLASH_S_PARTITION_SIZE)
+#else
 #define S_CODE_START    (S_IMAGE_LOAD_ADDRESS + BL2_HEADER_SIZE)
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
+#endif /* RSS_XIP */
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 /* Secure Data stored in VM0. Size defined in flash layout */
@@ -120,19 +125,31 @@
 #define S_CODE_VECTOR_TABLE_SIZE    (0x1C0)
 
 /* Non-secure regions */
-/* Non-Secure Code executes from VM1 */
+/* Non-Secure Code executes from VM1, or XIP from flash via the SIC */
+#ifdef RSS_XIP
+#define NS_CODE_START   (RSS_RUNTIME_NS_XIP_BASE_NS)
+#define NS_CODE_SIZE    (FLASH_NS_PARTITION_SIZE)
+#else
 #define NS_CODE_START   (VM1_BASE_NS + NS_DATA_SIZE + BL2_HEADER_SIZE)
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
+#endif /* RSS_XIP */
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-/* Non-Secure Data stored in VM1. */
+/* Non-Secure Data stored after secure data, or in VM1. */
+#ifdef RSS_XIP
+#define NS_DATA_START   (VM0_BASE_NS + S_DATA_SIZE)
+#else
 #define NS_DATA_START   (VM1_BASE_NS)
+#endif
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for MPC and SAU configuration */
+#ifdef RSS_XIP
+#define NS_PARTITION_START RSS_RUNTIME_NS_XIP_BASE_NS
+#else
 #define NS_PARTITION_START (NS_CODE_START)
-#define NS_PARTITION_SIZE (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE \
-                           - BL2_TRAILER_SIZE)
+#endif /* RSS_XIP */
+#define NS_PARTITION_SIZE (NS_CODE_SIZE)
 
 #define SECONDARY_PARTITION_START (FWU_HOST_IMAGE_BASE_S)
 #define SECONDARY_PARTITION_SIZE (0x100000)

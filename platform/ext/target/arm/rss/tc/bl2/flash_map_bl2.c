@@ -23,6 +23,36 @@ const ARM_DRIVER_FLASH *flash_driver[] = {
 const int flash_driver_entry_num = ARRAY_SIZE(flash_driver);
 
 const struct flash_area flash_map[] = {
+#ifdef RSS_XIP
+    {
+        .fa_id = FLASH_AREA_10_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_10_OFFSET,
+        .fa_size = FLASH_AREA_10_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_11_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_11_OFFSET,
+        .fa_size = FLASH_AREA_11_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_12_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_12_OFFSET,
+        .fa_size = FLASH_AREA_12_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_13_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_13_OFFSET,
+        .fa_size = FLASH_AREA_13_SIZE,
+    },
+#else
     {
         .fa_id = FLASH_AREA_2_ID,
         .fa_device_id = FLASH_DEVICE_ID,
@@ -51,6 +81,7 @@ const struct flash_area flash_map[] = {
         .fa_off = FLASH_AREA_5_OFFSET,
         .fa_size = FLASH_AREA_5_SIZE,
     },
+#endif /* RSS_XIP */
     {
         .fa_id = FLASH_AREA_6_ID,
         .fa_device_id = FLASH_DEVICE_ID,

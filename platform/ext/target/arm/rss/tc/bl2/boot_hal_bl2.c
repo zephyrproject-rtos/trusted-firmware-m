@@ -14,6 +14,7 @@
 #endif /* PLATFORM_HAS_BOOT_DMA */
 #include "flash_layout.h"
 #include "bootutil/bootutil_log.h"
+#include "bootutil/bootutil.h"
 #include "device_definition.h"
 #include "host_base_address.h"
 #include "platform_base_address.h"
@@ -26,10 +27,13 @@
 #include "bl2_image_id.h"
 #include "Driver_Flash.h"
 #include "host_flash_atu.h"
+#include "sic_boot.h"
 
 #ifdef FLASH_DEV_NAME
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 #endif /* FLASH_DEV_NAME */
+
+extern struct boot_rsp rsp;
 
 int32_t boot_platform_post_init(void)
 {
@@ -72,6 +76,13 @@ int32_t boot_platform_post_init(void)
     BOOT_LOG_INF("DMA350 driver initialized successfully.");
 #endif /* PLATFORM_HAS_BOOT_DMA */
 
+#ifdef RSS_XIP
+    result = sic_boot_init();
+    if (result) {
+        return result;
+    }
+#endif /* RSS_XIP */
+
     return 0;
 }
 
@@ -82,7 +93,14 @@ int boot_platform_pre_load(uint32_t image_id)
 
 int boot_platform_post_load(uint32_t image_id)
 {
-    enum atu_error_t err;
+    int err;
+
+#ifdef RSS_XIP
+    err = sic_boot_post_load(image_id, rsp.br_image_off);
+    if (err) {
+        return err;
+    }
+#endif /* RSS_XIP */
 
     if (image_id == RSS_BL2_IMAGE_SCP) {
         uint32_t channel_stat = 0;
@@ -119,4 +137,72 @@ int boot_platform_post_load(uint32_t image_id)
     }
 
     return 0;
+}
+
+void boot_platform_quit(struct boot_arm_vector_table *vt)
+{
+    /* Clang at O0, stores variables on the stack with SP relative addressing.
+     * When manually set the SP then the place of reset vector is lost.
+     * Static variables are stored in 'data' or 'bss' section, change of SP has
+     * no effect on them.
+     */
+    static struct boot_arm_vector_table *vt_cpy;
+    int32_t result;
+
+    vt_cpy = vt;
+
+#ifdef RSS_XIP
+    result = sic_boot_pre_quit(&vt_cpy);
+    if (result) {
+        while(1){}
+    }
+#endif /* RSS_XIP */
+
+#ifdef CRYPTO_HW_ACCELERATOR
+    result = crypto_hw_accelerator_finish();
+    if (result) {
+        while(1){}
+    }
+#endif /* CRYPTO_HW_ACCELERATOR */
+
+#ifdef FLASH_DEV_NAME
+    result = FLASH_DEV_NAME.Uninitialize();
+    if (result != ARM_DRIVER_OK) {
+        while(1){}
+    }
+#endif /* FLASH_DEV_NAME */
+#ifdef FLASH_DEV_NAME_2
+    result = FLASH_DEV_NAME_2.Uninitialize();
+    if (result != ARM_DRIVER_OK) {
+        while(1){}
+    }
+#endif /* FLASH_DEV_NAME_2 */
+#ifdef FLASH_DEV_NAME_3
+    result = FLASH_DEV_NAME_3.Uninitialize();
+    if (result != ARM_DRIVER_OK) {
+        while(1){}
+    }
+#endif /* FLASH_DEV_NAME_3 */
+#ifdef FLASH_DEV_NAME_SCRATCH
+    result = FLASH_DEV_NAME_SCRATCH.Uninitialize();
+    if (result != ARM_DRIVER_OK) {
+        while(1){}
+    }
+#endif /* FLASH_DEV_NAME_SCRATCH */
+
+#if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
+ || defined(__ARM_ARCH_8_1M_MAIN__)
+    /* Restore the Main Stack Pointer Limit register's reset value
+     * before passing execution to runtime firmware to make the
+     * bootloader transparent to it.
+     */
+    __set_MSPLIM(0);
+#endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
+       || defined(__ARM_ARCH_8_1M_MAIN__) */
+
+    __set_MSP(vt_cpy->msp);
+    __DSB();
+    __ISB();
+
+    boot_jump_to_next_image(vt_cpy->reset);
 }

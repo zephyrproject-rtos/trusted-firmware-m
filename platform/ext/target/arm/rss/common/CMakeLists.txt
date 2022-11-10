@@ -18,6 +18,11 @@ target_include_directories(platform_region_defs
         cc312
 )
 
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        $<$<BOOL:${RSS_XIP}>:RSS_XIP>
+)
+
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.

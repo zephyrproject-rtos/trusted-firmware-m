@@ -23,6 +23,8 @@ __PACKED_STRUCT bl2_assembly_and_test_provisioning_data_t {
     uint8_t bl2_rotpk_1[32];
     uint8_t bl2_rotpk_2[32];
     uint8_t bl2_rotpk_3[32];
+    uint8_t s_image_encryption_key[32];
+    uint8_t ns_image_encryption_key[32];
 
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
     uint8_t secure_debug_pk[32];
@@ -94,6 +96,21 @@ static const struct bl2_assembly_and_test_provisioning_data_t bl2_assembly_and_t
 #error "No public key available for given signing algorithm."
 #endif /* MCUBOOT_SIGN_RSA_LEN */
 
+    /* Secure image encryption key; */
+    {
+        0xfc, 0x57, 0x01, 0xdc, 0x61, 0x35, 0xe1, 0x32,
+        0x38, 0x47, 0xbd, 0xc4, 0x0f, 0x04, 0xd2, 0xe5,
+        0xbe, 0xe5, 0x83, 0x3b, 0x23, 0xc2, 0x9f, 0x93,
+        0x59, 0x3d, 0x00, 0x01, 0x8c, 0xfa, 0x99, 0x94,
+    },
+    /* Non-secure image encryption key; */
+    {
+        0xfc, 0x57, 0x01, 0xdc, 0x61, 0x35, 0xe1, 0x32,
+        0x38, 0x47, 0xbd, 0xc4, 0x0f, 0x04, 0xd2, 0xe5,
+        0xbe, 0xe5, 0x83, 0x3b, 0x23, 0xc2, 0x9f, 0x93,
+        0x59, 0x3d, 0x00, 0x01, 0x8c, 0xfa, 0x99, 0x94,
+    },
+
 #ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
     {
         0xf4, 0x0c, 0x8f, 0xbf, 0x12, 0xdb, 0x78, 0x2a,
@@ -163,6 +180,19 @@ enum tfm_plat_err_t provision_assembly_and_test(void)
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_3,
                              sizeof(bl2_assembly_and_test_prov_data.bl2_rotpk_3),
                              bl2_assembly_and_test_prov_data.bl2_rotpk_3);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+
+    err = tfm_plat_otp_write(PLAT_OTP_ID_KEY_SECURE_ENCRYPTION,
+                             sizeof(bl2_assembly_and_test_prov_data.s_image_encryption_key),
+                             bl2_assembly_and_test_prov_data.s_image_encryption_key);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+    err = tfm_plat_otp_write(PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION,
+                             sizeof(bl2_assembly_and_test_prov_data.ns_image_encryption_key),
+                             bl2_assembly_and_test_prov_data.ns_image_encryption_key);
     if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
         return err;
     }

@@ -17,7 +17,12 @@
 #ifndef __RSS_MEMORY_SIZES_H__
 #define __RSS_MEMORY_SIZES_H__
 
+#ifdef RSS_XIP
+#define VM0_SIZE                         0x00010000 /* 64 KiB */
+#define VM1_SIZE                         0x00010000 /* 64 KiB */
+#else
 #define VM0_SIZE                         0x00080000 /* 512 KiB */
 #define VM1_SIZE                         0x00080000 /* 512 KiB */
+#endif /* RSS_XIP */
 
 #endif /* __RSS_MEMORY_SIZES_H__ */

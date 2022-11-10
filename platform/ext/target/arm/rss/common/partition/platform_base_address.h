@@ -145,6 +145,12 @@
 #define FWU_HOST_IMAGE_BASE_S            (HOST_ACCESS_BASE_S + 0x000000) /* Region to allow writing new RSS FW images */
 #define HOST_COMMS_MAPPABLE_BASE_S       (HOST_ACCESS_BASE_S + 0x100000) /* Region into which to map host comms pointers */
 
+/* SIC regions open in BL2 and runtime */
+#define RSS_RUNTIME_S_XIP_BASE_S         SIC_HOST_BASE_S              /* RSS runtime secure image XIP secure address */
+#define RSS_RUNTIME_NS_XIP_BASE_S        (SIC_HOST_BASE_S + 0x060000) /* RSS runtime non-secure image XIP secure address */
+
+#define RSS_RUNTIME_NS_XIP_BASE_NS       (SIC_HOST_BASE_NS + 0x060000) /* RSS runtime non-secure image XIP non-secure address */
+
 /* Memory map addresses exempt from memory attribution by both the SAU and IDAU */
 #define RSS_EWIC_BASE                    0xE0047000 /* External Wakeup Interrupt Controller
                                                      * Access from Non-secure software is only allowed
