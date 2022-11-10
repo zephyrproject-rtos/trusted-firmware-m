@@ -126,6 +126,10 @@ endif()
 if (TFM_PARTITION_NS_AGENT_TZ)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
+    if (CONFIG_TFM_CONNECTION_BASED_SERVICE_API)
+        install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_connection_api.c
+                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
+    endif()
 endif()
 
 if (CONFIG_TFM_USE_TRUSTZONE)
