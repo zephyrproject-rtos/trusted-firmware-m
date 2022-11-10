@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
 
-#include "platform_base_address.h"
+#include "host_base_address.h"
 
 /* Flash layout on RSS with BL2 (multiple image boot):
  *
@@ -41,12 +41,13 @@
  * with comment.
  */
 
+
 /* Size of a Secure and of a Non-secure image */
-#define FLASH_BL2_PARTITION_SIZE        (0x20000) /* BL2 partition: 128 KB */
-#define FLASH_S_PARTITION_SIZE          (0x80000) /* S   partition: 512 KB */
-#define FLASH_NS_PARTITION_SIZE         (0x80000) /* NS  partition: 512 KB */
-#define FLASH_AP_PARTITION_SIZE         (0x80000) /* AP  partition: 512 KB */
-#define FLASH_SCP_PARTITION_SIZE        (0x80000) /* SCP partition: 512 KB */
+#define FLASH_BL2_PARTITION_SIZE        (0x10000) /* BL2 partition: 128 KiB */
+#define FLASH_S_PARTITION_SIZE          (0x60000) /* S   partition: 384 KiB */
+#define FLASH_NS_PARTITION_SIZE         (0x60000) /* NS  partition: 384 KiB */
+#define FLASH_AP_PARTITION_SIZE         (0x80000) /* AP  partition: 512 KiB */
+#define FLASH_SCP_PARTITION_SIZE        (0x80000) /* SCP partition: 512 KiB */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
@@ -55,11 +56,9 @@
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)    /* 4 KB */
 /* Same as FLASH0_SIZE */
-#define FLASH_TOTAL_SIZE                (VM0_SIZE)  /* 8 MB */
+#define FLASH_TOTAL_SIZE                (0xFC00000)  /* 252 MiB */
 
-/* Flash layout info for BL2 bootloader */
-/* Same as FLASH0_BASE_S */
-#define FLASH_BASE_ADDRESS              (VM0_BASE_S)
+#define FLASH_BASE_ADDRESS              (HOST_FLASH0_BASE_S)
 
 /* Offset and size definitions of the flash partitions that are handled by the
  * bootloader. The image swapping is done between IMAGE_PRIMARY and
@@ -76,19 +75,19 @@
 #define FLASH_AREA_1_OFFSET        (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
 #define FLASH_AREA_1_SIZE          (FLASH_BL2_PARTITION_SIZE)
 
-/* Secure image primary slot */
+/* Secure image primary slot. */
 #define FLASH_AREA_2_ID            (FLASH_AREA_1_ID + 1)
 #define FLASH_AREA_2_OFFSET        (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
 #define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE)
-/* Non-secure image primary slot */
+/* Non-secure image primary slot. */
 #define FLASH_AREA_3_ID            (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
 #define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
-/* Secure image secondary slot */
+/* Secure image secondary slot. */
 #define FLASH_AREA_4_ID            (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_4_OFFSET        (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
 #define FLASH_AREA_4_SIZE          (FLASH_S_PARTITION_SIZE)
-/* Non-secure image secondary slot */
+/* Non-secure image secondary slot. */
 #define FLASH_AREA_5_ID            (FLASH_AREA_4_ID + 1)
 #define FLASH_AREA_5_OFFSET        (FLASH_AREA_4_OFFSET + FLASH_AREA_4_SIZE)
 #define FLASH_AREA_5_SIZE          (FLASH_NS_PARTITION_SIZE)
@@ -109,6 +108,7 @@
 #define FLASH_AREA_9_ID            (FLASH_AREA_8_ID + 1)
 #define FLASH_AREA_9_OFFSET        (FLASH_AREA_8_OFFSET + FLASH_AREA_8_SIZE)
 #define FLASH_AREA_9_SIZE          (FLASH_SCP_PARTITION_SIZE)
+
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
@@ -141,16 +141,20 @@
                                          SECURE_IMAGE_MAX_SIZE)
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
 
+#define S_DATA_SIZE                     (0x20000) /* 128KiB */
+#define NS_DATA_SIZE                    (0x20000) /* 128KiB */
+
 /* Image load addresses used by imgtool.py */
-#define S_IMAGE_LOAD_ADDRESS            (VM1_BASE_S)
-#define NS_IMAGE_LOAD_ADDRESS           (S_IMAGE_LOAD_ADDRESS + \
-                                         SECURE_IMAGE_MAX_SIZE)
+#define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S + S_DATA_SIZE)
+#define NS_IMAGE_LOAD_ADDRESS           (VM1_BASE_S + NS_DATA_SIZE)
 
 /* Flash device name used by BL2
  * Name is defined in flash driver file: Driver_Flash.c
  */
+#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 #define FLASH_DEV_NAME Driver_FLASH0
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_FLASH_PROGRAM_UNIT      (0x1)
+#endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
 #endif /* __FLASH_LAYOUT_H__ */

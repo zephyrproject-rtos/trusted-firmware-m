@@ -125,6 +125,7 @@ SECTIONS
     Image$$SHARED_DATA$$RW$$Base = ADDR(.tfm_bl2_shared_data);
     Image$$SHARED_DATA$$RW$$Limit = ADDR(.tfm_bl2_shared_data) + SIZEOF(.tfm_bl2_shared_data);
 
+    . = BL1_1_DATA_START;
     Image$$BL1_1_ER_DATA_START$$Base = .;
     .data : AT (__etext)
     {

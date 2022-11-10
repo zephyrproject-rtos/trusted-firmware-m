@@ -22,12 +22,14 @@
 #ifndef __PLATFORM_BASE_ADDRESS_H__
 #define __PLATFORM_BASE_ADDRESS_H__
 
+#include "rss_memory_sizes.h"
+
 /* ======= Defines peripherals memory map addresses ======= */
 /* Non-secure memory map addresses */
 #define ITCM_BASE_NS                     0x00000000 /* Instruction TCM Non-Secure base address */
 #define DTCM_BASE_NS                     0x20000000 /* Data TCM Non-Secure base address */
 #define VM0_BASE_NS                      0x21000000 /* Volatile Memory 0 Non-Secure base address */
-#define VM1_BASE_NS                      0x21800000 /* Volatile Memory 1 Non-Secure base address */
+#define VM1_BASE_NS                      (VM0_BASE_NS + VM0_SIZE) /* Volatile Memory 1 Secure base address */
 /* Non-Secure Private CPU region */
 #define CPU0_PWRCTRL_BASE_NS             0x40012000 /* CPU 0 Power Control Block Non-Secure base address */
 #define CPU0_IDENTITY_BASE_NS            0x4001F000 /* CPU 0 Identity Block Non-Secure base address */
@@ -73,7 +75,7 @@
 #define ROM_BASE_S                       0x11000000 /* CODE ROM Secure base address. No NS alias for ROM */
 #define DTCM_BASE_S                      0x30000000 /* Data TCM Secure base address */
 #define VM0_BASE_S                       0x31000000 /* Volatile Memory 0 Secure base address */
-#define VM1_BASE_S                       0x31800000 /* Volatile Memory 1 Secure base address */
+#define VM1_BASE_S                       (VM0_BASE_S + VM0_SIZE) /* Volatile Memory 1 Secure base address */
 /* Secure Private CPU region */
 #define CPU0_SECCTRL_BASE_S              0x50011000 /* CPU 0 Local Security Control Block Secure base address */
 #define CPU0_PWRCTRL_BASE_S              0x50012000 /* CPU 0 Power Control Block Secure base address */
@@ -142,8 +144,6 @@
 #define ITCM_SIZE                        0x00008000 /* 32 kB */
 #define ROM_SIZE                         0x00020000 /* 128 kB */
 #define DTCM_SIZE                        0x00008000 /* 32 kB */
-#define VM0_SIZE                         0x00800000 /* 8 MB */
-#define VM1_SIZE                         0x00800000 /* 8 MB */
 #define HOST_ACCESS_SIZE                 0x10000000 /* 256 MB */
 
 /* Defines for Driver MPC's */

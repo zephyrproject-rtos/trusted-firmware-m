@@ -329,15 +329,11 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
 
-    /* VM0 is allocated for NS data, so whole range is set to non-secure
-     * accesible. */
     ret = Driver_VM0_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_VM0_MPC.ConfigRegion(NS_DATA_START,
-                                      NS_DATA_LIMIT,
-                                      ARM_MPC_ATTR_NONSECURE);
+    ret = Driver_VM1_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -345,7 +341,10 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     /* Configuring primary non-secure partition.
      * It is ensured in flash_layout.h that these memory regions are located in
      * VM1 SRAM device. */
-    ret = Driver_VM1_MPC.Initialize();
+
+    ret = Driver_VM1_MPC.ConfigRegion(NS_DATA_START,
+                                      NS_DATA_LIMIT,
+                                      ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }

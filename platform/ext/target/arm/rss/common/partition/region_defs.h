@@ -20,6 +20,47 @@
 #include "flash_layout.h"
 #include "platform_base_address.h"
 
+/* RSS memory layout is as follows during BL1
+ *     |---------------------------------------------------------
+ * VM0 | BOOT_SHARED  | BL1_2_CODE | BL1_1_DATA  | BL1_2_DATA   |
+ *     |---------------------------------------------------------
+ *     |---------------------------------------------------------
+ * VM1 | BL2_CODE                                               |
+ *     |---------------------------------------------------------
+ *
+ * If the size of VM0 and VM1 are larger than 64KiB, the size of BL1 code/data
+ * and BL2 code can be increased to fill the extra space.
+ *
+ * RSS memory layout is as follows during BL2
+ *     |---------------------------------------------------------
+ * VM0 | BOOT_SHARED  | ?XIP tables | BL2_DATA                  |
+ *     |---------------------------------------------------------
+ *     |---------------------------------------------------------
+ * VM1 | BL2_CODE                                               |
+ *     |---------------------------------------------------------
+ *
+ * If the size of VM0 and VM1 are larger than 64KiB, the size of BL2 code and
+ * data can be increased to fill the extra space.
+ *
+ * RSS memory layout is as follows during Runtime with XIP mode enabled
+ *     |---------------------------------------------------------
+ * VM0 | BOOT_SHARED+S_DATA                                     |
+ *     |---------------------------------------------------------
+ *     |---------------------------------------------------------
+ * VM1 | S_DATA                     | NS_DATA                   |
+ *     |---------------------------------------------------------
+ *
+ * RSS memory layout is as follows during Runtime with XIP mode disabled. Note
+ * that each SRAM must be at least 512KiB in this mode (64KiB data and 384KiB
+ * code, for each of secure and non-secure).
+ *     |-----------------------------------------------------------------------|
+ * VM0 | BOOT_SHARED+S_DATA | S_CODE                                           |
+ *     |-----------------------------------------------------------------------|
+ *     |-----------------------------------------------------------------------|
+ * VM1 | NS_DATA            | NS_CODE                                          |
+ *     |-----------------------------------------------------------------------|
+ */
+
 #define BL1_1_HEAP_SIZE         (0x0001000)
 #define BL1_1_MSP_STACK_SIZE    (0x0001800)
 
@@ -66,14 +107,13 @@
             (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE - BL2_TRAILER_SIZE)
 
 /* Secure regions */
-/* Secure Code executes from VM1 */
+/* Secure Code executes from VM0 */
 #define S_CODE_START    (S_IMAGE_LOAD_ADDRESS + BL2_HEADER_SIZE)
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
-/* Secure Data stored in VM0 */
-#define S_DATA_START    (VM0_BASE_S + 0x500000)
-#define S_DATA_SIZE     (0x100000)
+/* Secure Data stored in VM0. Size defined in flash layout */
+#define S_DATA_START    (VM0_BASE_S)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 /* Size of vector table: 111 interrupt handlers + 4 bytes MSP initial value */
@@ -81,25 +121,21 @@
 
 /* Non-secure regions */
 /* Non-Secure Code executes from VM1 */
-#define NS_CODE_START   (VM1_BASE_NS + SECURE_IMAGE_MAX_SIZE + BL2_HEADER_SIZE)
+#define NS_CODE_START   (VM1_BASE_NS + NS_DATA_SIZE + BL2_HEADER_SIZE)
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-/* Non-Secure Data stored in VM0 */
-#define NS_DATA_START   (VM0_BASE_NS + 0x600000)
-#define NS_DATA_SIZE    (0x100000)
+/* Non-Secure Data stored in VM1. */
+#define NS_DATA_START   (VM1_BASE_NS)
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for MPC and SAU configuration */
-#define NS_PARTITION_START \
-            (VM1_BASE_NS + SECURE_IMAGE_MAX_SIZE)
-#define NS_PARTITION_SIZE (FLASH_NS_PARTITION_SIZE)
+#define NS_PARTITION_START (NS_CODE_START)
+#define NS_PARTITION_SIZE (FLASH_NS_PARTITION_SIZE - BL2_HEADER_SIZE \
+                           - BL2_TRAILER_SIZE)
 
-/* Secondary partition for new images in case of firmware upgrade */
-#define SECONDARY_PARTITION_START \
-            (VM0_BASE_NS + S_IMAGE_SECONDARY_PARTITION_OFFSET)
-#define SECONDARY_PARTITION_SIZE (FLASH_S_PARTITION_SIZE + \
-                                  FLASH_NS_PARTITION_SIZE)
+#define SECONDARY_PARTITION_START (FWU_HOST_IMAGE_BASE_S)
+#define SECONDARY_PARTITION_SIZE (0x100000)
 
 /* Bootloader regions */
 /* BL1_1 is XIP from ROM */
@@ -111,19 +147,19 @@
 #define PROVISIONING_DATA_SIZE  (0x2400) /* 9 KB */
 #define PROVISIONING_DATA_LIMIT (PROVISIONING_DATA_START + PROVISIONING_DATA_SIZE - 1)
 
-/* BL1_2 executes from VM1 */
-#define BL1_2_CODE_START  (NS_IMAGE_LOAD_ADDRESS + NON_SECURE_IMAGE_MAX_SIZE)
-#define BL1_2_CODE_SIZE   (0x2000) /* 8 KB */
+/* BL1_2 executes from VM0, leaving space for the shared data */
+#define BL1_2_CODE_START  (VM0_BASE_S + BOOT_TFM_SHARED_DATA_SIZE)
+#define BL1_2_CODE_SIZE   (0x2000) /* 8 KiB */
 #define BL1_2_CODE_LIMIT  (BL1_2_CODE_START + BL1_2_CODE_SIZE - 1)
 
-/* BL2 executes from VM1, and is positioned directly after BL1_2 */
-#define BL2_IMAGE_START   (BL1_2_CODE_START + BL1_2_CODE_SIZE)
+/* BL2 executes from VM1 */
+#define BL2_IMAGE_START   (VM1_BASE_S)
 #define BL2_CODE_START    (BL2_IMAGE_START + BL1_HEADER_SIZE)
 #define BL2_CODE_SIZE     (IMAGE_BL2_CODE_SIZE)
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
-/* Bootloader uses same memory as for secure image */
-#define BL1_1_DATA_START  (S_DATA_START)
+/* BL1 data is in VM0 */
+#define BL1_1_DATA_START  (BL1_2_CODE_START + BL1_2_CODE_SIZE)
 #define BL1_1_DATA_SIZE   (0x4000) /* 16 KB */
 #define BL1_1_DATA_LIMIT  (BL1_1_DATA_START + BL1_1_DATA_SIZE - 1)
 
@@ -131,15 +167,20 @@
 #define BL1_2_DATA_SIZE   (0x4000) /* 16 KB */
 #define BL1_2_DATA_LIMIT  (BL1_2_DATA_START + BL1_2_DATA_SIZE - 1)
 
-#define BL2_DATA_START    (S_DATA_START)
+/* XIP data go after the reserved space for boot_data */
+#define BL2_XIP_TABLES_START (VM0_BASE_S + BOOT_TFM_SHARED_DATA_SIZE)
+#define BL2_XIP_TABLES_SIZE  (0x5000) /* 20 KiB */
+#define BL2_XIP_TABLES_LIMIT (BL2_XIP_TABLES_START + BL2_XIP_TABLES_SIZE - 1)
+
+/* BL2 data is in VM0, in the same space as BL1 data */
+#define BL2_DATA_START    (BL2_XIP_TABLES_START + BL2_XIP_TABLES_SIZE)
 #define BL2_DATA_SIZE     (0x8000) /* 32 KB */
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
-/* Shared data area between bootloader and runtime firmware.
- * Shared data area is allocated at the beginning of the RAM, it is overlapping
- * with TF-M Secure code's MSP stack
+/* Store boot data is in the start of VM0. It overlaps with the secure data
+ * region
  */
-#define BOOT_TFM_SHARED_DATA_BASE S_DATA_START
+#define BOOT_TFM_SHARED_DATA_BASE VM0_BASE_S
 #define BOOT_TFM_SHARED_DATA_SIZE (0x400)
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
