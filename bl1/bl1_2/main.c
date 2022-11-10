@@ -150,14 +150,14 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
      * values to a sensible range. In this case, we choose 1024 as the bound as
      * it is the same as the max amount of signatures as a H=10 LMS key.
      */
-    if (image_to_decrypt->protected_values.security_counter >= 1024) {
+    if (image_after_decrypt->protected_values.security_counter >= 1024) {
         FIH_RET(FIH_FAILURE);
     }
 
     /* The image security counter is used as a KDF input */
     rc = bl1_derive_key(TFM_BL1_KEY_BL2_ENCRYPTION, label, sizeof(label),
-                        (uint8_t *)&image_to_decrypt->protected_values.security_counter,
-                        sizeof(image_to_decrypt->protected_values.security_counter),
+                        (uint8_t *)&image_after_decrypt->protected_values.security_counter,
+                        sizeof(image_after_decrypt->protected_values.security_counter),
                         key_buf, sizeof(key_buf));
     if (rc) {
         FIH_RET(fih_int_encode_zero_equality(rc));
