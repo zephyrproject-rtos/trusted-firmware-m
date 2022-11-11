@@ -374,16 +374,18 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
                                     uintptr_t *p_boundary)
 {
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
     uint32_t i, j;
+    struct platform_data_t *plat_data_ptr;
+    fih_int fih_rc = FIH_FAILURE;
+#endif /* CONFIG_TFM_MMIO_REGION_ENABLE == 1 */
     bool privileged;
     bool ns_agent;
     uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
-    struct platform_data_t *plat_data_ptr;
 #if TFM_LVL == 2
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
-    fih_int fih_rc = FIH_FAILURE;
 
     if (!p_ldinf || !p_boundary) {
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
