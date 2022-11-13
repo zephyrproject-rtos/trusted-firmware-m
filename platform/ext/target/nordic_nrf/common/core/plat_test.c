@@ -91,27 +91,3 @@ void tfm_plat_test_non_secure_timer_stop(void)
 {
     timer_stop(NRF_TIMER1);
 }
-
-#ifdef PSA_API_TEST_ENABLED
-uint32_t pal_nvmem_get_addr(void)
-{
-#ifdef NRF_TRUSTZONE_NONSECURE
-    static bool psa_scratch_initialized = false;
-
-    if (!psa_scratch_initialized) {
-        uint32_t reset_reason = nrfx_reset_reason_get();
-        nrfx_reset_reason_clear(reset_reason);
-
-        int is_pinreset = reset_reason & NRFX_RESET_REASON_RESETPIN_MASK;
-        if ((reset_reason == 0) || is_pinreset){
-            /* PSA API tests expect this area to be initialized to all 0xFFs
-             * after a power-on or pin reset.
-             */
-            memset((void*)PSA_TEST_SCRATCH_AREA_BASE, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
-        }
-        psa_scratch_initialized = true;
-    }
-#endif /* NRF_TRUSTZONE_NONSECURE */
-    return (uint32_t)PSA_TEST_SCRATCH_AREA_BASE;
-}
-#endif /* PSA_API_TEST_ENABLED */
