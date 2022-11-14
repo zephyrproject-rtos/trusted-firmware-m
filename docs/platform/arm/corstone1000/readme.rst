@@ -78,7 +78,7 @@ FVP
 
 .. code-block:: bash
 
-    cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITES_PATHS=<tf-m-root>/trusted-firmware-m/platform/ext/target/arm/corstone1000/ci_regression_tests/
+    cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=<tf-m-root>/trusted-firmware-m/platform/ext/target/arm/corstone1000/ci_regression_tests/
     cmake --build build -- install
     cd ./build/install/outputs/
     cat bl2_signed.bin bl2_signed.bin tfm_s_signed.bin > cs1000.bin
@@ -94,7 +94,7 @@ FPGA
 
 .. code-block:: bash
 
-    cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITES_PATHS=<tf-m-root>/trusted-firmware-m/platform/ext/target/arm/corstone1000/ci_regression_tests/ -DTEST_S_PS=OFF -DTEST_S_PLATFORM=OFF
+    cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=<tf-m-root>/trusted-firmware-m/platform/ext/target/arm/corstone1000/ci_regression_tests/ -DTEST_S_PS=OFF -DTEST_S_PLATFORM=OFF
     cmake --build build -- install
     cd ./build/install/outputs/
     cat bl2_signed.bin bl2_signed.bin tfm_s_signed.bin > cs1000.bin

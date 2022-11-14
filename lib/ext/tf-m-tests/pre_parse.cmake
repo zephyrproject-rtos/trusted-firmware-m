@@ -36,10 +36,10 @@ endforeach()
 # By default EXTRA_<NS/S>_TEST_SUITES_PATHS is not set, extra test is also an
 # out-of-tree build regression test, and if they are enabled,
 # TFM_<NS/S>_REG_TEST will be enabled.
-if (EXTRA_NS_TEST_SUITES_PATHS)
+if (EXTRA_NS_TEST_SUITE_PATH)
     set(TFM_NS_REG_TEST ON)
 endif()
 
-if (EXTRA_S_TEST_SUITES_PATHS)
+if (EXTRA_S_TEST_SUITE_PATH)
     set(TFM_S_REG_TEST ON)
 endif()
