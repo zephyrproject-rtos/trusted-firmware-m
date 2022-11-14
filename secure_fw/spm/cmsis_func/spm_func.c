@@ -87,11 +87,11 @@ void tfm_spm_seal_psp_stacks(void)
      * Seal the ER_INITIAL_PSP by writing the seal value to the reserved
      * region.
      */
-    uint32_t *arm_lib_stck_seal_base =
-        ((uint32_t *)&REGION_NAME(Image$$, ER_INITIAL_PSP_SEAL, $$ZI$$Base)[-1]) - 2;
+    uint32_t *arm_lib_stack_seal_base =
+        (uint32_t *)&REGION_NAME(Image$$, ER_INITIAL_PSP_SEAL, $$ZI$$Base);
 
-    *(arm_lib_stck_seal_base) = TFM_STACK_SEAL_VALUE;
-    *(arm_lib_stck_seal_base + 1) = TFM_STACK_SEAL_VALUE;
+    *(arm_lib_stack_seal_base) = TFM_STACK_SEAL_VALUE;
+    *(arm_lib_stack_seal_base + 1) = TFM_STACK_SEAL_VALUE;
 }
 
 /*
