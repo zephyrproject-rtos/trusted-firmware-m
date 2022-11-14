@@ -22,6 +22,7 @@
 #include "crypto_hw.h"
 #include "fih.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
+#include "bl2_image_id.h"
 
 int32_t boot_platform_post_init(void)
 {
@@ -71,7 +72,7 @@ int boot_platform_pre_load(uint32_t image_id)
 {
     enum atu_error_t err;
 
-    if (image_id == 3) {
+    if (image_id == RSS_BL2_IMAGE_SCP) {
         /* Initialize SCP ATU region */
         err = atu_initialize_region(&ATU_DEV_S, 0, HOST_BOOT1_LOAD_BASE_S,
                                     SCP_BL1_SRAM_BASE, SCP_BL1_SIZE);
@@ -79,7 +80,7 @@ int boot_platform_pre_load(uint32_t image_id)
             return 1;
         }
 
-    } else if (image_id == 2) {
+    } else if (image_id == RSS_BL2_IMAGE_AP) {
         /* Initialize AP ATU region */
         err = atu_initialize_region(&ATU_DEV_S, 0, HOST_BOOT0_LOAD_BASE_S,
                                     AP_BL1_SRAM_BASE, AP_BL1_SIZE);
@@ -95,8 +96,7 @@ int boot_platform_post_load(uint32_t image_id)
 {
     enum atu_error_t err;
 
-    /* FIXME: provide enum for image_ids */
-    if (image_id == 3) {
+    if (image_id == RSS_BL2_IMAGE_SCP) {
         uint32_t channel_stat = 0;
         struct rss_sysctrl_t *sysctrl =
                                      (struct rss_sysctrl_t *)RSS_SYSCTRL_BASE_S;
@@ -124,7 +124,7 @@ int boot_platform_post_load(uint32_t image_id)
         }
         BOOT_LOG_INF("Got SCP BL1 started event");
 
-    } else if (image_id == 2) {
+    } else if (image_id == RSS_BL2_IMAGE_AP) {
         /* Close AP ATU region */
         err = atu_uninitialize_region(&ATU_DEV_S, 0);
         if (err != ATU_ERR_NONE) {

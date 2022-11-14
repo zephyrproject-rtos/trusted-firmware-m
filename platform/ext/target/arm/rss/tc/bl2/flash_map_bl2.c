@@ -9,6 +9,7 @@
 #include "target.h"
 #include "Driver_Flash.h"
 #include "host_base_address.h"
+#include "bl2_image_id.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 
@@ -88,19 +89,19 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
 {
     int rc = -1;
 
-    if (image_id == 0) {
+    if (image_id == RSS_BL2_IMAGE_S) {
         *exec_ram_start = S_IMAGE_LOAD_ADDRESS;
         *exec_ram_size  = SECURE_IMAGE_MAX_SIZE;
         rc = 0;
-    } else if (image_id == 1) {
+    } else if (image_id == RSS_BL2_IMAGE_NS) {
         *exec_ram_start = NS_IMAGE_LOAD_ADDRESS;
         *exec_ram_size  = NON_SECURE_IMAGE_MAX_SIZE;
         rc = 0;
-    } else if (image_id == 2) {
+    } else if (image_id == RSS_BL2_IMAGE_AP) {
         *exec_ram_start = HOST_BOOT0_LOAD_BASE_S;
         *exec_ram_size  = AP_BL1_SIZE;
         rc = 0;
-    } else if (image_id == 3) {
+    } else if (image_id == RSS_BL2_IMAGE_SCP) {
         *exec_ram_start = HOST_BOOT1_LOAD_BASE_S;
         *exec_ram_size  = SCP_BL1_SIZE;
         rc = 0;
