@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -487,3 +487,82 @@ struct tgu_armv8_m_dev_t TGU_ARMV8_M_DTCM_DEV_S = {
     &(TGU_ARMV8_M_DTCM_DEV_CFG_S),
     &(TGU_ARMV8_M_DTCM_DEV_DATA_S),
 };
+
+/* Ranges controlled by this DDR4_MPC */
+static const struct mpc_sie_memory_range_t MPC_DDR4_BLK0_RANGE_NS = {
+    .base         = MPC_DDR4_BLK0_RANGE_BASE_NS,
+    .limit        = MPC_DDR4_BLK0_RANGE_LIMIT_NS,
+    .range_offset = MPC_DDR4_BLK0_RANGE_OFFSET_NS,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_DDR4_BLK1_RANGE_S = {
+    .base         = MPC_DDR4_BLK1_RANGE_BASE_S,
+    .limit        = MPC_DDR4_BLK1_RANGE_LIMIT_S,
+    .range_offset = MPC_DDR4_BLK1_RANGE_OFFSET_S,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_DDR4_BLK2_RANGE_NS = {
+    .base         = MPC_DDR4_BLK2_RANGE_BASE_NS,
+    .limit        = MPC_DDR4_BLK2_RANGE_LIMIT_NS,
+    .range_offset = MPC_DDR4_BLK2_RANGE_OFFSET_NS,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_DDR4_BLK3_RANGE_S = {
+    .base         = MPC_DDR4_BLK3_RANGE_BASE_S,
+    .limit        = MPC_DDR4_BLK3_RANGE_LIMIT_S,
+    .range_offset = MPC_DDR4_BLK3_RANGE_OFFSET_S,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_DDR4_BLK4_RANGE_NS = {
+    .base         = MPC_DDR4_BLK4_RANGE_BASE_NS,
+    .limit        = MPC_DDR4_BLK4_RANGE_LIMIT_NS,
+    .range_offset = MPC_DDR4_BLK4_RANGE_OFFSET_NS,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_DDR4_BLK5_RANGE_S = {
+    .base         = MPC_DDR4_BLK5_RANGE_BASE_S,
+    .limit        = MPC_DDR4_BLK5_RANGE_LIMIT_S,
+    .range_offset = MPC_DDR4_BLK5_RANGE_OFFSET_S,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_DDR4_BLK6_RANGE_NS = {
+    .base         = MPC_DDR4_BLK6_RANGE_BASE_NS,
+    .limit        = MPC_DDR4_BLK6_RANGE_LIMIT_NS,
+    .range_offset = MPC_DDR4_BLK6_RANGE_OFFSET_NS,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_DDR4_BLK7_RANGE_S = {
+    .base         = MPC_DDR4_BLK7_RANGE_BASE_S,
+    .limit        = MPC_DDR4_BLK7_RANGE_LIMIT_S,
+    .range_offset = MPC_DDR4_BLK7_RANGE_OFFSET_S,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
+};
+
+#define MPC_DDR4_RANGE_LIST_LEN  8u
+static const struct mpc_sie_memory_range_t*
+    MPC_DDR4_RANGE_LIST[MPC_DDR4_RANGE_LIST_LEN] = {
+        &MPC_DDR4_BLK0_RANGE_NS,
+        &MPC_DDR4_BLK1_RANGE_S,
+        &MPC_DDR4_BLK2_RANGE_NS,
+        &MPC_DDR4_BLK3_RANGE_S,
+        &MPC_DDR4_BLK4_RANGE_NS,
+        &MPC_DDR4_BLK5_RANGE_S,
+        &MPC_DDR4_BLK6_RANGE_NS,
+        &MPC_DDR4_BLK7_RANGE_S,
+    };
+static struct mpc_sie_dev_cfg_t MPC_DDR4_DEV_CFG_S = {
+    .base = MPC_DDR4_BASE_S,
+    .range_list = MPC_DDR4_RANGE_LIST,
+    .nbr_of_ranges = MPC_DDR4_RANGE_LIST_LEN};
+static struct mpc_sie_dev_data_t MPC_DDR4_DEV_DATA_S = {
+    .is_initialized = false};
+struct mpc_sie_dev_t MPC_DDR4_DEV_S = {
+    &(MPC_DDR4_DEV_CFG_S),
+    &(MPC_DDR4_DEV_DATA_S)};

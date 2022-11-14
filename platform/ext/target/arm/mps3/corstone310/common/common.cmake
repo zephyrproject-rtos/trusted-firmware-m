@@ -94,6 +94,7 @@ target_sources(platform_s
         ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/ppc_corstone310_drv.c
+        ${CORSTONE310_COMMON_DIR}/native_drivers/tgu_armv8_m_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c

@@ -43,6 +43,10 @@
 // <i> Configuration settings for Driver_QSPI_MPC in component ::Drivers:MPC
 #define   RTE_QSPI_MPC                              1
 
+// <q> MPC (Memory Protection Controller) [Driver_DDR4_MPC]
+// <i> Configuration settings for Driver_DDR4_MPC in component ::Drivers:MPC
+#define   RTE_DDR4_MPC                              1
+
 // <q> TGU (TCM Gating Unit [Driver_ITCM_TGU_ARMV8_M]
 // <i> Configuration settings for Driver_ITCM_TGU_ARMV8_M in component ::Drivers:TGU
 #define   RTE_ITCM_TGU_ARMV8_M                      1

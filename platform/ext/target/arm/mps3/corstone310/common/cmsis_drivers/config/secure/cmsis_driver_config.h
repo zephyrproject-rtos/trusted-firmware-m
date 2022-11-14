@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #define MPC_ISRAM1_DEV      MPC_ISRAM1_DEV_S
 #define MPC_SRAM_DEV        MPC_SRAM_DEV_S
 #define MPC_QSPI_DEV        MPC_QSPI_DEV_S
+#define MPC_DDR4_DEV        MPC_DDR4_DEV_S
 
 #define TGU_ARMV8_M_ITCM_DEV TGU_ARMV8_M_ITCM_DEV_S
 #define TGU_ARMV8_M_DTCM_DEV TGU_ARMV8_M_DTCM_DEV_S

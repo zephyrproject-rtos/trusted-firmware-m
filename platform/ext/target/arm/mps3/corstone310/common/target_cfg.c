@@ -37,10 +37,13 @@
 extern const struct memory_region_limits memory_regions;
 
 /* Import MPC drivers */
+extern ARM_DRIVER_MPC Driver_ITCM_TGU_ARMV8_M;
+extern ARM_DRIVER_MPC Driver_DTCM_TGU_ARMV8_M;
 extern ARM_DRIVER_MPC Driver_ISRAM0_MPC;
 extern ARM_DRIVER_MPC Driver_ISRAM1_MPC;
 extern ARM_DRIVER_MPC Driver_SRAM_MPC;
 extern ARM_DRIVER_MPC Driver_QSPI_MPC;
+extern ARM_DRIVER_MPC Driver_DDR4_MPC;
 
 /* Import PPC drivers */
 extern ARM_DRIVER_PPC_CORSTONE310 Driver_MAIN0_PPC_CORSTONE310;
@@ -168,7 +171,7 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-/*----------------- NVIC interrupt enabling for S peripherals ----------------*/
+/*----------------- NVIC interrupt enabling ----------------*/
 enum tfm_plat_err_t nvic_interrupt_enable(void)
 {
     int32_t ret = ARM_DRIVER_OK;
@@ -182,6 +185,12 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
+    ret = Driver_ISRAM1_MPC.EnableInterrupt();
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Enable MPC interrupt for ISRAM1!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
     ret = Driver_SRAM_MPC.EnableInterrupt();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Enable MPC interrupt for SRAM!");
@@ -191,6 +200,12 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
     ret = Driver_QSPI_MPC.EnableInterrupt();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Enable MPC interrupt for QSPI!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    ret = Driver_DDR4_MPC.EnableInterrupt();
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Enable MPC interrupt for DDR4!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
@@ -259,36 +274,164 @@ enum tfm_plat_err_t init_debug(void)
 /*------------------- SAU/IDAU configuration functions -----------------------*/
 void sau_and_idau_cfg(void)
 {
+/*        +---------------+  +-----------------------+ +------------+
+          |   IDAU view   |  |      SAU view         | | IDAU + SAU |
+0x00000000+=======+=======+  +=======+=======+=======+ +============+
+          | ITCM  |       |  | ITCM  |   NS  | RNR 0 | |     NS     |
+0x00008000+-------+       |  +-------+-------+-------+ +------------+
+          |          NS   |  |           S           | |     S      |
+0x01000000+-------+       |  +-------+               | |            |
+          | SRAM  |       |  | SRAM  |               | |            |
+          +-------+       |  +-------+               | |            |
+          | BL2   |       |  | BL2   |               | |            |
+          +-------+       |  +-------+-------+-------+ +------------+
+          |       |       |  |       |   NS  | RNR 1 | |     NS     |
+0x01200000+-------+       |  +-------+-------+-------+ +------------+
+          |               |  |                       | |            |
+0x10000000+-------+-------+  +-------+               | |            |
+          | ITCM  |       |  | ITCM  |               | |            |
+0x10008000+-------+       |  +-------+               | |            |
+          |               |  |                       | |            |
+0x11000000+-------+   S   |  +-------+    S          | |     S      |
+          | SRAM  |       |  | SRAM  |               | |            |
+          +-------+       |  +-------+               | |            |
+          | BL2   |       |  | BL2   |               | |            |
+          +-------+       |  +-------+               | |            |
+          |       |       |  |       |               | |            |
+0x11200000+-------+       |  +-------+               | |            |
+          |               |  |                       | |            |
+0x20000000+-------+-------+  +-------+-------+-------+ +------------+
+          | DTCM  |       |  | DTCM  |   NS  | RNR 2 | |     NS     |
+0x20008000+-------+       |  +-------+-------+-------+ +------------+
+          |               |  |                       | |            |
+0x21000000+--------+      |  +--------+  S           | |     S      |
+          | ISRAM0 |      |  | ISRAM0 |              | |            |
+          +--------+      |  +--------+------+-------+ +------------+
+          | ISRAM1 |      |  | ISRAM1 |  NS  | RNR 3 | |     NS     |
+0x21400000+--------+      |  +--------+------+-------+ +------------+
+          |               |  |                       | |            |
+0x28000000+-------+       |  +-------+               | |            |
+          | QSPI  |       |  | QSPI  |               | |            |
+          +-------+  NS   |  +-------+    S          | |     S      |
+          | s-    |       |  | s-    |               | |            |
+          | part  |       |  | part  |               | |            |
+          | ion   |       |  | ion   |               | |            |
+          +-------+       |  +-------+               | |            |
+          | ven-  |       |  | ven-  |               | |            |
+          | eer   |       |  | eer   |               | |            |
+          +-------+       |  +-------+-------+-------+ +------------+
+          | ns-   |       |  | ns-   |       |       | |            |
+          | part  |       |  | part  |   NS  | RNR 4 | |     NS     |
+          | ion   |       |  | ion   |       |       | |            |
+0x28800000+-------+       |  +-------+-------+-------+ +------------+
+          |               |  |                       | |            |
+0x30000000+-------+-------+  +-------+               | |            |
+          | DTCM  |       |  | DTCM  |               | |            |
+0x30008000+-------+       |  +-------+               | |            |
+          |          NSC  |  |                       | |            |
+0x31000000+-------+       |  +-------+   S           | |     S      |
+          | ISRAM |       |  | ISRAM |               | |            |
+0x31400000+-------+       |  +-------+               | |            |
+          |               |  |                       | |            |
+0x38000000+-------+       |  +-------+               | |            |
+          | QSPI  |       |  | QSPI  |               | |            |
+          +-------+       |  +-------+               | |            |
+          | s-    |       |  | s-    |               | |            |
+          | part  |       |  | part  |               | |            |
+          | ion   |       |  | ion   |               | |            |
+          +-------+       |  +-------+-------+-------+ +------------+
+          | ven-  |       |  | ven-  |  NSC  | RNR 5 | |     NSC    |
+          | eer   |       |  | eer   |       |       | |            |
+          +-------+       |  +-------+-------+-------+ +------------+
+          | ns-   |       |  | ns-   |               | |            |
+          | part  |       |  | part  |               | |            |
+          | ion   |       |  | ion   |    S          | |     S      |
+0x38800000+-------+       |  +-------+               | |            |
+          |               |  |                       | |            |
+0x40000000+--------+------+  +--------+------+-------+ +------------+
+          | Periph |  NS  |  | Periph |  NS  | RNR 6 | |     NS     |
+0x50000000+--------+------+  +--------+------+-------+ +------------+
+          | Periph |   S  |  | Periph |  S           | |     S      |
+0x60000000+--------+------+  +--------+------+-------+ +------------+
+          | DDR4 0 |  NS  |  | DDR4 0 |      |       | |     NS     |
+0x70000000+--------+------+  +--------+      |       | +------------+
+          | DDR4 1 |   S  |  | DDR4 1 |      |       | |     S      |
+0x80000000+--------+------+  +--------+      |       | +------------+
+          | DDR4 2 |  NS  |  | DDR4 2 |      |       | |     NS     |
+0x90000000+--------+------+  +--------+      |       | +------------+
+          | DDR4 3 |   S  |  | DDR4 3 |      |       | |     S      |
+0xA0000000+--------+------+  +--------+  NS  | RNR 7 | +------------+
+          | DDR4 4 |  NS  |  | DDR4 4 |      |       | |     NS     |
+0xB0000000+--------+------+  +--------+      |       | +------------+
+          | DDR4 5 |   S  |  | DDR4 5 |      |       | |     S      |
+0xC0000000+--------+------+  +--------+      |       | +------------+
+          | DDR4 6 |  NS  |  | DDR4 6 |      |       | |     NS     |
+0xD0000000+--------+------+  +--------+      |       | +------------+
+          | DDR4 7 |   S  |  | DDR4 7 |      |       | |     S      |
+0xE0000000+--------+------+  +--------+------+-------+ +------------*/
+
     struct corstone310_sacfg_t *sacfg = (struct corstone310_sacfg_t*)CORSTONE310_SACFG_BASE_S;
 
-    /* Enables SAU */
-    TZ_SAU_Enable();
+    /* Allows IDAU to define the RAM region as a NSC */
+    sacfg->nsccfg |= RAMNSC;
 
     /* Configures SAU regions to be non-secure */
-    SAU->RNR  = 0;
+    /* Configure ITCM */
+    SAU->RNR = 0;
+    SAU->RBAR = (ITCM_BASE_NS & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((ITCM_BASE_NS + ITCM_SIZE - 1) & SAU_RBAR_BADDR_Msk)
+                | SAU_RLAR_ENABLE_Msk;
+
+    /* Configure SRAM */
+    SAU->RNR = 1;
+    SAU->RBAR = ((SRAM_BASE_NS + BL2_CODE_SIZE) & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((SRAM_BASE_NS + SRAM_SIZE - 1) & SAU_RBAR_BADDR_Msk)
+                | SAU_RLAR_ENABLE_Msk;
+
+    /* Configure DTCM */
+    SAU->RNR = 2;
+    SAU->RBAR = (DTCM0_BASE_NS & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((DTCM0_BASE_NS + (DTCM_BLK_SIZE * DTCM_BLK_NUM) - 1)
+                 & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+
+    /* Configure ISRAM0: secure, ISRAM1: non-secure */
+    SAU->RNR = 3;
+    SAU->RBAR = (ISRAM1_BASE_NS & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((ISRAM1_BASE_NS + ISRAM1_SIZE - 1)
+                 & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+
+    /* Configure QSPI */
+    SAU->RNR = 4;
     SAU->RBAR = (memory_regions.non_secure_partition_base
                  & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.non_secure_partition_limit
                   & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 
-    SAU->RNR  = 1;
-    SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = (NS_DATA_LIMIT & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
-
     /* Configures veneers region to be non-secure callable */
-    SAU->RNR  = 2;
+    SAU->RNR  = 5;
     SAU->RBAR = (memory_regions.veneer_base & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.veneer_limit & SAU_RLAR_LADDR_Msk)
                  | SAU_RLAR_ENABLE_Msk | SAU_RLAR_NSC_Msk;
 
     /* Configure the peripherals space */
-    SAU->RNR  = 3;
+    SAU->RNR  = 6;
     SAU->RBAR = (PERIPHERALS_BASE_NS_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                   | SAU_RLAR_ENABLE_Msk;
 
-    /* Allows SAU to define the RAM region as a NSC */
-    sacfg->nsccfg |= RAMNSC;
+    /* Configure DDR4 with the last available region */
+    SAU->RNR  = 7;
+    SAU->RBAR = (DDR4_BLK0_BASE_NS & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((DDR4_BLK0_BASE_NS + ((uint32_t)DDR4_BLK_NUM * DDR4_BLK_SIZE) - 1)
+                 & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+    /* Enables SAU */
+    TZ_SAU_Enable();
+
+    /* Add barriers to assure the SAU configuration is done before continue
+     * the execution.
+     */
+    __DSB();
+    __ISB();
 }
 
 /*------------------- Memory configuration functions -------------------------*/
@@ -296,18 +439,63 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
 
-    /* The second half of ISRAM0 is allocated for NS data,
-     * so it's set to non-secure accesible. */
+    /* All memory not used by TF-M is set to Non-Secure. */
+
+    ret = Driver_ITCM_TGU_ARMV8_M.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Initialize TGU for ITCM!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    ret = Driver_ITCM_TGU_ARMV8_M.ConfigRegion(ITCM_BASE_NS,
+                                               (ITCM_BASE_NS + ITCM_SIZE - 1),
+                                               ARM_MPC_ATTR_NONSECURE);
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Configure TGU for ITCM!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    ret = Driver_DTCM_TGU_ARMV8_M.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Initialize TGU for DTCM!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    ret = Driver_DTCM_TGU_ARMV8_M.ConfigRegion(DTCM0_BASE_NS,
+                          (DTCM0_BASE_NS + (DTCM_BLK_SIZE * DTCM_BLK_NUM) - 1),
+                          ARM_MPC_ATTR_NONSECURE);
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Configure TGU for DTCM!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    ret = Driver_SRAM_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Initialize MPC for SRAM!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    ret = Driver_SRAM_MPC.ConfigRegion((SRAM_BASE_NS + BL2_CODE_SIZE),
+                                       (SRAM_BASE_NS + SRAM_SIZE - 1),
+                                       ARM_MPC_ATTR_NONSECURE);
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Configure MPC for SRAM!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
     ret = Driver_ISRAM0_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         ERROR_MSG("Failed to Initialize MPC for ISRAM0!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_ISRAM0_MPC.ConfigRegion(NS_DATA_START,
-                                      NS_DATA_LIMIT,
-                                      ARM_MPC_ATTR_NONSECURE);
+
+    ret = Driver_ISRAM1_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Configure MPC for ISRAM0!");
+        ERROR_MSG("Failed to Initialize MPC for ISRAM1!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    ret = Driver_ISRAM1_MPC.ConfigRegion(MPC_ISRAM1_RANGE_BASE_NS,
+                                         MPC_ISRAM1_RANGE_LIMIT_NS,
+                                         ARM_MPC_ATTR_NONSECURE);
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Configure MPC for ISRAM1!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
@@ -316,7 +504,7 @@ enum tfm_plat_err_t mpc_init_cfg(void)
      * QSPI device. */
     ret = Driver_QSPI_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Initialize MPC for SRAM!");
+        ERROR_MSG("Failed to Initialize MPC for QSPI!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
     ret = Driver_QSPI_MPC.ConfigRegion(
@@ -324,28 +512,52 @@ enum tfm_plat_err_t mpc_init_cfg(void)
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Configure MPC for SRAM!");
+        ERROR_MSG("Failed to Configure MPC for QSPI!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* Unused MPCs */
-    ret = Driver_SRAM_MPC.Initialize();
+    ret = Driver_DDR4_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Initialize MPC for SRAM!");
+        ERROR_MSG("Failed to Initialize MPC for DDR4!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-
-    ret = Driver_ISRAM1_MPC.Initialize();
+    ret = Driver_DDR4_MPC.ConfigRegion(MPC_DDR4_BLK0_RANGE_BASE_NS,
+                                       MPC_DDR4_BLK0_RANGE_LIMIT_NS,
+                                       ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Initialize MPC for ISRAM0!");
+        ERROR_MSG("Failed to Configure MPC for DDR4 0!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    ret = Driver_DDR4_MPC.ConfigRegion(MPC_DDR4_BLK2_RANGE_BASE_NS,
+                                       MPC_DDR4_BLK2_RANGE_LIMIT_NS,
+                                       ARM_MPC_ATTR_NONSECURE);
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Configure MPC for DDR4 2!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    ret = Driver_DDR4_MPC.ConfigRegion(MPC_DDR4_BLK4_RANGE_BASE_NS,
+                                       MPC_DDR4_BLK4_RANGE_LIMIT_NS,
+                                       ARM_MPC_ATTR_NONSECURE);
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Configure MPC for DDR4 4!");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+    ret = Driver_DDR4_MPC.ConfigRegion(MPC_DDR4_BLK6_RANGE_BASE_NS,
+                                       MPC_DDR4_BLK6_RANGE_LIMIT_NS,
+                                       ARM_MPC_ATTR_NONSECURE);
+    if (ret != ARM_DRIVER_OK) {
+        ERROR_MSG("Failed to Configure MPC for DDR4 6!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* Lock down the MPCs */
-    Driver_QSPI_MPC.LockDown();
+    /* Lock down the MPCs and TGUs */
+    Driver_ITCM_TGU_ARMV8_M.LockDown();
+    Driver_DTCM_TGU_ARMV8_M.LockDown();
+    Driver_SRAM_MPC.LockDown();
     Driver_ISRAM0_MPC.LockDown();
     Driver_ISRAM1_MPC.LockDown();
-    Driver_SRAM_MPC.LockDown();
+    Driver_QSPI_MPC.LockDown();
+    Driver_DDR4_MPC.LockDown();
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
@@ -358,12 +570,24 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 
 void mpc_revert_non_secure_to_secure_cfg(void)
 {
-    Driver_ISRAM0_MPC.ConfigRegion(MPC_ISRAM0_RANGE_BASE_S,
-                                   MPC_ISRAM0_RANGE_LIMIT_S,
-                                   ARM_MPC_ATTR_SECURE);
+    Driver_ITCM_TGU_ARMV8_M.ConfigRegion(ITCM_BASE_S,
+                                         (ITCM_BASE_S + ITCM_SIZE - 1),
+                                         ARM_MPC_ATTR_SECURE);
+
+    Driver_DTCM_TGU_ARMV8_M.ConfigRegion(DTCM0_BASE_S,
+                            (DTCM0_BASE_S + (DTCM_BLK_SIZE * DTCM_BLK_NUM) - 1),
+                            ARM_MPC_ATTR_SECURE);
 
     Driver_SRAM_MPC.ConfigRegion(MPC_SRAM_RANGE_BASE_S,
                                  MPC_SRAM_RANGE_LIMIT_S,
+                                 ARM_MPC_ATTR_SECURE);
+
+    Driver_ISRAM1_MPC.ConfigRegion(MPC_ISRAM1_RANGE_BASE_S,
+                                   MPC_ISRAM1_RANGE_LIMIT_S,
+                                   ARM_MPC_ATTR_SECURE);
+
+    Driver_QSPI_MPC.ConfigRegion(MPC_QSPI_RANGE_BASE_S,
+                                 MPC_QSPI_RANGE_LIMIT_S,
                                  ARM_MPC_ATTR_SECURE);
 
     /* Add barriers to assure the MPC configuration is done before continue
