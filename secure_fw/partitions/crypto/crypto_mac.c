@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -196,9 +196,6 @@ psa_status_t tfm_crypto_mac_sign_finish(psa_invec in_vec[],
     /* Init the handle in the operation with the one passed from the iov */
     *handle_out = iov->op_handle;
 
-    /* Initialise mac_length to zero */
-    out_vec[1].len = 0;
-
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_MAC_OPERATION,
                                          handle,
@@ -211,6 +208,8 @@ psa_status_t tfm_crypto_mac_sign_finish(psa_invec in_vec[],
     if (status == PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
         (void)tfm_crypto_operation_release(handle_out);
+    } else {
+        out_vec[1].len = 0;
     }
 
     return status;
@@ -335,8 +334,12 @@ psa_status_t tfm_crypto_mac_compute(psa_invec in_vec[],
         return status;
     }
 
-    return psa_mac_compute(encoded_key, alg, input, input_length, mac, mac_size,
-                           &out_vec[0].len);
+    status = psa_mac_compute(encoded_key, alg, input, input_length, mac, mac_size,
+                             &out_vec[0].len);
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_MAC_MODULE_DISABLED */
 }
 

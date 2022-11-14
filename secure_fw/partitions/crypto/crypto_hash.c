@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -129,9 +129,6 @@ psa_status_t tfm_crypto_hash_finish(psa_invec in_vec[],
     /* Init the handle in the operation with the one passed from the iov */
     *handle_out = iov->op_handle;
 
-    /* Initialise hash_length to zero */
-    out_vec[1].len = 0;
-
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_HASH_OPERATION,
                                          handle,
@@ -144,6 +141,8 @@ psa_status_t tfm_crypto_hash_finish(psa_invec in_vec[],
     if (status == PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
         (void)tfm_crypto_operation_release(handle_out);
+    } else {
+        out_vec[1].len = 0;
     }
 
     return status;
@@ -295,6 +294,7 @@ psa_status_t tfm_crypto_hash_compute(psa_invec in_vec[],
          return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
+    psa_status_t status = PSA_SUCCESS;
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_algorithm_t alg = iov->alg;
     const uint8_t *input = in_vec[1].base;
@@ -302,10 +302,12 @@ psa_status_t tfm_crypto_hash_compute(psa_invec in_vec[],
     uint8_t *hash = out_vec[0].base;
     size_t hash_size = out_vec[0].len;
 
-    /* Initialize hash_length to zero */
-    out_vec[0].len = 0;
-    return psa_hash_compute(alg, input, input_length, hash, hash_size,
-                            &out_vec[0].len);
+    status = psa_hash_compute(alg, input, input_length, hash, hash_size,
+                              &out_vec[0].len);
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_HASH_MODULE_DISABLED */
 }
 

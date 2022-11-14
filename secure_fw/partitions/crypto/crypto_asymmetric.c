@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -49,8 +49,12 @@ psa_status_t tfm_crypto_sign_message(psa_invec in_vec[],
         return status;
     }
 
-    return psa_sign_message(encoded_key, alg, input, input_length,
-                            signature, signature_size, &(out_vec[0].len));
+    status = psa_sign_message(encoded_key, alg, input, input_length,
+                              signature, signature_size, &(out_vec[0].len));
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED */
 }
 
@@ -118,8 +122,12 @@ psa_status_t tfm_crypto_sign_hash(psa_invec in_vec[],
         return status;
     }
 
-    return psa_sign_hash(encoded_key, alg, hash, hash_length,
-                         signature, signature_size, &(out_vec[0].len));
+    status = psa_sign_hash(encoded_key, alg, hash, hash_length,
+                           signature, signature_size, &(out_vec[0].len));
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_ASYM_SIGN_MODULE_DISABLED */
 }
 
@@ -208,9 +216,13 @@ psa_status_t tfm_crypto_asymmetric_encrypt(psa_invec in_vec[],
         return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
-    return psa_asymmetric_encrypt(encoded_key, alg, input, input_length,
-                                  salt, salt_length,
-                                  output, output_size, &(out_vec[0].len));
+    status = psa_asymmetric_encrypt(encoded_key, alg, input, input_length,
+                                    salt, salt_length,
+                                    output, output_size, &(out_vec[0].len));
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED */
 }
 
@@ -246,9 +258,13 @@ psa_status_t tfm_crypto_asymmetric_decrypt(psa_invec in_vec[],
         return status;
     }
 
-    return psa_asymmetric_decrypt(encoded_key, alg, input, input_length,
-                                  salt, salt_length,
-                                  output, output_size, &(out_vec[0].len));
+    status = psa_asymmetric_decrypt(encoded_key, alg, input, input_length,
+                                    salt, salt_length,
+                                    output, output_size, &(out_vec[0].len));
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED */
 }
 /*!@}*/

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -57,7 +57,11 @@ psa_status_t tfm_crypto_cipher_generate_iv(psa_invec in_vec[],
 
     *handle_out = handle;
 
-    return psa_cipher_generate_iv(operation, iv, iv_size, &out_vec[1].len);
+    status = psa_cipher_generate_iv(operation, iv, iv_size, &out_vec[1].len);
+    if (status != PSA_SUCCESS) {
+        out_vec[1].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
@@ -232,9 +236,6 @@ psa_status_t tfm_crypto_cipher_update(psa_invec in_vec[],
     /* Init the handle in the operation with the one passed from the iov */
     *handle_out = iov->op_handle;
 
-    /* Initialise the output_length to zero */
-    out_vec[1].len = 0;
-
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
                                          handle,
@@ -243,8 +244,12 @@ psa_status_t tfm_crypto_cipher_update(psa_invec in_vec[],
         return status;
     }
 
-    return psa_cipher_update(operation, input, input_length,
-                             output, output_size, &out_vec[1].len);
+    status = psa_cipher_update(operation, input, input_length,
+                               output, output_size, &out_vec[1].len);
+    if (status != PSA_SUCCESS) {
+        out_vec[1].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
@@ -274,9 +279,6 @@ psa_status_t tfm_crypto_cipher_finish(psa_invec in_vec[],
     /* Init the handle in the operation with the one passed from the iov */
     *handle_out = iov->op_handle;
 
-    /* Initialise the output_length to zero */
-    out_vec[1].len = 0;
-
     /* Look up the corresponding operation context */
     status = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
                                          handle,
@@ -289,6 +291,8 @@ psa_status_t tfm_crypto_cipher_finish(psa_invec in_vec[],
     if (status == PSA_SUCCESS) {
         /* Release the operation context, ignore if the operation fails. */
         (void)tfm_crypto_operation_release(handle_out);
+    } else {
+        out_vec[1].len = 0;
     }
 
     return status;
@@ -370,8 +374,12 @@ psa_status_t tfm_crypto_cipher_encrypt(psa_invec in_vec[],
         return status;
     }
 
-    return psa_cipher_encrypt(encoded_key, alg, input, input_length, output,
-                              output_size, &out_vec[0].len);
+    status = psa_cipher_encrypt(encoded_key, alg, input, input_length, output,
+                                output_size, &out_vec[0].len);
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 
@@ -404,8 +412,12 @@ psa_status_t tfm_crypto_cipher_decrypt(psa_invec in_vec[],
         return status;
     }
 
-    return psa_cipher_decrypt(encoded_key, alg, input, input_length, output,
-                              output_size, &out_vec[0].len);
+    status = psa_cipher_decrypt(encoded_key, alg, input, input_length, output,
+                                output_size, &out_vec[0].len);
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
 /*!@}*/

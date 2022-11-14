@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,6 +13,12 @@
 #include "tfm_crypto_defs.h"
 #include "tfm_crypto_private.h"
 
+/*!
+ * \defgroup public_psa Public functions, PSA
+ *
+ */
+
+/*!@{*/
 psa_status_t tfm_crypto_import_key(psa_invec in_vec[],
                                    size_t in_len,
                                    psa_outvec out_vec[],
@@ -278,8 +284,12 @@ psa_status_t tfm_crypto_export_key(psa_invec in_vec[],
 
     encoded_key = mbedtls_svc_key_id_make(partition_id, key);
 
-    return psa_export_key(encoded_key, data, data_size,
-                          &(out_vec[0].len));
+    status = psa_export_key(encoded_key, data, data_size,
+                            &(out_vec[0].len));
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
@@ -312,8 +322,12 @@ psa_status_t tfm_crypto_export_public_key(psa_invec in_vec[],
 
     encoded_key = mbedtls_svc_key_id_make(partition_id, key);
 
-    return psa_export_public_key(encoded_key, data, data_size,
-                                 &(out_vec[0].len));
+    status = psa_export_public_key(encoded_key, data, data_size,
+                                   &(out_vec[0].len));
+    if (status != PSA_SUCCESS) {
+        out_vec[0].len = 0;
+    }
+    return status;
 #endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
 
@@ -446,3 +460,4 @@ psa_status_t tfm_crypto_generate_key(psa_invec in_vec[],
     return status;
 #endif /* TFM_CRYPTO_KEY_MODULE_DISABLED */
 }
+/*!@}*/
