@@ -58,6 +58,12 @@ if (TFM_PROFILE)
     include(config/profile/${TFM_PROFILE}.cmake)
 endif()
 
+# Load Secure Partition settings according to regression configuration as all SPs are disabled
+# by default
+if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
+    include(${CMAKE_CURRENT_LIST_DIR}/tests/regression_config.cmake)
+endif()
+
 include(${CMAKE_SOURCE_DIR}/config/tfm_build_log_config.cmake)
 
 # Load TF-M model specific default config

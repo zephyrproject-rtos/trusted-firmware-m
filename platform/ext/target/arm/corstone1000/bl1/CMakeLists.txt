@@ -55,6 +55,7 @@ target_include_directories(bl1
     PRIVATE
         ${CMAKE_SOURCE_DIR}/platform/include
         ../Device/Include
+        ${CMAKE_SOURCE_DIR}/platform/ext/cmsis
 )
 
 # target_add_scatter_file(bl1) cannot be used as it would add the platform_region_defs dependency
@@ -198,8 +199,7 @@ target_sources(bl1_main
 
 target_link_libraries(bl1_main
     PRIVATE
-        bl2_hal
-        tfm_arch
+        platform_bl2
 )
 
 target_compile_definitions(bl1_main
