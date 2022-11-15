@@ -76,6 +76,8 @@ target_include_directories(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
         ${PLATFORM_DIR}/ext/common
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
 )
 
 target_sources(platform_s
@@ -90,7 +92,8 @@ target_sources(platform_s
         ${CORSTONE310_COMMON_DIR}/native_drivers/mpu_armv8m_drv.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/ppc_corstone310_drv.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/syscounter_armv8-m_cntrl_drv.c
-        ${CORSTONE310_COMMON_DIR}/native_drivers/uart_cmsdk_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CORSTONE310_COMMON_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CORSTONE310_COMMON_DIR}/services/src/tfm_platform_system.c>
 )
@@ -114,7 +117,8 @@ target_sources(platform_ns
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
         ${CORSTONE310_COMMON_DIR}/device/source/platform_ns_device_definition.c
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
-        ${CORSTONE310_COMMON_DIR}/native_drivers/uart_cmsdk_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
 )
 
 target_include_directories(platform_ns
@@ -131,6 +135,8 @@ target_include_directories(platform_ns
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${PLATFORM_DIR}/ext/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
 )
 
 #========================= Platform BL2 =======================================#
@@ -141,7 +147,8 @@ if(BL2)
             ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
             ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
             ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
-            ${CORSTONE310_COMMON_DIR}/native_drivers/uart_cmsdk_drv.c
+            ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
     )
 
     target_include_directories(platform_bl2
@@ -155,6 +162,8 @@ if(BL2)
             ${CORSTONE310_COMMON_DIR}/partition
             ${CORSTONE310_COMMON_DIR}/services/src
             ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
 
         PRIVATE
             ${CORSTONE310_COMMON_DIR}

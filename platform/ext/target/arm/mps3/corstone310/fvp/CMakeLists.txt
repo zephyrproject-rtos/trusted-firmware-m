@@ -31,14 +31,17 @@ target_compile_definitions(platform_fvp
 target_include_directories(platform_fvp
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
-        native_drivers
         libraries
+        native_drivers
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}
         device/config
         ${PLATFORM_DIR}/ext/cmsis
         ${PLATFORM_DIR}/ext/driver
         ${CORSTONE310_COMMON_DIR}/device/include
         ${CORSTONE310_COMMON_DIR}/partition
         ${CORSTONE310_COMMON_DIR}/native_drivers
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
 )
 
 target_compile_options(platform_fvp
