@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited
+ * Copyright (c) 2019-2023 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@
  *        - When counter scaling is enabled, ScaleVal is the value added to the
  *          Counter Count Value for every period of the counter as determined
  *          by 1/Frequency from the current operating frequency of the system
- *          counter (the “counter tick”).
+ *          counter (the "counter tick").
  *        - ScaleVal is expressed as an unsigned fixed-point number with
  *          a 8 bit integer value and a 24-bit fractional value
  *   - Interrupt for error detection

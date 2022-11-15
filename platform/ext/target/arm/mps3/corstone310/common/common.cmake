@@ -79,6 +79,9 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
 )
 
 target_sources(platform_s
@@ -89,12 +92,11 @@ target_sources(platform_s
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
         ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
-        ${CORSTONE310_COMMON_DIR}/native_drivers/mpu_armv8m_drv.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/ppc_corstone310_drv.c
-        ${CORSTONE310_COMMON_DIR}/native_drivers/syscounter_armv8-m_cntrl_drv.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CORSTONE310_COMMON_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CORSTONE310_COMMON_DIR}/services/src/tfm_platform_system.c>
 )
@@ -103,7 +105,7 @@ target_sources(tfm_sprt
     PRIVATE
         # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
         # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
-        $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CORSTONE310_COMMON_DIR}/native_drivers/systimer_armv8-m_drv.c>
+        $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c>
 )
 
 target_compile_options(platform_s
@@ -139,6 +141,9 @@ target_include_directories(platform_ns
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
 )
 
 #========================= Platform BL2 =======================================#
@@ -167,6 +172,9 @@ if(BL2)
             ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
             ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
             ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+            ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+            ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+            ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
 
         PRIVATE
             ${CORSTONE310_COMMON_DIR}

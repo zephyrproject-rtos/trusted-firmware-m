@@ -43,6 +43,8 @@ target_include_directories(platform_fvp
         ${CORSTONE310_COMMON_DIR}/native_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
 )
 
 target_compile_options(platform_fvp
