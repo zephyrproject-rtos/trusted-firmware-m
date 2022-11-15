@@ -55,6 +55,11 @@ target_include_directories(platform_s
         Native_Driver
         partition
         services/include
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
+        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b
     INTERFACE
         cc312
         fw_update_agent
@@ -80,15 +85,15 @@ target_sources(platform_s
 if (PLATFORM_IS_FVP)
 target_sources(platform_s
     PRIVATE
-        Native_Driver/spi_strataflashj3_flash_lib.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
         Native_Driver/cfi_drv.c
 )
 else()
 target_sources(platform_s
     PRIVATE
-        Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
-        Native_Driver/spi_n25q256a_flash_lib.c
-        Native_Driver/spi_sst26vf064b_flash_lib.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/xilinx_pg153_axi_qspi_controller_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/spi_n25q256a_flash_lib.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/spi_sst26vf064b_flash_lib.c
 )
 endif()
 
@@ -133,15 +138,15 @@ target_sources(platform_bl2
 if (PLATFORM_IS_FVP)
 target_sources(platform_bl2
     PRIVATE
-        Native_Driver/spi_strataflashj3_flash_lib.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
         Native_Driver/cfi_drv.c
 )
 else()
 target_sources(platform_bl2
     PRIVATE
-        Native_Driver/xilinx_pg153_axi_qspi_controller_drv.c
-        Native_Driver/spi_n25q256a_flash_lib.c
-        Native_Driver/spi_sst26vf064b_flash_lib.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/xilinx_pg153_axi_qspi_controller_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/spi_n25q256a_flash_lib.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/spi_sst26vf064b_flash_lib.c
 )
 endif()
 
@@ -186,6 +191,11 @@ target_include_directories(platform_bl2
         Native_Driver
         fw_update_agent
         io
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
+        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b
         .
     INTERFACE
         cc312
