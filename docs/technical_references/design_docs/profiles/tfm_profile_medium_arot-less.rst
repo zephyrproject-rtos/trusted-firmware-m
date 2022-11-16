@@ -132,7 +132,7 @@ The default configurations in ``config/profile/profile_medium_arotless`` are sho
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_PARTITION_CRYPTO``                   | ``ON``                                                                                              | Enable Crypto service               |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
-   | ``CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED``    | ``ON``                                                                                              | Disable Crypto asymmetric           |
+   | ``CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED``     | ``OFF``                                                                                             | Enable Crypto asymmetric            |
    |                                            |                                                                                                     | encryption operations               |
    +--------------------------------------------+-----------------------------------------------------------------------------------------------------+-------------------------------------+
    | ``TFM_MBEDCRYPTO_CONFIG_PATH``             | ``${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_profile_medium.h`` | Re-use Profile Medium configuration |

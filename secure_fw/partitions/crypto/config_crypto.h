@@ -32,58 +32,58 @@
 #define CRYPTO_CONC_OPER_NUM                   8
 #endif
 
-/* Disable PSA Crypto random number generator module */
-#ifndef CRYPTO_RNG_MODULE_DISABLED
-#pragma message("CRYPTO_RNG_MODULE_DISABLED is defaulted to 0. Please check and set it explicitly.")
-#define CRYPTO_RNG_MODULE_DISABLED             0
+/* Enable PSA Crypto random number generator module */
+#ifndef CRYPTO_RNG_MODULE_ENABLED
+#pragma message("CRYPTO_RNG_MODULE_ENABLED is defaulted to 1. Please check and set it explicitly.")
+#define CRYPTO_RNG_MODULE_ENABLED              1
 #endif
 
-/* Disable PSA Crypto Key module */
-#ifndef CRYPTO_KEY_MODULE_DISABLED
-#pragma message("CRYPTO_KEY_MODULE_DISABLED is defaulted to 0. Please check and set it explicitly.")
-#define CRYPTO_KEY_MODULE_DISABLED             0
+/* Enable PSA Crypto Key module */
+#ifndef CRYPTO_KEY_MODULE_ENABLED
+#pragma message("CRYPTO_KEY_MODULE_ENABLED is defaulted to 1. Please check and set it explicitly.")
+#define CRYPTO_KEY_MODULE_ENABLED              1
 #endif
 
-/* Disable PSA Crypto AEAD module */
-#ifndef CRYPTO_AEAD_MODULE_DISABLED
-#pragma message("CRYPTO_AEAD_MODULE_DISABLED is defaulted to 0. Please check and set it explicitly.")
-#define CRYPTO_AEAD_MODULE_DISABLED            0
+/* Enable PSA Crypto AEAD module */
+#ifndef CRYPTO_AEAD_MODULE_ENABLED
+#pragma message("CRYPTO_AEAD_MODULE_ENABLED is defaulted to 1. Please check and set it explicitly.")
+#define CRYPTO_AEAD_MODULE_ENABLED             1
 #endif
 
-/* Disable PSA Crypto MAC module */
-#ifndef CRYPTO_MAC_MODULE_DISABLED
-#pragma message("CRYPTO_MAC_MODULE_DISABLED is defaulted to 0. Please check and set it explicitly.")
-#define CRYPTO_MAC_MODULE_DISABLED             0
+/* Enable PSA Crypto MAC module */
+#ifndef CRYPTO_MAC_MODULE_ENABLED
+#pragma message("CRYPTO_MAC_MODULE_ENABLED is defaulted to 1. Please check and set it explicitly.")
+#define CRYPTO_MAC_MODULE_ENABLED              1
 #endif
 
-/* Disable PSA Crypto Hash module */
-#ifndef CRYPTO_HASH_MODULE_DISABLED
-#pragma message("CRYPTO_HASH_MODULE_DISABLED is defaulted to 0. Please check and set it explicitly.")
-#define CRYPTO_HASH_MODULE_DISABLED            0
+/* Enable PSA Crypto Hash module */
+#ifndef CRYPTO_HASH_MODULE_ENABLED
+#pragma message("CRYPTO_HASH_MODULE_ENABLED is defaulted to 1. Please check and set it explicitly.")
+#define CRYPTO_HASH_MODULE_ENABLED             1
 #endif
 
-/* Disable PSA Crypto Cipher module */
-#ifndef CRYPTO_CIPHER_MODULE_DISABLED
-#pragma message("CRYPTO_CIPHER_MODULE_DISABLED is defaulted to 0. Please check and set it explicitly.")
-#define CRYPTO_CIPHER_MODULE_DISABLED          0
+/* Enable PSA Crypto Cipher module */
+#ifndef CRYPTO_CIPHER_MODULE_ENABLED
+#pragma message("CRYPTO_CIPHER_MODULE_ENABLED is defaulted to 1. Please check and set it explicitly.")
+#define CRYPTO_CIPHER_MODULE_ENABLED           1
 #endif
 
-/* Disable PSA Crypto asymmetric key signature module */
-#ifndef CRYPTO_ASYM_SIGN_MODULE_DISABLED
-#pragma message("CRYPTO_ASYM_SIGN_MODULE_DISABLED is defaulted to 0. Please check and set it explicitly.")
-#define CRYPTO_ASYM_SIGN_MODULE_DISABLED       0
+/* Enable PSA Crypto asymmetric key signature module */
+#ifndef CRYPTO_ASYM_SIGN_MODULE_ENABLED
+#pragma message("CRYPTO_ASYM_SIGN_MODULE_ENABLED is defaulted to 1. Please check and set it explicitly.")
+#define CRYPTO_ASYM_SIGN_MODULE_ENABLED        1
 #endif
 
-/* Disable PSA Crypto asymmetric key encryption module */
-#ifndef CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED
-#pragma message("CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED is defaulted to 0. Please check and set it explicitly.")
-#define CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED    0
+/* Enable PSA Crypto asymmetric key encryption module */
+#ifndef CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED
+#pragma message("CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED is defaulted to 1. Please check and set it explicitly.")
+#define CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED     1
 #endif
 
-/* Disable PSA Crypto key derivation module */
-#ifndef CRYPTO_KEY_DERIVATION_MODULE_DISABLED
-#pragma message("CRYPTO_KEY_DERIVATION_MODULE_DISABLED is defaulted to 0. Please check and set it explicitly.")
-#define CRYPTO_KEY_DERIVATION_MODULE_DISABLED  0
+/* Enable PSA Crypto key derivation module */
+#ifndef CRYPTO_KEY_DERIVATION_MODULE_ENABLED
+#pragma message("CRYPTO_KEY_DERIVATION_MODULE_ENABLED is defaulted to 1. Please check and set it explicitly.")
+#define CRYPTO_KEY_DERIVATION_MODULE_ENABLED   1
 #endif
 
 /* Default size of the internal scratch buffer used for PSA FF IOVec allocations */

@@ -20,7 +20,7 @@
  */
 
 /*!@{*/
-#if (!CRYPTO_HASH_MODULE_DISABLED)
+#if CRYPTO_HASH_MODULE_ENABLED
 psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
                                        psa_outvec out_vec[])
 {
@@ -176,7 +176,7 @@ release_operation_and_return:
     (void)tfm_crypto_operation_release(p_handle);
     return status;
 }
-#else /* !CRYPTO_HASH_MODULE_DISABLED */
+#else /* CRYPTO_HASH_MODULE_ENABLED */
 psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
                                        psa_outvec out_vec[])
 {
@@ -185,5 +185,5 @@ psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
-#endif /* !CRYPTO_HASH_MODULE_DISABLED */
+#endif /* CRYPTO_HASH_MODULE_ENABLED */
 /*!@}*/

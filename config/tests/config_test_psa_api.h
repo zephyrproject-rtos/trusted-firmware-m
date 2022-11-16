@@ -33,32 +33,32 @@
 /* The max number of concurrent operations that can be active (allocated) at any time in Crypto */
 #define CRYPTO_CONC_OPER_NUM                   8
 
-/* Disable PSA Crypto random number generator module */
-#define CRYPTO_RNG_MODULE_DISABLED             0
+/* Enable PSA Crypto random number generator module */
+#define CRYPTO_RNG_MODULE_ENABLED              1
 
-/* Disable PSA Crypto Key module */
-#define CRYPTO_KEY_MODULE_DISABLED             0
+/* Enable PSA Crypto Key module */
+#define CRYPTO_KEY_MODULE_ENABLED              1
 
-/* Disable PSA Crypto AEAD module */
-#define CRYPTO_AEAD_MODULE_DISABLED            0
+/* Enable PSA Crypto AEAD module */
+#define CRYPTO_AEAD_MODULE_ENABLED             1
 
-/* Disable PSA Crypto MAC module */
-#define CRYPTO_MAC_MODULE_DISABLED             0
+/* Enable PSA Crypto MAC module */
+#define CRYPTO_MAC_MODULE_ENABLED              1
 
-/* Disable PSA Crypto Hash module */
-#define CRYPTO_HASH_MODULE_DISABLED            0
+/* Enable PSA Crypto Hash module */
+#define CRYPTO_HASH_MODULE_ENABLED             1
 
-/* Disable PSA Crypto Cipher module */
-#define CRYPTO_CIPHER_MODULE_DISABLED          0
+/* Enable PSA Crypto Cipher module */
+#define CRYPTO_CIPHER_MODULE_ENABLED           1
 
-/* Disable PSA Crypto asymmetric key signature module */
-#define CRYPTO_ASYM_SIGN_MODULE_DISABLED       0
+/* Enable PSA Crypto asymmetric key signature module */
+#define CRYPTO_ASYM_SIGN_MODULE_ENABLED        1
 
-/* Disable PSA Crypto asymmetric key encryption module */
-#define CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED    0
+/* Enable PSA Crypto asymmetric key encryption module */
+#define CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED     1
 
-/* Disable PSA Crypto key derivation module */
-#define CRYPTO_KEY_DERIVATION_MODULE_DISABLED  0
+/* Enable PSA Crypto key derivation module */
+#define CRYPTO_KEY_DERIVATION_MODULE_ENABLED   1
 
 /* Default size of the internal scratch buffer used for PSA FF IOVec allocations */
 #define CRYPTO_IOVEC_BUFFER_SIZE               5120

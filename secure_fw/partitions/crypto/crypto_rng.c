@@ -24,7 +24,7 @@
 psa_status_t tfm_crypto_random_interface(psa_invec in_vec[],
                                          psa_outvec out_vec[])
 {
-#if CRYPTO_RNG_MODULE_DISABLED
+#if !CRYPTO_RNG_MODULE_ENABLED
     (void)in_vec;
     (void)out_vec;
 

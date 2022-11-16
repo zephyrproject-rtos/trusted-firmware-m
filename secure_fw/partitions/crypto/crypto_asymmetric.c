@@ -20,7 +20,7 @@
  */
 
 /*!@{*/
-#if (!CRYPTO_ASYM_SIGN_MODULE_DISABLED)
+#if CRYPTO_ASYM_SIGN_MODULE_ENABLED
 psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
                                                   psa_outvec out_vec[],
                                              mbedtls_svc_key_id_t *encoded_key)
@@ -83,7 +83,7 @@ psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
-#else /* !CRYPTO_ASYM_SIGN_MODULE_DISABLED */
+#else /* CRYPTO_ASYM_SIGN_MODULE_ENABLED */
 psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
                                                   psa_outvec out_vec[],
                                              mbedtls_svc_key_id_t *encoded_key)
@@ -94,9 +94,9 @@ psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
-#endif /* !CRYPTO_ASYM_SIGN_MODULE_DISABLED */
+#endif /* CRYPTO_ASYM_SIGN_MODULE_ENABLED */
 
-#if (!CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED)
+#if CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED
 psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
                                                      psa_outvec out_vec[],
                                              mbedtls_svc_key_id_t *encoded_key)
@@ -149,7 +149,7 @@ psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
-#else /* !CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED */
+#else /* CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED */
 psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
                                                      psa_outvec out_vec[],
                                              mbedtls_svc_key_id_t *encoded_key)
@@ -160,5 +160,5 @@ psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
-#endif /* !CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED */
+#endif /* CRYPTO_ASYM_ENCRYPT_MODULE_ENABLED */
 /*!@}*/
