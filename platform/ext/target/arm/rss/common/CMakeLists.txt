@@ -166,18 +166,20 @@ target_compile_options(platform_s
 
 #========================= Platform Crypto Keys ===============================#
 
-target_sources(platform_crypto_keys
-    PRIVATE
-        crypto_keys.c
-)
+if (TFM_PARTITION_CRYPTO)
+    target_sources(platform_crypto_keys
+        PRIVATE
+            crypto_keys.c
+    )
 
-target_include_directories(platform_crypto_keys
-    PUBLIC
-        .
-        ./native_drivers
-        ./device/include
-        ./device/config
-)
+    target_include_directories(platform_crypto_keys
+        PUBLIC
+            .
+            ./native_drivers
+            ./device/include
+            ./device/config
+    )
+endif()
 
 #========================= Platform Non-Secure ================================#
 

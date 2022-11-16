@@ -34,6 +34,8 @@ set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     3          CACHE STRING   "ID of the fla
 set(MCUBOOT_DATA_SHARING                ON         CACHE BOOL     "Add sharing of application specific data using the same shared data area as for the measured boot")
 set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS OFF CACHE BOOL     "Enable storing of encoded measurements in boot.")
 
+set(TFM_PARTITION_CRYPTO                ON         CACHE BOOL     "Enable Crypto partition")
+set(TFM_PARTITION_INITIAL_ATTESTATION   ON         CACHE BOOL     "Enable Initial Attestation partition")
 set(TFM_PARTITION_PROTECTED_STORAGE     OFF        CACHE BOOL     "Enable Protected Storage partition")
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF     CACHE BOOL     "Enable Internal Trusted Storage partition")
 set(TFM_PARTITION_MEASURED_BOOT         ON         CACHE BOOL     "Enable Measured boot partition")
