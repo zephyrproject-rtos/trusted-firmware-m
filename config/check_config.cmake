@@ -29,6 +29,8 @@ tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND PSA_FRAMEWORK_HAS_MM_IOVEC)
 
 tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND TFM_NS_MANAGE_NSID)
 tfm_invalid_config(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM AND NOT TFM_MULTI_CORE_TOPOLOGY)
+# Multi-core platform with mailbox partition cannot fully work with SFN backend yet.
+tfm_invalid_config(TFM_PARTITION_NS_AGENT_MAILBOX AND CONFIG_TFM_SPM_BACKEND_SFN)
 
 tfm_invalid_config(TFM_ISOLATION_LEVEL EQUAL 3 AND CONFIG_TFM_STACK_WATERMARKS)
 

@@ -9,6 +9,7 @@
 
 ############################ Partitions ########################################
 
+set(CONFIG_TFM_SPM_BACKEND      "IPC"       CACHE STRING    "The SPM backend [IPC, SFN]")
 set(CONFIG_TFM_SPM_BACKEND_IPC  ON)
 set(CONFIG_TFM_SPM_BACKEND_SFN  OFF)
 set(CONFIG_TFM_PARTITION_META   ON)
