@@ -14,9 +14,5 @@ set(CONFIG_TFM_PSA_API_SFN_CALL             {{config_impl['CONFIG_TFM_PSA_API_SF
 set(CONFIG_TFM_PSA_API_CROSS_CALL           {{config_impl['CONFIG_TFM_PSA_API_CROSS_CALL']}}           PARENT_SCOPE)
 set(CONFIG_TFM_PSA_API_SUPERVISOR_CALL      {{config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL']}}      PARENT_SCOPE)
 
-if((CONFIG_TFM_FLOAT_ABI GREATER 0) AND CONFIG_TFM_SPM_BACKEND_SFN)
-    message(FATAL_ERROR "FP is not supported for SFN model.")
-endif()
-
 set(CONFIG_TFM_FLIH_API     {{config_impl['CONFIG_TFM_FLIH_API']}}    PARENT_SCOPE)
 set(CONFIG_TFM_SLIH_API     {{config_impl['CONFIG_TFM_SLIH_API']}}    PARENT_SCOPE)
