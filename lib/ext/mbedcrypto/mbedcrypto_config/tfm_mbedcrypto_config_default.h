@@ -554,4 +554,8 @@
 #include "mbedtls_entropy_nv_seed_config.h"
 #endif
 
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "mbedtls_accelerator_config.h"
+#endif
+
 #endif /* MBEDTLS_CONFIG_H */
