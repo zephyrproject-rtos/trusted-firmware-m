@@ -39,10 +39,11 @@ static uint8_t block[TFM_FWU_BUF_SIZE] __aligned(4);
 static psa_status_t tfm_fwu_start(const psa_msg_t *msg)
 {
     psa_fwu_component_t component;
-#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1 || TFM_CONFIG_FWU_MAX_MANIFEST_SIZE == 0
     uint8_t *manifest = NULL;
 #else
-    uint8_t manifest[TFM_CONFIG_FWU_MAX_MANIFEST_SIZE];
+    uint8_t manifest_data[TFM_CONFIG_FWU_MAX_MANIFEST_SIZE];
+    uint8_t *manifest = manifest_data;
 #endif
     size_t manifest_size;
     psa_status_t status;
@@ -52,7 +53,7 @@ static psa_status_t tfm_fwu_start(const psa_msg_t *msg)
     if (msg->in_size[0] != sizeof(component)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
-    if (msg->in_size[1] > sizeof(manifest)) {
+    if (msg->in_size[1] > TFM_CONFIG_FWU_MAX_MANIFEST_SIZE) {
         return PSA_ERROR_NOT_SUPPORTED;
     }
     psa_read(msg->handle, 0, &component, sizeof(component));
@@ -86,7 +87,7 @@ static psa_status_t tfm_fwu_start(const psa_msg_t *msg)
 
         /* The component is not in FWU process. Initialize the ctx for this component. */
         status = fwu_bootloader_staging_area_init(component,
-                                                  (const void *)&manifest,
+                                                  (const void *)manifest,
                                                   manifest_size);
         if (status != PSA_SUCCESS) {
             return status;
@@ -529,7 +530,6 @@ psa_status_t tfm_firmware_update_service_sfn(const psa_msg_t *msg)
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
-    return PSA_ERROR_GENERIC_ERROR;
 }
 
 psa_status_t tfm_fwu_entry(void)
