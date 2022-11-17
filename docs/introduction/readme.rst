@@ -14,13 +14,21 @@ Environment (NSPE) and the Secure Processing Environment (SPE). It can but is
 not limited to using the `Arm TrustZone technology`_ on Armv8-M and Armv8.1-M
 architectures. In pre-Armv8-M architectures physical core isolation is required.
 
-**Trusted Firmware-M consists of:**
+**TF-M consists of:**
 
-- Secure Boot to authenticate integrity of NSPE and SPE images
-- TF-M Core responsible for controlling the isolation, communication and
-  execution within SPE and with NSPE
-- Crypto, Internal Trusted Storage (ITS), Protected Storage (PS) and
-  Attestation secure services
+- Secure Boot to authenticate NSPE and SPE images
+- TF-M Core for controlling the isolation, communication
+  and execution within SPE and with NSPE
+- Crypto, Internal Trusted Storage (ITS), Protected Storage (PS),
+  Firmware Update and Attestation secure services
+
+TF-M implements PSA-FF-M defined IPC and SFN mechanisms to allow communication
+between isolated firmware partitions. TF-M is highly configurable allowing users
+to only include the required secure services and features. Project provides
+‘TF-M base’ build with just TF-M core and platform drivers and 4 predefined
+configurations known as :ref:`tf-m_profiles`. TF-M Profiles or TF-M base can
+be configured to include required services and features as described in the
+'Configuration' section.
 
 .. figure:: readme_tfm_v8.png
    :scale: 65 %

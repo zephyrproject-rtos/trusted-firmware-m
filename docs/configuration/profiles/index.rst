@@ -1,5 +1,8 @@
+.. _tf-m_profiles:
+
+#############
 TF-M Profiles
-=============
+#############
 
 The capabilities and resources may dramatically vary on different IoT devices.
 Some IoT devices may have very limited memory resource. The program on those devices should keep
@@ -83,4 +86,4 @@ Each profile has predefined configuration for cryptographic library, located in
 
 --------------
 
-Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020, Arm Limited. All rights reserved.*
