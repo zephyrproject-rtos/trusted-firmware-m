@@ -30,7 +30,7 @@ target_compile_definitions(platform_fvp
 
 target_include_directories(platform_fvp
     PUBLIC
-        ${CMAKE_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
         native_drivers
         libraries
         device/config
@@ -39,6 +39,11 @@ target_include_directories(platform_fvp
         ${CORSTONE310_COMMON_DIR}/device/include
         ${CORSTONE310_COMMON_DIR}/partition
         ${CORSTONE310_COMMON_DIR}/native_drivers
+)
+
+target_compile_options(platform_fvp
+    PRIVATE
+        ${COMPILER_CMSE_FLAG}
 )
 
 target_link_libraries(platform_bl2
