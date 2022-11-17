@@ -309,6 +309,8 @@ target_sources(tfm_spm
 
 #=========================== CPAK generator tool ===============================
 
+find_package(Python3)
+
 add_custom_target(cpak_generator
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator/cpak_generator.c
 )
@@ -322,6 +324,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_genera
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator
     COMMAND ${CMAKE_COMMAND} -S ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator
                              -B ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator
+                             -G ${CMAKE_GENERATOR}
                              -DMBEDCRYPTO_PATH=${MBEDCRYPTO_PATH}
                              -DBL1_2_HASH_PATH=\\\"$<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin\\\"
                              -DGUK_PATH=\\\"${TFM_GUK_PATH}\\\"
@@ -337,7 +340,7 @@ add_custom_target(cpak_public ALL
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator/bin_to_pem.py
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/
     COMMAND ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_generator
-    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator/bin_to_pem.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cpak_generator/bin_to_pem.py
                     --input_key_file ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_public.bin
                     --output_key_file ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_public.pem
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/cpak_generator/cpak_public.bin $<TARGET_FILE_DIR:bl1_1>

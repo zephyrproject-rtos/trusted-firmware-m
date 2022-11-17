@@ -5,6 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
+find_package(Python3)
+
 add_subdirectory(lib)
 
 add_executable(bl1_2)
@@ -84,7 +86,7 @@ add_custom_command(OUTPUT bl2_signed.bin bl2_signed_hash.bin
     OUTPUT ${bin_dir}/bl2_signed.bin ${bin_dir}/bl2_signed_hash.bin
     DEPENDS $<TARGET_FILE_DIR:bl2>/bl2.bin bl2_bin signing_layout_bl2
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
-    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
                     --input_file $<TARGET_FILE_DIR:bl2>/bl2.bin
                     --img_output_file bl2_signed.bin
                     --hash_output_file bl2_signed_hash.bin

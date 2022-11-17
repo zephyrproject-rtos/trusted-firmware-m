@@ -5,6 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
+find_package(Python3)
+
 add_subdirectory(lib)
 add_subdirectory(shared_lib)
 add_executable(bl1_1)
@@ -71,7 +73,7 @@ add_custom_command(OUTPUT bl1_2_padded.bin bl1_2_padded_hash.bin
     OUTPUT ${bin_dir}/bl1_2_padded.bin ${bin_dir}/bl1_2_padded_hash.bin
     DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2.bin bl1_2_bin signing_layout_bl1_2
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl1_2_img.py
-    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl1_2_img.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl1_2_img.py
                     --input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2.bin
                     --img_output_file bl1_2_padded.bin
                     --hash_output_file bl1_2_padded_hash.bin
@@ -95,7 +97,7 @@ add_custom_command(OUTPUT bl1_provisioning_bundle.bin
     DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
     bl1_2_padded_bin bl2_signed_bin
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_provisioning_bundle.py
-    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_provisioning_bundle.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_provisioning_bundle.py
                     --bl2_encryption_key_input_file ${TFM_BL2_ENCRYPTION_KEY_PATH}
                     --bl2_signing_key_input_file ${TFM_BL2_SIGNING_KEY_PATH}
                     --guk_input_file ${TFM_GUK_PATH}
