@@ -28,10 +28,8 @@ set(CONFIG_TFM_USE_TRUSTZONE            OFF        CACHE BOOL     "Enable use of
 set(TFM_MULTI_CORE_TOPOLOGY             ON         CACHE BOOL     "Whether to build for a dual-cpu architecture")
 set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to use a platform specific inter core communication instead of mailbox in dual-cpu topology")
 
-if(TFM_PARTITION_CRYPTO)
-    set(CRYPTO_HW_ACCELERATOR           ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
-    set(CRYPTO_NV_SEED                  OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
-endif()
+set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
+set(CRYPTO_NV_SEED                      OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
 
 set(TFM_CRYPTO_TEST_ALG_CFB             OFF        CACHE BOOL     "Test CFB cryptography mode")
 set(NS                                  FALSE      CACHE BOOL     "Whether to build NS app")

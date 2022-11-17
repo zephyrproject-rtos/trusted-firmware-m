@@ -16,8 +16,6 @@ set(BL2_TRAILER_SIZE                    0x2000      CACHE STRING    "Trailer siz
 ################################## Dependencies ################################
 set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
-if(TFM_PARTITION_CRYPTO)
-    set(CRYPTO_HW_ACCELERATOR           ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
-    set(CRYPTO_NV_SEED                  OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
-    set(MBEDCRYPTO_BUILD_TYPE           minsizerel  CACHE STRING "Build type of Mbed Crypto library")
-endif()
+set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
+set(CRYPTO_NV_SEED                      OFF         CACHE BOOL      "Use stored NV seed to provide entropy")
+set(MBEDCRYPTO_BUILD_TYPE               minsizerel  CACHE STRING "Build type of Mbed Crypto library")
