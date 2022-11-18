@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "cmsis_compiler.h"
 #include "config_its.h"
 #include "psa/storage_common.h"
 #include "tfm_internal_trusted_storage.h"
@@ -27,7 +28,7 @@
  * Note: size must be aligned to the max flash program unit to meet the
  * alignment requirement of the filesystem.
  */
-static uint8_t asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
+static uint8_t __ALIGNED(4) asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
                                           ITS_FLASH_MAX_ALIGNMENT)];
 #endif
 
