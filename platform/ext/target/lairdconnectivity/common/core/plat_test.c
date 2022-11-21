@@ -102,22 +102,6 @@ void tfm_plat_test_non_secure_timer_stop(void)
     timer_stop(NRF_TIMER1);
 }
 
-void pal_timer_init_ns(uint32_t ticks)
-{
-    timer_init(NRF_TIMER1, ticks);
-    NVIC_EnableIRQ(TIMER1_IRQn);
-}
-
-void pal_timer_start_ns(void)
-{
-    timer_start(NRF_TIMER1);
-}
-
-void pal_timer_stop_ns(void)
-{
-    timer_stop(NRF_TIMER1);
-}
-
 #if defined(PSA_API_TEST_NS) && !defined(PSA_API_TEST_IPC)
 /* Watchdog timeout handler. */
 void TIMER1_Handler(void)
