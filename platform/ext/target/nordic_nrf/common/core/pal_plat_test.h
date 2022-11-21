@@ -20,23 +20,6 @@
  */
 
 /**
- * \brief Initialize the timer with the given number of ticks.
- *
- * \param[in] ticks Number of ticks per microsecond
- */
-void pal_timer_init_ns(uint32_t ticks);
-
-/**
- * \brief Start the timer.
- */
-void pal_timer_start_ns(void);
-
-/**
- * \brief Stop and reset the timer.
- */
-void pal_timer_stop_ns(void);
-
-/**
  * \brief Get the address of a free, word-aligned, 1K memory area.
  */
 uint32_t pal_nvmem_get_addr(void);
