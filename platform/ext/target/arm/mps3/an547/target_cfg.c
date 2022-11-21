@@ -241,6 +241,9 @@ void sau_and_idau_cfg(void)
 {
     struct sse300_sacfg_t *sacfg = (struct sse300_sacfg_t*)SSE300_SACFG_BASE_S;
 
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
     /* Enables SAU */
     TZ_SAU_Enable();
 
@@ -269,6 +272,10 @@ void sau_and_idau_cfg(void)
 
     /* Allows SAU to define the CODE region as a NSC */
     sacfg->nsccfg |= CODENSC;
+
+    /* Ensure the write is completed and flush pipeline */
+    __DSB();
+    __ISB();
 }
 
 /*------------------- Memory configuration functions -------------------------*/

@@ -292,6 +292,9 @@ void sau_and_idau_cfg(void)
 {
     struct rss_sacfg_t *sacfg = (struct rss_sacfg_t *)RSS_SACFG_BASE_S;
 
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
     /* Enables SAU */
     TZ_SAU_Enable();
 
@@ -331,6 +334,10 @@ void sau_and_idau_cfg(void)
 
     /* Configure MSC to enable secure accesses for the DMA */
     sacfg->nsmscexp = 0x0;
+
+    /* Ensure the write is completed and flush pipeline */
+    __DSB();
+    __ISB();
 
 }
 

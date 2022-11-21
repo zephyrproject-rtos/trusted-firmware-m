@@ -372,6 +372,9 @@ void sau_and_idau_cfg(void)
 
     struct corstone310_sacfg_t *sacfg = (struct corstone310_sacfg_t*)CORSTONE310_SACFG_BASE_S;
 
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
     /* Allows IDAU to define the RAM region as a NSC */
     sacfg->nsccfg |= RAMNSC;
 

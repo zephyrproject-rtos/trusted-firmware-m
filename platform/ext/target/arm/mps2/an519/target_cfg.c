@@ -292,6 +292,9 @@ void sau_and_idau_cfg(void)
     struct spctrl_def *spctrl = CMSDK_SPCTRL;
     uint32_t i;
 
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
     /* Enables SAU */
     TZ_SAU_Enable();
 
@@ -305,6 +308,10 @@ void sau_and_idau_cfg(void)
 
     /* Allows SAU to define the code region as a NSC */
     spctrl->nsccfg |= NSCCFG_CODENSC;
+
+    /* Ensure the write is completed and flush pipeline */
+    __DSB();
+    __ISB();
 }
 
 /*------------------- Memory configuration functions -------------------------*/
