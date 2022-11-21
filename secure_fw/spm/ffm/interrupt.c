@@ -161,7 +161,7 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
 #if TFM_LVL == 1
         flih_result = p_ildi->flih_func();
 #else
-        if (tfm_hal_boundary_need_switch(spm_boundary,
+        if (!tfm_hal_boundary_need_switch(spm_boundary,
                                          p_part->boundary)) {
             flih_result = p_ildi->flih_func();
         } else {
