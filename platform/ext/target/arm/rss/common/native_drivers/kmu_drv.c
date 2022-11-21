@@ -362,7 +362,7 @@ enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot)
     p_kmu->kmuksc[slot] |= KMU_KMUKSC_EK_MASK;
 
     /* Wait for the key export to complete */
-    while (p_kmu->kmuis & KMU_KMISR_KEC_MASK) {}
+    while (!(p_kmu->kmuis & KMU_KMISR_KEC_MASK)) {}
 
     if (p_kmu->kmuis & KMU_KMISR_WTE_MASK) {
         err = KMU_ERROR_INTERNAL_ERROR;
