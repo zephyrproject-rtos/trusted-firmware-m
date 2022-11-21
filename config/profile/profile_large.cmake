@@ -19,7 +19,7 @@ set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON    CACHE BOOL "Enable Internal Tru
 set(TFM_PARTITION_PLATFORM                 ON    CACHE BOOL "Enable the TF-M Platform partition")
 set(TFM_PARTITION_PROTECTED_STORAGE        ON    CACHE BOOL "Enable Protected Storage partition")
 set(TFM_PARTITION_INITIAL_ATTESTATION      ON    CACHE BOOL "Enable Initial Attestation partition")
-set(SYMMETRIC_INITIAL_ATTESTATION          ON    CACHE BOOL "Use symmetric crypto for inital attestation")
+set(SYMMETRIC_INITIAL_ATTESTATION          OFF   CACHE BOOL "Use symmetric crypto for inital attestation")
 set(TFM_PARTITION_FIRMWARE_UPDATE          OFF   CACHE BOOL "Enable firmware update partition")
 
 ################################## Advanced options #############################
@@ -27,7 +27,6 @@ set(TFM_PARTITION_FIRMWARE_UPDATE          OFF   CACHE BOOL "Enable firmware upd
 set(MCUBOOT_FIH_PROFILE                   MEDIUM CACHE STRING "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 set(ITS_BUF_SIZE                           ""    CACHE STRING "Size of the ITS internal data transfer buffer (defaults to ITS_MAX_ASSET_SIZE if not set)")
 set(PS_CRYPTO_AEAD_ALG               PSA_ALG_CCM CACHE STRING "The AEAD algorithm to use for authenticated encryption in protected storage")
-set(CRYPTO_ASYM_ENCRYPT_MODULE_DISABLED    ON    CACHE BOOL "Disable PSA Crypto asymmetric key encryption module")
 
 ################################## Dependencies ################################
 

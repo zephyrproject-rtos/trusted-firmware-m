@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-set(TFM_PROFILE                   profile_medium CACHE STRING "Configuration profile")
+set(TFM_PROFILE                   profile_small CACHE STRING "Configuration profile")
 
 ############################ SPM CONFIGURATION  ################################
 
