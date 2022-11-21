@@ -45,7 +45,12 @@ void tfm_core_panic(void);
 #define M2S(m) STRINGIFY_EXPAND(m)
 
 /* Runtime memory operations forwarding */
+#ifndef spm_memcpy
 #define spm_memcpy memcpy
+#endif /* spm_memcpy */
+
+#ifndef spm_memset
 #define spm_memset memset
+#endif /* spm_memset */
 
 #endif /* __TFM_UTILS_H__ */

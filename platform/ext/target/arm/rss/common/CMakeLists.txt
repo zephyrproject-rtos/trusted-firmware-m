@@ -136,6 +136,7 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_checker_layer.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_checker_device_defs.c>
+        spm_dma_copy.c
 )
 
 target_link_libraries(platform_s
@@ -153,6 +154,7 @@ target_sources(tfm_sprt
 target_compile_definitions(platform_s
     INTERFACE
         ATTEST_KEY_BITS=${ATTEST_KEY_BITS}
+        spm_memcpy=spm_dma_memcpy
     PRIVATE
         # Needed for DMA-350 library
         CMSIS_device_header="rss.h"
