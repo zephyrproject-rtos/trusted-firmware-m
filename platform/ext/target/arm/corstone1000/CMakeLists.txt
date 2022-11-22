@@ -95,8 +95,8 @@ endif()
 target_compile_definitions(platform_s
     PUBLIC
         $<$<BOOL:${EXTERNAL_SYSTEM_SUPPORT}>:EXTERNAL_SYSTEM_SUPPORT>
-    PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
+    PRIVATE
         $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
 )
 
