@@ -199,7 +199,7 @@ target_sources(bl1_main
 
 target_link_libraries(bl1_main
     PRIVATE
-        platform_bl2
+        bl2_hal
 )
 
 target_compile_definitions(bl1_main
