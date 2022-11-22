@@ -10,7 +10,7 @@
 
 /* Size of output buffer in platform service. */
 #if ITS_NUM_ASSETS != 5
-#pragma message ("ITS_NUM_ASSETS is redefined to 5.")
+#pragma message("ITS_NUM_ASSETS is redefined to 5.")
 #undef ITS_NUM_ASSETS
 #endif
 #define ITS_NUM_ASSETS    5
