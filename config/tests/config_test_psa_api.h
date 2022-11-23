@@ -109,7 +109,15 @@
 #define ITS_VALIDATE_METADATA_FROM_FLASH       1
 
 /* The maximum asset size to be stored in the Internal Trusted Storage */
+#ifdef TEST_PSA_API_CRYPTO
+/*
+ * When building for the PSA Crypto API tests, ensure the ITS max asset size is
+ * set to at least the size of the largest asset created by the tests.
+ */
+#define ITS_MAX_ASSET_SIZE                     1229
+#else
 #define ITS_MAX_ASSET_SIZE                     512
+#endif
 
 /*
  * Size of the ITS internal data transfer buffer
