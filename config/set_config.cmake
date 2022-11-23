@@ -63,7 +63,7 @@ endif()
 include(${CMAKE_SOURCE_DIR}/config/tfm_build_log_config.cmake)
 
 # Load TF-M model specific default config
-# Load IPC backend config ifiIsolation level is explicitly specified to 2/3 or IPC backend is
+# Load IPC backend config if isolation level is explicitly specified to 2/3 or IPC backend is
 # selected via build command line. Otherwise, load SFN backend config by default.
 # If a pair of invalid settings are passed via command line, it will be captured later via config
 # check.
