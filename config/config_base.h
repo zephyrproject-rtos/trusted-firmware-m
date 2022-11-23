@@ -151,7 +151,7 @@
 /* The maximal number of secure services that are connected or requested at the same time */
 #define CONFIG_TFM_CONN_HANDLE_MAX_NUM         8
 
-/* Enable the doorbell APIs */
-#define CONFIG_TFM_DOORBELL_API                1
+/* Disable the doorbell APIs */
+#define CONFIG_TFM_DOORBELL_API                0
 
 #endif /* __CONFIG_BASE_H__ */

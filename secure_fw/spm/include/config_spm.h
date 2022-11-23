@@ -17,17 +17,20 @@
 #define CONFIG_TFM_CONN_HANDLE_MAX_NUM 8
 #endif
 
-/* Enable the doorbell APIs */
+/* Set the doorbell APIs */
 #ifndef CONFIG_TFM_DOORBELL_API
-#pragma message("CONFIG_TFM_DOORBELL_API is defaulted to 1. Please check and set it explicitly.")
-#define CONFIG_TFM_DOORBELL_API        1
-#endif
-
-/* Disable doorbell for SFN backend */
 #if CONFIG_TFM_SPM_BACKEND_SFN == 1
-#pragma message("CONFIG_TFM_DOORBELL_API is redefined to 0.")
-#undef  CONFIG_TFM_DOORBELL_API
+#pragma message("CONFIG_TFM_DOORBELL_API is defaulted to 0 for SFN backend. Please check and set it explicitly.")
 #define CONFIG_TFM_DOORBELL_API        0
+#else /* CONFIG_TFM_SPM_BACKEND_SFN == 1 */
+#pragma message("CONFIG_TFM_DOORBELL_API is defaulted to 1 for IPC backend. Please check and set it explicitly.")
+#define CONFIG_TFM_DOORBELL_API        1
+#endif /* CONFIG_TFM_SPM_BACKEND_SFN == 1 */
+#endif /* !CONFIG_TFM_DOORBELL_API */
+
+/* Check invalid configs */
+#if (CONFIG_TFM_SPM_BACKEND_SFN == 1) && CONFIG_TFM_DOORBELL_API
+#error "Invalid config: CONFIG_TFM_SPM_BACKEND_SFN AND CONFIG_TFM_DOORBELL_API!"
 #endif
 
 #endif /* __CONFIG_PARTITION_SPM_H__ */

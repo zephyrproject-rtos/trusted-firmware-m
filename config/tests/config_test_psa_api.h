@@ -159,7 +159,12 @@
 /* The maximal number of secure services that are connected or requested at the same time */
 #define CONFIG_TFM_CONN_HANDLE_MAX_NUM         8
 
-/* Enable the doorbell APIs */
+/* Set the doorbell APIs */
+#ifdef TEST_PSA_API_IPC
+/* IPC test suite uses IPC backend */
 #define CONFIG_TFM_DOORBELL_API                1
+#else
+#define CONFIG_TFM_DOORBELL_API                0
+#endif
 
 #endif /* __CONFIG_TEST_PSA_API_H__ */
