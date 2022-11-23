@@ -100,6 +100,13 @@ target_compile_definitions(platform_s
         $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
 )
 
+if (TFM_PARTITION_CRYPTO)
+    target_include_directories(platform_crypto_keys
+        PUBLIC
+            .
+    )
+endif()
+
 #========================= Platform BL2 =======================================#
 
 set(BL2_SOURCE ${CMAKE_SOURCE_DIR}/bl2)
