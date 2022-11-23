@@ -122,6 +122,12 @@ psa_status_t fwu_bootloader_staging_area_init(psa_fwu_component_t component,
         LOG_ERRFMT("TFM FWU: opening flash failed.\r\n");
         return PSA_ERROR_STORAGE_FAILURE;
     }
+
+    if (flash_area_erase(fap, 0, fap->fa_size) != 0) {
+        LOG_ERRFMT("TFM FWU: erasing flash failed.\r\n");
+        return PSA_ERROR_GENERIC_ERROR;
+    }
+
     mcuboot_ctx[component].fap = fap;
 
     /* Reset the loaded_size. */
