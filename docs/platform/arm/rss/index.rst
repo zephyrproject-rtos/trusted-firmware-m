@@ -7,6 +7,8 @@ Runtime Security Subsystem (RSS)
 
     RSS introduction <readme.rst>
     RSS communication design <rss_comms.rst>
+    RSS hardware key management <rss_key_management.rst>
+    RSS provisioning <rss_provisioning.rst>
 
 RSS also includes the following extra partitions:
 
