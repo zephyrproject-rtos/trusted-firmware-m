@@ -215,7 +215,9 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
 };
 
 #if defined(__ICCARM__)
-extern typeof(__vector_table) __attribute__ ((alias ("__vector_table"))) __Vectors;
+#define ARRAY_LENGTH(array) (sizeof((array))/sizeof((array)[0]))
+extern const VECTOR_TABLE_Type __attribute__ ((alias ("__vector_table")))
+             __Vectors[ARRAY_LENGTH(__VECTOR_TABLE)];
 #endif
 
 #if defined ( __GNUC__ )
