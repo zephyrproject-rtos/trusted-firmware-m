@@ -49,13 +49,13 @@ slot_s=$slot2
 slot_ns=$slot3
 fi
 if [ $slot2 == $u5 ]; then
-external_loader="C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32U585I-IOT02A.stldr"
+external_loader="-el C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32U585I-IOT02A.stldr"
 fi
 if [ $slot2 == $l5 ]; then
-external_loader="C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32L562E-DK.stldr"
+external_loader="-el C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32L562E-DK.stldr"
 fi
-connect_no_reset="-c port=SWD "$sn_option" mode=UR -el $external_loader"
-connect="-c port=SWD "$sn_option" mode=UR --hardRst -el $external_loader"
+connect_no_reset="-c port=SWD "$sn_option" mode=UR $external_loader"
+connect="-c port=SWD "$sn_option" mode=UR --hardRst $external_loader"
 
 echo "Write TFM_Appli Secure"
 # part ot be updated according to flash_layout.h
