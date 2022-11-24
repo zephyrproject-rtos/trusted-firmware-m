@@ -21,6 +21,7 @@ target_include_directories(platform_region_defs
 target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${RSS_XIP}>:RSS_XIP>
+        $<$<BOOL:${RSS_DEBUG_UART}>:RSS_DEBUG_UART>
 )
 
 #========================= Platform common defs ===============================#
@@ -121,7 +122,6 @@ target_sources(platform_s
         cmsis_drivers/Driver_Flash.c
         cmsis_drivers/Driver_MPC.c
         cmsis_drivers/Driver_PPC.c
-        cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/host_device_definition.c
         device/source/system_core_init.c
@@ -140,7 +140,10 @@ target_sources(platform_s
         native_drivers/ppc_rss_drv.c
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         native_drivers/systimer_armv8-m_drv.c
-        native_drivers/uart_pl011_drv.c
+        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
+        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_pl011_drv.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
         tfm_peripherals_def.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -205,12 +208,14 @@ endif()
 target_sources(platform_ns
     PRIVATE
         cmsis_drivers/Driver_Flash.c
-        cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/host_device_definition.c
         device/source/system_core_init.c
         native_drivers/systimer_armv8-m_drv.c
-        native_drivers/uart_pl011_drv.c
+        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
+        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_pl011_drv.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
         native_drivers/cfi_drv.c
         native_drivers/spi_strataflashj3_flash_lib.c
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_ns_mailbox.c>
@@ -238,7 +243,6 @@ target_sources(platform_bl2
         tfm_hal_platform_reset.c
         bl2/provisioning.c
         cmsis_drivers/Driver_Flash.c
-        cmsis_drivers/Driver_USART.c
         device/source/device_definition.c
         device/source/host_device_definition.c
         device/source/system_core_init.c
@@ -251,7 +255,10 @@ target_sources(platform_bl2
         native_drivers/kmu_drv.c
         native_drivers/sic_drv.c
         native_drivers/mhu_v2_x.c
-        native_drivers/uart_pl011_drv.c
+        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
+        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_pl011_drv.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
         native_drivers/lcm_drv.c
         otp_lcm.c
         nv_counters.c
@@ -302,8 +309,6 @@ target_compile_definitions(platform_bl2
 target_sources(platform_bl1
     PRIVATE
         ./bl1/boot_hal_bl1.c
-        $<$<BOOL:${TFM_BL1_LOGGING}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
-        $<$<BOOL:${TFM_BL1_LOGGING}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_pl011_drv.c>
         $<$<NOT:$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c>
         $<$<NOT:$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/cfi_drv.c>
         $<$<NOT:$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/spi_strataflashj3_flash_lib.c>
@@ -312,6 +317,10 @@ target_sources(platform_bl1
         ./device/source/system_core_init.c
         ./native_drivers/atu_rss_drv.c
         ./native_drivers/kmu_drv.c
+        $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<NOT:$<BOOL:${RSS_DEBUG_UART}>>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
+        $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
+        $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<NOT:$<BOOL:${RSS_DEBUG_UART}>>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_pl011_drv.c>
+        $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
         ./native_drivers/lcm_drv.c
         ./otp_lcm.c
         ./nv_counters.c

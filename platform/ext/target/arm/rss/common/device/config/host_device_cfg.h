@@ -24,10 +24,17 @@
  * defined and configured via the secure and/or non-secure base address.
  */
 
+#ifndef RSS_DEBUG_UART
 /* ARM UART PL011 */
 #define DEFAULT_UART_BAUDRATE  115200
 #define UART0_PL011_S
 #define UART0_PL011_NS
+#else
+/* ARM UART CMSDK */
+#define DEFAULT_UART_BAUDRATE  115200
+#define UART0_CMSDK_S
+#define UART0_CMSDK_NS
+#endif /* !RSS_DEBUG_UART */
 
 /*External Intel Strata Flash Device*/
 #define SPI_STRATAFLASHJ3_S

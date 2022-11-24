@@ -21,7 +21,11 @@
 #include "device_definition.h"
 #include "RTE_Device.h"
 
+#ifndef RSS_DEBUG_UART
 #define UART0_DEV                    UART0_PL011_DEV_NS
+#else
+#define UART0_DEV                    UART0_CMSDK_NS
+#endif /* !RSS_DEBUG_UART */
 
 #define FLASH0_DEV                   SPI_STRATAFLASHJ3_DEV
 

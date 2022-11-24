@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,10 @@
 #include "platform_base_address.h"
 #include "host_base_address.h"
 
+#ifndef RSS_DEBUG_UART
 /* Arm UART PL011 driver structures */
 static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_S = {
-    .base = UART0_BASE_S,
+    .base = HOST_UART0_BASE_S,
     .def_baudrate = DEFAULT_UART_BAUDRATE,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
@@ -41,7 +42,7 @@ static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_S = {
 struct uart_pl011_dev_t UART0_PL011_DEV_S = {&(UART0_PL011_DEV_CFG_S),
                                              &(UART0_PL011_DEV_DATA_S)};
 static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_NS = {
-    .base = UART0_BASE_NS,
+    .base = HOST_UART0_BASE_NS,
     .def_baudrate = DEFAULT_UART_BAUDRATE,
     .def_wlen = UART_PL011_WLEN_8,
     .def_parity = UART_PL011_PARITY_DISABLED,
@@ -52,6 +53,34 @@ static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_NS = {
     .baudrate = 0};
 struct uart_pl011_dev_t UART0_PL011_DEV_NS = {&(UART0_PL011_DEV_CFG_NS),
                                               &(UART0_PL011_DEV_DATA_NS)};
+#else
+static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_S = {
+    .base = RSS_DEBUG_UART0_BASE_S,
+    .default_baudrate = DEFAULT_UART_BAUDRATE
+};
+static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_S = {
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
+};
+struct uart_cmsdk_dev_t ARM_UART0_DEV_S = {
+    &(UART0_CMSDK_DEV_CFG_S),
+    &(UART0_CMSDK_DEV_DATA_S)
+};
+static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_NS = {
+    .base = RSS_DEBUG_UART0_BASE_NS,
+    .default_baudrate = DEFAULT_UART_BAUDRATE
+};
+static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_NS = {
+    .state = 0,
+    .system_clk = 0,
+    .baudrate = 0
+};
+struct uart_cmsdk_dev_t ARM_UART0_DEV_NS = {
+    &(UART0_CMSDK_DEV_CFG_NS),
+    &(UART0_CMSDK_DEV_DATA_NS)
+};
+#endif /* !RSS_DEBUG_UART */
 
 #if (defined (SPI_STRATAFLASHJ3_S) && defined (CFI_S))
 static const struct cfi_dev_cfg_t CFI_DEV_CFG_S = {

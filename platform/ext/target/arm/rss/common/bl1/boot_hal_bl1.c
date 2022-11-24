@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -42,13 +42,16 @@ static int32_t init_atu_regions(void)
 {
     enum atu_error_t err;
 
+#ifndef RSS_DEBUG_UART
     /* Initialize UART region */
     err = atu_initialize_region(&ATU_DEV_S,
                                 get_supported_region_count(&ATU_DEV_S) - 1,
-                                UART0_BASE_NS, HOST_UART_BASE, HOST_UART_SIZE);
+                                HOST_UART0_BASE_NS, HOST_UART_BASE,
+                                HOST_UART_SIZE);
     if (err != ATU_ERR_NONE) {
         return 1;
     }
+#endif /* !RSS_DEBUG_UART */
 
     /* Initialize BL2 slot 0 region */
     err = atu_initialize_region(&ATU_DEV_S,

@@ -65,11 +65,12 @@
 #define SLOWCLK_TIMER_CMSDK_BASE_NS      0x4802F000 /* CMSDK based SLOWCLK Timer Non-Secure base address */
 #define SYSWDOG_ARMV8_M_CNTRL_BASE_NS    0x48040000 /* Non-Secure Watchdog Timer control frame Non-Secure base address */
 #define SYSWDOG_ARMV8_M_REFRESH_BASE_NS  0x48041000 /* Non-Secure Watchdog Timer refresh frame Non-Secure base address */
+#define RSS_DEBUG_UART0_BASE_NS          0xE0305000 /* Debug UART attached to RSS subsystem */
 /* Non-Secure Host region */
 #define HOST_ACCESS_BASE_NS              0x60000000 /* Can access the Host region based on ATU config */
 #define HOST_ACCESS_LIMIT_NS             (HOST_ACCESS_BASE_NS + HOST_ACCESS_SIZE - 1)
 /* ATU regions open in bootloader and runtime */
-#define UART0_BASE_NS                    (HOST_ACCESS_BASE_NS + 0xFF00000) /* UART 0 Non-Secure base address */
+#define HOST_UART0_BASE_NS               (HOST_ACCESS_BASE_NS + 0xFF00000) /* UART 0 Non-Secure base address */
 
 /* Secure memory map addresses */
 #define ITCM_BASE_S                      0x10000000 /* Instruction TCM Secure base address */
@@ -128,13 +129,14 @@
 #define SLOWCLK_TIMER_CMSDK_BASE_S       0x5802F000 /* CMSDK based SLOWCLK Timer Secure base address */
 #define SYSWDOG_ARMV8_M_CNTRL_BASE_S     0x58040000 /* Secure Watchdog Timer control frame Secure base address */
 #define SYSWDOG_ARMV8_M_REFRESH_BASE_S   0x58041000 /* Secure Watchdog Timer refresh frame Secure base address */
+#define RSS_DEBUG_UART0_BASE_S           0xF0305000 /* Debug UART attached to RSS subsystem */
 
 /* Secure Host region */
 #define HOST_ACCESS_BASE_S               0x70000000 /* Can access the Host region based on ATU config */
 #define HOST_ACCESS_LIMIT_S              (HOST_ACCESS_BASE_S + HOST_ACCESS_SIZE - 1)
 
 /* ATU regions open in bootloader and runtime */
-#define UART0_BASE_S                     (HOST_ACCESS_BASE_S + 0xFF00000) /* UART 0 Secure base address */
+#define HOST_UART0_BASE_S                (HOST_ACCESS_BASE_S + 0xFF00000) /* UART 0 Secure base address */
 /* ATU regions open in BL1 */
 #define HOST_FLASH0_BASE_S               (HOST_ACCESS_BASE_S + 0x200000) /* Host flash 0 address */
 /* ATU regions open in BL2 */
