@@ -503,7 +503,7 @@ psa_status_t cc3xx_sign_message(const psa_key_attributes_t *attributes,
     }
 
 #if defined(PSA_WANT_ALG_DETERMINISTIC_ECDSA)
-    if (PSA_ALG_ECDSA_IS_DETERMINISTIC(alg)) {
+    if (PSA_ALG_IS_DETERMINISTIC_ECDSA(alg)) {
         ret = cc3xx_hash_compute(PSA_ALG_SIGN_GET_HASH(alg), input,
                                  input_length, hash, sizeof(hash), &hash_len);
         if (ret != PSA_SUCCESS) {
