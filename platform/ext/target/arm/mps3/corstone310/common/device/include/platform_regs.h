@@ -320,6 +320,12 @@ struct corstone310_nsacfg_t {
 #define UART5_PERIPH_PPCEXP2_POS_MASK              (1UL << 8)
 #define CLCD_PERIPH_PPCEXP2_POS_MASK               (1UL << 10)
 #define RTC_PERIPH_PPCEXP2_POS_MASK                (1UL << 11)
+
+#ifdef CORSTONE310_FVP
+#define VSI_PERIPH_PPCEXP2_POS_MASK                (1UL << 12)
+#define VIO_PERIPH_PPCEXP2_POS_MASK                (1UL << 13)
+#define VSOCKET_PERIPH_PPCEXP2_POS_MASK            (1UL << 14)
+#endif
 /* End PERIPH PPCEXP2 peripherals definition */
 
 /* PERIPH PPCEXP3 peripherals definition */

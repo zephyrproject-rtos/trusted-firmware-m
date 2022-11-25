@@ -459,6 +459,18 @@ enum tfm_plat_err_t ppc_init_cfg(void)
                                         CLCD_PERIPH_PPCEXP2_POS_MASK,
                                         ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
 
+#ifdef CORSTONE310_FVP
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        VSI_PERIPH_PPCEXP2_POS_MASK,
+                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        VIO_PERIPH_PPCEXP2_POS_MASK,
+                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
+    err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigSecurity(
+                                        VSOCKET_PERIPH_PPCEXP2_POS_MASK,
+                                        ARM_PPC_CORSTONE310_NONSECURE_CONFIG);
+#endif
+
     /* Grant un-privileged access for UART0 in NS domain */
     err |= Driver_PERIPH_EXP2_PPC_CORSTONE310.ConfigPrivilege(
                                         UART0_PERIPH_PPCEXP2_POS_MASK,

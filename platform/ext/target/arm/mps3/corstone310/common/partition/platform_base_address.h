@@ -91,6 +91,20 @@
 #define UART5_BASE_NS                    0x49308000 /* UART 5 Non-Secure base address */
 #define CLCD_Config_Reg_BASE_NS          0x4930A000 /* CLCD Config Reg Non-Secure base address */
 #define RTC_BASE_NS                      0x4930B000 /* RTC Non-Secure base address */
+
+#ifdef CORSTONE310_FVP
+#define VSOCKET_BASE_NS                  0x4FEE0000 /*!< VSOCKET Non-Secure base address */
+#define VIO_BASE_NS                      0x4FEF0000 /*!< VIO Non-Secure base address */
+#define VSI0_BASE_NS                     0x4FF00000 /*!< VSI 0 Non-Secure base address */
+#define VSI1_BASE_NS                     0x4FF10000 /*!< VSI 1 Non-Secure base address */
+#define VSI2_BASE_NS                     0x4FF20000 /*!< VSI 2 Non-Secure base address */
+#define VSI3_BASE_NS                     0x4FF30000 /*!< VSI 3 Non-Secure base address */
+#define VSI4_BASE_NS                     0x4FF40000 /*!< VSI 4 Non-Secure base address */
+#define VSI5_BASE_NS                     0x4FF50000 /*!< VSI 5 Non-Secure base address */
+#define VSI6_BASE_NS                     0x4FF60000 /*!< VSI 6 Non-Secure base address */
+#define VSI7_BASE_NS                     0x4FF70000 /*!< VSI 7 Non-Secure base address */
+#endif
+
 #define DDR4_BLK0_BASE_NS                0x60000000 /* DDR4 block 0 Non-Secure base address */
 #define DDR4_BLK2_BASE_NS                0x80000000 /* DDR4 block 2 Non-Secure base address */
 #define DDR4_BLK4_BASE_NS                0xA0000000 /* DDR4 block 4 Non-Secure base address */
@@ -178,6 +192,20 @@
 #define UART5_BASE_S                     0x59308000 /* UART 5 Secure base address */
 #define CLCD_Config_Reg_BASE_S           0x5930A000 /* CLCD Config Reg Secure base address */
 #define RTC_BASE_S                       0x5930B000 /* RTC Secure base address */
+
+#ifdef CORSTONE310_FVP
+#define VSOCKET_BASE_S                   0x5FEE0000 /*!< VSOCKET Secure base address */
+#define VIO_BASE_S                       0x5FEF0000 /*!< VIO Secure base address */
+#define VSI0_BASE_S                      0x5FF00000 /*!< VSI 0 Secure base address */
+#define VSI1_BASE_S                      0x5FF10000 /*!< VSI 1 Secure base address */
+#define VSI2_BASE_S                      0x5FF20000 /*!< VSI 2 Secure base address */
+#define VSI3_BASE_S                      0x5FF30000 /*!< VSI 3 Secure base address */
+#define VSI4_BASE_S                      0x5FF40000 /*!< VSI 4 Secure base address */
+#define VSI5_BASE_S                      0x5FF50000 /*!< VSI 5 Secure base address */
+#define VSI6_BASE_S                      0x5FF60000 /*!< VSI 6 Secure base address */
+#define VSI7_BASE_S                      0x5FF70000 /*!< VSI 7 Secure base address */
+#endif
+
 #define DDR4_BLK1_BASE_S                 0x70000000 /* DDR4 block 1 Secure base address */
 #define DDR4_BLK3_BASE_S                 0x90000000 /* DDR4 block 3 Secure base address */
 #define DDR4_BLK5_BASE_S                 0xB0000000 /* DDR4 block 5 Secure base address */
