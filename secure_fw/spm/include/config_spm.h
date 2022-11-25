@@ -19,13 +19,10 @@
 
 /* Set the doorbell APIs */
 #ifndef CONFIG_TFM_DOORBELL_API
-#if CONFIG_TFM_SPM_BACKEND_SFN == 1
-#pragma message("CONFIG_TFM_DOORBELL_API is defaulted to 0 for SFN backend. Please check and set it explicitly.")
-#define CONFIG_TFM_DOORBELL_API        0
-#else /* CONFIG_TFM_SPM_BACKEND_SFN == 1 */
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 #pragma message("CONFIG_TFM_DOORBELL_API is defaulted to 1 for IPC backend. Please check and set it explicitly.")
 #define CONFIG_TFM_DOORBELL_API        1
-#endif /* CONFIG_TFM_SPM_BACKEND_SFN == 1 */
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 #endif /* !CONFIG_TFM_DOORBELL_API */
 
 /* Check invalid configs */

@@ -8,7 +8,6 @@ import argparse
 import logging
 import os
 import re
-import hashlib
 
 from kconfiglib import Kconfig
 import menuconfig
@@ -50,8 +49,7 @@ def parse_args():
         '-p', '--platform-path',
         dest = 'platform_path',
         required = False,
-        help = 'The platform path which contains specific Kconfig and defconfig\
-                files'
+        help = 'The platform path which contains specific Kconfig and defconfig files'
     )
 
     args = parser.parse_args()
@@ -75,7 +73,7 @@ def generate_file(dot_config):
     The regular expression is used to parse the text like:
         - CONFIG_FOO=val
         - # CONFIG_FOO is not set
-    The 'FOO" will be saved into the name part of groupdict, and the 'val' will
+    The 'FOO' will be saved into the name part of groupdict, and the 'val' will
     be saved into the 'val' part of groupdict.
     '''
     pattern_set = re.compile('CONFIG_(?P<name>[A-Za-z|_|0-9]*)=(?P<val>\S+)')
@@ -181,22 +179,22 @@ if __name__ == '__main__':
     def_config = ''
     mtime_prv = 0
 
-    if not os.path.exists(args.output_path):
-        os.mkdir(args.output_path)
-
-    if args.platform_path:
+    if args.platform_path and os.path.exists(args.platform_path):
         platform_abs_path = os.path.abspath(args.platform_path)
+        def_config = os.path.join(platform_abs_path, 'defconfig')
 
         # Pass environment variable to Kconfig to load extra Kconfig file.
         os.environ['PLATFORM_PATH'] = platform_abs_path
 
-        def_config = os.path.join(platform_abs_path, 'defconfig')
-    else:
-        os.environ['PLATFORM_PATH'] = ''
-
     # Load Kconfig file. kconfig_file is the root Kconfig file. The path is
     # input by users from the command.
     tfm_kconfig = Kconfig(args.kconfig_file)
+
+    if not os.path.exists(args.output_path):
+        os.mkdir(args.output_path)
+
+    # Change program execution path to the output folder path.
+    os.chdir(args.output_path)
 
     if os.path.exists(dot_config):
         # Load .config which contains the previous configurations.
@@ -207,9 +205,6 @@ if __name__ == '__main__':
         # Load platform specific defconfig if exists.
         tfm_kconfig.load_config(def_config)
         logging.info('Load configs from \'{}\''.format(def_config))
-
-    # Change program execution path to the output folder path.
-    os.chdir(args.output_path)
 
     # UI options
     if args.ui == 'tui':

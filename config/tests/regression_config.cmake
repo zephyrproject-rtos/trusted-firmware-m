@@ -28,6 +28,7 @@ if(TEST_S_PS OR TEST_NS_PS)
     set(TFM_PARTITION_PROTECTED_STORAGE        ON       CACHE BOOL      "Enable Protected Storage partition")
     set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
     set(TFM_PARTITION_CRYPTO                   ON       CACHE BOOL      "Enable Crypto partition")
+    set(TFM_PARTITION_PLATFORM                 ON       CACHE BOOL      "Enable Platform partition")
 endif()
 
 if(TEST_S_ATTESTATION OR TEST_NS_ATTESTATION)

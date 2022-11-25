@@ -20,7 +20,6 @@ config TEST_S
 
 config TEST_NS
     bool "Enable default non-secure test cases"
-    depends on NS
     default n
     imply TEST_NS_ATTESTATION
     imply TEST_NS_T_COSE
@@ -41,27 +40,40 @@ menu "Secure regression tests"
 
 config TEST_S_ATTESTATION
     bool "Attestation"
-    depends on TFM_PARTITION_INITIAL_ATTESTATION
+    default n
+    imply TFM_PARTITION_INITIAL_ATTESTATION
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    imply TFM_PARTITION_CRYPTO
 
 config TEST_S_CRYPTO
     bool "Crypto"
-    depends on TFM_PARTITION_CRYPTO
+    default n
+    imply TFM_PARTITION_CRYPTO
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 
 config TEST_S_ITS
     bool "ITS"
-    depends on TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    default n
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 
 config TEST_S_PS
     bool "PS"
-    depends on TFM_PARTITION_PROTECTED_STORAGE
+    default n
+    imply TFM_PARTITION_PROTECTED_STORAGE
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    imply TFM_PARTITION_CRYPTO
+    imply TFM_PARTITION_PLATFORM
+
 
 config TEST_S_PLATFORM
     bool "Platform"
-    depends on TFM_PARTITION_PLATFORM
+    default n
+    imply TFM_PARTITION_PLATFORM
 
 config TEST_S_FWU
     bool "FWU"
-    depends on TFM_PARTITION_FIRMWARE_UPDATE
+    default n
+    imply TFM_PARTITION_FIRMWARE_UPDATE
 
 config TEST_S_IPC
     bool "IPC"
@@ -79,42 +91,53 @@ endmenu
 ################################# Non-secure test ##############################
 
 menu "Non-Secure regression tests"
-    depends on NS
 
 config TEST_NS_ATTESTATION
     bool "Attestation"
-    depends on TFM_PARTITION_INITIAL_ATTESTATION
+    default n
+    imply TFM_PARTITION_INITIAL_ATTESTATION
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    imply TFM_PARTITION_CRYPTO
 
 config TEST_NS_T_COSE
     bool "t_cose"
-    depends on TFM_PARTITION_INITIAL_ATTESTATION && !SYMMETRIC_INITIAL_ATTESTATION
+    default n
+    imply TFM_PARTITION_INITIAL_ATTESTATION
 
 config TEST_NS_QCBOR
     bool "QCBOR"
-    depends on TFM_PARTITION_INITIAL_ATTESTATION
+    default n
+    imply TFM_PARTITION_INITIAL_ATTESTATION
 
 config TEST_NS_CRYPTO
     bool "Crypto"
-    depends on TFM_PARTITION_CRYPTO
-
-comment "PS NS test depends on partition ITS and PS, and NS ITS test"
-    depends on !(TFM_PARTITION_PROTECTED_STORAGE && TEST_NS_ITS)
+    default n
+    imply TFM_PARTITION_CRYPTO
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 
 config TEST_NS_PS
     bool "PS"
-    depends on TFM_PARTITION_PROTECTED_STORAGE && TEST_NS_ITS
+    default n
+    imply TFM_PARTITION_PROTECTED_STORAGE
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    imply TFM_PARTITION_CRYPTO
+    imply TFM_PARTITION_PLATFORM
+    imply TEST_NS_ITS
 
 config TEST_NS_ITS
     bool "ITS"
-    depends on TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    default n
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
 
 config TEST_NS_PLATFORM
     bool "Platform"
-    depends on TFM_PARTITION_PLATFORM
+    default n
+    imply TFM_PARTITION_PLATFORM
 
 config TEST_NS_FWU
     bool "FWU"
-    depends on TFM_PARTITION_FIRMWARE_UPDATE
+    default n
+    imply TFM_PARTITION_FIRMWARE_UPDATE
 
 config TEST_NS_MULTI_CORE
     bool "Multi-core"
@@ -131,7 +154,6 @@ choice TEST_NS_IRQ
     config TEST_NS_NONE_IRQ
         bool "None IRQ test"
 
-    # Make FLIH IRQ test as the default IRQ test
     config TEST_NS_FLIH_IRQ
         bool "First-Level Interrupt Handling"
 
@@ -146,11 +168,11 @@ config TEST_NS_FPU
 
 config TEST_NS_IPC
     bool "IPC"
-    depends on CONFIG_TFM_SPM_BACKEND_IPC
+    depends on TFM_SPM_BACKEND_IPC
 
 config TEST_NS_SFN_BACKEND
     bool "SFN backend"
-    depends on CONFIG_TFM_SPM_BACKEND_SFN
+    depends on TFM_SPM_BACKEND_SFN
 
 endmenu
 

@@ -16,6 +16,6 @@ config CONFIG_TFM_CONN_HANDLE_MAX_NUM
 
 config CONFIG_TFM_DOORBELL_API
     bool "Enable the doorbell APIs"
-    default n if CONFIG_TFM_SPM_BACKEND_SFN
+    depends on TFM_SPM_BACKEND_IPC
     default y
 endmenu
