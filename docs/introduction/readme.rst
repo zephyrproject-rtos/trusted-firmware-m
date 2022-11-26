@@ -57,11 +57,9 @@ Contributions to this project are accepted under the same license with developer
 sign-off as described in the :doc:`Contributing Guidelines </contributing/contributing_process>`.
 
 This project contains code from other projects as listed below. The code from
-external projects is limited to ``app``, ``bl2``, ``lib`` and ``platform``
+external projects is limited to ``bl2``, ``lib`` and ``platform``
 folders. The original license text is included in those source files.
 
-- The ``app`` folder contains files imported from CMSIS_5 project and the files
-  have Apache 2.0 license.
 - The ``bl2`` folder contains files imported from MCUBoot project and the files
   have Apache 2.0 license.
 - The ``lib`` folder may contain 3rd party files with diverse licenses.
