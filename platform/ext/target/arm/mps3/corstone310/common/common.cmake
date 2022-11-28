@@ -60,29 +60,114 @@ if(BL2)
     )
 endif()
 
+#========================= Device definition lib ===============================#
+
+add_library(device_definition INTERFACE)
+target_include_directories(device_definition
+    INTERFACE
+        ${CORSTONE310_COMMON_DIR}/device/include
+        ${CORSTONE310_COMMON_DIR}/native_drivers
+        ${CORSTONE310_COMMON_DIR}/partition
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+        ${CMAKE_SOURCE_DIR}
+)
+
+add_library(device_definition_s STATIC)
+target_sources(device_definition_s
+    PUBLIC
+        ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
+)
+
+target_compile_options(device_definition_s
+    PRIVATE
+        ${COMPILER_CMSE_FLAG}
+)
+
+add_library(device_definition_ns STATIC)
+target_sources(device_definition_ns
+    PUBLIC
+        ${CORSTONE310_COMMON_DIR}/device/source/platform_ns_device_definition.c
+)
+
+#========================= CMSIS lib ===============================#
+
+add_library(cmsis_includes INTERFACE)
+target_include_directories(cmsis_includes
+    INTERFACE
+        ${CORSTONE310_COMMON_DIR}/device/include
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers
+        ${PLATFORM_DIR}/ext/cmsis
+        ${CORSTONE310_COMMON_DIR}/partition
+)
+
+add_library(cmsis_includes_s INTERFACE)
+target_link_libraries(cmsis_includes_s INTERFACE cmsis_includes)
+target_include_directories(cmsis_includes_s
+    INTERFACE
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
+)
+
+target_compile_options(cmsis_includes_s
+    INTERFACE
+        ${COMPILER_CMSE_FLAG}
+)
+
+add_library(cmsis_includes_ns INTERFACE)
+target_link_libraries(cmsis_includes_ns INTERFACE cmsis_includes)
+target_include_directories(cmsis_includes_ns
+    INTERFACE
+        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure
+)
+
+#========================= Linking ===============================#
+
+target_link_libraries(device_definition_s PUBLIC device_definition)
+target_link_libraries(device_definition_s PRIVATE cmsis_includes_s)
+target_link_libraries(device_definition_ns PUBLIC device_definition)
+target_link_libraries(device_definition_ns PRIVATE cmsis_includes_ns)
+
+target_link_libraries(platform_bl2
+    PUBLIC
+        cmsis_includes
+    PRIVATE
+        device_definition_s
+        cmsis_includes_s
+)
+
+target_link_libraries(platform_s
+    PUBLIC
+        cmsis_includes_s
+    INTERFACE
+        device_definition
+    PRIVATE
+        device_definition_s
+
+)
+
+target_link_libraries(platform_ns
+    PUBLIC
+        cmsis_includes_ns
+    PRIVATE
+        device_definition_ns
+)
 #========================= Platform Secure ====================================#
 
 target_include_directories(platform_s
     PUBLIC
-        ${CORSTONE310_COMMON_DIR}
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
-        ${CORSTONE310_COMMON_DIR}/device
-        ${CORSTONE310_COMMON_DIR}/device/include
-        ${CORSTONE310_COMMON_DIR}/device/source/armclang
-        ${CORSTONE310_COMMON_DIR}/native_drivers
-        ${CORSTONE310_COMMON_DIR}/partition
-        ${CORSTONE310_COMMON_DIR}/services/src
-        ${CMAKE_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
-        ${PLATFORM_DIR}/ext/common
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
-        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
-        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
-        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
-        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
-        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
+        ${CORSTONE310_COMMON_DIR}
+    PRIVATE
+        ${CORSTONE310_COMMON_DIR}
+        ${CORSTONE310_COMMON_DIR}/device
+        ${CORSTONE310_COMMON_DIR}/services/src
+        ${PLATFORM_DIR}/ext/common
 )
 
 target_sources(platform_s
@@ -91,7 +176,6 @@ target_sources(platform_s
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_TGU.c
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_PPC.c
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
-        ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/ppc_corstone310_drv.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/tgu_armv8_m_drv.c
@@ -99,6 +183,7 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_peripherals_def.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CORSTONE310_COMMON_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CORSTONE310_COMMON_DIR}/services/src/tfm_platform_system.c>
 )
@@ -120,7 +205,6 @@ target_compile_options(platform_s
 target_sources(platform_ns
     PRIVATE
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
-        ${CORSTONE310_COMMON_DIR}/device/source/platform_ns_device_definition.c
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
@@ -129,23 +213,11 @@ target_sources(platform_ns
 target_include_directories(platform_ns
     PUBLIC
         ${CORSTONE310_COMMON_DIR}
-        ${CMAKE_SOURCE_DIR}
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure
-        ${CORSTONE310_COMMON_DIR}/device
-        ${CORSTONE310_COMMON_DIR}/device/include
-        ${CORSTONE310_COMMON_DIR}/device/source/armclang
-        ${CORSTONE310_COMMON_DIR}/native_drivers
-        ${CORSTONE310_COMMON_DIR}/partition
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+    PRIVATE
+        ${CORSTONE310_COMMON_DIR}/device
         ${PLATFORM_DIR}/ext/common
-        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
-        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
-        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
-        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
-        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
-        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
 )
 
 #========================= Platform BL2 =======================================#
@@ -154,33 +226,17 @@ if(BL2)
     target_sources(platform_bl2
         PRIVATE
             ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
-            ${CORSTONE310_COMMON_DIR}/device/source/platform_s_device_definition.c
             ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
             ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
     )
 
     target_include_directories(platform_bl2
-        PUBLIC
-            ${CORSTONE310_COMMON_DIR}/cmsis_drivers
-            ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
+        PRIVATE
             ${CORSTONE310_COMMON_DIR}/device
-            ${CORSTONE310_COMMON_DIR}/device/include
-            ${CORSTONE310_COMMON_DIR}/device/source/armclang
-            ${CORSTONE310_COMMON_DIR}/native_drivers
-            ${CORSTONE310_COMMON_DIR}/partition
             ${CORSTONE310_COMMON_DIR}/services/src
             ${CMAKE_CURRENT_SOURCE_DIR}/device/config
-            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
-            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
-            ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
-            ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
-            ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
-            ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
-
-        PRIVATE
             ${CORSTONE310_COMMON_DIR}
-            ${CMAKE_SOURCE_DIR}
     )
 endif()
 

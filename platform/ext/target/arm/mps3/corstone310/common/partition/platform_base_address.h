@@ -50,6 +50,12 @@
 #define AHB_USER_1_BASE_NS               0x41105000 /* AHB USER 1 Non-Secure base address */
 #define AHB_USER_2_BASE_NS               0x41106000 /* AHB USER 2 Non-Secure base address */
 #define AHB_USER_3_BASE_NS               0x41107000 /* AHB USER 3 Non-Secure base address */
+#ifdef CORSTONE310_AN555
+#define DMA_0_BASE_NS                    0x41200000 /* DMA0 Non-Secure base address */
+#define DMA_1_BASE_NS                    0x41201000 /* DMA1 Non-Secure base address */
+#define DMA_2_BASE_NS                    0x41202000 /* DMA2 Non-Secure base address */
+#define DMA_3_BASE_NS                    0x41203000 /* DMA3 Non-Secure base address */
+#endif
 #define ETHERNET_BASE_NS                 0x41400000 /* Ethernet Non-Secure base address */
 #define USB_BASE_NS                      0x41500000 /* USB Non-Secure base address */
 #define USER_APB0_BASE_NS                0x41700000 /* User APB 0 Non-Secure base address */
@@ -140,6 +146,12 @@
 #define AHB_USER_1_BASE_S                0x51105000 /* AHB USER 1 Secure base address */
 #define AHB_USER_2_BASE_S                0x51106000 /* AHB USER 2 Secure base address */
 #define AHB_USER_3_BASE_S                0x51107000 /* AHB USER 3 Secure base address */
+#ifdef CORSTONE310_AN555
+#define DMA_0_BASE_S                     0x51200000  /* DMA0 Secure base address */
+#define DMA_1_BASE_S                     0x51201000  /* DMA1 Secure base address */
+#define DMA_2_BASE_S                     0x51202000  /* DMA2 Secure base address */
+#define DMA_3_BASE_S                     0x51203000  /* DMA3 Secure base address */
+#endif
 #define ETHERNET_BASE_S                  0x51400000 /* Ethernet Secure base address */
 #define USB_BASE_S                       0x51500000 /* USB Secure base address */
 #define USER_APB0_BASE_S                 0x51700000 /* User APB 0 Secure base address */
@@ -236,7 +248,9 @@
 #define DDR4_BLK_NUM    (0x8)        /* Number of DDR4 blocks */
 
 /* All VMs use the same MPC block size as defined by VMMPCBLKSIZE. */
-#define MPC_BLK_SIZE    (0x8000)     /* 32 kB */
+#define SRAM_MPC_BLK_SIZE    (0x4000)     /* 16 kB */
+#define QSPI_MPC_BLK_SIZE    (0x40000)    /* 256 kB */
+#define DDR4_MPC_BLK_SIZE    (0x100000)   /* 1 MB */
 
 /* Defines for Driver MPC's */
 /* SRAM -- 2 MB */

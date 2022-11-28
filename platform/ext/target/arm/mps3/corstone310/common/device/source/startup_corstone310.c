@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -103,6 +103,19 @@ DEFAULT_IRQ_HANDLER(SPI_SHIELD1_Handler)
 #ifdef CORSTONE310_FVP
 DEFAULT_IRQ_HANDLER(DMA_Channel_0_Handler)
 DEFAULT_IRQ_HANDLER(DMA_Channel_1_Handler)
+#else
+DEFAULT_IRQ_HANDLER(DMA_Ch_0_Error_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_0_Terminal_Count_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_0_Combined_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_1_Error_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_1_Terminal_Count_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_1_Combined_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_2_Error_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_2_Terminal_Count_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_2_Combined_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_3_Error_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_3_Terminal_Count_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_3_Combined_Handler)
 #endif
 DEFAULT_IRQ_HANDLER(ETHOS_U55_Handler)
 DEFAULT_IRQ_HANDLER(GPIO0_Combined_Handler)
@@ -163,7 +176,7 @@ DEFAULT_IRQ_HANDLER(GPIO3_2_Handler)
 DEFAULT_IRQ_HANDLER(GPIO3_3_Handler)
 DEFAULT_IRQ_HANDLER(UARTRX5_Handler)
 DEFAULT_IRQ_HANDLER(UARTTX5_Handler)
-DEFAULT_IRQ_HANDLER(UART5_Handler)
+DEFAULT_IRQ_HANDLER(UART5_Combined_Handler)
 #ifdef CORSTONE310_FVP
 DEFAULT_IRQ_HANDLER(VSI0_Handler)
 DEFAULT_IRQ_HANDLER(VSI1_Handler)
@@ -265,10 +278,6 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
 #ifdef CORSTONE310_FVP
   DMA_Channel_0_Handler,             /*  57: DMA (DMA350) Channel 0 Handler */
   DMA_Channel_1_Handler,             /*  58: DMA (DMA350) Channel 1 Handler */
-#else
-  0,                                 /*  57: Reserved */
-  0,                                 /*  58: Reserved */
-#endif
   0,                                 /*  59: Reserved */
   0,                                 /*  60: Reserved */
   0,                                 /*  61: Reserved */
@@ -279,6 +288,20 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   0,                                 /*  66: Reserved */
   0,                                 /*  67: Reserved */
   0,                                 /*  68: Reserved */
+#else
+  DMA_Ch_0_Error_Handler,            /*  57: DMA Ch0 Error Handler */
+  DMA_Ch_0_Terminal_Count_Handler,   /*  58: DMA Ch0 Terminal Count Handler */
+  DMA_Ch_0_Combined_Handler,         /*  59: DMA Ch0 Combined Handler */
+  DMA_Ch_1_Error_Handler,            /*  60: DMA Ch1 Error Handler */
+  DMA_Ch_1_Terminal_Count_Handler,   /*  61: DMA Ch1 Terminal Count Handler */
+  DMA_Ch_1_Combined_Handler,         /*  62: DMA Ch1 Combined Handler */
+  DMA_Ch_2_Error_Handler,            /*  63: DMA Ch2 Error Handler */
+  DMA_Ch_2_Terminal_Count_Handler,   /*  64: DMA Ch2 Terminal Count Handler */
+  DMA_Ch_2_Combined_Handler,         /*  65: DMA Ch2 Combined Handler */
+  DMA_Ch_3_Error_Handler,            /*  66: DMA Ch3 Error Handler */
+  DMA_Ch_3_Terminal_Count_Handler,   /*  67: DMA Ch3 Terminal Count Handler */
+  DMA_Ch_3_Combined_Handler,         /*  68: DMA Ch3 Combined Handler */
+#endif
   GPIO0_Combined_Handler,            /*  69: GPIO 0 Combined Handler */
   GPIO1_Combined_Handler,            /*  70: GPIO 1 Combined Handler */
   GPIO2_Combined_Handler,            /*  71: GPIO 2 Combined Handler */
@@ -337,7 +360,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   GPIO3_3_Handler,                   /*  124: GPIO3 Pin 3 Handler */
   UARTRX5_Handler,                   /*  125: UART 5 RX Interrupt */
   UARTTX5_Handler,                   /*  126: UART 5 TX Interrupt */
-  UART5_Handler,                     /*  127: UART 5 combined Interrupt */
+  UART5_Combined_Handler,            /*  127: UART 5 combined Interrupt */
 #ifdef CORSTONE310_FVP
   0,                                 /*  128: Reserved */
   0,                                 /*  129: Reserved */

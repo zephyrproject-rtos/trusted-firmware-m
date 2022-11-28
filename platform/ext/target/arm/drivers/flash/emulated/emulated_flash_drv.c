@@ -129,7 +129,7 @@ enum emulated_flash_error_t emulated_flash_program_data(struct emulated_flash_de
     int32_t rc = 0;
 
     /* Check flash memory boundaries and alignment with minimal write size */
-    rc  = is_range_valid(dev, addr + cnt);
+    rc  = is_range_valid(dev, addr + cnt - 1);
     rc |= is_write_aligned(dev, addr);
     rc |= is_write_aligned(dev, cnt);
     if (rc != 0) {

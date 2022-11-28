@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2021-2022, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -65,7 +65,7 @@ void axi_qspi_uninitialize(struct axi_qspi_dev_t* dev);
  * Main function to send data and rcv data through QSPI controller.
  */
 enum axi_qspi_error_t spi_transfer_and_receive(struct axi_qspi_dev_t* dev,
-        uint8_t *send_buffer, uint8_t *rcv_buffer, int bytes);
+        uint8_t *send_buffer, uint8_t *rcv_buffer, uint32_t bytes);
 
 /**
  * Selects the XiP controller by programming the MUX bit.

@@ -1,22 +1,22 @@
 /*
  *
- * Copyright (c) 2021-2022, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include "cmsis.h"
 #include "xilinx_pg153_axi_qspi_controller_drv.h"
 
-static void WRITE_REGISTER(uint32_t base,
-                           uint32_t offset,
-                           uint32_t mask,
-                           uint32_t val)
+__STATIC_INLINE void WRITE_REGISTER(uint32_t reg,
+                                    uint32_t mask,
+                                    uint32_t val)
 {
-    uint32_t reg_val = *((volatile uint32_t*)(base + offset));
+    uint32_t reg_val = *(volatile uint32_t*)reg;
     reg_val &= ~mask;
     reg_val |= (mask & val);
-    *((volatile uint32_t*)(base + offset)) = reg_val;
+    *(volatile uint32_t *)reg = reg_val;
 }
 
 /* QSPI controller registers */
@@ -67,11 +67,11 @@ typedef struct qspi_controller_registers {
 #define PAGE_SIZE              256
 
 enum axi_qspi_error_t spi_transfer_and_receive(struct axi_qspi_dev_t* dev,
-        uint8_t *send_buffer, uint8_t *rcv_buffer, int bytes)
+        uint8_t *send_buffer, uint8_t *rcv_buffer, uint32_t bytes)
 {
     uint32_t control_reg;
     uint8_t rcv_data;
-    int j = 0;
+    uint32_t j = 0;
     volatile qspi_controller_registers_t *ctrl_regs =
                                 (qspi_controller_registers_t*)dev->cfg->base;
 
@@ -97,7 +97,7 @@ enum axi_qspi_error_t spi_transfer_and_receive(struct axi_qspi_dev_t* dev,
     /* Write to Data Transmit Register */
     /* Even in case of read, there is a need to write dummy data to
        DTR for read to take place. */
-    for (int i = 0; i < bytes; i++) {
+    for (uint32_t i = 0; i < bytes; i++) {
         ctrl_regs->spi_dtr = send_buffer[i];
     }
 
@@ -146,8 +146,7 @@ enum axi_qspi_error_t axi_qspi_initialize(struct axi_qspi_dev_t* dev)
     }
 
     /* Switch to QSPI Controller */
-    WRITE_REGISTER(dev->cfg->scc_base,
-                   MODE_REG_OFFSET,
+    WRITE_REGISTER(dev->cfg->scc_base + MODE_REG_OFFSET,
                    QSPI_READ_WRITE_SELECT_SIGNAL,
                    QSPIMODE);
 
@@ -179,8 +178,7 @@ enum axi_qspi_error_t select_xip_mode(struct axi_qspi_dev_t* dev)
     }
 
     /* Switch to XIP Controller */
-    WRITE_REGISTER(dev->cfg->scc_base,
-                   MODE_REG_OFFSET,
+    WRITE_REGISTER(dev->cfg->scc_base + MODE_REG_OFFSET,
                    QSPI_READ_WRITE_SELECT_SIGNAL,
                    XIPMODE);
 
@@ -195,8 +193,7 @@ enum axi_qspi_error_t select_qspi_mode(struct axi_qspi_dev_t* dev)
     }
 
     /* Switch to XIP Controller */
-    WRITE_REGISTER(dev->cfg->scc_base,
-                   MODE_REG_OFFSET,
+    WRITE_REGISTER(dev->cfg->scc_base + MODE_REG_OFFSET,
                    QSPI_READ_WRITE_SELECT_SIGNAL,
                    QSPIMODE);
 

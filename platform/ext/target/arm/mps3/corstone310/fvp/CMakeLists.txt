@@ -36,7 +36,6 @@ target_include_directories(platform_fvp
     PRIVATE
         ${CMAKE_SOURCE_DIR}
         device/config
-        ${PLATFORM_DIR}/ext/cmsis
         ${PLATFORM_DIR}/ext/driver
         ${CORSTONE310_COMMON_DIR}/device/include
         ${CORSTONE310_COMMON_DIR}/partition
@@ -52,6 +51,12 @@ target_compile_options(platform_fvp
         ${COMPILER_CMSE_FLAG}
 )
 
+target_link_libraries(platform_fvp
+    PRIVATE
+        cmsis_includes_s
+        device_definition_s
+)
+
 target_link_libraries(platform_bl2
     PUBLIC
         platform_fvp
@@ -62,41 +67,51 @@ target_link_libraries(platform_s
         platform_fvp
 )
 
-target_include_directories(platform_bl2
-    PRIVATE
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+target_include_directories(device_definition
+    INTERFACE
+        libraries
+        native_drivers
 )
 
-target_sources(platform_bl2
+add_library(flash_drivers STATIC)
+
+target_include_directories(flash_drivers
+    PRIVATE
+        ${PLATFORM_DIR}/ext/driver
+        ${CORSTONE310_COMMON_DIR}/partition
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
+)
+
+target_sources(flash_drivers
     PRIVATE
         cmsis_drivers/Driver_Flash.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
 )
 
-target_include_directories(platform_ns
+target_link_libraries(flash_drivers
     PRIVATE
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        cmsis_includes_s
 )
 
-target_sources(platform_ns
+target_link_libraries(platform_bl2
     PRIVATE
-        cmsis_drivers/Driver_Flash.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+        flash_drivers
 )
 
-target_include_directories(platform_s
+target_link_libraries(platform_s
     PRIVATE
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        flash_drivers
+)
+
+target_link_libraries(platform_ns
+    PRIVATE
+        flash_drivers
 )
 
 target_sources(platform_s
     PRIVATE
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
-        cmsis_drivers/Driver_Flash.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
 )
 
 target_compile_definitions(platform_s

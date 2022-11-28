@@ -284,35 +284,7 @@ void sau_and_idau_cfg(void)
           | SRAM  |       |  | SRAM  |               | |            |
           +-------+       |  +-------+               | |            |
           | BL2   |       |  | BL2   |               | |            |
-          +-------+       |  +-------+-------+-------+ +------------+
-          |       |       |  |       |   NS  | RNR 1 | |     NS     |
-0x01200000+-------+       |  +-------+-------+-------+ +------------+
-          |               |  |                       | |            |
-0x10000000+-------+-------+  +-------+               | |            |
-          | ITCM  |       |  | ITCM  |               | |            |
-0x10008000+-------+       |  +-------+               | |            |
-          |               |  |                       | |            |
-0x11000000+-------+   S   |  +-------+    S          | |     S      |
-          | SRAM  |       |  | SRAM  |               | |            |
           +-------+       |  +-------+               | |            |
-          | BL2   |       |  | BL2   |               | |            |
-          +-------+       |  +-------+               | |            |
-          |       |       |  |       |               | |            |
-0x11200000+-------+       |  +-------+               | |            |
-          |               |  |                       | |            |
-0x20000000+-------+-------+  +-------+-------+-------+ +------------+
-          | DTCM  |       |  | DTCM  |   NS  | RNR 2 | |     NS     |
-0x20008000+-------+       |  +-------+-------+-------+ +------------+
-          |               |  |                       | |            |
-0x21000000+--------+      |  +--------+  S           | |     S      |
-          | ISRAM0 |      |  | ISRAM0 |              | |            |
-          +--------+      |  +--------+------+-------+ +------------+
-          | ISRAM1 |      |  | ISRAM1 |  NS  | RNR 3 | |     NS     |
-0x21400000+--------+      |  +--------+------+-------+ +------------+
-          |               |  |                       | |            |
-0x28000000+-------+       |  +-------+               | |            |
-          | QSPI  |       |  | QSPI  |               | |            |
-          +-------+  NS   |  +-------+    S          | |     S      |
           | s-    |       |  | s-    |               | |            |
           | part  |       |  | part  |               | |            |
           | ion   |       |  | ion   |               | |            |
@@ -321,31 +293,55 @@ void sau_and_idau_cfg(void)
           | eer   |       |  | eer   |               | |            |
           +-------+       |  +-------+-------+-------+ +------------+
           | ns-   |       |  | ns-   |       |       | |            |
-          | part  |       |  | part  |   NS  | RNR 4 | |     NS     |
+          | part  |       |  | part  |   NS  | RNR 1 | |     NS     |
           | ion   |       |  | ion   |       |       | |            |
-0x28800000+-------+       |  +-------+-------+-------+ +------------+
+0x01200000+-------+       |  +-------+-------+-------+ +------------+
+          |               |  |                       | |            |
+0x10000000+-------+-------+  +-------+               | |            |
+          | ITCM  |       |  | ITCM  |               | |            |
+0x10008000+-------+       |  +-------+               | |            |
+          |               |  |                       | |            |
+0x11000000+-------+  NSC  |  +-------+    S          | |     S      |
+          | SRAM  |       |  | SRAM  |               | |            |
+          +-------+       |  +-------+               | |            |
+          | BL2   |       |  | BL2   |               | |            |
+          +-------+       |  +-------+               | |            |
+          | s-    |       |  | s-    |               | |            |
+          | part  |       |  | part  |               | |            |
+          | ion   |       |  | ion   |               | |            |
+          +-------+       |  +-------+-------+-------+ +------------+
+          | ven-  |       |  | ven-  |  NSC  | RNR 2 | |     NSC    |
+          | eer   |       |  | eer   |       |       | |            |
+          +-------+       |  +-------+-------+-------+ +------------+
+          | ns-   |       |  | ns-   |               | |            |
+          | part  |       |  | part  |               | |            |
+          | ion   |       |  | ion   |    S          | |     S      |
+0x11200000+-------+       |  +-------+               | |            |
+          |               |  |                       | |            |
+0x20000000+-------+-------+  +-------+-------+-------+ +------------+
+          | DTCM  |       |  | DTCM  |   NS  | RNR 3 | |     NS     |
+0x20008000+-------+       |  +-------+-------+-------+ +------------+
+          |               |  |                       | |            |
+0x21000000+--------+      |  +--------+  S           | |     S      |
+          | ISRAM0 |      |  | ISRAM0 |              | |            |
+          +--------+      |  +--------+------+-------+ +------------+
+          | ISRAM1 |      |  | ISRAM1 |  NS  | RNR 4 | |     NS     |
+0x21400000+--------+      |  +--------+------+-------+ +------------+
+          |               |  |           S           | |     S      |
+0x28000000+-------+       |  +--------+------+-------+ +------------+
+          | QSPI  |  NS   |  | QSPI   |  NS  | RNR 5 | |     NS     |
+0x28800000+-------+       |  +--------+------+-------+ +------------+
           |               |  |                       | |            |
 0x30000000+-------+-------+  +-------+               | |            |
           | DTCM  |       |  | DTCM  |               | |            |
 0x30008000+-------+       |  +-------+               | |            |
-          |          NSC  |  |                       | |            |
+          |           S   |  |                       | |            |
 0x31000000+-------+       |  +-------+   S           | |     S      |
           | ISRAM |       |  | ISRAM |               | |            |
 0x31400000+-------+       |  +-------+               | |            |
           |               |  |                       | |            |
 0x38000000+-------+       |  +-------+               | |            |
           | QSPI  |       |  | QSPI  |               | |            |
-          +-------+       |  +-------+               | |            |
-          | s-    |       |  | s-    |               | |            |
-          | part  |       |  | part  |               | |            |
-          | ion   |       |  | ion   |               | |            |
-          +-------+       |  +-------+-------+-------+ +------------+
-          | ven-  |       |  | ven-  |  NSC  | RNR 5 | |     NSC    |
-          | eer   |       |  | eer   |       |       | |            |
-          +-------+       |  +-------+-------+-------+ +------------+
-          | ns-   |       |  | ns-   |               | |            |
-          | part  |       |  | part  |               | |            |
-          | ion   |       |  | ion   |    S          | |     S      |
 0x38800000+-------+       |  +-------+               | |            |
           |               |  |                       | |            |
 0x40000000+--------+------+  +--------+------+-------+ +------------+
@@ -375,8 +371,8 @@ void sau_and_idau_cfg(void)
     /* Ensure all memory accesses are completed */
     __DMB();
 
-    /* Allows IDAU to define the RAM region as a NSC */
-    sacfg->nsccfg |= RAMNSC;
+    /* Allows IDAU to define the CODE region as a NSC */
+    sacfg->nsccfg |= CODENSC;
 
     /* Configures SAU regions to be non-secure */
     /* Configure ITCM */
@@ -387,43 +383,43 @@ void sau_and_idau_cfg(void)
 
     /* Configure SRAM */
     SAU->RNR = 1;
-    SAU->RBAR = ((SRAM_BASE_NS + BL2_CODE_SIZE) & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = ((SRAM_BASE_NS + SRAM_SIZE - 1) & SAU_RBAR_BADDR_Msk)
-                | SAU_RLAR_ENABLE_Msk;
-
-    /* Configure DTCM */
-    SAU->RNR = 2;
-    SAU->RBAR = (DTCM0_BASE_NS & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = ((DTCM0_BASE_NS + (DTCM_BLK_SIZE * DTCM_BLK_NUM) - 1)
-                 & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
-
-    /* Configure ISRAM0: secure, ISRAM1: non-secure */
-    SAU->RNR = 3;
-    SAU->RBAR = (ISRAM1_BASE_NS & SAU_RBAR_BADDR_Msk);
-    SAU->RLAR = ((ISRAM1_BASE_NS + ISRAM1_SIZE - 1)
-                 & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
-
-    /* Configure QSPI */
-    SAU->RNR = 4;
     SAU->RBAR = (memory_regions.non_secure_partition_base
                  & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.non_secure_partition_limit
                   & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 
     /* Configures veneers region to be non-secure callable */
-    SAU->RNR  = 5;
+    SAU->RNR = 2;
     SAU->RBAR = (memory_regions.veneer_base & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (memory_regions.veneer_limit & SAU_RLAR_LADDR_Msk)
                  | SAU_RLAR_ENABLE_Msk | SAU_RLAR_NSC_Msk;
 
+    /* Configure DTCM */
+    SAU->RNR = 3;
+    SAU->RBAR = (DTCM0_BASE_NS & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((DTCM0_BASE_NS + (DTCM_BLK_SIZE * DTCM_BLK_NUM) - 1)
+                 & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+
+    /* Configure ISRAM0: secure, ISRAM1: non-secure */
+    SAU->RNR = 4;
+    SAU->RBAR = (ISRAM1_BASE_NS & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((ISRAM1_BASE_NS + ISRAM1_SIZE - 1)
+                 & SAU_RBAR_BADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+
+    /* Configure QSPI */
+    SAU->RNR = 5;
+    SAU->RBAR = ((QSPI_SRAM_BASE_NS) & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = ((QSPI_SRAM_BASE_NS + QSPI_SRAM_SIZE - 1) & SAU_RBAR_BADDR_Msk)
+                | SAU_RLAR_ENABLE_Msk;
+
     /* Configure the peripherals space */
-    SAU->RNR  = 6;
+    SAU->RNR = 6;
     SAU->RBAR = (PERIPHERALS_BASE_NS_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
                   | SAU_RLAR_ENABLE_Msk;
 
     /* Configure DDR4 with the last available region */
-    SAU->RNR  = 7;
+    SAU->RNR = 7;
     SAU->RBAR = (DDR4_BLK0_BASE_NS & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = ((DDR4_BLK0_BASE_NS + ((uint32_t)DDR4_BLK_NUM * DDR4_BLK_SIZE) - 1)
                  & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
@@ -470,16 +466,16 @@ enum tfm_plat_err_t mpc_init_cfg(void)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    ret = Driver_SRAM_MPC.Initialize();
+    ret = Driver_QSPI_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Initialize MPC for SRAM!");
+        ERROR_MSG("Failed to Initialize MPC for QSPI!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_SRAM_MPC.ConfigRegion((SRAM_BASE_NS + BL2_CODE_SIZE),
-                                       (SRAM_BASE_NS + SRAM_SIZE - 1),
+    ret = Driver_QSPI_MPC.ConfigRegion(MPC_QSPI_RANGE_BASE_NS,
+                                       MPC_QSPI_RANGE_LIMIT_NS,
                                        ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Configure MPC for SRAM!");
+        ERROR_MSG("Failed to Configure MPC for QSPI!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
@@ -504,18 +500,18 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 
     /* Configuring primary non-secure partition.
      * It is ensured in flash_layout.h that this memory region is located in
-     * QSPI device. */
-    ret = Driver_QSPI_MPC.Initialize();
+     * SRAM device. */
+    ret = Driver_SRAM_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Initialize MPC for QSPI!");
+        ERROR_MSG("Failed to Initialize MPC for SRAM!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_QSPI_MPC.ConfigRegion(
+    ret = Driver_SRAM_MPC.ConfigRegion(
                                       memory_regions.non_secure_partition_base,
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
-        ERROR_MSG("Failed to Configure MPC for QSPI!");
+        ERROR_MSG("Failed to Configure MPC for SRAM!");
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 

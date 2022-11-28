@@ -136,8 +136,8 @@ static enum sst26vf064b_error_t spi_flash_unblock(
 
     spi_flash_write_enable(dev);
     send_buf_flash1[0] = 0x42;
-    for(int counter=0;counter<18;counter++){
-      send_buf_flash1[counter + 1] = 0;
+    for(uint8_t counter = 0; counter < 18; counter++) {
+        send_buf_flash1[counter + 1] = 0;
     }
     qspi_ret = spi_transfer_and_receive(dev->controller,
                                         send_buf_flash1,
@@ -314,7 +314,7 @@ static enum sst26vf064b_error_t spi_sst26vf064b_program_data(
         } else {
             write_size = MAX_PROGRAM_SIZE;
         }
-        for (int i = 0; i < write_size; i++) {
+        for (uint32_t i = 0; i < write_size; i++) {
             send_buf_flash1[i+4] = data[current_data_index++];
         }
         /* start program */
@@ -438,7 +438,7 @@ enum sst26vf064b_error_t spi_sst26vf064b_read(
             return (enum sst26vf064b_error_t) qspi_ret;
         }
         /* copy data to user location */
-        for (int i = 0; i < read_size; i++) {
+        for (uint32_t i = 0; i < read_size; i++) {
             data[current_data_index] = rcv_buf_flash1[i+4];
             current_data_index++;
         }
@@ -457,7 +457,7 @@ static enum sst26vf064b_error_t spi_sst26vf064b_verify_id(
 
     /* Read ID */
     send_buf_flash1[0] = CMD_READ_ID;
-    for (int i = 1; i <=3 ; i++) {
+    for (uint8_t i = 1; i <=3 ; i++) {
         send_buf_flash1[i] = DUMMY_VAL;
     }
     qspi_ret = spi_transfer_and_receive(dev->controller,

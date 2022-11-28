@@ -99,7 +99,7 @@
 // <i> Configuration settings for Driver_PERIPH_EXP3_PPC_CORSTONE310 in component ::Drivers:PPC
 #define   RTE_PERIPH_EXP3_PPC_CORSTONE310           1
 
-// <q> Flash device in QSPI [Driver_Flash0]
+// <q> Flash device emulated in SRAM [Driver_Flash0]
 // <i> Configuration settings for Driver_Flash0 in component ::Drivers:Flash
 #define   RTE_FLASH0                                1
 

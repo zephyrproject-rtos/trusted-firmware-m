@@ -17,7 +17,7 @@
 #ifndef __DRIVER_FLASH_SST26VF064B_H__
 #define __DRIVER_FLASH_SST26VF064B_H__
 
-#include "cmsis.h"
+#include "cmsis_compiler.h"
 #include "Driver_Flash_Common.h"
 #include "spi_sst26vf064b_flash_lib.h"
 
@@ -39,7 +39,8 @@ struct arm_flash_sst26vf064b_flash_dev_t {
 static const ARM_FLASH_CAPABILITIES SST26VF064BDriverCapabilities = {
     0, /* event_ready */
     0, /* data_width = 0:8-bit, 1:16-bit, 2:32-bit */
-    1  /* erase_chip */
+    1, /* erase_chip */
+    0, /* reserved */
 };
 
 static ARM_FLASH_INFO SST26VF064B_DEV_DATA = {
@@ -52,7 +53,7 @@ static ARM_FLASH_INFO SST26VF064B_DEV_DATA = {
     .erased_value   = ARM_FLASH_DRV_ERASE_VALUE
 };
 
-static inline ARM_FLASH_CAPABILITIES SST26VF064B_Driver_GetCapabilities(void)
+__STATIC_INLINE ARM_FLASH_CAPABILITIES SST26VF064B_Driver_GetCapabilities(void)
 {
     return SST26VF064BDriverCapabilities;
 }
