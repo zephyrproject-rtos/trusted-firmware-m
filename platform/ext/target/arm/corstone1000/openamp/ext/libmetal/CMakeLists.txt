@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -16,3 +16,7 @@ fetch_remote_library(
         GIT_REPOSITORY      https://github.com/OpenAMP/libmetal.git
         GIT_TAG             ${LIBMETAL_VERSION}
 )
+
+if (NOT LIB_BINARY_PATH_VAR)
+set(LIBMETAL_BIN_PATH "${CMAKE_SOURCE_DIR}/build/lib/ext/libmetal-subbuild" CACHE PATH "Path to build directory of libmetal.")
+endif()

@@ -16,6 +16,10 @@ fetch_remote_library(
         GIT_TAG             ${PLATFORM_PSA_ADAC_VERSION}
 )
 
+if (NOT LIB_BINARY_PATH_VAR)
+set(PLATFORM_PSA_ADAC_BUILD_PATH "${CMAKE_SOURCE_DIR}/build/lib/ext/libpsaadac-build" CACHE PATH "Path to build directory of psa-adac.")
+endif()
+
 set(PSA_ADAC_TARGET "trusted-firmware-m")
 set(PSA_ADAC_MBEDTLS_INCLUDE "${MBEDCRYPTO_PATH}/include")
 set(PSA_ADAC_TOOLCHAIN    FALSE    CACHE BOOL "Whether to use psa-adac toolchain." FORCE)
