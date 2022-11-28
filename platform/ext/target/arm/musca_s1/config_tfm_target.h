@@ -12,4 +12,9 @@
 #undef CRYPTO_NV_SEED
 #define CRYPTO_NV_SEED                         0
 
+#ifdef TEST_PSA_API_CRYPTO
+#undef CRYPTO_STACK_SIZE
+#define CRYPTO_STACK_SIZE                      0x2100
+#endif
+
 #endif /* __CONFIG_TFM_TARGET_H__ */
