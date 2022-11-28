@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2022 Arm Limited
+; * Copyright (c) 2009-2023 Arm Limited
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 MEMORY
 {
     FLASH    (rx)  : ORIGIN = BL2_CODE_START, LENGTH = BL2_CODE_SIZE
-    CODE_RAM (rwx) : ORIGIN = BL2_CODE_SRAM_BASE, LENGTH = TOTAL_CODE_SRAM_SIZE
+    CODE_RAM (rwx) : ORIGIN = BL2_CODE_SRAM_BASE, LENGTH = S_RAM_CODE_SIZE
     RAM      (rwx) : ORIGIN = BL2_DATA_START, LENGTH = BL2_DATA_SIZE
 }
 

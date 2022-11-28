@@ -80,7 +80,6 @@ target_include_directories(platform_s
         partition
         services/include
         Libraries
-        Native_Driver
     INTERFACE
         cc312
 )
@@ -88,7 +87,6 @@ target_include_directories(platform_s
 target_sources(platform_s
     PRIVATE
         CMSIS_Driver/Driver_QSPI_Flash.c
-        CMSIS_Driver/Driver_GFC100_EFlash.c
         CMSIS_Driver/Driver_MPC.c
         CMSIS_Driver/Driver_PPC.c
         CMSIS_Driver/Driver_USART.c
@@ -96,12 +94,9 @@ target_sources(platform_s
         Device/Source/system_core_init.c
         Native_Driver/mpc_sie200_drv.c
         Native_Driver/mpu_armv8m_drv.c
-        Native_Driver/ppc_sse200_drv.c
         Native_Driver/gpio_cmsdk_drv.c
         Libraries/mt25ql_flash_lib.c
         Native_Driver/qspi_ip6514e_drv.c
-        Native_Driver/gfc100_eflash_drv.c
-        Native_Driver/musca_b1_eflash_drv.c
         Native_Driver/musca_b1_scc_drv.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/uart_pl011_drv.c
@@ -144,7 +139,6 @@ target_include_directories(platform_ns
         Device/Include
         Native_Driver
         services/include
-        Native_Driver
         Libraries
 )
 
@@ -155,11 +149,8 @@ if(BL2)
         PRIVATE
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
-            CMSIS_Driver/Driver_GFC100_EFlash.c
             Native_Driver/uart_pl011_drv.c
             CMSIS_Driver/Driver_USART.c
-            Native_Driver/gfc100_eflash_drv.c
-            Native_Driver/musca_b1_eflash_drv.c
             Native_Driver/musca_b1_scc_drv.c
     )
 
@@ -177,7 +168,6 @@ if(BL2)
             ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include # for fih.h interop only
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
-            Native_Driver
             Libraries
     )
 
@@ -218,4 +208,38 @@ target_sources(tfm_spm
         tfm_hal_platform.c
         faults.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
+)
+
+#========================= Flash driver definition ===========================#
+
+add_library(flash_drivers STATIC)
+
+target_include_directories(flash_drivers
+    PRIVATE
+        ${PLATFORM_DIR}/ext/driver
+        ${PLATFORM_DIR}/ext/cmsis
+        ${PLATFORM_DIR}/ext/common
+        Native_Driver
+        CMSIS_Driver/Config
+        Device/Config
+        Device/Include
+        Libraries
+        .
+)
+
+target_sources(flash_drivers
+    PRIVATE
+        CMSIS_Driver/Driver_GFC100_EFlash.c
+        Native_Driver/gfc100_eflash_drv.c
+        Native_Driver/musca_b1_eflash_drv.c
+)
+
+target_link_libraries(platform_bl2
+    PRIVATE
+        flash_drivers
+)
+
+target_link_libraries(platform_s
+    PRIVATE
+        flash_drivers
 )

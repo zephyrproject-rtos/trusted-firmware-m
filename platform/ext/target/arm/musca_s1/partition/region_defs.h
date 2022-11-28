@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,11 +133,6 @@
             (NS_ROM_ALIAS(S_IMAGE_SECONDARY_PARTITION_OFFSET))
 #define SECONDARY_PARTITION_SIZE (FLASH_S_PARTITION_SIZE + \
                                   FLASH_NS_PARTITION_SIZE)
-
-/* Code SRAM area */
-#define TOTAL_CODE_SRAM_SIZE     (0x00080000) /* 512 KB */
-#define S_CODE_SRAM_ALIAS_BASE   (0x1A400000)
-#define NS_CODE_SRAM_ALIAS_BASE  (0x0A400000)
 
 #ifdef BL2
 /* Bootloader regions */

@@ -136,16 +136,16 @@
                                   FLASH_NS_PARTITION_SIZE)
 
 /* Code SRAM area */
-#define TOTAL_CODE_SRAM_SIZE     (0x00080000) /* 512 KB */
-#define S_CODE_SRAM_ALIAS_BASE   (0x1A400000)
-#define NS_CODE_SRAM_ALIAS_BASE  (0x0A400000)
+#define S_RAM_CODE_SIZE          (0x00080000) /* 512 KB */
+#define S_RAM_CODE_START         (0x1A400000)
+#define NS_RAM_CODE_START        (0x0A400000)
 
 #ifdef BL2
 /* Bootloader regions */
 /* Since eFlash is written using the eFlash driver, it is wiser to run
  * the driver code from sram instead of eFlash, to avoid any interference.
  */
-#define BL2_CODE_SRAM_ALIAS_BASE (S_CODE_SRAM_ALIAS_BASE)
+#define BL2_CODE_SRAM_ALIAS_BASE (S_RAM_CODE_START)
 #define BL2_CODE_SRAM_ALIAS(x)   (BL2_CODE_SRAM_ALIAS_BASE + x)
 #define BL2_CODE_SRAM_BASE       (BL2_CODE_SRAM_ALIAS(FLASH_AREA_BL2_OFFSET))
 
