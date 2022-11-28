@@ -31,7 +31,10 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 /* IAR Specific */
 #if defined(__ICCARM__)
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 #pragma required = ipc_schedule
+#endif
+
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
@@ -100,7 +103,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   ands    r0, lr                              \n" /* NS interrupted */
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
         "   push    {r0, lr}                            \n" /* Save R0, LR */
-        "   bl      ipc_schedule                         \n"
+        "   bl      ipc_schedule                        \n"
         "   pop     {r2, lr}                            \n"
         "   cmp     r0, r1                              \n" /* curr, next ctx */
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
@@ -124,15 +127,12 @@ __attribute__((naked)) void PendSV_Handler(void)
 }
 #endif
 
-#if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
-                              uint32_t *psp);
-#pragma required = tfm_core_svc_handler
-#endif
-
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
+#if !defined(__ICCARM__)
+    ".syntax unified                        \n"
+#endif
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"

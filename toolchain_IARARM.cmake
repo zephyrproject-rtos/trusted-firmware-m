@@ -26,6 +26,8 @@ set(CMAKE_ASM_COMPILER iasmarm)
 set(LINKER_VENEER_OUTPUT_FLAG --import_cmse_lib_out= )
 set(COMPILER_CMSE_FLAG --cmse)
 
+set(CMAKE_C_FLAGS_DEBUG "-r -On")
+
 # This variable name is a bit of a misnomer. The file it is set to is included
 # at a particular step in the compiler initialisation. It is used here to
 # configure the extensions for object files. Despite the name, it also works
