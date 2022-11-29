@@ -64,7 +64,6 @@ config TEST_S_PS
     imply TFM_PARTITION_CRYPTO
     imply TFM_PARTITION_PLATFORM
 
-
 config TEST_S_PLATFORM
     bool "Platform"
     default n
@@ -72,8 +71,11 @@ config TEST_S_PLATFORM
 
 config TEST_S_FWU
     bool "FWU"
-    default n
+    depends on PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT
     imply TFM_PARTITION_FIRMWARE_UPDATE
+    imply TFM_PARTITION_CRYPTO
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    imply TFM_PARTITION_PLATFORM
 
 config TEST_S_IPC
     bool "IPC"
@@ -103,11 +105,15 @@ config TEST_NS_T_COSE
     bool "t_cose"
     default n
     imply TFM_PARTITION_INITIAL_ATTESTATION
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    imply TFM_PARTITION_CRYPTO
 
 config TEST_NS_QCBOR
     bool "QCBOR"
     default n
     imply TFM_PARTITION_INITIAL_ATTESTATION
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    imply TFM_PARTITION_CRYPTO
 
 config TEST_NS_CRYPTO
     bool "Crypto"
@@ -136,8 +142,11 @@ config TEST_NS_PLATFORM
 
 config TEST_NS_FWU
     bool "FWU"
-    default n
+    depends on PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT
     imply TFM_PARTITION_FIRMWARE_UPDATE
+    imply TFM_PARTITION_CRYPTO
+    imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    imply TFM_PARTITION_PLATFORM
 
 config TEST_NS_MULTI_CORE
     bool "Multi-core"
@@ -145,14 +154,10 @@ config TEST_NS_MULTI_CORE
 
 config TEST_NS_MANAGE_NSID
     bool "NSID management"
-    depends on TFM_NS_MANAGE_NSID
 
 choice TEST_NS_IRQ
     prompt "IRQ test type"
-    default TEST_NS_NONE_IRQ
-
-    config TEST_NS_NONE_IRQ
-        bool "None IRQ test"
+    optional
 
     config TEST_NS_FLIH_IRQ
         bool "First-Level Interrupt Handling"

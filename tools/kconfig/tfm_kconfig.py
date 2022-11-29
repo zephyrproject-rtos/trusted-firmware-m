@@ -179,8 +179,13 @@ if __name__ == '__main__':
     def_config = ''
     mtime_prv = 0
 
-    if args.platform_path and os.path.exists(args.platform_path):
+    if args.platform_path:
         platform_abs_path = os.path.abspath(args.platform_path)
+
+        if not os.path.exists(platform_abs_path):
+            logging.error('Platform path {} doesn\'t exist!'.format(platform_abs_path))
+            exit(1)
+
         def_config = os.path.join(platform_abs_path, 'defconfig')
 
         # Pass environment variable to Kconfig to load extra Kconfig file.
@@ -199,12 +204,10 @@ if __name__ == '__main__':
     if os.path.exists(dot_config):
         # Load .config which contains the previous configurations.
         mtime_prv = os.stat(dot_config).st_mtime
-        tfm_kconfig.load_config(dot_config)
-        logging.info('Load configs from \'{}\''.format(dot_config))
+        logging.info(tfm_kconfig.load_config(dot_config))
     elif os.path.exists(def_config):
         # Load platform specific defconfig if exists.
-        tfm_kconfig.load_config(def_config)
-        logging.info('Load configs from \'{}\''.format(def_config))
+        logging.info(tfm_kconfig.load_config(def_config))
 
     # UI options
     if args.ui == 'tui':
@@ -214,7 +217,7 @@ if __name__ == '__main__':
     else:
         # Save .config if UI is not created.
         # The previous .config will be saved as .config.old.
-        tfm_kconfig.write_config(dot_config)
+        logging.info(tfm_kconfig.write_config(dot_config))
 
     # Generate output files if .config has been changed.
     if os.path.exists(dot_config) and os.stat(dot_config).st_mtime != mtime_prv:
