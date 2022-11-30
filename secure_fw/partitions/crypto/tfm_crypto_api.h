@@ -14,6 +14,7 @@ extern "C" {
 
 #include <stdint.h>
 #include "tfm_crypto_defs.h"
+#include "tfm_crypto_key.h"
 #include "psa/crypto_client_struct.h"
 
 /**
@@ -151,7 +152,7 @@ psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
  */
 psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
                                             psa_outvec out_vec[],
-                                            mbedtls_svc_key_id_t *encoded_key);
+                                            struct tfm_crypto_key_id_s *encoded_key);
 /**
  * \brief This function acts as interface for the MAC module
  *
@@ -163,7 +164,7 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
  */
 psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
                                       psa_outvec out_vec[],
-                                      mbedtls_svc_key_id_t *encoded_key);
+                                      struct tfm_crypto_key_id_s *encoded_key);
 /**
  * \brief This function acts as interface for the Cipher module
  *
@@ -175,7 +176,7 @@ psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
  */
 psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
                                          psa_outvec out_vec[],
-                                         mbedtls_svc_key_id_t *encoded_key);
+                                         struct tfm_crypto_key_id_s *encoded_key);
 /**
  * \brief This function acts as interface for the AEAD module
  *
@@ -187,7 +188,7 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
  */
 psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
                                        psa_outvec out_vec[],
-                                       mbedtls_svc_key_id_t *encoded_key);
+                                       struct tfm_crypto_key_id_s *encoded_key);
 
 /**
  * \brief This function acts as interface for the Asymmetric signing module
@@ -200,7 +201,7 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
  */
 psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
                                                   psa_outvec out_vec[],
-                                             mbedtls_svc_key_id_t *encoded_key);
+                                                  struct tfm_crypto_key_id_s *encoded_key);
 
 /**
  * \brief This function acts as interface for the Asymmetric encryption module
@@ -213,7 +214,7 @@ psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
  */
 psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
                                                      psa_outvec out_vec[],
-                                             mbedtls_svc_key_id_t *encoded_key);
+                                                     struct tfm_crypto_key_id_s *encoded_key);
 
 /**
  * \brief This function acts as interface for the Key derivation module
@@ -225,8 +226,8 @@ psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
  * \return Return values as described in \ref psa_status_t
  */
 psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
-                                            psa_outvec out_vec[],
-                                            mbedtls_svc_key_id_t *encoded_key);
+                                                 psa_outvec out_vec[],
+                                                 struct tfm_crypto_key_id_s *encoded_key);
 /**
  * \brief This function acts as interface for the Random module
  *

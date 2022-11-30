@@ -15,7 +15,6 @@
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
 
-
 struct tfm_crypto_operation_s {
     uint32_t in_use;                /*!< Indicates if the operation is in use */
     int32_t owner;                  /*!< Indicates an ID of the owner of

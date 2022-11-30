@@ -10,6 +10,7 @@
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
+#include "tfm_crypto_key.h"
 #include "tfm_crypto_defs.h"
 #include "tfm_sp_log.h"
 #include "crypto_check_config.h"
@@ -30,10 +31,6 @@
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
-
-#ifndef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
-#error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
-#endif
 
 #include <string.h>
 #include "psa/framework_feature.h"
@@ -355,7 +352,7 @@ psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     int32_t caller_id = 0;
-    mbedtls_svc_key_id_t encoded_key = MBEDTLS_SVC_KEY_ID_INIT;
+    struct tfm_crypto_key_id_s encoded_key = TFM_CRYPTO_KEY_ID_S_INIT;
     bool is_key_required = false;
     enum tfm_crypto_group_id group_id;
 
@@ -376,7 +373,8 @@ psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
         /* The caller_id being set in the owner field is the partition ID
          * of the calling partition
          */
-        encoded_key = mbedtls_svc_key_id_make(caller_id, iov->key_id);
+        encoded_key.key_id = iov->key_id;
+        encoded_key.owner = caller_id;
     }
 
     /* Dispatch to each sub-module based on the Group ID */
