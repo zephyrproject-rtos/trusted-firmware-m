@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,38 +145,38 @@ extern struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS;
 
 /* ARM MPC SSE 200 driver structures */
 #ifdef MPC_ISRAM0_S
-#include "mpc_sie200_drv.h"
-extern struct mpc_sie200_dev_t MPC_ISRAM0_DEV_S;
+#include "mpc_sie_drv.h"
+extern struct mpc_sie_dev_t MPC_ISRAM0_DEV_S;
 #endif
 
 #ifdef MPC_ISRAM1_S
-#include "mpc_sie200_drv.h"
-extern struct mpc_sie200_dev_t MPC_ISRAM1_DEV_S;
+#include "mpc_sie_drv.h"
+extern struct mpc_sie_dev_t MPC_ISRAM1_DEV_S;
 #endif
 
 #ifdef MPC_ISRAM2_S
-#include "mpc_sie200_drv.h"
-extern struct mpc_sie200_dev_t MPC_ISRAM2_DEV_S;
+#include "mpc_sie_drv.h"
+extern struct mpc_sie_dev_t MPC_ISRAM2_DEV_S;
 #endif
 
 #ifdef MPC_ISRAM3_S
-#include "mpc_sie200_drv.h"
-extern struct mpc_sie200_dev_t MPC_ISRAM3_DEV_S;
+#include "mpc_sie_drv.h"
+extern struct mpc_sie_dev_t MPC_ISRAM3_DEV_S;
 #endif
 
 #ifdef MPC_BRAM_S
-#include "mpc_sie200_drv.h"
-extern struct mpc_sie200_dev_t MPC_BRAM_DEV_S;
+#include "mpc_sie_drv.h"
+extern struct mpc_sie_dev_t MPC_BRAM_DEV_S;
 #endif
 
 #ifdef MPC_QSPI_S
-#include "mpc_sie200_drv.h"
-extern struct mpc_sie200_dev_t MPC_QSPI_DEV_S;
+#include "mpc_sie_drv.h"
+extern struct mpc_sie_dev_t MPC_QSPI_DEV_S;
 #endif
 
 #ifdef MPC_DDR4_S
-#include "mpc_sie200_drv.h"
-extern struct mpc_sie200_dev_t MPC_DDR4_DEV_S;
+#include "mpc_sie_drv.h"
+extern struct mpc_sie_dev_t MPC_DDR4_DEV_S;
 #endif
 
 #ifdef MPS3_IO_S

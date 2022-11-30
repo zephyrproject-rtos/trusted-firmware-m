@@ -70,6 +70,11 @@ target_include_directories(platform_s
         device/include
         device/config
         ${CMAKE_SOURCE_DIR}
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
 )
 
 target_sources(platform_s
@@ -80,12 +85,11 @@ target_sources(platform_s
         cmsis_drivers/Driver_MPC.c
         cmsis_drivers/Driver_PPC.c
         cmsis_drivers/Driver_USART.c
-        native_drivers/mpc_sie200_drv.c
-        native_drivers/mpu_armv8m_drv.c
         native_drivers/ppc_sse200_drv.c
-        native_drivers/uart_cmsdk_drv.c
-        native_drivers/timer_cmsdk_drv.c
-        native_drivers/ppc_sse200_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk/timer_cmsdk_drv.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -101,8 +105,8 @@ target_sources(platform_ns
     PRIVATE
         device/source/system_core_init.c
         device/source/device_definition.c
-        native_drivers/uart_cmsdk_drv.c
-        native_drivers/timer_cmsdk_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk/timer_cmsdk_drv.c
         cmsis_drivers/Driver_USART.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
@@ -116,6 +120,10 @@ target_include_directories(platform_ns
         native_drivers
         cmsis_drivers/config
         ${PLATFORM_DIR}/ext/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk
 )
 
 #========================= Platform BL2 =======================================#
@@ -127,7 +135,7 @@ if(BL2)
             device/source/device_definition.c
             cmsis_drivers/Driver_Flash.c
             cmsis_drivers/Driver_USART.c
-            native_drivers/uart_cmsdk_drv.c
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
     )
 
     target_include_directories(platform_bl2
@@ -136,6 +144,10 @@ if(BL2)
             device/include
             device/config
             cmsis_drivers/config
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
+            ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
+            ${PLATFORM_DIR}/ext/target/arm/drivers/timer/cmsdk
         PRIVATE
             .
             ${CMAKE_SOURCE_DIR}
