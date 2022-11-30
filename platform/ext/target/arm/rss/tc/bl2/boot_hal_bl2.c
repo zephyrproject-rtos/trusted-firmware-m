@@ -28,12 +28,16 @@
 #include "Driver_Flash.h"
 #include "host_flash_atu.h"
 #include "sic_boot.h"
+#include "plat_def_fip_uuid.h"
+#include "flash_map/flash_map.h"
 
 #ifdef FLASH_DEV_NAME
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 #endif /* FLASH_DEV_NAME */
 
 extern struct boot_rsp rsp;
+extern struct flash_area flash_map[];
+extern const int flash_map_entry_num;
 
 int32_t boot_platform_post_init(void)
 {
@@ -86,9 +90,65 @@ int32_t boot_platform_post_init(void)
     return 0;
 }
 
+static struct flash_area *flash_map_slot_from_flash_area_id(uint32_t area_id)
+{
+    uint32_t idx;
+    for (idx = 0; idx < flash_map_entry_num; idx++) {
+        if (area_id == flash_map[idx].fa_id) {
+            return &flash_map[idx];
+        }
+    }
+    return NULL;
+}
+
 int boot_platform_pre_load(uint32_t image_id)
 {
-    return host_flash_atu_pre_load(image_id);
+    uuid_t uuid;
+    uint32_t offsets[2];
+    struct flash_area *flash_area_primary =
+        flash_map_slot_from_flash_area_id(FLASH_AREA_IMAGE_PRIMARY(image_id));
+    struct flash_area *flash_area_secondary =
+        flash_map_slot_from_flash_area_id(FLASH_AREA_IMAGE_SECONDARY(image_id));
+    int rc;
+
+    if (flash_area_primary == NULL || flash_area_secondary == NULL) {
+        return 1;
+    }
+
+    switch(image_id) {
+    case RSS_BL2_IMAGE_SCP:
+        uuid = UUID_RSS_FIRMWARE_SCP_BL1;
+        break;
+    case RSS_BL2_IMAGE_AP:
+        uuid = UUID_RSS_FIRMWARE_AP_BL1;
+        break;
+    case RSS_BL2_IMAGE_NS:
+#ifndef RSS_XIP
+        uuid = UUID_RSS_FIRMWARE_NS;
+#else
+        uuid = UUID_RSS_SIC_TABLES_NS;
+#endif /* RSS_XIP */
+        break;
+    case RSS_BL2_IMAGE_S:
+#ifndef RSS_XIP
+        uuid = UUID_RSS_FIRMWARE_S;
+#else
+        uuid = UUID_RSS_SIC_TABLES_S;
+#endif /* RSS_XIP */
+        break;
+    default:
+        return 1;
+    }
+
+    rc = host_flash_atu_init_regions_for_image(uuid, offsets);
+    if (rc) {
+        return rc;
+    }
+
+    flash_area_primary->fa_off += offsets[0];
+    flash_area_secondary->fa_off += offsets[1];
+
+    return 0;
 }
 
 int boot_platform_post_load(uint32_t image_id)
@@ -131,7 +191,7 @@ int boot_platform_post_load(uint32_t image_id)
         mhu_v2_x_channel_send(&MHU_RSS_TO_SCP_DEV, 0, 1);
     }
 
-    err = host_flash_atu_post_load(image_id);
+    err = host_flash_atu_uninit_regions();
     if (err) {
         return err;
     }

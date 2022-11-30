@@ -16,7 +16,7 @@
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
-int32_t __WEAK bl1_image_get_flash_offset(uint32_t image_id)
+uint32_t __WEAK bl1_image_get_flash_offset(uint32_t image_id)
 {
     switch (image_id) {
     case 0:

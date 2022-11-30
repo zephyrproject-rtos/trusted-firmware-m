@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 #define __FLASH_LAYOUT_H__
 
 #include "host_base_address.h"
+#include "platform_base_address.h"
 
 /* Flash layout on RSS with XIP mode disabled:
  *
@@ -49,7 +50,6 @@
  * with comment.
  */
 
-
 /* Size of a Secure and of a Non-secure image */
 #define FLASH_BL2_PARTITION_SIZE        (0x10000) /* BL2 partition: 128 KiB */
 #define FLASH_S_PARTITION_SIZE          (0x60000) /* S   partition: 384 KiB */
@@ -69,11 +69,14 @@
 #endif /* RSS_XIP */
 
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
-#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)    /* 4 KB */
+#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x200)    /* 1 KiB */
 /* Same as FLASH0_SIZE */
 #define FLASH_TOTAL_SIZE                (0xFC00000)  /* 252 MiB */
 
-#define FLASH_BASE_ADDRESS              (HOST_FLASH0_BASE_S)
+/* Flash offsets are offsets in the host ATU mapping space, to allow host flash
+ * to be mapped at any point in the mapping space.
+ */
+#define FLASH_BASE_ADDRESS              (HOST_ACCESS_BASE_S)
 
 /* Offset and size definitions of the flash partitions that are handled by the
  * bootloader. The image swapping is done between IMAGE_PRIMARY and
@@ -81,77 +84,76 @@
  * swapping.
  */
 
+#ifndef RSS_GPT_SUPPORT
+#define FLASH_FIP_A_OFFSET         0x0
+#define FLASH_FIP_B_OFFSET         (FLASH_FIP_A_OFFSET + 0x800000)
+#endif /* !RSS_GPT_SUPPORT */
+
 /* BL2 primary slot */
 #define FLASH_AREA_0_ID            (1)
-#define FLASH_AREA_0_OFFSET        (0)
+#define FLASH_AREA_0_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_0_SIZE          (FLASH_BL2_PARTITION_SIZE)
 /* BL2 secondary slot */
 #define FLASH_AREA_1_ID            (FLASH_AREA_0_ID + 1)
-#define FLASH_AREA_1_OFFSET        (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
+#define FLASH_AREA_1_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_1_SIZE          (FLASH_BL2_PARTITION_SIZE)
 
 /* Secure image primary slot. */
 #define FLASH_AREA_2_ID            (FLASH_AREA_1_ID + 1)
-#define FLASH_AREA_2_OFFSET        (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
+#define FLASH_AREA_2_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE)
 /* Non-secure image primary slot. */
 #define FLASH_AREA_3_ID            (FLASH_AREA_2_ID + 1)
-#define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
+#define FLASH_AREA_3_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
 /* Secure image secondary slot. */
 #define FLASH_AREA_4_ID            (FLASH_AREA_3_ID + 1)
-#define FLASH_AREA_4_OFFSET        (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
+#define FLASH_AREA_4_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_4_SIZE          (FLASH_S_PARTITION_SIZE)
 /* Non-secure image secondary slot. */
 #define FLASH_AREA_5_ID            (FLASH_AREA_4_ID + 1)
-#define FLASH_AREA_5_OFFSET        (FLASH_AREA_4_OFFSET + FLASH_AREA_4_SIZE)
+#define FLASH_AREA_5_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_5_SIZE          (FLASH_NS_PARTITION_SIZE)
 
 /* AP image primary slot */
 #define FLASH_AREA_6_ID            (FLASH_AREA_5_ID + 1)
-#define FLASH_AREA_6_OFFSET        (FLASH_AREA_5_OFFSET + FLASH_AREA_5_SIZE)
+#define FLASH_AREA_6_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_6_SIZE          (FLASH_AP_PARTITION_SIZE)
 /* SCP image primary slot */
 #define FLASH_AREA_7_ID            (FLASH_AREA_6_ID + 1)
-#define FLASH_AREA_7_OFFSET        (FLASH_AREA_6_OFFSET + FLASH_AREA_6_SIZE)
+#define FLASH_AREA_7_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_7_SIZE          (FLASH_SCP_PARTITION_SIZE)
 /* AP image secondary slot */
 #define FLASH_AREA_8_ID            (FLASH_AREA_7_ID + 1)
-#define FLASH_AREA_8_OFFSET        (FLASH_AREA_7_OFFSET + FLASH_AREA_7_SIZE)
+#define FLASH_AREA_8_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_8_SIZE          (FLASH_AP_PARTITION_SIZE)
 /* SCP image secondary slot */
 #define FLASH_AREA_9_ID            (FLASH_AREA_8_ID + 1)
-#define FLASH_AREA_9_OFFSET        (FLASH_AREA_8_OFFSET + FLASH_AREA_8_SIZE)
+#define FLASH_AREA_9_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_9_SIZE          (FLASH_SCP_PARTITION_SIZE)
 
 #ifdef RSS_XIP
 /* Secure image SIC tables primary slot */
 #define FLASH_AREA_10_ID            (FLASH_AREA_9_ID + 1)
-#define FLASH_AREA_10_OFFSET        (FLASH_AREA_9_OFFSET + FLASH_AREA_9_SIZE)
+#define FLASH_AREA_10_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_10_SIZE          (FLASH_SIC_TABLE_SIZE)
 /* Non-secure image SIC tables primary slot */
 #define FLASH_AREA_11_ID            (FLASH_AREA_10_ID + 1)
-#define FLASH_AREA_11_OFFSET        (FLASH_AREA_10_OFFSET + FLASH_AREA_10_SIZE)
+#define FLASH_AREA_11_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_11_SIZE          (FLASH_SIC_TABLE_SIZE)
 /* Secure image SIC tables secondary slot */
 #define FLASH_AREA_12_ID            (FLASH_AREA_11_ID + 1)
-#define FLASH_AREA_12_OFFSET        (FLASH_AREA_11_OFFSET + FLASH_AREA_11_SIZE)
+#define FLASH_AREA_12_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_12_SIZE          (FLASH_SIC_TABLE_SIZE)
 /* Non-secure image SIC tables secondary slot */
 #define FLASH_AREA_13_ID            (FLASH_AREA_12_ID + 1)
-#define FLASH_AREA_13_OFFSET        (FLASH_AREA_12_OFFSET + FLASH_AREA_12_SIZE)
+#define FLASH_AREA_13_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_13_SIZE          (FLASH_SIC_TABLE_SIZE)
 #endif /* RSS_XIP */
-
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
-
-/* Check that all the images can fit in the Flash area. */
-#if (FLASH_AREA_9_OFFSET + FLASH_AREA_9_SIZE > FLASH_TOTAL_SIZE)
-#error "Out of Flash memory!"
-#endif
 
 #ifdef RSS_XIP
 #define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_10_ID : \
@@ -210,10 +212,8 @@
 /* Flash device name used by BL2
  * Name is defined in flash driver file: Driver_Flash.c
  */
-#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 #define FLASH_DEV_NAME Driver_FLASH0
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_FLASH_PROGRAM_UNIT      (0x1)
-#endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
 #endif /* __FLASH_LAYOUT_H__ */

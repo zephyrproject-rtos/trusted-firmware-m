@@ -84,7 +84,10 @@ struct uart_cmsdk_dev_t ARM_UART0_DEV_NS = {
 
 #if (defined (SPI_STRATAFLASHJ3_S) && defined (CFI_S))
 static const struct cfi_dev_cfg_t CFI_DEV_CFG_S = {
-    .base = HOST_FLASH0_BASE_S
+    /* Define the flash base/size to be the same as the host access area, as the
+     * flash may not be mapped contiguously or predictably within that area.
+     */
+    .base = HOST_ACCESS_BASE_S,
 };
 struct cfi_dev_t CFI_DEV_S = {
     .cfg = &CFI_DEV_CFG_S,

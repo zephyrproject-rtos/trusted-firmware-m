@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2013-2023 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -108,7 +108,7 @@ static int32_t ARM_Flash_PowerControl(ARM_POWER_STATE state)
 #if (RTE_FLASH0)
 static ARM_FLASH_INFO ARM_FLASH0_DEV_DATA = {
     .sector_info    = NULL,     /* Uniform sector layout */
-    .sector_count   = HOST_FLASH0_SIZE / 0x1000,
+    .sector_count   = HOST_ACCESS_SIZE / 0x1000,
     .sector_size    = 0x1000,
     .page_size      = 256U,
     .program_unit   = 1U,

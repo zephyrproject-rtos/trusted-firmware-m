@@ -22,7 +22,7 @@ const ARM_DRIVER_FLASH *flash_driver[] = {
 };
 const int flash_driver_entry_num = ARRAY_SIZE(flash_driver);
 
-const struct flash_area flash_map[] = {
+struct flash_area flash_map[] = {
 #ifdef RSS_XIP
     {
         .fa_id = FLASH_AREA_10_ID,

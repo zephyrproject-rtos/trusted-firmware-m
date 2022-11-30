@@ -32,15 +32,7 @@
 #define HOST_UART_BASE     0x2A400000UL /* Host UART base address */
 #define HOST_UART_SIZE     0x2000U      /* 8KB */
 
-/* In future HOST_FLASH0_BASE should be set to the _actual_ base of the flash,
- * and we should implement some logic to locate the images (in a FIP, probably).
- * For now, define the base address at an offset large enough that it's not used
- * by the AP firmware images.
- */
-/* #define HOST_FLASH_BASE   0x08000000UL /1* Host flash base address *1/ */
-/* FIP size = 34 MB */
-/* Total boot flash size = 64 MB */
-#define HOST_FLASH0_BASE   0x0A200000UL /* Host flash base address */
-#define HOST_FLASH0_SIZE   0x1E00000    /* 30 MiB */
+#define HOST_FLASH0_BASE   0x08000000UL /* Host flash base address */
+#define HOST_FLASH0_SIZE   0x4000000    /* 64 MiB */
 
 #endif  /* __HOST_BASE_ADDRESS_H__ */

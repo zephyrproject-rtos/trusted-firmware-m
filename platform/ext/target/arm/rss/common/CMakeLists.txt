@@ -22,6 +22,7 @@ target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${RSS_XIP}>:RSS_XIP>
         $<$<BOOL:${RSS_DEBUG_UART}>:RSS_DEBUG_UART>
+        $<$<BOOL:${RSS_GPT_SUPPORT}>:RSS_GPT_SUPPORT>
 )
 
 #========================= Platform common defs ===============================#
@@ -262,6 +263,9 @@ target_sources(platform_bl2
         native_drivers/lcm_drv.c
         otp_lcm.c
         nv_counters.c
+        fip_parser/fip_parser.c
+        fip_parser/host_flash_atu.c
+        $<$<BOOL:${RSS_GPT_SUPPORT}>:${CMAKE_CURRENT_SOURCE_DIR}/fip_parser/gpt.c>
 )
 
 target_include_directories(platform_bl2
@@ -281,6 +285,7 @@ target_include_directories(platform_bl2
     PRIVATE
         ${PLATFORM_DIR}/..
         native_drivers
+        ./fip_parser
 )
 
 target_compile_definitions(platform_bl2
@@ -309,9 +314,9 @@ target_compile_definitions(platform_bl2
 target_sources(platform_bl1
     PRIVATE
         ./bl1/boot_hal_bl1.c
-        $<$<NOT:$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_Flash.c>
-        $<$<NOT:$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/cfi_drv.c>
-        $<$<NOT:$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/spi_strataflashj3_flash_lib.c>
+        cmsis_drivers/Driver_Flash.c
+        native_drivers/cfi_drv.c
+        native_drivers/spi_strataflashj3_flash_lib.c
         ./device/source/device_definition.c
         ./device/source/host_device_definition.c
         ./device/source/system_core_init.c
@@ -325,6 +330,9 @@ target_sources(platform_bl1
         ./otp_lcm.c
         ./nv_counters.c
         ./tfm_hal_platform_reset.c
+        ./fip_parser/fip_parser.c
+        ./fip_parser/host_flash_atu.c
+        $<$<BOOL:${RSS_GPT_SUPPORT}>:${CMAKE_CURRENT_SOURCE_DIR}/fip_parser/gpt.c>
 )
 
 target_include_directories(platform_bl1_interface
@@ -335,6 +343,7 @@ target_include_directories(platform_bl1_interface
         ./device/config
         ./device/include
         ./native_drivers
+        ./fip_parser
 )
 
 target_compile_definitions(platform_bl1

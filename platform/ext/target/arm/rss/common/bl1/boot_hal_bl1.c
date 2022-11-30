@@ -27,16 +27,30 @@
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include <string.h>
 #include "cmsis_compiler.h"
+#include "fip_parser.h"
+#include "host_flash_atu.h"
+#include "plat_def_fip_uuid.h"
 
 extern uint8_t computed_bl1_2_hash[];
 extern uint32_t platform_code_is_bl1_2;
+uint32_t image_offsets[2];
 
-#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
-#endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+
+uint32_t bl1_image_get_flash_offset(uint32_t image_id)
+{
+    switch (image_id) {
+    case 0:
+        return HOST_FLASH0_IMAGE0_BASE_S - FLASH_BASE_ADDRESS + image_offsets[0];
+    case 1:
+        return HOST_FLASH0_IMAGE1_BASE_S - FLASH_BASE_ADDRESS + image_offsets[1];
+    default:
+        FIH_PANIC;
+    }
+}
 
 static int32_t init_atu_regions(void)
 {
@@ -52,26 +66,6 @@ static int32_t init_atu_regions(void)
         return 1;
     }
 #endif /* !RSS_DEBUG_UART */
-
-    /* Initialize BL2 slot 0 region */
-    err = atu_initialize_region(&ATU_DEV_S,
-                                0,
-                                HOST_FLASH0_BASE_S + FLASH_AREA_0_OFFSET,
-                                HOST_FLASH0_BASE + FLASH_AREA_0_OFFSET,
-                                FLASH_AREA_0_SIZE);
-    if (err != ATU_ERR_NONE) {
-        return 1;
-    }
-
-    /* Initialize BL2 slot 1 region */
-    err = atu_initialize_region(&ATU_DEV_S,
-                                1,
-                                HOST_FLASH0_BASE_S + FLASH_AREA_1_OFFSET,
-                                HOST_FLASH0_BASE + FLASH_AREA_1_OFFSET,
-                                FLASH_AREA_1_SIZE);
-    if (err != ATU_ERR_NONE) {
-        return 1;
-    }
 
     return 0;
 }
@@ -101,12 +95,10 @@ int32_t boot_platform_init(void)
     stdio_init();
 #endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
-#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {
         return 1;
     }
-#endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
     result = bl1_trng_generate_random(prbg_seed, sizeof(prbg_seed));
     if (result != 0) {
@@ -115,6 +107,11 @@ int32_t boot_platform_init(void)
 
     result = kmu_init(&KMU_DEV_S, prbg_seed);
     if (result != KMU_ERROR_NONE) {
+        return result;
+    }
+
+    result = host_flash_atu_init_regions_for_image(UUID_RSS_FIRMWARE_BL2, image_offsets);
+    if (result) {
         return result;
     }
 
@@ -173,6 +170,14 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
     int32_t result;
 
+    if (platform_code_is_bl1_2) {
+        result = host_flash_atu_uninit_regions();
+        if (result) {
+            while(1){}
+        }
+    }
+
+
     result = invalidate_hardware_keys();
     if (result) {
         while(1){}
@@ -185,12 +190,10 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
     result = FLASH_DEV_NAME.Uninitialize();
     if (result != ARM_DRIVER_OK) {
         while (1){}
     }
-#endif /* TFM_BL1_MEMORY_MAPPED_FLASH */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
@@ -223,8 +226,6 @@ int boot_platform_post_load(uint32_t image_id)
     uint8_t dak_seed_label[]  = "BL1_DAK_SEED_DERIVATION";
     /* The KMU requires word alignment */
     uint8_t __ALIGNED(4) tmp_buf[32];
-
-    (void)image_id;
 
     rc = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t *)&lcs);
     if (rc) {

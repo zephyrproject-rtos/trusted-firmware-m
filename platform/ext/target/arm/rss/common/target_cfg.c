@@ -36,6 +36,14 @@ REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 #endif
 
 const struct memory_region_limits memory_regions = {
+#ifdef RSS_XIP
+    .non_secure_code_start = RSS_RUNTIME_NS_XIP_BASE_NS,
+
+    .non_secure_partition_base = RSS_RUNTIME_NS_XIP_BASE_NS,
+
+    .non_secure_partition_limit = RSS_RUNTIME_NS_XIP_BASE_NS +
+                                  NS_PARTITION_SIZE - 1,
+#else
     .non_secure_code_start =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
         BL2_HEADER_SIZE,
@@ -46,6 +54,7 @@ const struct memory_region_limits memory_regions = {
     .non_secure_partition_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
         NS_PARTITION_SIZE - 1,
+#endif /* RSS_XIP */
 
 #ifndef TFM_MULTI_CORE_TOPOLOGY
     .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
