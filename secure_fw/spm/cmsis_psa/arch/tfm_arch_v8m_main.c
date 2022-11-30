@@ -31,9 +31,12 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 /* IAR Specific */
 #if defined(__ICCARM__)
 
-#pragma required = ipc_schedule
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
+
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+#pragma required = ipc_schedule
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1*/
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
@@ -124,11 +127,6 @@ __attribute__((naked)) void PendSV_Handler(void)
 }
 #endif
 
-#if defined(__ICCARM__)
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
-                              uint32_t *psp);
-#pragma required = tfm_core_svc_handler
-#endif
 
 __attribute__((naked)) void SVC_Handler(void)
 {
