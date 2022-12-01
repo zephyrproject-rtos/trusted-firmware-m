@@ -60,4 +60,14 @@ static inline tfm_crypto_library_key_id_t tfm_crypto_library_key_id_init_default
 {
     return tfm_crypto_library_key_id_init(0, 0);
 }
+
+/*!
+ * \brief This function is used to perform the necessary steps to initialise the underlying
+ *        library that provides the implementation of the PSA Crypto core to the TF-M Crypto
+ *        service
+ *
+ * \return PSA_SUCCESS on successful initialisation
+ */
+psa_status_t tfm_crypto_core_library_init(void);
+
 #endif /* CRYPTO_LIBRARY_H */

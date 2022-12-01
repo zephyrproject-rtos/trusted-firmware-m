@@ -18,14 +18,6 @@
 
 #include "crypto_library.h"
 
-/*
- * \brief This Mbed TLS include is needed to initialise the memory allocator
- *        of the library used for internal allocations
- */
-#include "mbedtls/memory_buffer_alloc.h"
-
-#include "mbedtls/platform.h"
-
 #if CRYPTO_NV_SEED
 #include "tfm_plat_crypto_nv_seed.h"
 #endif /* CRYPTO_NV_SEED */
@@ -254,15 +246,11 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
     return status;
 }
 
-/**
- * \brief Static buffer to be used by Mbed Crypto for memory allocations
- *
- */
-static uint8_t mbedtls_mem_buf[CRYPTO_ENGINE_BUF_SIZE] = {0};
-
 static psa_status_t tfm_crypto_engine_init(void)
 {
+    psa_status_t status = PSA_ERROR_GENERIC_ERROR;
     char *library_info = NULL;
+
 #if CRYPTO_NV_SEED
     LOG_INFFMT("[INF][Crypto] ");
     LOG_INFFMT("Provisioning entropy seed... ");
@@ -272,19 +260,16 @@ static psa_status_t tfm_crypto_engine_init(void)
     LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
 #endif /* CRYPTO_NV_SEED */
 
-    library_info = tfm_crypto_library_get_info();
-    LOG_DBGFMT("[DBG][Crypto] PSA Crypto backend library identifier: \033[0;32m%s\033[0m\r\n", library_info);
-
-    /* Initialise the Mbed Crypto memory allocator to use static memory
-     * allocation from the provided buffer instead of using the heap
+    /* Initialise the underlying Cryptographic library that provides the
+     * PSA Crypto core layer
      */
-    mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
-                                     CRYPTO_ENGINE_BUF_SIZE);
-
-    /* mbedtls_printf is used to print messages including error information. */
-#if (TFM_PARTITION_LOG_LEVEL >= TFM_PARTITION_LOG_LEVEL_ERROR)
-    mbedtls_platform_set_printf(printf);
-#endif
+    library_info = tfm_crypto_library_get_info();
+    LOG_DBGFMT("[DBG][Crypto] Initialising \033[0;32m%s\033[0m as PSA Crypto backend library... ", library_info);
+    status = tfm_crypto_core_library_init();
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+    LOG_DBGFMT("\033[0;32mcomplete.\033[0m\r\n");
 
     /* Initialise the crypto accelerator if one is enabled. If the driver API is
      * the one defined by the PSA Unified Driver interface, the initialisation is
@@ -299,9 +284,10 @@ static psa_status_t tfm_crypto_engine_init(void)
     LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-    /* Perform the initialisation of the PSA subsystem in the Mbed Crypto
-     * library. If a driver is built using the PSA Driver interface, the function
-     * below will perform also the same operations as crypto_hw_accelerator_init()
+    /* Perform the initialisation of the PSA subsystem available through the chosen
+     * Cryptographic library. If a driver is built using the PSA Driver interface,
+     * the function below will perform also the same operations done by the HAL init
+     * crypto_hw_accelerator_init()
      */
     return psa_crypto_init();
 }
