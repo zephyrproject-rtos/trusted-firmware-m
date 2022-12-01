@@ -26,7 +26,7 @@
 
  /* Define clocks */
 #define  XTAL             (32000000UL)
-#define  PERIPHERAL_XTAL  (32000000UL)
+#define  PERIPHERAL_XTAL  (25000000UL)
 #define  SYSTEM_CLOCK     (XTAL)
 #define  PERIPHERAL_CLOCK (PERIPHERAL_XTAL)
 
