@@ -168,8 +168,12 @@ psa_status_t mbedtls_psa_platform_get_builtin_key(
     psa_drv_slot_number_t *slot_number)
 {
     enum tfm_plat_err_t plat_err;
+    struct tfm_crypto_key_id_s tfm_key_id = {
+        .key_id = MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key_id),
+        .owner = MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(key_id)};
 
-    plat_err = tfm_plat_builtin_key_get_lifetime_and_slot(key_id, lifetime,
+    plat_err = tfm_plat_builtin_key_get_lifetime_and_slot(tfm_key_id,
+                                                          lifetime,
                                                           slot_number);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return PSA_ERROR_DOES_NOT_EXIST;

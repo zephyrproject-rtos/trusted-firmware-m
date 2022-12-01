@@ -7,14 +7,14 @@
 
 #ifndef __TFM_PLAT_CRYPTO_KEYS_H__
 #define __TFM_PLAT_CRYPTO_KEYS_H__
+
+#include "psa/crypto.h"
+
 /**
  * \note The interfaces defined in this file must be implemented for each
  *       SoC.
  */
-
-#define MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
-
-#include "tfm_mbedcrypto_include.h"
+#include "tfm_crypto_key.h"
 
 #include "tfm_plat_defs.h"
 
@@ -29,13 +29,13 @@ extern "C" {
  * \brief Gets key usage for a given builtin key ID and owner.
  *
  * \param[in]  key_id        ID of key
- * \param[in]  user          Which user to get the usage permissions for
+ * \param[in]  owner         Which owner to get the usage permissions for
  * \param[out] usage         The permissions that the given user has for the key
  *
  * \return Returns error code specified in \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t tfm_plat_builtin_key_get_usage(psa_key_id_t key_id,
-                                                   mbedtls_key_owner_id_t user,
+                                                   int32_t owner,
                                                    psa_key_usage_t *usage);
 
 /**
@@ -48,7 +48,7 @@ enum tfm_plat_err_t tfm_plat_builtin_key_get_usage(psa_key_id_t key_id,
  * \return Returns error code specified in \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t tfm_plat_builtin_key_get_lifetime_and_slot(
-    mbedtls_svc_key_id_t key_id,
+    struct tfm_crypto_key_id_s key_id,
     psa_key_lifetime_t *lifetime,
     psa_drv_slot_number_t *slot_number);
 

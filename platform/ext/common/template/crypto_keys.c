@@ -34,7 +34,7 @@
 #endif
 
 enum tfm_plat_err_t tfm_plat_builtin_key_get_usage(psa_key_id_t key_id,
-                                                   mbedtls_key_owner_id_t user,
+                                                   int32_t owner,
                                                    psa_key_usage_t *usage)
 {
     *usage = 0;
@@ -45,7 +45,7 @@ enum tfm_plat_err_t tfm_plat_builtin_key_get_usage(psa_key_id_t key_id,
         *usage = PSA_KEY_USAGE_DERIVE;
         break;
     case TFM_BUILTIN_KEY_ID_IAK:
-        switch(user) {
+        switch(owner) {
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
         case TFM_SP_INITIAL_ATTESTATION:
             *usage = PSA_KEY_USAGE_SIGN_HASH;
@@ -78,11 +78,11 @@ enum tfm_plat_err_t tfm_plat_builtin_key_get_usage(psa_key_id_t key_id,
 }
 
 enum tfm_plat_err_t tfm_plat_builtin_key_get_lifetime_and_slot(
-    mbedtls_svc_key_id_t key_id,
+    struct tfm_crypto_key_id_s key_id,
     psa_key_lifetime_t *lifetime,
     psa_drv_slot_number_t *slot_number)
 {
-    switch (MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key_id)) {
+    switch (key_id.key_id) {
     case TFM_BUILTIN_KEY_ID_HUK:
         *slot_number = TFM_BUILTIN_KEY_SLOT_HUK;
         *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(

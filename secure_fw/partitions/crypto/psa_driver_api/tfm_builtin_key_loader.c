@@ -24,6 +24,10 @@
 #define TFM_BUILTIN_MAX_KEYS 8
 #endif /* TFM_BUILTIN_MAX_KEYS */
 
+#ifndef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
+#endif
+
 struct tfm_builtin_key_t {
     uint8_t key[TFM_BUILTIN_MAX_KEY_LEN];
     size_t key_len;
@@ -33,57 +37,6 @@ struct tfm_builtin_key_t {
 };
 
 static struct tfm_builtin_key_t builtin_key_slots[TFM_BUILTIN_MAX_KEYS] = {0};
-
-psa_status_t tfm_builtin_key_loader_load_key(uint8_t *buf, size_t key_len,
-                                             psa_key_attributes_t *attr)
-{
-    psa_status_t err;
-    psa_drv_slot_number_t slot_number;
-    psa_key_lifetime_t lifetime;
-    mbedtls_svc_key_id_t key_id;
-
-    /* Set the owner to 0, as we handle permissions on a granular basis. Having
-     * builtin keys being defined with different owners seems to cause a memory
-     * leak in the MbedTLS core.
-     */
-    key_id = psa_get_key_id(attr);
-    key_id.MBEDTLS_PRIVATE(owner) = 0;
-    psa_set_key_id(attr, key_id);
-
-    if (key_len > TFM_BUILTIN_MAX_KEY_LEN) {
-        return PSA_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    err = mbedtls_psa_platform_get_builtin_key(psa_get_key_id(attr), &lifetime,
-                                               &slot_number);
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
-    memcpy(&(builtin_key_slots[slot_number].attr), attr,
-           sizeof(psa_key_attributes_t));
-    memcpy(&(builtin_key_slots[slot_number].key), buf, key_len);
-    builtin_key_slots[slot_number].key_len = key_len;
-    builtin_key_slots[slot_number].is_loaded = 1;
-
-    return PSA_SUCCESS;
-}
-
-psa_status_t tfm_builtin_key_loader_get_key_buffer_size(
-        mbedtls_svc_key_id_t key_id, size_t *len)
-{
-    psa_status_t err;
-    psa_drv_slot_number_t slot_number;
-    psa_key_lifetime_t lifetime;
-
-    err = mbedtls_psa_platform_get_builtin_key(key_id, &lifetime, &slot_number);
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
-    *len = builtin_key_slots[slot_number].key_len;
-    return PSA_SUCCESS;
-}
 
 static psa_status_t builtin_key_get_attributes(
         struct tfm_builtin_key_t *key_slot, psa_key_attributes_t *attr)
@@ -156,6 +109,62 @@ static psa_status_t builtin_key_copy_to_buffer(
     return PSA_SUCCESS;
 }
 
+/*!
+ * \defgroup tfm_builtin_key_loader
+ *
+ */
+/*!@{*/
+psa_status_t tfm_builtin_key_loader_load_key(uint8_t *buf, size_t key_len,
+                                             psa_key_attributes_t *attr)
+{
+    psa_status_t err;
+    psa_drv_slot_number_t slot_number;
+    psa_key_lifetime_t lifetime;
+    mbedtls_svc_key_id_t key_id;
+
+    /* Set the owner to 0, as we handle permissions on a granular basis. Having
+     * builtin keys being defined with different owners seems to cause a memory
+     * leak in the MbedTLS core.
+     */
+    key_id = psa_get_key_id(attr);
+    key_id = mbedtls_svc_key_id_make(0, MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key_id));
+    psa_set_key_id(attr, key_id);
+
+    if (key_len > TFM_BUILTIN_MAX_KEY_LEN) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    err = mbedtls_psa_platform_get_builtin_key(psa_get_key_id(attr), &lifetime,
+                                               &slot_number);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
+
+    memcpy(&(builtin_key_slots[slot_number].attr), attr,
+           sizeof(psa_key_attributes_t));
+    memcpy(&(builtin_key_slots[slot_number].key), buf, key_len);
+    builtin_key_slots[slot_number].key_len = key_len;
+    builtin_key_slots[slot_number].is_loaded = 1;
+
+    return PSA_SUCCESS;
+}
+
+psa_status_t tfm_builtin_key_loader_get_key_buffer_size(
+        mbedtls_svc_key_id_t key_id, size_t *len)
+{
+    psa_status_t err;
+    psa_drv_slot_number_t slot_number;
+    psa_key_lifetime_t lifetime;
+
+    err = mbedtls_psa_platform_get_builtin_key(key_id, &lifetime, &slot_number);
+    if (err != PSA_SUCCESS) {
+        return err;
+    }
+
+    *len = builtin_key_slots[slot_number].key_len;
+    return PSA_SUCCESS;
+}
+
 psa_status_t tfm_builtin_key_loader_get_key_buffer(
         psa_drv_slot_number_t slot_number, psa_key_attributes_t *attributes,
         uint8_t *key_buffer, size_t key_buffer_size, size_t *key_buffer_length)
@@ -211,3 +220,4 @@ psa_status_t tfm_builtin_key_loader_get_key_buffer(
 
     return err;
 }
+/*!@}*/
