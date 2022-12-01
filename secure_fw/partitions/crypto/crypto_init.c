@@ -16,6 +16,8 @@
 #include "crypto_check_config.h"
 #include "tfm_plat_crypto_keys.h"
 
+#include "crypto_library.h"
+
 /*
  * \brief This Mbed TLS include is needed to initialise the memory allocator
  *        of the library used for internal allocations
@@ -260,6 +262,7 @@ static uint8_t mbedtls_mem_buf[CRYPTO_ENGINE_BUF_SIZE] = {0};
 
 static psa_status_t tfm_crypto_engine_init(void)
 {
+    char *library_info = NULL;
 #if CRYPTO_NV_SEED
     LOG_INFFMT("[INF][Crypto] ");
     LOG_INFFMT("Provisioning entropy seed... ");
@@ -268,6 +271,9 @@ static psa_status_t tfm_crypto_engine_init(void)
     }
     LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
 #endif /* CRYPTO_NV_SEED */
+
+    library_info = tfm_crypto_library_get_info();
+    LOG_DBGFMT("[DBG][Crypto] PSA Crypto backend library identifier: \033[0;32m%s\033[0m\r\n", library_info);
 
     /* Initialise the Mbed Crypto memory allocator to use static memory
      * allocation from the provided buffer instead of using the heap
