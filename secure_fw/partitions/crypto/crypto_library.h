@@ -18,8 +18,12 @@
 #ifndef CRYPTO_LIBRARY_H
 #define CRYPTO_LIBRARY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "psa/crypto.h"
-#include "tfm_crypto_api.h"
+#include "psa/crypto_client_struct.h"
 
 /**
  * \brief This macro extracts the key ID from the library encoded key passed as parameter
@@ -69,5 +73,37 @@ static inline tfm_crypto_library_key_id_t tfm_crypto_library_key_id_init_default
  * \return PSA_SUCCESS on successful initialisation
  */
 psa_status_t tfm_crypto_core_library_init(void);
+
+/**
+ * \brief Gets key attributes for the underlying PSA crypto core implemented by
+ *        the available crypto library, from client key attributes.
+ *
+ * \param[in]  client_key_attr  Client key attributes
+ * \param[in]  client_id        Partition ID of the calling client
+ * \param[out] key_attributes   Key attributes
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_core_library_key_attributes_from_client(
+                    const struct psa_client_key_attributes_s *client_key_attr,
+                    int32_t client_id,
+                    psa_key_attributes_t *key_attributes);
+
+/**
+ * \brief Converts key attributes of the underlying cryptographic library,
+ *        to the attributes exposed to the client (i.e. client key attributes).
+ *
+ * \param[in]  key_attributes   Key attributes
+ * \param[out] client_key_attr  Client key attributes
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_core_library_key_attributes_to_client(
+                        const psa_key_attributes_t *key_attributes,
+                        struct psa_client_key_attributes_s *client_key_attr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CRYPTO_LIBRARY_H */

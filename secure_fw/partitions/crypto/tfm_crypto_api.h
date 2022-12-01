@@ -15,7 +15,6 @@ extern "C" {
 #include <stdint.h>
 #include "tfm_crypto_defs.h"
 #include "tfm_crypto_key.h"
-#include "psa/crypto_client_struct.h"
 
 /**
  * \brief List of possible operation types supported by the TFM based
@@ -64,32 +63,6 @@ psa_status_t tfm_crypto_init_alloc(void);
  * \return Return values as described in \ref psa_status_t
  */
 psa_status_t tfm_crypto_get_caller_id(int32_t *id);
-
-/**
- * \brief Gets key attributes from client key attributes.
- *
- * \param[in]  client_key_attr  Client key attributes
- * \param[in]  client_id        Partition ID of the calling client
- * \param[out] key_attributes   Key attributes
- *
- * \return Return values as described in \ref psa_status_t
- */
-psa_status_t tfm_crypto_key_attributes_from_client(
-                    const struct psa_client_key_attributes_s *client_key_attr,
-                    int32_t client_id,
-                    psa_key_attributes_t *key_attributes);
-
-/**
- * \brief Converts key attributes to client key attributes.
- *
- * \param[in]  key_attributes   Key attributes
- * \param[out] client_key_attr  Client key attributes
- *
- * \return Return values as described in \ref psa_status_t
- */
-psa_status_t tfm_crypto_key_attributes_to_client(
-                        const psa_key_attributes_t *key_attributes,
-                        struct psa_client_key_attributes_s *client_key_attr);
 
 /**
  * \brief Allocate an operation context in the backend

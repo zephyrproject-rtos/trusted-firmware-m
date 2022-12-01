@@ -115,7 +115,8 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
         psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
         int32_t partition_id = encoded_key->owner;
 
-        status = tfm_crypto_key_attributes_from_client(client_key_attr,
+        status = tfm_crypto_core_library_key_attributes_from_client(
+                                                       client_key_attr,
                                                        partition_id,
                                                        &key_attributes);
         if (status != PSA_SUCCESS) {

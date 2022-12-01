@@ -43,7 +43,8 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
         psa_key_id_t *key_id = out_vec[0].base;
         psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
 
-        status = tfm_crypto_key_attributes_from_client(client_key_attr,
+        status = tfm_crypto_core_library_key_attributes_from_client(
+                                                       client_key_attr,
                                                        partition_id,
                                                        &key_attributes);
         if (status != PSA_SUCCESS) {
@@ -81,8 +82,8 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
 
         status = psa_get_key_attributes(library_key, &key_attributes);
         if (status == PSA_SUCCESS) {
-            status = tfm_crypto_key_attributes_to_client(&key_attributes,
-                                                         client_key_attr);
+            status = tfm_crypto_core_library_key_attributes_to_client(&key_attributes,
+                                                                      client_key_attr);
         }
     }
     break;
@@ -91,7 +92,8 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
         psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
         struct psa_client_key_attributes_s *client_key_attr = out_vec[0].base;
 
-        status = tfm_crypto_key_attributes_from_client(client_key_attr,
+        status = tfm_crypto_core_library_key_attributes_from_client(
+                                                       client_key_attr,
                                                        partition_id,
                                                        &key_attributes);
         if (status != PSA_SUCCESS) {
@@ -100,8 +102,8 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
 
         psa_reset_key_attributes(&key_attributes);
 
-        status = tfm_crypto_key_attributes_to_client(&key_attributes,
-                                                     client_key_attr);
+        status = tfm_crypto_core_library_key_attributes_to_client(&key_attributes,
+                                                                  client_key_attr);
     }
     break;
     case TFM_CRYPTO_EXPORT_KEY_SID:
@@ -141,7 +143,8 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
         psa_key_id_t *target_key_id = out_vec[0].base;
         tfm_crypto_library_key_id_t target_key = tfm_crypto_library_key_id_init_default();
 
-        status = tfm_crypto_key_attributes_from_client(client_key_attr,
+        status = tfm_crypto_core_library_key_attributes_from_client(
+                                                       client_key_attr,
                                                        partition_id,
                                                        &key_attributes);
         if (status != PSA_SUCCESS) {
@@ -165,7 +168,8 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
                                                                  in_vec[1].base;
         psa_key_id_t *key_handle = out_vec[0].base;
 
-        status = tfm_crypto_key_attributes_from_client(client_key_attr,
+        status = tfm_crypto_core_library_key_attributes_from_client(
+                                                       client_key_attr,
                                                        partition_id,
                                                        &key_attributes);
         if (status != PSA_SUCCESS) {
