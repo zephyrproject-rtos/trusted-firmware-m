@@ -47,10 +47,14 @@ void tfm_core_panic(void);
 /* Runtime memory operations forwarding */
 #ifndef spm_memcpy
 #define spm_memcpy memcpy
+#else
+void *spm_memcpy(void *dest, const void *src, size_t n);
 #endif /* spm_memcpy */
 
 #ifndef spm_memset
 #define spm_memset memset
+#else
+void *spm_memset(void *s, int c, size_t n);
 #endif /* spm_memset */
 
 #endif /* __TFM_UTILS_H__ */
