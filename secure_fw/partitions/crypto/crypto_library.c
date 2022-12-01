@@ -16,24 +16,33 @@
 #include "psa/error.h"
 #include "crypto_library.h"
 
-/*
+/**
+ * \brief This include is required to get the underlying platform function
+ *        to allow the builtin keys support in mbed TLS to map slots to key
+ *        IDs.
+ */
+#include "tfm_plat_crypto_keys.h"
+
+/**
  * \brief These includes are required to get the interface that TF-M crypto
  *        exposes on its client side, in particular regarding key attributes
  */
 #include "psa/crypto_client_struct.h"
 
-/*
+/**
  * \brief This Mbed TLS include is needed to initialise the memory allocator
  *        of the library used for internal allocations
  */
 #include "mbedtls/memory_buffer_alloc.h"
-/*
+
+/**
  * \brief This Mbed TLS include is needed to set the mbedtls_printf to the
  *        function required by the TF-M framework in order to be able to
  *        print to terminal through mbedtls_printf
  */
 #include "mbedtls/platform.h"
-/*
+
+/**
  * \brief This Mbed TLS include is needed to retrieve version information for
  *        display
  */
@@ -139,6 +148,32 @@ psa_status_t tfm_crypto_core_library_key_attributes_to_client(
 
     /* Return the key_id as the client key id, do not return the owner */
     client_key_attr->id = MBEDTLS_SVC_KEY_ID_GET_KEY_ID(core.MBEDTLS_PRIVATE(id));
+
+    return PSA_SUCCESS;
+}
+
+/**
+ * \brief This function is required by mbed TLS to enable support for
+ *        platform builtin keys in the PSA Crypto core layer implemented
+ *        by mbed TLS. This function is not standardized by the API hence
+ *        this layer directly provides the symbol required by the library
+ *
+ * \note It maps builtin key IDs to cryptographic drivers and slots. The
+ *       actual data is deferred to a platform function, as different
+ *       platforms may have different key storage capabilities.
+ */
+psa_status_t mbedtls_psa_platform_get_builtin_key(
+    mbedtls_svc_key_id_t key_id,
+    psa_key_lifetime_t *lifetime,
+    psa_drv_slot_number_t *slot_number)
+{
+    enum tfm_plat_err_t plat_err;
+
+    plat_err = tfm_plat_builtin_key_get_lifetime_and_slot(key_id, lifetime,
+                                                          slot_number);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return PSA_ERROR_DOES_NOT_EXIST;
+    }
 
     return PSA_SUCCESS;
 }
