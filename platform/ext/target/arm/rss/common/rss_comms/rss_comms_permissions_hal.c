@@ -10,6 +10,9 @@
 #include "psa_manifest/sid.h"
 #include "tfm_hal_platform.h"
 
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+#include "tfm_attest_defs.h"
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 #ifdef TFM_PARTITION_MEASURED_BOOT
 #include "measured_boot_defs.h"
 #endif /* TFM_PARTITION_MEASURED_BOOT */
@@ -94,6 +97,16 @@ enum tfm_plat_err_t comms_permissions_service_check(psa_handle_t handle,
     uint32_t function_id = 0;
 
     switch(handle) {
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+    case TFM_ATTESTATION_SERVICE_HANDLE:
+        switch(type) {
+        case TFM_ATTEST_GET_TOKEN:
+        case TFM_ATTEST_GET_TOKEN_SIZE:
+            return TFM_PLAT_ERR_SUCCESS;
+        default:
+            goto out_err;
+        }
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION
     case TFM_DELEGATED_ATTESTATION_HANDLE:
         switch(type) {
