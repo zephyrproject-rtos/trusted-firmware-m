@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -163,8 +165,8 @@ macro(tfm_toolchain_reload_compiler)
     include(Compiler/ARMCC-ASM)
     __compiler_armcc(ASM)
 
-    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 6.10.1)
-        message(FATAL_ERROR "Please select newer Arm compiler version starting from 6.10.1.")
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 6.13)
+        message(FATAL_ERROR "Please select newer Arm compiler version starting from 6.13.")
     endif()
 
     if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.15 AND

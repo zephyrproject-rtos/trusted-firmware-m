@@ -153,7 +153,7 @@ To compile TF-M code, at least one of the supported compiler toolchains have to
 be available in the build environment. The currently supported compiler
 versions are:
 
-    - Arm Compiler v6.10.1 ~ v6.14, v6.18+
+    - Arm Compiler v6.13 ~ v6.14, v6.18+
 
       .. tabs::
 
@@ -463,3 +463,5 @@ Here are some next steps for exploring TF-M:
 --------------
 
 *Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*
