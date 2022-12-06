@@ -13,8 +13,6 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include <limits.h>
-#include "tfm_api.h"
 #include "psa/crypto.h"
 #ifdef PLATFORM_DEFAULT_CRYPTO_KEYS
 #include "crypto_keys/tfm_builtin_key_ids.h"
@@ -23,18 +21,24 @@ extern "C" {
 #endif /* PLATFORM_DEFAULT_CRYPTO_KEYS */
 
 /**
- * \brief This type is used to overcome a limitation in the number of maximum
- *        IOVECs that can be used especially in psa_aead_encrypt and
- *        psa_aead_decrypt.
+ * \brief The maximum supported length of a nonce through the TF-M
+ *        interfaces
  */
 #define TFM_CRYPTO_MAX_NONCE_LENGTH (16u)
+
+/**
+ * \brief This type is used to overcome a limitation in the number of maximum
+ *        IOVECs that can be used especially in psa_aead_encrypt and
+ *        psa_aead_decrypt. By using this type we pack the nonce and the actual
+ *        nonce_length at part of the same structure
+ */
 struct tfm_crypto_aead_pack_input {
     uint8_t nonce[TFM_CRYPTO_MAX_NONCE_LENGTH];
     uint32_t nonce_length;
 };
 
 /**
- * \brief Structure used to pack non-pointer types in a call
+ * \brief Structure used to pack non-pointer types in a call to PSA Crypto APIs
  *
  */
 struct tfm_crypto_pack_iovec {
@@ -73,7 +77,7 @@ enum tfm_crypto_group_id {
     TFM_CRYPTO_GROUP_ID_KEY_DERIVATION,
 };
 
-/* X macro describing each of the available PSA Crypto APIs */
+/* Set of X macros describing each of the available PSA Crypto APIs */
 #define KEY_MANAGEMENT_FUNCS                       \
     X(TFM_CRYPTO_GET_KEY_ATTRIBUTES)               \
     X(TFM_CRYPTO_RESET_KEY_ATTRIBUTES)             \
@@ -157,11 +161,9 @@ enum tfm_crypto_group_id {
 #define RANDOM_FUNCS                               \
     X(TFM_CRYPTO_GENERATE_RANDOM)
 
-/*
- * Define function IDs in each group. The function ID will be encoded into
- * tfm_crypto_func_sid below.
- * Each group is defined as a dedicated enum in case the total number of
- * PSA Crypto APIs exceeds 256.
+/**
+ * \brief Define function IDs in each group. The function ID will be encoded into
+ *        tfm_crypto_func_sid below. Each group is defined as a dedicated enum
  */
 #define X(func_id)    func_id,
 enum tfm_crypto_key_management_func_id {
@@ -193,18 +195,31 @@ enum tfm_crypto_random_func_id {
 };
 #undef X
 
+/**
+ * \brief This macro is used to encode a function ID in a 16-bit value as the
+ *        top 8 bits towards the MSB
+ */
 #define FUNC_ID(func_id)    (((func_id) & 0xFF) << 8)
 
-/*
- * Numerical progressive value identifying a function API exposed through
- * the interfaces (S or NS). It's used to dispatch the requests from S/NS
- * to the corresponding API implementation in the Crypto service backend.
+/**
+ * \brief This macro is used to extract the group_id from an encoded function_id
+ *        by accessing the low 8 bits towards the LSB
+ */
+#define TFM_CRYPTO_GET_GROUP_ID(_function_id)    \
+                        ((enum tfm_crypto_group_id)((_function_id) & 0xFF))
+/**
+ * \brief This type defines numerical progressive values identifying a function API
+ *        exposed through the interfaces (S or NS). It's used to dispatch the requests
+ *        from S/NS to the corresponding API implementation in the Crypto service backend.
  *
- * Each function SID is encoded as uint16_t.
- *     |  Func ID  |  Group ID |
- *     15         8 7          0
- * Func ID is defined in each group func_id enum above
- * Group ID is defined in tfm_crypto_group_id.
+ * \note Each function SID is encoded as uint16_t.
+ *        +-----------+-----------+
+ *        |  Func ID  |  Group ID |
+ *        +-----------+-----------+
+ *   (MSB)15         8 7          0(LSB)
+ *
+ *       where Func ID is defined in each group tfm_crypto_*_func_id enum above and Group ID
+ *       is defined in \ref tfm_crypto_group_id.
  */
 enum tfm_crypto_func_sid {
 
@@ -255,27 +270,6 @@ enum tfm_crypto_func_sid {
 
 };
 #undef X
-
-/**
- * \brief Define an invalid value for an SID
- *
- */
-#define TFM_CRYPTO_SID_INVALID (~0x0u)
-
-/**
- * \brief This value is used to mark an handle as invalid.
- *
- */
-#define TFM_CRYPTO_INVALID_HANDLE (0x0u)
-
-/**
- * \brief Define miscellaneous literal constants that are used in the service
- *
- */
-enum {
-    TFM_CRYPTO_NOT_IN_USE = 0,
-    TFM_CRYPTO_IN_USE = 1
-};
 
 #ifdef __cplusplus
 }

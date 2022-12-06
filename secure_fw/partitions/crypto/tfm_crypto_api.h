@@ -15,6 +15,7 @@ extern "C" {
 #include <stdint.h>
 #include "tfm_crypto_defs.h"
 #include "tfm_crypto_key.h"
+#include "tfm_api.h"
 
 /**
  * \brief List of possible operation types supported by the TFM based
@@ -33,13 +34,6 @@ enum tfm_crypto_operation_type {
     /* Used to force the enum size */
     TFM_CRYPTO_OPERATION_TYPE_MAX = INT_MAX
 };
-
-/*
- * Macro to determine the group_id corresponding to a function_id by
- * accessing the tfm_crypto_func_sid table
- */
-#define TFM_CRYPTO_GET_GROUP_ID(_function_id)    \
-                        ((enum tfm_crypto_group_id)((_function_id) & 0xFF))
 
 /**
  * \brief Initialise the service

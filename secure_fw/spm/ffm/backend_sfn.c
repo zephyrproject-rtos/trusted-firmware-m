@@ -90,6 +90,7 @@ psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
 static void spm_thread_fn(void)
 {
     struct partition_t *p_part, *p_curr;
+    psa_status_t status;
 
     p_curr = GET_CURRENT_COMPONENT();
     /* Call partition initialization routine one by one. */
@@ -105,7 +106,8 @@ static void spm_thread_fn(void)
         SET_CURRENT_COMPONENT(p_part);
 
         if (p_part->p_ldinf->entry != 0) {
-            if (((sfn_init_fn_t)p_part->p_ldinf->entry)() < PSA_SUCCESS) {
+            status = ((sfn_init_fn_t)p_part->p_ldinf->entry)();
+            if (status < PSA_SUCCESS) {
                 tfm_core_panic();
             }
         }
