@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -23,20 +23,9 @@ include(version)
 include(remote_library)
 
 ############################ CONFIGURATION #####################################
-
-# Configure TFM_PLATFORM
-include(${CMAKE_SOURCE_DIR}/config/tfm_platform.cmake)
-
-if(TFM_SYSTEM_DSP)
-    message(FATAL_ERROR "Hardware DSP is currently not supported in TF-M")
-endif()
-
+include(config/pre_config.cmake)
 include(config/set_config.cmake)
-
-if(NOT ${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" AND
-   NOT ${CMAKE_GENERATOR} STREQUAL "Ninja")
-    Message(FATAL_ERROR "Unsupported generator ${CMAKE_GENERATOR}. Hint: Try -G\"Unix Makefiles\"")
-endif()
+include(config/post_config.cmake)
 
 ############################### Compiler configuration #########################
 
