@@ -11,7 +11,7 @@
 include(lib/ext/tf-m-tests/fetch_repo.cmake)
 
 # Load TF-M regression test suites setting
-if(TFM_NS_REG_TEST OR TFM_S_REG_TEST)
+if(NOT USE_KCONFIG_TOOL AND (TFM_NS_REG_TEST OR TFM_S_REG_TEST))
     include(${TFM_TEST_PATH}/config/set_config.cmake)
 endif()
 

@@ -30,9 +30,6 @@ if(EXISTS ${TARGET_PLATFORM_PATH}/config.cmake)
     include(${TARGET_PLATFORM_PATH}/config.cmake)
 endif()
 
-# Load configs generated from Kconfig
-include(${CMAKE_SOURCE_DIR}/config/kconfig.cmake)
-
 # Parse tf-m-tests config prior to platform specific config.cmake
 # Some platforms select different configuration according when regression tests
 # are enabled.

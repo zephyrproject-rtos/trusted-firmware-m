@@ -24,7 +24,13 @@ include(remote_library)
 
 ############################ CONFIGURATION #####################################
 include(config/pre_config.cmake)
-include(config/set_config.cmake)
+
+if(USE_KCONFIG_TOOL)
+    include(${CMAKE_SOURCE_DIR}/config/kconfig.cmake)
+else()
+    include(${CMAKE_SOURCE_DIR}/config/set_config.cmake)
+endif()
+
 include(config/post_config.cmake)
 
 ############################### Compiler configuration #########################
