@@ -60,3 +60,9 @@ set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Prot
 set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Initial Attestation partition")
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
+
+if (NOT ${CMAKE_BUILD_TYPE} STREQUAL Release)
+  set(ENABLE_FWU_AGENT_DEBUG_LOGS     TRUE        CACHE BOOL      "Enable Firmware update agent debug logs.")
+else()
+  set(ENABLE_FWU_AGENT_DEBUG_LOGS     FALSE        CACHE BOOL     "Enable Firmware update agent debug logs.")
+endif()
