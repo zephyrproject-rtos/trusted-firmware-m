@@ -25,6 +25,9 @@ if (TFM_EXTRA_CONFIG_PATH)
     include(${TFM_EXTRA_CONFIG_PATH})
 endif()
 
+# Set TF-M project config header file
+add_library(tfm_config INTERFACE)
+
 # Load PSA config, setting options not already set
 if (TEST_PSA_API)
     include(config/tests/config_test_psa_api.cmake)
@@ -104,8 +107,6 @@ include(lib/ext/tf-m-tests/fetch_repo.cmake)
 # Set secure log configs
 # It also depends on regression test config.
 include(config/tfm_secure_log.cmake)
-
-add_library(tfm_config INTERFACE)
 
 # Set user defined TF-M config header file
 if(PROJECT_CONFIG_HEADER_FILE)

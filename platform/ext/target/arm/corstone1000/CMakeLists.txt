@@ -98,7 +98,15 @@ target_compile_definitions(platform_s
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
     PRIVATE
         $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
+        $<$<BOOL:${ENABLE_FWU_AGENT_DEBUG_LOGS}>:ENABLE_FWU_AGENT_DEBUG_LOGS>
 )
+
+if (TFM_PARTITION_CRYPTO)
+    target_include_directories(platform_crypto_keys
+        PUBLIC
+            .
+    )
+endif()
 
 #========================= Platform BL2 =======================================#
 
@@ -138,6 +146,7 @@ target_compile_definitions(platform_bl2
     PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
         $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
+        $<$<BOOL:${ENABLE_FWU_AGENT_DEBUG_LOGS}>:ENABLE_FWU_AGENT_DEBUG_LOGS>
 )
 
 # boot_hal_bl2.c is compiled as part of 'bl2' target and not inside

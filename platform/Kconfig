@@ -56,4 +56,7 @@ config PLATFORM_DEFAULT_SYSTEM_RESET_HALT
     bool "Use default system reset/halt implementation"
     default y
 
+config PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT
+    bool
+    default n
 endmenu

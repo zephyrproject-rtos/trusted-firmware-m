@@ -31,12 +31,12 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 /* IAR Specific */
 #if defined(__ICCARM__)
 
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
-#pragma required = ipc_schedule
-#endif
-
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
+
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+#pragma required = ipc_schedule
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1*/
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 

@@ -20,4 +20,8 @@ config PLATFORM_SP_STACK_SIZE
     hex "Stack size"
     default 0x500
 
+config PLATFORM_NV_COUNTER_MODULE_DISABLED
+    bool "Disable Non-volatile counter module"
+    default n
+
 endmenu

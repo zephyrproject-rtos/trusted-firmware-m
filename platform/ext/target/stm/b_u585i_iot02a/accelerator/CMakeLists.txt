@@ -56,7 +56,7 @@ if(BL2)
 endif()
 ############################ Crypto Service ####################################
 
-if (TFM_PLATFORM_CRYPTO)
+if (TFM_PARTITION_CRYPTO)
     target_sources(crypto_service_crypto_hw
         PRIVATE
             ${PLATFORM_DIR}/ext/target/stm/common/hal/accelerator/rsa_alt.c

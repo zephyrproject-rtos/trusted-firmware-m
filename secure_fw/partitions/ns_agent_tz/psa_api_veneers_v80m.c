@@ -18,6 +18,8 @@
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 #include "spm_ipc.h"
 #include "ffm/psa_api.h"
+#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
+#include "tfm_psa_call_pack.h"
 #endif
 
 /*
@@ -50,6 +52,12 @@
 #pragma required = tfm_spm_client_psa_close
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
+#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
+#pragma required = psa_close_sfn
+#pragma required = psa_connect_sfn
+#pragma required = psa_call_pack_sfn
+#pragma required = psa_framework_version_sfn
+#pragma required = psa_version_sfn
 #endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1 */
 
 #endif

@@ -448,6 +448,7 @@ Dependency chain
     cbor2 --> python
     click --> python
     imgtool --> python
+    kconfiglib --> python
    @enduml
 
 .. rubric:: Next steps

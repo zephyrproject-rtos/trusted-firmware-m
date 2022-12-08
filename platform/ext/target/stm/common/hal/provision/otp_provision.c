@@ -166,7 +166,7 @@ const struct flash_otp_nv_counters_region_t otp_stm_provision = {
 #ifdef PLATFORM_DEFAULT_NV_COUNTERS
     .flash_nv_counters = { 0x0, 0x0, 0x0 },
 #endif
-    .is_valid =  OTP_NV_COUNTERS_IS_VALID
+    .swap_count =  1
 };
 
 

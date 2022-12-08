@@ -19,6 +19,7 @@
 #include "tfm_plat_nv_counters.h"
 #include "tfm_plat_defs.h"
 #include "uefi_fmp.h"
+#include "uart_stdout.h"
 
 /* Properties of image in a bank */
 struct fwu_image_properties {
@@ -955,12 +956,15 @@ static int systic_counter = 0;
 void SysTick_Handler(void)
 {
     systic_counter++;
-    if ((systic_counter % 10) == 0) {
-        FWU_LOG_MSG("%s: counted = %d, expiring on = %u\n\r", __func__,
-                                systic_counter, HOST_ACK_TIMEOUT_SEC);
+    if (systic_counter % 10 == 0) {
+        SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+        stdio_output_string("*", 1);
+        SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
     }
     if (systic_counter == HOST_ACK_TIMEOUT_SEC) {
-        FWU_LOG_MSG("%s, timer expired, reseting the system\n\r", __func__);
+        SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+        stdio_output_string("timer expired!\n\r",
+                           sizeof("timer expired!\n\r"));
         NVIC_SystemReset();
     }
 }
