@@ -19,7 +19,7 @@ if(POLICY CMP0123)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-include(cmake/version.cmake)
+include(version)
 include(remote_library)
 
 ############################ CONFIGURATION #####################################
