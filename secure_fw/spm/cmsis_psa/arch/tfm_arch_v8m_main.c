@@ -58,6 +58,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
 #endif
         "   push   {r4-r6, lr}                      \n"
         "   cpsid  i                                \n"
+        "   isb                                     \n"
         "   mov    r4, r2                           \n"
         "   mrs    r5, psplim                       \n"
         "   movs   r12, #0                          \n"
@@ -71,9 +72,11 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_LOCKED)"     \n"
         "   str    r3, [r2, #0]                     \n"
         "   cpsie  i                                \n"
+        "   isb                                     \n"
         "   mov    r6, r1                           \n"
         "   bl     cross_call_entering_c            \n"
         "   cpsid  i                                \n"
+        "   isb                                     \n"
         "   mov    r1, r6                           \n"
         "   bl     cross_call_exiting_c             \n"
         "   movs   r12, #0                          \n"
@@ -86,6 +89,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r5, #"M2S(SCHEDULER_UNLOCKED)"   \n"
         "   str    r5, [r4, #0]                     \n"
         "   cpsie  i                                \n"
+        "   isb                                     \n"
         "   pop    {r4-r6, pc}                      \n"
     );
 }
@@ -108,6 +112,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   cmp     r0, r1                              \n" /* curr, next ctx */
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
         "   cpsid   i                                   \n"
+        "   isb                                         \n"
         "   mrs     r2, psp                             \n"
         "   ands    r3, lr, #"M2S(EXC_RETURN_DCRS)"     \n" /* Check DCRS */
         "   itt     ne                                  \n" /* Skip saving callee */
@@ -133,6 +138,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
         "   cpsie   i                                   \n"
+        "   isb                                         \n"
         "v8m_pendsv_exit:                               \n"
         "   bx      lr                                  \n"
     );

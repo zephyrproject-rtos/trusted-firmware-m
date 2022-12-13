@@ -55,6 +55,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
 #endif
         "   push   {r4-r6, lr}                          \n"
         "   cpsid  i                                    \n"
+        "   isb                                         \n"
         "   mov    r4, r2                               \n"
         "   cmp    r2, #0                               \n"
         "   beq    v8b_lock_sched                       \n"
@@ -69,9 +70,11 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_LOCKED)"         \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
+        "   isb                                         \n"
         "   mov    r6, r1                               \n"
         "   bl     cross_call_entering_c                \n"
         "   cpsid  i                                    \n"
+        "   isb                                         \n"
         "   mov    r1, r6                               \n"
         "   bl     cross_call_exiting_c                 \n"
         "   cmp    r4, #0                               \n"
@@ -85,6 +88,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
+        "   isb                                         \n"
         "   pop    {r4-r6, pc}                          \n"
     );
 }
