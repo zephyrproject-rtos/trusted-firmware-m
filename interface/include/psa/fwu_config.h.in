@@ -15,13 +15,14 @@
 /* Components if the device. When porting a specific bootloader to FWU partition,
  * the bootloader specific image types can be defined here.
  */
-#if MCUBOOT_IMAGE_NUMBER > 1
+#define FWU_COMPONENT_NUMBER              @MCUBOOT_IMAGE_NUMBER@
+
+#if FWU_COMPONENT_NUMBER > 1
 #define FWU_COMPONENT_ID_SECURE           0x00U
 #define FWU_COMPONENT_ID_NONSECURE        0x01U
 #else
 #define FWU_COMPONENT_ID_FULL             0x00U
 #endif
-#define FWU_COMPONENT_NUMBER              MCUBOOT_IMAGE_NUMBER
 
 /* The maximum size of an image digest in bytes. This is dependent
  * on the hash algorithm used.
