@@ -21,7 +21,7 @@
 #include "array.h"
 #include "cmsis.h"
 #include "region.h"
-#include "mpu_armv8m_drv.h"
+#include "mpu_armv8.h"
 #include "common_target_cfg.h"
 #include "tfm_hal_defs.h"
 #include "tfm_hal_isolation.h"
@@ -38,7 +38,6 @@
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
-struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
 #ifndef TFM_MULTI_CORE_TOPOLOGY
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
@@ -55,79 +54,24 @@ REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
-const struct mpu_armv8m_region_cfg_t region_cfg[] = {
-    /* Veneer region */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
-        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-        MPU_ARMV8M_XN_EXEC_OK,
-        MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
+#define ARM_MPU_NON_TRANSIENT        ( 1U )
+#define ARM_MPU_TRANSIENT            ( 0U )
+#define ARM_MPU_WRITE_BACK           ( 1U )
+#define ARM_MPU_WRITE_THROUGH        ( 0U )
+#define ARM_MPU_READ_ALLOCATE        ( 1U )
+#define ARM_MPU_NON_READ_ALLOCATE    ( 0U )
+#define ARM_MPU_WRITE_ALLOCATE       ( 1U )
+#define ARM_MPU_NON_WRITE_ALLOCATE   ( 0U )
+#define ARM_MPU_READ_ONLY            ( 1U )
+#define ARM_MPU_READ_WRITE           ( 0U )
+#define ARM_MPU_UNPRIVILEGED         ( 1U )
+#define ARM_MPU_PRIVILEGED           ( 0U )
+#define ARM_MPU_EXECUTE_NEVER        ( 1U )
+#define ARM_MPU_EXECUTE_OK           ( 0U )
 #ifdef TFM_PXN_ENABLE
-        MPU_ARMV8M_PRIV_EXEC_OK
+    #define ARM_MPU_PRIVILEGE_EXECUTE_NEVER        ( 1U )
+    #define ARM_MPU_PRIVILEGE_EXECUTE_OK           ( 0U )
 #endif
-    },
-    /* TFM Core unprivileged code region */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit),
-        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-        MPU_ARMV8M_XN_EXEC_OK,
-        MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
-#ifdef TFM_PXN_ENABLE
-        MPU_ARMV8M_PRIV_EXEC_OK
-#endif
-    },
-    /* RO region */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base),
-        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
-        MPU_ARMV8M_XN_EXEC_OK,
-        MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
-#ifdef TFM_PXN_ENABLE
-#if TFM_LVL == 1
-        MPU_ARMV8M_PRIV_EXEC_OK
-#else
-        MPU_ARMV8M_PRIV_EXEC_NEVER
-#endif
-#endif
-    },
-    /* RW, ZI and stack as one region */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base),
-        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-        MPU_ARMV8M_XN_EXEC_NEVER,
-        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
-#ifdef TFM_PXN_ENABLE
-        MPU_ARMV8M_PRIV_EXEC_NEVER
-#endif
-    },
-#ifdef CONFIG_TFM_PARTITION_META
-    /* TFM partition metadata pointer region */
-    {
-        0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit),
-        MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
-        MPU_ARMV8M_XN_EXEC_NEVER,
-        MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
-        MPU_ARMV8M_SH_NONE,
-#ifdef TFM_PXN_ENABLE
-        MPU_ARMV8M_PRIV_EXEC_NEVER
-#endif
-    }
-#endif
-};
 
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
@@ -135,8 +79,111 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
                                             uintptr_t *p_spm_boundary)
 {
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
-    struct mpu_armv8m_region_cfg_t localcfg;
+const ARM_MPU_Region_t mpu_region_attributes[] = {
+    /* Veneer region
+     * Region Number 0, Non-shareable, Read-Only, Non-Privileged, Executable,
+     * Privilege Executable - if PXN available, Attribute set: 0
+     */
+    {
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
+                     ARM_MPU_SH_NON,
+                     ARM_MPU_READ_ONLY,
+                     ARM_MPU_UNPRIVILEGED,
+                     ARM_MPU_EXECUTE_OK),
+        #ifdef TFM_PXN_ENABLE
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
+                         ARM_MPU_PRIVILEGE_EXECUTE_OK,
+                         0)
+        #else
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
+                     0)
+        #endif
+    },
+    /* TFM Core unprivileged code region
+     * Region Number 1, Non-shareable, Read-Only, Non-Privileged, Executable,
+     * Privilege Executable - if PXN available, Attribute set: 0
+     */
+    {
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base),
+                     ARM_MPU_SH_NON,
+                     ARM_MPU_READ_ONLY,
+                     ARM_MPU_UNPRIVILEGED,
+                     ARM_MPU_EXECUTE_OK),
+        #ifdef TFM_PXN_ENABLE
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit) - 1,
+                         ARM_MPU_PRIVILEGE_EXECUTE_OK,
+                         0)
+        #else
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit) - 1,
+                     0)
+        #endif
+    },
+    /* RO region
+     * Region Number 2, Non-shareable, Read-Only, Non-Privileged, Executable,
+     * PXN depends on isolation level, Attribute set: 0
+     */
+    {
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base),
+                     ARM_MPU_SH_NON,
+                     ARM_MPU_READ_ONLY,
+                     ARM_MPU_UNPRIVILEGED,
+                     ARM_MPU_EXECUTE_OK),
+        #ifdef TFM_PXN_ENABLE
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1,
+            #if TFM_LVL == 1
+                         ARM_MPU_PRIVILEGE_EXECUTE_OK,
+            #else
+                         ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
+            #endif
+                         0)
+        #else
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1,
+                     0)
+        #endif
+    },
+    /* RW, ZI and stack as one region
+     * Region Number 3, Non-shareable, Read-Write, Non-Privileged, Execute Never
+     * Attribute set: 1, Privilege Execute Never - if PXN available
+     */
+    {
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base),
+                     ARM_MPU_SH_NON,
+                     ARM_MPU_READ_WRITE,
+                     ARM_MPU_UNPRIVILEGED,
+                     ARM_MPU_EXECUTE_NEVER),
+        #ifdef TFM_PXN_ENABLE
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1,
+                         ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
+                         1)
+        #else
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1,
+                     1)
+        #endif
+    },
+#ifdef CONFIG_TFM_PARTITION_META
+    /* TFM partition metadata pointer region
+     * Region Number 4, Non-shareable, Read-Write, Non-Privileged, Execute Never
+     * Attribute set: 1, Privilege Execute Never - if PXN available
+     */
+    {
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base),
+                     ARM_MPU_SH_NON,
+                     ARM_MPU_READ_WRITE,
+                     ARM_MPU_UNPRIVILEGED,
+                     ARM_MPU_EXECUTE_NEVER),
+        #ifdef TFM_PXN_ENABLE
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit) - 1,
+                         ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
+                         1)
+        #else
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit) - 1,
+                     1)
+        #endif
+    }
 #endif
+};
+    ARM_MPU_Region_t localcfg;
+#endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
     /* Set up isolation boundaries between SPE and NSPE */
     sau_and_idau_cfg();
     if (mpc_init_cfg() != TFM_PLAT_ERR_SUCCESS) {
@@ -148,28 +195,61 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
     int32_t i;
 
-    mpu_armv8m_clean(&dev_mpu_s);
-
-    MPU_Type *mpu = (MPU_Type *)(&dev_mpu_s)->base;
     uint32_t mpu_region_num =
-        (mpu->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
+        (MPU ->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
 
-    if (ARRAY_SIZE(region_cfg) > mpu_region_num) {
+    if (mpu_region_num < ARRAY_SIZE(mpu_region_attributes)) {
         return TFM_HAL_ERROR_GENERIC;
     }
-    for (i = 0; i < ARRAY_SIZE(region_cfg); i++) {
-        memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
-        localcfg.region_nr = i;
-        if (mpu_armv8m_region_enable(&dev_mpu_s,
-            (struct mpu_armv8m_region_cfg_t *)&localcfg)
-            != MPU_ARMV8M_OK) {
-            return TFM_HAL_ERROR_GENERIC;
-        }
+
+    /* Turn off MPU during configuration */
+    if ((MPU->CTRL & MPU_CTRL_ENABLE_Msk)) {
+        ARM_MPU_Disable();
+    }
+    /* Disable all regions */
+    for (i = 0; i < mpu_region_num; i++) {
+        ARM_MPU_ClrRegion(i);
+    }
+
+    /* Configure attribute registers
+     * Attr0 : Normal memory, Inner/Outer Cacheable, Write-Trough Read-Allocate
+     */
+    ARM_MPU_SetMemAttr(0,
+                   ARM_MPU_ATTR(ARM_MPU_ATTR_MEMORY_(ARM_MPU_NON_TRANSIENT,
+                                                     ARM_MPU_WRITE_THROUGH,
+                                                     ARM_MPU_READ_ALLOCATE,
+                                                     ARM_MPU_NON_WRITE_ALLOCATE),
+                                ARM_MPU_ATTR_MEMORY_(ARM_MPU_NON_TRANSIENT,
+                                                     ARM_MPU_WRITE_THROUGH,
+                                                     ARM_MPU_READ_ALLOCATE,
+                                                     ARM_MPU_NON_WRITE_ALLOCATE)));
+    /* Attr1 : Normal memory, Inner/Outer Cacheable, Write-Back R-W Allocate */
+    ARM_MPU_SetMemAttr(1,
+                    ARM_MPU_ATTR(ARM_MPU_ATTR_MEMORY_(ARM_MPU_NON_TRANSIENT,
+                                                     ARM_MPU_WRITE_BACK,
+                                                     ARM_MPU_READ_ALLOCATE,
+                                                     ARM_MPU_WRITE_ALLOCATE),
+                                ARM_MPU_ATTR_MEMORY_(ARM_MPU_NON_TRANSIENT,
+                                                     ARM_MPU_WRITE_BACK,
+                                                     ARM_MPU_READ_ALLOCATE,
+                                                     ARM_MPU_WRITE_ALLOCATE)));
+    /* Attr2 : Device memory, nGnRE */
+    ARM_MPU_SetMemAttr(2,
+                       ARM_MPU_ATTR(ARM_MPU_ATTR_DEVICE,
+                                    ARM_MPU_ATTR_DEVICE_nGnRE));
+
+    /* Configure regions */
+    for (i = 0; i < ARRAY_SIZE(mpu_region_attributes); i++) {
+        localcfg.RBAR = mpu_region_attributes[i].RBAR;
+        localcfg.RLAR = mpu_region_attributes[i].RLAR;
+        ARM_MPU_SetRegion(i, localcfg.RBAR, localcfg.RLAR);
     }
     n_configured_regions = i;
 
-    mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
-                      HARDFAULT_NMI_ENABLE);
+    /* Enable MPU with the above configurations. Allow default memory map for
+     * privileged software and enable MPU during HardFault and NMI handlers.
+     */
+    ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_HFNMIENA_Msk);
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
     *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
@@ -201,7 +281,8 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     size_t mmio_list_length;
 
 #if TFM_LVL == 2
-    struct mpu_armv8m_region_cfg_t localcfg;
+    ARM_MPU_Region_t local_mpu_region;
+    uint32_t mpu_region_num;
 #endif
     if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
@@ -259,21 +340,42 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
          * Setup regions for unprivileged assets only.
          */
         if (!privileged) {
-            localcfg.region_base = plat_data_ptr->periph_start;
-            localcfg.region_limit = plat_data_ptr->periph_limit;
-            localcfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DEVICE_IDX;
-            localcfg.attr_exec = MPU_ARMV8M_XN_EXEC_NEVER;
-            localcfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
-            localcfg.attr_sh = MPU_ARMV8M_SH_NONE;
-#ifdef TFM_PXN_ENABLE
-            localcfg.attr_pxn = MPU_ARMV8M_PRIV_EXEC_NEVER;
-#endif
-            localcfg.region_nr = n_configured_regions++;
+            //Turn off MPU during configuration
+            if ((MPU->CTRL & MPU_CTRL_ENABLE_Msk)) {
+                ARM_MPU_Disable();
+            }
+            /* Assemble region base and limit address register contents. */
+            local_mpu_region.RBAR = ARM_MPU_RBAR(plat_data_ptr->periph_start,
+                                                 ARM_MPU_SH_NON,
+                                                 ARM_MPU_READ_WRITE,
+                                                 ARM_MPU_UNPRIVILEGED,
+                                                 ARM_MPU_EXECUTE_NEVER);
+            /* Attr2 contains required attribute set for device regions */
+            #ifdef TFM_PXN_ENABLE
+            local_mpu_region.RLAR = ARM_MPU_RLAR_PXN(plat_data_ptr->periph_limit,
+                                                     ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
+                                                     2);
+            #else
+            local_mpu_region.RLAR = ARM_MPU_RLAR(plat_data_ptr->periph_limit,
+                                                 2);
+            #endif
+            n_configured_regions++;
 
-            if (mpu_armv8m_region_enable(&dev_mpu_s, &localcfg)
-                != MPU_ARMV8M_OK) {
+            mpu_region_num =
+                (MPU->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
+
+            /* There is a limited number of availale MPU regions in v8M */
+            if (mpu_region_num < n_configured_regions) {
                 return TFM_HAL_ERROR_GENERIC;
             }
+
+            /* Configure device mpu region */
+            ARM_MPU_SetRegion(n_configured_regions,
+                              local_mpu_region.RBAR,
+                              local_mpu_region.RLAR);
+
+            /* Enable MPU with the new region added */
+            ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_HFNMIENA_Msk);
         }
 #endif
     }
