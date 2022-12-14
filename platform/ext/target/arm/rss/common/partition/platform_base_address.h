@@ -135,21 +135,23 @@
 #define HOST_ACCESS_BASE_S               0x70000000 /* Can access the Host region based on ATU config */
 #define HOST_ACCESS_LIMIT_S              ((uint32_t)HOST_ACCESS_BASE_S + (uint32_t)HOST_ACCESS_SIZE - 1)
 
+#define HOST_IMAGE_MAX_SIZE              0x2000000 /* 32 MiB */
+
 /* ATU regions open in bootloader and runtime */
 #define HOST_UART0_BASE_S                (HOST_ACCESS_BASE_S + 0xFF00000) /* UART 0 Secure base address */
 /* ATU regions open in BL1 */
-#define HOST_FLASH0_TEMP_BASE_S          (HOST_ACCESS_BASE_S + 0x200000) /* Temporary address for mapping host flash areas */
-#define HOST_FLASH0_IMAGE0_BASE_S        (HOST_ACCESS_BASE_S + 0x300000) /* Host flash image 0 input secure address */
-#define HOST_FLASH0_IMAGE1_BASE_S        (HOST_ACCESS_BASE_S + 0x400000) /* Host flash image 1 input secure address */
+#define HOST_FLASH0_TEMP_BASE_S          (HOST_ACCESS_BASE_S + 2 * HOST_IMAGE_MAX_SIZE) /* Temporary address for mapping host flash areas */
+#define HOST_FLASH0_IMAGE0_BASE_S        (HOST_ACCESS_BASE_S + 3 * HOST_IMAGE_MAX_SIZE) /* Host flash image 0 input secure address */
+#define HOST_FLASH0_IMAGE1_BASE_S        (HOST_ACCESS_BASE_S + 4 * HOST_IMAGE_MAX_SIZE) /* Host flash image 1 input secure address */
 /* ATU regions open in BL2 */
-#define HOST_BOOT_IMAGE0_LOAD_BASE_S     (HOST_ACCESS_BASE_S + 0x000000) /* Host boot image 0 output secure address */
-#define HOST_BOOT_IMAGE1_LOAD_BASE_S     (HOST_ACCESS_BASE_S + 0x100000) /* Host boot image 1 output secure address */
-#define HOST_FLASH0_TEMP0_BASE_S         (HOST_ACCESS_BASE_S + 0x200000) /* Temporary secure address for mapping host flash areas */
-#define HOST_FLASH0_IMAGE0_BASE_S        (HOST_ACCESS_BASE_S + 0x300000) /* Host flash image 0 input secure address */
-#define HOST_FLASH0_IMAGE1_BASE_S        (HOST_ACCESS_BASE_S + 0x400000) /* Host flash image 1 input secure address */
+#define HOST_BOOT_IMAGE0_LOAD_BASE_S     (HOST_ACCESS_BASE_S + 0 * HOST_IMAGE_MAX_SIZE) /* Host boot image 0 output secure address */
+#define HOST_BOOT_IMAGE1_LOAD_BASE_S     (HOST_ACCESS_BASE_S + 1 * HOST_IMAGE_MAX_SIZE) /* Host boot image 1 output secure address */
+#define HOST_FLASH0_TEMP0_BASE_S         (HOST_ACCESS_BASE_S + 2 * HOST_IMAGE_MAX_SIZE) /* Temporary secure address for mapping host flash areas */
+#define HOST_FLASH0_IMAGE0_BASE_S        (HOST_ACCESS_BASE_S + 3 * HOST_IMAGE_MAX_SIZE) /* Host flash image 0 input secure address */
+#define HOST_FLASH0_IMAGE1_BASE_S        (HOST_ACCESS_BASE_S + 4 * HOST_IMAGE_MAX_SIZE) /* Host flash image 1 input secure address */
 /* ATU regions open at runtime */
-#define FWU_HOST_IMAGE_BASE_S            (HOST_ACCESS_BASE_S + 0x000000) /* Region to allow writing new RSS FW images */
-#define HOST_COMMS_MAPPABLE_BASE_S       (HOST_ACCESS_BASE_S + 0x100000) /* Region into which to map host comms pointers */
+#define FWU_HOST_IMAGE_BASE_S            (HOST_ACCESS_BASE_S + 0 * HOST_IMAGE_MAX_SIZE) /* Region to allow writing new RSS FW images */
+#define HOST_COMMS_MAPPABLE_BASE_S       (HOST_ACCESS_BASE_S + 1 * HOST_IMAGE_MAX_SIZE) /* Region into which to map host comms pointers */
 
 /* SIC regions open in BL2 and runtime */
 #define RSS_RUNTIME_S_XIP_BASE_S         SIC_HOST_BASE_S              /* RSS runtime secure image XIP secure address */

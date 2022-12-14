@@ -5,6 +5,15 @@
 #
 #-------------------------------------------------------------------------------
 
+if (RSS_XIP)
+set(PLATFORM_DEFAULT_IMAGE_SIGNING      OFF       CACHE BOOL    "Use default image signing implementation")
+set(BL2_HEADER_SIZE                     0x400     CACHE STRING  "BL2 Header size")
+set(BL2_TRAILER_SIZE                    0x400     CACHE STRING  "BL2 Trailer size")
+
+set(MCUBOOT_S_IMAGE_FLASH_AREA_NUM      10        CACHE STRING  "ID of the flash area containing the primary Secure image")
+set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     11        CACHE STRING  "ID of the flash area containing the primary Non-Secure image")
+endif()
+
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")
 set(PLATFORM_DEFAULT_OTP                OFF        CACHE BOOL     "Use trusted on-chip flash to implement OTP memory")
 set(PLATFORM_DEFAULT_CRYPTO_KEYS        OFF        CACHE BOOL     "Use default crypto keys implementation.")

@@ -55,7 +55,7 @@ static int setup_aligned_atu_slot(uint64_t physical_address, uint32_t size,
         || aligned_physical_address + *atu_slot_size > HOST_FLASH0_BASE + HOST_FLASH0_SIZE
         || aligned_physical_address + *atu_slot_size < aligned_physical_address
         || aligned_physical_address + *atu_slot_size < *atu_slot_size
-        || *atu_slot_size > 0x100000 /* Max image slot size */
+        || *atu_slot_size > HOST_IMAGE_MAX_SIZE
         || *alignment_offset > boundary) {
         return 1;
     }
@@ -134,8 +134,8 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
 #endif /* RSS_GPT_SUPPORT */
 
 #ifdef RSS_GPT_SUPPORT
-    physical_address = HOST_FLASH0_BASE + FLASH_AREA_IMAGE_SECTOR_SIZE;
-    rc = setup_aligned_atu_slot(physical_address, FLASH_AREA_IMAGE_SECTOR_SIZE,
+    physical_address = HOST_FLASH0_BASE + FLASH_LBA_SIZE;
+    rc = setup_aligned_atu_slot(physical_address, FLASH_LBA_SIZE,
                                 page_size, RSS_ATU_REGION_TEMP_SLOT,
                                 HOST_FLASH0_TEMP_BASE_S, &alignment_offset,
                                 &atu_slot_size);
@@ -156,7 +156,7 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
     }
 
     physical_address = HOST_FLASH0_BASE
-                       + header.list_lba * FLASH_AREA_IMAGE_SECTOR_SIZE;
+                       + header.list_lba * FLASH_LBA_SIZE;
     rc = setup_aligned_atu_slot(physical_address,
                                 header.list_entry_size * header.list_num, page_size,
                                 RSS_ATU_REGION_TEMP_SLOT,
@@ -173,7 +173,7 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
                                     atu_slot_size - alignment_offset, &entry);
     if (rc == 0) {
         fip_found[0] = true;
-        fip_offsets[0] = entry.first_lba * FLASH_AREA_IMAGE_SECTOR_SIZE;
+        fip_offsets[0] = entry.first_lba * FLASH_LBA_SIZE;
     } else {
         fip_found[0] = false;
     }
@@ -185,7 +185,7 @@ int host_flash_atu_get_fip_offsets(bool fip_found[2], uint64_t fip_offsets[2])
                                     atu_slot_size - alignment_offset, &entry);
     if (rc == 0) {
         fip_found[1] = true;
-        fip_offsets[1] = entry.first_lba * FLASH_AREA_IMAGE_SECTOR_SIZE;
+        fip_offsets[1] = entry.first_lba * FLASH_LBA_SIZE;
     } else {
         fip_found[1] = false;
     }
@@ -285,7 +285,7 @@ static int setup_image_output_slots(uuid_t image_uuid)
         atu_err = atu_initialize_region(&ATU_DEV_S,
                                         RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
                                         HOST_BOOT_IMAGE1_LOAD_BASE_S,
-                                        SCP_BL1_SRAM_BASE, SCP_BL1_MAX_SIZE);
+                                        SCP_BOOT_SRAM_BASE, SCP_BOOT_SRAM_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             return 1;
         }
@@ -299,7 +299,7 @@ static int setup_image_output_slots(uuid_t image_uuid)
         atu_err = atu_initialize_region(&ATU_DEV_S,
                                         RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
                                         HOST_BOOT_IMAGE0_LOAD_BASE_S,
-                                        AP_BL1_SRAM_BASE, AP_BL1_MAX_SIZE);
+                                        AP_BOOT_SRAM_BASE, AP_BOOT_SRAM_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             return 1;
         }

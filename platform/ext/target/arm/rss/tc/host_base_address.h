@@ -23,11 +23,11 @@
 #define __HOST_BASE_ADDRESS_H__
 
 /* Host addresses */
-#define AP_BL1_SRAM_BASE   0x0UL        /* AP initial boot SRAM base address */
-#define AP_BL1_MAX_SIZE    0x80000U     /* 512KB, limited by flash partition size */
+#define AP_BOOT_SRAM_BASE   0x0UL        /* AP initial boot SRAM base address */
+#define AP_BOOT_SRAM_SIZE   0x80000U     /* 512KB */
 
-#define SCP_BL1_SRAM_BASE  0x40000000UL /* SCP initial boot SRAM base address */
-#define SCP_BL1_MAX_SIZE   0x80000U     /* 512KB, limited by flash partition size */
+#define SCP_BOOT_SRAM_BASE  0x40000000UL /* SCP initial boot SRAM base address */
+#define SCP_BOOT_SRAM_SIZE  0x80000U     /* 512KB */
 
 #define HOST_UART_BASE     0x2A400000UL /* Host UART base address */
 #define HOST_UART_SIZE     0x2000U      /* 8KB */

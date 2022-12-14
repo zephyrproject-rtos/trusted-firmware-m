@@ -119,6 +119,11 @@
 
 /* Secure Data stored in VM0. Size defined in flash layout */
 #define S_DATA_START    (VM0_BASE_S)
+#ifdef RSS_XIP
+#define S_DATA_SIZE    (VM0_SIZE + VM1_SIZE / 2)
+#else
+#define S_DATA_SIZE    (VM0_SIZE - FLASH_S_PARTITION_SIZE)
+#endif /* RSS_XIP */
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
 /* Size of vector table: 111 interrupt handlers + 4 bytes MSP initial value */
@@ -138,8 +143,10 @@
 /* Non-Secure Data stored after secure data, or in VM1. */
 #ifdef RSS_XIP
 #define NS_DATA_START   (VM0_BASE_NS + S_DATA_SIZE)
+#define NS_DATA_SIZE    ((VM0_SIZE + VM1_SIZE) - S_DATA_SIZE)
 #else
 #define NS_DATA_START   (VM1_BASE_NS)
+#define NS_DATA_SIZE    (VM1_SIZE - FLASH_NS_PARTITION_SIZE)
 #endif
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
@@ -152,7 +159,7 @@
 #define NS_PARTITION_SIZE (NS_CODE_SIZE)
 
 #define SECONDARY_PARTITION_START (FWU_HOST_IMAGE_BASE_S)
-#define SECONDARY_PARTITION_SIZE (0x100000)
+#define SECONDARY_PARTITION_SIZE (HOST_IMAGE_MAX_SIZE)
 
 /* Bootloader regions */
 /* BL1_1 is XIP from ROM */
@@ -177,11 +184,13 @@
 
 /* BL1 data is in VM0 */
 #define BL1_1_DATA_START  (BL1_2_CODE_START + BL1_2_CODE_SIZE)
-#define BL1_1_DATA_SIZE   (0x4000) /* 16 KB */
+#define BL1_1_DATA_SIZE   ((VM0_SIZE - BOOT_TFM_SHARED_DATA_SIZE \
+                           - BL1_2_CODE_SIZE) / 2)
 #define BL1_1_DATA_LIMIT  (BL1_1_DATA_START + BL1_1_DATA_SIZE - 1)
 
 #define BL1_2_DATA_START  (BL1_1_DATA_START + BL1_1_DATA_SIZE)
-#define BL1_2_DATA_SIZE   (0x4000) /* 16 KB */
+#define BL1_2_DATA_SIZE   ((VM0_SIZE - BOOT_TFM_SHARED_DATA_SIZE \
+                           - BL1_2_CODE_SIZE) / 2)
 #define BL1_2_DATA_LIMIT  (BL1_2_DATA_START + BL1_2_DATA_SIZE - 1)
 
 /* XIP data go after the reserved space for boot_data */
@@ -191,7 +200,8 @@
 
 /* BL2 data is in VM0, in the same space as BL1 data */
 #define BL2_DATA_START    (BL2_XIP_TABLES_START + BL2_XIP_TABLES_SIZE)
-#define BL2_DATA_SIZE     (0x8000) /* 32 KB */
+#define BL2_DATA_SIZE     (VM0_SIZE - BL2_XIP_TABLES_SIZE \
+                           - BOOT_TFM_SHARED_DATA_SIZE)
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
 /* Store boot data is in the start of VM0. It overlaps with the secure data

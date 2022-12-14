@@ -19,7 +19,6 @@ target_sources(platform_s
         rss_comms_protocol_embed.c
         rss_comms_protocol_pointer_access.c
         rss_comms_atu.c
-        rss_comms_permissions_hal.c
 )
 
 target_compile_definitions(platform_s

@@ -19,29 +19,7 @@
 
 #include "host_base_address.h"
 #include "platform_base_address.h"
-
-/* Flash layout on RSS with XIP mode disabled:
- *
- * 0x8400_0000 BL2 - MCUBoot (128 KiB)
- * 0x8401_0000 BL2 - MCUBoot (128 KiB)
- * 0x8402_0000 Secure image     primary slot (384 KiB)
- * 0x8408_0000 Non-secure image primary slot (384 KiB)
- * 0x840E_0000 Secure image     secondary slot (384 KiB)
- * 0x8414_0000 Non-secure image secondary slot (384 KiB)
- * 0x841A_0000 AP BL1  primary slot (512 KiB)
- * 0x8422_0000 SCP BL1 primary slot (512 KiB)
- * 0x842A_0000 AP BL1  secondary slot (512 KiB)
- * 0x8432_0000 SCP BL1 secondary slot (512 KiB)
- * 0x843A_0000 Unused
- *
- * If XIP mode is enabled, 4 more flash regions are defined:
- *
- * 0x843A_0000 Secure image SIC tables     primary slot (10 KiB)
- * 0x843A_A000 Non-secure image SIC tables primary slot (10 KiB)
- * 0x843B_4000 Secure image SIC tables     secondary slot (10 KiB)
- * 0x843B_E000 Non-secure image SIC tables secondary slot (10 KiB)
- * 0x843C_8000 Unused
- */
+#include "host_flash_layout.h"
 
 /* This header file is included from linker scatter file as well, where only a
  * limited C constructs are allowed. Therefore it is not possible to include
@@ -50,31 +28,8 @@
  * with comment.
  */
 
-/* Size of a Secure and of a Non-secure image */
-#define FLASH_BL2_PARTITION_SIZE        (0x10000) /* BL2 partition: 128 KiB */
-#define FLASH_S_PARTITION_SIZE          (0x60000) /* S   partition: 384 KiB */
-#define FLASH_NS_PARTITION_SIZE         (0x60000) /* NS  partition: 384 KiB */
-#define FLASH_AP_PARTITION_SIZE         (0x80000) /* AP  partition: 512 KiB */
-#define FLASH_SCP_PARTITION_SIZE        (0x80000) /* SCP partition: 512 KiB */
-#define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
-                                          FLASH_NS_PARTITION_SIZE) ? \
-                                         FLASH_S_PARTITION_SIZE :    \
-                                         FLASH_NS_PARTITION_SIZE)
-
-#ifdef RSS_XIP
-/* Each table contains a bit less that 8KiB of HTR and 2KiB of mcuboot headers.
- * The spare space in the 8KiB is used for decryption IVs.
- */
-#define FLASH_SIC_TABLE_SIZE            (0xA000) /* 10KiB */
-#endif /* RSS_XIP */
-
-/* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
-#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x200)    /* 1 KiB */
-/* Same as FLASH0_SIZE */
-#define FLASH_TOTAL_SIZE                (0xFC00000)  /* 252 MiB */
-
-/* Flash offsets are offsets in the host ATU mapping space, to allow host flash
- * to be mapped at any point in the mapping space.
+/* Define to 0, so that we can feed the flash driver a fixed address instead of
+ * an offset.
  */
 #define FLASH_BASE_ADDRESS              (HOST_ACCESS_BASE_S)
 
@@ -84,10 +39,21 @@
  * swapping.
  */
 
-#ifndef RSS_GPT_SUPPORT
-#define FLASH_FIP_A_OFFSET         0x0
-#define FLASH_FIP_B_OFFSET         (FLASH_FIP_A_OFFSET + 0x800000)
-#endif /* !RSS_GPT_SUPPORT */
+/* Sanity check that we can map the partition sizes given. The SIC tables are
+ * always smaller than the partitons, so no need to check those. */
+#if FLASH_BL2_PARTITION_SIZE > HOST_IMAGE_MAX_SIZE \
+ || FLASH_S_PARTITION_SIZE   > HOST_IMAGE_MAX_SIZE \
+ || FLASH_NS_PARTITION_SIZE  > HOST_IMAGE_MAX_SIZE \
+ || FLASH_AP_PARTITION_SIZE  > HOST_IMAGE_MAX_SIZE \
+ || FLASH_SCP_PARTITION_SIZE > HOST_IMAGE_MAX_SIZE
+#error A partition is larger than HOST_IMAGE_MAX_SIZE, and so cannot be mapped
+#endif
+
+#ifndef RSS_XIP
+#define FLASH_SIC_TABLE_SIZE 0
+#endif /* !RSS_XIP */
+
+#define FLASH_MAX_PARTITION_SIZE SECURE_IMAGE_MAX_SIZE
 
 /* BL2 primary slot */
 #define FLASH_AREA_0_ID            (1)
@@ -185,19 +151,15 @@
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
-#define SECURE_IMAGE_MAX_SIZE           FLASH_S_PARTITION_SIZE
-
 #define NON_SECURE_IMAGE_OFFSET         (SECURE_IMAGE_OFFSET + \
                                          SECURE_IMAGE_MAX_SIZE)
+#ifndef RSS_XIP
+#define SECURE_IMAGE_MAX_SIZE           FLASH_S_PARTITION_SIZE
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_NS_PARTITION_SIZE
-
-#ifdef RSS_XIP
-#define S_DATA_SIZE                     (0x18000) /* 96KiB */
-#define NS_DATA_SIZE                    (0x08000) /* 32KiB */
 #else
-#define S_DATA_SIZE                     (0x20000) /* 128KiB */
-#define NS_DATA_SIZE                    (0x20000) /* 128KiB */
-#endif /* RSS_XIP */
+#define SECURE_IMAGE_MAX_SIZE           FLASH_SIC_TABLE_SIZE
+#define NON_SECURE_IMAGE_MAX_SIZE       FLASH_SIC_TABLE_SIZE
+#endif /* !RSS_XIP */
 
 /* Image load addresses used by imgtool.py */
 #ifdef RSS_XIP
@@ -205,15 +167,8 @@
 #define NS_IMAGE_LOAD_ADDRESS           (S_IMAGE_LOAD_ADDRESS + \
                                          FLASH_SIC_TABLE_SIZE)
 #else
-#define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S + S_DATA_SIZE)
-#define NS_IMAGE_LOAD_ADDRESS           (VM1_BASE_S + NS_DATA_SIZE)
+#define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S + VM0_SIZE - FLASH_S_PARTITION_SIZE)
+#define NS_IMAGE_LOAD_ADDRESS           (VM1_BASE_S + VM1_SIZE - FLASH_NS_PARTITION_SIZE)
 #endif
-
-/* Flash device name used by BL2
- * Name is defined in flash driver file: Driver_Flash.c
- */
-#define FLASH_DEV_NAME Driver_FLASH0
-/* Smallest flash programmable unit in bytes */
-#define TFM_HAL_FLASH_PROGRAM_UNIT      (0x1)
 
 #endif /* __FLASH_LAYOUT_H__ */

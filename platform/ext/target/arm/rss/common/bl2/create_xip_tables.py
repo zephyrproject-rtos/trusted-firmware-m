@@ -69,7 +69,7 @@ table = struct_pack([
             nonce_bytes,
             len(htr).to_bytes(4, 'little'),
             htr
-            ], pad_to=8192)
+            ])
 
 with open(args.table_output_file, "wb") as out_file:
     out_file.write(table)
