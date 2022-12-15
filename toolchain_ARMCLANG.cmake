@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -43,8 +43,6 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-nostdlib>
         $<$<COMPILE_LANGUAGE:C>:-std=c99>
         $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
-        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-mfpu=none>
-        $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
         $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
         $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
         $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
@@ -77,7 +75,6 @@ macro(tfm_toolchain_reset_linker_flags)
         --diag_suppress=6304
         # Pattern only matches removed unused sections.
         --diag_suppress=6329
-        --fpu=softvfp
     )
 endmacro()
 
@@ -96,7 +93,21 @@ macro(tfm_toolchain_set_processor_arch)
             endif()
         endif()
 
+        # ARMCLANG specifies that '+nofp' is available on following M-profile cpus:
+        # 'cortex-m4', 'cortex-m7', 'cortex-m33', 'cortex-m35p' and 'cortex-m55'.
+        # Build fails if other M-profile cpu, such as 'cortex-m23', is added with '+nofp'.
+        # Explicitly list those cpu to align with ARMCLANG description.
+        if (NOT CONFIG_TFM_FLOAT_ABI STREQUAL "hard" AND
+            (TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m4"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m7"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m33"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m35p"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"))
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
+        endif()
+
         string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_CPU_FLAG "${CMAKE_SYSTEM_PROCESSOR}")
+        string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
     else()
         set(CMAKE_ASM_CPU_FLAG  ${TFM_SYSTEM_ARCHITECTURE})
 
@@ -107,6 +118,10 @@ macro(tfm_toolchain_set_processor_arch)
         # Modifiers are additive instead of subtractive (.fp Vs .no_fp)
         if (TFM_SYSTEM_DSP)
             string(APPEND CMAKE_ASM_CPU_FLAG ".dsp")
+        endif()
+
+        if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+            string(APPEND CMAKE_ASM_CPU_FLAG ".fp")
         endif()
     endif()
 
@@ -199,6 +214,24 @@ macro(tfm_toolchain_reload_compiler)
     else()
         set(CMAKE_C_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
         set(CMAKE_CXX_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+    endif()
+
+    set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
+    # As BL2 does not use hardware FPU, specify '--fpu=SoftVFP' explicitly to use software
+    # library functions for BL2 to override any implicit FPU option, such as '--cpu' option.
+    # Because the implicit hardware FPU option enforces BL2 to initialize FPU but hardware FPU
+    # is not actually enabled in BL2, it will cause BL2 runtime fault.
+    set(BL2_LINKER_CP_OPTION --fpu=SoftVFP)
+
+    if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+        set(COMPILER_CP_FLAG -mfloat-abi=hard)
+        if (CONFIG_TFM_ENABLE_FP)
+            set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+            set(LINKER_CP_OPTION --fpu=${CONFIG_TFM_FP_ARCH_LINK})
+        endif()
+    else()
+        set(COMPILER_CP_FLAG -mfloat-abi=soft)
+        set(LINKER_CP_OPTION --fpu=SoftVFP)
     endif()
 
     # Workaround for issues with --depend-single-line with armasm and Ninja

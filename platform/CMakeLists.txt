@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -219,6 +219,10 @@ if(BL2)
             $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
     )
 
+    target_compile_options(platform_bl2
+        PUBLIC
+            ${BL2_COMPILER_CP_FLAG}
+    )
 endif()
 
 #========================= Platform BL1_1 =====================================#
