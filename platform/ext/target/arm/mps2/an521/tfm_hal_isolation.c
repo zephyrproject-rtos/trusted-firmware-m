@@ -515,8 +515,11 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
     bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
 #if TFM_LVL == 3
     struct mpu_armv8m_region_cfg_t localcfg;
-    uint32_t i, mmio_index;
+    uint32_t i;
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
+    uint32_t mmio_index;
     struct platform_data_t *plat_data_ptr;
+#endif
     const struct asset_desc_t *rt_mem;
     fih_int fih_rc = FIH_FAILURE;
 #endif /* TFM_LVL == 3 */
