@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2020-2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,7 +14,9 @@
 #include "config_its.h"
 #include "its_utils.h"
 #include "tfm_hal_its.h"
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "tfm_hal_ps.h"
+#endif
 
 /* Include the correct flash interface implementation for ITS */
 #if ITS_RAM_FS

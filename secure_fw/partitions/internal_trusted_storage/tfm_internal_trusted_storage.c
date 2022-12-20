@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,7 +11,9 @@
 #include "tfm_internal_trusted_storage.h"
 
 #include "tfm_hal_its.h"
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "tfm_hal_ps.h"
+#endif
 #include "flash_fs/its_flash_fs.h"
 #include "psa_manifest/pid.h"
 #include "tfm_its_defs.h"
