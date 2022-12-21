@@ -229,6 +229,7 @@ target_include_directories(bl1_main
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_SOURCE_DIR}/platform/ext/accelerator/cc312>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_SOURCE_DIR}/lib/ext/cryptocell-312-runtime/shared/include/mbedtls>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_SOURCE_DIR}/lib/ext/cryptocell-312-runtime/shared/include/crypto_api/cc3x>
+        ../soft_crc
 )
 
 # Configurations based on platform level cmake files
@@ -241,6 +242,7 @@ target_sources(bl1_main
         ../Native_Driver/firewall.c
         ../Native_Driver/uart_pl011_drv.c
         ../fw_update_agent/fwu_agent.c
+        ../soft_crc/soft_crc.c
         ../Native_Driver/arm_watchdog_drv.c
         ../Native_Driver/watchdog.c
         bl1_boot_hal.c

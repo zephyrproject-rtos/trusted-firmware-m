@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,6 +20,7 @@
 #include "tfm_plat_defs.h"
 #include "uefi_fmp.h"
 #include "uart_stdout.h"
+#include "soft_crc.h"
 
 /* Properties of image in a bank */
 struct fwu_image_properties {
@@ -323,6 +324,10 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
         _metadata.img_entry[i].img_props[BANK_1].accepted = IMAGE_NOT_ACCEPTED;
         _metadata.img_entry[i].img_props[BANK_1].version = INVALID_VERSION;
     }
+
+    /* Calculate CRC32 for fwu metadata */
+    _metadata.crc_32 = crc32((uint8_t *)&_metadata.version,
+                             sizeof(struct fwu_metadata) - sizeof(uint32_t));
 
     ret = metadata_write(&_metadata);
     if (ret) {

@@ -63,6 +63,7 @@ target_include_directories(platform_s
     INTERFACE
         cc312
         fw_update_agent
+        soft_crc
 )
 
 target_sources(platform_s
@@ -190,6 +191,7 @@ target_include_directories(platform_bl2
         fip_parser
         Native_Driver
         fw_update_agent
+        soft_crc
         io
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
