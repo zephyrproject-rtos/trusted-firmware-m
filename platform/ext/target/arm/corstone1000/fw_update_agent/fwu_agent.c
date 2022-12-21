@@ -193,6 +193,53 @@ static enum fwu_agent_error_t private_metadata_write(
     return FWU_AGENT_SUCCESS;
 }
 
+static enum fwu_agent_error_t metadata_validate(struct fwu_metadata *p_metadata)
+{
+    int ret;
+
+    FWU_LOG_MSG("%s: enter:\n\r", __func__);
+
+    if (!p_metadata) {
+        return FWU_AGENT_ERROR;
+    }
+
+    uint32_t calculated_crc32 = crc32((uint8_t *)&(p_metadata->version),
+                                      sizeof(struct fwu_metadata) - sizeof(uint32_t));
+
+    if (p_metadata->crc_32 != calculated_crc32) {
+        FWU_LOG_MSG("%s: failed: crc32 calculated: 0x%x, given: 0x%x\n\r", __func__,
+                    calculated_crc32, p_metadata->crc_32);
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: success\n\r", __func__);
+
+    return FWU_AGENT_SUCCESS;
+}
+
+static enum fwu_agent_error_t metadata_read_without_validation(struct fwu_metadata *p_metadata)
+{
+    int ret;
+
+    FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
+                  FWU_METADATA_REPLICA_1_OFFSET, sizeof(struct fwu_metadata));
+
+    if (!p_metadata) {
+        return FWU_AGENT_ERROR;
+    }
+
+    ret = FWU_METADATA_FLASH_DEV.ReadData(FWU_METADATA_REPLICA_1_OFFSET,
+                                p_metadata, sizeof(struct fwu_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: success: active = %u, previous = %d\n\r", __func__,
+                  p_metadata->active_index, p_metadata->previous_active_index);
+
+    return FWU_AGENT_SUCCESS;
+}
+
 static enum fwu_agent_error_t metadata_read(struct fwu_metadata *p_metadata)
 {
     int ret;
@@ -207,6 +254,10 @@ static enum fwu_agent_error_t metadata_read(struct fwu_metadata *p_metadata)
     ret = FWU_METADATA_FLASH_DEV.ReadData(FWU_METADATA_REPLICA_1_OFFSET,
                                 p_metadata, sizeof(struct fwu_metadata));
     if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    if (metadata_validate(p_metadata) != FWU_AGENT_SUCCESS) {
         return FWU_AGENT_ERROR;
     }
 

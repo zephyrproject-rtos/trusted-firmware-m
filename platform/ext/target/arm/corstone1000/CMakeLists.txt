@@ -80,6 +80,7 @@ target_sources(platform_s
         fw_update_agent/uefi_capsule_parser.c
         fw_update_agent/fwu_agent.c
         fw_update_agent/uefi_fmp.c
+        soft_crc/soft_crc.c
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
 )
 
