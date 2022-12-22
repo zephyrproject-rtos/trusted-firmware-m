@@ -157,6 +157,7 @@ target_compile_definitions(platform_bl2
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
         $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
         $<$<BOOL:${ENABLE_FWU_AGENT_DEBUG_LOGS}>:ENABLE_FWU_AGENT_DEBUG_LOGS>
+        PLAT_LOG_LEVEL=${PLAT_LOG_LEVEL}
 )
 
 # boot_hal_bl2.c is compiled as part of 'bl2' target and not inside
