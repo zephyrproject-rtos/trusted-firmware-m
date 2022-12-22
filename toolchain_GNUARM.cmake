@@ -333,7 +333,7 @@ macro(target_share_symbols target symbol_name_file)
     add_custom_command(
         TARGET ${target}
         POST_BUILD
-        COMMAND ${CROSS_COMPILE}-objcopy
+        COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${target}> --wildcard ${STRIP_SYMBOL_KEEP_LIST} --strip-all $<TARGET_FILE_DIR:${target}>/${target}_shared_symbols.axf
     )
 endmacro()
@@ -359,7 +359,7 @@ macro(target_strip_symbols target)
     add_custom_command(
         TARGET ${target}
         POST_BUILD
-        COMMAND ${CROSS_COMPILE}-objcopy
+        COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${target}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${target}>
     )
 endmacro()
@@ -371,7 +371,7 @@ macro(target_strip_symbols_from_dependency target dependency)
     add_custom_command(
         TARGET ${target}
         PRE_LINK
-        COMMAND ${CROSS_COMPILE}-objcopy
+        COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${dependency}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${dependency}>
     )
 endmacro()
@@ -383,7 +383,7 @@ macro(target_weaken_symbols target)
     add_custom_command(
         TARGET ${target}
         POST_BUILD
-        COMMAND ${CROSS_COMPILE}-objcopy
+        COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${target}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${target}>
     )
 endmacro()
@@ -395,7 +395,7 @@ macro(target_weaken_symbols_from_dependency target dependency)
     add_custom_command(
         TARGET ${target}
         PRE_LINK
-        COMMAND ${CROSS_COMPILE}-objcopy
+        COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${dependency}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${dependency}>
     )
 endmacro()
