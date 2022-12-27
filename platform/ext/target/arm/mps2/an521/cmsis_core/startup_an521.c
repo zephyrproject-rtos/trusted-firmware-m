@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,6 +22,9 @@
  */
 
 #include "cmsis.h"
+#if defined(TEST_NS_FPU) || defined(TEST_S_FPU)
+#include "test_interrupt.h"
+#endif
 
 /*----------------------------------------------------------------------------
   External References
@@ -96,7 +99,11 @@ DEFAULT_IRQ_HANDLER(UARTRX3_Handler)
 DEFAULT_IRQ_HANDLER(UARTTX3_Handler)
 DEFAULT_IRQ_HANDLER(UARTRX4_Handler)
 DEFAULT_IRQ_HANDLER(UARTTX4_Handler)
+#if defined(TEST_NS_FPU) || defined(TEST_S_FPU)
+#define UART0_Combined_Handler TFM_FPU_S_TEST_Handler
+#else
 DEFAULT_IRQ_HANDLER(UART0_Combined_Handler)
+#endif
 DEFAULT_IRQ_HANDLER(UART1_Combined_Handler)
 DEFAULT_IRQ_HANDLER(UART2_Combined_Handler)
 DEFAULT_IRQ_HANDLER(UART3_Combined_Handler)

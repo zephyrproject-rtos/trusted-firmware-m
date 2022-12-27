@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,9 +10,6 @@
 #include "tfm_hal_platform.h"
 #include "tfm_plat_defs.h"
 #include "uart_stdout.h"
-#if defined(TEST_NS_FPU) || defined(TEST_S_FPU)
-#include "test_interrupt.h"
-#endif
 
 extern const struct memory_region_limits memory_regions;
 
@@ -52,9 +49,6 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_platform_init(void)
 #if defined(TEST_S_FPU) || defined(TEST_NS_FPU)
     /* Set IRQn in secure mode */
     NVIC_ClearTargetState(TFM_FPU_S_TEST_IRQ);
-
-    /* Register FPU secure test interrupt handler */
-    NVIC_SetVector(TFM_FPU_S_TEST_IRQ, (uint32_t)TFM_FPU_S_TEST_Handler);
 
     /* Enable FPU secure test interrupt */
     NVIC_EnableIRQ(TFM_FPU_S_TEST_IRQ);
