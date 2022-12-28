@@ -47,7 +47,7 @@ const struct memory_region_limits memory_regions = {
         NS_PARTITION_SIZE - 1,
 
     .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
 };
 
 /* Configures the RAM region to NS callable in sacfg block's nsccfg register */

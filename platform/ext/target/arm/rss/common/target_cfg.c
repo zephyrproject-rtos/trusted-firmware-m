@@ -49,7 +49,7 @@ const struct memory_region_limits memory_regions = {
 
 #ifndef TFM_MULTI_CORE_TOPOLOGY
     .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
 #endif
 };
 

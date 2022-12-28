@@ -47,7 +47,7 @@ const struct memory_region_limits memory_regions = {
         (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
 
     .veneer_limit =
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
 };
 
 /* Allows software, via SAU, to define the code region as a NSC */
