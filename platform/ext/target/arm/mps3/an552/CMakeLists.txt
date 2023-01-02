@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -78,7 +78,7 @@ endif()
 target_include_directories(platform_s
     PUBLIC
         .
-        ../common
+        ${PLATFORM_DIR}/ext/common
         cmsis_drivers
         cmsis_drivers/config
         device
@@ -88,7 +88,7 @@ target_include_directories(platform_s
         native_drivers
         partition
         services/src
-        ${PLATFORM_DIR}/..
+        ${CMAKE_SOURCE_DIR}
 )
 
 target_sources(platform_s
@@ -146,8 +146,8 @@ target_sources(platform_ns
 target_include_directories(platform_ns
     PUBLIC
         .
-        ../common
-        ${PLATFORM_DIR}/..
+        ${PLATFORM_DIR}/ext/common
+        ${CMAKE_SOURCE_DIR}
         cmsis_drivers
         cmsis_drivers/config
         device
@@ -156,7 +156,7 @@ target_include_directories(platform_ns
         device/source/armclang
         native_drivers
         partition
-        ${CMAKE_SOURCE_DIR}/platform/ext/cmsis
+        ${PLATFORM_DIR}/ext/cmsis
 )
 
 #========================= Platform BL2 =======================================#
@@ -187,8 +187,9 @@ if(BL2)
 
         PRIVATE
             .
-            ${PLATFORM_DIR}/..
+            ${CMAKE_SOURCE_DIR}
             native_drivers
+            ${PLATFORM_DIR}/ext/common
     )
 endif()
 
@@ -197,8 +198,9 @@ endif()
 target_sources(tfm_spm
     PRIVATE
         target_cfg.c
-        tfm_hal_isolation.c
         tfm_hal_platform.c
-        faults.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c
+        ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
+        ${PLATFORM_DIR}/ext/common/tfm_hal_platform_v8m.c
+        ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
+        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${PLATFORM_DIR}/ext/common/tfm_interrupts.c>
 )

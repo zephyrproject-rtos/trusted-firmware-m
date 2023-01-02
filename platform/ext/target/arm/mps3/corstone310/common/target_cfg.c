@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 #include "cmsis.h"
 #include "utilities.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "Driver_PPC.h"
 #include "Driver_MPC.h"
 #include "region_defs.h"
@@ -29,31 +29,12 @@
 /* Throw out bus error when an access causes security violation */
 #define CMSDK_SECRESPCFG_BUS_ERR_MASK   (1UL << 0)
 
-/* The section names come from the scatter file */
-REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-REGION_DECLARE(Image$$, ER_VENEER, $$Base);
-REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
-
-const struct memory_region_limits memory_regions = {
-    .non_secure_code_start =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
-        BL2_HEADER_SIZE,
-
-    .non_secure_partition_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base),
-
-    .non_secure_partition_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
-        NS_PARTITION_SIZE - 1,
-
-    .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
-};
-
 /* Configures the RAM region to NS callable in sacfg block's nsccfg register */
 #define RAMNSC  0x2
 /* Configures the CODE region to NS callable in sacfg block's nsccfg register */
 #define CODENSC  0x1
+
+extern const struct memory_region_limits memory_regions;
 
 /* Import MPC drivers */
 extern ARM_DRIVER_MPC Driver_ISRAM0_MPC;
@@ -354,6 +335,23 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     __ISB();
 
     return TFM_PLAT_ERR_SUCCESS;
+}
+
+void mpc_revert_non_secure_to_secure_cfg(void)
+{
+    Driver_ISRAM0_MPC.ConfigRegion(MPC_ISRAM0_RANGE_BASE_S,
+                                   MPC_ISRAM0_RANGE_LIMIT_S,
+                                   ARM_MPC_ATTR_SECURE);
+
+    Driver_SRAM_MPC.ConfigRegion(MPC_SRAM_RANGE_BASE_S,
+                                 MPC_SRAM_RANGE_LIMIT_S,
+                                 ARM_MPC_ATTR_SECURE);
+
+    /* Add barriers to assure the MPC configuration is done before continue
+     * the execution.
+     */
+    __DSB();
+    __ISB();
 }
 
 void mpc_clear_irq(void)

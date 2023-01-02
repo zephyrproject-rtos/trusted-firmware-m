@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -10,7 +10,7 @@
 #define __TFM_PERIPHERALS_DEF_H__
 
 #include "platform_irq.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 
 #ifdef __cplusplus
 extern "C" {

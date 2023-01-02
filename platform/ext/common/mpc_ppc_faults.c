@@ -1,15 +1,14 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "cmsis.h"
-#include "target_cfg.h"
-#include "Driver_Common.h"
-#include "exception_info.h"
+#include "common_target_cfg.h"
 #include "utilities.h"
+#include "exception_info.h"
 
 void C_MPC_Handler(void)
 {

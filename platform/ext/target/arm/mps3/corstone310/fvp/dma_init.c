@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 #include "platform_s_device_definition.h"
 #include "platform_base_address.h"
 #include "dma350_drv.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 
 struct platform_data_t tfm_peripheral_dma0_ch0 = {
         DMA_350_BASE_S + 0x1000,

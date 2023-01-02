@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -8,35 +8,42 @@
  *
  */
 
+/*
+ * The current implementation in this file only supports isolation
+ * level 1 and level 2.
+ */
+
 #include <arm_cmse.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 #include "array.h"
 #include "cmsis.h"
-#include "Driver_Common.h"
-#include "mmio_defs.h"
-#include "mpu_armv8m_drv.h"
 #include "region.h"
-#include "target_cfg.h"
+#include "mpu_armv8m_drv.h"
+#include "common_target_cfg.h"
 #include "tfm_hal_defs.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_peripherals_def.h"
-#include "load/partition_defs.h"
-#include "load/asset_defs.h"
 #include "load/spm_load_api.h"
 
-/* It can be retrieved from the MPU_TYPE register. */
-#define MPU_REGION_NUM                  16
 #define PROT_BOUNDARY_VAL \
     ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+/* Boundary handle binding macros. */
+#define HANDLE_ATTR_PRIV_POS            1U
+#define HANDLE_ATTR_PRIV_MASK           (0x1UL << HANDLE_ATTR_PRIV_POS)
+#define HANDLE_ATTR_NS_POS              0U
+#define HANDLE_ATTR_NS_MASK             (0x1UL << HANDLE_ATTR_NS_POS)
 
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
+#ifndef TFM_MULTI_CORE_TOPOLOGY
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
+#endif /* TFM_MULTI_CORE_TOPOLOGY */
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
@@ -121,6 +128,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     }
 #endif
 };
+
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
@@ -142,7 +150,11 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
 
     mpu_armv8m_clean(&dev_mpu_s);
 
-    if (ARRAY_SIZE(region_cfg) > MPU_REGION_NUM) {
+    MPU_Type *mpu = (MPU_Type *)(&dev_mpu_s)->base;
+    uint32_t mpu_region_num =
+        (mpu->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
+
+    if (ARRAY_SIZE(region_cfg) > mpu_region_num) {
         return TFM_HAL_ERROR_GENERIC;
     }
     for (i = 0; i < ARRAY_SIZE(region_cfg); i++) {
@@ -166,7 +178,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
 }
 
 /*
- * Implementation of tfm_hal_bind_boundary() on AN547:
+ * Implementation of tfm_hal_bind_boundary():
  *
  * The API encodes some attributes into a handle and returns it to SPM.
  * The attributes include isolation boundaries, privilege, and MMIO information.
@@ -185,6 +197,9 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
     struct platform_data_t *plat_data_ptr;
+    const uintptr_t* mmio_list;
+    size_t mmio_list_length;
+
 #if TFM_LVL == 2
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
@@ -201,6 +216,8 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
     p_asset = LOAD_INFO_ASSET(p_ldinf);
 
+    get_partition_named_mmio_list(&mmio_list, &mmio_list_length);
+
     /*
      * Validate if the named MMIO of partition is allowed by the platform.
      * Otherwise, skip validation.
@@ -211,13 +228,13 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
         if (!(p_asset[i].attr & ASSET_ATTR_NAMED_MMIO)) {
             continue;
         }
-        for (j = 0; j < ARRAY_SIZE(partition_named_mmio_list); j++) {
-            if (p_asset[i].dev.dev_ref == partition_named_mmio_list[j]) {
+        for (j = 0; j < mmio_list_length; j++) {
+            if (p_asset[i].dev.dev_ref == mmio_list[j]) {
                 break;
             }
         }
 
-        if (j == ARRAY_SIZE(partition_named_mmio_list)) {
+        if (j == mmio_list_length) {
             /* The MMIO asset is not in the allowed list of platform. */
             return TFM_HAL_ERROR_GENERIC;
         }

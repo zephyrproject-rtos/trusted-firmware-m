@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -64,7 +64,6 @@ endif()
 target_include_directories(platform_s
     PUBLIC
         ${CORSTONE310_COMMON_DIR}
-        ../common
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/secure
         ${CORSTONE310_COMMON_DIR}/device
@@ -73,8 +72,10 @@ target_include_directories(platform_s
         ${CORSTONE310_COMMON_DIR}/native_drivers
         ${CORSTONE310_COMMON_DIR}/partition
         ${CORSTONE310_COMMON_DIR}/services/src
-        ${PLATFORM_DIR}/..
+        ${CMAKE_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+        ${PLATFORM_DIR}/ext/common
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 target_sources(platform_s
@@ -121,8 +122,7 @@ target_sources(platform_ns
 target_include_directories(platform_ns
     PUBLIC
         ${CORSTONE310_COMMON_DIR}
-        ../common
-        ${PLATFORM_DIR}/..
+        ${CMAKE_SOURCE_DIR}
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure
         ${CORSTONE310_COMMON_DIR}/device
@@ -131,6 +131,8 @@ target_include_directories(platform_ns
         ${CORSTONE310_COMMON_DIR}/native_drivers
         ${CORSTONE310_COMMON_DIR}/partition
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${PLATFORM_DIR}/ext/common
 )
 
 #========================= Platform BL2 =======================================#
@@ -159,7 +161,7 @@ if(BL2)
 
         PRIVATE
             ${CORSTONE310_COMMON_DIR}
-            ${PLATFORM_DIR}/..
+            ${CMAKE_SOURCE_DIR}
             ${CORSTONE310_COMMON_DIR}/native_drivers
     )
 endif()
@@ -169,8 +171,12 @@ endif()
 target_sources(tfm_spm
     PRIVATE
         ${CORSTONE310_COMMON_DIR}/target_cfg.c
-        ${CORSTONE310_COMMON_DIR}/tfm_hal_isolation.c
         ${CORSTONE310_COMMON_DIR}/tfm_hal_platform.c
+        ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
+        ${PLATFORM_DIR}/ext/common/tfm_hal_platform_v8m.c
+        ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
+
         ${CMAKE_CURRENT_SOURCE_DIR}/dma_init.c
-        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CORSTONE310_COMMON_DIR}/tfm_interrupts.c>
+        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_peripherals_def.c
+        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${PLATFORM_DIR}/ext/common/tfm_interrupts.c>
 )
