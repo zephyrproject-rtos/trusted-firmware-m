@@ -7,6 +7,7 @@ Firmware Update Service
 :Contact: Sherry Zhang <Sherry.Zhang2@arm.com>
 
 .. contents:: Table of Contents
+   :depth: 3
 
 ***************************************
 Introduction of Firmware Update service

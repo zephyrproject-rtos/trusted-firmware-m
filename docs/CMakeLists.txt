@@ -40,21 +40,12 @@ add_custom_target(tfm_docs_userguide_html ALL
 )
 add_dependencies(docs tfm_docs_userguide_html)
 
-add_custom_command(OUTPUT "${SPHINXCFG_OUTPUT_PATH}/latex/TF-M.tex"
-    OUTPUT "${SPHINXCFG_OUTPUT_PATH}/latex/"
-    COMMAND "${SPHINX_EXECUTABLE}" -b latex "${SPHINXCFG_SOURCE_PATH}" "${SPHINXCFG_OUTPUT_PATH}/latex"
-    WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    DEPENDS tfm_docs_sphinx_cfg
+add_custom_target(tfm_docs_userguide_pdf ALL
+    COMMAND "${SPHINX_EXECUTABLE}" -W -b latex -j auto -c ${SPHINXCFG_CONFIG_PATH} ${SPHINXCFG_SOURCE_PATH} "${SPHINXCFG_OUTPUT_PATH}/latex"
+    COMMAND ${PDFLATEX_COMPILER} -output-directory "${SPHINXCFG_OUTPUT_PATH}/latex" TF-M.tex
+    COMMAND ${CMAKE_COMMAND} -E copy "${SPHINXCFG_OUTPUT_PATH}/latex/TF-M.pdf" "${SPHINXCFG_OUTPUT_PATH}/tf-m_user_guide.pdf"
+    WORKING_DIRECTORY ${SPHINXCFG_SOURCE_PATH}
     DEPENDS ${SPHINXCFG_DOC_FILES}
-)
-add_custom_command(OUTPUT "${SPHINXCFG_OUTPUT_PATH}/latex/TF-M.pdf"
-    COMMAND ${PDFLATEX_COMPILER} TF-M.tex
-    COMMAND ${CMAKE_COMMAND} -E copy TF-M.tex ${SPHINXCFG_OUTPUT_PATH}/tf-m_user_guide.pdf
-    WORKING_DIRECTORY ${SPHINXCFG_OUTPUT_PATH}/latex/
-    DEPENDS "${SPHINXCFG_OUTPUT_PATH}/latex/TF-M.tex"
-)
-add_custom_target(tfm_docs_userguide_pdf
-    DEPENDS "${SPHINXCFG_OUTPUT_PATH}/latex/TF-M.pdf"
 )
 add_dependencies(docs tfm_docs_userguide_pdf)
 
