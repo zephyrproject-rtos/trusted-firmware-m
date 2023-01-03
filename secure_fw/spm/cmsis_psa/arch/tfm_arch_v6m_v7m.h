@@ -51,6 +51,23 @@ __STATIC_INLINE bool is_return_secure_stack(uint32_t lr)
     return true;
 }
 
+/**
+ * \brief Check whether the default stacking rules apply, or whether the
+ *        Additional state context, also known as callee registers,
+ *        are already on the stack.
+ *
+ * \param[in] lr            LR register containing the EXC_RETURN value.
+ *
+ * \retval true             Always use default stacking rules on
+ *                          v6m/v7m architectures.
+ */
+__STATIC_INLINE bool is_default_stacking_rules_apply(uint32_t lr)
+{
+    (void)lr;
+
+    return true;
+}
+
 #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
 /**
  * \brief Check whether the stack frame for this exception has space allocated

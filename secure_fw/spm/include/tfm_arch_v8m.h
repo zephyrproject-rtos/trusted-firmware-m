@@ -62,7 +62,31 @@ extern uint64_t __STACK_SEAL;
  */
 __STATIC_INLINE bool is_return_secure_stack(uint32_t lr)
 {
-    return (lr & EXC_RETURN_S);
+    return (lr & EXC_RETURN_S) ? true : false;
+}
+
+/**
+ * \brief Check whether the default stacking rules apply, or whether the
+ *        Additional state context, also known as callee registers,
+ *        are already on the stack.
+ *        DCRS bit is only present from V8M and above.
+ *        If DCRS is 1 then Stack contains:
+ *        r0, r1, r2, r3, r12, r14 (lr), the return address and xPSR
+ *
+ *        If DCRS is 0 then the stack contains the following too before
+ *        the caller-saved registers:
+ *        Integrity signature, res, r4, r5, r6, r7, r8, r9, r10, r11
+ *
+ * \param[in] lr            LR register containing the EXC_RETURN value.
+ *
+ * \retval true             Default rules for stacking the Additional state
+ *                          context registers followed.
+ * \retval false            Stacking of the Additional state context
+ *                          registers skipped.
+ */
+__STATIC_INLINE bool is_default_stacking_rules_apply(uint32_t lr)
+{
+    return (lr & EXC_RETURN_DCRS) ? true : false;
 }
 
 /**

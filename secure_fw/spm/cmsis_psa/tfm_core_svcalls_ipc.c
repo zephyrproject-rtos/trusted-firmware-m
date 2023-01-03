@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -139,12 +139,14 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         svc_args = psp;
     }
 
-    /*
-     * Stack contains:
-     * r0, r1, r2, r3, r12, r14 (lr), the return address and xPSR
-     * First argument (r0) is svc_args[0]
-     */
     if (is_return_secure_stack(exc_return)) {
+        if (is_default_stacking_rules_apply(exc_return) == false) {
+            /* In this case offset the svc_args and only use
+             * the caller-saved registers
+             */
+            svc_args = &svc_args[10];
+        }
+
         /* SV called directly from secure context. Check instruction for
          * svc_number
          */
