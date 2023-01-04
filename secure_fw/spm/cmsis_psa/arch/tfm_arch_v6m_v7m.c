@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -90,7 +90,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         ".syntax unified                    \n"
 #endif
         "   push    {r0, lr}                \n"
-        "   bl      ipc_schedule             \n"
+        "   bl      ipc_schedule            \n"
         "   pop     {r2, r3}                \n"
         "   mov     lr, r3                  \n"
         "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
@@ -104,12 +104,20 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   mov     r6, r10                 \n"
         "   mov     r7, r11                 \n"
         "   stm     r2!, {r4-r7}            \n"
+        "   subs    r2, #40                 \n" /* Rewind r2(SP) to context top
+                                                 * With two more dummy data for
+                                                 * reserved additional state context,
+                                                 * integrity signature offset
+                                                 */
         "   mov     r3, lr                  \n"
-        "   subs    r2, #32                 \n" /* reset r2(SP) to top */
         "   stm     r0!, {r2, r3}           \n" /* Save struct context_ctrl_t */
         "   ldm     r1!, {r2, r3}           \n" /* Load ctx of next thread */
         "   mov     lr, r3                  \n"
-        "   adds    r2, #16                 \n" /* Start of popping r4-r11 */
+        "   adds    r2, #24                 \n" /* Pop dummy data for
+                                                 * reserved additional state context,
+                                                 * integrity signature offset,
+                                                 * r4-r11
+                                                 */
         "   ldm     r2!, {r4-r7}            \n"
         "   mov     r8, r4                  \n"
         "   mov     r9, r5                  \n"
@@ -156,6 +164,10 @@ __attribute__((naked)) void SVC_Handler(void)
     "MOV     r6, r10                        \n"
     "MOV     r7, r11                        \n"
     "PUSH    {r4-r7}                        \n"
+    "SUB     sp, sp, #8                     \n" /* Dumy data to align SP offset for
+                                                 * reserved additional state context,
+                                                 * integrity signature
+                                                 */
     "LDR     r4, ="M2S(STACK_SEAL_PATTERN)" \n" /* clear r4-r11 */
     "MOV     r5, r4                         \n"
     "MOV     r6, r4                         \n"
@@ -168,6 +180,10 @@ __attribute__((naked)) void SVC_Handler(void)
     "BX      lr                             \n"
     "from_flih_func:                        \n"
     "POP     {r4, r5}                       \n" /* Seal stack */
+    "ADD     sp, sp, #8                     \n" /* Dummy data to align SP offset for
+                                                 * reserved additional state context,
+                                                 * integrity signature
+                                                 */
     "POP     {r4-r7}                        \n"
     "MOV     r8, r4                         \n"
     "MOV     r9, r5                         \n"

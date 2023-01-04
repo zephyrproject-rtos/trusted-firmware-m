@@ -109,15 +109,27 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
         "   cpsid   i                                   \n"
         "   mrs     r2, psp                             \n"
-        "   stmdb   r2!, {r4-r11}                       \n" /* Save callee */
+        "   ands    r3, lr, #"M2S(EXC_RETURN_DCRS)"     \n" /* Check DCRS */
+        "   itt     ne                                  \n" /* Skip saving callee */
+        "   stmdbne r2!, {r4-r11}                       \n" /* Save callee */
+        "   subne   r2, #8                              \n" /* SP offset for
+                                                             * reserved additional state context,
+                                                             * integrity signature
+                                                             */
         "   stmia   r0, {r2, lr}                        \n" /* Save curr ctx:
                                                              * PSP, LR
                                                              */
         "   ldmia   r1!, {r2, lr}                       \n" /* Load next ctx:
                                                              * PSP, LR
                                                              */
+        "   ands    r3, lr, #"M2S(EXC_RETURN_DCRS)"     \n" /* Check DCRS */
+        "   itt     ne                                  \n" /* Skip loading callee */
+        "   addne   r2, #8                              \n" /* SP offset for
+                                                             * reserved additional state context,
+                                                             * integrity signature
+                                                             */
+        "   ldmiane r2!, {r4-r11}                       \n" /* Load callee */
         "   ldr     r3, [r1]                            \n" /* Load sp_limit */
-        "   ldmia   r2!, {r4-r11}                       \n" /* Restore callee */
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
         "   cpsie   i                                   \n"
@@ -131,42 +143,54 @@ __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
 #if !defined(__ICCARM__)
-    ".syntax unified                        \n"
+    ".syntax unified                         \n"
 #endif
-    "MRS     r0, MSP                        \n"
-    "MOV     r1, lr                         \n"
-    "MRS     r2, PSP                        \n"
-    "MRS     r3, PSPLIM                     \n"
-    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
-    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, dummy */
-    "BL      tfm_core_svc_handler           \n"
-    "MOV     lr, r0                         \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, dummy */
-    "POP     {r2, r3}                       \n" /* PSP PSPLIM */
-    "AND     r0, #8                         \n" /* Mode bit */
-    "AND     r1, #8                         \n"
-    "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
-    "BGT     to_flih_func                   \n"
-    "BLT     from_flih_func                 \n"
-    "BX      lr                             \n"
-    "to_flih_func:                          \n"
-    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
-    "PUSH    {r4-r11}                       \n"
-    "LDR     r4, ="M2S(STACK_SEAL_PATTERN)" \n" /* clear r4-r11 */
-    "MOV     r5, r4                         \n"
-    "MOV     r6, r4                         \n"
-    "MOV     r7, r4                         \n"
-    "MOV     r8, r4                         \n"
-    "MOV     r9, r4                         \n"
-    "MOV     r10, r4                        \n"
-    "MOV     r11, r4                        \n"
-    "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
-    "BX      lr                             \n"
-    "from_flih_func:                        \n"
-    "POP     {r4, r5}                       \n" /* Seal stack */
-    "POP     {r4-r11}                       \n"
-    "POP     {r1, r2}                       \n" /* PSP PSPLIM */
-    "BX      lr                             \n"
+    "MRS     r0, MSP                         \n"
+    "MOV     r1, lr                          \n"
+    "MRS     r2, PSP                         \n"
+    "MRS     r3, PSPLIM                      \n"
+    "PUSH    {r2, r3}                        \n" /* PSP PSPLIM */
+    "PUSH    {r1, r2}                        \n" /* Orig_exc_return, dummy */
+    "BL      tfm_core_svc_handler            \n"
+    "MOV     lr, r0                          \n"
+    "POP     {r1, r2}                        \n" /* Orig_exc_return, dummy */
+    "POP     {r2, r3}                        \n" /* PSP PSPLIM */
+    "AND     r0, #8                          \n" /* Mode bit */
+    "AND     r1, #8                          \n"
+    "SUBS    r0, r1                          \n" /* Compare EXC_RETURN values */
+    "BGT     to_flih_func                    \n"
+    "BLT     from_flih_func                  \n"
+    "BX      lr                              \n"
+    "to_flih_func:                           \n"
+    "PUSH    {r2, r3}                        \n" /* PSP PSPLIM */
+    "ANDS    r3, lr, #"M2S(EXC_RETURN_DCRS)" \n" /* Check DCRS */
+    "ITT     ne                              \n" /* Skip saving callee */
+    "PUSHNE  {r4-r11}                        \n" /* Save callee */
+    "SUBSNE  sp, #8                          \n" /* SP offset for
+                                                  * reserved additional state context,
+                                                  * integrity signature
+                                                  */
+    "LDR     r4, ="M2S(STACK_SEAL_PATTERN)"  \n" /* clear r4-r11 */
+    "MOV     r5, r4                          \n"
+    "MOV     r6, r4                          \n"
+    "MOV     r7, r4                          \n"
+    "MOV     r8, r4                          \n"
+    "MOV     r9, r4                          \n"
+    "MOV     r10, r4                         \n"
+    "MOV     r11, r4                         \n"
+    "PUSH    {r4, r5}                        \n" /* Seal stack before EXC_RET */
+    "BX      lr                              \n"
+    "from_flih_func:                         \n"
+    "POP     {r4, r5}                        \n" /* Seal stack */
+    "ANDS    r3, lr, #"M2S(EXC_RETURN_DCRS)" \n" /* Check DCRS */
+    "ITT     ne                              \n" /* Skip loading callee */
+    "ADDSNE  sp, #8                          \n" /* SP offset for
+                                                  * reserved additional state context,
+                                                  * integrity signature
+                                                  */
+    "POPNE   {r4-r11}                        \n" /* Load callee */
+    "POP     {r1, r2}                        \n" /* PSP PSPLIM */
+    "BX      lr                              \n"
     );
 }
 
