@@ -39,7 +39,6 @@ macro(tfm_toolchain_reset_compiler_flags)
         -Wall
         -Wno-format
         -Wno-return-type
-        -Wno-unused-const-variable
         -Wno-unused-but-set-variable
         -c
         -fdata-sections
