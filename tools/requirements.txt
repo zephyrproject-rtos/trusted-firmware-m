@@ -1,8 +1,8 @@
 cbor2
 click
-cryptography
+cryptography>=36.0.1
 pyasn1
-imgtool>=1.6.0
+imgtool>=1.9.0
 Jinja2>=2.10.3
 PyYAML
 pyhsslms
