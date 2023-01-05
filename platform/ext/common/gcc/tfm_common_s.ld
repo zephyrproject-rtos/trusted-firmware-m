@@ -66,13 +66,17 @@ SECTIONS
     .gnu.sgstubs ALIGN(TFM_LINKER_VENEERS_ALIGNMENT) :
     {
         *(.gnu.sgstubs*)
-        . = ALIGN(TFM_LINKER_VENEERS_ALIGNMENT);
     } > FLASH
     Image$$ER_VENEER$$Base = ADDR(.gnu.sgstubs);
-    Image$$VENEER_ALIGN$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
-#endif
+    Image$$VENEER_ALIGN$$Limit = ALIGN(TFM_LINKER_VENEERS_ALIGNMENT);
 
+    /* GCC always places veneers at the end of .gnu.sgstubs section, so the only
+     * way to align the end of .gnu.sgstubs section is to align start of the
+     * next section */
+    .copy.table : ALIGN(TFM_LINKER_VENEERS_ALIGNMENT)
+#else
     .copy.table : ALIGN(4)
+#endif
     {
         __copy_table_start__ = .;
 #ifdef RAM_VECTORS_SUPPORT
