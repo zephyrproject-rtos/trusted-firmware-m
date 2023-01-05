@@ -5,6 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
+rsource "Kconfig.arch"
+
 menu "Platform options"
 
 config PLATFORM_DEFAULT_BL1
@@ -59,4 +61,5 @@ config PLATFORM_DEFAULT_SYSTEM_RESET_HALT
 config PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT
     bool
     default n
+
 endmenu
