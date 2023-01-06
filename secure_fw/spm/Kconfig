@@ -22,6 +22,7 @@ choice
 
     config CONFIG_TFM_SPM_BACKEND_IPC
         bool "IPC Backend"
+        select CONFIG_TFM_PARTITION_META
 endchoice
 
 config CONFIG_TFM_SPM_BACKEND
@@ -58,3 +59,18 @@ config PSA_FRAMEWORK_HAS_MM_IOVEC
     default n
     depends on TFM_ISOLATION_LEVEL = 1
 endmenu
+
+######################## Promptless (non-user) config options ##################
+########### Do NOT change the following config options anywhere! ###############
+config CONFIG_TFM_PARTITION_META
+    def_bool n
+
+config TFM_PARTITION_NS_AGENT_MAILBOX
+    bool
+    default y if TFM_MULTI_CORE_TOPOLOGY
+    default n
+
+config TFM_PARTITION_NS_AGENT_TZ
+    bool
+    default y if CONFIG_TFM_USE_TRUSTZONE
+    default n
