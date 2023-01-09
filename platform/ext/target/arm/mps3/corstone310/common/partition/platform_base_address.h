@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited
+ * Copyright (c) 2019-2023 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,6 +234,9 @@
 #define QSPI_SRAM_SIZE  (0x00800000) /* 8 MB */
 #define DDR4_BLK_SIZE   (0x10000000) /* 256 MB */
 #define DDR4_BLK_NUM    (0x8)        /* Number of DDR4 blocks */
+
+/* All VMs use the same MPC block size as defined by VMMPCBLKSIZE. */
+#define MPC_BLK_SIZE    (0x8000)     /* 32 kB */
 
 /* Defines for Driver MPC's */
 /* SRAM -- 2 MB */

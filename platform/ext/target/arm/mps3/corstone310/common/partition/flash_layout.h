@@ -26,11 +26,11 @@
  * 0x0006_0000 Non-secure image primary slot (3.125 MB)
  * 0x0038_0000 Secure image     secondary slot (384 KB)
  * 0x003E_0000 Non-secure image secondary slot (3.125 MB)
- * 0x0070_0000 Scratch area (384 KB)
- * 0x0076_0000 Protected Storage Area (20 KB)
- * 0x0076_5000 Internal Trusted Storage Area (16 KB)
- * 0x0076_9000 OTP / NV counters  area (8 KB)
- * 0x0076_B000 Unused
+ * 0x0070_0000 Scratch area (16 KB)
+ * 0x0070_4000 Protected Storage Area (20 KB)
+ * 0x0070_9000 Internal Trusted Storage Area (16 KB)
+ * 0x0070_D000 OTP / NV counters  area (8 KB)
+ * 0x0070_F000 Unused
  *
  * Default Flash layout on Corstone-310 with BL2 (single image boot):
  *
@@ -40,12 +40,12 @@
  * 0x0038_0000 Secondary image area (768 KB):
  *    0x0038_0000 Secure     image secondary (384 KB)
  *    0x003E_0000 Non-secure image secondary (3.125 MB)
- * 0x0070_0000 Scratch area (384 KB)
- * 0x0076_0000 Protected Storage Area (20 KB)
- * 0x0076_5000 Internal Trusted Storage Area (16 KB)
- * 0x0076_9000 NV counters area (4 KB)
- * 0x0076_A000 OTP / NV counters  area (8 KB)
- * 0x0076_C000 Unused
+ * 0x0070_0000 Scratch area (16 KB)
+ * 0x0070_4000 Protected Storage Area (20 KB)
+ * 0x0070_9000 Internal Trusted Storage Area (16 KB)
+ * 0x0070_D000 NV counters area (4 KB)
+ * 0x0070_E000 OTP / NV counters  area (8 KB)
+ * 0x0071_0000 Unused
  */
 
 
@@ -64,9 +64,25 @@
 #define FLASH_MAX_PARTITION_SIZE FLASH_NS_PARTITION_SIZE
 #endif
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
-#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)     /* 4 KB */
+#define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)          /* 4 KB */
 /* Same as FLASH0_SIZE */
 #define FLASH_TOTAL_SIZE                (QSPI_SRAM_SIZE)  /* 8 MB */
+
+#if ((FLASH_S_PARTITION_SIZE % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0)
+#error "Secure image size should be a multiple of flash sector size!"
+#endif
+
+#if ((FLASH_NS_PARTITION_SIZE % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0)
+#error "Non-secure image size should be a multiple of flash sector size!"
+#endif
+
+#if ((FLASH_S_PARTITION_SIZE % MPC_BLK_SIZE) != 0)
+#error "Secure image size should be a multiple of MPC block size!"
+#endif
+
+#if ((FLASH_NS_PARTITION_SIZE % MPC_BLK_SIZE) != 0)
+#error "Non-secure image size should be a multiple of MPC block size!"
+#endif
 
 /* Flash layout info for BL2 bootloader */
 /* Same as FLASH0_BASE_S */
@@ -94,7 +110,7 @@
 /* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (FLASH_S_PARTITION_SIZE)
+#define FLASH_AREA_SCRATCH_SIZE    (4 * FLASH_AREA_IMAGE_SECTOR_SIZE)
 /* The maximum number of status entries supported by the bootloader. */
 #define MCUBOOT_STATUS_MAX_ENTRIES ((FLASH_S_PARTITION_SIZE + \
                                      FLASH_NS_PARTITION_SIZE) / \
@@ -123,7 +139,7 @@
 /* Scratch area */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
-#define FLASH_AREA_SCRATCH_SIZE    (FLASH_S_PARTITION_SIZE)
+#define FLASH_AREA_SCRATCH_SIZE    (4 * FLASH_AREA_IMAGE_SECTOR_SIZE)
 /* The maximum number of status entries supported by the bootloader. */
 #define MCUBOOT_STATUS_MAX_ENTRIES (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_SCRATCH_SIZE)
@@ -133,12 +149,6 @@
 #else /* MCUBOOT_IMAGE_NUMBER > 2 */
 #error "Only MCUBOOT_IMAGE_NUMBER 1 and 2 are supported!"
 #endif /* MCUBOOT_IMAGE_NUMBER */
-
-/* mpc_init_cfg function in target_cfg.c expects that all the images can fit
- * in SRAM area. */
-#if ( FLASH_AREA_SCRATCH_OFFSET + FLASH_AREA_SCRATCH_SIZE > QSPI_SRAM_SIZE)
-#error "Out of SRAM memory!"
-#endif
 
 /* Protected Storage (PS) Service definitions */
 #define FLASH_PS_AREA_OFFSET            (FLASH_AREA_SCRATCH_OFFSET + \
@@ -155,6 +165,12 @@
                                            FLASH_ITS_AREA_SIZE)
 #define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_AREA_IMAGE_SECTOR_SIZE * 2)
 #define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
+
+/* mpc_init_cfg function in target_cfg.c expects that all the images can fit
+ * in QSPI SRAM area. */
+#if ( FLASH_OTP_NV_COUNTERS_AREA_OFFSET + FLASH_OTP_NV_COUNTERS_AREA_SIZE > QSPI_SRAM_SIZE)
+#error "Out of QSPI SRAM memory!"
+#endif
 
 /* Offset and size definition in flash area used by assemble.py */
 #define SECURE_IMAGE_OFFSET             (0x0)
