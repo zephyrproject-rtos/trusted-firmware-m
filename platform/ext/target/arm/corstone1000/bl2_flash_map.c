@@ -28,15 +28,15 @@ struct flash_area flash_map[] = {
         .fa_id = FLASH_AREA_0_ID,
         .fa_device_id = FLASH_DEVICE_ID,
         .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_AREA_0_OFFSET,
-        .fa_size = FLASH_AREA_0_SIZE,
+        .fa_off = FLASH_INVALID_OFFSET,
+        .fa_size = FLASH_INVALID_SIZE,
     },
     {
         .fa_id = FLASH_AREA_1_ID,
         .fa_device_id = FLASH_DEVICE_ID,
         .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_AREA_1_OFFSET,
-        .fa_size = FLASH_AREA_1_SIZE,
+        .fa_off = FLASH_INVALID_OFFSET,
+        .fa_size = FLASH_INVALID_SIZE,
     },
 #ifndef TFM_S_REG_TEST
     {

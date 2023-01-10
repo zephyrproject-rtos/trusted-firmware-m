@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -601,12 +601,12 @@ __attribute__((naked)) void boot_clear_bl2_ram_area(void)
     );
 }
 
-extern void add_bank_offset_to_image_offset(uint32_t bank_offset);
+extern void set_flash_area_image_offset(uint32_t offset);
 
 int32_t boot_platform_init(void)
 {
     int32_t result;
-    uint32_t bank_offset;
+    uint32_t image_offset;
 
     result = corstone1000_watchdog_init();
     if (result != ARM_DRIVER_OK) {
@@ -653,8 +653,8 @@ int32_t boot_platform_init(void)
         }
     }
 
-    bl1_get_boot_bank(&bank_offset);
-    add_bank_offset_to_image_offset(bank_offset);
+    bl1_get_active_bl2_image(&image_offset);
+    set_flash_area_image_offset(image_offset);
 
     return 0;
 }

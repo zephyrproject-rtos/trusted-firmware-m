@@ -154,7 +154,7 @@ static enum fwu_agent_error_t private_metadata_read(
         return FWU_AGENT_ERROR;
     }
 
-    ret = FWU_METADATA_FLASH_DEV.ReadData(FWU_PRIVATE_AREA_OFFSET, p_metadata,
+    ret = FWU_METADATA_FLASH_DEV.ReadData(FWU_PRIVATE_METADATA_REPLICA_1_OFFSET, p_metadata,
                                           sizeof(struct fwu_private_metadata));
     if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
         return FWU_AGENT_ERROR;
@@ -178,12 +178,12 @@ static enum fwu_agent_error_t private_metadata_write(
         return FWU_AGENT_ERROR;
     }
 
-    ret = FWU_METADATA_FLASH_DEV.EraseSector(FWU_PRIVATE_AREA_OFFSET);
+    ret = FWU_METADATA_FLASH_DEV.EraseSector(FWU_PRIVATE_METADATA_REPLICA_1_OFFSET);
     if (ret != ARM_DRIVER_OK) {
         return FWU_AGENT_ERROR;
     }
 
-    ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_PRIVATE_AREA_OFFSET,
+    ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_PRIVATE_METADATA_REPLICA_1_OFFSET,
                                 p_metadata, sizeof(struct fwu_private_metadata));
     if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
         return FWU_AGENT_ERROR;
@@ -783,7 +783,7 @@ static enum fwu_agent_error_t fwu_select_previous(
 
 }
 
-void bl1_get_boot_bank(uint32_t *bank_offset)
+void bl1_get_active_bl2_image(uint32_t *offset)
 {
     struct fwu_private_metadata priv_metadata;
     enum fwu_agent_state_t current_state;
@@ -837,15 +837,15 @@ void bl1_get_boot_bank(uint32_t *bank_offset)
     }
 
     if (boot_index == BANK_0) {
-        *bank_offset = BANK_0_PARTITION_OFFSET;
+        *offset = SE_BL2_BANK_0_OFFSET;
     } else if (boot_index == BANK_1) {
-        *bank_offset = BANK_1_PARTITION_OFFSET;
+        *offset = SE_BL2_BANK_1_OFFSET;
     } else {
         FWU_ASSERT(0);
     }
 
-    FWU_LOG_MSG("%s: exit: booting from bank = %u, offset = %x\n\r", __func__,
-                        boot_index, *bank_offset);
+    FWU_LOG_MSG("%s: exit: booting from bank = %u, offset = 0x%x\n\r", __func__,
+                        boot_index, *offset);
 
     return;
 }
