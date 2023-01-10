@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -382,7 +382,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
     bool privileged;
     bool ns_agent;
     uint32_t partition_attrs = 0;
-#if TFM_LVL == 2
+#if (CONFIG_TFM_MMIO_REGION_ENABLE == 1) && (TFM_LVL == 2)
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
 #if CONFIG_TFM_MMIO_REGION_ENABLE == 1
