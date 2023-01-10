@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@
 
 #define MPC_VM0_DEV                  MPC_VM0_DEV_S
 #define MPC_VM1_DEV                  MPC_VM1_DEV_S
+#ifdef RSS_XIP
+#define MPC_SIC_DEV                  MPC_SIC_DEV_S
+#endif /* RSS_XIP */
 
 #define PPC_RSS_MAIN0_DEV            PPC_RSS_MAIN0_DEV_S
 #define PPC_RSS_MAIN_EXP0_DEV        PPC_RSS_MAIN_EXP0_DEV_S

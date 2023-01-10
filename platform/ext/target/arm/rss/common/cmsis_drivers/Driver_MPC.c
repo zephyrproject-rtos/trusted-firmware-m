@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2016-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -342,3 +342,143 @@ ARM_DRIVER_MPC Driver_VM1_MPC = {
     .LockDown         = VM1_MPC_LockDown,
 };
 #endif /* RTE_VM1_MPC */
+
+#if (RTE_SIC_MPC)
+/* Ranges controlled by this SIC_MPC */
+static const struct mpc_sie_memory_range_t MPC_SIC_RANGE_S = {
+    .base         = MPC_SIC_RANGE_BASE_S,
+    .limit        = MPC_SIC_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_SIC_RANGE_NS = {
+    .base         = MPC_SIC_RANGE_BASE_NS,
+    .limit        = MPC_SIC_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
+};
+
+#define MPC_SIC_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_SIC_RANGE_LIST[MPC_SIC_RANGE_LIST_LEN] = {
+        &MPC_SIC_RANGE_S,
+        &MPC_SIC_RANGE_NS
+    };
+
+/* SIC_MPC Driver wrapper functions */
+static int32_t SIC_MPC_Initialize(void)
+{
+    enum mpc_sie_error_t ret;
+
+    ret = mpc_sie_init(&MPC_SIC_DEV,
+                       MPC_SIC_RANGE_LIST,
+                       MPC_SIC_RANGE_LIST_LEN);
+
+    return error_trans(ret);
+}
+
+static int32_t SIC_MPC_Uninitialize(void)
+{
+    /* Nothing to be done */
+    return ARM_DRIVER_OK;
+}
+
+static int32_t SIC_MPC_GetBlockSize(uint32_t *blk_size)
+{
+    enum mpc_sie_error_t ret;
+
+    ret = mpc_sie_get_block_size(&MPC_SIC_DEV, blk_size);
+
+    return error_trans(ret);
+}
+
+static int32_t SIC_MPC_GetCtrlConfig(uint32_t *ctrl_val)
+{
+    enum mpc_sie_error_t ret;
+
+    ret = mpc_sie_get_ctrl(&MPC_SIC_DEV, ctrl_val);
+
+    return error_trans(ret);
+}
+
+static int32_t SIC_MPC_SetCtrlConfig(uint32_t ctrl)
+{
+    enum mpc_sie_error_t ret;
+
+    ret = mpc_sie_set_ctrl(&MPC_SIC_DEV, ctrl);
+
+    return error_trans(ret);
+}
+
+static int32_t SIC_MPC_GetRegionConfig(uintptr_t base,
+                                       uintptr_t limit,
+                                       ARM_MPC_SEC_ATTR *attr)
+{
+    enum mpc_sie_error_t ret;
+
+    ret = mpc_sie_get_region_config(&MPC_SIC_DEV, base, limit,
+                                    (enum mpc_sie_sec_attr_t*)attr);
+
+    return error_trans(ret);
+}
+
+static int32_t SIC_MPC_ConfigRegion(uintptr_t base,
+                                    uintptr_t limit,
+                                    ARM_MPC_SEC_ATTR attr)
+{
+    enum mpc_sie_error_t ret;
+
+    ret = mpc_sie_config_region(&MPC_SIC_DEV, base, limit,
+                                (enum mpc_sie_sec_attr_t)attr);
+
+    return error_trans(ret);
+}
+
+static int32_t SIC_MPC_EnableInterrupt(void)
+{
+    enum mpc_sie_error_t ret;
+
+    ret = mpc_sie_irq_enable(&MPC_SIC_DEV);
+
+    return error_trans(ret);
+}
+
+static void SIC_MPC_DisableInterrupt(void)
+{
+    mpc_sie_irq_disable(&MPC_SIC_DEV);
+}
+
+
+static void SIC_MPC_ClearInterrupt(void)
+{
+    mpc_sie_clear_irq(&MPC_SIC_DEV);
+}
+
+static uint32_t SIC_MPC_InterruptState(void)
+{
+    return mpc_sie_irq_state(&MPC_SIC_DEV);
+}
+
+static int32_t SIC_MPC_LockDown(void)
+{
+    return mpc_sie_lock_down(&MPC_SIC_DEV);
+}
+
+/* SIC_MPC Driver CMSIS access structure */
+ARM_DRIVER_MPC Driver_SIC_MPC = {
+    .GetVersion       = ARM_MPC_GetVersion,
+    .Initialize       = SIC_MPC_Initialize,
+    .Uninitialize     = SIC_MPC_Uninitialize,
+    .GetBlockSize     = SIC_MPC_GetBlockSize,
+    .GetCtrlConfig    = SIC_MPC_GetCtrlConfig,
+    .SetCtrlConfig    = SIC_MPC_SetCtrlConfig,
+    .ConfigRegion     = SIC_MPC_ConfigRegion,
+    .GetRegionConfig  = SIC_MPC_GetRegionConfig,
+    .EnableInterrupt  = SIC_MPC_EnableInterrupt,
+    .DisableInterrupt = SIC_MPC_DisableInterrupt,
+    .ClearInterrupt   = SIC_MPC_ClearInterrupt,
+    .InterruptState   = SIC_MPC_InterruptState,
+    .LockDown         = SIC_MPC_LockDown,
+};
+#endif /* RTE_SIC_MPC */

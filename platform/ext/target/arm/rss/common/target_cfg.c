@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,6 +92,7 @@ const struct dma350_remap_list_t dma350_address_remap = {
 /* Import MPC drivers */
 extern ARM_DRIVER_MPC Driver_VM0_MPC;
 extern ARM_DRIVER_MPC Driver_VM1_MPC;
+extern ARM_DRIVER_MPC Driver_SIC_MPC;
 
 /* Import PPC drivers */
 extern DRIVER_PPC_RSS Driver_PPC_RSS_MAIN0;

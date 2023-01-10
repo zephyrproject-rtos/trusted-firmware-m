@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,6 +179,11 @@ extern struct mpc_sie_dev_t MPC_VM0_DEV_S;
 #ifdef MPC_VM1_S
 #include "mpc_sie_drv.h"
 extern struct mpc_sie_dev_t MPC_VM1_DEV_S;
+#endif
+
+#ifdef MPC_SIC_S
+#include "mpc_sie_drv.h"
+extern struct mpc_sie_dev_t MPC_SIC_DEV_S;
 #endif
 
 /* Message Handling Units (MHU) */

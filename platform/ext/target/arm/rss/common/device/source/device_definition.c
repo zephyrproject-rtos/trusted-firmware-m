@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -438,6 +438,18 @@ static struct mpc_sie_dev_data_t MPC_VM1_DEV_DATA_S = {
 struct mpc_sie_dev_t MPC_VM1_DEV_S = {
     &(MPC_VM1_DEV_CFG_S),
     &(MPC_VM1_DEV_DATA_S)};
+#endif
+
+#ifdef MPC_SIC_S
+static const struct mpc_sie_dev_cfg_t MPC_SIC_DEV_CFG_S = {
+    .base = MPC_SIC_BASE_S};
+static struct mpc_sie_dev_data_t MPC_SIC_DEV_DATA_S = {
+    .range_list = 0,
+    .nbr_of_ranges = 0,
+    .is_initialized = false };
+struct mpc_sie_dev_t MPC_SIC_DEV_S = {
+    &(MPC_SIC_DEV_CFG_S),
+    &(MPC_SIC_DEV_DATA_S)};
 #endif
 
 /* Message Handling Units (MHU) */

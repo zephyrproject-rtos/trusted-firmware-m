@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited
+ * Copyright (c) 2019-2023 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,7 @@
 #define GPIO1_CMSDK_BASE_S               0x50101000 /* GPIO 1 Secure base address */
 #define SIC_BASE_S                       0x50140000 /* SIC Secure base address */
 #define ATU_BASE_S                       0x50150000 /* ATU Secure base address */
+#define MPC_SIC_BASE_S                   0x50151000 /* SIC Memory Protection Controller Secure base address */
 #define SYSCNTR_CNTRL_BASE_S             0x5015A000 /* System Counter Control Secure base address */
 #define SYSCNTR_READ_BASE_S              0x5015B000 /* System Counter Read Secure base address */
 #define MHU0_SENDER_BASE_S               0x50160000 /* Combined MHU 0 Sender Secure base address */
@@ -172,5 +173,13 @@
 #define MPC_VM1_RANGE_BASE_S             (VM1_BASE_S)
 #define MPC_VM1_RANGE_LIMIT_S            (VM1_BASE_S + VM1_SIZE-1)
 #define MPC_VM1_RANGE_OFFSET_S           (0x0)
+
+/* SIC -- 1 MiB */
+#define MPC_SIC_RANGE_BASE_NS            (SIC_HOST_BASE_NS)
+#define MPC_SIC_RANGE_LIMIT_NS           (SIC_HOST_BASE_NS + SIC_MAPPABLE_SIZE-1)
+#define MPC_SIC_RANGE_OFFSET_NS          (0x0)
+#define MPC_SIC_RANGE_BASE_S             (SIC_HOST_BASE_S)
+#define MPC_SIC_RANGE_LIMIT_S            (SIC_HOST_BASE_S + SIC_MAPPABLE_SIZE-1)
+#define MPC_SIC_RANGE_OFFSET_S           (0x0)
 
 #endif  /* __PLATFORM_BASE_ADDRESS_H__ */
