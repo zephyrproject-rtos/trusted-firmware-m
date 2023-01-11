@@ -135,6 +135,10 @@ target_sources(platform_bl2
         io/io_block.c
         io/io_flash.c
         io/io_storage.c
+        soft_crc/soft_crc.c
+        partition/partition.c
+        partition/gpt.c
+        platform.c
 )
 
 if (PLATFORM_IS_FVP)
@@ -179,7 +183,6 @@ target_compile_definitions(bl2
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
-
 )
 target_compile_definitions(bootutil
     PRIVATE

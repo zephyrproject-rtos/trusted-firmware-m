@@ -850,34 +850,20 @@ void bl1_get_active_bl2_image(uint32_t *offset)
     return;
 }
 
-void bl2_get_boot_bank(uint32_t *bank_offset)
+uint8_t bl2_get_boot_bank(void)
 {
-    uint32_t boot_index;
+    uint8_t boot_index;
     struct fwu_private_metadata priv_metadata;
-    FWU_LOG_MSG("%s: enter\n\r", __func__);
-
+    FWU_LOG_MSG("%s: enter", __func__);
     if (fwu_metadata_init()) {
         FWU_ASSERT(0);
     }
-
     if (private_metadata_read(&priv_metadata)) {
         FWU_ASSERT(0);
     }
-
     boot_index = priv_metadata.boot_index;
-
-    if (boot_index == BANK_0) {
-        *bank_offset = BANK_0_PARTITION_OFFSET;
-    } else if (boot_index == BANK_1) {
-        *bank_offset = BANK_1_PARTITION_OFFSET;
-    } else {
-        FWU_ASSERT(0);
-    }
-
-    FWU_LOG_MSG("%s: exit: booting from bank = %u, offset = %x\n\r", __func__,
-                        boot_index, *bank_offset);
-
-    return;
+    FWU_LOG_MSG("%s: exit: booting from bank = %u", __func__, boot_index);
+    return boot_index;
 }
 
 static void disable_host_ack_timer(void)

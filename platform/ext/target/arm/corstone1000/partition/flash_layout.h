@@ -32,7 +32,7 @@
 #define SRAM_BASE                       (0x30000000)
 #define SRAM_SIZE                       (0x80000)     /* 512 KB */
 
-#define BL2_DATA_GAP_SIZE               (0x09000)     /* 36 KB */
+#define BL2_DATA_GAP_SIZE               (0x09800)  /* 38 KB */
 
 #define BL1_DATA_START                  (SRAM_BASE)
 #define BL1_DATA_SIZE                   (0x10000)     /* 64 KiB*/
