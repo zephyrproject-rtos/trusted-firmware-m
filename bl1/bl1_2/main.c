@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -15,6 +15,11 @@
 #include "image.h"
 #include "region_defs.h"
 #include "pq_crypto.h"
+
+/* Disable both semihosting code and argv usage for main */
+#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+__asm("  .global __ARM_use_no_argv\n");
+#endif
 
 extern uint32_t platform_code_is_bl1_2;
 
