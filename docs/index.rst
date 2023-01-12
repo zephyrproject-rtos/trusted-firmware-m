@@ -44,7 +44,7 @@ Trusted Firmware-M Documentation
             <p>Guidelines for integration with TF-M.</p>
         </li>
         <li class="grid-item">
-            <a href="technical_references/design_docs/index.html">
+            <a href="design_docs/index.html">
                 <img alt="" src="_static/images/tfm-reference.png"/>
                 <h2>References</h2>
             </a>
@@ -89,7 +89,7 @@ Trusted Firmware-M Documentation
     building/tfm_build_instruction
     configuration/index
     integration_guide/index
-    technical_references/design_docs/index
+    design_docs/index
     Tools <tools/index>
 
 .. toctree::

@@ -75,7 +75,7 @@ See ``interface/src/tfm_ns_interface.c.example`` for more details.
 
 TF-M provides a reference implementation of NS mailbox on multi-core platforms,
 under folder ``interface/src/multi_core``.
-See :doc:`Mailbox design </technical_references/design_docs/dual-cpu/mailbox_design_on_dual_core_system>`
+See :doc:`Mailbox design </design_docs/dual-cpu/mailbox_design_on_dual_core_system>`
 for TF-M multi-core mailbox design.
 
 Interface with non-secure world regression tests
