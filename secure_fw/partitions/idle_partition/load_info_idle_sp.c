@@ -12,6 +12,10 @@
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
 
+#if TFM_LVL == 3
+#define TFM_SP_IDLE_NASSETS     (1)
+#endif
+
 #define IDLE_SP_STACK_SIZE      (0x100)
 
 struct partition_tfm_sp_idle_load_info_t {
@@ -20,6 +24,9 @@ struct partition_tfm_sp_idle_load_info_t {
     /* per-partition variable length load data */
     uintptr_t                       stack_addr;
     uintptr_t                       heap_addr;
+#if TFM_LVL == 3
+    struct asset_desc_t             assets[TFM_SP_IDLE_NASSETS];
+#endif
 } __attribute__((aligned(4)));
 
 /* Entrypoint function declaration */
@@ -44,10 +51,24 @@ const struct partition_tfm_sp_idle_load_info_t
         .heap_size                  = 0,
         .ndeps                      = 0,
         .nservices                  = 0,
+#if TFM_LVL == 3
+        .nassets                    = TFM_SP_IDLE_NASSETS,
+#else
         .nassets                    = 0,
+#endif
     },
     .stack_addr                     = (uintptr_t)idle_sp_stack,
     .heap_addr                      = 0,
+#if TFM_LVL == 3
+    .assets                         = {
+        {
+            .mem.start              = (uintptr_t)idle_sp_stack,
+
+            .mem.limit              = (uintptr_t)&idle_sp_stack[IDLE_SP_STACK_SIZE],
+            .attr                   = ASSET_ATTR_READ_WRITE,
+        },
+    },
+#endif
 };
 
 /* Placeholder for partition runtime space. Do not reference it. */
