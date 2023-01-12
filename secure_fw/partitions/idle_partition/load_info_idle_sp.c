@@ -11,12 +11,19 @@
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
+/* Note that region_defs.h must be included before tfm_s_linker_alignments.h
+ * to let platform overwrite default alignment values.
+ */
+#include "region_defs.h"
+#include "tfm_s_linker_alignments.h"
 
 #if TFM_LVL == 3
 #define TFM_SP_IDLE_NASSETS     (1)
 #endif
 
-#define IDLE_SP_STACK_SIZE      (0x100)
+/* Stack size must be aligned to satisfy platform alignment requirements */
+#define IDLE_SP_STACK_SIZE \
+    ROUND_UP_TO_MULTIPLE(0x100, TFM_LINKER_IDLE_PARTITION_STACK_ALIGNMENT)
 
 struct partition_tfm_sp_idle_load_info_t {
     /* common length load data */
@@ -32,7 +39,7 @@ struct partition_tfm_sp_idle_load_info_t {
 /* Entrypoint function declaration */
 extern void tfm_idle_thread(void);
 /* Stack */
-uint8_t idle_sp_stack[IDLE_SP_STACK_SIZE] __attribute__((aligned(8)));
+uint8_t idle_sp_stack[IDLE_SP_STACK_SIZE] __attribute__((aligned(TFM_LINKER_IDLE_PARTITION_STACK_ALIGNMENT)));
 
 /* Partition load, deps, service load data. Put to a dedicated section. */
 #if defined(__ICCARM__)
