@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -146,7 +146,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 
 uint32_t backend_system_run(void)
 {
-    return EXC_RETURN_THREAD_S_PSP;
+    return EXC_RETURN_THREAD_PSP;
 }
 
 psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)

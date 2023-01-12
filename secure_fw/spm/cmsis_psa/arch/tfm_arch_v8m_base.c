@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -98,7 +98,7 @@ __attribute__((naked)) void PendSV_Handler(void)
 #if !defined(__ICCARM__)
         ".syntax unified                                \n"
 #endif
-        "   movs    r0, #"M2S(EXC_RETURN_SECURE_STACK)" \n"
+        "   movs    r0, #"M2S(EXC_RETURN_S)"            \n"
         "   mov     r1, lr                              \n"
         "   tst     r0, r1                              \n" /* NS interrupted */
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */

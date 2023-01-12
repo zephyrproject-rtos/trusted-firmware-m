@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -112,7 +112,7 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     /* Set FLIH result to the ISR */
     p_ctx_flih_ret->state_ctx.r0 = (uint32_t)result;
 
-    return EXC_RETURN_HANDLER_S_MSP;
+    return EXC_RETURN_HANDLER;
 }
 #endif
 
