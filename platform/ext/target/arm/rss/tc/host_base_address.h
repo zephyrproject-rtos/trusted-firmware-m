@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,10 @@
 
 /* Host addresses */
 #define AP_BL1_SRAM_BASE   0x0UL        /* AP initial boot SRAM base address */
-#define AP_BL1_SIZE        0x20000U     /* 128KB */
+#define AP_BL1_MAX_SIZE    0x80000U     /* 512KB, limited by flash partition size */
 
 #define SCP_BL1_SRAM_BASE  0x40000000UL /* SCP initial boot SRAM base address */
-#define SCP_BL1_SIZE       0x10000U     /* 64KB */
+#define SCP_BL1_MAX_SIZE   0x80000U     /* 512KB, limited by flash partition size */
 
 #define HOST_UART_BASE     0x2A400000UL /* Host UART base address */
 #define HOST_UART_SIZE     0x2000U      /* 8KB */
@@ -38,7 +38,9 @@
  * by the AP firmware images.
  */
 /* #define HOST_FLASH_BASE   0x08000000UL /1* Host flash base address *1/ */
-#define HOST_FLASH0_BASE   0x08400000UL /* Host flash base address */
-#define HOST_FLASH0_SIZE   0xFC00000    /* 252 MiB */
+/* FIP size = 34 MB */
+/* Total boot flash size = 64 MB */
+#define HOST_FLASH0_BASE   0x0A200000UL /* Host flash base address */
+#define HOST_FLASH0_SIZE   0x1E00000    /* 30 MiB */
 
 #endif  /* __HOST_BASE_ADDRESS_H__ */

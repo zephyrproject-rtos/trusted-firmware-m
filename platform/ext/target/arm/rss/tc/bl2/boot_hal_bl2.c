@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -94,7 +94,7 @@ int boot_platform_post_load(uint32_t image_id)
          */
         memmove((void *)HOST_BOOT_IMAGE1_LOAD_BASE_S,
                 (void *)(HOST_BOOT_IMAGE1_LOAD_BASE_S + 0x1000),
-                SCP_BL1_SIZE - 0x1000);
+                SCP_BL1_MAX_SIZE - 0x1000);
 
         /* Release SCP CPU from wait */
         sysctrl->gretreg = 0x1;

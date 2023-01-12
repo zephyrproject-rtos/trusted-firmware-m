@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -99,11 +99,11 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
         rc = 0;
     } else if (image_id == RSS_BL2_IMAGE_AP) {
         *exec_ram_start = HOST_BOOT_IMAGE0_LOAD_BASE_S;
-        *exec_ram_size  = AP_BL1_SIZE;
+        *exec_ram_size  = AP_BL1_MAX_SIZE;
         rc = 0;
     } else if (image_id == RSS_BL2_IMAGE_SCP) {
         *exec_ram_start = HOST_BOOT_IMAGE1_LOAD_BASE_S;
-        *exec_ram_size  = SCP_BL1_SIZE;
+        *exec_ram_size  = SCP_BL1_MAX_SIZE;
         rc = 0;
     }
 

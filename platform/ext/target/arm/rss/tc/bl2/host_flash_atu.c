@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -86,7 +86,7 @@ int host_flash_atu_pre_load(uint32_t image_id)
         atu_err = atu_initialize_region(&ATU_DEV_S,
                                         RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
                                         HOST_BOOT_SCP_LOAD_BASE_S,
-                                        SCP_BL1_SRAM_BASE, SCP_BL1_SIZE);
+                                        SCP_BL1_SRAM_BASE, SCP_BL1_MAX_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             return 1;
         }
@@ -96,7 +96,7 @@ int host_flash_atu_pre_load(uint32_t image_id)
         atu_err = atu_initialize_region(&ATU_DEV_S,
                                         RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
                                         HOST_BOOT_AP_LOAD_BASE_S,
-                                        AP_BL1_SRAM_BASE, AP_BL1_SIZE);
+                                        AP_BL1_SRAM_BASE, AP_BL1_MAX_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             return 1;
         }
@@ -107,7 +107,7 @@ int host_flash_atu_pre_load(uint32_t image_id)
         atu_err = atu_initialize_region(&ATU_DEV_S,
                                         RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
                                         HOST_BOOT_AP_LOAD_BASE_S,
-                                        AP_BL1_SRAM_BASE, AP_BL1_SIZE);
+                                        AP_BL1_SRAM_BASE, AP_BL1_MAX_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             return 1;
         }
@@ -119,7 +119,7 @@ int host_flash_atu_pre_load(uint32_t image_id)
         atu_err = atu_initialize_region(&ATU_DEV_S,
                                         RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
                                         HOST_BOOT_AP_LOAD_BASE_S,
-                                        AP_BL1_SRAM_BASE, AP_BL1_SIZE);
+                                        AP_BL1_SRAM_BASE, AP_BL1_MAX_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             return 1;
         }
