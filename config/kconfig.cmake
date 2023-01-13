@@ -24,15 +24,92 @@ if(TFM_PROFILE)
     message(FATAL_ERROR "Selecting TF-M profiles is not supported yet in Kconfig system!")
 endif()
 
+# This function parses the input ${cmake_file} to get normal CMake variables and their values in the
+# format of "set(_VAR_ _VALUE_)". The format could be split into multiple lines.
+# Note that CMake does not allow the "(" to be in a different line as "set" and no white spaces are
+# recommanded between "set" and "(". So the function only covers format of "set(".
+function(convert_normal_cmake_config_to_kconfig cmake_file out_var)
+    # Operate on a local var and write back to the "out_var" later.
+    set(local_var "")
+
+    # Read out the strings of the file. Binary data in the file are ignored
+    file(STRINGS ${cmake_file} CONTENTS)
+
+    # Exclude lines of comments (started with "#")
+    set(CONTENTS_WITHOUT_COMMENTS "")
+
+    foreach(LINE ${CONTENTS})
+        string(REGEX MATCH "^#.*" OUT_STRING ${LINE})
+        if(NOT OUT_STRING)
+            string(APPEND CONTENTS_WITHOUT_COMMENTS "${LINE}\n")
+        endif()
+    endforeach()
+
+    # Search for strings match set(_VAR_ _VALUE_) with support of multi-line format
+    string(REGEX MATCHALL
+           "set\\([ \t\r\n]*([A-Za-z0-9_]*)[ \t\r\n]*([^ \t\r\n]*)[ \t\r\n]*\\)"
+           OUT_STRINGS ${CONTENTS_WITHOUT_COMMENTS})
+
+    foreach(MATCHED_ITEM ${OUT_STRINGS})
+        # Try to convert CMake format to Kconfig one
+        # If the format does not match, the content will not be changed and fall down to the next
+
+        # Bool types
+        string(REGEX REPLACE
+               "set\\([ \t\r\n]*([A-Za-z0-9_]*)[ \t\r\n]*(TRUE|ON)[ \t\r\n]*\\)"
+               "config \\1\n default y\n"
+               MATCHED_ITEM ${MATCHED_ITEM})
+        string(REGEX REPLACE
+               "set\\([ \t\r\n]*([A-Za-z0-9_]*)[ \t\r\n]*(FALSE|OFF)[ \t\r\n]*\\)"
+               "config \\1\n default n\n"
+               MATCHED_ITEM ${MATCHED_ITEM})
+        # Hex int
+        string(REGEX REPLACE
+               "set\\([ \t\r\n]*([A-Za-z0-9_]*)[ \t\r\n]*(0x[0-9a-fA-F]+[ \t\r\n]*)\\)"
+               "config \\1\n default \\2\n"
+               MATCHED_ITEM ${MATCHED_ITEM})
+        # Decimal int
+        string(REGEX REPLACE
+               "set\\([ \t\r\n]*([A-Za-z0-9_]*)[ \t\r\n]*([0-9]+)[ \t\r\n]*\\)"
+               "config \\1\n default \\2\n"
+               MATCHED_ITEM ${MATCHED_ITEM})
+        # Quoted string
+        string(REGEX REPLACE
+               "set\\([ \t\r\n]*([A-Za-z0-9_]*)[ \t\r\n]*(\".*\")[ \t\r\n]*\\)"
+               "config \\1\n default \\2\n"
+               MATCHED_ITEM ${MATCHED_ITEM})
+        # If none of the above matches, must be a non-quoted string
+        string(REGEX REPLACE
+               "set\\([ \t\r\n]*([A-Za-z0-9_]*)[ \t\r\n]*(.*)[ \t\r\n]*\\)"
+               "config \\1\n default \"\\2\"\n"
+               MATCHED_ITEM ${MATCHED_ITEM})
+
+        string(APPEND local_var ${MATCHED_ITEM})
+    endforeach()
+
+    set(${out_var} ${local_var} PARENT_SCOPE)
+endfunction()
+
+# Platform Kconfig file
 if(NOT EXISTS ${PLATFORM_KCONFIG})
     message(WARNING "The platform does not have Kconfig file! \
                      The Kconfig system cannot get its configuration settings.
                      So it is not guaranteed that the Kconfig system works properly.")
 
+    # Parse platform's preload.cmake and config.cmake to get config options.
+    set(PLATFORM_KCONFIG_OPTIONS "")
+    set(PLATFORM_KCONFIG ${KCONFIG_OUTPUT_DIR}/platform/Kconfig)
+
+    convert_normal_cmake_config_to_kconfig(${TARGET_PLATFORM_PATH}/preload.cmake PLATFORM_KCONFIG_OPTIONS)
+    file(WRITE ${PLATFORM_KCONFIG} ${PLATFORM_KCONFIG_OPTIONS})
+
     if(EXISTS ${TARGET_PLATFORM_PATH}/config.cmake)
         include(${TARGET_PLATFORM_PATH}/config.cmake)
+        convert_normal_cmake_config_to_kconfig(${TARGET_PLATFORM_PATH}/config.cmake PLATFORM_KCONFIG_OPTIONS)
+        file(APPEND ${PLATFORM_KCONFIG} ${PLATFORM_KCONFIG_OPTIONS})
     endif()
 endif()
+get_filename_component(PLATFORM_KCONFIG_PATH ${PLATFORM_KCONFIG} DIRECTORY)
 
 # User customized config file
 if(DEFINED KCONFIG_CONFIG_FILE AND NOT EXISTS ${KCONFIG_CONFIG_FILE})
@@ -47,7 +124,7 @@ list(APPEND CONFIG_FILE_LIST
 # Set up ENV variables for the tfm_kconfig.py which are then consumed by Kconfig files.
 set(KCONFIG_ENV_VARS "TFM_SOURCE_DIR=${CMAKE_SOURCE_DIR} \
                       TFM_VERSION=${TFM_VERSION} \
-                      PLATFORM_PATH=${TARGET_PLATFORM_PATH} \
+                      PLATFORM_PATH=${PLATFORM_KCONFIG_PATH} \
                       CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
 
 if(MENUCONFIG)
