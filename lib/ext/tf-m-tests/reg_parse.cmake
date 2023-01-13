@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -45,6 +45,6 @@ if (EXTRA_S_TEST_SUITE_PATH)
 endif()
 
 # Load regression configs overrided by platform
-if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/reg_config_override.cmake)
-    include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/reg_config_override.cmake)
+if (EXISTS ${TARGET_PLATFORM_PATH}/reg_config_override.cmake)
+    include(${TARGET_PLATFORM_PATH}/reg_config_override.cmake)
 endif()

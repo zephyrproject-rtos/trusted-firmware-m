@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -200,6 +200,6 @@ endif()
 
 ##################### Platform-specific installation ###########################
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/install.cmake)
-    include(platform/ext/target/${TFM_PLATFORM}/install.cmake)
+if (EXISTS ${TARGET_PLATFORM_PATH}/install.cmake)
+    include(${TARGET_PLATFORM_PATH}/install.cmake)
 endif()

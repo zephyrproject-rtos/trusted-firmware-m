@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -13,7 +13,6 @@ endif()
 
 set(DOTCONFIG_FILE              "${CMAKE_BINARY_DIR}/.config")
 set(ROOT_KCONFIG                "${CMAKE_SOURCE_DIR}/Kconfig")
-set(PLATFORM_PATH               "${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}")
 
 find_package(Python3)
 
@@ -21,7 +20,7 @@ find_package(Python3)
 execute_process(
     COMMAND
     ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/tools/kconfig/tfm_kconfig.py
-    -k ${ROOT_KCONFIG} -o ${CMAKE_BINARY_DIR} -u gui -p ${PLATFORM_PATH}
+    -k ${ROOT_KCONFIG} -o ${CMAKE_BINARY_DIR} -u gui -p ${TARGET_PLATFORM_PATH}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     RESULT_VARIABLE ret
 )

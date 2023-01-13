@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -10,8 +10,8 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
-    include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
+if (EXISTS ${TARGET_PLATFORM_PATH}/preload_ns.cmake)
+    include(${TARGET_PLATFORM_PATH}/preload_ns.cmake)
     tfm_toolchain_reload_compiler()
 endif()
 

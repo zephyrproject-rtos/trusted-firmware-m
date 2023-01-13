@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -17,8 +17,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/psa/framework_feature.h.in
                ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
                @ONLY)
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
-    include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
+if (EXISTS ${TARGET_PLATFORM_PATH}/preload_ns.cmake)
+    include(${TARGET_PLATFORM_PATH}/preload_ns.cmake)
     tfm_toolchain_reload_compiler()
 endif()
 

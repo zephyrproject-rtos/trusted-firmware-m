@@ -27,10 +27,10 @@ endif()
 
 # Some compiler flags depend on the CPU / platform config. This include should
 # be run before the toolchain file so the compiler can be configured properly.
-if (NOT EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+if (NOT EXISTS ${TARGET_PLATFORM_PATH}/preload.cmake)
     Message(FATAL_ERROR "preload.cmake is not found in ${TFM_PLATFORM}")
 else()
-    include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+    include(${TARGET_PLATFORM_PATH}/preload.cmake)
 endif()
 
 # Set TF-M project config header file
@@ -48,8 +48,8 @@ if (EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.c
 endif()
 
 # Load platform config, setting options not already set
-if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/config.cmake)
-    include(platform/ext/target/${TFM_PLATFORM}/config.cmake)
+if (EXISTS ${TARGET_PLATFORM_PATH}/config.cmake)
+    include(${TARGET_PLATFORM_PATH}/config.cmake)
 endif()
 
 # Load configs generated from Kconfig
@@ -128,7 +128,7 @@ if(PROJECT_CONFIG_HEADER_FILE)
 endif()
 
 # Set platform defined TF-M config header file
-set(TARGET_CONFIG_HEADER_FILE "${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/config_tfm_target.h")
+set(TARGET_CONFIG_HEADER_FILE ${TARGET_PLATFORM_PATH}/config_tfm_target.h)
 if(EXISTS ${TARGET_CONFIG_HEADER_FILE})
     target_compile_definitions(tfm_config
         INTERFACE

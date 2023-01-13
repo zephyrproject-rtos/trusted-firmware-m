@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -116,6 +116,6 @@ include(config/cp_check.cmake)
 
 ###################### Platform-specific checks ################################
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
-    include(platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
+if (EXISTS ${TARGET_PLATFORM_PATH}/check_config.cmake)
+    include(${TARGET_PLATFORM_PATH}/check_config.cmake)
 endif()
