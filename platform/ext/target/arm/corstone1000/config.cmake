@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -18,8 +18,6 @@ set(MCUBOOT_SECURITY_COUNTER_S          "1"      CACHE STRING    "Security count
 set(MCUBOOT_IMAGE_NUMBER                2          CACHE STRING   "Whether to combine S and NS into either 1 image, or sign each separately")
 set(TFM_ISOLATION_LEVEL                 2          CACHE STRING   "Isolation level")
 
-set(CONFIG_TFM_USE_TRUSTZONE            OFF        CACHE BOOL     "Enable use of TrustZone to transition between NSPE and SPE")
-set(TFM_MULTI_CORE_TOPOLOGY             ON         CACHE BOOL     "Whether to build for a dual-cpu architecture")
 set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to use a platform specific inter core communication instead of mailbox in dual-cpu topology")
 
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
@@ -67,3 +65,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL Debug OR ${CMAKE_BUILD_TYPE} STREQUAL RelWithDe
 else()
   set(ENABLE_FWU_AGENT_DEBUG_LOGS     FALSE        CACHE BOOL     "Enable Firmware update agent debug logs.")
 endif()
+
+# Platform-specific configurations
+set(CONFIG_TFM_USE_TRUSTZONE            OFF)
+set(TFM_MULTI_CORE_TOPOLOGY             ON)

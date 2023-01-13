@@ -235,10 +235,11 @@ config.cmake:
 
     (MANDATORY)
 
-    This file is use to setup default build configuration for TF-M.
+    This file is used to setup default build configurations for TF-M and platform configurations
+    which have fixed values depending on hardware and software supportness.
+    These configurations should be set as normal CMake variables while others are cache variables.
 
-    It must specify the values below, and should also specify other
-    configuration values that are fixed for the platform.
+    The platform configurations in the below table are required.
 
     +------------------------------+-------------------------------------------------------------------+
     |    name                      |        description                                                |
@@ -247,6 +248,28 @@ config.cmake:
     +------------------------------+-------------------------------------------------------------------+
     |TFM_MULTI_CORE_TOPOLOGY       | NSPE runs on a separate CPU to SPE                                |
     +------------------------------+-------------------------------------------------------------------+
+
+    The platform configurations in the below table control optional features which rely on platform
+    specific implementation.
+    These features are disabled by default.
+    Platforms shall implement corresponding functionalities and explicitly set the configuration to
+    enable the feature.
+
+    +-------------------------------------+------------------------------------------------------------+
+    |    name                             |        description                                         |
+    +=====================================+============================================================+
+    |PLATFORM_HAS_ISOLATION_L3_SUPPORT    | Whether the platform has isolation level 3 support         |
+    +-------------------------------------+------------------------------------------------------------+
+    |PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT | Wheter the platform has firmware update support            |
+    +-------------------------------------+------------------------------------------------------------+
+    |PLATFORM_SLIH_IRQ_TEST_SUPPORT       | Wheter the platform has SLIH test support                  |
+    +-------------------------------------+------------------------------------------------------------+
+    |PLATFORM_FLIH_IRQ_TEST_SUPPORT       | Wheter the platform has FLIH test support                  |
+    +-------------------------------------+------------------------------------------------------------+
+    |PSA_API_TEST_TARGET                  | The target platform name of PSA API test                   |
+    +-------------------------------------+------------------------------------------------------------+
+
+    For build configurations, please refer to ``config_base.cmake``.
 
     [config_cmake_]
 
@@ -706,8 +729,8 @@ Annex
 ::
 
     [config_cmake]
-    set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
-    set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
+    set(CONFIG_TFM_USE_TRUSTZONE            ON)
+    set(TFM_MULTI_CORE_TOPOLOGY             OFF)
     set(BL2                                 OFF         CACHE BOOL      "Whether to build BL2")
     set(NS                                  FALSE       CACHE BOOL      "Whether to build NS app" FORCE)
 

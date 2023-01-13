@@ -21,7 +21,6 @@ set(TEST_PSA_API                        ""          CACHE STRING    "Which (if a
 set(TEST_BL1_1                          OFF         CACHE BOOL      "Whether to build BL1_1 tests")
 set(TEST_BL1_2                          OFF         CACHE BOOL      "Whether to build BL1_2 tests")
 
-set(PLATFORM_HAS_ISOLATION_L3_SUPPORT   OFF         CACHE BOOL      "Platform supports Isolation level 3")
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
 set(PSA_FRAMEWORK_HAS_MM_IOVEC          OFF         CACHE BOOL      "Enable MM-IOVEC")
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")

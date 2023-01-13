@@ -18,5 +18,6 @@ else()
     set(BL2_TRAILER_SIZE                0xC00       CACHE STRING    "Trailer size")
 endif()
 
-set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL     "Enable use of TrustZone to transition between NSPE and SPE")
-set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL     "Whether to build for a dual-cpu architecture")
+# Platform-specific configurations
+set(CONFIG_TFM_USE_TRUSTZONE            ON)
+set(TFM_MULTI_CORE_TOPOLOGY             OFF)
