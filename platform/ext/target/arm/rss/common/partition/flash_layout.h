@@ -161,13 +161,19 @@
 #define NON_SECURE_IMAGE_MAX_SIZE       FLASH_SIC_TABLE_SIZE
 #endif /* !RSS_XIP */
 
+#if !defined(RSS_XIP) && \
+    FLASH_BL2_PARTITION_SIZE + FLASH_S_PARTITION_SIZE + FLASH_NS_PARTITION_SIZE \
+    > VM0_SIZE + VM1_SIZE
+#error Partition sizes are too large to load into RSS SRAM
+#endif
+
 /* Image load addresses used by imgtool.py */
 #ifdef RSS_XIP
-#define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S + BOOT_TFM_SHARED_DATA_SIZE)
+#define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S + FLASH_BL2_PARTITION_SIZE)
 #define NS_IMAGE_LOAD_ADDRESS           (S_IMAGE_LOAD_ADDRESS + \
                                          FLASH_SIC_TABLE_SIZE)
 #else
-#define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S + VM0_SIZE - FLASH_S_PARTITION_SIZE)
+#define S_IMAGE_LOAD_ADDRESS            (VM0_BASE_S)
 #define NS_IMAGE_LOAD_ADDRESS           (VM1_BASE_S + VM1_SIZE - FLASH_NS_PARTITION_SIZE)
 #endif
 

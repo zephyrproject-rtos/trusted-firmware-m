@@ -21,44 +21,65 @@
 #include "platform_base_address.h"
 
 /* RSS memory layout is as follows during BL1
- *     |---------------------------------------------------------
- * VM0 | BOOT_SHARED  | BL1_2_CODE | BL1_1_DATA  | BL1_2_DATA   |
- *     |---------------------------------------------------------
- *     |---------------------------------------------------------
- * VM1 | BL2_CODE                                               |
- *     |---------------------------------------------------------
+ *      |----------------------------------------|
+ * DTCM | BOOT_SHARED | BL1_1_DATA | BL1_2_DATA  |
+ *      |----------------------------------------|
+ *
+ *      |----------------------------------------|
+ * ITCM | BL1_2_CODE  |                          |
+ *      |----------------------------------------|
+ *
+ *      |---------------------------------------------------------
+ * VM0  |                                                        |
+ *      |---------------------------------------------------------
+ *      |---------------------------------------------------------
+ * VM1  |                                                        |
+ *      |---------------------------------------------------------
  *
  * If the size of VM0 and VM1 are larger than 64KiB, the size of BL1 code/data
  * and BL2 code can be increased to fill the extra space.
  *
  * RSS memory layout is as follows during BL2
- *     |---------------------------------------------------------
- * VM0 | BOOT_SHARED  | ?XIP tables | BL2_DATA                  |
- *     |---------------------------------------------------------
- *     |---------------------------------------------------------
- * VM1 | BL2_CODE                                               |
- *     |---------------------------------------------------------
+ *      |----------------------------------------|
+ * DTCM | BOOT_SHARED |                          |
+ *      |----------------------------------------|
  *
- * If the size of VM0 and VM1 are larger than 64KiB, the size of BL2 code and
- * data can be increased to fill the extra space.
+ *      |---------------------------------------------------------
+ * VM0  | BL2_CODE                                               |
+ *      |---------------------------------------------------------
+ *      |---------------------------------------------------------
+ * VM1  | BL2_CODE                 | XIP tables  | BL2_DATA      |
+ *      |---------------------------------------------------------
+ *
+ * If the size of VM0 and VM1 are larger than 64KiB, the size of BL2 code can be
+ * increased to fill the extra space. Note that BL2 code is aligned to the start
+ * of S_DATA, so under non-XIP mode it will not start at the beginning of VM0.
  *
  * RSS memory layout is as follows during Runtime with XIP mode enabled
- *     |---------------------------------------------------------
- * VM0 | BOOT_SHARED+S_DATA                                     |
- *     |---------------------------------------------------------
- *     |---------------------------------------------------------
- * VM1 | S_DATA                     | NS_DATA                   |
- *     |---------------------------------------------------------
+ *      |----------------------------------------|
+ * DTCM | BOOT_SHARED |                          |
+ *      |----------------------------------------|
+ *
+ *      |---------------------------------------------------------
+ * VM0  | S_DATA                                                 |
+ *      |---------------------------------------------------------
+ *      |---------------------------------------------------------
+ * VM1  | S_DATA                     | NS_DATA                   |
+ *      |---------------------------------------------------------
  *
  * RSS memory layout is as follows during Runtime with XIP mode disabled. Note
  * that each SRAM must be at least 512KiB in this mode (64KiB data and 384KiB
  * code, for each of secure and non-secure).
- *     |-----------------------------------------------------------------------|
- * VM0 | BOOT_SHARED+S_DATA | S_CODE                                           |
- *     |-----------------------------------------------------------------------|
- *     |-----------------------------------------------------------------------|
- * VM1 | NS_DATA            | NS_CODE                                          |
- *     |-----------------------------------------------------------------------|
+ *      |----------------------------------------|
+ * DTCM | BOOT_SHARED |                          |
+ *      |----------------------------------------|
+ *
+ *      |----------------------------------------------------------------------|
+ * VM0  | S_CODE                                           | S_DATA            |
+ *      |----------------------------------------------------------------------|
+ *      |----------------------------------------------------------------------|
+ * VM1  |  NS_DATA          | NS_CODE                                          |
+ *      |----------------------------------------------------------------------|
  */
 
 #define BL1_1_HEAP_SIZE         (0x0001000)
@@ -118,11 +139,12 @@
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
 /* Secure Data stored in VM0. Size defined in flash layout */
-#define S_DATA_START    (VM0_BASE_S)
 #ifdef RSS_XIP
-#define S_DATA_SIZE    (VM0_SIZE + VM1_SIZE / 2)
+#define S_DATA_START    (VM0_BASE_S)
+#define S_DATA_SIZE     (VM0_SIZE + (VM1_SIZE / 2))
 #else
-#define S_DATA_SIZE    (VM0_SIZE - FLASH_S_PARTITION_SIZE)
+#define S_DATA_START    (VM0_BASE_S + FLASH_S_PARTITION_SIZE)
+#define S_DATA_SIZE     (VM0_SIZE - FLASH_S_PARTITION_SIZE)
 #endif /* RSS_XIP */
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
@@ -135,12 +157,12 @@
 #define NS_CODE_START   (RSS_RUNTIME_NS_XIP_BASE_NS)
 #define NS_CODE_SIZE    (FLASH_NS_PARTITION_SIZE)
 #else
-#define NS_CODE_START   (VM1_BASE_NS + NS_DATA_SIZE + BL2_HEADER_SIZE)
+#define NS_CODE_START   (NS_DATA_START + NS_DATA_SIZE)
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
 #endif /* RSS_XIP */
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-/* Non-Secure Data stored after secure data, or in VM1. */
+/* Non-Secure Data stored after secure data, or in VM1 if not in XIP mode. */
 #ifdef RSS_XIP
 #define NS_DATA_START   (VM0_BASE_NS + S_DATA_SIZE)
 #define NS_DATA_SIZE    ((VM0_SIZE + VM1_SIZE) - S_DATA_SIZE)
@@ -171,43 +193,44 @@
 #define PROVISIONING_DATA_SIZE  (0x2400) /* 9 KB */
 #define PROVISIONING_DATA_LIMIT (PROVISIONING_DATA_START + PROVISIONING_DATA_SIZE - 1)
 
-/* BL1_2 executes from VM0, leaving space for the shared data */
-#define BL1_2_CODE_START  (VM0_BASE_S + BOOT_TFM_SHARED_DATA_SIZE)
+/* BL1_2 is in the ITCM */
+#define BL1_2_CODE_START  (ITCM_BASE_S)
 #define BL1_2_CODE_SIZE   (0x2000) /* 8 KiB */
 #define BL1_2_CODE_LIMIT  (BL1_2_CODE_START + BL1_2_CODE_SIZE - 1)
 
-/* BL2 executes from VM1 */
-#define BL2_IMAGE_START   (VM1_BASE_S)
+/* BL2 is aligned to the start of the combined secure/non-secure data region */
+#define BL2_IMAGE_START   (S_DATA_START)
 #define BL2_CODE_START    (BL2_IMAGE_START + BL1_HEADER_SIZE)
 #define BL2_CODE_SIZE     (IMAGE_BL2_CODE_SIZE)
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
-/* BL1 data is in VM0 */
-#define BL1_1_DATA_START  (BL1_2_CODE_START + BL1_2_CODE_SIZE)
-#define BL1_1_DATA_SIZE   ((VM0_SIZE - BOOT_TFM_SHARED_DATA_SIZE \
-                           - BL1_2_CODE_SIZE) / 2)
+#if FLASH_BL2_PARTITION_SIZE + BL2_DATA_SIZE + XIP_TABLE_SIZE > VM0_SIZE + VM1_SIZE
+#error FLASH_BL2_PARTITION_SIZE + BL2_DATA_SIZE + 2 * FLASH_SIC_TABLE_SIZE is too large to fit in RSS SRAM
+#endif
+
+/* BL1 data is in DTCM */
+#define BL1_1_DATA_START  (BOOT_TFM_SHARED_DATA_BASE + BOOT_TFM_SHARED_DATA_SIZE)
+#define BL1_1_DATA_SIZE   ((DTCM_SIZE - BOOT_TFM_SHARED_DATA_SIZE) / 2)
 #define BL1_1_DATA_LIMIT  (BL1_1_DATA_START + BL1_1_DATA_SIZE - 1)
 
 #define BL1_2_DATA_START  (BL1_1_DATA_START + BL1_1_DATA_SIZE)
-#define BL1_2_DATA_SIZE   ((VM0_SIZE - BOOT_TFM_SHARED_DATA_SIZE \
-                           - BL1_2_CODE_SIZE) / 2)
+#define BL1_2_DATA_SIZE   ((DTCM_SIZE - BOOT_TFM_SHARED_DATA_SIZE) / 2)
 #define BL1_2_DATA_LIMIT  (BL1_2_DATA_START + BL1_2_DATA_SIZE - 1)
 
-/* XIP data go after the reserved space for boot_data */
-#define BL2_XIP_TABLES_START (VM0_BASE_S + BOOT_TFM_SHARED_DATA_SIZE)
-#define BL2_XIP_TABLES_SIZE  (0x5000) /* 20 KiB */
+/* XIP data goes after the BL2 image */
+#define BL2_XIP_TABLES_START (BL2_IMAGE_START + FLASH_BL2_PARTITION_SIZE)
+#define BL2_XIP_TABLES_SIZE  (FLASH_SIC_TABLE_SIZE * 2)
 #define BL2_XIP_TABLES_LIMIT (BL2_XIP_TABLES_START + BL2_XIP_TABLES_SIZE - 1)
 
-/* BL2 data is in VM0, in the same space as BL1 data */
+/* BL2 data is after the code. TODO FIXME this should be in DTCM once the CC3XX
+ * runtime driver supports DMA remapping.
+ */
 #define BL2_DATA_START    (BL2_XIP_TABLES_START + BL2_XIP_TABLES_SIZE)
-#define BL2_DATA_SIZE     (VM0_SIZE - BL2_XIP_TABLES_SIZE \
-                           - BOOT_TFM_SHARED_DATA_SIZE)
+#define BL2_DATA_SIZE     (DTCM_SIZE - BOOT_TFM_SHARED_DATA_SIZE)
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
-/* Store boot data is in the start of VM0. It overlaps with the secure data
- * region
- */
-#define BOOT_TFM_SHARED_DATA_BASE VM0_BASE_S
+/* Store boot data at the start of the DTCM. */
+#define BOOT_TFM_SHARED_DATA_BASE DTCM_BASE_S
 #define BOOT_TFM_SHARED_DATA_SIZE (0x400)
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)

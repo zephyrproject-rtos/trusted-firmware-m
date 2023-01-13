@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 
 /* Sizes of a images */
-#define FLASH_BL2_PARTITION_SIZE        (0x10000) /* BL2 partition: 128 KiB */
+#define FLASH_BL2_PARTITION_SIZE        (0x18000) /* BL2 partition: 96 KiB */
 #define FLASH_S_PARTITION_SIZE          (0x60000) /* S   partition: 384 KiB */
 #define FLASH_NS_PARTITION_SIZE         (0x60000) /* NS  partition: 384 KiB */
 #define FLASH_AP_PARTITION_SIZE         (0x80000) /* AP  partition: 512 KiB */
@@ -29,7 +29,7 @@
 /* Each table contains a bit less that 8KiB of HTR and 2KiB of mcuboot headers.
  * The spare space in the 8KiB is used for decryption IVs.
  */
-#define FLASH_SIC_TABLE_SIZE            (0xA000) /* 10KiB */
+#define FLASH_SIC_TABLE_SIZE            (0x2800) /* 10KiB */
 #endif /* RSS_XIP */
 
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
