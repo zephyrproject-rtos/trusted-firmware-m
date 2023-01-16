@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,6 +8,7 @@
 #ifndef __CONFIG_PARTITION_PS_H__
 #define __CONFIG_PARTITION_PS_H__
 
+#include "config_its.h"
 #include "config_platform.h"
 #include "config_tfm.h"
 
@@ -65,6 +66,13 @@
 #if (!PS_ROLLBACK_PROTECTION) && defined(PS_ENCRYPTION) && \
     (defined(PS_CRYPTO_AEAD_ALG_GCM) || defined(PS_CRYPTO_AEAD_ALG_CCM))
 #error "Invalid config: NOT PS_ROLLBACK_PROTECTION and PS_ENCRYPTION and PSA_ALG_GCM or PSA_ALG_CCM!"
+#endif
+
+/* Enable ITS_VALIDATE_METADATA_FROM_FLASH when PS_VALIDATE_METADATA_FROM_FLASH is enabled */
+#if PS_VALIDATE_METADATA_FROM_FLASH && (!ITS_VALIDATE_METADATA_FROM_FLASH)
+#pragma message("ITS_VALIDATE_METADATA_FROM_FLASH is redefined to 1.")
+#undef ITS_VALIDATE_METADATA_FROM_FLASH
+#define ITS_VALIDATE_METADATA_FROM_FLASH 1
 #endif
 
 #endif /* __CONFIG_PARTITION_PS_H__ */

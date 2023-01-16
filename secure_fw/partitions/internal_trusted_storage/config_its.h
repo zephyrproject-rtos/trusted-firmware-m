@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,7 +9,6 @@
 #define __CONFIG_PARTITION_ITS_H__
 
 #include "config_tfm.h"
-#include "config_ps.h"
 
 /* Create flash FS if it doesn't exist for Internal Trusted Storage partition */
 #ifndef ITS_CREATE_FLASH_LAYOUT
@@ -26,13 +25,6 @@
 /* Validate filesystem metadata every time it is read from flash */
 #ifndef ITS_VALIDATE_METADATA_FROM_FLASH
 #pragma message("ITS_VALIDATE_METADATA_FROM_FLASH is defaulted to 1. Please check and set it explicitly.")
-#define ITS_VALIDATE_METADATA_FROM_FLASH 1
-#endif
-
-/* Enable ITS_VALIDATE_METADATA_FROM_FLASH when PS_VALIDATE_METADATA_FROM_FLASH is enabled */
-#if (!ITS_VALIDATE_METADATA_FROM_FLASH) && PS_VALIDATE_METADATA_FROM_FLASH
-#pragma message("ITS_VALIDATE_METADATA_FROM_FLASH is redefined to 1.")
-#undef ITS_VALIDATE_METADATA_FROM_FLASH
 #define ITS_VALIDATE_METADATA_FROM_FLASH 1
 #endif
 
