@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -23,6 +23,14 @@ endif()
 # Load extra config
 if (TFM_EXTRA_CONFIG_PATH)
     include(${TFM_EXTRA_CONFIG_PATH})
+endif()
+
+# Some compiler flags depend on the CPU / platform config. This include should
+# be run before the toolchain file so the compiler can be configured properly.
+if (NOT EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
+    Message(FATAL_ERROR "preload.cmake is not found in ${TFM_PLATFORM}")
+else()
+    include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload.cmake)
 endif()
 
 # Set TF-M project config header file
