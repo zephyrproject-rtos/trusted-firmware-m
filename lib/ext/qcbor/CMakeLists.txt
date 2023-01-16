@@ -20,19 +20,15 @@ set(QCBOR_OPT_DISABLE_FLOAT_HW_USE     ON  CACHE BOOL  "Eliminate dependency on 
 set(QCBOR_OPT_DISABLE_FLOAT_PREFERRED  ON  CACHE BOOL  "Eliminate support for half-precision and CBOR preferred serialization" FORCE)
 set(QCBOR_OPT_DISABLE_FLOAT_ALL        ON  CACHE BOOL  "Eliminate floating-point support completely" FORCE)
 
-if ("${QCBOR_PATH}" STREQUAL "DOWNLOAD")
-    FetchContent_Declare(qcbor
-        GIT_REPOSITORY https://github.com/laurencelundblade/QCBOR.git
-        GIT_TAG ${QCBOR_VERSION}
-        GIT_PROGRESS TRUE
-    )
-
-    FetchContent_GetProperties(qcbor)
-    if(NOT qcbor_POPULATED)
-        FetchContent_Populate(qcbor)
-        set(QCBOR_PATH ${qcbor_SOURCE_DIR} CACHE PATH "Path to qcbor (or DOWNLOAD to get automatically" FORCE)
-    endif()
-endif()
+fetch_remote_library(
+    LIB_NAME                qcbor
+    LIB_SOURCE_PATH_VAR     QCBOR_PATH
+    LIB_BASE_DIR            "${CMAKE_BINARY_DIR}/lib/ext"
+    FETCH_CONTENT_ARGS
+        GIT_REPOSITORY      https://github.com/laurencelundblade/QCBOR.git
+        GIT_TAG             ${QCBOR_VERSION}
+        GIT_PROGRESS        TRUE
+)
 
 add_subdirectory(${QCBOR_PATH} ${CMAKE_CURRENT_BINARY_DIR}/QCBOR)
 
