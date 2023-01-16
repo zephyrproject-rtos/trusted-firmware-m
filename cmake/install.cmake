@@ -41,6 +41,9 @@ install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
 install(FILES       ${INTERFACE_INC_DIR}/tfm_ns_client_ext.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
+install(FILES       ${CMAKE_SOURCE_DIR}/secure_fw/include/config_tfm.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+
 install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_pack.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
@@ -190,6 +193,10 @@ if(TFM_PARTITION_FIRMWARE_UPDATE)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_fwu_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
+
+###################### Install for NS regression tests #########################
+
+include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/install.cmake)
 
 ##################### Platform-specific installation ###########################
 
