@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2021-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2021, Cypress Semiconductor Corp. All rights reserved.
+# Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -22,4 +23,9 @@ target_sources(tfm_spm
 target_sources(tfm_partitions
     INTERFACE
         ${CMAKE_CURRENT_SOURCE_DIR}/load_info_idle_sp.c
+)
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        TFM_PARTITION_IDLE
 )
