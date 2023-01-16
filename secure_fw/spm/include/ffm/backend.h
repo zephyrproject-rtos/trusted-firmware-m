@@ -52,18 +52,15 @@ psa_status_t backend_messaging(struct service_t *p_serv,
  */
 psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status);
 
-/*
- * Runtime model-specific Partition wait operation.
- * Put the Partition to a status that waits for signals.
+/**
+ * \brief Set the wait signal pattern in current partition.
  */
-psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask);
+psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals);
 
-/*
- * Runtime model-specific Partition wake up operation.
- * Wakes up the Partition with the asserted signals in 'p_pt'.
+/**
+ * \brief Set the asserted signal pattern in current partition.
  */
-void backend_wake_up(struct partition_t *p_pt);
-
+uint32_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal);
 
 /* The component list, and a MACRO indicate this is not a common global. */
 extern struct partition_head_t partition_listhead;

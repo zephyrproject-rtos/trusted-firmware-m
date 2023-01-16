@@ -52,6 +52,55 @@ uintptr_t *partition_meta_indicator_pos;
 
 extern uint32_t scheduler_lock;
 
+/*
+ * Query the state of current thread.
+ */
+static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
+{
+    struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
+    struct partition_t *p_pt = NULL;
+    uint32_t state = p_thrd->state;
+    psa_signal_t signal_ret = 0;
+
+    /* Get current partition of thread. */
+    p_pt = TO_CONTAINER(p_thrd->p_context_ctrl,
+                        struct partition_t, ctx_ctrl);
+
+    CRITICAL_SECTION_ENTER(cs_signal);
+
+    signal_ret = p_pt->signals_waiting & p_pt->signals_asserted;
+
+    if (signal_ret) {
+        /*
+         * If the partition is waiting some signals and any of them is asserted,
+         * change thread to be THRD_STATE_RET_VAL_AVAIL and fill the retval. If
+         * the waiting signal is TFM_IPC_REPLY_SIGNAL, it means the Secure
+         * Partition is waiting for the services to be fulfilled, then the
+         * return value comes from the backend_replying() by the server
+         * Partition. For other waiting signals by psa_wait(), the return value
+         * is just the signal.
+         */
+        if (signal_ret == TFM_IPC_REPLY_SIGNAL) {
+            p_pt->signals_asserted &= ~TFM_IPC_REPLY_SIGNAL;
+            *p_retval = (uint32_t)p_pt->reply_value;
+        } else {
+            *p_retval = signal_ret;
+        }
+
+        p_pt->signals_waiting = 0;
+        state = THRD_STATE_RET_VAL_AVAIL;
+    } else if (p_pt->signals_waiting != 0) {
+        /*
+         * If the thread is waiting some signals but none of them is asserted,
+         * block the thread.
+         */
+        state = THRD_STATE_BLOCK;
+    }
+
+    CRITICAL_SECTION_LEAVE(cs_signal);
+    return state;
+}
+
 static void prv_process_metadata(struct partition_t *p_pt)
 {
     const struct partition_load_info_t *p_pt_ldi;
@@ -102,7 +151,6 @@ psa_status_t backend_messaging(struct service_t *service,
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     if (!handle || !service || !service->p_ldinf || !service->partition) {
         return PSA_ERROR_PROGRAMMER_ERROR;
@@ -111,21 +159,10 @@ psa_status_t backend_messaging(struct service_t *service,
     p_owner = service->partition;
     signal = service->p_ldinf->signal;
 
-    CRITICAL_SECTION_ENTER(cs_assert);
-
     UNI_LIST_INSERT_AFTER(p_owner, handle, p_handles);
 
     /* Messages put. Update signals */
-    p_owner->signals_asserted |= signal;
-
-    if (p_owner->signals_waiting & signal) {
-        if (p_owner->thrd.state == THRD_STATE_BLOCK) {
-            thrd_set_state(&p_owner->thrd, THRD_STATE_RUNNABLE);
-            tfm_arch_set_context_ret_code(p_owner->thrd.p_context_ctrl,
-                        (p_owner->signals_asserted & p_owner->signals_waiting));
-        }
-        p_owner->signals_waiting &= ~signal;
-    }
+    backend_assert_signal(p_owner, signal);
 
     /*
      * If it is a NS request via RPC, it is unnecessary to block current
@@ -133,10 +170,8 @@ psa_status_t backend_messaging(struct service_t *service,
      */
 
     if (!is_tfm_rpc_msg(handle)) {
-        thrd_set_state(&handle->p_client->thrd, THRD_STATE_BLOCK);
-        handle->p_client->signals_asserted |= TFM_IPC_REPLY_SIGNAL;
+        backend_wait_signals(handle->p_client, TFM_IPC_REPLY_SIGNAL);
     }
-    CRITICAL_SECTION_LEAVE(cs_assert);
 
     handle->status = TFM_HANDLE_STATUS_ACTIVE;
 
@@ -145,21 +180,12 @@ psa_status_t backend_messaging(struct service_t *service,
 
 psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
 {
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
-
-    CRITICAL_SECTION_ENTER(cs_assert);
-
     if (is_tfm_rpc_msg(handle)) {
         tfm_rpc_client_call_reply(handle, status);
     } else {
-        if (handle->p_client->signals_asserted & TFM_IPC_REPLY_SIGNAL) {
-            thrd_set_state(&handle->p_client->thrd, THRD_STATE_RUNNABLE);
-            tfm_arch_set_context_ret_code(handle->p_client->thrd.p_context_ctrl,
-                                        status);
-            handle->p_client->signals_asserted &= ~TFM_IPC_REPLY_SIGNAL;
-        }
+        handle->p_client->reply_value = (uintptr_t)status;
+        backend_assert_signal(handle->p_client, TFM_IPC_REPLY_SIGNAL);
     }
-    CRITICAL_SECTION_LEAVE(cs_assert);
 
     /*
      * 'psa_reply' exists in IPC model only and returns 'void'. Return
@@ -220,6 +246,9 @@ uint32_t backend_system_run(void)
     SPM_ASSERT(SPM_THREAD_CONTEXT);
 #endif
 
+    /* Init thread callback function. */
+    thrd_set_query_callback(query_state);
+
     partition_meta_indicator_pos = (uintptr_t *)hal_mem_sp_meta_start;
     control = thrd_start_scheduler(&CURRENT_THREAD);
 
@@ -234,38 +263,40 @@ uint32_t backend_system_run(void)
     return control;
 }
 
-psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
+psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
 {
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+    struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
     psa_signal_t ret_signal;
 
-    /*
-     * 'backend_wait()' sets the waiting signal mask for partition, and
-     * blocks the partition thread state to wait for signals.
-     * These changes should be inside the ciritical section to avoid
-     * 'signal_waiting' or the thread state to be changed by interrupts
-     * while this function is reading or writing values.
-     */
-    CRITICAL_SECTION_ENTER(cs_assert);
-
-    ret_signal = p_pt->signals_asserted & signal_mask;
-    if (ret_signal == 0) {
-        p_pt->signals_waiting = signal_mask;
-        thrd_set_state(&p_pt->thrd, THRD_STATE_BLOCK);
+    if (!p_pt) {
+        tfm_core_panic();
     }
-    CRITICAL_SECTION_LEAVE(cs_assert);
+
+    CRITICAL_SECTION_ENTER(cs_signal);
+
+    ret_signal = p_pt->signals_asserted & signals;
+    if (ret_signal == 0) {
+        p_pt->signals_waiting = signals;
+    }
+
+    CRITICAL_SECTION_LEAVE(cs_signal);
 
     return ret_signal;
 }
 
-void backend_wake_up(struct partition_t *p_pt)
+uint32_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
 {
-    if (p_pt->thrd.state == THRD_STATE_BLOCK) {
-        thrd_set_state(&p_pt->thrd, THRD_STATE_RUNNABLE);
-        tfm_arch_set_context_ret_code(p_pt->thrd.p_context_ctrl,
-                            (p_pt->signals_asserted & p_pt->signals_waiting));
+    struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
+
+    if (!p_pt) {
+        tfm_core_panic();
     }
-    p_pt->signals_waiting = 0;
+
+    CRITICAL_SECTION_ENTER(cs_signal);
+    p_pt->signals_asserted |= signal;
+    CRITICAL_SECTION_LEAVE(cs_signal);
+
+    return PSA_SUCCESS;
 }
 
 uint64_t ipc_schedule(void)

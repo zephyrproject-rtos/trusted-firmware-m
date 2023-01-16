@@ -110,6 +110,7 @@ struct partition_t {
     void                               *p_metadata;
     struct context_ctrl_t              ctx_ctrl;
     struct thread_t                    thrd;            /* IPC model */
+    uintptr_t                          reply_value;
 #else
     uint32_t                           state;           /* SFN model */
 #endif
@@ -346,13 +347,6 @@ struct conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle);
 void tfm_core_handler_mode(void);
 
 void update_caller_outvec_len(struct conn_handle_t *handle);
-
-/*
- * Set partition signal.
- *
- * Assert a signal to given partition.
- */
-void spm_assert_signal(void *p_pt, psa_signal_t signal);
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 

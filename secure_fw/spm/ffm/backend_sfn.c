@@ -149,15 +149,17 @@ uint32_t backend_system_run(void)
     return EXC_RETURN_THREAD_PSP;
 }
 
-psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
+psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
 {
-    while (!(p_pt->signals_asserted & signal_mask))
+    while (!(p_pt->signals_asserted & signals))
         ;
 
-    return p_pt->signals_asserted & signal_mask;
+    return p_pt->signals_asserted & signals;
 }
 
-void backend_wake_up(struct partition_t *p_pt)
+uint32_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
 {
-    (void)p_pt;
+    p_pt->signals_asserted |= signal;
+
+    return PSA_SUCCESS;
 }

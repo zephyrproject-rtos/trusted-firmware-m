@@ -21,14 +21,36 @@ static struct thread_t *p_rnbl_head = NULL; /* Point to the first runnable. */
 #define LIST_HEAD   p_thrd_head
 #define RNBL_HEAD   p_rnbl_head
 
+/* Callback function pointer for thread to query current state. */
+static thrd_query_state_t query_state_cb = (thrd_query_state_t)NULL;
+
+void thrd_set_query_callback(thrd_query_state_t fn)
+{
+    query_state_cb = fn;
+}
+
 struct thread_t *thrd_next(void)
 {
     struct thread_t *p_thrd = RNBL_HEAD;
+    uint32_t retval = 0;
+
     /*
      * First runnable thread has highest priority since threads are
      * sorted by priority.
      */
-    while (p_thrd && p_thrd->state != THRD_STATE_RUNNABLE) {
+    while (p_thrd) {
+        /* Change thread state if any signal changed */
+        p_thrd->state = query_state_cb(p_thrd, &retval);
+
+        if (p_thrd->state == THRD_STATE_RET_VAL_AVAIL) {
+            tfm_arch_set_context_ret_code(p_thrd->p_context_ctrl, retval);
+            p_thrd->state = THRD_STATE_RUNNABLE;
+        }
+
+        if (p_thrd->state == THRD_STATE_RUNNABLE) {
+            break;
+        }
+
         p_thrd = p_thrd->next;
     }
 

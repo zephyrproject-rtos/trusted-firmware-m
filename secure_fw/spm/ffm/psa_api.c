@@ -136,17 +136,14 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
     }
 
     /*
-     * backend_wake_up() blocks the caller thread if no signals are
-     * available. In this case, the return value of this function is temporary
-     * set into runtime context. After new signal(s) are available, the return
-     * value is updated with the available signal(s) and blocked thread gets
-     * to run.
+     * After new signal(s) are available, the return value will be updated in
+     * PendSV and blocked thread gets to run.
      */
     if (timeout == PSA_BLOCK) {
-        return backend_wait(partition, signal_mask);
+        return backend_wait_signals(partition, signal_mask);
+    } else {
+        return partition->signals_asserted & signal_mask;
     }
-
-    return partition->signals_asserted & signal_mask;
 }
 #endif
 
@@ -537,7 +534,7 @@ void tfm_spm_partition_psa_notify(int32_t partition_id)
 {
     struct partition_t *p_pt = tfm_spm_get_partition_by_id(partition_id);
 
-    spm_assert_signal(p_pt, PSA_DOORBELL);
+    backend_assert_signal(p_pt, PSA_DOORBELL);
 }
 
 void tfm_spm_partition_psa_clear(void)

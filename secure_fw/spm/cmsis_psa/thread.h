@@ -17,6 +17,7 @@
 #define THRD_STATE_BLOCK          2
 #define THRD_STATE_DETACH         3
 #define THRD_STATE_INVALID        4
+#define THRD_STATE_RET_VAL_AVAIL  5
 
 /* Priorities. Lower value has higher priority */
 #define THRD_PRIOR_HIGHEST        0x0
@@ -44,6 +45,9 @@ struct thread_t {
     struct thread_t *next;              /* Next thread in list               */
 };
 
+/* Query thread state function type */
+typedef uint32_t (*thrd_query_state_t)(struct thread_t *p_thrd,
+                                       uint32_t *p_retval);
 /*
  * Definition for the current thread and its access helper preprocessor.
  * The definition needs to be declared in one of the sources.
@@ -95,6 +99,14 @@ extern struct thread_t *p_curr_thrd;
  *  `true` if schedule is under expectation. `false` if not.
  */
 #define THRD_EXPECTING_SCHEDULE() (!(thrd_next() == CURRENT_THREAD))
+
+/*
+ * Init the global query state callback function pointer.
+ *
+ * Parameters :
+ *  fn             -     Query state function pointer.
+ */
+void thrd_set_query_callback(thrd_query_state_t fn);
 
 /*
  * Set thread state, and updates the runnable head.
