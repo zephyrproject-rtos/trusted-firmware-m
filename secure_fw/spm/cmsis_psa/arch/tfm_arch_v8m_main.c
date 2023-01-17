@@ -244,10 +244,10 @@ void tfm_arch_config_extensions(void)
 
     /* Prevent non-secure from modifying FPU’s power setting. */
     SCnSCB->CPPWR |= SCnSCB_CPPWR_SUS11_Msk | SCnSCB_CPPWR_SUS10_Msk;
+#endif /* CONFIG_TFM_FP >= 1 */
 
 #if defined(__ARM_ARCH_8_1M_MAIN__)
     SCB->CCR |= SCB_CCR_TRD_Msk;
-#endif
 #endif
 }
 
