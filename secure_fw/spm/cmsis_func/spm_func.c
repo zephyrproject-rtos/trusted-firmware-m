@@ -795,7 +795,6 @@ static enum tfm_status_e tfm_spm_sfn_request_handler(
 {
     enum tfm_status_e res;
     struct iovec_params_t iovecs = {0};
-    bool parameters_ok = false;
 
     res = tfm_check_sfn_req_integrity(desc_ptr);
     if (res != TFM_SUCCESS) {
@@ -806,14 +805,10 @@ static enum tfm_status_e tfm_spm_sfn_request_handler(
     desc_ptr->caller_part_idx = tfm_spm_partition_get_running_partition_idx();
 
     res = tfm_core_check_sfn_parameters(desc_ptr, &iovecs);
-    if (res == TFM_SUCCESS) {
-        parameters_ok = true;
+    if (res != TFM_SUCCESS) {
+        /* The sanity check of iovecs failed. */
+        tfm_secure_api_error_handler();
     }
-
-    /* If the check of iovecs fails, we still want to propagate the error code
-     * back to the caller eventually so we proceed with the partition start
-     * procedure but we will eventually not call the requested function
-     */
 
     res = tfm_core_check_sfn_req_rules(desc_ptr);
     if (res != TFM_SUCCESS) {
@@ -831,7 +826,7 @@ static enum tfm_status_e tfm_spm_sfn_request_handler(
         tfm_secure_api_error_handler();
     }
 
-    return (parameters_ok ? TFM_SUCCESS : TFM_ERROR_INVALID_PARAMETER);
+    return res;
 }
 
 int32_t tfm_spm_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr)
@@ -844,7 +839,7 @@ int32_t tfm_spm_sfn_request_thread_mode(struct tfm_sfn_req_s *desc_ptr)
     res = tfm_core_check_sfn_parameters(desc_ptr, &iovecs);
     if (res != TFM_SUCCESS) {
         /* The sanity check of iovecs failed. */
-        return (int32_t)PSA_ERROR_PROGRAMMER_ERROR;
+        return (int32_t)res;
     }
 
     /* No excReturn value is needed as no exception handling is used */
@@ -947,34 +942,22 @@ void tfm_spm_partition_request_return_handler(
     tfm_arch_trigger_exc_return(EXC_RETURN_THREAD_S_MSP);
 }
 
-__attribute__((naked))
-static void perform_exc_return_with_return_value_and_reset(uint32_t exc_return, uint32_t msp_stack_val, int32_t ret_val)
-{
-    /* Equivalent to a call to __set_MSP() and then tfm_arch_trigger_exc_return
-     * with the exc_return value received as parameter in the handler
-     */
-    __ASM volatile (
-        "MSR msp, R1\n"
-        "MOV R4, R2\n"
-        "BX R0" );
-}
-
 void tfm_spm_partition_completion_handler(enum tfm_status_e res, uint32_t exc_return, uint32_t *msp)
 {
-    int32_t ret_val = PSA_SUCCESS;
-
-    /* TFM_ERRRO_INVALID_PARAMETER is a special case that needs to propagated back to the caller */
-    if (res != TFM_SUCCESS && res != TFM_ERROR_INVALID_PARAMETER) {
+    if (res != TFM_SUCCESS) {
         tfm_secure_api_error_handler();
-    }
-
-    if (res == TFM_ERROR_INVALID_PARAMETER) {
-        ret_val = PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     uint32_t msp_stack_val = (uint32_t)msp + sizeof(struct tfm_state_context_t);
 
-    perform_exc_return_with_return_value_and_reset(exc_return, msp_stack_val, ret_val);
+    /* Equivalent to a call to __set_MSP() and then tfm_arch_trigger_exc_return
+     * with the exc_return value received as parameter in the handler
+     */
+    __ASM volatile (
+        "MSR msp, %0\n"
+        "MOV R0, %1\n"
+        "BX R0"
+        : : "r" (msp_stack_val), "r" (exc_return) : );
 }
 
 /* This SVC handler is called, if a thread mode execution environment is to
