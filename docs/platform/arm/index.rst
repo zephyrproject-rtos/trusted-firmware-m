@@ -3,7 +3,7 @@ Arm platforms
 #############
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :titlesonly:
 
     Corstone-1000 <corstone1000/readme.rst>

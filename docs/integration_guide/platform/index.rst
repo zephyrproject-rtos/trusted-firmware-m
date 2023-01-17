@@ -8,6 +8,7 @@ Adding a new platform
     platform_folder.rst
     platform_ext_folder.rst
     porting_TFM_to_a_new_hardware
+    documenting_platform.rst
     platform_provisioning.rst
     platform_deprecation.rst
 
