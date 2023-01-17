@@ -201,10 +201,6 @@ SECTIONS
         *psa_lifecycle.*(.rodata*)
         *tfm_log_raw.*(.text*)             /* NXP */
         *tfm_log_raw.*(.rodata*)
-        *tfm_psa_call_pack.*(.text*)
-        *tfm_psa_call_pack.*(.rodata*)
-        *psa_interface_svc.*(.text*)
-        *psa_interface_svc.*(.rodata*)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
