@@ -171,16 +171,14 @@ target_include_directories(platform_ns
         ${CMAKE_SOURCE_DIR}/platform/ext/cmsis
 )
 
-if(NS)
-    # Adding new defined handler function to the library where the weak handler
-    # funtion symbol are, to override weak handler funtion.
-    # Otherwise the weak handler funtion cannot be replaced by the new defined
-    # hanlder function which symbol is in another library.
-    target_sources(tfm_ns
-        PRIVATE
-            $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_fp_test_interrupt.c>
-    )
-endif()
+# Adding new defined handler function to the library where the weak handler
+# funtion symbol are, to override weak handler funtion.
+# Otherwise the weak handler funtion cannot be replaced by the new defined
+# hanlder function which symbol is in another library.
+target_sources(tfm_ns
+    PRIVATE
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_fp_test_interrupt.c>
+)
 
 #========================= Platform BL2 =======================================#
 
