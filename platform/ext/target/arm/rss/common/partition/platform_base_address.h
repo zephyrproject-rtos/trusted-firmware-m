@@ -28,8 +28,10 @@
 /* Non-secure memory map addresses */
 #define ITCM_BASE_NS                     0x00000000 /* Instruction TCM Non-Secure base address */
 #define SIC_HOST_BASE_NS                 0x02000000 /* Secure I-Cache Non-Secure mapping base address */
+#define ITCM_CPU0_BASE_NS                0x0A000000 /* CPU0 Instruction TCM Non-Secure base address */
 #define DTCM_BASE_NS                     0x20000000 /* Data TCM Non-Secure base address */
 #define VM0_BASE_NS                      0x21000000 /* Volatile Memory 0 Non-Secure base address */
+#define DTCM_CPU0_BASE_NS                0x24000000 /* CPU0 Data TCM Non-Secure base address */
 #define VM1_BASE_NS                      (VM0_BASE_NS + VM0_SIZE) /* Volatile Memory 1 Secure base address */
 /* Non-Secure Private CPU region */
 #define CPU0_PWRCTRL_BASE_NS             0x40012000 /* CPU 0 Power Control Block Non-Secure base address */
@@ -74,10 +76,12 @@
 
 /* Secure memory map addresses */
 #define ITCM_BASE_S                      0x10000000 /* Instruction TCM Secure base address */
-#define SIC_HOST_BASE_S                  0x12000000 /* Secure I-Cache Secure mapping base address */
 #define ROM_BASE_S                       0x11000000 /* CODE ROM Secure base address. No NS alias for ROM */
+#define SIC_HOST_BASE_S                  0x12000000 /* Secure I-Cache Secure mapping base address */
+#define ITCM_CPU0_BASE_S                 0x1A000000 /* CPU0 Instruction TCM Secure base address */
 #define DTCM_BASE_S                      0x30000000 /* Data TCM Secure base address */
 #define VM0_BASE_S                       0x31000000 /* Volatile Memory 0 Secure base address */
+#define DTCM_CPU0_BASE_S                 0x34000000 /* CPU0 Data TCM Secure base address */
 #define VM1_BASE_S                       (VM0_BASE_S + VM0_SIZE) /* Volatile Memory 1 Secure base address */
 /* Secure Private CPU region */
 #define CPU0_SECCTRL_BASE_S              0x50011000 /* CPU 0 Local Security Control Block Secure base address */

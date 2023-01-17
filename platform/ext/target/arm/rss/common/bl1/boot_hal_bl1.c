@@ -24,6 +24,7 @@
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #include "fih.h"
+#include "cc3xx_dma.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include <string.h>
 #include "cmsis_compiler.h"
@@ -122,6 +123,37 @@ int32_t boot_platform_init(void)
 
     return 0;
 }
+
+int32_t boot_platform_post_init(void)
+{
+#ifdef CRYPTO_HW_ACCELERATOR
+    int32_t result;
+    uint32_t idx;
+    cc3xx_dma_remap_region_t remap_regions[] = {
+        {ITCM_BASE_S, ITCM_SIZE, ITCM_CPU0_BASE_S, 0x01000000},
+        {ITCM_BASE_NS, ITCM_SIZE, ITCM_CPU0_BASE_NS, 0x01000000},
+        {DTCM_BASE_S, DTCM_SIZE, DTCM_CPU0_BASE_S, 0x01000000},
+        {DTCM_BASE_NS, DTCM_SIZE, DTCM_CPU0_BASE_NS, 0x01000000},
+    };
+
+    result = crypto_hw_accelerator_init();
+    if (result) {
+        return 1;
+    }
+
+    for (idx = 0; idx < (sizeof(remap_regions) / sizeof(remap_regions[0])); idx++) {
+        result = cc3xx_dma_remap_region_init(idx, &remap_regions[idx]);
+        if (result) {
+            return 1;
+        }
+    }
+
+    (void)fih_delay_init();
+#endif /* CRYPTO_HW_ACCELERATOR */
+
+    return 0;
+}
+
 
 static int rss_derive_key(enum tfm_bl1_key_id_t key_id, uint8_t *label,
                           size_t label_len, uint8_t *out, uint32_t lcs)
