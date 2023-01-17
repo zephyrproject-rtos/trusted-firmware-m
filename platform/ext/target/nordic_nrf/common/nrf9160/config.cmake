@@ -10,5 +10,6 @@ include(${PLATFORM_PATH}/common/core/config.cmake)
 
 set(SECURE_UART1                        ON         CACHE BOOL      "Enable secure UART1")
 set(PSA_API_TEST_TARGET                 "nrf9160"  CACHE STRING    "PSA API test target")
-set(ITS_NUM_ASSETS                      "5"        CACHE STRING    "The maximum number of assets to be stored in the Internal Trusted Storage area")
 set(NRF_NS_STORAGE                      OFF        CACHE BOOL      "Enable non-secure storage partition")
+set(BL2                                 ON         CACHE BOOL      "Whether to build BL2")
+set(NRF_NS_SECONDARY                    ${BL2}     CACHE BOOL      "Enable non-secure secondary partition")

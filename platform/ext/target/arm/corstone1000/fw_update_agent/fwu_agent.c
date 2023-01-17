@@ -18,6 +18,8 @@
 #include "platform_description.h"
 #include "tfm_plat_nv_counters.h"
 #include "tfm_plat_defs.h"
+#include "uefi_fmp.h"
+#include "uart_stdout.h"
 
 /* Properties of image in a bank */
 struct fwu_image_properties {
@@ -83,6 +85,11 @@ struct fwu_private_metadata {
 
        /* staged nv_counter: temprary location before written to the otp */
        uint32_t nv_counter[NR_OF_IMAGES_IN_FW_BANK];
+
+       /* FMP information */
+       uint32_t fmp_version;
+       uint32_t fmp_last_attempt_version;
+       uint32_t fmp_last_attempt_status;
 
 } __packed;
 
@@ -278,7 +285,7 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
 {
     enum fwu_agent_error_t ret;
     struct fwu_private_metadata priv_metadata;
-    uint32_t image_version = 0;
+    uint32_t image_version = FWU_IMAGE_INITIAL_VERSION;
 
     FWU_LOG_MSG("%s: enter\n\r", __func__);
 
@@ -302,8 +309,8 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
     memset(&_metadata, 0, sizeof(struct fwu_metadata));
 
     _metadata.version = 1;
-    _metadata.active_index = 0;
-    _metadata.previous_active_index = 1;
+    _metadata.active_index = BANK_0;
+    _metadata.previous_active_index = BANK_1;
 
     /* bank 0 is the place where images are located at the
      * start of device lifecycle */
@@ -338,6 +345,10 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
 
     priv_metadata.boot_index = BANK_0;
     priv_metadata.boot_attempted = 0;
+
+    priv_metadata.fmp_version = FWU_IMAGE_INITIAL_VERSION;
+    priv_metadata.fmp_last_attempt_version = FWU_IMAGE_INITIAL_VERSION;
+    priv_metadata.fmp_last_attempt_status = LAST_ATTEMPT_STATUS_SUCCESS;
 
     ret = private_metadata_write(&priv_metadata);
     if (ret) {
@@ -540,9 +551,25 @@ enum fwu_agent_error_t corstone1000_fwu_flash_image(void)
                                 &image_bank_offset);
         switch(image_index) {
             case IMAGE_ALL:
+
                 ret = flash_full_capsule(&_metadata, capsule_info.image[i],
                                          capsule_info.size[i],
                                          capsule_info.version[i]);
+
+                if (ret != FWU_AGENT_SUCCESS) {
+
+                    priv_metadata.fmp_last_attempt_version = capsule_info.version[i];
+                    priv_metadata.fmp_last_attempt_status = LAST_ATTEMPT_STATUS_ERROR_UNSUCCESSFUL;
+
+                    private_metadata_write(&priv_metadata);
+
+                    fmp_set_image_info(&full_capsule_image_guid,
+                            priv_metadata.fmp_version,
+                            priv_metadata.fmp_last_attempt_version,
+                            priv_metadata.fmp_last_attempt_status);
+                }
+
+
                 break;
             default:
                 FWU_LOG_MSG("%s: sent image not recognized\n\r", __func__);
@@ -866,17 +893,42 @@ enum fwu_agent_error_t corstone1000_fwu_host_ack(void)
 
     current_state = get_fwu_agent_state(&_metadata, &priv_metadata);
     if (current_state == FWU_AGENT_STATE_REGULAR) {
+
         ret = FWU_AGENT_SUCCESS; /* nothing to be done */
+
+        fmp_set_image_info(&full_capsule_image_guid,
+                priv_metadata.fmp_version,
+                priv_metadata.fmp_last_attempt_version,
+                priv_metadata.fmp_last_attempt_status);
+
         goto out;
+
     } else if (current_state != FWU_AGENT_STATE_TRIAL) {
         FWU_ASSERT(0);
     }
 
     if (_metadata.active_index != priv_metadata.boot_index) {
+
         /* firmware update failed, revert back to previous bank */
+
+        priv_metadata.fmp_last_attempt_version =
+         _metadata.img_entry[IMAGE_0].img_props[_metadata.active_index].version;
+
+        priv_metadata.fmp_last_attempt_status = LAST_ATTEMPT_STATUS_ERROR_UNSUCCESSFUL;
+
         ret = fwu_select_previous(&_metadata, &priv_metadata);
+
     } else {
+
         /* firmware update successful */
+
+        priv_metadata.fmp_version =
+         _metadata.img_entry[IMAGE_0].img_props[_metadata.active_index].version;
+        priv_metadata.fmp_last_attempt_version =
+         _metadata.img_entry[IMAGE_0].img_props[_metadata.active_index].version;
+
+        priv_metadata.fmp_last_attempt_status = LAST_ATTEMPT_STATUS_SUCCESS;
+
         ret = fwu_accept_image(&full_capsule_image_guid, &_metadata,
                                 &priv_metadata);
         if (!ret) {
@@ -886,6 +938,10 @@ enum fwu_agent_error_t corstone1000_fwu_host_ack(void)
 
     if (ret == FWU_AGENT_SUCCESS) {
         disable_host_ack_timer();
+        fmp_set_image_info(&full_capsule_image_guid,
+                priv_metadata.fmp_version,
+                priv_metadata.fmp_last_attempt_version,
+                priv_metadata.fmp_last_attempt_status);
     }
 
 out:
@@ -900,12 +956,15 @@ static int systic_counter = 0;
 void SysTick_Handler(void)
 {
     systic_counter++;
-    if ((systic_counter % 10) == 0) {
-        FWU_LOG_MSG("%s: counted = %d, expiring on = %u\n\r", __func__,
-                                systic_counter, HOST_ACK_TIMEOUT_SEC);
+    if (systic_counter % 10 == 0) {
+        SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+        stdio_output_string("*", 1);
+        SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
     }
     if (systic_counter == HOST_ACK_TIMEOUT_SEC) {
-        FWU_LOG_MSG("%s, timer expired, reseting the system\n\r", __func__);
+        SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
+        stdio_output_string("timer expired!\n\r",
+                           sizeof("timer expired!\n\r"));
         NVIC_SystemReset();
     }
 }

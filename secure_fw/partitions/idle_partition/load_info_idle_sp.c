@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -29,11 +29,11 @@ uint8_t idle_sp_stack[IDLE_SP_STACK_SIZE] __attribute__((aligned(8)));
 
 /* Partition load, deps, service load data. Put to a dedicated section. */
 #if defined(__ICCARM__)
-#pragma location = ".part_load"
+#pragma location = ".part_load_priority_lowest"
 __root
 #endif
 const struct partition_tfm_sp_idle_load_info_t
-    tfm_sp_idle_load __attribute__((used, section(".part_load"))) = {
+    tfm_sp_idle_load __attribute__((used, section(".part_load_priority_lowest"))) = {
     .load_info = {
         .psa_ff_ver                 = 0x0101 | PARTITION_INFO_MAGIC,
         .pid                        = TFM_SP_IDLE_ID,
@@ -52,8 +52,8 @@ const struct partition_tfm_sp_idle_load_info_t
 
 /* Placeholder for partition runtime space. Do not reference it. */
 #if defined(__ICCARM__)
-#pragma location = ".bss.part_runtime"
+#pragma location = ".bss.part_runtime_priority_lowest"
 __root
 #endif
 static struct partition_t tfm_idle_partition_runtime_item
-    __attribute__((used, section(".bss.part_runtime")));
+    __attribute__((used, section(".bss.part_runtime_priority_lowest")));

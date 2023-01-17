@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +11,7 @@
 #include "cc3xx_dma.h"
 #include "cc3xx_lcs.h"
 #include "cc3xx_engine_state.h"
+#include "device_definition.h"
 
 static cc3xx_err_t cc3xx_aes_dumpiv(cc3xx_aes_mode_t mode, uint8_t *iv) {
     switch (mode) {
@@ -46,6 +47,72 @@ static cc3xx_err_t cc3xx_aes_loadiv(cc3xx_aes_mode_t mode, const uint8_t *iv) {
     return CC3XX_ERR_SUCCESS;
 }
 
+#ifdef KMU_S
+static cc3xx_err_t cc3xx_aes_setkey(cc3xx_aes_key_id_t key_id,
+                                    const uint8_t *key,
+                                    cc3xx_aes_keysize_t key_size)
+{
+    enum kmu_error_t kmu_err;
+
+    if (*CC3XX_REG_AO_HOST_AO_LOCK_BITS & 0x1U) {
+        return CC3XX_ERR_INVALID_STATE;
+    }
+
+    if (key_id != CC3XX_AES_KEY_ID_USER_KEY) {
+        switch (key_id) {
+        case CC3XX_AES_KEY_ID_HUK:
+            kmu_err = kmu_export_key(&KMU_DEV_S, KMU_HW_SLOT_HUK);
+            break;
+        case CC3XX_AES_KEY_ID_KRTL:
+            kmu_err = kmu_export_key(&KMU_DEV_S, KMU_HW_SLOT_KRTL);
+            break;
+        case CC3XX_AES_KEY_ID_KCP:
+            kmu_err = kmu_export_key(&KMU_DEV_S, KMU_HW_SLOT_KP_CM);
+            break;
+        case CC3XX_AES_KEY_ID_KCE:
+            kmu_err = kmu_export_key(&KMU_DEV_S, KMU_HW_SLOT_KCE_CM);
+            break;
+        case CC3XX_AES_KEY_ID_KPICV:
+            kmu_err = kmu_export_key(&KMU_DEV_S, KMU_HW_SLOT_KP_DM);
+            break;
+        case CC3XX_AES_KEY_ID_KCEICV:
+            kmu_err = kmu_export_key(&KMU_DEV_S, KMU_HW_SLOT_KCE_DM);
+            break;
+        case CC3XX_AES_KEY_ID_GUK:
+            kmu_err = kmu_export_key(&KMU_DEV_S, KMU_HW_SLOT_GUK);
+            break;
+        default:
+            return CC3XX_ERR_NOT_IMPLEMENTED;
+        }
+        if (kmu_err != KMU_ERROR_NONE) {
+            return CC3XX_ERR_KEY_IMPORT_FAILED;
+        }
+    } else {
+        switch (key_size) {
+        case CC3XX_AES_KEYSIZE_256:
+            *CC3XX_REG_AES_AES_KEY_0_7 = ((uint32_t*)key)[7];
+            *CC3XX_REG_AES_AES_KEY_0_6 = ((uint32_t*)key)[6];
+        case CC3XX_AES_KEYSIZE_192:
+            *CC3XX_REG_AES_AES_KEY_0_5 = ((uint32_t*)key)[5];
+            *CC3XX_REG_AES_AES_KEY_0_4 = ((uint32_t*)key)[4];
+        case CC3XX_AES_KEYSIZE_128:
+            *CC3XX_REG_AES_AES_KEY_0_3 = ((uint32_t*)key)[3];
+            *CC3XX_REG_AES_AES_KEY_0_2 = ((uint32_t*)key)[2];
+            *CC3XX_REG_AES_AES_KEY_0_1 = ((uint32_t*)key)[1];
+            *CC3XX_REG_AES_AES_KEY_0_0 = ((uint32_t*)key)[0];
+            break;
+        default:
+            return CC3XX_ERR_NOT_IMPLEMENTED;
+        }
+    }
+
+    /* Set key size */
+    *CC3XX_REG_AES_AES_CONTROL &= ~(0b11U << 12);
+    *CC3XX_REG_AES_AES_CONTROL |= (key_size & 0b11U) << 12;
+
+    return CC3XX_ERR_SUCCESS;
+}
+#else
 static cc3xx_err_t cc3xx_aes_check_key_lock(cc3xx_aes_key_id_t key_id)
 {
     cc3xx_err_t err = CC3XX_ERR_SUCCESS;
@@ -105,6 +172,11 @@ static cc3xx_err_t cc3xx_aes_setkey(cc3xx_aes_key_id_t key_id,
             return CC3XX_ERR_INVALID_STATE;
         }
 
+        /* If the KMU is not integrated, there are limited keys */
+        if (key_id > CC3XX_AES_KEY_ID_KCEICV) {
+            return CC3XX_ERR_NOT_IMPLEMENTED;
+        }
+
         /* Check if the key is masked / locked */
         err = cc3xx_aes_check_key_lock(key_id);
         if (err != CC3XX_ERR_SUCCESS) {
@@ -141,6 +213,7 @@ static cc3xx_err_t cc3xx_aes_setkey(cc3xx_aes_key_id_t key_id,
 
     return CC3XX_ERR_SUCCESS;
 }
+#endif /* KMU_S */
 
 cc3xx_err_t cc3xx_aes(cc3xx_aes_key_id_t key_id, const uint8_t *key,
                       cc3xx_aes_keysize_t key_size, const uint8_t* in, size_t

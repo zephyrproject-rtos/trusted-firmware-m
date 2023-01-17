@@ -188,7 +188,7 @@ the interrupt.
 
 The platform's ``region_defs.h`` file should define a macro ``MAILBOX_IRQ`` that
 identifies the interrupt being used. The platform must also provide a function
-``mailbox_init_irq()`` that initialises the interrupt as described in [2]_.
+``mailbox_irq_init()`` that initialises the interrupt as described in [2]_.
 
 Platform specific driver should put Inter-Processor Communication interrupt into
 a proper exception priority, according to system and application requirements.

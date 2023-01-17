@@ -12,37 +12,7 @@
   "priority": "NORMAL",
   "model": "SFN",
   "entry_init": "tfm_its_entry",
-  "stack_size": "0x680",
-  "secure_functions": [
-    {
-      "sfid": "TFM_ITS_SET",
-      "signal": "TFM_ITS_SET_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "sfid": "TFM_ITS_GET",
-      "signal": "TFM_ITS_GET_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "sfid": "TFM_ITS_GET_INFO",
-      "signal": "TFM_ITS_GET_INFO_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "sfid": "TFM_ITS_REMOVE",
-      "signal": "TFM_ITS_REMOVE_REQ",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    }
-  ],
+  "stack_size": "ITS_STACK_SIZE",
   "services" : [
     {
       "name": "TFM_INTERNAL_TRUSTED_STORAGE_SERVICE",
@@ -51,7 +21,8 @@
       "connection_based": false,
       "stateless_handle": 3,
       "version": 1,
-      "version_policy": "STRICT"
+      "version_policy": "STRICT",
+      "mm_iovec": "enable",
     }
   ]
 }

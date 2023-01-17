@@ -23,6 +23,7 @@ set(MCUBOOT_UPGRADE_STRATEGY            "OVERWRITE_ONLY" CACHE STRING "Upgrade s
 set(BL2_HEADER_SIZE                     0x400       CACHE STRING    "Header size")
 set(BL2_TRAILER_SIZE                    0x400       CACHE STRING    "Trailer size")
 set(MCUBOOT_ALIGN_VAL                   1           CACHE STRING    "align option for mcuboot and build image with imgtool [1, 2, 4, 8, 16, 32]")
+set(MCUBOOT_CONFIRM_IMAGE               OFF         CACHE BOOL      "Whether to confirm the image if REVERT is supported in MCUboot")
 
 # Specifying a scope of the accepted values of MCUBOOT_UPGRADE_STRATEGY for
 # platforms to choose a specific upgrade strategy for images. These certain
@@ -34,9 +35,9 @@ set_property(CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS "OVERWRITE_ONLY;SWA
 set_property(CACHE MCUBOOT_ALIGN_VAL PROPERTY STRINGS "1;2;4;8;16;32")
 
 set(MCUBOOT_DIRECT_XIP_REVERT           ON          CACHE BOOL      "Enable the revert mechanism in direct-xip mode")
-set(MCUBOOT_MEASURED_BOOT               ON          CACHE BOOL      "Add boot measurement values to boot status. Used for initial attestation token")
 set(MCUBOOT_HW_ROLLBACK_PROT            ON          CACHE BOOL      "Enable security counter validation against non-volatile HW counters")
 set(MCUBOOT_ENC_IMAGES                  OFF         CACHE BOOL      "Enable encrypted image upgrade support")
+set(MCUBOOT_BOOTSTRAP                   OFF         CACHE BOOL      "Support initial state with empty primary slot and images installed from secondary slots")
 set(MCUBOOT_ENCRYPT_RSA                 OFF         CACHE BOOL      "Use RSA for encrypted image upgrade support")
 set(MCUBOOT_FIH_PROFILE                 OFF         CACHE STRING    "Fault injection hardening profile [OFF, LOW, MEDIUM, HIGH]")
 
@@ -55,6 +56,5 @@ set(MCUBOOT_SECURITY_COUNTER_S          1           CACHE STRING    "Security co
 set(MCUBOOT_SECURITY_COUNTER_NS         1           CACHE STRING    "Security counter for NS image. auto sets it to IMAGE_VERSION_NS")
 set(MCUBOOT_S_IMAGE_MIN_VER             0.0.0+0     CACHE STRING    "Minimum version of secure image required by the non-secure image for upgrade to this non-secure image. If MCUBOOT_IMAGE_NUMBER == 1 this option has no effect")
 set(MCUBOOT_NS_IMAGE_MIN_VER            0.0.0+0     CACHE STRING    "Minimum version of non-secure image required by the secure image for upgrade to this secure image. If MCUBOOT_IMAGE_NUMBER == 1 this option has no effect")
-set(MCUBOOT_ENC_KEY_LEN_S               128         CACHE STRING    "Length of the AES key for encrypt S image")
-set(MCUBOOT_ENC_KEY_LEN_NS              128         CACHE STRING    "Length of the AES key for encrypt NS image")
+set(MCUBOOT_ENC_KEY_LEN                 128         CACHE STRING    "Length of the AES key for encrypting images")
 set(MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH  "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/config/mcuboot-mbedtls-cfg.h" CACHE FILEPATH "Mbedtls config file to use with MCUboot")

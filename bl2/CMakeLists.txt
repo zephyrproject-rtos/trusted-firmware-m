@@ -35,6 +35,7 @@ target_link_libraries(bl2
     PRIVATE
         tfm_boot_status
         $<$<BOOL:${TEST_BL2}>:mcuboot_tests>
+        platform_bl2
 )
 
 target_compile_options(bl2
@@ -54,6 +55,8 @@ target_compile_definitions(bl2
         $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
         $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
         $<$<BOOL:${TEST_BL2}>:TEST_BL2>
+        $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:TFM_PARTITION_FIRMWARE_UPDATE>
+        $<$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>:CONFIG_TFM_BOOT_STORE_MEASUREMENTS>
 )
 
 add_convert_to_bin_target(bl2)
@@ -78,6 +81,7 @@ target_compile_definitions(bl2_mbedcrypto_config
         MBEDTLS_CONFIG_FILE="${MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH}"
         # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077
         $<$<OR:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>
+        $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:CC312_LEGACY_DRIVER_API_ENABLED>
 )
 
 cmake_policy(SET CMP0079 NEW)
@@ -90,6 +94,7 @@ set(MBEDTLS_FATAL_WARNINGS OFF)
 set(ENABLE_DOCS OFF)
 set(INSTALL_MBEDTLS_HEADERS OFF)
 set(LIB_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/mbedcrypto/install)
+set(GEN_FILES OFF)
 
 # Set the prefix to be used by mbedTLS targets
 set(MBEDTLS_TARGET_PREFIX bl2_)

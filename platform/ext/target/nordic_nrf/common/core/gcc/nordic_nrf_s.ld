@@ -1,6 +1,8 @@
 ;/*
 ; * Copyright (c) 2009-2022 Arm Limited
 ; * Copyright (c) 2020 Nordic Semiconductor ASA
+; * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+; * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -35,9 +37,6 @@ MEMORY
 #endif
 }
 
-#ifdef TFM_MULTI_CORE_TOPOLOGY
-#define VENEERS()
-#else
 #define VENEERS() \
     /* \
      * We need a dummy section to "reset" the location counter to FLASH if the \
@@ -75,7 +74,6 @@ MEMORY
  \
     ASSERT ((Load$$LR$$LR_VENEER$$Limit - Load$$LR$$LR_VENEER$$Base) \
             <= CMSE_VENEER_REGION_SIZE, "Veneer region overflowed")
-#endif
 
 /* For builds without BL2, or when BL2 will be booting a single
  * combined S and NS image, we force placing the veneers section
@@ -93,11 +91,7 @@ MEMORY
 #define VENEER_POS 2
 #endif
 
-__heap_size__  = S_HEAP_SIZE;
-#if !defined(TFM_PSA_API)
-__psp_stack_size__ = S_PSP_STACK_SIZE;
-#endif
-__msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
+__msp_stack_size__ = S_MSP_STACK_SIZE;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
@@ -110,6 +104,7 @@ SECTIONS
     {
         __vectors_start__ = .;
         KEEP(*(.vectors))
+        . = ALIGN(4);
         __vectors_end__ = .;
 
         /* If this image is placed at the beginning of flash make sure we
@@ -132,29 +127,29 @@ SECTIONS
         /* Copy interrupt vectors from flash to RAM */
         LONG (__vectors_start__)                            /* From */
         LONG (__ram_vectors_start__)                        /* To   */
-        LONG (__vectors_end__ - __vectors_start__)          /* Size */
+        LONG ((__vectors_end__ - __vectors_start__) / 4)    /* Size */
 #endif
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA))
+        LONG (SIZEOF(.TFM_DATA) / 4)
 
         LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
         LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA) / 4)
 
         LONG (LOADADDR(.TFM_APP_ROT_LINKER_DATA))
         LONG (ADDR(.TFM_APP_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA) / 4)
 
 #if defined (S_RAM_CODE_START)
         LONG (LOADADDR(.TFM_RAM_CODE))
         LONG (ADDR(.TFM_RAM_CODE))
-        LONG (SIZEOF(.TFM_RAM_CODE))
+        LONG (SIZEOF(.TFM_RAM_CODE) / 4)
 #endif
 #if defined(S_CODE_SRAM_ALIAS_BASE)
         LONG (LOADADDR(.ER_CODE_SRAM))
         LONG (ADDR(.ER_CODE_SRAM))
-        LONG (SIZEOF(.ER_CODE_SRAM))
+        LONG (SIZEOF(.ER_CODE_SRAM) / 4)
 #endif
         __copy_table_end__ = .;
     } > FLASH
@@ -163,23 +158,19 @@ SECTIONS
     {
         __zero_table_start__ = .;
         LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS))
-#if !defined(TFM_PSA_API)
-        LONG (ADDR(.TFM_SECURE_STACK))
-        LONG (SIZEOF(.TFM_SECURE_STACK))
-#endif /* !defined(TFM_PSA_API) */
+        LONG (SIZEOF(.TFM_BSS) / 4)
         LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
 
         LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS) / 4)
 #if defined(PSA_PROXY_SHARED_MEMORY_BASE)
         LONG (PSA_PROXY_SHARED_MEMORY_BASE)
-        LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
+        LONG (PSA_PROXY_SHARED_MEMORY_SIZE / 4)
 #endif
 #if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
-        LONG (SIZEOF(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
 #endif
         __zero_table_end__ = .;
     } > FLASH
@@ -201,15 +192,26 @@ SECTIONS
         *psa_lifecycle.*(.rodata*)
         *tfm_log_raw.*(.text*)             /* NXP */
         *tfm_log_raw.*(.rodata*)
+        *tfm_psa_call_pack.*(.text*)
+        *tfm_psa_call_pack.*(.rodata*)
+        *psa_interface_svc.*(.text*)
+        *psa_interface_svc.*(.rodata*)
         . = ALIGN(32);
     } > FLASH
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
     Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
 
     /**** Section for holding partition RO load data */
+    /*
+     * Sort the partition info by priority to guarantee the initing order.
+     * The first loaded partition will be inited at last in SFN model.
+     */
     .TFM_SP_LOAD_LIST : ALIGN(4)
     {
-       KEEP(*(.part_load))
+       KEEP(*(.part_load_priority_lowest))
+       KEEP(*(.part_load_priority_low))
+       KEEP(*(.part_load_priority_normal))
+       KEEP(*(.part_load_priority_high))
     } > FLASH
     Image$$TFM_SP_LOAD_LIST$$RO$$Base = ADDR(.TFM_SP_LOAD_LIST);
     Image$$TFM_SP_LOAD_LIST$$RO$$Limit = ADDR(.TFM_SP_LOAD_LIST) + SIZEOF(.TFM_SP_LOAD_LIST);
@@ -330,18 +332,6 @@ VENEERS()
         . = ABSOLUTE(S_DATA_START) ;
     } > RAM
 
-    /*
-     * MPU on Armv6-M/v7-M core in multi-core topology may require more strict
-     * alignment that MPU region base address must align with the MPU region
-     * size.
-     * As a result, in multi-core topology, to save memory resource and MPU
-     * regions, unprivileged data sections and privileged data sections are
-     * separated and gathered in unprivileged/privileged data area respectively.
-     * Keep BL2 shared data and MSP stack at the beginning of the secure data
-     * area in single Armv8-M topology, while move the two areas to the
-     * beginning of privileged data region in multi-core topology.
-     */
-#ifndef TFM_MULTI_CORE_TOPOLOGY
 #ifdef CODE_SHARING
     /* The code sharing between bootloader and runtime requires to share the
      * global variables.
@@ -363,39 +353,19 @@ VENEERS()
 
     .msp_stack : ALIGN(32)
     {
-        . += __msp_init_stack_size__;
+        . += __msp_stack_size__ - 0x8;
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
-# if !defined(TFM_PSA_API)
-    /* PSP is unprivileged in single-core topology */
-    .psp_stack : ALIGN(32)
-    {
-        . += (__psp_stack_size__ - 0x8); // reserve space for stack seal (8 bytes)
-    } > RAM
-    Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-
-    .psp_stack_seal_res :
+    .msp_stack_seal_res :
     {
         . += 0x8;
     } > RAM
-    Image$$ER_INITIAL_PSP_SEAL$$ZI$$Base = ADDR(.psp_stack_seal_res);
-    Image$$ER_INITIAL_PSP_SEAL$$ZI$$Limit = ADDR(.psp_stack_seal_res) + SIZEOF(.psp_stack_seal_res);
-# endif
-#endif
+    __StackSeal = ADDR(.msp_stack_seal_res);
 
-#if !defined(TFM_PSA_API)
-    .TFM_SECURE_STACK : ALIGN(128)
-    {
-        . += 0x2000;
-    } > RAM
-    Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
-    Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
-#endif /* !defined(TFM_PSA_API) */
-
-#if (TFM_LVL == 1)
+#if defined(ENABLE_HEAP)
+    __heap_size__ = S_HEAP_SIZE;
     .heap : ALIGN(8)
     {
         __end__ = .;
@@ -405,12 +375,13 @@ VENEERS()
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
-#endif /* TFM_LVL == 1 */
+#endif /* defined(ENABLE_HEAP) */
 
 #if defined(CONFIG_TFM_PARTITION_META)
     .TFM_SP_META_PTR : ALIGN(32)
     {
         *(.bss.SP_META_PTR_SPRTL_INST)
+        . = ALIGN(32);
     } > RAM
     Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
@@ -487,37 +458,6 @@ VENEERS()
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
 #endif /* TFM_LVL != 1 */
 
-#ifdef TFM_MULTI_CORE_TOPOLOGY
-#ifdef S_DATA_PRIV_START
-    /**** Privileged data area base address specified by multi-core platform */
-    .tfm_secure_priv_data_boundary :
-    {
-        . = ABSOLUTE(S_DATA_PRIV_START) ;
-    } > RAM
-#endif
-
-    /*
-     * Move BL2 shared area and MSP stack to the beginning of privileged data
-     * area in multi-core topology.
-     */
-
-    /* shared_data and msp_stack are overlapping on purpose when
-     * msp_stack is extended until the beginning of RAM, when shared_date
-     * was read out by partitions
-     */
-    .tfm_bl2_shared_data : ALIGN(32)
-    {
-        . += BOOT_TFM_SHARED_DATA_SIZE;
-    } > RAM AT> RAM
-
-    .msp_stack : ALIGN(32)
-    {
-        . += __msp_init_stack_size__;
-    } > RAM
-    Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
-    Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
-#endif
-
     /**** PSA RoT DATA start here */
 
     Image$$TFM_PSA_RW_STACK_START$$Base = .;
@@ -591,12 +531,22 @@ VENEERS()
     .TFM_BSS : ALIGN(4)
     {
         __bss_start__ = .;
+
+        /* The runtime partition placed order is same as load partition */
         __partition_runtime_start__ = .;
-        KEEP(*(.bss.part_runtime))
+        KEEP(*(.bss.part_runtime_priority_lowest))
+        KEEP(*(.bss.part_runtime_priority_low))
+        KEEP(*(.bss.part_runtime_priority_normal))
+        KEEP(*(.bss.part_runtime_priority_high))
         __partition_runtime_end__ = .;
         . = ALIGN(4);
+
+        /* The runtime service placed order is same as load partition */
         __service_runtime_start__ = .;
-        KEEP(*(.bss.serv_runtime))
+        KEEP(*(.bss.serv_runtime_priority_lowest))
+        KEEP(*(.bss.serv_runtime_priority_low))
+        KEEP(*(.bss.serv_runtime_priority_normal))
+        KEEP(*(.bss.serv_runtime_priority_high))
         __service_runtime_end__ = .;
         *(.bss*)
         *(COMMON)
@@ -618,18 +568,22 @@ VENEERS()
      * variable is treated like an initialized variable. To not waste memory
      * NOLOAD attribute used here. The whole section is zero initialized by
      * adding section information to .zero.table */
-    .PSA_PROXY_SHARED_MEMORY (NOLOAD) :
+    .PSA_PROXY_SHARED_MEMORY (NOLOAD) : ALIGN(4)
     {
         KEEP(*(PSA_PROXY_SHARED_MEMORY_SECTION))
+        .= ALIGN(4);
     } > PSA_PROXY_SHARED_MEMORY_RAM
 #endif
 
 #if defined (S_RAM_CODE_START)
     /* Code executed from RAM */
-    .TFM_RAM_CODE S_RAM_CODE_START :
+    .TFM_RAM_CODE S_RAM_CODE_START : ALIGN(4)
     {
         KEEP(*(.ramfunc))
+        . = ALIGN(4);
     } > RAM AT> FLASH
+
+    ASSERT(S_RAM_CODE_START % 4 == 0, "S_RAM_CODE_START must be divisible by 4")
 #endif
 
 #if VENEER_POS == 3
@@ -638,11 +592,11 @@ VENEERS()
 
     Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;
 
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
     Load$$LR$$LR_SECONDARY_PARTITION$$Base = SECONDARY_PARTITION_START;
-#endif /* BL2 */
+#endif /* NRF_NS_SECONDARY */
 
-#ifdef NRF_NS_STORAGE
+#ifdef NRF_NS_STORAGE_PARTITION_START
     Load$$LR$$LR_NRF_NS_STORAGE_PARTITION$$Base = NRF_NS_STORAGE_PARTITION_START;
 #endif /* NRF_NS_STORAGE */
 

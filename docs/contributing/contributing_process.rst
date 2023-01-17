@@ -5,75 +5,56 @@ Contributions to the TF-M project need to follow the process below.
 
 .. Note::
 
-   Please contact :doc:`maintainers </contributing/maintainers>` for any
-   questions.
+   Please contact `TF-M mailing list <mailing_list_>`_ for any question.
 
-- Subscribe to `TF-M development mailing list
-  <https://lists.trustedfirmware.org/mailman3/lists/tf-m.lists.trustedfirmware.org>`_
-  if not subscribed already.
+- It is recommended to subscribe to `TF-M mailing list <mailing_list_>`_
+  via `this page <https://lists.trustedfirmware.org/mailman3/lists/tf-m.lists.trustedfirmware.org>`_.
 - Refer to the `Roadmap
   <https://developer.trustedfirmware.org/w/tf_m/planning>`_ or send a mail to
-  the tf-m@lists.trustedfirmware.org to check if this work is already
-  planned/progresses elsewhere.
-- Create a task in `Phabricator
-  <https://developer.trustedfirmware.org/maniphest>`_, put as many details as
-  possible in the description. Add 'Trusted Firmware M' in the 'Tags' field.
-- For non-trivial changes, need to follow the design proposal process
-  :doc:`Design Proposal Guideline </contributing/tfm_design_proposal_guideline>`
-  for the TF-M project.
-- After the design has been accepted by the maintainer(s), a corresponding
-  patch should be posted; follow guidelines below:
+  the `TF-M mailing list <mailing_list_>`_ to get the latest status and plan of
+  TF-M.
+- Follow :doc:`Design Proposal Guideline </contributing/tfm_design_proposal_guideline>`
+  to propose your design.
+- Follow guidelines below to prepare the patch:
 
   - Clone the TF-M code on your own machine from `TF-M git repository
     <https://git.trustedfirmware.org/TF-M/trusted-firmware-m.git>`_.
   - Follow the :doc:`TF-M getting started </getting_started/tfm_getting_started>`,
-    :doc:`Build Instructions </technical_references/instructions/tfm_build_instruction>` and
+    :doc:`Build Instructions </building/tfm_build_instruction>`
     :doc:`Coding Guide </contributing/coding_guide>` for the TF-M project.
   - Make your changes in logical chunks to help reviewers. Each commit should
     be a separate review and either work properly or be squashed after the
     review and before merging.
-  - Update documentation in docs/ folder if needed.
+  - Follow :doc:`Documentation Contribution Guidelines </contributing/doc_guidelines>`
+    to update documentation in ``docs`` folder if needed.
   - Test your changes and add details to the commit description.
-  - The code is accepted under :doc:`DCO </contributing/dco>`, Developer
-    Certificate of Origin, so you must add following fields to your
-    commit description:
+  - The code is accepted under :doc:`Developer Certificate of Origin (DCO) </contributing/dco>`.
+    Use ``git commit -s`` to add a ``Signed-off-by`` trailer at the end of the
+    commit log message.
+    See `git-commit <https://git-scm.com/docs/git-commit>`_ for details.
+  - Add a `Change-Id <https://review.trustedfirmware.org/Documentation/user-changeid.html>`_
+    to the commit message, which can be generated any way you like (e.g. from
+    the SHA of the commit).
+    It is suggested to clone repositories with commit-msg hook. The commit-msg
+    hook attaches Change-Id automatically.
+    Take `trusted-firmware-m <https://review.trustedfirmware.org/admin/repos/TF-M/trusted-firmware-m>`_
+    as an example.
 
-    .. code-block:: text
-
-       Author: Full Name <email address>
-       Signed-off-by: Full Name <email address>
-
-    .. Note::
-
-       Sign off authority needs to adhere to the [DCO](./dco.txt) rules.
-
-  - You must add a `Change-Id
-    <https://review.trustedfirmware.org/Documentation/user-changeid.html>` to
-    the commit message, which can be generated any way you like (e.g. from the
-    SHA of the commit), or use the commit hook.
-  - Create a user in the `TF-M Gerrit <https://review.trustedfirmware.org>`,
-    then add `SSH keys or HTTP credentials
-    <https://review.trustedfirmware.org/settings/>`.
-  - Submit your patch for review.
-
-    .. code-block:: shell
-
-       git push ssh://review.trustedfirmware.org:29418/TF-M/trusted-firmware-m.git HEAD:refs/for/master
-
-    or
-
-    .. code-block:: shell
-
-       git push https://review.trustedfirmware.org/TF-M/trusted-firmware-m.git HEAD:refs/for/master
-
-- Add relevant :doc:`maintainers </contributing/maintainers>` for reviewing
+- Submit your patch for review.
+  Refer to `Uploading Changes <https://review.trustedfirmware.org/Documentation/user-upload.html>`_
+  for details of uploading patch.
+- Add relevant :doc:`code owner(s) </contributing/maintainers>` for reviewing
   the patch.
 - You may be asked to provide further details or make additional changes.
-- You can discuss further with maintainer(s) by directly over email if
-  necessary.
-- Once the change is approved by maintainers, the patch will be merged by the
+- You can discuss further with code owner(s) and maintainer(s) directly via
+  `TF-M mailing list <mailing_list_>`_ if necessary.
+- Click ``Allow-CI +1`` button on Gerrit page to run CI to validate your patch.
+  Your patch shall pass CI successfully before being merged. Code owner(s) and
+  maintainer(s) may ask for additional test.
+- Once the change is approved by code owners, the patch will be merged by the
   maintainer.
-- Mark the task as 'resolved' after patch is merged.
+
+.. _mailing_list: tf-m@lists.trustedfirmware.org
 
 --------------
 

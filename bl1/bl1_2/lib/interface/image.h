@@ -20,7 +20,7 @@ extern "C" {
 #endif
 
 #define BL1_2_IMAGE_DECRYPT_MAGIC_EXPECTED 0xDEADBEEF
-#define PAD_SIZE (BL1_HEADER_SIZE - CTR_IV_LEN - 1292 - \
+#define PAD_SIZE (BL1_HEADER_SIZE - CTR_IV_LEN - 1452 - \
                   sizeof(struct tfm_bl1_image_version_t) - 2 * sizeof(uint32_t))
 
 __PACKED_STRUCT tfm_bl1_image_version_t {
@@ -33,7 +33,7 @@ __PACKED_STRUCT tfm_bl1_image_version_t {
 __PACKED_STRUCT bl1_2_image_t {
     __PACKED_STRUCT  {
         uint8_t ctr_iv[CTR_IV_LEN];
-        uint8_t sig[1292];
+        uint8_t sig[1452];
     } header;
     __PACKED_STRUCT {
         struct tfm_bl1_image_version_t version;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,8 +12,8 @@
  * FixMe:
  * This is a beta quality driver for MPU in v8M. To be finalized.
  */
-
-enum mpu_armv8m_error_t mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
+FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_enable(
+                                          struct mpu_armv8m_dev_t *dev,
                                           uint32_t privdef_en,
                                           uint32_t hfnmi_en)
 {
@@ -45,7 +45,7 @@ enum mpu_armv8m_error_t mpu_armv8m_enable(struct mpu_armv8m_dev_t *dev,
     __DSB();
     __ISB();
 
-    return MPU_ARMV8M_OK;
+    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
 }
 
 enum mpu_armv8m_error_t mpu_armv8m_disable(struct mpu_armv8m_dev_t *dev)
@@ -58,7 +58,7 @@ enum mpu_armv8m_error_t mpu_armv8m_disable(struct mpu_armv8m_dev_t *dev)
     return MPU_ARMV8M_OK;
 }
 
-enum mpu_armv8m_error_t mpu_armv8m_region_enable(
+FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_region_enable(
                                 struct mpu_armv8m_dev_t *dev,
                                 struct mpu_armv8m_region_cfg_t *region_cfg)
 {
@@ -70,7 +70,7 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
 
     /*FIXME : Add complete error checking*/
     if ((region_cfg->region_base & ~MPU_RBAR_BASE_Msk) != 0) {
-        return MPU_ARMV8M_ERROR;
+        FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
     }
     /* region_limit doesn't need to be aligned but the scatter
      * file needs to be setup to ensure that partitions do not overlap.
@@ -106,10 +106,11 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
     __DSB();
     __ISB();
 
-    return MPU_ARMV8M_OK;
+    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
 }
 
-enum mpu_armv8m_error_t mpu_armv8m_region_disable(struct mpu_armv8m_dev_t *dev,
+FIH_RET_TYPE(enum mpu_armv8m_error_t) mpu_armv8m_region_disable(
+                                                  struct mpu_armv8m_dev_t *dev,
                                                   uint32_t region_nr)
 {
 
@@ -129,16 +130,17 @@ enum mpu_armv8m_error_t mpu_armv8m_region_disable(struct mpu_armv8m_dev_t *dev,
     /*Restore main MPU control*/
     mpu->CTRL = ctrl_before;
 
-    return MPU_ARMV8M_OK;
+    FIH_RET(fih_int_encode(MPU_ARMV8M_OK));
 }
 
 enum mpu_armv8m_error_t mpu_armv8m_clean(struct mpu_armv8m_dev_t *dev)
 {
     MPU_Type *mpu = (MPU_Type *)dev->base;
     uint32_t i = (mpu->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
+    fih_int fih_rc = FIH_FAILURE;
 
     while (i > 0) {
-        mpu_armv8m_region_disable(dev, i - 1);
+        FIH_CALL(mpu_armv8m_region_disable, fih_rc, dev, i - 1);
         i--;
     }
 

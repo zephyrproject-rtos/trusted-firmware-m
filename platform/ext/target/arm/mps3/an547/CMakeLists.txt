@@ -26,7 +26,7 @@ endif()
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547_s.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547.c
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -37,12 +37,12 @@ target_add_scatter_file(tfm_s
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547_ns.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547.c
     )
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an547_ns.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/an547_ns.ld>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/an547_ns.icf>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_ns.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_ns.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_ns.icf>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
@@ -55,12 +55,12 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547_bl2.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an547.c
     )
     target_add_scatter_file(bl2
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an547_bl2.sct>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/an547_bl2.ld>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/an547_bl2.icf>
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_bl2.sct>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_bl2.ld>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_bl2.icf>
     )
 endif()
 
@@ -95,14 +95,7 @@ target_sources(platform_s
         native_drivers/ppc_sse300_drv.c
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         native_drivers/uart_cmsdk_drv.c
-        spm_hal.c
-        $<$<BOOL:${TFM_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
-        target_cfg.c
         tfm_peripherals_def.c
-        tfm_hal_isolation.c
-        tfm_hal_platform.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -112,11 +105,6 @@ target_sources(tfm_sprt
         # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
         # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
-)
-
-target_link_libraries(platform_s
-    PRIVATE
-        tfm_utilities
 )
 
 target_compile_options(platform_s
@@ -180,3 +168,14 @@ if(BL2)
             native_drivers
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        target_cfg.c
+        tfm_hal_isolation.c
+        tfm_hal_platform.c
+        faults.c
+        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
+)

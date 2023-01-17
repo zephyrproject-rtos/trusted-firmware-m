@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2021, NXP Semiconductors. All rights reserved.
 # Copyright (c) 2020, Linaro. All rights reserved.
 #
@@ -39,8 +39,7 @@ target_include_directories(platform_region_defs
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/startup_LPC55S69_cm33_core0_s.S>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_LPC55S69_cm33_core0_s.s>
+        ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_lpcxpresso55s69.c
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
@@ -50,8 +49,7 @@ target_add_scatter_file(tfm_s
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/startup_LPC55S69_cm33_core0_ns.S>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/startup_LPC55S69_cm33_core0_ns.s>
+            ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_lpcxpresso55s69.c
     )
     target_add_scatter_file(tfm_ns
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/LPC55S69_cm33_core0_ns.ld>
@@ -66,7 +64,7 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/startup_LPC55S69_cm33_core0_bl2.S>
+            ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_lpcxpresso55s69.c
     )
     target_add_scatter_file(bl2
             $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armgcc/LPC55S69_cm33_core0_bl2.ld>
@@ -98,10 +96,6 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        target_cfg.c
-        ../common/spm_hal.c
-        ../common/tfm_hal_isolation.c
-        ../common/tfm_hal_platform.c
         ../common/CMSIS_Driver/Driver_Flash_iap1.c
         ../common/CMSIS_Driver/Driver_USART.c
         ../common/Native_Driver/mpu_armv8m_drv.c
@@ -131,10 +125,15 @@ target_sources(platform_s
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/fsl_sbrk.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/debug_console/fsl_debug_console.c
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/str/fsl_str.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/services/src/tfm_platform_system.c>
+        ${NXP_HAL_FILE_PATH}/common/plat_attest_hal.c
+)
+
+target_link_libraries(platform_s
+    PRIVATE
+    # For attest HAL strnlen
+        tfm_sprt
 )
 
 target_compile_options(platform_s
@@ -261,3 +260,13 @@ if(BL2)
         project_template/bl2/hardware_init.c
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        target_cfg.c
+        ../common/faults.c
+        ../common/tfm_hal_isolation.c
+        ../common/tfm_hal_platform.c
+)

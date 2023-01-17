@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,7 +17,7 @@
 #include "ffm/interrupt.h"
 #include "load/interrupt_defs.h"
 
-static struct irq_load_info_t *p_tfm_timer0_irq_ldinf = NULL;
+static const struct irq_load_info_t *p_tfm_timer0_irq_ldinf = NULL;
 static void *p_timer0_pt = NULL;
 
 void TFM_TIMER0_IRQ_Handler(void)
@@ -23,7 +26,7 @@ void TFM_TIMER0_IRQ_Handler(void)
 }
 
 enum tfm_hal_status_t tfm_timer0_irq_init(void *p_pt,
-                                          struct irq_load_info_t *p_ildi)
+                                          const struct irq_load_info_t *p_ildi)
 {
     p_tfm_timer0_irq_ldinf = p_ildi;
     p_timer0_pt = p_pt;
@@ -45,7 +48,7 @@ void FF_TEST_UART_IRQ_Handler(void)
 }
 
 enum tfm_hal_status_t ff_test_uart_irq_init(void *p_pt,
-                                            struct irq_load_info_t *p_ildi)
+                                            const struct irq_load_info_t *p_ildi)
 {
     ff_test_uart_irq.p_ildi = p_ildi;
     ff_test_uart_irq.p_pt = p_pt;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
  * Copyright (c) 2019-2020 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +20,9 @@
 #include "platform_description.h"
 #include "device_definition.h"
 #include "region_defs.h"
-#include "tfm_secure_api.h"
 #include "tfm_plat_defs.h"
 #include "region.h"
-#include "tfm_assert.h"
+#include "utilities.h"
 #include "tfm_spm_log.h"
 
 /* The section names come from the scatter file */
@@ -234,8 +233,8 @@ int32_t mpc_init_cfg(void)
     /* == Flash region == */
 
     /* The regions have to be alligned to 32 kB to cover the AHB Flash Region. */
-    TFM_ASSERT((memory_regions.non_secure_partition_base % FLASH_SUBREGION_SIZE) == 0);
-    TFM_ASSERT(((memory_regions.non_secure_partition_limit+1) % FLASH_SUBREGION_SIZE) == 0);
+    SPM_ASSERT((memory_regions.non_secure_partition_base % FLASH_SUBREGION_SIZE) == 0);
+    SPM_ASSERT(((memory_regions.non_secure_partition_limit+1) % FLASH_SUBREGION_SIZE) == 0);
 
     /* Flash region is divided into 20 sub-regions (sector). Each flash sub-regions (sector) is 32 kbytes. */
     /* 1) Set FLASH memory security access rule configuration to init value (0x3 = all regions set to secure and privileged user access) */
@@ -268,8 +267,8 @@ int32_t mpc_init_cfg(void)
 
 #ifdef BL2 /* Set secondary image region to NS, when BL2 is enabled */
     /* The regions have to be alligned to 32 kB to cover the AHB Flash Region. */
-    TFM_ASSERT((memory_regions.secondary_partition_base % FLASH_SUBREGION_SIZE) == 0);
-    TFM_ASSERT(((memory_regions.secondary_partition_limit+1) % FLASH_SUBREGION_SIZE) == 0);
+    SPM_ASSERT((memory_regions.secondary_partition_base % FLASH_SUBREGION_SIZE) == 0);
+    SPM_ASSERT(((memory_regions.secondary_partition_limit+1) % FLASH_SUBREGION_SIZE) == 0);
 
     /* 2) Set FLASH memory security access rule configuration (set to non-secure and non-privileged user access allowed).*/
     ns_region_start_id = memory_regions.secondary_partition_base/FLASH_SUBREGION_SIZE;
@@ -313,8 +312,8 @@ int32_t mpc_init_cfg(void)
     /* == SRAM region == */
 
     /* The regions have to be alligned to 4 kB to cover the AHB RAM Region */
-    TFM_ASSERT((S_DATA_SIZE % DATA_SUBREGION_SIZE) == 0);
-    TFM_ASSERT(((S_DATA_SIZE + NS_DATA_SIZE) % DATA_SUBREGION_SIZE) == 0);
+    SPM_ASSERT((S_DATA_SIZE % DATA_SUBREGION_SIZE) == 0);
+    SPM_ASSERT(((S_DATA_SIZE + NS_DATA_SIZE) % DATA_SUBREGION_SIZE) == 0);
 
     /* Security access rules for RAM (0x3 = all regions set to secure and privileged user access*/
     AHB_SECURE_CTRL->SEC_CTRL_RAM0[0].MEM_RULE[0]= 0x33333333U; /* 0x2000_0000 - 0x2000_7FFF */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +7,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include "tfm_attest_hal.h"
 #include "tfm_plat_boot_seed.h"
 #include "tfm_plat_device_id.h"
@@ -47,6 +48,7 @@ tfm_attest_hal_get_verification_service(uint32_t *size, uint8_t *buf)
 {
     enum tfm_plat_err_t err;
     size_t otp_size;
+    size_t copy_size;
 
     err = tfm_plat_otp_read(PLAT_OTP_ID_VERIFICATION_SERVICE_URL, *size, buf);
     if(err != TFM_PLAT_ERR_SUCCESS) {
@@ -58,7 +60,10 @@ tfm_attest_hal_get_verification_service(uint32_t *size, uint8_t *buf)
         return err;
     }
 
-    *size = tfm_strnlen((char*)buf, otp_size);
+    /* Actually copied data is always the smaller */
+    copy_size = *size < otp_size ? *size : otp_size;
+    /* String content */
+    *size = tfm_strnlen((char*)buf, copy_size);
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -68,6 +73,7 @@ tfm_attest_hal_get_profile_definition(uint32_t *size, uint8_t *buf)
 {
     enum tfm_plat_err_t err;
     size_t otp_size;
+    size_t copy_size;
 
     err = tfm_plat_otp_read(PLAT_OTP_ID_PROFILE_DEFINITION, *size, buf);
     if(err != TFM_PLAT_ERR_SUCCESS) {
@@ -79,7 +85,10 @@ tfm_attest_hal_get_profile_definition(uint32_t *size, uint8_t *buf)
         return err;
     }
 
-    *size = tfm_strnlen((char*)buf, otp_size);
+    /* Actually copied data is always the smaller */
+    copy_size = *size < otp_size ? *size : otp_size;
+    /* String content */
+    *size = tfm_strnlen((char*)buf, copy_size);
 
     return TFM_PLAT_ERR_SUCCESS;
 }
@@ -101,6 +110,7 @@ enum tfm_plat_err_t tfm_plat_get_implementation_id(uint32_t *size,
 {
     enum tfm_plat_err_t err;
     size_t otp_size;
+    size_t copy_size;
 
     err = tfm_plat_otp_read(PLAT_OTP_ID_IMPLEMENTATION_ID, *size, buf);
     if(err != TFM_PLAT_ERR_SUCCESS) {
@@ -112,27 +122,69 @@ enum tfm_plat_err_t tfm_plat_get_implementation_id(uint32_t *size,
         return err;
     }
 
-    *size = otp_size;
+    /* Actually copied data is always the smaller */
+    copy_size = *size < otp_size ? *size : otp_size;
+    /* Binary data */
+    *size = copy_size;
 
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t tfm_plat_get_hw_version(uint32_t *size, uint8_t *buf)
+enum tfm_plat_err_t tfm_plat_get_cert_ref(uint32_t *size, uint8_t *buf)
 {
     enum tfm_plat_err_t err;
     size_t otp_size;
+    size_t copy_size;
 
-    err = tfm_plat_otp_read(PLAT_OTP_ID_HW_VERSION, *size, buf);
+    err = tfm_plat_otp_read(PLAT_OTP_ID_CERT_REF, *size, buf);
     if(err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
-    err =  tfm_plat_otp_get_size(PLAT_OTP_ID_HW_VERSION, &otp_size);
+    err =  tfm_plat_otp_get_size(PLAT_OTP_ID_CERT_REF, &otp_size);
     if(err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
-    *size = tfm_strnlen((char*)buf, otp_size);
+    /* Actually copied data is always the smaller */
+    copy_size = *size < otp_size ? *size : otp_size;
+    /* String content */
+    *size = tfm_strnlen((char*)buf, copy_size);
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_attest_hal_get_platform_config(uint32_t *size,
+                                                       uint8_t  *buf)
+{
+    uint32_t dummy_plat_config = 0xDEADBEEF;
+
+    if (*size < sizeof(dummy_plat_config)) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+     memcpy(buf, &dummy_plat_config, sizeof(dummy_plat_config));
+     *size = sizeof(dummy_plat_config);
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+enum tfm_plat_err_t tfm_attest_hal_get_platform_hash_algo(uint32_t *size,
+                                                          uint8_t *buf)
+{
+#ifdef MEASUREMENT_HASH_ALGO_NAME
+    const char hash_algo[] = MEASUREMENT_HASH_ALGO_NAME;
+#else
+    const char hash_algo[] = "not-hash-extended";
+#endif
+
+    if (*size < sizeof(hash_algo) - 1) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* Not including the null-terminator. */
+     memcpy(buf, hash_algo, sizeof(hash_algo) - 1);
+    *size = sizeof(hash_algo) - 1;
 
     return TFM_PLAT_ERR_SUCCESS;
 }

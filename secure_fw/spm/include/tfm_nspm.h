@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,7 +14,7 @@
 
 #define TFM_NS_CLIENT_INVALID_ID            ((int32_t)0)
 
-#if !defined(TFM_MULTI_CORE_TOPOLOGY)
+#ifdef CONFIG_TFM_USE_TRUSTZONE
 /*
  * The macro cmse_nsfptr_create defined in the gcc library uses the non-standard
  * gcc C lanuage extension 'typeof'. TF-M is built with '-std=c99' so typeof
@@ -37,8 +39,8 @@
 #else
 #define __tfm_nspm_secure_gateway_attributes__ \
         __attribute__((cmse_nonsecure_entry))
-#endif /* !__ARMCC_VERSION */
-#endif /* __GNUC__ && !TFM_MULTI_CORE_TOPOLOGY */
+#endif /* !defined(__ARMCC_VERSION) && !defined(__ICCARM__) */
+#endif /* CONFIG_TFM_USE_TRUSTZONE */
 
 /**
  * \brief initialise the NS context database

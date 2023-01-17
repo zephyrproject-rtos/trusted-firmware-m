@@ -421,13 +421,6 @@ enum tfm_plat_err_t ppc_init_cfg(void)
     err |= Driver_PPC_SSE300_PERIPH0.ConfigSecurity(
                                         WATCHDOG_PERIPH_PPC0_POS_MASK,
                                         PPC_SSE300_NONSECURE_CONFIG);
-#ifdef TEST_NS_FPU
-    /* Grant un-privileged access for TIMER1 in NS domain */
-    err |= Driver_PPC_SSE300_PERIPH0.ConfigPrivilege(
-                                        SYSTEM_TIMER1_PERIPH_PPC0_POS_MASK,
-                                        PPC_SSE300_NONSECURE_CONFIG,
-                                        PPC_SSE300_PRIV_AND_NONPRIV_CONFIG);
-#endif
 
     /* Grant non-secure access to peripherals on PERIPH1 */
     err |= Driver_PPC_SSE300_PERIPH1.Initialize();

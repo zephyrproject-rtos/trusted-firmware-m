@@ -26,7 +26,7 @@ endif()
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an552_s.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an552.c
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -37,18 +37,18 @@ target_add_scatter_file(tfm_s
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an552_ns.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an552.c
     )
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an552_ns.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/an552_ns.ld>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/an552_ns.icf>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_ns.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_ns.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_ns.icf>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
             $<$<C_COMPILER_ID:ARMClang>:CMSIS_5_RTX_V8MMN>
-            $<$<AND:$<C_COMPILER_ID:GNU>,$<STREQUAL:${CONFIG_TFM_FP},hard>>:CMSIS_5_RTX_V8MMFN>
-            $<$<AND:$<C_COMPILER_ID:GNU>,$<STREQUAL:${CONFIG_TFM_FP},soft>>:CMSIS_5_RTX_V8MMN>
+            $<$<AND:$<C_COMPILER_ID:GNU>,$<OR:$<BOOL:${CONFIG_TFM_ENABLE_FP}>,$<BOOL:${CONFIG_TFM_ENABLE_MVE_FP}>>>:CMSIS_5_RTX_V8MMFN>
+            $<$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<OR:$<BOOL:${CONFIG_TFM_ENABLE_FP}>,$<BOOL:${CONFIG_TFM_ENABLE_MVE_FP}>>>>:CMSIS_5_RTX_V8MMN>
             $<$<C_COMPILER_ID:IAR>:CMSIS_5_RTX_V81MMN>
     )
     target_compile_options(tfm_ns
@@ -64,12 +64,12 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an552_bl2.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/device/source/startup_an552.c
     )
     target_add_scatter_file(bl2
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/armclang/an552_bl2.sct>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/gcc/an552_bl2.ld>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/iar/an552_bl2.icf>
+            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_bl2.sct>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_bl2.ld>
+            $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_bl2.icf>
     )
 endif()
 
@@ -105,14 +105,7 @@ target_sources(platform_s
         native_drivers/emulated_flash_drv.c
         native_drivers/syscounter_armv8-m_cntrl_drv.c
         native_drivers/uart_cmsdk_drv.c
-        spm_hal.c
-        $<$<AND:$<BOOL:${TFM_PSA_API}>,$<NOT:$<BOOL:${TEST_NS_FPU}>>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
-        target_cfg.c
         tfm_peripherals_def.c
-        tfm_hal_isolation.c
-        tfm_hal_platform.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -122,25 +115,6 @@ target_sources(tfm_sprt
         # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
         # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
-
-        # FPU client test partition access the timer as ARoT Partitions.
-        # Put the driver to SPRT so that FPU tests can access it.
-        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
-        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-)
-
-# Adding new defined handler function to the library where the weak handler
-# funtion symbol are, to override weak handler funtion.
-# Otherwise the weak handler funtion cannot be replaced by the new defined
-# hanlder function which symbol is in another library.
-target_sources(tfm_s
-    PRIVATE
-        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
-)
-
-target_link_libraries(platform_s
-    PRIVATE
-        tfm_utilities
 )
 
 target_compile_options(platform_s
@@ -152,6 +126,7 @@ target_compile_options(platform_s
 target_compile_definitions(platform_s
     PUBLIC
         $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
+        $<$<BOOL:${TEST_S_FPU}>:TEST_S_FPU>
 )
 
 #========================= Platform Non-Secure ================================#
@@ -164,6 +139,8 @@ target_sources(platform_ns
         device/source/system_core_init.c
         native_drivers/uart_cmsdk_drv.c
         native_drivers/systimer_armv8-m_drv.c
+    INTERFACE
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/an552_ns_init.c>
 )
 
 target_include_directories(platform_ns
@@ -179,15 +156,7 @@ target_include_directories(platform_ns
         device/source/armclang
         native_drivers
         partition
-)
-
-# Adding new defined handler function to the library where the weak handler
-# funtion symbol are, to override weak handler funtion.
-# Otherwise the weak handler funtion cannot be replaced by the new defined
-# hanlder function which symbol is in another library.
-target_sources(tfm_ns
-    PRIVATE
-        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_fp_test_interrupt.c>
+        ${CMAKE_SOURCE_DIR}/platform/ext/cmsis
 )
 
 #========================= Platform BL2 =======================================#
@@ -222,3 +191,14 @@ if(BL2)
             native_drivers
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        target_cfg.c
+        tfm_hal_isolation.c
+        tfm_hal_platform.c
+        faults.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c
+)

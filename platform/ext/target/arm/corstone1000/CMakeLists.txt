@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -18,14 +20,14 @@ target_include_directories(platform_region_defs
 
 target_compile_definitions(platform_region_defs
     INTERFACE
-        $<$<BOOL:${TEST_S}>:TEST_S>
+        $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
 )
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_corstone1000_s.S>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_corstone1000.c>
 )
 target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_s.ld>
@@ -33,10 +35,10 @@ target_add_scatter_file(tfm_s
 
 target_sources(bl2
     PRIVATE
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/startup_corstone1000_bl.S>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_corstone1000.c>
 )
 target_add_scatter_file(bl2
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/corstone1000_bl2.ld>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_bl2.ld>
 )
 
 #========================= Platform Secure ====================================#
@@ -68,14 +70,11 @@ target_sources(platform_s
         Native_Driver/mhu_v2_x.c
         Native_Driver/watchdog.c
         Native_Driver/arm_watchdog_drv.c
-        tfm_hal_multi_core.c
-        tfm_hal_isolation.c
-        tfm_hal_platform.c
-        ${PLATFORM_DIR}/ext/common/tfm_hal_nvic.c
         $<$<BOOL:TFM_PARTITION_PLATFORM>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
         fw_update_agent/uefi_capsule_parser.c
         fw_update_agent/fwu_agent.c
-        $<$<BOOL:${TEST_S}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
+        fw_update_agent/uefi_fmp.c
+        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
 )
 
 if (PLATFORM_IS_FVP)
@@ -94,10 +93,20 @@ target_sources(platform_s
 endif()
 
 target_compile_definitions(platform_s
-    PRIVATE
+    PUBLIC
+        $<$<BOOL:${EXTERNAL_SYSTEM_SUPPORT}>:EXTERNAL_SYSTEM_SUPPORT>
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
-        $<$<BOOL:${TEST_S}>:TEST_S>
+    PRIVATE
+        $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
+        $<$<BOOL:${ENABLE_FWU_AGENT_DEBUG_LOGS}>:ENABLE_FWU_AGENT_DEBUG_LOGS>
 )
+
+if (TFM_PARTITION_CRYPTO)
+    target_include_directories(platform_crypto_keys
+        PUBLIC
+            .
+    )
+endif()
 
 #========================= Platform BL2 =======================================#
 
@@ -115,6 +124,7 @@ target_sources(platform_bl2
         fip_parser/fip_parser.c
         fw_update_agent/fwu_agent.c
         bl2_security_cnt.c
+        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
 )
 
 if (PLATFORM_IS_FVP)
@@ -135,7 +145,8 @@ endif()
 target_compile_definitions(platform_bl2
     PRIVATE
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
-        $<$<BOOL:${TEST_S}>:TEST_S>
+        $<$<BOOL:${TFM_S_REG_TEST}>:TFM_S_REG_TEST>
+        $<$<BOOL:${ENABLE_FWU_AGENT_DEBUG_LOGS}>:ENABLE_FWU_AGENT_DEBUG_LOGS>
 )
 
 # boot_hal_bl2.c is compiled as part of 'bl2' target and not inside
@@ -171,10 +182,10 @@ target_include_directories(platform_bl2
         fip_parser
         Native_Driver
         fw_update_agent
+        .
     INTERFACE
         cc312
     PRIVATE
-        .
         CMSIS_Driver/Config
         Device/Config
         ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
@@ -185,3 +196,33 @@ target_include_directories(platform_bl2
 #========================= BL1 component =======================================#
 
 add_subdirectory(bl1)
+
+#========================= ns_agent_mailbox ===================================#
+
+target_sources(tfm_psa_rot_partition_ns_agent_mailbox
+    PRIVATE
+        tfm_hal_multi_core.c
+)
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        tfm_hal_isolation.c
+        tfm_hal_platform.c
+        $<$<BOOL:${TFM_S_REG_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/target_cfg.c>
+)
+
+#========================= tfm_adac ============================================#
+
+if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
+    target_compile_definitions(platform_bl2
+        PRIVATE
+            PLATFORM_PSA_ADAC_SECURE_DEBUG
+    )
+
+    target_link_libraries(trusted-firmware-m-psa-adac
+        PRIVATE
+            platform_bl2
+    )
+endif()

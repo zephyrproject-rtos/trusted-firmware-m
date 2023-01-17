@@ -25,6 +25,8 @@ extern "C" {
 #define TFM_TIMER1_IRQ           (TIMER1_IRQn)
 #define FF_TEST_UART_IRQ         (UART1_Tx_IRQn)
 #define FF_TEST_UART_IRQ_Handler UARTTX1_Handler
+#define TFM_FPU_S_TEST_IRQ       (TFM_FPU_S_TEST_IRQn)
+#define TFM_FPU_NS_TEST_IRQ      (TFM_FPU_NS_TEST_IRQn)
 
 struct platform_data_t;
 

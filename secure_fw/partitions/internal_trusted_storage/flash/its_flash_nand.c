@@ -6,10 +6,10 @@
  *
  */
 
-#include "its_flash_nand.h"
+#include <string.h>
 
+#include "its_flash_nand.h"
 #include "flash_fs/its_flash_fs.h"
-#include "tfm_memory_utils.h"
 
 /* Valid entries for data item width */
 static const uint32_t data_width_byte[] = {
@@ -73,9 +73,9 @@ static psa_status_t its_flash_nand_read(const struct its_flash_fs_config_t *cfg,
     }
 
     if (block_id == flash_dev->buf_block_id_0) {
-        (void)tfm_memcpy(buff, flash_dev->write_buf_0 + offset, size);
+        (void)memcpy(buff, flash_dev->write_buf_0 + offset, size);
     } else if (block_id == flash_dev->buf_block_id_1) {
-        (void)tfm_memcpy(buff, flash_dev->write_buf_1 + offset, size);
+        (void)memcpy(buff, flash_dev->write_buf_1 + offset, size);
     } else {
         addr = get_phys_address(cfg, block_id, offset);
         remaining_len = size;
@@ -100,7 +100,7 @@ static psa_status_t its_flash_nand_read(const struct its_flash_fs_config_t *cfg,
             read_length = ((addr - aligned_addr + size >= data_width) ?
                                 (data_width - (addr - aligned_addr)) : size);
             /* Copy the read data. */
-            tfm_memcpy(buff, temp_buffer + addr - aligned_addr, read_length);
+            memcpy(buff, temp_buffer + addr - aligned_addr, read_length);
             remaining_len -= read_length;
         }
 
@@ -130,7 +130,7 @@ static psa_status_t its_flash_nand_read(const struct its_flash_fs_config_t *cfg,
                 return PSA_ERROR_STORAGE_FAILURE;
             }
             /* Copy the read data. */
-            tfm_memcpy(buff + read_length, temp_buffer, remaining_len);
+            memcpy(buff + read_length, temp_buffer, remaining_len);
         }
     }
 
@@ -153,15 +153,15 @@ static psa_status_t its_flash_nand_write(
      * buffer if exists. If no more empty buffer, return error.
      */
     if (block_id == flash_dev->buf_block_id_0) {
-        (void)tfm_memcpy(flash_dev->write_buf_0 + offset, buff, size);
+        (void)memcpy(flash_dev->write_buf_0 + offset, buff, size);
     } else if (block_id == flash_dev->buf_block_id_1) {
-        (void)tfm_memcpy(flash_dev->write_buf_1 + offset, buff, size);
+        (void)memcpy(flash_dev->write_buf_1 + offset, buff, size);
     } else if (flash_dev->buf_block_id_0 == ITS_BLOCK_INVALID_ID) {
         flash_dev->buf_block_id_0 = block_id;
-        (void)tfm_memcpy(flash_dev->write_buf_0 + offset, buff, size);
+        (void)memcpy(flash_dev->write_buf_0 + offset, buff, size);
     } else if (flash_dev->buf_block_id_1 == ITS_BLOCK_INVALID_ID) {
         flash_dev->buf_block_id_1 = block_id;
-        (void)tfm_memcpy(flash_dev->write_buf_1 + offset, buff, size);
+        (void)memcpy(flash_dev->write_buf_1 + offset, buff, size);
     } else {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
@@ -196,7 +196,7 @@ static psa_status_t its_flash_nand_flush(
         }
 
         /* Clear the write buffer */
-        (void)tfm_memset(flash_dev->write_buf_0, 0, flash_dev->buf_size);
+        (void)memset(flash_dev->write_buf_0, 0, flash_dev->buf_size);
         flash_dev->buf_block_id_0 = ITS_BLOCK_INVALID_ID;
     } else if (block_id == flash_dev->buf_block_id_1) {
         addr = get_phys_address(cfg, flash_dev->buf_block_id_1, 0);
@@ -209,7 +209,7 @@ static psa_status_t its_flash_nand_flush(
         }
 
         /* Clear the write buffer */
-        (void)tfm_memset(flash_dev->write_buf_1, 0, flash_dev->buf_size);
+        (void)memset(flash_dev->write_buf_1, 0, flash_dev->buf_size);
         flash_dev->buf_block_id_1 = ITS_BLOCK_INVALID_ID;
     } else {
         return PSA_ERROR_GENERIC_ERROR;

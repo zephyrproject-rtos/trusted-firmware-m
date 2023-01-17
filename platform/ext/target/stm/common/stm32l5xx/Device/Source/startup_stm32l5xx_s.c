@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,21 +22,15 @@
  */
 
 #include "cmsis.h"
-#include "region.h"
-
-/*----------------------------------------------------------------------------
-  Exception / Interrupt Handler Function Prototype
- *----------------------------------------------------------------------------*/
-typedef void( *pFunc )( void );
 
 /*----------------------------------------------------------------------------
   External References
  *----------------------------------------------------------------------------*/
-#define __MSP_INITIAL_SP              REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
-#define __MSP_STACK_LIMIT             REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base)
-
-extern uint32_t __MSP_INITIAL_SP;
-extern uint32_t __MSP_STACK_LIMIT;
+extern uint32_t __INITIAL_SP;
+extern uint32_t __STACK_LIMIT;
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+extern uint64_t __STACK_SEAL;
+#endif
 
 extern void __PROGRAM_START(void) __NO_RETURN;
 
@@ -49,8 +43,8 @@ void Reset_Handler  (void) __NO_RETURN;
   Exception / Interrupt Handler
  *----------------------------------------------------------------------------*/
 #define DEFAULT_IRQ_HANDLER(handler_name)  \
-void handler_name(void); \
-__WEAK void handler_name(void) { \
+void __WEAK handler_name(void) __NO_RETURN; \
+void handler_name(void) { \
     while(1); \
 }
 
@@ -187,9 +181,9 @@ DEFAULT_IRQ_HANDLER(OTFDEC1_IRQHandler)
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-extern const pFunc __VECTOR_TABLE[];
-       const pFunc __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
-  (pFunc)(&__MSP_INITIAL_SP),           /*      Initial Stack Pointer */
+extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
+       const VECTOR_TABLE_Type __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
+  (VECTOR_TABLE_Type)(&__INITIAL_SP),/*      Initial Stack Pointer */
   Reset_Handler,                    /*      Reset Handler */
   NMI_Handler,                      /* -14: NMI Handler */
   HardFault_Handler,                /* -13: Hard Fault Handler */
@@ -344,10 +338,15 @@ extern const pFunc __VECTOR_TABLE[];
  *----------------------------------------------------------------------------*/
 void Reset_Handler(void)
 {
-  __disable_irq();
-  __set_MSPLIM((uint32_t)(&__MSP_STACK_LIMIT));
+     __disable_irq();
+    __set_PSP((uint32_t)(&__INITIAL_SP));
 
-  SystemInit();   /* CMSIS System Initialization */
+    __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
+    __set_PSPLIM((uint32_t)(&__STACK_LIMIT));
 
-  __PROGRAM_START();                        /* Enter PreMain (C library entry point) */
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+    __TZ_set_STACKSEAL_S((uint32_t *)(&__STACK_SEAL));
+#endif
+    SystemInit();   /* CMSIS System Initialization */
+    __PROGRAM_START();                        /* Enter PreMain (C library entry point) */
 }

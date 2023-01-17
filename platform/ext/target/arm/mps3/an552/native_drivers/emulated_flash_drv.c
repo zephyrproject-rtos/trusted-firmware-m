@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited
+ * Copyright (c) 2021-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <arm_cmse.h>
 
 static int32_t is_range_valid(struct emulated_flash_dev_t *flash_dev,
                               uint32_t offset)
@@ -56,6 +57,28 @@ static int32_t is_sector_aligned(struct emulated_flash_dev_t *flash_dev,
     return rc;
 }
 
+static int32_t is_secure_alias_needed(uint32_t addr)
+{
+    int32_t rc = -1;
+
+    /* Only have to check it if the object is building for secure side */
+#if defined(__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+    cmse_address_info_t address_info;
+    /* Check if address can be accessed from non-secure */
+    address_info = cmse_TTA((void*)addr);
+    /* We only care about the security of the address here */
+    if(address_info.flags.nonsecure_read_ok) {
+        rc = 0;
+    }
+    else {
+        rc = 1;
+    }
+#else
+    rc = 0;
+#endif
+    return rc;
+}
+
 static int32_t is_flash_ready_to_write(const uint8_t *start_addr, uint32_t cnt)
 {
     int32_t rc = 0;
@@ -75,13 +98,22 @@ enum emulated_flash_error_t emulated_flash_read_data(struct emulated_flash_dev_t
                                                      uint32_t addr, void *data,
                                                      uint32_t cnt)
 {
-    uint32_t start_addr = dev->memory_base + addr;
+    uint32_t start_addr = 0;
     int32_t rc = 0;
 
     /* Check flash memory boundaries */
     rc = is_range_valid(dev, addr + cnt);
     if (rc != 0) {
         return EMULATED_FLASH_ERR_INVALID_PARAM;
+    }
+
+    /* Check which alias(S or NS) should be used to access the data */
+    rc = is_secure_alias_needed(addr + dev->memory_base_ns);
+    if(rc == 1) {
+        start_addr = dev->memory_base_s + addr;
+    }
+    else if(rc == 0) {
+        start_addr = dev->memory_base_ns + addr;
     }
 
     /* Flash interface just emulated over SRAM, use memcpy */
@@ -93,7 +125,7 @@ enum emulated_flash_error_t emulated_flash_program_data(struct emulated_flash_de
                                                         uint32_t addr, const void *data,
                                                         uint32_t cnt)
 {
-    uint32_t start_addr = dev->memory_base + addr;
+    uint32_t start_addr = 0;
     int32_t rc = 0;
 
     /* Check flash memory boundaries and alignment with minimal write size */
@@ -102,6 +134,15 @@ enum emulated_flash_error_t emulated_flash_program_data(struct emulated_flash_de
     rc |= is_write_aligned(dev, cnt);
     if (rc != 0) {
         return EMULATED_FLASH_ERR_INVALID_PARAM;
+    }
+
+    /* Check which alias(S or NS) should be used to access the data */
+    rc = is_secure_alias_needed(addr + dev->memory_base_ns);
+    if(rc == 1) {
+        start_addr = dev->memory_base_s + addr;
+    }
+    else if(rc == 0) {
+        start_addr = dev->memory_base_ns + addr;
     }
 
     /* Check if the flash area to write the data was erased previously */
@@ -118,14 +159,24 @@ enum emulated_flash_error_t emulated_flash_program_data(struct emulated_flash_de
 enum emulated_flash_error_t emulated_flash_erase_sector(struct emulated_flash_dev_t* dev,
                                                         uint32_t addr)
 {
-    uint32_t start_addr = dev->memory_base + addr;
-    uint32_t rc = 0;
+    uint32_t start_addr = 0;
+    int32_t rc = 0;
 
     rc  = is_range_valid(dev, addr);
     rc |= is_sector_aligned(dev, addr);
     if (rc != 0) {
         return EMULATED_FLASH_ERR_INVALID_PARAM;
     }
+
+    /* Check which alias(S or NS) should be used to access the data */
+    rc = is_secure_alias_needed(addr + dev->memory_base_ns);
+    if(rc == 1) {
+        start_addr = dev->memory_base_s + addr;
+    }
+    else if(rc == 0) {
+        start_addr = dev->memory_base_ns + addr;
+    }
+
 
     /* Flash interface just emulated over SRAM, use memset */
     memset((void *)start_addr,
@@ -137,7 +188,17 @@ enum emulated_flash_error_t emulated_flash_erase_sector(struct emulated_flash_de
 void emulated_flash_erase_chip(struct emulated_flash_dev_t* dev)
 {
     uint32_t i;
-    uint32_t addr = dev->memory_base;
+    uint32_t addr = 0;
+    int32_t rc = 0;
+
+    /* Only check 1 byte, as the whole memory should have the same security */
+    rc = is_secure_alias_needed(dev->memory_base_ns);
+    if(rc == 1) {
+        addr = dev->memory_base_s;
+    }
+    else if(rc == 0) {
+        addr = dev->memory_base_ns;
+    }
 
     for (i = 0; i < dev->data->sector_count; i++) {
         /* Flash interface just emulated over SRAM, use memset */

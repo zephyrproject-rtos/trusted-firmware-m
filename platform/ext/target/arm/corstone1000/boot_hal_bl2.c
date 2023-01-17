@@ -11,7 +11,7 @@
 #include "boot_hal.h"
 #include "Driver_Flash.h"
 #include "flash_layout.h"
-#include "bootutil/fault_injection_hardening.h"
+#include "fih.h"
 #include "bootutil/bootutil_log.h"
 #include "fip_parser.h"
 #include "flash_map/flash_map.h"
@@ -100,10 +100,12 @@ int32_t boot_platform_init(void)
         return 1;
     }
 
+#ifndef TFM_S_REG_TEST
     result = fill_bl2_flash_map_by_parsing_fips(BANK_0_PARTITION_OFFSET);
     if (result) {
         return 1;
     }
+#endif
 
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {

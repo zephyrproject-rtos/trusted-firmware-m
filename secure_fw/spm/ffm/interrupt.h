@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,7 +27,7 @@
  *                                partition.
  * \retval Any other value      The load info pointer associated with the signal
  */
-struct irq_load_info_t *get_irq_info_for_signal(
+const struct irq_load_info_t *get_irq_info_for_signal(
                                     const struct partition_load_info_t *p_ldinf,
                                     psa_signal_t signal);
 
@@ -39,7 +42,7 @@ struct irq_load_info_t *get_irq_info_for_signal(
  *  The input parameters are maintained by platforms and they must be init-ed
  *  in the interrupt init functions.
  */
-void spm_handle_interrupt(void *p_pt, struct irq_load_info_t *p_ildi);
+void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi);
 
 /*
  * Prepare execution context for deprivileged FLIH functions

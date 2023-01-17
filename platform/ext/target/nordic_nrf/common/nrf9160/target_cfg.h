@@ -32,6 +32,7 @@
  */
 
 #include "tfm_plat_defs.h"
+#include "region_defs.h"
 
 #define TFM_DRIVER_STDIO    Driver_USART1
 #define NS_DRIVER_STDIO     Driver_USART0
@@ -45,14 +46,14 @@ struct memory_region_limits {
     uint32_t non_secure_partition_limit;
     uint32_t veneer_base;
     uint32_t veneer_limit;
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
     uint32_t secondary_partition_base;
     uint32_t secondary_partition_limit;
-#endif /* BL2 */
-#ifdef NRF_NS_STORAGE
+#endif /* NRF_NS_SECONDARY */
+#ifdef NRF_NS_STORAGE_PARTITION_START
     uint32_t non_secure_storage_partition_base;
     uint32_t non_secure_storage_partition_limit;
-#endif
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 };
 
 /**

@@ -19,17 +19,22 @@
 
 #include "flash_layout.h"
 
-#define BL2_HEAP_SIZE           (0x0001000)
-#define BL2_MSP_STACK_SIZE      (0x0001800)
+#define BL2_HEAP_SIZE           (0x00001000)
+#define BL2_MSP_STACK_SIZE      (0x00001800)
 
-#define S_HEAP_SIZE             (0x0001000)
-#define S_MSP_STACK_SIZE_INIT   (0x0000400)
-#define S_MSP_STACK_SIZE        (0x0000800)
-#define S_PSP_STACK_SIZE        (0x0000800)
+#ifdef ENABLE_HEAP
+#define S_HEAP_SIZE             (0x00000200)
+#endif
 
-#define NS_HEAP_SIZE            (0x0001000)
-#define NS_MSP_STACK_SIZE       (0x00000A0)
-#define NS_PSP_STACK_SIZE       (0x0000140)
+#ifdef TFM_FIH_PROFILE_ON
+#define S_MSP_STACK_SIZE        (0x00000A40)
+#else
+#define S_MSP_STACK_SIZE        (0x00000800)
+#endif
+#define S_PSP_STACK_SIZE        (0x00000800)
+
+#define NS_HEAP_SIZE            (0x00001000)
+#define NS_STACK_SIZE           (0x000001E0)
 
 /* This size of buffer is big enough to store an attestation
  * token produced by initial attestation service

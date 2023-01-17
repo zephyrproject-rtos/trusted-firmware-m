@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -22,7 +25,7 @@ void TFM_TIMER0_IRQ_Handler(void)
 }
 
 enum tfm_hal_status_t tfm_timer0_irq_init(void *p_pt,
-                                          struct irq_load_info_t *p_ildi)
+                                          const struct irq_load_info_t *p_ildi)
 {
     timer0_irq.p_ildi = p_ildi;
     timer0_irq.p_pt = p_pt;

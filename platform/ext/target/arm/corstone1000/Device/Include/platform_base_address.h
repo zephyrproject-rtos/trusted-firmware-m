@@ -70,6 +70,7 @@
 #define CORSTONE1000_HOST_SHARED_RAM_BASE          (0x62000000U) /* Shared RAM                        */
 #define CORSTONE1000_HOST_XNVM_BASE                (0x68000000U) /* XNVM                              */
 #define CORSTONE1000_HOST_BASE_SYSTEM_CONTROL_BASE (0x7A010000U) /* Host SCB                          */
+#define CORSTONE1000_EXT_SYS_RESET_REG             (0x7A010310U) /* external system (cortex-M3)       */
 #define CORSTONE1000_HOST_FIREWALL_BASE            (0x7A800000U) /* Host Firewall                     */
 #define CORSTONE1000_HOST_INT_APBCOM_BASE          (0x7B900000U) /* Internal APBCOM                   */
 #define CORSTONE1000_HOST_FPGA_SCC_REGISTERS       (0x80000000U) /* FPGA SCC Registers                */

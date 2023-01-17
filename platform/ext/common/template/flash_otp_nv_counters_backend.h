@@ -16,7 +16,6 @@
 extern "C" {
 #endif
 #define OTP_NV_COUNTERS_INITIALIZED 0xC0DE8112U
-#define OTP_NV_COUNTERS_IS_VALID    0x3072C0DEU
 
 __PACKED_STRUCT flash_otp_nv_counters_region_t {
     /* Must be the first item */
@@ -33,7 +32,7 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
         uint8_t boot_seed[32];
         uint8_t lcs[4];
         uint8_t implementation_id[32];
-        uint8_t hw_version[32];
+        uint8_t cert_ref[32];
         uint8_t verification_service_url[32];
         uint8_t profile_definition[32];
 
@@ -43,15 +42,27 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
 
         uint8_t bl2_nv_counter_0[64];
         uint8_t bl2_nv_counter_1[64];
-
         uint8_t bl2_nv_counter_2[64];
+        uint8_t bl2_nv_counter_3[64];
+
         uint8_t bl2_rotpk_2[32];
+        uint8_t bl2_rotpk_3[32];
 #endif /* BL2 */
 
 #ifdef BL1
         uint8_t bl1_rotpk_0[32];
         uint8_t bl1_nv_counter_0[16];
 #endif /* BL1 */
+
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+        uint8_t ns_nv_counter_0[64];
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+        uint8_t ns_nv_counter_1[64];
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+        uint8_t ns_nv_counter_2[64];
+#endif
 
         uint8_t entropy_seed[64];
 
@@ -68,7 +79,7 @@ __PACKED_STRUCT flash_otp_nv_counters_region_t {
     /* Must be last item, so that it can be written separately after the main
      * write operation has succeeded
      */
-    uint32_t is_valid;
+    uint32_t swap_count;
 };
 
 /**

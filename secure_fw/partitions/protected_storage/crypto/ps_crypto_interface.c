@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,10 +8,10 @@
 #include "ps_crypto_interface.h"
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
-#include "tfm_memory_utils.h"
 
 #ifndef PS_CRYPTO_AEAD_ALG
 #define PS_CRYPTO_AEAD_ALG PSA_ALG_GCM
@@ -40,9 +40,16 @@ static uint8_t ps_crypto_iv_buf[PS_IV_LEN_BYTES];
 
 psa_status_t ps_crypto_init(void)
 {
-    /* Currently, no initialisation is required. This may change if key
-     * handling is changed.
+    /* For GCM and CCM it is essential that nonce doesn't get repeated. If there
+     * is no rollback protection, an attacker could try to rollback the storage and
+     * encrypt another plaintext block with same IV/Key pair; this breaks GCM and CCM
+     * usage rules.
      */
+#ifndef PS_ROLLBACK_PROTECTION
+    if (PS_CRYPTO_AEAD_ALG == PSA_ALG_GCM || PS_CRYPTO_AEAD_ALG == PSA_ALG_CCM) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+#endif
     return PSA_SUCCESS;
 }
 
@@ -62,14 +69,20 @@ psa_status_t ps_crypto_setkey(const uint8_t *key_label, size_t key_label_len)
     psa_set_key_type(&attributes, PS_KEY_TYPE);
     psa_set_key_bits(&attributes, PSA_BYTES_TO_BITS(PS_KEY_LEN_BYTES));
 
-    /* Set up a key derivation operation with HUK derivation as the alg */
-    status = psa_key_derivation_setup(&op, TFM_CRYPTO_ALG_HUK_DERIVATION);
+    status = psa_key_derivation_setup(&op, PSA_ALG_HKDF(PSA_ALG_SHA_256));
     if (status != PSA_SUCCESS) {
         return status;
     }
 
+    /* Set up a key derivation operation with HUK  */
+    status = psa_key_derivation_input_key(&op, PSA_KEY_DERIVATION_INPUT_SECRET,
+                                          TFM_BUILTIN_KEY_ID_HUK);
+    if (status != PSA_SUCCESS) {
+        goto err_release_op;
+    }
+
     /* Supply the PS key label as an input to the key derivation */
-    status = psa_key_derivation_input_bytes(&op, PSA_KEY_DERIVATION_INPUT_LABEL,
+    status = psa_key_derivation_input_bytes(&op, PSA_KEY_DERIVATION_INPUT_INFO,
                                             key_label,
                                             key_label_len);
     if (status != PSA_SUCCESS) {
@@ -114,7 +127,7 @@ psa_status_t ps_crypto_destroykey(void)
 
 void ps_crypto_set_iv(const union ps_crypto_t *crypto)
 {
-    (void)tfm_memcpy(ps_crypto_iv_buf, crypto->ref.iv, PS_IV_LEN_BYTES);
+    (void)memcpy(ps_crypto_iv_buf, crypto->ref.iv, PS_IV_LEN_BYTES);
 }
 
 psa_status_t ps_crypto_get_iv(union ps_crypto_t *crypto)
@@ -144,8 +157,8 @@ psa_status_t ps_crypto_get_iv(union ps_crypto_t *crypto)
     uint64_t iv_l;
     uint32_t iv_h;
 
-    (void)tfm_memcpy(&iv_l, ps_crypto_iv_buf, sizeof(iv_l));
-    (void)tfm_memcpy(&iv_h, (ps_crypto_iv_buf+sizeof(iv_l)), sizeof(iv_h));
+    (void)memcpy(&iv_l, ps_crypto_iv_buf, sizeof(iv_l));
+    (void)memcpy(&iv_h, (ps_crypto_iv_buf+sizeof(iv_l)), sizeof(iv_h));
     iv_l++;
     /* If overflow, increment the MSBs */
     if (iv_l == 0) {
@@ -163,10 +176,10 @@ psa_status_t ps_crypto_get_iv(union ps_crypto_t *crypto)
     }
 
     /* Update the local buffer */
-    (void)tfm_memcpy(ps_crypto_iv_buf, &iv_l, sizeof(iv_l));
-    (void)tfm_memcpy((ps_crypto_iv_buf + sizeof(iv_l)), &iv_h, sizeof(iv_h));
+    (void)memcpy(ps_crypto_iv_buf, &iv_l, sizeof(iv_l));
+    (void)memcpy((ps_crypto_iv_buf + sizeof(iv_l)), &iv_h, sizeof(iv_h));
     /* Update the caller buffer */
-    (void)tfm_memcpy(crypto->ref.iv, ps_crypto_iv_buf, PS_IV_LEN_BYTES);
+    (void)memcpy(crypto->ref.iv, ps_crypto_iv_buf, PS_IV_LEN_BYTES);
 
     return PSA_SUCCESS;
 }
@@ -193,7 +206,7 @@ psa_status_t ps_crypto_encrypt_and_tag(union ps_crypto_t *crypto,
 
     /* Copy the tag out of the output buffer */
     *out_len -= PS_TAG_LEN_BYTES;
-    (void)tfm_memcpy(crypto->ref.tag, (out + *out_len), PS_TAG_LEN_BYTES);
+    (void)memcpy(crypto->ref.tag, (out + *out_len), PS_TAG_LEN_BYTES);
 
     return PSA_SUCCESS;
 }
@@ -210,7 +223,7 @@ psa_status_t ps_crypto_auth_and_decrypt(const union ps_crypto_t *crypto,
     psa_status_t status;
 
     /* Copy the tag into the input buffer */
-    (void)tfm_memcpy((in + in_len), crypto->ref.tag, PS_TAG_LEN_BYTES);
+    (void)memcpy((in + in_len), crypto->ref.tag, PS_TAG_LEN_BYTES);
     in_len += PS_TAG_LEN_BYTES;
 
     status = psa_aead_decrypt(ps_key, PS_CRYPTO_ALG,

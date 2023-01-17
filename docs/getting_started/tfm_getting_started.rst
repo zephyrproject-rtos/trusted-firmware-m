@@ -25,9 +25,9 @@ To build & run TF-M:
 
     - Follow the this guide to set up and check your environment.
     - Follow the
-      :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`
+      :doc:`Build instructions </building/tfm_build_instruction>`
       to compile and build the TF-M source.
-    - Follow the :doc:`Run TF-M examples on Arm platforms </technical_references/instructions/run_tfm_examples_on_arm_platforms>`
+    - Follow the :doc:`Run TF-M examples on Arm platforms </building/run_tfm_examples_on_arm_platforms>`
       for information on running the example.
 
 To port TF-M to a another system or OS, follow the
@@ -99,7 +99,7 @@ The following environments are supported:
 
         .. code-block:: bash
 
-            set PATH=<CMake_Path>\bin;$PATH
+            set PATH=<CMake_Path>\bin;%PATH%
 
 ###########################
 Install python dependencies
@@ -153,7 +153,7 @@ To compile TF-M code, at least one of the supported compiler toolchains have to
 be available in the build environment. The currently supported compiler
 versions are:
 
-    - Arm Compiler v6.10.1 ~ v6.14.1
+    - Arm Compiler v6.10.1 ~ v6.14, v6.18+
 
       .. tabs::
 
@@ -176,16 +176,18 @@ versions are:
 
                 .. code-block:: bash
 
-                    set PATH=<ARM_CLANG_PATH>\bin;$PATH
+                    set PATH=<ARM_CLANG_PATH>\bin;%PATH%
                     set ARM_PRODUCT_PATH=<ARM_CLANG_PATH>\sw\mappings
 
               - Configure proper tool variant and license.
 
       .. note::
 
-          Arm compiler starting from *v6.15* may cause MemManage fault in TF-M
-          higher isolation levels. The issue is under investigation and
-          recommended to using versions prior to v6.15.
+          Arm compiler v6.15 ~ v6.17 may cause MemManage fault.
+          This defect has been fixed since Arm compiler v6.18.
+          See [SDCOMP-59788] in Armclang v6.18 `release note`__ for details.
+
+          .. __: https://developer.arm.com/-/media/Arm%20Developer%20Community/Downloads/Arm%20Compiler%20for%20Embedded/6-18/Release%20notes%20for%20Arm%20Compiler%20for%20Embedded%206.pdf
 
     - GNU Arm compiler v7.3.1+
 
@@ -207,7 +209,7 @@ versions are:
 
                 .. code-block:: bash
 
-                    export PATH=<GNU_ARM_PATH>\bin;$PATH
+                    set PATH=<GNU_ARM_PATH>\bin;%PATH%
 
       .. note::
 
@@ -235,7 +237,7 @@ versions are:
 
                 .. code-block:: bash
 
-                    export PATH=<IAR_COMPILER_PATH>\bin;$PATH
+                    set PATH=<IAR_COMPILER_PATH>\bin;%PATH%
 
 #############################
 Build AN521 regression sample
@@ -446,16 +448,17 @@ Dependency chain
     cbor2 --> python
     click --> python
     imgtool --> python
+    kconfiglib --> python
    @enduml
 
 .. rubric:: Next steps
 
 Here are some next steps for exploring TF-M:
 
-    - Detailed :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
-    - :doc:`IAR Build instructions </technical_references/instructions/tfm_build_instruction_iar>`.
-    - Try other :doc:`Samples and Demos </technical_references/instructions/run_tfm_examples_on_arm_platforms>`.
-    - :doc:`Documentation generation </technical_references/instructions/documentation_generation>`.
+    - Detailed :doc:`Build instructions </building/tfm_build_instruction>`.
+    - :doc:`IAR Build instructions </building/tfm_build_instruction_iar>`.
+    - Try other :doc:`Samples and Demos </building/run_tfm_examples_on_arm_platforms>`.
+    - :doc:`Documentation generation </building/documentation_generation>`.
 
 --------------
 

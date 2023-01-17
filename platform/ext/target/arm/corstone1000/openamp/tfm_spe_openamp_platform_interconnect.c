@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -48,7 +48,7 @@ static const void *get_caller_private_data(int32_t client_id)
 {
     if (!registered_msg) {
         SPMLOG_ERRMSG("FATAL_ERROR: Map pointer cannot be NULL.\r\n");
-        TFM_CORE_ASSERT(0);
+        SPM_ASSERT(0);
     }
 
     return registered_msg;
@@ -112,4 +112,3 @@ int32_t tfm_inter_core_comm_init(void)
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-

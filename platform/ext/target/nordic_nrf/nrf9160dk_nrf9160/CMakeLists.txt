@@ -1,5 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, Nordic Semiconductor ASA.
+# Copyright (c) 2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -18,7 +19,6 @@ target_include_directories(platform_region_defs
 
 target_sources(platform_s
     PRIVATE
-        tfm_hal_platform.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
 
@@ -47,3 +47,10 @@ if (TFM_PARTITION_PLATFORM)
 install(FILES       services/include/tfm_ioctl_api.h
         DESTINATION ${TFM_INSTALL_PATH}/interface/include)
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        tfm_hal_platform.c
+)

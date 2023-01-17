@@ -35,10 +35,7 @@ MEMORY
 }
 
 __heap_size__  = S_HEAP_SIZE;
-#if !defined(TFM_PSA_API)
-__psp_stack_size__ = S_PSP_STACK_SIZE;
-#endif
-__msp_init_stack_size__ = S_MSP_STACK_SIZE_INIT;
+__msp_stack_size__ = S_MSP_STACK_SIZE;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a libc_nano.a)
@@ -61,15 +58,15 @@ SECTIONS
         __copy_table_start__ = .;
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA))
+        LONG (SIZEOF(.TFM_DATA) / 4)
 
         LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
         LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA) / 4)
 
         LONG (LOADADDR(.TFM_APP_ROT_LINKER_DATA))
         LONG (ADDR(.TFM_APP_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA) / 4)
         __copy_table_end__ = .;
     } > FLASH
 
@@ -77,31 +74,34 @@ SECTIONS
     {
         __zero_table_start__ = .;
         LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS))
-#if !defined(TFM_PSA_API)
-        LONG (ADDR(.TFM_SECURE_STACK))
-        LONG (SIZEOF(.TFM_SECURE_STACK))
-#endif /* !defined(TFM_PSA_API) */
+        LONG (SIZEOF(.TFM_BSS) / 4)
         LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
 
         LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS) / 4)
 #if defined(PSA_PROXY_SHARED_MEMORY_BASE)
         LONG (PSA_PROXY_SHARED_MEMORY_BASE)
-        LONG (PSA_PROXY_SHARED_MEMORY_SIZE)
+        LONG (PSA_PROXY_SHARED_MEMORY_SIZE / 4)
 #endif
 #if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
-        LONG (SIZEOF(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
 #endif
         __zero_table_end__ = .;
     } > FLASH
 
     /**** Section for holding partition RO load data */
+    /*
+     * Sort the partition info by priority to guarantee the initing order.
+     * The first loaded partition will be inited at last in SFN model.
+     */
     .TFM_SP_LOAD_LIST : ALIGN(4)
     {
-       KEEP(*(.part_load))
+       KEEP(*(.part_load_priority_lowest))
+       KEEP(*(.part_load_priority_low))
+       KEEP(*(.part_load_priority_normal))
+       KEEP(*(.part_load_priority_high))
     } > FLASH
     Image$$TFM_SP_LOAD_LIST$$RO$$Base = ADDR(.TFM_SP_LOAD_LIST);
     Image$$TFM_SP_LOAD_LIST$$RO$$Limit = ADDR(.TFM_SP_LOAD_LIST) + SIZEOF(.TFM_SP_LOAD_LIST);
@@ -157,30 +157,15 @@ SECTIONS
     } > RAM
 /**** Unpriv  DATA start here */
     Image$$TFM_APP_RW_STACK_START$$Base = ADDR(.dummy_empty);
-# if !defined(TFM_PSA_API)
-    /* PSP is unprivileged in single-core topology */
-    .psp_stack : ALIGN(32)
-    {
-        . += (__psp_stack_size__ - 0x8); // reserve space for stack seal (8 bytes)
-    } > RAM
-    Image$$ER_INITIAL_PSP$$ZI$$Base = ADDR(.psp_stack);
-    Image$$ER_INITIAL_PSP$$ZI$$Limit = ADDR(.psp_stack) + SIZEOF(.psp_stack);
-
-    .psp_stack_seal_res :
-    {
-        . += 0x8;
-    } > RAM
-    Image$$ER_INITIAL_PSP_SEAL$$ZI$$Base = ADDR(.psp_stack_seal_res);
-    Image$$ER_INITIAL_PSP_SEAL$$ZI$$Limit = ADDR(.psp_stack_seal_res) + SIZEOF(.psp_stack_seal_res);
-# endif
 #if defined(CONFIG_TFM_PARTITION_META)
     .TFM_SP_META_PTR : ALIGN(32)
     {
         *(.bss.SP_META_PTR_SPRTL_INST)
+        . = ALIGN(32);
     } > RAM
     Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
-#endif 
+#endif
 
     .TFM_APP_ROT_LINKER_DATA : ALIGN(32)
     {
@@ -200,6 +185,9 @@ SECTIONS
         . += (. - start_of_TFM_APP_ROT_LINKER) ? 0 : 4;
         . = ALIGN(GTZC_RAM_ALIGN);
     } > RAM AT> RAM
+
+    ASSERT(GTZC_RAM_ALIGN % 4 == 0, "GTZC_RAM_ALIGN must be divisible by 4")
+
     Image$$TFM_APP_ROT_LINKER_DATA$$ZI$$Base = ADDR(.TFM_APP_ROT_LINKER_BSS);
     Image$$TFM_APP_ROT_LINKER_DATA$$ZI$$Limit = ADDR(.TFM_APP_ROT_LINKER_BSS) + SIZEOF(.TFM_APP_ROT_LINKER_BSS);
 
@@ -218,19 +206,16 @@ SECTIONS
 
     .msp_stack : ALIGN(32)
     {
-        . += __msp_init_stack_size__;
+        . += __msp_stack_size__ - 0x8;
     } > RAM
     Image$$ARM_LIB_STACK$$ZI$$Base = ADDR(.msp_stack);
     Image$$ARM_LIB_STACK$$ZI$$Limit = ADDR(.msp_stack) + SIZEOF(.msp_stack);
 
-#if !defined(TFM_PSA_API)
-    .TFM_SECURE_STACK : ALIGN(128)
+    .msp_stack_seal_res :
     {
-        . += 0x2000;
+        . += 0x8;
     } > RAM
-    Image$$TFM_SECURE_STACK$$ZI$$Base = ADDR(.TFM_SECURE_STACK);
-    Image$$TFM_SECURE_STACK$$ZI$$Limit = ADDR(.TFM_SECURE_STACK) + SIZEOF(.TFM_SECURE_STACK);
-#endif /* !defined(TFM_PSA_API) */
+    __StackSeal = ADDR(.msp_stack_seal_res);
 
 #if (TFM_LVL == 1)
     .heap : ALIGN(8)
@@ -312,7 +297,7 @@ SECTIONS
     Image$$TFM_PSA_ROT_LINKER_DATA$$ZI$$Base = ADDR(.TFM_PSA_ROT_LINKER_BSS);
     Image$$TFM_PSA_ROT_LINKER_DATA$$ZI$$Limit = ADDR(.TFM_PSA_ROT_LINKER_BSS) + SIZEOF(.TFM_PSA_ROT_LINKER_BSS);
 
-      .TFM_DATA : ALIGN(4)
+    .TFM_DATA : ALIGN(4)
     {
         *(.data*)
 
@@ -398,12 +383,22 @@ SECTIONS
     .TFM_BSS : ALIGN(4)
     {
         __bss_start__ = .;
+
+        /* The runtime partition placed order is same as load partition */
         __partition_runtime_start__ = .;
-        KEEP(*(.bss.part_runtime))
+        KEEP(*(.bss.part_runtime_priority_lowest))
+        KEEP(*(.bss.part_runtime_priority_low))
+        KEEP(*(.bss.part_runtime_priority_normal))
+        KEEP(*(.bss.part_runtime_priority_high))
         __partition_runtime_end__ = .;
         . = ALIGN(4);
+
+        /* The runtime service placed order is same as load partition */
         __service_runtime_start__ = .;
-        KEEP(*(.bss.serv_runtime))
+        KEEP(*(.bss.serv_runtime_priority_lowest))
+        KEEP(*(.bss.serv_runtime_priority_low))
+        KEEP(*(.bss.serv_runtime_priority_normal))
+        KEEP(*(.bss.serv_runtime_priority_high))
         __service_runtime_end__ = .;
         *(.bss*)
         *(COMMON)
@@ -425,9 +420,10 @@ SECTIONS
      * variable is treated like an initialized variable. To not waste memory
      * NOLOAD attribute used here. The whole section is zero initialized by
      * adding section information to .zero.table */
-    .PSA_PROXY_SHARED_MEMORY (NOLOAD) :
+    .PSA_PROXY_SHARED_MEMORY (NOLOAD) : ALIGN(4)
     {
         KEEP(*(PSA_PROXY_SHARED_MEMORY_SECTION))
+        . = ALIGN(4);
     } > PSA_PROXY_SHARED_MEMORY_RAM
 #endif
 

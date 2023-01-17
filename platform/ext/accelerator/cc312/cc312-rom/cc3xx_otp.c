@@ -25,7 +25,6 @@ cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr, size_t size, const uint8_t *buf)
     uint32_t start_offset;
     uint8_t in_done = 0;
     size_t copy_size;
-    uint16_t zero_count;
 
     /* First iterate through and check all values are valid (will not require a
      * 1 bit to be unset).

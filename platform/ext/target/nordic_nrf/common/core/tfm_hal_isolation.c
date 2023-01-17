@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,12 +15,12 @@
 #include "spu.h"
 #include "target_cfg.h"
 #include "tfm_hal_isolation.h"
-#include "tfm_spm_hal.h"
 #include "mmio_defs.h"
 #include "array.h"
-#ifdef TFM_PSA_API
 #include "load/spm_load_api.h"
-#endif /* TFM_PSA_API */
+
+#define PROT_BOUNDARY_VAL \
+    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
 
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
@@ -41,7 +44,8 @@ struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 static uint32_t n_configured_regions = 0;
 enum tfm_hal_status_t mpu_init_cfg(void);
 
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
+enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
+                                            uintptr_t *p_spm_boundary)
 {
     /* Set up isolation boundaries between SPE and NSPE */
     sau_and_idau_cfg();
@@ -58,19 +62,22 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
+    *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
+
     return TFM_HAL_SUCCESS;
 }
 
-#ifdef TFM_PSA_API
 enum tfm_hal_status_t
-tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
-                        void **pp_boundaries)
+tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
+                        uintptr_t *p_boundary)
 {
-    if (!p_ldinf || !pp_boundaries) {
+    if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
     bool privileged;
+    bool ns_agent;
+    uint32_t partition_attrs = 0;
 
 #if TFM_LVL == 1
     privileged = true;
@@ -78,11 +85,16 @@ tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
-    *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
+    partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
+                    HANDLE_ATTR_PRIV_MASK;
+    partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
+                        HANDLE_ATTR_NS_MASK;
+    *p_boundary = (uintptr_t)partition_attrs;
 
     for (uint32_t i = 0; i < p_ldinf->nassets; i++) {
         const struct asset_desc_t *p_asset =
-                (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
+                LOAD_INFO_ASSET(p_ldinf);
 
         if (!(p_asset[i].attr & ASSET_ATTR_NAMED_MMIO)) {
             // Skip numbered MMIO. NB: Need to add validation if it
@@ -143,20 +155,19 @@ tfm_hal_bind_boundaries(const struct partition_load_info_t *p_ldinf,
 }
 
 enum tfm_hal_status_t
-tfm_hal_update_boundaries(const struct partition_load_info_t *p_ldinf,
-                          void *p_boundaries)
+tfm_hal_activate_boundary(const struct partition_load_info_t *p_ldinf,
+                          uintptr_t boundary)
 {
     /* Privileged level is required to be set always */
     CONTROL_Type ctrl;
     ctrl.w = __get_CONTROL();
 
-    ctrl.b.nPRIV = ((uint32_t)p_boundaries & HANDLE_ATTR_PRIV_MASK) ? 0 : 1;
+    ctrl.b.nPRIV = ((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK) ? 0 : 1;
 
     __set_CONTROL(ctrl.w);
 
     return TFM_HAL_SUCCESS;
 }
-#endif /* TFM_PSA_API */
 
 #if !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0)
 static bool accessible_to_region(const void *p, size_t s, int flags)
@@ -226,30 +237,35 @@ static bool accessible_to_region(const void *p, size_t s, int flags)
 }
 #endif /* !defined(__SAUREGION_PRESENT) || (__SAUREGION_PRESENT == 0) */
 
-enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base, size_t size,
-                                                uint32_t attr)
+enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
+                                           size_t size, uint32_t access_type)
 {
     int flags = 0;
     int32_t range_access_allowed_by_mpu;
 
-    if (attr & TFM_HAL_ACCESS_NS) {
+    /* If size is zero, this indicates an empty buffer, we can ignore base. */
+    if (size == 0) {
+        return TFM_HAL_SUCCESS;
+    }
+
+    if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
+        flags |= CMSE_MPU_UNPRIV;
+    }
+
+    if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
         CONTROL_Type ctrl;
         ctrl.w = __TZ_get_CONTROL_NS();
         if (ctrl.b.nPRIV == 1) {
-            attr |= TFM_HAL_ACCESS_UNPRIVILEGED;
+            flags |= CMSE_MPU_UNPRIV;
         } else {
-            attr &= ~TFM_HAL_ACCESS_UNPRIVILEGED;
+            flags &= ~CMSE_MPU_UNPRIV;
         }
         flags |= CMSE_NONSECURE;
     }
 
-    if (attr & TFM_HAL_ACCESS_UNPRIVILEGED) {
-        flags |= CMSE_MPU_UNPRIV;
-    }
-
-    if ((attr & TFM_HAL_ACCESS_READABLE) && (attr & TFM_HAL_ACCESS_WRITABLE)) {
+    if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
         flags |= CMSE_MPU_READWRITE;
-    } else if (attr & TFM_HAL_ACCESS_READABLE) {
+    } else if (access_type & TFM_HAL_ACCESS_READABLE) {
         flags |= CMSE_MPU_READ;
     } else {
         return TFM_HAL_ERROR_INVALID_INPUT;
@@ -390,7 +406,7 @@ enum tfm_hal_status_t mpu_init_cfg(void)
 		// enough regions for it.
 		//
 	    // NB: Enabling null-pointer detection can also
-		// cause tfm_hal_bind_boundaries to return an error due to
+		// cause tfm_hal_bind_boundary to return an error due to
 		// insufficient memory regions
 		return TFM_HAL_ERROR_GENERIC;
 	}
@@ -427,4 +443,18 @@ enum tfm_hal_status_t mpu_init_cfg(void)
                       HARDFAULT_NMI_ENABLE);
 
     return TFM_HAL_SUCCESS;
+}
+
+bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                  uintptr_t boundary_to)
+{
+    if (boundary_from == boundary_to) {
+        return false;
+    }
+
+    if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
+        ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
+        return false;
+    }
+    return true;
 }

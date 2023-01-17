@@ -24,11 +24,6 @@ SCRIPTPATH=`dirname $SCRIPT`
 BINPATH="$SCRIPTPATH/bin"
 PATH="/C/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/":$PATH
 stm32programmercli="STM32_Programmer_CLI"
-external_loader="C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32L562E-DK.stldr"
-connect_no_reset="-c port=SWD "$sn_option" mode=UR -el $external_loader"
-connect="-c port=SWD "$sn_option" mode=UR --hardRst -el $external_loader"
-
-echo "Write TFM_Appli Secure"
 # part ot be updated according to flash_layout.h
 slot0=
 slot1=
@@ -42,11 +37,33 @@ boot=
 nvmcnt=
 prov=
 unused=
+encrypted=
+#select external flash according to slot2 value
+u5=0x70000000
+l5=0x90000000
+slot_s=$slot0
+slot_ns=$slot1
+#when image are encrypted, image are not installed in place (mcuboot installs the image from download slot)
+if [ $encrypted == "0x1" ]; then
+slot_s=$slot2
+slot_ns=$slot3
+fi
+if [ $slot2 == $u5 ]; then
+external_loader="-el C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32U585I-IOT02A.stldr"
+fi
+if [ $slot2 == $l5 ]; then
+external_loader="-el C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32L562E-DK.stldr"
+fi
+connect_no_reset="-c port=SWD "$sn_option" mode=UR $external_loader"
+connect="-c port=SWD "$sn_option" mode=UR --hardRst $external_loader"
 
-$stm32programmercli $connect -d $BINPATH/tfm_s_signed.bin $slot0 -v
+echo "Write TFM_Appli Secure"
+# part ot be updated according to flash_layout.h
+
+$stm32programmercli $connect -d $BINPATH/tfm_s_signed.bin $slot_s -v
 echo "TFM_Appli Secure Written"
 echo "Write TFM_Appli NonSecure"
-$stm32programmercli $connect -d $BINPATH/tfm_ns_signed.bin $slot1 -v
+$stm32programmercli $connect -d $BINPATH/tfm_ns_signed.bin $slot_ns -v
 echo "TFM_Appli NonSecure Written"
 echo "Write TFM_SBSFU_Boot"
 $stm32programmercli $connect -d $BINPATH/bl2.bin $boot -v

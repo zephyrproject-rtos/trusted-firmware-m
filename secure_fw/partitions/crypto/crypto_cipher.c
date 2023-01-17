@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,404 +8,194 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "config_crypto.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
-#include "tfm_crypto_private.h"
 
 /*!
- * \defgroup public_psa Public functions, PSA
+ * \addtogroup tfm_crypto_api_shim_layer
  *
  */
 
 /*!@{*/
-psa_status_t tfm_crypto_cipher_generate_iv(psa_invec in_vec[],
-                                           size_t in_len,
-                                           psa_outvec out_vec[],
-                                           size_t out_len)
+#if CRYPTO_CIPHER_MODULE_ENABLED
+psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
+                                         psa_outvec out_vec[],
+                                         mbedtls_svc_key_id_t *encoded_key)
 {
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status = PSA_SUCCESS;
+    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
+    psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
     psa_cipher_operation_t *operation = NULL;
+    uint32_t *p_handle = NULL;
+    uint16_t sid = iov->function_id;
 
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 1, out_len, 1, 2);
+    if (sid == TFM_CRYPTO_CIPHER_ENCRYPT_SID) {
+#if CRYPTO_SINGLE_PART_FUNCS_DISABLED
+        return PSA_ERROR_NOT_SUPPORTED;
+#else
+        const uint8_t *input = in_vec[1].base;
+        size_t input_length = in_vec[1].len;
+        uint8_t *output = out_vec[0].base;
+        size_t output_size = out_vec[0].len;
 
-    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
+        status = psa_cipher_encrypt(*encoded_key, iov->alg, input, input_length,
+                                    output, output_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
+#endif
     }
 
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    uint32_t handle = iov->op_handle;
-    uint32_t *handle_out = out_vec[0].base;
-    unsigned char *iv = out_vec[1].base;
-    size_t iv_size = out_vec[1].len;
+    if (sid == TFM_CRYPTO_CIPHER_DECRYPT_SID) {
+#if CRYPTO_SINGLE_PART_FUNCS_DISABLED
+        return PSA_ERROR_NOT_SUPPORTED;
+#else
+        const uint8_t *input = in_vec[1].base;
+        size_t input_length = in_vec[1].len;
+        uint8_t *output = out_vec[0].base;
+        size_t output_size = out_vec[0].len;
 
-    /* Init the handle in the operation with the one passed from the iov */
-    *handle_out = iov->op_handle;
+        status = psa_cipher_decrypt(*encoded_key, iov->alg, input, input_length,
+                                    output, output_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
+        return status;
+#endif
+    }
 
-    /* Look up the corresponding operation context */
-    status = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                         handle,
-                                         (void **)&operation);
+    if ((sid == TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SID) ||
+        (sid == TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SID)) {
+        p_handle = out_vec[0].base;
+        *p_handle = iov->op_handle;
+        status = tfm_crypto_operation_alloc(TFM_CRYPTO_CIPHER_OPERATION,
+                                            out_vec[0].base,
+                                            (void **)&operation);
+    } else {
+        status = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
+                                             iov->op_handle,
+                                             (void **)&operation);
+        if ((sid == TFM_CRYPTO_CIPHER_FINISH_SID) ||
+            (sid == TFM_CRYPTO_CIPHER_ABORT_SID)) {
+            /*
+             * finish()/abort() interface put handle in out_vec[0].
+             * Therefore, out_vec[0] shall be specially set to original handle
+             * value. Otherwise, the garbage data in message out_vec[0] may
+             * override the original handle value in client, after lookup fails.
+             */
+            p_handle = out_vec[0].base;
+            *p_handle = iov->op_handle;
+        }
+    }
     if (status != PSA_SUCCESS) {
+        if (sid == TFM_CRYPTO_CIPHER_ABORT_SID) {
+            /*
+             * Mbed TLS psa_cipher_abort() will return a misleading error code
+             * if it is called with invalid operation content, since it
+             * doesn't validate the operation handle.
+             * It is neither necessary to call tfm_crypto_operation_release()
+             * with an invalid handle.
+             * Therefore return PSA_SUCCESS directly as psa_cipher_abort() can
+             * be called multiple times.
+             */
+            return PSA_SUCCESS;
+        }
         return status;
     }
 
-    *handle_out = handle;
+    switch (sid) {
+    case TFM_CRYPTO_CIPHER_GENERATE_IV_SID:
+    {
+        unsigned char *iv = out_vec[0].base;
+        size_t iv_size = out_vec[0].len;
 
-    return psa_cipher_generate_iv(operation, iv, iv_size, &out_vec[1].len);
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
-}
-
-psa_status_t tfm_crypto_cipher_set_iv(psa_invec in_vec[],
-                                      size_t in_len,
-                                      psa_outvec out_vec[],
-                                      size_t out_len)
-{
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status = PSA_SUCCESS;
-    psa_cipher_operation_t *operation = NULL;
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 1, 1);
-
-    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    uint32_t handle = iov->op_handle;
-    uint32_t *handle_out = out_vec[0].base;
-    const unsigned char *iv = in_vec[1].base;
-    size_t iv_length = in_vec[1].len;
-
-    /* Init the handle in the operation with the one passed from the iov */
-    *handle_out = iov->op_handle;
-
-    /* Look up the corresponding operation context */
-    status = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                         handle,
-                                         (void **)&operation);
-    if (status != PSA_SUCCESS) {
+        status = psa_cipher_generate_iv(operation, iv, iv_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
         return status;
     }
+    case TFM_CRYPTO_CIPHER_SET_IV_SID:
+    {
+        const unsigned char *iv = in_vec[1].base;
+        size_t iv_length = in_vec[1].len;
 
-    return psa_cipher_set_iv(operation, iv, iv_length);
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
-}
-
-psa_status_t tfm_crypto_cipher_encrypt_setup(psa_invec in_vec[],
-                                             size_t in_len,
-                                             psa_outvec out_vec[],
-                                             size_t out_len)
-{
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status = PSA_SUCCESS;
-    psa_cipher_operation_t *operation = NULL;
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 1, out_len, 1, 1);
-
-    if ((out_vec[0].len != sizeof(uint32_t)) ||
-        (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
+        return psa_cipher_set_iv(operation, iv, iv_length);
     }
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    uint32_t handle = iov->op_handle;
-    uint32_t *handle_out = out_vec[0].base;
-    psa_key_id_t key_id = iov->key_id;
-    psa_algorithm_t alg = iov->alg;
-    mbedtls_svc_key_id_t encoded_key;
+    case TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SID:
+    {
+        status = psa_cipher_encrypt_setup(operation, *encoded_key, iov->alg);
+        if (status != PSA_SUCCESS) {
+            goto release_operation_and_return;
+        }
+    }
+    break;
+    case TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SID:
+    {
+        status = psa_cipher_decrypt_setup(operation, *encoded_key, iov->alg);
+        if (status != PSA_SUCCESS) {
+            goto release_operation_and_return;
+        }
+    }
+    break;
+    case TFM_CRYPTO_CIPHER_UPDATE_SID:
+    {
+        const uint8_t *input = in_vec[1].base;
+        size_t input_length = in_vec[1].len;
+        unsigned char *output = out_vec[0].base;
+        size_t output_size = out_vec[0].len;
 
-    /* Allocate the operation context in the secure world */
-    status = tfm_crypto_operation_alloc(TFM_CRYPTO_CIPHER_OPERATION,
-                                        &handle,
-                                        (void **)&operation);
-    if (status != PSA_SUCCESS) {
+        status = psa_cipher_update(operation, input, input_length,
+                                   output, output_size, &out_vec[0].len);
+        if (status != PSA_SUCCESS) {
+            out_vec[0].len = 0;
+        }
         return status;
     }
-    *handle_out = handle;
+    case TFM_CRYPTO_CIPHER_FINISH_SID:
+    {
+        uint8_t *output = out_vec[1].base;
+        size_t output_size = out_vec[1].len;
 
-    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
-    if (status != PSA_SUCCESS) {
-        goto exit;
+        status = psa_cipher_finish(operation,
+                                   output, output_size, &out_vec[1].len);
+        if (status == PSA_SUCCESS) {
+            /* In case of success automatically release the operation */
+            goto release_operation_and_return;
+        } else {
+            out_vec[1].len = 0;
+        }
     }
-
-    status = psa_cipher_encrypt_setup(operation, encoded_key, alg);
-    if (status != PSA_SUCCESS) {
-        goto exit;
+    break;
+    case TFM_CRYPTO_CIPHER_ABORT_SID:
+    {
+        status = psa_cipher_abort(operation);
+        goto release_operation_and_return;
+    }
+    default:
+        return PSA_ERROR_NOT_SUPPORTED;
     }
 
     return status;
 
-exit:
+release_operation_and_return:
     /* Release the operation context, ignore if the operation fails. */
-    (void)tfm_crypto_operation_release(handle_out);
+    (void)tfm_crypto_operation_release(p_handle);
     return status;
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
-
-psa_status_t tfm_crypto_cipher_decrypt_setup(psa_invec in_vec[],
-                                             size_t in_len,
-                                             psa_outvec out_vec[],
-                                             size_t out_len)
+#else /* CRYPTO_CIPHER_MODULE_ENABLED */
+psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
+                                         psa_outvec out_vec[],
+                                         mbedtls_svc_key_id_t *encoded_key)
 {
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
+    (void)in_vec;
+    (void)out_vec;
+    (void)encoded_key;
+
     return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status = PSA_SUCCESS;
-    psa_cipher_operation_t *operation = NULL;
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 1, out_len, 1, 1);
-
-    if ((out_vec[0].len != sizeof(uint32_t)) ||
-        (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec))) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    uint32_t handle = iov->op_handle;
-    uint32_t *handle_out = out_vec[0].base;
-    psa_key_id_t key_id = iov->key_id;
-    psa_algorithm_t alg = iov->alg;
-    mbedtls_svc_key_id_t encoded_key;
-
-    /* Allocate the operation context in the secure world */
-    status = tfm_crypto_operation_alloc(TFM_CRYPTO_CIPHER_OPERATION,
-                                        &handle,
-                                        (void **)&operation);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    *handle_out = handle;
-    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
-    if (status != PSA_SUCCESS) {
-        goto exit;
-    }
-
-    status = psa_cipher_decrypt_setup(operation, encoded_key, alg);
-    if (status != PSA_SUCCESS) {
-        goto exit;
-    }
-
-    return status;
-
-exit:
-    /* Release the operation context, ignore if the operation fails. */
-    (void)tfm_crypto_operation_release(handle_out);
-    return status;
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
 }
-
-psa_status_t tfm_crypto_cipher_update(psa_invec in_vec[],
-                                      size_t in_len,
-                                      psa_outvec out_vec[],
-                                      size_t out_len)
-{
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status = PSA_SUCCESS;
-    psa_cipher_operation_t *operation = NULL;
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 1, 2);
-
-    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    uint32_t handle = iov->op_handle;
-    uint32_t *handle_out = out_vec[0].base;
-    const uint8_t *input = in_vec[1].base;
-    size_t input_length = in_vec[1].len;
-    unsigned char *output = out_vec[1].base;
-    size_t output_size = out_vec[1].len;
-
-    /* Init the handle in the operation with the one passed from the iov */
-    *handle_out = iov->op_handle;
-
-    /* Initialise the output_length to zero */
-    out_vec[1].len = 0;
-
-    /* Look up the corresponding operation context */
-    status = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                         handle,
-                                         (void **)&operation);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    return psa_cipher_update(operation, input, input_length,
-                             output, output_size, &out_vec[1].len);
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
-}
-
-psa_status_t tfm_crypto_cipher_finish(psa_invec in_vec[],
-                                      size_t in_len,
-                                      psa_outvec out_vec[],
-                                      size_t out_len)
-{
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status = PSA_SUCCESS;
-    psa_cipher_operation_t *operation = NULL;
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 1, out_len, 1, 2);
-
-    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    uint32_t handle = iov->op_handle;
-    uint32_t *handle_out = out_vec[0].base;
-    unsigned char *output = out_vec[1].base;
-    size_t output_size = out_vec[1].len;
-
-    /* Init the handle in the operation with the one passed from the iov */
-    *handle_out = iov->op_handle;
-
-    /* Initialise the output_length to zero */
-    out_vec[1].len = 0;
-
-    /* Look up the corresponding operation context */
-    status = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                         handle,
-                                         (void **)&operation);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    status = psa_cipher_finish(operation, output, output_size, &out_vec[1].len);
-    if (status == PSA_SUCCESS) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-    }
-
-    return status;
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
-}
-
-psa_status_t tfm_crypto_cipher_abort(psa_invec in_vec[],
-                                     size_t in_len,
-                                     psa_outvec out_vec[],
-                                     size_t out_len)
-{
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status = PSA_SUCCESS;
-    psa_cipher_operation_t *operation = NULL;
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 1, out_len, 1, 1);
-
-    if ((in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) ||
-        (out_vec[0].len != sizeof(uint32_t))) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    uint32_t handle = iov->op_handle;
-    uint32_t *handle_out = out_vec[0].base;
-
-    /* Init the handle in the operation with the one passed from the iov */
-    *handle_out = iov->op_handle;
-
-    /* Look up the corresponding operation context */
-    status = tfm_crypto_operation_lookup(TFM_CRYPTO_CIPHER_OPERATION,
-                                         handle,
-                                         (void **)&operation);
-    if (status != PSA_SUCCESS) {
-        /* Operation does not exist, so abort has no effect */
-        return PSA_SUCCESS;
-    }
-
-    status = psa_cipher_abort(operation);
-
-    if (status != PSA_SUCCESS) {
-        /* Release the operation context, ignore if the operation fails. */
-        (void)tfm_crypto_operation_release(handle_out);
-        return status;
-    }
-
-    return tfm_crypto_operation_release(handle_out);
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
-}
-
-psa_status_t tfm_crypto_cipher_encrypt(psa_invec in_vec[],
-                                       size_t in_len,
-                                       psa_outvec out_vec[],
-                                       size_t out_len)
-{
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status = PSA_SUCCESS;
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 1, 1);
-
-    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    psa_key_id_t key_id = iov->key_id;
-    psa_algorithm_t alg = iov->alg;
-    const uint8_t *input = in_vec[1].base;
-    size_t input_length = in_vec[1].len;
-    uint8_t *output = out_vec[0].base;
-    size_t output_size = out_vec[0].len;
-    mbedtls_svc_key_id_t encoded_key;
-
-    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    return psa_cipher_encrypt(encoded_key, alg, input, input_length, output,
-                              output_size, &out_vec[0].len);
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
-}
-
-psa_status_t tfm_crypto_cipher_decrypt(psa_invec in_vec[],
-                                       size_t in_len,
-                                       psa_outvec out_vec[],
-                                       size_t out_len)
-{
-#ifdef TFM_CRYPTO_CIPHER_MODULE_DISABLED
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
-    psa_status_t status = PSA_SUCCESS;
-
-    CRYPTO_IN_OUT_LEN_VALIDATE(in_len, 1, 2, out_len, 1, 1);
-
-    if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
-    psa_key_id_t key_id = iov->key_id;
-    psa_algorithm_t alg = iov->alg;
-    const uint8_t *input = in_vec[1].base;
-    size_t input_length = in_vec[1].len;
-    uint8_t *output = out_vec[0].base;
-    size_t output_size = out_vec[0].len;
-    mbedtls_svc_key_id_t encoded_key;
-
-    status = tfm_crypto_encode_id_and_owner(key_id, &encoded_key);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    return psa_cipher_decrypt(encoded_key, alg, input, input_length, output,
-                              output_size, &out_vec[0].len);
-#endif /* TFM_CRYPTO_CIPHER_MODULE_DISABLED */
-}
+#endif /* CRYPTO_CIPHER_MODULE_ENABLED */
 /*!@}*/

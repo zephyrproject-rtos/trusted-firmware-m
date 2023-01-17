@@ -5,6 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
+find_package(Python3)
+
 add_subdirectory(lib)
 
 add_executable(bl1_2)
@@ -41,6 +43,7 @@ target_compile_definitions(bl1_2
     PRIVATE
         $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
         $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>
+        $<$<BOOL:${TFM_BL1_PQ_CRYPTO}>:TFM_BL1_PQ_CRYPTO>
 )
 
 target_link_shared_code(bl1_2
@@ -83,11 +86,12 @@ add_custom_command(OUTPUT bl2_signed.bin bl2_signed_hash.bin
     OUTPUT ${bin_dir}/bl2_signed.bin ${bin_dir}/bl2_signed_hash.bin
     DEPENDS $<TARGET_FILE_DIR:bl2>/bl2.bin bl2_bin signing_layout_bl2
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
-    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/create_bl2_img.py
                     --input_file $<TARGET_FILE_DIR:bl2>/bl2.bin
                     --img_output_file bl2_signed.bin
                     --hash_output_file bl2_signed_hash.bin
                     --encrypt_key_file ${TFM_BL2_ENCRYPTION_KEY_PATH}
+                    --sign_key_file ${TFM_BL2_SIGNING_KEY_PATH}
                     --signing_layout_file $<TARGET_OBJECTS:signing_layout_bl2>
                     --img_version ${TFM_BL1_IMAGE_VERSION_BL2}
                     --img_security_counter ${TFM_BL1_IMAGE_SECURITY_COUNTER_BL2}

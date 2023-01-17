@@ -1,3 +1,9 @@
+/**************************************************************************//**
+ * @file     cmsis_gcc.h
+ * @brief    CMSIS compiler GCC header file
+ * @version  V5.4.1
+ * @date     27. May 2021
+ ******************************************************************************/
 /*
  * Copyright (c) 2009-2021 Arm Limited. All rights reserved.
  *
@@ -14,14 +20,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * The file derives from the implementation of CMSIS compiler
- * GCC header (cmsis_gcc.h) version V5.4.1. These changes were also applied to
- * the previous version of this file in TF-M.
- * Changes:
- * - INITIAL_SP and STACK_LIMIT renamed to match Armclang naming convention
- * - Copy table copy size interpreted as bytes instead of words to keep it
- *   aligned with ld files
  */
 
 #ifndef __CMSIS_GCC_H
@@ -151,13 +149,13 @@ __STATIC_FORCEINLINE __NO_RETURN void __cmsis_start(void)
   extern const __zero_table_t __zero_table_end__;
 
   for (__copy_table_t const* pTable = &__copy_table_start__; pTable < &__copy_table_end__; ++pTable) {
-    for(uint32_t i=0u; i<(pTable->wlen/sizeof(pTable->dest)); ++i) {
+    for(uint32_t i=0u; i<pTable->wlen; ++i) {
       pTable->dest[i] = pTable->src[i];
     }
   }
 
   for (__zero_table_t const* pTable = &__zero_table_start__; pTable < &__zero_table_end__; ++pTable) {
-    for(uint32_t i=0u; i<(pTable->wlen/sizeof(pTable->dest)); ++i) {
+    for(uint32_t i=0u; i<pTable->wlen; ++i) {
       pTable->dest[i] = 0u;
     }
   }
@@ -169,11 +167,11 @@ __STATIC_FORCEINLINE __NO_RETURN void __cmsis_start(void)
 #endif
 
 #ifndef __INITIAL_SP
-#define __INITIAL_SP              Image$$ARM_LIB_STACK$$ZI$$Limit
+#define __INITIAL_SP              __StackTop
 #endif
 
 #ifndef __STACK_LIMIT
-#define __STACK_LIMIT             Image$$ARM_LIB_STACK$$ZI$$Base
+#define __STACK_LIMIT             __StackLimit
 #endif
 
 #ifndef __VECTOR_TABLE

@@ -18,6 +18,10 @@ include(${STM_COMMON_DIR}/stm32u5xx/CMakeLists.txt)
 target_sources(tfm_s
     PRIVATE
         ${STM_COMMON_DIR}/stm32u5xx/Device/Source/startup_stm32u5xx_s.c
+        ${STM_COMMON_DIR}/stm32u5xx/bl2/low_level_ospi_device.c
+        ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_ospi_flash.c
+        ${STM_COMMON_DIR}/hal/Components/mx25lm51245g/mx25lm51245g.c
+        ${B_U585I_IOT02A_DIR}/src/b_u585i_iot02a_ospi.c
 )
 
 if(NS)
@@ -31,6 +35,10 @@ if(BL2)
     target_sources(bl2
         PRIVATE
             ${STM_COMMON_DIR}/stm32u5xx/Device/Source/startup_stm32u5xx_bl2.c
+            ${STM_COMMON_DIR}/stm32u5xx/bl2/low_level_ospi_device.c
+            ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_ospi_flash.c
+            ${STM_COMMON_DIR}/hal/Components/mx25lm51245g/mx25lm51245g.c
+            ${B_U585I_IOT02A_DIR}/src/b_u585i_iot02a_ospi.c
     )
 endif()
 

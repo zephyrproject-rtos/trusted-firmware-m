@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Arm Limited
+ * Copyright (c) 2018-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ extern volatile uint32_t uFlowStage;
 #endif /* FLOW_CONTROL */
 #include "Driver_MPC.h"
 #include "region_defs.h"
-#include "tfm_secure_api.h"
 #include "tfm_plat_defs.h"
 /*  fix me to move to a CMSIS driver */
 #include "stm32u5xx_hal.h"
@@ -230,6 +229,7 @@ void pinmux_init_cfg(void)
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
+  __HAL_RCC_GPIOI_CLK_ENABLE();
   GPIOA_S->SECCFGR = 0x0;
   GPIOB_S->SECCFGR = 0x0;
   GPIOC_S->SECCFGR = 0x0;
@@ -238,6 +238,7 @@ void pinmux_init_cfg(void)
   GPIOF_S->SECCFGR = 0x0;
   GPIOG_S->SECCFGR = 0x0;
   GPIOH_S->SECCFGR = 0x0;
+  GPIOI_S->SECCFGR = 0x0;
 
 }
 /*------------------- SAU/IDAU configuration functions -----------------------*/

@@ -265,8 +265,8 @@ tree/table or top hash). A couple of possible solutions would be:
 - Divide up the UIDs, so certain UIDs from Protected Storage refer to assets in
   internal storage, and others to ones in external storage.
 
-- Use the ``type`` field of ``psa_call`` in IPC model and extra veneers in
-  library model to distinguish between internal and external storage requests.
+- Use the ``type`` field of ``psa_call`` in IPC model to distinguish between
+  internal and external storage requests.
 
 The other option for code sharing would be for Protected Storage and ITS to
 directly share filesystem code, which would be placed in a shared code region.

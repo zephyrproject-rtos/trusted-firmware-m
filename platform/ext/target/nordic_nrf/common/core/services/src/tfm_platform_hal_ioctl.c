@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2021-2022 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
 #include <platform/include/tfm_platform_system.h>
 #include <cmsis.h>
 #include <stdio.h>
@@ -6,12 +12,17 @@
 #include <arm_cmse.h>
 #include <array.h>
 #include <tfm_hal_isolation.h>
-#include <tfm_memory_utils.h>
 
 /* This contains the user provided allowed ranges */
 #include <tfm_read_ranges.h>
 
 #include <hal/nrf_gpio.h>
+
+/* Boundary handle binding macros. */
+#define HANDLE_ATTR_PRIV_POS            1U
+#define HANDLE_ATTR_PRIV_MASK           (0x1UL << HANDLE_ATTR_PRIV_POS)
+#define HANDLE_ATTR_NS_POS              0U
+#define HANDLE_ATTR_NS_MASK             (0x1UL << HANDLE_ATTR_NS_POS)
 
 enum tfm_platform_err_t
 tfm_platform_hal_read_service(const psa_invec  *in_vec,
@@ -21,9 +32,9 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 	struct tfm_read_service_out_t *out;
 	enum tfm_hal_status_t status;
 	enum tfm_platform_err_t err;
-	uint32_t attr = TFM_HAL_ACCESS_WRITABLE |
-			TFM_HAL_ACCESS_READABLE |
-			TFM_HAL_ACCESS_NS;
+	uintptr_t boundary = (1 << HANDLE_ATTR_NS_POS) &
+	                      HANDLE_ATTR_NS_MASK;
+	uint32_t attr = TFM_HAL_ACCESS_READWRITE;
 
 	if (in_vec->len != sizeof(struct tfm_read_service_args_t) ||
 	    out_vec->len != sizeof(struct tfm_read_service_out_t)) {
@@ -41,9 +52,8 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 		return TFM_PLATFORM_ERR_INVALID_PARAM;
 	}
 
-	status = tfm_hal_memory_has_access((uintptr_t)args->destination,
-					    args->len,
-					    attr);
+	status = tfm_hal_memory_check(boundary, (uintptr_t)args->destination,
+	                              args->len, attr);
 	if (status != TFM_HAL_SUCCESS) {
 		return TFM_PLATFORM_ERR_INVALID_PARAM;
 	}
@@ -54,9 +64,9 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 
 		if (args->addr >= start &&
 		    args->addr + args->len <= start + size) {
-			tfm_memcpy(args->destination,
-				   (const void *)args->addr,
-				   args->len);
+			memcpy(args->destination,
+			       (const void *)args->addr,
+			       args->len);
 			out->result = 0;
 			err = TFM_PLATFORM_ERR_SUCCESS;
 			break;

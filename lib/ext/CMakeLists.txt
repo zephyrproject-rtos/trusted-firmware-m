@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -19,3 +19,5 @@ endif()
 if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
     add_subdirectory(psa-adac)
 endif()
+
+add_subdirectory(tf-m-extras)

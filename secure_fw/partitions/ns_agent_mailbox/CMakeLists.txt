@@ -1,12 +1,13 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
-# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-if (NOT TFM_MULTI_CORE_TOPOLOGY)
+if (NOT TFM_PARTITION_NS_AGENT_MAILBOX)
     return()
 endif()
 
@@ -20,16 +21,15 @@ target_sources(tfm_psa_rot_partition_ns_agent_mailbox
         ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/tfm_rpc.c
         $<$<NOT:$<BOOL:${TFM_PLAT_SPECIFIC_MULTI_CORE_COMM}>>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/tfm_spe_mailbox.c>
         ns_agent_mailbox.c
+        tfm_multi_core_mem_check.c
 )
 
 target_link_libraries(tfm_psa_rot_partition_ns_agent_mailbox
     PRIVATE
         platform_common_interface
-        psa_interface
         tfm_spm
         tfm_sprt
         platform_s
-        tfm_secure_api
 )
 
 # The generated sources
@@ -55,4 +55,9 @@ target_include_directories(tfm_psa_rot_partition_ns_agent_mailbox
 target_link_libraries(tfm_partitions
     INTERFACE
         tfm_psa_rot_partition_ns_agent_mailbox
+)
+
+target_compile_definitions(tfm_partition_defs
+    INTERFACE
+        TFM_PARTITION_NS_AGENT_MAILBOX
 )

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2021, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2022, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -13,9 +13,8 @@
  * The API supports AES-GCM as defined in NIST SP 800-38D.
  *
  */
-#if defined(MBEDTLS_CONFIG_FILE)
-    #include MBEDTLS_CONFIG_FILE
-#endif
+
+#include "mbedtls/build_info.h"
 
 #if defined(MBEDTLS_GCM_C) && defined(MBEDTLS_GCM_ALT)
 

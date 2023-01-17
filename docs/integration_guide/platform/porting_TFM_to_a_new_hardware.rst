@@ -19,7 +19,7 @@ Building environnement
 ======================
 Make sure you have a working build environnement and that you can build
 TF-M on AN521 following the
-:doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
+:doc:`Build instructions </building/tfm_build_instruction>`.
 
 Toolchains and software requirements
 ====================================
@@ -59,7 +59,7 @@ In a nutshell, this should be a 6 iterative steps process:
 
     #. Running the regression tests
 
-        - See :doc:`Running TF-M on Arm platforms </technical_references/instructions/run_tfm_examples_on_arm_platforms>`
+        - See :doc:`Running TF-M on Arm platforms </building/run_tfm_examples_on_arm_platforms>`
           as an example
 
 
@@ -90,7 +90,7 @@ platform/ext/common
 ===================
 This folder contains files and folder commons to the platforms, such as the
 shims to the CMSIS drivers. It also contains the scatter files that can be
-used for the tfm_s partition.
+used for the bl2, tfm_s, tfm_ns partitions.
 
 This folder also contains another folder named template. The latter contains
 example implementations that are used for platforms by default, but which can be
@@ -148,6 +148,14 @@ Questions to be answered:
       This optional Non-Secure world is set-up via the tfm_ns target in the
       CMakelists.txt file (see below).
 
+    - How does the non-secure world communicate with the secure world?
+
+      TF-M supports running the non-secure world on the same CPU as the secure
+      world, communicating via TrustZone or running the non-secure world on
+      a separate CPU, communicating via a mailbox.
+
+      The architecture is configured in the config.cmake file (see below).
+
     - How does the FLASH need to be split between worlds?
 
       The flash split is very dependent on the support of BL2 and NS world.
@@ -192,7 +200,7 @@ CMakeLists.txt :
 
         - Add scatter files to the bl2, tfm_s, and/or tfm_ns target. [SCATTER_]
 
-            Please note that TF-M provides a common scatter file, for the tfm_s target, which can be used in most cases. [SCATTER_COMMON_]
+            Please note that TF-M provides a common scatter file, for the bl2, tfm_s, tfm_ns targets, which can be used in most cases. [SCATTER_COMMON_]
 
         - Add startup files to the bl2, tfm_s, and/or tfm_ns target. [STARTUP_]
         - Add required sources and includes for the bl2, tfm_s and tfm_ns target (if supported) [SOURCES_INCLUDES_]
@@ -212,10 +220,13 @@ preload.cmake :
 preload_ns.cmake:
 -----------------
 
-    If platform is a dual core then it must provide a preload_ns.cmake, which is
+    If platform is a dual core then it may provide a preload_ns.cmake, which is
     the equivalent of preload.cmake but for the second core.
 
     If the platform is single core, this file should not be present.
+
+    If the platform is dual core but both cores have the same architecture,
+    this file is optional.
 
     [preload_cmake_]
 
@@ -224,8 +235,26 @@ config.cmake:
 
     (MANDATORY)
 
-    This file is use to setup default build configuration for TF-M, see example
-    below. [config_cmake_]
+    This file is use to setup default build configuration for TF-M.
+
+    It must specify the values below, and should also specify other
+    configuration values that are fixed for the platform.
+
+    +------------------------------+-------------------------------------------------------------------+
+    |    name                      |        description                                                |
+    +==============================+===================================================================+
+    |CONFIG_TFM_USE_TRUSTZONE      | Use TrustZone to transition between NSPE and SPE on the same CPU  |
+    +------------------------------+-------------------------------------------------------------------+
+    |TFM_MULTI_CORE_TOPOLOGY       | NSPE runs on a separate CPU to SPE                                |
+    +------------------------------+-------------------------------------------------------------------+
+
+    [config_cmake_]
+
+install.cmake:
+--------------
+
+    If there are platform-specific files that need to be installed, this file
+    can be provided to do that.
 
 
 startup files:
@@ -236,15 +265,6 @@ startup files:
     These files (one for BL2, one for S, one for NS) are the expected startup
     files. The reset handler should call SystemInit and then should end up
     calling __START which should be defined as _start if not defined elsewhere.
-
-.. Note::
-
-   The startup files for the Secure and None-secure world and for the current
-   supported toolchains (GNUARM, ARMClang and IAR) must switch to the PSP stack
-   before calling start.
-
-   The startup file for BL2, when using the provided BL2 (MCUboot), must stay on
-   MSP.
 
 .. _flash_layout.h:
 
@@ -327,19 +347,17 @@ region_defs.h:
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |S_HEAP_SIZE                       | Size of the Secure (S) world Heap                                 | yes                                           |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
-    |S_MSP_STACK_SIZE_INIT             | Size of the Secure (S) world Main stack                           | if isolation L3                               |
-    +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |S_MSP_STACK_SIZE                  | Size of the Secure (S) world Main stack                           | yes                                           |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |S_PSP_STACK_SIZE                  | Size of the Secure (S) world Process stack                        | no for IPC model                              |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |NS_HEAP_SIZE                      | Size of the Non-Secure (NS) world Heap                            | if tfm_ns is built                            |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
-    |NS_MSP_STACK_SIZE                 | Size of the Non-Secure (NS) world Main stack                      | if tfm_ns is built                            |
-    +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
-    |NS_PSP_STACK_SIZE                 | Size of the Non-Secure (NS) world Process stack                   | if tfm_ns is built                            |
+    |NS_STACK_SIZE                     | Size of the Non-Secure (NS) world stack                           | if tfm_ns is built                            |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE | Size of the buffer that will store the initial attestation        | used by initial attestation partition         |
+    +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
+    |TFM_ATTEST_BOOT_RECORDS_MAX_SIZE  | Size of buffer that can store the encoded list of boot records    | used by delegated attestation partition       |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |BL2_HEADER_SIZE                   | Size of the Header for the Bootloader (MCUboot)                   | if bl2 is built                               |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
@@ -367,15 +385,6 @@ region_defs.h:
     +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
     |TOTAL_CODE_SRAM_SIZE              | Size of the S code                                                    | if no XIP on flash                |
     +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
-    |CMSE_VENEER_REGION_START          | Start of the veneer Code                                              | if library mode and not multicore |
-    +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
-    |CMSE_VENEER_REGION_SIZE           | Size of the veneer Code                                               | if library mode and not multicore |
-    +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
-    |PSA_PROXY_SHARED_MEMORY_BASE      | Start of shared memory                                                | if IPC mode and secure enclave    |
-    +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
-    |PSA_PROXY_SHARED_MEMORY_SIZE      | Size of shared memory                                                 | if IPC mode and secure enclave    |
-    +----------------------------------+-----------------------------------------------------------------------+-----------------------------------+
-
 
 CMSIS_Driver/Config/cmsis_driver_config.h:
 ------------------------------------------
@@ -421,14 +430,6 @@ CMSIS_Driver/Driver_USART.c:
 
     Refer to the CMSIS `USART <https://www.keil.com/pack/doc/CMSIS/Driver/html/group__usart__interface__gr.html>`_
     documentation.
-
-spm_hal.c:
-----------
-
-    (location as defined in CMakeLists.txt)
-
-    This file should contain all the functions required by the SPM component.
-    Refer to Functions_ for each of them
 
 target_cfg.[ch]:
 ----------------
@@ -520,33 +521,6 @@ tfm_platform_hal_ioctl:
 
     enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request, psa_invec  *in_vec, psa_outvec *out_vec);
 
-tfm_spm_hal_configure_default_isolation:
-----------------------------------------
-
-    This function is called by SPM to setup the isolation level, it's called
-    during the partition initialisation but before calling the init of each
-    partition.
-
-.. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(bool privileged, const struct platform_data_t *platform_data);
-
-.. Note::
-
-   When Fault Injection Hardening (FIH) is enabled this function will return
-   fih_int.
-
-tfm_spm_hal_set_secure_irq_priority:
-------------------------------------
-
-    This function sets the priority for the IRQ passed in the parameter.
-    The precision of the priority value might be adjusted to match the
-    available priority bits in the underlying target platform.
-
-.. code-block:: c
-
-    enum tfm_plat_err_t tfm_spm_hal_set_secure_irq_priority(IRQn_Type irq_line, uint32_t priority);
-
 tfm_spm_hal_get_mem_security_attr:
 ----------------------------------
 
@@ -604,15 +578,6 @@ tfm_hal_irq_disable:
 
     void tfm_hal_irq_disable(uint32_t irq_num);
 
-tfm_spm_hal_set_irq_target_state:
----------------------------------
-
-    This function sets the target_state for the IRQ.
-
-.. code-block:: c
-
-    enum irq_target_state_t tfm_spm_hal_set_irq_target_state(IRQn_Type irq_line, enum irq_target_state_t target_state);
-
 Annex
 =====
 
@@ -634,9 +599,9 @@ Annex
 
     [SCATTER]
     target_add_scatter_file(bl2
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/tfm_bl2.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/<folder to gcc specifics>/tfm_bl2.ld>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/tfm_ns_bl2.icf>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_bl2.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_bl2.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_bl2.icf>
     )
     target_add_scatter_file(tfm_s
         $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_s.sct>
@@ -644,9 +609,9 @@ Annex
         $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_s.icf>
     )
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/tfm_ns.sct>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to gcc specifics>/tfm_ns.ld>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/tfm_ns_ns.icf>
+        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_SOURCE_DIR}/platform/ext/common/armclang/tfm_common_ns.sct>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/common/gcc/tfm_common_ns.ld>
+        $<$<C_COMPILER_ID:IAR>:${CMAKE_SOURCE_DIR}/platform/ext/common/iar/tfm_common_ns.icf>
     )
 
 ------------
@@ -666,21 +631,15 @@ Annex
     [STARTUP]
     target_sources(bl2
         PRIVATE
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/startup_bl2.s>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to gcc specifics>/startup_bl2.S>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/startup_bl2.s>
+        ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/<folder to platform>/device/source/startup_<platform name>.c
     )
     target_sources(tfm_s
         PRIVATE
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/startup_tfm_s.s>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to gcc specifics>/startup_bl2.S>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/startup_bl2.s>
+        ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/<folder to platform>/device/source/startup_<platform name>.c
     )
     target_sources(tfm_ns
         PRIVATE
-        $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to armclang specifics>/startup_tfm_ns.s>
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to gcc specifics>/startup_tfm_ns.S>
-        $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/<folder to iar specifics>/startup_tfm_ns.s>
+        ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/<folder to platform>/device/source/startup_<platform name>.c
     )
 
 ------------
@@ -708,6 +667,12 @@ Annex
     )
     target_sources(platform_ns
         PRIVATE
+    )
+    target_sources(tfm_spm
+        PRIVATE
+            target_cfg.c
+            tfm_hal_isolation.c
+            tfm_hal_platform.c
     )
 
 ------------
@@ -741,6 +706,8 @@ Annex
 ::
 
     [config_cmake]
+    set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
+    set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL      "Whether to build for a dual-cpu architecture")
     set(BL2                                 OFF         CACHE BOOL      "Whether to build BL2")
     set(NS                                  FALSE       CACHE BOOL      "Whether to build NS app" FORCE)
 
@@ -768,3 +735,5 @@ Annex
     tfm_invalid_config((CMAKE_C_COMPILER_ID STREQUAL "ARMClang") AND (CMAKE_C_COMPILER_VERSION VERSION_LESS "6.10.1"))
 
 *Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

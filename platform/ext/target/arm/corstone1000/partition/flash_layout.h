@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,11 +119,7 @@
  *
  */
 #define SE_BL2_PARTITION_SIZE           (0x19000)    /* 100 KB */
-#ifdef TEST_S
-#define TFM_PARTITION_SIZE              (0x61C00)    /* 391 KB */
-#else
 #define TFM_PARTITION_SIZE              (0x5E000)    /* 376 KB */
-#endif
 #define FIP_PARTITION_SIZE              (0x200000)   /* 2 MB */
 #define KERNEL_PARTITION_SIZE           (0xC00000)   /* 12 MB */
 
@@ -212,7 +208,7 @@
 #define FWU_METADATA_IMAGE_2_SIZE_LIMIT (FLASH_FIP_SIZE)
 
 /* Macros needed to imgtool.py, used when creating TF-M signed image */
-#define IMAGE_LOAD_ADDRESS              (SRAM_BASE)
+#define S_IMAGE_LOAD_ADDRESS            (SRAM_BASE)
 #define SECURE_IMAGE_OFFSET             (0x0)
 #define SECURE_IMAGE_MAX_SIZE           (TFM_PARTITION_SIZE)
 #define NON_SECURE_IMAGE_OFFSET         (TFM_PARTITION_SIZE)

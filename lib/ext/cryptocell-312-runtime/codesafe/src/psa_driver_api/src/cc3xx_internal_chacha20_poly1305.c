@@ -337,7 +337,7 @@ psa_status_t cc3xx_chacha20_poly1305_finish(
     CCError_t rc = CC_FAIL;
 
     if (context == NULL || tag == NULL ||
-        tag_length == NULL || tag_size < CC_POLY_BLOCK_SIZE_IN_BYTES) {
+        tag_length == NULL || tag_size != CC_POLY_BLOCK_SIZE_IN_BYTES) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
     *tag_length = 0;

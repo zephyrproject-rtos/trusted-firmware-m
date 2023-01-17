@@ -54,11 +54,7 @@
  *        interface layer should be the only part that should
  *        be configured through defines
  */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 static psa_status_t cc3xx_internal_ecdsa_verify(
     const psa_key_attributes_t *attributes,
@@ -80,7 +76,7 @@ static psa_status_t cc3xx_internal_ecdsa_verify(
     const CCEcpkiDomain_t *pDomain;
     CCEcpkiBuildTempData_t temp_data;
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
-    CCError_t cc_err;
+    CCError_t cc_err = CC_FAIL;
 
     err = cc3xx_psa_hash_mode_to_cc_hash_mode(alg, do_hashing, &hash_mode);
     if (err != PSA_SUCCESS) {
@@ -152,7 +148,7 @@ static psa_status_t cc3xx_internal_ecdsa_sign(
 {
     psa_key_type_t key_type = psa_get_key_type(attributes);
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
-    psa_ecc_family_t curve = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
+    psa_ecc_family_t curve;
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t cc_err;
     CCEcpkiDomainID_t domainId;
@@ -175,6 +171,12 @@ static psa_status_t cc3xx_internal_ecdsa_sign(
     /* FixMe: 521 bits keys are not producing the correct result with CC3XX */
     if (key_bits == 521) {
         return PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    if (PSA_KEY_TYPE_IS_ECC(key_type)) {
+        curve = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
+    } else {
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
@@ -257,9 +259,6 @@ static psa_status_t cc3xx_internal_rsa_verify(
     size_t signature_length, bool do_hashing)
 
 {
-#ifndef MBEDTLS_RSA_C
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
     psa_key_type_t key_type = psa_get_key_type(attributes);
     size_t hash_bytes = PSA_HASH_LENGTH(PSA_ALG_SIGN_GET_HASH(alg));
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
@@ -319,7 +318,6 @@ cleanup:
     mbedtls_free(pPubUserContext);
     mbedtls_free(pUserPubKey);
     return err;
-#endif /* MBEDTLS_RSA_C */
 }
 
 static psa_status_t cc3xx_internal_rsa_sign(
@@ -331,9 +329,6 @@ static psa_status_t cc3xx_internal_rsa_sign(
     uint8_t *signature, size_t signature_size,
     size_t *signature_length, bool do_hashing)
 {
-#ifndef MBEDTLS_RSA_C
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t cc_err = CC_FATAL_ERROR;
@@ -418,7 +413,6 @@ cleanup:
     mbedtls_free(user_context_ptr);
 
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
-#endif /* MBEDTLS_RSA_C */
 }
 
 /** \defgroup psa_asym_sign PSA driver entry points for asymmetric sign/verify
@@ -443,15 +437,20 @@ psa_status_t cc3xx_sign_hash(const psa_key_attributes_t *attributes,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
+#if defined(PSA_WANT_ALG_ECDSA)
     if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_sign(
             attributes, key, key_length, alg, input, input_length, signature,
             signature_size, signature_length, false);
-    } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_ECDSA */
+#if defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN) || defined(PSA_WANT_ALG_RSA_PSS)
+    if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
         return cc3xx_internal_rsa_sign(attributes, key, key_length, alg, input,
                                        input_length, signature, signature_size,
                                        signature_length, false);
-    }
+    } else
+#endif /* PSA_WANT_ALG_RSA_PKCS1V15_SIGN || PSA_WANT_ALG_RSA_PSS */
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
@@ -471,15 +470,20 @@ psa_status_t cc3xx_verify_hash(const psa_key_attributes_t *attributes,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
+#if defined(PSA_WANT_ALG_ECDSA)
     if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_verify(attributes, key, key_length, alg,
                                            hash, hash_length, signature,
                                            signature_length, false);
-    } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_ECDSA */
+#if defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN) || defined(PSA_WANT_ALG_RSA_PSS)
+    if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
         return cc3xx_internal_rsa_verify(attributes, key, key_length, alg, hash,
                                          hash_length, signature,
                                          signature_length, false);
-    }
+    } else
+#endif /* PSA_WANT_ALG_RSA_PKCS1V15_SIGN || PSA_WANT_ALG_RSA_PSS */
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
@@ -498,7 +502,8 @@ psa_status_t cc3xx_sign_message(const psa_key_attributes_t *attributes,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
-    if (PSA_ALG_ECDSA_IS_DETERMINISTIC(alg)) {
+#if defined(PSA_WANT_ALG_DETERMINISTIC_ECDSA)
+    if (PSA_ALG_IS_DETERMINISTIC_ECDSA(alg)) {
         ret = cc3xx_hash_compute(PSA_ALG_SIGN_GET_HASH(alg), input,
                                  input_length, hash, sizeof(hash), &hash_len);
         if (ret != PSA_SUCCESS) {
@@ -508,15 +513,22 @@ psa_status_t cc3xx_sign_message(const psa_key_attributes_t *attributes,
         return cc3xx_internal_ecdsa_sign(attributes, key, key_length, alg, hash,
                                          hash_len, signature, signature_size,
                                          signature_length, false);
-    } else if (PSA_ALG_IS_ECDSA(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_DETERMINISTIC_ECDSA */
+#if defined(PSA_WANT_ALG_ECDSA)
+    if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_sign(
             attributes, key, key_length, alg, input, input_length, signature,
             signature_size, signature_length, true);
-    } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_ECDSA */
+#if defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN) || defined(PSA_WANT_ALG_RSA_PSS)
+    if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
         return cc3xx_internal_rsa_sign(attributes, key, key_length, alg, input,
                                        input_length, signature, signature_size,
                                        signature_length, true);
-    }
+    } else
+#endif /* PSA_WANT_ALG_RSA_PKCS1V15_SIGN || PSA_WANT_ALG_RSA_PSS */
 
     return PSA_ERROR_NOT_SUPPORTED;
 }
@@ -531,15 +543,20 @@ psa_status_t cc3xx_verify_message(const psa_key_attributes_t *attributes,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
+#if defined(PSA_WANT_ALG_ECDSA)
     if (PSA_ALG_IS_ECDSA(alg)) {
         return cc3xx_internal_ecdsa_verify(attributes, key, key_length, alg,
                                            input, input_length, signature,
                                            signature_length, true);
-    } else if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_ECDSA */
+#if defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN) || defined(PSA_WANT_ALG_RSA_PSS)
+    if (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) || PSA_ALG_IS_RSA_PSS(alg)) {
         return cc3xx_internal_rsa_verify(attributes, key, key_length, alg,
                                          input, input_length, signature,
                                          signature_length, true);
-    }
+    } else
+#endif /* PSA_WANT_ALG_RSA_PKCS1V15_SIGN || PSA_WANT_ALG_RSA_PSS */
 
     return PSA_ERROR_NOT_SUPPORTED;
 }

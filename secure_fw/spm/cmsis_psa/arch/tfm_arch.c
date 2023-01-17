@@ -8,8 +8,13 @@
 #include "compiler_ext_defs.h"
 #include "security_defs.h"
 #include "tfm_arch.h"
-#include "tfm_core_utils.h"
+#include "tfm_core_trustzone.h"
 #include "utilities.h"
+#include "config_impl.h"
+
+#if defined(__ICCARM__) && (CONFIG_TFM_FP >= 1)
+#pragma required = tfm_arch_clear_fp_data
+#endif
 
 __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
                                            uint32_t exc_return)
@@ -18,16 +23,16 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
 #if !defined(__ICCARM__)
         ".syntax unified                        \n"
 #endif
-        "mov     sp, r0                         \n"
-
-        /* Seal Main Stack before using */
-        "ldr     r2, ="M2S(STACK_SEAL_PATTERN)" \n"
-        "ldr     r3, ="M2S(STACK_SEAL_PATTERN)" \n"
-        "push    {r2, r3}                       \n"
-        "bx      r1                             \n"
+        "mov     r4, r0                         \n"
+        "mov     r5, r1                         \n"
+#if (CONFIG_TFM_FLOAT_ABI > 0)
+        "bl      tfm_arch_clear_fp_data         \n"
+#endif
+        "mov     sp, r4                         \n"
+        "bx      r5                             \n"
     );
 }
-
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
 {
     struct context_ctrl_t *ctx_ctrl = (struct context_ctrl_t *)p_ctx_ctrl;
@@ -46,7 +51,7 @@ void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
 }
 
 /* Caution: Keep 'uint32_t' always for collecting thread return values! */
-__attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
+__naked uint32_t tfm_arch_trigger_pendsv(void)
 {
     __ASM volatile(
 #ifndef __ICCARM__
@@ -60,13 +65,20 @@ __attribute__((naked)) uint32_t tfm_arch_trigger_pendsv(void)
         "bx      lr                                    \n"
     );
 }
+#endif
 
 void tfm_arch_init_context(void *p_ctx_ctrl,
                            uintptr_t pfn, void *param, uintptr_t pfnlr)
 {
     uintptr_t sp = ((struct context_ctrl_t *)p_ctx_ctrl)->sp;
+    uintptr_t sp_limit = ((struct context_ctrl_t *)p_ctx_ctrl)->sp_limit;
     struct full_context_t *p_tctx =
             (struct full_context_t *)arch_seal_thread_stack(sp);
+
+    /* Check if enough space on stack */
+    if ((uintptr_t)p_tctx - sizeof(struct full_context_t) < sp_limit) {
+        tfm_core_panic();
+    }
 
     p_tctx--;
 

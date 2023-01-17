@@ -392,12 +392,12 @@ struct platform_data_t
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
 REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
 REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
-#endif /* BL2 */
-#ifdef NRF_NS_STORAGE
+#endif /* NRF_NS_SECONDARY */
+#ifdef NRF_NS_STORAGE_PARTITION_START
 REGION_DECLARE(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base);
-#endif /* NRF_NS_STORAGE */
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -417,22 +417,22 @@ const struct memory_region_limits memory_regions = {
     .veneer_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
 
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
     .secondary_partition_base =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
 
     .secondary_partition_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
         SECONDARY_PARTITION_SIZE - 1,
-#endif /* BL2 */
+#endif /* NRF_NS_SECONDARY */
 
-#ifdef NRF_NS_STORAGE
+#ifdef NRF_NS_STORAGE_PARTITION_START
     .non_secure_storage_partition_base =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base),
     .non_secure_storage_partition_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base) +
         NRF_NS_STORAGE_PARTITION_SIZE - 1,
-#endif /* NRF_NS_STORAGE */
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 };
 
 /* To write into AIRCR register, 0x5FA value must be write to the VECTKEY field,
@@ -525,14 +525,14 @@ enum tfm_plat_err_t spu_init_cfg(void)
      * Configure SPU Regions for Non-Secure Code and SRAM (Data)
      * Configure SPU for Peripheral Security
      * Configure Non-Secure Callable Regions
-     * Configure Secondary Image Partition for BL2
+     * Configure Secondary Image Partition
+     * Configure Non-Secure Storage Partition
      */
 
-    /* Explicitly reset Flash and SRAM configuration to all-Secure,
-     * in case this has been overwritten by earlier images e.g.
-     * bootloader.
+    /* Reset Flash and SRAM configuration of regions that are not owned by
+     * the bootloader(s) to all-Secure.
      */
-    spu_regions_reset_all_secure();
+    spu_regions_reset_unlocked_secure();
 
     /* Configures SPU Code and Data regions to be non-secure */
     spu_regions_flash_config_non_secure(memory_regions.non_secure_partition_base,
@@ -543,18 +543,18 @@ enum tfm_plat_err_t spu_init_cfg(void)
     spu_regions_flash_config_non_secure_callable(memory_regions.veneer_base,
                                                  memory_regions.veneer_limit - 1);
 
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
     /* Secondary image partition */
     spu_regions_flash_config_non_secure(memory_regions.secondary_partition_base,
                                         memory_regions.secondary_partition_limit);
-#endif /* BL2 */
+#endif /* NRF_NS_SECONDARY */
 
-#ifdef NRF_NS_STORAGE
+#ifdef NRF_NS_STORAGE_PARTITION_START
     /* Configures storage partition to be non-secure */
     spu_regions_flash_config_non_secure(
         memory_regions.non_secure_storage_partition_base,
         memory_regions.non_secure_storage_partition_limit);
-#endif /* NRF_NS_STORAGE */
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 
     return TFM_PLAT_ERR_SUCCESS;
 }

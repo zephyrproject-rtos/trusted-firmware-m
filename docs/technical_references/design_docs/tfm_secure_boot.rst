@@ -48,8 +48,9 @@ next reset.
 A default RSA key pair is stored in the repository, public key is in ``keys.c``
 and private key is in ``root-RSA-3072.pem``.
 
-.. Warning::
-    DO NOT use them in production code, they are exclusively for testing!
+.. Danger::
+    DO NOT use the default keys in a production code, they are exclusively
+    for testing!
 
 The private key must be stored in a safe place outside of the repository.
 ``imgtool.py`` (found in the ``scripts`` directory in the MCUBoot repository,
@@ -210,10 +211,6 @@ executing it in place, the newest image is copied to RAM for execution. The load
 address, the location in RAM where the image is copied to, is stored in the
 image header.
 
-.. Note::
-
-    Only single image boot is supported with ``RAM load`` upgrade mode.
-
 Summary of different modes for image upgrade
 ============================================
 Different implementations of the image upgrade operation (whether through
@@ -234,7 +231,7 @@ modes are supported by which platforms:
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | FVP_SSE300_MPS3     | No              | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
-| Corstone-Polaris    | NO              | Yes           | Yes      | Yes            | No           |
+| Corstone-310 FVP    | Yes             | Yes           | Yes      | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | LPC55S69            | Yes             | Yes           | No       | Yes            | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
@@ -259,6 +256,8 @@ modes are supported by which platforms:
 | nRF5340 DK          | Yes             | Yes           | No       | No             | No           |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 | BL5340 DVK          | Yes             | Yes           | Yes      | No             | No           |
++---------------------+-----------------+---------------+----------+----------------+--------------+
+| RSS                 | No              | No            | No       | No             | Yes          |
 +---------------------+-----------------+---------------+----------+----------------+--------------+
 
 .. [1] To disable BL2, please set the ``BL2`` cmake option to ``OFF``
@@ -312,7 +311,7 @@ compile time switches:
 
 Example of how to provide the secure image minimum version::
 
-    cmake -DTFM_PLATFORM=arm/musca_b1/sse_200 -DMCUBOOT_S_IMAGE_MIN_VER=1.2.3+4 ..
+    cmake -DTFM_PLATFORM=arm/musca_b1 -DMCUBOOT_S_IMAGE_MIN_VER=1.2.3+4 ..
 
 ********************
 Signature algorithms
@@ -418,7 +417,7 @@ MCUBoot related compile time switches can be set by cmake variables.
         ``SWAP_USING_SCRATCH`` or ``SWAP_USING_MOVE``, an image is needed in
         the primary image area as well, to trigger the update.
 
-    .. Warning::
+    .. Danger::
         DO NOT use the ``enc-rsa2048-pub.pem`` key in production code, it is
         exclusively for testing!
 
@@ -433,7 +432,7 @@ images.
 The version number of the image (single image boot) can manually be passed in
 through the command line in the cmake configuration step::
 
-    cmake -DTFM_PLATFORM=arm/musca_b1/sse_200 -DIMAGE_VERSION_S=1.2.3+4 ..
+    cmake -DTFM_PLATFORM=arm/musca_b1 -DIMAGE_VERSION_S=1.2.3+4 ..
 
 Alternatively, the version number can be less specific (e.g 1, 1.2, or 1.2.3),
 where the missing numbers are automatically set to zero. The image version
@@ -467,7 +466,7 @@ and its value should always be increased if a security flaw was fixed in the
 current image version. The value of the security counter (single image boot) can
 be specified at build time in the cmake configuration step::
 
-    cmake -DTFM_PLATFORM=arm/musca_b1/sse_200 -DSECURITY_COUNTER_S=42 ../
+    cmake -DTFM_PLATFORM=arm/musca_b1 -DSECURITY_COUNTER_S=42 ../
 
 The security counter can be independent from the image version, but not
 necessarily. Alternatively, if it is not specified at build time with the
@@ -763,9 +762,11 @@ RAM loading firmware upgrade
 To enable RAM loading, please set ``MCUBOOT_UPGRADE_STRATEGY`` to "RAM_LOAD"
 (either in the configuration file or through the command line), and then specify
 a destination load address in RAM where the image can be copied to and executed
-from. The ``IMAGE_LOAD_ADDRESS`` macro must be specified in the target dependent
-files, for example with Musca-S, its ``flash_layout.h`` file in the ``platform``
-folder should include ``#define IMAGE_LOAD_ADDRESS #0xA0020000``
+from. The ``S_IMAGE_LOAD_ADDRESS`` macro must be specified in the target
+dependent files, and if multiple image boot is enabled then
+``NS_IMAGE_LOAD_ADDRESS`` must also be defined. For example with Musca-S, its
+``flash_layout.h`` file in the ``platform`` folder should include ``#define
+S_IMAGE_LOAD_ADDRESS #0xA0020000``
 
 Executing firmware upgrade on Musca-S board
 --------------------------------------------

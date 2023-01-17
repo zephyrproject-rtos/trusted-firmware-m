@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,19 +10,16 @@
 #include "tfm_hal_platform.h"
 #include "tfm_plat_defs.h"
 #include "uart_stdout.h"
+#if defined(TEST_NS_FPU) || defined(TEST_S_FPU)
+#include "test_interrupt.h"
+#endif
 
 extern const struct memory_region_limits memory_regions;
 
-#ifdef TFM_FIH_PROFILE_ON
-fih_int tfm_hal_platform_init(void)
-#else
-enum tfm_hal_status_t tfm_hal_platform_init(void)
-#endif
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_platform_init(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
-#ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
-#endif
 
     plat_err = enable_fault_handlers();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
@@ -34,17 +31,10 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
-#ifdef TFM_FIH_PROFILE_ON
     FIH_CALL(init_debug, fih_rc);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_PLAT_ERR_SUCCESS))) {
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
-#else
-    plat_err = init_debug();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_HAL_ERROR_GENERIC;
-    }
-#endif
 
     __enable_irq();
     stdio_init();
@@ -58,6 +48,22 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
+
+#if defined(TEST_S_FPU) || defined(TEST_NS_FPU)
+    /* Set IRQn in secure mode */
+    NVIC_ClearTargetState(TFM_FPU_S_TEST_IRQ);
+
+    /* Register FPU secure test interrupt handler */
+    NVIC_SetVector(TFM_FPU_S_TEST_IRQ, (uint32_t)TFM_FPU_S_TEST_Handler);
+
+    /* Enable FPU secure test interrupt */
+    NVIC_EnableIRQ(TFM_FPU_S_TEST_IRQ);
+#endif
+
+#if defined(TEST_NS_FPU)
+    /* Set IRQn in non-secure mode */
+    NVIC_SetTargetState(TFM_FPU_NS_TEST_IRQ);
+#endif
 
     FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }

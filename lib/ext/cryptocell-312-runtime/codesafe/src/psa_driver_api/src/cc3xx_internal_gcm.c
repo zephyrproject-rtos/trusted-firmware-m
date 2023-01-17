@@ -443,7 +443,7 @@ static psa_status_t gcm_finish(AesGcmContext_t *context,
         if (CC_PalMemCmp(context->preTagBuf, pTag, context->tagSize) == 0) {
             status = PSA_SUCCESS;
         } else {
-            status = PSA_ERROR_INVALID_ARGUMENT;
+            status = PSA_ERROR_INVALID_SIGNATURE;
         }
     }
 
@@ -742,12 +742,6 @@ psa_status_t cc3xx_gcm_update(
         return ret;
     }
 
-    ret = gcm_process_lenA_lenC(ctx);
-    if (ret != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("gcm_process_lenA_lenC failed: %d", ret);
-        return ret;
-    }
-
     return PSA_SUCCESS;
 }
 
@@ -764,6 +758,12 @@ psa_status_t cc3xx_gcm_finish(
     if (NULL == ctx || NULL == tag) {
         CC_PAL_LOG_ERR("Null pointer exception\n");
         return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    ret = gcm_process_lenA_lenC(ctx);
+    if (ret != PSA_SUCCESS) {
+        CC_PAL_LOG_ERR("gcm_process_lenA_lenC failed: %d", ret);
+        return ret;
     }
 
     ret = gcm_finish(ctx, tag, tag_size);

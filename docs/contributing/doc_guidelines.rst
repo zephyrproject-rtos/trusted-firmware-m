@@ -62,8 +62,8 @@ Platform Documentation
 The Documentation Build system provides an interface with the platform directory
 allowing maintainers to bundle platform specific documentation. **This behaviour
 needs to be explicitly enabled for each platform's space** by
-modifying the `platform/ext/index.rst` (responsible for generating the
-:doc:`Platform Index File </platform/ext/index>`) and adding a table of
+modifying the `platform/index.rst` (responsible for generating the
+:doc:`Platform Index File </platform/index>`) and adding a table of
 contents entry for the corresponding platform space.
 
 The format and structure of this entry is not strictly defined, and allows
@@ -77,7 +77,7 @@ set to recursively match all documents under that directory.
         :caption: PLATFORM_X_CAPTION
         :glob:
 
-        target/PLATFORM_X/**
+        PLATFORM_X/**
 
 ****************
 Common Use Cases

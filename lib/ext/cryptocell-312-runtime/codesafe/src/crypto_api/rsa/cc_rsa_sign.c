@@ -5,9 +5,7 @@
  */
 
 #ifdef CC_IOT
-    #if defined(MBEDTLS_CONFIG_FILE)
-    #include MBEDTLS_CONFIG_FILE
-    #endif
+#include "mbedtls/build_info.h"
 #endif
 
 #if !defined(CC_IOT) || ( defined(CC_IOT) && defined(MBEDTLS_RSA_C))

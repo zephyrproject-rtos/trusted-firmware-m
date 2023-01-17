@@ -1,5 +1,6 @@
+################################
 Trusted Firmware-M Documentation
-================================
+################################
 
 .. raw:: html
 
@@ -21,7 +22,7 @@ Trusted Firmware-M Documentation
                system, and then build and run a sample application.</p>
         </li>
         <li class="grid-item">
-            <a href="platform/ext/index.html">
+            <a href="platform/index.html">
                 <img alt="" src="_static/images/tfm-platform.png"/>
                 <h2>Supported Platforms</h2>
             </a>
@@ -68,6 +69,7 @@ Trusted Firmware-M Documentation
 
 .. toctree::
     :caption: Overview
+    :titlesonly:
     :maxdepth: 1
     :hidden:
 
@@ -79,11 +81,13 @@ Trusted Firmware-M Documentation
 
 .. toctree::
     :caption: Development
+    :titlesonly:
     :maxdepth: 1
     :hidden:
 
-    Platform Selection<platform/ext/index>
-    Building <technical_references/instructions/tfm_build_instruction>
+    Platform Selection<platform/index>
+    building/tfm_build_instruction
+    configuration/index
     integration_guide/index
     technical_references/design_docs/index
     Tools <tools/index>
@@ -108,4 +112,4 @@ Trusted Firmware-M Documentation
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

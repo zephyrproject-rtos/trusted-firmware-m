@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -32,15 +35,16 @@
 #define LOAD_ALLOCED_STACK_ADDR(pldinf)    (*((uintptr_t *)(pldinf + 1)))
 
 #define LOAD_INFO_DEPS(pldinf)                                         \
-    ((uintptr_t)(pldinf + 1) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t))
+    ((const uint32_t *)((uintptr_t)(pldinf + 1) + LOAD_INFO_EXT_LENGTH * sizeof(uintptr_t)))
 #define LOAD_INFO_SERVICE(pldinf)                                      \
-    ((uintptr_t)LOAD_INFO_DEPS(pldinf) + (pldinf)->ndeps * sizeof(uint32_t))
+    ((const struct service_load_info_t *)((uintptr_t)LOAD_INFO_DEPS(pldinf) + \
+     (pldinf)->ndeps * sizeof(uint32_t)))
 #define LOAD_INFO_ASSET(pldinf)                                        \
-    ((uintptr_t)LOAD_INFO_SERVICE(pldinf) +                            \
-     (pldinf)->nservices * sizeof(struct service_load_info_t))
+    ((const struct asset_desc_t *)((uintptr_t)LOAD_INFO_SERVICE(pldinf) + \
+     (pldinf)->nservices * sizeof(struct service_load_info_t)))
 #define LOAD_INFO_IRQ(pldinf)                                          \
-    ((uintptr_t)LOAD_INFO_ASSET(pldinf) +                              \
-     (pldinf)->nassets * sizeof(struct asset_desc_t))
+    ((const struct irq_load_info_t *)((uintptr_t)LOAD_INFO_ASSET(pldinf) + \
+     (pldinf)->nassets * sizeof(struct asset_desc_t)))
 
 /* Runtime partition struct list head node type */
 struct partition_head_t {

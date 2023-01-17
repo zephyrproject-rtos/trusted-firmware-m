@@ -1,16 +1,9 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-
-/***************************************************************************/
-/*                             DRAFT UNDER REVIEW                          */
-/*   These APIs are still evolving and are meant as a prototype for review.*/
-/*   The APIs will change depending on feedback and will be firmed up      */
-/*   to a stable set of APIs once all the feedback has been considered.    */
-/***************************************************************************/
 
 #ifndef __PSA_INITIAL_ATTESTATION_H__
 #define __PSA_INITIAL_ATTESTATION_H__
@@ -46,7 +39,7 @@ extern "C" {
  * attestation service. Used to configure buffers for services that verify the
  * produced tokens.
  */
-#define PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE (0x400)
+#define PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE (0x800)
 
 /**
  * The list of fixed claims in the initial attestation token is still evolving,
@@ -115,11 +108,11 @@ extern "C" {
  *                 represents non-secure caller, positive numbers represents
  *                 secure callers, zero is invalid.
  *
- *  - HW version:  Optional claim. Globally unique number in EAN-13 format
- *                 identifying the GDSII that went to fabrication, HW and ROM.
- *                 It can be used to reference the security level of the PSA-ROT
- *                 via a certification website. Custom claim with a value is
- *                 encoded as text string.
+ *  - Certification Reference: Optional claim. Globally unique number in EAN-13
+ *                 format identifying the GDSII that went to fabrication, HW and
+ *                 ROM. It can be used to reference the security level of the
+ *                 PSA-ROTvia a certification website. Custom claim with a value
+ *                 is encoded as text string.
 
  *  - Boot seed:   It represents a random value created at system boot time that
  *                 will allow differentiation of reports from different system

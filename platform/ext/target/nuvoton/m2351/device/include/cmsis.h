@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited
+ * Copyright (c) 2019-2022 Arm Limited
  * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
@@ -50,6 +50,7 @@
 #define __Vendor_SysTickConfig    0U        /* Set to 1 if different SysTick Config is used */
 
 #include "platform_description.h"
+#include "system_core_init.h"
 #include <core_cm23.h>    /*!< ARM Cortex-M23 processor and core peripherals */
 
 /* =====================  End of section using anonymous unions  ================ */

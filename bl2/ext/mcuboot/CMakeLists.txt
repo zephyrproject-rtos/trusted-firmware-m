@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -11,6 +11,14 @@ cmake_policy(SET CMP0079 NEW)
 add_library(mcuboot_config INTERFACE)
 
 set(MCUBOOT_KEY_ENC "${MCUBOOT_PATH}/enc-rsa2048-pub.pem" CACHE FILEPATH "Path to key with which to encrypt binary")
+
+# Add/process CBOR encoded measured boot data (MCUBOOT_MEASURED_BOOT) only if
+# the store encoded measurements config is enabled. Otherwise, unencoded
+# measurements are stored in the shared data area and must be processed at
+# runtime.
+if (CONFIG_TFM_BOOT_STORE_MEASUREMENTS AND CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS)
+    set(MCUBOOT_MEASURED_BOOT ON)
+endif()
 
 add_subdirectory("${MCUBOOT_PATH}/boot/bootutil" bootutil)
 
@@ -144,10 +152,12 @@ add_custom_command(OUTPUT tfm_s_signed.bin
         --pad-header
         -H ${BL2_HEADER_SIZE}
         -s ${MCUBOOT_SECURITY_COUNTER_S}
-        -L ${MCUBOOT_ENC_KEY_LEN_S}
+        -L ${MCUBOOT_ENC_KEY_LEN}
         -d \"\(1,${MCUBOOT_NS_IMAGE_MIN_VER}\)\"
         $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
+        $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
         $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+        $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
         $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
         ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_signed.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_signed.bin $<TARGET_FILE_DIR:bl2>
@@ -195,11 +205,13 @@ if(NS)
             --pad-header
             -H ${BL2_HEADER_SIZE}
             -s ${MCUBOOT_SECURITY_COUNTER_NS}
-            -L ${MCUBOOT_ENC_KEY_LEN_NS}
+            -L ${MCUBOOT_ENC_KEY_LEN}
             -d \"\(0, ${MCUBOOT_S_IMAGE_MIN_VER}\)\"
             $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
+            $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+            $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_ns_signed.bin
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_ns_signed.bin $<TARGET_FILE_DIR:bl2>
     )
@@ -232,22 +244,21 @@ if(NS)
             DEPENDS tfm_s_ns_bin tfm_s_ns.bin
             DEPENDS signing_layout_s
 
-        # Use the non-secure key to sign the combined image if FORWARD_PROT_MSG is set.
-        # In such a configuration there is a subsystem with higher privileges controlling the
-        # the boot process and current implementation requires to use the non-secure key here.
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
             -v ${MCUBOOT_IMAGE_VERSION_S}
             --layout $<TARGET_OBJECTS:signing_layout_s>
-            -k $<IF:$<BOOL:${FORWARD_PROT_MSG}>,${MCUBOOT_KEY_NS},${MCUBOOT_KEY_S}>
+            -k ${MCUBOOT_KEY_S}
             --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
             --align ${MCUBOOT_ALIGN_VAL}
             --pad
             --pad-header
             -H ${BL2_HEADER_SIZE}
             -s ${MCUBOOT_SECURITY_COUNTER_S}
-            -L ${MCUBOOT_ENC_KEY_LEN_S}
+            -L ${MCUBOOT_ENC_KEY_LEN}
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
+            $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+            $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns.bin
             ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns_signed.bin
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/tfm_s_ns_signed.bin $<TARGET_FILE_DIR:bl2>

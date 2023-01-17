@@ -1,3 +1,5 @@
+:orphan:
+
 *************
 Version 1.4.0
 *************
@@ -42,7 +44,7 @@ The following platforms have been removed from TF-M code base.
   - nRF5340 PDK
   - Musca_A
 
-See :doc:`Platform deprecation and removal </platform/ext/platform_deprecation>`
+See :doc:`/integration_guide/platform/platform_deprecation`
 for other platforms under deprecation process.
 
 Tested platforms

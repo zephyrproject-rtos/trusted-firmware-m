@@ -47,7 +47,7 @@ List of rules
 - Use void argument if your function doesn't contain any argument.
 - Use C90 ``/* */`` for comments rather than C99 ``//``
 - No trailing spaces in code.
-- Max 80 characters length. Text files are exception as stated above.
+- Keep up to 100 characters per line but 140 chars can be accepted exceptionally.
 - Open curly brace ``{`` at the same if/else/while/for/switch statement line.
 - Use curly braces ``{ }`` for one line statement bodies also.
 - Put open curly brace in the line below the function header.
@@ -76,4 +76,4 @@ List of rules
 
 --------------
 
-*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*

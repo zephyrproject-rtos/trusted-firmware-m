@@ -59,18 +59,23 @@ void cross_call_exiting_c(psa_status_t status, uintptr_t frame_addr)
 }
 
 __used
-void spm_interface_cross_dispatcher(uintptr_t fn_addr,
-                                    uintptr_t frame_addr,
-                                    uint32_t  switch_stack)
+void spm_interface_cross_dispatcher(uintptr_t fn_addr, uintptr_t frame_addr)
 {
+    uint32_t sp = 0, sp_limit = 0;
+
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
         tfm_core_panic();
     }
 
-    arch_non_preempt_call(fn_addr, frame_addr,
-                          switch_stack ? SPM_THREAD_CONTEXT->sp : 0,
-                          switch_stack ? SPM_THREAD_CONTEXT->sp_limit : 0);
+    if ((frame_addr <= SPM_THREAD_CONTEXT->sp_limit) ||
+        (frame_addr >  SPM_THREAD_CONTEXT->sp_base)) {
+        sp       = SPM_THREAD_CONTEXT->sp;
+        sp_limit = SPM_THREAD_CONTEXT->sp_limit;
+    }
+
+    arch_non_preempt_call(fn_addr, frame_addr, sp, sp_limit);
+
     /*
      * No need to clear cross_frame and retcode_status because execution here
      * indicates the current thread is running, subsequent interrupts

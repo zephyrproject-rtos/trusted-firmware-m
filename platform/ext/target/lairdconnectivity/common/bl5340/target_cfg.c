@@ -646,12 +646,12 @@ enum tfm_plat_err_t spu_init_cfg(void)
     spu_regions_flash_config_non_secure_callable(memory_regions.veneer_base,
         memory_regions.veneer_limit - 1);
 
-#ifdef NRF_NS_STORAGE
+#ifdef NRF_NS_STORAGE_PARTITION_START
     /* Configures storage partition to be non-secure */
     spu_regions_flash_config_non_secure(
         memory_regions.non_secure_storage_partition_base,
         memory_regions.non_secure_storage_partition_limit);
-#endif /* NRF_NS_STORAGE */
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 
     return TFM_PLAT_ERR_SUCCESS;
 }

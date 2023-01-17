@@ -89,7 +89,10 @@ IAT generation in Initial Attestation secure service
 ****************************************************
 
 The sequence of IAT generation of symmetric Initial Attestation is shown in
-:ref:`ia-service-figure` below.
+:ref:`ia-service-figure` below. Note that the ``Register symmetric IAK`` stage
+is no longer required due to changes in the Crypto partition
+(``attest_symmetric_key.c`` is now responsible only for calculating the instance
+ID).
 
 .. _ia-service-figure:
 
@@ -102,7 +105,6 @@ In Initial Attestation secure service, symmetric Initial Attestation implements
 the following steps in ``attest_create_token()``, which are different from those
 of asymmetric Initial Attestation.
 
-    - Fetch and register IAK
     - ``attest_token_start()``
     - Instance ID claims
     - ``attest_token_finish()``
@@ -113,54 +115,19 @@ Otherwise, asymmetric Initial Attestation dedicated implementations are included
 instead.
 
 Symmetric Initial Attestation implementation resides a new file
-``attest_symmetric_key.c`` to handle symmetric IAK and Instance ID related
-operations.
+``attest_symmetric_key.c`` to handle symmetric Instance ID related operations.
 Symmetric Initial Attestation dedicated ``attest_token_start()`` and
 ``attest_token_finish()`` are added in ``attestation_token.c``.
 
 The details are covered in following sections.
 
-Register symmetric IAK
-======================
+Symmetric Instance ID
+=====================
 
-Symmetric Initial Attestation dedicated ``attest_symmetric_key.c`` implements 4
-major functions. The functions are listed in the table below.
-
-.. table:: Functions in ``attest_symmetric_key.c``
-    :widths: auto
-    :align: center
-
-    +-------------------------------------------------+----------------------------------------------------+
-    | Functions                                       | Descriptions                                       |
-    +=================================================+====================================================+
-    | ``attest_register_initial_attestation_key()``   | Fetches device symmetric IAK, imports it into      |
-    |                                                 | Crypto service and get the handle.                 |
-    |                                                 | The handle will be used to compute the             |
-    |                                                 | authentication tag of IAT.                         |
-    |                                                 | Invokes HAL API ``tfm_plat_get_symmetric_iak()``   |
-    |                                                 | to fetch symmetric IAK from device.                |
-    |                                                 |                                                    |
-    |                                                 | Refer to `HAL APIs`_ for more details.             |
-    +-------------------------------------------------+----------------------------------------------------+
-    | ``attest_unregister_initial_attestation_key()`` | Destroys the symmetric IAK handle after IAT        |
-    |                                                 | generation completes.                              |
-    +-------------------------------------------------+----------------------------------------------------+
-    | ``attest_get_signing_key_handle()``             | Return the IAK handle registered in                |
-    |                                                 | ``attest_register_initial_attestation_key()``.     |
-    +-------------------------------------------------+----------------------------------------------------+
-    | ``attest_get_instance_id()``                    | Return the Instance ID value calculated in         |
-    |                                                 | ``attest_register_initial_attestation_key()``.     |
-    |                                                 |                                                    |
-    |                                                 | Refer to `Instance ID claim`_ for more details.    |
-    +-------------------------------------------------+----------------------------------------------------+
-
-``attest_register_initial_attestation_key()`` and
-``attest_unregister_initial_attestation_key()`` share the same API declarations
-with asymmetric Initial Attestation.
-
-``attest_get_signing_key_handle()`` and ``attest_get_instance_id()`` are defined
-by symmetric Initial Attestation but can be shared with asymmetric Initial
-Attestation later.
+Symmetric Initial Attestation dedicated ``attest_symmetric_key.c`` implements
+the ``attest_get_instance_id()`` function. This function returns the Instance ID
+value, calculating it if it has not already been calculated. Refer to
+`Instance ID claim_` for more details.
 
 .. note ::
 
@@ -169,10 +136,9 @@ Attestation later.
 Instance ID calculation
 -----------------------
 
-In symmetric Initial Attestation, Instance ID is also calculated in
-``attest_register_initial_attestation_key()``, after IAK handle is registered.
-It can protect critical symmetric IAK from being frequently fetched, which
-increases the risk of asset disclosure.
+In symmetric Initial Attestation, Instance ID is also calculated the first time
+it is requested. It can protect critical symmetric IAK from being frequently
+fetched, which increases the risk of asset disclosure.
 
 The Instance ID value is the output of hashing symmetric IAK raw data *twice*,
 as requested in PSA Attestation API [1]_. HMAC-SHA256 may be hard-coded as the
@@ -220,9 +186,6 @@ Descriptions of each step are listed below:
 
 #. ``t_cose_mac0_sign_init()`` is invoked to initialize ``COSE_Mac0`` signing
    context in ``t_cose``.
-
-#. The symmetric IAK handle is returned by ``attest_get_signing_key_handle()``.
-   See the details in `Register symmetric IAK`_.
 
 #. The symmetric IAK handle is set into ``COSE_Mac0`` signing context via
    ``t_cose_mac0_set_signing_key()``.
@@ -588,7 +551,7 @@ Reference
 
 .. [1] `PSA Attestation API 1.0 (ARM IHI 0085) <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Implement/IHI0085-PSA_Attestation_API-1.0.2.pdf?revision=eef78753-c77e-4b24-bcf0-65596213b4c1&la=en&hash=E5E0353D612077AFDCE3F2F3708A50C77A74B2A3>`_
 
-.. [2] :doc:`Trusted Firmware-M Profile Small Design </technical_references/design_docs/profiles/tfm_profile_small>`
+.. [2] :doc:`Trusted Firmware-M Profile Small Design </configuration/profiles/tfm_profile_small>`
 
 .. [3] :doc:`Initial Attestation Service Integration Guide </integration_guide/services/tfm_attestation_integration_guide>`
 
@@ -598,4 +561,4 @@ Reference
 
 ----------------
 
-*Copyright (c) 2020-2021 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2020-2022 Arm Limited. All Rights Reserved.*

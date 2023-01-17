@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -34,14 +34,14 @@ typedef enum {
 } cc3xx_aes_keysize_t;
 
 typedef enum {
-    /* In the TRM the huk is referred to as the rkek */
-    CC3XX_AES_KEY_ID_HUK      = 0x0U,
-    CC3XX_AES_KEY_ID_KRTL     = 0x1U,
-    CC3XX_AES_KEY_ID_KCP      = 0x2U,
-    CC3XX_AES_KEY_ID_KCE      = 0x3U,
-    CC3XX_AES_KEY_ID_KPICV    = 0x4U,
-    CC3XX_AES_KEY_ID_KCEICV   = 0x5U,
-    CC3XX_AES_KEY_ID_USER_KEY = 0xFFU,
+    CC3XX_AES_KEY_ID_HUK      = 0x0U,  /*!< Hardware unique key. Also referred to as RKEK */
+    CC3XX_AES_KEY_ID_KRTL     = 0x1U,  /*!< RTL Key */
+    CC3XX_AES_KEY_ID_KCP      = 0x2U,  /*!< DM provisioning key */
+    CC3XX_AES_KEY_ID_KCE      = 0x3U,  /*!< DM code encryption key */
+    CC3XX_AES_KEY_ID_KPICV    = 0x4U,  /*!< CM provisioning key */
+    CC3XX_AES_KEY_ID_KCEICV   = 0x5U,  /*!< CM code encryption key */
+    CC3XX_AES_KEY_ID_GUK      = 0xFU,  /*!< Group unique key. See CCA spec for information */
+    CC3XX_AES_KEY_ID_USER_KEY = 0xFFU, /*!< Key input into registers manually */
 } cc3xx_aes_key_id_t;
 
 cc3xx_err_t cc3xx_aes(cc3xx_aes_key_id_t key_id, const uint8_t *key,

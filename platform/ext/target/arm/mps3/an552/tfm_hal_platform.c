@@ -11,8 +11,8 @@
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
 #include "device_definition.h"
-#if (CONFIG_TFM_FP == 2) && (TEST_NS_FPU == 1)
-#include "tfm_plat_test.h"
+#if defined(TEST_NS_FPU) || defined(TEST_S_FPU)
+#include "test_interrupt.h"
 #endif
 
 /* Get address of memory regions to configure MPU */
@@ -59,12 +59,20 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
-#if (CONFIG_TFM_FP == 2) && (TEST_NS_FPU == 1)
-    /* Configure secure timer */
-    tfm_plat_test_secure_timer_nvic_configure();
+#if defined(TEST_S_FPU) || defined(TEST_NS_FPU)
+    /* Set IRQn in secure mode */
+    NVIC_ClearTargetState(TFM_FPU_S_TEST_IRQ);
 
-    /* Configure non-secure timer */
-    tfm_plat_test_non_secure_timer_nvic_configure();
+    /* Register FPU secure test interrupt handler */
+    NVIC_SetVector(TFM_FPU_S_TEST_IRQ, (uint32_t)TFM_FPU_S_TEST_Handler);
+
+    /* Enable FPU secure test interrupt */
+    NVIC_EnableIRQ(TFM_FPU_S_TEST_IRQ);
+#endif
+
+#if defined(TEST_NS_FPU)
+    /* Set IRQn in non-secure mode */
+    NVIC_SetTargetState(TFM_FPU_NS_TEST_IRQ);
 #endif
 
     return TFM_HAL_SUCCESS;

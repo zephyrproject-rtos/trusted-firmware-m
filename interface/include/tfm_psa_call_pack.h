@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -26,6 +26,15 @@ extern "C" {
         (((((uint32_t)type) << TYPE_OFFSET) & TYPE_MASK)       | \
          ((((uint32_t)in_len) << IN_LEN_OFFSET) & IN_LEN_MASK) | \
          ((((uint32_t)out_len) << OUT_LEN_OFFSET) & OUT_LEN_MASK))
+
+#define PARAM_UNPACK_TYPE(ctrl_param) \
+        ((int32_t)(((ctrl_param) & TYPE_MASK) >> TYPE_OFFSET))
+
+#define PARAM_UNPACK_IN_LEN(ctrl_param) \
+        ((size_t)(((ctrl_param) & IN_LEN_MASK) >> IN_LEN_OFFSET))
+
+#define PARAM_UNPACK_OUT_LEN(ctrl_param) \
+        ((size_t)(((ctrl_param) & OUT_LEN_MASK) >> OUT_LEN_OFFSET))
 
 psa_status_t tfm_psa_call_pack(psa_handle_t handle,
                                uint32_t ctrl_param,

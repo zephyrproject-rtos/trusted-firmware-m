@@ -5,11 +5,18 @@
 #
 #-------------------------------------------------------------------------------
 
+########################## FPU and MVE #########################################
+
+tfm_invalid_config(NOT CMAKE_C_COMPILER_ID STREQUAL "GNU" AND (CONFIG_TFM_ENABLE_FP OR CONFIG_TFM_ENABLE_MVE OR CONFIG_TFM_ENABLE_MVE_FP))
+tfm_invalid_config((NOT CONFIG_TFM_FP_ARCH) AND (CONFIG_TFM_ENABLE_FP OR CONFIG_TFM_ENABLE_MVE_FP))
+tfm_invalid_config((NOT CONFIG_TFM_ENABLE_FP AND NOT CONFIG_TFM_ENABLE_MVE AND NOT CONFIG_TFM_ENABLE_MVE_FP) AND CONFIG_TFM_LAZY_STACKING)
+tfm_invalid_config((CONFIG_TFM_ENABLE_FP OR CONFIG_TFM_ENABLE_MVE OR CONFIG_TFM_ENABLE_MVE_FP) AND NOT CONFIG_TFM_ENABLE_CP10CP11)
+
 ###################### Check compiler for FP vulnerability #####################
 
 # Check compiler with mitigation for the VLLDM instruction security vulnerability or not.
 # For more information, please check https://developer.arm.com/support/arm-security-updates/vlldm-instruction-security-vulnerability.
-if (CONFIG_TFM_FP STREQUAL "hard")
+if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
     # Create test C file.
     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/cvetest.c "int x;")
     # Compile with mitigation -mfix-cmse-cve-2021-35465.

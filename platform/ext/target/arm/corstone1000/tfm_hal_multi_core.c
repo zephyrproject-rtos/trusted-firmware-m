@@ -16,11 +16,22 @@
 #define HOST_CPU_PE0_CONFIG_OFFSET 0x010
 #define AA64nAA32_MASK (1 << 3)
 
+#ifdef EXTERNAL_SYSTEM_SUPPORT
+void tfm_external_system_boot()
+{
+    volatile uint32_t *ext_sys_reset_ctl_reg = (uint32_t *)(CORSTONE1000_EXT_SYS_RESET_REG);
+
+    /* de-assert CPU_WAIT signal*/
+    *ext_sys_reset_ctl_reg = 0x0;
+}
+#endif
+
 void tfm_hal_boot_ns_cpu(uintptr_t start_addr)
 {
     /* Switch the shared flash to XiP mode for the host */
     Select_XIP_Mode_For_Shared_Flash();
 
+#ifndef TFM_S_REG_TEST
     volatile uint32_t *bir_base = (uint32_t *)CORSTONE1000_HOST_BIR_BASE;
 
     /* Program Boot Instruction Register to jump to BL2 (TF-A) base address
@@ -53,6 +64,12 @@ void tfm_hal_boot_ns_cpu(uintptr_t start_addr)
     *reset_ctl_reg = 0;
 
     (void) start_addr;
+
+#ifdef EXTERNAL_SYSTEM_SUPPORT
+    /*release EXT SYS out of reset*/
+    tfm_external_system_boot();
+#endif
+#endif /* !TFM_S_REG_TEST */
 }
 
 void tfm_hal_wait_for_ns_cpu_ready(void)

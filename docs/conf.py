@@ -43,13 +43,6 @@ except:
 
 # -- General configuration ---------------------------------------------------
 
-# If your documentation needs a minimal Sphinx version, state it here.
-#
-# needs_sphinx = '1.4'
-
-# Add any Sphinx extension module names here, as strings. They can be
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
-# ones.
 extensions = [
     'sphinx.ext.imgmath',
     'm2r2', #Support markdown files. Needed for external code.
@@ -62,9 +55,9 @@ extensions = [
 # PlantUML
 plantuml = 'java -jar ' + os.environ['PLANTUML_JAR_PATH']
 
-#Make auso section labals generated be prefixed with file name.
+# Make auto section labels generated be prefixed with file name.
 autosectionlabel_prefix_document=True
-#Add auso section label for level 2 headers only.
+# Add auto section label for level 2 headers only.
 autosectionlabel_maxdepth=2
 
 # Add any paths that contain templates here, relative to this directory.
@@ -89,7 +82,7 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'readme.rst',
-                    'platform/ext/target/cypress/psoc64/security/keys/readme.rst',
+                    'platform/cypress/psoc64/security/keys/readme.rst',
                     'lib/ext/**']
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -97,27 +90,19 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output -------------------------------------------------
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-#
 html_theme = 'sphinx_rtd_theme'
 
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#
 html_theme_options = {
     'collapse_navigation' : False,
     'prev_next_buttons_location' : None,   # Hide Prev and Next buttons
-#    'display_version': True,    # Show version under logo
+    'display_version': True,    # Show version under logo
     'sticky_navigation': True,
-    'navigation_depth': 2,
+    'navigation_depth': 3,
 }
 
 # Remove the "View page source" link from the top of docs pages
 html_show_sourcelink = False
 
-#
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to configuration directory. They are copied after the builtin static
 # files, so a file named "default.css" will overwrite the builtin "default.css".
@@ -128,16 +113,6 @@ html_logo = '_static/images/tf_logo_white.png'
 
 # Set the documentation favicon
 html_favicon = '_static/images/favicon.ico'
-
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# The default sidebars (for documents that don't match any pattern) are
-# defined by theme itself.  Builtin themes are using these templates by
-# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
-# 'searchbox.html']``.
-#
-# html_sidebars = {}
 
 #Disable adding conf.py copyright notice to HTML output
 html_show_copyright = False
@@ -155,10 +130,6 @@ def setup(app):
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'TF-M doc'
 
-rst_prolog = """
-.. |TFM_VERSION| replace:: version
-"""
-
 # Enable figures and tables auto numbering
 numfig = True
 numfig_secnum_depth = 0
@@ -172,20 +143,9 @@ numfig_format = {
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
     # 'papersize': 'letterpaper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    #
     # 'pointsize': '10pt',
-
-    # Additional stuff for the LaTeX preamble.
-    #
     # 'preamble': '',
-
-    # Latex figure (float) alignment
-    #
     # 'figure_align': 'htbp',
 }
 
@@ -197,24 +157,3 @@ latex_documents = [
      author, 'manual'),
 ]
 
-# -- Options for manual page output ------------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-#man_pages = [
-#    (master_doc, 'tf-m', title,
-#     [author], 7)
-#]
-
-# -- Options for Texinfo output ----------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-#texinfo_documents = [
-#    (master_doc, 'TF-M', title,
-#     author, 'TF-M', 'Trusted Firmware for Cortex-M',
-#     'Miscellaneous'),
-#]
-
-# -- Extension configuration -------------------------------------------------

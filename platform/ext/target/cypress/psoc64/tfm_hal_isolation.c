@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,8 +19,13 @@
 #include "tfm_peripherals_def.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
+#include "tfm_hal_isolation.h"
 
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
+#define PROT_BOUNDARY_VAL \
+    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+
+enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
+                                            uintptr_t *p_spm_boundary)
 {
     Cy_PDL_Init(CY_DEVICE_CFG);
 
@@ -33,16 +41,36 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
         return TFM_HAL_ERROR_GENERIC;
     }
 
+    *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
+
     return TFM_HAL_SUCCESS;
 }
 
-enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
-                                                size_t size,
-                                                uint32_t attr)
+enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
+                                           uintptr_t base,
+                                           size_t size,
+                                           uint32_t access_type)
 {
     enum tfm_status_e status;
+    uint32_t flags = 0;
 
-    status = tfm_has_access_to_region((const void *)base, size, attr);
+    if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
+        flags |= MEM_CHECK_MPU_READWRITE;
+    } else if (access_type & TFM_HAL_ACCESS_READABLE) {
+        flags |= MEM_CHECK_MPU_READ;
+    } else {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
+        flags |= MEM_CHECK_MPU_UNPRIV;
+    }
+
+    if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
+        flags |= MEM_CHECK_NONSECURE;
+    }
+
+    status = tfm_has_access_to_region((const void *)base, size, flags);
     if (status != TFM_SUCCESS) {
          return TFM_HAL_ERROR_MEM_FAULT;
     }
@@ -51,7 +79,7 @@ enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
 }
 
 /*
- * Implementation of tfm_hal_bind_boundaries() on PSOC64:
+ * Implementation of tfm_hal_bind_boundary() on PSOC64:
  *
  * The API encodes some attributes into a handle and returns it to SPM.
  * The attributes include isolation boundaries, privilege, and MMIO information.
@@ -60,15 +88,17 @@ enum tfm_hal_status_t tfm_hal_memory_has_access(uintptr_t base,
  * SPM passes the handle to platform to do platform settings and update
  * isolation boundaries.
  */
-enum tfm_hal_status_t tfm_hal_bind_boundaries(
+enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
-                                    void **pp_boundaries)
+                                    uintptr_t *p_boundary)
 {
     uint32_t i, j;
     bool privileged;
+    bool ns_agent;
+    uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
 
-    if (!p_ldinf || !pp_boundaries) {
+    if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
@@ -78,7 +108,8 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
-    p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
+    ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
+    p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     /*
      * Validate if the named MMIO of partition is allowed by the platform.
@@ -100,17 +131,21 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
             return TFM_HAL_ERROR_GENERIC;
         }
     }
-    *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
+                        HANDLE_ATTR_PRIV_MASK;
+    partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
+                        HANDLE_ATTR_NS_MASK;
+    *p_boundary = (uintptr_t)partition_attrs;
 
     return TFM_HAL_SUCCESS;
 }
 
-enum tfm_hal_status_t tfm_hal_update_boundaries(
+enum tfm_hal_status_t tfm_hal_activate_boundary(
                              const struct partition_load_info_t *p_ldinf,
-                             void *p_boundaries)
+                             uintptr_t boundary)
 {
     CONTROL_Type ctrl;
-    bool privileged = !!((uint32_t)p_boundaries & HANDLE_ATTR_PRIV_MASK);
+    bool privileged = !!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK);
 
     /* Privileged level is required to be set always */
     ctrl.w = __get_CONTROL();
@@ -118,4 +153,18 @@ enum tfm_hal_status_t tfm_hal_update_boundaries(
     __set_CONTROL(ctrl.w);
 
     return TFM_HAL_SUCCESS;
+}
+
+bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                  uintptr_t boundary_to)
+{
+    if (boundary_from == boundary_to) {
+        return false;
+    }
+
+    if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
+        ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
+        return false;
+    }
+    return true;
 }

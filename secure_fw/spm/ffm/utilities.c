@@ -5,6 +5,7 @@
  *
  */
 #include <inttypes.h>
+#include "config_spm.h"
 #include "fih.h"
 #include "utilities.h"
 #include "tfm_hal_platform.h"

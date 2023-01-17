@@ -70,10 +70,6 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/system_stm32u5xx.c
         ${STM_COMMON_DIR}/hal/Native_Driver/mpu_armv8m_drv.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_platform.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/low_level_device.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
@@ -90,12 +86,12 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rcc.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rcc_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_gtzc.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_cortex.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_platform_system.c>
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rng.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rng_ex.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_ospi.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_ll_dlyb.c
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash_ex.c
@@ -189,11 +185,15 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_hash_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_pka.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_cryp.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_cryp_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rng.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rng_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rtc.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_rtc_ex.c
             ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_icache.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_hal_ospi.c
+            ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32u5xx_ll_dlyb.c
             ${STM_COMMON_DIR}/hal/Native_Driver/low_level_rng.c
             ${STM_COMMON_DIR}/hal/provision/otp_provision.c
             ${STM_COMMON_DIR}/hal/Native_Driver/nv_counters.c
@@ -216,6 +216,15 @@ if(BL2)
             ${CMAKE_CURRENT_SOURCE_DIR}/bl2/stm32u5xx_hal_msp.c
     )
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_platform.c
+)
 
 install(FILES
         ${STM_COMMON_DIR}/scripts/stm_tool.py
@@ -269,14 +278,30 @@ set(CONTENT_FOR_BL2_PREPROCESSING
     "\tRE_BL2_WRP_START = (FLASH_AREA_BL2_OFFSET),\n"
     "\tRE_BL2_WRP_END = (FLASH_AREA_BL2_NOHDP_OFFSET+FLASH_AREA_BL2_NOHDP_SIZE-0x1),\n"
     "\tRE_BL2_HDP_END = (FLASH_AREA_BL2_NOHDP_OFFSET-0x1),\n"
+    "#if defined(EXTERNAL_FLASH)\n"
+    "\tRE_IMAGE_FLASH_SECURE_UPDATE = (OSPI_FLASH_BASE_ADDRESS+FLASH_AREA_2_OFFSET),\n"
+    "\tRE_IMAGE_FLASH_NON_SECURE_UPDATE = (OSPI_FLASH_BASE_ADDRESS+FLASH_AREA_3_OFFSET),\n"
+    "\tRE_IMAGE_FLASH_UNUSED = (FLASH_BASE_ADDRESS+FLASH_AREA_1_OFFSET+FLASH_AREA_1_SIZE),\n"
+    "#else\n"
     "\tRE_IMAGE_FLASH_SECURE_UPDATE = (FLASH_BASE_ADDRESS+FLASH_AREA_2_OFFSET),\n"
     "\tRE_IMAGE_FLASH_NON_SECURE_UPDATE = (FLASH_BASE_ADDRESS+FLASH_AREA_3_OFFSET),\n"
     "\tRE_IMAGE_FLASH_UNUSED = (FLASH_BASE_ADDRESS+FLASH_AREA_3_OFFSET+FLASH_AREA_3_SIZE),\n"
+    "#endif\n"
     "\tRE_IMAGE_FLASH_SCRATCH = (FLASH_BASE_ADDRESS+FLASH_AREA_SCRATCH_OFFSET),\n"
     "\tRE_IMAGE_FLASH_NV_COUNTERS = (FLASH_BASE_ADDRESS+FLASH_NV_COUNTERS_AREA_OFFSET),\n"
     "\tRE_IMAGE_FLASH_NV_PS = (FLASH_BASE_ADDRESS+FLASH_PS_AREA_OFFSET),\n"
-    "\tRE_IMAGE_FLASH_NV_ITS = (FLASH_BASE_ADDRESS+FLASH_ITS_AREA_OFFSET)\n}\;"
+    "\tRE_IMAGE_FLASH_NV_ITS = (FLASH_BASE_ADDRESS+FLASH_ITS_AREA_OFFSET),\n"
 )
+if(MCUBOOT_ENC_IMAGES)
+    set(CONTENT_ENCRYPTED
+    "\tRE_IMAGE_ENCRYPTED = 0x01\n}\;"
+    )
+else()
+    set(CONTENT_ENCRYPTED
+    "\tRE_IMAGE_ENCRYPTED = 0x0\n}\;"
+    )
+endif()
 
 string(CONCAT BL2_PREPROCESSING ${FLAGS_FOR_BL2_PREPROCESSING}
-       ${CONTENT_FOR_BL2_PREPROCESSING})
+       ${CONTENT_FOR_BL2_PREPROCESSING}
+       ${CONTENT_ENCRYPTED})

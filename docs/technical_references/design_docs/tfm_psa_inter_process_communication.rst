@@ -17,13 +17,10 @@ For more terminology please check Reference_ document.
 ***************
 Design Overview
 ***************
-IPC re-uses existed components in library model:
+Components for implementing IPC:
 
 - SPM – for partition information and isolation actions
 - Core – for exception handling
-
-Extra components for implementing IPC:
-
 - Memory pool
 - Message manager
 - Thread
@@ -43,9 +40,7 @@ SPM and Core
 SPM manages Secure Partition information. Enhancements need to be done in SPM
 data structure for Secure Partition for IPC due to:
 
-- IPC model requires each Secure Partition has its own stack area while
-  isolation level 1 of library model makes all partition shares same stack
-  pointer. This needs to be changed while implementing IPC.
+- IPC model requires each Secure Partition has its own stack area.
 - Multiple services are holding in same Secure Partition and each service
   has its own information like message queue, SID and priority.
 - Changed information related manifest items need to be changed, too.
@@ -230,4 +225,4 @@ Reference
 
 --------------
 
-*Copyright (c) 2019, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2022, Arm Limited. All rights reserved.*

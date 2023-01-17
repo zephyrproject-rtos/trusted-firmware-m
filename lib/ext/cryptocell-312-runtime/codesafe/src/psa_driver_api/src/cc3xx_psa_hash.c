@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,6 +17,9 @@
 #include "cc3xx_crypto_primitives_private.h"
 #include "cc_pal_log.h"
 #include "cc_pal_mem.h"
+
+/* To be able to include the PSA style configuration */
+#include "mbedtls/build_info.h"
 
 #define MAX_HASH_CHUNK_SIZE 0xffff
 
@@ -137,19 +140,27 @@ psa_status_t cc3xx_hash_setup(cc3xx_hash_operation_t *operation,
     pHashCtx = &(operation->ctx);
     CC_PalMemSetZero(pHashCtx, sizeof(HashContext_t));
     switch (alg) {
-#ifdef CC3XX_CONFIG_SUPPORT_SHA1
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
         pHashCtx->mode = HASH_SHA1;
         break;
-#endif /* CC3XX_CONFIG_SUPPORT_SHA1 */
+#endif /* PSA_WANT_ALG_SHA_1 */
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
         pHashCtx->mode = HASH_SHA224;
         break;
+#endif /* PSA_WANT_ALG_SHA_224 */
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
         pHashCtx->mode = HASH_SHA256;
         break;
+#endif /* PSA_WANT_ALG_SHA_256 */
+#if defined(PSA_WANT_ALG_SHA_384)
     case PSA_ALG_SHA_384:
+#endif /* PSA_WANT_ALG_SHA_384 */
+#if defined(PSA_WANT_ALG_SHA_512)
     case PSA_ALG_SHA_512:
+#endif /* PSA_WANT_ALG_SHA_512 */
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -266,6 +277,7 @@ psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation,
 
     /* Copy the result to the user buffer  */
     switch (pHashCtx->mode) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case HASH_SHA1:
         if (SHA1_DIGEST_SIZE_IN_BYTES > hash_size) {
             return PSA_ERROR_BUFFER_TOO_SMALL;
@@ -273,6 +285,8 @@ psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation,
         CC_PalMemCopy(hash, pHashCtx->digest, SHA1_DIGEST_SIZE_IN_BYTES);
         *hash_length = SHA1_DIGEST_SIZE_IN_BYTES;
         break;
+#endif /* PSA_WANT_ALG_SHA_1 */
+#if defined(PSA_WANT_ALG_SHA_224)
     case HASH_SHA224:
         if (SHA224_DIGEST_SIZE_IN_BYTES > hash_size) {
             return PSA_ERROR_BUFFER_TOO_SMALL;
@@ -280,6 +294,8 @@ psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation,
         CC_PalMemCopy(hash, pHashCtx->digest, SHA224_DIGEST_SIZE_IN_BYTES);
         *hash_length = SHA224_DIGEST_SIZE_IN_BYTES;
         break;
+#endif /* PSA_WANT_ALG_SHA_224 */
+#if defined(PSA_WANT_ALG_SHA_256)
     case HASH_SHA256:
         if (SHA256_DIGEST_SIZE_IN_BYTES > hash_size) {
             return PSA_ERROR_BUFFER_TOO_SMALL;
@@ -287,8 +303,9 @@ psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation,
         CC_PalMemCopy(hash, pHashCtx->digest, SHA256_DIGEST_SIZE_IN_BYTES);
         *hash_length = SHA256_DIGEST_SIZE_IN_BYTES;
         break;
+#endif /* PSA_WANT_ALG_SHA_256 */
     default:
-        CC_PAL_LOG_ERR("Unsupported HASH type (%d)\n", pHashCtx->mode);
+        return PSA_ERROR_NOT_SUPPORTED;
     }
     return PSA_SUCCESS;
 }

@@ -16,7 +16,6 @@
 #include "psa/error.h"
 #include "utilities.h"
 #include "thread.h"
-#include "tfm_core_utils.h"
 
 /**
  * In linux environment and for psa_call type client api,
@@ -82,7 +81,7 @@ void send_service_reply_to_non_secure(int32_t reply, void *private)
     handle = unordered_map_get_entry_handle(s_map_entry);
     if (handle == INVALID_MAP_HANDLE) {
         SPMLOG_ERRMSG("FATAL_ERROR: Map handle not valid\r\n");
-        TFM_CORE_ASSERT(0);
+        SPM_ASSERT(0);
     }
     unordered_map_free(handle);
 }
@@ -90,7 +89,7 @@ void send_service_reply_to_non_secure(int32_t reply, void *private)
 static psa_invec * prepare_in_vecs(unordered_map_entry_t* s_map_entry)
 {
     uint32_t in_len = s_map_entry->msg.params.psa_call_params.in_len;
-    TFM_CORE_ASSERT(in_len <= PSA_MAX_IOVEC);
+    SPM_ASSERT(in_len <= PSA_MAX_IOVEC);
 
     psa_invec *input_buffer_in_vec = (psa_invec*)tfm_to_openamp_translate_non_secure_to_secure_ptr(
                                          (void*)s_map_entry->msg.params.psa_call_params.in_vec);
@@ -109,7 +108,7 @@ static void * alloc_outout_buffer_in_shared_mem(size_t length,
 
     /* pre allocate output_buffer space from openamp shared memory */
     s_map_entry->output_buffer = tfm_to_openamp_get_buffer(&buffer_sz);
-    TFM_CORE_ASSERT((s_map_entry->output_buffer != NULL) && (buffer_sz >= length));
+    SPM_ASSERT((s_map_entry->output_buffer != NULL) && (buffer_sz >= length));
     s_map_entry->is_output_buffer = true;
     s_map_entry->output_buffer_len = length;
     spm_memset(s_map_entry->output_buffer, 0x0, length);
@@ -127,7 +126,7 @@ static psa_status_t alloc_and_prepare_out_vecs(psa_outvec **out_vec_start_ptr,
     int max_shared_mem_buffer_size = 0;
     uint32_t out_len = s_map_entry->msg.params.psa_call_params.out_len;
 
-    TFM_CORE_ASSERT(out_len <= PSA_MAX_IOVEC);
+    SPM_ASSERT(out_len <= PSA_MAX_IOVEC);
     *out_vec_start_ptr = NULL;
 
     if (out_len == 0) {

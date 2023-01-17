@@ -19,7 +19,7 @@
 
 /* Include the public header first as it contains the typedefs */
 #include "cc3xx_crypto_primitives.h"
-
+#include "cc3xx_config.h"
 #include "psa/crypto.h"
 
 #include "hash_driver.h"
@@ -99,7 +99,6 @@ struct cc3xx_aead_operation_s {
     psa_algorithm_t alg;          /*!< AEAD algorithm */
     psa_key_type_t key_type;      /*!< Key type */
     psa_encrypt_or_decrypt_t dir; /*!< Encrypt/decrypt direction */
-
     size_t tag_length;            /*!< Size of the authentication tag */
 
     union {
@@ -107,6 +106,11 @@ struct cc3xx_aead_operation_s {
         AesCcmContext_t ccm;            /*!< Low-level CCM context */
         ChachaPolyContext_t chachapoly; /*!< Low-level Chacha20-Poly1305 ctx */
     } ctx;
+
+#if defined(CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE)
+    uint8_t cache_buf[AES_BLOCK_SIZE]; /*!< Required to support cached mode */
+    size_t curr_cache_size;            /*!< Size of data currently cached */
+#endif /* CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE */
 };
 
 #ifdef __cplusplus

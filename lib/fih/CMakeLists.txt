@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -8,9 +8,9 @@
 cmake_minimum_required(VERSION 3.15)
 
 add_library(tfm_fih_headers INTERFACE)
-add_library(tfm_fih_implementation STATIC)
+add_library(tfm_fih STATIC)
 
-target_sources(tfm_fih_implementation
+target_sources(tfm_fih
     PRIVATE
         src/fih.c
 )
@@ -20,7 +20,7 @@ target_include_directories(tfm_fih_headers
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
 )
 
-target_link_libraries(tfm_fih_implementation
+target_link_libraries(tfm_fih
     PUBLIC
         tfm_fih_headers
         platform_common_interface

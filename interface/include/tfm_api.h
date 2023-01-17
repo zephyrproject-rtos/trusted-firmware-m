@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -59,29 +59,7 @@ enum tfm_status_e
     TFM_ERROR_GENERIC = 0x1F,
 };
 
-/*
- * Structure to package type, in_len and out_len, it is mainly used for
- * psa_call.
- */
-struct tfm_control_parameter_t {
-   int32_t type;
-   size_t in_len;
-   size_t out_len;
-};
-
 /********************* Secure function declarations ***************************/
-
-/**
- * \brief Assign client ID to the current TZ context.
- *
- * \param[in] ns_client_id      The client ID to be assigned to the current
- *                              context.
- * \retval TFM_SUCCESS          The client ID assigned successfully.
- * \retval error code           The client ID assignment failed, an error code
- *                              returned according to \ref tfm_status_e.
- * \note This function have to be called from handler mode.
- */
-enum tfm_status_e tfm_register_client_id (int32_t ns_client_id);
 
 /**
  * \brief Retrieve the version of the PSA Framework API that is implemented.

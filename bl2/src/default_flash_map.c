@@ -51,6 +51,38 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME_2;
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME_3;
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME_SCRATCH;
 
+#if !defined(FLASH_DRIVER_LIST)
+/* Default Drivers list */
+const ARM_DRIVER_FLASH *flash_driver[] = {
+    &FLASH_DEV_NAME,
+#if FLASH_DEV_NAME_0 != FLASH_DEV_NAME
+    &FLASH_DEV_NAME_0,
+#endif
+#if FLASH_DEV_NAME_1 != FLASH_DEV_NAME
+    &FLASH_DEV_NAME_1,
+#endif
+#if FLASH_DEV_NAME_2 != FLASH_DEV_NAME
+    &FLASH_DEV_NAME_2,
+#endif
+#if (MCUBOOT_IMAGE_NUMBER == 2)
+#if FLASH_DEV_NAME_1 != FLASH_DEV_NAME
+    &FLASH_DEV_NAME_1,
+#endif
+#if FLASH_DEV_NAME_3 != FLASH_DEV_NAME
+    &FLASH_DEV_NAME_3,
+#endif
+#endif /* (MCUBOOT_IMAGE_NUMBER == 2) */
+#if defined(MCUBOOT_SWAP_USING_SCRATCH) && \
+    defined(FLASH_DEV_NAME_SCRATCH) && FLASH_DEV_NAME_SCRATCH != FLASH_DEV_NAME
+    &FLASH_DEV_NAME_SCRATCH
+#endif
+};
+#else
+/* Platform driver list */
+const ARM_DRIVER_FLASH *flash_driver[] = FLASH_DRIVER_LIST;
+#endif /* !defined(FLASH_DRIVER_LIST) */
+const int flash_driver_entry_num = ARRAY_SIZE(flash_driver);
+
 const struct flash_area flash_map[] = {
     {
         .fa_id = FLASH_AREA_0_ID,

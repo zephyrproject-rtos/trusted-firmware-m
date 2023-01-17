@@ -599,7 +599,7 @@ CCError_t PolyFinish(PolyState_t *state, uint8_t *tag, size_t tag_size)
     CCError_t rc = CC_FAIL;
     uint32_t pkaRegsNum = POLY_PKA_REGS_NUM;
 
-    if ((tag == NULL) || (tag_size < CC_POLY_BLOCK_SIZE_IN_BYTES)) {
+    if ((tag == NULL) || (tag_size != CC_POLY_BLOCK_SIZE_IN_BYTES)) {
         return CC_POLY_DATA_INVALID_ERROR;
     }
 
@@ -625,7 +625,7 @@ CCError_t PolyFinish(PolyState_t *state, uint8_t *tag, size_t tag_size)
 
     PkaFinishAndMutexUnlock(pkaRegsNum);
 
-    CC_PalMemCopy(tag, state->context.acc, sizeof(state->context.acc));
+    CC_PalMemCopy(tag, state->context.acc, tag_size);
 
     return CC_OK;
 }

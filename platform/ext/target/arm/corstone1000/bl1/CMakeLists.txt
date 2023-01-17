@@ -39,6 +39,7 @@ target_link_libraries(bl1
     PRIVATE
         bl1_main
         bl2_mbedcrypto
+        cmsis_stack_override
 )
 
 # add_convert_to_bin_target(bl1) requires at least one source file added to bl1. This sources will
@@ -46,13 +47,15 @@ target_link_libraries(bl1
 # added here, as those not use this image number macro.
 target_sources(bl1
     PRIVATE
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/../Device/Source/gcc/startup_corstone1000_bl.S>
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/../Device/Source/startup_corstone1000.c>
 )
 
 # Needed for the GCC startup files
 target_include_directories(bl1
     PRIVATE
         ${CMAKE_SOURCE_DIR}/platform/include
+        ../Device/Include
+        ${CMAKE_SOURCE_DIR}/platform/ext/cmsis
 )
 
 # target_add_scatter_file(bl1) cannot be used as it would add the platform_region_defs dependency
@@ -197,7 +200,6 @@ target_sources(bl1_main
 target_link_libraries(bl1_main
     PRIVATE
         bl2_hal
-        tfm_arch
 )
 
 target_compile_definitions(bl1_main
@@ -219,6 +221,7 @@ target_compile_definitions(bl1_main
     PRIVATE
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_STATE}>:CRYPTO_HW_ACCELERATOR_OTP_${CRYPTO_HW_ACCELERATOR_OTP_STATE}>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
+        $<$<BOOL:${ENABLE_FWU_AGENT_DEBUG_LOGS}>:ENABLE_FWU_AGENT_DEBUG_LOGS>
 )
 
 target_include_directories(bl1_main
@@ -291,13 +294,16 @@ target_compile_definitions(signing_layout_for_bl2
     PRIVATE
         MCUBOOT_IMAGE_NUMBER=${BL1_IMAGE_NUMBER}
         BL1
-        $<$<BOOL:${TEST_S}>:TEST_S>
 )
 
 target_include_directories(signing_layout_for_bl2
     PRIVATE
         ../partition
 )
+
+if (CONFIG_TFM_BOOT_STORE_MEASUREMENTS)
+    set(MCUBOOT_MEASURED_BOOT ON)
+endif()
 
 add_custom_target(bl2_signed_bin
     ALL
@@ -322,6 +328,7 @@ add_custom_command(OUTPUT bl2_signed.bin
         -d \"\(0,${MCUBOOT_S_IMAGE_MIN_VER}\)\"
         $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
         $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
+        $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
         $<TARGET_FILE_DIR:bl2>/bl2.bin
         ${CMAKE_CURRENT_BINARY_DIR}/bl2_signed.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl2_signed.bin $<TARGET_FILE_DIR:bl2>

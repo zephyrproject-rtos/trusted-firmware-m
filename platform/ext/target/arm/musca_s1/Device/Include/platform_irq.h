@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,8 @@ typedef enum IRQn
   PWM_1_IRQn                =   74, /*  PWM1 interrupt                      */
   PWM_2_IRQn                =   75, /*  PWM2 interrupt                      */
   IOMUX_IRQn                =   76, /*  IOMUX interrupt                     */
+  TFM_FPU_S_TEST_IRQn       =   77, /*  TFM FPU Secure Test Interrupt       */
+  TFM_FPU_NS_TEST_IRQn      =   78, /*  TFM FPU Non-Secure Test Interrupt   */
 } IRQn_Type;
 
 #ifdef __cplusplus

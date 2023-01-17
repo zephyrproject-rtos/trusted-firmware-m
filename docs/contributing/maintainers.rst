@@ -42,6 +42,13 @@ Sherry Zhang
     :email: `Sherry.Zhang2@arm.com <Sherry.Zhang2@arm.com>`__
     :github: `sherryzhang <https://github.com/sherryzhang>`__
 
+BL1 immutable bootloader
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Raef Coles
+    :email: `Raef.Coles@arm.com <Raef.Coles@arm.com>`__
+    :github: `RcColes <https://github.com/RcColes>`__
+
 Secure Storage
 ~~~~~~~~~~~~~~
 
@@ -74,13 +81,6 @@ Ken Liu
 Kevin Peng
     :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
     :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
-
-Audit Log
-~~~~~~~~~
-
-Jamie Fox
-    :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
-    :github: `jf549 <https://github.com/jf549>`__
 
 Attestation
 ~~~~~~~~~~~
@@ -115,12 +115,34 @@ Kevin Peng
     :email: `Kevin.Peng@arm.com <Kevin.Peng@arm.com>`__
     :github: `kevin-peng-hao <https://github.com/kevin-peng-hao>`__
 
-Arm Platforms: MPS2, MPS3, Musca(A,B1,S1)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Arm Platforms
+~~~~~~~~~~~~~
+
+MPS2, MPS3, Musca(A,B1,S1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Mark Horvath
     :email: `Mark.Horvath@arm.com <mark.horvath@arm.com>`__
     :github: `mark-horvath-arm <https://github.com/mark-horvath-arm>`__
+
+Corstone1000
+^^^^^^^^^^^^
+
+Vishnu Banavath
+    :email: `Vishnu.Banavath@arm.com <vishnu.banavath@arm.com>`__
+    :github: `vishnu-banavath <https://github.com/vishnu-banavath>`__
+
+Mohamed Omar Asaker
+    :email: `Mohamed.OmarAsaker@arm.com <mohamed.omarasaker@arm.com>`__
+    :github: `mohamedasaker-arm <https://github.com/mohamedasaker-arm>`__
+
+RSS
+^^^
+
+Jamie Fox
+    :email: `jamie.fox@arm.com <jamie.fox@arm.com>`__
+    :github: `jf549 <https://github.com/jf549>`__
 
 NXP Platforms
 ~~~~~~~~~~~~~
@@ -144,16 +166,12 @@ Chris Brand
     :email: `Chris Brand@cypress.com <chris.brand@cypress.com>`__
     :github: `UEWBot <https://github.com/UEWBot>`__
 
-Raymond Ngun
-    :email: `Raymond.Ngunn@cypress.com <raymond.ngunn@cypress.com>`__
-    :github: `RaymondNgun <https://github.com/RaymondNgun>`__
-
 Laird Connectivity Platforms:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Jamie McCrae
-    :email: `Jamie.McCrae@lairdconnect.com <jamie.mccrae@lairdconnect.com>`__
-    :github: `thedjnk <https://github.com/thedjnk>`__
+Greg Leach
+    :email: `Greg.Leach@lairdconnect.com <greg.leach@lairdconnect.com>`__
+    :github: `greg-leach <https://github.com/greg-leach>`__
 
 Nordic Semiconductor Platforms
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -172,4 +190,4 @@ WS Chang
 
 =============
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*

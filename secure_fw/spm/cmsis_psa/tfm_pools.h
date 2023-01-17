@@ -8,6 +8,7 @@
 #define __TFM_POOLS_H__
 
 #include <stdbool.h>
+#include "psa/error.h"
 #include "compiler_ext_defs.h"
 #include "lists.h"
 
@@ -58,11 +59,11 @@ struct tfm_pool_instance_t {
  * \param[in] chunksz           Size of chunks.
  * \param[in] num               Number of chunks.
  *
- * \retval SPM_SUCCESS          Success.
+ * \retval PSA_SUCCESS          Success.
  * \retval SPM_ERROR_BAD_PARAMETERS Parameters error.
  */
-int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
-                      size_t chunksz, size_t num);
+psa_status_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
+                           size_t chunksz, size_t num);
 
 /**
  * \brief Allocate a memory from pool.

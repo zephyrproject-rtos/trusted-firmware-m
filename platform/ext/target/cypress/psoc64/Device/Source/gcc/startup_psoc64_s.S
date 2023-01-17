@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2021 ARM Limited. All rights reserved.
+ * Copyright (c) 2009-2022 ARM Limited. All rights reserved.
  * Copyright (c) 2019-2021, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -144,31 +144,28 @@ Reset_Handler:
  *  there are array of triplets, each of which specify:
  *    offset 0: LMA of start of a section to copy from
  *    offset 4: VMA of start of a section to copy to
- *    offset 8: size of the section to copy. Must be multiply of 4
+ *    offset 8: size of the section to copy.
  *
  *  All addresses must be aligned to 4 bytes boundary.
  */
     ldr    r4, =__copy_table_start__
     ldr    r5, =__copy_table_end__
-
 .L_loop0:
     cmp    r4, r5
     bge    .L_loop0_done
     ldr    r1, [r4]
     ldr    r2, [r4, #4]
     ldr    r3, [r4, #8]
-
+    lsls   r3, r3, #2
 .L_loop0_0:
     subs    r3, #4
     blt    .L_loop0_0_done
     ldr    r0, [r1, r3]
     str    r0, [r2, r3]
     b    .L_loop0_0
-
 .L_loop0_0_done:
     adds    r4, #12
     b    .L_loop0
-
 .L_loop0_done:
 #else
 /*  Single section scheme.
@@ -183,19 +180,15 @@ Reset_Handler:
     ldr    r1, =__etext
     ldr    r2, =__data_start__
     ldr    r3, =__data_end__
-
     subs    r3, r2
     ble    .L_loop1_done
-
 .L_loop1:
     subs    r3, #4
     ldr    r0, [r1,r3]
     str    r0, [r2,r3]
     bgt    .L_loop1
-
 .L_loop1_done:
 #endif /*__STARTUP_COPY_MULTIPLE */
-
 /*  This part of work usually is done in C library startup code. Otherwise,
  *  define this macro to enable it in this startup.
  *
@@ -212,25 +205,23 @@ Reset_Handler:
  *  Between symbol address __copy_table_start__ and __copy_table_end__,
  *  there are array of tuples specifying:
  *    offset 0: Start of a BSS section
- *    offset 4: Size of this BSS section. Must be multiply of 4
+ *    offset 4: Size of this BSS section.
  */
     ldr    r3, =__zero_table_start__
     ldr    r4, =__zero_table_end__
-
 .L_loop2:
     cmp    r3, r4
     bge    .L_loop2_done
     ldr    r1, [r3]
     ldr    r2, [r3, #4]
-    movs    r0, 0
-
+    lsls   r2, r2, #2
+    movs   r0, 0
 .L_loop2_0:
     subs    r2, #4
     blt    .L_loop2_0_done
     str    r0, [r1, r2]
     b    .L_loop2_0
 .L_loop2_0_done:
-
     adds    r3, #8
     b    .L_loop2
 .L_loop2_done:
@@ -245,12 +236,9 @@ Reset_Handler:
  */
     ldr    r1, =__bss_start__
     ldr    r2, =__bss_end__
-
     movs    r0, 0
-
     subs    r2, r1
     ble    .L_loop3_done
-
 .L_loop3:
     subs    r2, #4
     str    r0, [r1, r2]

@@ -32,19 +32,8 @@
 #define mbedtls_free free
 #endif
 
-/* FixMe: Currently, some parts of the low-level driver are
- *        are not built at all based on the mbed TLS configuration,
- *        hence they can't be called from the interface code.
- *        Eventually, the low level driver should be made
- *        independent of the mbed TLS configuration and the
- *        interface layer should be the only part that should
- *        be configured through defines
- */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+/* To be able to include the PSA style configuration */
+#include "mbedtls/build_info.h"
 
 static psa_status_t cc3xx_internal_rsa_encrypt(
     const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
@@ -52,9 +41,6 @@ static psa_status_t cc3xx_internal_rsa_encrypt(
     size_t input_length, const uint8_t *label, size_t label_len,
     uint8_t *output, size_t output_size, size_t *output_length)
 {
-#ifndef MBEDTLS_RSA_C
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     psa_key_type_t key_type = psa_get_key_type(attributes);
     CCError_t error = CC_FATAL_ERROR;
@@ -149,7 +135,6 @@ cleanup:
     }
 
     return cc3xx_rsa_cc_error_to_psa_error(error);
-#endif /* MBEDTLS_RSA_C */
 }
 
 static psa_status_t cc3xx_internal_rsa_decrypt(
@@ -158,9 +143,6 @@ static psa_status_t cc3xx_internal_rsa_decrypt(
     size_t input_length, const uint8_t *label, size_t label_length,
     uint8_t *output, size_t output_size, size_t *output_length)
 {
-#ifndef MBEDTLS_RSA_C
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     CCError_t error = CC_FATAL_ERROR;
     CCRsaUserPrivKey_t *pUserPrivKey = NULL;
@@ -234,16 +216,7 @@ cleanup:
         mbedtls_free(pPrimeData);
     }
 
-    /* This is a common error code so make sure it gets correctly decoded even
-     * if the detailed translation done by cc3xx_rsa_c_error_to_psa_error() is
-     * not enabled through CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
-     */
-    if (error == CC_RSA_15_ERROR_IN_DECRYPTED_DATA_SIZE) {
-        return PSA_ERROR_BUFFER_TOO_SMALL;
-    }
-
     return cc3xx_rsa_cc_error_to_psa_error(error);
-#endif /* MBEDTLS_RSA_C */
 }
 
 /** \defgroup psa_asym_encrypt PSA driver entry points for asymmetric cipher
@@ -264,18 +237,30 @@ psa_status_t cc3xx_asymmetric_encrypt(const psa_key_attributes_t *attributes,
                                       size_t *output_length)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    size_t key_bits = psa_get_key_bits(attributes);
+    psa_key_type_t type = psa_get_key_type(attributes);
 
+    *output_length = 0;
+
+#if defined(PSA_WANT_ALG_RSA_OAEP) || defined(PSA_WANT_ALG_RSA_PKCS1V15_CRYPT)
     if ((alg == PSA_ALG_RSA_PKCS1V15_CRYPT) || PSA_ALG_IS_RSA_OAEP(alg)) {
+        /* Check that the output buffer is large enough */
+        if (output_size <
+                PSA_ASYMMETRIC_ENCRYPT_OUTPUT_SIZE(type, key_bits, alg)) {
+            return PSA_ERROR_BUFFER_TOO_SMALL;
+        }
         status = cc3xx_internal_rsa_encrypt(
             attributes, key_buffer, key_buffer_size, alg, input, input_length,
             salt, salt_length, output, output_size, output_length);
-    } else {
-        if (PSA_ALG_IS_ASYMMETRIC_ENCRYPTION(alg) ||
-            alg == PSA_ALG_ECDSA_ANY) {
-            status = PSA_ERROR_NOT_SUPPORTED;
-        } else {
-            status = PSA_ERROR_INVALID_ARGUMENT;
-        }
+    } else
+#endif /* PSA_WANT_ALG_RSA_OAEP || PSA_WANT_ALG_RSA_PKCS1V15_CRYPT */
+#if defined(PSA_WANT_ALG_ECDSA_ANY)
+    if (PSA_ALG_IS_ASYMMETRIC_ENCRYPTION(alg) || alg == PSA_ALG_ECDSA_ANY) {
+        status = PSA_ERROR_NOT_SUPPORTED;
+    } else
+#endif /* PSA_WANT_ALG_ECDSA_ANY */
+    {
+        status = PSA_ERROR_INVALID_ARGUMENT;
     }
 
     return status;
@@ -295,17 +280,25 @@ psa_status_t cc3xx_asymmetric_decrypt(const psa_key_attributes_t *attributes,
 
     *output_length = 0;
 
-    if (alg == PSA_ALG_RSA_PKCS1V15_CRYPT || PSA_ALG_IS_RSA_OAEP(alg)) {
+#if defined(PSA_WANT_ALG_RSA_OAEP) || defined(PSA_WANT_ALG_RSA_PKCS1V15_CRYPT)
+    if ((alg == PSA_ALG_RSA_PKCS1V15_CRYPT) || PSA_ALG_IS_RSA_OAEP(alg)) {
+        /* We don't perform a check on the output buffer size in the decrypt
+         * case because the PSA_ASYMMETRIC_DECRYPT_OUTPUT_SIZE would return
+         * only a sufficient value, while the necessary value could be smaller
+         * hence too restrictive on the implementation.
+         */
         status = cc3xx_internal_rsa_decrypt(
             attributes, key_buffer, key_buffer_size, alg, input, input_length,
             salt, salt_length, output, output_size, output_length);
-    } else {
-        if (PSA_ALG_IS_ASYMMETRIC_ENCRYPTION(alg) ||
-            alg == PSA_ALG_ECDSA_ANY) {
-            status = PSA_ERROR_NOT_SUPPORTED;
-        } else {
-            status = PSA_ERROR_INVALID_ARGUMENT;
-        }
+    } else
+#endif /* PSA_WANT_ALG_RSA_OAEP || PSA_WANT_ALG_RSA_PKCS1V15_CRYPT */
+#if defined(PSA_WANT_ALG_ECDSA_ANY)
+    if (PSA_ALG_IS_ASYMMETRIC_ENCRYPTION(alg) || alg == PSA_ALG_ECDSA_ANY) {
+        status = PSA_ERROR_NOT_SUPPORTED;
+    } else
+#endif /* PSA_WANT_ALG_ECDSA_ANY */
+    {
+        status = PSA_ERROR_INVALID_ARGUMENT;
     }
 
     return status;

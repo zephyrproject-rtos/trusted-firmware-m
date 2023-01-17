@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,17 @@
 #define __TFM_MULTI_CORE_H__
 
 #include <stdbool.h>
+
+#include "tfm_api.h"
+
+/* Follow CMSE flag definitions */
+#define MEM_CHECK_MPU_READWRITE         (1 << 0x0)
+#define MEM_CHECK_AU_NONSECURE          (1 << 0x1)
+#define MEM_CHECK_MPU_UNPRIV            (1 << 0x2)
+#define MEM_CHECK_MPU_READ              (1 << 0x3)
+#define MEM_CHECK_MPU_NONSECURE         (1 << 0x4)
+#define MEM_CHECK_NONSECURE             (MEM_CHECK_AU_NONSECURE | \
+                                         MEM_CHECK_MPU_NONSECURE)
 
 /* Security attributes of target memory region in memory access check. */
 struct security_attr_info_t {
@@ -80,14 +91,16 @@ void tfm_get_ns_mem_region_attr(const void *p, size_t s,
 /**
  * \brief Check whether a memory access is allowed to access to a memory range
  *
- * \param[in] p      The start address of the range to check
- * \param[in] s      The size of the range to check
- * \param[in] attr   The attributes indicating the access permissions.
+ * \param[in] p               The start address of the range to check
+ * \param[in] s               The size of the range to check
+ * \param[in] flags           The memory access types to be checked between
+ *                            given memory and boundaries.
  *
  * \return TFM_SUCCESS if the access is allowed,
  *         TFM_ERROR_GENERIC otherwise.
  */
-int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr);
+enum tfm_status_e tfm_has_access_to_region(const void *p, size_t s,
+                                           uint32_t flags);
 
 /**
  * \brief Initialization of the multi core communication.
@@ -97,4 +110,20 @@ int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t attr);
  */
 int32_t tfm_inter_core_comm_init(void);
 
+/**
+ * \brief Check whether a memory range is inside a memory region.
+ *
+ * \param[in] p             The start address of the range to check
+ * \param[in] s             The size of the range to check
+ * \param[in] region_start  The start address of the region, which should
+ *                          contain the range
+ * \param[in] region_limit  The end address of the region, which should contain
+ *                          the range
+ *
+ * \return TFM_SUCCESS if the region contains the range,
+ *         TFM_ERROR_GENERIC otherwise.
+ */
+enum tfm_status_e check_address_range(const void *p, size_t s,
+                                      uintptr_t region_start,
+                                      uintptr_t region_limit);
 #endif /* __TFM_MULTI_CORE_H__ */

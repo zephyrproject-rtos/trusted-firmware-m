@@ -59,11 +59,7 @@
  *        interface layer should be the only part that should
  *        be configured through defines
  */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 /* Based on ecp_wrst_gen_keypair_base */
 static psa_status_t
@@ -148,9 +144,6 @@ cc3xx_internal_gen_rsa_keypair(const psa_key_attributes_t *attributes,
                                uint8_t *key_buffer, size_t key_buffer_size,
                                size_t *key_buffer_length)
 {
-#ifndef MBEDTLS_RSA_C
-    return PSA_ERROR_NOT_SUPPORTED;
-#else
     CCError_t cc_err = CC_FAIL;
     psa_status_t err = PSA_ERROR_CORRUPTION_DETECTED;
     psa_key_type_t key_bits = psa_get_key_bits(attributes);
@@ -308,7 +301,6 @@ end:
     mbedtls_free(pCcPrivKey);
 
     return cc3xx_rsa_cc_error_to_psa_error(cc_err);
-#endif
 }
 
 /** \defgroup psa_key_generation PSA driver entry points for key handling
@@ -330,6 +322,7 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
     *key_buffer_length = 0;
 
     if (PSA_KEY_TYPE_IS_KEY_PAIR(key_type)) {
+#if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)
         if (PSA_KEY_TYPE_IS_ECC(key_type)) {
             if (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) ==
                     PSA_ECC_FAMILY_SECP_K1 ||
@@ -340,10 +333,14 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
                 err = cc3xx_internal_gen_ecc_wstr_keypair(
                     attributes, key_buffer, key_buffer_size, key_buffer_length);
             }
-        } else if (PSA_KEY_TYPE_IS_RSA(key_type)) {
+        } else
+#endif /* PSA_WANT_KEY_TYPE_ECC_KEY_PAIR */
+#if defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR)
+        if (PSA_KEY_TYPE_IS_RSA(key_type)) {
             err = cc3xx_internal_gen_rsa_keypair(
                 attributes, key_buffer, key_buffer_size, key_buffer_length);
         }
+#endif /* PSA_WANT_KEY_TYPE_RSA_KEY_PAIR */
     } else if (PSA_KEY_TYPE_IS_UNSTRUCTURED(key_type)) {
         err = psa_generate_random(key_buffer, key_buffer_size);
         if (err == PSA_SUCCESS) {
@@ -352,6 +349,21 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
     }
 
     return err;
+}
+
+static psa_status_t cc3xx_export_key_buffer_internal(const uint8_t *key_buffer,
+                                                     size_t key_buffer_size,
+                                                     uint8_t *data,
+                                                     size_t data_size,
+                                                     size_t *data_length )
+{
+    if(key_buffer_size > data_size) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+    CC_PalMemCopy(data, key_buffer, key_buffer_size);
+    CC_PalMemSetZero(data + key_buffer_size, data_size - key_buffer_size);
+    *data_length = key_buffer_size;
+    return PSA_SUCCESS;
 }
 
 psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
@@ -370,52 +382,47 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
     /* Initialise the return value to 0 */
     *data_length = 0;
 
+    if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
+        /* Exporting public -> public */
+        return(cc3xx_export_key_buffer_internal(key_buffer, key_buffer_size,
+                                                data, data_size, data_length));
+    }
+
+#if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)
     if (PSA_KEY_TYPE_IS_ECC(key_type)) {
-        if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
-            /* Revert to software driver when the requested key is a
-             * public key (no conversion needed)
-             */
-            err = PSA_ERROR_NOT_SUPPORTED;
 
-        } else {
-            /* FixMe: Make sure that data_length is set correctly */
-            err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
-            if (err != PSA_SUCCESS) {
-                CC_PAL_LOG_ERR("Error - curve is not supported\n");
-                return err;
-            }
-
-            err = cc3xx_ecc_psa_priv_to_cc_priv(domainId, key_buffer,
-                                                key_buffer_size, &pUserPrivKey);
-            if (err != PSA_SUCCESS) {
-                return err;
-            }
-
-            err = cc3xx_ecc_cc_priv_to_cc_publ(&pUserPrivKey, &pUserPublKey);
-            if (err != PSA_SUCCESS) {
-                return err;
-            }
-
-            *data_length = data_size;
-            err = cc3xx_ecc_cc_publ_to_psa_publ(&pUserPublKey,
-                                                data, data_length);
-            if (err != PSA_SUCCESS) {
-                return err;
-            }
-        }
-    } else if (PSA_KEY_TYPE_IS_RSA(key_type)) {
-
-        if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
-            /* Revert to software driver when the requested key is a
-             * public key (no conversion needed)
-             */
-            err = PSA_ERROR_NOT_SUPPORTED;
-        } else {
-            err = cc3xx_rsa_psa_priv_to_psa_publ((uint8_t *)key_buffer,
-                            key_buffer_size, data, data_size, data_length);
+        /* FixMe: Make sure that data_length is set correctly */
+        err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
+        if (err != PSA_SUCCESS) {
+            CC_PAL_LOG_ERR("Error - curve is not supported\n");
+            return err;
         }
 
-    } else {
+        err = cc3xx_ecc_psa_priv_to_cc_priv(domainId, key_buffer,
+                                            key_buffer_size, &pUserPrivKey);
+        if (err != PSA_SUCCESS) {
+            return err;
+        }
+
+        err = cc3xx_ecc_cc_priv_to_cc_publ(&pUserPrivKey, &pUserPublKey);
+        if (err != PSA_SUCCESS) {
+            return err;
+        }
+
+        *data_length = data_size;
+        err = cc3xx_ecc_cc_publ_to_psa_publ(&pUserPublKey,
+                                            data, data_length);
+    } else
+#endif /* PSA_WANT_KEY_TYPE_ECC_KEY_PAIR */
+#if defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR)
+    if (PSA_KEY_TYPE_IS_RSA(key_type)) {
+
+        err = cc3xx_rsa_psa_priv_to_psa_publ((uint8_t *)key_buffer,
+                        key_buffer_size, data, data_size, data_length);
+
+    } else
+#endif /* PSA_WANT_KEY_TYPE_RSA_KEY_PAIR */
+    {
         err = PSA_ERROR_NOT_SUPPORTED;
     }
 

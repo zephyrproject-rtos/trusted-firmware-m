@@ -14,20 +14,7 @@ extern "C" {
 
 #include <stdint.h>
 #include "tfm_crypto_defs.h"
-#ifdef TFM_PSA_API
-#include "psa/service.h"
-
-/**
- * \brief This define is a function pointer type to the Uniform Signature API
- *        prototype.
- */
-typedef psa_status_t (*tfm_crypto_us_t)(psa_invec[],size_t,psa_outvec[],size_t);
-#endif
-
 #include "psa/crypto_client_struct.h"
-
-#define UNIFORM_SIGNATURE_API(api_name) \
-    psa_status_t api_name(psa_invec[], size_t, psa_outvec[], size_t)
 
 /**
  * \brief List of possible operation types supported by the TFM based
@@ -46,6 +33,13 @@ enum tfm_crypto_operation_type {
     /* Used to force the enum size */
     TFM_CRYPTO_OPERATION_TYPE_MAX = INT_MAX
 };
+
+/*
+ * Macro to determine the group_id corresponding to a function_id by
+ * accessing the tfm_crypto_func_sid table
+ */
+#define TFM_CRYPTO_GET_GROUP_ID(_function_id)    \
+                        ((enum tfm_crypto_group_id)((_function_id) & 0xFF))
 
 /**
  * \brief Initialise the service
@@ -111,7 +105,7 @@ psa_status_t tfm_crypto_operation_alloc(enum tfm_crypto_operation_type type,
 /**
  * \brief Release an operation context in the backend
  *
- * \param[in] handle Pointer to the handle of the context to release
+ * \param[in/out] handle Pointer to the handle of the context to release
  *
  * \return Return values as described in \ref psa_status_t
  */
@@ -129,87 +123,130 @@ psa_status_t tfm_crypto_operation_release(uint32_t *handle);
 psa_status_t tfm_crypto_operation_lookup(enum tfm_crypto_operation_type type,
                                          uint32_t handle,
                                          void **ctx);
+
 /**
- * \brief Encodes the input key id and owner to output key
+ * \brief This function acts as interface from the framework dispatching
+ *        calls to the set of functions that implement the PSA Crypto APIs.
+ *        It is based on the Uniform Signatures prototype.
  *
- * \param[in]  key_id       Id of the key to encode
- * \param[out] enc_key_ptr  Pointer to encoded key with id and owner
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[in]  in_len   Length of the valid entries in in_vec
+ * \param[out] out_vec  Array of outvec parameters
+ * \param[in]  out_len  Length of the valid entries in out_vec
  *
  * \return Return values as described in \ref psa_status_t
  */
-psa_status_t tfm_crypto_encode_id_and_owner(psa_key_id_t key_id,
-                                            mbedtls_svc_key_id_t *enc_key_ptr);
+psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
+                                       size_t in_len,
+                                       psa_outvec out_vec[],
+                                       size_t out_len);
+/**
+ * \brief This function acts as interface for the Key management module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ * \param[in]  encoded_key Key encoded with partition_id and key_id
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
+                                            psa_outvec out_vec[],
+                                            mbedtls_svc_key_id_t *encoded_key);
+/**
+ * \brief This function acts as interface for the MAC module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ * \param[in]  encoded_key Key encoded with partition_id and key_id
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_mac_interface(psa_invec in_vec[],
+                                      psa_outvec out_vec[],
+                                      mbedtls_svc_key_id_t *encoded_key);
+/**
+ * \brief This function acts as interface for the Cipher module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ * \param[in]  encoded_key Key encoded with partition_id and key_id
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
+                                         psa_outvec out_vec[],
+                                         mbedtls_svc_key_id_t *encoded_key);
+/**
+ * \brief This function acts as interface for the AEAD module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ * \param[in]  encoded_key Key encoded with partition_id and key_id
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
+                                       psa_outvec out_vec[],
+                                       mbedtls_svc_key_id_t *encoded_key);
 
-#define LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API \
-    X(tfm_crypto_get_key_attributes)          \
-    X(tfm_crypto_reset_key_attributes)        \
-    X(tfm_crypto_open_key)                    \
-    X(tfm_crypto_close_key)                   \
-    X(tfm_crypto_import_key)                  \
-    X(tfm_crypto_destroy_key)                 \
-    X(tfm_crypto_export_key)                  \
-    X(tfm_crypto_export_public_key)           \
-    X(tfm_crypto_purge_key)                   \
-    X(tfm_crypto_copy_key)                    \
-    X(tfm_crypto_hash_compute)                \
-    X(tfm_crypto_hash_compare)                \
-    X(tfm_crypto_hash_setup)                  \
-    X(tfm_crypto_hash_update)                 \
-    X(tfm_crypto_hash_finish)                 \
-    X(tfm_crypto_hash_verify)                 \
-    X(tfm_crypto_hash_abort)                  \
-    X(tfm_crypto_hash_clone)                  \
-    X(tfm_crypto_mac_compute)                 \
-    X(tfm_crypto_mac_verify)                  \
-    X(tfm_crypto_mac_sign_setup)              \
-    X(tfm_crypto_mac_verify_setup)            \
-    X(tfm_crypto_mac_update)                  \
-    X(tfm_crypto_mac_sign_finish)             \
-    X(tfm_crypto_mac_verify_finish)           \
-    X(tfm_crypto_mac_abort)                   \
-    X(tfm_crypto_cipher_encrypt)              \
-    X(tfm_crypto_cipher_decrypt)              \
-    X(tfm_crypto_cipher_encrypt_setup)        \
-    X(tfm_crypto_cipher_decrypt_setup)        \
-    X(tfm_crypto_cipher_generate_iv)          \
-    X(tfm_crypto_cipher_set_iv)               \
-    X(tfm_crypto_cipher_update)               \
-    X(tfm_crypto_cipher_finish)               \
-    X(tfm_crypto_cipher_abort)                \
-    X(tfm_crypto_aead_encrypt)                \
-    X(tfm_crypto_aead_decrypt)                \
-    X(tfm_crypto_aead_encrypt_setup)          \
-    X(tfm_crypto_aead_decrypt_setup)          \
-    X(tfm_crypto_aead_generate_nonce)         \
-    X(tfm_crypto_aead_set_nonce)              \
-    X(tfm_crypto_aead_set_lengths)            \
-    X(tfm_crypto_aead_update_ad)              \
-    X(tfm_crypto_aead_update)                 \
-    X(tfm_crypto_aead_finish)                 \
-    X(tfm_crypto_aead_verify)                 \
-    X(tfm_crypto_aead_abort)                  \
-    X(tfm_crypto_sign_message)                \
-    X(tfm_crypto_verify_message)              \
-    X(tfm_crypto_sign_hash)                   \
-    X(tfm_crypto_verify_hash)                 \
-    X(tfm_crypto_asymmetric_encrypt)          \
-    X(tfm_crypto_asymmetric_decrypt)          \
-    X(tfm_crypto_key_derivation_setup)        \
-    X(tfm_crypto_key_derivation_get_capacity) \
-    X(tfm_crypto_key_derivation_set_capacity) \
-    X(tfm_crypto_key_derivation_input_bytes)  \
-    X(tfm_crypto_key_derivation_input_key)    \
-    X(tfm_crypto_key_derivation_key_agreement)\
-    X(tfm_crypto_key_derivation_output_bytes) \
-    X(tfm_crypto_key_derivation_output_key)   \
-    X(tfm_crypto_key_derivation_abort)        \
-    X(tfm_crypto_raw_key_agreement)           \
-    X(tfm_crypto_generate_random)             \
-    X(tfm_crypto_generate_key)                \
+/**
+ * \brief This function acts as interface for the Asymmetric signing module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ * \param[in]  encoded_key Key encoded with partition_id and key_id
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_asymmetric_sign_interface(psa_invec in_vec[],
+                                                  psa_outvec out_vec[],
+                                             mbedtls_svc_key_id_t *encoded_key);
 
-#define X(api_name) UNIFORM_SIGNATURE_API(api_name);
-LIST_TFM_CRYPTO_UNIFORM_SIGNATURE_API
-#undef X
+/**
+ * \brief This function acts as interface for the Asymmetric encryption module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ * \param[in]  encoded_key Key encoded with partition_id and key_id
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_asymmetric_encrypt_interface(psa_invec in_vec[],
+                                                     psa_outvec out_vec[],
+                                             mbedtls_svc_key_id_t *encoded_key);
+
+/**
+ * \brief This function acts as interface for the Key derivation module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ * \param[in]  encoded_key Key encoded with partition_id and key_id
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
+                                            psa_outvec out_vec[],
+                                            mbedtls_svc_key_id_t *encoded_key);
+/**
+ * \brief This function acts as interface for the Random module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_random_interface(psa_invec in_vec[],
+                                         psa_outvec out_vec[]);
+/**
+ * \brief This function acts as interface for the Hash module
+ *
+ * \param[in]  in_vec   Array of invec parameters
+ * \param[out] out_vec  Array of outvec parameters
+ *
+ * \return Return values as described in \ref psa_status_t
+ */
+psa_status_t tfm_crypto_hash_interface(psa_invec in_vec[],
+                                       psa_outvec out_vec[]);
 
 #ifdef __cplusplus
 }

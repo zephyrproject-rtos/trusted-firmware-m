@@ -29,14 +29,11 @@ target_include_directories(tfm_partitions
 target_sources(tfm_psa_rot_partition_fwu
     PRIVATE
         tfm_fwu_req_mngr.c
-        tfm_fwu.c
-        $<$<BOOL:${TFM_PSA_API}>:
-        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/intermedia_tfm_firmware_update.c>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/intermedia_tfm_firmware_update.c
 )
 target_sources(tfm_partitions
     INTERFACE
-        $<$<BOOL:${TFM_PSA_API}>:
-            ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/load_info_tfm_firmware_update.c>
+        ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/firmware_update/auto_generated/load_info_tfm_firmware_update.c
 )
 
 # The bootloader specific configuration.
@@ -47,34 +44,32 @@ add_subdirectory(bootloader/${TFM_FWU_BOOTLOADER_LIB})
 
 target_link_libraries(tfm_psa_rot_partition_fwu
     PRIVATE
-        tfm_secure_api
-        psa_interface
         platform_s
+        tfm_config
         tfm_sprt
 )
 
+
+# Generate firmware update feature
+if (NOT FWU_DEVICE_CONFIG_FILE)
+    configure_file(${CMAKE_SOURCE_DIR}/interface/include/psa/fwu_config.h.in
+                   ${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h
+                   @ONLY)
+    set(FWU_DEVICE_CONFIG_FILE "${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h")
+else()
+    # FWU_DEVICE_CONFIG_FILE exists and is a file
+    if(NOT EXISTS ${FWU_DEVICE_CONFIG_FILE})
+        message(FATAL_ERROR "FWU_DEVICE_CONFIG_FILE:${FWU_DEVICE_CONFIG_FILE} does not exist.")
+    elseif(IS_DIRECTORY ${FWU_DEVICE_CONFIG_FILE})
+        message(FATAL_ERROR "FWU_DEVICE_CONFIG_FILE:${FWU_DEVICE_CONFIG_FILE} is a folder while a file is expected.")
+    endif()
+endif()
+
+
 target_compile_definitions(tfm_psa_rot_partition_fwu
     PRIVATE
-        $<$<BOOL:${TFM_PSA_API}>:TFM_PSA_API>
         $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:DEFAULT_MCUBOOT_FLASH_MAP>
-        $<$<BOOL:${TFM_FWU_BUF_SIZE}>:TFM_FWU_BUF_SIZE=${TFM_FWU_BUF_SIZE}>
-)
-
-############################ Secure API ########################################
-
-target_sources(tfm_secure_api
-    INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_fwu_secure_api.c
-)
-
-# The veneers give warnings about not being properly declared so they get hidden
-# to not overshadow _real_ warnings.
-set_source_files_properties(tfm_fwu_secure_api.c
-    PROPERTIES
-        COMPILE_FLAGS
-            $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
-            $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
-            $<$<C_COMPILER_ID:IAR>:>
+        FWU_DEVICE_CONFIG_FILE="${FWU_DEVICE_CONFIG_FILE}"
 )
 
 ############################ Partition Defs ####################################
@@ -88,7 +83,13 @@ target_compile_definitions(tfm_partition_defs
     INTERFACE
     TFM_PARTITION_FIRMWARE_UPDATE
 )
-# Generate firmware update feature
-configure_file(${CMAKE_SOURCE_DIR}/interface/include/psa/fwu_config.h.in
-               ${CMAKE_BINARY_DIR}/generated/interface/include/psa/fwu_config.h
-               @ONLY)
+
+################ Display the configuration being applied #######################
+
+include(utils)
+dump_options("Firmware Update Partition config"
+"
+    TFM_FWU_BOOTLOADER_LIB;
+    FWU_DEVICE_CONFIG_FILE
+"
+)

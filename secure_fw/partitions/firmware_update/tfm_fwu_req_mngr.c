@@ -7,554 +7,535 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "tfm_fwu_req_mngr.h"
-#include "tfm_fwu.h"
+#include <string.h>
+#include "config_fwu.h"
+#include "tfm_platform_api.h"
+#include "tfm_bootloader_fwu_abstraction.h"
 #include "psa/update.h"
 #include "service_api.h"
 #include "tfm_api.h"
-
-#ifdef TFM_PSA_API
 #include "psa/service.h"
 #include "psa_manifest/tfm_firmware_update.h"
-#include "tfm_memory_utils.h"
-#endif
+#include "compiler_ext_defs.h"
+
+#define COMPONENTS_ITER(x)  \
+    for ((x) = 0; (x) < (FWU_COMPONENT_NUMBER); (x)++)
 
 typedef struct tfm_fwu_ctx_s {
-    psa_image_id_t image_id;
-    uint8_t image_state;
+    psa_status_t error;
+    uint8_t component_state;
     bool in_use;
 } tfm_fwu_ctx_t;
 
 /**
  * \brief The context of FWU service.
  */
-static tfm_fwu_ctx_t fwu_ctx[TFM_FWU_MAX_IMAGES];
+static tfm_fwu_ctx_t fwu_ctx[FWU_COMPONENT_NUMBER];
 
-#ifdef TFM_PSA_API
-#ifndef TFM_FWU_BUF_SIZE
-#define TFM_FWU_BUF_SIZE PSA_FWU_MAX_BLOCK_SIZE
+#if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
+static uint8_t block[TFM_FWU_BUF_SIZE] __aligned(4);
 #endif
-static uint8_t data_block[TFM_FWU_BUF_SIZE];
-#endif
-/**
- * \brief Check if the image is in FWU process, return the index if it is.
- */
-static bool get_image_index(psa_image_id_t image_id, uint8_t *index)
+
+static psa_status_t tfm_fwu_start(const psa_msg_t *msg)
 {
-    if (!index) {
-        return false;
-    }
-
-    for (uint8_t i = 0; i < TFM_FWU_MAX_IMAGES; i++) {
-        if (fwu_ctx[i].in_use && (fwu_ctx[i].image_id == image_id)) {
-            *index = i;
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- * \brief The the next free index in fwu_ctx.
- */
-static bool get_next_free_index(uint8_t *index)
-{
-    for (uint8_t i = 0; i < TFM_FWU_MAX_IMAGES; i++) {
-        if (!fwu_ctx[i].in_use) {
-            *index = i;
-            return true;
-        }
-    }
-    return false;
-}
-
-#ifndef TFM_PSA_API
-psa_status_t tfm_fwu_write_req(psa_invec *in_vec, size_t in_len,
-                               psa_outvec *out_vec, size_t out_len)
-{
-    psa_image_id_t image_id;
-    size_t block_offset;
-    uint8_t *p_data;
-    size_t data_length;
-    psa_status_t status = PSA_SUCCESS;
-    uint8_t image_index;
-
-    (void)out_vec;
-
-    /* Check input parameters. */
-    if (in_vec[0].len != sizeof(image_id) ||
-        in_vec[1].len != sizeof(block_offset)) {
-        /* The size of one of the arguments is incorrect */
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    p_data = (uint8_t * const)in_vec[2].base;
-
-    if (p_data == NULL) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    block_offset = *((size_t *)in_vec[1].base);
-    data_length = in_vec[2].len;
-    image_id = *((psa_image_id_t *)in_vec[0].base);
-
-    if (get_image_index(image_id, &image_index)) {
-        /* The image is in FWU process. */
-        if ((fwu_ctx[image_index].image_state != PSA_IMAGE_CANDIDATE) &&
-            (fwu_ctx[image_index].image_state != PSA_IMAGE_REJECTED)) {
-            return PSA_ERROR_CURRENTLY_INSTALLING;
-        }
-    } else {
-        /* The image is not in FWU process. */
-        if (get_next_free_index(&image_index)) {
-            /* Get a free index. Start the FWU process of this image. */
-            status = tfm_internal_fwu_initialize(image_id);
-            if (status != PSA_SUCCESS) {
-                return status;
-            }
-            fwu_ctx[image_index].in_use = true;
-            fwu_ctx[image_index].image_id = image_id;
-            fwu_ctx[image_index].image_state = PSA_IMAGE_CANDIDATE;
-        } else {
-            /* No more resource can be used. */
-            return PSA_ERROR_INSUFFICIENT_MEMORY;
-        }
-    }
-
-    return tfm_internal_fwu_write(image_id,
-                                  block_offset,
-                                  p_data,
-                                  data_length);
-}
-
-psa_status_t tfm_fwu_install_req(psa_invec *in_vec, size_t in_len,
-                                 psa_outvec *out_vec, size_t out_len)
-{
-    psa_image_id_t image_id;
-    psa_image_id_t *dependency_id;
-    psa_image_version_t *dependency_version;
-    psa_status_t status;
-    uint8_t image_index;
-
-    /* Check input/output parameters. */
-    if (in_vec[0].len != sizeof(image_id) ||
-        out_vec[0].len != sizeof(*dependency_id) ||
-        out_vec[1].len != sizeof(*dependency_version)) {
-        /* The size of one of the arguments is incorrect. */
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    image_id = *((psa_image_id_t *)in_vec[0].base);
-    dependency_id = out_vec[0].base;
-    dependency_version = out_vec[1].base;
-
-    if ((!get_image_index(image_id, &image_index)) ||
-       (fwu_ctx[image_index].image_state != PSA_IMAGE_CANDIDATE)) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    } else {
-        status = tfm_internal_fwu_install(image_id,
-                                          dependency_id,
-                                          dependency_version);
-        if (status == PSA_SUCCESS) {
-            fwu_ctx[image_index].image_state = PSA_IMAGE_INSTALLED;
-
-            /* The image has been successfully installed, free the index. */
-            fwu_ctx[image_index].in_use = false;
-        } else if (status == PSA_SUCCESS_REBOOT) {
-            fwu_ctx[image_index].image_state = PSA_IMAGE_REBOOT_NEEDED;
-        } else if (status != PSA_ERROR_DEPENDENCY_NEEDED) {
-            /* In PSA_ERROR_DEPENDENCY_NEEDED case, the image still keeps in
-             * CANDIDATE state.
-             */
-            fwu_ctx[image_index].image_state = PSA_IMAGE_REJECTED;
-        }
-
-        return status;
-    }
-}
-
-psa_status_t tfm_fwu_query_req(psa_invec *in_vec, size_t in_len,
-                               psa_outvec *out_vec, size_t out_len)
-{
-    psa_image_id_t image_id;
-    psa_image_info_t *info_p;
-    psa_status_t result = 0;
-    uint8_t image_index;
-
-    if ((in_vec[0].len != sizeof(image_id)) ||
-       (out_vec[0].len != sizeof(*info_p))) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    image_id = *((psa_image_id_t *)in_vec[0].base);
-    info_p = (psa_image_info_t *)out_vec[0].base;
-    result = tfm_internal_fwu_query(image_id, info_p);
-    if (result == PSA_SUCCESS) {
-        /* Fill the image state if the query image is not the running image. */
-        if (info_p->state == PSA_IMAGE_UNDEFINED) {
-            if (get_image_index(image_id, &image_index)) {
-                /* The queried image is the currently updating image. */
-                info_p->state = fwu_ctx[image_index].image_state;
-            }
-        }
-    }
-
-    return result;
-}
-
-psa_status_t tfm_fwu_request_reboot_req(psa_invec *in_vec, size_t in_len,
-                               psa_outvec *out_vec, size_t out_len)
-{
-    (void)in_vec;
-    (void)out_vec;
-    (void)in_len;
-    (void)out_len;
-
-    tfm_internal_fwu_request_reboot();
-
-    /* If it goes here, then the reboot fails. */
-    return PSA_ERROR_SERVICE_FAILURE;
-}
-
-psa_status_t tfm_fwu_accept_req(psa_invec *in_vec, size_t in_len,
-                                psa_outvec *out_vec, size_t out_len)
-{
-    (void)out_vec;
-    (void)out_len;
-
-    psa_image_id_t image_id;
-
-    if (in_vec[0].len != sizeof(image_id) || in_len != 1) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-    image_id = *((psa_image_id_t *)in_vec[0].base);
-
-    /* This operation set the running image to INSTALLED state, the images
-     * in the staging area does not impact this operation.
-     */
-    return tfm_internal_fwu_accept(image_id);
-}
-
-/* Abort the currently running FWU. */
-psa_status_t tfm_fwu_abort_req(psa_invec *in_vec, size_t in_len,
-                               psa_outvec *out_vec, size_t out_len)
-{
-    psa_image_id_t image_id;
-    psa_status_t status;
-    uint8_t image_index;
-
-    (void)out_vec;
-
-    if (in_vec[0].len != sizeof(image_id)) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    image_id = *((psa_image_id_t *)in_vec[0].base);
-    if (get_image_index(image_id, &image_index)) {
-        /* The image is in FWU process. */
-        if ((fwu_ctx[image_index].image_state == PSA_IMAGE_CANDIDATE) ||
-           (fwu_ctx[image_index].image_state == PSA_IMAGE_REBOOT_NEEDED) ||
-           (fwu_ctx[image_index].image_state == PSA_IMAGE_REJECTED)) {
-            status = tfm_internal_fwu_abort(image_id);
-            if (status != PSA_SUCCESS) {
-                return status;
-            }
-
-            fwu_ctx[image_index].image_state = PSA_IMAGE_UNDEFINED;
-            fwu_ctx[image_index].in_use = false;
-            fwu_ctx[image_index].image_id = TFM_FWU_INVALID_IMAGE_ID;
-            return PSA_SUCCESS;
-        } else {
-            /* If the image is in INSTALLED state or UNDEFINED, it should not in
-             * a FWU process.
-             */
-            return PSA_ERROR_PROGRAMMER_ERROR;
-        }
-    } else {
-        /* No image with the provided image_id is not in FWU process. */
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-}
+    psa_fwu_component_t component;
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1 || TFM_CONFIG_FWU_MAX_MANIFEST_SIZE == 0
+    uint8_t *manifest = NULL;
 #else
-typedef psa_status_t (*fwu_func_t)(void);
-static psa_msg_t msg;
-
-static psa_status_t tfm_fwu_write_ipc(void)
-{
-    psa_image_id_t image_id;
-    size_t block_offset;
-    size_t data_length, write_size, num;
-    psa_status_t status = PSA_SUCCESS;
-    uint8_t image_index;
+    uint8_t manifest_data[TFM_CONFIG_FWU_MAX_MANIFEST_SIZE];
+    uint8_t *manifest = manifest_data;
+#endif
+    size_t manifest_size;
+    psa_status_t status;
+    psa_fwu_component_info_t info;
 
     /* Check input parameters. */
-    if (msg.in_size[2] > PSA_FWU_MAX_BLOCK_SIZE) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (msg.in_size[0] != sizeof(image_id) ||
-        msg.in_size[1] != sizeof(block_offset)) {
+    if (msg->in_size[0] != sizeof(component)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
+    if (msg->in_size[1] > TFM_CONFIG_FWU_MAX_MANIFEST_SIZE) {
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+    psa_read(msg->handle, 0, &component, sizeof(component));
 
-    num = psa_read(msg.handle, 0, &image_id, sizeof(image_id));
-    if (num != sizeof(image_id)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
+    if (component >= FWU_COMPONENT_NUMBER) {
+        return PSA_ERROR_DOES_NOT_EXIST;
+    }
+    manifest_size = msg->in_size[1];
+    if (manifest_size > 0) {
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+        manifest = (uint8_t *)psa_map_invec(msg->handle, 1);
+#else
+        psa_read(msg->handle, 1, manifest, manifest_size);
+#endif
     }
 
-    num = psa_read(msg.handle, 1, &block_offset, sizeof(block_offset));
-    if (num != sizeof(block_offset)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    if (get_image_index(image_id, &image_index)) {
-        /* The image is in FWU process. */
-        if ((fwu_ctx[image_index].image_state != PSA_IMAGE_CANDIDATE) &&
-            (fwu_ctx[image_index].image_state != PSA_IMAGE_REJECTED)) {
-            return PSA_ERROR_CURRENTLY_INSTALLING;
+    /* The component is in FWU process. */
+    if (fwu_ctx[component].in_use) {
+        if (fwu_ctx[component].component_state != PSA_FWU_READY) {
+            return PSA_ERROR_BAD_STATE;
         }
     } else {
-        /* The image is not in FWU process. */
-        if (get_next_free_index(&image_index)) {
-            /* Get a free index. Start the FWU process of this image. */
-            status = tfm_internal_fwu_initialize(image_id);
-            if (status != PSA_SUCCESS) {
-                return status;
-            }
-            fwu_ctx[image_index].in_use = true;
-            fwu_ctx[image_index].image_id = image_id;
-            fwu_ctx[image_index].image_state = PSA_IMAGE_CANDIDATE;
-        } else {
-            /* No more resource can be used. */
-            return PSA_ERROR_INSUFFICIENT_MEMORY;
+        /* Query the state of the component. */
+        status = fwu_bootloader_get_image_info(component, true, false, &info);
+        if (status != PSA_SUCCESS) {
+            return status;
         }
+        if (info.state != PSA_FWU_READY) {
+            return PSA_ERROR_BAD_STATE;
+        }
+
+        /* The component is not in FWU process. Initialize the ctx for this component. */
+        status = fwu_bootloader_staging_area_init(component,
+                                                  (const void *)manifest,
+                                                  manifest_size);
+        if (status != PSA_SUCCESS) {
+            return status;
+        }
+        fwu_ctx[component].in_use = true;
+        fwu_ctx[component].component_state = PSA_FWU_WRITING;
+    }
+    return PSA_SUCCESS;
+}
+
+static psa_status_t tfm_fwu_write(const psa_msg_t *msg)
+{
+    psa_fwu_component_t component;
+    size_t image_offset;
+    size_t block_size;
+    psa_status_t status = PSA_SUCCESS;
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+    uint8_t *block;
+#else
+    size_t write_size, num;
+#endif
+
+    /* Check input parameters. */
+    if (msg->in_size[2] > PSA_FWU_MAX_WRITE_SIZE) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    block_size = msg->in_size[2];
+
+    if (msg->in_size[0] != sizeof(component) ||
+        msg->in_size[1] != sizeof(image_offset)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    tfm_memset(data_block, 0, sizeof(data_block));
-    data_length = msg.in_size[2];
-    while (data_length > 0) {
-        write_size = sizeof(data_block) <= data_length ?
-                     sizeof(data_block) : data_length;
-        num = psa_read(msg.handle, 2, data_block, write_size);
+    psa_read(msg->handle, 0, &component, sizeof(component));
+    if (component >= FWU_COMPONENT_NUMBER) {
+        return PSA_ERROR_DOES_NOT_EXIST;
+    }
+
+    psa_read(msg->handle, 1, &image_offset, sizeof(image_offset));
+
+    /* Check the component state. */
+    if (!fwu_ctx[component].in_use ||
+        fwu_ctx[component].component_state != PSA_FWU_WRITING) {
+        return PSA_ERROR_BAD_STATE;
+    }
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+    if (block_size > 0) {
+        block = (uint8_t *)psa_map_invec(msg->handle, 2);
+        status = fwu_bootloader_load_image(component,
+                                           image_offset,
+                                           block,
+                                           block_size);
+    }
+#else
+    while (block_size > 0) {
+        write_size = sizeof(block) <= block_size ?
+                     sizeof(block) : block_size;
+        num = psa_read(msg->handle, 2, block, write_size);
         if (num != write_size) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        status = tfm_internal_fwu_write(image_id,
-                                        block_offset,
-                                        data_block,
-                                        write_size);
+        status = fwu_bootloader_load_image(component,
+                                           image_offset,
+                                           block,
+                                           write_size);
         if (status != PSA_SUCCESS) {
             return status;
         }
-        data_length -= write_size;
-        block_offset += write_size;
+        block_size -= write_size;
+        image_offset += write_size;
     }
+#endif
+    return status;
+}
+
+static psa_status_t tfm_fwu_finish(const psa_msg_t *msg)
+{
+    psa_fwu_component_t component;
+
+    /* Check input parameters. */
+    if (msg->in_size[0] != sizeof(component)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+    psa_read(msg->handle, 0, &component, sizeof(component));
+    if (component >= FWU_COMPONENT_NUMBER) {
+        return PSA_ERROR_DOES_NOT_EXIST;
+    }
+
+    /* Check the component state. */
+    if (!fwu_ctx[component].in_use ||
+        fwu_ctx[component].component_state != PSA_FWU_WRITING) {
+        return PSA_ERROR_BAD_STATE;
+    }
+
+    /* Validity, authenticity and integrity of the image is deferred to system
+     * reboot.
+     */
+    fwu_ctx[component].component_state = PSA_FWU_CANDIDATE;
     return PSA_SUCCESS;
 }
 
-static psa_status_t tfm_fwu_install_ipc(void)
+static psa_status_t tfm_fwu_install(void)
 {
-    psa_image_id_t image_id;
-    psa_image_id_t dependency_id;
-    psa_image_version_t dependency_version;
-    size_t num;
+    psa_fwu_component_t component = 0;
     psa_status_t status;
-    uint8_t image_index;
+    uint8_t candidate_number = 0, index;
+    psa_fwu_component_info_t info;
+    psa_fwu_component_t candidates[FWU_COMPONENT_NUMBER];
 
-    /* Check input parameters. */
-    if (msg.in_size[0] != sizeof(image_id) ||
-        msg.out_size[0] != sizeof(dependency_id) ||
-        msg.out_size[1] != sizeof(dependency_version)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    num = psa_read(msg.handle, 0, &image_id, sizeof(image_id));
-    if (num != sizeof(image_id)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    if ((!get_image_index(image_id, &image_index)) ||
-       (fwu_ctx[image_index].image_state != PSA_IMAGE_CANDIDATE)) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    } else {
-        status = tfm_internal_fwu_install(image_id,
-                                          &dependency_id,
-                                          &dependency_version);
-        if (status == PSA_SUCCESS) {
-            fwu_ctx[image_index].image_state = PSA_IMAGE_INSTALLED;
-
-            /* The image has been successfully installed, free the index. */
-            fwu_ctx[image_index].in_use = false;
-        } else if (status == PSA_SUCCESS_REBOOT) {
-            fwu_ctx[image_index].image_state = PSA_IMAGE_REBOOT_NEEDED;
-        } else if (status == PSA_ERROR_DEPENDENCY_NEEDED) {
-            psa_write(msg.handle, 0, &dependency_id, sizeof(dependency_id));
-            psa_write(msg.handle, 1, &dependency_version,
-                      sizeof(dependency_version));
+    /* If at least one component is in STAGED, TRIAL or REJECTED state results
+     * PSA_ERROR_BAD_STATE error.
+     */
+    COMPONENTS_ITER(component) {
+        if (fwu_ctx[component].in_use) {
+            if (fwu_ctx[component].component_state == PSA_FWU_STAGED ||
+                fwu_ctx[component].component_state == PSA_FWU_REJECTED) {
+                return PSA_ERROR_BAD_STATE;
+            } else if (fwu_ctx[component].component_state == PSA_FWU_CANDIDATE) {
+                candidates[candidate_number++] = component;
+            }
         } else {
-            fwu_ctx[image_index].image_state = PSA_IMAGE_REJECTED;
-        }
-
-        return status;
-    }
-}
-
-static psa_status_t tfm_fwu_query_ipc(void)
-{
-    psa_image_id_t image_id;
-    size_t num;
-    psa_image_info_t info;
-    psa_status_t result;
-    uint8_t image_index;
-
-    /* Check input parameters. */
-    if (msg.in_size[0] != sizeof(image_id)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    num = psa_read(msg.handle, 0, &image_id, sizeof(image_id));
-    if (num != sizeof(image_id)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-    result = tfm_internal_fwu_query(image_id, &info);
-    if (result == PSA_SUCCESS) {
-        /* Fill the image state if the query image is not the running image. */
-        if (info.state == PSA_IMAGE_UNDEFINED) {
-            if (get_image_index(image_id, &image_index)) {
-                /* The queried image is the currently updating image. */
-                info.state = fwu_ctx[image_index].image_state;
+            status = fwu_bootloader_get_image_info(component, true, false, &info);
+            if (status != PSA_SUCCESS) {
+                return status;
+            }
+            if (info.state == PSA_FWU_TRIAL) {
+                return PSA_ERROR_BAD_STATE;
             }
         }
+    }
 
-        psa_write(msg.handle, 0, &info, sizeof(info));
+    /* No components in CANDIDATE state. */
+    if (candidate_number == 0) {
+        return PSA_ERROR_BAD_STATE;
+    }
+
+    status = fwu_bootloader_install_image(candidates,
+                                          candidate_number);
+
+    if (status == PSA_ERROR_DEPENDENCY_NEEDED) {
+        /* No need to update the CANDIDATE components' state in this case. */
+        return status;
+    }
+
+    /* Update the CANDIDATE components' state and error context accordingly. */
+    for (index = 0; index < candidate_number; index++) {
+        component = candidates[index];
+        if (status == PSA_SUCCESS) {
+            /* Check TRIAL state is supported or not. */
+#ifdef FWU_SUPPORT_TRIAL_STATE
+            fwu_ctx[component].component_state = PSA_FWU_TRIAL;
+#else
+            fwu_ctx[component].component_state = PSA_FWU_UPDATED;
+#endif
+        } else if (status != PSA_SUCCESS_REBOOT && status != PSA_SUCCESS_RESTART) {
+            /* Switch to FAILED state on other errors. */
+            fwu_ctx[component].component_state = PSA_FWU_FAILED;
+            fwu_ctx[component].error = status;
+        } else {
+            fwu_ctx[component].component_state = PSA_FWU_STAGED;
+        }
+    }
+    return status;
+}
+
+static psa_status_t tfm_fwu_query(const psa_msg_t *msg)
+{
+    psa_fwu_component_t component = { 0 };
+    psa_fwu_component_info_t info;
+    psa_status_t result;
+    bool query_impl_info = false, query_state = true;
+
+    /* Check input parameters. */
+    if (msg->in_size[0] != sizeof(component) ||
+        msg->out_size[0] != sizeof(psa_fwu_component_info_t)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+    psa_read(msg->handle, 0, &component, sizeof(component));
+    if (component >= FWU_COMPONENT_NUMBER) {
+        return PSA_ERROR_DOES_NOT_EXIST;
+    }
+
+    if (fwu_ctx[component].in_use) {
+        info.state = fwu_ctx[component].component_state;
+        query_state = false;
+        /* The psa_fwu_impl_info_t contains the digest of second image when
+         * store state is CANDIDATE. Calculate the digest when store state is
+         * CANDIDATE.
+         */
+        if (fwu_ctx[component].component_state == PSA_FWU_CANDIDATE) {
+            query_impl_info = true;
+        } else if (fwu_ctx[component].component_state == PSA_FWU_REJECTED ||
+                   fwu_ctx[component].component_state == PSA_FWU_FAILED) {
+            info.error = fwu_ctx[component].error;
+        }
+    }
+
+    /* If there is no active ctx, the possible component states are READY and
+     * TRIAL.
+     */
+    result = fwu_bootloader_get_image_info(component, query_state,
+                                           query_impl_info, &info);
+    if (result == PSA_SUCCESS) {
+        psa_write(msg->handle, 0, &info, sizeof(info));
     }
 
     return result;
 }
 
-static psa_status_t tfm_fwu_request_reboot_ipc(void)
+static psa_status_t tfm_fwu_request_reboot(void)
 {
-    tfm_internal_fwu_request_reboot();
+    tfm_platform_system_reset();
 
     return PSA_SUCCESS;
 }
 
-static psa_status_t tfm_fwu_accept_ipc(void)
+static psa_status_t tfm_fwu_accept(void)
 {
-    psa_image_id_t image_id;
+#ifdef FWU_SUPPORT_TRIAL_STATE
+    psa_fwu_component_t component = 0;
+    psa_status_t status = PSA_ERROR_BAD_STATE;
+    psa_fwu_component_info_t info;
+    psa_fwu_component_t trials[FWU_COMPONENT_NUMBER];
+    uint8_t trials_number = 0, index;
+
+    COMPONENTS_ITER(component) {
+        if (fwu_ctx[component].in_use) {
+            if (fwu_ctx[component].component_state == PSA_FWU_TRIAL) {
+                trials[trials_number++] = component;
+            }
+        } else {
+            status = fwu_bootloader_get_image_info(component, true, false, &info);
+            if (status != PSA_SUCCESS) {
+                return status;
+            }
+            if (info.state == PSA_FWU_TRIAL) {
+                trials[trials_number++] = component;
+                fwu_ctx[component].in_use = true;
+                fwu_ctx[component].component_state = PSA_FWU_TRIAL;
+            }
+        }
+    }
+
+    if (trials_number == 0) {
+        return PSA_ERROR_BAD_STATE;
+    }
+    status = fwu_bootloader_mark_image_accepted(trials, trials_number);
+    if (status != PSA_SUCCESS) {
+        /* Rebooting the system results in the image being automatically rejected.
+         * Keep the component in TRIAL state.
+         */
+        return status;
+    }
+
+    for (index = 0; index < trials_number; index++) {
+        component = trials[index];
+        fwu_ctx[component].component_state = PSA_FWU_UPDATED;
+    }
+    return status;
+#else
+    return PSA_ERROR_NOT_SUPPORTED;
+#endif
+}
+
+psa_status_t tfm_fwu_reject(const psa_msg_t *msg)
+{
+    psa_fwu_component_t component = 0;
+    psa_status_t status = PSA_SUCCESS, error;
+    psa_fwu_component_info_t info;
+    bool staged_trial_component_found = false, in_trial_state = false;
     size_t num;
 
     /* Check input parameters. */
-    if (msg.in_size[0] != sizeof(image_id)) {
+    if (msg->in_size[0] != sizeof(error)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
-    num = psa_read(msg.handle, 0, &image_id, sizeof(image_id));
-    if (num != sizeof(image_id)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    /* This operation set the running image to INSTALLED state, the images
-     * in the staging area does not impact this operation.
-     */
-    return tfm_internal_fwu_accept(image_id);
-}
-
-static psa_status_t tfm_fwu_abort_ipc(void)
-{
-    psa_image_id_t image_id;
-    size_t num;
-    uint8_t image_index;
-    psa_status_t status;
-
-    if (msg.in_size[0] != sizeof(image_id)) {
+    num = psa_read(msg->handle, 0, &error, sizeof(error));
+    if (num != sizeof(error)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    num = psa_read(msg.handle, 0, &image_id, sizeof(image_id));
-    if (num != sizeof(image_id)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    if (get_image_index(image_id, &image_index)) {
-        /* The image is in FWU process. */
-        if ((fwu_ctx[image_index].image_state == PSA_IMAGE_CANDIDATE) ||
-           (fwu_ctx[image_index].image_state == PSA_IMAGE_REBOOT_NEEDED) ||
-           (fwu_ctx[image_index].image_state == PSA_IMAGE_REJECTED)) {
-            status = tfm_internal_fwu_abort(image_id);
+    COMPONENTS_ITER(component) {
+        in_trial_state = false;
+        if (fwu_ctx[component].in_use) {
+            if (fwu_ctx[component].component_state == PSA_FWU_STAGED) {
+                /* If the installation state is STAGED, then the state of
+                 * affected components changes to FAILED.
+                 */
+                fwu_ctx[component].component_state = PSA_FWU_FAILED;
+                fwu_ctx[component].error = error;
+                staged_trial_component_found = true;
+                /* Reject the staged image. */
+                status = fwu_bootloader_reject_staged_image(component);
+                if (status != PSA_SUCCESS) {
+                    return status;
+                }
+            } else if (fwu_ctx[component].component_state == PSA_FWU_TRIAL) {
+                staged_trial_component_found = true;
+                in_trial_state = true;
+            }
+        } else {
+            status = fwu_bootloader_get_image_info(component, true, false, &info);
             if (status != PSA_SUCCESS) {
                 return status;
             }
 
-            fwu_ctx[image_index].image_state = PSA_IMAGE_UNDEFINED;
-            fwu_ctx[image_index].in_use = false;
-            fwu_ctx[image_index].image_id = TFM_FWU_INVALID_IMAGE_ID;
+            /* Reject the component if it is in TRIAL state. Reserve a ctx
+             * for the component to record its state.
+             */
+            if (info.state == PSA_FWU_TRIAL) {
+                fwu_ctx[component].in_use = true;
+                in_trial_state = true;
+                fwu_ctx[component].component_state = PSA_FWU_TRIAL;
+                staged_trial_component_found = true;
+            }
+        }
+        if (in_trial_state) {
+            /* Reject the running(trial) image. */
+            status = fwu_bootloader_reject_trial_image(component);
+            /* If a reboot is required, the state of affected components
+             * changes to REJECTED and PSA_SUCCESS_REBOOT is returned.
+             * If a component restart is required, the state of affected
+             * components changes to REJECTED and PSA_SUCCESS_RESTART is
+             * returned.
+             * If no reboot or component restart is required, the state
+             * of affected components changes to FAILED and PSA_SUCCESS
+             * is returned.
+             */
+            if (status == PSA_SUCCESS_REBOOT || status == PSA_SUCCESS_RESTART) {
+                fwu_ctx[component].component_state = PSA_FWU_REJECTED;
+                fwu_ctx[component].error = error;
+            } else if (status == PSA_SUCCESS) {
+                fwu_ctx[component].component_state = PSA_FWU_FAILED;
+                fwu_ctx[component].error = error;
+            } else {
+                return status;
+            }
+        }
+    }
+    if (!staged_trial_component_found) {
+        /* There are no components in the STAGED or TRIAL state. */
+        return PSA_ERROR_BAD_STATE;
+    }
+    return status;
+}
+
+static psa_status_t tfm_fwu_cancel(const psa_msg_t *msg)
+{
+    psa_fwu_component_t component;
+
+    if (msg->in_size[0] != sizeof(component)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    psa_read(msg->handle, 0, &component, sizeof(component));
+    if (component >= FWU_COMPONENT_NUMBER) {
+        return PSA_ERROR_DOES_NOT_EXIST;
+    }
+
+    if (fwu_ctx[component].in_use) {
+        /* The component is in FWU process. */
+        if ((fwu_ctx[component].component_state == PSA_FWU_WRITING) ||
+           (fwu_ctx[component].component_state == PSA_FWU_CANDIDATE)) {
+            fwu_ctx[component].component_state = PSA_FWU_FAILED;
+            fwu_ctx[component].error = PSA_SUCCESS;
             return PSA_SUCCESS;
         } else {
             /* If the image is in INSTALLED state or UNDEFINED, it should not in
              * a FWU process.
              */
-            return PSA_ERROR_PROGRAMMER_ERROR;
+            return PSA_ERROR_BAD_STATE;
         }
     } else {
-        /* No image with the provided image_id is not in FWU process. */
-        return PSA_ERROR_INVALID_ARGUMENT;
+        /* The component is not in WRITING or CANDIDATE state. */
+        return PSA_ERROR_BAD_STATE;
     }
 }
 
-static void fwu_signal_handle(psa_signal_t signal, fwu_func_t pfn)
+static psa_status_t tfm_fwu_clean(const psa_msg_t *msg)
 {
+    psa_fwu_component_t component;
     psa_status_t status;
 
-    status = psa_get(signal, &msg);
-    if (status != PSA_SUCCESS) {
-        return;
+    if (msg->in_size[0] != sizeof(component)) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    switch (msg.type) {
-    case PSA_IPC_CONNECT:
-        psa_reply(msg.handle, PSA_SUCCESS);
-        break;
-    case PSA_IPC_CALL:
-        status = pfn();
-        psa_reply(msg.handle, status);
-        break;
-    case PSA_IPC_DISCONNECT:
-        psa_reply(msg.handle, PSA_SUCCESS);
-        break;
-    default:
-        psa_panic();
+    psa_read(msg->handle, 0, &component, sizeof(component));
+    if (component >= FWU_COMPONENT_NUMBER) {
+        return PSA_ERROR_DOES_NOT_EXIST;
+    }
+
+    if (fwu_ctx[component].in_use) {
+        /* The component is in FWU process. */
+        if ((fwu_ctx[component].component_state == PSA_FWU_FAILED) ||
+            (fwu_ctx[component].component_state == PSA_FWU_UPDATED)) {
+            status = fwu_bootloader_clean_component(component);
+            if (status != PSA_SUCCESS) {
+                return status;
+            }
+            fwu_ctx[component].component_state = PSA_FWU_READY;
+            fwu_ctx[component].in_use = false;
+            return PSA_SUCCESS;
+        } else {
+            /* If the image is in INSTALLED state or UNDEFINED, it should not in
+             * a FWU process.
+             */
+            return PSA_ERROR_BAD_STATE;
+        }
+    } else {
+        /* The component is not in FAILED or UPDATED state. */
+        return PSA_ERROR_BAD_STATE;
     }
 }
-#endif
 
-psa_status_t tfm_fwu_init(void)
+psa_status_t tfm_firmware_update_service_sfn(const psa_msg_t *msg)
 {
-#ifdef TFM_PSA_API
-    psa_signal_t signals = 0;
+    switch (msg->type) {
+    case TFM_FWU_START:
+        return tfm_fwu_start(msg);
+    case TFM_FWU_WRITE:
+        return tfm_fwu_write(msg);
+    case TFM_FWU_FINISH:
+        return tfm_fwu_finish(msg);
+    case TFM_FWU_INSTALL:
+        return tfm_fwu_install();
+    case TFM_FWU_CANCEL:
+        return tfm_fwu_cancel(msg);
+    case TFM_FWU_CLEAN:
+        return tfm_fwu_clean(msg);
+    case TFM_FWU_QUERY:
+        return tfm_fwu_query(msg);
+    case TFM_FWU_REQUEST_REBOOT:
+        return tfm_fwu_request_reboot();
+    case TFM_FWU_ACCEPT:
+        return tfm_fwu_accept();
+    case TFM_FWU_REJECT:
+        return tfm_fwu_reject(msg);
+    default:
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+}
 
+psa_status_t tfm_fwu_entry(void)
+{
     if (fwu_bootloader_init() != 0) {
-        psa_panic();
+        return PSA_ERROR_GENERIC_ERROR;
     }
-
-    while (1) {
-        signals = psa_wait(PSA_WAIT_ANY, PSA_BLOCK);
-        if (signals & TFM_FWU_WRITE_SIGNAL) {
-            fwu_signal_handle(TFM_FWU_WRITE_SIGNAL, tfm_fwu_write_ipc);
-        } else if (signals & TFM_FWU_INSTALL_SIGNAL) {
-            fwu_signal_handle(TFM_FWU_INSTALL_SIGNAL, tfm_fwu_install_ipc);
-        } else if (signals & TFM_FWU_ABORT_SIGNAL) {
-            fwu_signal_handle(TFM_FWU_ABORT_SIGNAL, tfm_fwu_abort_ipc);
-        } else if (signals & TFM_FWU_QUERY_SIGNAL) {
-            fwu_signal_handle(TFM_FWU_QUERY_SIGNAL, tfm_fwu_query_ipc);
-        } else if (signals & TFM_FWU_REQUEST_REBOOT_SIGNAL) {
-            fwu_signal_handle(TFM_FWU_REQUEST_REBOOT_SIGNAL,
-                              tfm_fwu_request_reboot_ipc);
-        } else if (signals & TFM_FWU_ACCEPT_SIGNAL) {
-            fwu_signal_handle(TFM_FWU_ACCEPT_SIGNAL, tfm_fwu_accept_ipc);
-        } else {
-            psa_panic();
-        }
-    }
-#else
-    return fwu_bootloader_init();
-#endif
+    return PSA_SUCCESS;
 }

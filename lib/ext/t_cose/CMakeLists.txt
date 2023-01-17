@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -23,12 +23,12 @@ target_compile_definitions(tfm_t_cose_defs
         T_COSE_USE_PSA_CRYPTO
         T_COSE_USE_PSA_CRYPTO_FROM_TFM
         T_COSE_DISABLE_CONTENT_TYPE
-        $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_ES384>
-        $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_ES512>
+        $<$<OR:$<NOT:$<STREQUAL:${ATTEST_KEY_BITS},384>>,$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_ES384>
+        $<$<OR:$<NOT:$<STREQUAL:${ATTEST_KEY_BITS},521>>,$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_ES512>
         $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_SIGN_VERIFY_TESTS>
         $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:T_COSE_DISABLE_SIGN1>
         $<$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_MAC0>
-        $<$<NOT:$<CONFIG:Debug>>:T_COSE_DISABLE_SHORT_CIRCUIT_SIGN>
+        $<$<NOT:$<BOOL:${ATTEST_INCLUDE_TEST_CODE}>>:T_COSE_DISABLE_SHORT_CIRCUIT_SIGN>
 )
 
 ############################### t_cose common ##################################

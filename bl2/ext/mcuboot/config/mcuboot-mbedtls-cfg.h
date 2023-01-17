@@ -1,7 +1,7 @@
 /*
  *  Minimal configuration for using TLS in the bootloader
  *
- *  Copyright (C) 2006-2021, Arm Limited. All rights reserved.
+ *  Copyright (C) 2006-2022, Arm Limited. All rights reserved.
  *  Copyright (C) 2016, Linaro Ltd
  *
  *  SPDX-License-Identifier: Apache-2.0
@@ -82,9 +82,18 @@
 #endif /* CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING */
 
 #ifdef CRYPTO_HW_ACCELERATOR
+#ifndef CC312_LEGACY_DRIVER_API_ENABLED
+/*
+ * Forcing the legacy driver API enabled all the time regardless of
+ * cmake configuration in BL2.
+ */
+#define CC312_LEGACY_DRIVER_API_ENABLED
+#warning "Use CC312 legacy driver API for BL2"
 #include "mbedtls_accelerator_config.h"
+#undef CC312_LEGACY_DRIVER_API_ENABLED
+#else
+#include "mbedtls_accelerator_config.h"
+#endif /* !CC312_LEGACY_DRIVER_API_ENABLED */
 #endif
-
-#include "mbedtls/check_config.h"
 
 #endif /* __MCUBOOT_MBEDTLS_CFG__ */

@@ -26,8 +26,10 @@
 #define BL1_HEAP_SIZE           (0x0001000)
 #define BL1_MSP_STACK_SIZE      (0x0001800)
 
-#define S_HEAP_SIZE             (0x0000200)
-#define S_MSP_STACK_SIZE_INIT   (0x0000400)
+#ifdef ENABLE_HEAP
+    #define S_HEAP_SIZE             (0x0000200)
+#endif
+
 #define S_MSP_STACK_SIZE        (0x0000800)
 
 #define BOOT_TFM_SHARED_DATA_SIZE (0x400)
@@ -50,7 +52,7 @@
 
 #define S_DATA_START            (SRAM_BASE + TFM_PARTITION_SIZE)
 #define S_DATA_SIZE             (SRAM_SIZE - TFM_PARTITION_SIZE)
-#define S_UNPRIV_DATA_SIZE      (0x2000)
+#define S_UNPRIV_DATA_SIZE      (0x2160)
 #define S_DATA_LIMIT            (S_DATA_START + S_DATA_SIZE - 1)
 #define S_DATA_PRIV_START       (S_DATA_START + S_UNPRIV_DATA_SIZE)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,14 +12,14 @@
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
-#include "tfm_crypto_private.h"
 
 #ifndef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
 #error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
 #endif
 
 /*!
- * \defgroup public Public functions
+ * \defgroup key_helpers Helper functions to translate between client and server
+ *                       view of the key attributes structure.
  *
  */
 /*!@{*/
@@ -74,27 +74,6 @@ psa_status_t tfm_crypto_key_attributes_to_client(
 
     /* Return the key_id as the client key id, do not return the owner */
     client_key_attr->id = core.MBEDTLS_PRIVATE(id).MBEDTLS_PRIVATE(key_id);
-
-    return PSA_SUCCESS;
-}
-
-psa_status_t tfm_crypto_encode_id_and_owner(psa_key_id_t key_id,
-                                            mbedtls_svc_key_id_t *enc_key_ptr)
-{
-    int32_t partition_id = 0;
-    psa_status_t status = tfm_crypto_get_caller_id(&partition_id);
-
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    /* If Null Pointer, return PSA_ERROR_PROGRAMMER_ERROR */
-    if (enc_key_ptr == NULL) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    /* Use the client key id as the key_id and its partition id as the owner */
-    *enc_key_ptr = mbedtls_svc_key_id_make(partition_id, key_id);
 
     return PSA_SUCCESS;
 }

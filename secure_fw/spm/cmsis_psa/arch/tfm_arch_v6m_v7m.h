@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -122,46 +122,14 @@ __STATIC_INLINE void tfm_arch_set_msplim(uint32_t msplim)
  */
 __STATIC_INLINE uintptr_t arch_seal_thread_stack(uintptr_t stk)
 {
-    TFM_CORE_ASSERT((stk & 0x7) == 0);
+    SPM_ASSERT((stk & 0x7) == 0);
     return stk;
 }
 
 /**
- * \brief Secure the MSP
- *
- * \param[in] msplim        MSP limit value to be written.
+ * \brief Check MSP sealing.
  */
-__STATIC_INLINE void tfm_arch_init_secure_msp(uint32_t msplim)
+__STATIC_INLINE void tfm_arch_check_msp_sealing(void)
 {
-    /*
-     * Defined as an empty function now.
-     * The MSP limit value can be used in more strict memory check.
-     */
-    (void)msplim;
 }
-
-/**
- * \brief Whether in privileged level
- *
- * \retval true             If current execution runs in privileged level.
- * \retval false            If current execution runs in unprivileged level.
- */
-__STATIC_INLINE bool tfm_arch_is_priv(void)
-{
-    CONTROL_Type ctrl;
-
-    /* If in Handler mode */
-    if (__get_IPSR()) {
-        return true;
-    }
-
-    /* If in privileged Thread mode */
-    ctrl.w = __get_CONTROL();
-    if (!ctrl.b.nPRIV) {
-        return true;
-    }
-
-    return false;
-}
-
-#endif
+#endif /* __TFM_ARCH_V6M_V7M_H__ */

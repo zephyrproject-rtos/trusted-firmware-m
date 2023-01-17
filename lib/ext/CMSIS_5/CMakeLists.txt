@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporationn (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -27,26 +29,29 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL IAR)
     set_target_properties(CMSIS_5_RTX_V8MMFN PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V8MMFN.a)
     set_target_properties(CMSIS_5_RTX_V8MBN PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_V8MBN.a)
     set_target_properties(CMSIS_5_RTX_CM3   PROPERTIES IMPORTED_LOCATION ${CMSIS_5_PATH}/RTOS2/RTX/Library/IAR/RTX_CM3.a)
-    target_link_libraries(CMSIS_5_RTX_V81MMN
-        INTERFACE
-            tfm_s_veneers
-    )
+    if (CONFIG_TFM_USE_TRUSTZONE)
+        target_link_libraries(CMSIS_5_RTX_V81MMN
+            INTERFACE
+                tfm_s_veneers
+        )
+    endif()
 else()
     message(FATAL_ERROR "${CMAKE_C_COMPILER_ID} does not have CMSIS RTX static libraries set up")
 endif()
 
-target_link_libraries(CMSIS_5_RTX_V8MMN
-    INTERFACE
-        tfm_s_veneers
-)
+if (CONFIG_TFM_USE_TRUSTZONE)
+    target_link_libraries(CMSIS_5_RTX_V8MMN
+        INTERFACE
+            tfm_s_veneers
+    )
 
-target_link_libraries(CMSIS_5_RTX_V8MMFN
-    INTERFACE
-        tfm_s_veneers
-)
+    target_link_libraries(CMSIS_5_RTX_V8MMFN
+        INTERFACE
+            tfm_s_veneers
+    )
 
-target_link_libraries(CMSIS_5_RTX_V8MBN
-    INTERFACE
-        tfm_s_veneers
-)
-
+    target_link_libraries(CMSIS_5_RTX_V8MBN
+        INTERFACE
+            tfm_s_veneers
+    )
+endif()

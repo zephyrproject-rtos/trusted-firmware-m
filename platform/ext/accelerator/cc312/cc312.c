@@ -25,10 +25,10 @@
 
 #define CC312_NULL_CONTEXT "NO SALT!"
 
-CCRndContext_t*           CC312_pRndCtx         = NULL;
-CCRndWorkBuff_t*          CC312_pRndWorkBuff    = NULL;
-mbedtls_ctr_drbg_context* CC312_pRndState       = NULL;
-mbedtls_entropy_context*  CC312_pMbedtlsEntropy = NULL;
+static CCRndContext_t           *CC312_pRndCtx         = NULL;
+static CCRndWorkBuff_t          *CC312_pRndWorkBuff    = NULL;
+static mbedtls_ctr_drbg_context *CC312_pRndState       = NULL;
+static mbedtls_entropy_context  *CC312_pMbedtlsEntropy = NULL;
 
 CCError_t CC_PalDataBufferAttrGet(const unsigned char *pDataBuffer,
                                   size_t buffSize, uint8_t buffType,

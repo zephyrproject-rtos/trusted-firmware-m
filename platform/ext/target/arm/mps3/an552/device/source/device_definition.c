@@ -450,25 +450,6 @@ struct syscounter_armv8_m_read_dev_t SYSCOUNTER_READ_ARMV8_M_DEV_NS = {
 
 /* System timers */
 #ifdef SYSTIMER0_ARMV8_M_S
-#ifdef TEST_NS_FPU
-static const struct systimer_armv8_m_dev_cfg_t SYSTIMER0_ARMV8_M_DEV_CFG_S
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-= {
-    .base = SYSTIMER0_ARMV8_M_BASE_S,
-    .default_freq_hz = SYSTIMER0_ARMV8M_DEFAULT_FREQ_HZ
-};
-static struct systimer_armv8_m_dev_data_t SYSTIMER0_ARMV8_M_DEV_DATA_S
-TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-= {
-    .is_initialized = false
-};
-struct systimer_armv8_m_dev_t SYSTIMER0_ARMV8_M_DEV_S
-TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-= {
-    &(SYSTIMER0_ARMV8_M_DEV_CFG_S),
-    &(SYSTIMER0_ARMV8_M_DEV_DATA_S)
-};
-#else
 static const struct systimer_armv8_m_dev_cfg_t SYSTIMER0_ARMV8_M_DEV_CFG_S
 #ifdef TEST_NS_SLIH_IRQ
     TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
@@ -498,7 +479,6 @@ struct systimer_armv8_m_dev_t SYSTIMER0_ARMV8_M_DEV_S
     &(SYSTIMER0_ARMV8_M_DEV_CFG_S),
     &(SYSTIMER0_ARMV8_M_DEV_DATA_S)
 };
-#endif /* TEST_NS_FPU */
 #endif
 
 #ifdef SYSTIMER0_ARMV8_M_NS
@@ -534,25 +514,6 @@ struct systimer_armv8_m_dev_t SYSTIMER1_ARMV8_M_DEV_S = {
 #endif
 
 #ifdef SYSTIMER1_ARMV8_M_NS
-#ifdef TEST_NS_FPU
-static const struct systimer_armv8_m_dev_cfg_t SYSTIMER1_ARMV8_M_DEV_CFG_NS
-TFM_LINK_SET_RO_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-= {
-    .base = SYSTIMER1_ARMV8_M_BASE_NS,
-    .default_freq_hz = SYSTIMER1_ARMV8M_DEFAULT_FREQ_HZ
-};
-static struct systimer_armv8_m_dev_data_t SYSTIMER1_ARMV8_M_DEV_DATA_NS
-TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-= {
-    .is_initialized = false
-};
-struct systimer_armv8_m_dev_t SYSTIMER1_ARMV8_M_DEV_NS
-TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FPU_SERVICE_TEST", "APP-ROT")
-= {
-    &(SYSTIMER1_ARMV8_M_DEV_CFG_NS),
-    &(SYSTIMER1_ARMV8_M_DEV_DATA_NS)
-};
-#else
 static const struct systimer_armv8_m_dev_cfg_t
 SYSTIMER1_ARMV8_M_DEV_CFG_NS = {
     .base = SYSTIMER1_ARMV8_M_BASE_NS,
@@ -566,7 +527,6 @@ struct systimer_armv8_m_dev_t SYSTIMER1_ARMV8_M_DEV_NS = {
     &(SYSTIMER1_ARMV8_M_DEV_CFG_NS),
     &(SYSTIMER1_ARMV8_M_DEV_DATA_NS)
 };
-#endif /* TEST_NS_FPU */
 #endif
 
 #ifdef SYSTIMER2_ARMV8_M_S

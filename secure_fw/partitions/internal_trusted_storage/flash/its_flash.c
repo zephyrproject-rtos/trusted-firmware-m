@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,9 +7,10 @@
 
 #include "its_flash.h"
 
+#include "config_its.h"
 #include "flash_fs/its_flash_fs.h"
 
-#ifdef ITS_RAM_FS
+#if ITS_RAM_FS
 #ifndef ITS_RAM_FS_SIZE
 #error "ITS_RAM_FS_SIZE must be defined by the target in flash_layout.h"
 #endif
@@ -32,7 +33,7 @@ struct its_flash_nand_dev_t its_flash_nand_dev = {
 #endif
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-#ifdef PS_RAM_FS
+#if PS_RAM_FS
 #ifndef PS_RAM_FS_SIZE
 #error "PS_RAM_FS_SIZE must be defined by the target in flash_layout.h"
 #endif

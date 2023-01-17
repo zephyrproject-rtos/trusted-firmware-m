@@ -10,6 +10,9 @@
   *
   * <h2><center>&copy; Copyright (c) 2020-2021 STMicroelectronics.
   * All rights reserved.</center></h2>
+  * <h2><center>&copy; Copyright (c) 2022 Cypress Semiconductor Corporation
+  * (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.
+  * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
   * the "License"; You may not use this file except in compliance with the
@@ -36,7 +39,7 @@
                   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,  \
                   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
 #if defined(__ICCARM__)
-__root 
+__root
 #endif
 #if defined(__ICCARM__)
 #pragma default_function_attributes = @ ".BL2_OTP_Const"
@@ -65,7 +68,7 @@ const struct flash_otp_nv_counters_region_t otp_stm_provision = {
         0xEA, 0x31, 0x19, 0x35, 0x64, 0xCB, 0xA9, 0x1F,
         0xEC, 0x6F, 0x9A, 0x00, 0x2A, 0x7D, 0xC0, 0x50,
         0x4B, 0x92, 0xA1, 0x93, 0x71, 0x34, 0x58, 0x5F
-    },  
+    },
 #endif
     /* IAK len */
     .iak_len = { INT2LE(32) },
@@ -95,9 +98,9 @@ const struct flash_otp_nv_counters_region_t otp_stm_provision = {
         0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC,
         0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD,
     },
-    /* hw version */
-    .hw_version = { '0','6','0','4','5','6','5','2',
-                    '7','2','8','2','9','1','0','0'},
+    /* certification reference */
+    .cert_ref = { '0','6','0','4','5','6','5','2','7',
+                  '2','8','2','9','1','0','0','1','0'},
     /* verification_service_url */
     .verification_service_url = "www.trustedfirmware.org",
     /* attestation_profile_definition */
@@ -118,7 +121,7 @@ const struct flash_otp_nv_counters_region_t otp_stm_provision = {
     }
     .bl2_nv_counter_0 = { INT64NULL },
     .bl2_nv_counter_1 = { INT64NULL },
-    .bl2_nv_counter_2 = [ INT64NULL },
+    .bl2_nv_counter_2 = { INT64NULL },
     .bl2_rotpk_2 =  {
         0xe1, 0x80, 0x15, 0x99, 0x3d, 0x6d, 0x27, 0x60,
         0xb4, 0x99, 0x27, 0x4b, 0xae, 0xf2, 0x64, 0xb8,
@@ -163,7 +166,7 @@ const struct flash_otp_nv_counters_region_t otp_stm_provision = {
 #ifdef PLATFORM_DEFAULT_NV_COUNTERS
     .flash_nv_counters = { 0x0, 0x0, 0x0 },
 #endif
-    .is_valid =  OTP_NV_COUNTERS_IS_VALID
+    .swap_count =  1
 };
 
 

@@ -8,10 +8,10 @@
 #include "ps_encrypted_object.h"
 
 #include <stddef.h>
+#include <string.h>
 
 #include "crypto/ps_crypto_interface.h"
 #include "psa/internal_trusted_storage.h"
-#include "tfm_memory_utils.h"
 #include "ps_object_defs.h"
 #include "ps_utils.h"
 
@@ -43,8 +43,8 @@ static psa_status_t fill_key_label(struct ps_object_t *obj, size_t *length)
         return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
-    tfm_memcpy(ps_crypto_buf, &client_id, sizeof(client_id));
-    tfm_memcpy(ps_crypto_buf + sizeof(client_id), &uid, sizeof(uid));
+    memcpy(ps_crypto_buf, &client_id, sizeof(client_id));
+    memcpy(ps_crypto_buf + sizeof(client_id), &uid, sizeof(uid));
 
     *length = sizeof(client_id) + sizeof(uid);
 
@@ -82,7 +82,7 @@ static psa_status_t ps_object_auth_decrypt(uint32_t fid,
         return err;
     }
 
-    (void)tfm_memcpy(ps_crypto_buf, p_obj_data, cur_size);
+    (void)memcpy(ps_crypto_buf, p_obj_data, cur_size);
 
     /* Use File ID as a part of the associated data to authenticate
      * the object in the FS. The tag will be stored in the object table and
@@ -158,7 +158,7 @@ static psa_status_t ps_object_auth_encrypt(uint32_t fid,
         return PSA_ERROR_GENERIC_ERROR;
     }
 
-    (void)tfm_memcpy(p_obj_data, ps_crypto_buf, cur_size);
+    (void)memcpy(p_obj_data, ps_crypto_buf, cur_size);
 
     return ps_crypto_destroykey();
 }
@@ -192,10 +192,10 @@ psa_status_t ps_encrypted_object_read(uint32_t fid, struct ps_object_t *obj)
      * skip the padding byte.
      */
     decrypt_size = data_length - sizeof(obj->header.crypto.ref.iv);
-    tfm_memcpy(&obj->header.info, ps_crypto_buf, decrypt_size);
-    tfm_memcpy(obj->header.crypto.ref.iv,
-               ps_crypto_buf + decrypt_size,
-               sizeof(obj->header.crypto.ref.iv));
+    memcpy(&obj->header.info, ps_crypto_buf, decrypt_size);
+    memcpy(obj->header.crypto.ref.iv,
+           ps_crypto_buf + decrypt_size,
+           sizeof(obj->header.crypto.ref.iv));
 
     /* Decrypt the object data */
     err = ps_object_auth_decrypt(fid, decrypt_size, obj);
@@ -224,7 +224,7 @@ psa_status_t ps_encrypted_object_write(uint32_t fid, struct ps_object_t *obj)
      * Toolchains may add padding byte after iv array in crypto.ref structure.
      * The padding byte shall not be written into the storage area.
      */
-    (void)tfm_memcpy(ps_crypto_buf + wrt_size,
+    (void)memcpy(ps_crypto_buf + wrt_size,
                      obj->header.crypto.ref.iv,
                      sizeof(obj->header.crypto.ref.iv));
     wrt_size += sizeof(obj->header.crypto.ref.iv);

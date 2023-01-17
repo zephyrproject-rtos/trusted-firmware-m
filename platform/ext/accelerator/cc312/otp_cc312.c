@@ -5,6 +5,7 @@
  *
  */
 
+#include "config_attest.h"
 #include "tfm_plat_otp.h"
 
 #include "cmsis_compiler.h"
@@ -13,6 +14,7 @@
 #include "uart_stdout.h"
 #include "region_defs.h"
 #include "cmsis.h"
+#include <string.h>
 
 /* Define some offsets from the CC312 base address, to access particular
  * registers and memory regions
@@ -127,9 +129,9 @@ static inline uint32_t cc_read_reg(uint32_t offset) {
  *  This field is implemented in the CC312 user-area. It is used in TF-M to
  *  store the implementation_id
  *
- *  @var plat_otp_layout_t::hw_version
+ *  @var plat_otp_layout_t::cert_ref
  *  This field is implemented in the CC312 user-area. It is used in TF-M to
- *  store the hw version
+ *  store the certification reference.
  *
  *  @var plat_otp_layout_t::verification_service_url
  *  This field is implemented in the CC312 user-area. It is used in TF-M to
@@ -196,13 +198,13 @@ __PACKED_STRUCT plat_otp_layout_t {
         __PACKED_STRUCT{
             uint16_t boot_seed_zero_bits;
             uint16_t implementation_id_zero_bits;
-            uint16_t hw_version_zero_bits;
+            uint16_t cert_ref_zero_bits;
             uint16_t verification_service_url_zero_bits;
             uint16_t profile_definition_zero_bits;
             uint16_t iak_len_zero_bits;
             uint16_t iak_type_zero_bits;
             uint16_t iak_id_zero_bits;
-            uint16_t bl2_rotpk_zero_bits[3];
+            uint16_t bl2_rotpk_zero_bits[4];
 #ifdef BL1
             uint16_t bl1_rotpk_0_zero_bits;
 #ifdef PLATFORM_DEFAULT_BL1
@@ -220,24 +222,38 @@ __PACKED_STRUCT plat_otp_layout_t {
 
         uint8_t boot_seed[32];
         uint8_t implementation_id[32];
-        uint8_t hw_version[32];
+        uint8_t cert_ref[32];
         uint8_t verification_service_url[32];
         uint8_t profile_definition[32];
 
-        uint8_t bl2_rotpk[3][32];
-        uint8_t bl2_nv_counter[3][64];
+        uint8_t bl2_rotpk[4][32];
+        uint8_t bl2_nv_counter[4][64];
 
 #ifdef BL1
-        uint8_t bl1_rotpk_0[32];
-        uint8_t bl1_nv_counter[16];
 #ifdef PLATFORM_DEFAULT_BL1
+        uint8_t bl1_rotpk_0[56];
+        uint8_t bl1_nv_counter[16];
+
         uint8_t bl2_encryption_key[32];
         uint8_t bl1_2_image_hash[32];
         uint8_t bl2_image_hash[32];
 
         uint8_t bl1_2_image[BL1_2_CODE_SIZE];
+#else /* PLATFORM_DEFAULT_BL1 */
+        uint8_t bl1_rotpk_0[32];
+        uint8_t bl1_nv_counter[16];
 #endif /* PLATFORM_DEFAULT_BL1 */
 #endif /* BL1 */
+
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+        uint8_t ns_nv_counter_0[64];
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+        uint8_t ns_nv_counter_1[64];
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+        uint8_t ns_nv_counter_2[64];
+#endif
 
         uint8_t secure_debug_pk[32];
     };
@@ -411,6 +427,10 @@ static enum tfm_plat_err_t otp_write(uint8_t *addr, size_t size,
         *word_ptr = word;
         wait_until_otp_programming_completes();
 
+        if (*word_ptr != word) {
+            return TFM_PLAT_ERR_SYSTEM_ERR;
+        }
+
         in_done += copy_size;
     }
 
@@ -459,9 +479,9 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
-    err = verify_zero_bits_count(otp->hw_version,
-                                 sizeof(otp->hw_version),
-                                 (uint8_t*)&otp->hw_version_zero_bits);
+    err = verify_zero_bits_count(otp->cert_ref,
+                                 sizeof(otp->cert_ref),
+                                 (uint8_t*)&otp->cert_ref_zero_bits);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
@@ -494,7 +514,7 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
     err = verify_zero_bits_count(otp->iak_id,
                                  sizeof(otp->iak_id),
                                  (uint8_t*)&otp->iak_id_zero_bits);
@@ -503,7 +523,7 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
     }
 #endif /* ATTEST_INCLUDE_COSE_KEY_ID */
 
-    for(idx = 0; idx < 3; idx++) {
+    for(idx = 0; idx < MCUBOOT_IMAGE_NUMBER; idx++) {
         err = verify_zero_bits_count(otp->bl2_rotpk[idx],
                                      sizeof(otp->bl2_rotpk[idx]),
                                      (uint8_t*)&otp->bl2_rotpk_zero_bits[idx]);
@@ -653,8 +673,8 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_IMPLEMENTATION_ID:
         return otp_read(otp->implementation_id,
                         sizeof(otp->implementation_id), out_len, out);
-    case PLAT_OTP_ID_HW_VERSION:
-        return otp_read(otp->hw_version, sizeof(otp->hw_version), out_len,
+    case PLAT_OTP_ID_CERT_REF:
+        return otp_read(otp->cert_ref, sizeof(otp->cert_ref), out_len,
                         out);
     case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
         return otp_read(otp->verification_service_url,
@@ -695,6 +715,13 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         return otp_read(otp->bl2_nv_counter[2],
                         sizeof(otp->bl2_nv_counter[2]), out_len, out);
 
+    case PLAT_OTP_ID_BL2_ROTPK_3:
+        return otp_read(otp->bl2_rotpk[3], sizeof(otp->bl2_rotpk[3]), out_len,
+                        out);
+    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+        return otp_read(otp->bl2_nv_counter[3],
+                        sizeof(otp->bl2_nv_counter[3]), out_len, out);
+
 #ifdef BL1
     case PLAT_OTP_ID_BL1_ROTPK_0:
         return otp_read(otp->bl1_rotpk_0,
@@ -717,6 +744,22 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
                         sizeof(otp->bl1_2_image), out_len, out);
 #endif /* PLATFORM_DEFAULT_BL1 */
 #endif /* BL1 */
+
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+    case PLAT_OTP_ID_NV_COUNTER_NS_0:
+        return otp_read(otp->ns_nv_counter_0,
+                        sizeof(otp->ns_nv_counter_0), out_len, out);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+    case PLAT_OTP_ID_NV_COUNTER_NS_1:
+        return otp_read(otp->ns_nv_counter_1,
+                        sizeof(otp->ns_nv_counter_1), out_len, out);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+    case PLAT_OTP_ID_NV_COUNTER_NS_2:
+        return otp_read(otp->ns_nv_counter_2,
+                        sizeof(otp->ns_nv_counter_2), out_len, out);
+#endif
 
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
@@ -860,9 +903,9 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(otp->implementation_id,
                          sizeof(otp->implementation_id), in_len, in,
                          (uint8_t*)&otp->implementation_id_zero_bits);
-    case PLAT_OTP_ID_HW_VERSION:
-        return otp_write(otp->hw_version, sizeof(otp->hw_version), in_len,
-                         in, (uint8_t*)&otp->hw_version_zero_bits);
+    case PLAT_OTP_ID_CERT_REF:
+        return otp_write(otp->cert_ref, sizeof(otp->cert_ref), in_len,
+                         in, (uint8_t*)&otp->cert_ref_zero_bits);
     case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
         return otp_write(otp->verification_service_url,
                          sizeof(otp->verification_service_url), in_len, in,
@@ -906,6 +949,13 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(otp->bl2_nv_counter[2],
                          sizeof(otp->bl2_nv_counter[2]), in_len, in, NULL);
 
+    case PLAT_OTP_ID_BL2_ROTPK_3:
+        return otp_write(otp->bl2_rotpk[3], sizeof(otp->bl2_rotpk[3]), in_len,
+                         in, (uint8_t*)&otp->bl2_rotpk_zero_bits[3]);
+    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+        return otp_write(otp->bl2_nv_counter[3],
+                         sizeof(otp->bl2_nv_counter[3]), in_len, in, NULL);
+
 #ifdef BL1
     case PLAT_OTP_ID_BL1_ROTPK_0:
         return otp_write(otp->bl1_rotpk_0, sizeof(otp->bl1_rotpk_0), in_len, in,
@@ -931,6 +981,22 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
                          sizeof(otp->bl1_2_image), in_len, in, NULL);
 #endif /* PLATFORM_DEFAULT_BL1 */
 #endif /* BL1 */
+
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+    case PLAT_OTP_ID_NV_COUNTER_NS_0:
+        return otp_write(otp->ns_nv_counter_0,
+                         sizeof(otp->ns_nv_counter_0), in_len, in, NULL);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+    case PLAT_OTP_ID_NV_COUNTER_NS_1:
+        return otp_write(otp->ns_nv_counter_1,
+                         sizeof(otp->ns_nv_counter_1), in_len, in, NULL);
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+    case PLAT_OTP_ID_NV_COUNTER_NS_2:
+        return otp_write(otp->ns_nv_counter_2,
+                         sizeof(otp->ns_nv_counter_2), in_len, in, NULL);
+#endif
 
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
@@ -969,8 +1035,8 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_IMPLEMENTATION_ID:
         *size = sizeof(otp->implementation_id);
         break;
-    case PLAT_OTP_ID_HW_VERSION:
-        *size = sizeof(otp->hw_version);
+    case PLAT_OTP_ID_CERT_REF:
+        *size = sizeof(otp->cert_ref);
         break;
     case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
         *size = sizeof(otp->verification_service_url);
@@ -1010,6 +1076,13 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         *size = sizeof(otp->bl2_nv_counter[2]);
         break;
 
+    case PLAT_OTP_ID_BL2_ROTPK_3:
+        *size = sizeof(otp->bl2_rotpk[3]);
+        break;
+    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
+        *size = sizeof(otp->bl2_nv_counter[3]);
+        break;
+
 #ifdef BL1
     case PLAT_OTP_ID_BL1_ROTPK_0:
         *size = sizeof(otp->bl1_rotpk_0);
@@ -1031,6 +1104,22 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         *size = sizeof(otp->bl1_2_image);
         break;
 #endif /* PLATFORM_DEFAULT_BL1 */
+#endif
+
+#if (PLATFORM_NS_NV_COUNTERS > 0)
+    case PLAT_OTP_ID_NV_COUNTER_NS_0:
+        *size = sizeof(otp->ns_nv_counter_0);
+        break;
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 1)
+    case PLAT_OTP_ID_NV_COUNTER_NS_1:
+        *size = sizeof(otp->ns_nv_counter_1);
+        break;
+#endif
+#if (PLATFORM_NS_NV_COUNTERS > 2)
+    case PLAT_OTP_ID_NV_COUNTER_NS_2:
+        *size = sizeof(otp->ns_nv_counter_2);
+        break;
 #endif
 
     case PLAT_OTP_ID_ENTROPY_SEED:

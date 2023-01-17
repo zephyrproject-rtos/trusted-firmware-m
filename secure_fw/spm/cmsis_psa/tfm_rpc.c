@@ -42,14 +42,14 @@ uint32_t tfm_rpc_psa_framework_version(void)
 
 uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params)
 {
-    TFM_CORE_ASSERT(params != NULL);
+    SPM_ASSERT(params != NULL);
 
     return tfm_spm_client_psa_version(params->sid);
 }
 
 psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
 {
-    TFM_CORE_ASSERT(params != NULL);
+    SPM_ASSERT(params != NULL);
 
     return tfm_spm_client_psa_call(params->handle,
                                    PARAM_PACK(params->type,
@@ -63,14 +63,14 @@ psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
 
 psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params)
 {
-    TFM_CORE_ASSERT(params != NULL);
+    SPM_ASSERT(params != NULL);
 
     return tfm_spm_client_psa_connect(params->sid, params->version);
 }
 
 void tfm_rpc_psa_close(const struct client_call_params_t *params)
 {
-    TFM_CORE_ASSERT(params != NULL);
+    SPM_ASSERT(params != NULL);
 
     tfm_spm_client_psa_close(params->handle);
 }

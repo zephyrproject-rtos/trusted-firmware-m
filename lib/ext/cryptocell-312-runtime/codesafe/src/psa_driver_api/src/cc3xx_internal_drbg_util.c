@@ -45,7 +45,6 @@ size_t cc3xx_hmac_drbg_initialized;
 
 psa_status_t cc3xx_ctr_drbg_get_ctx(CCRndContext_t *rnd_ctx)
 {
-
     int error;
     CCError_t cc_error;
 
@@ -85,10 +84,7 @@ cc3xx_hmac_drbg_init_with_params(mbedtls_hmac_drbg_context *hmac_drbg_ctx,
                                  const uint8_t *key_buffer, size_t key_len,
                                  const CCEcpkiDomain_t *pDomain)
 {
-
     int error;
-    /* This seed should be double the size of the maximum order size to store
-     * the hash +  */
     uint8_t seed_buff[CC_ECPKI_MODUL_MAX_LENGTH_IN_WORDS * 4 * 2] = {0};
     size_t hash_bits = PSA_BYTES_TO_BITS(hash_len);
     size_t hash_bytes_used = 0;

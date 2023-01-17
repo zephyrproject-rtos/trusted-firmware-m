@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Nordic Semiconductor ASA. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,14 +23,15 @@
 #define BL2_HEAP_SIZE           (0x00001000)
 #define BL2_MSP_STACK_SIZE      (0x00001800)
 
-#define S_HEAP_SIZE             (0x00001000)
-#define S_MSP_STACK_SIZE_INIT   (0x00000400)
+#ifdef ENABLE_HEAP
+    #define S_HEAP_SIZE             (0x0000200)
+#endif
+
 #define S_MSP_STACK_SIZE        (0x00000800)
 #define S_PSP_STACK_SIZE        (0x00000800)
 
 #define NS_HEAP_SIZE            (0x00001000)
-#define NS_MSP_STACK_SIZE       (0x000000A0)
-#define NS_PSP_STACK_SIZE       (0x00000140)
+#define NS_STACK_SIZE           (0x000001E0)
 
 /* Size of nRF SPU (Nordic IDAU) regions */
 #define SPU_FLASH_REGION_SIZE   (0x00004000)
@@ -45,7 +46,7 @@
  * SPU flash region granularity is 16 KB on nRF5340. Alignment
  * of partitions is defined in accordance with this constraint.
  */
-#ifdef BL2
+#ifdef NRF_NS_SECONDARY
 #ifndef LINK_TO_SECONDARY_PARTITION
 #define S_IMAGE_PRIMARY_PARTITION_OFFSET   (FLASH_AREA_0_OFFSET)
 #define S_IMAGE_SECONDARY_PARTITION_OFFSET (FLASH_AREA_2_OFFSET)
@@ -55,7 +56,7 @@
 #endif /* !LINK_TO_SECONDARY_PARTITION */
 #else
 #define S_IMAGE_PRIMARY_PARTITION_OFFSET (0x0)
-#endif /* BL2 */
+#endif /* NRF_NS_SECONDARY */
 
 #ifndef LINK_TO_SECONDARY_PARTITION
 #define NS_IMAGE_PRIMARY_PARTITION_OFFSET (FLASH_AREA_0_OFFSET \
@@ -153,9 +154,11 @@
                                   FLASH_NS_PARTITION_SIZE)
 
 /* Non-secure storage region */
+#ifdef NRF_NS_STORAGE
 #define NRF_NS_STORAGE_PARTITION_START \
             (NS_ROM_ALIAS(NRF_FLASH_NS_STORAGE_AREA_OFFSET))
 #define NRF_NS_STORAGE_PARTITION_SIZE (NRF_FLASH_NS_STORAGE_AREA_SIZE)
+#endif /* NRF_NS_STORAGE */
 
 #ifdef BL2
 /* Bootloader regions */

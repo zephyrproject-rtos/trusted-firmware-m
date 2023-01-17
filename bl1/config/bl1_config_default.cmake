@@ -6,7 +6,10 @@
 #-------------------------------------------------------------------------------
 
 set(TFM_BL2_ENCRYPTION_KEY_PATH         ${CMAKE_SOURCE_DIR}/bl1/bl1_2/bl2_dummy_encryption_key.bin CACHE STRING "Path to binary key to use for encrypting BL2")
+set(TFM_GUK_PATH                        ${CMAKE_SOURCE_DIR}/bl1/bl1_1/dummy_guk.bin CACHE STRING "Path to binary GUK key file to provision")
 set(TFM_BL2_IMAGE_FLASH_AREA_NUM        0           CACHE STRING    "Which flash area BL2 is stored in")
+
+set(TFM_BL2_SIGNING_KEY_PATH            ${CMAKE_SOURCE_DIR}/bl1/bl1_2/bl1_dummy_rotpk CACHE FILEPATH "Path to binary BL2 signing private key")
 
 set(TFM_BL1_MEMORY_MAPPED_FLASH         ON          CACHE BOOL      "Whether BL1 can directly access flash content")
 
@@ -15,6 +18,7 @@ set(TFM_BL1_DEFAULT_OTP                 ON          CACHE BOOL      "Whether BL1
 set(TFM_BL1_DEFAULT_PROVISIONING        ON          CACHE BOOL      "Whether BL1_1 will use default provisioning")
 set(TFM_BL1_SOFTWARE_CRYPTO             ON          CACHE BOOL      "Whether BL1_1 will use software crypto")
 set(TFM_BL1_DUMMY_TRNG                  ON          CACHE BOOL      "Whether BL1_1 will use dummy TRNG")
+set(TFM_BL1_PQ_CRYPTO                   OFF         CACHE BOOL      "Enable LMS PQ crypto for BL2 verification. This is experimental and should not yet be used in production")
 
 set(TFM_BL1_IMAGE_VERSION_BL2           "1.9.0+0"   CACHE STRING    "Image version of BL2 image")
 set(TFM_BL1_IMAGE_SECURITY_COUNTER_BL2  1           CACHE STRING    "Security counter value to include with BL2 image")

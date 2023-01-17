@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -36,7 +36,6 @@ musca_s1_pin_service(const psa_invec  *in_vec,
                      const psa_outvec *out_vec)
 {
     struct tfm_pin_service_args_t *args;
-    uint32_t *result;
     enum gpio_altfunc_t altfunc;
     enum pinmode_select_t pin_mode;
 
@@ -46,7 +45,7 @@ musca_s1_pin_service(const psa_invec  *in_vec,
     }
 
     args = (struct tfm_pin_service_args_t *)in_vec->base;
-    result = (uint32_t *)out_vec->base;
+
     switch (args->type) {
     case TFM_PIN_SERVICE_TYPE_SET_ALTFUNC:
         altfunc = (enum gpio_altfunc_t)args->u.set_altfunc.alt_func;
