@@ -11,6 +11,7 @@ fetch_remote_library(
     LIB_NAME                mbedcrypto
     LIB_SOURCE_PATH_VAR     MBEDCRYPTO_PATH
     LIB_PATCH_DIR           ${CMAKE_CURRENT_LIST_DIR}
+    LIB_FORCE_PATCH         ${MBEDCRYPTO_FORCE_PATCH}
     FETCH_CONTENT_ARGS
         GIT_REPOSITORY      ${MBEDCRYPTO_GIT_REMOTE}
         GIT_TAG             ${MBEDCRYPTO_VERSION}
