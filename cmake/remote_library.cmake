@@ -216,6 +216,8 @@ endfunction()
 # [in]     LIB_BASE_DIR <path>  - is used to set FETCHCONTENT_BASE_DIR.
 # [in]     LIB_PATCH_DIR <path> - optional path to local folder which contains patches
 #           that should be applied.
+# [in]     LIB_FORCE_PATCH - optional argument to force applying patches when the path
+#            is a local folder instead of fetching from the remote repository.
 # [in]     GIT_REPOSITORY, GIT_TAG, ... - see https://cmake.org/cmake/help/latest/module/ExternalProject.html
 #           for more details
 #
@@ -226,7 +228,7 @@ endfunction()
 function(fetch_remote_library)
     # Parse arguments
     set(options "")
-    set(oneValueArgs LIB_NAME LIB_SOURCE_PATH_VAR LIB_BINARY_PATH_VAR LIB_BASE_DIR LIB_PATCH_DIR)
+    set(oneValueArgs LIB_NAME LIB_SOURCE_PATH_VAR LIB_BINARY_PATH_VAR LIB_BASE_DIR LIB_PATCH_DIR LIB_FORCE_PATCH)
     set(multiValueArgs FETCH_CONTENT_ARGS)
     cmake_parse_arguments(PARSE_ARGV 0 ARG "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
@@ -240,6 +242,7 @@ function(fetch_remote_library)
     endif()
 
     if ("${${ARG_LIB_SOURCE_PATH_VAR}}" STREQUAL "DOWNLOAD")
+        set(SOURCE_PATH_IS_DOWNLOAD TRUE)
         # Process arguments which can be an empty string
         # There is a feature/bug in CMake that result in problem with empty string arguments
         # See https://gitlab.kitware.com/cmake/cmake/-/issues/16341 for details
@@ -275,7 +278,7 @@ function(fetch_remote_library)
         endif()
     endif()
 
-    if (ARG_LIB_PATCH_DIR)
+    if (ARG_LIB_PATCH_DIR AND (SOURCE_PATH_IS_DOWNLOAD OR ARG_LIB_FORCE_PATCH))
         # look for patch files
         file(GLOB PATCH_FILES "${ARG_LIB_PATCH_DIR}/*.patch")
 
