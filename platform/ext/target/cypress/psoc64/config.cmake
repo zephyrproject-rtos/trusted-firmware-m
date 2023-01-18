@@ -29,9 +29,11 @@ set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Cryp
 
 set(CY_MTB_PDL_CAT1_LIB_PATH            "DOWNLOAD"  CACHE PATH      "Path to MTB_PDL_CAT1 repo (or DOWNLOAD to fetch automatically")
 set(CY_MTB_PDL_CAT1_LIB_VERSION         "release-v2.0.0" CACHE STRING "The version of MTB_PDL_CAT1 to use")
+set(CY_MTB_PDL_CAT1_FORCE_PATCH         OFF         CACHE BOOL      "Always apply MTB_PDL_CAT1 patches")
 
 set(CY_P64_UTILS_LIB_PATH               "DOWNLOAD"  CACHE PATH      "Path to p64_utils repo (or DOWNLOAD to fetch automatically")
 set(CY_P64_UTILS_LIB_VERSION            "release-v1.0.0" CACHE STRING "The version of p64_utils to use")
+set(CY_P64_UTILS_FORCE_PATCH            OFF         CACHE BOOL      "Always apply p64_utils patches")
 
 # Configure PDL to use RAM interrup vectors. This is required by P64_utils
 add_definitions(-DRAM_VECTORS_SUPPORT)
