@@ -40,6 +40,7 @@ set(TFM_PARTITION_INITIAL_ATTESTATION   ON         CACHE BOOL     "Enable Initia
 set(TFM_PARTITION_PROTECTED_STORAGE     OFF        CACHE BOOL     "Enable Protected Storage partition")
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF     CACHE BOOL     "Enable Internal Trusted Storage partition")
 set(TFM_PARTITION_MEASURED_BOOT         ON         CACHE BOOL     "Enable Measured boot partition")
+set(TFM_PARTITION_PLATFORM              ON         CACHE BOOL     "Enable Platform partition")
 set(MEASURED_BOOT_HASH_ALG              PSA_ALG_SHA_256 CACHE STRING "Hash algorithm used by Measured boot services")
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ${CMAKE_CURRENT_LIST_DIR}/mbedtls_extra_config.h CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
