@@ -1,7 +1,7 @@
-From c45889334c75933c99de4195c8559a4a7aba8892 Mon Sep 17 00:00:00 2001
+From 270713ac18597abf1bd4b8eb76cd84b6cdfa2b95 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Tue, 23 Aug 2022 13:06:07 +0100
-Subject: [PATCH 9/9] Initialise driver wrappers as first step in
+Subject: [PATCH 6/6] Initialise driver wrappers as first step in
  psa_crypto_init()
 
 This patch amends the order of initialisations performed in psa_crypto_init()
@@ -14,10 +14,10 @@ Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
  1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index 8cc5629f9..b0159991c 100644
+index 43c8b9e6..a700a3ce 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
-@@ -6306,6 +6306,11 @@ psa_status_t psa_crypto_init( void )
+@@ -6327,6 +6327,11 @@ psa_status_t psa_crypto_init( void )
      if( global_data.initialized != 0 )
          return( PSA_SUCCESS );
  
@@ -29,7 +29,7 @@ index 8cc5629f9..b0159991c 100644
      /* Initialize and seed the random generator. */
      mbedtls_psa_random_init( &global_data.rng );
      global_data.rng_state = RNG_INITIALIZED;
-@@ -6318,11 +6323,6 @@ psa_status_t psa_crypto_init( void )
+@@ -6339,11 +6344,6 @@ psa_status_t psa_crypto_init( void )
      if( status != PSA_SUCCESS )
          goto exit;
  
