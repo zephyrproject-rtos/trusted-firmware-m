@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -32,7 +32,7 @@ extern "C" {
  */
 typedef psa_key_id_t psa_key_handle_t;
 
-/** Check whether an handle is null.
+/** Check whether a handle is null.
  *
  * \param handle  Handle
  *
