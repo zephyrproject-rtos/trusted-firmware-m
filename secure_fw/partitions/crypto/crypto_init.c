@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -301,7 +301,6 @@ static psa_status_t tfm_crypto_module_init(void)
 psa_status_t tfm_crypto_init(void)
 {
     psa_status_t status;
-    enum tfm_plat_err_t plat_err;
 
     /* Initialise other modules of the service */
     status = tfm_crypto_module_init();
@@ -313,11 +312,6 @@ psa_status_t tfm_crypto_init(void)
     status =  tfm_crypto_engine_init();
     if (status != PSA_SUCCESS) {
         return status;
-    }
-
-    plat_err = tfm_plat_load_builtin_keys();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_ERROR_GENERIC_ERROR;
     }
 
     return PSA_SUCCESS;

@@ -1,23 +1,16 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#ifndef __PLATFORM_BUILTIN_KEY_IDS_H__
-#define __PLATFORM_BUILTIN_KEY_IDS_H__
+#ifndef __TFM_BUILTIN_KEY_IDS_H__
+#define __TFM_BUILTIN_KEY_IDS_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * \brief The PSA driver location for TF-M builtin keys. Arbitrary within the
- * ranges documented at
- * https://armmbed.github.io/mbed-crypto/html/api/keys/lifetimes.html#c.psa_key_location_t
- */
-#define TFM_BUILTIN_KEY_LOADER_KEY_LOCATION ((psa_key_location_t)0x800001)
 
 /**
  * \brief The persistent key identifiers for TF-M builtin keys.
@@ -27,7 +20,7 @@ extern "C" {
  *
  */
 enum tfm_key_id_builtin_t {
-    TFM_BUILTIN_KEY_ID_MIN = 0x7fff815Bu,
+    TFM_BUILTIN_KEY_ID_MIN = 0x7FFF815Bu,
     TFM_BUILTIN_KEY_ID_HUK,
     TFM_BUILTIN_KEY_ID_IAK,
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION
@@ -43,4 +36,4 @@ enum tfm_key_id_builtin_t {
 #ifdef __cplusplus
 }
 #endif
-#endif /* __PLATFORM_BUILTIN_KEY_IDS_H__ */
+#endif /* __TFM_BUILTIN_KEY_IDS_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -30,6 +30,12 @@ extern "C" {
  *
  */
 #define CRYPTO_LIBRARY_GET_KEY_ID(encoded_key_library) MBEDTLS_SVC_KEY_ID_GET_KEY_ID(encoded_key_library)
+
+/**
+ * \brief This macro extracts the owner from the library encoded key passed as parameter
+ *
+ */
+#define CRYPTO_LIBRARY_GET_OWNER(encoded_key_library) MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(encoded_key_library)
 
 /**
  * \brief The following typedef must be defined to the type associated to the key_id in the underlying library

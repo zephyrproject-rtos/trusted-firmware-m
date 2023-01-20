@@ -92,7 +92,7 @@ target_add_scatter_file(bl1_2
 )
 
 
-install(FILES       platform_builtin_key_ids.h
+install(FILES       tfm_builtin_key_ids.h
         DESTINATION ${TFM_INSTALL_PATH}/interface/include)
 
 #========================= Platform Secure ====================================#

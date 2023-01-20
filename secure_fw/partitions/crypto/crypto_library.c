@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -167,18 +167,17 @@ psa_status_t mbedtls_psa_platform_get_builtin_key(
     psa_key_lifetime_t *lifetime,
     psa_drv_slot_number_t *slot_number)
 {
-    enum tfm_plat_err_t plat_err;
-    struct tfm_crypto_key_id_s tfm_key_id = {
-        .key_id = MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key_id),
-        .owner = MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(key_id)};
+    const tfm_plat_builtin_key_descriptor_t *desc_table = NULL;
+    size_t number_of_keys = tfm_plat_builtin_key_get_desc_table_ptr(&desc_table);
 
-    plat_err = tfm_plat_builtin_key_get_lifetime_and_slot(tfm_key_id,
-                                                          lifetime,
-                                                          slot_number);
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_ERROR_DOES_NOT_EXIST;
+    for (size_t idx = 0; idx < number_of_keys; idx++) {
+        if (desc_table[idx].key_id == MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key_id)) {
+            *lifetime = desc_table[idx].lifetime;
+            *slot_number = desc_table[idx].slot_number;
+            return PSA_SUCCESS;
+        }
     }
 
-    return PSA_SUCCESS;
+    return PSA_ERROR_DOES_NOT_EXIST;
 }
 /*!@}*/

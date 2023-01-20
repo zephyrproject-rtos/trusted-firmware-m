@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,21 +9,15 @@
 #define __TFM_BUILTIN_KEY_IDS_H__
 
 /**
- * \brief The PSA driver location for TF-M builtin keys. Arbitrary within the
- * ranges documented at
- * https://armmbed.github.io/mbed-crypto/html/api/keys/lifetimes.html#c.psa_key_location_t
- */
-#define TFM_BUILTIN_KEY_LOADER_KEY_LOCATION ((psa_key_location_t)0x800001)
-
-/**
  * \brief The persistent key identifiers for TF-M builtin keys.
  *
- * The value of TFM_BUILTIN_KEY_ID_MIN (and therefore of the whole range) is
- * completely arbitrary except for being inside the PSA builtin keys range.
- *
+ * \note The value of TFM_BUILTIN_KEY_ID_MIN (and therefore of the whole range) is
+ *       completely arbitrary except for being inside the PSA builtin keys range.
+ *       The range is specified by the limits defined through MBEDTLS_PSA_KEY_ID_BUILTIN_MIN
+ *       and MBEDTLS_PSA_KEY_ID_BUILTIN_MAX
  */
 enum tfm_builtin_key_id_t {
-    TFM_BUILTIN_KEY_ID_MIN = 0x7fff815Bu,
+    TFM_BUILTIN_KEY_ID_MIN = 0x7FFF815Bu,
     TFM_BUILTIN_KEY_ID_HUK,
     TFM_BUILTIN_KEY_ID_IAK,
 #ifdef TFM_PARTITION_DELEGATED_ATTESTATION

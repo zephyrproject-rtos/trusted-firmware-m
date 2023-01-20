@@ -1,4 +1,4 @@
-From 6c54899b07c7cc9615e98eba30781500f4b906c6 Mon Sep 17 00:00:00 2001
+From 89b0a57e9c29fde64572c62dbd4c3d75adde30a1 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Fri, 15 Jul 2022 12:41:34 +0100
 Subject: [PATCH 3/6] Driver wrapper entry points for CC3XX
@@ -20,7 +20,7 @@ Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
  3 files changed, 452 insertions(+), 52 deletions(-)
 
 diff --git a/include/psa/crypto_driver_contexts_composites.h b/include/psa/crypto_driver_contexts_composites.h
-index 3f1c8af4..2fdf9561 100644
+index 3f1c8af4b..2fdf9561f 100644
 --- a/include/psa/crypto_driver_contexts_composites.h
 +++ b/include/psa/crypto_driver_contexts_composites.h
 @@ -41,6 +41,9 @@
@@ -54,7 +54,7 @@ index 3f1c8af4..2fdf9561 100644
  
  #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_COMPOSITES_H */
 diff --git a/include/psa/crypto_driver_contexts_primitives.h b/include/psa/crypto_driver_contexts_primitives.h
-index 2bb01ed4..2bc0bda7 100644
+index 2bb01ed43..2bc0bda70 100644
 --- a/include/psa/crypto_driver_contexts_primitives.h
 +++ b/include/psa/crypto_driver_contexts_primitives.h
 @@ -40,6 +40,9 @@
@@ -88,7 +88,7 @@ index 2bb01ed4..2bc0bda7 100644
  
  #endif /* PSA_CRYPTO_DRIVER_CONTEXTS_PRIMITIVES_H */
 diff --git a/library/psa_crypto_driver_wrappers.c b/library/psa_crypto_driver_wrappers.c
-index 19819413..e822eef0 100644
+index 198194139..e822eef01 100644
 --- a/library/psa_crypto_driver_wrappers.c
 +++ b/library/psa_crypto_driver_wrappers.c
 @@ -48,6 +48,16 @@
