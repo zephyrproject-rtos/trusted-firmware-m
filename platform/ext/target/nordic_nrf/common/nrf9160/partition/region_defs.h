@@ -114,20 +114,36 @@
 #define S_DATA_SIZE     0x16000 /* 88 KB */
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
+#define S_CODE_VECTOR_TABLE_SIZE (0x144)
+
+#if defined(NULL_POINTER_EXCEPTION_DETECTION) && S_CODE_START == 0
+/* If this image is placed at the beginning of flash make sure we
+ * don't put any code in the first 256 bytes of flash as that area
+ * is used for null-pointer dereference detection.
+ */
+#define TFM_LINKER_CODE_START_RESERVED (256)
+#if S_CODE_VECTOR_TABLE_SIZE < TFM_LINKER_CODE_START_RESERVED
+#error "The interrupt table is too short too for null pointer detection"
+#endif
+#endif
+
+/* The veneers needs to be placed at the end of the secure image.
+ * This is because the NCS sub-region is defined as starting at the highest
+ * address of an SPU region and going downwards.
+ */
+#define TFM_LINKER_VENEERS_LOCATION_END
 /* The CMSE veneers shall be placed in an NSC region
  * which will be placed in a secure SPU region with the given alignment.
  */
-#define CMSE_VENEER_REGION_SIZE     (0x400)
-/* The Nordic IDAU has different alignment requirements than the ARM SAU, so
+#define TFM_LINKER_VENEERS_SIZE     (0x400)
+/* The Nordic SPU has different alignment requirements than the ARM SAU, so
  * these override the default start and end alignments. */
-#define CMSE_VENEER_REGION_START_ALIGN \
-            (ALIGN(SPU_FLASH_REGION_SIZE) - CMSE_VENEER_REGION_SIZE + \
-                (. > (ALIGN(SPU_FLASH_REGION_SIZE) - CMSE_VENEER_REGION_SIZE) \
+#define TFM_LINKER_VENEERS_START \
+            (ALIGN(SPU_FLASH_REGION_SIZE) - TFM_LINKER_VENEERS_SIZE + \
+                (. > (ALIGN(SPU_FLASH_REGION_SIZE) - TFM_LINKER_VENEERS_SIZE) \
                     ? SPU_FLASH_REGION_SIZE : 0))
-#define CMSE_VENEER_REGION_END_ALIGN (ALIGN(SPU_FLASH_REGION_SIZE))
-/* We want the veneers placed in the secure code so it isn't placed at the very
- * end. When placed in code, we don't need an absolute start address. */
-#define CMSE_VENEER_REGION_IN_CODE
+
+#define TFM_LINKER_VENEERS_END ALIGN(SPU_FLASH_REGION_SIZE)
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
