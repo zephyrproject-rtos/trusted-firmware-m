@@ -518,6 +518,12 @@ const struct memory_region_limits memory_regions = {
 
     .veneer_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+
+#ifdef NRF_NS_STORAGE_PARTITION_START
+    .non_secure_storage_partition_base = NRF_NS_STORAGE_PARTITION_START,
+    .non_secure_storage_partition_limit = NRF_NS_STORAGE_PARTITION_START +
+        NRF_NS_STORAGE_PARTITION_SIZE - 1,
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 };
 
 /* To write into AIRCR register, 0x5FA value must be write to the VECTKEY field,
