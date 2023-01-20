@@ -390,14 +390,8 @@ struct platform_data_t
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
-#ifdef NRF_NS_SECONDARY
-REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
-#endif /* NRF_NS_SECONDARY */
-#ifdef NRF_NS_STORAGE_PARTITION_START
-REGION_DECLARE(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base);
-#endif /* NRF_NS_STORAGE_PARTITION_START */
+REGION_DECLARE(Image$$, ER_VENEER, $$Base);
+REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -412,25 +406,20 @@ const struct memory_region_limits memory_regions = {
         NS_PARTITION_SIZE - 1,
 
     .veneer_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
 
     .veneer_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
 
 #ifdef NRF_NS_SECONDARY
-    .secondary_partition_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
-
-    .secondary_partition_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
+    .secondary_partition_base = SECONDARY_PARTITION_START,
+    .secondary_partition_limit = SECONDARY_PARTITION_START +
         SECONDARY_PARTITION_SIZE - 1,
 #endif /* NRF_NS_SECONDARY */
 
 #ifdef NRF_NS_STORAGE_PARTITION_START
-    .non_secure_storage_partition_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base),
-    .non_secure_storage_partition_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NRF_NS_STORAGE_PARTITION, $$Base) +
+    .non_secure_storage_partition_base = NRF_NS_STORAGE_PARTITION_START,
+    .non_secure_storage_partition_limit = NRF_NS_STORAGE_PARTITION_START +
         NRF_NS_STORAGE_PARTITION_SIZE - 1,
 #endif /* NRF_NS_STORAGE_PARTITION_START */
 };
