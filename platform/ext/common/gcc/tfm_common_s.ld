@@ -38,6 +38,31 @@ MEMORY
 #endif
 }
 
+#ifndef TFM_LINKER_VENEERS_START
+#define TFM_LINKER_VENEERS_START ALIGN(TFM_LINKER_VENEERS_ALIGNMENT)
+#endif
+
+#ifndef TFM_LINKER_VENEERS_END
+#define TFM_LINKER_VENEERS_END ALIGN(TFM_LINKER_VENEERS_ALIGNMENT)
+#endif
+
+#define VENEERS() \
+/* \
+ * Place the CMSE Veneers (containing the SG instruction) after the code, in \
+ * a separate at least 32 bytes aligned region so that the SAU can \
+ * programmed to just set this region as Non-Secure Callable. \
+ */ \
+.gnu.sgstubs TFM_LINKER_VENEERS_START : \
+{ \
+    *(.gnu.sgstubs*) \
+} > FLASH \
+/* GCC always places veneers at the end of .gnu.sgstubs section, so the only \
+ * way to align the end of .gnu.sgstubs section is to align start of the \
+ * next section */ \
+.sgstubs_end : TFM_LINKER_VENEERS_END \
+{ \
+} > FLASH
+
 __msp_stack_size__ = S_MSP_STACK_SIZE;
 
 /* Library configurations */
@@ -55,29 +80,16 @@ SECTIONS
         __vectors_end__ = .;
     } > FLASH
 
+#if defined(S_CODE_VECTOR_TABLE_SIZE)
     ASSERT(. <= ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE, ".TFM_VECTORS section size overflow.")
     . = ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE;
-
-#ifdef CONFIG_TFM_USE_TRUSTZONE
-    /*
-     * Place the CMSE Veneers (containing the SG instruction) after the code, in
-     * a separate at least 32 bytes aligned region so that the SAU can
-     * programmed to just set this region as Non-Secure Callable.
-     */
-    .gnu.sgstubs ALIGN(TFM_LINKER_VENEERS_ALIGNMENT) :
-    {
-        *(.gnu.sgstubs*)
-    } > FLASH
-    Image$$ER_VENEER$$Base = ADDR(.gnu.sgstubs);
-    Image$$VENEER_ALIGN$$Limit = ALIGN(TFM_LINKER_VENEERS_ALIGNMENT);
-
-    /* GCC always places veneers at the end of .gnu.sgstubs section, so the only
-     * way to align the end of .gnu.sgstubs section is to align start of the
-     * next section */
-    .copy.table : ALIGN(TFM_LINKER_VENEERS_ALIGNMENT)
-#else
-    .copy.table : ALIGN(4)
 #endif
+
+#if defined(CONFIG_TFM_USE_TRUSTZONE) && !defined(TFM_LINKER_VENEERS_LOCATION_END)
+    VENEERS()
+#endif
+
+    .copy.table : ALIGN(4)
     {
         __copy_table_start__ = .;
 #ifdef RAM_VECTORS_SUPPORT
@@ -420,6 +432,10 @@ SECTIONS
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
     Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
 
+#if defined(CONFIG_TFM_USE_TRUSTZONE) && defined(TFM_LINKER_VENEERS_LOCATION_END)
+    VENEERS()
+#endif
+
 #ifdef RAM_VECTORS_SUPPORT
     .ramVectors (NOLOAD) : ALIGN(TFM_LINKER_RAM_VECTORS_ALIGNMENT)
     {
@@ -506,6 +522,15 @@ SECTIONS
     } > RAM AT> FLASH
 
     ASSERT(S_RAM_CODE_START % 4 == 0, "S_RAM_CODE_START must be divisible by 4")
+#endif
+
+#if defined(CONFIG_TFM_USE_TRUSTZONE)
+    Image$$ER_VENEER$$Base = ADDR(.gnu.sgstubs);
+    Image$$VENEER_ALIGN$$Limit = ADDR(.sgstubs_end);
+
+#if defined(TFM_LINKER_VENEERS_SIZE)
+    ASSERT ((Image$$VENEER_ALIGN$$Limit - Image$$ER_VENEER$$Base) <= TFM_LINKER_VENEERS_SIZE, "Veneer region overflowed")
+#endif
 #endif
 
     Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;
