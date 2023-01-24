@@ -112,7 +112,7 @@ Other test configurations are:
 - -DTEST_S_PS=ON/OFF
 - -DTEST_S_PLATFORM=ON/OFF
 
-*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*
 
 .. _Arm Ecosystem FVPs: https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps
-.. _Arm Corstone-1000 User Guide: https://gitlab.arm.com/arm-reference-solutions/arm-reference-solutions-docs/-/blob/CORSTONE1000-2022.04.19/docs/embedded-a/corstone1000/user-guide.rst
+.. _Arm Corstone-1000 User Guide: https://corstone1000.docs.arm.com/en/corstone1000-2022.11.23/user-guide.html
