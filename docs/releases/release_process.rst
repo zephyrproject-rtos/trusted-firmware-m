@@ -62,6 +62,12 @@ to main branch.
 Although this document specifies the release cadence, this does not preclude
 an adhoc release for specific project requirements.
 
+.. note::
+  When a new release starts the previous release branch obsoletes and is
+  a subject for removal as shown for `v1.1.x` on the diagram above.
+  At any moment only the latest release branch is maintained.
+  The release tags will point to a commit in detached head state.
+
 Release Version Scheme
 ----------------------
 
@@ -76,4 +82,4 @@ compiled as a dot separated set of numbers:
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*

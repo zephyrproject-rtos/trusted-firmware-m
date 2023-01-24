@@ -38,7 +38,7 @@ Rules
 - An explicit platform name is preferred in a vendor's TOCtree instead of use of
   platform's title by default.
 
-.. note:
+.. note::
   Do not forget to update the summary file after adding a new platform
   `/docs/platform/platform_introduction.rst` included into TF-M introduction.
 
