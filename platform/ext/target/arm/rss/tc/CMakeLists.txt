@@ -72,6 +72,7 @@ target_sources(platform_bl2
 target_include_directories(platform_bl2
     PUBLIC
         ./host_drivers
+        ./bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
         $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
