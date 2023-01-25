@@ -12,7 +12,7 @@ set(FETCHCONTENT_QUIET FALSE)
 
 # Default configuration of QCBOR repository
 set(QCBOR_PATH      "DOWNLOAD"  CACHE PATH      "Path to qcbor (or DOWNLOAD to fetch automatically")
-set(QCBOR_VERSION   "92d3f890"  CACHE STRING    "The version of qcbor to use")
+set(QCBOR_VERSION   "v1.2"      CACHE STRING    "The version of qcbor to use")
 
 # Entirely disable the floating-point support
 # in the qcbor library to reduce code size.
