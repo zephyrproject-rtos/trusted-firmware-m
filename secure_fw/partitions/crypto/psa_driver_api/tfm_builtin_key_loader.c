@@ -5,7 +5,11 @@
  *
  */
 #include <string.h>
+#if defined(TFM_BUILTIN_KEY_LOADER_DERIVE_KEY_USING_PSA)
+#include "tfm_mbedcrypto_include.h"
+#else
 #include "mbedtls/hkdf.h"
+#endif /* TFM_BUILTIN_KEY_LOADER_DERIVE_KEY_USING_PSA */
 #include "tfm_builtin_key_loader.h"
 #include "psa_manifest/pid.h"
 #include "tfm_plat_crypto_keys.h"
@@ -113,6 +117,82 @@ static psa_status_t builtin_key_get_attributes(
  *        keys that are returned for usage to the PSA Crypto core, are differentiated
  *        based on the partition user. The derived keys are described as platform keys
  */
+#if defined(TFM_BUILTIN_KEY_LOADER_DERIVE_KEY_USING_PSA)
+static psa_status_t derive_subkey_into_buffer(
+        struct tfm_builtin_key_t *key_slot, int32_t user,
+        uint8_t *key_buffer, size_t key_buffer_size, size_t *key_buffer_length)
+{
+#ifdef TFM_PARTITION_TEST_PS
+    /* Hack to allow the PS tests to work, since they directly call
+     * ps_system_prepare from the test partition which would otherwise derive a
+     * different key.
+     */
+    if (user == TFM_SP_PS_TEST) {
+        user = TFM_SP_PS;
+    }
+#endif /* TFM_PARTITION_TEST_PS */
+
+    psa_status_t status;
+    tfm_crypto_library_key_id_t output_key_id_local = tfm_crypto_library_key_id_init_default();
+    tfm_crypto_library_key_id_t builtin_key = psa_get_key_id(&key_slot->attr);
+    tfm_crypto_library_key_id_t input_key_id_local = tfm_crypto_library_key_id_init(
+        TFM_SP_CRYPTO, CRYPTO_LIBRARY_GET_KEY_ID(builtin_key));
+    psa_key_derivation_operation_t deriv_ops = psa_key_derivation_operation_init();
+    psa_key_attributes_t output_key_attr = PSA_KEY_ATTRIBUTES_INIT;
+    psa_key_attributes_t input_key_attr = PSA_KEY_ATTRIBUTES_INIT;
+
+    /* Set properties for the output key */
+    psa_set_key_type(&output_key_attr, PSA_KEY_TYPE_RAW_DATA);
+    psa_set_key_bits(&output_key_attr, PSA_BYTES_TO_BITS(key_buffer_size));
+    psa_set_key_usage_flags(&output_key_attr, PSA_KEY_USAGE_EXPORT);
+
+    /* Import the key material as a volatiile key */
+    psa_set_key_usage_flags(&input_key_attr, PSA_KEY_USAGE_DERIVE);
+    psa_set_key_algorithm(&input_key_attr, PSA_ALG_HKDF(PSA_ALG_SHA_256));
+    psa_set_key_type(&input_key_attr, PSA_KEY_TYPE_DERIVE);
+    status = psa_import_key(&input_key_attr, key_slot->key, key_slot->key_len, &input_key_id_local);
+    if (status != PSA_SUCCESS) {
+        goto wrap_up;
+    }
+
+    status = psa_key_derivation_setup(&deriv_ops, PSA_ALG_HKDF(PSA_ALG_SHA_256));
+    if (status != PSA_SUCCESS) {
+        goto wrap_up;
+    }
+
+    /* No salt is being used for the derivation */
+
+    status = psa_key_derivation_input_key(
+                    &deriv_ops, PSA_KEY_DERIVATION_INPUT_SECRET, input_key_id_local);
+    if (status != PSA_SUCCESS) {
+        goto wrap_up;
+    }
+
+    status = psa_key_derivation_input_bytes(
+                    &deriv_ops, PSA_KEY_DERIVATION_INPUT_INFO, (uint8_t *)&user, sizeof(user));
+    if (status != PSA_SUCCESS) {
+        goto wrap_up;
+    }
+
+    status = psa_key_derivation_output_key(&output_key_attr, &deriv_ops,
+                                           &output_key_id_local);
+    if (status != PSA_SUCCESS) {
+        goto wrap_up;
+    }
+
+    status = psa_export_key(output_key_id_local, key_buffer, key_buffer_size, key_buffer_length);
+    if (status != PSA_SUCCESS) {
+        goto wrap_up;
+    }
+
+wrap_up:
+    (void)psa_key_derivation_abort(&deriv_ops);
+    (void)psa_destroy_key(input_key_id_local);
+    (void)psa_destroy_key(output_key_id_local);
+
+    return status;
+}
+#else
 static psa_status_t derive_subkey_into_buffer(
         struct tfm_builtin_key_t *key_slot, int32_t user,
         uint8_t *key_buffer, size_t key_buffer_size, size_t *key_buffer_length)
@@ -148,6 +228,7 @@ static psa_status_t derive_subkey_into_buffer(
 
     return PSA_SUCCESS;
 }
+#endif /* TFM_BUILTIN_KEY_LOADER_DERIVE_KEY_USING_PSA */
 
 static psa_status_t builtin_key_copy_to_buffer(
         struct tfm_builtin_key_t *key_slot, uint8_t *key_buffer,
@@ -296,7 +377,8 @@ psa_status_t tfm_builtin_key_loader_get_builtin_key(
      * they all need access to the raw builtin key.
      */
     int32_t user = CRYPTO_LIBRARY_GET_OWNER(key_id);
-    if (psa_get_key_usage_flags(attributes) & PSA_KEY_USAGE_DERIVE) {
+    if (psa_get_key_usage_flags(attributes) & PSA_KEY_USAGE_DERIVE && user != TFM_SP_CRYPTO) {
+
         err = derive_subkey_into_buffer(key_slot, user,
                                         key_buffer, key_buffer_size,
                                         key_buffer_length);
