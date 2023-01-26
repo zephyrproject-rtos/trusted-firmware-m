@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,22 +7,22 @@
 
 #include "cc3xx_init.h"
 
-#include "cc3xx_reg_defs.h"
+#include "cc3xx_dev.h"
 
 cc3xx_err_t cc3xx_init(void)
 {
     /* Configure entire system to litte endian */
-    *CC3XX_REG_HOST_RGF_HOST_RGF_ENDIAN = 0x0U;
+    P_CC3XX->host_rgf.host_rgf_endian = 0x0U;
 
     /* Disable the DFA countermeasures since they're unsupported, and lock the
      * config option.
      */
-    *CC3XX_REG_AO_HOST_AO_LOCK_BITS &= ~(0b1U << 7);
-    *CC3XX_REG_AO_HOST_AO_LOCK_BITS |= 0b1U << 8;
-    *CC3XX_REG_AES_AES_DFA_IS_ON = 0b0U;
+    P_CC3XX->ao.host_ao_lock_bits &= ~(0b1U << 7);
+    P_CC3XX->ao.host_ao_lock_bits |= 0b1U << 8;
+    P_CC3XX->aes.aes_dfa_is_on = 0b0U;
 
     /* Set AHB to secure */
-    *CC3XX_REG_AHB_AHBM_HNONSEC = 0b00U;
+    P_CC3XX->ahb.ahbm_hnonsec = 0b00U;
 
     return CC3XX_ERR_SUCCESS;
 }

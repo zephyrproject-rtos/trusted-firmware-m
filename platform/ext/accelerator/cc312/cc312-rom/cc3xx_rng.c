@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,19 +8,20 @@
 #include "cc3xx_rng.h"
 
 #include "cc3xx_error.h"
-#include "cc3xx_reg_defs.h"
+#include "cc3xx_dev.h"
 
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
 
-cc3xx_err_t cc3xx_rng_init()
+cc3xx_err_t cc3xx_rng_init(void)
 {
+
     /* Enable clock */
-    *CC3XX_REG_RNG_RNG_CLK_ENABLE = 0x1U;
+    P_CC3XX->rng.rng_clk_enable = 0x1U;
 
     /* reset trng */
-    *CC3XX_REG_RNG_RNG_SW_RESET = 0x1U;
+    P_CC3XX->rng.rng_sw_reset = 0x1U;
 
     /* Apparently there's no way to tell that the reset has finished, so just do
      * these things repeatedly until they succeed (and hence the reset has
@@ -28,41 +29,42 @@ cc3xx_err_t cc3xx_rng_init()
      */
     do {
         /* Enable clock */
-        *CC3XX_REG_RNG_RNG_CLK_ENABLE = 0x1U;
+        P_CC3XX->rng.rng_clk_enable = 0x1U;
 
         /* Set subsampling ratio */
-        *CC3XX_REG_RNG_SAMPLE_CNT1 = CC3XX_RNG_SUBSAMPLING_RATE;
+        P_CC3XX->rng.sample_cnt1 = CC3XX_CONFIG_LOWLEVEL_RNG_SUBSAMPLING_RATE;
 
-    } while (*CC3XX_REG_RNG_SAMPLE_CNT1 != CC3XX_RNG_SUBSAMPLING_RATE);
+    } while (P_CC3XX->rng.sample_cnt1 != CC3XX_CONFIG_LOWLEVEL_RNG_SUBSAMPLING_RATE);
 
     /* Temporarily disable the random source */
-    *CC3XX_REG_RNG_RND_SOURCE_ENABLE = 0x0U;
+    P_CC3XX->rng.rnd_source_enable = 0x0U;
 
     /* Clear the interrupts */
-    *CC3XX_REG_RNG_RNG_ICR = 0x3FU;
+    P_CC3XX->rng.rng_icr = 0x3FU;
 
     /* Mask all interrupts except EHR_VALID */
-    *CC3XX_REG_RNG_RNG_IMR = 0x3EU;
+    P_CC3XX->rng.rng_imr = 0x3EU;
 
     /* Select the oscillator ring (And set SOP_SEL to 0x1 as is mandatory) */
-    *CC3XX_REG_RNG_TRNG_CONFIG = CC3XX_RNG_RING_OSCILLATOR_ID | (0x1U << 2);
+    P_CC3XX->rng.trng_config = CC3XX_CONFIG_LOWLEVEL_RNG_RING_OSCILLATOR_ID | (0x1U << 2);
 
     /* Set debug control register to no bypasses */
-    *CC3XX_REG_RNG_TRNG_DEBUG_CONTROL = 0x0U;
+    P_CC3XX->rng.trng_debug_control = 0x0U;
 
     /* Enable the random source */
-    *CC3XX_REG_RNG_RND_SOURCE_ENABLE = 0x1U;
+    P_CC3XX->rng.rnd_source_enable = 0x1U;
 
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_rng_finish()
+cc3xx_err_t cc3xx_rng_finish(void)
 {
+
     /* Disable the random source */
-    *CC3XX_REG_RNG_RND_SOURCE_ENABLE = 0x0U;
+    P_CC3XX->rng.rnd_source_enable = 0x0U;
 
     /* Disable clock */
-    *CC3XX_REG_RNG_RNG_CLK_ENABLE = 0x0U;
+    P_CC3XX->rng.rng_clk_enable = 0x0U;
 
     return CC3XX_ERR_SUCCESS;
 }
@@ -70,6 +72,7 @@ cc3xx_err_t cc3xx_rng_finish()
 cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length)
 {
     uint32_t attempt_count = 0;
+    uint32_t idx;
 
     /* The cc312 generates 192 bits of entropy, which is used as 24 bytes */
     for (int byte_am = 0; byte_am < length; byte_am += 24) {
@@ -81,39 +84,36 @@ cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length)
          * failed.
          */
         do {
-            if (*CC3XX_REG_RNG_RNG_ISR & 0xEU) {
+            if (P_CC3XX->rng.rng_isr & 0xEU) {
                 /* At least one test has failed - the buffer contents aren't
                  * random.
                  */
 
                 /* Reset EHR registers */
-                *CC3XX_REG_RNG_RST_BITS_COUNTER = 0x1U;
+                P_CC3XX->rng.rst_bits_counter = 0x1U;
 
                 /* Clear the interrupt bits to restart generator */
-                *CC3XX_REG_RNG_RNG_ICR = 0x3FU;
+                P_CC3XX->rng.rng_icr = 0x3FU;
 
                 attempt_count++;
             }
-        } while ((! (*CC3XX_REG_RNG_RNG_ISR & 0x1U))
-                 && attempt_count < CC3XX_RNG_MAX_ATTEMPTS);
+        } while ((! (P_CC3XX->rng.rng_isr & 0x1U))
+                 && attempt_count < CC3XX_CONFIG_LOWLEVEL_RNG_MAX_ATTEMPTS);
 
-        if (attempt_count == CC3XX_RNG_MAX_ATTEMPTS) {
+        if (attempt_count == CC3XX_CONFIG_LOWLEVEL_RNG_MAX_ATTEMPTS) {
             cc3xx_rng_finish();
             return CC3XX_ERR_GENERIC_ERROR;
         }
 
-        tmp_buf[0] = *CC3XX_REG_RNG_EHR_DATA_0;
-        tmp_buf[1] = *CC3XX_REG_RNG_EHR_DATA_1;
-        tmp_buf[2] = *CC3XX_REG_RNG_EHR_DATA_2;
-        tmp_buf[3] = *CC3XX_REG_RNG_EHR_DATA_3;
-        tmp_buf[4] = *CC3XX_REG_RNG_EHR_DATA_4;
-        tmp_buf[5] = *CC3XX_REG_RNG_EHR_DATA_5;
+        for (idx = 0; idx < 6; idx++) {
+            tmp_buf[idx] = P_CC3XX->rng.ehr_data[idx];
+        }
 
         /* Reset EHR register */
-        *CC3XX_REG_RNG_RST_BITS_COUNTER = 0x1U;
+        P_CC3XX->rng.rst_bits_counter = 0x1U;
 
         /* Clear the interrupt bits to restart generator */
-        *CC3XX_REG_RNG_RNG_ICR = 0xFFFFFFFF;
+        P_CC3XX->rng.rng_icr = 0xFFFFFFFF;
 
         copy_size = length > byte_am + 24 ? 24 : (length - byte_am);
         memcpy(buf + byte_am, (uint8_t*)tmp_buf, copy_size);

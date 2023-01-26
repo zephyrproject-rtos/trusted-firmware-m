@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,17 +7,19 @@
 
 #include "cc3xx_otp.h"
 
-#include "cc3xx_reg_defs.h"
+#include "cc3xx_dev.h"
 
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
 
-void cc3xx_otp_wait_until_fuse_programming_complete(void) {
-    while (! (*CC3XX_REG_NVM_AIB_FUSE_PROG_COMPLETED & 1)) {}
+static void cc3xx_otp_wait_until_fuse_programming_complete(void) {
+
+    while (! (P_CC3XX->nvm.aib_fuse_prog_completed & 1)) {}
 }
 
-cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr, size_t size, const uint8_t *buf)
+cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr,
+                            size_t size, const uint8_t *buf)
 {
     uint32_t* word_ptr;
     uint32_t current_word;
@@ -74,7 +76,8 @@ cc3xx_err_t cc3xx_otp_write(uint8_t *otp_addr, size_t size, const uint8_t *buf)
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_otp_read(const uint8_t *otp_addr, size_t size, uint8_t *buf)
+cc3xx_err_t cc3xx_otp_read(const uint8_t *otp_addr,
+                           size_t size, uint8_t *buf)
 {
     uint32_t* word_ptr;
     uint32_t word;

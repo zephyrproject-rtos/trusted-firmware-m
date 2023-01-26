@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -45,9 +45,9 @@ typedef enum {
 } cc3xx_aes_key_id_t;
 
 cc3xx_err_t cc3xx_aes(cc3xx_aes_key_id_t key_id, const uint8_t *key,
-                    cc3xx_aes_keysize_t key_size, const uint8_t* in, size_t
-                    in_len, uint8_t* iv, uint8_t *out,
-                    cc3xx_aes_direction_t direction, cc3xx_aes_mode_t mode);
+                      cc3xx_aes_keysize_t key_size, const uint8_t* in,
+                      size_t in_len, uint8_t* iv, uint8_t *out,
+                      cc3xx_aes_direction_t direction, cc3xx_aes_mode_t mode);
 
 #ifdef __cplusplus
 }

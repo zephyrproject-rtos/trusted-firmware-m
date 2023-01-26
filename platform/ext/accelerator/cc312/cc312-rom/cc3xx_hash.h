@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-cc3xx_err_t cc3xx_hash_sha256_init();
+cc3xx_err_t cc3xx_hash_sha256_init(void);
 cc3xx_err_t cc3xx_hash_sha256_update(const uint8_t *buf, size_t length);
 cc3xx_err_t cc3xx_hash_sha256_finish(uint8_t *res, size_t length);
 

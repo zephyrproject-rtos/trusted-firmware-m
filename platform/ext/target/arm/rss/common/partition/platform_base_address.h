@@ -99,6 +99,7 @@
 #define SIC_BASE_S                       0x50140000 /* SIC Secure base address */
 #define ATU_BASE_S                       0x50150000 /* ATU Secure base address */
 #define MPC_SIC_BASE_S                   0x50151000 /* SIC Memory Protection Controller Secure base address */
+#define CC3XX_BASE_S                     0x50154000 /* CryptoCell CC3XX Secure base address */
 #define SYSCNTR_CNTRL_BASE_S             0x5015A000 /* System Counter Control Secure base address */
 #define SYSCNTR_READ_BASE_S              0x5015B000 /* System Counter Read Secure base address */
 #define MHU0_SENDER_BASE_S               0x50160000 /* Combined MHU 0 Sender Secure base address */

@@ -12,6 +12,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 
 #ifndef CC3XX_DMA_REMAP_REGION_AM
 #define CC3XX_DMA_REMAP_REGION_AM 4
