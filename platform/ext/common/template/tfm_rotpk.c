@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -46,6 +46,9 @@ tfm_plat_get_rotpk_hash(uint8_t image_id,
                                   rotpk_hash_size);
         case 2:
             return get_rotpk_hash(PLAT_OTP_ID_BL2_ROTPK_2, rotpk_hash,
+                                  rotpk_hash_size);
+        case 3:
+            return get_rotpk_hash(PLAT_OTP_ID_BL2_ROTPK_3, rotpk_hash,
                                   rotpk_hash_size);
         default:
             return TFM_PLAT_ERR_INVALID_INPUT;

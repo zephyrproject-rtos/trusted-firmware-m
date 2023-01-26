@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -25,6 +25,8 @@ extern "C" {
 #define TFM_TIMER1_IRQ           (TIMER1_IRQn)
 #define FF_TEST_UART_IRQ         (UARTTX2_IRQn)
 #define FF_TEST_UART_IRQ_Handler UARTTX2_Handler
+#define TFM_FPU_S_TEST_IRQ       (UART0_IRQn)
+#define TFM_FPU_NS_TEST_IRQ      (UART1_IRQn)
 
 struct platform_data_t;
 

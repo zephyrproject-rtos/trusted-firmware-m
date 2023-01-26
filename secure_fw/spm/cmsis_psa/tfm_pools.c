@@ -7,6 +7,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include "thread.h"
 #include "psa/client.h"
 #include "psa/service.h"
@@ -15,11 +16,9 @@
 #include "utilities.h"
 #include "lists.h"
 #include "tfm_pools.h"
-#include "tfm_memory_utils.h"
-#include "tfm_core_utils.h"
 
-int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
-                      size_t chunksz, size_t num)
+psa_status_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
+                           size_t chunksz, size_t num)
 {
     struct tfm_pool_chunk_t *pchunk;
     size_t i;
@@ -50,7 +49,7 @@ int32_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
     pool->chunksz = chunksz;
     pool->chunk_count = num;
 
-    return SPM_SUCCESS;
+    return PSA_SUCCESS;
 }
 
 void *tfm_pool_alloc(struct tfm_pool_instance_t *pool)

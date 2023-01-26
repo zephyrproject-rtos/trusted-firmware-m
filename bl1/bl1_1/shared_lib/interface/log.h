@@ -17,7 +17,7 @@ extern "C" {
 #ifdef TFM_BL1_LOGGING
 #define BL1_LOG(str) do { \
     const unsigned char msg[] = str; \
-    stdio_output_string(msg, sizeof(msg)); \
+    stdio_output_string(msg, sizeof(msg) - 1); \
 } while (0)
 #else
 #define BL1_LOG(str)

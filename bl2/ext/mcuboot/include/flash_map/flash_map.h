@@ -133,6 +133,9 @@ struct flash_sector {
  */
 #define DRV_FLASH_AREA(area) ((area)->fa_driver)
 
+/* Initialiaze all flash driver */
+int flash_area_driver_init(void);
+
 /*
  * Start using flash area.
  */

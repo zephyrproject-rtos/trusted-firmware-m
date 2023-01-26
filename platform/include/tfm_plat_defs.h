@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,11 +21,12 @@ enum tfm_plat_err_t {
     TFM_PLAT_ERR_MAX_VALUE = 0x55A3,
     TFM_PLAT_ERR_INVALID_INPUT = 0xA3C5,
     TFM_PLAT_ERR_UNSUPPORTED = 0xC35A,
+    TFM_PLAT_ERR_NOT_PERMITTED = 0xC5A3,
     /* Following entry is only to ensure the error code of int size */
     TFM_PLAT_ERR_FORCE_INT_SIZE = INT_MAX
 };
 
-#if defined(TFM_PSA_API) && defined(TFM_LVL) && (TFM_LVL != 1)
+#if defined(TFM_LVL) && (TFM_LVL != 1)
 
 /*!
  * \def TFM_LINK_SET_RO_IN_PARTITION_SECTION(TFM_PARTITION_NAME)

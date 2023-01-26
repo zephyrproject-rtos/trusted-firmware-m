@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Nuvoton Technology Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 #include "NuMicro.h"
-#include "system_core_init.h"
+#include "cmsis.h"
 #include "platform_description.h"
 
 /*----------------------------------------------------------------------------

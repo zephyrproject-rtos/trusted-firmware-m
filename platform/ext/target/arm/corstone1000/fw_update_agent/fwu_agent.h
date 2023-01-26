@@ -8,10 +8,7 @@
 #ifndef FWU_AGENT_H
 #define FWU_AGENT_H
 
-/* Set 1 to enable debug messages */
-#define ENABLE_DEBUG_LOGS         1
-
-#if (ENABLE_DEBUG_LOGS == 1)
+#ifdef ENABLE_FWU_AGENT_DEBUG_LOGS
     #include <stdio.h>
     #define FWU_LOG_MSG(f_, ...) printf((f_), ##__VA_ARGS__)
 #else
@@ -29,6 +26,9 @@ enum fwu_agent_error_t {
                     while(1) {};                                               \
                 }                                                              \
 
+
+/* Version used for the very first image of the device. */
+#define FWU_IMAGE_INITIAL_VERSION 0
 
 enum fwu_agent_error_t fwu_metadata_provision(void);
 enum fwu_agent_error_t fwu_metadata_init(void);

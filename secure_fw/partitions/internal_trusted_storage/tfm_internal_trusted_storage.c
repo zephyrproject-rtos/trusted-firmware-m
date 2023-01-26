@@ -1,40 +1,24 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-
+#include <string.h>
+#include "config_its.h"
 #include "tfm_internal_trusted_storage.h"
 
 #include "tfm_hal_its.h"
 #include "tfm_hal_ps.h"
-#include "flash/its_flash.h"
 #include "flash_fs/its_flash_fs.h"
 #include "psa_manifest/pid.h"
-#include "tfm_memory_utils.h"
 #include "tfm_its_defs.h"
-#include "tfm_its_req_mngr.h"
 #include "its_utils.h"
 #include "tfm_sp_log.h"
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "ps_object_defs.h"
 #endif
-
-#ifndef ITS_BUF_SIZE
-/* By default, set the ITS buffer size to the max asset size so that all
- * requests can be handled in one iteration.
- */
-#define ITS_BUF_SIZE ITS_MAX_ASSET_SIZE
-#endif
-
-/* Buffer to store asset data from the caller.
- * Note: size must be aligned to the max flash program unit to meet the
- * alignment requirement of the filesystem.
- */
-static uint8_t asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
-                                          ITS_FLASH_MAX_ALIGNMENT)];
 
 static uint8_t g_fid[ITS_FILE_ID_SIZE];
 static struct its_file_info_t g_file_info;
@@ -78,8 +62,8 @@ static void tfm_its_get_fid(int32_t client_id,
                             psa_storage_uid_t uid,
                             uint8_t *fid)
 {
-    tfm_memcpy(fid, (const void *)&client_id, sizeof(client_id));
-    tfm_memcpy(fid + sizeof(client_id), (const void *)&uid, sizeof(uid));
+    memcpy(fid, (const void *)&client_id, sizeof(client_id));
+    memcpy(fid + sizeof(client_id), (const void *)&uid, sizeof(uid));
 }
 
 /**
@@ -157,8 +141,8 @@ psa_status_t tfm_its_init(void)
 
     /* Prepare the ITS filesystem */
     status = its_flash_fs_prepare(&fs_ctx_its);
-#ifdef ITS_CREATE_FLASH_LAYOUT
-    /* If ITS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
+#if ITS_CREATE_FLASH_LAYOUT
+    /* If ITS_CREATE_FLASH_LAYOUT is set to 1, it indicates that it is required to
      * create a ITS flash layout. ITS service will generate an empty and valid
      * ITS flash layout to store assets. It will erase all data located in the
      * assigned ITS memory area before generating the ITS layout.
@@ -198,8 +182,8 @@ psa_status_t tfm_its_init(void)
 
     /* Prepare the PS filesystem */
     status = its_flash_fs_prepare(&fs_ctx_ps);
-#ifdef PS_CREATE_FLASH_LAYOUT
-    /* If PS_CREATE_FLASH_LAYOUT is set, it indicates that it is required to
+#if PS_CREATE_FLASH_LAYOUT
+    /* If PS_CREATE_FLASH_LAYOUT is set to 1, it indicates that it is required to
      * create a PS flash layout. PS service will generate an empty and valid
      * PS flash layout to store assets. It will erase all data located in the
      * assigned PS memory area before generating the PS layout.
@@ -229,20 +213,20 @@ psa_status_t tfm_its_init(void)
     return status;
 }
 
-psa_status_t tfm_its_set(int32_t client_id,
-                         psa_storage_uid_t uid,
-                         size_t data_length,
-                         psa_storage_create_flags_t create_flags)
+psa_status_t tfm_its_set(struct its_asset_info *asset_info,
+                         uint8_t *data_buf,
+                         size_t max_size,
+                         size_t size_to_write,
+                         size_t offset)
 {
     psa_status_t status;
-    size_t write_size;
-    size_t offset;
-    uint32_t flags;
+    psa_storage_uid_t uid;
+    psa_storage_create_flags_t create_flags;
+    int32_t client_id;
 
-    /* Check that the UID is valid */
-    if (uid == TFM_ITS_INVALID_UID) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
+    uid = asset_info->uid;
+    create_flags = asset_info->create_flags;
+    client_id = asset_info->client_id;
 
     /* Check that the create_flags does not contain any unsupported flags */
     if (create_flags & ~(PSA_STORAGE_FLAG_WRITE_ONCE |
@@ -251,69 +235,68 @@ psa_status_t tfm_its_set(int32_t client_id,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
-    /* Set file id */
-    tfm_its_get_fid(client_id, uid, g_fid);
+    if (offset == 0) {
+        /* First time creating an asset */
 
-    /* Read file info */
-    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                        &g_file_info);
-    if (status == PSA_SUCCESS) {
-        /* If the object exists and has the write once flag set, then it
-         * cannot be modified.
-         */
-        if (g_file_info.flags & PSA_STORAGE_FLAG_WRITE_ONCE) {
-            return PSA_ERROR_NOT_PERMITTED;
+        /* Check that the UID is valid */
+        if (uid == TFM_ITS_INVALID_UID) {
+            return PSA_ERROR_INVALID_ARGUMENT;
         }
-    } else if (status != PSA_ERROR_DOES_NOT_EXIST) {
-        /* If the file does not exist, then do nothing.
-         * If other error occurred, return it
-         */
-        return status;
-    }
 
-    offset = 0;
-    flags = (uint32_t)create_flags |
-            ITS_FLASH_FS_FLAG_CREATE | ITS_FLASH_FS_FLAG_TRUNCATE;
+        /* Set file id */
+        tfm_its_get_fid(client_id, uid, g_fid);
 
-    /* Iteratively read data from the caller and write it to the filesystem, in
-     * chunks no larger than the size of the asset_data buffer.
-     */
-    do {
-        /* Write as much of the data as will fit in the asset_data buffer */
-        write_size = ITS_UTILS_MIN(data_length, sizeof(asset_data));
-
-        /* Read asset data from the caller */
-        (void)its_req_mngr_read(asset_data, write_size);
-
-        /* Write to the file in the file system */
-        status = its_flash_fs_file_write(get_fs_ctx(client_id), g_fid, flags,
-                                         data_length, write_size, offset,
-                                         asset_data);
-        if (status != PSA_SUCCESS) {
+        /* Read file info */
+        status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
+                                            &g_file_info);
+        if (status == PSA_SUCCESS) {
+            /*
+             * If the object exists and has the write once flag set, then it
+             * cannot be modified.
+             */
+            if (g_file_info.flags & PSA_STORAGE_FLAG_WRITE_ONCE) {
+                return PSA_ERROR_NOT_PERMITTED;
+            }
+        } else if (status != PSA_ERROR_DOES_NOT_EXIST) {
+            /*
+             * If the file does not exist, then do nothing.
+             * If other error occurred, return it
+             */
             return status;
         }
 
-        /* Do not create or truncate after the first iteration */
-        flags &= ~(ITS_FLASH_FS_FLAG_CREATE | ITS_FLASH_FS_FLAG_TRUNCATE);
+        create_flags |= ITS_FLASH_FS_FLAG_CREATE | ITS_FLASH_FS_FLAG_TRUNCATE;
+    }
 
-        offset += write_size;
-        data_length -= write_size;
-    } while (data_length > 0);
+    /* Write to the file in the file system */
+    status = its_flash_fs_file_write(get_fs_ctx(client_id),
+                                     g_fid,
+                                     create_flags, max_size,
+                                     size_to_write, offset, data_buf);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     return PSA_SUCCESS;
 }
 
-psa_status_t tfm_its_get(int32_t client_id,
-                         psa_storage_uid_t uid,
-                         size_t data_offset,
-                         size_t data_size,
-                         size_t *p_data_length)
+psa_status_t tfm_its_get(struct its_asset_info *asset_info,
+                         uint8_t *data_buf,
+                         size_t size_to_read,
+                         size_t offset,
+                         size_t *size_read,
+                         bool first_get)
 {
     psa_status_t status;
-    size_t read_size;
+    int32_t client_id;
+    psa_storage_uid_t uid;
+
+    client_id = asset_info->client_id;
+    uid = asset_info->uid;
 
 #ifdef TFM_PARTITION_TEST_PS
-    /* The PS test partition can call tfm_its_get() through PS code. Treat it
+    /*
+     * The PS test partition can call tfm_its_get() through PS code. Treat it
      * as if it were PS.
      */
     if (client_id == TFM_SP_PS_TEST) {
@@ -321,54 +304,42 @@ psa_status_t tfm_its_get(int32_t client_id,
     }
 #endif
 
-    /* Check that the UID is valid */
-    if (uid == TFM_ITS_INVALID_UID) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
+    if (first_get) {
+        /* Check that the UID is valid */
+        if (uid == TFM_ITS_INVALID_UID) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+        }
 
-    /* Set file id */
-    tfm_its_get_fid(client_id, uid, g_fid);
+        /* Set file id */
+        tfm_its_get_fid(client_id, uid, g_fid);
 
-    /* Read file info */
-    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                        &g_file_info);
-    if (status != PSA_SUCCESS) {
-        return status;
+        /* Read file info */
+        status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
+                                            &g_file_info);
+        if (status != PSA_SUCCESS) {
+            return status;
+        }
     }
 
     /* Boundary check the incoming request */
-    if (data_offset > g_file_info.size_current) {
+    if (offset > g_file_info.size_current) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Copy the object data only from within the file boundary */
-    data_size = ITS_UTILS_MIN(data_size,
-                              g_file_info.size_current - data_offset);
+    size_to_read = ITS_UTILS_MIN(size_to_read,
+                                 g_file_info.size_current - offset);
+
+    /* Read file data from the filesystem */
+    status = its_flash_fs_file_read(get_fs_ctx(client_id),
+                                    g_fid, size_to_read,
+                                    offset, data_buf);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
 
     /* Update the size of the output data */
-    *p_data_length = data_size;
-
-    /* Iteratively read data from the filesystem and write it to the caller, in
-     * chunks no larger than the size of the asset_data buffer.
-     */
-    do {
-        /* Read as much of the data as will fit in the asset_data buffer */
-        read_size = ITS_UTILS_MIN(data_size, sizeof(asset_data));
-
-        /* Read file data from the filesystem */
-        status = its_flash_fs_file_read(get_fs_ctx(client_id), g_fid, read_size,
-                                        data_offset, asset_data);
-        if (status != PSA_SUCCESS) {
-            *p_data_length = 0;
-            return status;
-        }
-
-        /* Write asset data to the caller */
-        its_req_mngr_write(asset_data, read_size);
-
-        data_offset += read_size;
-        data_size -= read_size;
-    } while (data_size > 0);
+    *size_read = size_to_read;
 
     return PSA_SUCCESS;
 }

@@ -131,7 +131,7 @@ extern void Cy_Platform_Init(void);
 void platform_init(void)
 {
     cy_en_sysclk_status_t clk_rc;
-#ifdef TEST_NS_SLIH_IRQ
+#if defined(TEST_NS_SLIH_IRQ) || defined(TEST_NS_FLIH_IRQ)
     cy_en_sysint_status_t int_rc;
 #endif
 
@@ -172,7 +172,7 @@ void platform_init(void)
 
     Cy_Platform_Init();
 
-#ifdef TEST_NS_SLIH_IRQ
+#if defined(TEST_NS_SLIH_IRQ) || defined(TEST_NS_FLIH_IRQ)
     int_rc = Cy_SysInt_Init(&CY_TCPWM_NVIC_CFG_S, TFM_TIMER0_IRQ_Handler);
     if (int_rc != CY_SYSINT_SUCCESS) {
         SPMLOG_INFMSG("WARNING: Fail to initialize timer interrupt (IRQ TEST might fail)!\r\n");

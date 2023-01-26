@@ -169,6 +169,16 @@ echo "postbuild.sh failed"
 echo $command
 exit 1
 fi
+echo $updatebat" updated"
+command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b encrypted -m  RE_IMAGE_ENCRYPTED -s 0 "$updatesh
+$command  >> $projectdir"/output.txt"
+ret=$?
+if [ $ret != 0 ]; then
+echo "postbuild.sh failed"
+echo $command
+exit 1
+fi
+
 command=$cmd" "$stm_tool" flash --layout "$preprocess_bl2_file" -b boot -m  RE_BL2_BIN_ADDRESS -s 0 "$bin2hexsh
 $command  >> $projectdir"/output.txt"
 ret=$?

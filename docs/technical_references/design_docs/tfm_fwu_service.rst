@@ -18,15 +18,17 @@ bootloader and FWU service.
 
 This partition supports the following features:
 
-- Query image information
-  Fetch information about the firmware images on the device. This covers the
-  images in the running area and also the staging area.
-- Store image
-  Write a candidate image to its staging area.
-- Validate image
-  Starts the validation of the image.
-- Trigger reboot
-  Trigger a reboot to restart the platform.
+- Query the firmware store information.
+- Image preparation: prepare a new firmware image in the component's firmware store.
+- Image installation: install prepared firmware images on all components that have been prepared for installation.
+- Image trial: manage a trial of new firmware images atomically on all components that are in TRIAL state.
+
+A typical flow through the component states is shown below [1]_.
+
+.. figure:: media/fwu-states.svg
+   :scale: 65 %
+   :align: center
+   :name: The component state model transitions.
 
 **********
 Components
@@ -35,23 +37,17 @@ The structure of the TF-M Firmware Update service is listed below:
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
    | **Component name**          | **Description**                                               | **Location**                                                                          |
    +=============================+===============================================================+=======================================================================================+
-   | SPE client API interface    | This module exports the client API of PSA Firmware Update to  | ``./secure_fw/partitions/firmware_update/tfm_fwu_secure_api.c``                       |
-   |                             | the other services available in TF-M.                         |                                                                                       |
+   | Client API interface        | This module exports the client API of PSA Firmware Update to  | ``./interface/src/tfm_fwu_api.c``                                                     |
+   |                             | the users.                                                    |                                                                                       |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
-   | NSPE client API interface   | This module exports the client API of PSA Firmware Update to  | ``./interface/src/tfm_firmware_update_func_api.c``                                    |
-   |                             | the NSPE(i.e. to the applications).                           | ``./interface/src/tfm_firmware_update_ipc_api.c``                                     |
+   | Manifest                    | The manifest file is a description of the service components. | ``./secure_fw/partitions/firmware_update/tfm_firmware_update.yaml``                   |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
-   | Manifest                    | The manifest file is a description of the service components  | ``./secure_fw/partitions/firmware_update/tfm_firmware_update.yaml``                   |
-   |                             | for both library mode and IPC mode.                           |                                                                                       |
+   | NSPE client API interface   | This module exports the client API of PSA Firmware Update to  | ``./interface/src/tfm_fwu_api.c``                                                     |
+   |                             | the NSPE(i.e. to the applications).                           |                                                                                       |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
-   | Secure functions and IPC    | This module handles all the secure function requests in       | ``./secure_fw/partitions/firmware_update/tfm_fwu_req_mngr.c``                         |
-   | request handlers            | library model and all the service requests in IPC model.      |                                                                                       |
+   | IPC request handlers        | This module handles all the secure requests in IPC model.     | ``./secure_fw/partitions/firmware_update/tfm_fwu_req_mngr.c``                         |
    |                             | It maitains the image state context and calls the image ID    |                                                                                       |
    |                             | converter to achieve the firmware update functionalities.     |                                                                                       |
-   +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
-   | Image ID Converter          | This module converts the image ID between psa_image_id_t,     | ``./secure_fw/partitions/firmware_update/tfm_fwu_internal.c``                         |
-   |                             | which is the image ID structure in user interfaces, and       |                                                                                       |
-   |                             | bl_image_id_t which is the image ID structure in bootloader.  |                                                                                       |
    +-----------------------------+---------------------------------------------------------------+---------------------------------------------------------------------------------------+
    | Shim layer between FWU and  | This module provides the APIs with the functionality of       | ``./secure_fw/partitions/firmware_update/bootloader/tfm_bootloader_fwu_abstraction.h``|
    | bootloader                  | operating the bootloader to cooperate with the Firmware Update|                                                                                       |
@@ -65,10 +61,8 @@ The structure of the TF-M Firmware Update service is listed below:
 ***********************
 Service API description
 ***********************
-This service follows the PSA Firmware Update API spec of version 0.7 [1]_.
-It implements the mandatory interface functions listed in section 5.1 and the
-optional interface ``psa_fwu_accept()``. Please refer to Firmware Update spec
-for the detailed description.
+This service follows the PSA Firmware Update API spec of version 1.0 [1]_. Please refer to
+Firmware Update spec for the detailed description.
 
 *************************************
 Shim Layer between FWU and bootloader
@@ -98,8 +92,10 @@ Prototype
 
 Description
 ^^^^^^^^^^^
-Bootloader related initialization for the firmware update, such as reading
-some necessary shared data from the memory if needed.
+Bootloader related initialization for the firmware update. It reads
+some necessary shared data from the memory if needed. It initializes
+the flash drivers defined in FLASH_DRIVER_LIST. Platform can define
+FLASH_DRIVER_LIST in flash_layout.h to overload the default driver list.
 
 Parameters
 ^^^^^^^^^^
@@ -111,17 +107,21 @@ fwu_bootloader_staging_area_init(function)
 
 .. code-block:: c
 
-    psa_status_t fwu_bootloader_staging_area_init(bl_image_id_t bootloader_image_id);
+    psa_status_t fwu_bootloader_staging_area_init(psa_fwu_component_t component,
+                                                  const void *manifest,
+                                                  size_t manifest_size);
 
 **Description**
 
-Prepare the staging area of the image with the given ID for image download.
+The component is in READY state. Prepare the staging area of the component for image download.
 For example, initialize the staging area, open the flash area, and so on.
-The image will be written into the staging area later.
 
 **Parameters**
 
-- ``bootloader_image_id``: The identifier of the target image in bootloader.
+- ``component``: The identifier of the target component in bootloader.
+- ``manifest``: A pointer to a buffer containing a detached manifest for the update.
+  If the manifest is bundled with the firmware image, manifest must be NULL.
+- ``manifest_size``: Size of the manifest buffer in bytes.
 
 fwu_bootloader_load_image(function)
 -----------------------------------
@@ -129,18 +129,18 @@ fwu_bootloader_load_image(function)
 
 .. code-block:: c
 
-    psa_status_t fwu_bootloader_load_image(bl_image_id_t bootloader_image_id,
+    psa_status_t fwu_bootloader_load_image(psa_fwu_component_t component,
                                            size_t        image_offset,
                                            const void    *block,
                                            size_t        block_size);
 
 **Description**
 
-Load the image to its staging area.
+Load the image into the target component.
 
 **Parameters**
 
-- ``bootloader_image_id``: The identifier of the target image in bootloader.
+- ``component``: The identifier of the target component in bootloader.
 - ``image_offset``: The offset of the image being passed into block, in bytes.
 - ``block``: A buffer containing a block of image data. This might be a complete image or a subset.
 - ``block_size``: Size of block.
@@ -151,9 +151,8 @@ fwu_bootloader_install_image(function)
 
 .. code-block:: c
 
-    psa_status_t fwu_bootloader_install_image(bl_image_id_t bootloader_image_id,
-                                              bl_image_id_t       *dependency,
-                                              psa_image_version_t *dependency_version);
+    psa_status_t fwu_bootloader_install_image(psa_fwu_component_t *candidates,
+                                              uint8_t number);
 
 **Description**
 
@@ -164,9 +163,8 @@ the error code PSA_SUCCESS_REBOOT.
 
 **Parameters**
 
-- ``bootloader_image_id``: The identifier of the target image in bootloader.
-- ``dependency``: Bootloader image ID of dependency if needed.
-- ``dependency_version``: Bootloader image version of dependency if needed.
+- ``candidates``: A list of components in CANDIDATE state.
+- ``number``: Number of components in CANDIDATE state.
 
 fwu_bootloader_mark_image_accepted(function)
 --------------------------------------------
@@ -174,33 +172,68 @@ fwu_bootloader_mark_image_accepted(function)
 
 .. code-block:: c
 
-    psa_status_t fwu_bootloader_mark_image_accepted(bl_image_id_t bootloader_image_id);
+    psa_status_t fwu_bootloader_mark_image_accepted(const psa_fwu_component_t *trials,
+                                                    uint8_t number);
 
 **Description**
 
-Call this API to mark the running images as permanent/accepted to avoid
+Call this API to mark the TRIAL(running) image in component as confirmed to avoid
 revert when next time bootup. Usually, this API is called after the running
 images have been verified as valid.
 
 **Parameters**
 
-    N/A
+- ``trials``: A list of components in TRIAL state.
+- ``number``: Number of components in TRIAL state.
 
-fwu_bootloader_abort(function)
-------------------------------
+fwu_bootloader_reject_staged_image(function)
+--------------------------------------------
 **Prototype**
 
 .. code-block:: c
 
-    psa_status_t fwu_bootloader_abort(void);
+    psa_status_t fwu_bootloader_reject_staged_image(psa_fwu_component_t component);
 
 **Description**
 
-Abort the current image download process.
+The component is in STAGED state. Call this API to Uninstall the staged image in the
+component so that this image will not be treated as a candidate next time bootup.
 
 **Parameters**
 
-    N/A
+- ``component``: The identifier of the target component in bootloader.
+
+fwu_bootloader_reject_trial_image(function)
+--------------------------------------------
+**Prototype**
+
+.. code-block:: c
+
+    psa_status_t fwu_bootloader_reject_trial_image(psa_fwu_component_t component);
+
+**Description**
+
+The component is in TRIAL state. Mark the running image in the component as rejected.
+
+**Parameters**
+
+- ``component``: The identifier of the target component in bootloader.
+
+fwu_bootloader_clean_component(function)
+----------------------------------------
+**Prototype**
+
+.. code-block:: c
+
+    psa_status_t fwu_bootloader_clean_component(psa_fwu_component_t component);
+
+**Description**
+
+The component is in FAILED or UPDATED state. Clean the staging area of the component.
+
+**Parameters**
+
+- ``component``: The identifier of the target component in bootloader.
 
 fwu_bootloader_get_image_info(function)
 ---------------------------------------
@@ -208,9 +241,10 @@ fwu_bootloader_get_image_info(function)
 
 .. code-block:: c
 
-    psa_status_t fwu_bootloader_get_image_info(bl_image_id_t    bootloader_image_id,
-                                               bool             staging_area,
-                                               tfm_image_info_t *info);
+    psa_status_t fwu_bootloader_get_image_info(psa_fwu_component_t component,
+                                               bool query_state,
+                                               bool query_impl_info,
+                                               psa_fwu_component_info_t *info);
 
 **Description**
 
@@ -219,13 +253,10 @@ or the running area.
 
 **Parameters**
 
-    - ``bootloader_image_id``: The identifier of the target image in bootloader.
-    - ``active_image``: Indicates image location.
-
-        - ``True``: the running image.
-        - ``False``: the image in the passive(or staging) slot.
-
-    - ``info``: Buffer containing the image information.
+    - ``component``: The identifier of the target component in bootloader.
+    - ``query_state``: Whether query the 'state' field of psa_fwu_component_info_t.
+    - ``query_impl_info``: Whether Query 'impl' field of psa_fwu_component_info_t.
+    - ``info``: Buffer containing return the component information.
 
 ******************************************
 Additional shared data between BL2 and SPE
@@ -238,26 +269,48 @@ is preferred to avoid involving the CBOR encoder which can increase the code
 size. The FWU partition will read the shared data at the partition
 initialization.
 
-******************
-Image ID structure
-******************
-The structure of image ID is:
-    image_id[7:0]: slot.
-    image_id[15:8]: image type.
-    image_id[31:16]: specific image ID.
+*********************************************
+Build configurations related to FWU partition
+*********************************************
+- ``TFM_PARTITION_FIRMWARE_UPDATE`` Controls whether FWU partition is enabled or not.
+- ``TFM_FWU_BOOTLOADER_LIB`` Bootloader configure file for FWU partition.
+- ``TFM_CONFIG_FWU_MAX_WRITE_SIZE`` The maximum permitted size for block in psa_fwu_write, in bytes.
+- ``TFM_FWU_BUF_SIZE`` Size of the FWU internal data transfer buffer (defaults to
+  TFM_CONFIG_FWU_MAX_WRITE_SIZE if not set).
+- ``FWU_STACK_SIZE`` The stack size of FWU Partition.
+- ``FWU_DEVICE_CONFIG_FILE`` The device configuration file for FWU partition. The default value is
+  the configuration file generated for MCUboot. The following macros should be defined in the
+  configuration file:
 
-Three image types are defined in this partition.
-- FWU_IMAGE_TYPE_NONSECURE: the non_secure image
-- FWU_IMAGE_TYPE_SECURE: the secure image
-- FWU_IMAGE_TYPE_FULL: the secure + non_secure image
+  - ``FWU_COMPONENT_NUMBER`` The number of components on the device.
 
-Macros **FWU_CALCULATE_IMAGE_ID**, **FWU_IMAGE_ID_GET_TYPE** and
-**FWU_IMAGE_ID_GET_SLOT** are dedicated to converting the image id, type, and
-slot. The service users can call these macros to get the image ID.
+    .. Note::
 
-.. Note::
+        In this design, component ID ranges from 0 to ``FWU_COMPONENT_NUMBER`` - 1.
 
-    The image ID structure, as well as the macros listed here, is TF-M specific implementation.
+  - ``FWU_SUPPORT_TRIAL_STATE`` Whether TRIAL component state is supported.
+- ``TEST_NS_FWU`` FWU nonsecure tests switch.
+- ``TEST_S_FWU`` FWU secure tests switch.
+
+    .. Note::
+
+        The running image which supports revert mechanism should be confirmed before initiating a
+        firmware update process. For example, if the running image is built with
+        ``-DMCUBOOT_UPGRADE_STRATEGY=SWAP_USING_MOVE``, the image should be confirmed either by
+        adding ``-DMCUBOOT_CONFIRM_IMAGE=ON`` build option or by calling ``psa_fwu_accept()`` API
+        before initiating a firmware update process. Otherwise, ``PSA_ERROR_BAD_STATE`` will be
+        returned by ``psa_fwu_start()``.
+
+*************************************
+Limitations of current implementation
+*************************************
+Currently, the MCUboot based implementation does not record image update results like failure or
+success. And FWU partition does not detect failure errors in bootloader installation. If an image
+installation fails in the bootloader and the old image still runs after reboot, ``PSA_FWU_READY``
+state will be returned by ``psa_fwu_query()`` after reboot.
+
+Currently, image download recovery after a reboot is not supported. If a reboot happens in image
+preparation, the downloaded image data will be ignored after the reboot.
 
 ***********************************
 Benefits Analysis on this Partition
@@ -266,10 +319,9 @@ Benefits Analysis on this Partition
 Implement the FWU functionality in the non-secure side
 ======================================================
 The APIs listed in PSA Firmware Update API spec [1]_ can also be implemented in
-the non-secure side. The library model implementation can be referred to for the
-non-secure side implementation.
+the non-secure side.
 
-Pros and Cons for Implementing FWU APIs in Secure Side
+Pros and Cons for implementing FWU APIs in secure side
 ======================================================
 
 Pros
@@ -308,8 +360,8 @@ analysis above.
 Reference
 *********
 
-.. [1] `PSA Firwmare Update API <https://developer.arm.com/documentation/ihi0093/0000/>`_
+.. [1] `PSA Firwmare Update API <https://arm-software.github.io/psa-api/fwu/1.0/>`_
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

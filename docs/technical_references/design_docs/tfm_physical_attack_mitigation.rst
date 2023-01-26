@@ -404,23 +404,21 @@ harden it against physical attacks.
 .. code-block:: c
 
   enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void);
-  enum tfm_plat_err_t tfm_spm_hal_configure_default_isolation(
-                 bool privileged,
-                 const struct platform_data_t *platform_data);
-  enum tfm_hal_status_t tfm_hal_mpu_update_partition_boundary(uintptr_t start,
-                                                              uintptr_t end);
+  enum tfm_hal_status_t tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
+                                              uintptr_t *p_boundary);
 
 Memory access check
 ^^^^^^^^^^^^^^^^^^^
 TFM SPM exposes a HAL API for platform specific memory access check. The
-system integrator is responsible to implement these API on a particular SoC and
+system integrator is responsible to implement this API on a particular SoC and
 harden it against physical attacks.
 
 .. code-block:: c
 
-  tfm_hal_status_t tfm_hal_memory_has_access(const uintptr_t base,
-                                             size_t size,
-                                             uint32_t attr);
+  tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
+                                        uintptr_t base,
+                                        size_t size,
+                                        uint32_t access_type);
 
 .. _tf-m-against-physical-attacks:
 
@@ -442,7 +440,7 @@ the MCUboot project (version 1.7.0) [2]_ which TF-M relies on.
 The FIH library is put under TF-M ``lib/fih/``.
 
 The implementation of the different techniques was assigned to fault injection
-protection profiles. Four profile (OFF, LOW, MEDIUM, HIGH) was introduced to fit
+protection profiles. Four profiles (OFF, LOW, MEDIUM, HIGH) were introduced to fit
 better to the device capability (memory size, TRNG availability) and to
 protection requirements mandated by the device threat model. Fault injection
 protection profile is configurable at compile-time, default value: OFF.
@@ -466,8 +464,8 @@ below.
 |                                |             |                |              | capability       |
 +--------------------------------+-------------+----------------+--------------+------------------+
 
-Similar to MCUboot four profiles are supported, it can be configured at build
-time by setting(default is OFF):
+Similar to MCUboot, four profiles are supported. It can be configured at build
+time by setting (default is OFF):
 
   ``-DTFM_FIH_PROFILE=<OFF, LOW, MEDIUM, HIGH>``
 
@@ -477,12 +475,12 @@ As analyzed in :ref:`phy-att-threat-model`, this section focuses on integrating
 FIH library in TF-M SPM to mitigate physical attacks.
 
   - Identify critical function call path which is mandatory for configuring
-    isolation or debug access. Transfer them to ``fih_int`` functions with the
-    usage of ``FIH_CALL`` and ``FIH_RET`` macros. These are providing the extra
-    checking functionality (control flow monitor, redundant checks and
-    variables, random delay, complex constant) according to the profile
+    isolation or debug access. Change their return types to ``FIH_RET_TYPE`` and
+    make them return with ``FIH_RET``. Then call them with ``FIH_CALL``. These macros
+    are providing the extra checking functionality (control flow monitor, redundant
+    checks and variables, random delay, complex constant) according to the profile
     settings. More details about usage can be found here:
-    ``tf-m/lib/fih/inc/fault_injection_hardening.h``
+    ``trusted-firmware-m/lib/fih/inc/fih.h``
 
     Take simplified TF-M SPM initialization flow as an example:
 
@@ -502,10 +500,9 @@ FIH library in TF-M SPM to mitigate physical attacks.
         |
         |--> During each partition initialization
                     |
-                    |--> tfm_spm_hal_configure_default_isolation()
+                    |--> tfm_hal_bind_boundary()
                                        |
-                                       |--> platform specific peripheral
-                                            isolation impl.
+                                       |--> platform specific peripheral isolation impl.
 
   - Might make the important setting of peripheral config register redundant
     and verify them to match expectations before continue.
@@ -518,9 +515,9 @@ FIH library in TF-M SPM to mitigate physical attacks.
 
       fih_int tfm_hal_verify_static_boundaries(void);
 
-    This function is intended to be called just before the security state
-    transition and is responsible for checking all critical hardware
-    configuration. The goal is to catch if something is missed and act according
+    This function is intended to be called just after the static boundaries are
+    set up and is responsible for checking all critical hardware configurations.
+    The goal is to catch if something is missed and act according
     to system policy. The introduction of one more checking point requires one
     more intervention with precise timing. The system integrator is responsible
     to implement this API on a particular SoC and harden it against physical
@@ -535,14 +532,13 @@ FIH library in TF-M SPM to mitigate physical attacks.
 
     .. code-block:: c
 
-      int fih_delay_init(void);
-      unsigned char fih_delay_random_uchar(void);
+      void fih_delay_init(void);
+      uint8_t fih_delay_random(void);
 
   - Similar countermeasures can be implemented in critical steps in platform
     specific implementation.
 
-    Take memory isolation settings on AN521 and Musca-B1 platforms as an
-    example.
+    Take memory isolation settings on AN521 platform as an example.
     The following hardware components are responsible for memory isolation in a
     SoC, which is based on SSE-200 subsystem.
     System integrators must examine the chip specific memory isolation solution,
@@ -565,7 +561,7 @@ FIH library in TF-M SPM to mitigate physical attacks.
         restricted access in secure domain. It mitigates that a vulnerable or
         malicious ARoT partition can access to device assets.
 
-    The following AN521/Musca-B1 specific isolation configuration functions
+    The following AN521 specific isolation configuration functions
     shall be hardened against physical attacks.
 
     .. code-block:: c
@@ -581,10 +577,10 @@ FIH library in TF-M SPM to mitigate physical attacks.
     condition check when calling platform standard device driver libraries
     according to usage scenarios.
 
-Impact on code size
-===================
-The addition of protection code against physical attacks increases the code
-size. The actual increase depends on the selected profile and where the
+Impact on memory footprint
+==========================
+The addition of protection code against physical attacks increases the memory
+footprint. The actual increase depends on the selected profile and where the
 mitigation code is added.
 
 Attack experiment with SPM
@@ -635,4 +631,4 @@ Reference
 
 --------------------------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

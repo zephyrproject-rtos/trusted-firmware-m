@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,6 +14,7 @@
 #include "runtime_defs.h"
 #include "tfm_hal_platform.h"
 #include "ffm/backend.h"
+#include "ffm/stack_watermark.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/spm_load_api.h"
@@ -25,12 +29,15 @@
 /* Declare the global component list */
 struct partition_head_t partition_listhead;
 
+/* Current running partition. */
+struct partition_t *p_current_partition;
+
 /*
  * Send message and wake up the SP who is waiting on message queue, block the
  * current component state and activate the next component.
  */
-static psa_status_t sfn_messaging(struct service_t *service,
-                                  struct conn_handle_t *handle)
+psa_status_t backend_messaging(struct service_t *service,
+                               struct conn_handle_t *handle)
 {
     struct partition_t *p_target;
     psa_status_t status;
@@ -63,7 +70,7 @@ static psa_status_t sfn_messaging(struct service_t *service,
     return status;
 }
 
-static psa_status_t sfn_replying(struct conn_handle_t *handle, int32_t status)
+psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
 {
     SET_CURRENT_COMPONENT(handle->p_client);
 
@@ -110,39 +117,37 @@ static void spm_thread_fn(void)
 }
 
 /* Parameters are treated as assuredly */
-void sfn_comp_init_assuredly(struct partition_t *p_pt, uint32_t service_set)
+void backend_init_comp_assuredly(struct partition_t *p_pt,
+                                 uint32_t service_set)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
-
+    struct context_ctrl_t ns_agent_ctrl;
     p_pt->p_handles = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;
 
-    THRD_SYNC_INIT(&p_pt->waitobj);
-
-    ARCH_CTXCTRL_INIT(&p_pt->ctx_ctrl,
-                      LOAD_ALLOCED_STACK_ADDR(p_pldi),
-                      p_pldi->stack_size);
+    watermark_stack(p_pt);
 
     /*
      * Built-in partitions still have thread instances: NS Agent (TZ) and
      * IDLE partition, and NS Agent (TZ) needs to be specific cared here.
      */
-    if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
-        THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
-                  TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
-
-        thrd_start(&p_pt->thrd,
-                   POSITION_TO_ENTRY(spm_thread_fn, thrd_fn_t),
-                   POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t));
+    if (IS_PARTITION_NS_AGENT(p_pldi)) {
+        ARCH_CTXCTRL_INIT(&ns_agent_ctrl,
+                          LOAD_ALLOCED_STACK_ADDR(p_pldi),
+                          p_pldi->stack_size);
+        tfm_arch_init_context(&ns_agent_ctrl, (uintptr_t)spm_thread_fn,
+                              NULL, p_pldi->entry);
+        tfm_arch_refresh_hardware_context(&ns_agent_ctrl);
+        SET_CURRENT_COMPONENT(p_pt);
     }
 }
 
-uint32_t sfn_system_run(void)
+uint32_t backend_system_run(void)
 {
-    return thrd_start_scheduler(&CURRENT_THREAD);
+    return EXC_RETURN_THREAD_S_PSP;
 }
 
-static psa_signal_t sfn_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
+psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
 {
     while (!(p_pt->signals_asserted & signal_mask))
         ;
@@ -150,16 +155,7 @@ static psa_signal_t sfn_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
     return p_pt->signals_asserted & signal_mask;
 }
 
-static void sfn_wake_up(struct partition_t *p_pt)
+void backend_wake_up(struct partition_t *p_pt)
 {
     (void)p_pt;
 }
-
-const struct backend_ops_t backend_instance = {
-    .comp_init_assuredly = sfn_comp_init_assuredly,
-    .system_run          = sfn_system_run,
-    .messaging           = sfn_messaging,
-    .replying            = sfn_replying,
-    .wait                = sfn_wait,
-    .wake_up             = sfn_wake_up,
-};

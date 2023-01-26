@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 ARM Limited
+ * Copyright (c) 2018-2022 ARM Limited
  * Copyright (c) 2021 Cypress Semiconductor Corp. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,8 +39,8 @@ LR_CODE NS_CODE_START {
         .ANY (+ZI +RW)
     }
 
-    /* MSP */
-    ARM_LIB_STACK +0 ALIGN 32 EMPTY NS_MSP_STACK_SIZE {
+    /* STACK */
+    ARM_LIB_STACK +0 ALIGN 32 EMPTY NS_STACK_SIZE {
     }
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY NS_HEAP_SIZE {

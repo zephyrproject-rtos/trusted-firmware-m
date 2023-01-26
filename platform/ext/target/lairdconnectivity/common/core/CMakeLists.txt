@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Nordic Semiconductor ASA.
 # Copyright (c) 2021, Laird Connectivity.
 #
@@ -65,12 +65,7 @@ target_sources(platform_s
         ${NRF_FOLDER_PATH}/nrfx_glue.c
         ${NRF_FOLDER_PATH}/native_drivers/mpu_armv8m_drv.c
         ${NRF_FOLDER_PATH}/native_drivers/spu.c
-        ${NRF_FOLDER_PATH}/spm_hal.c
-        ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
-        ${NRF_FOLDER_PATH}/tfm_hal_platform_common.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
-    PUBLIC
-        plat_test.c
+        $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
 
 if(TFM_PARTITION_PLATFORM)
@@ -165,3 +160,12 @@ install(FILES       ${NRF_FOLDER_PATH}/services/src/tfm_ioctl_core_ns_api.c
         DESTINATION ${TFM_INSTALL_PATH}/interface/src)
 
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        ${NRF_FOLDER_PATH}/faults.c
+        ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
+        ${NRF_FOLDER_PATH}/tfm_hal_platform_common.c
+)

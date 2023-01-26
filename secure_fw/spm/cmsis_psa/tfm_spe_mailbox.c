@@ -9,7 +9,6 @@
 #include "cmsis_compiler.h"
 
 #include "psa/error.h"
-#include "tfm_core_utils.h"
 #include "utilities.h"
 #include "tfm_arch.h"
 #include "thread.h"
@@ -26,8 +25,8 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
 {
     struct client_call_params_t spm_params = {0};
 
-    TFM_CORE_ASSERT(params != NULL);
-    TFM_CORE_ASSERT(psa_ret != NULL);
+    SPM_ASSERT(params != NULL);
+    SPM_ASSERT(psa_ret != NULL);
 
     (void)client_id;
 
@@ -194,7 +193,7 @@ int32_t tfm_mailbox_handle_msg(void)
     struct ns_mailbox_queue_t *ns_queue = spe_mailbox_queue.ns_queue;
     struct mailbox_msg_t *msg_ptr;
 
-    TFM_CORE_ASSERT(ns_queue != NULL);
+    SPM_ASSERT(ns_queue != NULL);
 
     tfm_mailbox_hal_enter_critical();
 
@@ -301,7 +300,7 @@ int32_t tfm_mailbox_reply_msg(mailbox_msg_handle_t handle, int32_t reply)
     int32_t ret;
     struct ns_mailbox_queue_t *ns_queue = spe_mailbox_queue.ns_queue;
 
-    TFM_CORE_ASSERT(ns_queue != NULL);
+    SPM_ASSERT(ns_queue != NULL);
 
     /*
      * If handle == MAILBOX_MSG_NULL_HANDLE, reply to the mailbox message

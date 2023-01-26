@@ -1,4 +1,5 @@
 :orphan:
+
 *************
 Version 1.3.0
 *************
@@ -49,7 +50,7 @@ New platforms supported
 
   - Secure Enclave system:
 
-    - :doc:`Musca-B1 Secure Enclave. </platform/ext/target/arm/musca_b1/secure_enclave/readme>`
+    - Musca-B1 Secure Enclave (deprecated after TF-M v1.6.0).
 
 Deprecated platforms
 ====================
@@ -59,7 +60,7 @@ The following platforms have been removed from TF-M code base.
   - SSE-200_AWS
   - AN539
 
-See :doc:`Platform deprecation and removal </platform/ext/platform_deprecation>`
+See :doc:`/integration_guide/platform/platform_deprecation`
 for other platforms under deprecation process.
 
 Tested platforms
@@ -163,7 +164,7 @@ Reference
 
   .. [4] :doc:`TF-M physical attack mitigation </technical_references/design_docs/tfm_physical_attack_mitigation>`
 
-  .. [5] :doc:`TF-M Profile Large design </technical_references/design_docs/profiles/tfm_profile_large>`
+  .. [5] :doc:`TF-M Profile Large design </configuration/profiles/tfm_profile_large>`
 
   .. [6] :doc:`Code sharing between independently linked XIP binaries </technical_references/design_docs/code_sharing>`
 

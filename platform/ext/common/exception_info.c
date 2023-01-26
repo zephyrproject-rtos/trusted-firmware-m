@@ -8,7 +8,6 @@
 #include "tfm_arch.h"
 #include "exception_info.h"
 #include "tfm_spm_log.h"
-#include "tfm_core_utils.h"
 
 struct exception_info_t {
     uint32_t EXC_RETURN;        /* EXC_RETURN value in LR. */
@@ -100,8 +99,8 @@ uint32_t *get_exception_frame(uint32_t lr, uint32_t msp, uint32_t psp)
 #endif
 }
 
-static void dump_exception_info_t(bool stack_error,
-                                  struct exception_info_t *ctx)
+static void dump_exception_info(bool stack_error,
+                                struct exception_info_t *ctx)
 {
     SPMLOG_DBGMSG("Here is some context for the exception:\r\n");
     SPMLOG_DBGMSGVAL("    EXC_RETURN (LR): ", ctx->EXC_RETURN);
@@ -196,11 +195,17 @@ static void dump_error(uint32_t error_type)
         SPMLOG_ERRMSG("UsageFault\r\n");
         stack_error = true;
         break;
+    case EXCEPTION_TYPE_PLATFORM:
+        SPMLOG_ERRMSG("Platform Exception\r\n");
+        /* Depends on the platform, assume it may cause stack error */
+        stack_error = true;
+        break;
     default:
         SPMLOG_ERRMSG("Unknown\r\n");
         break;
     }
-    dump_exception_info_t(stack_error, &exception_info);
+
+    dump_exception_info(stack_error, &exception_info);
 }
 
 void store_and_dump_context(uint32_t LR_in, uint32_t MSP_in, uint32_t PSP_in,
@@ -213,8 +218,7 @@ void store_and_dump_context(uint32_t LR_in, uint32_t MSP_in, uint32_t PSP_in,
     ctx->MSP = MSP_in;
     ctx->PSP = PSP_in;
     ctx->EXC_FRAME = get_exception_frame(ctx->EXC_RETURN, ctx->MSP, ctx->PSP);
-    spm_memcpy(ctx->EXC_FRAME_COPY, ctx->EXC_FRAME,
-               sizeof(ctx->EXC_FRAME_COPY));
+    memcpy(ctx->EXC_FRAME_COPY, ctx->EXC_FRAME, sizeof(ctx->EXC_FRAME_COPY));
 
 #ifdef FAULT_STATUS_PRESENT
     ctx->CFSR = SCB->CFSR;

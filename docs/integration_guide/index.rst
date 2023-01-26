@@ -8,12 +8,11 @@ with other hardware platforms and operating systems.
 .. toctree::
     :maxdepth: 1
 
+    SPM Backends <spm_backends.rst>
     NS client integration <non-secure_client_extension_integration_guide.rst>
     OS migration to Armv8-M <os_migration_guide_armv8m.rst>
-    tfm_fpu_support.rst
-    tfm_secure_irq_integration_guide.rst
-    Adding a Test Suite <tfm_test_suites_addition.rst>
-    How to add a partition <services/tfm_secure_partition_addition>
+    tfm_fpu_support
+    Secure Interrupt <tfm_secure_irq_integration_guide.rst>
 
 .. toctree::
     :maxdepth: 2
@@ -25,12 +24,12 @@ with other hardware platforms and operating systems.
 *****************
 How to build TF-M
 *****************
-Follow the :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
+Follow the :doc:`Build instructions </building/tfm_build_instruction>`.
 
 ********************************************************
 How to export files for building non-secure applications
 ********************************************************
-Explained in the :doc:`Build instructions </technical_references/instructions/tfm_build_instruction>`.
+Explained in the :doc:`Build instructions </building/tfm_build_instruction>`.
 
 *************************
 How to add a new platform

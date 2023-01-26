@@ -308,7 +308,7 @@ of SPM and SPRTL implementation. The pseudo code of a tooling result:
 Implementation
 ==============
 The SPRTL C Runtime sources are put under:
-'$TFM_ROOT/secure_fw/partitions/lib/sprt/'
+'$TFM_ROOT/secure_fw/partitions/lib/runtime/'
 
 The output of this folder is a static library named as 'libtfm_sprt.a'. The code
 of 'libtfm_sprt.a' is put into a dedicated section so that a hardware protected

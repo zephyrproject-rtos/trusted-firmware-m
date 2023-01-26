@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  * Copyright (c) 2018-2019, Laurence Lundblade.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -9,15 +9,16 @@
 #include "attest_key.h"
 #include <stdint.h>
 #include <stddef.h>
+#include "config_attest.h"
 #include "tfm_plat_defs.h"
-#include "tfm_plat_crypto_keys.h"
 #include "tfm_plat_device_id.h"
 #include "t_cose_standard_constants.h"
 #include "q_useful_buf.h"
 #include "qcbor.h"
-#include "tfm_memory_utils.h"
+#include "tfm_crypto_defs.h"
 
-#define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)
+#define ATTEST_ECC_PUBLIC_KEY_SIZE \
+             PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(ATTEST_KEY_BITS)
 
 /**
  * The size of X and Y coordinate in 2 parameter style EC public
@@ -29,26 +30,11 @@
  */
 #define ECC_P256_COORD_SIZE PSA_BITS_TO_BYTES(256) /* 256 bits -> 32 bytes */
 
-/* 0 is defined as an invalid handle in the PSA spec, so it is used here to
- * indicate that the key isn't loaded.
- */
-#define ATTEST_KEY_HANDLE_NOT_LOADED 0
-
-/**
- * Global key handle for the attestation key. Used to prevent keys having to be
- * reloaded multiple times during a single token operation.
- */
-static psa_key_handle_t attestation_key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
-
-/**
- * The public key is kept loaded as it is both not required to be secret (and
- * hence can be kept in attestation memory) and immutable.
- */
-static uint8_t  attestation_public_key[ECC_P256_PUBLIC_KEY_SIZE]; /* 65bytes */
+static uint8_t  attestation_public_key[ATTEST_ECC_PUBLIC_KEY_SIZE];
 static size_t   attestation_public_key_len = 0;
 static psa_ecc_family_t attestation_key_curve;
 
-#ifdef INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
 /* 32bytes */
 static uint8_t attestation_key_id[PSA_HASH_LENGTH(PSA_ALG_SHA_256)];
 #endif
@@ -57,90 +43,25 @@ static uint8_t attestation_key_id[PSA_HASH_LENGTH(PSA_ALG_SHA_256)];
 static uint8_t instance_id_buf[INSTANCE_ID_MAX_SIZE];
 static size_t instance_id_len = 0U;
 
-enum psa_attest_err_t
-attest_register_initial_attestation_key()
+static enum psa_attest_err_t attest_load_public_key(void)
 {
-    enum tfm_plat_err_t plat_res;
-    psa_ecc_family_t psa_curve;
-    struct ecc_key_t attest_key = {0};
-    uint8_t key_buf[3 * ECC_P256_COORD_SIZE]; /* priv + x_coord + y_coord */
-    psa_key_handle_t key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
     psa_status_t crypto_res;
-    psa_key_attributes_t key_attributes = psa_key_attributes_init();
+    psa_key_attributes_t attr;
+    psa_key_handle_t handle = TFM_BUILTIN_KEY_ID_IAK;
 
-    if (attestation_key_handle != ATTEST_KEY_HANDLE_NOT_LOADED) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    /* Get the initial attestation key */
-    plat_res = tfm_plat_get_initial_attest_key(key_buf, sizeof(key_buf),
-                                               &attest_key, &psa_curve);
-
-    /* Check the availability of the private key */
-    if (plat_res != TFM_PLAT_ERR_SUCCESS || attest_key.priv_key == NULL) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    /* Setup the key policy for private key */
-    psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_SIGN_HASH);
-    psa_set_key_algorithm(&key_attributes, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
-    psa_set_key_type(&key_attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(psa_curve));
-
-    /* Register private key to Crypto service */
-    crypto_res = psa_import_key(&key_attributes,
-                                attest_key.priv_key,
-                                attest_key.priv_key_size,
-                                &key_handle);
-
-
+    crypto_res = psa_get_key_attributes(handle, &attr);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
 
-    attestation_key_handle = key_handle;
+    attestation_key_curve = PSA_KEY_TYPE_ECC_GET_FAMILY(attr.type);
 
-    /* If the public key length is 0 then it hasn't been loaded */
-    if (attestation_public_key_len == 0) {
-        crypto_res = psa_export_public_key(key_handle, attestation_public_key,
-                                           ECC_P256_PUBLIC_KEY_SIZE,
-                                           &attestation_public_key_len);
-        if (crypto_res != PSA_SUCCESS) {
-            return PSA_ATTEST_ERR_GENERAL;
-        }
-
-        attestation_key_curve = psa_curve;
-    }
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-enum psa_attest_err_t
-attest_unregister_initial_attestation_key()
-{
-    psa_status_t crypto_res;
-
-    if (attestation_key_handle == ATTEST_KEY_HANDLE_NOT_LOADED) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    crypto_res = psa_destroy_key(attestation_key_handle);
+    crypto_res = psa_export_public_key(handle, attestation_public_key,
+                                       sizeof(attestation_public_key),
+                                       &attestation_public_key_len);
     if (crypto_res != PSA_SUCCESS) {
         return PSA_ATTEST_ERR_GENERAL;
     }
-
-    attestation_key_handle = ATTEST_KEY_HANDLE_NOT_LOADED;
-
-    return PSA_ATTEST_ERR_SUCCESS;
-}
-
-enum psa_attest_err_t
-attest_get_signing_key_handle(psa_key_handle_t *handle)
-{
-    if (attestation_key_handle == ATTEST_KEY_HANDLE_NOT_LOADED) {
-        return PSA_ATTEST_ERR_GENERAL;
-    }
-
-    *handle = attestation_key_handle;
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
@@ -153,10 +74,14 @@ attest_get_signing_key_handle(psa_key_handle_t *handle)
 static enum psa_attest_err_t attest_calc_instance_id(void)
 {
     psa_status_t crypto_res;
+    enum psa_attest_err_t attest_res;
     psa_hash_operation_t hash = psa_hash_operation_init();
 
-    if (!attestation_public_key_len) {
-        return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+    if (attestation_public_key_len == 0U) {
+        attest_res = attest_load_public_key();
+        if (attest_res != PSA_ATTEST_ERR_SUCCESS) {
+            return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+        }
     }
 
     crypto_res = psa_hash_setup(&hash, PSA_ALG_SHA_256);
@@ -204,7 +129,7 @@ attest_get_instance_id(struct q_useful_buf_c *id_buf)
     return PSA_ATTEST_ERR_SUCCESS;
 }
 
-#ifdef INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
 
 #define MAX_ENCODED_COSE_KEY_SIZE \
     1 + /* 1 byte to encode map */ \
@@ -405,6 +330,13 @@ attest_get_initial_attestation_key_id(struct q_useful_buf_c *attest_key_id)
     buffer_for_attest_key_id.ptr = attestation_key_id;
     buffer_for_attest_key_id.len = PSA_HASH_LENGTH(PSA_ALG_SHA_256);
 
+    if (attestation_public_key_len == 0U) {
+        attest_res = attest_load_public_key();
+        if (attest_res != PSA_ATTEST_ERR_SUCCESS) {
+            return PSA_ATTEST_ERR_CLAIM_UNAVAILABLE;
+        }
+    }
+
     /* Needs to calculate only once */
     if (attest_key_id_calculated == 0) {
         buffer_for_attest_public_key.ptr = attestation_public_key;
@@ -425,4 +357,4 @@ attest_get_initial_attestation_key_id(struct q_useful_buf_c *attest_key_id)
 
     return PSA_ATTEST_ERR_SUCCESS;
 }
-#endif /* INCLUDE_COSE_KEY_ID */
+#endif /* ATTEST_INCLUDE_COSE_KEY_ID */

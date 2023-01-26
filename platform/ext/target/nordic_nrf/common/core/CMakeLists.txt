@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 # Copyright (c) 2020, Nordic Semiconductor ASA.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -68,13 +68,21 @@ target_sources(platform_s
         nrfx_glue.c
         native_drivers/mpu_armv8m_drv.c
         native_drivers/spu.c
-        spm_hal.c
-        tfm_hal_isolation.c
-        tfm_hal_platform_common.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
-    PUBLIC
-        plat_test.c
+        $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
 )
+
+if (NRF_HW_INIT_RESET_ON_BOOT)
+    target_sources(platform_s
+        PRIVATE
+            hw_init.c
+    )
+
+    target_compile_definitions(platform_s
+        PUBLIC
+            NRF_HW_INIT_RESET_ON_BOOT
+            $<$<BOOL:${NRF_HW_INIT_NRF_PERIPHERALS}>:NRF_HW_INIT_NRF_PERIPHERALS>
+    )
+endif()
 
 if(TFM_PARTITION_PLATFORM)
     target_sources(platform_s
@@ -168,3 +176,12 @@ install(FILES       services/src/tfm_ioctl_core_ns_api.c
         DESTINATION ${TFM_INSTALL_PATH}/interface/src)
 
 endif()
+
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        tfm_hal_isolation.c
+        tfm_hal_platform_common.c
+        faults.c
+)

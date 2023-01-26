@@ -5,6 +5,8 @@
  *
  */
 
+/* PSA Firmware Update API v1.0 Beta */
+
 #ifndef PSA_UPDATE_H
 #define PSA_UPDATE_H
 
@@ -12,255 +14,268 @@
 #include <stdint.h>
 
 #include "psa/error.h"
+#ifdef FWU_DEVICE_CONFIG_FILE
+#include FWU_DEVICE_CONFIG_FILE
+#else
 #include "psa/fwu_config.h"
+#endif
 #include "tfm_fwu_defs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define TFM_FWU_INVALID_IMAGE_ID             0
-
-/* The maximum size of an image digest in bytes. This is dependent
- * on the hash algorithm used.
+/**
+ * @brief The major version of this implementation of the Firmware Update API.
  */
-#define PSA_FWU_MAX_DIGEST_SIZE              32
-#define TFM_IMAGE_INFO_INVALID_DIGEST        0xFF
-
-/* The image ID macros. */
-#define FWU_IMAGE_ID_SLOT_POSITION           0U
-
-/* The area where the image is running. */
-#define FWU_IMAGE_ID_SLOT_ACTIVE             0x01U
-
-/* The area to stage the image. */
-#define FWU_IMAGE_ID_SLOT_STAGE              0x02U
-#define FWU_IMAGE_ID_SLOT_MASK               0x00FF
-
-#define FWU_IMAGE_ID_TYPE_POSITION           8U
-#define FWU_IMAGE_ID_SPECIFIC_ID_POSITION    16U
-
-#define FWU_CALCULATE_IMAGE_ID(slot, type, specific_id)             \
-                             ((slot & FWU_IMAGE_ID_SLOT_MASK) |     \
-                             (type << FWU_IMAGE_ID_TYPE_POSITION) | \
-                             (specific_id << FWU_IMAGE_ID_SPECIFIC_ID_POSITION))
-#define FWU_IMAGE_ID_GET_TYPE(image_id) (image_id >> FWU_IMAGE_ID_TYPE_POSITION)
-#define FWU_IMAGE_ID_GET_SLOT(image_id) (image_id & FWU_IMAGE_ID_SLOT_MASK)
-
-/* Image state macros. */
-#define PSA_IMAGE_UNDEFINED            0
-#define PSA_IMAGE_CANDIDATE            1
-#define PSA_IMAGE_INSTALLED            2
-#define PSA_IMAGE_REJECTED             3
-#define PSA_IMAGE_PENDING_INSTALL      4
-#define PSA_IMAGE_REBOOT_NEEDED        5
-
-/*
- * image_id[7:0]: slot.
- * image_id[15:8]: image type.
- * image_id[31:16]: specific image ID.
- */
-typedef uint32_t psa_image_id_t;
-
-typedef struct tfm_image_version_s {
-    uint8_t iv_major;
-    uint8_t iv_minor;
-    uint16_t iv_revision;
-    uint32_t iv_build_num;
-} psa_image_version_t;
-
-typedef struct tfm_image_info_s {
-    psa_image_version_t version;
-    uint8_t state;
-    uint8_t digest[PSA_FWU_MAX_DIGEST_SIZE];
-} psa_image_info_t;
-
-typedef struct psa_hash_s {
-    uint8_t value[PSA_FWU_MAX_DIGEST_SIZE];
-} psa_hash_t;
+#define PSA_FWU_API_VERSION_MAJOR 1
 
 /**
- * \brief Writes an image to its staging area.
- *
- * Writes the image data 'block' with length 'block_size' to its staging area.
- * If the image size is less than or equal to PSA_FWU_MAX_BLOCK_SIZE, the
- * caller can send the entire image in one call.
- * If the image size is greater than PSA_FWU_MAX_BLOCK_SIZE, the caller must
- * send parts of the image by calling this API multiple times with different
- * data blocks.
- *
- * \param[in] image_id        The identifier of the image
- * \param[in] block_offset    The offset of the block being passed into block,
- *                            in bytes
- * \param[in] block           A buffer containing a block of image data. This
- *                            might be a complete image or a subset.
- * \param[in] block_size      Size of block. The size must not be greater than
- *                            PSA_FWU_MAX_BLOCK_SIZE.
- *
- * \return A status indicating the success/failure of the operation
- *
- * \retval PSA_SUCCESS                     The data in block has been
- *                                         successfully stored.
- * \retval PSA_ERROR_INVALID_ARGUMENT      One of the following error
- *                                         conditions occurred:
- *                                         The parameter size is greater than
- *                                         PSA_FWU_MAX_BLOCK_SIZE;
- *                                         The parameter size is 0;
- *                                         The combination of offset and size
- *                                         is out of bounds.
- *
- * \retval PSA_ERROR_INSUFFICIENT_MEMORY   There is not enough memory to
- *                                         process the update
- * \retval PSA_ERROR_INSUFFICIENT_STORAGE  There is not enough storage to
- *                                         process the update
- * \retval PSA_ERROR_GENERAL_ERROR         A fatal error occurred
- * \retval PSA_ERROR_CURRENTLY_INSTALLING        The image is currently locked for
- *                                         writing.
+ * @brief The minor version of this implementation of the Firmware Update API.
  */
-psa_status_t psa_fwu_write(psa_image_id_t image_id,
-                           size_t block_offset,
+#define PSA_FWU_API_VERSION_MINOR 0
+
+/**
+ * @brief A status code that indicates that the firmware of another component
+ *        requires updating.
+ */
+#define PSA_ERROR_DEPENDENCY_NEEDED ((psa_status_t)-156)
+
+/**
+ * @brief A status code that indicates that the system is limiting i/o
+ *        operations to avoid rapid flash exhaustion.
+ */
+#define PSA_ERROR_FLASH_ABUSE ((psa_status_t)-160)
+
+/**
+ * @brief A status code that indicates that the system does not have enough
+ *        power to carry out the request.
+ */
+#define PSA_ERROR_INSUFFICIENT_POWER ((psa_status_t)-161)
+
+/**
+ * @brief The action was completed successfully and requires a system reboot to
+ *        complete installation.
+ */
+#define PSA_SUCCESS_REBOOT ((psa_status_t)+1)
+
+/**
+ * @brief The action was completed successfully and requires a restart of the
+ *        component to complete installation.
+ */
+#define PSA_SUCCESS_RESTART ((psa_status_t)+2)
+
+/**
+ * @brief Firmware component type identifier.
+ */
+typedef uint8_t psa_fwu_component_t;
+
+/**
+ * @brief Version information about a firmware image.
+ */
+typedef struct psa_fwu_image_version_t {
+    /* The major version of an image. */
+    uint8_t major;
+    /* The minor version of an image. */
+    uint8_t minor;
+    /* The revision or patch version of an image. */
+    uint16_t patch;
+    /* The build number of an image. */
+    uint32_t build;
+} psa_fwu_image_version_t;
+
+/**
+ * @brief The READY state: the component is ready to start another update.
+ */
+#define PSA_FWU_READY 0u
+
+/**
+ * @brief The WRITING state: a new firmware image is being written to the
+ *        firmware store.
+ */
+#define PSA_FWU_WRITING 1u
+
+/**
+ * @brief The CANDIDATE state: a new firmware image is ready for installation.
+ */
+#define PSA_FWU_CANDIDATE 2u
+
+/**
+ * @brief The STAGED state: a new firmware image is queued for installation.
+ */
+#define PSA_FWU_STAGED 3u
+
+/**
+ * @brief The FAILED state: a firmware update has been cancelled or has failed.
+ */
+#define PSA_FWU_FAILED 4u
+
+/**
+ * @brief The TRIAL state: a new firmware image requires testing prior to
+ *        acceptance of the update.
+ */
+#define PSA_FWU_TRIAL 5u
+
+/**
+ * @brief The REJECTED state: a new firmware image has been rejected after
+ *        testing.
+ */
+#define PSA_FWU_REJECTED 6u
+
+/**
+ * @brief The UPDATED state: a firmware update has been successful, and the new
+ *        image is now active.
+ */
+#define PSA_FWU_UPDATED 7u
+
+/**
+ * @brief Flag to indicate whether the image data in the component staging area
+ *        is discarded at system reset.
+ */
+#define PSA_FWU_FLAG_VOLATILE_STAGING 0x00000001u
+
+/**
+ * @brief Flag to indicate whether a firmware component expects encrypted images
+ *        during an update.
+ */
+#define PSA_FWU_FLAG_ENCRYPTION 0x00000002u
+
+/**
+ * @brief The implementation-specific data in the component information
+ *        structure.
+ */
+typedef struct {
+    /* The digest of second image when store state is CANDIDATE. */
+    uint8_t candidate_digest[TFM_FWU_MAX_DIGEST_SIZE];
+ } psa_fwu_impl_info_t;
+
+/**
+ * @brief Information about the firmware store for a firmware component.
+ */
+typedef struct psa_fwu_component_info_t {
+    /* State of the component. */
+    uint8_t state;
+    /* Error for second image when store state is REJECTED or FAILED. */
+    psa_status_t error;
+    /* Version of active image. */
+    psa_fwu_image_version_t version;
+    /* Maximum image size in bytes. */
+    uint32_t max_size;
+    /* Flags that describe extra information about the firmware component. */
+    uint32_t flags;
+    /* Implementation-defined image location. */
+    uint32_t location;
+    /* Reserved for implementation-specific usage. */
+    psa_fwu_impl_info_t impl;
+} psa_fwu_component_info_t;
+
+/**
+ * @brief Retrieve the firmware store information for a specific firmware
+ *        component.
+ *
+ * @param component Firmware component for which information is requested.
+ * @param info      Output parameter for component information.
+ *
+ * @return Result status.
+ */
+psa_status_t psa_fwu_query(psa_fwu_component_t component,
+                           psa_fwu_component_info_t *info);
+
+/**
+ * @brief Begin a firmware update operation for a specific firmware component.
+ *
+ * @param component     Identifier of the firmware component to be updated.
+ * @param manifest      A pointer to a buffer containing a detached manifest for
+ *                      the update.
+ * @param manifest_size The size of the detached manifest.
+ *
+ * @return Result status.
+ */
+psa_status_t psa_fwu_start(psa_fwu_component_t component,
+                           const void *manifest,
+                           size_t manifest_size);
+
+/**
+ * @brief The maximum permitted size for block in psa_fwu_write(), in bytes.
+ */
+#define PSA_FWU_MAX_WRITE_SIZE TFM_CONFIG_FWU_MAX_WRITE_SIZE
+
+/**
+ * @brief Write a firmware image, or part of a firmware image, to its staging
+ *        area.
+ *
+ * @param component    Identifier of the firmware component being updated.
+ * @param image_offset The offset of the data block in the whole image.
+ * @param block        A buffer containing a block of image data.
+ * @param block_size   Size of block, in bytes.
+ *
+ * @return Result status.
+ */
+psa_status_t psa_fwu_write(psa_fwu_component_t component,
+                           size_t image_offset,
                            const void *block,
                            size_t block_size);
 
-
 /**
- * \brief Starts the installation of an image.
+ * @brief Mark a firmware image in the staging area as ready for installation.
  *
- * The authenticity and integrity of the image is checked during installation.
- * If a reboot is required to complete installation then the implementation
- * can choose to defer the authenticity checks to that point.
+ * @param component Identifier of the firmware component to install.
  *
- * \param[in] image_id            The identifier of the image to install
- * \param[out] dependency_uuid    If PSA_ERROR_DEPENDENCY_NEEDED is returned,
- *                                this parameter is filled with dependency
- *                                information
- * \param[out] dependency_version If PSA_ERROR_DEPENDENCY_NEEDED is returned,
- *                                this parameter is filled with the minimum
- *                                required version for the dependency
- *
- * \return A status indicating the success/failure of the operation
- *
- * \retval PSA_SUCCESS                     The image was successfully
- *                                         installed. The platform does not
- *                                         require a reboot.
- * \retval PSA_SUCCESS_REBOOT              A system reboot is needed to finish
- *                                         installation.
- * \retval PSA_ERROR_INVALID_ARGUMENT      Bad input parameter
- * \retval PSA_ERROR_INVALID_SIGNATURE     The signature is incorrect
- * \retval PSA_ERROR_GENERAL_ERROR         A fatal error occurred
- * \retval PSA_ERROR_DEPENDENCY_NEEDED     A different image requires
- *                                         installation first
- * \retval PSA_ERROR_STORAGE_FAILURE       Some persistent storage could not be
- *                                         read or written by the
- *                                         implementation
+ * @return Result status.
  */
-psa_status_t psa_fwu_install(psa_image_id_t image_id,
-                             psa_image_id_t *dependency_uuid,
-                             psa_image_version_t *dependency_version);
+psa_status_t psa_fwu_finish(psa_fwu_component_t component);
 
 /**
- * \brief Aborts an ongoing installation and erases the staging area of the
- *        image.
+ * @brief Abandon an update that is in WRITING or CANDIDATE state.
  *
- * \param[in] image_id      The identifier of the image to abort installation
+ * @param component Identifier of the firmware component to be cancelled.
  *
- * \return A status indicating the success/failure of the operation
- *
- * \retval PSA_SUCCESS                    Installation of the provided image_id
- *                                        has been aborted
- * \retval PSA_ERROR_INVALID_ARGUMENT     No image with the provided image_id
- *                                        is currently being installed
- * \retval PSA_ERROR_NOT_PERMITTED        The caller is not authorized to
- *                                        abort an installation
+ * @return Result status.
  */
-psa_status_t psa_fwu_abort(psa_image_id_t image_id);
+psa_status_t psa_fwu_cancel(psa_fwu_component_t component);
 
 /**
- * \brief Returns information for an image of a particular image_id.
+ * @brief Prepare the component for another update.
  *
- * \param[in] image_id         The image_id of the image to query
+ * @param component Identifier of the firmware component to tidy up.
  *
- * \param[out] info            Output parameter for image information
- *                             related to the image_id
- *
- * \return A status indicating the success/failure of the operation
- *
- * \retval PSA_SUCCESS                     Image information has been returned
- * \retval PSA_ERROR_NOT_PERMITTED         The caller is not authorized to
- *                                         access platform version information
+ * @return Result status.
  */
-psa_status_t psa_fwu_query(psa_image_id_t image_id,
-                           psa_image_info_t *info);
+psa_status_t psa_fwu_clean(psa_fwu_component_t component);
 
 /**
- * \brief Requests the platform to reboot. On success, the platform initiates
- *        a reboot, and might not return to the caller.
+ * @brief Start the installation of all firmware images that have been prepared
+ *        for update.
  *
- * \return A status indicating the success/failure of the operation
+ * @return Result status.
+ */
+psa_status_t psa_fwu_install(void);
+
+/**
+ * @brief Requests the platform to reboot.
  *
- * \retval PSA_SUCCESS                   The platform will reboot soon
- * \retval PSA_ERROR_NOT_PERMITTED       The caller is not authorized to
- *                                       reboot the platform
+ * @return Result status.
  */
 psa_status_t psa_fwu_request_reboot(void);
 
 /**
- * \brief Indicates to the implementation that the upgrade was successful.
+ * @brief Abandon an installation that is in STAGED or TRIAL state.
  *
- * \param[in] image_id         The image_id of the image to query
+ * @param error An application-specific error code chosen by the application.
  *
- * \return A status indicating the success/failure of the operation
- *
- * \retval PSA_SUCCESS                  The image and its dependencies have
- *                                      transitioned into a PSA_IMAGE_INSTALLED
- *                                      state
- * \retval PSA_ERROR_NOT_SUPPORTED      The implementation does not support a
- *                                      PSA_IMAGE_PENDING_INSTALL state
- * \retval PSA_ERROR_NOT_PERMITTED      The caller is not permitted to make
- *                                      this call
+ * @return Result status.
  */
-psa_status_t psa_fwu_accept(psa_image_id_t image_id);
+psa_status_t psa_fwu_reject(psa_status_t error);
 
 /**
- * \brief Stores a manifest object and associates it with a particular image ID.
+ * @brief Accept a firmware update that is currently in TRIAL state.
  *
- * \param[in] image_id            The identifier of the image
- *
- * \param[in] manifest            A pointer to a buffer containing a manifest
- *                                object
- *
- * \param[in] manifest_size       The size of the manifest parameter
- *
- * \param[in] manifest_dependency Output parameter containing the hash of a
- *                                required manifest when
- *                                PSA_ERROR_DEPENDENCY_NEEDED is returned
- *
- * \return A status indicating the success/failure of the operation
- *
- * \retval PSA_SUCCESS                     The manifest is persisted
- * \retval PSA_ERROR_NOT_PERMITTED         The manifest is too old to be
- *                                         installed
- * \retval PSA_ERROR_WRONG_DEVICE          The manifest is not intended for this
- *                                         device
- * \retval PSA_ERROR_INVALID_SIGNATURE     The manifest signature is not valid
- * \retval PSA_ERROR_DEPENDENCY_NEEDED     A different manifest is needed
- * \retval PSA_ERROR_INVALID_ARGUMENT      Parameter size is 0 or a pointer
- *                                         parameter is NULL
- * \retval PSA_ERROR_COMMUNICATION_FAILURE The system could not communicate with
- *                                         the installer
- * \retval PSA_ERROR_NOT_SUPPORTED         This function is not implemented
- * \retval PSA_ERROR_CURRENTLY_INSTALLING  An existing manifest for image ID is
- *                                         currently being installed and is
- *                                         locked from writing
- * \retval PSA_ERROR_GENERIC_ERROR         A fatal error occurred
+ * @return Result status.
  */
-psa_status_t psa_fwu_set_manifest(psa_image_id_t image_id,
-                                  const void *manifest,
-                                  size_t manifest_size,
-                                  psa_hash_t *manifest_dependency);
-
+psa_status_t psa_fwu_accept(void);
 
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* PSA_UPDATE_H */

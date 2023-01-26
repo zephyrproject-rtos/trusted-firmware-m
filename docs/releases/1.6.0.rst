@@ -35,7 +35,7 @@ New security advisories
 New platforms supported
 =======================
 
-  - :doc:`AN552. </platform/ext/target/arm/mps3/an552/README>`
+  - :doc:`AN552. </platform/arm/mps3/an552/README>`
 
 Deprecated platforms
 ====================

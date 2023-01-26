@@ -210,7 +210,7 @@ TF-M has the requirements on commit message:
 ============== ====================================================
 Topic          Justification
 ============== ====================================================
-Boot           bl2/*
+Boot           `bl2/*` or `bl1/*`
 Build          For build system related purpose.
 Docs           All \*.rst changes.
 Dualcpu        Dual-cpu related changes.
@@ -222,8 +222,9 @@ Partition      Multiple partition related changes.
 Partition Name Specific partition related changes.
 Service        Multiple service related changes.
 Service Name   Specific service related changes.
-SPM            secure_fw/spm/*
-SPRTL          secure-fw/partitions/lib/sprt/*
+SPM            `secure_fw/spm/*`
+SPRTL          `secure-fw/partitions/lib/runtime/*`
+Tool           `tools` folder or `tf-m-tools` repo
 ============== ====================================================
 
 .. note::
@@ -234,4 +235,4 @@ SPRTL          secure-fw/partitions/lib/sprt/*
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

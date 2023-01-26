@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2020, Arm Limited and Contributors. All rights reserved.
+ * Copyright (c) 2001-2022, Arm Limited and Contributors. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -118,6 +118,7 @@ static CClibRetCode_t VerifyPidVal(void)
     uint32_t pidVal1[CC_BSV_PID_SIZE_WORDS] = {CC_BSV_PID_0_VAL, CC_BSV_PID_1_VAL, CC_BSV_PID_2_VAL, CC_BSV_PID_3_VAL, CC_BSV_PID_4_VAL};
     uint32_t pidVal2[CC_BSV_PID_SIZE_WORDS] = {CC_BSV_PID_0_VAL, CC_BSV_PID_1_VAL, CC_BSV_PID_2_1_VAL, CC_BSV_PID_3_VAL, CC_BSV_PID_4_VAL};
     uint32_t pidVal3[CC_BSV_PID_SIZE_WORDS] = {CC_BSV_PID_0_VAL, CC_BSV_PID_1_VAL, CC_BSV_PID_2_2_VAL, CC_BSV_PID_3_VAL, CC_BSV_PID_4_VAL};
+    uint32_t pidVal4[CC_BSV_PID_SIZE_WORDS] = {CC_BSV_PID_0_1_VAL, CC_BSV_PID_1_VAL, CC_BSV_PID_2_VAL, CC_BSV_PID_3_VAL, CC_BSV_PID_4_VAL};
 
     pidReg[0] = CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, PERIPHERAL_ID_0));
     pidReg[1] = CC_HAL_READ_REGISTER(CC_REG_OFFSET(HOST_RGF, PERIPHERAL_ID_1));
@@ -127,7 +128,8 @@ static CClibRetCode_t VerifyPidVal(void)
 
     if ((CC_PalMemCmp((uint8_t*)pidVal1, (uint8_t*)pidReg, sizeof(pidVal1)) != 0) &&
         (CC_PalMemCmp((uint8_t*)pidVal2, (uint8_t*)pidReg, sizeof(pidVal2)) != 0) &&
-        (CC_PalMemCmp((uint8_t*)pidVal3, (uint8_t*)pidReg, sizeof(pidVal3)) != 0)) {
+        (CC_PalMemCmp((uint8_t*)pidVal3, (uint8_t*)pidReg, sizeof(pidVal3)) != 0) &&
+        (CC_PalMemCmp((uint8_t*)pidVal4, (uint8_t*)pidReg, sizeof(pidVal4)) != 0)) {
         return CC_LIB_RET_EINVAL_PIDR;
     }
 

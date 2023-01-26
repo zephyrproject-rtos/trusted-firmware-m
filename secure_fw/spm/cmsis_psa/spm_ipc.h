@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,10 +13,10 @@
 
 #include <stdint.h>
 #include "config_impl.h"
+#include "config_spm.h"
 #include "current.h"
 #include "tfm_arch.h"
 #include "lists.h"
-#include "tfm_secure_api.h"
 #include "thread.h"
 #include "psa/service.h"
 #include "load/partition_defs.h"
@@ -35,9 +37,6 @@
             (IS_PARTITION_PSA_ROT(p_ldinf) ? TFM_PARTITION_PRIVILEGED_MODE : \
                                              TFM_PARTITION_UNPRIVILEGED_MODE)
 #endif
-#define GET_CURRENT_PARTITION_PRIVILEGED_MODE() \
-            (GET_PARTITION_PRIVILEGED_MODE( \
-                      ((struct partition_t *)GET_CURRENT_COMPONENT())->p_ldinf))
 
 /*
  * Set a number limit for stateless handle.
@@ -99,7 +98,7 @@ struct conn_handle_t {
                                          * Save caller outvec pointer for
                                          * write length update
                                          */
-#ifdef TFM_MULTI_CORE_TOPOLOGY
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
     const void *caller_data;            /*
                                          * Pointer to the private data of the
                                          * caller. It identifies the NSPE PSA
@@ -115,18 +114,19 @@ struct conn_handle_t {
 /* Partition runtime type */
 struct partition_t {
     const struct partition_load_info_t *p_ldinf;
-    void                               *p_boundaries;
     void                               *p_interrupts;
     void                               *p_metadata;
-    struct context_ctrl_t              ctx_ctrl;
+    uintptr_t                          boundary;
     uint32_t                           signals_allowed;
     uint32_t                           signals_waiting;
     volatile uint32_t                  signals_asserted;
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+    struct context_ctrl_t              ctx_ctrl;
     struct sync_obj_t                  waitobj;
-    union {
-        struct thread_t                thrd;            /* IPC model */
-        uint32_t                       state;           /* SFN model */
-    };
+    struct thread_t                    thrd;            /* IPC model */
+#else
+    uint32_t                           state;           /* SFN model */
+#endif
     struct conn_handle_t               *p_handles;
     struct partition_t                 *next;
 };
@@ -136,11 +136,6 @@ struct service_t {
     const struct service_load_info_t *p_ldinf;     /* Service load info      */
     struct partition_t *partition;                 /* Owner of the service   */
     struct service_t *next;                        /* For list operation     */
-};
-
-enum tfm_memory_access_e {
-    TFM_MEMORY_ACCESS_RO = 1,
-    TFM_MEMORY_ACCESS_RW = 2,
 };
 
 /**
@@ -165,10 +160,10 @@ struct conn_handle_t *tfm_spm_create_conn_handle(void);
  *
  * \param[in] conn_handle   Handle to be validated
  *
- * \retval SPM_SUCCESS        Success
+ * \retval PSA_SUCCESS        Success
  * \retval SPM_ERROR_GENERIC  Invalid handle
  */
-int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle);
+psa_status_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle);
 
 /**
  * \brief                   Free connection handle which not used anymore.
@@ -176,11 +171,9 @@ int32_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle);
  * \param[in] conn_handle   Connection handle created by
  *                          tfm_spm_create_conn_handle()
  *
- * \retval SPM_SUCCESS      Success
- * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
  * \retval "Does not return"  Panic for not find service by handle
  */
-int32_t tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle);
+void tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle);
 
 /******************** Partition management functions *************************/
 
@@ -287,7 +280,7 @@ void spm_fill_message(struct conn_handle_t *conn_handle,
  *                          by partition management functions
  * \param[in] version       Client support version
  *
- * \retval SPM_SUCCESS      Success
+ * \retval PSA_SUCCESS      Success
  * \retval SPM_ERROR_BAD_PARAMETERS Bad parameters input
  * \retval SPM_ERROR_VERSION Check failed
  */
@@ -302,32 +295,12 @@ int32_t tfm_spm_check_client_version(struct service_t *service,
  *                          by partition management functions
  * \param[in] ns_caller     Whether from NS caller
  *
- * \retval SPM_SUCCESS      Success
+ * \retval PSA_SUCCESS      Success
  * \retval SPM_ERROR_GENERIC Authorization check failed
  */
 int32_t tfm_spm_check_authorization(uint32_t sid,
                                     struct service_t *service,
                                     bool ns_caller);
-
-/**
- * \brief                      Check the memory reference is valid.
- *
- * \param[in] buffer           Pointer of memory reference
- * \param[in] len              Length of memory reference in bytes
- * \param[in] ns_caller        From non-secure caller
- * \param[in] access           Type of access specified by the
- *                             \ref tfm_memory_access_e
- * \param[in] privileged       Privileged mode or unprivileged mode:
- *                             \ref TFM_PARTITION_UNPRIVILEGED_MODE
- *                             \ref TFM_PARTITION_PRIVILEGED_MODE
- *
- * \retval SPM_SUCCESS               Success
- * \retval SPM_ERROR_BAD_PARAMETERS  Bad parameters input
- * \retval SPM_ERROR_MEMORY_CHECK    Check failed
- */
-int32_t tfm_memory_check(const void *buffer, size_t len, bool ns_caller,
-                         enum tfm_memory_access_e access,
-                         uint32_t privileged);
 
 /**
  * \brief                       Get the ns_caller info from runtime context.
@@ -359,7 +332,7 @@ int32_t tfm_spm_get_client_id(bool ns_caller);
  *  Each takes 32 bits. The context control is used by PendSV_Handler to do
  *  context switch.
  */
-uint64_t do_schedule(void);
+uint64_t ipc_schedule(void);
 
 /**
  * \brief                      SPM initialization implementation
@@ -404,12 +377,11 @@ void spm_assert_signal(void *p_pt, psa_signal_t signal);
  * to the caller.
  *
  * fn_addr      - the target function to be called.
- * frame_addr   - customized ABI frame type for the function call.
- * switch_stack - indicator if need to switch stack.
+ * frame_addr   - Address of the customized ABI frame. The frame must be
+ *                stored in the caller's stack (which means the frame variable
+ *                must be a local variable).
  */
-void spm_interface_cross_dispatcher(uintptr_t fn_addr,
-                                    uintptr_t frame_addr,
-                                    uint32_t  switch_stack);
+void spm_interface_cross_dispatcher(uintptr_t fn_addr, uintptr_t frame_addr);
 
 /* Execute a customized ABI function in C */
 psa_status_t cross_call_entering_c(uintptr_t fn_addr, uintptr_t frame_addr);

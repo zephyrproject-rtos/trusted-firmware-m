@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,164 +14,212 @@
  * limitations under the License.
  */
 
+#include "tfm_plat_crypto_keys.h"
+
+#include "tfm_builtin_key_ids.h"
+
 #include <stddef.h>
 #include <string.h>
 
-#include "psa/crypto_types.h"
-#include "tfm_plat_crypto_keys.h"
+#include "region_defs.h"
+#include "cmsis_compiler.h"
 #include "tfm_plat_otp.h"
-#include "mbedtls/hkdf.h"
+#include "psa_manifest/pid.h"
+#include "tfm_builtin_key_loader.h"
 
-#ifdef CRYPTO_HW_ACCELERATOR
-#include "crypto_hw.h"
-#endif /* CRYPTO_HW_ACCELERATOR */
+#define TFM_NS_PARTITION_ID -1
 
-enum tfm_plat_err_t tfm_plat_get_huk_derived_key(const uint8_t *label,
-                                                 size_t label_size,
-                                                 const uint8_t *context,
-                                                 size_t context_size,
-                                                 uint8_t *key,
-                                                 size_t key_size)
+#ifndef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
+#error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
+#endif
+
+enum tfm_plat_err_t tfm_plat_builtin_key_get_usage(psa_key_id_t key_id,
+                                                   mbedtls_key_owner_id_t user,
+                                                   psa_key_usage_t *usage)
 {
-#ifdef CRYPTO_HW_ACCELERATOR
-    return crypto_hw_accelerator_huk_derive_key(label, label_size, context,
-                                                context_size, key, key_size);
-#else
-    uint8_t huk_buf[32];
-    enum tfm_plat_err_t err;
-    int mbedtls_err;
+    *usage = 0;
 
-    if (key == NULL) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+    switch (key_id) {
+    case TFM_BUILTIN_KEY_ID_HUK:
+        /* Allow access to all partitions */
+        *usage = PSA_KEY_USAGE_DERIVE;
+        break;
+    case TFM_BUILTIN_KEY_ID_IAK:
+        switch(user) {
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+        case TFM_SP_INITIAL_ATTESTATION:
+            *usage = PSA_KEY_USAGE_SIGN_HASH;
+#ifdef SYMMETRIC_INITIAL_ATTESTATION
+            /* Needed to calculate the instance ID */
+            *usage |= PSA_KEY_USAGE_EXPORT;
+#endif /* SYMMETRIC_INITIAL_ATTESTATION */
+            break;
+#if defined(TEST_S_ATTESTATION) || defined(TEST_NS_ATTESTATION)
+        /* So that the tests can validate created tokens */
+#ifdef TEST_S_ATTESTATION
+        case TFM_SP_SECURE_TEST_PARTITION:
+#endif /* TEST_S_ATTESTATION */
+#ifdef TEST_NS_ATTESTATION
+        case TFM_NS_PARTITION_ID:
+#endif /* TEST_NS_ATTESTATION */
+            *usage = PSA_KEY_USAGE_VERIFY_HASH;
+            break;
+#endif /* TEST_S_ATTESTATION || TEST_NS_ATTESTATION */
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
+        default:
+            return TFM_PLAT_ERR_NOT_PERMITTED;
+        }
+        break;
+    default:
+        return TFM_PLAT_ERR_UNSUPPORTED;
     }
 
-    if (label == NULL && label_size != 0) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-
-    if (context == NULL && context_size != 0) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-
-    err = tfm_plat_otp_read(PLAT_OTP_ID_HUK, sizeof(huk_buf), huk_buf);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        goto out;
-    }
-
-    mbedtls_err = mbedtls_hkdf(mbedtls_md_info_from_type(MBEDTLS_MD_SHA256),
-                               label, label_size, huk_buf, sizeof(huk_buf),
-                               context, context_size, key, key_size);
-    if (mbedtls_err) {
-        err = TFM_PLAT_ERR_SYSTEM_ERR;
-        goto out;
-    }
-
-out:
-    memset(huk_buf, 0, sizeof(huk_buf));
-
-    return err;
-#endif /* CRYPTO_HW_ACCELERATOR */
+    return TFM_PLAT_ERR_SUCCESS;
 }
+
+enum tfm_plat_err_t tfm_plat_builtin_key_get_lifetime_and_slot(
+    mbedtls_svc_key_id_t key_id,
+    psa_key_lifetime_t *lifetime,
+    psa_drv_slot_number_t *slot_number)
+{
+    switch (MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key_id)) {
+    case TFM_BUILTIN_KEY_ID_HUK:
+        *slot_number = TFM_BUILTIN_KEY_SLOT_HUK;
+        *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
+                        PSA_KEY_LIFETIME_PERSISTENT,
+                        TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
+        break;
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+    case TFM_BUILTIN_KEY_ID_IAK:
+        *slot_number = TFM_BUILTIN_KEY_SLOT_IAK;
+        *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
+                        PSA_KEY_LIFETIME_PERSISTENT,
+                        TFM_BUILTIN_KEY_LOADER_KEY_LOCATION);
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
+        break;
+    default:
+        return TFM_PLAT_ERR_UNSUPPORTED;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+static enum tfm_plat_err_t tfm_plat_get_huk(uint8_t *buf, size_t buf_len,
+                                            size_t *key_len,
+                                            size_t *key_bits,
+                                            psa_algorithm_t *algorithm,
+                                            psa_key_type_t *type)
+{
+    enum tfm_plat_err_t err;
+
+    err = tfm_plat_otp_read(PLAT_OTP_ID_HUK, buf_len, buf);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    err = tfm_plat_otp_get_size(PLAT_OTP_ID_HUK, key_len);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    *key_bits = *key_len * 8;
+    *algorithm = PSA_ALG_HKDF(PSA_ALG_SHA_256);
+    *type = PSA_KEY_TYPE_DERIVE;
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
+                                            size_t *key_len,
+                                            size_t *key_bits,
+                                            psa_algorithm_t *algorithm,
+                                            psa_key_type_t *type)
+{
+    enum tfm_plat_err_t err;
+#ifndef SYMMETRIC_INITIAL_ATTESTATION
+    psa_ecc_family_t curve_type;
+#endif /* SYMMETRIC_INITIAL_ATTESTATION */
+
+    err = tfm_plat_otp_read(PLAT_OTP_ID_IAK_LEN,
+                            sizeof(size_t), (uint8_t*)key_len);
+    if(err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+    *key_bits = *key_len * 8;
+
+    if (buf_len < *key_len) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
 
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
-enum tfm_plat_err_t tfm_plat_get_symmetric_iak(uint8_t *key_buf,
-                                               size_t buf_len,
-                                               size_t *key_len,
-                                               psa_algorithm_t *key_alg)
-{
-    enum tfm_plat_err_t err;
-
-    if (key_buf == NULL || key_len == NULL) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-
-    err = tfm_plat_otp_read(PLAT_OTP_ID_IAK, buf_len, key_buf);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = tfm_plat_otp_read(PLAT_OTP_ID_IAK_LEN, sizeof(size_t),
-                            (uint8_t*)key_len);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
     err = tfm_plat_otp_read(PLAT_OTP_ID_IAK_TYPE,
-                            sizeof(psa_algorithm_t), (uint8_t*)key_alg);
+                            sizeof(psa_algorithm_t), (uint8_t*)algorithm);
     if(err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
-    return TFM_PLAT_ERR_SUCCESS;
-
-}
-
-enum tfm_plat_err_t tfm_plat_get_symmetric_iak_id(void *kid_buf,
-                                                  size_t buf_len,
-                                                  size_t *kid_len)
-{
-    enum tfm_plat_err_t err;
-    size_t otp_size;
-
-    if (kid_buf == NULL || kid_len == NULL) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
-    }
-
-    err = tfm_plat_otp_read(PLAT_OTP_ID_IAK_ID, buf_len, kid_buf);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    err =  tfm_plat_otp_get_size(PLAT_OTP_ID_IAK_ID, &otp_size);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    *kid_len = strlen(kid_buf) <= otp_size ? strlen(kid_buf) : otp_size;
-
-    return TFM_PLAT_ERR_SUCCESS;
-}
+    *type = PSA_KEY_TYPE_HMAC;
 #else /* SYMMETRIC_INITIAL_ATTESTATION */
-enum tfm_plat_err_t
-tfm_plat_get_initial_attest_key(uint8_t          *key_buf,
-                                uint32_t          size,
-                                struct ecc_key_t *ecc_key,
-                                psa_ecc_family_t *curve_type)
+    err = tfm_plat_otp_read(PLAT_OTP_ID_IAK_TYPE, sizeof(psa_ecc_family_t),
+                            &curve_type);
+    if(err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_256);
+    *type = PSA_KEY_TYPE_ECC_KEY_PAIR(curve_type);
+#endif /* SYMMETRIC_INITIAL_ATTESTATION */
+
+    return tfm_plat_otp_read(PLAT_OTP_ID_IAK, *key_len, buf);
+}
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
+
+enum tfm_plat_err_t tfm_plat_load_builtin_keys(void)
 {
-    uint32_t key_size;
-    enum tfm_plat_err_t err;
+    psa_status_t err;
+    mbedtls_svc_key_id_t key_id = MBEDTLS_SVC_KEY_ID_INIT;
+    psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
+    enum tfm_plat_err_t plat_err;
+    uint8_t buf[32];
+    size_t key_len;
+    size_t key_bits;
+    psa_algorithm_t algorithm;
+    psa_key_type_t type;
 
-    if (key_buf == NULL || ecc_key == NULL || curve_type == NULL) {
-        return TFM_PLAT_ERR_INVALID_INPUT;
+    /* HUK */
+    plat_err = tfm_plat_get_huk(buf, sizeof(buf), &key_len, &key_bits,
+                                &algorithm, &type);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
+    }
+    key_id.MBEDTLS_PRIVATE(key_id) = TFM_BUILTIN_KEY_ID_HUK;
+    psa_set_key_id(&attr, key_id);
+    psa_set_key_bits(&attr, key_bits);
+    psa_set_key_algorithm(&attr, algorithm);
+    psa_set_key_type(&attr, type);
+    err = tfm_builtin_key_loader_load_key(buf, key_len, &attr);
+    if (err != PSA_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err = tfm_plat_otp_read(PLAT_OTP_ID_IAK, size, key_buf);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+    /* IAK */
+    plat_err = tfm_plat_get_iak(buf, sizeof(buf), &key_len, &key_bits,
+                                &algorithm, &type);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-
-    err =  tfm_plat_otp_read(PLAT_OTP_ID_IAK_LEN, sizeof(key_size),
-                             (uint8_t*)&key_size);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
+    key_id.MBEDTLS_PRIVATE(key_id) = TFM_BUILTIN_KEY_ID_IAK;
+    psa_set_key_id(&attr, key_id);
+    psa_set_key_bits(&attr, key_bits);
+    psa_set_key_algorithm(&attr, algorithm);
+    psa_set_key_type(&attr, type);
+    err = tfm_builtin_key_loader_load_key(buf, key_len, &attr);
+    if (err != PSA_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-
-    /* Set the EC curve type which the key belongs to */
-    err = tfm_plat_otp_read(PLAT_OTP_ID_IAK_TYPE,
-                            sizeof(psa_ecc_family_t), curve_type);
-    if(err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    /* Copy the private key to the buffer, it MUST be present */
-    ecc_key->priv_key = key_buf;
-    ecc_key->priv_key_size = key_size;
-
-    ecc_key->pubx_key = NULL;
-    ecc_key->pubx_key_size = 0;
-    ecc_key->puby_key = NULL;
-    ecc_key->puby_key_size = 0;
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
 
     return TFM_PLAT_ERR_SUCCESS;
 }
-#endif /* SYMMETRIC_INITIAL_ATTESTATION */

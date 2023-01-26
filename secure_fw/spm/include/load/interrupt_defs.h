@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,7 +21,7 @@ struct irq_load_info_t {
      * Initialization function per interrupt.
      * args:  owner Partition, irq_load_info
      */
-    enum tfm_hal_status_t (*init)(void *pt, struct irq_load_info_t *pildi);
+    enum tfm_hal_status_t (*init)(void *pt, const struct irq_load_info_t *pildi);
     psa_flih_result_t (*flih_func)(void);     /* FLIH function, NULL for SLIH */
     int32_t      pid;                         /* Owner Partition ID           */
     uint32_t     source;                      /* IRQ source (number/index)    */
@@ -27,8 +30,8 @@ struct irq_load_info_t {
 
 /* IRQ runtime data */
 struct irq_t {
-    void                   *p_pt;   /* The owner Partition struct partition_t */
-    struct irq_load_info_t *p_ildi; /* The interrupt load info                */
+    void                         *p_pt;       /* The owner Partition     */
+    const struct irq_load_info_t *p_ildi;     /* The interrupt load info */
 };
 
 #endif /* __INTERRUPT_DEFS_H__ */

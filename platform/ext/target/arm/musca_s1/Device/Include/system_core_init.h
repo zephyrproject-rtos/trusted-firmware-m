@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * This file is derivative of CMSIS V5.01 \Device\ARM\ARMCM33\Include\system_ARMCM33.h
- * Git SHA: 8a1d9d6ee18b143ae5befefa14d89fb5b3f99c75
- *
+ */
+
+/*
+ * This file is derivative of CMSIS V5.9.0 system_ARMCM33.h
+ * Git SHA: 2b7495b8535bdcb306dac29b9ded4cfb679d7e5c
  */
 
 #ifndef __SYSTEM_CORE_INIT_H__
@@ -30,6 +32,11 @@ extern "C" {
 extern uint32_t SystemCoreClock;     /*!< System Clock Frequency (Core Clock) */
 extern uint32_t PeripheralClock;     /*!< Peripheral Clock Frequency */
 extern uint32_t RefClock;            /*!< External Reference Clock Frequency */
+
+/**
+  \brief Exception / Interrupt Handler Function Prototype
+*/
+typedef void(*VECTOR_TABLE_Type)(void);
 
 /**
   \brief Setup the microcontroller system.

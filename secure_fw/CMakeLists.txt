@@ -1,6 +1,8 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+# company) or an affiliate of Cypress Semiconductor Corporation. All rights
+# reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -10,10 +12,29 @@ cmake_minimum_required(VERSION 3.15)
 
 add_executable(tfm_s)
 add_library(secure_fw INTERFACE)
-add_library(tfm_secure_api INTERFACE)
 
 add_subdirectory(spm)
 add_subdirectory(partitions)
+
+target_include_directories(tfm_config
+    INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/crypto
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/firmware_update
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/initial_attestation
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/internal_trusted_storage
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/platform
+        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/protected_storage
+        ${CMAKE_CURRENT_SOURCE_DIR}/spm/include
+        ${CMAKE_BINARY_DIR}/generated/interface/include
+)
+
+target_compile_definitions(tfm_config
+    INTERFACE
+        $<$<STREQUAL:${PS_CRYPTO_AEAD_ALG},PSA_ALG_GCM>:PS_CRYPTO_AEAD_ALG_GCM>
+        $<$<STREQUAL:${PS_CRYPTO_AEAD_ALG},PSA_ALG_CCM>:PS_CRYPTO_AEAD_ALG_CCM>
+        $<$<BOOL:${PS_ENCRYPTION}>:PS_ENCRYPTION>
+)
 
 target_include_directories(secure_fw
     INTERFACE
@@ -33,7 +54,6 @@ target_link_libraries(tfm_s
         platform_s
         psa_interface
         tfm_sprt
-        tfm_secure_api
 )
 
 set_target_properties(tfm_s
@@ -61,16 +81,6 @@ add_convert_to_bin_target(tfm_s)
 
 ############################ Secure API ########################################
 
-target_include_directories(tfm_secure_api
-    INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-
-target_link_libraries(tfm_secure_api
-    INTERFACE
-        tfm_arch
-)
-
 set_source_files_properties(
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_cross.c
@@ -80,24 +90,16 @@ set_source_files_properties(
     COMPILE_FLAGS $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
 )
 
-# Secure component relies on 'tfm_secure_api', append headers/sources
-# into this target, also the SPE build indicator.
-target_sources(tfm_secure_api
-    INTERFACE
+target_sources(tfm_sprt
+    PRIVATE
         $<$<BOOL:${CONFIG_TFM_PSA_API_SUPERVISOR_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_svc.c>
         $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_cross.c>
         $<$<BOOL:${CONFIG_TFM_PSA_API_SFN_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/cmsis_psa/psa_interface_sfn.c>
 )
 
-target_compile_definitions(tfm_secure_api
-    INTERFACE
-        CONFIG_TFM_BUILDING_SPE=1
-        $<$<BOOL:${CONFIG_TFM_DOORBELL_API}>:CONFIG_TFM_DOORBELL_API=1>
-)
-
 ############################# Secure veneers ###################################
 
-if(NOT (TFM_PSA_API AND TFM_MULTI_CORE_TOPOLOGY))
+if(CONFIG_TFM_USE_TRUSTZONE)
     add_library(tfm_s_veneers STATIC)
 
     target_sources(tfm_s_veneers

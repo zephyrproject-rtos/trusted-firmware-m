@@ -5,8 +5,6 @@
  *
  */
 
-#include "config_impl.h"
-
 #include "psa/client.h"
 #include "tfm_ns_interface.h"
 #include "tfm_api.h"
@@ -54,26 +52,3 @@ psa_status_t psa_call(psa_handle_t handle, int32_t type,
                                 (uint32_t)in_vec,
                                 (uint32_t)out_vec);
 }
-
-/* Following veneers are only needed by connection-based services */
-#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-psa_handle_t psa_connect(uint32_t sid, uint32_t version)
-{
-    return tfm_ns_interface_dispatch(
-                                (veneer_fn)tfm_psa_connect_veneer,
-                                sid,
-                                version,
-                                0,
-                                0);
-}
-
-void psa_close(psa_handle_t handle)
-{
-    (void)tfm_ns_interface_dispatch(
-                         (veneer_fn)tfm_psa_close_veneer,
-                         (uint32_t)handle,
-                         0,
-                         0,
-                         0);
-}
-#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */

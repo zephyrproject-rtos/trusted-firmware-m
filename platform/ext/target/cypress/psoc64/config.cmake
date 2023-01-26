@@ -1,6 +1,8 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2021, Arm Limited. All rights reserved.
-# Copyright (c) 2021-2022, Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+# company) or an affiliate of Cypress Semiconductor Corporation. All rights
+# reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
@@ -13,9 +15,15 @@ set(TFM_NS_CLIENT_IDENTIFICATION        OFF         CACHE BOOL      "Enable NS c
 
 add_definitions(-DCYB0644ABZI_S2D44)
 
+set(CONFIG_TFM_USE_TRUSTZONE            OFF         CACHE BOOL      "Enable use of TrustZone to transition between NSPE and SPE")
 set(TFM_MULTI_CORE_TOPOLOGY             ON          CACHE BOOL      "Whether to build for a dual-cpu architecture")
 set(NUM_MAILBOX_QUEUE_SLOT              4           CACHE BOOL      "Number of mailbox queue slots")
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT      ON          CACHE BOOL      "Platform supports SLIH IRQ tests")
+set(PLATFORM_FLIH_IRQ_TEST_SUPPORT      ON          CACHE BOOL      "Platform supports FLIH IRQ tests")
+set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
+set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Protected Storage partition")
+set(TFM_PARTITION_PLATFORM              ON          CACHE BOOL      "Enable Platform partition")
+set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
 
 ################################## Dependencies ################################
 

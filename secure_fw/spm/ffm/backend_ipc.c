@@ -1,16 +1,22 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include <stdint.h>
+#include "aapcs_local.h"
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
+#include "config_spm.h"
 #include "runtime_defs.h"
+#include "ffm/stack_watermark.h"
 #include "spm_ipc.h"
+#include "tfm_hal_memory_symbols.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
 #include "tfm_rpc.h"
@@ -25,22 +31,26 @@
 struct partition_head_t partition_listhead;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
+/* Instance for SPM_THREAD_CONTEXT */
 
-#ifdef TFM_MULTI_CORE_TOPOLOGY
-/* TODO: To be checked when RPC design updates. */
-static uint8_t spm_stack_local[CONFIG_TFM_SPM_THREAD_STACK_SIZE] __aligned(8);
-struct context_ctrl_t spm_thread_context = {
-    .sp        = (uint32_t)&spm_stack_local[CONFIG_TFM_SPM_THREAD_STACK_SIZE],
-    .sp_limit  = (uint32_t)spm_stack_local,
-    .allocated = 0,
-    .exc_ret   = 0,
-};
-struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
-#else
+#ifdef CONFIG_TFM_USE_TRUSTZONE
 struct context_ctrl_t *p_spm_thread_context;
+#else
+/* If ns_agent_tz isn't used, we need to provide a stack for SPM to use */
+static uint8_t spm_thread_stack[CONFIG_TFM_SPM_THREAD_STACK_SIZE] __aligned(8);
+ARCH_CLAIM_CTXCTRL_INSTANCE(spm_thread_context,
+                            spm_thread_stack,
+                            sizeof(spm_thread_stack));
+
+struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
 #endif
 
 #endif
+
+/* Indicator point to the partition meta */
+uintptr_t *partition_meta_indicator_pos;
+
+extern uint32_t scheduler_lock;
 
 static void prv_process_metadata(struct partition_t *p_pt)
 {
@@ -52,7 +62,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
     uint32_t allocate_size;
 
     p_pt_ldi = p_pt->p_ldinf;
-    p_srv_ldi = (struct service_load_info_t *)LOAD_INFO_SERVICE(p_pt_ldi);
+    p_srv_ldi = LOAD_INFO_SERVICE(p_pt_ldi);
     ctx_ctrl = &p_pt->ctx_ctrl;
 
     /* common runtime metadata */
@@ -87,8 +97,8 @@ static void prv_process_metadata(struct partition_t *p_pt)
  * Send message and wake up the SP who is waiting on message queue, block the
  * current thread and trigger scheduler.
  */
-static psa_status_t ipc_messaging(struct service_t *service,
-                                  struct conn_handle_t *handle)
+psa_status_t backend_messaging(struct service_t *service,
+                               struct conn_handle_t *handle)
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
@@ -129,7 +139,7 @@ static psa_status_t ipc_messaging(struct service_t *service,
     return PSA_SUCCESS;
 }
 
-static psa_status_t ipc_replying(struct conn_handle_t *handle, int32_t status)
+psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
 {
     if (is_tfm_rpc_msg(handle)) {
         tfm_rpc_client_call_reply(handle, status);
@@ -148,8 +158,8 @@ static psa_status_t ipc_replying(struct conn_handle_t *handle, int32_t status)
 extern void sprt_main(void);
 
 /* Parameters are treated as assuredly */
-static void ipc_comp_init_assuredly(struct partition_t *p_pt,
-                                    uint32_t service_setting)
+void backend_init_comp_assuredly(struct partition_t *p_pt,
+                                 uint32_t service_setting)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
 
@@ -166,14 +176,19 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
                       LOAD_ALLOCED_STACK_ADDR(p_pldi),
                       p_pldi->stack_size);
 
+    watermark_stack(p_pt);
+
     prv_process_metadata(p_pt);
 
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
-#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1) && !defined(TFM_MULTI_CORE_TOPOLOGY)
-    if (p_pldi->pid == TFM_SP_NON_SECURE_ID) {
-        SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
+#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
+    if (IS_PARTITION_NS_AGENT(p_pldi)) {
+        /* Get the context from ns_agent_tz */
+        if (p_pldi->pid == 0) {
+            SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
+        }
     }
 #endif
 
@@ -182,35 +197,37 @@ static void ipc_comp_init_assuredly(struct partition_t *p_pt,
                THRD_GENERAL_EXIT);
 }
 
-static uint32_t ipc_system_run(void)
+uint32_t backend_system_run(void)
 {
     uint32_t control;
     struct partition_t *p_cur_pt;
+    fih_int fih_rc = FIH_FAILURE;
 
-#if CONFIG_TFM_PSA_API_THREAD_CALL == 1
-    TFM_CORE_ASSERT(SPM_THREAD_CONTEXT);
+#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
+    SPM_ASSERT(SPM_THREAD_CONTEXT);
 #endif
 
+    partition_meta_indicator_pos = (uintptr_t *)hal_mem_sp_meta_start;
     control = thrd_start_scheduler(&CURRENT_THREAD);
 
     p_cur_pt = TO_CONTAINER(CURRENT_THREAD->p_context_ctrl,
                             struct partition_t, ctx_ctrl);
 
-    if (tfm_hal_update_boundaries(p_cur_pt->p_ldinf, p_cur_pt->p_boundaries)
-            != TFM_HAL_SUCCESS) {
+    FIH_CALL(tfm_hal_activate_boundary, fih_rc, p_cur_pt->p_ldinf, p_cur_pt->boundary);
+    if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         tfm_core_panic();
     }
 
     return control;
 }
 
-static psa_signal_t ipc_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
+psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     psa_signal_t ret_signal;
 
     /*
-     * 'ipc_wait()' sets the waiting signal mask for partition, and
+     * 'backend_wait()' sets the waiting signal mask for partition, and
      * blocks the partition thread state to wait for signals.
      * These changes should be inside the ciritical section to avoid
      * 'signal_waiting' or the thread state to be changed by interrupts
@@ -228,18 +245,61 @@ static psa_signal_t ipc_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
     return ret_signal;
 }
 
-static void ipc_wake_up(struct partition_t *p_pt)
+void backend_wake_up(struct partition_t *p_pt)
 {
     thrd_wake_up(&p_pt->waitobj,
                  p_pt->signals_asserted & p_pt->signals_waiting);
     p_pt->signals_waiting = 0;
 }
 
-const struct backend_ops_t backend_instance = {
-    .comp_init_assuredly = ipc_comp_init_assuredly,
-    .system_run          = ipc_system_run,
-    .messaging           = ipc_messaging,
-    .replying            = ipc_replying,
-    .wait                = ipc_wait,
-    .wake_up             = ipc_wake_up,
-};
+uint64_t ipc_schedule(void)
+{
+    fih_int fih_rc = FIH_FAILURE;
+    AAPCS_DUAL_U32_T ctx_ctrls;
+    struct partition_t *p_part_curr, *p_part_next;
+    struct context_ctrl_t *p_curr_ctx;
+    struct thread_t *pth_next = thrd_next();
+    struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
+
+    p_curr_ctx = (struct context_ctrl_t *)(CURRENT_THREAD->p_context_ctrl);
+
+    AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)p_curr_ctx, (uint32_t)p_curr_ctx);
+
+    p_part_curr = GET_CURRENT_COMPONENT();
+    p_part_next = GET_THRD_OWNER(pth_next);
+
+    if (scheduler_lock != SCHEDULER_LOCKED && pth_next != NULL &&
+        p_part_curr != p_part_next) {
+        /* Check if there is enough room on stack to save more context */
+        if ((p_curr_ctx->sp_limit +
+                sizeof(struct tfm_additional_context_t)) > __get_PSP()) {
+            tfm_core_panic();
+        }
+
+        CRITICAL_SECTION_ENTER(cs);
+        /*
+         * If required, let the platform update boundary based on its
+         * implementation. Change privilege, MPU or other configurations.
+         */
+        if (tfm_hal_boundary_need_switch(p_part_curr->boundary,
+                                         p_part_next->boundary)) {
+            FIH_CALL(tfm_hal_activate_boundary, fih_rc,
+                     p_part_next->p_ldinf, p_part_next->boundary);
+            if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
+                tfm_core_panic();
+            }
+        }
+        ARCH_FLUSH_FP_CONTEXT();
+
+        AAPCS_DUAL_U32_SET_A1(ctx_ctrls, (uint32_t)pth_next->p_context_ctrl);
+
+        CURRENT_THREAD = pth_next;
+        CRITICAL_SECTION_LEAVE(cs);
+    }
+
+    /* Update meta indicator */
+    if (partition_meta_indicator_pos && (p_part_next->p_metadata)) {
+        *partition_meta_indicator_pos = (uintptr_t)(p_part_next->p_metadata);
+    }
+    return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
+}

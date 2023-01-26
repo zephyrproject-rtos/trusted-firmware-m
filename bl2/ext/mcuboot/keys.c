@@ -21,13 +21,13 @@
  * Original code taken from mcuboot project at:
  * https://github.com/mcu-tools/mcuboot
  * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
- * Modifications are Copyright (c) 2019-2020 Arm Limited.
+ * Modifications are Copyright (c) 2019-2022 Arm Limited.
  */
 
 #include <stddef.h>
 #include <bootutil/sign_key.h>
 #include "mcuboot_config/mcuboot_config.h"
-#include "tfm_plat_crypto_keys.h"
+#include "tfm_plat_rotpk.h"
 
 #ifdef MCUBOOT_ENC_IMAGES
 unsigned char enc_priv_key[] = {
@@ -181,7 +181,7 @@ const unsigned char rsa_pub_key[] = {
     0xc9, 0x02, 0x03, 0x01, 0x00, 0x01,
 };
 const unsigned int rsa_pub_key_len = 270;
-#if (MCUBOOT_IMAGE_NUMBER ==2)
+#if (MCUBOOT_IMAGE_NUMBER > 1)
 const unsigned char rsa_pub_key_1[] = {
     0x30, 0x82, 0x01, 0x0a, 0x02, 0x82, 0x01, 0x01,
     0x00, 0xac, 0xd2, 0x74, 0x93, 0x3e, 0x5f, 0xe7,
@@ -275,7 +275,7 @@ const unsigned char rsa_pub_key[] = {
     0x4b, 0x02, 0x03, 0x01, 0x00, 0x01,
 };
 const unsigned int rsa_pub_key_len = 398;
-#if (MCUBOOT_IMAGE_NUMBER == 2)
+#if (MCUBOOT_IMAGE_NUMBER > 1)
 const unsigned char rsa_pub_key_1[] = {
     0x30, 0x82, 0x01, 0x8a, 0x02, 0x82, 0x01, 0x81,
     0x00, 0xbf, 0xb7, 0xb0, 0x9f, 0xe8, 0xc8, 0xd1,
@@ -341,12 +341,26 @@ const struct bootutil_key bootutil_keys[] = {
         .key = rsa_pub_key,
         .len = &rsa_pub_key_len,
     },
-#if (MCUBOOT_IMAGE_NUMBER == 2)
+#if (MCUBOOT_IMAGE_NUMBER > 1)
     {
         .key = rsa_pub_key_1,
         .len = &rsa_pub_key_len_1,
     },
-#endif
+#endif /* MCUBOOT_IMAGE_NUMBER > 1 */
+#if (MCUBOOT_IMAGE_NUMBER > 2)
+    {
+        /* FIXME assuming the image 0 key is reused here */
+        .key = rsa_pub_key,
+        .len = &rsa_pub_key_len,
+    },
+#endif /* MCUBOOT_IMAGE_NUMBER > 2 */
+#if (MCUBOOT_IMAGE_NUMBER > 3)
+    {
+        /* FIXME assuming the image 0 key is reused here */
+        .key = rsa_pub_key,
+        .len = &rsa_pub_key_len,
+    },
+#endif /* MCUBOOT_IMAGE_NUMBER > 3 */
 };
 const int bootutil_key_cnt = MCUBOOT_IMAGE_NUMBER;
 #endif /* HAVE_KEYS */

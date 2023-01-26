@@ -282,4 +282,7 @@
 #define BOOT_TFM_SHARED_DATA_SIZE (0x400)
 #define BOOT_TFM_SHARED_DATA_BASE (0x3003fc00)
 
+#if defined(EXTERNAL_FLASH)
+#define FLASH_DRIVER_LIST {&TFM_Driver_OSPI_FLASH0, &TFM_Driver_FLASH0}
+#endif /* EXTERNAL_FLASH */
 #endif /* __FLASH_LAYOUT_H__ */

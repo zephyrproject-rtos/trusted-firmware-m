@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,6 +8,9 @@
 #include "fih.h"
 #include "tfm_hal_defs.h"
 #include "tfm_hal_platform.h"
+#ifdef FIH_ENABLE_DELAY
+#include "tfm_fih_rng.h"
+#endif
 
 #ifdef TFM_FIH_PROFILE_ON
 fih_int FIH_SUCCESS = FIH_INT_INIT(FIH_POSITIVE_VALUE);
@@ -85,23 +88,33 @@ void fih_panic_loop(void)
 #ifdef FIH_ENABLE_DELAY
 void fih_delay_init(void)
 {
-    volatile int32_t ret = TFM_HAL_ERROR_GENERIC;
+    fih_int ret = FIH_FAILURE;
 
-    ret = tfm_hal_random_init();
-    if (ret != TFM_HAL_SUCCESS) {
+    ret = tfm_fih_random_init();
+
+#ifdef FIH_ENABLE_DOUBLE_VARS
+    if (ret.val != FIH_SUCCESS.val) {
         FIH_PANIC;
     }
+
+    if (ret.msk != FIH_SUCCESS.msk) {
+        FIH_PANIC;
+    }
+#else /* FIH_ENABLE_DOUBLE_VARS */
+    if (ret != FIH_SUCCESS) {
+        FIH_PANIC;
+    }
+#endif /* FIH_ENABLE_DOUBLE_VARS */
 }
 
 uint8_t fih_delay_random(void)
 {
-    volatile int32_t ret = TFM_HAL_ERROR_GENERIC;
     uint8_t rand_value = 0xFF;
 
-    ret = tfm_hal_random_generate(&rand_value, sizeof(rand_value));
-    if (ret != TFM_HAL_SUCCESS) {
-        FIH_PANIC;
-    }
+    /* Repeat random generation to mitigate instruction skip */
+    tfm_fih_random_generate(&rand_value);
+    tfm_fih_random_generate(&rand_value);
+    tfm_fih_random_generate(&rand_value);
 
     return rand_value;
 }

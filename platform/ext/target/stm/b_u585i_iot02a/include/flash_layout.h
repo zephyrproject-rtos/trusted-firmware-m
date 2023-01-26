@@ -16,7 +16,11 @@
 
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
+/* new field for OSPI */
 
+#define OSPI_FLASH_TOTAL_SIZE           (0x4000000)  /* 64 MB same as MX25LM51245G_FLASH_SIZE */
+#define OSPI_FLASH_BASE_ADDRESS         (0x70000000) /* same as OCTOSPI1_BASE  */
+#define EXTERNAL_FLASH
 /* This header file is included from linker scatter file as well, where only a
  * limited C constructs are allowed. Therefore it is not possible to include
  * here the platform_retarget.h to access flash related defines. To resolve this
@@ -32,10 +36,10 @@
  * 0x0002_8000 NV counters area (16 KB)
  * 0x0002_c000 Secure Storage Area (16 KB)
  * 0x0003_0000 Internal Trusted Storage Area (16 KB)
- * 0x0003_4000 Secure image     primary slot (256 KB)
- * 0x0007_4000 Non-secure image primary slot (512 KB)
- * 0x000f_4000 Secure image     secondary slot (256 KB)
- * 0x0013_4000 Non-secure image secondary slot (512 KB)
+ * 0x0003_4000 Secure image     primary slot (384 KB)
+ * 0x0009_4000 Non-secure image primary slot (512 KB)
+ * 0x0011_4000 Secure image     secondary slot (384 KB)
+ * 0x0017_4000 Non-secure image secondary slot (512 KB)
  *
  * Bl2 binary is written at 0x1_2000:
  * it contains bl2_counter init value, OTP write protect, NV counters area init.
@@ -79,7 +83,7 @@
 
 /* area for BL2 code protected by hdp */
 #define FLASH_AREA_BL2_OFFSET           (FLASH_AREA_PERSO_OFFSET+FLASH_AREA_PERSO_SIZE )
-#define FLASH_AREA_BL2_SIZE             (0x12000)
+#define FLASH_AREA_BL2_SIZE             (0x16000)
 /* HDP area end at this address */
 #define FLASH_BL2_HDP_END               (FLASH_AREA_BL2_OFFSET+FLASH_AREA_BL2_SIZE-1)
 /* area for BL2 code not protected by hdp */
@@ -119,7 +123,7 @@
 #error "FLASH_ITS_AREA_OFFSET not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
 #endif /*  (FLASH_ITS_AREA_OFFSET % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
 
-#define FLASH_S_PARTITION_SIZE          (0x40000) /* 256 KB for S partition */
+#define FLASH_S_PARTITION_SIZE          (0x60000) /* 384 KB for S partition */
 #define FLASH_NS_PARTITION_SIZE         (0x80000) /* 512 KB for NS partition */
 
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
@@ -151,7 +155,11 @@
 /* Secure image secondary slot */
 #define FLASH_AREA_2_ID                 (FLASH_AREA_1_ID + 1)
 #define FLASH_AREA_2_DEVICE_ID          (FLASH_AREA_1_DEVICE_ID)
+#if defined(EXTERNAL_FLASH)
+#define FLASH_AREA_2_OFFSET             (0x000000000)
+#else
 #define FLASH_AREA_2_OFFSET             (FLASH_AREA_1_OFFSET + FLASH_AREA_1_SIZE)
+#endif /* EXTERNAL FLASH */
 /* Control  Secure image secondary slot */
 #if (FLASH_AREA_2_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
 #error "FLASH_AREA_2_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
@@ -161,8 +169,12 @@
 /* Non-secure image secondary slot */
 #define FLASH_AREA_3_ID                 (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_3_DEVICE_ID          (FLASH_AREA_2_DEVICE_ID)
+#if defined(EXTERNAL_FLASH)
+/* Add 0x8000 to fix tools issue on external flash */
+#define FLASH_AREA_3_OFFSET             (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE + 0x8000)
+#else
 #define FLASH_AREA_3_OFFSET             (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
-
+#endif /* EXTERNAL FLASH */
 #if (FLASH_AREA_3_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
 #error "FLASH_AREA_3_OFFSET  not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
 #endif /*  (FLASH_AREA_3_OFFSET  % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
@@ -172,6 +184,18 @@
 #define FLASH_AREA_SCRATCH_ID           (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_SCRATCH_DEVICE_ID    (FLASH_AREA_3_DEVICE_ID)
 
+
+#if defined(EXTERNAL_FLASH)
+/* Config for Area Using External flash driver */
+#define OSPI_FLASH_DEV_ID          (FLASH_DEVICE_ID+1)
+#define FLASH_DEVICE_ID_2          (OSPI_FLASH_DEV_ID)
+#define FLASH_DEVICE_ID_3          (OSPI_FLASH_DEV_ID)
+#define OSPI_FLASH_DEV_NAME   TFM_Driver_OSPI_FLASH0
+#define FLASH_DEV_NAME_2 OSPI_FLASH_DEV_NAME
+#define FLASH_DEV_NAME_3 OSPI_FLASH_DEV_NAME
+
+#define FLASH_DRIVER_LIST {&TFM_Driver_OSPI_FLASH0, &TFM_Driver_FLASH0}
+#endif /* defined(EXTERNAL_FLASH) */
 /*
  * The maximum number of status entries supported by the bootloader.
  */

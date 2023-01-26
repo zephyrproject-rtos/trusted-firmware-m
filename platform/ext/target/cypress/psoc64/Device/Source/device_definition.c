@@ -65,6 +65,8 @@ const cy_stc_scb_uart_config_t KITPROG_UART_config =
 cy_stc_tcpwm_counter_config_t tcpwm_config_timer0
 #if defined(TEST_NS_SLIH_IRQ)
     TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
+#elif defined(TEST_NS_FLIH_IRQ)
+    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FLIH_TEST", "APP-ROT")
 #endif /* TEST_NS_SLIH_IRQ */
     = {
     .period             = TIMER0_MATCH, /* Upper limit (wrap around) */
@@ -92,6 +94,8 @@ cy_stc_tcpwm_counter_config_t tcpwm_config_timer0
 cy_stc_sysint_t CY_TCPWM_NVIC_CFG_S
 #if defined(TEST_NS_SLIH_IRQ)
     TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
+#elif defined(TEST_NS_FLIH_IRQ)
+    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FLIH_TEST", "APP-ROT")
 #endif /* TEST_NS_SLIH_IRQ */
     = {
     .intrSrc = TFM_TIMER0_IRQ,             /* NVIC #3 */
@@ -102,6 +106,8 @@ cy_stc_sysint_t CY_TCPWM_NVIC_CFG_S
 tfm_timer_irq_test_dev_t CY_TCPWM0_TIMER0_DEV_S
 #if defined(TEST_NS_SLIH_IRQ)
     TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_SLIH_TEST", "APP-ROT")
+#elif defined(TEST_NS_FLIH_IRQ)
+    TFM_LINK_SET_RW_IN_PARTITION_SECTION("TFM_SP_FLIH_TEST", "APP-ROT")
 #endif /* TEST_NS_SLIH_IRQ */
     = {
     .is_initialized     = false,

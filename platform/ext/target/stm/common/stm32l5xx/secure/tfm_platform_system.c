@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2018-2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include "cmsis.h"
 #include "target_cfg.h"
-#include "tfm_spm_hal.h"
 #include "uart_stdout.h"
 #include "tfm_platform_system.h"
 #include "tfm_hal_platform.h"

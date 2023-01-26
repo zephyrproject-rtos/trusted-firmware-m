@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited
+ * Copyright (c) 2018-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 #include "target_cfg.h"
 #include "Driver_MPC.h"
 #include "region_defs.h"
-#include "tfm_secure_api.h"
 #include "tfm_plat_defs.h"
 /*  fix me to move to a CMSIS driver */
 #include "stm32l5xx_hal.h"

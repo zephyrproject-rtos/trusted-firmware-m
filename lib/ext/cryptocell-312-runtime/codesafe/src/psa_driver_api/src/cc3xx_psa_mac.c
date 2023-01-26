@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,7 +21,10 @@
 #include "cc_pal_log.h"
 #include "cc_pal_mem.h"
 
-/* SHA512 is not supported, this is the only size we will need */
+/* To be able to include the PSA style configuration */
+#include "mbedtls/build_info.h"
+
+/* SHA512 is not supported by the hardware, this is the only size required */
 #define MD_MAX_SIZE 32
 
 /** \brief Return the block size for different hashing algorithms
@@ -260,17 +263,21 @@ static psa_status_t hmac_setup(cc3xx_mac_operation_t *operation,
     cc3xx_hash_operation_t *hmac = &(operation->hmac);
 
     switch (hash_alg) {
-#ifdef CC3XX_CONFIG_SUPPORT_SHA1
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
         hmac->ctx.mode = HASH_SHA1;
         break;
-#endif /* CC3XX_CONFIG_SUPPORT_SHA1 */
+#endif /* PSA_WANT_ALG_SHA_1 */
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
         hmac->ctx.mode = HASH_SHA224;
         break;
+#endif /* PSA_WANT_ALG_SHA_224 */
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
         hmac->ctx.mode = HASH_SHA256;
         break;
+#endif /* PSA_WANT_ALG_SHA_256 */
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
@@ -333,17 +340,21 @@ static psa_status_t hmac_finish(cc3xx_mac_operation_t *operation, uint8_t *mac,
     size_t block_size;
 
     switch (hmac->ctx.mode) {
-#ifdef CC3XX_CONFIG_SUPPORT_SHA1
+#if defined(PSA_WANT_ALG_SHA_1)
     case HASH_SHA1:
         hash_alg = PSA_ALG_SHA_1;
         break;
-#endif /* CC3XX_CONFIG_SUPPORT_SHA1 */
+#endif /* PSA_WANT_ALG_SHA_1 */
+#if defined(PSA_WANT_ALG_SHA_224)
     case HASH_SHA224:
         hash_alg = PSA_ALG_SHA_224;
         break;
+#endif /* PSA_WANT_ALG_SHA_224 */
+#if defined(PSA_WANT_ALG_SHA_256)
     case HASH_SHA256:
         hash_alg = PSA_ALG_SHA_256;
         break;
+#endif /* PSA_WANT_ALG_SHA_256 */
     default:
         return PSA_ERROR_BAD_STATE;
     }
@@ -396,13 +407,19 @@ static psa_status_t mac_setup(cc3xx_mac_operation_t *operation,
     }
 
     CC_PalMemSetZero(operation, sizeof(cc3xx_mac_operation_t));
+#if defined(PSA_WANT_ALG_CMAC)
     if (PSA_ALG_FULL_LENGTH_MAC(alg) == PSA_ALG_CMAC) {
         status = cmac_setup(&(operation->cmac), attributes, key_buffer,
                             key_buffer_size, alg);
-    } else if (PSA_ALG_IS_HMAC(alg)) {
+    } else
+#endif /* PSA_WANT_ALG_CMAC */
+#if defined(PSA_WANT_ALG_HMAC)
+    if (PSA_ALG_IS_HMAC(alg)) {
         status = hmac_setup(operation, key_buffer, key_buffer_size,
                             PSA_ALG_HMAC_GET_HASH(alg));
-    } else {
+    } else
+#endif /* PSA_WANT_ALG_HMAC */
+    {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -443,12 +460,18 @@ psa_status_t cc3xx_mac_update(cc3xx_mac_operation_t *operation,
     if (operation == NULL || input == NULL) {
         return PSA_ERROR_INVALID_ARGUMENT;
     }
+#if defined(PSA_WANT_ALG_CMAC)
     if (PSA_ALG_FULL_LENGTH_MAC(operation->alg) == PSA_ALG_CMAC) {
         return cmac_update(&(operation->cmac), input, input_length);
-    } else if (PSA_ALG_IS_HMAC(operation->alg)) {
+    } else
+#endif /* PSA_WANT_ALG_CMAC */
+#if defined(PSA_WANT_ALG_HMAC)
+    if (PSA_ALG_IS_HMAC(operation->alg)) {
         return cc3xx_hash_update(&(operation->hmac), input, input_length);
-    } else {
-        return PSA_ERROR_BAD_STATE;
+    } else
+#endif /* PSA_WANT_ALG_HMAC */
+    {
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 }
 
@@ -457,13 +480,18 @@ psa_status_t cc3xx_mac_sign_finish(cc3xx_mac_operation_t *operation,
                                    size_t *mac_length)
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-
+#if defined(PSA_WANT_ALG_CMAC)
     if (PSA_ALG_FULL_LENGTH_MAC(operation->alg) == PSA_ALG_CMAC) {
         status = cmac_finish(&(operation->cmac), mac);
-    } else if (PSA_ALG_IS_HMAC(operation->alg)) {
+    } else
+#endif /* PSA_WANT_ALG_CMAC */
+#if defined(PSA_WANT_ALG_HMAC)
+    if (PSA_ALG_IS_HMAC(operation->alg)) {
         status = hmac_finish(operation, mac, mac_size);
-    } else {
-        return PSA_ERROR_BAD_STATE;
+    } else
+#endif /* PSA_WANT_ALG_HMAC */
+    {
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     if (status != PSA_SUCCESS) {
@@ -482,13 +510,23 @@ psa_status_t cc3xx_mac_verify_finish(cc3xx_mac_operation_t *operation,
     uint8_t actual_mac[PSA_MAC_MAX_SIZE];
 
     if (mac_length > sizeof(actual_mac)) {
-        return (PSA_ERROR_INVALID_ARGUMENT);
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
+
+#if defined(PSA_WANT_ALG_CMAC)
     if (PSA_ALG_FULL_LENGTH_MAC(operation->alg) == PSA_ALG_CMAC) {
         status = cmac_finish(&(operation->cmac), actual_mac);
-    } else if (PSA_ALG_IS_HMAC(operation->alg)) {
+    } else
+#endif /* PSA_WANT_ALG_CMAC */
+#if defined(PSA_WANT_ALG_HMAC)
+    if (PSA_ALG_IS_HMAC(operation->alg)) {
         status = hmac_finish(operation, actual_mac, mac_length);
+    } else
+#endif /* PSA_WANT_ALG_HMAC */
+    {
+        status = PSA_ERROR_NOT_SUPPORTED;
     }
+
     if (status != PSA_SUCCESS) {
         goto cleanup;
     }

@@ -15,14 +15,15 @@
 #include "image.h"
 #include "fih.h"
 
+uint8_t computed_bl1_2_hash[BL1_2_HASH_SIZE];
+
 fih_int validate_image_at_addr(uint8_t *image)
 {
-    uint8_t computed_bl1_2_hash[BL1_2_HASH_SIZE];
     uint8_t stored_bl1_2_hash[BL1_2_HASH_SIZE];
     fih_int fih_rc = FIH_FAILURE;
 
     FIH_CALL(bl1_sha256_compute, fih_rc, image, BL1_2_CODE_SIZE,
-                                     computed_bl1_2_hash);
+                                         computed_bl1_2_hash);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
@@ -52,6 +53,9 @@ int main(void)
     BL1_LOG("[INF] Starting TF-M BL1_1\r\n");
 
     fih_rc = bl1_otp_init();
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_PANIC;
+    }
 
     if (tfm_plat_provisioning_is_required()) {
         if (tfm_plat_provisioning_perform()) {
@@ -71,6 +75,11 @@ int main(void)
     run_bl1_1_testsuite();
 #endif /* TEST_BL1_1 */
 
+    fih_rc = fih_int_encode_zero_equality(boot_platform_pre_load(0));
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_PANIC;
+    }
+
     /* Copy BL1_2 from OTP into SRAM*/
     FIH_CALL(bl1_read_bl1_2_image, fih_rc, (uint8_t *)BL1_2_CODE_START);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
@@ -80,6 +89,11 @@ int main(void)
     FIH_CALL(validate_image_at_addr, fih_rc, (uint8_t *)BL1_2_CODE_START);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BL1_LOG("[ERR] BL1_2 image failed to validate\r\n");
+        FIH_PANIC;
+    }
+
+    fih_rc = fih_int_encode_zero_equality(boot_platform_post_load(0));
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
     }
 

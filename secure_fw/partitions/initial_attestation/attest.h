@@ -90,8 +90,9 @@ psa_status_t attest_init(void);
  * \return Returns error code as specified in \ref psa_status_t
  */
 psa_status_t
-initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
-                               psa_outvec *out_vec, uint32_t num_outvec);
+initial_attest_get_token(const void *challenge_buf, size_t challenge_size,
+                         void *token_buf, size_t token_buf_size,
+                         size_t *token_size);
 
 /**
  * \brief Get the size of the initial attestation token
@@ -106,8 +107,7 @@ initial_attest_get_token(const psa_invec  *in_vec,  uint32_t num_invec,
  * \return Returns error code as specified in \ref psa_status_t
  */
 psa_status_t
-initial_attest_get_token_size(const psa_invec  *in_vec,  uint32_t num_invec,
-                                    psa_outvec *out_vec, uint32_t num_outvec);
+initial_attest_get_token_size(size_t challenge_size, size_t *token_size);
 
 #ifdef __cplusplus
 }

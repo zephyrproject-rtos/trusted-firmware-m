@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -42,6 +42,7 @@ psa_status_t its_flash_fs_dblock_compact_block(
     struct its_block_meta_t block_meta;
     psa_status_t err;
     uint32_t scratch_id = 0;
+    int8_t flush_data = 0;
 
     /* Read current block meta */
     err = its_flash_fs_mblock_read_block_metadata(fs_ctx, lblock, &block_meta);
@@ -66,6 +67,7 @@ psa_status_t its_flash_fs_dblock_compact_block(
         if (err != PSA_SUCCESS) {
             return PSA_ERROR_GENERIC_ERROR;
         }
+        flush_data = 1;
     }
 
     if (dst_offset > block_meta.data_start) {
@@ -80,6 +82,7 @@ psa_status_t its_flash_fs_dblock_compact_block(
         if (err != PSA_SUCCESS) {
             return PSA_ERROR_GENERIC_ERROR;
         }
+        flush_data = 1;
     }
 
     /* Swap the scratch and current data blocks. Must swap even with nothing
@@ -104,7 +107,7 @@ psa_status_t its_flash_fs_dblock_compact_block(
      * data block 0, in which case it will be flushed at the end of the metadata
      * block update.
      */
-    if (lblock != ITS_LOGICAL_DBLOCK0) {
+    if ((lblock != ITS_LOGICAL_DBLOCK0) && (flush_data != 0)) {
         err = fs_ctx->ops->flush(fs_ctx->cfg, scratch_id);
     }
 

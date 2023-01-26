@@ -117,8 +117,8 @@ partition runtime utilities provided by TF-M.
 ================================= =============================================
 Folder name                       Purpose
 ================================= =============================================
-lib/sprt/\*                       The SPRTL sources and intermedia files. [1]
-lib/sprt/shared\*                 Sources can be shared by out of SPRTL. [2]
+lib/runtime/\*                    The SPRTL sources and intermedia files. [1]
+lib/runtime/shared\*              Sources can be shared by out of SPRTL. [2]
 <partition_x>/\*                  Files for 'partition_x'.
 <partition_x>/include/\*          RoT Service API headers of 'partition_x'. [3]
 <partition_y>/\*                  Files for 'partition_y'.
@@ -150,7 +150,6 @@ ffm/\*                              SPM logic complies with PSA-FF-M and
                                     such as the runtime API and the thread
                                     operation, etc.
 cmsis_psa/\*                        CMSIS implementation for PSA-FF-M SPM. [1]
-cmsis_func/\*                       The library model implementation. [2]
 \*                                  Implementation sources.
 =================================== ===========================================
 
@@ -162,4 +161,4 @@ cmsis_func/\*                       The library model implementation. [2]
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

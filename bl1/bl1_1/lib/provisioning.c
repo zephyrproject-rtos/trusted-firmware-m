@@ -21,9 +21,11 @@
 __PACKED_STRUCT bl1_assembly_and_test_provisioning_data_t {
     uint32_t magic;
     uint8_t bl2_encryption_key[32];
+    uint8_t guk[32];
     uint8_t bl1_2_image_hash[32];
     uint8_t bl2_image_hash[32];
     uint8_t bl1_2_image[BL1_2_CODE_SIZE];
+    uint8_t bl1_rotpk_0[56];
 };
 
 static const struct bl1_assembly_and_test_provisioning_data_t *bl1_assembly_and_test_prov_data =
@@ -31,6 +33,18 @@ static const struct bl1_assembly_and_test_provisioning_data_t *bl1_assembly_and_
 
 void tfm_plat_provisioning_check_for_dummy_keys(void)
 {
+    uint64_t guk_start;
+
+    tfm_plat_otp_read(PLAT_OTP_ID_GUK, sizeof(guk_start), (uint8_t *)&guk_start);
+
+    if (guk_start == 0x0706050403020100) {
+        BL1_LOG("\033[1;31m[WRN] ");
+        BL1_LOG("This device was provisioned with dummy keys. ");
+        BL1_LOG("This device is \033[1;1mNOT SECURE");
+        BL1_LOG("\033[0m\r\n");
+    }
+
+    memset(&guk_start, 0, sizeof(guk_start));
 }
 
 int tfm_plat_provisioning_is_required(void)
@@ -58,6 +72,13 @@ enum tfm_plat_err_t provision_assembly_and_test(void)
         return err;
     }
 
+    err = tfm_plat_otp_write(PLAT_OTP_ID_GUK,
+                             sizeof(bl1_assembly_and_test_prov_data->guk),
+                             bl1_assembly_and_test_prov_data->guk);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_HASH,
                              sizeof(bl1_assembly_and_test_prov_data->bl1_2_image_hash),
                              bl1_assembly_and_test_prov_data->bl1_2_image_hash);
@@ -75,6 +96,13 @@ enum tfm_plat_err_t provision_assembly_and_test(void)
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE,
                              sizeof(bl1_assembly_and_test_prov_data->bl1_2_image),
                              bl1_assembly_and_test_prov_data->bl1_2_image);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+
+    err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_ROTPK_0,
+                             sizeof(bl1_assembly_and_test_prov_data->bl1_rotpk_0),
+                             bl1_assembly_and_test_prov_data->bl1_rotpk_0);
     if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
         return err;
     }

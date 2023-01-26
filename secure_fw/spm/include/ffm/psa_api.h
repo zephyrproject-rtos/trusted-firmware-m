@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "config_spm.h"
 #include "psa/client.h"
 #include "psa/service.h"
 

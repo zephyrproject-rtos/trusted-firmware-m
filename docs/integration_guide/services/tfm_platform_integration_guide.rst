@@ -32,7 +32,7 @@ The Platform service interfaces and types are defined and documented in
 
 - ``platform_sp.h/c`` : These files define and implement functionalities related
   to the platform service
-- ``tfm_platform_secure_api.c`` : This file implements ``tfm_platform_api.h``
+- ``tfm_platform_api.c`` : This file implements ``tfm_platform_api.h``
   functions to be called from the secure partitions. This is the entry point
   when the secure partitions request an action to the Platform service
   (e.g system reset).
@@ -77,7 +77,8 @@ Non-Volatile counters
 =====================
 
 The Platform Service provides an abstracted service for exposing the NV counters
-to the secure world. The following operations are supported:
+to secure partitions or non-secure callers. The following operations are
+supported:
 
 - Increment a counter.
 - Read a counter value to a preallocated buffer.
@@ -95,7 +96,7 @@ The range of counters id is defined in :
 ``platform/include/tfm_plat_nv_counters.h``
 
 For Level 2,3 isolation implementations, secure partitions in the
-Application Root of Trust, should have ``TFM_SP_PLATFORM_NV_COUNTER`` set as a
+Application Root of Trust, should have ``TFM_PLATFORM_SERVICE`` set as a
 dependency for access to the NV counter API.
 
 ***************************
@@ -110,4 +111,4 @@ Current Service Limitations
 
 --------------
 
-*Copyright (c) 2018-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*

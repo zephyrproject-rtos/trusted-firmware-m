@@ -43,14 +43,19 @@ The definition for Isolation Level 3:
   Partitions.
 
 .. important::
-  The PSA RoT Services can be implemented directly within the SPM, or as RoT
-  Services within one or more PSA RoT Secure Partitions. But if the PSA RoT
-  Services needs to be accessed by NSPE or Application RoT of Trust Services
-  must be implemented in a Secure Partitions (Please refer to chapter 2.4 -
-  "RoT Services" of `PSA Firmware_Framework for M`_).
-  The implementation in this design treats the PSA RoT Secure Partition in the
-  PSA RoT domain to follow `L3.3` above and relax `L3.2` for PSA RoT Secure
-  Partition under isolation level 3.
+  A Secure Partition RoT Service is a Root of Trust Service implemented within
+  a Secure Partition. An Application RoT Service must be implemented as
+  a Secure Partition RoT Service. But it is implementation-defined whether a
+  PSA RoT Service is a Secure Partition RoT Service.
+
+  Here listed several possible PSA RoT Service implementation mechanisms:
+
+  1. Implement them in Secure Partitions with respective boundaries.
+  2. Implement them in Secure Partitions, but no boundaries between these
+     Secure Partitions.
+  3. Implement them in a customized way instead of Secure Partitions.
+
+  TF-M chooses the 2nd option to balance performance and complexity.
 
 Isolation Rules
 ===============
@@ -62,11 +67,11 @@ of the isolation the boundaries should offer.
 .. note::
   In general, assets include not only ROM/RAM and peripherals. For the detail
   information about the memory assets and peripheral, please
-  refer to `PSA Firmware_Framework for M`_.
+  refer to `Firmware Framework for M (FF-M)`_.
 
 Memory Asset Class
 ------------------
-There are 3 memory asset classes defined in `PSA Firmware_Framework for M`_:
+There are 3 memory asset classes defined in `Firmware Framework for M (FF-M)`_:
 
 - Code
 - Constant data
@@ -388,16 +393,16 @@ interfaces. Please refer to it for more detail.
 
 Appendix
 ========
-| `PSA Firmware_Framework for M`_
+| `Firmware Framework for M (FF-M)`_
 
-.. _PSA Firmware_Framework for M:
+.. _Firmware Framework for M (FF-M):
   https://www.arm.com/architecture/security-features/platform-security
 
-| `Trusted Base System Architecture for Armv6-M, Armv7-M and Armv8-M`_
+| `Trusted Base System Architecture for M (TBSA-M)`_
 
-.. _Trusted Base System Architecture for Armv6-M, Armv7-M and Armv8-M:
-   https://www.arm.com/architecture/security-features/platform-security
+.. _Trusted Base System Architecture for M (TBSA-M):
+  https://www.arm.com/architecture/security-features/platform-security
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*

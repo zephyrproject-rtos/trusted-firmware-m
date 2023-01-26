@@ -67,6 +67,11 @@ extern const uint32_t MSIRangeTable[16];    /*!< MSI ranges table values     */
   */
 
 /**
+  \brief Exception / Interrupt Handler Function Prototype
+*/
+typedef void(*VECTOR_TABLE_Type)(void);
+
+/**
   * @brief Setup the microcontroller system.
   *
   * Initialize the System and update the SystemCoreClock variable.

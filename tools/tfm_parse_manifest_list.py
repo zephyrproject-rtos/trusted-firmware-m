@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -56,35 +58,36 @@ class TemplateLoader(BaseLoader):
             source = f.read()
         return source, template, False
 
-def get_single_macro_def_from_file(file_name, macro_name):
+def parse_configurations(file_paths):
     """
-    This function parses the given file_name to get the definition of the given
-    C Macro (macro_name).
+    Parses the given config files and return a dict whose key-values are build
+    configurations and their values.
 
-    It assumes that the target Macro has no multiple definitions in different
-    build configurations.
-
-    It supports Macros defined in multi-line, for example:
-    #define SOME_MACRO          \
-                            the_macro_value
-
-    Inputs:
-        - file_name: the file to get the Macro from
-        - macro_name: the name of the Macro to get
-    Returns:
-        - The Macro definition with '()' stripped, or Exception if not found
+    Valid configurations should be in the format of:
+    "#define VAR [...]" in a single line.
+    The value of the config is optional.
     """
+    configurations = {}
 
-    with open(file_name, 'r') as f:
-        pattern = re.compile(r'#define\s+{}[\\\s]+.*'.format(macro_name))
-        result = pattern.findall(f.read())
+    lines = []
+    for file in file_paths:
+        with open(file, 'r') as config_file:
+            lines += config_file.readlines()
 
-        if len(result) != 1:
-            raise Exception('{} not defined or has multiple definitions'.format(macro_name))
+    for line in lines:
+        if not line.startswith('#define'):
+            continue
 
-    macro_def = result[0].split()[-1].strip('()')
+        line = line.rstrip('\r\n')
+        line_items = line.split(maxsplit=2)
+        if len(line_items) == 3:
+            configurations[line_items[1]] = line_items[2]
+        elif len(line_items) == 2:
+            configurations[line_items[1]] = ''
 
-    return macro_def
+    logging.debug(configurations)
+
+    return configurations
 
 def manifest_validation(manifest, pid):
     """
@@ -100,9 +103,16 @@ def manifest_validation(manifest, pid):
     if manifest['psa_framework_version'] not in [1.0, 1.1]:
         raise Exception('Invalid psa_framework_version of {}'.format(manifest['name']))
 
-    # "type" validatoin
+    # "type" validation
     if manifest['type'] not in ['PSA-ROT', 'APPLICATION-ROT']:
         raise Exception('Invalid type of {}'.format(manifest['name']))
+
+    # "priority" validation
+    if manifest['priority'] not in ['HIGH', 'NORMAL', 'LOW']:
+        raise Exception('Invalid priority of {}'.format(manifest['name']))
+
+    if 'ns_agent' not in manifest:
+        manifest['ns_agent'] = False
 
     # Every PSA Partition must have at least either a secure service or an IRQ
     if (pid == None or pid >= TFM_PID_BASE) \
@@ -153,19 +163,69 @@ def manifest_validation(manifest, pid):
 
     return manifest
 
-def process_partition_manifests(manifest_lists, isolation_level, backend):
+def check_circular_dependency(partitions, service_partition_map):
     """
-    Parse the input manifest lists, generate the data base for genereated files
+    This function detects if there is any circular partition dependency chain.
+    If a circular dependency is detected, the script exits with error.
+
+    Inputs:
+        - partitions:            dict of partition manifests
+        - service_partition_map: map between services and their owner Partitions
+    """
+
+    dependency_table = {}
+    for partition in partitions:
+        manifest = partition['manifest']
+        dependencies = manifest['dependencies'].copy() \
+                       if 'dependencies' in manifest else []
+        dependencies += manifest['weak_dependencies'].copy() \
+                        if 'weak_dependencies' in manifest else []
+        dependency_table[manifest['name']] = {
+            'dependencies': [service_partition_map[dependency]
+                             for dependency in dependencies
+                             if dependency in service_partition_map],
+            'validated': False
+        }
+
+    for partition in dependency_table.keys():
+        validate_dependency_chain(partition, dependency_table, [])
+
+def validate_dependency_chain(partition,
+                              dependency_table,
+                              dependency_chain):
+    """
+    Recursively validate if the given partition and its dependencies
+    have a circular dependency with the given dependency_chain.
+    Exit with error code once any circular is detected.
+
+    Inputs:
+        - partition:        next partition to be checked
+        - dependency_table: dict of partitions and their dependencies
+        - dependency_chain: list of dependencies in current chain
+    """
+
+    dependency_chain.append(partition)
+    if partition in dependency_chain[:-1]:
+        logging.error(
+            'Circular dependency exists in chain: {}'.format(
+                ', '.join(dependency_chain)))
+        exit(1)
+    for dependency in dependency_table[partition]['dependencies']:
+        if dependency_table[dependency]['validated']:
+            continue
+        validate_dependency_chain(dependency, dependency_table, dependency_chain)
+    dependency_table[partition]['validated'] = True
+
+def process_partition_manifests(manifest_lists, configs):
+    """
+    Parse the input manifest lists, check if manifest settings are valid,
+    generate the data base for generated files
     and generate manifest header files.
 
     Parameters
     ----------
     manifest_lists:
-        A list of Secure Partition manifest lists and their original paths.
-        The manifest lists might be processed by CMake and the paths might be
-        different to the original ones. Original paths are needed to handle
-        relative paths in the lists.
-        The format must be [list A, orignal path A, list B, orignal path B, ...]
+        A list of Secure Partition manifest lists
 
     Returns
     -------
@@ -178,9 +238,11 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
     all_manifests = []
     pid_list = []
     no_pid_manifest_idx = []
+    service_partition_map = {}
     partition_statistics = {
         'connection_based_srv_num': 0,
         'ipc_partitions': [],
+        'mmio_region_num': 0,
         'flih_num': 0,
         'slih_num': 0
     }
@@ -191,52 +253,59 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
         'CONFIG_TFM_PSA_API_CROSS_CALL'           : '0',
         'CONFIG_TFM_PSA_API_SUPERVISOR_CALL'      : '0',
         'CONFIG_TFM_CONNECTION_BASED_SERVICE_API' : '0',
+        'CONFIG_TFM_MMIO_REGION_ENABLE'           : '0',
         'CONFIG_TFM_FLIH_API'                     : '0',
         'CONFIG_TFM_SLIH_API'                     : '0'
     }
 
+    isolation_level = int(configs['TFM_ISOLATION_LEVEL'], base = 10)
+    backend = configs['CONFIG_TFM_SPM_BACKEND']
+
     # Get all the manifests information as a dictionary
     for i, item in enumerate(manifest_lists):
-        if i % 2 == 0 and not os.path.isfile(item):
+        if not os.path.isfile(item):
             logging.error('Manifest list item [{}] must be a file'.format(i))
             exit(1)
-
-        if i % 2 == 1:
-            if not os.path.isdir(item):
-                logging.error('Manifest list item [{}] must be a directory'.format(i))
-                exit(1)
-
-            # Skip original manifest paths
-            continue
 
         # The manifest list file generated by configure_file()
         with open(item) as manifest_list_yaml_file:
             manifest_dic = yaml.safe_load(manifest_list_yaml_file)['manifest_list']
             for dict in manifest_dic:
-                # Add original path of manifest list.
-                # The validation will be done in the next loop.
-                dict['list_path'] = manifest_lists[i + 1]
+                # Replace environment variables in the manifest path and convert to absolute path.
+                # If it's already abspath, the path will not be changed.
+                manifest_path = os.path.join(os.path.dirname(item), # path of manifest list
+                                             os.path.expandvars(dict['manifest']))\
+                                             .replace('\\', '/')
+                dict['manifest'] = manifest_path
                 all_manifests.append(dict)
+
+    logging.info("------------ Display partition configuration - start ------------")
 
     # Parse the manifests
     for i, manifest_item in enumerate(all_manifests):
-        valid_enabled_conditions  = ['on',  'true',  'enabled']
-        valid_disabled_conditions = ['off', 'false', 'disabled', '']
+        valid_enabled_conditions  = ['1', 'on',  'true',  'enabled']
+        valid_disabled_conditions = ['0', 'off', 'false', 'disabled', '']
         is_enabled = ''
 
         if 'conditional' in manifest_item.keys():
-            is_enabled = str(manifest_item['conditional']).lower()
+            if manifest_item['conditional'] not in configs.keys():
+                logging.error('Configuration "{}" is not defined!'.format(manifest_item['conditional']))
+                exit(1)
+            is_enabled = configs[manifest_item['conditional']].lower()
         else:
-            # Partitions without 'conditional' is alwasy on
-            is_enabled = 'on'
+            # Partitions without 'conditional' is always on
+            is_enabled = '1'
 
         if is_enabled in valid_disabled_conditions:
+            logging.info("   {:40s}  OFF".format(manifest_item['description']))
             continue
-        elif is_enabled not in valid_enabled_conditions:
+        elif is_enabled in valid_enabled_conditions:
+            logging.info("   {:40s}  ON".format(manifest_item['description']))
+        else:
             raise Exception('Invalid "conditional" attribute: "{}" for {}. '
                             'Please set to one of {} or {}, case-insensitive.'\
                             .format(manifest_item['conditional'],
-                                    manifest_item['name'],
+                                    manifest_item['description'],
                                     valid_enabled_conditions, valid_disabled_conditions))
 
         # Check if partition ID is manually set
@@ -248,15 +317,11 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
 
             # Check if partition ID is duplicated
             if pid in pid_list:
-                raise Exception('PID No. {pid} has already been used!'.format(pid))
+                raise Exception('PID No. {} has already been used!'.format(pid))
             else:
                 pid_list.append(pid)
 
-        # Replace environment variables in the manifest path
-        manifest_path = os.path.expandvars(manifest_item['manifest'])
-        # Convert to absolute path. If it's already abspath, the path will not be changed.
-        manifest_path = os.path.join(manifest_item['list_path'], manifest_path).replace('\\', '/')
-
+        manifest_path = manifest_item['manifest']
         with open(manifest_path) as manifest_file:
             manifest = yaml.safe_load(manifest_file)
             if manifest.get('model', None) == 'dual':
@@ -274,6 +339,7 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
         # number (0) when there are no services.
         srv_idx = -1
         for srv_idx, service in enumerate(manifest.get('services', [])):
+            service_partition_map[service['name']] = manifest['name']
             if manifest['model'] == 'IPC':
                 # Assign signal value, the first 4 bits are reserved by FF-M
                 service['signal_value'] = (1 << (srv_idx + 4))
@@ -284,6 +350,10 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
             if service['connection_based']:
                 partition_statistics['connection_based_srv_num'] += 1
         logging.debug('{} has {} services'.format(manifest['name'], srv_idx +1))
+
+        # Calculate the number of mmio region
+        mmio_region_list = manifest.get('mmio_regions', [])
+        partition_statistics['mmio_region_num'] += len(mmio_region_list)
 
         # Set initial value to -1 to make (irq + 1) reflect the correct
         # number (0) when there are no irqs.
@@ -326,6 +396,10 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
                                'loadinfo_file': load_info_file,
                                'output_dir':output_dir})
 
+    logging.info("------------ Display partition configuration - end ------------")
+
+    check_circular_dependency(partition_list, service_partition_map)
+
     # Automatically assign PIDs for partitions without 'pid' attribute
     pid = max(pid_list, default = TFM_PID_BASE - 1)
     for idx in no_pid_manifest_idx:
@@ -356,9 +430,12 @@ def process_partition_manifests(manifest_lists, isolation_level, backend):
     if partition_statistics['connection_based_srv_num'] > 0:
         config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API'] = 1
 
+    if partition_statistics['mmio_region_num'] > 0:
+        config_impl['CONFIG_TFM_MMIO_REGION_ENABLE'] = 1
+
     if partition_statistics['flih_num'] > 0:
         config_impl['CONFIG_TFM_FLIH_API'] = 1
-    elif partition_statistics['slih_num'] > 0:
+    if partition_statistics['slih_num'] > 0:
         config_impl['CONFIG_TFM_SLIH_API'] = 1
 
     context['partitions'] = partition_list
@@ -392,7 +469,7 @@ def gen_per_partition_files(context):
         partition_context['attr'] = one_partition['attr']
         partition_context['manifest_out_basename'] = one_partition['manifest_out_basename']
 
-        logging.info ('Generating {} in {}'.format(one_partition['attr']['name'],
+        logging.info ('Generating {} in {}'.format(one_partition['attr']['description'],
                                             one_partition['output_dir']))
         outfile_path = os.path.dirname(one_partition['header_file'])
         if not os.path.exists(outfile_path):
@@ -461,13 +538,14 @@ def process_stateless_services(partitions):
     valid index for the service.
     Framework puts each service into a reordered stateless service list at
     position of "index". Other unused positions are left None.
+
+    Keep the variable names start with upper case 'STATIC_HANDLE_' the same
+    as the preprocessors in C sources. This could easier the upcomping
+    modification when developer searches these definitions for modification.
     """
 
-    STATIC_HANDLE_CONFIG_FILE = 'secure_fw/spm/cmsis_psa/spm_ipc.h'
-
     collected_stateless_services = []
-    stateless_index_max_num = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_NUM_LIMIT'), base = 10)
+    STATIC_HANDLE_NUM_LIMIT = 32
 
     # Collect all stateless services first.
     for partition in partitions:
@@ -484,15 +562,15 @@ def process_stateless_services(partitions):
     if len(collected_stateless_services) == 0:
         return []
 
-    if len(collected_stateless_services) > stateless_index_max_num:
-        raise Exception('Stateless service numbers range exceed {number}.'.format(number=stateless_index_max_num))
+    if len(collected_stateless_services) > STATIC_HANDLE_NUM_LIMIT:
+        raise Exception('Stateless service numbers range exceed {number}.'.format(number=STATIC_HANDLE_NUM_LIMIT))
 
     """
     Allocate an empty stateless service list to store services.
     Use "handle - 1" as the index for service, since handle value starts from
     1 and list index starts from 0.
     """
-    reordered_stateless_services = [None] * stateless_index_max_num
+    reordered_stateless_services = [None] * STATIC_HANDLE_NUM_LIMIT
     auto_alloc_services = []
 
     for service in collected_stateless_services:
@@ -505,7 +583,7 @@ def process_stateless_services(partitions):
 
         # Fill in service list with specified stateless handle, otherwise skip
         if isinstance(service_handle, int):
-            if service_handle < 1 or service_handle > stateless_index_max_num:
+            if service_handle < 1 or service_handle > STATIC_HANDLE_NUM_LIMIT:
                 raise Exception('Invalid stateless_handle setting: {handle}.'.format(handle=service['stateless_handle']))
             # Convert handle index to reordered service list index
             service_handle = service_handle - 1
@@ -518,22 +596,15 @@ def process_stateless_services(partitions):
         else:
             raise Exception('Invalid stateless_handle setting: {handle}.'.format(handle=service['stateless_handle']))
 
-    STATIC_HANDLE_IDX_BIT_WIDTH = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_IDX_BIT_WIDTH'), base = 10)
+    STATIC_HANDLE_IDX_BIT_WIDTH = 8
     STATIC_HANDLE_IDX_MASK = (1 << STATIC_HANDLE_IDX_BIT_WIDTH) - 1
-
-    STATIC_HANDLE_INDICATOR_OFFSET = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_INDICATOR_OFFSET'), base = 10)
-
-    STATIC_HANDLE_VER_OFFSET = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_VER_OFFSET'), base = 10)
-
-    STATIC_HANDLE_VER_BIT_WIDTH = \
-        int(get_single_macro_def_from_file(STATIC_HANDLE_CONFIG_FILE, 'STATIC_HANDLE_VER_BIT_WIDTH'), base = 10)
+    STATIC_HANDLE_INDICATOR_OFFSET = 30
+    STATIC_HANDLE_VER_OFFSET = 8
+    STATIC_HANDLE_VER_BIT_WIDTH = 8
     STATIC_HANDLE_VER_MASK = (1 << STATIC_HANDLE_VER_BIT_WIDTH) - 1
 
     # Auto-allocate stateless handle and encode the stateless handle
-    for i in range(0, stateless_index_max_num):
+    for i in range(0, STATIC_HANDLE_NUM_LIMIT):
         service = reordered_stateless_services[i]
 
         if service == None and len(auto_alloc_services) > 0:
@@ -541,7 +612,6 @@ def process_stateless_services(partitions):
 
         """
         Encode stateless flag and version into stateless handle
-        Check STATIC_HANDLE_CONFIG_FILE for details
         """
         stateless_handle_value = 0
         if service != None:
@@ -582,20 +652,14 @@ def parse_args():
                         , dest='gen_file_args'
                         , required=True
                         , metavar='file-list'
-                        , help='These files descripe the file list to generate')
+                        , help='These files describe the file list to generate')
 
-    parser.add_argument('-l', '--isolation-level'
-                        , dest='isolation_level'
+    parser.add_argument('-c', '--config-files'
+                        , nargs='+'
+                        , dest='config_files'
                         , required=True
-                        , choices=['1', '2', '3']
-                        , metavar='isolation-level')
-
-    parser.add_argument('-b', '--backend'
-                        , dest='backend'
-                        , required=True
-                        , choices=['IPC', 'SFN']
-                        , metavar='spm-backend'
-                        , help='The isolation level')
+                        , metavar='config-files'
+                        , help='A header file contains build configurations')
 
     parser.add_argument('-q', '--quiet'
                         , dest='quiet'
@@ -605,11 +669,6 @@ def parse_args():
                         , help='Reduce log messages')
 
     args = parser.parse_args()
-
-    if len(args.manifest_lists) % 2 != 0:
-        logging.error('Invalid structure in manifest lists.\n'
-              'Each element shall consist of a manifest list and its original path')
-        exit(1)
 
     return args
 
@@ -650,8 +709,7 @@ def main():
     os.chdir(os.path.join(sys.path[0], '..'))
 
     context = process_partition_manifests(manifest_lists,
-                                          int(args.isolation_level),
-                                          args.backend)
+                                          parse_configurations(args.config_files))
 
     utilities = {}
     utilities['donotedit_warning'] = donotedit_warning

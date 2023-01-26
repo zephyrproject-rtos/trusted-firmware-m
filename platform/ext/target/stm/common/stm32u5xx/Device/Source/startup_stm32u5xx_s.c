@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,21 +22,15 @@
  */
 
 #include "cmsis.h"
-#include "region.h"
-
-/*----------------------------------------------------------------------------
-  Exception / Interrupt Handler Function Prototype
- *----------------------------------------------------------------------------*/
-typedef void( *pFunc )( void );
 
 /*----------------------------------------------------------------------------
   External References
  *----------------------------------------------------------------------------*/
-#define __MSP_INITIAL_SP              REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
-#define __MSP_STACK_LIMIT             REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Base)
-
-extern uint32_t __MSP_INITIAL_SP;
-extern uint32_t __MSP_STACK_LIMIT;
+extern uint32_t __INITIAL_SP;
+extern uint32_t __STACK_LIMIT;
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+extern uint64_t __STACK_SEAL;
+#endif
 
 extern void Error_Handler(void);
 extern void __PROGRAM_START(void) __NO_RETURN;
@@ -50,8 +44,8 @@ void Reset_Handler  (void) __NO_RETURN;
   Exception / Interrupt Handler
  *----------------------------------------------------------------------------*/
 #define DEFAULT_IRQ_HANDLER(handler_name)  \
-void handler_name(void); \
-__WEAK void handler_name(void) { \
+void __WEAK handler_name(void) __NO_RETURN; \
+void handler_name(void) { \
     while(1); \
 }
 
@@ -212,9 +206,9 @@ DEFAULT_IRQ_HANDLER(FMAC_IRQHandler)
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
-extern const pFunc __VECTOR_TABLE[];
-       const pFunc __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
-  (pFunc)(&__MSP_INITIAL_SP),       /*      Initial Stack Pointer */
+extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
+       const VECTOR_TABLE_Type __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
+  (VECTOR_TABLE_Type)(&__INITIAL_SP),/*      Initial Stack Pointer */
   Reset_Handler,                    /*      Reset Handler */
   NMI_Handler,                      /* -14: NMI Handler */
   Error_Handler,                    /* -13: Hard Fault Handler */
@@ -374,17 +368,6 @@ extern const pFunc __VECTOR_TABLE[];
   FMAC_IRQHandler,                  /* 124: FMAC global interrupt  */
 };
 
-
-/*----------------------------------------------------------------------------
-  Exception / Interrupt Vector table
- *----------------------------------------------------------------------------*/
-
-#if defined ( __GNUC__ )
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#endif
-
-
 #if defined ( __GNUC__ )
 #pragma GCC diagnostic pop
 #endif
@@ -394,13 +377,20 @@ extern const pFunc __VECTOR_TABLE[];
  *----------------------------------------------------------------------------*/
 void Reset_Handler(void)
 {
+    __set_PSP((uint32_t)(&__INITIAL_SP));
+
+    __set_MSPLIM((uint32_t)(&__STACK_LIMIT));
+    __set_PSPLIM((uint32_t)(&__STACK_LIMIT));
+
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+    __TZ_set_STACKSEAL_S((uint32_t *)(&__STACK_SEAL));
+#endif
   __IO uint32_t tmp;
   /* disable IRQ is removed, to support tamper interrupt from the beginning */
   /*__disable_irq();*/
   /* Tamp IRQ prio is set to highest , and IRQ is enabled */
   NVIC_SetPriority(TAMP_IRQn, 0);
   NVIC_EnableIRQ(TAMP_IRQn);
-  __set_MSPLIM((uint32_t)(&__MSP_STACK_LIMIT));
   SCB->VTOR = (uint32_t) &__VECTOR_TABLE[0];
   /* Program AIRCR with PRIS = 1*/
   tmp = SCB->AIRCR;

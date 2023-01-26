@@ -10,6 +10,7 @@
  */
 
 #include "attest_token.h"
+#include "config_attest.h"
 #include "qcbor.h"
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
 #include "t_cose_mac0_sign.h"
@@ -20,6 +21,7 @@
 #include "q_useful_buf.h"
 #include "psa/crypto.h"
 #include "attest_key.h"
+#include "tfm_crypto_defs.h"
 
 
 /**
@@ -98,7 +100,7 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
                           int32_t cose_alg_id,
                           const struct q_useful_buf *out_buf)
 {
-    psa_key_handle_t key_handle = 0;
+    psa_key_handle_t key_handle = TFM_BUILTIN_KEY_ID_IAK;
     struct t_cose_key attest_key;
     enum psa_attest_err_t attest_ret;
     enum t_cose_err_t cose_ret;
@@ -116,10 +118,6 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
 
     t_cose_mac0_sign_init(&(me->mac_ctx), t_cose_options, cose_alg_id);
 
-    attest_ret = attest_get_signing_key_handle(&key_handle);
-    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
-        return ATTEST_TOKEN_ERR_SIGNING_KEY;
-    }
     attest_key.crypto_lib = T_COSE_CRYPTO_LIB_PSA;
     attest_key.k.key_handle = (uint64_t)key_handle;
 
@@ -234,10 +232,9 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
 {
     enum t_cose_err_t cose_ret;
     enum attest_token_err_t return_value = ATTEST_TOKEN_ERR_SUCCESS;
-    enum psa_attest_err_t   attest_ret;
     int32_t                 t_cose_options = 0;
     struct t_cose_key attest_key;
-    psa_key_handle_t private_key;
+    psa_key_handle_t private_key = TFM_BUILTIN_KEY_ID_IAK;
     struct q_useful_buf_c attest_key_id = NULL_Q_USEFUL_BUF_C;
 
     /* Remember some of the configuration values */
@@ -248,20 +245,16 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     if (opt_flags & TOKEN_OPT_SHORT_CIRCUIT_SIGN) {
         t_cose_options |= T_COSE_OPT_SHORT_CIRCUIT_SIG;
     } else {
-#ifdef INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
         attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);
         if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
             return ATTEST_TOKEN_ERR_GENERAL;
         }
-#endif /* INCLUDE_COSE_KEY_ID */
+#endif /* ATTEST_INCLUDE_COSE_KEY_ID */
     }
 
     t_cose_sign1_sign_init(&(me->signer_ctx), t_cose_options, cose_alg_id);
 
-    attest_ret = attest_get_signing_key_handle(&private_key);
-    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
-        return ATTEST_TOKEN_ERR_SIGNING_KEY;
-    }
     attest_key.crypto_lib = T_COSE_CRYPTO_LIB_PSA;
     attest_key.k.key_handle = private_key;
 

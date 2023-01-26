@@ -26,8 +26,15 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     }
 
     /**** Section for holding partition RO load data */
+    /*
+     * Sort the partition info by priority to guarantee the initing order.
+     * The first loaded partition will be inited at last in SFN model.
+     */
     TFM_SP_LOAD_LIST +0 ALIGN 4 {
-        *(.part_load)
+        *(.part_load_priority_lowest)
+        *(.part_load_priority_low)
+        *(.part_load_priority_normal)
+        *(.part_load_priority_high)
     }
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
@@ -86,20 +93,6 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     TFM_APP_RW_STACK_START +0 ALIGN GTZC_RAM_ALIGN EMPTY 0x0 {
     }
 
-# if !defined(TFM_PSA_API)
-    /* PSP is unprivileged in single-core topology. Reserve 8 bytes for seal */
-    ER_INITIAL_PSP +0 ALIGN 32 EMPTY S_PSP_STACK_SIZE - 0x8 {
-    }
-
-    ER_INITIAL_PSP_SEAL +0 EMPTY 0x8 {
-    }
-# endif /* !defined(TFM_PSA_API) */
-
-
-#if !defined(TFM_PSA_API)
-    TFM_SECURE_STACK +0 ALIGN 128 EMPTY 0x2000 {
-    }
-#endif /* !defined(TFM_PSA_API) */
 
 #if defined(CONFIG_TFM_PARTITION_META)
     TFM_SP_META_PTR +0 ALIGN 32 {
@@ -126,7 +119,10 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     }
 
     /* MSP */
-    ARM_LIB_STACK +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE {
+    ARM_LIB_STACK +0 ALIGN 32 OVERLAY EMPTY S_MSP_STACK_SIZE - 0x8 {
+    }
+
+    STACKSEAL +0 EMPTY 0x8 {
     }
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY S_HEAP_SIZE {
@@ -136,12 +132,20 @@ LR_CODE S_CODE_START S_CODE_SIZE {
         * (+RW +ZI)
     }
 
+    /**** The runtime partition placed order is same as load partition */
     ER_PART_RT_POOL +0 ALIGN 4 {
-        *(.bss.part_runtime)
+        *(.bss.part_runtime_priority_lowest)
+        *(.bss.part_runtime_priority_low)
+        *(.bss.part_runtime_priority_normal)
+        *(.bss.part_runtime_priority_high)
     }
 
+    /**** The runtime service placed order is same as load partition */
     ER_SERV_RT_POOL +0 ALIGN 4 {
-        *(.bss.serv_runtime)
+        *(.bss.serv_runtime_priority_lowest)
+        *(.bss.serv_runtime_priority_low)
+        *(.bss.serv_runtime_priority_normal)
+        *(.bss.serv_runtime_priority_high)
     }
 
     /**** PSA RoT DATA start here */

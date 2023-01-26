@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
-# Copyright (c) 2020-2022, Cypress Semiconductor Corp. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -103,18 +104,12 @@ target_sources(platform_s
         ./Native_Driver/generated_source/cycfg_routing.c
         ./Native_Driver/generated_source/cycfg_system.c
         ./Native_Driver/generated_source/cycfg_qspi_memslot.c
-        ./tfm_interrupts.c
-        ./tfm_hal_multi_core.c
-        ./tfm_hal_isolation.c
-        ./tfm_hal_platform.c
         ./CMSIS_Driver/Driver_Flash.c
         ./CMSIS_Driver/Driver_USART.c
-        ./target_cfg.c
         ./driver_smpu.c
         ./driver_ppu.c
         ./driver_dap.c
         ./Device/Source/device_definition.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -125,7 +120,7 @@ target_compile_definitions(platform_s
 )
 
 target_link_libraries(platform_s
-    PRIVATE
+    PUBLIC
         ${MTB_PDL_CAT1_LIB_S_TARGET}
         ${P64_UTILS_LIB_TARGET}
 )
@@ -185,25 +180,19 @@ if (NS)
     )
 endif()
 
-########################### export sources #####################################
+#========================= ns_agent_mailbox ===================================#
 
-set(INSTALL_INTERFACE_INC_DIR    ${TFM_INSTALL_PATH}/interface/include)
-set(INSTALL_INTERFACE_SRC_DIR    ${TFM_INSTALL_PATH}/interface/src)
-set(INSTALL_IMAGE_SIGNING_DIR    ${TFM_INSTALL_PATH}/image_signing)
-set(INSTALL_MEMORY_LAYOUT_DIR    ${TFM_INSTALL_PATH}/memory_layout)
+target_sources(tfm_psa_rot_partition_ns_agent_mailbox
+    PRIVATE
+        tfm_hal_multi_core.c
+)
 
-install(FILES       mailbox/platform_multicore.c
-                    mailbox/platform_ns_mailbox.c
-        DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
+#========================= tfm_spm ============================================#
 
-install(FILES       mailbox/platform_multicore.h
-                    mailbox/ns_ipc_config.h
-                    Device/Config/device_cfg.h
-        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
-
-install(FILES       partition/flash_layout.h
-                    partition/region_defs.h
-        DESTINATION ${INSTALL_MEMORY_LAYOUT_DIR})
-
-install(FILES       security/policy/policy_multi_CM0_CM4_tfm_dev_certs.json
-        DESTINATION ${INSTALL_IMAGE_SIGNING_DIR})
+target_sources(tfm_spm
+    PRIVATE
+        ./target_cfg.c
+        ./tfm_interrupts.c
+        ./tfm_hal_isolation.c
+        ./tfm_hal_platform.c
+)

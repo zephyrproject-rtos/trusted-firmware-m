@@ -10,6 +10,9 @@ This document introduces a generic threat model of Trusted Firmware-M (TF-M).
 This generic threat model provides an overall analysis of TF-M implementation
 and identifies general threats and mitigation.
 
+There is also a dedicated document for physical attacks mitigations which can be found
+:doc:`here </technical_references/design_docs/tfm_physical_attack_mitigation>`.
+
 .. note::
 
   If you think a security vulnerability is found, please follow
@@ -135,9 +138,8 @@ More details of data flows are listed below.
   +-----------+----------------------------------------------------------------+
   | ``DF2``   | NSPE requests TF-M RoT services.                               |
   |           |                                                                |
-  |           | - In TF-M Library model, NS invokes Secure Function calls      |
-  |           | - In TF-M IPC model, NS invokes PSA Client calls based on IPC  |
-  |           |   protocol defined in [FF-M]_.                                 |
+  |           | NSPE requests RoT services via PSA Client APIs defined in      |
+  |           | [FF-M]_.                                                       |
   |           |                                                                |
   |           | In single Armv8-M core scenarios, SG instruction is executed   |
   |           | in Non-secure Callable region to trigger a transition from     |
@@ -149,9 +151,9 @@ More details of data flows are listed below.
   | ``DF3``   | Secure Partitions fetch input data from NS and write back      |
   |           | output data to NS.                                             |
   |           |                                                                |
-  |           | In TF-M IPC model, as required in [FF-M]_, Secure Partitions   |
-  |           | should not directly access NSPE memory. Instead, RoT services  |
-  |           | relies on TF-M SPM to access NSPE memory.                      |
+  |           | As required in [FF-M]_, Secure Partitions should not directly  |
+  |           | access NSPE memory. Instead, RoT services relies on TF-M SPM   |
+  |           | to access NSPE memory.                                         |
   +-----------+----------------------------------------------------------------+
   | ``DF4``   | TF-M returns RoT service results to NSPE after NS request to   |
   |           | RoT service is completed.                                      |
@@ -710,11 +712,8 @@ RoT services read and write NS data
 
 This section identifies threats on ``DF3`` defined in `Data Flow Diagram`_.
 
-In Library model, RoT services directly read and write NS memory to simplify
-the implementation and decrease latency.
-
-In TF-M IPC model, RoT services can either directly access NS memory or rely on
-TF-M SPM to obtain NS input data and send response data back to NS memory.
+RoT services can either directly access NS memory or rely on TF-M SPM to obtain NS input data and
+send response data back to NS memory.
 
 .. _TFM-GENERIC-SECURE-SERVICE-RW-T-1:
 
@@ -738,10 +737,10 @@ TF-M SPM to obtain NS input data and send response data back to NS memory.
   +---------------+------------------------------------------------------------+
   | Category      | Tampering                                                  |
   +---------------+------------------------------------------------------------+
-  | Mitigation    | In TF-M IPC model, if RoT services request SPM to read and |
-  |               | write NS data. TF-M SPM follows [FF-M]_ to copy the NS     |
-  |               | input data into SPE memory region owned by the RoT         |
-  |               | service, before the RoT service processes the data.        |
+  | Mitigation    | If RoT services request SPM to read and write NS data.     |
+  |               | TF-M SPM follows [FF-M]_ to copy the NS input data into    |
+  |               | SPE memory region owned by the RoT service, before the RoT |
+  |               | service processes the data.                                |
   |               | Therefore, the NS input data is protected during the RoT   |
   |               | service execution from being tampered.                     |
   |               |                                                            |
@@ -795,9 +794,9 @@ TF-M SPM to obtain NS input data and send response data back to NS memory.
   |               | service calls and therefore each service call requires no  |
   |               | more than 4 input/output vectors.                          |
   |               |                                                            |
-  |               | In TF-M IPC model, if RoT services request SPM to read and |
-  |               | write NS data. SPM will validate the target addresses and  |
-  |               | can detect the invalid addresses to mitigate this threat.  |
+  |               | If RoT services request SPM to read and write NS data.     |
+  |               | SPM will validate the target addresses and can detect the  |
+  |               | invalid addresses to mitigate this threat.                 |
   |               |                                                            |
   |               | If RoT services can directly access NS memory, it is       |
   |               | required to review and confirm the implementation of RoT   |
@@ -838,9 +837,9 @@ TF-M SPM to obtain NS input data and send response data back to NS memory.
   |               | service calls and therefore each service call requires no  |
   |               | more than 4 input/output vectors.                          |
   |               |                                                            |
-  |               | In TF-M IPC model, if RoT services request SPM to read and |
-  |               | write NS data. SPM will validate the target addresses and  |
-  |               | can detect the invalid addresses to mitigate this threat.  |
+  |               | If RoT services request SPM to read and write NS data.     |
+  |               | SPM will validate the target addresses and can detect the  |
+  |               | invalid addresses to mitigate this threat.                 |
   |               |                                                            |
   |               | If RoT services can directly access NS memory, it is       |
   |               | required to review and confirm the implementation of RoT   |

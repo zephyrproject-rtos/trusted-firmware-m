@@ -1,14 +1,16 @@
 /**************************************************************************//**
  * @file     cmsis_iccarm.h
  * @brief    CMSIS compiler ICCARM (IAR Compiler for Arm) header file
- * @version  V5.1.1
- * @date     30. July 2019
+ * @version  V5.3.0
+ * @date     14. April 2021
  ******************************************************************************/
 
 //------------------------------------------------------------------------------
 //
-// Copyright (c) 2017-2020 IAR Systems
-// Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+// Copyright (c) 2017-2021 IAR Systems
+// Copyright (c) 2017-2021 Arm Limited. All rights reserved.
+//
+// SPDX-License-Identifier: Apache-2.0
 //
 // Licensed under the Apache License, Version 2.0 (the "License")
 // you may not use this file except in compliance with the License.
@@ -250,11 +252,11 @@ __packed struct  __iar_u32 { uint32_t v; };
 #endif
 
 #ifndef __INITIAL_SP
-#define __INITIAL_SP              ARM_LIB_STACK$$Limit
+#define __INITIAL_SP              CSTACK$$Limit
 #endif
 
 #ifndef __STACK_LIMIT
-#define __STACK_LIMIT             ARM_LIB_STACK$$Base
+#define __STACK_LIMIT             CSTACK$$Base
 #endif
 
 #ifndef __VECTOR_TABLE

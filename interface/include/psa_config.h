@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,10 +24,8 @@
  */
 #if defined(CONFIG_TFM_BUILDING_SPE)
 
-#ifdef TFM_PSA_API
 /* SPE has specific configurations. */
 #include "config_impl.h"
-#endif /* TFM_PSA_API */
 
 #include "psa_interface_redirect.h"
 

@@ -248,6 +248,11 @@ void fc_init_mpl(enum rgn_mpe_t mpe);
 void fc_enable_mpl(enum rgn_mpe_t mpe, enum rgn_mpl_t mpl);
 
 /**
+ * \brief Reads Master Permission List in the selected Firewall Component
+ */
+void fc_read_mpl(enum rgn_mpe_t mpe, enum rgn_mpl_t* mpl);
+
+/**
  * \brief Disables Master Permission List in the selected Firewall Component
  */
 void fc_disable_mpl(enum rgn_mpe_t mpe, enum rgn_mpl_t mpl);

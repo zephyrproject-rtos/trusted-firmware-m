@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited
+ * Copyright (c) 2020-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,7 @@ define region NS_CODE_region =   mem:[from NS_CODE_START size NS_CODE_SIZE];
 
 define region NS_RAM_region  =  mem:[from NS_DATA_START size NS_DATA_SIZE];
 
-define block ARM_LIB_STACK_MSP  with alignment = 8, size = NS_MSP_STACK_SIZE { };
-define block ARM_LIB_STACK      with alignment = 8, size = NS_PSP_STACK_SIZE { };
+define block CSTACK             with alignment = 8, size = NS_STACK_SIZE { };
 define block HEAP               with alignment = 8, size = NS_HEAP_SIZE { };
 define block ARM_LIB_HEAP       with alignment = 8, size = NS_HEAP_SIZE { };
 define overlay HEAP_OVL         {block HEAP};
@@ -51,8 +50,7 @@ if (isdefinedsymbol(__USE_DLIB_PERTHREAD))
 
 define block LR_CODE with fixed order {block ER_CODE};
 define block DATA with fixed order {block ER_DATA,
-                                    block ARM_LIB_STACK_MSP,
-                                    block ARM_LIB_STACK,
+                                    block CSTACK,
                                     overlay HEAP_OVL};
 
 place in NS_CODE_region  { block LR_CODE };

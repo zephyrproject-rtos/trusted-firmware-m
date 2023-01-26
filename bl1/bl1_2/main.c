@@ -14,9 +14,11 @@
 #include "log.h"
 #include "image.h"
 #include "region_defs.h"
+#include "pq_crypto.h"
 
 extern uint32_t platform_code_is_bl1_2;
 
+#ifndef TFM_BL1_PQ_CRYPTO
 static fih_int image_hash_check(struct bl1_2_image_t *img)
 {
     uint8_t computed_bl2_hash[BL2_HASH_SIZE];
@@ -39,6 +41,7 @@ static fih_int image_hash_check(struct bl1_2_image_t *img)
                                        BL2_HASH_SIZE);
     FIH_RET(fih_rc);
 }
+#endif /* !TFM_BL1_PQ_CRYPTO */
 
 static fih_int is_image_security_counter_valid(struct bl1_2_image_t *img)
 {
@@ -62,7 +65,15 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
     fih_int fih_rc = FIH_FAILURE;
 
 #ifdef TFM_BL1_PQ_CRYPTO
-    /* TODO */
+    #warning PQ crypto is experimental, and should not be used in production
+    BL1_LOG("\033[1;31m[WRN] ");
+    BL1_LOG("PQ crypto is experimental, and should not be used in production");
+    BL1_LOG("\033[0m\r\n");
+    FIH_CALL(pq_crypto_verify, fih_rc, TFM_BL1_KEY_ROTPK_0,
+                                       (uint8_t *)&img->protected_values,
+                                       sizeof(img->protected_values),
+                                       img->header.sig,
+                                       sizeof(img->header.sig));
 #else
     FIH_CALL(image_hash_check, fih_rc, img);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
@@ -108,6 +119,8 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
     struct bl1_2_image_t *image_to_decrypt;
     struct bl1_2_image_t *image_after_decrypt =
         (struct bl1_2_image_t *)BL2_IMAGE_START;
+    uint8_t key_buf[32];
+    uint8_t label[] = "BL2_DECRYPTION_KEY";
 
 #ifdef TFM_BL1_MEMORY_MAPPED_FLASH
     /* If we have memory-mapped flash, we can do the decrypt directly from the
@@ -133,11 +146,28 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
     image_to_decrypt = (struct bl1_2_image_t *)BL2_IMAGE_START;
 #endif /* TFM_BL1_MEMORY_MAPPED_FLASH */
 
-    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_BL2_ENCRYPTION,
-                        image_to_decrypt->header.ctr_iv,
-                        (uint8_t *)&image_to_decrypt->protected_values.encrypted_data,
-                        sizeof(image_after_decrypt->protected_values.encrypted_data),
-                        (uint8_t *)&image_after_decrypt->protected_values.encrypted_data);
+    /* As the security counter is an attacker controlled parameter, bound the
+     * values to a sensible range. In this case, we choose 1024 as the bound as
+     * it is the same as the max amount of signatures as a H=10 LMS key.
+     */
+    if (image_to_decrypt->protected_values.security_counter >= 1024) {
+        FIH_RET(FIH_FAILURE);
+    }
+
+    /* The image security counter is used as a KDF input */
+    rc = bl1_derive_key(TFM_BL1_KEY_BL2_ENCRYPTION, label, sizeof(label),
+                        (uint8_t *)&image_to_decrypt->protected_values.security_counter,
+                        sizeof(image_to_decrypt->protected_values.security_counter),
+                        key_buf, sizeof(key_buf));
+    if (rc) {
+        FIH_RET(fih_int_encode_zero_equality(rc));
+    }
+
+    rc = bl1_aes_256_ctr_decrypt(TFM_BL1_KEY_USER, key_buf,
+                                 image_after_decrypt->header.ctr_iv,
+                                 (uint8_t *)&image_to_decrypt->protected_values.encrypted_data,
+                                 sizeof(image_after_decrypt->protected_values.encrypted_data),
+                                 (uint8_t *)&image_after_decrypt->protected_values.encrypted_data);
     if (rc) {
         FIH_RET(fih_int_encode_zero_equality(rc));
     }

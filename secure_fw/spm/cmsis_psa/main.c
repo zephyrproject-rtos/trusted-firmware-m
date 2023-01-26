@@ -5,60 +5,35 @@
  *
  */
 
+#include "build_config_check.h"
 #include "fih.h"
 #include "ffm/tfm_boot_data.h"
-#include "compile_check_defs.h"
 #include "region.h"
 #include "spm_ipc.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
-#include "tfm_spm_hal.h"
+#include "tfm_api.h"
 #include "tfm_spm_log.h"
 #include "tfm_version.h"
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
 
-/*
- * Avoids the semihosting issue
- * FixMe: describe 'semihosting issue'
- */
-#if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
-__asm("  .global __ARM_use_no_argv\n");
-#endif
-
-#ifndef TFM_LVL
-#error TFM_LVL is not defined!
-#elif (TFM_LVL != 1) && (TFM_LVL != 2) && (TFM_LVL != 3)
-#error Invalid TFM_LVL value. Only TFM_LVL 1, 2 and 3 are supported in IPC model!
-#endif
-
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
+uintptr_t spm_boundary = (uintptr_t)NULL;
 
 static fih_int tfm_core_init(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
-#ifdef TFM_FIH_PROFILE_ON
     fih_int fih_rc = FIH_FAILURE;
-#else
-    enum tfm_hal_status_t hal_status = TFM_HAL_ERROR_GENERIC;
-#endif
 
     /*
      * Access to any peripheral should be performed after programming
      * the necessary security components such as PPC/SAU.
      */
-#ifdef TFM_FIH_PROFILE_ON
-    FIH_CALL(tfm_hal_set_up_static_boundaries, fih_rc);
+    FIH_CALL(tfm_hal_set_up_static_boundaries, fih_rc, &spm_boundary);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
-#else /* TFM_FIH_PROFILE_ON */
-    hal_status = tfm_hal_set_up_static_boundaries();
-    if (hal_status != TFM_HAL_SUCCESS) {
-        return TFM_ERROR_GENERIC;
-    }
-#endif /* TFM_FIH_PROFILE_ON */
-
 #ifdef TFM_FIH_PROFILE_ON
     FIH_CALL(tfm_hal_verify_static_boundaries, fih_rc);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
@@ -66,21 +41,14 @@ static fih_int tfm_core_init(void)
     }
 #endif
 
-#ifdef TFM_FIH_PROFILE_ON
     FIH_CALL(tfm_hal_platform_init, fih_rc);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
         FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
-#else /* TFM_FIH_PROFILE_ON */
-    hal_status = tfm_hal_platform_init();
-    if (hal_status != TFM_HAL_SUCCESS) {
-        return TFM_ERROR_GENERIC;
-    }
-#endif /* TFM_FIH_PROFILE_ON */
 
     plat_err = tfm_plat_otp_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
     }
 
     /* Perform provisioning. */
@@ -100,8 +68,8 @@ static fih_int tfm_core_init(void)
 
     SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_LVL);
 
-#if (CONFIG_TFM_FP == 2)
-    SPMLOG_INFMSG("TF-M FP mode: Hardware\r\n");
+#if (CONFIG_TFM_FLOAT_ABI == 2)
+    SPMLOG_INFMSG("TF-M Float ABI: Hard\r\n");
 #ifdef CONFIG_TFM_LAZY_STACKING
     SPMLOG_INFMSG("Lazy stacking enabled\r\n");
 #else
@@ -141,11 +109,13 @@ int main(void)
      */
     tfm_arch_set_secure_exception_priorities();
 
-#if (CONFIG_TFM_FP >= 1)
-    tfm_arch_clear_fp_data();
+#ifdef TFM_FIH_PROFILE_ON
+    /* Check secure exception priority */
+    FIH_CALL(tfm_arch_verify_secure_exception_priorities, fih_rc);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+         tfm_core_panic();
+    }
 #endif
-
-    tfm_arch_clear_fp_status();
 
     /* Move to handler mode for further SPM initialization. */
     tfm_core_handler_mode();

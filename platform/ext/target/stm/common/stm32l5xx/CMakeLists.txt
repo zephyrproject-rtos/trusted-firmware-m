@@ -70,10 +70,6 @@ target_sources(platform_s
         ${STM_COMMON_DIR}/hal/Native_Driver/tick.c
         ${STM_COMMON_DIR}/hal/Native_Driver/mpu_armv8m_drv.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/spm_hal.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_platform.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/secure/low_level_device.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_flash.c
         ${STM_COMMON_DIR}/hal/CMSIS_Driver/low_level_com.c
@@ -90,8 +86,6 @@ target_sources(platform_s
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rcc.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rcc_ex.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_gtzc.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_isolation_mpu_v8m.c
-        ${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_nvic.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_platform_system>
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng.c
         ${CMAKE_CURRENT_SOURCE_DIR}/hal/Src/stm32l5xx_hal_rng_ex.c
@@ -205,6 +199,15 @@ if(BL2)
     )
 endif()
 
+#========================= tfm_spm ============================================#
+
+target_sources(tfm_spm
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/target_cfg.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_isolation.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/secure/tfm_hal_platform.c
+)
+
 install(FILES
         ${STM_COMMON_DIR}/scripts/stm_tool.py
         ${STM_COMMON_DIR}/scripts/bin2hex.py
@@ -277,8 +280,18 @@ set(CONTENT_FOR_BL2_PREPROCESSING
     "\tRE_IMAGE_FLASH_NV_COUNTERS = (FLASH_BASE_ADDRESS+FLASH_NV_COUNTERS_AREA_OFFSET),\n"
     "#endif\n"
     "\tRE_IMAGE_FLASH_NV_PS = (FLASH_BASE_ADDRESS+FLASH_PS_AREA_OFFSET),\n"
-    "\tRE_IMAGE_FLASH_NV_ITS = (FLASH_BASE_ADDRESS+FLASH_ITS_AREA_OFFSET)\n}\;"
+    "\tRE_IMAGE_FLASH_NV_ITS = (FLASH_BASE_ADDRESS+FLASH_ITS_AREA_OFFSET),\n"
 )
+if(MCUBOOT_ENC_IMAGES)
+    set(CONTENT_ENCRYPTED
+    "\tRE_IMAGE_ENCRYPTED = 0x01\n}\;"
+    )
+else()
+    set(CONTENT_ENCRYPTED
+    "\tRE_IMAGE_ENCRYPTED = 0x0\n}\;"
+    )
+endif()
 
 string(CONCAT BL2_PREPROCESSING ${FLAGS_FOR_BL2_PREPROCESSING}
-       ${CONTENT_FOR_BL2_PREPROCESSING})
+       ${CONTENT_FOR_BL2_PREPROCESSING}
+       ${CONTENT_ENCRYPTED})

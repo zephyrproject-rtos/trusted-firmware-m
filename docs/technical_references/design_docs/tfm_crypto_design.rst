@@ -38,11 +38,7 @@ components, which are listed below:
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
    | **Component name**          | **Description**                                               | **Location**                                                         |
    +=============================+===============================================================+======================================================================+
-   | SPE client API interface    | This module exports the client API of PSA Crypto to the other | ``./secure_fw/partitions/crypto/tfm_crypto_secure_api.c``            |
-   |                             | services available in TF-M.                                   |                                                                      |
-   +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
-   | NSPE client API interface   | This module exports the client API of PSA Crypto to the NSPE  | ``./interface/src/tfm_crypto_api.c``                                 |
-   |                             | (i.e. to the applications).                                   |                                                                      |
+   | Client API interface        | This module exports the client API of PSA Crypto to the users.| ``./interface/src/tfm_crypto_api.c``                                 |
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
    | Mbed Crypto                 | The Mbed Crypto library is used in the service as a           | Needed as dependency at the same level of the TF-M folder,           |
    |                             | cryptographic library exposing the PSA Crypto API interface.  | i.e. ``../mbed-crypto``                                              |
@@ -68,8 +64,7 @@ components, which are listed below:
    |                             | functionality.                                                | ``./secure_fw/partitions/crypto/crypto_mac.c``                       |
    |                             |                                                               | ''./secure_fw/partitions/crypto/crypto_key_management.c''            |
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
-   | Manifest                    | The manifest file is a description of the service components  | ``./secure_fw/partitions/crypto/manifest.yaml``                      |
-   |                             | for both library model and IPC model.                         |                                                                      |
+   | Manifest                    | The manifest file is a description of the service components. | ``./secure_fw/partitions/crypto/manifest.yaml``                      |
    +-----------------------------+---------------------------------------------------------------+----------------------------------------------------------------------+
    | CMake files and headers     | The CMake files are used by the TF-M CMake build system to    | ``./secure_fw/partitions/crypto/CMakeLists.inc``                     |
    |                             | build the service as part of the Secure FW build. The service | ``./secure_fw/partitions/crypto/CMakeLists.txt``                     |
@@ -159,34 +154,39 @@ configuration of the Mbed Crypto library.
 .. table:: Configuration parameters table
    :widths: auto
 
-   +-------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------+
-   | **Parameter**                 | **Type**                  | **Description**                                                | **Scope**                               | **Default**                                        |
-   +===============================+===========================+================================================================+=========================================+====================================================+
-   | ``CRYPTO_ENGINE_BUF_SIZE``    | CMake build               | Buffer used by Mbed Crypto for its own allocations at runtime. | To be configured based on the desired   | 8096 (bytes)                                       |
-   |                               | configuration parameter   | This is a buffer allocated in static memory.                   | use case and application requirements.  |                                                    |
-   +-------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------+
-   | ``CRYPTO_CONC_OPER_NUM``      | CMake build               | This parameter defines the maximum number of possible          | To be configured based on the desire    | 8                                                  |
-   |                               | configuration parameter   | concurrent operation contexts (cipher, MAC, hash and key deriv)| use case and platform requirements.     |                                                    |
-   |                               |                           | for multi-part operations, that can be allocated simultaneously|                                         |                                                    |
-   |                               |                           | at any time.                                                   |                                         |                                                    |
-   +-------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------+
-   | ``CRYPTO_IOVEC_BUFFER_SIZE``  | CMake build               | This parameter applies only to IPC model builds. In IPC model, | To be configured based on the desired   | 5120 (bytes)                                       |
-   |                               | configuration parameter   | during a Service call, input and outputs are allocated         | use case and application requirements.  |                                                    |
-   |                               |                           | temporarily in an internal scratch buffer whose size is        |                                         |                                                    |
-   |                               |                           | determined by this parameter.                                  |                                         |                                                    |
-   +-------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------+
-   | ``MBEDTLS_CONFIG_FILE``       | Configuration header      | The Mbed Crypto library can be configured to support different | To be configured based on the           | ``./platform/ext/common/tfm_mbedcrypto_config.h``  |
-   |                               |                           | algorithms through the usage of a a configuration header file  | application and platform requirements.  |                                                    |
-   |                               |                           | at build time. This allows for tailoring FLASH/RAM requirements|                                         |                                                    |
-   |                               |                           | for different platforms and use cases.                         |                                         |                                                    |
-   +-------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------+
+   +------------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+
+   | **Parameter**                      | **Type**                  | **Description**                                                | **Scope**                               | **Default**                                                                |
+   +====================================+===========================+================================================================+=========================================+============================================================================+
+   | ``CRYPTO_ENGINE_BUF_SIZE``         | CMake build               | Buffer used by Mbed Crypto for its own allocations at runtime. | To be configured based on the desired   | 8096 (bytes)                                                               |
+   |                                    | configuration parameter   | This is a buffer allocated in static memory.                   | use case and application requirements.  |                                                                            |
+   +------------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+
+   | ``CRYPTO_CONC_OPER_NUM``           | CMake build               | This parameter defines the maximum number of possible          | To be configured based on the desire    | 8                                                                          |
+   |                                    | configuration parameter   | concurrent operation contexts (cipher, MAC, hash and key deriv)| use case and platform requirements.     |                                                                            |
+   |                                    |                           | for multi-part operations, that can be allocated simultaneously|                                         |                                                                            |
+   |                                    |                           | at any time.                                                   |                                         |                                                                            |
+   +------------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+
+   | ``CRYPTO_IOVEC_BUFFER_SIZE``       | CMake build               | This parameter applies only to IPC model builds. In IPC model, | To be configured based on the desired   | 5120 (bytes)                                                               |
+   |                                    | configuration parameter   | during a Service call, input and outputs are allocated         | use case and application requirements.  |                                                                            |
+   |                                    |                           | temporarily in an internal scratch buffer whose size is        |                                         |                                                                            |
+   |                                    |                           | determined by this parameter.                                  |                                         |                                                                            |
+   +------------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+
+   | ``MBEDTLS_CONFIG_FILE``            | Configuration header      | The Mbed Crypto library can be configured to support different | To be configured based on the           | ``./lib/ext/mbedcrypto/mbedcrypto_config/tfm_mbedcrypto_config_default.h`` |
+   |                                    |                           | algorithms through the usage of a a configuration header file  | application and platform requirements.  |                                                                            |
+   |                                    |                           | at build time. This allows for tailoring FLASH/RAM requirements|                                         |                                                                            |
+   |                                    |                           | for different platforms and use cases.                         |                                         |                                                                            |
+   +------------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+
+   | ``MBEDTLS_PSA_CRYPTO_CONFIG_FILE`` | Configuration header      | This header file specifies which cryptographic mechanisms are  | To be configured based on the           | ``./lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h``         |
+   |                                    |                           | available through the PSA API when #MBEDTLS_PSA_CRYPTO_CONFIG  | application and platform requirements.  |                                                                            |
+   |                                    |                           | is enabled, and is not used when #MBEDTLS_PSA_CRYPTO_CONFIG is |                                         |                                                                            |
+   |                                    |                           | disabled.                                                      |                                         |                                                                            |
+   +------------------------------------+---------------------------+----------------------------------------------------------------+-----------------------------------------+----------------------------------------------------------------------------+
 
 References
 ----------
 
-.. [1] ``mbed-crypto`` repository which holds the PSA Crypto API specification and the Mbed Crypto reference implementation: \ https://github.com/ARMmbed/mbed-crypto
+.. [1] ``mbed-crypto`` repository which holds the PSA Crypto API specification and the Mbed Crypto reference implementation: \ https://github.com/Mbed-TLS
 
 
 --------------
 
-*Copyright (c) 2019-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2022, Arm Limited. All rights reserved.*

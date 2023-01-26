@@ -6,7 +6,6 @@
  */
 
 #include "ps_utils.h"
-#include "tfm_memory_utils.h"
 
 psa_status_t ps_utils_check_contained_in(uint32_t superset_size,
                                          uint32_t subset_offset,

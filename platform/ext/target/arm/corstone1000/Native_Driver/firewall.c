@@ -293,6 +293,21 @@ void fc_enable_mpl(enum rgn_mpe_t mpe, enum rgn_mpl_t mpl)
         ptr->rgn_mpl3 |= (mpl & RGN_MPL_EN_MASK);
 }
 
+void fc_read_mpl(enum rgn_mpe_t mpe, enum rgn_mpl_t* mpl)
+{
+    struct _firewall_pe_rwe_reg_map_t *ptr =
+         (struct _firewall_pe_rwe_reg_map_t *)fw_data.rwe_ptr;
+    if (mpe == RGN_MPE0)
+        *mpl = (ptr->rgn_mpl0 & RGN_MPL_EN_MASK);
+    else if (mpe == RGN_MPE1)
+        *mpl = (ptr->rgn_mpl1 & RGN_MPL_EN_MASK);
+    else if (mpe == RGN_MPE2)
+        *mpl = (ptr->rgn_mpl2 & RGN_MPL_EN_MASK);
+    else if (mpe == RGN_MPE3)
+        *mpl = (ptr->rgn_mpl3 & RGN_MPL_EN_MASK);
+}
+
+
 void fc_disable_mpl(enum rgn_mpe_t mpe, enum rgn_mpl_t mpl)
 {
     struct _firewall_pe_rwe_reg_map_t *ptr =

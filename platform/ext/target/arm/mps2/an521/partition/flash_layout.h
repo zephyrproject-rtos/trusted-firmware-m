@@ -29,7 +29,7 @@
  * 0x0030_0000 Protected Storage Area (20 KB)
  * 0x0030_5000 Internal Trusted Storage Area (16 KB)
  * 0x0030_9000 OTP / NV counters area (8 KB)
- * 0x0030_B000 Unused (984 KB)
+ * 0x0030_B000 Unused (980 KB)
  *
  * Flash layout on MPS2 AN521 with BL2 (single image boot):
  *
@@ -44,7 +44,7 @@
  * 0x0038_0000 Protected Storage Area (20 KB)
  * 0x0038_5000 Internal Trusted Storage Area (16 KB)
  * 0x0038_9000 OTP / NV counters area (8 KB)
- * 0x0038_B000 Unused (984 KB)
+ * 0x0038_B000 Unused (468 KB)
  *
  * Flash layout on MPS2 AN521, if BL2 not defined:
  *

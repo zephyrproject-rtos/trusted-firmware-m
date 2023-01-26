@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,12 +17,10 @@
 #include "tfm_peripherals_config.h"
 #include "load/interrupt_defs.h"
 #include "ffm/interrupt.h"
-#include "tfm_spm_hal.h"
-
 
 static enum tfm_hal_status_t irq_init(struct irq_t *irq, IRQn_Type irqn,
                                       void * p_pt,
-                                      struct irq_load_info_t *p_ildi)
+                                      const struct irq_load_info_t *p_ildi)
 {
     irq->p_ildi = p_ildi;
     irq->p_pt = p_pt;
@@ -40,7 +41,7 @@ void FPU_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_fpu_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&fpu_irq, TFM_FPU_IRQ, p_pt, p_ildi);
 }
@@ -55,17 +56,17 @@ void CLOCK_POWER_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_clock_power_irq_init(void *p_pt,
-                                               struct irq_load_info_t *p_ildi)
+                                               const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&clock_power_irq, TFM_CLOCK_POWER_IRQ, p_pt, p_ildi);
 }
 
 enum tfm_hal_status_t tfm_clock_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_clock_power_irq_init")));
 
 enum tfm_hal_status_t tfm_power_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_clock_power_irq_init")));
 #endif
 
@@ -80,29 +81,29 @@ void UARTE0_SPIM0_SPIS0_TWIM0_TWIS0_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_serial0_init(void *p_pt,
-                                        struct irq_load_info_t *p_ildi)
+                                        const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&serial0_irq, TFM_SERIAL0_IRQ, p_pt, p_ildi);
 }
 
 enum tfm_hal_status_t tfm_spim0_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial0_init")));
 
 enum tfm_hal_status_t tfm_spis0_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial0_init")));
 
 enum tfm_hal_status_t tfm_twim0_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial0_init")));
 
 enum tfm_hal_status_t tfm_twis0_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial0_init")));
 
 enum tfm_hal_status_t tfm_uarte0_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial0_init")));
 #endif
 
@@ -117,29 +118,29 @@ void UARTE1_SPIM1_SPIS1_TWIM1_TWIS1_IRQHandler_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_serial1_init(void *p_pt,
-                                        struct irq_load_info_t *p_ildi)
+                                        const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&serial1_irq, TFM_SERIAL1_IRQ, p_pt, p_ildi);
 }
 
 enum tfm_hal_status_t tfm_spim1_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial1_init")));
 
 enum tfm_hal_status_t tfm_spis1_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial1_init")));
 
 enum tfm_hal_status_t tfm_twim1_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial1_init")));
 
 enum tfm_hal_status_t tfm_twis1_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial1_init")));
 
 enum tfm_hal_status_t tfm_uarte1_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial1_init")));
 #endif
 
@@ -154,29 +155,29 @@ void UARTE2_SPIM2_SPIS2_TWIM2_TWIS2_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_serial2_init(void *p_pt,
-                                        struct irq_load_info_t *p_ildi)
+                                        const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&serial2_irq, TFM_SERIAL2_IRQ, p_pt, p_ildi);
 }
 
 enum tfm_hal_status_t tfm_spim2_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial2_init")));
 
 enum tfm_hal_status_t tfm_spis2_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial2_init")));
 
 enum tfm_hal_status_t tfm_twim2_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial2_init")));
 
 enum tfm_hal_status_t tfm_twis2_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial2_init")));
 
 enum tfm_hal_status_t tfm_uarte2_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial2_init")));
 #endif
 
@@ -191,29 +192,29 @@ void UARTE3_SPIM3_SPIS3_TWIM3_TWIS3_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_serial3_init(void *p_pt,
-                                        struct irq_load_info_t *p_ildi)
+                                        const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&serial3_irq, TFM_SERIAL3_IRQ, p_pt, p_ildi);
 }
 
 enum tfm_hal_status_t tfm_spim3_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial3_init")));
 
 enum tfm_hal_status_t tfm_spis3_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial3_init")));
 
 enum tfm_hal_status_t tfm_twim3_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial3_init")));
 
 enum tfm_hal_status_t tfm_twis3_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial3_init")));
 
 enum tfm_hal_status_t tfm_uarte3_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_serial3_init")));
 #endif
 
@@ -226,7 +227,7 @@ void GPIOTE0_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_gpiote0_irq_init(void *p_pt,
-                                           struct irq_load_info_t *p_ildi)
+                                           const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&gpiote0_irq, TFM_GPIOTE0_IRQ, p_pt, p_ildi);
 }
@@ -241,7 +242,7 @@ void SAADC_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_saadc_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&saadc_irq, TFM_SAADC_IRQ, p_pt, p_ildi);
 }
@@ -256,7 +257,7 @@ void TIMER0_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_timer0_irq_init(void *p_pt,
-                                          struct irq_load_info_t *p_ildi)
+                                          const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&timer0_irq, TFM_TIMER0_IRQ, p_pt, p_ildi);
 }
@@ -271,7 +272,7 @@ void TIMER1_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_timer1_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&timer1_irq, TFM_TIMER1_IRQ, p_pt, p_ildi);
 }
@@ -286,7 +287,7 @@ void TIMER2_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_timer2_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&timer2_irq, TFM_TIMER2_IRQ, p_pt, p_ildi);
 }
@@ -301,7 +302,7 @@ void RTC0_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_rtc0_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&rtc0_irq, TFM_RTC0_IRQ, p_pt, p_ildi);
 }
@@ -316,7 +317,7 @@ void RTC1_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_rtc1_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&rtc1_irq, TFM_RTC1_IRQ, p_pt, p_ildi);
 }
@@ -331,7 +332,7 @@ void WDT_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_wdt_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&wdt_irq, TFM_WDT_IRQ, p_pt, p_ildi);
 }
@@ -346,7 +347,7 @@ void EGU0_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_egu0_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&egu0_irq, TFM_EGU0_IRQ, p_pt, p_ildi);
 }
@@ -361,7 +362,7 @@ void EGU1_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_egu1_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&egu1_irq, TFM_EGU1_IRQ, p_pt, p_ildi);
 }
@@ -376,7 +377,7 @@ void EGU2_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_egu2_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&egu2_irq, TFM_EGU2_IRQ, p_pt, p_ildi);
 }
@@ -391,7 +392,7 @@ void EGU3_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_egu3_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&egu3_irq, TFM_EGU3_IRQ, p_pt, p_ildi);
 }
@@ -406,7 +407,7 @@ void EGU4_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_egu4_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&egu4_irq, TFM_EGU4_IRQ, p_pt, p_ildi);
 }
@@ -421,7 +422,7 @@ void EGU5_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_egu5_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&egu5_irq, TFM_EGU5_IRQ, p_pt, p_ildi);
 }
@@ -436,7 +437,7 @@ void PWM0_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_pwm0_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&pwm0_irq, TFM_PWM0_IRQ, p_pt, p_ildi);
 }
@@ -451,7 +452,7 @@ void PWM1_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_pwm1_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&pwm1_irq, TFM_PWM1_IRQ, p_pt, p_ildi);
 }
@@ -466,7 +467,7 @@ void PWM2_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_pwm2_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&pwm2_irq, TFM_PWM2_IRQ, p_pt, p_ildi);
 }
@@ -481,7 +482,7 @@ void PWM3_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_pwm3_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&pwm3_irq, TFM_PWM3_IRQ, p_pt, p_ildi);
 }
@@ -496,7 +497,7 @@ void PDM_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_pdm_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&pdm_irq, TFM_PDM_IRQ, p_pt, p_ildi);
 }
@@ -511,7 +512,7 @@ void IPC_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_ipc_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&ipc_irq, TFM_IPC_IRQ, p_pt, p_ildi);
 }
@@ -526,7 +527,7 @@ void I2S_IRQHandler(void)
 }
 
 enum tfm_hal_status_t tfm_i20_irq_init(void *p_pt,
-                                         struct irq_load_info_t *p_ildi)
+                                         const struct irq_load_info_t *p_ildi)
 {
     return irq_init(&i2s_irq, TFM_I2S_IRQ, p_pt, p_ildi);
 }
@@ -535,7 +536,7 @@ enum tfm_hal_status_t tfm_i20_irq_init(void *p_pt,
 
 #ifdef PSA_API_TEST_IPC
 enum tfm_hal_status_t ff_test_uart_irq_init(void *p_pt,
-                                            struct irq_load_info_t *p_ildi)
+                                            const struct irq_load_info_t *p_ildi)
 __attribute__((alias("tfm_egu5_irq_init")));
 
 #endif

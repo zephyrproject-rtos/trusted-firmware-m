@@ -147,7 +147,6 @@ to use functions from the PSA API is ``psa/initial_attestation.h``.
 
 The TF-M Initial Attestation Service source files are located in
 ``secure_fw/partitions/initial_attestation``.
-The CBOR library is located in ``lib/ext/qcbor`` folder.
 
 Service source files
 ====================
@@ -156,9 +155,12 @@ Service source files
       It can be used on 32-bit and 64-bit machines. It was designed to suite
       constrained devices with low memory usage and without dynamic memory
       allocation.
-      It is a fork of this external `QCBOR library <https://github.com/laurencelundblade/QCBOR>`__.
-    - ``lib/ext/qcbor/inc/qcbor.h``: Public API documentation of CBOR
-      library.
+      Its source code is fetched automatically during the build configuration
+      step from an external repository: `QCBOR library <https://github.com/laurencelundblade/QCBOR>`__.
+    - ``<qcbor_src>/inc/qcbor/qcbor_encode.h``: Public API documentation of
+      CBOR library (encoding).
+    - ``<qcbor_src>/inc/qcbor/qcbor_decode.h``: Public API documentation of
+      CBOR library (decoding).
 
 - COSE library:
     - ``lib/ext/t_cose``: This library is used to sign a CBOR token and create
@@ -176,21 +178,15 @@ Service source files
       of APIs, retrieval of claims and token creation.
     - ``attest_token_encode.c``: Implements the token creation functions such as
       start and finish token creation and adding claims to the token.
-    - ``attest_asymmetric_key.c``: Get the asymmetric attestation key from
-      platform layer and register it to the TF-M Crypto service for further
-      usage.
+    - ``attest_asymmetric_key.c``: Calculate the Instance ID value based on
+      asymmetric initial attestation key.
     - ``tfm_attest.c``: Implements the SPM abstraction layer, and bind the
       attestation service to the SPM implementation in TF-M project.
-    - ``tfm_attest_secure_api.c``: Implements the secure API layer to allow
-      other services in the secure domain to request functionalities
-      from the attestation service using the PSA API interface.
     - ``tfm_attest_req_mngr.c``: Includes the initialization entry of
       attestation service and handles attestation service requests in IPC
       model.
-    - ``attest_symmetric_key.c``: Get the symmetric initial attestation key
-      from platform layer and register it into TF-M Crypto service for further
-      usage. Also calculate the Instance ID value based on symmetric initial
-      attestation key.
+    - ``attest_symmetric_key.c``: Calculate the Instance ID value based on
+      symmetric initial attestation key.
 
 Service interface definitions
 =============================
@@ -216,8 +212,6 @@ Service interface definitions
 - **Crypto interface**:
     - ``t_cose_crypto.h``: Expose an API to bind the ``t_cose`` implementation
       to any cryptographic library.
-    - ``tfm_plat_crypto_keys.h``: Expose an API to get the attestation key from
-      platform layer.
 
 PSA interface
 =============
@@ -247,12 +241,7 @@ System integrators might need to port these interfaces to a custom secure
 partition manager implementation (SPM). Implementations in TF-M project can be
 found here:
 
--  ``interface/src/tfm_initial_attestation_func_api.c``: non-secure interface
-   implementation for library model
--  ``interface/src/tfm_initial_attestation_ipc_api.c``: non-secure interface
-   implementation for IPC model
--  ``secure_fw/partitions/initial_attestation/tfm_attestation_secure_api.c``:
-   secure interface implementation
+-  ``interface/src/tfm_attest_api.c``: interface implementation.
 
 Secure Partition Manager (SPM) interface
 ========================================
@@ -318,7 +307,7 @@ in the claims in the initial attestation token paragraph.
   number during a boot cycle.
 - ``tfm_plat_get_implementation_id``: Get the implementation ID of the
   device.
-- ``tfm_plat_get_hw_version``: Get the hardware version of the device.
+- ``tfm_plat_get_cert_ref``: Get the hardware version of the device.
 
 Boot loader interface
 =====================
@@ -440,20 +429,10 @@ Key handling
 ^^^^^^^^^^^^
 The provisioning of the initial attestation key is out of scope of the service
 and this document. It is assumed that device maker provisions the unique
-asymmetric key pair during the manufacturing process. The following API is
-defined to retrieve the attestation key pair from platform layer. Software
-integrators **must** port this interface according to their SoC design and make
-sure that key pair is available by Crypto service:
-
-- ``tfm_plat_get_initial_attest_key()``: Retrieve the initial attestation key
-  pair from platform layer.
-
-In TF-M project the attestation key is retrieved by initial attestation service.
-The key is registered and unregistered to the Crypto service by attestation
-service with ``psa_import_key()`` and ``psa_destroy_key()`` API calls for
-further usage. See in ``attestation_key.c``. In other implementation if the
-attestation key is directly retrieved by the Crypto service then this key
-handling is not necessary.
+asymmetric key pair during the manufacturing process. Software integrators
+**must** make sure that ``TFM_BUILTIN_KEY_SLOT_IAK`` is available via the Crypto
+service, which will then be used by the Attestation partition to perform the
+required signing operations via the PSA crypto interface.
 
 Symmetric key algorithm based attestation
 -----------------------------------------
@@ -513,10 +492,6 @@ those flags. The list of flags are:
 
 - ``ATTEST_INCLUDE_OPTIONAL_CLAIMS``: Include also the optional claims to the
   attestation token. Default value: ON.
-- ``ATTEST_INCLUDE_TEST_CODE``: Test code is removed from COSE library and from
-  attestation test suite if it is OFF. Its default value depends on the build
-  type. It is ON if build type is ``Debug``, otherwise OFF (different kinds
-  of ``Release`` builds).
 - ``ATTEST_INCLUDE_COSE_KEY_ID``: COSE key-id is an optional field in the COSE
   unprotected header. Key-id is calculated and added to the COSE header based
   on the value of this flag. Default value: OFF.
@@ -526,6 +501,18 @@ those flags. The list of flags are:
   properly ported to it.
 - ``SYMMETRIC_INITIAL_ATTESTATION``: Select symmetric initial attestation.
   Default value: OFF.
+- ``ATTEST_INCLUDE_TEST_CODE``: The initial attestation implementation is
+  instrumented with additional test code. This is required in order to run
+  some of the initial attestation regression tests.
+  These tests are not required to be run by platform integrators, and are
+  only meant to be used for development or modification of the initial
+  attestation implementation.
+  Enabling this option enables T_COSE_DISABLE_SHORT_CIRCUIT_SIGN which will
+  short circuit the signing operation.
+  Default value: OFF.
+- ``ATTEST_STACK_SIZE``- Defines the stack size of the Initial Attestation Partition.
+  This value mainly depends on the build type(debug, release and minisizerel) and
+  compiler.
 
 Related compile time options
 ----------------------------
@@ -625,9 +612,9 @@ that user has license for DS-5 and FVP models:
 
  - Build TF-M with any of the ``ConfigRegression*.cmake`` build configurations
    for MPS2 AN521 platform. More info in
-   :doc:`tfm_build_instruction </technical_references/instructions/tfm_build_instruction>`.
+   :doc:`tfm_build_instruction </building/tfm_build_instruction>`.
  - Lunch FVP model in DS-5. More info in
-   :doc:`Run TF-M examples on Arm platforms </technical_references/instructions/run_tfm_examples_on_arm_platforms>`.
+   :doc:`Run TF-M examples on Arm platforms </building/run_tfm_examples_on_arm_platforms>`.
  - Set a breakpoint in ``test/secure_fw/suites/attestation/attest_token_test.c``
    in ``decode_test_internal(..)`` after the ``token_main_alt(..)`` returned,
    i.e. on line 859. Execute the code in the model until the breakpoint hits

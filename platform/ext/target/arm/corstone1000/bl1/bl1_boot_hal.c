@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,7 @@
 #include "boot_hal.h"
 #include "Driver_Flash.h"
 #include "flash_layout.h"
-#include "bootutil/fault_injection_hardening.h"
+#include "fih.h"
 #include "bootutil/bootutil_log.h"
 #include "firewall.h"
 #include "watchdog.h"

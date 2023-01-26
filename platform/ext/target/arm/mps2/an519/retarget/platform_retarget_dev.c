@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2021 Arm Limited
+ * Copyright (c) 2016-2022 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 
 #include "platform_retarget_dev.h"
 #include "platform_retarget.h"
-#include "system_cmsdk_mps2_an519.h"
+#include "system_core_init.h"
 #include "tfm_plat_defs.h"
 
 /* ARM UART driver structures */

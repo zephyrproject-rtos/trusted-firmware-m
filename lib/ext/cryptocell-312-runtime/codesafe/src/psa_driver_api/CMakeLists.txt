@@ -14,6 +14,7 @@ target_include_directories(${CC312_PSA_DRIVER_API_TARGET}
 target_sources(${CC312_PSA_DRIVER_API_TARGET}
     PRIVATE
         # PSA Cryptoprocessor Unified Driver interface entry point sources
+        src/cc3xx_psa_init.c
         src/cc3xx_psa_hash.c
         src/cc3xx_psa_cipher.c
         src/cc3xx_psa_mac.c

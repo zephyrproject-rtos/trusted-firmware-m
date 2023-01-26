@@ -6,24 +6,19 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 #include "array.h"
 #include "tfm_boot_status.h"
 #include "region_defs.h"
-#include "tfm_memory_utils.h"
 #include "tfm_api.h"
-#include "tfm_core_utils.h"
 #include "psa_manifest/pid.h"
-#ifdef TFM_PSA_API
 #include "internal_errors.h"
 #include "utilities.h"
 #include "psa/service.h"
 #include "thread.h"
-#include "tfm_spm_hal.h"
 #include "spm_ipc.h"
 #include "load/partition_defs.h"
-#else
-#include "spm_func.h"
-#endif
+#include "tfm_hal_isolation.h"
 
 /*!
  * \def BOOT_DATA_VALID
@@ -74,6 +69,9 @@ static const struct boot_data_access_policy access_policy_table[] = {
 #ifdef TFM_PARTITION_FIRMWARE_UPDATE
     {TFM_SP_FWU, TLV_MAJOR_FWU},
 #endif
+#ifdef TFM_PARTITION_MEASURED_BOOT
+    {TFM_SP_MEASURED_BOOT, TLV_MAJOR_MBS},
+#endif
 };
 
 /*!
@@ -91,13 +89,7 @@ static int32_t tfm_core_check_boot_data_access_policy(uint8_t major_type)
     int32_t rc = -1;
     const uint32_t array_size = ARRAY_SIZE(access_policy_table);
 
-#ifndef TFM_PSA_API
-    uint32_t partition_idx = tfm_spm_partition_get_running_partition_idx();
-
-    partition_id = tfm_spm_partition_get_partition_id(partition_idx);
-#else
     partition_id = tfm_spm_partition_get_running_partition_id();
-#endif
 
     for (i = 0; i < array_size; ++i) {
         if (partition_id == access_policy_table[i].partition_id) {
@@ -148,38 +140,16 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     uintptr_t tlv_end, offset;
     size_t next_tlv_offset;
 #endif /* BOOT_DATA_AVAILABLE */
-#ifndef TFM_PSA_API
-    uint32_t running_partition_idx =
-                tfm_spm_partition_get_running_partition_idx();
-    uint32_t res;
-#else
-    uint32_t privileged;
-#endif
+    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    fih_int fih_rc = FIH_FAILURE;
 
-#ifndef TFM_PSA_API
-    /*
-     * Make sure that the output pointer points to a memory area that is owned
-     * by the partition. And check 4 bytes alignment.
-     */
-    res = tfm_spm_check_buffer_access(running_partition_idx,
-                                      (void *)buf_start,
-                                      buf_size,
-                                      2);
-    if (res != TFM_SUCCESS) {
-        /* Not in accessible range, return error */
-        args[0] = (uint32_t)res;
-        return;
-    }
-#else
-    privileged = GET_CURRENT_PARTITION_PRIVILEGED_MODE();
-
-    if (tfm_memory_check(buf_start, buf_size, false, TFM_MEMORY_ACCESS_RW,
-        privileged) != SPM_SUCCESS) {
-        /* Not in accessible range, return error */
+    FIH_CALL(tfm_hal_memory_check, fih_rc,
+             curr_partition->boundary, (uintptr_t)buf_start,
+             buf_size, TFM_HAL_ACCESS_READWRITE);
+    if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
         return;
     }
-#endif
 
     if (is_boot_data_valid != BOOT_DATA_VALID) {
         args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;

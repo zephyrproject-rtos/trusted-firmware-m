@@ -1,10 +1,17 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include <arm_cmse.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 #include "array.h"
 #include "cmsis.h"
 #include "Driver_Common.h"
@@ -12,18 +19,14 @@
 #include "mpu_armv8m_drv.h"
 #include "region.h"
 #include "target_cfg.h"
+#include "tfm_hal_defs.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_plat_defs.h"
 #include "region_defs.h"
 #include "tfm_peripherals_def.h"
-#include "tfm_core_utils.h"
-#include "low_level_rng.h"
-
-#ifdef TFM_PSA_API
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
-#endif /* TFM_PSA_API */
 
 #ifdef FLOW_CONTROL
 #include "target_flowcontrol.h"
@@ -38,6 +41,9 @@ extern volatile uint32_t uFlowStage;
 
 /* It can be retrieved from the MPU_TYPE register. */
 #define MPU_REGION_NUM                  8
+#define PROT_BOUNDARY_VAL \
+    ((1U << HANDLE_ATTR_PRIV_POS) & HANDLE_ATTR_PRIV_MASK)
+
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
 
@@ -196,7 +202,7 @@ static enum tfm_hal_status_t mpu_init(void)
         /* configure secure MPU regions */
         for (i = 0; i < ARRAY_SIZE(region_cfg); i++)
         {
-            spm_memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
+            memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
             localcfg.region_nr = i;
 
             if (mpu_armv8m_region_enable(&dev_mpu_s,
@@ -223,7 +229,7 @@ static enum tfm_hal_status_t mpu_init(void)
         /* check secure MPU regions */
         for (i = 0; i < ARRAY_SIZE(region_cfg); i++)
         {
-            spm_memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
+            memcpy(&localcfg, &region_cfg[i], sizeof(localcfg));
             localcfg.region_nr = i;
 
             if (mpu_armv8m_region_enable_check(&dev_mpu_s,
@@ -269,7 +275,8 @@ static enum tfm_hal_status_t mpu_init(void)
 }
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
+enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
+                                            uintptr_t *p_spm_boundary)
 {
     /* Set up isolation boundaries between SPE and NSPE */
     /* Configures non-secure memory spaces in the target */
@@ -295,12 +302,13 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
     mpu_init();
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
+    *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
+
     return TFM_HAL_SUCCESS;
 }
 
-#ifdef TFM_PSA_API
 /*
- * Implementation of tfm_hal_bind_boundaries() on STM:
+ * Implementation of tfm_hal_bind_boundary() on STM:
  *
  * The API encodes some attributes into a handle and returns it to SPM.
  * The attributes include isolation boundaries, privilege, and MMIO information.
@@ -315,36 +323,41 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(void)
  *
  * The encoding format assignment:
  * - For isolation level 3
- *      BIT | 31        24 | 23         20 | ... | 7           4 | 3        0 |
- *          | Unique Index | Region Attr 5 | ... | Region Attr 1 | Privileged |
+ *      BIT | 31        24 | 23         20 | ... | 7           4 | 3       0 |
+ *          | Unique Index | Region Attr 5 | ... | Region Attr 1 | Base Attr |
  *
  *      In which the "Region Attr i" is:
  *      BIT |       3      | 2        0 |
  *          | 1: RW, 0: RO | MMIO Index |
  *
+ *      In which the "Base Attr" is:
+ *      BIT |               1                |                           0                     |
+ *          | 1: privileged, 0: unprivileged | 1: Trustzone-specific NSPE, 0: Secure partition |
+ *
  * - For isolation level 1/2
- *      BIT | 31                           0 |
- *          | 1: privileged, 0: unprivileged |
+ *      BIT | 31     2 |              1                |                           0                     |
+ *          | Reserved |1: privileged, 0: unprivileged | 1: Trustzone-specific NSPE, 0: Secure partition |
  *
  * This is a reference implementation on STM, and may have some limitations.
  * 1. The maximum number of allowed MMIO regions is 5.
  * 2. Highest 8 bits are for index. It supports 256 unique handles at most.
  */
 
-enum tfm_hal_status_t tfm_hal_bind_boundaries(
-
+enum tfm_hal_status_t tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
-                                    void **pp_boundaries)
+                                    uintptr_t *p_boundary)
 {
     uint32_t i, j;
     bool privileged;
+    bool ns_agent;
+    uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
     struct platform_data_t *plat_data_ptr;
 #if TFM_LVL == 2
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
 
-    if (!p_ldinf || !pp_boundaries) {
+    if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
@@ -354,7 +367,8 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
     privileged = IS_PARTITION_PSA_ROT(p_ldinf);
 #endif
 
-    p_asset = (const struct asset_desc_t *)LOAD_INFO_ASSET(p_ldinf);
+    ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
+    p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     /*
      * Validate if the named MMIO of partition is allowed by the platform.
@@ -399,16 +413,21 @@ enum tfm_hal_status_t tfm_hal_bind_boundaries(
         }
 #endif
     }
-    *pp_boundaries = (void *)(((uint32_t)privileged) & HANDLE_ATTR_PRIV_MASK);
+    partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
+                        HANDLE_ATTR_PRIV_MASK;
+    partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
+                        HANDLE_ATTR_NS_MASK;
+    *p_boundary = (uintptr_t)partition_attrs;
+
     return TFM_HAL_SUCCESS;
 }
 
-enum tfm_hal_status_t tfm_hal_update_boundaries(
+enum tfm_hal_status_t tfm_hal_activate_boundary(
                              const struct partition_load_info_t *p_ldinf,
-                             void *p_boundaries)
+                             uintptr_t boundary)
 {
     CONTROL_Type ctrl;
-    uint32_t local_handle = (uint32_t)p_boundaries;
+    uint32_t local_handle = (uint32_t)boundary;
     bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
 
     /* Privileged level is required to be set always */
@@ -418,4 +437,61 @@ enum tfm_hal_status_t tfm_hal_update_boundaries(
 
     return TFM_HAL_SUCCESS;
 }
-#endif /* TFM_PSA_API */
+
+enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
+                                           size_t size, uint32_t access_type)
+{
+    int flags = 0;
+
+    /* If size is zero, this indicates an empty buffer and base is ignored */
+    if (size == 0) {
+        return TFM_HAL_SUCCESS;
+    }
+
+    if (!base) {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
+        flags |= CMSE_MPU_READWRITE;
+    } else if (access_type & TFM_HAL_ACCESS_READABLE) {
+        flags |= CMSE_MPU_READ;
+    } else {
+        return TFM_HAL_ERROR_INVALID_INPUT;
+    }
+
+    if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
+        flags |= CMSE_MPU_UNPRIV;
+    }
+
+    if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
+        CONTROL_Type ctrl;
+        ctrl.w = __TZ_get_CONTROL_NS();
+        if (ctrl.b.nPRIV == 1) {
+            flags |= CMSE_MPU_UNPRIV;
+        } else {
+            flags &= ~CMSE_MPU_UNPRIV;
+        }
+        flags |= CMSE_NONSECURE;
+    }
+
+    if (cmse_check_address_range((void *)base, size, flags) != NULL) {
+        return TFM_HAL_SUCCESS;
+    } else {
+        return TFM_HAL_ERROR_MEM_FAULT;
+    }
+}
+
+bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
+                                  uintptr_t boundary_to)
+{
+    if (boundary_from == boundary_to) {
+        return false;
+    }
+
+    if (((uint32_t)boundary_from & HANDLE_ATTR_PRIV_MASK) &&
+        ((uint32_t)boundary_to & HANDLE_ATTR_PRIV_MASK)) {
+        return false;
+    }
+    return true;
+}

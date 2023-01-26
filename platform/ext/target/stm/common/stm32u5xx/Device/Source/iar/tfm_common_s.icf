@@ -41,8 +41,15 @@ define block TFM_UNPRIV_CODE with alignment = GTZC_FLASH_ALIGN {
        };
 
     /**** Section for holding partition RO load data */
+    /*
+     * Sort the partition info by priority to guarantee the initing order.
+     * The first loaded partition will be inited at last in SFN model.
+     */
 define block TFM_SP_LOAD_LIST with alignment = 4 {
-    ro section .part_load object load_info_*.o,
+    ro section .part_load_priority_lowest object load_info_*.o,
+    ro section .part_load_priority_low object load_info_*.o,
+    ro section .part_load_priority_normal object load_info_*.o,
+    ro section .part_load_priority_high object load_info_*.o,
 };
 
     /**** PSA RoT RO part (CODE + RODATA) start here */
@@ -78,21 +85,13 @@ define block TFM_SECURE_DATA_START with size = 0 { };
 
     /* Shared area between BL2 and runtime to exchange data */
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
-define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE { };
+define block ARM_LIB_STACK with alignment = 32, size = S_MSP_STACK_SIZE - 0x8 { };
 define overlay STACK_DATA {block TFM_SHARED_DATA};
 define overlay STACK_DATA {block ARM_LIB_STACK};
 
-# if !defined(TFM_PSA_API)
-    /* Reserve space for stack seal (8 bytes) */
-define block ER_INITIAL_PSP with alignment = 32, size = S_PSP_STACK_SIZE - 0x8 { };
-define block ER_INITIAL_PSP_SEAL with size = 0x8 { };
-# endif
-keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
+define block STACKSEAL with size = 0x8 { };
 
-#if !defined(TFM_PSA_API)
-define block TFM_SECURE_STACK   with size = 0x2000, alignment = 128 {};
-keep {block TFM_SECURE_STACK};
-#endif /* !defined(TFM_PSA_API) */
+keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 
 #if defined(CONFIG_TFM_PARTITION_META)
 define block TFM_SP_META_PTR with alignment = 32 {
@@ -121,12 +120,20 @@ keep {block HEAP, block ARM_LIB_HEAP};
 
 define block ER_TFM_DATA          with alignment = 8 {readwrite};
 
+/* The runtime partition placed order is same as load partition */
 define block ER_PART_RT_POOL      with alignment = 4 {
-    zi section .bss.part_runtime
+    zi section .bss.part_runtime_priority_lowest,
+    zi section .bss.part_runtime_priority_low,
+    zi section .bss.part_runtime_priority_normal,
+    zi section .bss.part_runtime_priority_high,
 };
 
+/* The runtime service placed order is same as load partition */
 define block ER_SERV_RT_POOL      with alignment = 4 {
-    zi section .bss.serv_runtime
+    zi section .bss.serv_runtime_priority_lowest,
+    zi section .bss.serv_runtime_priority_low,
+    zi section .bss.serv_runtime_priority_normal,
+    zi section .bss.serv_runtime_priority_high,
 };
 
 keep {block ER_PART_RT_POOL, block ER_SERV_RT_POOL};
@@ -216,17 +223,6 @@ define block DATA with fixed order {
      */
     block TFM_APP_RW_STACK_START,
     /* Shared area between BL2 and runtime to exchange data */
-# if !defined(TFM_PSA_API)
-    /* PSP is unprivileged in single-core topology */
-    block ER_INITIAL_PSP,
-    /* Define stack seal block for Library mode */
-    block ER_INITIAL_PSP_SEAL,
-# endif
-
-
-#if !defined(TFM_PSA_API)
-    block TFM_SECURE_STACK,
-#endif /* !defined(TFM_PSA_API) */
 
 #if defined(CONFIG_TFM_PARTITION_META)
     block TFM_SP_META_PTR,
@@ -263,6 +259,7 @@ define block DATA with fixed order {
     block TFM_PSA_ROT_LINKER_DATA,
 
     overlay STACK_DATA,
+    block STACKSEAL,
     /*
      * This empty, zero long execution region is here to mark the end address
      * of PSA RoT RW and Stack.

@@ -41,11 +41,11 @@ The mitigation is included in this release.
 New platforms supported
 =======================
 
-  - :doc:`Corstone-1000 </platform/ext/target/arm/corstone1000/readme>`
+  - :doc:`Corstone-1000 </platform/arm/corstone1000/readme>`
 
-  - :doc:`Corstone-Polaris </platform/ext/target/arm/mps3/corstone_polaris/README>`
+  - :doc:`Corstone-Polaris </platform/arm/mps3/corstone310/README>`
 
-  - :doc:`B-U585I-IOT02A </platform/ext/target/stm/b_u585i_iot02a/readme>`
+  - :doc:`B-U585I-IOT02A </platform/stm/b_u585i_iot02a/readme>`
 
 Deprecated platforms
 ====================
@@ -54,7 +54,7 @@ The following platform has been removed from TF-M code base.
 
   - arm/mps2/fvp_sse300
 
-See :doc:`Platform deprecation and removal </platform/ext/platform_deprecation>`
+See :doc:`/integration_guide/platform/platform_deprecation`
 for other platforms under deprecation process.
 
 Tested platforms
@@ -122,4 +122,4 @@ won't be fixed by TF-M.
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

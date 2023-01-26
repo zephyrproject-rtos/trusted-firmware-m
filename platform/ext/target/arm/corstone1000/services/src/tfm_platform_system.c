@@ -9,6 +9,7 @@
 #include "platform_description.h"
 #include "corstone1000_ioctl_requests.h"
 #include "fwu_agent.h"
+#include "uefi_fmp.h"
 
 void tfm_platform_hal_system_reset(void)
 {
@@ -34,6 +35,14 @@ enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request,
 
         case IOCTL_CORSTONE1000_FWU_HOST_ACK:
             corstone1000_fwu_host_ack();
+            break;
+
+        case IOCTL_CORSTONE1000_FMP_GET_IMAGE_INFO:
+            if (out_vec == NULL) {
+                ret = TFM_PLATFORM_ERR_INVALID_PARAM;
+                break;
+            }
+            fmp_get_image_info(out_vec[0].base, out_vec[0].len);
             break;
 
         default:

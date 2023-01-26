@@ -42,23 +42,23 @@ Service source files
 - ``crypto_asymmetric.c`` : This module handles requests for asymmetric
   cryptographic operations
 - ``crypto_init.c`` : This module provides basic functions to initialise the
-  secure service during TF-M boot. When the service is built for IPC mode
+  secure service during TF-M boot. When the service is built for IPC model
   compatibility, this layer handles as well the connection requests and the
   proper dispatching of requests to the corresponding functions, and it holds
   the internal buffer used to allocate temporarily the IOVECs needed. The size
-  of this buffer is controlled by the ``TFM_CRYPTO_IOVEC_BUFFER_SIZE`` define.
+  of this buffer is controlled by the ``CRYPTO_IOVEC_BUFFER_SIZE`` define.
   This module also provides a static buffer which is used by the Mbed Crypto
   library for its own allocations. The size of this buffer is controlled by
-  the ``TFM_CRYPTO_ENGINE_BUF_SIZE`` define
+  the ``CRYPTO_ENGINE_BUF_SIZE`` define
 - ``crypto_alloc.c`` : This module is required for the allocation and release of
-  crypto operation contexts in the SPE. The ``TFM_CRYPTO_CONC_OPER_NUM``,
+  crypto operation contexts in the SPE. The ``CRYPTO_CONC_OPER_NUM``,
   defined in this file, determines how many concurrent contexts are supported
   for multipart operations (8 for the current implementation). For multipart
   cipher/hash/MAC/generator operations, a context is associated to the handle
   provided during the setup phase, and is explicitly cleared only following a
   termination or an abort
-- ``tfm_crypto_secure_api.c`` : This module implements the PSA Crypto API
-  client interface exposed to the Secure Processing Environment
+- ``tfm_crypto_api.c`` : This module implements the PSA Crypto API
+  client interface exposed to users.
 - ``tfm_crypto_api.c`` :  This module is contained in ``interface/src`` and
   implements the PSA Crypto API client interface exposed to the  Non-Secure
   Processing Environment.
@@ -74,12 +74,14 @@ The Crypto service can use either a hardware crypto accelerator backend like
 CC-312 or a software crypto library which by default is MbedTLS.
 
 If using MbedTLS as backend, then the library configuration is supplied using
-the ``TFM_MBEDCRYPTO_CONFIG_PATH`` cmake option.
+the ``TFM_MBEDCRYPTO_CONFIG_PATH`` and ``TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH``
+cmake option.
 
 Platforms can specify an extra config file by setting the
 ``TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH`` variable (which is a wrapper
 around the ``MBEDTLS_USER_CONFIG_FILE`` option).  This is preferred for platform
-configuration over ``TFM_MBEDCRYPTO_CONFIG_PATH`` as it does not interfere with
+configuration over ``TFM_MBEDCRYPTO_CONFIG_PATH`` and
+``TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH`` as it does not interfere with
 config changes due to TFM Profile.
 
 .. Note::
@@ -88,6 +90,13 @@ config changes due to TFM Profile.
     MBEDTLS_ENTROPY_NV_SEED with unique seed. For production devices,
     it can also select a hardware entropy source via
     MBEDTLS_ENTROPY_HARDWARE_ALT
+
+**************************************
+Other Crypto Service Build Definitions
+**************************************
+- ``CRYPTO_STACK_SIZE``- Defines the stack size of the Crypto Secure Partition. This
+  value mainly depends on other crypto service configurations, the build type(debug,
+  release and minisizerel) and compiler.
 
 **************************
 Crypto service integration
@@ -116,4 +125,4 @@ Secure world.
 
 --------------
 
-*Copyright (c) 2018-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*

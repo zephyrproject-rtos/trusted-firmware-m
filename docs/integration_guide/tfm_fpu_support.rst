@@ -15,8 +15,8 @@ Environment (NSPE).
   2021.10`` and later version shall be used to mitigate VLLDM instruction
   security vulnerability [4]_.
 * Support Inter-Process Communication (IPC) [5]_ model in TF-M, and doesn't
-  support LIBRARY or SFN model.
-* Support Armv8.0-M mainline.
+  support SFN model.
+* Support Armv8-M mainline.
 * Support isolation level 1,2,3.
 * Does not support use FPU in First-Level Interrupt Handling (FLIH) [6]_ at
   current stage.
@@ -24,10 +24,21 @@ Environment (NSPE).
 Please refer to Arm musca S1 [7]_ platform as a reference implementation when
 you enable FP support on your platforms.
 
+.. Note::
+    Alternatively, if you intend to use FP in your own NSPE application but the
+    TF-M SPE services that you enable do not require FP, you can set the CMake
+    configuration ``CONFIG_TFM_ENABLE_CP10CP11`` to ``ON`` and **ignore** any
+    configurations described below.
+
+.. Note::
+    ``GNU Arm Embedded Toolchain 10.3-2021.10`` may have issue that reports
+    ``'-mcpu=cortex-m55' conflicts with '-march=armv8.1-m.main'`` warning [8]_.
+    This issue has been fixed in the later version.
+
 ============================
 FP ABI type for SPE and NSPE
 ============================
-FP design in Armv8.0-M [8]_ architecture requires consistent FP ABI types
+FP design in Armv8.0-M [9]_ architecture requires consistent FP ABI types
 between SPE and NSPE. Furthermore, both sides shall set up CPACR individually
 when FPU is used. Otherwise, No Coprocessor (NOCP) usage fault will be asserted
 during FP context switch between security states.
@@ -52,18 +63,26 @@ CMake configurations for FP support
 ===================================
 The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
 
-* ``CONFIG_TFM_FP`` are used to configure FP ABI type for secure and non-secure
-  side both.
+* ``CONFIG_TFM_ENABLE_FP`` is used to enable/disable FPU usage.
 
-  +-------------------+---------------------------+
-  | CONFIG_TFM_FP     | FP ABI type [2]_ [3]_     |
-  +===================+===========================+
-  | soft (default)    | Software                  |
-  +-------------------+---------------------------+
-  | hard              | Hardware                  |
-  +-------------------+---------------------------+
+  +--------------------------+---------------------------+
+  | CONFIG_TFM_ENABLE_FP     | FP support                |
+  +==========================+===========================+
+  | off (default)            | FP diasabled              |
+  +--------------------------+---------------------------+
+  | on                       | FP enabled                |
+  +--------------------------+---------------------------+
 
-  FP software ABI type is default in TF-M.
+.. Note::
+    ``CONFIG_TFM_FLOAT_ABI`` depends on ``CONFIG_TFM_ENABLE_FP``. If
+    ``CONFIG_TFM_ENABLE_FP is set ``CONFIG_TFM_FLOAT_ABI`` is automatically
+    set to ``hard``.
+
+.. Note::
+    If you build TF-M SPE with ``CONFIG_TFM_ENABLE_FP=on`` and provide your own
+    NSPE application, your own NSPE **must** take care of enabling floating point
+    coprocessors CP10 and CP11 on the NS side to avoid aforementioned NOCP usage
+    fault.
 
 * ``CONFIG_TFM_LAZY_STACKING`` is used to enable/disable lazy stacking
   feature. This feature is only valid for FP hardware ABI type.
@@ -109,8 +128,10 @@ Reference
 
 .. [7] `Musca-S1 Test Chip Board <https://developer.arm.com/tools-and-software/development-boards/iot-test-chips-and-boards/musca-s1-test-chip-board>`_
 
-.. [8] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
+.. [8] `GCC Issue on '-mcpu=cortex-m55' conflicts with '-march=armv8.1-m.main' Warning <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97327>`_
+
+.. [9] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
 
 --------------
 
-*Copyright (c) 2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*

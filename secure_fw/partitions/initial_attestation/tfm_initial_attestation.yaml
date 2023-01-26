@@ -12,25 +12,7 @@
   "priority": "NORMAL",
   "model": "SFN",
   "entry_init": "attest_partition_init",
-  "stack_size": "0x0A80",
-  "secure_functions": [
-    {
-      "name": "TFM_ATTEST_GET_TOKEN",
-      "signal": "INITIAL_ATTEST_GET_TOKEN",
-      "sid": "0x00000020",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-    {
-      "name": "TFM_ATTEST_GET_TOKEN_SIZE",
-      "signal": "INITIAL_ATTEST_GET_TOKEN_SIZE",
-      "sid": "0x00000021",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-  ],
+  "stack_size": "ATTEST_STACK_SIZE",
   "services": [
     {
       "name": "TFM_ATTESTATION_SERVICE",
@@ -39,7 +21,8 @@
       "connection_based": false,
       "stateless_handle": 4,
       "version": 1,
-      "version_policy": "STRICT"
+      "version_policy": "STRICT",
+      "mm_iovec": "enable",
     }
   ],
   "dependencies": [

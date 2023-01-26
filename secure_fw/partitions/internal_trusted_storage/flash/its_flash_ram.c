@@ -4,11 +4,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
-
+#include <string.h>
 #include "its_flash_ram.h"
 
 #include "flash_fs/its_flash_fs.h"
-#include "tfm_memory_utils.h"
 
 /**
  * \brief Gets physical address of the given block ID.
@@ -38,7 +37,7 @@ static psa_status_t its_flash_ram_read(const struct its_flash_fs_config_t *cfg,
 {
     uint32_t idx = get_phys_address(cfg, block_id, offset);
 
-    (void)tfm_memcpy(buff, (uint8_t *)cfg->flash_dev + idx, size);
+    (void)memcpy(buff, (uint8_t *)cfg->flash_dev + idx, size);
 
     return PSA_SUCCESS;
 }
@@ -49,7 +48,7 @@ static psa_status_t its_flash_ram_write(const struct its_flash_fs_config_t *cfg,
 {
     uint32_t idx = get_phys_address(cfg, block_id, offset);
 
-    (void)tfm_memcpy((uint8_t *)cfg->flash_dev + idx, buff, size);
+    (void)memcpy((uint8_t *)cfg->flash_dev + idx, buff, size);
 
     return PSA_SUCCESS;
 }
@@ -71,8 +70,8 @@ static psa_status_t its_flash_ram_erase(const struct its_flash_fs_config_t *cfg,
 {
     uint32_t idx = get_phys_address(cfg, block_id, 0);
 
-    (void)tfm_memset((uint8_t *)cfg->flash_dev + idx, cfg->erase_val,
-                     cfg->block_size);
+    (void)memset((uint8_t *)cfg->flash_dev + idx, cfg->erase_val,
+                 cfg->block_size);
 
     return PSA_SUCCESS;
 }

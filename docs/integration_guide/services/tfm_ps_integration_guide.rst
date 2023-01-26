@@ -260,8 +260,8 @@ The following optional platform definitions may be defined in
   the NAND flash implementation. The buffer must be at least as large as a
   logical filesystem block.
 
-More information about the ``flash_layout.h`` content, not PS related, is
-available in :doc:`platform readme </platform/ext/readme>` along with other
+More information about the ``flash_layout.h`` content, not ITS related, is
+available in :doc:`../platform/platform_ext_folder` along with other
 platform information.
 
 TF-M NV Counter Interface
@@ -273,6 +273,11 @@ platform NV counter interface. For API specification, please check:
 The system integrators **may** implement this interface based on the target
 capabilities and set the ``PS_ROLLBACK_PROTECTION`` flag to compile in
 the rollback protection code.
+
+  .. Note::
+    If this flag is enabled, the lifecycle of the PS service depends on the
+    shorter write endurance of the assets storage device and the NV counters
+    storage device.
 
 Secret Platform Unique Key
 ==========================
@@ -319,13 +324,22 @@ PS Service Build Definitions
 The PS service uses a set of C definitions to compile in/out certain features,
 as well as to configure certain service parameters. When using the TF-M build
 system, these definitions are controlled by build flags of the same name. The
-``config/config_default.cmake`` file sets the default values of those flags, but
+``config/config_base.cmake`` file sets the default values of those flags, but
 they can be overwritten based on platform capabilities by setting them in
 ``platform/ext/target/<TARGET_NAME>/config.cmake``. The list of PS service build
 definitions is:
 
 - ``PS_ENCRYPTION``- this flag allows to enable/disable encryption
   option to encrypt the protected storage data.
+
+- ``PS_CRYPTO_AEAD_ALG`` - this flag indicates the AEAD algorithm to use for
+  authenticated encryption in Protected Storage.
+
+  .. Note::
+    For GCM/CCM it is essential that IV doesn't get repeated. If this flag is set to
+    ``PSA_ALG_GCM`` or ``PSA_ALG_CCM``, ``PS_ROLLBACK_PROTECTION`` must be enabled
+    to protect against IV rollback.
+
 - ``PS_CREATE_FLASH_LAYOUT``- this flag indicates that it is required
   to create a PS flash layout. If this flag is set, PS service will
   generate an empty and valid PS flash layout to store assets. It will
@@ -383,6 +397,9 @@ definitions is:
   which cannot be decreased again.
   Overriding this flag from its default value of ``OFF`` when not
   building the regression tests is not currently supported.
+- ``PS_STACK_SIZE``- Defines the stack size of the Protected Storage Secure
+  Partition. This value mainly depends on the build type(debug, release and
+  minisizerel) and compiler.
 
 --------------
 

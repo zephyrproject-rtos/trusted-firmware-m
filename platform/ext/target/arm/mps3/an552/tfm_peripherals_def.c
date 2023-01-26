@@ -86,17 +86,10 @@ struct platform_data_t tfm_peripheral_timer0 = {
 };
 
 struct platform_data_t tfm_peripheral_timer1 = {
-#if (CONFIG_TFM_FP == 2) && (TEST_NS_FPU == 1)
-        SYSTIMER1_ARMV8_M_BASE_NS,
-        SYSTIMER1_ARMV8_M_BASE_NS + 0xFFF,
-        PPC_SP_DO_NOT_CONFIGURE,
-        -1
-#else
         SYSTIMER1_ARMV8_M_BASE_S,
         SYSTIMER1_ARMV8_M_BASE_S + 0xFFF,
         PPC_SP_PERIPH0,
         SYSTEM_TIMER1_PERIPH_PPC0_POS_MASK
-#endif
 };
 
 struct platform_data_t tfm_peripheral_timer2 = {

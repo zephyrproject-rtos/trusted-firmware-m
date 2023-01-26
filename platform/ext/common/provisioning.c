@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include "config_attest.h"
 #include "tfm_plat_provisioning.h"
 
 #include "cmsis_compiler.h"
@@ -12,7 +13,6 @@
 #include "tfm_attest_hal.h"
 #include "psa/crypto.h"
 #include "tfm_spm_log.h"
-#include "tfm_memory_utils.h"
 
 #include <string.h>
 
@@ -33,7 +33,7 @@ __PACKED_STRUCT tfm_psa_rot_provisioning_data_t {
 
     uint8_t boot_seed[32];
     uint8_t implementation_id[32];
-    uint8_t hw_version[32];
+    uint8_t cert_ref[32];
     uint8_t verification_service_url[32];
     uint8_t profile_definition[32];
 
@@ -86,12 +86,24 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
         0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC, 0xCC,
         0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD, 0xDD,
     },
-    /* hw version */
-    "0604565272829100",
+    /* certification reference */
+    "0604565272829-10010",
     /* verification_service_url */
     "www.trustedfirmware.org",
     /* attestation_profile_definition */
+#if ATTEST_TOKEN_PROFILE_PSA_IOT_1
     "PSA_IOT_PROFILE_1",
+#elif ATTEST_TOKEN_PROFILE_PSA_2_0_0
+    "http://arm.com/psa/2.0.0",
+#elif ATTEST_TOKEN_PROFILE_ARM_CCA
+    "http://arm.com/CCA-SSD/1.0.0",
+#else
+#ifdef TFM_PARTITION_INITIAL_ATTESTATION
+#error "Attestation token profile is incorrect"
+#else
+    "UNDEFINED",
+#endif /* TFM_PARTITION_INITIAL_ATTESTATION */
+#endif
     /* Entropy seed */
     {
         0x12, 0x13, 0x23, 0x34, 0x0a, 0x05, 0x89, 0x78,
@@ -122,7 +134,7 @@ void tfm_plat_provisioning_check_for_dummy_keys(void)
         SPMLOG_ERRMSG("\033[0m\r\n");
     }
 
-    tfm_memset(&iak_start, 0, sizeof(iak_start));
+    memset(&iak_start, 0, sizeof(iak_start));
 }
 
 int tfm_plat_provisioning_is_required(void)
@@ -184,7 +196,7 @@ enum tfm_plat_err_t provision_psa_rot(void)
         return err;
     }
 
-#ifdef ATTEST_INCLUDE_COSE_KEY_ID
+#if ATTEST_INCLUDE_COSE_KEY_ID
     err = tfm_plat_otp_write(PLAT_OTP_ID_IAK_ID,
                              sizeof(psa_rot_prov_data.iak_id),
                              psa_rot_prov_data.iak_id);
@@ -205,9 +217,9 @@ enum tfm_plat_err_t provision_psa_rot(void)
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
-    err = tfm_plat_otp_write(PLAT_OTP_ID_HW_VERSION,
-                             sizeof(psa_rot_prov_data.hw_version),
-                             psa_rot_prov_data.hw_version);
+    err = tfm_plat_otp_write(PLAT_OTP_ID_CERT_REF,
+                             sizeof(psa_rot_prov_data.cert_ref),
+                             psa_rot_prov_data.cert_ref);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

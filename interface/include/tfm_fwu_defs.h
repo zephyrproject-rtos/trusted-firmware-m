@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,12 +12,17 @@
 extern "C" {
 #endif
 
-/* Image type identities. When porting a specific bootloader to FWU partition,
- * the bootloader specific image types can be defined here.
- */
-#define FWU_IMAGE_TYPE_NONSECURE        0x01U
-#define FWU_IMAGE_TYPE_SECURE           0x02U
-#define FWU_IMAGE_TYPE_FULL             0x03U
+/* FWU message types that distinguish FWU services. */
+#define TFM_FWU_START                1001
+#define TFM_FWU_WRITE                1002
+#define TFM_FWU_FINISH               1003
+#define TFM_FWU_CANCEL               1004
+#define TFM_FWU_INSTALL              1005
+#define TFM_FWU_CLEAN                1006
+#define TFM_FWU_REJECT               1007
+#define TFM_FWU_REQUEST_REBOOT       1008
+#define TFM_FWU_ACCEPT               1009
+#define TFM_FWU_QUERY                1010
 
 #ifdef __cplusplus
 }

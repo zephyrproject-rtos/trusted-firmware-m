@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,19 +19,21 @@ extern "C" {
 #define HUK_SIZE (32)
 #endif /* HUK_SIZE */
 
+#ifndef GUK_SIZE
+#define GUK_SIZE (32)
+#endif /* GUK_SIZE */
+
 #ifndef BL2_ENCRYPTION_KEY_SIZE
 #define BL2_ENCRYPTION_KEY_SIZE (32)
 #endif /* BL2_ENCRYPTION_KEY_SIZE */
 
- enum tfm_bl1_key_id_t {
+enum tfm_bl1_key_id_t {
     TFM_BL1_KEY_HUK,
+    TFM_BL1_KEY_GUK,
     TFM_BL1_KEY_BL2_ENCRYPTION,
-#ifdef TEST_BL1_1
-    TFM_BL1_KEY_TEST_1,
-    TFM_BL1_KEY_TEST_2,
-#endif /* TEST_BL1_1 */
+    TFM_BL1_KEY_ROTPK_0,
 
-  tfm_bl1_key_max,
+    TFM_BL1_KEY_USER,
 };
 
 #ifdef __cplusplus

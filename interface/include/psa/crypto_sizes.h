@@ -176,8 +176,46 @@
  * operations, and does not need to accept all key sizes up to the limit. */
 #define PSA_VENDOR_RSA_MAX_KEY_BITS 4096
 
-/* The maximum size of an ECC key on this implementation, in bits */
+/* The maximum size of an ECC key on this implementation, in bits.
+ * This is a vendor-specific macro. */
+#if defined(MBEDTLS_PSA_CRYPTO_CONFIG)
+#if defined(MBEDTLS_PSA_CRYPTO_CONFIG_FILE)
+#include MBEDTLS_PSA_CRYPTO_CONFIG_FILE
+#else
+#include "psa/crypto_config.h"
+#endif
+#if defined(PSA_WANT_ECC_SECP_R1_521)
 #define PSA_VENDOR_ECC_MAX_CURVE_BITS 521
+#elif defined(PSA_WANT_ECC_BRAINPOOL_P_R1_512)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 512
+#elif defined(PSA_WANT_ECC_MONTGOMERY_448)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 448
+#elif defined(PSA_WANT_ECC_SECP_R1_384)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 384
+#elif defined(PSA_WANT_ECC_BRAINPOOL_P_R1_384)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 384
+#elif defined(PSA_WANT_ECC_SECP_R1_256)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 256
+#elif defined(PSA_WANT_ECC_SECP_K1_256)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 256
+#elif defined(PSA_WANT_ECC_BRAINPOOL_P_R1_256)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 256
+#elif defined(PSA_WANT_ECC_MONTGOMERY_255)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 255
+#elif defined(PSA_WANT_ECC_SECP_R1_224)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 224
+#elif defined(PSA_WANT_ECC_SECP_K1_224)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 224
+#elif defined(PSA_WANT_ECC_SECP_R1_192)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 192
+#elif defined(PSA_WANT_ECC_SECP_K1_192)
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 192
+#else
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 0
+#endif
+#else /* defined(MBEDTLS_PSA_CRYPTO_CONFIG)  */
+#define PSA_VENDOR_ECC_MAX_CURVE_BITS 521
+#endif /* defined(MBEDTLS_PSA_CRYPTO_CONFIG)  */
 
 /** This macro returns the maximum supported length of the PSK for the
  * TLS-1.2 PSK-to-MS key derivation
@@ -696,7 +734,7 @@
  *      subjectPublicKey     BIT STRING  } -- contains DSAPublicKey
  * AlgorithmIdentifier  ::=  SEQUENCE  {
  *      algorithm               OBJECT IDENTIFIER,
- *      parameters              Dss-Parms  } -- SEQUENCE of 3 INTEGERs
+ *      parameters              Dss-Params  } -- SEQUENCE of 3 INTEGERs
  * DSAPublicKey  ::=  INTEGER -- public key, Y
  *
  * - 3 * 4 bytes of SEQUENCE overhead;
@@ -931,8 +969,7 @@
  *
  * \param key_type  A symmetric key type that is compatible with algorithm \p alg.
  *
- * \param alg       A cipher algorithm (\c PSA_ALG_XXX value such that
- *                  #PSA_ALG_IS_CIPHER(\p alg) is true).
+ * \param alg       A cipher algorithm (\c PSA_ALG_XXX value such that #PSA_ALG_IS_CIPHER(\p alg) is true).
  *
  * \return The default IV size for the specified key type and algorithm.
  *         If the algorithm does not use an IV, return 0.

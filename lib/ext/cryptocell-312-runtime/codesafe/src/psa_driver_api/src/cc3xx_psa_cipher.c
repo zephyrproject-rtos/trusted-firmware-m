@@ -20,29 +20,8 @@
 #include "cc_pal_mem.h"
 #include "cc_pal_log.h"
 
-/**
- * \brief By default, the driver interface enables Chacha20
- */
-#ifndef CC3XX_CONFIG_SUPPORT_CHACHA20
-#define CC3XX_CONFIG_SUPPORT_CHACHA20
-#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
-
-/* FixMe: The strategy to configure the CC3XX driver layer is not finalised,
- *        so for the time being we just use the mbed TLS config file to
- *        understand if we need to set CC3XX specific config defines.
- */
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
-
-/* FixMe: Temporary way of bridging mbed TLS based configuration
- *        with specific CC3XX driver configuration defines
- */
-#ifndef MBEDTLS_CHACHA20_C
-#undef CC3XX_CONFIG_SUPPORT_CHACHA20
-#endif
+/* To be able to include the PSA style configuration */
+#include "mbedtls/build_info.h"
 
 static psa_status_t add_pkcs_padding(
         uint8_t *output,
@@ -108,7 +87,7 @@ static psa_status_t cipher_setup(
     }
 
     if (!(PSA_ALG_IS_CIPHER(alg) || PSA_ALG_IS_BLOCK_CIPHER_MAC(alg))) {
-     return PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     CC_PalMemSetZero(operation, sizeof(cc3xx_cipher_operation_t));
@@ -119,8 +98,12 @@ static psa_status_t cipher_setup(
     operation->iv_size    = PSA_CIPHER_IV_LENGTH(key_type, alg);
     operation->block_size = (PSA_ALG_IS_STREAM_CIPHER(alg) ? 1 :
                              PSA_BLOCK_CIPHER_BLOCK_LENGTH(key_type));
+    /* Default callbacks get overwritten only in case of PKCS7 padding */
+    operation->add_padding = NULL;
+    operation->get_padding = NULL;
 
     switch (operation->key_type) {
+#if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
         cc3xx_aes_init(&operation->ctx.aes);
 
@@ -133,8 +116,8 @@ static psa_status_t cipher_setup(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+
         case PSA_CRYPTO_DRIVER_DECRYPT:
             if (( ret = cc3xx_aes_setkey_dec(
                     &operation->ctx.aes,
@@ -143,14 +126,14 @@ static psa_status_t cipher_setup(
                 != PSA_SUCCESS) {
                 return ret;
             }
-
             break;
+
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         }
-
         break;
-#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
+#endif /* PSA_WANT_KEY_TYPE_AES */
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
     case PSA_KEY_TYPE_CHACHA20:
         cc3xx_chacha20_init(&operation->ctx.chacha);
 
@@ -162,19 +145,18 @@ static psa_status_t cipher_setup(
             return ret;
         }
         break;
-#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
 
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
     if (operation->alg == PSA_ALG_CBC_PKCS7) {
         operation->add_padding = add_pkcs_padding;
         operation->get_padding = get_pkcs_padding;
-    } else {
-        operation->add_padding = NULL;
-        operation->get_padding = NULL;
     }
+#endif /* PSA_WANT_ALG_CBC_PKCS7 */
 
     return ret;
 }
@@ -223,7 +205,7 @@ psa_status_t cc3xx_cipher_set_iv(
     }
 
     switch (operation->key_type) {
-#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
     case  PSA_KEY_TYPE_CHACHA20:
     {
         uint8_t *iv_pnt = (uint8_t *)iv;
@@ -258,8 +240,8 @@ psa_status_t cc3xx_cipher_set_iv(
         }
     }
     break;
-#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
-
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
+#if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
 
         if (iv_length != AES_IV_SIZE) {
@@ -270,6 +252,7 @@ psa_status_t cc3xx_cipher_set_iv(
         operation->iv_size = iv_length;
         ret = PSA_SUCCESS;
         break;
+#endif /* PSA_WANT_KEY_TYPE_AES */
 
     default:
         ret = PSA_ERROR_NOT_SUPPORTED;
@@ -304,8 +287,10 @@ psa_status_t cc3xx_cipher_update(
     size_t copy_len;
 
     switch (operation->key_type) {
+#if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING) || defined(PSA_WANT_ALG_CBC_PKCS7)
         case PSA_ALG_CBC_NO_PADDING:
         case PSA_ALG_CBC_PKCS7:
             if ((operation->dir == PSA_CRYPTO_DRIVER_DECRYPT &&
@@ -388,8 +373,9 @@ psa_status_t cc3xx_cipher_update(
 
                 *output_length = input_length;
             }
-
             break;
+#endif /* PSA_WANT_ALG_CBC_NO_PADDING || PSA_WANT_ALG_CBC_PKCS7 */
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
         case PSA_ALG_ECB_NO_PADDING:
             if (( ret = cc3xx_aes_crypt(
                     &operation->ctx.aes,
@@ -403,8 +389,9 @@ psa_status_t cc3xx_cipher_update(
             }
 
             *output_length = input_length;
-
             break;
+#endif /* PSA_WANT_ALG_ECB_NO_PADDING */
+#if defined(PSA_WANT_ALG_CTR)
         case PSA_ALG_CTR:
             if (( ret = cc3xx_aes_crypt(
                     &operation->ctx.aes,
@@ -418,8 +405,9 @@ psa_status_t cc3xx_cipher_update(
             }
 
             *output_length = input_length;
-
             break;
+#endif /* PSA_WANT_ALG_CTR */
+#if defined(PSA_WANT_ALG_OFB)
         case PSA_ALG_OFB:
             if (( ret = cc3xx_aes_crypt(
                     &operation->ctx.aes,
@@ -433,8 +421,8 @@ psa_status_t cc3xx_cipher_update(
             }
 
             *output_length = input_length;
-
             break;
+#endif /* PSA_WANT_ALG_OFB */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         } /* operation->alg */
@@ -443,8 +431,8 @@ psa_status_t cc3xx_cipher_update(
             return PSA_ERROR_CORRUPTION_DETECTED;
         }
         break;
-
-#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
+#endif /* PSA_WANT_KEY_TYPE_AES */
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
     case PSA_KEY_TYPE_CHACHA20:
         if (( ret = cc3xx_chacha20_update(
                 &operation->ctx.chacha,
@@ -457,7 +445,7 @@ psa_status_t cc3xx_cipher_update(
             return ret;
         }
         break;
-#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
 
     default:
         return PSA_ERROR_NOT_SUPPORTED;
@@ -490,8 +478,10 @@ psa_status_t cc3xx_cipher_finish(
     *output_length = 0;
 
     switch (operation->key_type) {
+#if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
         switch (operation->alg) {
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING) || defined(PSA_WANT_ALG_CBC_PKCS7)
         case PSA_ALG_CBC_NO_PADDING:
         case PSA_ALG_CBC_PKCS7:
             if (operation->dir == PSA_CRYPTO_DRIVER_ENCRYPT) {
@@ -565,24 +555,32 @@ psa_status_t cc3xx_cipher_finish(
 
             CC_PalMemCopy(output, temp_buff, data_len);
             *output_length = data_len;
-
             break;
+#endif /* PSA_WANT_ALG_CBC_NO_PADDING || PSA_WANT_ALG_CBC_PKCS7 */
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
         case PSA_ALG_ECB_NO_PADDING:
+            return PSA_SUCCESS;
+#endif /* PSA_WANT_ALG_ECB_NO_PADDING */
+#if defined(PSA_WANT_ALG_CTR)
         case PSA_ALG_CTR:
+            return PSA_SUCCESS;
+#endif /* PSA_WANT_ALG_CTR */
+#if defined(PSA_WANT_ALG_OFB)
         case PSA_ALG_OFB:
             return PSA_SUCCESS;
+#endif /* PSA_WANT_ALG_OFB */
         default:
             return PSA_ERROR_NOT_SUPPORTED;
         } /* operation->alg */
         break;
-
-#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
+#endif /* PSA_WANT_KEY_TYPE_AES */
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
     case PSA_KEY_TYPE_CHACHA20:
         ret = cc3xx_chacha20_finish(&operation->ctx.chacha, output,
                                     output_size, output_length);
         cc3xx_chacha20_free(&operation->ctx.chacha);
         break;
-#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
 
     default:
         ret = PSA_ERROR_NOT_SUPPORTED;
@@ -594,14 +592,16 @@ psa_status_t cc3xx_cipher_finish(
 psa_status_t cc3xx_cipher_abort(cc3xx_cipher_operation_t *operation)
 {
     switch (operation->key_type) {
+#if defined(PSA_WANT_KEY_TYPE_AES)
     case PSA_KEY_TYPE_AES:
         cc3xx_aes_free(&operation->ctx.aes);
         break;
-#if defined(CC3XX_CONFIG_SUPPORT_CHACHA20)
+#endif /* PSA_WANT_KEY_TYPE_AES */
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20)
     case PSA_KEY_TYPE_CHACHA20:
         cc3xx_chacha20_free(&operation->ctx.chacha);
         break;
-#endif /* CC3XX_CONFIG_SUPPORT_CHACHA20 */
+#endif /* PSA_WANT_KEY_TYPE_CHACHA20 */
     default:
         return PSA_ERROR_NOT_SUPPORTED;
     }

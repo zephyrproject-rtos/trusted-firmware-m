@@ -1,5 +1,10 @@
 bl1_sha256_compute
+bl1_sha256_init
+bl1_sha256_update
+bl1_sha256_finish
+
 bl1_aes_256_ctr_decrypt
+bl1_derive_key
 bl1_otp_read_nv_counter
 bl1_otp_write_nv_counter
 bl1_otp_read_bl2_image_hash

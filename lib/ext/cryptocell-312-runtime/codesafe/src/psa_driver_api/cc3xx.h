@@ -27,7 +27,7 @@
  * \note This file must be included by psa_crypto_driver_wrappers.c. The
  * definition of the context types used in the implementation is provided
  * through \ref cc3xx_crypto_primitives_private.h which is included, when
- * \ref PSA_CRYPTO_DRIVER_CC3XX is defined, in turn by psa/crypto.h, then
+ * \ref PSA_CRYPTO_DRIVER_CC3XX is defined, in turn by \ref psa/crypto.h, then
  * psa/crypto_struct.h and finally by psa/crypto_driver_context_primitives.h
  * and by psa/crypto_driver_context_composites.h from the mbedTLS module.
  * When \ref PSA_CRYPTO_DRIVER_CC3XX is not defined, the implementation
@@ -38,55 +38,40 @@
 
 #ifdef __DOXYGEN_ONLY__
 /*!
- *  Used to enable the cc3xx driver in the PSA Driver Core layer. When this is
+ *  Enables the cc3xx driver in the PSA Driver Core layer. When this is
  *  defined, the \ref cc3xx_crypto_primitives_private.h type definitions are
- *  also visible through including psa/crypto.h
- *
+ *  also visible through including \ref psa/crypto.h
  */
 #define PSA_CRYPTO_DRIVER_CC3XX
 
 /*!
- *  Used to enable the type conversion from CCError_t to psa_status_t when
+ *  Enables fine grained type conversion from CCError_t to psa_status_t when
  *  translating error codes from CC format to PSA format in ECC and RSA
  *  modules. The translation functions occupy ~1KB of flash hence keep them
- *  disabled by default. By default any CC low-level failure is treated as
- *  PSA_ERROR_HARDWARE_FAILURE
+ *  disabled by default. By default only a minimum set of CC errors is
+ *  translated to PSA errors just to comply with PSA ACK negative tests.
  */
 #define CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION
 
 /*!
- *  Used to enable support for SHA-1 algorithms in the interface layer. By
- *  default this is kept disabled as SHA-1 is deemed un-secure
+ *  Enables the implementation of the one-shot AEAD API functions to be
+ *  implemented using multipart AEAD functions, thus saving ~2KB size of code
+ *  when all CCM, GCM and Chacha20-Poly1305 are enabled. By default is kept
+ *  enabled.
  */
-#define CC3XX_CONFIG_SUPPORT_SHA1
+#define CC3XX_CONFIG_AEAD_ONE_SHOT_USE_MULTIPART
 
 /*!
- *  Used to enable support for the GCM AEAD algorithm in the interface layer.
- *  By default this is kept enabled
+ *  Enables the AEAD module to support cached operations for AES based modes,
+ *  CCM and GCM. Cached operations make sure that multipart flows are always
+ *  accepting any length of the input data, and not restrict the input blocks
+ *  to be aligned to multiples of the AES block size. It's kept disabled by
+ *  default as it requires around 0.5 KB of flash.
  */
-#define CC3XX_CONFIG_SUPPORT_GCM
-
-/*!
- *  Used to enable support for RSA algorithm in the interface layer.
- *  By default this is kept enabled. At the moment affects only the RSA utils
- */
-#define CC3XX_CONFIG_SUPPORT_RSA
-
-/*!
- *  Used to enable support for the Chacha20 algorithm in the interface layer.
- *  By default it's kept enabled
- */
-#define CC3XX_CONFIG_SUPPORT_CHACHA20
-
-/*!
- *  Used to enable support for the Poly1305 algorithm in the interface layer.
- *  by default it's kept enabled. Note that there isn't a separate interface
- *  to exercise the Poly1305 algorithm other than through the combination with
- *  Chacha20 in an AEAD scheme.
- */
-#define CC3XX_CONFIG_SUPPORT_CHACHA20_POLY1305
+#define CC3XX_CONFIG_ENABLE_AEAD_AES_CACHED_MODE
 #endif /* __DOXYGEN_ONLY__ */
 
+#include "cc3xx_psa_init.h"
 #include "cc3xx_psa_cipher.h"
 #include "cc3xx_psa_entropy.h"
 #include "cc3xx_psa_hash.h"

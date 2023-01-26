@@ -6,12 +6,6 @@
 #-------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.15)
 
-# Don't load this file if it is specified as a cmake toolchain file
-if(NOT TFM_TOOLCHAIN_FILE)
-    message(DEPRECATION "SETTING CMAKE_TOOLCHAIN_FILE is deprecated. It has been replaced with TFM_TOOLCHAIN_FILE.")
-    return()
-endif()
-
 SET(CMAKE_SYSTEM_NAME Generic)
 
 set(CMAKE_C_COMPILER armclang)
@@ -45,8 +39,8 @@ macro(tfm_toolchain_reset_compiler_flags)
         $<$<COMPILE_LANGUAGE:C>:-masm=auto>
         $<$<COMPILE_LANGUAGE:C>:-nostdlib>
         $<$<COMPILE_LANGUAGE:C>:-std=c99>
-        $<$<AND:$<COMPILE_LANGUAGE:C>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:-mfpu=none>
-        $<$<AND:$<COMPILE_LANGUAGE:ASM>,$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>>:--fpu=none>
+        $<$<COMPILE_LANGUAGE:C>:-mfpu=none>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
         $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
         $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
     )
@@ -78,7 +72,7 @@ macro(tfm_toolchain_reset_linker_flags)
         --diag_suppress=6304
         # Pattern only matches removed unused sections.
         --diag_suppress=6329
-        $<$<NOT:$<BOOL:${TFM_SYSTEM_FP}>>:--fpu=softvfp>
+        --fpu=softvfp
     )
 endmacro()
 
@@ -86,16 +80,9 @@ macro(tfm_toolchain_set_processor_arch)
     if (DEFINED TFM_SYSTEM_PROCESSOR)
         set(CMAKE_SYSTEM_PROCESSOR       ${TFM_SYSTEM_PROCESSOR})
 
-        if (DEFINED TFM_SYSTEM_MVE)
-            if(NOT TFM_SYSTEM_MVE)
-                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
-            endif()
-        endif()
-
-        if (DEFINED TFM_SYSTEM_FP)
-            if(NOT TFM_SYSTEM_FP)
-                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
-            endif()
+        if (TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
+            message(WARNING "MVE is not yet supported using ARMCLANG")
+            string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
         endif()
 
         if (DEFINED TFM_SYSTEM_DSP)
@@ -115,14 +102,6 @@ macro(tfm_toolchain_set_processor_arch)
         # Modifiers are additive instead of subtractive (.fp Vs .no_fp)
         if (TFM_SYSTEM_DSP)
             string(APPEND CMAKE_ASM_CPU_FLAG ".dsp")
-        else()
-            if (TFM_SYSTEM_MVE)
-                string(APPEND CMAKE_ASM_CPU_FLAG ".mve")
-            endif()
-
-            if (TFM_SYSTEM_FP)
-                string(APPEND CMAKE_ASM_CPU_FLAG ".fp")
-            endif()
         endif()
     endif()
 
@@ -139,16 +118,9 @@ macro(tfm_toolchain_set_processor_arch)
     set(CMAKE_C_COMPILER_TARGET      arm-${CROSS_COMPILE})
     set(CMAKE_ASM_COMPILER_TARGET    arm-${CROSS_COMPILE})
 
-    if (DEFINED TFM_SYSTEM_MVE)
-        if(NOT TFM_SYSTEM_MVE)
-            string(APPEND CMAKE_SYSTEM_ARCH "+nomve")
-        endif()
-    endif()
-
-    if (DEFINED TFM_SYSTEM_FP)
-        if(NOT TFM_SYSTEM_FP)
-            string(APPEND CMAKE_SYSTEM_ARCH "+nofp")
-        endif()
+    # MVE is currently not supported in case of armclang
+    if (TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
+        string(APPEND CMAKE_SYSTEM_ARCH "+nomve")
     endif()
 
     if (DEFINED TFM_SYSTEM_DSP)
@@ -188,18 +160,18 @@ macro(tfm_toolchain_reload_compiler)
         message(FATAL_ERROR "Please select newer Arm compiler version starting from 6.10.1.")
     endif()
 
-    if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.15)
-        message(WARNING "Armclang starting from v6.15 may cause MemManage fault."
-                            " The root cause is still under analysis by Armclang."
-                            " Please use lower Armclang versions instead.")
+    if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.15 AND
+        CMAKE_C_COMPILER_VERSION VERSION_LESS 6.18)
+        message(FATAL_ERROR "Armclang 6.15~6.17 may cause MemManage fault."
+                            " This defect has been fixed since Armclang 6.18."
+                            " See [SDCOMP-59788] in Armclang 6.18 release note for details."
+                            " Please use other Armclang versions instead.")
     endif()
 
-    # Cmake's armclang support will set either mcpu or march, but march gives
-    # better code size so we manually set it.
-    set(CMAKE_C_FLAGS   "-march=${CMAKE_SYSTEM_ARCH}")
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
     if (DEFINED TFM_SYSTEM_PROCESSOR)
+        set(CMAKE_C_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         # But armlink doesn't support this +dsp syntax
@@ -211,6 +183,8 @@ macro(tfm_toolchain_reload_compiler)
 
         string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
         string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
+    else()
+        set(CMAKE_C_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
     endif()
 
     # Workaround for issues with --depend-single-line with armasm and Ninja

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2020 Arm Limited
+ * Copyright (c) 2009-2022 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 
 /*
- * This file is derivative of CMSIS V5.6.0 system_ARMv81MML.h
- * Git SHA: b5f0603d6a584d1724d952fd8b0737458b90d62b
+ * This file is derivative of CMSIS V5.9.0 system_ARMCM55.h
+ * Git SHA: 2b7495b8535bdcb306dac29b9ded4cfb679d7e5c
  */
 
 #ifndef __SYSTEM_CORE_INIT_H__
@@ -32,14 +32,22 @@ extern uint32_t SystemCoreClock;  /*!< System Clock Frequency (Core Clock)  */
 extern uint32_t PeripheralClock;  /*!< Peripheral Clock Frequency */
 
 /**
- * \brief  Initializes the system
- */
-extern void SystemInit(void);
+  \brief Exception / Interrupt Handler Function Prototype
+*/
+typedef void(*VECTOR_TABLE_Type)(void);
 
 /**
- * \brief  Restores system core clock
+  \brief Setup the microcontroller system.
+   Initialize the System and update the SystemCoreClock variable.
  */
-extern void SystemCoreClockUpdate(void);
+extern void SystemInit (void);
+
+
+/**
+  \brief  Update SystemCoreClock variable.
+   Updates the SystemCoreClock with current core Clock retrieved from cpu registers.
+ */
+extern void SystemCoreClockUpdate (void);
 
 #ifdef __cplusplus
 }

@@ -21,6 +21,7 @@
 #include "tfm_peripherals_def.h"
 #include "tfm_plat_defs.h"
 #include "arm_uart_drv.h"
+#include "fih.h"
 
 #define TFM_DRIVER_STDIO    Driver_USART0
 #define NS_DRIVER_STDIO     Driver_USART0
@@ -81,17 +82,17 @@ struct platform_data_t
  *
  * \return  Returns error code.
  */
-int32_t mpc_init_cfg(void);
+FIH_RET_TYPE(int32_t) mpc_init_cfg(void);
 
 /**
  * \brief Configures the Peripheral Protection Controller.
  */
-void ppc_init_cfg(void);
+FIH_RET_TYPE(int32_t) ppc_init_cfg(void);
 
 /**
  * \brief Restict access to peripheral to secure
  */
-void ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t loc);
+FIH_RET_TYPE(int32_t) ppc_configure_to_secure(enum ppc_bank_e bank, uint16_t loc);
 
 /**
  * \brief Allow non-secure access to peripheral
@@ -101,12 +102,12 @@ void ppc_configure_to_non_secure(enum ppc_bank_e bank, uint16_t loc);
 /**
  * \brief Enable secure unprivileged access to peripheral
  */
-void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos);
+FIH_RET_TYPE(int32_t) ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos);
 
 /**
  * \brief Clear secure unprivileged access to peripheral
  */
-void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos);
+FIH_RET_TYPE(int32_t) ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint16_t pos);
 
 /**
  * \brief Clears PPC interrupt.
@@ -116,7 +117,7 @@ void ppc_clear_irq(void);
 /**
  * \brief Configures SAU and IDAU.
  */
-void sau_and_idau_cfg(void);
+FIH_RET_TYPE(int32_t) sau_and_idau_cfg(void);
 
 /**
  * \brief Enables the fault handlers and sets priorities.
@@ -137,7 +138,7 @@ enum tfm_plat_err_t system_reset_cfg(void);
  *
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
-enum tfm_plat_err_t init_debug(void);
+FIH_RET_TYPE(enum tfm_plat_err_t) init_debug(void);
 
 /**
  * \brief Configures all external interrupts to target the
@@ -156,5 +157,14 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void);
  * \return Returns values as specified by the \ref tfm_plat_err_t
  */
 enum tfm_plat_err_t nvic_interrupt_enable(void);
+
+/* Function for FIH to verify that SAU & IDAU are correctly configured. */
+fih_int fih_verify_sau_and_idau_cfg(void);
+
+/* Function for FIH to verify that MPC is correctly configured. */
+fih_int fih_verify_mpc_cfg(void);
+
+/* Function for FIH to verify that PPC is correctly configured. */
+fih_int fih_verify_ppc_cfg(void);
 
 #endif /* __TARGET_CFG_H__ */

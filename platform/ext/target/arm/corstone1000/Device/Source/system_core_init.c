@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
  * \Device\ARM\ARMCM0plus\Source\system_ARMCM0plus.c
  */
 
-#include "system_core_init.h"
 #include "cmsis.h"
 
 /*----------------------------------------------------------------------------
@@ -29,8 +28,9 @@
 #define  PERIPHERAL_CLOCK   (50000000UL)
 
 /*----------------------------------------------------------------------------
-  Externals
+  Exception / Interrupt Vector table
  *----------------------------------------------------------------------------*/
+extern const VECTOR_TABLE_Type __VECTOR_TABLE[240];
 
 /*----------------------------------------------------------------------------
   System Core Clock Variable
@@ -53,8 +53,7 @@ void SystemCoreClockUpdate (void)
 void SystemInit (void)
 {
 #if defined (__VTOR_PRESENT) && (__VTOR_PRESENT == 1U)
-    extern uint32_t __Vectors;
-    SCB->VTOR = (uint32_t) &__Vectors;
+    SCB->VTOR = (uint32_t) &(__VECTOR_TABLE);
 #endif
     SystemCoreClockUpdate();
 }

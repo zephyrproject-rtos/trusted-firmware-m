@@ -38,6 +38,7 @@ struct flash_area flash_map[] = {
         .fa_off = FLASH_AREA_1_OFFSET,
         .fa_size = FLASH_AREA_1_SIZE,
     },
+#ifndef TFM_S_REG_TEST
     {
         .fa_id = FLASH_AREA_2_ID,
         .fa_device_id = FLASH_DEVICE_ID,
@@ -52,6 +53,7 @@ struct flash_area flash_map[] = {
         .fa_off = FLASH_INVALID_OFFSET,
         .fa_size = FLASH_INVALID_SIZE,
     },
+#endif
 };
 
 const int flash_map_entry_num = ARRAY_SIZE(flash_map);

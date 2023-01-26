@@ -18,7 +18,6 @@ This document uses the following terms and abbreviations.
    IPC                Interprocess communication
    IPC model          The secure IPC framework
    irqs               Interrupt requests
-   Library model      The secure function call framework
    MMIO               Memory Mapped I/O
    PSA                Platform Security Architecture
    RoT                Root of Trust
@@ -47,8 +46,7 @@ focuses on the configuration, manifest, implement rules. The actual
 source-level implementation is not included in this document.
 
 .. Note::
-   If not otherwise specified, the steps are identical for Library, IPC and SFN
-   model.
+   If not otherwise specified, the steps are identical for IPC and SFN model.
 
    The IPC and SFN model conforms to the *PSA Firmware Framework for M (FF-M) v
    1.1* changes. Refer to `PSA Firmware Framework specification`_ and
@@ -189,7 +187,6 @@ Here is the RoT Service ID table used in TF-M.
    =========================== ====================== ========================
    **Partitions**              **Vendor ID(20 bits)** **Function ID(12 bits)**
    =========================== ====================== ========================
-   audit_logging               0x00000                0x000-0x01F
    initial_attestation         0x00000                0x020-0x03F
    platform                    0x00000                0x040-0x05F
    protected_storage           0x00000                0x060-0x06F
@@ -197,8 +194,6 @@ Here is the RoT Service ID table used in TF-M.
    crypto                      0x00000                0x080-0x09F
    firmware_update             0x00000                0x0A0-0x0BF
    tfm_secure_client           0x0000F                0x000-0x01F
-   core_test                   0x0000F                0x020-0x03F
-   core_test_2                 0x0000F                0x040-0x05F
    tfm_ipc_client              0x0000F                0x060-0x07F
    tfm_ipc_service             0x0000F                0x080-0x09F
    tfm_slih_test_service       0x0000F                0x0A0-0x0AF
@@ -218,8 +213,14 @@ is set for indexing stateless services. It must be either ``"auto"`` or a
 number in the range [1, 32] in current implementation and may extend. Also the
 ``connection-based`` attribute must be set to ``false`` for stateless services.
 
-Here is the stateless handle allocation for partitions in TF-M. Partitions not
-listed are not applied to stateless mechanism yet.
+The indexes of stateless handles are divided into two ranges for different
+usages.
+Indexes [1, 16] are assigned to TF-M Secure Partitions.
+The rest indexes [17, 32] are reserved for any other Secure Partitions, for
+example Secure Partitions in ``tf-m-tests`` and ``tf-m-extras``.
+
+The following table summaries the stateless handle allocation for the TF-M
+Secure Partitions.
 
 .. table:: Stateless Handle table
    :widths: auto
@@ -231,7 +232,27 @@ listed are not applied to stateless mechanism yet.
    TFM_SP_PS                       2
    TFM_SP_ITS                      3
    TFM_SP_INITIAL_ATTESTATION      4
+   TFM_SP_FWU                      5
+   TFM_SP_PLATFORM                 6
    =============================== =======================
+
+For the indexes of other Secure Partitions, please refer to their manifests or
+documentations.
+
+stack_size
+----------
+The ``stack_size`` is required to indicate the stack memory usage of the Secure
+Partition.
+The value of this attribute must be a decimal or hexadecimal value in bytes.
+It can also be a build configurable with default value defined in
+``config_base.cmake``.
+The value of the configuration can be overridden to fit different use cases.
+
+heap_size
+---------
+This attribute is optional. The default value is 0.
+It indicates the heap memory usage of the Secure Partition.
+The allowed values are the same as the ``stack_size``.
 
 mmio_regions
 ------------
@@ -264,26 +285,6 @@ Here is an example for it:
    #define TFM_PERIPHERAL_A                 (&tfm_peripheral_A)
 
 
-Library model support
----------------------
-For the library model, the user needs to add a ``secure_functions`` item. The
-main difference between ``secure_function`` and ``services`` is the extra
-``signal`` key for secure function entry. This is not required in FF-M v1.0.
-
-The ``signal`` must be the upper case of the secure function name.
-
-.. code-block:: yaml
-
-  "secure_functions": [
-    {
-      "name": "TFM_EXAMPLE_A",
-      "signal": "EXAMPLE_A_FUNC",
-      "sid": "0x00000000",
-      "non_secure_clients": true,
-      "version": 1,
-      "version_policy": "STRICT"
-    },
-
 Add configuration
 =================
 The following configuration tasks are required for the newly added secure
@@ -308,7 +309,7 @@ Here is a reference example for `CMakeLists.txt`_
    - ``tfm_app_rot_partition*`` in case of an Application RoT partition
 
 The current CMake configuration should also be updated, by updating
-``<TF-M base folder>/config/config_default.cmake``
+``<TF-M base folder>/config/config_base.cmake``
 to include the CMake configuration variable of the newly added Secure
 Partition, e.g, TFM_PARTITION_EXAMPLE and adding the relevant
 subdirectory in ``<TF-M base folder>/secure_fw/CMakeLists.txt``, e.g.
@@ -322,54 +323,14 @@ necessary information of secure partition.
 The manifest tool ``tools/tfm_parse_manifest_list.py`` processes it and
 generates necessary files while building.
 
-- ``name``: The name string of the secure partition.
-- ``short_name``: should be the same as the ``name`` in the secure partition
-  manifest file.
-- ``manifest``: the relative path of the manifest file to TF-M root.
-  In out-of-tree secure partition, ``manifest`` can be an absolute path or the
-  relative path to the current manifest list file.
-- ``conditional``: Optional configuration to enable or disable this partition.
-  If it is not set, the Secure Partition is always enabled.
-  The value of this attribute must be a CMake variable surrounded by ``@``.
-  The value of the CMake variable must be:
-
-  - ``ON``, ``TRUE`` or ``ENABLED`` - the Partition is enabled.
-  - ``OFF``, ``FALSE`` or ``DISABLED`` - the Partition is disabled.
-  - unset - the Partition is disabled.
-
-  The build system relies on the CMake command ``configure_file()`` to replace
-  the CMake variables with the corresponding values before the manifest tool
-  processes it.
-  If you are using the manifest tool out of the CMake build system, you can also
-  set this attribute to the values allowed above to make the tool work.
-
-- ``version_major``: major version the partition manifest.
-- ``version_minor``: minor version the partition manifest.
-- ``pid``: Secure Partition ID value distributed in chapter `Secure Partition
-  ID Distribution`_.
-- ``output_dir``: Optional path to hold the generated files.
-  The files are generated to:
-
-  - ``<build_dir>/generated/<output_dir>``, if ``output_dir`` is relative path.
-  - ``<output_dir>``, if ``output_dir`` is absolute path.
-  - ``<build_dir>/generated/``, if ``output_dir`` is not set.
-- ``linker_pattern``: contains the information for linker to place the symbols
-  of the Secure Partition. The following patterns are supported:
-
-    - ``library_list`` - the library defined by CMake in `Add configuration`_
-      section. It must be ``*tfm_*partition_<name>.*``, the ``<name>>`` must
-      match the CMake library name.
-
-    - ``object_list`` - Any object files containing symbols belonging to the
-      Secure Partition but are not included in the Secure Partitions library.
+Please refer to the :ref:`tfm_manifest_list` for the format of manifest lists.
 
 Reference configuration example:
 
 .. code-block:: yaml
 
     {
-      "name": "TFM Example Service",
-      "short_name": "TFM_SP_EXAMPLE",
+      "description": "TFM Example Partition",
       "manifest": "secure_fw/partitions/example/tfm_example_partition.yaml",
       "conditional": "@TFM_PARTITION_EXAMPLE@",
       "output_path": "partitions/example",
@@ -547,57 +508,18 @@ sends a message "Hello World" when called.
         }
     }
 
-Test connection
----------------
-To test that the service has been implemented correctly, the user needs to call
-it from somewhere. One option is to create a new testsuite, such as
-``<TF-M-test base folder>/test/secure_fw/suites/example/non_secure/example_ns_
-interface_testsuite.c``.
+Test suites and test partitions
+-------------------------------
 
-The process of adding test connection is explained in the specification
-:doc:`Adding TF-M Regression Test Suite </integration_guide/tfm_test_suites_addition>`
+A regression test suite can be added to verify whether the new secure partition
+works as expected. Refer to
+`Adding TF-M Regression Test Suite <https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/docs/tfm_test_suites_addition.rst>`_
+for the details of adding a regression test suite.
 
-.. code-block:: c
-
-    #include "psa_manifest/sid.h"
-    #include "psa/client.h"
-
-    #include "test_framework.h"
-    #include "test_log.h"
-
-    static void tfm_example_test_1001(struct test_result_t *ret)
-    {
-        char str1[] = "str1";
-        char str2[] = "str2";
-        char str3[128], str4[128];
-        struct psa_invec invecs[2] = {{str1, sizeof(str1)},
-                                      {str2, sizeof(str2)}};
-        struct psa_outvec outvecs[2] = {{str3, sizeof(str3)},
-                                        {str4, sizeof(str4)}};
-        psa_handle_t handle;
-        psa_status_t status;
-        uint32_t version;
-
-        version = psa_version(ROT_A_SID);
-        TEST_LOG("TFM service support version is %d.\r\n", version);
-        handle = psa_connect(ROT_A_SID, ROT_A_VERSION);
-        status = psa_call(handle, PSA_IPC_CALL, invecs, 2, outvecs, 2);
-        if (status >= 0) {
-            TEST_LOG("psa_call is successful!\r\n");
-        } else {
-            TEST_FAIL("psa_call is failed!\r\n");
-            return;
-        }
-
-        TEST_LOG("outvec1 is: %s\r\n", outvecs[0].base);
-        TEST_LOG("outvec2 is: %s\r\n", outvecs[1].base);
-        psa_close(handle);
-        ret->val = TEST_PASSED;
-    }
-
-Once the test and service has been implemented, the project can be built and
-executed. The user should see the "Hello World" message in the console as
-received by the testsuite.
+Some regression tests require a dedicated RoT service. The implementations of
+the RoT service for test are similar to secure partition addition. Refer to
+`Adding partitions for regression tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/docs/tfm_test_services_addition.rst>`_
+to get more information.
 
 Out-of-tree Secure Partition build
 ----------------------------------
@@ -689,7 +611,7 @@ below. Please note those input shall be wrapped with double quotes.
 
 .. code-block:: bash
 
-  -DTFM_EXTRA_MANIFEST_LIST_FILES="<Absolute-path-part-1-folder/manifes_list.yaml>;<Absolute-path-part-2-folder/manifes_list.yaml>"
+  -DTFM_EXTRA_MANIFEST_LIST_FILES="<Absolute-path-part-1-folder/manifest_list.yaml>;<Absolute-path-part-2-folder/manifest_list.yaml>"
   -DTFM_EXTRA_PARTITION_PATHS="<Absolute-path-part-1-folder>;<Absolute-path-part-2-folder>"
 
 .. Note::
@@ -731,3 +653,5 @@ Reference
 --------------
 
 *Copyright (c) 2019-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

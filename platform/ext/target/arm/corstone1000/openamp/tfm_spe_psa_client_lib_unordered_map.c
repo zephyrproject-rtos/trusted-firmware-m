@@ -6,11 +6,12 @@
  */
 
 #include "tfm_spe_psa_client_lib_unordered_map.h"
-#include "tfm_core_utils.h"
+#include "utilities.h"
 #include "tfm_spe_openamp_interface.h"
 #include "tfm_spe_shm_openamp.h"
 #include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 /*
  * SPE map where tf-m copies the psa_client parameters
@@ -100,7 +101,7 @@ int32_t unordered_map_insert(const ns_openamp_msg_t *ns_msg, const void *in,
         return ret;
     }
 
-    spm_memcpy(&psa_client_lib_map_.map[*handle].msg, ns_msg,
+    memcpy(&psa_client_lib_map_.map[*handle].msg, ns_msg,
                                 sizeof(ns_openamp_msg_t));
 
     psa_client_lib_map_.map[*handle].input_buffer = in;

@@ -16,15 +16,14 @@ extern "C" {
 #include "tfm_peripherals_def.h"
 
 /* Boundary handle binding macros. */
-#define HANDLE_PER_ATTR_BITS            (0x4)
-#define HANDLE_ATTR_PRIV_MASK           ((1 << HANDLE_PER_ATTR_BITS) - 1)
+#define HANDLE_ATTR_PRIV_POS            1U
+#define HANDLE_ATTR_PRIV_MASK           (0x1UL << HANDLE_ATTR_PRIV_POS)
+#define HANDLE_ATTR_NS_POS              0U
+#define HANDLE_ATTR_NS_MASK             (0x1UL << HANDLE_ATTR_NS_POS)
 
 /* Allowed named MMIO of this platform */
 const uintptr_t partition_named_mmio_list[] = {
     (uintptr_t)TFM_PERIPHERAL_TIMER0,
-#ifdef TEST_NS_FPU
-    (uintptr_t)TFM_PERIPHERAL_TIMER1,
-#endif
     (uintptr_t)TFM_PERIPHERAL_STD_UART,
 #ifdef PSA_API_TEST_IPC
     (uintptr_t)FF_TEST_UART_REGION,

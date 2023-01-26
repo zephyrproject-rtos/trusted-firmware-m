@@ -10,6 +10,8 @@
 #define __BOOT_HAL_H__
 
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 #include "cmsis_compiler.h"
 
 /* Include header section */
@@ -73,6 +75,65 @@ int32_t boot_platform_post_init(void);
  * \param[in] vt  pointer to secure application vector table descriptor
  */
 void boot_platform_quit(struct boot_arm_vector_table *vt) __NO_RETURN;
+
+/**
+ * \brief Platform operation to perform steps required before image load.
+ *        Can be overridden for platform specific initialization.
+ *
+ * \param[in] image_id  The ID of the image that is about to be loaded.
+ *
+ * \return Returns 0 on success, non-zero otherwise
+ */
+int boot_platform_pre_load(uint32_t image_id);
+
+/**
+ * \brief Platform operation to perform steps required after image load.
+ *        Can be overridden for platform specific initialization.
+ *
+ * \param[in] image_id  The ID of the image that has just been loaded.
+ *
+ * \return Returns 0 on success, non-zero otherwise
+ */
+int boot_platform_post_load(uint32_t image_id);
+
+struct boot_measurement_metadata {
+    uint32_t measurement_type;  /* Identifier of the measurement method
+                                 * used to compute the measurement value.
+                                 */
+    uint8_t signer_id[64];      /* Signer identity (hash of public key). */
+    size_t  signer_id_size;     /* Size of the signer's ID in bytes. */
+    char sw_type[10];           /* Representing the role of the SW component. */
+    char sw_version[14];        /* Version of the SW component in the form of:
+                                 * "major.minor.revision+build".
+                                 */
+};
+
+/**
+ * \brief Stores single boot measurement and associated metadata in a
+ *        non-persistent storage to a known location.
+ *
+ * \note  The measurement values and associated metadata are stored at a known
+ *        location where they can be accessed later at runtime from secure
+ *        software.
+ *
+ * \param[in] index                 In which measurement slot to store,
+ *                                  the largest allowed index is 63 (0x3F).
+ * \param[in] measurement           Pointer to buffer that stores the
+ *                                  measurement value.
+ * \param[in] measurement_size      Size of the measurement value in bytes.
+ * \param[in] metadata              Pointer to a structure, containing the
+ *                                  associated metadata.
+ * \param[in] lock_measurement      If true, it locks the measurement slot and
+ *                                  it is not allowed the extend it anymore with
+ *                                  additional measurement values.
+ *
+ * \return Returns 0 on success, non-zero otherwise.
+ */
+int boot_store_measurement(uint8_t index,
+                           const uint8_t *measurement,
+                           size_t measurement_size,
+                           const struct boot_measurement_metadata *metadata,
+                           bool lock_measurement);
 
 #ifdef __cplusplus
 }

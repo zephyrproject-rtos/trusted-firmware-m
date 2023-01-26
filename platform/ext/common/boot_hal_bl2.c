@@ -5,6 +5,7 @@
  *
  */
 
+#include <string.h>
 #include "target_cfg.h"
 #include "region.h"
 #include "cmsis.h"
@@ -13,8 +14,14 @@
 #include "flash_layout.h"
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
-#include "bootutil/fault_injection_hardening.h"
+#include "fih.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
+
+#ifdef MEASURED_BOOT_API
+#include "region_defs.h"
+#include "tfm_boot_status.h"
+#include "boot_measurement.h"
+#endif /* MEASURED_BOOT_API */
 
 /* Flash device names must be specified by target */
 #ifdef FLASH_DEV_NAME
@@ -227,3 +234,116 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
 
     boot_jump_to_next_image(vt_cpy->reset);
 }
+
+__WEAK int boot_platform_pre_load(uint32_t image_id)
+{
+    return 0;
+}
+
+__WEAK int boot_platform_post_load(uint32_t image_id)
+{
+    return 0;
+}
+
+#ifdef MEASURED_BOOT_API
+static int boot_add_data_to_shared_area(uint8_t        major_type,
+                                        uint16_t       minor_type,
+                                        size_t         size,
+                                        const uint8_t *data)
+{
+    struct shared_data_tlv_entry tlv_entry = {0};
+    struct tfm_boot_data *boot_data;
+    uintptr_t tlv_end, offset;
+
+    if (data == NULL) {
+        return -1;
+    }
+
+    boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
+
+    /* Check whether the shared area needs to be initialized. */
+    if ((boot_data->header.tlv_magic != SHARED_DATA_TLV_INFO_MAGIC) ||
+        (boot_data->header.tlv_tot_len > BOOT_TFM_SHARED_DATA_SIZE)) {
+
+        memset((void *)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
+        boot_data->header.tlv_magic   = SHARED_DATA_TLV_INFO_MAGIC;
+        boot_data->header.tlv_tot_len = SHARED_DATA_HEADER_SIZE;
+    }
+
+    /* Get the boundaries of TLV section. */
+    tlv_end = BOOT_TFM_SHARED_DATA_BASE + boot_data->header.tlv_tot_len;
+    offset  = BOOT_TFM_SHARED_DATA_BASE + SHARED_DATA_HEADER_SIZE;
+
+    /* Check whether TLV entry is already added. Iterates over the TLV section
+     * looks for the same entry if found then returns with error.
+     */
+    while (offset < tlv_end) {
+        /* Create local copy to avoid unaligned access */
+        memcpy(&tlv_entry, (const void *)offset, SHARED_DATA_ENTRY_HEADER_SIZE);
+        if (GET_MAJOR(tlv_entry.tlv_type) == major_type &&
+            GET_MINOR(tlv_entry.tlv_type) == minor_type) {
+            return -1;
+        }
+
+        offset += SHARED_DATA_ENTRY_SIZE(tlv_entry.tlv_len);
+    }
+
+    /* Add TLV entry. */
+    tlv_entry.tlv_type = SET_TLV_TYPE(major_type, minor_type);
+    tlv_entry.tlv_len  = size;
+
+    /* Check integer overflow and overflow of shared data area. */
+    if (SHARED_DATA_ENTRY_SIZE(size) >
+        (UINT16_MAX - boot_data->header.tlv_tot_len)) {
+        return -1;
+    } else if ((SHARED_DATA_ENTRY_SIZE(size) + boot_data->header.tlv_tot_len) >
+               BOOT_TFM_SHARED_DATA_SIZE) {
+        return -1;
+    }
+
+    offset = tlv_end;
+    memcpy((void *)offset, &tlv_entry, SHARED_DATA_ENTRY_HEADER_SIZE);
+
+    offset += SHARED_DATA_ENTRY_HEADER_SIZE;
+    memcpy((void *)offset, data, size);
+
+    boot_data->header.tlv_tot_len += SHARED_DATA_ENTRY_SIZE(size);
+
+    return 0;
+}
+
+__WEAK int boot_store_measurement(
+                            uint8_t index,
+                            const uint8_t *measurement,
+                            size_t measurement_size,
+                            const struct boot_measurement_metadata *metadata,
+                            bool lock_measurement)
+{
+    uint16_t minor_type;
+    uint8_t claim;
+    int rc;
+
+    if (index >= BOOT_MEASUREMENT_SLOT_MAX) {
+        return -1;
+    }
+
+    minor_type = SET_MBS_MINOR(index, SW_MEASURE_METADATA);
+    rc = boot_add_data_to_shared_area(TLV_MAJOR_MBS,
+                                      minor_type,
+                                      sizeof(struct boot_measurement_metadata),
+                                      (const uint8_t *)metadata);
+    if (rc) {
+        return rc;
+    }
+
+    claim = lock_measurement ? SW_MEASURE_VALUE_NON_EXTENDABLE
+                             : SW_MEASURE_VALUE;
+    minor_type = SET_MBS_MINOR(index, claim);
+    rc = boot_add_data_to_shared_area(TLV_MAJOR_MBS,
+                                      minor_type,
+                                      measurement_size,
+                                      measurement);
+
+    return rc;
+}
+#endif /* MEASURED_BOOT_API */

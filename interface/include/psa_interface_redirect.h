@@ -7,6 +7,7 @@
 #ifndef __PSA_INTERFACE_REDIRECT_H__
 #define __PSA_INTERFACE_REDIRECT_H__
 
+#include "config_spm.h"
 #include "psa/framework_feature.h"
 
 #if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1

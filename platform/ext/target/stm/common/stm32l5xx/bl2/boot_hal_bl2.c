@@ -8,6 +8,7 @@
   * @attention
   *
   * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * <h2><center>&copy; Copyright (c) 2022 Arm Limited.
   * All rights reserved.</center></h2>
   *
   * This software component is licensed by ST under BSD 3-Clause license,
@@ -31,7 +32,7 @@
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #endif
-#include "bootutil/fault_injection_hardening.h"
+#include "fih.h"
 #if defined(EXTERNAL_FLASH)
 #include "flash_map_backend/flash_map_backend.h"
 #endif /*  defined(EXTERNAL_FLASH) */
