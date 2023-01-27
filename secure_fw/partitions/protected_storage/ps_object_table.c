@@ -72,7 +72,9 @@ struct ps_obj_table_t {
                                                              */
 };
 
+#ifdef PS_ENCRYPTION
 static uint8_t ps_table_key_label[] = "table_key_label";
+#endif
 
 /* Object table indexes */
 #define PS_OBJ_TABLE_IDX_0 0
