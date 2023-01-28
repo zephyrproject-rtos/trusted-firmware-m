@@ -2,11 +2,20 @@ Design Documents
 ================
 
 .. toctree::
-    :maxdepth: 1
-    :glob:
+    :maxdepth: 2
 
-    */index
-    *
+    Secure Boot     <booting/index>
+    Dual CPU        <dual-cpu/index>
+    Secure Services <services/index>
+    Software Design <software/index>
+
+.. toctree::
+    :maxdepth: 1
+
+    Isolation Rules            <ff_isolation.rst>
+    Builtin Keys               <tfm_builtin_keys.rst>
+    Logging system             <tfm_log_system_design_document.rst>
+    Physical Attack Mitigation <tfm_physical_attack_mitigation.rst>
 
 --------------
 

@@ -26,7 +26,7 @@ This partition supports the following features:
 
 A typical flow through the component states is shown below [1]_.
 
-.. figure:: media/fwu-states.svg
+.. figure:: /design_docs/media/fwu-states.svg
    :scale: 65 %
    :align: center
    :name: The component state model transitions.

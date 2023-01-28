@@ -1,6 +1,14 @@
 ###########
 Secure boot
 ###########
+
+.. toctree::
+    :maxdepth: 1
+
+    BL1 Immutable bootloader <bl1.rst>
+    Rollback Protection      <secure_boot_rollback_protection.rst>
+    HW Key integration       <secure_boot_hw_key_integration.rst>
+
 For secure devices it is security critical to enforce firmware authenticity to
 protect against execution of malicious software. This is implemented by building
 a trust chain where each step in the execution chain authenticates the next

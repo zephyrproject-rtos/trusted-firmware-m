@@ -96,7 +96,7 @@ components, which are listed below:
 The interaction between the different components is described by the
 following block diagram:
 
-.. figure:: media/tfm_crypto_design.png
+.. figure:: /design_docs/media/tfm_crypto_design.png
 
    Block diagram of the different components of the TF-M Crypto service. A
    dotted line is used to indicate the interaction with a library.

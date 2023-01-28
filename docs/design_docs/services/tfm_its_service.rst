@@ -6,6 +6,11 @@ Internal Trusted Storage (ITS) Service
 :Organization: Arm Limited
 :Contact: Jamie Fox <jamie.fox@arm.com>
 
+.. toctree::
+    :maxdepth: 1
+
+    Block-aligned flash <tfm_its_512_flash.rst>
+
 PSA Internal Trusted Storage
 ============================
 PSA Internal Trusted Storage (ITS) is a PSA RoT Service for storing the most

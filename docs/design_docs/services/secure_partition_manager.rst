@@ -18,7 +18,7 @@ Introduction
 ************
 The service access process of FF-M:
 
-.. figure:: media/tfmdev.*
+.. figure:: /design_docs/media/tfmdev.*
     :align: center
     :name: fig-tfmdev
     :width: 80%
@@ -106,7 +106,7 @@ There are `THREE` isolation levels defined in `FF-M`. These levels can
 fulfil different security requirements by defining different isolation
 boundaries.
 
-.. figure:: media/modelisolation.*
+.. figure:: /design_docs/media/modelisolation.*
     :align: center
     :name: fig-modelisolation
     :width: 80%
@@ -173,7 +173,7 @@ states:
 
 The state transition diagram:
 
-.. figure:: media/spestate.*
+.. figure:: /design_docs/media/spestate.*
     :align: center
     :name: fig-spestate
     :width: 70%
@@ -341,7 +341,7 @@ partition runtime model.
   scheduling, the isolation boundaries NEED to be switched if there are
   boundaries between components.
 
-.. figure:: media/hybridruntime.*
+.. figure:: /design_docs/media/hybridruntime.*
   :align: center
   :name: fig-hybridruntime
   :width: 60%
@@ -363,7 +363,7 @@ switching) and cross-boundary call. A direct call reaches the API entrance
 directly, while a cross-boundary call needs a mechanism (Supervisor call e.g.)
 to cross the boundary first before reaching the API entrance.
 
-.. figure:: media/twocalltypes.*
+.. figure:: /design_docs/media/twocalltypes.*
     :align: center
     :name: fig-twocalltypes
     :width: 60%
@@ -374,7 +374,7 @@ SPM internal execution flow
 ---------------------------
 SPM internal execution flow as shown in diagram:
 
-.. figure:: media/abi_scheduler.*
+.. figure:: /design_docs/media/abi_scheduler.*
     :align: center
     :name: fig-abi_scheduler
     :width: 60%
@@ -483,7 +483,7 @@ Hence PSA API has two types of ABI: `Cross-boundary ABI` and
 shows up: The IPC partition, hence `schedule` is the mechanism when accessing
 services inside an IPC partition.
 
-.. figure:: media/spmabitypes.*
+.. figure:: /design_docs/media/spmabitypes.*
     :align: center
     :name: fig-spmabi
     :width: 60%
@@ -662,7 +662,7 @@ As there may be multiple NSPE threads calling into SPE, and SPM wants to
 identify them, special mechanisms can be proposed to provide the identification.
 Check specific NS ID client ID or context related documents for details.
 
-.. figure:: media/tzcontext.*
+.. figure:: /design_docs/media/tzcontext.*
     :align: center
     :name: fig-tzcontext
     :width: 40%

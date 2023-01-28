@@ -62,7 +62,7 @@ clients, the FF-M client API behaviour follows the FF-M definition. And NS
 Agent needs customization in SPM since it has extra requirements compared to
 a generic secure partition.
 
-.. figure:: media/mailbox_ns_agent1.*
+.. figure:: /design_docs/media/mailbox_ns_agent1.*
     :align: center
     :name: fig-mailbox1
     :width: 70%

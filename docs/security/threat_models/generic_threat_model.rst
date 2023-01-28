@@ -1152,9 +1152,9 @@ Reference
 
 .. [STRIDE] `The STRIDE Threat Model <https://docs.microsoft.com/en-us/previous-versions/commerce-server/ee823878(v=cs.20)?redirectedfrom=MSDN>`_
 
-.. [SECURE-BOOT] :doc:`Secure boot </design_docs/tfm_secure_boot>`
+.. [SECURE-BOOT] :doc:`Secure boot </design_docs/booting/tfm_secure_boot>`
 
-.. [ROLLBACK-PROTECT] :doc:`Rollback protection in TF-M secure boot </design_docs/secure_boot_rollback_protection>`
+.. [ROLLBACK-PROTECT] :doc:`Rollback protection in TF-M secure boot </design_docs/booting/secure_boot_rollback_protection>`
 
 .. [ARM arm] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
 

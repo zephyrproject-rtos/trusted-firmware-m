@@ -46,7 +46,7 @@ The top-level design is shown in :ref:`overall-diagram-figure` below.
 
 .. _overall-diagram-figure:
 
-.. figure:: media/symmetric_initial_attest/overall_diagram.png
+.. figure:: /design_docs/media/symmetric_initial_attest/overall_diagram.png
     :align: center
 
     Overall design diagram
@@ -96,7 +96,7 @@ ID).
 
 .. _ia-service-figure:
 
-.. figure:: media/symmetric_initial_attest/ia_service_flow.png
+.. figure:: /design_docs/media/symmetric_initial_attest/ia_service_flow.png
     :align: center
 
     Symmetric IAT generation flow in Initial Attestation secure service
@@ -177,7 +177,7 @@ The workflow inside ``attest_token_start()`` is shown in
 
 .. _attest-token-start-figure:
 
-.. figure:: media/symmetric_initial_attest/attest_token_start.png
+.. figure:: /design_docs/media/symmetric_initial_attest/attest_token_start.png
     :align: center
 
     Workflow in symmetric Initial Attestation ``attest_token_start()``
@@ -228,7 +228,7 @@ The simplified flow in ``attest_token_finish()`` is shown in
 
 .. _attest-token-finish-figure:
 
-.. figure:: media/symmetric_initial_attest/attest_token_finish.png
+.. figure:: /design_docs/media/symmetric_initial_attest/attest_token_finish.png
     :align: center
 
     Workflow in symmetric Initial Attestation ``attest_token_finish()``
@@ -474,7 +474,7 @@ The workflow of symmetric Initial Attestation dedicated
 
 .. _iat-decode-figure:
 
-.. figure:: media/symmetric_initial_attest/iat_decode.png
+.. figure:: /design_docs/media/symmetric_initial_attest/iat_decode.png
     :align: center
 
     Workflow in symmetric Initial Attestation ``attest_token_decode_validate_token()``

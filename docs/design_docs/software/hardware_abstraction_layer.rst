@@ -45,7 +45,7 @@ Overview
 ********
 This section provides an overview of the abstraction layer structure.
 
-.. figure:: media/hal_structure.png
+.. figure:: /design_docs/media/hal_structure.png
 
 Here lists a minimal set of necessary functionalities:
 
@@ -524,7 +524,7 @@ referencing the content in this pointer.
 
 Log API
 =======
-The log API is used by the :term:`TF-M` :doc:`log system <tfm_log_system_design_document>`.
+The log API is used by the :term:`TF-M` :doc:`log system </design_docs/tfm_log_system_design_document>`.
 The log device could be uart, memory, usb, etc.
 
 APIs
@@ -583,8 +583,8 @@ This API is called by :term:`SPM` to output logs.
 
 **Note**
 
-Please check :doc:`TF-M log system <tfm_log_system_design_document>` for more
-information.
+Please check :doc:`TF-M log system </design_docs/tfm_log_system_design_document>`
+for more information.
 
 Interrupt APIs
 ==============

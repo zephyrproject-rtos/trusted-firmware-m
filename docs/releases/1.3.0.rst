@@ -166,7 +166,7 @@ Reference
 
   .. [5] :doc:`TF-M Profile Large design </configuration/profiles/tfm_profile_large>`
 
-  .. [6] :doc:`Code sharing between independently linked XIP binaries </design_docs/code_sharing>`
+  .. [6] :doc:`Code sharing between independently linked XIP binaries </design_docs/software/code_sharing>`
 
   .. [7] :doc:`Security Handling </security/index>`
 
