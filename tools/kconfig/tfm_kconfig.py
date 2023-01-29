@@ -193,7 +193,7 @@ def generate_file(dot_config):
 
             # Write the result into cmake and header files.
             if name and not in_component_options:
-                f_cmake.write('set({:<45} {:<15} CACHE {:<6} "")\n'.
+                f_cmake.write('set({:<45} {:<15} CACHE {:<6} "" FORCE)\n'.
                               format(name, cmake_val, cmake_type))
             if name and in_component_options:
                 f_header.write('#define {:<45} {}\n'.format(name, header_val))
@@ -253,7 +253,7 @@ if __name__ == '__main__':
     # Load Kconfig file. kconfig_file is the root Kconfig file. The path is
     # input by users from the command.
     tfm_kconfig = Kconfig(args.kconfig_file)
-    tfm_kconfig.enable_undef_warnings() # Print warnings for undefined symbols when loading
+    tfm_kconfig.disable_undef_warnings() # Disable warnings for undefined symbols when loading
     tfm_kconfig.disable_override_warnings() # Overriding would happen when loading multiple config files
     tfm_kconfig.disable_redun_warnings() # Redundant definitions might happen when loading multiple config files
 

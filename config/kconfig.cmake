@@ -90,12 +90,83 @@ function(convert_normal_cmake_config_to_kconfig cmake_file out_var)
     set(${out_var} ${local_var} PARENT_SCOPE)
 endfunction()
 
-# Platform Kconfig file
-if(NOT EXISTS ${PLATFORM_KCONFIG})
-    message(WARNING "The platform does not have Kconfig file! \
-                     The Kconfig system cannot get its configuration settings.
-                     So it is not guaranteed that the Kconfig system works properly.")
+# This function goes through the CMake cache variables and convert them to .config format.
+# The function distinguishes command-line variables and other ones and it can only handle one of
+# them in the same time.
+function(convert_cache_config_to_dotconfig convert_cl_var out_var)
+    # Operate on a local var and write back to the out_var later
+    set(local_var "")
 
+    get_cmake_property(CACHE_VARS CACHE_VARIABLES)
+    foreach(CACHE_VAR ${CACHE_VARS})
+        get_property(HELP_STRING CACHE ${CACHE_VAR} PROPERTY HELPSTRING)
+
+        if("${HELP_STRING}" MATCHES "variable specified on the command line")
+            # Command-line variables have the help string above by default
+            set(IS_CL_VAR TRUE)
+        else()
+            set(IS_CL_VAR FALSE)
+        endif()
+
+        if((IS_CL_VAR AND NOT ${convert_cl_var}) OR (NOT IS_CL_VAR AND ${convert_cl_var}))
+            continue()
+        endif()
+
+        set(CACHE_VAR_VAL ${${CACHE_VAR}})
+        STRING(TOUPPER "${CACHE_VAR_VAL}" CACHE_VAR_VAL_UPPER)
+
+        set(CACHE_VAR "CONFIG_${CACHE_VAR}")
+
+        set(KCONFIG_OPTION_ITEM "")
+
+        # False CMAKE values
+        if(CACHE_VAR_VAL_UPPER STREQUAL "OFF" OR CACHE_VAR_VAL_UPPER STREQUAL "FALSE")
+            set(KCONFIG_OPTION_ITEM "${CACHE_VAR}=n\r\n")
+        # True CMAKE Values
+        elseif(CACHE_VAR_VAL_UPPER STREQUAL "ON" OR CACHE_VAR_VAL_UPPER STREQUAL "TRUE")
+            set(KCONFIG_OPTION_ITEM "${CACHE_VAR}=y\r\n")
+        # Non-quoted values (hex and decimal numbers)
+        elseif(CACHE_VAR_VAL MATCHES "^0x[a-fA-F0-9]+$" OR CACHE_VAR_VAL MATCHES "^[0-9]+$" )
+            set(KCONFIG_OPTION_ITEM "${CACHE_VAR}=${CACHE_VAR_VAL}\r\n")
+        # Everything else is a quoted string
+        else()
+            if(${CACHE_VAR} STREQUAL "CONFIG_TEST_PSA_API")
+                # Turn on the corresponding "choice" option for psa-arch-test
+                list(APPEND _LEGAL_PSA_API_TEST_LIST "IPC" "CRYPTO" "INITIAL_ATTESTATION" "INTERNAL_TRUSTED_STORAGE" "PROTECTED_STORAGE" "STORAGE")
+                list(FIND _LEGAL_PSA_API_TEST_LIST ${CACHE_VAR_VAL_UPPER} _RET_VAL)
+                if(NOT ${_RET_VAL} EQUAL -1)
+                    set(KCONFIG_OPTION_ITEM "CONFIG_PSA_API_TEST_${CACHE_VAR_VAL_UPPER}=y\r\n")
+
+                    if(${CACHE_VAR_VAL_UPPER} STREQUAL "IPC")
+                        # PSA API IPC test requires IPC model to be enabled while
+                        # the CONFIG_TFM_SPM_BACKEND_IPC cannot be selected or implied because it is a choice.
+                        # It can be only enabled in a Kconfig config file. So append it here.
+                        string(APPEND KCONFIG_OPTION_ITEM "CONFIG_CONFIG_TFM_SPM_BACKEND_IPC=y\r\n")
+                    endif()
+                endif()
+            elseif(${CACHE_VAR} STREQUAL "CONFIG_CONFIG_TFM_SPM_BACKEND")
+                # Turn on the corresponding "choice" option for SPM backend
+                set(KCONFIG_OPTION_ITEM "CONFIG_CONFIG_TFM_SPM_BACKEND_${CACHE_VAR_VAL_UPPER}=y\r\n")
+            else()
+                set(KCONFIG_OPTION_ITEM "${CACHE_VAR}=\"${CACHE_VAR_VAL}\"\r\n")
+            endif()
+        endif()
+
+        string(APPEND local_var ${KCONFIG_OPTION_ITEM})
+    endforeach()
+
+    set(${out_var} ${local_var} PARENT_SCOPE)
+endfunction()
+
+# Initialize the .cl_config
+set(COMMAND_LINE_CONFIG_TO_FILE ${KCONFIG_OUTPUT_DIR}/.cl_config)
+file(REMOVE ${COMMAND_LINE_CONFIG_TO_FILE})
+
+# Initialize the .cache_var_config
+set(CACHE_VAR_CONFIG_FILE ${KCONFIG_OUTPUT_DIR}/.cache_var_config)
+file(REMOVE ${CACHE_VAR_CONFIG_FILE})
+
+if(NOT EXISTS ${PLATFORM_KCONFIG})
     # Parse platform's preload.cmake and config.cmake to get config options.
     set(PLATFORM_KCONFIG_OPTIONS "")
     set(PLATFORM_KCONFIG ${KCONFIG_OUTPUT_DIR}/platform/Kconfig)
@@ -107,9 +178,24 @@ if(NOT EXISTS ${PLATFORM_KCONFIG})
         include(${TARGET_PLATFORM_PATH}/config.cmake)
         convert_normal_cmake_config_to_kconfig(${TARGET_PLATFORM_PATH}/config.cmake PLATFORM_KCONFIG_OPTIONS)
         file(APPEND ${PLATFORM_KCONFIG} ${PLATFORM_KCONFIG_OPTIONS})
+
+        set(PLATFORM_CMAKE_CONFIGS "")
+        set(CONVERT_CL_VAR FALSE)
+        convert_cache_config_to_dotconfig(CONVERT_CL_VAR PLATFORM_CMAKE_CONFIGS)
+        file(APPEND ${CACHE_VAR_CONFIG_FILE} ${PLATFORM_CMAKE_CONFIGS})
     endif()
 endif()
 get_filename_component(PLATFORM_KCONFIG_PATH ${PLATFORM_KCONFIG} DIRECTORY)
+
+# Parse command-line variables
+set(CL_CONFIGS "")
+set(CONVERT_CL_VAR TRUE)
+convert_cache_config_to_dotconfig(CONVERT_CL_VAR CL_CONFIGS)
+file(APPEND ${COMMAND_LINE_CONFIG_TO_FILE} ${CL_CONFIGS})
+
+if(NOT EXISTS ${CACHE_VAR_CONFIG_FILE})
+    set(CACHE_VAR_CONFIG_FILE "")
+endif()
 
 # User customized config file
 if(DEFINED KCONFIG_CONFIG_FILE AND NOT EXISTS ${KCONFIG_CONFIG_FILE})
@@ -119,7 +205,9 @@ endif()
 # Note the order of CONFIG_FILE_LIST, as the first loaded configs would be
 # overridden by later ones.
 list(APPEND CONFIG_FILE_LIST
-            ${KCONFIG_CONFIG_FILE})
+            ${CACHE_VAR_CONFIG_FILE}
+            ${KCONFIG_CONFIG_FILE}
+            ${COMMAND_LINE_CONFIG_TO_FILE})
 
 # Set up ENV variables for the tfm_kconfig.py which are then consumed by Kconfig files.
 set(KCONFIG_ENV_VARS "TFM_SOURCE_DIR=${CMAKE_SOURCE_DIR} \
