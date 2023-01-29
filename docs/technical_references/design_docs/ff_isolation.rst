@@ -50,10 +50,12 @@ The definition for Isolation Level 3:
 
   Here listed several possible PSA RoT Service implementation mechanisms:
 
-  1. Implement them in Secure Partitions with respective boundaries.
-  2. Implement them in Secure Partitions, but no boundaries between these
-     Secure Partitions.
-  3. Implement them in a customized way instead of Secure Partitions.
+  1. Implement PSA RoT Services in Secure Partitions with respective
+     boundaries.
+  2. Implement PSA RoT Services in Secure Partitions, but no boundaries between
+     these Secure Partitions as they are in the PSA RoT Domain.
+  3. Implement PSA RoT Services in a customized way instead of Secure
+     Partitions, an internal library of PSA RoT domain e.g.
 
   TF-M chooses the 2nd option to balance performance and complexity.
 
@@ -65,9 +67,10 @@ isolation boundaries should be placed, the isolation rules define the strength
 of the isolation the boundaries should offer.
 
 .. note::
-  In general, assets include not only ROM/RAM and peripherals. For the detail
-  information about the memory assets and peripheral, please
-  refer to `Firmware Framework for M (FF-M)`_.
+  Refer to chapter `Memory Assets` in `Firmware Framework for M (FF-M)`_ to
+  know asset class items. Assets are represented by memory addresses in the
+  system memory map, which makes assets named `Memory Assets`. The often-seen
+  asset items are ROM, RAM, and memory-mapped peripherals.
 
 Memory Asset Class
 ------------------
@@ -93,6 +96,7 @@ original description:
   The domain containing the SPM can only access Private data and Constant data
   assets of other domains when required to implement the PSA Firmware Framework
   API.
+- I7. (Optional, added in FF-M 1.1) Constant data is not executable.
 
  The first 3 rules from ``I1`` to ``I3`` defines the mandatory rules to comply
  the isolation, while ``I4`` to ``I6`` are optional rules to enhance the
@@ -101,9 +105,9 @@ original description:
  .. important::
    There is a table in the chapter ``3.1.2`` of ``FF-M 1.0`` under ``I1`` lists
    the asset types and allowed access method. Preventing executable access on
-   constant data costs more hardware resources, so the requirement in the table
-   about constant data can be regarded as a recommendation instead of a
-   mandatory item under some hardware resource-constrained cases.
+   constant data costs more hardware resources, so there is an optional rule
+   I7 created in `FF-M Extensions (FF-M 1.1)`_ to comfort implementations with
+   constrained hardware resources.
 
 Hardware Infrastructure
 =======================
@@ -359,12 +363,11 @@ Here lists the required regions while complying with the rules:
   attributes covers 'A_RWXN'.
 
 .. important::
-  The default memory map is not involved in this example, because it grants PSA
-  RoT domain program (especially SPM) the ability to access the place not
-  covered in an explicitly defined region. In a system lack of enough MPU
-  regions, the default memory map can be applied, in this case, the whole image
-  layout needs to be audited to find out if the uncovered region contains
-  garbage or gadget data which could provide an attack.
+   The default memory map grants PSA RoT domain components the ability to
+   access the place not covered in an explicitly defined region. This
+   characteristic can be used for saving regions. In the case when the default
+   memory map is applied, the uncovered regions need to be audited to make
+   sure all assets are placed properly.
 
 Interfaces
 ==========
@@ -397,6 +400,11 @@ Appendix
 
 .. _Firmware Framework for M (FF-M):
   https://www.arm.com/architecture/security-features/platform-security
+
+| `FF-M Extensions (FF-M 1.1)`_
+
+.. _FF-M Extensions (FF-M 1.1):
+  https://developer.arm.com/documentation/aes0039/latest
 
 | `Trusted Base System Architecture for M (TBSA-M)`_
 
