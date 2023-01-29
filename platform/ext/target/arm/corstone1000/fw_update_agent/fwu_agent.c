@@ -290,6 +290,20 @@ static enum fwu_agent_error_t metadata_write(
         return FWU_AGENT_ERROR;
     }
 
+    FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
+                  FWU_METADATA_REPLICA_2_OFFSET, sizeof(struct fwu_metadata));
+
+    ret = FWU_METADATA_FLASH_DEV.EraseSector(FWU_METADATA_REPLICA_2_OFFSET);
+    if (ret != ARM_DRIVER_OK) {
+        return FWU_AGENT_ERROR;
+    }
+
+    ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_METADATA_REPLICA_2_OFFSET,
+                                p_metadata, sizeof(struct fwu_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
     FWU_LOG_MSG("%s: success: active = %u, previous = %d\n\r", __func__,
                   p_metadata->active_index, p_metadata->previous_active_index);
     return FWU_AGENT_SUCCESS;
