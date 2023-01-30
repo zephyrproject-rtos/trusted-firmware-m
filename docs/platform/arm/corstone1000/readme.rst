@@ -61,7 +61,7 @@ The platform binaries are build using Yocto. Below is the user guide:
 Secure Test
 ===========
 
-This section can be used to test the secure enclave software indedendently from
+This section can be used to test the secure enclave software independently from
 the host. The below configuration builds the secure enclave binaries with CI test
 frame integrated. On boot, secure enclave softwares stack is brought up, and
 CI tests starts executing at the end of the initialization process. In the
