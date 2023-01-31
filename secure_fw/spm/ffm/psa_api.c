@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -1168,7 +1168,6 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
                                        uint32_t outvec_idx)
 {
     struct conn_handle_t *handle;
-    uint32_t privileged;
     struct partition_t *partition = NULL;
     fih_int fih_rc = FIH_FAILURE;
 
@@ -1179,7 +1178,6 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
     }
 
     partition = handle->service->partition;
-    privileged = GET_PARTITION_PRIVILEGED_MODE(partition->p_ldinf);
 
     /*
      * It is a fatal error if MM-IOVEC has not been enabled for the RoT

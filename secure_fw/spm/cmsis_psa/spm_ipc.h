@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -25,18 +25,6 @@
 #define TFM_HANDLE_STATUS_IDLE          0 /* Handle created             */
 #define TFM_HANDLE_STATUS_ACTIVE        1 /* Handle in use              */
 #define TFM_HANDLE_STATUS_TO_FREE       2 /* Free the handle            */
-
-/* Privileged definitions for partition thread mode */
-#define TFM_PARTITION_UNPRIVILEGED_MODE         (0U)
-#define TFM_PARTITION_PRIVILEGED_MODE           (1U)
-
-#if TFM_LVL == 1
-#define GET_PARTITION_PRIVILEGED_MODE(p_ldinf)     TFM_PARTITION_PRIVILEGED_MODE
-#else
-#define GET_PARTITION_PRIVILEGED_MODE(p_ldinf)  \
-            (IS_PARTITION_PSA_ROT(p_ldinf) ? TFM_PARTITION_PRIVILEGED_MODE : \
-                                             TFM_PARTITION_UNPRIVILEGED_MODE)
-#endif
 
 /*
  * Set a number limit for stateless handle.
