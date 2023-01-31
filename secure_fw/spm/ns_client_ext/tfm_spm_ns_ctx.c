@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,6 +8,7 @@
 #include "tfm_nspm.h"
 #include "tfm_ns_ctx.h"
 #include "tfm_ns_client_ext.h"
+#include "utilities.h"
 
 #define DEFAULT_NS_CLIENT_ID ((int32_t)-1)
 
