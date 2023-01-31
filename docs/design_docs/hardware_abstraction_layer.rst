@@ -71,8 +71,8 @@ Here lists a minimal set of necessary functionalities:
     permitted access to those assets. Currently, :term:`TF-M` only needs the
     debug authentication. The whole debug mechanism and related :term:`HAL` will
     be enhanced in the future. Please refer to the :doc:`Debug authentication
-    settings section </integration_guide/platform/platform_folder>` for more
-    details.
+    settings section </integration_guide/source_structure/platform_folder>`
+    for more details.
 
 *****************
 Design Principles

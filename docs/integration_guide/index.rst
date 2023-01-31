@@ -4,22 +4,22 @@ Integration Guide
 The purpose of this document is to provide a guide on how to integrate TF-M
 with other hardware platforms and operating systems.
 
-
 .. toctree::
     :maxdepth: 1
 
-    SPM Backends <spm_backends.rst>
-    NS client integration <non-secure_client_extension_integration_guide.rst>
+    Source Structure        <source_structure/index>
+    SPM Backends            <spm_backends.rst>
+    NS client integration   <non-secure_client_extension_integration_guide.rst>
     OS migration to Armv8-M <os_migration_guide_armv8m.rst>
-    tfm_fpu_support
-    Secure Interrupt <tfm_secure_irq_integration_guide.rst>
+    Floating-Point Support  <tfm_fpu_support.rst>
+    Secure Interrupt        <tfm_secure_irq_integration_guide.rst>
+    Platform Provisioning   <platform_provisioning.rst>
 
 .. toctree::
     :maxdepth: 2
 
     platform/index
     services/index
-
 
 *****************
 How to build TF-M

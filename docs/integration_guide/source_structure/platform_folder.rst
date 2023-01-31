@@ -1,3 +1,5 @@
+.. _platform_folder:
+
 ###############################
 Details for the platform folder
 ###############################
@@ -94,4 +96,4 @@ Please see the :doc:`platform_ext_folder` for details.
 
 --------------
 
-*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*

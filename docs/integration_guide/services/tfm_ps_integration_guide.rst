@@ -261,7 +261,7 @@ The following optional platform definitions may be defined in
   logical filesystem block.
 
 More information about the ``flash_layout.h`` content, not ITS related, is
-available in :doc:`../platform/platform_ext_folder` along with other
+available in :ref:`platform_ext_folder` along with other
 platform information.
 
 TF-M NV Counter Interface

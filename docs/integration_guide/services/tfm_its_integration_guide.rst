@@ -254,7 +254,7 @@ The following optional platform definitions may be defined in
   value will increase the memory footprint of the service.
 
 More information about the ``flash_layout.h`` content, not ITS related, is
-available in :doc:`../platform/platform_ext_folder` along with other
+available in :ref:`platform_ext_folder` along with other
 platform information.
 
 ITS Service Build Definitions

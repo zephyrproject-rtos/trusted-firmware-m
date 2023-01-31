@@ -1,3 +1,5 @@
+.. _platform_ext_folder:
+
 ###################################
 Details for the platform/ext folder
 ###################################
@@ -302,6 +304,6 @@ HW components:
 
 --------------
 
-*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
 *Copyright (c) 2020-2022 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*
