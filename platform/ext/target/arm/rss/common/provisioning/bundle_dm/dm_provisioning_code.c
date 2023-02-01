@@ -31,29 +31,14 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
-    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_0,
-                             sizeof(data.bl2_rotpk_0),
-                             data.bl2_rotpk_0);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_1,
-                             sizeof(data.bl2_rotpk_1),
-                             data.bl2_rotpk_1);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_2,
-                             sizeof(data.bl2_rotpk_2),
-                             data.bl2_rotpk_2);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_3,
-                             sizeof(data.bl2_rotpk_3),
-                             data.bl2_rotpk_3);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
+    /* Assumes BL2 counters are contiguous*/
+    for (int idx = 0; idx < MCUBOOT_IMAGE_NUMBER; idx++) {
+        err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_0 + idx,
+                                 sizeof(data.bl2_rotpk[idx]),
+                                 data.bl2_rotpk[idx]);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
+        }
     }
 
     err = tfm_plat_otp_write(PLAT_OTP_ID_KEY_SECURE_ENCRYPTION,

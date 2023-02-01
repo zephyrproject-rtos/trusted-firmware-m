@@ -49,10 +49,7 @@ struct __attribute__((__packed__)) dm_provisioning_bundle {
             uint8_t bl1_rotpk_0[56];
             uint8_t bl2_encryption_key[32];
 
-            uint8_t bl2_rotpk_0[32];
-            uint8_t bl2_rotpk_1[32];
-            uint8_t bl2_rotpk_2[32];
-            uint8_t bl2_rotpk_3[32];
+            uint8_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][32];
             uint8_t s_image_encryption_key[32];
             uint8_t ns_image_encryption_key[32];
 

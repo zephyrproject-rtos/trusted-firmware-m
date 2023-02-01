@@ -21,6 +21,8 @@
 #define USER_AREA_OFFSET(x) (OTP_OFFSET(user_data) + \
                              offsetof(struct plat_user_area_layout_t, x))
 #define USER_AREA_SIZE(x)   (sizeof(((struct plat_user_area_layout_t *)0)->x))
+#define IF_IMAGE_ID(macro, x, image_id) \
+    image_id < MCUBOOT_IMAGE_NUMBER ? macro(x[image_id]) : 0
 
 __PACKED_STRUCT plat_user_area_layout_t {
     __PACKED_UNION {
@@ -47,7 +49,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
                 uint32_t bl1_rotpk_0[14];
                 uint32_t bl2_encryption_key[8];
 
-                uint32_t bl2_rotpk[4][8];
+                uint32_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][8];
                 uint32_t s_image_encryption_key[8];
                 uint32_t ns_image_encryption_key[8];
 
@@ -67,7 +69,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
 
             __PACKED_STRUCT {
                 uint32_t bl1_nv_counter[16];
-                uint32_t bl2_nv_counter[4][16];
+                uint32_t bl2_nv_counter[MCUBOOT_IMAGE_NUMBER][16];
 #ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
                 uint32_t ps_nv_counter[3][16];
 #endif /* PLATFORM_HAS_PS_NV_OTP_COUNTERS */
@@ -103,15 +105,25 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     USER_AREA_OFFSET(dm_locked.verification_service_url),
     USER_AREA_OFFSET(dm_locked.profile_definition),
 
-    USER_AREA_OFFSET(dm_locked.bl2_rotpk[0]),
-    USER_AREA_OFFSET(dm_locked.bl2_rotpk[1]),
-    USER_AREA_OFFSET(dm_locked.bl2_rotpk[2]),
-    USER_AREA_OFFSET(dm_locked.bl2_rotpk[3]),
+    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 0),
+    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 1),
+    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 2),
+    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 3),
+    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 4),
+    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 5),
+    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 6),
+    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 7),
+    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 8),
 
-    USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[0]),
-    USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[1]),
-    USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[2]),
-    USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[3]),
+    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 0),
+    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 1),
+    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 2),
+    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 3),
+    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 4),
+    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 5),
+    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 6),
+    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 7),
+    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 8),
 
 #ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
     USER_AREA_OFFSET(unlocked_area.ps_nv_counter[0]),
@@ -158,15 +170,25 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     USER_AREA_SIZE(dm_locked.verification_service_url),
     USER_AREA_SIZE(dm_locked.profile_definition),
 
-    USER_AREA_SIZE(dm_locked.bl2_rotpk[0]),
-    USER_AREA_SIZE(dm_locked.bl2_rotpk[1]),
-    USER_AREA_SIZE(dm_locked.bl2_rotpk[2]),
-    USER_AREA_SIZE(dm_locked.bl2_rotpk[3]),
+    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 0),
+    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 1),
+    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 2),
+    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 3),
+    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 4),
+    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 5),
+    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 6),
+    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 7),
+    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 8),
 
-    USER_AREA_SIZE(unlocked_area.bl2_nv_counter[0]),
-    USER_AREA_SIZE(unlocked_area.bl2_nv_counter[1]),
-    USER_AREA_SIZE(unlocked_area.bl2_nv_counter[2]),
-    USER_AREA_SIZE(unlocked_area.bl2_nv_counter[3]),
+    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 0),
+    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 1),
+    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 2),
+    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 3),
+    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 4),
+    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 5),
+    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 6),
+    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 7),
+    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 8),
 
 #ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
     USER_AREA_SIZE(unlocked_area.ps_nv_counter[0]),
@@ -408,6 +430,10 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
     return check_keys_for_tampering(lcs);
 }
 
+#define PLAT_OTP_ID_BL2_ROTPK_MAX PLAT_OTP_ID_BL2_ROTPK_0 + MCUBOOT_IMAGE_NUMBER
+#define PLAT_OTP_ID_NV_COUNTER_BL2_MAX \
+    PLAT_OTP_ID_NV_COUNTER_BL2_0 + MCUBOOT_IMAGE_NUMBER
+
 enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
                                       size_t out_len, uint8_t *out)
 {
@@ -416,6 +442,13 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
 
     if (id >= PLAT_OTP_ID_MAX) {
         return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    if (id >= PLAT_OTP_ID_BL2_ROTPK_MAX && id <= PLAT_OTP_ID_BL2_ROTPK_8) {
+        return TFM_PLAT_ERR_UNSUPPORTED;
+    }
+    if (id >= PLAT_OTP_ID_NV_COUNTER_BL2_MAX && id <= PLAT_OTP_ID_NV_COUNTER_BL2_8) {
+        return TFM_PLAT_ERR_UNSUPPORTED;
     }
 
     switch(id) {
@@ -537,6 +570,13 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return TFM_PLAT_ERR_INVALID_INPUT;
     }
 
+    if (id >= PLAT_OTP_ID_BL2_ROTPK_MAX && id <= PLAT_OTP_ID_BL2_ROTPK_8) {
+        return TFM_PLAT_ERR_UNSUPPORTED;
+    }
+    if (id >= PLAT_OTP_ID_NV_COUNTER_BL2_MAX && id <= PLAT_OTP_ID_NV_COUNTER_BL2_8) {
+        return TFM_PLAT_ERR_UNSUPPORTED;
+    }
+
     switch (id) {
     case PLAT_OTP_ID_LCS:
         return otp_write_lcs(in_len, in);
@@ -551,6 +591,13 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
 {
     if (id >= PLAT_OTP_ID_MAX) {
         return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    if (id >= PLAT_OTP_ID_BL2_ROTPK_MAX && id <= PLAT_OTP_ID_BL2_ROTPK_8) {
+        return TFM_PLAT_ERR_UNSUPPORTED;
+    }
+    if (id >= PLAT_OTP_ID_NV_COUNTER_BL2_MAX && id <= PLAT_OTP_ID_NV_COUNTER_BL2_8) {
+        return TFM_PLAT_ERR_UNSUPPORTED;
     }
 
     *size = otp_sizes[id];
