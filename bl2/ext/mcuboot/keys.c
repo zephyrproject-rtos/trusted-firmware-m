@@ -21,7 +21,7 @@
  * Original code taken from mcuboot project at:
  * https://github.com/mcu-tools/mcuboot
  * Git SHA of the original version: ac55554059147fff718015be9f4bd3108123f50a
- * Modifications are Copyright (c) 2019-2022 Arm Limited.
+ * Modifications are Copyright (c) 2019-2023 Arm Limited.
  */
 
 #include <stddef.h>
@@ -361,6 +361,44 @@ const struct bootutil_key bootutil_keys[] = {
         .len = &rsa_pub_key_len,
     },
 #endif /* MCUBOOT_IMAGE_NUMBER > 3 */
+#if (MCUBOOT_IMAGE_NUMBER > 4)
+    {
+        /* FIXME assuming the image 0 key is reused here */
+        .key = rsa_pub_key,
+        .len = &rsa_pub_key_len,
+    },
+#endif /* MCUBOOT_IMAGE_NUMBER > 4 */
+#if (MCUBOOT_IMAGE_NUMBER > 5)
+    {
+        /* FIXME assuming the image 0 key is reused here */
+        .key = rsa_pub_key,
+        .len = &rsa_pub_key_len,
+    },
+#endif /* MCUBOOT_IMAGE_NUMBER > 5 */
+#if (MCUBOOT_IMAGE_NUMBER > 6)
+    {
+        /* FIXME assuming the image 0 key is reused here */
+        .key = rsa_pub_key,
+        .len = &rsa_pub_key_len,
+    },
+#endif /* MCUBOOT_IMAGE_NUMBER > 6 */
+#if (MCUBOOT_IMAGE_NUMBER > 7)
+    {
+        /* FIXME assuming the image 0 key is reused here */
+        .key = rsa_pub_key,
+        .len = &rsa_pub_key_len,
+    },
+#endif /* MCUBOOT_IMAGE_NUMBER > 7 */
+#if (MCUBOOT_IMAGE_NUMBER > 8)
+    {
+        /* FIXME assuming the image 0 key is reused here */
+        .key = rsa_pub_key,
+        .len = &rsa_pub_key_len,
+    },
+#endif /* MCUBOOT_IMAGE_NUMBER > 8 */
+#if (MCUBOOT_IMAGE_NUMBER > 9)
+#error "MCUBOOT_IMAGE_NUMBER Unsupported!"
+#endif /* MCUBOOT_IMAGE_NUMBER > 9 */
 };
 const int bootutil_key_cnt = MCUBOOT_IMAGE_NUMBER;
 #endif /* HAVE_KEYS */
