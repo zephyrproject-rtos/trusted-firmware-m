@@ -57,38 +57,6 @@ struct uart_pl011_dev_t UART0_PL011_DEV_NS = {&(UART0_PL011_DEV_CFG_NS),
                                               &(UART0_PL011_DEV_DATA_NS)};
 #endif
 
-/* UART CMSDK driver structures */
-#ifdef UART0_CMSDK_S
-static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_S = {
-    .base = RSS_DEBUG_UART0_BASE_S,
-    .default_baudrate = DEFAULT_UART_BAUDRATE
-};
-static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_S = {
-    .state = 0,
-    .system_clk = 0,
-    .baudrate = 0
-};
-struct uart_cmsdk_dev_t UART0_CMSDK_DEV_S = {
-    &(UART0_CMSDK_DEV_CFG_S),
-    &(UART0_CMSDK_DEV_DATA_S)
-};
-#endif
-#ifdef UART0_CMSDK_NS
-static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_NS = {
-    .base = RSS_DEBUG_UART0_BASE_NS,
-    .default_baudrate = DEFAULT_UART_BAUDRATE
-};
-static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_NS = {
-    .state = 0,
-    .system_clk = 0,
-    .baudrate = 0
-};
-struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS = {
-    &(UART0_CMSDK_DEV_CFG_NS),
-    &(UART0_CMSDK_DEV_DATA_NS)
-};
-#endif
-
 #if (defined (SPI_STRATAFLASHJ3_S) && defined (CFI_S))
 static const struct cfi_dev_cfg_t CFI_DEV_CFG_S = {
     /* Define the flash base/size to be the same as the host access area, as the
@@ -110,4 +78,29 @@ struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV = {
     .program_unit = 0,
     .is_initialized = false
 };
+#endif
+
+/* Message Handling Units (MHU) */
+#ifdef MHU_AP_TO_RSS
+struct mhu_v2_x_dev_t MHU_AP_TO_RSS_DEV = {
+    MHU0_RECEIVER_BASE_S,
+    MHU_V2_X_RECEIVER_FRAME};
+#endif
+
+#ifdef MHU_RSS_TO_AP
+struct mhu_v2_x_dev_t MHU_RSS_TO_AP_DEV = {
+    MHU0_SENDER_BASE_S,
+    MHU_V2_X_SENDER_FRAME};
+#endif
+
+#ifdef MHU_SCP_TO_RSS
+struct mhu_v2_x_dev_t MHU_SCP_TO_RSS_DEV = {
+    MHU2_RECEIVER_BASE_S,
+    MHU_V2_X_RECEIVER_FRAME};
+#endif
+
+#ifdef MHU_RSS_TO_SCP
+struct mhu_v2_x_dev_t MHU_RSS_TO_SCP_DEV = {
+    MHU2_SENDER_BASE_S,
+    MHU_V2_X_SENDER_FRAME};
 #endif

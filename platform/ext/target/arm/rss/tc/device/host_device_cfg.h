@@ -32,18 +32,16 @@
 #define UART0_PL011_NS
 #endif /* RSS_USE_HOST_UART */
 
-#ifdef RSS_DEBUG_UART
-/* ARM UART CMSDK */
-#define DEFAULT_UART_CONTROL 0
-#define DEFAULT_UART_BAUDRATE  115200
-#define UART0_CMSDK_S
-#define UART0_CMSDK_NS
-#endif /* RSS_DEBUG_UART */
-
 /*External Intel Strata Flash Device*/
 #define SPI_STRATAFLASHJ3_S
 
 /* CFI Controller */
 #define CFI_S
+
+/* MHU */
+#define MHU_AP_TO_RSS
+#define MHU_RSS_TO_AP
+#define MHU_SCP_TO_RSS
+#define MHU_RSS_TO_SCP
 
 #endif  /* __HOST_DEVICE_CFG_H__ */

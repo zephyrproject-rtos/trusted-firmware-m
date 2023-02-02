@@ -42,20 +42,31 @@ extern struct uart_pl011_dev_t UART0_PL011_DEV_S;
 extern struct uart_pl011_dev_t UART0_PL011_DEV_NS;
 #endif
 
-/* UART CMSDK driver structures */
-#ifdef UART0_CMSDK_S
-#include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t UART0_CMSDK_DEV_S;
-#endif
-#ifdef UART0_CMSDK_NS
-#include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS;
-#endif
-
 #if (defined(SPI_STRATAFLASHJ3_S) && defined(CFI_S))
 #include "spi_strataflashj3_flash_lib.h"
 extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV;
 extern struct cfi_strataflashj3_dev_t SPI_STRATAFLASHJ3_DEV_SE_SECURE_FLASH;
+#endif
+
+/* Message Handling Units (MHU) */
+#ifdef MHU_AP_TO_RSS
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_AP_TO_RSS_DEV;
+#endif
+
+#ifdef MHU_RSS_TO_AP
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_RSS_TO_AP_DEV;
+#endif
+
+#ifdef MHU_SCP_TO_RSS
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_SCP_TO_RSS_DEV;
+#endif
+
+#ifdef MHU_RSS_TO_SCP
+#include "mhu_v2_x.h"
+extern struct mhu_v2_x_dev_t MHU_RSS_TO_SCP_DEV;
 #endif
 
 #ifdef __cplusplus

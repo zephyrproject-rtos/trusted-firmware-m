@@ -135,7 +135,6 @@ target_sources(platform_s
         cmsis_drivers/Driver_MPC.c
         cmsis_drivers/Driver_PPC.c
         device/source/device_definition.c
-        device/source/host_device_definition.c
         device/source/system_core_init.c
         libraries/dma350_lib.c
         native_drivers/atu_rss_drv.c
@@ -215,7 +214,6 @@ endif()
 target_sources(platform_ns
     PRIVATE
         device/source/device_definition.c
-        device/source/host_device_definition.c
         device/source/system_core_init.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
@@ -248,7 +246,6 @@ target_sources(platform_bl2
     PRIVATE
         tfm_hal_platform_reset.c
         device/source/device_definition.c
-        device/source/host_device_definition.c
         device/source/system_core_init.c
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_lib.c>
         native_drivers/atu_rss_drv.c
@@ -318,7 +315,6 @@ target_sources(platform_bl1_1
     PRIVATE
         ./bl1/boot_hal_bl1_1.c
         ./device/source/device_definition.c
-        ./device/source/host_device_definition.c
         ./device/source/system_core_init.c
         ./native_drivers/atu_rss_drv.c
         ./native_drivers/kmu_drv.c
