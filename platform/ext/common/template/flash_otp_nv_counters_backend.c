@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -310,7 +310,7 @@ enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *dat
     size_t input_idx = 0;
     size_t input_copy_size;
     uint32_t *swap_count;
-    uint8_t swap_count_buf[TFM_HAL_ITS_PROGRAM_UNIT];
+    uint8_t swap_count_buf[TFM_HAL_ITS_PROGRAM_UNIT > 4 ? TFM_HAL_ITS_PROGRAM_UNIT : 4];
 
     start = round_down(offset, TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
     end = round_up(offset + cnt, TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
