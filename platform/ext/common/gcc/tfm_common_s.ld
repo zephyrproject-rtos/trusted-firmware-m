@@ -55,9 +55,10 @@ SECTIONS
         __vectors_end__ = .;
     } > FLASH
 
-#ifdef CONFIG_TFM_USE_TRUSTZONE
     ASSERT(. <= ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE, ".TFM_VECTORS section size overflow.")
     . = ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE;
+
+#ifdef CONFIG_TFM_USE_TRUSTZONE
     /*
      * Place the CMSE Veneers (containing the SG instruction) after the code, in
      * a separate at least 32 bytes aligned region so that the SAU can
