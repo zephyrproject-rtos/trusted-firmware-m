@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -39,7 +39,7 @@ macro(tfm_toolchain_reset_compiler_flags)
     endif()
 
     add_compile_options(
-        --specs=nano.specs
+        -specs=nano.specs
         -Wall
         -Wno-format
         -Wno-return-type
@@ -69,7 +69,7 @@ macro(tfm_toolchain_reset_linker_flags)
 
     add_link_options(
         --entry=Reset_Handler
-        --specs=nano.specs
+        -specs=nano.specs
         LINKER:-check-sections
         LINKER:-fatal-warnings
         LINKER:--gc-sections
