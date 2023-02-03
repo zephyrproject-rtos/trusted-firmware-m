@@ -15,3 +15,4 @@
 set(TFM_SYSTEM_PROCESSOR cortex-m33)
 set(TFM_SYSTEM_ARCHITECTURE armv8-m.main)
 set(TFM_SYSTEM_DSP OFF)
+set(CONFIG_TFM_FP_ARCH "fpv5-sp-d16")
