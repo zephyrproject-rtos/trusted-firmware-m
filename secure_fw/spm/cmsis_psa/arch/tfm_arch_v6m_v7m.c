@@ -9,7 +9,7 @@
 #include "compiler_ext_defs.h"
 #include "security_defs.h"
 #include "utilities.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_arch.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_svcalls.h"

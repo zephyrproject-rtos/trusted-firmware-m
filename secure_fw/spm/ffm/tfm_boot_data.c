@@ -16,7 +16,7 @@
 #include "utilities.h"
 #include "psa/service.h"
 #include "thread.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "load/partition_defs.h"
 #include "tfm_hal_isolation.h"
 

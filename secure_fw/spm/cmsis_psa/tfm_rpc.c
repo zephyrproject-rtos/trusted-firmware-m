@@ -5,7 +5,7 @@
  *
  */
 
-#include "spm_ipc.h"
+#include "spm.h"
 #include "ffm/psa_api.h"
 #include "tfm_rpc.h"
 #include "utilities.h"

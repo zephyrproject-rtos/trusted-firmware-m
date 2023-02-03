@@ -13,7 +13,7 @@
 #include "compiler_ext_defs.h"
 #include "security_defs.h"
 #include "region_defs.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "svc_num.h"
 #include "tfm_arch.h"
 #include "tfm_hal_device_header.h"

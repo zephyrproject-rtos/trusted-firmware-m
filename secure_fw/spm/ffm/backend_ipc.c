@@ -15,7 +15,7 @@
 #include "config_spm.h"
 #include "runtime_defs.h"
 #include "ffm/stack_watermark.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_hal_memory_symbols.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"

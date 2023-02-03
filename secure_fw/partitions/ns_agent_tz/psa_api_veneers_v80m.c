@@ -16,7 +16,7 @@
 #include "psa/client.h"
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-#include "spm_ipc.h"
+#include "spm.h"
 #include "ffm/psa_api.h"
 #elif CONFIG_TFM_PSA_API_SFN_CALL == 1
 #include "tfm_psa_call_pack.h"

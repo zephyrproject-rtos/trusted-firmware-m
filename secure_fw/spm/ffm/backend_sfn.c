@@ -20,7 +20,7 @@
 #include "load/spm_load_api.h"
 #include "psa/error.h"
 #include "psa/service.h"
-#include "spm_ipc.h"
+#include "spm.h"
 
 /* SFN Partition state */
 #define SFN_PARTITION_STATE_NOT_INITED        0

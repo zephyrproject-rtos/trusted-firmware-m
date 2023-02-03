@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef __SPM_IPC_H__
-#define __SPM_IPC_H__
+#ifndef __SPM_H__
+#define __SPM_H__
 
 #include <stdint.h>
 #include "config_impl.h"
@@ -377,4 +377,4 @@ void cross_call_exiting_c(psa_status_t status, uintptr_t frame_addr);
 
 #endif
 
-#endif /* __SPM_IPC_H__ */
+#endif /* __SPM_H__ */

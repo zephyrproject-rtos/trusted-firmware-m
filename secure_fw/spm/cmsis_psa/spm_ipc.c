@@ -26,7 +26,7 @@
 #include "tfm_hal_defs.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_hal_isolation.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_nspm.h"
 #include "tfm_rpc.h"

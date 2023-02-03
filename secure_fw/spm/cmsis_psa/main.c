@@ -9,7 +9,7 @@
 #include "fih.h"
 #include "ffm/tfm_boot_data.h"
 #include "region.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
 #include "tfm_api.h"

@@ -13,7 +13,7 @@
 #include "lists.h"
 #include "region.h"
 #include "region_defs.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_plat_defs.h"
 #include "utilities.h"

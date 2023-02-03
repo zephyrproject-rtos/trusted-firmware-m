@@ -8,7 +8,7 @@
 #ifndef __STACK_WATERMARK_H__
 #define __STACK_WATERMARK_H__
 
-#include "spm_ipc.h"
+#include "spm.h"
 
 #ifdef CONFIG_TFM_STACK_WATERMARKS
 void watermark_stack(struct partition_t *p_pt);

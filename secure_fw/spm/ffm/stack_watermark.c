@@ -10,7 +10,7 @@
 #include "ffm/stack_watermark.h"
 #include "lists.h"
 #include "load/spm_load_api.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_spm_log.h"
 
 /* Always output, regardless of log level.

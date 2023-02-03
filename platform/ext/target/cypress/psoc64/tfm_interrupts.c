@@ -13,7 +13,7 @@
 #include "cmsis.h"
 #include "cy_ipc_drv.h"
 #include "spe_ipc_config.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_peripherals_def.h"
 #include "ffm/interrupt.h"

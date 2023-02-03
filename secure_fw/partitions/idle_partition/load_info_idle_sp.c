@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "spm_ipc.h"
+#include "spm.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"

@@ -9,7 +9,7 @@
 #define __BACKEND_H__
 
 #include <stdint.h>
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_arch.h"
 #include "load/spm_load_api.h"
 #include "psa/error.h"

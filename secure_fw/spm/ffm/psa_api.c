@@ -16,7 +16,7 @@
 #include "psa/lifecycle.h"
 #include "psa/service.h"
 #include "interrupt.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_arch.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"

@@ -23,7 +23,7 @@
 #include "psa/client.h"
 #include "psa/service.h"
 #include "thread.h"
-#include "spm_ipc.h"
+#include "spm.h"
 
 #define TFM_RPC_SUCCESS             (0)
 #define TFM_RPC_INVAL_PARAM         (INT32_MIN + 1)

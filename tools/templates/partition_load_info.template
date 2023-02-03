@@ -15,7 +15,7 @@
 #include "config_tfm.h"
 #include "region.h"
 #include "region_defs.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "load/interrupt_defs.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"

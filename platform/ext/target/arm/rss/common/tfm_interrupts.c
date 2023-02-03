@@ -10,7 +10,7 @@
 
 #include "cmsis.h"
 #include "device_definition.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_peripherals_def.h"
 #include "ffm/interrupt.h"

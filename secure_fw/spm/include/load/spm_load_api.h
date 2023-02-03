@@ -16,7 +16,7 @@
 #include "interrupt_defs.h"
 #include "partition_defs.h"
 #include "service_defs.h"
-#include "spm_ipc.h"
+#include "spm.h"
 
 /* No more partition to be loaded */
 #define NO_MORE_PARTITION        NULL

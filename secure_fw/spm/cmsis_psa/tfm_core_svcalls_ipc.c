@@ -8,7 +8,7 @@
 #include <string.h>
 #include "config_spm.h"
 #include "region.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "svc_num.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
