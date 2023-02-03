@@ -102,12 +102,12 @@ struct conn_handle_t {
 struct partition_t {
     const struct partition_load_info_t *p_ldinf;
     void                               *p_interrupts;
-    void                               *p_metadata;
     uintptr_t                          boundary;
     uint32_t                           signals_allowed;
     uint32_t                           signals_waiting;
     volatile uint32_t                  signals_asserted;
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
+    void                               *p_metadata;
     struct context_ctrl_t              ctx_ctrl;
     struct thread_t                    thrd;            /* IPC model */
 #else
