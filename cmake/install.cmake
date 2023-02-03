@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2023, Arm Limited. All rights reserved.
-# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -128,8 +128,11 @@ if (TFM_PARTITION_NS_AGENT_TZ)
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
+    install(DIRECTORY   ${INTERFACE_INC_DIR}/os_wrapper
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+
 if (CONFIG_TFM_USE_TRUSTZONE)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c.example
+    install(DIRECTORY   ${INTERFACE_SRC_DIR}/os_wrapper
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 

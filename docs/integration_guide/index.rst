@@ -64,14 +64,21 @@ in the file ``<install_dir>/interface/include/psa/protected_storage.h``.
 TF-M also exports a reference implementation of PSA APIs for NS clients in the
 ``<install_dir>/interface/src``.
 
-On Armv8-M TrustZone based platforms, NS OS shall implement interface API
-``tfm_ns_interface_dispatch()`` to integrate with TF-M implementation of PSA
-APIs. See ``interface/include/tfm_ns_interface.h`` for the detailed declaration
-of ``tfm_ns_interface_dispatch()``.
-TF-M provides an example of ``tfm_ns_interface_dispatch()`` implementation on
-Armv8-M TrustZone based platforms. In this example, NS OS calls mutex in
-``tfm_ns_interface_dispatch()`` to synchronize multiple NS client calls to TF-M.
-See ``interface/src/tfm_ns_interface.c.example`` for more details.
+On Armv8-M TrustZone based platforms, NS OS uses ``tfm_ns_interface_dispatch()``
+to integrate with TF-M implementation of PSA APIs. TF-M provides a reference
+implementation of this function for RTOS and bare metal use cases.
+RTOS implementation of ``tfm_ns_interface_dispatch()`` (provided in
+``interface\src\os_wrapper\tfm_ns_interface_rtos.c``) uses mutex to provide
+multithread safety. Mutex wrapper functions defined in
+``interface/include/os_wrapper/mutex.h`` are expected to be provided by NS RTOS.
+When reference RTOS implementation of dispatch function is used NS application
+should call ``tfm_ns_interface_init()`` function before first PSA API call.
+Bare metal implementation ``tfm_ns_interface_dispatch()`` (provided in
+``interface\src\os_wrapper\tfm_ns_interface_bare_metal.c``) does not
+provide multithread safety and does not require implementation of mutex
+interface.
+If needed, instead of using reference implementation, NS application may provide
+its own implementation of ``tfm_ns_interface_dispatch()`` function.
 
 TF-M provides a reference implementation of NS mailbox on multi-core platforms,
 under folder ``interface/src/multi_core``.
@@ -137,3 +144,5 @@ environment before the script will succeed when the script is not run via cmake.
 --------------
 
 *Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*
