@@ -14,25 +14,25 @@ menu "SPM"
 config TFM_ISOLATION_LEVEL
     int "Isolation level"
     default 1
-    range 1 1 if TFM_SPM_BACKEND_SFN
+    range 1 1 if CONFIG_TFM_SPM_BACKEND_SFN
     range 1 3 if PLATFORM_HAS_ISOLATION_L3_SUPPORT
     range 1 2
 
 choice
     prompt "SPM Backend"
-    default TFM_SPM_BACKEND_SFN
+    default CONFIG_TFM_SPM_BACKEND_SFN
 
-    config TFM_SPM_BACKEND_SFN
+    config CONFIG_TFM_SPM_BACKEND_SFN
         bool "SFN Backend"
 
-    config TFM_SPM_BACKEND_IPC
+    config CONFIG_TFM_SPM_BACKEND_IPC
         bool "IPC Backend"
 endchoice
 
 config CONFIG_TFM_SPM_BACKEND
     string
-    default "IPC" if TFM_SPM_BACKEND_IPC
-    default "SFN" if TFM_SPM_BACKEND_SFN
+    default "IPC" if CONFIG_TFM_SPM_BACKEND_IPC
+    default "SFN" if CONFIG_TFM_SPM_BACKEND_SFN
     default ""
 
 choice

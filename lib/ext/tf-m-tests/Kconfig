@@ -79,7 +79,7 @@ config TEST_S_FWU
 
 config TEST_S_IPC
     bool "IPC"
-    depends on TFM_SPM_BACKEND_IPC
+    depends on CONFIG_TFM_SPM_BACKEND_IPC
 
 config TEST_S_SFN_BACKEND
     bool "SFN backend"
@@ -173,7 +173,7 @@ config TEST_NS_FPU
 
 config TEST_NS_IPC
     bool "IPC"
-    depends on TFM_SPM_BACKEND_IPC
+    depends on CONFIG_TFM_SPM_BACKEND_IPC
 
 config TEST_NS_SFN_BACKEND
     bool "SFN backend"
