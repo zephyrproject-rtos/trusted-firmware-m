@@ -45,6 +45,7 @@ target_sources(tfm_spm
         cmsis_psa/static_loader.c
         ffm/psa_api.c
         ffm/psa_call_api.c
+        $<$<BOOL:${CONFIG_TFM_CONNECTION_BASED_SERVICE_API}>:ffm/psa_connection_api.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:ffm/backend_ipc.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:ffm/backend_sfn.c>
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:ffm/interrupt.c>
