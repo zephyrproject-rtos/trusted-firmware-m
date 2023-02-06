@@ -106,38 +106,6 @@ uint32_t tfm_spm_get_lifecycle_state(void)
     return PSA_LIFECYCLE_UNKNOWN;
 }
 
-/* PSA Client API function body */
-
-uint32_t tfm_spm_client_psa_framework_version(void)
-{
-    return PSA_FRAMEWORK_VERSION;
-}
-
-uint32_t tfm_spm_client_psa_version(uint32_t sid)
-{
-    struct service_t *service;
-    bool ns_caller = tfm_spm_is_ns_caller();
-
-    /*
-     * It should return PSA_VERSION_NONE if the RoT Service is not
-     * implemented.
-     */
-    service = tfm_spm_get_service_by_sid(sid);
-    if (!service) {
-        return PSA_VERSION_NONE;
-    }
-
-    /*
-     * It should return PSA_VERSION_NONE if the caller is not authorized
-     * to access the RoT Service.
-     */
-    if (tfm_spm_check_authorization(sid, service, ns_caller) != PSA_SUCCESS) {
-        return PSA_VERSION_NONE;
-    }
-
-    return service->p_ldinf->version;
-}
-
 /* PSA Partition API function body */
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1 \
