@@ -14,8 +14,8 @@ fetch_remote_library(
     LIB_PATCH_DIR           ${CMAKE_CURRENT_LIST_DIR}
     LIB_FORCE_PATCH         LIBMETAL_FORCE_PATCH
     FETCH_CONTENT_ARGS
-        GIT_REPOSITORY      https://github.com/OpenAMP/libmetal.git
         GIT_TAG             ${LIBMETAL_VERSION}
+        GIT_REPOSITORY      https://github.com/OpenAMP/libmetal.git
 )
 
 if (NOT LIB_BINARY_PATH_VAR)

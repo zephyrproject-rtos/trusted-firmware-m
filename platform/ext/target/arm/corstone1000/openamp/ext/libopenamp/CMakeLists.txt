@@ -12,8 +12,8 @@ fetch_remote_library(
     LIB_SOURCE_PATH_VAR     LIBOPENAMP_SRC_PATH
     LIB_BINARY_PATH_VAR     LIBOPENAMP_BIN_PATH
     FETCH_CONTENT_ARGS
-        GIT_REPOSITORY      https://github.com/OpenAMP/open-amp.git
         GIT_TAG             ${OPENAMP_VERSION}
+        GIT_REPOSITORY      https://github.com/OpenAMP/open-amp.git
 )
 
 if (NOT LIB_BINARY_PATH_VAR)

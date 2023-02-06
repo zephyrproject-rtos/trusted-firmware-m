@@ -23,7 +23,7 @@ if (NS OR TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2 OR TEST_BL1_1 OR TEST_BL
         FETCH_CONTENT_ARGS
             GIT_REPOSITORY      https://git.trustedfirmware.org/TF-M/tf-m-tests.git
             GIT_TAG             ${TFM_TEST_REPO_VERSION}
-            GIT_PROGRESS TRUE
+            GIT_PROGRESS        TRUE
     )
 
     if ("${CMSIS_5_PATH}" STREQUAL DOWNLOAD)

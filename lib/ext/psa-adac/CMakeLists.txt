@@ -12,8 +12,8 @@ fetch_remote_library(
     LIB_SOURCE_PATH_VAR     PLATFORM_PSA_ADAC_SOURCE_PATH
     LIB_BINARY_PATH_VAR     PLATFORM_PSA_ADAC_BUILD_PATH
     FETCH_CONTENT_ARGS
-        GIT_REPOSITORY      https://git.trustedfirmware.org/shared/psa-adac.git
         GIT_TAG             ${PLATFORM_PSA_ADAC_VERSION}
+        GIT_REPOSITORY      https://git.trustedfirmware.org/shared/psa-adac.git
 )
 
 if (NOT LIB_BINARY_PATH_VAR)

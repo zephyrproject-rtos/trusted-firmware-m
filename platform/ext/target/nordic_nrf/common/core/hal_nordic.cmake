@@ -12,6 +12,6 @@ fetch_remote_library(
     LIB_NAME                hal_nordic
     LIB_SOURCE_PATH_VAR     HAL_NORDIC_PATH
     FETCH_CONTENT_ARGS
-        GIT_REPOSITORY      ${HAL_NORDIC_REMOTE}
         GIT_TAG             ${HAL_NORDIC_VERSION}
+        GIT_REPOSITORY      ${HAL_NORDIC_REMOTE}
 )
