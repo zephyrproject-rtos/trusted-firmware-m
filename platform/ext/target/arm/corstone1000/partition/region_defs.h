@@ -64,6 +64,8 @@
 #define NS_DATA_START OPENAMP_SE_SHARED_MEMORY_START_ADDR
 #define NS_DATA_SIZE OPENAMP_SHARED_MEMORY_SIZE
 
+#define S_CODE_VECTOR_TABLE_SIZE    (0xc0)
+
 /* Stub NS macros needed for compilation */
 #define NS_DATA_LIMIT   NS_DATA_START + NS_DATA_SIZE
 #define NS_CODE_START   0x0
