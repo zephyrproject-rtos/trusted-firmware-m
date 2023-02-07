@@ -26,6 +26,7 @@ target_sources(tfm_sprt
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_partition_metadata_indicator.c>
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./rt_main.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:./sfn_common_thread.c>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:./psa_api_ipc.c>
         $<$<BOOL:${TFM_SP_LOG_RAW_ENABLED}>:./tfm_sp_log_raw.c>
         $<$<BOOL:${TFM_SP_LOG_RAW_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/tfm_hal_sp_logdev_periph.c>
 )
@@ -44,7 +45,7 @@ target_compile_definitions(tfm_partition_defs
         $<$<BOOL:${TFM_SP_LOG_RAW_ENABLED}>:TFM_SP_LOG_RAW_ENABLED>
 )
 
-target_include_directories(tfm_partitions
+target_include_directories(tfm_sprt
     INTERFACE
         $<BUILD_INTERFACE:$<$<BOOL:${CONFIG_TFM_PARTITION_META}>:${CMAKE_CURRENT_SOURCE_DIR}/include>>
 )

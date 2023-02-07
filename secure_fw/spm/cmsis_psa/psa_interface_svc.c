@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "compiler_ext_defs.h"
 #include "config_spm.h"
+#include "runtime_defs.h"
 #include "svc_num.h"
 #include "tfm_psa_call_pack.h"
 #include "utilities.h"
@@ -157,3 +158,14 @@ __naked void psa_eoi_svc(psa_signal_t irq_signal)
 #endif
 
 #endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
+
+
+const struct psa_api_tbl_t psa_api_svc = {
+                                tfm_psa_call_pack_svc,
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+                                psa_connect_svc,
+                                psa_close_svc,
+#endif
+                                psa_version_svc,
+                                psa_framework_version_svc
+                            };

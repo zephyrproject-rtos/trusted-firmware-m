@@ -12,9 +12,6 @@
 
 #if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
 
-#define psa_framework_version    psa_framework_version_svc
-#define psa_version              psa_version_svc
-#define tfm_psa_call_pack        tfm_psa_call_pack_svc
 #define psa_wait                 psa_wait_svc
 #define psa_get                  psa_get_svc
 #define psa_read                 psa_read_svc
@@ -31,8 +28,6 @@
 
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-#define psa_connect              psa_connect_svc
-#define psa_close                psa_close_svc
 #define psa_set_rhandle          psa_set_rhandle_svc
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
@@ -51,9 +46,6 @@
 
 #elif CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-#define psa_framework_version    psa_framework_version_cross
-#define psa_version              psa_version_cross
-#define tfm_psa_call_pack        tfm_psa_call_pack_cross
 #define psa_wait                 psa_wait_cross
 #define psa_get                  psa_get_cross
 #define psa_read                 psa_read_cross
@@ -70,8 +62,6 @@
 
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-#define psa_connect              psa_connect_cross
-#define psa_close                psa_close_cross
 #define psa_set_rhandle          psa_set_rhandle_cross
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
@@ -97,17 +87,12 @@
 
 #elif CONFIG_TFM_PSA_API_SFN_CALL == 1
 
-#define psa_framework_version    psa_framework_version_sfn
-#define psa_version              psa_version_sfn
-#define tfm_psa_call_pack        psa_call_pack_sfn
 #define psa_read                 psa_read_sfn
 #define psa_skip                 psa_skip_sfn
 #define psa_write                psa_write_sfn
 #define psa_panic                psa_panic_sfn
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-#define psa_connect              psa_connect_sfn
-#define psa_close                psa_close_sfn
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 #if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
 #define psa_wait                 psa_wait_sfn

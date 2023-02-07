@@ -102,6 +102,9 @@ static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
     return state;
 }
 
+extern struct psa_api_tbl_t psa_api_cross;
+extern struct psa_api_tbl_t psa_api_svc;
+
 static void prv_process_metadata(struct partition_t *p_pt)
 {
     const struct partition_load_info_t *p_pt_ldi;
@@ -128,6 +131,12 @@ static void prv_process_metadata(struct partition_t *p_pt)
                                     ARCH_CTXCTRL_ALLOCATED_PTR(ctx_ctrl);
 
     p_rt_meta->entry = p_pt_ldi->entry;
+#if TFM_LVL == 1
+    p_rt_meta->psa_fns = &psa_api_cross;
+#else
+    /* TODO: ABI for PRoT partitions needs to be updated based on implementations. */
+    p_rt_meta->psa_fns = &psa_api_svc;
+#endif
     p_rt_meta->n_sfn = 0;
     p_sfn_table = p_rt_meta->sfn_table;
 

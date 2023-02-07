@@ -12,7 +12,7 @@
 #include "ffm/psa_api.h"
 #include "psa/client.h"
 
-uint32_t psa_framework_version_sfn(void)
+uint32_t psa_framework_version(void)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -22,7 +22,7 @@ uint32_t psa_framework_version_sfn(void)
     return tfm_spm_client_psa_framework_version();
 }
 
-uint32_t psa_version_sfn(uint32_t sid)
+uint32_t psa_version(uint32_t sid)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -32,7 +32,7 @@ uint32_t psa_version_sfn(uint32_t sid)
     return tfm_spm_client_psa_version(sid);
 }
 
-psa_status_t psa_call_pack_sfn(psa_handle_t handle, uint32_t ctrl_param,
+psa_status_t tfm_psa_call_pack(psa_handle_t handle, uint32_t ctrl_param,
                                const psa_invec *in_vec, psa_outvec *out_vec)
 {
     struct partition_t *p_client, *p_target;
@@ -107,7 +107,7 @@ void psa_panic_sfn(void)
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 
-psa_handle_t psa_connect_sfn(uint32_t sid, uint32_t version)
+psa_handle_t psa_connect(uint32_t sid, uint32_t version)
 {
     struct partition_t *p_client, *p_target;
     psa_status_t stat;
@@ -134,7 +134,7 @@ psa_handle_t psa_connect_sfn(uint32_t sid, uint32_t version)
     return (psa_handle_t)stat;
 }
 
-void psa_close_sfn(psa_handle_t handle)
+void psa_close(psa_handle_t handle)
 {
     struct partition_t *p_client, *p_target;
     psa_status_t stat;

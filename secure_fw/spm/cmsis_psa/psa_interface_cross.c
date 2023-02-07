@@ -15,6 +15,7 @@
 #include "psa/client.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
+#include "runtime_defs.h"
 
 #if defined(__ICCARM__)
 
@@ -422,3 +423,13 @@ void psa_unmap_outvec_cross(psa_handle_t msg_handle, uint32_t outvec_idx,
 }
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
+const struct psa_api_tbl_t psa_api_cross = {
+                                tfm_psa_call_pack_cross,
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+                                psa_connect_cross,
+                                psa_close_cross,
+#endif
+                                psa_version_cross,
+                                psa_framework_version_cross
+                            };
