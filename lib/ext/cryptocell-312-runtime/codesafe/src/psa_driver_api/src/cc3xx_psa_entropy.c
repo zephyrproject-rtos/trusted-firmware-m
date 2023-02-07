@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -41,19 +41,19 @@ psa_status_t cc3xx_get_entropy(uint32_t flags, size_t *estimate_bits,
     uint32_t estimate_bytes;
 
     if (output == NULL) {
-        CC_PAL_LOG_ERR("output cannot be NULL\n");
+        CC_PAL_LOG_ERR("output cannot be NULL");
         status = PSA_ERROR_INVALID_ARGUMENT;
         goto end;
     }
 
     if (estimate_bits == NULL) {
-        CC_PAL_LOG_ERR("estimate_bits cannot be NULL\n");
+        CC_PAL_LOG_ERR("estimate_bits cannot be NULL");
         status = PSA_ERROR_INVALID_ARGUMENT;
         goto end;
     }
 
     if (output_size == 0) {
-        CC_PAL_LOG_ERR("output_size cannot be 0\n");
+        CC_PAL_LOG_ERR("output_size cannot be 0");
         status = PSA_ERROR_INVALID_ARGUMENT;
         goto end;
     }
@@ -64,7 +64,7 @@ psa_status_t cc3xx_get_entropy(uint32_t flags, size_t *estimate_bits,
 
     cc_err = RNG_PLAT_SetUserRngParameters(&trngParams);
     if (cc_err != CC_OK) {
-        CC_PAL_LOG_ERR("Error: RNG_PLAT_SetUserRngParameters() failed.\n");
+        CC_PAL_LOG_ERR("Error: RNG_PLAT_SetUserRngParameters() failed");
         status = PSA_ERROR_HARDWARE_FAILURE;
         goto end;
     }

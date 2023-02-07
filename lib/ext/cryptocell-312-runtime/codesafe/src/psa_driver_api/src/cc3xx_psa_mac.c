@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -52,7 +52,7 @@ static size_t psa_get_hash_block_size(psa_algorithm_t alg)
 static psa_status_t cmac_init(AesContext_t *ctx)
 {
     if (ctx == NULL) {
-        CC_PAL_LOG_ERR("NULL pointer exception\n");
+        CC_PAL_LOG_ERR("NULL pointer exception");
         return (PSA_ERROR_INVALID_ARGUMENT);
     }
 
@@ -74,8 +74,8 @@ static psa_status_t cmac_init(AesContext_t *ctx)
 static psa_status_t cmac_setkey(AesContext_t *ctx, const unsigned char *key,
                                 unsigned int keybits)
 {
-    if (ctx == NULL || key == NULL) {
-        CC_PAL_LOG_ERR("Null pointer, ctx or key are NULL\n");
+    if ((ctx == NULL) || (key == NULL)) {
+        CC_PAL_LOG_ERR("Null pointer, ctx or key are NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -121,15 +121,14 @@ static psa_status_t cmac_setup(cc3xx_cipher_operation_t *cmac,
 
     status = cmac_init(&(cmac->ctx.aes));
     if (status != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR(" 'cmac_init' failed with psa return code %d\n", status);
+        CC_PAL_LOG_ERR("cmac_init failed with psa return code %d", status);
         return status;
     }
 
     status = cmac_setkey(&(cmac->ctx.aes), key_buffer,
                          psa_get_key_bits(attributes));
     if (status != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR(" 'cmac_setkey' failed with psa return code %d\n",
-                       status);
+        CC_PAL_LOG_ERR("cmac_setkey failed with psa return code %d", status);
         return status;
     }
     return PSA_SUCCESS;
@@ -158,7 +157,7 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
             (const uint8_t *)&(cmac_ctx)->unprocessed_data, block_size,
             &inBuffInfo, NULL, 0, &outBuffInfo);
         if (ret != CC_OK) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_INVALID_ARGUMENT;
         }
 
@@ -166,7 +165,7 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
                             block_size);
 
         if (ret != AES_DRV_OK) {
-            CC_PAL_LOG_ERR("ProcessAesDrv failed with return code %d\n", ret);
+            CC_PAL_LOG_ERR("ProcessAesDrv failed with return code %d", ret);
             return PSA_ERROR_GENERIC_ERROR;
         }
 
@@ -183,7 +182,7 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
         drvError_t ret = SetDataBuffersInfo(input, main_chunk_in_bytes,
                                             &inBuffInfo, NULL, 0, &outBuffInfo);
         if (ret != CC_OK) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_INVALID_ARGUMENT;
         }
 
@@ -192,7 +191,7 @@ static psa_status_t cmac_update(cc3xx_cipher_operation_t *cmac_ctx,
         ret = ProcessAesDrv(&(cmac_ctx->ctx.aes), &inBuffInfo, &outBuffInfo,
                             main_chunk_in_bytes);
         if (ret != AES_DRV_OK) {
-            CC_PAL_LOG_ERR("ProcessAesDrv failed with return code %d\n", ret);
+            CC_PAL_LOG_ERR("ProcessAesDrv failed with return code %d", ret);
             return PSA_ERROR_GENERIC_ERROR;
         }
 
@@ -229,7 +228,7 @@ static psa_status_t cmac_finish(cc3xx_cipher_operation_t *cmac_ctx,
                              cmac_ctx->unprocessed_size, &inBuffInfo, NULL,
                              0, &outBuffInfo);
     if (ret != CC_OK) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -237,7 +236,7 @@ static psa_status_t cmac_finish(cc3xx_cipher_operation_t *cmac_ctx,
                        (uint32_t)(cmac_ctx)->unprocessed_size);
 
     if (ret != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("FinishAesDrv failed with return code 0x%x\n", ret);
+        CC_PAL_LOG_ERR("FinishAesDrv failed with return code 0x%x", ret);
         return PSA_ERROR_GENERIC_ERROR;
     }
 

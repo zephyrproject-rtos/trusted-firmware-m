@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,10 +13,10 @@
  */
 
 #include "cc3xx_internal_ecdh.h"
-#include <cc_ecpki_dh.h>
-#include <cc_ec_mont_api.h>
-#include <cc_pal_log.h>
-#include <cc_pal_mem.h>
+#include "cc_ecpki_dh.h"
+#include "cc_ec_mont_api.h"
+#include "cc_pal_log.h"
+#include "cc_pal_mem.h"
 
 /** \defgroup internal_ecdh_util Internal ECDH functions
  *
@@ -33,8 +33,8 @@ psa_status_t cc3xx_ecdh_calc_secret_wrst(
     CCError_t status;
     CCEcdhTempData_t EcdhTempData;
 
-    if (NULL == ctx || NULL == secret) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == ctx) || (NULL == secret)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         ret = PSA_ERROR_INVALID_ARGUMENT;
         goto exit;
     }
@@ -45,7 +45,7 @@ psa_status_t cc3xx_ecdh_calc_secret_wrst(
                            secret_size,
                            &EcdhTempData);
     if (status != CC_OK) {
-        CC_PAL_LOG_ERR("Error calculating shared secret value\n");
+        CC_PAL_LOG_ERR("Error calculating shared secret value");
         ret = PSA_ERROR_INVALID_ARGUMENT;
         goto exit;
     }
@@ -66,8 +66,8 @@ psa_status_t cc3xx_ecdh_calc_secret_mont(
     CCError_t status;
     CCEcMontTempBuff_t EcMontTempBuff;
 
-    if (NULL == priv_key || NULL == publ_key || NULL == secret) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == priv_key) || (NULL == publ_key) || (NULL == secret)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         ret = PSA_ERROR_INVALID_ARGUMENT;
         goto exit;
     }
@@ -80,7 +80,7 @@ psa_status_t cc3xx_ecdh_calc_secret_mont(
                                  publ_key_size,
                                  &EcMontTempBuff);
     if (status != CC_OK) {
-        CC_PAL_LOG_ERR("Error calculating shared secret value\n");
+        CC_PAL_LOG_ERR("Error calculating shared secret value");
         ret = PSA_ERROR_INVALID_ARGUMENT;
         goto exit;
     }

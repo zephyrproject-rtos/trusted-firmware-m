@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -47,7 +47,7 @@ psa_status_t cc3xx_psa_hash_mode_to_cc_hash_mode(psa_algorithm_t alg,
     } else
 #endif /* PSA_WANT_ALG_RSA_PKCS1V15_SIGN_RAW */
     {
-        CC_PAL_LOG_ERR("Algorithm 0x%x is not OAEP or HASH-AND-SIGN\r\n", alg);
+        CC_PAL_LOG_ERR("Algorithm 0x%x is not OAEP or HASH-AND-SIGN", alg);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -56,7 +56,7 @@ psa_status_t cc3xx_psa_hash_mode_to_cc_hash_mode(psa_algorithm_t alg,
         if (! (PSA_ALG_IS_RSA_PKCS1V15_SIGN(alg) ||
                PSA_ALG_IS_RSA_PSS(alg) ||
                PSA_ALG_IS_RSA_OAEP(alg)) ) {
-            CC_PAL_LOG_ERR("Algorithm 0x%x is not ECDSA or RSA\r\n", alg);
+            CC_PAL_LOG_ERR("Algorithm 0x%x is not ECDSA or RSA", alg);
             return PSA_ERROR_INVALID_ARGUMENT;
         }
     }
@@ -116,7 +116,7 @@ psa_status_t cc3xx_psa_hash_mode_to_cc_hash_mode(psa_algorithm_t alg,
         } else {
             *(CCRsaHashOpMode_t *)hash_mode = CC_RSA_HASH_OpModeLast;
         }
-        CC_PAL_LOG_ERR("Extracted hash_alg 0x%x is not valid\r\n", hash_alg);
+        CC_PAL_LOG_ERR("Extracted hash_alg 0x%x is not valid", hash_alg);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 

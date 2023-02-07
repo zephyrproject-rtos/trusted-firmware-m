@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -182,11 +182,11 @@ psa_status_t cc3xx_ecc_cc_error_to_psa_error(CCError_t cc_error)
 
     default:
         err = PSA_ERROR_GENERIC_ERROR;
-        CC_PAL_LOG_ERR("Unknown CC_ERROR %d\r\n", cc_error);
+        CC_PAL_LOG_ERR("Unknown CC_ERROR %d", cc_error);
         break;
     }
 
-    CC_PAL_LOG_DEBUG("Converted CC_ERROR %d (0x%08x) to PSA_ERROR %d\r\n",
+    CC_PAL_LOG_DEBUG("Converted CC_ERROR %d (0x%08x) to PSA_ERROR %d",
                      cc_error, cc_error, err);
     return err;
 #endif /* CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION */
@@ -227,8 +227,7 @@ psa_status_t cc3xx_ecc_cc_priv_to_cc_publ(CCEcpkiUserPrivKey_t *pUserPrivKey,
     err = cc3xx_ecc_cc_error_to_psa_error(cc_err);
 
     if (err != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("Error building private key with error code %d\n",
-                       cc_err);
+        CC_PAL_LOG_ERR("Error building private key with error code %d", cc_err);
         return err;
     }
 
@@ -311,21 +310,21 @@ psa_status_t cc3xx_ecc_psa_priv_to_cc_priv(CCEcpkiDomainID_t DomainId,
     CCError_t status;
     const CCEcpkiDomain_t *pDomain;
 
-    if (NULL == priv_key || NULL == pUserPrivKey) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == priv_key) || (NULL == pUserPrivKey)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     pDomain = CC_EcpkiGetEcDomain(DomainId);
     if (NULL == pDomain) {
-        CC_PAL_LOG_ERR("Domain ID %d is not supported\n", DomainId);
+        CC_PAL_LOG_ERR("Domain ID %d is not supported", DomainId);
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
     status =
         CC_EcpkiPrivKeyBuild(pDomain, priv_key, priv_key_size, pUserPrivKey);
     if (status != CC_OK) {
-        CC_PAL_LOG_ERR("Error building private key\n");
+        CC_PAL_LOG_ERR("Error building private key");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -342,15 +341,15 @@ psa_status_t cc3xx_ecc_psa_publ_to_cc_publ(CCEcpkiDomainID_t DomainId,
     const CCEcpkiDomain_t *pDomain;
     CCEcpkiBuildTempData_t BuildTempData;
 
-    if (NULL == publ_key || NULL == pUserPublKey) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == publ_key) || (NULL == pUserPublKey)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         ret = PSA_ERROR_INVALID_ARGUMENT;
         goto exit;
     }
 
     pDomain = CC_EcpkiGetEcDomain(DomainId);
     if (NULL == pDomain) {
-        CC_PAL_LOG_ERR("Domain ID %d is not supported\n", DomainId);
+        CC_PAL_LOG_ERR("Domain ID %d is not supported", DomainId);
         ret = PSA_ERROR_NOT_SUPPORTED;
         goto exit;
     }
@@ -359,7 +358,7 @@ psa_status_t cc3xx_ecc_psa_publ_to_cc_publ(CCEcpkiDomainID_t DomainId,
                                           publ_key_size, ECpublKeyFullCheck,
                                           pUserPublKey, &BuildTempData);
     if (status != CC_OK) {
-        CC_PAL_LOG_ERR("Error building public key\n");
+        CC_PAL_LOG_ERR("Error building public key");
         ret = PSA_ERROR_INVALID_ARGUMENT;
         goto exit;
     }
