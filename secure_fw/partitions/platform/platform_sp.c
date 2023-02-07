@@ -38,6 +38,14 @@ enum tfm_platform_err_t platform_sp_system_reset(void)
     return TFM_PLATFORM_ERR_SUCCESS;
 }
 
+static psa_status_t platform_sp_system_reset_psa_api(const psa_msg_t *msg)
+{
+    (void)msg; /* unused parameter */
+
+    return platform_sp_system_reset();
+}
+
+#if !PLATFORM_NV_COUNTER_MODULE_DISABLED
 static enum tfm_platform_err_t nv_counter_permissions_check(
         int32_t client_id,
         enum tfm_nv_counter_t nv_counter_no,
@@ -71,14 +79,6 @@ static enum tfm_platform_err_t nv_counter_permissions_check(
     }
 }
 
-static psa_status_t platform_sp_system_reset_psa_api(const psa_msg_t *msg)
-{
-    (void)msg; /* unused parameter */
-
-    return platform_sp_system_reset();
-}
-
-#if !PLATFORM_NV_COUNTER_MODULE_DISABLED
 static psa_status_t platform_sp_nv_read_psa_api(const psa_msg_t *msg)
 {
     enum tfm_plat_err_t err = TFM_PLAT_ERR_SYSTEM_ERR;
