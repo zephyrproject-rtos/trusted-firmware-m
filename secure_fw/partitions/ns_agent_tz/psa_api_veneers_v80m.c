@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -33,13 +33,15 @@
 
 #if defined(__ICCARM__)
 
-#pragma required = M2S(psa_framework_version)
-#pragma required = M2S(psa_version)
-#pragma required = M2S(tfm_psa_call_pack)
+#include "tfm_psa_call_pack.h"
+
+#pragma required = psa_framework_version
+#pragma required = psa_version
+#pragma required = tfm_psa_call_pack
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-#pragma required = M2S(psa_connect)
-#pragma required = M2S(psa_close)
+#pragma required = psa_connect
+#pragma required = psa_close
 #endif
 
 #endif
