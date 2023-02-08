@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020, IAR Systems AB. All rights reserved.
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -21,6 +21,7 @@ else()
 endif()
 
 set(CMAKE_C_COMPILER iccarm)
+set(CMAKE_CXX_COMPILER iccarm)
 set(CMAKE_ASM_COMPILER iasmarm)
 
 set(LINKER_VENEER_OUTPUT_FLAG --import_cmse_lib_out= )
