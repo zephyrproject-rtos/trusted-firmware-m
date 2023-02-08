@@ -113,11 +113,9 @@ The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
   are: auto, fpv5-d16, fpv5-sp-d16, etc. For armclang, example value are: none,
   softvfp, fpv5-d16, fpv5-sp-d16, etc.
 
-  Default value of ``CONFIG_TFM_FP_ARCH`` for GNUARM compiler is fpv5-sp-d16.
-
-  This parameter shall be specified by platform. Please check compiler
-  reference manual and processor hardware manual for more details to set
-  correct FPU configuration for platform.
+  This parameter shall be specified by platform in preload.cmake. Please check
+  compiler reference manual and processor hardware manual for more details to
+  set correct FPU configuration for platform.
 
 * ``CONFIG_TFM_FP_ARCH_ASM`` specifies the target FPU architecture name shared
   by Arm Compiler armasm and armlink. It is only used in the ``--fpu=`` argument
