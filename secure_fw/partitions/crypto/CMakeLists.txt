@@ -64,6 +64,8 @@ target_compile_definitions(tfm_psa_rot_partition_crypto
         MBEDTLS_PSA_CRYPTO_DRIVERS
         MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
         $<$<BOOL:CRYPTO_BUILTIN_KEYS>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY>
+    PRIVATE
+        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_TYPE},cc312>:CRYPTO_HW_ACCELERATOR_CC312>
 )
 
 ############################ Partition Defs ####################################

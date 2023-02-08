@@ -19,13 +19,6 @@
 #define CRYPTO_ENGINE_BUF_SIZE                 0x2080
 #endif
 
-/* The CC312 needs at least 0x4000 of heap size to work properly */
-#if defined(CRYPTO_HW_ACCELERATOR_CC312) && (CRYPTO_ENGINE_BUF_SIZE < 0x4000)
-#pragma message("CRYPTO_ENGINE_BUF_SIZE is redefined to 0x4000.")
-#undef  CRYPTO_ENGINE_BUF_SIZE
-#define CRYPTO_ENGINE_BUF_SIZE                 0x4000
-#endif
-
 /* The max number of concurrent operations that can be active (allocated) at any time in Crypto */
 #ifndef CRYPTO_CONC_OPER_NUM
 #pragma message("CRYPTO_CONC_OPER_NUM is defaulted to 8. Please check and set it explicitly.")

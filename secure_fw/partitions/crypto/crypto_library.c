@@ -62,6 +62,7 @@ static char mbedtls_version_full[18];
  * \brief Static buffer to be used by Mbed Crypto for memory allocations
  *
  */
+#include "config_engine_buf.h"
 static uint8_t mbedtls_mem_buf[CRYPTO_ENGINE_BUF_SIZE] = {0};
 
 /*!
