@@ -1,7 +1,7 @@
 From 6f49a579de65abbae877ba067ee1a76671ae8e83 Mon Sep 17 00:00:00 2001
 From: Raef Coles <raef.coles@arm.com>
 Date: Tue, 19 Jul 2022 11:12:30 +0100
-Subject: [PATCH 4/6] Add TF-M builtin key driver
+Subject: [PATCH 4/7] Add TF-M builtin key driver
 
 Signed-off-by: Raef Coles <raef.coles@arm.com>
 Co-authored-by: Antonio de Angelis <antonio.deangelis@arm.com>

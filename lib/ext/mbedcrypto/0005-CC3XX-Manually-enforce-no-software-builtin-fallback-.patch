@@ -1,7 +1,7 @@
 From 9e1fcca0e8ba9e58135c91af9c8c640b1d0b32c5 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Tue, 2 Aug 2022 13:05:05 +0200
-Subject: [PATCH 5/6] CC3XX: Manually enforce no-software builtin fallback when
+Subject: [PATCH 5/7] CC3XX: Manually enforce no-software builtin fallback when
  CC3XX is available
 
 This wil be enforced by the autogen framework eventually, but for the time
