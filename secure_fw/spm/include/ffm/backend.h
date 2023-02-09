@@ -55,12 +55,12 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status);
 /**
  * \brief Set the wait signal pattern in current partition.
  */
-psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals);
+psa_status_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals);
 
 /**
  * \brief Set the asserted signal pattern in current partition.
  */
-uint32_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal);
+psa_status_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal);
 
 /* The component list, and a MACRO indicate this is not a common global. */
 extern struct partition_head_t partition_listhead;

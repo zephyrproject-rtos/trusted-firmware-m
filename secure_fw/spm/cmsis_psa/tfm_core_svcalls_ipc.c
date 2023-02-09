@@ -24,6 +24,7 @@
 #include "load/partition_defs.h"
 #include "psa/client.h"
 #include "tfm_hal_platform.h"
+#include "internal_status_code.h"
 
 /* MSP bottom (higher address) */
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
@@ -61,7 +62,7 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         break;
 #if CONFIG_TFM_DOORBELL_API == 1
     case TFM_SVC_PSA_NOTIFY:
-        tfm_spm_partition_psa_notify((int32_t)ctx[0]);
+        return tfm_spm_partition_psa_notify((int32_t)ctx[0]);
         break;
     case TFM_SVC_PSA_CLEAR:
         tfm_spm_partition_psa_clear();
@@ -201,7 +202,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
             tfm_core_panic();
         }
         svc_args[0] = SVC_Handler_IPC(svc_number, svc_args, exc_return);
-        if (THRD_EXPECTING_SCHEDULE()) {
+        if (svc_args[0] == STATUS_NEED_SCHEDULE) {
             tfm_arch_trigger_pendsv();
         }
 #else

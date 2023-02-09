@@ -16,4 +16,6 @@
 #define SPM_ERROR_MEMORY_CHECK     ((psa_status_t)-252)
 #define SPM_ERROR_GENERIC          ((psa_status_t)-253)
 
+#define STATUS_NEED_SCHEDULE       ((psa_status_t)-254)
+
 #endif /* __INTERNAL_STATUS_CODE_H__ */

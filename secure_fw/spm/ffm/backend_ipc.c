@@ -26,6 +26,7 @@
 #include "load/service_defs.h"
 #include "load/spm_load_api.h"
 #include "psa/error.h"
+#include "internal_status_code.h"
 
 /* Declare the global component list */
 struct partition_head_t partition_listhead;
@@ -151,6 +152,7 @@ psa_status_t backend_messaging(struct service_t *service,
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
+    psa_status_t ret = PSA_SUCCESS;
 
     if (!handle || !service || !service->p_ldinf || !service->partition) {
         return PSA_ERROR_PROGRAMMER_ERROR;
@@ -162,7 +164,7 @@ psa_status_t backend_messaging(struct service_t *service,
     UNI_LIST_INSERT_AFTER(p_owner, handle, p_handles);
 
     /* Messages put. Update signals */
-    backend_assert_signal(p_owner, signal);
+    ret = backend_assert_signal(p_owner, signal);
 
     /*
      * If it is a NS request via RPC, it is unnecessary to block current
@@ -170,12 +172,14 @@ psa_status_t backend_messaging(struct service_t *service,
      */
 
     if (!is_tfm_rpc_msg(handle)) {
-        backend_wait_signals(handle->p_client, TFM_IPC_REPLY_SIGNAL);
+        ret = backend_wait_signals(handle->p_client, TFM_IPC_REPLY_SIGNAL);
+    } else {
+        ret = PSA_SUCCESS;
     }
 
     handle->status = TFM_HANDLE_STATUS_ACTIVE;
 
-    return PSA_SUCCESS;
+    return ret;
 }
 
 psa_status_t backend_replying(struct connection_t *handle, int32_t status)
@@ -184,7 +188,7 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
         tfm_rpc_client_call_reply(handle, status);
     } else {
         handle->p_client->reply_value = (uintptr_t)status;
-        backend_assert_signal(handle->p_client, TFM_IPC_REPLY_SIGNAL);
+        return backend_assert_signal(handle->p_client, TFM_IPC_REPLY_SIGNAL);
     }
 
     /*
@@ -263,10 +267,10 @@ uint32_t backend_system_run(void)
     return control;
 }
 
-psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
+psa_status_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
 {
     struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
-    psa_signal_t ret_signal;
+    psa_status_t ret = PSA_SUCCESS;
 
     if (!p_pt) {
         tfm_core_panic();
@@ -274,19 +278,21 @@ psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals
 
     CRITICAL_SECTION_ENTER(cs_signal);
 
-    ret_signal = p_pt->signals_asserted & signals;
-    if (ret_signal == 0) {
+    ret = p_pt->signals_asserted & signals;
+    if (ret == 0) {
         p_pt->signals_waiting = signals;
+        ret = STATUS_NEED_SCHEDULE;
     }
 
     CRITICAL_SECTION_LEAVE(cs_signal);
 
-    return ret_signal;
+    return ret;
 }
 
-uint32_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
+psa_status_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
 {
     struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
+    psa_status_t ret = PSA_SUCCESS;
 
     if (!p_pt) {
         tfm_core_panic();
@@ -294,9 +300,13 @@ uint32_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
 
     CRITICAL_SECTION_ENTER(cs_signal);
     p_pt->signals_asserted |= signal;
+
+    if (p_pt->signals_asserted & p_pt->signals_waiting) {
+        ret = STATUS_NEED_SCHEDULE;
+    }
     CRITICAL_SECTION_LEAVE(cs_signal);
 
-    return PSA_SUCCESS;
+    return ret;
 }
 
 uint64_t ipc_schedule(void)

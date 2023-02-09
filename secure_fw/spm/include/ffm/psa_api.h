@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -267,11 +267,12 @@ int32_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
  *
  * \param[in] partition_id      Secure Partition ID of the target partition.
  *
- * \retval void                 Success.
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_NEED_SCHEDULE    Require schedule thread.
  * \retval "PROGRAMMER ERROR"   partition_id does not correspond to a Secure
  *                              Partition.
  */
-void tfm_spm_partition_psa_notify(int32_t partition_id);
+psa_status_t tfm_spm_partition_psa_notify(int32_t partition_id);
 
 /**
  * \brief Function body of \ref psa_clear.
