@@ -18,11 +18,7 @@
 
 #include <hal/nrf_gpio.h>
 
-/* Boundary handle binding macros. */
-#define HANDLE_ATTR_PRIV_POS            1U
-#define HANDLE_ATTR_PRIV_MASK           (0x1UL << HANDLE_ATTR_PRIV_POS)
-#define HANDLE_ATTR_NS_POS              0U
-#define HANDLE_ATTR_NS_MASK             (0x1UL << HANDLE_ATTR_NS_POS)
+#include "handle_attr.h"
 
 enum tfm_platform_err_t
 tfm_platform_hal_read_service(const psa_invec  *in_vec,
