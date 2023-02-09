@@ -279,9 +279,7 @@ psa_status_t tfm_spm_partition_psa_notify(int32_t partition_id)
 {
     struct partition_t *p_pt = tfm_spm_get_partition_by_id(partition_id);
 
-    backend_assert_signal(p_pt, PSA_DOORBELL);
-
-    return PSA_SUCCESS;
+    return backend_assert_signal(p_pt, PSA_DOORBELL);
 }
 
 psa_status_t tfm_spm_partition_psa_clear(void)

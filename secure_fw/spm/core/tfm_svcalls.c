@@ -24,6 +24,7 @@
 #include "load/partition_defs.h"
 #include "psa/client.h"
 #include "tfm_hal_platform.h"
+#include "internal_status_code.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(uint8_t svc_number,
@@ -171,7 +172,7 @@ uint32_t spm_svc_handler(uint32_t *msp, uint32_t exc_return, uint32_t *psp)
         }
 
         svc_args[0] = handle_psa_api_requests(svc_number, svc_args);
-        if (THRD_EXPECTING_SCHEDULE()) {
+        if (svc_args[0] == STATUS_NEED_SCHEDULE) {
             tfm_arch_trigger_pendsv();
         }
 

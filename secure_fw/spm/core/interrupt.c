@@ -21,6 +21,7 @@
 
 #include "load/spm_load_api.h"
 #include "ffm/backend.h"
+#include "internal_status_code.h"
 
 extern uintptr_t spm_boundary;
 
@@ -142,6 +143,7 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
 {
     psa_flih_result_t flih_result;
     struct partition_t *p_part;
+    psa_status_t ret = 0;
 
     if (!p_pt || !p_ildi) {
         tfm_core_panic();
@@ -175,10 +177,10 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
     }
 
     if (flih_result == PSA_FLIH_SIGNAL) {
-        backend_assert_signal(p_pt, p_ildi->signal);
+        ret = backend_assert_signal(p_pt, p_ildi->signal);
         /* In SFN backend, there is only one thread, no thread switch. */
 #if CONFIG_TFM_SPM_BACKEND_SFN != 1
-        if (THRD_EXPECTING_SCHEDULE()) {
+        if (ret == STATUS_NEED_SCHEDULE) {
             tfm_arch_trigger_pendsv();
         }
 #endif

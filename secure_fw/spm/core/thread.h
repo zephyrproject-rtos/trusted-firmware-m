@@ -96,14 +96,6 @@ extern struct thread_t *p_curr_thrd;
                                 CURRENT_THREAD->p_context_ctrl = (void *)(x)
 
 /*
- * Check if a schedule is under expectation by measuring on a given thread.
- *
- * Return :
- *  `true` if schedule is under expectation. `false` if not.
- */
-#define THRD_EXPECTING_SCHEDULE() (!(thrd_next() == CURRENT_THREAD))
-
-/*
  * Init the global query state callback function pointer.
  *
  * Parameters :
