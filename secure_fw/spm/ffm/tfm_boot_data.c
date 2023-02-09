@@ -12,7 +12,7 @@
 #include "region_defs.h"
 #include "tfm_api.h"
 #include "psa_manifest/pid.h"
-#include "internal_errors.h"
+#include "internal_status_code.h"
 #include "utilities.h"
 #include "psa/service.h"
 #include "thread.h"

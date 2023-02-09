@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,7 @@
 #include "thread.h"
 #include "psa/client.h"
 #include "psa/service.h"
-#include "internal_errors.h"
+#include "internal_status_code.h"
 #include "cmsis_compiler.h"
 #include "utilities.h"
 #include "lists.h"
