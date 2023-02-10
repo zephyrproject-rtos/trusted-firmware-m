@@ -13,7 +13,11 @@ execute_process(COMMAND git describe --tags --always
     OUTPUT_VARIABLE TFM_VERSION_FULL
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-if(TFM_VERSION_FULL STREQUAL "")
+# In a repository cloned with --no-tags option TFM_VERSION_FULL will be a hash
+# only hence checking it for a tag format to accept as valid version.
+
+string(FIND ${TFM_VERSION_FULL} "TF-M" TFM_TAG)
+if(TFM_TAG EQUAL -1)
     set(TFM_VERSION_FULL v${TFM_VERSION_MANUAL})
     message(WARNING "Actual TF-M version is not available from Git repository. Settled to " ${TFM_VERSION_FULL})
 endif()
