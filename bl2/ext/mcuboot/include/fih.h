@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,11 +20,11 @@ extern "C" {
 #include "stdint.h"
 
 /*
- * FIH return type macro changes the function return types to fih_int.
+ * FIH return type macro changes the function return types to fih_ret.
  * All functions that need to be protected by FIH and called via FIH_CALL must
- * return a fih_int type.
+ * return a fih_ret type.
  */
-#define FIH_RET_TYPE(type)    fih_int
+#define FIH_RET_TYPE(type)    fih_ret
 
 #include "bootutil/fault_injection_hardening.h"
 
