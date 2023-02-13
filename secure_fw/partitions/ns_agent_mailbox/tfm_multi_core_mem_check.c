@@ -22,15 +22,6 @@
 #error TFM_LVL is not defined!
 #endif
 
-/* Follow CMSE flag definitions */
-#define MEM_CHECK_MPU_READWRITE         (1 << 0x0)
-#define MEM_CHECK_AU_NONSECURE          (1 << 0x1)
-#define MEM_CHECK_MPU_UNPRIV            (1 << 0x2)
-#define MEM_CHECK_MPU_READ              (1 << 0x3)
-#define MEM_CHECK_MPU_NONSECURE         (1 << 0x4)
-#define MEM_CHECK_NONSECURE             (MEM_CHECK_AU_NONSECURE | \
-                                         MEM_CHECK_MPU_NONSECURE)
-
 void tfm_get_mem_region_security_attr(const void *p, size_t s,
                                       struct security_attr_info_t *p_attr)
 {
