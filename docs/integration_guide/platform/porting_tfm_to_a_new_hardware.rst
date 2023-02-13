@@ -544,35 +544,38 @@ tfm_platform_hal_ioctl:
 
     enum tfm_platform_err_t tfm_platform_hal_ioctl(tfm_platform_ioctl_req_t request, psa_invec  *in_vec, psa_outvec *out_vec);
 
-tfm_spm_hal_get_mem_security_attr:
-----------------------------------
+tfm_hal_get_mem_security_attr:
+------------------------------
 
+    Required on multi-core platforms only.
     This function shall fill the security_attr_info_t argument with the current
     active security configuration.
 
 .. code-block:: c
 
-    void tfm_spm_hal_get_mem_security_attr(const void *p, size_t s, struct security_attr_info_t *p_attr);
+    void tfm_hal_get_mem_security_attr(const void *p, size_t s, struct security_attr_info_t *p_attr);
 
-tfm_spm_hal_get_secure_access_attr:
------------------------------------
-
-    This function shall fill the mem_attr_info_t argument with the current
-    active secure memory configuration.
-
-.. code-block:: c
-
-    void tfm_spm_hal_get_secure_access_attr(const void *p, size_t s, struct mem_attr_info_t *p_attr);
-
-tfm_spm_hal_get_ns_access_attr:
+tfm_hal_get_secure_access_attr:
 -------------------------------
 
-    This function shall fill the mem_attr_info_t argument with the current
-    active secure memory configuration for the NS side.
+    Required on multi-core platforms only.
+    This function shall fill the mem_attr_info_t argument with the current active memory
+    configuration of the target S memory region.
 
 .. code-block:: c
 
-    void tfm_spm_hal_get_ns_access_attr(const void *p, size_t s, struct mem_attr_info_t *p_attr);
+    void tfm_hal_get_secure_access_attr(const void *p, size_t s, struct mem_attr_info_t *p_attr);
+
+tfm_hal_get_ns_access_attr:
+---------------------------
+
+    Required on multi-core platforms only.
+    This function shall fill the mem_attr_info_t argument with the current active memory
+    configuration for the target NS memory region.
+
+.. code-block:: c
+
+    void tfm_hal_get_ns_access_attr(const void *p, size_t s, struct mem_attr_info_t *p_attr);
 
 tfm_hal_irq_clear_pending:
 --------------------------

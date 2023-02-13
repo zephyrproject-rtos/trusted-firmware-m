@@ -10,17 +10,15 @@ Memory Access Check of Trusted Firmware-M in Multi-Core Topology
 Introduction
 ************
 
-TF-M memory access check functions ``tfm_core_has_read_access_to_region()`` and
-``tfm_core_has_write_access_to_region()`` check whether an access has proper
+TF-M memory access check function ``tfm_has_access_to_region()`` checks whether an access has proper
 permission to read or write the target memory region.
 
-On single Armv8-M core platform, TF-M memory access check implementation relies
-on `Armv8-M Security Extension`_ (CMSE) intrinsic
-``cmse_check_address_range()``.
+On single Armv8-M core platform based on Trustzone, TF-M memory access check implementation relies
+on `Armv8-M Security Extension`_ (CMSE) intrinsic ``cmse_check_address_range()``.
 The secure core may not implement CMSE on multi-core platforms. Even if CMSE is
 implemented on a multi-core platform, additional check on system-level security
 and memory access management units are still necessary since CMSE intrinsics and
-TT instructions are only aware of MPU/SAU/IDAU inside the core.
+TT instructions are only aware of MPU/SAU/IDAU inside the secure core.
 
 As a result, TF-M in multi-core topology requires a dedicated access check
 process which can work without CMSE support. This document discuss about the
@@ -67,163 +65,89 @@ specs.
 General Check Process in TF-M Core
 ==================================
 
-In multi-core topology, ``tfm_core_has_read_access_to_region()`` and
-``tfm_core_has_write_access_to_region()`` are still invoked to keep an uniform
-interface to TF-M Core/SPM.
+In multi-core topology, ``tfm_has_access_to_region()`` is still invoked to keep an uniform interface
+to TF-M SPM. The function implementation should be placed in multi-core topology specific files
+separated from Trustzone-based access check.
 
-Multi-core topology specific implementations of
-``tfm_core_has_read_access_to_region()`` and
-``tfm_core_has_write_access_to_region()`` are similar to those in single Armv8-M
-scenario.
-Both functions set corresponding flags according to the parameters and
-invoke static function ``has_access_to_region()`` to execute the check process.
-Both implementations should be placed in multi-core topology specific files
-separated from single Armv8-M access check.
+Multi-core platform specific ``tfm_hal_memory_check()`` can invoke ``tfm_has_access_to_region()`` to
+implement the entire memory access check routine.
 
-A reference code of ``tfm_core_has_read_access_to_region()`` implementation is
-shown below.
+During the check process, ``tfm_has_access_to_region()`` compares the access permission with memory
+region attributes and determines whether the access is allowed to access the region according to
+policy described in `Memory Access Check Policy`_ above.
 
-.. code-block:: c
+``tfm_has_access_to_region()`` invokes 3 HAL APIs to retrieve attributes of target memory region.
 
-    int32_t tfm_core_has_read_access_to_region(const void *p, size_t s,
-                                               bool ns_caller,
-                                               uint32_t privileged)
-    {
-        uint8_t flags = MEM_CHECK_MPU_READ;
+- ``tfm_hal_get_mem_security_attr()`` retrieves the security attributes of the target memory region.
+- ``tfm_hal_get_secure_access_attr()`` retrieves secure access attributes of the target memory
+  region.
+- ``tfm_hal_get_ns_access_attr()`` retrieves non-secure access attributes of the target memory
+  region.
 
-        if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
-            flags |= MEM_CHECK_MPU_UNPRIV;
-        }
+All three functions are implemented by multi-core platform support. The definitions are specified in
+the section `HAL APIs`_ below.
 
-        if (ns_caller) {
-            flags |= MEM_CHECK_NONSECURE;
-        }
-
-        return has_access_to_region(p, s, flags);
-    }
-
-
-A reference code of ``tfm_core_has_write_access_to_region()`` implementation is
-shown below.
-
-.. code-block:: c
-
-    int32_t tfm_core_has_write_access_to_region(void *p, size_t s,
-                                                bool ns_caller,
-                                                uint32_t privileged)
-    {
-        uint8_t flags = MEM_CHECK_MPU_READWRITE;
-
-        if (privileged == TFM_PARTITION_UNPRIVILEGED_MODE) {
-            flags |= MEM_CHECK_MPU_UNPRIV;
-        }
-
-        if (ns_caller) {
-            flags |= MEM_CHECK_NONSECURE;
-        }
-
-        return has_access_to_region(p, s, flags);
-    }
-
-
-The flags ``MEM_CHECK_MPU_READ``, ``MEM_CHECK_MPU_UNPRIV``,
-``MEM_CHECK_MPU_READWRITE`` and ``MEM_CHECK_NONSECURE`` above will be described
-in the section `Access Permission Flags`_.
-
-The prototype of static function ``has_access_to_region()`` follows that in
-single Armv8-M. The multi-core topology specific ``has_access_to_region()``
-executes a general process to check if the access can access the target region.
-
-During the check process, ``has_access_to_region()`` invokes three HAL APIs
-``tfm_spm_hal_get_mem_security_attr()``, ``tfm_spm_hal_get_ns_access_attr()``
-and ``tfm_spm_hal_get_secure_access_attr()`` to retrieve the attributes of
-target memory region. ``has_access_to_region()`` compares the access permission
-with memory region attributes and determines whether the access is allowed to
-access the region according to policy described in `Memory Access Check Policy`_
-above.
-
-| ``tfm_spm_hal_get_mem_security_attr()`` retrieves the security attributes of
-  the target memory region.
-| ``tfm_spm_hal_get_secure_access_attr()`` retrieves secure access attributes of
-  the target memory region.
-| ``tfm_spm_hal_get_ns_access_attr()`` retrieves non-secure access attributes of
-  the target memory region.
-| All three functions are implemented by multi-core platform support. The
-  definitions are specified in the section `HAL APIs`_ below.
-
-The pseudo code of ``has_access_to_region()`` is shown below.
+The pseudo code of ``tfm_has_access_to_region()`` is shown below.
 
 .. code-block:: c
     :linenos:
     :emphasize-lines: 19,36,46
 
-    static int32_t has_access_to_region(const void *p, size_t s, uint8_t flags)
+    enum tfm_status_e tfm_has_access_to_region(const void *p, size_t s, uint8_t flags)
     {
         struct security_attr_info_t security_attr;
         struct mem_attr_info_t mem_attr;
 
-        /* The memory access check should be executed inside TF-M PSA RoT */
-        if (not in privileged level) {
-            abort;
+        /* Validate input parameters */
+        if (Validation failed) {
+            return error;
         }
 
-        if (memory region exceeds memory space limitation) {
-            return TFM_ERROR_GENERIC;
+        /* The memory access check should be executed inside TF-M PSA RoT */
+        if (Not in privileged level) {
+            abort;
         }
 
         /* Set initial value */
         security_attr_init(&security_attr);
 
         /* Retrieve security attributes of memory region */
-        tfm_spm_hal_get_mem_security_attr(p, s, &security_attr);
-
-        if (!security_attr.is_valid) {
-            /* Invalid memory region */
-            return TFM_ERROR_GENERIC;
-        }
+        tfm_hal_get_mem_security_attr(p, s, &security_attr);
 
         /* Compare according to current Isolation Level */
-        if (Parameter flags mismatch security attributes) {
-            return TFM_ERROR_GENERIC;
+        if (Input flags mismatch security attributes) {
+            return error;
         }
 
         /* Set initial value */
         mem_attr_init(&mem_attr);
 
-        if (security_attr.is_secure) {
+        if (The target memory region is in secure memory space) {
             /* Retrieve access attributes of secure memory region */
-            tfm_spm_hal_get_secure_access_attr(p, s, &mem_attr);
+            tfm_hal_get_secure_access_attr(p, s, &mem_attr);
 
             if (Not in Isolation Level 1) {
-                /* Secure MPU must be enabled in Isolation Level 2 and 3 */
-                if (!mem_attr->is_mpu_enabled) {
+                /* Secure memory protection unit(s) must be enabled in Isolation Level 2 and 3 */
+                if (Protection unit not enabled) {
                     abort;
                 }
             }
         } else {
             /* Retrieve access attributes of non-secure memory region. */
-            tfm_spm_hal_get_ns_access_attr(p, s, &mem_attr);
+            tfm_hal_get_ns_access_attr(p, s, &mem_attr);
         }
 
-        if (!mem_attr.is_valid) {
-            /* Invalid memory region */
-            return TFM_ERROR_GENERIC;
+        /* Compare according to current Isolation Level and non-secure/secure access. */
+        if (Input flags match memory attributes) {
+            return success;
         }
 
-        /*
-         * Compare according to current Isolation Level and non-secure/secure
-         * access.
-         */
-        if (access flags matches MPU attributes) {
-            return TFM_SUCCESS;
-        }
-
-        return TFM_ERROR_GENERIC;
+        return error;
     }
 
 .. note::
    It cannot be guaranteed that TF-M provides a comprehensive memory access
-   check on non-secure memory for NSPE client call If non-secure memory
+   check on non-secure memory for NSPE client call. If non-secure memory
    protection or isolation is required in a multi-core system, NSPE software
    should implement and execute the check functionalities in NSPE, rather than
    relying on TF-M access check.
@@ -236,7 +160,6 @@ The pseudo code of ``has_access_to_region()`` is shown below.
    If a multi-core system enforces the privileged/unprivileged isolation and
    protection of non-secure area, NSPE software should execute the corresponding
    check functionalities before submitting the NSPE client call request to SPE.
-
 
 *******************
 Data Types and APIs
@@ -301,13 +224,12 @@ If this flag is unset, it indicates the access is required from SPE.
     #define MEM_CHECK_NONSECURE       (MEM_CHECK_AU_NONSECURE | \
                                        MEM_CHECK_MPU_NONSECURE)
 
-
 Security Attributes Information
 -------------------------------
 
 The structure ``security_attr_info_t`` contains the security attributes
 information of the target memory region.
-``tfm_spm_hal_get_mem_security_attr()`` implementation should fill the structure
+``tfm_hal_get_mem_security_attr()`` implementation should fill the structure
 fields according to the platform specific secure isolation setting.
 
 .. code-block:: c
@@ -322,15 +244,13 @@ fields according to the platform specific secure isolation setting.
 | ``is_secure`` indicates the target memory region is secure or non-secure. The
   value is only valid when ``is_valid`` is ``true``.
 
-
 Memory Attributes Information
 -----------------------------
 
 The structure ``mem_attr_info_t`` contains the memory access attributes
 information of the target memory region.
-``tfm_spm_hal_get_secure_access_attr()`` and
-``tfm_spm_hal_get_ns_access_attr()`` implementations should fill the structure
-fields according to the memory protection settings.
+``tfm_hal_get_secure_access_attr()`` and ``tfm_hal_get_ns_access_attr()`` implementations should
+fill the structure fields according to the memory protection settings.
 
 .. code-block:: c
 
@@ -357,145 +277,136 @@ fields according to the memory protection settings.
   memory region allows unprivileged read/write. Both the fields are valid only
   when  ``is_valid`` is ``true``.
 
-
 HAL APIs
 ========
 
-``tfm_spm_hal_get_mem_security_attr()``
----------------------------------------
+``tfm_hal_get_mem_security_attr()``
+-----------------------------------
 
-``tfm_spm_hal_get_mem_security_attr()`` retrieves the current active security
-configuration information and fills the ``security_attr_info_t``.
+``tfm_hal_get_mem_security_attr()`` retrieves the current active security configuration information
+and fills the ``security_attr_info_t``.
 
 .. code-block:: c
 
-    void tfm_spm_hal_get_mem_security_attr(const void *p, size_t s,
-                                           struct security_attr_info_t *p_attr);
+    void tfm_hal_get_mem_security_attr(const void *p, size_t s,
+                                       struct security_attr_info_t *p_attr);
 
 +--------------------------------------------------------------------+
-|**Paramters**                                                       |
+| **Parameters**                                                     |
 +-------------+------------------------------------------------------+
-|``p``        |Base address of the target memory region              |
+| ``p``       | Base address of the target memory region             |
 +-------------+------------------------------------------------------+
-|``s``        |Size of the target memory region                      |
+| ``s``       | Size of the target memory region                     |
 +-------------+------------------------------------------------------+
-|``p_attr``   |Pointer to the ``security_attr_info_t`` to be filled  |
+| ``p_attr``  | Pointer to the ``security_attr_info_t`` to be filled |
 +-------------+------------------------------------------------------+
-|**Return**                                                          |
+| **Return**                                                         |
 +-------------+------------------------------------------------------+
-|``void``     |None                                                  |
+| ``void``    | None                                                 |
 +-------------+------------------------------------------------------+
 
 The implementation should be decoupled from TF-M current isolation level or
 access check policy.
 
-All the fields in ``security_attr_info_t`` should be explicitly set in
-``tfm_spm_hal_get_mem_security_attr()``.
+All the fields in ``security_attr_info_t`` shall be explicitly set in
+``tfm_hal_get_mem_security_attr()``.
 
-If the target memory region crosses boundaries of different security regions or
-levels in security isolation configuration,
-``tfm_spm_hal_get_mem_security_attr()`` should determine whether the memory
+If the target memory region crosses boundaries of different security regions or levels in security
+isolation configuration, ``tfm_hal_get_mem_security_attr()`` should determine whether the memory
 region violates current security isolation.
-It is recommended to mark the target memory region as invalid in such case, even
-if the adjoining regions or levels may have the same security configuration.
+It is recommended to mark the target memory region as invalid in such case, even if the adjoining
+regions or levels have the same security configuration.
 
-If the target memory region is not explicitly specified in memory security
-configuration, ``tfm_spm_hal_get_mem_security_attr()`` can return the following
-values according to actual use case:
+If the target memory region is not explicitly specified in memory security configuration,
+``tfm_hal_get_mem_security_attr()`` can return the following values according to actual use case:
 
 - Either set ``is_valid = false``
-- Or set ``is_valid = true`` and set ``is_secure`` according to platform
-  specific policy.
+- Or set ``is_valid = true`` and set ``is_secure`` according to platform specific policy.
 
-
-``tfm_spm_hal_get_secure_access_attr()``
+``tfm_hal_get_secure_access_attr()``
 ----------------------------------------
 
-``tfm_spm_hal_get_secure_access_attr()`` retrieves the secure memory protection
-configuration information and fills the ``mem_attr_info_t``.
+``tfm_hal_get_secure_access_attr()`` retrieves the secure memory protection configuration
+information and fills the ``mem_attr_info_t``.
 
 .. code-block:: c
 
-    void tfm_spm_hal_get_secure_access_attr(const void *p, size_t s,
-                                            struct mem_attr_info_t *p_attr);
-
-+--------------------------------------------------------------------+
-|**Paramters**                                                       |
-+-------------+------------------------------------------------------+
-|``p``        |Base address of the target memory region              |
-+-------------+------------------------------------------------------+
-|``s``        |Size of the target memory region                      |
-+-------------+------------------------------------------------------+
-|``p_attr``   |Pointer to the ``mem_attr_info_t`` to be filled       |
-+-------------+------------------------------------------------------+
-|**Return**                                                          |
-+-------------+------------------------------------------------------+
-|``void``     |None                                                  |
-+-------------+------------------------------------------------------+
-
-The implementation should be decoupled from TF-M current isolation level or
-access check policy.
-
-All the fields in ``mem_attr_info_t`` should be explicitly set in
-``tfm_spm_hal_get_secure_access_attr()``, according to current active memory
-protection configuration. It is recommended to retrieve the attributes from
-secure MPU and other hardware memory protection unit(s). But the implementation
-can be simplified by checking system-level memory region layout setting.
-
-If the target memory region is not specified in current active secure memory
-protection configuration, ``tfm_spm_hal_get_secure_access_attr()`` can select
-the following values according to actual use case.
-
-- Either directly set ``is_valid`` to ``false``
-- Or set ``is_valid`` to ``true`` and set other fields according to other memory
-  assignment information, such as system-level memory region layout.
-
-If secure memory protection unit(s) is *disabled* and the target memory
-region is a valid area according to platform resource assignment,
-``tfm_spm_hal_get_secure_access_attr()`` must set ``is_mpu_enabled`` to
-``false`` and set other fields according to current system-level memory region
-layout.
-
-
-``tfm_spm_hal_get_ns_access_attr()``
-------------------------------------
-
-``tfm_spm_hal_get_ns_access_attr()`` retrieves the non-secure memory protection
-configuration information and fills the ``mem_attr_info_t``.
-
-.. code-block:: c
-
-    void tfm_spm_hal_get_ns_access_attr(const void *p, size_t s,
+    void tfm_hal_get_secure_access_attr(const void *p, size_t s,
                                         struct mem_attr_info_t *p_attr);
 
-+--------------------------------------------------------------------+
-|**Paramters**                                                       |
-+-------------+------------------------------------------------------+
-|``p``        |Base address of the target memory region              |
-+-------------+------------------------------------------------------+
-|``s``        |Size of the target memory region                      |
-+-------------+------------------------------------------------------+
-|``p_attr``   |Pointer to the ``mem_attr_info_t`` to be filled       |
-+-------------+------------------------------------------------------+
-|**Return**                                                          |
-+-------------+------------------------------------------------------+
-|``void``     |None                                                  |
-+-------------+------------------------------------------------------+
++--------------------------------------------------------------+
+| **Parameters**                                               |
++------------+-------------------------------------------------+
+| ``p``      | Base address of the target memory region        |
++------------+-------------------------------------------------+
+| ``s``      | Size of the target memory region                |
++------------+-------------------------------------------------+
+| ``p_attr`` | Pointer to the ``mem_attr_info_t`` to be filled |
++------------+-------------------------------------------------+
+| **Return**                                                   |
++------------+-------------------------------------------------+
+| ``void``   | None                                            |
++------------+-------------------------------------------------+
 
 The implementation should be decoupled from TF-M current isolation level or
 access check policy.
 
-Since non-secure core runs asynchronously, the non-secure MPU setting may be
-modified by NSPE OS and the attributes of the target memory region can be
-unavailable during ``tfm_spm_hal_get_ns_access_attr()`` execution in TF-M.
-When the target memory region is not specified in non-secure MPU,
-``tfm_spm_hal_get_ns_access_attr()`` can set the fields according to other
-memory setting information, such as system-level memory region layout.
+All the fields in ``mem_attr_info_t`` shall be explicitly set in
+``tfm_hal_get_secure_access_attr()``, according to current active memory protection configuration.
+It is recommended to retrieve the attributes from secure MPU and other hardware memory protection
+unit(s). The implementation can also be simplified by checking static system-level memory layout.
 
-If non-secure memory protection unit(s) is *disabled* and the target memory
-region is a valid area according to platform resource assignment,
-``tfm_spm_hal_get_ns_access_attr()`` can set the following fields in
-``mem_attr_info_t`` to default values:
+If the target memory region is not specified in current active secure memory protection
+configuration, ``tfm_hal_get_secure_access_attr()`` can select the following values according to
+actual use case.
+
+- Either directly set ``is_valid`` to ``false``
+- Or set ``is_valid`` to ``true`` and set other fields according to other memory assignment
+  information, such as static system-level memory layout.
+
+If secure memory protection unit(s) is *disabled* and the target memory region is a valid area
+according to platform resource assignment, ``tfm_hal_get_secure_access_attr()`` must set
+``is_mpu_enabled`` to ``false`` and set other fields according to current system-level memory
+layout.
+
+``tfm_hal_get_ns_access_attr()``
+--------------------------------
+
+``tfm_hal_get_ns_access_attr()`` retrieves the non-secure memory protection configuration
+information and fills the ``mem_attr_info_t``.
+
+.. code-block:: c
+
+    void tfm_hal_get_ns_access_attr(const void *p, size_t s,
+                                    struct mem_attr_info_t *p_attr);
+
++--------------------------------------------------------------+
+| **Parameters**                                               |
++------------+-------------------------------------------------+
+| ``p``      | Base address of the target memory region        |
++------------+-------------------------------------------------+
+| ``s``      | Size of the target memory region                |
++------------+-------------------------------------------------+
+| ``p_attr`` | Pointer to the ``mem_attr_info_t`` to be filled |
++------------+-------------------------------------------------+
+| **Return**                                                   |
++------------+-------------------------------------------------+
+| ``void``   | None                                            |
++------------+-------------------------------------------------+
+
+The implementation should be decoupled from TF-M current isolation level or
+access check policy.
+
+Since non-secure core runs asynchronously, the non-secure MPU setting may be modified by NSPE OS and
+therefore the attributes of the target memory region can be unavailable during
+``tfm_hal_get_ns_access_attr()`` execution in TF-M.
+When the target memory region is not specified in non-secure MPU, ``tfm_hal_get_ns_access_attr()``
+can set the fields according to other memory setting information, such as static system-level memory
+layout.
+
+If non-secure memory protection unit(s) is *disabled* and the target memory region is a valid area
+according to platform resource assignment, ``tfm_hal_get_ns_access_attr()`` can set the following
+fields in ``mem_attr_info_t`` to default values:
 
 - ``is_mpu_enabled = false``
 - ``is_valid = true``
@@ -503,10 +414,106 @@ region is a valid area according to platform resource assignment,
 - ``is_priv_rd_allow = true``
 - ``is_unpriv_rd_allow = true``
 
-``is_priv_wr_allow`` and ``is_unpriv_wr_allow`` can be set according to current
-system-level memory region layout, such as whether it is in code section or data
-section.
+``is_priv_wr_allow`` and ``is_unpriv_wr_allow`` can be set according to current system-level memory
+layout, such as whether it is in code section or data section.
+
+General retrieval functions
+===========================
+
+TF-M implements 3 general retrieval functions to retrieve memory region security attributes or
+memory protection configurations, based on static system-level memory layout. Platform specific HAL
+functions can invoke those 3 general functions to simplify implementations.
+
+- ``tfm_get_mem_region_security_attr()`` retrieves general security attributes from static
+  system-level memory layout.
+- ``tfm_get_secure_mem_region_attr()`` retrieves general secure memory protection configurations
+  from static system-level memory layout.
+- ``tfm_get_ns_mem_region_attr()`` retrieves general non-secure memory protection configurations
+  from static system-level memory layout.
+
+If a multi-core platform's memory layout may vary in runtime, it shall not rely on these 3 functions
+to retrieve static configurations.
+These 3 functions run through memory layout table to check against each memory section one by one,
+with pure software implementation. It might cost more time compared to hardware-based memory access
+check.
+
+``tfm_get_mem_region_security_attr()``
+--------------------------------------
+
+``tfm_get_mem_region_security_attr()`` retrieves security attributes of target memory region
+according to the static system-level memory layout and fills the ``security_attr_info_t``.
+
+.. code-block:: c
+
+    void tfm_get_mem_region_security_attr(const void *p, size_t s,
+                                          struct security_attr_info_t *p_attr);
+
++--------------------------------------------------------------------+
+| **Parameters**                                                     |
++-------------+------------------------------------------------------+
+| ``p``       | Base address of the target memory region             |
++-------------+------------------------------------------------------+
+| ``s``       | Size of the target memory region                     |
++-------------+------------------------------------------------------+
+| ``p_attr``  | Pointer to the ``security_attr_info_t`` to be filled |
++-------------+------------------------------------------------------+
+| **Return**                                                         |
++-------------+------------------------------------------------------+
+| ``void``    | None                                                 |
++-------------+------------------------------------------------------+
+
+``tfm_get_secure_mem_region_attr()``
+------------------------------------
+
+``tfm_get_secure_mem_region_attr()`` retrieves general secure memory protection configuration
+information of the target memory region according to the static system-level memory layout and fills
+the ``mem_attr_info_t``.
+
+.. code-block:: c
+
+    void tfm_get_secure_mem_region_attr(const void *p, size_t s,
+                                        struct mem_attr_info_t *p_attr);
+
++--------------------------------------------------------------+
+| **Parameters**                                               |
++------------+-------------------------------------------------+
+| ``p``      | Base address of the target memory region        |
++------------+-------------------------------------------------+
+| ``s``      | Size of the target memory region                |
++------------+-------------------------------------------------+
+| ``p_attr`` | Pointer to the ``mem_attr_info_t`` to be filled |
++------------+-------------------------------------------------+
+| **Return**                                                   |
++------------+-------------------------------------------------+
+| ``void``   | None                                            |
++------------+-------------------------------------------------+
+
+``tfm_get_ns_mem_region_attr()``
+--------------------------------
+
+``tfm_get_ns_mem_region_attr()`` retrieves general non-secure memory protection configuration
+information of the target memory region according to the static system-level memory layout and fills
+the ``mem_attr_info_t``.
+
+.. code-block:: c
+
+    void tfm_get_ns_mem_region_attr(const void *p, size_t s,
+                                    struct mem_attr_info_t *p_attr);
+
++--------------------------------------------------------------+
+| **Parameters**                                               |
++------------+-------------------------------------------------+
+| ``p``      | Base address of the target memory region        |
++------------+-------------------------------------------------+
+| ``s``      | Size of the target memory region                |
++------------+-------------------------------------------------+
+| ``p_attr`` | Pointer to the ``mem_attr_info_t`` to be filled |
++------------+-------------------------------------------------+
+| **Return**                                                   |
++------------+-------------------------------------------------+
+| ``void``   | None                                            |
++------------+-------------------------------------------------+
 
 --------------
 
-*Copyright (c) 2019-2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2019-2023, Arm Limited. All rights reserved.*
