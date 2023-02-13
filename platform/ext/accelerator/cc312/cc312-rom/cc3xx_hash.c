@@ -204,7 +204,7 @@ cc3xx_err_t cc3xx_hash_sha256_finish(uint8_t *res,
     }
 
     for (idx = 0; idx < 8; idx++) {
-        ((uint32_t*)res)[idx] = bswap_32(P_CC3XX->hash.hash_h[idx]);
+        tmp_buf[idx] = bswap_32(P_CC3XX->hash.hash_h[idx]);
     }
 
     memcpy(res, tmp_buf, sizeof(tmp_buf));
