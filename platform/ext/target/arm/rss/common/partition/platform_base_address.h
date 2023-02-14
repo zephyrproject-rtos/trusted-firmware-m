@@ -140,7 +140,7 @@
 #define HOST_ACCESS_BASE_S               0x70000000 /* Can access the Host region based on ATU config */
 #define HOST_ACCESS_LIMIT_S              ((uint32_t)HOST_ACCESS_BASE_S + (uint32_t)HOST_ACCESS_SIZE - 1)
 
-#define HOST_IMAGE_MAX_SIZE              0x2000000 /* 32 MiB */
+#define HOST_IMAGE_MAX_SIZE              0x1000000 /* 16 MiB */
 
 /* ATU regions open in bootloader and runtime */
 #define HOST_UART0_BASE_S                (HOST_ACCESS_BASE_S + 0xFF00000) /* UART 0 Secure base address */
