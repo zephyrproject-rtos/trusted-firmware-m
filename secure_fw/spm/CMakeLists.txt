@@ -42,7 +42,7 @@ target_sources(tfm_spm
         cmsis_psa/main.c
         cmsis_psa/spm_ipc.c
         $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:cmsis_psa/spm_cross_call.c>
-        cmsis_psa/static_loader.c
+        cmsis_psa/rom_loader.c
         ffm/psa_api.c
         ffm/psa_call_api.c
         ffm/psa_version_api.c
