@@ -32,7 +32,14 @@ extern "C" {
 /* Require built-in implementations based on PSA requirements */
 /****************************************************************/
 #if defined(MBEDTLS_PSA_CRYPTO_CONFIG)
-
+#ifdef PSA_USE_SE_ST
+/* secure element define */
+#define PSA_WANT_KEY_TYPE_AES                   1
+#ifdef MBEDTLS_PSA_CRYPTO_C
+#define MBEDTLS_PSA_CRYPTO_SE_C
+#define MBEDTLS_CMAC_C
+#define MBEDTLS_CIPHER_MODE_CBC
+#endif
 #ifdef PSA_WANT_ALG_SHA_1
 #define MBEDTLS_SHA1_ALT
 #endif /* PSA_WANT_ALG_SHA_1 */
@@ -76,6 +83,7 @@ extern "C" {
 #define MBEDTLS_ECDSA_SIGN_ALT
 #endif
 
+#endif
 #else /* MBEDTLS_PSA_CRYPTO_CONFIG */
 /****************************************************************/
 /* Infer PSA requirements from Mbed TLS capabilities */
@@ -116,8 +124,15 @@ extern "C" {
 #define MBEDTLS_ECDSA_SIGN_ALT
 #endif /* MBEDTLS_ECDSA_C */
 
+/* secure element define */
+#ifdef MBEDTLS_PSA_CRYPTO_C
+#ifdef PSA_USE_SE_ST
+#define MBEDTLS_PSA_CRYPTO_SE_C
+#define MBEDTLS_CMAC_C
+#define MBEDTLS_CIPHER_MODE_CBC
+#endif
+#endif
 #endif /* MBEDTLS_PSA_CRYPTO_CONFIG */
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

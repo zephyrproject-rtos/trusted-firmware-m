@@ -836,5 +836,52 @@ void mbedtls_aes_decrypt(mbedtls_aes_context *ctx,
     mbedtls_internal_aes_decrypt(ctx, input, output);
 }
 #endif /* MBEDTLS_DEPRECATED_REMOVED */
+
+#if defined(HW_CRYPTO_DPA_AES)
+
+int mbedtls_aes_unwrap(mbedtls_aes_context *ctx,
+                       uint32_t *Encryptedkey,
+                       uint32_t *input,
+                       size_t length,
+                       uint32_t *output)
+{
+    AES_VALIDATE_RET( ctx != NULL );
+    AES_VALIDATE_RET( Encryptedkey != NULL );
+    AES_VALIDATE_RET( input != NULL );
+
+    ctx->hcryp_aes.Init.KeyMode = CRYP_KEYMODE_WRAPPED;
+    ctx->hcryp_aes.Init.KeyProtection = CRYP_KEYPROT_ENABLE;
+    ctx->hcryp_aes.Init.Algorithm = CRYP_AES_ECB;
+    ctx->hcryp_aes.Init.DataType = CRYP_NO_SWAP;
+    ctx->hcryp_aes.Init.KeySize = CRYP_KEYSIZE_256B;
+    ctx->hcryp_aes.Init.DataWidthUnit = CRYP_DATAWIDTHUNIT_WORD;
+
+    /* reconfigure the CRYP */
+    if ( HAL_CRYP_SetConfig( &ctx->hcryp_aes, &ctx->hcryp_aes.Init ) != HAL_OK )
+    {
+        return( MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED );
+    }
+
+    /* User key decryption and loading in : SAES_KEYRx registers */
+    if (HAL_CRYPEx_UnwrapKey(&ctx->hcryp_aes,
+                             Encryptedkey,
+                             ST_AES_TIMEOUT) != HAL_OK)
+  {
+      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
+  }
+
+  /* Secure AES ECB Encryption */
+  if (HAL_CRYP_Encrypt(&ctx->hcryp_aes,
+                       input,
+                       length,
+                       output,
+                       ST_AES_TIMEOUT) != HAL_OK)
+  {
+      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
+  }
+
+  return (0);
+}
+#endif /* HW_CRYPTO_DPA_AES */
 #endif /* MBEDTLS_AES_ALT */
 #endif /* MBEDTLS_AES_C */

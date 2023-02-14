@@ -33,3 +33,4 @@ set(MCUBOOT_FIH_PROFILE                 LOW         CACHE STRING    "Fault injec
 set(CONFIG_TFM_USE_TRUSTZONE             ON)
 set(TFM_MULTI_CORE_TOPOLOGY              OFF)
 set(PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT ON)
+set(STSAFEA                             ON          CACHE BOOL      "Activate ST SAFE SUPPORT")
