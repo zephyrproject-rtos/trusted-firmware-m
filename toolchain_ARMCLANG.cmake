@@ -216,7 +216,10 @@ macro(tfm_toolchain_reload_compiler)
         set(CMAKE_CXX_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
     endif()
 
-    set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
+    set(BL2_COMPILER_CP_FLAG
+        $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
+    )
     # As BL2 does not use hardware FPU, specify '--fpu=SoftVFP' explicitly to use software
     # library functions for BL2 to override any implicit FPU option, such as '--cpu' option.
     # Because the implicit hardware FPU option enforces BL2 to initialize FPU but hardware FPU
@@ -224,13 +227,24 @@ macro(tfm_toolchain_reload_compiler)
     set(BL2_LINKER_CP_OPTION --fpu=SoftVFP)
 
     if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
-        set(COMPILER_CP_FLAG -mfloat-abi=hard)
+        set(COMPILER_CP_FLAG
+            $<$<COMPILE_LANGUAGE:C>:-mfloat-abi=hard>
+        )
         if (CONFIG_TFM_ENABLE_FP)
-            set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
-            set(LINKER_CP_OPTION --fpu=${CONFIG_TFM_FP_ARCH_LINK})
+            set(COMPILER_CP_FLAG
+                $<$<COMPILE_LANGUAGE:C>:-mfpu=${CONFIG_TFM_FP_ARCH};-mfloat-abi=hard>
+                $<$<COMPILE_LANGUAGE:ASM>:--fpu=${CONFIG_TFM_FP_ARCH_ASM}>
+            )
+            # armasm and armlink have the same option "--fpu" and are both used to
+            # specify the target FPU architecture. So the supported FPU architecture
+            # names can be shared by armasm and armlink.
+            set(LINKER_CP_OPTION --fpu=${CONFIG_TFM_FP_ARCH_ASM})
         endif()
     else()
-        set(COMPILER_CP_FLAG -mfloat-abi=soft)
+        set(COMPILER_CP_FLAG
+            $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
+            $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
+        )
         set(LINKER_CP_OPTION --fpu=SoftVFP)
     endif()
 
