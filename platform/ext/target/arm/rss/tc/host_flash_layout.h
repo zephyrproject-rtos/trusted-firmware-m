@@ -25,6 +25,8 @@
 #define FLASH_AP_PARTITION_SIZE         (0x80000) /* AP  partition: 512 KiB */
 #define FLASH_SCP_PARTITION_SIZE        (0x80000) /* SCP partition: 512 KiB */
 
+#define HOST_IMAGE_HEADER_SIZE          (0x2000)
+
 #ifdef RSS_XIP
 /* Each table contains a bit less that 8KiB of HTR and 2KiB of mcuboot headers.
  * The spare space in the 8KiB is used for decryption IVs.

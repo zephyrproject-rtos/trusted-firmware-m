@@ -163,16 +163,10 @@ int boot_platform_post_load(uint32_t image_id)
 #endif /* RSS_XIP */
 
     if (image_id == RSS_BL2_IMAGE_SCP) {
+        memset(HOST_BOOT_IMAGE1_LOAD_BASE_S, 0, HOST_IMAGE_HEADER_SIZE);
         uint32_t channel_stat = 0;
         struct rss_sysctrl_t *sysctrl =
                                      (struct rss_sysctrl_t *)RSS_SYSCTRL_BASE_S;
-
-        /* Remove the image header and move the image to the start of SCP memory
-         * FIXME: Would be better to set SCP VTOR, but not currently possible
-         */
-        memmove((void *)HOST_BOOT_IMAGE1_LOAD_BASE_S,
-                (void *)(HOST_BOOT_IMAGE1_LOAD_BASE_S + 0x1000),
-                SCP_BOOT_SRAM_SIZE - 0x1000);
 
         /* Release SCP CPU from wait */
         sysctrl->gretreg = 0x1;
@@ -185,6 +179,7 @@ int boot_platform_post_load(uint32_t image_id)
         BOOT_LOG_INF("Got SCP BL1 started event");
 
     } else if (image_id == RSS_BL2_IMAGE_AP) {
+        memset(HOST_BOOT_IMAGE0_LOAD_BASE_S, 0, HOST_IMAGE_HEADER_SIZE);
         BOOT_LOG_INF("Telling SCP to start AP cores");
         mhu_v2_x_initiate_transfer(&MHU_RSS_TO_SCP_DEV);
         /* Slot 0 is used in the SCP protocol */

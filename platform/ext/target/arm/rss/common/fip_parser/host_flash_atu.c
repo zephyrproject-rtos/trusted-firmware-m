@@ -17,10 +17,11 @@
 
 #include <string.h>
 
-#define RSS_ATU_REGION_TEMP_SLOT          2
-#define RSS_ATU_REGION_INPUT_IMAGE_SLOT_0 3
-#define RSS_ATU_REGION_INPUT_IMAGE_SLOT_1 4
-#define RSS_ATU_REGION_OUTPUT_IMAGE_SLOT  5
+#define RSS_ATU_REGION_TEMP_SLOT           2
+#define RSS_ATU_REGION_INPUT_IMAGE_SLOT_0  3
+#define RSS_ATU_REGION_INPUT_IMAGE_SLOT_1  4
+#define RSS_ATU_REGION_OUTPUT_IMAGE_SLOT   5
+#define RSS_ATU_REGION_OUTPUT_HEADER_SLOT  6
 
 static inline uint32_t round_down(uint32_t num, uint32_t boundary)
 {
@@ -281,11 +282,23 @@ static int setup_image_output_slots(uuid_t image_uuid)
 
     case_uuid = UUID_RSS_FIRMWARE_SCP_BL1;
     if (memcmp(&image_uuid, &case_uuid, sizeof(uuid_t)) == 0) {
+        /* Initialize SCP ATU header region */
+        atu_err = atu_initialize_region(&ATU_DEV_S,
+                                        RSS_ATU_REGION_OUTPUT_HEADER_SLOT,
+                                        HOST_BOOT_IMAGE1_LOAD_BASE_S,
+                                        SCP_BOOT_SRAM_BASE + SCP_BOOT_SRAM_SIZE
+                                        - HOST_IMAGE_HEADER_SIZE,
+                                        HOST_IMAGE_HEADER_SIZE);
+        if (atu_err != ATU_ERR_NONE) {
+            return 1;
+        }
+
         /* Initialize SCP ATU output region */
         atu_err = atu_initialize_region(&ATU_DEV_S,
                                         RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
-                                        HOST_BOOT_IMAGE1_LOAD_BASE_S,
-                                        SCP_BOOT_SRAM_BASE, SCP_BOOT_SRAM_SIZE);
+                                        HOST_BOOT_IMAGE1_LOAD_BASE_S + HOST_IMAGE_HEADER_SIZE,
+                                        SCP_BOOT_SRAM_BASE,
+                                        SCP_BOOT_SRAM_SIZE - HOST_IMAGE_HEADER_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             return 1;
         }
@@ -295,11 +308,22 @@ static int setup_image_output_slots(uuid_t image_uuid)
 
     case_uuid = UUID_RSS_FIRMWARE_AP_BL1;
     if (memcmp(&image_uuid, &case_uuid, sizeof(uuid_t)) == 0) {
+        /* Initialize AP ATU header region */
+        atu_err = atu_initialize_region(&ATU_DEV_S,
+                                        RSS_ATU_REGION_OUTPUT_HEADER_SLOT,
+                                        HOST_BOOT_IMAGE0_LOAD_BASE_S,
+                                        AP_BOOT_SRAM_BASE + AP_BOOT_SRAM_SIZE
+                                        - HOST_IMAGE_HEADER_SIZE,
+                                        HOST_IMAGE_HEADER_SIZE);
+        if (atu_err != ATU_ERR_NONE) {
+            return 1;
+        }
         /* Initialize AP ATU region */
         atu_err = atu_initialize_region(&ATU_DEV_S,
                                         RSS_ATU_REGION_OUTPUT_IMAGE_SLOT,
-                                        HOST_BOOT_IMAGE0_LOAD_BASE_S,
-                                        AP_BOOT_SRAM_BASE, AP_BOOT_SRAM_SIZE);
+                                        HOST_BOOT_IMAGE0_LOAD_BASE_S + HOST_IMAGE_HEADER_SIZE,
+                                        AP_BOOT_SRAM_BASE,
+                                        AP_BOOT_SRAM_SIZE - HOST_IMAGE_HEADER_SIZE);
         if (atu_err != ATU_ERR_NONE) {
             return 1;
         }
@@ -345,6 +369,12 @@ int host_flash_atu_uninit_regions(void)
 
     atu_err = atu_uninitialize_region(&ATU_DEV_S,
                                       RSS_ATU_REGION_OUTPUT_IMAGE_SLOT);
+    if (atu_err != ATU_ERR_NONE) {
+        return 1;
+    }
+
+    atu_err = atu_uninitialize_region(&ATU_DEV_S,
+                                      RSS_ATU_REGION_OUTPUT_HEADER_SLOT);
     if (atu_err != ATU_ERR_NONE) {
         return 1;
     }
