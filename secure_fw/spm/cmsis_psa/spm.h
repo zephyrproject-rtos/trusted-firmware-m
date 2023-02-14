@@ -33,7 +33,11 @@
 #define STATIC_HANDLE_NUM_LIMIT         32
 #define CLIENT_HANDLE_VALUE_MIN         1
 
-#define STATIC_HANDLE_IDX_BIT_WIDTH     8
+/*
+ * Bit width can be increased to match STATIC_HANDLE_NUM_LIMIT,
+ * current allowed maximum bit width is 8 for 256 handles.
+ */
+#define STATIC_HANDLE_IDX_BIT_WIDTH     5
 #define STATIC_HANDLE_IDX_MASK \
     (uint32_t)((1UL << STATIC_HANDLE_IDX_BIT_WIDTH) - 1)
 #define GET_INDEX_FROM_STATIC_HANDLE(handle) \
@@ -50,10 +54,6 @@
 #define STATIC_HANDLE_INDICATOR_OFFSET  30
 #define IS_STATIC_HANDLE(handle) \
     ((handle) & (1UL << STATIC_HANDLE_INDICATOR_OFFSET))
-
-/* Valid index should be [0, STATIC_HANDLE_NUM_LIMIT-1] */
-#define IS_VALID_STATIC_HANDLE_IDX(index) \
-    ((uint32_t)(index) < STATIC_HANDLE_NUM_LIMIT)
 
 #define SPM_INVALID_PARTITION_IDX       (~0U)
 

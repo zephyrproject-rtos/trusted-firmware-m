@@ -46,7 +46,9 @@ a handle by the manifest tooling, and then generated to header file ``sid.h``.
       - reserved
     * - bit 15 - bit 8
       - service version requested by client - for client version check
-    * - bit 7 - bit 0
+    * - bit 7 - bit 5
+      - reserved
+    * - bit 4 - bit 0
       - the handle index, [0, 31]
 
 Since connection-based services and stateless services share the same PSA API
@@ -84,7 +86,7 @@ Changes in Programming API
 ==========================
 
 This chapter describes the changes in programming API for stateless services.
-The following APIs' bebavious and message data structure members are updated to
+The following APIs' behavious and message data structure members are updated to
 support the stateless service.
 
 psa_connect()

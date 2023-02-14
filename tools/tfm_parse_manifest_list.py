@@ -596,7 +596,7 @@ def process_stateless_services(partitions):
         else:
             raise Exception('Invalid stateless_handle setting: {handle}.'.format(handle=service['stateless_handle']))
 
-    STATIC_HANDLE_IDX_BIT_WIDTH = 8
+    STATIC_HANDLE_IDX_BIT_WIDTH = 5
     STATIC_HANDLE_IDX_MASK = (1 << STATIC_HANDLE_IDX_BIT_WIDTH) - 1
     STATIC_HANDLE_INDICATOR_OFFSET = 30
     STATIC_HANDLE_VER_OFFSET = 8

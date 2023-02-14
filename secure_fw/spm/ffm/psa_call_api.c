@@ -60,10 +60,6 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     if (IS_STATIC_HANDLE(handle)) {
         index = GET_INDEX_FROM_STATIC_HANDLE(handle);
 
-        if (!IS_VALID_STATIC_HANDLE_IDX(index)) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
-        }
-
         service = stateless_services_ref_tbl[index];
         if (!service) {
             return PSA_ERROR_PROGRAMMER_ERROR;
