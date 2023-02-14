@@ -335,6 +335,11 @@ target_compile_definitions(platform_bl1
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
 )
 
+target_sources(bl1_1_lib
+    INTERFACE
+        ./bl1/provisioning.c
+)
+
 #========================= ns_agent_mailbox ===================================#
 
 if(TFM_MULTI_CORE_TOPOLOGY)
