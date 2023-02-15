@@ -12,7 +12,7 @@ Secure Services
     Service Signing             <tfm_uniform_secure_service_signature.rst>
     Crypto                      <tfm_crypto_design.rst>
     Initial Attestation         <symmetric_initial_attest.rst>
-    Internal Storage            <tfm_its_service.rst>
+    Internal Trusted Storage    <tfm_its_service.rst>
     Firmware Update             <tfm_fwu_service.rst>
     PS Key Management           <ps_key_management.rst>
 

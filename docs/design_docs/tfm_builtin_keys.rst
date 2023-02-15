@@ -6,6 +6,8 @@ TF-M builtin keys
 :Organization: Arm Limited
 :Contact: raef.coles@arm.com
 
+.. _tfm-builtin-keys-label:
+
 ************
 Introduction
 ************

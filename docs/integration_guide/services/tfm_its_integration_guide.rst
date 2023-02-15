@@ -2,6 +2,8 @@
 TF-M Internal Trusted Storage Service Integration Guide
 #######################################################
 
+.. _its-introduction-label:
+
 ************
 Introduction
 ************
@@ -313,7 +315,7 @@ build definitions is:
   filesystem is lost in the case of an asynchronous power failure.
 - ``ITS_STACK_SIZE``- Defines the stack size of the Internal Trusted Storage
   Secure Partition. This value mainly depends on the platform specific flash
-  drivers, the build type(debug, release and minisizerel) and compiler.
+  drivers, the build type (Debug, Release and MinSizeRel) and compiler.
 
 --------------
 

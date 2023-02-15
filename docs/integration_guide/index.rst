@@ -35,7 +35,7 @@ Explained in the :doc:`Build instructions </building/tfm_build_instruction>`.
 How to add a new platform
 *************************
 
-:doc:`Porting TF-M to a New Hardware </integration_guide/platform/porting_TFM_to_a_new_hardware>`
+:doc:`Porting TF-M to a New Hardware </integration_guide/platform/porting_tfm_to_a_new_hardware>`
 contains guidance on how to add a new platform.
 
 ***************************

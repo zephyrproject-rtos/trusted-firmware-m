@@ -7,7 +7,7 @@ Adding a new platform
 .. toctree::
     :maxdepth: 1
 
-    porting_TFM_to_a_new_hardware
+    porting_tfm_to_a_new_hardware
     documenting_platform.rst
     platform_deprecation.rst
 
