@@ -41,9 +41,6 @@ install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
 install(FILES       ${INTERFACE_INC_DIR}/tfm_ns_client_ext.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
-install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/config_impl.h
-        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
-
 install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_pack.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
@@ -126,10 +123,6 @@ endif()
 if (TFM_PARTITION_NS_AGENT_TZ)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    if (CONFIG_TFM_CONNECTION_BASED_SERVICE_API)
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_connection_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    endif()
 endif()
 
 if (CONFIG_TFM_USE_TRUSTZONE)

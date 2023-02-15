@@ -219,4 +219,60 @@ void tfm_psa_close_veneer(psa_handle_t handle)
     );
 }
 
+#else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+
+/*
+ * Define a variable to enable naked tfm_psa_connect_veneer() to return the error code.
+ * It is not supported to directly return the error code in psa_status_t type in Basic Asm via
+ * M2S.
+ */
+__used int32_t ret_err = (int32_t)PSA_ERROR_NOT_SUPPORTED;
+#if defined(__ICCARM__)
+#pragma required = ret_err
+#endif
+
+__tz_naked_veneer
+psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
+{
+    __ASM volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                      \n"
+#endif
+
+        "   ldr    r2, [sp]                                   \n"
+        "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
+        "   cmp    r2, r3                                     \n"
+        "   bne    reent_panic3                               \n"
+
+        "   ldr    r1, =ret_err                               \n"
+        "   ldr    r0, [r1]                                   \n"
+        "   bxns   lr                                         \n"
+
+        "reent_panic3:                                        \n"
+        "   svc    "M2S(TFM_SVC_PSA_PANIC)"                   \n"
+        "   b      .                                          \n"
+    );
+}
+
+__tz_naked_veneer
+void tfm_psa_close_veneer(psa_handle_t handle)
+{
+    __ASM volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                      \n"
+#endif
+
+        "   ldr    r2, [sp]                                   \n"
+        "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
+        "   cmp    r2, r3                                     \n"
+        "   bne    reent_panic5                               \n"
+
+        "   bxns   lr                                         \n"
+
+        "reent_panic5:                                        \n"
+        "   svc    "M2S(TFM_SVC_PSA_PANIC)"                   \n"
+        "   b      .                                          \n"
+    );
+}
+
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
