@@ -70,11 +70,11 @@
 #define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE)
 /* Non-secure image primary slot. */
 #define FLASH_AREA_3_ID            (FLASH_AREA_2_ID + 1)
-#define FLASH_AREA_3_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
+#define FLASH_AREA_3_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
 /* Secure image secondary slot. */
 #define FLASH_AREA_4_ID            (FLASH_AREA_3_ID + 1)
-#define FLASH_AREA_4_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
+#define FLASH_AREA_4_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_4_SIZE          (FLASH_S_PARTITION_SIZE)
 /* Non-secure image secondary slot. */
 #define FLASH_AREA_5_ID            (FLASH_AREA_4_ID + 1)
@@ -87,11 +87,11 @@
 #define FLASH_AREA_6_SIZE          (FLASH_AP_PARTITION_SIZE)
 /* SCP image primary slot */
 #define FLASH_AREA_7_ID            (FLASH_AREA_6_ID + 1)
-#define FLASH_AREA_7_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
+#define FLASH_AREA_7_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_7_SIZE          (FLASH_SCP_PARTITION_SIZE)
 /* AP image secondary slot */
 #define FLASH_AREA_8_ID            (FLASH_AREA_7_ID + 1)
-#define FLASH_AREA_8_OFFSET        (HOST_FLASH0_IMAGE0_BASE_S - HOST_ACCESS_BASE_S)
+#define FLASH_AREA_8_OFFSET        (HOST_FLASH0_IMAGE1_BASE_S - HOST_ACCESS_BASE_S)
 #define FLASH_AREA_8_SIZE          (FLASH_AP_PARTITION_SIZE)
 /* SCP image secondary slot */
 #define FLASH_AREA_9_ID            (FLASH_AREA_8_ID + 1)
