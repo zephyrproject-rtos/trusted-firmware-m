@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2021, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -39,7 +39,7 @@ target_link_libraries(psa_adac_cc312
         platform_bl2
     PRIVATE
         bl2_mbedcrypto
-        trusted-firmware-m-psa-adac
+        psa_adac_config
 )
 
 target_link_libraries(platform_bl2
