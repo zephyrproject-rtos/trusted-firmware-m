@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -24,7 +26,6 @@ target_sources(tfm_sprt
         ${CMAKE_SOURCE_DIR}/secure_fw/shared/crt_memcpy.c
         ${CMAKE_SOURCE_DIR}/secure_fw/shared/crt_memset.c
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./sprt_partition_metadata_indicator.c>
-        $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:./rt_main.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:./sfn_common_thread.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:./psa_api_ipc.c>
         $<$<BOOL:${TFM_SP_LOG_RAW_ENABLED}>:./tfm_sp_log_raw.c>

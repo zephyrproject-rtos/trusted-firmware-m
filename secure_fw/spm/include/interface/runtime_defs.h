@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -40,7 +43,7 @@ struct psa_api_tbl_t {
 };
 
 struct runtime_metadata_t {
-    uintptr_t            entry;      /* Entry function invoked by sprt_main */
+    uintptr_t            entry;      /* Entry function */
     struct psa_api_tbl_t *psa_fns;   /* PSA API entry table */
     uint32_t             n_sfn;      /* Number of Secure FuNctions */
     service_fn_t         sfn_table[];/* Secure FuNctions Table */

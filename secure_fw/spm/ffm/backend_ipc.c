@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -208,13 +208,14 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
     return PSA_SUCCESS;
 }
 
-extern void sprt_main(void);
+extern void common_sfn_thread(void);
 
 /* Parameters are treated as assuredly */
 void backend_init_comp_assuredly(struct partition_t *p_pt,
                                  uint32_t service_setting)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
+    thrd_fn_t thrd_entry;
 
 #if CONFIG_TFM_DOORBELL_API == 1
     p_pt->signals_allowed |= PSA_DOORBELL;
@@ -244,8 +245,16 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     }
 #endif
 
+    if (IS_PARTITION_IPC_MODEL(p_pldi)) {
+        /* IPC Partition */
+        thrd_entry = POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t);
+    } else {
+        /* SFN Partition */
+        thrd_entry = POSITION_TO_ENTRY(common_sfn_thread, thrd_fn_t);
+    }
+
     thrd_start(&p_pt->thrd,
-               POSITION_TO_ENTRY(sprt_main, thrd_fn_t),
+               thrd_entry,
                THRD_GENERAL_EXIT);
 }
 
