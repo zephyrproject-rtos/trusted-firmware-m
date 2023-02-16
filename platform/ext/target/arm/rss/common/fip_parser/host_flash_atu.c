@@ -43,7 +43,7 @@ static int setup_aligned_atu_slot(uint64_t physical_address, uint32_t size,
 
     aligned_physical_address = round_down(physical_address, boundary);
     *atu_slot_size = round_up(physical_address + size, boundary)
-                     - (physical_address);
+                     - aligned_physical_address;
 
     *alignment_offset = physical_address - aligned_physical_address;
 
