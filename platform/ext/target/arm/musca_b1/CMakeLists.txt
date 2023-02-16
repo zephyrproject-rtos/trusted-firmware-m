@@ -15,6 +15,11 @@ target_include_directories(platform_region_defs
         partition
 )
 
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
+)
+
 #========================= Platform common defs ===============================#
 
 # Specify the location of platform specific build dependencies.
@@ -175,6 +180,33 @@ if(BL2)
             Native_Driver
             Libraries
     )
+
+endif()
+
+#========================= tfm_adac ============================================#
+
+if (${PLATFORM_PSA_ADAC_SECURE_DEBUG})
+    target_sources(platform_bl2
+        PRIVATE
+            systick_microsecond_timer.c
+            bl2/boot_hal_bl2.c
+    )
+
+    target_compile_definitions(platform_bl2
+        PRIVATE
+            PLATFORM_PSA_ADAC_SECURE_DEBUG
+    )
+
+    target_link_libraries(platform_bl2
+        PRIVATE
+            trusted-firmware-m-psa-adac
+    )
+
+    target_link_libraries(trusted-firmware-m-psa-adac
+        PRIVATE
+            psa_adac_cc312
+    )
+
 endif()
 
 #========================= tfm_spm ============================================#

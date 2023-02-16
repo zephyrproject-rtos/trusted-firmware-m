@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,12 @@
 #include "flash_layout.h"
 
 #define BL2_HEAP_SIZE           (0x0001000)
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+#define BL2_MSP_STACK_SIZE      (0x0002800)
+#else
 #define BL2_MSP_STACK_SIZE      (0x0001800)
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
 #ifdef ENABLE_HEAP
 #define S_HEAP_SIZE             (0x0000200)
