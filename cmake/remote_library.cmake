@@ -278,7 +278,11 @@ function(fetch_remote_library)
         endif()
     endif()
 
-    if (ARG_LIB_PATCH_DIR AND (SOURCE_PATH_IS_DOWNLOAD OR ARG_LIB_FORCE_PATCH))
+    if (ARG_LIB_FORCE_PATCH)
+        set(FORCE_PATCH ${${ARG_LIB_FORCE_PATCH}})
+    endif()
+
+    if (ARG_LIB_PATCH_DIR AND (SOURCE_PATH_IS_DOWNLOAD OR FORCE_PATCH))
         # look for patch files
         file(GLOB PATCH_FILES "${ARG_LIB_PATCH_DIR}/*.patch")
 
