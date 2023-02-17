@@ -14,7 +14,7 @@ fetch_remote_library(
     FETCH_CONTENT_ARGS
         GIT_REPOSITORY      ${HAL_NORDIC_REMOTE}
         GIT_TAG             ${HAL_NORDIC_VERSION}
-        GIT_SHALLOW         FALSE # Disable shallow fetch because version is a SHA.
+        GIT_SHALLOW         TRUE
         GIT_PROGRESS        TRUE
         GIT_SUBMODULES      ""
 )
