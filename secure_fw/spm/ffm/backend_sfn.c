@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -86,7 +86,7 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
     return status;
 }
 
-static void spm_thread_fn(void)
+static uint32_t spm_thread_fn(uint32_t param)
 {
     struct partition_t *p_part, *p_curr;
     psa_status_t status;
@@ -115,6 +115,8 @@ static void spm_thread_fn(void)
     }
 
     SET_CURRENT_COMPONENT(p_curr);
+
+    return param;
 }
 
 /* Parameters are treated as assuredly */
@@ -125,6 +127,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     struct context_ctrl_t ns_agent_ctrl;
     p_pt->p_handles = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;
+    void *param = NULL;
 
     watermark_stack(p_pt);
 
@@ -133,11 +136,15 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
      * IDLE partition, and NS Agent (TZ) needs to be specific cared here.
      */
     if (IS_NS_AGENT(p_pldi)) {
+        if (IS_NS_AGENT_TZ(p_pldi)) {
+            /* NS agent TZ expects NSPE entry point as the parameter */
+            param = (void *)tfm_hal_get_ns_entry_point();
+        }
         ARCH_CTXCTRL_INIT(&ns_agent_ctrl,
                           LOAD_ALLOCED_STACK_ADDR(p_pldi),
                           p_pldi->stack_size);
         tfm_arch_init_context(&ns_agent_ctrl, (uintptr_t)spm_thread_fn,
-                              NULL, p_pldi->entry);
+                              param, p_pldi->entry);
         tfm_arch_refresh_hardware_context(&ns_agent_ctrl);
         SET_CURRENT_COMPONENT(p_pt);
     }

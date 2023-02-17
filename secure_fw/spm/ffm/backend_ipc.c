@@ -212,6 +212,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
     thrd_fn_t thrd_entry;
+    void *param = NULL;
 
 #if CONFIG_TFM_DOORBELL_API == 1
     p_pt->signals_allowed |= PSA_DOORBELL;
@@ -247,10 +248,15 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
         thrd_entry = POSITION_TO_ENTRY(common_sfn_thread, thrd_fn_t);
     }
 
+    if (IS_NS_AGENT_TZ(p_pldi)) {
+        /* NS agent TZ expects NSPE entry point as the parameter */
+        param = (void *)tfm_hal_get_ns_entry_point();
+    }
+
     thrd_start(&p_pt->thrd,
                thrd_entry,
                THRD_GENERAL_EXIT,
-               NULL);
+               param);
 }
 
 uint32_t backend_system_run(void)
