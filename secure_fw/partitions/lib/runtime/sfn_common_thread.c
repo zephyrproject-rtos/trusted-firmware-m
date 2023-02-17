@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +16,7 @@
 #include "psa/error.h"
 #include "psa/service.h"
 
-void common_sfn_thread(void)
+void common_sfn_thread(void *param)
 {
     psa_signal_t sig_asserted, signal_mask, sig;
     psa_msg_t msg;
@@ -26,7 +29,7 @@ void common_sfn_thread(void)
     p_sfn_table = (service_fn_t *)meta->sfn_table;
     signal_mask = (1 << meta->n_sfn) - 1;
 
-    if (sfn_init && sfn_init() != PSA_SUCCESS) {
+    if (sfn_init && sfn_init(param) != PSA_SUCCESS) {
         psa_panic();
     }
 

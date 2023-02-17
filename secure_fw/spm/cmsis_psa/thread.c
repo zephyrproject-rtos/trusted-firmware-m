@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -74,14 +77,14 @@ static void insert_by_prior(struct thread_t **head, struct thread_t *node)
     }
 }
 
-void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn)
+void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn, void *param)
 {
     SPM_ASSERT(p_thrd != NULL);
 
     /* Insert a new thread with priority */
     insert_by_prior(&LIST_HEAD, p_thrd);
 
-    tfm_arch_init_context(p_thrd->p_context_ctrl, (uintptr_t)fn, NULL,
+    tfm_arch_init_context(p_thrd->p_context_ctrl, (uintptr_t)fn, param,
                           (uintptr_t)exit_fn);
 
     /* Mark it as RUNNABLE after insertion */

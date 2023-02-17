@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -116,13 +119,12 @@ void thrd_set_state(struct thread_t *p_thrd, uint32_t new_state);
  *  p_thrd         -     Pointer of thread_t struct
  *  fn             -     Thread entry function
  *  exit_fn        -     The function to go when 'fn' exited
+ *  param          -     Parameter passed to fn
  *
  * Note :
- *  - thrd_fn_t does not have parameters but param is still set into R0 for some
- *    special usages, for example the NS agent.
  *  - The thread is not "started" immediately.
  */
-void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn);
+void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn, void *param);
 
 /*
  * Get the next thread to run in list.

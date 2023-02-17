@@ -19,7 +19,7 @@
 
 /* SFN defs */
 typedef psa_status_t (*service_fn_t)(psa_msg_t *msg);
-typedef psa_status_t (*sfn_init_fn_t)(void);
+typedef psa_status_t (*sfn_init_fn_t)(void *param);
 
 /* PSA API dispatcher for IPC model. */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1

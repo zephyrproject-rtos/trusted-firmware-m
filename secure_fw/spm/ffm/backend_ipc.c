@@ -208,7 +208,7 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
     return PSA_SUCCESS;
 }
 
-extern void common_sfn_thread(void);
+extern void common_sfn_thread(void *param);
 
 /* Parameters are treated as assuredly */
 void backend_init_comp_assuredly(struct partition_t *p_pt,
@@ -255,7 +255,8 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 
     thrd_start(&p_pt->thrd,
                thrd_entry,
-               THRD_GENERAL_EXIT);
+               THRD_GENERAL_EXIT,
+               NULL);
 }
 
 uint32_t backend_system_run(void)

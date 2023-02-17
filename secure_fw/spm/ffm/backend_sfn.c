@@ -53,7 +53,7 @@ psa_status_t backend_messaging(struct service_t *service,
 
     if (p_target->state == SFN_PARTITION_STATE_NOT_INITED) {
         if (p_target->p_ldinf->entry != 0) {
-            status = ((sfn_init_fn_t)p_target->p_ldinf->entry)();
+            status = ((sfn_init_fn_t)p_target->p_ldinf->entry)(NULL);
             /* Negative value indicates errors. */
             if (status < PSA_SUCCESS) {
                 return PSA_ERROR_PROGRAMMER_ERROR;
@@ -105,7 +105,7 @@ static void spm_thread_fn(void)
         SET_CURRENT_COMPONENT(p_part);
 
         if (p_part->p_ldinf->entry != 0) {
-            status = ((sfn_init_fn_t)p_part->p_ldinf->entry)();
+            status = ((sfn_init_fn_t)p_part->p_ldinf->entry)(NULL);
             if (status < PSA_SUCCESS) {
                 tfm_core_panic();
             }
