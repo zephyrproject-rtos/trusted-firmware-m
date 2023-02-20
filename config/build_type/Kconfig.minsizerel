@@ -1,0 +1,22 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2023, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+if BL2
+config MCUBOOT_LOG_LEVEL
+    default "OFF"
+endif
+
+config TFM_SPM_LOG_LEVEL
+    default 0
+
+config TFM_PARTITION_LOG_LEVEL
+    default 0
+
+if BL1 && PLATFORM_DEFAULT_BL1
+config TFM_BL1_LOGGING
+    default n
+endif

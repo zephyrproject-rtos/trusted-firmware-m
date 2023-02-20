@@ -1,0 +1,18 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2023, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+
+config MBEDCRYPTO_BUILD_TYPE
+    default "relwithdebinfo"
+
+config TFM_SPM_LOG_LEVEL
+    default 3
+
+config TFM_PARTITION_LOG_LEVEL
+    default 3
+
+config CONFIG_TFM_HALT_ON_CORE_PANIC
+    default y

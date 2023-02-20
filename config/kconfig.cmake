@@ -187,6 +187,10 @@ if(NOT EXISTS ${PLATFORM_KCONFIG})
 endif()
 get_filename_component(PLATFORM_KCONFIG_PATH ${PLATFORM_KCONFIG} DIRECTORY)
 
+# Build type Kconfig file, for example 'Kconfig.minsizerel', the suffix passed
+# by Kconfig environment variables and it shall be lowercase.
+string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
+
 # TF-M profile config file
 if(TFM_PROFILE)
     set(TFM_PROFILE_KCONFIG_FILE ${CMAKE_SOURCE_DIR}/config/profile/${TFM_PROFILE}.conf)
@@ -228,7 +232,7 @@ list(APPEND CONFIG_FILE_LIST
 set(KCONFIG_ENV_VARS "TFM_SOURCE_DIR=${CMAKE_SOURCE_DIR} \
                       TFM_VERSION=${TFM_VERSION} \
                       PLATFORM_PATH=${PLATFORM_KCONFIG_PATH} \
-                      CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+                      CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE_LOWERCASE}")
 
 if(MENUCONFIG)
     # Note: Currently, only GUI menuconfig can be supported with CMake integration
@@ -281,11 +285,6 @@ include(${KCONFIG_OUTPUT_DIR}/project_config.cmake)
 # Load regression configs overrided by platform
 if(EXISTS ${TARGET_PLATFORM_PATH}/reg_config_override.cmake)
     include(${TARGET_PLATFORM_PATH}/reg_config_override.cmake)
-endif()
-
-# Load build type config, setting options not already set
-if(EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
-    include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
 endif()
 
 # Load defaults, setting options not already set
