@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "cmsis_compiler.h"
+#include "compiler_ext_defs.h"
 #include "config_impl.h"
 #include "security_defs.h"
 #include "svc_num.h"
