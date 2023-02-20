@@ -277,7 +277,7 @@ static psa_status_t tfm_crypto_engine_init(void)
      * performed directly through psa_crypto_init() while the PSA subsystem is
      * initialised
      */
-#if defined(CRYPTO_HW_ACCELERATOR) && defined(CC312_LEGACY_DRIVER_API_ENABLED)
+#if defined(CRYPTO_HW_ACCELERATOR) && defined(LEGACY_DRIVER_API_ENABLED)
     LOG_INFFMT("[INF][Crypto] Initialising HW accelerator... ");
     if (crypto_hw_accelerator_init() != 0) {
         return PSA_ERROR_HARDWARE_FAILURE;

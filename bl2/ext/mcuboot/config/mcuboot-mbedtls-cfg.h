@@ -82,18 +82,18 @@
 #endif /* CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING */
 
 #ifdef CRYPTO_HW_ACCELERATOR
-#ifndef CC312_LEGACY_DRIVER_API_ENABLED
+#ifndef LEGACY_DRIVER_API_ENABLED
 /*
  * Forcing the legacy driver API enabled all the time regardless of
  * cmake configuration in BL2.
  */
-#define CC312_LEGACY_DRIVER_API_ENABLED
-#warning "Use CC312 legacy driver API for BL2"
+#define LEGACY_DRIVER_API_ENABLED
+#warning "Use legacy driver API for BL2"
 #include "mbedtls_accelerator_config.h"
-#undef CC312_LEGACY_DRIVER_API_ENABLED
+#undef LEGACY_DRIVER_API_ENABLED
 #else
 #include "mbedtls_accelerator_config.h"
-#endif /* !CC312_LEGACY_DRIVER_API_ENABLED */
+#endif /* !LEGACY_DRIVER_API_ENABLED */
 #endif
 
 #endif /* __MCUBOOT_MBEDTLS_CFG__ */

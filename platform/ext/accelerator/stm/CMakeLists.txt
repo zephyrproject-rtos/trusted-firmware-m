@@ -47,6 +47,7 @@ if (TFM_PARTITION_CRYPTO)
     target_compile_definitions(crypto_service_mbedcrypto
         PUBLIC
             CRYPTO_HW_ACCELERATOR
+            LEGACY_DRIVER_API_ENABLED
     )
 
     target_compile_options(crypto_service_mbedcrypto
