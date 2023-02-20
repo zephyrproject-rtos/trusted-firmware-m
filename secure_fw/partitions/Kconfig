@@ -38,4 +38,9 @@ config TFM_PARTITION_LOG_LEVEL
     default 1 if PARTITION_LOG_LEVEL_ERROR
     default 0 if PARTITION_LOG_LEVEL_SILENCE
 
+config TFM_SP_LOG_RAW_ENABLED
+    bool
+    default y if TFM_PARTITION_LOG_LEVEL != 0 || TFM_S_REG_TEST || TFM_NS_REG_TEST
+    default n
+
 endmenu

@@ -290,7 +290,3 @@ endif()
 
 # Load defaults, setting options not already set
 include(config/config_base.cmake)
-
-# Set secure log configs
-# It also depends on regression test config.
-include(config/tfm_secure_log.cmake)

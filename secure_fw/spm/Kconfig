@@ -135,6 +135,11 @@ config TFM_SPM_LOG_LEVEL
 
 endmenu
 
+config TFM_SPM_LOG_RAW_ENABLED
+    bool
+    default y if TFM_SPM_LOG_LEVEL != 0 || TFM_SP_LOG_RAW_ENABLED
+    default n
+
 ######################## Promptless (non-user) config options ##################
 ########### Do NOT change the following config options anywhere! ###############
 config CONFIG_TFM_PARTITION_META
