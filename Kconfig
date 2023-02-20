@@ -10,24 +10,15 @@ mainmenu "TF-M Configuration"
 # Load platform Kconfig file if exists
 osource "$(PLATFORM_PATH)/Kconfig"
 
-################################# Bootloader ###################################
+################################# System options ###############################
 
 rsource "Kconfig.bl"
-
-################################# SPM ##########################################
-
 rsource "secure_fw/spm/Kconfig"
-
-################################# Secure partitions ############################
-
-# These are partition switches.
-rsource "secure_fw/partitions/Kconfig"
-
-################################# Platforms ####################################
-
+rsource "secure_fw/partitions/Kconfig" # These are partition switches.
 rsource "platform/Kconfig"
+rsource "Kconfig.misc"
 
-################################# TEST #########################################
+################################# Test options #################################
 
 menu "TF-M tests"
 rsource "lib/ext/tf-m-tests/Kconfig"

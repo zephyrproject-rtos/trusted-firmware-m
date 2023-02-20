@@ -72,12 +72,6 @@ config PSA_FRAMEWORK_HAS_MM_IOVEC
 
 ################################# Misc #########################################
 
-config TFM_CODE_SHARING
-    bool "Enable code sharing between MCUboot and secure firmware"
-    #FIXME: Shall check IAR
-    default n
-    depends on !CRYPTO_HW_ACCELERATOR
-
 config TFM_EXCEPTION_INFO_DUMP
     bool "Exception information dump"
     default n
