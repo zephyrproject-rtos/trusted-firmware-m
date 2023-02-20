@@ -11,10 +11,14 @@ menu "Platform partition component configs"
 config PLATFORM_SERVICE_INPUT_BUFFER_SIZE
     int "Size of input buffer"
     default 64
+    help
+      Size of the internal transiant buffer to hold input vectors from client.
 
 config PLATFORM_SERVICE_OUTPUT_BUFFER_SIZE
     int "Size of output buffer"
     default 64
+    help
+      Size of the internal transiant buffer to hold service outputs.
 
 config PLATFORM_SP_STACK_SIZE
     hex "Stack size"

@@ -58,9 +58,11 @@ choice
 
     config MCUBOOT_UPGRADE_STRATEGY_SWAP_USING_SCRATCH
         bool "Swap using scratch"
+        imply FWU_SUPPORT_TRIAL_STATE
 
     config MCUBOOT_UPGRADE_STRATEGY_SWAP_USING_MOVE
         bool "Swap using move"
+        imply FWU_SUPPORT_TRIAL_STATE
 
     config MCUBOOT_UPGRADE_STRATEGY_DIRECT_XIP
         bool "Direct xip"

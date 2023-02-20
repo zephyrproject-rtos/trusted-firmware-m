@@ -278,9 +278,6 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cm
     include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
 endif()
 
-# Include FWU partition configs.
-include(config/tfm_fwu_config.cmake)
-
 # Include coprocessor configs
 include(config/cp_config_default.cmake)
 
