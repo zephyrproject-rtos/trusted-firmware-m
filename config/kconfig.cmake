@@ -19,11 +19,6 @@ set(DOTCONFIG_FILE      ${KCONFIG_OUTPUT_DIR}/.config)
 set(ROOT_KCONFIG        ${CMAKE_SOURCE_DIR}/Kconfig)
 set(PLATFORM_KCONFIG    ${TARGET_PLATFORM_PATH}/Kconfig)
 
-if(TFM_PROFILE)
-    # Selecting TF-M profiles is not supported yet.
-    message(FATAL_ERROR "Selecting TF-M profiles is not supported yet in Kconfig system!")
-endif()
-
 # This function parses the input ${cmake_file} to get normal CMake variables and their values in the
 # format of "set(_VAR_ _VALUE_)". The format could be split into multiple lines.
 # Note that CMake does not allow the "(" to be in a different line as "set" and no white spaces are
@@ -192,6 +187,19 @@ if(NOT EXISTS ${PLATFORM_KCONFIG})
 endif()
 get_filename_component(PLATFORM_KCONFIG_PATH ${PLATFORM_KCONFIG} DIRECTORY)
 
+# TF-M profile config file
+if(TFM_PROFILE)
+    set(TFM_PROFILE_KCONFIG_FILE ${CMAKE_SOURCE_DIR}/config/profile/${TFM_PROFILE}.conf)
+    if(NOT EXISTS ${TFM_PROFILE_KCONFIG_FILE})
+        message(FATAL_ERROR "No such file: ${TFM_PROFILE_KCONFIG_FILE}, please check ${TFM_PROFILE} is right.")
+    endif()
+
+    set(TFM_PROFILE_TEST_KCONFIG_FILE ${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/${TFM_PROFILE}_test.conf)
+    if(NOT EXISTS ${TFM_PROFILE_TEST_KCONFIG_FILE})
+        message(FATAL_ERROR "No such file: ${TFM_PROFILE_TEST_KCONFIG_FILE}, please check ${TFM_PROFILE} is right.")
+    endif()
+endif()
+
 # Parse command-line variables
 set(CL_CONFIGS "")
 set(CONVERT_CL_VAR TRUE)
@@ -210,6 +218,8 @@ endif()
 # Note the order of CONFIG_FILE_LIST, as the first loaded configs would be
 # overridden by later ones.
 list(APPEND CONFIG_FILE_LIST
+            ${TFM_PROFILE_KCONFIG_FILE}
+            ${TFM_PROFILE_TEST_KCONFIG_FILE}
             ${CACHE_VAR_CONFIG_FILE}
             ${KCONFIG_CONFIG_FILE}
             ${COMMAND_LINE_CONFIG_TO_FILE})
