@@ -24,7 +24,7 @@ struct tfm_pool_chunk_t {
 struct tfm_pool_instance_t {
     struct tfm_pool_chunk_t *next;        /* Point to the first free node   */
     size_t chunksz;                       /* Chunks size of pool member     */
-    size_t chunk_count;                   /* A number of chunks in the pool */
+    size_t pool_sz;                       /* Pool size in bytes             */
     uint8_t chunks[];                     /* Data indicator                 */
 };
 
