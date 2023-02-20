@@ -22,9 +22,26 @@ config PLATFORM_HAS_ISOLATION_L3_SUPPORT
 ################################# Test dependencies ############################
 
 config PS_TEST_NV_COUNTERS
-    def_bool y
+    bool "Use the PS test NV counters"
+    default y
     help
-      Use the test NV counters to test Protected Storage rollback scenarios
+      Enables the virtual implementation of the PS NV counters interface in
+      test/secure_fw/suites/ps/secure/nv_counters of the tf-m-tests repo,
+      which emulates NV counters in RAM, and disables the hardware
+      implementation of NV counters provided by the secure service. This flag is
+      enabled by default, but has no effect when the secure regression test is
+      disabled. This flag can be overridden to OFF when building the regression
+      tests. In this case, the PS rollback protection test suite will not be
+      built, as it relies on extra functionality provided by the virtual NV
+      counters to simulate different rollback scenarios.
+
+      The remainder of the PS test suites will run using the hardware NV
+      counters. Please note that running the tests in this configuration will
+      quickly increase the hardware NV counter values, which cannot be decreased
+      again.
+
+      Overriding this flag from its default value of OFF when not building the
+      regression tests is not currently supported.
 
 config PLATFORM_SLIH_IRQ_TEST_SUPPORT
     def_bool n
