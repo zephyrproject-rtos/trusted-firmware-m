@@ -10,8 +10,6 @@
 set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cryptography mode")
 set(PLATFORM_GPLED_ENABLED              OFF         CACHE BOOL      "Use the general purpose LEDs on the platform board")
 
-set(MCUBOOT_DATA_SHARING                ON          CACHE BOOL      "Add sharing of application specific data using the same shared data area as for the measured boot")
-
 set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
 
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ${CMAKE_SOURCE_DIR}/platform/ext/target/arm/musca_b1/generated_file_list.yaml  CACHE PATH "Path to extra generated file list. Appended to stardard TFM generated file list." FORCE)
@@ -35,3 +33,4 @@ set(PLATFORM_HAS_ISOLATION_L3_SUPPORT   ON)
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT      ON)
 
 set(PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT ON)
+set(MCUBOOT_DATA_SHARING                ON)

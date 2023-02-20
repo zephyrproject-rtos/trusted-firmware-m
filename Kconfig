@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,6 +9,10 @@ mainmenu "TF-M Configuration"
 
 # Load platform Kconfig file if exists
 osource "$(PLATFORM_PATH)/Kconfig"
+
+################################# Bootloader ###################################
+
+rsource "Kconfig.bl"
 
 ################################# SPM ##########################################
 

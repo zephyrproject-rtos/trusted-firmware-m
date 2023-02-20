@@ -278,16 +278,6 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cm
     include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
 endif()
 
-# Load bl1 config
-if(BL1 AND PLATFORM_DEFAULT_BL1)
-    include(${CMAKE_SOURCE_DIR}/bl1/config/bl1_config_default.cmake)
-endif()
-
-# Load MCUboot specific default.cmake
-if(NOT DEFINED BL2 OR BL2)
-    include(${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/mcuboot_default_config.cmake)
-endif()
-
 # Include FWU partition configs.
 include(config/tfm_fwu_config.cmake)
 

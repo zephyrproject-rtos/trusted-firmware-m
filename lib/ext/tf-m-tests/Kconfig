@@ -1,11 +1,30 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
 menu "TF-M regression tests"
+
+################################# Bootloader test ##############################
+
+config TEST_BL1_1
+    bool "BL1_1 tests"
+    default n
+    depends on BL1
+
+config TEST_BL1_2
+    bool "BL1_2 tests"
+    default n
+    depends on BL1
+
+config TEST_BL2
+    bool "BL2 tests"
+    default n
+    depends on BL2
+
+################################# Regression test ##############################
 
 config TEST_S
     bool "Enable default secure test cases"
