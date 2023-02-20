@@ -8,6 +8,7 @@
 menuconfig TFM_PARTITION_CRYPTO
     bool "Crypto"
     depends on TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
+    select CRYPTO_NV_SEED if !CRYPTO_HW_ACCELERATOR
     default n
 
 if TFM_PARTITION_CRYPTO

@@ -278,9 +278,6 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cm
     include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
 endif()
 
-# Include coprocessor configs
-include(config/cp_config_default.cmake)
-
 # Load defaults, setting options not already set
 include(config/config_base.cmake)
 

@@ -14,6 +14,7 @@ config CRYPTO_STACK_SIZE
 
 config CRYPTO_ENGINE_BUF_SIZE
     hex "Crypto engine buffer size"
+    default 0x4000 if CRYPTO_HW_ACCELERATOR_CC312
     default 0x2080
     help
       The mbed TLS library requires to provide a static buffer to be used as
@@ -71,8 +72,10 @@ config CRYPTO_KEY_DERIVATION_MODULE_ENABLED
     default y
 
 config CRYPTO_NV_SEED
-    bool "Use stored NV seed to provide entropy"
-    default y
+    bool
+    default n if CRYPTO_HW_ACCELERATOR
+    help
+      Use stored NV seed to provide entropy
 
 config CRYPTO_SINGLE_PART_FUNCS_DISABLED
     bool "Disable single-part operations"

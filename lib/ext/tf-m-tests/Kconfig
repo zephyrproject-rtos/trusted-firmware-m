@@ -106,6 +106,7 @@ config TEST_S_SFN_BACKEND
 
 config TEST_S_FPU
     bool "FPU"
+    depends on CONFIG_TFM_ENABLE_FP
     default n
 endmenu
 
@@ -188,6 +189,7 @@ endchoice
 
 config TEST_NS_FPU
     bool "FPU"
+    depends on CONFIG_TFM_ENABLE_FP
     default n
 
 config TEST_NS_IPC

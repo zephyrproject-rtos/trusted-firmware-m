@@ -101,16 +101,3 @@ config CONFIG_TFM_FP_ARCH_ASM
     string
     default "FPv5_D16" if FP_ARCH_FPV5_D16
     default ""
-
-################################# Platform Hardware topology ###################
-config TFM_MULTI_CORE_TOPOLOGY
-    bool
-    default n
-    help
-      Dual-cpu architecture
-
-config CONFIG_TFM_USE_TRUSTZONE
-    bool
-    default n
-    help
-      Enable use of TrustZone to transition between NSPE and SPE
