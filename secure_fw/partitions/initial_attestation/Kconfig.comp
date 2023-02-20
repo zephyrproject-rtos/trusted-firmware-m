@@ -21,7 +21,7 @@ config ATTEST_INCLUDE_COSE_KEY_ID
       COSE key-id is an optional field in the COSE unprotected header.
       Key-id is calculated and added to the COSE header based on the value of this option.
 
-choice
+choice ATTEST_TOKEN_PROFILE
     prompt "Token profile"
     default ATTEST_TOKEN_PROFILE_PSA_IOT_1
 

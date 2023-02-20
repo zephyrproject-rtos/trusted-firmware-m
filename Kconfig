@@ -38,6 +38,12 @@ endmenu
 # shall be considered while adopting TF-M to other build systems.
 
 menu "TF-M component configs"
+
+# Load configurations set by PSA arch test
+if TEST_PSA_API != ""
+    rsource "$(TFM_SOURCE_DIR)/config/tests/Kconfig.test_psa_api"
+endif
+
 rsource "secure_fw/spm/Kconfig.comp"
 
 menu "Secure Partitions component configs"
