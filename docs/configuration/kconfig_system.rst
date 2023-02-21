@@ -6,7 +6,7 @@ The Kconfig System
 The Kconfig system is an alternative tool to the CMake config system for users to change config
 options of TF-M.
 
-.. figure:: kconfig_header_file_system.png
+.. figure:: kconfig_header_file_system.svg
 
 It handles dependencies and validations automatically when you change configurations so that the
 generated configuration options are always valid.

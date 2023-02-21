@@ -46,7 +46,7 @@ How to configure
 ****************
 
 TF-M Project provides a base build, defined in ``/config/config_base.cmake``
-and ``/config/profile/config_profile_base.h``. It includes SPM and platform code only.
+and ``/config/config_base.h``.
 Starting from the base, users can enable required services and features using several
 independent methods to configure TF-M.
 
@@ -100,8 +100,8 @@ check the corresponded document.
 Base Configuration
 ******************
 
-The base configuraion is the ground for configuring TF-M providing default
-defined in ``/config/config_base.cmake`` and ``/config/profile/config_profile_base.h``.
+The base configuration is the ground for configuring TF-M providing default
+defined in ``/config/config_base.cmake`` and ``/config/config_base.h``.
 The base build includes SPM and platform code only.
 
 This table lists the config option categorizations of the SPM and Secure
