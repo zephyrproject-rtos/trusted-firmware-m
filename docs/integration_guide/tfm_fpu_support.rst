@@ -18,6 +18,9 @@ Environment (NSPE).
   support SFN model.
 * Support Armv8-M mainline.
 * Support isolation level 1,2,3.
+* Support Arm Compiler for Embedded [10]_. ``Arm Compiler for Embedded 6.17``
+  and later version shall be used to mitigate VLLDM instruction security
+  vulnerability [4]_.
 * Does not support use FPU in First-Level Interrupt Handling (FLIH) [6]_ at
   current stage.
 
@@ -73,7 +76,7 @@ The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
   +--------------------------+---------------------------+
   | CONFIG_TFM_ENABLE_FP     | FP support                |
   +==========================+===========================+
-  | off (default)            | FP diasabled              |
+  | off (default)            | FP disabled               |
   +--------------------------+---------------------------+
   | on                       | FP enabled                |
   +--------------------------+---------------------------+
@@ -107,7 +110,8 @@ The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
   target, valid for FP hardware ABI type.
 
   FP architecture is processor dependent. For GNUARM compiler, example value
-  are: auto, fpv5-d16, fpv5-sp-d16, etc.
+  are: auto, fpv5-d16, fpv5-sp-d16, etc. For armclang, example value are: none,
+  softvfp, fpv5-d16, fpv5-sp-d16, etc.
 
   Default value of ``CONFIG_TFM_FP_ARCH`` for GNUARM compiler is fpv5-sp-d16.
 
@@ -115,6 +119,16 @@ The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
   reference manual and processor hardware manual for more details to set
   correct FPU configuration for platform.
 
+* ``CONFIG_TFM_FP_ARCH_ASM`` specifies the target FPU architecture name shared
+  by Arm Compiler armasm and armlink. It is only used in the ``--fpu=`` argument
+  by Arm Compiler and shall be aligned with ``CONFIG_TFM_FP_ARCH``.
+
+  FP architecture is processor dependent. For armasm and armlink, example value
+  are: SoftVFP, FPv5_D16, etc.
+
+  This parameter shall be specified by platform in preload.cmake. Please check
+  compiler reference manual and processor hardware manual for more details to
+  set correct FPU configuration for platform.
 
 *********
 Reference
@@ -136,6 +150,8 @@ Reference
 .. [8] `GCC Issue on '-mcpu=cortex-m55' conflicts with '-march=armv8.1-m.main' Warning <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97327>`_
 
 .. [9] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
+
+.. [10] `Arm Compiler for Embedded <https://developer.arm.com/Tools%20and%20Software/Arm%20Compiler%20for%20Embedded>`_
 
 --------------
 
