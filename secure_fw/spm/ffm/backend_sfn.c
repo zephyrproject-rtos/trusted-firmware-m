@@ -46,7 +46,6 @@ psa_status_t backend_messaging(struct service_t *service,
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    handle->sfn_magic = TFM_MSG_MAGIC_SFN;
     p_target = service->partition;
     p_target->p_handles = handle;
 

@@ -57,8 +57,6 @@
 
 #define SPM_INVALID_PARTITION_IDX       (~0U)
 
-#define TFM_MSG_MAGIC_SFN               0x21216565
-
 /* Get partition by thread or context data */
 #define GET_THRD_OWNER(x)        TO_CONTAINER(x, struct partition_t, thrd)
 #define GET_CTX_OWNER(x)         TO_CONTAINER(x, struct partition_t, ctx_ctrl)
@@ -75,9 +73,6 @@ struct conn_handle_t {
                                          */
     struct partition_t *p_client;       /* Caller partition               */
     struct service_t *service;          /* RoT service pointer            */
-    union {
-        uint32_t sfn_magic;             /* SFN - Indicate a SFN message   */
-    };
     psa_msg_t msg;                      /* PSA message body               */
     psa_invec invec[PSA_MAX_IOVEC];     /* Put in/out vectors in msg body */
     psa_outvec outvec[PSA_MAX_IOVEC];
