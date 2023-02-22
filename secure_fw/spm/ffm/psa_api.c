@@ -150,7 +150,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
 psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 {
-    struct conn_handle_t *handle = NULL;
+    struct connection_t *handle = NULL;
     struct partition_t *partition = NULL;
     fih_int fih_rc = FIH_FAILURE;
 
@@ -210,12 +210,12 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
                                   void *buffer, size_t num_bytes)
 {
     size_t bytes;
-    struct conn_handle_t *handle = NULL;
+    struct connection_t *handle = NULL;
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_msg_handle(msg_handle);
+    handle = spm_msg_handle_to_connection(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -280,10 +280,10 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
 size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
                                   size_t num_bytes)
 {
-    struct conn_handle_t *handle = NULL;
+    struct connection_t *handle = NULL;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_msg_handle(msg_handle);
+    handle = spm_msg_handle_to_connection(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -340,12 +340,12 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
 void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
                                  const void *buffer, size_t num_bytes)
 {
-    struct conn_handle_t *handle = NULL;
+    struct connection_t *handle = NULL;
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_msg_handle(msg_handle);
+    handle = spm_msg_handle_to_connection(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -409,12 +409,12 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
                                          psa_status_t status)
 {
     struct service_t *service;
-    struct conn_handle_t *handle;
+    struct connection_t *handle;
     psa_status_t ret = PSA_SUCCESS;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_msg_handle(msg_handle);
+    handle = spm_msg_handle_to_connection(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -521,7 +521,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
     CRITICAL_SECTION_LEAVE(cs_assert);
 
     if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {
-        tfm_spm_free_conn_handle(handle);
+        spm_free_connection(handle);
     } else {
         handle->status = TFM_HANDLE_STATUS_IDLE;
     }
@@ -676,12 +676,12 @@ void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
 const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
                                             uint32_t invec_idx)
 {
-    struct conn_handle_t *handle;
+    struct connection_t *handle;
     struct partition_t *partition = NULL;
     fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_msg_handle(msg_handle);
+    handle = spm_msg_handle_to_connection(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -752,10 +752,10 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
 void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
                                        uint32_t invec_idx)
 {
-    struct conn_handle_t *handle;
+    struct connection_t *handle;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_msg_handle(msg_handle);
+    handle = spm_msg_handle_to_connection(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -806,12 +806,12 @@ void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
 void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
                                        uint32_t outvec_idx)
 {
-    struct conn_handle_t *handle;
+    struct connection_t *handle;
     struct partition_t *partition = NULL;
     fih_int fih_rc = FIH_FAILURE;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_msg_handle(msg_handle);
+    handle = spm_msg_handle_to_connection(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }
@@ -880,10 +880,10 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
 void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
                                         uint32_t outvec_idx, size_t len)
 {
-    struct conn_handle_t *handle;
+    struct connection_t *handle;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_msg_handle(msg_handle);
+    handle = spm_msg_handle_to_connection(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }

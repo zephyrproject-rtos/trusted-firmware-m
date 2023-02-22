@@ -19,7 +19,7 @@
 psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
 {
     struct service_t *service;
-    struct conn_handle_t *conn_handle;
+    struct connection_t *p_connection;
     int32_t client_id;
     psa_handle_t handle;
     bool ns_caller = tfm_spm_is_ns_caller();
@@ -62,24 +62,24 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
      * code to client when creation fails.
      */
     CRITICAL_SECTION_ENTER(cs_assert);
-    conn_handle = tfm_spm_create_conn_handle();
+    p_connection = spm_allocate_connection();
     CRITICAL_SECTION_LEAVE(cs_assert);
-    if (!conn_handle) {
+    if (!p_connection) {
         return PSA_ERROR_CONNECTION_BUSY;
     }
 
-    handle = tfm_spm_to_user_handle(conn_handle);
+    handle = connection_to_handle(p_connection);
     /* No input or output needed for connect message */
-    spm_fill_message(conn_handle, service, handle, PSA_IPC_CONNECT,
+    spm_fill_message(p_connection, service, handle, PSA_IPC_CONNECT,
                      client_id, NULL, 0, NULL, 0, NULL);
 
-    return backend_messaging(service, conn_handle);
+    return backend_messaging(service, p_connection);
 }
 
 psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 {
     struct service_t *service;
-    struct conn_handle_t *conn_handle;
+    struct connection_t *p_connection;
     int32_t client_id;
     bool ns_caller = tfm_spm_is_ns_caller();
 
@@ -99,12 +99,12 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
      * It is a PROGRAMMER ERROR if an invalid handle was provided that is not
      * the null handle.
      */
-    conn_handle = spm_get_handle_by_client_handle(handle, client_id);
-    if (!conn_handle) {
+    p_connection = spm_get_client_connection(handle, client_id);
+    if (!p_connection) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    service = conn_handle->service;
+    service = p_connection->service;
     if (!service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         return PSA_ERROR_PROGRAMMER_ERROR;
@@ -114,23 +114,23 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
      * It is a PROGRAMMER ERROR if the connection is currently handling a
      * request.
      */
-    if (conn_handle->status == TFM_HANDLE_STATUS_ACTIVE) {
+    if (p_connection->status == TFM_HANDLE_STATUS_ACTIVE) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
     /* No input or output needed for close message */
-    spm_fill_message(conn_handle, service, handle, PSA_IPC_DISCONNECT,
+    spm_fill_message(p_connection, service, handle, PSA_IPC_DISCONNECT,
                      client_id, NULL, 0, NULL, 0, NULL);
 
-    return backend_messaging(service, conn_handle);
+    return backend_messaging(service, p_connection);
 }
 
 void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
 {
-    struct conn_handle_t *handle;
+    struct connection_t *handle;
 
     /* It is a fatal error if message handle is invalid */
-    handle = spm_get_handle_by_msg_handle(msg_handle);
+    handle = spm_msg_handle_to_connection(msg_handle);
     if (!handle) {
         tfm_core_panic();
     }

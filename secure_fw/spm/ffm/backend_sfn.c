@@ -37,7 +37,7 @@ struct partition_t *p_current_partition;
  * current component state and activate the next component.
  */
 psa_status_t backend_messaging(struct service_t *service,
-                               struct conn_handle_t *handle)
+                               struct connection_t *handle)
 {
     struct partition_t *p_target;
     psa_status_t status;
@@ -69,7 +69,7 @@ psa_status_t backend_messaging(struct service_t *service,
     return status;
 }
 
-psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
+psa_status_t backend_replying(struct connection_t *handle, int32_t status)
 {
     SET_CURRENT_COMPONENT(handle->p_client);
 

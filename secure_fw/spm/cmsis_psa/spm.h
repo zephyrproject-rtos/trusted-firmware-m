@@ -62,7 +62,7 @@
 #define GET_CTX_OWNER(x)         TO_CONTAINER(x, struct partition_t, ctx_ctrl)
 
 /* RoT connection handle list */
-struct conn_handle_t {
+struct connection_t {
     void *rhandle;                      /* Reverse handle value           */
     uint32_t status;                    /*
                                          * Status of handle, three valid
@@ -90,7 +90,7 @@ struct conn_handle_t {
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
     uint32_t iovec_status;              /* MM-IOVEC status                */
 #endif
-    struct conn_handle_t *p_handles;    /* Handle(s) link                 */
+    struct connection_t *p_handles;     /* Handle(s) link                 */
 };
 
 /* Partition runtime type */
@@ -109,7 +109,7 @@ struct partition_t {
 #else
     uint32_t                           state;           /* SFN model */
 #endif
-    struct conn_handle_t               *p_handles;
+    struct connection_t                *p_handles;
     struct partition_t                 *next;
 };
 
@@ -129,33 +129,12 @@ int32_t tfm_spm_partition_get_running_partition_id(void);
 
 /******************** Service handle management functions ********************/
 
-/**
- * \brief                   Create connection handle for client connect
- *
- * \retval NULL             Create failed
- * \retval "Not NULL"       Service handle created
- */
-struct conn_handle_t *tfm_spm_create_conn_handle(void);
+struct connection_t *spm_allocate_connection(void);
 
-/**
- * \brief                   Validate connection handle for client connect
- *
- * \param[in] conn_handle   Handle to be validated
- *
- * \retval PSA_SUCCESS        Success
- * \retval SPM_ERROR_GENERIC  Invalid handle
- */
-psa_status_t tfm_spm_validate_conn_handle(const struct conn_handle_t *conn_handle);
+psa_status_t spm_validate_connection(const struct connection_t *p_connection);
 
-/**
- * \brief                   Free connection handle which not used anymore.
- *
- * \param[in] conn_handle   Connection handle created by
- *                          tfm_spm_create_conn_handle()
- *
- * \retval "Does not return"  Panic for not find service by handle
- */
-void tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle);
+/* Panic if invalid connection is given. */
+void spm_free_connection(struct connection_t *p_connection);
 
 /******************** Partition management functions *************************/
 
@@ -171,8 +150,8 @@ void tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle);
  * also get updated based on the count of handles with given signal
  * still in the partition handles.
  */
-struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
-                                               psa_signal_t signal);
+struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
+                                              psa_signal_t signal);
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC */
 
 #if CONFIG_TFM_DOORBELL_API == 1
@@ -211,10 +190,10 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
  *
  * \return                  A SPM recognised handle or NULL. It is NULL when
  *                          verification of the converted SPM handle fails.
- *                          \ref conn_handle_t structures
+ *                          \ref connection_t structures
  */
-struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
-                                                      int32_t client_id);
+struct connection_t *spm_get_client_connection(psa_handle_t handle,
+                                               int32_t client_id);
 #endif
 
 /**
@@ -226,14 +205,14 @@ struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
  *
  * \return                  A SPM recognised handle or NULL. It is NULL when
  *                          verification of the converted SPM handle fails.
- *                          \ref conn_handle_t structures
+ *                          \ref connection_t structures
  */
-struct conn_handle_t *spm_get_handle_by_msg_handle(psa_handle_t msg_handle);
+struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle);
 
 /**
  * \brief                   Fill the user message in handle.
  *
- * \param[in] conn_handle   The 'conn_handle' contains the user message.
+ * \param[in] p_connection  The 'p_connection' contains the user message.
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
  * \prarm[in] handle        Connect handle return by psa_connect().
@@ -246,7 +225,7 @@ struct conn_handle_t *spm_get_handle_by_msg_handle(psa_handle_t msg_handle);
  * \param[in] out_len       Number of output \ref psa_outvec structures
  * \param[in] caller_outvec Array of caller output \ref psa_outvec structures
  */
-void spm_fill_message(struct conn_handle_t *conn_handle,
+void spm_fill_message(struct connection_t *p_connection,
                       struct service_t *service,
                       psa_handle_t handle,
                       int32_t type, int32_t client_id,
@@ -329,19 +308,19 @@ uint32_t tfm_spm_init(void);
 /**
  * \brief Converts a handle instance into a corresponded user handle.
  */
-psa_handle_t tfm_spm_to_user_handle(struct conn_handle_t *handle_instance);
+psa_handle_t connection_to_handle(struct connection_t *p_connection);
 
 /**
  * \brief Converts a user handle into a corresponded handle instance.
  */
-struct conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle);
+struct connection_t *handle_to_connection(psa_handle_t handle);
 
 /**
  * \brief Move to handler mode by a SVC for specific purpose
  */
 void tfm_core_handler_mode(void);
 
-void update_caller_outvec_len(struct conn_handle_t *handle);
+void update_caller_outvec_len(struct connection_t *handle);
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 

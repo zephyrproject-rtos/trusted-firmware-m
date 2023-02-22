@@ -44,13 +44,13 @@ uint32_t backend_system_run(void);
 
 /* Runtime model-specific message handling mechanism. */
 psa_status_t backend_messaging(struct service_t *p_serv,
-                               struct conn_handle_t *handle);
+                               struct connection_t *handle);
 
 /*
  * Runtime model-specific message replying.
  * Return the connection handle or the acked status code.
  */
-psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status);
+psa_status_t backend_replying(struct connection_t *handle, int32_t status);
 
 /**
  * \brief Set the wait signal pattern in current partition.

@@ -25,7 +25,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
 {
     psa_invec invecs[PSA_MAX_IOVEC];
     psa_outvec outvecs[PSA_MAX_IOVEC];
-    struct conn_handle_t *conn_handle;
+    struct connection_t *p_connection;
     struct service_t *service;
     int i, j;
     int32_t client_id;
@@ -83,20 +83,20 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         }
 
         CRITICAL_SECTION_ENTER(cs_assert);
-        conn_handle = tfm_spm_create_conn_handle();
+        p_connection = spm_allocate_connection();
         CRITICAL_SECTION_LEAVE(cs_assert);
 
-        if (!conn_handle) {
+        if (!p_connection) {
             return PSA_ERROR_CONNECTION_BUSY;
         }
 
-        conn_handle->rhandle = NULL;
-        handle = tfm_spm_to_user_handle(conn_handle);
+        p_connection->rhandle = NULL;
+        handle = connection_to_handle(p_connection);
     } else {
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
         /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
-        conn_handle = spm_get_handle_by_client_handle(handle, client_id);
-        if (!conn_handle) {
+        p_connection = spm_get_client_connection(handle, client_id);
+        if (!p_connection) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
@@ -104,11 +104,11 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
          * It is a PROGRAMMER ERROR if the connection is currently
          * handling a request.
          */
-        if (conn_handle->status != TFM_HANDLE_STATUS_IDLE) {
+        if (p_connection->status != TFM_HANDLE_STATUS_IDLE) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        service = conn_handle->service;
+        service = p_connection->service;
 
         if (!service) {
             /* FixMe: Need to implement a mechanism to resolve this failure. */
@@ -192,8 +192,8 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         }
     }
 
-    spm_fill_message(conn_handle, service, handle, type, client_id,
+    spm_fill_message(p_connection, service, handle, type, client_id,
                      invecs, in_num, outvecs, out_num, outptr);
 
-    return backend_messaging(service, conn_handle);
+    return backend_messaging(service, p_connection);
 }

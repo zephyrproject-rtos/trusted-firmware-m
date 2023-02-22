@@ -147,7 +147,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
  * current thread and trigger scheduler.
  */
 psa_status_t backend_messaging(struct service_t *service,
-                               struct conn_handle_t *handle)
+                               struct connection_t *handle)
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
@@ -178,7 +178,7 @@ psa_status_t backend_messaging(struct service_t *service,
     return PSA_SUCCESS;
 }
 
-psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
+psa_status_t backend_replying(struct connection_t *handle, int32_t status)
 {
     if (is_tfm_rpc_msg(handle)) {
         tfm_rpc_client_call_reply(handle, status);
