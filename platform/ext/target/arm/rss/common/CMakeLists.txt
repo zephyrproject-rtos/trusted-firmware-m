@@ -116,6 +116,9 @@ target_include_directories(platform_s
         partition
         services/src
         ${PLATFORM_DIR}/..
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
 )
 
 target_sources(platform_s
@@ -134,10 +137,10 @@ target_sources(platform_s
         native_drivers/mhu_v2_x.c
         native_drivers/mhu_wrapper_v2_x.c
         native_drivers/mpc_sie_drv.c
-        native_drivers/mpu_armv8m_drv.c
         native_drivers/ppc_rss_drv.c
-        native_drivers/syscounter_armv8-m_cntrl_drv.c
-        native_drivers/systimer_armv8-m_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
         tfm_peripherals_def.c
@@ -164,7 +167,7 @@ target_sources(tfm_sprt
     PRIVATE
         # SLIH test Partition and FLIH test Partition access the timer as ARoT Partitions.
         # Put the driver to SPRT so that both SLIH and FLIH tests can access it.
-        $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/systimer_armv8-m_drv.c>
+        $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c>
 )
 
 target_compile_definitions(platform_s
@@ -206,7 +209,6 @@ target_sources(platform_ns
         device/source/device_definition.c
         device/source/host_device_definition.c
         device/source/system_core_init.c
-        native_drivers/systimer_armv8-m_drv.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_ns_mailbox.c>
@@ -225,6 +227,8 @@ target_include_directories(platform_ns
         device/source/armclang
         native_drivers
         partition
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
 )
 
 #========================= Platform BL2 =======================================#
@@ -268,10 +272,11 @@ target_include_directories(platform_bl2
         partition
         services/src
         libraries
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
 
     PRIVATE
         ${PLATFORM_DIR}/..
-        native_drivers
         ./fip_parser
 )
 
@@ -328,6 +333,8 @@ target_include_directories(platform_bl1_interface
         ./device/include
         ./native_drivers
         ./fip_parser
+        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
 )
 
 target_compile_definitions(platform_bl1
