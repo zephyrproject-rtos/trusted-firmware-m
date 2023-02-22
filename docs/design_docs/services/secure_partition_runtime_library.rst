@@ -202,35 +202,40 @@ Due to specified API (printf, e.g.) need to access privileged resources, TF-M
 Core needs to provide interface for the resources accessing. The permission
 checking must happen in Core while caller is calling these interface.
 
-Secure Partition Scratch Area
-=============================
-For the API needs partition specific private data, there needs to be a way to
-pass the partition specific data for the API. Use C language preprocessor to
-forward the existing prototype declaration can work, but it has the risks of
-breaking the build since this method needs compilers support ('-include' e.g.).
-Furthermore, no valid runtime tricks can work due to these limitations on
-M-profile architecture:
+Secure Partition Local Storage
+==============================
+There are APIs that need to reference specific partition private data ('malloc'
+references local heap, e.g.), and the APIs reference the data by mechanisms
+other than function parameters. The mechanism in TF-M is called
+'Secure Partition Local Storage'.
+
+A straight way for accessing the local storage is to put the local storage
+pointer in a known position in the stack, but there is a bit of difficulty in
+particular scenarios.
 
 .. note::
-  - We cannot apply the aligned mask on a stack address to get stack bottom
-    where the private data pointer stands. This is because aligned stack bottom
-    is not supported.
-  - We cannot read special registers such as 'PSPLIMIT' for retrieving the
-    private data pointer while executing in unprivileged mode.
-  - Furthermore, some earlier versions of the ARM architecture do not have
-    certain special-purpose registers ('PSPLIMIT' etc.).
+  - The partition's stack is not fixed-size aligned, using stack address
+    aligning method can not work.
+  - It requires privileged permission to *access* special registers such
+    as `PSPLIMIT`. And Armv6-M and Armv7-M don't have `PSPLIMIT`.`
 
-A system-provided scratch area is a precondition for implementing APIs that need
-to access private data (such as 'malloc'). The requirements for implementing
-such an area are:
+Another common method is to put the pointer in one shared global variable, and
+the scheduler maintains the value of this variable to point to the running
+partition's local storage in runtime. It does not fully align with SPRTL design
+prerequisites listed above, hence extra settings are required to guarantee the
+isolation boundaries are not broken.
 
 .. important::
-  - The area must be ``READ-ONLY`` for the running Secure Partition.
-  - The SPM must put the running Secure Partition's metadata into this area
-    while scheduling.
+  - This variable is put inside a dedicated shared region and it can not hold
+    information not belonging to the owner.
 
-With these requirements, the passed parameters can be retrieved by SPRTL easily
-with a read operation on the fixed memory address.
+And this mechanism has disadvantages:
+
+  - It needs extra maintenance effort from the scheduler and extra resources
+    for containing the variable.
+
+TF-M chooses this common way as the default option for local storage and can
+be expanded to support more methods.
 
 Tooling Support on Partition Entry
 ==================================
@@ -241,18 +246,19 @@ PSA FF requires each Secure Partition to have an entry point. For example:
   /* The entry point function must not return. */
   void entry_point(void);
 
-Each partition has its own dedicated metadata for heap tracking and other
-runtime state. The metadata is designed to be saved at the read-write data area
+Each partition has its own dedicated local_storage for heap tracking and other
+runtime state. The local_storage is designed to be saved at the read-write data area
 of a partition with a specific name. A generic entry point needs to be available
-to get partition metadata and do initialization before calling into the actual
+to get partition local_storage and do initialization before calling into the actual
 partition entry. This generic entry point is defined as '__sprtmain':
 
 .. code-block:: c
 
     void __sprtmain(void)
     {
-      /* Get current SP private data from scratch area */
-      struct sprt_meta_t *m = (struct sprt_meta_t *)tfm_sprt_scratch_data;
+      /* Get current SP private data from local storage */
+      struct p_sp_local_storage_t *m =
+              (struct p_sp_local_storage_t *)tfm_sprt_local_storage;
 
       /* Potential heap init - check later chapter */
       if (m->heap_size) {
@@ -262,7 +268,7 @@ partition entry. This generic entry point is defined as '__sprtmain':
       /* Call thread entry 'entry_point' */
       m->thread_entry();
 
-      /* SVC back to tell Core end this thread */
+      /* Back to tell Core end this thread */
       SVC(THREAD_EXIT);
     }
 
@@ -285,8 +291,8 @@ partition manifest:
   }
 
 Tooling would do manipulation to tell SPM the partition entry as '__sprtmain',
-and TF-M SPM would switch the activated metadata into the scratch area. Finally,
-the partition entry point gets called and run, tooling helps on the decoupling
+and TF-M SPM would maintain the local storage at run time. Finally, the
+partition entry point gets called and run, tooling helps on the decoupling
 of SPM and SPRTL implementation. The pseudo code of a tooling result:
 
 .. code-block:: c
@@ -297,7 +303,7 @@ of SPM and SPRTL implementation. The pseudo code of a tooling result:
     .priority = NORMAL,
     .id = 0x00000100,
     .entry_point = __sprtmain, /* Tell SPM entry is '__sprtmain' */
-    .metadata = { /* struct sprt_meta_t */
+    .local_storage = { /* struct sprt_local_storage_t */
       .heap_sa = sp1_heap_buf,
       .heap_sz = sizeof(sp1_heap_buf),
       .thread_entry = sp1_entry, /* Actual Partition Entry */
@@ -336,8 +342,8 @@ To provide a simple implementation, the following requirements are defined for
 
 The interface for flushing can be a logging device.
 
-Function with Implied Parameters
---------------------------------
+Function needs implied inputs
+-----------------------------
 Take 'malloc' as an example. There is only one parameter for 'malloc' in
 the prototype. Heap management code is put in the SPRTL for sharing with caller
 partitions. The heap instance belongs to each partition, which means this
@@ -345,13 +351,14 @@ instance needs to be passed into the heap management code as a parameter. For
 allocation API in heap management, it needs two parameters - 'size' and
 'instance', while for 'malloc' caller it needs a 'malloc' with one parameter
 'size' only. As mentioned in the upper chapter, this instance can be retrieved
-from the Secure Partition scratch area. The implementation can be:
+from the Secure Partition Local Storage. The implementation can be:
 
 .. code-block:: c
 
   void *malloc(size_t sz)
   {
-      struct sprt_meta_t *m = (struct sprt_meta_t *)tfm_sprt_scratch_data;
+      struct p_sp_local_storage_t *m =
+          (struct p_sp_local_storage_t *)tfm_sprt_local_storage;
 
       return tfm_sprt_alloc(m->heap_instance, sz);
   }

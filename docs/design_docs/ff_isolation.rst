@@ -175,7 +175,7 @@ necessary regions for each asset type in one partition only.
 There is re-usable code like the C-Runtime and RoT Service API which are same
 across different partitions. TF-M creates a Secure Partition Runtime Library
 (SPRTL) as a specific library shared by the Secure Partition. Please refer to
-:doc:`Secure Partition Runtime Library </design_docs/services/tfm_secure_partition_runtime_library>`
+:doc:`Secure Partition Runtime Library </design_docs/services/secure_partition_runtime_library>`
 for more detail.
 
 .. note::
