@@ -94,6 +94,18 @@ macro(tfm_toolchain_reload_compiler)
 
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
+
+    # Can't use the highest optimization with IAR on v8.1m arch because of the
+    # compilation bug in mbedcrypto
+    if ((CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "9.20") AND
+        (CMAKE_C_COMPILER_VERSION VERSION_LESS_EQUAL "9.32") AND
+        ((TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85") OR
+         (TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55")) AND
+        (CMAKE_BUILD_TYPE STREQUAL "Release"))
+        message(FATAL_ERROR "Release build isn't available for M55 and M85"
+                " cores with IAR version between 9.20 and 9.32.")
+    endif()
+
 endmacro()
 
 # Configure environment for the compiler setup run by cmake at the first
