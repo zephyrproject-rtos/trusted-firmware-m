@@ -78,12 +78,11 @@ FVP
 
 .. code-block:: bash
 
-    cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=<tf-m-root>/trusted-firmware-m/platform/ext/target/arm/corstone1000/ci_regression_tests/
+    cd <tf-m-root>/
+    cmake -B build/ -S  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
     cmake --build build -- install
-    cd ./build/install/outputs/
-    cat bl2_signed.bin bl2_signed.bin tfm_s_signed.bin > cs1000.bin
-    cd <path-to-FVP-installation>/models/Linux64_GCC-9.3/
-    ./FVP_Corstone-1000 -C board.flashloader0.fname="none" -C se.trustedBootROMloader.fname="./<path-to-build-dir>/install/outputs/bl1.bin" -C board.xnvm_size=64 -C se.trustedSRAM_config=6 -C se.BootROM_config="3" -C board.smsc_91c111.enabled=0  -C board.hostbridge.userNetworking=true --data board.flash0=./<path-to-build-dir>/install/outputs/cs1000.bin@0x68100000 -C diagnostics=4 -C disable_visualisation=true -C board.se_flash_size=8192 -C diagnostics=4  -C disable_visualisation=true
+    ./platform/ext/target/arm/corstone1000/create-flash-image.sh build/install/outputs cs1000.bin
+    <path-to-FVP-installation>/models/Linux64_GCC-9.3/FVP_Corstone-1000 -C board.flashloader0.fname="none" -C se.trustedBootROMloader.fname="build/install/outputs/bl1.bin" -C board.xnvm_size=64 -C se.trustedSRAM_config=6 -C se.BootROM_config="3" -C board.smsc_91c111.enabled=0  -C board.hostbridge.userNetworking=true --data board.flash0=build/install/outputs/cs1000.bin@0x68000000 -C diagnostics=4 -C disable_visualisation=true -C board.se_flash_size=8192 -C diagnostics=4  -C disable_visualisation=true
 
 FPGA
 ----
@@ -94,12 +93,12 @@ FPGA
 
 .. code-block:: bash
 
-    cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=<tf-m-root>/trusted-firmware-m/platform/ext/target/arm/corstone1000/ci_regression_tests/ -DTEST_S_PS=OFF -DTEST_S_PLATFORM=OFF
+    cd <tf-m-root>/
+    cmake -B build/ -S  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DTEST_NS=OFF -DTEST_S=ON -DTEST_S_PS=OFF -DTEST_S_PLATFORM=OFF -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
     cmake --build build -- install
-    cd ./build/install/outputs/
-    cat bl2_signed.bin bl2_signed.bin tfm_s_signed.bin > cs1000.bin
-    cp bl1.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
-    cp cs1000.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
+    ./platform/ext/target/arm/corstone1000/create-flash-image.sh build/install/outputs cs1000.bin
+    cp build/install/outputs/bl1.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
+    cp build/install/outputs/cs1000.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
 
 FPGA build can not compile all the CI tests into a single build as it exceeds
 the available RAM size. So there is a need to select few tests but not all.
