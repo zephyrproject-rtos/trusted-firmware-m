@@ -10,7 +10,7 @@
  */
 
 #include "attest_token.h"
-#include "config_attest.h"
+#include "config_tfm.h"
 #include "qcbor/qcbor.h"
 #ifdef SYMMETRIC_INITIAL_ATTESTATION
 #include "t_cose_mac0_sign.h"

@@ -7,7 +7,7 @@
 #ifndef __CRYPTO_CHECK_CONFIG_H__
 #define __CRYPTO_CHECK_CONFIG_H__
 
-#include "config_crypto.h"
+#include "config_tfm.h"
 
 #if CRYPTO_RNG_MODULE_ENABLED  && \
     (!defined(MBEDTLS_CTR_DRBG_C) &&            \

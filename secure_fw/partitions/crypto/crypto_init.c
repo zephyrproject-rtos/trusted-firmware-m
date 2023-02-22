@@ -6,7 +6,8 @@
  */
 #include <stdbool.h>
 
-#include "config_crypto.h"
+#include "config_tfm.h"
+#include "config_crypto_check.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"

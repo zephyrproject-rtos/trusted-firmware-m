@@ -7,7 +7,7 @@
 
 #include "its_flash.h"
 
-#include "config_its.h"
+#include "config_tfm.h"
 #include "flash_fs/its_flash_fs.h"
 
 #if ITS_RAM_FS

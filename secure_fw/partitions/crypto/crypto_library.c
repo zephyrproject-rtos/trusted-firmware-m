@@ -11,7 +11,7 @@
 
 #include "tfm_sp_log.h"
 
-#include "config_crypto.h"
+#include "config_tfm.h"
 #include "psa/crypto.h"
 #include "psa/error.h"
 #include "crypto_library.h"

@@ -7,7 +7,7 @@
  *
  */
 #include <string.h>
-#include "config_its.h"
+#include "config_tfm.h"
 #include "tfm_internal_trusted_storage.h"
 
 #include "tfm_hal_its.h"

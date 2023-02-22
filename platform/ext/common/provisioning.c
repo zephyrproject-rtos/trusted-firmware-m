@@ -5,7 +5,7 @@
  *
  */
 
-#include "config_attest.h"
+#include "config_tfm.h"
 #include "tfm_plat_provisioning.h"
 
 #include "cmsis_compiler.h"

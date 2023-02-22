@@ -10,7 +10,7 @@
 #include <stdbool.h>
 
 #include "cmsis_compiler.h"
-#include "config_its.h"
+#include "config_tfm.h"
 #include "psa/storage_common.h"
 #include "tfm_internal_trusted_storage.h"
 #include "its_utils.h"

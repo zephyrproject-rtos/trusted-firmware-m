@@ -11,7 +11,7 @@
 #include <string.h>
 
 #include "cmsis_compiler.h"
-#include "config_ps.h"
+#include "config_tfm.h"
 #include "crypto/ps_crypto_interface.h"
 #include "nv_counters/ps_nv_counters.h"
 #include "psa/internal_trusted_storage.h"

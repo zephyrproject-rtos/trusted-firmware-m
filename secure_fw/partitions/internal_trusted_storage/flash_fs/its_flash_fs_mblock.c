@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-#include "config_its.h"
+#include "config_tfm.h"
 #include "its_flash_fs_mblock.h"
 #include "psa/storage_common.h"
 

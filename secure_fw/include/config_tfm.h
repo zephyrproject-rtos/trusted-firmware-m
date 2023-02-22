@@ -24,6 +24,8 @@ extern "C" {
 #include TARGET_CONFIG_HEADER_FILE
 #endif
 
+#include "config_base.h"
+
 #ifdef __cplusplus
 }
 #endif

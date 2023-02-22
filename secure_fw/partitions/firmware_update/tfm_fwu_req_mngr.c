@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include "config_fwu.h"
+#include "config_tfm.h"
 #include "tfm_platform_api.h"
 #include "tfm_bootloader_fwu_abstraction.h"
 #include "psa/update.h"

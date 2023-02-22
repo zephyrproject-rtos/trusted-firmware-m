@@ -11,7 +11,7 @@
 #ifndef __ITS_FLASH_H__
 #define __ITS_FLASH_H__
 
-#include "config_its.h"
+#include "config_tfm.h"
 #include "its_utils.h"
 #include "tfm_hal_its.h"
 #ifdef TFM_PARTITION_PROTECTED_STORAGE

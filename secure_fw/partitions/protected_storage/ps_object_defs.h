@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "config_ps.h"
+#include "config_tfm.h"
 #include "psa/protected_storage.h"
 
 #ifdef PS_ENCRYPTION

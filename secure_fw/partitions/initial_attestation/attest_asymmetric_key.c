@@ -9,7 +9,7 @@
 #include "attest_key.h"
 #include <stdint.h>
 #include <stddef.h>
-#include "config_attest.h"
+#include "config_tfm.h"
 #include "tfm_plat_defs.h"
 #include "tfm_plat_device_id.h"
 #include "t_cose_standard_constants.h"

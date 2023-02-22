@@ -5,7 +5,8 @@
  *
  */
 
-#include "config_ps.h"
+#include "config_tfm.h"
+#include "config_ps_check.h"
 #include "tfm_protected_storage.h"
 #include "ps_object_system.h"
 #include "tfm_ps_defs.h"

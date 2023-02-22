@@ -7,7 +7,7 @@
 
 #include "tfm_plat_provisioning.h"
 
-#include "config_attest.h"
+#include "config_tfm.h"
 #include "cmsis_compiler.h"
 #include "tfm_plat_otp.h"
 #include "tfm_attest_hal.h"

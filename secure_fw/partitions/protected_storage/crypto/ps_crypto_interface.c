@@ -10,7 +10,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "config_ps.h"
+#include "config_tfm.h"
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
 

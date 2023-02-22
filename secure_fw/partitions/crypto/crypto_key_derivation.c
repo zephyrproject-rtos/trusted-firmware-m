@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "config_crypto.h"
+#include "config_tfm.h"
 #include "tfm_sp_log.h"
 
 #include "tfm_mbedcrypto_include.h"

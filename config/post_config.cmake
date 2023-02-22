@@ -46,3 +46,8 @@ if(EXISTS ${TARGET_CONFIG_HEADER_FILE})
             TARGET_CONFIG_HEADER_FILE="${TARGET_CONFIG_HEADER_FILE}"
     )
 endif()
+
+target_include_directories(tfm_config
+    INTERFACE
+        ${CMAKE_CURRENT_LIST_DIR}
+)
