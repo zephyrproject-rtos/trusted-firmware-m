@@ -236,7 +236,7 @@ static inline int32_t ARM_USARTx_Control(UARTx_Resources *uart_dev,
  *                                \ref uart_cmsdk_dev_t
  * \param[out] USART_DRIVER_NAME  Resulting Driver name
  */
-#define ARM_DRIVER_USART(USART_DEV, USART_DRIVER_NAME)                        \
+#define ARM_DRIVER_USART_CMSDK(USART_DEV, USART_DRIVER_NAME)                  \
 static UARTx_Resources USART_DRIVER_NAME##_DEV = {                            \
     .dev = &USART_DEV,                                                        \
     .tx_nbr_bytes = 0,                                                        \
@@ -317,6 +317,7 @@ static ARM_USART_MODEM_STATUS USART_DRIVER_NAME##_GetModemStatus(void)        \
     return modem_status;                                                      \
 }                                                                             \
                                                                               \
+extern ARM_DRIVER_USART USART_DRIVER_NAME;                                    \
 ARM_DRIVER_USART USART_DRIVER_NAME   = {                                      \
     ARM_USART_GetVersion,                                                     \
     ARM_USART_GetCapabilities,                                                \

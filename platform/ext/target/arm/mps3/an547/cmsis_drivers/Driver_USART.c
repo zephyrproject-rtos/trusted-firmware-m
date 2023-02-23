@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "Driver_USART_Cmsdk.h"
+#include "Driver_USART_CMSDK.h"
 #include "cmsis_driver_config.h"
 #include "RTE_Device.h"
 
@@ -28,31 +28,31 @@
 
 #if (defined (RTE_USART0) && (RTE_USART0 == 1))
 
-ARM_DRIVER_USART(UART0_CMSDK_DEV, Driver_USART0);
+ARM_DRIVER_USART_CMSDK(UART0_CMSDK_DEV, Driver_USART0);
 
 #endif /* RTE_USART0 */
 
 #if (defined (RTE_USART1) && (RTE_USART1 == 1))
 
-ARM_DRIVER_USART(UART1_CMSDK_DEV, Driver_USART1);
+ARM_DRIVER_USART_CMSDK(UART1_CMSDK_DEV, Driver_USART1);
 
 #endif /* RTE_USART1 */
 
 #if (defined (RTE_USART2) && (RTE_USART2 == 1))
 
-ARM_DRIVER_USART(UART2_CMSDK_DEV, Driver_USART2);
+ARM_DRIVER_USART_CMSDK(UART2_CMSDK_DEV, Driver_USART2);
 
 #endif /* RTE_USART2 */
 
 #if (defined (RTE_USART3) && (RTE_USART3 == 1))
 
-ARM_DRIVER_USART(UART3_CMSDK_DEV, Driver_USART3);
+ARM_DRIVER_USART_CMSDK(UART3_CMSDK_DEV, Driver_USART3);
 
 #endif /* RTE_USART3 */
 
 #if (defined (RTE_USART4) && (RTE_USART4 == 1))
 
-ARM_DRIVER_USART(UART4_CMSDK_DEV, Driver_USART4);
+ARM_DRIVER_USART_CMSDK(UART4_CMSDK_DEV, Driver_USART4);
 
 #endif /* RTE_USART4 */
 #endif
