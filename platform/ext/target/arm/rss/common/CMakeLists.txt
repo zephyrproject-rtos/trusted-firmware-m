@@ -120,6 +120,8 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
 )
 
 target_sources(platform_s
@@ -143,7 +145,7 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
-        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         tfm_peripherals_def.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -211,7 +213,7 @@ target_sources(platform_ns
         device/source/host_device_definition.c
         device/source/system_core_init.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
-        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_ns_mailbox.c>
 )
 
@@ -231,6 +233,8 @@ target_include_directories(platform_ns
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
 )
 
 #========================= Platform BL2 =======================================#
@@ -250,7 +254,7 @@ target_sources(platform_bl2
         native_drivers/sic_drv.c
         native_drivers/mhu_v2_x.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
-        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         native_drivers/lcm_drv.c
         otp_lcm.c
         nv_counters.c
@@ -277,6 +281,8 @@ target_include_directories(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
 
     PRIVATE
         ${PLATFORM_DIR}/..
@@ -317,7 +323,7 @@ target_sources(platform_bl1
         ./native_drivers/atu_rss_drv.c
         ./native_drivers/kmu_drv.c
         $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
-        $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/uart_cmsdk_drv.c>
+        $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         ./native_drivers/lcm_drv.c
         ./otp_lcm.c
         ./nv_counters.c
@@ -339,6 +345,8 @@ target_include_directories(platform_bl1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
 )
 
 target_compile_definitions(platform_bl1

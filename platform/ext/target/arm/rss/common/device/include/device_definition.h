@@ -46,16 +46,6 @@ extern struct atu_dev_t ATU_DEV_S;
 extern struct sic_dev_t SIC_DEV_S;
 #endif
 
-/* UART PL011 driver structures */
-#ifdef UART0_PL011_S
-#include "uart_pl011_drv.h"
-extern struct uart_pl011_dev_t UART0_PL011_DEV_S;
-#endif
-#ifdef UART0_PL011_NS
-#include "uart_pl011_drv.h"
-extern struct uart_pl011_dev_t UART0_PL011_DEV_NS;
-#endif
-
 /* ARM PPC driver structures */
 #ifdef PPC_RSS_MAIN0_S
 #include "ppc_rss_drv.h"

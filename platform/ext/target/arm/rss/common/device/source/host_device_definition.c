@@ -27,8 +27,8 @@
 #include "platform_base_address.h"
 #include "host_base_address.h"
 
-#ifndef RSS_DEBUG_UART
 /* Arm UART PL011 driver structures */
+#ifdef UART0_PL011_S
 static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_S = {
     .base = HOST_UART0_BASE_S,
     .def_baudrate = DEFAULT_UART_BAUDRATE,
@@ -41,6 +41,8 @@ static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_S = {
     .baudrate = 0};
 struct uart_pl011_dev_t UART0_PL011_DEV_S = {&(UART0_PL011_DEV_CFG_S),
                                              &(UART0_PL011_DEV_DATA_S)};
+#endif
+#ifdef UART0_PL011_NS
 static const struct uart_pl011_dev_cfg_t UART0_PL011_DEV_CFG_NS = {
     .base = HOST_UART0_BASE_NS,
     .def_baudrate = DEFAULT_UART_BAUDRATE,
@@ -53,7 +55,10 @@ static struct uart_pl011_dev_data_t UART0_PL011_DEV_DATA_NS = {
     .baudrate = 0};
 struct uart_pl011_dev_t UART0_PL011_DEV_NS = {&(UART0_PL011_DEV_CFG_NS),
                                               &(UART0_PL011_DEV_DATA_NS)};
-#else
+#endif
+
+/* UART CMSDK driver structures */
+#ifdef UART0_CMSDK_S
 static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_S = {
     .base = RSS_DEBUG_UART0_BASE_S,
     .default_baudrate = DEFAULT_UART_BAUDRATE
@@ -63,10 +68,12 @@ static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_S = {
     .system_clk = 0,
     .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART0_DEV_S = {
+struct uart_cmsdk_dev_t UART0_CMSDK_DEV_S = {
     &(UART0_CMSDK_DEV_CFG_S),
     &(UART0_CMSDK_DEV_DATA_S)
 };
+#endif
+#ifdef UART0_CMSDK_NS
 static const struct uart_cmsdk_dev_cfg_t UART0_CMSDK_DEV_CFG_NS = {
     .base = RSS_DEBUG_UART0_BASE_NS,
     .default_baudrate = DEFAULT_UART_BAUDRATE
@@ -76,11 +83,11 @@ static struct uart_cmsdk_dev_data_t UART0_CMSDK_DEV_DATA_NS = {
     .system_clk = 0,
     .baudrate = 0
 };
-struct uart_cmsdk_dev_t ARM_UART0_DEV_NS = {
+struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS = {
     &(UART0_CMSDK_DEV_CFG_NS),
     &(UART0_CMSDK_DEV_DATA_NS)
 };
-#endif /* !RSS_DEBUG_UART */
+#endif
 
 #if (defined (SPI_STRATAFLASHJ3_S) && defined (CFI_S))
 static const struct cfi_dev_cfg_t CFI_DEV_CFG_S = {

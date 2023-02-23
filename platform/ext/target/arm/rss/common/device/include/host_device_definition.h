@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,13 +41,15 @@ extern struct uart_pl011_dev_t UART0_PL011_DEV_S;
 #include "uart_pl011_drv.h"
 extern struct uart_pl011_dev_t UART0_PL011_DEV_NS;
 #endif
+
+/* UART CMSDK driver structures */
 #ifdef UART0_CMSDK_S
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART0_DEV_S;
+extern struct uart_cmsdk_dev_t UART0_CMSDK_DEV_S;
 #endif
 #ifdef UART0_CMSDK_NS
 #include "uart_cmsdk_drv.h"
-extern struct uart_cmsdk_dev_t ARM_UART0_DEV_NS;
+extern struct uart_cmsdk_dev_t UART0_CMSDK_DEV_NS;
 #endif
 
 #if (defined(SPI_STRATAFLASHJ3_S) && defined(CFI_S))

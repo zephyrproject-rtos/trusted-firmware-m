@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2016-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,15 +75,15 @@ enum uart_cmsdk_error_t uart_cmsdk_set_baudrate(struct uart_cmsdk_dev_t* dev,
         return UART_CMSDK_ERR_NOT_INIT;
     }
 
-    /* Sets baudrate */
     bauddiv = (dev->data->system_clk / baudrate);
-    dev->data->baudrate = baudrate;
 
     /* Minimum bauddiv value */
     if(bauddiv < 16) {
         return UART_CMSDK_ERR_INVALID_BAUD;
     }
 
+    /* Sets baudrate */
+    dev->data->baudrate = baudrate;
     p_uart->bauddiv = bauddiv;
 
     return UART_CMSDK_ERR_NONE;
