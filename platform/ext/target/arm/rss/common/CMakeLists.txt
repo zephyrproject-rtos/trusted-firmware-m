@@ -117,6 +117,7 @@ target_include_directories(platform_s
         services/src
         ${PLATFORM_DIR}/..
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
 )
@@ -136,9 +137,9 @@ target_sources(platform_s
         native_drivers/sic_drv.c
         native_drivers/mhu_v2_x.c
         native_drivers/mhu_wrapper_v2_x.c
-        native_drivers/mpc_sie_drv.c
         native_drivers/ppc_rss_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
@@ -228,6 +229,7 @@ target_include_directories(platform_ns
         native_drivers
         partition
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
 )
 
@@ -273,6 +275,7 @@ target_include_directories(platform_bl2
         services/src
         libraries
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
 
     PRIVATE
@@ -334,6 +337,7 @@ target_include_directories(platform_bl1_interface
         ./native_drivers
         ./fip_parser
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
 )
 

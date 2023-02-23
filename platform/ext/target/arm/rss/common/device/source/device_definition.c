@@ -417,11 +417,33 @@ struct syswdog_armv8_m_dev_t SYSWDOG_ARMV8_M_DEV_NS = {
 
 /* ARM MPC RSS driver structures */
 #ifdef MPC_VM0_S
+/* Ranges controlled by this VM0_MPC */
+static const struct mpc_sie_memory_range_t MPC_VM0_RANGE_S = {
+    .base         = MPC_VM0_RANGE_BASE_S,
+    .limit        = MPC_VM0_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_VM0_RANGE_NS = {
+    .base         = MPC_VM0_RANGE_BASE_NS,
+    .limit        = MPC_VM0_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
+};
+
+#define MPC_VM0_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_VM0_RANGE_LIST[MPC_VM0_RANGE_LIST_LEN] = {
+        &MPC_VM0_RANGE_S,
+        &MPC_VM0_RANGE_NS
+    };
+
 static const struct mpc_sie_dev_cfg_t MPC_VM0_DEV_CFG_S = {
-    .base = MPC_VM0_BASE_S};
+    .base = MPC_VM0_BASE_S,
+    .range_list = MPC_VM0_RANGE_LIST,
+    .nbr_of_ranges = MPC_VM0_RANGE_LIST_LEN};
 static struct mpc_sie_dev_data_t MPC_VM0_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
     .is_initialized = false };
 struct mpc_sie_dev_t MPC_VM0_DEV_S = {
     &(MPC_VM0_DEV_CFG_S),
@@ -429,11 +451,33 @@ struct mpc_sie_dev_t MPC_VM0_DEV_S = {
 #endif
 
 #ifdef MPC_VM1_S
+/* Ranges controlled by this VM1_MPC */
+static const struct mpc_sie_memory_range_t MPC_VM1_RANGE_S = {
+    .base         = MPC_VM1_RANGE_BASE_S,
+    .limit        = MPC_VM1_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_VM1_RANGE_NS = {
+    .base         = MPC_VM1_RANGE_BASE_NS,
+    .limit        = MPC_VM1_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
+};
+
+#define MPC_VM1_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_VM1_RANGE_LIST[MPC_VM1_RANGE_LIST_LEN] = {
+        &MPC_VM1_RANGE_S,
+        &MPC_VM1_RANGE_NS
+    };
+
 static const struct mpc_sie_dev_cfg_t MPC_VM1_DEV_CFG_S = {
-    .base = MPC_VM1_BASE_S};
+    .base = MPC_VM1_BASE_S,
+    .range_list = MPC_VM1_RANGE_LIST,
+    .nbr_of_ranges = MPC_VM1_RANGE_LIST_LEN};
 static struct mpc_sie_dev_data_t MPC_VM1_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
     .is_initialized = false };
 struct mpc_sie_dev_t MPC_VM1_DEV_S = {
     &(MPC_VM1_DEV_CFG_S),
@@ -441,11 +485,33 @@ struct mpc_sie_dev_t MPC_VM1_DEV_S = {
 #endif
 
 #ifdef MPC_SIC_S
+/* Ranges controlled by this SIC_MPC */
+static const struct mpc_sie_memory_range_t MPC_SIC_RANGE_S = {
+    .base         = MPC_SIC_RANGE_BASE_S,
+    .limit        = MPC_SIC_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
+};
+
+static const struct mpc_sie_memory_range_t MPC_SIC_RANGE_NS = {
+    .base         = MPC_SIC_RANGE_BASE_NS,
+    .limit        = MPC_SIC_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
+};
+
+#define MPC_SIC_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_SIC_RANGE_LIST[MPC_SIC_RANGE_LIST_LEN] = {
+        &MPC_SIC_RANGE_S,
+        &MPC_SIC_RANGE_NS
+    };
+
 static const struct mpc_sie_dev_cfg_t MPC_SIC_DEV_CFG_S = {
-    .base = MPC_SIC_BASE_S};
+    .base = MPC_SIC_BASE_S,
+    .range_list = MPC_SIC_RANGE_LIST,
+    .nbr_of_ranges = MPC_SIC_RANGE_LIST_LEN};
 static struct mpc_sie_dev_data_t MPC_SIC_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
     .is_initialized = false };
 struct mpc_sie_dev_t MPC_SIC_DEV_S = {
     &(MPC_SIC_DEV_CFG_S),
