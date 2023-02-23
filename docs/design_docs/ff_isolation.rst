@@ -362,12 +362,26 @@ Here lists the required regions while complying with the rules:
   attributes in general, they are standalone regions in MPU even their
   attributes covers 'A_RWXN'.
 
+Default access rules
+====================
+Hardware protection components MAY have the capability to collect regions
+not explicitly configured in static or runtime settings, and then apply
+default access rules to the collected. Furthermore, one default rule can be
+applied to multiple non-contiguous regions which makes them share a common
+boundary. This operation sets up a standalone 'region' as same as other
+explicitly configured regions. And it doesn't affect the analysis summary
+above - just be aware that some regions listed in the table MAY not be
+explicitly configured.
+
+Take the MPU as an example, MPU can assign a default privileged access
+attribute to the regions (SPM and PRoT regions e.g.) not explicitly configured.
+This feature can reduce required MPU regions and ease the programming because
+regions can be put non-address-contiguous and skip the explicit configuration.
+
 .. important::
-   The default memory map grants PSA RoT domain components the ability to
-   access the place not covered in an explicitly defined region. This
-   characteristic can be used for saving regions. In the case when the default
-   memory map is applied, the uncovered regions need to be audited to make
-   sure all assets are placed properly.
+  When this default access rules mechanism is applied, the
+  non-explicitly-expressed regions must be reviewed to ensure the isolation
+  boundaries are set properly.
 
 Interfaces
 ==========
