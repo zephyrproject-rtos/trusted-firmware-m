@@ -24,10 +24,19 @@
 #define PARTITION_INFO_MAGIC                    (0x5F5F0000)
 
 /*
- * Partition load data - flags
- * bit 7-0: priority
- * bit 8: 1 - PSA_ROT, 0 - APP_ROT
- * bit 9: 1 - IPC model, 0 - SFN model
+ * Partition flag start
+ *
+ * 31       10  9   8   7          0
+ * +---------+--+---+---+----------+
+ * | RES[21] |NS|I/S|A/P| Priority |
+ * +---------+--+---+---+----------+
+ *
+ * Field      Desc                        Value
+ * Priority:  Partition Priority          Lowest, low, normal, high, hightest
+ * A/P:       ARoT or PRoT domain         1: PRoT              0: ARoT
+ * I/S:       IPC or SFN typed partition  1: IPC               0: SFN
+ * NS:        NS Agent or not             1: NS Agent          0: Not
+ * RES:       21 bits reserved            0
  */
 #define PARTITION_PRI_HIGHEST                   (0x0)
 #define PARTITION_PRI_HIGH                      (0xF)
@@ -50,12 +59,13 @@
 #define PTR_TO_REFERENCE(x)                     (uintptr_t)(x)
 #define REFERENCE_TO_PTR(x, t)                  (t)(x)
 
-#define IS_PARTITION_PSA_ROT(pldi)              (!!((pldi)->flags \
+#define IS_PSA_ROT(pldi)                        (!!((pldi)->flags \
                                                      & PARTITION_MODEL_PSA_ROT))
-#define IS_PARTITION_IPC_MODEL(pldi)            (!!((pldi)->flags \
-                                                         & PARTITION_MODEL_IPC))
-#define IS_PARTITION_NS_AGENT(pldi)             (!!((pldi)->flags \
-                                                         & PARTITION_NS_AGENT))
+#define IS_IPC_MODEL(pldi)                      (!!((pldi)->flags \
+                                                     & PARTITION_MODEL_IPC))
+#define IS_NS_AGENT(pldi)                       (!!((pldi)->flags \
+                                                     & PARTITION_NS_AGENT))
+/* Partition flag end */
 
 /*
  * Common partition structure type, the extendable data is right after it.

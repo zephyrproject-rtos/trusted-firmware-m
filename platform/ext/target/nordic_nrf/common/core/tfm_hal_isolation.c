@@ -82,10 +82,10 @@ tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = IS_PARTITION_PSA_ROT(p_ldinf);
+    privileged = IS_PSA_ROT(p_ldinf);
 #endif
 
-    ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
+    ns_agent = IS_NS_AGENT(p_ldinf);
     partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
                     HANDLE_ATTR_PRIV_MASK;
     partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &

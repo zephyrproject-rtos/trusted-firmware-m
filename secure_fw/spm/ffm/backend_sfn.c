@@ -94,7 +94,7 @@ static void spm_thread_fn(void)
     p_curr = GET_CURRENT_COMPONENT();
     /* Call partition initialization routine one by one. */
     UNI_LIST_FOREACH(p_part, PARTITION_LIST_ADDR, next) {
-        if (IS_PARTITION_IPC_MODEL(p_part->p_ldinf)) {
+        if (IS_IPC_MODEL(p_part->p_ldinf)) {
             continue;
         }
 
@@ -132,7 +132,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
      * Built-in partitions still have thread instances: NS Agent (TZ) and
      * IDLE partition, and NS Agent (TZ) needs to be specific cared here.
      */
-    if (IS_PARTITION_NS_AGENT(p_pldi)) {
+    if (IS_NS_AGENT(p_pldi)) {
         ARCH_CTXCTRL_INIT(&ns_agent_ctrl,
                           LOAD_ALLOCED_STACK_ADDR(p_pldi),
                           p_pldi->stack_size);

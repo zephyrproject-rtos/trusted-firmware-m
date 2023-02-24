@@ -121,7 +121,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
     /* common runtime metadata */
     allocate_size = sizeof(*p_rt_meta);
 
-    if (!IS_PARTITION_IPC_MODEL(p_pt_ldi)) {
+    if (!IS_IPC_MODEL(p_pt_ldi)) {
         /* SFN specific metadata - SFN function table */
         allocate_size += sizeof(service_fn_t) * p_pt_ldi->nservices;
     }
@@ -140,7 +140,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
     p_rt_meta->n_sfn = 0;
     p_sfn_table = p_rt_meta->sfn_table;
 
-    if (!IS_PARTITION_IPC_MODEL(p_pt_ldi)) {
+    if (!IS_IPC_MODEL(p_pt_ldi)) {
         /* SFN table. The signal bit of the service is the same index of SFN. */
         for (int i = 0; i < p_pt_ldi->nservices; i++) {
             p_sfn_table[i] = (service_fn_t)p_srv_ldi[i].sfn;
@@ -237,7 +237,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
 #if (CONFIG_TFM_PSA_API_CROSS_CALL == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
-    if (IS_PARTITION_NS_AGENT(p_pldi)) {
+    if (IS_NS_AGENT(p_pldi)) {
         /* Get the context from ns_agent_tz */
         if (p_pldi->pid == 0) {
             SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
@@ -245,7 +245,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     }
 #endif
 
-    if (IS_PARTITION_IPC_MODEL(p_pldi)) {
+    if (IS_IPC_MODEL(p_pldi)) {
         /* IPC Partition */
         thrd_entry = POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t);
     } else {

@@ -425,7 +425,7 @@ bool tfm_spm_is_ns_caller(void)
         tfm_core_panic();
     }
 
-    return IS_PARTITION_NS_AGENT(partition->p_ldinf);
+    return IS_NS_AGENT(partition->p_ldinf);
 }
 
 int32_t tfm_spm_get_client_id(bool ns_caller)
