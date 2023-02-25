@@ -20,11 +20,16 @@
 
 #include "flash_layout.h"
 
+/* BL1_1 */
+#define BL1_1_HEAP_SIZE         (0x0001000) /* 4KiB */
+#define BL1_1_MSP_STACK_SIZE    (0x0001800) /* 6KiB */
+
+/* BL1_2 */
+#define BL1_2_HEAP_SIZE         (0x0001000) /* 4KiB */
+#define BL1_2_MSP_STACK_SIZE    (0x0001800) /* 6KiB */
+
 #define BL2_HEAP_SIZE           (0x0001000)
 #define BL2_MSP_STACK_SIZE      (0x0001E00)
-
-#define BL1_HEAP_SIZE           (0x0001000)
-#define BL1_MSP_STACK_SIZE      (0x0001800)
 
 #ifdef ENABLE_HEAP
     #define S_HEAP_SIZE             (0x0000200)
@@ -80,8 +85,8 @@
 
 
 /* SE BL2 regions */
-#define BL2_CODE_START    (SRAM_BASE + TFM_PARTITION_SIZE + \
-                           BL2_DATA_GAP_SIZE + BL2_HEADER_SIZE)
+#define BL2_IMAGE_START   (SRAM_BASE + SRAM_SIZE - SE_BL2_PARTITION_SIZE)
+#define BL2_CODE_START    (BL2_IMAGE_START + BL2_HEADER_SIZE)
 #define BL2_CODE_SIZE     (IMAGE_BL2_CODE_SIZE)
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
@@ -91,9 +96,25 @@
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
 /* SE BL1 regions */
-#define BL1_CODE_START    (0)
-#define BL1_CODE_SIZE     (0x00020000)     /* Whole SE ROM, 128 KiB */
-#define BL1_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
+#define BL1_1_CODE_START    (0)
+#define BL1_1_CODE_SIZE     (0x0000A000)     /* 40 KiB */
+#define BL1_1_CODE_LIMIT    (BL1_1_CODE_START + BL1_1_CODE_SIZE - 1)
+
+#define PROVISIONING_DATA_START (BL1_1_CODE_START + BL1_1_CODE_SIZE)
+#define PROVISIONING_DATA_SIZE  (0x00002000)     /* 8 KiB */
+#define PROVISIONING_DATA_LIMIT (PROVISIONING_DATA_START + PROVISIONING_DATA_SIZE - 1)
+
+#define BL1_1_DATA_START    (SRAM_BASE)
+#define BL1_1_DATA_SIZE     (0x8000)     /* 32 KiB*/
+#define BL1_1_DATA_LIMIT    (BL1_1_DATA_START + BL1_1_DATA_SIZE - 1)
+
+#define BL1_2_CODE_START    (BL1_1_DATA_START + BL1_1_DATA_SIZE)
+#define BL1_2_CODE_SIZE     (0x00001000)     /* 4 KiB */
+#define BL1_2_CODE_LIMIT    (BL1_2_CODE_START + BL1_2_CODE_SIZE - 1)
+
+#define BL1_2_DATA_START    (BL1_2_CODE_START+BL1_2_CODE_SIZE)
+#define BL1_2_DATA_SIZE     (0x8000)     /* 32 KiB*/
+#define BL1_2_DATA_LIMIT    (BL1_2_DATA_START + BL1_2_DATA_SIZE - 1)
 
 #define BOOT_TFM_SHARED_DATA_BASE (S_DATA_PRIV_START)
 

@@ -24,12 +24,12 @@
 
 MEMORY
 {
-    FLASH (rx)  : ORIGIN = BL1_CODE_START, LENGTH = BL1_CODE_SIZE
-    RAM   (rwx) : ORIGIN = BL1_DATA_START, LENGTH = BL1_DATA_SIZE
+    FLASH (rx)  : ORIGIN = BL1_2_CODE_START, LENGTH = BL1_2_CODE_SIZE
+    RAM   (rwx) : ORIGIN = BL1_2_DATA_START, LENGTH = BL1_2_DATA_SIZE
 }
 
-__heap_size__  = BL1_HEAP_SIZE;
-__msp_stack_size__ = BL1_MSP_STACK_SIZE;
+__heap_size__  = BL1_2_HEAP_SIZE;
+__msp_stack_size__ = BL1_2_MSP_STACK_SIZE;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a)

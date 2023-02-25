@@ -8,7 +8,14 @@
 #-------------------------------------------------------------------------------
 
 set(BL1                                 ON         CACHE BOOL     "Whether to build BL1")
-set(PLATFORM_DEFAULT_BL1                OFF        CACHE STRING   "Whether to use default BL1 or platform-specific one")
+set(PLATFORM_DEFAULT_BL1                ON         CACHE STRING   "Whether to use default BL1 or platform-specific one")
+set(PLATFORM_DEFAULT_OTP                OFF        CACHE BOOL     "Use trusted on-chip flash to implement OTP memory")
+
+set(TFM_BL1_DEFAULT_PROVISIONING        OFF        CACHE BOOL     "Whether BL1_1 will use default provisioning")
+set(TFM_BL1_SOFTWARE_CRYPTO             OFF        CACHE BOOL     "Whether BL1_1 will use software crypto")
+set(TFM_BL1_MEMORY_MAPPED_FLASH         OFF        CACHE BOOL     "Whether BL1 can directly access flash content")
+set(TFM_BL1_PQ_CRYPTO                   OFF        CACHE BOOL     "Enable LMS PQ crypto for BL2 verification. This is experimental and should not yet be used in production")
+
 set(BL2                                 ON         CACHE BOOL     "Whether to build BL2")
 set(BL2_TRAILER_SIZE                    0x800      CACHE STRING   "Trailer size")
 set(DEFAULT_MCUBOOT_FLASH_MAP           OFF        CACHE BOOL     "Whether to use the default flash map defined by TF-M project")
@@ -25,13 +32,6 @@ set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL      "Whether to e
 set(TFM_CRYPTO_TEST_ALG_CFB             OFF        CACHE BOOL     "Test CFB cryptography mode")
 set(NS                                  FALSE      CACHE BOOL     "Whether to build NS app")
 set(EXTERNAL_SYSTEM_SUPPORT             OFF        CACHE BOOL     "Whether to include external system support.")
-
-# FVP is not integrated/tested with CC312.
-if (${PLATFORM_IS_FVP})
-  set(PLATFORM_DEFAULT_OTP              TRUE      CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
-else()
-  set(PLATFORM_DEFAULT_OTP              FALSE      CACHE BOOL      "Use trusted on-chip flash to implement OTP memory")
-endif()
 
 # External dependency on OpenAMP and Libmetal
 set(LIBMETAL_SRC_PATH                   "DOWNLOAD"  CACHE PATH      "Path to Libmetal (or DOWNLOAD to fetch automatically")
@@ -59,6 +59,8 @@ set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Prot
 set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Initial Attestation partition")
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
+set(TFM_PARTITION_MEASURED_BOOT         ON          CACHE BOOL      "Enable Measured boot partition")
+
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug OR ${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo)
   set(ENABLE_FWU_AGENT_DEBUG_LOGS     TRUE          CACHE BOOL      "Enable Firmware update agent debug logs.")

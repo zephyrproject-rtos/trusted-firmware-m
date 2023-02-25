@@ -41,6 +41,23 @@ target_add_scatter_file(bl2
         $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_bl2.ld>
 )
 
+target_sources(bl1_1
+PRIVATE
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_corstone1000.c>
+)
+
+target_add_scatter_file(bl1_1
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/corstone1000_bl1_1.ld>
+)
+
+target_sources(bl1_2
+PRIVATE
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_corstone1000.c>
+)
+target_add_scatter_file(bl1_2
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/corstone1000_bl1_2.ld>
+)
+
 #========================= Platform Secure ====================================#
 
 add_subdirectory(openamp)
@@ -121,6 +138,55 @@ if (TFM_PARTITION_CRYPTO)
             .
     )
 endif()
+
+#========================= Platform BL1 =======================================#
+
+target_sources(platform_bl1
+    PRIVATE
+        ./Device/Source/system_core_init.c
+        ./Device/Source/device_definition.c
+        ./bl1/boot_hal_bl1.c
+        ./Native_Driver/firewall.c
+        ./CMSIS_Driver/Driver_Flash.c
+        ./CMSIS_Driver/Driver_USART.c
+        ./Native_Driver/uart_pl011_drv.c
+        $<$<BOOL:${PLATFORM_IS_FVP}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/cfi_drv.c>
+        $<$<BOOL:${PLATFORM_IS_FVP}>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c>
+        $<$<NOT:$<BOOL:${PLATFORM_IS_FVP}>>:${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/xilinx_pg153_axi_qspi_controller_drv.c>
+        $<$<NOT:$<BOOL:${PLATFORM_IS_FVP}>>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/spi_n25q256a_flash_lib.c>
+        $<$<NOT:$<BOOL:${PLATFORM_IS_FVP}>>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/spi_sst26vf064b_flash_lib.c>
+        ./fw_update_agent/uefi_capsule_parser.c
+        ./fw_update_agent/fwu_agent.c
+        ./fw_update_agent/uefi_fmp.c
+        ./soft_crc/soft_crc.c
+        ./Native_Driver/arm_watchdog_drv.c
+        ./Native_Driver/watchdog.c
+        ./bl1/provisioning.c
+        $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
+)
+
+target_compile_definitions(platform_bl1
+    PUBLIC
+        $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
+        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
+        $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
+)
+
+target_include_directories(platform_bl1_interface
+    INTERFACE
+        .
+        ./Device/Include
+        ./Device/Config
+        ./Native_Driver
+        ./CMSIS_Driver/Config
+        ./fw_update_agent
+        ./soft_crc
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
+        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/
+)
 
 #========================= Platform BL2 =======================================#
 
@@ -220,10 +286,6 @@ target_include_directories(platform_bl2
         ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
         $<BUILD_INTERFACE:${BL2_SOURCE}/ext/mcuboot/include>
 )
-
-#========================= BL1 component =======================================#
-
-add_subdirectory(bl1)
 
 #========================= ns_agent_mailbox ===================================#
 

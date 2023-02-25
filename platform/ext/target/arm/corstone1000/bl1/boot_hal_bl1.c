@@ -12,13 +12,16 @@
 #include "Driver_Flash.h"
 #include "flash_layout.h"
 #include "fih.h"
-#include "bootutil/bootutil_log.h"
 #include "firewall.h"
 #include "watchdog.h"
 #include "mpu_config.h"
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
 #include "fwu_agent.h"
+#include "uart_stdout.h"
+#include "region_defs.h"
+#include "log.h"
+
 
 #if defined(CRYPTO_HW_ACCELERATOR) || \
     defined(CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING)
@@ -80,6 +83,9 @@ enum host_firewall_host_comp_id_t {
   COMP_OCVM,
   COMP_DEBUG,
 };
+
+extern uint32_t platform_code_is_bl1_2;
+
 
 static void setup_mpu(void)
 {
@@ -581,56 +587,44 @@ static void setup_host_firewall(void)
        fw_lockdown(FW_FULL_LOCKDOWN);
 }
 
-
-__attribute__((naked)) void boot_clear_bl2_ram_area(void)
+uint32_t bl1_image_get_flash_offset(uint32_t image_id)
 {
-    __ASM volatile(
-        ".syntax unified                             \n"
-        "movs    r0, #0                              \n"
-        "ldr     r1, =Image$$ER_DATA$$Base           \n"
-        "ldr     r2, =Image$$ARM_LIB_HEAP$$ZI$$Limit \n"
-        "subs    r2, r2, r1                          \n"
-        "Loop:                                       \n"
-        "subs    r2, #4                              \n"
-        "blt     Clear_done                          \n"
-        "str     r0, [r1, r2]                        \n"
-        "b       Loop                                \n"
-        "Clear_done:                                 \n"
-        "bx      lr                                  \n"
-         : : : "r0" , "r1" , "r2" , "memory"
-    );
+    /* SE BL2 Offset is equal to bank offset as it is the first think in the Bank */
+    uint32_t se_bl2_offset = 0;
+    bl1_get_active_bl2_image(&se_bl2_offset);
+    switch (image_id) {
+        case 0:
+            return se_bl2_offset;
+        case 1:
+            return se_bl2_offset + SE_BL2_PARTITION_SIZE;
+        default:
+            FIH_PANIC;
+    }
 }
-
-extern void set_flash_area_image_offset(uint32_t offset);
 
 int32_t boot_platform_init(void)
 {
     int32_t result;
     uint32_t image_offset;
 
-    result = corstone1000_watchdog_init();
-    if (result != ARM_DRIVER_OK) {
-        return 1;
+    if (!platform_code_is_bl1_2) {
+        result = corstone1000_watchdog_init();
+        if (result != ARM_DRIVER_OK) {
+            return 1;
+        }
+#if !(PLATFORM_IS_FVP)
+        setup_mpu();
+#endif
+        setup_se_firewall();
+#if !(PLATFORM_IS_FVP)
+        setup_host_firewall();
+#endif
     }
 
-#if !(PLATFORM_IS_FVP)
-    setup_mpu();
-#endif
-    setup_se_firewall();
-#if !(PLATFORM_IS_FVP)
-    setup_host_firewall();
-#endif
+#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+    stdio_init();
+#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
-    result = FLASH_DEV_NAME.Initialize(NULL);
-    if (result != ARM_DRIVER_OK) {
-        return 1;
-    }
-#if PLATFORM_DEFAULT_OTP
-   result = FLASH_DEV_NAME_SE_SECURE_FLASH.Initialize(NULL);
-   if (result != ARM_DRIVER_OK) {
-       return 1;
-   }
-#endif
 
 #ifdef CRYPTO_HW_ACCELERATOR
     result = crypto_hw_accelerator_init();
@@ -639,23 +633,11 @@ int32_t boot_platform_init(void)
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-    result = tfm_plat_otp_init();
-    if (result != TFM_PLAT_ERR_SUCCESS) {
-        BOOT_LOG_ERR("OTP system initialization failed");
-        FIH_PANIC;
-    }
+    return 0;
+}
 
-    if (tfm_plat_provisioning_is_required()) {
-        result = fwu_metadata_provision();
-        if (result != FWU_AGENT_SUCCESS) {
-            BOOT_LOG_ERR("Provisioning FWU Metadata failed");
-            FIH_PANIC;
-        }
-    }
-
-    bl1_get_active_bl2_image(&image_offset);
-    set_flash_area_image_offset(image_offset);
-
+int32_t boot_platform_post_init(void)
+{
     return 0;
 }
 
@@ -678,17 +660,15 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     (void)fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-    result = FLASH_DEV_NAME.Uninitialize();
-    if (result != ARM_DRIVER_OK) {
-        while (1);
-    }
 
-#if PLATFORM_DEFAULT_OTP
-    result = FLASH_DEV_NAME_SE_SECURE_FLASH.Uninitialize();
+#if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
+    stdio_uninit();
+#endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+
+    result = corstone1000_watchdog_reset_timer();
     if (result != ARM_DRIVER_OK) {
         while (1);
     }
-#endif
 
     vt_cpy = vt;
 

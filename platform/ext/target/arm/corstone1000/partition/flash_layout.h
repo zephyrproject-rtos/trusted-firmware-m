@@ -34,16 +34,6 @@
 
 #define BL2_DATA_GAP_SIZE               (0x09800)  /* 38 KB */
 
-#define BL1_DATA_START                  (SRAM_BASE)
-#define BL1_DATA_SIZE                   (0x10000)     /* 64 KiB*/
-#define BL1_DATA_LIMIT                  (BL1_DATA_START + BL1_DATA_SIZE - 1)
-
-#ifdef BL1
-
-#define IMAGE_EXECUTABLE_RAM_START      (SRAM_BASE + BL1_DATA_SIZE)
-#define IMAGE_EXECUTABLE_RAM_SIZE       (SRAM_SIZE - BL1_DATA_SIZE)
-
-#endif /* BL1 */
 
 /*****************/
 /***** Flash *****/
