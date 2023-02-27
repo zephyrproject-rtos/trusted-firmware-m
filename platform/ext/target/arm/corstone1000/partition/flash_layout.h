@@ -136,23 +136,38 @@
 #define BANK_PARTITION_SIZE             (0xFE0000)   /* 15.875 MB */
 #define TFM_PARTITION_SIZE              (0x5E000)    /* 376 KB */
 
-/* Macros needed to imgtool.py, used when creating BL2 signed image */
-#define BL2_IMAGE_LOAD_ADDRESS          (SRAM_BASE + TFM_PARTITION_SIZE + BL2_DATA_GAP_SIZE)
-#define BL2_IMAGE_OFFSET                (0x0)
-#define BL2_IMAGE_MAX_SIZE              (SE_BL2_PARTITION_SIZE)
+/************************************************************/
+/* Bank : Images flash offsets are with respect to the bank */
+/************************************************************/
+
+/* Image 0: BL2 primary and secondary images */
+#define FLASH_AREA_0_ID                 (1)
+#define FLASH_AREA_0_OFFSET             (0) /* starting from 0th offset of the bank */
+#define FLASH_AREA_0_SIZE               (SE_BL2_PARTITION_SIZE)
+
+#define FLASH_AREA_1_ID                 (FLASH_AREA_0_ID + 1)
+#define FLASH_AREA_1_OFFSET             (FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE)
+#define FLASH_AREA_1_SIZE               (SE_BL2_PARTITION_SIZE)
 
 /* Image 1: TF-M primary and secondary images */
-#define FLASH_AREA_0_ID                 (1)
-#define FLASH_AREA_0_SIZE               (TFM_PARTITION_SIZE)
-#define FLASH_AREA_1_ID                 (FLASH_AREA_0_ID + 1)
-#define FLASH_AREA_1_SIZE               (TFM_PARTITION_SIZE)
+#define FLASH_AREA_2_ID                 (1)
+#define FLASH_AREA_2_SIZE               (TFM_PARTITION_SIZE)
+#define FLASH_AREA_3_ID                 (FLASH_AREA_2_ID + 1)
+#define FLASH_AREA_3_SIZE               (TFM_PARTITION_SIZE)
 
 /* Image 2: Host FIP */
 #define FIP_SIGNATURE_AREA_SIZE         (0x1000)      /* 4 KB */
 
 /* Host BL2 (TF-A) primary and secondary image. */
-#define FLASH_AREA_2_ID                 (FLASH_AREA_1_ID + 1)
-#define FLASH_AREA_3_ID                 (FLASH_AREA_2_ID + 1)
+#define FLASH_AREA_4_ID                 (FLASH_AREA_3_ID + 1)
+#define FLASH_AREA_5_ID                 (FLASH_AREA_4_ID + 1)
+
+#define BL1_FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
+                                                          255 )
+#define BL1_FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_1_ID : \
+                                                          255 )
+
+#define BL1_FLASH_AREA_IMAGE_SCRATCH        255
 
 /* Macros needed to imgtool.py, used when creating TF-M signed image */
 #define S_IMAGE_LOAD_ADDRESS            (SRAM_BASE)
@@ -161,11 +176,11 @@
 #define NON_SECURE_IMAGE_OFFSET         (TFM_PARTITION_SIZE)
 #define NON_SECURE_IMAGE_MAX_SIZE       (0x0)
 
-#define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_0_ID : \
-                                         ((x) == 1) ? FLASH_AREA_2_ID : \
+#define FLASH_AREA_IMAGE_PRIMARY(x)     (((x) == 0) ? FLASH_AREA_2_ID : \
+                                         ((x) == 1) ? FLASH_AREA_4_ID : \
                                                       255 )
-#define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_1_ID : \
-                                         ((x) == 1) ? FLASH_AREA_3_ID : \
+#define FLASH_AREA_IMAGE_SECONDARY(x)   (((x) == 0) ? FLASH_AREA_3_ID : \
+                                         ((x) == 1) ? FLASH_AREA_5_ID : \
                                                       255 )
 
 #define FLASH_AREA_IMAGE_SCRATCH        255

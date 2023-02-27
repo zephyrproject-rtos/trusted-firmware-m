@@ -638,6 +638,13 @@ int32_t boot_platform_init(void)
 
 int32_t boot_platform_post_init(void)
 {
+    int32_t result;
+    if (platform_code_is_bl1_2) {
+        result = FLASH_DEV_NAME.Initialize(NULL);
+        if (result != ARM_DRIVER_OK) {
+            return 1;
+        }
+    }
     return 0;
 }
 
@@ -664,6 +671,13 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
 #endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+
+    if (platform_code_is_bl1_2) {
+        result = FLASH_DEV_NAME.Uninitialize();
+        if (result != ARM_DRIVER_OK) {
+            return 1;
+        }
+    }
 
     result = corstone1000_watchdog_reset_timer();
     if (result != ARM_DRIVER_OK) {
