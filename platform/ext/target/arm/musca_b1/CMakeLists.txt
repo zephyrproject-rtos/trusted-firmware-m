@@ -232,12 +232,15 @@ target_sources(flash_drivers
         CMSIS_Driver/Driver_GFC100_EFlash.c
         Native_Driver/gfc100_eflash_drv.c
         Native_Driver/musca_b1_eflash_drv.c
+        Device/Source/gfc100_eflash_definition.c
 )
 
-target_link_libraries(platform_bl2
-    PRIVATE
-        flash_drivers
-)
+if(BL2)
+    target_link_libraries(platform_bl2
+        PRIVATE
+            flash_drivers
+    )
+endif()
 
 target_link_libraries(platform_s
     PRIVATE
