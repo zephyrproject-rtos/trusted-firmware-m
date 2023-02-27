@@ -119,6 +119,16 @@ target_compile_options(cmsis_includes_s
         ${COMPILER_CMSE_FLAG}
 )
 
+target_compile_options(cmsis_includes_s
+    INTERFACE
+        ${COMPILER_CP_FLAG}
+)
+
+target_link_options(cmsis_includes_s
+    INTERFACE
+        ${LINKER_CP_OPTION}
+)
+
 add_library(cmsis_includes_ns INTERFACE)
 target_link_libraries(cmsis_includes_ns INTERFACE cmsis_includes)
 target_include_directories(cmsis_includes_ns
