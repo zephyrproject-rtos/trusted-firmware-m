@@ -262,7 +262,7 @@ LR_CODE S_CODE_START S_CODE_SIZE {
 #if defined(S_RAM_CODE_START)
     /* Flash drivers code that gets copied from Flash */
     ER_CODE_SRAM S_RAM_CODE_START ALIGN 4 {
-        *libflash_drivers* (.text, .text.*, .rodata, .rodata.*)
+        *libflash_drivers* (+RO)
         * (.ramfunc)
     }
 

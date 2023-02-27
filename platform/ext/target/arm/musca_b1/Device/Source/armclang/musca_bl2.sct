@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,7 @@ LR_CODE BL2_CODE_START {
 
     /* eFlash driver code that gets copied from Flash to SRAM */
     ER_CODE_SRAM BL2_CODE_SRAM_BASE {
-        Driver_GFC100_EFlash.o (+RO)
-        gfc100_eflash_drv.o (+RO)
-        musca_b1_eflash_drv.o (+RO)
+        *libflash_drivers* (+RO)
     }
 
     /* Base address of bootloader data area */

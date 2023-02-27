@@ -51,18 +51,14 @@ SECTIONS
         KEEP(*(.init))
         KEEP(*(.fini))
 
-        *startup_cmsdk_musca_bl2.*(.text*)
+        *startup_musca.*(.text*)
     } > FLASH
 
     /* eFlash driver code that gets copied from Flash to SRAM */
     .ER_CODE_SRAM : ALIGN(4)
     {
-        *Driver_GFC100_EFlash.o(.text*)
-        *Driver_GFC100_EFlash.o(.rodata*)
-        *gfc100_eflash_drv.o(.text*)
-        *gfc100_eflash_drv.o(.rodata*)
-        *musca_b1_eflash_drv.o(.text*)
-        *musca_b1_eflash_drv.o(.rodata*)
+        *libflash_drivers.o(.text*)
+        *libflash_drivers.o(.rodata*)
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
     Image$$ER_CODE_SRAM$$Base = ADDR(.ER_CODE_SRAM);
