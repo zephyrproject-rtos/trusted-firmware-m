@@ -43,6 +43,7 @@ set(DEFAULT_MCUBOOT_FLASH_MAP           OFF        CACHE BOOL     "Whether to us
 set(MCUBOOT_S_IMAGE_FLASH_AREA_NUM      2          CACHE STRING   "ID of the flash area containing the primary Secure image")
 set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     3          CACHE STRING   "ID of the flash area containing the primary Non-Secure image")
 set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS OFF CACHE BOOL     "Enable storing of encoded measurements in boot.")
+set(RSS_USE_HOST_FLASH                  ON         CACHE BOOL     "Enable RSS using the host flash.")
 
 set(TFM_PARTITION_CRYPTO                ON         CACHE BOOL     "Enable Crypto partition")
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON         CACHE BOOL     "Enable Initial Attestation partition")

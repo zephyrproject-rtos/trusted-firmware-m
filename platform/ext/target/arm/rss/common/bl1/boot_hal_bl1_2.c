@@ -24,9 +24,11 @@
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include <string.h>
 #include "cmsis_compiler.h"
+#ifdef RSS_USE_HOST_FLASH
 #include "fip_parser.h"
 #include "host_flash_atu.h"
 #include "plat_def_fip_uuid.h"
+#endif
 #include "tfm_plat_nv_counters.h"
 #include "rss_key_derivation.h"
 
@@ -37,6 +39,7 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
+#ifdef RSS_USE_HOST_FLASH
 uint32_t bl1_image_get_flash_offset(uint32_t image_id)
 {
     switch (image_id) {
@@ -48,6 +51,7 @@ uint32_t bl1_image_get_flash_offset(uint32_t image_id)
         FIH_PANIC;
     }
 }
+#endif
 
 static int32_t init_atu_regions(void)
 {
@@ -109,10 +113,12 @@ int32_t boot_platform_init(void)
         return result;
     }
 
+#ifdef RSS_USE_HOST_FLASH
     result = host_flash_atu_init_regions_for_image(UUID_RSS_FIRMWARE_BL2, image_offsets);
     if (result) {
         return result;
     }
+#endif
 
     return 0;
 }
@@ -148,11 +154,12 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
     int32_t result;
 
+#ifdef RSS_USE_HOST_FLASH
     result = host_flash_atu_uninit_regions();
     if (result) {
         while(1){}
     }
-
+#endif
 
     result = invalidate_hardware_keys();
     if (result) {

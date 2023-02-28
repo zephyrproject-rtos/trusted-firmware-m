@@ -23,6 +23,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSS_XIP}>:RSS_XIP>
         $<$<BOOL:${RSS_DEBUG_UART}>:RSS_DEBUG_UART>
         $<$<BOOL:${RSS_USE_HOST_UART}>:RSS_USE_HOST_UART>
+        $<$<BOOL:${RSS_USE_HOST_FLASH}>:RSS_USE_HOST_FLASH>
         $<$<BOOL:${RSS_GPT_SUPPORT}>:RSS_GPT_SUPPORT>
 )
 
@@ -261,9 +262,6 @@ target_sources(platform_bl2
         native_drivers/lcm_drv.c
         otp_lcm.c
         nv_counters.c
-        fip_parser/fip_parser.c
-        fip_parser/host_flash_atu.c
-        $<$<BOOL:${RSS_GPT_SUPPORT}>:${CMAKE_CURRENT_SOURCE_DIR}/fip_parser/gpt.c>
         $<$<BOOL:${RSS_XIP}>:${CMAKE_CURRENT_SOURCE_DIR}/bl2/sic_boot.c>
 )
 
@@ -289,7 +287,6 @@ target_include_directories(platform_bl2
 
     PRIVATE
         ${PLATFORM_DIR}/..
-        ./fip_parser
 )
 
 target_compile_definitions(platform_bl2
@@ -323,9 +320,6 @@ target_sources(platform_bl1_1
         ./device/source/device_definition.c
         ./device/source/host_device_definition.c
         ./device/source/system_core_init.c
-        ./fip_parser/fip_parser.c
-        ./fip_parser/fip_parser.c
-        ./fip_parser/host_flash_atu.c
         ./native_drivers/atu_rss_drv.c
         ./native_drivers/kmu_drv.c
         ./native_drivers/lcm_drv.c
@@ -334,7 +328,6 @@ target_sources(platform_bl1_1
         ./tfm_hal_platform_reset.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
-        $<$<BOOL:${RSS_GPT_SUPPORT}>:${CMAKE_CURRENT_SOURCE_DIR}/fip_parser/gpt.c>
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -351,7 +344,6 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
-        ./fip_parser
 )
 
 target_compile_definitions(platform_bl1_1_interface
@@ -394,6 +386,10 @@ target_compile_definitions(platform_bl1_2
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
         $<$<BOOL:${RSS_AMOUNT}>:RSS_AMOUNT=${RSS_AMOUNT}>
 )
+
+if(RSS_USE_HOST_FLASH)
+    add_subdirectory(./fip_parser)
+endif()
 
 #========================= ns_agent_mailbox ===================================#
 
