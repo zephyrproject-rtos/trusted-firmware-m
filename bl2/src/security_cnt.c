@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -36,19 +36,19 @@ static enum tfm_nv_counter_t get_nv_counter_from_image_id(uint32_t image_id)
     return (enum tfm_nv_counter_t)nv_counter;
 }
 
-fih_int boot_nv_security_counter_init(void)
+fih_ret boot_nv_security_counter_init(void)
 {
-    fih_int fih_rc = FIH_FAILURE;
+    FIH_DECLARE(fih_rc, FIH_FAILURE);
 
-    fih_rc = fih_int_encode_zero_equality(tfm_plat_init_nv_counter());
+    fih_rc = fih_ret_encode_zero_equality(tfm_plat_init_nv_counter());
 
     FIH_RET(fih_rc);
 }
 
-fih_int boot_nv_security_counter_get(uint32_t image_id, fih_int *security_cnt)
+fih_ret boot_nv_security_counter_get(uint32_t image_id, fih_int *security_cnt)
 {
     enum tfm_nv_counter_t nv_counter;
-    fih_int fih_rc = FIH_FAILURE;
+    FIH_DECLARE(fih_rc, FIH_FAILURE);
     uint32_t security_cnt_soft;
 
     /* Check if it's a null-pointer. */
@@ -61,7 +61,7 @@ fih_int boot_nv_security_counter_get(uint32_t image_id, fih_int *security_cnt)
         FIH_RET(FIH_FAILURE);
     }
 
-    fih_rc = fih_int_encode_zero_equality(
+    fih_rc = fih_ret_encode_zero_equality(
              tfm_plat_read_nv_counter(nv_counter,
                                       sizeof(security_cnt_soft),
                                       (uint8_t *)&security_cnt_soft));
