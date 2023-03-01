@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "config_impl.h"
 #include "lists.h"
-#include "region.h"
+#include "memory_symbols.h"
 #include "region_defs.h"
 #include "spm.h"
 #include "tfm_hal_interrupt.h"
@@ -23,22 +23,12 @@
 #include "load/service_defs.h"
 #include "psa/client.h"
 
-/* Partition load data region */
-REGION_DECLARE(Image$$, TFM_SP_LOAD_LIST, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_SP_LOAD_LIST, $$RO$$Limit);
-
-/* Partition and service runtime pool region */
-REGION_DECLARE(Image$$, ER_PART_RT_POOL, $$ZI$$Base);
-REGION_DECLARE(Image$$, ER_PART_RT_POOL, $$ZI$$Limit);
-REGION_DECLARE(Image$$, ER_SERV_RT_POOL, $$ZI$$Base);
-REGION_DECLARE(Image$$, ER_SERV_RT_POOL, $$ZI$$Limit);
-
-static uintptr_t ldinf_sa = PART_REGION_ADDR(TFM_SP_LOAD_LIST, $$RO$$Base);
-static uintptr_t ldinf_ea = PART_REGION_ADDR(TFM_SP_LOAD_LIST, $$RO$$Limit);
-static uintptr_t part_pool_sa = PART_REGION_ADDR(ER_PART_RT_POOL, $$ZI$$Base);
-static uintptr_t part_pool_ea = PART_REGION_ADDR(ER_PART_RT_POOL, $$ZI$$Limit);
-static uintptr_t serv_pool_sa = PART_REGION_ADDR(ER_SERV_RT_POOL, $$ZI$$Base);
-static uintptr_t serv_pool_ea = PART_REGION_ADDR(ER_SERV_RT_POOL, $$ZI$$Limit);
+static uintptr_t ldinf_sa     = PART_INFOLIST_START;
+static uintptr_t ldinf_ea     = PART_INFOLIST_END;
+static uintptr_t part_pool_sa = PART_INFORAM_START;
+static uintptr_t part_pool_ea = PART_INFORAM_END;
+static uintptr_t serv_pool_sa = SERV_INFORAM_START;
+static uintptr_t serv_pool_ea = SERV_INFORAM_END;
 
 /* Allocate runtime space for partition. Panic if pool runs out. */
 static struct partition_t *tfm_allocate_partition_assuredly(void)

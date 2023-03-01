@@ -37,7 +37,4 @@
 
 #endif  /* __ICCARM__ */
 
-#define PART_REGION_ADDR(partition, region) \
-    (uintptr_t)&REGION_NAME(Image$$, partition, region)
-
 #endif  /* __REGION_H__ */

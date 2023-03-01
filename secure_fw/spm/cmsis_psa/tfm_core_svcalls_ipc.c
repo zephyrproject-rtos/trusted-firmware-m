@@ -7,7 +7,7 @@
 
 #include <string.h>
 #include "config_spm.h"
-#include "region.h"
+#include "memory_symbols.h"
 #include "spm.h"
 #include "svc_num.h"
 #include "tfm_api.h"
@@ -25,9 +25,6 @@
 #include "psa/client.h"
 #include "tfm_hal_platform.h"
 #include "internal_status_code.h"
-
-/* MSP bottom (higher address) */
-REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
 
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(uint8_t svc_num,
@@ -170,9 +167,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         exc_return = tfm_spm_init();
         tfm_arch_check_msp_sealing();
         /* The following call does not return */
-        tfm_arch_free_msp_and_exc_ret(
-            (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit),
-            exc_return);
+        tfm_arch_free_msp_and_exc_ret(SPM_BOOT_STACK_BOTTOM, exc_return);
         break;
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);

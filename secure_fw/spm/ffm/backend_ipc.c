@@ -16,12 +16,12 @@
 #include "runtime_defs.h"
 #include "ffm/stack_watermark.h"
 #include "spm.h"
-#include "tfm_hal_memory_symbols.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
 #include "tfm_rpc.h"
 #include "ffm/backend.h"
 #include "utilities.h"
+#include "cmsis_psa/memory_symbols.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/spm_load_api.h"
@@ -271,7 +271,7 @@ uint32_t backend_system_run(void)
     /* Init thread callback function. */
     thrd_set_query_callback(query_state);
 
-    partition_meta_indicator_pos = (uintptr_t *)hal_mem_sp_meta_start;
+    partition_meta_indicator_pos = (uintptr_t *)PART_LOCAL_STORAGE_PTR_POS;
     control = thrd_start_scheduler(&CURRENT_THREAD);
 
     p_cur_pt = TO_CONTAINER(CURRENT_THREAD->p_context_ctrl,

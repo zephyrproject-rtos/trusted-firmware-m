@@ -74,7 +74,6 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
         $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:ext/common/tfm_hal_spm_logdev_peripheral.c>
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:ext/common/exception_info.c>
-        ext/common/tfm_hal_memory_symbols.c
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:ext/common/template/attest_hal.c>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
         $<$<BOOL:${PLATFORM_DEFAULT_ROTPK}>:ext/common/template/tfm_rotpk.c>
