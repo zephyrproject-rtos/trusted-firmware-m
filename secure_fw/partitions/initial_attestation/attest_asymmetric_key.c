@@ -54,7 +54,7 @@ static enum psa_attest_err_t attest_load_public_key(void)
         return PSA_ATTEST_ERR_GENERAL;
     }
 
-    attestation_key_curve = PSA_KEY_TYPE_ECC_GET_FAMILY(attr.type);
+    attestation_key_curve = PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(&attr));
 
     crypto_res = psa_export_public_key(handle, attestation_public_key,
                                        sizeof(attestation_public_key),
