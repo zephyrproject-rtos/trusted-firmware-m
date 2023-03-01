@@ -12,7 +12,7 @@
 #undef CRYPTO_NV_SEED
 #define CRYPTO_NV_SEED                         0
 
-#ifdef TEST_PSA_API_CRYPTO
+#ifdef PSA_API_TEST_CRYPTO
 #undef CRYPTO_STACK_SIZE
 #define CRYPTO_STACK_SIZE                      0x2200
 #endif

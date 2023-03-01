@@ -23,8 +23,8 @@ add_library(tfm_config INTERFACE)
 
 target_compile_definitions(tfm_config
     INTERFACE
-        $<$<STREQUAL:${TEST_PSA_API},CRYPTO>:TEST_PSA_API_CRYPTO>
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:TEST_PSA_API_IPC>
+        $<$<STREQUAL:${TEST_PSA_API},CRYPTO>:PSA_API_TEST_CRYPTO>
+        $<$<STREQUAL:${TEST_PSA_API},IPC>:PSA_API_TEST_IPC>
 )
 
 # Set user defined TF-M config header file

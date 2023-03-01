@@ -109,7 +109,7 @@
 #define ITS_VALIDATE_METADATA_FROM_FLASH       1
 
 /* The maximum asset size to be stored in the Internal Trusted Storage */
-#ifdef TEST_PSA_API_CRYPTO
+#ifdef PSA_API_TEST_CRYPTO
 /*
  * When building for the PSA Crypto API tests, ensure the ITS max asset size is
  * set to at least the size of the largest asset created by the tests.
@@ -160,7 +160,7 @@
 #define CONFIG_TFM_CONN_HANDLE_MAX_NUM         8
 
 /* Set the doorbell APIs */
-#ifdef TEST_PSA_API_IPC
+#ifdef PSA_API_TEST_IPC
 /* IPC test suite uses IPC backend */
 #define CONFIG_TFM_DOORBELL_API                1
 #else
