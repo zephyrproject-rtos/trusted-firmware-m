@@ -106,7 +106,7 @@ Trusted Firmware-M Documentation
     :hidden:
     :caption: Links
 
-    API Reference <https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/reference_manual/html/index.html>
+    API Reference <https://ci.trustedfirmware.org/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/reference_manual/html/index.html>
     Security Center <https://developer.trustedfirmware.org/w/collaboration/security_center>
     PSA <https://www.arm.com/architecture/security-features/platform-security>
 
