@@ -194,8 +194,19 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         }
     }
 
-    spm_fill_message(p_connection, service, handle, type, client_id,
-                     invecs, in_num, outvecs, out_num, outptr);
+    spm_fill_message(p_connection, service, handle, type, client_id);
+    for (i = 0; i < in_num; i++) {
+        p_connection->msg.in_size[i] = invecs[i].len;
+        p_connection->invec[i].base = invecs[i].base;
+    }
+
+    for (i = 0; i < out_num; i++) {
+        p_connection->msg.out_size[i] = outvecs[i].len;
+        p_connection->outvec[i].base = outvecs[i].base;
+        /* Out len is used to record the written number, set 0 here again */
+        p_connection->outvec[i].len = 0;
+    }
+    p_connection->caller_outvec = outptr;
 
     return backend_messaging(service, p_connection);
 }

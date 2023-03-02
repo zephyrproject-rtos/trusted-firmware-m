@@ -69,9 +69,7 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
     }
 
     handle = connection_to_handle(p_connection);
-    /* No input or output needed for connect message */
-    spm_fill_message(p_connection, service, handle, PSA_IPC_CONNECT,
-                     client_id, NULL, 0, NULL, 0, NULL);
+    spm_fill_message(p_connection, service, handle, PSA_IPC_CONNECT, client_id);
 
     return backend_messaging(service, p_connection);
 }
@@ -118,9 +116,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    /* No input or output needed for close message */
-    spm_fill_message(p_connection, service, handle, PSA_IPC_DISCONNECT,
-                     client_id, NULL, 0, NULL, 0, NULL);
+    spm_fill_message(p_connection, service, handle, PSA_IPC_DISCONNECT, client_id);
 
     return backend_messaging(service, p_connection);
 }

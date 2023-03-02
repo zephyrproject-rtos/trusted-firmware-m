@@ -358,42 +358,20 @@ struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle)
 void spm_fill_message(struct connection_t *p_connection,
                       struct service_t *service,
                       psa_handle_t handle,
-                      int32_t type, int32_t client_id,
-                      psa_invec *invec, size_t in_len,
-                      psa_outvec *outvec, size_t out_len,
-                      psa_outvec *caller_outvec)
+                      int32_t type, int32_t client_id)
 {
-    uint32_t i;
-
     SPM_ASSERT(p_connection);
     SPM_ASSERT(service);
-    SPM_ASSERT(!(invec == NULL && in_len != 0));
-    SPM_ASSERT(!(outvec == NULL && out_len != 0));
-    SPM_ASSERT(in_len <= SIZE_MAX - out_len);
-    SPM_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
     spm_memset(&p_connection->msg, 0, sizeof(psa_msg_t));
 
     p_connection->service = service;
     p_connection->p_client = GET_CURRENT_COMPONENT();
-    p_connection->caller_outvec = caller_outvec;
     p_connection->msg.client_id = client_id;
 
     /* Copy contents */
     p_connection->msg.type = type;
-
-    for (i = 0; i < in_len; i++) {
-        p_connection->msg.in_size[i] = invec[i].len;
-        p_connection->invec[i].base = invec[i].base;
-    }
-
-    for (i = 0; i < out_len; i++) {
-        p_connection->msg.out_size[i] = outvec[i].len;
-        p_connection->outvec[i].base = outvec[i].base;
-        /* Out len is used to record the wrote number, set 0 here again */
-        p_connection->outvec[i].len = 0;
-    }
 
     /* Use the user connect handle as the message handle */
     p_connection->msg.handle = handle;

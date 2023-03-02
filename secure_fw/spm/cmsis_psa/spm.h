@@ -223,19 +223,11 @@ struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle);
  * \param[in] type          Message type, PSA_IPC_CONNECT, PSA_IPC_CALL or
  *                          PSA_IPC_DISCONNECT
  * \param[in] client_id     Partition ID of the sender of the message
- * \param[in] invec         Array of input \ref psa_invec structures
- * \param[in] in_len        Number of input \ref psa_invec structures
- * \param[in] outvec        Array of output \ref psa_outvec structures
- * \param[in] out_len       Number of output \ref psa_outvec structures
- * \param[in] caller_outvec Array of caller output \ref psa_outvec structures
  */
 void spm_fill_message(struct connection_t *p_connection,
                       struct service_t *service,
                       psa_handle_t handle,
-                      int32_t type, int32_t client_id,
-                      psa_invec *invec, size_t in_len,
-                      psa_outvec *outvec, size_t out_len,
-                      psa_outvec *caller_outvec);
+                      int32_t type, int32_t client_id);
 
 /**
  * \brief                   Check the client version according to
