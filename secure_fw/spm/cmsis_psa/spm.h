@@ -92,7 +92,9 @@ struct connection_t {
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
     uint32_t iovec_status;              /* MM-IOVEC status                */
 #endif
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
     struct connection_t *p_handles;     /* Handle(s) link                 */
+#endif
 };
 
 /* Partition runtime type */
