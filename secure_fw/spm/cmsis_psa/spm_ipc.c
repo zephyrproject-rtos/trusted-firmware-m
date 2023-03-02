@@ -397,7 +397,10 @@ void spm_fill_message(struct connection_t *p_connection,
 
     /* Use the user connect handle as the message handle */
     p_connection->msg.handle = handle;
+
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
     p_connection->msg.rhandle = p_connection->rhandle;
+#endif
 
     /* Set the private data of NSPE client caller in multi-core topology */
     if (TFM_CLIENT_ID_IS_NS(client_id)) {

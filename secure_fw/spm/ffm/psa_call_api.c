@@ -90,7 +90,9 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
             return PSA_ERROR_CONNECTION_BUSY;
         }
 
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
         p_connection->rhandle = NULL;
+#endif
         handle = connection_to_handle(p_connection);
     } else {
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1

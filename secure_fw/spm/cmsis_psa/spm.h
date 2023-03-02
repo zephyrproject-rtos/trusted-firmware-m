@@ -63,7 +63,9 @@
 
 /* RoT connection handle list */
 struct connection_t {
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
     void *rhandle;                      /* Reverse handle value           */
+#endif
     uint32_t status;                    /*
                                          * Status of handle, three valid
                                          * options:
