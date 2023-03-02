@@ -45,7 +45,7 @@ list(APPEND CONFIG_FILE_LIST
             ${KCONFIG_CONFIG_FILE})
 
 # Set up ENV variables for the tfm_kconfig.py which are then consumed by Kconfig files.
-set(KCONFIG_ENV_VARS "TFM_BASE=${CMAKE_SOURCE_DIR} \
+set(KCONFIG_ENV_VARS "TFM_SOURCE_DIR=${CMAKE_SOURCE_DIR} \
                       TFM_VERSION=${TFM_VERSION} \
                       PLATFORM_PATH=${TARGET_PLATFORM_PATH} \
                       CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
