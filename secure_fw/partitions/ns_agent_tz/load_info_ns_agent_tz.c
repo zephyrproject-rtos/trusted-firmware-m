@@ -65,7 +65,8 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
         .flags                      = (PARTITION_PRI_LOWEST - 1)
                                     | PARTITION_MODEL_IPC
                                     | PARTITION_MODEL_PSA_ROT
-                                    | PARTITION_NS_AGENT,
+                                    | PARTITION_NS_AGENT
+                                    | PARTITION_NS_AGENT_TZ,
         .entry                      = ENTRY_TO_POSITION(ns_agent_tz_main),
         .stack_size                 = TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED,
         .heap_size                  = 0,

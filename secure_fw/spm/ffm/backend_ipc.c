@@ -232,12 +232,10 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
-#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
-    if (IS_NS_AGENT(p_pldi)) {
+#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1)
+    if (IS_NS_AGENT_TZ(p_pldi)) {
         /* Get the context from ns_agent_tz */
-        if (p_pldi->pid == 0) {
-            SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
-        }
+        SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
     }
 #endif
 

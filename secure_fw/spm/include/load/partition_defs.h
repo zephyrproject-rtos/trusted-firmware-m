@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -36,7 +36,8 @@
  * A/P:       ARoT or PRoT domain         1: PRoT              0: ARoT
  * I/S:       IPC or SFN typed partition  1: IPC               0: SFN
  * NS:        NS Agent or not             1: NS Agent          0: Not
- * RES:       21 bits reserved            0
+ * NS:        NS Agent TZ or not          1: NS Agent TZ       0: Not
+ * RES:       20 bits reserved            0
  */
 #define PARTITION_PRI_HIGHEST                   (0x0)
 #define PARTITION_PRI_HIGH                      (0xF)
@@ -49,6 +50,7 @@
 #define PARTITION_MODEL_IPC                     (1U << 9)
 
 #define PARTITION_NS_AGENT                      (1U << 10)
+#define PARTITION_NS_AGENT_TZ                   (1U << 11)
 
 #define PARTITION_PRIORITY(flag)                ((flag) & PARTITION_PRI_MASK)
 #define TO_THREAD_PRIORITY(x)                   (x)
@@ -65,6 +67,14 @@
                                                      & PARTITION_MODEL_IPC))
 #define IS_NS_AGENT(pldi)                       (!!((pldi)->flags \
                                                      & PARTITION_NS_AGENT))
+#ifdef CONFIG_TFM_USE_TRUSTZONE
+#define IS_NS_AGENT_TZ(pldi)                    (IS_NS_AGENT(pldi) \
+                                                     && !!((pldi)->flags \
+                                                       & PARTITION_NS_AGENT_TZ))
+#else
+#define IS_NS_AGENT_TZ(pldi)                    false
+#endif
+
 /* Partition flag end */
 
 /*
