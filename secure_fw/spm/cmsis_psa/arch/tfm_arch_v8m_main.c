@@ -279,7 +279,8 @@ void tfm_arch_config_extensions(void)
      */
     SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
                   | (3U << 11U*2U);  /* enable CP11 full access */
-
+    __DSB();
+    __ISB();
     /*
      * Permit Non-secure access to the Floating-point Extension.
      * Note: It is still necessary to set CPACR_NS to enable the FP Extension

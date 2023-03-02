@@ -116,6 +116,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   cmp     r0, r1                              \n" /* curr, next ctx */
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
         "   cpsid   i                                   \n"
+        "   isb                                         \n"
         "   mrs     r2, psp                             \n"
         "   mov     r3, lr                              \n"
         "   push    {r0, r1}                            \n"
@@ -162,6 +163,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
         "   cpsie   i                                   \n"
+        "   isb                                         \n"
         "v8b_pendsv_exit:                               \n"
         "   bx      lr                                  \n"
     );

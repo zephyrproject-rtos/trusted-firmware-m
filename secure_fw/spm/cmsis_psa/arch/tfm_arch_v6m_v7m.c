@@ -53,6 +53,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
 #endif
         "   push   {r4, lr}                             \n"
         "   cpsid  i                                    \n"
+        "   isb                                         \n"
         "   cmp    r2, #0                               \n"
         "   beq    v6v7_lock_sched                      \n"
         "   mov    r4, sp                               \n"/* switch stack   */
@@ -63,10 +64,12 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r4, #"M2S(SCHEDULER_LOCKED)"         \n"/* Do not touch   */
         "   str    r4, [r3, #0]                         \n"
         "   cpsie  i                                    \n"
+        "   isb                                         \n"
         "   push   {r1, r2}                             \n"
         "   bl     cross_call_entering_c                \n"
         "   pop    {r1, r4}                             \n"
         "   cpsid  i                                    \n"
+        "   isb                                         \n"
         "   bl     cross_call_exiting_c                 \n"
         "   cmp    r4, #0                               \n"
         "   beq    v6v7_release_sched                   \n"
@@ -76,6 +79,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
+        "   isb                                         \n"
         "   pop    {r4, pc}                             \n"
     );
 }
@@ -96,6 +100,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   cmp     r0, r1                  \n" /* ctx of curr and next thrd */
         "   beq     v6v7_pendsv_exit        \n" /* No schedule if curr = next */
         "   cpsid   i                       \n"
+        "   isb                             \n"
         "   mrs     r2, psp                 \n"
         "   subs    r2, #32                 \n" /* Make room for r4-r11 */
         "   stm     r2!, {r4-r7}            \n" /* Save callee registers */
@@ -128,6 +133,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "   adds    r2, #16                 \n" /* End of popping r4-r11 */
         "   msr     psp, r2                 \n"
         "   cpsie   i                       \n"
+        "   isb                             \n"
         "v6v7_pendsv_exit:                  \n"
         "   bx      lr                      \n"
     );
@@ -244,6 +250,8 @@ void tfm_arch_config_extensions(void)
      */
     SCB->CPACR |= (3U << 10U*2U)     /* enable CP10 full access */
                   | (3U << 11U*2U);  /* enable CP11 full access */
+    __DSB();
+    __ISB();
 #endif
 #endif
 }
