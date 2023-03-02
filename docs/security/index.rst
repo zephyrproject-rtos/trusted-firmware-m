@@ -45,7 +45,7 @@ TF-M values researchers and community members who report vulnerabilities and
 TF-M policy is to credit the contributor's name in the published security advisory.
 
 .. _issue tracker: https://developer.trustedfirmware.org/project/view/2/
-.. _mailing list: https://lists.trustedfirmware.org/mailman/listinfo/tf-m
+.. _mailing list: https://lists.trustedfirmware.org/mailman3/lists/tf-m.lists.trustedfirmware.org/
 .. _TrustedFirmware.org security incident process: https://developer.trustedfirmware.org/w/collaboration/security_center/
 .. _Security Incident Process: https://developer.trustedfirmware.org/w/collaboration/security_center/reporting/
 

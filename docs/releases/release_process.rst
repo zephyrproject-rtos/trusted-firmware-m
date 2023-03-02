@@ -8,7 +8,7 @@ The project aims to do a release once every 6 months around April and November
 time and are listed in the :ref:`releases/index:Future release plans`.
 The releases are to be performed and tagged on a dedicated release branch.
 The release process is initiated by an announcement in
-`TF-M mailing list <https://lists.trustedfirmware.org/mailman/listinfo/tf-m>`_
+`TF-M mailing list <https://lists.trustedfirmware.org/mailman3/lists/tf-m.lists.trustedfirmware.org/>`_
 and followed by the creation of a release branch.
 Normal development on the main branch is not blocked and can be continued.
 The testing will be performed on release candidates and depending on

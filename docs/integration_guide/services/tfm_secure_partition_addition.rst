@@ -298,9 +298,7 @@ Add CMake configure files
 
 Here is a reference example for `CMakeLists.txt`_
 
-.. _CMakeLists.txt: https://git.trustedfirmware.org/TF-M/tf-m-tools.git/tree/
-  example_partition/CMakeLists.txt
-
+.. _CMakeLists.txt: https://git.trustedfirmware.org/TF-M/tf-m-extras.git/tree/examples/example_partition/CMakeLists.txt
 .. Note::
    The secure partition must be built as a standalone static library, and the
    name of the library must follow this pattern, as it affects how the linker
@@ -518,7 +516,7 @@ for the details of adding a regression test suite.
 
 Some regression tests require a dedicated RoT service. The implementations of
 the RoT service for test are similar to secure partition addition. Refer to
-`Adding partitions for regression tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/docs/tfm_test_services_addition.rst>`_
+`Adding partitions for regression tests <https://git.trustedfirmware.org/TF-M/tf-m-tests.git/tree/docs/tfm_test_partitions_addition.rst>`_
 to get more information.
 
 Out-of-tree Secure Partition build

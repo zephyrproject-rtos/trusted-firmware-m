@@ -276,8 +276,8 @@ References
 
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
 .. _Restructed Text: https://docutils.sourceforge.io/rst.html
-.. _Python Documentation Guidelines: https://devguide.python.org/documenting/#style-guide
-.. _Pygments Lexers: https://pygments.org/lexers/
+.. _Python Documentation Guidelines: https://devguide.python.org/documentation/style-guide/
+.. _Pygments Lexers: https://pygments.org/docs/api/#lexers
 
 --------------
 

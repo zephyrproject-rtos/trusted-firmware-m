@@ -214,14 +214,9 @@ Reference
 *********
 
 | `PSA Firmware Framework specification URL`_
-| `Slides includes IPC basic introduction URL`_
-| `IPC model implementation URL`_
 
 .. _PSA Firmware Framework specification URL:
   https://www.arm.com/architecture/security-features/platform-security
-.. _Slides includes IPC basic introduction URL: https://connect.linaro.org/
-  resources/yvr18/sessions/yvr18-108/
-.. _IPC model implementation URL: https://www.youtube.com/watch?v=6wEFoq49qUw
 
 --------------
 
