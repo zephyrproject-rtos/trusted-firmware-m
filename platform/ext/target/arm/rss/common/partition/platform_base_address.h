@@ -164,6 +164,10 @@
 /* ATU regions open at runtime */
 #define FWU_HOST_IMAGE_BASE_S            (HOST_ACCESS_BASE_S + 0 * HOST_IMAGE_MAX_SIZE) /* Region to allow writing new RSS FW images */
 #define HOST_COMMS_MAPPABLE_BASE_S       (HOST_ACCESS_BASE_S + 1 * HOST_IMAGE_MAX_SIZE) /* Region into which to map host comms pointers */
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
+#define HOST_ACCESS_PS_BASE_S            (HOST_ACCESS_BASE_S + 2 * HOST_IMAGE_MAX_SIZE) /* Region into which to map Protected Storage */
+#define HOST_ACCESS_PS_BASE_OFFSET       (HOST_ACCESS_PS_BASE_S - HOST_ACCESS_BASE_S)
+#endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
 /* SIC regions open in BL2 and runtime */
 #define RSS_RUNTIME_S_XIP_BASE_S         SIC_HOST_BASE_S              /* RSS runtime secure image XIP secure address */

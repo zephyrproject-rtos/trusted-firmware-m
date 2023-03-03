@@ -70,7 +70,8 @@ set(TFM_NS_NV_COUNTER_AMOUNT            3          CACHE STRING   "How many NS N
 set(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM   ON         CACHE BOOL     "Whether to use a platform specific inter-core communication instead of mailbox in dual-cpu topology")
 set(TEST_NS_MULTI_CORE                  OFF        CACHE BOOL     "Whether to build NS regression multi-core tests")
 
-configure_file(${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml ${CMAKE_BINARY_DIR}/tools/tfm_manifest_list.yaml)
+set(TFM_PLAT_SPECIFIC_MANIFEST_FILE "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Platform specific Secure Partition manifests file")
+configure_file(${TFM_PLAT_SPECIFIC_MANIFEST_FILE} ${CMAKE_BINARY_DIR}/tools/tfm_manifest_list.yaml)
 set(TFM_MANIFEST_LIST                   ${CMAKE_BINARY_DIR}/tools/tfm_manifest_list.yaml CACHE FILEPATH "TF-M native Secure Partition manifests list file")
 
 # Platform-specific configurations
