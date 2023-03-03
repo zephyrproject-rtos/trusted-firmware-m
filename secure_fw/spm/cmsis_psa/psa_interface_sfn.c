@@ -60,8 +60,8 @@ psa_status_t tfm_psa_call_pack(psa_handle_t handle, uint32_t ctrl_param,
     return (psa_status_t)stat;
 }
 
-size_t psa_read_sfn(psa_handle_t msg_handle, uint32_t invec_idx,
-                    void *buffer, size_t num_bytes)
+size_t psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
+                void *buffer, size_t num_bytes)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -72,8 +72,8 @@ size_t psa_read_sfn(psa_handle_t msg_handle, uint32_t invec_idx,
                                        buffer, num_bytes);
 }
 
-size_t psa_skip_sfn(psa_handle_t msg_handle, uint32_t invec_idx,
-                    size_t num_bytes)
+size_t psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
+                size_t num_bytes)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -83,8 +83,8 @@ size_t psa_skip_sfn(psa_handle_t msg_handle, uint32_t invec_idx,
     return tfm_spm_partition_psa_skip(msg_handle, invec_idx, num_bytes);
 }
 
-void psa_write_sfn(psa_handle_t msg_handle, uint32_t outvec_idx,
-                   const void *buffer, size_t num_bytes)
+void psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
+               const void *buffer, size_t num_bytes)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -94,7 +94,7 @@ void psa_write_sfn(psa_handle_t msg_handle, uint32_t outvec_idx,
     tfm_spm_partition_psa_write(msg_handle, outvec_idx, buffer, num_bytes);
 }
 
-void psa_panic_sfn(void)
+void psa_panic(void)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -162,7 +162,7 @@ void psa_close(psa_handle_t handle)
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 
 #if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
-psa_signal_t psa_wait_sfn(psa_signal_t signal_mask, uint32_t timeout)
+psa_signal_t psa_wait(psa_signal_t signal_mask, uint32_t timeout)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -172,7 +172,7 @@ psa_signal_t psa_wait_sfn(psa_signal_t signal_mask, uint32_t timeout)
     return tfm_spm_partition_psa_wait(signal_mask, timeout);
 }
 
-void psa_irq_enable_sfn(psa_signal_t irq_signal)
+void psa_irq_enable(psa_signal_t irq_signal)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -182,7 +182,7 @@ void psa_irq_enable_sfn(psa_signal_t irq_signal)
     tfm_spm_partition_psa_irq_enable(irq_signal);
 }
 
-psa_irq_status_t psa_irq_disable_sfn(psa_signal_t irq_signal)
+psa_irq_status_t psa_irq_disable(psa_signal_t irq_signal)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -194,7 +194,7 @@ psa_irq_status_t psa_irq_disable_sfn(psa_signal_t irq_signal)
 #endif
 
 #if CONFIG_TFM_SLIH_API == 1
-void psa_eoi_sfn(psa_signal_t irq_signal)
+void psa_eoi(psa_signal_t irq_signal)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -206,7 +206,7 @@ void psa_eoi_sfn(psa_signal_t irq_signal)
 #endif
 
 #if CONFIG_TFM_FLIH_API == 1
-void psa_reset_signal_sfn(psa_signal_t irq_signal)
+void psa_reset_signal(psa_signal_t irq_signal)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -219,7 +219,7 @@ void psa_reset_signal_sfn(psa_signal_t irq_signal)
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
 
-const void *psa_map_invec_sfn(psa_handle_t msg_handle, uint32_t invec_idx)
+const void *psa_map_invec(psa_handle_t msg_handle, uint32_t invec_idx)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -229,7 +229,7 @@ const void *psa_map_invec_sfn(psa_handle_t msg_handle, uint32_t invec_idx)
     return tfm_spm_partition_psa_map_invec(msg_handle, invec_idx);
 }
 
-void psa_unmap_invec_sfn(psa_handle_t msg_handle, uint32_t invec_idx)
+void psa_unmap_invec(psa_handle_t msg_handle, uint32_t invec_idx)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -239,7 +239,7 @@ void psa_unmap_invec_sfn(psa_handle_t msg_handle, uint32_t invec_idx)
     tfm_spm_partition_psa_unmap_invec(msg_handle, invec_idx);
 }
 
-void *psa_map_outvec_sfn(psa_handle_t msg_handle, uint32_t outvec_idx)
+void *psa_map_outvec(psa_handle_t msg_handle, uint32_t outvec_idx)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */
@@ -249,8 +249,7 @@ void *psa_map_outvec_sfn(psa_handle_t msg_handle, uint32_t outvec_idx)
     return tfm_spm_partition_psa_map_outvec(msg_handle, outvec_idx);
 }
 
-void psa_unmap_outvec_sfn(psa_handle_t msg_handle, uint32_t outvec_idx,
-                          size_t len)
+void psa_unmap_outvec(psa_handle_t msg_handle, uint32_t outvec_idx, size_t len)
 {
     if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
         /* PSA APIs must be called from Thread mode */

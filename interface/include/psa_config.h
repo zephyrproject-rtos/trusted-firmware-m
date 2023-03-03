@@ -27,8 +27,6 @@
 /* SPE has specific configurations. */
 #include "config_impl.h"
 
-#include "psa_interface_redirect.h"
-
 #endif
 
 #endif /* __PSA_CONFIG_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -426,10 +426,39 @@ void psa_unmap_outvec_cross(psa_handle_t msg_handle, uint32_t outvec_idx,
 
 const struct psa_api_tbl_t psa_api_cross = {
                                 tfm_psa_call_pack_cross,
+                                psa_version_cross,
+                                psa_framework_version_cross,
+                                psa_wait_cross,
+                                psa_get_cross,
+                                psa_read_cross,
+                                psa_skip_cross,
+                                psa_write_cross,
+                                psa_reply_cross,
+                                psa_panic_cross,
+                                psa_rot_lifecycle_state_cross,
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
                                 psa_connect_cross,
                                 psa_close_cross,
-#endif
-                                psa_version_cross,
-                                psa_framework_version_cross
+                                psa_set_rhandle_cross,
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+#if CONFIG_TFM_DOORBELL_API == 1
+                                psa_notify_cross,
+                                psa_clear_cross,
+#endif /* CONFIG_TFM_DOORBELL_API == 1 */
+#if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
+                                psa_irq_enable_cross,
+                                psa_irq_disable_cross,
+#if CONFIG_TFM_FLIH_API == 1
+                                psa_reset_signal_cross,
+#endif /* CONFIG_TFM_FLIH_API == 1 */
+#if CONFIG_TFM_SLIH_API == 1
+                                psa_eoi_cross,
+#endif /* CONFIG_TFM_SLIH_API == 1 */
+#endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+                                psa_map_invec_cross,
+                                psa_unmap_invec_cross,
+                                psa_map_outvec_cross,
+                                psa_unmap_outvec_cross,
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
                             };
