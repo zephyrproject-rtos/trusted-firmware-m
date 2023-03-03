@@ -203,7 +203,7 @@ target_sources(platform_bl2
         Native_Driver/arm_watchdog_drv.c
         fip_parser/fip_parser.c
         fw_update_agent/fwu_agent.c
-        bl2_security_cnt.c
+        bl2/security_cnt_bl2.c
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
         io/io_block.c
         io/io_flash.c
@@ -242,8 +242,8 @@ target_compile_definitions(platform_bl2
 # platform_init/quit* apis symbol collision in bl1.
 target_sources(bl2
     PRIVATE
-        bl2_flash_map.c
-        boot_hal_bl2.c
+        bl2/flash_map_bl2.c
+        bl2/boot_hal_bl2.c
 )
 
 target_link_libraries(bl2
