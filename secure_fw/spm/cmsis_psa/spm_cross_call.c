@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,6 @@
 #include "tfm_arch.h"
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"
-#include "internal_status_code.h"
 
 typedef psa_status_t (*target_fn_t)(uint32_t a0, uint32_t a1,
                                     uint32_t a2, uint32_t a3);
@@ -54,7 +53,7 @@ void cross_call_exiting_c(psa_status_t status, uintptr_t frame_addr)
     }
 
     /* Interrupt is masked, PendSV will not happen immediately. */
-    if (status == STATUS_NEED_SCHEDULE) {
+    if (THRD_EXPECTING_SCHEDULE()) {
         tfm_arch_trigger_pendsv();
     }
 }

@@ -148,7 +148,7 @@ uint32_t backend_system_run(void)
     return EXC_RETURN_THREAD_PSP;
 }
 
-psa_status_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
+psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
 {
     while (!(p_pt->signals_asserted & signals))
         ;
@@ -156,7 +156,7 @@ psa_status_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals
     return p_pt->signals_asserted & signals;
 }
 
-psa_status_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
+uint32_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
 {
     p_pt->signals_asserted |= signal;
 
