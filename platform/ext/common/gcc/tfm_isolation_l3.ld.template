@@ -90,6 +90,9 @@ SECTIONS
         LONG (__ram_vectors_start__)                        /* To   */
         LONG ((__vectors_end__ - __vectors_start__) / 4)    /* Size */
 #endif
+        LONG (LOADADDR(.spm_data))
+        LONG (ADDR(.spm_data))
+        LONG (SIZEOF(.spm_data) / 4)
         LONG (LOADADDR(.TFM_DATA))
         LONG (ADDR(.TFM_DATA))
         LONG (SIZEOF(.TFM_DATA) / 4)
@@ -110,6 +113,8 @@ SECTIONS
     .zero.table : ALIGN(4)
     {
         __zero_table_start__ = .;
+        LONG (ADDR(.spm_bss))
+        LONG (SIZEOF(.spm_bss) / 4)
 #if defined(CONFIG_TFM_PARTITION_META)
         LONG (ADDR(.TFM_SP_META_PTR))
         LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
@@ -308,6 +313,15 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
 #endif
+
+    .spm_data :
+    {
+        *libtfm_spm*:*(.data*);
+    } > RAM AT> FLASH
+    .spm_bss :
+    {
+        *libtfm_spm*:*(.bss*);
+    } > RAM AT> RAM
 
     /**** PSA RoT DATA start here */
 {% for partition in partitions %}
