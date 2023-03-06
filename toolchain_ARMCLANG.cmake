@@ -94,7 +94,7 @@ macro(tfm_toolchain_set_processor_arch)
         endif()
 
         # ARMCLANG specifies that '+nofp' is available on following M-profile cpus:
-        # 'cortex-m4', 'cortex-m7', 'cortex-m33', 'cortex-m35p' and 'cortex-m55'.
+        # 'cortex-m4', 'cortex-m7', 'cortex-m33', 'cortex-m35p', 'cortex-m55' and 'cortex-m85'.
         # Build fails if other M-profile cpu, such as 'cortex-m23', is added with '+nofp'.
         # Explicitly list those cpu to align with ARMCLANG description.
         if (NOT CONFIG_TFM_FLOAT_ABI STREQUAL "hard" AND
@@ -102,7 +102,8 @@ macro(tfm_toolchain_set_processor_arch)
             OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m7"
             OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m33"
             OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m35p"
-            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"))
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85"))
                 string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
         endif()
 
