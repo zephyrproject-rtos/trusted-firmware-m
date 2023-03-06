@@ -78,8 +78,10 @@ static struct arm_n25q256a_flash_dev_t ARM_FLASH0_DEV = {
 static struct arm_flash_sst26vf064b_flash_dev_t ARM_FLASH1_DEV = {
     .dev    = &FLASH1_DEV,
     .data   = &SST26VF064B_DEV_DATA,
-    .irq_toggle_needed = false,
-    .xip_qspi_toggle_needed = false
+    .setup_qspi = NULL,
+    .release_qspi = NULL,
+    .memory_base_s = 0,
+    .memory_base_ns = 0,
 };
 #endif /* RTE_FLASH1 */
 #endif /* PLATFORM_IS_FVP */

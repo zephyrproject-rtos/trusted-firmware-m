@@ -22,10 +22,10 @@
 #include "RTE_Device.h"
 #include "platform_base_address.h"
 
-#define FLASH0_BASE_S         SRAM_BASE_S
-#define FLASH0_BASE_NS        SRAM_BASE_NS
-#define FLASH0_SIZE           SRAM_SIZE
-#define FLASH0_SECTOR_SIZE    0x00001000 /* 4 kB */
+#define FLASH0_BASE_S         QSPI_SRAM_BASE_S
+#define FLASH0_BASE_NS        QSPI_SRAM_BASE_NS
+#define FLASH0_SIZE           QSPI_SRAM_SIZE
+#define FLASH0_SECTOR_SIZE    0x00010000 /* 64 kB */
 #define FLASH0_PAGE_SIZE      0x00001000 /* 4 kB */
 #define FLASH0_PROGRAM_UNIT   0x1        /* Minimum write size */
 

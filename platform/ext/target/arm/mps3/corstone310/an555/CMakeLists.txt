@@ -13,16 +13,20 @@ add_library(flash_drivers STATIC)
 
 target_include_directories(flash_drivers
     PRIVATE
-        ${PLATFORM_DIR}/ext/driver
-        ${CORSTONE310_COMMON_DIR}/partition
+        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated
+        ${PLATFORM_DIR}/ext/driver
+        device/include
+        device/config
 )
 
 target_sources(flash_drivers
     PRIVATE
         cmsis_drivers/Driver_Flash.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/spi_sst26vf064b_flash_lib.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/xilinx_pg153_axi_qspi_controller_drv.c
+        device/source/flash_device_definition.c
 )
 
 target_link_libraries(flash_drivers

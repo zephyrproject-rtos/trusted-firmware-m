@@ -114,6 +114,16 @@ be located in ``<MPS3 device name>/MB/HBI<BoardNumberBoardrevision>/AN555``
 
 The MPS3 board tested is HBI0309C.
 
+#. Execute the following command to create the tfm.bin binary
+   which fills the entire available space on the MPS3 onboard QSPI.
+   This way the whole flash content (PS, ITS, OTP, NV counters) is in a known state.
+   (If anything left in the QSPI, this binary will overwrite it.)
+   Also, MPS3 can only handle SFN 8.3 format, so the binary name must be shortened.::
+
+   $ cd <build dir>/bin
+   $ cp tfm_s_ns_signed.bin tfm.bin
+   $ truncate -s 8M tfm.bin
+
 #. Copy ``bl2.bin`` and ``tfm.bin`` files from
    build dir to ``<MPS3 device name>/SOFTWARE/``
 #. Open ``<MPS3 device name>/MB/HBI0309C/AN555/images.txt``
@@ -126,8 +136,8 @@ The MPS3 board tested is HBI0309C.
     IMAGE0UPDATE: RAM
     IMAGE0FILE: \SOFTWARE\bl2.bin
 
-    IMAGE1ADDRESS: 0x01_00_1102_0000
-    IMAGE1UPDATE: RAM
+    IMAGE1ADDRESS: 0x01_00_0000_0000
+    IMAGE1UPDATE: FORCEQSPI
     IMAGE1FILE: \SOFTWARE\tfm.bin
 
 #. Close ``<MPS3 device name>/MB/HBI0309C/AN555/images.txt``

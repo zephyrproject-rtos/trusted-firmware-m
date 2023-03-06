@@ -88,7 +88,7 @@
 #define S_IMAGE_PRIMARY_AREA_OFFSET \
              (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 /* Secure Code stored in Code SRAM */
-#define S_CODE_START    ((SRAM_BASE_S) + (S_IMAGE_PRIMARY_AREA_OFFSET))
+#define S_CODE_START    ((QSPI_SRAM_BASE_S) + (S_IMAGE_PRIMARY_AREA_OFFSET))
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
@@ -109,7 +109,7 @@
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
                         (NS_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 /* Non-Secure Code stored in Code SRAM memory */
-#define NS_CODE_START   (SRAM_BASE_NS + (NS_IMAGE_PRIMARY_AREA_OFFSET))
+#define NS_CODE_START   (QSPI_SRAM_BASE_NS + (NS_IMAGE_PRIMARY_AREA_OFFSET))
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
@@ -120,12 +120,12 @@
 
 /* NS partition information is used for MPC and SAU configuration */
 #define NS_PARTITION_START \
-            ((SRAM_BASE_NS) + (NS_IMAGE_PRIMARY_PARTITION_OFFSET))
+            ((QSPI_SRAM_BASE_NS) + (NS_IMAGE_PRIMARY_PARTITION_OFFSET))
 #define NS_PARTITION_SIZE (FLASH_NS_PARTITION_SIZE)
 
 /* Secondary partition for new images in case of firmware upgrade */
 #define SECONDARY_PARTITION_START \
-            ((SRAM_BASE_NS) + (S_IMAGE_SECONDARY_PARTITION_OFFSET))
+            ((QSPI_SRAM_BASE_NS) + (S_IMAGE_SECONDARY_PARTITION_OFFSET))
 #define SECONDARY_PARTITION_SIZE (FLASH_S_PARTITION_SIZE + \
                                   FLASH_NS_PARTITION_SIZE)
 

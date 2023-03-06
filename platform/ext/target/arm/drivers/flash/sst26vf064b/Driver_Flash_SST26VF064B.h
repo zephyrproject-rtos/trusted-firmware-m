@@ -25,15 +25,16 @@
  * ARM FLASH device structure
  */
 struct arm_flash_sst26vf064b_flash_dev_t {
-    struct spi_sst26vf064b_dev_t* dev; /*!< FLASH memory device structure */
-    ARM_FLASH_INFO* data;              /*!< FLASH data */
-    bool irq_toggle_needed;            /* Disable IRQ on QSPI mode flash
-                                        * accesses */
-    bool xip_qspi_toggle_needed;       /* Change between XIP and QSPI mode
-                                        * when using the flash through CMSIS
-                                        * layerIRQ and XIP toggle settings
-                                        * are used, when the SW runs from the
-                                        * QSPI flash */
+    struct spi_sst26vf064b_dev_t* dev;   /*!< FLASH memory device structure */
+    ARM_FLASH_INFO* data;                /*!< FLASH data */
+    int8_t (*setup_qspi)(struct arm_flash_sst26vf064b_flash_dev_t* dev);
+                                         /*!< Setup flash for QSPI access */
+    int8_t (*release_qspi)(struct arm_flash_sst26vf064b_flash_dev_t* dev);
+                                         /*!< Setup flash for XIP access */
+    const uint32_t memory_base_s;        /*!< FLASH memory base address in
+                                          *   XIP mode, secure alias */
+    const uint32_t memory_base_ns;       /*!< FLASH memory base address in
+                                          *   XIP mode, non-secure alias */
 };
 /* Driver Capabilities */
 static const ARM_FLASH_CAPABILITIES SST26VF064BDriverCapabilities = {
@@ -58,56 +59,24 @@ __STATIC_INLINE ARM_FLASH_CAPABILITIES SST26VF064B_Driver_GetCapabilities(void)
     return SST26VF064BDriverCapabilities;
 }
 
-__STATIC_INLINE uint32_t __save_disable_irq(void)
-{
-    uint32_t result = 0;
-
-    __ASM volatile ("mrs %0, primask \n cpsid i" : "=r" (result) :: "memory");
-    return result;
-}
-
-__STATIC_INLINE void __restore_irq(uint32_t status)
-{
-    __ASM volatile ("msr primask, %0" :: "r" (status) : "memory");
-}
-
-struct critical_section_t {
-    uint32_t   state;
-    struct arm_flash_sst26vf064b_flash_dev_t* dev;
-};
-
-#define CRITICAL_SECTION_INIT(flash_dev)             \
-{                                                    \
-    .state = 0,                                      \
-    .dev = flash_dev                                 \
-}
-
-#define CRITICAL_SECTION_ENTER(cs)                   \
-do {                                                 \
-    if(cs.dev->irq_toggle_needed) {                  \
-        (cs).state = __save_disable_irq();           \
-    }                                                \
+#define SETUP_QSPI(flash_dev)                                            \
+do {                                                                     \
+    if(flash_dev.setup_qspi != NULL) {                                   \
+        if(flash_dev.setup_qspi(&flash_dev) != 0) {                      \
+            ret = SST26VF064B_ERR_QSPI_SETUP;                            \
+            goto cleanup;                                                \
+        }                                                                \
+    }                                                                    \
 } while(0)
 
-#define CRITICAL_SECTION_LEAVE(cs)                   \
-do {                                                 \
-    if(cs.dev->irq_toggle_needed) {                  \
-        __restore_irq((cs).state);                   \
-    }                                                \
-} while(0)
-
-#define SELECT_QSPI_MODE(flash_dev)                  \
-do {                                                 \
-    if(flash_dev.xip_qspi_toggle_needed) {           \
-        select_qspi_mode(flash_dev.dev->controller); \
-    }                                                \
-} while(0)
-
-#define SELECT_XIP_MODE(flash_dev)                   \
-do {                                                 \
-    if(flash_dev.xip_qspi_toggle_needed) {           \
-        select_xip_mode(flash_dev.dev->controller);  \
-    }                                                \
+#define RELEASE_QSPI(flash_dev)                                          \
+do {                                                                     \
+    if(flash_dev.setup_qspi != NULL) {                                   \
+        if(flash_dev.release_qspi(&flash_dev) != 0) {                    \
+            /* Should never get there */                                 \
+            __ASM("B .");                                                \
+        }                                                                \
+    }                                                                    \
 } while(0)
 
 /*
@@ -122,7 +91,7 @@ static int32_t FLASH_DRIVER_NAME##_Initialize(                                \
                                             ARM_Flash_SignalEvent_t cb_event) \
 {                                                                             \
     ARG_UNUSED(cb_event);                                                     \
-    enum sst26vf064b_error_t ret;                                             \
+    enum sst26vf064b_error_t ret = ARM_DRIVER_OK;                             \
     struct spi_sst26vf064b_dev_t* dev = FLASH_DEV.dev;                        \
     ARM_FLASH_INFO* data = FLASH_DEV.data;                                    \
                                                                               \
@@ -131,16 +100,16 @@ static int32_t FLASH_DRIVER_NAME##_Initialize(                                \
     dev->sector_size = data->sector_size;                                     \
     dev->program_unit = data->program_unit;                                   \
                                                                               \
-    struct critical_section_t cs_assert = CRITICAL_SECTION_INIT(&FLASH_DEV);  \
-    CRITICAL_SECTION_ENTER(cs_assert);                                        \
-                                                                              \
-    SELECT_QSPI_MODE(FLASH_DEV);                                              \
+    SETUP_QSPI(FLASH_DEV);                                                    \
     ret = spi_sst26vf064b_initialize(FLASH_DEV.dev);                          \
-    SELECT_XIP_MODE(FLASH_DEV);                                               \
-                                                                              \
-    CRITICAL_SECTION_LEAVE(cs_assert);                                        \
     if (ret != SST26VF064B_ERR_NONE) {                                        \
         SPI_FLASH_LOG_MSG("%s: Initialization failed.\n\r", __func__);        \
+        goto cleanup;                                                         \
+    }                                                                         \
+                                                                              \
+cleanup:                                                                      \
+    RELEASE_QSPI(FLASH_DEV);                                                  \
+    if (ret != SST26VF064B_ERR_NONE) {                                        \
         return ARM_DRIVER_ERROR;                                              \
     }                                                                         \
     return ARM_DRIVER_OK;                                                     \
@@ -157,28 +126,27 @@ static int32_t FLASH_DRIVER_NAME##_ReadData(uint32_t addr,                    \
     {                                                                         \
         SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", \
                           __func__, addr);                                    \
-        return ARM_DRIVER_ERROR;                                              \
+        ret = SST26VF064B_ERR_WRONG_ARGUMENT;                                 \
+        goto cleanup;                                                         \
     }                                                                         \
                                                                               \
     cnt *= data_width_byte[SST26VF064BDriverCapabilities.data_width];         \
                                                                               \
-    struct critical_section_t cs_assert = CRITICAL_SECTION_INIT(&FLASH_DEV);  \
-    CRITICAL_SECTION_ENTER(cs_assert);                                        \
-                                                                              \
-    SELECT_QSPI_MODE(FLASH_DEV);                                              \
+    SETUP_QSPI(FLASH_DEV);                                                    \
     ret = spi_sst26vf064b_read(FLASH_DEV.dev, addr, (uint8_t*) data, cnt);    \
-    SELECT_XIP_MODE(FLASH_DEV);                                               \
-                                                                              \
-    CRITICAL_SECTION_LEAVE(cs_assert);                                        \
-                                                                              \
     if (ret != SST26VF064B_ERR_NONE) {                                        \
         SPI_FLASH_LOG_MSG("%s: read failed: addr=0x%x, cnt=%u\n\r",           \
                           __func__, addr, cnt);                               \
-        return ARM_DRIVER_ERROR;                                              \
+        goto cleanup;                                                         \
     }                                                                         \
                                                                               \
     cnt /= data_width_byte[SST26VF064BDriverCapabilities.data_width];         \
                                                                               \
+cleanup:                                                                      \
+    RELEASE_QSPI(FLASH_DEV);                                                  \
+    if (ret != SST26VF064B_ERR_NONE) {                                        \
+        return ARM_DRIVER_ERROR;                                              \
+    }                                                                         \
     return cnt;                                                               \
 }                                                                             \
                                                                               \
@@ -193,28 +161,27 @@ static int32_t FLASH_DRIVER_NAME##_ProgramData(uint32_t addr,                 \
     {                                                                         \
         SPI_FLASH_LOG_MSG("%s: Incorrect data width selected: addr=0x%x\n\r", \
                           __func__, addr);                                    \
-        return ARM_DRIVER_ERROR;                                              \
+        ret = SST26VF064B_ERR_WRONG_ARGUMENT;                                 \
+        goto cleanup;                                                         \
     }                                                                         \
                                                                               \
     cnt *= data_width_byte[SST26VF064BDriverCapabilities.data_width];         \
                                                                               \
-    struct critical_section_t cs_assert = CRITICAL_SECTION_INIT(&FLASH_DEV);  \
-    CRITICAL_SECTION_ENTER(cs_assert);                                        \
-                                                                              \
-    SELECT_QSPI_MODE(FLASH_DEV);                                              \
+    SETUP_QSPI(FLASH_DEV);                                                    \
     ret = spi_sst26vf064b_program(FLASH_DEV.dev, addr, (uint8_t*) data, cnt); \
-    SELECT_XIP_MODE(FLASH_DEV);                                               \
-                                                                              \
-    CRITICAL_SECTION_LEAVE(cs_assert);                                        \
-                                                                              \
     if (ret != SST26VF064B_ERR_NONE) {                                        \
         SPI_FLASH_LOG_MSG("%s: program failed: addr=0x%x, cnt=%u\n\r",        \
                           __func__, addr, cnt);                               \
-        return ARM_DRIVER_ERROR;                                              \
+        goto cleanup;                                                         \
     }                                                                         \
                                                                               \
     cnt /= data_width_byte[SST26VF064BDriverCapabilities.data_width];         \
                                                                               \
+cleanup:                                                                      \
+    RELEASE_QSPI(FLASH_DEV);                                                  \
+    if (ret != SST26VF064B_ERR_NONE) {                                        \
+        return ARM_DRIVER_ERROR;                                              \
+    }                                                                         \
     return cnt;                                                               \
 }                                                                             \
                                                                               \
@@ -222,17 +189,16 @@ static int32_t FLASH_DRIVER_NAME##_EraseSector(uint32_t addr)                 \
 {                                                                             \
     enum sst26vf064b_error_t ret;                                             \
                                                                               \
-    struct critical_section_t cs_assert = CRITICAL_SECTION_INIT(&FLASH_DEV);  \
-    CRITICAL_SECTION_ENTER(cs_assert);                                        \
-                                                                              \
-    SELECT_QSPI_MODE(FLASH_DEV);                                              \
+    SETUP_QSPI(FLASH_DEV);                                                    \
     ret = spi_sst26vf064b_erase_sector(FLASH_DEV.dev, addr);                  \
-    SELECT_XIP_MODE(FLASH_DEV);                                               \
-                                                                              \
-    CRITICAL_SECTION_LEAVE(cs_assert);                                        \
-                                                                              \
     if (ret != SST26VF064B_ERR_NONE) {                                        \
         SPI_FLASH_LOG_MSG("%s: erase failed: addr=0x%x\n\r", __func__, addr); \
+        goto cleanup;                                                         \
+    }                                                                         \
+                                                                              \
+cleanup:                                                                      \
+    RELEASE_QSPI(FLASH_DEV);                                                  \
+    if (ret != SST26VF064B_ERR_NONE) {                                        \
         return ARM_DRIVER_ERROR;                                              \
     }                                                                         \
     return ARM_DRIVER_OK;                                                     \
@@ -242,17 +208,16 @@ static int32_t FLASH_DRIVER_NAME##_EraseChip(void)                            \
 {                                                                             \
     enum sst26vf064b_error_t ret;                                             \
                                                                               \
-    struct critical_section_t cs_assert = CRITICAL_SECTION_INIT(&FLASH_DEV);  \
-    CRITICAL_SECTION_ENTER(cs_assert);                                        \
-                                                                              \
-    SELECT_QSPI_MODE(FLASH_DEV);                                              \
+    SETUP_QSPI(FLASH_DEV);                                                    \
     ret = spi_sst26vf064b_erase_chip(FLASH_DEV.dev);                          \
-    SELECT_XIP_MODE(FLASH_DEV);                                               \
-                                                                              \
-    CRITICAL_SECTION_LEAVE(cs_assert);                                        \
-                                                                              \
     if (ret != SST26VF064B_ERR_NONE) {                                        \
         SPI_FLASH_LOG_MSG("%s: erase chip failed\n\r", __func__);             \
+        goto cleanup;                                                         \
+    }                                                                         \
+                                                                              \
+cleanup:                                                                      \
+    RELEASE_QSPI(FLASH_DEV);                                                  \
+    if (ret != SST26VF064B_ERR_NONE) {                                        \
         return ARM_DRIVER_ERROR;                                              \
     }                                                                         \
     return ARM_DRIVER_OK;                                                     \
