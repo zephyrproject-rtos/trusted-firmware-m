@@ -164,6 +164,13 @@
 #define FLASH_OTP_NV_COUNTERS_AREA_SIZE   (2 * FLASH_AREA_IMAGE_SECTOR_SIZE)   /* 128 kB */
 #define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE FLASH_AREA_IMAGE_SECTOR_SIZE
 
+#if (((FLASH_OTP_NV_COUNTERS_AREA_SIZE % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0) ||          \
+    (FLASH_OTP_NV_COUNTERS_AREA_SIZE < (2 * FLASH_OTP_NV_COUNTERS_SECTOR_SIZE)) ||       \
+    (((FLASH_OTP_NV_COUNTERS_AREA_SIZE / FLASH_OTP_NV_COUNTERS_SECTOR_SIZE) % 2) != 0)   \
+    )
+#error "NV_COUNTERS should be a multiple of block size and total number of blocks should be more greater than or equal to 2 and even."
+#endif
+
 /* mpc_init_cfg function in target_cfg.c expects that all the images can fit
  * in SRAM area. */
 #if ( FLASH_OTP_NV_COUNTERS_AREA_OFFSET + FLASH_OTP_NV_COUNTERS_AREA_SIZE > QSPI_SRAM_SIZE)
@@ -204,6 +211,14 @@
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_PS_PROGRAM_UNIT       (0x1)
 
+#if (((TFM_HAL_PS_FLASH_AREA_SIZE % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0) ||   \
+    ((TFM_HAL_PS_FLASH_AREA_SIZE / FLASH_AREA_IMAGE_SECTOR_SIZE) == 0) ||   \
+    ((TFM_HAL_PS_FLASH_AREA_SIZE / FLASH_AREA_IMAGE_SECTOR_SIZE) == 1) ||   \
+    ((TFM_HAL_PS_FLASH_AREA_SIZE / FLASH_AREA_IMAGE_SECTOR_SIZE) == 3)      \
+    )
+#error "PS area size should be a multiple of block size and total number of blocks can not be 0, 1 or 3."
+#endif
+
 /* Internal Trusted Storage (ITS) Service definitions
  * Note: Further documentation of these definitions can be found in the
  * TF-M ITS Integration Guide. The ITS should be in the internal flash, but is
@@ -224,6 +239,14 @@
 #define TFM_HAL_ITS_SECTORS_PER_BLOCK  (1)
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_ITS_PROGRAM_UNIT       (0x1)
+
+#if (((TFM_HAL_ITS_FLASH_AREA_SIZE % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0) ||  \
+    ((TFM_HAL_ITS_FLASH_AREA_SIZE / FLASH_AREA_IMAGE_SECTOR_SIZE) == 0) ||   \
+    ((TFM_HAL_ITS_FLASH_AREA_SIZE / FLASH_AREA_IMAGE_SECTOR_SIZE) == 1) ||   \
+    ((TFM_HAL_ITS_FLASH_AREA_SIZE / FLASH_AREA_IMAGE_SECTOR_SIZE) == 3)      \
+    )
+#error "ITS area size should be a multiple of block size and total number of blocks can not be 0, 1 or 3."
+#endif
 
 /* OTP / NV counter definitions */
 #define TFM_OTP_NV_COUNTERS_AREA_SIZE   (FLASH_OTP_NV_COUNTERS_AREA_SIZE / 2)
