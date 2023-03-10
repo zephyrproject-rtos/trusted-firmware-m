@@ -73,6 +73,11 @@ target_sources(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
 )
 
+target_compile_definitions(platform_bl2
+    PRIVATE
+        MEASURED_BOOT_HASH_ALG=${MEASURED_BOOT_HASH_ALG}
+)
+
 target_include_directories(platform_bl2
     PUBLIC
         bl2

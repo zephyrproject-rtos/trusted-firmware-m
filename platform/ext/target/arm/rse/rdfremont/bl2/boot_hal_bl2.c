@@ -7,10 +7,14 @@
 
 #include "boot_hal.h"
 
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "boot_measurement.h"
 #include "bootutil/bootutil.h"
 #include "bootutil/bootutil_log.h"
+#include "bootutil/fault_injection_hardening.h"
 #include "device_definition.h"
 #include "flash_map/flash_map.h"
 #include "host_base_address.h"
@@ -19,13 +23,185 @@
 #include "ni_tower_lib.h"
 #include "platform_base_address.h"
 #include "platform_regs.h"
+#include "psa/crypto.h"
 #include "rse_expansion_regs.h"
 #include "size_defs.h"
+#include "tfm_boot_status.h"
+#include "tfm_plat_defs.h"
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #include "fih.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
+
+static uint8_t lcp_measurement[PSA_HASH_LENGTH(MEASURED_BOOT_HASH_ALG)];
+static struct boot_measurement_metadata lcp_measurement_metadata = {0};
+
+/*
+ * Store an entry of data in the shared area of memory so it can be used by the
+ * runtime firmware. The shared memory has a standard format see
+ * 'secure_fw/spm/include/boot/tfm_boot_status.h' for details.
+ */
+static int boot_add_data_to_shared_area(uint8_t major_type,
+                                        uint16_t minor_type,
+                                        size_t size,
+                                        const uint8_t *data)
+{
+    struct shared_data_tlv_entry tlv_entry = {0};
+    struct tfm_boot_data *boot_data;
+    uintptr_t tlv_end, offset;
+
+    if (data == NULL) {
+        return -1;
+    }
+
+    boot_data = (struct tfm_boot_data *)BOOT_TFM_SHARED_DATA_BASE;
+
+    /* Check whether the shared area needs to be initialized. */
+    if ((boot_data->header.tlv_magic != SHARED_DATA_TLV_INFO_MAGIC) ||
+                (boot_data->header.tlv_tot_len > BOOT_TFM_SHARED_DATA_SIZE)) {
+        memset((void *)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
+        boot_data->header.tlv_magic   = SHARED_DATA_TLV_INFO_MAGIC;
+        boot_data->header.tlv_tot_len = SHARED_DATA_HEADER_SIZE;
+    }
+
+    /* Get the boundaries of TLV section. */
+    tlv_end = BOOT_TFM_SHARED_DATA_BASE + boot_data->header.tlv_tot_len;
+    offset  = BOOT_TFM_SHARED_DATA_BASE + SHARED_DATA_HEADER_SIZE;
+
+    /*
+     * Check whether TLV entry is already added. Iterates over the TLV section
+     * looks for the same entry if found then returns with error.
+     */
+    while (offset < tlv_end) {
+        /* Create local copy to avoid unaligned access */
+        memcpy(&tlv_entry, (const void *)offset, SHARED_DATA_ENTRY_HEADER_SIZE);
+        if (GET_MAJOR(tlv_entry.tlv_type) == major_type &&
+            GET_MINOR(tlv_entry.tlv_type) == minor_type) {
+
+            return -1;
+        }
+
+        offset += SHARED_DATA_ENTRY_SIZE(tlv_entry.tlv_len);
+    }
+
+    /* Add TLV entry. */
+    tlv_entry.tlv_type = SET_TLV_TYPE(major_type, minor_type);
+    tlv_entry.tlv_len  = size;
+
+    /* Check integer overflow and overflow of shared data area. */
+    if (SHARED_DATA_ENTRY_SIZE(size) >
+                (UINT16_MAX - boot_data->header.tlv_tot_len)) {
+        return -1;
+    } else if ((SHARED_DATA_ENTRY_SIZE(size) + boot_data->header.tlv_tot_len) >
+                BOOT_TFM_SHARED_DATA_SIZE) {
+        return -1;
+    }
+
+    offset = tlv_end;
+    memcpy((void *)offset, &tlv_entry, SHARED_DATA_ENTRY_HEADER_SIZE);
+
+    offset += SHARED_DATA_ENTRY_HEADER_SIZE;
+    memcpy((void *)offset, data, size);
+
+    boot_data->header.tlv_tot_len += SHARED_DATA_ENTRY_SIZE(size);
+
+    return 0;
+}
+
+/*
+ * Store a boot measurement in shared memory based on common
+ * boot_store_measurement see 'platform/ext/common/boot_hal_bl2.c'
+ */
+static int store_measurement(uint8_t index,
+                             const uint8_t *measurement,
+                             size_t measurement_size,
+                             const struct boot_measurement_metadata *metadata,
+                             bool lock_measurement)
+{
+    uint16_t minor_type;
+    uint8_t claim;
+    int rc;
+
+    minor_type = SET_MBS_MINOR(index, SW_MEASURE_METADATA);
+    rc = boot_add_data_to_shared_area(TLV_MAJOR_MBS,
+                                      minor_type,
+                                      sizeof(struct boot_measurement_metadata),
+                                      (const uint8_t *)metadata);
+    if (rc) {
+        BOOT_LOG_ERR("BL2: Unable to store measurement");
+        return rc;
+    }
+
+    claim = lock_measurement ? SW_MEASURE_VALUE_NON_EXTENDABLE
+                             : SW_MEASURE_VALUE;
+    minor_type = SET_MBS_MINOR(index, claim);
+    rc = boot_add_data_to_shared_area(TLV_MAJOR_MBS,
+                                      minor_type,
+                                      measurement_size,
+                                      measurement);
+
+    return rc;
+}
+
+/*
+ * Store a boot measurement in shared memory.
+ *
+ * There is an special handling for LCP which is loading multiple instances
+ * of the same image so requires multiple measurements but only one store as
+ * measurements should be identical.
+ */
+int boot_store_measurement(uint8_t index,
+                           const uint8_t *measurement,
+                           size_t measurement_size,
+                           const struct boot_measurement_metadata *metadata,
+                           bool lock_measurement)
+{
+    static bool lcp_measurement_created = false;
+
+    if (index >= BOOT_MEASUREMENT_SLOT_MAX) {
+        return -1;
+    }
+
+    /*
+     * LCP image requires multiple loads. If slot index is for LCP, then don't
+     * add data to the shared area.
+     */
+    if(index == BOOT_MEASUREMENT_SLOT_RT_0 + RSE_FIRMWARE_LCP_ID) {
+        if (measurement_size != PSA_HASH_LENGTH(MEASURED_BOOT_HASH_ALG)) {
+            BOOT_LOG_ERR("BL2: LCP measurements different lengths");
+            return -1;
+        }
+
+        /*
+         * If LCP measurements are not stored, store the input measurements.
+         * Else, check if the store measurements matches with the input
+         * measurements. If those doesn't match, then return -1.
+         */
+        if (lcp_measurement_created == false) {
+            memcpy(lcp_measurement, measurement,
+                   measurement_size * sizeof(uint8_t));
+            memcpy(&lcp_measurement_metadata, metadata,
+                   sizeof(struct boot_measurement_metadata));
+            lcp_measurement_created = true;
+        } else {
+            if ((memcmp(measurement, lcp_measurement,
+                        measurement_size * sizeof(uint8_t)) != 0) ||
+                (memcmp(metadata, &lcp_measurement_metadata,
+                        sizeof(struct boot_measurement_metadata)) != 0)) {
+                BOOT_LOG_ERR("BL2: LCP measurements different");
+                return -1;
+            }
+        }
+        return 0;
+    }
+
+    return store_measurement(index,
+                             measurement,
+                             measurement_size,
+                             metadata,
+                             lock_measurement);
+}
 
 /*
  * Initializes the ATU region before configuring the NI-Tower. This function
@@ -564,7 +740,7 @@ static int boot_platform_post_load_lcp(void)
 {
     enum atu_error_t atu_err;
     struct boot_rsp rsp;
-    int lcp_idx;
+    int lcp_idx, rc;
     fih_ret fih_rc = FIH_FAILURE;
     fih_ret recovery_succeeded = FIH_FAILURE;
 
@@ -638,6 +814,19 @@ static int boot_platform_post_load_lcp(void)
             BOOT_LOG_ERR("BL2: ATU could not uninit LCP code load region");
             return 1;
         }
+    }
+
+    /*
+     * Save the boot measurement after LCP images are loaded.
+     */
+    rc = store_measurement(
+        (uint8_t)BOOT_MEASUREMENT_SLOT_RT_0 + RSE_FIRMWARE_LCP_ID,
+        lcp_measurement,
+        PSA_HASH_LENGTH(MEASURED_BOOT_HASH_ALG) * sizeof(uint8_t),
+        &lcp_measurement_metadata, false);
+    if (rc) {
+        BOOT_LOG_ERR("BL2: Could not store LCP measurement");
+        return 1;
     }
 
     /* Close RSE ATU region configured to access RSE header region for LCP */
