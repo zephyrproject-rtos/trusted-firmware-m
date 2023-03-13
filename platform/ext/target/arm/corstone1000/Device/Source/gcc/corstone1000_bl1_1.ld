@@ -89,7 +89,7 @@ SECTIONS
 
     /* To copy multiple ROM to RAM sections,
      * define etext2/data2_start/data2_end and
-     * define __STARTUP_COPY_MULTIPLE in startup_corstone700_bl2.S */
+     * define __STARTUP_COPY_MULTIPLE in startup_corstone1000.c */
     .copy.table :
     {
         . = ALIGN(4);
