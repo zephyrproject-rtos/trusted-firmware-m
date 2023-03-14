@@ -302,85 +302,135 @@ static enum tfm_plat_err_t make_backup(void)
     return err;
 }
 
+static enum tfm_plat_err_t copy_data_into_block(uint32_t data_offset,
+                                                size_t data_size,
+                                                const uint8_t *data,
+                                                uint32_t block_offset,
+                                                size_t block_size,
+                                                uint8_t *block)
+{
+    uint32_t copy_start_offset;
+    uint32_t copy_end_offset;
+
+    /* Check if any of our data needs to be copied into this buf */
+    if (data_offset + data_size > block_offset &&
+        data_offset < block_offset + block_size) {
+        if (data_offset > block_offset) {
+            copy_start_offset = data_offset;
+        } else {
+            copy_start_offset = block_offset;
+        }
+
+        if (data_offset + data_size > block_offset + block_size) {
+            copy_end_offset = block_offset + block_size;
+        } else {
+            copy_end_offset = data_offset + data_size;
+        }
+
+        memcpy(block + (copy_start_offset - block_offset),
+               data + (copy_start_offset - data_offset),
+               copy_end_offset - copy_start_offset);
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
 enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *data, uint32_t cnt)
 {
     enum tfm_plat_err_t err = TFM_PLAT_ERR_SUCCESS;
     size_t copy_size;
+    size_t erase_start_offset;
+    size_t erase_end_offset;
+    size_t swap_count_erase_start_offset;
+    size_t swap_count_program_block_start_offset;
     size_t idx;
-    size_t start;
-    size_t end;
-    size_t input_idx = 0;
-    size_t input_copy_size;
-    uint32_t *swap_count;
-    uint8_t swap_count_buf[TFM_HAL_ITS_PROGRAM_UNIT > 4 ? TFM_HAL_ITS_PROGRAM_UNIT : 4];
+    uint32_t swap_count;
+    uint32_t swap_count_buf_size = TFM_HAL_ITS_PROGRAM_UNIT > sizeof(swap_count) ?
+        TFM_HAL_ITS_PROGRAM_UNIT : sizeof(swap_count);
 
-    start = round_down(offset, TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
-    end = round_up(offset + cnt, TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
+    erase_start_offset = round_down(offset, TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
+    erase_end_offset = round_up(offset + cnt, TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
+
+    swap_count_erase_start_offset =
+        round_down(offsetof(struct flash_otp_nv_counters_region_t, swap_count),
+                   TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
+
+    swap_count_program_block_start_offset =
+        round_down(offsetof(struct flash_otp_nv_counters_region_t, swap_count),
+                   TFM_HAL_ITS_PROGRAM_UNIT);
+
+    if (erase_end_offset > TFM_OTP_NV_COUNTERS_AREA_SIZE) {
+        /* Erase is beyond the TFM_OTP_NV_COUNTERS_AREA */
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
     ARM_FLASH_CAPABILITIES DriverCapabilities;
     uint8_t data_width;
 
     DriverCapabilities = OTP_NV_COUNTERS_FLASH_DEV.GetCapabilities();
     data_width = data_width_byte[DriverCapabilities.data_width];
 
-    if (end > TFM_OTP_NV_COUNTERS_AREA_SIZE) {
-        /* Erase is beyond the TFM_OTP_NV_COUNTERS_AREA */
+    /* read the swap_count now, to make life easier when writing it later */
+    err = (enum tfm_plat_err_t)OTP_NV_COUNTERS_FLASH_DEV.ReadData(
+            TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR +
+            offsetof(struct flash_otp_nv_counters_region_t, swap_count),
+            &swap_count, sizeof(swap_count) / data_width);
+    if (err < 0) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    swap_count += 1;
+    if (swap_count == UINT32_MAX) {
+        swap_count = 1;
     }
 
     /* If it's not part of the sectors that are being erased, first erase the
      * sector with the swap_count flag.
      */
-    if (end < offsetof(struct flash_otp_nv_counters_region_t, swap_count)) {
-        err = erase_flash_region(round_down(TFM_OTP_NV_COUNTERS_AREA_ADDR +
-                                 offsetof(struct flash_otp_nv_counters_region_t, swap_count),
-                                 TFM_OTP_NV_COUNTERS_SECTOR_SIZE),
+    if (erase_end_offset < swap_count_erase_start_offset) {
+        err = erase_flash_region(TFM_OTP_NV_COUNTERS_AREA_ADDR +
+                                 swap_count_erase_start_offset,
                                  TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
     }
 
-    err = erase_flash_region(round_down(TFM_OTP_NV_COUNTERS_AREA_ADDR + offset,
-                                        TFM_OTP_NV_COUNTERS_SECTOR_SIZE),
-                             round_up(cnt, TFM_OTP_NV_COUNTERS_SECTOR_SIZE));
+    /* Erase the region we want to write */
+    err = erase_flash_region(TFM_OTP_NV_COUNTERS_AREA_ADDR + erase_start_offset,
+                             erase_end_offset - erase_start_offset);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
     /* Don't write the swap count, as this is done at the end */
-    if (end > offsetof(struct flash_otp_nv_counters_region_t, swap_count)) {
-        end = round_down(offsetof(struct flash_otp_nv_counters_region_t, swap_count),
-                         TFM_HAL_ITS_PROGRAM_UNIT);
+    if (erase_end_offset > swap_count_program_block_start_offset) {
+        erase_end_offset = swap_count_program_block_start_offset;
     }
 
-    for (idx = start; idx < end; idx += copy_size) {
-        copy_size = (idx + sizeof(block)) <= end ? sizeof(block) : end - idx;
+    for (idx = erase_start_offset; idx < erase_end_offset; idx += copy_size) {
+        if ((idx + sizeof(block)) <= erase_end_offset) {
+            copy_size = sizeof(block);
+        } else {
+             copy_size = erase_end_offset - idx;
+        }
 
-        err = (enum tfm_plat_err_t)OTP_NV_COUNTERS_FLASH_DEV.ReadData(TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR + idx,
-                                                 block,
-                                                 copy_size / data_width);
+        err = (enum tfm_plat_err_t)OTP_NV_COUNTERS_FLASH_DEV.ReadData(
+                TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR + idx, block,
+                copy_size / data_width);
         if (err < 0) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
 
-        if (idx + copy_size >= offset && idx < offset + cnt) {
-            input_copy_size = sizeof(block) - ((offset + input_idx) % sizeof(block));
-            if (input_idx + input_copy_size > cnt) {
-                input_copy_size = cnt - input_idx;
-            }
-
-            memcpy((void*)(block + ((offset + input_idx) % sizeof(block))),
-                   (void*)((uint8_t *)data + input_idx),
-                   input_copy_size);
-
-            input_idx += input_copy_size;
+        err = copy_data_into_block(offset, cnt, data, idx, copy_size, block);
+        if (err != TFM_PLAT_ERR_SUCCESS) {
+            return err;
         }
 
         uint32_t num_items = copy_size / data_width;
 
-        err = (enum tfm_plat_err_t)OTP_NV_COUNTERS_FLASH_DEV.ProgramData(TFM_OTP_NV_COUNTERS_AREA_ADDR + idx,
-                                                    block,
-                                                    num_items);
+        err = (enum tfm_plat_err_t)OTP_NV_COUNTERS_FLASH_DEV.ProgramData(
+                TFM_OTP_NV_COUNTERS_AREA_ADDR + idx, block, num_items);
         if (err < 0) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
@@ -392,57 +442,61 @@ enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *dat
         if (err > 0 && err != num_items) {
             return TFM_PLAT_ERR_SYSTEM_ERR;
         }
-
-        if (idx >= offset && idx < offset + cnt) {
-            memset(block, 0, sizeof(block));
-        }
     }
 
     /* If we've not already restored most of the last sector (except the swap
      * count), do it now. */
-    if (end < round_down(offsetof(struct flash_otp_nv_counters_region_t, swap_count),
-                         TFM_OTP_NV_COUNTERS_SECTOR_SIZE)) {
-        err = copy_flash_region(round_down(TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR +
-                                           offsetof(struct flash_otp_nv_counters_region_t, swap_count),
-                                           TFM_OTP_NV_COUNTERS_SECTOR_SIZE),
-                                round_down(TFM_OTP_NV_COUNTERS_AREA_ADDR +
-                                           offsetof(struct flash_otp_nv_counters_region_t, swap_count),
-                                           TFM_OTP_NV_COUNTERS_SECTOR_SIZE),
-                                TFM_OTP_NV_COUNTERS_AREA_ADDR +
-                                round_down(offsetof(struct flash_otp_nv_counters_region_t, swap_count),
-                                           TFM_HAL_ITS_PROGRAM_UNIT) -
-                                round_down(TFM_OTP_NV_COUNTERS_AREA_ADDR +
-                                           offsetof(struct flash_otp_nv_counters_region_t, swap_count),
-                                           TFM_OTP_NV_COUNTERS_SECTOR_SIZE));
+    if (erase_end_offset < swap_count_program_block_start_offset) {
+        err = copy_flash_region(
+                TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR + swap_count_erase_start_offset,
+                TFM_OTP_NV_COUNTERS_AREA_ADDR + swap_count_erase_start_offset,
+                swap_count_program_block_start_offset - swap_count_erase_start_offset);
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
     }
 
-    /* Read, modify, and write the swap count */
-    err = read_otp_nv_counters_flash(round_down(offsetof(struct flash_otp_nv_counters_region_t, swap_count),
-                                     TFM_HAL_ITS_PROGRAM_UNIT) + TFM_OTP_NV_COUNTERS_AREA_SIZE,
-                                     swap_count_buf, sizeof(swap_count_buf));
+    /* Copy the last program-unit. This _may_ contain the data that we needed to
+     * write on platforms that have large program-units, so attempt to write
+     * into the buffer still (and let copy_data_into_block() check if it needs
+     * to actually copy).
+     */
+    err = (enum tfm_plat_err_t)OTP_NV_COUNTERS_FLASH_DEV.ReadData(
+            TFM_OTP_NV_COUNTERS_BACKUP_AREA_ADDR + swap_count_program_block_start_offset,
+            block, swap_count_buf_size / data_width);
+    if (err < 0) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    err = copy_data_into_block(offset, cnt, data,
+                               swap_count_program_block_start_offset,
+                               swap_count_buf_size, block);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
-#if (TFM_HAL_ITS_PROGRAM_UNIT == 1)
-    swap_count = (uint32_t*)(swap_count_buf);
-#else
-    swap_count = (uint32_t*)(swap_count_buf + (offsetof(struct flash_otp_nv_counters_region_t, swap_count) %
-                                               TFM_HAL_ITS_PROGRAM_UNIT));
-#endif
-    *swap_count += 1;
-    if (*swap_count == UINT32_MAX) {
-        *swap_count = 1;
+    err = copy_data_into_block(
+            offsetof(struct flash_otp_nv_counters_region_t, swap_count),
+            sizeof(swap_count), (uint8_t *)&swap_count,
+            swap_count_program_block_start_offset, swap_count_buf_size, block);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
     }
-    err = (enum tfm_plat_err_t)OTP_NV_COUNTERS_FLASH_DEV.ProgramData(TFM_OTP_NV_COUNTERS_AREA_ADDR +
-                                                                     round_down(offsetof(struct flash_otp_nv_counters_region_t, swap_count),
-                                                                                TFM_HAL_ITS_PROGRAM_UNIT),
-                                                                     swap_count_buf,
-                                                                     sizeof(swap_count_buf));
+
+    uint32_t num_items = swap_count_buf_size / data_width;
+
+    err = (enum tfm_plat_err_t)OTP_NV_COUNTERS_FLASH_DEV.ProgramData(
+            TFM_OTP_NV_COUNTERS_AREA_ADDR + swap_count_program_block_start_offset,
+            block, num_items);
     if (err < 0) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    /* When err is positive it contains the number of data items
+     * successfully programmed. Check that every byte of
+     * programming succeeded.
+     */
+    if (err > 0 && err != num_items) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
