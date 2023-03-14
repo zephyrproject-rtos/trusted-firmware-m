@@ -104,6 +104,10 @@ tfm_invalid_config(ATTEST_INCLUDE_TEST_CODE AND NOT (TEST_NS_ATTESTATION OR TEST
 
 tfm_invalid_config(TFM_PROFILE STREQUAL "profile_small" AND CONFIG_TFM_SPM_BACKEND_IPC)
 
+######################## TF-M Arch config check ################################
+
+tfm_invalid_config(TFM_PXN_ENABLE AND NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
+
 ########################### Test check config ##################################
 
 if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
