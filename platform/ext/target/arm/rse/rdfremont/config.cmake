@@ -19,7 +19,11 @@ set(MCUBOOT_IMAGE_NUMBER                6        CACHE STRING  "Number of images
 set(RSE_USE_HOST_UART                   OFF      CACHE BOOL    "Whether RSE should use the UART from the host system (opposed to dedicated UART private to RSE)")
 set(RSE_USE_HOST_FLASH                  OFF      CACHE BOOL    "Enable RSE using the host flash.")
 set(RSE_HAS_EXPANSION_PERIPHERALS       ON       CACHE BOOL    "Whether RSE has sub-platform specific peripherals in the expansion layer")
-set(PLAT_LCP_COUNT                      16       CACHE STRING  "Number of LCPs to load")
+if (TFM_PLATFORM_VARIANT STREQUAL "1")
+    set(PLAT_LCP_COUNT                      8        CACHE STRING  "Number of LCPs to load")
+else()
+    set(PLAT_LCP_COUNT                      16       CACHE STRING  "Number of LCPs to load")
+endif()
 set(RSE_LOAD_NS_IMAGE                   OFF      CACHE BOOL    "Whether to load an NS image")
 set(CONFIG_TFM_SPM_BACKEND              IPC      CACHE STRING  "The SPM backend")
 
