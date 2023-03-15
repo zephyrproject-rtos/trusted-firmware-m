@@ -123,6 +123,17 @@ to NS interrupts to the lower half of available priorities so that it wouldn't
 be possible for any non-secure interrupt to preempt a higher-priority secure
 interrupt.
 
+********************************
+Secure interrupts and scheduling
+********************************
+To ensure correct operation in the general case, the secure scheduler is not
+run after handling a secure interrupt that pre-empted the NSPE. On systems
+with specific constraints, it may be desirable to run the scheduler in this
+situation, which can be done by setting
+``CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED`` to 1. This could be done if the
+NSPE is known to be a simple, single-threaded application or if non-secure
+interrupts cannot pre-empt the SPE, for example.
+
 **********************************
 Integration with non-Cmake systems
 **********************************

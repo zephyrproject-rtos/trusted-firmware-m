@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -18,4 +20,8 @@ config CONFIG_TFM_DOORBELL_API
     bool "Enable the doorbell APIs"
     depends on TFM_SPM_BACKEND_IPC
     default y
+
+config CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED
+    bool "Run the scheduler after a secure interrupt pre-empts the NSPE"
+    default n
 endmenu

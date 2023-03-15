@@ -24,7 +24,7 @@ Build configuration
    modules, specify location of external dependency or other selection,
    global to a project. These option set shall be considered while adopting TF-M
    to other build systems.
-   In the :ref:`Base_configuration` tabletheses options have *Build* type.
+   In the :ref:`Base_configuration` table these options have *Build* type.
 
 Component configuration
    To adjust a particular parameter to a desired value. Those options are
@@ -259,22 +259,26 @@ Platform Secure Partition
 
 Secure Partition Manager
 ========================
-+-------------------------------------+-----------+-------------+
-| Options                             | Type      | Base Values |
-+=====================================+===========+=============+
-|TFM_ISOLATION_LEVEL                  | Build     |   1         |
-+-------------------------------------+-----------+-------------+
-|PSA_FRAMEWORK_HAS_MM_IOVEC           | Build     |   OFF       |
-+-------------------------------------+-----------+-------------+
-|CONFIG_TFM_SPM_BACKEND               | Build     |   "SFN"     |
-+-------------------------------------+-----------+-------------+
-|TFM_SPM_LOG_LEVEL                    | Build     |   1         |
-+-------------------------------------+-----------+-------------+
-|CONFIG_TFM_CONN_HANDLE_MAX_NUM       | Component |   8         |
-+-------------------------------------+-----------+-------------+
-|CONFIG_TFM_DOORBELL_API              | Component |   0         |
-+-------------------------------------+-----------+-------------+
++----------------------------------------+-----------+-------------+
+| Options                                | Type      | Base Values |
++========================================+===========+=============+
+|TFM_ISOLATION_LEVEL                     | Build     |   1         |
++----------------------------------------+-----------+-------------+
+|PSA_FRAMEWORK_HAS_MM_IOVEC              | Build     |   OFF       |
++----------------------------------------+-----------+-------------+
+|CONFIG_TFM_SPM_BACKEND                  | Build     |   "SFN"     |
++----------------------------------------+-----------+-------------+
+|TFM_SPM_LOG_LEVEL                       | Build     |   1         |
++----------------------------------------+-----------+-------------+
+|CONFIG_TFM_CONN_HANDLE_MAX_NUM          | Component |   8         |
++----------------------------------------+-----------+-------------+
+|CONFIG_TFM_DOORBELL_API                 | Component |   0         |
++----------------------------------------+-----------+-------------+
+|CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED | Component |   OFF       |
++----------------------------------------+-----------+-------------+
 
 --------------
 
 *Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

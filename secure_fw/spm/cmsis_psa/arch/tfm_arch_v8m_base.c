@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -104,8 +104,10 @@ __attribute__((naked)) void PendSV_Handler(void)
 #endif
         "   movs    r0, #"M2S(EXC_RETURN_S)"            \n"
         "   mov     r1, lr                              \n"
+#if CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED == 1
         "   tst     r0, r1                              \n" /* NS interrupted */
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
+#endif
         "   push    {r0, lr}                            \n" /* Save R0, LR */
         "   bl      ipc_schedule                        \n"
         "   pop     {r2, r3}                            \n"

@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -230,12 +233,17 @@
 
 /* The maximal number of secure services that are connected or requested at the same time */
 #ifndef CONFIG_TFM_CONN_HANDLE_MAX_NUM
-#define CONFIG_TFM_CONN_HANDLE_MAX_NUM         8
+#define CONFIG_TFM_CONN_HANDLE_MAX_NUM          8
 #endif
 
 /* Disable the doorbell APIs */
 #ifndef CONFIG_TFM_DOORBELL_API
-#define CONFIG_TFM_DOORBELL_API                0
+#define CONFIG_TFM_DOORBELL_API                 0
+#endif
+
+/* Do not run the scheduler after handling a secure interrupt if the NSPE was pre-empted */
+#ifndef CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED
+#define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 0
 #endif
 
 #endif /* __CONFIG_BASE_H__ */
