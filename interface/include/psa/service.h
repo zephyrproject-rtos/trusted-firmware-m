@@ -11,8 +11,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "config_impl.h"
+
 #include "psa/client.h"
-#include "psa_config.h"
 #include "psa/error.h"
 #include "psa/framework_feature.h"
 

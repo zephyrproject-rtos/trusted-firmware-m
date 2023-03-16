@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include "psa/client.h"
+#include "config_impl.h"
 #include "tfm_psa_call_pack.h"
 #include "sprt_partition_metadata_indicator.h"
 #include "runtime_defs.h"

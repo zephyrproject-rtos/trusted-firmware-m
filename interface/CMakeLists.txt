@@ -61,11 +61,6 @@ target_sources(tfm_sprt
         ${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c
 )
 
-target_compile_definitions(tfm_sprt
-    PUBLIC
-        CONFIG_TFM_BUILDING_SPE=1
-)
-
 ###################### Export configurations to NS #############################
 
 if (TFM_MULTI_CORE_TOPOLOGY)

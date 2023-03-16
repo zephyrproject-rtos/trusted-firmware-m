@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 
+#include "config_impl.h"
 #include "psa/client.h"
 #include "psa/error.h"
 #include "psa/service.h"

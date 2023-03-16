@@ -35,7 +35,6 @@ install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa_manifest
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
                     ${INTERFACE_INC_DIR}/tfm_ns_interface.h
-                    ${INTERFACE_INC_DIR}/psa_config.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_ns_client_ext.h
