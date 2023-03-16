@@ -192,6 +192,16 @@
 #define ITS_STACK_SIZE                         0x720
 #endif
 
+/* The size of the authentication tag used when authentication/encryption of ITS files is enabled */
+#ifndef TFM_ITS_AUTH_TAG_LENGTH
+#define TFM_ITS_AUTH_TAG_LENGTH                16
+#endif
+
+/* The size of the nonce used when ITS file encryption is enabled */
+#ifndef TFM_ITS_ENC_NONCE_LENGTH
+#define TFM_ITS_ENC_NONCE_LENGTH               12
+#endif
+
 /* PS Partition Configs */
 
 /* Create flash FS if it doesn't exist for Protected Storage partition */

@@ -48,6 +48,7 @@ target_sources(platform_s
 target_compile_definitions(platform_s
     PUBLIC
         NRF_SKIP_FICR_NS_COPY_TO_RAM
+        $<$<BOOL:${ITS_ENCRYPTION}>:ITS_ENCRYPTION>
 )
 
 #========================= Platform Non-Secure ================================#

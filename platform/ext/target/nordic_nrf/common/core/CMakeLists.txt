@@ -75,6 +75,7 @@ target_sources(platform_s
         native_drivers/spu.c
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TEST_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/pal_plat_test.c>
+        $<$<BOOL:${ITS_ENCRYPTION}>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_its_encryption.c>
 )
 
 if (NRF_HW_INIT_RESET_ON_BOOT)

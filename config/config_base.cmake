@@ -126,6 +126,7 @@ set(PS_ENCRYPTION                       ON          CACHE BOOL      "Enable encr
 set(PS_CRYPTO_AEAD_ALG                  PSA_ALG_GCM CACHE STRING    "The AEAD algorithm to use for authenticated encryption in Protected Storage")
 
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE OFF      CACHE BOOL      "Enable Internal Trusted Storage partition")
+set(ITS_ENCRYPTION                   OFF         CACHE BOOL      "Enable authenticated encryption of ITS files using platform specific APIs")
 
 set(TFM_PARTITION_CRYPTO                OFF         CACHE BOOL      "Enable Crypto partition")
 set(CRYPTO_TFM_BUILTIN_KEYS_DRIVER      ON          CACHE BOOL      "Whether to allow crypto service to store builtin keys. Without this, ALL builtin keys must be stored in a platform-specific location")
