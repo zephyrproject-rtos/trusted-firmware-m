@@ -170,6 +170,11 @@ macro(tfm_toolchain_reload_compiler)
                             " See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157 for the issue detail.")
     endif()
 
+    if (GCC_VERSION VERSION_GREATER_EQUAL 11.3.1)
+        message(FATAL_ERROR "GNU Arm compiler version greater and equal than *11.3.Rel1* has a linker issue in syscall."
+                            " Select other GNU Arm compiler versions instead.")
+    endif()
+
     unset(CMAKE_C_FLAGS_INIT)
     unset(CMAKE_CXX_FLAGS_INIT)
     unset(CMAKE_ASM_FLAGS_INIT)
