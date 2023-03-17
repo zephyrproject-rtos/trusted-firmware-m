@@ -46,6 +46,8 @@ target_sources(tfm_spm
         ffm/psa_api.c
         ffm/psa_call_api.c
         ffm/psa_version_api.c
+        ffm/psa_read_write_skip_api.c
+        $<$<BOOL:${PSA_FRAMEWORK_HAS_MM_IOVEC}>:ffm/psa_mmiovec_api.c>
         $<$<BOOL:${CONFIG_TFM_CONNECTION_BASED_SERVICE_API}>:ffm/psa_connection_api.c>
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:ffm/psa_irq_api.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:ffm/backend_ipc.c>
