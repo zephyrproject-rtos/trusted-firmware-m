@@ -37,7 +37,7 @@
 #if defined(MBEDTLS_PSA_CRYPTO_PLATFORM_FILE)
 #include MBEDTLS_PSA_CRYPTO_PLATFORM_FILE
 #else
-#include "psa/crypto_platform.h"
+#include "crypto_platform.h"
 #endif
 
 #include <stdint.h>
