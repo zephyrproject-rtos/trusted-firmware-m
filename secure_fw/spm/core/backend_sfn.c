@@ -14,7 +14,7 @@
 #include "runtime_defs.h"
 #include "tfm_hal_platform.h"
 #include "ffm/backend.h"
-#include "ffm/stack_watermark.h"
+#include "stack_watermark.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/spm_load_api.h"

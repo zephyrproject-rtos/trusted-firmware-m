@@ -7,7 +7,7 @@
 
 #include "build_config_check.h"
 #include "fih.h"
-#include "ffm/tfm_boot_data.h"
+#include "tfm_boot_data.h"
 #include "memory_symbols.h"
 #include "spm.h"
 #include "tfm_hal_isolation.h"

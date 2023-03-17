@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include "ffm/backend.h"
-#include "ffm/stack_watermark.h"
+#include "stack_watermark.h"
 #include "lists.h"
 #include "load/spm_load_api.h"
 #include "spm.h"
