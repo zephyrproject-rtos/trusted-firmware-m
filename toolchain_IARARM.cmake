@@ -41,7 +41,6 @@ macro(tfm_toolchain_reset_compiler_flags)
     add_compile_options(
         $<$<COMPILE_LANGUAGE:C,CXX>:-e>
         $<$<COMPILE_LANGUAGE:C,CXX>:--dlib_config=full>
-        $<$<COMPILE_LANGUAGE:C,CXX>:--vla>
         $<$<COMPILE_LANGUAGE:C,CXX>:--silent>
         $<$<COMPILE_LANGUAGE:C,CXX>:-DNO_TYPEOF>
         $<$<COMPILE_LANGUAGE:C,CXX>:-D_NO_DEFINITIONS_IN_HEADER_FILES>
