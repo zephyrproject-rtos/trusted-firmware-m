@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -39,10 +39,10 @@
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 static uint32_t n_configured_regions = 0;
 
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CONFIG_TFM_USE_TRUSTZONE
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
-#endif /* TFM_MULTI_CORE_TOPOLOGY */
+#endif /* CONFIG_TFM_USE_TRUSTZONE */
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
@@ -80,6 +80,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
 {
 #ifdef CONFIG_TFM_ENABLE_MEMORY_PROTECT
 const ARM_MPU_Region_t mpu_region_attributes[] = {
+#ifdef CONFIG_TFM_USE_TRUSTZONE
     /* Veneer region
      * Region Number 0, Non-shareable, Read-Only, Non-Privileged, Executable,
      * Privilege Executable - if PXN available, Attribute set: 0
@@ -99,6 +100,7 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
                      0)
         #endif
     },
+#endif /* CONFIG_TFM_USE_TRUSTZONE */
     /* TFM Core unprivileged code region
      * Region Number 1, Non-shareable, Read-Only, Non-Privileged, Executable,
      * Privilege Executable - if PXN available, Attribute set: 0

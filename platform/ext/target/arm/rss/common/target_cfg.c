@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +33,7 @@
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CONFIG_TFM_USE_TRUSTZONE
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 #endif
@@ -56,7 +59,7 @@ const struct memory_region_limits memory_regions = {
         NS_PARTITION_SIZE - 1,
 #endif /* RSS_XIP */
 
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CONFIG_TFM_USE_TRUSTZONE
     .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
     .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
 #endif
@@ -309,7 +312,7 @@ void sau_and_idau_cfg(void)
     SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (NS_DATA_LIMIT & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CONFIG_TFM_USE_TRUSTZONE
     /* Configures veneers region to be non-secure callable */
     SAU->RNR  = 2;
     SAU->RBAR = (memory_regions.veneer_base & SAU_RBAR_BADDR_Msk);
