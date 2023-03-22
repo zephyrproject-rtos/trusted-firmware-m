@@ -222,17 +222,21 @@ uint32_t its_flash_fs_mblock_cur_data_scratch_id(
                                               uint32_t lblock);
 
 /**
- * \brief Gets file metadata entry index.
+ * \brief Gets file metadata entry index and file metadata.
  *
- * \param[in,out] fs_ctx  Filesystem context
- * \param[in]     fid     ID of the file
- * \param[out]    idx     Index of the file metadata in the file system
+ * \note  A NULL [file_meta] indicates ignoring file meta.
+ *
+ * \param[in,out]       fs_ctx      Filesystem context
+ * \param[in]           fid         ID of the file
+ * \param[out]          idx         Index of the file metadata in the file system
+ * \param[out]          file_meta   Pointer to file meta structure
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_mblock_get_file_idx(struct its_flash_fs_ctx_t *fs_ctx,
-                                              const uint8_t *fid,
-                                              uint32_t *idx);
+psa_status_t its_flash_fs_mblock_get_file_idx_meta(struct its_flash_fs_ctx_t *fs_ctx,
+                                                   const uint8_t *fid,
+                                                   uint32_t *idx,
+                                                   struct its_file_meta_t *file_meta);
 /**
  * \brief Gets file metadata entry index of the first file with one of the
  *        provided flags set.
