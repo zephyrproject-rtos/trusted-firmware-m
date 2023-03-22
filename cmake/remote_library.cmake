@@ -273,15 +273,15 @@ function(fetch_remote_library)
                 set(${ARG_LIB_BINARY_PATH_VAR} ${${ARG_LIB_NAME}_BINARY_DIR} CACHE PATH "Path to build directory of \"${ARG_LIB_NAME}\"")
             endif()
         endif()
+    endif()
 
-        if (ARG_LIB_PATCH_DIR)
-            # look for patch files
-            file(GLOB PATCH_FILES "${ARG_LIB_PATCH_DIR}/*.patch")
+    if (ARG_LIB_PATCH_DIR)
+        # look for patch files
+        file(GLOB PATCH_FILES "${ARG_LIB_PATCH_DIR}/*.patch")
 
-            if(PATCH_FILES)
-                # Apply patches for existing sources
-                apply_patches("${${ARG_LIB_SOURCE_PATH_VAR}}" "${PATCH_FILES}")
-            endif()
+        if(PATCH_FILES)
+            # Apply patches for existing sources
+            apply_patches("${${ARG_LIB_SOURCE_PATH_VAR}}" "${PATCH_FILES}")
         endif()
     endif()
 endfunction()
