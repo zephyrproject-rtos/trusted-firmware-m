@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -192,20 +192,6 @@ psa_status_t its_flash_fs_wipe_all(struct its_flash_fs_ctx_t *fs_ctx)
 {
     /* Clean and initialize the metadata block */
     return its_flash_fs_mblock_reset_metablock(fs_ctx);
-}
-
-psa_status_t its_flash_fs_file_exist(struct its_flash_fs_ctx_t *fs_ctx,
-                                     const uint8_t *fid)
-{
-    psa_status_t err;
-    uint32_t idx;
-
-    err = its_flash_fs_mblock_get_file_idx(fs_ctx, fid, &idx);
-    if (err != PSA_SUCCESS) {
-        return PSA_ERROR_DOES_NOT_EXIST;
-    }
-
-    return PSA_SUCCESS;
 }
 
 psa_status_t its_flash_fs_file_get_info(struct its_flash_fs_ctx_t *fs_ctx,
