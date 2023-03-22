@@ -20,6 +20,8 @@
 #error "Unsupported ARM Architecture."
 #endif
 
+uint32_t psp_limit;
+
 /* Delcaraction flag to control the scheduling logic in PendSV. */
 uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 

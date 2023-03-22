@@ -131,6 +131,7 @@ struct service_t {
 int32_t tfm_spm_partition_get_running_partition_id(void);
 
 /******************** Service handle management functions ********************/
+void spm_init_connection_space(void);
 
 struct connection_t *spm_allocate_connection(void);
 

@@ -16,6 +16,8 @@
 #error "Armv6-M/Armv7-M can only support multi-core TF-M now."
 #endif
 
+extern uint32_t psp_limit;
+
 #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
 #define EXC_RETURN_FTYPE                        (1 << 4)
 #endif
@@ -100,17 +102,27 @@ __STATIC_INLINE bool is_stack_alloc_fp_space(uint32_t lr)
 #endif
 
 /**
+ * \brief Get PSP Limit.
+ *
+ * \retval psp limit        Limit of PSP stack.
+ */
+__STATIC_INLINE uint32_t tfm_arch_get_psplim(void)
+{
+    return psp_limit;
+}
+
+/**
  * \brief Set PSP limit value.
  *
  * \param[in] psplim        PSP limit value to be written.
  */
 __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 {
-    /*
-     * Defined as an empty function now.
-     * The PSP limit value can be used in more strict memory check.
-     */
-    (void)psplim;
+    if (psplim > __get_PSP()) {
+        tfm_core_panic();
+    }
+
+    psp_limit = psplim;
 }
 
 /**

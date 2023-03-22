@@ -104,6 +104,16 @@ __STATIC_INLINE bool is_stack_alloc_fp_space(uint32_t lr)
 }
 
 /**
+ * \brief Get value of PSPLIM register.
+ *
+ * \retval psplim        Register value in PSPLIM register.
+ */
+__STATIC_INLINE uint32_t tfm_arch_get_psplim(void)
+{
+    return __get_PSPLIM();
+}
+
+/**
  * \brief Set PSPLIM register.
  *
  * \param[in] psplim        Register value to be written into PSPLIM.

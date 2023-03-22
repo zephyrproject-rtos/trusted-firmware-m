@@ -58,6 +58,8 @@ target_sources(tfm_spm
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:core/thread.c>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:ns_client_ext/tfm_ns_ctx.c>
         ns_client_ext/tfm_spm_ns_ctx.c
+        $<$<OR:$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>,$<BOOL:${CONFIG_TFM_CONNECTION_BASED_SERVICE_API}>>:core/spm_connection_pool.c>
+        $<$<NOT:$<OR:$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>,$<BOOL:${CONFIG_TFM_CONNECTION_BASED_SERVICE_API}>>>:core/spm_local_connection.c>
         #TODO add other arches
         $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:core/arch/tfm_arch_v8m_main.c>
         $<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>:core/arch/tfm_arch_v8m_base.c>
@@ -115,6 +117,11 @@ set_source_files_properties(tfm_secure_api.c
             $<$<C_COMPILER_ID:ARMClang>:-Wno-implicit-function-declaration>
             $<$<C_COMPILER_ID:GNU>:-Wno-implicit-function-declaration>
             $<$<C_COMPILER_ID:IAR>:>
+)
+
+target_compile_definitions(tfm_config
+    INTERFACE
+        $<$<OR:$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>,$<BOOL:${CONFIG_TFM_CONNECTION_BASED_SERVICE_API}>>:CONFIG_TFM_CONNECTION_POOL_ENABLE>
 )
 
 ############################ TFM arch ##########################################
