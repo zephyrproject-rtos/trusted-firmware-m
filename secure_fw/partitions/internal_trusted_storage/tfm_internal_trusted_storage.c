@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -217,6 +217,21 @@ psa_status_t tfm_its_init(void)
     return status;
 }
 
+static psa_status_t get_file_info(psa_storage_uid_t uid, int32_t client_id)
+{
+    /* Check that the UID is valid */
+    if (uid == TFM_ITS_INVALID_UID) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* Set file id */
+    tfm_its_get_fid(client_id, uid, g_fid);
+
+    /* Read file info */
+    return its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
+                                      &g_file_info);
+}
+
 psa_status_t tfm_its_set(struct its_asset_info *asset_info,
                          uint8_t *data_buf,
                          size_t max_size,
@@ -240,19 +255,10 @@ psa_status_t tfm_its_set(struct its_asset_info *asset_info,
     }
 
     if (offset == 0) {
-        /* First time creating an asset */
-
-        /* Check that the UID is valid */
-        if (uid == TFM_ITS_INVALID_UID) {
-            return PSA_ERROR_INVALID_ARGUMENT;
-        }
-
-        /* Set file id */
-        tfm_its_get_fid(client_id, uid, g_fid);
-
-        /* Read file info */
-        status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                            &g_file_info);
+        /* First time creating an asset.
+         * Validate and read file info.
+         */
+        status = get_file_info(uid, client_id);
         if (status == PSA_SUCCESS) {
             /*
              * If the object exists and has the write once flag set, then it
@@ -309,17 +315,8 @@ psa_status_t tfm_its_get(struct its_asset_info *asset_info,
 #endif
 
     if (first_get) {
-        /* Check that the UID is valid */
-        if (uid == TFM_ITS_INVALID_UID) {
-            return PSA_ERROR_INVALID_ARGUMENT;
-        }
-
-        /* Set file id */
-        tfm_its_get_fid(client_id, uid, g_fid);
-
-        /* Read file info */
-        status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                            &g_file_info);
+        /* Validate and read file info */
+        status = get_file_info(uid, client_id);
         if (status != PSA_SUCCESS) {
             return status;
         }
@@ -353,17 +350,8 @@ psa_status_t tfm_its_get_info(int32_t client_id, psa_storage_uid_t uid,
 {
     psa_status_t status;
 
-    /* Check that the UID is valid */
-    if (uid == TFM_ITS_INVALID_UID) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    /* Set file id */
-    tfm_its_get_fid(client_id, uid, g_fid);
-
-    /* Read file info */
-    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                        &g_file_info);
+    /* Validate and read file info */
+    status = get_file_info(uid, client_id);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -389,16 +377,8 @@ psa_status_t tfm_its_remove(int32_t client_id, psa_storage_uid_t uid)
     }
 #endif
 
-    /* Check that the UID is valid */
-    if (uid == TFM_ITS_INVALID_UID) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    /* Set file id */
-    tfm_its_get_fid(client_id, uid, g_fid);
-
-    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                        &g_file_info);
+    /* Validate and read file info */
+    status = get_file_info(uid, client_id);
     if (status != PSA_SUCCESS) {
         return status;
     }
