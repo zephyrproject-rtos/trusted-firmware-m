@@ -95,7 +95,13 @@ A brief description of what is implemented by each source file is as below:
    the contexts is much simpler (i.e. just an handle), and the Alloc module
    keeps track of the association between handles and contexts
  - ``tfm_crypto_api.c`` :  This module is contained in ``interface/src`` and
-   implements the PSA Crypto API client interface exposed to both S/NS clients
+   implements the PSA Crypto API client interface exposed to both S/NS clients.
+   This module allows a configuration option ``CONFIG_TFM_CRYPTO_API_RENAME``
+   to be set to 1 in case the NS environment or integrators want to rename the
+   API symbols exported by the TF-M Crypto service. The renaming adds a default
+   prefix, ``tfm_crypto__`` to all functions. The prefix can be changed editing
+   the interface file. This config option is for the NS environment or
+   integration setup only, hence it is not accessible through the TF-M config
  - ``tfm_mbedcrypto_alt.c`` : This module is specific to the mbed TLS [3]_
    library integration and provides some alternative implementation of mbed TLS
    APIs that can be used when a optimised profile is chosen. Through the
