@@ -43,6 +43,11 @@ function(convert_normal_cmake_config_to_kconfig cmake_file out_var)
         if(NOT OUT_STRING)
             string(APPEND CONTENTS_WITHOUT_COMMENTS "${LINE}\n")
         endif()
+
+        string(REGEX MATCH "^include\\((.*)\\)$" OUT_STRING ${LINE})
+        if(OUT_STRING AND CMAKE_MATCH_COUNT EQUAL 1)
+            message(FATAL_ERROR "Including another file in config file is not supported yet: ${LINE}")
+        endif()
     endforeach()
 
     # Search for strings match set(_VAR_ _VALUE_) with support of multi-line format
