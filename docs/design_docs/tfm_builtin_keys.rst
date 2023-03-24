@@ -26,10 +26,10 @@ and might include (but are not limited to) the following:
 The ``tfm_builtin_key_loader`` component implements a mechanism to discover
 those keys and make them available to the PSA Crypto APIs for usage. Note that
 if a key is stored in a subsystem which can't be read by the secure
-processing environment, a full opaque driver must be used to be able to use
+processing environment, a full opaque driver [1]_ must be used to be able to use
 those keys through the PSA Crypto APIs. This document focuses only on the case
-where the keys can be read by the SPE and processed by the driver described in
-this document.
+where the keys can be read by the SPE (i.e. running TF-M), so the driver applies
+only on those cases, which can be considered as "_transparent_ builin keys".
 
 In TF-M's legacy solution, the IAK is loaded by the attestation service as a
 volatile key, which requires some key-loading logic to be implemented by that
@@ -44,7 +44,7 @@ builtin keys available in a platform.
 
 Implementing a driver to deal with builtin keys allows to expand the legacy
 solution for dealing with this type of keys in several ways. For example, it
-avoid the need for partitions to implement dedicated mechanisms for probing the
+avoids the need for partitions to implement dedicated mechanisms for probing the
 HAL layer for builtin keys and load them as volatile. It removes the need to
 have implementation specific call flows for deriving keys from the HUK (as that
 requirement now is fulfilled by the driver itself transparently). It allows
@@ -223,7 +223,7 @@ are keys where the key material is directly accessible by the PSA Crypto core),
 so some modifications had to be made. Opaque keyslots have the same basic
 structure as standard transparent key slots, and can be passed to the functions
 usually reserved for transparent keys, though this is a private implementation
-detail of the mbed TLS library and is not specified in the driver interface.
+detail of the Mbed TLS library and is not specified in the driver interface.
 Therefore, the only modification required currently is to allow keys that have
 the location ``TFM_BUILTIN_KEY_LOADER_KEY_LOCATION`` to be passed to the
 functions that usually accept transparent keys only, i.e. with the location
@@ -232,14 +232,17 @@ assumption of the PSA Crypto core is that, if a driver that provides an
 additional location, will also provide dedicated cryptographic mechanisms to act
 on those keys, but this is not the case of the ``tfm_builtin_key_loader``, as it
 just provides a mechanism to load keys (which act as a transparent key with
-local storage, once loaded), but mbed TLS does not support such "transparent
-builtin key" concept.
+local storage, once loaded), but Mbed TLS does not support such "transparent
+builtin key" concept. Note that the modifications on Mbed TLS are relying on non
+standard implementation details hence this particular integration can change
+between releases [3]_.
 
 References
 ----------
 
 .. [1] PSA cryptoprocessor driver interface: \ https://github.com/Mbed-TLS/mbedtls/blob/development/docs/proposed/psa-driver-interface.md
 .. [2] Definition of psa_key_location_t type in the PSA spec: \ https://armmbed.github.io/mbed-crypto/html/api/keys/lifetimes.html#c.psa_key_location_t
+.. [3] Interface for platform keys: \ https://github.com/ARM-software/psa-crypto-api/issues/550
 
 --------------
 
