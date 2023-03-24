@@ -459,35 +459,9 @@ __PACKED_STRUCT __ALIGNED(4) _cc3xx_reg_map_t {
                     /*!< Offset: 0xD48-0xD4C Reserved */
         __IM uint32_t dout_fifo_empty;
                     /*!< Offset: 0xD50 (RO) */
-        uint8_t _reserved_4[172];
-                    /*!< Offset: 0xD54-0xDFC Reserved */
+        uint8_t _reserved_4[428];
+                    /*!< Offset: 0xD54-0xEFC Reserved */
     } dout;
-
-    /* AO block */
-    __PACKED_STRUCT {
-        __IOM uint32_t host_dcu_en[4];
-                    /*!< Offset: 0xE00 (RW) */
-        __IOM uint32_t host_dcu_lock[4];
-                    /*!< Offset: 0xE10 (RW) */
-        __IM uint32_t ao_icv_dcu_restriction_mask[4];
-                    /*!< Offset: 0xE20 (RO) */
-        __IM uint32_t ao_cc_sec_debug_reset;
-                    /*!< Offset: 0xE30 (RO) */
-        __IOM uint32_t host_ao_lock_bits;
-                    /*!< Offset: 0xE34 (RW) */
-        __IOM uint32_t ao_apb_filtering;
-                    /*!< Offset: 0xE38 (RW) */
-        __IM uint32_t ao_cc_gppc;
-                    /*!< Offset: 0xE3C (RO) */
-        __OM uint32_t host_rgf_cc_sw_rst;
-                    /*!< Offset: 0xE40 (WO) */
-        __IM uint32_t dcu_debug_bits[4];
-                    /*!< Offset: 0xE44 (RO) */
-        __IM uint32_t ao_permanent_disable_mask[4];
-                    /*!< Offset: 0xE54 (RO) */
-        uint8_t _reserved_0[156];
-                    /*!< Offset: 0xE58-0xEFC Reserved */
-    } ao;
 
     /* Host_SRAM block */
     __PACKED_STRUCT {
@@ -523,9 +497,35 @@ __PACKED_STRUCT __ALIGNED(4) _cc3xx_reg_map_t {
                     /*!< Offset: 0xFF0 (RO) */
         __IM uint32_t component_id_1;
                     /*!< Offset: 0xFF4 (RO) */
-        uint8_t _reserved_0[3852];
-                    /*!< Offset: 0xFF8-0x1F00 Reserved */
+        uint8_t _reserved_0[3592];
+                    /*!< Offset: 0xFF8-0x1DFC Reserved */
     } id;
+
+    /* AO block */
+    __PACKED_STRUCT {
+        __IOM uint32_t host_dcu_en[4];
+                    /*!< Offset: 0x1E00 (RW) */
+        __IOM uint32_t host_dcu_lock[4];
+                    /*!< Offset: 0x1E10 (RW) */
+        __IM uint32_t ao_icv_dcu_restriction_mask[4];
+                    /*!< Offset: 0x1E20 (RO) */
+        __IM uint32_t ao_cc_sec_debug_reset;
+                    /*!< Offset: 0x1E30 (RO) */
+        __IOM uint32_t host_ao_lock_bits;
+                    /*!< Offset: 0x1E34 (RW) */
+        __IOM uint32_t ao_apb_filtering;
+                    /*!< Offset: 0x1E38 (RW) */
+        __IM uint32_t ao_cc_gppc;
+                    /*!< Offset: 0x1E3C (RO) */
+        __OM uint32_t host_rgf_cc_sw_rst;
+                    /*!< Offset: 0x1E40 (WO) */
+        __IM uint32_t dcu_debug_bits[4];
+                    /*!< Offset: 0x1E44 (RO) */
+        __IM uint32_t ao_permanent_disable_mask[4];
+                    /*!< Offset: 0x1E54 (RO) */
+        uint8_t _reserved_0[160];
+                    /*!< Offset: 0x1E58-0x1EFC Reserved */
+    } ao;
 
     /* NVM block */
     __PACKED_STRUCT {
