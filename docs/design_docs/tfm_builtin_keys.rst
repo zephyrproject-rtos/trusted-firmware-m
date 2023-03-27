@@ -237,8 +237,27 @@ builtin key" concept. Note that the modifications on Mbed TLS are relying on non
 standard implementation details hence this particular integration can change
 between releases [3]_.
 
+**********************************************
+Using Opaque PSA crypto accelerators with TF-M
+**********************************************
+
+For platforms which have a cryptographic accelerator which has a corresponding
+Opaque PSA crypto accelerator driver, the TF-M builtin key loader driver can be
+disabled using the ``-DCRYPTO_TFM_BUILTIN_KEYS_DRIVER=OFF`` cmake option. The
+platform can then redefine the HAL function
+``tfm_plat_builtin_key_get_desc_table_ptr`` to point to a table where the
+location and slot number of the keys corresponds instead to the opaque driver.
+The PSA driver wrapper will then route the calls into the opaque driver, with no
+other changes needed. If the description table is altered but the builtin key
+loader driver is not disabled, it is possible to mix software builtin keys with
+keys stored in opaque accelerators on a per-key level. Note that because the key
+policy enforcement via ``tfm_plat_builtin_key_get_desc_table_ptr`` is currently
+applied by the builtin key loader driver, other opaque drivers must apply either
+this policy or their own policy (Though this may be changed in future).
+
+**********
 References
-----------
+**********
 
 .. [1] PSA cryptoprocessor driver interface: \ https://github.com/Mbed-TLS/mbedtls/blob/development/docs/proposed/psa-driver-interface.md
 .. [2] Definition of psa_key_location_t type in the PSA spec: \ https://armmbed.github.io/mbed-crypto/html/api/keys/lifetimes.html#c.psa_key_location_t
