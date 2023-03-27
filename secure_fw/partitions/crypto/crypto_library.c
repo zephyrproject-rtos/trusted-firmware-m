@@ -46,7 +46,7 @@
  * \brief This Mbed TLS include is needed to retrieve version information for
  *        display
  */
-#include "mbedtls/build_info.h"
+#include "mbedtls/version.h"
 
 #ifndef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
 #error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
