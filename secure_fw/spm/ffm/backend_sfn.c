@@ -157,8 +157,9 @@ uint32_t backend_system_run(void)
 
 psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
 {
-    while (!(p_pt->signals_asserted & signals))
-        ;
+    while (!(p_pt->signals_asserted & signals)) {
+        __WFI();
+    }
 
     return p_pt->signals_asserted & signals;
 }
