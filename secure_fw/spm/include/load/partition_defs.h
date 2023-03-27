@@ -26,18 +26,18 @@
 /*
  * Partition flag start
  *
- * 31       10  9   8   7          0
- * +---------+--+---+---+----------+
- * | RES[21] |NS|I/S|A/P| Priority |
- * +---------+--+---+---+----------+
+ * 31      12 11 10  9   8  7         0
+ * +---------+--+--+---+---+----------+
+ * | RES[20] |TZ|NS|I/S|A/P| Priority |
+ * +---------+--+--+---+---+----------+
  *
- * Field      Desc                        Value
- * Priority:  Partition Priority          Lowest, low, normal, high, hightest
- * A/P:       ARoT or PRoT domain         1: PRoT              0: ARoT
- * I/S:       IPC or SFN typed partition  1: IPC               0: SFN
- * NS:        NS Agent or not             1: NS Agent          0: Not
- * NS:        NS Agent TZ or not          1: NS Agent TZ       0: Not
- * RES:       20 bits reserved            0
+ * Field                Desc                        Value
+ * Priority, bits[7:0]:  Partition Priority          Lowest, low, normal, high, hightest
+ * A/P, bit[8]:          ARoT or PRoT domain         1: PRoT              0: ARoT
+ * I/S, bit[9]:          IPC or SFN typed partition  1: IPC               0: SFN
+ * NS,  bit[10]:         NS Agent or not             1: NS Agent          0: Not
+ * TZ,  bit[11]:         NS Agent TZ or not          1: NS Agent TZ       0: Not
+ * RES, bits[31:12]:     20 bits reserved            0
  */
 #define PARTITION_PRI_HIGHEST                   (0x0)
 #define PARTITION_PRI_HIGH                      (0xF)
