@@ -40,6 +40,7 @@ typedef struct partition_entry_list {
 int load_partition_table(unsigned int image_id);
 const partition_entry_t *get_partition_entry(const char *name);
 const partition_entry_t *get_partition_entry_by_type(const uuid_t *type_guid);
+const partition_entry_t *get_partition_replica_by_type(const uuid_t *type_uuid);
 const partition_entry_t *get_partition_entry_by_uuid(const uuid_t *part_uuid);
 const partition_entry_list_t *get_partition_entry_list(void);
 void partition_init(unsigned int image_id);

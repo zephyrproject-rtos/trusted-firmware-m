@@ -64,6 +64,8 @@ target_include_directories(platform_s
         cc312
         fw_update_agent
         soft_crc
+        io
+        partition
 )
 
 target_sources(platform_s
@@ -81,6 +83,11 @@ target_sources(platform_s
         fw_update_agent/fwu_agent.c
         fw_update_agent/uefi_fmp.c
         soft_crc/soft_crc.c
+        io/io_block.c
+        io/io_flash.c
+        io/io_storage.c
+        partition/partition.c
+        partition/gpt.c
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
 )
 

@@ -8,6 +8,7 @@
 #ifndef DRIVERS_PARTITION_EFI_H
 #define DRIVERS_PARTITION_EFI_H
 
+#include <stdint.h>
 #include <string.h>
 
 #include "uuid.h"
