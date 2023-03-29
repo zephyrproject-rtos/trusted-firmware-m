@@ -75,6 +75,8 @@
 #define IS_NS_AGENT_TZ(pldi)                    false
 #endif
 
+#define PARTITION_TYPE_TO_INDEX(type)           (!!((type) & PARTITION_NS_AGENT_TZ))
+
 /* Partition flag end */
 
 /*

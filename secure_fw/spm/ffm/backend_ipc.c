@@ -206,13 +206,13 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
 
 extern void common_sfn_thread(void *param);
 
-/* Parameters are treated as assuredly */
-void backend_init_comp_assuredly(struct partition_t *p_pt,
-                                 uint32_t service_setting)
+static thrd_fn_t partition_init(struct partition_t *p_pt,
+                                uint32_t service_setting, uint32_t *param)
 {
-    const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
     thrd_fn_t thrd_entry;
-    void *param = NULL;
+
+    (void)param;
+    SPM_ASSERT(p_pt);
 
 #if CONFIG_TFM_DOORBELL_API == 1
     p_pt->signals_allowed |= PSA_DOORBELL;
@@ -222,41 +222,72 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 
     UNI_LISI_INIT_NODE(p_pt, p_handles);
 
+    prv_process_metadata(p_pt);
+
+    if (IS_IPC_MODEL(p_pt->p_ldinf)) {
+        /* IPC Partition */
+        thrd_entry = POSITION_TO_ENTRY(p_pt->p_ldinf->entry, thrd_fn_t);
+    } else {
+        /* SFN Partition */
+        thrd_entry = (thrd_fn_t)common_sfn_thread;
+    }
+    return thrd_entry;
+}
+
+#ifdef CONFIG_TFM_USE_TRUSTZONE
+static thrd_fn_t ns_agent_tz_init(struct partition_t *p_pt,
+                                  uint32_t service_setting, uint32_t *param)
+{
+    thrd_fn_t thrd_entry;
+
+    (void)service_setting;
+    SPM_ASSERT(p_pt);
+    SPM_ASSERT(param);
+
+#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1)
+    /* Get the context from ns_agent_tz */
+    SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
+#endif
+
+    thrd_entry = POSITION_TO_ENTRY(p_pt->p_ldinf->entry, thrd_fn_t);
+
+    /* NS agent TZ expects NSPE entry point as the parameter */
+    *param = tfm_hal_get_ns_entry_point();
+    return thrd_entry;
+}
+#else
+static thrd_fn_t ns_agent_tz_init(struct partition_t *p_pt,
+                                  uint32_t service_setting, uint32_t *param)
+{
+    (void)p_pt;
+    (void)service_setting;
+    (void)param;
+}
+#endif
+
+typedef thrd_fn_t (*comp_init_fn_t)(struct partition_t *, uint32_t, uint32_t *);
+comp_init_fn_t comp_init_fns[] = {partition_init, ns_agent_tz_init};
+
+/* Parameters are treated as assuredly */
+void backend_init_comp_assuredly(struct partition_t *p_pt, uint32_t service_setting)
+{
+    const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
+    thrd_fn_t thrd_entry;
+    uint32_t param;
+    int32_t index = PARTITION_TYPE_TO_INDEX(p_pldi->flags);
+
     ARCH_CTXCTRL_INIT(&p_pt->ctx_ctrl,
                       LOAD_ALLOCED_STACK_ADDR(p_pldi),
                       p_pldi->stack_size);
 
     watermark_stack(p_pt);
 
-    prv_process_metadata(p_pt);
-
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
-#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1)
-    if (IS_NS_AGENT_TZ(p_pldi)) {
-        /* Get the context from ns_agent_tz */
-        SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
-    }
-#endif
+    thrd_entry = (comp_init_fns[index])(p_pt, service_setting, &param);
 
-    if (IS_IPC_MODEL(p_pldi)) {
-        /* IPC Partition */
-        thrd_entry = POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t);
-    } else {
-        /* SFN Partition */
-        thrd_entry = POSITION_TO_ENTRY(common_sfn_thread, thrd_fn_t);
-    }
-
-    if (IS_NS_AGENT_TZ(p_pldi)) {
-        /* NS agent TZ expects NSPE entry point as the parameter */
-        param = (void *)tfm_hal_get_ns_entry_point();
-    }
-
-    thrd_start(&p_pt->thrd,
-               thrd_entry,
-               THRD_GENERAL_EXIT,
-               param);
+    thrd_start(&p_pt->thrd, thrd_entry, THRD_GENERAL_EXIT, (void *)param);
 }
 
 uint32_t backend_system_run(void)
