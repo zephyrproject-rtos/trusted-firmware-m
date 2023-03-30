@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -72,14 +72,6 @@ __PACKED_STRUCT plat_user_area_layout_t {
 
     uint32_t bl1_2_image[BL1_2_CODE_SIZE / sizeof(uint32_t)];
 };
-
-#ifdef NDEBUG
-#define LOG(str)
-#else
-#define LOG(str) do { \
-    stdio_output_string((const unsigned char *)str, sizeof(str) - 1); \
-} while (0);
-#endif /* NDEBUG */
 
 #define OTP_OFFSET(x)       (offsetof(struct lcm_otp_layout_t, x))
 #define OTP_SIZE(x)         (sizeof(((struct lcm_otp_layout_t *)0)->x))
@@ -251,7 +243,6 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
-#ifdef BL1
     err = verify_zero_bits_count(USER_AREA_OFFSET(bl2_encryption_key),
                                  USER_AREA_SIZE(bl2_encryption_key),
                                  USER_AREA_OFFSET(bl2_encryption_key_zero_bits));
@@ -259,14 +250,12 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         return err;
     }
 
-#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
     err = verify_zero_bits_count(USER_AREA_OFFSET(secure_debug_pk),
                                  USER_AREA_SIZE(secure_debug_pk),
                                  USER_AREA_OFFSET(secure_debug_pk_zero_bits));
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
-#endif
 
     err = verify_zero_bits_count(USER_AREA_OFFSET(bl1_2_image_hash),
                                  USER_AREA_SIZE(bl1_2_image_hash),
@@ -288,7 +277,6 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
-#endif /* BL1 */
 
     err = verify_zero_bits_count(USER_AREA_OFFSET(host_rotpk_s),
                                  USER_AREA_SIZE(host_rotpk_s),
@@ -377,31 +365,13 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
     enum lcm_error_t err;
     enum lcm_lcs_t lcs;
     enum tfm_plat_err_t plat_err;
-    enum lcm_bool_t sp_enabled;
-    enum lcm_tp_mode_t tp_mode;
 
     err = lcm_get_otp_size(&LCM_DEV_S, &otp_size);
     if (err != LCM_ERROR_NONE) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-
     if (otp_size < OTP_OFFSET(user_data) +
                    sizeof(struct plat_user_area_layout_t)) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-
-    err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
-    if (err != LCM_ERROR_NONE) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
-    if (tp_mode == LCM_TP_MODE_VIRGIN) {
-        err = lcm_set_tp_mode(&LCM_DEV_S, LCM_TP_MODE_TCI);
-        if (err != LCM_ERROR_NONE) {
-            return TFM_PLAT_ERR_SYSTEM_ERR;
-        }
-        LOG("TP mode set complete, reset now.\r\n");
-        tfm_hal_system_reset();
-    } else if (!(tp_mode == LCM_TP_MODE_TCI || tp_mode == LCM_TP_MODE_PCI)) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
@@ -409,17 +379,7 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
     if (err != LCM_ERROR_NONE) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    if (lcs == LCM_LCS_CM || lcs == LCM_LCS_DM) {
-        err = lcm_get_sp_enabled(&LCM_DEV_S, &sp_enabled);
-        if (err != LCM_ERROR_NONE) {
-            return TFM_PLAT_ERR_SYSTEM_ERR;
-        }
-
-        if (sp_enabled != LCM_TRUE) {
-            LOG("Enabling secure provisioning mode\r\n");
-            lcm_set_sp_enabled(&LCM_DEV_S);
-        }
-    } else if (lcs == LCM_LCS_SE) {
+    if (lcs == LCM_LCS_SE) {
         /* If we are in SE LCS, check keys for tampering. Only applies to keys
          * in the user storage area, since the others are checked for tampering
          * by HW.
@@ -504,7 +464,6 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
         return otp_read(USER_AREA_OFFSET(ns_image_encryption_key),
                         USER_AREA_SIZE(ns_image_encryption_key), out_len, out);
-#ifdef BL1
     case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
         return otp_read(USER_AREA_OFFSET(bl2_encryption_key),
                         USER_AREA_SIZE(bl2_encryption_key), out_len, out);
@@ -523,8 +482,6 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_BL1_2_IMAGE:
         return otp_read(USER_AREA_OFFSET(bl1_2_image),
                         USER_AREA_SIZE(bl1_2_image), out_len, out);
-#endif /* BL1 */
-
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
 
@@ -567,11 +524,10 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    LOG("LCS transition complete, resetting now.\r\n");
-
+#ifdef TFM_DUMMY_PROVISIONING
     tfm_hal_system_reset();
+#endif /* TFM_DUMMY_PROVISIONING */
 
-    /* This should never happen */
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -656,7 +612,7 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(USER_AREA_OFFSET(ns_image_encryption_key),
                          USER_AREA_SIZE(ns_image_encryption_key), in_len, in,
                          USER_AREA_OFFSET(ns_image_encryption_key_zero_bits));
-#ifdef BL1
+
     case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
         return otp_write(USER_AREA_OFFSET(bl2_encryption_key),
                          USER_AREA_SIZE(bl2_encryption_key), in_len, in,
@@ -679,8 +635,6 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_BL1_2_IMAGE:
         return otp_write(USER_AREA_OFFSET(bl1_2_image),
                          USER_AREA_SIZE(bl1_2_image), in_len, in, 0);
-#endif /* BL1 */
-
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;
 
@@ -787,7 +741,7 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
         *size = USER_AREA_SIZE(ns_image_encryption_key);
         break;
-#ifdef BL1
+
     case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
         *size = USER_AREA_SIZE(bl2_encryption_key);
         break;
@@ -806,7 +760,6 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
     case PLAT_OTP_ID_BL1_2_IMAGE:
         *size = USER_AREA_SIZE(bl1_2_image);
         break;
-#endif
 
     case PLAT_OTP_ID_ENTROPY_SEED:
         return TFM_PLAT_ERR_UNSUPPORTED;

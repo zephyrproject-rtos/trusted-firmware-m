@@ -64,7 +64,7 @@ int main(void)
 
     if (tfm_plat_provisioning_is_required()) {
         if (tfm_plat_provisioning_perform()) {
-            BL1_LOG("[ERR] BL1_2 provisioning failed\r\n");
+            BL1_LOG("[ERR] BL1 provisioning failed\r\n");
             FIH_PANIC;
         }
     }

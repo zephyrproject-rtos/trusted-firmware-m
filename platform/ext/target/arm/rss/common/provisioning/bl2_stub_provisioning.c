@@ -16,11 +16,6 @@ int tfm_plat_provisioning_is_required(void)
     return 0;
 }
 
-enum tfm_plat_err_t provision_assembly_and_test(void)
-{
-    return TFM_PLAT_ERR_SUCCESS;
-}
-
 enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
 {
     return TFM_PLAT_ERR_SUCCESS;

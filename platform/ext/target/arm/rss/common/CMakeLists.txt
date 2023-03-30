@@ -101,6 +101,8 @@ if (TFM_MULTI_CORE_TOPOLOGY)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rss_comms rss_comms)
 endif()
 
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/provisioning provisioning)
+
 target_include_directories(platform_s
     PUBLIC
         .
@@ -154,7 +156,6 @@ target_sources(platform_s
         nv_counters.c
         attest_hal.c
         tfm_hal_platform_reset.c
-        provisioning.c
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_checker_layer.c>
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/dma350_checker_device_defs.c>
@@ -242,7 +243,6 @@ target_include_directories(platform_ns
 target_sources(platform_bl2
     PRIVATE
         tfm_hal_platform_reset.c
-        bl2/provisioning.c
         device/source/device_definition.c
         device/source/host_device_definition.c
         device/source/system_core_init.c
@@ -352,11 +352,6 @@ target_include_directories(platform_bl1_interface
 target_compile_definitions(platform_bl1
     PUBLIC
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
-)
-
-target_sources(bl1_1_lib
-    INTERFACE
-        ./bl1/provisioning.c
 )
 
 #========================= ns_agent_mailbox ===================================#
