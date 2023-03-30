@@ -11,6 +11,7 @@
 #include <inttypes.h>
 
 #include "compiler_ext_defs.h"
+#include "config_spm.h"
 #include "security_defs.h"
 #include "region_defs.h"
 #include "spm.h"
@@ -105,7 +106,7 @@ __attribute__((naked)) void PendSV_Handler(void)
 #endif
         "   movs    r0, #"M2S(EXC_RETURN_S)"            \n"
         "   ands    r0, lr                              \n" /* NS interrupted */
-#if CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED == 1
+#if CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED == 0
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
 #endif
         "   push    {r0, lr}                            \n" /* Save R0, LR */

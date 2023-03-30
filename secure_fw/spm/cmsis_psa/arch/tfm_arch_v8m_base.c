@@ -10,6 +10,7 @@
 
 #include <inttypes.h>
 #include "compiler_ext_defs.h"
+#include "config_spm.h"
 #include "security_defs.h"
 #include "spm.h"
 #include "svc_num.h"
@@ -104,7 +105,7 @@ __attribute__((naked)) void PendSV_Handler(void)
 #endif
         "   movs    r0, #"M2S(EXC_RETURN_S)"            \n"
         "   mov     r1, lr                              \n"
-#if CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED == 1
+#if CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED == 0
         "   tst     r0, r1                              \n" /* NS interrupted */
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
 #endif

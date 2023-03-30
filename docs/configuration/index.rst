@@ -274,7 +274,7 @@ Secure Partition Manager
 +----------------------------------------+-----------+-------------+
 |CONFIG_TFM_DOORBELL_API                 | Component |   0         |
 +----------------------------------------+-----------+-------------+
-|CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED | Component |   OFF       |
+|CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED | Component |   0         |
 +----------------------------------------+-----------+-------------+
 
 --------------
