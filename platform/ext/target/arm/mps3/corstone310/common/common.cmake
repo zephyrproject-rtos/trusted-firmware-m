@@ -189,11 +189,11 @@ target_sources(platform_s
         ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/ppc_corstone310_drv.c
         ${CORSTONE310_COMMON_DIR}/native_drivers/tgu_armv8_m_drv.c
+        ${CORSTONE310_COMMON_DIR}/tfm_peripherals_def.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_peripherals_def.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CORSTONE310_COMMON_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CORSTONE310_COMMON_DIR}/services/src/tfm_platform_system.c>
 )
@@ -259,8 +259,6 @@ target_sources(tfm_spm
         ${PLATFORM_DIR}/ext/common/mpc_ppc_faults.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_platform_v8m.c
         ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
-
         ${CMAKE_CURRENT_SOURCE_DIR}/dma_init.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_peripherals_def.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${PLATFORM_DIR}/ext/common/tfm_interrupts.c>
 )

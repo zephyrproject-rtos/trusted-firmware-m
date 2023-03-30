@@ -25,6 +25,11 @@
 #include "device_definition.h"
 #include "syscounter_armv8-m_cntrl_drv.h"
 #include "uart_stdout.h"
+#include "tfm_peripherals_def.h"
+
+#ifdef PSA_API_TEST_IPC
+#define PSA_FF_TEST_SECURE_UART2
+#endif
 
 /* Throw out bus error when an access causes security violation */
 #define CMSDK_SECRESPCFG_BUS_ERR_MASK   (1UL << 0)
@@ -33,6 +38,13 @@
 #define RAMNSC  0x2
 /* Configures the CODE region to NS callable in sacfg block's nsccfg register */
 #define CODENSC  0x1
+
+#define FF_TEST_NVMEM_REGION_START            0x010FC000
+#define FF_TEST_NVMEM_REGION_END              0x010FC3FF
+#define FF_TEST_SERVER_PARTITION_MMIO_START   0x010FC400
+#define FF_TEST_SERVER_PARTITION_MMIO_END     0x010FC500
+#define FF_TEST_DRIVER_PARTITION_MMIO_START   0x010FC600
+#define FF_TEST_DRIVER_PARTITION_MMIO_END     0x010FC700
 
 extern const struct memory_region_limits memory_regions;
 
@@ -95,6 +107,54 @@ static DRIVER_PPC_SSE300 *const ppc_bank_drivers[] = {
 };
 
 #define PPC_BANK_COUNT (sizeof(ppc_bank_drivers)/sizeof(ppc_bank_drivers[0]))
+
+#ifdef PSA_API_TEST_IPC
+
+/* Below data structure are only used for PSA FF tests, and this pattern is
+ * definitely not to be followed for real life use cases, as it can break
+ * security.
+ */
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_UART_REGION = {
+        UART2_BASE_S,
+        UART2_BASE_S + 0xFFF,
+        PPC_SP_PERIPH_EXP2,
+        UART2_PERIPH_PPCEXP2_POS_MASK
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_WATCHDOG_REGION = {
+        SYSWDOG_ARMV8_M_CNTRL_BASE_S,
+        SYSWDOG_ARMV8_M_CNTRL_BASE_S + 0x2000,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_NVMEM_REGION = {
+        FF_TEST_NVMEM_REGION_START,
+        FF_TEST_NVMEM_REGION_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_SERVER_PARTITION_MMIO = {
+        FF_TEST_SERVER_PARTITION_MMIO_START,
+        FF_TEST_SERVER_PARTITION_MMIO_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+
+struct platform_data_t
+    tfm_peripheral_FF_TEST_DRIVER_PARTITION_MMIO = {
+        FF_TEST_DRIVER_PARTITION_MMIO_START,
+        FF_TEST_DRIVER_PARTITION_MMIO_END,
+        PPC_SP_DO_NOT_CONFIGURE,
+        -1
+};
+#endif
 
 enum tfm_plat_err_t enable_fault_handlers(void)
 {
@@ -431,9 +491,11 @@ enum tfm_plat_err_t ppc_init_cfg(void)
     err |= Driver_PPC_SSE300_PERIPH_EXP2.ConfigSecurity(
                                         UART1_PERIPH_PPCEXP2_POS_MASK,
                                         PPC_SSE300_NONSECURE_CONFIG);
+#ifndef PSA_FF_TEST_SECURE_UART2
     err |= Driver_PPC_SSE300_PERIPH_EXP2.ConfigSecurity(
                                         UART2_PERIPH_PPCEXP2_POS_MASK,
                                         PPC_SSE300_NONSECURE_CONFIG);
+#endif
     err |= Driver_PPC_SSE300_PERIPH_EXP2.ConfigSecurity(
                                         UART3_PERIPH_PPCEXP2_POS_MASK,
                                         PPC_SSE300_NONSECURE_CONFIG);

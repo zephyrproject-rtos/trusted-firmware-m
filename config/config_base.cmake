@@ -31,7 +31,7 @@ set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCU
 set(MCUBOOT_VERSION                     "v1.10.0"   CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
-set(PSA_ARCH_TESTS_VERSION              "cf8bd71"   CACHE STRING    "The version of PSA arch tests to use")
+set(PSA_ARCH_TESTS_VERSION              "5c57920"   CACHE STRING    "The version of PSA arch tests to use")
 set(PSA_ARCH_TESTS_FORCE_PATCH          OFF         CACHE BOOL      "Always apply PSA arch tests patches")
 
 set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE       CACHE BOOL      "Whether to use psa-adac secure debug.")

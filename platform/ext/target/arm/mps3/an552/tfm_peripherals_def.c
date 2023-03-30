@@ -43,7 +43,14 @@ static const uintptr_t partition_named_mmio_list[] = {
     (uintptr_t)TFM_PERIPHERAL_UART4,
     (uintptr_t)TFM_PERIPHERAL_UART5,
     (uintptr_t)TFM_PERIPHERAL_CLCD,
-    (uintptr_t)TFM_PERIPHERAL_RTC
+    (uintptr_t)TFM_PERIPHERAL_RTC,
+#ifdef PSA_API_TEST_IPC
+    (uintptr_t)FF_TEST_UART_REGION,
+    (uintptr_t)FF_TEST_WATCHDOG_REGION,
+    (uintptr_t)FF_TEST_NVMEM_REGION,
+    (uintptr_t)FF_TEST_SERVER_PARTITION_MMIO,
+    (uintptr_t)FF_TEST_DRIVER_PARTITION_MMIO,
+#endif
 };
 
 void get_partition_named_mmio_list(const uintptr_t** list, size_t* length) {

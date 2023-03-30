@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 set(DEFAULT_NS_SCATTER                ON    CACHE BOOL    "Use default NS scatter files for target")
-
+set(PSA_API_TEST_TARGET          "cs3x0"    CACHE STRING  "PSA_API_TARGET name")
 # Make FLIH IRQ test as the default IRQ test on Corstone-310
 set(TEST_NS_SLIH_IRQ                  OFF   CACHE BOOL    "Whether to build NS regression Second-Level Interrupt Handling tests")
 
