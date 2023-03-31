@@ -23,6 +23,7 @@ target_sources(bl1_2_lib
         $<$<BOOL:${TFM_BL1_PQ_CRYPTO}>:${MBEDCRYPTO_PATH}/library/lms.c>
         $<$<BOOL:${TFM_BL1_PQ_CRYPTO}>:${MBEDCRYPTO_PATH}/library/lmots.c>
         $<$<BOOL:${TFM_BL1_PQ_CRYPTO}>:${MBEDCRYPTO_PATH}/library/platform_util.c>
+        $<$<BOOL:${TFM_BL1_PQ_CRYPTO}>:${MBEDCRYPTO_PATH}/library/psa_util.c>
         ./image.c
 )
 

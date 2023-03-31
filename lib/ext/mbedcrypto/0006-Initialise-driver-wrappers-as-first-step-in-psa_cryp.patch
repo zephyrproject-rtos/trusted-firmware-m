@@ -1,7 +1,7 @@
-From fbfff539fdbff01a9366df674e2e090a88774c4f Mon Sep 17 00:00:00 2001
+From b938250a8d152b2a29a404d7ae2328bcd666495d Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Tue, 23 Aug 2022 13:06:07 +0100
-Subject: [PATCH 6/7] Initialise driver wrappers as first step in
+Subject: [PATCH 6/8] Initialise driver wrappers as first step in
  psa_crypto_init()
 
 This patch amends the order of initialisations performed in psa_crypto_init()
@@ -11,43 +11,37 @@ initialisation sequence.
 
 Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
 ---
- library/psa_crypto.c | 16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
+ library/psa_crypto.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index 43c8b9e6a..d8a393343 100644
+index df7776f3..267ae141 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
-@@ -6327,14 +6327,6 @@ psa_status_t psa_crypto_init( void )
-     if( global_data.initialized != 0 )
-         return( PSA_SUCCESS );
+@@ -7155,6 +7155,11 @@ psa_status_t psa_crypto_init(void)
+     }
+     global_data.drivers_initialized = 1;
  
--    /* Initialize and seed the random generator. */
--    mbedtls_psa_random_init( &global_data.rng );
--    global_data.rng_state = RNG_INITIALIZED;
--    status = mbedtls_psa_random_seed( &global_data.rng );
--    if( status != PSA_SUCCESS )
--        goto exit;
--    global_data.rng_state = RNG_SEEDED;
--
-     status = psa_initialize_key_slots( );
-     if( status != PSA_SUCCESS )
-         goto exit;
-@@ -6344,6 +6336,14 @@ psa_status_t psa_crypto_init( void )
-     if( status != PSA_SUCCESS )
-         goto exit;
- 
-+    /* Initialize and seed the random generator. */
-+    mbedtls_psa_random_init( &global_data.rng );
-+    global_data.rng_state = RNG_INITIALIZED;
-+    status = mbedtls_psa_random_seed( &global_data.rng );
-+    if( status != PSA_SUCCESS )
++    status = psa_initialize_key_slots();
++    if (status != PSA_SUCCESS) {
 +        goto exit;
-+    global_data.rng_state = RNG_SEEDED;
++    }
 +
+     /* Initialize and seed the random generator. */
+     mbedtls_psa_random_init(&global_data.rng);
+     global_data.rng_state = RNG_INITIALIZED;
+@@ -7164,11 +7169,6 @@ psa_status_t psa_crypto_init(void)
+     }
+     global_data.rng_state = RNG_SEEDED;
+ 
+-    status = psa_initialize_key_slots();
+-    if (status != PSA_SUCCESS) {
+-        goto exit;
+-    }
+-
  #if defined(PSA_CRYPTO_STORAGE_HAS_TRANSACTIONS)
-     status = psa_crypto_load_transaction( );
-     if( status == PSA_SUCCESS )
+     status = psa_crypto_load_transaction();
+     if (status == PSA_SUCCESS) {
 -- 
 2.25.1
 
