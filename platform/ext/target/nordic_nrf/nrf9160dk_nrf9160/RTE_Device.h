@@ -35,6 +35,8 @@
 //   </h> Pin Configuration
 // </e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART0]
 
+#define   RTE_USART0_HWFC               NRF_UARTE_HWFC_DISABLED
+
 // <e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART1]
 // <i> Configuration settings for Driver_USART1 in component ::Drivers:USART
 #define   RTE_USART1                    1
@@ -44,11 +46,13 @@
 //     <o> RXD
 #define   RTE_USART1_RXD_PIN            0
 //     <o> RTS
-#define   RTE_USART1_RTS_PIN            0xFFFFFFFF
+#define   RTE_USART1_RTS_PIN            14
 //     <o> CTS
-#define   RTE_USART1_CTS_PIN            0xFFFFFFFF
+#define   RTE_USART1_CTS_PIN            15
 //   </h> Pin Configuration
 // </e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART1]
+
+#define   RTE_USART1_HWFC               NRF_UARTE_HWFC_DISABLED
 
 // <e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART2]
 // <i> Configuration settings for Driver_USART2 in component ::Drivers:USART
@@ -65,6 +69,8 @@
 //   </h> Pin Configuration
 // </e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART2]
 
+#define   RTE_USART2_HWFC               NRF_UARTE_HWFC_DISABLED
+
 // <e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART3]
 // <i> Configuration settings for Driver_USART3 in component ::Drivers:USART
 #define   RTE_USART3                    0
@@ -80,6 +86,7 @@
 //   </h> Pin Configuration
 // </e> USART (Universal synchronous - asynchronous receiver transmitter) [Driver_USART3]
 
+#define   RTE_USART3_HWFC               NRF_UARTE_HWFC_DISABLED
 // <e> FLASH (Flash Memory) [Driver_FLASH0]
 // <i> Configuration settings for Driver_FLASH0 in component ::Drivers:FLASH
 #define   RTE_FLASH0                    1
