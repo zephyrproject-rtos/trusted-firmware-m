@@ -93,7 +93,7 @@ void stdio_init(void)
     ret = STDIO_DRIVER.PowerControl(ARM_POWER_FULL);
     ASSERT_HIGH(ret);
 
-    ret = STDIO_DRIVER.Control(ARM_USART_MODE_ASYNCHRONOUS,
+    ret = STDIO_DRIVER.Control(DEFAULT_UART_CONTROL | ARM_USART_MODE_ASYNCHRONOUS,
                                DEFAULT_UART_BAUDRATE);
     ASSERT_HIGH(ret);
     (void)ret;
