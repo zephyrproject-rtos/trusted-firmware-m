@@ -307,7 +307,7 @@ static ARM_USART_MODEM_STATUS ARM_USART_GetModemStatus(void)
         .baudrate = NRF_UARTE_BAUDRATE_115200,                            \
         .interrupt_priority = NRFX_UARTE_DEFAULT_CONFIG_IRQ_PRIORITY,     \
         .hal_cfg  = {                                                     \
-            .hwfc   = NRF_UARTE_HWFC_DISABLED,                            \
+            .hwfc   = RTE_USART##idx##_HWFC,                              \
             .parity = NRF_UARTE_PARITY_EXCLUDED,                          \
             .stop   = NRF_UARTE_STOP_ONE,                                 \
         },                                                                \
