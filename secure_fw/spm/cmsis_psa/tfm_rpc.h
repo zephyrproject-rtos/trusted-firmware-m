@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -182,7 +182,7 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct connection_t *handle)
      * This condition check should be improved after TF-M non-secure client ID
      * management is implemented.
      */
-    if (handle && (handle->msg.client_id <= 0)) {
+    if (handle && (handle->caller_data) && (handle->msg.client_id <= 0)) {
         return true;
     }
 
@@ -204,8 +204,6 @@ void tfm_rpc_set_caller_data(struct connection_t *handle, int32_t client_id);
 #define is_tfm_rpc_msg(x)                       (false)
 
 #define tfm_rpc_client_call_reply(owner, ret)   do {} while (0)
-
-#define tfm_rpc_set_caller_data(hdl, client_id) do {} while (0)
 
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 #endif /* __TFM_RPC_H__ */

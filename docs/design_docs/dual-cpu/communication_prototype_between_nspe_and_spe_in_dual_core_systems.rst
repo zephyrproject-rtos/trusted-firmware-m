@@ -449,7 +449,7 @@ the caller after PSA client call is completed.
 
 ``tfm_rpc_set_caller_data()`` invokes callback function ``get_caller_data()`` to
 fetch the private data of caller of PSA client call and set it into TF-M message
-structure.
+structure. It must always return non-NULL.
 
 TF-M RPC definitions for mailbox
 --------------------------------
@@ -705,4 +705,5 @@ Reference
 
 *Copyright (c) 2019-2022 Arm Limited. All Rights Reserved.*
 
-*Copyright (c) 2020-2022 Cypress Semiconductor Corporation. All Rights Reserved.*
+*Copyright (c) 2020-2023 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

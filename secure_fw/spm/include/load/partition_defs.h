@@ -69,10 +69,15 @@
                                                      & PARTITION_NS_AGENT))
 #ifdef CONFIG_TFM_USE_TRUSTZONE
 #define IS_NS_AGENT_TZ(pldi)                    (IS_NS_AGENT(pldi) \
-                                                     && !!((pldi)->flags \
-                                                       & PARTITION_NS_AGENT_TZ))
+                                                     && !!((pldi)->flags & PARTITION_NS_AGENT_TZ))
 #else
 #define IS_NS_AGENT_TZ(pldi)                    false
+#endif
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+#define IS_NS_AGENT_MAILBOX(pldi)               (IS_NS_AGENT(pldi) \
+                                                     && !((pldi)->flags & PARTITION_NS_AGENT_TZ))
+#else
+#define IS_NS_AGENT_MAILBOX(pldi)               false
 #endif
 
 #define PARTITION_TYPE_TO_INDEX(type)           (!!((type) & PARTITION_NS_AGENT_TZ))
