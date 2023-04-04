@@ -611,3 +611,18 @@ if (RSS_XIP)
         DEPENDS bin/tfm_ns_sic_tables_signed.bin
     )
 endif()
+
+############################## BL1 DMA ###################################
+add_custom_target(bl1_1_dma_bin
+    ALL
+    SOURCES bl1_1_dma.bin ${bin_dir}/bl1_1_dma.bin
+)
+
+add_custom_command(OUTPUT bl1_1_dma.bin
+    OUTPUT ${bin_dir}/bl1_1_dma.bin
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/bl1/scripts/create_bl1_1_dma_bin.py
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bl1/scripts/create_bl1_1_dma_bin.py
+                    --input_file ${CMAKE_CURRENT_SOURCE_DIR}/bl1/scripts/dma_config.yaml
+                    --output_file bl1_1_dma.bin
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl1_1_dma.bin $<TARGET_FILE_DIR:bl1_1>
+)

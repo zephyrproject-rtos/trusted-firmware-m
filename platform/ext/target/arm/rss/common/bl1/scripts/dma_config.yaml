@@ -1,0 +1,48 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2023, Arm Limited. All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+#
+#-------------------------------------------------------------------------------
+program:
+  - location: "rom"                                 # Program 0
+    channel: 0
+    description: "Init flow - Setup DMA Channel 1"
+    commands:
+      - !include include/program0_cmd0.yaml         # Program 0 - Command 0
+      - !include include/program0_cmd1.yaml         # Program 0 - Command 1
+
+  - location: "rom"                                 # Program 1
+    channel: 1
+    description: "Test Mode"
+    commands:
+      - !include include/program1_cmd0.yaml         # Program 1 - Command 0
+      - !include include/program1_cmd1.yaml         # Program 1 - Command 1
+      - !include include/program1_cmd2.yaml         # Program 1 - Command 2
+
+  - location: "rom"                                 # Program 2
+    channel: 0
+    description: "P3 P4 Init"
+    commands:
+      - !include include/program2_cmd0.yaml         # Program 2 - Command 0
+      - !include include/program2_cmd1.yaml         # Program 2 - Command 1
+      - !include include/program2_cmd2.yaml         # Program 2 - Command 2
+
+  - location: "rom"                                 # Program 3
+    channel: 1
+    description: "Mission-Provisioning Mode"
+    commands:
+      - !include include/program3_cmd0.yaml         # Program 3 - Command 0
+      - !include include/program3_cmd1.yaml         # Program 3 - Command 1
+      - !include include/program3_cmd2.yaml         # Program 3 - Command 2
+      - !include include/program3_cmd3.yaml         # Program 3 - Command 3
+
+  - location: "rom"                                 # Program 4
+    channel: 0
+    description: "1st stage OTP loader"
+    commands:
+      - !include include/program4_cmd0.yaml         # Program 4 - Command 0
+      - !include include/program4_cmd1.yaml         # Program 4 - Command 1
+      - !include include/program4_cmd2.yaml         # Program 4 - Command 2
+      - !include include/program4_cmd3.yaml         # Program 4 - Command 3
+      - !include include/program4_cmd4.yaml         # Program 4 - Command 4
