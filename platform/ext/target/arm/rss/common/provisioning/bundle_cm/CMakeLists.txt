@@ -44,6 +44,7 @@ target_include_directories(cm_provisioning_bundle
 
 target_link_libraries(cm_provisioning_bundle
     platform_bl1
+    bl1_1_shared_lib
 )
 
 add_custom_target(encrypted_cm_provisioning_bundle

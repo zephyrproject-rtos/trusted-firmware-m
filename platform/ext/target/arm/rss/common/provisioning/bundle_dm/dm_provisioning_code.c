@@ -17,6 +17,58 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     enum tfm_plat_err_t err;
     uint32_t new_lcs;
 
+    err = tfm_plat_otp_write(PLAT_OTP_ID_KEY_BL2_ENCRYPTION,
+                             sizeof(data.bl2_encryption_key),
+                             data.bl2_encryption_key);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+
+    err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_ROTPK_0,
+                             sizeof(data.bl1_rotpk_0),
+                             data.bl1_rotpk_0);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+
+    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_0,
+                             sizeof(data.bl2_rotpk_0),
+                             data.bl2_rotpk_0);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_1,
+                             sizeof(data.bl2_rotpk_1),
+                             data.bl2_rotpk_1);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_2,
+                             sizeof(data.bl2_rotpk_2),
+                             data.bl2_rotpk_2);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+    err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_3,
+                             sizeof(data.bl2_rotpk_3),
+                             data.bl2_rotpk_3);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+
+    err = tfm_plat_otp_write(PLAT_OTP_ID_KEY_SECURE_ENCRYPTION,
+                             sizeof(data.s_image_encryption_key),
+                             data.s_image_encryption_key);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+    err = tfm_plat_otp_write(PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION,
+                             sizeof(data.ns_image_encryption_key),
+                             data.ns_image_encryption_key);
+    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+        return err;
+    }
+
     err = tfm_plat_otp_write(PLAT_OTP_ID_HOST_ROTPK_S,
                              sizeof(data.host_rotpk_s),
                              data.host_rotpk_s);
@@ -53,13 +105,6 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     err = tfm_plat_otp_write(PLAT_OTP_ID_PROFILE_DEFINITION,
                              sizeof(data.profile_definition),
                              data.profile_definition);
-    if (err != TFM_PLAT_ERR_SUCCESS) {
-        return err;
-    }
-
-    err = tfm_plat_otp_write(PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES,
-                             sizeof(data.cca_system_properties),
-                             (uint8_t*)&data.cca_system_properties);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

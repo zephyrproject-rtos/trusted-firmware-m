@@ -27,16 +27,8 @@ struct __attribute__((__packed__)) cm_provisioning_bundle {
         struct __attribute__((__packed__)) cm_provisioning_data {
             uint8_t bl1_2_image_hash[32];
             uint8_t bl1_2_image[BL1_2_CODE_SIZE];
-            uint8_t huk[32];
             uint8_t guk[32];
-            uint8_t bl1_rotpk_0[56];
-            uint8_t bl2_encryption_key[32];
-            uint8_t bl2_rotpk_0[32];
-            uint8_t bl2_rotpk_1[32];
-            uint8_t bl2_rotpk_2[32];
-            uint8_t bl2_rotpk_3[32];
-            uint8_t s_image_encryption_key[32];
-            uint8_t ns_image_encryption_key[32];
+            uint32_t cca_system_properties;
         } values;
         uint8_t _pad[PROVISIONING_BUNDLE_VALUES_SIZE];
     };
@@ -53,13 +45,22 @@ struct __attribute__((__packed__)) dm_provisioning_bundle {
     uint8_t code[PROVISIONING_BUNDLE_CODE_SIZE];
     union __attribute__((__packed__)) {
         struct __attribute__((__packed__)) dm_provisioning_data {
+            uint8_t bl1_rotpk_0[56];
+            uint8_t bl2_encryption_key[32];
+
+            uint8_t bl2_rotpk_0[32];
+            uint8_t bl2_rotpk_1[32];
+            uint8_t bl2_rotpk_2[32];
+            uint8_t bl2_rotpk_3[32];
+            uint8_t s_image_encryption_key[32];
+            uint8_t ns_image_encryption_key[32];
+
             uint8_t host_rotpk_s[96];
             uint8_t host_rotpk_ns[96];
             uint8_t host_rotpk_cca[96];
             uint8_t implementation_id[32];
             uint8_t verification_service_url[32];
             uint8_t profile_definition[32];
-            uint32_t cca_system_properties;
             uint8_t secure_debug_pk[32];
         } values;
         uint8_t _pad[PROVISIONING_BUNDLE_VALUES_SIZE];

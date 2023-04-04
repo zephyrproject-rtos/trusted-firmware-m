@@ -17,6 +17,9 @@ def struct_pack(objects, pad_to=0):
     size = struct.calcsize(defstring)
     if size < pad_to:
         defstring += str(pad_to - size) + "x"
+    elif size > pad_to and pad_to != 0:
+        print("Error padding struct of size {} to {}".format(size, pad_to))
+        exit(1);
 
     return (bytes(struct.pack(defstring, *objects)))
 
@@ -57,7 +60,7 @@ patch_bundle = struct_pack([
 ])
 
 code = struct_pack([code], pad_to=0x8000)
-values = struct_pack([patch_bundle, values[len(patch_bundle):]], pad_to=0x2800)
+values = struct_pack([patch_bundle, values[len(patch_bundle):]], pad_to=0x3800)
 data = struct_pack([values, data], pad_to=0x3E00)
 
 bundle = struct_pack([

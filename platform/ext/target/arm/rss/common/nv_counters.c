@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,7 +21,7 @@
 
 #include <string.h>
 
-#define OTP_COUNTER_MAX_SIZE    (128u * sizeof(uint32_t))
+#define OTP_COUNTER_MAX_SIZE    (16u * sizeof(uint32_t))
 #define NV_COUNTER_SIZE         4
 #define OTP_COUNTER_MAGIC       0x3333CAFE
 
