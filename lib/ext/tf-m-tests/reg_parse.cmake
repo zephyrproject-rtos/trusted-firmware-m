@@ -43,8 +43,3 @@ endif()
 if (EXTRA_S_TEST_SUITE_PATH)
     set(TFM_S_REG_TEST ON)
 endif()
-
-# Load regression configs overrided by platform
-if (EXISTS ${TARGET_PLATFORM_PATH}/reg_config_override.cmake)
-    include(${TARGET_PLATFORM_PATH}/reg_config_override.cmake)
-endif()

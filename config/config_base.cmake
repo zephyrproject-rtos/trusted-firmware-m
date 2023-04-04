@@ -72,9 +72,6 @@ set(TFM_EXTRA_MANIFEST_LIST_FILES       ""          CACHE FILEPATH  "Extra manif
 set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ""          CACHE PATH      "Path to extra generated file list. Appended to stardard TFM generated file list.")
 set(TFM_EXTRA_PARTITION_PATHS           ""          CACHE PATH      "List of extra Secure Partitions directories. An extra Secure Parition folder contains source code, CMakeLists.txt and manifest files")
 
-set(TFM_SPM_LOG_LEVEL                   TFM_SPM_LOG_LEVEL_SILENCE       CACHE STRING    "Set default SPM log level as INFO level")
-set(TFM_PARTITION_LOG_LEVEL             TFM_PARTITION_LOG_LEVEL_SILENCE   CACHE STRING    "Set default Secure Partition log level as INFO level")
-
 set(TFM_CODE_SHARING                    OFF         CACHE PATH      "Enable code sharing between MCUboot and secure firmware")
 set(CONFIG_TFM_BOOT_STORE_MEASUREMENTS  ON          CACHE BOOL      "Store measurement values from all the boot stages. Used for initial attestation token.")
 set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS  ON  CACHE BOOL      "Enable storing of encoded measurements in boot.")
