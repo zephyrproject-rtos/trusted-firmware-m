@@ -55,17 +55,17 @@ size_t psa_skip(psa_handle_t msg_handle, uint32_t invec_idx, size_t num_bytes)
 void psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
                const void *buffer, size_t num_bytes)
 {
-    return PART_METADATA()->psa_fns->psa_write(msg_handle, outvec_idx, buffer, num_bytes);
+    PART_METADATA()->psa_fns->psa_write(msg_handle, outvec_idx, buffer, num_bytes);
 }
 
 void psa_reply(psa_handle_t msg_handle, psa_status_t retval)
 {
-    return PART_METADATA()->psa_fns->psa_reply(msg_handle, retval);
+    PART_METADATA()->psa_fns->psa_reply(msg_handle, retval);
 }
 
 void psa_panic(void)
 {
-    return PART_METADATA()->psa_fns->psa_panic();
+    PART_METADATA()->psa_fns->psa_panic();
 }
 
 uint32_t psa_rot_lifecycle_state(void)
@@ -81,31 +81,31 @@ psa_handle_t psa_connect(uint32_t sid, uint32_t version)
 
 void psa_close(psa_handle_t handle)
 {
-    return PART_METADATA()->psa_fns->psa_close(handle);
+   PART_METADATA()->psa_fns->psa_close(handle);
 }
 
 void psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
 {
-    return PART_METADATA()->psa_fns->psa_set_rhandle(msg_handle, rhandle);
+    PART_METADATA()->psa_fns->psa_set_rhandle(msg_handle, rhandle);
 }
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 
 #if CONFIG_TFM_DOORBELL_API == 1
 void psa_notify(int32_t partition_id)
 {
-    return PART_METADATA()->psa_fns->psa_notify(partition_id);
+    PART_METADATA()->psa_fns->psa_notify(partition_id);
 }
 
 void psa_clear(void)
 {
-    return PART_METADATA()->psa_fns->psa_clear();
+    PART_METADATA()->psa_fns->psa_clear();
 }
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
 #if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
 void psa_irq_enable(psa_signal_t irq_signal)
 {
-    return PART_METADATA()->psa_fns->psa_irq_enable(irq_signal);
+    PART_METADATA()->psa_fns->psa_irq_enable(irq_signal);
 }
 
 psa_irq_status_t psa_irq_disable(psa_signal_t irq_signal)
@@ -116,14 +116,14 @@ psa_irq_status_t psa_irq_disable(psa_signal_t irq_signal)
 #if CONFIG_TFM_FLIH_API == 1
 void psa_reset_signal(psa_signal_t irq_signal)
 {
-    return PART_METADATA()->psa_fns->psa_reset_signal(irq_signal);
+   PART_METADATA()->psa_fns->psa_reset_signal(irq_signal);
 }
 #endif /* CONFIG_TFM_FLIH_API == 1 */
 
 #if CONFIG_TFM_SLIH_API == 1
 void psa_eoi(psa_signal_t irq_signal)
 {
-    return PART_METADATA()->psa_fns->psa_eoi(irq_signal);
+    PART_METADATA()->psa_fns->psa_eoi(irq_signal);
 }
 #endif /* CONFIG_TFM_SLIH_API == 1 */
 #endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
@@ -136,16 +136,16 @@ const void *psa_map_invec(psa_handle_t msg_handle, uint32_t invec_idx)
 
 void psa_unmap_invec(psa_handle_t msg_handle, uint32_t invec_idx)
 {
-    return PART_METADATA()->psa_fns->psa_unmap_invec(msg_handle, invec_idx);
+    PART_METADATA()->psa_fns->psa_unmap_invec(msg_handle, invec_idx);
 }
 
 void *psa_map_outvec(psa_handle_t msg_handle, uint32_t outvec_idx)
 {
-    return PART_METADATA()->psa_fns->psa_map_outvec(msg_handle, outvec_idx);
+    PART_METADATA()->psa_fns->psa_map_outvec(msg_handle, outvec_idx);
 }
 
 void psa_unmap_outvec(psa_handle_t msg_handle, uint32_t outvec_idx, size_t len)
 {
-    return PART_METADATA()->psa_fns->psa_unmap_outvec(msg_handle, outvec_idx, len);
+    PART_METADATA()->psa_fns->psa_unmap_outvec(msg_handle, outvec_idx, len);
 }
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
