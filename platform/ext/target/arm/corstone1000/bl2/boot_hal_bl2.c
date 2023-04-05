@@ -89,6 +89,7 @@ static bool fill_flash_map_with_fip_data(uint8_t boot_index) {
 
     /* parse directly from flash using XIP mode */
     /* FIP is large so its not a good idea to load it in memory */
+    Select_XIP_Mode_For_Shared_Flash();
     result = parse_fip_and_extract_tfa_info(
         FLASH_BASE_ADDRESS + fip_offset + FIP_SIGNATURE_AREA_SIZE, fip_size,
         &tfa_offset, &tfa_size);
@@ -96,7 +97,7 @@ static bool fill_flash_map_with_fip_data(uint8_t boot_index) {
         BOOT_LOG_ERR("parse_fip_and_extract_tfa_info failed");
         return false;
     }
-
+    Select_Write_Mode_For_Shared_Flash();
     flash_map[2].fa_off = fip_offset + FIP_SIGNATURE_AREA_SIZE + tfa_offset;
     flash_map[2].fa_size = tfa_size;
     flash_map[3].fa_off = flash_map[2].fa_off + flash_map[2].fa_size;
