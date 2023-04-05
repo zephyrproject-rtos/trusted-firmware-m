@@ -1,11 +1,13 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
 find_package(Python3)
+
+set(CMAKE_BUILD_TYPE ${BL1_2_BUILD_TYPE})
 
 add_subdirectory(lib)
 
@@ -35,7 +37,8 @@ target_link_libraries(bl1_2
     PRIVATE
         bl1_1_shared_lib_interface
         bl1_2_lib
-        platform_bl1_interface
+        platform_bl1_1_interface
+        platform_bl1_2
         $<$<BOOL:${TEST_BL1_2}>:bl1_2_tests>
 )
 

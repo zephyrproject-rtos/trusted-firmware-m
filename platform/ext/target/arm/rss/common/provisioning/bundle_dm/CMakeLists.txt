@@ -43,7 +43,7 @@ target_include_directories(dm_provisioning_bundle
 )
 
 target_link_libraries(dm_provisioning_bundle
-    platform_bl1
+    platform_bl1_1
 )
 
 add_custom_target(encrypted_dm_provisioning_bundle

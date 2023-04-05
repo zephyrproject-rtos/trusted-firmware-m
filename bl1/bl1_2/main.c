@@ -15,17 +15,17 @@
 #include "image.h"
 #include "region_defs.h"
 #include "pq_crypto.h"
+#include "tfm_plat_nv_counters.h"
 
 /* Disable both semihosting code and argv usage for main */
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
 __asm("  .global __ARM_use_no_argv\n");
 #endif
 
-extern uint32_t platform_code_is_bl1_2;
-
 #ifndef TFM_BL1_PQ_CRYPTO
 static fih_int image_hash_check(struct bl1_2_image_t *img)
 {
+    enum tfm_plat_err_t plat_err;
     uint8_t computed_bl2_hash[BL2_HASH_SIZE];
     uint8_t stored_bl2_hash[BL2_HASH_SIZE];
     fih_int fih_rc = FIH_FAILURE;
@@ -37,10 +37,13 @@ static fih_int image_hash_check(struct bl1_2_image_t *img)
         FIH_RET(fih_rc);
     }
 
-    FIH_CALL(bl1_otp_read_bl2_image_hash, fih_rc, stored_bl2_hash);
+    plat_err = tfm_plat_otp_read(PLAT_OTP_ID_BL2_IMAGE_HASH, BL2_HASH_SIZE,
+                                 stored_bl2_hash);
+    fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(fih_rc);
+        FIH_RET(FIH_FAILURE);
     }
+
 
     FIH_CALL(bl_secure_memeql, fih_rc, computed_bl2_hash, stored_bl2_hash,
                                        BL2_HASH_SIZE);
@@ -52,9 +55,12 @@ static fih_int is_image_security_counter_valid(struct bl1_2_image_t *img)
 {
     uint32_t security_counter;
     fih_int fih_rc;
+    enum tfm_plat_err_t plat_err;
 
-    FIH_CALL(bl1_otp_read_nv_counter, fih_rc, BL1_NV_COUNTER_ID_BL2_IMAGE,
-                                          &security_counter);
+    plat_err = tfm_plat_read_nv_counter(PLAT_NV_COUNTER_BL1_0,
+                                        sizeof(security_counter),
+                                        (uint8_t *)&security_counter);
+    fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
@@ -92,6 +98,7 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
 fih_int validate_image_at_addr(struct bl1_2_image_t *image)
 {
     fih_int fih_rc = FIH_FAILURE;
+    enum tfm_plat_err_t plat_err;
 
     FIH_CALL(is_image_signature_valid, fih_rc, image);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
@@ -105,8 +112,9 @@ fih_int validate_image_at_addr(struct bl1_2_image_t *image)
     }
 
     /* TODO work out if the image actually boots before updating the counter */
-    FIH_CALL(bl1_otp_write_nv_counter, fih_rc, BL1_NV_COUNTER_ID_BL2_IMAGE,
-                                               image->protected_values.security_counter);
+    plat_err = tfm_plat_set_nv_counter(PLAT_NV_COUNTER_BL1_0,
+                                       image->protected_values.security_counter);
+    fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         BL1_LOG("[ERR] NV counter update failed\r\n");
         FIH_RET(FIH_FAILURE);
@@ -212,7 +220,6 @@ static fih_int validate_image(uint32_t image_id)
 
 int main(void)
 {
-    platform_code_is_bl1_2 = 1;
     fih_int fih_rc = FIH_FAILURE;
 
     fih_rc = fih_int_encode_zero_equality(boot_platform_init());

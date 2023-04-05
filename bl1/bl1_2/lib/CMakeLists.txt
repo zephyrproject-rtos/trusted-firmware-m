@@ -7,8 +7,6 @@
 
 add_library(bl1_2_lib STATIC)
 
-set(CMAKE_BUILD_TYPE ${MBEDCRYPTO_BUILD_TYPE})
-
 target_include_directories(bl1_2_lib
     PUBLIC
         ./interface
@@ -36,6 +34,6 @@ target_link_libraries(bl1_2_lib
     PUBLIC
         platform_common_interface
     PRIVATE
-        platform_bl1_interface
+        platform_bl1_2
         bl1_1_shared_lib_interface
 )

@@ -96,4 +96,8 @@ config TFM_BL1_LOGGING
     bool "Enable BL1 Logging"
     default y
 
+config BL1_2_BUILD_TYPE
+    string "BL1_2 build type"
+    default "$(CMAKE_BUILD_TYPE)"
+
 endif

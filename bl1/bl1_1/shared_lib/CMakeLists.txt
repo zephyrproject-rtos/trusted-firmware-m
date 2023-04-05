@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -31,11 +31,10 @@ target_sources(bl1_1_shared_lib
 target_link_libraries(bl1_1_shared_lib
     PUBLIC
         bl1_1_shared_lib_interface
-        platform_region_defs
         tfm_fih
     PRIVATE
+        platform_bl1_1
         $<$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>:bl1_1_crypto_mbedcrypto>
-        $<$<AND:$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>,$<BOOL:${CRYPTO_HW_ACCELERATOR}>>:bl1_crypto_hw>
 )
 
 target_compile_options(bl1_1_shared_lib_interface

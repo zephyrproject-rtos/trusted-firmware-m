@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+; * Copyright (c) 2021-2023 Arm Limited. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -122,6 +122,7 @@ SECTIONS
     Image$$SHARED_DATA$$RW$$Limit = ADDR(.tfm_bl2_shared_data) + SIZEOF(.tfm_bl2_shared_data);
 
     . = BL1_2_DATA_START;
+    Image$$BL1_2_ER_DATA_START$$Base = .;
     .data : AT (__etext)
     {
         __data_start__ = .;
@@ -189,4 +190,8 @@ SECTIONS
     Image$$ARM_LIB_HEAP$$ZI$$Limit = ADDR(.heap) + SIZEOF(.heap);
 
     PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
+    Image$$BL1_2_ER_DATA_LIMIT$$Base = .;
+
+    Image$$BL1_1_ER_DATA_START$$Base = BL1_1_DATA_START;
+    Image$$BL1_1_ER_DATA_LIMIT$$Base = BL1_1_DATA_START + BL1_2_DATA_SIZE;
 }

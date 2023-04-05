@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -14,10 +14,7 @@
 #include "flash_layout.h"
 #include "region_defs.h"
 #include "uart_stdout.h"
-#ifdef CRYPTO_HW_ACCELERATOR
-#include "crypto_hw.h"
 #include "fih.h"
-#endif /* CRYPTO_HW_ACCELERATOR */
 
 #ifdef MEASURED_BOOT_API
 #include "region_defs.h"
@@ -38,8 +35,6 @@ REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 #endif /* defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
        || defined(__ARM_ARCH_8_1M_MAIN__) */
 
-uint32_t platform_code_is_bl1_2 = 0;
-
 REGION_DECLARE(Image$$, BL1_1_ER_DATA_START, $$Base)[];
 REGION_DECLARE(Image$$, BL1_1_ER_DATA_LIMIT, $$Base)[];
 REGION_DECLARE(Image$$, BL1_2_ER_DATA_START, $$Base)[];
@@ -57,12 +52,6 @@ __WEAK __attribute__((naked)) void boot_clear_ram_area(void)
 #if !defined(__ICCARM__)
         ".syntax unified                               \n"
 #endif
-        /* If platform_code_is_bl1_2 isn't set, don't clear anything to allow
-         * code-sharing to work correctly.
-         */
-        "ldr     r0, %0                                \n"
-        "cmp     r0, #0                                \n"
-        "beq     Clear_done_2                          \n"
         /* Clear the entire BL1_1 data section */
         "movs    r0, #0                                \n"
         "ldr     r1, =Image$$BL1_1_ER_DATA_START$$Base \n"
@@ -87,7 +76,7 @@ __WEAK __attribute__((naked)) void boot_clear_ram_area(void)
         "Clear_done_2:                                 \n"
         "bx lr                                         \n"
          :
-         : "m" (platform_code_is_bl1_2)
+         :
          : "r0" , "r1" , "r2" , "memory"
     );
 }
@@ -159,27 +148,11 @@ __WEAK int32_t boot_platform_init(void)
     }
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
-    if(!platform_code_is_bl1_2) {
-        /* Clear boot data area */
-        memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
-    }
-
     return 0;
 }
 
 __WEAK int32_t boot_platform_post_init(void)
 {
-#ifdef CRYPTO_HW_ACCELERATOR
-    int32_t result;
-
-    result = crypto_hw_accelerator_init();
-    if (result) {
-        return 1;
-    }
-
-    (void)fih_delay_init();
-#endif /* CRYPTO_HW_ACCELERATOR */
-
     return 0;
 }
 
@@ -192,14 +165,6 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
      */
     static struct boot_arm_vector_table *vt_cpy;
     int32_t result;
-
-#ifdef CRYPTO_HW_ACCELERATOR
-
-    result = crypto_hw_accelerator_finish();
-    if (result) {
-        while (1);
-    }
-#endif /* CRYPTO_HW_ACCELERATOR */
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
     result = FLASH_DEV_NAME.Uninitialize();

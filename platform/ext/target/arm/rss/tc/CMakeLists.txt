@@ -79,16 +79,28 @@ target_include_directories(platform_bl2
 
 #========================= Platform BL1 =======================================#
 
-target_sources(platform_bl1
+target_sources(platform_bl1_1
     PRIVATE
-        cmsis_drivers/Driver_Flash.c
-        host_drivers/cfi_drv.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
         $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<NOT:$<BOOL:${RSS_DEBUG_UART}>>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
         $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<NOT:$<BOOL:${RSS_DEBUG_UART}>>>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/uart_pl011_drv.c>
 )
 
-target_include_directories(platform_bl1
+target_include_directories(platform_bl1_1_interface
+    INTERFACE
+        ./host_drivers
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
+        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
+)
+
+target_sources(platform_bl1_2
+    PRIVATE
+        cmsis_drivers/Driver_Flash.c
+        host_drivers/cfi_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
+)
+
+target_include_directories(platform_bl1_2
     PUBLIC
         ./host_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common

@@ -27,8 +27,3 @@ target_include_directories(bl1_1_lib
     INTERFACE
         ./bundle_common
 )
-
-target_link_libraries(bl1_1_lib
-    INTERFACE
-        platform_bl1
-)

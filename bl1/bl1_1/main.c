@@ -8,6 +8,7 @@
 #include "crypto.h"
 #include "otp.h"
 #include "tfm_plat_provisioning.h"
+#include "tfm_plat_otp.h"
 #include "boot_hal.h"
 #include "region_defs.h"
 #include "log.h"
@@ -24,6 +25,7 @@ uint8_t computed_bl1_2_hash[BL1_2_HASH_SIZE];
 
 fih_int validate_image_at_addr(uint8_t *image)
 {
+    enum tfm_plat_err_t plat_err;
     uint8_t stored_bl1_2_hash[BL1_2_HASH_SIZE];
     fih_int fih_rc = FIH_FAILURE;
 
@@ -33,7 +35,9 @@ fih_int validate_image_at_addr(uint8_t *image)
         FIH_RET(FIH_FAILURE);
     }
 
-    FIH_CALL(bl1_otp_read_bl1_2_image_hash, fih_rc, stored_bl1_2_hash);
+    plat_err = tfm_plat_otp_read(PLAT_OTP_ID_BL1_2_IMAGE_HASH, BL1_2_HASH_SIZE,
+                                 stored_bl1_2_hash);
+    fih_rc = fih_int_encode_zero_equality(plat_err);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
@@ -56,11 +60,6 @@ int main(void)
         FIH_PANIC;
     }
     BL1_LOG("[INF] Starting TF-M BL1_1\r\n");
-
-    fih_rc = bl1_otp_init();
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_PANIC;
-    }
 
     if (tfm_plat_provisioning_is_required()) {
         if (tfm_plat_provisioning_perform()) {

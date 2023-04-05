@@ -43,7 +43,7 @@ target_include_directories(cm_provisioning_bundle
 )
 
 target_link_libraries(cm_provisioning_bundle
-    platform_bl1
+    platform_bl1_1
     bl1_1_shared_lib
 )
 

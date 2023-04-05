@@ -21,8 +21,9 @@ if (BL2)
 endif()
 
 if (BL1 AND PLATFORM_DEFAULT_BL1)
-    add_library(platform_bl1 STATIC)
-    add_library(platform_bl1_interface INTERFACE)
+    add_library(platform_bl1_1 STATIC)
+    add_library(platform_bl1_2 STATIC)
+    add_library(platform_bl1_1_interface INTERFACE)
 endif()
 
 if (TFM_PARTITION_CRYPTO)
@@ -189,7 +190,7 @@ if(BL2)
             $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
             $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
             $<$<BOOL:${PLATFORM_DEFAULT_ROTPK}>:ext/common/template/tfm_rotpk.c>
-            $<$<OR:$<AND:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
+            $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
     )
 
@@ -227,7 +228,7 @@ endif()
 #========================= Platform BL1_1 =====================================#
 
 if(BL1 AND PLATFORM_DEFAULT_BL1)
-    target_include_directories(platform_bl1_interface
+    target_include_directories(platform_bl1_1_interface
         INTERFACE
             .
             ./include
@@ -235,14 +236,14 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             ./ext/driver
     )
 
-    target_link_libraries(platform_bl1_interface
+    target_link_libraries(platform_bl1_1_interface
         INTERFACE
             platform_region_defs
             platform_common_interface
             cmsis_stack_override
     )
 
-    target_compile_definitions(platform_bl1_interface
+    target_compile_definitions(platform_bl1_1_interface
         INTERFACE
             $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
             $<$<BOOL:${TFM_BL1_LOGGING}>:TFM_BL1_LOGGING>
@@ -252,27 +253,77 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
             $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
+            $<$<BOOL:${TFM_BL1_2_IN_OTP}>:TFM_BL1_2_IN_OTP>
     )
 
-    target_sources(platform_bl1
+    target_sources(platform_bl1_1
         PRIVATE
-            ./ext/common/boot_hal_bl1.c
+            ./ext/common/boot_hal_bl1_1.c
             ./ext/common/uart_stdout.c
-            $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
-            $<$<OR:$<AND:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
+            $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
     )
 
-    target_link_libraries(platform_bl1
+    target_link_libraries(platform_bl1_1
         PUBLIC
-            platform_bl1_interface
+            platform_bl1_1_interface
+            platform_region_defs
         PRIVATE
             tfm_fih
             tfm_fih_headers
-            $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:bl1_crypto_hw>
             tfm_boot_status
     )
+endif()
 
+#========================= Platform BL1_2 =====================================#
+
+if(BL1 AND PLATFORM_DEFAULT_BL1)
+    target_include_directories(platform_bl1_2
+        PRIVATE
+            .
+            ./include
+            ./ext/cmsis
+            ./ext/driver
+    )
+
+    target_link_libraries(platform_bl1_2
+        INTERFACE
+            platform_region_defs
+            platform_common_interface
+            cmsis_stack_override
+    )
+
+    target_compile_definitions(platform_bl1_2
+        INTERFACE
+            $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
+            $<$<BOOL:${TFM_BL1_LOGGING}>:TFM_BL1_LOGGING>
+            $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
+            $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION>
+            $<$<BOOL:${TFM_DUMMY_PROVISIONING}>:TFM_DUMMY_PROVISIONING>
+            $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
+            $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
+            $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
+            $<$<BOOL:${TFM_BL1_2_IN_OTP}>:TFM_BL1_2_IN_OTP>
+    )
+
+    target_sources(platform_bl1_2
+        PRIVATE
+            ./ext/common/boot_hal_bl1_2.c
+            $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
+            $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
+            $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
+    )
+
+    target_link_libraries(platform_bl1_2
+        PUBLIC
+            platform_bl1_1_interface
+        PRIVATE
+            tfm_fih
+            tfm_fih_headers
+            tfm_boot_status
+            platform_region_defs
+            bl1_1_shared_lib_interface
+    )
 endif()
 
 #========================= Platform region defs ===============================#

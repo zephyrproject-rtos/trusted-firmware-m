@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -28,3 +28,4 @@ set(TFM_BL1_2_IN_OTP                    TRUE        CACHE BOOL      "Whether BL1
 set(BL1_HEADER_SIZE                     0x800       CACHE STRING    "BL1 Header size")
 set(BL1_TRAILER_SIZE                    0x000       CACHE STRING    "BL1 Trailer size")
 
+set(BL1_2_BUILD_TYPE                    ${CMAKE_BUILD_TYPE} CACHE STRING "Build type of BL1_2")

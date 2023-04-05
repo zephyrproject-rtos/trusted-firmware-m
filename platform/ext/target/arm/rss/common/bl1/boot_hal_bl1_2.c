@@ -22,18 +22,17 @@
 #include "device_definition.h"
 #include "platform_regs.h"
 #ifdef CRYPTO_HW_ACCELERATOR
-#include "crypto_hw.h"
 #include "fih.h"
-#include "cc3xx_dma.h"
+#include "cc3xx_drv.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include <string.h>
 #include "cmsis_compiler.h"
 #include "fip_parser.h"
 #include "host_flash_atu.h"
 #include "plat_def_fip_uuid.h"
+#include "tfm_plat_nv_counters.h"
 
 extern uint8_t computed_bl1_2_hash[];
-extern uint32_t platform_code_is_bl1_2;
 uint32_t image_offsets[2];
 
 /* Flash device name must be specified by target */
@@ -76,6 +75,7 @@ int32_t boot_platform_init(void)
 {
     int32_t result;
     uint8_t prbg_seed[KMU_PRBG_SEED_LEN];
+    enum tfm_plat_err_t plat_err;
 
     /* Initialize stack limit register */
     uint32_t msp_stack_bottom =
@@ -83,9 +83,10 @@ int32_t boot_platform_init(void)
 
     __set_MSPLIM(msp_stack_bottom);
 
-    /* Enable system reset for the RSS */
-    struct rss_sysctrl_t *rss_sysctrl = (void *)RSS_SYSCTRL_BASE_S;
-    rss_sysctrl->reset_mask |= (1U << 8U);
+    plat_err = tfm_plat_init_nv_counter();
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return 1;
+    }
 
     result = init_atu_regions();
     if (result) {
@@ -116,41 +117,11 @@ int32_t boot_platform_init(void)
         return result;
     }
 
-    if(!platform_code_is_bl1_2) {
-        /* Clear boot data area */
-        memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
-    }
-
     return 0;
 }
 
 int32_t boot_platform_post_init(void)
 {
-#ifdef CRYPTO_HW_ACCELERATOR
-    int32_t result;
-    uint32_t idx;
-    cc3xx_dma_remap_region_t remap_regions[] = {
-        {ITCM_BASE_S, ITCM_SIZE, ITCM_CPU0_BASE_S, 0x01000000},
-        {ITCM_BASE_NS, ITCM_SIZE, ITCM_CPU0_BASE_NS, 0x01000000},
-        {DTCM_BASE_S, DTCM_SIZE, DTCM_CPU0_BASE_S, 0x01000000},
-        {DTCM_BASE_NS, DTCM_SIZE, DTCM_CPU0_BASE_NS, 0x01000000},
-    };
-
-    result = crypto_hw_accelerator_init();
-    if (result) {
-        return 1;
-    }
-
-    for (idx = 0; idx < (sizeof(remap_regions) / sizeof(remap_regions[0])); idx++) {
-        result = cc3xx_dma_remap_region_init(idx, &remap_regions[idx]);
-        if (result) {
-            return 1;
-        }
-    }
-
-    (void)fih_delay_init();
-#endif /* CRYPTO_HW_ACCELERATOR */
-
     return 0;
 }
 
@@ -202,11 +173,9 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
     int32_t result;
 
-    if (platform_code_is_bl1_2) {
-        result = host_flash_atu_uninit_regions();
-        if (result) {
-            while(1){}
-        }
+    result = host_flash_atu_uninit_regions();
+    if (result) {
+        while(1){}
     }
 
 
@@ -216,7 +185,7 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     }
 
 #ifdef CRYPTO_HW_ACCELERATOR
-    result = crypto_hw_accelerator_finish();
+    result = cc3xx_finish();
     if (result) {
         while (1);
     }

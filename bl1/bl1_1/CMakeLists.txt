@@ -35,7 +35,7 @@ target_link_libraries(bl1_1
     PRIVATE
         bl1_1_lib
         bl1_1_shared_lib
-        platform_bl1
+        platform_bl1_1
         $<$<BOOL:${TEST_BL1_1}>:bl1_1_tests>
 )
 

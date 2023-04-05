@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -26,5 +26,5 @@ target_include_directories(cc312_rom
 
 target_link_libraries(cc312_rom
     PRIVATE
-        platform_bl1
+        platform_bl1_1_interface
 )
