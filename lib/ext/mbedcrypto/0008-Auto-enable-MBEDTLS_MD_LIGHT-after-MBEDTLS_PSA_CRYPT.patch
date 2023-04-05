@@ -1,4 +1,4 @@
-From e6b8f4ce185635c7545adafde8a537d3e747223f Mon Sep 17 00:00:00 2001
+From 90e24d8259fc2aea1f261e47da1b753c66cc52d8 Mon Sep 17 00:00:00 2001
 From: Summer Qin <summer.qin@arm.com>
 Date: Mon, 3 Apr 2023 10:12:31 +0800
 Subject: [PATCH 8/8] Auto-enable MBEDTLS_MD_LIGHT after
@@ -12,7 +12,7 @@ Signed-off-by: Summer Qin <summer.qin@arm.com>
  1 file changed, 14 insertions(+), 14 deletions(-)
 
 diff --git a/include/mbedtls/build_info.h b/include/mbedtls/build_info.h
-index 1b3d59fa..b13f9308 100644
+index 1b3d59fab..b13f9308a 100644
 --- a/include/mbedtls/build_info.h
 +++ b/include/mbedtls/build_info.h
 @@ -80,20 +80,6 @@

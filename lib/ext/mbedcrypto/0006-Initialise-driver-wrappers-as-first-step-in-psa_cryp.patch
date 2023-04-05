@@ -1,4 +1,4 @@
-From b938250a8d152b2a29a404d7ae2328bcd666495d Mon Sep 17 00:00:00 2001
+From 624a78c552eb50c0631532306d2ed3fd3116e5e0 Mon Sep 17 00:00:00 2001
 From: Antonio de Angelis <Antonio.deAngelis@arm.com>
 Date: Tue, 23 Aug 2022 13:06:07 +0100
 Subject: [PATCH 6/8] Initialise driver wrappers as first step in
@@ -15,21 +15,21 @@ Signed-off-by: Antonio de Angelis <antonio.deangelis@arm.com>
  1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/library/psa_crypto.c b/library/psa_crypto.c
-index df7776f3..267ae141 100644
+index df7776f39..6fe509c28 100644
 --- a/library/psa_crypto.c
 +++ b/library/psa_crypto.c
-@@ -7155,6 +7155,11 @@ psa_status_t psa_crypto_init(void)
+@@ -7148,6 +7148,11 @@ psa_status_t psa_crypto_init(void)
+         return PSA_SUCCESS;
      }
-     global_data.drivers_initialized = 1;
  
 +    status = psa_initialize_key_slots();
 +    if (status != PSA_SUCCESS) {
 +        goto exit;
 +    }
 +
-     /* Initialize and seed the random generator. */
-     mbedtls_psa_random_init(&global_data.rng);
-     global_data.rng_state = RNG_INITIALIZED;
+     /* Init drivers */
+     status = psa_driver_wrapper_init();
+     if (status != PSA_SUCCESS) {
 @@ -7164,11 +7169,6 @@ psa_status_t psa_crypto_init(void)
      }
      global_data.rng_state = RNG_SEEDED;
