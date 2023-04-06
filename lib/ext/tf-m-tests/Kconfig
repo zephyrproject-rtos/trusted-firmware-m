@@ -26,21 +26,6 @@ config TEST_BL2
 
 ################################# Regression test ##############################
 
-config TEST_FRAMEWORK_S
-    bool
-    default y if EXTRA_S_TEST_SUITE_PATH != ""
-    default n
-    help
-      Whether to build S regression tests framework
-
-config TEST_FRAMEWORK_NS
-    bool
-    depends on NS
-    default y if EXTRA_NS_TEST_SUITE_PATH != ""
-    default n
-    help
-      Whether to build NS regression tests framework
-
 config TFM_S_REG_TEST
     bool
     default y if EXTRA_S_TEST_SUITE_PATH != ""
@@ -83,7 +68,6 @@ config TEST_PARTITION_FPU_TEST
 config TEST_S
     bool "Enable default secure test cases"
     default n
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
     imply TEST_S_ATTESTATION
     imply TEST_S_CRYPTO
@@ -97,7 +81,6 @@ config TEST_S
 config TEST_NS
     bool "Enable default non-secure test cases"
     default n
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
     imply TEST_NS_ATTESTATION
     imply TEST_NS_T_COSE
@@ -122,7 +105,6 @@ config TEST_S_ATTESTATION
     imply TFM_PARTITION_INITIAL_ATTESTATION
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     imply TFM_PARTITION_CRYPTO
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
 
 config TEST_S_CRYPTO
@@ -130,14 +112,12 @@ config TEST_S_CRYPTO
     default n
     imply TFM_PARTITION_CRYPTO
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
 
 config TEST_S_ITS
     bool "ITS"
     default n
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
 
 config TEST_S_PS
@@ -147,14 +127,12 @@ config TEST_S_PS
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     imply TFM_PARTITION_CRYPTO
     imply TFM_PARTITION_PLATFORM
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
 
 config TEST_S_PLATFORM
     bool "Platform"
     default n
     imply TFM_PARTITION_PLATFORM
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
 
 config TEST_S_FWU
@@ -164,27 +142,23 @@ config TEST_S_FWU
     imply TFM_PARTITION_CRYPTO
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     imply TFM_PARTITION_PLATFORM
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
 
 config TEST_S_IPC
     bool "IPC"
     depends on CONFIG_TFM_SPM_BACKEND_IPC
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
     select TFM_PARTITION_IPC_TEST
 
 config TEST_S_SFN_BACKEND
     bool "SFN backend"
     depends on CONFIG_TFM_SPM_BACKEND_SFN
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
     select TFM_PARTITION_SFN_BACKEND_TEST
 
 config TEST_S_FPU
     bool "FPU"
     depends on CONFIG_TFM_ENABLE_FP
-    select TEST_FRAMEWORK_S
     select TFM_S_REG_TEST
     select TEST_PARTITION_FPU_TEST
 endmenu
@@ -199,7 +173,6 @@ config TEST_NS_ATTESTATION
     imply TFM_PARTITION_INITIAL_ATTESTATION
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     imply TFM_PARTITION_CRYPTO
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 config TEST_NS_T_COSE
@@ -208,7 +181,6 @@ config TEST_NS_T_COSE
     imply TFM_PARTITION_INITIAL_ATTESTATION
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     imply TFM_PARTITION_CRYPTO
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 config TEST_NS_QCBOR
@@ -217,7 +189,6 @@ config TEST_NS_QCBOR
     imply TFM_PARTITION_INITIAL_ATTESTATION
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     imply TFM_PARTITION_CRYPTO
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 config TEST_NS_CRYPTO
@@ -225,7 +196,6 @@ config TEST_NS_CRYPTO
     default n
     imply TFM_PARTITION_CRYPTO
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 config TEST_NS_PS
@@ -236,21 +206,18 @@ config TEST_NS_PS
     imply TFM_PARTITION_CRYPTO
     imply TFM_PARTITION_PLATFORM
     imply TEST_NS_ITS
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 config TEST_NS_ITS
     bool "ITS"
     default n
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 config TEST_NS_PLATFORM
     bool "Platform"
     default n
     imply TFM_PARTITION_PLATFORM
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 config TEST_NS_FWU
@@ -260,19 +227,16 @@ config TEST_NS_FWU
     imply TFM_PARTITION_CRYPTO
     imply TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
     imply TFM_PARTITION_PLATFORM
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 config TEST_NS_MULTI_CORE
     bool "Multi-core"
     depends on TFM_MULTI_CORE_TOPOLOGY
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 config TEST_NS_MANAGE_NSID
     bool "NSID management"
     depends on TFM_NS_MANAGE_NSID
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
 
 choice TEST_NS_IRQ
@@ -283,13 +247,11 @@ choice TEST_NS_IRQ
     config TEST_NS_FLIH_IRQ
         bool "First-Level Interrupt Handling"
         depends on PLATFORM_FLIH_IRQ_TEST_SUPPORT
-        imply TEST_FRAMEWORK_NS
         select TFM_NS_REG_TEST
 
     config TEST_NS_SLIH_IRQ
         bool "Second-Level Interrupt Handling"
         depends on PLATFORM_SLIH_IRQ_TEST_SUPPORT
-        imply TEST_FRAMEWORK_NS
         select TFM_NS_REG_TEST
 
 endchoice
@@ -297,21 +259,18 @@ endchoice
 config TEST_NS_FPU
     bool "FPU"
     depends on CONFIG_TFM_ENABLE_FP
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
     select TEST_PARTITION_FPU_TEST
 
 config TEST_NS_IPC
     bool "IPC"
     depends on CONFIG_TFM_SPM_BACKEND_IPC
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
     select TFM_PARTITION_IPC_TEST
 
 config TEST_NS_SFN_BACKEND
     bool "SFN backend"
     depends on CONFIG_TFM_SPM_BACKEND_SFN
-    imply TEST_FRAMEWORK_NS
     select TFM_NS_REG_TEST
     select TFM_PARTITION_SFN_BACKEND_TEST
 
