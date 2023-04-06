@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -116,7 +116,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
                                     | PARTITION_MODEL_PSA_ROT
 {% endif %}
 {% if manifest.ns_agent is sameas true %}
-                                    | PARTITION_NS_AGENT
+                                    | PARTITION_NS_AGENT_MB
 {% endif %}
                                     | PARTITION_PRI_{{manifest.priority}},
         .entry                      = ENTRY_TO_POSITION({{manifest.entry}}),
