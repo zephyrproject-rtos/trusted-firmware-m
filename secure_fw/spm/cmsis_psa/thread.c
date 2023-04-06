@@ -12,6 +12,7 @@
 #include "thread.h"
 #include "tfm_arch.h"
 #include "utilities.h"
+#include "critical_section.h"
 
 /* Declaration of current thread pointer. */
 struct thread_t *p_curr_thrd;
@@ -36,7 +37,9 @@ struct thread_t *thrd_next(void)
 {
     struct thread_t *p_thrd = RNBL_HEAD;
     uint32_t retval = 0;
+    struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
 
+    CRITICAL_SECTION_ENTER(cs_signal);
     /*
      * First runnable thread has highest priority since threads are
      * sorted by priority.
@@ -56,6 +59,7 @@ struct thread_t *thrd_next(void)
 
         p_thrd = p_thrd->next;
     }
+    CRITICAL_SECTION_LEAVE(cs_signal);
 
     return p_thrd;
 }
