@@ -28,7 +28,7 @@ set(MBEDCRYPTO_VERSION                  "mbedtls-3.4.0" CACHE STRING "The versio
 set(MBEDCRYPTO_GIT_REMOTE               "https://github.com/Mbed-TLS/mbedtls.git" CACHE STRING "The URL (or path) to retrieve MbedTLS from.")
 
 set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
-set(MCUBOOT_VERSION                     "9e8eddc"    CACHE STRING    "The version of MCUboot to use")
+set(MCUBOOT_VERSION                     "v1.10.0"   CACHE STRING    "The version of MCUboot to use")
 
 set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
 set(PSA_ARCH_TESTS_VERSION              "cf8bd71"   CACHE STRING    "The version of PSA arch tests to use")
