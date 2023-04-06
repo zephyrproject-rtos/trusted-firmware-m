@@ -76,10 +76,6 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
     fih_int fih_rc = FIH_FAILURE;
 
 #ifdef TFM_BL1_PQ_CRYPTO
-    #warning PQ crypto is experimental, and should not be used in production
-    BL1_LOG("\033[1;31m[WRN] ");
-    BL1_LOG("PQ crypto is experimental, and should not be used in production");
-    BL1_LOG("\033[0m\r\n");
     FIH_CALL(pq_crypto_verify, fih_rc, TFM_BL1_KEY_ROTPK_0,
                                        (uint8_t *)&img->protected_values,
                                        sizeof(img->protected_values),
