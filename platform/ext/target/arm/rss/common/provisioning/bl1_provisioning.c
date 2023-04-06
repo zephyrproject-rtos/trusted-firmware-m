@@ -118,6 +118,11 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
         gpio_set(RSS_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
     }
 
+    memset((void *)PROVISIONING_BUNDLE_CODE_START, 0,
+           PROVISIONING_BUNDLE_CODE_SIZE);
+    memset((void *)PROVISIONING_BUNDLE_VALUES_START, 0,
+           PROVISIONING_BUNDLE_VALUES_SIZE + PROVISIONING_BUNDLE_DATA_SIZE);
+
     return err;
 }
 
@@ -137,7 +142,7 @@ static enum tfm_plat_err_t provision_psa_rot(void)
     memcpy((void *)PROVISIONING_BUNDLE_CODE_START,
            (void *)dm_encrypted_bundle->code,
            PROVISIONING_BUNDLE_CODE_SIZE);
-    memcpy((void*)PROVISIONING_BUNDLE_VALUES_START,
+    memcpy((void *)PROVISIONING_BUNDLE_VALUES_START,
            (void *)&dm_encrypted_bundle->values,
            PROVISIONING_BUNDLE_VALUES_SIZE + PROVISIONING_BUNDLE_DATA_SIZE);
 
@@ -146,6 +151,11 @@ static enum tfm_plat_err_t provision_psa_rot(void)
     if (err != TFM_PLAT_ERR_SUCCESS) {
         gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
     }
+
+    memset((void *)PROVISIONING_BUNDLE_CODE_START, 0,
+           PROVISIONING_BUNDLE_CODE_SIZE);
+    memset((void *)PROVISIONING_BUNDLE_VALUES_START, 0,
+           PROVISIONING_BUNDLE_VALUES_SIZE + PROVISIONING_BUNDLE_DATA_SIZE);
 
     return err;
 }
