@@ -106,9 +106,9 @@ assets. As the agent has the capability to forward and represent non-secure
 clients, it is the agent's duty to identify the non-secure clients it is
 representing.
 
-Updated Programming Items
-=========================
-These Client APIs are the expansion based on the standard Client APIs:
+Updated programming interfaces
+==============================
+These Client APIs are expanded from the standard Client APIs:
 
 - ``agent_psa_connect`` is extended from ``psa_connect``.
 - ``agent_psa_call`` is extended from ``psa_call``.
@@ -271,6 +271,172 @@ Code Example
 .. note::
   ``__customized*`` API are implementation-specific APIs to be implemented by
   the mailbox Agent developer.
+
+****************************
+API implementation reference
+****************************
+Takes ``psa_call`` as the example here to showcase the difference between the
+interface and its calling implementation logic. The prototype of the
+implementation logic for ``psa_call`` in SPM is:
+
+.. code-block:: c
+
+  psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
+                                       uint32_t ctrl_param,
+                                       const psa_invec *inptr,
+                                       psa_outvec *outptr);
+
+And the prototype for agent-specific ``agent_psa_call``:
+
+.. code-block:: c
+
+  psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
+                              client_vectors_t *vecs, client_param_t *params);
+
+
+``agent_psa_call`` reuses the existing ``tfm_spm_client_psa_call`` as the
+internal implementation, the procedure after ``agent_psa_call`` gets called is
+slightly different compared to a classic ``psa_call`` procedure
+(Error handling is not described here as it works as usual):
+
+- Extract ``inptr`` and ``outptr`` from ``vecs`` before calling
+  ``tfm_spm_client_psa_call``.
+- After ``tfm_spm_client_psa_call`` created a ``psa_msg_t`` instance, the
+  member ``client_id`` in the instance needs to be updated to a value given by
+  ``ns_client_id`` of argument ``params`` to indicate the non-secure client
+  the mailbox agent is representing.
+- The member ``client_data`` in the argument ``params`` needs to be recorded
+  for a future reply usage.
+
+Here ``tfm_spm_client_psa_call`` needs more inputs to accomplish the required
+operations such as NS client ID updating and backup the ``client_data``. But
+it would be inefficient if these inputs were given by arguments, because the
+caller was not always an agent so in most of the cases these extra arguments
+were not used, but the classic ``psa_call`` procedure would be forced to fill
+them always before calling ``tfm_spm_client_psa_call``.
+
+A solution referencing the local storage scheme can save the cost spent on
+extra arguments passing, this solution:
+
+- Calls an agent-specific callback for the extra steps during
+  ``tfm_spm_client_psa_call`` when the caller is a mailbox agent.
+- Puts callback required inputs in the local storage.
+
+Here is the pseudo-code for this solution:
+
+.. code-block:: c
+
+  psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
+                                       uint32_t ctrl_param,
+                                       const psa_invec *inptr,
+                                       psa_outvec *outptr)
+  {
+      ...
+      if (CALLER()->flags & MAILBOX_AGENT) {
+          post_handling_mailbox(p_connection);
+      }
+      ...
+  }
+
+  void post_handling_mailbox(connection_t *p_conn)
+  {
+      p_conn->msg.client_id   = LOCAL_STORAGE()->client_param.ns_client_id;
+      p_conn->msg.client_data = LOCAL_STORAGE()->client_param.client_data;
+  }
+
+The ``client_data`` saved in the connection instance will be returned to the
+caller when it calls ``psa_get`` to retrieve the reply.
+
+Local storage for SPM
+=====================
+The local storage mechanism can be similar to what :doc:`SPRTL </design_docs/services/secure_partition_runtime_library>`
+does. The stack top is still the ideal place for local storage indicator
+because SPM also has its dedicated stack. For Armv8m, shifting the xSPLIM to
+detect stack overflow is an advantage. For earlier architecture versions, a
+global variable saving the stack top is still applicable.
+
+.. important::
+  This mechanism may conflict with some private 'alloca' implementations,
+  remember the local storage must be put at the top of the stack,
+  and `alloca` working buffer is put after (usually higher addresses for the
+  descending stack case) the local storage data.
+
+Example:
+
+.. code-block:: c
+
+  void *claim_local_storage(uint32_t sz)
+  {
+      PSPLIM += sz;
+      return PSPLIM;
+  }
+
+Customized manifest attribute
+=============================
+Two extra customized manifest attributes are added:
+
+============= ====================================================
+Name          Description
+============= ====================================================
+ns_agent      Indicate if manifest owner is an Agent.
+------------- ----------------------------------------------------
+ns_client_ids Possible non-secure Client ID values (<0).
+============= ====================================================
+
+Attribute 'ns_client_ids' can be a set of numbers, or it can use a range
+expression such as [min, max]. The tooling can detect ID overlap between
+multiple non-secure agents.
+
+***********************
+Manifest tooling update
+***********************
+The manifest for agents involves specific keys ('ns_agent' e.g.), these keys
+give hints about how to achieve out-of-FFM partitions which might be abused
+easily by developers, for example, claim partitions as agents. Some
+restrictions need to be applied in the manifest tool to limit the general
+secure service development referencing these keys.
+
+.. note::
+  The limitations can mitigate the abuse but can't prevent it, as developers
+  own all the source code they are working with.
+
+One mechanism: adding a confirmation in the partition list file.
+
+.. parsed-literal::
+
+  "description": "Non-Secure Mailbox Agent",
+  "manifest": "${CMAKE_SOURCE_DIR}/secure_fw/partitions/ns_agent_mailbox/ns_agent_mailbox.yaml",
+  "non_ffm_attributes": "ns_agent", "other_option",
+
+``non_ffm_attributes`` tells the manifest tool that ``ns_agent`` is valid
+in ns_agent_mailbox.ymal. Otherwise, the manifest tool reports an error when a
+non-agent service abuses ns_agent in its manifest.
+
+***********************************
+Runtime programming characteristics
+***********************************
+
+Mailbox agent shall not be blocked by Agent-specific APIs. It can be blocked when:
+
+- It is calling standard PSA Client APIs.
+- It is calling ``psa_wait``.
+
+IDLE processing
+===============
+Only ONE place is recommended to enter IDLE. The place is decided based on the
+system topologies:
+
+- If there is one Trustzone-based NSPE, this NSPE is the recommended place no
+  matter how many mailbox agents are in the system.
+- If there are only mailbox-based NSPEs, entering IDLE can happen in
+  one of the mailbox agents.
+
+The solution is:
+
+- An IDLE entering API is provided in SPRTL.
+- A partition without specific flag can't call this API.
+- The manifest tooling counts the partitions with this specific flag, and
+  assert errors when multiple instances are found.
 
 --------------
 
