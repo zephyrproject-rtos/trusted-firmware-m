@@ -21,14 +21,10 @@ endif()
 
 # Load build type config, setting options not already set
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
-if(EXISTS ${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
-    include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake)
-endif()
+include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake OPTIONAL)
 
 # Load platform config, setting options not already set
-if(EXISTS ${TARGET_PLATFORM_PATH}/config.cmake)
-    include(${TARGET_PLATFORM_PATH}/config.cmake)
-endif()
+include(${TARGET_PLATFORM_PATH}/config.cmake OPTIONAL)
 
 # Parse tf-m-tests config prior to platform specific config.cmake
 # Some platforms select different configuration according when regression tests

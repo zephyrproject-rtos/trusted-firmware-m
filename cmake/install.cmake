@@ -203,7 +203,4 @@ endif()
 include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/install.cmake)
 
 ##################### Platform-specific installation ###########################
-
-if (EXISTS ${TARGET_PLATFORM_PATH}/install.cmake)
-    include(${TARGET_PLATFORM_PATH}/install.cmake)
-endif()
+include(${TARGET_PLATFORM_PATH}/install.cmake OPTIONAL)

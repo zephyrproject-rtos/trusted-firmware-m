@@ -120,6 +120,4 @@ include(config/cp_check.cmake)
 
 ###################### Platform-specific checks ################################
 
-if (EXISTS ${TARGET_PLATFORM_PATH}/check_config.cmake)
-    include(${TARGET_PLATFORM_PATH}/check_config.cmake)
-endif()
+include(${TARGET_PLATFORM_PATH}/check_config.cmake OPTIONAL)
