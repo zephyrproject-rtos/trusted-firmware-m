@@ -185,7 +185,7 @@ config MCUBOOT_KEY_NS
 
 config MCUBOOT_IMAGE_VERSION_S
     string "Version number of S image"
-    default "$(TFM_VERSION)"
+    default "${TFM_VERSION}"
 
 config MCUBOOT_IMAGE_VERSION_NS
     string "Version number of NS image"
