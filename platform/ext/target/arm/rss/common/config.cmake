@@ -77,6 +77,8 @@ set(TFM_MULTI_CORE_TOPOLOGY             ON)
 set(MCUBOOT_DATA_SHARING                ON)
 set(TFM_PARTITION_MEASURED_BOOT         ON)
 
+set(PLAT_MHU_VERSION                    2          CACHE STRING  "Supported MHU version by platform")
+
 set(RSS_AMOUNT                          1          CACHE STRING  "Amount of RSSes in the system")
 
 set(BL1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")

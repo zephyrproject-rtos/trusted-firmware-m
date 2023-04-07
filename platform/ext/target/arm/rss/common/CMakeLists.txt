@@ -140,8 +140,10 @@ target_sources(platform_s
         native_drivers/dma350_ch_drv.c
         native_drivers/kmu_drv.c
         native_drivers/sic_drv.c
-        native_drivers/mhu_v2_x.c
-        native_drivers/mhu_wrapper_v2_x.c
+        $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v2_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v2_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v3_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v3_x.c>
         native_drivers/ppc_rss_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
@@ -227,7 +229,10 @@ target_sources(platform_bl2
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_drv.c>
         native_drivers/kmu_drv.c
         native_drivers/sic_drv.c
-        native_drivers/mhu_v2_x.c
+        $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v2_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},2>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v2_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_v3_x.c>
+        $<$<EQUAL:${PLAT_MHU_VERSION},3>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/mhu_wrapper_v3_x.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         native_drivers/lcm_drv.c
