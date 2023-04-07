@@ -9,9 +9,7 @@
 include(config/config_base.cmake)
 
 # Load regression configs overrided by platform
-if(EXISTS ${TARGET_PLATFORM_PATH}/reg_config_override.cmake)
-    include(${TARGET_PLATFORM_PATH}/reg_config_override.cmake)
-endif()
+include(${TARGET_PLATFORM_PATH}/reg_config_override.cmake OPTIONAL)
 
 # Fetch tf-m-tests repo during config, if NS or regression test is required.
 # Therefore tf-m-tests configs can be set with TF-M configs since their configs
