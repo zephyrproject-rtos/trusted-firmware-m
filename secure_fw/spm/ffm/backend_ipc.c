@@ -328,9 +328,13 @@ uint64_t ipc_schedule(void)
     AAPCS_DUAL_U32_T ctx_ctrls;
     struct partition_t *p_part_curr, *p_part_next;
     struct context_ctrl_t *p_curr_ctx;
-    struct thread_t *pth_next = thrd_next();
+    struct thread_t *pth_next;
     struct critical_section_t cs = CRITICAL_SECTION_STATIC_INIT;
 
+    /* Protect concurrent access to current thread/component and thread status */
+    CRITICAL_SECTION_ENTER(cs);
+
+    pth_next = thrd_next();
     p_curr_ctx = (struct context_ctrl_t *)(CURRENT_THREAD->p_context_ctrl);
 
     AAPCS_DUAL_U32_SET(ctx_ctrls, (uint32_t)p_curr_ctx, (uint32_t)p_curr_ctx);
@@ -346,7 +350,6 @@ uint64_t ipc_schedule(void)
             tfm_core_panic();
         }
 
-        CRITICAL_SECTION_ENTER(cs);
         /*
          * If required, let the platform update boundary based on its
          * implementation. Change privilege, MPU or other configurations.
@@ -364,12 +367,13 @@ uint64_t ipc_schedule(void)
         AAPCS_DUAL_U32_SET_A1(ctx_ctrls, (uint32_t)pth_next->p_context_ctrl);
 
         CURRENT_THREAD = pth_next;
-        CRITICAL_SECTION_LEAVE(cs);
     }
 
     /* Update meta indicator */
     if (partition_meta_indicator_pos && (p_part_next->p_metadata)) {
         *partition_meta_indicator_pos = (uintptr_t)(p_part_next->p_metadata);
     }
+    CRITICAL_SECTION_LEAVE(cs);
+
     return AAPCS_DUAL_U32_AS_U64(ctx_ctrls);
 }
