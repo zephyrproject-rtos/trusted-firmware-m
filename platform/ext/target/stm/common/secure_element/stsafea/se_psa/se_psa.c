@@ -82,7 +82,7 @@ int32_t debug_print(char const *fmt, ...)
 
   len = vsnprintf(trace_buf, sizeof(trace_buf), fmt, args);
 
-  return tfm_hal_output_spm_log(trace_buf, len);
+  return SPMLOG_DBGMSG(trace_buf);
 }
 
 /**
