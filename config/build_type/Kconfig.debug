@@ -8,11 +8,13 @@
 config MBEDCRYPTO_BUILD_TYPE
     default "relwithdebinfo"
 
-config TFM_SPM_LOG_LEVEL
-    default 3
-
-config TFM_PARTITION_LOG_LEVEL
-    default 3
-
 config CONFIG_TFM_HALT_ON_CORE_PANIC
     default y
+
+choice SPM_LOG_LEVEL
+    default SPM_LOG_LEVEL_DEBUG
+endchoice
+
+choice PARTITION_LOG_LEVEL
+    default PARTITION_LOG_LEVEL_DEBUG
+endchoice

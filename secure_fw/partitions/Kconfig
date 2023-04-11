@@ -14,7 +14,7 @@ rsource "crypto/Kconfig"
 rsource "platform/Kconfig"
 rsource "internal_trusted_storage/Kconfig"
 
-choice
+choice PARTITION_LOG_LEVEL
     prompt "Secure Partition Log Level"
     default PARTITION_LOG_LEVEL_SILENCE
 
