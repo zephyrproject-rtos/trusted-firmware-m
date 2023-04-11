@@ -166,7 +166,7 @@ file(REMOVE ${COMMAND_LINE_CONFIG_TO_FILE})
 set(CACHE_VAR_CONFIG_FILE ${KCONFIG_OUTPUT_DIR}/.cache_var_config)
 file(REMOVE ${CACHE_VAR_CONFIG_FILE})
 
-if(NOT EXISTS ${PLATFORM_KCONFIG})
+if(NOT EXISTS ${PLATFORM_KCONFIG} AND NOT EXISTS ${DOTCONFIG_FILE})
     # Parse platform's preload.cmake and config.cmake to get config options.
     set(PLATFORM_KCONFIG_OPTIONS "")
     set(PLATFORM_KCONFIG ${KCONFIG_OUTPUT_DIR}/platform/Kconfig)
