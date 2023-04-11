@@ -105,15 +105,18 @@ cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length)
             return CC3XX_ERR_GENERIC_ERROR;
         }
 
-        for (idx = 0; idx < 6; idx++) {
-            tmp_buf[idx] = P_CC3XX->rng.ehr_data[idx];
-        }
-
         /* Reset EHR register */
         P_CC3XX->rng.rst_bits_counter = 0x1U;
 
-        /* Clear the interrupt bits to restart generator */
+        /* Make sure the interrupt is cleared before the generator is
+         * restarted, to avoid a race condition with the hardware
+         */
         P_CC3XX->rng.rng_icr = 0xFFFFFFFF;
+
+        /* Reading the EHR_DATA restarts the generator */
+        for (idx = 0; idx < 6; idx++) {
+            tmp_buf[idx] = P_CC3XX->rng.ehr_data[idx];
+        }
 
         copy_size = length > byte_am + 24 ? 24 : (length - byte_am);
         memcpy(buf + byte_am, (uint8_t*)tmp_buf, copy_size);
