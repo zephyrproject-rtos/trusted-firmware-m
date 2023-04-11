@@ -130,7 +130,7 @@ function(convert_cache_config_to_dotconfig convert_cl_var out_var)
             set(KCONFIG_OPTION_ITEM "${CACHE_VAR}=${CACHE_VAR_VAL}\r\n")
         # Everything else is a quoted string
         else()
-            if(${CACHE_VAR} STREQUAL "CONFIG_TEST_PSA_API")
+            if(${CACHE_VAR} STREQUAL "CONFIG_TEST_PSA_API" AND CACHE_VAR_VAL_UPPER)
                 # Turn on the corresponding "choice" option for psa-arch-test
                 list(APPEND _LEGAL_PSA_API_TEST_LIST "IPC" "CRYPTO" "INITIAL_ATTESTATION" "INTERNAL_TRUSTED_STORAGE" "PROTECTED_STORAGE" "STORAGE")
                 list(FIND _LEGAL_PSA_API_TEST_LIST ${CACHE_VAR_VAL_UPPER} _RET_VAL)
