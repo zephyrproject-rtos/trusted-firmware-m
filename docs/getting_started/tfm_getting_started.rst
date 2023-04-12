@@ -217,9 +217,6 @@ versions are:
           support. The bug is reported in `here <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157>`__.
           Select other GNU Arm compiler versions instead.
 
-          GNU Arm compiler version greater and equal than *11.3.Rel1* has a linker issue in syscall.
-          Select other GNU Arm compiler versions instead.
-
     - IAR Arm compiler v8.42.x, v8.50.x
 
       .. tabs::
