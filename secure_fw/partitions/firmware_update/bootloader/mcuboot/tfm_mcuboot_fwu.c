@@ -21,13 +21,9 @@
     #error "FWU_COMPONENT_NUMBER mismatch with MCUBOOT_IMAGE_NUMBER"
 #endif
 
-#if (MCUBOOT_IMAGE_NUMBER == 1)
-#define MAX_IMAGE_INFO_LENGTH    (sizeof(struct image_version) + \
-                                  SHARED_DATA_ENTRY_HEADER_SIZE)
-#else
-#define MAX_IMAGE_INFO_LENGTH    2 * (sizeof(struct image_version) + \
-                                      SHARED_DATA_ENTRY_HEADER_SIZE)
-#endif
+#define MAX_IMAGE_INFO_LENGTH   (MCUBOOT_IMAGE_NUMBER * \
+                                (sizeof(struct image_version) + \
+                                 SHARED_DATA_ENTRY_HEADER_SIZE))
 
 /*
  * \struct fwu_image_info_data
