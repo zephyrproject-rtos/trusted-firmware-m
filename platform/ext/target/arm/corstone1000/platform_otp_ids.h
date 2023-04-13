@@ -35,6 +35,7 @@ enum tfm_otp_element_id_t {
     PLAT_OTP_ID_BL2_ROTPK_2,
     PLAT_OTP_ID_BL2_ROTPK_3,
 
+    /* BL2 NV counters must be contiguous */
     PLAT_OTP_ID_NV_COUNTER_BL2_0,
     PLAT_OTP_ID_NV_COUNTER_BL2_1,
     PLAT_OTP_ID_NV_COUNTER_BL2_2,

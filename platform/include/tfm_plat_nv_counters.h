@@ -36,6 +36,7 @@ enum tfm_nv_counter_t {
     PLAT_NV_COUNTER_PS_1,      /* Used by PS service */
     PLAT_NV_COUNTER_PS_2,      /* Used by PS service */
 
+    /* BL2 NV counters must be contiguous */
     PLAT_NV_COUNTER_BL2_0,     /* Used by bootloader */
     PLAT_NV_COUNTER_BL2_1,     /* Used by bootloader */
     PLAT_NV_COUNTER_BL2_2,     /* Used by bootloader */
