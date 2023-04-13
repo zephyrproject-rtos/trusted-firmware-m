@@ -32,5 +32,7 @@
  * this must match the size configured into the ROM part of the ICS.
  */
 #define OTP_DMA_ICS_SIZE   (0x400)
+/* How much space in ROM is used for the DMA Initial Command Sequence */
+#define ROM_DMA_ICS_SIZE   (0x1000)
 
 #endif /* __RSS_MEMORY_SIZES_H__ */
