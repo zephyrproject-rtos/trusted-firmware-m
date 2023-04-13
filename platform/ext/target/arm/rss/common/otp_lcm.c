@@ -271,6 +271,11 @@ enum tfm_plat_err_t tfm_plat_otp_init(void)
     enum lcm_error_t err;
     enum lcm_lcs_t lcs;
 
+    err = lcm_init(&LCM_DEV_S);
+    if (err != LCM_ERROR_NONE) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
     err = lcm_get_otp_size(&LCM_DEV_S, &otp_size);
     if (err != LCM_ERROR_NONE) {
         return TFM_PLAT_ERR_SYSTEM_ERR;

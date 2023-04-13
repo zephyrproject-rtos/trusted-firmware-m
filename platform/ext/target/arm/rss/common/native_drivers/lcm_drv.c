@@ -99,9 +99,18 @@ static int is_pointer_word_aligned(void *ptr) {
 enum lcm_error_t lcm_init(struct lcm_dev_t *dev)
 {
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;
+    enum lcm_lcs_t lcs;
+    enum lcm_error_t err;
 
-    if (p_lcm->key_err) {
-        return LCM_ERROR_INVALID_KEY;
+    err = lcm_get_lcs(dev, &lcs);
+    if (err != LCM_ERROR_NONE) {
+        return err;
+    }
+
+    if (lcs == LCM_LCS_SE) {
+        if (p_lcm->key_err) {
+            return LCM_ERROR_INVALID_KEY;
+        }
     }
 
     return LCM_ERROR_NONE;
