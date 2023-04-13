@@ -35,3 +35,4 @@ SPI_STRATAFLASHJ3_DEV
 stdio_init
 stdio_uninit
 stdio_output_string
+tfm_log_printf
