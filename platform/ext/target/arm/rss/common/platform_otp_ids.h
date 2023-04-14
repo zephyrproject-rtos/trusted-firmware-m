@@ -28,6 +28,7 @@ enum tfm_otp_element_id_t {
     PLAT_OTP_ID_VERIFICATION_SERVICE_URL,
     PLAT_OTP_ID_PROFILE_DEFINITION,
 
+    /* BL2 ROTPK must be contiguous */
     PLAT_OTP_ID_BL2_ROTPK_0,
     PLAT_OTP_ID_BL2_ROTPK_1,
     PLAT_OTP_ID_BL2_ROTPK_2,
