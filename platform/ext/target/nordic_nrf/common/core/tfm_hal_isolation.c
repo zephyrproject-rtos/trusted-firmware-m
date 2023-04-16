@@ -401,7 +401,10 @@ enum tfm_hal_status_t mpu_init_cfg(void)
 #endif /* CONFIG_TFM_PARTITION_META */
 
 #ifdef NULL_POINTER_EXCEPTION_DETECTION
-	if(MPU_ARMV8M_NUM_REGIONS - n_configured_regions < 2) {
+	uint32_t num_regions =
+		((MPU->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos);
+
+	if ((num_regions - n_configured_regions) < 2) {
 		// We have enabled null pointer detection, but we don't have
 		// enough regions for it.
 		//
