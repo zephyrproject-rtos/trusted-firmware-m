@@ -27,9 +27,9 @@
  * 0x0008_0000 Secondary image area (448 KB):
  *    0x0008_0000 Secure     image secondary (256 KB)
  *    0x000c_0000 Non-secure image secondary (192 KB)
- * 0x000f_0000 Protected Storage Area (20 KB)
- * 0x000f_4000 Internal Trusted Storage Area (16 KB)
- * 0x000f_6000 OTP / NV counters  area (8 KB)
+ * 0x000f_0000 Protected Storage Area (16 KB)
+ * 0x000f_4000 Internal Trusted Storage Area (8 KB)
+ * 0x000f_6000 OTP / NV counters area (8 KB)
  * 0x000f_8000 Non-secure storage, used when built with NRF_NS_STORAGE=ON,
  *             otherwise unused (32 KB)
  *
@@ -40,7 +40,7 @@
  *    0x0007_8000 Non-secure image primary (480 KB)
  * 0x000f_0000 Protected Storage Area (16 KB)
  * 0x000f_4000 Internal Trusted Storage Area (8 KB)
- * 0x000f_6000 OTP / NV counters  area (8 KB)
+ * 0x000f_6000 OTP / NV counters area (8 KB)
  * 0x000f_8000 Non-secure storage, used when built with NRF_NS_STORAGE=ON,
  *             otherwise unused (32 KB)
  */
