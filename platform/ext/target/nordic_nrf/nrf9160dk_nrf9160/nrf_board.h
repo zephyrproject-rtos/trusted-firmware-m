@@ -17,6 +17,8 @@
 #ifndef NRF_BOARD_H__
 #define NRF_BOARD_H__
 
+#include <hal/nrf_gpio.h>
+
 #define BUTTON1_PIN          (8UL)
 #define BUTTON1_ACTIVE_LEVEL (0UL)
 #define BUTTON1_PULL         (NRF_GPIO_PIN_PULLUP)
