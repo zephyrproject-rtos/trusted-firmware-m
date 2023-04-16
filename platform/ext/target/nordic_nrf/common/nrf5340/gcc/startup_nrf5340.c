@@ -119,7 +119,7 @@ DEFAULT_IRQ_HANDLER(CRYPTOCELL_IRQHandler)
 
 extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
        const VECTOR_TABLE_Type __VECTOR_TABLE[] __VECTOR_TABLE_ATTRIBUTE = {
-  (VECTOR_TABLE_Type)(&__INITIAL_SP),     /*      Initial Stack Pointer */
+  (VECTOR_TABLE_Type)(&__INITIAL_SP), /* Initial Stack Pointer */
   Reset_Handler,               /* Reset Handler */
   NMI_Handler,                 /* NMI Handler */
   HardFault_Handler,           /* Hard Fault Handler */
@@ -136,7 +136,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   PendSV_Handler,              /* PendSV Handler */
   SysTick_Handler,             /* SysTick Handler */
 
-/* External Interrupts */
+  /* External Interrupts */
   FPU_IRQHandler,
   CACHE_IRQHandler,
   0,                           /* Reserved */

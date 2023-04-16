@@ -435,10 +435,11 @@ enum tfm_plat_err_t enable_fault_handlers(void)
     NVIC_SetPriority(SecureFault_IRQn, 0);
 
     /* Enables BUS, MEM, USG and Secure faults */
-    SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk
-        | SCB_SHCSR_BUSFAULTENA_Msk
-        | SCB_SHCSR_MEMFAULTENA_Msk
-        | SCB_SHCSR_SECUREFAULTENA_Msk;
+    SCB->SHCSR |= SCB_SHCSR_USGFAULTENA_Msk |
+                  SCB_SHCSR_BUSFAULTENA_Msk |
+                  SCB_SHCSR_MEMFAULTENA_Msk |
+                  SCB_SHCSR_SECUREFAULTENA_Msk;
+
     return TFM_PLAT_ERR_SUCCESS;
 }
 
@@ -524,18 +525,21 @@ enum tfm_plat_err_t spu_init_cfg(void)
     spu_regions_reset_unlocked_secure();
 
     /* Configures SPU Code and Data regions to be non-secure */
-    spu_regions_flash_config_non_secure(memory_regions.non_secure_partition_base,
-                                        memory_regions.non_secure_partition_limit);
+    spu_regions_flash_config_non_secure(
+        memory_regions.non_secure_partition_base,
+        memory_regions.non_secure_partition_limit);
     spu_regions_sram_config_non_secure(NS_DATA_START, NS_DATA_LIMIT);
 
     /* Configures veneers region to be non-secure callable */
-    spu_regions_flash_config_non_secure_callable(memory_regions.veneer_base,
-                                                 memory_regions.veneer_limit - 1);
+    spu_regions_flash_config_non_secure_callable(
+        memory_regions.veneer_base,
+        memory_regions.veneer_limit - 1);
 
 #ifdef NRF_NS_SECONDARY
     /* Secondary image partition */
-    spu_regions_flash_config_non_secure(memory_regions.secondary_partition_base,
-                                        memory_regions.secondary_partition_limit);
+    spu_regions_flash_config_non_secure(
+        memory_regions.secondary_partition_base,
+        memory_regions.secondary_partition_limit);
 #endif /* NRF_NS_SECONDARY */
 
 #ifdef NRF_NS_STORAGE_PARTITION_START
