@@ -79,9 +79,12 @@ FVP
 .. code-block:: bash
 
     cd <tf-m-root>/
-    cmake -B build/ -S  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
+    cmake -B build/ -S . -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
     cmake --build build -- install
+    dd conv=notrunc bs=1 if=build/install/outputs/bl1_1.bin of=build/install/outputs/bl1.bin seek=0
+    dd conv=notrunc bs=1 if=build/install/outputs/bl1_provisioning_bundle.bin of=build/install/outputs/bl1.bin seek=40960
     ./platform/ext/target/arm/corstone1000/create-flash-image.sh build/install/outputs cs1000.bin
+
     <path-to-FVP-installation>/models/Linux64_GCC-9.3/FVP_Corstone-1000 -C board.flashloader0.fname="none" -C se.trustedBootROMloader.fname="build/install/outputs/bl1.bin" -C board.xnvm_size=64 -C se.trustedSRAM_config=6 -C se.BootROM_config="3" -C board.smsc_91c111.enabled=0  -C board.hostbridge.userNetworking=true --data board.flash0=build/install/outputs/cs1000.bin@0x68000000 -C diagnostics=4 -C disable_visualisation=true -C board.se_flash_size=8192 -C diagnostics=4  -C disable_visualisation=true
 
 FPGA
@@ -94,8 +97,10 @@ FPGA
 .. code-block:: bash
 
     cd <tf-m-root>/
-    cmake -B build/ -S  -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DTEST_NS=OFF -DTEST_S=ON -DTEST_S_PS=OFF -DTEST_S_PLATFORM=OFF -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
+    cmake -B build/ -S . -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DTEST_NS=OFF -DTEST_S=ON -DTEST_S_PS=OFF -DTEST_S_PLATFORM=OFF -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
     cmake --build build -- install
+    dd conv=notrunc bs=1 if=build/install/outputs/bl1_1.bin of=build/install/outputs/bl1.bin seek=0
+    dd conv=notrunc bs=1 if=build/install/outputs/bl1_provisioning_bundle.bin of=build/install/outputs/bl1.bin seek=40960
     ./platform/ext/target/arm/corstone1000/create-flash-image.sh build/install/outputs cs1000.bin
     cp build/install/outputs/bl1.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
     cp build/install/outputs/cs1000.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
