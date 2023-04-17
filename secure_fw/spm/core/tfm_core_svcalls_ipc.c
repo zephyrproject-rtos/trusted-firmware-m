@@ -156,8 +156,8 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         tfm_core_panic();
     }
 
-    if (!(exc_return & EXC_RETURN_MODE)
-                                  != (svc_number > TFM_SVC_THREAD_NUMBER_END)) {
+    if (!!(exc_return & EXC_RETURN_MODE) == TFM_SVC_IS_HANDLER_MODE(svc_number)) {
+        /* Mode of caller does match mode of the target SVC */
         tfm_core_panic();
     }
 
