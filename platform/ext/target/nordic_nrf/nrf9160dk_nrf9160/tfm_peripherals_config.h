@@ -26,8 +26,8 @@ extern "C" {
 #define TFM_PERIPHERAL_WDT_SECURE 1
 #endif
 
-#if defined(NRF9160_XXAA)
-    #include <tfm_peripherals_config_nrf9160.h>
+#if defined(NRF91_SERIES)
+    #include <tfm_peripherals_config_nrf91.h>
 #else
     #error "Unknown device."
 #endif

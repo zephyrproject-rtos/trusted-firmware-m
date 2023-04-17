@@ -9,6 +9,7 @@
 include(${PLATFORM_PATH}/common/core/config.cmake)
 
 set(SECURE_UART1                        ON         CACHE BOOL      "Enable secure UART1")
+# Use nrf9160 until test target name in PSA arch test repository has been updated to nrf91
 set(PSA_API_TEST_TARGET                 "nrf9160"  CACHE STRING    "PSA API test target")
 set(NRF_NS_STORAGE                      OFF        CACHE BOOL      "Enable non-secure storage partition")
 set(BL2                                 ON         CACHE BOOL      "Whether to build BL2")

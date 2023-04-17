@@ -7,4 +7,4 @@
 
 set(PLATFORM_PATH platform/ext/target/${TFM_PLATFORM}/..)
 
-include(${PLATFORM_PATH}/common/nrf9160/config.cmake)
+include(${PLATFORM_PATH}/common/nrf91/config.cmake)
