@@ -47,7 +47,6 @@ target_sources(platform_s
 
 target_compile_definitions(platform_s
     PUBLIC
-        NRF5340_XXAA_APPLICATION
         NRF_SKIP_FICR_NS_COPY_TO_RAM
 )
 
@@ -65,7 +64,6 @@ target_sources(platform_ns
 
 target_compile_definitions(platform_ns
     PUBLIC
-        NRF5340_XXAA_APPLICATION
         NRF_TRUSTZONE_NONSECURE
         DOMAIN_NS=1
 )
@@ -85,7 +83,6 @@ if(BL2)
 
     target_compile_definitions(platform_bl2
         PUBLIC
-            NRF5340_XXAA_APPLICATION
             NRF_SKIP_FICR_NS_COPY_TO_RAM
     )
 endif()
