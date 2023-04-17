@@ -18,7 +18,7 @@
 #ifndef __FLASH_LAYOUT_H__
 #define __FLASH_LAYOUT_H__
 
-/* Flash layout on NRF9160 with BL2:
+/* Flash layout on nRF91 with BL2:
  *
  * 0x0000_0000 BL2 - MCUBoot (64 KB)
  * 0x0001_0000 Primary image area (448 KB):
@@ -33,7 +33,7 @@
  * 0x000f_8000 Non-secure storage, used when built with NRF_NS_STORAGE=ON,
  *             otherwise unused (32 KB)
  *
- * Flash layout on NRF9160 without BL2:
+ * Flash layout on nRF91 without BL2:
  *
  * 0x0000_0000 Primary image area (960 KB):
  *    0x0000_0000 Secure     image primary (480 KB)
@@ -97,7 +97,7 @@
 #define FLASH_AREA_2_SIZE          (FLASH_S_PARTITION_SIZE + \
                                     FLASH_NS_PARTITION_SIZE)
 /* Not used, only the Non-swapping firmware upgrade operation
- * is supported on NRF9160.
+ * is supported on nRF91.
  */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_2_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
@@ -124,7 +124,7 @@
 #define FLASH_AREA_3_OFFSET        (FLASH_AREA_2_OFFSET + FLASH_AREA_2_SIZE)
 #define FLASH_AREA_3_SIZE          (FLASH_NS_PARTITION_SIZE)
 /* Not used, only the Non-swapping firmware upgrade operation
- * is supported on NRF9160.
+ * is supported on nRF91.
  */
 #define FLASH_AREA_SCRATCH_ID      (FLASH_AREA_3_ID + 1)
 #define FLASH_AREA_SCRATCH_OFFSET  (FLASH_AREA_3_OFFSET + FLASH_AREA_3_SIZE)
@@ -137,7 +137,7 @@
 #endif /* MCUBOOT_IMAGE_NUMBER */
 
 /* Not used, only the Non-swapping firmware upgrade operation
- * is supported on nRF9160. The maximum number of status entries
+ * is supported on nRF91. The maximum number of status entries
  * supported by the bootloader.
  */
 #define MCUBOOT_STATUS_MAX_ENTRIES      (0)

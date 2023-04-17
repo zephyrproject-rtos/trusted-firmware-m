@@ -10,11 +10,11 @@ cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(NRF_BOARD_SELECTED True)
 
-add_subdirectory(../common/nrf9160 nrf9160)
+add_subdirectory(../common/nrf91 nrf91)
 
 target_include_directories(platform_region_defs
     INTERFACE
-        ../common/nrf9160/partition
+        ../common/nrf91/partition
 )
 
 target_sources(platform_s
@@ -25,7 +25,7 @@ target_sources(platform_s
 target_include_directories(platform_s
     PUBLIC
         .
-        ../common/nrf9160/partition
+        ../common/nrf91/partition
         services/include
 )
 
@@ -37,7 +37,7 @@ target_include_directories(platform_ns
 if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
-            ../common/nrf9160/partition
+            ../common/nrf91/partition
         PRIVATE
             .
     )
