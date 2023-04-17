@@ -16,20 +16,20 @@ add_subdirectory(../core nrf_common)
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf9160.c>
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf91.c>
 )
 
 if(NS)
     target_sources(tfm_ns
         PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf9160.c>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf91.c>
     )
 endif()
 
 if(BL2)
     target_sources(bl2
         PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf9160.c>
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/startup_nrf91.c>
     )
 endif()
 
@@ -42,7 +42,7 @@ target_include_directories(platform_s
 
 target_sources(platform_s
     PRIVATE
-        ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf9160.c
+        ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf91.c
 )
 
 target_compile_definitions(platform_s
@@ -59,7 +59,7 @@ target_include_directories(platform_ns
 
 target_sources(platform_ns
     PRIVATE
-        ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf9160.c
+        ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf91.c
 )
 
 target_compile_definitions(platform_ns
@@ -78,7 +78,7 @@ if(BL2)
 
     target_sources(platform_bl2
         PRIVATE
-            ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf9160.c
+            ${HAL_NORDIC_PATH}/nrfx/mdk/system_nrf91.c
     )
 
     target_compile_definitions(platform_bl2

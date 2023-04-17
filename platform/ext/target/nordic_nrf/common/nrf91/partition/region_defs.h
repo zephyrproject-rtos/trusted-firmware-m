@@ -43,7 +43,7 @@
 #define PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE   (0x250)
 
 /*
- * SPU flash region granularity is 32 KB on nRF9160. Alignment
+ * SPU flash region granularity is 32 KB on nRF91. Alignment
  * of partitions is defined in accordance with this constraint.
  */
 #ifdef NRF_NS_SECONDARY
