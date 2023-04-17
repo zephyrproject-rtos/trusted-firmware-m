@@ -76,3 +76,4 @@ endif()
 # Platform-specific configurations
 set(CONFIG_TFM_USE_TRUSTZONE            OFF)
 set(TFM_MULTI_CORE_TOPOLOGY             ON)
+set(PS_NUM_ASSETS                       "40"        CACHE STRING    "The maximum number of assets to be stored in the Protected Storage area")
