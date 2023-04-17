@@ -14,7 +14,7 @@
 #include "spm.h"
 #include "tfm_hal_interrupt.h"
 
-void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
+psa_status_t tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
 {
     struct partition_t *partition;
     const struct irq_load_info_t *irq_info;
@@ -27,6 +27,8 @@ void tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
     }
 
     tfm_hal_irq_enable(irq_info->source);
+
+    return PSA_SUCCESS;
 }
 
 psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal)
@@ -48,7 +50,7 @@ psa_irq_status_t tfm_spm_partition_psa_irq_disable(psa_signal_t irq_signal)
 
 /* This API is only used for FLIH. */
 #if CONFIG_TFM_FLIH_API == 1
-void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
+psa_status_t tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     const struct irq_load_info_t *irq_info;
@@ -74,12 +76,14 @@ void tfm_spm_partition_psa_reset_signal(psa_signal_t irq_signal)
     CRITICAL_SECTION_ENTER(cs_assert);
     partition->signals_asserted &= ~irq_signal;
     CRITICAL_SECTION_LEAVE(cs_assert);
+
+    return PSA_SUCCESS;
 }
 #endif /* CONFIG_TFM_FLIH_API == 1 */
 
 /* This API is only used for SLIH. */
 #if CONFIG_TFM_SLIH_API == 1
-void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
+psa_status_t tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     const struct irq_load_info_t *irq_info = NULL;
@@ -109,5 +113,7 @@ void tfm_spm_partition_psa_eoi(psa_signal_t irq_signal)
 
     tfm_hal_irq_clear_pending(irq_info->source);
     tfm_hal_irq_enable(irq_info->source);
+
+    return PSA_SUCCESS;
 }
 #endif /* CONFIG_TFM_SLIH_API == 1 */

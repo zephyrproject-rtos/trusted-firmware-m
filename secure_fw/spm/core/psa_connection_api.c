@@ -121,7 +121,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
     return backend_messaging(service, p_connection);
 }
 
-void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
+psa_status_t tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
 {
     struct connection_t *handle;
 
@@ -138,4 +138,6 @@ void tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
 
     handle->msg.rhandle = rhandle;
     handle->rhandle = rhandle;
+
+    return PSA_SUCCESS;
 }

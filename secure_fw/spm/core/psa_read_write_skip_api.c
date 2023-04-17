@@ -143,8 +143,8 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
     return num_bytes;
 }
 
-void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
-                                 const void *buffer, size_t num_bytes)
+psa_status_t tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
+                                         const void *buffer, size_t num_bytes)
 {
     struct connection_t *handle = NULL;
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
@@ -209,4 +209,6 @@ void tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
 
     /* Update the write number */
     handle->outvec[outvec_idx].len += num_bytes;
+
+    return PSA_SUCCESS;
 }

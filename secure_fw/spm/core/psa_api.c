@@ -275,14 +275,16 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
 }
 
 #if CONFIG_TFM_DOORBELL_API == 1
-void tfm_spm_partition_psa_notify(int32_t partition_id)
+psa_status_t tfm_spm_partition_psa_notify(int32_t partition_id)
 {
     struct partition_t *p_pt = tfm_spm_get_partition_by_id(partition_id);
 
     backend_assert_signal(p_pt, PSA_DOORBELL);
+
+    return PSA_SUCCESS;
 }
 
-void tfm_spm_partition_psa_clear(void)
+psa_status_t tfm_spm_partition_psa_clear(void)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     struct partition_t *partition = NULL;
@@ -300,10 +302,12 @@ void tfm_spm_partition_psa_clear(void)
     CRITICAL_SECTION_ENTER(cs_assert);
     partition->signals_asserted &= ~PSA_DOORBELL;
     CRITICAL_SECTION_LEAVE(cs_assert);
+
+    return PSA_SUCCESS;
 }
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
-void tfm_spm_partition_psa_panic(void)
+psa_status_t tfm_spm_partition_psa_panic(void)
 {
 #ifdef CONFIG_TFM_HALT_ON_CORE_PANIC
     tfm_hal_system_halt();
@@ -314,4 +318,7 @@ void tfm_spm_partition_psa_panic(void)
      */
     tfm_hal_system_reset();
 #endif
+
+    /* Execution should not reach here */
+    return PSA_ERROR_GENERIC_ERROR;
 }

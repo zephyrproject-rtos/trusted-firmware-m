@@ -53,20 +53,16 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         return tfm_spm_partition_psa_skip((psa_handle_t)ctx[0], ctx[1],
                                           (size_t)ctx[2]);
     case TFM_SVC_PSA_WRITE:
-        tfm_spm_partition_psa_write((psa_handle_t)ctx[0], ctx[1],
-                                    (void *)ctx[2], (size_t)ctx[3]);
-        break;
+        return tfm_spm_partition_psa_write((psa_handle_t)ctx[0], ctx[1],
+                                           (void *)ctx[2], (size_t)ctx[3]);
 #if CONFIG_TFM_DOORBELL_API == 1
     case TFM_SVC_PSA_NOTIFY:
-        tfm_spm_partition_psa_notify((int32_t)ctx[0]);
-        break;
+        return tfm_spm_partition_psa_notify((int32_t)ctx[0]);
     case TFM_SVC_PSA_CLEAR:
-        tfm_spm_partition_psa_clear();
-        break;
+        return tfm_spm_partition_psa_clear();
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
     case TFM_SVC_PSA_PANIC:
-        tfm_spm_partition_psa_panic();
-        break;
+        return tfm_spm_partition_psa_panic();
     case TFM_SVC_PSA_LIFECYCLE:
         return tfm_spm_get_lifecycle_state();
 /* Following svc handlers are only needed by connection-based services */
@@ -78,8 +74,7 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         status = tfm_spm_client_psa_close((psa_handle_t)ctx[0]);
         break;
     case TFM_SVC_PSA_SET_RHANDLE:
-        tfm_spm_partition_psa_set_rhandle((psa_handle_t)ctx[0], (void *)ctx[1]);
-        break;
+        return tfm_spm_partition_psa_set_rhandle((psa_handle_t)ctx[0], (void *)ctx[1]);
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 /* These APIs are only used in IPC backend. */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
@@ -87,29 +82,25 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
         return tfm_spm_partition_psa_get((psa_signal_t)ctx[0],
                                          (psa_msg_t *)ctx[1]);
     case TFM_SVC_PSA_REPLY:
-        tfm_spm_partition_psa_reply((psa_handle_t)ctx[0], (psa_status_t)ctx[1]);
-        break;
+        return tfm_spm_partition_psa_reply((psa_handle_t)ctx[0], (psa_status_t)ctx[1]);
     case TFM_SVC_PSA_WAIT:
         return tfm_spm_partition_psa_wait((psa_signal_t)ctx[0], ctx[1]);
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
 #if CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1
     case TFM_SVC_PSA_IRQ_ENABLE:
-        tfm_spm_partition_psa_irq_enable((psa_signal_t)ctx[0]);
-        break;
+        return tfm_spm_partition_psa_irq_enable((psa_signal_t)ctx[0]);
     case TFM_SVC_PSA_IRQ_DISABLE:
         return tfm_spm_partition_psa_irq_disable((psa_signal_t)ctx[0]);
 /* This API is only used for FLIH. */
 #if CONFIG_TFM_FLIH_API == 1
     case TFM_SVC_PSA_RESET_SIGNAL:
-        tfm_spm_partition_psa_reset_signal((psa_signal_t)ctx[0]);
-        break;
+        return tfm_spm_partition_psa_reset_signal((psa_signal_t)ctx[0]);
 #endif
 /* This API is only used for SLIH. */
 #if CONFIG_TFM_SLIH_API == 1
     case TFM_SVC_PSA_EOI:
-        tfm_spm_partition_psa_eoi((psa_signal_t)ctx[0]);
-        break;
+        return tfm_spm_partition_psa_eoi((psa_signal_t)ctx[0]);
 #endif
 #endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
     default:
