@@ -14,4 +14,5 @@ set(BL2                                 ON         CACHE BOOL      "Whether to b
 set(NRF_NS_SECONDARY                    ${BL2}     CACHE BOOL      "Enable non-secure secondary partition")
 
 # Platform-specific configurations
+# Use nrf9160 until test target name in PSA arch test repository has been updated to nrf91
 set(PSA_API_TEST_TARGET                 "nrf9160")
