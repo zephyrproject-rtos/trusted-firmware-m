@@ -34,7 +34,6 @@ target_include_directories(platform_s
         ./host_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
 )
 
 #========================= Platform_ns ========================================#
@@ -53,7 +52,6 @@ target_include_directories(platform_ns
         ./host_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
 )
 
 #========================= Platform BL2 =======================================#
@@ -74,7 +72,6 @@ target_include_directories(platform_bl2
         ./host_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
 )
 
 #========================= Platform BL1 =======================================#
@@ -90,7 +87,6 @@ target_include_directories(platform_bl1_1_interface
         ./host_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
 )
 
 target_sources(platform_bl1_2
@@ -105,5 +101,4 @@ target_include_directories(platform_bl1_2
         ./host_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
 )
