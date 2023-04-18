@@ -155,6 +155,19 @@ Following are the supported attributes of in the manifest lists.
     Any object files containing symbols belonging to the Secure Partition that
     are not included in the Secure Partitions library.
 
+- ``non_ffm_attributes``
+
+  Optional.
+
+  TF-M defines some special manifest attributes for TF-M dedicated Secure Partitions.
+  Those special attributes are not compliant to FF-M.
+  Using the specific attributes requires explicit registration by adding them to
+  this ``non_ffm_attributes``.
+  The purpose is to ensure that developers are aware of the compliance issue.
+  The manifest tool will report errors if unregistered Non-FFM attributes are detected.
+  This attribute is for TF-M specific Secure Partitions and using TF-M-specific attributes
+  is not encouraged.
+
 Generated File List
 ===================
 A generated file list is a YAML file that describes the files to be generated

@@ -33,6 +33,11 @@ TFM_PID_BASE = 256
 
 # variable for checking for duplicated sid
 sid_list = []
+
+# Summary of manifest attributes defined by FFM for use in the Secure Partition manifest file.
+ffm_manifest_attributes = ['psa_framework_version', 'name', 'type', 'priority', 'model', 'entry_point', \
+'stack_size', 'description', 'entry_init', 'heap_size', 'mmio_regions', 'services', 'irqs', 'dependencies']
+
 class TemplateLoader(BaseLoader):
     """
     Template loader class.
@@ -216,6 +221,20 @@ def validate_dependency_chain(partition,
         validate_dependency_chain(dependency, dependency_table, dependency_chain)
     dependency_table[partition]['validated'] = True
 
+def manifest_attribute_check(manifest, manifest_item):
+    """
+    Check whether Non-FF-M compliant attributes are explicitly registered in manifest lists.
+
+    Inputs:
+        - manifest:        next manifest to be checked
+        - manifest_item:   the manifest items in manifest lists
+    """
+    allowed_attributes = ffm_manifest_attributes + manifest_item.get('non_ffm_attributes', [])
+    for keyword in manifest.keys():
+        if keyword not in allowed_attributes:
+            logging.error('The Non-FFM attribute {} is used by {} without registration.'.format(keyword, manifest['name']))
+            exit(1)
+
 def process_partition_manifests(manifest_lists, configs):
     """
     Parse the input manifest lists, check if manifest settings are valid,
@@ -324,6 +343,9 @@ def process_partition_manifests(manifest_lists, configs):
         manifest_path = manifest_item['manifest']
         with open(manifest_path) as manifest_file:
             manifest = yaml.safe_load(manifest_file)
+            # check manifest attribute validity
+            manifest_attribute_check(manifest, manifest_item)
+
             if manifest.get('model', None) == 'dual':
                 # If a Partition supports both models, it can set the "model" to "backend".
                 # The actual model used follows the backend being used.

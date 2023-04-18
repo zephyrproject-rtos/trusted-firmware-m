@@ -34,7 +34,8 @@
         "library_list": [
            "*tfm_*ns_agent_mailbox.*"
          ],
-      }
+      },
+      "non_ffm_attributes": ['ns_agent']
     },
     {
       "description": "Protected Storage Partition",

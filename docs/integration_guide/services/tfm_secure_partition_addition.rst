@@ -342,6 +342,9 @@ Reference configuration example:
       }
     }
 
+For more descriptions of Secure Partition manifests, please refer to :doc:
+`TF-M Manifest Tool User Guide </integration_guide/services/tfm_manifest_tool_user_guide.rst`.
+
 TF-M also supports out-of-tree Secure Partition build where you can have your
 own manifest lists.
 Please refer to `Out-of-tree Secure Partition build`_ for details.
