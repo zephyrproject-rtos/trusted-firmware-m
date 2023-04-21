@@ -20,7 +20,7 @@ target_include_directories(tfm_psa_rot_partition_its
         ${CMAKE_BINARY_DIR}/generated/secure_fw/partitions/internal_trusted_storage
     PUBLIC
         # Required for ps_object_defs.h
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/../protected_storage
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../protected_storage>
 )
 target_include_directories(tfm_partitions
     INTERFACE
