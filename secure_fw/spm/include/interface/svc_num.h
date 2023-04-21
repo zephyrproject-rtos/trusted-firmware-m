@@ -102,9 +102,9 @@
 #define TFM_SVC_IS_PLATFORM(svc_num)        (!!((svc_num) & TFM_SVC_NUM_PLATFORM_MSK))
 #define TFM_SVC_IS_HANDLER_MODE(svc_num)    (!!((svc_num) & TFM_SVC_NUM_HANDLER_MODE_MSK))
 #define TFM_SVC_IS_PSA_API(svc_num)         (((svc_num) & (TFM_SVC_NUM_PLATFORM_MSK | \
-                                                           TFM_SVC_NUM_PSA_MSK)) \
-                                                                             == TFM_SVC_NUM_PSA_MSK)
-#define TFM_SVC_IS_SPM(svc_numb)            (((svc_num) & (TFM_SVC_NUM_PLATFORM_MSK | \
-                                                           TFM_SVC_NUM_PSA_MSK)) == 0)
+                                                           TFM_SVC_NUM_PSA_API_MSK)) \
+                                                                         == TFM_SVC_NUM_PSA_API_MSK)
+#define TFM_SVC_IS_SPM(svc_num)             (((svc_num) & (TFM_SVC_NUM_PLATFORM_MSK | \
+                                                           TFM_SVC_NUM_PSA_API_MSK)) == 0)
 
 #endif /* __SVC_NUM_H__ */

@@ -26,17 +26,21 @@
 #include "tfm_hal_platform.h"
 
 #ifdef PLATFORM_SVC_HANDLERS
-extern int32_t platform_svc_handlers(uint8_t svc_num,
+extern int32_t platform_svc_handlers(uint8_t svc_number,
                                      uint32_t *ctx, uint32_t lr);
 #endif
 
 #if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
-static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
-                               uint32_t lr)
+static int32_t handle_psa_api_requests(uint8_t svc_number, uint32_t *ctx)
 {
     psa_status_t status = PSA_SUCCESS;
 
-    switch (svc_num) {
+    if (TFM_SVC_IS_HANDLER_MODE(svc_number)) {
+        /* PSA APIs are not allowed to be called from Handler mode */
+        tfm_core_panic();
+    }
+
+    switch (svc_number) {
     case TFM_SVC_PSA_FRAMEWORK_VERSION:
         return tfm_spm_client_psa_framework_version();
     case TFM_SVC_PSA_VERSION:
@@ -104,20 +108,51 @@ static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
 #endif
 #endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
     default:
-#ifdef PLATFORM_SVC_HANDLERS
-        return (platform_svc_handlers(svc_num, ctx, lr));
-#else
-        SPMLOG_ERRMSG("Unknown SVC number requested!\r\n");
+        SPMLOG_ERRMSGVAL("Unknown PSA API SVC number requested: ", svc_number);
         return PSA_ERROR_GENERIC_ERROR;
-#endif
     }
+
     spm_handle_programmer_errors(status);
     return status;
 }
 #endif
 
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
-                              uint32_t *psp)
+static uint32_t handle_spm_svc_requests(uint32_t svc_number, uint32_t exc_return,
+                                        uint32_t *svc_args, uint32_t *msp)
+{
+    switch (svc_number) {
+    case TFM_SVC_SPM_INIT:
+        exc_return = tfm_spm_init();
+        tfm_arch_check_msp_sealing();
+        /* The following call does not return */
+        tfm_arch_free_msp_and_exc_ret(SPM_BOOT_STACK_BOTTOM, exc_return);
+        break;
+    case TFM_SVC_GET_BOOT_DATA:
+        tfm_core_get_boot_data_handler(svc_args);
+        break;
+#if (TFM_LVL != 1) && (CONFIG_TFM_FLIH_API == 1)
+    case TFM_SVC_PREPARE_DEPRIV_FLIH:
+        exc_return = tfm_flih_prepare_depriv_flih((struct partition_t *)svc_args[0],
+                                                  (uintptr_t)svc_args[1]);
+        break;
+    case TFM_SVC_FLIH_FUNC_RETURN:
+        exc_return = tfm_flih_return_to_isr(svc_args[0], (struct context_flih_ret_t *)msp);
+        break;
+#endif
+#if TFM_SP_LOG_RAW_ENABLED
+    case TFM_SVC_OUTPUT_UNPRIV_STRING:
+        svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0], svc_args[1]);
+        break;
+#endif
+    default:
+        SPMLOG_ERRMSGVAL("Unknown SPM SVC requested: ", svc_number);
+        svc_args[0] = PSA_ERROR_GENERIC_ERROR;
+    }
+
+    return exc_return;
+}
+
+uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return, uint32_t *psp)
 {
     uint8_t svc_number = TFM_SVC_PSA_FRAMEWORK_VERSION;
     uint32_t *svc_args = msp;
@@ -152,55 +187,36 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         tfm_core_panic();
     }
 
-    switch (svc_number) {
-    case TFM_SVC_SPM_INIT:
-        exc_return = tfm_spm_init();
-        tfm_arch_check_msp_sealing();
-        /* The following call does not return */
-        tfm_arch_free_msp_and_exc_ret(SPM_BOOT_STACK_BOTTOM, exc_return);
-        break;
-    case TFM_SVC_GET_BOOT_DATA:
-        tfm_core_get_boot_data_handler(svc_args);
-        break;
-#if (TFM_LVL != 1) && (CONFIG_TFM_FLIH_API == 1)
-    case TFM_SVC_PREPARE_DEPRIV_FLIH:
-        exc_return = tfm_flih_prepare_depriv_flih(
-                                            (struct partition_t *)svc_args[0],
-                                            (uintptr_t)svc_args[1]);
-        break;
-    case TFM_SVC_FLIH_FUNC_RETURN:
-        exc_return = tfm_flih_return_to_isr(svc_args[0],
-                                            (struct context_flih_ret_t *)msp);
-        break;
-#endif
-#if TFM_SP_LOG_RAW_ENABLED
-    case TFM_SVC_OUTPUT_UNPRIV_STRING:
-        svc_args[0] = tfm_hal_output_spm_log((const char *)svc_args[0],
-                                             svc_args[1]);
-        break;
-#endif
-    default:
+    if (TFM_SVC_IS_SPM(svc_number)) {
+        /* SPM SVC */
+        return handle_spm_svc_requests(svc_number, exc_return, svc_args, msp);
+    }
+
 #if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
-        if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
-                                     - (uint32_t)msp) > 0) {
+    if (TFM_SVC_IS_PSA_API(svc_number)) {
+        if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit) - (uint32_t)msp) > 0) {
             /* The Main Stack has contents, not calling from Partition thread */
             tfm_core_panic();
         }
-        svc_args[0] = SVC_Handler_IPC(svc_number, svc_args, exc_return);
+
+        svc_args[0] = handle_psa_api_requests(svc_number, svc_args);
         if (THRD_EXPECTING_SCHEDULE()) {
             tfm_arch_trigger_pendsv();
         }
-#else
-#ifdef PLATFORM_SVC_HANDLERS
-        svc_args[0] = (platform_svc_handlers(svc_number, svc_args, exc_return));
-#else
-        SPMLOG_ERRMSG("Unknown SVC number requested!\r\n");
-        svc_args[0] = PSA_ERROR_GENERIC_ERROR;
-#endif
-        spm_handle_programmer_errors(svc_args[0]);
-#endif
-        break;
+
+        return exc_return;
     }
+#endif
+
+#ifdef PLATFORM_SVC_HANDLERS
+    if (TFM_SVC_IS_PLATFORM(svc_number)) {
+        svc_args[0] = (platform_svc_handlers(svc_number, svc_args, exc_return));
+        return exc_return;
+    }
+#endif
+
+    SPMLOG_ERRMSGVAL("Unknown SVC number requested: ", svc_number);
+    svc_args[0] = PSA_ERROR_GENERIC_ERROR;
 
     return exc_return;
 }
