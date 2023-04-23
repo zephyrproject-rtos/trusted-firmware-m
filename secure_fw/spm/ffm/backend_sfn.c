@@ -125,9 +125,10 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
     struct context_ctrl_t ns_agent_ctrl;
+    void *param = NULL;
+
     p_pt->p_handles = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;
-    void *param = NULL;
 
     watermark_stack(p_pt);
 

@@ -116,10 +116,10 @@ static int32_t tfm_core_check_boot_data_access_policy(uint8_t major_type)
 /* Compile time check to verify that shared data region is not overlapping with
  * non-secure data area.
  */
-#if ((BOOT_TFM_SHARED_DATA_BASE  >= NS_DATA_START && \
-      BOOT_TFM_SHARED_DATA_BASE  <= NS_DATA_LIMIT) || \
-     (BOOT_TFM_SHARED_DATA_LIMIT >= NS_DATA_START && \
-      BOOT_TFM_SHARED_DATA_LIMIT <= NS_DATA_LIMIT))
+#if (((BOOT_TFM_SHARED_DATA_BASE  >= NS_DATA_START) && \
+      (BOOT_TFM_SHARED_DATA_BASE  <= NS_DATA_LIMIT)) || \
+     ((BOOT_TFM_SHARED_DATA_LIMIT >= NS_DATA_START) && \
+      (BOOT_TFM_SHARED_DATA_LIMIT <= NS_DATA_LIMIT)))
 #error "Shared data area and non-secure data area is overlapping"
 #endif
 
