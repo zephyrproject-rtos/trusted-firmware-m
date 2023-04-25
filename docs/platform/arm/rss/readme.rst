@@ -49,7 +49,7 @@ key distributed with TF-M, use the following command::
         --align 1 \
         -v "0.0.1" \
         -s 1 \
-        -H 0x1000 \
+        -H 0x2000 \
         --pad-header \
         -S 0x80000 \
         --pad \
@@ -77,20 +77,10 @@ For more information on the ``imgtool`` parameters, see the MCUBoot
 Running the code
 ----------------
 
-To run the built images, they need to be concatenated into binaries that can be
-placed in ROM and flash. To create the ROM image, navigate to the TF-M build
-directory and run the following ``srec_cat`` command::
-
-    srec_cat \
-        bl1_1.bin -Binary -offset 0x0 \
-        bl1_provisioning_bundle.bin -Binary -offset 0xE000 \
-        -o rom.bin -Binary
-
-For development purposes, the OTP image is included as a provisioning bundle in
-the ROM image and provisioned into OTP by BL1_1.
-
-To create the flash image, the following ``fiptool`` command should be run.
-``fiptool`` documentation can be found `here <https://trustedfirmware-a.readthedocs.io/en/latest/getting_started/tools-build.html?highlight=fiptool#building-and-using-the-fip-tool>`_.
+To run the built images, the flash image must be created by concatenating the
+images that are output from the build. To create the flash image, the following
+``fiptool`` command should be run. ``fiptool`` documentation can be found `here
+<https://trustedfirmware-a.readthedocs.io/en/latest/getting_started/tools-build.html?highlight=fiptool#building-and-using-the-fip-tool>`_.
 Note that an up-to-date fiptool that supports the RSS UUIDs must be used.::
 
     fiptool create \
@@ -169,9 +159,9 @@ image::
             fip_gpt.bin -Binary -offset 0x0 \
             -o host_flash.bin -Binary
 
-The ROM binary should be placed in RSS ROM at ``0x11000000`` and the host flash
-binary should be placed at the base of the host flash. For the TC platform,
-this is at ``0x80000000``.
+The BL1_1 ROM binary should be placed in RSS ROM at ``0x11000000`` and the host
+flash binary should be placed at the base of the host flash. For the TC
+platform, this is at ``0x80000000``.
 
 --------------
 
