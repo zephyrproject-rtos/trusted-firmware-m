@@ -229,6 +229,40 @@ SECTIONS
         *libtfm_spm*:*(.rodata*)
     } > FLASH
 
+    .TFM_UNPRIV_CODE : ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT)
+    {
+        *(SFN)
+        *(.text*)
+
+        KEEP(*(.init))
+        KEEP(*(.fini))
+
+        /* .ctors */
+        *crtbegin.o(.ctors)
+        *crtbegin?.o(.ctors)
+        *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+        *(SORT(.ctors.*))
+        *(.ctors)
+
+        /* .dtors */
+         *crtbegin.o(.dtors)
+         *crtbegin?.o(.dtors)
+         *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+         *(SORT(.dtors.*))
+         *(.dtors)
+
+        *(.rodata*)
+
+        KEEP(*(.eh_frame*))
+        . = ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT);
+    } > FLASH
+    Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
+    Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
+
+#if defined(CONFIG_TFM_USE_TRUSTZONE) && defined(TFM_LINKER_VENEERS_LOCATION_END)
+    VENEERS()
+#endif
+
     /**** Base address of secure data area */
     .tfm_secure_data_start :
     {
@@ -394,40 +428,6 @@ SECTIONS
 
     /**** PSA RoT DATA end here */
     Image$$TFM_PSA_RW_STACK_END$$Base = .;
-
-    .TFM_UNPRIV_CODE : ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT)
-    {
-        *(SFN)
-        *(.text*)
-
-        KEEP(*(.init))
-        KEEP(*(.fini))
-
-        /* .ctors */
-        *crtbegin.o(.ctors)
-        *crtbegin?.o(.ctors)
-        *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
-        *(SORT(.ctors.*))
-        *(.ctors)
-
-        /* .dtors */
-         *crtbegin.o(.dtors)
-         *crtbegin?.o(.dtors)
-         *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
-         *(SORT(.dtors.*))
-         *(.dtors)
-
-        *(.rodata*)
-
-        KEEP(*(.eh_frame*))
-        . = ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT);
-    } > FLASH
-    Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
-    Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
-
-#if defined(CONFIG_TFM_USE_TRUSTZONE) && defined(TFM_LINKER_VENEERS_LOCATION_END)
-    VENEERS()
-#endif
 
 #ifdef RAM_VECTORS_SUPPORT
     .ramVectors (NOLOAD) : ALIGN(TFM_LINKER_RAM_VECTORS_ALIGNMENT)
