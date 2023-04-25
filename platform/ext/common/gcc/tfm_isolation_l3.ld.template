@@ -78,9 +78,9 @@ SECTIONS
     /* GCC always places veneers at the end of .gnu.sgstubs section, so the only
      * way to align the end of .gnu.sgstubs section is to align start of the
      * next section */
-    .copy.table : ALIGN(TFM_LINKER_VENEERS_ALIGNMENT)
+    .copy.table ALIGN(TFM_LINKER_VENEERS_ALIGNMENT) :
 #else
-    .copy.table : ALIGN(4)
+    .copy.table ALIGN(4) :
 #endif
     {
         __copy_table_start__ = .;
@@ -110,7 +110,7 @@ SECTIONS
         __copy_table_end__ = .;
     } > FLASH
 
-    .zero.table : ALIGN(4)
+    .zero.table ALIGN(4) :
     {
         __zero_table_start__ = .;
         LONG (ADDR(.spm_bss))
@@ -133,7 +133,7 @@ SECTIONS
      * Sort the partition info by priority to guarantee the initing order.
      * The first loaded partition will be inited at last in SFN model.
      */
-    .TFM_SP_LOAD_LIST : ALIGN(4)
+    .TFM_SP_LOAD_LIST ALIGN(4) :
     {
        KEEP(*(.part_load_priority_lowest))
        KEEP(*(.part_load_priority_low))
@@ -147,7 +147,7 @@ SECTIONS
     . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT);
 {% for partition in partitions %}
     {% if partition.manifest.type == 'PSA-ROT' %}
-    .{{partition.manifest.name}}_RO : ALIGN(TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT)
+    .{{partition.manifest.name}}_RO ALIGN(TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT) :
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -174,7 +174,7 @@ SECTIONS
     /**** APPLICATION RoT RO CODE + data starts here */
 {% for partition in partitions %}
     {% if partition.manifest.type == 'APPLICATION-ROT' %}
-    .{{partition.manifest.name}}_RO : ALIGN(TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT)
+    .{{partition.manifest.name}}_RO ALIGN(TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT) :
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -200,7 +200,7 @@ SECTIONS
 
 #if defined(S_RAM_CODE_START)
     /* Flash drivers code that gets copied from Flash */
-    .ER_CODE_SRAM : ALIGN(4)
+    .ER_CODE_SRAM ALIGN(S_RAM_CODE_START, 4) :
     {
         *libflash_drivers*:*(.text*)
         *libflash_drivers*:*(.rodata*)
@@ -211,7 +211,7 @@ SECTIONS
     Image$$ER_CODE_SRAM$$Limit = ADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
 #endif
 
-    .ER_TFM_CODE : ALIGN(4)
+    .ER_TFM_CODE ALIGN(4) :
     {
         *startup*(.text*)
         *libplatform_s*:*(.text*)
@@ -222,7 +222,7 @@ SECTIONS
     } > FLASH
 
     /**** Unprivileged Secure code starts here */
-    .ER_UNPRIV_CODE : ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT)
+    .ER_UNPRIV_CODE ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT) :
     {
         *(SFN)
         *(.text*)
@@ -283,12 +283,12 @@ SECTIONS
      * msp_stack is extended until the beginning of RAM, when shared_date
      * was read out by partitions
      */
-    .tfm_bl2_shared_data : ALIGN(TFM_LINKER_BL2_SHARED_DATA_ALIGNMENT)
+    .tfm_bl2_shared_data ALIGN(TFM_LINKER_BL2_SHARED_DATA_ALIGNMENT) :
     {
         . += BOOT_TFM_SHARED_DATA_SIZE;
     } > RAM
 
-    .msp_stack : ALIGN(TFM_LINKER_MSP_STACK_ALIGNMENT)
+    .msp_stack ALIGN(TFM_LINKER_MSP_STACK_ALIGNMENT) :
     {
         . += __msp_stack_size__ - 0x8;
     } > RAM
@@ -303,7 +303,7 @@ SECTIONS
 
 #if defined(ENABLE_HEAP)
     __heap_size__ = S_HEAP_SIZE;
-    .heap : ALIGN(8)
+    .heap ALIGN(8) :
     {
         __end__ = .;
         PROVIDE(end = .);
@@ -331,7 +331,7 @@ SECTIONS
     . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_START$$Base = .;
 
-    .ER_{{partition.manifest.name}}_RWZI : ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT)
+    .ER_{{partition.manifest.name}}_RWZI ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT) :
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -349,7 +349,7 @@ SECTIONS
     Image$$ER_{{partition.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{partition.manifest.name}}_RWZI);
     Image$$ER_{{partition.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{partition.manifest.name}}_RWZI) + SIZEOF(.ER_{{partition.manifest.name}}_RWZI);
 
-    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(4)
+    .{{partition.manifest.name}}_RWZI_BSS ALIGN(4) :
     {
         start_of_{{partition.manifest.name}}_RWZI = .;
     {% if partition.attr.linker_pattern.library_list %}
@@ -390,7 +390,7 @@ SECTIONS
     . = ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT);
     Image$$PT_{{partition.manifest.name}}_PRIVATE_DATA_START$$Base = .;
 
-    .ER_{{partition.manifest.name}}_RWZI : ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT)
+    .ER_{{partition.manifest.name}}_RWZI ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT) :
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
@@ -408,7 +408,7 @@ SECTIONS
     Image$$.ER_{{partition.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{partition.manifest.name}}_RWZI);
     Image$$.ER_{{partition.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{partition.manifest.name}}_RWZI) + SIZEOF(.ER_{{partition.manifest.name}}_RWZI);
 
-    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(4)
+    .{{partition.manifest.name}}_RWZI_BSS ALIGN(4) :
     {
         start_of_{{partition.manifest.name}}_RWZI = .;
     {% if partition.attr.linker_pattern.library_list %}
@@ -443,16 +443,16 @@ SECTIONS
     Image$$PT_APP_RWZI_END$$Base = .;
 
 #ifdef RAM_VECTORS_SUPPORT
-    .ramVectors (NOLOAD) : ALIGN(TFM_LINKER_RAM_VECTORS_ALIGNMENT)
+    .ramVectors ALIGN(TFM_LINKER_RAM_VECTORS_ALIGNMENT) (NOLOAD) :
     {
         __ram_vectors_start__ = .;
         KEEP(*(.ram_vectors))
         __ram_vectors_end__   = .;
     } > RAM
-    .TFM_DATA __ram_vectors_end__ : ALIGN(4)
+    .TFM_DATA __ram_vectors_end__ :
 #else
 
-    .TFM_DATA : ALIGN(4)
+    .TFM_DATA ALIGN(4) :
 #endif
     {
         *(.data*)
@@ -485,7 +485,7 @@ SECTIONS
     Image$$ER_TFM_DATA$$RW$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA);
 
 #if defined(CONFIG_TFM_PARTITION_META)
-    .TFM_SP_META_PTR : ALIGN(TFM_LINKER_SP_META_PTR_ALIGNMENT)
+    .TFM_SP_META_PTR ALIGN(TFM_LINKER_SP_META_PTR_ALIGNMENT) :
     {
         *(.bss.SP_META_PTR_SPRTL_INST)
         . = ALIGN(TFM_LINKER_SP_META_PTR_ALIGNMENT);
@@ -494,7 +494,7 @@ SECTIONS
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
 #endif
 
-    .TFM_BSS : ALIGN(4)
+    .TFM_BSS ALIGN(4) :
     {
         __bss_start__ = .;
 
