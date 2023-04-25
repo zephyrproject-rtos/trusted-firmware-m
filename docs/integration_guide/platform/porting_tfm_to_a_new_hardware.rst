@@ -57,6 +57,10 @@ In a nutshell, this should be a 6 iterative steps process:
 
         - E.G. NV Counters, attestation, crypto keys....
 
+    #. Adding the optional platform SVC handling
+
+        Some platforms may have their own SVC requests in addition to the TF-M built-in ones.
+
     #. Running the regression tests
 
         - See :doc:`Running TF-M on Arm platforms </building/run_tfm_examples_on_arm_platforms>`
@@ -267,6 +271,8 @@ config.cmake:
     |PLATFORM_FLIH_IRQ_TEST_SUPPORT       | Wheter the platform has FLIH test support                  |
     +-------------------------------------+------------------------------------------------------------+
     |PSA_API_TEST_TARGET                  | The target platform name of PSA API test                   |
+    +-------------------------------------+------------------------------------------------------------+
+    |PLATFORM_SVC_HANDLERS                | Whether the platform has specific SVC handling             |
     +-------------------------------------+------------------------------------------------------------+
 
     For build configurations, please refer to ``config_base.cmake``.
@@ -513,6 +519,24 @@ check_config.cmake:
 
     [check_config.cmake_]
 
+platform_svc_numbers.h
+----------------------
+
+    (OPTIONAL)
+
+    If your platform has its own SVC handling, then you need to
+
+    - create the ``platform_svc_numbers.h`` which defines the platform SVC numbers.
+
+      The bit [7] of the number must be set to 1 to reflect that it is a platform SVC number.
+      The bit [6] indicates whether this SVC should be called from Handler mode or Thread mode.
+      For more details of the bit assignments, please check the ``svc_num.h``.
+      TF-M provides two Macros ``TFM_SVC_NUM_PLATFORM_THREAD(index)`` and
+      ``TFM_SVC_NUM_PLATFORM_HANDLER(index)`` to easily construct a valid number.
+
+    - implement the `platform_svc_handlers`_ function which handles SVC.
+    - enable ``PLATFORM_SVC_HANDLERS`` config option.
+
 .. _Functions:
 
 Functions
@@ -603,6 +627,16 @@ tfm_hal_irq_disable:
 .. code-block:: c
 
     void tfm_hal_irq_disable(uint32_t irq_num);
+
+platform_svc_handlers
+---------------------
+
+    This function is the platform's SVC handler.
+    It should return the result for callers and the SPM will then return it to the caller.
+
+.. code-block:: c
+
+    int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args, uint32_t exc_return);
 
 Annex
 =====
