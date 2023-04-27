@@ -40,6 +40,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
              * modifiable by new provisioning code.
              */
                 uint32_t cca_system_properties;
+                uint32_t rss_id;
             } cm_locked;
 
             __PACKED_STRUCT {
@@ -68,6 +69,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
                 uint32_t bl1_nv_counter[16];
                 uint32_t bl2_nv_counter[4][16];
                 uint32_t host_nv_counter[3][16];
+                uint32_t reprovisioning_bits;
             } unlocked_area;
         };
         uint8_t _pad[OTP_TOTAL_SIZE - OTP_DMA_ICS_SIZE - BL1_2_CODE_SIZE -

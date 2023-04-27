@@ -47,30 +47,34 @@ target_link_libraries(cm_provisioning_bundle
     bl1_1_shared_lib
 )
 
-add_custom_target(encrypted_cm_provisioning_bundle
-    ALL
-    SOURCES encrypted_cm_provisioning_bundle.bin
-)
+math(EXPR RSS_AMOUNT_LOOP_RANGE "${RSS_AMOUNT} - 1")
+foreach(RSS_ID RANGE ${RSS_AMOUNT_LOOP_RANGE})
+    add_custom_target(encrypted_cm_provisioning_bundle_${RSS_ID}
+        ALL
+        SOURCES encrypted_cm_provisioning_bundle_${RSS_ID}.bin
+    )
 
-add_custom_command(OUTPUT encrypted_cm_provisioning_bundle.bin
-    DEPENDS $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
-    DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
-    DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
-    bl1_2_padded_bin bl2_signed_bin cm_provisioning_bundle
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../rss_create_provisioning_bundle.py
-    COMMAND ${CROSS_COMPILE}-objcopy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
-                    --dump-section CODE=cm_provisioning_code.bin
-    COMMAND ${CROSS_COMPILE}-objcopy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
-                    --dump-section DATA=cm_provisioning_data.bin
-    COMMAND ${CROSS_COMPILE}-objcopy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
-                    --dump-section VALUES=cm_provisioning_values.bin
-    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../rss_create_provisioning_bundle.py
-                    --provisioning_code cm_provisioning_code.bin
-                    --provisioning_data cm_provisioning_data.bin
-                    --provisioning_values cm_provisioning_values.bin
-                    --bl1_2_padded_hash_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
-                    --bl1_2_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
-                    --bundle_output_file encrypted_cm_provisioning_bundle.bin
-                    --magic "0xC0DEFEED"
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_cm_provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/encrypted_cm_provisioning_bundle.bin
-)
+    add_custom_command(OUTPUT encrypted_cm_provisioning_bundle_${RSS_ID}.bin
+        DEPENDS $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
+        DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
+        DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
+        bl1_2_padded_bin bl2_signed_bin cm_provisioning_bundle
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../rss_create_provisioning_bundle.py
+        COMMAND ${CROSS_COMPILE}-objcopy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
+                        --dump-section CODE=cm_provisioning_code.bin
+        COMMAND ${CROSS_COMPILE}-objcopy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
+                        --dump-section DATA=cm_provisioning_data.bin
+        COMMAND ${CROSS_COMPILE}-objcopy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
+                        --dump-section VALUES=cm_provisioning_values.bin
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../rss_create_provisioning_bundle.py
+                        --provisioning_code cm_provisioning_code.bin
+                        --provisioning_data cm_provisioning_data.bin
+                        --provisioning_values cm_provisioning_values.bin
+                        --bl1_2_padded_hash_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded_hash.bin
+                        --bl1_2_input_file $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
+                        --bundle_output_file encrypted_cm_provisioning_bundle_${RSS_ID}.bin
+                        --magic "0xC0DEFEED"
+                        --rss_id ${RSS_ID}
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_cm_provisioning_bundle_${RSS_ID}.bin ${CMAKE_BINARY_DIR}/bin/encrypted_cm_provisioning_bundle_${RSS_ID}.bin
+    )
+endforeach()

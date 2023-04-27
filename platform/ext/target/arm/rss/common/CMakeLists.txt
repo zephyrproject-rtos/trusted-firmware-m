@@ -351,6 +351,7 @@ target_include_directories(platform_bl1_1_interface
 target_compile_definitions(platform_bl1_1_interface
     INTERFACE
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
+        RSS_AMOUNT=${RSS_AMOUNT}
 )
 
 target_link_libraries(platform_bl1_1
@@ -383,6 +384,7 @@ target_sources(platform_bl1_2
         $<$<BOOL:${RSS_GPT_SUPPORT}>:${CMAKE_CURRENT_SOURCE_DIR}/fip_parser/gpt.c>
         $<$<NOT:$<BOOL:${TFM_BL1_LOGGING}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/atu_rss_drv.c>
         $<$<NOT:$<BOOL:${TFM_BL1_LOGGING}>>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/host_device_definition.c>
+        ./rss_key_derivation.c
 )
 
 target_include_directories(platform_bl1_2
@@ -404,6 +406,7 @@ target_include_directories(platform_bl1_2
 target_compile_definitions(platform_bl1_2
     PUBLIC
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
+        $<$<BOOL:${RSS_AMOUNT}>:RSS_AMOUNT=${RSS_AMOUNT}>
 )
 
 #========================= ns_agent_mailbox ===================================#

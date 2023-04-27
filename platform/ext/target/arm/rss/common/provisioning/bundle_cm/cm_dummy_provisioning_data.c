@@ -12,6 +12,8 @@ const struct cm_provisioning_data data = {
     {},
     /* BL1_2_IMAGE */
     {},
+    /* RSS_ID */
+    0,
     /* GUK */
     {
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,

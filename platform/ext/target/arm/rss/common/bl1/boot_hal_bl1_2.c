@@ -14,12 +14,9 @@
 #include "region_defs.h"
 #include "platform_base_address.h"
 #include "uart_stdout.h"
-#include "otp.h"
-#include "crypto.h"
 #include "tfm_plat_otp.h"
 #include "trng.h"
 #include "kmu_drv.h"
-#include "device_definition.h"
 #include "platform_regs.h"
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "fih.h"
@@ -31,8 +28,8 @@
 #include "host_flash_atu.h"
 #include "plat_def_fip_uuid.h"
 #include "tfm_plat_nv_counters.h"
+#include "rss_key_derivation.h"
 
-extern uint8_t computed_bl1_2_hash[];
 uint32_t image_offsets[2];
 
 /* Flash device name must be specified by target */
@@ -126,28 +123,6 @@ int32_t boot_platform_post_init(void)
 }
 
 
-static int rss_derive_key(enum tfm_bl1_key_id_t key_id, uint8_t *label,
-                          size_t label_len, uint8_t *out, uint32_t lcs)
-{
-    int rc;
-    uint8_t context[BL1_2_HASH_SIZE + sizeof(uint32_t) * 2] = {0};
-
-    /* TODO load the reprovisioning_bits from OTP, so they can be updated. */
-    uint32_t reprovisioning_bits = 0;
-
-    memcpy(context, computed_bl1_2_hash, BL1_2_HASH_SIZE);
-
-    memcpy(context + BL1_2_HASH_SIZE, &lcs, sizeof(uint32_t));
-
-    memcpy(context + BL1_2_HASH_SIZE + sizeof(uint32_t), &reprovisioning_bits,
-           sizeof(uint32_t));
-
-    rc = bl1_derive_key(key_id, label, label_len, context,
-                        sizeof(context), out, 32);
-
-    return rc;
-}
-
 static int invalidate_hardware_keys(void)
 {
     enum kmu_error_t kmu_err;
@@ -220,68 +195,29 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
 
 int boot_platform_post_load(uint32_t image_id)
 {
-    int rc;
-    uint32_t lcs;
-    uint8_t vhuk_label[]      = "BL1_VHUK_DERIVATION";
-    uint8_t cpak_seed_label[] = "BL1_CPAK_SEED_DERIVATION";
-    uint8_t dak_seed_label[]  = "BL1_DAK_SEED_DERIVATION";
-    /* The KMU requires word alignment */
-    uint8_t __ALIGNED(4) tmp_buf[32];
+    int rc = 0;
+    uint8_t key_buf[32];
+    size_t key_len;
 
-    rc = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t *)&lcs);
+    rc = rss_derive_vhuk_seed(key_buf, sizeof(key_buf), &key_len);
     if (rc) {
-        return rc;
+        goto exit;
     }
 
-    /* In PLAT_OTP_LCS_ASSEMBLY_AND_TEST the HUK and GUK may not have yet been
-     * provisioned, and therefore the key derivation will fail, so skip it.
-     */
-    if (lcs != PLAT_OTP_LCS_ASSEMBLY_AND_TEST) {
-        /* Derive a Virtual HUK that can be used by TF-M without exposing the
-         * real HUK. This allows hardware protection of the HUK, and
-         * reprovisioning of the device. This key is the same in all LCSes.
-         */
-        rc = rss_derive_key(TFM_BL1_KEY_HUK, vhuk_label, sizeof(vhuk_label),
-                            tmp_buf, 0);
-        if (rc) {
-            return rc;
-        }
-        rc = kmu_set_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 0, tmp_buf,
-                         sizeof(tmp_buf));
-        if (rc) {
-            return rc;
-        }
-
-        memset(tmp_buf, 0, sizeof(tmp_buf));
-
-        rc = rss_derive_key(TFM_BL1_KEY_GUK, cpak_seed_label,
-                            sizeof(cpak_seed_label), tmp_buf, lcs);
-        if (rc) {
-            return rc;
-        }
-
-        rc = kmu_set_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 1, tmp_buf,
-                         sizeof(tmp_buf));
-        if (rc) {
-            return rc;
-        }
-
-        memset(tmp_buf, 0, sizeof(tmp_buf));
-
-        rc = rss_derive_key(TFM_BL1_KEY_GUK, dak_seed_label,
-                            sizeof(dak_seed_label), tmp_buf, lcs);
-        if (rc) {
-            return rc;
-        }
-
-        rc = kmu_set_key(&KMU_DEV_S, KMU_USER_SLOT_MIN + 2, tmp_buf,
-                         sizeof(tmp_buf));
-        if (rc) {
-            return rc;
-        }
-
-        memset(tmp_buf, 0, sizeof(tmp_buf));
+    rc = rss_derive_vhuk(key_buf, sizeof(key_buf), KMU_USER_SLOT_MIN);
+    if (rc) {
+        goto exit;
     }
 
-    return 0;
+    rc = rss_derive_cpak_seed(KMU_USER_SLOT_MIN + 1);
+    if (rc) {
+        goto exit;
+    }
+
+    rc = rss_derive_dak_seed(KMU_USER_SLOT_MIN + 2);
+
+exit:
+    memset(key_buf, 0, sizeof(key_buf));
+
+    return rc;
 }

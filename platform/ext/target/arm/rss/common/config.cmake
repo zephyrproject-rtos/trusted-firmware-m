@@ -72,3 +72,5 @@ set(CONFIG_TFM_USE_TRUSTZONE            OFF)
 set(TFM_MULTI_CORE_TOPOLOGY             ON)
 set(MCUBOOT_DATA_SHARING                ON)
 set(TFM_PARTITION_MEASURED_BOOT         ON)
+
+set(RSS_AMOUNT                          1          CACHE STRING  "Amount of RSSes in the system")

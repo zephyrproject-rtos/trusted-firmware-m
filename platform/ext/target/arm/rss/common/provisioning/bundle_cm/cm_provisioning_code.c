@@ -21,31 +21,39 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     uint8_t huk[32];
     int32_t int_err;
 
+    err = tfm_plat_otp_write(PLAT_OTP_ID_RSS_ID,
+                             sizeof(data.rss_id),
+                             (const uint8_t *)&data.rss_id);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+
     err = tfm_plat_otp_write(PLAT_OTP_ID_GUK,
                              sizeof(data.guk),
                              data.guk);
-    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+    if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_HASH,
                              sizeof(data.bl1_2_image_hash),
                              data.bl1_2_image_hash);
-    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+    if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE,
                              sizeof(data.bl1_2_image),
                              data.bl1_2_image);
-    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+    if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL1_2_IMAGE_LEN,
                              sizeof(bl1_2_len),
                              (uint8_t *)&bl1_2_len);
-    if (err != TFM_PLAT_ERR_SUCCESS && err != TFM_PLAT_ERR_UNSUPPORTED) {
+    if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }
 

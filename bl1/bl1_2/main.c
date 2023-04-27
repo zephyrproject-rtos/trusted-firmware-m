@@ -234,6 +234,11 @@ int main(void)
     run_bl1_2_testsuite();
 #endif /* TEST_BL1_2 */
 
+    fih_rc = fih_int_encode_zero_equality(boot_platform_pre_load(0));
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_PANIC;
+    }
+
     BL1_LOG("[INF] Attempting to boot image 0\r\n");
     FIH_CALL(validate_image, fih_rc, 0);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
@@ -242,6 +247,11 @@ int main(void)
         if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
             FIH_PANIC;
         }
+    }
+
+    fih_rc = fih_int_encode_zero_equality(boot_platform_post_load(0));
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_PANIC;
     }
 
     BL1_LOG("[INF] Jumping to BL2\r\n");

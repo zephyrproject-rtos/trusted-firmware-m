@@ -65,6 +65,9 @@ enum tfm_otp_element_id_t {
 
     PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES,
 
+    PLAT_OTP_ID_REPROVISIONING_BITS,
+    PLAT_OTP_ID_RSS_ID,
+
     PLAT_OTP_ID_MAX = UINT32_MAX,
 };
 
