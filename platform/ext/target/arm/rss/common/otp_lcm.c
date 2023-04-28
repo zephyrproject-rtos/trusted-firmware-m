@@ -88,6 +88,104 @@ __PACKED_STRUCT plat_user_area_layout_t {
     uint32_t dma_initial_command_sequence[OTP_DMA_ICS_SIZE / sizeof(uint32_t)];
 };
 
+static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
+    OTP_OFFSET(huk),
+    OTP_OFFSET(guk),
+    0,
+    USER_AREA_OFFSET(dm_locked.iak_len),
+    USER_AREA_OFFSET(dm_locked.iak_type),
+    USER_AREA_OFFSET(dm_locked.iak_id),
+
+    USER_AREA_OFFSET(dm_locked.implementation_id),
+    USER_AREA_OFFSET(dm_locked.verification_service_url),
+    USER_AREA_OFFSET(dm_locked.profile_definition),
+
+    USER_AREA_OFFSET(dm_locked.bl2_rotpk[0]),
+    USER_AREA_OFFSET(dm_locked.bl2_rotpk[1]),
+    USER_AREA_OFFSET(dm_locked.bl2_rotpk[2]),
+    USER_AREA_OFFSET(dm_locked.bl2_rotpk[3]),
+
+    USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[0]),
+    USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[1]),
+    USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[2]),
+    USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[3]),
+
+    USER_AREA_OFFSET(unlocked_area.host_nv_counter[0]),
+    USER_AREA_OFFSET(unlocked_area.host_nv_counter[1]),
+    USER_AREA_OFFSET(unlocked_area.host_nv_counter[2]),
+
+    USER_AREA_OFFSET(dm_locked.bl2_encryption_key),
+    USER_AREA_OFFSET(dm_locked.s_image_encryption_key),
+    USER_AREA_OFFSET(dm_locked.ns_image_encryption_key),
+
+    USER_AREA_OFFSET(bl1_2_image),
+    USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
+    OTP_OFFSET(rotpk),
+    USER_AREA_OFFSET(dm_locked.bl1_rotpk_0),
+
+    USER_AREA_OFFSET(unlocked_area.bl1_nv_counter),
+
+    USER_AREA_OFFSET(dm_locked.secure_debug_pk),
+
+    USER_AREA_OFFSET(dm_locked.host_rotpk_s),
+    USER_AREA_OFFSET(dm_locked.host_rotpk_ns),
+    USER_AREA_OFFSET(dm_locked.host_rotpk_cca),
+
+    USER_AREA_OFFSET(cm_locked.cca_system_properties),
+
+    USER_AREA_OFFSET(unlocked_area.reprovisioning_bits),
+    USER_AREA_OFFSET(cm_locked.rss_id),
+};
+
+static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
+    OTP_SIZE(huk),
+    OTP_SIZE(guk),
+    sizeof(uint32_t),
+    USER_AREA_SIZE(dm_locked.iak_len),
+    USER_AREA_SIZE(dm_locked.iak_type),
+    USER_AREA_SIZE(dm_locked.iak_id),
+
+    USER_AREA_SIZE(dm_locked.implementation_id),
+    USER_AREA_SIZE(dm_locked.verification_service_url),
+    USER_AREA_SIZE(dm_locked.profile_definition),
+
+    USER_AREA_SIZE(dm_locked.bl2_rotpk[0]),
+    USER_AREA_SIZE(dm_locked.bl2_rotpk[1]),
+    USER_AREA_SIZE(dm_locked.bl2_rotpk[2]),
+    USER_AREA_SIZE(dm_locked.bl2_rotpk[3]),
+
+    USER_AREA_SIZE(unlocked_area.bl2_nv_counter[0]),
+    USER_AREA_SIZE(unlocked_area.bl2_nv_counter[1]),
+    USER_AREA_SIZE(unlocked_area.bl2_nv_counter[2]),
+    USER_AREA_SIZE(unlocked_area.bl2_nv_counter[3]),
+
+    USER_AREA_SIZE(unlocked_area.host_nv_counter[0]),
+    USER_AREA_SIZE(unlocked_area.host_nv_counter[1]),
+    USER_AREA_SIZE(unlocked_area.host_nv_counter[2]),
+
+    USER_AREA_SIZE(dm_locked.bl2_encryption_key),
+    USER_AREA_SIZE(dm_locked.s_image_encryption_key),
+    USER_AREA_SIZE(dm_locked.ns_image_encryption_key),
+
+    USER_AREA_SIZE(bl1_2_image),
+    USER_AREA_SIZE(cm_locked.bl1_2_image_len),
+    OTP_SIZE(rotpk),
+    USER_AREA_SIZE(dm_locked.bl1_rotpk_0),
+
+    USER_AREA_SIZE(unlocked_area.bl1_nv_counter),
+
+    USER_AREA_SIZE(dm_locked.secure_debug_pk),
+
+    USER_AREA_SIZE(dm_locked.host_rotpk_s),
+    USER_AREA_SIZE(dm_locked.host_rotpk_ns),
+    USER_AREA_SIZE(dm_locked.host_rotpk_cca),
+
+    USER_AREA_SIZE(cm_locked.cca_system_properties),
+
+    USER_AREA_SIZE(unlocked_area.reprovisioning_bits),
+    USER_AREA_SIZE(cm_locked.rss_id),
+};
+
 static uint32_t count_buffer_zero_bits(const uint8_t* buf, size_t size)
 {
     size_t byte_index;
@@ -301,104 +399,13 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     enum tfm_plat_err_t err;
     size_t size;
 
-    switch (id) {
-    case PLAT_OTP_ID_HUK:
-        return otp_read(OTP_OFFSET(huk), OTP_SIZE(huk), out_len, out);
-    case PLAT_OTP_ID_GUK:
-        return otp_read(OTP_OFFSET(guk), OTP_SIZE(guk), out_len, out);
+    if (id >= PLAT_OTP_ID_MAX) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
 
+    switch(id) {
     case PLAT_OTP_ID_LCS:
         return otp_read_lcs(out_len, out);
-    case PLAT_OTP_ID_IMPLEMENTATION_ID:
-        return otp_read(USER_AREA_OFFSET(dm_locked.implementation_id),
-                        USER_AREA_SIZE(dm_locked.implementation_id),
-                        out_len, out);
-    case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
-        return otp_read(USER_AREA_OFFSET(dm_locked.verification_service_url),
-                        USER_AREA_SIZE(dm_locked.verification_service_url),
-                        out_len, out);
-    case PLAT_OTP_ID_PROFILE_DEFINITION:
-        return otp_read(USER_AREA_OFFSET(dm_locked.profile_definition),
-                        USER_AREA_SIZE(dm_locked.profile_definition),
-                        out_len, out);
-
-    case PLAT_OTP_ID_BL2_ROTPK_0:
-        return otp_read(USER_AREA_OFFSET(dm_locked.bl2_rotpk[0]),
-                        USER_AREA_SIZE(dm_locked.bl2_rotpk[0]),
-                        out_len, out);
-    case PLAT_OTP_ID_NV_COUNTER_BL2_0:
-        return otp_read(USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[0]),
-                        USER_AREA_SIZE(unlocked_area.bl2_nv_counter[0]),
-                        out_len, out);
-
-    case PLAT_OTP_ID_BL2_ROTPK_1:
-        return otp_read(USER_AREA_OFFSET(dm_locked.bl2_rotpk[1]),
-                        USER_AREA_SIZE(dm_locked.bl2_rotpk[1]),
-                        out_len, out);
-    case PLAT_OTP_ID_NV_COUNTER_BL2_1:
-        return otp_read(USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[1]),
-                        USER_AREA_SIZE(unlocked_area.bl2_nv_counter[1]),
-                        out_len, out);
-
-    case PLAT_OTP_ID_BL2_ROTPK_2:
-        return otp_read(USER_AREA_OFFSET(dm_locked.bl2_rotpk[2]),
-                        USER_AREA_SIZE(dm_locked.bl2_rotpk[2]),
-                        out_len, out);
-    case PLAT_OTP_ID_NV_COUNTER_BL2_2:
-        return otp_read(USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[2]),
-                        USER_AREA_SIZE(unlocked_area.bl2_nv_counter[2]),
-                        out_len, out);
-
-    case PLAT_OTP_ID_BL2_ROTPK_3:
-        return otp_read(USER_AREA_OFFSET(dm_locked.bl2_rotpk[3]),
-                        USER_AREA_SIZE(dm_locked.bl2_rotpk[3]),
-                        out_len, out);
-    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
-        return otp_read(USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[3]),
-                        USER_AREA_SIZE(unlocked_area.bl2_nv_counter[3]),
-                        out_len, out);
-
-    case PLAT_OTP_ID_NV_COUNTER_NS_0:
-        return otp_read(USER_AREA_OFFSET(unlocked_area.host_nv_counter[0]),
-                        USER_AREA_SIZE(unlocked_area.host_nv_counter[0]),
-                        out_len, out);
-    case PLAT_OTP_ID_NV_COUNTER_NS_1:
-        return otp_read(USER_AREA_OFFSET(unlocked_area.host_nv_counter[1]),
-                        USER_AREA_SIZE(unlocked_area.host_nv_counter[1]),
-                        out_len, out);
-    case PLAT_OTP_ID_NV_COUNTER_NS_2:
-        return otp_read(USER_AREA_OFFSET(unlocked_area.host_nv_counter[2]),
-                        USER_AREA_SIZE(unlocked_area.host_nv_counter[2]),
-                        out_len, out);
-
-    case PLAT_OTP_ID_KEY_SECURE_ENCRYPTION:
-        return otp_read(USER_AREA_OFFSET(dm_locked.s_image_encryption_key),
-                        USER_AREA_SIZE(dm_locked.s_image_encryption_key),
-                        out_len, out);
-    case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
-        return otp_read(USER_AREA_OFFSET(dm_locked.ns_image_encryption_key),
-                        USER_AREA_SIZE(dm_locked.ns_image_encryption_key),
-                        out_len, out);
-    case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
-        return otp_read(USER_AREA_OFFSET(dm_locked.bl2_encryption_key),
-                        USER_AREA_SIZE(dm_locked.bl2_encryption_key),
-                        out_len, out);
-    case PLAT_OTP_ID_BL1_2_IMAGE_HASH:
-        return otp_read(OTP_OFFSET(rotpk),
-                        OTP_SIZE(rotpk),
-                        out_len, out);
-    case PLAT_OTP_ID_BL1_2_IMAGE_LEN:
-        return otp_read(USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
-                        USER_AREA_SIZE(cm_locked.bl1_2_image_len),
-                        out_len, out);
-    case PLAT_OTP_ID_NV_COUNTER_BL1_0:
-        return otp_read(USER_AREA_OFFSET(unlocked_area.bl1_nv_counter),
-                        USER_AREA_SIZE(unlocked_area.bl1_nv_counter),
-                        out_len, out);
-    case PLAT_OTP_ID_BL1_ROTPK_0:
-        return otp_read(USER_AREA_OFFSET(dm_locked.bl1_rotpk_0),
-                        USER_AREA_SIZE(dm_locked.bl1_rotpk_0),
-                        out_len, out);
     case PLAT_OTP_ID_BL1_2_IMAGE:
         err = otp_read(USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
                        USER_AREA_SIZE(cm_locked.bl1_2_image_len),
@@ -409,34 +416,8 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
 
         return otp_read(OTP_TOTAL_SIZE - OTP_DMA_ICS_SIZE - size, size,
                         out_len, out);
-    case PLAT_OTP_ID_ENTROPY_SEED:
-        return TFM_PLAT_ERR_UNSUPPORTED;
-
-    case PLAT_OTP_ID_SECURE_DEBUG_PK:
-        return otp_read(USER_AREA_OFFSET(dm_locked.secure_debug_pk),
-                        USER_AREA_SIZE(dm_locked.secure_debug_pk),
-                        out_len, out);
-
-    case PLAT_OTP_ID_HOST_ROTPK_S:
-        return otp_read(USER_AREA_OFFSET(dm_locked.host_rotpk_s),
-                        USER_AREA_SIZE(dm_locked.host_rotpk_s),
-                        out_len, out);
-    case PLAT_OTP_ID_HOST_ROTPK_NS:
-        return otp_read(USER_AREA_OFFSET(dm_locked.host_rotpk_ns),
-                        USER_AREA_SIZE(dm_locked.host_rotpk_ns),
-                        out_len, out);
-    case PLAT_OTP_ID_HOST_ROTPK_CCA:
-        return otp_read(USER_AREA_OFFSET(dm_locked.host_rotpk_cca),
-                        USER_AREA_SIZE(dm_locked.host_rotpk_cca),
-                        out_len, out);
-
-    case PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES:
-        return otp_read(USER_AREA_OFFSET(cm_locked.cca_system_properties),
-                        USER_AREA_SIZE(cm_locked.cca_system_properties),
-                        out_len, out);
-
     default:
-        return TFM_PLAT_ERR_UNSUPPORTED;
+        return otp_read(otp_offsets[id], otp_sizes[id], out_len, out);
     }
 }
 
@@ -537,137 +518,15 @@ static enum tfm_plat_err_t otp_write_lcs(size_t in_len, const uint8_t *in)
 enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
                                        size_t in_len, const uint8_t *in)
 {
-    switch (id) {
-    case PLAT_OTP_ID_HUK:
-        return otp_write(OTP_OFFSET(huk), OTP_SIZE(huk), in_len, in);
-    case PLAT_OTP_ID_GUK:
-        return otp_write(OTP_OFFSET(guk), OTP_SIZE(guk), in_len, in);
+    if (id >= PLAT_OTP_ID_MAX) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
 
+    switch (id) {
     case PLAT_OTP_ID_LCS:
         return otp_write_lcs(in_len, in);
-    case PLAT_OTP_ID_IMPLEMENTATION_ID:
-        return otp_write(USER_AREA_OFFSET(dm_locked.implementation_id),
-                         USER_AREA_SIZE(dm_locked.implementation_id),
-                         in_len, in);
-    case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
-        return otp_write(USER_AREA_OFFSET(dm_locked.verification_service_url),
-                         USER_AREA_SIZE(dm_locked.verification_service_url),
-                         in_len, in);
-    case PLAT_OTP_ID_PROFILE_DEFINITION:
-        return otp_write(USER_AREA_OFFSET(dm_locked.profile_definition),
-                         USER_AREA_SIZE(dm_locked.profile_definition),
-                         in_len, in);
-
-    case PLAT_OTP_ID_BL2_ROTPK_0:
-        return otp_write(USER_AREA_OFFSET(dm_locked.bl2_rotpk[0]),
-                         USER_AREA_SIZE(dm_locked.bl2_rotpk[0]),
-                         in_len, in);
-    case PLAT_OTP_ID_NV_COUNTER_BL2_0:
-        return otp_write(USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[0]),
-                         USER_AREA_SIZE(unlocked_area.bl2_nv_counter[0]),
-                         in_len, in);
-
-    case PLAT_OTP_ID_BL2_ROTPK_1:
-        return otp_write(USER_AREA_OFFSET(dm_locked.bl2_rotpk[1]),
-                         USER_AREA_SIZE(dm_locked.bl2_rotpk[1]),
-                         in_len, in);
-    case PLAT_OTP_ID_NV_COUNTER_BL2_1:
-        return otp_write(USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[1]),
-                         USER_AREA_SIZE(unlocked_area.bl2_nv_counter[1]),
-                         in_len, in);
-
-    case PLAT_OTP_ID_BL2_ROTPK_2:
-        return otp_write(USER_AREA_OFFSET(dm_locked.bl2_rotpk[2]),
-                         USER_AREA_SIZE(dm_locked.bl2_rotpk[2]),
-                         in_len, in);
-    case PLAT_OTP_ID_NV_COUNTER_BL2_2:
-        return otp_write(USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[2]),
-                         USER_AREA_SIZE(unlocked_area.bl2_nv_counter[2]),
-                         in_len, in);
-
-    case PLAT_OTP_ID_BL2_ROTPK_3:
-        return otp_write(USER_AREA_OFFSET(dm_locked.bl2_rotpk[3]),
-                         USER_AREA_SIZE(dm_locked.bl2_rotpk[3]),
-                         in_len, in);
-    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
-        return otp_write(USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[3]),
-                         USER_AREA_SIZE(unlocked_area.bl2_nv_counter[3]),
-                         in_len, in);
-
-    case PLAT_OTP_ID_NV_COUNTER_NS_0:
-        return otp_write(USER_AREA_OFFSET(unlocked_area.host_nv_counter[0]),
-                         USER_AREA_SIZE(unlocked_area.host_nv_counter[0]),
-                         in_len, in);
-    case PLAT_OTP_ID_NV_COUNTER_NS_1:
-        return otp_write(USER_AREA_OFFSET(unlocked_area.host_nv_counter[1]),
-                         USER_AREA_SIZE(unlocked_area.host_nv_counter[1]),
-                         in_len, in);
-    case PLAT_OTP_ID_NV_COUNTER_NS_2:
-        return otp_write(USER_AREA_OFFSET(unlocked_area.host_nv_counter[2]),
-                         USER_AREA_SIZE(unlocked_area.host_nv_counter[2]),
-                         in_len, in);
-
-    case PLAT_OTP_ID_KEY_SECURE_ENCRYPTION:
-        return otp_write(USER_AREA_OFFSET(dm_locked.s_image_encryption_key),
-                         USER_AREA_SIZE(dm_locked.s_image_encryption_key),
-                         in_len, in);
-    case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
-        return otp_write(USER_AREA_OFFSET(dm_locked.ns_image_encryption_key),
-                         USER_AREA_SIZE(dm_locked.ns_image_encryption_key),
-                         in_len, in);
-
-    case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
-        return otp_write(USER_AREA_OFFSET(dm_locked.bl2_encryption_key),
-                         USER_AREA_SIZE(dm_locked.bl2_encryption_key),
-                         in_len, in);
-    case PLAT_OTP_ID_BL1_2_IMAGE_HASH:
-        return otp_write(OTP_OFFSET(rotpk),
-                         OTP_SIZE(rotpk),
-                         in_len, in);
-    case PLAT_OTP_ID_BL1_2_IMAGE_LEN:
-        return otp_write(USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
-                         USER_AREA_SIZE(cm_locked.bl1_2_image_len),
-                         in_len, in);
-    case PLAT_OTP_ID_NV_COUNTER_BL1_0:
-        return otp_write(USER_AREA_OFFSET(unlocked_area.bl1_nv_counter),
-                         USER_AREA_SIZE(unlocked_area.bl1_nv_counter),
-                         in_len, in);
-    case PLAT_OTP_ID_BL1_ROTPK_0:
-        return otp_write(USER_AREA_OFFSET(dm_locked.bl1_rotpk_0),
-                         USER_AREA_SIZE(dm_locked.bl1_rotpk_0),
-                         in_len, in);
-    case PLAT_OTP_ID_BL1_2_IMAGE:
-        return otp_write(USER_AREA_OFFSET(bl1_2_image),
-                         USER_AREA_SIZE(bl1_2_image),
-                         in_len, in);
-    case PLAT_OTP_ID_ENTROPY_SEED:
-        return TFM_PLAT_ERR_UNSUPPORTED;
-
-    case PLAT_OTP_ID_SECURE_DEBUG_PK:
-        return otp_write(USER_AREA_OFFSET(dm_locked.secure_debug_pk),
-                         USER_AREA_SIZE(dm_locked.secure_debug_pk),
-                         in_len, in);
-
-    case PLAT_OTP_ID_HOST_ROTPK_S:
-        return otp_write(USER_AREA_OFFSET(dm_locked.host_rotpk_s),
-                         USER_AREA_SIZE(dm_locked.host_rotpk_s),
-                         in_len, in);
-    case PLAT_OTP_ID_HOST_ROTPK_NS:
-        return otp_write(USER_AREA_OFFSET(dm_locked.host_rotpk_ns),
-                         USER_AREA_SIZE(dm_locked.host_rotpk_ns),
-                         in_len, in);
-    case PLAT_OTP_ID_HOST_ROTPK_CCA:
-        return otp_write(USER_AREA_OFFSET(dm_locked.host_rotpk_cca),
-                         USER_AREA_SIZE(dm_locked.host_rotpk_cca),
-                         in_len, in);
-
-    case PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES:
-        return otp_write(USER_AREA_OFFSET(cm_locked.cca_system_properties),
-                         USER_AREA_SIZE(cm_locked.cca_system_properties),
-                         in_len, in);
-
     default:
-        return TFM_PLAT_ERR_UNSUPPORTED;
+        return otp_write(otp_offsets[id], otp_sizes[id], in_len, in);
     }
 }
 
@@ -675,115 +534,11 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
 enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
                                           size_t *size)
 {
-    switch (id) {
-    case PLAT_OTP_ID_HUK:
-        *size = OTP_SIZE(huk);
-        break;
-    case PLAT_OTP_ID_GUK:
-        *size = OTP_SIZE(guk);
-        break;
-
-    case PLAT_OTP_ID_LCS:
-        *size = sizeof(uint32_t);
-        break;
-    case PLAT_OTP_ID_IMPLEMENTATION_ID:
-        *size = USER_AREA_SIZE(dm_locked.implementation_id);
-        break;
-    case PLAT_OTP_ID_VERIFICATION_SERVICE_URL:
-        *size = USER_AREA_SIZE(dm_locked.verification_service_url);
-        break;
-    case PLAT_OTP_ID_PROFILE_DEFINITION:
-        *size = USER_AREA_SIZE(dm_locked.profile_definition);
-        break;
-
-    case PLAT_OTP_ID_BL2_ROTPK_0:
-        *size = USER_AREA_SIZE(dm_locked.bl2_rotpk[0]);
-        break;
-    case PLAT_OTP_ID_NV_COUNTER_BL2_0:
-        *size = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[0]);
-        break;
-
-    case PLAT_OTP_ID_BL2_ROTPK_1:
-        *size = USER_AREA_SIZE(dm_locked.bl2_rotpk[1]);
-        break;
-    case PLAT_OTP_ID_NV_COUNTER_BL2_1:
-        *size = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[1]);
-        break;
-
-    case PLAT_OTP_ID_BL2_ROTPK_2:
-        *size = USER_AREA_SIZE(dm_locked.bl2_rotpk[2]);
-        break;
-    case PLAT_OTP_ID_NV_COUNTER_BL2_2:
-        *size = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[2]);
-        break;
-
-    case PLAT_OTP_ID_BL2_ROTPK_3:
-        *size = USER_AREA_SIZE(dm_locked.bl2_rotpk[3]);
-        break;
-    case PLAT_OTP_ID_NV_COUNTER_BL2_3:
-        *size = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[3]);
-        break;
-
-    case PLAT_OTP_ID_NV_COUNTER_NS_0:
-        *size = USER_AREA_SIZE(unlocked_area.host_nv_counter[0]);
-        break;
-    case PLAT_OTP_ID_NV_COUNTER_NS_1:
-        *size = USER_AREA_SIZE(unlocked_area.host_nv_counter[1]);
-        break;
-    case PLAT_OTP_ID_NV_COUNTER_NS_2:
-        *size = USER_AREA_SIZE(unlocked_area.host_nv_counter[2]);
-        break;
-
-    case PLAT_OTP_ID_KEY_SECURE_ENCRYPTION:
-        *size = USER_AREA_SIZE(dm_locked.s_image_encryption_key);
-        break;
-    case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
-        *size = USER_AREA_SIZE(dm_locked.ns_image_encryption_key);
-        break;
-
-    case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
-        *size = USER_AREA_SIZE(dm_locked.bl2_encryption_key);
-        break;
-    case PLAT_OTP_ID_BL1_2_IMAGE_HASH:
-        *size = OTP_SIZE(rotpk);
-        break;
-    case PLAT_OTP_ID_BL1_2_IMAGE_LEN:
-        *size = USER_AREA_SIZE(cm_locked.bl1_2_image_len);
-        break;
-    case PLAT_OTP_ID_NV_COUNTER_BL1_0:
-        *size = USER_AREA_SIZE(unlocked_area.bl1_nv_counter);
-        break;
-    case PLAT_OTP_ID_BL1_ROTPK_0:
-        *size = USER_AREA_SIZE(dm_locked.bl1_rotpk_0);
-        break;
-    case PLAT_OTP_ID_BL1_2_IMAGE:
-        *size = USER_AREA_SIZE(bl1_2_image);
-        break;
-
-    case PLAT_OTP_ID_ENTROPY_SEED:
-        return TFM_PLAT_ERR_UNSUPPORTED;
-
-    case PLAT_OTP_ID_SECURE_DEBUG_PK:
-        *size = USER_AREA_SIZE(dm_locked.secure_debug_pk);
-        break;
-
-    case PLAT_OTP_ID_HOST_ROTPK_S:
-        *size = USER_AREA_SIZE(dm_locked.host_rotpk_s);
-        break;
-    case PLAT_OTP_ID_HOST_ROTPK_NS:
-        *size = USER_AREA_SIZE(dm_locked.host_rotpk_ns);
-        break;
-    case PLAT_OTP_ID_HOST_ROTPK_CCA:
-        *size = USER_AREA_SIZE(dm_locked.host_rotpk_cca);
-        break;
-
-    case PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES:
-        *size = USER_AREA_SIZE(cm_locked.cca_system_properties);
-        break;
-
-    default:
-        return TFM_PLAT_ERR_UNSUPPORTED;
+    if (id >= PLAT_OTP_ID_MAX) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
     }
+
+    *size = otp_sizes[id];
 
     return TFM_PLAT_ERR_SUCCESS;
 }
