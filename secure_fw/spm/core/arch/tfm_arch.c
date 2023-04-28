@@ -12,7 +12,7 @@
 #include "utilities.h"
 #include "config_impl.h"
 
-#if defined(__ICCARM__) && (CONFIG_TFM_FP >= 1)
+#if defined(__ICCARM__) && (CONFIG_TFM_FLOAT_ABI >= 1)
 #pragma required = tfm_arch_clear_fp_data
 #endif
 
