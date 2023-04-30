@@ -30,7 +30,7 @@ extern int32_t platform_svc_handlers(uint8_t svc_num,
                                      uint32_t *ctx, uint32_t lr);
 #endif
 
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+#if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
 static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
@@ -189,7 +189,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         break;
 #endif
     default:
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+#if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
         if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
                                      - (uint32_t)msp) > 0) {
             /* The Main Stack has contents, not calling from Partition thread */

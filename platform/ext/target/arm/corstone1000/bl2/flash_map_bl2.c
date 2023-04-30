@@ -25,21 +25,6 @@ extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
  */
 struct flash_area flash_map[] = {
     {
-        .fa_id = FLASH_AREA_0_ID,
-        .fa_device_id = FLASH_DEVICE_ID,
-        .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_INVALID_OFFSET,
-        .fa_size = FLASH_INVALID_SIZE,
-    },
-    {
-        .fa_id = FLASH_AREA_1_ID,
-        .fa_device_id = FLASH_DEVICE_ID,
-        .fa_driver = &FLASH_DEV_NAME,
-        .fa_off = FLASH_INVALID_OFFSET,
-        .fa_size = FLASH_INVALID_SIZE,
-    },
-#ifndef TFM_S_REG_TEST
-    {
         .fa_id = FLASH_AREA_2_ID,
         .fa_device_id = FLASH_DEVICE_ID,
         .fa_driver = &FLASH_DEV_NAME,
@@ -48,6 +33,21 @@ struct flash_area flash_map[] = {
     },
     {
         .fa_id = FLASH_AREA_3_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_INVALID_OFFSET,
+        .fa_size = FLASH_INVALID_SIZE,
+    },
+#ifndef TFM_S_REG_TEST
+    {
+        .fa_id = FLASH_AREA_4_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_INVALID_OFFSET,
+        .fa_size = FLASH_INVALID_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_5_ID,
         .fa_device_id = FLASH_DEVICE_ID,
         .fa_driver = &FLASH_DEV_NAME,
         .fa_off = FLASH_INVALID_OFFSET,

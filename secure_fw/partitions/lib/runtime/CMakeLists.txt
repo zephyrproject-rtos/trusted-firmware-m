@@ -38,6 +38,8 @@ target_link_libraries(tfm_sprt
         tfm_spm_defs
         tfm_partition_defs
         platform_s
+    PRIVATE
+        tfm_spm
 )
 
 target_compile_definitions(tfm_partition_defs

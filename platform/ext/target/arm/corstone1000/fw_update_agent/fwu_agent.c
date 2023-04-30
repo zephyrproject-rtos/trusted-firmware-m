@@ -21,6 +21,10 @@
 #include "uefi_fmp.h"
 #include "uart_stdout.h"
 #include "soft_crc.h"
+#if !BL1
+#include "partition.h"
+#include "platform.h"
+#endif
 
 /* Properties of image in a bank */
 struct fwu_image_properties {
@@ -143,6 +147,7 @@ extern ARM_DRIVER_FLASH FWU_METADATA_FLASH_DEV;
 
 #define HOST_ACK_TIMEOUT_SEC    (6 * 60) /* ~seconds, not exact */
 
+#if BL1
 static enum fwu_agent_error_t private_metadata_read(
         struct fwu_private_metadata* p_metadata)
 {
@@ -165,7 +170,40 @@ static enum fwu_agent_error_t private_metadata_read(
 
     return FWU_AGENT_SUCCESS;
 }
+#elif
+static enum fwu_agent_error_t private_metadata_read(
+        struct fwu_private_metadata* p_metadata)
+{
+    partition_entry_t *part;
+    uuid_t private_uuid = PRIVATE_METADATA_TYPE_UUID;
+    int ret;
 
+    FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+    if (!p_metadata) {
+        return FWU_AGENT_ERROR;
+    }
+
+    part = get_partition_entry_by_type(&private_uuid);
+    if (!part) {
+        FWU_LOG_MSG("Private metadata partition not found\n\r");
+        return FWU_AGENT_ERROR;
+    }
+
+    ret = FWU_METADATA_FLASH_DEV.ReadData(part->start, p_metadata,
+                                          sizeof(struct fwu_private_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: success: boot_index = %u\n\r", __func__,
+                        p_metadata->boot_index);
+
+    return FWU_AGENT_SUCCESS;
+}
+#endif
+
+#if BL1
 static enum fwu_agent_error_t private_metadata_write(
         struct fwu_private_metadata* p_metadata)
 {
@@ -192,6 +230,42 @@ static enum fwu_agent_error_t private_metadata_write(
     FWU_LOG_MSG("%s: success\n\r", __func__);
     return FWU_AGENT_SUCCESS;
 }
+#elif
+static enum fwu_agent_error_t private_metadata_write(
+        struct fwu_private_metadata* p_metadata)
+{
+    uuid_t private_uuid = PRIVATE_METADATA_TYPE_UUID;
+    partition_entry_t *part;
+    int ret;
+
+    FWU_LOG_MSG("%s: enter: boot_index = %u\n\r", __func__,
+                        p_metadata->boot_index);
+
+    if (!p_metadata) {
+        return FWU_AGENT_ERROR;
+    }
+
+    part = get_partition_entry_by_type(&private_uuid);
+    if (!part) {
+        FWU_LOG_MSG("Private metadata partition not found\n\r");
+        return FWU_AGENT_ERROR;
+    }
+
+    ret = FWU_METADATA_FLASH_DEV.EraseSector(part->start);
+    if (ret != ARM_DRIVER_OK) {
+        return FWU_AGENT_ERROR;
+    }
+
+    ret = FWU_METADATA_FLASH_DEV.ProgramData(part->start,
+                                p_metadata, sizeof(struct fwu_private_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_private_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: success\n\r", __func__);
+    return FWU_AGENT_SUCCESS;
+}
+#endif
 
 static enum fwu_agent_error_t metadata_validate(struct fwu_metadata *p_metadata)
 {
@@ -217,6 +291,7 @@ static enum fwu_agent_error_t metadata_validate(struct fwu_metadata *p_metadata)
     return FWU_AGENT_SUCCESS;
 }
 
+#if BL1
 static enum fwu_agent_error_t metadata_read_without_validation(struct fwu_metadata *p_metadata)
 {
     int ret;
@@ -239,7 +314,41 @@ static enum fwu_agent_error_t metadata_read_without_validation(struct fwu_metada
 
     return FWU_AGENT_SUCCESS;
 }
+#elif
+static enum fwu_agent_error_t metadata_read_without_validation(struct fwu_metadata *p_metadata)
+{
+    uuid_t metadata_uuid = FWU_METADATA_TYPE_UUID;
+    partition_entry_t *part;
+    int ret;
 
+    if (!p_metadata) {
+        return FWU_AGENT_ERROR;
+    }
+
+    part = get_partition_entry_by_type(&metadata_uuid);
+    if (!part) {
+        FWU_LOG_MSG("%s: FWU metadata partition not found\n\r", __func__);
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
+                  part->start, sizeof(struct fwu_metadata));
+
+
+    ret = FWU_METADATA_FLASH_DEV.ReadData(part->start,
+                                p_metadata, sizeof(struct fwu_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: success: active = %u, previous = %d\n\r", __func__,
+                  p_metadata->active_index, p_metadata->previous_active_index);
+
+    return FWU_AGENT_SUCCESS;
+}
+#endif
+
+#if BL1
 static enum fwu_agent_error_t metadata_read(struct fwu_metadata *p_metadata)
 {
     int ret;
@@ -266,7 +375,45 @@ static enum fwu_agent_error_t metadata_read(struct fwu_metadata *p_metadata)
 
     return FWU_AGENT_SUCCESS;
 }
+#elif
+static enum fwu_agent_error_t metadata_read(struct fwu_metadata *p_metadata)
+{
+    uuid_t metadata_uuid = FWU_METADATA_TYPE_UUID;
+    partition_entry_t *part;
+    int ret;
 
+    if (!p_metadata) {
+        return FWU_AGENT_ERROR;
+    }
+
+    part = get_partition_entry_by_type(&metadata_uuid);
+    if (!part) {
+        FWU_LOG_MSG("%s: FWU metadata partition not found\n\r", __func__);
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
+                  part->start, sizeof(struct fwu_metadata));
+
+    ret = FWU_METADATA_FLASH_DEV.ReadData(part->start,
+                                p_metadata, sizeof(struct fwu_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    if (metadata_validate(p_metadata) != FWU_AGENT_SUCCESS) {
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: success: active = %u, previous = %d\n\r", __func__,
+                  p_metadata->active_index, p_metadata->previous_active_index);
+
+    return FWU_AGENT_SUCCESS;
+}
+#endif
+
+
+#if BL1
 static enum fwu_agent_error_t metadata_write(
                         struct fwu_metadata *p_metadata)
 {
@@ -304,10 +451,96 @@ static enum fwu_agent_error_t metadata_write(
         return FWU_AGENT_ERROR;
     }
 
+    FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
+                  FWU_METADATA_REPLICA_2_OFFSET, sizeof(struct fwu_metadata));
+
+    ret = FWU_METADATA_FLASH_DEV.EraseSector(FWU_METADATA_REPLICA_2_OFFSET);
+    if (ret != ARM_DRIVER_OK) {
+        return FWU_AGENT_ERROR;
+    }
+
+    ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_METADATA_REPLICA_2_OFFSET,
+                                p_metadata, sizeof(struct fwu_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
     FWU_LOG_MSG("%s: success: active = %u, previous = %d\n\r", __func__,
                   p_metadata->active_index, p_metadata->previous_active_index);
     return FWU_AGENT_SUCCESS;
 }
+#elif
+static enum fwu_agent_error_t metadata_write(
+                        struct fwu_metadata *p_metadata)
+{
+    uuid_t metadata_uuid = FWU_METADATA_TYPE_UUID;
+    partition_entry_t *part;
+    int ret;
+
+    if (!p_metadata) {
+        return FWU_AGENT_ERROR;
+    }
+
+    part = get_partition_entry_by_type(&metadata_uuid);
+    if (!part) {
+        FWU_LOG_MSG("%s: FWU metadata partition not found\n\r", __func__);
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
+                  part->start, sizeof(struct fwu_metadata));
+
+    ret = FWU_METADATA_FLASH_DEV.EraseSector(part->start);
+    if (ret != ARM_DRIVER_OK) {
+        return FWU_AGENT_ERROR;
+    }
+
+    ret = FWU_METADATA_FLASH_DEV.ProgramData(part->start,
+                                p_metadata, sizeof(struct fwu_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    part = get_partition_replica_by_type(&metadata_uuid);
+    if (!part) {
+        FWU_LOG_MSG("%s: FWU metadata replica partition not found\n\r", __func__);
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
+                  part->start, sizeof(struct fwu_metadata));
+
+    ret = FWU_METADATA_FLASH_DEV.EraseSector(part->start);
+    if (ret != ARM_DRIVER_OK) {
+        return FWU_AGENT_ERROR;
+    }
+
+    ret = FWU_METADATA_FLASH_DEV.ProgramData(part->start,
+                                p_metadata, sizeof(struct fwu_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: enter: flash addr = %u, size = %d\n\r", __func__,
+                  FWU_METADATA_REPLICA_2_OFFSET, sizeof(struct fwu_metadata));
+
+    ret = FWU_METADATA_FLASH_DEV.EraseSector(FWU_METADATA_REPLICA_2_OFFSET);
+    if (ret != ARM_DRIVER_OK) {
+        return FWU_AGENT_ERROR;
+    }
+
+    ret = FWU_METADATA_FLASH_DEV.ProgramData(FWU_METADATA_REPLICA_2_OFFSET,
+                                p_metadata, sizeof(struct fwu_metadata));
+    if (ret < 0 || ret != sizeof(struct fwu_metadata)) {
+        return FWU_AGENT_ERROR;
+    }
+
+    FWU_LOG_MSG("%s: success: active = %u, previous = %d\n\r", __func__,
+                  p_metadata->active_index, p_metadata->previous_active_index);
+    return FWU_AGENT_SUCCESS;
+}
+#endif
+
 
 enum fwu_agent_error_t fwu_metadata_init(void)
 {
@@ -354,6 +587,11 @@ enum fwu_agent_error_t fwu_metadata_provision(void)
     uint32_t image_version = FWU_IMAGE_INITIAL_VERSION;
 
     FWU_LOG_MSG("%s: enter\n\r", __func__);
+
+#if !BL1
+    plat_io_storage_init();
+    partition_init(PLATFORM_GPT_IMAGE);
+#endif
 
     ret = fwu_metadata_init();
     if (ret) {

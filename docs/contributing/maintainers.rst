@@ -129,13 +129,13 @@ David Hazi
 Corstone1000
 ^^^^^^^^^^^^
 
-Vishnu Banavath
-    :email: `Vishnu.Banavath@arm.com <vishnu.banavath@arm.com>`__
-    :github: `vishnu-banavath <https://github.com/vishnu-banavath>`__
+Xueliang Zhong
+    :email: `Xueliang.Zhong@arm.com <xueliang.zhong@arm.com>`__
+    :github: `xueliang-zhong <https://github.com/xueliang-zhong-arm>`__
 
-Mohamed Omar Asaker
-    :email: `Mohamed.OmarAsaker@arm.com <mohamed.omarasaker@arm.com>`__
-    :github: `mohamedasaker-arm <https://github.com/mohamedasaker-arm>`__
+Emekcan Aras
+    :email: `Emekcan.Aras@arm.com <emekcan.aras@arm.com>`__
+    :github: `ememarar <https://github.com/ememarar>`__
 
 RSS
 ^^^

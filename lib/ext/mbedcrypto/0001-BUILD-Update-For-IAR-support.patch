@@ -5,7 +5,7 @@ Subject: [PATCH 1/8] BUILD: Update For IAR support
 
 Applied the same change as in mbed-crypto for using this as a sub
 project with the IAR toolchain. Use __asm generic ,and avoid empty
-enum.
+enum. Avoid declaration of array with null size.
 
 Signed-off-by: TTornblom <thomas.tornblom@iar.com>
 Signed-off-by: Michel Jaouen <michel.jaouen@st.com>
@@ -13,7 +13,8 @@ Signed-off-by: Michel Jaouen <michel.jaouen@st.com>
  CMakeLists.txt          | 4 +++-
  include/mbedtls/ssl.h   | 1 +
  library/constant_time.c | 2 +-
- 3 files changed, 5 insertions(+), 2 deletions(-)
+ library/psa_crypto.c    | 7 ++++++-
+ 4 files changed, 11 insertions(+), 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 8d3f08a98..096bb6e14 100644
@@ -55,6 +56,33 @@ index 552a918f4..471d91618 100644
  #elif defined(__aarch64__)
      asm volatile ("ldr %w0, [%1]" : "=r" (r) : "r" (p) :);
  #endif
+diff --git a/library/psa_crypto.c b/library/psa_crypto.c
+index bc19ed07c..8b9f28f4d 100644
+--- a/library/psa_crypto.c
++++ b/library/psa_crypto.c
+@@ -6611,8 +6611,13 @@ static psa_status_t psa_key_agreement_internal(psa_key_derivation_operation_t *o
+                                                size_t peer_key_length)
+ {
+     psa_status_t status;
++#if PSA_RAW_KEY_AGREEMENT_OUTPUT_MAX_SIZE != 0
+     uint8_t shared_secret[PSA_RAW_KEY_AGREEMENT_OUTPUT_MAX_SIZE];
++    size_t shared_secret_length = sizeof(shared_secret);
++#else
++    uint8_t *shared_secret = NULL;
+     size_t shared_secret_length = 0;
++#endif
+     psa_algorithm_t ka_alg = PSA_ALG_KEY_AGREEMENT_GET_BASE(operation->alg);
+ 
+     /* Step 1: run the secret agreement algorithm to generate the shared
+@@ -6621,7 +6626,7 @@ static psa_status_t psa_key_agreement_internal(psa_key_derivation_operation_t *o
+                                             private_key,
+                                             peer_key, peer_key_length,
+                                             shared_secret,
+-                                            sizeof(shared_secret),
++                                            shared_secret_length,
+                                             &shared_secret_length);
+     if (status != PSA_SUCCESS) {
+         goto exit;
 -- 
 2.32.0
 

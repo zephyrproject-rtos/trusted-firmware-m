@@ -109,7 +109,7 @@ config NUM_MAILBOX_QUEUE_SLOT
 
 ################################# SPM log level ################################
 
-choice
+choice SPM_LOG_LEVEL
     prompt "SPM Log Level"
     default SPM_LOG_LEVEL_SILENCE
 

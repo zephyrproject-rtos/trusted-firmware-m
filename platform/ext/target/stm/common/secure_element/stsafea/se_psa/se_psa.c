@@ -81,8 +81,8 @@ int32_t debug_print(char const *fmt, ...)
   char trace_buf[500];
 
   len = vsnprintf(trace_buf, sizeof(trace_buf), fmt, args);
-
-  return tfm_hal_output_spm_log(trace_buf, len);
+  SPMLOG_DBGMSG(trace_buf);
+  return 0;
 }
 
 /**
@@ -622,6 +622,7 @@ int se_st_engine_init(void)
     {
         return -1;
     }
+    return 0;
 }
 #endif /* PSA_USE_SE_ST */
 

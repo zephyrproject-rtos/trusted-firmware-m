@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2022, Arm Limited. All rights reserved.
+; * Copyright (c) 2023, Arm Limited. All rights reserved.
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the "License");
 ; * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@
 
 MEMORY
 {
-    FLASH (rx)  : ORIGIN = BL1_CODE_START, LENGTH = BL1_CODE_SIZE
-    RAM   (rwx) : ORIGIN = BL1_DATA_START, LENGTH = BL1_DATA_SIZE
+    FLASH (rx)  : ORIGIN = BL1_1_CODE_START, LENGTH = BL1_1_CODE_SIZE
+    RAM   (rwx) : ORIGIN = BL1_1_DATA_START, LENGTH = BL1_1_DATA_SIZE
 }
 
-__heap_size__  = BL1_HEAP_SIZE;
-__msp_stack_size__ = BL1_MSP_STACK_SIZE;
+__heap_size__  = BL1_1_HEAP_SIZE;
+__msp_stack_size__ = BL1_1_MSP_STACK_SIZE;
 
 /* Library configurations */
 GROUP(libgcc.a libc.a libm.a libnosys.a)
@@ -46,6 +46,11 @@ SECTIONS
         __end__ = .;
 
         *(.text*)
+
+        KEEP(*shared_lib*:*(.text*))
+        KEEP(*bl1_tests_shared*:*(.text*))
+        KEEP(*bl1_crypto_hw*:*(.text*))
+        KEEP(*boot_hal_bl1*(.text*))
 
         KEEP(*(.init))
         KEEP(*(.fini))
@@ -84,7 +89,7 @@ SECTIONS
 
     /* To copy multiple ROM to RAM sections,
      * define etext2/data2_start/data2_end and
-     * define __STARTUP_COPY_MULTIPLE in startup_corstone700_bl2.S */
+     * define __STARTUP_COPY_MULTIPLE in startup_corstone1000.c */
     .copy.table :
     {
         . = ALIGN(4);
@@ -121,6 +126,8 @@ SECTIONS
     Image$$SHARED_DATA$$RW$$Base = ADDR(.tfm_bl2_shared_data);
     Image$$SHARED_DATA$$RW$$Limit = ADDR(.tfm_bl2_shared_data) + SIZEOF(.tfm_bl2_shared_data);
 
+    . = BL1_1_DATA_START;
+    Image$$BL1_1_ER_DATA_START$$Base = .;
     .data : AT (__etext)
     {
         __data_start__ = .;
@@ -188,4 +195,9 @@ SECTIONS
     Image$$ARM_LIB_HEAP$$ZI$$Limit = ADDR(.heap) + SIZEOF(.heap);
 
     PROVIDE(__stack = Image$$ARM_LIB_STACK$$ZI$$Limit);
+
+    Image$$BL1_1_ER_DATA_LIMIT$$Base = .;
+
+    Image$$BL1_2_ER_DATA_START$$Base = BL1_2_DATA_START;
+    Image$$BL1_2_ER_DATA_LIMIT$$Base = BL1_2_DATA_START + BL1_2_DATA_SIZE;
 }
