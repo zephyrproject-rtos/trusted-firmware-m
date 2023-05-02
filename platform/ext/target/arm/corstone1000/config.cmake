@@ -15,6 +15,7 @@ set(TFM_BL1_DEFAULT_PROVISIONING        OFF        CACHE BOOL     "Whether BL1_1
 set(TFM_BL1_SOFTWARE_CRYPTO             OFF        CACHE BOOL     "Whether BL1_1 will use software crypto")
 set(TFM_BL1_MEMORY_MAPPED_FLASH         OFF        CACHE BOOL     "Whether BL1 can directly access flash content")
 set(TFM_BL1_PQ_CRYPTO                   OFF        CACHE BOOL     "Enable LMS PQ crypto for BL2 verification. This is experimental and should not yet be used in production")
+set(BL1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 will share with BL1_2")
 
 set(TFM_BL2_IMAGE_FLASH_AREA_NUM        0          CACHE STRING   "Which flash area BL2 is stored in")
 set(MCUBOOT_S_IMAGE_FLASH_AREA_NUM      2          CACHE STRING   "ID of the flash area containing the primary Secure image")

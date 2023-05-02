@@ -62,6 +62,8 @@ target_add_scatter_file(bl1_2
 
 add_subdirectory(openamp)
 
+add_subdirectory(${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom cc312-rom)
+
 target_include_directories(platform_s
     PUBLIC
         .
@@ -142,38 +144,83 @@ endif()
 
 #========================= Platform BL1 =======================================#
 
-target_sources(platform_bl1
+target_sources(platform_bl1_1
     PRIVATE
-        ./Device/Source/system_core_init.c
-        ./Device/Source/device_definition.c
-        ./bl1/boot_hal_bl1.c
-        ./Native_Driver/firewall.c
         ./CMSIS_Driver/Driver_Flash.c
         ./CMSIS_Driver/Driver_USART.c
+        ./Device/Source/device_definition.c
+        ./Device/Source/system_core_init.c
+        ./Native_Driver/arm_watchdog_drv.c
+        ./Native_Driver/firewall.c
         ./Native_Driver/uart_pl011_drv.c
         $<$<BOOL:${PLATFORM_IS_FVP}>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c>
         $<$<BOOL:${PLATFORM_IS_FVP}>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c>
         $<$<NOT:$<BOOL:${PLATFORM_IS_FVP}>>:${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/xilinx_pg153_axi_qspi_controller_drv.c>
         $<$<NOT:$<BOOL:${PLATFORM_IS_FVP}>>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/spi_n25q256a_flash_lib.c>
         $<$<NOT:$<BOOL:${PLATFORM_IS_FVP}>>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/spi_sst26vf064b_flash_lib.c>
-        ./fw_update_agent/uefi_capsule_parser.c
+        ./Native_Driver/watchdog.c
+        ./bl1/boot_hal_bl1_1.c
+        ./bl1/provisioning.c
         ./fw_update_agent/fwu_agent.c
+        ./fw_update_agent/uefi_capsule_parser.c
         ./fw_update_agent/uefi_fmp.c
         ./soft_crc/soft_crc.c
-        ./Native_Driver/arm_watchdog_drv.c
-        ./Native_Driver/watchdog.c
-        ./bl1/provisioning.c
         $<$<NOT:$<BOOL:${PLATFORM_DEFAULT_OTP}>>:${PLATFORM_DIR}/ext/accelerator/cc312/otp_cc312.c>
+        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_crypto.c>
+        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/cc312_rom_trng.c>
 )
 
-target_compile_definitions(platform_bl1
+target_compile_definitions(platform_bl1_1
     PUBLIC
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
+
 )
 
-target_include_directories(platform_bl1_interface
+target_include_directories(platform_bl1_1_interface
+    INTERFACE
+        .
+        ./Device/Include
+        ./Device/Config
+        ./Native_Driver
+        ./CMSIS_Driver/Config
+        ./fw_update_agent
+        ./soft_crc
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
+        ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/
+        ${CMAKE_SOURCE_DIR}/bl1/bl1_1/shared_lib/interface/
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_SOURCE_DIR}/platform/ext/accelerator/interface>
+)
+
+target_link_libraries(platform_bl1_1
+    PRIVATE
+        $<$<NOT:$<BOOL:${TFM_BL1_SOFTWARE_CRYPTO}>>:cc312_rom>
+)
+
+target_sources(platform_bl1_2
+    PRIVATE
+        ./bl1/boot_hal_bl1_2.c
+)
+
+target_compile_definitions(platform_bl1_2
+    PUBLIC
+        $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
+        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
+        $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
+)
+
+target_include_directories(platform_bl1_2
+    PRIVATE
+        $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom>
     INTERFACE
         .
         ./Device/Include

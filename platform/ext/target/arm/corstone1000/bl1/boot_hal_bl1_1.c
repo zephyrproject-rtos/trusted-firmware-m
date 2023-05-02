@@ -22,10 +22,8 @@
 #include "region_defs.h"
 #include "log.h"
 
-
-#if defined(CRYPTO_HW_ACCELERATOR) || \
-    defined(CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING)
-#include "crypto_hw.h"
+#ifdef CRYPTO_HW_ACCELERATOR
+#include "cc3xx_drv.h"
 #endif
 
 /* Flash device name must be specified by target */
@@ -83,9 +81,6 @@ enum host_firewall_host_comp_id_t {
   COMP_OCVM,
   COMP_DEBUG,
 };
-
-extern uint32_t platform_code_is_bl1_2;
-
 
 static void setup_mpu(void)
 {
@@ -587,31 +582,16 @@ static void setup_host_firewall(void)
        fw_lockdown(FW_FULL_LOCKDOWN);
 }
 
-uint32_t bl1_image_get_flash_offset(uint32_t image_id)
-{
-    /* SE BL2 Offset is equal to bank offset as it is the first think in the Bank */
-    uint32_t se_bl2_offset = 0;
-    bl1_get_active_bl2_image(&se_bl2_offset);
-    switch (image_id) {
-        case 0:
-            return se_bl2_offset;
-        case 1:
-            return se_bl2_offset + SE_BL2_PARTITION_SIZE;
-        default:
-            FIH_PANIC;
-    }
-}
-
 int32_t boot_platform_init(void)
 {
     int32_t result;
     uint32_t image_offset;
 
-    if (!platform_code_is_bl1_2) {
-        result = corstone1000_watchdog_init();
-        if (result != ARM_DRIVER_OK) {
-            return 1;
-        }
+
+    result = corstone1000_watchdog_init();
+    if (result != ARM_DRIVER_OK) {
+	return 1;
+     }
 #if !(PLATFORM_IS_FVP)
         setup_mpu();
 #endif
@@ -619,7 +599,6 @@ int32_t boot_platform_init(void)
 #if !(PLATFORM_IS_FVP)
         setup_host_firewall();
 #endif
-    }
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_init();
@@ -627,24 +606,12 @@ int32_t boot_platform_init(void)
 
 
 #ifdef CRYPTO_HW_ACCELERATOR
-    result = crypto_hw_accelerator_init();
+    result = cc3xx_init();
     if (result) {
         return 1;
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-    return 0;
-}
-
-int32_t boot_platform_post_init(void)
-{
-    int32_t result;
-    if (platform_code_is_bl1_2) {
-        result = FLASH_DEV_NAME.Initialize(NULL);
-        if (result != ARM_DRIVER_OK) {
-            return 1;
-        }
-    }
     return 0;
 }
 
@@ -658,26 +625,10 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
     int32_t result;
 
-#ifdef CRYPTO_HW_ACCELERATOR
-    result = crypto_hw_accelerator_finish();
-    if (result) {
-        while (1);
-    }
-
-    (void)fih_delay_init();
-#endif /* CRYPTO_HW_ACCELERATOR */
-
-
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
 #endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
-    if (platform_code_is_bl1_2) {
-        result = FLASH_DEV_NAME.Uninitialize();
-        if (result != ARM_DRIVER_OK) {
-            return 1;
-        }
-    }
 
     result = corstone1000_watchdog_reset_timer();
     if (result != ARM_DRIVER_OK) {
