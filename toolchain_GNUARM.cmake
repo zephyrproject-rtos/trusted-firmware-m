@@ -23,6 +23,8 @@ set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
 set(LINKER_VENEER_OUTPUT_FLAG -Wl,--cmse-implib,--out-implib=)
 set(COMPILER_CMSE_FLAG -mcmse)
 
+set(CMAKE_C_FLAGS_DEBUG "-g -Og")
+
 # This variable name is a bit of a misnomer. The file it is set to is included
 # at a particular step in the compiler initialisation. It is used here to
 # configure the extensions for object files. Despite the name, it also works
