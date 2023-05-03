@@ -367,9 +367,8 @@ macro(target_share_symbols target symbol_name_file)
         VERBATIM
         COMMAND python3 -c "from sys import argv; import re; f = open(argv[1], 'rt'); p = [x.replace('*', '.*') for x in argv[2:]]; l = [x for x in f.readlines() if re.search(r'(?=('+'$|'.join(p + ['SYMDEFS']) + r'))', x)]; f.close(); f = open(argv[1], 'wt'); f.writelines(l); f.close();" $<TARGET_FILE_DIR:${target}>/${target}_shared_symbols.txt ${KEEP_SYMBOL_LIST})
 
-    # Force the target to not remove the symbols if they're unused. Not
-    # currently possible on GNU, has to be part of the linker script.
-    list(TRANSFORM KEEP_SYMBOL_LIST PREPEND --keep=)
+    # Force the target to not remove the symbols if they're unused.
+    list(TRANSFORM KEEP_SYMBOL_LIST PREPEND --undefined=)
     target_link_options(${target}
         PRIVATE
             ${KEEP_SYMBOL_LIST}
