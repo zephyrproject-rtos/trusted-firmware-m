@@ -24,9 +24,6 @@
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include <string.h>
 #include "cmsis_compiler.h"
-#include "fip_parser.h"
-#include "host_flash_atu.h"
-#include "plat_def_fip_uuid.h"
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;

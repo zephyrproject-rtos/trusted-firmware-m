@@ -320,15 +320,20 @@ target_sources(platform_bl1_1
     PRIVATE
         ./bl1/boot_hal_bl1_1.c
         ./device/source/device_definition.c
-        $<$<BOOL:${TFM_BL1_LOGGING}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/host_device_definition.c>
+        ./device/source/host_device_definition.c
         ./device/source/system_core_init.c
+        ./fip_parser/fip_parser.c
+        ./fip_parser/fip_parser.c
+        ./fip_parser/host_flash_atu.c
+        ./native_drivers/atu_rss_drv.c
         ./native_drivers/kmu_drv.c
-        $<$<BOOL:${TFM_BL1_LOGGING}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/atu_rss_drv.c>
-        $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
-        $<$<AND:$<BOOL:${TFM_BL1_LOGGING}>,$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         ./native_drivers/lcm_drv.c
+        ./nv_counters.c
         ./otp_lcm.c
         ./tfm_hal_platform_reset.c
+        $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
+        $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
+        $<$<BOOL:${RSS_GPT_SUPPORT}>:${CMAKE_CURRENT_SOURCE_DIR}/fip_parser/gpt.c>
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -339,13 +344,13 @@ target_include_directories(platform_bl1_1_interface
         ./device/config
         ./device/include
         ./native_drivers
-        ./fip_parser
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
+        ./fip_parser
 )
 
 target_compile_definitions(platform_bl1_1_interface
@@ -374,33 +379,13 @@ target_link_libraries(cc312_rom
 
 target_sources(platform_bl1_2
     PRIVATE
-        ./native_drivers/kmu_drv.c
         ./bl1/boot_hal_bl1_2.c
-        ./device/source/system_core_init.c
-        ./native_drivers/atu_rss_drv.c
-        ./nv_counters.c
-        ./fip_parser/fip_parser.c
-        ./fip_parser/host_flash_atu.c
-        $<$<BOOL:${RSS_GPT_SUPPORT}>:${CMAKE_CURRENT_SOURCE_DIR}/fip_parser/gpt.c>
-        $<$<NOT:$<BOOL:${TFM_BL1_LOGGING}>>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/atu_rss_drv.c>
-        $<$<NOT:$<BOOL:${TFM_BL1_LOGGING}>>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/host_device_definition.c>
         ./rss_key_derivation.c
 )
 
 target_include_directories(platform_bl1_2
     PRIVATE
         .
-        ./cmsis_drivers
-        ./cmsis_drivers/config
-        ./device/config
-        ./device/include
-        ./native_drivers
-        ./fip_parser
-        ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
-        ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie
-        ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
-        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
-        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
 )
 
 target_compile_definitions(platform_bl1_2

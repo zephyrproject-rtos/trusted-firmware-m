@@ -47,9 +47,6 @@ SECTIONS
 
         *(.text*)
 
-        KEEP(*shared_lib*:*(.text*))
-        KEEP(*(*.text.tfm_plat_otp_*))
-        KEEP(*(*.text.cc3xx_finish))
         KEEP(*(.init))
         KEEP(*(.fini))
 
@@ -129,8 +126,6 @@ SECTIONS
         __data_start__ = .;
         *(vtable)
         *(.data*)
-        KEEP(*(*SPI_STRATAFLASHJ3_DEV*))
-        KEEP(*(*ATU_DEV_S*))
 
         . = ALIGN(4);
         /* preinit data */
