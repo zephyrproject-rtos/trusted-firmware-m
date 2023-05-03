@@ -171,7 +171,7 @@
 
 /* Memory size definitions */
 #define ITCM_SIZE                        0x00008000 /* 32 kB */
-#define ROM_SIZE                         0x00008000 /* 32 kB */
+#define ROM_SIZE                         0x00020000 /* 128 kB */
 #define DTCM_SIZE                        0x00008000 /* 32 kB */
 #define HOST_ACCESS_SIZE                 0x10000000 /* 256 MB */
 #define SIC_MAPPABLE_SIZE                0x01000000 /* 16 MB */
