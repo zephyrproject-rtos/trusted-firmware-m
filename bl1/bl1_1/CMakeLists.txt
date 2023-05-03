@@ -44,7 +44,7 @@ target_compile_definitions(bl1_1
         $<$<BOOL:${TEST_BL1_1}>:TEST_BL1_1>
 )
 
-target_share_symbols(bl1_1 ${CMAKE_CURRENT_SOURCE_DIR}/bl1_1_shared_symbols.txt)
+target_share_symbols(bl1_1 ${BL1_SHARED_SYMBOLS_PATH})
 
 ################################################################################
 

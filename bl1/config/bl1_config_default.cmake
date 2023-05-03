@@ -29,3 +29,5 @@ set(BL1_HEADER_SIZE                     0x800       CACHE STRING    "BL1 Header 
 set(BL1_TRAILER_SIZE                    0x000       CACHE STRING    "BL1 Trailer size")
 
 set(BL1_2_BUILD_TYPE                    ${CMAKE_BUILD_TYPE} CACHE STRING "Build type of BL1_2")
+
+set(BL1_SHARED_SYMBOLS_PATH ${CMAKE_SOURCE_DIR}/bl1/bl1_1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
