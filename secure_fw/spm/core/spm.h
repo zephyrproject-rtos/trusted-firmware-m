@@ -64,36 +64,35 @@
 /* RoT connection handle list */
 struct connection_t {
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-    void *rhandle;                      /* Reverse handle value           */
+    void *rhandle;                           /* Reverse handle value           */
 #endif
-    uint32_t status;                    /*
-                                         * Status of handle, three valid
-                                         * options:
-                                         * TFM_HANDLE_STATUS_ACTIVE,
-                                         * TFM_HANDLE_STATUS_IDLE and
-                                         * TFM_HANDLE_STATUS_TO_FREE
-                                         */
-    struct partition_t *p_client;       /* Caller partition               */
-    struct service_t *service;          /* RoT service pointer            */
-    psa_msg_t msg;                      /* PSA message body               */
-    psa_invec invec[PSA_MAX_IOVEC];     /* Put in/out vectors in msg body */
-    psa_outvec outvec[PSA_MAX_IOVEC];
-    psa_outvec *caller_outvec;          /*
-                                         * Save caller outvec pointer for
-                                         * write length update
-                                         */
+    uint32_t status;                         /*
+                                              * Status of handle, three valid
+                                              * options:
+                                              * TFM_HANDLE_STATUS_ACTIVE,
+                                              * TFM_HANDLE_STATUS_IDLE and
+                                              * TFM_HANDLE_STATUS_TO_FREE
+                                              */
+    struct partition_t *p_client;            /* Caller partition               */
+    struct service_t *service;               /* RoT service pointer            */
+    psa_msg_t msg;                           /* PSA message body               */
+    const void *invec_base[PSA_MAX_IOVEC];   /* Base addresses of invec from client */
+    size_t invec_accessed[PSA_MAX_IOVEC];    /* Size of data accessed by psa_read/skip */
+    void *outvec_base[PSA_MAX_IOVEC];        /* Base addresses of outvec from client */
+    size_t outvec_written[PSA_MAX_IOVEC];    /* Size of data written by psa_write */
+    psa_outvec *caller_outvec;               /* Save caller outvec pointer for write length update*/
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
-    const void *caller_data;            /*
-                                         * Pointer to the private data of the
-                                         * caller. It identifies the NSPE PSA
-                                         * client calls in multi-core topology
-                                         */
+    const void *caller_data;                 /*
+                                              * Pointer to the private data of the
+                                              * caller. It identifies the NSPE PSA
+                                              * client calls in multi-core topology
+                                              */
 #endif
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
-    uint32_t iovec_status;              /* MM-IOVEC status                */
+    uint32_t iovec_status;                   /* MM-IOVEC status                */
 #endif
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-    struct connection_t *p_handles;     /* Handle(s) link                 */
+    struct connection_t *p_handles;          /* Handle(s) link                 */
 #endif
 };
 

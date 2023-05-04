@@ -485,8 +485,8 @@ void update_caller_outvec_len(struct connection_t *handle)
             continue;
         }
 
-        SPM_ASSERT(handle->caller_outvec[i].base == handle->outvec[i].base);
+        SPM_ASSERT(handle->caller_outvec[i].base == handle->outvec_base[i]);
 
-        handle->caller_outvec[i].len = handle->outvec[i].len;
+        handle->caller_outvec[i].len = handle->outvec_written[i];
     }
 }

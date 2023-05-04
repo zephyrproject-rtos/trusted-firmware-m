@@ -223,7 +223,7 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
                      * zero bytes have been written.
                      */
                     if (i >= OUTVEC_IDX_BASE) {
-                        handle->outvec[i - OUTVEC_IDX_BASE].len = 0;
+                        handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
                     }
                 }
             }

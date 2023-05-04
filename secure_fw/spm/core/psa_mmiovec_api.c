@@ -78,15 +78,15 @@ const void *tfm_spm_partition_psa_map_invec(psa_handle_t msg_handle,
      * invalid or not readable.
      */
     FIH_CALL(tfm_hal_memory_check, fih_rc,
-             partition->boundary, (uintptr_t)handle->invec[invec_idx].base,
-             handle->invec[invec_idx].len, TFM_HAL_ACCESS_READABLE);
+             partition->boundary, (uintptr_t)handle->invec_base[invec_idx],
+             handle->msg.in_size[invec_idx], TFM_HAL_ACCESS_READABLE);
     if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         tfm_core_panic();
     }
 
     SET_IOVEC_MAPPED(handle, (invec_idx + INVEC_IDX_BASE));
 
-    return handle->invec[invec_idx].base;
+    return handle->invec_base[invec_idx];
 }
 
 void tfm_spm_partition_psa_unmap_invec(psa_handle_t msg_handle,
@@ -207,14 +207,14 @@ void *tfm_spm_partition_psa_map_outvec(psa_handle_t msg_handle,
      * It is a fatal error if the output vector is invalid or not read-write.
      */
     FIH_CALL(tfm_hal_memory_check, fih_rc,
-             partition->boundary, (uintptr_t)handle->outvec[outvec_idx].base,
-             handle->outvec[outvec_idx].len, TFM_HAL_ACCESS_READWRITE);
+             partition->boundary, (uintptr_t)handle->outvec_base[outvec_idx],
+             handle->msg.out_size[outvec_idx], TFM_HAL_ACCESS_READWRITE);
     if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
         tfm_core_panic();
     }
     SET_IOVEC_MAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE));
 
-    return handle->outvec[outvec_idx].base;
+    return handle->outvec_base[outvec_idx];
 }
 
 void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
@@ -278,5 +278,5 @@ void tfm_spm_partition_psa_unmap_outvec(psa_handle_t msg_handle,
     SET_IOVEC_UNMAPPED(handle, (outvec_idx + OUTVEC_IDX_BASE));
 
     /* Update the write number */
-    handle->outvec[outvec_idx].len = len;
+    handle->outvec_written[outvec_idx] = len;
 }

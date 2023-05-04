@@ -15,7 +15,7 @@
 size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
                                   void *buffer, size_t num_bytes)
 {
-    size_t bytes;
+    size_t bytes, remaining;
     struct connection_t *handle = NULL;
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
@@ -54,8 +54,9 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
     SET_IOVEC_ACCESSED(handle, (invec_idx + INVEC_IDX_BASE));
 #endif
 
+    remaining = handle->msg.in_size[invec_idx] - handle->invec_accessed[invec_idx];
     /* There was no remaining data in this input vector */
-    if (handle->msg.in_size[invec_idx] == 0) {
+    if (remaining == 0) {
         return 0;
     }
 
@@ -70,15 +71,13 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
         tfm_core_panic();
     }
 
-    bytes = num_bytes > handle->msg.in_size[invec_idx] ?
-                        handle->msg.in_size[invec_idx] : num_bytes;
+    bytes = num_bytes < remaining ? num_bytes : remaining;
 
-    spm_memcpy(buffer, handle->invec[invec_idx].base, bytes);
+    spm_memcpy(buffer, (char *)handle->invec_base[invec_idx] +
+                               handle->invec_accessed[invec_idx], bytes);
 
-    /* There maybe some remaining data */
-    handle->invec[invec_idx].base =
-                                (char *)handle->invec[invec_idx].base + bytes;
-    handle->msg.in_size[invec_idx] -= bytes;
+    /* Update the data size read */
+    handle->invec_accessed[invec_idx] += num_bytes;
 
     return bytes;
 }
@@ -87,6 +86,7 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
                                   size_t num_bytes)
 {
     struct connection_t *handle = NULL;
+    size_t remaining;
 
     /* It is a fatal error if message handle is invalid */
     handle = spm_msg_handle_to_connection(msg_handle);
@@ -122,8 +122,9 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
     SET_IOVEC_ACCESSED(handle, (invec_idx + INVEC_IDX_BASE));
 #endif
 
+    remaining = handle->msg.in_size[invec_idx] - handle->invec_accessed[invec_idx];
     /* There was no remaining data in this input vector */
-    if (handle->msg.in_size[invec_idx] == 0) {
+    if (remaining == 0) {
         return 0;
     }
 
@@ -131,14 +132,12 @@ size_t tfm_spm_partition_psa_skip(psa_handle_t msg_handle, uint32_t invec_idx,
      * If num_bytes is greater than the remaining size of the input vector then
      * the remaining size of the input vector is used.
      */
-    if (num_bytes > handle->msg.in_size[invec_idx]) {
-        num_bytes = handle->msg.in_size[invec_idx];
+    if (num_bytes > remaining) {
+        num_bytes = remaining;
     }
 
-    /* There maybe some remaining data */
-    handle->invec[invec_idx].base =
-                            (char *)handle->invec[invec_idx].base + num_bytes;
-    handle->msg.in_size[invec_idx] -= num_bytes;
+    /* Update the data size accessed */
+    handle->invec_accessed[invec_idx] += num_bytes;
 
     return num_bytes;
 }
@@ -176,8 +175,7 @@ psa_status_t tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outve
      * It is a fatal error if the call attempts to write data past the end of
      * the client output vector
      */
-    if (num_bytes > handle->msg.out_size[outvec_idx] -
-        handle->outvec[outvec_idx].len) {
+    if (num_bytes > handle->msg.out_size[outvec_idx] - handle->outvec_written[outvec_idx]) {
         tfm_core_panic();
     }
 
@@ -204,11 +202,11 @@ psa_status_t tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outve
         tfm_core_panic();
     }
 
-    spm_memcpy((char *)handle->outvec[outvec_idx].base +
-               handle->outvec[outvec_idx].len, buffer, num_bytes);
+    spm_memcpy((char *)handle->outvec_base[outvec_idx] +
+               handle->outvec_written[outvec_idx], buffer, num_bytes);
 
-    /* Update the write number */
-    handle->outvec[outvec_idx].len += num_bytes;
+    /* Update the data size written */
+    handle->outvec_written[outvec_idx] += num_bytes;
 
     return PSA_SUCCESS;
 }
