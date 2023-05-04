@@ -260,7 +260,7 @@ __STATIC_INLINE bool tfm_arch_is_priv(void)
 }
 
 #if (CONFIG_TFM_FLOAT_ABI >= 1) && CONFIG_TFM_LAZY_STACKING
-#define ARCH_FLUSH_FP_CONTEXT()  __asm volatile("vmov  s0, s0 \n":::"memory")
+#define ARCH_FLUSH_FP_CONTEXT()  __asm volatile("vmov.f32  s0, s0 \n":::"memory")
 #else
 #define ARCH_FLUSH_FP_CONTEXT()
 #endif
