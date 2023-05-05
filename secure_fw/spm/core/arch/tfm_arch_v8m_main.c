@@ -33,7 +33,7 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #if defined(__ICCARM__)
 
 #pragma required = scheduler_lock
-#pragma required = tfm_core_svc_handler
+#pragma required = spm_svc_handler
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
 #pragma required = ipc_schedule
@@ -160,7 +160,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r3, PSPLIM                      \n"
     "PUSH    {r2, r3}                        \n" /* PSP PSPLIM */
     "PUSH    {r1, r2}                        \n" /* Orig_exc_return, dummy */
-    "BL      tfm_core_svc_handler            \n"
+    "BL      spm_svc_handler                 \n"
     "MOV     lr, r0                          \n"
     "POP     {r1, r2}                        \n" /* Orig_exc_return, dummy */
     "POP     {r2, r3}                        \n" /* PSP PSPLIM */

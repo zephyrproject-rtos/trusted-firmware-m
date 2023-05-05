@@ -18,7 +18,6 @@
 
  * \returns                     EXC_RETURN value indicates where to return.
  */
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
-                              uint32_t *psp);
+uint32_t spm_svc_handler(uint32_t *msp, uint32_t exc_return, uint32_t *psp);
 
 #endif

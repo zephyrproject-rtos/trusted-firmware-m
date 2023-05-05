@@ -34,7 +34,7 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #endif
 
 #pragma required = scheduler_lock
-#pragma required = tfm_core_svc_handler
+#pragma required = spm_svc_handler
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
@@ -182,7 +182,7 @@ __attribute__((naked)) void SVC_Handler(void)
     "MRS     r3, PSPLIM                     \n"
     "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
     "PUSH    {r1, r2}                       \n" /* Orig_exc_return, dummy */
-    "BL      tfm_core_svc_handler           \n"
+    "BL      spm_svc_handler                \n"
     "MOV     lr, r0                         \n"
     "POP     {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "MOVS    r2, #8                         \n"

@@ -53,7 +53,7 @@ target_sources(tfm_spm
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:core/backend_sfn.c>
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:core/interrupt.c>
         $<$<BOOL:${CONFIG_TFM_STACK_WATERMARKS}>:core/stack_watermark.c>
-        core/tfm_core_svcalls_ipc.c
+        core/tfm_svcalls.c
         core/tfm_pools.c
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:core/thread.c>
         $<$<BOOL:${TFM_NS_MANAGE_NSID}>:ns_client_ext/tfm_ns_ctx.c>

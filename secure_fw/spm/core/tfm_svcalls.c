@@ -123,7 +123,7 @@ static uint32_t handle_spm_svc_requests(uint32_t svc_number, uint32_t exc_return
     return exc_return;
 }
 
-uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return, uint32_t *psp)
+uint32_t spm_svc_handler(uint32_t *msp, uint32_t exc_return, uint32_t *psp)
 {
     uint8_t svc_number = TFM_SVC_PSA_FRAMEWORK_VERSION;
     uint32_t *svc_args = msp;
