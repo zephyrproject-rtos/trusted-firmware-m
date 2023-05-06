@@ -85,11 +85,6 @@ parse_field_from_yaml("${GENERATED_FILE_LISTS}" template TEMPLATE_FILES)
 # Paths used in GENERATED_FILE_LISTS are all relative to TF-M root (${CMAKE_SOURCE_DIR})
 list(TRANSFORM TEMPLATE_FILES REPLACE "^([^/\\][^:].*)" "${CMAKE_SOURCE_DIR}/\\1")
 
-parse_field_from_yaml("${GENERATED_FILE_LISTS}" output OUTPUT_FILES)
-# Replace relative paths with absolute paths
-# Paths used in GENERATED_FILE_LISTS are all relative to TF-M root (${CMAKE_SOURCE_DIR})
-list(TRANSFORM OUTPUT_FILES REPLACE "^([^/\\][^:].*)" "${CMAKE_BINARY_DIR}/generated/\\1")
-
 ############################### Generate Manifest config header ################
 
 # The function appends the given `config` to the `out_var` variable.
@@ -120,30 +115,12 @@ endfunction()
 #   - The isolation level
 #   - The SPM backend
 #   - "conditional" attributes for every Secure Partition in manifest lists
-#   - "stack_size" in manifests
-#   - "heap_size" in manifests
 append_manifest_config(MANIFEST_CONFIG_H_CONTENT TFM_ISOLATION_LEVEL STRING)
 append_manifest_config(MANIFEST_CONFIG_H_CONTENT CONFIG_TFM_SPM_BACKEND STRING)
 
 parse_field_from_yaml("${MANIFEST_LISTS}" conditional CONDITIONS)
 foreach(CON ${CONDITIONS})
     append_manifest_config(MANIFEST_CONFIG_H_CONTENT ${CON} BOOL)
-endforeach()
-
-parse_field_from_yaml("${MANIFEST_FILES}" stack_size STACK_SIZES)
-foreach(STK_SIZE ${STACK_SIZES})
-    if (NOT STK_SIZE GREATER 0)
-        # The "stack_size" might not be a valid number. Treat it as a configuration
-        append_manifest_config(MANIFEST_CONFIG_H_CONTENT ${STK_SIZE} STRING)
-    endif()
-endforeach()
-
-parse_field_from_yaml("${MANIFEST_FILES}" heap_size HEAP_SIZES)
-foreach(HEAP_SIZE ${HEAP_SIZES})
-    if (NOT HEAP_SIZE GREATER 0)
-        # The "heap_size" might not be a valid number. Treat it as a configuration
-        append_manifest_config(MANIFEST_CONFIG_H_CONTENT ${HEAP_SIZE} STRING)
-    endif()
 endforeach()
 
 # Generate the config header
