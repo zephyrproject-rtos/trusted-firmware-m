@@ -16,6 +16,8 @@ cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_psa_rot_partition_ns_agent_mailbox STATIC)
 
+add_dependencies(tfm_psa_rot_partition_ns_agent_mailbox manifest_tool)
+
 target_sources(tfm_psa_rot_partition_ns_agent_mailbox
     PRIVATE
         ${CMAKE_SOURCE_DIR}/secure_fw/spm/core/tfm_rpc.c

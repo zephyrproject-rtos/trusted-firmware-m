@@ -84,6 +84,13 @@ parse_field_from_yaml("${GENERATED_FILE_LISTS}" template TEMPLATE_FILES)
 # Replace relative paths with absolute paths
 # Paths used in GENERATED_FILE_LISTS are all relative to TF-M root (${CMAKE_SOURCE_DIR})
 list(TRANSFORM TEMPLATE_FILES REPLACE "^([^/\\][^:].*)" "${CMAKE_SOURCE_DIR}/\\1")
+# Append the fixed templates that are not in the GENERATED_FILE_LISTS
+list(APPEND TEMPLATE_FILES
+     ${CMAKE_CURRENT_SOURCE_DIR}/templates/manifestfilename.template
+     ${CMAKE_CURRENT_SOURCE_DIR}/templates/partition_intermedia.template
+     ${CMAKE_CURRENT_SOURCE_DIR}/templates/partition_load_info.template
+     ${CMAKE_CURRENT_SOURCE_DIR}/config_impl.cmake.template
+)
 
 ############################### Generate Manifest config header ################
 
@@ -154,6 +161,18 @@ set(MANIFEST_COMMAND
     -c ${CMAKE_CURRENT_BINARY_DIR}/manifest_config.h
     -o ${CMAKE_BINARY_DIR}/generated
     ${PARSE_MANIFEST_QUIET_FLAG})
+
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/generated
+    COMMAND ${MANIFEST_COMMAND}
+    DEPENDS ${MANIFEST_LISTS} ${GENERATED_FILE_LISTS}
+            ${MANIFEST_FILES} ${TEMPLATE_FILES}
+)
+
+add_custom_target(
+    manifest_tool
+    DEPENDS ${CMAKE_BINARY_DIR}/generated
+)
 
 # The files need to be generated before cmake will allow them to be used as
 # sources. Due to issue with custom_command scoping the easiest way to do this

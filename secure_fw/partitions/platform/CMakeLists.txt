@@ -16,6 +16,8 @@ add_library(tfm_psa_rot_partition_platform STATIC
     platform_sp.c
 )
 
+add_dependencies(tfm_psa_rot_partition_platform manifest_tool)
+
 # The generated sources
 target_sources(tfm_psa_rot_partition_platform
     PRIVATE

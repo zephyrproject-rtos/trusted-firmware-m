@@ -14,6 +14,8 @@ cmake_policy(SET CMP0079 NEW)
 
 add_library(tfm_psa_rot_partition_its STATIC)
 
+add_dependencies(tfm_psa_rot_partition_its manifest_tool)
+
 target_include_directories(tfm_psa_rot_partition_its
     PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>

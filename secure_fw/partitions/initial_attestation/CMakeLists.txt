@@ -17,6 +17,8 @@ configure_file(${CMAKE_SOURCE_DIR}/interface/include/psa/initial_attestation.h.i
 
 add_library(tfm_psa_rot_partition_attestation STATIC)
 
+add_dependencies(tfm_psa_rot_partition_attestation manifest_tool)
+
 target_sources(tfm_psa_rot_partition_attestation PRIVATE
     tfm_attest.c
     tfm_attest_req_mngr.c
