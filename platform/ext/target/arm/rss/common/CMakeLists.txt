@@ -133,6 +133,8 @@ target_sources(platform_s
         device/source/system_core_init.c
         $<$<BOOL:${TFM_PARTITION_DPE}>:${CMAKE_CURRENT_SOURCE_DIR}/dpe/dpe_plat.c>
         libraries/dma350_lib.c
+        libraries/sds.c
+        libraries/sds_svc.c
         native_drivers/atu_rss_drv.c
         native_drivers/dma350_drv.c
         native_drivers/dma350_ch_drv.c

@@ -35,4 +35,10 @@
 #define HOST_FLASH0_BASE   0x08000000UL /* Host flash base address */
 #define HOST_FLASH0_SIZE   0x4000000    /* 64 MiB */
 
+#define AP_TRUSTED_SRAM_BASE  0x4000000UL /* AP trusted SRAM base address */
+#define AP_SHARED_RAM_BASE    AP_TRUSTED_SRAM_BASE
+
+#define PLAT_RSS_AP_SDS_BASE  AP_SHARED_RAM_BASE
+#define PLAT_RSS_AP_SDS_SIZE  0x6E0U      /* 1760 bytes */
+
 #endif  /* __HOST_BASE_ADDRESS_H__ */

@@ -25,6 +25,10 @@ int32_t platform_svc_handlers(uint8_t svc_num, uint32_t *svc_args,
                     (void *)svc_args[2]);
             break;
 
+        case TFM_SVC_PLATFORM_SDS_STRUCT_ADD:
+            retval = (int32_t)sds_struct_add((void *)svc_args[0]);
+            break;
+
         default:
             retval = PSA_ERROR_GENERIC_ERROR;
             break;
