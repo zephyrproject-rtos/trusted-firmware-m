@@ -57,11 +57,11 @@ add_custom_command(OUTPUT encrypted_dm_provisioning_bundle.bin
     DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
     bl1_2_padded_bin bl2_signed_bin dm_provisioning_bundle
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../rss_create_provisioning_bundle.py
-    COMMAND ${CROSS_COMPILE}-objcopy $<TARGET_FILE_DIR:dm_provisioning_bundle>/dm_provisioning_bundle.axf
+    COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:dm_provisioning_bundle>/dm_provisioning_bundle.axf
                     --dump-section CODE=dm_provisioning_code.bin
-    COMMAND ${CROSS_COMPILE}-objcopy $<TARGET_FILE_DIR:dm_provisioning_bundle>/dm_provisioning_bundle.axf
+    COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:dm_provisioning_bundle>/dm_provisioning_bundle.axf
                     --dump-section DATA=dm_provisioning_data.bin
-    COMMAND ${CROSS_COMPILE}-objcopy $<TARGET_FILE_DIR:dm_provisioning_bundle>/dm_provisioning_bundle.axf
+    COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:dm_provisioning_bundle>/dm_provisioning_bundle.axf
                     --dump-section VALUES=dm_provisioning_values.bin
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../rss_create_provisioning_bundle.py
                     --provisioning_code dm_provisioning_code.bin
