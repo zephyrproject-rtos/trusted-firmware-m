@@ -17,6 +17,7 @@ target_sources(cc312_rom
         ./cc3xx_dma.c
         ./cc3xx_init.c
         ./cc3xx_engine_state.c
+        ./cc3xx_stdlib.c
 )
 
 target_include_directories(cc312_rom
