@@ -32,10 +32,10 @@ enum rss_gpio_val_t {
 };
 
 static const volatile struct cm_provisioning_bundle *cm_encrypted_bundle =
-(const struct cm_provisioning_bundle *)VM0_BASE_S;
+(const struct cm_provisioning_bundle *)CM_PROVISIONING_BUNDLE_START;
 
 static const volatile struct dm_provisioning_bundle *dm_encrypted_bundle =
-(const struct dm_provisioning_bundle *)VM1_BASE_S;
+(const struct dm_provisioning_bundle *)DM_PROVISIONING_BUNDLE_START;
 
 static void gpio_set(enum rss_gpio_val_t val)
 {
