@@ -30,7 +30,7 @@ if (TFM_PARTITION_CRYPTO)
     add_library(platform_crypto_keys STATIC)
 endif()
 
-set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE PATH "Path to platform directory")
 
 add_subdirectory(ext/target/${TFM_PLATFORM} target)
 

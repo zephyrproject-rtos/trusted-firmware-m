@@ -18,15 +18,15 @@ add_subdirectory(partitions)
 
 target_include_directories(tfm_config
     INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/crypto
-        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/firmware_update
-        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/initial_attestation
-        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/internal_trusted_storage
-        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/platform
-        ${CMAKE_CURRENT_SOURCE_DIR}/partitions/protected_storage
-        ${CMAKE_CURRENT_SOURCE_DIR}/spm/include
-        ${CMAKE_BINARY_DIR}/generated/interface/include
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/partitions/crypto>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/partitions/firmware_update>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/partitions/initial_attestation>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/partitions/internal_trusted_storage>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/partitions/platform>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/partitions/protected_storage>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/spm/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/generated/interface/include>
 )
 
 target_compile_definitions(tfm_config

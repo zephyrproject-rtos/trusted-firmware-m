@@ -39,33 +39,6 @@ target_add_scatter_file(tfm_s
     $<$<AND:$<VERSION_EQUAL:${TFM_ISOLATION_LEVEL},3>,$<C_COMPILER_ID:IAR>>:${CMAKE_BINARY_DIR}/generated/platform/ext/common/iar/tfm_isolation_l3.icf>
 )
 
-if(NS)
-    target_sources(tfm_ns
-        PRIVATE
-         ${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/startup_an521.c
-    )
-    target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct>
-        $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld>
-        $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf>
-    )
-    target_link_libraries(CMSIS_5_tfm_ns
-        INTERFACE
-        $<$<AND:$<C_COMPILER_ID:GNU>,$<OR:$<BOOL:${CONFIG_TFM_ENABLE_FP}>,$<BOOL:${CONFIG_TFM_ENABLE_MVE_FP}>>>:CMSIS_5_RTX_V8MMFN>
-        $<$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<OR:$<BOOL:${CONFIG_TFM_ENABLE_FP}>,$<BOOL:${CONFIG_TFM_ENABLE_MVE_FP}>>>>:CMSIS_5_RTX_V8MMN>
-            $<$<C_COMPILER_ID:ARMClang>:CMSIS_5_RTX_V8MMN>
-            $<$<C_COMPILER_ID:IAR>:CMSIS_5_RTX_V8MMN>
-    )
-    target_compile_options(tfm_ns
-        PUBLIC
-            ${COMPILER_CP_FLAG}
-    )
-    target_link_options(tfm_ns
-        PUBLIC
-            ${LINKER_CP_OPTION}
-    )
-endif()
-
 if(BL2)
     target_sources(bl2
         PRIVATE
@@ -177,6 +150,7 @@ if(BL2)
             .
             ${PLATFORM_DIR}/..
             native_drivers
+            native_drivers/timer_cmsdk
     )
 endif()
 

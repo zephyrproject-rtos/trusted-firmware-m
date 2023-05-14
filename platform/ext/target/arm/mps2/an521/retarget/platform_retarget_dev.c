@@ -26,7 +26,7 @@
 #include "platform_retarget_dev.h"
 #include "platform_retarget.h"
 #include "system_core_init.h"
-#include "platform/include/tfm_plat_defs.h"
+#include "tfm_plat_defs.h"
 
 /* ARM UART driver structures */
 #ifdef ARM_UART0_S

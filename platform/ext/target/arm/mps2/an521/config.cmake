@@ -23,7 +23,13 @@ else()
     set(BL2_TRAILER_SIZE 0x10400 CACHE STRING "Trailer size")
 endif()
 
+# Paramters for PSA API tests
+
+set(PSA_API_TEST_TARGET              an521     CACHE STRING  "PSA_API_TARGET name")
+set(PSA_API_TEST_CPU_ARCH            armv8m_ml CACHE STRING  "NSPE CPU_ARCH for PSA tests")
+
 # Platform-specific configurations
+
 set(CONFIG_TFM_USE_TRUSTZONE          ON)
 set(TFM_MULTI_CORE_TOPOLOGY           OFF)
 

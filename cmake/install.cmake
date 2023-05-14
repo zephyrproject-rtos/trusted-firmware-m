@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/
-        DESTINATION ${TFM_INSTALL_PATH}/outputs
+        DESTINATION outputs
 )
 
 set(INTERFACE_INC_DIR ${CMAKE_SOURCE_DIR}/interface/include)
@@ -17,6 +17,8 @@ set(INTERFACE_SRC_DIR ${CMAKE_SOURCE_DIR}/interface/src)
 set(INSTALL_INTERFACE_INC_DIR    ${TFM_INSTALL_PATH}/interface/include)
 set(INSTALL_INTERFACE_SRC_DIR    ${TFM_INSTALL_PATH}/interface/src)
 set(INSTALL_INTERFACE_LIB_DIR    ${TFM_INSTALL_PATH}/interface/lib)
+set(INSTALL_PLATFORM_NS_DIR      ${TFM_INSTALL_PATH}/platform)
+set(INSTALL_CMAKE_DIR            ${TFM_INSTALL_PATH}/cmake)
 
 # export veneer lib
 if (CONFIG_TFM_USE_TRUSTZONE)
@@ -170,25 +172,33 @@ set(INSTALL_IMAGE_SIGNING_DIR ${TFM_INSTALL_PATH}/image_signing)
 
 if(BL2)
     install(DIRECTORY bl2/ext/mcuboot/scripts
-            DESTINATION ${INSTALL_IMAGE_SIGNING_DIR})
+            DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}
+            PATTERN "scripts/*.py"
+            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+            GROUP_EXECUTE GROUP_READ
+            PATTERN "scripts/wrapper/*.py"
+            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                        GROUP_EXECUTE GROUP_READ)
+
+    install(DIRECTORY ${MCUBOOT_PATH}/scripts/imgtool
+            DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/scripts)
 
     if (MCUBOOT_ENC_IMAGES)
         install(FILES ${MCUBOOT_KEY_ENC}
                 DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
     endif()
 
-    if (PLATFORM_DEFAULT_IMAGE_SIGNING)
-        install(FILES $<TARGET_OBJECTS:signing_layout_s>
-            DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
-        install(FILES ${MCUBOOT_KEY_S}
-            DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
-        if(MCUBOOT_IMAGE_NUMBER GREATER 1)
-            install(FILES $<TARGET_OBJECTS:signing_layout_ns>
-                    DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
-            install(FILES ${MCUBOOT_KEY_NS}
-                    DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
-        endif()
+    # unconditionally install all necessary files for optional signing
+    install(FILES $<TARGET_OBJECTS:signing_layout_s>
+        DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
+
+    if(MCUBOOT_IMAGE_NUMBER GREATER 1)
+        install(FILES $<TARGET_OBJECTS:signing_layout_ns>
+                DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
     endif()
+
+    install(FILES ${MCUBOOT_KEY_NS} ${MCUBOOT_KEY_S}
+            DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
 endif()
 
 if(TFM_PARTITION_FIRMWARE_UPDATE)
@@ -196,9 +206,74 @@ if(TFM_PARTITION_FIRMWARE_UPDATE)
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
-###################### Install for NS regression tests #########################
+###################### Install NS platform sources #############################
 
-include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/install.cmake)
+install(CODE "MESSAGE(\"----- Installing platform NS -----\")")
+
+install(FILES ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
+              DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
+              DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
+              DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(DIRECTORY ${PLATFORM_DIR}/ext/cmsis
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES ${CMAKE_SOURCE_DIR}/cmake/spe-CMakeLists.cmake
+        DESTINATION ${TFM_INSTALL_PATH}
+        RENAME CMakeLists.txt)
+
+install(FILES ${PLATFORM_DIR}/ns/toolchain_ns_GNUARM.cmake
+        DESTINATION ${INSTALL_CMAKE_DIR})
+
+# copy all files from active platform directory
+install(DIRECTORY ${TARGET_PLATFORM_PATH}/ns/
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR} OPTIONAL)
+
+# Export platform abilities
+install(FILES ${TARGET_PLATFORM_PATH}/config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR} OPTIONAL)
+
+install(FILES
+        ${CMAKE_SOURCE_DIR}/lib/fih/inc/fih.h
+        ${PLATFORM_DIR}/include/tfm_plat_ns.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
+
+if (TARGET psa_crypto_config)
+# FIXIT: This is a temporal patch to reduce the change scope and simplify review.
+# In the future we shall decouple this target from tfm_config becuase
+# "psa_crypto_config" target exists not in all configurations.
+# Functionally "psa_crypto_config" provides only include path for Crypto accelerator.
+install(TARGETS tfm_config psa_crypto_config psa_interface
+        DESTINATION ${TFM_INSTALL_PATH}
+        EXPORT tfm-config
+        )
+else()
+        install(TARGETS tfm_config psa_interface
+        DESTINATION ${TFM_INSTALL_PATH}
+        EXPORT tfm-config
+        )
+endif()
+
+target_include_directories(psa_interface
+        INTERFACE
+        $<INSTALL_INTERFACE:interface/include>
+        )
+
+install(EXPORT tfm-config
+        FILE spe_export.cmake
+        DESTINATION ${INSTALL_CMAKE_DIR})
+
+configure_file(${CMAKE_SOURCE_DIR}/config/spe_config.cmake.in
+               ${INSTALL_CMAKE_DIR}/spe_config.cmake @ONLY)
 
 ##################### Platform-specific installation ###########################
 include(${TARGET_PLATFORM_PATH}/install.cmake OPTIONAL)
+
+###################### Install for NS regression tests #########################
+
+include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/install.cmake OPTIONAL)
+

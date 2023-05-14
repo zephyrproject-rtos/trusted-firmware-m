@@ -46,7 +46,6 @@ set(PLATFORM_IS_FVP                     FALSE       CACHE BOOL      "Whether to 
 
 set(BL1                                 OFF         CACHE BOOL      "Whether to build BL1")
 set(BL2                                 ON          CACHE BOOL      "Whether to build BL2")
-set(NS                                  ON          CACHE BOOL      "Whether to build NS app")
 set(NS_EVALUATION_APP_PATH              ""          CACHE PATH      "Path to TFM NS Evaluation Application")
 
 set(TEST_S                              OFF         CACHE BOOL      "Whether to build S regression tests")
@@ -149,7 +148,14 @@ to the include path of mbedtls.")
 set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH   "${CMAKE_SOURCE_DIR}/lib/ext/mbedcrypto/mbedcrypto_config/crypto_config_default.h" CACHE PATH "Config to use psa crypto setting for Mbed Crypto.")
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH ""    CACHE PATH      "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
-################################################################################
+########################## MCUBoot signing #####################################
+
+if (CONFIG_TFM_BOOT_STORE_MEASUREMENTS AND CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS)
+    set(MCUBOOT_MEASURED_BOOT ON)
+else()
+    set(MCUBOOT_MEASURED_BOOT OFF)
+endif()
+
 ################################################################################
 
 # Specifying the accepted values for certain configuration options to facilitate

@@ -28,9 +28,9 @@ add_library(psa_interface INTERFACE)
 
 target_include_directories(psa_interface
     INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_BINARY_DIR}/generated/interface/include
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/generated/interface/include>
+        $<BUILD_INTERFACE:$<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core>>
 )
 
 target_link_libraries(psa_interface

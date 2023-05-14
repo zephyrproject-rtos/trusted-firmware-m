@@ -58,5 +58,5 @@ endif()
 
 target_include_directories(tfm_config
     INTERFACE
-        ${CMAKE_CURRENT_LIST_DIR}
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
 )
