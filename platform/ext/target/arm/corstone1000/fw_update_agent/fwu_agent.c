@@ -802,6 +802,8 @@ static enum fwu_agent_error_t flash_full_capsule(
     }
     metadata->active_index = previous_active_index;
     metadata->previous_active_index = active_index;
+    metadata->crc_32 = crc32((uint8_t *)&metadata->version,
+                              sizeof(struct fwu_metadata) - sizeof(uint32_t));
 
     ret = metadata_write(metadata);
     if (ret) {
@@ -913,6 +915,8 @@ static enum fwu_agent_error_t accept_full_capsule(
     if (ret) {
         return ret;
     }
+    metadata->crc_32 = crc32((uint8_t *)&metadata->version,
+                              sizeof(struct fwu_metadata) - sizeof(uint32_t));
 
     ret = metadata_write(metadata);
     if (ret) {
@@ -1007,6 +1011,8 @@ static enum fwu_agent_error_t fwu_select_previous(
     if (ret) {
         return ret;
     }
+    metadata->crc_32 = crc32((uint8_t *)&metadata->version,
+                              sizeof(struct fwu_metadata) - sizeof(uint32_t));
 
     ret = metadata_write(metadata);
     if (ret) {
