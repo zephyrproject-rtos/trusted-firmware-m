@@ -60,7 +60,7 @@ static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
 }
 #else /* PSA_FRAMEWORK_HAS_MM_IOVEC == 1 */
 /* Buffer to store the created attestation token. */
-static uint8_t token_buff[PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE];
+static uint8_t token_buff[PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE];
 
 static psa_status_t psa_attest_get_token(const psa_msg_t *msg)
 {

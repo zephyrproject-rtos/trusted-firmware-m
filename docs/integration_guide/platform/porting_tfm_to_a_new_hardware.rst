@@ -384,7 +384,7 @@ region_defs.h:
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |NS_STACK_SIZE                     | Size of the Non-Secure (NS) world stack                           | if tfm_ns is built                            |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
-    |PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE | Size of the buffer that will store the initial attestation        | used by initial attestation partition         |
+    |PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE | Size of the buffer that will store the initial attestation        | used by initial attestation partition         |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+
     |TFM_ATTEST_BOOT_RECORDS_MAX_SIZE  | Size of buffer that can store the encoded list of boot records    | used by delegated attestation partition       |
     +----------------------------------+-------------------------------------------------------------------+-----------------------------------------------+

@@ -102,7 +102,7 @@
 /* This size of buffer is big enough to store an attestation
  * token produced by initial attestation service
  */
-#define PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE   (0x800)
+#define PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE   (0x800)
 /* This size of buffer is big enough to store an array of all the
  * boot records/measurements which is encoded in CBOR format.
  */

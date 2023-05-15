@@ -40,7 +40,7 @@
 /* This size of buffer is big enough to store an attestation
  * token produced by initial attestation service
  */
-#define PSA_INITIAL_ATTEST_TOKEN_MAX_SIZE   (0x250)
+#define PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE   (0x250)
 
 /* eFlash MPC granularity is 4 KB on Musca_B1. Alignment
  * of partitions is defined in accordance with this constraint.
