@@ -158,7 +158,7 @@ SECTIONS
 /**** Unpriv  DATA start here */
     Image$$TFM_APP_RW_STACK_START$$Base = ADDR(.dummy_empty);
 #if defined(CONFIG_TFM_PARTITION_META)
-    .TFM_SP_META_PTR : ALIGN(32)
+    .TFM_SP_META_PTR (NOLOAD): ALIGN(32)
     {
         *(.bss.SP_META_PTR_SPRTL_INST)
         . = ALIGN(32);
@@ -176,7 +176,7 @@ SECTIONS
     Image$$TFM_APP_ROT_LINKER_DATA$$RW$$Base = ADDR(.TFM_APP_ROT_LINKER_DATA);
     Image$$TFM_APP_ROT_LINKER_DATA$$RW$$Limit = ADDR(.TFM_APP_ROT_LINKER_DATA) + SIZEOF(.TFM_APP_ROT_LINKER_DATA);
 
-    .TFM_APP_ROT_LINKER_BSS : ALIGN(32)
+    .TFM_APP_ROT_LINKER_BSS (NOLOAD): ALIGN(32)
     {
         start_of_TFM_APP_ROT_LINKER = .;
         *tfm_app_rot_partition*:*(.bss*)
@@ -285,7 +285,7 @@ SECTIONS
     Image$$TFM_PSA_ROT_LINKER_DATA$$RW$$Base = ADDR(.TFM_PSA_ROT_LINKER_DATA);
     Image$$TFM_PSA_ROT_LINKER_DATA$$RW$$Limit = ADDR(.TFM_PSA_ROT_LINKER_DATA) + SIZEOF(.TFM_PSA_ROT_LINKER_DATA);
 
-    .TFM_PSA_ROT_LINKER_BSS : ALIGN(32)
+    .TFM_PSA_ROT_LINKER_BSS (NOLOAD): ALIGN(32)
     {
         start_of_TFM_PSA_ROT_LINKER = .;
         *tfm_psa_rot_partition*:*(.bss*)
@@ -380,7 +380,7 @@ SECTIONS
     Image$$TFM_APP_ROT_LINKER$$Base = ADDR(.TFM_APP_ROT_LINKER);
     Image$$TFM_APP_ROT_LINKER$$Limit = ADDR(.TFM_APP_ROT_LINKER) + SIZEOF(.TFM_APP_ROT_LINKER);
 
-    .TFM_BSS : ALIGN(4)
+    .TFM_BSS (NOLOAD): ALIGN(4)
     {
         __bss_start__ = .;
 

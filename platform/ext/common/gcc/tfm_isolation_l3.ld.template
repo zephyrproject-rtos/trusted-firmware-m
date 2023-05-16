@@ -318,7 +318,7 @@ SECTIONS
     {
         *libtfm_spm*:*(.data*);
     } > RAM AT> FLASH
-    .spm_bss :
+    .spm_bss (NOLOAD):
     {
         *libtfm_spm*:*(.bss*);
     } > RAM AT> RAM
@@ -349,7 +349,7 @@ SECTIONS
     Image$$ER_{{partition.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{partition.manifest.name}}_RWZI);
     Image$$ER_{{partition.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{partition.manifest.name}}_RWZI) + SIZEOF(.ER_{{partition.manifest.name}}_RWZI);
 
-    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(4)
+    .{{partition.manifest.name}}_RWZI_BSS (NOLOAD): ALIGN(4)
     {
         start_of_{{partition.manifest.name}}_RWZI = .;
     {% if partition.attr.linker_pattern.library_list %}
@@ -408,7 +408,7 @@ SECTIONS
     Image$$.ER_{{partition.manifest.name}}_RWZI$$RW$$Base = ADDR(.ER_{{partition.manifest.name}}_RWZI);
     Image$$.ER_{{partition.manifest.name}}_RWZI$$RW$$Limit = ADDR(.ER_{{partition.manifest.name}}_RWZI) + SIZEOF(.ER_{{partition.manifest.name}}_RWZI);
 
-    .{{partition.manifest.name}}_RWZI_BSS : ALIGN(4)
+    .{{partition.manifest.name}}_RWZI_BSS (NOLOAD): ALIGN(4)
     {
         start_of_{{partition.manifest.name}}_RWZI = .;
     {% if partition.attr.linker_pattern.library_list %}
@@ -494,7 +494,7 @@ SECTIONS
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
 #endif
 
-    .TFM_BSS : ALIGN(4)
+    .TFM_BSS (NOLOAD): ALIGN(4)
     {
         __bss_start__ = .;
 
