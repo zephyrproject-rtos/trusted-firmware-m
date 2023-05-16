@@ -13,19 +13,106 @@
 #include "device_definition.h"
 #include "flash_map/flash_map.h"
 #include "host_base_address.h"
+#include "ni_tower_lib.h"
 #include "platform_base_address.h"
 #include "platform_regs.h"
+#include "size_defs.h"
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #include "fih.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
 
+/*
+ * Initializes the ATU region before configuring the NI-Tower. This function
+ * maps the physical base address of the NI-Tower instance received as the
+ * parameter to a logical address HOST_NI_TOWER_BASE.
+ */
+static int32_t ni_tower_pre_init(uint64_t ni_tower_phys_address)
+{
+    enum atu_error_t atu_err;
+    enum atu_roba_t roba_value;
+
+    atu_err = atu_initialize_region(
+                &ATU_DEV_S,
+                HOST_NI_TOWER_ATU_ID,
+                HOST_NI_TOWER_BASE,
+                ni_tower_phys_address,
+                HOST_NI_TOWER_SIZE);
+    if (atu_err != ATU_ERR_NONE) {
+        return -1;
+    }
+
+    roba_value = ATU_ROBA_SET_1;
+    atu_err = set_axnsc(&ATU_DEV_S, roba_value, HOST_NI_TOWER_ATU_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: Unable to modify AxNSE");
+        return -1;
+    }
+
+    roba_value = ATU_ROBA_SET_0;
+    atu_err = set_axprot1(&ATU_DEV_S, roba_value, HOST_NI_TOWER_ATU_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        BOOT_LOG_ERR("BL2: Unable to modify AxPROT1");
+        return -1;
+    }
+
+    return 0;
+}
+
+/* Un-initializes the ATU region after configuring the NI-Tower */
+static int32_t ni_tower_post_init(void)
+{
+    enum atu_error_t atu_err;
+
+    atu_err = atu_uninitialize_region(&ATU_DEV_S, HOST_NI_TOWER_ATU_ID);
+    if (atu_err != ATU_ERR_NONE) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Programs the System control NI-Tower for nodes under Always-On (AON) domain.
+ */
+static int32_t ni_tower_sysctrl_aon_init(void)
+{
+    int32_t err;
+
+    err = ni_tower_pre_init(HOST_SYSCTRL_NI_TOWER_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    err = program_sysctrl_ni_tower_aon();
+    if (err != 0) {
+        BOOT_LOG_ERR("BL2: Unable to configure System Control NI-Tower for "
+                        "nodes under AON domain");
+        return err;
+    }
+
+    err = ni_tower_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    BOOT_LOG_INF("BL2: System Control NI-Tower configured for node under AON "
+                    "domain");
+
+    return 0;
+}
+
 int32_t boot_platform_post_init(void)
 {
-#ifdef CRYPTO_HW_ACCELERATOR
     int32_t result;
 
+    result = ni_tower_sysctrl_aon_init();
+    if (result != 0) {
+        return result;
+    }
+
+#ifdef CRYPTO_HW_ACCELERATOR
     result = crypto_hw_accelerator_init();
     if (result) {
         return 1;

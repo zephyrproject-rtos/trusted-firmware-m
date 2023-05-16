@@ -24,4 +24,9 @@
 #define MHU_V3_RSE_TO_SCP
 #define MHU_V3_SCP_TO_RSE
 
+/* NI-Tower */
+#ifdef PLATFORM_HAS_NI_TOWER
+#define SYSCTRL_NI_TOWER
+#endif /* PLATFORM_HAS_NI_TOWER */
+
 #endif /* __HOST_DEVICE_CFG_H__ */

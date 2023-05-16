@@ -75,4 +75,11 @@ enum sysctrl_xMNI_ids {
     SYSCTRL_CONFIG_SPACE_ID = 0xF
 };
 
+/**
+ * \brief Programs System Control block NI-Tower PSAM and APU for AON domain
+ *
+ * \return Returns -1 if there is an error, else 0.
+ */
+int32_t program_sysctrl_ni_tower_aon(void);
+
 #endif /* __NI_TOWER_LIB_H__ */
