@@ -224,36 +224,18 @@ Execute TF-M example and regression tests on Musca test chip boards
     :doc:`target platform readme </platform/arm/musca_b1/readme>`
     to have the correct setup.
 
-    Install SRecord for Musca test chip boards.
+    Install SRecord for Musca test chip boards:
 
     - Windows: `SRecord v1.63 <https://sourceforge.net/projects/srecord/>`__
-    - Linux: sudo apt-get install -y srecord
+    - Linux: ``sudo apt-get install -y srecord``
 
 Example application with BL2 bootloader
 =======================================
 
 #. Create a unified hex file comprising of both ``bl2.bin`` and
-   ``tfm_s_ns_signed.bin``.
+   ``tfm_s_ns_signed.bin`` for Musca-B1 or Musca-S1 platforms::
 
-    - For Musca-B1
-
-        - Windows::
-
-            srec_cat.exe bin\bl2.bin -Binary -offset 0xA000000 bin\tfm_s_ns_signed.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
-
-        - Linux::
-
-            srec_cat bin/bl2.bin -Binary -offset 0xA000000 bin/tfm_s_ns_signed.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
-
-    - For Musca-S1
-
-        - Windows::
-
-            srec_cat.exe bin\bl2.bin -Binary -offset 0xA000000 bin\tfm_s_ns_signed.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
-
-        - Linux::
-
-            srec_cat bin/bl2.bin -Binary -offset 0xA000000 bin/tfm_s_ns_signed.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
+     srec_cat bin/bl2.bin -Binary -offset 0xA000000 bin/tfm_s_ns_signed.bin -Binary -offset 0xA020000 -o tfm.hex -Intel
 
 #. Power up the Musca board by connecting it to a computer with a USB lead.
    Press the ``PBON`` button if the green ``ON`` LED does not immediately turn
