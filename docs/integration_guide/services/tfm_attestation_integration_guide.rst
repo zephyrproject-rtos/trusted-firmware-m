@@ -491,7 +491,8 @@ service features. The ``CommonConfig.cmake`` file sets the default values of
 those flags. The list of flags are:
 
 - ``ATTEST_INCLUDE_OPTIONAL_CLAIMS``: Include also the optional claims to the
-  attestation token. Default value: ON.
+  attestation token. Default value: ON in base configure and profile large while
+  OFF in profile small and medium.
 - ``ATTEST_INCLUDE_COSE_KEY_ID``: COSE key-id is an optional field in the COSE
   unprotected header. Key-id is calculated and added to the COSE header based
   on the value of this flag. Default value: OFF.
