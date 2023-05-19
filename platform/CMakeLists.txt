@@ -10,9 +10,7 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
-if (NS)
-    add_subdirectory(ns)
-endif()
+add_subdirectory(ns)
 
 add_library(platform_s STATIC)
 add_library(platform_region_defs INTERFACE)
