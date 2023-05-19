@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,9 +236,6 @@
 #define BOOT_TFM_SHARED_DATA_SIZE (0x400)
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
-
-/* AP to RSS MHU receiver interrupt */
-#define MAILBOX_IRQ CMU_MHU0_Receiver_IRQn
 
 #define PROVISIONING_BUNDLE_CODE_START ITCM_BASE_S
 #define PROVISIONING_BUNDLE_CODE_SIZE  ITCM_SIZE

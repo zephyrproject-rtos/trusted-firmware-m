@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2017-2022 ARM Limited. All rights reserved.
- * Copyright (c) 2019-2021 Cypress Semiconductor Corp. All rights reserved.
+ * Copyright (c) 2019-2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,8 +192,5 @@
  */
 #define BOOT_TFM_SHARED_DATA_BASE (S_RAM_ALIAS(S_DATA_PRIV_OFFSET))
 #define BOOT_TFM_SHARED_DATA_SIZE 0x400
-
-/* NSPE-to-SPE interrupt */
-#define MAILBOX_IRQ NvicMux7_IRQn
 
 #endif /* __REGION_DEFS_H__ */

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2020-2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -32,6 +33,9 @@ extern struct platform_data_t tfm_peripheral_dma0_ch0;
 #define TFM_PERIPHERAL_STD_UART  (&tfm_peripheral_std_uart)
 #define TFM_PERIPHERAL_TIMER0    (&tfm_peripheral_timer0)
 #define TFM_PERIPHERAL_DMA0_CH0  (&tfm_peripheral_dma0_ch0)
+
+/* AP to RSS MHU receiver interrupt */
+#define MAILBOX_IRQ CMU_MHU0_Receiver_IRQn
 
 #ifdef __cplusplus
 }

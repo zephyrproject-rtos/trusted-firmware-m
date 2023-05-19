@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,9 +121,6 @@
 
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
-
-/* NSPE-to-SPE interrupt */
-#define MAILBOX_IRQ HSE1_RECEIVER_COMBINED_IRQn
 
 #endif /* __REGION_DEFS_H__ */
 

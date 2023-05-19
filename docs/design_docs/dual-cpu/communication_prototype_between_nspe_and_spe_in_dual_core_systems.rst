@@ -186,9 +186,10 @@ operations, such as interrupt EOI or acknowledge.
 The interrupt handler shall call ``spm_handle_interrupt()`` to notify SPM of
 the interrupt.
 
-The platform's ``region_defs.h`` file shall define a macro ``MAILBOX_IRQ`` that
-identifies the interrupt being used. The platform must also provide a function
-``mailbox_irq_init()`` that initialises the interrupt as described in [2]_.
+The platform's ``tfm_peripherals_def.h`` file shall define a macro
+``MAILBOX_IRQ`` that identifies the interrupt being used. The platform must
+also provide a function ``mailbox_irq_init()`` that initialises the interrupt
+as described in [2]_.
 
 Platform specific driver shall put Inter-Processor Communication interrupt into
 a proper exception priority, according to system and application requirements.
