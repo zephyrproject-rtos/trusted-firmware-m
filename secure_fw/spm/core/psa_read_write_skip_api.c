@@ -77,7 +77,7 @@ size_t tfm_spm_partition_psa_read(psa_handle_t msg_handle, uint32_t invec_idx,
                                handle->invec_accessed[invec_idx], bytes);
 
     /* Update the data size read */
-    handle->invec_accessed[invec_idx] += num_bytes;
+    handle->invec_accessed[invec_idx] += bytes;
 
     return bytes;
 }
