@@ -12,7 +12,7 @@ bl1_sha256_init
 bl1_sha256_update
 bl1_trng_generate_random
 bl_secure_memcpy
-cc3xx_finish
+cc3xx_uninit
 computed_bl1_2_hash
 get_supported_region_count
 host_flash_atu_init_regions_for_image

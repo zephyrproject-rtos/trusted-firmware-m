@@ -22,7 +22,7 @@ fih_int bl1_sha256_init(void)
 {
     fih_int fih_rc = FIH_FAILURE;
 
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_init());
+    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_init(CC3XX_HASH_ALG_SHA256));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
@@ -32,35 +32,21 @@ fih_int bl1_sha256_init(void)
 
 fih_int bl1_sha256_finish(uint8_t *hash)
 {
-    fih_int fih_rc = FIH_FAILURE;
+    uint32_t tmp_buf[32 / sizeof(uint32_t)];
 
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_finish(hash, 32));
-    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
-    }
+    cc3xx_hash_finish(tmp_buf, 32);
+
+    memcpy(hash, tmp_buf, sizeof(tmp_buf));
 
     return FIH_SUCCESS;
 }
 
 fih_int bl1_sha256_update(uint8_t *data, size_t data_length)
 {
-    size_t idx;
     fih_int fih_rc = FIH_FAILURE;
 
-    for (idx = 0; idx + 0x8000 < data_length; idx += 0x8000) {
-        fih_rc = FIH_FAILURE;
-        fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_update(data + idx,
-                                                                       0x8000));
-        if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-            FIH_RET(FIH_FAILURE);
-        }
-    }
-    if (idx != (data_length - (data_length % 0x8000))) {
-        FIH_RET(FIH_FAILURE);
-    }
-
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_update(data + idx,
-                                                                   data_length - idx));
+    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_update(data,
+                                                            data_length));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
@@ -72,39 +58,26 @@ fih_int bl1_sha256_compute(const uint8_t *data,
                            size_t data_length,
                            uint8_t *hash)
 {
+    uint32_t tmp_buf[32 / sizeof(uint32_t)];
     fih_int fih_rc = FIH_FAILURE;
-    size_t idx = 0;
 
     if (data == NULL || hash == NULL) {
         FIH_RET(FIH_FAILURE);
     }
 
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_init());
+    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_init(CC3XX_HASH_ALG_SHA256));
     if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
 
-    for (idx = 0; idx + 0x8000 < data_length; idx += 0x8000) {
-        fih_rc = FIH_FAILURE;
-        fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_update(data + idx,
-                                                                       0x8000));
-        if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-            FIH_RET(FIH_FAILURE);
-        }
-    }
-    if (idx != (data_length - (data_length % 0x8000))) {
+    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_update(data,
+                                                            data_length));
+    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
+    cc3xx_hash_finish(tmp_buf, 32);
 
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_update(data + idx,
-                                                                   data_length - idx));
-    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
-    }
-    fih_rc = fih_int_encode_zero_equality(cc3xx_hash_sha256_finish(hash, 32));
-    if(fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(FIH_FAILURE);
-    }
+    memcpy(hash, tmp_buf, sizeof(tmp_buf));
 
     FIH_RET(FIH_SUCCESS);
 }
@@ -143,10 +116,10 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
                                 uint8_t *plaintext)
 {
     cc3xx_aes_key_id_t cc3xx_key_type;
-    uint8_t  __ALIGNED(4) key_buf[32];
+    uint32_t key_buf[32 / sizeof(uint32_t)];
     int32_t rc = 0;
-    size_t idx = 0;
     const uint8_t *input_key = key_buf;
+    cc3xx_err_t err;
 
     if (ciphertext_length == 0) {
         return 0;
@@ -156,8 +129,12 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
         return -1;
     }
 
+    if ((uintptr_t)counter & 0x3) {
+        return -1;
+    }
+
     if (key_material == NULL) {
-        rc = bl1_key_to_cc3xx_key(key_id, &cc3xx_key_type, key_buf,
+        rc = bl1_key_to_cc3xx_key(key_id, &cc3xx_key_type, (uint8_t *)key_buf,
                                   sizeof(key_buf));
         if (rc) {
             return rc;
@@ -167,20 +144,18 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
         input_key = key_material;
     }
 
-    for (idx = 0; idx + 0x8000 < ciphertext_length; idx += 0x8000) {
-        rc = cc3xx_aes(cc3xx_key_type, input_key, CC3XX_AES_KEYSIZE_256,
-                       ciphertext + idx, 0x8000, counter, plaintext + idx,
-                       CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_CTR);
-        if (rc != CC3XX_ERR_SUCCESS) {
-            return rc;
-        }
+    err = cc3xx_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
+                         cc3xx_key_type, input_key, CC3XX_AES_KEYSIZE_256,
+                         (uint32_t *)counter, 16);
+    if (err != CC3XX_ERR_SUCCESS) {
+        return 1;
     }
 
-    /* Under CTR mode encryption and decryption are the same operation */
-    return cc3xx_aes(cc3xx_key_type, input_key, CC3XX_AES_KEYSIZE_256,
-                     ciphertext + idx, ciphertext_length - idx, counter,
-                     plaintext + idx, CC3XX_AES_DIRECTION_ENCRYPT,
-                     CC3XX_AES_MODE_CTR);
+    cc3xx_aes_set_output_buffer(plaintext, ciphertext_length);
+    cc3xx_aes_update(ciphertext, ciphertext_length);
+    cc3xx_aes_finish(NULL);
+
+    return 0;
 }
 
 static int32_t aes_256_ecb_encrypt(enum tfm_bl1_key_id_t key_id,
@@ -189,8 +164,9 @@ static int32_t aes_256_ecb_encrypt(enum tfm_bl1_key_id_t key_id,
                                    uint8_t *ciphertext)
 {
     cc3xx_aes_key_id_t cc3xx_key_type;
-    uint8_t __ALIGNED(4) key_buf[32];
+    uint32_t key_buf[32 / sizeof(uint32_t)];
     int32_t rc = 0;
+    cc3xx_err_t err;
 
     if (ciphertext_length == 0) {
         return 0;
@@ -205,9 +181,17 @@ static int32_t aes_256_ecb_encrypt(enum tfm_bl1_key_id_t key_id,
         return rc;
     }
 
-    return cc3xx_aes(cc3xx_key_type, key_buf, CC3XX_AES_KEYSIZE_256, plaintext,
-                     ciphertext_length, NULL, ciphertext,
-                     CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_ECB);
+    err = cc3xx_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_ECB,
+                         cc3xx_key_type, (uint32_t *)key_buf,
+                         CC3XX_AES_KEYSIZE_256,
+                         NULL, 0);
+    if (err != CC3XX_ERR_SUCCESS) {
+        return 1;
+    }
+
+    cc3xx_aes_set_output_buffer(ciphertext, ciphertext_length);
+    cc3xx_aes_update(plaintext, ciphertext_length);
+    cc3xx_aes_finish(NULL);
 }
 
 /* This is a counter-mode KDF complying with NIST SP800-108 where the PRF is a

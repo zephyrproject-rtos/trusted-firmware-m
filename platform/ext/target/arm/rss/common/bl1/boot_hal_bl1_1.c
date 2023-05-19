@@ -93,10 +93,7 @@ int32_t boot_platform_init(void)
     }
 
     for (idx = 0; idx < (sizeof(remap_regions) / sizeof(remap_regions[0])); idx++) {
-        result = cc3xx_dma_remap_region_init(idx, &remap_regions[idx]);
-        if (result != CC3XX_ERR_SUCCESS) {
-            return 1;
-        }
+        cc3xx_dma_remap_region_init(idx, &remap_regions[idx]);
     }
 
     (void)fih_delay_init();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -10,8 +10,6 @@
 
 int32_t bl1_trng_generate_random(uint8_t *output, size_t output_size)
 {
-    cc3xx_err_t err;
-
     if (output_size == 0) {
         return 0;
     }
@@ -20,15 +18,11 @@ int32_t bl1_trng_generate_random(uint8_t *output, size_t output_size)
         return -1;
     }
 
-    cc3xx_rng_init();
-    err = cc3xx_rng_get_random(output, output_size);
-    cc3xx_rng_finish();
-
-    return err;
+    return cc3xx_rng_get_random(output, output_size);
 }
 
 unsigned char fih_delay_random_uchar(void) {
-    unsigned char out = 0;
-    bl1_trng_generate_random(&out, sizeof(out));
-    return out;
+    uint32_t out = 0;
+    cc3xx_rng_get_random_uint(256, &out);
+    return (unsigned char)out;
 }
