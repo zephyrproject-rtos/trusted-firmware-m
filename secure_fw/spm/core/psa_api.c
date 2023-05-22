@@ -207,27 +207,15 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
         if (handle->msg.type >= PSA_IPC_CALL) {
 
 #if PSA_FRAMEWORK_HAS_MM_IOVEC
-
             /*
-             * If the unmapped function is not called for an input/output vector
-             * that has been mapped, the framework will remove the mapping.
+             * Any output vectors that are still mapped will report that
+             * zero bytes have been written.
              */
-            int i;
-
-            for (i = 0; i < PSA_MAX_IOVEC * 2; i++) {
-                if (IOVEC_IS_MAPPED(handle, i) &&
-                    (!IOVEC_IS_UNMAPPED(handle, i))) {
-                    SET_IOVEC_UNMAPPED(handle, i);
-                    /*
-                     * Any output vectors that are still mapped will report that
-                     * zero bytes have been written.
-                     */
-                    if (i >= OUTVEC_IDX_BASE) {
-                        handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
-                    }
+            for (int i = OUTVEC_IDX_BASE; i < PSA_MAX_IOVEC * 2; i++) {
+                if (IOVEC_IS_MAPPED(handle, i) && (!IOVEC_IS_UNMAPPED(handle, i))) {
+                    handle->outvec_written[i - OUTVEC_IDX_BASE] = 0;
                 }
             }
-
 #endif
             /* Reply to a request message. Return values are based on status */
             ret = status;

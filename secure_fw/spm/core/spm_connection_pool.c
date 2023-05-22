@@ -113,19 +113,8 @@ void spm_init_connection_space(void)
 
 struct connection_t *spm_allocate_connection(void)
 {
-    struct connection_t *p_connection;
-
     /* Get buffer for handle list structure from handle pool */
-    p_connection = (struct connection_t *)tfm_pool_alloc(connection_pool);
-    if (!p_connection) {
-        return NULL;
-    }
-
-    spm_memset(p_connection, 0, sizeof(*p_connection));
-
-    p_connection->status = TFM_HANDLE_STATUS_IDLE;
-
-    return p_connection;
+    return (struct connection_t *)tfm_pool_alloc(connection_pool);
 }
 
 psa_status_t spm_validate_connection(const struct connection_t *p_connection)

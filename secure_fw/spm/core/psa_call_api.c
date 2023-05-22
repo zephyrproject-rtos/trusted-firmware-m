@@ -90,10 +90,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
             return PSA_ERROR_CONNECTION_BUSY;
         }
 
-#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-        p_connection->rhandle = NULL;
-#endif
-        handle = connection_to_handle(p_connection);
+        spm_init_connection(p_connection, service, client_id);
     } else {
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
         /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
@@ -194,7 +191,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         }
     }
 
-    spm_fill_message(p_connection, service, handle, type, client_id);
+    p_connection->msg.type = type;
     for (i = 0; i < in_num; i++) {
         p_connection->msg.in_size[i] = invecs[i].len;
         p_connection->invec_base[i] = invecs[i].base;

@@ -81,15 +81,7 @@ void spm_init_connection_space(void)
 
 struct connection_t *spm_allocate_connection(void)
 {
-    struct connection_t *p_connection;
-
-    p_connection = alloc_conn_from_stack_top();
-
-    spm_memset(p_connection, 0, sizeof(*p_connection));
-
-    p_connection->status = TFM_HANDLE_STATUS_IDLE;
-
-    return p_connection;
+    return alloc_conn_from_stack_top();
 }
 
 psa_status_t spm_validate_connection(const struct connection_t *p_connection)

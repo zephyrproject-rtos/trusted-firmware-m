@@ -21,7 +21,6 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
     struct service_t *service;
     struct connection_t *p_connection;
     int32_t client_id;
-    psa_handle_t handle;
     bool ns_caller = tfm_spm_is_ns_caller();
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
@@ -68,8 +67,8 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
         return PSA_ERROR_CONNECTION_BUSY;
     }
 
-    handle = connection_to_handle(p_connection);
-    spm_fill_message(p_connection, service, handle, PSA_IPC_CONNECT, client_id);
+    spm_init_connection(p_connection, service, client_id);
+    p_connection->msg.type = PSA_IPC_CONNECT;
 
     return backend_messaging(service, p_connection);
 }
@@ -116,7 +115,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    spm_fill_message(p_connection, service, handle, PSA_IPC_DISCONNECT, client_id);
+    p_connection->msg.type = PSA_IPC_DISCONNECT;
 
     return backend_messaging(service, p_connection);
 }

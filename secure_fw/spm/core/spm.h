@@ -214,20 +214,16 @@ struct connection_t *spm_get_client_connection(psa_handle_t handle,
 struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle);
 
 /**
- * \brief                   Fill the user message in handle.
+ * \brief                   Initialize connection and fill in with the input information.
  *
- * \param[in] p_connection  The 'p_connection' contains the user message.
+ * \param[in] p_connection  The 'p_connection' to initialize and fill information in.
  * \param[in] service       Target service context pointer, which can be
  *                          obtained by partition management functions
- * \prarm[in] handle        Connect handle return by psa_connect().
- * \param[in] type          Message type, PSA_IPC_CONNECT, PSA_IPC_CALL or
- *                          PSA_IPC_DISCONNECT
  * \param[in] client_id     Partition ID of the sender of the message
  */
-void spm_fill_message(struct connection_t *p_connection,
-                      struct service_t *service,
-                      psa_handle_t handle,
-                      int32_t type, int32_t client_id);
+void spm_init_connection(struct connection_t *p_connection,
+                         struct service_t *service,
+                         int32_t client_id);
 
 /**
  * \brief                   Check the client version according to

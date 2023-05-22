@@ -225,10 +225,9 @@ struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle)
     return p_conn_handle;
 }
 
-void spm_fill_message(struct connection_t *p_connection,
-                      struct service_t *service,
-                      psa_handle_t handle,
-                      int32_t type, int32_t client_id)
+void spm_init_connection(struct connection_t *p_connection,
+                         struct service_t *service,
+                         int32_t client_id)
 {
     SPM_ASSERT(p_connection);
     SPM_ASSERT(service);
@@ -239,15 +238,12 @@ void spm_fill_message(struct connection_t *p_connection,
     p_connection->service = service;
     p_connection->p_client = GET_CURRENT_COMPONENT();
     p_connection->msg.client_id = client_id;
-
-    /* Copy contents */
-    p_connection->msg.type = type;
-
     /* Use the user connect handle as the message handle */
-    p_connection->msg.handle = handle;
+    p_connection->msg.handle = connection_to_handle(p_connection);
 
-#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-    p_connection->msg.rhandle = p_connection->rhandle;
+    p_connection->status = TFM_HANDLE_STATUS_IDLE;
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+    p_connection->iovec_status = 0;
 #endif
 
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
