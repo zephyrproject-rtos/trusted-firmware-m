@@ -78,6 +78,7 @@ target_include_directories(platform_s
         partition
         services/include
         Libraries
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
     INTERFACE
         cc312
 )
@@ -95,10 +96,10 @@ target_sources(platform_s
         Native_Driver/mpu_armv8m_drv.c
         Native_Driver/ppc_sse200_drv.c
         Native_Driver/gpio_cmsdk_drv.c
-        Native_Driver/uart_pl011_drv.c
         Native_Driver/musca_s1_scc_drv.c
         Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/cache_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         ${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c
         Libraries/mt25ql_flash_lib.c
         ${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c
@@ -121,11 +122,11 @@ target_compile_definitions(platform_s
 
 target_sources(platform_ns
     PRIVATE
-        Native_Driver/uart_pl011_drv.c
         Native_Driver/timer_cmsdk_drv.c
         CMSIS_Driver/Driver_USART.c
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_ioctl_ns_api.c>
         $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_gpled_api.c>
 )
@@ -140,6 +141,8 @@ target_include_directories(platform_ns
         services/include
         Libraries
         ${PLATFORM_DIR}/ext/cmsis
+    PRIVATE
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
 )
 
 #========================= Platform BL2 =======================================#
@@ -150,7 +153,7 @@ if(BL2)
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
             CMSIS_Driver/Driver_Flash_MRAM.c
-            Native_Driver/uart_pl011_drv.c
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
             Native_Driver/cache_drv.c
             Native_Driver/musca_s1_scc_drv.c
             CMSIS_Driver/Driver_USART.c
@@ -168,6 +171,7 @@ if(BL2)
             CMSIS_Driver/Config
             Device/Config
             Native_Driver
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
             ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include # for fih.h interop only
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only

@@ -80,6 +80,7 @@ target_include_directories(platform_s
         partition
         services/include
         Libraries
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
     INTERFACE
         cc312
 )
@@ -99,7 +100,7 @@ target_sources(platform_s
         Native_Driver/qspi_ip6514e_drv.c
         Native_Driver/musca_b1_scc_drv.c
         Native_Driver/ppc_sse200_drv.c
-        Native_Driver/uart_pl011_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         $<$<NOT:$<BOOL:${TEST_NS_SLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
@@ -121,11 +122,11 @@ target_sources(tfm_sprt
 
 target_sources(platform_ns
     PRIVATE
-        Native_Driver/uart_pl011_drv.c
         Native_Driver/timer_cmsdk_drv.c
         CMSIS_Driver/Driver_USART.c
         Device/Source/system_core_init.c
         Device/Source/device_definition.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_ioctl_ns_api.c>
         $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_gpled_api.c>
@@ -140,6 +141,8 @@ target_include_directories(platform_ns
         Native_Driver
         services/include
         Libraries
+    PRIVATE
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
 )
 
 #========================= Platform BL2 =======================================#
@@ -149,7 +152,7 @@ if(BL2)
         PRIVATE
             Device/Source/system_core_init.c
             Device/Source/device_definition.c
-            Native_Driver/uart_pl011_drv.c
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
             CMSIS_Driver/Driver_USART.c
             Native_Driver/musca_b1_scc_drv.c
     )
@@ -165,6 +168,7 @@ if(BL2)
             CMSIS_Driver/Config
             Device/Config
             Native_Driver
+            ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
             ${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/include # for fih.h interop only
             ${MCUBOOT_PATH}/boot/bootutil/include # for fault_injection_hardening.h only
             ${CMAKE_BINARY_DIR}/bl2/ext/mcuboot # for mcuboot_config.h only
@@ -216,6 +220,7 @@ add_library(flash_drivers STATIC)
 
 target_include_directories(flash_drivers
     PRIVATE
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
         ${PLATFORM_DIR}/ext/driver
         ${PLATFORM_DIR}/ext/cmsis
         ${PLATFORM_DIR}/ext/common
