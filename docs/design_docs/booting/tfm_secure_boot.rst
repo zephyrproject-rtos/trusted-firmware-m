@@ -12,7 +12,7 @@ Secure boot
 For secure devices it is security critical to enforce firmware authenticity to
 protect against execution of malicious software. This is implemented by building
 a trust chain where each step in the execution chain authenticates the next
-step before execution. The chain of trust in based on a "Root of Trust" which
+step before execution. The chain of trust is based on a "Root of Trust" which
 is implemented using asymmetric cryptography. The Root of Trust is a combination
 of an immutable bootloader and a public key (ROTPK).
 
@@ -176,12 +176,14 @@ please refer to the MCUBoot
 
 .. Note::
 
-    After a successful image upgrade the firmware can mark itself as "OK" at
-    runtime by setting the image_ok flag in the flash. When this happens, the
-    swap is made "permanent" and MCUBoot will then still choose to run it
-    during the next boot. Currently TF-M does not set the image_ok flag,
-    therefore the bootloader will always perform a "revert" (swap the images
-    back) during the next boot.
+    After a successful image upgrade, user can mark the image as "OK"
+    at runtime by explicitly calling ``psa_fwu_accept``. When this happens,
+    the swap is made "permanent" and MCUBoot will then still choose to run it
+    during the next boot.
+
+    TF-M does not set the image_ok flag, because it is user's duty to determine
+    whether the image is acceptable. Therefore the bootloader will always
+    perform a "revert" (swap the images back) during the next boot.
 
 Direct execute-in-place operation
 =================================
@@ -823,4 +825,4 @@ bootutil_misc.c to control the image status.
     image. As a result, the firmware update service is not supported in
     direct-xip mode and ram-load mode.
 
-*Copyright (c) 2018-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2018-2023, Arm Limited. All rights reserved.*
