@@ -249,10 +249,10 @@ TF-M Profile Large adds a dedicated MbedTLS config file
 
 Major MbedTLS configurations are set as listed below:
 
-    - Enable SHA256 and SHA512
+    - Enable SHA256, SHA384 and SHA512
     - Enable generic message digest wrappers
     - Enable AES
-    - Enable CCM mode, GCM mode and CBC mode for symmetric ciphers
+    - Enable CCM mode, GCM mode, CTR mode, CFB mode and CBC mode for symmetric ciphers
     - Disable other modes for symmetric ciphers
     - Enable ECDH
     - Enable ECDSA
