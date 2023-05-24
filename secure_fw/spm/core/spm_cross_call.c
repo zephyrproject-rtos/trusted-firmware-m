@@ -47,14 +47,19 @@ void cross_call_exiting_c(psa_status_t status, uintptr_t frame_addr)
     struct partition_t            *caller  = GET_CURRENT_COMPONENT();
     struct cross_call_abi_frame_t *p_frame =
                                   (struct cross_call_abi_frame_t *)frame_addr;
+    uint32_t                      sched_attempted;
 
     /* Write the status into frame as the default return value. */
     if (caller->ctx_ctrl.retcode_status == CROSS_RETCODE_EMPTY) {
         p_frame->a0 = (uint32_t)status;
     }
 
+    /* Release scheduler lock and check the record of schedule attempt. */
+    sched_attempted = arch_release_sched_lock();
+
     /* Interrupt is masked, PendSV will not happen immediately. */
-    if (status == STATUS_NEED_SCHEDULE) {
+    if (status == STATUS_NEED_SCHEDULE ||
+        sched_attempted == SCHEDULER_ATTEMPTED) {
         tfm_arch_trigger_pendsv();
     }
 }

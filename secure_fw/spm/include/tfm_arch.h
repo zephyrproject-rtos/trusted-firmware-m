@@ -28,6 +28,7 @@
 #error "Unsupported ARM Architecture."
 #endif
 
+#define SCHEDULER_ATTEMPTED 2 /* Schedule attempt when scheduler is locked. */
 #define SCHEDULER_LOCKED    1
 #define SCHEDULER_UNLOCKED  0
 
@@ -308,8 +309,20 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
 uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl);
 
 /*
- * Triggers scheduler. A return type is assigned in case
- * SPM returns values by the context.
+ * Release the scheduler lock and return if there are scheduling attempts during
+ * locked period. The recorded attempts are cleared after this function so do
+ * not call it a second time after unlock to query attempt status.
+ *
+ * return value:
+ *   SCHEDULER_ATTEMPTED: unlocked successfully but there are recorded attempts
+ *                        or function get called without locked.
+ *   other values:        unlocked successfully without attempts detected.
+ */
+uint32_t arch_release_sched_lock(void);
+
+/*
+ * Start scheduling if scheduler is not locked, or the attempt is recorded and
+ * return without starting the scheduler.
  */
 uint32_t tfm_arch_trigger_pendsv(void);
 

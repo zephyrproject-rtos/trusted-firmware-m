@@ -77,15 +77,12 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   mov    r1, r6                               \n"
         "   bl     cross_call_exiting_c                 \n"
         "   cmp    r4, #0                               \n"
-        "   beq    v8b_release_sched                    \n"
+        "   beq    v8b_enable_irq_and_exit              \n"
         "   movs   r3, #0                               \n"/* To callee stack */
         "   msr    psplim, r3                           \n"
         "   mov    sp, r4                               \n"
         "   msr    psplim, r5                           \n"
-        "v8b_release_sched:                             \n"
-        "   ldr    r2, =scheduler_lock                  \n"/* To unlock sched */
-        "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"
-        "   str    r3, [r2, #0]                         \n"
+        "v8b_enable_irq_and_exit:                       \n"
         "   cpsie  i                                    \n"
         "   isb                                         \n"
         "   pop    {r4-r6, pc}                          \n"

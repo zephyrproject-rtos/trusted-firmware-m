@@ -84,9 +84,6 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   msrne  psplim, r12                      \n"
         "   movne  sp, r4                           \n"
         "   msrne  psplim, r5                       \n"
-        "   ldr    r4, =scheduler_lock              \n" /* To unlock sched */
-        "   movs   r5, #"M2S(SCHEDULER_UNLOCKED)"   \n"
-        "   str    r5, [r4, #0]                     \n"
         "   cpsie  i                                \n"
         "   isb                                     \n"
         "   pop    {r4-r6, pc}                      \n"

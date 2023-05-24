@@ -51,8 +51,6 @@ struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
 /* Indicator point to the partition meta */
 uintptr_t *partition_meta_indicator_pos;
 
-extern uint32_t scheduler_lock;
-
 /*
  * Query the state of current thread.
  */
@@ -383,8 +381,7 @@ uint64_t ipc_schedule(void)
     p_part_curr = GET_CURRENT_COMPONENT();
     p_part_next = GET_THRD_OWNER(pth_next);
 
-    if (scheduler_lock != SCHEDULER_LOCKED && pth_next != NULL &&
-        p_part_curr != p_part_next) {
+    if (pth_next != NULL && p_part_curr != p_part_next) {
         /* Check if there is enough room on stack to save more context */
         if ((p_curr_ctx->sp_limit +
                 sizeof(struct tfm_additional_context_t)) > __get_PSP()) {

@@ -48,16 +48,39 @@ void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
     }
 }
 
+__naked uint32_t arch_release_sched_lock(void)
+{
+    __asm volatile(
+        SYNTAX_UNIFIED
+        "ldr    r1, =scheduler_lock                    \n"
+        "ldr    r0, [r1, #0]                           \n"
+        "movs   r2, #"M2S(SCHEDULER_UNLOCKED)"         \n"/* Unlock scheduler */
+        "str    r2, [r1, #0]                           \n"
+        "dsb    #0xf                                   \n"
+        "bx     lr                                     \n"
+    );
+}
+
 /* Caution: Keep 'uint32_t' always for collecting thread return values! */
 __naked uint32_t tfm_arch_trigger_pendsv(void)
 {
     __ASM volatile(
         SYNTAX_UNIFIED
+        "ldr     r0, =scheduler_lock                   \n"
+        "ldr     r2, [r0, #0]                          \n"
+        "cmp     r2, #"M2S(SCHEDULER_UNLOCKED)"        \n"
+        /* Skip PendSV if scheduler is locked and mark scheduling attempted. */
+        "bne     mark_schedule_attempted_and_exit      \n"
         "ldr     r0, ="M2S(SCB_ICSR_ADDR)"             \n"
         "ldr     r1, ="M2S(SCB_ICSR_PENDSVSET_BIT)"    \n"
         "str     r1, [r0, #0]                          \n"
         "dsb     #0xf                                  \n"
         "isb                                           \n"
+        "bx      lr                                    \n"
+    "mark_schedule_attempted_and_exit:                 \n"
+        "movs    r2, #"M2S(SCHEDULER_ATTEMPTED)"       \n"
+        "str     r2, [r0, #0]                          \n"
+        "dsb     #0xf                                  \n"
         "bx      lr                                    \n"
     );
 }

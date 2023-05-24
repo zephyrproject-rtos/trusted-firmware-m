@@ -72,12 +72,9 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   isb                                         \n"
         "   bl     cross_call_exiting_c                 \n"
         "   cmp    r4, #0                               \n"
-        "   beq    v6v7_release_sched                   \n"
+        "   beq    v6v7_enable_irq_and_exit             \n"
         "   mov    sp, r4                               \n"/* switch stack   */
-        "v6v7_release_sched:                            \n"
-        "   ldr    r2, =scheduler_lock                  \n"/* release pendsv */
-        "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"
-        "   str    r3, [r2, #0]                         \n"
+        "v6v7_enable_irq_and_exit:                      \n"
         "   cpsie  i                                    \n"
         "   isb                                         \n"
         "   pop    {r4, pc}                             \n"
