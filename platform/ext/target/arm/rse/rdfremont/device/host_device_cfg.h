@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 /* NI-Tower */
 #ifdef PLATFORM_HAS_NI_TOWER
 #define RD_SYSCTRL_NI_TOWER
+#define RD_PERIPH_NI_TOWER
 #endif /* PLATFORM_HAS_NI_TOWER */
 
 /* MSCP */

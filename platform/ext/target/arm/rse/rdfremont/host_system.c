@@ -14,7 +14,7 @@
 
 static volatile bool scp_setup_signal_received = false;
 
-#ifdef RD_SYSCTRL_NI_TOWER
+#if defined(RD_SYSCTRL_NI_TOWER) || defined(RD_PERIPH_NI_TOWER)
 /*
  * Initializes the ATU region before configuring the NI-Tower. This function
  * maps the physical base address of the NI-Tower instance received as the
@@ -62,7 +62,9 @@ static int ni_tower_post_init(void)
 
     return 0;
 }
+#endif
 
+#ifdef RD_SYSCTRL_NI_TOWER
 /*
  * Programs the System control NI-Tower for nodes under Always-On (AON) domain.
  */
@@ -114,6 +116,33 @@ static int ni_tower_sysctrl_systop_init(void)
 }
 #endif
 
+#ifdef RD_PERIPH_NI_TOWER
+/*
+ * Programs the Peripheral NI-Tower.
+ */
+static int ni_tower_periph_init(void)
+{
+    int err;
+
+    err = ni_tower_pre_init(HOST_PERIPH_NI_TOWER_PHYS_BASE);
+    if (err != 0) {
+        return err;
+    }
+
+    err = program_periph_ni_tower();
+    if (err != 0) {
+        return err;
+    }
+
+    err = ni_tower_post_init();
+    if (err != 0) {
+        return err;
+    }
+
+    return 0;
+}
+#endif
+
 int host_system_prepare_mscp_access(void)
 {
 #ifdef RD_SYSCTRL_NI_TOWER
@@ -145,6 +174,14 @@ int host_system_prepare_ap_access(void)
 #ifdef RD_SYSCTRL_NI_TOWER
     /* Configure System Control NI-Tower for nodes under SYSTOP power domain */
     res = ni_tower_sysctrl_systop_init();
+    if (res != 0) {
+        return 1;
+    }
+#endif
+
+#ifdef RD_PERIPH_NI_TOWER
+    /* Configure Peripheral NI-Tower */
+    res = ni_tower_periph_init();
     if (res != 0) {
         return 1;
     }

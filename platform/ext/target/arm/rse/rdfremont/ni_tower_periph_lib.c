@@ -218,3 +218,8 @@ static int32_t program_periph_apu(void)
 
     return 0;
 }
+
+int32_t program_periph_ni_tower(void)
+{
+    return program_periph_apu();
+}

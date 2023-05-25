@@ -70,6 +70,7 @@ target_sources(platform_bl2
         device/rse_expansion_device_definition.c
         host_drivers/mscp_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
+        ni_tower_periph_lib.c
         ni_tower_sysctrl_lib.c
 )
 
