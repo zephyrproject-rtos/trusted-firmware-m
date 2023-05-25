@@ -22,6 +22,7 @@ target_compile_definitions(platform_region_defs
     INTERFACE
         $<$<BOOL:${RSS_XIP}>:RSS_XIP>
         $<$<BOOL:${RSS_DEBUG_UART}>:RSS_DEBUG_UART>
+        $<$<BOOL:${RSS_USE_HOST_UART}>:RSS_USE_HOST_UART>
         $<$<BOOL:${RSS_GPT_SUPPORT}>:RSS_GPT_SUPPORT>
 )
 

@@ -15,14 +15,16 @@ struct platform_data_t tfm_peripheral_std_uart = {
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
-#else
+#endif /* RSS_DEBUG_UART */
+
+#ifdef RSS_USE_HOST_UART
 struct platform_data_t tfm_peripheral_std_uart = {
         HOST_UART0_BASE_NS,
         HOST_UART0_BASE_NS + 0xFFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
-#endif /* RSS_DEBUG_UART */
+#endif /* RSS_USE_HOST_UART */
 
 struct platform_data_t tfm_peripheral_timer0 = {
         SYSTIMER0_ARMV8_M_BASE_S,

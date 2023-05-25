@@ -34,7 +34,7 @@ static int32_t init_atu_regions(void)
 {
     enum atu_error_t err;
 
-#ifndef RSS_DEBUG_UART
+#ifdef RSS_USE_HOST_UART
     /* Initialize UART region */
     err = atu_initialize_region(&ATU_DEV_S,
                                 get_supported_region_count(&ATU_DEV_S) - 1,
@@ -43,7 +43,7 @@ static int32_t init_atu_regions(void)
     if (err != ATU_ERR_NONE) {
         return 1;
     }
-#endif /* !RSS_DEBUG_UART */
+#endif /* RSS_USE_HOST_UART */
 
     return 0;
 }
