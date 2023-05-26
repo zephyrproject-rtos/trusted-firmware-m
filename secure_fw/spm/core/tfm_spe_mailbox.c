@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -29,8 +30,6 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
     SPM_ASSERT(params != NULL);
     SPM_ASSERT(psa_ret != NULL);
 
-    (void)client_id;
-
     switch (call_type) {
     case MAILBOX_PSA_FRAMEWORK_VERSION:
         *psa_ret = tfm_rpc_psa_framework_version();
@@ -46,6 +45,8 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
         spm_params.in_len = params->psa_call_params.in_len;
         spm_params.out_vec = params->psa_call_params.out_vec;
         spm_params.out_len = params->psa_call_params.out_len;
+        spm_params.ns_client_id = client_id;
+        spm_params.client_data = NULL;
         *psa_ret = tfm_rpc_psa_call(&spm_params);
         return MAILBOX_SUCCESS;
 /* Following cases are only needed by connection-based services */
@@ -53,6 +54,8 @@ static int32_t tfm_mailbox_dispatch(uint32_t call_type,
     case MAILBOX_PSA_CONNECT:
         spm_params.sid = params->psa_connect_params.sid;
         spm_params.version = params->psa_connect_params.version;
+        spm_params.ns_client_id = client_id;
+        spm_params.client_data = NULL;
         *psa_ret = tfm_rpc_psa_connect(&spm_params);
         return MAILBOX_SUCCESS;
     case MAILBOX_PSA_CLOSE:

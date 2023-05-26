@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corporation. All rights reserved.
+ * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -177,6 +178,8 @@ static psa_status_t prepare_params_for_psa_call(struct client_call_params_t *spm
     spm_params->type = s_map_entry->msg.params.psa_call_params.type;
     spm_params->in_len = s_map_entry->msg.params.psa_call_params.in_len;
     spm_params->out_len = s_map_entry->msg.params.psa_call_params.out_len;
+    spm_params->ns_client_id = s_map_entry->msg.client_id;
+    spm_params->client_data = NULL;
 
     spm_params->out_vec = NULL;
     ret = alloc_and_prepare_out_vecs(&spm_params->out_vec, s_map_entry);
@@ -279,6 +282,8 @@ void deliver_msg_to_tfm_spe(void *private)
         case OPENAMP_PSA_CONNECT:
             spm_params.sid = s_map_entry->msg.params.psa_connect_params.sid;
             spm_params.version = s_map_entry->msg.params.psa_connect_params.version;
+            spm_params->ns_client_id = s_map_entry->msg.client_id;
+            spm_params.client_data = NULL;
             psa_ret = tfm_rpc_psa_connect(&spm_params);
             if (psa_ret != PSA_SUCCESS) {
                 send_service_reply_to_non_secure(psa_ret, s_map_entry);

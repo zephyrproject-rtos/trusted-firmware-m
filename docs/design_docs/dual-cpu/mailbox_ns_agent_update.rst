@@ -131,7 +131,7 @@ requests.
 .. code-block:: c
 
   psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
-                                 int32_t ns_client_id, void *client_data);
+                                 int32_t ns_client_id, const void *client_data);
 
 One extra parameter ``ns_client_id`` added to tell SPM which NS client the
 agent is representing when API gets called. It is recorded in the handle
@@ -151,18 +151,19 @@ an ``In progress`` status code.
 
 .. code-block:: c
 
-  typedef struct {
-      psa_invec     in_vecs[PSA_MAX_IOVEC];
-      psa_outvec    out_vecs[PSA_MAX_IOVEC];
-  } client_vectors_t;
+  struct client_vectors {
+      psa_invec     * in_vec;
+      psa_outvec    * out_vec;
+  };
 
-  typedef struct {
-      int32_t ns_client_id;
-      void    *client_data;
-  } client_param_t;
+  struct client_params {
+      int32_t     ns_client_id;
+      const void *client_data;
+  };
 
-  psa_status_t agent_psa_call(psa_handle_t handle, int32_t type,
-                              client_vectors_t *vecs, client_param_t *params);
+  psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
+                              const struct client_vectors *vecs,
+                              const struct client_params *params);
 
 Compared to the standard ``psa_call``, this API:
 
@@ -223,7 +224,7 @@ Code Example
       psa_signal_t   signals;
       psa_status_t   status;
       psa_msg_t      msg;
-      client_param_t client_param;
+      struct client_params client_param;
       struct __customized_t ns_msg;
 
       while (1) {
@@ -234,9 +235,10 @@ Code Example
               __customized_platform_get_mail(&ns_msg);
 
               /*
-               * MACRO 'SID', 'VER', 'NSID' and 'VECTORS' represents necessary
-               * information extraction from 'ns_msg', put MACRO names here
-               * and leave the details to the implementation.
+               * MACRO 'SID', 'VER', 'NSID', 'INVEC_LEN', 'OUTVEC_LEN', and
+               * 'VECTORS' represent necessary information extraction from
+               * 'ns_msg', put MACRO names here and leave the details to the
+               * implementation.
                */
               if (ns_msg.type == PSA_IPC_CONNECT) {
                   ns_msg.handle = agent_psa_connect(SID(ns_msg), VER(ns_msg),
@@ -249,7 +251,9 @@ Code Example
                   client_param.client_data  = &ns_msg;
 
                   ns_msg.status = agent_psa_call(ns_msg.handle,
-                                                 ns_msg.type,
+                                                 PARAM_PACK(ns_msg.type,
+                                                            INVEC_LEN(ns_msg),
+                                                            OUTVEC_LEN(ns_msg)),
                                                  VECTORS(ns_msg),
                                                  &client_param);
                   /* Handle the stateless service case. */
@@ -291,7 +295,8 @@ And the prototype for agent-specific ``agent_psa_call``:
 .. code-block:: c
 
   psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
-                              client_vectors_t *vecs, client_param_t *params);
+                              const struct client_vectors *vecs,
+                              const struct client_params *params);
 
 
 ``agent_psa_call`` reuses the existing ``tfm_spm_client_psa_call`` as the
@@ -441,3 +446,5 @@ The solution is:
 --------------
 
 *Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

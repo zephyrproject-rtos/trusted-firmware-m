@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2023, Arm Limited. All rights reserved.
-# Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+# Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
 # company) or an affiliate of Cypress Semiconductor Corporation. All rights
 # reserved.
 #
@@ -34,6 +34,7 @@ target_include_directories(tfm_spm
 
 target_sources(tfm_spm
     PRIVATE
+        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:core/agent_api.c>
         core/tfm_boot_data.c
         core/utilities.c
         $<$<NOT:$<STREQUAL:${TFM_SPM_LOG_LEVEL},TFM_SPM_LOG_LEVEL_SILENCE>>:core/spm_log.c>

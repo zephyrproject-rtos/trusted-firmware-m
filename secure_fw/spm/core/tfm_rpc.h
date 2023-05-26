@@ -42,6 +42,8 @@ struct client_call_params_t {
     psa_outvec      *out_vec;
     size_t          out_len;
     uint32_t        version;
+    int32_t         ns_client_id;
+    void            *client_data;
 };
 
 /*

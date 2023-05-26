@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,6 +9,7 @@
 
 #include "config_impl.h"
 #include "spm.h"
+#include "ffm/agent_api.h"
 #include "ffm/psa_api.h"
 #include "tfm_rpc.h"
 #include "utilities.h"
@@ -51,12 +54,22 @@ uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params)
 psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
 {
     SPM_ASSERT(params != NULL);
+    /* TODO: Is the lifetime of this variable appropriate ? */
+    const struct client_vectors vecs = {
+        .in_vec = params->in_vec,
+        .out_vec = params->out_vec,
+    };
+    const struct client_params client_params = {
+        .ns_client_id = params->ns_client_id,
+        .client_data = params->client_data,
+    };
 
-    return tfm_spm_client_psa_call(params->handle,
-                                   PARAM_PACK(params->type,
-                                              params->in_len,
-                                              params->out_len),
-                                   params->in_vec, params->out_vec);
+    return agent_psa_call(params->handle,
+                          PARAM_PACK(params->type,
+                                     params->in_len,
+                                     params->out_len),
+                          &vecs,
+                          &client_params);
 }
 
 /* Following PSA APIs are only needed by connection-based services */
@@ -66,7 +79,10 @@ psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params)
 {
     SPM_ASSERT(params != NULL);
 
-    return tfm_spm_client_psa_connect(params->sid, params->version);
+    return agent_psa_connect(params->sid,
+                             params->version,
+                             params->ns_client_id,
+                             params->client_data);
 }
 
 void tfm_rpc_psa_close(const struct client_call_params_t *params)

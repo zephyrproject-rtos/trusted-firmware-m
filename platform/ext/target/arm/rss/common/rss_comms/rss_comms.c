@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -32,6 +34,8 @@ static psa_status_t message_dispatch(struct client_request_t *req)
         .in_len = req->in_len,
         .out_vec = req->out_vec,
         .out_len = req->out_len,
+        .ns_client_id = req->client_id,
+        .client_data = NULL,
     };
 
     SPMLOG_DBGMSG("[RSS-COMMS] Dispatching message\r\n");
