@@ -28,7 +28,7 @@
  * Heap size for the crypto backend
  * CRYPTO_ENGINE_BUF_SIZE needs to be >8KB for EC signing by attest module.
  */
-#define CRYPTO_ENGINE_BUF_SIZE                 0x2080
+#define CRYPTO_ENGINE_BUF_SIZE                 0x2380
 
 /* The max number of concurrent operations that can be active (allocated) at any time in Crypto */
 #define CRYPTO_CONC_OPER_NUM                   8
