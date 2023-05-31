@@ -46,7 +46,7 @@ index 8a547ee..57aab97 100644
  
  
 +#if (defined(__GNUC__) && !defined(__clang__))
-+/* 
++/*
 + * This is how the -Wmaybe-uninitialized compiler warning is
 + * handled. It can’t be ignored because some version of gcc enable it
 + * with -Wall which is a common and useful gcc warning option. It also
@@ -89,7 +89,7 @@ index 8a547ee..57aab97 100644
 + * https://stackoverflow.com/questions/5080848/disable-gcc-may-be-used-uninitialized-on-a-particular-variable
 + */
 +#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-+#endif 
++#endif
 +
 +
 +
