@@ -236,7 +236,7 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     int32_t                 t_cose_options = 0;
     struct t_cose_key attest_key;
     psa_key_handle_t private_key = TFM_BUILTIN_KEY_ID_IAK;
-    struct q_useful_buf_c attest_key_id;
+    struct q_useful_buf_c attest_key_id = NULL_Q_USEFUL_BUF_C;
 
     /* Remember some of the configuration values */
     me->opt_flags  = opt_flags;
