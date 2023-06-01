@@ -43,8 +43,8 @@ static uint32_t n_configured_regions = 0;
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 #endif /* CONFIG_TFM_USE_TRUSTZONE */
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_APP_CODE_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_CODE_END, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
@@ -106,17 +106,17 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
      * Privilege Executable - if PXN available, Attribute set: 0
      */
     {
-        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base),
+        ARM_MPU_RBAR((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base),
                      ARM_MPU_SH_NON,
                      ARM_MPU_READ_ONLY,
                      ARM_MPU_UNPRIVILEGED,
                      ARM_MPU_EXECUTE_OK),
         #ifdef TFM_PXN_ENABLE
-        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit) - 1,
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1,
                          ARM_MPU_PRIVILEGE_EXECUTE_OK,
                          0)
         #else
-        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit) - 1,
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1,
                      0)
         #endif
     },

@@ -48,8 +48,8 @@ extern volatile uint32_t uFlowStage;
 static uint32_t n_configured_regions = 0;
 
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
 REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$RW$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_DATA, $$ZI$$Limit);
 
@@ -62,7 +62,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     /* TFM Core unprivileged code region */
     {
         0, /* will be updated before using */
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base),
         FLASH_BASE_S + FLASH_AREA_0_OFFSET + FLASH_AREA_0_SIZE - 32,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
@@ -79,7 +79,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         S_CODE_START,
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base),
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_ONLY,

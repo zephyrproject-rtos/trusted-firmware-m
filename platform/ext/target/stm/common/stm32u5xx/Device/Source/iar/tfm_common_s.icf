@@ -27,7 +27,7 @@ define block ER_TFM_CODE with fixed order, alignment = 8, maximum size = S_CODE_
        readonly
 };
 
-define block TFM_UNPRIV_CODE with alignment = GTZC_FLASH_ALIGN {
+define block TFM_UNPRIV_CODE_START with alignment = GTZC_FLASH_ALIGN {
        section SFN,
        ro section .rodata object tfm_*_secure_api.o,
        ro object *6M_tl*.a,
@@ -39,6 +39,12 @@ define block TFM_UNPRIV_CODE with alignment = GTZC_FLASH_ALIGN {
        ro object stm32u5xx_hal*.o,
        ro object tick.o
        };
+
+    /*
+     * This empty, zero long execution region is here to mark the end address
+     * of TFM unprivileged code.
+     */
+define block TFM_UNPRIV_CODE_END with alignment = 32, size = 0 { };
 
     /**** Section for holding partition RO load data */
     /*
@@ -184,7 +190,8 @@ define block LR_CODE with fixed order {
        block TFM_PSA_CODE_END,
 /**** UnPrivileged Flash start here , UNPRIV_BLOCK is align to match GTZC constrains */
 
-       block TFM_UNPRIV_CODE,
+       block TFM_UNPRIV_CODE_START,
+       block TFM_UNPRIV_CODE_END,
 
 /**** APPLICATION RoT RO part (CODE + RODATA) start here */
 

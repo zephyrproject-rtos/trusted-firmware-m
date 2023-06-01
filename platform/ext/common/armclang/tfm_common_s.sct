@@ -55,9 +55,16 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     }
 
     /**** Unprivileged Secure code start here */
-    TFM_UNPRIV_CODE +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
+    TFM_UNPRIV_CODE_START +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT {
         *(SFN)
         * (+RO)
+    }
+
+    /*
+     * This empty, zero long execution region is here to mark the end address
+     * of TFM unprivileged code.
+     */
+    TFM_UNPRIV_CODE_END +0 ALIGN TFM_LINKER_UNPRIV_CODE_ALIGNMENT EMPTY 0x0 {
     }
 
     /**** Section for holding partition RO load data */

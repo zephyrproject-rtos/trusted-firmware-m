@@ -53,8 +53,8 @@ void tfm_get_mem_region_security_attr(const void *p, size_t s,
 }
 
 #if TFM_LVL == 2
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-REGION_DECLARE(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit);
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
+REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
 #ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
@@ -98,8 +98,8 @@ void tfm_get_secure_mem_region_attr(const void *p, size_t s,
     p_attr->is_valid = true;
 
     /* TFM Core unprivileged code region */
-    base = (uintptr_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Base);
-    limit = (uintptr_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE, $$RO$$Limit) - 1;
+    base = (uintptr_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
+    limit = (uintptr_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1;
     if (check_address_range(p, s, base, limit) == TFM_SUCCESS) {
         p_attr->is_priv_rd_allow = true;
         p_attr->is_priv_wr_allow = false;
