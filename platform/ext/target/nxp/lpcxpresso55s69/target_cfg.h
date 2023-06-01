@@ -30,8 +30,10 @@ extern "C" {
 #define TARGET_DEBUG_LOG 0
 #endif
 
-#define TFM_DRIVER_STDIO    Driver_USART0
-#define NS_DRIVER_STDIO     Driver_USART0
+#define TFM_DRIVER_STDIO    Driver_USART
+#define NS_DRIVER_STDIO     Driver_USART
+
+#define USART_BASE          USART0
 
 /**
  * \brief Store the addresses of memory regions
@@ -53,8 +55,8 @@ struct memory_region_limits {
  */
 struct platform_data_t
 {
-    uint32_t periph_start; /* Not used so far */
-    uint32_t periph_limit; /* Not used so far */
+    uint32_t periph_start;
+    uint32_t periph_limit;
     volatile uint32_t *periph_ppc_bank; /* Secure control register address */
     uint32_t periph_ppc_loc;            /* Position in the secure control register */
 };

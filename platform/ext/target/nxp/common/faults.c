@@ -9,6 +9,7 @@
 #include "cmsis.h"
 #include "utilities.h"
 #include "exception_info.h"
+#include "target_cfg.h"
 
 void C_SEC_VIO_IRQHandler(void)
 {

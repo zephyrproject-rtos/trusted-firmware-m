@@ -21,6 +21,14 @@
  * Git SHA: 2b7495b8535bdcb306dac29b9ded4cfb679d7e5c
  */
 
+/* NS linker scripts using the default CMSIS style naming conventions, while the
+ * secure and bl2 linker scripts remain untouched (region.h compatibility).
+ * To be compatible with the untouched files (which using ARMCLANG naming style),
+ * we have to override __INITIAL_SP and __STACK_LIMIT labels. */
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) 
+#include "cmsis_override.h"
+#endif
+
 #include "cmsis.h"
 
 /*----------------------------------------------------------------------------
@@ -215,9 +223,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
 };
 
 #if defined(__ICCARM__)
-#define ARRAY_LENGTH(array) (sizeof((array))/sizeof((array)[0]))
-extern const VECTOR_TABLE_Type __attribute__ ((alias ("__vector_table")))
-             __Vectors[ARRAY_LENGTH(__VECTOR_TABLE)];
+extern typeof(__vector_table) __attribute__ ((alias ("__vector_table"))) __Vectors;
 #endif
 
 #if defined ( __GNUC__ )

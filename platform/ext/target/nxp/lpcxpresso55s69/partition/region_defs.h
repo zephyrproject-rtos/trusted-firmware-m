@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
- * Copyright 2019-2020 NXP. All rights reserved.
+ * Copyright 2019-2023 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

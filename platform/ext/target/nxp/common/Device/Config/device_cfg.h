@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright 2019-2023 NXP. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +15,22 @@
  * limitations under the License.
  */
 
+#ifndef __DEVICE_CFG_H__
+#define __DEVICE_CFG_H__
+
 /**
- * \file device_definition.h
- * \brief The structure definitions in this file are exported based on the
- * peripheral definitions from device_cfg.h.
- * This file is meant to be used as a helper for baremetal
- * applications and/or as an example of how to configure the generic
- * driver structures.
+ * \file device_cfg.h
+ * \brief Configuration file native driver re-targeting
+ *
+ * \details This file can be used to add native driver specific macro
+ *          definitions to select which peripherals are available in the build.
+ *
+ * This is a default device configuration file with all peripherals enabled.
  */
 
-#ifndef __DEVICE_DEFINITION_H__
-#define __DEVICE_DEFINITION_H__
+#define DEFAULT_UART_CONTROL 0
 
-#include "device_cfg.h"
-#include "board.h"
+/* Default UART baud rate */
+#define DEFAULT_UART_BAUDRATE 115200
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "fsl_ctimer.h"
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif  /* __DEVICE_DEFINITION_H__ */
+#endif  /* __DEVICE_CFG_H__ */

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2018-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2019 Arm Limited. All rights reserved.
+ * Copyright 2019-2021 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +15,9 @@
  * limitations under the License.
  */
 
-#ifndef __PLATFORM_DESCRIPTION_H__
-#define __PLATFORM_DESCRIPTION_H__
+#ifndef __PLATFORM_IRQ_H__
+#define __PLATFORM_IRQ_H__
 
-//#include "platform_base_address.h"
-//#include "platform_pins.h"
-//#include "platform_regs.h"
-#include "cmsis.h"
+/* typedef enum IRQn {} IRQn_Type is defined in <platform>.h */
 
-#endif  /* __PLATFORM_DESCRIPTION_H__ */
+#endif  /* __PLATFORM_IRQ_H__ */

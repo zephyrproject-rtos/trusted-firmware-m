@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2020-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2021, NXP Semiconductors. All rights reserved.
 # Copyright (c) 2020, Linaro. All rights reserved.
+# Copyright 2021-2023 NXP. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -76,12 +76,13 @@ endif()
 target_include_directories(platform_s
     PUBLIC
         .
-        project_template/s
-        Device/Config
         Device/Include
+        project_template/s
         partition
         ${PLATFORM_DIR}/ext/target/nxp/common
         ${PLATFORM_DIR}/ext/target/nxp/common/CMSIS_Driver
+        ${PLATFORM_DIR}/ext/target/nxp/common/Device/Config
+        ${PLATFORM_DIR}/ext/target/nxp/common/Device/Include
         ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers
@@ -127,7 +128,6 @@ target_sources(platform_s
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/utilities/str/fsl_str.c
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${PLATFORM_DIR}/ext/target/nxp/common/services/src/tfm_platform_system.c>
-        ${NXP_HAL_FILE_PATH}/common/plat_attest_hal.c
 )
 
 target_link_libraries(platform_s
@@ -156,10 +156,11 @@ target_sources(tfm_s
 target_include_directories(platform_ns
     PUBLIC
         .
-        Device/Config
         Device/Include
         Native_Driver
         project_template/ns
+        ${PLATFORM_DIR}/ext/target/nxp/common/Device/Config
+        ${PLATFORM_DIR}/ext/target/nxp/common/Device/Include
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/lists
         ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager
@@ -210,12 +211,14 @@ if(BL2)
             partition
             Device/Include
             project_template/bl2
+            ${PLATFORM_DIR}/ext/target/nxp/common/Device/Include
             ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver
             ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/drivers
         PRIVATE
             .
-            Device/Config
+            ${PLATFORM_DIR}/ext/target/nxp/common/Device/Config
+            ${PLATFORM_DIR}/ext/target/nxp/common/Device/Include
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/serial_manager
             ${NXP_HAL_FILE_PATH}/common/Native_Driver
             ${NXP_HAL_FILE_PATH}/common/Native_Driver/components/uart

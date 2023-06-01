@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
- * Copyright (c) 2019-2020 NXP. All rights reserved.
+ * Copyright (c) 2019-2022 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,6 +156,10 @@ enum tfm_plat_err_t nvic_interrupt_enable(void)
 
 void sau_and_idau_cfg(void)
 {
+
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
     /* Enables SAU */
     TZ_SAU_Enable();
 
@@ -191,6 +195,10 @@ void sau_and_idau_cfg(void)
     SAU->RLAR = (memory_regions.secondary_partition_limit & SAU_RLAR_LADDR_Msk)
                 | SAU_RLAR_ENABLE_Msk;
 #endif /* BL2 */
+
+    /* Ensure the write is completed and flush pipeline */
+    __DSB();
+    __ISB();
 
 #if TARGET_DEBUG_LOG
     SPMLOG_DBGMSG("=== [SAU NS] =======\r\n");
@@ -407,6 +415,8 @@ int32_t ppc_init_cfg(void)
      *  1    Non-secure, privileged access allowed.
      *  2    Secure, user access allowed.
      *  3    Secure, privileged access allowed. */
+
+    /* Write access attributes for AHB_SECURE_CTRL module are tier-4 (secure privileged). */ 
 
     /* Security access rules for APB Bridge 0 peripherals. */
     AHB_SECURE_CTRL->SEC_CTRL_APB_BRIDGE[0].SEC_CTRL_APB_BRIDGE0_MEM_CTRL0 =
