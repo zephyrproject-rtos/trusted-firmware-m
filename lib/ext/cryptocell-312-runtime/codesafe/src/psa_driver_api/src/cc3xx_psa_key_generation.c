@@ -329,14 +329,14 @@ psa_status_t cc3xx_generate_key(const psa_key_attributes_t *attributes,
                     PSA_ECC_FAMILY_SECP_R1 ||
                 PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) ==
                     PSA_ECC_FAMILY_SECP_R2) {
-                err = cc3xx_internal_gen_ecc_wstr_keypair(
+                return cc3xx_internal_gen_ecc_wstr_keypair(
                     attributes, key_buffer, key_buffer_size, key_buffer_length);
             }
-        } else
+        }
 #endif /* PSA_WANT_KEY_TYPE_ECC_KEY_PAIR */
 #if defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR)
         if (PSA_KEY_TYPE_IS_RSA(key_type)) {
-            err = cc3xx_internal_gen_rsa_keypair(
+            return cc3xx_internal_gen_rsa_keypair(
                 attributes, key_buffer, key_buffer_size, key_buffer_length);
         }
 #endif /* PSA_WANT_KEY_TYPE_RSA_KEY_PAIR */
