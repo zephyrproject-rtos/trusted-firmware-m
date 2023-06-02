@@ -79,11 +79,11 @@ target_include_directories(platform_s
         Device/Include
         project_template/s
         partition
+        ../../arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/ext/target/nxp/common
         ${PLATFORM_DIR}/ext/target/nxp/common/CMSIS_Driver
         ${PLATFORM_DIR}/ext/target/nxp/common/Device/Config
         ${PLATFORM_DIR}/ext/target/nxp/common/Device/Include
-        ${PLATFORM_DIR}/ext/target/nxp/common/Native_Driver
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers
         ${NXP_HAL_FILE_PATH}/common/Native_Driver
@@ -99,7 +99,7 @@ target_sources(platform_s
     PRIVATE
         ../common/CMSIS_Driver/Driver_Flash_iap1.c
         ../common/CMSIS_Driver/Driver_USART.c
-        ../common/Native_Driver/mpu_armv8m_drv.c
+        ../../arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         project_template/s/board.c
         project_template/s/clock_config.c
         project_template/s/peripherals.c
