@@ -167,7 +167,7 @@ config MCUBOOT_FIH_PROFILE
     default "HIGH" if MCUBOOT_FIH_PROFILE_HIGH
 
 config MCUBOOT_SIGNATURE_TYPE
-    string "Algorithm to use for signature validation [RSA-2048, RSA-3072]"
+    string "Algorithm to use for signature validation [RSA-2048, RSA-3072, EC-P256, EC-P384]"
     default "RSA-3072"
     help
       Note - If either SIGNATURE_TYPE or KEY_LEN are changed, the entries for KEY_S

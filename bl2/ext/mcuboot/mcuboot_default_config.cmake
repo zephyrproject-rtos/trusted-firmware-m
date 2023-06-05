@@ -46,7 +46,7 @@ set(MCUBOOT_USE_PSA_CRYPTO              OFF         CACHE BOOL      "Enable the 
 # and KEY_NS will either have to be updated manually or removed from the cache.
 # `cmake .. -UMCUBOOT_KEY_S -UMCUBOOT_KEY_NS`. Once removed from the cache it
 # will be set to default again.
-set(MCUBOOT_SIGNATURE_TYPE              "RSA-3072"       CACHE STRING    "Algorithm to use for signature validation [RSA-2048, RSA-3072]")
+set(MCUBOOT_SIGNATURE_TYPE              "RSA-3072"       CACHE STRING    "Algorithm to use for signature validation [RSA-2048, RSA-3072, EC-P256, EC-P384]")
 set(MCUBOOT_GENERATE_SIGNING_KEYPAIR    OFF              CACHE BOOL      "Generate new keypair for signing and use that instead of MCUBOOT_KEY_S and MCUBOOT_KEY_NS")
 set(MCUBOOT_KEY_S                       "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/root-${MCUBOOT_SIGNATURE_TYPE}.pem" CACHE FILEPATH "Path to key with which to sign secure binary")
 set(MCUBOOT_KEY_NS                      "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/root-${MCUBOOT_SIGNATURE_TYPE}_1.pem" CACHE FILEPATH "Path to key with which to sign non-secure binary")

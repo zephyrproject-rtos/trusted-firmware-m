@@ -85,6 +85,7 @@ target_compile_definitions(bl2_mbedcrypto_config
         $<$<STREQUAL:${SIG_TYPE},RSA>:MCUBOOT_SIGN_RSA>
         $<$<STREQUAL:${SIG_TYPE},RSA>:MCUBOOT_SIGN_RSA_LEN=${SIG_LEN}>
         $<$<BOOL:${MCUBOOT_USE_PSA_CRYPTO}>:MCUBOOT_USE_PSA_CRYPTO>
+        $<$<STREQUAL:${SIG_TYPE},EC>:MCUBOOT_SIGN_EC${SIG_LEN}>
         MBEDTLS_CONFIG_FILE="${MCUBOOT_MBEDCRYPTO_CONFIG_FILEPATH}"
         # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077
         $<$<OR:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>

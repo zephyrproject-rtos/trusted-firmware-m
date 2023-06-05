@@ -18,13 +18,27 @@
 #include "bootutil_priv.h"
 #include "psa/crypto.h"
 
+#if defined(MCUBOOT_SIGN_EC384)
+#define MCUBOOT_HASH_ALG    PSA_ALG_SHA_384
+#define MCUBOOT_HASH_SIZE   (48)
+#else
 #define MCUBOOT_HASH_ALG    PSA_ALG_SHA_256
 #define MCUBOOT_HASH_SIZE   (32)
+#endif /* MCUBOOT_SIGN_EC384 */
 
 #ifdef MCUBOOT_HW_KEY
-#include  "bootutil/crypto/sha256.h"
+#include  "bootutil/crypto/sha.h"
+#if defined(MCUBOOT_SIGN_RSA)
 #define SIG_BUF_SIZE (MCUBOOT_SIGN_RSA_LEN / 8)
-#endif
+#define SIG_EXTRA_BYTES     (24) /* Few extra bytes for encoding and for public exponent. */
+#elif defined(MCUBOOT_SIGN_EC256)
+#define SIG_BUF_SIZE        (64) /* Curve byte (32) * 2 for EC-256 */
+#define SIG_EXTRA_BYTES     (32)
+#elif defined(MCUBOOT_SIGN_EC384)
+#define SIG_BUF_SIZE        (96) /* Curve byte (48) * 2 for EC-384 */
+#define SIG_EXTRA_BYTES     (48)
+#endif /* MCUBOOT_SIGN_RSA */
+#endif /* MCUBOOT_HW_KEY */
 #endif /* TFM_MEASURED_BOOT_API */
 
 /* Firmware Update specific macros */
@@ -72,8 +86,8 @@ static int collect_image_measurement_and_metadata(
     uint16_t type;
 #ifdef MCUBOOT_HW_KEY
     /* Few extra bytes for encoding and for public exponent. */
-    uint8_t key_buf[SIG_BUF_SIZE + 24];
-    bootutil_sha256_context sha256_ctx;
+    uint8_t key_buf[SIG_BUF_SIZE + SIG_EXTRA_BYTES];
+    bootutil_sha_context sha_ctx;
 #endif
     int rc;
 
@@ -97,7 +111,7 @@ static int collect_image_measurement_and_metadata(
             break;
         }
 
-        if (type == IMAGE_TLV_SHA256) {
+        if (type == EXPECTED_HASH_TLV) {
             /* Retrieve the image hash (measurement value) from the TLV area. */
             if (len > measurement_buf_size) {
                 return -1;
@@ -122,9 +136,9 @@ static int collect_image_measurement_and_metadata(
             }
 
             /* Calculate the hash of the public key (signer ID). */
-            bootutil_sha256_init(&sha256_ctx);
-            bootutil_sha256_update(&sha256_ctx, key_buf, len);
-            bootutil_sha256_finish(&sha256_ctx, metadata->signer_id);
+            bootutil_sha_init(&sha_ctx);
+            bootutil_sha_update(&sha_ctx, key_buf, len);
+            bootutil_sha_finish(&sha_ctx, metadata->signer_id);
 #else
         } else if (type == IMAGE_TLV_KEYHASH) {
             /* Retrieve the signer ID (hash of PUBKEY) from the TLV area. */

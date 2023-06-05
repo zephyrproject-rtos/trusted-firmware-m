@@ -1,7 +1,7 @@
 /*
  *  Minimal configuration for using TLS in the bootloader
  *
- *  Copyright (C) 2006-2022, Arm Limited. All rights reserved.
+ *  Copyright (C) 2006-2023, Arm Limited. All rights reserved.
  *  Copyright (C) 2016, Linaro Ltd
  *
  *  SPDX-License-Identifier: Apache-2.0
@@ -31,6 +31,7 @@
  * Minimal configuration for using mbed TLS in the bootloader
  *
  * - RSA signature verification
+ * - ECDSA signature verification
  * - Optionally, enable support for PSA Crypto APIs
  */
 
@@ -52,6 +53,34 @@
 #define MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
 #endif /* MCUBOOT_USE_PSA_CRYPTO */
 
+#if defined(MCUBOOT_SIGN_RSA)
+#define MBEDTLS_RSA_C
+#define MBEDTLS_PKCS1_V21
+/* Save RAM by adjusting to our exact needs */
+#if MCUBOOT_SIGN_RSA_LEN == 3072
+#define MBEDTLS_MPI_MAX_SIZE 384
+#else /* RSA2048 */
+#define MBEDTLS_MPI_MAX_SIZE 256
+#endif
+#endif /* MCUBOOT_SIGN_RSA */
+
+#if defined(MCUBOOT_SIGN_EC384)
+#define MBEDTLS_ECP_DP_SECP384R1_ENABLED
+/* When the image is signed with EC-P384 the image hash
+ * is calculated using SHA-384
+ */
+#define MBEDTLS_SHA512_C
+#define MBEDTLS_SHA384_C
+#else
+/* All the other supported signing algorithms use SHA-256 to compute the image hash */
+#define MBEDTLS_SHA256_C
+#define MBEDTLS_SHA224_C
+#endif /* MCUBOOT_SIGN_EC384 */
+
+#ifdef MCUBOOT_SIGN_EC256
+#define MBEDTLS_ECP_DP_SECP256R1_ENABLED
+#endif /* MCUBOOT_SIGN_EC256 */
+
 /* System support */
 #define MBEDTLS_PLATFORM_C
 #define MBEDTLS_PLATFORM_MEMORY
@@ -62,8 +91,6 @@
 #define MBEDTLS_PLATFORM_EXIT_ALT
 #define MBEDTLS_PLATFORM_PRINTF_ALT
 
-#define MBEDTLS_RSA_C
-#define MBEDTLS_PKCS1_V21
 
 /* mbed TLS modules */
 #define MBEDTLS_ASN1_PARSE_C
@@ -71,16 +98,13 @@
 #define MBEDTLS_BIGNUM_C
 #define MBEDTLS_MD_C
 #define MBEDTLS_OID_C
-#define MBEDTLS_SHA256_C
-#define MBEDTLS_SHA224_C
 #define MBEDTLS_AES_C
 #define MBEDTLS_CIPHER_MODE_CTR
-
-/* Save RAM by adjusting to our exact needs */
-#if MCUBOOT_SIGN_RSA_LEN == 3072
-#define MBEDTLS_MPI_MAX_SIZE 384
-#else /* RSA2048 */
-#define MBEDTLS_MPI_MAX_SIZE 256
+#if defined(MCUBOOT_SIGN_EC256) || \
+    defined(MCUBOOT_SIGN_EC384)
+#define MBEDTLS_ECP_C
+#define MBEDTLS_ECP_NIST_OPTIM
+#define MBEDTLS_ECDSA_C
 #endif
 
 #define MBEDTLS_SSL_MAX_CONTENT_LEN 1024
