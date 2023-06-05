@@ -120,7 +120,7 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
 
     spm_memset(p_tctx, 0, sizeof(*p_tctx));
 
-    ARCH_CTXCTRL_EXCRET_PATTERN(&p_tctx->stat_ctx, param, pfn, pfnlr);
+    ARCH_CTXCTRL_EXCRET_PATTERN(&p_tctx->stat_ctx, param, 0, 0, 0, pfn, pfnlr);
 
     ((struct context_ctrl_t *)p_ctx_ctrl)->exc_ret  = EXC_RETURN_THREAD_PSP;
     ((struct context_ctrl_t *)p_ctx_ctrl)->sp       = (uintptr_t)p_tctx;

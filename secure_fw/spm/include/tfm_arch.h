@@ -152,13 +152,20 @@ struct context_flih_ret_t {
 /* The last allocated pointer. */
 #define ARCH_CTXCTRL_ALLOCATED_PTR(x)         ((x)->sp)
 
-/* Prepare a exception return pattern on the stack. */
-#define ARCH_CTXCTRL_EXCRET_PATTERN(x, param, pfn, pfnlr) do {            \
-            (x)->r0 = (uint32_t)(param);                                  \
+/* Prepare an exception return pattern on the stack. */
+#define ARCH_CTXCTRL_EXCRET_PATTERN(x, param0, param1, param2, param3, pfn, pfnlr) do { \
+            (x)->r0 = (uint32_t)(param0);                                 \
+            (x)->r1 = (uint32_t)(param1);                                 \
+            (x)->r2 = (uint32_t)(param2);                                 \
+            (x)->r3 = (uint32_t)(param3);                                 \
             (x)->ra = (uint32_t)(pfn);                                    \
             (x)->lr = (uint32_t)(pfnlr);                                  \
             (x)->xpsr = XPSR_T32;                                         \
         } while (0)
+
+/* Set state context parameter r0. */
+#define ARCH_STATE_CTX_SET_R0(x, r0_val)                                  \
+            ((x)->r0             = (uint32_t)(r0_val))
 
 /*
  * Claim a statically initialized context control instance.
@@ -222,6 +229,16 @@ __STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
     __ISB();
 }
 
+__attribute__ ((always_inline))
+__STATIC_INLINE void __set_CONTROL_nPRIV(uint32_t nPRIV)
+{
+    CONTROL_Type ctrl;
+
+    ctrl.w = __get_CONTROL();
+    ctrl.b.nPRIV = nPRIV;
+    __set_CONTROL(ctrl.w);
+    __ISB();
+}
 
 /**
  * \brief Whether in privileged level
