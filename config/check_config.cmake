@@ -77,16 +77,15 @@ tfm_invalid_config(PLATFORM_DEFAULT_NV_COUNTERS AND  NOT PLATFORM_DEFAULT_OTP_WR
 tfm_invalid_config(TFM_DUMMY_PROVISIONING AND (PLATFORM_DEFAULT_OTP AND NOT PLATFORM_DEFAULT_OTP_WRITEABLE))
 tfm_invalid_config(TFM_NS_NV_COUNTER_AMOUNT GREATER 3)
 
-####################### Firmware Update Parttion ###############################
+####################### Firmware Update Partition ###############################
 
 tfm_invalid_config(NOT PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT AND TFM_PARTITION_FIRMWARE_UPDATE)
 tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT TFM_PARTITION_PLATFORM)
 tfm_invalid_config((MCUBOOT_UPGRADE_STRATEGY STREQUAL "DIRECT_XIP" OR MCUBOOT_UPGRADE_STRATEGY STREQUAL "RAM_LOAD") AND TFM_PARTITION_FIRMWARE_UPDATE)
 tfm_invalid_config(TFM_PARTITION_FIRMWARE_UPDATE AND NOT MCUBOOT_DATA_SHARING)
 
-####################### Protected Storage Parttion ###############################
+####################### Protected Storage Partition ###############################
 
-tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 # PS only uses the platform partition when PS_ROLLBACK_PROTECTION is ON, but
 # the dependency in the manifest file means the dependency is unconditional
 tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_PLATFORM)
