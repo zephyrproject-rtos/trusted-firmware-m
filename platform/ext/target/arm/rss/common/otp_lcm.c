@@ -20,6 +20,12 @@
 #include "kmu_drv.h"
 #endif /* RSS_ENCRYPTED_OTP_KEYS */
 
+#ifdef MCUBOOT_SIGN_EC384
+#define BL2_ROTPK_HASH_SIZE (12)
+#else
+#define BL2_ROTPK_HASH_SIZE (8)
+#endif
+
 #define OTP_OFFSET(x)       (offsetof(struct lcm_otp_layout_t, x))
 #define OTP_SIZE(x)         (sizeof(((struct lcm_otp_layout_t *)0)->x))
 #define USER_AREA_OFFSET(x) (OTP_OFFSET(user_data) + \
@@ -51,7 +57,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
             __PACKED_STRUCT {
                 uint32_t bl1_rotpk_0[14];
 
-                uint32_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][8];
+                uint32_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][BL2_ROTPK_HASH_SIZE];
 
                 uint32_t iak_len;
                 uint32_t iak_type;

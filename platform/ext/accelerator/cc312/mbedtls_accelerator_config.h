@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -20,7 +20,10 @@ extern "C" {
 #define MBEDTLS_CTR_DRBG_C
 
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
+
+#ifndef MCUBOOT_SIGN_EC384
 #define MBEDTLS_ENTROPY_FORCE_SHA256
+#endif
 
 #ifdef USE_MBEDTLS_CRYPTOCELL
 #define MBEDTLS_MD_C
