@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -274,6 +274,10 @@ enum kmu_error_t kmu_set_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *key,
                              size_t key_len);
 enum kmu_error_t kmu_get_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *buf,
                              size_t buf_len);
+
+enum kmu_error_t kmu_get_key_buffer_ptr(struct kmu_dev_t *dev, uint32_t slot,
+                                        volatile uint32_t **key_slot,
+                                        size_t *slot_size);
 
 enum kmu_error_t kmu_reset_slot(struct kmu_dev_t *dev, uint32_t slot);
 
