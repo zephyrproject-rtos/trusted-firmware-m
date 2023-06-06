@@ -19,6 +19,7 @@ target_sources(cc312_rom
         ./cc3xx_engine_state.c
         ./cc3xx_stdlib.c
         ./cc3xx_chacha.c
+        ./cc3xx_kdf.c
 )
 
 target_include_directories(cc312_rom
