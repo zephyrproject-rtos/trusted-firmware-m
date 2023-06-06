@@ -6,7 +6,6 @@
  */
 
 #include "trng.h"
-
 #include "cc3xx_rng.h"
 #include "device_definition.h"
 

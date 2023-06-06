@@ -5,22 +5,18 @@
  *
  */
 
-#include "cc3xx_stdlib.h"
+#include "dpa_hardened_word_copy.h"
 
+#include "device_definition.h"
 #include "cc3xx_rng.h"
 #include "cc3xx_config.h"
 
 #include <assert.h>
-#include <stdbool.h>
 
 /* This isn't part of cc3xx_config.h as the initial values of the permutation
  * buffer need to be updated if it is increased.
  */
 #define SECURE_COPY_MAX_WORDS 8
-
-#ifdef CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY
-#include "dpa_hardened_word_copy.h"
-#endif /* CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY */
 
 static uint32_t xorshift_plus_128_lfsr(void)
 {
@@ -103,12 +99,10 @@ static void fisher_yates_shuffle(uint8_t *permutation_buf, size_t len)
     }
 }
 
-#ifndef CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY
-void cc3xx_dpa_hardened_word_copy(volatile uint32_t *dst,
-                                  volatile const uint32_t *src, size_t word_count)
+void dpa_hardened_word_copy(volatile uint32_t *dst,
+                            volatile const uint32_t *src, size_t word_count)
 {
     uint8_t permutation_buf[SECURE_COPY_MAX_WORDS] = {0, 1, 2, 3, 4, 5, 6, 7};
-    uint32_t offset = 0;
     size_t idx;
 
     /* Make sure this copy can be represented by the permutation buffer */
@@ -116,13 +110,7 @@ void cc3xx_dpa_hardened_word_copy(volatile uint32_t *dst,
 
     fisher_yates_shuffle(permutation_buf, word_count);
     for(idx = 0; idx < word_count; idx++) {
+        kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
         dst[permutation_buf[idx]] = src[permutation_buf[idx]];
     }
 }
-#else
-void cc3xx_dpa_hardened_word_copy(volatile uint32_t *dst,
-                                  volatile const uint32_t *src, size_t word_count)
-{
-    dpa_hardened_word_copy(dst, src, word_count);
-}
-#endif /* CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY */

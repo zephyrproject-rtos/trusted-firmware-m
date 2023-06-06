@@ -325,6 +325,7 @@ target_sources(platform_bl1_1
         ./tfm_hal_platform_reset.c
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
+        ./dpa_hardened_word_copy.c
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -347,6 +348,7 @@ target_compile_definitions(platform_bl1_1_interface
     INTERFACE
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
         RSS_AMOUNT=${RSS_AMOUNT}
+        KMU_CONFIG_EXTERNAL_SECURE_WORD_COPY
 )
 
 target_link_libraries(platform_bl1_1

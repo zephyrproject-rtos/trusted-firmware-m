@@ -5,11 +5,11 @@
  *
  */
 
-#ifndef CC3XX_STDLIB_H
-#define CC3XX_STDLIB_H
+#ifndef __RSS_SECURE_WORD_COPY_H__
+#define __RSS_SECURE_WORD_COPY_H__
 
-#include "stdint.h"
-#include "stddef.h"
+#include <stdint.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,11 +27,11 @@ extern "C" {
  * \param[in]  src               Source buffer to copy from.
  * \param[in]  word_count        The amount of words to copy.
  */
-void cc3xx_dpa_hardened_word_copy(volatile uint32_t *dst,
-                                  volatile const uint32_t *src, size_t word_count);
+void dpa_hardened_word_copy(volatile uint32_t *dst,
+                            volatile const uint32_t *src, size_t word_count);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CC3XX_STDLIB_H */
+#endif /* __RSS_SECURE_WORD_COPY_H__ */

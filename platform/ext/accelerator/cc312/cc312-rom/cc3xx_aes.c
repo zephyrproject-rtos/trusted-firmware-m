@@ -135,7 +135,7 @@ static cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
         }
     } else {
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
-        cc3xx_secure_word_copy(hw_key_buf_ptr, key, key_word_size - 1);
+        cc3xx_dpa_hardened_word_copy(hw_key_buf_ptr, key, key_word_size - 1);
         hw_key_buf_ptr[key_word_size - 1] = key[key_word_size - 1];
 #else
         hw_key_buf_ptr[0] = key[0];
@@ -435,8 +435,8 @@ cc3xx_err_t cc3xx_aes_init(cc3xx_aes_direction_t direction,
     if (key != NULL) {
         aes_state.state_contains_key = true;
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
-        cc3xx_secure_word_copy((uint32_t *)aes_state.key_buf, key,
-                               get_key_size_bytes(key_size) / sizeof(uint32_t));
+        cc3xx_dpa_hardened_word_copy((uint32_t *)aes_state.key_buf, key,
+                                     get_key_size_bytes(key_size) / sizeof(uint32_t));
 #else
         memcpy(aes_state.key_buf, key, get_key_size_bytes(key_size));
 #endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
@@ -493,9 +493,9 @@ void cc3xx_aes_get_state(struct cc3xx_aes_state_t *state)
 {
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     memcpy(state, &aes_state, sizeof(*state));
-    cc3xx_secure_word_copy(state->key_buf,
-                           aes_state.key_buf,
-                           sizeof(state->key_buf) / sizeof(uint32_t));
+    cc3xx_dpa_hardened_word_copy(state->key_buf,
+                                 aes_state.key_buf,
+                                 sizeof(state->key_buf) / sizeof(uint32_t));
 #else
     memcpy(state, &aes_state, sizeof(*state));
 #endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */
@@ -527,9 +527,9 @@ cc3xx_err_t cc3xx_aes_set_state(const struct cc3xx_aes_state_t *state)
 
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     memcpy(&aes_state, state, sizeof(*state));
-    cc3xx_secure_word_copy(aes_state.key_buf,
-                           state->key_buf,
-                           sizeof(state->key_buf) / sizeof(uint32_t));
+    cc3xx_dpa_hardened_word_copy(aes_state.key_buf,
+                                 state->key_buf,
+                                 sizeof(state->key_buf) / sizeof(uint32_t));
 #else
     memcpy(&aes_state, state, sizeof(*state));
 #endif /* CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE */

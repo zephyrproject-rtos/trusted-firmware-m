@@ -62,7 +62,7 @@ static inline void set_key(const uint32_t *key)
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
     (void)idx;
 
-    cc3xx_secure_word_copy(P_CC3XX->chacha.chacha_key, key, 7);
+    cc3xx_dpa_hardened_word_copy(P_CC3XX->chacha.chacha_key, key, 7);
     P_CC3XX->chacha.chacha_key[7] = key[7];
 #else
     for (idx = 0; idx < 8; idx++) {

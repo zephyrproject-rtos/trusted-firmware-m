@@ -106,4 +106,13 @@
 /* Whether DFA mitigations are enabled. Has a code-size and performance cost */
 #define CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE
 
+/* Whether an external secure word copying function (for copying keys etc) will
+ * be provided by the platform
+ */
+#define CC3XX_CONFIG_STDLIB_EXTERNAL_SECURE_WORD_COPY
+
+#ifndef CC3XX_CONFIG_STDLIB_LFSR_MAX_ATTEMPTS
+#define CC3XX_CONFIG_STDLIB_LFSR_MAX_ATTEMPTS 128
+#endif /* CC3XX_CONFIG_STDLIB_LFSR_MAX_ATTEMPTS */
+
 #endif /* CC3XX_CONFIG_H */
