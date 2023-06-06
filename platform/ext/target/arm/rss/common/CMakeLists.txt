@@ -327,6 +327,7 @@ target_sources(platform_bl1_1
         $<$<BOOL:${RSS_DEBUG_UART}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART_cmsdk.c>
         $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         ./dpa_hardened_word_copy.c
+        ./cc312/cc3xx_aes_external_key_loader.c
 )
 
 target_include_directories(platform_bl1_1_interface

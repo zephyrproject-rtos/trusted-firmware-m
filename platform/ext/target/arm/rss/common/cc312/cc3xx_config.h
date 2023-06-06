@@ -39,7 +39,7 @@
 /* #define CC3XX_CONFIG_AES_GCM_VARIABLE_IV_ENABLE */
 
 /* Whether the AES CMAC support is enabled */
-/* #define CC3XX_CONFIG_AES_CMAC_ENABLE */
+#define CC3XX_CONFIG_AES_CMAC_ENABLE
 
 /* Whether the AES CCM support is enabled */
 #define CC3XX_CONFIG_AES_CCM_ENABLE
@@ -51,6 +51,11 @@
  * AES will instead only run the CBC_MAC operation with the CCM IVs, with the
  * CTR decryption having to be done seperately. */
 #define CC3XX_CONFIG_AES_TUNNELLING_ENABLE
+
+/* Whether an external key-loader should be invoked instead of the standard AES
+ * hardware key loading mechanism
+ */
+#define CC3XX_CONFIG_AES_EXTERNAL_KEY_LOADER
 
 /* Whether CHACHA is enabled */
 /* #define CC3XX_CONFIG_CHACHA_ENABLE */

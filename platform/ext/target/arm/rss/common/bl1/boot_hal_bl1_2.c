@@ -31,6 +31,7 @@
 #endif
 #include "tfm_plat_nv_counters.h"
 #include "rss_key_derivation.h"
+#include "rss_kmu_slot_ids.h"
 
 uint32_t image_offsets[2];
 
@@ -203,28 +204,25 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
 int boot_platform_post_load(uint32_t image_id)
 {
     int rc = 0;
-    uint8_t key_buf[32];
-    size_t key_len;
+    uint32_t vhuk_seed[8];
+    size_t vhuk_seed_len;
 
-    rc = rss_derive_vhuk_seed(key_buf, sizeof(key_buf), &key_len);
+    rc = rss_derive_vhuk_seed(vhuk_seed, sizeof(vhuk_seed), &vhuk_seed_len);
     if (rc) {
-        goto exit;
+        return rc;
     }
 
-    rc = rss_derive_vhuk(key_buf, sizeof(key_buf), KMU_USER_SLOT_MIN);
+    rc = rss_derive_vhuk((uint8_t *)vhuk_seed, vhuk_seed_len, RSS_KMU_SLOT_VHUK);
     if (rc) {
-        goto exit;
+        return rc;
     }
 
-    rc = rss_derive_cpak_seed(KMU_USER_SLOT_MIN + 1);
+    rc = rss_derive_cpak_seed(RSS_KMU_SLOT_CPAK_SEED);
     if (rc) {
-        goto exit;
+        return rc;
     }
 
-    rc = rss_derive_dak_seed(KMU_USER_SLOT_MIN + 2);
-
-exit:
-    memset(key_buf, 0, sizeof(key_buf));
+    rc = rss_derive_dak_seed(RSS_KMU_SLOT_DAK_SEED);
 
     return rc;
 }

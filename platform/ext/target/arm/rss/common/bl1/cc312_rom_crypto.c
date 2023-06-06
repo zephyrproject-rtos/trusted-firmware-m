@@ -15,6 +15,7 @@
 #include "otp.h"
 #include "fih.h"
 #include "cc3xx_drv.h"
+#include "kmu_drv.h"
 
 #define KEY_DERIVATION_MAX_BUF_SIZE 128
 
@@ -82,24 +83,25 @@ fih_int bl1_sha256_compute(const uint8_t *data,
     FIH_RET(FIH_SUCCESS);
 }
 
-static int32_t bl1_key_to_cc3xx_key(enum tfm_bl1_key_id_t key_id,
-                                    cc3xx_aes_key_id_t *cc3xx_key_type,
-                                    uint8_t *key_buf, size_t key_buf_size)
+static int32_t bl1_key_to_kmu_key(enum tfm_bl1_key_id_t key_id,
+                                    enum kmu_hardware_keyslot_t *cc3xx_key_type,
+                                    uint8_t **key_buf, size_t key_buf_size)
 {
     int32_t rc;
 
     switch(key_id) {
     case TFM_BL1_KEY_HUK:
-        *cc3xx_key_type = CC3XX_AES_KEY_ID_HUK;
+        *cc3xx_key_type = KMU_HW_SLOT_HUK;
+        *key_buf = NULL;
         break;
     case TFM_BL1_KEY_GUK:
-        *cc3xx_key_type = CC3XX_AES_KEY_ID_GUK;
+        *cc3xx_key_type = KMU_HW_SLOT_GUK;
+        *key_buf = NULL;
         break;
     default:
-        *cc3xx_key_type = CC3XX_AES_KEY_ID_USER_KEY;
-        rc = bl1_otp_read_key(key_id, key_buf);
+        rc = bl1_otp_read_key(key_id, *key_buf);
         if (rc) {
-            memset(key_buf, 0, key_buf_size);
+            memset(*key_buf, 0, key_buf_size);
             return rc;
         }
         break;
@@ -115,10 +117,10 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
                                 size_t ciphertext_length,
                                 uint8_t *plaintext)
 {
-    cc3xx_aes_key_id_t cc3xx_key_type;
+    enum kmu_hardware_keyslot_t kmu_key_slot;
     uint32_t key_buf[32 / sizeof(uint32_t)];
     int32_t rc = 0;
-    const uint8_t *input_key = key_buf;
+    uint8_t *input_key = (uint8_t *)key_buf;
     cc3xx_err_t err;
 
     if (ciphertext_length == 0) {
@@ -134,19 +136,18 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
     }
 
     if (key_material == NULL) {
-        rc = bl1_key_to_cc3xx_key(key_id, &cc3xx_key_type, (uint8_t *)key_buf,
-                                  sizeof(key_buf));
+        rc = bl1_key_to_kmu_key(key_id, &kmu_key_slot, &input_key,
+                                sizeof(key_buf));
         if (rc) {
             return rc;
         }
     } else {
-        cc3xx_key_type = CC3XX_AES_KEY_ID_USER_KEY;
-        input_key = key_material;
+        input_key = (uint8_t *)key_material;
     }
 
     err = cc3xx_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
-                         cc3xx_key_type, input_key, CC3XX_AES_KEYSIZE_256,
-                         (uint32_t *)counter, 16);
+                         kmu_key_slot, (uint32_t *)input_key,
+                         CC3XX_AES_KEYSIZE_256, (uint32_t *)counter, 16);
     if (err != CC3XX_ERR_SUCCESS) {
         return 1;
     }
@@ -158,132 +159,28 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
     return 0;
 }
 
-static int32_t aes_256_ecb_encrypt(enum tfm_bl1_key_id_t key_id,
-                                   const uint8_t *plaintext,
-                                   size_t ciphertext_length,
-                                   uint8_t *ciphertext)
-{
-    cc3xx_aes_key_id_t cc3xx_key_type;
-    uint32_t key_buf[32 / sizeof(uint32_t)];
-    int32_t rc = 0;
-    cc3xx_err_t err;
-
-    if (ciphertext_length == 0) {
-        return 0;
-    }
-
-    if (ciphertext == NULL || plaintext == NULL) {
-        return -1;
-    }
-
-    rc = bl1_key_to_cc3xx_key(key_id, &cc3xx_key_type, key_buf, sizeof(key_buf));
-    if (rc) {
-        return rc;
-    }
-
-    err = cc3xx_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_ECB,
-                         cc3xx_key_type, (uint32_t *)key_buf,
-                         CC3XX_AES_KEYSIZE_256,
-                         NULL, 0);
-    if (err != CC3XX_ERR_SUCCESS) {
-        return 1;
-    }
-
-    cc3xx_aes_set_output_buffer(ciphertext, ciphertext_length);
-    cc3xx_aes_update(plaintext, ciphertext_length);
-    cc3xx_aes_finish(NULL);
-}
-
-/* This is a counter-mode KDF complying with NIST SP800-108 where the PRF is a
- * combined sha256 hash and an ECB-mode AES encryption. ECB is acceptable here
- * since the input to the PRF is a hash, and the hash input is different every
- * time because of the counter being part of the input.
- */
-int32_t bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
+int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
                        size_t label_length, const uint8_t *context,
                        size_t context_length, uint8_t *output_key,
                        size_t output_length)
 {
-    uint8_t state[KEY_DERIVATION_MAX_BUF_SIZE];
-    uint8_t state_size = label_length + context_length + sizeof(uint8_t)
-                         + 2 * sizeof(uint32_t);
-    uint8_t state_hash[32];
-    uint32_t L = output_length;
-    uint32_t n = (output_length + sizeof(state_hash) - 1) / sizeof(state_hash);
-    uint32_t i = 1;
-    size_t output_idx = 0;
-    cc3xx_err_t rc;
+    enum kmu_hardware_keyslot_t kmu_key_slot;
+    uint32_t key_buf[32 / sizeof(uint32_t)];
+    uint8_t *input_key = (uint8_t *)key_buf;
+    int32_t rc = 0;
+    cc3xx_err_t err;
 
-    if (output_length == 0) {
-        return 0;
+    rc = bl1_key_to_kmu_key(key_id, &kmu_key_slot, &input_key, sizeof(key_buf));
+    if (rc) {
+        return rc;
     }
 
-    if (label == NULL || label_length == 0 ||
-        context == NULL || context_length == 0 ||
-        output_key == NULL) {
-        return -1;
+    err = cc3xx_kdf_cmac(kmu_key_slot, (uint32_t *)input_key,
+                         CC3XX_AES_KEYSIZE_256, label, label_length, context,
+                         context_length, (uint32_t *)output_key, output_length);
+    if (err != CC3XX_ERR_SUCCESS) {
+        return 1;
     }
-
-    if (state_size > KEY_DERIVATION_MAX_BUF_SIZE) {
-        return -1;
-    }
-
-    memcpy(state + sizeof(uint32_t), label, label_length);
-    memset(state + sizeof(uint32_t) + label_length, 0, sizeof(uint8_t));
-    memcpy(state + sizeof(uint32_t) + label_length + sizeof(uint8_t),
-           context, context_length);
-    memcpy(state + sizeof(uint32_t) + label_length + sizeof(uint8_t) + context_length,
-           &L, sizeof(uint32_t));
-
-    for (i = 1; i < n; i++) {
-        memcpy(state, &i, sizeof(uint32_t));
-
-        /* Hash the state to make it a constant size */
-        rc = bl1_sha256_compute(state, state_size, state_hash);
-        if (rc != CC3XX_ERR_SUCCESS) {
-            goto err;
-        }
-
-        /* Encrypt using ECB, which is fine because the state is different every
-         * time and we're hashing it.
-         */
-        rc = aes_256_ecb_encrypt(input_key, state_hash, sizeof(state_hash),
-                                 output_key + output_idx);
-        if (rc != CC3XX_ERR_SUCCESS) {
-            goto err;
-        }
-
-        output_idx += sizeof(state_hash);
-    }
-
-    /* For the last block, encrypt into the state buf and then memcpy out how
-     * much we need
-     */
-    memcpy(state, &i, sizeof(uint32_t));
-
-    rc = bl1_sha256_compute(state, state_size, state_hash);
-    if (rc != CC3XX_ERR_SUCCESS) {
-        goto err;
-    }
-
-    /* This relies on us being able to have overlapping input and output
-     * pointers.
-     */
-    rc = aes_256_ecb_encrypt(input_key, state_hash, sizeof(state_hash),
-                             state_hash);
-    if (rc != CC3XX_ERR_SUCCESS) {
-        goto err;
-    }
-
-    memcpy(output_key + output_idx, state_hash, output_length - output_idx);
-    memset(state, 0, sizeof(state));
-    memset(state_hash, 0, sizeof(state_hash));
 
     return 0;
-
-err:
-    memset(output_key, 0, output_length);
-    memset(state, 0, sizeof(state));
-    memset(state_hash, 0, sizeof(state_hash));
-    return rc;
 }

@@ -10,22 +10,11 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "rss_kmu_slot_ids.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * \brief                     Get the boot state.
-
- * \param[out] state          The buffer to get the state into.
- * \param[in]  state_buf_len  The size of the state buffer.
- * \param[out] state_size     The size of the state.
- *
- * \return                    0 on success, non-zero on error.
- */
-int rss_get_boot_state(uint8_t *state, size_t state_buf_len,
-                       size_t *state_size);
 
 /**
  * \brief                     Derive a VHUK seed.
@@ -36,7 +25,7 @@ int rss_get_boot_state(uint8_t *state, size_t state_buf_len,
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_vhuk_seed(uint8_t *vhuk_seed, size_t vhuk_seed_buf_len,
+int rss_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
                          size_t *vhuk_seed_size);
 
 /**
@@ -46,7 +35,7 @@ int rss_derive_vhuk_seed(uint8_t *vhuk_seed, size_t vhuk_seed_buf_len,
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_cpak_seed(uint32_t kmu_output_slot);
+int rss_derive_cpak_seed(enum rss_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the DAK seed, and lock in a KMU slot.
@@ -55,7 +44,7 @@ int rss_derive_cpak_seed(uint32_t kmu_output_slot);
  *
  * \return                    0 on success, non-zero on error.
  */
-int rss_derive_dak_seed(uint32_t kmu_output_slot);
+int rss_derive_dak_seed(enum rss_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the VHUK, and lock in a KMU slot.
@@ -68,7 +57,7 @@ int rss_derive_dak_seed(uint32_t kmu_output_slot);
  * \return                    0 on success, non-zero on error.
  */
 int rss_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
-                    uint32_t kmu_output_slot);
+                    enum rss_kmu_slot_id_t slot);
 
 /**
  * \brief                     Derive the session key, and lock in a KMU slot.
@@ -81,7 +70,7 @@ int rss_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
  * \return                    0 on success, non-zero on error.
  */
 int rss_derive_session_key(const uint8_t *ivs, size_t ivs_len,
-                           uint32_t kmu_output_slot);
+                           enum rss_kmu_slot_id_t slot);
 
 #ifdef __cplusplus
 }
