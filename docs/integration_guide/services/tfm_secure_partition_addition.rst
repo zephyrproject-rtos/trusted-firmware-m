@@ -284,6 +284,17 @@ Here is an example for it:
    struct platform_data_t tfm_peripheral_A;
    #define TFM_PERIPHERAL_A                 (&tfm_peripheral_A)
 
+mm_iovec
+--------
+Memory-mapped iovecs (MM-IOVEC) provides direct mapping of client input and output vectors into the
+Secure Partition.
+When this attribute is set to ``enable``, it enables Secure Partitions to use the MM-IOVEC APIs if
+the framework supports MM-IOVEC.
+
+Using MM-IOVEC provides a memory and runtime optimization for larger buffers, but reduces mitigation
+for common security vulnerabilities.
+Please refer to `Firmware Framework for M 1.1 Extensions`_ for more details.
+Whether to use MM-IOVEC depends on the requirements of memory and runtime optimization and security.
 
 Add configuration
 =================
