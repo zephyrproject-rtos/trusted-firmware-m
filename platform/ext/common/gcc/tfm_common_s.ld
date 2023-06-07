@@ -156,8 +156,8 @@ SECTIONS
 
     .TFM_PSA_ROT_LINKER ALIGN(TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT) :
     {
-        *tfm_psa_rot_partition*:*(.text*)
-        *tfm_psa_rot_partition*:*(.rodata*)
+        *tfm_psa_rot_partition*:(SORT_BY_ALIGNMENT(.text*))
+        *tfm_psa_rot_partition*:(SORT_BY_ALIGNMENT(.rodata*))
         *(TFM_*_PSA-ROT_ATTR_FN)
         . = ALIGN(TFM_LINKER_PSA_ROT_LINKER_CODE_ALIGNMENT);
     } > FLASH
@@ -175,8 +175,8 @@ SECTIONS
 
     .TFM_APP_ROT_LINKER ALIGN(TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT) :
     {
-        *tfm_app_rot_partition*:*(.text*)
-        *tfm_app_rot_partition*:*(.rodata*)
+        *tfm_app_rot_partition*:(SORT_BY_ALIGNMENT(.text*))
+        *tfm_app_rot_partition*:(SORT_BY_ALIGNMENT(.rodata*))
         *(TFM_*_APP-ROT_ATTR_FN)
         . = ALIGN(TFM_LINKER_APP_ROT_LINKER_CODE_ALIGNMENT);
     } > FLASH
@@ -193,8 +193,8 @@ SECTIONS
     /* Flash drivers code that gets copied from Flash */
     .ER_CODE_SRAM ALIGN(S_RAM_CODE_START, 4) :
     {
-        *libflash_drivers*:*(.text*)
-        *libflash_drivers*:*(.rodata*)
+        *libflash_drivers*:(SORT_BY_ALIGNMENT(.text*))
+        *libflash_drivers*:(SORT_BY_ALIGNMENT(.rodata*))
         KEEP(*(.ramfunc))
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
@@ -222,8 +222,8 @@ SECTIONS
     .ER_TFM_CODE ALIGN(4) :
     {
         *startup*(.text*)
-        *libplatform_s*:*(.text*)
-        *libtfm_spm*:*(.text*)
+        *libplatform_s*:(SORT_BY_ALIGNMENT(.text*))
+        *libtfm_spm*:(SORT_BY_ALIGNMENT(.text*))
 
         *libplatform_s*:*(.rodata*)
         *libtfm_spm*:*(.rodata*)
@@ -232,7 +232,7 @@ SECTIONS
     .TFM_UNPRIV_CODE ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT) :
     {
         *(SFN)
-        *(.text*)
+        *(SORT_BY_ALIGNMENT(.text*))
 
         KEEP(*(.init))
         KEEP(*(.fini))
@@ -251,7 +251,7 @@ SECTIONS
          *(SORT(.dtors.*))
          *(.dtors)
 
-        *(.rodata*)
+        *(SORT_BY_ALIGNMENT(.rodata*))
 
         KEEP(*(.eh_frame*))
         . = ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT);
@@ -346,7 +346,7 @@ SECTIONS
 
     .TFM_APP_ROT_LINKER_DATA ALIGN(TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT) :
     {
-        *tfm_app_rot_partition*:*(.data*)
+        *tfm_app_rot_partition*:(SORT_BY_ALIGNMENT(.data*))
         *(TFM_*_APP-ROT_ATTR_RW)
         . = ALIGN(4);
     } > RAM AT> FLASH
@@ -356,7 +356,7 @@ SECTIONS
     .TFM_APP_ROT_LINKER_BSS ALIGN(4) (NOLOAD) :
     {
         start_of_TFM_APP_ROT_LINKER = .;
-        *tfm_app_rot_partition*:*(.bss*)
+        *tfm_app_rot_partition*:(SORT_BY_ALIGNMENT(.bss*))
         *tfm_app_rot_partition*:*(COMMON)
         *(TFM_*_APP-ROT_ATTR_ZI)
         . += (. - start_of_TFM_APP_ROT_LINKER) ? 0 : 4;
@@ -407,7 +407,7 @@ SECTIONS
 
     .TFM_PSA_ROT_LINKER_DATA ALIGN(TFM_LINKER_PSA_ROT_LINKER_DATA_ALIGNMENT) :
     {
-        *tfm_psa_rot_partition*:*(.data*)
+        *tfm_psa_rot_partition*:(SORT_BY_ALIGNMENT(.data*))
         *(TFM_*_PSA-ROT_ATTR_RW)
         . = ALIGN(4);
     } > RAM AT> FLASH
@@ -417,7 +417,7 @@ SECTIONS
     .TFM_PSA_ROT_LINKER_BSS ALIGN(4) (NOLOAD) :
     {
         start_of_TFM_PSA_ROT_LINKER = .;
-        *tfm_psa_rot_partition*:*(.bss*)
+        *tfm_psa_rot_partition*:(SORT_BY_ALIGNMENT(.bss*))
         *tfm_psa_rot_partition*:*(COMMON)
         *(TFM_*_PSA-ROT_ATTR_ZI)
         . += (. - start_of_TFM_PSA_ROT_LINKER) ? 0 : 4;
@@ -442,7 +442,7 @@ SECTIONS
     .TFM_DATA ALIGN(4) :
 #endif
     {
-        *(.data*)
+        *(SORT_BY_ALIGNMENT(.data*))
 
         . = ALIGN(4);
         /* preinit data */
@@ -491,7 +491,7 @@ SECTIONS
         KEEP(*(.bss.serv_runtime_priority_normal))
         KEEP(*(.bss.serv_runtime_priority_high))
         __service_runtime_end__ = .;
-        *(.bss*)
+        *(SORT_BY_ALIGNMENT(.bss*))
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;

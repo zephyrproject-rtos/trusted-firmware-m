@@ -151,14 +151,14 @@ SECTIONS
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.text*)
-        {{pattern}}:*(.rodata*)
+        {{pattern}}:(SORT_BY_ALIGNMENT(.text*))
+        {{pattern}}:(SORT_BY_ALIGNMENT(.rodata*))
         {% endfor %}
     {% endif %}
     {% if partition.attr.linker_pattern.object_list %}
         {% for pattern in partition.attr.linker_pattern.object_list %}
-        {{pattern}}(.text*)
-        {{pattern}}:*(.rodata*)
+        {{pattern}}(SORT_BY_ALIGNMENT(.text*))
+        {{pattern}}:(SORT_BY_ALIGNMENT(.rodata*))
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_PSA-ROT_ATTR_FN)
@@ -178,14 +178,14 @@ SECTIONS
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.text*)
-        {{pattern}}:*(.rodata*)
+        {{pattern}}:(SORT_BY_ALIGNMENT(.text*))
+        {{pattern}}:(SORT_BY_ALIGNMENT(.rodata*))
         {% endfor %}
     {% endif %}
     {% if partition.attr.linker_pattern.object_list %}
         {% for pattern in partition.attr.linker_pattern.object_list %}
-        {{pattern}}(.text*)
-        {{pattern}}:*(.rodata*)
+        {{pattern}}(SORT_BY_ALIGNMENT(.text*))
+        {{pattern}}:(SORT_BY_ALIGNMENT(.rodata*))
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_APP-ROT_ATTR_FN)
@@ -202,8 +202,8 @@ SECTIONS
     /* Flash drivers code that gets copied from Flash */
     .ER_CODE_SRAM ALIGN(S_RAM_CODE_START, 4) :
     {
-        *libflash_drivers*:*(.text*)
-        *libflash_drivers*:*(.rodata*)
+        *libflash_drivers*:(SORT_BY_ALIGNMENT(.text*))
+        *libflash_drivers*:(SORT_BY_ALIGNMENT(.rodata*))
         KEEP(*(.ramfunc))
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
@@ -214,18 +214,18 @@ SECTIONS
     .ER_TFM_CODE : ALIGN(4)
     {
         *startup*(.text*)
-        *libplatform_s*:*(.text*)
-        *libtfm_spm*:*(.text*)
+        *libplatform_s*:(SORT_BY_ALIGNMENT(.text*))
+        *libtfm_spm*:(SORT_BY_ALIGNMENT(.text*))
 
-        *libplatform_s*:*(.rodata*)
-        *libtfm_spm*:*(.rodata*)
+        *libplatform_s*:(SORT_BY_ALIGNMENT(.rodata*))
+        *libtfm_spm*:(SORT_BY_ALIGNMENT(.rodata*))
     } > FLASH
 
     /**** Unprivileged Secure code starts here */
     .ER_UNPRIV_CODE ALIGN(TFM_LINKER_UNPRIV_CODE_ALIGNMENT) :
     {
         *(SFN)
-        *(.text*)
+        *(SORT_BY_ALIGNMENT(.text*))
 
         KEEP(*(.init))
         KEEP(*(.fini))
@@ -244,7 +244,7 @@ SECTIONS
          *(SORT(.dtors.*))
          *(.dtors)
 
-        *(.rodata*)
+        *(SORT_BY_ALIGNMENT(.rodata*))
 
         KEEP(*(.eh_frame*))
 
@@ -320,7 +320,7 @@ SECTIONS
     } > RAM AT> FLASH
     .spm_bss (NOLOAD):
     {
-        *libtfm_spm*:*(.bss*);
+        *libtfm_spm*:(SORT_BY_ALIGNMENT(.bss*));
     } > RAM AT> RAM
 
     /**** PSA RoT DATA start here */
@@ -335,12 +335,12 @@ SECTIONS
     {
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.data*)
+        {{pattern}}:(SORT_BY_ALIGNMENT(.data*))
         {% endfor %}
     {% endif %}
     {% if partition.attr.linker_pattern.object_list %}
         {% for pattern in partition.attr.linker_pattern.object_list %}
-        {{pattern}}(.data*)
+        {{pattern}}(SORT_BY_ALIGNMENT(.data*))
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_PSA-ROT_ATTR_RW)
@@ -354,7 +354,7 @@ SECTIONS
         start_of_{{partition.manifest.name}}_RWZI = .;
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.bss*)
+        {{pattern}}:(SORT_BY_ALIGNMENT(.bss*))
         {{pattern}}:*(COMMON)
         {% endfor %}
     {% endif %}
@@ -399,7 +399,7 @@ SECTIONS
     {% endif %}
     {% if partition.attr.linker_pattern.object_list %}
         {% for pattern in partition.attr.linker_pattern.object_list %}
-        {{pattern}}(.data*)
+        {{pattern}}(SORT_BY_ALIGNMENT(.data*))
         {% endfor %}
     {% endif %}
         *({{partition.manifest.name}}_APP-ROT_ATTR_RW)
@@ -413,13 +413,13 @@ SECTIONS
         start_of_{{partition.manifest.name}}_RWZI = .;
     {% if partition.attr.linker_pattern.library_list %}
         {% for pattern in partition.attr.linker_pattern.library_list %}
-        {{pattern}}:*(.bss*)
+        {{pattern}}:(SORT_BY_ALIGNMENT(.bss*))
         {{pattern}}:*(COMMON)
         {% endfor %}
     {% endif %}
     {% if partition.attr.linker_pattern.object_list %}
         {% for pattern in partition.attr.linker_pattern.object_list %}
-        {{pattern}}(.bss*)
+        {{pattern}}(SORT_BY_ALIGNMENT(.bss*))
         {{pattern}}(COMMON)
         {% endfor %}
     {% endif %}
@@ -455,7 +455,7 @@ SECTIONS
     .TFM_DATA ALIGN(4) :
 #endif
     {
-        *(.data*)
+        *(SORT_BY_ALIGNMENT(.data*))
 
         . = ALIGN(4);
         /* preinit data */
@@ -514,7 +514,7 @@ SECTIONS
         KEEP(*(.bss.serv_runtime_priority_normal))
         KEEP(*(.bss.serv_runtime_priority_high))
         __service_runtime_end__ = .;
-        *(.bss*)
+        *(SORT_BY_ALIGNMENT(.bss*))
         *(COMMON)
         . = ALIGN(4);
         __bss_end__ = .;
