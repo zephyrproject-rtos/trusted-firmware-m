@@ -45,11 +45,6 @@
 /* GTZC specific Alignment */
 #define GTZC_RAM_ALIGN 512
 #define GTZC_FLASH_ALIGN 8192
-/*
- * This size of buffer is big enough to store an attestation
- * token produced by initial attestation service
- */
-#define PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE   0x250
 
 /*  FIX ME : include stm32u5xx.h instead  */
 #define _SRAM2_TOP              (0x40000) /* 256Kbytes */

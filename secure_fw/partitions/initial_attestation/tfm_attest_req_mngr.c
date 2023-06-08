@@ -17,7 +17,6 @@
 #include "psa/framework_feature.h"
 #include "psa/service.h"
 #include "psa_manifest/tfm_initial_attestation.h"
-#include "region_defs.h"
 #include "tfm_attest_defs.h"
 
 #define ECC_P256_PUBLIC_KEY_SIZE PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)

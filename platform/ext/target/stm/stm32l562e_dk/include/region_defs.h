@@ -31,13 +31,6 @@
 #define NS_HEAP_SIZE            0x0001000
 #define NS_STACK_SIZE           0x0001000
 
-
-/*
- * This size of buffer is big enough to store an attestation
- * token produced by initial attestation service
- */
-#define PSA_INITIAL_ATTEST_MAX_TOKEN_SIZE   0x250
-
 #define _SRAM2_TOP              (0x40000) /* 256Kbytes */
 #define _SRAM1_SIZE_MAX         (0x30000)  /*!< SRAM1=192k*/
 #define _SRAM2_SIZE_MAX         (0xfc00)  /*!< SRAM2=64k -0x400 */

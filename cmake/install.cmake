@@ -90,7 +90,7 @@ if (TFM_PARTITION_CRYPTO)
 endif()
 
 if (TFM_PARTITION_INITIAL_ATTESTATION)
-    install(FILES       ${INTERFACE_INC_DIR}/psa/initial_attestation.h
+    install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa/initial_attestation.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_attest_defs.h
                         ${INTERFACE_INC_DIR}/tfm_attest_iat_defs.h
