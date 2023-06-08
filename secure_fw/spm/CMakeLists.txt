@@ -10,6 +10,12 @@
 
 cmake_minimum_required(VERSION 3.15)
 
+if(PSA_FRAMEWORK_HAS_MM_IOVEC)
+    message(NOTICE "**** MM-IOVEC is enabled for memory and runtime optimizations for larger buffers, ****\n"
+                   "**** but reduces mitigation for common security vulnerabilities. ****\n"
+                   "**** Check FF-M 1.1 https://developer.arm.com/documentation/aes0039/latest for more details. ****")
+endif()
+
 add_library(tfm_spm STATIC)
 add_library(tfm_spm_defs INTERFACE)
 add_library(tfm_boot_status INTERFACE)
