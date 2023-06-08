@@ -25,6 +25,9 @@
  */
 
 #include "host_device_cfg.h"
+#ifdef RSS_HAS_EXPANSION_PERIPHERALS
+#include "rss_expansion_device_cfg.h"
+#endif /* RSS_HAS_EXPANSION_PERIPHERALS */
 
 #ifdef RSS_DEBUG_UART
 /* ARM UART CMSDK */

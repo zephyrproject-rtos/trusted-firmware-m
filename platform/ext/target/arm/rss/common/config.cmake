@@ -13,6 +13,7 @@ set(MCUBOOT_NS_IMAGE_FLASH_AREA_NUM     11        CACHE STRING  "ID of the flash
 endif()
 
 set(RSS_USE_HOST_UART                   ON         CACHE BOOL     "Whether RSS should setup to use the UART from the host system")
+set(RSS_HAS_EXPANSION_PERIPHERALS       OFF        CACHE BOOL     "Whether RSS has sub-platform specific peripherals in the expansion layer")
 
 set(CRYPTO_HW_ACCELERATOR               ON         CACHE BOOL     "Whether to enable the crypto hardware accelerator on supported platforms")
 set(PLATFORM_DEFAULT_OTP                OFF        CACHE BOOL     "Use trusted on-chip flash to implement OTP memory")

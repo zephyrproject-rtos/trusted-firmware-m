@@ -28,6 +28,9 @@
 
 #include "device_cfg.h"
 #include "host_device_definition.h"
+#ifdef RSS_HAS_EXPANSION_PERIPHERALS
+#include "rss_expansion_device_definition.h"
+#endif /* RSS_HAS_EXPANSION_PERIPHERALS */
 
 #ifdef __cplusplus
 extern "C" {

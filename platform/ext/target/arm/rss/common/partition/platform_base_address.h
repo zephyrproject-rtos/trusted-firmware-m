@@ -23,6 +23,9 @@
 #define __PLATFORM_BASE_ADDRESS_H__
 
 #include "rss_memory_sizes.h"
+#ifdef RSS_HAS_EXPANSION_PERIPHERALS
+#include "rss_expansion_base_address.h"
+#endif /* RSS_HAS_EXPANSION_PERIPHERALS */
 
 /* ======= Defines peripherals memory map addresses ======= */
 /* Non-secure memory map addresses */

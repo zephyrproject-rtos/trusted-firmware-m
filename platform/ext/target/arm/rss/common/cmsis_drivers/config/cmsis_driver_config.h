@@ -21,6 +21,10 @@
 #include "device_definition.h"
 #include "RTE_Device.h"
 #include "host_cmsis_driver_config.h"
+#ifdef RSS_HAS_EXPANSION_PERIPHERALS
+#include "rss_expansion_cmsis_driver_config.h"
+#endif /* RSS_HAS_EXPANSION_PERIPHERALS */
+
 
 #ifdef RSS_DEBUG_UART
 #define UART0_DEV                    UART0_CMSDK_DEV_NS
