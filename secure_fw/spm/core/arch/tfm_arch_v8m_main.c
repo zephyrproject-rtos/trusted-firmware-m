@@ -50,43 +50,43 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-__naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                                   uint32_t stk_base, uint32_t stk_limit)
+__naked
+void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
 {
     __asm volatile(
-        SYNTAX_UNIFIED
-        "   push   {r4-r6, lr}                      \n"
-        "   cpsid  i                                \n"
-        "   isb                                     \n"
-        "   mov    r4, r2                           \n"
-        "   mrs    r5, psplim                       \n"
-        "   movs   r12, #0                          \n"
-        "   cmp    r2, #0                           \n"
-        "   itttt  ne                               \n" /* To callee stack */
-        "   msrne  psplim, r12                      \n"
-        "   movne  r4, sp                           \n"
-        "   movne  sp, r2                           \n"
-        "   msrne  psplim, r3                       \n"
-        "   ldr    r2, =scheduler_lock              \n" /* To lock sched */
-        "   movs   r3, #"M2S(SCHEDULER_LOCKED)"     \n"
-        "   str    r3, [r2, #0]                     \n"
-        "   cpsie  i                                \n"
-        "   isb                                     \n"
-        "   mov    r6, r1                           \n"
-        "   bl     cross_call_entering_c            \n"
-        "   cpsid  i                                \n"
-        "   isb                                     \n"
-        "   mov    r1, r6                           \n"
-        "   bl     cross_call_exiting_c             \n"
-        "   movs   r12, #0                          \n"
-        "   cmp    r4, #0                           \n"
-        "   ittt   ne                               \n" /* To caller stack */
-        "   msrne  psplim, r12                      \n"
-        "   movne  sp, r4                           \n"
-        "   msrne  psplim, r5                       \n"
-        "   cpsie  i                                \n"
-        "   isb                                     \n"
-        "   pop    {r4-r6, pc}                      \n"
+        "   push    {r4-r6, lr}             \n"
+        "   push    {r0-r4, r12}            \n"
+        "   cpsid   i                       \n"
+        "   isb                             \n"
+        "   bl      cross_call_entering_c   \n" /* r0: new SP, r1: new PSPLIM */
+        "   mrs     r5, psplim              \n"
+        "   mov     r6, sp                  \n"
+        "   cmp     r0, #0                  \n"
+        "   itttt   ne                      \n"
+        "   movne   r2, #0                  \n"
+        "   msrne   psplim, r2              \n" /* Clear PSPLIM before setting
+                                                 * PSP to a new value. This can
+                                                 * avoid potential stack
+                                                 * overflow.
+                                                 */
+        "   movne   sp, r0                  \n" /* To SPM stack */
+        "   msrne   psplim, r1              \n"
+        "   cpsie   i                       \n"
+        "   isb                             \n"
+        "   ldmia   r6!, {r0-r4, r12}       \n" /* Load PSA interface input args
+                                                 * and target function
+                                                 */
+        "   blx     r12                     \n"
+        "   cpsid   i                       \n"
+        "   isb                             \n"
+        "   bl      cross_call_exiting_c    \n"
+        "   mov     r2, #0                  \n" /* Back to caller new stack */
+        "   msr     psplim, r2              \n"
+        "   mov     sp, r6                  \n"
+        "   msr     psplim, r5              \n"
+        "   cpsie   i                       \n"
+        "   isb                             \n"
+        "   pop     {r4-r6, pc}             \n"
     );
 }
 

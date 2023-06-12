@@ -314,23 +314,17 @@ void update_caller_outvec_len(struct connection_t *handle);
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
 /*
- * SPM dispatcher to handle the API call under non-privileged model.
- * This API runs under callers stack, and switch to SPM stack when
- * calling 'p_fn', then switch back to caller stack before returning
- * to the caller.
- *
- * fn_addr      - the target function to be called.
- * frame_addr   - Address of the customized ABI frame. The frame must be
- *                stored in the caller's stack (which means the frame variable
- *                must be a local variable).
+ * Executes with interrupt unmasked.Check the necessity of switching to SPM
+ * stack and lock scheduler. Return value is the pair of SPM SP and PSPLIM if
+ * necessary. Otherwise, zeros.
  */
-void spm_interface_cross_dispatcher(uintptr_t fn_addr, uintptr_t frame_addr);
+uint64_t cross_call_entering_c(void);
 
-/* Execute a customized ABI function in C */
-psa_status_t cross_call_entering_c(uintptr_t fn_addr, uintptr_t frame_addr);
-
-/* Execute a customized ABI function in C */
-void cross_call_exiting_c(psa_status_t status, uintptr_t frame_addr);
+/*
+ * Executes with interrupt masked.
+ * Check return value from backend and trigger scheduler in PendSV if necessary.
+ */
+psa_status_t cross_call_exiting_c(psa_status_t status);
 
 #endif
 

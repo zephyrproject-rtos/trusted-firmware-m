@@ -47,45 +47,46 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-__naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                                   uint32_t stk_base, uint32_t stk_limit)
+__naked
+void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
 {
     __asm volatile(
         SYNTAX_UNIFIED
-        "   push   {r4-r6, lr}                          \n"
-        "   cpsid  i                                    \n"
-        "   isb                                         \n"
-        "   mov    r4, r2                               \n"
-        "   cmp    r2, #0                               \n"
-        "   beq    v8b_lock_sched                       \n"
-        "   mrs    r5, psplim                           \n"/* To caller stack */
-        "   movs   r4, #0                               \n"
-        "   msr    psplim, r4                           \n"
-        "   mov    r4, sp                               \n"
-        "   mov    sp, r2                               \n"
-        "   msr    psplim, r3                           \n"
-        "v8b_lock_sched:                                \n"/* To lock sched */
-        "   ldr    r2, =scheduler_lock                  \n"
-        "   movs   r3, #"M2S(SCHEDULER_LOCKED)"         \n"
-        "   str    r3, [r2, #0]                         \n"
-        "   cpsie  i                                    \n"
-        "   isb                                         \n"
-        "   mov    r6, r1                               \n"
-        "   bl     cross_call_entering_c                \n"
-        "   cpsid  i                                    \n"
-        "   isb                                         \n"
-        "   mov    r1, r6                               \n"
-        "   bl     cross_call_exiting_c                 \n"
-        "   cmp    r4, #0                               \n"
-        "   beq    v8b_enable_irq_and_exit              \n"
-        "   movs   r3, #0                               \n"/* To callee stack */
-        "   msr    psplim, r3                           \n"
-        "   mov    sp, r4                               \n"
-        "   msr    psplim, r5                           \n"
-        "v8b_enable_irq_and_exit:                       \n"
-        "   cpsie  i                                    \n"
-        "   isb                                         \n"
-        "   pop    {r4-r6, pc}                          \n"
+        "   push   {r5-r7, lr}              \n"
+        "   mov    r5, r12                  \n"
+        "   push   {r0-r5}                  \n"
+        "   cpsid  i                        \n"
+        "   isb                             \n"
+        "   bl     cross_call_entering_c    \n" /* r0: new SP, r1: new PSPLIM */
+        "   mrs    r6, psplim               \n"
+        "   mov    r7, sp                   \n"
+        "   cmp    r0, #0                   \n"
+        "   beq    v8b_branch_to_target     \n"
+        "   movs   r2, #0                   \n"
+        "   msr    psplim, r2               \n" /* Clear PSPLIM before setting
+                                                 * PSP to a new value. This can
+                                                 * avoid potential stack
+                                                 * overflow.
+                                                 */
+        "   mov    sp, r0                   \n" /* To SPM stack */
+        "   msr    psplim, r1               \n"
+        "v8b_branch_to_target:              \n"
+        "   cpsie  i                        \n"
+        "   isb                             \n"
+        "   ldmia  r7!, {r0-r5}             \n" /* Load PSA interface input args
+                                                 * and target function
+                                                 */
+        "   blx    r5                       \n"
+        "   cpsid  i                        \n"
+        "   isb                             \n"
+        "   bl     cross_call_exiting_c     \n"
+        "   movs   r2, #0                   \n" /* Back to caller new stack */
+        "   msr    psplim, r2               \n"
+        "   mov    sp, r7                   \n"
+        "   msr    psplim, r6               \n"
+        "   cpsie  i                        \n"
+        "   isb                             \n"
+        "   pop    {r5-r7, pc}              \n"
     );
 }
 

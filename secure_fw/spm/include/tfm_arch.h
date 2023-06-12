@@ -122,8 +122,6 @@ struct context_ctrl_t {
                                            */
     uint32_t                sp_limit;     /* Stack limit (lower address)     */
     uint32_t                sp_base;      /* Stack usage start (higher addr) */
-    uint32_t                cross_frame;  /* Cross call frame position.      */
-    uint32_t                retcode_status; /* Cross call retcode status.    */
 };
 
 /*
@@ -154,8 +152,6 @@ struct cross_call_abi_frame_t {
             (x)->sp_limit       = ((uint32_t)(buf) + 7) & ~0x7;              \
             (x)->sp_base        = (x)->sp;                                   \
             (x)->exc_ret        = 0;                                         \
-            (x)->cross_frame    = 0;                                         \
-            (x)->retcode_status = CROSS_RETCODE_EMPTY;                       \
         } while (0)
 
 /* Allocate 'size' bytes in stack. */
@@ -309,6 +305,12 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
 uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl);
 
 /*
+ * Lock the scheduler. Any scheduling attempt during locked period will not
+ * take place and is recorded.
+ */
+void arch_acquire_sched_lock(void);
+
+/*
  * Release the scheduler lock and return if there are scheduling attempts during
  * locked period. The recorded attempts are cleared after this function so do
  * not call it a second time after unlock to query attempt status.
@@ -327,10 +329,14 @@ uint32_t arch_release_sched_lock(void);
 uint32_t tfm_arch_trigger_pendsv(void);
 
 /*
- * Switch to a new stack area, lock scheduler and call function.
- * If 'stk_base' is ZERO, stack won't be switched and re-use caller stack.
+ * Switch to SPM stack area if the caller is not NS agent, lock scheduler and
+ * target function in the backend will be called to return the value on the
+ * caller stack. This function is non-preemptive.
+ *
+ * NOTE: This function cannot be called by any C functions as it uses a
+ * customized parameter passing method and puts the target function address in
+ * r12. These input parameters a0~a3 come from standard PSA interface input.
  */
-void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                           uint32_t stk_base, uint32_t stk_limit);
+void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3);
 
 #endif

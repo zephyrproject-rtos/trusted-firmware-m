@@ -46,38 +46,35 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 
 #if CONFIG_TFM_PSA_API_CROSS_CALL == 1
 
-__naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
-                                   uint32_t stk_base, uint32_t stk_limit)
+__naked
+void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
 {
     __asm volatile(
         SYNTAX_UNIFIED
-        "   push   {r4, lr}                             \n"
-        "   cpsid  i                                    \n"
-        "   isb                                         \n"
-        "   cmp    r2, #0                               \n"
-        "   beq    v6v7_lock_sched                      \n"
-        "   mov    r4, sp                               \n"/* switch stack   */
-        "   mov    sp, r2                               \n"
-        "   mov    r2, r4                               \n"
-        "v6v7_lock_sched:                               \n"/* lock pendsv    */
-        "   ldr    r3, =scheduler_lock                  \n"/* R2 = caller SP */
-        "   movs   r4, #"M2S(SCHEDULER_LOCKED)"         \n"/* Do not touch   */
-        "   str    r4, [r3, #0]                         \n"
-        "   cpsie  i                                    \n"
-        "   isb                                         \n"
-        "   push   {r1, r2}                             \n"
-        "   bl     cross_call_entering_c                \n"
-        "   pop    {r1, r4}                             \n"
-        "   cpsid  i                                    \n"
-        "   isb                                         \n"
-        "   bl     cross_call_exiting_c                 \n"
-        "   cmp    r4, #0                               \n"
-        "   beq    v6v7_enable_irq_and_exit             \n"
-        "   mov    sp, r4                               \n"/* switch stack   */
-        "v6v7_enable_irq_and_exit:                      \n"
-        "   cpsie  i                                    \n"
-        "   isb                                         \n"
-        "   pop    {r4, pc}                             \n"
+        "   push   {r4-r6, lr}              \n"
+        "   mov    r4, r12                  \n"
+        "   push   {r0-r5}                  \n"
+        "   cpsid  i                        \n"
+        "   isb                             \n"
+        "   bl     cross_call_entering_c    \n" /* r0: new SP */
+        "   cmp    r0, #0                   \n"
+        "   beq    v6v7_branch_to_target    \n"
+        "   mov    r6, sp                   \n"
+        "   mov    sp, r0                   \n" /* switch stack */
+        "v6v7_branch_to_target:             \n"
+        "   cpsie  i                        \n"
+        "   isb                             \n"
+        "   ldmia  r6!, {r0-r5}             \n" /* Load PSA interface input args
+                                                 * and target function
+                                                 */
+        "   blx    r4                       \n"
+        "   cpsid  i                        \n"
+        "   isb                             \n"
+        "   bl     cross_call_exiting_c     \n"
+        "   mov    sp, r6                   \n" /* switch stack */
+        "   cpsie  i                        \n"
+        "   isb                             \n"
+        "   pop    {r4-r6, pc}              \n"
     );
 }
 

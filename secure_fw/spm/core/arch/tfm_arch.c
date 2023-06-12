@@ -35,17 +35,20 @@ void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
 {
     struct context_ctrl_t *ctx_ctrl = (struct context_ctrl_t *)p_ctx_ctrl;
 
-    /*
-     * If a cross call is pending (cross_frame != CROSS_RETCODE_EMPTY), write
-     * return value to the frame position.
-     * Otherwise, write the return value to the state context on stack.
-     */
-    if (ctx_ctrl->cross_frame) {
-        ((struct cross_call_abi_frame_t *)ctx_ctrl->cross_frame)->a0 = ret_code;
-        ctx_ctrl->retcode_status = CROSS_RETCODE_UPDATED;
-    } else {
-        ((struct full_context_t *)ctx_ctrl->sp)->stat_ctx.r0 = ret_code;
-    }
+    /* Write the return value to the state context on stack. */
+    ((struct full_context_t *)ctx_ctrl->sp)->stat_ctx.r0 = ret_code;
+}
+
+__naked void arch_acquire_sched_lock(void)
+{
+    __asm volatile(
+        SYNTAX_UNIFIED
+        "   ldr    r0, =scheduler_lock                 \n"
+        "   movs   r1, #"M2S(SCHEDULER_LOCKED)"        \n"
+        "   str    r1, [r0, #0]                        \n"
+        "   dsb    #0xf                                \n"
+        "   bx     lr                                  \n"
+    );
 }
 
 __naked uint32_t arch_release_sched_lock(void)
