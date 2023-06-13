@@ -365,11 +365,9 @@ MCUBoot related compile time switches can be set by cmake variables.
     - **"RAM_LOAD":** Activate RAM loading firmware upgrade operation, where
       the latest image is copied to RAM and runs from there instead of being
       executed in-place.
-- MCUBOOT_SIGNATURE_TYPE (default: RSA):
-    - **RSA:** Image is signed with RSA algorithm
-- MCUBOOT_SIGNATURE_KEY_LEN (default: 3072):
-    - **2048:** Image is signed with 2048 bit key.
-    - **3072:** Image is signed with 3072 bit key.
+- MCUBOOT_SIGNATURE_TYPE (default: RSA-3072):
+    - **RSA-2048:** Image is signed with RSA algorithm and signed with 2048 bit key.
+    - **RSA-3072:** Image is signed with RSA algorithm and signed with 3072 bit key.
 - MCUBOOT_IMAGE_NUMBER (default: 2):
     - **1:** Single image boot, secure and non-secure images are signed and
       updated together.
