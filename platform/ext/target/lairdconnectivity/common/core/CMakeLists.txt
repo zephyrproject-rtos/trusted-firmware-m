@@ -172,4 +172,5 @@ target_sources(tfm_spm
         ${NRF_FOLDER_PATH}/faults.c
         ${NRF_FOLDER_PATH}/tfm_hal_isolation.c
         ${NRF_FOLDER_PATH}/tfm_hal_platform_common.c
+        ${NRF_FOLDER_PATH}/target_cfg.c
 )

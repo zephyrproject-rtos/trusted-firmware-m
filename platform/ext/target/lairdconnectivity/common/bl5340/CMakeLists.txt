@@ -106,6 +106,5 @@ target_compile_definitions(platform_region_defs
 
 target_sources(tfm_spm
     PRIVATE
-        target_cfg.c
         ${CMAKE_CURRENT_SOURCE_DIR}/${NRF_FOLDER_PATH}/tfm_interrupts.c
 )

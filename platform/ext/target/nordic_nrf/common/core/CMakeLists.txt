@@ -190,4 +190,5 @@ target_sources(tfm_spm
         tfm_hal_isolation.c
         tfm_hal_platform_common.c
         faults.c
+        target_cfg.c
 )

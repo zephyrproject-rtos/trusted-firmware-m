@@ -99,6 +99,5 @@ target_compile_definitions(platform_region_defs
 
 target_sources(tfm_spm
     PRIVATE
-        target_cfg.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
 )
