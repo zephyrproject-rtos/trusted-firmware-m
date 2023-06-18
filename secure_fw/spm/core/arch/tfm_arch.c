@@ -20,9 +20,7 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
                                            uint32_t exc_return)
 {
     __ASM volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                        \n"
-#endif
+        SYNTAX_UNIFIED
         "mov     r4, r0                         \n"
         "mov     r5, r1                         \n"
 #if (CONFIG_TFM_FLOAT_ABI > 0)
@@ -54,9 +52,7 @@ void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
 __naked uint32_t tfm_arch_trigger_pendsv(void)
 {
     __ASM volatile(
-#ifndef __ICCARM__
-        ".syntax unified                               \n"
-#endif
+        SYNTAX_UNIFIED
         "ldr     r0, ="M2S(SCB_ICSR_ADDR)"             \n"
         "ldr     r1, ="M2S(SCB_ICSR_PENDSVSET_BIT)"    \n"
         "str     r1, [r0, #0]                          \n"

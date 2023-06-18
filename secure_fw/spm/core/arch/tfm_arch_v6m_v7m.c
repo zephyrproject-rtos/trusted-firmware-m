@@ -50,9 +50,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
                                    uint32_t stk_base, uint32_t stk_limit)
 {
     __asm volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                                \n"
-#endif
+        SYNTAX_UNIFIED
         "   push   {r4, lr}                             \n"
         "   cpsid  i                                    \n"
         "   isb                                         \n"
@@ -92,9 +90,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __ASM volatile(
-#if !defined(__ICCARM__)
-        ".syntax unified                    \n"
-#endif
+        SYNTAX_UNIFIED
         "   push    {r0, lr}                \n"
         "   bl      ipc_schedule            \n"
         "   pop     {r2, r3}                \n"
@@ -145,9 +141,7 @@ __attribute__((naked)) void PendSV_Handler(void)
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-#if !defined(__ICCARM__)
-    ".syntax unified                        \n"
-#endif
+    SYNTAX_UNIFIED
     "MRS     r0, MSP                        \n"
     "MOV     r1, lr                         \n"
     "MRS     r2, PSP                        \n"
