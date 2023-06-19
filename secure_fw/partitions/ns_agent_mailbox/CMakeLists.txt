@@ -57,7 +57,7 @@ target_link_libraries(tfm_partitions
         tfm_psa_rot_partition_ns_agent_mailbox
 )
 
-target_compile_definitions(tfm_partition_defs
+target_compile_definitions(tfm_config
     INTERFACE
         TFM_PARTITION_NS_AGENT_MAILBOX
 )

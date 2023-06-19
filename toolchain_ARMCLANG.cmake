@@ -299,7 +299,7 @@ macro(target_add_scatter_file target)
     target_link_libraries(${target}_scatter
         platform_region_defs
         psa_interface
-        tfm_partition_defs
+        tfm_config
     )
 
     target_compile_options(${target}_scatter

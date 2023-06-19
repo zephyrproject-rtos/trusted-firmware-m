@@ -92,7 +92,7 @@ target_link_libraries(tfm_partitions
         tfm_app_rot_partition_ps
 )
 
-target_compile_definitions(tfm_partition_defs
+target_compile_definitions(tfm_config
     INTERFACE
         TFM_PARTITION_PROTECTED_STORAGE
 )

@@ -113,6 +113,6 @@ if (TFM_PARTITION_CRYPTO)
     )
     target_link_libraries(crypto_service_crypto_hw
          INTERFACE
-         tfm_partition_defs
+            tfm_config
     )
 endif()

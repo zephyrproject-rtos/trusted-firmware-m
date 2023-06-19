@@ -90,7 +90,7 @@ target_link_libraries(tfm_partitions
 )
 
 
-target_compile_definitions(tfm_partition_defs
+target_compile_definitions(tfm_config
     INTERFACE
-    TFM_PARTITION_INITIAL_ATTESTATION
+        TFM_PARTITION_INITIAL_ATTESTATION
 )

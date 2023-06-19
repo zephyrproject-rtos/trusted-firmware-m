@@ -102,7 +102,7 @@ target_link_libraries(platform_s
         cmsis_stack_override
     PRIVATE
         psa_interface
-        tfm_partition_defs
+        tfm_config
         tfm_spm_defs # For tfm_spm_log.h
         $<$<BOOL:${TFM_PARTITION_CRYPTO}>:platform_crypto_keys>
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:tfm_sprt>
@@ -151,7 +151,7 @@ if(TFM_PARTITION_CRYPTO)
             crypto_service_mbedcrypto
             tfm_psa_rot_partition_crypto
             platform_region_defs
-            tfm_partition_defs
+            tfm_config
     )
 
     target_include_directories(platform_crypto_keys

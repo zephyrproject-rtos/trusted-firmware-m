@@ -36,7 +36,6 @@ target_include_directories(psa_interface
 target_link_libraries(psa_interface
     INTERFACE
         tfm_config
-        tfm_partition_defs
 )
 
 target_compile_definitions(psa_interface
