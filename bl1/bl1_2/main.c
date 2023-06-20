@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -184,7 +184,7 @@ static fih_int copy_and_decrypt_image(uint32_t image_id)
      * invocation calls through to a crypto accelerator with a DMA, and slightly
      * faster otherwise.
      */
-    image_to_decrypt = (struct bl1_2_image_t *)(FLASH_BASE_ADDRESS +
+    image_to_decrypt = (struct bl1_2_image_t *)(FLASH_BL1_BASE_ADDRESS +
                        bl1_image_get_flash_offset(image_id));
 
     /* Copy everything that isn't encrypted, to prevent TOCTOU attacks and

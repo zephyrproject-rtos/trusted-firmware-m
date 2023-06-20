@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2024 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@
 /*****************/
 
 #define FLASH_BASE_ADDRESS              (0x68000000)
+#define FLASH_BL1_BASE_ADDRESS          (FLASH_BASE_ADDRESS)
 
 #if PLATFORM_IS_FVP
 /* INTEL STRATA J3 NOR FLASH NVM */
@@ -87,6 +88,8 @@
 #define SECURE_FLASH_SECTOR_SIZE        SST26VF064B_FLASH_SECTOR_SIZE
 
 #endif
+
+#define FLASH_DEV_NAME_BL1              FLASH_DEV_NAME
 
 /* Static Configurations of the Flash */
 #define SE_BL2_PARTITION_SIZE           (0x18000)    /* 96 KB */

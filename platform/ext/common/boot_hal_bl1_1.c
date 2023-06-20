@@ -25,7 +25,7 @@
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 /* Flash device name must be specified by target */
-extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME_BL1;
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
 REGION_DECLARE(Image$$, ER_DATA, $$Base)[];
@@ -106,7 +106,7 @@ __WEAK int32_t boot_platform_init(void)
     }
 
 #ifdef TFM_BL1_2_IN_FLASH
-    if (FLASH_DEV_NAME.Initialize(NULL) != ARM_DRIVER_OK) {
+    if (FLASH_DEV_NAME_BL1.Initialize(NULL) != ARM_DRIVER_OK) {
         return 1;
     }
 #endif /* TFM_BL1_2_IN_FLASH */
@@ -132,7 +132,7 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
     static struct boot_arm_vector_table *vt_cpy;
 
 #ifdef TFM_BL1_2_IN_FLASH
-    if (FLASH_DEV_NAME.Uninitialize() != ARM_DRIVER_OK) {
+    if (FLASH_DEV_NAME_BL1.Uninitialize() != ARM_DRIVER_OK) {
         while (1){}
     }
 #endif /* TFM_BL1_2_IN_FLASH */

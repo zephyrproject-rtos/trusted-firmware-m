@@ -31,11 +31,13 @@
  * an offset.
  */
 #define FLASH_BASE_ADDRESS              (HOST_ACCESS_BASE_S)
+#define FLASH_BL1_BASE_ADDRESS          (FLASH_BASE_ADDRESS)
 
 /* Flash device name used by BL1 and BL2
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME Driver_FLASH0
+#define FLASH_DEV_NAME_BL1 FLASH_DEV_NAME
 
 /* Smallest flash programmable unit in bytes */
 #define TFM_HAL_FLASH_PROGRAM_UNIT      (0x1)
