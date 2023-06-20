@@ -5,6 +5,7 @@
  *
  */
 
+#include "config_tfm.h"
 #include "rss_provisioning_bundle.h"
 
 const struct dm_provisioning_data data = {
