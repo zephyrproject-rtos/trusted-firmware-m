@@ -108,6 +108,7 @@ macro(tfm_toolchain_set_processor_arch)
         endif()
 
         string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_CPU_FLAG "${CMAKE_SYSTEM_PROCESSOR}")
+        string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
         string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
     else()
         set(CMAKE_ASM_CPU_FLAG  ${TFM_SYSTEM_ARCHITECTURE})
