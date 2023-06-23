@@ -210,9 +210,31 @@ enum rse_atu_ids {
                                          HOST_LCP_ATU_SIZE -                \
                                          RSE_IMG_HDR_ATU_WINDOW_SIZE)
 
+/* AP BL1 */
+
+/* AP BL1 ATU HEADER logical address start */
+#define HOST_AP_BL1_HDR_ATU_WINDOW_BASE_S (HOST_LCP_IMG_CODE_BASE_S +          \
+                                           HOST_LCP_ATU_SIZE)
+/* AP BL1 Image address start, offset so end of HEADER at end of ATU HEADER */
+#define HOST_AP_BL1_IMG_HDR_BASE_S        (HOST_AP_BL1_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE -       \
+                                           BL2_HEADER_SIZE)
+/* AP BL1 Code region and SCP ATU CODE logical address start */
+#define HOST_AP_BL1_IMG_CODE_BASE_S       (HOST_AP_BL1_HDR_ATU_WINDOW_BASE_S + \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+/* AP BL1 Shared SRAM physical address start */
+#define HOST_AP_BL1_PHYS_BASE             HOST_AP_SHARED_SRAM_PHYS_BASE
+/* AP BL1 ATU CODE size (aligned size of SCP image) */
+#define HOST_AP_BL1_ATU_SIZE              ALIGN_UP(SIZE_DEF_AP_BL1_IMAGE,      \
+                                                   RSE_ATU_PAGE_SIZE)
+/* AP BL1 HEADER physical address start (mapped to end of AP ITCM) */
+#define HOST_AP_BL1_HDR_PHYS_BASE         (HOST_AP_BL1_PHYS_BASE +             \
+                                           HOST_AP_BL1_ATU_SIZE -              \
+                                           RSE_IMG_HDR_ATU_WINDOW_SIZE)
+
 /* Last RSE logical address used for loading images */
-#define RSE_IMAGE_LOADING_END           (HOST_LCP_IMG_CODE_BASE_S +         \
-                                         HOST_LCP_ATU_SIZE)
+#define RSE_IMAGE_LOADING_END             (HOST_AP_BL1_IMG_CODE_BASE_S +       \
+                                           HOST_AP_BL1_ATU_SIZE)
 
 /* SCP sysctrl region logical address start */
 #define HOST_SCP_INIT_CTRL_BASE_S    RSE_IMAGE_LOADING_END

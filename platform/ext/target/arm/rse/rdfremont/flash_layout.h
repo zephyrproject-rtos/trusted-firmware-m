@@ -36,6 +36,8 @@
  * 0x34_0000 MCP secondary slot (512 KB)
  * 0x3C_0000 LCP primary slot (64 KB)
  * 0x3D_0000 LCP secondary slot (64 KB)
+ * 0x3E_0000 AP BL1 primary slot (512 KB)
+ * 0x46_0000 AP BL1 secondary slot (512 KB)
  */
 
 /*
@@ -53,6 +55,7 @@
 #define FLASH_SCP_PARTITION_SIZE        (SIZE_DEF_SCP_IMAGE) /* SCP partition */
 #define FLASH_MCP_PARTITION_SIZE        (SIZE_DEF_MCP_IMAGE) /* MCP  partition */
 #define FLASH_LCP_PARTITION_SIZE        (SIZE_DEF_LCP_IMAGE) /* LCP  partition */
+#define FLASH_AP_BL1_PARTITION_SIZE     (SIZE_DEF_AP_BL1_IMAGE) /* AP BL1  partition */
 #define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
                                           FLASH_NS_PARTITION_SIZE) ? \
                                          FLASH_S_PARTITION_SIZE :    \
@@ -125,13 +128,21 @@
 #define FLASH_AREA_11_ID            (FLASH_AREA_10_ID + 1)
 #define FLASH_AREA_11_OFFSET        (FLASH_AREA_10_OFFSET + FLASH_AREA_10_SIZE)
 #define FLASH_AREA_11_SIZE          (FLASH_LCP_PARTITION_SIZE)
+/* AP BL1 image primary slot */
+#define FLASH_AREA_12_ID            (FLASH_AREA_11_ID + 1)
+#define FLASH_AREA_12_OFFSET        (FLASH_AREA_11_OFFSET + FLASH_AREA_11_SIZE)
+#define FLASH_AREA_12_SIZE          (FLASH_AP_BL1_PARTITION_SIZE)
+/* AP BL1 image secondary slot */
+#define FLASH_AREA_13_ID            (FLASH_AREA_12_ID + 1)
+#define FLASH_AREA_13_OFFSET        (FLASH_AREA_12_OFFSET + FLASH_AREA_12_SIZE)
+#define FLASH_AREA_13_SIZE          (FLASH_AP_BL1_PARTITION_SIZE)
 
 /* Maximum number of image sectors supported by the bootloader. */
 #define MCUBOOT_MAX_IMG_SECTORS    (FLASH_MAX_PARTITION_SIZE / \
                                     FLASH_AREA_IMAGE_SECTOR_SIZE)
 
 /* Check that all the images can fit in the Flash area. */
-#if (FLASH_AREA_11_OFFSET + FLASH_AREA_11_SIZE > FLASH_TOTAL_SIZE)
+#if (FLASH_AREA_13_OFFSET + FLASH_AREA_13_SIZE > FLASH_TOTAL_SIZE)
 #error "Out of Flash memory!"
 #endif
 
@@ -141,6 +152,7 @@
          ((x) == RSE_FIRMWARE_SCP_ID)        ? FLASH_AREA_6_ID : \
          ((x) == RSE_FIRMWARE_MCP_ID)        ? FLASH_AREA_8_ID : \
          ((x) == RSE_FIRMWARE_LCP_ID)        ? FLASH_AREA_10_ID : \
+         ((x) == RSE_FIRMWARE_AP_BL1_ID)     ? FLASH_AREA_12_ID : \
                                               255)
 #define FLASH_AREA_IMAGE_SECONDARY(x) \
         (((x) == RSE_FIRMWARE_SECURE_ID)     ? FLASH_AREA_4_ID : \
@@ -148,6 +160,7 @@
          ((x) == RSE_FIRMWARE_SCP_ID)        ? FLASH_AREA_7_ID : \
          ((x) == RSE_FIRMWARE_MCP_ID)        ? FLASH_AREA_9_ID : \
          ((x) == RSE_FIRMWARE_LCP_ID)        ? FLASH_AREA_11_ID : \
+         ((x) == RSE_FIRMWARE_AP_BL1_ID)     ? FLASH_AREA_13_ID : \
                                               255)
 
 /* Scratch area is not used with RAM loading firmware upgrade */
