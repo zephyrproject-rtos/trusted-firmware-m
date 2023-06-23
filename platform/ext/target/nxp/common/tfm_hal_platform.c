@@ -71,28 +71,3 @@ uint32_t tfm_hal_get_ns_entry_point(void)
     return *((uint32_t *)(memory_regions.non_secure_code_start + 4));
 }
 
-#ifdef FIH_ENABLE_DELAY  
-
-/* This implementation is based on MCUBoot */
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/entropy.h"
-
-static mbedtls_entropy_context fih_entropy_ctx;
-static mbedtls_ctr_drbg_context fih_drbg_ctx;
-
-fih_int tfm_fih_random_init(void)
-{
-    mbedtls_entropy_init(&fih_entropy_ctx);
-    mbedtls_ctr_drbg_init(&fih_drbg_ctx);
-    mbedtls_ctr_drbg_seed(&fih_drbg_ctx , mbedtls_entropy_func,
-                          &fih_entropy_ctx, NULL, 0);
-
-    return FIH_SUCCESS;
-}
-
-void tfm_fih_random_generate(uint8_t *rand)
-{
-    mbedtls_ctr_drbg_random(&fih_drbg_ctx, (unsigned char*) rand, sizeof(uint8_t));
-}
-
-#endif /* FIH_ENABLE_DELAY */
