@@ -136,7 +136,6 @@ psa_status_t tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rh
     }
 
     handle->msg.rhandle = rhandle;
-    handle->rhandle = rhandle;
 
     return PSA_SUCCESS;
 }
