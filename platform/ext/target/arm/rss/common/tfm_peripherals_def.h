@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2020-2023 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -35,7 +35,8 @@ extern struct platform_data_t tfm_peripheral_dma0_ch0;
 #define TFM_PERIPHERAL_DMA0_CH0  (&tfm_peripheral_dma0_ch0)
 
 /* AP to RSS MHU receiver interrupt */
-#define MAILBOX_IRQ CMU_MHU0_Receiver_IRQn
+#define MAILBOX_IRQ   CMU_MHU0_Receiver_IRQn    /* AP_MONITOR  */
+#define MAILBOX_IRQ_1 CMU_MHU1_Receiver_IRQn    /* AP_NS */
 
 /* Append RSS-specific static MPU regions to the standard ones in
  * tfm_hal_isolation_v8m.c.

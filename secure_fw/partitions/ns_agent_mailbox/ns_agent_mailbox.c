@@ -8,6 +8,7 @@
  */
 
 #include "async.h"
+#include "config_tfm.h"
 #include "psa/service.h"
 #include "psa_manifest/ns_agent_mailbox.h"
 #include "tfm_hal_mailbox.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -41,7 +41,7 @@ enum tfm_hal_status_t tfm_timer0_irq_init(void *p_pt,
 }
 
 #ifdef TFM_MULTI_CORE_TOPOLOGY
-static struct irq_t mbox_irq_info = {0};
+static struct irq_t mbox_irq_info[2] = {0};
 
 /* Platform specific inter-processor communication interrupt handler. */
 void CMU_MHU0_Receiver_Handler(void)
@@ -53,14 +53,26 @@ void CMU_MHU0_Receiver_Handler(void)
      * SPM will send a MAILBOX_INTERRUPT_SIGNAL to the corresponding partition
      * indicating that a message has arrived and can be processed.
      */
-    spm_handle_interrupt(mbox_irq_info.p_pt, mbox_irq_info.p_ildi);
+    spm_handle_interrupt(mbox_irq_info[0].p_pt, mbox_irq_info[0].p_ildi);
+}
+
+/* Platform specific inter-processor communication interrupt handler. */
+void CMU_MHU1_Receiver_Handler(void)
+{
+    (void)tfm_multi_core_hal_receive(&MHU_AP_NS_TO_RSS_DEV, &MHU_RSS_TO_AP_NS_DEV);
+
+    /*
+     * SPM will send a MAILBOX_INTERRUPT_SIGNAL to the corresponding partition
+     * indicating that a message has arrived and can be processed.
+     */
+    spm_handle_interrupt(mbox_irq_info[1].p_pt, mbox_irq_info[1].p_ildi);
 }
 
 enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
                                        const struct irq_load_info_t *p_ildi)
 {
-    mbox_irq_info.p_pt = p_pt;
-    mbox_irq_info.p_ildi = p_ildi;
+    mbox_irq_info[0].p_pt = p_pt;
+    mbox_irq_info[0].p_ildi = p_ildi;
 
     /* Set MHU interrupt priority to the same as PendSV (the lowest)
      * TODO: Consider advantages/disadvantages of setting it one higher
@@ -70,6 +82,24 @@ enum tfm_hal_status_t mailbox_irq_init(void *p_pt,
     /* CMU_MHU0 is a secure peripheral, so its IRQs have to target S state */
     NVIC_ClearTargetState(CMU_MHU0_Receiver_IRQn);
     NVIC_DisableIRQ(CMU_MHU0_Receiver_IRQn);
+
+    return TFM_HAL_SUCCESS;
+}
+
+enum tfm_hal_status_t mailbox_irq_1_init(void *p_pt,
+                                         const struct irq_load_info_t *p_ildi)
+{
+    mbox_irq_info[1].p_pt = p_pt;
+    mbox_irq_info[1].p_ildi = p_ildi;
+
+    /* Set MHU interrupt priority to the same as PendSV (the lowest)
+     * TODO: Consider advantages/disadvantages of setting it one higher
+     */
+    NVIC_SetPriority(CMU_MHU1_Receiver_IRQn, NVIC_GetPriority(PendSV_IRQn));
+
+    /* CMU_MHU1 is a secure peripheral, so its IRQs have to target S state */
+    NVIC_ClearTargetState(CMU_MHU1_Receiver_IRQn);
+    NVIC_DisableIRQ(CMU_MHU1_Receiver_IRQn);
 
     return TFM_HAL_SUCCESS;
 }
