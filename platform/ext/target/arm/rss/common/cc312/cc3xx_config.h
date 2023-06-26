@@ -73,6 +73,13 @@
 /* Whether RNG is enabled */
 #define CC3XX_CONFIG_RNG_ENABLE
 
+/* Whether the CTR_DRBG is enabled through the generic interface */
+#define CC3XX_CONFIG_DRBG_CTR_ENABLE
+/* Whether the HMAC_DRBG is enabled through the generic interface */
+#define CC3XX_CONFIG_DRBG_HMAC_ENABLE
+/* Whether the HASH_DRBG is enabled through the generic interface */
+#define CC3XX_CONFIG_DRBG_HASH_ENABLE
+
 /* Whether an external TRNG should be used in place of the standard CC3XX TRNG */
 #ifdef RSS_OTP_TRNG
 #define CC3XX_CONFIG_RNG_EXTERNAL_TRNG

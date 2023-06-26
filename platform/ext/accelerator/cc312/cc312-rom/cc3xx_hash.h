@@ -37,7 +37,7 @@ extern "C" {
 
 /**
  * \brief                        Initialize a hash operation.
-
+ *
  * \param[in]  alg               Which hash algorithm should be initialized.
  *
  * \return                       CC3XX_ERR_SUCCESS on success, another
@@ -47,7 +47,7 @@ cc3xx_err_t cc3xx_hash_init(cc3xx_hash_alg_t alg);
 
 /**
  * \brief                        Input data into a hash operation.
-
+ *
  * \param[in]  buf               A pointer to the data to be input.
  * \param[in]  length            The size of the data to be input.
  *
@@ -59,8 +59,8 @@ cc3xx_err_t cc3xx_hash_update(const uint8_t *buf, size_t length);
 /**
  * \brief                        Get the current state of the hash operation.
  *                               Allows for restartable hash operations.
-
- * \param[out] state            The cc3xx_hash_state_t to write the state into.
+ *
+ * \param[out] state             The cc3xx_hash_state_t to write the state into.
  */
 void cc3xx_hash_get_state(struct cc3xx_hash_state_t *state);
 
@@ -68,27 +68,27 @@ void cc3xx_hash_get_state(struct cc3xx_hash_state_t *state);
  * \brief                        Set the current state of the hash operation.
  *                               Allows for restartable hash operations.
  *
- * \note                         This funtion initializes the hardware, there is
- *                               no need to seperately call cc3xx_hash_init.
-
- * \param[in]  state            The cc3xx_hash_state_t to read the state from.
+ * \note                         This function initializes the hardware, there is
+ *                               no need to separately call cc3xx_hash_init.
+ *
+ * \param[in]  state             The cc3xx_hash_state_t to read the state from.
  */
 void cc3xx_hash_set_state(const struct cc3xx_hash_state_t *state);
 
 /**
  * \brief                        Finish a hash operation, and output the hash.
  *
- * \param[out]  res             The result of the hash operation.
- * \param[in]   length          The size of the result buffer. Must match the
- *                              hash output size. Checked by assert only.
+ * \param[out]  res              The result of the hash operation.
+ * \param[in]   length           The size of the result buffer. Must match the
+ *                               hash output size. Checked by assert only.
  */
 void cc3xx_hash_finish(uint32_t *res, size_t length);
 
 /**
- * \brief                       Uninitialize the hash engine.
+ * \brief                        Uninitialize the hash engine.
  *
- * \note                        The hash engine is not implicitly uninitialized
- *                              on an error.
+ * \note                         The hash engine is not implicitly uninitialized
+ *                               on an error.
  *
  */
 void cc3xx_hash_uninit(void);

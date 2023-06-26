@@ -22,6 +22,11 @@ target_sources(cc312_rom
         ./cc3xx_kdf.c
         ./cc3xx_pka.c
         ./cc3xx_poly1305.c
+        ./cc3xx_hmac.c
+        ./cc3xx_drbg_ctr.c
+        ./cc3xx_drbg_hash.c
+        ./cc3xx_drbg_hmac.c
+        ./cc3xx_drbg.c
 )
 
 target_include_directories(cc312_rom
