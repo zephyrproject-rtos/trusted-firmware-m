@@ -73,6 +73,7 @@ target_include_directories(platform_s
         partition
         services/include
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a
@@ -112,7 +113,7 @@ if (PLATFORM_IS_FVP)
 target_sources(platform_s
     PRIVATE
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
-        Native_Driver/cfi_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
 )
 else()
 target_sources(platform_s
@@ -150,7 +151,7 @@ target_sources(platform_bl1
         ./CMSIS_Driver/Driver_Flash.c
         ./CMSIS_Driver/Driver_USART.c
         ./Native_Driver/uart_pl011_drv.c
-        $<$<BOOL:${PLATFORM_IS_FVP}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/cfi_drv.c>
+        $<$<BOOL:${PLATFORM_IS_FVP}>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c>
         $<$<BOOL:${PLATFORM_IS_FVP}>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c>
         $<$<NOT:$<BOOL:${PLATFORM_IS_FVP}>>:${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/xilinx_pg153_axi_qspi_controller_drv.c>
         $<$<NOT:$<BOOL:${PLATFORM_IS_FVP}>>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/spi_n25q256a_flash_lib.c>
@@ -182,6 +183,7 @@ target_include_directories(platform_bl1_interface
         ./fw_update_agent
         ./soft_crc
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/
@@ -218,7 +220,7 @@ if (PLATFORM_IS_FVP)
 target_sources(platform_bl2
     PRIVATE
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
-        Native_Driver/cfi_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
 )
 else()
 target_sources(platform_bl2
@@ -272,6 +274,7 @@ target_include_directories(platform_bl2
         soft_crc
         io
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a

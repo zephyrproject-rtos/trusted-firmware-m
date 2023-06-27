@@ -257,7 +257,7 @@ if (PLATFORM_IS_FVP)
 target_sources(bl1_main
     PRIVATE
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
-        ../Native_Driver/cfi_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
 )
 else()
 target_sources(bl1_main
@@ -278,6 +278,7 @@ target_include_directories(bl1_main
         ../Native_Driver
         ../fw_update_agent
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
+        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a
