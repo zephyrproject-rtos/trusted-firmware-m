@@ -18,9 +18,11 @@ fih_int bl1_read_bl1_2_image(uint8_t *image)
 {
     fih_int fih_rc;
 
-    fih_rc = fih_int_encode(FLASH_DEV_NAME.ReadData(BL1_2_IMAGE_FLASH_OFFSET,
+    fih_rc = fih_int_encode_zero_equality(
+                fih_not_eq(BL1_2_CODE_SIZE,
+                           (FLASH_DEV_NAME.ReadData(BL1_2_IMAGE_FLASH_OFFSET,
                                                     image,
-                                                    BL1_2_CODE_SIZE);
+                                                    BL1_2_CODE_SIZE))));
 
     FIH_RET(fih_rc);
 }
