@@ -218,6 +218,11 @@ if (TFM_PARTITION_CRYPTO)
             $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:CC312_LEGACY_DRIVER_API_ENABLED>
     )
 
+    target_include_directories(psa_crypto_config
+        INTERFACE
+            ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
     target_compile_options(crypto_service_cc312
         PUBLIC
             $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
