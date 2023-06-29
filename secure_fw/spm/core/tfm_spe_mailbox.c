@@ -20,54 +20,6 @@
 
 static struct secure_mailbox_queue_t spe_mailbox_queue;
 
-static int32_t tfm_mailbox_dispatch(uint32_t call_type,
-                                    const struct psa_client_params_t *params,
-                                    int32_t client_id,
-                                    psa_status_t *psa_ret)
-{
-    struct client_call_params_t spm_params = {0};
-
-    SPM_ASSERT(params != NULL);
-    SPM_ASSERT(psa_ret != NULL);
-
-    switch (call_type) {
-    case MAILBOX_PSA_FRAMEWORK_VERSION:
-        *psa_ret = tfm_rpc_psa_framework_version();
-        return MAILBOX_SUCCESS;
-    case MAILBOX_PSA_VERSION:
-        spm_params.sid = params->psa_version_params.sid;
-        *psa_ret = tfm_rpc_psa_version(&spm_params);
-        return MAILBOX_SUCCESS;
-    case MAILBOX_PSA_CALL:
-        spm_params.handle = params->psa_call_params.handle;
-        spm_params.type = params->psa_call_params.type;
-        spm_params.in_vec = params->psa_call_params.in_vec;
-        spm_params.in_len = params->psa_call_params.in_len;
-        spm_params.out_vec = params->psa_call_params.out_vec;
-        spm_params.out_len = params->psa_call_params.out_len;
-        spm_params.ns_client_id = client_id;
-        spm_params.client_data = NULL;
-        *psa_ret = tfm_rpc_psa_call(&spm_params);
-        return MAILBOX_SUCCESS;
-/* Following cases are only needed by connection-based services */
-#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-    case MAILBOX_PSA_CONNECT:
-        spm_params.sid = params->psa_connect_params.sid;
-        spm_params.version = params->psa_connect_params.version;
-        spm_params.ns_client_id = client_id;
-        spm_params.client_data = NULL;
-        *psa_ret = tfm_rpc_psa_connect(&spm_params);
-        return MAILBOX_SUCCESS;
-    case MAILBOX_PSA_CLOSE:
-        spm_params.handle = params->psa_close_params.handle;
-        tfm_rpc_psa_close(&spm_params);
-        return MAILBOX_SUCCESS;
-#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
-    default:
-        return MAILBOX_INVAL_PARAMS;
-    }
-}
-
 __STATIC_INLINE void set_spe_queue_empty_status(uint8_t idx)
 {
     if (idx < NUM_MAILBOX_QUEUE_SLOT) {
@@ -188,11 +140,91 @@ __STATIC_INLINE int32_t check_mailbox_msg(const struct mailbox_msg_t *msg)
     return MAILBOX_SUCCESS;
 }
 
+/* Passes the request from the mailbox message into SPM.
+ * idx indicates the slot used to use for any immediate reply.
+ * If it queues the reply immediately, updates reply_slots accordingly.
+ */
+static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
+                                    uint8_t idx,
+                                    mailbox_queue_status_t *reply_slots)
+{
+    const struct psa_client_params_t *params = &msg_ptr->params;
+    struct client_call_params_t spm_params = {0};
+    psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
+
+    SPM_ASSERT(params != NULL);
+    SPM_ASSERT(psa_ret != NULL);
+
+    switch (msg_ptr->call_type) {
+    case MAILBOX_PSA_FRAMEWORK_VERSION:
+        psa_ret = tfm_rpc_psa_framework_version();
+        /* Directly write the result to NSPE */
+        *reply_slots |= (1 << idx);
+        mailbox_direct_reply(idx, (uint32_t)psa_ret);
+        break;
+
+    case MAILBOX_PSA_VERSION:
+        spm_params.sid = params->psa_version_params.sid;
+        psa_ret = tfm_rpc_psa_version(&spm_params);
+        /* Directly write the result to NSPE */
+        *reply_slots |= (1 << idx);
+        mailbox_direct_reply(idx, (uint32_t)psa_ret);
+        break;
+
+    case MAILBOX_PSA_CALL:
+        spm_params.handle = params->psa_call_params.handle;
+        spm_params.type = params->psa_call_params.type;
+        spm_params.in_vec = params->psa_call_params.in_vec;
+        spm_params.in_len = params->psa_call_params.in_len;
+        spm_params.out_vec = params->psa_call_params.out_vec;
+        spm_params.out_len = params->psa_call_params.out_len;
+        spm_params.ns_client_id = msg_ptr->client_id;
+        spm_params.client_data = NULL;
+        psa_ret = tfm_rpc_psa_call(&spm_params);
+        /*
+         * If it failed to deliver psa_call() request to TF-M IPC SPM,
+         * the failure result should be returned immediately.
+         */
+        if (psa_ret != PSA_SUCCESS) {
+            *reply_slots |= (1 << idx);
+            mailbox_direct_reply(idx, (uint32_t)psa_ret);
+        }
+        break;
+
+/* Following cases are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+    case MAILBOX_PSA_CONNECT:
+        spm_params.sid = params->psa_connect_params.sid;
+        spm_params.version = params->psa_connect_params.version;
+        spm_params.ns_client_id = msg_ptr->client_id;
+        spm_params.client_data = NULL;
+        psa_ret = tfm_rpc_psa_connect(&spm_params);
+        /*
+         * If it failed to deliver psa_connect() request to TF-M IPC SPM,
+         * the failure result should be returned immediately.
+         */
+        if (psa_ret != PSA_SUCCESS) {
+            *reply_slots |= (1 << idx);
+            mailbox_direct_reply(idx, (uint32_t)psa_ret);
+        }
+        break;
+
+    case MAILBOX_PSA_CLOSE:
+        spm_params.handle = params->psa_close_params.handle;
+        tfm_rpc_psa_close(&spm_params);
+        break;
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+
+    default:
+        return MAILBOX_INVAL_PARAMS;
+    }
+
+    return MAILBOX_SUCCESS;
+}
+
 int32_t tfm_mailbox_handle_msg(void)
 {
     uint8_t idx;
-    int32_t result;
-    psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
     mailbox_queue_status_t mask_bits, pend_slots, reply_slots = 0;
     struct ns_mailbox_queue_t *ns_queue = spe_mailbox_queue.ns_queue;
     struct mailbox_msg_t *msg_ptr;
@@ -245,9 +277,7 @@ int32_t tfm_mailbox_handle_msg(void)
          */
         spe_mailbox_queue.cur_proc_slot_idx = idx;
 
-        result = tfm_mailbox_dispatch(msg_ptr->call_type, &msg_ptr->params,
-                                      msg_ptr->client_id, &psa_ret);
-        if (result != MAILBOX_SUCCESS) {
+        if (tfm_mailbox_dispatch(msg_ptr, idx, &reply_slots) != MAILBOX_SUCCESS) {
             mailbox_clean_queue_slot(idx);
             continue;
         }
@@ -255,30 +285,6 @@ int32_t tfm_mailbox_handle_msg(void)
         /* Clean up the current slot index under processing */
         spe_mailbox_queue.cur_proc_slot_idx = NUM_MAILBOX_QUEUE_SLOT;
 
-        if ((msg_ptr->call_type == MAILBOX_PSA_FRAMEWORK_VERSION) ||
-            (msg_ptr->call_type == MAILBOX_PSA_VERSION)) {
-            /*
-             * Directly write the result to NSPE for psa_framework_version() and
-             * psa_version().
-             */
-            reply_slots |= (1 << idx);
-
-            mailbox_direct_reply(idx, (uint32_t)psa_ret);
-        } else if ((msg_ptr->call_type == MAILBOX_PSA_CONNECT) ||
-                   (msg_ptr->call_type == MAILBOX_PSA_CALL)) {
-            /*
-             * If it failed to deliver psa_connect() or psa_call() request to
-             * TF-M IPC SPM, the failure result should be returned immediately.
-             */
-            if (psa_ret != PSA_SUCCESS) {
-                reply_slots |= (1 << idx);
-                mailbox_direct_reply(idx, (uint32_t)psa_ret);
-            }
-        }
-        /*
-         * Skip checking psa_call() since it neither returns immediately nor
-         * has return value.
-         */
     }
 
     tfm_mailbox_hal_enter_critical();
