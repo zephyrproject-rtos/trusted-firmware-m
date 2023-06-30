@@ -179,11 +179,6 @@
 /* The maximum size of an ECC key on this implementation, in bits.
  * This is a vendor-specific macro. */
 #if defined(MBEDTLS_PSA_CRYPTO_CONFIG)
-#if defined(MBEDTLS_PSA_CRYPTO_CONFIG_FILE)
-#include MBEDTLS_PSA_CRYPTO_CONFIG_FILE
-#else
-#include "crypto_config.h"
-#endif
 #if defined(PSA_WANT_ECC_SECP_R1_521)
 #define PSA_VENDOR_ECC_MAX_CURVE_BITS 521
 #elif defined(PSA_WANT_ECC_BRAINPOOL_P_R1_512)
