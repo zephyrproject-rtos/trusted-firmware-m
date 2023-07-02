@@ -282,7 +282,7 @@ void deliver_msg_to_tfm_spe(void *private)
         case OPENAMP_PSA_CONNECT:
             spm_params.sid = s_map_entry->msg.params.psa_connect_params.sid;
             spm_params.version = s_map_entry->msg.params.psa_connect_params.version;
-            spm_params->ns_client_id = s_map_entry->msg.client_id;
+            spm_params.ns_client_id = s_map_entry->msg.client_id;
             spm_params.client_data = NULL;
             psa_ret = tfm_rpc_psa_connect(&spm_params);
             if (psa_ret != PSA_SUCCESS) {
