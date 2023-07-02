@@ -118,10 +118,6 @@ __STATIC_INLINE uint32_t tfm_arch_get_psplim(void)
  */
 __STATIC_INLINE void tfm_arch_set_psplim(uint32_t psplim)
 {
-    if (psplim > __get_PSP()) {
-        tfm_core_panic();
-    }
-
     psp_limit = psplim;
 }
 
