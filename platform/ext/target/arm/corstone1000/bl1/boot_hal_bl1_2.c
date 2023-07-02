@@ -78,7 +78,7 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     int32_t result;
 
 #ifdef CRYPTO_HW_ACCELERATOR
-    result = cc3xx_finish();
+    result = cc3xx_uninit();
     if (result) {
         while (1);
     }
