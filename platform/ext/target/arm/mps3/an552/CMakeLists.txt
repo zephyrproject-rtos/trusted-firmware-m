@@ -224,3 +224,7 @@ target_sources(tfm_spm
         ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${PLATFORM_DIR}/ext/common/tfm_interrupts.c>
 )
+
+if(NOT PLATFORM_DEFAULT_PROVISIONING)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/provisioning provisioning)
+endif()

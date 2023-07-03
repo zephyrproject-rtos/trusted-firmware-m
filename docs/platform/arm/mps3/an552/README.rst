@@ -19,6 +19,13 @@ Build instructions with platform name: arm/mps3/an552
    FVP (FVP_SSE300_MPS3) and Corstone SSE-300 with Ethos-U55 Example Subsystem
    for MPS3 (AN552). For the FVP, at least version 11.16 is required.
 
+.. note::
+
+   Provisioning bundles can be generated with the ``-DPLATFORM_DEFAULT_PROVISIONING=OFF``
+   flag. The provisioning bundle binary will be generated and it's going to contain the
+   provisioning code and provisioning values. The provisioning bundle has to be placed
+   on the ``0x10022000`` address.
+
 To run the example code on AN552
 --------------------------------
 FPGA image is available to download `here <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`__
@@ -69,6 +76,11 @@ The MPS3 board tested is HBI0309C.
    Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
    to ``Debug``.
 
+.. note::
+
+   If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
+   be placed on the ``0x10022000`` address.
+
 To run the example code on Corstone-300 Ethos-U55 Ecosystem FVP
 ---------------------------------------------------------------
 FVP is available to download `here <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`__
@@ -101,6 +113,14 @@ FVP is available to download `here <https://developer.arm.com/tools-and-software
    Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
    to ``Debug``.
 
+.. note::
+
+   If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
+   be placed on the ``0x10022000`` address with::
+
+   $ ./FVP_Corstone_SSE-300_Ethos-U55 -a cpu0*="bl2.axf" --data "tfm_s_ns_signed.bin"@0x01000000 --data "encrypted_provisioning_bundle.bin"@0x10022000
+
+
 -------------
 
-*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*

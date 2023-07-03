@@ -123,12 +123,12 @@
 /* Bootloader regions */
 /* Use ITCM to store Bootloader */
 #define BL2_CODE_START    (ITCM_BASE_S)
-#define BL2_CODE_SIZE     (ITCM_SIZE)
+#define BL2_CODE_SIZE     (0x00020000)      /* 128 kB */
 #define BL2_CODE_LIMIT    (BL2_CODE_START + BL2_CODE_SIZE - 1)
 
 /* Bootloader uses same memory as for secure image */
 #define BL2_DATA_START    (S_DATA_START)
-#define BL2_DATA_SIZE     (S_DATA_SIZE)
+#define BL2_DATA_SIZE     (0x00010000)  /* 64 kB */
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 #endif /* BL2 */
 
@@ -140,5 +140,18 @@
 #define BOOT_TFM_SHARED_DATA_SIZE (0x400)
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
+
+#define PROVISIONING_BUNDLE_CODE_START (BL2_CODE_START + BL2_CODE_SIZE)
+#define PROVISIONING_BUNDLE_CODE_SIZE  (0x2000)
+/* The max size of the values(keys, seeds) that are going to be provisioned
+ * into the OTP. */
+#define PROVISIONING_BUNDLE_VALUES_START (BL2_DATA_START + BL2_DATA_SIZE)
+#define PROVISIONING_BUNDLE_VALUES_SIZE (0x400)
+#define PROVISIONING_BUNDLE_DATA_START (PROVISIONING_BUNDLE_VALUES_START + \
+                                        PROVISIONING_BUNDLE_VALUES_SIZE)
+#define PROVISIONING_BUNDLE_DATA_SIZE (0x400)
+
+#define PROVISIONING_BUNDLE_START (PROVISIONING_BUNDLE_CODE_START + \
+                                      PROVISIONING_BUNDLE_CODE_SIZE)
 
 #endif /* __REGION_DEFS_H__ */
