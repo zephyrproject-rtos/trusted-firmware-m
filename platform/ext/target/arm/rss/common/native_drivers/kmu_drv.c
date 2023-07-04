@@ -41,8 +41,14 @@ struct _kmu_reg_map_t {
                  *                       Register */
     volatile uint32_t kmuksk[32][8];
                 /*!< Offset: 0x130 (R/W) KMU Key Slot Register */
-    volatile uint32_t reserved_1[680];
-                /*!< Offset: 0x530-0xFCC Reserved */
+    volatile uint32_t kmurd_8;
+                /*!< Offset: 0x530 (R/ ) KMU 8-cycle-limit random delay Register */
+    volatile uint32_t kmurd_16;
+                /*!< Offset: 0x534 (R/ ) KMU 16-cycle-limit random delay Register */
+    volatile uint32_t kmurd_32;
+                /*!< Offset: 0x538 (R/ ) KMU 32-cycle-limit random delay Register */
+    volatile uint32_t reserved_1[668];
+                /*!< Offset: 0x53C-0xFCC Reserved */
     volatile uint32_t pidr4;
                 /*!< Offset: 0xFD0 (R/ ) Peripheral ID 4 */
     volatile uint32_t reserved_2[3];
@@ -379,4 +385,27 @@ enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot)
 out:
     p_kmu->kmuic = 0xFFFFFFFFu;
     return err;
+}
+
+enum kmu_error_t kmu_random_delay(struct kmu_dev_t *dev,
+                                  enum kmu_delay_limit_t limit)
+{
+    struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
+    uint32_t foo;
+
+    switch(limit) {
+    case KMU_DELAY_LIMIT_8_CYCLES:
+        foo = p_kmu->kmurd_8;
+        break;
+    case KMU_DELAY_LIMIT_16_CYCLES:
+        foo = p_kmu->kmurd_16;
+        break;
+    case KMU_DELAY_LIMIT_32_CYCLES:
+        foo = p_kmu->kmurd_32;
+        break;
+    default:
+        return KMU_ERROR_INVALID_DELAY_LENGTH;
+    }
+
+    return KMU_ERROR_NONE;
 }

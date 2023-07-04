@@ -6,7 +6,9 @@
  */
 
 #include "trng.h"
+
 #include "cc3xx_rng.h"
+#include "device_definition.h"
 
 int32_t bl1_trng_generate_random(uint8_t *output, size_t output_size)
 {
@@ -22,7 +24,9 @@ int32_t bl1_trng_generate_random(uint8_t *output, size_t output_size)
 }
 
 unsigned char fih_delay_random_uchar(void) {
-    uint32_t out = 0;
-    cc3xx_rng_get_random_uint(256, &out);
-    return (unsigned char)out;
+    /* Perform a hardware delay here, then return 0 so no software delay is
+     * used.
+     */
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+    return 0;
 }

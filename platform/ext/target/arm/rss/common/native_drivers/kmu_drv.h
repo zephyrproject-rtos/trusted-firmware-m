@@ -191,6 +191,7 @@ enum kmu_error_t {
     KMU_ERROR_SLOT_ALREADY_WRITTEN,
     KMU_ERROR_NOT_READY,
     KMU_ERROR_INTERNAL_ERROR,
+    KMU_ERROR_INVALID_DELAY_LENGTH,
 };
 
 enum kmu_hardware_keyslot_t {
@@ -217,6 +218,12 @@ enum kmu_destination_port_data_writes_t {
     KMU_DESTINATION_PORT_WIDTH_8_WRITES,
     KMU_DESTINATION_PORT_WIDTH_16_WRITES,
     KMU_DESTINATION_PORT_WIDTH_32_WRITES,
+};
+
+enum kmu_delay_limit_t {
+    KMU_DELAY_LIMIT_8_CYCLES,
+    KMU_DELAY_LIMIT_16_CYCLES,
+    KMU_DELAY_LIMIT_32_CYCLES,
 };
 
 /**
@@ -271,6 +278,9 @@ enum kmu_error_t kmu_get_key(struct kmu_dev_t *dev, uint32_t slot, uint8_t *buf,
 enum kmu_error_t kmu_reset_slot(struct kmu_dev_t *dev, uint32_t slot);
 
 enum kmu_error_t kmu_export_key(struct kmu_dev_t *dev, uint32_t slot);
+
+enum kmu_error_t kmu_random_delay(struct kmu_dev_t *dev,
+                                  enum kmu_delay_limit_t limit);
 
 #ifdef __cplusplus
 }
