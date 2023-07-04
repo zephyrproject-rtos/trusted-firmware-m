@@ -32,6 +32,10 @@
 #include "tfm_plat_nv_counters.h"
 #include "rss_key_derivation.h"
 #include "rss_kmu_slot_ids.h"
+#include "mpu_armv8m_drv.h"
+#include "cmsis.h"
+
+struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
 uint32_t image_offsets[2];
 
@@ -145,6 +149,31 @@ static int invalidate_hardware_keys(void)
     return 0;
 }
 
+static int disable_rom_execution(void)
+{
+    int rc;
+    struct mpu_armv8m_region_cfg_t rom_region_config = {
+        0,
+        ROM_BASE_S,
+        ROM_BASE_S + ROM_SIZE,
+        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
+        MPU_ARMV8M_XN_EXEC_NEVER,
+        MPU_ARMV8M_AP_RO_PRIV_ONLY,
+        MPU_ARMV8M_SH_NONE,
+#ifdef TFM_PXN_ENABLE
+        MPU_ARMV8M_PRIV_EXEC_NEVER,
+#endif
+    };
+
+    rc = mpu_armv8m_region_enable(&dev_mpu_s, &rom_region_config);
+    if (rc != 0) {
+        return rc;
+    }
+
+    mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
+                      HARDFAULT_NMI_ENABLE);
+}
+
 void boot_platform_quit(struct boot_arm_vector_table *vt)
 {
     /* Clang at O0, stores variables on the stack with SP relative addressing.
@@ -184,6 +213,11 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
 #endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
     kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+
+    result = disable_rom_execution();
+    if (result) {
+        while (1);
+    }
 
     vt_cpy = vt;
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \

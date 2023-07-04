@@ -375,11 +375,13 @@ target_sources(platform_bl1_2
     PRIVATE
         ./bl1/boot_hal_bl1_2.c
         ./rss_key_derivation.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
 )
 
 target_include_directories(platform_bl1_2
     PRIVATE
         .
+        ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
 )
 
 target_compile_definitions(platform_bl1_2

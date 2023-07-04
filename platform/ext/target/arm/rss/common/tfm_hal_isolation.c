@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -122,8 +122,21 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
 #ifdef TFM_PXN_ENABLE
         MPU_ARMV8M_PRIV_EXEC_NEVER
 #endif
-    }
+    },
 #endif
+    /* Keep ROM as no-execute, and prevent unpriv from accessing */
+    {
+        0, /* will be updated before using */
+        ROM_BASE_S,
+        ROM_BASE_S + ROM_SIZE,
+        MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
+        MPU_ARMV8M_XN_EXEC_NEVER,
+        MPU_ARMV8M_AP_RO_PRIV_ONLY,
+        MPU_ARMV8M_SH_NONE,
+#ifdef TFM_PXN_ENABLE
+        MPU_ARMV8M_PRIV_EXEC_NEVER,
+#endif
+    },
 };
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
