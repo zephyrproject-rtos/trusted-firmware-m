@@ -111,6 +111,8 @@ int boot_platform_pre_load(uint32_t image_id)
         flash_map_slot_from_flash_area_id(FLASH_AREA_IMAGE_SECONDARY(image_id));
     int rc;
 
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+
     if (flash_area_primary == NULL || flash_area_secondary == NULL) {
         return 1;
     }
@@ -244,6 +246,8 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
         while(1){}
     }
 #endif /* FLASH_DEV_NAME_SCRATCH */
+
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
  || defined(__ARM_ARCH_8_1M_MAIN__)

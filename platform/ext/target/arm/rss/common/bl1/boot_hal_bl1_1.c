@@ -110,6 +110,14 @@ int32_t boot_platform_post_init(void)
     return 0;
 }
 
+
+int boot_platform_pre_load(uint32_t image_id)
+{
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+
+    return 0;
+}
+
 void boot_platform_quit(struct boot_arm_vector_table *vt)
 {
     /* Clang at O0, stores variables on the stack with SP relative addressing.
@@ -122,6 +130,8 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();
 #endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
+
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 
     vt_cpy = vt;
 

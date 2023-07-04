@@ -23,6 +23,7 @@ kmu_init
 kmu_get_key_buffer_ptr
 kmu_set_key_locked
 kmu_set_slot_invalid
+kmu_random_delay
 pq_crypto_verify
 stdio_init
 stdio_output_string

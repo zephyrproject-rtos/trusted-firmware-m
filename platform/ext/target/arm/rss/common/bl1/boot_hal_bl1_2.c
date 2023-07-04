@@ -183,6 +183,8 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     stdio_uninit();
 #endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+
     vt_cpy = vt;
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
  || defined(__ARM_ARCH_8_1M_MAIN__)
@@ -199,6 +201,13 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     __ISB();
 
     boot_jump_to_next_image(vt_cpy->reset);
+}
+
+int boot_platform_pre_load(uint32_t image_id)
+{
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+
+    return 0;
 }
 
 int boot_platform_post_load(uint32_t image_id)

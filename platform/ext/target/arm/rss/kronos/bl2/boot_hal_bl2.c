@@ -115,6 +115,8 @@ int boot_platform_pre_load(uint32_t image_id)
         return 1;
     }
 
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
+
     switch(image_id) {
     case RSS_BL2_IMAGE_SCP:
         uuid = UUID_RSS_FIRMWARE_SCP_BL1;
@@ -244,6 +246,8 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
         while(1){}
     }
 #endif /* FLASH_DEV_NAME_SCRATCH */
+
+    kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
 
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
  || defined(__ARM_ARCH_8_1M_MAIN__)
