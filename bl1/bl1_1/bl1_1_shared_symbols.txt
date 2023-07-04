@@ -8,7 +8,6 @@ bl1_sha256_finish
 bl1_sha256_init
 bl1_sha256_update
 bl1_trng_generate_random
-bl_secure_memcpy
 computed_bl1_2_hash
 pq_crypto_verify
 stdio_init

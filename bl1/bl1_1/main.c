@@ -42,8 +42,8 @@ fih_int validate_image_at_addr(uint8_t *image)
         FIH_RET(FIH_FAILURE);
     }
 
-    FIH_CALL(bl_secure_memeql, fih_rc, computed_bl1_2_hash,
-                                       stored_bl1_2_hash, BL1_2_HASH_SIZE);
+    FIH_CALL(bl_fih_memeql, fih_rc, computed_bl1_2_hash,
+                                    stored_bl1_2_hash, BL1_2_HASH_SIZE);
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }

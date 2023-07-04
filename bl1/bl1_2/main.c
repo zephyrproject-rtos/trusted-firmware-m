@@ -46,8 +46,8 @@ static fih_int image_hash_check(struct bl1_2_image_t *img)
     }
 
 
-    FIH_CALL(bl_secure_memeql, fih_rc, computed_bl2_hash, stored_bl2_hash,
-                                       BL2_HASH_SIZE);
+    FIH_CALL(bl_fih_memeql, fih_rc, computed_bl2_hash, stored_bl2_hash,
+                                    BL2_HASH_SIZE);
     FIH_RET(fih_rc);
 }
 #endif /* !TFM_BL1_PQ_CRYPTO */
@@ -144,10 +144,9 @@ fih_int copy_and_decrypt_image(uint32_t image_id)
     /* Copy everything that isn't encrypted, to prevent TOCTOU attacks and
      * simplify logic.
      */
-    FIH_CALL(bl_secure_memcpy, fih_rc, image_after_decrypt,
-                        image_to_decrypt,
-                        sizeof(struct bl1_2_image_t) -
-                        sizeof(image_after_decrypt->protected_values.encrypted_data));
+    memcpy(image_after_decrypt, image_to_decrypt,
+           sizeof(struct bl1_2_image_t) -
+           sizeof(image_after_decrypt->protected_values.encrypted_data));
 #else
     /* If the flash isn't memory-mapped, defer to the flash driver to copy the
      * entire block in to SRAM. We'll then do the decrypt in-place.
