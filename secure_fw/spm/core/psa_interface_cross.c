@@ -17,32 +17,32 @@
 #include "psa/service.h"
 #include "runtime_defs.h"
 
+/*
+ * R12 stores address of target api which will be called in
+ * arch_cross_call_entry.
+ */
+#define CROSS_CALL_ENTRY(psa_target_api)              \
+    __asm volatile(                                   \
+        SYNTAX_UNIFIED                                \
+        "push   {r4, lr}                   \n"        \
+        "ldr    r4, ="M2S(psa_target_api)" \n"        \
+        "mov    r12, r4                    \n"        \
+        "bl     arch_cross_call_entry      \n"        \
+        "pop    {r4, pc}                   \n"        \
+    )
+
 __naked
 __section(".psa_interface_cross_call")
 uint32_t psa_framework_version_cross(void)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_client_psa_framework_version   \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_client_psa_framework_version);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 uint32_t psa_version_cross(uint32_t sid)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_client_psa_version             \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_client_psa_version);
 }
 
 __naked
@@ -52,42 +52,21 @@ psa_status_t tfm_psa_call_pack_cross(psa_handle_t handle,
                                      const psa_invec *in_vec,
                                      psa_outvec *out_vec)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_client_psa_call                \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_client_psa_call);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 psa_signal_t psa_wait_cross(psa_signal_t signal_mask, uint32_t timeout)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_wait             \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_wait);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 psa_status_t psa_get_cross(psa_signal_t signal, psa_msg_t *msg)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_get              \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_get);
 }
 
 __naked
@@ -95,14 +74,7 @@ __section(".psa_interface_cross_call")
 size_t psa_read_cross(psa_handle_t msg_handle, uint32_t invec_idx,
                       void *buffer, size_t num_bytes)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_read             \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_read);
 }
 
 __naked
@@ -110,14 +82,7 @@ __section(".psa_interface_cross_call")
 size_t psa_skip_cross(psa_handle_t msg_handle,
                       uint32_t invec_idx, size_t num_bytes)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_skip             \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_skip);
 }
 
 __naked
@@ -125,28 +90,14 @@ __section(".psa_interface_cross_call")
 void psa_write_cross(psa_handle_t msg_handle, uint32_t outvec_idx,
                      const void *buffer, size_t num_bytes)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_write            \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_write);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 void psa_reply_cross(psa_handle_t msg_handle, psa_status_t status)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_reply            \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_reply);
 }
 
 #if CONFIG_TFM_DOORBELL_API == 1
@@ -154,28 +105,14 @@ __naked
 __section(".psa_interface_cross_call")
 void psa_notify_cross(int32_t partition_id)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_notify           \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_notify);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 void psa_clear_cross(void)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_clear            \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_clear);
 }
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
@@ -183,28 +120,14 @@ __naked
 __section(".psa_interface_cross_call")
 void psa_panic_cross(void)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_panic            \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_panic);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 uint32_t psa_rot_lifecycle_state_cross(void)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_get_lifecycle_state            \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_get_lifecycle_state);
 }
 
 /* Following PSA APIs are only needed by connection-based services */
@@ -214,42 +137,21 @@ __naked
 __section(".psa_interface_cross_call")
 psa_handle_t psa_connect_cross(uint32_t sid, uint32_t version)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_client_psa_connect             \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_client_psa_connect);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 void psa_close_cross(psa_handle_t handle)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_client_psa_close               \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_client_psa_close);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 void psa_set_rhandle_cross(psa_handle_t msg_handle, void *rhandle)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_set_rhandle      \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_set_rhandle);
 }
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
@@ -259,28 +161,14 @@ __naked
 __section(".psa_interface_cross_call")
 void psa_irq_enable_cross(psa_signal_t irq_signal)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_irq_enable       \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_irq_enable);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 psa_irq_status_t psa_irq_disable_cross(psa_signal_t irq_signal)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_irq_disable      \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_irq_disable);
 }
 
 /* This API is only used for FLIH. */
@@ -289,14 +177,7 @@ __naked
 __section(".psa_interface_cross_call")
 void psa_reset_signal_cross(psa_signal_t irq_signal)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_reset_signal     \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_reset_signal);
 }
 #endif /* CONFIG_TFM_FLIH_API == 1 */
 
@@ -306,14 +187,7 @@ __naked
 __section(".psa_interface_cross_call")
 void psa_eoi_cross(psa_signal_t irq_signal)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_eoi              \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_eoi);
 }
 #endif /* CONFIG_TFM_SLIH_API */
 #endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
@@ -324,42 +198,21 @@ __naked
 __section(".psa_interface_cross_call")
 const void *psa_map_invec_cross(psa_handle_t msg_handle, uint32_t invec_idx)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_map_invec        \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_map_invec);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 void psa_unmap_invec_cross(psa_handle_t msg_handle, uint32_t invec_idx)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_unmap_invec      \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_unmap_invec);
 }
 
 __naked
 __section(".psa_interface_cross_call")
 void *psa_map_outvec_cross(psa_handle_t msg_handle, uint32_t outvec_idx)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_map_outvec       \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_map_outvec);
 }
 
 __naked
@@ -367,14 +220,7 @@ __section(".psa_interface_cross_call")
 void psa_unmap_outvec_cross(psa_handle_t msg_handle, uint32_t outvec_idx,
                             size_t len)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_partition_psa_unmap_outvec     \n"
-        "mov    r12, r4                                     \n"
-        "bl     arch_cross_call                             \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    CROSS_CALL_ENTRY(tfm_spm_partition_psa_unmap_outvec);
 }
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
