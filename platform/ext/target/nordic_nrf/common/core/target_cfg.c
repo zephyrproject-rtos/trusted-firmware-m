@@ -698,29 +698,37 @@ enum tfm_plat_err_t spu_init_cfg(void)
      */
     spu_regions_reset_unlocked_secure();
 
+    uint32_t perm;
+
     /* Configures SPU Code and Data regions to be non-secure */
-    spu_regions_flash_config_non_secure(
-        memory_regions.non_secure_partition_base,
-        memory_regions.non_secure_partition_limit);
-    spu_regions_sram_config_non_secure(NS_DATA_START, NS_DATA_LIMIT);
+    perm = 0;
+    perm |= NRF_SPU_MEM_PERM_READ;
+    perm |= NRF_SPU_MEM_PERM_WRITE;
+    perm |= NRF_SPU_MEM_PERM_EXECUTE;
+
+    spu_regions_flash_config(memory_regions.non_secure_partition_base,
+			     memory_regions.non_secure_partition_limit, SPU_SECURE_ATTR_NONSECURE,
+			     perm, SPU_LOCK_CONF_LOCKED);
+
+    spu_regions_sram_config(NS_DATA_START, NS_DATA_LIMIT, SPU_SECURE_ATTR_NONSECURE, perm,
+			    SPU_LOCK_CONF_LOCKED);
 
     /* Configures veneers region to be non-secure callable */
-    spu_regions_flash_config_non_secure_callable(
-        memory_regions.veneer_base,
-        memory_regions.veneer_limit - 1);
+    spu_regions_flash_config_non_secure_callable(memory_regions.veneer_base,
+						 memory_regions.veneer_limit - 1);
 
 #ifdef NRF_NS_SECONDARY
     /* Secondary image partition */
-    spu_regions_flash_config_non_secure(
-        memory_regions.secondary_partition_base,
-        memory_regions.secondary_partition_limit);
+    spu_regions_flash_config(memory_regions.secondary_partition_base,
+			     memory_regions.secondary_partition_limit, SPU_SECURE_ATTR_NONSECURE,
+			     perm, SPU_LOCK_CONF_LOCKED);
 #endif /* NRF_NS_SECONDARY */
 
 #ifdef NRF_NS_STORAGE_PARTITION_START
     /* Configures storage partition to be non-secure */
-    spu_regions_flash_config_non_secure(
-        memory_regions.non_secure_storage_partition_base,
-        memory_regions.non_secure_storage_partition_limit);
+    spu_regions_flash_config(memory_regions.non_secure_storage_partition_base,
+			     memory_regions.non_secure_storage_partition_limit,
+			     SPU_SECURE_ATTR_NONSECURE, perm, SPU_LOCK_CONF_LOCKED);
 #endif /* NRF_NS_STORAGE_PARTITION_START */
 
     return TFM_PLAT_ERR_SUCCESS;
@@ -840,12 +848,12 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     spu_peripheral_config_non_secure((uint32_t)NRF_VMC, false);
 
     /* DPPI channel configuration */
-    spu_dppi_config_non_secure(TFM_PERIPHERAL_DPPI_CHANNEL_MASK_SECURE, true);
+    spu_dppi_config_non_secure(TFM_PERIPHERAL_DPPI_CHANNEL_MASK_SECURE, SPU_LOCK_CONF_LOCKED);
 
     /* GPIO pin configuration */
-    spu_gpio_config_non_secure(0, TFM_PERIPHERAL_GPIO0_PIN_MASK_SECURE, true);
+    spu_gpio_config_non_secure(0, TFM_PERIPHERAL_GPIO0_PIN_MASK_SECURE, SPU_LOCK_CONF_LOCKED);
 #ifdef TFM_PERIPHERAL_GPIO1_PIN_MASK_SECURE
-    spu_gpio_config_non_secure(1, TFM_PERIPHERAL_GPIO1_PIN_MASK_SECURE, true);
+    spu_gpio_config_non_secure(1, TFM_PERIPHERAL_GPIO1_PIN_MASK_SECURE, SPU_LOCK_CONF_LOCKED);
 #endif
 
 #ifdef NRF53_SERIES
