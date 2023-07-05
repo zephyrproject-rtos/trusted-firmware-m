@@ -187,7 +187,7 @@ defined:
 
 .. code-block:: c
 
-  #define PSA_MSG_ACK            (0x00000004u)
+  #define ASYNC_MSG_REPLY            (0x00000004u)
 
 This signal can be sent to agent type component only. An agent can call
 ``psa_get`` with this signal to get one acknowledged message. This signal is
@@ -196,7 +196,7 @@ cleared when all queued messages for the agent have been retrieved using
 For the stateless handle, the internal handle object is freed after this
 ``psa_get`` call. The agent can know what kind of message is acknowledged by
 the ``type`` member in the ``psa_msg_t``, and the ``client_data`` passed in is
-put in member ``rhandle``. If no 'PSA_MSG_ACK' signals pending, calling
+put in member ``rhandle``. If no 'ASYNC_MSG_REPLY' signals pending, calling
 ``psa_get`` gets ``panic``.
 
 Code Example
@@ -260,9 +260,9 @@ Code Example
                */
               error_dispatch(status);
 
-          } else if (signals & PSA_MSG_ACK) {
+          } else if (signals & ASYNC_MSG_REPLY) {
               /* The handle is freed for stateless service after 'psa_get'. */
-              status        = psa_get(PSA_MSG_ACK, &msg);
+              status        = psa_get(ASYNC_MSG_REPLY, &msg);
               ms_msg        = msg.rhandle;
               ns_msg.status = status;
               __customized_platform__send_mail(&ns_msg);

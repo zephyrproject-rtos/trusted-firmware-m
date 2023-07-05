@@ -1,11 +1,13 @@
 /*
  * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
- * Copyright (c) 2021, Cypress Semiconductor Corp. All rights reserved.
+ * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
+#include "async.h"
 #include "psa/service.h"
 #include "psa_manifest/ns_agent_mailbox.h"
 #include "tfm_hal_multi_core.h"
@@ -41,6 +43,14 @@ void ns_agent_mailbox_entry(void)
         if (signals & MAILBOX_SIGNAL) {
             psa_eoi(MAILBOX_SIGNAL);
             tfm_rpc_client_call_handler();
+        } else if (signals & ASYNC_MSG_REPLY) {
+            /* TODO when this is the only caller of tfm_rpc_client_call_reply(),
+             * make it parameterless and move the rest of this code inside it
+             */
+            psa_msg_t msg;
+            psa_status_t status = psa_get(ASYNC_MSG_REPLY, &msg);
+
+            tfm_rpc_client_call_reply(msg.rhandle, status);
         } else {
             psa_panic();
         }
