@@ -25,6 +25,10 @@
 #include "hw_init.h"
 #include "startup.h"
 
+__NO_RETURN __attribute__((naked)) void default_tfm_IRQHandler(void) {
+    while(1);
+}
+
 DEFAULT_IRQ_HANDLER(NMI_Handler)
 DEFAULT_IRQ_HANDLER(HardFault_Handler)
 DEFAULT_IRQ_HANDLER(MemManage_Handler)
