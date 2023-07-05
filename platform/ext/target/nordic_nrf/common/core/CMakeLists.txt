@@ -31,6 +31,11 @@ target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
 )
 
+target_sources(tfm_s
+    PRIVATE
+        startup.c
+)
+
 if(NS)
     target_add_scatter_file(tfm_ns
         $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld>
@@ -38,6 +43,10 @@ if(NS)
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
             CMSIS_5_RTX_V8MMN
+    )
+    target_sources(tfm_ns
+        PRIVATE
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup.c>
     )
 endif()
 
@@ -161,6 +170,10 @@ if(BL2)
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
             ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_nvmc.c
             nrfx_glue.c
+    )
+    target_sources(bl2
+        PRIVATE
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup.c>
     )
 
     target_include_directories(platform_bl2
