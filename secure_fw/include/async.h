@@ -12,11 +12,6 @@
 #include "psa/error.h"
 
 /**
- * Status returned for a request that will complete asynchronously.
- */
-#define AGENT_STATUS_IN_PROGRESS  ((psa_status_t)-256)
-
-/**
  * The signal number for the Secure Partition message acknowledgment.
  */
 #define ASYNC_MSG_REPLY    (0x00000004u)

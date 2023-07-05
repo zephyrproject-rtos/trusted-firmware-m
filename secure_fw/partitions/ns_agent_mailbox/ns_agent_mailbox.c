@@ -44,13 +44,7 @@ void ns_agent_mailbox_entry(void)
             psa_eoi(MAILBOX_SIGNAL);
             tfm_rpc_client_call_handler();
         } else if (signals & ASYNC_MSG_REPLY) {
-            /* TODO when this is the only caller of tfm_rpc_client_call_reply(),
-             * make it parameterless and move the rest of this code inside it
-             */
-            psa_msg_t msg;
-            psa_status_t status = psa_get(ASYNC_MSG_REPLY, &msg);
-
-            tfm_rpc_client_call_reply(msg.rhandle, status);
+            tfm_rpc_client_call_reply();
         } else {
             psa_panic();
         }

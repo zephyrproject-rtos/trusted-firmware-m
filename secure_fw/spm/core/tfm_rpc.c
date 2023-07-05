@@ -7,6 +7,7 @@
  *
  */
 
+#include "async.h"
 #include "config_impl.h"
 #include "spm.h"
 #include "ffm/agent_api.h"
@@ -54,6 +55,7 @@ uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params)
 psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
 {
     SPM_ASSERT(params != NULL);
+
     /* TODO: Is the lifetime of this variable appropriate ? */
     const struct client_vectors vecs = {
         .in_vec = params->in_vec,
@@ -130,11 +132,19 @@ void tfm_rpc_client_call_handler(void)
     rpc_ops.handle_req();
 }
 
-void tfm_rpc_client_call_reply(const void *owner, int32_t ret)
+void tfm_rpc_client_call_reply(void)
 {
-    const struct connection_t *handle = (const struct connection_t *)owner;
+    psa_msg_t msg;
+    psa_status_t status = psa_get(ASYNC_MSG_REPLY, &msg);
+    struct connection_t *handle = (struct connection_t *)msg.rhandle;
 
-    rpc_ops.reply(handle->caller_data, ret);
+    rpc_ops.reply(handle->caller_data, status);
+
+    if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {
+        spm_free_connection(handle);
+    } else {
+        handle->status = TFM_HANDLE_STATUS_IDLE;
+    }
 }
 
 void tfm_rpc_set_caller_data(struct connection_t *handle, int32_t client_id)

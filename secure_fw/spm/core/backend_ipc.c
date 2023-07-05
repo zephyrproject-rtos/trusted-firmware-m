@@ -192,10 +192,10 @@ psa_status_t backend_messaging(struct service_t *service,
      * thread.
      */
 
-    if (!is_tfm_rpc_msg(handle)) {
-        ret = backend_wait_signals(handle->p_client, ASYNC_MSG_REPLY);
-    } else {
+    if (is_tfm_rpc_msg(handle)) {
         ret = PSA_SUCCESS;
+    } else {
+        ret = backend_wait_signals(handle->p_client, ASYNC_MSG_REPLY);
     }
 
     handle->status = TFM_HANDLE_STATUS_ACTIVE;
@@ -205,19 +205,23 @@ psa_status_t backend_messaging(struct service_t *service,
 
 psa_status_t backend_replying(struct connection_t *handle, int32_t status)
 {
+    struct partition_t *client = handle->p_client;
+
     if (is_tfm_rpc_msg(handle)) {
-        tfm_rpc_client_call_reply(handle, status);
+        /*
+         * Add to the list of outstanding responses.
+         * Note that we use the partition's p_handles pointer.
+         * This assumes that partitions using the agent API will process all requests
+         * asynchronously and will not also provide services of their own.
+         */
+        handle->reply_value = (uintptr_t)status;
+        handle->msg.rhandle = handle;
+        UNI_LIST_INSERT_AFTER(client, handle, p_handles);
+        return backend_assert_signal(handle->p_client, ASYNC_MSG_REPLY);
     } else {
         handle->p_client->reply_value = (uintptr_t)status;
         return backend_assert_signal(handle->p_client, ASYNC_MSG_REPLY);
     }
-
-    /*
-     * 'psa_reply' exists in IPC model only and returns 'void'. Return
-     * 'PSA_SUCCESS' here always since SPM does not forward the status
-     * to the caller.
-     */
-    return PSA_SUCCESS;
 }
 
 extern void common_sfn_thread(void *param);

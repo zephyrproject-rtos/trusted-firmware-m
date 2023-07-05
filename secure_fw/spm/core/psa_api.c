@@ -9,6 +9,7 @@
  */
 
 #include <stdint.h>
+#include "async.h"
 #include "bitops.h"
 #include "config_impl.h"
 #include "config_spm.h"
@@ -94,6 +95,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
 psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
 {
+    psa_status_t ret = PSA_ERROR_GENERIC_ERROR;
     struct connection_t *handle = NULL;
     struct partition_t *partition = NULL;
     fih_int fih_rc = FIH_FAILURE;
@@ -135,18 +137,43 @@ psa_status_t tfm_spm_partition_psa_get(psa_signal_t signal, psa_msg_t *msg)
         tfm_core_panic();
     }
 
-    /*
-     * Get message by signal from partition. It is a fatal error if getting
-     * failed, which means the input signal is not correspond to an RoT service.
-     */
-    handle = spm_get_handle_by_signal(partition, signal);
-    if (!handle) {
-        return PSA_ERROR_DOES_NOT_EXIST;
+    if (signal == ASYNC_MSG_REPLY) {
+        struct connection_t **pr_handle_iter, **prev = NULL;
+        struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+
+        /* Remove tail of the list, which is the first item added */
+        CRITICAL_SECTION_ENTER(cs_assert);
+        if (!partition->p_handles) {
+            tfm_core_panic();
+        }
+        UNI_LIST_FOREACH_NODE_PNODE(pr_handle_iter, handle,
+                                    partition, p_handles) {
+            prev = pr_handle_iter;
+        }
+        handle = *prev;
+        UNI_LIST_REMOVE_NODE_BY_PNODE(prev, p_handles);
+        ret = handle->reply_value;
+        /* Clear the signal if there are no more asynchronous responses waiting */
+        if (!partition->p_handles) {
+            partition->signals_asserted &= ~ASYNC_MSG_REPLY;
+        }
+        CRITICAL_SECTION_LEAVE(cs_assert);
+    } else {
+        /*
+         * Get message by signal from partition. It is a fatal error if getting
+         * failed, which means the input signal does not correspond to an RoT service.
+         */
+        handle = spm_get_handle_by_signal(partition, signal);
+        if (handle) {
+            ret = PSA_SUCCESS;
+        } else {
+            return PSA_ERROR_DOES_NOT_EXIST;
+        }
     }
 
     spm_memcpy(msg, &handle->msg, sizeof(psa_msg_t));
 
-    return PSA_SUCCESS;
+    return ret;
 }
 #endif
 
@@ -253,10 +280,16 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
     ret = backend_replying(handle, ret);
     CRITICAL_SECTION_LEAVE(cs_assert);
 
-    if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {
-        spm_free_connection(handle);
-    } else {
-        handle->status = TFM_HANDLE_STATUS_IDLE;
+    /*
+     * When using the asynchronous agent API, retain the handle
+     * until the response has been collected by the agent
+     */
+    if (!is_tfm_rpc_msg(handle)) {
+        if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {
+            spm_free_connection(handle);
+        } else {
+            handle->status = TFM_HANDLE_STATUS_IDLE;
+        }
     }
 
     return ret;

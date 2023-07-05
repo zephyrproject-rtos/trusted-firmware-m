@@ -12,6 +12,7 @@
 
 #include "cmsis_compiler.h"
 
+#include "async.h"
 #include "config_impl.h"
 #include "psa/error.h"
 #include "utilities.h"
@@ -177,6 +178,8 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
     const struct psa_client_params_t *params = &msg_ptr->params;
     struct client_call_params_t spm_params = {0};
     psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
+    /* assume asynchronous */
+    bool sync = false;
 
     SPM_ASSERT(params != NULL);
     SPM_ASSERT(psa_ret != NULL);
@@ -184,17 +187,13 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
     switch (msg_ptr->call_type) {
     case MAILBOX_PSA_FRAMEWORK_VERSION:
         psa_ret = tfm_rpc_psa_framework_version();
-        /* Directly write the result to NSPE */
-        *reply_slots |= (1 << idx);
-        mailbox_direct_reply(idx, (uint32_t)psa_ret);
+        sync = true;
         break;
 
     case MAILBOX_PSA_VERSION:
         spm_params.sid = params->psa_version_params.sid;
         psa_ret = tfm_rpc_psa_version(&spm_params);
-        /* Directly write the result to NSPE */
-        *reply_slots |= (1 << idx);
-        mailbox_direct_reply(idx, (uint32_t)psa_ret);
+        sync = true;
         break;
 
     case MAILBOX_PSA_CALL:
@@ -228,13 +227,8 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         spm_params.ns_client_id = msg_ptr->client_id;
         spm_params.client_data = NULL;
         psa_ret = tfm_rpc_psa_call(&spm_params);
-        /*
-         * If it failed to deliver psa_call() request to TF-M IPC SPM,
-         * the failure result should be returned immediately.
-         */
         if (psa_ret != PSA_SUCCESS) {
-            *reply_slots |= (1 << idx);
-            mailbox_direct_reply(idx, (uint32_t)psa_ret);
+            sync = true;
         }
         break;
 
@@ -246,13 +240,8 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         spm_params.ns_client_id = msg_ptr->client_id;
         spm_params.client_data = NULL;
         psa_ret = tfm_rpc_psa_connect(&spm_params);
-        /*
-         * If it failed to deliver psa_connect() request to TF-M IPC SPM,
-         * the failure result should be returned immediately.
-         */
         if (psa_ret != PSA_SUCCESS) {
-            *reply_slots |= (1 << idx);
-            mailbox_direct_reply(idx, (uint32_t)psa_ret);
+            sync = true;
         }
         break;
 
@@ -264,6 +253,12 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
 
     default:
         return MAILBOX_INVAL_PARAMS;
+    }
+
+    /* Any synchronous result should be returned immediately */
+    if (sync) {
+        *reply_slots |= (1 << idx);
+        mailbox_direct_reply(idx, (uint32_t)psa_ret);
     }
 
     return MAILBOX_SUCCESS;
@@ -331,7 +326,6 @@ int32_t tfm_mailbox_handle_msg(void)
 
         /* Clean up the current slot index under processing */
         spe_mailbox_queue.cur_proc_slot_idx = NUM_MAILBOX_QUEUE_SLOT;
-
     }
 
     tfm_mailbox_hal_enter_critical();

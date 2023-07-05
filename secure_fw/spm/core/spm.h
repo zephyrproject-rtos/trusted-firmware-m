@@ -90,6 +90,7 @@ struct connection_t {
 #endif
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
     struct connection_t *p_handles;          /* Handle(s) link                 */
+    uintptr_t reply_value;                   /* Result of this operation, if aynchronous */
 #endif
 };
 

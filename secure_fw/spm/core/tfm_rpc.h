@@ -157,11 +157,9 @@ void tfm_rpc_client_call_handler(void);
 /**
  * \brief Reply PSA client call return result
  *
- * \param[in] owner             A handle to identify the owner of the PSA
- *                              client call.
- * \param[in] ret               PSA client call return result value.
+ * \param[in] void
  */
-void tfm_rpc_client_call_reply(const void *owner, int32_t ret);
+void tfm_rpc_client_call_reply(void);
 
 /*
  * Check if the message was allocated for a non-secure request via RPC
