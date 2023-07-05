@@ -37,7 +37,7 @@ struct mpu_armv8m_dev_t dev_mpu_s = {MPU_BASE};
 
 #ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
 #if TFM_ISOLATION_LEVEL == 3
@@ -54,7 +54,7 @@ const static struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, PT_RO_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, PT_RO_END, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, PT_RO_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
@@ -66,7 +66,7 @@ const static struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, PT_PRIV_RWZI_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, PT_PRIV_RWZI_END, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, PT_PRIV_RWZI_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_ONLY,
@@ -77,7 +77,7 @@ const static struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit),
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit) - 1,
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
@@ -103,7 +103,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
@@ -113,7 +113,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit),
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
@@ -123,7 +123,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
@@ -133,7 +133,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
@@ -144,7 +144,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit),
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit) -1,
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
@@ -168,6 +168,9 @@ static fih_int fih_verify_mpu_armv8m_region_enabled(
     uint32_t limit_cfg;
 
     if ((region_cfg->region_base & ~MPU_RBAR_BASE_Msk) != 0) {
+        FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
+    }
+    if ((region_cfg->region_limit & ~MPU_RLAR_LIMIT_Msk) != 0x1F) {
         FIH_RET(fih_int_encode(MPU_ARMV8M_ERROR));
     }
 
@@ -554,7 +557,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
          i++) {
         localcfg.region_nr = n_configured_regions + i;
         localcfg.region_base = rt_mem[i].mem.start;
-        localcfg.region_limit = rt_mem[i].mem.limit;
+        localcfg.region_limit = rt_mem[i].mem.limit - 1;
 
         FIH_CALL(mpu_armv8m_region_enable, fih_rc, &dev_mpu_s, &localcfg);
         if (fih_not_eq(fih_rc, fih_int_encode(MPU_ARMV8M_OK))) {

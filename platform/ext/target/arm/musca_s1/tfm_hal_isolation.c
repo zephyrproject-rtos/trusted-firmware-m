@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -44,7 +44,7 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 #ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit);
 #endif
 
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
@@ -73,7 +73,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
     region_cfg.region_nr = n_configured_regions;
     region_cfg.region_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit);
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_CODE_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -88,7 +88,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_CODE_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -103,7 +103,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base);
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_CODE_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -118,7 +118,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base);
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -134,7 +134,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;

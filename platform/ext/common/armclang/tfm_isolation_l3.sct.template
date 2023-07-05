@@ -249,6 +249,12 @@ LR_CODE S_CODE_START S_CODE_SIZE {
     TFM_SP_META_PTR +0 ALIGN TFM_LINKER_SP_META_PTR_ALIGNMENT {
         *(.bss.SP_META_PTR_SPRTL_INST)
     }
+    /*
+     * This empty, zero long execution region is here to mark the end address
+     * of TFM partition metadata pointer region.
+     */
+    TFM_SP_META_PTR_END +0 ALIGN TFM_LINKER_SP_META_PTR_ALIGNMENT EMPTY 0x0 {
+    }
 #endif
 
 #ifdef RAM_VECTORS_SUPPORT

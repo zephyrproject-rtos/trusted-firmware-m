@@ -42,9 +42,9 @@
 #define FF_TEST_NVMEM_REGION_START            0x010FC000
 #define FF_TEST_NVMEM_REGION_END              0x010FC3FF
 #define FF_TEST_SERVER_PARTITION_MMIO_START   0x010FC400
-#define FF_TEST_SERVER_PARTITION_MMIO_END     0x010FC500
+#define FF_TEST_SERVER_PARTITION_MMIO_END     0x010FC4FF
 #define FF_TEST_DRIVER_PARTITION_MMIO_START   0x010FC600
-#define FF_TEST_DRIVER_PARTITION_MMIO_END     0x010FC700
+#define FF_TEST_DRIVER_PARTITION_MMIO_END     0x010FC6FF
 
 extern const struct memory_region_limits memory_regions;
 
@@ -143,7 +143,7 @@ struct platform_data_t
 struct platform_data_t
     tfm_peripheral_FF_TEST_WATCHDOG_REGION = {
         SYSWDOG_ARMV8_M_CNTRL_BASE_S,
-        SYSWDOG_ARMV8_M_CNTRL_BASE_S + 0x2000,
+        SYSWDOG_ARMV8_M_CNTRL_BASE_S + 0x1FFF,
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };

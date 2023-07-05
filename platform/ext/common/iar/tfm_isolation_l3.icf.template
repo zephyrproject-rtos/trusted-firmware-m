@@ -216,6 +216,12 @@ define block PT_PRIV_RWZI_END with alignment = TFM_LINKER_PT_PRIV_RWZI_ALIGNMENT
 define block TFM_SP_META_PTR with alignment = TFM_LINKER_SP_META_PTR_ALIGNMENT {
     zi section .bss.SP_META_PTR_SPRTL_INST
        };
+
+    /*
+     * This empty, zero long execution region is here to mark the end address
+     * of TFM partition metadata pointer region.
+     */
+define block TFM_SP_META_PTR_END with alignment = TFM_LINKER_SP_META_PTR_ALIGNMENT, size = 0 { };
 #endif
 
 #ifdef RAM_VECTORS_SUPPORT
@@ -306,6 +312,7 @@ define block DATA with fixed order {
 
 #if defined(CONFIG_TFM_PARTITION_META)
     block TFM_SP_META_PTR,
+    block TFM_SP_META_PTR_END,
 #endif
 
 #ifdef RAM_VECTORS_SUPPORT

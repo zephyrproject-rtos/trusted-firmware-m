@@ -51,7 +51,7 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_START, $$Base);
 REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 #ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
 #define ARM_MPU_NON_TRANSIENT        ( 1U )
@@ -174,11 +174,11 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
                      ARM_MPU_UNPRIVILEGED,
                      ARM_MPU_EXECUTE_NEVER),
         #ifdef TFM_PXN_ENABLE
-        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit) - 1,
+        ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit) - 1,
                          ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
                          1)
         #else
-        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit) - 1,
+        ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit) - 1,
                      1)
         #endif
     }
@@ -244,6 +244,12 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
     for (i = 0; i < ARRAY_SIZE(mpu_region_attributes); i++) {
         localcfg.RBAR = mpu_region_attributes[i].RBAR;
         localcfg.RLAR = mpu_region_attributes[i].RLAR;
+        if ((localcfg.RBAR & ~MPU_RBAR_BASE_Msk) != 0) {
+            return TFM_HAL_ERROR_GENERIC;
+        }
+        if ((localcfg.RLAR & ~MPU_RLAR_LIMIT_Msk) != 0x1F) {
+            return TFM_HAL_ERROR_GENERIC;
+        }
         ARM_MPU_SetRegion(i, localcfg.RBAR, localcfg.RLAR);
     }
     n_configured_regions = i;
@@ -345,6 +351,12 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
             //Turn off MPU during configuration
             if ((MPU->CTRL & MPU_CTRL_ENABLE_Msk)) {
                 ARM_MPU_Disable();
+            }
+            if ((plat_data_ptr->periph_start & ~MPU_RBAR_BASE_Msk) != 0) {
+                return TFM_HAL_ERROR_GENERIC;
+            }
+            if ((plat_data_ptr->periph_limit & ~MPU_RLAR_LIMIT_Msk) != 0x1F) {
+                return TFM_HAL_ERROR_GENERIC;
             }
             /* Assemble region base and limit address register contents. */
             local_mpu_region.RBAR = ARM_MPU_RBAR(plat_data_ptr->periph_start,

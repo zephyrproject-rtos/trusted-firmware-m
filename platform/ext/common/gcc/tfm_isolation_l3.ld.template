@@ -491,6 +491,8 @@ SECTIONS
     } > RAM AT> RAM
     Image$$TFM_SP_META_PTR$$ZI$$Base = ADDR(.TFM_SP_META_PTR);
     Image$$TFM_SP_META_PTR$$ZI$$Limit = ADDR(.TFM_SP_META_PTR) + SIZEOF(.TFM_SP_META_PTR);
+    /* This is needed for the uniform configuration of MPU region. */
+    Image$$TFM_SP_META_PTR_END$$ZI$$Limit = Image$$TFM_SP_META_PTR$$ZI$$Limit;
 #endif
 
     .TFM_BSS ALIGN(4) (NOLOAD):

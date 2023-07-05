@@ -145,6 +145,12 @@ keep {block TFM_SHARED_DATA, block ARM_LIB_STACK};
 define block TFM_SP_META_PTR with alignment = TFM_LINKER_SP_META_PTR_ALIGNMENT {
     zi section .bss.SP_META_PTR_SPRTL_INST
        };
+
+    /*
+     * This empty, zero long execution region is here to mark the end address
+     * of TFM partition metadata pointer region.
+     */
+define block TFM_SP_META_PTR_END with alignment = TFM_LINKER_SP_META_PTR_ALIGNMENT, size = 0 { };
 #endif
 
 define block TFM_APP_RW_STACK_START with alignment = TFM_LINKER_APP_ROT_LINKER_DATA_ALIGNMENT, size = 0 { };
@@ -321,6 +327,7 @@ define block DATA with fixed order {
 
 #if defined(CONFIG_TFM_PARTITION_META)
     block TFM_SP_META_PTR,
+    block TFM_SP_META_PTR_END,
 #endif
 
     /**** APP RoT DATA start here */

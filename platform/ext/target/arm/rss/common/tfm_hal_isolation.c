@@ -56,7 +56,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
@@ -70,7 +70,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit),
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
@@ -83,7 +83,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
@@ -100,7 +100,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
@@ -114,7 +114,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit),
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit) - 1,
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
@@ -128,7 +128,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     {
         0, /* will be updated before using */
         ROM_BASE_S,
-        ROM_BASE_S + ROM_SIZE,
+        ROM_BASE_S + ROM_SIZE - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RO_PRIV_ONLY,
