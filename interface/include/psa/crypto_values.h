@@ -47,13 +47,6 @@
  * value, check with the Arm PSA framework group to pick one that other
  * domains aren't already using. */
 
-/* Tell uncrustify not to touch the constant definitions, otherwise
- * it might change the spacing to something that is not PSA-compliant
- * (e.g. adding a space after casts).
- *
- * *INDENT-OFF*
- */
-
 /** The action was completed successfully. */
 #ifndef PSA_SUCCESS
 #define PSA_SUCCESS ((psa_status_t)0)
@@ -325,15 +318,6 @@
  * written by an incompatible version of the library.
  */
 #define PSA_ERROR_DATA_INVALID          ((psa_status_t)-153)
-
-/** The function that returns this status is defined as interruptible and
- *  still has work to do, thus the user should call the function again with the
- *  same operation context until it either returns #PSA_SUCCESS or any other
- *  error. This is not an error per se, more a notification of status.
- */
-#define PSA_OPERATION_INCOMPLETE           ((psa_status_t)-248)
-
-/* *INDENT-ON* */
 
 /**@}*/
 
@@ -2398,93 +2382,6 @@
 /** The maximum value for a key identifier chosen by the implementation.
  */
 #define PSA_KEY_ID_VENDOR_MAX                   ((psa_key_id_t)0x7fffffff)
-#if !defined(MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER)
-
-#define MBEDTLS_SVC_KEY_ID_INIT ((psa_key_id_t) 0)
-#define MBEDTLS_SVC_KEY_ID_GET_KEY_ID(id) (id)
-#define MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(id) (0)
-
-/** Utility to initialize a key identifier at runtime.
- *
- * \param unused  Unused parameter.
- * \param key_id  Identifier of the key.
- */
-static inline mbedtls_svc_key_id_t mbedtls_svc_key_id_make(
-    unsigned int unused, psa_key_id_t key_id)
-{
-    (void) unused;
-
-    return key_id;
-}
-
-/** Compare two key identifiers.
- *
- * \param id1 First key identifier.
- * \param id2 Second key identifier.
- *
- * \return Non-zero if the two key identifier are equal, zero otherwise.
- */
-static inline int mbedtls_svc_key_id_equal(mbedtls_svc_key_id_t id1,
-                                           mbedtls_svc_key_id_t id2)
-{
-    return id1 == id2;
-}
-
-/** Check whether a key identifier is null.
- *
- * \param key Key identifier.
- *
- * \return Non-zero if the key identifier is null, zero otherwise.
- */
-static inline int mbedtls_svc_key_id_is_null(mbedtls_svc_key_id_t key)
-{
-    return key == 0;
-}
-
-#else /* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
-#include "mbedtls/private_access.h"
-#define MBEDTLS_SVC_KEY_ID_INIT ((mbedtls_svc_key_id_t){ 0, 0 })
-#define MBEDTLS_SVC_KEY_ID_GET_KEY_ID(id) ((id).MBEDTLS_PRIVATE(key_id))
-#define MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(id) ((id).MBEDTLS_PRIVATE(owner))
-
-/** Utility to initialize a key identifier at runtime.
- *
- * \param owner_id Identifier of the key owner.
- * \param key_id   Identifier of the key.
- */
-static inline mbedtls_svc_key_id_t mbedtls_svc_key_id_make(
-    mbedtls_key_owner_id_t owner_id, psa_key_id_t key_id)
-{
-    return (mbedtls_svc_key_id_t){ .MBEDTLS_PRIVATE(key_id) = key_id,
-                                   .MBEDTLS_PRIVATE(owner) = owner_id };
-}
-
-/** Compare two key identifiers.
- *
- * \param id1 First key identifier.
- * \param id2 Second key identifier.
- *
- * \return Non-zero if the two key identifier are equal, zero otherwise.
- */
-static inline int mbedtls_svc_key_id_equal(mbedtls_svc_key_id_t id1,
-                                           mbedtls_svc_key_id_t id2)
-{
-    return (id1.MBEDTLS_PRIVATE(key_id) == id2.MBEDTLS_PRIVATE(key_id)) &&
-           mbedtls_key_owner_id_equal(id1.MBEDTLS_PRIVATE(owner), id2.MBEDTLS_PRIVATE(owner));
-}
-
-/** Check whether a key identifier is null.
- *
- * \param key Key identifier.
- *
- * \return Non-zero if the key identifier is null, zero otherwise.
- */
-static inline int mbedtls_svc_key_id_is_null(mbedtls_svc_key_id_t key)
-{
-    return key.MBEDTLS_PRIVATE(key_id) == 0;
-}
-
-#endif /* !MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
 
 /**@}*/
 

@@ -135,11 +135,11 @@ static inline struct psa_key_attributes_s psa_key_attributes_init(void)
 }
 
 static inline void psa_set_key_id(psa_key_attributes_t *attributes,
-                                  mbedtls_svc_key_id_t key)
+                                  psa_key_id_t key)
 {
     psa_key_lifetime_t lifetime = attributes->client.lifetime;
 
-    attributes->client.id = (psa_key_id_t)key;
+    attributes->client.id = key;
 
     if( PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
     {
@@ -150,10 +150,10 @@ static inline void psa_set_key_id(psa_key_attributes_t *attributes,
     }
 }
 
-static inline mbedtls_svc_key_id_t psa_get_key_id(
+static inline psa_key_id_t psa_get_key_id(
     const psa_key_attributes_t *attributes)
 {
-    return (mbedtls_svc_key_id_t)attributes->client.id;
+    return attributes->client.id;
 }
 
 static inline void psa_set_key_lifetime(psa_key_attributes_t *attributes,

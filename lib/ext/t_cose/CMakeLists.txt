@@ -46,11 +46,6 @@ target_sources(tfm_t_cose_common
         ${CMAKE_CURRENT_SOURCE_DIR}/crypto_adapters/t_cose_psa_crypto.c
 )
 
-target_link_libraries(tfm_t_cose_common
-    INTERFACE
-        psa_crypto_config
-)
-
 ############################ t_cose secure #####################################
 
 add_library(tfm_t_cose_s STATIC EXCLUDE_FROM_ALL)

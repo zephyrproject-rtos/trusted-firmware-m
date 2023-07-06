@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -65,9 +65,6 @@ target_compile_definitions(tfm_psa_rot_partition_crypto
         MBEDTLS_PSA_CRYPTO_DRIVERS
         MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
         $<$<BOOL:CRYPTO_BUILTIN_KEYS>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY>
-    PRIVATE
-        $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_TYPE},cc312>:CRYPTO_HW_ACCELERATOR_CC312>
-        MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
 )
 
 ############################ Partition Defs ####################################
@@ -82,18 +79,6 @@ target_compile_definitions(tfm_partition_defs
         TFM_PARTITION_CRYPTO
 )
 
-target_link_libraries(tfm_config
-    INTERFACE
-        psa_crypto_config
-)
-
-############################### PSA CRYPTO CONFIG ##############################
-add_library(psa_crypto_config INTERFACE)
-target_compile_definitions(psa_crypto_config
-    INTERFACE
-        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH}"
-)
-
 ############################### MBEDCRYPTO #####################################
 
 add_library(crypto_service_mbedcrypto_config INTERFACE)
@@ -101,6 +86,7 @@ add_library(crypto_service_mbedcrypto_config INTERFACE)
 target_compile_definitions(crypto_service_mbedcrypto_config
     INTERFACE
         MBEDTLS_CONFIG_FILE="${TFM_MBEDCRYPTO_CONFIG_PATH}"
+        MBEDTLS_PSA_CRYPTO_CONFIG_FILE="${TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH}"
         $<$<BOOL:${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}>:MBEDTLS_USER_CONFIG_FILE="${TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH}">
         PSA_CRYPTO_SECURE
         # Workaround for https://github.com/ARMmbed/mbedtls/issues/1077
@@ -115,7 +101,6 @@ target_compile_definitions(crypto_service_mbedcrypto_config
 target_link_libraries(crypto_service_mbedcrypto_config
     INTERFACE
         tfm_config
-        psa_crypto_config
 )
 
 cmake_policy(SET CMP0079 NEW)
@@ -167,11 +152,6 @@ target_compile_options(${MBEDTLS_TARGET_PREFIX}mbedcrypto
         $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-const-variable>
         $<$<C_COMPILER_ID:ARMClang>:-Wno-unused-parameter>
-)
-
-target_compile_definitions(${MBEDTLS_TARGET_PREFIX}mbedcrypto
-    PRIVATE
-        MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
 )
 
 target_link_libraries(${MBEDTLS_TARGET_PREFIX}mbedcrypto
