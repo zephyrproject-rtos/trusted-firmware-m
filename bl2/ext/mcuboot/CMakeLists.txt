@@ -85,7 +85,30 @@ configure_file(include/mcuboot_config/mcuboot_config.h.in
 
 if (PLATFORM_DEFAULT_IMAGE_SIGNING)
     find_package(Python3)
+    if(MCUBOOT_GENERATE_SIGNING_KEYPAIR)
+        add_custom_target(generated_private_key
+            SOURCES
+                generated_private_key_s.pem
+                generated_private_key_ns.pem
+        )
 
+        add_custom_command(OUTPUT generated_private_key_s.pem
+            COMMAND ${Python3_EXECUTABLE} ${MCUBOOT_PATH}/scripts/imgtool.py
+                keygen
+                -k generated_private_key_s.pem
+                -t rsa-${MCUBOOT_SIGNATURE_KEY_LEN}
+            COMMAND ${CMAKE_COMMAND} -E copy generated_private_key_s.pem $<TARGET_FILE_DIR:bl2>
+        )
+        add_custom_command(OUTPUT generated_private_key_ns.pem
+            COMMAND ${Python3_EXECUTABLE} ${MCUBOOT_PATH}/scripts/imgtool.py
+                keygen
+                -k generated_private_key_ns.pem
+                -t rsa-${MCUBOOT_SIGNATURE_KEY_LEN}
+            COMMAND ${CMAKE_COMMAND} -E copy generated_private_key_ns.pem $<TARGET_FILE_DIR:bl2>
+        )
+        set(MCUBOOT_KEY_S $<TARGET_FILE_DIR:bl2>/generated_private_key_s.pem CACHE FILEPATH "" FORCE)
+        set(MCUBOOT_KEY_NS $<TARGET_FILE_DIR:bl2>/generated_private_key_ns.pem CACHE FILEPATH "" FORCE)
+    endif()
     set(IMAGE_TYPE "S_IMAGE")
     set(FLASH_AREA_NUM ${MCUBOOT_S_IMAGE_FLASH_AREA_NUM})
     if (MCUBOOT_IMAGE_NUMBER GREATER 1)
@@ -140,6 +163,8 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
     add_custom_command(OUTPUT tfm_s_signed.bin
         DEPENDS $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
         DEPENDS tfm_s_bin signing_layout_s
+        # FIXME: combining the two generator prepends the current path, so two is used
+        DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,> $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key_s.pem,>
         WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
         #Sign secure binary image with provided secret key
@@ -193,6 +218,8 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
         add_custom_command(OUTPUT tfm_ns_signed.bin
             DEPENDS $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             DEPENDS tfm_ns_bin signing_layout_ns
+            # FIXME: combining the two generator prepends the current path, so two is used
+            DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,> $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key_ns.pem,>
             WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
             #Sign non-secure binary image with provided secret key

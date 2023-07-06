@@ -175,6 +175,10 @@ config MCUBOOT_SIGNATURE_KEY_LEN
     int "Key length to use for signature validation"
     default 3072
 
+config MCUBOOT_GENERATE_SIGNING_KEYPAIR
+    bool "Generate new keypair or use MCUBOOT_KEY_S and MCUBOOT_KEY_NS for signing"
+    default n
+
 config MCUBOOT_KEY_S
     string "Path to key with which to sign secure binary"
     default "$(TFM_SOURCE_DIR)/bl2/ext/mcuboot/root-${MCUBOOT_SIGNATURE_TYPE}-${MCUBOOT_SIGNATURE_KEY_LEN}.pem"

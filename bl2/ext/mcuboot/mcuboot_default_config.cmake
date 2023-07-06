@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2021-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -47,6 +47,7 @@ set(MCUBOOT_FIH_PROFILE                 OFF         CACHE STRING    "Fault injec
 # will be set to default again.
 set(MCUBOOT_SIGNATURE_TYPE              "RSA"       CACHE STRING    "Algorithm to use for signature validation")
 set(MCUBOOT_SIGNATURE_KEY_LEN           3072        CACHE STRING    "Key length to use for signature validation")
+set(MCUBOOT_GENERATE_SIGNING_KEYPAIR    OFF         CACHE BOOL      "Generate new keypair for signing and use that instead of MCUBOOT_KEY_S and MCUBOOT_KEY_NS")
 set(MCUBOOT_KEY_S                       "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/root-${MCUBOOT_SIGNATURE_TYPE}-${MCUBOOT_SIGNATURE_KEY_LEN}.pem" CACHE FILEPATH "Path to key with which to sign secure binary")
 set(MCUBOOT_KEY_NS                      "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/root-${MCUBOOT_SIGNATURE_TYPE}-${MCUBOOT_SIGNATURE_KEY_LEN}_1.pem" CACHE FILEPATH "Path to key with which to sign non-secure binary")
 
