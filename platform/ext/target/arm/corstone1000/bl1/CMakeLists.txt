@@ -159,7 +159,6 @@ target_sources(bl1_main
     PRIVATE
         ${MCUBOOT_PATH}/boot/bootutil/src/loader.c
         ${MCUBOOT_PATH}/boot/bootutil/src/bootutil_misc.c
-        ${MCUBOOT_PATH}/boot/bootutil/src/bootutil_public.c
         ${MCUBOOT_PATH}/boot/bootutil/src/image_validate.c
         ${MCUBOOT_PATH}/boot/bootutil/src/image_rsa.c
         ${MCUBOOT_PATH}/boot/bootutil/src/tlv.c
