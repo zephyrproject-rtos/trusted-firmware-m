@@ -4021,6 +4021,12 @@ psa_status_t psa_generate_key(const psa_key_attributes_t *attributes,
  * macros whose definitions are implementation-specific. */
 #include "psa/crypto_sizes.h"
 
+/* The file "crypto_client_struct.h" contains definitions for structures
+ * whose definitions differ in the client view and the PSA server
+ * implementation in TF-M. */
+#include "psa/crypto_client_struct.h"
+
+
 /* The file "crypto_struct.h" contains definitions for
  * implementation-specific structs that are declared above. */
 #include "psa/crypto_struct.h"

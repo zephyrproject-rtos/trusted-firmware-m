@@ -117,33 +117,24 @@ typedef uint16_t psa_key_bits_t;
  * conditionals. */
 #define PSA_MAX_KEY_BITS 0xfff8
 
-/* On the client side, only some key attributes are visible.
- * The server has a different definition of psa_key_attributes_s which
- * maintains more attributes.
- */
-#include "psa/crypto_client_struct.h"
-struct psa_key_attributes_s {
-    struct psa_client_key_attributes_s client;
-};
+#define PSA_KEY_ATTRIBUTES_INIT PSA_CLIENT_KEY_ATTRIBUTES_INIT
 
-#define PSA_KEY_ATTRIBUTES_INIT {PSA_CLIENT_KEY_ATTRIBUTES_INIT}
-
-static inline struct psa_key_attributes_s psa_key_attributes_init(void)
+static inline struct psa_client_key_attributes_s psa_key_attributes_init(void)
 {
-    const struct psa_key_attributes_s v = PSA_KEY_ATTRIBUTES_INIT;
+    const struct psa_client_key_attributes_s v = PSA_KEY_ATTRIBUTES_INIT;
     return v;
 }
 
 static inline void psa_set_key_id(psa_key_attributes_t *attributes,
                                   psa_key_id_t key)
 {
-    psa_key_lifetime_t lifetime = attributes->client.lifetime;
+    psa_key_lifetime_t lifetime = attributes->lifetime;
 
-    attributes->client.id = key;
+    attributes->id = key;
 
     if( PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
     {
-        attributes->client.lifetime =
+        attributes->lifetime =
             PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
                 PSA_KEY_LIFETIME_PERSISTENT,
                 PSA_KEY_LIFETIME_GET_LOCATION(lifetime));
@@ -153,23 +144,23 @@ static inline void psa_set_key_id(psa_key_attributes_t *attributes,
 static inline psa_key_id_t psa_get_key_id(
     const psa_key_attributes_t *attributes)
 {
-    return attributes->client.id;
+    return attributes->id;
 }
 
 static inline void psa_set_key_lifetime(psa_key_attributes_t *attributes,
                                         psa_key_lifetime_t lifetime)
 {
-    attributes->client.lifetime = lifetime;
+    attributes->lifetime = lifetime;
     if(PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
     {
-        attributes->client.id = 0;
+        attributes->id = 0;
     }
 }
 
 static inline psa_key_lifetime_t psa_get_key_lifetime(
     const psa_key_attributes_t *attributes)
 {
-    return attributes->client.lifetime;
+    return attributes->lifetime;
 }
 
 static inline void psa_extend_key_usage_flags(psa_key_usage_t *usage_flags)
@@ -185,52 +176,52 @@ static inline void psa_set_key_usage_flags(psa_key_attributes_t *attributes,
                                            psa_key_usage_t usage_flags)
 {
     psa_extend_key_usage_flags(&usage_flags);
-    attributes->client.usage = usage_flags;
+    attributes->usage = usage_flags;
 }
 
 static inline psa_key_usage_t psa_get_key_usage_flags(
     const psa_key_attributes_t *attributes)
 {
-    return attributes->client.usage;
+    return attributes->usage;
 }
 
 static inline void psa_set_key_algorithm(psa_key_attributes_t *attributes,
                                          psa_algorithm_t alg)
 {
-    attributes->client.alg = alg;
+    attributes->alg = alg;
 }
 
 static inline psa_algorithm_t psa_get_key_algorithm(
     const psa_key_attributes_t *attributes)
 {
-    return attributes->client.alg;
+    return attributes->alg;
 }
 
 static inline void psa_set_key_type(psa_key_attributes_t *attributes,
                                     psa_key_type_t type)
 {
-    attributes->client.type = type;
+    attributes->type = type;
 }
 
 static inline psa_key_type_t psa_get_key_type(
     const psa_key_attributes_t *attributes)
 {
-    return attributes->client.type;
+    return attributes->type;
 }
 
 static inline void psa_set_key_bits(psa_key_attributes_t *attributes,
                                     size_t bits)
 {
     if (bits > PSA_MAX_KEY_BITS)
-        attributes->client.bits = PSA_KEY_BITS_TOO_LARGE;
+        attributes->bits = PSA_KEY_BITS_TOO_LARGE;
     else
-        attributes->client.bits = bits;
+        attributes->bits = bits;
 }
 
 static inline size_t psa_get_key_bits(
     const psa_key_attributes_t *attributes)
 {
-    return attributes->client.bits;
+    return attributes->bits;
 }
 
 #ifdef __cplusplus

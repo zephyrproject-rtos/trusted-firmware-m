@@ -384,7 +384,7 @@ typedef uint32_t psa_key_usage_t;
  *
  * Once a key has been created, it is impossible to change its attributes.
  */
-typedef struct psa_key_attributes_s psa_key_attributes_t;
+typedef struct psa_client_key_attributes_s psa_key_attributes_t;
 
 /**@}*/
 
