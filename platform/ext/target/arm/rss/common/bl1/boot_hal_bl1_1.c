@@ -56,6 +56,7 @@ int32_t boot_platform_init(void)
 {
     int32_t result;
     enum tfm_plat_err_t plat_err;
+    uint8_t prbg_seed[KMU_PRBG_SEED_LEN];
     uint32_t idx;
 #ifdef RSS_ENABLE_BRINGUP_HELPERS
     enum lcm_error_t lcm_err;
@@ -116,6 +117,17 @@ int32_t boot_platform_init(void)
 
     (void)fih_delay_init();
 #endif /* CRYPTO_HW_ACCELERATOR */
+
+    /* Init KMU */
+    result = bl1_trng_generate_random(prbg_seed, sizeof(prbg_seed));
+    if (result != 0) {
+        return result;
+    }
+
+    result = kmu_init(&KMU_DEV_S, prbg_seed);
+    if (result != KMU_ERROR_NONE) {
+        return result;
+    }
 
     /* Clear boot data area */
     memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);

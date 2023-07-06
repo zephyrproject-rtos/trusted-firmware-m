@@ -69,5 +69,8 @@ add_custom_command(OUTPUT encrypted_dm_provisioning_bundle.bin
                     --provisioning_values dm_provisioning_values.bin
                     --bundle_output_file encrypted_dm_provisioning_bundle.bin
                     --magic "0xBEEFFEED"
+                    --key_file=${RSS_RTL_KEY_PATH}
+                    --krtl_derivation_label="DM_PROVISIONING"
+                    --provisioning_lcs 1
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_dm_provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/encrypted_dm_provisioning_bundle.bin
 )

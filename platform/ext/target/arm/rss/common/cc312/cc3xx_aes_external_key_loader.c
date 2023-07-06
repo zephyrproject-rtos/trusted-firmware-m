@@ -69,6 +69,13 @@ cc3xx_err_t set_key(cc3xx_aes_key_id_t key_id, const uint32_t *key,
             return CC3XX_ERR_KEY_IMPORT_FAILED;
         }
 
+        /* For tunnel 1 keys, we assume the keyslot directly after the indicated
+         * one is setup to output into AES_KEY_1;
+         */
+        if (is_tun1) {
+            key_id += 1;
+        }
+
         /* It's an error to use an unlocked slot */
         kmu_err = kmu_get_key_export_config_locked(&KMU_DEV_S, key_id);
         if (kmu_err != KMU_ERROR_SLOT_LOCKED) {

@@ -230,6 +230,7 @@ enum kmu_delay_limit_t {
  * \brief ARM KMU export policy configuration structure
  */
 struct kmu_key_export_config_t {
+    uint32_t export_address;
     uint8_t destination_port_write_delay;
     uint8_t destination_port_address_increment;
     enum kmu_destination_port_data_width_t destination_port_data_width_code;
@@ -254,9 +255,9 @@ struct kmu_dev_t {
 
 enum kmu_error_t kmu_init(struct kmu_dev_t *dev, uint8_t *prbg_seed);
 
-enum kmu_error_t kmu_key_get_export_config(struct kmu_dev_t *dev, uint32_t slot,
+enum kmu_error_t kmu_get_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
                                            struct kmu_key_export_config_t *config);
-enum kmu_error_t kmu_key_set_export_config(struct kmu_dev_t *dev, uint32_t slot,
+enum kmu_error_t kmu_set_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
                                            struct kmu_key_export_config_t *config);
 
 enum kmu_error_t kmu_set_key_locked(struct kmu_dev_t *dev, uint32_t slot);

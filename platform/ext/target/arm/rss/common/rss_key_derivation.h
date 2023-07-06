@@ -60,8 +60,14 @@ int rss_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
                     enum rss_kmu_slot_id_t slot);
 
 /**
- * \brief                     Derive the session key, and lock in a KMU slot.
-
+ * \brief                     Derive the session key, and lock into two KMU
+ *                            slots.
+ *
+ * \note                      Due to a limitation in KMU key export, keys used
+ *                            for AEAD (such as this one) require two slots. The
+ *                            slots used will be `slot` and `slot + 1`. It is
+ *                            invalid for `slot` to be `KMU_USER_SLOT_MAX`
+ *
  * \param[in]  ivs             A buffer containing the iv values.
  * \param[in]  ivs_len         The size of the ivs buffer. This must be
  *                             RSS_AMOUNT * 32 in size.
@@ -71,6 +77,36 @@ int rss_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
  */
 int rss_derive_session_key(const uint8_t *ivs, size_t ivs_len,
                            enum rss_kmu_slot_id_t slot);
+
+/**
+ * \brief                     Derive the CM provisioning key, and lock into two
+ *                            KMU slots.
+ *
+ * \note                      Due to a limitation in KMU key export, keys used
+ *                            for AEAD (such as this one) require two slots. The
+ *                            slots used will be `slot` and `slot + 1`. It is
+ *                            invalid for `slot` to be `KMU_USER_SLOT_MAX`
+ *
+ * \param[in]  kmu_output_slot The slot to derive and lock the seed into.
+ *
+ * \return                    0 on success, non-zero on error.
+ */
+int rss_derive_cm_provisioning_key(enum rss_kmu_slot_id_t slot);
+
+/**
+ * \brief                     Derive the DM provisioning key, and lock into two
+ *                            KMU slots.
+ *
+ * \note                      Due to a limitation in KMU key export, keys used
+ *                            for AEAD (such as this one) require two slots. The
+ *                            slots used will be `slot` and `slot + 1`. It is
+ *                            invalid for `slot` to be `KMU_USER_SLOT_MAX`
+ *
+ * \param[in]  kmu_output_slot The slot to derive and lock the seed into.
+ *
+ * \return                    0 on success, non-zero on error.
+ */
+int rss_derive_dm_provisioning_key(enum rss_kmu_slot_id_t slot);
 
 #ifdef __cplusplus
 }

@@ -80,7 +80,6 @@ static int32_t init_atu_regions(void)
 int32_t boot_platform_init(void)
 {
     int32_t result;
-    uint8_t prbg_seed[KMU_PRBG_SEED_LEN];
     enum tfm_plat_err_t plat_err;
 
     /* Initialize stack limit register */
@@ -106,16 +105,6 @@ int32_t boot_platform_init(void)
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {
         return 1;
-    }
-
-    result = bl1_trng_generate_random(prbg_seed, sizeof(prbg_seed));
-    if (result != 0) {
-        return result;
-    }
-
-    result = kmu_init(&KMU_DEV_S, prbg_seed);
-    if (result != KMU_ERROR_NONE) {
-        return result;
     }
 
 #ifdef RSS_USE_HOST_FLASH

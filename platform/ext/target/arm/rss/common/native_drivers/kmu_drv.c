@@ -98,7 +98,7 @@ enum kmu_error_t kmu_init(struct kmu_dev_t *dev, uint8_t *prbg_seed)
     return KMU_ERROR_NONE;
 }
 
-enum kmu_error_t kmu_key_get_export_config(struct kmu_dev_t *dev, uint32_t slot,
+enum kmu_error_t kmu_get_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
                                            struct kmu_key_export_config_t *config)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
@@ -106,6 +106,8 @@ enum kmu_error_t kmu_key_get_export_config(struct kmu_dev_t *dev, uint32_t slot,
     if (slot >= KMU_GET_NKS(p_kmu)) {
         return KMU_ERROR_INVALID_SLOT;
     }
+
+    config->export_address = p_kmu->kmudkpa[slot];
 
     config->destination_port_write_delay =
         (p_kmu->kmuksc[slot] & KMU_KMUKSC_DPWD_MASK) >> KMU_KMUKSC_DPWD_OFF;
@@ -128,7 +130,7 @@ enum kmu_error_t kmu_key_get_export_config(struct kmu_dev_t *dev, uint32_t slot,
     return KMU_ERROR_NONE;
 }
 
-enum kmu_error_t kmu_key_set_export_config(struct kmu_dev_t *dev, uint32_t slot,
+enum kmu_error_t kmu_set_key_export_config(struct kmu_dev_t *dev, uint32_t slot,
                                            struct kmu_key_export_config_t *config)
 {
     struct _kmu_reg_map_t* p_kmu = (struct _kmu_reg_map_t*)dev->cfg->base;
@@ -136,6 +138,8 @@ enum kmu_error_t kmu_key_set_export_config(struct kmu_dev_t *dev, uint32_t slot,
     if (slot >= KMU_GET_NKS(p_kmu)) {
         return KMU_ERROR_INVALID_SLOT;
     }
+
+    p_kmu->kmudkpa[slot] = config->export_address;
 
     p_kmu->kmuksc[slot] &= ~KMU_KMUKSC_DPWD_MASK;
     p_kmu->kmuksc[slot] |=

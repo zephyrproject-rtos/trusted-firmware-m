@@ -24,6 +24,18 @@ enum rss_kmu_slot_id_t {
      */
     RSS_KMU_SLOT_SESSION_KEY_0,
     _RSS_KMU_AEAD_RESERVED_SLOT_SESSION_KEY,
+    /* The CM provisioning key is used for AEAD, so requires two contiguous
+     * slots. Only the first should be used for calls, the key loader and
+     * derivation code will transparently use the second where necessary.
+     */
+    RSS_KMU_SLOT_CM_PROVISIONING_KEY,
+    _RSS_KMU_AEAD_RESERVED_SLOT_CM_PROVISIONING_KEY,
+    /* The DM provisioning key is used for AEAD, so requires two contiguous
+     * slots. Only the first should be used for calls, the key loader and
+     * derivation code will transparently use the second where necessary.
+     */
+    RSS_KMU_SLOT_DM_PROVISIONING_KEY,
+    _RSS_KMU_AEAD_RESERVED_SLOT_DM_PROVISIONING_KEY,
 };
 
 #ifdef __cplusplus

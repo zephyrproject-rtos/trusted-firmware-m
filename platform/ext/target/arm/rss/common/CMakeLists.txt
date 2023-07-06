@@ -330,6 +330,7 @@ target_sources(platform_bl1_1
         ./dpa_hardened_word_copy.c
         ./cc312/cc3xx_aes_external_key_loader.c
         $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bringup_helpers/rss_bringup_helpers.c>
+        ./rss_key_derivation.c
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -377,7 +378,6 @@ target_link_libraries(cc312_rom
 target_sources(platform_bl1_2
     PRIVATE
         ./bl1/boot_hal_bl1_2.c
-        ./rss_key_derivation.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
 )
 

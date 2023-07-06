@@ -12,7 +12,6 @@ bl1_sha256_init
 bl1_sha256_update
 bl1_trng_generate_random
 bl_secure_memcpy
-cc3xx_kdf_cmac
 cc3xx_uninit
 computed_bl1_2_hash
 dpa_hardened_word_copy
@@ -25,6 +24,12 @@ kmu_set_key_locked
 kmu_set_slot_invalid
 kmu_random_delay
 pq_crypto_verify
+rss_derive_cpak_seed
+rss_derive_dak_seed
+rss_derive_session_key
+rss_derive_vhuk
+rss_derive_vhuk_seed
+rss_get_boot_state
 stdio_init
 stdio_output_string
 stdio_uninit

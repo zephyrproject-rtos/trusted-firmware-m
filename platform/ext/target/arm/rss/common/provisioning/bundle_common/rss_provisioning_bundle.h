@@ -37,7 +37,8 @@ struct __attribute__((__packed__)) cm_provisioning_bundle {
     };
     uint8_t data[PROVISIONING_BUNDLE_DATA_SIZE];
     /* This section is metadata */
-    uint8_t tag[16];
+    uint32_t iv[3];
+    uint32_t tag[4];
     uint32_t magic2;
 };
 
@@ -67,7 +68,8 @@ struct __attribute__((__packed__)) dm_provisioning_bundle {
     };
     uint8_t data[PROVISIONING_BUNDLE_DATA_SIZE];
     /* This section is metadata */
-    uint8_t tag[16];
+    uint32_t iv[3];
+    uint32_t tag[4];
     uint32_t magic2;
 };
 

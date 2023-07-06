@@ -14,6 +14,9 @@
 #include "tfm_hal_platform.h"
 #include <string.h>
 #include "platform_regs.h"
+#include "cc3xx_aes.h"
+#include "rss_kmu_slot_ids.h"
+#include "rss_key_derivation.h"
 
 enum rss_gpio_val_t {
     RSS_GPIO_STATE_VIRGIN_IDLE = 0x1,
@@ -94,7 +97,9 @@ static enum tfm_plat_err_t enable_sp_mode(void)
 
 static enum tfm_plat_err_t provision_assembly_and_test(void)
 {
+    int rc;
     enum tfm_plat_err_t err;
+    cc3xx_err_t cc_err;
 
     err = enable_sp_mode();
     if (err != TFM_PLAT_ERR_SUCCESS) {
@@ -103,14 +108,52 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
 
     gpio_set(RSS_GPIO_STATE_CM_SECURE_PROVISIONING_STARTS);
 
-    /* TODO replace this with decrypt and auth */
-    /* gpio_set(RSS_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB); */
-    memcpy((void*)PROVISIONING_BUNDLE_CODE_START,
-           (void *)cm_encrypted_bundle->code,
-           PROVISIONING_BUNDLE_CODE_SIZE);
-    memcpy((void*)PROVISIONING_BUNDLE_VALUES_START,
-           (void *)&cm_encrypted_bundle->values,
-           PROVISIONING_BUNDLE_VALUES_SIZE + PROVISIONING_BUNDLE_DATA_SIZE);
+    rc = rss_derive_cm_provisioning_key(RSS_KMU_SLOT_CM_PROVISIONING_KEY);
+    if (rc) {
+        gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
+        BL1_LOG("[ERR] CM provisioning key derivation failed\r\n");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    cc_err = cc3xx_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CCM,
+                            RSS_KMU_SLOT_CM_PROVISIONING_KEY, NULL,
+                            CC3XX_AES_KEYSIZE_256,
+                            (uint32_t *)cm_encrypted_bundle->iv,
+                            sizeof(cm_encrypted_bundle->iv));
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        BL1_LOG("[ERR] CC3XX setup failed\r\n");
+        gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    cc3xx_aes_set_tag_len(sizeof(cm_encrypted_bundle->tag));
+    cc3xx_aes_set_data_len(offsetof(struct cm_provisioning_bundle, iv) -
+                           offsetof(struct cm_provisioning_bundle, code),
+                           sizeof(cm_encrypted_bundle->magic));
+
+    cc3xx_aes_update_authed_data((uint8_t *)&cm_encrypted_bundle->magic,
+                                 sizeof(cm_encrypted_bundle->magic));
+
+    cc3xx_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_CODE_START,
+                                PROVISIONING_BUNDLE_CODE_SIZE);
+
+    cc3xx_aes_update((uint8_t *)cm_encrypted_bundle->code,
+                     PROVISIONING_BUNDLE_CODE_SIZE);
+
+    cc3xx_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_VALUES_START,
+                                PROVISIONING_BUNDLE_VALUES_SIZE +
+                                PROVISIONING_BUNDLE_DATA_SIZE);
+
+    cc3xx_aes_update((uint8_t *)&cm_encrypted_bundle->values,
+                     PROVISIONING_BUNDLE_VALUES_SIZE +
+                     PROVISIONING_BUNDLE_DATA_SIZE);
+
+    cc_err = cc3xx_aes_finish((uint32_t *)cm_encrypted_bundle->tag);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        BL1_LOG("[ERR] CM bundle decryption failed\r\n");
+        gpio_set(RSS_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB);
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
 
     BL1_LOG("[INF] Running CM provisioning bundle\r\n");
     err = ((enum tfm_plat_err_t (*)(void))(PROVISIONING_BUNDLE_CODE_START | 0b1))();
@@ -129,6 +172,8 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
 static enum tfm_plat_err_t provision_psa_rot(void)
 {
     enum tfm_plat_err_t err;
+    cc3xx_err_t cc_err;
+    int rc;
 
     err = enable_sp_mode();
     if (err != TFM_PLAT_ERR_SUCCESS) {
@@ -137,14 +182,52 @@ static enum tfm_plat_err_t provision_psa_rot(void)
 
     gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_STARTS);
 
-    /* TODO replace this with decrypt and auth */
-    /* gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB); */
-    memcpy((void *)PROVISIONING_BUNDLE_CODE_START,
-           (void *)dm_encrypted_bundle->code,
-           PROVISIONING_BUNDLE_CODE_SIZE);
-    memcpy((void *)PROVISIONING_BUNDLE_VALUES_START,
-           (void *)&dm_encrypted_bundle->values,
-           PROVISIONING_BUNDLE_VALUES_SIZE + PROVISIONING_BUNDLE_DATA_SIZE);
+    rc = rss_derive_dm_provisioning_key(RSS_KMU_SLOT_DM_PROVISIONING_KEY);
+    if (rc) {
+        gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
+        BL1_LOG("[ERR] DM provisioning key derivation failed\r\n");
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    cc_err = cc3xx_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CCM,
+                            RSS_KMU_SLOT_DM_PROVISIONING_KEY, NULL,
+                            CC3XX_AES_KEYSIZE_256,
+                            (uint32_t *)dm_encrypted_bundle->iv,
+                            sizeof(dm_encrypted_bundle->iv));
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        BL1_LOG("[ERR] CC3XX setup failed\r\n");
+        gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_OTHER_ERROR);
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    cc3xx_aes_set_tag_len(sizeof(dm_encrypted_bundle->tag));
+    cc3xx_aes_set_data_len(offsetof(struct dm_provisioning_bundle, iv) -
+                           offsetof(struct dm_provisioning_bundle, code),
+                           sizeof(dm_encrypted_bundle->magic));
+
+    cc3xx_aes_update_authed_data((uint8_t *)&dm_encrypted_bundle->magic,
+                                 sizeof(dm_encrypted_bundle->magic));
+
+    cc3xx_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_CODE_START,
+                                PROVISIONING_BUNDLE_CODE_SIZE);
+
+    cc3xx_aes_update((uint8_t *)dm_encrypted_bundle->code,
+                     PROVISIONING_BUNDLE_CODE_SIZE);
+
+    cc3xx_aes_set_output_buffer((uint8_t *)PROVISIONING_BUNDLE_VALUES_START,
+                                PROVISIONING_BUNDLE_VALUES_SIZE +
+                                PROVISIONING_BUNDLE_DATA_SIZE);
+
+    cc3xx_aes_update((uint8_t *)&dm_encrypted_bundle->values,
+                     PROVISIONING_BUNDLE_VALUES_SIZE +
+                     PROVISIONING_BUNDLE_DATA_SIZE);
+
+    cc_err = cc3xx_aes_finish((uint32_t *)dm_encrypted_bundle->tag);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        BL1_LOG("[ERR] DM bundle decryption failed\r\n");
+        gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB);
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
 
     BL1_LOG("[INF] Running DM provisioning bundle\r\n");
     err = ((enum tfm_plat_err_t (*)(void))(PROVISIONING_BUNDLE_CODE_START | 0b1))();
@@ -220,10 +303,12 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
 
         err = provision_assembly_and_test();
         if (err != TFM_PLAT_ERR_SUCCESS) {
+            BL1_LOG("[ERR] CM provisioning failed\r\n");
             return err;
         }
 
         gpio_set(RSS_GPIO_STATE_CM_SECURE_PROVISIONING_FINISHED_SUCCESSFULLY);
+        BL1_LOG("[INF] CM provisioning succeeded\r\n");
 
 #ifndef TFM_DUMMY_PROVISIONING
         __WFI();
@@ -244,10 +329,12 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
 
         err = provision_psa_rot();
         if (err != TFM_PLAT_ERR_SUCCESS) {
+            BL1_LOG("[ERR] DM provisioning failed\r\n");
             return err;
         }
 
         gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FINISHED_SUCCESSFULLY);
+        BL1_LOG("[INF] DM provisioning succeeded\r\n");
 
 #ifndef TFM_DUMMY_PROVISIONING
         __WFI();
