@@ -16,7 +16,6 @@
 #include "cc_pal_abort.h"
 #include "cc_pal_mem.h"
 #include "cc_pal_types.h"
-#include "chacha20_alt.h"
 #include "chacha_driver.h"
 #include "poly.h"
 #include "psa/crypto.h"
