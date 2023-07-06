@@ -385,7 +385,7 @@ enum tfm_plat_err_t write_otp_nv_counters_flash(uint32_t offset, const void *dat
     /* If it's not part of the sectors that are being erased, first erase the
      * sector with the swap_count flag.
      */
-    if (erase_end_offset <= swap_count_erase_start_offset) {
+    if (erase_end_offset < swap_count_erase_start_offset) {
         err = erase_flash_region(TFM_OTP_NV_COUNTERS_AREA_ADDR +
                                  swap_count_erase_start_offset,
                                  TFM_OTP_NV_COUNTERS_SECTOR_SIZE);
