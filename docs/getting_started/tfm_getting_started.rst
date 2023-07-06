@@ -341,6 +341,22 @@ Arm Development Studio.
             --application cpu0=<build_dir>/bin/bl2.axf \
             --data cpu0=<build_dir>/bin/tfm_s_ns_signed.bin@0x10080000
 
+        .. note::
+
+           The log is output to telnet by default.
+           It can be also redirected to stdout by adding the following parameter.
+
+           .. code-block:: bash
+
+               --parameter fvp_mps2.UART0.out_file=/dev/stdout
+
+           To automatically terminate the fast-model when it finishes running,
+           you can add the following parameters:
+
+           .. code-block:: bash
+
+               --parameter fvp_mps2.UART0.shutdown_on_eot=1
+
     .. group-tab:: Windows
 
         1. install Arm Development Studio to get the fast-model.
@@ -366,6 +382,15 @@ Arm Development Studio.
             --parameter fvp_mps2.telnetterminal2.quiet=1 \
             --application cpu0=<build_dir>/bin/bl2.axf \
             --data cpu0=<build_dir>/bin/tfm_s_ns_signed.bin@0x10080000
+
+        .. note::
+
+           To automatically terminate the fast-model when it finishes running,
+           you can add the following parameters:
+
+           .. code-block:: bash
+
+               --parameter fvp_mps2.UART0.shutdown_on_eot=1
 
 After completing the procedure you should see the following messages on the
 DAPLink UART (baud 115200 8n1)::
