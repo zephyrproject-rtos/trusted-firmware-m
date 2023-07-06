@@ -12,6 +12,27 @@
 
 #include "startup.h"
 
+#if !(defined(DOMAIN_NS) || defined(BL2))
+#include "utilities.h"
+#endif
+
+void default_irq_handler(void)
+{
+	/*
+	 * This file is used by the TF-M build system. Usually in the
+	 * secure domain (tfm_s.elf), but also for vanilla BL2 and for
+	 * testing purposes in the non-secure domain (tfm_ns.elf).
+	 *
+	 * When used in vanilla BL2 or the non-secure domain we do not
+	 * have tfm_core_panic so we loop forever instead.
+	 */
+#if defined(DOMAIN_NS) || defined(BL2)
+	while(1);
+#else
+	tfm_core_panic();
+#endif
+}
+
 /*----------------------------------------------------------------------------
   Reset Handler called on controller reset
  *----------------------------------------------------------------------------*/

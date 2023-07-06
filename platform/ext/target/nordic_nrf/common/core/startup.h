@@ -28,6 +28,12 @@ __NO_RETURN void __attribute__((weak, alias("default_tfm_IRQHandler"))) handler_
 
 __NO_RETURN void Reset_Handler(void);
 
+/*
+ * The default irq handler is used as a backup in case of
+ * misconfiguration.
+ */
+void default_irq_handler(void);
+
 extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
 
 #endif /* __STARTUP_H__ */
