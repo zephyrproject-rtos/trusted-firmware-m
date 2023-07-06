@@ -28,6 +28,8 @@ __NO_RETURN void __attribute__((weak, alias("default_tfm_IRQHandler"))) handler_
 
 __NO_RETURN void Reset_Handler(void);
 
+void SPU_IRQHandler(void);
+
 /*
  * The default irq handler is used as a backup in case of
  * misconfiguration.
