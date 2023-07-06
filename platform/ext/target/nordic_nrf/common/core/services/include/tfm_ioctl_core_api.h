@@ -101,7 +101,7 @@ struct tfm_read_service_range {
  * @brief Perform a GPIO MCU select operation.
  *
  * @param pin_number         Pin_number.
- * @param mcu                MCU to control the pin, use nrf_gpio_pin_sel_t values.
+ * @param mcu                MCU to control the pin, use nrf_gpio_pin_mcusel_t values.
 
  * @param[out] result        Result of operation
  *
