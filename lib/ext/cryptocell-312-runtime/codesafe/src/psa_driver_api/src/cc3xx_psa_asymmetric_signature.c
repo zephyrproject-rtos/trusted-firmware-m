@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -85,13 +85,13 @@ static psa_status_t cc3xx_internal_ecdsa_verify(
 
     err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
     if (err != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("Error - curve is not supported\n");
+        CC_PAL_LOG_ERR("Error - curve is not supported");
         return err;
     }
 
     pDomain = CC_EcpkiGetEcDomain(domainId);
     if (NULL == pDomain) {
-        CC_PAL_LOG_ERR("Error - domain id %d is not supported\n", domainId);
+        CC_PAL_LOG_ERR("Error - domain id %d is not supported", domainId);
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -117,9 +117,7 @@ static psa_status_t cc3xx_internal_ecdsa_verify(
     }
 
     if (err != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR(
-            "Error - building public key failed with return code 0x%08x\n",
-            cc_err);
+        CC_PAL_LOG_ERR("Error - building public key failed with return code 0x%x", cc_err);
         return err;
     }
 
@@ -129,10 +127,7 @@ static psa_status_t cc3xx_internal_ecdsa_verify(
     err = cc3xx_ecc_cc_error_to_psa_error(cc_err);
 
     if (err != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR(
-            "Error - ecdsa signacture verification failed with return "
-            "code 0x%08x\n",
-            cc_err);
+        CC_PAL_LOG_ERR("Error - ecdsa signacture verification failed with return code 0x%x", cc_err);
         return err;
     }
 
@@ -181,13 +176,13 @@ static psa_status_t cc3xx_internal_ecdsa_sign(
 
     err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
     if (err != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("Error - curve is not supported\n");
+        CC_PAL_LOG_ERR("Error - curve is not supported");
         return err;
     }
 
     pDomain = CC_EcpkiGetEcDomain(domainId);
     if (NULL == pDomain) {
-        CC_PAL_LOG_ERR("Error - domain id %d is not supported\n", domainId);
+        CC_PAL_LOG_ERR("Error - domain id %d is not supported", domainId);
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -203,8 +198,7 @@ static psa_status_t cc3xx_internal_ecdsa_sign(
     err = cc3xx_ecc_cc_error_to_psa_error(cc_err);
 
     if (err != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("Error building private key with error code %d\n",
-                       cc_err);
+        CC_PAL_LOG_ERR("Error building private key with error code %d", cc_err);
         goto cleanup;
     }
 
@@ -241,7 +235,7 @@ static psa_status_t cc3xx_internal_ecdsa_sign(
     err = cc3xx_ecc_cc_error_to_psa_error(cc_err);
     if (err != PSA_SUCCESS) {
         *signature_length = 0;
-        CC_PAL_LOG_ERR("Error ecdsa signing with error code %d\n", cc_err);
+        CC_PAL_LOG_ERR("Error ecdsa signing with error code %d", cc_err);
         goto cleanup;
     }
 

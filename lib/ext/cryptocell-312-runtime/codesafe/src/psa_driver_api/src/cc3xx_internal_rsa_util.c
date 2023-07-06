@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -775,12 +775,12 @@ psa_status_t cc3xx_rsa_cc_error_to_psa_error(CCError_t cc_error)
         break;
 
     default:
-        CC_PAL_LOG_ERR("Unknown CC_ERROR %d\r\n", cc_error);
+        CC_PAL_LOG_ERR("Unknown CC_ERROR %d", cc_error);
         err = PSA_ERROR_GENERIC_ERROR;
         break;
     }
 
-    CC_PAL_LOG_DEBUG("Converted CC_ERROR %d (0x%08x) to PSA_ERROR %d\r\n",
+    CC_PAL_LOG_DEBUG("Converted CC_ERROR %d (0x%x) to PSA_ERROR %d",
                      cc_error, cc_error, err);
     return err;
 #endif /* CC3XX_CONFIG_ENABLE_CC_TO_PSA_TYPE_CONVERSION */

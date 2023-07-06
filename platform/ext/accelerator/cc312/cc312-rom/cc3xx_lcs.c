@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,21 +7,22 @@
 
 #include "cc3xx_lcs.h"
 
+#include "cc3xx_dev.h"
 #include "cc3xx_lcs_defs.h"
-#include "cc3xx_reg_defs.h"
 #include "cc3xx_error.h"
 
-cc3xx_err_t cc3xx_lcs_get(cc3xx_lcs_t* lcs){
+cc3xx_err_t cc3xx_lcs_get(cc3xx_lcs_t* lcs)
+{
     uint32_t code = 0;
 
     /* Wait until the NVM controller is idle */
-    while (! (*CC3XX_REG_NVM_NVM_IS_IDLE & 0b1U)) {}
+    while (! (P_CC3XX->nvm.nvm_is_idle & 0b1U)) {}
 
-    if (! (*CC3XX_REG_NVM_LCS_IS_VALID & 0b1U)) {
+    if (! (P_CC3XX->nvm.lcs_is_valid & 0b1U)) {
         return CC3XX_ERR_INVALID_LCS;
     }
 
-    code = *CC3XX_REG_NVM_LCS_REG & 0b111U;
+    code = P_CC3XX->nvm.lcs_reg & 0b111U;
 
     switch(code) {
         case CC3XX_LCS_CM_CODE:
@@ -43,7 +44,8 @@ cc3xx_err_t cc3xx_lcs_get(cc3xx_lcs_t* lcs){
     return CC3XX_ERR_SUCCESS;
 }
 
-const char* cc3xx_lcs_get_name(cc3xx_lcs_t lcs) {
+const char* cc3xx_lcs_get_name(cc3xx_lcs_t lcs)
+{
     switch(lcs) {
         case cc3xx_lcs_cm:
             return "LCS_CM";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,10 @@
 // <q> MPC (Memory Protection Controller) [Driver_QSPI_MPC]
 // <i> Configuration settings for Driver_QSPI_MPC in component ::Drivers:MPC
 #define   RTE_QSPI_MPC                              1
+
+// <q> MPC (Memory Protection Controller) [Driver_DDR4_MPC]
+// <i> Configuration settings for Driver_DDR4_MPC in component ::Drivers:MPC
+#define   RTE_DDR4_MPC                              1
 
 // <q> TGU (TCM Gating Unit [Driver_ITCM_TGU_ARMV8_M]
 // <i> Configuration settings for Driver_ITCM_TGU_ARMV8_M in component ::Drivers:TGU
@@ -95,7 +99,7 @@
 // <i> Configuration settings for Driver_PERIPH_EXP3_PPC_CORSTONE310 in component ::Drivers:PPC
 #define   RTE_PERIPH_EXP3_PPC_CORSTONE310           1
 
-// <q> Flash device emulated by SRAM [Driver_Flash0]
+// <q> Flash device emulated in SRAM [Driver_Flash0]
 // <i> Configuration settings for Driver_Flash0 in component ::Drivers:Flash
 #define   RTE_FLASH0                                1
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -103,6 +103,19 @@ DEFAULT_IRQ_HANDLER(SPI_SHIELD1_Handler)
 #ifdef CORSTONE310_FVP
 DEFAULT_IRQ_HANDLER(DMA_Channel_0_Handler)
 DEFAULT_IRQ_HANDLER(DMA_Channel_1_Handler)
+#else
+DEFAULT_IRQ_HANDLER(DMA_Ch_0_Error_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_0_Terminal_Count_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_0_Combined_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_1_Error_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_1_Terminal_Count_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_1_Combined_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_2_Error_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_2_Terminal_Count_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_2_Combined_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_3_Error_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_3_Terminal_Count_Handler)
+DEFAULT_IRQ_HANDLER(DMA_Ch_3_Combined_Handler)
 #endif
 DEFAULT_IRQ_HANDLER(ETHOS_U55_Handler)
 DEFAULT_IRQ_HANDLER(GPIO0_Combined_Handler)
@@ -163,7 +176,17 @@ DEFAULT_IRQ_HANDLER(GPIO3_2_Handler)
 DEFAULT_IRQ_HANDLER(GPIO3_3_Handler)
 DEFAULT_IRQ_HANDLER(UARTRX5_Handler)
 DEFAULT_IRQ_HANDLER(UARTTX5_Handler)
-DEFAULT_IRQ_HANDLER(UART5_Handler)
+DEFAULT_IRQ_HANDLER(UART5_Combined_Handler)
+#ifdef CORSTONE310_FVP
+DEFAULT_IRQ_HANDLER(VSI0_Handler)
+DEFAULT_IRQ_HANDLER(VSI1_Handler)
+DEFAULT_IRQ_HANDLER(VSI2_Handler)
+DEFAULT_IRQ_HANDLER(VSI3_Handler)
+DEFAULT_IRQ_HANDLER(VSI4_Handler)
+DEFAULT_IRQ_HANDLER(VSI5_Handler)
+DEFAULT_IRQ_HANDLER(VSI6_Handler)
+DEFAULT_IRQ_HANDLER(VSI7_Handler)
+#endif
 
 /*----------------------------------------------------------------------------
   Exception / Interrupt Vector table
@@ -255,10 +278,6 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
 #ifdef CORSTONE310_FVP
   DMA_Channel_0_Handler,             /*  57: DMA (DMA350) Channel 0 Handler */
   DMA_Channel_1_Handler,             /*  58: DMA (DMA350) Channel 1 Handler */
-#else
-  0,                                 /*  57: Reserved */
-  0,                                 /*  58: Reserved */
-#endif
   0,                                 /*  59: Reserved */
   0,                                 /*  60: Reserved */
   0,                                 /*  61: Reserved */
@@ -269,6 +288,20 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   0,                                 /*  66: Reserved */
   0,                                 /*  67: Reserved */
   0,                                 /*  68: Reserved */
+#else
+  DMA_Ch_0_Error_Handler,            /*  57: DMA Ch0 Error Handler */
+  DMA_Ch_0_Terminal_Count_Handler,   /*  58: DMA Ch0 Terminal Count Handler */
+  DMA_Ch_0_Combined_Handler,         /*  59: DMA Ch0 Combined Handler */
+  DMA_Ch_1_Error_Handler,            /*  60: DMA Ch1 Error Handler */
+  DMA_Ch_1_Terminal_Count_Handler,   /*  61: DMA Ch1 Terminal Count Handler */
+  DMA_Ch_1_Combined_Handler,         /*  62: DMA Ch1 Combined Handler */
+  DMA_Ch_2_Error_Handler,            /*  63: DMA Ch2 Error Handler */
+  DMA_Ch_2_Terminal_Count_Handler,   /*  64: DMA Ch2 Terminal Count Handler */
+  DMA_Ch_2_Combined_Handler,         /*  65: DMA Ch2 Combined Handler */
+  DMA_Ch_3_Error_Handler,            /*  66: DMA Ch3 Error Handler */
+  DMA_Ch_3_Terminal_Count_Handler,   /*  67: DMA Ch3 Terminal Count Handler */
+  DMA_Ch_3_Combined_Handler,         /*  68: DMA Ch3 Combined Handler */
+#endif
   GPIO0_Combined_Handler,            /*  69: GPIO 0 Combined Handler */
   GPIO1_Combined_Handler,            /*  70: GPIO 1 Combined Handler */
   GPIO2_Combined_Handler,            /*  71: GPIO 2 Combined Handler */
@@ -327,10 +360,113 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   GPIO3_3_Handler,                   /*  124: GPIO3 Pin 3 Handler */
   UARTRX5_Handler,                   /*  125: UART 5 RX Interrupt */
   UARTTX5_Handler,                   /*  126: UART 5 TX Interrupt */
-  UART5_Handler,                     /*  127: UART 5 combined Interrupt */
+  UART5_Combined_Handler,            /*  127: UART 5 combined Interrupt */
+#ifdef CORSTONE310_FVP
   0,                                 /*  128: Reserved */
   0,                                 /*  129: Reserved */
   0,                                 /*  130: Reserved */
+  0,                                 /*  131: Reserved */
+  0,                                 /*  132: Reserved */
+  0,                                 /*  133: Reserved */
+  0,                                 /*  134: Reserved */
+  0,                                 /*  135: Reserved */
+  0,                                 /*  136: Reserved */
+  0,                                 /*  137: Reserved */
+  0,                                 /*  138: Reserved */
+  0,                                 /*  139: Reserved */
+  0,                                 /*  140: Reserved */
+  0,                                 /*  141: Reserved */
+  0,                                 /*  142: Reserved */
+  0,                                 /*  143: Reserved */
+  0,                                 /*  144: Reserved */
+  0,                                 /*  145: Reserved */
+  0,                                 /*  146: Reserved */
+  0,                                 /*  147: Reserved */
+  0,                                 /*  148: Reserved */
+  0,                                 /*  149: Reserved */
+  0,                                 /*  150: Reserved */
+  0,                                 /*  151: Reserved */
+  0,                                 /*  152: Reserved */
+  0,                                 /*  153: Reserved */
+  0,                                 /*  154: Reserved */
+  0,                                 /*  155: Reserved */
+  0,                                 /*  156: Reserved */
+  0,                                 /*  157: Reserved */
+  0,                                 /*  158: Reserved */
+  0,                                 /*  159: Reserved */
+  0,                                 /*  160: Reserved */
+  0,                                 /*  161: Reserved */
+  0,                                 /*  162: Reserved */
+  0,                                 /*  163: Reserved */
+  0,                                 /*  164: Reserved */
+  0,                                 /*  165: Reserved */
+  0,                                 /*  166: Reserved */
+  0,                                 /*  167: Reserved */
+  0,                                 /*  168: Reserved */
+  0,                                 /*  169: Reserved */
+  0,                                 /*  170: Reserved */
+  0,                                 /*  171: Reserved */
+  0,                                 /*  172: Reserved */
+  0,                                 /*  173: Reserved */
+  0,                                 /*  174: Reserved */
+  0,                                 /*  175: Reserved */
+  0,                                 /*  176: Reserved */
+  0,                                 /*  177: Reserved */
+  0,                                 /*  178: Reserved */
+  0,                                 /*  179: Reserved */
+  0,                                 /*  180: Reserved */
+  0,                                 /*  181: Reserved */
+  0,                                 /*  182: Reserved */
+  0,                                 /*  183: Reserved */
+  0,                                 /*  184: Reserved */
+  0,                                 /*  185: Reserved */
+  0,                                 /*  186: Reserved */
+  0,                                 /*  187: Reserved */
+  0,                                 /*  188: Reserved */
+  0,                                 /*  189: Reserved */
+  0,                                 /*  190: Reserved */
+  0,                                 /*  191: Reserved */
+  0,                                 /*  192: Reserved */
+  0,                                 /*  193: Reserved */
+  0,                                 /*  194: Reserved */
+  0,                                 /*  195: Reserved */
+  0,                                 /*  196: Reserved */
+  0,                                 /*  197: Reserved */
+  0,                                 /*  198: Reserved */
+  0,                                 /*  199: Reserved */
+  0,                                 /*  200: Reserved */
+  0,                                 /*  201: Reserved */
+  0,                                 /*  202: Reserved */
+  0,                                 /*  203: Reserved */
+  0,                                 /*  204: Reserved */
+  0,                                 /*  205: Reserved */
+  0,                                 /*  206: Reserved */
+  0,                                 /*  207: Reserved */
+  0,                                 /*  208: Reserved */
+  0,                                 /*  209: Reserved */
+  0,                                 /*  210: Reserved */
+  0,                                 /*  211: Reserved */
+  0,                                 /*  212: Reserved */
+  0,                                 /*  213: Reserved */
+  0,                                 /*  214: Reserved */
+  0,                                 /*  215: Reserved */
+  0,                                 /*  216: Reserved */
+  0,                                 /*  217: Reserved */
+  0,                                 /*  218: Reserved */
+  0,                                 /*  219: Reserved */
+  0,                                 /*  220: Reserved */
+  0,                                 /*  221: Reserved */
+  0,                                 /*  222: Reserved */
+  0,                                 /*  223: Reserved */
+  VSI0_Handler,                      /*  224: VSI 0 Handler */
+  VSI1_Handler,                      /*  225: VSI 1 Handler */
+  VSI2_Handler,                      /*  226: VSI 2 Handler */
+  VSI3_Handler,                      /*  227: VSI 3 Handler */
+  VSI4_Handler,                      /*  228: VSI 4 Handler */
+  VSI5_Handler,                      /*  229: VSI 5 Handler */
+  VSI6_Handler,                      /*  230: VSI 6 Handler */
+  VSI7_Handler,                      /*  231: VSI 7 Handler */
+#endif
 };
 
 #if defined ( __GNUC__ )

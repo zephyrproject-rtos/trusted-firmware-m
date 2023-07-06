@@ -162,13 +162,13 @@ Reference
 
   .. [3] :doc:`TF-M generic threat model </security/threat_models/generic_threat_model>`
 
-  .. [4] :doc:`TF-M physical attack mitigation </technical_references/design_docs/tfm_physical_attack_mitigation>`
+  .. [4] :doc:`TF-M physical attack mitigation </design_docs/tfm_physical_attack_mitigation>`
 
   .. [5] :doc:`TF-M Profile Large design </configuration/profiles/tfm_profile_large>`
 
-  .. [6] :doc:`Code sharing between independently linked XIP binaries </technical_references/design_docs/code_sharing>`
+  .. [6] :doc:`Code sharing between independently linked XIP binaries </design_docs/software/code_sharing>`
 
-  .. [7] :doc:`Security Handling </security/security>`
+  .. [7] :doc:`Security Handling </security/index>`
 
 --------------
 

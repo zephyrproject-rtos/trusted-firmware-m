@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -23,6 +23,7 @@ extern "C" {
 #define TLV_MAJOR_IAS      0x1
 #define TLV_MAJOR_FWU      0x2
 #define TLV_MAJOR_MBS      0x3
+#define TLV_MAJOR_INVALID  0xF
 
 /**
  * The shared data between boot loader and runtime SW is TLV encoded. The

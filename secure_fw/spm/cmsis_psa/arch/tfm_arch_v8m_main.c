@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
- *  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
- *   * reserved.
- *   *
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
+ *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
@@ -11,9 +11,10 @@
 #include <inttypes.h>
 
 #include "compiler_ext_defs.h"
+#include "config_spm.h"
 #include "security_defs.h"
 #include "region_defs.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "svc_num.h"
 #include "tfm_arch.h"
 #include "tfm_hal_device_header.h"
@@ -58,6 +59,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
 #endif
         "   push   {r4-r6, lr}                      \n"
         "   cpsid  i                                \n"
+        "   isb                                     \n"
         "   mov    r4, r2                           \n"
         "   mrs    r5, psplim                       \n"
         "   movs   r12, #0                          \n"
@@ -71,9 +73,11 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_LOCKED)"     \n"
         "   str    r3, [r2, #0]                     \n"
         "   cpsie  i                                \n"
+        "   isb                                     \n"
         "   mov    r6, r1                           \n"
         "   bl     cross_call_entering_c            \n"
         "   cpsid  i                                \n"
+        "   isb                                     \n"
         "   mov    r1, r6                           \n"
         "   bl     cross_call_exiting_c             \n"
         "   movs   r12, #0                          \n"
@@ -86,6 +90,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r5, #"M2S(SCHEDULER_UNLOCKED)"   \n"
         "   str    r5, [r4, #0]                     \n"
         "   cpsie  i                                \n"
+        "   isb                                     \n"
         "   pop    {r4-r6, pc}                      \n"
     );
 }
@@ -99,72 +104,102 @@ __attribute__((naked)) void PendSV_Handler(void)
 #if !defined(__ICCARM__)
         ".syntax unified                                \n"
 #endif
-        "   movs    r0, #"M2S(EXC_RETURN_SECURE_STACK)" \n"
+        "   movs    r0, #"M2S(EXC_RETURN_S)"            \n"
         "   ands    r0, lr                              \n" /* NS interrupted */
+#if CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED == 0
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
+#endif
         "   push    {r0, lr}                            \n" /* Save R0, LR */
-        "   bl      ipc_schedule                         \n"
+        "   bl      ipc_schedule                        \n"
         "   pop     {r2, lr}                            \n"
         "   cmp     r0, r1                              \n" /* curr, next ctx */
         "   beq     v8m_pendsv_exit                     \n" /* No schedule */
         "   cpsid   i                                   \n"
+        "   isb                                         \n"
         "   mrs     r2, psp                             \n"
-        "   stmdb   r2!, {r4-r11}                       \n" /* Save callee */
+        "   ands    r3, lr, #"M2S(EXC_RETURN_DCRS)"     \n" /* Check DCRS */
+        "   itt     ne                                  \n" /* Skip saving callee */
+        "   stmdbne r2!, {r4-r11}                       \n" /* Save callee */
+        "   subne   r2, #8                              \n" /* SP offset for
+                                                             * reserved additional state context,
+                                                             * integrity signature
+                                                             */
         "   stmia   r0, {r2, lr}                        \n" /* Save curr ctx:
                                                              * PSP, LR
                                                              */
         "   ldmia   r1!, {r2, lr}                       \n" /* Load next ctx:
                                                              * PSP, LR
                                                              */
+        "   ands    r3, lr, #"M2S(EXC_RETURN_DCRS)"     \n" /* Check DCRS */
+        "   itt     ne                                  \n" /* Skip loading callee */
+        "   addne   r2, #8                              \n" /* SP offset for
+                                                             * reserved additional state context,
+                                                             * integrity signature
+                                                             */
+        "   ldmiane r2!, {r4-r11}                       \n" /* Load callee */
         "   ldr     r3, [r1]                            \n" /* Load sp_limit */
-        "   ldmia   r2!, {r4-r11}                       \n" /* Restore callee */
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
         "   cpsie   i                                   \n"
+        "   isb                                         \n"
         "v8m_pendsv_exit:                               \n"
         "   bx      lr                                  \n"
     );
 }
 #endif
 
-
 __attribute__((naked)) void SVC_Handler(void)
 {
     __ASM volatile(
-    "MRS     r0, MSP                        \n"
-    "MOV     r1, lr                         \n"
-    "MRS     r2, PSP                        \n"
-    "MRS     r3, PSPLIM                     \n"
-    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
-    "PUSH    {r1, r2}                       \n" /* Orig_exc_return, dummy */
-    "BL      tfm_core_svc_handler           \n"
-    "MOV     lr, r0                         \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, dummy */
-    "POP     {r2, r3}                       \n" /* PSP PSPLIM */
-    "AND     r0, #8                         \n" /* Mode bit */
-    "AND     r1, #8                         \n"
-    "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
-    "BGT     to_flih_func                   \n"
-    "BLT     from_flih_func                 \n"
-    "BX      lr                             \n"
-    "to_flih_func:                          \n"
-    "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
-    "PUSH    {r4-r11}                       \n"
-    "LDR     r4, ="M2S(STACK_SEAL_PATTERN)" \n" /* clear r4-r11 */
-    "MOV     r5, r4                         \n"
-    "MOV     r6, r4                         \n"
-    "MOV     r7, r4                         \n"
-    "MOV     r8, r4                         \n"
-    "MOV     r9, r4                         \n"
-    "MOV     r10, r4                        \n"
-    "MOV     r11, r4                        \n"
-    "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
-    "BX      lr                             \n"
-    "from_flih_func:                        \n"
-    "POP     {r4, r5}                       \n" /* Seal stack */
-    "POP     {r4-r11}                       \n"
-    "POP     {r1, r2}                       \n" /* PSP PSPLIM */
-    "BX      lr                             \n"
+#if !defined(__ICCARM__)
+    ".syntax unified                         \n"
+#endif
+    "MRS     r0, MSP                         \n"
+    "MOV     r1, lr                          \n"
+    "MRS     r2, PSP                         \n"
+    "MRS     r3, PSPLIM                      \n"
+    "PUSH    {r2, r3}                        \n" /* PSP PSPLIM */
+    "PUSH    {r1, r2}                        \n" /* Orig_exc_return, dummy */
+    "BL      tfm_core_svc_handler            \n"
+    "MOV     lr, r0                          \n"
+    "POP     {r1, r2}                        \n" /* Orig_exc_return, dummy */
+    "POP     {r2, r3}                        \n" /* PSP PSPLIM */
+    "AND     r0, #8                          \n" /* Mode bit */
+    "AND     r1, #8                          \n"
+    "SUBS    r0, r1                          \n" /* Compare EXC_RETURN values */
+    "BGT     to_flih_func                    \n"
+    "BLT     from_flih_func                  \n"
+    "BX      lr                              \n"
+    "to_flih_func:                           \n"
+    "PUSH    {r2, r3}                        \n" /* PSP PSPLIM */
+    "ANDS    r3, lr, #"M2S(EXC_RETURN_DCRS)" \n" /* Check DCRS */
+    "ITT     ne                              \n" /* Skip saving callee */
+    "PUSHNE  {r4-r11}                        \n" /* Save callee */
+    "SUBSNE  sp, #8                          \n" /* SP offset for
+                                                  * reserved additional state context,
+                                                  * integrity signature
+                                                  */
+    "LDR     r4, ="M2S(STACK_SEAL_PATTERN)"  \n" /* clear r4-r11 */
+    "MOV     r5, r4                          \n"
+    "MOV     r6, r4                          \n"
+    "MOV     r7, r4                          \n"
+    "MOV     r8, r4                          \n"
+    "MOV     r9, r4                          \n"
+    "MOV     r10, r4                         \n"
+    "MOV     r11, r4                         \n"
+    "PUSH    {r4, r5}                        \n" /* Seal stack before EXC_RET */
+    "BX      lr                              \n"
+    "from_flih_func:                         \n"
+    "POP     {r4, r5}                        \n" /* Seal stack */
+    "ANDS    r3, lr, #"M2S(EXC_RETURN_DCRS)" \n" /* Check DCRS */
+    "ITT     ne                              \n" /* Skip loading callee */
+    "ADDSNE  sp, #8                          \n" /* SP offset for
+                                                  * reserved additional state context,
+                                                  * integrity signature
+                                                  */
+    "POPNE   {r4-r11}                        \n" /* Load callee */
+    "POP     {r1, r2}                        \n" /* PSP PSPLIM */
+    "BX      lr                              \n"
     );
 }
 

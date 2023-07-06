@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -18,13 +18,6 @@ else()
     set(BL2_TRAILER_SIZE                0xC00       CACHE STRING    "Trailer size")
 endif()
 
-set(CONFIG_TFM_USE_TRUSTZONE            ON          CACHE BOOL     "Enable use of TrustZone to transition between NSPE and SPE")
-set(TFM_MULTI_CORE_TOPOLOGY             OFF         CACHE BOOL     "Whether to build for a dual-cpu architecture")
-
-if(PLATFORM_GPLED_ENABLED)
-    #If required, Musca_s1 platform supports GPLED services
-    set(PLATFORM_GPLED_SUPPORTED        ON          CACHE BOOL      "Whether to enable the gpled functionality on supported platforms")
-else()
-    #By default, GPLED support is disabled
-    set(PLATFORM_GPLED_SUPPORTED        OFF         CACHE BOOL      "Whether to enable the gpled functionality on supported platforms")
-endif()
+# Platform-specific configurations
+set(CONFIG_TFM_USE_TRUSTZONE            ON)
+set(TFM_MULTI_CORE_TOPOLOGY             OFF)

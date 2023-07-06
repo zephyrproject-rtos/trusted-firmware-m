@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,26 +17,23 @@
 #endif
 
 #if defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-#define EXC_RETURN_FPU_FRAME_BASIC              (1 << 4)
+#define EXC_RETURN_FTYPE                        (1 << 4)
 #endif
-
-#define EXC_RETURN_THREAD_S_PSP                 0xFFFFFFFD
-#define EXC_RETURN_HANDLER_S_MSP                0xFFFFFFF1
 
 /* Exception return behavior */
 
 /* stack pointer used to restore context: 0=MSP 1=PSP. */
-#define EXC_RETURN_SPSEL    (1UL << 2)
+#define EXC_RETURN_SPSEL                        (1UL << 2)
 /* processor mode for return: 0=Handler mode 1=Thread mod. */
-#define EXC_RETURN_MODE     (1UL << 3)
+#define EXC_RETURN_MODE                         (1UL << 3)
 
 /* Exception numbers */
 #define EXC_NUM_THREAD_MODE                     (0)
 #define EXC_NUM_SVCALL                          (11)
 #define EXC_NUM_PENDSV                          (14)
 
-#define SCB_ICSR_ADDR                   (0xE000ED04)
-#define SCB_ICSR_PENDSVSET_BIT          (0x10000000)
+#define SCB_ICSR_ADDR                           (0xE000ED04)
+#define SCB_ICSR_PENDSVSET_BIT                  (0x10000000)
 
 /**
  * \brief Check whether Secure or Non-secure stack is used to restore stack
@@ -48,6 +45,23 @@
  *                          multi-core topology.
  */
 __STATIC_INLINE bool is_return_secure_stack(uint32_t lr)
+{
+    (void)lr;
+
+    return true;
+}
+
+/**
+ * \brief Check whether the default stacking rules apply, or whether the
+ *        Additional state context, also known as callee registers,
+ *        are already on the stack.
+ *
+ * \param[in] lr            LR register containing the EXC_RETURN value.
+ *
+ * \retval true             Always use default stacking rules on
+ *                          v6m/v7m architectures.
+ */
+__STATIC_INLINE bool is_default_stacking_rules_apply(uint32_t lr)
 {
     (void)lr;
 
@@ -66,7 +80,7 @@ __STATIC_INLINE bool is_return_secure_stack(uint32_t lr)
  */
 __STATIC_INLINE bool is_stack_alloc_fp_space(uint32_t lr)
 {
-    return (lr & EXC_RETURN_FPU_FRAME_BASIC) ? false : true;
+    return (lr & EXC_RETURN_FTYPE) ? false : true;
 }
 #elif defined(__ARM_ARCH_6M__)
 /**

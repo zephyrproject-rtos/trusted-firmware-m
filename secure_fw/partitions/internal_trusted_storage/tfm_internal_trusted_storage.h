@@ -22,12 +22,6 @@
 extern "C" {
 #endif
 
-struct its_asset_info {
-    psa_storage_uid_t uid;
-    int32_t client_id;
-    psa_storage_create_flags_t create_flags;
-};
-
 /**
  * \brief Initializes the internal trusted storage system.
  *
@@ -48,13 +42,10 @@ psa_status_t tfm_its_init(void);
  *
  * Stores data in the internal storage.
  *
- * \param[in] asset_info    The asset info include UID, client, etc...
- * \param[in] data_buf      The asset data buffer to be stored
- * \param[in] max_size      Size of the asset file to be set. Ignored if
- *                          the file is not being created.
- * \param[in] size_to_write Size in bytes of data to write in a single call
- * \param[in] offset        Offset in the file to write. Must be less than or
- *                          equal to the current file size.
+ * \param[in] client_id     Identifier of the asset's owner (client)
+ * \param[in] uid           The identifier for the data
+ * \param[in] data_length   The size in bytes of the data in `p_data`
+ * \param[in] create_flags  The flags that the data will be stored with
  *
  * \return A status indicating the success/failure of the operation
  *
@@ -75,11 +66,10 @@ psa_status_t tfm_its_init(void);
  *                                         references memory the caller cannot
  *                                         access
  */
-psa_status_t tfm_its_set(struct its_asset_info *asset_info,
-                         uint8_t *data_buf,
-                         size_t max_size,
-                         size_t size_to_write,
-                         size_t offset);
+psa_status_t tfm_its_set(int32_t client_id,
+                         psa_storage_uid_t uid,
+                         size_t data_length,
+                         psa_storage_create_flags_t create_flags);
 
 /**
  * \brief Retrieve data associated with a provided UID
@@ -91,13 +81,12 @@ psa_status_t tfm_its_set(struct its_asset_info *asset_info,
  * `p_data_length`. If `data_size` is 0, the contents of `p_data_length` will
  * be set to zero.
  *
- * \param[in]  asset_info     The asset info include UID, client, etc...
- * \param[out] data_buf       The buffer to stored the asset data
- * \param[in]  size_to_read   The amount of data requested
- * \param[in]  offset         The starting offset of the data requested
- * \param[out] size_read      On success, this will contain size of the data
- *                            placed in `data_buf`.
- * \param[in] first_get       Indicator of if it is the first call of a series
+ * \param[in]  client_id      Identifier of the asset's owner (client)
+ * \param[in]  uid            The uid value
+ * \param[in]  data_offset    The starting offset of the data requested
+ * \param[in]  data_size      The amount of data requested
+ * \param[out] p_data_length  On success, this will contain size of the data
+ *                            placed in `p_data`.
  *
  * \return A status indicating the success/failure of the operation
  *
@@ -117,12 +106,11 @@ psa_status_t tfm_its_set(struct its_asset_info *asset_info,
  *                                     larger than the size of the data
  *                                     associated with `uid`.
  */
-psa_status_t tfm_its_get(struct its_asset_info *asset_info,
-                         uint8_t *data_buf,
-                         size_t size_to_read,
-                         size_t offset,
-                         size_t *size_read,
-                         bool first_get);
+psa_status_t tfm_its_get(int32_t client_id,
+                         psa_storage_uid_t uid,
+                         size_t data_offset,
+                         size_t data_size,
+                         size_t *p_data_length);
 
 /**
  * \brief Retrieve the metadata about the provided uid

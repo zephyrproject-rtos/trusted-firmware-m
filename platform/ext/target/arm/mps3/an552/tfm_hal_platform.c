@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
 #include "cmsis.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "tfm_hal_platform.h"
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"
@@ -73,22 +73,14 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 #if defined(TEST_NS_FPU)
     /* Set IRQn in non-secure mode */
     NVIC_SetTargetState(TFM_FPU_NS_TEST_IRQ);
+#if (TFM_LVL >= 2)
+    /* On isolation level 2, FPU test ARoT service runs in unprivileged mode.
+     * Set SCB.CCR.USERSETMPEND as 1 to enable FPU test service to access STIR
+     * register.
+     */
+    SCB->CCR |= SCB_CCR_USERSETMPEND_Msk;
+#endif
 #endif
 
     return TFM_HAL_SUCCESS;
-}
-
-uint32_t tfm_hal_get_ns_VTOR(void)
-{
-    return memory_regions.non_secure_code_start;
-}
-
-uint32_t tfm_hal_get_ns_MSP(void)
-{
-    return *((uint32_t *)memory_regions.non_secure_code_start);
-}
-
-uint32_t tfm_hal_get_ns_entry_point(void)
-{
-    return *((uint32_t *)(memory_regions.non_secure_code_start+ 4));
 }

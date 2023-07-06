@@ -1,13 +1,55 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#include "target_cfg.h"
+#include "tfm_peripherals_def.h"
+#include "array.h"
 #include "cmsis.h"
 
+/* Allowed named MMIO of this platform */
+static const uintptr_t partition_named_mmio_list[] = {
+    (uintptr_t)TFM_PERIPHERAL_GPIO0,
+    (uintptr_t)TFM_PERIPHERAL_GPIO1,
+    (uintptr_t)TFM_PERIPHERAL_GPIO2,
+    (uintptr_t)TFM_PERIPHERAL_GPIO3,
+    (uintptr_t)TFM_PERIPHERAL_DMA1,
+    (uintptr_t)TFM_PERIPHERAL_DMA2,
+    (uintptr_t)TFM_PERIPHERAL_DMA3,
+    (uintptr_t)TFM_PERIPHERAL_ETHERNET,
+    (uintptr_t)TFM_PERIPHERAL_USB,
+    (uintptr_t)TFM_PERIPHERAL_TIMER0,
+    (uintptr_t)TFM_PERIPHERAL_TIMER1,
+    (uintptr_t)TFM_PERIPHERAL_TIMER2,
+    (uintptr_t)TFM_PERIPHERAL_TIMER3,
+    (uintptr_t)TFM_PERIPHERAL_SLOWCLK,
+    (uintptr_t)TFM_PERIPHERAL_TOUCH_I2C,
+    (uintptr_t)TFM_PERIPHERAL_AUDIO_I2C,
+    (uintptr_t)TFM_PERIPHERAL_ADC_SPI,
+    (uintptr_t)TFM_PERIPHERAL_SHIELD0_SPI,
+    (uintptr_t)TFM_PERIPHERAL_SHIELD1_SPI,
+    (uintptr_t)TFM_PERIPHERAL_SHIELD0_I2C,
+    (uintptr_t)TFM_PERIPHERAL_SHIELD1_I2C,
+    (uintptr_t)TFM_PERIPHERAL_DDR4_EEPROM_I2C,
+    (uintptr_t)TFM_PERIPHERAL_FPGA_SCC,
+    (uintptr_t)TFM_PERIPHERAL_FPGA_I2S,
+    (uintptr_t)TFM_PERIPHERAL_FPGA_IO,
+    (uintptr_t)TFM_PERIPHERAL_STD_UART,
+    (uintptr_t)TFM_PERIPHERAL_UART1,
+    (uintptr_t)TFM_PERIPHERAL_UART2,
+    (uintptr_t)TFM_PERIPHERAL_UART3,
+    (uintptr_t)TFM_PERIPHERAL_UART4,
+    (uintptr_t)TFM_PERIPHERAL_UART5,
+    (uintptr_t)TFM_PERIPHERAL_CLCD,
+    (uintptr_t)TFM_PERIPHERAL_RTC
+};
+
+void get_partition_named_mmio_list(const uintptr_t** list, size_t* length) {
+    *list = partition_named_mmio_list;
+    *length = ARRAY_SIZE(partition_named_mmio_list);
+}
 struct platform_data_t tfm_peripheral_gpio0 = {
         GPIO0_CMSDK_BASE_S,
         GPIO0_CMSDK_BASE_S + 0xFFF,

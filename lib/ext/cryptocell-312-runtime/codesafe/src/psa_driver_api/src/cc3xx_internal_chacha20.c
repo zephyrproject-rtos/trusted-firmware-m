@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -30,13 +30,13 @@ static psa_status_t chacha_block(ChachaContext_t *ctx, const uint8_t *input,
     drvRc = SetDataBuffersInfo(input, size, &inBuffInfo,
                                output, size, &outBuffInfo);
     if (drvRc != 0) {
-        CC_PAL_LOG_ERR("Bad I/O buffers\r\n");
+        CC_PAL_LOG_ERR("Bad I/O buffers");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     drvRc = ProcessChacha(ctx, &inBuffInfo, &outBuffInfo, size);
     if (drvRc != 0) {
-        CC_PAL_LOG_ERR("cc3xx_chacha20_update failed: %d\r\n", drvRc);
+        CC_PAL_LOG_ERR("cc3xx_chacha20_update failed: %d", drvRc);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -53,7 +53,7 @@ static psa_status_t chacha_block(ChachaContext_t *ctx, const uint8_t *input,
 void cc3xx_chacha20_init(ChachaContext_t *ctx)
 {
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\r\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return;
     }
 
@@ -71,7 +71,7 @@ void cc3xx_chacha20_init(ChachaContext_t *ctx)
 void cc3xx_chacha20_free(ChachaContext_t *ctx)
 {
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\r\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return;
     }
 
@@ -132,8 +132,8 @@ psa_status_t cc3xx_chacha20_update(
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 
-    if (ctx == NULL || input == NULL || output == NULL || output_len == NULL) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((ctx == NULL) || (input == NULL) || (output == NULL) || (output_len == NULL)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
     *output_len = 0;

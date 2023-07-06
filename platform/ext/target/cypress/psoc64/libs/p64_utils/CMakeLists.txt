@@ -10,6 +10,7 @@ fetch_remote_library(
     LIB_NAME                p64_utils
     LIB_SOURCE_PATH_VAR     CY_P64_UTILS_LIB_PATH
     LIB_PATCH_DIR           ${CMAKE_CURRENT_LIST_DIR}
+    LIB_FORCE_PATCH         CY_P64_UTILS_FORCE_PATCH
     FETCH_CONTENT_ARGS
         GIT_REPOSITORY      https://github.com/Infineon/p64_utils.git
         GIT_TAG             ${CY_P64_UTILS_LIB_VERSION}

@@ -32,12 +32,16 @@
 #endif
 
 #define TIMER_RELOAD_VALUE (1*1000*1000)
+#define TIMER_FREQ_HZ      (1000000)
 
 static void timer_init(NRF_TIMER_Type * TIMER, uint32_t ticks)
 {
     nrf_timer_mode_set(TIMER, NRF_TIMER_MODE_TIMER);
     nrf_timer_bit_width_set(TIMER, NRF_TIMER_BIT_WIDTH_32);
-    nrf_timer_frequency_set(TIMER, NRF_TIMER_FREQ_1MHz);
+    nrf_timer_prescaler_set(TIMER,
+                            NRF_TIMER_PRESCALER_CALCULATE(
+                                NRF_TIMER_BASE_FREQUENCY_GET(TIMER),
+                                TIMER_FREQ_HZ));
     nrf_timer_cc_set(TIMER, NRF_TIMER_CC_CHANNEL0, ticks);
     /* Clear the timer once event is generated. */
     nrf_timer_shorts_enable(TIMER, NRF_TIMER_SHORT_COMPARE0_CLEAR_MASK);
@@ -91,27 +95,3 @@ void tfm_plat_test_non_secure_timer_stop(void)
 {
     timer_stop(NRF_TIMER1);
 }
-
-#ifdef PSA_API_TEST_ENABLED
-uint32_t pal_nvmem_get_addr(void)
-{
-#ifdef NRF_TRUSTZONE_NONSECURE
-    static bool psa_scratch_initialized = false;
-
-    if (!psa_scratch_initialized) {
-        uint32_t reset_reason = nrfx_reset_reason_get();
-        nrfx_reset_reason_clear(reset_reason);
-
-        int is_pinreset = reset_reason & NRFX_RESET_REASON_RESETPIN_MASK;
-        if ((reset_reason == 0) || is_pinreset){
-            /* PSA API tests expect this area to be initialized to all 0xFFs
-             * after a power-on or pin reset.
-             */
-            memset((void*)PSA_TEST_SCRATCH_AREA_BASE, 0xFF, PSA_TEST_SCRATCH_AREA_SIZE);
-        }
-        psa_scratch_initialized = true;
-    }
-#endif /* NRF_TRUSTZONE_NONSECURE */
-    return (uint32_t)PSA_TEST_SCRATCH_AREA_BASE;
-}
-#endif /* PSA_API_TEST_ENABLED */

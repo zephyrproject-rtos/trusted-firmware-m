@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -51,8 +51,8 @@ static psa_status_t gcm_setkey(
         size_t key_bits,
         cryptoDirection_t direction)
 {
-    if (NULL == ctx || NULL == key) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == ctx) || (NULL == key)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -96,7 +96,7 @@ static psa_status_t gcm_calc_h(AesGcmContext_t *context)
                             (uint8_t *)(context->H), AES_128_BIT_KEY_SIZE,
                             &outBuffInfo);
     if (rc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
 
         return PSA_ERROR_INVALID_ARGUMENT;
     }
@@ -105,7 +105,7 @@ static psa_status_t gcm_calc_h(AesGcmContext_t *context)
     rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo,
                        CC_AES_BLOCK_SIZE_IN_BYTES);
     if (rc != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("calculating H failed with error code %d\n", rc);
+        CC_PAL_LOG_ERR("calculating H failed with error code %d", rc);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -191,7 +191,7 @@ static psa_status_t gcm_init(AesGcmContext_t *context,
     /******************************************************/
     status = gcm_calc_h(context);
     if (status != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("calculating H failed with error code %d\n", status);
+        CC_PAL_LOG_ERR("calculating H failed with error code %d", status);
         return status;
     }
 
@@ -229,15 +229,14 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv,
         rc = SetDataBuffersInfo(pIv, iv_size, &inBuffInfo, NULL, 0,
                                 &outBuffInfo);
         if (rc != 0) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_DATA_INVALID;
         }
 
         /* Calculate J0 - First phase */
         rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo, iv_size);
         if (rc != AES_DRV_OK) {
-            CC_PAL_LOG_ERR(
-                "calculating J0 (phase 1) failed with error code 0x%X\n", rc);
+            CC_PAL_LOG_ERR("calculating J0 (phase 1) failed with error code 0x%x", rc);
             return PSA_ERROR_GENERIC_ERROR;
         }
 
@@ -256,7 +255,7 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv,
                                 CC_AESGCM_GHASH_DIGEST_SIZE_BYTES, &inBuffInfo,
                                 NULL, 0, &outBuffInfo);
         if (rc != 0) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_DATA_INVALID;
         }
 
@@ -264,14 +263,13 @@ static psa_status_t gcm_process_j0(AesGcmContext_t *context, const uint8_t *pIv,
         rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo,
                            CC_AESGCM_GHASH_DIGEST_SIZE_BYTES);
         if (rc != AES_DRV_OK) {
-            CC_PAL_LOG_ERR(
-                "calculating J0 (phase 2) failed with error code %d\n", rc);
+            CC_PAL_LOG_ERR("calculating J0 (phase 2) failed with error code %d", rc);
             return PSA_ERROR_DATA_INVALID;
         }
     }
 
     if (rc != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("gcm process j0 failed with error code %d\n", rc);
+        CC_PAL_LOG_ERR("gcm process j0 failed with error code %d", rc);
         return PSA_ERROR_DATA_INVALID;
     } else {
         /* On success set the iv_size of the context */
@@ -310,14 +308,14 @@ static psa_status_t gcm_process_aad(AesGcmContext_t *context,
     rc = SetDataBuffersInfo(pAad, aadSize, &inBuffInfo, NULL, 0,
                             &outBuffInfo);
     if (rc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     /* Calculate GHASH(A) */
     rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo, aadSize);
     if (rc != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("processing AAD failed with error code %d\n", rc);
+        CC_PAL_LOG_ERR("processing AAD failed with error code %d", rc);
         return PSA_ERROR_DATA_INVALID;
     } else {
         /* Set aadSize on context only on success */
@@ -347,13 +345,13 @@ static psa_status_t gcm_process_cipher(AesGcmContext_t *context,
     rc = SetDataBuffersInfo(pTextDataIn,  length, &inBuffInfo,
                             pTextDataOut, length, &outBuffInfo);
     if (rc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo, length);
     if (rc != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("processing cipher failed with error code %d\n", rc);
+        CC_PAL_LOG_ERR("processing cipher failed with error code %d", rc);
         return PSA_ERROR_DATA_INVALID;
     } else {
         return PSA_SUCCESS;
@@ -382,7 +380,7 @@ static psa_status_t gcm_process_lenA_lenC(AesGcmContext_t *context)
                             CC_AESGCM_GHASH_DIGEST_SIZE_BYTES, &inBuffInfo,
                             NULL, 0, &outBuffInfo);
     if (rc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -390,9 +388,7 @@ static psa_status_t gcm_process_lenA_lenC(AesGcmContext_t *context)
     rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo,
                        CC_AESGCM_GHASH_DIGEST_SIZE_BYTES);
     if (rc != AES_DRV_OK) {
-        CC_PAL_LOG_ERR(
-            "processing Lengths of AAD and Cipher failed with error code %d\n",
-            rc);
+        CC_PAL_LOG_ERR("processing Lengths of AAD and Cipher failed with error code %d", rc);
         return PSA_ERROR_DATA_INVALID;
     } else {
         return PSA_SUCCESS;
@@ -424,7 +420,7 @@ static psa_status_t gcm_finish(AesGcmContext_t *context,
                             context->preTagBuf,
                             CC_AESGCM_GHASH_DIGEST_SIZE_BYTES, &outBuffInfo);
     if (rc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -432,7 +428,7 @@ static psa_status_t gcm_finish(AesGcmContext_t *context,
     rc = ProcessAesGcm(context, &inBuffInfo, &outBuffInfo,
                        CC_AESGCM_GHASH_DIGEST_SIZE_BYTES);
     if (rc != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("Finish operation failed with error code %d\n", rc);
+        CC_PAL_LOG_ERR("Finish operation failed with error code %d", rc);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -603,7 +599,7 @@ psa_status_t cc3xx_gcm_decrypt(
 void cc3xx_gcm_init(AesGcmContext_t *ctx)
 {
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return;
     }
 
@@ -613,7 +609,7 @@ void cc3xx_gcm_init(AesGcmContext_t *ctx)
 void cc3xx_gcm_free(AesGcmContext_t *ctx)
 {
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return;
     }
 
@@ -644,8 +640,8 @@ psa_status_t cc3xx_gcm_set_nonce(
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
-    if (NULL == ctx || NULL == nonce) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == ctx) || (NULL == nonce)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -656,7 +652,7 @@ psa_status_t cc3xx_gcm_set_nonce(
 
     ret = gcm_calc_h(ctx);
     if (ret != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("gcm_calc_h failed: %d\n", ret);
+        CC_PAL_LOG_ERR("gcm_calc_h failed: %d", ret);
         return ret;
     }
 
@@ -687,7 +683,7 @@ psa_status_t cc3xx_gcm_set_lengths(
     size_t dataSize)
 {
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -710,7 +706,7 @@ psa_status_t cc3xx_gcm_update_ad(
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
     if (NULL == ctx || NULL == aad) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -731,8 +727,8 @@ psa_status_t cc3xx_gcm_update(
 {
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
-    if (NULL == ctx || NULL == input || NULL == output) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == ctx) || (NULL == input) || (NULL == output)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -755,8 +751,8 @@ psa_status_t cc3xx_gcm_finish(
 
     *tag_len = 0;
 
-    if (NULL == ctx || NULL == tag) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == ctx) || (NULL == tag)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -768,7 +764,6 @@ psa_status_t cc3xx_gcm_finish(
 
     ret = gcm_finish(ctx, tag, tag_size);
     if (ret != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("gcm_finish failed: %d", ret);
         return ret;
     }
 

@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -35,13 +35,14 @@ install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa_manifest
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_api.h
                     ${INTERFACE_INC_DIR}/tfm_ns_interface.h
-                    ${INTERFACE_INC_DIR}/psa_config.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_ns_client_ext.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
-install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/config_impl.h
+install(FILES       ${CMAKE_SOURCE_DIR}/secure_fw/include/config_tfm.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+install(FILES       ${CMAKE_SOURCE_DIR}/config/config_base.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 install(FILES       ${INTERFACE_INC_DIR}/tfm_psa_call_pack.h
@@ -78,6 +79,7 @@ if (TFM_PARTITION_CRYPTO)
                         ${INTERFACE_INC_DIR}/psa/crypto_compat.h
                         ${INTERFACE_INC_DIR}/psa/crypto.h
                         ${INTERFACE_INC_DIR}/psa/crypto_client_struct.h
+                        ${INTERFACE_INC_DIR}/psa/crypto_platform.h
                         ${INTERFACE_INC_DIR}/psa/crypto_sizes.h
                         ${INTERFACE_INC_DIR}/psa/crypto_struct.h
                         ${INTERFACE_INC_DIR}/psa/crypto_types.h
@@ -126,14 +128,13 @@ endif()
 if (TFM_PARTITION_NS_AGENT_TZ)
     install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    if (CONFIG_TFM_CONNECTION_BASED_SERVICE_API)
-        install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_connection_api.c
-                DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
-    endif()
 endif()
 
+    install(DIRECTORY   ${INTERFACE_INC_DIR}/os_wrapper
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+
 if (CONFIG_TFM_USE_TRUSTZONE)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_ns_interface.c.example
+    install(DIRECTORY   ${INTERFACE_SRC_DIR}/os_wrapper
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
@@ -176,12 +177,14 @@ if(BL2)
                 DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
     endif()
 
-    install(FILES $<TARGET_OBJECTS:signing_layout_s>
+    if (PLATFORM_DEFAULT_IMAGE_SIGNING)
+        install(FILES $<TARGET_OBJECTS:signing_layout_s>
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
 
-    if(MCUBOOT_IMAGE_NUMBER GREATER 1)
-        install(FILES $<TARGET_OBJECTS:signing_layout_ns>
-                DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
+        if(MCUBOOT_IMAGE_NUMBER GREATER 1)
+            install(FILES $<TARGET_OBJECTS:signing_layout_ns>
+                    DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
+    endif()
 
         install(FILES ${MCUBOOT_KEY_NS}
                 DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
@@ -196,8 +199,9 @@ if(TFM_PARTITION_FIRMWARE_UPDATE)
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
-##################### Platform-specific installation ###########################
+###################### Install for NS regression tests #########################
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/install.cmake)
-    include(platform/ext/target/${TFM_PLATFORM}/install.cmake)
-endif()
+include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/install.cmake)
+
+##################### Platform-specific installation ###########################
+include(${TARGET_PLATFORM_PATH}/install.cmake OPTIONAL)

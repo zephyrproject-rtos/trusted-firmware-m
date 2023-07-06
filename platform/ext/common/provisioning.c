@@ -5,7 +5,7 @@
  *
  */
 
-#include "config_attest.h"
+#include "config_tfm.h"
 #include "tfm_plat_provisioning.h"
 
 #include "cmsis_compiler.h"
@@ -29,7 +29,9 @@ __PACKED_STRUCT tfm_psa_rot_provisioning_data_t {
     uint8_t iak[32];
     uint32_t iak_len;
     uint32_t iak_type;
+#if ATTEST_INCLUDE_COSE_KEY_ID
     uint8_t iak_id[32];
+#endif /* ATTEST_INCLUDE_COSE_KEY_ID */
 
     uint8_t boot_seed[32];
     uint8_t implementation_id[32];
@@ -70,8 +72,10 @@ static const struct tfm_psa_rot_provisioning_data_t psa_rot_prov_data = {
     /* IAK type */
     PSA_ECC_FAMILY_SECP_R1,
 #endif /* SYMMETRIC_INITIAL_ATTESTATION */
+#if ATTEST_INCLUDE_COSE_KEY_ID
     /* IAK id */
     "kid@trustedfirmware.example",
+#endif /* ATTEST_INCLUDE_COSE_KEY_ID */
     /* boot seed */
     {
         0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0xA6, 0xA7,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -22,6 +22,23 @@
 
 #ifndef PSA_CRYPTO_TYPES_H
 #define PSA_CRYPTO_TYPES_H
+
+/* In Mbed TLS, we would query the current config through inclusion of
+ * of mbedtls/build_info.h, but in TF-M, we don't rely on build_info.h
+ * hence we just include the current configuration if it has been passed
+ * through command line. These config defines are required in crypto_sizes.h
+ * to compute macros that define sizes which depend on algorithms supported
+ * by the implementation
+ */
+#if defined(MBEDTLS_PSA_CRYPTO_CONFIG_FILE)
+#include MBEDTLS_PSA_CRYPTO_CONFIG_FILE
+#endif /* MBEDTLS_PSA_CRYPTO_CONFIG_FILE */
+
+#if defined(MBEDTLS_PSA_CRYPTO_PLATFORM_FILE)
+#include MBEDTLS_PSA_CRYPTO_PLATFORM_FILE
+#else
+#include "crypto_platform.h"
+#endif
 
 #include <stdint.h>
 
@@ -85,7 +102,7 @@ typedef uint8_t psa_ecc_family_t;
  * Values of this type are generally constructed by macros called
  * `PSA_DH_FAMILY_xxx`.
  *
- * The group identifier is required to create an Diffie-Hellman key using the
+ * The group identifier is required to create a Diffie-Hellman key using the
  * PSA_KEY_TYPE_DH_KEY_PAIR() or PSA_KEY_TYPE_DH_PUBLIC_KEY()
  * macros.
  *
@@ -145,7 +162,7 @@ typedef uint32_t psa_algorithm_t;
  * integration-specific device management event occurs (for example,
  * a factory reset).
  *
- * Persistent keys have a key identifier of type #psa_key_id_t.
+ * Persistent keys have a key identifier of type #mbedtls_svc_key_id_t.
  * This identifier remains valid throughout the lifetime of the key,
  * even if the application instance that created the key terminates.
  * The application can call psa_open_key() to open a persistent key that
@@ -257,7 +274,38 @@ typedef uint32_t psa_key_location_t;
  *       consideration to allow backward compatibility.
  */
 typedef uint32_t psa_key_id_t;
-#define PSA_KEY_ID_INIT 0
+
+/** Encoding of key identifiers as seen inside the PSA Crypto implementation.
+ *
+ * When PSA Crypto is built as a library inside an application, this type
+ * is identical to #psa_key_id_t. When PSA Crypto is built as a service
+ * that can store keys on behalf of multiple clients, this type
+ * encodes the #psa_key_id_t value seen by each client application as
+ * well as extra information that identifies the client that owns
+ * the key.
+ *
+ * \note Values of this type are encoded in the persistent key store.
+ *       Any changes to existing values will require bumping the storage
+ *       format version and providing a translation when reading the old
+ *       format.
+ */
+#if !defined(MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER)
+typedef psa_key_id_t mbedtls_svc_key_id_t;
+
+#else /* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
+/* Define the MBEDTLS_PRIVATE macro. */
+#include "mbedtls/private_access.h"
+/* Implementation-specific: The Mbed Cryptography library can be built as
+ * part of a multi-client service that exposes the PSA Cryptography API in each
+ * client and encodes the client identity in the key identifier argument of
+ * functions such as psa_open_key().
+ */
+typedef struct {
+    psa_key_id_t MBEDTLS_PRIVATE(key_id);
+    mbedtls_key_owner_id_t MBEDTLS_PRIVATE(owner);
+} mbedtls_svc_key_id_t;
+
+#endif /* !MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
 
 /**@}*/
 
@@ -384,7 +432,19 @@ typedef uint32_t psa_key_usage_t;
  *
  * Once a key has been created, it is impossible to change its attributes.
  */
-typedef struct psa_client_key_attributes_s psa_key_attributes_t;
+typedef struct psa_key_attributes_s psa_key_attributes_t;
+
+
+#ifndef __DOXYGEN_ONLY__
+#if defined(MBEDTLS_PSA_CRYPTO_SE_C)
+/* Mbed Crypto defines this type in crypto_types.h because it is also
+ * visible to applications through an implementation-specific extension.
+ * For the PSA Cryptography specification, this type is only visible
+ * via crypto_se_driver.h.
+ */
+typedef uint64_t psa_key_slot_number_t;
+#endif /* MBEDTLS_PSA_CRYPTO_SE_C */
+#endif /* !__DOXYGEN_ONLY__ */
 
 /**@}*/
 

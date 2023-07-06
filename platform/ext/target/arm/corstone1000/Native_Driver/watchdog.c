@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -77,6 +77,23 @@ int corstone1000_watchdog_init()
 
     __enable_irq();
     
+    return ARM_DRIVER_OK;
+}
+
+/**
+ *  \brief Reset the Secure Enclave & SoC Watchdog's.
+ *
+ *  \returns ARM Driver return code.
+ */
+int corstone1000_watchdog_reset_timer() {
+    /* Unlock, clear and lock the watchdog timer */
+    arm_watchdog_unlock(&SE_WD_DEV);
+    arm_watchdog_clear_interrupt_and_refresh_counter(&SE_WD_DEV);
+    arm_watchdog_lock(&SE_WD_DEV);
+    /* Unlock, clear and lock the watchdog timer */
+    arm_watchdog_unlock(&SOC_WD_DEV);
+    arm_watchdog_clear_interrupt_and_refresh_counter(&SOC_WD_DEV);
+    arm_watchdog_lock(&SOC_WD_DEV);
     return ARM_DRIVER_OK;
 }
 

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,52 +12,35 @@ set(FETCHCONTENT_QUIET FALSE)
 
 # Default configuration of QCBOR repository
 set(QCBOR_PATH      "DOWNLOAD"  CACHE PATH      "Path to qcbor (or DOWNLOAD to fetch automatically")
-set(QCBOR_VERSION   "b0e70332"  CACHE STRING    "The version of qcbor to use")
+set(QCBOR_VERSION   "v1.2"      CACHE STRING    "The version of qcbor to use")
 
-if ("${QCBOR_PATH}" STREQUAL "DOWNLOAD")
-    FetchContent_Declare(qcbor
-        GIT_REPOSITORY https://github.com/laurencelundblade/QCBOR.git
-        GIT_TAG ${QCBOR_VERSION}
-        GIT_PROGRESS TRUE
-    )
+# Entirely disable the floating-point support
+# in the qcbor library to reduce code size.
+set(QCBOR_OPT_DISABLE_FLOAT_HW_USE     ON  CACHE BOOL  "Eliminate dependency on FP hardware and FP instructions" FORCE)
+set(QCBOR_OPT_DISABLE_FLOAT_PREFERRED  ON  CACHE BOOL  "Eliminate support for half-precision and CBOR preferred serialization" FORCE)
+set(QCBOR_OPT_DISABLE_FLOAT_ALL        ON  CACHE BOOL  "Eliminate floating-point support completely" FORCE)
 
-    FetchContent_GetProperties(qcbor)
-    if(NOT qcbor_POPULATED)
-        FetchContent_Populate(qcbor)
-        set(QCBOR_PATH ${qcbor_SOURCE_DIR} CACHE PATH "Path to qcbor (or DOWNLOAD to get automatically" FORCE)
-    endif()
-endif()
-
-add_library(tfm_qcbor_s STATIC EXCLUDE_FROM_ALL)
-
-target_sources(tfm_qcbor_s
-    PRIVATE
-        ${QCBOR_PATH}/src/ieee754.c
-        ${QCBOR_PATH}/src/qcbor_encode.c
-        ${QCBOR_PATH}/src/qcbor_decode.c
-        ${QCBOR_PATH}/src/UsefulBuf.c
+fetch_remote_library(
+    LIB_NAME                qcbor
+    LIB_SOURCE_PATH_VAR     QCBOR_PATH
+    LIB_PATCH_DIR           ${CMAKE_CURRENT_LIST_DIR}
+    LIB_BASE_DIR            "${CMAKE_BINARY_DIR}/lib/ext"
+    FETCH_CONTENT_ARGS
+        GIT_REPOSITORY      https://github.com/laurencelundblade/QCBOR.git
+        GIT_TAG             ${QCBOR_VERSION}
+        GIT_PROGRESS        TRUE
 )
 
-target_compile_definitions(tfm_qcbor_s
-    PRIVATE
-        QCBOR_DISABLE_FLOAT_HW_USE
-)
+add_subdirectory(${QCBOR_PATH} ${CMAKE_CURRENT_BINARY_DIR}/QCBOR)
 
-target_include_directories(tfm_qcbor_s
+set_target_properties(qcbor PROPERTIES EXCLUDE_FROM_ALL TRUE)
+
+target_compile_options(qcbor
     PUBLIC
-        $<BUILD_INTERFACE:${QCBOR_PATH}/inc>
+        ${COMPILER_CP_FLAG}
+)
+
+target_include_directories(qcbor
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${QCBOR_PATH}/inc/qcbor>
-)
-
-target_link_libraries(tfm_qcbor_s
-    PRIVATE
-        tfm_attestation_defs
-        tfm_t_cose_defs
-)
-
-target_compile_options(tfm_qcbor_s
-    PRIVATE
-        ${COMPILER_CP_FLAG}
 )

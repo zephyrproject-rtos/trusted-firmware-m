@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Arm Limited
+ * Copyright (c) 2020-2023 Arm Limited
  * Copyright (c) 2021 IAR Systems AB
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,10 +25,8 @@
 
 do not initialize  { section .noinit };
 initialize by copy { readwrite };
-initialize by copy { 
-       ro object Driver_GFC100_EFlash.o,
-       ro object gfc100_eflash_drv.o,
-       ro object musca_b1_eflash_drv.o
+initialize by copy {
+       ro object *libflash_drivers*,
        };
 
 define block ER_CODE        with fixed order, alignment = 8 {
@@ -40,9 +38,9 @@ place at address BL2_CODE_START {block LR_CODE};
 
 define block ER_CODE_SRAM  with fixed order, alignment = 8 {
        rw section .text,
-       rw section .rodata 
+       rw section .rodata
        };
-       
+
 place at address BL2_CODE_SRAM_BASE {block ER_CODE_SRAM};
 
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };

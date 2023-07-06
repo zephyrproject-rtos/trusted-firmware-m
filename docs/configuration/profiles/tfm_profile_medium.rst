@@ -467,7 +467,7 @@ Reference
 
 .. [RFC7251] `AES-CCM Elliptic Curve Cryptography (ECC) Cipher Suites for TLS <https://tools.ietf.org/html/rfc7251>`_
 
-.. [CRYPTO-DESIGN] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
+.. [CRYPTO-DESIGN] :doc:`Crypto design </design_docs/services/tfm_crypto_design>`
 
 .. [ITS-INTEGRATE] :doc:`ITS integration guide </integration_guide/services/tfm_its_integration_guide>`
 

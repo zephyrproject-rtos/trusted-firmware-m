@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 #ifndef __DEVICE_CFG_H__
 #define __DEVICE_CFG_H__
 
+#include "host_device_cfg.h"
+
 /**
  * \file device_cfg.h
  * \brief
@@ -27,6 +29,9 @@
 /* ARM Memory Protection Controller (MPC) */
 #define MPC_VM0_S
 #define MPC_VM1_S
+#ifdef RSS_XIP
+#define MPC_SIC_S
+#endif /* RSS_XIP */
 
 /* ARM Peripheral Protection Controllers (PPC) */
 #define PPC_RSS_MAIN0_S
@@ -44,10 +49,10 @@
 /* ARM ATU */
 #define ATU_S
 
-/* ARM UART PL011 */
-#define DEFAULT_UART_BAUDRATE  115200
-#define UART0_PL011_S
-#define UART0_PL011_NS
+#ifdef RSS_XIP
+/* ARM SIC */
+#define SIC_S
+#endif
 
 /** System Counter Armv8-M */
 #define SYSCOUNTER_CNTRL_ARMV8_M_S

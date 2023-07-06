@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,10 +84,10 @@
 #define   RTE_DDR4_MPC                   0
 // </e> MPC (Memory Protection Controller) [Driver_DDR4_MPC]
 
-// <e> PPC (Peripheral Protection Controller) [Driver_AHB_PPCEXP0]
-// <i> Configuration settings for Driver_AHB_PPCEXP0 in component ::Drivers:MPC
+// <e> PPC (Peripheral Protection Controller) [Driver_AHB_PPC_EXP0]
+// <i> Configuration settings for Driver_AHB_PPC_EXP0 in component ::Drivers:MPC
 #define   RTE_AHB_PPCEXP0                1
-// </e> PPC (Peripheral Protection Controller) [Driver_AHB_PPCEXP0]
+// </e> PPC (Peripheral Protection Controller) [Driver_AHB_PPC_EXP0]
 
 // <e> PPC (Peripheral Protection Controller) [Driver_APB_PPC0]
 // <i> Configuration settings for Driver_APB_PPC0 in component ::Drivers:MPC
@@ -99,20 +99,20 @@
 #define   RTE_APB_PPC1                   1
 // </e> PPC (Peripheral Protection Controller) [Driver_APB_PPC1]
 
-// <e> PPC (Peripheral Protection Controller) [Driver_APB_PPCEXP0]
-// <i> Configuration settings for Driver_APB_PPCEXP0 in component ::Drivers:MPC
+// <e> PPC (Peripheral Protection Controller) [Driver_APB_PPC_EXP0]
+// <i> Configuration settings for Driver_APB_PPC_EXP0 in component ::Drivers:MPC
 #define   RTE_APB_PPCEXP0                1
-// </e> PPC (Peripheral Protection Controller) [Driver_APB_PPCEXP0]
+// </e> PPC (Peripheral Protection Controller) [Driver_APB_PPC_EXP0]
 
-// <e> PPC (Peripheral Protection Controller) [Driver_APB_PPCEXP1]
-// <i> Configuration settings for Driver_APB_PPCEXP1 in component ::Drivers:MPC
+// <e> PPC (Peripheral Protection Controller) [Driver_APB_PPC_EXP1]
+// <i> Configuration settings for Driver_APB_PPC_EXP1 in component ::Drivers:MPC
 #define   RTE_APB_PPCEXP1                1
-// </e> PPC (Peripheral Protection Controller) [Driver_APB_PPCEXP1]
+// </e> PPC (Peripheral Protection Controller) [Driver_APB_PPC_EXP1]
 
-// <e> PPC (Peripheral Protection Controller) [Driver_APB_PPCEXP2]
-// <i> Configuration settings for Driver_APB_PPCEXP2 in component ::Drivers:MPC
+// <e> PPC (Peripheral Protection Controller) [Driver_APB_PPC_EXP2]
+// <i> Configuration settings for Driver_APB_PPC_EXP2 in component ::Drivers:MPC
 #define   RTE_APB_PPCEXP2                1
-// </e> PPC (Peripheral Protection Controller) [Driver_APB_PPCEXP2]
+// </e> PPC (Peripheral Protection Controller) [Driver_APB_PPC_EXP2]
 
 // <e> Flash device emulated by BRAM [Driver_Flash0]
 // <i> Configuration settings for Driver_Flash0 in component ::Drivers:Flash

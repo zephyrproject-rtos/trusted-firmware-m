@@ -4,7 +4,7 @@ Run TF-M examples on Arm platforms
 Instructions for how to run TF-M and example test application on Arm platforms.
 
 Follow :doc:`build instruction <tfm_build_instruction>` to build the binaries.
-Follow :doc:`secure boot </technical_references/design_docs/tfm_secure_boot>` to build the
+Follow :doc:`secure boot </design_docs/booting/tfm_secure_boot>` to build the
 binaries with or without BL2 bootloader.
 
 ****************************************************************
@@ -561,7 +561,7 @@ port (baud 115200 8n1) the following messages::
 Firmware upgrade and image validation with BL2 bootloader
 =========================================================
 High level operation of BL2 bootloader and instructions for testing firmware
-upgrade is described in :doc:`secure boot </technical_references/design_docs/tfm_secure_boot>`.
+upgrade is described in :doc:`secure boot </design_docs/booting/tfm_secure_boot>`.
 
 --------------
 

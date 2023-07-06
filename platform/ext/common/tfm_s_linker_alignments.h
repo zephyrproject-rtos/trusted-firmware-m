@@ -13,6 +13,11 @@
 #ifndef __TFM_S_LINKER_ALIGNMENTS__
 #define __TFM_S_LINKER_ALIGNMENTS__
 
+/* Helper macro that can be used to round up to multiple to satisfy required
+ * alignment. */
+#define ROUND_UP_TO_MULTIPLE(number, multiple) \
+    ((((number) + (multiple) - 1) / (multiple)) * (multiple))
+
 /* Default alignment for linker file sections is set to 32 because ARM TrustZone
  * protection units (SAU and MPU) require regions to be 32 bytes aligned. */
 #ifndef TFM_LINKER_DEFAULT_ALIGNMENT
@@ -69,6 +74,18 @@
 
 #ifndef TFM_LINKER_SECURE_DATA_ALIGNMENT
 #define TFM_LINKER_SECURE_DATA_ALIGNMENT        TFM_LINKER_DEFAULT_ALIGNMENT
+#endif
+
+/* Alignment of stack of NS agent TZ partition. This should not be needed once
+ * TZ NS agent partition is reworked to use manifest files. */
+#ifndef TFM_LINKER_NS_AGENT_TZ_STACK_ALIGNMENT
+#define TFM_LINKER_NS_AGENT_TZ_STACK_ALIGNMENT  TFM_LINKER_DEFAULT_ALIGNMENT
+#endif
+
+/* Alignment of stack of Idle partition. This should not be needed once Idle
+ * partition is reworked to use manifest files. */
+#ifndef TFM_LINKER_IDLE_PARTITION_STACK_ALIGNMENT
+#define TFM_LINKER_IDLE_PARTITION_STACK_ALIGNMENT   TFM_LINKER_DEFAULT_ALIGNMENT
 #endif
 
 /* Alignment of RAM vector table */

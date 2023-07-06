@@ -479,7 +479,7 @@ available by Crypto service:
   initial attestation key. The key identifier can be used as ``kid`` parameter
   in COSE header. Optional.
 
-.. note:
+.. note::
 
    Asymmetric initial attestation and symmetric initial attestation may share
    the same HAL APIs in future development.

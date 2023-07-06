@@ -21,12 +21,12 @@ include(${NRF_FOLDER_PATH}/hal_nordic.cmake)
 # Specify the location of platform specific build dependencies.
 
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:GNU>:${NRF_FOLDER_PATH}/gcc/nordic_nrf_s.ld>
+    $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
 )
 
 if(NS)
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:GNU>:${NRF_FOLDER_PATH}/gcc/nordic_nrf_ns.ld>
+        $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
@@ -36,7 +36,7 @@ endif()
 
 if(BL2)
     target_add_scatter_file(bl2
-            $<$<C_COMPILER_ID:GNU>:${NRF_FOLDER_PATH}/gcc/nordic_nrf_bl2.ld>
+        $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_bl2.ld>
     )
 endif()
 

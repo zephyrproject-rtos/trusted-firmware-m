@@ -1,5 +1,5 @@
-Corstone SSE-310 with Ethos-U55 Example Subsystem for Arm Virtual Hardware
-==========================================================================
+Corstone SSE-310 with Ethos-U55 Example Subsystem for Arm Virtual Hardware, and for MPS3 (AN555)
+================================================================================================
 
 Introduction
 ------------
@@ -12,19 +12,6 @@ usual MPS3 peripherals.
 This platform port supports all TF-M regression tests (Secure and Non-secure)
 with Isolation Level 1 and 2.
 
-Building TF-M
--------------
-
-Follow the instructions in :doc:`Building instructions </building/tfm_build_instruction>`.
-Build instructions with platform name: arm/mps3/corstone310/fvp
-
-``-DTFM_PLATFORM=arm/mps3/corstone310/fvp``
-
-.. note::
-
-   The built binaries can be run on the Corstone-310 Arm Virtual Hardware
-   (VHT_Corstone_SSE-310). At least VHT version 11.17 is required.
-
 .. note::
 
    This platform support does not provide software for Ethos-U55 IP, only
@@ -33,6 +20,24 @@ Build instructions with platform name: arm/mps3/corstone310/fvp
 .. note::
 
    For Armclang compiler v6.18 or later version is required.
+
+Building TF-M
+-------------
+
+Follow the instructions in :doc:`Building instructions </building/tfm_build_instruction>`.
+
+For Corstone-310 Ethos-U55 Arm Virtual Hardware use the following platform name:
+
+``-DTFM_PLATFORM=arm/mps3/corstone310/fvp``
+
+.. note::
+
+   The built binaries can be run on the Corstone-310 Arm Virtual Hardware
+   (VHT_Corstone_SSE-310). At least VHT version 11.17 is required.
+
+For AN555 use the following platform name:
+
+``-DTFM_PLATFORM=arm/mps3/corstone310/an555``
 
 To run the example code on Corstone-310 Ethos-U55 Arm Virtual Hardware
 ----------------------------------------------------------------------
@@ -66,11 +71,11 @@ To run the built binaries:
 
 #. Execute the following command to start VHT::
 
-    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x01040000
+    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x01020000
 
 #. The  serial port's output can be redirected to a file with::
 
-    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x01040000 -C mps3_board.uart0.unbuffered_output=1 -C mps3_board.uart0.out_file="output.log"
+    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x01020000 -C mps3_board.uart0.unbuffered_output=1 -C mps3_board.uart0.out_file="output.log"
 
    The output should contain the following messages::
 
@@ -97,6 +102,72 @@ To run the built binaries:
    Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
    to ``Debug``.
 
+To run the example code on AN555
+--------------------------------
+FPGA image is available for download from `here <https://developer.arm.com/downloads/view/AN555>`__
+
+If the link above is not working just go to `Arm PDH <https://developer.arm.com/downloads>`__ and search for AN555.
+
+To run BL2 bootloader, TF-M example application and tests in the MPS3 board,
+it is required to have AN555 image in the MPS3 board SD card. The image should
+be located in ``<MPS3 device name>/MB/HBI<BoardNumberBoardrevision>/AN555``
+
+The MPS3 board tested is HBI0309C.
+
+#. Execute the following command to create the tfm.bin binary
+   which fills the entire available space on the MPS3 onboard QSPI.
+   This way the whole flash content (PS, ITS, OTP, NV counters) is in a known state.
+   (If anything left in the QSPI, this binary will overwrite it.)
+   Also, MPS3 can only handle SFN 8.3 format, so the binary name must be shortened.::
+
+   $ cd <build dir>/bin
+   $ cp tfm_s_ns_signed.bin tfm.bin
+   $ truncate -s 8M tfm.bin
+
+#. Copy ``bl2.bin`` and ``tfm.bin`` files from
+   build dir to ``<MPS3 device name>/SOFTWARE/``
+#. Open ``<MPS3 device name>/MB/HBI0309C/AN555/images.txt``
+#. Update the ``images.txt`` file as follows::
+
+    [IMAGES]
+    TOTALIMAGES: 2
+
+    IMAGE0ADDRESS: 0x01_00_1100_0000
+    IMAGE0UPDATE: RAM
+    IMAGE0FILE: \SOFTWARE\bl2.bin
+
+    IMAGE1ADDRESS: 0x01_00_0000_0000
+    IMAGE1UPDATE: FORCEQSPI
+    IMAGE1FILE: \SOFTWARE\tfm.bin
+
+#. Close ``<MPS3 device name>/MB/HBI0309C/AN555/images.txt``
+#. Unmount/eject the ``<MPS3 device name>`` unit
+#. Reset the board to execute the TF-M example application
+#. After completing the procedure you should be able to see similar messages
+   to this on the serial port (baud 115200 8n1)::
+
+    [INF] Starting bootloader
+    [INF] Beginning BL2 provisioning
+    [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
+    [INF] Swap type: none
+    [INF] Swap type: none
+    [INF] Bootloader chainload address offset: 0x0
+    [INF] Jumping to the first image slot
+    [INF] Beginning TF-M provisioning
+    [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
+    [Sec Thread] Secure image initializing!
+    TF-M isolation level is: 0x00000002
+    Booting TF-M <TF-M version and git hash>
+    Creating an empty ITS flash layout.
+    Creating an empty PS flash layout.
+    [INF][Crypto] Provisioning entropy seed... complete.
+    Non-Secure system starting...
+
+.. note::
+
+   Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
+   to ``Debug``.
+
 --------------
 
-*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*

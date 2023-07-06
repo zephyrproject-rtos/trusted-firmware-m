@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
  * Copyright 2019-2020 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -142,9 +142,9 @@ security tier by programing corresponding registers in secure AHB controller. */
                                   FLASH_NS_PARTITION_SIZE)
 
 /* Code SRAM area */
-#define TOTAL_CODE_SRAM_SIZE     (0x8000) /* SRAM X region */
-#define S_CODE_SRAM_ALIAS_BASE   (0x14000000)
-#define NS_CODE_SRAM_ALIAS_BASE  (0x04000000)
+#define S_RAM_CODE_SIZE          (0x8000) /* SRAM X region */
+#define S_RAM_CODE_START         (0x14000000)
+#define NS_RAM_CODE_START        (0x04000000)
 
 #ifdef BL2
 /* Bootloader regions */

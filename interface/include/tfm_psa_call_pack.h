@@ -8,7 +8,6 @@
 #ifndef __TFM_PSA_CALL_PACK_H__
 #define __TFM_PSA_CALL_PACK_H__
 
-#include "psa_config.h"
 #include "psa/client.h"
 
 #ifdef __cplusplus

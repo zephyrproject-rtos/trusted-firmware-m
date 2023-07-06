@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
 # company) or an affiliate of Cypress Semiconductor Corporation. All rights
 # reserved.
@@ -42,8 +42,14 @@ target_sources(tfm_spm
         cmsis_psa/main.c
         cmsis_psa/spm_ipc.c
         $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:cmsis_psa/spm_cross_call.c>
-        cmsis_psa/static_loader.c
+        cmsis_psa/rom_loader.c
         ffm/psa_api.c
+        ffm/psa_call_api.c
+        ffm/psa_version_api.c
+        ffm/psa_read_write_skip_api.c
+        $<$<BOOL:${PSA_FRAMEWORK_HAS_MM_IOVEC}>:ffm/psa_mmiovec_api.c>
+        $<$<BOOL:${CONFIG_TFM_CONNECTION_BASED_SERVICE_API}>:ffm/psa_connection_api.c>
+        $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:ffm/psa_irq_api.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:ffm/backend_ipc.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:ffm/backend_sfn.c>
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:ffm/interrupt.c>

@@ -18,10 +18,13 @@ Environment (NSPE).
   support SFN model.
 * Support Armv8-M mainline.
 * Support isolation level 1,2,3.
+* Support Arm Compiler for Embedded [10]_. ``Arm Compiler for Embedded 6.17``
+  and later version shall be used to mitigate VLLDM instruction security
+  vulnerability [4]_.
 * Does not support use FPU in First-Level Interrupt Handling (FLIH) [6]_ at
   current stage.
 
-Please refer to Arm musca S1 [7]_ platform as a reference implementation when
+Please refer to Arm AN521 or AN552 platform as a reference implementation when
 you enable FP support on your platforms.
 
 .. Note::
@@ -29,6 +32,11 @@ you enable FP support on your platforms.
     TF-M SPE services that you enable do not require FP, you can set the CMake
     configuration ``CONFIG_TFM_ENABLE_CP10CP11`` to ``ON`` and **ignore** any
     configurations described below.
+
+.. Note::
+    FPU test issue has not been fixed yet on Musca-S1 [7]_. When running FPU
+    tests on Musca-S1, secure thread fails to trigger secure interrupt. FPU test
+    is disabled by default on Musca-S1 until the issue is fixed.
 
 .. Note::
     ``GNU Arm Embedded Toolchain 10.3-2021.10`` may have issue that reports
@@ -68,7 +76,7 @@ The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
   +--------------------------+---------------------------+
   | CONFIG_TFM_ENABLE_FP     | FP support                |
   +==========================+===========================+
-  | off (default)            | FP diasabled              |
+  | off (default)            | FP disabled               |
   +--------------------------+---------------------------+
   | on                       | FP enabled                |
   +--------------------------+---------------------------+
@@ -102,7 +110,8 @@ The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
   target, valid for FP hardware ABI type.
 
   FP architecture is processor dependent. For GNUARM compiler, example value
-  are: auto, fpv5-d16, fpv5-sp-d16, etc.
+  are: auto, fpv5-d16, fpv5-sp-d16, etc. For armclang, example value are: none,
+  softvfp, fpv5-d16, fpv5-sp-d16, etc.
 
   Default value of ``CONFIG_TFM_FP_ARCH`` for GNUARM compiler is fpv5-sp-d16.
 
@@ -110,6 +119,16 @@ The following CMake configurations configure ``COMPILER_CP_FLAG`` in TF-M SPE.
   reference manual and processor hardware manual for more details to set
   correct FPU configuration for platform.
 
+* ``CONFIG_TFM_FP_ARCH_ASM`` specifies the target FPU architecture name shared
+  by Arm Compiler armasm and armlink. It is only used in the ``--fpu=`` argument
+  by Arm Compiler and shall be aligned with ``CONFIG_TFM_FP_ARCH``.
+
+  FP architecture is processor dependent. For armasm and armlink, example value
+  are: SoftVFP, FPv5_D16, etc.
+
+  This parameter shall be specified by platform in preload.cmake. Please check
+  compiler reference manual and processor hardware manual for more details to
+  set correct FPU configuration for platform.
 
 *********
 Reference
@@ -131,6 +150,8 @@ Reference
 .. [8] `GCC Issue on '-mcpu=cortex-m55' conflicts with '-march=armv8.1-m.main' Warning <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97327>`_
 
 .. [9] `Armv8-M Architecture Reference Manual <https://developer.arm.com/documentation/ddi0553/latest>`_
+
+.. [10] `Arm Compiler for Embedded <https://developer.arm.com/Tools%20and%20Software/Arm%20Compiler%20for%20Embedded>`_
 
 --------------
 

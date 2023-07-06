@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -406,114 +406,212 @@ struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS = {
 
 /* ARM MPC SSE 200 driver structures */
 #ifdef MPC_ISRAM0_S
-static const struct mpc_sie200_dev_cfg_t MPC_ISRAM0_DEV_CFG_S = {
-    .base = MPC_ISRAM0_BASE_S
+static const struct mpc_sie_memory_range_t MPC_ISRAM0_RANGE_S = {
+    .base         = MPC_ISRAM0_RANGE_BASE_S,
+    .limit        = MPC_ISRAM0_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
 };
-static struct mpc_sie200_dev_data_t MPC_ISRAM0_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
-    .state = 0,
-    .reserved = 0
+
+static const struct mpc_sie_memory_range_t MPC_ISRAM0_RANGE_NS = {
+    .base         = MPC_ISRAM0_RANGE_BASE_NS,
+    .limit        = MPC_ISRAM0_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
 };
-struct mpc_sie200_dev_t MPC_ISRAM0_DEV_S = {
+
+#define MPC_ISRAM0_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_ISRAM0_RANGE_LIST[MPC_ISRAM0_RANGE_LIST_LEN] = {
+        &MPC_ISRAM0_RANGE_S,
+        &MPC_ISRAM0_RANGE_NS
+};
+
+static struct mpc_sie_dev_cfg_t MPC_ISRAM0_DEV_CFG_S = {
+    .base = MPC_ISRAM0_BASE_S,
+    .range_list = MPC_ISRAM0_RANGE_LIST,
+    .nbr_of_ranges = MPC_ISRAM0_RANGE_LIST_LEN};
+static struct mpc_sie_dev_data_t MPC_ISRAM0_DEV_DATA_S = {
+    .is_initialized = false};
+
+struct mpc_sie_dev_t MPC_ISRAM0_DEV_S = {
     &(MPC_ISRAM0_DEV_CFG_S),
     &(MPC_ISRAM0_DEV_DATA_S)
 };
 #endif
 
 #ifdef MPC_ISRAM1_S
-static const struct mpc_sie200_dev_cfg_t MPC_ISRAM1_DEV_CFG_S = {
-    .base = MPC_ISRAM1_BASE_S
+static const struct mpc_sie_memory_range_t MPC_ISRAM1_RANGE_S = {
+    .base         = MPC_ISRAM1_RANGE_BASE_S,
+    .limit        = MPC_ISRAM1_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
 };
-static struct mpc_sie200_dev_data_t MPC_ISRAM1_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
-    .state = 0,
-    .reserved = 0
+
+static const struct mpc_sie_memory_range_t MPC_ISRAM1_RANGE_NS = {
+    .base         = MPC_ISRAM1_RANGE_BASE_NS,
+    .limit        = MPC_ISRAM1_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
 };
-struct mpc_sie200_dev_t MPC_ISRAM1_DEV_S = {
+
+#define MPC_ISRAM1_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_ISRAM1_RANGE_LIST[MPC_ISRAM1_RANGE_LIST_LEN] = {
+        &MPC_ISRAM1_RANGE_S,
+        &MPC_ISRAM1_RANGE_NS
+};
+
+static struct mpc_sie_dev_cfg_t MPC_ISRAM1_DEV_CFG_S = {
+    .base = MPC_ISRAM1_BASE_S,
+    .range_list = MPC_ISRAM1_RANGE_LIST,
+    .nbr_of_ranges = MPC_ISRAM1_RANGE_LIST_LEN};
+static struct mpc_sie_dev_data_t MPC_ISRAM1_DEV_DATA_S = {
+    .is_initialized = false};
+
+struct mpc_sie_dev_t MPC_ISRAM1_DEV_S = {
     &(MPC_ISRAM1_DEV_CFG_S),
     &(MPC_ISRAM1_DEV_DATA_S)
 };
 #endif
 
 #ifdef MPC_ISRAM2_S
-static const struct mpc_sie200_dev_cfg_t MPC_ISRAM2_DEV_CFG_S = {
-    .base = MPC_ISRAM2_BASE_S
+static const struct mpc_sie_memory_range_t MPC_ISRAM2_RANGE_S = {
+    .base         = MPC_ISRAM2_RANGE_BASE_S,
+    .limit        = MPC_ISRAM2_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
 };
-static struct mpc_sie200_dev_data_t MPC_ISRAM2_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
-    .state = 0,
-    .reserved = 0
+
+static const struct mpc_sie_memory_range_t MPC_ISRAM2_RANGE_NS = {
+    .base         = MPC_ISRAM2_RANGE_BASE_NS,
+    .limit        = MPC_ISRAM2_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
 };
-struct mpc_sie200_dev_t MPC_ISRAM2_DEV_S = {
+
+#define MPC_ISRAM2_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_ISRAM2_RANGE_LIST[MPC_ISRAM2_RANGE_LIST_LEN] = {
+        &MPC_ISRAM2_RANGE_S,
+        &MPC_ISRAM2_RANGE_NS
+};
+
+static struct mpc_sie_dev_cfg_t MPC_ISRAM2_DEV_CFG_S = {
+    .base = MPC_ISRAM2_BASE_S,
+    .range_list = MPC_ISRAM2_RANGE_LIST,
+    .nbr_of_ranges = MPC_ISRAM2_RANGE_LIST_LEN};
+static struct mpc_sie_dev_data_t MPC_ISRAM2_DEV_DATA_S = {
+    .is_initialized = false};
+
+struct mpc_sie_dev_t MPC_ISRAM2_DEV_S = {
     &(MPC_ISRAM2_DEV_CFG_S),
     &(MPC_ISRAM2_DEV_DATA_S)
 };
 #endif
 
 #ifdef MPC_ISRAM3_S
-static const struct mpc_sie200_dev_cfg_t MPC_ISRAM3_DEV_CFG_S = {
-    .base = MPC_ISRAM3_BASE_S
+static const struct mpc_sie_memory_range_t MPC_ISRAM3_RANGE_S = {
+    .base         = MPC_ISRAM3_RANGE_BASE_S,
+    .limit        = MPC_ISRAM3_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
 };
-static struct mpc_sie200_dev_data_t MPC_ISRAM3_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
-    .state = 0,
-    .reserved = 0
+
+static const struct mpc_sie_memory_range_t MPC_ISRAM3_RANGE_NS = {
+    .base         = MPC_ISRAM3_RANGE_BASE_NS,
+    .limit        = MPC_ISRAM3_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
 };
-struct mpc_sie200_dev_t MPC_ISRAM3_DEV_S = {
+
+#define MPC_ISRAM3_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_ISRAM3_RANGE_LIST[MPC_ISRAM3_RANGE_LIST_LEN] = {
+        &MPC_ISRAM3_RANGE_S,
+        &MPC_ISRAM3_RANGE_NS
+};
+
+static struct mpc_sie_dev_cfg_t MPC_ISRAM3_DEV_CFG_S = {
+    .base = MPC_ISRAM3_BASE_S,
+    .range_list = MPC_ISRAM3_RANGE_LIST,
+    .nbr_of_ranges = MPC_ISRAM3_RANGE_LIST_LEN};
+static struct mpc_sie_dev_data_t MPC_ISRAM3_DEV_DATA_S = {
+    .is_initialized = false};
+
+struct mpc_sie_dev_t MPC_ISRAM3_DEV_S = {
     &(MPC_ISRAM3_DEV_CFG_S),
     &(MPC_ISRAM3_DEV_DATA_S)
 };
 #endif
 
-#ifdef MPC_BRAM_S
-static const struct mpc_sie200_dev_cfg_t MPC_BRAM_DEV_CFG_S = {
-    .base = MPC_BRAM_BASE_S
+#ifdef MPC_DDR4_S
+static const struct mpc_sie_memory_range_t MPC_DDR4_RANGE_S = {
+    .base         = MPC_DDR4_RANGE_BASE_S,
+    .limit        = MPC_DDR4_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
 };
-static struct mpc_sie200_dev_data_t MPC_BRAM_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
-    .state = 0,
-    .reserved = 0
+
+static const struct mpc_sie_memory_range_t MPC_DDR4_RANGE_NS = {
+    .base         = MPC_DDR4_RANGE_BASE_NS,
+    .limit        = MPC_DDR4_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
 };
-struct mpc_sie200_dev_t MPC_BRAM_DEV_S = {
-    &(MPC_BRAM_DEV_CFG_S),
-    &(MPC_BRAM_DEV_DATA_S)
+
+#define MPC_DDR4_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_DDR4_RANGE_LIST[MPC_DDR4_RANGE_LIST_LEN] = {
+        &MPC_DDR4_RANGE_S,
+        &MPC_DDR4_RANGE_NS
+};
+
+static struct mpc_sie_dev_cfg_t MPC_DDR4_DEV_CFG_S = {
+    .base = MPC_DDR4_BASE_S,
+    .range_list = MPC_DDR4_RANGE_LIST,
+    .nbr_of_ranges = MPC_DDR4_RANGE_LIST_LEN};
+static struct mpc_sie_dev_data_t MPC_DDR4_DEV_DATA_S = {
+    .is_initialized = false};
+
+struct mpc_sie_dev_t MPC_DDR4_DEV_S = {
+    &(MPC_DDR4_DEV_CFG_S),
+    &(MPC_DDR4_DEV_DATA_S)
 };
 #endif
 
 #ifdef MPC_QSPI_S
-static const struct mpc_sie200_dev_cfg_t MPC_QSPI_DEV_CFG_S = {
-    .base = MPC_QSPI_BASE_S
+static const struct mpc_sie_memory_range_t MPC_QSPI_RANGE_S = {
+    .base         = MPC_QSPI_RANGE_BASE_S,
+    .limit        = MPC_QSPI_RANGE_LIMIT_S,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_SECURE
 };
-static struct mpc_sie200_dev_data_t MPC_QSPI_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
-    .state = 0,
-    .reserved = 0
+
+static const struct mpc_sie_memory_range_t MPC_QSPI_RANGE_NS = {
+    .base         = MPC_QSPI_RANGE_BASE_NS,
+    .limit        = MPC_QSPI_RANGE_LIMIT_NS,
+    .range_offset = 0,
+    .attr         = MPC_SIE_SEC_ATTR_NONSECURE
 };
-struct mpc_sie200_dev_t MPC_QSPI_DEV_S = {
+
+#define MPC_QSPI_RANGE_LIST_LEN  2u
+static const struct mpc_sie_memory_range_t*
+    MPC_QSPI_RANGE_LIST[MPC_QSPI_RANGE_LIST_LEN] = {
+        &MPC_QSPI_RANGE_S,
+        &MPC_QSPI_RANGE_NS
+};
+
+static struct mpc_sie_dev_cfg_t MPC_QSPI_DEV_CFG_S = {
+    .base = MPC_QSPI_BASE_S,
+    .range_list = MPC_QSPI_RANGE_LIST,
+    .nbr_of_ranges = MPC_QSPI_RANGE_LIST_LEN};
+static struct mpc_sie_dev_data_t MPC_QSPI_DEV_DATA_S = {
+    .is_initialized = false};
+
+struct mpc_sie_dev_t MPC_QSPI_DEV_S = {
     &(MPC_QSPI_DEV_CFG_S),
     &(MPC_QSPI_DEV_DATA_S)
-};
-#endif
-
-#ifdef MPC_DDR4_S
-static const struct mpc_sie200_dev_cfg_t MPC_DDR4_DEV_CFG_S = {
-    .base = MPC_DDR4_BASE_S
-};
-static struct mpc_sie200_dev_data_t MPC_DDR4_DEV_DATA_S = {
-    .range_list = 0,
-    .nbr_of_ranges = 0,
-    .state = 0,
-    .reserved = 0
-};
-struct mpc_sie200_dev_t MPC_DDR4_DEV_S = {
-    &(MPC_DDR4_DEV_CFG_S),
-    &(MPC_DDR4_DEV_DATA_S)
 };
 #endif
 

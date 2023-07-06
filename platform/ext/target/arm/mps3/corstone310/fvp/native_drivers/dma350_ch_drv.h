@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 #include "dma350_regdef.h"
 
-/* For __STATIC_INLINE */
+/* For __STATIC_INLINE and __DMB */
 #include "cmsis_compiler.h"
 
 #include <stdbool.h>
@@ -3612,6 +3612,8 @@ void dma350_cmdlink_set_linkaddr32(struct dma350_cmdlink_gencfg_t *cmdlink_cfg,
 __STATIC_INLINE
 void dma350_ch_cmd(struct dma350_ch_dev_t *dev, enum dma350_ch_cmd_t cmd)
 {
+    /* Wait outstanding CPU writes to avoid race condition with DMA */
+    __DMB();
     dev->cfg.ch_base->CH_CMD = cmd;
 }
 

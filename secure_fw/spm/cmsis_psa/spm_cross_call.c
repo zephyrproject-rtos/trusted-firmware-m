@@ -9,7 +9,7 @@
 #include "config_impl.h"
 #include "compiler_ext_defs.h"
 #include "current.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_arch.h"
 #include "ffm/backend.h"
 #include "ffm/psa_api.h"

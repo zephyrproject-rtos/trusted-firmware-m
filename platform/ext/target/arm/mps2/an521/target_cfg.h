@@ -25,6 +25,7 @@
 
 #define TFM_DRIVER_STDIO    Driver_USART0
 #define NS_DRIVER_STDIO     Driver_USART0
+#define ERPC_UART           Driver_USART1
 
 /**
  * \brief Defines the word offsets of Slave Peripheral Protection Controller

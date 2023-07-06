@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -20,13 +20,13 @@
 #include "psa/client.h"
 #include "psa/service.h"
 #include "thread.h"
-#include "internal_errors.h"
+#include "internal_status_code.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
 #include "tfm_hal_defs.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_hal_isolation.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "tfm_peripherals_def.h"
 #include "tfm_nspm.h"
 #include "tfm_rpc.h"
@@ -51,7 +51,7 @@ static struct service_head_t services_listhead;
 struct service_t *stateless_services_ref_tbl[STATIC_HANDLE_NUM_LIMIT];
 
 /* Pools */
-TFM_POOL_DECLARE(conn_handle_pool, sizeof(struct conn_handle_t),
+TFM_POOL_DECLARE(connection_pool, sizeof(struct connection_t),
                  CONFIG_TFM_CONN_HANDLE_MAX_NUM);
 
 /*********************** Connection handle conversion APIs *******************/
@@ -78,30 +78,30 @@ static uint32_t loop_index;
  * handle in pool offset, the converted value is named as a user handle.
  *
  * The formula:
- *  user_handle = (handle_instance - POOL_START) * CONVERSION_FACTOR_VALUE +
+ *  handle =      (p_connection - POOL_START) * CONVERSION_FACTOR_VALUE +
  *                CLIENT_HANDLE_VALUE_MIN + loop_index
  * where:
  *  CONVERSION_FACTOR_VALUE = 1 << CONVERSION_FACTOR_BITOFFSET, and should not
  *  exceed CONVERSION_FACTOR_VALUE_MAX.
  *
- *  handle_instance in RANGE[POOL_START, POOL_END]
- *  user_handle     in RANGE[CLIENT_HANDLE_VALUE_MIN, 0x3FFFFFFF]
+ *  p_connection    in RANGE[POOL_START, POOL_END]
+ *  handle          in RANGE[CLIENT_HANDLE_VALUE_MIN, 0x3FFFFFFF]
  *  loop_index      in RANGE[0, CONVERSION_FACTOR_VALUE - 1]
  *
  *  note:
  *  loop_index is used to promise same handle instance is converted into
  *  different user handles in short time.
  */
-psa_handle_t tfm_spm_to_user_handle(struct conn_handle_t *handle_instance)
+psa_handle_t connection_to_handle(struct connection_t *p_connection)
 {
-    psa_handle_t user_handle;
+    psa_handle_t handle;
 
     loop_index = (loop_index + 1) % CONVERSION_FACTOR_VALUE;
-    user_handle = (psa_handle_t)((((uintptr_t)handle_instance -
-                  (uintptr_t)conn_handle_pool) << CONVERSION_FACTOR_BITOFFSET) +
+    handle = (psa_handle_t)((((uintptr_t)p_connection -
+                  (uintptr_t)connection_pool) << CONVERSION_FACTOR_BITOFFSET) +
                   CLIENT_HANDLE_VALUE_MIN + loop_index);
 
-    return user_handle;
+    return handle;
 }
 
 /*
@@ -110,38 +110,38 @@ psa_handle_t tfm_spm_to_user_handle(struct conn_handle_t *handle_instance)
  * is returned as NULL.
  *
  * The formula:
- *  handle_instance = ((user_handle - CLIENT_HANDLE_VALUE_MIN) /
+ *  p_connection =    ((handle - CLIENT_HANDLE_VALUE_MIN) /
  *                    CONVERSION_FACTOR_VALUE) + POOL_START
  * where:
  *  CONVERSION_FACTOR_VALUE = 1 << CONVERSION_FACTOR_BITOFFSET, and should not
  *  exceed CONVERSION_FACTOR_VALUE_MAX.
  *
- *  handle_instance in RANGE[POOL_START, POOL_END]
- *  user_handle     in RANGE[CLIENT_HANDLE_VALUE_MIN, 0x3FFFFFFF]
+ *  p_connection    in RANGE[POOL_START, POOL_END]
+ *  handle          in RANGE[CLIENT_HANDLE_VALUE_MIN, 0x3FFFFFFF]
  *  loop_index      in RANGE[0, CONVERSION_FACTOR_VALUE - 1]
  */
-struct conn_handle_t *tfm_spm_to_handle_instance(psa_handle_t user_handle)
+struct connection_t *handle_to_connection(psa_handle_t handle)
 {
-    struct conn_handle_t *handle_instance;
+    struct connection_t *p_connection;
 
-    if (user_handle == PSA_NULL_HANDLE) {
+    if (handle == PSA_NULL_HANDLE) {
         return NULL;
     }
 
-    handle_instance = (struct conn_handle_t *)((((uintptr_t)user_handle -
-                      CLIENT_HANDLE_VALUE_MIN) >> CONVERSION_FACTOR_BITOFFSET) +
-                      (uintptr_t)conn_handle_pool);
+    p_connection = (struct connection_t *)((((uintptr_t)handle -
+                    CLIENT_HANDLE_VALUE_MIN) >> CONVERSION_FACTOR_BITOFFSET) +
+                    (uintptr_t)connection_pool);
 
-    return handle_instance;
+    return p_connection;
 }
 
 /* Service handle management functions */
-struct conn_handle_t *tfm_spm_create_conn_handle(void)
+struct connection_t *spm_allocate_connection(void)
 {
-    struct conn_handle_t *p_handle;
+    struct connection_t *p_handle;
 
     /* Get buffer for handle list structure from handle pool */
-    p_handle = (struct conn_handle_t *)tfm_pool_alloc(conn_handle_pool);
+    p_handle = (struct connection_t *)tfm_pool_alloc(connection_pool);
     if (!p_handle) {
         return NULL;
     }
@@ -153,10 +153,10 @@ struct conn_handle_t *tfm_spm_create_conn_handle(void)
     return p_handle;
 }
 
-psa_status_t tfm_spm_validate_conn_handle(const struct conn_handle_t *handle)
+psa_status_t spm_validate_connection(const struct connection_t *handle)
 {
     /* Check the handle address is valid */
-    if (is_valid_chunk_data_in_pool(conn_handle_pool,
+    if (is_valid_chunk_data_in_pool(connection_pool,
                                     (uint8_t *)handle) != true) {
         return SPM_ERROR_GENERIC;
     }
@@ -164,15 +164,15 @@ psa_status_t tfm_spm_validate_conn_handle(const struct conn_handle_t *handle)
     return PSA_SUCCESS;
 }
 
-void tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle)
+void spm_free_connection(struct connection_t *p_connection)
 {
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
-    SPM_ASSERT(conn_handle != NULL);
+    SPM_ASSERT(p_connection != NULL);
 
     CRITICAL_SECTION_ENTER(cs_assert);
     /* Back handle buffer to pool */
-    tfm_pool_free(conn_handle_pool, conn_handle);
+    tfm_pool_free(connection_pool, p_connection);
     CRITICAL_SECTION_LEAVE(cs_assert);
 }
 
@@ -180,11 +180,11 @@ void tfm_spm_free_conn_handle(struct conn_handle_t *conn_handle)
 
 /* This API is only used in IPC backend. */
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
-struct conn_handle_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
-                                               psa_signal_t signal)
+struct connection_t *spm_get_handle_by_signal(struct partition_t *p_ptn,
+                                              psa_signal_t signal)
 {
-    struct conn_handle_t *p_handle_iter;
-    struct conn_handle_t **pr_handle_iter, **last_found_handle_holder = NULL;
+    struct connection_t *p_handle_iter;
+    struct connection_t **pr_handle_iter, **last_found_handle_holder = NULL;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     uint32_t nr_found_msgs = 0;
 
@@ -310,12 +310,12 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 
 /* Message functions */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
-                                                      int32_t client_id)
+struct connection_t *spm_get_client_connection(psa_handle_t handle,
+                                               int32_t client_id)
 {
-    struct conn_handle_t *p_conn_handle = tfm_spm_to_handle_instance(handle);
+    struct connection_t *p_conn_handle = handle_to_connection(handle);
 
-    if (tfm_spm_validate_conn_handle(p_conn_handle) != PSA_SUCCESS) {
+    if (spm_validate_connection(p_conn_handle) != PSA_SUCCESS) {
         return NULL;
     }
 
@@ -328,7 +328,7 @@ struct conn_handle_t *spm_get_handle_by_client_handle(psa_handle_t handle,
 }
 #endif
 
-struct conn_handle_t *spm_get_handle_by_msg_handle(psa_handle_t msg_handle)
+struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle)
 {
     /*
      * The message handler passed by the caller is considered invalid in the
@@ -340,10 +340,9 @@ struct conn_handle_t *spm_get_handle_by_msg_handle(psa_handle_t msg_handle)
      * Check the conditions above
      */
     int32_t partition_id;
-    struct conn_handle_t *p_conn_handle =
-                                    tfm_spm_to_handle_instance(msg_handle);
+    struct connection_t *p_conn_handle = handle_to_connection(msg_handle);
 
-    if (tfm_spm_validate_conn_handle(p_conn_handle) != PSA_SUCCESS) {
+    if (spm_validate_connection(p_conn_handle) != PSA_SUCCESS) {
         return NULL;
     }
 
@@ -356,54 +355,34 @@ struct conn_handle_t *spm_get_handle_by_msg_handle(psa_handle_t msg_handle)
     return p_conn_handle;
 }
 
-void spm_fill_message(struct conn_handle_t *conn_handle,
+void spm_fill_message(struct connection_t *p_connection,
                       struct service_t *service,
                       psa_handle_t handle,
-                      int32_t type, int32_t client_id,
-                      psa_invec *invec, size_t in_len,
-                      psa_outvec *outvec, size_t out_len,
-                      psa_outvec *caller_outvec)
+                      int32_t type, int32_t client_id)
 {
-    uint32_t i;
-
-    SPM_ASSERT(conn_handle);
+    SPM_ASSERT(p_connection);
     SPM_ASSERT(service);
-    SPM_ASSERT(!(invec == NULL && in_len != 0));
-    SPM_ASSERT(!(outvec == NULL && out_len != 0));
-    SPM_ASSERT(in_len <= SIZE_MAX - out_len);
-    SPM_ASSERT(in_len + out_len <= PSA_MAX_IOVEC);
 
     /* Clear message buffer before using it */
-    spm_memset(&conn_handle->msg, 0, sizeof(psa_msg_t));
+    spm_memset(&p_connection->msg, 0, sizeof(psa_msg_t));
 
-    THRD_SYNC_INIT(&conn_handle->ack_evnt);
-    conn_handle->service = service;
-    conn_handle->p_client = GET_CURRENT_COMPONENT();
-    conn_handle->caller_outvec = caller_outvec;
-    conn_handle->msg.client_id = client_id;
+    p_connection->service = service;
+    p_connection->p_client = GET_CURRENT_COMPONENT();
+    p_connection->msg.client_id = client_id;
 
     /* Copy contents */
-    conn_handle->msg.type = type;
-
-    for (i = 0; i < in_len; i++) {
-        conn_handle->msg.in_size[i] = invec[i].len;
-        conn_handle->invec[i].base = invec[i].base;
-    }
-
-    for (i = 0; i < out_len; i++) {
-        conn_handle->msg.out_size[i] = outvec[i].len;
-        conn_handle->outvec[i].base = outvec[i].base;
-        /* Out len is used to record the wrote number, set 0 here again */
-        conn_handle->outvec[i].len = 0;
-    }
+    p_connection->msg.type = type;
 
     /* Use the user connect handle as the message handle */
-    conn_handle->msg.handle = handle;
-    conn_handle->msg.rhandle = conn_handle->rhandle;
+    p_connection->msg.handle = handle;
+
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+    p_connection->msg.rhandle = p_connection->rhandle;
+#endif
 
     /* Set the private data of NSPE client caller in multi-core topology */
     if (TFM_CLIENT_ID_IS_NS(client_id)) {
-        tfm_rpc_set_caller_data(conn_handle, client_id);
+        tfm_rpc_set_caller_data(p_connection, client_id);
     }
 }
 
@@ -427,7 +406,7 @@ bool tfm_spm_is_ns_caller(void)
         tfm_core_panic();
     }
 
-    return IS_PARTITION_NS_AGENT(partition->p_ldinf);
+    return IS_NS_AGENT(partition->p_ldinf);
 }
 
 int32_t tfm_spm_get_client_id(bool ns_caller)
@@ -454,9 +433,9 @@ uint32_t tfm_spm_init(void)
     uint32_t service_setting;
     fih_int fih_rc = FIH_FAILURE;
 
-    tfm_pool_init(conn_handle_pool,
-                  POOL_BUFFER_SIZE(conn_handle_pool),
-                  sizeof(struct conn_handle_t),
+    tfm_pool_init(connection_pool,
+                  POOL_BUFFER_SIZE(connection_pool),
+                  sizeof(struct connection_t),
                   CONFIG_TFM_CONN_HANDLE_MAX_NUM);
 
     UNI_LISI_INIT_NODE(PARTITION_LIST_ADDR, next);
@@ -492,21 +471,9 @@ uint32_t tfm_spm_init(void)
     return backend_system_run();
 }
 
-void update_caller_outvec_len(struct conn_handle_t *handle)
+void update_caller_outvec_len(struct connection_t *handle)
 {
     uint32_t i;
-
-    /*
-     * FixeMe: abstract these part into dedicated functions to avoid
-     * accessing thread context in psa layer
-     */
-    /*
-     * If it is a NS request via RPC, the owner of this message is not set.
-     * Or if it is a SFN message, it does not have owner thread state either.
-     */
-    if ((!is_tfm_rpc_msg(handle)) && (handle->sfn_magic != TFM_MSG_MAGIC_SFN)) {
-        SPM_ASSERT(handle->ack_evnt.owner->state == THRD_STATE_BLOCK);
-    }
 
     for (i = 0; i < PSA_MAX_IOVEC; i++) {
         if (handle->msg.out_size[i] == 0) {
@@ -517,24 +484,4 @@ void update_caller_outvec_len(struct conn_handle_t *handle)
 
         handle->caller_outvec[i].len = handle->outvec[i].len;
     }
-}
-
-void spm_assert_signal(void *p_pt, psa_signal_t signal)
-{
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
-    struct partition_t *partition = (struct partition_t *)p_pt;
-
-    if (!partition) {
-        tfm_core_panic();
-    }
-
-    CRITICAL_SECTION_ENTER(cs_assert);
-
-    partition->signals_asserted |= signal;
-
-    if (partition->signals_waiting & signal) {
-        backend_wake_up(partition);
-    }
-
-    CRITICAL_SECTION_LEAVE(cs_assert);
 }

@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -23,7 +23,7 @@ if (NS OR TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2 OR TEST_BL1_1 OR TEST_BL
         FETCH_CONTENT_ARGS
             GIT_REPOSITORY      https://git.trustedfirmware.org/TF-M/tf-m-tests.git
             GIT_TAG             ${TFM_TEST_REPO_VERSION}
-            GIT_PROGRESS TRUE
+            GIT_PROGRESS        TRUE
     )
 
     if ("${CMSIS_5_PATH}" STREQUAL DOWNLOAD)
@@ -32,10 +32,5 @@ if (NS OR TFM_S_REG_TEST OR TFM_NS_REG_TEST OR TEST_BL2 OR TEST_BL1_1 OR TEST_BL
 
     if (NOT TFM_TEST_PATH)
         set(TFM_TEST_PATH ${TFM_TEST_REPO_PATH}/test CACHE PATH "Path to TFM tests" FORCE)
-    endif()
-
-    # Load TF-M regression test suites setting
-    if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
-        include(${TFM_TEST_PATH}/config/set_config.cmake)
     endif()
 endif()

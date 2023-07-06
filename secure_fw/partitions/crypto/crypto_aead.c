@@ -8,11 +8,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "config_crypto.h"
+#include "config_tfm.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
+#include "tfm_crypto_key.h"
 #include "tfm_crypto_defs.h"
+
+#include "crypto_library.h"
 
 /*!
  * \defgroup tfm_crypto_api_shim_layer Set of functions implementing a thin shim
@@ -26,7 +29,7 @@
 #if CRYPTO_AEAD_MODULE_ENABLED
 psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
                                        psa_outvec out_vec[],
-                                       mbedtls_svc_key_id_t *encoded_key)
+                                       struct tfm_crypto_key_id_s *encoded_key)
 {
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
@@ -34,6 +37,8 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
     uint32_t *p_handle = NULL;
     uint16_t sid = iov->function_id;
 
+    tfm_crypto_library_key_id_t library_key = tfm_crypto_library_key_id_init(
+                                                  encoded_key->owner, encoded_key->key_id);
     if (sid == TFM_CRYPTO_AEAD_ENCRYPT_SID) {
 #if CRYPTO_SINGLE_PART_FUNCS_DISABLED
         return PSA_ERROR_NOT_SUPPORTED;
@@ -49,7 +54,7 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
         const uint8_t *additional_data = in_vec[2].base;
         size_t additional_data_length = in_vec[2].len;
 
-        status = psa_aead_encrypt(*encoded_key, iov->alg, nonce, nonce_length,
+        status = psa_aead_encrypt(library_key, iov->alg, nonce, nonce_length,
                                   additional_data, additional_data_length,
                                   plaintext, plaintext_length,
                                   ciphertext, ciphertext_size, &out_vec[0].len);
@@ -75,7 +80,7 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
         const uint8_t *additional_data = in_vec[2].base;
         size_t additional_data_length = in_vec[2].len;
 
-        status = psa_aead_decrypt(*encoded_key, iov->alg, nonce, nonce_length,
+        status = psa_aead_decrypt(library_key, iov->alg, nonce, nonce_length,
                                   additional_data, additional_data_length,
                                   ciphertext, ciphertext_length,
                                   plaintext, plaintext_size, &out_vec[0].len);
@@ -130,7 +135,7 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
     switch (sid) {
     case TFM_CRYPTO_AEAD_ENCRYPT_SETUP_SID:
     {
-        status = psa_aead_encrypt_setup(operation, *encoded_key, iov->alg);
+        status = psa_aead_encrypt_setup(operation, library_key, iov->alg);
         if (status != PSA_SUCCESS) {
             goto release_operation_and_return;
         }
@@ -138,7 +143,7 @@ psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
     break;
     case TFM_CRYPTO_AEAD_DECRYPT_SETUP_SID:
     {
-        status = psa_aead_decrypt_setup(operation, *encoded_key, iov->alg);
+        status = psa_aead_decrypt_setup(operation, library_key, iov->alg);
         if (status != PSA_SUCCESS) {
             goto release_operation_and_return;
         }
@@ -245,7 +250,7 @@ release_operation_and_return:
 #else /* CRYPTO_AEAD_MODULE_ENABLED */
 psa_status_t tfm_crypto_aead_interface(psa_invec in_vec[],
                                        psa_outvec out_vec[],
-                                       mbedtls_svc_key_id_t *encoded_key)
+                                       struct tfm_crypto_key_id_s *encoded_key)
 {
     (void)in_vec;
     (void)out_vec;

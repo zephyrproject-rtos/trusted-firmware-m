@@ -12,6 +12,9 @@
 #include "bootutil_priv.h"
 #include "bootutil/bootutil_log.h"
 #include "Driver_Flash.h"
+#ifdef PLATFORM_HAS_BOOT_DMA
+#include "boot_dma.h"
+#endif /* PLATFORM_HAS_BOOT_DMA */
 
 #define FLASH_PROGRAM_UNIT    TFM_HAL_FLASH_PROGRAM_UNIT
 
@@ -113,6 +116,9 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
     uint32_t remaining_len, read_length;
     uint32_t aligned_off;
     uint32_t item_number;
+#ifdef PLATFORM_HAS_BOOT_DMA
+    uint32_t dma_src_addr;
+#endif /* PLATFORM_HAS_BOOT_DMA */
 
     /* The maximum value of data_width is 4 bytes. */
     uint8_t temp_buffer[sizeof(uint32_t)];
@@ -134,6 +140,25 @@ int flash_area_read(const struct flash_area *area, uint32_t off, void *dst,
     DriverCapabilities = DRV_FLASH_AREA(area)->GetCapabilities();
     data_width = data_width_byte[DriverCapabilities.data_width];
     aligned_off = FLOOR_ALIGN(off, data_width);
+
+#ifdef PLATFORM_HAS_BOOT_DMA
+    if (len >= BOOT_DMA_MIN_SIZE_REQ) {
+        dma_src_addr = FLASH_BASE_ADDRESS + area->fa_off + off;
+        BOOT_LOG_DBG("dma memcpy call:src_addr=%#x, dest_addr=%#x, len=%#x",
+                      dma_src_addr, dst, len);
+
+        ret = boot_dma_memcpy(dma_src_addr, (uint32_t)dst, len, 0);
+        if (ret == 0) {
+            /* DMA transfer copy success */
+            return 0;
+        }
+    }
+#endif /* PLATFORM_HAS_BOOT_DMA */
+
+    /* Either DMA is not supported or DMA transfer copy failure or
+     * memory transaction size is less than required.
+     * Continue to use default flash driver.
+     */
 
     /* Read the first data_width long data if `off` is not aligned. */
     if (aligned_off != off) {

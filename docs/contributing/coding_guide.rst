@@ -24,7 +24,7 @@ divergence.
 
 .. Warning::
 
-    Text files do not fall within these rules as they may require different formatting.``
+    Text files do not fall within these rules as they may require different formatting.
 
 ****************
 Consistent style

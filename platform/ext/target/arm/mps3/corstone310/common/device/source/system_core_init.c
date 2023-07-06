@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2023 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,7 +26,7 @@
 /*----------------------------------------------------------------------------
   Define clocks
  *----------------------------------------------------------------------------*/
- #define  XTAL             (32000000UL)
+ #define  XTAL             (25000000UL)
  #define  SYSTEM_CLOCK     (XTAL)
  #define  PERIPHERAL_CLOCK (25000000UL)
 

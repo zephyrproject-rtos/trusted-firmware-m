@@ -44,7 +44,7 @@ Trusted Firmware-M Documentation
             <p>Guidelines for integration with TF-M.</p>
         </li>
         <li class="grid-item">
-            <a href="technical_references/design_docs/index.html">
+            <a href="design_docs/index.html">
                 <img alt="" src="_static/images/tfm-reference.png"/>
                 <h2>References</h2>
             </a>
@@ -85,11 +85,11 @@ Trusted Firmware-M Documentation
     :maxdepth: 1
     :hidden:
 
-    Platform Selection<platform/index>
+    Platforms <platform/index>
     building/tfm_build_instruction
     configuration/index
     integration_guide/index
-    technical_references/design_docs/index
+    design_docs/index
     Tools <tools/index>
 
 .. toctree::
@@ -106,7 +106,7 @@ Trusted Firmware-M Documentation
     :hidden:
     :caption: Links
 
-    API Reference <https://ci.trustedfirmware.org/view/TF-M/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/reference_manual/html/index.html>
+    API Reference <https://ci.trustedfirmware.org/job/tf-m-build-docs-nightly/lastSuccessfulBuild/artifact/trusted-firmware-m/build/docs/reference_manual/html/index.html>
     Security Center <https://developer.trustedfirmware.org/w/collaboration/security_center>
     PSA <https://www.arm.com/architecture/security-features/platform-security>
 

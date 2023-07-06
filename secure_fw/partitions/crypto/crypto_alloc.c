@@ -9,13 +9,29 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "config_crypto.h"
+#include "config_tfm.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
 #include "tfm_crypto_defs.h"
 
+/**
+ * \brief Define miscellaneous literal constants that are used in the service
+ */
+enum {
+    TFM_CRYPTO_NOT_IN_USE = 0,
+    TFM_CRYPTO_IN_USE = 1
+};
 
+/**
+ * \brief This value is used to mark an handle for multipart operations as invalid.
+ */
+#define TFM_CRYPTO_INVALID_HANDLE (0x0u)
+
+/**
+ * \brief A type describing the context stored in Secure memory by the TF-M Crypto
+ *        service to support multipart calls on secure side
+ */
 struct tfm_crypto_operation_s {
     uint32_t in_use;                /*!< Indicates if the operation is in use */
     int32_t owner;                  /*!< Indicates an ID of the owner of

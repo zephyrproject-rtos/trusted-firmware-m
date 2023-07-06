@@ -601,9 +601,9 @@ Reference
 
 .. [9] `PSA Attestation API 1.0 (ARM IHI 0085) <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Implement/IHI0085-PSA_Attestation_API-1.0.2.pdf?revision=eef78753-c77e-4b24-bcf0-65596213b4c1&la=en&hash=E5E0353D612077AFDCE3F2F3708A50C77A74B2A3>`_
 
-.. [10] :doc:`Secure boot </technical_references/design_docs/tfm_secure_boot>`
+.. [10] :doc:`Secure boot </design_docs/booting/tfm_secure_boot>`
 
-.. [11] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
+.. [11] :doc:`Crypto design </design_docs/services/tfm_crypto_design>`
 
 .. [12] :doc:`TF-M build instruction </building/tfm_build_instruction>`
 

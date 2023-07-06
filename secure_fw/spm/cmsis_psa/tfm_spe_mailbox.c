@@ -8,6 +8,7 @@
 
 #include "cmsis_compiler.h"
 
+#include "config_impl.h"
 #include "psa/error.h"
 #include "utilities.h"
 #include "tfm_arch.h"

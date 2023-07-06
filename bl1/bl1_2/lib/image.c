@@ -12,9 +12,11 @@
 #include "region_defs.h"
 #include "fih.h"
 
+#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+#endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
-int32_t __WEAK bl1_image_get_flash_offset(uint32_t image_id)
+uint32_t __WEAK bl1_image_get_flash_offset(uint32_t image_id)
 {
     switch (image_id) {
     case 0:
@@ -26,6 +28,7 @@ int32_t __WEAK bl1_image_get_flash_offset(uint32_t image_id)
     }
 }
 
+#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 fih_int bl1_image_copy_to_sram(uint32_t image_id, uint8_t *out)
 {
     uint32_t flash_offset;
@@ -37,3 +40,4 @@ fih_int bl1_image_copy_to_sram(uint32_t image_id, uint8_t *out)
 
     FIH_RET(fih_rc);
 }
+#endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */

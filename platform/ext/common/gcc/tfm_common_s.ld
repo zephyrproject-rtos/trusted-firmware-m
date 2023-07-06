@@ -1,5 +1,5 @@
 ;/*
-; * Copyright (c) 2009-2022 Arm Limited
+; * Copyright (c) 2009-2023 Arm Limited
 ; * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 ; * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 ; *
@@ -33,10 +33,35 @@ MEMORY
 {
   FLASH    (rx)  : ORIGIN = S_CODE_START, LENGTH = S_CODE_SIZE
   RAM      (rwx) : ORIGIN = S_DATA_START, LENGTH = S_DATA_SIZE
-#if defined(S_CODE_SRAM_ALIAS_BASE)
-  CODE_RAM (rwx) : ORIGIN = S_CODE_SRAM_ALIAS_BASE, LENGTH = TOTAL_CODE_SRAM_SIZE
+#if defined(S_RAM_CODE_START)
+  CODE_RAM (rwx) : ORIGIN = S_RAM_CODE_START, LENGTH = S_RAM_CODE_SIZE
 #endif
 }
+
+#ifndef TFM_LINKER_VENEERS_START
+#define TFM_LINKER_VENEERS_START ALIGN(TFM_LINKER_VENEERS_ALIGNMENT)
+#endif
+
+#ifndef TFM_LINKER_VENEERS_END
+#define TFM_LINKER_VENEERS_END ALIGN(TFM_LINKER_VENEERS_ALIGNMENT)
+#endif
+
+#define VENEERS() \
+/* \
+ * Place the CMSE Veneers (containing the SG instruction) after the code, in \
+ * a separate at least 32 bytes aligned region so that the SAU can \
+ * programmed to just set this region as Non-Secure Callable. \
+ */ \
+.gnu.sgstubs TFM_LINKER_VENEERS_START : \
+{ \
+    *(.gnu.sgstubs*) \
+} > FLASH \
+/* GCC always places veneers at the end of .gnu.sgstubs section, so the only \
+ * way to align the end of .gnu.sgstubs section is to align start of the \
+ * next section */ \
+.sgstubs_end : TFM_LINKER_VENEERS_END \
+{ \
+} > FLASH
 
 __msp_stack_size__ = S_MSP_STACK_SIZE;
 
@@ -55,21 +80,13 @@ SECTIONS
         __vectors_end__ = .;
     } > FLASH
 
-#ifdef CONFIG_TFM_USE_TRUSTZONE
+#if defined(S_CODE_VECTOR_TABLE_SIZE)
     ASSERT(. <= ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE, ".TFM_VECTORS section size overflow.")
     . = ADDR(.TFM_VECTORS) + S_CODE_VECTOR_TABLE_SIZE;
-    /*
-     * Place the CMSE Veneers (containing the SG instruction) after the code, in
-     * a separate at least 32 bytes aligned region so that the SAU can
-     * programmed to just set this region as Non-Secure Callable.
-     */
-    .gnu.sgstubs ALIGN(TFM_LINKER_VENEERS_ALIGNMENT) :
-    {
-        *(.gnu.sgstubs*)
-        . = ALIGN(TFM_LINKER_VENEERS_ALIGNMENT);
-    } > FLASH
-    Image$$ER_VENEER$$Base = ADDR(.gnu.sgstubs);
-    Image$$VENEER_ALIGN$$Limit = ADDR(.gnu.sgstubs) + SIZEOF(.gnu.sgstubs);
+#endif
+
+#if defined(CONFIG_TFM_USE_TRUSTZONE) && !defined(TFM_LINKER_VENEERS_LOCATION_END)
+    VENEERS()
 #endif
 
     .copy.table : ALIGN(4)
@@ -94,11 +111,6 @@ SECTIONS
         LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA) / 4)
 
 #if defined (S_RAM_CODE_START)
-        LONG (LOADADDR(.TFM_RAM_CODE))
-        LONG (ADDR(.TFM_RAM_CODE))
-        LONG (SIZEOF(.TFM_RAM_CODE) / 4)
-#endif
-#if defined(S_CODE_SRAM_ALIAS_BASE)
         LONG (LOADADDR(.ER_CODE_SRAM))
         LONG (ADDR(.ER_CODE_SRAM))
         LONG (SIZEOF(.ER_CODE_SRAM) / 4)
@@ -177,24 +189,24 @@ SECTIONS
     /**** APPLICATION RoT RO part (CODE + RODATA) end here */
     Image$$TFM_APP_CODE_END$$Base = .;
 
-#if defined(S_CODE_SRAM_ALIAS_BASE)
+#if defined(S_RAM_CODE_START)
+    /* Flash drivers code that gets copied from Flash */
     .ER_CODE_SRAM : ALIGN(4)
     {
-        *Driver_GFC100_EFlash.o(.text*)
-        *Driver_GFC100_EFlash.o(.rodata*)
-        *gfc100_eflash_drv.o(.text*)
-        *gfc100_eflash_drv.o(.rodata*)
-        *musca_b1_eflash_drv.o(.text*)
-        *musca_b1_eflash_drv.o(.rodata*)
+        *libflash_drivers*:*(.text*)
+        *libflash_drivers*:*(.rodata*)
+        KEEP(*(.ramfunc))
         . = ALIGN(4); /* This alignment is needed to make the section size 4 bytes aligned */
     } > CODE_RAM AT > FLASH
+
+    ASSERT(S_RAM_CODE_START % 4 == 0, "S_RAM_CODE_START must be divisible by 4")
+
     Image$$ER_CODE_SRAM$$RO$$Base = ADDR(.ER_CODE_SRAM);
     Image$$ER_CODE_SRAM$$RO$$Limit = ADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
     Image$$ER_CODE_SRAM$$Base = ADDR(.ER_CODE_SRAM);
     Image$$ER_CODE_SRAM$$Limit = ADDR(.ER_CODE_SRAM) + SIZEOF(.ER_CODE_SRAM);
 #endif
 
-#if TFM_LVL != 1
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
@@ -206,8 +218,6 @@ SECTIONS
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
     } > FLASH
     __exidx_end = .;
-
-#endif /* TFM_LVL != 1 */
 
     .ER_TFM_CODE : ALIGN(4)
     {
@@ -415,6 +425,10 @@ SECTIONS
     Image$$TFM_UNPRIV_CODE$$RO$$Base = ADDR(.TFM_UNPRIV_CODE);
     Image$$TFM_UNPRIV_CODE$$RO$$Limit = ADDR(.TFM_UNPRIV_CODE) + SIZEOF(.TFM_UNPRIV_CODE);
 
+#if defined(CONFIG_TFM_USE_TRUSTZONE) && defined(TFM_LINKER_VENEERS_LOCATION_END)
+    VENEERS()
+#endif
+
 #ifdef RAM_VECTORS_SUPPORT
     .ramVectors (NOLOAD) : ALIGN(TFM_LINKER_RAM_VECTORS_ALIGNMENT)
     {
@@ -492,15 +506,13 @@ SECTIONS
     Image$$ER_TFM_DATA$$Base = ADDR(.TFM_DATA);
     Image$$ER_TFM_DATA$$Limit = ADDR(.TFM_DATA) + SIZEOF(.TFM_DATA) + SIZEOF(.TFM_BSS);
 
-#if defined (S_RAM_CODE_START)
-    /* Code executed from RAM */
-    .TFM_RAM_CODE S_RAM_CODE_START :
-    {
-        KEEP(*(.ramfunc))
-        . = ALIGN(4);
-    } > RAM AT> FLASH
+#if defined(CONFIG_TFM_USE_TRUSTZONE)
+    Image$$ER_VENEER$$Base = ADDR(.gnu.sgstubs);
+    Image$$VENEER_ALIGN$$Limit = ADDR(.sgstubs_end);
 
-    ASSERT(S_RAM_CODE_START % 4 == 0, "S_RAM_CODE_START must be divisible by 4")
+#if defined(TFM_LINKER_VENEERS_SIZE)
+    ASSERT ((Image$$VENEER_ALIGN$$Limit - Image$$ER_VENEER$$Base) <= TFM_LINKER_VENEERS_SIZE, "Veneer region overflowed")
+#endif
 #endif
 
     Load$$LR$$LR_NS_PARTITION$$Base = NS_PARTITION_START;

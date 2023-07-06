@@ -56,4 +56,21 @@ void tfm_psa_close_veneer(psa_handle_t handle)
 {
     psa_close(handle);
 }
+#else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+__tz_c_veneer
+psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
+{
+    (void)sid;
+    (void)version;
+
+    return PSA_ERROR_NOT_SUPPORTED;
+}
+
+__tz_c_veneer
+void tfm_psa_close_veneer(psa_handle_t handle)
+{
+    (void)handle;
+
+    return;
+}
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */

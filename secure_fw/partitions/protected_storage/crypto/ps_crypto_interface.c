@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "config_tfm.h"
 #include "tfm_crypto_defs.h"
 #include "psa/crypto.h"
 
@@ -45,10 +46,13 @@ psa_status_t ps_crypto_init(void)
      * encrypt another plaintext block with same IV/Key pair; this breaks GCM and CCM
      * usage rules.
      */
+    const psa_algorithm_t ps_crypto_aead_alg = PS_CRYPTO_AEAD_ALG;
 #ifndef PS_ROLLBACK_PROTECTION
-    if (PS_CRYPTO_AEAD_ALG == PSA_ALG_GCM || PS_CRYPTO_AEAD_ALG == PSA_ALG_CCM) {
+    if ((ps_crypto_aead_alg == PSA_ALG_GCM) || (ps_crypto_aead_alg == PSA_ALG_CCM)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
+#else
+    (void)ps_crypto_aead_alg;
 #endif
     return PSA_SUCCESS;
 }

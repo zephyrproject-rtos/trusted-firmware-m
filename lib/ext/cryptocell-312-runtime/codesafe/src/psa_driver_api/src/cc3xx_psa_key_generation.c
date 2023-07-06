@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -91,20 +91,19 @@ cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
 
     err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
     if (err != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("Error - curve is not supported\n");
+        CC_PAL_LOG_ERR("Error - curve is not supported");
         return err;
     }
 
     pDomain = CC_EcpkiGetEcDomain(domainId);
     if (NULL == pDomain) {
-        CC_PAL_LOG_ERR("Error - domain id %d is not supported\n", domainId);
+        CC_PAL_LOG_ERR("Error - domain id %d is not supported", domainId);
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
     pTempBuff = mbedtls_calloc(1, pTempBuffsize);
     if (NULL == pTempBuff) {
-        CC_PAL_LOG_ERR(
-            "Error - failed to allocate memory for temporary buffer\n");
+        CC_PAL_LOG_ERR("Error - failed to allocate memory for temporary buffer");
         return PSA_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -123,7 +122,7 @@ cc3xx_internal_gen_ecc_wstr_keypair(const psa_key_attributes_t *attributes,
                                  pUserPublKey, pTempBuff, NULL);
 
     if (rc != CC_SUCCESS) {
-        CC_PAL_LOG_ERR("Error - Key generation ended with result: %d\n", rc);
+        CC_PAL_LOG_ERR("Error - Key generation ended with result: %d", rc);
         err = cc3xx_ecc_cc_error_to_psa_error(rc);
         goto end;
     } else {
@@ -394,7 +393,7 @@ psa_status_t cc3xx_export_public_key(const psa_key_attributes_t *attributes,
         /* FixMe: Make sure that data_length is set correctly */
         err = cc3xx_ecc_psa_domain_to_cc_domain(curve, key_bits, &domainId);
         if (err != PSA_SUCCESS) {
-            CC_PAL_LOG_ERR("Error - curve is not supported\n");
+            CC_PAL_LOG_ERR("Error - curve is not supported");
             return err;
         }
 

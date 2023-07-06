@@ -74,7 +74,8 @@
       "pid": 259,
       "linker_pattern": {
         "library_list": [
-           "*tfm_*partition_crypto.*"
+           "*tfm_*partition_crypto.*",
+           "*mbedcrypto.*",
          ]
       }
     },

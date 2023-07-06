@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,29 +24,49 @@
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #include "fih.h"
+#include "cc3xx_dma.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include <string.h>
 #include "cmsis_compiler.h"
+#include "fip_parser.h"
+#include "host_flash_atu.h"
+#include "plat_def_fip_uuid.h"
 
 extern uint8_t computed_bl1_2_hash[];
 extern uint32_t platform_code_is_bl1_2;
+uint32_t image_offsets[2];
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 
 REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 
+uint32_t bl1_image_get_flash_offset(uint32_t image_id)
+{
+    switch (image_id) {
+    case 0:
+        return HOST_FLASH0_IMAGE0_BASE_S - FLASH_BASE_ADDRESS + image_offsets[0];
+    case 1:
+        return HOST_FLASH0_IMAGE1_BASE_S - FLASH_BASE_ADDRESS + image_offsets[1];
+    default:
+        FIH_PANIC;
+    }
+}
+
 static int32_t init_atu_regions(void)
 {
     enum atu_error_t err;
 
+#ifndef RSS_DEBUG_UART
     /* Initialize UART region */
     err = atu_initialize_region(&ATU_DEV_S,
                                 get_supported_region_count(&ATU_DEV_S) - 1,
-                                UART0_BASE_NS, HOST_UART_BASE, HOST_UART_SIZE);
+                                HOST_UART0_BASE_NS, HOST_UART_BASE,
+                                HOST_UART_SIZE);
     if (err != ATU_ERR_NONE) {
         return 1;
     }
+#endif /* !RSS_DEBUG_UART */
 
     return 0;
 }
@@ -91,6 +111,11 @@ int32_t boot_platform_init(void)
         return result;
     }
 
+    result = host_flash_atu_init_regions_for_image(UUID_RSS_FIRMWARE_BL2, image_offsets);
+    if (result) {
+        return result;
+    }
+
     if(!platform_code_is_bl1_2) {
         /* Clear boot data area */
         memset((void*)BOOT_TFM_SHARED_DATA_BASE, 0, BOOT_TFM_SHARED_DATA_SIZE);
@@ -98,6 +123,37 @@ int32_t boot_platform_init(void)
 
     return 0;
 }
+
+int32_t boot_platform_post_init(void)
+{
+#ifdef CRYPTO_HW_ACCELERATOR
+    int32_t result;
+    uint32_t idx;
+    cc3xx_dma_remap_region_t remap_regions[] = {
+        {ITCM_BASE_S, ITCM_SIZE, ITCM_CPU0_BASE_S, 0x01000000},
+        {ITCM_BASE_NS, ITCM_SIZE, ITCM_CPU0_BASE_NS, 0x01000000},
+        {DTCM_BASE_S, DTCM_SIZE, DTCM_CPU0_BASE_S, 0x01000000},
+        {DTCM_BASE_NS, DTCM_SIZE, DTCM_CPU0_BASE_NS, 0x01000000},
+    };
+
+    result = crypto_hw_accelerator_init();
+    if (result) {
+        return 1;
+    }
+
+    for (idx = 0; idx < (sizeof(remap_regions) / sizeof(remap_regions[0])); idx++) {
+        result = cc3xx_dma_remap_region_init(idx, &remap_regions[idx]);
+        if (result) {
+            return 1;
+        }
+    }
+
+    (void)fih_delay_init();
+#endif /* CRYPTO_HW_ACCELERATOR */
+
+    return 0;
+}
+
 
 static int rss_derive_key(enum tfm_bl1_key_id_t key_id, uint8_t *label,
                           size_t label_len, uint8_t *out, uint32_t lcs)
@@ -145,6 +201,14 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
      */
     static struct boot_arm_vector_table *vt_cpy;
     int32_t result;
+
+    if (platform_code_is_bl1_2) {
+        result = host_flash_atu_uninit_regions();
+        if (result) {
+            while(1){}
+        }
+    }
+
 
     result = invalidate_hardware_keys();
     if (result) {
@@ -194,8 +258,6 @@ int boot_platform_post_load(uint32_t image_id)
     uint8_t dak_seed_label[]  = "BL1_DAK_SEED_DERIVATION";
     /* The KMU requires word alignment */
     uint8_t __ALIGNED(4) tmp_buf[32];
-
-    (void)image_id;
 
     rc = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t *)&lcs);
     if (rc) {

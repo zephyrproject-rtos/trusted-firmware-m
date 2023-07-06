@@ -33,7 +33,12 @@ place at address BL2_CODE_START {block LR_CODE};
 
 define block TFM_SHARED_DATA with alignment = 32, size = BOOT_TFM_SHARED_DATA_SIZE { };
 define block ER_DATA         with alignment = 32 {readwrite};
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+define block ARM_LIB_STACK   with alignment = 32, size = BL2_MSP_STACK_SIZE - 0x8 { };
+define block STACKSEAL with size = 0x8 { };
+#else
 define block ARM_LIB_STACK   with alignment = 32, size = BL2_MSP_STACK_SIZE { };
+#endif /* #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
 define block HEAP            with alignment = 8, size = BL2_HEAP_SIZE { };
 define block ARM_LIB_HEAP    with alignment = 8, size = BL2_HEAP_SIZE { };
 define overlay HEAP_OVL      {block HEAP};
@@ -51,6 +56,9 @@ define block DATA with fixed order, maximum size = BL2_DATA_SIZE {
        block TFM_SHARED_DATA,
        block ER_DATA,
        block ARM_LIB_STACK,
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+       block STACKSEAL,
+#endif /* #if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
        overlay HEAP_OVL
 };
 place at address BOOT_TFM_SHARED_DATA_BASE {block DATA};

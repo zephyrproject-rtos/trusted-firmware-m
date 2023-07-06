@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #define __DEVICE_DEFINITION_H__
 
 #include "device_cfg.h"
+#include "host_device_definition.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,14 +40,10 @@ extern "C" {
 extern struct atu_dev_t ATU_DEV_S;
 #endif
 
-/* UART PL011 driver structures */
-#ifdef UART0_PL011_S
-#include "uart_pl011_drv.h"
-extern struct uart_pl011_dev_t UART0_PL011_DEV_S;
-#endif
-#ifdef UART0_PL011_NS
-#include "uart_pl011_drv.h"
-extern struct uart_pl011_dev_t UART0_PL011_DEV_NS;
+/* SIC driver structures */
+#ifdef SIC_S
+#include "sic_drv.h"
+extern struct sic_dev_t SIC_DEV_S;
 #endif
 
 /* ARM PPC driver structures */
@@ -172,6 +169,11 @@ extern struct mpc_sie_dev_t MPC_VM0_DEV_S;
 #ifdef MPC_VM1_S
 #include "mpc_sie_drv.h"
 extern struct mpc_sie_dev_t MPC_VM1_DEV_S;
+#endif
+
+#ifdef MPC_SIC_S
+#include "mpc_sie_drv.h"
+extern struct mpc_sie_dev_t MPC_SIC_DEV_S;
 #endif
 
 /* Message Handling Units (MHU) */

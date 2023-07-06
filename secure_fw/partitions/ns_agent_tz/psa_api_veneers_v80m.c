@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -8,19 +8,13 @@
 #include <stdint.h>
 
 #include "cmsis_compiler.h"
+#include "compiler_ext_defs.h"
 #include "config_impl.h"
 #include "security_defs.h"
 #include "svc_num.h"
 #include "utilities.h"
 
 #include "psa/client.h"
-
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-#include "spm_ipc.h"
-#include "ffm/psa_api.h"
-#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-#include "tfm_psa_call_pack.h"
-#endif
 
 /*
  * This is the veneers of FF-M Client APIs for Armv8.0-m.
@@ -40,25 +34,16 @@
 
 #if defined(__ICCARM__)
 
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
+#include "tfm_psa_call_pack.h"
 
-#pragma required = tfm_spm_client_psa_framework_version
-#pragma required = tfm_spm_client_psa_version
-#pragma required = tfm_spm_client_psa_call
-#pragma required = spm_interface_cross_dispatcher
+#pragma required = psa_framework_version
+#pragma required = psa_version
+#pragma required = tfm_psa_call_pack
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-#pragma required = tfm_spm_client_psa_connect
-#pragma required = tfm_spm_client_psa_close
-#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
-
-#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-#pragma required = psa_close_sfn
-#pragma required = psa_connect_sfn
-#pragma required = psa_call_pack_sfn
-#pragma required = psa_framework_version_sfn
-#pragma required = psa_version_sfn
-#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1 */
+#pragma required = psa_connect
+#pragma required = psa_close
+#endif
 
 #endif
 
@@ -108,18 +93,7 @@ uint32_t tfm_psa_framework_version_veneer(void)
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic1                               \n"
         "   push   {r4, lr}                                   \n"
-
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r3}                                    \n"
-        "   ldr    r0, =tfm_spm_client_psa_framework_version  \n"
-        "   mov    r1, sp                                     \n"
-        "   bl     spm_interface_cross_dispatcher             \n"
-        "   pop    {r0-r3}                                    \n"
-#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   bl     psa_framework_version_sfn                  \n"
-#else
-        "   svc    "M2S(TFM_SVC_PSA_FRAMEWORK_VERSION)"       \n"
-#endif
+        "   bl     "M2S(psa_framework_version)"               \n"
         "   bl     clear_caller_context                       \n"
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
@@ -146,17 +120,7 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
         "   bne    reent_panic2                               \n"
 
         "   push   {r4, lr}                                   \n"
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r3}                                    \n"
-        "   ldr    r0, =tfm_spm_client_psa_version            \n"
-        "   mov    r1, sp                                     \n"
-        "   bl     spm_interface_cross_dispatcher             \n"
-        "   pop    {r0-r3}                                    \n"
-#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   bl     psa_version_sfn                            \n"
-#else
-        "   svc    "M2S(TFM_SVC_PSA_VERSION)"                 \n"
-#endif
+        "   bl     "M2S(psa_version)"                         \n"
         "   bl     clear_caller_context                       \n"
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
@@ -187,17 +151,7 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
         "   bne    reent_panic4                               \n"
         "   pop    {r2, r3}                                   \n"
         "   push   {r4, lr}                                   \n"
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r3}                                    \n"
-        "   ldr    r0, =tfm_spm_client_psa_call               \n"
-        "   mov    r1, sp                                     \n"
-        "   bl     spm_interface_cross_dispatcher             \n"
-        "   pop    {r0-r3}                                    \n"
-#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   bl     psa_call_pack_sfn                          \n"
-#else
-        "   svc    "M2S(TFM_SVC_PSA_CALL)"                    \n"
-#endif
+        "   bl     "M2S(tfm_psa_call_pack)"                   \n"
         "   bl     clear_caller_context                       \n"
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
@@ -225,19 +179,8 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
         "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic3                               \n"
-
         "   push   {r4, lr}                                   \n"
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r3}                                    \n"
-        "   ldr    r0, =tfm_spm_client_psa_connect            \n"
-        "   mov    r1, sp                                     \n"
-        "   bl     spm_interface_cross_dispatcher             \n"
-        "   pop    {r0-r3}                                    \n"
-#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   bl     psa_connect_sfn                            \n"
-#else
-        "   svc    "M2S(TFM_SVC_PSA_CONNECT)"                 \n"
-#endif
+        "   bl     "M2S(psa_connect)"                         \n"
         "   bl     clear_caller_context                       \n"
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
@@ -264,21 +207,67 @@ void tfm_psa_close_veneer(psa_handle_t handle)
         "   bne    reent_panic5                               \n"
 
         "   push   {r4, lr}                                   \n"
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-        "   push   {r0-r3}                                    \n"
-        "   ldr    r0, =tfm_spm_client_psa_close              \n"
-        "   mov    r1, sp                                     \n"
-        "   bl     spm_interface_cross_dispatcher             \n"
-        "   pop    {r0-r3}                                    \n"
-#elif CONFIG_TFM_PSA_API_SFN_CALL == 1
-        "   bl     psa_close_sfn                              \n"
-#else
-        "   svc    "M2S(TFM_SVC_PSA_CLOSE)"                   \n"
-#endif
+        "   bl     "M2S(psa_close)"                           \n"
         "   bl     clear_caller_context                       \n"
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
         "   mov    r4, r1                                     \n"
+        "   bxns   lr                                         \n"
+
+        "reent_panic5:                                        \n"
+        "   svc    "M2S(TFM_SVC_PSA_PANIC)"                   \n"
+        "   b      .                                          \n"
+    );
+}
+
+#else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
+
+/*
+ * Define a variable to enable naked tfm_psa_connect_veneer() to return the error code.
+ * It is not supported to directly return the error code in psa_status_t type in Basic Asm via
+ * M2S.
+ */
+__used int32_t ret_err = (int32_t)PSA_ERROR_NOT_SUPPORTED;
+#if defined(__ICCARM__)
+#pragma required = ret_err
+#endif
+
+__tz_naked_veneer
+psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
+{
+    __ASM volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                      \n"
+#endif
+
+        "   ldr    r2, [sp]                                   \n"
+        "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
+        "   cmp    r2, r3                                     \n"
+        "   bne    reent_panic3                               \n"
+
+        "   ldr    r1, =ret_err                               \n"
+        "   ldr    r0, [r1]                                   \n"
+        "   bxns   lr                                         \n"
+
+        "reent_panic3:                                        \n"
+        "   svc    "M2S(TFM_SVC_PSA_PANIC)"                   \n"
+        "   b      .                                          \n"
+    );
+}
+
+__tz_naked_veneer
+void tfm_psa_close_veneer(psa_handle_t handle)
+{
+    __ASM volatile(
+#if !defined(__ICCARM__)
+        ".syntax unified                                      \n"
+#endif
+
+        "   ldr    r2, [sp]                                   \n"
+        "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
+        "   cmp    r2, r3                                     \n"
+        "   bne    reent_panic5                               \n"
+
         "   bxns   lr                                         \n"
 
         "reent_panic5:                                        \n"

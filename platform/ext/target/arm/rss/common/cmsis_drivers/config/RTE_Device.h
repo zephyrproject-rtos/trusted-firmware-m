@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,12 @@
 // <q> MPC (Memory Protection Controller) [Driver_VM1_MPC]
 // <i> Configuration settings for Driver_VM1_MPC in component ::Drivers:MPC
 #define   RTE_VM1_MPC                 1
+
+// <q> MPC (Memory Protection Controller) [Driver_SIC_MPC]
+// <i> Configuration settings for Driver_SIC_MPC in component ::Drivers:MPC
+#ifdef RSS_XIP
+#define   RTE_SIC_MPC                 1
+#endif /* RSS_XIP */
 
 // <q> PPC (Peripheral Protection Controller) [PPC_RSS_MAIN0]
 // <i> Configuration settings for Driver_PPC_RSS_MAIN0 in component ::Drivers:PPC

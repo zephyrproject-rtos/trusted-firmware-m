@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,6 +20,7 @@
 #define THRD_STATE_BLOCK          2
 #define THRD_STATE_DETACH         3
 #define THRD_STATE_INVALID        4
+#define THRD_STATE_RET_VAL_AVAIL  5
 
 /* Priorities. Lower value has higher priority */
 #define THRD_PRIOR_HIGHEST        0x0
@@ -44,6 +48,9 @@ struct thread_t {
     struct thread_t *next;              /* Next thread in list               */
 };
 
+/* Query thread state function type */
+typedef uint32_t (*thrd_query_state_t)(struct thread_t *p_thrd,
+                                       uint32_t *p_retval);
 /*
  * Definition for the current thread and its access helper preprocessor.
  * The definition needs to be declared in one of the sources.
@@ -97,6 +104,14 @@ extern struct thread_t *p_curr_thrd;
 #define THRD_EXPECTING_SCHEDULE() (!(thrd_next() == CURRENT_THREAD))
 
 /*
+ * Init the global query state callback function pointer.
+ *
+ * Parameters :
+ *  fn             -     Query state function pointer.
+ */
+void thrd_set_query_callback(thrd_query_state_t fn);
+
+/*
  * Set thread state, and updates the runnable head.
  *
  * Parameters :
@@ -112,13 +127,12 @@ void thrd_set_state(struct thread_t *p_thrd, uint32_t new_state);
  *  p_thrd         -     Pointer of thread_t struct
  *  fn             -     Thread entry function
  *  exit_fn        -     The function to go when 'fn' exited
+ *  param          -     Parameter passed to fn
  *
  * Note :
- *  - thrd_fn_t does not have parameters but param is still set into R0 for some
- *    special usages, for example the NS agent.
  *  - The thread is not "started" immediately.
  */
-void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn);
+void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn, void *param);
 
 /*
  * Get the next thread to run in list.
@@ -137,49 +151,5 @@ struct thread_t *thrd_next(void);
  *  The EXC_RETURN payload of the first runnable thread for caller usage.
  */
 uint32_t thrd_start_scheduler(struct thread_t **ppth);
-
-/* Sync object */
-
-/* A magic for corruption detecting */
-#ifndef NDEBUG
-#define THRD_SYNC_MAGIC                0x736f626a   /* 'sobj' */
-#endif
-
-struct sync_obj_t {
-#ifndef NDEBUG
-    uint32_t magic;             /* The magic for corruption detecting */
-#endif
-    struct thread_t *owner;     /* The owner thread of the sync object */
-};
-
-#ifndef NDEBUG
-#define THRD_SYNC_INIT(p_sync_obj) do {                            \
-                            (p_sync_obj)->magic = THRD_SYNC_MAGIC; \
-                            (p_sync_obj)->owner = NULL;            \
-                        } while (0)
-#else
-#define THRD_SYNC_INIT(p_sync_obj) (p_sync_obj)->owner = NULL
-#endif
-
-/*
- * Block the thread to wait on an sync object. The thread becomes the onwer of
- * sync object.
- *
- * Parameters:
- *  p_sync_obj  -    The pointer of sync object allocated by the caller
- *  pth         -    The thread_t which waits on p_sync_obj.
- *
- */
-void thrd_set_wait(struct sync_obj_t *p_sync_obj, struct thread_t *pth);
-
-/*
- * Wake up the sync object owner thread and set the return value of the function
- * that caused the "waiting".
- *
- * Parameters :
- *  p_sync_obj   -   The sync object that the thread is waiting on
- *  ret_val      -   Value to be returned to owner
- */
-void thrd_wake_up(struct sync_obj_t *p_sync_obj, uint32_t ret_val);
 
 #endif /* __M_THREAD_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,9 +89,24 @@ typedef enum _IRQn_Type {
     SPI_SHIELD0_IRQn                   = 54,   /* SPI (Shield 0) Interrupt */
     SPI_SHIELD1_IRQn                   = 55,   /* SPI (Shield 1) Interrupt */
     /* Reserved                        = 56,      Reserved */
+#ifdef CORSTONE310_FVP
     DMA_CHANNEL_0_IRQn                 = 57,   /* DMA Channel 0 Interrupt */
     DMA_CHANNEL_1_IRQn                 = 58,   /* DMA Channel 1 Interrupt */
     /* Reserved                        = 59:68    Reserved */
+#else
+    DMA_CHANNEL_0_Error_IRQn           = 57,   /*  57: DMA Ch0 Error Interrupt */
+    DMA_CHANNEL_0_Terminal_Count_IRQn  = 58,   /*  58: DMA Ch0 Terminal Count Interrupt */
+    DMA_CHANNEL_0_Combined_IRQn        = 59,   /*  59: DMA Ch0 Combined Interrupt */
+    DMA_CHANNEL_1_Error_IRQn           = 60,   /*  60: DMA Ch1 Error Interrupt */
+    DMA_CHANNEL_1_Terminal_Count_IRQn  = 61,   /*  61: DMA Ch1 Terminal Count Interrupt */
+    DMA_CHANNEL_1_Combined_IRQn        = 62,   /*  62: DMA Ch1 Combined Interrupt */
+    DMA_CHANNEL_2_Error_IRQn           = 63,   /*  63: DMA Ch2 Error Interrupt */
+    DMA_CHANNEL_2_Terminal_Count_IRQn  = 64,   /*  64: DMA Ch2 Terminal Count Interrupt */
+    DMA_CHANNEL_2_Combined_IRQn        = 65,   /*  65: DMA Ch2 Combined Interrupt */
+    DMA_CHANNEL_3_Error_IRQn           = 66,   /*  66: DMA Ch3 Error Interrupt */
+    DMA_CHANNEL_3_Terminal_Count_IRQn  = 67,   /*  67: DMA Ch3 Terminal Count Interrupt */
+    DMA_CHANNEL_3_Combined_IRQn        = 68,   /*  68: DMA Ch3 Combined Interrupt */
+#endif
     GPIO0_Combined_IRQn                = 69,   /* GPIO 0 Combined Interrupt */
     GPIO1_Combined_IRQn                = 70,   /* GPIO 1 Combined Interrupt */
     GPIO2_Combined_IRQn                = 71,   /* GPIO 2 Combined Interrupt */
@@ -150,7 +165,7 @@ typedef enum _IRQn_Type {
     GPIO3_3_IRQn                       = 124,
     UARTRX5_IRQn                       = 125,   /* UART 5 RX Interrupt */
     UARTTX5_IRQn                       = 126,   /* UART 5 TX Interrupt */
-    UART5_IRQn                         = 127,   /* UART 5 combined Interrupt */
+    UART5_Combined_IRQn                = 127,   /* UART 5 combined Interrupt */
     /* Reserved                        = 128:130   Reserved */
 } IRQn_Type;
 

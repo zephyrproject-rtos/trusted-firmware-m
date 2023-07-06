@@ -14,6 +14,62 @@
 #include "psa/client.h"
 #include "psa/service.h"
 
+#if PSA_FRAMEWORK_HAS_MM_IOVEC
+
+/*
+ * The MM-IOVEC status
+ * The max total number of invec and outvec is 8.
+ * Each invec/outvec takes 4 bit, 32 bits in total.
+ *
+ * The encoding format of the MM-IOVEC status:
+ *--------------------------------------------------------------
+ *|  Bit   |  31 - 28  |  27 - 24  | ... |  7 - 4   |  3 - 0   |
+ *--------------------------------------------------------------
+ *| Vector | outvec[3] | outvec[2] | ... | invec[1] | invec[0] |
+ *--------------------------------------------------------------
+ *
+ * Take invec[0] as an example:
+ *
+ * bit 0:  whether invec[0] has been mapped.
+ * bit 1:  whether invec[0] has been unmapped.
+ * bit 2:  whether invec[0] has been accessed using psa_read(), psa_skip() or
+ *         psa_write().
+ * bit 3:  reserved for invec[0].
+ */
+
+#define IOVEC_STATUS_BITS              4   /* Each vector occupies 4 bits. */
+#define OUTVEC_IDX_BASE                4   /*
+                                            * Base index of outvec.
+                                            * There are four invecs in front of
+                                            * outvec.
+                                            */
+#define INVEC_IDX_BASE                 0   /* Base index of invec. */
+
+#define IOVEC_MAPPED_BIT               (1U << 0)
+#define IOVEC_UNMAPPED_BIT             (1U << 1)
+#define IOVEC_ACCESSED_BIT             (1U << 2)
+
+#define IOVEC_IS_MAPPED(handle, iovec_idx)      \
+    ((((handle)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) &  \
+                               IOVEC_MAPPED_BIT)
+#define IOVEC_IS_UNMAPPED(handle, iovec_idx)    \
+    ((((handle)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) &  \
+                               IOVEC_UNMAPPED_BIT)
+#define IOVEC_IS_ACCESSED(handle, iovec_idx)    \
+    ((((handle)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) &  \
+                               IOVEC_ACCESSED_BIT)
+#define SET_IOVEC_MAPPED(handle, iovec_idx)     \
+    (((handle)->iovec_status) |= (IOVEC_MAPPED_BIT <<   \
+                              ((iovec_idx) * IOVEC_STATUS_BITS)))
+#define SET_IOVEC_UNMAPPED(handle, iovec_idx)   \
+    (((handle)->iovec_status) |= (IOVEC_UNMAPPED_BIT << \
+                              ((iovec_idx) * IOVEC_STATUS_BITS)))
+#define SET_IOVEC_ACCESSED(handle, iovec_idx)   \
+    (((handle)->iovec_status) |= (IOVEC_ACCESSED_BIT << \
+                              ((iovec_idx) * IOVEC_STATUS_BITS)))
+
+#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
 /**
  * \brief This function handles the specific programmer error cases.
  *

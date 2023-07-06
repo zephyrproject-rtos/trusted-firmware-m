@@ -4,22 +4,22 @@ Integration Guide
 The purpose of this document is to provide a guide on how to integrate TF-M
 with other hardware platforms and operating systems.
 
-
 .. toctree::
     :maxdepth: 1
 
-    SPM Backends <spm_backends.rst>
-    NS client integration <non-secure_client_extension_integration_guide.rst>
+    Source Structure        <source_structure/index>
+    SPM Backends            <spm_backends.rst>
+    NS client integration   <non-secure_client_extension_integration_guide.rst>
     OS migration to Armv8-M <os_migration_guide_armv8m.rst>
-    tfm_fpu_support
-    Secure Interrupt <tfm_secure_irq_integration_guide.rst>
+    Floating-Point Support  <tfm_fpu_support.rst>
+    Secure Interrupt        <tfm_secure_irq_integration_guide.rst>
+    Platform Provisioning   <platform_provisioning.rst>
 
 .. toctree::
     :maxdepth: 2
 
     platform/index
     services/index
-
 
 *****************
 How to build TF-M
@@ -35,7 +35,7 @@ Explained in the :doc:`Build instructions </building/tfm_build_instruction>`.
 How to add a new platform
 *************************
 
-:doc:`Porting TF-M to a New Hardware </integration_guide/platform/porting_TFM_to_a_new_hardware>`
+:doc:`Porting TF-M to a New Hardware </integration_guide/platform/porting_tfm_to_a_new_hardware>`
 contains guidance on how to add a new platform.
 
 ***************************
@@ -64,18 +64,25 @@ in the file ``<install_dir>/interface/include/psa/protected_storage.h``.
 TF-M also exports a reference implementation of PSA APIs for NS clients in the
 ``<install_dir>/interface/src``.
 
-On Armv8-M TrustZone based platforms, NS OS shall implement interface API
-``tfm_ns_interface_dispatch()`` to integrate with TF-M implementation of PSA
-APIs. See ``interface/include/tfm_ns_interface.h`` for the detailed declaration
-of ``tfm_ns_interface_dispatch()``.
-TF-M provides an example of ``tfm_ns_interface_dispatch()`` implementation on
-Armv8-M TrustZone based platforms. In this example, NS OS calls mutex in
-``tfm_ns_interface_dispatch()`` to synchronize multiple NS client calls to TF-M.
-See ``interface/src/tfm_ns_interface.c.example`` for more details.
+On Armv8-M TrustZone based platforms, NS OS uses ``tfm_ns_interface_dispatch()``
+to integrate with TF-M implementation of PSA APIs. TF-M provides a reference
+implementation of this function for RTOS and bare metal use cases.
+RTOS implementation of ``tfm_ns_interface_dispatch()`` (provided in
+``interface\src\os_wrapper\tfm_ns_interface_rtos.c``) uses mutex to provide
+multithread safety. Mutex wrapper functions defined in
+``interface/include/os_wrapper/mutex.h`` are expected to be provided by NS RTOS.
+When reference RTOS implementation of dispatch function is used NS application
+should call ``tfm_ns_interface_init()`` function before first PSA API call.
+Bare metal implementation ``tfm_ns_interface_dispatch()`` (provided in
+``interface\src\os_wrapper\tfm_ns_interface_bare_metal.c``) does not
+provide multithread safety and does not require implementation of mutex
+interface.
+If needed, instead of using reference implementation, NS application may provide
+its own implementation of ``tfm_ns_interface_dispatch()`` function.
 
 TF-M provides a reference implementation of NS mailbox on multi-core platforms,
 under folder ``interface/src/multi_core``.
-See :doc:`Mailbox design </technical_references/design_docs/dual-cpu/mailbox_design_on_dual_core_system>`
+See :doc:`Mailbox design </design_docs/dual-cpu/mailbox_design_on_dual_core_system>`
 for TF-M multi-core mailbox design.
 
 Interface with non-secure world regression tests
@@ -116,6 +123,17 @@ to NS interrupts to the lower half of available priorities so that it wouldn't
 be possible for any non-secure interrupt to preempt a higher-priority secure
 interrupt.
 
+********************************
+Secure interrupts and scheduling
+********************************
+To ensure correct operation in the general case, the secure scheduler is not
+run after handling a secure interrupt that pre-empted the NSPE. On systems
+with specific constraints, it may be desirable to run the scheduler in this
+situation, which can be done by setting
+``CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED`` to 1. This could be done if the
+NSPE is known to be a simple, single-threaded application or if non-secure
+interrupts cannot pre-empt the SPE, for example.
+
 **********************************
 Integration with non-Cmake systems
 **********************************
@@ -137,3 +155,5 @@ environment before the script will succeed when the script is not run via cmake.
 --------------
 
 *Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

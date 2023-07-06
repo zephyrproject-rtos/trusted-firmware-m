@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2014 Wind River Systems, Inc.
- * Copyright (c) 2017-2022 Arm Limited.
+ * Copyright (c) 2017-2023 Arm Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ __asm("  .global __ARM_use_no_argv\n");
 
 /* Static buffer to be used by mbedtls for memory allocation */
 static uint8_t mbedtls_mem_buf[BL2_MBEDTLS_MEM_BUF_LEN];
+struct boot_rsp rsp;
 
 static void do_boot(struct boot_rsp *rsp)
 {
@@ -88,8 +89,7 @@ static void do_boot(struct boot_rsp *rsp)
 
 int main(void)
 {
-    struct boot_rsp rsp;
-    fih_int fih_rc = FIH_FAILURE;
+    fih_ret fih_rc = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
     int32_t image_id;
 
@@ -127,7 +127,7 @@ int main(void)
     }
 
     FIH_CALL(boot_nv_security_counter_init, fih_rc);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+    if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
         BOOT_LOG_ERR("Error while initializing the security counter");
         FIH_PANIC;
     }
@@ -151,8 +151,13 @@ int main(void)
             FIH_PANIC;
         }
 
+        /* Primary goal to zeroize the 'rsp' is to avoid to accidentally load
+         * the NS image in case of a fault injection attack. However, it is
+         * done anyway as a good practice to sanitize memory.
+         */
+        memset(&rsp, 0, sizeof(struct boot_rsp));
         FIH_CALL(boot_go_for_image_id, fih_rc, &rsp, image_id);
-        if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
             BOOT_LOG_ERR("Unable to find bootable image");
             FIH_PANIC;
         }

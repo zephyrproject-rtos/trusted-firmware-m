@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
  * Copyright 2019-2021 NXP. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,11 +65,12 @@
 
 #define FLASH_S_PARTITION_SIZE              (0x28000) /* S partition: 160 KB */
 #define FLASH_NS_PARTITION_SIZE             (0x18000) /* NS partition: 96 KB */
-#define FLASH_MAX_PARTITION_SIZE            ((FLASH_S_PARTITION_SIZE >   \
-                                             FLASH_NS_PARTITION_SIZE) ? \
-                                             FLASH_S_PARTITION_SIZE :    \
-                                             FLASH_NS_PARTITION_SIZE)
 
+#if (FLASH_S_PARTITION_SIZE > FLASH_NS_PARTITION_SIZE)
+#define FLASH_MAX_PARTITION_SIZE FLASH_S_PARTITION_SIZE
+#else
+#define FLASH_MAX_PARTITION_SIZE FLASH_NS_PARTITION_SIZE
+#endif
 #else /* NO BL2 */
 
 #define FLASH_S_PARTITION_SIZE              (0x50000)       /* S partition: 320 kB*/

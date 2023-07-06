@@ -18,11 +18,7 @@
 
 #include <hal/nrf_gpio.h>
 
-/* Boundary handle binding macros. */
-#define HANDLE_ATTR_PRIV_POS            1U
-#define HANDLE_ATTR_PRIV_MASK           (0x1UL << HANDLE_ATTR_PRIV_POS)
-#define HANDLE_ATTR_NS_POS              0U
-#define HANDLE_ATTR_NS_MASK             (0x1UL << HANDLE_ATTR_NS_POS)
+#include "handle_attr.h"
 
 enum tfm_platform_err_t
 tfm_platform_hal_read_service(const psa_invec  *in_vec,
@@ -76,14 +72,14 @@ tfm_platform_hal_read_service(const psa_invec  *in_vec,
 	return err;
 }
 
-#if defined(GPIO_PIN_CNF_MCUSEL_Msk)
+#if NRF_GPIO_HAS_SEL
 static bool valid_mcu_select(uint32_t mcu)
 {
 	switch (mcu) {
-	case NRF_GPIO_PIN_MCUSEL_APP:
-	case NRF_GPIO_PIN_MCUSEL_NETWORK:
-	case NRF_GPIO_PIN_MCUSEL_PERIPHERAL:
-	case NRF_GPIO_PIN_MCUSEL_TND:
+	case NRF_GPIO_PIN_SEL_APP:
+	case NRF_GPIO_PIN_SEL_NETWORK:
+	case NRF_GPIO_PIN_SEL_PERIPHERAL:
+	case NRF_GPIO_PIN_SEL_TND:
 		return true;
 	default:
 		return false;
@@ -94,7 +90,7 @@ static uint32_t gpio_service_mcu_select(struct tfm_gpio_service_args * args)
 {
 	if (nrf_gpio_pin_present_check(args->mcu_select.pin_number) &&
 	    valid_mcu_select(args->mcu_select.mcu)) {
-		nrf_gpio_pin_mcu_select(args->mcu_select.pin_number, args->mcu_select.mcu);
+		nrf_gpio_pin_control_select(args->mcu_select.pin_number, args->mcu_select.mcu);
 		return 0;
 	} else {
 		return -1;
@@ -128,5 +124,5 @@ tfm_platform_hal_gpio_service(const psa_invec  *in_vec, const psa_outvec *out_ve
 
 	return TFM_PLATFORM_ERR_SUCCESS;
 }
-#endif /* defined(GPIO_PIN_CNF_MCUSEL_Msk) */
+#endif /* NRF_GPIO_HAS_SEL */
 

@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-/** \file cc3xx_psa_mac.c
+/** \file cc3xx_psa_init.c
  *
  * This file contains the implementation of the entry points associated to the
  * mac capability (single-part and multipart) as described by the PSA

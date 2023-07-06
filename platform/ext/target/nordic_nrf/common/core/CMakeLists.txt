@@ -28,12 +28,12 @@ include(hal_nordic.cmake)
 # Specify the location of platform specific build dependencies.
 
 target_add_scatter_file(tfm_s
-    $<$<C_COMPILER_ID:GNU>:${CMAKE_SOURCE_DIR}/platform/ext/target/nordic_nrf/common/core/gcc/nordic_nrf_s.ld>
+    $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
 )
 
 if(NS)
     target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/nordic_nrf_ns.ld>
+        $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld>
     )
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
@@ -43,9 +43,14 @@ endif()
 
 if(BL2)
     target_add_scatter_file(bl2
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/gcc/nordic_nrf_bl2.ld>
+        $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_bl2.ld>
     )
 endif()
+
+target_compile_definitions(platform_region_defs
+    INTERFACE
+        $<$<BOOL:${NULL_POINTER_EXCEPTION_DETECTION}>:NULL_POINTER_EXCEPTION_DETECTION>
+)
 
 #========================= Platform Secure ====================================#
 
@@ -69,6 +74,7 @@ target_sources(platform_s
         native_drivers/mpu_armv8m_drv.c
         native_drivers/spu.c
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TEST_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/pal_plat_test.c>
 )
 
 if (NRF_HW_INIT_RESET_ON_BOOT)
@@ -123,7 +129,7 @@ target_sources(platform_ns
         cmsis_drivers/Driver_USART.c
         ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
         nrfx_glue.c
-        plat_test.c
+        $<$<BOOL:${TEST_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/pal_plat_test.c>
 )
 
 target_include_directories(platform_ns

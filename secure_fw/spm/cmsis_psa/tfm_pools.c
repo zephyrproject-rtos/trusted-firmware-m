@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,7 @@
 #include "thread.h"
 #include "psa/client.h"
 #include "psa/service.h"
-#include "internal_errors.h"
+#include "internal_status_code.h"
 #include "cmsis_compiler.h"
 #include "utilities.h"
 #include "lists.h"
@@ -47,7 +47,7 @@ psa_status_t tfm_pool_init(struct tfm_pool_instance_t *pool, size_t poolsz,
 
     /* Prepare instance and insert to pool list */
     pool->chunksz = chunksz;
-    pool->chunk_count = num;
+    pool->pool_sz = poolsz;
 
     return PSA_SUCCESS;
 }
@@ -83,23 +83,17 @@ bool is_valid_chunk_data_in_pool(struct tfm_pool_instance_t *pool,
                                  uint8_t *data)
 {
     const uintptr_t chunks_start = (uintptr_t)(pool->chunks);
-    const size_t chunks_size = pool->chunksz + sizeof(struct tfm_pool_chunk_t);
-    const size_t chunk_count = pool->chunk_count;
-    const uintptr_t chunks_end = chunks_start + chunks_size * chunk_count;
-    uintptr_t pool_chunk_address = 0;
+    const size_t chunks_offset = (uintptr_t)data - chunks_start;
 
     /* Check that the message was allocated from the pool. */
-    if ((uintptr_t)data < chunks_start || (uintptr_t)data >= chunks_end) {
+    if ((uintptr_t)data < chunks_start || chunks_offset >= pool->pool_sz) {
         return false;
     }
 
-    pool_chunk_address =
-        (uint32_t)TO_CONTAINER(data, struct tfm_pool_chunk_t, data);
-
-    /* Make sure that the chunk containing the message is aligned on */
-    /* chunk boundary in the pool. */
-    if ((pool_chunk_address - chunks_start) % chunks_size != 0) {
+    if ((chunks_offset % (pool->chunksz + sizeof(struct tfm_pool_chunk_t)))
+        != offsetof(struct tfm_pool_chunk_t, data)) {
         return false;
     }
+
     return true;
 }

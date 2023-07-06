@@ -7,3 +7,4 @@
 
 #Stop cmake running compiler tests.
 set (CMAKE_C_COMPILER_FORCED true)
+set (CMAKE_CXX_COMPILER_FORCED true)

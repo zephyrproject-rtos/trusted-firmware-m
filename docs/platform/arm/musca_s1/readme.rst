@@ -5,8 +5,8 @@ Musca-S1 Platform Specifics
 ****************
 DAPLink Firmware
 ****************
-The code on Musca-S1 is running from embedded flash. Make sure that the DAPLink
-FW for QSPI/MRAM is downloaded to the board. You can find on the
+The code on Musca-S1 is running from on-chip eMRAM (2MB non-volatile bootable memory).
+Make sure that the DAPLink FW for QSPI/MRAM is downloaded to the board. You can find on the
 `Arm Community page <https://community.arm.com/oss-platforms/w/docs/463/musca-s1-firmware-update-qspi-mram-boot-recovery>`__
 A short description of how to update the DAPLink FW can be found there as well.
 
@@ -22,4 +22,4 @@ generic service request delivery mechanism.
 
 --------------
 
-*Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2023, Arm Limited. All rights reserved.*

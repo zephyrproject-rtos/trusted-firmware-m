@@ -92,7 +92,7 @@ struct _lcm_reg_map_t {
     };
 };
 
-static inline int is_pointer_word_aligned(void *ptr) {
+static int is_pointer_word_aligned(void *ptr) {
     return !((uint32_t)ptr & (sizeof(uint32_t) - 1));
 }
 
@@ -280,8 +280,14 @@ enum lcm_error_t lcm_get_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t *lcs)
     return LCM_ERROR_NONE;
 }
 
-static enum lcm_error_t count_otp_zero_bits(struct lcm_dev_t *dev, uint32_t offset,
-                                            uint32_t len, uint32_t *zero_bits)
+/* Armclang attempts to inline this function, which causes huge code size
+ * increases. It is marked as __attribute__((noinline)) explicitly to prevent
+ * this.
+ */
+__attribute__((noinline))
+static enum lcm_error_t count_otp_zero_bits(struct lcm_dev_t *dev,
+                                            uint32_t offset, uint32_t len,
+                                            uint32_t *zero_bits)
 {
     enum lcm_error_t err;
     uint32_t idx;
@@ -573,6 +579,12 @@ enum lcm_error_t lcm_set_lcs(struct lcm_dev_t *dev, enum lcm_lcs_t lcs,
     return LCM_ERROR_INTERNAL_ERROR;
 }
 
+
+/* Armclang attempts to inline this function, which causes huge code size
+ * increases. It is marked as __attribute__((noinline)) explicitly to prevent
+ * this.
+ */
+__attribute__((noinline))
 enum lcm_error_t lcm_otp_write(struct lcm_dev_t *dev, uint32_t offset, uint32_t len,
                                const uint8_t *buf)
 {
@@ -626,8 +638,14 @@ enum lcm_error_t lcm_otp_write(struct lcm_dev_t *dev, uint32_t offset, uint32_t 
     return LCM_ERROR_NONE;
 }
 
-enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset, uint32_t len,
-                              uint8_t *buf)
+
+/* Armclang attempts to inline this function, which causes huge code size
+ * increases. It is marked as __attribute__((noinline)) explicitly to prevent
+ * this.
+ */
+__attribute__((noinline))
+enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset,
+                              uint32_t len, uint8_t *buf)
 {
     enum lcm_error_t err;
     struct _lcm_reg_map_t *p_lcm = (struct _lcm_reg_map_t *)dev->cfg->base;

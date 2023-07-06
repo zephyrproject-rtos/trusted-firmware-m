@@ -86,25 +86,39 @@ The full list of default options is in ``config/config_base.cmake`` and
 explained in :ref:`tfm_cmake_configuration`. Several important options
 are listed below.
 
-+---------------------+----------------------------------------+---------------+
-| Parameter           | Description                            | Default value |
-+=====================+========================================+===============+
-| BL2                 | Build level 2 secure bootloader.       | ON            |
-+---------------------+----------------------------------------+---------------+
-| NS                  | Build NS app. Required for test code.  | ON            |
-+---------------------+----------------------------------------+---------------+
-| TFM_ISOLATION_LEVEL | Set TFM isolation level.               | 1             |
-+---------------------+----------------------------------------+---------------+
-| TFM_PROFILE         | Set TFM profile.                       |               |
-+---------------------+----------------------------------------+---------------+
-| TEST_S              | Build secure regression tests.         | OFF           |
-+---------------------+----------------------------------------+---------------+
-| TEST_NS             | Build non-secure regression tests.     | OFF           |
-+---------------------+----------------------------------------+---------------+
-| TEST_PSA_API        | Build PSA API TESTS for the given      |               |
-|                     | suite. Takes a PSA api ``SUITE`` as an |               |
-|                     | argument (``CRYPTO`` etc).             |               |
-+---------------------+----------------------------------------+---------------+
++----------------------------+------------------------------------------+---------------+
+| Parameter                  | Description                              | Default value |
++============================+==========================================+===============+
+| BL2                        | Build level 2 secure bootloader.         | ON            |
++----------------------------+------------------------------------------+---------------+
+| NS                         | Build NS app. Required for test code.    | ON            |
++----------------------------+------------------------------------------+---------------+
+| PROJECT_CONFIG_HEADER_FILE | User defined header file for TF-M config |               |
++----------------------------+------------------------------------------+---------------+
+| TFM_ISOLATION_LEVEL        | Set TFM isolation level.                 | 1             |
++----------------------------+------------------------------------------+---------------+
+| TFM_PROFILE                | Set TFM profile.                         |               |
++----------------------------+------------------------------------------+---------------+
+| TEST_S                     | Build secure regression tests.           | OFF           |
++----------------------------+------------------------------------------+---------------+
+| TEST_NS                    | Build non-secure regression tests.       | OFF           |
++----------------------------+------------------------------------------+---------------+
+| TEST_PSA_API               | Build PSA API TESTS for the given        |               |
+|                            | suite. Takes a PSA api ``SUITE`` as an   |               |
+|                            | argument (``CRYPTO`` etc).               |               |
++----------------------------+------------------------------------------+---------------+
+
+Project Config Header File
+--------------------------
+
+CMake variable ``PROJECT_CONFIG_HEADER_FILE`` is set by users with the full path of the
+configuration header file, which is used to fine-tune component options. The detailed reference
+for project config header file is in :ref:`Header_configuration`.
+
+.. Note::
+
+    It is recommended to clean up build folder before re-build if config header file is updated.
+    CMake is unable to automatically recognize the dependency when the header file is defined as a macro.
 
 TF-M Profiles
 -------------
@@ -329,5 +343,5 @@ Alternately using traditional cmake syntax
 
 --------------
 
-*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
 *Copyright (c) 2022, Cypress Semiconductor Corporation. All rights reserved.*

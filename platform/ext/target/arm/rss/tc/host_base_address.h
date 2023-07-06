@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,16 @@
 #define __HOST_BASE_ADDRESS_H__
 
 /* Host addresses */
-#define AP_BL1_SRAM_BASE   0x0UL        /* AP initial boot SRAM base address */
-#define AP_BL1_SIZE        0x20000U     /* 128KB */
+#define AP_BOOT_SRAM_BASE   0x0UL        /* AP initial boot SRAM base address */
+#define AP_BOOT_SRAM_SIZE   0x80000U     /* 512KB */
 
-#define SCP_BL1_SRAM_BASE  0x40000000UL /* SCP initial boot SRAM base address */
-#define SCP_BL1_SIZE       0x10000U     /* 64KB */
+#define SCP_BOOT_SRAM_BASE  0x40000000UL /* SCP initial boot SRAM base address */
+#define SCP_BOOT_SRAM_SIZE  0x80000U     /* 512KB */
 
-#define HOST_UART_BASE     0x2A400000UL /* Host UART base address */
+#define HOST_UART_BASE     0x7FF80000UL /* Host UART base address */
 #define HOST_UART_SIZE     0x2000U      /* 8KB */
+
+#define HOST_FLASH0_BASE   0x08000000UL /* Host flash base address */
+#define HOST_FLASH0_SIZE   0x4000000    /* 64 MiB */
 
 #endif  /* __HOST_BASE_ADDRESS_H__ */

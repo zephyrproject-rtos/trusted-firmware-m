@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "attest.h"
 #include "psa/initial_attestation.h"
-#include "qcbor.h"
+#include "qcbor/qcbor.h"
 
 #ifdef __cplusplus
 extern "C" {

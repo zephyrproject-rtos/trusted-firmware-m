@@ -49,7 +49,7 @@ extensions = [
     'sphinx.ext.autosectionlabel', #Make sphinx generate a label for each section
     'sphinxcontrib.plantuml', #Add support for PlantUML drawings
     'sphinxcontrib.rsvgconverter', #Add support for SVG to PDF
-    'sphinx_tabs.tabs' #Enable tab extension in Sphinx
+    'sphinx_tabs.tabs', #Enable tab extension in Sphinx
 ]
 
 # PlantUML
@@ -157,3 +157,4 @@ latex_documents = [
      author, 'manual'),
 ]
 
+language = 'en'

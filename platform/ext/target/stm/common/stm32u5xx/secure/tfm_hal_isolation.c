@@ -275,7 +275,7 @@ static enum tfm_hal_status_t mpu_init(void)
 }
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
                                             uintptr_t *p_spm_boundary)
 {
     /* Set up isolation boundaries between SPE and NSPE */
@@ -304,8 +304,15 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
 
     *p_spm_boundary = (uintptr_t)PROT_BOUNDARY_VAL;
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
+
+#ifdef TFM_FIH_PROFILE_ON
+fih_int tfm_hal_verify_static_boundaries(void)
+{
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
+}
+#endif
 
 /*
  * Implementation of tfm_hal_bind_boundary() on STM:
@@ -343,7 +350,7 @@ enum tfm_hal_status_t tfm_hal_set_up_static_boundaries(
  * 2. Highest 8 bits are for index. It supports 256 unique handles at most.
  */
 
-enum tfm_hal_status_t tfm_hal_bind_boundary(
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
                                     const struct partition_load_info_t *p_ldinf,
                                     uintptr_t *p_boundary)
 {
@@ -358,16 +365,16 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 #endif
 
     if (!p_ldinf || !p_boundary) {
-        return TFM_HAL_ERROR_GENERIC;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = IS_PARTITION_PSA_ROT(p_ldinf);
+    privileged = IS_PSA_ROT(p_ldinf);
 #endif
 
-    ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
+    ns_agent = IS_NS_AGENT(p_ldinf);
     p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     /*
@@ -388,7 +395,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 
         if (j == ARRAY_SIZE(partition_named_mmio_list)) {
             /* The MMIO asset is not in the allowed list of platform. */
-            return TFM_HAL_ERROR_GENERIC;
+            FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
         }
 #if TFM_LVL == 2
         plat_data_ptr = REFERENCE_TO_PTR(p_asset[i].dev.dev_ref,
@@ -408,7 +415,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 
             if (mpu_armv8m_region_enable(&dev_mpu_s, &localcfg)
                 != MPU_ARMV8M_OK) {
-                return TFM_HAL_ERROR_GENERIC;
+                FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
             }
         }
 #endif
@@ -419,10 +426,10 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
                         HANDLE_ATTR_NS_MASK;
     *p_boundary = (uintptr_t)partition_attrs;
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 
-enum tfm_hal_status_t tfm_hal_activate_boundary(
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
                              const struct partition_load_info_t *p_ldinf,
                              uintptr_t boundary)
 {
@@ -435,21 +442,21 @@ enum tfm_hal_status_t tfm_hal_activate_boundary(
     ctrl.b.nPRIV = privileged ? 0 : 1;
     __set_CONTROL(ctrl.w);
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 
-enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
                                            size_t size, uint32_t access_type)
 {
     int flags = 0;
 
     /* If size is zero, this indicates an empty buffer and base is ignored */
     if (size == 0) {
-        return TFM_HAL_SUCCESS;
+        FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
     }
 
     if (!base) {
-        return TFM_HAL_ERROR_INVALID_INPUT;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_INVALID_INPUT));
     }
 
     if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
@@ -457,7 +464,7 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
     } else if (access_type & TFM_HAL_ACCESS_READABLE) {
         flags |= CMSE_MPU_READ;
     } else {
-        return TFM_HAL_ERROR_INVALID_INPUT;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_INVALID_INPUT));
     }
 
     if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
@@ -476,9 +483,9 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
     }
 
     if (cmse_check_address_range((void *)base, size, flags) != NULL) {
-        return TFM_HAL_SUCCESS;
+        FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
     } else {
-        return TFM_HAL_ERROR_MEM_FAULT;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_MEM_FAULT));
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ extern struct mpc_sie_dev_t MPC_SRAM_DEV_S;
 extern struct mpc_sie_dev_t MPC_QSPI_DEV_S;
 extern struct mpc_sie_dev_t MPC_ISRAM0_DEV_S;
 extern struct mpc_sie_dev_t MPC_ISRAM1_DEV_S;
+extern struct mpc_sie_dev_t MPC_DDR4_DEV_S;
 
 #ifdef CORSTONE310_FVP
 /* DMA350 driver structures */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2018-2019, Laurence Lundblade.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -9,12 +9,12 @@
 #include "attest_key.h"
 #include <stdint.h>
 #include <stddef.h>
-#include "config_attest.h"
+#include "config_tfm.h"
 #include "tfm_plat_defs.h"
 #include "tfm_plat_device_id.h"
 #include "t_cose_standard_constants.h"
 #include "q_useful_buf.h"
-#include "qcbor.h"
+#include "qcbor/qcbor.h"
 #include "tfm_crypto_defs.h"
 
 #define ATTEST_ECC_PUBLIC_KEY_SIZE \
@@ -54,7 +54,7 @@ static enum psa_attest_err_t attest_load_public_key(void)
         return PSA_ATTEST_ERR_GENERAL;
     }
 
-    attestation_key_curve = PSA_KEY_TYPE_ECC_GET_FAMILY(attr.type);
+    attestation_key_curve = PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(&attr));
 
     crypto_res = psa_export_public_key(handle, attestation_public_key,
                                        sizeof(attestation_public_key),

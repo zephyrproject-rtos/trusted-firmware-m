@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -19,7 +19,7 @@
 #include "chacha20_alt.h"
 #include "chacha_driver.h"
 #include "poly.h"
-#include <psa/crypto.h>
+#include "psa/crypto.h"
 
 #include "cc3xx_internal_chacha20.h"
 #include "cc3xx_internal_chacha20_poly1305.h"

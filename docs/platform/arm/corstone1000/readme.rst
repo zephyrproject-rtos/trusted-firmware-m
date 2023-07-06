@@ -61,7 +61,7 @@ The platform binaries are build using Yocto. Below is the user guide:
 Secure Test
 ===========
 
-This section can be used to test the secure enclave software indedendently from
+This section can be used to test the secure enclave software independently from
 the host. The below configuration builds the secure enclave binaries with CI test
 frame integrated. On boot, secure enclave softwares stack is brought up, and
 CI tests starts executing at the end of the initialization process. In the
@@ -78,12 +78,14 @@ FVP
 
 .. code-block:: bash
 
-    cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=<tf-m-root>/trusted-firmware-m/platform/ext/target/arm/corstone1000/ci_regression_tests/
+    cd <tf-m-root>/
+    cmake -B build/ -S . -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DPLATFORM_IS_FVP=TRUE -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
     cmake --build build -- install
-    cd ./build/install/outputs/
-    cat bl2_signed.bin bl2_signed.bin tfm_s_signed.bin > cs1000.bin
-    cd <path-to-FVP-installation>/models/Linux64_GCC-9.3/
-    ./FVP_Corstone-1000 -C board.flashloader0.fname="none" -C se.trustedBootROMloader.fname="./<path-to-build-dir>/install/outputs/bl1.bin" -C board.xnvm_size=64 -C se.trustedSRAM_config=6 -C se.BootROM_config="3" -C board.smsc_91c111.enabled=0  -C board.hostbridge.userNetworking=true --data board.flash0=./<path-to-build-dir>/install/outputs/cs1000.bin@0x68100000 -C diagnostics=4 -C disable_visualisation=true -C board.se_flash_size=8192 -C diagnostics=4  -C disable_visualisation=true
+    dd conv=notrunc bs=1 if=build/install/outputs/bl1_1.bin of=build/install/outputs/bl1.bin seek=0
+    dd conv=notrunc bs=1 if=build/install/outputs/bl1_provisioning_bundle.bin of=build/install/outputs/bl1.bin seek=40960
+    ./platform/ext/target/arm/corstone1000/create-flash-image.sh build/install/outputs cs1000.bin
+
+    <path-to-FVP-installation>/models/Linux64_GCC-9.3/FVP_Corstone-1000 -C board.flashloader0.fname="none" -C se.trustedBootROMloader.fname="build/install/outputs/bl1.bin" -C board.xnvm_size=64 -C se.trustedSRAM_config=6 -C se.BootROM_config="3" -C board.smsc_91c111.enabled=0  -C board.hostbridge.userNetworking=true --data board.flash0=build/install/outputs/cs1000.bin@0x68000000 -C diagnostics=4 -C disable_visualisation=true -C board.se_flash_size=8192 -C diagnostics=4  -C disable_visualisation=true
 
 FPGA
 ----
@@ -94,12 +96,14 @@ FPGA
 
 .. code-block:: bash
 
-    cmake -B build/ -S <tf-m-root>/ -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DTEST_NS=OFF -DTEST_S=ON -DEXTRA_S_TEST_SUITE_PATH=<tf-m-root>/trusted-firmware-m/platform/ext/target/arm/corstone1000/ci_regression_tests/ -DTEST_S_PS=OFF -DTEST_S_PLATFORM=OFF
+    cd <tf-m-root>/
+    cmake -B build/ -S . -DCMAKE_BUILD_TYPE=Debug -DTFM_TOOLCHAIN_FILE=<tf-m-root>/toolchain_GNUARM.cmake -DTFM_PLATFORM=arm/corstone1000 -DTEST_NS=OFF -DTEST_S=ON -DTEST_S_PS=OFF -DTEST_S_PLATFORM=OFF -DEXTRA_S_TEST_SUITE_PATH=platform/ext/target/arm/corstone1000/ci_regression_tests/
     cmake --build build -- install
-    cd ./build/install/outputs/
-    cat bl2_signed.bin bl2_signed.bin tfm_s_signed.bin > cs1000.bin
-    cp bl1.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
-    cp cs1000.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
+    dd conv=notrunc bs=1 if=build/install/outputs/bl1_1.bin of=build/install/outputs/bl1.bin seek=0
+    dd conv=notrunc bs=1 if=build/install/outputs/bl1_provisioning_bundle.bin of=build/install/outputs/bl1.bin seek=40960
+    ./platform/ext/target/arm/corstone1000/create-flash-image.sh build/install/outputs cs1000.bin
+    cp build/install/outputs/bl1.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
+    cp build/install/outputs/cs1000.bin <path-to-FPGA-SD-CARD>/SOFTWARE/
 
 FPGA build can not compile all the CI tests into a single build as it exceeds
 the available RAM size. So there is a need to select few tests but not all.
@@ -112,7 +116,7 @@ Other test configurations are:
 - -DTEST_S_PS=ON/OFF
 - -DTEST_S_PLATFORM=ON/OFF
 
-*Copyright (c) 2021-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2021-2023, Arm Limited. All rights reserved.*
 
 .. _Arm Ecosystem FVPs: https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps
-.. _Arm Corstone-1000 User Guide: https://gitlab.arm.com/arm-reference-solutions/arm-reference-solutions-docs/-/blob/CORSTONE1000-2022.04.19/docs/embedded-a/corstone1000/user-guide.rst
+.. _Arm Corstone-1000 User Guide: https://corstone1000.docs.arm.com/en/corstone1000-2022.11.23/user-guide.html

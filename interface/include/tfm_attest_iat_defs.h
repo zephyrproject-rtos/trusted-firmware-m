@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#include "config_attest.h"
+#include "config_tfm.h"
 
 #if ATTEST_TOKEN_PROFILE_PSA_IOT_1
 

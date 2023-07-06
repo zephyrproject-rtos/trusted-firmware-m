@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -40,7 +40,7 @@ void cc3xx_aes_init(AesContext_t *ctx)
 void cc3xx_aes_free(AesContext_t *ctx)
 {
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return;
     }
 
@@ -53,13 +53,8 @@ static psa_status_t aes_setkey(
         size_t key_bits,
         cryptoDirection_t direction)
 {
-    if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (NULL == key) {
-        CC_PAL_LOG_ERR("key cannot be NULL\n");
+    if ((NULL == ctx) || (NULL == key)) {
+        CC_PAL_LOG_ERR("ctx or key cannot be NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -77,7 +72,7 @@ static psa_status_t aes_setkey(
         ctx->keySizeId = KEY_SIZE_256_BIT;
         break;
     default:
-        CC_PAL_LOG_ERR("key_bits (%d) not supported\n", key_bits);
+        CC_PAL_LOG_ERR("key_bits (%d) not supported", key_bits);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -126,12 +121,12 @@ psa_status_t cc3xx_aes_crypt(
     }
 
     if (NULL == ctx || NULL == input || NULL == output || NULL == iv) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     if (mode != CIPHER_CTR && length % AES_BLOCK_SIZE) {
-        CC_PAL_LOG_ERR("Length %d not a multiple of the block size\n", length);
+        CC_PAL_LOG_ERR("Length %d not a multiple of the block size", length);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -144,13 +139,13 @@ psa_status_t cc3xx_aes_crypt(
     drvRet = SetDataBuffersInfo(input,  length, &inBuffInfo,
                                 output, length, &outBuffInfo);
     if (drvRet != 0) {
-        CC_PAL_LOG_ERR("Bad i/o buffers\n");
+        CC_PAL_LOG_ERR("Bad i/o buffers");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     drvRet = ProcessAesDrv(ctx, &inBuffInfo, &outBuffInfo, length);
     if (drvRet != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("cc3xx_aes_crypt failed: %d\n", drvRet);
+        CC_PAL_LOG_ERR("cc3xx_aes_crypt failed: %d", drvRet);
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 

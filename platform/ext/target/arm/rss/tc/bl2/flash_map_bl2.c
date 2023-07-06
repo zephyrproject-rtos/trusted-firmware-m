@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #include "target.h"
 #include "Driver_Flash.h"
 #include "host_base_address.h"
+#include "bl2_image_id.h"
 
 #define ARRAY_SIZE(arr) (sizeof(arr)/sizeof((arr)[0]))
 
@@ -21,7 +22,37 @@ const ARM_DRIVER_FLASH *flash_driver[] = {
 };
 const int flash_driver_entry_num = ARRAY_SIZE(flash_driver);
 
-const struct flash_area flash_map[] = {
+struct flash_area flash_map[] = {
+#ifdef RSS_XIP
+    {
+        .fa_id = FLASH_AREA_10_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_10_OFFSET,
+        .fa_size = FLASH_AREA_10_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_11_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_11_OFFSET,
+        .fa_size = FLASH_AREA_11_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_12_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_12_OFFSET,
+        .fa_size = FLASH_AREA_12_SIZE,
+    },
+    {
+        .fa_id = FLASH_AREA_13_ID,
+        .fa_device_id = FLASH_DEVICE_ID,
+        .fa_driver = &FLASH_DEV_NAME,
+        .fa_off = FLASH_AREA_13_OFFSET,
+        .fa_size = FLASH_AREA_13_SIZE,
+    },
+#else
     {
         .fa_id = FLASH_AREA_2_ID,
         .fa_device_id = FLASH_DEVICE_ID,
@@ -50,6 +81,7 @@ const struct flash_area flash_map[] = {
         .fa_off = FLASH_AREA_5_OFFSET,
         .fa_size = FLASH_AREA_5_SIZE,
     },
+#endif /* RSS_XIP */
     {
         .fa_id = FLASH_AREA_6_ID,
         .fa_device_id = FLASH_DEVICE_ID,
@@ -88,21 +120,21 @@ int boot_get_image_exec_ram_info(uint32_t image_id,
 {
     int rc = -1;
 
-    if (image_id == 0) {
+    if (image_id == RSS_BL2_IMAGE_S) {
         *exec_ram_start = S_IMAGE_LOAD_ADDRESS;
         *exec_ram_size  = SECURE_IMAGE_MAX_SIZE;
         rc = 0;
-    } else if (image_id == 1) {
+    } else if (image_id == RSS_BL2_IMAGE_NS) {
         *exec_ram_start = NS_IMAGE_LOAD_ADDRESS;
         *exec_ram_size  = NON_SECURE_IMAGE_MAX_SIZE;
         rc = 0;
-    } else if (image_id == 2) {
-        *exec_ram_start = HOST_BOOT0_LOAD_BASE_S;
-        *exec_ram_size  = AP_BL1_SIZE;
+    } else if (image_id == RSS_BL2_IMAGE_AP) {
+        *exec_ram_start = HOST_BOOT_IMAGE0_LOAD_BASE_S;
+        *exec_ram_size  = AP_BOOT_SRAM_SIZE;
         rc = 0;
-    } else if (image_id == 3) {
-        *exec_ram_start = HOST_BOOT1_LOAD_BASE_S;
-        *exec_ram_size  = SCP_BL1_SIZE;
+    } else if (image_id == RSS_BL2_IMAGE_SCP) {
+        *exec_ram_start = HOST_BOOT_IMAGE1_LOAD_BASE_S;
+        *exec_ram_size  = SCP_BOOT_SRAM_SIZE;
         rc = 0;
     }
 

@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -15,13 +15,13 @@
 #include "config_spm.h"
 #include "runtime_defs.h"
 #include "ffm/stack_watermark.h"
-#include "spm_ipc.h"
-#include "tfm_hal_memory_symbols.h"
+#include "spm.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
 #include "tfm_rpc.h"
 #include "ffm/backend.h"
 #include "utilities.h"
+#include "cmsis_psa/memory_symbols.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/spm_load_api.h"
@@ -52,6 +52,58 @@ uintptr_t *partition_meta_indicator_pos;
 
 extern uint32_t scheduler_lock;
 
+/*
+ * Query the state of current thread.
+ */
+static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
+{
+    struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
+    struct partition_t *p_pt = NULL;
+    uint32_t state = p_thrd->state;
+    psa_signal_t signal_ret = 0;
+
+    /* Get current partition of thread. */
+    p_pt = TO_CONTAINER(p_thrd->p_context_ctrl,
+                        struct partition_t, ctx_ctrl);
+
+    CRITICAL_SECTION_ENTER(cs_signal);
+
+    signal_ret = p_pt->signals_waiting & p_pt->signals_asserted;
+
+    if (signal_ret) {
+        /*
+         * If the partition is waiting some signals and any of them is asserted,
+         * change thread to be THRD_STATE_RET_VAL_AVAIL and fill the retval. If
+         * the waiting signal is TFM_IPC_REPLY_SIGNAL, it means the Secure
+         * Partition is waiting for the services to be fulfilled, then the
+         * return value comes from the backend_replying() by the server
+         * Partition. For other waiting signals by psa_wait(), the return value
+         * is just the signal.
+         */
+        if (signal_ret == TFM_IPC_REPLY_SIGNAL) {
+            p_pt->signals_asserted &= ~TFM_IPC_REPLY_SIGNAL;
+            *p_retval = (uint32_t)p_pt->reply_value;
+        } else {
+            *p_retval = signal_ret;
+        }
+
+        p_pt->signals_waiting = 0;
+        state = THRD_STATE_RET_VAL_AVAIL;
+    } else if (p_pt->signals_waiting != 0) {
+        /*
+         * If the thread is waiting some signals but none of them is asserted,
+         * block the thread.
+         */
+        state = THRD_STATE_BLOCK;
+    }
+
+    CRITICAL_SECTION_LEAVE(cs_signal);
+    return state;
+}
+
+extern struct psa_api_tbl_t psa_api_cross;
+extern struct psa_api_tbl_t psa_api_svc;
+
 static void prv_process_metadata(struct partition_t *p_pt)
 {
     const struct partition_load_info_t *p_pt_ldi;
@@ -68,7 +120,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
     /* common runtime metadata */
     allocate_size = sizeof(*p_rt_meta);
 
-    if (!IS_PARTITION_IPC_MODEL(p_pt_ldi)) {
+    if (!IS_IPC_MODEL(p_pt_ldi)) {
         /* SFN specific metadata - SFN function table */
         allocate_size += sizeof(service_fn_t) * p_pt_ldi->nservices;
     }
@@ -78,10 +130,16 @@ static void prv_process_metadata(struct partition_t *p_pt)
                                     ARCH_CTXCTRL_ALLOCATED_PTR(ctx_ctrl);
 
     p_rt_meta->entry = p_pt_ldi->entry;
+#if TFM_LVL == 1
+    p_rt_meta->psa_fns = &psa_api_cross;
+#else
+    /* TODO: ABI for PRoT partitions needs to be updated based on implementations. */
+    p_rt_meta->psa_fns = &psa_api_svc;
+#endif
     p_rt_meta->n_sfn = 0;
     p_sfn_table = p_rt_meta->sfn_table;
 
-    if (!IS_PARTITION_IPC_MODEL(p_pt_ldi)) {
+    if (!IS_IPC_MODEL(p_pt_ldi)) {
         /* SFN table. The signal bit of the service is the same index of SFN. */
         for (int i = 0; i < p_pt_ldi->nservices; i++) {
             p_sfn_table[i] = (service_fn_t)p_srv_ldi[i].sfn;
@@ -98,11 +156,10 @@ static void prv_process_metadata(struct partition_t *p_pt)
  * current thread and trigger scheduler.
  */
 psa_status_t backend_messaging(struct service_t *service,
-                               struct conn_handle_t *handle)
+                               struct connection_t *handle)
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
 
     if (!handle || !service || !service->p_ldinf || !service->partition) {
         return PSA_ERROR_PROGRAMMER_ERROR;
@@ -111,19 +168,10 @@ psa_status_t backend_messaging(struct service_t *service,
     p_owner = service->partition;
     signal = service->p_ldinf->signal;
 
-    CRITICAL_SECTION_ENTER(cs_assert);
-
     UNI_LIST_INSERT_AFTER(p_owner, handle, p_handles);
 
     /* Messages put. Update signals */
-    p_owner->signals_asserted |= signal;
-
-    if (p_owner->signals_waiting & signal) {
-        thrd_wake_up(&p_owner->waitobj,
-                     (p_owner->signals_asserted & p_owner->signals_waiting));
-        p_owner->signals_waiting &= ~signal;
-    }
-    CRITICAL_SECTION_LEAVE(cs_assert);
+    backend_assert_signal(p_owner, signal);
 
     /*
      * If it is a NS request via RPC, it is unnecessary to block current
@@ -131,7 +179,7 @@ psa_status_t backend_messaging(struct service_t *service,
      */
 
     if (!is_tfm_rpc_msg(handle)) {
-        thrd_set_wait(&handle->ack_evnt, CURRENT_THREAD);
+        backend_wait_signals(handle->p_client, TFM_IPC_REPLY_SIGNAL);
     }
 
     handle->status = TFM_HANDLE_STATUS_ACTIVE;
@@ -139,12 +187,13 @@ psa_status_t backend_messaging(struct service_t *service,
     return PSA_SUCCESS;
 }
 
-psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
+psa_status_t backend_replying(struct connection_t *handle, int32_t status)
 {
     if (is_tfm_rpc_msg(handle)) {
         tfm_rpc_client_call_reply(handle, status);
     } else {
-        thrd_wake_up(&handle->ack_evnt, status);
+        handle->p_client->reply_value = (uintptr_t)status;
+        backend_assert_signal(handle->p_client, TFM_IPC_REPLY_SIGNAL);
     }
 
     /*
@@ -155,13 +204,15 @@ psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
     return PSA_SUCCESS;
 }
 
-extern void sprt_main(void);
+extern void common_sfn_thread(void *param);
 
 /* Parameters are treated as assuredly */
 void backend_init_comp_assuredly(struct partition_t *p_pt,
                                  uint32_t service_setting)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
+    thrd_fn_t thrd_entry;
+    void *param = NULL;
 
 #if CONFIG_TFM_DOORBELL_API == 1
     p_pt->signals_allowed |= PSA_DOORBELL;
@@ -169,7 +220,6 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 
     p_pt->signals_allowed |= service_setting;
 
-    THRD_SYNC_INIT(&p_pt->waitobj);
     UNI_LISI_INIT_NODE(p_pt, p_handles);
 
     ARCH_CTXCTRL_INIT(&p_pt->ctx_ctrl,
@@ -183,18 +233,30 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     THRD_INIT(&p_pt->thrd, &p_pt->ctx_ctrl,
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
-#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1) && defined(CONFIG_TFM_USE_TRUSTZONE)
-    if (IS_PARTITION_NS_AGENT(p_pldi)) {
+#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1)
+    if (IS_NS_AGENT_TZ(p_pldi)) {
         /* Get the context from ns_agent_tz */
-        if (p_pldi->pid == 0) {
-            SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
-        }
+        SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
     }
 #endif
 
+    if (IS_IPC_MODEL(p_pldi)) {
+        /* IPC Partition */
+        thrd_entry = POSITION_TO_ENTRY(p_pldi->entry, thrd_fn_t);
+    } else {
+        /* SFN Partition */
+        thrd_entry = POSITION_TO_ENTRY(common_sfn_thread, thrd_fn_t);
+    }
+
+    if (IS_NS_AGENT_TZ(p_pldi)) {
+        /* NS agent TZ expects NSPE entry point as the parameter */
+        param = (void *)tfm_hal_get_ns_entry_point();
+    }
+
     thrd_start(&p_pt->thrd,
-               POSITION_TO_ENTRY(sprt_main, thrd_fn_t),
-               THRD_GENERAL_EXIT);
+               thrd_entry,
+               THRD_GENERAL_EXIT,
+               param);
 }
 
 uint32_t backend_system_run(void)
@@ -207,7 +269,10 @@ uint32_t backend_system_run(void)
     SPM_ASSERT(SPM_THREAD_CONTEXT);
 #endif
 
-    partition_meta_indicator_pos = (uintptr_t *)hal_mem_sp_meta_start;
+    /* Init thread callback function. */
+    thrd_set_query_callback(query_state);
+
+    partition_meta_indicator_pos = (uintptr_t *)PART_LOCAL_STORAGE_PTR_POS;
     control = thrd_start_scheduler(&CURRENT_THREAD);
 
     p_cur_pt = TO_CONTAINER(CURRENT_THREAD->p_context_ctrl,
@@ -221,35 +286,40 @@ uint32_t backend_system_run(void)
     return control;
 }
 
-psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
+psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
 {
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+    struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
     psa_signal_t ret_signal;
 
-    /*
-     * 'backend_wait()' sets the waiting signal mask for partition, and
-     * blocks the partition thread state to wait for signals.
-     * These changes should be inside the ciritical section to avoid
-     * 'signal_waiting' or the thread state to be changed by interrupts
-     * while this function is reading or writing values.
-     */
-    CRITICAL_SECTION_ENTER(cs_assert);
-
-    ret_signal = p_pt->signals_asserted & signal_mask;
-    if (ret_signal == 0) {
-        p_pt->signals_waiting = signal_mask;
-        thrd_set_wait(&p_pt->waitobj, CURRENT_THREAD);
+    if (!p_pt) {
+        tfm_core_panic();
     }
-    CRITICAL_SECTION_LEAVE(cs_assert);
+
+    CRITICAL_SECTION_ENTER(cs_signal);
+
+    ret_signal = p_pt->signals_asserted & signals;
+    if (ret_signal == 0) {
+        p_pt->signals_waiting = signals;
+    }
+
+    CRITICAL_SECTION_LEAVE(cs_signal);
 
     return ret_signal;
 }
 
-void backend_wake_up(struct partition_t *p_pt)
+uint32_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
 {
-    thrd_wake_up(&p_pt->waitobj,
-                 p_pt->signals_asserted & p_pt->signals_waiting);
-    p_pt->signals_waiting = 0;
+    struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
+
+    if (!p_pt) {
+        tfm_core_panic();
+    }
+
+    CRITICAL_SECTION_ENTER(cs_signal);
+    p_pt->signals_asserted |= signal;
+    CRITICAL_SECTION_LEAVE(cs_signal);
+
+    return PSA_SUCCESS;
 }
 
 uint64_t ipc_schedule(void)

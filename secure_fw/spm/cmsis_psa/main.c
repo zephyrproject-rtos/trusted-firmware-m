@@ -8,8 +8,8 @@
 #include "build_config_check.h"
 #include "fih.h"
 #include "ffm/tfm_boot_data.h"
-#include "region.h"
-#include "spm_ipc.h"
+#include "memory_symbols.h"
+#include "spm.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
 #include "tfm_api.h"
@@ -18,7 +18,6 @@
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
 
-REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Base);
 uintptr_t spm_boundary = (uintptr_t)NULL;
 
 static fih_int tfm_core_init(void)
@@ -87,8 +86,7 @@ int main(void)
     fih_int fih_rc = FIH_FAILURE;
 
     /* set Main Stack Pointer limit */
-    tfm_arch_set_msplim((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK,
-                                                                   $$ZI$$Base));
+    tfm_arch_set_msplim(SPM_BOOT_STACK_TOP);
 
     fih_delay_init();
 

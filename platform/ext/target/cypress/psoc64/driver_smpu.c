@@ -29,7 +29,9 @@
 #include "tfm_api.h"
 #include "tfm_spm_log.h"
 #include "tfm_hal_its.h"
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "tfm_hal_ps.h"
+#endif
 #include "tfm_multi_core.h"
 
 #include "cy_prot.h"
@@ -249,12 +251,14 @@ static cy_en_prot_status_t get_region(const PROT_SMPU_SMPU_STRUCT_Type *smpu,
         /* Retrieve the OTP / NV area info */
         *base = FLASH_OTP_NV_COUNTERS_AREA_OFFSET;
         *size = FLASH_OTP_NV_COUNTERS_AREA_SIZE;
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
     } else if (smpu == PS_SMPU_STRUCT) {
         struct tfm_hal_ps_fs_info_t ps_fs_info;
         /* Retrieve the PS region definition */
         tfm_hal_ps_fs_info(&ps_fs_info);
         *base = ps_fs_info.flash_area_addr;
         *size = ps_fs_info.flash_area_size;
+#endif
     } else {
         /* We don't know where to get the region definition */
         ret = CY_PROT_FAILURE;

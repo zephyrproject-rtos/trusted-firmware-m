@@ -10,38 +10,27 @@
 #include <stdbool.h>
 
 #include "cmsis_compiler.h"
-#include "config_its.h"
+#include "config_tfm.h"
 #include "psa/storage_common.h"
 #include "tfm_internal_trusted_storage.h"
-#include "its_utils.h"
 
 #include "psa/framework_feature.h"
 #include "psa/service.h"
 #include "psa_manifest/tfm_internal_trusted_storage.h"
 #include "tfm_its_defs.h"
-#if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
-#include "flash/its_flash.h"
-#endif /* PSA_FRAMEWORK_HAS_MM_IOVEC != 1 */
 
-#if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
-/* Buffer to store asset data from the caller.
- * Note: size must be aligned to the max flash program unit to meet the
- * alignment requirement of the filesystem.
- */
-static uint8_t __ALIGNED(4) asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
-                                          ITS_FLASH_MAX_ALIGNMENT)];
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+static uint8_t *p_data;
+#else
+static psa_handle_t handle;
 #endif
 
 static psa_status_t tfm_its_set_req(const psa_msg_t *msg)
 {
-    psa_status_t status;
     psa_storage_uid_t uid;
-    uint8_t *data_buf;
-    size_t size_remaining;
-    size_t offset;
     psa_storage_create_flags_t create_flags;
-    struct its_asset_info asset_info;
     size_t num;
+    size_t data_length;
 
     if (msg->in_size[0] != sizeof(uid) ||
         msg->in_size[2] != sizeof(create_flags)) {
@@ -58,56 +47,27 @@ static psa_status_t tfm_its_set_req(const psa_msg_t *msg)
     if (num != sizeof(create_flags)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
-
-    asset_info.uid = uid;
-    asset_info.client_id = msg->client_id;
-    asset_info.create_flags = create_flags;
-
-    size_remaining = msg->in_size[1];
-    offset = 0;
-
+    data_length = msg->in_size[1];
 #if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
-    if (size_remaining != 0) {
-        data_buf = (uint8_t *)psa_map_invec(msg->handle, 1);
+    if (data_length) {
+        p_data = (uint8_t *)psa_map_invec(msg->handle, 1);
     } else {
-        /* zero-size asset is supported */
-        data_buf = NULL;
+        p_data = NULL;
     }
-
-    status = tfm_its_set(&asset_info, data_buf, size_remaining,
-                         size_remaining, offset);
 #else
-    data_buf = asset_data;
-    do {
-        num = psa_read(msg->handle, 1, asset_data,
-                       ITS_UTILS_MIN(size_remaining, sizeof(asset_data)));
-
-        status = tfm_its_set(&asset_info, data_buf, size_remaining,
-                             num, offset);
-        if (status != PSA_SUCCESS) {
-            return status;
-        }
-
-        size_remaining -= num;
-        offset += num;
-    } while (size_remaining);
+    handle = msg->handle;
 #endif
-
-    return status;
+    return tfm_its_set(msg->client_id, uid, data_length, create_flags);
 }
 
 static psa_status_t tfm_its_get_req(const psa_msg_t *msg)
 {
     psa_status_t status;
     psa_storage_uid_t uid;
-    uint8_t *data_buf;
-    size_t size_to_read;
+    size_t data_size;
+    size_t data_length;
     size_t data_offset;
-    size_t out_size;
-    size_t size_read;
     size_t num;
-    struct its_asset_info asset_info;
-    bool first_get;
 
     if (msg->in_size[0] != sizeof(uid) ||
         msg->in_size[1] != sizeof(data_offset)) {
@@ -124,49 +84,22 @@ static psa_status_t tfm_its_get_req(const psa_msg_t *msg)
     if (num != sizeof(data_offset)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
-
-    asset_info.uid = uid;
-    asset_info.client_id = msg->client_id;
-    out_size = msg->out_size[0];
-    first_get = true;
-
+    data_size = msg->out_size[0];
 #if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
-    size_to_read = msg->out_size[0];
-    if (size_to_read != 0) {
-        data_buf = (uint8_t *)psa_map_outvec(msg->handle, 0);
+    if (data_size) {
+        p_data = (uint8_t *)psa_map_outvec(msg->handle, 0);
     } else {
-        data_buf = NULL;
-    }
-
-    status = tfm_its_get(&asset_info, data_buf, size_to_read,
-                         data_offset, &size_read, first_get);
-    if (status == PSA_SUCCESS && size_to_read != 0) {
-        /* Unmap to update caller’s outvec with the number of bytes written  */
-        psa_unmap_outvec(msg->handle, 0, size_read);
+        p_data = NULL;
     }
 #else
-    /* Fill in the outvec unless no data left */
-    data_buf = asset_data;
-    do {
-        size_to_read = ITS_UTILS_MIN(out_size, sizeof(asset_data));
-        status = tfm_its_get(&asset_info, data_buf, size_to_read,
-                             data_offset, &size_read, first_get);
-        if (status != PSA_SUCCESS) {
-            return status;
-        }
-        if (size_read == 0) {
-            /* No more data */
-            return PSA_SUCCESS;
-        }
-
-        psa_write(msg->handle, 0, data_buf, size_read);
-
-        first_get = false;
-        out_size -= size_read;
-        data_offset += size_read;
-    } while (out_size > 0);
+    handle = msg->handle;
 #endif
-
+    status = tfm_its_get(msg->client_id, uid, data_offset, data_size, &data_length);
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+    if ((status == PSA_SUCCESS) && (data_size != 0)) {
+        psa_unmap_outvec(msg->handle, 0, data_length);
+    }
+#endif
     return status;
 }
 
@@ -236,3 +169,22 @@ psa_status_t tfm_internal_trusted_storage_service_sfn(const psa_msg_t *msg)
 
     return PSA_ERROR_GENERIC_ERROR;
 }
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+static uint8_t *p_data;
+uint8_t *its_req_mngr_get_vec_base(void)
+{
+    return p_data;
+}
+#else
+size_t its_req_mngr_read(uint8_t *buf, size_t num_bytes)
+{
+    return psa_read(handle, 1, buf, num_bytes);
+}
+
+void its_req_mngr_write(const uint8_t *buf, size_t num_bytes)
+{
+    psa_write(handle, 0, buf, num_bytes);
+}
+#endif
+

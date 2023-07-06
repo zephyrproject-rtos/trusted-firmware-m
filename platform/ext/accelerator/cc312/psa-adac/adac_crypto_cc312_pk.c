@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited
+ * Copyright (c) 2021-2023 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -53,19 +53,19 @@ psa_status_t psa_adac_verify_signature(uint8_t key_type, uint8_t *key,
             ((hash_algo == PSA_ALG_SHA_512) ? CC_RSA_After_SHA512_mode :
                             CC_RSA_HASH_NO_HASH_mode);
 
-        PSA_ADAC_LOG_TRACE("cc312", "psa_adac_verify_signature Rsa%d\n",
+        PSA_ADAC_LOG_TRACE("cc312", "psa_adac_verify_signature Rsa%d\r\n",
                            key_size);
 
         error = CC_RsaPubKeyBuild(&pubKey, F4, sizeof(F4), key, key_size);
         if (error != CC_OK) {
-            PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaPubKeyBuild %lx\n",
+            PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaPubKeyBuild %lx\r\n",
                              error);
         } else {
             error = CC_RsaPssVerify(&rsaPubUserContext, &pubKey, hashOpMode,
                                     CC_PKCS1_MGF1, 32, (uint8_t *)hash,
                                     hash_size, (uint8_t *)sig);
             if (error != CC_OK) {
-                PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaPssVerify %lx\n",
+                PSA_ADAC_LOG_ERR("cc312", "Error in CC_RsaPssVerify %lx\r\n",
                                  error);
             }
         }
@@ -90,7 +90,7 @@ psa_status_t psa_adac_verify_signature(uint8_t key_type, uint8_t *key,
                 uint8_t pub_key[ECDSA_P256_PUBLIC_KEY_SIZE + 1] = {0x04};
                 memcpy(pub_key + 1, key, ECDSA_P256_PUBLIC_KEY_SIZE);
                 PSA_ADAC_LOG_TRACE("cc312",
-                        "psa_adac_verify_signature EcdsaP256\n");
+                        "psa_adac_verify_signature EcdsaP256\r\n");
                 error = CC_EcpkiPubKeyBuild(CC_EcpkiGetSecp256r1DomainP(),
                         pub_key, sizeof(pub_key), &pubKey);
             } else {
@@ -105,7 +105,7 @@ psa_status_t psa_adac_verify_signature(uint8_t key_type, uint8_t *key,
                 uint8_t pub_key[ECDSA_P521_PUBLIC_KEY_SIZE + 1] = {0x04};
                 memcpy(pub_key + 1, key, ECDSA_P521_PUBLIC_KEY_SIZE);
                 PSA_ADAC_LOG_TRACE("cc312",
-                        "psa_adac_verify_signature EcdsaP521\n");
+                        "psa_adac_verify_signature EcdsaP521\r\n");
                 error = CC_EcpkiPubKeyBuild(CC_EcpkiGetSecp521r1DomainP(),
                                             pub_key, sizeof(pub_key), &pubKey);
             } else {
@@ -119,18 +119,18 @@ psa_status_t psa_adac_verify_signature(uint8_t key_type, uint8_t *key,
         }
 
         if (CC_OK != error) {
-            PSA_ADAC_LOG_ERR("cc312", "Error in CC_EcpkiPubKeyBuild %lx\n",
+            PSA_ADAC_LOG_ERR("cc312", "Error in CC_EcpkiPubKeyBuild %lx\r\n",
                                         error);
         } else if (CC_OK != (error = EcdsaVerifyInit(&ecdsaVerifyUserContext,
                         &pubKey, hashOpMode))) {
-            PSA_ADAC_LOG_ERR("cc312", "Error in EcdsaVerifyInit %lx\n", error);
+            PSA_ADAC_LOG_ERR("cc312", "Error in EcdsaVerifyInit %lx\r\n", error);
         } else if (CC_OK != (error = EcdsaVerifyUpdate(&ecdsaVerifyUserContext,
                         hash, hash_size))) {
-            PSA_ADAC_LOG_ERR("cc312", "Error in EcdsaVerifyUpdate %lx\n",
+            PSA_ADAC_LOG_ERR("cc312", "Error in EcdsaVerifyUpdate %lx\r\n",
                                         error);
         } else if (CC_OK != (error = EcdsaVerifyFinish(&ecdsaVerifyUserContext,
                         sig, sig_size))) {
-            PSA_ADAC_LOG_ERR("cc312", "Error in EcdsaVerifyFinish %lx\n",
+            PSA_ADAC_LOG_ERR("cc312", "Error in EcdsaVerifyFinish %lx\r\n",
                                         error);
         }
 #else
@@ -140,7 +140,7 @@ psa_status_t psa_adac_verify_signature(uint8_t key_type, uint8_t *key,
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
-    PSA_ADAC_LOG_DEBUG("cc312", "Signature verification: %s\n",
+    PSA_ADAC_LOG_DEBUG("cc312", "Signature verification: %s\r\n",
                                        error == CC_OK ? "success" : "failure");
     return (error == CC_OK) ? PSA_SUCCESS : PSA_ERROR_INVALID_SIGNATURE;
 }

@@ -25,8 +25,10 @@
 #include "boot_measurement.h"
 #endif /* MEASURED_BOOT_API */
 
+#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
+#endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
 REGION_DECLARE(Image$$, ER_DATA, $$Base)[];
 REGION_DECLARE(Image$$, ARM_LIB_HEAP, $$ZI$$Limit)[];
@@ -150,10 +152,12 @@ __WEAK int32_t boot_platform_init(void)
     stdio_init();
 #endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
+#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
     result = FLASH_DEV_NAME.Initialize(NULL);
     if (result != ARM_DRIVER_OK) {
         return 1;
     }
+#endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
     if(!platform_code_is_bl1_2) {
         /* Clear boot data area */
@@ -197,10 +201,12 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
     }
 #endif /* CRYPTO_HW_ACCELERATOR */
 
+#ifndef TFM_BL1_MEMORY_MAPPED_FLASH
     result = FLASH_DEV_NAME.Uninitialize();
     if (result != ARM_DRIVER_OK) {
         while (1){}
     }
+#endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     stdio_uninit();

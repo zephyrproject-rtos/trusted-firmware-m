@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -9,7 +9,8 @@
  */
 
 #include "cmsis.h"
-#include "spm_ipc.h"
+#include "device_definition.h"
+#include "spm.h"
 #include "tfm_hal_interrupt.h"
 #include "tfm_peripherals_def.h"
 #include "ffm/interrupt.h"
@@ -45,7 +46,7 @@ static struct irq_t mbox_irq_info = {0};
 /* Platform specific inter-processor communication interrupt handler. */
 void CMU_MHU0_Receiver_Handler(void)
 {
-    (void)tfm_multi_core_hal_receive();
+    (void)tfm_multi_core_hal_receive(&MHU_AP_TO_RSS_DEV, &MHU_RSS_TO_AP_DEV);
 
     /*
      * SPM will send a MAILBOX_SIGNAL to the corresponding partition

@@ -498,8 +498,8 @@ struct platform_data_t
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Base);
-REGION_DECLARE(Load$$LR$$, LR_VENEER, $$Limit);
+REGION_DECLARE(Image$$, ER_VENEER, $$Base);
+REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 
 const struct memory_region_limits memory_regions = {
     .non_secure_code_start =
@@ -514,10 +514,16 @@ const struct memory_region_limits memory_regions = {
         NS_PARTITION_SIZE - 1,
 
     .veneer_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
 
     .veneer_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_VENEER, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+
+#ifdef NRF_NS_STORAGE_PARTITION_START
+    .non_secure_storage_partition_base = NRF_NS_STORAGE_PARTITION_START,
+    .non_secure_storage_partition_limit = NRF_NS_STORAGE_PARTITION_START +
+        NRF_NS_STORAGE_PARTITION_SIZE - 1,
+#endif /* NRF_NS_STORAGE_PARTITION_START */
 };
 
 /* To write into AIRCR register, 0x5FA value must be write to the VECTKEY field,
@@ -631,11 +637,10 @@ enum tfm_plat_err_t spu_init_cfg(void)
      * Configure Secondary Image Partition for BL2
      */
 
-    /* Explicitly reset Flash and SRAM configuration to all-Secure,
-     * in case this has been overwritten by earlier images e.g.
-     * bootloader.
+    /* Reset Flash and SRAM configuration of regions that are not owned by
+     * the bootloader(s) to all-Secure.
      */
-    spu_regions_reset_all_secure();
+    spu_regions_reset_unlocked_secure();
 
     /* Configures SPU Code and Data regions to be non-secure */
     spu_regions_flash_config_non_secure(memory_regions.non_secure_partition_base,
@@ -750,8 +755,8 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
      * This configuration can be done only from secure code, as otherwise those
      * register fields are not accessible.  That's why it is placed here.
      */
-    nrf_gpio_pin_mcu_select(PIN_XL1, NRF_GPIO_PIN_MCUSEL_PERIPHERAL);
-    nrf_gpio_pin_mcu_select(PIN_XL2, NRF_GPIO_PIN_MCUSEL_PERIPHERAL);
+    nrf_gpio_pin_control_select(PIN_XL1, NRF_GPIO_PIN_SEL_PERIPHERAL);
+    nrf_gpio_pin_control_select(PIN_XL2, NRF_GPIO_PIN_SEL_PERIPHERAL);
 
     /* Enable the instruction and data cache (this can be done only from secure
      * code; that's why it is placed here).

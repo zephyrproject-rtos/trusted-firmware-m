@@ -14,10 +14,15 @@
 #include <stddef.h>
 #include "compiler_ext_defs.h"
 #include "config_impl.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "load/partition_defs.h"
 #include "load/service_defs.h"
 #include "load/asset_defs.h"
+/* Note that region_defs.h must be included before tfm_s_linker_alignments.h
+ * to let platform overwrite default alignment values.
+ */
+#include "region_defs.h"
+#include "tfm_s_linker_alignments.h"
 
 #define TFM_SP_NS_AGENT_NDEPS                                   (0)
 #define TFM_SP_NS_AGENT_NSERVS                                  (0)
@@ -28,8 +33,13 @@
 /* Entrypoint function declaration */
 extern void ns_agent_tz_main(void);
 
+/* Stack size must be aligned to satisfy platform alignment requirements */
+#define TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED \
+    ROUND_UP_TO_MULTIPLE(CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE,\
+                         TFM_LINKER_NS_AGENT_TZ_STACK_ALIGNMENT)
+
 /* Stack */
-uint8_t ns_agent_tz_stack[CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE] __aligned(0x20);
+uint8_t ns_agent_tz_stack[TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED] __aligned(TFM_LINKER_NS_AGENT_TZ_STACK_ALIGNMENT);
 
 struct partition_tfm_sp_ns_agent_tz_load_info_t {
     /* common length load data */
@@ -55,14 +65,17 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
         .flags                      = (PARTITION_PRI_LOWEST - 1)
                                     | PARTITION_MODEL_IPC
                                     | PARTITION_MODEL_PSA_ROT
-                                    | PARTITION_NS_AGENT,
+                                    | PARTITION_NS_AGENT
+                                    | PARTITION_NS_AGENT_TZ,
         .entry                      = ENTRY_TO_POSITION(ns_agent_tz_main),
-        .stack_size                 = CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE,
+        .stack_size                 = TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED,
         .heap_size                  = 0,
         .ndeps                      = TFM_SP_NS_AGENT_NDEPS,
         .nservices                  = TFM_SP_NS_AGENT_NSERVS,
 #if TFM_LVL == 3
         .nassets                    = TFM_SP_NS_AGENT_NASSETS,
+#else
+        .nassets                    = 0,
 #endif
     },
     .stack_addr                     = (uintptr_t)ns_agent_tz_stack,
@@ -73,7 +86,7 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
             .mem.start              = (uintptr_t)ns_agent_tz_stack,
 
             .mem.limit              =
-               (uintptr_t)&ns_agent_tz_stack[CONFIG_TFM_NS_AGENT_TZ_STACK_SIZE],
+               (uintptr_t)&ns_agent_tz_stack[TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED],
             .attr                   = ASSET_ATTR_READ_WRITE,
         },
     },

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -45,7 +45,8 @@ static enum tfm_plat_err_t initialize_mhu(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum tfm_plat_err_t tfm_multi_core_hal_receive(void)
+enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
+                                               void *mhu_sender_dev)
 {
     enum mhu_error_t mhu_err;
     enum tfm_plat_err_t err;
@@ -56,9 +57,7 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void)
     memset(&reply, 0, sizeof(reply));
 
     /* Receive complete message */
-    mhu_err = mhu_receive_data(&MHU_AP_TO_RSS_DEV,
-                               (uint8_t *)&msg,
-                               &msg_len);
+    mhu_err = mhu_receive_data(mhu_receiver_dev, (uint8_t *)&msg, &msg_len);
     if (mhu_err != MHU_ERR_NONE) {
         SPMLOG_DBGMSGVAL("[COMMS] MHU receive failed: ", mhu_err);
         /* Can't respond, since we don't know anything about the message */
@@ -83,6 +82,9 @@ enum tfm_plat_err_t tfm_multi_core_hal_receive(void)
         goto out_free_req;
     }
 
+    /* Record the MHU sender device to be used for the reply */
+    req->mhu_sender_dev = mhu_sender_dev;
+
     if (queue_enqueue(req) != 0) {
         /* No queue capacity, drop message */
         err = TFM_PLAT_ERR_SYSTEM_ERR;
@@ -101,7 +103,7 @@ out_return_err:
                                      PSA_ERROR_CONNECTION_BUSY,
                                      &reply, &reply_size)
         == TFM_PLAT_ERR_SUCCESS) {
-        mhu_send_data(&MHU_RSS_TO_AP_DEV, (uint8_t *)&reply, reply_size);
+        mhu_send_data(mhu_sender_dev, (uint8_t *)&reply, reply_size);
     }
 
     return err;
@@ -125,7 +127,7 @@ enum tfm_plat_err_t tfm_multi_core_hal_reply(struct client_request_t *req)
         goto out;
     }
 
-    mhu_err = mhu_send_data(&MHU_RSS_TO_AP_DEV, (uint8_t *)&reply, reply_size);
+    mhu_err = mhu_send_data(req->mhu_sender_dev, (uint8_t *)&reply, reply_size);
     if (mhu_err != MHU_ERR_NONE) {
         SPMLOG_DBGMSGVAL("[COMMS] MHU send failed: ", mhu_err);
         err = TFM_PLAT_ERR_SYSTEM_ERR;

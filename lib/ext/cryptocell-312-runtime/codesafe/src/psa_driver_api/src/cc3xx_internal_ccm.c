@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,8 +12,6 @@
  *
  */
 
-#define CC_PAL_LOG_CUR_COMPONENT CC_LOG_MASK_CC_API
-
 #include "aesccm_driver.h"
 #include "cc_common.h"
 #include "cc_pal_abort.h"
@@ -21,7 +19,7 @@
 #include "cc_pal_types.h"
 
 #include "cc3xx_internal_ccm.h"
-#include <psa/crypto.h>
+#include "psa/crypto.h"
 
 /*! The size of the AES CCM star nonce in bytes. */
 #define CC3XX_CCM_STAR_NONCE_SIZE_BYTES 13
@@ -42,8 +40,8 @@ static psa_status_t ccm_setkey(
         size_t key_bits,
         cryptoDirection_t direction)
 {
-    if (NULL == ctx || NULL == key) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == ctx) || (NULL == key)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -229,7 +227,7 @@ static psa_status_t ccm_init(AesCcmContext_t *context,
     rc = SetDataBuffersInfo(tempBuff, CC_AES_BLOCK_SIZE_IN_BYTES, &inBuffInfo,
                             NULL, 0, &outBuffInfo);
     if (rc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_DATA_INVALID;
     }
 
@@ -237,7 +235,7 @@ static psa_status_t ccm_init(AesCcmContext_t *context,
     rc = ProcessAesCcmDrv(context, &inBuffInfo, &outBuffInfo,
                           CC_AES_BLOCK_SIZE_IN_BYTES);
     if (rc != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("calculating MAC failed with error code %d\n", rc);
+        CC_PAL_LOG_ERR("calculating MAC failed with error code %d", rc);
         return PSA_ERROR_DATA_INVALID;
     }
 
@@ -315,7 +313,7 @@ static psa_status_t ccm_ass_data(AesCcmContext_t *context,
     rc = SetDataBuffersInfo(context->tempBuff, CC_AES_BLOCK_SIZE_IN_BYTES,
                             &inBuffInfo, NULL, 0, &outBuffInfo);
     if (rc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_DATA_INVALID;
     }
 
@@ -324,7 +322,7 @@ static psa_status_t ccm_ass_data(AesCcmContext_t *context,
                           CC_AES_BLOCK_SIZE_IN_BYTES);
     if (rc != AES_DRV_OK) {
         CC_PAL_LOG_ERR("encrypt a0 concatenated with the beginning of "
-                       "Associated data failed with error code %d\n",
+                       "AD failed with error code %d",
                        rc);
         return PSA_ERROR_DATA_INVALID;
     }
@@ -334,17 +332,14 @@ static psa_status_t ccm_ass_data(AesCcmContext_t *context,
         rc = SetDataBuffersInfo(pAssocData, assocDataSize, &inBuffInfo, NULL, 0,
                                 &outBuffInfo);
         if (rc != 0) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_DATA_INVALID;
         }
 
         /* encrypt remaining Associated data */
-        rc =
-            ProcessAesCcmDrv(context, &inBuffInfo, &outBuffInfo, assocDataSize);
+        rc = ProcessAesCcmDrv(context, &inBuffInfo, &outBuffInfo, assocDataSize);
         if (rc != AES_DRV_OK) {
-            CC_PAL_LOG_ERR(
-                "encrypt remaining Associated data failed with error code %d\n",
-                rc);
+            CC_PAL_LOG_ERR("encrypt remaining AD failed with error code %d", rc);
             return PSA_ERROR_DATA_INVALID;
         }
     }
@@ -392,7 +387,7 @@ static psa_status_t ccm_text_data(AesCcmContext_t *context,
     rc = SetDataBuffersInfo(pTextDataIn, textDataSize, &inBuffInfo,
                             pTextDataOut, textDataSize, &outBuffInfo);
     if (rc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_DATA_INVALID;
     }
 
@@ -409,8 +404,7 @@ static psa_status_t ccm_text_data(AesCcmContext_t *context,
     rc = ProcessAesCcmDrv(context, &inBuffInfo, &outBuffInfo, textDataSize);
     if (rc != AES_DRV_OK) {
         CC_PAL_LOG_ERR("HW tunnel processing CCMPE/PD on text data failed with "
-                       "error code %d\n",
-                       rc);
+                       "error code %d", rc);
         return PSA_ERROR_DATA_INVALID;
     }
 
@@ -426,8 +420,7 @@ static psa_status_t ccm_text_data(AesCcmContext_t *context,
 
         rc = ProcessAesCcmDrv(context, &inBuffInfo, &outBuffInfo, textDataSize);
         if (rc != AES_DRV_OK) {
-            CC_PAL_LOG_ERR("CBC_MAC on text data failed with error code %d\n",
-                           rc);
+            CC_PAL_LOG_ERR("CBC_MAC on text data failed with error code %d", rc);
             return PSA_ERROR_DATA_INVALID;
         }
     }
@@ -436,7 +429,7 @@ static psa_status_t ccm_text_data(AesCcmContext_t *context,
     context->mode = CIPHER_CTR;
     rc = ProcessAesCcmDrv(context, &inBuffInfo, &outBuffInfo, textDataSize);
     if (rc != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("AES-CTR on text data failed with error code %d\n", rc);
+        CC_PAL_LOG_ERR("AES-CTR on text data failed with error code %d", rc);
         return PSA_ERROR_DATA_INVALID;
     }
 
@@ -448,18 +441,16 @@ static psa_status_t ccm_text_data(AesCcmContext_t *context,
         rc = SetDataBuffersInfo(pTextDataOut, textDataSize, &inBuffInfo, NULL,
                                 0, &outBuffInfo);
         if (rc != 0) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_DATA_INVALID;
         }
 
         if (ProcessAesCcmDrv(context, &inBuffInfo, &outBuffInfo,
                              textDataSize) != AES_DRV_OK) {
-            CC_PAL_LOG_ERR(
-                "AES-MAC on decrypt data failed with error code %d\n", rc);
+            CC_PAL_LOG_ERR("AES-MAC on decrypt data failed with error code %d", rc);
             return PSA_ERROR_DATA_INVALID;
         }
     }
-
 #endif /* defined(AES_NO_TUNNEL) || defined(ARCH_IS_CC310) */
 
     return PSA_SUCCESS;
@@ -507,15 +498,14 @@ static psa_status_t ccm_finish(AesCcmContext_t *context, unsigned char *macBuf,
             (uint8_t *)context->ivBuf, CC_AES_BLOCK_SIZE_IN_BYTES, &inBuffInfo,
             localMacBuf, CC_AES_BLOCK_SIZE_IN_BYTES, &outBuffInfo);
         if (rc != 0) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_DATA_INVALID;
         }
 
         rc = ProcessAesCcmDrv(context, &inBuffInfo, &outBuffInfo,
                               CC_AES_BLOCK_SIZE_IN_BYTES);
         if (rc != AES_DRV_OK) {
-            CC_PAL_LOG_ERR("encryption of IV buf failed with error code %d\n",
-                           rc);
+            CC_PAL_LOG_ERR("encryption of IV buf failed with error code %d", rc);
             return PSA_ERROR_DATA_INVALID;
         }
 
@@ -532,7 +522,7 @@ static psa_status_t ccm_finish(AesCcmContext_t *context, unsigned char *macBuf,
                                 &inBuffInfo, tempBuff,
                                 CC_AES_BLOCK_SIZE_IN_BYTES, &outBuffInfo);
         if (rc != 0) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_DATA_INVALID;
         }
 
@@ -540,15 +530,12 @@ static psa_status_t ccm_finish(AesCcmContext_t *context, unsigned char *macBuf,
         rc = ProcessAesCcmDrv(context, &inBuffInfo, &outBuffInfo,
                               CC_AES_BLOCK_SIZE_IN_BYTES);
         if (rc != AES_DRV_OK) {
-            CC_PAL_LOG_ERR("decryption of MAC buf failed with error code %d\n",
-                           rc);
+            CC_PAL_LOG_ERR("decryption of MAC buf failed with error code %d", rc);
             return PSA_ERROR_DATA_INVALID;
         }
         /* compare calculated and decrypted MAC results */
         if (CC_PalMemCmp(context->ivBuf, tempBuff, context->sizeOfT) != 0) {
-            /* if MAC results are different, return an Error */
-            CC_PAL_LOG_ERR(
-                "calculated and decrypted MAC results are different \n");
+            /* if MAC results are different, return a proper error code */
             return PSA_ERROR_INVALID_SIGNATURE;
         }
     }
@@ -699,7 +686,7 @@ psa_status_t cc3xx_decrypt_ccm(
 void cc3xx_ccm_init(AesCcmContext_t *ctx)
 {
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return;
     }
 
@@ -709,7 +696,7 @@ void cc3xx_ccm_init(AesCcmContext_t *ctx)
 void cc3xx_ccm_free(AesCcmContext_t *ctx)
 {
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return;
     }
 
@@ -738,7 +725,7 @@ psa_status_t cc3xx_ccm_set_lengths(
         size_t dataSize)
 {
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -764,8 +751,8 @@ psa_status_t cc3xx_ccm_set_nonce(
     uint8_t securityLevelField;
     uint8_t securityField;
 
-    if (NULL == ctx || NULL == pNonce) {
-        CC_PAL_LOG_ERR("Null pointer exception\n");
+    if ((NULL == ctx) || (NULL == pNonce)) {
+        CC_PAL_LOG_ERR("Null pointer exception");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -824,14 +811,14 @@ psa_status_t cc3xx_ccm_set_nonce(
     rc = SetDataBuffersInfo(tempBuff, CC_AES_BLOCK_SIZE_IN_BYTES, &inBuffInfo,
                             NULL, 0, &outBuffInfo);
     if (rc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_DATA_INVALID;
     }
 
     rc = ProcessAesCcmDrv(ctx, &inBuffInfo, &outBuffInfo,
                           CC_AES_BLOCK_SIZE_IN_BYTES);
     if (rc != AES_DRV_OK) {
-        CC_PAL_LOG_ERR("calculating MAC failed with error code %d\n", rc);
+        CC_PAL_LOG_ERR("calculating MAC failed with error code %d", rc);
         return PSA_ERROR_DATA_INVALID;
     }
 
@@ -852,7 +839,7 @@ psa_status_t cc3xx_ccm_update_ad(
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -874,7 +861,7 @@ psa_status_t cc3xx_ccm_update(
     psa_status_t ret = PSA_ERROR_CORRUPTION_DETECTED;
 
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -898,7 +885,7 @@ psa_status_t cc3xx_ccm_finish(
     *tag_len = 0;
 
     if (NULL == ctx) {
-        CC_PAL_LOG_ERR("ctx cannot be NULL\n");
+        CC_PAL_LOG_ERR("ctx cannot be NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 

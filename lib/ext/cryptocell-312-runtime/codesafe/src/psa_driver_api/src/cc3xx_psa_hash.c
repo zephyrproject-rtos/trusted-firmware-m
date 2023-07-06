@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -73,14 +73,14 @@ static psa_status_t hash_update(cc3xx_hash_operation_t *pHashUserCtx,
                                          ctx_ptr->blockSizeInBytes, &inBuffInfo,
                                          NULL, 0, NULL);
         if (rc != 0) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_GENERIC_ERROR;
         }
 
         rc = ProcessHashDrv(pHashUserCtx, &inBuffInfo,
                             ctx_ptr->blockSizeInBytes);
         if (rc != CC_OK) {
-            CC_PAL_LOG_ERR("ProcessHashDrv failed, ret = %d\n", rc);
+            CC_PAL_LOG_ERR("ProcessHashDrv failed, ret = %d", rc);
             return PSA_ERROR_GENERIC_ERROR;
         }
         ctx_ptr->prevDataInSize = 0;
@@ -94,13 +94,13 @@ static psa_status_t hash_update(cc3xx_hash_operation_t *pHashUserCtx,
         uint32_t rc = SetDataBuffersInfo(pDataIn, bytesToAdd, &inBuffInfo,
                                          NULL, 0, NULL);
         if (rc != 0) {
-            CC_PAL_LOG_ERR("illegal data buffers\n");
+            CC_PAL_LOG_ERR("illegal data buffers");
             return PSA_ERROR_GENERIC_ERROR;
         }
 
         rc = ProcessHashDrv(pHashUserCtx, &inBuffInfo, bytesToAdd);
         if (rc != CC_OK) {
-            CC_PAL_LOG_ERR("ProcessHashDrv failed, ret = %d\n", rc);
+            CC_PAL_LOG_ERR("ProcessHashDrv failed, ret = %d", rc);
             return PSA_ERROR_GENERIC_ERROR;
         }
         pDataIn += bytesToAdd;
@@ -133,7 +133,7 @@ psa_status_t cc3xx_hash_setup(cc3xx_hash_operation_t *operation,
     HashContext_t *pHashCtx = NULL;
 
     if (NULL == operation) {
-        CC_PAL_LOG_ERR("hash operation is NULL\n");
+        CC_PAL_LOG_ERR("hash operation is NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -177,7 +177,7 @@ psa_status_t cc3xx_hash_clone(const cc3xx_hash_operation_t *source_operation,
                               cc3xx_hash_operation_t *target_operation)
 {
     if (source_operation == NULL || target_operation == NULL) {
-        CC_PAL_LOG_ERR("source or target operation is NULL\n");
+        CC_PAL_LOG_ERR("source or target operation is NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
     CC_PalMemCopy(target_operation, source_operation,
@@ -191,7 +191,7 @@ psa_status_t cc3xx_hash_update(cc3xx_hash_operation_t *operation,
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 
     if (NULL == operation) {
-        CC_PAL_LOG_ERR("ctx is NULL\n");
+        CC_PAL_LOG_ERR("operation is NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -204,7 +204,7 @@ psa_status_t cc3xx_hash_update(cc3xx_hash_operation_t *operation,
 
     /* if len not zero, but pointer is NULL */
     if (NULL == input) {
-        CC_PAL_LOG_ERR("input is NULL\n");
+        CC_PAL_LOG_ERR("input is NULL");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
@@ -215,14 +215,14 @@ psa_status_t cc3xx_hash_update(cc3xx_hash_operation_t *operation,
         input += MAX_HASH_CHUNK_SIZE;
 
         if (status != PSA_SUCCESS) {
-            CC_PAL_LOG_ERR("hashUpdate failed, status = %d\n", status);
+            CC_PAL_LOG_ERR("hashUpdate failed, status = %d", status);
             return status;
         }
     }
 
     status = hash_update(operation, (uint8_t *)input, input_length);
     if (status != PSA_SUCCESS) {
-        CC_PAL_LOG_ERR("hashUpdate failed, status = %d\n", status);
+        CC_PAL_LOG_ERR("hashUpdate failed, status = %d", status);
         return status;
     }
 
@@ -259,18 +259,18 @@ psa_status_t cc3xx_hash_finish(cc3xx_hash_operation_t *operation,
     drvRc = SetDataBuffersInfo((uint8_t *)localPrevDataIn, dataInSize,
                                &inBuffInfo, NULL, 0, NULL);
     if (drvRc != 0) {
-        CC_PAL_LOG_ERR("illegal data buffers\n");
+        CC_PAL_LOG_ERR("illegal data buffers");
         return PSA_ERROR_INVALID_ARGUMENT;
     }
 
     drvRc = ProcessHashDrv(pHashCtx, &inBuffInfo, dataInSize);
     if (drvRc != HASH_DRV_OK) {
-        CC_PAL_LOG_ERR("ProcessHashDrv failed, ret = %d\n", drvRc);
+        CC_PAL_LOG_ERR("ProcessHashDrv failed, ret = %d", drvRc);
         return PSA_ERROR_GENERIC_ERROR;
     }
     drvRc = FinishHashDrv(pHashCtx);
     if (drvRc != HASH_DRV_OK) {
-        CC_PAL_LOG_ERR("FinishHashDrv failed, ret = %d\n", drvRc);
+        CC_PAL_LOG_ERR("FinishHashDrv failed, ret = %d", drvRc);
         return PSA_ERROR_GENERIC_ERROR;
     }
     pHashCtx->prevDataInSize = 0;

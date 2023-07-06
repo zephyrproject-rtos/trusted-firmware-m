@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -20,6 +20,7 @@
 #include "utilities.h"
 
 #include "load/spm_load_api.h"
+#include "ffm/backend.h"
 
 extern uintptr_t spm_boundary;
 
@@ -112,7 +113,7 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     /* Set FLIH result to the ISR */
     p_ctx_flih_ret->state_ctx.r0 = (uint32_t)result;
 
-    return EXC_RETURN_HANDLER_S_MSP;
+    return EXC_RETURN_HANDLER;
 }
 #endif
 
@@ -174,7 +175,7 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
     }
 
     if (flih_result == PSA_FLIH_SIGNAL) {
-        spm_assert_signal(p_pt, p_ildi->signal);
+        backend_assert_signal(p_pt, p_ildi->signal);
         /* In SFN backend, there is only one thread, no thread switch. */
 #if CONFIG_TFM_SPM_BACKEND_SFN != 1
         if (THRD_EXPECTING_SCHEDULE()) {

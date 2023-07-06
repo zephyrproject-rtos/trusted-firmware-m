@@ -1,5 +1,5 @@
 #------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -33,11 +33,5 @@ if ("${TEST_PSA_API}" STREQUAL "STORAGE")
     set(TFM_PARTITION_CRYPTO                   ON       CACHE BOOL      "Enable Crypto partition")
     set(TFM_PARTITION_PLATFORM                 ON       CACHE BOOL      "Enable Platform partition")
 endif()
-
-target_compile_definitions(tfm_config
-    INTERFACE
-        $<$<STREQUAL:${TEST_PSA_API},CRYPTO>:TEST_PSA_API_CRYPTO>
-        $<$<STREQUAL:${TEST_PSA_API},IPC>:TEST_PSA_API_IPC>
-)
 
 set(PROJECT_CONFIG_HEADER_FILE  "${CMAKE_SOURCE_DIR}/config/tests/config_test_psa_api.h" CACHE FILEPATH "User defined header file for TF-M config")

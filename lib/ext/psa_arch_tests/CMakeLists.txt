@@ -11,6 +11,7 @@ fetch_remote_library(
     LIB_NAME                psa_arch_tests
     LIB_SOURCE_PATH_VAR     PSA_ARCH_TESTS_PATH
     LIB_PATCH_DIR           ${CMAKE_CURRENT_LIST_DIR}
+    LIB_FORCE_PATCH         PSA_ARCH_TESTS_FORCE_PATCH
     FETCH_CONTENT_ARGS
         GIT_REPOSITORY      https://github.com/ARM-software/psa-arch-tests.git
         GIT_TAG             ${PSA_ARCH_TESTS_VERSION}

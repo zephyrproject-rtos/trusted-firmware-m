@@ -19,7 +19,7 @@ These tools are used to generate TF-M documentation:
     - Graphviz dot v2.38.0 or later
     - PlantUML v1.2018.11 or later
     - Java runtime environment v1.8 or later (for running PlantUML)
-    - Sphinx and other python modules, listed in ``tools/requirements_docs.txt``
+    - Sphinx and other python modules, listed in ``docs/requirements.txt``
 
 Additionally, for PDFs format:
 
@@ -51,7 +51,7 @@ To prepare your building environment execute the following steps:
             # Install the required Python modules
             pip3 install --upgrade pip
             cd trusted-firmware-m
-            pip3 install -r tools/requirements_docs.txt
+            pip3 install -r docs/requirements.txt
 
     .. group-tab:: Windows
 
@@ -77,7 +77,7 @@ To prepare your building environment execute the following steps:
             # Install the required Python modules
             pip3 install --upgrade pip
             cd trusted-firmware-m
-            pip3 install -r tools\requirements_docs.txt
+            pip3 install -r docs\requirements.txt
 
 ***************************
 Build TF-M Reference Manual
@@ -222,4 +222,4 @@ Dependencies
 
 --------------
 
-*Copyright (c) 2017-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
