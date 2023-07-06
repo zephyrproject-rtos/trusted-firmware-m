@@ -84,3 +84,5 @@ set(RSS_AMOUNT                          1          CACHE STRING  "Amount of RSSe
 
 set(BL1_SHARED_SYMBOLS_PATH             ${CMAKE_CURRENT_LIST_DIR}/bl1/bl1_1_shared_symbols.txt CACHE FILEPATH "Path to list of symbols that BL1_1 that can be referenced from BL1_2")
 set(RSS_RTL_KEY_PATH                    ${CMAKE_CURRENT_LIST_DIR}/provisioning/tci_krtl.bin CACHE FILEPATH "Path to binary RTL key for encrypting provisioning bundles")
+
+set(RSS_ENCRYPTED_OTP_KEYS              ON         CACHE BOOL "Whether keys in OTP are encrypted")

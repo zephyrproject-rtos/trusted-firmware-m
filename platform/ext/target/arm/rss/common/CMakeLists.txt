@@ -355,6 +355,7 @@ target_compile_definitions(platform_bl1_1_interface
         $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
         RSS_AMOUNT=${RSS_AMOUNT}
         KMU_CONFIG_EXTERNAL_SECURE_WORD_COPY
+        $<$<BOOL:${RSS_ENCRYPTED_OTP_KEYS}>:RSS_ENCRYPTED_OTP_KEYS>
 )
 
 target_link_libraries(platform_bl1_1

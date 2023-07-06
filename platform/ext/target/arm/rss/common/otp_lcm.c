@@ -15,6 +15,10 @@
 #include "uart_stdout.h"
 #include "tfm_hal_platform.h"
 #include "rss_memory_sizes.h"
+#ifdef RSS_ENCRYPTED_OTP_KEYS
+#include "cc3xx_drv.h"
+#include "kmu_drv.h"
+#endif /* RSS_ENCRYPTED_OTP_KEYS */
 
 #define OTP_OFFSET(x)       (offsetof(struct lcm_otp_layout_t, x))
 #define OTP_SIZE(x)         (sizeof(((struct lcm_otp_layout_t *)0)->x))
@@ -48,11 +52,8 @@ __PACKED_STRUCT plat_user_area_layout_t {
 
             __PACKED_STRUCT {
                 uint32_t bl1_rotpk_0[14];
-                uint32_t bl2_encryption_key[8];
 
                 uint32_t bl2_rotpk[MCUBOOT_IMAGE_NUMBER][8];
-                uint32_t s_image_encryption_key[8];
-                uint32_t ns_image_encryption_key[8];
 
                 uint32_t iak_len;
                 uint32_t iak_type;
@@ -66,6 +67,12 @@ __PACKED_STRUCT plat_user_area_layout_t {
                 uint32_t host_rotpk_s[24];
                 uint32_t host_rotpk_ns[24];
                 uint32_t host_rotpk_cca[24];
+
+                __PACKED_STRUCT {
+                    uint32_t bl2_encryption_key[8];
+                    uint32_t s_image_encryption_key[8];
+                    uint32_t ns_image_encryption_key[8];
+                } dm_encrypted;
             } dm_locked;
 
             __PACKED_STRUCT {
@@ -142,9 +149,9 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_NV_COUNTER_NS_1] = USER_AREA_OFFSET(unlocked_area.host_nv_counter[1]),
     [PLAT_OTP_ID_NV_COUNTER_NS_2] = USER_AREA_OFFSET(unlocked_area.host_nv_counter[2]),
 
-    [PLAT_OTP_ID_KEY_BL2_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.bl2_encryption_key),
-    [PLAT_OTP_ID_KEY_SECURE_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.s_image_encryption_key),
-    [PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.ns_image_encryption_key),
+    [PLAT_OTP_ID_KEY_BL2_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.dm_encrypted.bl2_encryption_key),
+    [PLAT_OTP_ID_KEY_SECURE_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.dm_encrypted.s_image_encryption_key),
+    [PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.dm_encrypted.ns_image_encryption_key),
 
     [PLAT_OTP_ID_BL1_2_IMAGE] = USER_AREA_OFFSET(bl1_2_image),
     [PLAT_OTP_ID_BL1_2_IMAGE_LEN] = USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
@@ -166,6 +173,8 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_OFFSET(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_OFFSET(cm_locked.sam_configuration),
+
+    [PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY] = OTP_OFFSET(kce_cm),
 };
 
 static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
@@ -212,9 +221,9 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_NV_COUNTER_NS_1] = USER_AREA_SIZE(unlocked_area.host_nv_counter[1]),
     [PLAT_OTP_ID_NV_COUNTER_NS_2] = USER_AREA_SIZE(unlocked_area.host_nv_counter[2]),
 
-    [PLAT_OTP_ID_KEY_BL2_ENCRYPTION] = USER_AREA_SIZE(dm_locked.bl2_encryption_key),
-    [PLAT_OTP_ID_KEY_SECURE_ENCRYPTION] = USER_AREA_SIZE(dm_locked.s_image_encryption_key),
-    [PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION] = USER_AREA_SIZE(dm_locked.ns_image_encryption_key),
+    [PLAT_OTP_ID_KEY_BL2_ENCRYPTION] = USER_AREA_SIZE(dm_locked.dm_encrypted.bl2_encryption_key),
+    [PLAT_OTP_ID_KEY_SECURE_ENCRYPTION] = USER_AREA_SIZE(dm_locked.dm_encrypted.s_image_encryption_key),
+    [PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION] = USER_AREA_SIZE(dm_locked.dm_encrypted.ns_image_encryption_key),
 
     [PLAT_OTP_ID_BL1_2_IMAGE] = USER_AREA_SIZE(bl1_2_image),
     [PLAT_OTP_ID_BL1_2_IMAGE_LEN] = USER_AREA_SIZE(cm_locked.bl1_2_image_len),
@@ -236,6 +245,8 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_DMA_ICS] = USER_AREA_SIZE(dma_initial_command_sequence),
     [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_SIZE(cm_locked.sam_configuration),
+
+    [PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY] = OTP_SIZE(kce_cm),
 };
 
 static uint32_t count_buffer_zero_bits(const uint8_t* buf, size_t size)
@@ -268,6 +279,48 @@ static enum tfm_plat_err_t otp_read(uint32_t offset, uint32_t len,
     }
 }
 
+static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
+                                              uint32_t buf_len, uint8_t *buf)
+{
+#ifndef RSS_ENCRYPTED_OTP_KEYS
+    return otp_read(offset, len, buf_len, buf);
+#else
+    /* This is designed for keys, so 32 is a sane limit */
+    uint32_t tmp_buf[32 / sizeof(uint32_t)];
+    uint32_t iv[4] = {offset, 0, 0, 0};
+    cc3xx_err_t cc_err;
+    enum tfm_plat_err_t plat_err;
+
+    if (len > sizeof(tmp_buf)) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    plat_err = otp_read(offset, len, sizeof(tmp_buf), (uint8_t *)tmp_buf);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
+    }
+
+    cc_err = cc3xx_aes_init(CC3XX_AES_DIRECTION_DECRYPT, CC3XX_AES_MODE_CTR,
+                            KMU_HW_SLOT_KCE_CM, NULL, CC3XX_AES_KEYSIZE_256,
+                            iv, sizeof(iv));
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    cc3xx_aes_set_output_buffer(buf, buf_len);
+
+    cc_err = cc3xx_aes_update((uint8_t *)tmp_buf, len);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        cc3xx_aes_uninit();
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    cc3xx_aes_finish(NULL);
+
+    return TFM_PLAT_ERR_SUCCESS;
+#endif
+}
+
 static enum tfm_plat_err_t otp_write(uint32_t offset, uint32_t len,
                                      uint32_t buf_len, const uint8_t *buf)
 {
@@ -283,6 +336,53 @@ static enum tfm_plat_err_t otp_write(uint32_t offset, uint32_t len,
     }
 
     return TFM_PLAT_ERR_SUCCESS;
+}
+
+static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
+                                     uint32_t buf_len, const uint8_t *buf)
+{
+#ifndef RSS_ENCRYPTED_OTP_KEYS
+    return otp_write(offset, len, buf_len, buf);
+#else
+    /* This is designed for keys, so 32 is a sane limit */
+    uint32_t tmp_buf[32 / sizeof(uint32_t)];
+    uint32_t iv[4] = {offset, 0, 0, 0};
+    cc3xx_err_t cc_err;
+    enum tfm_plat_err_t plat_err;
+
+    if (len > sizeof(tmp_buf)) {
+        return TFM_PLAT_ERR_INVALID_INPUT;
+    }
+
+    cc_err = cc3xx_aes_init(CC3XX_AES_DIRECTION_ENCRYPT, CC3XX_AES_MODE_CTR,
+                            KMU_HW_SLOT_KCE_CM, NULL, CC3XX_AES_KEYSIZE_256,
+                            iv, sizeof(iv));
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    cc3xx_aes_set_output_buffer((uint8_t *)tmp_buf, sizeof(tmp_buf));
+
+    cc_err = cc3xx_aes_update(buf, len);
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        cc3xx_aes_uninit();
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    cc3xx_aes_finish(NULL);
+
+    plat_err = otp_write(offset, len, sizeof(tmp_buf), (uint8_t *)tmp_buf);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        return plat_err;
+    }
+
+    cc_err = cc3xx_rng_get_random((uint8_t *)tmp_buf, sizeof(tmp_buf));
+    if (cc_err != CC3XX_ERR_SUCCESS) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    return TFM_PLAT_ERR_SUCCESS;
+#endif
 }
 
 static uint32_t count_otp_zero_bits(uint32_t offset, uint32_t len)
@@ -479,6 +579,10 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
     switch(id) {
     case PLAT_OTP_ID_LCS:
         return otp_read_lcs(out_len, out);
+    case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
+    case PLAT_OTP_ID_KEY_SECURE_ENCRYPTION:
+    case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
+        return otp_read_encrypted(otp_offsets[id], otp_sizes[id], out_len, out);
     case PLAT_OTP_ID_BL1_2_IMAGE:
         err = otp_read(USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
                        USER_AREA_SIZE(cm_locked.bl1_2_image_len),
@@ -605,6 +709,10 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
     switch (id) {
     case PLAT_OTP_ID_LCS:
         return otp_write_lcs(in_len, in);
+    case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
+    case PLAT_OTP_ID_KEY_SECURE_ENCRYPTION:
+    case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
+        return otp_write_encrypted(otp_offsets[id], otp_sizes[id], in_len, in);
     default:
         return otp_write(otp_offsets[id], otp_sizes[id], in_len, in);
     }

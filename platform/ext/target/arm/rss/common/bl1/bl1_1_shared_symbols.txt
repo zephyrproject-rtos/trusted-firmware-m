@@ -35,5 +35,7 @@ stdio_output_string
 stdio_uninit
 tfm_plat_init_nv_counter
 tfm_plat_otp_read
+tfm_plat_otp_write
 tfm_plat_read_nv_counter
 tfm_plat_set_nv_counter
+__assert_func

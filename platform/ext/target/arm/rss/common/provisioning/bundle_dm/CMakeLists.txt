@@ -43,7 +43,13 @@ target_include_directories(dm_provisioning_bundle
 )
 
 target_link_libraries(dm_provisioning_bundle
-    platform_bl1_1
+    PRIVATE
+        platform_bl1_1_interface
+        bl1_1_shared_lib_interface
+)
+
+target_link_shared_code(dm_provisioning_bundle
+    bl1_1
 )
 
 add_custom_target(encrypted_dm_provisioning_bundle

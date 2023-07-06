@@ -18,7 +18,7 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
     enum tfm_plat_err_t err;
     uint32_t new_lcs;
     uint32_t bl1_2_len = sizeof(data.bl1_2_image);
-    uint8_t huk[32];
+    uint8_t generated_key_buf[32];
     int32_t int_err;
 
     err = tfm_plat_otp_write(PLAT_OTP_ID_RSS_ID,
@@ -78,12 +78,26 @@ enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) 
         return err;
     }
 
-    int_err = bl1_trng_generate_random(huk, sizeof(huk));
+    int_err = bl1_trng_generate_random(generated_key_buf,
+                                       sizeof(generated_key_buf));
     if (int_err != 0) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    err = tfm_plat_otp_write(PLAT_OTP_ID_HUK, sizeof(huk), huk);
+    err = tfm_plat_otp_write(PLAT_OTP_ID_HUK,
+                             sizeof(generated_key_buf), generated_key_buf);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
+    int_err = bl1_trng_generate_random(generated_key_buf,
+                                       sizeof(generated_key_buf));
+    if (int_err != 0) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+
+    err = tfm_plat_otp_write(PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY,
+                             sizeof(generated_key_buf), generated_key_buf);
     if (err != TFM_PLAT_ERR_SUCCESS) {
         return err;
     }

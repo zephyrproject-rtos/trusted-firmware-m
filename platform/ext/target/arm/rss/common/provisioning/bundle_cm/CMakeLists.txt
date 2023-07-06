@@ -43,8 +43,13 @@ target_include_directories(cm_provisioning_bundle
 )
 
 target_link_libraries(cm_provisioning_bundle
-    platform_bl1_1
-    bl1_1_shared_lib
+    PRIVATE
+        platform_bl1_1_interface
+        bl1_1_shared_lib_interface
+)
+
+target_link_shared_code(cm_provisioning_bundle
+    bl1_1
 )
 
 math(EXPR RSS_AMOUNT_LOOP_RANGE "${RSS_AMOUNT} - 1")

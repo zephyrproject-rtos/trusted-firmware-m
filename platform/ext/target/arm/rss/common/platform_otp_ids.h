@@ -85,6 +85,8 @@ enum tfm_otp_element_id_t {
     PLAT_OTP_ID_DMA_ICS,
     PLAT_OTP_ID_SAM_CONFIG,
 
+    PLAT_OTP_ID_OTP_KEY_ENCRYPTION_KEY,
+
     PLAT_OTP_ID_MAX,
 
     _PLAT_OTP_ID_PAD = UINT32_MAX,

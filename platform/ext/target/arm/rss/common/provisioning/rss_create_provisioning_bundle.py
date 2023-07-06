@@ -71,8 +71,13 @@ args = parser.parse_args()
 with open(args.provisioning_code, "rb") as in_file:
     code = in_file.read()
 
-with open(args.provisioning_data, "rb") as in_file:
-    data = in_file.read()
+# It's technically possible to have provisioning code that requires no DATA
+# section, so this is optional.
+try:
+    with open(args.provisioning_data, "rb") as in_file:
+        data = in_file.read()
+except FileNotFoundError:
+    data = bytes(0);
 
 with open(args.provisioning_values, "rb") as in_file:
     values = in_file.read()
