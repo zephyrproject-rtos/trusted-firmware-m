@@ -631,10 +631,11 @@ enum tfm_plat_err_t spu_init_cfg(void)
      * Configure Secondary Image Partition for BL2
      */
 
-    /* Reset Flash and SRAM configuration of regions that are not owned by
-     * the bootloader(s) to all-Secure.
+    /* Explicitly reset Flash and SRAM configuration to all-Secure,
+     * in case this has been overwritten by earlier images e.g.
+     * bootloader.
      */
-    spu_regions_reset_unlocked_secure();
+    spu_regions_reset_all_secure();
 
     /* Configures SPU Code and Data regions to be non-secure */
     spu_regions_flash_config_non_secure(memory_regions.non_secure_partition_base,
