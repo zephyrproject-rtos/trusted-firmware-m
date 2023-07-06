@@ -121,7 +121,7 @@ typedef uint16_t psa_key_bits_t;
  * The server has a different definition of psa_key_attributes_s which
  * maintains more attributes.
  */
-#include "crypto_client_struct.h"
+#include "psa/crypto_client_struct.h"
 struct psa_key_attributes_s {
     struct psa_client_key_attributes_s client;
 };

@@ -182,7 +182,7 @@
 #if defined(MBEDTLS_PSA_CRYPTO_CONFIG_FILE)
 #include MBEDTLS_PSA_CRYPTO_CONFIG_FILE
 #else
-#include "crypto_config.h"
+#include "psa/crypto_config.h"
 #endif
 #if defined(PSA_WANT_ECC_SECP_R1_521)
 #define PSA_VENDOR_ECC_MAX_CURVE_BITS 521
