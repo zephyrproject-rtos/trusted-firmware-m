@@ -11,6 +11,8 @@
 #include "cc3xx_engine_state.h"
 #include "cc3xx_config.h"
 
+#include <assert.h>
+
 struct cc3xx_dma_state_t dma_state;
 
 #ifdef CC3XX_CONFIG_DMA_REMAP_ENABLE

@@ -10,6 +10,7 @@
 #include "cc3xx_error.h"
 #include "cc3xx_dev.h"
 
+#include <assert.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>

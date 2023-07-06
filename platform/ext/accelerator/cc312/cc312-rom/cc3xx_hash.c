@@ -13,6 +13,7 @@
 #include "cc3xx_engine_state.h"
 #include "cc3xx_endian_helpers.h"
 
+#include <assert.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>

@@ -15,7 +15,8 @@
 #include "cc3xx_endian_helpers.h"
 #include "cc3xx_stdlib.h"
 
-#include "stdbool.h"
+#include <assert.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef CC3XX_CONFIG_AES_EXTERNAL_KEY_LOADER

@@ -11,6 +11,8 @@
 #include "cc3xx_engine_state.h"
 #include "cc3xx_stdlib.h"
 
+#include <assert.h>
+
 struct cc3xx_chacha_state_t chacha_state;
 
 static void set_iv(const uint32_t *iv)
