@@ -186,6 +186,7 @@ target_compile_definitions(platform_s
         # Needed for DMA-350 library
         CMSIS_device_header="rss.h"
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
+        $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
 )
 
 target_compile_options(platform_s

@@ -84,7 +84,14 @@ enum tfm_plat_err_t tfm_plat_read_nv_counter(enum tfm_nv_counter_t counter_id,
         return read_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_2, val);
     case (PLAT_NV_COUNTER_BL2_3):
         return read_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_3, val);
-
+#ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
+    case (PLAT_NV_COUNTER_PS_0):
+        return read_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_PS_0, val);
+    case (PLAT_NV_COUNTER_PS_1):
+        return read_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_PS_1, val);
+    case (PLAT_NV_COUNTER_PS_2):
+        return read_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_PS_2, val);
+#endif /* PLATFORM_HAS_PS_NV_OTP_COUNTERS */
     case (PLAT_NV_COUNTER_NS_0):
         return read_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_NS_0, val);
     case (PLAT_NV_COUNTER_NS_1):
@@ -142,6 +149,15 @@ enum tfm_plat_err_t tfm_plat_set_nv_counter(enum tfm_nv_counter_t counter_id,
         return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_2, value);
     case (PLAT_NV_COUNTER_BL2_3):
         return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_BL2_3, value);
+
+#ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
+    case (PLAT_NV_COUNTER_PS_0):
+        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_PS_0, value);
+    case (PLAT_NV_COUNTER_PS_1):
+        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_PS_1, value);
+    case (PLAT_NV_COUNTER_PS_2):
+        return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_PS_2, value);
+#endif /* PLATFORM_HAS_PS_NV_OTP_COUNTERS */
 
     case (PLAT_NV_COUNTER_NS_0):
         return set_nv_counter_otp(PLAT_OTP_ID_NV_COUNTER_NS_0, value);
