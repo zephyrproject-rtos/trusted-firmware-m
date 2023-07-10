@@ -26,6 +26,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSS_USE_HOST_FLASH}>:RSS_USE_HOST_FLASH>
         $<$<BOOL:${RSS_GPT_SUPPORT}>:RSS_GPT_SUPPORT>
         $<$<BOOL:${RSS_HAS_EXPANSION_PERIPHERALS}>:RSS_HAS_EXPANSION_PERIPHERALS>
+        $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
 )
 
 #========================= Platform common defs ===============================#
@@ -186,7 +187,6 @@ target_compile_definitions(platform_s
         # Needed for DMA-350 library
         CMSIS_device_header="rss.h"
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
-        $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
 )
 
 target_compile_options(platform_s
