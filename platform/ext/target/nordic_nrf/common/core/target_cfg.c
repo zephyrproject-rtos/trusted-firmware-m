@@ -738,6 +738,10 @@ enum tfm_plat_err_t spu_init_cfg(void)
 						 memory_regions.veneer_limit - 1);
 
 #ifdef NRF_NS_SECONDARY
+	perm = 0;
+	perm |= NRF_SPU_MEM_PERM_READ;
+	perm |= NRF_SPU_MEM_PERM_WRITE;
+
     /* Secondary image partition */
     spu_regions_flash_config(memory_regions.secondary_partition_base,
 			     memory_regions.secondary_partition_limit, SPU_SECURE_ATTR_NONSECURE,
