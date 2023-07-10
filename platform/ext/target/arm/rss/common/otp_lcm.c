@@ -21,8 +21,8 @@
 #define USER_AREA_OFFSET(x) (OTP_OFFSET(user_data) + \
                              offsetof(struct plat_user_area_layout_t, x))
 #define USER_AREA_SIZE(x)   (sizeof(((struct plat_user_area_layout_t *)0)->x))
-#define IF_IMAGE_ID(macro, x, image_id) \
-    image_id < MCUBOOT_IMAGE_NUMBER ? macro(x[image_id]) : 0
+#define IF_BL2_IMAGE_EXISTS_ELSE_0(image_id, expr) \
+    image_id < MCUBOOT_IMAGE_NUMBER ? (expr) : 0
 
 __PACKED_STRUCT plat_user_area_layout_t {
     __PACKED_UNION {
@@ -94,133 +94,135 @@ __PACKED_STRUCT plat_user_area_layout_t {
 };
 
 static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
-    OTP_OFFSET(huk),
-    OTP_OFFSET(guk),
-    0,
-    USER_AREA_OFFSET(dm_locked.iak_len),
-    USER_AREA_OFFSET(dm_locked.iak_type),
-    USER_AREA_OFFSET(dm_locked.iak_id),
+    [PLAT_OTP_ID_HUK] = OTP_OFFSET(huk),
+    [PLAT_OTP_ID_GUK] = OTP_OFFSET(guk),
 
-    USER_AREA_OFFSET(dm_locked.implementation_id),
-    USER_AREA_OFFSET(dm_locked.verification_service_url),
-    USER_AREA_OFFSET(dm_locked.profile_definition),
+    [PLAT_OTP_ID_IAK_LEN] = USER_AREA_OFFSET(dm_locked.iak_len),
+    [PLAT_OTP_ID_IAK_TYPE] = USER_AREA_OFFSET(dm_locked.iak_type),
+    [PLAT_OTP_ID_IAK_ID] = USER_AREA_OFFSET(dm_locked.iak_id),
 
-    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 0),
-    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 1),
-    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 2),
-    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 3),
-    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 4),
-    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 5),
-    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 6),
-    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 7),
-    IF_IMAGE_ID(USER_AREA_OFFSET, dm_locked.bl2_rotpk, 8),
+    [PLAT_OTP_ID_IMPLEMENTATION_ID] = USER_AREA_OFFSET(dm_locked.implementation_id),
+    [PLAT_OTP_ID_VERIFICATION_SERVICE_URL] = USER_AREA_OFFSET(dm_locked.verification_service_url),
+    [PLAT_OTP_ID_PROFILE_DEFINITION] = USER_AREA_OFFSET(dm_locked.profile_definition),
 
-    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 0),
-    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 1),
-    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 2),
-    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 3),
-    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 4),
-    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 5),
-    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 6),
-    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 7),
-    IF_IMAGE_ID(USER_AREA_OFFSET, unlocked_area.bl2_nv_counter, 8),
+    [PLAT_OTP_ID_BL2_ROTPK_0] = IF_BL2_IMAGE_EXISTS_ELSE_0(0, USER_AREA_OFFSET(dm_locked.bl2_rotpk[0])),
+    [PLAT_OTP_ID_BL2_ROTPK_1] = IF_BL2_IMAGE_EXISTS_ELSE_0(1, USER_AREA_OFFSET(dm_locked.bl2_rotpk[1])),
+    [PLAT_OTP_ID_BL2_ROTPK_2] = IF_BL2_IMAGE_EXISTS_ELSE_0(2, USER_AREA_OFFSET(dm_locked.bl2_rotpk[2])),
+    [PLAT_OTP_ID_BL2_ROTPK_3] = IF_BL2_IMAGE_EXISTS_ELSE_0(3, USER_AREA_OFFSET(dm_locked.bl2_rotpk[3])),
+    [PLAT_OTP_ID_BL2_ROTPK_4] = IF_BL2_IMAGE_EXISTS_ELSE_0(4, USER_AREA_OFFSET(dm_locked.bl2_rotpk[4])),
+    [PLAT_OTP_ID_BL2_ROTPK_5] = IF_BL2_IMAGE_EXISTS_ELSE_0(5, USER_AREA_OFFSET(dm_locked.bl2_rotpk[5])),
+    [PLAT_OTP_ID_BL2_ROTPK_6] = IF_BL2_IMAGE_EXISTS_ELSE_0(6, USER_AREA_OFFSET(dm_locked.bl2_rotpk[6])),
+    [PLAT_OTP_ID_BL2_ROTPK_7] = IF_BL2_IMAGE_EXISTS_ELSE_0(7, USER_AREA_OFFSET(dm_locked.bl2_rotpk[7])),
+    [PLAT_OTP_ID_BL2_ROTPK_8] = IF_BL2_IMAGE_EXISTS_ELSE_0(8, USER_AREA_OFFSET(dm_locked.bl2_rotpk[8])),
+
+    [PLAT_OTP_ID_NV_COUNTER_BL2_0] = IF_BL2_IMAGE_EXISTS_ELSE_0(0, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[0])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_1] = IF_BL2_IMAGE_EXISTS_ELSE_0(1, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[1])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_2] = IF_BL2_IMAGE_EXISTS_ELSE_0(2, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[2])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_3] = IF_BL2_IMAGE_EXISTS_ELSE_0(3, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[3])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_4] = IF_BL2_IMAGE_EXISTS_ELSE_0(4, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[4])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_5] = IF_BL2_IMAGE_EXISTS_ELSE_0(5, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[5])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_6] = IF_BL2_IMAGE_EXISTS_ELSE_0(6, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[6])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_7] = IF_BL2_IMAGE_EXISTS_ELSE_0(7, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[7])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_8] = IF_BL2_IMAGE_EXISTS_ELSE_0(8, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[8])),
 
 #ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
-    USER_AREA_OFFSET(unlocked_area.ps_nv_counter[0]),
-    USER_AREA_OFFSET(unlocked_area.ps_nv_counter[1]),
-    USER_AREA_OFFSET(unlocked_area.ps_nv_counter[2]),
+    [PLAT_OTP_ID_NV_COUNTER_PS_0] = USER_AREA_OFFSET(unlocked_area.ps_nv_counter[0]),
+    [PLAT_OTP_ID_NV_COUNTER_PS_1] = USER_AREA_OFFSET(unlocked_area.ps_nv_counter[1]),
+    [PLAT_OTP_ID_NV_COUNTER_PS_2] = USER_AREA_OFFSET(unlocked_area.ps_nv_counter[2]),
 #endif /* PLATFORM_HAS_PS_NV_OTP_COUNTERS */
 
-    USER_AREA_OFFSET(unlocked_area.host_nv_counter[0]),
-    USER_AREA_OFFSET(unlocked_area.host_nv_counter[1]),
-    USER_AREA_OFFSET(unlocked_area.host_nv_counter[2]),
+    [PLAT_OTP_ID_NV_COUNTER_NS_0] = USER_AREA_OFFSET(unlocked_area.host_nv_counter[0]),
+    [PLAT_OTP_ID_NV_COUNTER_NS_1] = USER_AREA_OFFSET(unlocked_area.host_nv_counter[1]),
+    [PLAT_OTP_ID_NV_COUNTER_NS_2] = USER_AREA_OFFSET(unlocked_area.host_nv_counter[2]),
 
-    USER_AREA_OFFSET(dm_locked.bl2_encryption_key),
-    USER_AREA_OFFSET(dm_locked.s_image_encryption_key),
-    USER_AREA_OFFSET(dm_locked.ns_image_encryption_key),
+    [PLAT_OTP_ID_KEY_BL2_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.bl2_encryption_key),
+    [PLAT_OTP_ID_KEY_SECURE_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.s_image_encryption_key),
+    [PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION] = USER_AREA_OFFSET(dm_locked.ns_image_encryption_key),
 
-    USER_AREA_OFFSET(bl1_2_image),
-    USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
-    OTP_OFFSET(rotpk),
-    USER_AREA_OFFSET(dm_locked.bl1_rotpk_0),
+    [PLAT_OTP_ID_BL1_2_IMAGE] = USER_AREA_OFFSET(bl1_2_image),
+    [PLAT_OTP_ID_BL1_2_IMAGE_LEN] = USER_AREA_OFFSET(cm_locked.bl1_2_image_len),
+    [PLAT_OTP_ID_BL1_2_IMAGE_HASH] = OTP_OFFSET(rotpk),
+    [PLAT_OTP_ID_BL1_ROTPK_0] = USER_AREA_OFFSET(dm_locked.bl1_rotpk_0),
 
-    USER_AREA_OFFSET(unlocked_area.bl1_nv_counter),
+    [PLAT_OTP_ID_NV_COUNTER_BL1_0] = USER_AREA_OFFSET(unlocked_area.bl1_nv_counter),
 
-    USER_AREA_OFFSET(dm_locked.secure_debug_pk),
+    [PLAT_OTP_ID_SECURE_DEBUG_PK] = USER_AREA_OFFSET(dm_locked.secure_debug_pk),
 
-    USER_AREA_OFFSET(dm_locked.host_rotpk_s),
-    USER_AREA_OFFSET(dm_locked.host_rotpk_ns),
-    USER_AREA_OFFSET(dm_locked.host_rotpk_cca),
+    [PLAT_OTP_ID_HOST_ROTPK_S] = USER_AREA_OFFSET(dm_locked.host_rotpk_s),
+    [PLAT_OTP_ID_HOST_ROTPK_NS] = USER_AREA_OFFSET(dm_locked.host_rotpk_ns),
+    [PLAT_OTP_ID_HOST_ROTPK_CCA] = USER_AREA_OFFSET(dm_locked.host_rotpk_cca),
 
-    USER_AREA_OFFSET(cm_locked.cca_system_properties),
+    [PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES] = USER_AREA_OFFSET(cm_locked.cca_system_properties),
 
-    USER_AREA_OFFSET(unlocked_area.reprovisioning_bits),
-    USER_AREA_OFFSET(cm_locked.rss_id),
+    [PLAT_OTP_ID_REPROVISIONING_BITS] = USER_AREA_OFFSET(unlocked_area.reprovisioning_bits),
+    [PLAT_OTP_ID_RSS_ID] = USER_AREA_OFFSET(cm_locked.rss_id),
 };
 
 static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
-    OTP_SIZE(huk),
-    OTP_SIZE(guk),
-    sizeof(uint32_t),
-    USER_AREA_SIZE(dm_locked.iak_len),
-    USER_AREA_SIZE(dm_locked.iak_type),
-    USER_AREA_SIZE(dm_locked.iak_id),
+    [PLAT_OTP_ID_HUK] = OTP_SIZE(huk),
+    [PLAT_OTP_ID_GUK] = OTP_SIZE(guk),
 
-    USER_AREA_SIZE(dm_locked.implementation_id),
-    USER_AREA_SIZE(dm_locked.verification_service_url),
-    USER_AREA_SIZE(dm_locked.profile_definition),
+    [PLAT_OTP_ID_LCS] = sizeof(uint32_t),
 
-    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 0),
-    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 1),
-    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 2),
-    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 3),
-    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 4),
-    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 5),
-    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 6),
-    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 7),
-    IF_IMAGE_ID(USER_AREA_SIZE, dm_locked.bl2_rotpk, 8),
+    [PLAT_OTP_ID_IAK_LEN] = USER_AREA_SIZE(dm_locked.iak_len),
+    [PLAT_OTP_ID_IAK_TYPE] = USER_AREA_SIZE(dm_locked.iak_type),
+    [PLAT_OTP_ID_IAK_ID] = USER_AREA_SIZE(dm_locked.iak_id),
 
-    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 0),
-    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 1),
-    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 2),
-    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 3),
-    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 4),
-    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 5),
-    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 6),
-    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 7),
-    IF_IMAGE_ID(USER_AREA_SIZE, unlocked_area.bl2_nv_counter, 8),
+    [PLAT_OTP_ID_IMPLEMENTATION_ID] = USER_AREA_SIZE(dm_locked.implementation_id),
+    [PLAT_OTP_ID_VERIFICATION_SERVICE_URL] = USER_AREA_SIZE(dm_locked.verification_service_url),
+    [PLAT_OTP_ID_PROFILE_DEFINITION] = USER_AREA_SIZE(dm_locked.profile_definition),
+
+    [PLAT_OTP_ID_BL2_ROTPK_0] = IF_BL2_IMAGE_EXISTS_ELSE_0(0, USER_AREA_SIZE(dm_locked.bl2_rotpk[0])),
+    [PLAT_OTP_ID_BL2_ROTPK_1] = IF_BL2_IMAGE_EXISTS_ELSE_0(1, USER_AREA_SIZE(dm_locked.bl2_rotpk[1])),
+    [PLAT_OTP_ID_BL2_ROTPK_2] = IF_BL2_IMAGE_EXISTS_ELSE_0(2, USER_AREA_SIZE(dm_locked.bl2_rotpk[2])),
+    [PLAT_OTP_ID_BL2_ROTPK_3] = IF_BL2_IMAGE_EXISTS_ELSE_0(3, USER_AREA_SIZE(dm_locked.bl2_rotpk[3])),
+    [PLAT_OTP_ID_BL2_ROTPK_4] = IF_BL2_IMAGE_EXISTS_ELSE_0(4, USER_AREA_SIZE(dm_locked.bl2_rotpk[4])),
+    [PLAT_OTP_ID_BL2_ROTPK_5] = IF_BL2_IMAGE_EXISTS_ELSE_0(5, USER_AREA_SIZE(dm_locked.bl2_rotpk[5])),
+    [PLAT_OTP_ID_BL2_ROTPK_6] = IF_BL2_IMAGE_EXISTS_ELSE_0(6, USER_AREA_SIZE(dm_locked.bl2_rotpk[6])),
+    [PLAT_OTP_ID_BL2_ROTPK_7] = IF_BL2_IMAGE_EXISTS_ELSE_0(7, USER_AREA_SIZE(dm_locked.bl2_rotpk[7])),
+    [PLAT_OTP_ID_BL2_ROTPK_8] = IF_BL2_IMAGE_EXISTS_ELSE_0(8, USER_AREA_SIZE(dm_locked.bl2_rotpk[8])),
+
+    [PLAT_OTP_ID_NV_COUNTER_BL2_0] = IF_BL2_IMAGE_EXISTS_ELSE_0(0, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[0])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_1] = IF_BL2_IMAGE_EXISTS_ELSE_0(1, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[1])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_2] = IF_BL2_IMAGE_EXISTS_ELSE_0(2, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[2])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_3] = IF_BL2_IMAGE_EXISTS_ELSE_0(3, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[3])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_4] = IF_BL2_IMAGE_EXISTS_ELSE_0(4, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[4])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_5] = IF_BL2_IMAGE_EXISTS_ELSE_0(5, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[5])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_6] = IF_BL2_IMAGE_EXISTS_ELSE_0(6, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[6])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_7] = IF_BL2_IMAGE_EXISTS_ELSE_0(7, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[7])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_8] = IF_BL2_IMAGE_EXISTS_ELSE_0(8, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[8])),
 
 #ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
-    USER_AREA_SIZE(unlocked_area.ps_nv_counter[0]),
-    USER_AREA_SIZE(unlocked_area.ps_nv_counter[1]),
-    USER_AREA_SIZE(unlocked_area.ps_nv_counter[2]),
+    [PLAT_OTP_ID_NV_COUNTER_PS_0] = USER_AREA_SIZE(unlocked_area.ps_nv_counter[0]),
+    [PLAT_OTP_ID_NV_COUNTER_PS_1] = USER_AREA_SIZE(unlocked_area.ps_nv_counter[1]),
+    [PLAT_OTP_ID_NV_COUNTER_PS_2] = USER_AREA_SIZE(unlocked_area.ps_nv_counter[2]),
 #endif /* PLATFORM_HAS_PS_NV_OTP_COUNTERS */
 
-    USER_AREA_SIZE(unlocked_area.host_nv_counter[0]),
-    USER_AREA_SIZE(unlocked_area.host_nv_counter[1]),
-    USER_AREA_SIZE(unlocked_area.host_nv_counter[2]),
+    [PLAT_OTP_ID_NV_COUNTER_NS_0] = USER_AREA_SIZE(unlocked_area.host_nv_counter[0]),
+    [PLAT_OTP_ID_NV_COUNTER_NS_1] = USER_AREA_SIZE(unlocked_area.host_nv_counter[1]),
+    [PLAT_OTP_ID_NV_COUNTER_NS_2] = USER_AREA_SIZE(unlocked_area.host_nv_counter[2]),
 
-    USER_AREA_SIZE(dm_locked.bl2_encryption_key),
-    USER_AREA_SIZE(dm_locked.s_image_encryption_key),
-    USER_AREA_SIZE(dm_locked.ns_image_encryption_key),
+    [PLAT_OTP_ID_KEY_BL2_ENCRYPTION] = USER_AREA_SIZE(dm_locked.bl2_encryption_key),
+    [PLAT_OTP_ID_KEY_SECURE_ENCRYPTION] = USER_AREA_SIZE(dm_locked.s_image_encryption_key),
+    [PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION] = USER_AREA_SIZE(dm_locked.ns_image_encryption_key),
 
-    USER_AREA_SIZE(bl1_2_image),
-    USER_AREA_SIZE(cm_locked.bl1_2_image_len),
-    OTP_SIZE(rotpk),
-    USER_AREA_SIZE(dm_locked.bl1_rotpk_0),
+    [PLAT_OTP_ID_BL1_2_IMAGE] = USER_AREA_SIZE(bl1_2_image),
+    [PLAT_OTP_ID_BL1_2_IMAGE_LEN] = USER_AREA_SIZE(cm_locked.bl1_2_image_len),
+    [PLAT_OTP_ID_BL1_2_IMAGE_HASH] = OTP_SIZE(rotpk),
+    [PLAT_OTP_ID_BL1_ROTPK_0] = USER_AREA_SIZE(dm_locked.bl1_rotpk_0),
 
-    USER_AREA_SIZE(unlocked_area.bl1_nv_counter),
+    [PLAT_OTP_ID_NV_COUNTER_BL1_0] = USER_AREA_SIZE(unlocked_area.bl1_nv_counter),
 
-    USER_AREA_SIZE(dm_locked.secure_debug_pk),
+    [PLAT_OTP_ID_SECURE_DEBUG_PK] = USER_AREA_SIZE(dm_locked.secure_debug_pk),
 
-    USER_AREA_SIZE(dm_locked.host_rotpk_s),
-    USER_AREA_SIZE(dm_locked.host_rotpk_ns),
-    USER_AREA_SIZE(dm_locked.host_rotpk_cca),
+    [PLAT_OTP_ID_HOST_ROTPK_S] = USER_AREA_SIZE(dm_locked.host_rotpk_s),
+    [PLAT_OTP_ID_HOST_ROTPK_NS] = USER_AREA_SIZE(dm_locked.host_rotpk_ns),
+    [PLAT_OTP_ID_HOST_ROTPK_CCA] = USER_AREA_SIZE(dm_locked.host_rotpk_cca),
 
-    USER_AREA_SIZE(cm_locked.cca_system_properties),
+    [PLAT_OTP_ID_CCA_SYSTEM_PROPERTIES] = USER_AREA_SIZE(cm_locked.cca_system_properties),
 
-    USER_AREA_SIZE(unlocked_area.reprovisioning_bits),
-    USER_AREA_SIZE(cm_locked.rss_id),
+    [PLAT_OTP_ID_REPROVISIONING_BITS] = USER_AREA_SIZE(unlocked_area.reprovisioning_bits),
+    [PLAT_OTP_ID_RSS_ID] = USER_AREA_SIZE(cm_locked.rss_id),
 };
 
 static uint32_t count_buffer_zero_bits(const uint8_t* buf, size_t size)
