@@ -700,6 +700,16 @@ enum tfm_plat_err_t spu_init_cfg(void)
 
     uint32_t perm;
 
+    /* Configure Secure Code to be secure and RX */
+    perm = 0;
+    perm |= NRF_SPU_MEM_PERM_READ;
+    /* Do not permit writes to secure flash */
+    perm |= NRF_SPU_MEM_PERM_EXECUTE;
+
+    spu_regions_flash_config(S_CODE_START, S_CODE_LIMIT, SPU_SECURE_ATTR_SECURE, perm,
+			     SPU_LOCK_CONF_LOCKED);
+
+
     /* Configures SPU Code and Data regions to be non-secure */
     perm = 0;
     perm |= NRF_SPU_MEM_PERM_READ;
