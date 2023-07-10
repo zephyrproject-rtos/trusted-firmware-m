@@ -30,7 +30,7 @@ target_link_libraries(platform_ns
         platform_common_interface
         platform_region_defs
         tfm_fih_headers
-        tfm_ns_interface
+        tfm_api_ns
 )
 
 target_compile_definitions(platform_ns
