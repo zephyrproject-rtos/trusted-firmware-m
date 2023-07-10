@@ -58,6 +58,7 @@ macro(tfm_toolchain_reset_linker_flags)
       --silent
       --semihosting
       --redirect __write=__write_buffered
+      --diag_suppress=lp005
       "SHELL:--fpu none"
     )
 endmacro()

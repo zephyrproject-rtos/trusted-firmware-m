@@ -26,6 +26,27 @@ Build instructions with platform name: arm/mps3/an552
    provisioning code and provisioning values. The provisioning bundle has to be placed
    on the ``0x10022000`` address.
 
+.. note::
+
+   If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` and ``-DTFM_DUMMY_PROVISIONING=OFF`` are set
+   then unique values can be used for provisioning. The ${MCUBOOT_KEY_S} and ${MCUBOOT_KEY_NS}
+   will be used for signing and provisioning so any unique private signing key can be used.
+   If ``-DMCUBOOT_GENERATE_SIGNING_KEYPAIR=ON`` is set then a new mcuboot signing public and private
+   keypair is going to be generated and it's going to be used to sign the S and NS binaries.
+
+   The hash of the public key is going to be written into the ``provisioning_data.c`` automatically.
+   The other keys and seeds can be changed by passing the new values to the build command,
+   otherwise the default values going to be used:
+   ``tf-m/platform/ext/target/arm/mps3/an552/provisioning/provisioning_config.cmake``
+   Optionally it's possible to pass a new config file with the ``-DPROVISIONING_KEYS_CONFIG``
+   flag.
+
+   The new generated keypair can be found in the ``<build dir>/bin`` folder or in the
+   ``<install directory>/image_signing/keys`` after installation.
+   The generated provisioning_data.c file can be found at
+   ``<build directory>/platform/target/provisioning/provisioning_data.c``
+
+
 To run the example code on AN552
 --------------------------------
 FPGA image is available to download `here <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`__

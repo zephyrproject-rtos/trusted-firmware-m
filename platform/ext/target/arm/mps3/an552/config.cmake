@@ -10,6 +10,7 @@
 # Make FLIH IRQ test as the default IRQ test on Corstone-310
 set(TEST_NS_SLIH_IRQ                  OFF   CACHE BOOL    "Whether to build NS regression Second-Level Interrupt Handling tests")
 set(PSA_API_TEST_TARGET           "cs3x0"   CACHE STRING  "PSA_API_TARGET name")
+set(PROVISIONING_KEYS_CONFIG      "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps3/an552/provisioning/provisioning_config.cmake"   CACHE FILEPATH  "The config file which has the keys and seeds for provisioning")
 
 if(BL2)
     set(BL2_TRAILER_SIZE 0x800 CACHE STRING "Trailer size")

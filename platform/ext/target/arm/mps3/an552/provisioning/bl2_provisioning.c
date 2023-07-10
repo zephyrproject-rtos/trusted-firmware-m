@@ -70,7 +70,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
 
     if (lcs == PLAT_OTP_LCS_ASSEMBLY_AND_TEST) {
 
-        BOOT_LOG_INF("[INF] Waiting for CM provisioning bundle\r\n");
+        BOOT_LOG_INF("[INF] Waiting for provisioning bundle\r\n");
         while (encrypted_bundle->magic != BUNDLE_MAGIC ||
                encrypted_bundle->magic2 != BUNDLE_MAGIC) {
         }

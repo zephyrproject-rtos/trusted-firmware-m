@@ -59,7 +59,7 @@ SECTIONS
 
     VALUES :
     {
-        *_provisioning_data.o(.rodata.data)
+        *provisioning_data.o(.rodata.data)
     } > VALUES
 
 }
