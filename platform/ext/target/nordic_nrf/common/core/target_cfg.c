@@ -746,6 +746,10 @@ enum tfm_plat_err_t spu_init_cfg(void)
 
 #ifdef NRF_NS_STORAGE_PARTITION_START
     /* Configures storage partition to be non-secure */
+    perm = 0;
+    perm |= NRF_SPU_MEM_PERM_READ;
+    perm |= NRF_SPU_MEM_PERM_WRITE;
+
     spu_regions_flash_config(memory_regions.non_secure_storage_partition_base,
 			     memory_regions.non_secure_storage_partition_limit,
 			     SPU_SECURE_ATTR_NONSECURE, perm, SPU_LOCK_CONF_LOCKED);
