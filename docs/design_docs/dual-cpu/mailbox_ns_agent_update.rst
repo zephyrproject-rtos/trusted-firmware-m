@@ -299,10 +299,13 @@ And the prototype for agent-specific ``agent_psa_call``:
                               const struct client_params *params);
 
 
-``agent_psa_call`` reuses the existing ``tfm_spm_client_psa_call`` as the
-internal implementation, the procedure after ``agent_psa_call`` gets called is
-slightly different compared to a classic ``psa_call`` procedure
-(Error handling is not described here as it works as usual):
+The internal logic for ``agent_psa_call()`` is similar to
+``tfm_psa_call_pack()`` in IPC model. A new field ``agent_psa_call`` in
+partition metadata is added. ``tfm_agent_psa_call()``. ``tfm_agent_psa_call()``
+reuses the existing ``tfm_spm_client_psa_call()`` as the internal
+implementation. The procedure after ``tfm_agent_psa_call()`` gets called is
+slightly different compared to a classic ``psa_call`` procedure (Error handling
+is not described here as it works as usual):
 
 - Extract ``inptr`` and ``outptr`` from ``vecs`` before calling
   ``tfm_spm_client_psa_call``.
@@ -445,6 +448,6 @@ The solution is:
 
 --------------
 
-*Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*
 *Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*
