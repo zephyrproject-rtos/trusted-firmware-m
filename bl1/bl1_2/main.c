@@ -8,6 +8,8 @@
 #include "crypto.h"
 #include "otp.h"
 #include "boot_hal.h"
+#include "boot_measurement.h"
+#include "psa/crypto.h"
 #include "uart_stdout.h"
 #include "fih.h"
 #include "util.h"
@@ -23,20 +25,57 @@
 __asm("  .global __ARM_use_no_argv\n");
 #endif
 
+#if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) || !defined(TFM_BL1_PQ_CRYPTO)
+static uint8_t computed_bl2_hash[BL2_HASH_SIZE];
+#endif
+
+#ifdef CONFIG_TFM_BOOT_STORE_MEASUREMENTS
+#if (BL2_HASH_SIZE == 32)
+#define BL2_HASH_ALG  PSA_ALG_SHA_256
+#elif (BL2_HASH_SIZE == 64)
+#define BL2_HASH_ALG  PSA_ALG_SHA_512
+#else
+#error "The specified BL2_HASH_SIZE is not supported with measured boot."
+#endif /* BL2_HASH_SIZE */
+
+static void collect_boot_measurement(const struct bl1_2_image_t *image)
+{
+    struct boot_measurement_metadata bl2_metadata = {
+        .measurement_type = BL2_HASH_ALG,
+        .signer_id = { 0 },
+        .signer_id_size = BL2_HASH_SIZE,
+        .sw_type = "BL2",
+        .sw_version = {
+            image->protected_values.version.major,
+            image->protected_values.version.minor,
+            image->protected_values.version.revision,
+            image->protected_values.version.build_num,
+        },
+    };
+
+#ifdef TFM_BL1_PQ_CRYPTO
+    /* Get the public key hash as the signer ID */
+    if (pq_crypto_get_pub_key_hash(TFM_BL1_KEY_ROTPK_0, bl2_metadata.signer_id,
+                                   sizeof(bl2_metadata.signer_id),
+                                   &bl2_metadata.signer_id_size)) {
+        BL1_LOG("[WRN] Signer ID missing in measurement of BL2\r\n");
+    }
+#endif
+
+    /* Save the boot measurement of the BL2 image. */
+    if (boot_store_measurement(BOOT_MEASUREMENT_SLOT_BL2, computed_bl2_hash,
+                               BL2_HASH_SIZE, &bl2_metadata, true)) {
+        BL1_LOG("[WRN] Failed to store boot measurement of BL2\r\n");
+    }
+}
+#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS */
+
 #ifndef TFM_BL1_PQ_CRYPTO
 static fih_int image_hash_check(struct bl1_2_image_t *img)
 {
     enum tfm_plat_err_t plat_err;
-    uint8_t computed_bl2_hash[BL2_HASH_SIZE];
     uint8_t stored_bl2_hash[BL2_HASH_SIZE];
     fih_int fih_rc = FIH_FAILURE;
-
-    FIH_CALL(bl1_sha256_compute, fih_rc, (uint8_t *)&img->protected_values,
-                                         sizeof(img->protected_values),
-                                         computed_bl2_hash);
-    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
-        FIH_RET(fih_rc);
-    }
 
     plat_err = tfm_plat_otp_read(PLAT_OTP_ID_BL2_IMAGE_HASH, BL2_HASH_SIZE,
                                  stored_bl2_hash);
@@ -44,7 +83,6 @@ static fih_int image_hash_check(struct bl1_2_image_t *img)
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_RET(FIH_FAILURE);
     }
-
 
     FIH_CALL(bl_fih_memeql, fih_rc, computed_bl2_hash, stored_bl2_hash,
                                     BL2_HASH_SIZE);
@@ -75,6 +113,16 @@ static fih_int is_image_security_counter_valid(struct bl1_2_image_t *img)
 static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
 {
     fih_int fih_rc = FIH_FAILURE;
+
+    /* Calculate the image hash for measured boot and/or a hash-locked image */
+#if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) || !defined(TFM_BL1_PQ_CRYPTO)
+    FIH_CALL(bl1_sha256_compute, fih_rc, (uint8_t *)&img->protected_values,
+                                         sizeof(img->protected_values),
+                                         computed_bl2_hash);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        FIH_RET(fih_rc);
+    }
+#endif
 
 #ifdef TFM_BL1_PQ_CRYPTO
     FIH_CALL(pq_crypto_verify, fih_rc, TFM_BL1_KEY_ROTPK_0,
@@ -249,6 +297,13 @@ int main(void)
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
     }
+
+#ifdef CONFIG_TFM_BOOT_STORE_MEASUREMENTS
+    /* At this point there is a valid and decrypted BL2 image in the RAM at
+     * address BL2_IMAGE_START.
+     */
+    collect_boot_measurement((const struct bl1_2_image_t *)BL2_IMAGE_START);
+#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS */
 
     BL1_LOG("[INF] Jumping to BL2\r\n");
     boot_platform_quit((struct boot_arm_vector_table *)BL2_CODE_START);

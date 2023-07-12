@@ -24,6 +24,7 @@ kmu_set_key_locked
 kmu_set_slot_invalid
 kmu_random_delay
 pq_crypto_verify
+pq_crypto_get_pub_key_hash
 rss_derive_cpak_seed
 rss_derive_dak_seed
 rss_derive_session_key

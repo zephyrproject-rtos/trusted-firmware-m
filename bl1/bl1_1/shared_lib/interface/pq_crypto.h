@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -25,6 +25,12 @@ fih_int pq_crypto_verify(enum tfm_bl1_key_id_t key,
                          size_t data_length,
                          const uint8_t *signature,
                          size_t signature_length);
+
+/* Get the hash of the public key */
+int pq_crypto_get_pub_key_hash(enum tfm_bl1_key_id_t key,
+                               uint8_t *hash,
+                               size_t hash_size,
+                               size_t *hash_length);
 
 #ifdef __cplusplus
 }

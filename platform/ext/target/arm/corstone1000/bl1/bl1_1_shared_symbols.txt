@@ -15,6 +15,7 @@ cc3xx_uninit
 computed_bl1_2_hash
 corstone1000_watchdog_reset_timer
 pq_crypto_verify
+pq_crypto_get_pub_key_hash
 stdio_init
 stdio_output_string
 stdio_uninit

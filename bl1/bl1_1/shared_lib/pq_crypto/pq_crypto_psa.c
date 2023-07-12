@@ -84,3 +84,29 @@ out:
     mbedtls_lms_public_free(&ctx);
     FIH_RET(fih_rc);
 }
+
+int pq_crypto_get_pub_key_hash(enum tfm_bl1_key_id_t key,
+                               uint8_t *hash,
+                               size_t hash_size,
+                               size_t *hash_length)
+{
+    fih_int fih_rc;
+    uint8_t key_buf[MBEDTLS_LMS_PUBLIC_KEY_LEN(MBEDTLS_LMS_SHA256_M32_H10)];
+
+    if (hash_size < 32) {
+        return -1;
+    }
+
+    fih_rc = bl1_otp_read_key(key, key_buf);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        return -1;
+    }
+
+    fih_rc = bl1_sha256_compute(key_buf, sizeof(key_buf), hash);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        return -1;
+    }
+
+    *hash_length = 32;
+    return 0;
+}

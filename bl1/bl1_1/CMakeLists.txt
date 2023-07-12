@@ -42,6 +42,7 @@ target_link_libraries(bl1_1
 target_compile_definitions(bl1_1
     PRIVATE
         $<$<BOOL:${TEST_BL1_1}>:TEST_BL1_1>
+        $<$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>:CONFIG_TFM_BOOT_STORE_MEASUREMENTS>
 )
 
 target_share_symbols(bl1_1 ${BL1_SHARED_SYMBOLS_PATH})

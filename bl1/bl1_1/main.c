@@ -10,6 +10,8 @@
 #include "tfm_plat_provisioning.h"
 #include "tfm_plat_otp.h"
 #include "boot_hal.h"
+#include "boot_measurement.h"
+#include "psa/crypto.h"
 #include "region_defs.h"
 #include "log.h"
 #include "util.h"
@@ -22,6 +24,36 @@ __asm("  .global __ARM_use_no_argv\n");
 #endif
 
 uint8_t computed_bl1_2_hash[BL1_2_HASH_SIZE];
+
+#ifdef CONFIG_TFM_BOOT_STORE_MEASUREMENTS
+#if (BL1_2_HASH_SIZE == 32)
+#define BL1_2_HASH_ALG  PSA_ALG_SHA_256
+#elif (BL1_2_HASH_SIZE == 64)
+#define BL1_2_HASH_ALG  PSA_ALG_SHA_512
+#else
+#error "The specified BL1_2_HASH_SIZE is not supported with measured boot."
+#endif /* BL1_2_HASH_SIZE */
+
+static void collect_boot_measurement(void)
+{
+    struct boot_measurement_metadata bl1_2_metadata = {
+        .measurement_type = BL1_2_HASH_ALG,
+        .signer_id = { 0 },
+        .signer_id_size = BL1_2_HASH_SIZE,
+        .sw_type = "BL1_2",
+        .sw_version = { 0 },
+    };
+
+    /* Missing metadata:
+     * - image version: not available,
+     * - signer ID: the BL1_2 image is not signed.
+     */
+    if (boot_store_measurement(BOOT_MEASUREMENT_SLOT_BL1_2, computed_bl1_2_hash,
+                               BL1_2_HASH_SIZE, &bl1_2_metadata, true)) {
+        BL1_LOG("[WRN] Failed to store boot measurement of BL1_2\r\n");
+    }
+}
+#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS */
 
 static fih_int validate_image_at_addr(uint8_t *image)
 {
@@ -100,6 +132,10 @@ int main(void)
     if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
         FIH_PANIC;
     }
+
+#ifdef CONFIG_TFM_BOOT_STORE_MEASUREMENTS
+    collect_boot_measurement();
+#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS */
 
     BL1_LOG("[INF] Jumping to BL1_2\r\n");
     /* Jump to BL1_2 */

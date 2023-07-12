@@ -47,6 +47,7 @@ target_compile_definitions(bl1_2
         $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
         $<$<BOOL:${TEST_BL1_2}>:TEST_BL1_2>
         $<$<BOOL:${TFM_BL1_PQ_CRYPTO}>:TFM_BL1_PQ_CRYPTO>
+        $<$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>:CONFIG_TFM_BOOT_STORE_MEASUREMENTS>
 )
 
 target_link_shared_code(bl1_2
