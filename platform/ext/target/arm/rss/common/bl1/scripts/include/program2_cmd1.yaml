@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# This command sets the address of program3_cmd0 into the DMA350 Channel1
+# LINKADDR register.
+
 Header:
   - REGCLEAR: 0
   - Reserved: 0
@@ -38,8 +42,8 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000602
-DESADDR: 0x50003178
+DESADDR: 'dma350_base_address + 0x1178'
 XSIZE: 0x00010000
-FILLVAL: 0x110070F9
+FILLVAL: "program3_cmd0_exec_addr"
 GPOVAL0: 0x00000003
-LINKADDR: 0x110070DD
+LINKADDR: "program2_cmd2_exec_addr"

@@ -35,4 +35,7 @@
 /* How much space in ROM is used for the DMA Initial Command Sequence */
 #define ROM_DMA_ICS_SIZE   (0x1000)
 
+/* How much space in OTP can be used for the SAM configuration */
+#define OTP_SAM_CONFIGURATION_SIZE 0x18
+
 #endif /* __RSS_MEMORY_SIZES_H__ */

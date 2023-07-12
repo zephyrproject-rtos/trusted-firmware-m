@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# Copy 1 word from the end of this command into the ICC register of the
+# integrity checker. This triggers the checker.
+
 Header:
   - REGCLEAR: 0
   - Reserved: 0
@@ -38,10 +42,11 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000202
-SRCADDR: 0x110071EC
-DESADDR: 0x5015C004
+SRCADDR: 'otp_base_address + 0xc'
+DESADDR: 'integrity_checker_base_address + 0x4'
 XSIZE: 0x00010001
 SRCTRANSCFG: 0x000F0044
 DESTRIGINCFG: 0x00000000
 GPOVAL0: 0x00000006
-LINKADDR: 0x11007219
+LINKADDR: "program4_cmd4_exec_addr"
+ICC: 0x00000081

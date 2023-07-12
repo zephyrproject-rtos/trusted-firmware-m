@@ -4,6 +4,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# This command in run after trigger 1 is fired. This command stops channel 1
+# from executing by writing Channel1 CH_CMD register. Trigger 1 is fired if the
+# Lifecycle is SE, CM PCI/TCI or DM
+
 Header:
   - REGCLEAR: 0
   - Reserved: 0
@@ -38,9 +43,9 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x12000602
-DESADDR: 0x50003100
+DESADDR: 'dma350_base_address + 0x1100'
 XSIZE: 0x00010000
 FILLVAL: 0x00000008
 SRCTRIGINCFG: 0x00000201
 GPOVAL0: 0x00000002
-LINKADDR: 0x110070C1
+LINKADDR: "program2_cmd1_exec_addr"

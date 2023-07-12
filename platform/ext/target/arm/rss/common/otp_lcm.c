@@ -41,6 +41,7 @@ __PACKED_STRUCT plat_user_area_layout_t {
             /* Things after this point are not touched by BL1_1, and hence are
              * modifiable by new provisioning code.
              */
+                uint32_t sam_configuration[OTP_SAM_CONFIGURATION_SIZE/ sizeof(uint32_t)];
                 uint32_t cca_system_properties;
                 uint32_t rss_id;
             } cm_locked;
@@ -77,8 +78,8 @@ __PACKED_STRUCT plat_user_area_layout_t {
                 uint32_t reprovisioning_bits;
             } unlocked_area;
         };
-        uint8_t _pad[OTP_TOTAL_SIZE - OTP_DMA_ICS_SIZE - BL1_2_CODE_SIZE -
-                     sizeof(struct lcm_otp_layout_t)];
+        uint8_t _pad0[OTP_TOTAL_SIZE - OTP_DMA_ICS_SIZE - BL1_2_CODE_SIZE -
+                      sizeof(struct lcm_otp_layout_t)];
     };
 
     /* These two are aligned to the end of the OTP. The size of the DMA ICS is
@@ -90,7 +91,13 @@ __PACKED_STRUCT plat_user_area_layout_t {
      * hash using the CC DMA.
      */
     uint32_t bl1_2_image[BL1_2_CODE_SIZE / sizeof(uint32_t)];
-    uint32_t dma_initial_command_sequence[OTP_DMA_ICS_SIZE / sizeof(uint32_t)];
+    __PACKED_UNION {
+        __PACKED_STRUCT {
+            uint32_t integrity_checker_values[4];
+            uint32_t dma_commands[];
+        } dma_initial_command_sequence;
+        uint8_t _pad1[OTP_DMA_ICS_SIZE];
+    };
 };
 
 static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {

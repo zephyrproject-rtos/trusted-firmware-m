@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# This command zeroes the entire DTCM by writing doublewords.
+
 Header:
   - REGCLEAR: 0
   - Reserved: 0
@@ -37,10 +40,10 @@ Header:
   - AUTOCFG: 0
   - LINKADDR: 1
   - LINKADDRHI: 0
-CTRL: 0x10000602
-DESADDR: 0x5802125C
-XSIZE: 0x00010000
-DESTRANSCFG: 0x00000000
-FILLVAL: 0x00AAAAAA
-GPOVAL0: 0x00000005
-LINKADDR: 0x1100715D
+CTRL: 0x10000603
+DESADDR: 'dtcm_base_address'
+XSIZE: 0x10000000
+DESTRANSCFG: 0x000F0044
+FILLVAL: 0x00000000
+GPOVAL0: 0x00000004
+LINKADDR: "program2_cmd0_exec_addr"

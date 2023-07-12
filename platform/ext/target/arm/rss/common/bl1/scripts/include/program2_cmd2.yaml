@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# This command writes 0x1 into the DMA350 Channel1 CH_CMD register, this causes
+# it to start running.
+
 Header:
   - REGCLEAR: 0
   - Reserved: 0
@@ -42,4 +46,4 @@ DESADDR: 0x50003100
 XSIZE: 0x00010000
 FILLVAL: 0x00000001
 GPOVAL0: 0x00000003
-LINKADDR: 0x11007179
+LINKADDR: "program4_cmd0_exec_addr"

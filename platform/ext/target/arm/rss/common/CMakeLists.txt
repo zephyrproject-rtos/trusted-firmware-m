@@ -599,16 +599,31 @@ if (RSS_XIP)
 endif()
 
 ############################## BL1 DMA ###################################
-add_custom_target(bl1_1_dma_bin
+set(bin_dir ${CMAKE_BINARY_DIR}/bin)
+
+add_custom_target(dma_icses
     ALL
-    SOURCES bl1_1_dma.bin ${bin_dir}/bl1_1_dma.bin
+    SOURCES rom_dma_ics.bin ${bin_dir}/rom_dma_ics.bin
+            rom_dma_ics.hex ${bin_dir}/rom_dma_ics.hex
+            otp_dma_ics.bin ${bin_dir}/otp_dma_ics.bin
+            otp_dma_ics.hex ${bin_dir}/otp_dma_ics.hex
 )
 
-add_custom_command(OUTPUT bl1_1_dma.bin
-    OUTPUT ${bin_dir}/bl1_1_dma.bin
+add_custom_command(
+    OUTPUT rom_dma_ics.bin
+    OUTPUT otp_dma_ics.bin
+    OUTPUT rom_dma_ics.hex
+    OUTPUT otp_dma_ics.hex
+    OUTPUT ${bin_dir}/rom_dma_ics.bin
+    OUTPUT ${bin_dir}/otp_dma_ics.bin
+    OUTPUT ${bin_dir}/rom_dma_ics.hex
+    OUTPUT ${bin_dir}/otp_dma_ics.hex
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/bl1/scripts/create_bl1_1_dma_bin.py
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bl1/scripts/create_bl1_1_dma_bin.py
                     --input_file ${CMAKE_CURRENT_SOURCE_DIR}/bl1/scripts/dma_config.yaml
-                    --output_file bl1_1_dma.bin
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl1_1_dma.bin $<TARGET_FILE_DIR:bl1_1>
+                    --output_dir ${CMAKE_CURRENT_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/rom_dma_ics.bin $<TARGET_FILE_DIR:bl1_1>
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/otp_dma_ics.bin $<TARGET_FILE_DIR:bl1_1>
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/rom_dma_ics.hex $<TARGET_FILE_DIR:bl1_1>
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/otp_dma_ics.hex $<TARGET_FILE_DIR:bl1_1>
 )

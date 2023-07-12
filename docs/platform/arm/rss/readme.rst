@@ -77,9 +77,17 @@ For more information on the ``imgtool`` parameters, see the MCUBoot
 Running the code
 ----------------
 
-To run the built images, the flash image must be created by concatenating the
-images that are output from the build. To create the flash image, the following
-``fiptool`` command should be run. ``fiptool`` documentation can be found `here
+To run the built images, first the ROM image must be created from the bl1_1
+binary and the ROM DMA Initial Command Sequence (ICS).::
+
+    srec_cat \
+            bl1_1.bin -Binary     -offset 0x0 \
+            rom_dma_ics.bin -Binary -offset 0x1F000 \
+            -o rom.bin -Binary
+
+Then, the flash image must be created by concatenating the images that are
+output from the build. To create the flash image, the following ``fiptool``
+command should be run. ``fiptool`` documentation can be found `here
 <https://trustedfirmware-a.readthedocs.io/en/latest/getting_started/tools-build.html?highlight=fiptool#building-and-using-the-fip-tool>`_.
 Note that an up-to-date fiptool that supports the RSS UUIDs must be used.::
 
@@ -159,7 +167,7 @@ image::
             fip_gpt.bin -Binary -offset 0x0 \
             -o host_flash.bin -Binary
 
-The BL1_1 ROM binary should be placed in RSS ROM at ``0x11000000`` and the host
+The RSS ROM binary should be placed in RSS ROM at ``0x11000000`` and the host
 flash binary should be placed at the base of the host flash. For the TC
 platform, this is at ``0x80000000``.
 

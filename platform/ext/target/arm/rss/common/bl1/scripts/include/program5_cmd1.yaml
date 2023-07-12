@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# This command waits for trigger 4, then disables the DCU force disable
+# overrides by writing 0x00AAAAAA to the LCM_DCU_FORCE_DISABLE_REGISTER
+
 Header:
   - REGCLEAR: 0
   - Reserved: 0
@@ -24,7 +28,7 @@ Header:
   - TMPLTCFG: 0
   - SRCTMPLT: 0
   - DESTMPLT: 0
-  - SRCTRIGINCFG: 0
+  - SRCTRIGINCFG: 1
   - DESTRIGINCFG: 0
   - TRIGOUTCFG: 0
   - GPOEN0: 0
@@ -37,9 +41,10 @@ Header:
   - AUTOCFG: 0
   - LINKADDR: 1
   - LINKADDRHI: 0
-CTRL: 0x10000602
-DESADDR: 0x58021120
+CTRL: 0x12000602
+DESADDR: 'rss_system_control_registers_base_address + 0x25C'
 XSIZE: 0x00010000
-FILLVAL: 0x0000000E
-GPOVAL0: 0x00000002
-LINKADDR: 0x00000000
+FILLVAL: 0x00AAAAAA
+SRCTRIGINCFG: 0x00000204
+GPOVAL0: 0x0000000C
+LINKADDR: "program6_cmd0_exec_addr"

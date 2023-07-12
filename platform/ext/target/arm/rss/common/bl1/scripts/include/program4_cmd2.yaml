@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# Copy 3 words from the end of this command into the ICDA, ICDL, and ICEVA
+# registers of the integrity checker.
+
 Header:
   - REGCLEAR: 0
   - Reserved: 0
@@ -38,14 +42,14 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000202
-SRCADDR: 0x110071E0
-DESADDR: 0x5015C018
+SRCADDR: 'program4_cmd2_store_addr + 0x28'
+DESADDR: 'integrity_checker_base_address + 0x18'
 XSIZE: 0x00030003
 SRCTRANSCFG: 0x000F0044
 DESTRIGINCFG: 0x00000000
 GPOVAL0: 0x00000006
-LINKADDR: 0x110071F0
-ICDA: 0x31000000
-ICDL: 0x0000005C
-ICEVA: 0x31000170
-ICC: 0x00000081
+LINKADDR: "program4_cmd3_exec_addr"
+execute_link: false
+ICDA: 'vm0_base_address + 0x4' # The first word in VM0 is the integrity value
+ICDL: 'otp_size - 0x1' # This is measured in words
+ICEVA: 'vm0_base_address'

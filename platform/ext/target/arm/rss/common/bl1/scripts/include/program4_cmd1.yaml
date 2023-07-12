@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
+
+# This command copies the entire OTP DMA ICS section into VM0.
+
 Header:
   - REGCLEAR: 0
   - Reserved: 0
@@ -38,10 +41,10 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000202
-SRCADDR: 0x500A4C00
-DESADDR: 0x31000000
-XSIZE: 0x005D005D
+SRCADDR: "otp_base_address"
+DESADDR: "vm0_base_address"
+XSIZE: "otp_size"
 SRCTRANSCFG: 0x00000000
 DESTRIGINCFG: 0x000F0044
 GPOVAL0: 0x00000005
-LINKADDR: 0x110071BD
+LINKADDR: "program4_cmd2_exec_addr"

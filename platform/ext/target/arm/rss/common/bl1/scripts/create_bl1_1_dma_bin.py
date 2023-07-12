@@ -12,11 +12,11 @@ import argparse
 from yaml.loader import SafeLoader
 
 # logging setup
-logging.basicConfig(level=logging.ERROR, format='%(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.WARNING, format='%(name)s - %(levelname)s - %(message)s')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--input_file", help="DMA programs high level yaml file", required=True)
-parser.add_argument("--output_file", help="Output bin file", required=True)
+parser.add_argument("--output_dir", help="Output directory", required=True)
 args = parser.parse_args()
 
 class Loader(yaml.SafeLoader):
@@ -26,9 +26,13 @@ class Loader(yaml.SafeLoader):
 
     # load nested yaml files (if any)
     def include(self, node):
-        filename = os.path.join(self._root, self.construct_scalar(node))
-        with open(filename, 'r') as f:
-            return yaml.load(f, Loader)
+        filepath = os.path.join(self._root, self.construct_scalar(node))
+        command_name = os.path.basename(self.construct_scalar(node)).replace('.yaml', '')
+
+        with open(filepath, 'r') as f:
+            child_node = yaml.load(f, Loader)
+            child_node['command_name'] = command_name
+            return child_node
 
 Loader.add_constructor('!include', Loader.include)
 
@@ -41,39 +45,151 @@ def calculate_header_word(header):
             final_val = final_val + (val << i)
     return final_val
 
-def pad_hex(s):
-    return '0x' + s[2:].zfill(8)
+
+def resolve_store_reference(command, key, reference_string):
+    return command_storage_locations[reference_string]
+
+def resolve_exec_reference(command, key, reference_string):
+    command_location = command_execution_locations[reference_string]
+    # Need to set bit 0 if the link should be executed
+    if key != 'SRCADDR' and key != 'DESADDR':
+        try:
+            if command['execute_link']:
+                command_location += 1
+        except KeyError:
+            # Default to performing the link
+            command_location += 1
+    return command_location
+
+def resolve_size_reference(command, key, reference_string):
+    # Convert size to words
+    size = sizes[reference_string] // 4
+    if key == 'XSIZE':
+        size &= 0xFFFF
+        size |= size << 16
+    return size
+
+def resolve_base_address_reference(command, key, reference_string):
+    return location_base_addresses[reference_string]
+
+def resolve_program_reference(command, key, reference_string):
+    if "+" in reference_string:
+        split = reference_string.split(" + ")
+        reference_string = split[0].lstrip()
+        add_value = int(split[1], 0)
+    else:
+        add_value = 0
+
+    if "-" in reference_string:
+        split = reference_string.split(" - ")
+        reference_string = split[0].lstrip()
+        sub_value = int(split[1], 0)
+    else:
+        sub_value = 0
+
+    if "_store_addr" in reference_string:
+        value = resolve_store_reference(command, key, reference_string.replace("_store_addr", ""))
+    elif "_exec_addr" in reference_string:
+        value = resolve_exec_reference(command, key, reference_string.replace("_exec_addr", ""))
+    elif "_size" in reference_string:
+        value = resolve_size_reference(command, key, reference_string.replace("_size", ""))
+    elif "_base_address" in reference_string:
+        value = resolve_base_address_reference(command, key, reference_string.replace("_base_address", ""))
+    else:
+        raise ValueError("Invalid program reference {}".format(reference_string))
+    value = value + add_value - sub_value
+    logging.debug('resolving reference {} as {}'.format(reference_string, hex(value)))
+    return value
 
 # load top level input config file
 with open(args.input_file, 'r') as f:
    data = yaml.load(f, Loader)
 
 program_count = len(data["program"])
-logging.info('Number of DMA programs : %d ', program_count)
-hex_codes=[]
 
-for prog_idx in range(program_count):
-    command_count = len(data["program"][prog_idx]["commands"])
-    logging.info("Program " +str(prog_idx) + " has " +str(command_count) + " comamnds")
-    for cmd_idx in range(command_count):
-        command = data["program"][prog_idx]["commands"][cmd_idx]
+location_base_addresses={}
+location_next_addresses={}
+location_word_arrays={}
+output_locations={}
+
+command_storage_locations = {}
+command_execution_locations = {}
+sizes = {}
+
+reserved_keys=['command_name', 'execute_link']
+
+# Setup locations
+for location in data['locations']:
+    location_word_arrays[location] = []
+    location_base_addresses[location] = data['locations'][location]['base_address']
+    try:
+        reserved_size = data['locations'][location]['reserved']
+    except KeyError:
+        reserved_size = 0
+    location_next_addresses[location] = data['locations'][location]['base_address'] + reserved_size
+    try:
+        sizes[location] = data['locations'][location]['size']
+        size = sizes[location]
+    except KeyError:
+        size = 'unknown'
+        pass
+    logging.info('Location {} at {}, size {}, first usable address {}'.format(
+        location,
+        hex(location_base_addresses[location]),
+        size,
+        hex(location_next_addresses[location])))
+
+for program in data['program']:
+    commands = program['commands']
+    sizes[program['name']] = 0
+    for command in commands:
+        command_size = sum([1 for key in command if key not in reserved_keys]) * 4
+        sizes[command['command_name']] = command_size
+        sizes[program['name']] += command_size
+        command_storage_locations[command['command_name']] = location_next_addresses[program['storage_location']]
+        command_execution_locations[command['command_name']] = location_next_addresses[program['execution_location']]
+        location_next_addresses[program['storage_location']] += command_size
+        # don't increment twice if the storage location is the same as the
+        # execution location
+        if location_next_addresses[program['storage_location']] != location_next_addresses[program['execution_location']]:
+            location_next_addresses[program['execution_location']] += command_size
+        output_locations[program['storage_location']] = True
+    logging.info('Program {} stored at {}, executed from {}, size {}'.format(
+        program['name'],
+        hex(location_next_addresses[program['storage_location']] - sizes[program['name']]),
+        hex(location_next_addresses[program['execution_location']] - sizes[program['name']]),
+        sizes[program['name']],
+        ))
+
+for program in data['program']:
+    commands = program['commands']
+    for command in commands:
+        command["Header"] = calculate_header_word(command["Header"])
+        command_array = []
         for key in command:
-            if key == "Header":
-                header = data["program"][prog_idx]["commands"][cmd_idx]["Header"]
-                header_word = calculate_header_word(header)
-                hex_codes.append(str(hex(header_word)))
-                logging.debug("Calculated header word is %s",str(hex(header_word)))
-            else:
-                hex_codes.append(str(pad_hex(hex(command[key]))))
-                logging.debug(str(key) +': '+ str(pad_hex(hex(command[key]))))
+            if key in reserved_keys:
+                continue
+            try:
+                command_array.append(int(command[key]))
+            except ValueError:
+                command_array.append(int(resolve_program_reference(command, key, command[key])))
+        location_word_arrays[program['storage_location']] += command_array
 
-out_file = open(args.output_file, mode="wb")
-
-for item in hex_codes:
-    data = bytes.fromhex(item.replace('0x','').rstrip())
-    # by default; binary file is little in big endian format; update to little endian for arm */
-    swap_data = bytearray(data)
-    swap_data.reverse()
-    out_file.write(swap_data)
-
-out_file.close()
+for location in output_locations:
+    try:
+        reserved_size = data['locations'][location]['reserved']
+    except KeyError:
+        reserved_size = 0
+    if len(location_word_arrays[location]) * 4 + reserved_size > sizes[location]:
+        raise Exception
+    with open(os.path.join(args.output_dir, location + "_dma_ics.bin"), mode="wb") as bin_file:
+        with open(os.path.join(args.output_dir, location + "_dma_ics.hex"), mode="wt") as hex_file:
+            logging.info('Writing output binary for location {} to file {} of size {}'.format(
+                location, os.path.join(args.output_dir, location + "_dma_ics.bin"),
+                len(location_word_arrays[location]) * 4))
+            logging.info('Writing output hex for location {} to file {} of size {}'.format(
+                location, os.path.join(args.output_dir, location + "_dma_ics.hex"),
+                len(location_word_arrays[location]) * 4))
+            for word in location_word_arrays[location]:
+                bin_file.write(word.to_bytes(4, byteorder='little'))
+                hex_file.write(word.to_bytes(4, byteorder='big').hex() + '\n')
