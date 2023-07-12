@@ -36,11 +36,6 @@ __NO_RETURN __attribute__((naked)) void default_tfm_IRQHandler(void) {
 }
 
 DEFAULT_IRQ_HANDLER(NMI_Handler)
-DEFAULT_IRQ_HANDLER(HardFault_Handler)
-DEFAULT_IRQ_HANDLER(MemManage_Handler)
-DEFAULT_IRQ_HANDLER(BusFault_Handler)
-DEFAULT_IRQ_HANDLER(UsageFault_Handler)
-DEFAULT_IRQ_HANDLER(SecureFault_Handler)
 DEFAULT_IRQ_HANDLER(SVC_Handler)
 DEFAULT_IRQ_HANDLER(DebugMon_Handler)
 DEFAULT_IRQ_HANDLER(PendSV_Handler)
@@ -79,6 +74,19 @@ DEFAULT_IRQ_HANDLER(CRYPTOCELL_IRQHandler)
 
 #if defined(DOMAIN_NS) || defined(BL2)
 DEFAULT_IRQ_HANDLER(SPU_IRQHandler)
+DEFAULT_IRQ_HANDLER(HardFault_Handler)
+DEFAULT_IRQ_HANDLER(MemManage_Handler)
+DEFAULT_IRQ_HANDLER(BusFault_Handler)
+DEFAULT_IRQ_HANDLER(UsageFault_Handler)
+DEFAULT_IRQ_HANDLER(SecureFault_Handler)
+#else
+/*
+ * Default IRQ handlers will usually be overriden as they are
+ * weak. But due to the way TF-M links it's binary (doesn't use
+ * whole-archive), weak doesn't always work. So we explicitly ifdef
+ * out some IRQ handlers that we know will be overridden anyway to be
+ * safe.
+ */
 #endif
 
 #if defined ( __GNUC__ )

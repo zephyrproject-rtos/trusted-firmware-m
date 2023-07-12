@@ -27,6 +27,11 @@ void __PROGRAM_START(void) __NO_RETURN;
 __NO_RETURN void __attribute__((weak, alias("default_tfm_IRQHandler"))) handler_name(void);
 
 __NO_RETURN void Reset_Handler(void);
+__NO_RETURN void HardFault_Handler(void);
+__NO_RETURN void MemManage_Handler(void);
+__NO_RETURN void BusFault_Handler(void);
+__NO_RETURN void UsageFault_Handler(void);
+__NO_RETURN void SecureFault_Handler(void);
 
 void SPU_IRQHandler(void);
 
