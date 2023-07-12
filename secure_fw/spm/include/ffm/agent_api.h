@@ -13,6 +13,7 @@
 
 #include "config_impl.h"
 #include "psa/client.h"
+#include "psa/service.h"
 
 
 struct client_vectors {
@@ -53,7 +54,7 @@ struct client_params {
  * \arg                           The message is unrecognized by the RoT
  *                                Service or incorrectly formatted.
  */
-psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
+psa_status_t agent_psa_call(psa_handle_t handle, uint32_t ctrl_param,
                             const struct client_vectors *vecs,
                             const struct client_params *params);
 
@@ -64,12 +65,12 @@ psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
  *
  * \param[in] sid                       RoT Service identity.
  * \param[in] version                   The version of the RoT Service.
- * \param[in] ns_client_id              Which NS client is being represented.
- *                                      Negative value identifies the NS client.
- *                                      Zero or positive values are ignored
- *                                      and SPM uses the agent's ID instead.
- * \param[in] client_data               Caller identifier, treated as opaque
- *                                      by SPM.
+ * \param[in] params                    NS agent's client identifier.
+ *                                      Ignored for connection-based services.
+ *                                      ns_client_id identifies the NS client.
+ *                                      Zero or positive values are ignored and SPM
+ *                                      uses the agent's ID instead.
+ *                                      client_data is treated as opaque by SPM.
  *
  * \retval PSA_SUCCESS                  Success.
  * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
@@ -81,9 +82,9 @@ psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
  *                                      permitted to access the service.
  */
 psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
-                               int32_t ns_client_id, const void *client_data);
+                               const struct client_params *params);
 
-#else
+#else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #define agent_psa_connect    NULL
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 

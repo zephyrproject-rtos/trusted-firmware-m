@@ -11,6 +11,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "config_spm.h"
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+#include "ffm/agent_api.h"
+#endif
 #include "psa/client.h"
 #include "psa/service.h"
 
@@ -69,6 +72,63 @@
                               ((iovec_idx) * IOVEC_STATUS_BITS)))
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+/**
+ * \brief handler for \ref agent_psa_call.
+ *
+ * \param[in] handle            Service handle to the established connection,
+ *                              \ref psa_handle_t
+ * \param[in] ctrl_param        Parameters combined in uint32_t,
+ *                              includes request type, in_num and out_num.
+ * \param[in] vecs              Pointer of client_vectors structures.
+ *                              \ref vecs
+ * \param[in] params            Pointer to client_params structure.
+ *                              \ref params
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval "Does not return"    The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           An invalid handle was passed.
+ * \arg                           The connection is already handling a request.
+ * \arg                           An invalid memory reference was provided.
+ * \arg                           in_num + out_num > PSA_MAX_IOVEC.
+ * \arg                           The message is unrecognized by the RoT
+ *                                Service or incorrectly formatted.
+ */
+psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
+                                    uint32_t ctrl_param,
+                                    const struct client_vectors *vecs,
+                                    const struct client_params *params);
+
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+/**
+ * \brief handler for \ref agent_psa_connect.
+ *
+ * \param[in] sid               RoT Service identity.
+ * \param[in] version           The version of the RoT Service.
+ * \param[in] params            Pointer to client_params structure.
+ *                              \ref params
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
+ *                              connection.
+ * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
+ *                              connection at the moment.
+ * \retval "Does not return"    The RoT Service ID and version are not
+ *                              supported, or the caller is not permitted to
+ *                              access the service.
+ */
+psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
+                                       const struct client_params *params);
+#else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+#define tfm_spm_agent_psa_connect           NULL
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+#else /* TFM_PARTITION_NS_AGENT_MAILBOX */
+#define tfm_spm_agent_psa_connect           NULL
+#define tfm_spm_agent_psa_call              NULL
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
 /**
  * \brief This function handles the specific programmer error cases.

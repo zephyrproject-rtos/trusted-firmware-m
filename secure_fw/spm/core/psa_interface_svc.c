@@ -159,6 +159,25 @@ __naked void psa_eoi_svc(psa_signal_t irq_signal)
 
 #endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
 
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+__naked psa_status_t agent_psa_call_svc(psa_handle_t handle,
+                                        uint32_t ctrl_param,
+                                        const struct client_vectors *vecs,
+                                        const struct client_params *params)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_AGENT_PSA_CALL)"      \n"
+                   "bx      lr                                 \n");
+}
+
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+__naked psa_handle_t agent_psa_connect_svc(uint32_t sid, uint32_t version,
+                                           const struct client_params *params)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_AGENT_PSA_CONNECT)"   \n"
+                   "bx      lr                                 \n");
+}
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
 const struct psa_api_tbl_t psa_api_svc = {
                                 tfm_psa_call_pack_svc,
@@ -191,4 +210,10 @@ const struct psa_api_tbl_t psa_api_svc = {
                                 psa_eoi_svc,
 #endif /* CONFIG_TFM_SLIH_API == 1 */
 #endif /* CONFIG_TFM_FLIH_API == 1 || CONFIG_TFM_SLIH_API == 1 */
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+                                agent_psa_call_svc,
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+                                agent_psa_connect_svc,
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
                             };

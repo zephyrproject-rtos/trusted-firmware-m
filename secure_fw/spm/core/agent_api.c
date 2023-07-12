@@ -13,11 +13,15 @@
 #include "internal_status_code.h"
 #include "tfm_multi_core.h"
 #include "tfm_psa_call_pack.h"
+#include "current.h"
 
-psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
-                            const struct client_vectors *vecs,
-                            const struct client_params *params)
+psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
+                                    uint32_t ctrl_param,
+                                    const struct client_vectors *vecs,
+                                    const struct client_params *params)
 {
+    struct partition_t *curr_partition;
+
     size_t in_num = PARAM_UNPACK_IN_LEN(ctrl_param);
     size_t out_num = PARAM_UNPACK_OUT_LEN(ctrl_param);
 
@@ -49,18 +53,28 @@ psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
         }
     }
 
-    /* For now, just call the non-agent API */
+    curr_partition = GET_CURRENT_COMPONENT();
+
+    if (!IS_NS_AGENT_MAILBOX(curr_partition->p_ldinf)) {
+        tfm_core_panic();
+    }
+
     return tfm_spm_client_psa_call(handle, ctrl_param,
                                    vecs->in_vec, vecs->out_vec);
 }
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 
-psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
-                               int32_t ns_client_id, const void *client_data)
+psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
+                                       const struct client_params *params)
 {
-    (void)ns_client_id;
-    (void)client_data;
+    (void)params;
+
+    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+
+    if (!IS_NS_AGENT_MAILBOX(curr_partition->p_ldinf)) {
+        tfm_core_panic();
+    }
 
     return tfm_spm_client_psa_connect(sid, version);
 }

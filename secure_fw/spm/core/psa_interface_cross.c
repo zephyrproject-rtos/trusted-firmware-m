@@ -225,6 +225,42 @@ void psa_unmap_outvec_cross(psa_handle_t msg_handle, uint32_t outvec_idx,
 
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
 
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+__naked
+__section(".psa_interface_cross_call")
+psa_status_t agent_psa_call_cross(psa_handle_t handle,
+                                  uint32_t ctrl_param,
+                                  const struct client_vectors *vecs,
+                                  const struct client_params *params)
+{
+    __asm volatile(
+        SYNTAX_UNIFIED
+        "push   {r4, lr}                                    \n"
+        "ldr    r4, =tfm_spm_agent_psa_call                 \n"
+        "mov    r12, r4                                     \n"
+        "bl     arch_cross_call                             \n"
+        "pop    {r4, pc}                                    \n"
+    );
+}
+
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+__naked
+__section(".psa_interface_cross_call")
+psa_handle_t agent_psa_connect_cross(uint32_t sid, uint32_t version,
+                                     const struct client_params *params)
+{
+    __asm volatile(
+        SYNTAX_UNIFIED
+        "push   {r4, lr}                                    \n"
+        "ldr    r4, =tfm_spm_agent_psa_connect              \n"
+        "mov    r12, r4                                     \n"
+        "bl     arch_cross_call                             \n"
+        "pop    {r4, pc}                                    \n"
+    );
+}
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
+
 const struct psa_api_tbl_t psa_api_cross = {
                                 tfm_psa_call_pack_cross,
                                 psa_version_cross,
@@ -262,4 +298,10 @@ const struct psa_api_tbl_t psa_api_cross = {
                                 psa_map_outvec_cross,
                                 psa_unmap_outvec_cross,
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+                                agent_psa_call_cross,
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+                                agent_psa_connect_cross,
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
                             };

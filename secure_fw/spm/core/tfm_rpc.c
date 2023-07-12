@@ -80,18 +80,21 @@ psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
 psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params)
 {
     SPM_ASSERT(params != NULL);
+    const struct client_params client_params = {
+        .ns_client_id = params->ns_client_id,
+        .client_data = params->client_data,
+    };
 
     return agent_psa_connect(params->sid,
                              params->version,
-                             params->ns_client_id,
-                             params->client_data);
+                             &client_params);
 }
 
 void tfm_rpc_psa_close(const struct client_call_params_t *params)
 {
     SPM_ASSERT(params != NULL);
 
-    tfm_spm_client_psa_close(params->handle);
+    psa_close(params->handle);
 }
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
