@@ -31,6 +31,9 @@ __naked void tfm_arch_free_msp_and_exc_ret(uint32_t msp_base,
     );
 }
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
+
+extern uint32_t scheduler_lock;
+
 void tfm_arch_set_context_ret_code(void *p_ctx_ctrl, uint32_t ret_code)
 {
     struct context_ctrl_t *ctx_ctrl = (struct context_ctrl_t *)p_ctx_ctrl;
