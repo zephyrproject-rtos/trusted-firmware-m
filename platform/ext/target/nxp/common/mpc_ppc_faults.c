@@ -13,11 +13,11 @@
 
 void C_SEC_VIO_IRQHandler(void)
 {
-	/* Clear interrupt flag and pending IRQ */
+    /* Clear pending IRQ */
     NVIC_ClearPendingIRQ(SEC_VIO_IRQn);
 
     /* Print fault message and block execution */
-    ERROR_MSG("Platform Exception: MPC fault!!!");
+    ERROR_MSG("Platform Exception: MPC/PPC fault!!!");
 
     tfm_core_panic();
 }

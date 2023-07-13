@@ -108,7 +108,6 @@ target_sources(platform_s
         ../../arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         project_template/s/board.c
         project_template/s/clock_config.c
-        project_template/s/peripherals.c
         project_template/s/pin_mux.c
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/system_LPC55S69_cm33_core0.c
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers/fsl_clock.c
@@ -181,7 +180,6 @@ target_sources(platform_ns
         project_template/ns/board.c
         project_template/ns/hardware_init.c
         project_template/ns/clock_config.c
-        project_template/ns/peripherals.c
         project_template/ns/pin_mux.c
         ${PLATFORM_DIR}/ext/target/nxp/common/CMSIS_Driver/Driver_USART.c
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/system_LPC55S69_cm33_core0.c
@@ -275,7 +273,7 @@ endif()
 target_sources(tfm_spm
     PRIVATE
         target_cfg.c
-        ../common/faults.c
+        ../common/mpc_ppc_faults.c
         ../common/tfm_hal_isolation.c
         ../common/tfm_hal_platform.c
 )

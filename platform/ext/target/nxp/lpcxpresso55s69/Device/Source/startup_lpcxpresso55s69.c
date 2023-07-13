@@ -222,10 +222,6 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   FLEXCOMM8_IRQHandler,              /* Flexcomm Interface 8 (SPI, , FLEXCOMM) */
 };
 
-#if defined(__ICCARM__)
-extern typeof(__vector_table) __attribute__ ((alias ("__vector_table"))) __Vectors;
-#endif
-
 #if defined ( __GNUC__ )
 #pragma GCC diagnostic pop
 #endif
