@@ -571,11 +571,6 @@ psa_status_t tfm_its_get(int32_t client_id,
 {
     psa_status_t status;
 
-    #if (PSA_FRAMEWORK_HAS_MM_IOVEC != 1) && defined(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE) \
-        && (ITS_ENCRYPTION != 1)
-    size_t read_size;
-    #endif
-
 #ifdef TFM_PARTITION_TEST_PS
     /* The PS test partition can call tfm_its_get() through PS code. Treat it
      * as if it were PS.
