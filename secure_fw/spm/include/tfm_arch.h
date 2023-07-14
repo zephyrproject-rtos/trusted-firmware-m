@@ -12,6 +12,7 @@
 
 /* This header file collects the architecture related operations. */
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <inttypes.h>
 #include "fih.h"

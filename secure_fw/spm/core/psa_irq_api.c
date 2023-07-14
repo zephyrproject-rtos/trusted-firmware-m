@@ -13,6 +13,7 @@
 #include "interrupt.h"
 #include "spm.h"
 #include "tfm_hal_interrupt.h"
+#include "utilities.h"
 
 psa_status_t tfm_spm_partition_psa_irq_enable(psa_signal_t irq_signal)
 {

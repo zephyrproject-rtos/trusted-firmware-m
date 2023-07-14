@@ -13,6 +13,7 @@
 #include "ffm/psa_api.h"
 #include "load/service_defs.h"
 #include "spm.h"
+#include "utilities.h"
 
 /* PSA APIs only needed by connection-based services */
 
