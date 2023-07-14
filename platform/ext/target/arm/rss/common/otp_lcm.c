@@ -274,10 +274,20 @@ static enum tfm_plat_err_t otp_write(uint32_t offset, uint32_t len,
 
 static uint32_t count_otp_zero_bits(uint32_t offset, uint32_t len)
 {
-    uint8_t buf[len];
+    uint8_t buf[128];
+    uint32_t zero_count = 0;
+
+    while (len > sizeof(buf)) {
+        otp_read(offset, sizeof(buf), sizeof(buf), buf);
+        zero_count += count_buffer_zero_bits(buf, sizeof(buf));
+        len -= sizeof(buf);
+        offset += sizeof(buf);
+    }
 
     otp_read(offset, len, len, buf);
-    return count_buffer_zero_bits(buf, len);
+    zero_count += count_buffer_zero_bits(buf, len);
+
+    return zero_count;
 }
 
 static enum tfm_plat_err_t verify_zero_bits_count(uint32_t offset,
