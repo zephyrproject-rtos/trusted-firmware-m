@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -391,6 +391,12 @@ static enum tfm_plat_err_t otp_write(uint8_t *addr, size_t size,
      */
     if (zero_byte_buf != NULL) {
         zero_count = count_buffer_zero_bits(in, in_len);
+        if (in_len < size) {
+            /* If the buffer is smaller than the OTP item, count the remainder
+             * of the OTP item as well.
+             */
+            zero_count += count_otp_zero_bits(addr + in_len, size - in_len);
+        }
 
         err = otp_write(zero_byte_buf, 2, sizeof(zero_count), (uint8_t*)&zero_count, NULL);
         if (err != TFM_PLAT_ERR_SUCCESS) {
