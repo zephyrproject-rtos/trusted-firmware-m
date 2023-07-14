@@ -27,6 +27,8 @@ struct __attribute__((__packed__)) cm_provisioning_bundle {
         struct __attribute__((__packed__)) cm_provisioning_data {
             uint8_t bl1_2_image_hash[32];
             uint8_t bl1_2_image[BL1_2_CODE_SIZE];
+            uint8_t dma_otp_ics[OTP_DMA_ICS_SIZE];
+            uint8_t sam_config[OTP_SAM_CONFIGURATION_SIZE];
             uint32_t rss_id;
             uint8_t guk[32];
             uint32_t cca_system_properties;

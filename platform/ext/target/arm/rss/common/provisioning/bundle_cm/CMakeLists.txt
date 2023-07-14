@@ -75,6 +75,7 @@ foreach(RSS_ID RANGE ${RSS_AMOUNT_LOOP_RANGE})
                         --bundle_output_file encrypted_cm_provisioning_bundle_${RSS_ID}.bin
                         --magic "0xC0DEFEED"
                         --rss_id ${RSS_ID}
+                        --otp_dma_ics_input_file=$<TARGET_FILE_DIR:bl1_2>/otp_dma_ics.bin
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_cm_provisioning_bundle_${RSS_ID}.bin ${CMAKE_BINARY_DIR}/bin/encrypted_cm_provisioning_bundle_${RSS_ID}.bin
     )
 endforeach()

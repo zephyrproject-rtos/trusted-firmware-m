@@ -620,7 +620,7 @@ enum lcm_error_t lcm_otp_write(struct lcm_dev_t *dev, uint32_t offset, uint32_t 
         return err;
     }
 
-    if (otp_size <= (offset + len)) {
+    if (otp_size < (offset + len)) {
         return LCM_ERROR_INVALID_OFFSET;
     }
 
@@ -677,7 +677,7 @@ enum lcm_error_t lcm_otp_read(struct lcm_dev_t *dev, uint32_t offset,
         return err;
     }
 
-    if (otp_size <= (offset + len)) {
+    if (otp_size < (offset + len)) {
         return LCM_ERROR_INVALID_OFFSET;
     }
 

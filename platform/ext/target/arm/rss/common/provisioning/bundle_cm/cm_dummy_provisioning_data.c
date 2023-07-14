@@ -12,6 +12,10 @@ const struct cm_provisioning_data data = {
     {},
     /* BL1_2_IMAGE */
     {},
+    /* DMA ICS */
+    {},
+    /* SAM config placeholder */
+    {0},
     /* RSS_ID */
     0,
     /* GUK */

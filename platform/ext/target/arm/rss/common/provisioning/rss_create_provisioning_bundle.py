@@ -8,6 +8,7 @@
 import argparse
 import struct
 import secrets
+import binascii
 
 def struct_pack(objects, pad_to=0):
     defstring = "<"
@@ -31,6 +32,7 @@ parser.add_argument("--magic", help="the magic constant to insert at the start a
 parser.add_argument("--bl1_2_padded_hash_input_file", help="the hash of the final bl1_2 image", required=False)
 parser.add_argument("--bl1_2_input_file", help="the final bl1_2 image", required=False)
 parser.add_argument("--rss_id", help="the ID of the RSS", required=False)
+parser.add_argument("--otp_dma_ics_input_file", help="OTP DMA ICS input file", required=False)
 parser.add_argument("--bundle_output_file", help="bundle output file", required=False)
 args = parser.parse_args()
 
@@ -55,6 +57,15 @@ if args.bl1_2_input_file:
 else:
     bl1_2 = bytes(0)
 
+if args.otp_dma_ics_input_file:
+    with open(args.otp_dma_ics_input_file, "rb") as in_file:
+        otp_dma_ics = in_file.read()
+    otp_dma_ics = struct_pack([ otp_dma_ics], pad_to=0x400 - 4)
+    otp_ics_crc = binascii.crc32(otp_dma_ics).to_bytes(4, byteorder='little')
+    otp_dma_ics = struct_pack([otp_ics_crc, otp_dma_ics])
+else:
+    otp_dma_ics = bytes(0)
+
 if args.rss_id != None:
     rss_id = int(args.rss_id, 0).to_bytes(4, 'little')
 else:
@@ -63,6 +74,7 @@ else:
 patch_bundle = struct_pack([
     bl1_2_padded_hash,
     bl1_2,
+    otp_dma_ics,
     rss_id,
 ])
 

@@ -93,11 +93,11 @@ __PACKED_STRUCT plat_user_area_layout_t {
     uint32_t bl1_2_image[BL1_2_CODE_SIZE / sizeof(uint32_t)];
     __PACKED_UNION {
         __PACKED_STRUCT {
-            uint32_t integrity_checker_values[4];
+            uint32_t crc;
             uint32_t dma_commands[];
-        } dma_initial_command_sequence;
+        };
         uint8_t _pad1[OTP_DMA_ICS_SIZE];
-    };
+    } dma_initial_command_sequence;
 };
 
 static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
@@ -163,6 +163,9 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_REPROVISIONING_BITS] = USER_AREA_OFFSET(unlocked_area.reprovisioning_bits),
     [PLAT_OTP_ID_RSS_ID] = USER_AREA_OFFSET(cm_locked.rss_id),
+
+    [PLAT_OTP_ID_DMA_ICS] = USER_AREA_OFFSET(dma_initial_command_sequence),
+    [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_OFFSET(cm_locked.sam_configuration),
 };
 
 static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
@@ -230,6 +233,9 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
 
     [PLAT_OTP_ID_REPROVISIONING_BITS] = USER_AREA_SIZE(unlocked_area.reprovisioning_bits),
     [PLAT_OTP_ID_RSS_ID] = USER_AREA_SIZE(cm_locked.rss_id),
+
+    [PLAT_OTP_ID_DMA_ICS] = USER_AREA_SIZE(dma_initial_command_sequence),
+    [PLAT_OTP_ID_SAM_CONFIG] = USER_AREA_SIZE(cm_locked.sam_configuration),
 };
 
 static uint32_t count_buffer_zero_bits(const uint8_t* buf, size_t size)
