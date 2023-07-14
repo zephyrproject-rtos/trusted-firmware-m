@@ -258,4 +258,9 @@
 #define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 0
 #endif
 
+/* Enable OTP/NV_COUNTERS emulation in RAM */
+#ifndef OTP_NV_COUNTERS_RAM_EMULATION
+#define OTP_NV_COUNTERS_RAM_EMULATION           0
+#endif
+
 #endif /* __CONFIG_BASE_H__ */

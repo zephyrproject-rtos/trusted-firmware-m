@@ -21,7 +21,7 @@
 
 static enum tfm_plat_err_t create_or_restore_layout(void);
 
-#ifdef OTP_NV_COUNTERS_RAM_EMULATION
+#if OTP_NV_COUNTERS_RAM_EMULATION
 
 static struct flash_otp_nv_counters_region_t otp_nv_ram_buf = {0};
 

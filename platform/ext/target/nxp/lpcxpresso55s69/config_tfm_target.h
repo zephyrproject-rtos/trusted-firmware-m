@@ -30,6 +30,10 @@
 
 /* Enable emulated RAM FS for platforms that don't have flash for Protected Storage partition */
 #define PS_RAM_FS            1
+
+/* Enable OTP/NV_COUNTERS emulation in RAM */
+#define OTP_NV_COUNTERS_RAM_EMULATION 1
+
 #endif /* PLATFORM_NO_FLASH */
 
 #endif /* __CONFIG_TFM_TARGET_H__ */
