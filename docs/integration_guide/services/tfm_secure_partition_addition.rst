@@ -431,6 +431,9 @@ service has been included for reference. The following example sends a message
     #include "psa_manifest/tfm_example.h"
     #include "psa/service.h"
 
+    /* Some other type of services. */
+    #define SOME_ROT_A_SERVICE_TYPE                (1)
+
     static void rot_A(void)
     {
         const int BUFFER_LEN = 32;
@@ -449,21 +452,24 @@ service has been included for reference. The following example sends a message
              */
             psa_reply(msg.handle, PSA_SUCCESS);
             break;
-        case PSA_IPC_CALL:
-            for (i = 0; i < PSA_MAX_IOVEC; i++) {
-                if (msg.in_size[i] != 0) {
-                    psa_read(msg.handle, i, rec_buf, BUFFER_LEN);
-                }
-                if (msg.out_size[i] != 0) {
-                    psa_write(msg.handle, i, send_buf, BUFFER_LEN);
-                }
-            }
-            psa_reply(msg.handle, PSA_SUCCESS);
-            break;
         default:
-            /* cannot get here [broken SPM] */
-            psa_panic();
-            break;
+            /* Handling services requested by psa_call. */
+            if (msg.type == PSA_IPC_CALL) {
+                for (i = 0; i < PSA_MAX_IOVEC; i++) {
+                    if (msg.in_size[i] != 0) {
+                        psa_read(msg.handle, i, rec_buf, BUFFER_LEN);
+                    }
+                    if (msg.out_size[i] != 0) {
+                        psa_write(msg.handle, i, send_buf, BUFFER_LEN);
+                    }
+                }
+                psa_reply(msg.handle, PSA_SUCCESS);
+            } else if (msg.type == SOME_ROT_A_SERVICE_TYPE) {
+                /* Operations for SOME_ROT_A_SERVICE_TYPE */
+            } else {
+                /* Invalid type for this Secure Partition. */
+                return PSA_ERROR_PROGRAMMER_ERROR;
+            }
         }
     }
 
@@ -489,6 +495,9 @@ sends a message "Hello World" when called.
     #include "psa_manifest/tfm_example.h"
     #include "psa/service.h"
 
+    /* Some other type of services. */
+    #define SOME_ROT_A_SERVICE_TYPE                (1)
+
     psa_status_t rot_a_sfn(const psa_msg_t *msg)
     {
         const int BUFFER_LEN = 32;
@@ -504,19 +513,24 @@ sends a message "Hello World" when called.
              * or disconnect, so just reply with success.
              */
             return PSA_SUCCESS;
-        case PSA_IPC_CALL:
-            for (i = 0; i < PSA_MAX_IOVEC; i++) {
-                if (msg->in_size[i] != 0) {
-                    psa_read(msg->handle, i, rec_buf, BUFFER_LEN);
-                }
-                if (msg.->out_size[i] != 0) {
-                    psa_write(msg->handle, i, send_buf, BUFFER_LEN);
-                }
-            }
-            return PSA_SUCCESS;
         default:
-            /* cannot get here [broken SPM] */
-            return PSA_ERROR_PROGRAMMER_ERROR;
+            /* Handling services requested by psa_call. */
+            if (msg->type == PSA_IPC_CALL) {
+                for (i = 0; i < PSA_MAX_IOVEC; i++) {
+                    if (msg->in_size[i] != 0) {
+                        psa_read(msg->handle, i, rec_buf, BUFFER_LEN);
+                    }
+                    if (msg.->out_size[i] != 0) {
+                        psa_write(msg->handle, i, send_buf, BUFFER_LEN);
+                    }
+                }
+                return PSA_SUCCESS;
+            } else if (msg->type == SOME_ROT_A_SERVICE_TYPE) {
+                /* Operations for SOME_ROT_A_SERVICE_TYPE */
+            } else {
+                /* Invalid type for this Secure Partition. */
+                return PSA_ERROR_PROGRAMMER_ERROR;
+            }
         }
     }
 
