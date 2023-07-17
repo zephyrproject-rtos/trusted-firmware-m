@@ -169,6 +169,18 @@ target_sources(tfm_spm
         target_cfg.c
 )
 
+target_sources(tfm_s
+    PRIVATE
+    $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_${target}.c>
+)
+
+if(BL2)
+    target_sources(bl2
+        PRIVATE
+            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_${target}.c>
+    )
+endif()
+
 #========================= Files for building NS side platform ================#
 
 configure_file(config_nordic_nrf_spe.cmake.in
@@ -185,6 +197,7 @@ install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
 
 
 install(FILES       startup.c
+                    startup_${target}.c
                     nrfx_glue.c
                     pal_plat_test.c
                     pal_plat_test.h

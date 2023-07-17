@@ -8,12 +8,8 @@
 cmake_policy(SET CMP0076 NEW)
 set(CMAKE_CURRENT_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
+set(target nrf5340)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../core nrf_common)
-
-target_sources(tfm_ns
-    PRIVATE
-        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_LIST_DIR}/gcc/startup_nrf5340.c>
-)
 
 target_include_directories(platform_ns
     PUBLIC

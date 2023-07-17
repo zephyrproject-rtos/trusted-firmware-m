@@ -19,6 +19,7 @@ target_compile_definitions(platform_region_defs
 target_sources(tfm_ns
     PRIVATE
         startup.c
+        $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup_${target}.c>
 )
 
 # Additional NS API sources
