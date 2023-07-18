@@ -142,12 +142,10 @@ case. This mechanism can provide chances for the agents calling APIs for their
 own service accessing and API works asynchronously.
 
 As mentioned, the standard FFM Client service accessing API are blocked until
-the IPC message gets replied to. This API returns immediately without waiting
-for acknowledgement. A ``psa_handle_t`` is allocated and returned if no error
-occurred because a unique value is needed to help the agent manage the
-non-secure clients and the requests. The subsequent ``agent_psa_call``
-or ``agent_psa_close`` with this allocated but not acknowledged handle gets
-an ``In progress`` status code.
+the IPC message gets replied to. While this API returns immediately without
+waiting for acknowledgement. Unless an error occurred, these agent-specific
+API returns PSA_SUCCESS always. The replies for these access requests are
+always fetched initiative by the agent with a ``psa_get``.
 
 .. code-block:: c
 
@@ -199,8 +197,7 @@ For the stateless handle, the internal handle object is freed after this
 ``psa_get`` call. The agent can know what kind of message is acknowledged by
 the ``type`` member in the ``psa_msg_t``, and the ``client_data`` passed in is
 put in member ``rhandle``. If no 'PSA_MSG_ACK' signals pending, calling
-``psa_get`` gets an state representing ``not ready`` to the caller. This
-state is to be defined.
+``psa_get`` gets ``panic``.
 
 Code Example
 ============
@@ -241,8 +238,8 @@ Code Example
                * implementation.
                */
               if (ns_msg.type == PSA_IPC_CONNECT) {
-                  ns_msg.handle = agent_psa_connect(SID(ns_msg), VER(ns_msg),
-                                                    NSID(ns_msg), &ns_msg);
+                  status = agent_psa_connect(SID(ns_msg), VER(ns_msg),
+                                             NSID(ns_msg), &ns_msg);
               } else if (ns_msg.type == PSA_IPC_CLOSE) {
                   psa_close(ns_msg.handle);
               } else {
@@ -250,18 +247,19 @@ Code Example
                   client_param.ns_client_id = ns_msg.client_id;
                   client_param.client_data  = &ns_msg;
 
-                  ns_msg.status = agent_psa_call(ns_msg.handle,
-                                                 PARAM_PACK(ns_msg.type,
-                                                            INVEC_LEN(ns_msg),
-                                                            OUTVEC_LEN(ns_msg)),
-                                                 VECTORS(ns_msg),
-                                                 &client_param);
-                  /* Handle the stateless service case. */
-                  if (ns_msg.handle == NULL &&
-                      ns_msg.status != PSA_ERROR_IN_PROGRESS) {
-                      ns_msg.handle = (psa_handle_t)ns_msg.status;
-                  }
+                  status = agent_psa_call(ns_msg.handle,
+                                          PARAM_PACK(ns_msg.type,
+                                                    INVEC_LEN(ns_msg),
+                                                    OUTVEC_LEN(ns_msg)),
+                                          VECTORS(ns_msg),
+                                          &client_param);
               }
+              /*
+               * The service access reply is always fetched by a later
+               * `psa_get` hence here only errors need to be dispatched.
+               */
+              error_dispatch(status);
+
           } else if (signals & PSA_MSG_ACK) {
               /* The handle is freed for stateless service after 'psa_get'. */
               status        = psa_get(PSA_MSG_ACK, &msg);
