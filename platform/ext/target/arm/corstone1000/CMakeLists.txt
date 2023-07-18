@@ -80,6 +80,7 @@ target_include_directories(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
     INTERFACE
         cc312
         fw_update_agent
@@ -94,7 +95,7 @@ target_sources(platform_s
         CMSIS_Driver/Driver_USART.c
         Device/Source/device_definition.c
         Device/Source/system_core_init.c
-        Native_Driver/uart_pl011_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         Native_Driver/mhu_v2_x.c
         Native_Driver/watchdog.c
         Native_Driver/arm_watchdog_drv.c
@@ -152,7 +153,7 @@ target_sources(platform_bl1_1
         ./Device/Source/system_core_init.c
         ./Native_Driver/arm_watchdog_drv.c
         ./Native_Driver/firewall.c
-        ./Native_Driver/uart_pl011_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         $<$<BOOL:${PLATFORM_IS_FVP}>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c>
         $<$<BOOL:${PLATFORM_IS_FVP}>:${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c>
         $<$<NOT:$<BOOL:${PLATFORM_IS_FVP}>>:${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/xilinx_pg153_axi_qspi_controller_drv.c>
@@ -196,6 +197,7 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a/
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/
         ${CMAKE_SOURCE_DIR}/bl1/bl1_1/shared_lib/interface/
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:${CMAKE_SOURCE_DIR}/platform/ext/accelerator/interface>
 )
 
@@ -247,7 +249,7 @@ target_sources(platform_bl2
         CMSIS_Driver/Driver_USART.c
         Device/Source/device_definition.c
         Device/Source/system_core_init.c
-        Native_Driver/uart_pl011_drv.c
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
         Native_Driver/watchdog.c
         Native_Driver/arm_watchdog_drv.c
         fip_parser/fip_parser.c
@@ -326,6 +328,7 @@ target_include_directories(platform_bl2
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/n25q256a
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b
+        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
         .
     INTERFACE
         cc312
