@@ -24,6 +24,9 @@
 #endif /* CRYPTO_HW_ACCELERATOR */
 #include <string.h>
 #include "cmsis_compiler.h"
+#ifdef RSS_ENABLE_BRINGUP_HELPERS
+#include "rss_bringup_helpers.h"
+#endif /* RSS_ENABLE_BRINGUP_HELPERS */
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
@@ -54,6 +57,10 @@ int32_t boot_platform_init(void)
     int32_t result;
     enum tfm_plat_err_t plat_err;
     uint32_t idx;
+#ifdef RSS_ENABLE_BRINGUP_HELPERS
+    enum lcm_error_t lcm_err;
+    enum lcm_tp_mode_t tp_mode;
+#endif /* RSS_ENABLE_BRINGUP_HELPERS */
 
     /* Initialize stack limit register */
     uint32_t msp_stack_bottom =
@@ -69,6 +76,17 @@ int32_t boot_platform_init(void)
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return 1;
     }
+
+#ifdef RSS_ENABLE_BRINGUP_HELPERS
+    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return 2;
+    }
+
+    if (tp_mode == LCM_TP_MODE_VIRGIN || tp_mode == LCM_TP_MODE_TCI) {
+        rss_run_bringup_helpers_if_requested();
+    }
+#endif /* RSS_ENABLE_BRINGUP_HELPERS */
 
 #if defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2)
     result = init_atu_regions();

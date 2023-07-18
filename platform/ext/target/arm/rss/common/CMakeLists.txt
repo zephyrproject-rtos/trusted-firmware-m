@@ -27,6 +27,7 @@ target_compile_definitions(platform_region_defs
         $<$<BOOL:${RSS_GPT_SUPPORT}>:RSS_GPT_SUPPORT>
         $<$<BOOL:${RSS_HAS_EXPANSION_PERIPHERALS}>:RSS_HAS_EXPANSION_PERIPHERALS>
         $<$<BOOL:${PLATFORM_HAS_PS_NV_OTP_COUNTERS}>:PLATFORM_HAS_PS_NV_OTP_COUNTERS>
+        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:RSS_ENABLE_BRINGUP_HELPERS>
 )
 
 #========================= Platform common defs ===============================#
@@ -328,6 +329,7 @@ target_sources(platform_bl1_1
         $<$<BOOL:${RSS_DEBUG_UART}>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c>
         ./dpa_hardened_word_copy.c
         ./cc312/cc3xx_aes_external_key_loader.c
+        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bringup_helpers/rss_bringup_helpers.c>
 )
 
 target_include_directories(platform_bl1_1_interface
@@ -344,6 +346,7 @@ target_include_directories(platform_bl1_1_interface
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common
         ${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom
+        $<$<BOOL:${RSS_ENABLE_BRINGUP_HELPERS}>:${CMAKE_CURRENT_SOURCE_DIR}/bl1/bringup_helpers>
 )
 
 target_compile_definitions(platform_bl1_1_interface
