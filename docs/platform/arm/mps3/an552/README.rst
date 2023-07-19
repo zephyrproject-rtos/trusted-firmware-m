@@ -46,6 +46,11 @@ Build instructions with platform name: arm/mps3/an552
    The generated provisioning_data.c file can be found at
    ``<build directory>/platform/target/provisioning/provisioning_data.c``
 
+.. note::
+
+   The provisioning bundle generation depends on pyelftools that's have to be installed::
+
+    pip3 install pyelftools
 
 To run the example code on AN552
 --------------------------------

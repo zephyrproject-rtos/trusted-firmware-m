@@ -10,13 +10,6 @@ find_package(Python3)
 
 add_executable(provisioning_bundle)
 
-# The armclang toolchain file does not set the CMAKE_OBJCOPY
-# but it's used for the armclang build as well.
-unset(CMAKE_OBJCOPY CACHE)
-find_program(CMAKE_OBJCOPY NAMES "arm-none-eabi-objcopy")
-if(NOT CMAKE_OBJCOPY)
-    message(FATAL_ERROR "GNU ARM objcopy not found!")
-endif()
 
 set_target_properties(provisioning_bundle
     PROPERTIES
@@ -77,19 +70,8 @@ add_custom_command(OUTPUT encrypted_provisioning_bundle.bin
     DEPENDS $<TARGET_FILE_DIR:provisioning_bundle>/provisioning_bundle.axf
     DEPENDS provisioning_bundle
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_bundle.py
-    COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:provisioning_bundle>/provisioning_bundle.axf
-                    --dump-section CODE=provisioning_code.bin
-    COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:provisioning_bundle>/provisioning_bundle.axf
-                    --dump-section RO_DATA=provisioning_rodata.bin
-    COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:provisioning_bundle>/provisioning_bundle.axf
-                    --dump-section RW_DATA=provisioning_rwdata.bin
-    COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:provisioning_bundle>/provisioning_bundle.axf
-                    --dump-section VALUES=provisioning_values.bin
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_bundle.py
-                    --provisioning_code provisioning_code.bin
-                    --provisioning_rwdata provisioning_rwdata.bin
-                    --provisioning_rodata provisioning_rodata.bin
-                    --provisioning_values provisioning_values.bin
+                    --provisioning_bundle_axf ${CMAKE_BINARY_DIR}/bin/provisioning_bundle.axf
                     --bundle_output_file encrypted_provisioning_bundle.bin
                     --magic "0xC0DEFEED"
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/encrypted_provisioning_bundle.bin
