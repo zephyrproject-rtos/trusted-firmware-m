@@ -8,8 +8,9 @@
 
 #include "cmsis.h"
 #include "utilities.h"
-#include "exception_info.h"
 #include "target_cfg.h"
+/* "exception_info.h" must be the last include because of the IAR pragma */
+#include "exception_info.h"
 
 void C_SEC_VIO_IRQHandler(void)
 {
