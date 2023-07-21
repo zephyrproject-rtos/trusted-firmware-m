@@ -32,4 +32,6 @@
 #define FLASH0_SIZE                   (FLASH_TOTAL_SIZE)  /* 608 kB */
 #define FLASH0_PAGE_SIZE              (0x00000200)  /* 512 B */
 
+#define USART_BASE                    USART0
+
 #endif  /* __PLATFORM_BASE_ADDRESS_H__ */

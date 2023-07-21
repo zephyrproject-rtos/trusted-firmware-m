@@ -164,6 +164,7 @@ target_include_directories(platform_ns
         Device/Include
         Native_Driver
         project_template/ns
+        ${PLATFORM_DIR}/ext/target/nxp/common
         ${PLATFORM_DIR}/ext/target/nxp/common/Device/Config
         ${PLATFORM_DIR}/ext/target/nxp/common/Device/Include
         ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers

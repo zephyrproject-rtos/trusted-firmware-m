@@ -23,7 +23,7 @@
 
 #include "Driver_USART.h"
 #include "board.h"
-#include "target_cfg.h"
+#include "platform_base_address.h"
 
 #ifndef ARG_UNUSED
 #define ARG_UNUSED(arg)  (void)arg

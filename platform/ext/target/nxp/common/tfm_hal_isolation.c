@@ -18,12 +18,18 @@
 #include "target_cfg.h"
 #include "tfm_hal_defs.h"
 #include "tfm_hal_isolation.h"
-#include "region_defs.h" //NXP
+#include "region_defs.h"
 #include "tfm_peripherals_def.h"
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
 #include "fih.h"
+
+extern const struct memory_region_limits memory_regions;
+
+/* Define Peripherals NS address range for the platform */
+#define PERIPHERALS_BASE_NS_START (0x40000000)
+#define PERIPHERALS_BASE_NS_END   (0x4FFFFFFF)
 
 /* It can be retrieved from the MPU_TYPE register. */
 #define MPU_REGION_NUM                  8
@@ -94,25 +100,10 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 #endif /* TFM_LVL == 3 */
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
-extern void BOARD_InitHardware(void); //NXP
-
 FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
                                             uintptr_t *p_spm_boundary)
 {
     fih_int fih_rc = FIH_FAILURE;
-
-    BOARD_InitHardware(); //NXP
-
-#ifdef NS_QSPI_FLASH /* For LPC55s36-EVK */
-	#include "Driver_Flash.h"
-    extern ARM_DRIVER_FLASH Driver_QSPI_FLASH0;
-    Driver_QSPI_FLASH0.Initialize(NULL);
-#endif
-
-#if TARGET_DEBUG_LOG //NXP
-    stdio_init(); /* To enable USART */
-#endif
-
     /* Set up isolation boundaries between SPE and NSPE */
     sau_and_idau_cfg();
 
@@ -379,8 +370,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
         /* Assume PPC & MPC settings are required even under level 1 */
         plat_data_ptr = REFERENCE_TO_PTR(p_asset[i].dev.dev_ref,
                                          struct platform_data_t *);
-        ppc_configure_to_secure(plat_data_ptr->periph_ppc_bank,
-                                plat_data_ptr->periph_ppc_loc, privileged);
+        ppc_configure_to_secure(plat_data_ptr, privileged);
 #if TFM_LVL == 2
         /*
          * Static boundaries are set. Set up MPU region for MMIO.
@@ -584,6 +574,94 @@ bool tfm_hal_boundary_need_switch(uintptr_t boundary_from,
     return true;
 }
 
+/*------------------- SAU/IDAU configuration functions -----------------------*/
+
+void sau_and_idau_cfg(void)
+{
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
+    /* Enables SAU */
+    TZ_SAU_Enable();
+
+    /* Configures SAU regions to be non-secure */
+    SAU->RNR  = 0U;
+    SAU->RBAR = (memory_regions.non_secure_partition_base
+                & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (memory_regions.non_secure_partition_limit
+                & SAU_RLAR_LADDR_Msk)
+                | SAU_RLAR_ENABLE_Msk;
+
+    SAU->RNR  = 1U;
+    SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (NS_DATA_LIMIT & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
+
+    /* Configures veneers region to be non-secure callable */
+    SAU->RNR  = 2U;
+    SAU->RBAR = (memory_regions.veneer_base  & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (memory_regions.veneer_limit & SAU_RLAR_LADDR_Msk)
+                | SAU_RLAR_ENABLE_Msk
+                | SAU_RLAR_NSC_Msk;
+
+    /* Configure the peripherals space */
+    SAU->RNR  = 3U;
+    SAU->RBAR = (PERIPHERALS_BASE_NS_START & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (PERIPHERALS_BASE_NS_END & SAU_RLAR_LADDR_Msk)
+                | SAU_RLAR_ENABLE_Msk;
+
+#ifdef BL2
+    /* Secondary image partition */
+    SAU->RNR  = 4U;
+    SAU->RBAR = (memory_regions.secondary_partition_base  & SAU_RBAR_BADDR_Msk);
+    SAU->RLAR = (memory_regions.secondary_partition_limit & SAU_RLAR_LADDR_Msk)
+                | SAU_RLAR_ENABLE_Msk;
+#endif /* BL2 */
+
+    /* Ensure the write is completed and flush pipeline */
+    __DSB();
+    __ISB();
+}
+
+void ppc_configure_to_secure(struct platform_data_t *platform_data, bool privileged)
+{
+#ifdef AHB_SECURE_CTRL
+    /* Clear NS flag for peripheral to prevent NS access */
+    if(platform_data && platform_data->periph_ppc_bank)
+    {
+        /*  0b00..Non-secure and Non-priviledge user access allowed.
+         *  0b01..Non-secure and Privilege access allowed.
+         *  0b10..Secure and Non-priviledge user access allowed.
+         *  0b11..Secure and Priviledge/Non-priviledge user access allowed.
+         */
+        /* Set to secure and privileged user access 0x3. */
+        *platform_data->periph_ppc_bank = (*platform_data->periph_ppc_bank) | (((privileged == true)?0x3:0x2) << (platform_data->periph_ppc_loc));
+    }
+#endif
+#ifdef TRDC
+    /* If the peripheral is not shared with non-secure world, give it SEC access */
+    if (platform_data && platform_data->nseEnable == false)
+    {
+        trdc_mbc_memory_block_config_t mbcBlockConfig;
+
+        (void)memset(&mbcBlockConfig, 0, sizeof(mbcBlockConfig));
+    
+        mbcBlockConfig.nseEnable  = false;
+    
+        mbcBlockConfig.domainIdx = 0;       /* Core domain */
+        mbcBlockConfig.mbcIdx = platform_data->mbcIdx;
+        mbcBlockConfig.slaveMemoryIdx = platform_data->slaveMemoryIdx;
+        mbcBlockConfig.memoryBlockIdx = platform_data->memoryBlockIdx;
+ 
+        if (privileged == true)
+            mbcBlockConfig.memoryAccessControlSelect = TRDC_ACCESS_CONTROL_POLICY_SEC_PRIV_INDEX;
+        else
+            mbcBlockConfig.memoryAccessControlSelect = TRDC_ACCESS_CONTROL_POLICY_SEC_INDEX;
+        
+        TRDC_MbcSetMemoryBlockConfig(TRDC, &mbcBlockConfig);
+    }
+#endif    
+}
+
 #ifdef TFM_FIH_PROFILE_ON
 /* This function is responsible for checking all critical isolation configurations. */
 fih_int tfm_hal_verify_static_boundaries(void)
@@ -591,14 +669,16 @@ fih_int tfm_hal_verify_static_boundaries(void)
     int32_t result = TFM_HAL_ERROR_GENERIC;
     
         /* Check if SAU is enabled */
-    if(((SAU->CTRL & SAU_CTRL_ENABLE_Msk) == SAU_CTRL_ENABLE_Msk) &&
+    if(((SAU->CTRL & SAU_CTRL_ENABLE_Msk) == SAU_CTRL_ENABLE_Msk)
+#ifdef AHB_SECURE_CTRL
         /* Check if AHB secure controller check is enabled */
-        (AHB_SECURE_CTRL->MISC_CTRL_DP_REG == AHB_SECURE_CTRL->MISC_CTRL_REG) &&
+        && (AHB_SECURE_CTRL->MISC_CTRL_DP_REG == AHB_SECURE_CTRL->MISC_CTRL_REG) &&
     #ifdef SECTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING /* Different definition name for LPC55S36 */
         ((AHB_SECURE_CTRL->MISC_CTRL_REG & SECTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) == SECTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) 
     #else
         ((AHB_SECURE_CTRL->MISC_CTRL_REG & AHB_SECURE_CTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) == AHB_SECURE_CTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) 
     #endif 
+#endif /* AHB_SECURE_CTRL */
     )
     {
        result = TFM_HAL_SUCCESS;
