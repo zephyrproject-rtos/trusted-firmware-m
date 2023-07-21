@@ -33,9 +33,9 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = tfm_spm_is_ns_caller();
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
-    int32_t type = (int32_t)(int16_t)((ctrl_param & TYPE_MASK) >> TYPE_OFFSET);
-    size_t in_num = (size_t)((ctrl_param & IN_LEN_MASK) >> IN_LEN_OFFSET);
-    size_t out_num = (size_t)((ctrl_param & OUT_LEN_MASK) >> OUT_LEN_OFFSET);
+    int32_t type = PARAM_UNPACK_TYPE(ctrl_param);
+    size_t in_num = PARAM_UNPACK_IN_LEN(ctrl_param);
+    size_t out_num = PARAM_UNPACK_OUT_LEN(ctrl_param);
     fih_int fih_rc = FIH_FAILURE;
 
     /* The request type must be zero or positive. */
