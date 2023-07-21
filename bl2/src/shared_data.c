@@ -167,12 +167,12 @@ static int collect_image_measurement_and_metadata(
 int boot_save_shared_data(const struct image_header *hdr,
                           const struct flash_area *fap)
 {
-    struct image_version image_ver;
     const struct flash_area *temp_fap;
     uint8_t mcuboot_image_id = 0;
     uint8_t i;
     int32_t rc;
 #ifdef TFM_PARTITION_FIRMWARE_UPDATE
+    struct image_version image_ver;
     uint16_t fwu_minor;
 #endif
 #if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) && !defined(MCUBOOT_MEASURED_BOOT)
@@ -211,9 +211,9 @@ int boot_save_shared_data(const struct image_header *hdr,
         return -1;
     }
 
+#ifdef TFM_PARTITION_FIRMWARE_UPDATE
     image_ver = hdr->ih_ver;
 
-#ifdef TFM_PARTITION_FIRMWARE_UPDATE
     /* Currently hardcode it to 0 which indicates the full image. */
     fwu_minor = SET_FWU_MINOR(mcuboot_image_id, SW_VERSION);
     rc = boot_add_data_to_shared_area(TLV_MAJOR_FWU,

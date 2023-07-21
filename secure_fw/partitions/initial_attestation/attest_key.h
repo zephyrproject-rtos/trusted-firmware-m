@@ -9,7 +9,7 @@
 #define __ATTEST_KEY_H__
 
 #include "attest.h"
-#include "config_attest.h"
+#include "config_tfm.h"
 #include "psa/initial_attestation.h"
 #include "psa/crypto.h"
 #include "q_useful_buf.h"

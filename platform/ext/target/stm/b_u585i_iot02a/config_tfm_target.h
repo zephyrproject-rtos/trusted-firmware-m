@@ -12,4 +12,7 @@
 #undef CRYPTO_NV_SEED
 #define CRYPTO_NV_SEED                         0
 
+#undef ITS_NUM_ASSETS
+#define ITS_NUM_ASSETS                         32
+
 #endif /* __CONFIG_TFM_TARGET_H__ */

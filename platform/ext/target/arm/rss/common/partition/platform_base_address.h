@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited
+ * Copyright (c) 2019-2023 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,17 @@
 #ifndef __PLATFORM_BASE_ADDRESS_H__
 #define __PLATFORM_BASE_ADDRESS_H__
 
+#include "rss_memory_sizes.h"
+
 /* ======= Defines peripherals memory map addresses ======= */
 /* Non-secure memory map addresses */
 #define ITCM_BASE_NS                     0x00000000 /* Instruction TCM Non-Secure base address */
+#define SIC_HOST_BASE_NS                 0x02000000 /* Secure I-Cache Non-Secure mapping base address */
+#define ITCM_CPU0_BASE_NS                0x0A000000 /* CPU0 Instruction TCM Non-Secure base address */
 #define DTCM_BASE_NS                     0x20000000 /* Data TCM Non-Secure base address */
 #define VM0_BASE_NS                      0x21000000 /* Volatile Memory 0 Non-Secure base address */
-#define VM1_BASE_NS                      0x21800000 /* Volatile Memory 1 Non-Secure base address */
+#define DTCM_CPU0_BASE_NS                0x24000000 /* CPU0 Data TCM Non-Secure base address */
+#define VM1_BASE_NS                      (VM0_BASE_NS + VM0_SIZE) /* Volatile Memory 1 Secure base address */
 /* Non-Secure Private CPU region */
 #define CPU0_PWRCTRL_BASE_NS             0x40012000 /* CPU 0 Power Control Block Non-Secure base address */
 #define CPU0_IDENTITY_BASE_NS            0x4001F000 /* CPU 0 Identity Block Non-Secure base address */
@@ -62,18 +67,22 @@
 #define SLOWCLK_TIMER_CMSDK_BASE_NS      0x4802F000 /* CMSDK based SLOWCLK Timer Non-Secure base address */
 #define SYSWDOG_ARMV8_M_CNTRL_BASE_NS    0x48040000 /* Non-Secure Watchdog Timer control frame Non-Secure base address */
 #define SYSWDOG_ARMV8_M_REFRESH_BASE_NS  0x48041000 /* Non-Secure Watchdog Timer refresh frame Non-Secure base address */
+#define RSS_DEBUG_UART0_BASE_NS          0xE0305000 /* Debug UART attached to RSS subsystem */
 /* Non-Secure Host region */
 #define HOST_ACCESS_BASE_NS              0x60000000 /* Can access the Host region based on ATU config */
 #define HOST_ACCESS_LIMIT_NS             (HOST_ACCESS_BASE_NS + HOST_ACCESS_SIZE - 1)
 /* ATU regions open in bootloader and runtime */
-#define UART0_BASE_NS                    (HOST_ACCESS_BASE_NS + 0xFF00000) /* UART 0 Non-Secure base address */
+#define HOST_UART0_BASE_NS               (HOST_ACCESS_BASE_NS + 0xFF00000) /* UART 0 Non-Secure base address */
 
 /* Secure memory map addresses */
 #define ITCM_BASE_S                      0x10000000 /* Instruction TCM Secure base address */
 #define ROM_BASE_S                       0x11000000 /* CODE ROM Secure base address. No NS alias for ROM */
+#define SIC_HOST_BASE_S                  0x12000000 /* Secure I-Cache Secure mapping base address */
+#define ITCM_CPU0_BASE_S                 0x1A000000 /* CPU0 Instruction TCM Secure base address */
 #define DTCM_BASE_S                      0x30000000 /* Data TCM Secure base address */
 #define VM0_BASE_S                       0x31000000 /* Volatile Memory 0 Secure base address */
-#define VM1_BASE_S                       0x31800000 /* Volatile Memory 1 Secure base address */
+#define DTCM_CPU0_BASE_S                 0x34000000 /* CPU0 Data TCM Secure base address */
+#define VM1_BASE_S                       (VM0_BASE_S + VM0_SIZE) /* Volatile Memory 1 Secure base address */
 /* Secure Private CPU region */
 #define CPU0_SECCTRL_BASE_S              0x50011000 /* CPU 0 Local Security Control Block Secure base address */
 #define CPU0_PWRCTRL_BASE_S              0x50012000 /* CPU 0 Power Control Block Secure base address */
@@ -87,7 +96,10 @@
 #define LCM_BASE_S                       0x500A0000 /* LCM Secure base address */
 #define GPIO0_CMSDK_BASE_S               0x50100000 /* GPIO 0 Secure base address */
 #define GPIO1_CMSDK_BASE_S               0x50101000 /* GPIO 1 Secure base address */
+#define SIC_BASE_S                       0x50140000 /* SIC Secure base address */
 #define ATU_BASE_S                       0x50150000 /* ATU Secure base address */
+#define MPC_SIC_BASE_S                   0x50151000 /* SIC Memory Protection Controller Secure base address */
+#define CC3XX_BASE_S                     0x50154000 /* CryptoCell CC3XX Secure base address */
 #define SYSCNTR_CNTRL_BASE_S             0x5015A000 /* System Counter Control Secure base address */
 #define SYSCNTR_READ_BASE_S              0x5015B000 /* System Counter Read Secure base address */
 #define MHU0_SENDER_BASE_S               0x50160000 /* Combined MHU 0 Sender Secure base address */
@@ -122,16 +134,35 @@
 #define SLOWCLK_TIMER_CMSDK_BASE_S       0x5802F000 /* CMSDK based SLOWCLK Timer Secure base address */
 #define SYSWDOG_ARMV8_M_CNTRL_BASE_S     0x58040000 /* Secure Watchdog Timer control frame Secure base address */
 #define SYSWDOG_ARMV8_M_REFRESH_BASE_S   0x58041000 /* Secure Watchdog Timer refresh frame Secure base address */
+#define RSS_DEBUG_UART0_BASE_S           0xF0305000 /* Debug UART attached to RSS subsystem */
+
 /* Secure Host region */
 #define HOST_ACCESS_BASE_S               0x70000000 /* Can access the Host region based on ATU config */
-#define HOST_ACCESS_LIMIT_S              (HOST_ACCESS_BASE_S + HOST_ACCESS_SIZE - 1)
+#define HOST_ACCESS_LIMIT_S              ((uint32_t)HOST_ACCESS_BASE_S + (uint32_t)HOST_ACCESS_SIZE - 1)
+
+#define HOST_IMAGE_MAX_SIZE              0x1000000 /* 16 MiB */
+
 /* ATU regions open in bootloader and runtime */
-#define UART0_BASE_S                     (HOST_ACCESS_BASE_S + 0xFF00000) /* UART 0 Secure base address */
+#define HOST_UART0_BASE_S                (HOST_ACCESS_BASE_S + 0xFF00000) /* UART 0 Secure base address */
+/* ATU regions open in BL1 */
+#define HOST_FLASH0_TEMP_BASE_S          (HOST_ACCESS_BASE_S + 2 * HOST_IMAGE_MAX_SIZE) /* Temporary address for mapping host flash areas */
+#define HOST_FLASH0_IMAGE0_BASE_S        (HOST_ACCESS_BASE_S + 3 * HOST_IMAGE_MAX_SIZE) /* Host flash image 0 input secure address */
+#define HOST_FLASH0_IMAGE1_BASE_S        (HOST_ACCESS_BASE_S + 4 * HOST_IMAGE_MAX_SIZE) /* Host flash image 1 input secure address */
 /* ATU regions open in BL2 */
-#define HOST_BOOT0_LOAD_BASE_S           HOST_ACCESS_BASE_S               /* Host boot image 0 base address */
-#define HOST_BOOT1_LOAD_BASE_S           (HOST_ACCESS_BASE_S + 0x100000)  /* Host boot image 1 base address */
-/* Regions open at runtime */
-#define HOST_COMMS_MAPPABLE_BASE_S       HOST_ACCESS_BASE_S
+#define HOST_BOOT_IMAGE0_LOAD_BASE_S     (HOST_ACCESS_BASE_S + 0 * HOST_IMAGE_MAX_SIZE) /* Host boot image 0 output secure address */
+#define HOST_BOOT_IMAGE1_LOAD_BASE_S     (HOST_ACCESS_BASE_S + 1 * HOST_IMAGE_MAX_SIZE) /* Host boot image 1 output secure address */
+#define HOST_FLASH0_TEMP0_BASE_S         (HOST_ACCESS_BASE_S + 2 * HOST_IMAGE_MAX_SIZE) /* Temporary secure address for mapping host flash areas */
+#define HOST_FLASH0_IMAGE0_BASE_S        (HOST_ACCESS_BASE_S + 3 * HOST_IMAGE_MAX_SIZE) /* Host flash image 0 input secure address */
+#define HOST_FLASH0_IMAGE1_BASE_S        (HOST_ACCESS_BASE_S + 4 * HOST_IMAGE_MAX_SIZE) /* Host flash image 1 input secure address */
+/* ATU regions open at runtime */
+#define FWU_HOST_IMAGE_BASE_S            (HOST_ACCESS_BASE_S + 0 * HOST_IMAGE_MAX_SIZE) /* Region to allow writing new RSS FW images */
+#define HOST_COMMS_MAPPABLE_BASE_S       (HOST_ACCESS_BASE_S + 1 * HOST_IMAGE_MAX_SIZE) /* Region into which to map host comms pointers */
+
+/* SIC regions open in BL2 and runtime */
+#define RSS_RUNTIME_S_XIP_BASE_S         SIC_HOST_BASE_S              /* RSS runtime secure image XIP secure address */
+#define RSS_RUNTIME_NS_XIP_BASE_S        (SIC_HOST_BASE_S + 0x060000) /* RSS runtime non-secure image XIP secure address */
+
+#define RSS_RUNTIME_NS_XIP_BASE_NS       (SIC_HOST_BASE_NS + 0x060000) /* RSS runtime non-secure image XIP non-secure address */
 
 /* Memory map addresses exempt from memory attribution by both the SAU and IDAU */
 #define RSS_EWIC_BASE                    0xE0047000 /* External Wakeup Interrupt Controller
@@ -142,9 +173,8 @@
 #define ITCM_SIZE                        0x00008000 /* 32 kB */
 #define ROM_SIZE                         0x00020000 /* 128 kB */
 #define DTCM_SIZE                        0x00008000 /* 32 kB */
-#define VM0_SIZE                         0x00800000 /* 8 MB */
-#define VM1_SIZE                         0x00800000 /* 8 MB */
 #define HOST_ACCESS_SIZE                 0x10000000 /* 256 MB */
+#define SIC_MAPPABLE_SIZE                0x01000000 /* 16 MB */
 
 /* Defines for Driver MPC's */
 /* VM0 -- 8 MB */
@@ -162,5 +192,13 @@
 #define MPC_VM1_RANGE_BASE_S             (VM1_BASE_S)
 #define MPC_VM1_RANGE_LIMIT_S            (VM1_BASE_S + VM1_SIZE-1)
 #define MPC_VM1_RANGE_OFFSET_S           (0x0)
+
+/* SIC -- 1 MiB */
+#define MPC_SIC_RANGE_BASE_NS            (SIC_HOST_BASE_NS)
+#define MPC_SIC_RANGE_LIMIT_NS           (SIC_HOST_BASE_NS + SIC_MAPPABLE_SIZE-1)
+#define MPC_SIC_RANGE_OFFSET_NS          (0x0)
+#define MPC_SIC_RANGE_BASE_S             (SIC_HOST_BASE_S)
+#define MPC_SIC_RANGE_LIMIT_S            (SIC_HOST_BASE_S + SIC_MAPPABLE_SIZE-1)
+#define MPC_SIC_RANGE_OFFSET_S           (0x0)
 
 #endif  /* __PLATFORM_BASE_ADDRESS_H__ */

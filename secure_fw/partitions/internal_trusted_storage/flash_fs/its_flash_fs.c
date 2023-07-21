@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -194,20 +194,6 @@ psa_status_t its_flash_fs_wipe_all(struct its_flash_fs_ctx_t *fs_ctx)
     return its_flash_fs_mblock_reset_metablock(fs_ctx);
 }
 
-psa_status_t its_flash_fs_file_exist(struct its_flash_fs_ctx_t *fs_ctx,
-                                     const uint8_t *fid)
-{
-    psa_status_t err;
-    uint32_t idx;
-
-    err = its_flash_fs_mblock_get_file_idx(fs_ctx, fid, &idx);
-    if (err != PSA_SUCCESS) {
-        return PSA_ERROR_DOES_NOT_EXIST;
-    }
-
-    return PSA_SUCCESS;
-}
-
 psa_status_t its_flash_fs_file_get_info(struct its_flash_fs_ctx_t *fs_ctx,
                                         const uint8_t *fid,
                                         struct its_file_info_t *info)
@@ -216,23 +202,11 @@ psa_status_t its_flash_fs_file_get_info(struct its_flash_fs_ctx_t *fs_ctx,
     uint32_t idx;
     struct its_file_meta_t tmp_metadata;
 
-    /* Get the meta data index */
-    err = its_flash_fs_mblock_get_file_idx(fs_ctx, fid, &idx);
+    /* Get the meta data index and meta data */
+    err = its_flash_fs_mblock_get_file_idx_meta(fs_ctx, fid, &idx, &tmp_metadata);
     if (err != PSA_SUCCESS) {
         return PSA_ERROR_DOES_NOT_EXIST;
     }
-
-    /* Read file metadata */
-    err = its_flash_fs_mblock_read_file_meta(fs_ctx, idx, &tmp_metadata);
-    if (err != PSA_SUCCESS) {
-        return err;
-    }
-
-    /* Check if index is still referring to same file */
-    if (memcmp(fid, tmp_metadata.id, ITS_FILE_ID_SIZE)) {
-        return PSA_ERROR_DOES_NOT_EXIST;
-    }
-
     info->size_max = tmp_metadata.max_size;
     info->size_current = tmp_metadata.cur_size;
     info->flags = tmp_metadata.flags & ITS_FLASH_FS_USER_FLAGS_MASK;
@@ -268,14 +242,8 @@ psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
 #endif
 
     /* Check if the file already exists */
-    err = its_flash_fs_mblock_get_file_idx(fs_ctx, fid, &old_idx);
+    err = its_flash_fs_mblock_get_file_idx_meta(fs_ctx, fid, &old_idx, &file_meta);
     if (err == PSA_SUCCESS) {
-        /* Read existing file metadata */
-        err = its_flash_fs_mblock_read_file_meta(fs_ctx, old_idx, &file_meta);
-        if (err != PSA_SUCCESS) {
-            return PSA_ERROR_DOES_NOT_EXIST;
-        }
-
         if (flags & ITS_FLASH_FS_FLAG_TRUNCATE) {
             if (file_meta.max_size == max_size) {
                 /* Truncate and reuse the existing file, which is already the
@@ -575,8 +543,8 @@ psa_status_t its_flash_fs_file_delete(struct its_flash_fs_ctx_t *fs_ctx,
     psa_status_t err;
     uint32_t del_file_idx;
 
-    /* Get the file index */
-    err = its_flash_fs_mblock_get_file_idx(fs_ctx, fid, &del_file_idx);
+    /* Get the file index. */
+    err = its_flash_fs_mblock_get_file_idx_meta(fs_ctx, fid, &del_file_idx, NULL);
     if (err != PSA_SUCCESS) {
         return PSA_ERROR_DOES_NOT_EXIST;
     }
@@ -594,20 +562,9 @@ psa_status_t its_flash_fs_file_read(struct its_flash_fs_ctx_t *fs_ctx,
     uint32_t idx;
     struct its_file_meta_t tmp_metadata;
 
-    /* Get the file index */
-    err = its_flash_fs_mblock_get_file_idx(fs_ctx, fid, &idx);
+    /* Get the file index and meta data */
+    err = its_flash_fs_mblock_get_file_idx_meta(fs_ctx, fid, &idx, &tmp_metadata);
     if (err != PSA_SUCCESS) {
-        return PSA_ERROR_DOES_NOT_EXIST;
-    }
-
-    /* Read file metadata */
-    err = its_flash_fs_mblock_read_file_meta(fs_ctx, idx, &tmp_metadata);
-    if (err != PSA_SUCCESS) {
-        return PSA_ERROR_GENERIC_ERROR;
-    }
-
-    /* Check if index is still referring to same file */
-    if (memcmp(fid, tmp_metadata.id, ITS_FILE_ID_SIZE)) {
         return PSA_ERROR_DOES_NOT_EXIST;
     }
 

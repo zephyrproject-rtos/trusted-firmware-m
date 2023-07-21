@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,12 @@
 #include "flash_layout.h"
 
 #define BL2_HEAP_SIZE           (0x0001000)
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+#define BL2_MSP_STACK_SIZE      (0x0002800)
+#else
 #define BL2_MSP_STACK_SIZE      (0x0001800)
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
 #ifdef ENABLE_HEAP
 #define S_HEAP_SIZE             (0x0000200)
@@ -131,16 +136,16 @@
                                   FLASH_NS_PARTITION_SIZE)
 
 /* Code SRAM area */
-#define TOTAL_CODE_SRAM_SIZE     (0x00080000) /* 512 KB */
-#define S_CODE_SRAM_ALIAS_BASE   (0x1A400000)
-#define NS_CODE_SRAM_ALIAS_BASE  (0x0A400000)
+#define S_RAM_CODE_SIZE          (0x00080000) /* 512 KB */
+#define S_RAM_CODE_START         (0x1A400000)
+#define NS_RAM_CODE_START        (0x0A400000)
 
 #ifdef BL2
 /* Bootloader regions */
 /* Since eFlash is written using the eFlash driver, it is wiser to run
  * the driver code from sram instead of eFlash, to avoid any interference.
  */
-#define BL2_CODE_SRAM_ALIAS_BASE (S_CODE_SRAM_ALIAS_BASE)
+#define BL2_CODE_SRAM_ALIAS_BASE (S_RAM_CODE_START)
 #define BL2_CODE_SRAM_ALIAS(x)   (BL2_CODE_SRAM_ALIAS_BASE + x)
 #define BL2_CODE_SRAM_BASE       (BL2_CODE_SRAM_ALIAS(FLASH_AREA_BL2_OFFSET))
 

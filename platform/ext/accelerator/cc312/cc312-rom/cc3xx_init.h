@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,6 +9,7 @@
 #define CC3XX_INIT_H
 
 #include "cc3xx_error.h"
+#include "cc3xx_dev.h"
 
 #include <stdint.h>
 #include <stddef.h>

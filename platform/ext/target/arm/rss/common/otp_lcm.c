@@ -26,6 +26,8 @@ __PACKED_STRUCT plat_user_area_layout_t {
     uint32_t iak_id_zero_bits;
     uint32_t bl2_rotpk_zero_bits[3];
     uint32_t bl2_encryption_key_zero_bits;
+    uint32_t s_image_encryption_key_zero_bits;
+    uint32_t ns_image_encryption_key_zero_bits;
     uint32_t bl1_2_image_hash_zero_bits;
     uint32_t bl2_image_hash_zero_bits;
     uint32_t bl1_rotpk_0_zero_bits;
@@ -49,6 +51,9 @@ __PACKED_STRUCT plat_user_area_layout_t {
     uint32_t bl2_nv_counter[4][128];
 
     uint32_t bl2_encryption_key[8];
+    uint32_t s_image_encryption_key[8];
+    uint32_t ns_image_encryption_key[8];
+
     uint32_t bl1_2_image_hash[8];
     uint32_t bl2_image_hash[8];
     uint32_t bl1_nv_counter[128];
@@ -231,6 +236,19 @@ static enum tfm_plat_err_t check_keys_for_tampering(void)
         if (err != TFM_PLAT_ERR_SUCCESS) {
             return err;
         }
+    }
+
+    err = verify_zero_bits_count(USER_AREA_OFFSET(s_image_encryption_key),
+                                 USER_AREA_SIZE(s_image_encryption_key),
+                                 USER_AREA_OFFSET(s_image_encryption_key_zero_bits));
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+    err = verify_zero_bits_count(USER_AREA_OFFSET(ns_image_encryption_key),
+                                 USER_AREA_SIZE(ns_image_encryption_key),
+                                 USER_AREA_OFFSET(ns_image_encryption_key_zero_bits));
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
     }
 
 #ifdef BL1
@@ -480,6 +498,12 @@ enum tfm_plat_err_t tfm_plat_otp_read(enum tfm_otp_element_id_t id,
         return otp_read(USER_AREA_OFFSET(host_nv_counter[2]),
                         USER_AREA_SIZE(host_nv_counter[2]), out_len, out);
 
+    case PLAT_OTP_ID_KEY_SECURE_ENCRYPTION:
+        return otp_read(USER_AREA_OFFSET(s_image_encryption_key),
+                        USER_AREA_SIZE(s_image_encryption_key), out_len, out);
+    case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
+        return otp_read(USER_AREA_OFFSET(ns_image_encryption_key),
+                        USER_AREA_SIZE(ns_image_encryption_key), out_len, out);
 #ifdef BL1
     case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
         return otp_read(USER_AREA_OFFSET(bl2_encryption_key),
@@ -624,6 +648,14 @@ enum tfm_plat_err_t tfm_plat_otp_write(enum tfm_otp_element_id_t id,
         return otp_write(USER_AREA_OFFSET(host_nv_counter[2]),
                          USER_AREA_SIZE(host_nv_counter[2]), in_len, in, 0);
 
+    case PLAT_OTP_ID_KEY_SECURE_ENCRYPTION:
+        return otp_write(USER_AREA_OFFSET(s_image_encryption_key),
+                         USER_AREA_SIZE(s_image_encryption_key), in_len, in,
+                         USER_AREA_OFFSET(s_image_encryption_key_zero_bits));
+    case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
+        return otp_write(USER_AREA_OFFSET(ns_image_encryption_key),
+                         USER_AREA_SIZE(ns_image_encryption_key), in_len, in,
+                         USER_AREA_OFFSET(ns_image_encryption_key_zero_bits));
 #ifdef BL1
     case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
         return otp_write(USER_AREA_OFFSET(bl2_encryption_key),
@@ -749,6 +781,12 @@ enum tfm_plat_err_t tfm_plat_otp_get_size(enum tfm_otp_element_id_t id,
         *size = USER_AREA_SIZE(host_nv_counter[2]);
         break;
 
+    case PLAT_OTP_ID_KEY_SECURE_ENCRYPTION:
+        *size = USER_AREA_SIZE(s_image_encryption_key);
+        break;
+    case PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION:
+        *size = USER_AREA_SIZE(ns_image_encryption_key);
+        break;
 #ifdef BL1
     case PLAT_OTP_ID_KEY_BL2_ENCRYPTION:
         *size = USER_AREA_SIZE(bl2_encryption_key);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,10 +128,11 @@
 
 #define FLASH_PARTITION_SIZE            (FLASH_S_PARTITION_SIZE+FLASH_NS_PARTITION_SIZE)
 
-#define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
-                                          FLASH_NS_PARTITION_SIZE) ? \
-                                         FLASH_S_PARTITION_SIZE : \
-                                         FLASH_NS_PARTITION_SIZE)
+#if (FLASH_S_PARTITION_SIZE > FLASH_NS_PARTITION_SIZE)
+#define FLASH_MAX_PARTITION_SIZE FLASH_S_PARTITION_SIZE
+#else
+#define FLASH_MAX_PARTITION_SIZE FLASH_NS_PARTITION_SIZE
+#endif
 /* Secure image primary slot */
 #define FLASH_AREA_0_ID                 (1)
 #define FLASH_AREA_0_DEVICE_ID          (FLASH_DEVICE_ID-FLASH_DEVICE_ID)

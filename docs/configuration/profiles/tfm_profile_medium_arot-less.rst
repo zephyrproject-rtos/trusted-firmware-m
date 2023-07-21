@@ -231,9 +231,9 @@ Reference
 
 .. [5] `Arm Platform Security Architecture Firmware Framework 1.0 <https://developer.arm.com/-/media/Files/pdf/PlatformSecurityArchitecture/Architect/DEN0063-PSA_Firmware_Framework-1.0.0-2.pdf?revision=2d1429fa-4b5b-461a-a60e-4ef3d8f7f4b4>`_
 
-.. [6] `Transport Layer Security (TLS) / Datagram Transport Layer Security (DTLS) Profiles for the Internet of Things <https://tools.ietf.org/html/4>`_
+.. [6] `Transport Layer Security (TLS) / Datagram Transport Layer Security (DTLS) Profiles for the Internet of Things <https://tools.ietf.org/html/rfc7925>`_
 
-.. [7] `The Constrained Application Protocol (CoAP) <https://tools.ietf.org/html/5>`_
+.. [7] `The Constrained Application Protocol (CoAP) <https://tools.ietf.org/html/rfc7252>`_
 
 .. [8] `Secure OTA Updates for Cortex-M Devices with FreeRTOS <https://www.freertos.org/2021/07/secure-ota-updates-for-cortex-m-devices-with-freertos.html>`_
 
@@ -241,4 +241,4 @@ Reference
 
 --------------
 
-*Copyright (c) 2020-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*

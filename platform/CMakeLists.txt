@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -74,7 +74,6 @@ target_sources(platform_s
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/ext/common/uart_stdout.c>
         $<$<BOOL:${TFM_SPM_LOG_RAW_ENABLED}>:ext/common/tfm_hal_spm_logdev_peripheral.c>
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:ext/common/exception_info.c>
-        ext/common/tfm_hal_memory_symbols.c
         $<$<BOOL:${PLATFORM_DEFAULT_ATTEST_HAL}>:ext/common/template/attest_hal.c>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
         $<$<BOOL:${PLATFORM_DEFAULT_ROTPK}>:ext/common/template/tfm_rotpk.c>
@@ -118,7 +117,7 @@ target_compile_definitions(platform_s
         $<$<BOOL:${OTP_NV_COUNTERS_RAM_EMULATION}>:OTP_NV_COUNTERS_RAM_EMULATION>
         $<$<BOOL:${TFM_EXCEPTION_INFO_DUMP}>:TFM_EXCEPTION_INFO_DUMP>
         $<$<OR:$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>,$<STREQUAL:"${TEST_PSA_API}","IPC">>:CONFIG_TFM_ENABLE_MEMORY_PROTECT>
-        $<$<AND:$<BOOL:${TFM_PXN_ENABLE}>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>>:TFM_PXN_ENABLE>
+        $<$<BOOL:${TFM_PXN_ENABLE}>:TFM_PXN_ENABLE>
         $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},hard>:CONFIG_TFM_FLOAT_ABI=2>
         $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},soft>:CONFIG_TFM_FLOAT_ABI=0>
         $<$<BOOL:${CONFIG_TFM_LAZY_STACKING}>:CONFIG_TFM_LAZY_STACKING>
@@ -162,6 +161,7 @@ if(TFM_PARTITION_CRYPTO)
 
     target_compile_definitions(platform_crypto_keys
         PRIVATE
+            MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
             $<$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>:SYMMETRIC_INITIAL_ATTESTATION>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:PLATFORM_DEFAULT_OTP>
             $<$<BOOL:${TEST_S_ATTESTATION}>:TEST_S_ATTESTATION>
@@ -219,6 +219,10 @@ if(BL2)
             $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
     )
 
+    target_compile_options(platform_bl2
+        PUBLIC
+            ${BL2_COMPILER_CP_FLAG}
+    )
 endif()
 
 #========================= Platform BL1_1 =====================================#
@@ -248,6 +252,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
             $<$<BOOL:${TFM_DUMMY_PROVISIONING}>:TFM_DUMMY_PROVISIONING>
             $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:PLATFORM_DEFAULT_NV_COUNTERS>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
+            $<$<BOOL:${TFM_BL1_MEMORY_MAPPED_FLASH}>:TFM_BL1_MEMORY_MAPPED_FLASH>
     )
 
     target_sources(platform_bl1
@@ -298,4 +303,9 @@ target_compile_definitions(platform_region_defs
 target_include_directories(platform_region_defs
     INTERFACE
         ${CMAKE_CURRENT_LIST_DIR}/ext/common
+)
+
+target_link_libraries(platform_region_defs
+    INTERFACE
+        tfm_config
 )

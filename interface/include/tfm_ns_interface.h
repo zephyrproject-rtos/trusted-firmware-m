@@ -1,5 +1,7 @@
 /*
  * Copyright (c) 2017-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -24,8 +26,9 @@ typedef int32_t (*veneer_fn) (uint32_t arg0, uint32_t arg1,
  *          desired veneer function, to be called with the parameters
  *          described from arg0 to arg3.
  *
- * \note    NSPE shall implement this dispatcher according to NS specific
- *          implementation and actual usage scenario.
+ * \note    NSPE can use default implementation of this function or implement
+ *          this function according to NS specific implementation and actual
+ *          usage scenario.
  *
  * \param[in] fn   Function pointer to the veneer function desired
  * \param[in] arg0 Argument 0 of fn
@@ -42,6 +45,19 @@ typedef int32_t (*veneer_fn) (uint32_t arg0, uint32_t arg1,
 int32_t tfm_ns_interface_dispatch(veneer_fn fn,
                                   uint32_t arg0, uint32_t arg1,
                                   uint32_t arg2, uint32_t arg3);
+
+/**
+ * \brief NS interface initialization function
+ *
+ * \details This function initializes TF-M NS interface.
+ *
+ * \note    NSPE can use default implementation of this function or implement
+ *          this function according to NS specific implementation and actual
+ *          usage scenario.
+ *
+ * \return \ref OS_WRAPPER_SUCCESS on success or \ref OS_WRAPPER_ERROR on error
+ */
+uint32_t tfm_ns_interface_init(void);
 
 #ifdef __cplusplus
 }

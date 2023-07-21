@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -344,6 +344,11 @@ enum atu_error_t atu_initialize_region(struct atu_dev_t *dev, uint8_t region,
     if (dev == NULL) {
         /* Invalid parameters */
         return ATU_ERR_INVALID_ARG;
+    }
+
+    if ((phys_addr & ((1 << ps) - 1)) != 0 || (log_addr & ((1 << ps) - 1)) != 0
+         || (size & ((1 << ps) - 1)) != 0) {
+        return ATU_ERR_INVALID_ADDRESS;
     }
 
     err = set_start_logical_address(dev, log_addr, region);

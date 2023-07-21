@@ -5,7 +5,12 @@
 #
 #-------------------------------------------------------------------------------
 
-set(PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT  OFF         CACHE BOOL      "Platform supports firmware update, such as network connectivities and bootloader support")
+# It requires platform to enable network connectivity and
+# bootloader to support Firmware Update service
+if(NOT DEFINED PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT)
+    set(PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT OFF)
+endif()
+
 set(TFM_PARTITION_FIRMWARE_UPDATE         OFF         CACHE BOOL      "Enable firmware update partition")
 set(TFM_FWU_BOOTLOADER_LIB                "mcuboot"   CACHE STRING    "Bootloader configure file for Firmware Update partition")
 set(TFM_CONFIG_FWU_MAX_WRITE_SIZE         1024        CACHE STRING    "The maximum permitted size for block in psa_fwu_write, in bytes.")

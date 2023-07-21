@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -44,8 +44,8 @@ enum fwu_agent_error_t corstone1000_fwu_flash_image(void);
  */
 enum fwu_agent_error_t corstone1000_fwu_host_ack(void);
 
-void bl1_get_boot_bank(uint32_t *bank_offset);
-void bl2_get_boot_bank(uint32_t *bank_offset);
+void bl1_get_active_bl2_image(uint32_t *bank_offset);
+uint8_t bl2_get_boot_bank(void);
 
 /* When in trial state, start the timer for host to respond.
  * Diable timer when host responds back either by calling

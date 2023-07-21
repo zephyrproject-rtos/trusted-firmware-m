@@ -11,7 +11,7 @@
 #include <string.h>
 
 #include "cmsis_compiler.h"
-#include "config_ps.h"
+#include "config_tfm.h"
 #include "crypto/ps_crypto_interface.h"
 #include "nv_counters/ps_nv_counters.h"
 #include "psa/internal_trusted_storage.h"
@@ -72,7 +72,12 @@ struct ps_obj_table_t {
                                                              */
 };
 
+#ifdef PS_ENCRYPTION
+/* Even tho ps_table_key_label is read only it is left as non constant variable
+ * to ensure that it is protected as part of PS partition data.
+ */
 static uint8_t ps_table_key_label[] = "table_key_label";
+#endif
 
 /* Object table indexes */
 #define PS_OBJ_TABLE_IDX_0 0

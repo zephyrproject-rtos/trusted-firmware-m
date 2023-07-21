@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -40,10 +40,8 @@ if (IS_ABSOLUTE "${TFM_PLATFORM}")
     set(TFM_PLATFORM "${TFM_PLATFORM_RELATIVE_PATH}" CACHE STRING "Target platform set as an relative path." FORCE)
 endif()
 
-# Some compiler flags depend on the CPU / platform config. This include should
-# be run before the toolchain file so the compiler can be configured properly.
-if (NOT EXISTS "${TARGET_PATH}/${TFM_PLATFORM}/preload.cmake" OR NOT EXISTS "${TARGET_PATH}/${TFM_PLATFORM}/CMakeLists.txt")
+set(TARGET_PLATFORM_PATH    ${TARGET_PATH}/${TFM_PLATFORM})
+
+if (NOT EXISTS ${TARGET_PLATFORM_PATH}/CMakeLists.txt)
     Message(FATAL_ERROR "Unsupported TFM_PLATFORM ${TFM_PLATFORM}")
-else()
-    include(platform/ext/target/${TFM_PLATFORM}/preload.cmake)
 endif()

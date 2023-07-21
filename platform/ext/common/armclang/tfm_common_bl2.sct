@@ -35,13 +35,31 @@ LR_CODE BL2_CODE_START {
     TFM_SHARED_DATA BOOT_TFM_SHARED_DATA_BASE ALIGN 32 EMPTY BOOT_TFM_SHARED_DATA_SIZE {
     }
 
+/* If the layout is designed so that the shared data is at the start of the bl2
+ * data section, place the data directly afterwards. Else, place it where the
+ * macro is designed to go
+ */
+#if BL2_DATA_START == BOOT_TFM_SHARED_DATA_BASE
     ER_DATA +0 {
+#else
+    ER_DATA BL2_DATA_START {
+#endif
         * (+ZI +RW)
     }
 
+#if defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U)
+    /* MSP */
+    ARM_LIB_STACK +0 ALIGN 32 EMPTY BL2_MSP_STACK_SIZE - 0x8 {
+    }
+
+    STACKSEAL +0 EMPTY 0x8 {
+    }
+#else
     /* MSP */
     ARM_LIB_STACK +0 ALIGN 32 EMPTY BL2_MSP_STACK_SIZE {
     }
+
+#endif /* defined (__ARM_FEATURE_CMSE) && (__ARM_FEATURE_CMSE == 3U) */
 
     ARM_LIB_HEAP +0 ALIGN 8 EMPTY BL2_HEAP_SIZE {
     }

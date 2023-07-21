@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2021-2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -52,7 +52,7 @@ tfm_invalid_config((BL1 AND PLATFORM_DEFAULT_BL1 AND CONFIG_TFM_BOOT_STORE_MEASU
 ########################## BL2 #################################################
 
 get_property(MCUBOOT_STRATEGY_LIST CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS)
-tfm_invalid_config(BL2 AND (NOT MCUBOOT_UPGRADE_STRATEGY IN_LIST MCUBOOT_STRATEGY_LIST))
+tfm_invalid_config(BL2 AND (NOT MCUBOOT_UPGRADE_STRATEGY IN_LIST MCUBOOT_STRATEGY_LIST) AND NOT USE_KCONFIG_TOOL)
 
 # Maximum number of MCUBoot images supported by TF-M NV counters and ROTPKs
 tfm_invalid_config(MCUBOOT_IMAGE_NUMBER GREATER 4)
@@ -61,7 +61,7 @@ tfm_invalid_config((BL2 AND CONFIG_TFM_BOOT_STORE_MEASUREMENTS AND NOT CONFIG_TF
 tfm_invalid_config((NOT (TFM_PARTITION_FIRMWARE_UPDATE OR CONFIG_TFM_BOOT_STORE_MEASUREMENTS)) AND MCUBOOT_DATA_SHARING)
 
 get_property(MCUBOOT_ALIGN_VAL_LIST CACHE MCUBOOT_ALIGN_VAL PROPERTY STRINGS)
-tfm_invalid_config(BL2 AND (NOT MCUBOOT_ALIGN_VAL IN_LIST MCUBOOT_ALIGN_VAL_LIST))
+tfm_invalid_config(BL2 AND (NOT MCUBOOT_ALIGN_VAL IN_LIST MCUBOOT_ALIGN_VAL_LIST) AND NOT USE_KCONFIG_TOOL)
 
 ####################### Code sharing ###########################################
 
@@ -104,6 +104,10 @@ tfm_invalid_config(ATTEST_INCLUDE_TEST_CODE AND NOT (TEST_NS_ATTESTATION OR TEST
 
 tfm_invalid_config(TFM_PROFILE STREQUAL "profile_small" AND CONFIG_TFM_SPM_BACKEND_IPC)
 
+######################## TF-M Arch config check ################################
+
+tfm_invalid_config(TFM_PXN_ENABLE AND NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
+
 ########################### Test check config ##################################
 
 if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
@@ -116,6 +120,4 @@ include(config/cp_check.cmake)
 
 ###################### Platform-specific checks ################################
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
-    include(platform/ext/target/${TFM_PLATFORM}/check_config.cmake)
-endif()
+include(${TARGET_PLATFORM_PATH}/check_config.cmake OPTIONAL)

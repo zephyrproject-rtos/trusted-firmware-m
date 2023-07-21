@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "Driver_MPC.h"
 #include "Driver_PPC.h"
 #include "device_definition.h"
@@ -37,46 +37,12 @@
 #define All_SEL_STATUS (SPNIDEN_SEL_STATUS | SPIDEN_SEL_STATUS | \
                         NIDEN_SEL_STATUS | DBGEN_SEL_STATUS)
 
-/* The section names come from the scatter file */
-REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-REGION_DECLARE(Image$$, ER_VENEER, $$Base);
-REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
-#ifdef BL2
-REGION_DECLARE(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base);
-#endif /* BL2 */
-
-const struct memory_region_limits memory_regions = {
-    .non_secure_code_start =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
-        BL2_HEADER_SIZE,
-
-    .non_secure_partition_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base),
-
-    .non_secure_partition_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
-        NS_PARTITION_SIZE - 1,
-
-    .veneer_base =
-        (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-
-    .veneer_limit =
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
-
-#ifdef BL2
-    .secondary_partition_base =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base),
-
-    .secondary_partition_limit =
-        (uint32_t)&REGION_NAME(Load$$LR$$, LR_SECONDARY_PARTITION, $$Base) +
-        SECONDARY_PARTITION_SIZE - 1,
-#endif /* BL2 */
-};
-
 static struct mpu_armv8m_dev_t dev_mpu = { MPU_BASE };
 
 /* Allows software, via SAU, to define the code region as a NSC */
 #define NSCCFG_CODENSC  1
+
+extern const struct memory_region_limits memory_regions;
 
 /* Import MPC drivers */
 extern ARM_DRIVER_MPC Driver_QSPI_MPC;
@@ -227,36 +193,6 @@ enum tfm_plat_err_t nvic_interrupt_target_state_cfg(void)
     return TFM_PLAT_ERR_SUCCESS;
 }
 
-enum mpu_armv8m_error_t mpu_enable(uint32_t privdef_en, uint32_t hfnmi_en)
-{
-    return mpu_armv8m_enable(&dev_mpu, privdef_en, hfnmi_en);
-}
-
-enum mpu_armv8m_error_t mpu_disable(void)
-{
-    return mpu_armv8m_disable(&dev_mpu);
-}
-
-enum mpu_armv8m_error_t mpu_region_enable(
-                                     struct mpu_armv8m_region_cfg_t *region_cfg)
-{
-    if (!region_cfg) {
-        return MPU_ARMV8M_ERROR;
-    }
-
-    return mpu_armv8m_region_enable(&dev_mpu, region_cfg);
-}
-
-enum mpu_armv8m_error_t mpu_region_disable(uint32_t region_nr)
-{
-    return mpu_armv8m_region_disable(&dev_mpu, region_nr);
-}
-
-enum mpu_armv8m_error_t mpu_clean(void)
-{
-    return mpu_armv8m_clean(&dev_mpu);
-}
-
 /*----------------- NVIC interrupt enabling for S peripherals ----------------*/
 enum tfm_plat_err_t nvic_interrupt_enable(void)
 {
@@ -317,6 +253,9 @@ void sau_and_idau_cfg(void)
 {
     struct spctrl_def *spctrl = CMSDK_SPCTRL;
 
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
     /* Enables SAU */
     TZ_SAU_Enable();
 
@@ -354,10 +293,14 @@ void sau_and_idau_cfg(void)
 
     /* Allows SAU to define the code region as a NSC */
     spctrl->nsccfg |= NSCCFG_CODENSC;
+
+    /* Ensure the write is completed and flush pipeline */
+    __DSB();
+    __ISB();
 }
 
 /*------------------- Memory configuration functions -------------------------*/
-int32_t mpc_init_cfg(void)
+enum tfm_plat_err_t mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
 
@@ -469,7 +412,24 @@ int32_t mpc_init_cfg(void)
     __DSB();
     __ISB();
 
-    return ARM_DRIVER_OK;
+    return TFM_PLAT_ERR_SUCCESS;
+}
+
+void mpc_revert_non_secure_to_secure_cfg(void)
+{
+    Driver_ISRAM3_MPC.ConfigRegion(MPC_ISRAM3_RANGE_BASE_S,
+                                   MPC_ISRAM3_RANGE_LIMIT_S,
+                                   ARM_MPC_ATTR_SECURE);
+
+    Driver_QSPI_MPC.ConfigRegion(MPC_QSPI_RANGE_BASE_S,
+                                 MPC_QSPI_RANGE_LIMIT_S,
+                                 ARM_MPC_ATTR_SECURE);
+
+    /* Add barriers to assure the MPC configuration is done before continue
+     * the execution.
+     */
+    __DSB();
+    __ISB();
 }
 
 void mpc_clear_irq(void)
@@ -482,7 +442,7 @@ void mpc_clear_irq(void)
 }
 
 /*------------------- PPC configuration functions -------------------------*/
-int32_t ppc_init_cfg(void)
+enum tfm_plat_err_t ppc_init_cfg(void)
 {
     struct spctrl_def *spctrl = CMSDK_SPCTRL;
     int32_t ret = ARM_DRIVER_OK;
@@ -725,10 +685,10 @@ int32_t ppc_init_cfg(void)
      */
     spctrl->secrespcfg |= CMSDK_SECRESPCFG_BUS_ERR_MASK;
 
-    return ARM_DRIVER_OK;
+    return TFM_PLAT_ERR_SUCCESS;
 }
 
-void ppc_configure_to_secure_priv(enum ppc_bank_e bank, uint16_t pos)
+void ppc_configure_to_secure(enum ppc_bank_e bank, uint32_t pos)
 {
     ARM_DRIVER_PPC *ppc_driver;
 
@@ -739,11 +699,11 @@ void ppc_configure_to_secure_priv(enum ppc_bank_e bank, uint16_t pos)
     ppc_driver = ppc_bank_drivers[bank];
     if (ppc_driver) {
         ppc_driver->ConfigPeriph(pos, ARM_PPC_SECURE_ONLY,
-                                    ARM_PPC_PRIV_ONLY);
+                                      ARM_PPC_PRIV_ONLY);
     }
 }
 
-void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
+void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint32_t pos)
 {
     ARM_DRIVER_PPC *ppc_driver;
 
@@ -754,8 +714,13 @@ void ppc_en_secure_unpriv(enum ppc_bank_e bank, uint16_t pos)
     ppc_driver = ppc_bank_drivers[bank];
     if (ppc_driver) {
         ppc_driver->ConfigPeriph(pos, ARM_PPC_SECURE_ONLY,
-                                    ARM_PPC_PRIV_AND_NONPRIV);
+                                      ARM_PPC_PRIV_AND_NONPRIV);
     }
+}
+
+void ppc_clr_secure_unpriv(enum ppc_bank_e bank, uint32_t pos)
+{
+    ppc_configure_to_secure(bank, pos);
 }
 
 void ppc_clear_irq(void)

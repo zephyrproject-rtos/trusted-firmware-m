@@ -430,9 +430,9 @@ Reference
 
 .. [5] `The Transport Layer Security (TLS) Protocol Version 1.2 <https://tools.ietf.org/html/rfc5246>`_
 
-.. [6] :doc:`Physical attack mitigation in Trusted Firmware-M </technical_references/design_docs/tfm_physical_attack_mitigation>`
+.. [6] :doc:`Physical attack mitigation in Trusted Firmware-M </design_docs/tfm_physical_attack_mitigation>`
 
-.. [7] :doc:`Crypto design </technical_references/design_docs/tfm_crypto_design>`
+.. [7] :doc:`Crypto design </design_docs/services/tfm_crypto_design>`
 
 .. [8] :doc:`ITS integration guide </integration_guide/services/tfm_its_integration_guide>`
 

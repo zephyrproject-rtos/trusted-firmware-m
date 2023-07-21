@@ -24,6 +24,11 @@ target_sources(tfm_s
         ${B_U585I_IOT02A_DIR}/src/b_u585i_iot02a_ospi.c
 )
 
+if(STSAFEA)
+    set(STSAFEA_INTERFACE_SRC_DIR ${B_U585I_IOT02A_DIR}/src/)
+    include(${STM_COMMON_DIR}/secure_element/CMakeLists.txt)
+endif()
+
 if(NS)
     target_sources(tfm_ns
         PRIVATE

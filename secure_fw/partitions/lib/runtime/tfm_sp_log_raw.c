@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -95,7 +95,7 @@ static int _tfm_hex_num_output(struct formatted_buffer_t *pb, uint32_t num,
     return count;
 }
 
-static int _tfm_sp_log_vprintf(const char *fmt, va_list ap)
+int vprintf(const char *fmt, va_list ap)
 {
     int count = 0;
     struct formatted_buffer_t outputbuf;
@@ -168,7 +168,7 @@ int printf(const char *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    count = _tfm_sp_log_vprintf(fmt, ap);
+    count = vprintf(fmt, ap);
     va_end(ap);
 
     return count;

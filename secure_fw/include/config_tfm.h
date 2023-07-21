@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -18,11 +18,13 @@ extern "C" {
 
 /*
  * Platform defined header file for TF-M configs.
- * Path: platform/ext/target/${TFM_PLATFORM}/config_tfm_target.h
+ * Path: ${TARGET_PLATFORM_PATH}/config_tfm_target.h
  */
 #ifdef TARGET_CONFIG_HEADER_FILE
 #include TARGET_CONFIG_HEADER_FILE
 #endif
+
+#include "config_base.h"
 
 #ifdef __cplusplus
 }

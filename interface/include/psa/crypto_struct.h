@@ -109,7 +109,7 @@ static inline struct psa_key_derivation_s psa_key_derivation_operation_init(void
 typedef uint16_t psa_key_bits_t;
 /* The maximum value of the type used to represent bit-sizes.
  * This is used to mark an invalid key size. */
-#define PSA_KEY_BITS_TOO_LARGE ( (psa_key_bits_t) ( -1 ) )
+#define PSA_KEY_BITS_TOO_LARGE          ((psa_key_bits_t) -1)
 /* The maximum size of a key in bits.
  * Currently defined as the maximum that can be represented, rounded down
  * to a whole number of bytes.
@@ -141,7 +141,7 @@ static inline void psa_set_key_id(psa_key_attributes_t *attributes,
 
     attributes->client.id = (psa_key_id_t)key;
 
-    if( PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
+    if (PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
     {
         attributes->client.lifetime =
             PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
@@ -160,7 +160,7 @@ static inline void psa_set_key_lifetime(psa_key_attributes_t *attributes,
                                         psa_key_lifetime_t lifetime)
 {
     attributes->client.lifetime = lifetime;
-    if(PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
+    if (PSA_KEY_LIFETIME_IS_VOLATILE(lifetime))
     {
         attributes->client.id = 0;
     }
@@ -174,11 +174,13 @@ static inline psa_key_lifetime_t psa_get_key_lifetime(
 
 static inline void psa_extend_key_usage_flags(psa_key_usage_t *usage_flags)
 {
-    if (*usage_flags & PSA_KEY_USAGE_SIGN_HASH)
+    if (*usage_flags & PSA_KEY_USAGE_SIGN_HASH) {
         *usage_flags |= PSA_KEY_USAGE_SIGN_MESSAGE;
+    }
 
-    if (*usage_flags & PSA_KEY_USAGE_VERIFY_HASH)
+    if (*usage_flags & PSA_KEY_USAGE_VERIFY_HASH) {
         *usage_flags |= PSA_KEY_USAGE_VERIFY_MESSAGE;
+    }
 }
 
 static inline void psa_set_key_usage_flags(psa_key_attributes_t *attributes,
@@ -221,10 +223,11 @@ static inline psa_key_type_t psa_get_key_type(
 static inline void psa_set_key_bits(psa_key_attributes_t *attributes,
                                     size_t bits)
 {
-    if (bits > PSA_MAX_KEY_BITS)
+    if (bits > PSA_MAX_KEY_BITS) {
         attributes->client.bits = PSA_KEY_BITS_TOO_LARGE;
-    else
+    } else {
         attributes->client.bits = bits;
+    }
 }
 
 static inline size_t psa_get_key_bits(

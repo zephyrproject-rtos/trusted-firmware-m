@@ -15,7 +15,7 @@ The prerequisites before going to the review stage:
 
 - Read the :doc:`Contributing Process </contributing/contributing_process>`
   to know basic concepts.
-- Read the :doc:`Source Structure </technical_references/design_docs/source_structure>`
+- Read the :ref:`source_structure`
   for structure related reference.
 
 The review guidelines consist of these items:

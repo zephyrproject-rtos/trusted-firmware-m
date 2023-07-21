@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Arm Limited
+ * Copyright (c) 2021-2023 Arm Limited. All rights reserved.
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
@@ -29,7 +29,7 @@ int hardware_rng_poll(uint8_t *output, size_t len, size_t *olen)
 
     ret = RNG_PLAT_SetUserRngParameters(&trngParams);
     if (ret != 0) {
-        PSA_ADAC_LOG_ERR("cc312", "Error: RNG_PLAT_SetUserRngParameters() failed.\n");
+        PSA_ADAC_LOG_ERR("cc312", "Error: RNG_PLAT_SetUserRngParameters() failed.\r\n");
         error = -1;
         goto Cleanup;
     }
@@ -44,7 +44,7 @@ int hardware_rng_poll(uint8_t *output, size_t len, size_t *olen)
             (uint32_t *) &rndWorkBuff,    /*in*/
             0                             /*in - isFipsSupport false*/ );
     if (ret != 0) {
-        PSA_ADAC_LOG_ERR("cc312", "Error: LLF_RND_GetTrngSource() failed.\n");
+        PSA_ADAC_LOG_ERR("cc312", "Error: LLF_RND_GetTrngSource() failed.\r\n");
         error = -1;
         goto Cleanup;
     }
@@ -57,7 +57,6 @@ Cleanup:
     CC_PalMemSetZero(&rndState, sizeof(CCRndState_t));
     CC_PalMemSetZero(&trngParams, sizeof(CCRndParams_t));
 
-End:
     return error;
 }
 

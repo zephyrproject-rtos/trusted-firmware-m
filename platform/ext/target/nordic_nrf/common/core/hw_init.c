@@ -17,9 +17,7 @@
 
 /* Static asserts to verify that asm_core_cm33 defines matches core_cm33 */
 #include <core_cm33.h>
-#include "asm_core_cm33.h"
-NRFX_STATIC_ASSERT(_SCS_BASE_ADDR == SCS_BASE);
-NRFX_STATIC_ASSERT(_SCS_MPU_CTRL == (uintptr_t)&MPU->CTRL);
+#include "hw_init.h"
 
 #if defined(NRF_HW_INIT_NRF_PERIPHERALS)
 #if defined(NRF_RTC0) || defined(NRF_RTC1) || defined(NRF_RTC2)

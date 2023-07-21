@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -15,6 +15,7 @@ add_executable(bl2
     $<$<BOOL:${DEFAULT_MCUBOOT_FLASH_MAP}>:src/default_flash_map.c>
     $<$<BOOL:${MCUBOOT_DATA_SHARING}>:src/shared_data.c>
     $<$<BOOL:${PLATFORM_DEFAULT_PROVISIONING}>:src/provisioning.c>
+    $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
 )
 
 add_subdirectory(ext/mcuboot)
@@ -46,7 +47,7 @@ target_compile_options(bl2
 target_link_options(bl2
     PRIVATE
         $<$<C_COMPILER_ID:GNU>:-Wl,-Map=${CMAKE_BINARY_DIR}/bin/bl2.map>
-        $<$<C_COMPILER_ID:ARMClang>:--map>
+        $<$<C_COMPILER_ID:ARMClang>:--map;${BL2_LINKER_CP_OPTION}>
         $<$<C_COMPILER_ID:IAR>:--map\;${CMAKE_BINARY_DIR}/bin/bl2.map>
 )
 

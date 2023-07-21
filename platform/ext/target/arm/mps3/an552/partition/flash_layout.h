@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,11 +63,12 @@
 /* Size of a Secure and of a Non-secure image */
 #define FLASH_S_PARTITION_SIZE          (0x60000) /* S  partition: 384 KB */
 #define FLASH_NS_PARTITION_SIZE         (0x60000) /* NS partition: 384 KB */
-#define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
-                                          FLASH_NS_PARTITION_SIZE) ? \
-                                         FLASH_S_PARTITION_SIZE :    \
-                                         FLASH_NS_PARTITION_SIZE)
 
+#if (FLASH_S_PARTITION_SIZE > FLASH_NS_PARTITION_SIZE)
+#define FLASH_MAX_PARTITION_SIZE FLASH_S_PARTITION_SIZE
+#else
+#define FLASH_MAX_PARTITION_SIZE FLASH_NS_PARTITION_SIZE
+#endif
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)     /* 4 KB */
 /* Same as FLASH0_SIZE */
@@ -192,9 +193,9 @@
  * Name is defined in flash driver file: Driver_Flash.c
  */
 #define FLASH_DEV_NAME_0            Driver_FLASH0
-#define FLASH_DEVICE_ID_0           102
+#define FLASH_DEVICE_ID_0           FLASH_DEVICE_ID
 #define FLASH_DEV_NAME_1            Driver_FLASH0
-#define FLASH_DEVICE_ID_1           102
+#define FLASH_DEVICE_ID_1           FLASH_DEVICE_ID
 #define FLASH_DEV_NAME_2            Driver_FLASH1
 #define FLASH_DEVICE_ID_2           103
 #define FLASH_DEV_NAME_3            Driver_FLASH1

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@
 
 /* Secondary partition for new images in case of firmware upgrade */
 #define SECONDARY_PARTITION_START \
-            ((SRAM_BASE_NS) + (S_IMAGE_SECONDARY_PARTITION_OFFSET))
+            ((ISRAM1_BASE_NS) + (S_IMAGE_SECONDARY_PARTITION_OFFSET))
 #define SECONDARY_PARTITION_SIZE (FLASH_S_PARTITION_SIZE + \
                                   FLASH_NS_PARTITION_SIZE)
 

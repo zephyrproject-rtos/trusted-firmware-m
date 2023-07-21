@@ -1,3 +1,5 @@
+.. _adding_platform:
+
 #####################
 Adding a new platform
 #####################
@@ -5,12 +7,10 @@ Adding a new platform
 .. toctree::
     :maxdepth: 1
 
-    platform_folder.rst
-    platform_ext_folder.rst
-    porting_TFM_to_a_new_hardware
-    platform_provisioning.rst
+    porting_tfm_to_a_new_hardware
+    documenting_platform.rst
     platform_deprecation.rst
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*

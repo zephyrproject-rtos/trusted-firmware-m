@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited
+ * Copyright (c) 2019-2023 Arm Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -260,14 +260,21 @@ struct corstone310_nsacfg_t {
 #define GPIO1_MAIN_PPCEXP0_POS_MASK             (1UL << 1)
 #define GPIO2_MAIN_PPCEXP0_POS_MASK             (1UL << 2)
 #define GPIO3_MAIN_PPCEXP0_POS_MASK             (1UL << 3)
-#define USER_AHB0_MAIN_PPCEXP0_POS_MASK         (1UL << 4)
-#define USER_AHB1_MAIN_PPCEXP0_POS_MASK         (1UL << 5)
-#define USER_AHB2_MAIN_PPCEXP0_POS_MASK         (1UL << 6)
-#define USER_AHB3_MAIN_PPCEXP0_POS_MASK         (1UL << 7)
 #define USB_AND_ETHERNET_MAIN_PPCEXP0_POS_MASK  (1UL << 8)
+#ifdef CORSTONE310_AN555
+#define ONBOARD_QSPI_CONT_MAIN_PPCEXP0_POS_MASK (1UL << 13)
+#define PMOD0_QSPI_CONT_MAIN_PPCEXP0_POS_MASK   (1UL << 14)
+#define PMOD1_QSPI_CONT_MAIN_PPCEXP0_POS_MASK   (1UL << 15)
+#endif
 /* End MAIN PPCEXP0 peripherals definition */
 
 /* MAIN PPCEXP1 peripherals definition */
+#ifdef CORSTONE310_AN555
+#define DMA0_MAIN_PPCEXP1_POS_MASK (1UL << 0)
+#define DMA1_MAIN_PPCEXP1_POS_MASK (1UL << 1)
+#define DMA2_MAIN_PPCEXP1_POS_MASK (1UL << 2)
+#define DMA3_MAIN_PPCEXP1_POS_MASK (1UL << 3)
+#endif
 /* End MAIN PPCEXP1 peripherals definition */
 
 /* MAIN PPCEXP2 peripherals definition */
@@ -291,10 +298,14 @@ struct corstone310_nsacfg_t {
 /* End PERIPH PPC1 peripherals definition */
 
 /* PERIPH PPCEXP0 peripherals definition */
-#define USER_MEM_APB0_PERIPH_PPCEXP0_POS_MASK      (1UL << 0)
-#define USER_MEM_APB1_PERIPH_PPCEXP0_POS_MASK      (1UL << 1)
-#define NPU_APB0_PERIPH_PPCEXP0_POS_MASK           (1UL << 4)
-#define NPU_APB1_PERIPH_PPCEXP0_POS_MASK           (1UL << 5)
+#ifdef CORSTONE310_AN555
+#define TIMING_ADAPTER_APB0_PERIPH_PPCEXP0_POS_MASK (1UL << 0)
+#define TIMING_ADAPTER_APB1_PERIPH_PPCEXP0_POS_MASK (1UL << 1)
+#define TIMING_ADAPTER_APB2_PERIPH_PPCEXP0_POS_MASK (1UL << 2)
+#endif
+#ifdef CORSTONE310_FVP
+#define TIMING_ADAPTERS_PERIPH_PPCEXP0_POS_MASK     (1UL << 5)
+#endif
 /* End PERIPH PPCEXP0 peripherals definition */
 
 /* PERIPH PPCEXP1 peripherals definition */
@@ -320,6 +331,12 @@ struct corstone310_nsacfg_t {
 #define UART5_PERIPH_PPCEXP2_POS_MASK              (1UL << 8)
 #define CLCD_PERIPH_PPCEXP2_POS_MASK               (1UL << 10)
 #define RTC_PERIPH_PPCEXP2_POS_MASK                (1UL << 11)
+
+#ifdef CORSTONE310_FVP
+#define VSI_PERIPH_PPCEXP2_POS_MASK                (1UL << 12)
+#define VIO_PERIPH_PPCEXP2_POS_MASK                (1UL << 13)
+#define VSOCKET_PERIPH_PPCEXP2_POS_MASK            (1UL << 14)
+#endif
 /* End PERIPH PPCEXP2 peripherals definition */
 
 /* PERIPH PPCEXP3 peripherals definition */

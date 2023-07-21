@@ -47,7 +47,7 @@ __PACKED_STRUCT bl1_2_image_t {
     } protected_values;
 };
 
-int32_t bl1_image_get_flash_offset(uint32_t image_id);
+uint32_t bl1_image_get_flash_offset(uint32_t image_id);
 
 fih_int bl1_image_copy_to_sram(uint32_t image_id, uint8_t *out);
 

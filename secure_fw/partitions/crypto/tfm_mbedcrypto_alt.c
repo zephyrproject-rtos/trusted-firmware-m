@@ -5,10 +5,15 @@
  *
  */
 
-/*
- * This file collects the alternative functions to replace the
- * implementations in mbed-crypto if the corresponding mbed-crypto
- * MBEDTLS__FUNCTION_NAME__ALT is selected.
+/**
+ * \file This file collects the alternative functions to replace the
+ *       implementations in mbed-crypto if the corresponding mbed-crypto
+ *       MBEDTLS__FUNCTION_NAME__ALT is selected.
+ *
+ * \note This applies only when the legacy driver API based on the _ALT
+ *       implementations is selected, and has no effect when the PSA driver
+ *       interface is used. This is going to be deprecated in a future version
+ *       of mbed TLS.
  */
 
 /*

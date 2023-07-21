@@ -1,15 +1,23 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+ * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 #include <string.h>
-#include "config_its.h"
+#include "psa/framework_feature.h"
+#if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
+#include "cmsis_compiler.h"
+#endif
+#include "config_tfm.h"
 #include "tfm_internal_trusted_storage.h"
-
+#include "tfm_its_req_mngr.h"
 #include "tfm_hal_its.h"
+#ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "tfm_hal_ps.h"
+#endif
 #include "flash_fs/its_flash_fs.h"
 #include "psa_manifest/pid.h"
 #include "tfm_its_defs.h"
@@ -22,6 +30,15 @@
 
 static uint8_t g_fid[ITS_FILE_ID_SIZE];
 static struct its_file_info_t g_file_info;
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
+/* Buffer to store asset data from the caller.
+ * Note: size must be aligned to the max flash program unit to meet the
+ * alignment requirement of the filesystem.
+ */
+static uint8_t __ALIGNED(4) asset_data[ITS_UTILS_ALIGN(ITS_BUF_SIZE,
+                                          ITS_FLASH_MAX_ALIGNMENT)];
+#endif
 
 static its_flash_fs_ctx_t fs_ctx_its;
 static struct its_flash_fs_config_t fs_cfg_its = {
@@ -213,142 +230,8 @@ psa_status_t tfm_its_init(void)
     return status;
 }
 
-psa_status_t tfm_its_set(struct its_asset_info *asset_info,
-                         uint8_t *data_buf,
-                         size_t max_size,
-                         size_t size_to_write,
-                         size_t offset)
+static psa_status_t get_file_info(psa_storage_uid_t uid, int32_t client_id)
 {
-    psa_status_t status;
-    psa_storage_uid_t uid;
-    psa_storage_create_flags_t create_flags;
-    int32_t client_id;
-
-    uid = asset_info->uid;
-    create_flags = asset_info->create_flags;
-    client_id = asset_info->client_id;
-
-    /* Check that the create_flags does not contain any unsupported flags */
-    if (create_flags & ~(PSA_STORAGE_FLAG_WRITE_ONCE |
-                         PSA_STORAGE_FLAG_NO_CONFIDENTIALITY |
-                         PSA_STORAGE_FLAG_NO_REPLAY_PROTECTION)) {
-        return PSA_ERROR_NOT_SUPPORTED;
-    }
-
-    if (offset == 0) {
-        /* First time creating an asset */
-
-        /* Check that the UID is valid */
-        if (uid == TFM_ITS_INVALID_UID) {
-            return PSA_ERROR_INVALID_ARGUMENT;
-        }
-
-        /* Set file id */
-        tfm_its_get_fid(client_id, uid, g_fid);
-
-        /* Read file info */
-        status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                            &g_file_info);
-        if (status == PSA_SUCCESS) {
-            /*
-             * If the object exists and has the write once flag set, then it
-             * cannot be modified.
-             */
-            if (g_file_info.flags & PSA_STORAGE_FLAG_WRITE_ONCE) {
-                return PSA_ERROR_NOT_PERMITTED;
-            }
-        } else if (status != PSA_ERROR_DOES_NOT_EXIST) {
-            /*
-             * If the file does not exist, then do nothing.
-             * If other error occurred, return it
-             */
-            return status;
-        }
-
-        create_flags |= ITS_FLASH_FS_FLAG_CREATE | ITS_FLASH_FS_FLAG_TRUNCATE;
-    }
-
-    /* Write to the file in the file system */
-    status = its_flash_fs_file_write(get_fs_ctx(client_id),
-                                     g_fid,
-                                     create_flags, max_size,
-                                     size_to_write, offset, data_buf);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    return PSA_SUCCESS;
-}
-
-psa_status_t tfm_its_get(struct its_asset_info *asset_info,
-                         uint8_t *data_buf,
-                         size_t size_to_read,
-                         size_t offset,
-                         size_t *size_read,
-                         bool first_get)
-{
-    psa_status_t status;
-    int32_t client_id;
-    psa_storage_uid_t uid;
-
-    client_id = asset_info->client_id;
-    uid = asset_info->uid;
-
-#ifdef TFM_PARTITION_TEST_PS
-    /*
-     * The PS test partition can call tfm_its_get() through PS code. Treat it
-     * as if it were PS.
-     */
-    if (client_id == TFM_SP_PS_TEST) {
-        client_id = TFM_SP_PS;
-    }
-#endif
-
-    if (first_get) {
-        /* Check that the UID is valid */
-        if (uid == TFM_ITS_INVALID_UID) {
-            return PSA_ERROR_INVALID_ARGUMENT;
-        }
-
-        /* Set file id */
-        tfm_its_get_fid(client_id, uid, g_fid);
-
-        /* Read file info */
-        status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                            &g_file_info);
-        if (status != PSA_SUCCESS) {
-            return status;
-        }
-    }
-
-    /* Boundary check the incoming request */
-    if (offset > g_file_info.size_current) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    /* Copy the object data only from within the file boundary */
-    size_to_read = ITS_UTILS_MIN(size_to_read,
-                                 g_file_info.size_current - offset);
-
-    /* Read file data from the filesystem */
-    status = its_flash_fs_file_read(get_fs_ctx(client_id),
-                                    g_fid, size_to_read,
-                                    offset, data_buf);
-    if (status != PSA_SUCCESS) {
-        return status;
-    }
-
-    /* Update the size of the output data */
-    *size_read = size_to_read;
-
-    return PSA_SUCCESS;
-}
-
-psa_status_t tfm_its_get_info(int32_t client_id, psa_storage_uid_t uid,
-                              struct psa_storage_info_t *p_info)
-{
-    psa_status_t status;
-
     /* Check that the UID is valid */
     if (uid == TFM_ITS_INVALID_UID) {
         return PSA_ERROR_INVALID_ARGUMENT;
@@ -358,8 +241,174 @@ psa_status_t tfm_its_get_info(int32_t client_id, psa_storage_uid_t uid,
     tfm_its_get_fid(client_id, uid, g_fid);
 
     /* Read file info */
-    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                        &g_file_info);
+    return its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
+                                      &g_file_info);
+}
+
+psa_status_t tfm_its_set(int32_t client_id,
+                         psa_storage_uid_t uid,
+                         size_t data_length,
+                         psa_storage_create_flags_t create_flags)
+{
+    psa_status_t status;
+#if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
+    size_t write_size;
+    size_t offset;
+#endif
+    uint32_t flags;
+
+    /* Check that the UID is valid */
+    if (uid == TFM_ITS_INVALID_UID) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* Check that the create_flags does not contain any unsupported flags */
+    if (create_flags & ~(PSA_STORAGE_FLAG_WRITE_ONCE |
+                         PSA_STORAGE_FLAG_NO_CONFIDENTIALITY |
+                         PSA_STORAGE_FLAG_NO_REPLAY_PROTECTION)) {
+        return PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    /* Read file info */
+    status = get_file_info(uid, client_id);
+    if (status == PSA_SUCCESS) {
+        /* If the object exists and has the write once flag set, then it
+         * cannot be modified.
+         */
+        if (g_file_info.flags & PSA_STORAGE_FLAG_WRITE_ONCE) {
+            return PSA_ERROR_NOT_PERMITTED;
+        }
+    } else if (status != PSA_ERROR_DOES_NOT_EXIST) {
+        /* If the file does not exist, then do nothing.
+         * If other error occurred, return it
+         */
+        return status;
+    }
+
+    flags = (uint32_t)create_flags |
+            ITS_FLASH_FS_FLAG_CREATE | ITS_FLASH_FS_FLAG_TRUNCATE;
+
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+    /* Write to the file in the file system */
+    status = its_flash_fs_file_write(get_fs_ctx(client_id), g_fid, flags,
+                                     data_length, data_length, 0,
+                                     its_req_mngr_get_vec_base());
+#else
+    offset = 0;
+
+    /* Iteratively read data from the caller and write it to the filesystem, in
+     * chunks no larger than the size of the asset_data buffer.
+     */
+    do {
+        /* Write as much of the data as will fit in the asset_data buffer */
+        write_size = ITS_UTILS_MIN(data_length, sizeof(asset_data));
+
+        /* Read asset data from the caller */
+        (void)its_req_mngr_read(asset_data, write_size);
+
+        /* Write to the file in the file system */
+        status = its_flash_fs_file_write(get_fs_ctx(client_id), g_fid, flags,
+                                         data_length, write_size, offset,
+                                         asset_data);
+        if (status != PSA_SUCCESS) {
+            return status;
+        }
+
+        /* Do not create or truncate after the first iteration */
+        flags &= ~(ITS_FLASH_FS_FLAG_CREATE | ITS_FLASH_FS_FLAG_TRUNCATE);
+
+        offset += write_size;
+        data_length -= write_size;
+    } while (data_length > 0);
+#endif
+
+    return status;
+}
+
+psa_status_t tfm_its_get(int32_t client_id,
+                         psa_storage_uid_t uid,
+                         size_t data_offset,
+                         size_t data_size,
+                         size_t *p_data_length)
+{
+    psa_status_t status;
+#if PSA_FRAMEWORK_HAS_MM_IOVEC != 1
+    size_t read_size;
+#endif
+
+#ifdef TFM_PARTITION_TEST_PS
+    /* The PS test partition can call tfm_its_get() through PS code. Treat it
+     * as if it were PS.
+     */
+    if (client_id == TFM_SP_PS_TEST) {
+        client_id = TFM_SP_PS;
+    }
+#endif
+
+    /* Check that the UID is valid */
+    if (uid == TFM_ITS_INVALID_UID) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* Read file info */
+    status = get_file_info(uid, client_id);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    /* Boundary check the incoming request */
+    if (data_offset > g_file_info.size_current) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    /* Copy the object data only from within the file boundary */
+    data_size = ITS_UTILS_MIN(data_size,
+                              g_file_info.size_current - data_offset);
+
+    /* Update the size of the output data */
+    *p_data_length = data_size;
+#if PSA_FRAMEWORK_HAS_MM_IOVEC == 1
+        /* Read file data from the filesystem */
+        status = its_flash_fs_file_read(get_fs_ctx(client_id), g_fid, data_size,
+                                        data_offset, its_req_mngr_get_vec_base());
+        if (status != PSA_SUCCESS) {
+            *p_data_length = 0;
+            return status;
+        }
+#else
+
+    /* Iteratively read data from the filesystem and write it to the caller, in
+     * chunks no larger than the size of the asset_data buffer.
+     */
+    do {
+        /* Read as much of the data as will fit in the asset_data buffer */
+        read_size = ITS_UTILS_MIN(data_size, sizeof(asset_data));
+
+        /* Read file data from the filesystem */
+        status = its_flash_fs_file_read(get_fs_ctx(client_id), g_fid, read_size,
+                                        data_offset, asset_data);
+        if (status != PSA_SUCCESS) {
+            *p_data_length = 0;
+            return status;
+        }
+
+        /* Write asset data to the caller */
+        its_req_mngr_write(asset_data, read_size);
+
+        data_offset += read_size;
+        data_size -= read_size;
+    } while (data_size > 0);
+#endif
+    return PSA_SUCCESS;
+}
+
+psa_status_t tfm_its_get_info(int32_t client_id, psa_storage_uid_t uid,
+                              struct psa_storage_info_t *p_info)
+{
+    psa_status_t status;
+
+    /* Validate and read file info */
+    status = get_file_info(uid, client_id);
     if (status != PSA_SUCCESS) {
         return status;
     }
@@ -385,16 +434,8 @@ psa_status_t tfm_its_remove(int32_t client_id, psa_storage_uid_t uid)
     }
 #endif
 
-    /* Check that the UID is valid */
-    if (uid == TFM_ITS_INVALID_UID) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-    }
-
-    /* Set file id */
-    tfm_its_get_fid(client_id, uid, g_fid);
-
-    status = its_flash_fs_file_get_info(get_fs_ctx(client_id), g_fid,
-                                        &g_file_info);
+    /* Validate and read file info */
+    status = get_file_info(uid, client_id);
     if (status != PSA_SUCCESS) {
         return status;
     }

@@ -54,30 +54,19 @@ The following rules should be considered:
 #. New introduced terms and abbreviations should be added to Glossary and
    directly linked by the `:term:` notation across all documents using it.
 
-
 **********************
 Platform Documentation
 **********************
 
 The Documentation Build system provides an interface with the platform directory
-allowing maintainers to bundle platform specific documentation. **This behaviour
-needs to be explicitly enabled for each platform's space** by
-modifying the `platform/index.rst` (responsible for generating the
+allowing maintainers to bundle platform specific documentation. Platforms are
+grouped by vendor. **This behaviour needs to be explicitly enabled for each
+vendor's space** by providing the `<vendor>/index.rst` (responsible for generating the
 :doc:`Platform Index File </platform/index>`) and adding a table of
-contents entry for the corresponding platform space.
-
+contents entry for the corresponding vendor's space.
 The format and structure of this entry is not strictly defined, and allows
-flexible control of the platform's documentation space. In most cases it can be
-set to recursively match all documents under that directory.
-
-.. code-block:: restructuredtext
-
-    .. toctree::
-        :maxdepth: 4
-        :caption: PLATFORM_X_CAPTION
-        :glob:
-
-        PLATFORM_X/**
+flexible control of vendor's and platform's documentation space.
+Follow the :ref:`platform_documentation` document for more details.
 
 ****************
 Common Use Cases
@@ -88,7 +77,6 @@ for most common documentation elements.
 
 Headers
 =======
-
 
 .. code-block:: restructuredtext
 
@@ -111,7 +99,6 @@ Headers
 
 Code Blocks
 ===========
-
 
 The recommendation for code content, is to use the explicit code-block directive,
 ideally with a defined lexer for the language the block contains.
@@ -228,7 +215,6 @@ labels, internal linking is the recommended approach.
 
     *Copyright (c) XYZ *
 
-
 Document Links
 ==============
 
@@ -255,14 +241,12 @@ document. This technique can be used to add complex table in the bottom of a
 document and create clickable quick access references to it for improved user
 experience.
 
-
 Glossary term
 =============
 
 For technical terms and abbreviations, the recommended guidance is to add an
 entry to the :doc:`/glossary` and refer to it, using the `term:`
 directive
-
 
 .. code-block:: restructuredtext
 
@@ -292,9 +276,9 @@ References
 
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
 .. _Restructed Text: https://docutils.sourceforge.io/rst.html
-.. _Python Documentation Guidelines: https://devguide.python.org/documenting/#style-guide
-.. _Pygments Lexers: https://pygments.org/lexers/
+.. _Python Documentation Guidelines: https://devguide.python.org/documentation/style-guide/
+.. _Pygments Lexers: https://pygments.org/docs/api/#lexers
 
 --------------
 
-*Copyright (c) 2020-2021, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*

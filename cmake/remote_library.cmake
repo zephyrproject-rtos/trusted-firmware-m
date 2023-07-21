@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
+# Copyright (c) 2023 Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -271,9 +272,9 @@ function(fetch_remote_library)
 
             # Get remote properties
             _get_fetch_remote_properties(REPO_URL_VAR TAG_VAR ${ARG_FETCH_CONTENT_ARGS})
-            set(${ARG_LIB_SOURCE_PATH_VAR} ${${ARG_LIB_NAME}_SOURCE_DIR} CACHE PATH "Library has been downloaded from \"${REPO_URL_VAR}\", tag \"${TAG_VAR}\"" FORCE)
+            set(${ARG_LIB_SOURCE_PATH_VAR} ${${ARG_LIB_NAME}_SOURCE_DIR} CACHE PATH "Library has been downloaded from ${REPO_URL_VAR}, tag ${TAG_VAR}" FORCE)
             if (DEFINED ARG_LIB_BINARY_PATH_VAR)
-                set(${ARG_LIB_BINARY_PATH_VAR} ${${ARG_LIB_NAME}_BINARY_DIR} CACHE PATH "Path to build directory of \"${ARG_LIB_NAME}\"")
+                set(${ARG_LIB_BINARY_PATH_VAR} ${${ARG_LIB_NAME}_BINARY_DIR} CACHE PATH "Path to build directory of ${ARG_LIB_NAME}")
             endif()
         endif()
     endif()

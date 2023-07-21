@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -21,14 +24,36 @@ static struct thread_t *p_rnbl_head = NULL; /* Point to the first runnable. */
 #define LIST_HEAD   p_thrd_head
 #define RNBL_HEAD   p_rnbl_head
 
+/* Callback function pointer for thread to query current state. */
+static thrd_query_state_t query_state_cb = (thrd_query_state_t)NULL;
+
+void thrd_set_query_callback(thrd_query_state_t fn)
+{
+    query_state_cb = fn;
+}
+
 struct thread_t *thrd_next(void)
 {
     struct thread_t *p_thrd = RNBL_HEAD;
+    uint32_t retval = 0;
+
     /*
      * First runnable thread has highest priority since threads are
      * sorted by priority.
      */
-    while (p_thrd && p_thrd->state != THRD_STATE_RUNNABLE) {
+    while (p_thrd) {
+        /* Change thread state if any signal changed */
+        p_thrd->state = query_state_cb(p_thrd, &retval);
+
+        if (p_thrd->state == THRD_STATE_RET_VAL_AVAIL) {
+            tfm_arch_set_context_ret_code(p_thrd->p_context_ctrl, retval);
+            p_thrd->state = THRD_STATE_RUNNABLE;
+        }
+
+        if (p_thrd->state == THRD_STATE_RUNNABLE) {
+            break;
+        }
+
         p_thrd = p_thrd->next;
     }
 
@@ -52,14 +77,14 @@ static void insert_by_prior(struct thread_t **head, struct thread_t *node)
     }
 }
 
-void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn)
+void thrd_start(struct thread_t *p_thrd, thrd_fn_t fn, thrd_fn_t exit_fn, void *param)
 {
     SPM_ASSERT(p_thrd != NULL);
 
     /* Insert a new thread with priority */
     insert_by_prior(&LIST_HEAD, p_thrd);
 
-    tfm_arch_init_context(p_thrd->p_context_ctrl, (uintptr_t)fn, NULL,
+    tfm_arch_init_context(p_thrd->p_context_ctrl, (uintptr_t)fn, param,
                           (uintptr_t)exit_fn);
 
     /* Mark it as RUNNABLE after insertion */
@@ -95,24 +120,4 @@ uint32_t thrd_start_scheduler(struct thread_t **ppth)
     }
 
     return tfm_arch_refresh_hardware_context(pth->p_context_ctrl);
-}
-
-void thrd_set_wait(struct sync_obj_t *p_sync_obj, struct thread_t *pth)
-{
-    SPM_ASSERT(p_sync_obj && p_sync_obj->magic == THRD_SYNC_MAGIC);
-
-    p_sync_obj->owner = pth;
-    thrd_set_state(pth, THRD_STATE_BLOCK);
-}
-
-void thrd_wake_up(struct sync_obj_t *p_sync_obj, uint32_t ret_val)
-{
-    SPM_ASSERT(p_sync_obj && p_sync_obj->magic == THRD_SYNC_MAGIC);
-
-    if (p_sync_obj->owner && p_sync_obj->owner->state == THRD_STATE_BLOCK) {
-        thrd_set_state(p_sync_obj->owner, THRD_STATE_RUNNABLE);
-        tfm_arch_set_context_ret_code(p_sync_obj->owner->p_context_ctrl,
-                                      ret_val);
-        p_sync_obj->owner = NULL;
-    }
 }

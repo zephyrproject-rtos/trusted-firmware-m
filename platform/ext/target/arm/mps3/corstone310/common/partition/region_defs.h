@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
 #define BL2_MSP_STACK_SIZE      (0x0001800)
 
 #ifdef ENABLE_HEAP
-    #define S_HEAP_SIZE             (0x0000200)
+#define S_HEAP_SIZE             (0x0000200)
 #endif
 
 #define S_MSP_STACK_SIZE        (0x0000800)
@@ -88,41 +88,50 @@
 #define S_IMAGE_PRIMARY_AREA_OFFSET \
              (S_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 /* Secure Code stored in Code SRAM */
-#define S_CODE_START    ((SRAM_BASE_S) +  (S_IMAGE_PRIMARY_AREA_OFFSET))
+#define S_CODE_START    ((QSPI_SRAM_BASE_S) + (S_IMAGE_PRIMARY_AREA_OFFSET))
 #define S_CODE_SIZE     (IMAGE_S_CODE_SIZE)
 #define S_CODE_LIMIT    (S_CODE_START + S_CODE_SIZE - 1)
 
-/* Secure Data stored in first half of ISRAM0 */
+/* Secure Data stored in ISRAM0 */
 #define S_DATA_START    (ISRAM0_BASE_S)
-#define S_DATA_SIZE     (ISRAM0_SIZE / 2)
+#define S_DATA_SIZE     (ISRAM0_SIZE - S_RAM_CODE_SIZE)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
-/* Size of vector table: 146 interrupt handlers + 4 bytes MPS initial value */
-#define S_CODE_VECTOR_TABLE_SIZE    (0x24C)
+#ifdef CORSTONE310_FVP
+/* Size of vector table: 247 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0x3E0)
+#else
+/* Size of vector table: 143 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0x240)
+#endif
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
                         (NS_IMAGE_PRIMARY_PARTITION_OFFSET + BL2_HEADER_SIZE)
 /* Non-Secure Code stored in Code SRAM memory */
-#define NS_CODE_START   (SRAM_BASE_NS + (NS_IMAGE_PRIMARY_AREA_OFFSET))
+#define NS_CODE_START   (QSPI_SRAM_BASE_NS + (NS_IMAGE_PRIMARY_AREA_OFFSET))
 #define NS_CODE_SIZE    (IMAGE_NS_CODE_SIZE)
 #define NS_CODE_LIMIT   (NS_CODE_START + NS_CODE_SIZE - 1)
 
-/* Non-Secure Data stored in second half of ISRAM0 */
-#define NS_DATA_START   (ISRAM0_BASE_NS + S_DATA_SIZE)
-#define NS_DATA_SIZE    (ISRAM0_SIZE / 2)
+/* Non-Secure Data stored in ISRAM1 */
+#define NS_DATA_START   (ISRAM1_BASE_NS)
+#define NS_DATA_SIZE    (ISRAM1_SIZE)
 #define NS_DATA_LIMIT   (NS_DATA_START + NS_DATA_SIZE - 1)
 
 /* NS partition information is used for MPC and SAU configuration */
 #define NS_PARTITION_START \
-            ((SRAM_BASE_NS) + (NS_IMAGE_PRIMARY_PARTITION_OFFSET))
+            ((QSPI_SRAM_BASE_NS) + (NS_IMAGE_PRIMARY_PARTITION_OFFSET))
 #define NS_PARTITION_SIZE (FLASH_NS_PARTITION_SIZE)
 
 /* Secondary partition for new images in case of firmware upgrade */
 #define SECONDARY_PARTITION_START \
-            ((SRAM_BASE_NS) + (S_IMAGE_SECONDARY_PARTITION_OFFSET))
+            ((QSPI_SRAM_BASE_NS) + (S_IMAGE_SECONDARY_PARTITION_OFFSET))
 #define SECONDARY_PARTITION_SIZE (FLASH_S_PARTITION_SIZE + \
                                   FLASH_NS_PARTITION_SIZE)
+
+/* Code SRAM area */
+#define S_RAM_CODE_SIZE          (0x00004000) /* 16 KB (SRAM MPC block size)*/
+#define S_RAM_CODE_START         (S_DATA_START + S_DATA_SIZE)
 
 #ifdef BL2
 /* Bootloader regions */

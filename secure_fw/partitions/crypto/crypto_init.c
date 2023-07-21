@@ -1,27 +1,23 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 #include <stdbool.h>
 
-#include "config_crypto.h"
+#include "config_tfm.h"
+#include "config_crypto_check.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
+#include "tfm_crypto_key.h"
 #include "tfm_crypto_defs.h"
 #include "tfm_sp_log.h"
 #include "crypto_check_config.h"
 #include "tfm_plat_crypto_keys.h"
 
-/*
- * \brief This Mbed TLS include is needed to initialise the memory allocator
- *        of the library used for internal allocations
- */
-#include "mbedtls/memory_buffer_alloc.h"
-
-#include "mbedtls/platform.h"
+#include "crypto_library.h"
 
 #if CRYPTO_NV_SEED
 #include "tfm_plat_crypto_nv_seed.h"
@@ -30,10 +26,6 @@
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
 #endif /* CRYPTO_HW_ACCELERATOR */
-
-#ifndef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
-#error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
-#endif
 
 #include <string.h>
 #include "psa/framework_feature.h"
@@ -255,14 +247,11 @@ static psa_status_t tfm_crypto_call_srv(const psa_msg_t *msg)
     return status;
 }
 
-/**
- * \brief Static buffer to be used by Mbed Crypto for memory allocations
- *
- */
-static uint8_t mbedtls_mem_buf[CRYPTO_ENGINE_BUF_SIZE] = {0};
-
 static psa_status_t tfm_crypto_engine_init(void)
 {
+    psa_status_t status = PSA_ERROR_GENERIC_ERROR;
+    char *library_info = NULL;
+
 #if CRYPTO_NV_SEED
     LOG_INFFMT("[INF][Crypto] ");
     LOG_INFFMT("Provisioning entropy seed... ");
@@ -272,23 +261,23 @@ static psa_status_t tfm_crypto_engine_init(void)
     LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
 #endif /* CRYPTO_NV_SEED */
 
-    /* Initialise the Mbed Crypto memory allocator to use static memory
-     * allocation from the provided buffer instead of using the heap
+    /* Initialise the underlying Cryptographic library that provides the
+     * PSA Crypto core layer
      */
-    mbedtls_memory_buffer_alloc_init(mbedtls_mem_buf,
-                                     CRYPTO_ENGINE_BUF_SIZE);
-
-    /* mbedtls_printf is used to print messages including error information. */
-#if (TFM_PARTITION_LOG_LEVEL >= TFM_PARTITION_LOG_LEVEL_ERROR)
-    mbedtls_platform_set_printf(printf);
-#endif
+    library_info = tfm_crypto_library_get_info();
+    LOG_DBGFMT("[DBG][Crypto] Initialising \033[0;32m%s\033[0m as PSA Crypto backend library... ", library_info);
+    status = tfm_crypto_core_library_init();
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+    LOG_DBGFMT("\033[0;32mcomplete.\033[0m\r\n");
 
     /* Initialise the crypto accelerator if one is enabled. If the driver API is
      * the one defined by the PSA Unified Driver interface, the initialisation is
      * performed directly through psa_crypto_init() while the PSA subsystem is
      * initialised
      */
-#if defined(CRYPTO_HW_ACCELERATOR) && defined(CC312_LEGACY_DRIVER_API_ENABLED)
+#if defined(CRYPTO_HW_ACCELERATOR) && defined(LEGACY_DRIVER_API_ENABLED)
     LOG_INFFMT("[INF][Crypto] Initialising HW accelerator... ");
     if (crypto_hw_accelerator_init() != 0) {
         return PSA_ERROR_HARDWARE_FAILURE;
@@ -296,9 +285,10 @@ static psa_status_t tfm_crypto_engine_init(void)
     LOG_INFFMT("\033[0;32mcomplete.\033[0m\r\n");
 #endif /* CRYPTO_HW_ACCELERATOR */
 
-    /* Perform the initialisation of the PSA subsystem in the Mbed Crypto
-     * library. If a driver is built using the PSA Driver interface, the function
-     * below will perform also the same operations as crypto_hw_accelerator_init()
+    /* Perform the initialisation of the PSA subsystem available through the chosen
+     * Cryptographic library. If a driver is built using the PSA Driver interface,
+     * the function below will perform also the same operations done by the HAL init
+     * crypto_hw_accelerator_init()
      */
     return psa_crypto_init();
 }
@@ -312,7 +302,6 @@ static psa_status_t tfm_crypto_module_init(void)
 psa_status_t tfm_crypto_init(void)
 {
     psa_status_t status;
-    enum tfm_plat_err_t plat_err;
 
     /* Initialise other modules of the service */
     status = tfm_crypto_module_init();
@@ -324,11 +313,6 @@ psa_status_t tfm_crypto_init(void)
     status =  tfm_crypto_engine_init();
     if (status != PSA_SUCCESS) {
         return status;
-    }
-
-    plat_err = tfm_plat_load_builtin_keys();
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return PSA_ERROR_GENERIC_ERROR;
     }
 
     return PSA_SUCCESS;
@@ -355,7 +339,7 @@ psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     int32_t caller_id = 0;
-    mbedtls_svc_key_id_t encoded_key = MBEDTLS_SVC_KEY_ID_INIT;
+    struct tfm_crypto_key_id_s encoded_key = TFM_CRYPTO_KEY_ID_S_INIT;
     bool is_key_required = false;
     enum tfm_crypto_group_id group_id;
 
@@ -376,7 +360,8 @@ psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
         /* The caller_id being set in the owner field is the partition ID
          * of the calling partition
          */
-        encoded_key = mbedtls_svc_key_id_make(caller_id, iov->key_id);
+        encoded_key.key_id = iov->key_id;
+        encoded_key.owner = caller_id;
     }
 
     /* Dispatch to each sub-module based on the Group ID */

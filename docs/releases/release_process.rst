@@ -8,7 +8,7 @@ The project aims to do a release once every 6 months around April and November
 time and are listed in the :ref:`releases/index:Future release plans`.
 The releases are to be performed and tagged on a dedicated release branch.
 The release process is initiated by an announcement in
-`TF-M mailing list <https://lists.trustedfirmware.org/mailman/listinfo/tf-m>`_
+`TF-M mailing list <https://lists.trustedfirmware.org/mailman3/lists/tf-m.lists.trustedfirmware.org/>`_
 and followed by the creation of a release branch.
 Normal development on the main branch is not blocked and can be continued.
 The testing will be performed on release candidates and depending on
@@ -62,6 +62,12 @@ to main branch.
 Although this document specifies the release cadence, this does not preclude
 an adhoc release for specific project requirements.
 
+.. note::
+  When a new release starts the previous release branch obsoletes and is
+  a subject for removal as shown for `v1.1.x` on the diagram above.
+  At any moment only the latest release branch is maintained.
+  The release tags will point to a commit in detached head state.
+
 Release Version Scheme
 ----------------------
 
@@ -76,4 +82,4 @@ compiled as a dot separated set of numbers:
 
 --------------
 
-*Copyright (c) 2020, Arm Limited. All rights reserved.*
+*Copyright (c) 2020-2023, Arm Limited. All rights reserved.*

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,11 +12,11 @@
 #include "region_defs.h"
 #include "tfm_api.h"
 #include "psa_manifest/pid.h"
-#include "internal_errors.h"
+#include "internal_status_code.h"
 #include "utilities.h"
 #include "psa/service.h"
 #include "thread.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "load/partition_defs.h"
 #include "tfm_hal_isolation.h"
 
@@ -63,6 +63,11 @@ struct boot_data_access_policy {
  *        (identified by major_type).
  */
 static const struct boot_data_access_policy access_policy_table[] = {
+    /*
+     * IAR won't accept zero element array definition, so an invalid element
+     * is always defined here.
+     */
+    {INVALID_PARTITION_ID, TLV_MAJOR_INVALID},
 #ifdef TFM_PARTITION_INITIAL_ATTESTATION
     {TFM_SP_INITIAL_ATTESTATION, TLV_MAJOR_IAS},
 #endif
@@ -91,7 +96,12 @@ static int32_t tfm_core_check_boot_data_access_policy(uint8_t major_type)
 
     partition_id = tfm_spm_partition_get_running_partition_id();
 
-    for (i = 0; i < array_size; ++i) {
+    /*
+     * The first element of the access_policy_table is an invalid element,
+     * which isn't need to be checked, that's why the iteration
+     * starts from i=1.
+     */
+    for (i = 1; i < array_size; ++i) {
         if (partition_id == access_policy_table[i].partition_id) {
             if (major_type == access_policy_table[i].major_type) {
                 rc = 0;

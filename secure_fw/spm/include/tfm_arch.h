@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -84,6 +84,8 @@ struct tfm_state_context_t {
 
 /* Context addition to state context */
 struct tfm_additional_context_t {
+    uint32_t    integ_sign;    /* Integrity signature */
+    uint32_t    reserved;      /* Reserved */
     uint32_t    callee[8];     /* R4-R11. NOT ORDERED!! */
 };
 

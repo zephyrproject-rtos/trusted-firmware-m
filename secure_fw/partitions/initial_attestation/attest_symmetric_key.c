@@ -11,7 +11,7 @@
 #include <string.h>
 
 #include "attest_key.h"
-#include "config_attest.h"
+#include "config_tfm.h"
 #include "psa/crypto.h"
 #include "tfm_crypto_defs.h"
 

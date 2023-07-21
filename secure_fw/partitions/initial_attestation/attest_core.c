@@ -13,7 +13,7 @@
 #include "attest_boot_data.h"
 #include "attest_key.h"
 #include "attest_token.h"
-#include "config_attest.h"
+#include "config_tfm.h"
 #include "tfm_plat_defs.h"
 #include "tfm_plat_device_id.h"
 #include "tfm_plat_boot_seed.h"

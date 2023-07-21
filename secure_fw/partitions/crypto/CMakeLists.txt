@@ -21,13 +21,12 @@ target_sources(tfm_psa_rot_partition_crypto
         crypto_cipher.c
         crypto_hash.c
         crypto_mac.c
-        crypto_key.c
         crypto_aead.c
         crypto_asymmetric.c
         crypto_key_derivation.c
         crypto_key_management.c
         crypto_rng.c
-        tfm_mbedcrypto_builtin_keys.c
+        crypto_library.c
         $<$<BOOL:CRYPTO_TFM_BUILTIN_KEYS_DRIVER>:psa_driver_api/tfm_builtin_key_loader.c>
 )
 

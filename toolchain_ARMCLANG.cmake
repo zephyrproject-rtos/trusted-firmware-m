@@ -1,5 +1,7 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
+# or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -9,6 +11,7 @@ cmake_minimum_required(VERSION 3.15)
 SET(CMAKE_SYSTEM_NAME Generic)
 
 set(CMAKE_C_COMPILER armclang)
+set(CMAKE_CXX_COMPILER armclang)
 set(CMAKE_ASM_COMPILER armasm)
 
 set(LINKER_VENEER_OUTPUT_FLAG --import_cmse_lib_out=)
@@ -24,25 +27,25 @@ macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
 
     add_compile_options(
-        $<$<COMPILE_LANGUAGE:C>:-Wno-ignored-optimization-argument>
-        $<$<COMPILE_LANGUAGE:C>:-Wno-unused-command-line-argument>
-        $<$<COMPILE_LANGUAGE:C>:-Wall>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-Wno-ignored-optimization-argument>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-Wno-unused-command-line-argument>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-Wall>
         # Don't error when the MBEDTLS_NULL_ENTROPY warning is shown
-        $<$<COMPILE_LANGUAGE:C>:-Wno-error=cpp>
-        $<$<COMPILE_LANGUAGE:C>:-c>
-        $<$<COMPILE_LANGUAGE:C>:-fdata-sections>
-        $<$<COMPILE_LANGUAGE:C>:-ffunction-sections>
-        $<$<COMPILE_LANGUAGE:C>:-fno-builtin>
-        $<$<COMPILE_LANGUAGE:C>:-fshort-enums>
-        $<$<COMPILE_LANGUAGE:C>:-fshort-wchar>
-        $<$<COMPILE_LANGUAGE:C>:-funsigned-char>
-        $<$<COMPILE_LANGUAGE:C>:-masm=auto>
-        $<$<COMPILE_LANGUAGE:C>:-nostdlib>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-Wno-error=cpp>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-c>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fdata-sections>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-ffunction-sections>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fno-builtin>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fshort-enums>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-fshort-wchar>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-funsigned-char>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-masm=auto>
+        $<$<OR:$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:CXX>>:-nostdlib>
         $<$<COMPILE_LANGUAGE:C>:-std=c99>
-        $<$<COMPILE_LANGUAGE:C>:-mfpu=none>
-        $<$<COMPILE_LANGUAGE:ASM>:--fpu=none>
+        $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
         $<$<COMPILE_LANGUAGE:ASM>:--cpu=${CMAKE_ASM_CPU_FLAG}>
         $<$<AND:$<COMPILE_LANGUAGE:C>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
+        $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<BOOL:${TFM_DEBUG_SYMBOLS}>>:-g>
     )
 endmacro()
 
@@ -72,7 +75,6 @@ macro(tfm_toolchain_reset_linker_flags)
         --diag_suppress=6304
         # Pattern only matches removed unused sections.
         --diag_suppress=6329
-        --fpu=softvfp
     )
 endmacro()
 
@@ -91,7 +93,22 @@ macro(tfm_toolchain_set_processor_arch)
             endif()
         endif()
 
+        # ARMCLANG specifies that '+nofp' is available on following M-profile cpus:
+        # 'cortex-m4', 'cortex-m7', 'cortex-m33', 'cortex-m35p', 'cortex-m55' and 'cortex-m85'.
+        # Build fails if other M-profile cpu, such as 'cortex-m23', is added with '+nofp'.
+        # Explicitly list those cpu to align with ARMCLANG description.
+        if (NOT CONFIG_TFM_FLOAT_ABI STREQUAL "hard" AND
+            (TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m4"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m7"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m33"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m35p"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"
+            OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m85"))
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
+        endif()
+
         string(REGEX REPLACE "\\+nodsp" ".no_dsp" CMAKE_ASM_CPU_FLAG "${CMAKE_SYSTEM_PROCESSOR}")
+        string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_CPU_FLAG "${CMAKE_ASM_CPU_FLAG}")
     else()
         set(CMAKE_ASM_CPU_FLAG  ${TFM_SYSTEM_ARCHITECTURE})
 
@@ -102,6 +119,10 @@ macro(tfm_toolchain_set_processor_arch)
         # Modifiers are additive instead of subtractive (.fp Vs .no_fp)
         if (TFM_SYSTEM_DSP)
             string(APPEND CMAKE_ASM_CPU_FLAG ".dsp")
+        endif()
+
+        if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+            string(APPEND CMAKE_ASM_CPU_FLAG ".fp")
         endif()
     endif()
 
@@ -116,6 +137,7 @@ macro(tfm_toolchain_set_processor_arch)
     set(CMAKE_SYSTEM_ARCH            ${TFM_SYSTEM_ARCHITECTURE})
 
     set(CMAKE_C_COMPILER_TARGET      arm-${CROSS_COMPILE})
+    set(CMAKE_CXX_COMPILER_TARGET    arm-${CROSS_COMPILE})
     set(CMAKE_ASM_COMPILER_TARGET    arm-${CROSS_COMPILE})
 
     # MVE is currently not supported in case of armclang
@@ -135,6 +157,8 @@ macro(tfm_toolchain_set_processor_arch)
     include(Compiler/ARMClang)
     set(CMAKE_C_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
     set(CMAKE_C_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_ARCH})
+    set(CMAKE_CXX_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
+    set(CMAKE_CXX_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_ARCH})
     set(CMAKE_ASM_COMPILER_PROCESSOR_LIST ${CMAKE_SYSTEM_PROCESSOR})
     set(CMAKE_ASM_COMPILER_ARCH_LIST ${CMAKE_SYSTEM_ARCH})
 endmacro()
@@ -145,6 +169,7 @@ macro(tfm_toolchain_reload_compiler)
     tfm_toolchain_reset_linker_flags()
 
     unset(CMAKE_C_FLAGS_INIT)
+    unset(CMAKE_CXX_FLAGS_INIT)
     unset(CMAKE_C_LINK_FLAGS)
     unset(CMAKE_ASM_FLAGS_INIT)
     unset(CMAKE_ASM_LINK_FLAGS)
@@ -156,8 +181,8 @@ macro(tfm_toolchain_reload_compiler)
     include(Compiler/ARMCC-ASM)
     __compiler_armcc(ASM)
 
-    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 6.10.1)
-        message(FATAL_ERROR "Please select newer Arm compiler version starting from 6.10.1.")
+    if (CMAKE_C_COMPILER_VERSION VERSION_LESS 6.13)
+        message(FATAL_ERROR "Please select newer Arm compiler version starting from 6.13.")
     endif()
 
     if (CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 6.15 AND
@@ -173,18 +198,55 @@ macro(tfm_toolchain_reload_compiler)
     if (DEFINED TFM_SYSTEM_PROCESSOR)
         set(CMAKE_C_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_C_LINK_FLAGS   "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_CXX_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_LINK_FLAGS "--cpu=${CMAKE_SYSTEM_PROCESSOR}")
         # But armlink doesn't support this +dsp syntax
         string(REGEX REPLACE "\\+nodsp" "" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nodsp" "" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
         string(REGEX REPLACE "\\+nodsp" "" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
         # And uses different syntax for +nofp
         string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
         string(REGEX REPLACE "\\+nofp" ".no_fp" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
 
         string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_C_LINK_FLAGS   "${CMAKE_C_LINK_FLAGS}")
+        string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS}")
         string(REGEX REPLACE "\\+nomve" ".no_mve" CMAKE_ASM_LINK_FLAGS "${CMAKE_ASM_LINK_FLAGS}")
     else()
         set(CMAKE_C_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_CXX_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+    endif()
+
+    set(BL2_COMPILER_CP_FLAG
+        $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
+        $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
+    )
+    # As BL2 does not use hardware FPU, specify '--fpu=SoftVFP' explicitly to use software
+    # library functions for BL2 to override any implicit FPU option, such as '--cpu' option.
+    # Because the implicit hardware FPU option enforces BL2 to initialize FPU but hardware FPU
+    # is not actually enabled in BL2, it will cause BL2 runtime fault.
+    set(BL2_LINKER_CP_OPTION --fpu=SoftVFP)
+
+    if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+        set(COMPILER_CP_FLAG
+            $<$<COMPILE_LANGUAGE:C>:-mfloat-abi=hard>
+        )
+        if (CONFIG_TFM_ENABLE_FP)
+            set(COMPILER_CP_FLAG
+                $<$<COMPILE_LANGUAGE:C>:-mfpu=${CONFIG_TFM_FP_ARCH};-mfloat-abi=hard>
+                $<$<COMPILE_LANGUAGE:ASM>:--fpu=${CONFIG_TFM_FP_ARCH_ASM}>
+            )
+            # armasm and armlink have the same option "--fpu" and are both used to
+            # specify the target FPU architecture. So the supported FPU architecture
+            # names can be shared by armasm and armlink.
+            set(LINKER_CP_OPTION --fpu=${CONFIG_TFM_FP_ARCH_ASM})
+        endif()
+    else()
+        set(COMPILER_CP_FLAG
+            $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
+            $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
+        )
+        set(LINKER_CP_OPTION --fpu=SoftVFP)
     endif()
 
     # Workaround for issues with --depend-single-line with armasm and Ninja

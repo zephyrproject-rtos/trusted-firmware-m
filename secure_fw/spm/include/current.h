@@ -8,7 +8,7 @@
 #define __CURRENT_H__
 
 #include "thread.h"
-#include "spm_ipc.h"
+#include "spm.h"
 
 #if CONFIG_TFM_SPM_BACKEND_SFN != 1
 /* Get current component */

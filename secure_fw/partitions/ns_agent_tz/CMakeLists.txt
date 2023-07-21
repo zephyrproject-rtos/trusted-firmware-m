@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------------
 # Copyright (c) 2021-2022, Arm Limited. All rights reserved.
-# Copyright (c) 2021-2022 Cypress Semiconductor Corporationn (an Infineon company)
+# Copyright (c) 2021-2023 Cypress Semiconductor Corporationn (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
@@ -24,7 +24,6 @@ set(ARM_V80M_ARCH armv8-m.base armv8-m.main)
 # Trustzone NS Agent is tighly coupled with SPM
 target_sources(tfm_spm
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/ns_agent_tz_init.c
         "$<$<IN_LIST:${TFM_SYSTEM_ARCHITECTURE},${ARM_V80M_ARCH}>:${CMAKE_CURRENT_SOURCE_DIR}/ns_agent_tz_v80m.c>"
         "$<$<NOT:$<IN_LIST:${TFM_SYSTEM_ARCHITECTURE},${ARM_V80M_ARCH}>>:${CMAKE_CURRENT_SOURCE_DIR}/ns_agent_tz.c>"
 )

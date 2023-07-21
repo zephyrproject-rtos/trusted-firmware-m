@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -24,10 +24,20 @@
 #define PARTITION_INFO_MAGIC                    (0x5F5F0000)
 
 /*
- * Partition load data - flags
- * bit 7-0: priority
- * bit 8: 1 - PSA_ROT, 0 - APP_ROT
- * bit 9: 1 - IPC model, 0 - SFN model
+ * Partition flag start
+ *
+ * 31      12 11 10  9   8  7         0
+ * +---------+--+--+---+---+----------+
+ * | RES[20] |TZ|NS|I/S|A/P| Priority |
+ * +---------+--+--+---+---+----------+
+ *
+ * Field                Desc                        Value
+ * Priority, bits[7:0]:  Partition Priority          Lowest, low, normal, high, hightest
+ * A/P, bit[8]:          ARoT or PRoT domain         1: PRoT              0: ARoT
+ * I/S, bit[9]:          IPC or SFN typed partition  1: IPC               0: SFN
+ * NS,  bit[10]:         NS Agent or not             1: NS Agent          0: Not
+ * TZ,  bit[11]:         NS Agent TZ or not          1: NS Agent TZ       0: Not
+ * RES, bits[31:12]:     20 bits reserved            0
  */
 #define PARTITION_PRI_HIGHEST                   (0x0)
 #define PARTITION_PRI_HIGH                      (0xF)
@@ -40,6 +50,7 @@
 #define PARTITION_MODEL_IPC                     (1U << 9)
 
 #define PARTITION_NS_AGENT                      (1U << 10)
+#define PARTITION_NS_AGENT_TZ                   (1U << 11)
 
 #define PARTITION_PRIORITY(flag)                ((flag) & PARTITION_PRI_MASK)
 #define TO_THREAD_PRIORITY(x)                   (x)
@@ -50,12 +61,21 @@
 #define PTR_TO_REFERENCE(x)                     (uintptr_t)(x)
 #define REFERENCE_TO_PTR(x, t)                  (t)(x)
 
-#define IS_PARTITION_PSA_ROT(pldi)              (!!((pldi)->flags \
+#define IS_PSA_ROT(pldi)                        (!!((pldi)->flags \
                                                      & PARTITION_MODEL_PSA_ROT))
-#define IS_PARTITION_IPC_MODEL(pldi)            (!!((pldi)->flags \
-                                                         & PARTITION_MODEL_IPC))
-#define IS_PARTITION_NS_AGENT(pldi)             (!!((pldi)->flags \
-                                                         & PARTITION_NS_AGENT))
+#define IS_IPC_MODEL(pldi)                      (!!((pldi)->flags \
+                                                     & PARTITION_MODEL_IPC))
+#define IS_NS_AGENT(pldi)                       (!!((pldi)->flags \
+                                                     & PARTITION_NS_AGENT))
+#ifdef CONFIG_TFM_USE_TRUSTZONE
+#define IS_NS_AGENT_TZ(pldi)                    (IS_NS_AGENT(pldi) \
+                                                     && !!((pldi)->flags \
+                                                       & PARTITION_NS_AGENT_TZ))
+#else
+#define IS_NS_AGENT_TZ(pldi)                    false
+#endif
+
+/* Partition flag end */
 
 /*
  * Common partition structure type, the extendable data is right after it.

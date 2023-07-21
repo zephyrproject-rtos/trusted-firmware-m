@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -10,8 +10,9 @@
 
 #include <inttypes.h>
 #include "compiler_ext_defs.h"
+#include "config_spm.h"
 #include "security_defs.h"
-#include "spm_ipc.h"
+#include "spm.h"
 #include "svc_num.h"
 #include "tfm_hal_device_header.h"
 #include "tfm_arch.h"
@@ -28,7 +29,10 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 /* IAR Specific */
 #if defined(__ICCARM__)
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 #pragma required = ipc_schedule
+#endif
+
 #pragma required = scheduler_lock
 #pragma required = tfm_core_svc_handler
 
@@ -52,6 +56,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
 #endif
         "   push   {r4-r6, lr}                          \n"
         "   cpsid  i                                    \n"
+        "   isb                                         \n"
         "   mov    r4, r2                               \n"
         "   cmp    r2, #0                               \n"
         "   beq    v8b_lock_sched                       \n"
@@ -66,9 +71,11 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_LOCKED)"         \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
+        "   isb                                         \n"
         "   mov    r6, r1                               \n"
         "   bl     cross_call_entering_c                \n"
         "   cpsid  i                                    \n"
+        "   isb                                         \n"
         "   mov    r1, r6                               \n"
         "   bl     cross_call_exiting_c                 \n"
         "   cmp    r4, #0                               \n"
@@ -82,6 +89,7 @@ __naked void arch_non_preempt_call(uintptr_t fn_addr, uintptr_t frame_addr,
         "   movs   r3, #"M2S(SCHEDULER_UNLOCKED)"       \n"
         "   str    r3, [r2, #0]                         \n"
         "   cpsie  i                                    \n"
+        "   isb                                         \n"
         "   pop    {r4-r6, pc}                          \n"
     );
 }
@@ -95,41 +103,62 @@ __attribute__((naked)) void PendSV_Handler(void)
 #if !defined(__ICCARM__)
         ".syntax unified                                \n"
 #endif
-        "   movs    r0, #"M2S(EXC_RETURN_SECURE_STACK)" \n"
+        "   movs    r0, #"M2S(EXC_RETURN_S)"            \n"
         "   mov     r1, lr                              \n"
+#if CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED == 0
         "   tst     r0, r1                              \n" /* NS interrupted */
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
+#endif
         "   push    {r0, lr}                            \n" /* Save R0, LR */
-        "   bl      ipc_schedule                         \n"
+        "   bl      ipc_schedule                        \n"
         "   pop     {r2, r3}                            \n"
         "   mov     lr, r3                              \n"
         "   cmp     r0, r1                              \n" /* curr, next ctx */
         "   beq     v8b_pendsv_exit                     \n" /* No schedule */
         "   cpsid   i                                   \n"
         "   mrs     r2, psp                             \n"
-        "   mrs     r3, psplim                          \n"
+        "   mov     r3, lr                              \n"
+        "   push    {r0, r1}                            \n"
+        "   movs    r1, #"M2S(EXC_RETURN_DCRS)"         \n" /* Check DCRS */
+        "   ands    r1, r3                              \n"
+        "   beq     v8b_pendsv_callee_saved             \n" /* Skip saving callee */
         "   subs    r2, #32                             \n" /* For r4-r7 */
-        "   stm     r2!, {r4-r7}                        \n" /* Save callee */
+        "   stm     r2!, {r4-r7}                        \n" /* Save r4-r7 */
         "   mov     r4, r8                              \n"
         "   mov     r5, r9                              \n"
         "   mov     r6, r10                             \n"
         "   mov     r7, r11                             \n"
-        "   stm     r2!, {r4-r7}                        \n"
-        "   mov     r3, lr                              \n"
-        "   subs    r2, #32                             \n" /* set SP to top */
+        "   stm     r2!, {r4-r7}                        \n" /* Save r8-r11 */
+        "   subs    r2, #40                             \n" /* Set SP to top
+                                                             * With two more dummy data for
+                                                             * reserved additional state context,
+                                                             * integrity signature offset
+                                                             */
+        "v8b_pendsv_callee_saved:                       \n"
+        "   pop     {r0, r1}                            \n"
         "   stm     r0!, {r2, r3}                       \n" /* Save curr ctx */
         "   ldm     r1!, {r2, r3}                       \n" /* Load next ctx */
         "   mov     lr, r3                              \n"
-        "   ldr     r3, [r1]                            \n"
-        "   adds    r2, #16                             \n" /* Pop r4-r11 */
+        "   push    {r0, r1}                            \n"
+        "   movs    r1, #"M2S(EXC_RETURN_DCRS)"         \n" /* Check DCRS */
+        "   ands    r1, r3                              \n"
+        "   beq     v8b_pendsv_callee_loaded            \n" /* Skip loading callee */
+        "   adds    r2, #24                             \n" /* Pop dummy data for
+                                                             * reserved additional state context,
+                                                             * integrity signature offset,
+                                                             * r8-r11
+                                                             */
         "   ldm     r2!, {r4-r7}                        \n"
         "   mov     r8, r4                              \n"
         "   mov     r9, r5                              \n"
         "   mov     r10, r6                             \n"
         "   mov     r11, r7                             \n"
-        "   subs    r2, #32                             \n"
+        "   subs    r2, #32                             \n" /* Pop r4-r7 */
         "   ldm     r2!, {r4-r7}                        \n"
         "   adds    r2, #16                             \n" /* Pop r4-r11 end */
+        "v8b_pendsv_callee_loaded:                      \n"
+        "   pop     {r0, r1}                            \n"
+        "   ldr     r3, [r1]                            \n"
         "   msr     psp, r2                             \n"
         "   msr     psplim, r3                          \n"
         "   cpsie   i                                   \n"
@@ -164,12 +193,23 @@ __attribute__((naked)) void SVC_Handler(void)
     "BX      lr                             \n"
     "to_flih_func:                          \n"
     "PUSH    {r2, r3}                       \n" /* PSP PSPLIM */
-    "PUSH    {r4-r7}                        \n"
+    "PUSH    {r0, r1}                       \n"
+    "LDR     r0, ="M2S(EXC_RETURN_DCRS)"    \n" /* Check DCRS */
+    "MOV     r1, lr                         \n"
+    "ANDS    r0, r1                         \n"
+    "BEQ     v8b_svc_callee_saved           \n" /* Skip saving callee */
+    "PUSH    {r4-r7}                        \n" /* Save callee */
     "MOV     r4, r8                         \n"
     "MOV     r5, r9                         \n"
     "MOV     r6, r10                        \n"
     "MOV     r7, r11                        \n"
     "PUSH    {r4-r7}                        \n"
+    "SUB     sp, #8                         \n" /* Dummy data to align SP offset for
+                                                 * reserved additional state context,
+                                                 * integrity signature
+                                                 */
+    "v8b_svc_callee_saved:                  \n"
+    "POP     {r0, r1}                       \n"
     "LDR     r4, ="M2S(STACK_SEAL_PATTERN)" \n" /* clear r4-r11 */
     "MOV     r5, r4                         \n"
     "MOV     r6, r4                         \n"
@@ -182,12 +222,23 @@ __attribute__((naked)) void SVC_Handler(void)
     "BX      lr                             \n"
     "from_flih_func:                        \n"
     "POP     {r4, r5}                       \n" /* Seal stack */
+    "PUSH    {r0, r1}                       \n"
+    "LDR     r0, ="M2S(EXC_RETURN_DCRS)"    \n" /* Check DCRS */
+    "MOV     r1, lr                         \n"
+    "ANDS    r0, r1                         \n"
+    "BEQ     v8b_svc_callee_loaded          \n" /* Skip loading callee */
+    "ADD     sp, #8                         \n" /* Dummy data to align SP offset for
+                                                 * reserved additional state context,
+                                                 * integrity signature
+                                                 */
     "POP     {r4-r7}                        \n"
     "MOV     r8, r4                         \n"
     "MOV     r9, r5                         \n"
     "MOV     r10, r6                        \n"
     "MOV     r11, r7                        \n"
     "POP     {r4-r7}                        \n"
+    "v8b_svc_callee_loaded:                 \n"
+    "POP     {r0, r1}                       \n"
     "POP     {r1, r2}                       \n" /* PSP PSPLIM */
     "BX      lr                             \n"
     );

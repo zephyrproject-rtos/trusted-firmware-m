@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -382,7 +382,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
     bool privileged;
     bool ns_agent;
     uint32_t partition_attrs = 0;
-#if TFM_LVL == 2
+#if (CONFIG_TFM_MMIO_REGION_ENABLE == 1) && (TFM_LVL == 2)
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
 #if CONFIG_TFM_MMIO_REGION_ENABLE == 1
@@ -399,10 +399,10 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = IS_PARTITION_PSA_ROT(p_ldinf);
+    privileged = IS_PSA_ROT(p_ldinf);
 #endif
 
-    ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
+    ns_agent = IS_NS_AGENT(p_ldinf);
 
 
     /*
@@ -515,8 +515,11 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
     bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
 #if TFM_LVL == 3
     struct mpu_armv8m_region_cfg_t localcfg;
-    uint32_t i, mmio_index;
+    uint32_t i;
+#if CONFIG_TFM_MMIO_REGION_ENABLE == 1
+    uint32_t mmio_index;
     struct platform_data_t *plat_data_ptr;
+#endif
     const struct asset_desc_t *rt_mem;
     fih_int fih_rc = FIH_FAILURE;
 #endif /* TFM_LVL == 3 */

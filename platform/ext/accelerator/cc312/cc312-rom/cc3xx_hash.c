@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,8 +7,8 @@
 
 #include "cc3xx_hash.h"
 
+#include "cc3xx_dev.h"
 #include "cc3xx_error.h"
-#include "cc3xx_reg_defs.h"
 #include "cc3xx_dma.h"
 #include "cc3xx_engine_state.h"
 
@@ -35,7 +35,8 @@ static inline uint32_t bswap_32(uint32_t in) {
     return out;
 }
 
-cc3xx_err_t cc3xx_hash_sha256_init() {
+cc3xx_err_t cc3xx_hash_sha256_init(void)
+{
 
     if (cc3xx_engine_in_use) {
         return CC3XX_ERR_ENGINE_IN_USE;
@@ -43,68 +44,70 @@ cc3xx_err_t cc3xx_hash_sha256_init() {
     cc3xx_engine_in_use = true;
 
     /* Enable the hash engine clock */
-    *CC3XX_REG_MISC_HASH_CLK_ENABLE = 0x1U;
+    P_CC3XX->misc.hash_clk_enable = 0x1U;
 
     /* Enable the DMA clock */
-    *CC3XX_REG_MISC_DMA_CLK_ENABLE = 0x1U;
+    P_CC3XX->misc.dma_clk_enable = 0x1U;
 
     /* Wait for the crypto engine to be ready */
-    while (*CC3XX_REG_CC_CTL_CRYPTO_BUSY) {}
+    while (P_CC3XX->cc_ctl.crypto_busy) {}
 
     /* Set the crypto engine to the HASH engine */
-    *CC3XX_REG_CC_CTL_CRYPTO_CTL = 0b00111U;
+    P_CC3XX->cc_ctl.crypto_ctl = 0b00111U;
 
     /* Select HASH mode, not MAC */
-    *CC3XX_REG_HASH_HASH_SEL_AES_MAC  = 0x0U;
+    P_CC3XX->hash.hash_sel_aes_mac  = 0x0U;
 
     /* Configure the hash engine to SHA256 */
-    *CC3XX_REG_HASH_HASH_CONTROL = 0b0010U;
+    P_CC3XX->hash.hash_control = 0b0010U;
 
     /* Enable padding */
-    *CC3XX_REG_HASH_HASH_PAD_EN = 0x1U;
+    P_CC3XX->hash.hash_pad_en = 0x1U;
 
     /* Disable auto-padding to allow multipart operations */
-    *CC3XX_REG_HASH_AUTO_HW_PADDING = 0x0U;
+    P_CC3XX->hash.auto_hw_padding = 0x0U;
 
     /* Set already processed length to 0 */
-    *CC3XX_REG_HASH_HASH_CUR_LEN_0 = 0x0U;
-    *CC3XX_REG_HASH_HASH_CUR_LEN_1 = 0x0U;
+    P_CC3XX->hash.hash_cur_len[0] = 0x0U;
+    P_CC3XX->hash.hash_cur_len[1] = 0x0U;
 
     /* Set the registers to the magic initial values of sha256. CryptoCell
      * hardware requires the writes to happen in reverse order
      * (from H7 to H0).
      */
-    *CC3XX_REG_HASH_HASH_H7 = 0x5be0cd19U;
-    *CC3XX_REG_HASH_HASH_H6 = 0x1f83d9abU;
-    *CC3XX_REG_HASH_HASH_H5 = 0x9b05688cU;
-    *CC3XX_REG_HASH_HASH_H4 = 0x510e527fU;
-    *CC3XX_REG_HASH_HASH_H3 = 0xa54ff53aU;
-    *CC3XX_REG_HASH_HASH_H2 = 0x3c6ef372U;
-    *CC3XX_REG_HASH_HASH_H1 = 0xbb67ae85U;
-    *CC3XX_REG_HASH_HASH_H0 = 0x6a09e667U;
+    P_CC3XX->hash.hash_h[7] = 0x5be0cd19U;
+    P_CC3XX->hash.hash_h[6] = 0x1f83d9abU;
+    P_CC3XX->hash.hash_h[5] = 0x9b05688cU;
+    P_CC3XX->hash.hash_h[4] = 0x510e527fU;
+    P_CC3XX->hash.hash_h[3] = 0xa54ff53aU;
+    P_CC3XX->hash.hash_h[2] = 0x3c6ef372U;
+    P_CC3XX->hash.hash_h[1] = 0xbb67ae85U;
+    P_CC3XX->hash.hash_h[0] = 0x6a09e667U;
 
     return CC3XX_ERR_SUCCESS;
 }
 
-static void hash_uninit()
+static void hash_uninit(void)
 {
     /* Reset padding registers as required by the hardware */
-    *CC3XX_REG_HASH_HASH_PAD_CFG = 0x0U;
-    *CC3XX_REG_HASH_AUTO_HW_PADDING = 0x0U;
+    P_CC3XX->hash.hash_pad_cfg = 0x0U;
+    P_CC3XX->hash.auto_hw_padding = 0x0U;
 
     /* Set the crypto engine back to the default PASSTHROUGH engine */
-    *CC3XX_REG_CC_CTL_CRYPTO_CTL = 0x0U;
+    P_CC3XX->cc_ctl.crypto_ctl = 0x0U;
 
     /* Disable the hash engine clock */
-    *CC3XX_REG_MISC_HASH_CLK_ENABLE = 0x0U;
+    P_CC3XX->misc.hash_clk_enable = 0x0U;
 
     /* Disable the DMA clock */
-    *CC3XX_REG_MISC_DMA_CLK_ENABLE = 0x0U;
+    P_CC3XX->misc.dma_clk_enable = 0x0U;
 
     cc3xx_engine_in_use = false;
 }
 
-cc3xx_err_t cc3xx_hash_sha256_update(const uint8_t *buf, size_t length) {
+cc3xx_err_t cc3xx_hash_sha256_update(const uint8_t *buf,
+                                     size_t length)
+{
     size_t current_processed_length = 0;
     size_t partial_block_size_free = SHA256_BLOCK_SIZE - cc3xx_hash_partial_block_size;
     size_t partial_block_size_increase = 0;
@@ -132,7 +135,7 @@ cc3xx_err_t cc3xx_hash_sha256_update(const uint8_t *buf, size_t length) {
     /* If the unprocessed data buffer is full then write it out */
     if (cc3xx_hash_partial_block_size == SHA256_BLOCK_SIZE) {
         err = cc3xx_dma_input_data(cc3xx_hash_partial_block_buf,
-                                cc3xx_hash_partial_block_size);
+                                   cc3xx_hash_partial_block_size);
         if (err != CC3XX_ERR_SUCCESS) {
             hash_uninit();
             return err;
@@ -170,8 +173,12 @@ cc3xx_err_t cc3xx_hash_sha256_update(const uint8_t *buf, size_t length) {
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_hash_sha256_finish(uint8_t *res, size_t length) {
+cc3xx_err_t cc3xx_hash_sha256_finish(uint8_t *res,
+                                     size_t length)
+{
     cc3xx_err_t err = CC3XX_ERR_SUCCESS;
+    uint32_t tmp_buf[SHA256_OUTPUT_SIZE / sizeof(uint32_t)];
+    uint32_t idx;
 
     if (length < SHA256_OUTPUT_SIZE) {
         hash_uninit();
@@ -180,9 +187,9 @@ cc3xx_err_t cc3xx_hash_sha256_finish(uint8_t *res, size_t length) {
 
     /* Process the final block */
     if (cc3xx_hash_partial_block_size > 0) {
-        *CC3XX_REG_HASH_AUTO_HW_PADDING = 0x1U;
+        P_CC3XX->hash.auto_hw_padding = 0x1U;
         err = cc3xx_dma_input_data(cc3xx_hash_partial_block_buf,
-                                cc3xx_hash_partial_block_size);
+                                   cc3xx_hash_partial_block_size);
         if (err) {
             hash_uninit();
             return err;
@@ -191,19 +198,16 @@ cc3xx_err_t cc3xx_hash_sha256_finish(uint8_t *res, size_t length) {
     }
 
     /* Special-case for hardware padding when the length is 0 */
-    if (*CC3XX_REG_HASH_HASH_CUR_LEN_0 == 0
-        && *CC3XX_REG_HASH_HASH_CUR_LEN_1 == 0) {
-        *CC3XX_REG_HASH_HASH_PAD_CFG = 0x4U;
+    if (P_CC3XX->hash.hash_cur_len[0] == 0
+        && P_CC3XX->hash.hash_cur_len[1] == 0) {
+        P_CC3XX->hash.hash_pad_cfg = 0x4U;
     }
 
-    ((uint32_t*)res)[0] = bswap_32(*CC3XX_REG_HASH_HASH_H0);
-    ((uint32_t*)res)[1] = bswap_32(*CC3XX_REG_HASH_HASH_H1);
-    ((uint32_t*)res)[2] = bswap_32(*CC3XX_REG_HASH_HASH_H2);
-    ((uint32_t*)res)[3] = bswap_32(*CC3XX_REG_HASH_HASH_H3);
-    ((uint32_t*)res)[4] = bswap_32(*CC3XX_REG_HASH_HASH_H4);
-    ((uint32_t*)res)[5] = bswap_32(*CC3XX_REG_HASH_HASH_H5);
-    ((uint32_t*)res)[6] = bswap_32(*CC3XX_REG_HASH_HASH_H6);
-    ((uint32_t*)res)[7] = bswap_32(*CC3XX_REG_HASH_HASH_H7);
+    for (idx = 0; idx < 8; idx++) {
+        tmp_buf[idx] = bswap_32(P_CC3XX->hash.hash_h[idx]);
+    }
+
+    memcpy(res, tmp_buf, sizeof(tmp_buf));
 
     hash_uninit();
 

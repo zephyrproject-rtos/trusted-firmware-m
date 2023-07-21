@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited
+ * Copyright (c) 2019-2023 Arm Limited
  *
  * Licensed under the Apache License Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,12 @@
 #define AHB_USER_1_BASE_NS               0x41105000 /* AHB USER 1 Non-Secure base address */
 #define AHB_USER_2_BASE_NS               0x41106000 /* AHB USER 2 Non-Secure base address */
 #define AHB_USER_3_BASE_NS               0x41107000 /* AHB USER 3 Non-Secure base address */
+#ifdef CORSTONE310_AN555
+#define DMA_0_BASE_NS                    0x41200000 /* DMA0 Non-Secure base address */
+#define DMA_1_BASE_NS                    0x41201000 /* DMA1 Non-Secure base address */
+#define DMA_2_BASE_NS                    0x41202000 /* DMA2 Non-Secure base address */
+#define DMA_3_BASE_NS                    0x41203000 /* DMA3 Non-Secure base address */
+#endif
 #define ETHERNET_BASE_NS                 0x41400000 /* Ethernet Non-Secure base address */
 #define USB_BASE_NS                      0x41500000 /* USB Non-Secure base address */
 #define USER_APB0_BASE_NS                0x41700000 /* User APB 0 Non-Secure base address */
@@ -91,6 +97,20 @@
 #define UART5_BASE_NS                    0x49308000 /* UART 5 Non-Secure base address */
 #define CLCD_Config_Reg_BASE_NS          0x4930A000 /* CLCD Config Reg Non-Secure base address */
 #define RTC_BASE_NS                      0x4930B000 /* RTC Non-Secure base address */
+
+#ifdef CORSTONE310_FVP
+#define VSOCKET_BASE_NS                  0x4FEE0000 /*!< VSOCKET Non-Secure base address */
+#define VIO_BASE_NS                      0x4FEF0000 /*!< VIO Non-Secure base address */
+#define VSI0_BASE_NS                     0x4FF00000 /*!< VSI 0 Non-Secure base address */
+#define VSI1_BASE_NS                     0x4FF10000 /*!< VSI 1 Non-Secure base address */
+#define VSI2_BASE_NS                     0x4FF20000 /*!< VSI 2 Non-Secure base address */
+#define VSI3_BASE_NS                     0x4FF30000 /*!< VSI 3 Non-Secure base address */
+#define VSI4_BASE_NS                     0x4FF40000 /*!< VSI 4 Non-Secure base address */
+#define VSI5_BASE_NS                     0x4FF50000 /*!< VSI 5 Non-Secure base address */
+#define VSI6_BASE_NS                     0x4FF60000 /*!< VSI 6 Non-Secure base address */
+#define VSI7_BASE_NS                     0x4FF70000 /*!< VSI 7 Non-Secure base address */
+#endif
+
 #define DDR4_BLK0_BASE_NS                0x60000000 /* DDR4 block 0 Non-Secure base address */
 #define DDR4_BLK2_BASE_NS                0x80000000 /* DDR4 block 2 Non-Secure base address */
 #define DDR4_BLK4_BASE_NS                0xA0000000 /* DDR4 block 4 Non-Secure base address */
@@ -126,6 +146,12 @@
 #define AHB_USER_1_BASE_S                0x51105000 /* AHB USER 1 Secure base address */
 #define AHB_USER_2_BASE_S                0x51106000 /* AHB USER 2 Secure base address */
 #define AHB_USER_3_BASE_S                0x51107000 /* AHB USER 3 Secure base address */
+#ifdef CORSTONE310_AN555
+#define DMA_0_BASE_S                     0x51200000  /* DMA0 Secure base address */
+#define DMA_1_BASE_S                     0x51201000  /* DMA1 Secure base address */
+#define DMA_2_BASE_S                     0x51202000  /* DMA2 Secure base address */
+#define DMA_3_BASE_S                     0x51203000  /* DMA3 Secure base address */
+#endif
 #define ETHERNET_BASE_S                  0x51400000 /* Ethernet Secure base address */
 #define USB_BASE_S                       0x51500000 /* USB Secure base address */
 #define USER_APB0_BASE_S                 0x51700000 /* User APB 0 Secure base address */
@@ -178,6 +204,20 @@
 #define UART5_BASE_S                     0x59308000 /* UART 5 Secure base address */
 #define CLCD_Config_Reg_BASE_S           0x5930A000 /* CLCD Config Reg Secure base address */
 #define RTC_BASE_S                       0x5930B000 /* RTC Secure base address */
+
+#ifdef CORSTONE310_FVP
+#define VSOCKET_BASE_S                   0x5FEE0000 /*!< VSOCKET Secure base address */
+#define VIO_BASE_S                       0x5FEF0000 /*!< VIO Secure base address */
+#define VSI0_BASE_S                      0x5FF00000 /*!< VSI 0 Secure base address */
+#define VSI1_BASE_S                      0x5FF10000 /*!< VSI 1 Secure base address */
+#define VSI2_BASE_S                      0x5FF20000 /*!< VSI 2 Secure base address */
+#define VSI3_BASE_S                      0x5FF30000 /*!< VSI 3 Secure base address */
+#define VSI4_BASE_S                      0x5FF40000 /*!< VSI 4 Secure base address */
+#define VSI5_BASE_S                      0x5FF50000 /*!< VSI 5 Secure base address */
+#define VSI6_BASE_S                      0x5FF60000 /*!< VSI 6 Secure base address */
+#define VSI7_BASE_S                      0x5FF70000 /*!< VSI 7 Secure base address */
+#endif
+
 #define DDR4_BLK1_BASE_S                 0x70000000 /* DDR4 block 1 Secure base address */
 #define DDR4_BLK3_BASE_S                 0x90000000 /* DDR4 block 3 Secure base address */
 #define DDR4_BLK5_BASE_S                 0xB0000000 /* DDR4 block 5 Secure base address */
@@ -206,6 +246,11 @@
 #define QSPI_SRAM_SIZE  (0x00800000) /* 8 MB */
 #define DDR4_BLK_SIZE   (0x10000000) /* 256 MB */
 #define DDR4_BLK_NUM    (0x8)        /* Number of DDR4 blocks */
+
+/* All VMs use the same MPC block size as defined by VMMPCBLKSIZE. */
+#define SRAM_MPC_BLK_SIZE    (0x4000)     /* 16 kB */
+#define QSPI_MPC_BLK_SIZE    (0x40000)    /* 256 kB */
+#define DDR4_MPC_BLK_SIZE    (0x100000)   /* 1 MB */
 
 /* Defines for Driver MPC's */
 /* SRAM -- 2 MB */

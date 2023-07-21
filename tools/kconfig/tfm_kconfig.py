@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022, Arm Limited. All rights reserved.
+# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
@@ -9,7 +9,7 @@ import logging
 import os
 import re
 
-from kconfiglib import Kconfig
+from kconfiglib import Kconfig, TRI_TO_STR, BOOL, TRISTATE
 import menuconfig
 import guiconfig
 
@@ -37,6 +37,26 @@ def parse_args():
     )
 
     parser.add_argument(
+        '--envs',
+        dest='envs',
+        default = None,
+        nargs = '*',
+        help = 'The environment variables for Kconfig files. Use absolute paths for directories.\
+                The format must be key-value pairs with "=" in the middle, for example:\
+                FOO=foo BAR=bar'
+    )
+
+    parser.add_argument(
+        '--config-files',
+        dest='config_files',
+        default = None,
+        nargs = '*',
+        help = 'The config files to be load and merge. The load order is the same as this list order,\
+                The later ones override the former ones.\
+                If .config is found in output-path, this file list is ignored.'
+    )
+
+    parser.add_argument(
         '-u', '--ui',
         dest = 'ui',
         required = False,
@@ -45,16 +65,25 @@ def parse_args():
         help = 'Which config UI to display'
     )
 
-    parser.add_argument(
-        '-p', '--platform-path',
-        dest = 'platform_path',
-        required = False,
-        help = 'The platform path which contains specific Kconfig and defconfig files'
-    )
-
     args = parser.parse_args()
 
     return args
+
+def set_env_var(envs):
+    '''
+    The Kconfig files might use some environment variables.
+    This method sets environment variables for Kconfig files.
+    Each item in 'envs' should be in the key-value format, for example:
+    'FOO=foo BAR=bar'
+    '''
+    if envs is None:
+        return
+
+    for env in envs:
+        env_entries = env.strip('\r\n').split()
+        for _env in env_entries:
+            key, value = _env.split('=')
+            os.environ[key] = value
 
 def generate_file(dot_config):
     '''
@@ -66,7 +95,11 @@ def generate_file(dot_config):
     the prompt which contains in_component_label. These configs will be written
     into header file.
     '''
-    cmake_file, header_file = 'project_config.cmake', 'project_config.h'
+
+    output_dir = os.path.dirname(dot_config)
+    cmake_file = os.path.join(output_dir, 'project_config.cmake')
+    header_file = os.path.join(output_dir, 'project_config.h')
+
     in_component_options, menu_start = False, False
 
     '''
@@ -160,13 +193,50 @@ def generate_file(dot_config):
 
             # Write the result into cmake and header files.
             if name and not in_component_options:
-                f_cmake.write('set({:<45} {:<15} CACHE {:<6} "")\n'.
+                f_cmake.write('set({:<45} {:<15} CACHE {:<6} "" FORCE)\n'.
                               format(name, cmake_val, cmake_type))
             if name and in_component_options:
                 f_header.write('#define {:<45} {}\n'.format(name, header_val))
 
     logging.info('TF-M build configs saved to \'{}\''.format(cmake_file))
     logging.info('TF-M component configs saved to \'{}\''.format(header_file))
+
+def validate_promptless_sym(kconfig):
+    """
+    Check if any assignments to promptless symbols.
+    """
+
+    ret = True
+
+    for sym in kconfig.unique_defined_syms:
+        if sym.user_value and not any(node.prompt for node in sym.nodes):
+            logging.error('Assigning value to promptless symbol {}'.format(sym.name))
+            ret = False
+
+    return ret
+
+def validate_assigned_sym(kconfig):
+    """
+    Checks if all assigned symbols have the expected values
+    """
+
+    ret = True
+
+    for sym in kconfig.unique_defined_syms:
+        if not sym.user_value:
+            continue
+
+        if sym.type in (BOOL, TRISTATE):
+            user_val = TRI_TO_STR[sym.user_value]
+        else:
+            user_val = sym.user_value
+
+        if user_val != sym.str_value:
+            logging.error('Tried to set [{}] to <{}>, but is <{}> finally.'.format(
+                            sym.name, user_val, sym.str_value))
+            ret = False
+
+    return ret
 
 if __name__ == '__main__':
     logging.basicConfig(format='[%(filename)s] %(levelname)s: %(message)s',
@@ -175,39 +245,38 @@ if __name__ == '__main__':
     args = parse_args()
 
     # dot_config has a fixed name. Do NOT rename it.
-    dot_config = '.config'
-    def_config = ''
+    dot_config = os.path.abspath(os.path.join(args.output_path, '.config'))
     mtime_prv = 0
 
-    if args.platform_path:
-        platform_abs_path = os.path.abspath(args.platform_path)
-
-        if not os.path.exists(platform_abs_path):
-            logging.error('Platform path {} doesn\'t exist!'.format(platform_abs_path))
-            exit(1)
-
-        def_config = os.path.join(platform_abs_path, 'defconfig')
-
-        # Pass environment variable to Kconfig to load extra Kconfig file.
-        os.environ['PLATFORM_PATH'] = platform_abs_path
+    set_env_var(args.envs)
 
     # Load Kconfig file. kconfig_file is the root Kconfig file. The path is
     # input by users from the command.
     tfm_kconfig = Kconfig(args.kconfig_file)
+    tfm_kconfig.disable_undef_warnings() # Disable warnings for undefined symbols when loading
+    tfm_kconfig.disable_override_warnings() # Overriding would happen when loading multiple config files
+    tfm_kconfig.disable_redun_warnings() # Redundant definitions might happen when loading multiple config files
 
     if not os.path.exists(args.output_path):
         os.mkdir(args.output_path)
 
-    # Change program execution path to the output folder path.
-    os.chdir(args.output_path)
-
     if os.path.exists(dot_config):
         # Load .config which contains the previous configurations.
+        # Input config files are ignored.
+        logging.info('.config file found, other config files are ignored.')
         mtime_prv = os.stat(dot_config).st_mtime
         logging.info(tfm_kconfig.load_config(dot_config))
-    elif os.path.exists(def_config):
-        # Load platform specific defconfig if exists.
-        logging.info(tfm_kconfig.load_config(def_config))
+    elif args.config_files is not None:
+        # Load input config files if .config is not found and write the .config file.
+        for conf in args.config_files:
+            logging.info(tfm_kconfig.load_config(conf, replace = False))
+
+        if not validate_promptless_sym(tfm_kconfig) or not validate_assigned_sym(tfm_kconfig):
+            exit(1)
+
+    # Change program execution path to the output folder path because menuconfigs do not support
+    # writing .config to arbitrary folders.
+    os.chdir(args.output_path)
 
     # UI options
     if args.ui == 'tui':
@@ -215,10 +284,14 @@ if __name__ == '__main__':
     elif args.ui == 'gui':
         guiconfig.menuconfig(tfm_kconfig)
     else:
-        # Save .config if UI is not created.
-        # The previous .config will be saved as .config.old.
         logging.info(tfm_kconfig.write_config(dot_config))
 
+    if not os.path.exists(dot_config):
+        # This could happend when the user did not "Save" the config file when using menuconfig
+        # We should abort here in such case.
+        logging.error('No .config is saved!')
+        exit(1)
+
     # Generate output files if .config has been changed.
-    if os.path.exists(dot_config) and os.stat(dot_config).st_mtime != mtime_prv:
+    if os.stat(dot_config).st_mtime != mtime_prv:
         generate_file(dot_config)

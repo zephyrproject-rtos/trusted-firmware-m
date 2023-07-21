@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2021, Cypress Semiconductor Corp. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -29,7 +29,10 @@ void ns_agent_mailbox_entry(void)
 
     boot_ns_core();
 
-    tfm_inter_core_comm_init();
+    if (tfm_inter_core_comm_init()) {
+        LOG_ERRFMT("Inter-core communication init failed\r\n");
+        psa_panic();
+    }
 
     psa_irq_enable(MAILBOX_SIGNAL);
 

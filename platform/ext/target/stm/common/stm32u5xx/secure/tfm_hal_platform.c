@@ -13,7 +13,7 @@
 
 extern const struct memory_region_limits memory_regions;
 
-enum tfm_hal_status_t tfm_hal_platform_init(void)
+FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_platform_init(void)
 {
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
 
@@ -22,10 +22,10 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
 
     plat_err = nvic_interrupt_target_state_cfg();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        return TFM_HAL_ERROR_GENERIC;
+        FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
-    return TFM_HAL_SUCCESS;
+    FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 
 uint32_t tfm_hal_get_ns_VTOR(void)

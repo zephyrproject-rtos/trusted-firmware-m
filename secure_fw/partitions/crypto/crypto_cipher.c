@@ -8,11 +8,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "config_crypto.h"
+#include "config_tfm.h"
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
+#include "tfm_crypto_key.h"
 #include "tfm_crypto_defs.h"
+
+#include "crypto_library.h"
 
 /*!
  * \addtogroup tfm_crypto_api_shim_layer
@@ -23,7 +26,7 @@
 #if CRYPTO_CIPHER_MODULE_ENABLED
 psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
                                          psa_outvec out_vec[],
-                                         mbedtls_svc_key_id_t *encoded_key)
+                                         struct tfm_crypto_key_id_s *encoded_key)
 {
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
@@ -31,6 +34,8 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
     uint32_t *p_handle = NULL;
     uint16_t sid = iov->function_id;
 
+    tfm_crypto_library_key_id_t library_key = tfm_crypto_library_key_id_init(
+                                                  encoded_key->owner, encoded_key->key_id);
     if (sid == TFM_CRYPTO_CIPHER_ENCRYPT_SID) {
 #if CRYPTO_SINGLE_PART_FUNCS_DISABLED
         return PSA_ERROR_NOT_SUPPORTED;
@@ -40,7 +45,7 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
         uint8_t *output = out_vec[0].base;
         size_t output_size = out_vec[0].len;
 
-        status = psa_cipher_encrypt(*encoded_key, iov->alg, input, input_length,
+        status = psa_cipher_encrypt(library_key, iov->alg, input, input_length,
                                     output, output_size, &out_vec[0].len);
         if (status != PSA_SUCCESS) {
             out_vec[0].len = 0;
@@ -58,7 +63,7 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
         uint8_t *output = out_vec[0].base;
         size_t output_size = out_vec[0].len;
 
-        status = psa_cipher_decrypt(*encoded_key, iov->alg, input, input_length,
+        status = psa_cipher_decrypt(library_key, iov->alg, input, input_length,
                                     output, output_size, &out_vec[0].len);
         if (status != PSA_SUCCESS) {
             out_vec[0].len = 0;
@@ -127,7 +132,7 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
     }
     case TFM_CRYPTO_CIPHER_ENCRYPT_SETUP_SID:
     {
-        status = psa_cipher_encrypt_setup(operation, *encoded_key, iov->alg);
+        status = psa_cipher_encrypt_setup(operation, library_key, iov->alg);
         if (status != PSA_SUCCESS) {
             goto release_operation_and_return;
         }
@@ -135,7 +140,7 @@ psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
     break;
     case TFM_CRYPTO_CIPHER_DECRYPT_SETUP_SID:
     {
-        status = psa_cipher_decrypt_setup(operation, *encoded_key, iov->alg);
+        status = psa_cipher_decrypt_setup(operation, library_key, iov->alg);
         if (status != PSA_SUCCESS) {
             goto release_operation_and_return;
         }
@@ -189,7 +194,7 @@ release_operation_and_return:
 #else /* CRYPTO_CIPHER_MODULE_ENABLED */
 psa_status_t tfm_crypto_cipher_interface(psa_invec in_vec[],
                                          psa_outvec out_vec[],
-                                         mbedtls_svc_key_id_t *encoded_key)
+                                         struct tfm_crypto_key_id_s *encoded_key)
 {
     (void)in_vec;
     (void)out_vec;

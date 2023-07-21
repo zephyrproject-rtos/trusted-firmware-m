@@ -6,6 +6,8 @@ Supported Platforms
 
         - `Corstone-310 Ethos-U55 FVP.
           <https://arm-software.github.io/AVH/main/simulation/html/Using.html>`_
+        - `FPGA image loaded on MPS3 board (AN555).
+          <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`_
 
     - Cortex-M55 system:
 

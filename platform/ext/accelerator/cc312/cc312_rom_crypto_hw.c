@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -9,7 +9,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "region_defs.h"
-#include "cc3xx_init.h"
+#include "cc3xx_drv.h"
+#include "device_definition.h"
 
 int crypto_hw_accelerator_init(void)
 {

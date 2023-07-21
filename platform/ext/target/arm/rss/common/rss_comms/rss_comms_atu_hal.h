@@ -8,7 +8,12 @@
 #ifndef __RSS_COMMS_ATU_HAL_H__
 #define __RSS_COMMS_ATU_HAL_H__
 
+#ifndef RSS_XIP
 #define RSS_COMMS_ATU_REGION_MIN        0
+#else
+#define RSS_COMMS_ATU_REGION_MIN        2
+#endif /* !RSS_XIP */
+
 #define RSS_COMMS_ATU_REGION_MAX        15
 /* There must be at least one region */
 #define RSS_COMMS_ATU_REGION_AM         (RSS_COMMS_ATU_REGION_MAX - \

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021 Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2022 Arm Limited. All rights reserved.
  * Copyright (c) 2020 Nordic Semiconductor ASA. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,11 +62,11 @@
 #define FLASH_NS_PARTITION_SIZE               (0x30000)       /* NS partition: 192 kB*/
 #endif
 
-#define FLASH_MAX_PARTITION_SIZE        ((FLASH_S_PARTITION_SIZE >   \
-                                          FLASH_NS_PARTITION_SIZE) ? \
-                                         FLASH_S_PARTITION_SIZE :    \
-                                         FLASH_NS_PARTITION_SIZE)
-
+#if (FLASH_S_PARTITION_SIZE > FLASH_NS_PARTITION_SIZE)
+#define FLASH_MAX_PARTITION_SIZE FLASH_S_PARTITION_SIZE
+#else
+#define FLASH_MAX_PARTITION_SIZE FLASH_NS_PARTITION_SIZE
+#endif
 /* Sector size of the embedded flash hardware (erase/program) */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE        (0x1000)           /* 4 KB. Flash memory program/erase operations have a page granularity. */
 

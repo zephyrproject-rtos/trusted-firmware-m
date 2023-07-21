@@ -406,27 +406,6 @@ struct timer_cmsdk_dev_t CMSDK_TIMER1_DEV_NS = {&(CMSDK_TIMER1_DEV_CFG_NS),
                                                 &(CMSDK_TIMER1_DEV_DATA_NS)};
 #endif
 
-/** GFC-100 eflash driver structures */
-#ifdef GFC100_EFLASH0_S
-static const struct gfc100_eflash_dev_cfg_t GFC100_EFLASH0_CFG_S = {
-    .base = MUSCA_B1_EFLASH0_REG_MAP_S_BASE};
-static struct gfc100_eflash_dev_data_t GFC100_EFLASH0_DATA_S = {
-    .is_initialized = false,
-    .flash_size = 0};
-struct gfc100_eflash_dev_t GFC100_EFLASH0_DEV_S = {&(GFC100_EFLASH0_CFG_S),
-                                                   &(GFC100_EFLASH0_DATA_S)};
-#endif
-
-#ifdef GFC100_EFLASH1_S
-static const struct gfc100_eflash_dev_cfg_t GFC100_EFLASH1_CFG_S = {
-    .base = MUSCA_B1_EFLASH1_REG_MAP_S_BASE};
-static struct gfc100_eflash_dev_data_t GFC100_EFLASH1_DATA_S = {
-    .is_initialized = false,
-    .flash_size = 0};
-struct gfc100_eflash_dev_t GFC100_EFLASH1_DEV_S = {&(GFC100_EFLASH1_CFG_S),
-                                                   &(GFC100_EFLASH1_DATA_S)};
-#endif
-
 /* QSPI IP6514E driver structures */
 #ifdef QSPI_IP6514E_S
 static const struct qspi_ip6514e_dev_cfg_t QSPI_DEV_CFG_S = {

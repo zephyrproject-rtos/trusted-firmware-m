@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -35,7 +35,7 @@
 static uint32_t n_configured_regions = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CONFIG_TFM_USE_TRUSTZONE
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 #endif
@@ -51,7 +51,7 @@ REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
 const struct mpu_armv8m_region_cfg_t region_cfg[] = {
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CONFIG_TFM_USE_TRUSTZONE
     /* Veneer region */
     {
         0, /* will be updated before using */
@@ -199,10 +199,10 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 #if TFM_LVL == 1
     privileged = true;
 #else
-    privileged = IS_PARTITION_PSA_ROT(p_ldinf);
+    privileged = IS_PSA_ROT(p_ldinf);
 #endif
 
-    ns_agent = IS_PARTITION_NS_AGENT(p_ldinf);
+    ns_agent = IS_NS_AGENT(p_ldinf);
     p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     /*

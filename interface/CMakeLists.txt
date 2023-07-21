@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -17,8 +17,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/psa/framework_feature.h.in
                ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
                @ONLY)
 
-if (EXISTS ${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
-    include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/preload_ns.cmake)
+if (EXISTS ${TARGET_PLATFORM_PATH}/preload_ns.cmake)
+    include(${TARGET_PLATFORM_PATH}/preload_ns.cmake)
     tfm_toolchain_reload_compiler()
 endif()
 
@@ -59,11 +59,6 @@ target_sources(tfm_sprt
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_platform_api.c>
         $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_ps_api.c>
         ${CMAKE_CURRENT_SOURCE_DIR}/src/tfm_psa_call_pack.c
-)
-
-target_compile_definitions(tfm_sprt
-    PUBLIC
-        CONFIG_TFM_BUILDING_SPE=1
 )
 
 ###################### Export configurations to NS #############################

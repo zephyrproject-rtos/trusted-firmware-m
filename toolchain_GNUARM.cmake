@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -12,6 +12,10 @@ find_program(CMAKE_CXX_COMPILER ${CROSS_COMPILE}-g++)
 
 if(CMAKE_C_COMPILER STREQUAL "CMAKE_C_COMPILER-NOTFOUND")
     message(FATAL_ERROR "Could not find compiler: '${CROSS_COMPILE}-gcc'")
+endif()
+
+if(CMAKE_CXX_COMPILER STREQUAL "CMAKE_CXX_COMPILER-NOTFOUND")
+    message(FATAL_ERROR "Could not find compiler: '${CROSS_COMPILE}-g++'")
 endif()
 
 set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
@@ -35,7 +39,7 @@ macro(tfm_toolchain_reset_compiler_flags)
     endif()
 
     add_compile_options(
-        --specs=nano.specs
+        -specs=nano.specs
         -Wall
         -Wno-format
         -Wno-return-type
@@ -48,9 +52,11 @@ macro(tfm_toolchain_reset_compiler_flags)
         -funsigned-char
         -mthumb
         -nostdlib
-        -std=c99
+        $<$<COMPILE_LANGUAGE:C>:-std=c99>
+        $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
         # Force DWARF version 4 for zephyr as pyelftools does not support version 5 at present
         -gdwarf-4
+        -std=c99
         $<$<OR:$<BOOL:${TFM_DEBUG_SYMBOLS}>,$<BOOL:${TFM_CODE_COVERAGE}>>:-g>
     )
 endmacro()
@@ -66,7 +72,7 @@ macro(tfm_toolchain_reset_linker_flags)
 
     add_link_options(
         --entry=Reset_Handler
-        --specs=nano.specs
+        -specs=nano.specs
         LINKER:-check-sections
         LINKER:-fatal-warnings
         LINKER:--gc-sections
@@ -167,22 +173,34 @@ macro(tfm_toolchain_reload_compiler)
                             " See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157 for the issue detail.")
     endif()
 
+    # GNU Arm compiler version greater equal than *11.3.Rel1*
+    # has a linker issue that required system calls are missing,
+    # such as _read and _write. Add stub functions of required
+    # system calls to solve this issue.
+    if (GCC_VERSION VERSION_GREATER_EQUAL 11.3.1)
+        set(CONFIG_GNU_SYSCALL_STUB_ENABLED TRUE)
+    endif()
+
     unset(CMAKE_C_FLAGS_INIT)
+    unset(CMAKE_CXX_FLAGS_INIT)
     unset(CMAKE_ASM_FLAGS_INIT)
 
     if (CMAKE_SYSTEM_PROCESSOR)
         set(CMAKE_C_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+        set(CMAKE_CXX_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_C_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
         set(CMAKE_ASM_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
     else()
         set(CMAKE_C_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
+        set(CMAKE_CXX_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
         set(CMAKE_ASM_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
         set(CMAKE_C_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
         set(CMAKE_ASM_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
     endif()
 
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_INIT})
     set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
     set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)

@@ -119,23 +119,23 @@ Kevin Peng
 Arm Platforms
 ~~~~~~~~~~~~~
 
-MPS2, MPS3, Musca(A,B1,S1)
+MPS2, MPS3, Musca(B1,S1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Mark Horvath
-    :email: `Mark.Horvath@arm.com <mark.horvath@arm.com>`__
-    :github: `mark-horvath-arm <https://github.com/mark-horvath-arm>`__
+David Hazi
+    :email: `David.Hazi@arm.com <david.hazi@arm.com>`__
+    :github: `david-hazi-arm <https://github.com/david-hazi-arm>`__
 
 Corstone1000
 ^^^^^^^^^^^^
 
-Vishnu Banavath
-    :email: `Vishnu.Banavath@arm.com <vishnu.banavath@arm.com>`__
-    :github: `vishnu-banavath <https://github.com/vishnu-banavath>`__
+Xueliang Zhong
+    :email: `Xueliang.Zhong@arm.com <xueliang.zhong@arm.com>`__
+    :github: `xueliang-zhong <https://github.com/xueliang-zhong-arm>`__
 
-Mohamed Omar Asaker
-    :email: `Mohamed.OmarAsaker@arm.com <mohamed.omarasaker@arm.com>`__
-    :github: `mohamedasaker-arm <https://github.com/mohamedasaker-arm>`__
+Emekcan Aras
+    :email: `Emekcan.Aras@arm.com <emekcan.aras@arm.com>`__
+    :github: `ememarar <https://github.com/ememarar>`__
 
 RSS
 ^^^
@@ -190,4 +190,4 @@ WS Chang
 
 =============
 
-*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*

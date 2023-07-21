@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -7,8 +7,8 @@
 
 #include <string.h>
 #include "config_spm.h"
-#include "region.h"
-#include "spm_ipc.h"
+#include "memory_symbols.h"
+#include "spm.h"
 #include "svc_num.h"
 #include "tfm_api.h"
 #include "tfm_arch.h"
@@ -25,15 +25,12 @@
 #include "psa/client.h"
 #include "tfm_hal_platform.h"
 
-/* MSP bottom (higher address) */
-REGION_DECLARE(Image$$, ARM_LIB_STACK, $$ZI$$Limit);
-
 #ifdef PLATFORM_SVC_HANDLERS
 extern int32_t platform_svc_handlers(uint8_t svc_num,
                                      uint32_t *ctx, uint32_t lr);
 #endif
 
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+#if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
 static int32_t SVC_Handler_IPC(uint8_t svc_num, uint32_t *ctx,
                                uint32_t lr)
 {
@@ -139,12 +136,14 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         svc_args = psp;
     }
 
-    /*
-     * Stack contains:
-     * r0, r1, r2, r3, r12, r14 (lr), the return address and xPSR
-     * First argument (r0) is svc_args[0]
-     */
     if (is_return_secure_stack(exc_return)) {
+        if (is_default_stacking_rules_apply(exc_return) == false) {
+            /* In this case offset the svc_args and only use
+             * the caller-saved registers
+             */
+            svc_args = &svc_args[10];
+        }
+
         /* SV called directly from secure context. Check instruction for
          * svc_number
          */
@@ -167,9 +166,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         exc_return = tfm_spm_init();
         tfm_arch_check_msp_sealing();
         /* The following call does not return */
-        tfm_arch_free_msp_and_exc_ret(
-            (uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit),
-            exc_return);
+        tfm_arch_free_msp_and_exc_ret(SPM_BOOT_STACK_BOTTOM, exc_return);
         break;
     case TFM_SVC_GET_BOOT_DATA:
         tfm_core_get_boot_data_handler(svc_args);
@@ -192,7 +189,7 @@ uint32_t tfm_core_svc_handler(uint32_t *msp, uint32_t exc_return,
         break;
 #endif
     default:
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+#if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
         if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit)
                                      - (uint32_t)msp) > 0) {
             /* The Main Stack has contents, not calling from Partition thread */

@@ -48,6 +48,7 @@ __asm("  .global __ARM_use_no_argv\n");
 
 /* Static buffer to be used by mbedtls for memory allocation */
 static uint8_t mbedtls_mem_buf[BL2_MBEDTLS_MEM_BUF_LEN];
+struct boot_rsp rsp;
 
 static void do_boot(struct boot_rsp *rsp)
 {
@@ -88,7 +89,6 @@ static void do_boot(struct boot_rsp *rsp)
 
 int main(void)
 {
-    struct boot_rsp rsp;
     fih_ret fih_rc = FIH_FAILURE;
     enum tfm_plat_err_t plat_err;
     int32_t image_id;

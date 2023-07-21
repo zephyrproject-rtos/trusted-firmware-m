@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -27,10 +27,16 @@ enum tfm_plat_err_t tfm_multi_core_hal_init(void);
  * \brief Receive PSA client call request from NSPE.
  *        Implemented by platform specific inter-processor communication driver.
  *
+ * \param[in] mhu_receiver_dev  Pointer to MHU receiver device on which to read
+ *                              the message.
+ * \param[in] mhu_sender_dev    Pointer to MHU sender device on which to write
+ *                              the reply.
+ *
  * \retval TFM_PLAT_ERR_SUCCESS  Operation succeeded.
  * \retval Other return code     Operation failed with an error code.
  */
-enum tfm_plat_err_t tfm_multi_core_hal_receive(void);
+enum tfm_plat_err_t tfm_multi_core_hal_receive(void *mhu_receiver_dev,
+                                               void *mhu_sender_dev);
 
 /**
  * \brief Notify NSPE that a PSA client call return result is replied.

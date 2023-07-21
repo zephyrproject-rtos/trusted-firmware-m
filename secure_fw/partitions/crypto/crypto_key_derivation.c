@@ -8,17 +8,16 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
-#include "config_crypto.h"
+#include "config_tfm.h"
 #include "tfm_sp_log.h"
 
 #include "tfm_mbedcrypto_include.h"
 
 #include "tfm_crypto_api.h"
+#include "tfm_crypto_key.h"
 #include "tfm_crypto_defs.h"
 
-#ifndef MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
-#error "MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER must be selected in Mbed TLS config file"
-#endif
+#include "crypto_library.h"
 
 /*!
  * \addtogroup tfm_crypto_api_shim_layer
@@ -28,8 +27,8 @@
 /*!@{*/
 #if CRYPTO_KEY_DERIVATION_MODULE_ENABLED
 psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
-                                            psa_outvec out_vec[],
-                                            mbedtls_svc_key_id_t *encoded_key)
+                                                 psa_outvec out_vec[],
+                                                 struct tfm_crypto_key_id_s *encoded_key)
 {
     const struct tfm_crypto_pack_iovec *iov = in_vec[0].base;
     psa_status_t status = PSA_ERROR_NOT_SUPPORTED;
@@ -37,13 +36,15 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     uint32_t *p_handle = NULL;
     uint16_t sid = iov->function_id;
 
+    tfm_crypto_library_key_id_t library_key = tfm_crypto_library_key_id_init(
+                                                  encoded_key->owner, encoded_key->key_id);
     if (sid == TFM_CRYPTO_RAW_KEY_AGREEMENT_SID) {
         uint8_t *output = out_vec[0].base;
         size_t output_size = out_vec[0].len;
         const uint8_t *peer_key = in_vec[1].base;
         size_t peer_key_length = in_vec[1].len;
 
-        return psa_raw_key_agreement(iov->alg, *encoded_key,
+        return psa_raw_key_agreement(iov->alg, library_key,
                                      peer_key, peer_key_length,
                                      output, output_size, &out_vec[0].len);
     }
@@ -104,7 +105,7 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
     case TFM_CRYPTO_KEY_DERIVATION_INPUT_KEY_SID:
     {
          return psa_key_derivation_input_key(operation,
-                                             iov->step, *encoded_key);
+                                             iov->step, library_key);
     }
     case TFM_CRYPTO_KEY_DERIVATION_OUTPUT_KEY_SID:
     {
@@ -112,9 +113,10 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
                                                             in_vec[1].base;
         psa_key_id_t *key_handle = out_vec[0].base;
         psa_key_attributes_t key_attributes = PSA_KEY_ATTRIBUTES_INIT;
-        int32_t partition_id = MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(*encoded_key);
+        int32_t partition_id = encoded_key->owner;
 
-        status = tfm_crypto_key_attributes_from_client(client_key_attr,
+        status = tfm_crypto_core_library_key_attributes_from_client(
+                                                       client_key_attr,
                                                        partition_id,
                                                        &key_attributes);
         if (status != PSA_SUCCESS) {
@@ -122,9 +124,9 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
         }
 
         status = psa_key_derivation_output_key(&key_attributes, operation,
-                                               encoded_key);
+                                               &library_key);
 
-        *key_handle = encoded_key->MBEDTLS_PRIVATE(key_id);
+        *key_handle = CRYPTO_LIBRARY_GET_KEY_ID(library_key);
     }
     break;
     case TFM_CRYPTO_KEY_DERIVATION_ABORT_SID:
@@ -151,7 +153,7 @@ psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
         size_t peer_key_length = in_vec[1].len;
 
         return psa_key_derivation_key_agreement(operation, iov->step,
-                                                *encoded_key,
+                                                library_key,
                                                 peer_key,
                                                 peer_key_length);
     }
@@ -169,8 +171,8 @@ release_operation_and_return:
 }
 #else /* CRYPTO_KEY_DERIVATION_MODULE_ENABLED */
 psa_status_t tfm_crypto_key_derivation_interface(psa_invec in_vec[],
-                                            psa_outvec out_vec[],
-                                            mbedtls_svc_key_id_t *encoded_key)
+                                                 psa_outvec out_vec[],
+                                                 struct tfm_crypto_key_id_s *encoded_key)
 {
     (void)in_vec;
     (void)out_vec;

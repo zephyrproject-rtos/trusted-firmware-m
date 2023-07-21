@@ -1,27 +1,25 @@
 /*
  * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
+#include <stdint.h>
 
 #include "compiler_ext_defs.h"
-#include "ns_agent_tz.h"
 #include "security_defs.h"
 #include "tfm_arch.h"
 #include "tfm_hal_platform.h"
 
-#if defined(__ICCARM__)
-#pragma required = ns_agent_tz_init_c
-#endif
-
-__naked void ns_agent_tz_main(void)
+__naked void ns_agent_tz_main(uint32_t c_entry)
 {
     __ASM volatile(
 #ifndef __ICCARM__
         ".syntax unified                            \n"
 #endif
-        "   bl       ns_agent_tz_init_c             \n"
         "   ldr      r2, [sp]                       \n"
         "   ldr      r3, ="M2S(STACK_SEAL_PATTERN)" \n" /* SEAL double-check */
         "   cmp      r2, r3                         \n"

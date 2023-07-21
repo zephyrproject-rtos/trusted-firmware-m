@@ -32,6 +32,23 @@ Contributions to the TF-M project need to follow the process below.
     Use ``git commit -s`` to add a ``Signed-off-by`` trailer at the end of the
     commit log message.
     See `git-commit <https://git-scm.com/docs/git-commit>`_ for details.
+  - Ensure that each changed file has the correct copyright and license
+    information. Files that entirely consist of contributions to this project
+    should have a copyright notice and BSD-3-Clause SPDX license identifier of
+    the form as shown in :doc:`lic`. Files that contain changes to imported
+    Third Party IP files should retain their original copyright and license
+    notices.
+
+    Contributors can add the following copyright note, (whilst) it is suggested
+    to update copyright note only for *major*, non-trivial changes.
+
+    ::
+
+        Copyright (c) XXXX[-YYYY], <OWNER>. All rights reserved.
+
+    where XXXX is the year of first contribution and YYYY is the optional year
+    of most recent contribution. <OWNER> is your or your company name.
+
   - Add a `Change-Id <https://review.trustedfirmware.org/Documentation/user-changeid.html>`_
     to the commit message, which can be generated any way you like (e.g. from
     the SHA of the commit).

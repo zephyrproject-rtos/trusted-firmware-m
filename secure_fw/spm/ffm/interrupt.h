@@ -8,7 +8,7 @@
  *
  */
 
-#include "spm_ipc.h"
+#include "spm.h"
 
 #include "load/interrupt_defs.h"
 #include "load/partition_defs.h"

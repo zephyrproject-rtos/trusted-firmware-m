@@ -78,34 +78,101 @@ Running the code
 ----------------
 
 To run the built images, they need to be concatenated into binaries that can be
-placed in ROM and flash. To do this, navigate to the TF-M build directory and
-run the following ``srec_cat`` commands::
+placed in ROM and flash. To create the ROM image, navigate to the TF-M build
+directory and run the following ``srec_cat`` command::
 
     srec_cat \
         bl1_1.bin -Binary -offset 0x0 \
         bl1_provisioning_bundle.bin -Binary -offset 0xE000 \
         -o rom.bin -Binary
 
-    srec_cat \
-        bl2_signed.bin -Binary -offset 0x0 \
-        bl2_signed.bin -Binary -offset 0x20000 \
-        tfm_s_ns_signed.bin -Binary -offset 0x40000 \
-        tfm_s_ns_signed.bin -Binary -offset 0x140000 \
-        <Host AP BL1 image> -Binary -offset 0x240000 \
-        <SCP BL1 image> -Binary -offset 0x2C0000 \
-        <Host AP BL1 image>  -Binary -offset 0x340000 \
-        <SCP BL1 image> -Binary -offset 0x3C0000 \
-        -o flash.bin -Binary
-
 For development purposes, the OTP image is included as a provisioning bundle in
-the ROM image and provisioned into OTP by BL1_1. The flash image should include
-the signed host images from the previous section. For each boot image, there is
-a primary and secondary image; if these are different then BL2 will load the one
-with the higher version number.
+the ROM image and provisioned into OTP by BL1_1.
 
-The ROM binary should be placed in RSS ROM at ``0x11000000`` and the flash
-binary should be placed at ``0x31000000``.
+To create the flash image, the following ``fiptool`` command should be run.
+``fiptool`` documentation can be found `here <https://trustedfirmware-a.readthedocs.io/en/latest/getting_started/tools-build.html?highlight=fiptool#building-and-using-the-fip-tool>`_.
+Note that an up-to-date fiptool that supports the RSS UUIDs must be used.::
+
+    fiptool create \
+        --align 8192 --rss-bl2     bl2_signed.bin \
+        --align 8192 --rss-ns      tfm_ns_signed.bin \
+        --align 8192 --rss-s       tfm_s_signed.bin \
+        --align 8192 --rss-scp-bl1 <signed Host SCP BL1 image> \
+        --align 8192 --rss-ap-bl1  <signed Host AP BL1 image> \
+        fip.bin
+
+If you already have a ``fip.bin`` containing host firmware images, RSS FIP
+images can be patched in::
+
+    fiptool update --align 8192 --rss-bl2 bl2_signed.bin fip.bin
+    fiptool update --align 8192 --rss-ns  tfm_ns.bin fip.bin
+    fiptool update --align 8192 --rss-s   tfm_s.bin fip.bin
+
+If XIP mode is enabled, the following ``fiptool`` command should be run to
+create the flash image::
+
+    fiptool create \
+        --align 8192 --rss-bl2           bl2_signed.bin \
+        --align 8192 --rss-ns            tfm_ns.bin \
+        --align 8192 --rss-s             tfm_s.bin \
+        --align 8192 --rss-sic-tables-ns tfm_ns_sic_tables_signed.bin \
+        --align 8192 --rss-sic-tables-s  tfm_s_sic_tables_signed.bin \
+        --align 8192 --rss-scp-bl1       <signed Host SCP BL1 image> \
+        --align 8192 --rss-ap-bl1        <signed Host AP BL1 image> \
+        fip.bin
+
+Once the FIP is prepared, a host flash image can be created using ``srec_cat``::
+
+    srec_cat \
+            fip.bin -Binary -offset 0x0 \
+            -o host_flash.bin -Binary
+
+If GPT support is enabled, and a host ``fip.bin`` and ``fip_gpt.bin`` has been
+obtained, RSS images can be inserted by first patching the host FIP and then
+inserting that patched FIP into the GPT image::
+
+    sector_size=$(gdisk -l fip_gpt.bin | grep -i "sector size (logical):" | \
+                sed 's/.*logical): \([0-9]*\) bytes/\1/')
+
+    fip_label=" FIP_A$"
+    fip_start_sector=$(gdisk -l fip_gpt.bin | grep "$fip_label" | awk '{print $2}')
+    fip_sector_am=$(gdisk -l fip_gpt.bin | grep "$fip_label" | awk '{print $3 - $2}')
+
+    dd if=fip.bin of=fip_gpt.bin bs=$sector_size seek=$fip_start_sector \
+        count=$fip_sector_am conv=notrunc
+
+    fip_label = " FIP_B$"
+    fip_start_sector = $(gdisk -l fip_gpt.bin | grep "$fip_label" | awk '{print $2}')
+    fip_sector_am = $(gdisk -l fip_gpt.bin | grep "$fip_label" | awk '{print $3 - $2}')
+
+    dd if=fip.bin of=fip_gpt.bin bs=$sector_size seek=$fip_start_sector \
+        count=$fip_sector_am conv=notrunc
+
+To patch a ``fip_gpt.bin`` without having an initial ``fip.bin``, the FIP can be
+extracted from the GPT image using the following commands (and can then be
+patched and reinserted using the above commands)::
+
+    sector_size=$(gdisk -l fip_gpt.bin | grep -i "sector size (logical):" | \
+                sed 's/.*logical): \([0-9]*\) bytes/\1/')
+
+    fip_label=" FIP_A$"
+    fip_start_sector=$(gdisk -l fip_gpt.bin | grep "$fip_label" | awk '{print $2}')
+    fip_sector_am=$(gdisk -l fip_gpt.bin | grep "$fip_label" | awk '{print $3 - $2}')
+
+    dd if=fip_gpt.bin of=fip.bin bs=$sector_size skip=$fip_start_sector \
+        count=$fip_sector_am conv=notrunc
+
+Once the ``fip_gpt.bin`` is prepared, it is placed at the base of the host flash
+image::
+
+    srec_cat \
+            fip_gpt.bin -Binary -offset 0x0 \
+            -o host_flash.bin -Binary
+
+The ROM binary should be placed in RSS ROM at ``0x11000000`` and the host flash
+binary should be placed at the base of the host flash. For the TC platform,
+this is at ``0x80000000``.
 
 --------------
 
-*Copyright (c) 2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2022-2023, Arm Limited. All rights reserved.*

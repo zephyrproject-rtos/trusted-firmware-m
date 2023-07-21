@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -195,12 +195,7 @@ static psa_status_t cc3xx_internal_rsa_decrypt(
                                       output,
                                       output_length);
     } else {
-        CC_PAL_LOG_ERR("alg variable is corrupted");
-        while (1) {
-            /* Panic as the caller of this has already checked the
-             * algorithm validity
-             */
-        };
+        error = PSA_ERROR_CORRUPTION_DETECTED;
     }
 
 cleanup:

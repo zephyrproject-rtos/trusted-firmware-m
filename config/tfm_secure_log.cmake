@@ -5,6 +5,9 @@
 #
 #-------------------------------------------------------------------------------
 
+set(TFM_SPM_LOG_LEVEL           TFM_SPM_LOG_LEVEL_SILENCE       CACHE STRING    "Set default SPM log level as INFO level")
+set(TFM_PARTITION_LOG_LEVEL     TFM_PARTITION_LOG_LEVEL_SILENCE   CACHE STRING    "Set default Secure Partition log level as INFO level")
+
 # Secure regression tests also require SP log function
 # Enable SP log raw dump when SP log level is higher than silence or TF-M
 # regression test is enabled.

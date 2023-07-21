@@ -20,13 +20,6 @@ if(BL2)
     )
 endif()
 
-############################ Project Config ####################################
-
-target_compile_definitions(tfm_config
-    INTERFACE
-        CRYPTO_HW_ACCELERATOR_CC312
-)
-
 ################################ BL1 ###########################################
 
 if(BL1 AND PLATFORM_DEFAULT_BL1)
@@ -248,6 +241,7 @@ if (TFM_PARTITION_CRYPTO)
         PUBLIC
             CRYPTO_HW_ACCELERATOR
             MBEDTLS_ECDH_LEGACY_CONTEXT
+            $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:LEGACY_DRIVER_API_ENABLED>
             $<$<BOOL:${CC312_LEGACY_DRIVER_API_ENABLED}>:CC312_LEGACY_DRIVER_API_ENABLED>
     )
 

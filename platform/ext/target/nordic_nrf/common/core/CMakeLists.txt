@@ -74,6 +74,7 @@ target_sources(platform_s
         native_drivers/mpu_armv8m_drv.c
         native_drivers/spu.c
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
+        $<$<BOOL:${TEST_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/pal_plat_test.c>
 )
 
 if (NRF_HW_INIT_RESET_ON_BOOT)
@@ -128,7 +129,7 @@ target_sources(platform_ns
         cmsis_drivers/Driver_USART.c
         ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
         nrfx_glue.c
-        plat_test.c
+        $<$<BOOL:${TEST_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/pal_plat_test.c>
 )
 
 target_include_directories(platform_ns

@@ -29,6 +29,9 @@ fih_int bl1_otp_init(void)
 
     plat_err = tfm_plat_otp_init();
     fih_rc = fih_int_encode_zero_equality(plat_err);
+    if (fih_not_eq(fih_rc, FIH_SUCCESS)) {
+        return fih_rc;
+    }
 
     plat_err = tfm_plat_init_nv_counter();
     fih_rc = fih_int_encode_zero_equality(plat_err);

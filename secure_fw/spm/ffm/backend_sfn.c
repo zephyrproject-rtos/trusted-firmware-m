@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -20,7 +20,7 @@
 #include "load/spm_load_api.h"
 #include "psa/error.h"
 #include "psa/service.h"
-#include "spm_ipc.h"
+#include "spm.h"
 
 /* SFN Partition state */
 #define SFN_PARTITION_STATE_NOT_INITED        0
@@ -37,7 +37,7 @@ struct partition_t *p_current_partition;
  * current component state and activate the next component.
  */
 psa_status_t backend_messaging(struct service_t *service,
-                               struct conn_handle_t *handle)
+                               struct connection_t *handle)
 {
     struct partition_t *p_target;
     psa_status_t status;
@@ -46,7 +46,6 @@ psa_status_t backend_messaging(struct service_t *service,
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    handle->sfn_magic = TFM_MSG_MAGIC_SFN;
     p_target = service->partition;
     p_target->p_handles = handle;
 
@@ -54,7 +53,7 @@ psa_status_t backend_messaging(struct service_t *service,
 
     if (p_target->state == SFN_PARTITION_STATE_NOT_INITED) {
         if (p_target->p_ldinf->entry != 0) {
-            status = ((sfn_init_fn_t)p_target->p_ldinf->entry)();
+            status = ((sfn_init_fn_t)p_target->p_ldinf->entry)(NULL);
             /* Negative value indicates errors. */
             if (status < PSA_SUCCESS) {
                 return PSA_ERROR_PROGRAMMER_ERROR;
@@ -70,7 +69,7 @@ psa_status_t backend_messaging(struct service_t *service,
     return status;
 }
 
-psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
+psa_status_t backend_replying(struct connection_t *handle, int32_t status)
 {
     SET_CURRENT_COMPONENT(handle->p_client);
 
@@ -87,14 +86,15 @@ psa_status_t backend_replying(struct conn_handle_t *handle, int32_t status)
     return status;
 }
 
-static void spm_thread_fn(void)
+static uint32_t spm_thread_fn(uint32_t param)
 {
     struct partition_t *p_part, *p_curr;
+    psa_status_t status;
 
     p_curr = GET_CURRENT_COMPONENT();
     /* Call partition initialization routine one by one. */
     UNI_LIST_FOREACH(p_part, PARTITION_LIST_ADDR, next) {
-        if (IS_PARTITION_IPC_MODEL(p_part->p_ldinf)) {
+        if (IS_IPC_MODEL(p_part->p_ldinf)) {
             continue;
         }
 
@@ -105,7 +105,8 @@ static void spm_thread_fn(void)
         SET_CURRENT_COMPONENT(p_part);
 
         if (p_part->p_ldinf->entry != 0) {
-            if (((sfn_init_fn_t)p_part->p_ldinf->entry)() < PSA_SUCCESS) {
+            status = ((sfn_init_fn_t)p_part->p_ldinf->entry)(NULL);
+            if (status < PSA_SUCCESS) {
                 tfm_core_panic();
             }
         }
@@ -114,6 +115,8 @@ static void spm_thread_fn(void)
     }
 
     SET_CURRENT_COMPONENT(p_curr);
+
+    return param;
 }
 
 /* Parameters are treated as assuredly */
@@ -124,6 +127,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     struct context_ctrl_t ns_agent_ctrl;
     p_pt->p_handles = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;
+    void *param = NULL;
 
     watermark_stack(p_pt);
 
@@ -131,12 +135,16 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
      * Built-in partitions still have thread instances: NS Agent (TZ) and
      * IDLE partition, and NS Agent (TZ) needs to be specific cared here.
      */
-    if (IS_PARTITION_NS_AGENT(p_pldi)) {
+    if (IS_NS_AGENT(p_pldi)) {
+        if (IS_NS_AGENT_TZ(p_pldi)) {
+            /* NS agent TZ expects NSPE entry point as the parameter */
+            param = (void *)tfm_hal_get_ns_entry_point();
+        }
         ARCH_CTXCTRL_INIT(&ns_agent_ctrl,
                           LOAD_ALLOCED_STACK_ADDR(p_pldi),
                           p_pldi->stack_size);
         tfm_arch_init_context(&ns_agent_ctrl, (uintptr_t)spm_thread_fn,
-                              NULL, p_pldi->entry);
+                              param, p_pldi->entry);
         tfm_arch_refresh_hardware_context(&ns_agent_ctrl);
         SET_CURRENT_COMPONENT(p_pt);
     }
@@ -144,18 +152,21 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 
 uint32_t backend_system_run(void)
 {
-    return EXC_RETURN_THREAD_S_PSP;
+    return EXC_RETURN_THREAD_PSP;
 }
 
-psa_signal_t backend_wait(struct partition_t *p_pt, psa_signal_t signal_mask)
+psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
 {
-    while (!(p_pt->signals_asserted & signal_mask))
-        ;
+    while (!(p_pt->signals_asserted & signals)) {
+        __WFI();
+    }
 
-    return p_pt->signals_asserted & signal_mask;
+    return p_pt->signals_asserted & signals;
 }
 
-void backend_wake_up(struct partition_t *p_pt)
+uint32_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal)
 {
-    (void)p_pt;
+    p_pt->signals_asserted |= signal;
+
+    return PSA_SUCCESS;
 }

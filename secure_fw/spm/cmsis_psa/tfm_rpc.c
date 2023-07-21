@@ -5,7 +5,8 @@
  *
  */
 
-#include "spm_ipc.h"
+#include "config_impl.h"
+#include "spm.h"
 #include "ffm/psa_api.h"
 #include "tfm_rpc.h"
 #include "utilities.h"
@@ -115,12 +116,12 @@ void tfm_rpc_client_call_handler(void)
 
 void tfm_rpc_client_call_reply(const void *owner, int32_t ret)
 {
-    const struct conn_handle_t *handle = (const struct conn_handle_t *)owner;
+    const struct connection_t *handle = (const struct connection_t *)owner;
 
     rpc_ops.reply(handle->caller_data, ret);
 }
 
-void tfm_rpc_set_caller_data(struct conn_handle_t *handle, int32_t client_id)
+void tfm_rpc_set_caller_data(struct connection_t *handle, int32_t client_id)
 {
     handle->caller_data = rpc_ops.get_caller_data(client_id);
 }

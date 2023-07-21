@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -12,9 +12,9 @@
 #undef CRYPTO_NV_SEED
 #define CRYPTO_NV_SEED                         0
 
-#ifdef TEST_PSA_API_CRYPTO
+#ifdef PSA_API_TEST_CRYPTO
 #undef CRYPTO_STACK_SIZE
-#define CRYPTO_STACK_SIZE                      0x2100
+#define CRYPTO_STACK_SIZE                      0x2200
 #endif
 
 #endif /* __CONFIG_TFM_TARGET_H__ */

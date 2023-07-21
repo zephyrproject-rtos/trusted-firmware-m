@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,12 +11,10 @@
 #include <string.h>
 
 #include "region_defs.h"
-#include "dx_reg_base_host.h"
+#include "device_definition.h"
 #include "otp.h"
 #include "fih.h"
-#include "cc3xx_aes.h"
-#include "cc3xx_hash.h"
-#include "cmsis_compiler.h"
+#include "cc3xx_drv.h"
 
 #define KEY_DERIVATION_MAX_BUF_SIZE 128
 

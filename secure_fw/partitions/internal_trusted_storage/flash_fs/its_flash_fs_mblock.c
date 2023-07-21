@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-#include "config_its.h"
+#include "config_tfm.h"
 #include "its_flash_fs_mblock.h"
 #include "psa/storage_common.h"
 
@@ -994,9 +994,10 @@ uint32_t its_flash_fs_mblock_cur_data_scratch_id(
     return fs_ctx->meta_block_header.scratch_dblock;
 }
 
-psa_status_t its_flash_fs_mblock_get_file_idx(struct its_flash_fs_ctx_t *fs_ctx,
-                                              const uint8_t *fid,
-                                              uint32_t *idx)
+psa_status_t its_flash_fs_mblock_get_file_idx_meta(struct its_flash_fs_ctx_t *fs_ctx,
+                                                   const uint8_t *fid,
+                                                   uint32_t *idx,
+                                                   struct its_file_meta_t *file_meta)
 {
     psa_status_t err;
     uint32_t i;
@@ -1012,6 +1013,9 @@ psa_status_t its_flash_fs_mblock_get_file_idx(struct its_flash_fs_ctx_t *fs_ctx,
         if (!memcmp(tmp_metadata.id, fid, ITS_FILE_ID_SIZE)) {
             /* Found */
             *idx = i;
+            if (file_meta != NULL) {
+                *file_meta = tmp_metadata;
+            }
             return PSA_SUCCESS;
         }
     }

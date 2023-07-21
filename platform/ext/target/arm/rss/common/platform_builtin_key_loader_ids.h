@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
  */
 
-#ifndef TFM_BUILTIN_KEY_LOADER_IDS_H
-#define TFM_BUILTIN_KEY_LOADER_IDS_H
+#ifndef __PLATFORM_BUILTIN_KEY_LOADER_IDS_H__
+#define __PLATFORM_BUILTIN_KEY_LOADER_IDS_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,4 +30,4 @@ enum psa_drv_slot_number_t {
 }
 #endif
 
-#endif /* TFM_BUILTIN_KEY_LOADER_IDS_H */
+#endif /* __PLATFORM_BUILTIN_KEY_LOADER_IDS_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
  * or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
  *
@@ -23,7 +23,7 @@
 #include "psa/client.h"
 #include "psa/service.h"
 #include "thread.h"
-#include "spm_ipc.h"
+#include "spm.h"
 
 #define TFM_RPC_SUCCESS             (0)
 #define TFM_RPC_INVAL_PARAM         (INT32_MIN + 1)
@@ -165,12 +165,12 @@ void tfm_rpc_client_call_reply(const void *owner, int32_t ret);
  * Check if the message was allocated for a non-secure request via RPC
  *
  * \param[in] handle        The connection handle context pointer
- *                          \ref conn_handle_t structures
+ *                          \ref connection_t structures
  *
  * \retval true             The message was allocated for a NS request via RPC.
  * \retval false            Otherwise.
  */
-__STATIC_INLINE bool is_tfm_rpc_msg(const struct conn_handle_t *handle)
+__STATIC_INLINE bool is_tfm_rpc_msg(const struct connection_t *handle)
 {
     /*
      * FIXME
@@ -182,7 +182,7 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct conn_handle_t *handle)
      * This condition check should be improved after TF-M non-secure client ID
      * management is implemented.
      */
-    if (handle && (handle->msg.client_id <= 0) && !handle->ack_evnt.owner) {
+    if (handle && (handle->msg.client_id <= 0)) {
         return true;
     }
 
@@ -190,13 +190,13 @@ __STATIC_INLINE bool is_tfm_rpc_msg(const struct conn_handle_t *handle)
 }
 
 /*
- * \brief Set the private data of the NS caller in \ref conn_handle_t, to
+ * \brief Set the private data of the NS caller in \ref connection_t, to
  *        identify the caller after PSA client call is compeleted.
  *
- * \param[in] handle        The address of \ref conn_handle_t structure
+ * \param[in] handle        The address of \ref connection_t structure
  * \param[in] client_id     The client ID of the NS caller.
  */
-void tfm_rpc_set_caller_data(struct conn_handle_t *handle, int32_t client_id);
+void tfm_rpc_set_caller_data(struct connection_t *handle, int32_t client_id);
 
 #else /* TFM_PARTITION_NS_AGENT_MAILBOX */
 

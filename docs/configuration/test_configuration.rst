@@ -114,8 +114,6 @@ The Functional API tests are:
 
 The Firmware Framework test suites are:
  - ``IPC``
- - ``SFN``
- - ``Interrupt``
 
 Note that these map directly to the ``SUITE`` cmake variable used in the
 psa-arch-tests documentation.

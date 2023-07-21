@@ -1,39 +1,35 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022, Arm Limited. All rights reserved.
+# Copyright (c) 2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-menu "Attestation component configs"
-    depends on TFM_PARTITION_INITIAL_ATTESTATION
-
-config ATTEST_INCLUDE_OPTIONAL_CLAIMS
-    bool "Include optional claims in initial attestation token"
-    default y
-
-config ATTEST_INCLUDE_COSE_KEY_ID
-    bool "Include COSE key-id in initial attestation token"
+menuconfig TFM_PARTITION_INITIAL_ATTESTATION
+    bool "Initial attestation"
+    depends on TFM_PARTITION_CRYPTO
     default n
 
-choice
-    prompt "Set the initial attestation token profile"
-    config ATTEST_TOKEN_PROFILE_PSA_IOT_1
-        bool "PSA_IOT_1"
-    config ATTEST_TOKEN_PROFILE_PSA_2_0_0
-        bool "PSA_2_0_0"
-    config ATTEST_TOKEN_PROFILE_ARM_CCA
-        bool "ARM_CCA"
-endchoice
+if TFM_PARTITION_INITIAL_ATTESTATION
 
-config ATTEST_TOKEN_PROFILE
-    string
-    default "PSA_IOT_1" if ATTEST_TOKEN_PROFILE_PSA_IOT_1
-    default "PSA_2_0_0" if ATTEST_TOKEN_PROFILE_PSA_2_0_0
-    default "ARM_CCA" if ATTEST_TOKEN_PROFILE_ARM_CCA
+config SYMMETRIC_INITIAL_ATTESTATION
+    bool "Symmetric key algorithm based Initial Attestation"
+    default n
+    help
+      Use symmetric crypto for inital attestation
 
-config ATTEST_STACK_SIZE
-    hex "Stack size"
-    default 0x700
+config ATTEST_INCLUDE_TEST_CODE
+    bool "Include test code"
+    depends on TEST_NS_ATTESTATION || TEST_S_ATTESTATION
+    default n
+    help
+      Include minimal development tests in the initial attestation regression
+      test suite
 
-endmenu
+config ATTEST_KEY_BITS
+    int "Key bit width"
+    default 256
+    help
+      The size of the initial attestation key in bits
+
+endif

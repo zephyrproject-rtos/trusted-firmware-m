@@ -1,5 +1,8 @@
 /*
  * Copyright (c) 2017-2019 Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -82,7 +85,7 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
 
     mpu->RNR  = region_cfg->region_nr & MPU_RNR_REGION_Msk;
 
-    /* This 0s the lower bits of the base address */
+    /* This zeroes the lower bits of the base address */
     base_cfg = region_cfg->region_base & MPU_RBAR_BASE_Msk;
     base_cfg |= (region_cfg->attr_sh << MPU_RBAR_SH_Pos) & MPU_RBAR_SH_Msk;
     base_cfg |= (region_cfg->attr_access << MPU_RBAR_AP_Pos) & MPU_RBAR_AP_Msk;
@@ -90,7 +93,7 @@ enum mpu_armv8m_error_t mpu_armv8m_region_enable(
 
     mpu->RBAR = base_cfg;
 
-    /*This 0s the lower bits of base address but they are treated as 1 */
+    /* This zeroes the lower bits of limit address but they are treated as 1 */
     limit_cfg = (region_cfg->region_limit-1) & MPU_RLAR_LIMIT_Msk;
 
     limit_cfg |= (region_cfg->region_attridx << MPU_RLAR_AttrIndx_Pos) &

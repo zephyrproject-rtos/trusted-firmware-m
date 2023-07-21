@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  * Copyright (c) 2020, Cypress Semiconductor Corporation. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -214,19 +214,6 @@ psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx);
  * \return Returns error code as specified in \ref psa_status_t
  */
 psa_status_t its_flash_fs_wipe_all(its_flash_fs_ctx_t *fs_ctx);
-
-/**
- * \brief Checks if a file exists in the filesystem.
- *
- * \param[in,out] fs_ctx  Filesystem context
- * \param[in]     fid     File ID
- *
- * \return Returns PSA_SUCCESS if the file exists. If file does not exist, it
- *         returns PSA_ERROR_DOES_NOT_EXIST. Otherwise, it returns error code as
- *         specified in \ref psa_status_t.
- */
-psa_status_t its_flash_fs_file_exist(its_flash_fs_ctx_t *fs_ctx,
-                                     const uint8_t *fid);
 
 /**
  * \brief Gets the file information referenced by the file ID.

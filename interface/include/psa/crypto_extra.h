@@ -36,7 +36,7 @@ extern "C" {
  * string. The length of the byte string is the length of the base prime `p`
  * in bytes.
  */
-#define PSA_KEY_TYPE_DSA_PUBLIC_KEY                 ((psa_key_type_t)0x4002)
+#define PSA_KEY_TYPE_DSA_PUBLIC_KEY                 ((psa_key_type_t) 0x4002)
 
 /** DSA key pair (private and public key).
  *
@@ -54,13 +54,13 @@ extern "C" {
  * Add 1 to the resulting integer and use this as the private key *x*.
  *
  */
-#define PSA_KEY_TYPE_DSA_KEY_PAIR                    ((psa_key_type_t)0x7002)
+#define PSA_KEY_TYPE_DSA_KEY_PAIR                    ((psa_key_type_t) 0x7002)
 
 /** Whether a key type is a DSA key (pair or public-only). */
 #define PSA_KEY_TYPE_IS_DSA(type)                                       \
     (PSA_KEY_TYPE_PUBLIC_KEY_OF_KEY_PAIR(type) == PSA_KEY_TYPE_DSA_PUBLIC_KEY)
 
-#define PSA_ALG_DSA_BASE                        ((psa_algorithm_t)0x06000400)
+#define PSA_ALG_DSA_BASE                        ((psa_algorithm_t) 0x06000400)
 /** DSA signature with hashing.
  *
  * This is the signature scheme defined by FIPS 186-4,
@@ -77,7 +77,7 @@ extern "C" {
  */
 #define PSA_ALG_DSA(hash_alg)                             \
     (PSA_ALG_DSA_BASE | ((hash_alg) & PSA_ALG_HASH_MASK))
-#define PSA_ALG_DETERMINISTIC_DSA_BASE          ((psa_algorithm_t)0x06000500)
+#define PSA_ALG_DETERMINISTIC_DSA_BASE          ((psa_algorithm_t) 0x06000500)
 #define PSA_ALG_DSA_DETERMINISTIC_FLAG PSA_ALG_ECDSA_DETERMINISTIC_FLAG
 /** Deterministic DSA signature with hashing.
  *

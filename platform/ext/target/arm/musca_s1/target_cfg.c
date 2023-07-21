@@ -49,7 +49,7 @@ const struct memory_region_limits memory_regions = {
         (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
 
     .veneer_limit =
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
 };
 
 /* Allows software, via SAU, to define the code region as a NSC */
@@ -333,6 +333,9 @@ enum tfm_plat_err_t nvic_interrupt_enable()
 
 void sau_and_idau_cfg(void)
 {
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
     /* Enables SAU */
     TZ_SAU_Enable();
 
@@ -364,6 +367,10 @@ void sau_and_idau_cfg(void)
     /* Allows SAU to define the code region as a NSC */
     struct spctrl_def* spctrl = CMSDK_SPCTRL;
     spctrl->nsccfg |= NSCCFG_CODENSC;
+
+    /* Ensure the write is completed and flush pipeline */
+    __DSB();
+    __ISB();
 }
 
 /*------------------- Memory configuration functions -------------------------*/

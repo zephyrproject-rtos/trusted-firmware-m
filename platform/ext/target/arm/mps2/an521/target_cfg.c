@@ -336,7 +336,7 @@ const struct sau_cfg_t sau_cfg[] = {
     },
     {
         (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
         true,
     },
     {
@@ -387,6 +387,9 @@ FIH_RET_TYPE(int32_t) sau_and_idau_cfg(void)
     struct spctrl_def *spctrl = CMSDK_SPCTRL;
     uint32_t i;
 
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
     /* Enables SAU */
     TZ_SAU_Enable();
 
@@ -400,6 +403,10 @@ FIH_RET_TYPE(int32_t) sau_and_idau_cfg(void)
 
     /* Allows SAU to define the code region as a NSC */
     spctrl->nsccfg |= NSCCFG_CODENSC;
+
+    /* Ensure the write is completed and flush pipeline */
+    __DSB();
+    __ISB();
 
     FIH_RET(fih_int_encode(ARM_DRIVER_OK));
 }

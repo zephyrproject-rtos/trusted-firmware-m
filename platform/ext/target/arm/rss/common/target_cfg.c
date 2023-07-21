@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
+ * Copyright (c) 2023 Cypress Semiconductor Corporation (an Infineon
+ * company) or an affiliate of Cypress Semiconductor Corporation. All rights
+ * reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +33,20 @@
 
 /* The section names come from the scatter file */
 REGION_DECLARE(Load$$LR$$, LR_NS_PARTITION, $$Base);
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CONFIG_TFM_USE_TRUSTZONE
 REGION_DECLARE(Image$$, ER_VENEER, $$Base);
 REGION_DECLARE(Image$$, VENEER_ALIGN, $$Limit);
 #endif
 
 const struct memory_region_limits memory_regions = {
+#ifdef RSS_XIP
+    .non_secure_code_start = RSS_RUNTIME_NS_XIP_BASE_NS,
+
+    .non_secure_partition_base = RSS_RUNTIME_NS_XIP_BASE_NS,
+
+    .non_secure_partition_limit = RSS_RUNTIME_NS_XIP_BASE_NS +
+                                  NS_PARTITION_SIZE - 1,
+#else
     .non_secure_code_start =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
         BL2_HEADER_SIZE,
@@ -46,10 +57,11 @@ const struct memory_region_limits memory_regions = {
     .non_secure_partition_limit =
         (uint32_t)&REGION_NAME(Load$$LR$$, LR_NS_PARTITION, $$Base) +
         NS_PARTITION_SIZE - 1,
+#endif /* RSS_XIP */
 
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CONFIG_TFM_USE_TRUSTZONE
     .veneer_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
-    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+    .veneer_limit = (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
 #endif
 };
 
@@ -92,6 +104,7 @@ const struct dma350_remap_list_t dma350_address_remap = {
 /* Import MPC drivers */
 extern ARM_DRIVER_MPC Driver_VM0_MPC;
 extern ARM_DRIVER_MPC Driver_VM1_MPC;
+extern ARM_DRIVER_MPC Driver_SIC_MPC;
 
 /* Import PPC drivers */
 extern DRIVER_PPC_RSS Driver_PPC_RSS_MAIN0;
@@ -282,6 +295,9 @@ void sau_and_idau_cfg(void)
 {
     struct rss_sacfg_t *sacfg = (struct rss_sacfg_t *)RSS_SACFG_BASE_S;
 
+    /* Ensure all memory accesses are completed */
+    __DMB();
+
     /* Enables SAU */
     TZ_SAU_Enable();
 
@@ -296,7 +312,7 @@ void sau_and_idau_cfg(void)
     SAU->RBAR = (NS_DATA_START & SAU_RBAR_BADDR_Msk);
     SAU->RLAR = (NS_DATA_LIMIT & SAU_RLAR_LADDR_Msk) | SAU_RLAR_ENABLE_Msk;
 
-#ifndef TFM_MULTI_CORE_TOPOLOGY
+#ifdef CONFIG_TFM_USE_TRUSTZONE
     /* Configures veneers region to be non-secure callable */
     SAU->RNR  = 2;
     SAU->RBAR = (memory_regions.veneer_base & SAU_RBAR_BADDR_Msk);
@@ -322,6 +338,10 @@ void sau_and_idau_cfg(void)
     /* Configure MSC to enable secure accesses for the DMA */
     sacfg->nsmscexp = 0x0;
 
+    /* Ensure the write is completed and flush pipeline */
+    __DSB();
+    __ISB();
+
 }
 
 /*------------------- Memory configuration functions -------------------------*/
@@ -329,29 +349,41 @@ enum tfm_plat_err_t mpc_init_cfg(void)
 {
     int32_t ret = ARM_DRIVER_OK;
 
-    /* VM0 is allocated for NS data, so whole range is set to non-secure
-     * accesible. */
     ret = Driver_VM0_MPC.Initialize();
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
-    ret = Driver_VM0_MPC.ConfigRegion(NS_DATA_START,
+    ret = Driver_VM1_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+#ifdef RSS_XIP
+    ret = Driver_SIC_MPC.Initialize();
+    if (ret != ARM_DRIVER_OK) {
+        return TFM_PLAT_ERR_SYSTEM_ERR;
+    }
+#endif /* RSS_XIP */
+
+    /* Configuring primary non-secure partition.
+     * It is ensured in flash_layout.h that these memory regions are located in
+     * VM1 SRAM device. */
+
+    ret = Driver_VM1_MPC.ConfigRegion(NS_DATA_START,
                                       NS_DATA_LIMIT,
                                       ARM_MPC_ATTR_NONSECURE);
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    /* Configuring primary non-secure partition.
-     * It is ensured in flash_layout.h that these memory regions are located in
-     * VM1 SRAM device. */
-    ret = Driver_VM1_MPC.Initialize();
-    if (ret != ARM_DRIVER_OK) {
-        return TFM_PLAT_ERR_SYSTEM_ERR;
-    }
+#ifdef RSS_XIP
+    ret = Driver_SIC_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
+                                      memory_regions.non_secure_partition_limit,
+                                      ARM_MPC_ATTR_NONSECURE);
+#else
     ret = Driver_VM1_MPC.ConfigRegion(memory_regions.non_secure_partition_base,
                                       memory_regions.non_secure_partition_limit,
                                       ARM_MPC_ATTR_NONSECURE);
+#endif /* !RSS_XIP */
     if (ret != ARM_DRIVER_OK) {
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
@@ -366,6 +398,12 @@ enum tfm_plat_err_t mpc_init_cfg(void)
     if (ret != ARM_DRIVER_OK) {
         return ret;
     }
+#ifdef RSS_XIP
+    ret = Driver_SIC_MPC.LockDown();
+    if (ret != ARM_DRIVER_OK) {
+        return ret;
+    }
+#endif /* RSS_XIP */
 
     /* Add barriers to assure the MPC configuration is done before continue
      * the execution.
@@ -380,6 +418,9 @@ void mpc_clear_irq(void)
 {
     Driver_VM0_MPC.ClearInterrupt();
     Driver_VM1_MPC.ClearInterrupt();
+#ifdef RSS_XIP
+    Driver_SIC_MPC.ClearInterrupt();
+#endif /* RSS_XIP */
 }
 
 /*------------------- PPC configuration functions -------------------------*/
