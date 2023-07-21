@@ -159,8 +159,8 @@ static int disable_rom_execution(void)
         return rc;
     }
 
-    mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
-                      HARDFAULT_NMI_ENABLE);
+    return mpu_armv8m_enable(&dev_mpu_s, PRIVILEGED_DEFAULT_ENABLE,
+                             HARDFAULT_NMI_ENABLE);
 }
 
 void boot_platform_quit(struct boot_arm_vector_table *vt)
