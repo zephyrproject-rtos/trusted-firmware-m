@@ -181,7 +181,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     privileged = IS_PSA_ROT(p_ldinf);
 #endif
 
-    ns_agent = IS_NS_AGENT(p_ldinf);
+    ns_agent = IS_NS_AGENT_TZ(p_ldinf);
     partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
                         HANDLE_ATTR_PRIV_MASK;
     partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &

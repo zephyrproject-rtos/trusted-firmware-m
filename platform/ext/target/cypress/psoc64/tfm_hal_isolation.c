@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
- * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
+ * Copyright (c) 2022-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
  *
@@ -67,7 +67,7 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
     }
 
     if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
-        flags |= MEM_CHECK_NONSECURE;
+        tfm_core_panic();
     }
 
     status = tfm_has_access_to_region((const void *)base, size, flags);
@@ -94,7 +94,6 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 {
     uint32_t i, j;
     bool privileged;
-    bool ns_agent;
     uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
 
@@ -108,7 +107,6 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     privileged = IS_PSA_ROT(p_ldinf);
 #endif
 
-    ns_agent = IS_NS_AGENT(p_ldinf);
     p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     /*
@@ -133,8 +131,6 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     }
     partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
                         HANDLE_ATTR_PRIV_MASK;
-    partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
-                        HANDLE_ATTR_NS_MASK;
     *p_boundary = (uintptr_t)partition_attrs;
 
     return TFM_HAL_SUCCESS;

@@ -150,19 +150,6 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     spm_memcpy(outvecs, outptr, out_num * sizeof(psa_outvec));
 
     /*
-     * For client input vector, it is a PROGRAMMER ERROR if the provided payload
-     * memory reference was invalid or not readable.
-     */
-    for (i = 0; i < in_num; i++) {
-        FIH_CALL(tfm_hal_memory_check, fih_rc,
-                 curr_partition->boundary, (uintptr_t)invecs[i].base,
-                 invecs[i].len, TFM_HAL_ACCESS_READABLE);
-        if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
-        }
-    }
-
-    /*
      * Clients must never overlap input parameters because of the risk of a
      * double-fetch inconsistency.
      * Overflow is checked in tfm_hal_memory_check functions.
@@ -179,15 +166,35 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     }
 
     /*
-     * For client output vector, it is a PROGRAMMER ERROR if the provided
-     * payload memory reference was invalid or not read-write.
+     * The ns_agent_mailbox partition is responsible for validating the invecs and
+     * outvecs it passes.
+     * For all other partitions, that validation is done here.
      */
-    for (i = 0; i < out_num; i++) {
-        FIH_CALL(tfm_hal_memory_check, fih_rc,
-                 curr_partition->boundary, (uintptr_t)outvecs[i].base,
-                 outvecs[i].len, TFM_HAL_ACCESS_READWRITE);
-        if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
+    if (!IS_NS_AGENT_MAILBOX(curr_partition->p_ldinf)) {
+        /*
+         * For client input vector, it is a PROGRAMMER ERROR if the provided payload
+         * memory reference was invalid or not readable.
+         */
+        for (i = 0; i < in_num; i++) {
+            FIH_CALL(tfm_hal_memory_check, fih_rc,
+                     curr_partition->boundary, (uintptr_t)invecs[i].base,
+                     invecs[i].len, TFM_HAL_ACCESS_READABLE);
+            if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
+                return PSA_ERROR_PROGRAMMER_ERROR;
+            }
+        }
+
+        /*
+         * For client output vector, it is a PROGRAMMER ERROR if the provided
+         * payload memory reference was invalid or not read-write.
+         */
+        for (i = 0; i < out_num; i++) {
+            FIH_CALL(tfm_hal_memory_check, fih_rc,
+                     curr_partition->boundary, (uintptr_t)outvecs[i].base,
+                     outvecs[i].len, TFM_HAL_ACCESS_READWRITE);
+            if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
+                return PSA_ERROR_PROGRAMMER_ERROR;
+            }
         }
     }
 

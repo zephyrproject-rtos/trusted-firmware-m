@@ -7,6 +7,9 @@
  *
  */
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "cmsis_compiler.h"
 
 #include "config_impl.h"
@@ -18,7 +21,22 @@
 #include "tfm_rpc.h"
 #include "tfm_multi_core.h"
 
+
 static struct secure_mailbox_queue_t spe_mailbox_queue;
+
+/*
+ * Local copies of invecs and outvecs associated with each mailbox message
+ * while it is being processed.
+ */
+struct vectors {
+    psa_invec in_vec[PSA_MAX_IOVEC];
+    psa_outvec out_vec[PSA_MAX_IOVEC];
+    psa_outvec *original_out_vec;
+    size_t out_len;
+    bool in_use;
+};
+static struct vectors vectors[NUM_MAILBOX_QUEUE_SLOT] = {0};
+
 
 __STATIC_INLINE void set_spe_queue_empty_status(uint8_t idx)
 {
@@ -117,6 +135,14 @@ static void mailbox_direct_reply(uint8_t idx, uint32_t result)
     struct mailbox_reply_t *reply_ptr;
     uint32_t ret_result = result;
 
+    /* Copy outvec lengths back if necessary */
+    if (vectors[idx].in_use) {
+        for (int i = 0; i < vectors[idx].out_len; i++) {
+            vectors[idx].original_out_vec[i].len = vectors[idx].out_vec[i].len;
+        }
+        vectors[idx].in_use = false;
+    }
+
     /* Get reply address */
     reply_ptr = get_nspe_reply_addr(idx);
     spm_memcpy(&reply_ptr->return_val, &ret_result,
@@ -172,11 +198,32 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         break;
 
     case MAILBOX_PSA_CALL:
+        /* TODO check vector validity before use */
+        /* Make local copy of invecs and outvecs */
+        vectors[idx].in_use = true;
+        vectors[idx].out_len = params->psa_call_params.out_len;
+        vectors[idx].original_out_vec = params->psa_call_params.out_vec;
+        for (int i = 0; i < PSA_MAX_IOVEC; i++) {
+            if (i < params->psa_call_params.in_len) {
+                vectors[idx].in_vec[i] = params->psa_call_params.in_vec[i];
+            } else {
+                vectors[idx].in_vec[i].base = 0;
+                vectors[idx].in_vec[i].len = 0;
+            }
+        }
+        for (int i = 0; i < PSA_MAX_IOVEC; i++) {
+            if (i < params->psa_call_params.out_len) {
+                vectors[idx].out_vec[i] = params->psa_call_params.out_vec[i];
+            } else {
+                vectors[idx].out_vec[i].base = 0;
+                vectors[idx].out_vec[i].len = 0;
+            }
+        }
         spm_params.handle = params->psa_call_params.handle;
         spm_params.type = params->psa_call_params.type;
-        spm_params.in_vec = params->psa_call_params.in_vec;
+        spm_params.in_vec = vectors[idx].in_vec;
         spm_params.in_len = params->psa_call_params.in_len;
-        spm_params.out_vec = params->psa_call_params.out_vec;
+        spm_params.out_vec = vectors[idx].out_vec;
         spm_params.out_len = params->psa_call_params.out_len;
         spm_params.ns_client_id = msg_ptr->client_id;
         spm_params.client_data = NULL;

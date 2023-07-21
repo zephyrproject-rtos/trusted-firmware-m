@@ -215,7 +215,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     privileged = IS_PSA_ROT(p_ldinf);
 #endif
 
-    ns_agent = IS_NS_AGENT(p_ldinf);
+    ns_agent = IS_NS_AGENT_TZ(p_ldinf);
     p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     /*
@@ -328,13 +328,12 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
         flags |= CMSE_MPU_UNPRIV;
     }
 
-    /* If multi-core topology is enabled, then the client message has already
+    /*
+     * This check is only done for ns_agent_tz.
+     * In calls from ns_agent_mailbox, the client message has already
      * been marshalled into SPE memory over the MHU, so only need to check
      * access rights within the SPE here.
-     * FIXME: Will need to distinguish between NSPE->SPE veneer calls and
-     * multi-core topology calls if support for both is added.
      */
-#ifndef TFM_MULTI_CORE_TOPOLOGY
     if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
         CONTROL_Type ctrl;
         ctrl.w = __TZ_get_CONTROL_NS();
@@ -345,7 +344,6 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
         }
         flags |= CMSE_NONSECURE;
     }
-#endif
 
     if (cmse_check_address_range((void *)base, size, flags) != NULL) {
         return TFM_HAL_SUCCESS;
