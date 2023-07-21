@@ -55,44 +55,6 @@ SECTIONS
         . = ALIGN(4);
     } > FLASH
 
-    .copy.table : ALIGN(4)
-    {
-        __copy_table_start__ = .;
-        LONG (LOADADDR(.TFM_DATA))
-        LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA) / 4)
-
-        LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
-        LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA) / 4)
-
-        LONG (LOADADDR(.TFM_APP_ROT_LINKER_DATA))
-        LONG (ADDR(.TFM_APP_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA) / 4)
-        __copy_table_end__ = .;
-    } > FLASH
-
-    .zero.table : ALIGN(4)
-    {
-        __zero_table_start__ = .;
-        LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS) / 4)
-        LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
-
-        LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS) / 4)
-#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
-        LONG (PSA_PROXY_SHARED_MEMORY_BASE)
-        LONG (PSA_PROXY_SHARED_MEMORY_SIZE / 4)
-#endif
-#if defined(CONFIG_TFM_PARTITION_META)
-        LONG (ADDR(.TFM_SP_META_PTR))
-        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
-#endif
-        __zero_table_end__ = .;
-    } > FLASH
-
     /**** Section for holding partition RO load data */
     /*
      * Sort the partition info by priority to guarantee the initing order.
@@ -146,6 +108,40 @@ SECTIONS
 
     .ER_TFM_CODE : ALIGN(4)
     {
+        . = ALIGN(4);
+        __copy_table_start__ = .;
+        LONG (LOADADDR(.TFM_DATA))
+        LONG (ADDR(.TFM_DATA))
+        LONG (SIZEOF(.TFM_DATA) / 4)
+
+        LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA) / 4)
+
+        LONG (LOADADDR(.TFM_APP_ROT_LINKER_DATA))
+        LONG (ADDR(.TFM_APP_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA) / 4)
+        __copy_table_end__ = .;
+
+        . = ALIGN(4);
+        __zero_table_start__ = .;
+        LONG (ADDR(.TFM_BSS))
+        LONG (SIZEOF(.TFM_BSS) / 4)
+        LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
+
+        LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS) / 4)
+#if defined(PSA_PROXY_SHARED_MEMORY_BASE)
+        LONG (PSA_PROXY_SHARED_MEMORY_BASE)
+        LONG (PSA_PROXY_SHARED_MEMORY_SIZE / 4)
+#endif
+#if defined(CONFIG_TFM_PARTITION_META)
+        LONG (ADDR(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
+#endif
+        __zero_table_end__ = .;
+
         *libplatform_s*:*(.text*)
         *libtfm_spm*:*(.text*)
 

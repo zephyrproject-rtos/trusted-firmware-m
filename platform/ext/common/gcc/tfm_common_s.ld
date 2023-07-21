@@ -89,52 +89,6 @@ SECTIONS
     VENEERS()
 #endif
 
-    .copy.table ALIGN(4) :
-    {
-        __copy_table_start__ = .;
-#ifdef RAM_VECTORS_SUPPORT
-        /* Copy interrupt vectors from flash to RAM */
-        LONG (__vectors_start__)                            /* From */
-        LONG (__ram_vectors_start__)                        /* To   */
-        LONG ((__vectors_end__ - __vectors_start__) / 4)    /* Size */
-#endif
-        LONG (LOADADDR(.TFM_DATA))
-        LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA) / 4)
-
-        LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
-        LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA) / 4)
-
-        LONG (LOADADDR(.TFM_APP_ROT_LINKER_DATA))
-        LONG (ADDR(.TFM_APP_ROT_LINKER_DATA))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA) / 4)
-
-#if defined (S_RAM_CODE_START)
-        LONG (LOADADDR(.ER_CODE_SRAM))
-        LONG (ADDR(.ER_CODE_SRAM))
-        LONG (SIZEOF(.ER_CODE_SRAM) / 4)
-#endif
-        __copy_table_end__ = .;
-    } > FLASH
-
-    .zero.table ALIGN(4) :
-    {
-        __zero_table_start__ = .;
-        LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS) / 4)
-        LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
-
-        LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
-        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS) / 4)
-#if defined(CONFIG_TFM_PARTITION_META)
-        LONG (ADDR(.TFM_SP_META_PTR))
-        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
-#endif
-        __zero_table_end__ = .;
-    } > FLASH
-
     /**** Section for holding partition RO load data */
     /*
      * Sort the partition info by priority to guarantee the initing order.
@@ -221,6 +175,50 @@ SECTIONS
 
     .ER_TFM_CODE ALIGN(4) :
     {
+        /* .copy.table */
+        . = ALIGN(4);
+        __copy_table_start__ = .;
+#ifdef RAM_VECTORS_SUPPORT
+        /* Copy interrupt vectors from flash to RAM */
+        LONG (__vectors_start__)                            /* From */
+        LONG (__ram_vectors_start__)                        /* To   */
+        LONG ((__vectors_end__ - __vectors_start__) / 4)    /* Size */
+#endif
+        LONG (LOADADDR(.TFM_DATA))
+        LONG (ADDR(.TFM_DATA))
+        LONG (SIZEOF(.TFM_DATA) / 4)
+
+        LONG (LOADADDR(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (ADDR(.TFM_PSA_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_DATA) / 4)
+
+        LONG (LOADADDR(.TFM_APP_ROT_LINKER_DATA))
+        LONG (ADDR(.TFM_APP_ROT_LINKER_DATA))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_DATA) / 4)
+
+#if defined (S_RAM_CODE_START)
+        LONG (LOADADDR(.ER_CODE_SRAM))
+        LONG (ADDR(.ER_CODE_SRAM))
+        LONG (SIZEOF(.ER_CODE_SRAM) / 4)
+#endif
+        __copy_table_end__ = .;
+
+        /* .zero.table */
+        . = ALIGN(4);
+        __zero_table_start__ = .;
+        LONG (ADDR(.TFM_BSS))
+        LONG (SIZEOF(.TFM_BSS) / 4)
+        LONG (ADDR(.TFM_PSA_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_PSA_ROT_LINKER_BSS) / 4)
+
+        LONG (ADDR(.TFM_APP_ROT_LINKER_BSS))
+        LONG (SIZEOF(.TFM_APP_ROT_LINKER_BSS) / 4)
+#if defined(CONFIG_TFM_PARTITION_META)
+        LONG (ADDR(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
+#endif
+        __zero_table_end__ = .;
+
         *startup*(.text*)
         *libplatform_s*:(SORT_BY_ALIGNMENT(.text*))
         *libtfm_spm*:(SORT_BY_ALIGNMENT(.text*))

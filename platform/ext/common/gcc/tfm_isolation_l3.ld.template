@@ -78,62 +78,16 @@ SECTIONS
     /* GCC always places veneers at the end of .gnu.sgstubs section, so the only
      * way to align the end of .gnu.sgstubs section is to align start of the
      * next section */
-    .copy.table ALIGN(TFM_LINKER_VENEERS_ALIGNMENT) :
-#else
-    .copy.table ALIGN(4) :
-#endif
-    {
-        __copy_table_start__ = .;
-#ifdef RAM_VECTORS_SUPPORT
-        /* Copy interrupt vectors from flash to RAM */
-        LONG (__vectors_start__)                            /* From */
-        LONG (__ram_vectors_start__)                        /* To   */
-        LONG ((__vectors_end__ - __vectors_start__) / 4)    /* Size */
-#endif
-        LONG (LOADADDR(.spm_data))
-        LONG (ADDR(.spm_data))
-        LONG (SIZEOF(.spm_data) / 4)
-        LONG (LOADADDR(.TFM_DATA))
-        LONG (ADDR(.TFM_DATA))
-        LONG (SIZEOF(.TFM_DATA) / 4)
-{% for partition in partitions %}
-        LONG (LOADADDR(.ER_{{partition.manifest.name}}_RWZI))
-        LONG (ADDR(.ER_{{partition.manifest.name}}_RWZI))
-        LONG (SIZEOF(.ER_{{partition.manifest.name}}_RWZI) / 4)
-{% endfor %}
-#if defined(S_RAM_CODE_START)
-        LONG (LOADADDR(.ER_CODE_SRAM))
-        LONG (ADDR(.ER_CODE_SRAM))
-        LONG (SIZEOF(.ER_CODE_SRAM) / 4)
-#endif
-
-        __copy_table_end__ = .;
-    } > FLASH
-
-    .zero.table ALIGN(4) :
-    {
-        __zero_table_start__ = .;
-        LONG (ADDR(.spm_bss))
-        LONG (SIZEOF(.spm_bss) / 4)
-#if defined(CONFIG_TFM_PARTITION_META)
-        LONG (ADDR(.TFM_SP_META_PTR))
-        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
-#endif
-        LONG (ADDR(.TFM_BSS))
-        LONG (SIZEOF(.TFM_BSS) / 4)
-{% for partition in partitions %}
-        LONG (ADDR(.{{partition.manifest.name}}_RWZI_BSS))
-        LONG (SIZEOF(.{{partition.manifest.name}}_RWZI_BSS) / 4)
-{% endfor %}
-        __zero_table_end__ = .;
-    } > FLASH
 
     /**** Section for holding partition RO load data */
     /*
      * Sort the partition info by priority to guarantee the initing order.
      * The first loaded partition will be inited at last in SFN model.
      */
+    .TFM_SP_LOAD_LIST ALIGN(TFM_LINKER_VENEERS_ALIGNMENT) :
+#else
     .TFM_SP_LOAD_LIST ALIGN(4) :
+#endif
     {
        KEEP(*(.part_load_priority_lowest))
        KEEP(*(.part_load_priority_low))
@@ -213,6 +167,50 @@ SECTIONS
 
     .ER_TFM_CODE : ALIGN(4)
     {
+        /* .copy.table */
+        . = ALIGN(4);
+        __copy_table_start__ = .;
+#ifdef RAM_VECTORS_SUPPORT
+        /* Copy interrupt vectors from flash to RAM */
+        LONG (__vectors_start__)                            /* From */
+        LONG (__ram_vectors_start__)                        /* To   */
+        LONG ((__vectors_end__ - __vectors_start__) / 4)    /* Size */
+#endif
+        LONG (LOADADDR(.spm_data))
+        LONG (ADDR(.spm_data))
+        LONG (SIZEOF(.spm_data) / 4)
+        LONG (LOADADDR(.TFM_DATA))
+        LONG (ADDR(.TFM_DATA))
+        LONG (SIZEOF(.TFM_DATA) / 4)
+{% for partition in partitions %}
+        LONG (LOADADDR(.ER_{{partition.manifest.name}}_RWZI))
+        LONG (ADDR(.ER_{{partition.manifest.name}}_RWZI))
+        LONG (SIZEOF(.ER_{{partition.manifest.name}}_RWZI) / 4)
+{% endfor %}
+#if defined(S_RAM_CODE_START)
+        LONG (LOADADDR(.ER_CODE_SRAM))
+        LONG (ADDR(.ER_CODE_SRAM))
+        LONG (SIZEOF(.ER_CODE_SRAM) / 4)
+#endif
+        __copy_table_end__ = .;
+
+        /* .zero.table */
+        . = ALIGN(4);
+        __zero_table_start__ = .;
+        LONG (ADDR(.spm_bss))
+        LONG (SIZEOF(.spm_bss) / 4)
+#if defined(CONFIG_TFM_PARTITION_META)
+        LONG (ADDR(.TFM_SP_META_PTR))
+        LONG (SIZEOF(.TFM_SP_META_PTR) / 4)
+#endif
+        LONG (ADDR(.TFM_BSS))
+        LONG (SIZEOF(.TFM_BSS) / 4)
+{% for partition in partitions %}
+        LONG (ADDR(.{{partition.manifest.name}}_RWZI_BSS))
+        LONG (SIZEOF(.{{partition.manifest.name}}_RWZI_BSS) / 4)
+{% endfor %}
+        __zero_table_end__ = .;
+
         *startup*(.text*)
         *libplatform_s*:(SORT_BY_ALIGNMENT(.text*))
         *libtfm_spm*:(SORT_BY_ALIGNMENT(.text*))
