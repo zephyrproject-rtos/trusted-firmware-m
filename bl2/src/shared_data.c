@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -13,7 +13,6 @@
 #include "mcuboot_config/mcuboot_config.h"
 
 #if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) && !defined(MCUBOOT_MEASURED_BOOT)
-#include <stdio.h>
 #include "boot_hal.h"
 #include "boot_measurement.h"
 #include "bootutil_priv.h"
@@ -79,15 +78,10 @@ static int collect_image_measurement_and_metadata(
     int rc;
 
     /* Copy the software version information from the image header. */
-    rc = snprintf(metadata->sw_version, sizeof(metadata->sw_version),
-                  "%u.%u.%u+%u",
-                  hdr->ih_ver.iv_major,
-                  hdr->ih_ver.iv_minor,
-                  hdr->ih_ver.iv_revision,
-                  hdr->ih_ver.iv_build_num);
-    if ((rc < 0) || (rc >= sizeof(metadata->sw_version))) {
-        return -1;
-    }
+    metadata->sw_version.major = hdr->ih_ver.iv_major;
+    metadata->sw_version.minor = hdr->ih_ver.iv_minor;
+    metadata->sw_version.revision = hdr->ih_ver.iv_revision;
+    metadata->sw_version.build_num = hdr->ih_ver.iv_build_num;
 
     /* Traverse through all of the TLVs for the required items. */
     rc = bootutil_tlv_iter_begin(&it, hdr, fap, IMAGE_TLV_ANY, false);
@@ -180,10 +174,10 @@ int boot_save_shared_data(const struct image_header *hdr,
     uint8_t image_hash[MCUBOOT_HASH_SIZE];
     struct boot_measurement_metadata metadata = {
         .measurement_type = MCUBOOT_HASH_ALG,
-        .sw_type = "",
-        .sw_version = "",
         .signer_id = { 0 },
         .signer_id_size = 0,
+        .sw_type = "",
+        .sw_version = { 0 },
     };
 #endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS && !MCUBOOT_MEASURED_BOOT */
 
