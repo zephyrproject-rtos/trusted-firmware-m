@@ -11,7 +11,7 @@ bl1_sha256_finish
 bl1_sha256_init
 bl1_sha256_update
 bl1_trng_generate_random
-bl_secure_memcpy
+bl_fih_memeql
 cc3xx_uninit
 computed_bl1_2_hash
 dpa_hardened_word_copy
@@ -30,7 +30,6 @@ rss_derive_dak_seed
 rss_derive_session_key
 rss_derive_vhuk
 rss_derive_vhuk_seed
-rss_get_boot_state
 stdio_init
 stdio_output_string
 stdio_uninit
@@ -39,4 +38,3 @@ tfm_plat_otp_read
 tfm_plat_otp_write
 tfm_plat_read_nv_counter
 tfm_plat_set_nv_counter
-__assert_func
