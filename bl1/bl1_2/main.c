@@ -19,6 +19,7 @@
 #include "pq_crypto.h"
 #include "tfm_plat_nv_counters.h"
 #include "tfm_plat_otp.h"
+#include <string.h>
 
 /* Disable both semihosting code and argv usage for main */
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
