@@ -23,6 +23,10 @@ set(COMPILER_CMSE_FLAG $<$<COMPILE_LANGUAGE:C>:-mcmse>)
 # with the Ninja generator.
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extensions.cmake)
 
+if(NOT DEFINED CMAKE_OBJCOPY)
+    set(CMAKE_OBJCOPY ${CROSS_COMPILE}-objcopy CACHE FILEPATH "Path to objcopy")
+endif()
+
 macro(tfm_toolchain_reset_compiler_flags)
     set_property(DIRECTORY PROPERTY COMPILE_OPTIONS "")
 
@@ -427,7 +431,7 @@ macro(target_strip_symbols target)
     add_custom_command(
         TARGET ${target}
         POST_BUILD
-        COMMAND ${CROSS_COMPILE}-objcopy
+        COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${target}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${target}>
     )
 endmacro()
@@ -441,7 +445,7 @@ macro(target_strip_symbols_from_dependency target dependency)
     add_custom_command(
         TARGET ${target}
         PRE_LINK
-        COMMAND ${CROSS_COMPILE}-objcopy
+        COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${dependency}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${dependency}>
     )
 endmacro()
@@ -455,7 +459,7 @@ macro(target_weaken_symbols target)
     add_custom_command(
         TARGET ${target}
         POST_BUILD
-        COMMAND ${CROSS_COMPILE}-objcopy
+        COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${target}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${target}>
     )
 endmacro()
@@ -469,7 +473,7 @@ macro(target_weaken_symbols_from_dependency target dependency)
     add_custom_command(
         TARGET ${target}
         PRE_LINK
-        COMMAND ${CROSS_COMPILE}-objcopy
+        COMMAND ${CMAKE_OBJCOPY}
         ARGS $<TARGET_FILE:${dependency}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${dependency}>
     )
 endmacro()
