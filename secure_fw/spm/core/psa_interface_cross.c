@@ -19,7 +19,7 @@
 
 /*
  * R12 stores address of target api which will be called in
- * arch_cross_call_entry.
+ * arch_cross_call.
  */
 #define CROSS_CALL_ENTRY(psa_target_api)              \
     __asm volatile(                                   \
@@ -27,7 +27,7 @@
         "push   {r4, lr}                   \n"        \
         "ldr    r4, ="M2S(psa_target_api)" \n"        \
         "mov    r12, r4                    \n"        \
-        "bl     arch_cross_call_entry      \n"        \
+        "bl     arch_cross_call            \n"        \
         "pop    {r4, pc}                   \n"        \
     )
 
