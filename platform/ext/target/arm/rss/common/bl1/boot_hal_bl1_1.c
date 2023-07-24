@@ -27,6 +27,7 @@
 #ifdef RSS_ENABLE_BRINGUP_HELPERS
 #include "rss_bringup_helpers.h"
 #endif /* RSS_ENABLE_BRINGUP_HELPERS */
+#include "trng.h"
 
 /* Flash device name must be specified by target */
 extern ARM_DRIVER_FLASH FLASH_DEV_NAME;

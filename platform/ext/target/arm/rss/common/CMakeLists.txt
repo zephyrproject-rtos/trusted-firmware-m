@@ -361,6 +361,7 @@ target_compile_definitions(platform_bl1_1_interface
 target_link_libraries(platform_bl1_1
     PRIVATE
         cc312_rom
+        bl1_1_shared_lib_interface
 )
 
 target_sources(bl1_1_shared_lib
