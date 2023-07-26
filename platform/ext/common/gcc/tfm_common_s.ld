@@ -266,7 +266,8 @@ SECTIONS
     /**** Base address of secure data area */
     .tfm_secure_data_start :
     {
-        . = ABSOLUTE(S_DATA_START) ;
+        /* Relocate current position to RAM */
+        . = ALIGN(4);
     } > RAM
 
     /*
