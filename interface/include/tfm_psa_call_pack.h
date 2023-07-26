@@ -27,7 +27,7 @@ extern "C" {
          ((((uint32_t)out_len) << OUT_LEN_OFFSET) & OUT_LEN_MASK))
 
 #define PARAM_UNPACK_TYPE(ctrl_param) \
-        ((int32_t)(((ctrl_param) & TYPE_MASK) >> TYPE_OFFSET))
+        ((int32_t)(int16_t)(((ctrl_param) & TYPE_MASK) >> TYPE_OFFSET))
 
 #define PARAM_UNPACK_IN_LEN(ctrl_param) \
         ((size_t)(((ctrl_param) & IN_LEN_MASK) >> IN_LEN_OFFSET))
