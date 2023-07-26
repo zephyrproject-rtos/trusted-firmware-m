@@ -211,6 +211,7 @@ Build          For build system related purpose.
 Docs           All \*.rst changes.
 Dualcpu        Dual-cpu related changes.
 HAL            Generic HAL interface/implementation changes.
+Interface      Interface changes, either Non-source and secure.
 Pack           For packing purpose.
 Platform       Generic platform related changes under `platform/*`.
 Platform Name  Specific platform changes.
