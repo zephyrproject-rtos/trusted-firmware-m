@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include "aapcs_local.h"
+#include "async.h"
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
 #include "config_spm.h"
@@ -59,7 +60,7 @@ static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
     struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
     struct partition_t *p_pt = NULL;
     uint32_t state = p_thrd->state;
-    psa_signal_t signal_ret = 0;
+    psa_signal_t retval_signals = 0;
 
     /* Get current partition of thread. */
     p_pt = TO_CONTAINER(p_thrd->p_context_ctrl,
@@ -67,25 +68,34 @@ static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
 
     CRITICAL_SECTION_ENTER(cs_signal);
 
-    signal_ret = p_pt->signals_waiting & p_pt->signals_asserted;
+    retval_signals = p_pt->signals_waiting & p_pt->signals_asserted;
 
-    if (signal_ret) {
+    if (retval_signals) {
         /*
-         * If the partition is waiting some signals and any of them is asserted,
-         * change thread to be THRD_STATE_RET_VAL_AVAIL and fill the retval. If
-         * the waiting signal is TFM_IPC_REPLY_SIGNAL, it means the Secure
-         * Partition is waiting for the services to be fulfilled, then the
-         * return value comes from the backend_replying() by the server
-         * Partition. For other waiting signals by psa_wait(), the return value
-         * is just the signal.
+         * Signal "ASYNC_MSG_REPLY" can only be waited in one of cases below:
+         *
+         *   - A FF-M Secure Partition is calling the Client API and
+         *     expecting a replied "handle/status" from RoT Services.
+         *     FF-M Secure Partitions cannot use 'psa_wait' to wait
+         *     on this signal because the signal is not set in FF-M
+         *     Secure Partitions' "signals_allowed".
+         *
+         *   - A Mailbox NS Agent is calling "psa_wait" with a pattern
+         *     containing "ASYNC_MSG_REPLY". The signal is set in
+         *     Mailbox NS Agents' "signals_allowed".
+         *
+         * Here uses "signals_allowed" to check if the calling target is a
+         * FF-M Secure Partition or a Mailbox NS Agent.
          */
-        if (signal_ret == TFM_IPC_REPLY_SIGNAL) {
-            p_pt->signals_asserted &= ~TFM_IPC_REPLY_SIGNAL;
+        if ((retval_signals ==  ASYNC_MSG_REPLY) &&
+            ((p_pt->signals_allowed & ASYNC_MSG_REPLY) != ASYNC_MSG_REPLY)) {
+            p_pt->signals_asserted &= ~ASYNC_MSG_REPLY;
             *p_retval = (uint32_t)p_pt->reply_value;
         } else {
-            *p_retval = signal_ret;
+            *p_retval = retval_signals;
         }
 
+        /* Clear 'signals_waiting' to indicate the component is not waiting. */
         p_pt->signals_waiting = 0;
         state = THRD_STATE_RET_VAL_AVAIL;
     } else if (p_pt->signals_waiting != 0) {
@@ -179,7 +189,7 @@ psa_status_t backend_messaging(struct service_t *service,
      */
 
     if (!is_tfm_rpc_msg(handle)) {
-        ret = backend_wait_signals(handle->p_client, TFM_IPC_REPLY_SIGNAL);
+        ret = backend_wait_signals(handle->p_client, ASYNC_MSG_REPLY);
     } else {
         ret = PSA_SUCCESS;
     }
@@ -195,7 +205,7 @@ psa_status_t backend_replying(struct connection_t *handle, int32_t status)
         tfm_rpc_client_call_reply(handle, status);
     } else {
         handle->p_client->reply_value = (uintptr_t)status;
-        return backend_assert_signal(handle->p_client, TFM_IPC_REPLY_SIGNAL);
+        return backend_assert_signal(handle->p_client, ASYNC_MSG_REPLY);
     }
 
     /*
@@ -221,6 +231,11 @@ static thrd_fn_t partition_init(struct partition_t *p_pt,
 #endif /* CONFIG_TFM_DOORBELL_API == 1 */
 
     p_pt->signals_allowed |= service_setting;
+
+    /* Allow 'ASYNC_MSG_REPLY' for Mailbox NS Agent. */
+    if (IS_NS_AGENT_MAILBOX(p_pt->p_ldinf)) {
+        p_pt->signals_allowed |= ASYNC_MSG_REPLY;
+    }
 
     UNI_LISI_INIT_NODE(p_pt, p_handles);
 

@@ -22,12 +22,6 @@
 #error "No backend selected, check configurations."
 #endif
 
-/**
- * The signal number for the Secure Partition thread message and reply in IPC
- * mode.
- */
-#define TFM_IPC_REPLY_SIGNAL     (0x00000002u)
-
 /*
  * Runtime model-specific component initialization routine. This
  * is an `assuredly` function, would panic if any error occurred.
