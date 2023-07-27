@@ -326,10 +326,18 @@ int boot_platform_post_load(uint32_t image_id)
         return rc;
     }
 
+#ifdef RSS_BOOT_KEYS_CCA
     rc = rss_derive_dak_seed(RSS_KMU_SLOT_DAK_SEED);
     if (rc) {
         return rc;
     }
+#endif
+#ifdef RSS_BOOT_KEYS_DPE
+    rc = rss_derive_rot_cdi(RSS_KMU_SLOT_ROT_CDI);
+    if (rc) {
+        return rc;
+    }
+#endif
 
     rc = setup_kmu_slot_from_otp(RSS_KMU_SLOT_SECURE_ENCRYPTION_KEY,
                                  PLAT_OTP_ID_KEY_SECURE_ENCRYPTION,

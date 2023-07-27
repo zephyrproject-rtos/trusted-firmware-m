@@ -186,6 +186,8 @@ target_compile_definitions(platform_s
         ATTEST_KEY_BITS=${ATTEST_KEY_BITS}
         spm_memcpy=spm_dma_memcpy
     PRIVATE
+        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSS_BOOT_KEYS_CCA>
+        $<$<BOOL:${TFM_PARTITION_DPE}>:RSS_BOOT_KEYS_DPE>
         # Needed for DMA-350 library
         CMSIS_device_header="rss.h"
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:PLATFORM_SVC_HANDLERS>
@@ -292,6 +294,8 @@ target_include_directories(platform_bl2
 
 target_compile_definitions(platform_bl2
     PRIVATE
+        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSS_BOOT_KEYS_CCA>
+        $<$<BOOL:${TFM_PARTITION_DPE}>:RSS_BOOT_KEYS_DPE>
         # Needed for DMA-350 library
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:PLATFORM_HAS_BOOT_DMA>
         $<$<BOOL:${PLATFORM_BOOT_DMA_MIN_SIZE_REQ}>:BOOT_DMA_MIN_SIZE_REQ=${PLATFORM_BOOT_DMA_MIN_SIZE_REQ}>
@@ -343,6 +347,8 @@ target_include_directories(platform_bl1_1_interface
 
 target_compile_definitions(platform_bl1_1_interface
     INTERFACE
+        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSS_BOOT_KEYS_CCA>
+        $<$<BOOL:${TFM_PARTITION_DPE}>:RSS_BOOT_KEYS_DPE>
         RSS_AMOUNT=${RSS_AMOUNT}
         KMU_CONFIG_EXTERNAL_SECURE_WORD_COPY
         $<$<BOOL:${RSS_ENCRYPTED_OTP_KEYS}>:RSS_ENCRYPTED_OTP_KEYS>
@@ -382,6 +388,8 @@ target_include_directories(platform_bl1_2
 
 target_compile_definitions(platform_bl1_2
     PUBLIC
+        $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSS_BOOT_KEYS_CCA>
+        $<$<BOOL:${TFM_PARTITION_DPE}>:RSS_BOOT_KEYS_DPE>
         $<$<BOOL:${RSS_AMOUNT}>:RSS_AMOUNT=${RSS_AMOUNT}>
 )
 

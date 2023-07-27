@@ -191,6 +191,14 @@ int rss_derive_dak_seed(enum rss_kmu_slot_id_t slot)
                           sizeof(dak_seed_label), slot, false);
 }
 
+int rss_derive_rot_cdi(enum rss_kmu_slot_id_t slot)
+{
+    uint8_t rot_cdi_label[] = "BL1_ROT_CDI_DERIVATION";
+
+    return rss_derive_key(KMU_HW_SLOT_HUK, NULL, rot_cdi_label,
+                          sizeof(rot_cdi_label), slot, false);
+}
+
 int rss_derive_vhuk_seed(uint32_t *vhuk_seed, size_t vhuk_seed_buf_len,
                          size_t *vhuk_seed_size)
 {
@@ -292,4 +300,3 @@ int rss_derive_dm_provisioning_key(enum rss_kmu_slot_id_t slot)
     return derive_using_krtl_or_zero_key(dm_provisioning_label,
                                          sizeof(dm_provisioning_label), slot);
 }
-

@@ -18,7 +18,12 @@ enum rss_kmu_slot_id_t {
     RSS_KMU_SLOT_TRAM_KEY = KMU_USER_SLOT_MIN,
     RSS_KMU_SLOT_VHUK,
     RSS_KMU_SLOT_CPAK_SEED,
+#ifdef RSS_BOOT_KEYS_CCA
     RSS_KMU_SLOT_DAK_SEED,
+#endif
+#ifdef RSS_BOOT_KEYS_DPE
+    RSS_KMU_SLOT_ROT_CDI,
+#endif
     /* The session key is used for AEAD, so requires two contiguous slots. Only
      * the first should be used for calls, the key loader and derivation code
      * will transparently use the second where necessary.
