@@ -8,8 +8,8 @@
 #
 #-------------------------------------------------------------------------------
 
-set(PLATFORM_SLIH_IRQ_TEST_SUPPORT)
-set(PLATFORM_FLIH_IRQ_TEST_SUPPORT)
+set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON)
+set(PLATFORM_FLIH_IRQ_TEST_SUPPORT    ON)
 
 set(HAL_NORDIC_PATH "DOWNLOAD" CACHE PATH "Path to the Nordic HAL (or DOWNLOAD to fetch automatically)")
 set(HAL_NORDIC_VERSION "nrfx-3.0.0" CACHE STRING "Version of the Nordic HAL to download")
