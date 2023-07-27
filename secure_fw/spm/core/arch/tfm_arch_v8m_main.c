@@ -36,19 +36,16 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #pragma required = spm_svc_handler
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
+
 #pragma required = ipc_schedule
-#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1*/
-
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-
 #pragma required = cross_call_entering_c
 #pragma required = cross_call_exiting_c
 
-#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1*/
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1*/
 
 #endif
 
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 
 __naked
 void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
@@ -90,7 +87,7 @@ void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
     );
 }
 
-#endif /* CONFIG_TFM_PSA_API_CROSS_CALL == 1*/
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1*/
 
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
 __attribute__((naked)) void PendSV_Handler(void)

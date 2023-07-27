@@ -31,7 +31,7 @@ extern int32_t platform_svc_handlers(uint8_t svc_number,
                                      uint32_t *ctx, uint32_t lr);
 #endif
 
-#if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
+#if TFM_ISOLATION_LEVEL > 1
 typedef psa_status_t (*psa_api_svc_func_t)(uint32_t p0, uint32_t p1, uint32_t p2, uint32_t p3);
 
 /* The order of the functions must match the SVC number index defined in svc_num.h */
@@ -164,7 +164,7 @@ uint32_t spm_svc_handler(uint32_t *msp, uint32_t exc_return, uint32_t *psp)
         return handle_spm_svc_requests(svc_number, exc_return, svc_args, msp);
     }
 
-#if CONFIG_TFM_PSA_API_SUPERVISOR_CALL == 1
+#if TFM_ISOLATION_LEVEL > 1
     if (TFM_SVC_IS_PSA_API(svc_number)) {
         if (((uint32_t)&REGION_NAME(Image$$, ARM_LIB_STACK, $$ZI$$Limit) - (uint32_t)msp) > 0) {
             /* The Main Stack has contents, not calling from Partition thread */

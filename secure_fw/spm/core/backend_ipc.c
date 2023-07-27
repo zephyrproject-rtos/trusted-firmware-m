@@ -32,10 +32,12 @@
 /* Declare the global component list */
 struct partition_head_t partition_listhead;
 
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
-/* Instance for SPM_THREAD_CONTEXT */
+#if TFM_ISOLATION_LEVEL > 1
+extern uintptr_t spm_boundary;
+#endif
 
 #ifdef CONFIG_TFM_USE_TRUSTZONE
+/* Instance for SPM_THREAD_CONTEXT */
 struct context_ctrl_t *p_spm_thread_context;
 #else
 /* If ns_agent_tz isn't used, we need to provide a stack for SPM to use */
@@ -45,8 +47,6 @@ ARCH_CLAIM_CTXCTRL_INSTANCE(spm_thread_context,
                             sizeof(spm_thread_stack));
 
 struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
-#endif
-
 #endif
 
 /* Indicator point to the partition meta */
@@ -138,13 +138,17 @@ static void prv_process_metadata(struct partition_t *p_pt)
     p_rt_meta = (struct runtime_metadata_t *)
                                     ARCH_CTXCTRL_ALLOCATED_PTR(ctx_ctrl);
 
-    p_rt_meta->entry = p_pt_ldi->entry;
 #if TFM_ISOLATION_LEVEL == 1
     p_rt_meta->psa_fns = &psa_api_cross;
 #else
-    /* TODO: ABI for PRoT partitions needs to be updated based on implementations. */
-    p_rt_meta->psa_fns = &psa_api_svc;
+    if (tfm_hal_boundary_need_switch(spm_boundary, p_pt->boundary)) {
+        p_rt_meta->psa_fns = &psa_api_svc;
+    } else {
+        p_rt_meta->psa_fns = &psa_api_cross;
+    }
 #endif
+
+    p_rt_meta->entry = p_pt_ldi->entry;
     p_rt_meta->n_sfn = 0;
     p_sfn_table = p_rt_meta->sfn_table;
 
@@ -261,10 +265,8 @@ static thrd_fn_t ns_agent_tz_init(struct partition_t *p_pt,
     SPM_ASSERT(p_pt);
     SPM_ASSERT(param);
 
-#if (CONFIG_TFM_PSA_API_CROSS_CALL == 1)
     /* Get the context from ns_agent_tz */
     SPM_THREAD_CONTEXT = &p_pt->ctx_ctrl;
-#endif
 
     thrd_entry = POSITION_TO_ENTRY(p_pt->p_ldinf->entry, thrd_fn_t);
 
@@ -313,9 +315,7 @@ uint32_t backend_system_run(void)
     struct partition_t *p_cur_pt;
     fih_int fih_rc = FIH_FAILURE;
 
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
     SPM_ASSERT(SPM_THREAD_CONTEXT);
-#endif
 
     /* Init thread callback function. */
     thrd_set_query_callback(query_state);

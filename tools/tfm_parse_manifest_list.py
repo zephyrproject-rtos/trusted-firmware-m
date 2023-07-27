@@ -268,9 +268,6 @@ def process_partition_manifests(manifest_lists, configs):
     config_impl = {
         'CONFIG_TFM_SPM_BACKEND_SFN'              : '0',
         'CONFIG_TFM_SPM_BACKEND_IPC'              : '0',
-        'CONFIG_TFM_PSA_API_SFN_CALL'             : '0',
-        'CONFIG_TFM_PSA_API_CROSS_CALL'           : '0',
-        'CONFIG_TFM_PSA_API_SUPERVISOR_CALL'      : '0',
         'CONFIG_TFM_CONNECTION_BASED_SERVICE_API' : '0',
         'CONFIG_TFM_MMIO_REGION_ENABLE'           : '0',
         'CONFIG_TFM_FLIH_API'                     : '0',
@@ -441,13 +438,8 @@ def process_partition_manifests(manifest_lists, configs):
             exit(1)
 
         config_impl['CONFIG_TFM_SPM_BACKEND_SFN'] = '1'
-        config_impl['CONFIG_TFM_PSA_API_SFN_CALL'] = '1'
     elif backend == 'IPC':
         config_impl['CONFIG_TFM_SPM_BACKEND_IPC'] = '1'
-        if isolation_level > 1:
-            config_impl['CONFIG_TFM_PSA_API_SUPERVISOR_CALL'] = '1'
-        else:
-            config_impl['CONFIG_TFM_PSA_API_CROSS_CALL'] = '1'
 
     if partition_statistics['connection_based_srv_num'] > 0:
         config_impl['CONFIG_TFM_CONNECTION_BASED_SERVICE_API'] = 1

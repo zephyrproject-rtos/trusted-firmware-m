@@ -92,9 +92,9 @@ set_source_files_properties(
 
 target_sources(tfm_sprt
     PRIVATE
-        $<$<BOOL:${CONFIG_TFM_PSA_API_SUPERVISOR_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_svc.c>
-        $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_cross.c>
-        $<$<BOOL:${CONFIG_TFM_PSA_API_SFN_CALL}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_sfn.c>
+        $<$<BOOL:$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_svc.c>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_cross.c>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_sfn.c>
 )
 
 ############################# Secure veneers ###################################

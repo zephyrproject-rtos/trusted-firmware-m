@@ -311,7 +311,7 @@ void tfm_core_handler_mode(void);
 
 void update_caller_outvec_len(struct connection_t *handle);
 
-#if CONFIG_TFM_PSA_API_CROSS_CALL == 1
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 
 /*
  * Executes with interrupt unmasked.Check the necessity of switching to SPM

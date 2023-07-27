@@ -47,7 +47,7 @@ target_sources(tfm_spm
         core/arch/tfm_arch.c
         core/main.c
         core/spm_ipc.c
-        $<$<BOOL:${CONFIG_TFM_PSA_API_CROSS_CALL}>:core/spm_cross_call.c>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:core/spm_cross_call.c>
         core/rom_loader.c
         core/psa_api.c
         core/psa_call_api.c
