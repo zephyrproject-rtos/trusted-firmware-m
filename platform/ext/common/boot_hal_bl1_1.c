@@ -84,7 +84,6 @@ __WEAK __attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handle
 /* bootloader platform-specific hw initialization */
 __WEAK int32_t boot_platform_init(void)
 {
-    int32_t result;
     enum tfm_plat_err_t plat_err;
 
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
@@ -107,8 +106,7 @@ __WEAK int32_t boot_platform_init(void)
     }
 
 #ifndef TFM_BL1_2_IN_OTP
-    result = FLASH_DEV_NAME.Initialize(NULL);
-    if (result != ARM_DRIVER_OK) {
+    if (FLASH_DEV_NAME.Initialize(NULL) != ARM_DRIVER_OK) {
         return 1;
     }
 #endif /* !TFM_BL1_2_IN_OTP */
@@ -132,11 +130,9 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
      * no effect on them.
      */
     static struct boot_arm_vector_table *vt_cpy;
-    int32_t result;
 
 #ifndef TFM_BL1_2_IN_OTP
-    result = FLASH_DEV_NAME.Uninitialize();
-    if (result != ARM_DRIVER_OK) {
+    if (FLASH_DEV_NAME.Uninitialize() != ARM_DRIVER_OK) {
         while (1){}
     }
 #endif /* !TFM_BL1_2_IN_OTP */

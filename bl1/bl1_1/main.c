@@ -23,7 +23,7 @@ __asm("  .global __ARM_use_no_argv\n");
 
 uint8_t computed_bl1_2_hash[BL1_2_HASH_SIZE];
 
-fih_int validate_image_at_addr(uint8_t *image)
+static fih_int validate_image_at_addr(uint8_t *image)
 {
     enum tfm_plat_err_t plat_err;
     uint8_t stored_bl1_2_hash[BL1_2_HASH_SIZE];

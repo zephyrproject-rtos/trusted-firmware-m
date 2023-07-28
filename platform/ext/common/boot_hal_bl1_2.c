@@ -125,8 +125,6 @@ __WEAK __attribute__((naked)) void boot_jump_to_next_image(uint32_t reset_handle
 /* bootloader platform-specific hw initialization */
 __WEAK int32_t boot_platform_init(void)
 {
-    int32_t result;
-
 #if defined(__ARM_ARCH_8M_MAIN__) || defined(__ARM_ARCH_8M_BASE__) \
  || defined(__ARM_ARCH_8_1M_MAIN__)
     /* Initialize stack limit register */
@@ -142,8 +140,7 @@ __WEAK int32_t boot_platform_init(void)
 #endif /* defined(TFM_BL1_LOGGING) || defined(TEST_BL1_1) || defined(TEST_BL1_2) */
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
-    result = FLASH_DEV_NAME.Initialize(NULL);
-    if (result != ARM_DRIVER_OK) {
+    if (FLASH_DEV_NAME.Initialize(NULL) != ARM_DRIVER_OK) {
         return 1;
     }
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
@@ -164,11 +161,9 @@ __WEAK void boot_platform_quit(struct boot_arm_vector_table *vt)
      * no effect on them.
      */
     static struct boot_arm_vector_table *vt_cpy;
-    int32_t result;
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
-    result = FLASH_DEV_NAME.Uninitialize();
-    if (result != ARM_DRIVER_OK) {
+    if (FLASH_DEV_NAME.Uninitialize() != ARM_DRIVER_OK) {
         while (1){}
     }
 #endif /* !TFM_BL1_MEMORY_MAPPED_FLASH */
