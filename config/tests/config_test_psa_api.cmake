@@ -27,6 +27,18 @@ if ("${TEST_PSA_API}" STREQUAL "CRYPTO")
     set(TFM_PARTITION_PLATFORM                 ON       CACHE BOOL      "Enable Platform partition")
 endif()
 
+if ("${TEST_PSA_API}" STREQUAL "INTERNAL_TRUSTED_STORAGE")
+    set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
+    set(TFM_PARTITION_PLATFORM                 ON       CACHE BOOL      "Enable Platform partition")
+endif()
+
+if ("${TEST_PSA_API}" STREQUAL "PROTECTED_STORAGE")
+    set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
+    set(TFM_PARTITION_PROTECTED_STORAGE        ON       CACHE BOOL      "Enable Protected Storage partition")
+    set(TFM_PARTITION_CRYPTO                   ON       CACHE BOOL      "Enable Crypto partition")
+    set(TFM_PARTITION_PLATFORM                 ON       CACHE BOOL      "Enable Platform partition")
+endif()
+
 if ("${TEST_PSA_API}" STREQUAL "STORAGE")
     set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
     set(TFM_PARTITION_PROTECTED_STORAGE        ON       CACHE BOOL      "Enable Protected Storage partition")
