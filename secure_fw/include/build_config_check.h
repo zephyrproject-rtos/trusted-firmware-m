@@ -28,10 +28,10 @@ __asm("  .global __ARM_use_no_argv\n");
 #endif
 
 /* Check isolation levels. */
-#ifndef TFM_LVL
-#error TFM_LVL is not defined.
-#elif (TFM_LVL != 1) && (TFM_LVL != 2) && (TFM_LVL != 3)
-#error Invalid TFM_LVL value. The possible values are 1, 2 and 3.
+#ifndef TFM_ISOLATION_LEVEL
+#error TFM_ISOLATION_LEVEL is not defined.
+#elif (TFM_ISOLATION_LEVEL != 1) && (TFM_ISOLATION_LEVEL != 2) && (TFM_ISOLATION_LEVEL != 3)
+#error Invalid TFM_ISOLATION_LEVEL value. The possible values are 1, 2 and 3.
 #endif
 
 /* Check if there are unsupported thread priority. */

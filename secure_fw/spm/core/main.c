@@ -65,7 +65,7 @@ static fih_int tfm_core_init(void)
 
     SPMLOG_INFMSG("\033[1;34m[Sec Thread] Secure image initializing!\033[0m\r\n");
 
-    SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_LVL);
+    SPMLOG_DBGMSGVAL("TF-M isolation level is: ", TFM_ISOLATION_LEVEL);
 
 #if (CONFIG_TFM_FLOAT_ABI == 2)
     SPMLOG_INFMSG("TF-M Float ABI: Hard\r\n");

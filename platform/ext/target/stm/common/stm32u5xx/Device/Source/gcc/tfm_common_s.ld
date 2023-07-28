@@ -129,7 +129,7 @@ SECTIONS
     Image$$TFM_PSA_CODE_END$$Base = .;
 
 
-#if TFM_LVL != 1
+#if TFM_ISOLATION_LEVEL != 1
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
@@ -142,7 +142,7 @@ SECTIONS
     } > FLASH
     __exidx_end = .;
 
-#endif /* TFM_LVL != 1 */
+#endif /* TFM_ISOLATION_LEVEL != 1 */
 
     .ER_TFM_CODE : ALIGN(4)
     {
@@ -219,7 +219,7 @@ SECTIONS
     } > RAM
     __StackSeal = ADDR(.msp_stack_seal_res);
 
-#if (TFM_LVL == 1)
+#if (TFM_ISOLATION_LEVEL == 1)
     .heap : ALIGN(8)
     {
         __end__ = .;
@@ -229,9 +229,9 @@ SECTIONS
         __HeapLimit = .;
         __heap_limit = .; /* Add for _sbrk */
     } > RAM
-#endif /* TFM_LVL == 1 */
+#endif /* TFM_ISOLATION_LEVEL == 1 */
 
-#if TFM_LVL != 1
+#if TFM_ISOLATION_LEVEL != 1
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     .TFM_SP_SECURE_TEST_PARTITION_LINKER_DATA : ALIGN(32)
     {
@@ -244,7 +244,7 @@ SECTIONS
         /* FixMe:
          * Test framework use printf to print out test result. Implementation of
          * printf in GCC libc use static data and heap as well. To be able to
-         * execute test suites with TFM_LVL=3 this workaround is needed to
+         * execute test suites with TFM_ISOLATION_LEVEL=3 this workaround is needed to
          * allocate libc static data and heap within the data section of secure
          * test partition. This can be removed if test service will be executed
          * in privileged mode.
@@ -272,7 +272,7 @@ SECTIONS
         __heap_limit = .; /* Add for _sbrk */
     } > RAM AT> RAM
 #endif /* TFM_PARTITION_TEST_SECURE_SERVICES */
-#endif /* TFM_LVL != 1 */
+#endif /* TFM_ISOLATION_LEVEL != 1 */
 
     /**** PSA RoT DATA start here */
 

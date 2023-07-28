@@ -17,7 +17,7 @@
 #include "region_defs.h"
 #include "tfm_s_linker_alignments.h"
 
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
 #define TFM_SP_IDLE_NASSETS     (1)
 #endif
 
@@ -31,7 +31,7 @@ struct partition_tfm_sp_idle_load_info_t {
     /* per-partition variable length load data */
     uintptr_t                       stack_addr;
     uintptr_t                       heap_addr;
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
     struct asset_desc_t             assets[TFM_SP_IDLE_NASSETS];
 #endif
 } __attribute__((aligned(4)));
@@ -58,7 +58,7 @@ const struct partition_tfm_sp_idle_load_info_t
         .heap_size                  = 0,
         .ndeps                      = 0,
         .nservices                  = 0,
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
         .nassets                    = TFM_SP_IDLE_NASSETS,
 #else
         .nassets                    = 0,
@@ -66,7 +66,7 @@ const struct partition_tfm_sp_idle_load_info_t
     },
     .stack_addr                     = (uintptr_t)idle_sp_stack,
     .heap_addr                      = 0,
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
     .assets                         = {
         {
             .mem.start              = (uintptr_t)idle_sp_stack,

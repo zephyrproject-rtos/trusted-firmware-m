@@ -25,7 +25,7 @@
 
 extern uintptr_t spm_boundary;
 
-#if TFM_LVL != 1
+#if TFM_ISOLATION_LEVEL != 1
 extern void tfm_flih_func_return(psa_flih_result_t result);
 
 __attribute__((naked))
@@ -161,7 +161,7 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
         flih_result = PSA_FLIH_SIGNAL;
     } else {
         /* FLIH Model Handling */
-#if TFM_LVL == 1
+#if TFM_ISOLATION_LEVEL == 1
         flih_result = p_ildi->flih_func();
 #else
         if (!tfm_hal_boundary_need_switch(spm_boundary,

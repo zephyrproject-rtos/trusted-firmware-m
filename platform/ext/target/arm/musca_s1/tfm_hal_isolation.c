@@ -174,14 +174,14 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
     struct platform_data_t *plat_data_ptr;
-#if TFM_LVL == 2
+#if TFM_ISOLATION_LEVEL == 2
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
     if (!p_ldinf || !p_boundary) {
         return TFM_HAL_ERROR_GENERIC;
     }
 
-#if TFM_LVL == 1
+#if TFM_ISOLATION_LEVEL == 1
     privileged = true;
 #else
     privileged = IS_PSA_ROT(p_ldinf);
@@ -227,7 +227,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
                                      plat_data_ptr->periph_ppc_loc);
             }
         }
-#if TFM_LVL == 2
+#if TFM_ISOLATION_LEVEL == 2
         /*
          * Static boundaries are set. Set up MPU region for MMIO.
          * Setup regions for unprivileged assets only.

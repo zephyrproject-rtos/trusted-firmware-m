@@ -26,7 +26,7 @@
 
 #define TFM_SP_NS_AGENT_NDEPS                                   (0)
 #define TFM_SP_NS_AGENT_NSERVS                                  (0)
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
 #define TFM_SP_NS_AGENT_NASSETS                                 (1)
 #endif
 
@@ -47,7 +47,7 @@ struct partition_tfm_sp_ns_agent_tz_load_info_t {
     /* per-partition variable length load data */
     uintptr_t                       stack_addr;
     uintptr_t                       heap_addr;
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
     struct asset_desc_t             assets[TFM_SP_NS_AGENT_NASSETS];
 #endif
 } __attribute__((aligned(4)));
@@ -71,7 +71,7 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
         .heap_size                  = 0,
         .ndeps                      = TFM_SP_NS_AGENT_NDEPS,
         .nservices                  = TFM_SP_NS_AGENT_NSERVS,
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
         .nassets                    = TFM_SP_NS_AGENT_NASSETS,
 #else
         .nassets                    = 0,
@@ -79,7 +79,7 @@ const struct partition_tfm_sp_ns_agent_tz_load_info_t
     },
     .stack_addr                     = (uintptr_t)ns_agent_tz_stack,
     .heap_addr                      = 0,
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
     .assets                         = {
         {
             .mem.start              = (uintptr_t)ns_agent_tz_stack,

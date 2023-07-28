@@ -40,7 +40,7 @@ REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
 #endif /* CONFIG_TFM_PARTITION_META */
 
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
 /* Isolation level 3 needs to reserve at lease one MPU region for private data asset. */
 #define MIN_NR_PRIVATE_DATA_REGION    1
 
@@ -85,7 +85,7 @@ const static struct mpu_armv8m_region_cfg_t region_cfg[] = {
     }
 #endif
 };
-#else /* TFM_LVL == 3 */
+#else /* TFM_ISOLATION_LEVEL == 3 */
 /* Isolation level 1&2 do not need to reserve MPU region for private data asset. */
 #define MIN_NR_PRIVATE_DATA_REGION    0
 
@@ -152,7 +152,7 @@ const struct mpu_armv8m_region_cfg_t region_cfg[] = {
     }
 #endif
 };
-#endif /* TFM_LVL == 3 */
+#endif /* TFM_ISOLATION_LEVEL == 3 */
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
 #ifdef TFM_FIH_PROFILE_ON
@@ -382,7 +382,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
     bool privileged;
     bool ns_agent;
     uint32_t partition_attrs = 0;
-#if (CONFIG_TFM_MMIO_REGION_ENABLE == 1) && (TFM_LVL == 2)
+#if (CONFIG_TFM_MMIO_REGION_ENABLE == 1) && (TFM_ISOLATION_LEVEL == 2)
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
 #if CONFIG_TFM_MMIO_REGION_ENABLE == 1
@@ -396,7 +396,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
-#if TFM_LVL == 1
+#if TFM_ISOLATION_LEVEL == 1
     privileged = true;
 #else
     privileged = IS_PSA_ROT(p_ldinf);
@@ -455,7 +455,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
                 }
             }
         }
-#if TFM_LVL == 2
+#if TFM_ISOLATION_LEVEL == 2
         /*
          * Static boundaries are set. Set up MPU region for MMIO.
          * Setup regions for unprivileged assets only.
@@ -474,7 +474,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
                 FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
             }
         }
-#elif TFM_LVL == 3
+#elif TFM_ISOLATION_LEVEL == 3
         /* Encode MMIO attributes into the "partition_attrs". */
         partition_attrs <<= HANDLE_PER_ATTR_BITS;
         partition_attrs |= ((j + 1) & HANDLE_ATTR_INDEX_MASK);
@@ -485,7 +485,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
     }
 #endif /* CONFIG_TFM_MMIO_REGION_ENABLE == 1 */
 
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
     partition_attrs <<= HANDLE_PER_ATTR_BITS;
     /*
      * Highest 8 bits are reserved for index, if they are non-zero, MMIO numbers
@@ -513,7 +513,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
     CONTROL_Type ctrl;
     uint32_t local_handle = (uint32_t)boundary;
     bool privileged = !!(local_handle & HANDLE_ATTR_PRIV_MASK);
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
     struct mpu_armv8m_region_cfg_t localcfg;
     uint32_t i;
 #if CONFIG_TFM_MMIO_REGION_ENABLE == 1
@@ -522,14 +522,14 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
 #endif
     const struct asset_desc_t *rt_mem;
     fih_int fih_rc = FIH_FAILURE;
-#endif /* TFM_LVL == 3 */
+#endif /* TFM_ISOLATION_LEVEL == 3 */
 
     /* Privileged level is required to be set always */
     ctrl.w = __get_CONTROL();
     ctrl.b.nPRIV = privileged ? 0 : 1;
     __set_CONTROL(ctrl.w);
 
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
     if (!p_ldinf) {
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
@@ -599,7 +599,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_activate_boundary(
             FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
         }
     }
-#endif /* TFM_LVL == 3 */
+#endif /* TFM_ISOLATION_LEVEL == 3 */
     FIH_RET(fih_int_encode(TFM_HAL_SUCCESS));
 }
 

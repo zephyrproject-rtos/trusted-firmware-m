@@ -79,7 +79,7 @@ tfm_hal_bind_boundary(const struct partition_load_info_t *p_ldinf,
     bool ns_agent;
     uint32_t partition_attrs = 0;
 
-#if TFM_LVL == 1
+#if TFM_ISOLATION_LEVEL == 1
     privileged = true;
 #else
     privileged = IS_PSA_ROT(p_ldinf);

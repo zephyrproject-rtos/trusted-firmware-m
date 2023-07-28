@@ -129,7 +129,7 @@ static void prv_process_metadata(struct partition_t *p_pt)
                                     ARCH_CTXCTRL_ALLOCATED_PTR(ctx_ctrl);
 
     p_rt_meta->entry = p_pt_ldi->entry;
-#if TFM_LVL == 1
+#if TFM_ISOLATION_LEVEL == 1
     p_rt_meta->psa_fns = &psa_api_cross;
 #else
     /* TODO: ABI for PRoT partitions needs to be updated based on implementations. */

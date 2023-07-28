@@ -31,7 +31,7 @@
 {% set counter.service_counter = manifest.services|count %}
 #define {{"%-55s"|format(manifest.name|upper + "_NSERVS")}} ({{"%d"|format(counter.service_counter)}})
 {% set counter.asset_counter = manifest.mmio_regions|count %}
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
 #define {{"%-55s"|format(manifest.name|upper + "_NASSETS")}} ({{"%d"|format(counter.asset_counter)}} + 1)
 #else
 #define {{"%-55s"|format(manifest.name|upper + "_NASSETS")}} ({{"%d"|format(counter.asset_counter)}})
@@ -40,7 +40,7 @@
 #define {{"%-55s"|format(manifest.name|upper + "_NIRQS")}} ({{"%d"|format(counter.irq_counter)}})
 
 /* Memory region declaration */
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
 REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_START$$Base);
 REGION_DECLARE(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_END$$Base);
 #endif
@@ -82,7 +82,7 @@ struct partition_{{manifest.name|lower}}_load_info_t {
 {% if counter.service_counter > 0 %}
     struct service_load_info_t      services[{{(manifest.name|upper + "_NSERVS")}}];
 {% endif %}
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
     struct asset_desc_t             assets[{{(manifest.name|upper + "_NASSETS")}}];
 #else
 {% if counter.asset_counter > 0 %}
@@ -184,7 +184,7 @@ const struct partition_{{manifest.name|lower}}_load_info_t {{manifest.name|lower
     {% endfor %}
     },
 {% endif %}
-#if TFM_LVL == 3
+#if TFM_ISOLATION_LEVEL == 3
     .assets                         = {
         {
             .mem.start              = (uintptr_t)&REGION_NAME(Image$$, PT_{{manifest.name}}_PRIVATE, _DATA_START$$Base),

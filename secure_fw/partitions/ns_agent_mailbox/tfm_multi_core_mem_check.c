@@ -18,8 +18,8 @@
 #include "tfm_arch.h"
 #include "utilities.h"
 
-#ifndef TFM_LVL
-#error TFM_LVL is not defined!
+#ifndef TFM_ISOLATION_LEVEL
+#error TFM_ISOLATION_LEVEL is not defined!
 #endif
 
 void tfm_get_mem_region_security_attr(const void *p, size_t s,
@@ -52,7 +52,7 @@ void tfm_get_mem_region_security_attr(const void *p, size_t s,
     p_attr->is_valid = false;
 }
 
-#if TFM_LVL == 2
+#if TFM_ISOLATION_LEVEL == 2
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
 REGION_DECLARE(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
 #ifdef CONFIG_TFM_PARTITION_META
@@ -68,7 +68,7 @@ REGION_DECLARE(Image$$, TFM_APP_RW_STACK_END, $$Base);
 void tfm_get_secure_mem_region_attr(const void *p, size_t s,
                                     struct mem_attr_info_t *p_attr)
 {
-#if TFM_LVL == 1
+#if TFM_ISOLATION_LEVEL == 1
     p_attr->is_mpu_enabled = false;
     p_attr->is_valid = true;
 
@@ -91,7 +91,7 @@ void tfm_get_secure_mem_region_attr(const void *p, size_t s,
     }
 
     p_attr->is_valid = false;
-#elif TFM_LVL == 2
+#elif TFM_ISOLATION_LEVEL == 2
     uintptr_t base, limit;
 
     p_attr->is_mpu_enabled = false;
@@ -317,8 +317,8 @@ static enum tfm_status_e ns_mem_attr_check(struct mem_attr_info_t attr,
 static enum tfm_status_e secure_mem_attr_check(struct mem_attr_info_t attr,
                                                uint8_t flags)
 {
-#if TFM_LVL == 1
-    /* Privileged/unprivileged is ignored in TFM_LVL == 1 */
+#if TFM_ISOLATION_LEVEL == 1
+    /* Privileged/unprivileged is ignored in TFM_ISOLATION_LEVEL == 1 */
 
     if ((flags & MEM_CHECK_MPU_READWRITE) &&
         (attr.is_priv_rd_allow || attr.is_unpriv_rd_allow) &&
@@ -420,7 +420,7 @@ enum tfm_status_e tfm_has_access_to_region(const void *p, size_t s,
         /* Retrieve access attributes of secure memory region */
         tfm_hal_get_secure_access_attr(p, s, &mem_attr);
 
-#if TFM_LVL != 1
+#if TFM_ISOLATION_LEVEL != 1
         /* Secure MPU must be enabled in Isolation Level 2 and 3 */
         if (!mem_attr.is_mpu_enabled) {
             tfm_core_panic();

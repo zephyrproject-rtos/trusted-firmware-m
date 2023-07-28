@@ -360,7 +360,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
     uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
     struct platform_data_t *plat_data_ptr;
-#if TFM_LVL == 2
+#if TFM_ISOLATION_LEVEL == 2
     struct mpu_armv8m_region_cfg_t localcfg;
 #endif
 
@@ -368,7 +368,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
         FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
     }
 
-#if TFM_LVL == 1
+#if TFM_ISOLATION_LEVEL == 1
     privileged = true;
 #else
     privileged = IS_PSA_ROT(p_ldinf);
@@ -397,7 +397,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_bind_boundary(
             /* The MMIO asset is not in the allowed list of platform. */
             FIH_RET(fih_int_encode(TFM_HAL_ERROR_GENERIC));
         }
-#if TFM_LVL == 2
+#if TFM_ISOLATION_LEVEL == 2
         plat_data_ptr = REFERENCE_TO_PTR(p_asset[i].dev.dev_ref,
                                          struct platform_data_t *);
         /*

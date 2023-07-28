@@ -132,7 +132,7 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
                      ARM_MPU_EXECUTE_OK),
         #ifdef TFM_PXN_ENABLE
         ARM_MPU_RLAR_PXN((uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1,
-            #if TFM_LVL == 1
+            #if TFM_ISOLATION_LEVEL == 1
                          ARM_MPU_PRIVILEGE_EXECUTE_OK,
             #else
                          ARM_MPU_PRIVILEGE_EXECUTE_NEVER,
@@ -282,7 +282,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     const uintptr_t* mmio_list;
     size_t mmio_list_length;
 
-#if TFM_LVL == 2
+#if TFM_ISOLATION_LEVEL == 2
     ARM_MPU_Region_t local_mpu_region;
     uint32_t mpu_region_num;
 #endif
@@ -290,7 +290,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
         return TFM_HAL_ERROR_GENERIC;
     }
 
-#if TFM_LVL == 1
+#if TFM_ISOLATION_LEVEL == 1
     privileged = true;
 #else
     privileged = IS_PSA_ROT(p_ldinf);
@@ -336,7 +336,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
                                      plat_data_ptr->periph_ppc_mask);
             }
         }
-#if TFM_LVL == 2
+#if TFM_ISOLATION_LEVEL == 2
         /*
          * Static boundaries are set. Set up MPU region for MMIO.
          * Setup regions for unprivileged assets only.
