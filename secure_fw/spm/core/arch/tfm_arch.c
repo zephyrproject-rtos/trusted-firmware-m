@@ -105,6 +105,17 @@ void tfm_arch_init_context(void *p_ctx_ctrl,
         tfm_core_panic();
     }
 
+    /* Reserve a full context (state context + additional context) on the stack. */
+
+    /*
+     * Although a full context is reserved from the stack, the additional context within it is not
+     * needed to be popped out when doing exception return. They are reserved for the scheduler
+     * usage which requires full contexts.
+     * So the DCRS bit of EXC_RETURN payload is set to "1" in later code, which means default rule
+     * (no additional context) is followed.
+     * The tfm_arch_refresh_hardware_context() must set the PSP to the state context within the
+     * full context pointer rather than the full context pointer itself.
+     */
     p_tctx--;
 
     spm_memset(p_tctx, 0, sizeof(*p_tctx));
