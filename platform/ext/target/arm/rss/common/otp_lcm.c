@@ -25,8 +25,6 @@
 #define USER_AREA_OFFSET(x) (OTP_OFFSET(user_data) + \
                              offsetof(struct plat_user_area_layout_t, x))
 #define USER_AREA_SIZE(x)   (sizeof(((struct plat_user_area_layout_t *)0)->x))
-#define IF_BL2_IMAGE_EXISTS_ELSE_0(image_id, expr) \
-    image_id < MCUBOOT_IMAGE_NUMBER ? (expr) : 0
 
 __PACKED_STRUCT plat_user_area_layout_t {
     __PACKED_UNION {
@@ -119,25 +117,57 @@ static const uint16_t otp_offsets[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_VERIFICATION_SERVICE_URL] = USER_AREA_OFFSET(dm_locked.verification_service_url),
     [PLAT_OTP_ID_PROFILE_DEFINITION] = USER_AREA_OFFSET(dm_locked.profile_definition),
 
-    [PLAT_OTP_ID_BL2_ROTPK_0] = IF_BL2_IMAGE_EXISTS_ELSE_0(0, USER_AREA_OFFSET(dm_locked.bl2_rotpk[0])),
-    [PLAT_OTP_ID_BL2_ROTPK_1] = IF_BL2_IMAGE_EXISTS_ELSE_0(1, USER_AREA_OFFSET(dm_locked.bl2_rotpk[1])),
-    [PLAT_OTP_ID_BL2_ROTPK_2] = IF_BL2_IMAGE_EXISTS_ELSE_0(2, USER_AREA_OFFSET(dm_locked.bl2_rotpk[2])),
-    [PLAT_OTP_ID_BL2_ROTPK_3] = IF_BL2_IMAGE_EXISTS_ELSE_0(3, USER_AREA_OFFSET(dm_locked.bl2_rotpk[3])),
-    [PLAT_OTP_ID_BL2_ROTPK_4] = IF_BL2_IMAGE_EXISTS_ELSE_0(4, USER_AREA_OFFSET(dm_locked.bl2_rotpk[4])),
-    [PLAT_OTP_ID_BL2_ROTPK_5] = IF_BL2_IMAGE_EXISTS_ELSE_0(5, USER_AREA_OFFSET(dm_locked.bl2_rotpk[5])),
-    [PLAT_OTP_ID_BL2_ROTPK_6] = IF_BL2_IMAGE_EXISTS_ELSE_0(6, USER_AREA_OFFSET(dm_locked.bl2_rotpk[6])),
-    [PLAT_OTP_ID_BL2_ROTPK_7] = IF_BL2_IMAGE_EXISTS_ELSE_0(7, USER_AREA_OFFSET(dm_locked.bl2_rotpk[7])),
-    [PLAT_OTP_ID_BL2_ROTPK_8] = IF_BL2_IMAGE_EXISTS_ELSE_0(8, USER_AREA_OFFSET(dm_locked.bl2_rotpk[8])),
+    [PLAT_OTP_ID_BL2_ROTPK_0] = USER_AREA_OFFSET(dm_locked.bl2_rotpk[0]),
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    [PLAT_OTP_ID_BL2_ROTPK_1] = USER_AREA_OFFSET(dm_locked.bl2_rotpk[1]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 2)
+    [PLAT_OTP_ID_BL2_ROTPK_2] = USER_AREA_OFFSET(dm_locked.bl2_rotpk[2]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 3)
+    [PLAT_OTP_ID_BL2_ROTPK_3] = USER_AREA_OFFSET(dm_locked.bl2_rotpk[3]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 4)
+    [PLAT_OTP_ID_BL2_ROTPK_4] = USER_AREA_OFFSET(dm_locked.bl2_rotpk[4]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 5)
+    [PLAT_OTP_ID_BL2_ROTPK_5] = USER_AREA_OFFSET(dm_locked.bl2_rotpk[5]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 6)
+    [PLAT_OTP_ID_BL2_ROTPK_6] = USER_AREA_OFFSET(dm_locked.bl2_rotpk[6]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 7)
+    [PLAT_OTP_ID_BL2_ROTPK_7] = USER_AREA_OFFSET(dm_locked.bl2_rotpk[7]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 8)
+    [PLAT_OTP_ID_BL2_ROTPK_8] = USER_AREA_OFFSET(dm_locked.bl2_rotpk[8]),
+#endif
 
-    [PLAT_OTP_ID_NV_COUNTER_BL2_0] = IF_BL2_IMAGE_EXISTS_ELSE_0(0, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[0])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_1] = IF_BL2_IMAGE_EXISTS_ELSE_0(1, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[1])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_2] = IF_BL2_IMAGE_EXISTS_ELSE_0(2, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[2])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_3] = IF_BL2_IMAGE_EXISTS_ELSE_0(3, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[3])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_4] = IF_BL2_IMAGE_EXISTS_ELSE_0(4, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[4])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_5] = IF_BL2_IMAGE_EXISTS_ELSE_0(5, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[5])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_6] = IF_BL2_IMAGE_EXISTS_ELSE_0(6, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[6])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_7] = IF_BL2_IMAGE_EXISTS_ELSE_0(7, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[7])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_8] = IF_BL2_IMAGE_EXISTS_ELSE_0(8, USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[8])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_0] = USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[0]),
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_1] = USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[1]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 2)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_2] = USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[2]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 3)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_3] = USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[3]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 4)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_4] = USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[4]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 5)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_5] = USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[5]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 6)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_6] = USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[6]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 7)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_7] = USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[7]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 8)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_8] = USER_AREA_OFFSET(unlocked_area.bl2_nv_counter[8]),
+#endif
 
 #ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
     [PLAT_OTP_ID_NV_COUNTER_PS_0] = USER_AREA_OFFSET(unlocked_area.ps_nv_counter[0]),
@@ -191,25 +221,57 @@ static const uint16_t otp_sizes[PLAT_OTP_ID_MAX] = {
     [PLAT_OTP_ID_VERIFICATION_SERVICE_URL] = USER_AREA_SIZE(dm_locked.verification_service_url),
     [PLAT_OTP_ID_PROFILE_DEFINITION] = USER_AREA_SIZE(dm_locked.profile_definition),
 
-    [PLAT_OTP_ID_BL2_ROTPK_0] = IF_BL2_IMAGE_EXISTS_ELSE_0(0, USER_AREA_SIZE(dm_locked.bl2_rotpk[0])),
-    [PLAT_OTP_ID_BL2_ROTPK_1] = IF_BL2_IMAGE_EXISTS_ELSE_0(1, USER_AREA_SIZE(dm_locked.bl2_rotpk[1])),
-    [PLAT_OTP_ID_BL2_ROTPK_2] = IF_BL2_IMAGE_EXISTS_ELSE_0(2, USER_AREA_SIZE(dm_locked.bl2_rotpk[2])),
-    [PLAT_OTP_ID_BL2_ROTPK_3] = IF_BL2_IMAGE_EXISTS_ELSE_0(3, USER_AREA_SIZE(dm_locked.bl2_rotpk[3])),
-    [PLAT_OTP_ID_BL2_ROTPK_4] = IF_BL2_IMAGE_EXISTS_ELSE_0(4, USER_AREA_SIZE(dm_locked.bl2_rotpk[4])),
-    [PLAT_OTP_ID_BL2_ROTPK_5] = IF_BL2_IMAGE_EXISTS_ELSE_0(5, USER_AREA_SIZE(dm_locked.bl2_rotpk[5])),
-    [PLAT_OTP_ID_BL2_ROTPK_6] = IF_BL2_IMAGE_EXISTS_ELSE_0(6, USER_AREA_SIZE(dm_locked.bl2_rotpk[6])),
-    [PLAT_OTP_ID_BL2_ROTPK_7] = IF_BL2_IMAGE_EXISTS_ELSE_0(7, USER_AREA_SIZE(dm_locked.bl2_rotpk[7])),
-    [PLAT_OTP_ID_BL2_ROTPK_8] = IF_BL2_IMAGE_EXISTS_ELSE_0(8, USER_AREA_SIZE(dm_locked.bl2_rotpk[8])),
+    [PLAT_OTP_ID_BL2_ROTPK_0] = USER_AREA_SIZE(dm_locked.bl2_rotpk[0]),
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    [PLAT_OTP_ID_BL2_ROTPK_1] = USER_AREA_SIZE(dm_locked.bl2_rotpk[1]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 2)
+    [PLAT_OTP_ID_BL2_ROTPK_2] = USER_AREA_SIZE(dm_locked.bl2_rotpk[2]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 3)
+    [PLAT_OTP_ID_BL2_ROTPK_3] = USER_AREA_SIZE(dm_locked.bl2_rotpk[3]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 4)
+    [PLAT_OTP_ID_BL2_ROTPK_4] = USER_AREA_SIZE(dm_locked.bl2_rotpk[4]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 5)
+    [PLAT_OTP_ID_BL2_ROTPK_5] = USER_AREA_SIZE(dm_locked.bl2_rotpk[5]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 6)
+    [PLAT_OTP_ID_BL2_ROTPK_6] = USER_AREA_SIZE(dm_locked.bl2_rotpk[6]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 7)
+    [PLAT_OTP_ID_BL2_ROTPK_7] = USER_AREA_SIZE(dm_locked.bl2_rotpk[7]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 8)
+    [PLAT_OTP_ID_BL2_ROTPK_8] = USER_AREA_SIZE(dm_locked.bl2_rotpk[8]),
+#endif
 
-    [PLAT_OTP_ID_NV_COUNTER_BL2_0] = IF_BL2_IMAGE_EXISTS_ELSE_0(0, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[0])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_1] = IF_BL2_IMAGE_EXISTS_ELSE_0(1, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[1])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_2] = IF_BL2_IMAGE_EXISTS_ELSE_0(2, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[2])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_3] = IF_BL2_IMAGE_EXISTS_ELSE_0(3, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[3])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_4] = IF_BL2_IMAGE_EXISTS_ELSE_0(4, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[4])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_5] = IF_BL2_IMAGE_EXISTS_ELSE_0(5, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[5])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_6] = IF_BL2_IMAGE_EXISTS_ELSE_0(6, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[6])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_7] = IF_BL2_IMAGE_EXISTS_ELSE_0(7, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[7])),
-    [PLAT_OTP_ID_NV_COUNTER_BL2_8] = IF_BL2_IMAGE_EXISTS_ELSE_0(8, USER_AREA_SIZE(unlocked_area.bl2_nv_counter[8])),
+    [PLAT_OTP_ID_NV_COUNTER_BL2_0] = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[0]),
+#if (MCUBOOT_IMAGE_NUMBER > 1)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_1] = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[1]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 2)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_2] = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[2]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 3)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_3] = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[3]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 4)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_4] = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[4]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 5)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_5] = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[5]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 6)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_6] = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[6]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 7)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_7] = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[7]),
+#endif
+#if (MCUBOOT_IMAGE_NUMBER > 8)
+    [PLAT_OTP_ID_NV_COUNTER_BL2_8] = USER_AREA_SIZE(unlocked_area.bl2_nv_counter[8]),
+#endif
 
 #ifdef PLATFORM_HAS_PS_NV_OTP_COUNTERS
     [PLAT_OTP_ID_NV_COUNTER_PS_0] = USER_AREA_SIZE(unlocked_area.ps_nv_counter[0]),
