@@ -53,7 +53,6 @@ key distributed with TF-M, use the following command::
         --pad-header \
         -S 0x80000 \
         --pad \
-        --boot-record "HOST" \
         -L <load address> \
         <binary infile> \
         <signed binary outfile>
@@ -61,7 +60,7 @@ key distributed with TF-M, use the following command::
 The ``load address`` is the logical address in the RSS memory map to which BL2
 will load the image. RSS FW expects the first host image to be loaded to address
 ``0x70000000`` (the beginning of the RSS ATU host access region), and each
-subsequent host image to be loaded at an offset of ``0x100000`` from the
+subsequent host image to be loaded at an offset of ``0x1000000`` from the
 previous image. The RSS ATU should be configured to map these logical addresses
 to the physical addresses in the host system that the images need to be loaded
 to.
@@ -170,6 +169,20 @@ image::
 The RSS ROM binary should be placed in RSS ROM at ``0x11000000`` and the host
 flash binary should be placed at the base of the host flash. For the TC
 platform, this is at ``0x80000000``.
+
+The RSS OTP must be provisioned. On a development platform with
+``TFM_DUMMY_PROVISIONING`` enabled, BL1_1 expects provisioning bundles to be
+preloaded into SRAM. Preload ``encrypted_cm_provisioning_bundle_0.bin`` to the
+base of VM0, and ``encrypted_dm_provisioning_bundle.bin`` to the base of VM1.
+
+If ``TFM_DUMMY_PROVISIONING`` is disabled and provisioning is required, then
+BL1_1 will first wait for the TP mode to be set by a debugger (setting the
+``tp_mode`` variable in the current stack frame is easiest). BL1_1 will then
+wait for provisioning bundles to be loaded to VM0 and VM1 in the same way as
+when ``TFM_DUMMY_PROVISIONING`` is enabled, except that it will not
+automatically perform the reset once each provisioning state is complete. For
+more details about provisioning flows, see
+:doc:`RSS provisioning </platform/arm/rss/rss_provisioning>`.
 
 --------------
 
