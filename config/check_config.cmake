@@ -45,10 +45,6 @@ tfm_invalid_config(TEST_PSA_API STREQUAL "PROTECTED_STORAGE" AND NOT TFM_PARTITI
 tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
 tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_PROTECTED_STORAGE)
 
-########################## BL1 #################################################
-
-tfm_invalid_config((BL1 AND PLATFORM_DEFAULT_BL1 AND CONFIG_TFM_BOOT_STORE_MEASUREMENTS) AND NOT TFM_PARTITION_MEASURED_BOOT)
-
 ########################## BL2 #################################################
 
 get_property(MCUBOOT_STRATEGY_LIST CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS)

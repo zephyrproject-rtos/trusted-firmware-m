@@ -26,11 +26,11 @@
 __asm("  .global __ARM_use_no_argv\n");
 #endif
 
-#if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) || !defined(TFM_BL1_PQ_CRYPTO)
+#if defined(TFM_MEASURED_BOOT_API) || !defined(TFM_BL1_PQ_CRYPTO)
 static uint8_t computed_bl2_hash[BL2_HASH_SIZE];
 #endif
 
-#ifdef CONFIG_TFM_BOOT_STORE_MEASUREMENTS
+#ifdef TFM_MEASURED_BOOT_API
 #if (BL2_HASH_SIZE == 32)
 #define BL2_HASH_ALG  PSA_ALG_SHA_256
 #elif (BL2_HASH_SIZE == 64)
@@ -69,7 +69,7 @@ static void collect_boot_measurement(const struct bl1_2_image_t *image)
         BL1_LOG("[WRN] Failed to store boot measurement of BL2\r\n");
     }
 }
-#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS */
+#endif /* TFM_MEASURED_BOOT_API */
 
 #ifndef TFM_BL1_PQ_CRYPTO
 static fih_int image_hash_check(struct bl1_2_image_t *img)
@@ -116,7 +116,7 @@ static fih_int is_image_signature_valid(struct bl1_2_image_t *img)
     fih_int fih_rc = FIH_FAILURE;
 
     /* Calculate the image hash for measured boot and/or a hash-locked image */
-#if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) || !defined(TFM_BL1_PQ_CRYPTO)
+#if defined(TFM_MEASURED_BOOT_API) || !defined(TFM_BL1_PQ_CRYPTO)
     FIH_CALL(bl1_sha256_compute, fih_rc, (uint8_t *)&img->protected_values,
                                          sizeof(img->protected_values),
                                          computed_bl2_hash);
@@ -299,12 +299,12 @@ int main(void)
         FIH_PANIC;
     }
 
-#ifdef CONFIG_TFM_BOOT_STORE_MEASUREMENTS
+#ifdef TFM_MEASURED_BOOT_API
     /* At this point there is a valid and decrypted BL2 image in the RAM at
      * address BL2_IMAGE_START.
      */
     collect_boot_measurement((const struct bl1_2_image_t *)BL2_IMAGE_START);
-#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS */
+#endif /* TFM_MEASURED_BOOT_API */
 
     BL1_LOG("[INF] Jumping to BL2\r\n");
     boot_platform_quit((struct boot_arm_vector_table *)BL2_CODE_START);

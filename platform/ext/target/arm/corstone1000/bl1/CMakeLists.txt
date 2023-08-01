@@ -311,7 +311,7 @@ target_include_directories(signing_layout_for_bl2
         ../partition
 )
 
-if (CONFIG_TFM_BOOT_STORE_MEASUREMENTS)
+if (CONFIG_TFM_BOOT_STORE_MEASUREMENTS AND CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS)
     set(MCUBOOT_MEASURED_BOOT ON)
 endif()
 

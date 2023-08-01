@@ -63,7 +63,6 @@ set(TFM_PARTITION_PROTECTED_STORAGE     ON          CACHE BOOL      "Enable Prot
 set(TFM_PARTITION_CRYPTO                ON          CACHE BOOL      "Enable Crypto partition")
 set(TFM_PARTITION_INITIAL_ATTESTATION   ON          CACHE BOOL      "Enable Initial Attestation partition")
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE ON       CACHE BOOL      "Enable Internal Trusted Storage partition")
-set(TFM_PARTITION_MEASURED_BOOT         ON          CACHE BOOL      "Enable Measured boot partition")
 
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug OR ${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo)

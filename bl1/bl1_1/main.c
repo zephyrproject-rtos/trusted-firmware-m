@@ -25,7 +25,7 @@ __asm("  .global __ARM_use_no_argv\n");
 
 uint8_t computed_bl1_2_hash[BL1_2_HASH_SIZE];
 
-#ifdef CONFIG_TFM_BOOT_STORE_MEASUREMENTS
+#ifdef TFM_MEASURED_BOOT_API
 #if (BL1_2_HASH_SIZE == 32)
 #define BL1_2_HASH_ALG  PSA_ALG_SHA_256
 #elif (BL1_2_HASH_SIZE == 64)
@@ -53,7 +53,7 @@ static void collect_boot_measurement(void)
         BL1_LOG("[WRN] Failed to store boot measurement of BL1_2\r\n");
     }
 }
-#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS */
+#endif /* TFM_MEASURED_BOOT_API */
 
 static fih_int validate_image_at_addr(uint8_t *image)
 {
@@ -133,9 +133,9 @@ int main(void)
         FIH_PANIC;
     }
 
-#ifdef CONFIG_TFM_BOOT_STORE_MEASUREMENTS
+#ifdef TFM_MEASURED_BOOT_API
     collect_boot_measurement();
-#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS */
+#endif /* TFM_MEASURED_BOOT_API */
 
     BL1_LOG("[INF] Jumping to BL1_2\r\n");
     /* Jump to BL1_2 */

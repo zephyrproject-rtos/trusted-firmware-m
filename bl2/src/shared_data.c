@@ -12,7 +12,7 @@
 #include "sysflash/sysflash.h"
 #include "mcuboot_config/mcuboot_config.h"
 
-#if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) && !defined(MCUBOOT_MEASURED_BOOT)
+#ifdef TFM_MEASURED_BOOT_API
 #include "boot_hal.h"
 #include "boot_measurement.h"
 #include "bootutil_priv.h"
@@ -25,7 +25,7 @@
 #include  "bootutil/crypto/sha256.h"
 #define SIG_BUF_SIZE (MCUBOOT_SIGN_RSA_LEN / 8)
 #endif
-#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS && !MCUBOOT_MEASURED_BOOT */
+#endif /* TFM_MEASURED_BOOT_API */
 
 /* Firmware Update specific macros */
 #define TLV_MAJOR_FWU   0x2
@@ -44,7 +44,7 @@ extern int boot_add_data_to_shared_area(uint8_t        major_type,
 #endif /* TFM_PARTITION_FIRMWARE_UPDATE */
 
 
-#if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) && !defined(MCUBOOT_MEASURED_BOOT)
+#ifdef TFM_MEASURED_BOOT_API
 /**
  * Collect boot measurement and available associated metadata from the
  * TLV area of an image.
@@ -147,7 +147,7 @@ static int collect_image_measurement_and_metadata(
 
     return 0;
 }
-#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS && !MCUBOOT_MEASURED_BOOT */
+#endif /* TFM_MEASURED_BOOT_API */
 
 /**
  * Add application specific data to the shared memory area between the
@@ -169,7 +169,7 @@ int boot_save_shared_data(const struct image_header *hdr,
     struct image_version image_ver;
     uint16_t fwu_minor;
 #endif
-#if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) && !defined(MCUBOOT_MEASURED_BOOT)
+#ifdef TFM_MEASURED_BOOT_API
     enum boot_measurement_slot_t slot_id;
     uint8_t image_hash[MCUBOOT_HASH_SIZE];
     struct boot_measurement_metadata metadata = {
@@ -179,7 +179,7 @@ int boot_save_shared_data(const struct image_header *hdr,
         .sw_type = "",
         .sw_version = { 0 },
     };
-#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS && !MCUBOOT_MEASURED_BOOT */
+#endif /* TFM_MEASURED_BOOT_API */
 
     if (hdr == NULL || fap == NULL) {
         return -1;
@@ -219,7 +219,7 @@ int boot_save_shared_data(const struct image_header *hdr,
     }
 #endif /* TFM_PARTITION_FIRMWARE_UPDATE */
 
-#if defined(CONFIG_TFM_BOOT_STORE_MEASUREMENTS) && !defined(MCUBOOT_MEASURED_BOOT)
+#ifdef TFM_MEASURED_BOOT_API
     /* Determine the index of the measurement slot. */
     slot_id = BOOT_MEASUREMENT_SLOT_RT_0 + mcuboot_image_id;
 
@@ -264,7 +264,7 @@ int boot_save_shared_data(const struct image_header *hdr,
     if (rc) {
         return rc;
     }
-#endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS && !MCUBOOT_MEASURED_BOOT */
+#endif /* TFM_MEASURED_BOOT_API */
 
     return 0;
 }

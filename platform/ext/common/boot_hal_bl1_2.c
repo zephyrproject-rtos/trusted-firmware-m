@@ -16,11 +16,11 @@
 #include "uart_stdout.h"
 #include "fih.h"
 
-#ifdef MEASURED_BOOT_API
+#ifdef TFM_MEASURED_BOOT_API
 #include "region_defs.h"
 #include "tfm_boot_status.h"
 #include "boot_measurement.h"
-#endif /* MEASURED_BOOT_API */
+#endif /* TFM_MEASURED_BOOT_API */
 
 #ifndef TFM_BL1_MEMORY_MAPPED_FLASH
 /* Flash device name must be specified by target */
@@ -200,7 +200,7 @@ __WEAK int boot_platform_post_load(uint32_t image_id)
     return 0;
 }
 
-#ifdef MEASURED_BOOT_API
+#ifdef TFM_MEASURED_BOOT_API
 static int boot_add_data_to_shared_area(uint8_t        major_type,
                                         uint16_t       minor_type,
                                         size_t         size,
@@ -301,4 +301,4 @@ __WEAK int boot_store_measurement(
 
     return rc;
 }
-#endif /* MEASURED_BOOT_API */
+#endif /* TFM_MEASURED_BOOT_API */

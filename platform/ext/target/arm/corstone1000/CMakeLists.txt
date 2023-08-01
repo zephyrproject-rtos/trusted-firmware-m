@@ -174,7 +174,6 @@ target_sources(platform_bl1_1
 target_compile_definitions(platform_bl1_1
     PUBLIC
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
-        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
@@ -214,7 +213,6 @@ target_sources(platform_bl1_2
 target_compile_definitions(platform_bl1_2
     PUBLIC
         $<$<BOOL:${PLATFORM_IS_FVP}>:PLATFORM_IS_FVP>
-        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
         $<$<BOOL:${PLATFORM_DEFAULT_OTP_WRITEABLE}>:OTP_WRITEABLE>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR}>:CRYPTO_HW_ACCELERATOR>
         $<$<BOOL:${CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING}>:CRYPTO_HW_ACCELERATOR_OTP_PROVISIONING>
@@ -395,4 +393,3 @@ add_custom_command(OUTPUT bl1_provisioning_bundle.bin
                     --bundle_output_file bl1_provisioning_bundle.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/bl1_provisioning_bundle.bin $<TARGET_FILE_DIR:bl1_1>
 )
-

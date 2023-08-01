@@ -303,16 +303,6 @@ target_compile_options(platform_bl2
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${COMPILER_CMSE_FLAG}>
 )
 
-target_link_libraries(platform_bl2
-    PRIVATE
-        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:tfm_boot_status>
-)
-
-target_compile_definitions(platform_bl2
-    PUBLIC
-        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
-)
-
 #========================= Platform bl1_1 =======================================#
 
 target_sources(platform_bl1_1
@@ -353,7 +343,6 @@ target_include_directories(platform_bl1_1_interface
 
 target_compile_definitions(platform_bl1_1_interface
     INTERFACE
-        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
         RSS_AMOUNT=${RSS_AMOUNT}
         KMU_CONFIG_EXTERNAL_SECURE_WORD_COPY
         $<$<BOOL:${RSS_ENCRYPTED_OTP_KEYS}>:RSS_ENCRYPTED_OTP_KEYS>
@@ -393,7 +382,6 @@ target_include_directories(platform_bl1_2
 
 target_compile_definitions(platform_bl1_2
     PUBLIC
-        $<$<AND:$<BOOL:${CONFIG_TFM_BOOT_STORE_MEASUREMENTS}>,$<BOOL:${TFM_PARTITION_MEASURED_BOOT}>>:MEASURED_BOOT_API>
         $<$<BOOL:${RSS_AMOUNT}>:RSS_AMOUNT=${RSS_AMOUNT}>
 )
 
