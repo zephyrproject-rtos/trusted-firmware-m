@@ -324,11 +324,6 @@ psa_handle_t connection_to_handle(struct connection_t *p_connection);
  */
 struct connection_t *handle_to_connection(psa_handle_t handle);
 
-/**
- * \brief Move to handler mode by a SVC for specific purpose
- */
-void tfm_core_handler_mode(void);
-
 void update_caller_outvec_len(struct connection_t *handle);
 
 #endif /* __SPM_H__ */

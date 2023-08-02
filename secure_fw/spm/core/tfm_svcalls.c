@@ -278,10 +278,3 @@ void tfm_svc_thread_mode_spm_return(psa_status_t result)
 {
     __ASM volatile("SVC "M2S(TFM_SVC_THREAD_MODE_SPM_RETURN)"           \n");
 }
-
-__attribute__ ((naked)) void tfm_core_handler_mode(void)
-{
-    __ASM volatile("SVC %0           \n"
-                   "BX LR            \n"
-                   : : "I" (TFM_SVC_SPM_INIT));
-}

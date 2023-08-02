@@ -320,4 +320,12 @@ uint32_t arch_attempt_schedule(void);
  */
 void tfm_arch_thread_fn_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3);
 
+/*
+ * Reset MSP to msp_base.
+ * Use PSP as the current stack in Thread mode.
+ * Execute two init functions in turn.
+ */
+void arch_clean_stack_and_launch(void *param, uintptr_t spm_init_func,
+                                 uintptr_t ns_agent_entry, uint32_t msp_base);
+
 #endif

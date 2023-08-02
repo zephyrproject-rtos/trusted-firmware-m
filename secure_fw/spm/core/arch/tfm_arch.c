@@ -103,6 +103,37 @@ __naked uint32_t arch_attempt_schedule(void)
 }
 #endif
 
+#if CONFIG_TFM_SPM_BACKEND_SFN == 1
+__naked void arch_clean_stack_and_launch(void *param, uintptr_t spm_init_func,
+                                         uintptr_t ns_agent_entry, uint32_t msp_base)
+{
+    __ASM volatile(
+        SYNTAX_UNIFIED
+        "msr  msp, r3                       \n" /* Reset MSP */
+        "mov  lr, r2                        \n" /*
+                                                 * Set lr - the return address of the first
+                                                 * init function (r1) - to the second init
+                                                 * function (r2) so that they will be executed
+                                                 * in turn. The return value of first init
+                                                 * function is passed to second init function
+                                                 * through "r0".
+                                                 */
+        "movs r2, #"M2S(CONTROL_SPSEL_Msk)" \n"
+        "mrs  r3, control                   \n"
+        "orrs r3, r3, r2                    \n" /*
+                                                 * CONTROL.SPSEL, bit [1], stack-pointer
+                                                 * select.
+                                                 * 0: Use SP_main as the current stack.
+                                                 * 1: In Thread mode use PSP as the
+                                                 * current stack
+                                                 */
+        "msr  control, r3                   \n" /* Use PSP as the current stack */
+        "isb                                \n"
+        "bx   r1                            \n" /* Execute first init function */
+    );
+}
+#endif
+
 void tfm_arch_init_context(void *p_ctx_ctrl,
                            uintptr_t pfn, void *param, uintptr_t pfnlr)
 {

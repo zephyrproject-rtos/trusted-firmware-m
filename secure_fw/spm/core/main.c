@@ -17,6 +17,7 @@
 #include "tfm_version.h"
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
+#include "ffm/backend.h"
 
 #ifdef CONFIG_TFM_ENABLE_PROFILING
 #include "prof_intf_s.h"
@@ -126,8 +127,8 @@ int main(void)
     }
 #endif
 
-    /* Move to handler mode for further SPM initialization. */
-    tfm_core_handler_mode();
+    /* Further SPM initialization. */
+    BACKEND_SPM_INIT();
 
     return 0;
 }
