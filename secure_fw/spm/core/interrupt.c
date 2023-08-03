@@ -113,7 +113,7 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     /* Set FLIH result to the ISR */
     p_ctx_flih_ret->state_ctx.r0 = (uint32_t)result;
 
-    return EXC_RETURN_HANDLER;
+    return p_ctx_flih_ret->exc_return;
 }
 #endif
 

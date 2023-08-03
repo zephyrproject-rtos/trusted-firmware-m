@@ -140,17 +140,19 @@ __attribute__((naked)) void SVC_Handler(void)
     "PUSH    {r1, r2}                       \n" /* Orig_exc_return, dummy */
     "BL      spm_svc_handler                \n"
     "MOV     lr, r0                         \n"
-    "POP     {r1, r2}                       \n" /* Orig_exc_return, dummy */
+    "LDR     r1, [sp]                       \n" /* Get orig_exc_return value */
     "MOVS    r2, #8                         \n"
     "ANDS    r0, r2                         \n" /* Mode bit */
     "ANDS    r1, r2                         \n"
-    "POP     {r2, r3}                       \n" /* PSP dummy */
     "SUBS    r0, r1                         \n" /* Compare EXC_RETURN values */
     "BGT     to_flih_func                   \n"
     "BLT     from_flih_func                 \n"
+    "ADD     sp, #16                        \n" /*
+                                                 * "Unstack" unused orig_exc_return, dummy,
+                                                 * PSP, PSPLIM pushed by current handler
+                                                 */
     "BX      lr                             \n"
     "to_flih_func:                          \n"
-    "PUSH    {r2, r3}                       \n" /* PSP dummy */
     "PUSH    {r4-r7}                        \n"
     "MOV     r4, r8                         \n"
     "MOV     r5, r9                         \n"
@@ -172,6 +174,10 @@ __attribute__((naked)) void SVC_Handler(void)
     "PUSH    {r4, r5}                       \n" /* Seal stack before EXC_RET */
     "BX      lr                             \n"
     "from_flih_func:                        \n"
+    "ADD     sp, #16                        \n" /*
+                                                 * "Unstack" unused orig_exc_return, dummy,
+                                                 * PSP, PSPLIM pushed by current handler
+                                                 */
     "POP     {r4, r5}                       \n" /* Seal stack */
     "ADD     sp, sp, #8                     \n" /* Dummy data to align SP offset for
                                                  * reserved additional state context,
@@ -183,7 +189,11 @@ __attribute__((naked)) void SVC_Handler(void)
     "MOV     r10, r6                        \n"
     "MOV     r11, r7                        \n"
     "POP     {r4-r7}                        \n"
-    "POP     {r1, r2}                       \n" /* PSP dummy */
+    "ADD     sp, #16                        \n" /*
+                                                 * "Unstack" unused orig_exc_return, dummy,
+                                                 * PSP, PSPLIM pushed by the previous
+                                                 * TFM_SVC_PREPARE_DEPRIV_FLIH request
+                                                 */
     "BX      lr                             \n"
     );
 }

@@ -130,11 +130,13 @@ struct context_ctrl_t {
  * It is the same when de-privileged FLIH Function is ready to run.
  */
 struct context_flih_ret_t {
-    uint64_t stack_seal;    /* Two words stack seal */
+    uint64_t stack_seal;                  /* Two words stack seal                              */
     struct tfm_additional_context_t addi_ctx;
-    uint32_t psp;       /* PSP when interrupt exception ocurrs              */
-    uint32_t psplim;    /* PSPLIM when interrupt exception ocurrs when      */
-    struct tfm_state_context_t state_ctx; /* ctx on SVC_PREPARE_DEPRIV_FLIH */
+    uint32_t exc_return;                  /* exception return value on SVC_PREPARE_DEPRIV_FLIH */
+    uint32_t dummy;                       /* dummy value for 8 bytes aligned                   */
+    uint32_t psp;                         /* PSP when interrupt exception ocurrs               */
+    uint32_t psplim;                      /* PSPLIM when interrupt exception ocurrs when       */
+    struct tfm_state_context_t state_ctx; /* ctx on SVC_PREPARE_DEPRIV_FLIH                    */
 };
 
 /* Assign stack and stack limit to the context control instance. */
