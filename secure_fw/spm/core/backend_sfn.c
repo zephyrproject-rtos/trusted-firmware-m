@@ -133,8 +133,8 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
     watermark_stack(p_pt);
 
     /*
-     * Built-in partitions still have thread instances: NS Agent (TZ) and
-     * IDLE partition, and NS Agent (TZ) needs to be specific cared here.
+     * Built-in partitions have only one thread instance: NS Agent (TZ) and it
+     * needs to be specific cared here.
      */
     if (IS_NS_AGENT(p_pldi)) {
         if (IS_NS_AGENT_TZ(p_pldi)) {
