@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2017-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -17,6 +17,10 @@
 #include "tfm_version.h"
 #include "tfm_plat_otp.h"
 #include "tfm_plat_provisioning.h"
+
+#ifdef CONFIG_TFM_ENALBE_PROFILING
+#include "prof_intf_s.h"
+#endif
 
 uintptr_t spm_boundary = (uintptr_t)NULL;
 
@@ -83,6 +87,10 @@ static fih_int tfm_core_init(void)
 
 int main(void)
 {
+#ifdef CONFIG_TFM_ENALBE_PROFILING
+    PROFILING_INIT();
+#endif
+
     fih_int fih_rc = FIH_FAILURE;
 
     /* set Main Stack Pointer limit */
