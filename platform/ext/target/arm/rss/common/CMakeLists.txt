@@ -121,6 +121,7 @@ target_include_directories(platform_s
         device/config
         device/include
         device/source/armclang
+        dpe
         native_drivers
         libraries
         partition
@@ -140,6 +141,7 @@ target_sources(platform_s
         cmsis_drivers/Driver_PPC.c
         device/source/device_definition.c
         device/source/system_core_init.c
+        $<$<BOOL:${TFM_PARTITION_DPE}>:${CMAKE_CURRENT_SOURCE_DIR}/dpe/dpe_plat.c>
         libraries/dma350_lib.c
         native_drivers/atu_rss_drv.c
         native_drivers/dma350_drv.c
