@@ -10,8 +10,7 @@ bl1_sha256_finish
 bl1_sha256_init
 bl1_sha256_update
 bl1_trng_generate_random
-bl_secure_memcpy
-bl_secure_memeql
+bl_fih_memeql
 cc3xx_uninit
 computed_bl1_2_hash
 corstone1000_watchdog_reset_timer

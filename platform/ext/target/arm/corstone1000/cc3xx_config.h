@@ -39,7 +39,7 @@
 /* #define CC3XX_CONFIG_AES_GCM_VARIABLE_IV_ENABLE */
 
 /* Whether the AES CMAC support is enabled */
-/* #define CC3XX_CONFIG_AES_CMAC_ENABLE */
+#define CC3XX_CONFIG_AES_CMAC_ENABLE
 
 /* Whether the AES CCM support is enabled */
 /* #define CC3XX_CONFIG_AES_CCM_ENABLE */

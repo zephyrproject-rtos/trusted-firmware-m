@@ -199,91 +199,28 @@ static int32_t aes_256_ecb_encrypt(enum tfm_bl1_key_id_t key_id,
  * since the input to the PRF is a hash, and the hash input is different every
  * time because of the counter being part of the input.
  */
-int32_t bl1_derive_key(enum tfm_bl1_key_id_t input_key, const uint8_t *label,
+int32_t bl1_derive_key(enum tfm_bl1_key_id_t key_id, const uint8_t *label,
                        size_t label_length, const uint8_t *context,
                        size_t context_length, uint8_t *output_key,
                        size_t output_length)
 {
-    uint8_t state[KEY_DERIVATION_MAX_BUF_SIZE];
-    uint8_t state_size = label_length + context_length + sizeof(uint8_t)
-                         + 2 * sizeof(uint32_t);
-    uint8_t state_hash[32];
-    uint32_t L = output_length;
-    uint32_t n = (output_length + sizeof(state_hash) - 1) / sizeof(state_hash);
-    uint32_t i = 1;
-    size_t output_idx = 0;
-    cc3xx_err_t rc;
+    cc3xx_aes_key_id_t key_type;
+    uint32_t key_buf[32 / sizeof(uint32_t)];
+    uint8_t *input_key = (uint8_t *)key_buf;
+    int32_t rc = 0;
+    cc3xx_err_t err;
 
-    if (output_length == 0) {
-        return 0;
+    rc = bl1_key_to_cc3xx_key(key_id, &key_type, input_key, sizeof(key_buf));
+    if (rc) {
+        return rc;
     }
 
-    if (label == NULL || label_length == 0 ||
-        context == NULL || context_length == 0 ||
-        output_key == NULL) {
-        return -1;
+    err = cc3xx_kdf_cmac(key_type, (uint32_t *)input_key,
+                         CC3XX_AES_KEYSIZE_256, label, label_length, context,
+                         context_length, (uint32_t *)output_key, output_length);
+    if (err != CC3XX_ERR_SUCCESS) {
+        return 1;
     }
-
-    if (state_size > KEY_DERIVATION_MAX_BUF_SIZE) {
-        return -1;
-    }
-
-    memcpy(state + sizeof(uint32_t), label, label_length);
-    memset(state + sizeof(uint32_t) + label_length, 0, sizeof(uint8_t));
-    memcpy(state + sizeof(uint32_t) + label_length + sizeof(uint8_t),
-           context, context_length);
-    memcpy(state + sizeof(uint32_t) + label_length + sizeof(uint8_t) + context_length,
-           &L, sizeof(uint32_t));
-
-    for (i = 1; i < n; i++) {
-        memcpy(state, &i, sizeof(uint32_t));
-
-        /* Hash the state to make it a constant size */
-        rc = bl1_sha256_compute(state, state_size, state_hash);
-        if (rc != CC3XX_ERR_SUCCESS) {
-            goto err;
-        }
-
-        /* Encrypt using ECB, which is fine because the state is different every
-         * time and we're hashing it.
-         */
-        rc = aes_256_ecb_encrypt(input_key, state_hash, sizeof(state_hash),
-                                 output_key + output_idx);
-        if (rc != CC3XX_ERR_SUCCESS) {
-            goto err;
-        }
-
-        output_idx += sizeof(state_hash);
-    }
-
-    /* For the last block, encrypt into the state buf and then memcpy out how
-     * much we need
-     */
-    memcpy(state, &i, sizeof(uint32_t));
-
-    rc = bl1_sha256_compute(state, state_size, state_hash);
-    if (rc != CC3XX_ERR_SUCCESS) {
-        goto err;
-    }
-
-    /* This relies on us being able to have overlapping input and output
-     * pointers.
-     */
-    rc = aes_256_ecb_encrypt(input_key, state_hash, sizeof(state_hash),
-                             state_hash);
-    if (rc != CC3XX_ERR_SUCCESS) {
-        goto err;
-    }
-
-    memcpy(output_key + output_idx, state_hash, output_length - output_idx);
-    memset(state, 0, sizeof(state));
-    memset(state_hash, 0, sizeof(state_hash));
 
     return 0;
-
-err:
-    memset(output_key, 0, output_length);
-    memset(state, 0, sizeof(state));
-    memset(state_hash, 0, sizeof(state_hash));
-    return rc;
 }
