@@ -137,16 +137,6 @@ struct context_flih_ret_t {
     struct tfm_state_context_t state_ctx; /* ctx on SVC_PREPARE_DEPRIV_FLIH */
 };
 
-/* A customized ABI format. */
-struct cross_call_abi_frame_t {
-    uint32_t      a0;
-    uint32_t      a1;
-    uint32_t      a2;
-    uint32_t      a3;
-    uint32_t      unused0;
-    uint32_t      unused1;
-};
-
 /* Assign stack and stack limit to the context control instance. */
 #define ARCH_CTXCTRL_INIT(x, buf, sz) do {                                   \
             (x)->sp             = ((uint32_t)(buf) + (uint32_t)(sz)) & ~0x7; \
