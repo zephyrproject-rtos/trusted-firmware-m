@@ -443,7 +443,7 @@ psa_status_t cc3xx_decrypt_chacha20_poly1305(
         local_tag_buffer, PSA_AEAD_TAG_MAX_SIZE);
 
     /* Check tag in "constant-time" */
-    for (diff = 0, i = 0; i < sizeof(tag_length); i++)
+    for (diff = 0, i = 0; i < tag_length; i++)
         diff |= tag[i] ^ local_tag_buffer[i];
 
     if (diff != 0) {
