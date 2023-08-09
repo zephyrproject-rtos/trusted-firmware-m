@@ -36,7 +36,7 @@ config MCUBOOT_NS_IMAGE_FLASH_AREA_NUM
 config MCUBOOT_IMAGE_NUMBER
     int "Whether to combine S and NS into either 1 image, or sign each seperately"
     default 2
-    range 1 4
+    range 1 9
 
 config MCUBOOT_EXECUTION_SLOT
     int "Slot from which to execute the image, used for XIP mode"
