@@ -26,9 +26,9 @@ target_compile_definitions(tfm_t_cose_defs
         T_COSE_DISABLE_PS256
         T_COSE_DISABLE_PS384
         T_COSE_DISABLE_PS512
+        T_COSE_DISABLE_SHORT_CIRCUIT_SIGN
         $<$<OR:$<NOT:$<STREQUAL:${ATTEST_KEY_BITS},384>>,$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_ES384>
         $<$<OR:$<NOT:$<STREQUAL:${ATTEST_KEY_BITS},521>>,$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>:T_COSE_DISABLE_ES512>
-        $<$<NOT:$<BOOL:${ATTEST_INCLUDE_TEST_CODE}>>:T_COSE_DISABLE_SHORT_CIRCUIT_SIGN>
 )
 
 ############################### t_cose common ##################################

@@ -508,8 +508,6 @@ those flags. The list of flags are:
   These tests are not required to be run by platform integrators, and are
   only meant to be used for development or modification of the initial
   attestation implementation.
-  Enabling this option enables T_COSE_DISABLE_SHORT_CIRCUIT_SIGN which will
-  short circuit the signing operation.
   Default value: OFF.
 - ``ATTEST_STACK_SIZE``- Defines the stack size of the Initial Attestation
   Partition. This value mainly depends on the build type(debug, release and

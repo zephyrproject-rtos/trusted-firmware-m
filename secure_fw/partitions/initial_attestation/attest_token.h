@@ -103,15 +103,6 @@ enum attest_token_err_t {
 #define TOKEN_OPT_OMIT_CLAIMS        0x40000000
 
 /**
- * A special test mode where a proper signature is not produced. In
- * its place there is a concatenation of hashes of the payload to be
- * the same size as the signature. This works and can be used to
- * verify all of the SW stack except the public signature part. The
- * token has no security value in this mode because anyone can
- * replicate it. */
-#define TOKEN_OPT_SHORT_CIRCUIT_SIGN 0x80000000
-
-/**
  * The context for creating an attestation token.  The caller of
  * attest_token_encode must create one of these and pass it to the functions
  * here. It is small enough that it can go on the stack. It is most of

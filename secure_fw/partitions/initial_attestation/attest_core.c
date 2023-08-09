@@ -658,9 +658,8 @@ attest_create_token(struct q_useful_buf_c *challenge,
 #ifdef INCLUDE_TEST_CODE
     attest_get_option_flags(challenge, &option_flags, &key_select);
     if (option_flags) {
-        /* If any option flags are provided (TOKEN_OPT_OMIT_CLAIMS or
-         * TOKEN_OPT_SHORT_CIRCUIT_SIGN) then force the cose_algorithm_id
-         * to be either:
+        /* If any option flags are provided (e.g. TOKEN_OPT_OMIT_CLAIMS)
+         * then force the cose_algorithm_id to be either:
          *  - T_COSE_ALGORITHM_ES256 or  (SYMMETRIC_INITIAL_ATTESTATION=OFF)
          *  - T_COSE_ALGORITHM_HMAC256   (SYMMETRIC_INITIAL_ATTESTATION=ON)
          * for testing purposes to match with expected minimal token.

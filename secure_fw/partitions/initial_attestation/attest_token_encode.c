@@ -104,7 +104,6 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     struct t_cose_key attest_key;
     enum psa_attest_err_t attest_ret;
     enum t_cose_err_t cose_ret;
-    int32_t t_cose_options = 0;
     enum attest_token_err_t return_value = ATTEST_TOKEN_ERR_SUCCESS;
     struct q_useful_buf_c attest_key_id;
 
@@ -112,11 +111,7 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     me->opt_flags  = opt_flags;
     me->key_select = key_select;
 
-    if (opt_flags & TOKEN_OPT_SHORT_CIRCUIT_SIGN) {
-        t_cose_options |= T_COSE_OPT_SHORT_CIRCUIT_TAG;
-    }
-
-    t_cose_mac_compute_init(&(me->mac_ctx), t_cose_options, cose_alg_id);
+    t_cose_mac_compute_init(&(me->mac_ctx), 0, cose_alg_id);
 
     attest_key.key.handle = (uint64_t)key_handle;
 
@@ -239,7 +234,6 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
 {
     enum psa_attest_err_t attest_ret;
     enum t_cose_err_t cose_ret;
-    int32_t                 t_cose_options = 0;
     struct t_cose_key attest_key;
     psa_key_handle_t private_key = TFM_BUILTIN_KEY_ID_IAK;
     struct q_useful_buf_c attest_key_id = NULL_Q_USEFUL_BUF_C;
@@ -248,17 +242,12 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
     me->opt_flags  = opt_flags;
     me->key_select = key_select;
 
-
-    if (opt_flags & TOKEN_OPT_SHORT_CIRCUIT_SIGN) {
-        t_cose_options |= T_COSE_OPT_SHORT_CIRCUIT_SIG;
-    } else {
-        attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);
-        if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
-            return ATTEST_TOKEN_ERR_GENERAL;
-        }
+    attest_ret = attest_get_initial_attestation_key_id(&attest_key_id);
+    if (attest_ret != PSA_ATTEST_ERR_SUCCESS) {
+        return ATTEST_TOKEN_ERR_GENERAL;
     }
 
-    t_cose_sign1_sign_init(&(me->signer_ctx), t_cose_options, cose_alg_id);
+    t_cose_sign1_sign_init(&(me->signer_ctx), 0, cose_alg_id);
 
     attest_key.key.handle = private_key;
 
