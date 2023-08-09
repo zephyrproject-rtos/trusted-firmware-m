@@ -287,15 +287,23 @@ psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
     CRITICAL_SECTION_LEAVE(cs_assert);
 
     /*
-     * When using the asynchronous agent API, retain the handle
-     * until the response has been collected by the agent
+     * When IPC model is using the asynchronous agent API, retain the handle
+     * until the response has been collected by the agent.
      */
-    if (!is_tfm_rpc_msg(handle)) {
-        if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {
-            spm_free_connection(handle);
-        } else {
-            handle->status = TFM_HANDLE_STATUS_IDLE;
-        }
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+    if (is_tfm_rpc_msg(handle)) {
+        return ret;
+    }
+#endif
+
+    /*
+     * When the asynchronous agent API is not used or when in SFN model, free
+     * the connection handle immediately.
+     */
+    if (handle->status == TFM_HANDLE_STATUS_TO_FREE) {
+        spm_free_connection(handle);
+    } else {
+        handle->status = TFM_HANDLE_STATUS_IDLE;
     }
 
     return ret;

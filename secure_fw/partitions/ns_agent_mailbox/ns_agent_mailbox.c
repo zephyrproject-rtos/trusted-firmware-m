@@ -43,8 +43,10 @@ void ns_agent_mailbox_entry(void)
         if (signals & MAILBOX_SIGNAL) {
             psa_eoi(MAILBOX_SIGNAL);
             tfm_rpc_client_call_handler();
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
         } else if (signals & ASYNC_MSG_REPLY) {
             tfm_rpc_client_call_reply();
+#endif
         } else {
             psa_panic();
         }

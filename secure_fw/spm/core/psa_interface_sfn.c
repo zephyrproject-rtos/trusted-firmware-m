@@ -260,5 +260,67 @@ void psa_unmap_outvec(psa_handle_t msg_handle, uint32_t outvec_idx, size_t len)
 
     tfm_spm_partition_psa_unmap_outvec(msg_handle, outvec_idx, len);
 }
-
 #endif /* PSA_FRAMEWORK_HAS_MM_IOVEC */
+
+#ifdef TFM_PARTITION_NS_AGENT_MAILBOX
+psa_status_t agent_psa_call(psa_handle_t handle,
+                            uint32_t control,
+                            const struct client_params_t *params,
+                            const void *client_data_stateless)
+{
+    struct partition_t *p_client, *p_target;
+    psa_status_t stat;
+
+    if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
+        /* PSA APIs must be called from Thread mode */
+        tfm_core_panic();
+    }
+
+    p_client = GET_CURRENT_COMPONENT();
+
+    stat = tfm_spm_agent_psa_call(handle, control, params, client_data_stateless);
+
+    p_target = GET_CURRENT_COMPONENT();
+    if (p_client != p_target) {
+        /* Execution is returned from RoT Service */
+        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+                                           stat);
+    } else {
+        /* Execution is returned from SPM */
+        spm_handle_programmer_errors(stat);
+    }
+
+    return (psa_status_t)stat;
+}
+
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
+                               int32_t ns_client_id, const void *client_data)
+{
+    struct partition_t *p_client, *p_target;
+    psa_status_t stat;
+
+    if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
+        /* PSA APIs must be called from Thread mode */
+        tfm_core_panic();
+    }
+
+    p_client = GET_CURRENT_COMPONENT();
+
+    stat = tfm_spm_agent_psa_connect(sid, version, ns_client_id, client_data);
+
+    p_target = GET_CURRENT_COMPONENT();
+    if (p_client != p_target) {
+        /* Execution is returned from RoT Service */
+        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+                                           stat);
+    } else {
+        /* Execution is returned from SPM */
+        spm_handle_programmer_errors(stat);
+    }
+
+    return (psa_handle_t)stat;
+}
+#endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+#endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
+

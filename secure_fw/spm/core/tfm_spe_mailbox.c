@@ -183,8 +183,14 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
                                   params->psa_call_params.in_len,
                                   params->psa_call_params.out_len);
     psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
-    /* assume asynchronous */
+
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+    /* Assume asynchronous. Set to synchronous when an error happens. */
     bool sync = false;
+#else
+    /* Assume synchronous. */
+    bool sync = true;
+#endif
 
     SPM_ASSERT(params != NULL);
     SPM_ASSERT(psa_ret != NULL);

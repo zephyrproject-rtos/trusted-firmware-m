@@ -218,6 +218,11 @@
 #define PS_STACK_SIZE                          0x700
 #endif
 
+/* The stack size of the NS Agent Mailbox Secure Partition */
+#ifndef NS_AGENT_MAILBOX_STACK_SIZE
+#define NS_AGENT_MAILBOX_STACK_SIZE            0x800
+#endif
+
 /* SPM Partition Configs */
 
 /* Disable the doorbell APIs */

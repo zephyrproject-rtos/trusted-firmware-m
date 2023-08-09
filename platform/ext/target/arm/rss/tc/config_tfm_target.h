@@ -17,4 +17,6 @@
 
 #define ATTEST_TOKEN_PROFILE_ARM_CCA           1
 
+#define NS_AGENT_MAILBOX_STACK_SIZE            0xC00
+
 #endif /* __CONFIG_TFM_TARGET_H__ */

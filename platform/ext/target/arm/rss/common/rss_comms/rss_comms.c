@@ -113,10 +113,22 @@ static void rss_comms_handle_req(void)
         /* Deliver PSA Client call request to handler in SPM. */
         req_to_process = queue_entry;
         status = message_dispatch(req_to_process);
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
+        /*
+         * If status == PSA_SUCCESS, peer will be replied when mailbox agent
+         * partition receives a 'ASYNC_MSG_REPLY' signal from the requested
+         * service partition.
+         * If status != PSA_SUCCESS, the service call has been finished.
+         * Reply to the peer directly.
+         */
         if (status != PSA_SUCCESS) {
             SPMLOG_DBGMSGVAL("[RSS-COMMS] Message dispatch failed: ", status);
             rss_comms_reply(req_to_process, status);
         }
+#else
+        /* In SFN model, the service call has been finished. Reply to the peer directly. */
+        rss_comms_reply(req_to_process, status);
+#endif
     }
 }
 

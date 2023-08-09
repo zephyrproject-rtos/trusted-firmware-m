@@ -49,8 +49,7 @@ endif()
 # check.
 # Also select IPC model by default for multi-core platform unless it has already selected SFN model
 if((DEFINED TFM_ISOLATION_LEVEL AND TFM_ISOLATION_LEVEL GREATER 1) OR
-    CONFIG_TFM_SPM_BACKEND STREQUAL "IPC" OR
-    TFM_MULTI_CORE_TOPOLOGY)
+    CONFIG_TFM_SPM_BACKEND STREQUAL "IPC")
     include(config/tfm_ipc_config_default.cmake)
 else()
     #The default backend is SFN
