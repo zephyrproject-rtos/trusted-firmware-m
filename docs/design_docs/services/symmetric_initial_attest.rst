@@ -60,16 +60,17 @@ affected. Refer to Initial Attestation Service Integration Guide [3]_ for
 details of the implementation of Initial Attestation secure service.
 
 Symmetric Initial Attestation invokes ``t_cose`` library to build up
-``COSE_Mac0`` structure.
-``COSE_Mac0`` support is added to ``t_cose`` library in TF-M since official
-``t_cose`` hasn't supported ``COSE_Mac0`` yet. The design of ``COSE_Mac0``
-support is covered in `COSE_Mac0 support in t_cose`_.
+``COSE_Mac0`` structure. ``COSE_Mac0`` support was originally added to the
+``t_cose`` library fork in TF-M, however, since ``t_cose 2.0`` the upstream
+library [6]_ also supports it. The design of ``COSE_Mac0`` support is covered in
+`COSE_Mac0 support in t_cose`_.
 
 .. note ::
 
-    The ``COSE_Mac0`` implementation in this proposal is a prototype only for
-    Proof of Concept so far. It may be replaced after ``t_cose`` officially
-    supports ``COSE_Mac0`` message.
+    The ``COSE_Mac0`` implementation in this proposal is a prototype, describing
+    the original Proof of Concept and not the official ``COSE_Mac0`` support in
+    ``t_cose`` in which there may be differences since the support was
+    upstreamed.
 
 Several HAL APIs are defined to fetch platform specific assets required by
 Symmetric Initial Attestation. For example, ``tfm_plat_get_symmetric_iak()``
@@ -170,7 +171,7 @@ attest_token_start()
 ====================
 
 Symmetric Initial Attestation dedicated ``attest_token_start()`` initializes the
-``COSE_Mac0`` signing context and builds up the ``COSE_Mac0`` Header.
+``COSE_Mac0`` computation context and builds up the ``COSE_Mac0`` Header.
 
 The workflow inside ``attest_token_start()`` is shown in
 :ref:`attest-token-start-figure` below.
@@ -237,39 +238,39 @@ The simplified flow in ``attest_token_finish()`` is shown in
 COSE_Mac0 support in t_cose
 ***************************
 
-``COSE_Mac0`` supports in ``t_cose`` in TF-M include the following major
+``COSE_Mac0`` supports in ``t_cose`` include the following major
 functionalities:
 
     - Encoding ``COSE_Mac0`` structure
-    - Decoding and verifying ``COSE_Mac0`` structure
-    - HMAC computation to generate and verify authentication tag
-    - Short-circuit tagging for test mode
+    - Decoding and validating ``COSE_Mac0`` structure
+    - HMAC computation to generate and validate authentication tag
 
 According to RFC8152 [5]_, ``COSE_Mac0`` and ``COSE_Sign1`` have similar
-structures. Therefore, the prototype follows ``COSE_Sign1`` implementation to
-build up ``COSE_Mac0`` file structure and implement ``COSE_Mac0`` encoding and
-decoding.
+structures. Therefore, the prototype in TF-M followed ``COSE_Sign1``
+implementation to build up ``COSE_Mac0`` file structure and implement
+``COSE_Mac0`` encoding and decoding.
 
 Although ``COSE_Mac0`` can share lots of data types, APIs and encoding/decoding
-steps with ``COSE_Sign1`` in implementation, this prototype separates
-``COSE_Mac0`` implementation from ``COSE_Sign1``. ``COSE_Mac0`` owns its
-dedicated signing/verification contexts, APIs and encoding/decoding process.
-The purposes of separating ``COSE_Mac0`` and ``COSE_Sign1`` are listed below
+steps with ``COSE_Sign1`` in implementation, the prototype separated
+``COSE_Mac0`` implementation from ``COSE_Sign1``. ``COSE_Mac0`` owned and owns
+its dedicated signing/verification contexts, APIs and encoding/decoding process.
+The original purposes of separating ``COSE_Mac0`` and ``COSE_Sign1`` are listed
+below
 
-- It can keep changes to ``COSE_Sign1`` as small as possible and avoid conflicts
-  with development in ``COSE_Sign1```. It can decrease conflicts if ``t_cose``
-  in TF-M is synchronized with original ``t_cose`` repository later.
+- It could keep changes to ``COSE_Sign1`` as small as possible and avoid
+  conflicts with development in ``COSE_Sign1```. It decreased conflicts when
+  the fork in TF-M was synchronized with original ``t_cose`` repository.
 - ``COSE_Mac0`` and ``COSE_Sign1`` are exclusive in TF-M use cases.
   It cannot decrease TF-M memory footprint by extracting the common components
-  shared by ``COSE_Mac0`` and ``COSE_Sign1`` but can make the design
+  shared by ``COSE_Mac0`` and ``COSE_Sign1`` but could make the design
   over-complicated.
 
 .. note ::
 
-    Only HMAC is supported in current ``COSE_Mac0`` prototype.
+    Only HMAC was supported in the ``COSE_Mac0`` prototype.
 
-File structure
-==============
+File structure (deprecated)
+===========================
 
 New files are added to implement the functionalities listed above. The structure
 of files is shown in the table below.
@@ -305,8 +306,8 @@ signing and verification.
       ``COSE_Sign1``.
     - ``T_COSE_ENABLE_MAC0`` selects HMAC operations for ``COSE_Mac0``.
 
-Encoding COSE_Mac0
-==================
+Encoding COSE_Mac0 (deprecated)
+===============================
 
 Following ``COSE_Sign1`` implementation, ``COSE_Mac0`` encoding exports similar
 functions to Initial Attestation secure service.
@@ -379,8 +380,8 @@ Calculate and add authentication tag
     t_cose_mac0_encode_tag(struct t_cose_mac0_sign_ctx *context,
                            QCBOREncodeContext          *cbor_encode_ctx);
 
-Decoding COSE_Mac0
-==================
+Decoding COSE_Mac0 (deprecated)
+===============================
 
 Following ``COSE_Sign1`` implementation, ``COSE_Mac0`` decoding exports similar
 functions to test suite of Initial Attestation.
@@ -433,20 +434,6 @@ authentication tag.
                        struct q_useful_buf_c          cose_mac0,
                        struct q_useful_buf_c         *payload,
                        struct t_cose_parameters      *parameters);
-
-Short-circuit tagging
-=====================
-
-If ``T_COSE_OPT_SHORT_CIRCUIT_TAG`` option is enabled, ``COSE_Mac0`` encoding
-will hash the ``COSE_Mac0`` content and add the hash output as an authentication
-tag. It is useful when critical symmetric IAK is unavailable or cannot be
-accessed, perhaps because it has not been provisioned or configured for the
-particular device. It is only for test and must not be used in actual use case.
-The ``kid`` parameter will either be skipped in ``COSE_Mac0`` Header.
-
-If ``T_COSE_OPT_ALLOW_SHORT_CIRCUIT`` option is enabled, ``COSE_Mac0`` decoding
-will only verify the hash output, without requiring symmetric key for
-authentication tag verification.
 
 ***************
 TF-M Test suite
@@ -559,6 +546,8 @@ Reference
 
 .. [5] `CBOR Object Signing and Encryption (COSE) <https://tools.ietf.org/html/rfc8152>`_
 
+.. [6] `t_cose library <https://github.com/laurencelundblade/t_cose>`_
+
 ----------------
 
-*Copyright (c) 2020-2022 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2020-2024 Arm Limited. All Rights Reserved.*
