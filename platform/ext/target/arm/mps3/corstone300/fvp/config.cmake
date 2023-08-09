@@ -8,3 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include(${CORSTONE300_COMMON_DIR}/config.cmake)
+
+set(PROVISIONING_CODE_PADDED_SIZE       "0x2000"  CACHE STRING    "")
+set(PROVISIONING_VALUES_PADDED_SIZE     "0x400"   CACHE STRING    "")
+set(PROVISIONING_DATA_PADDED_SIZE       "0x400"   CACHE STRING    "")

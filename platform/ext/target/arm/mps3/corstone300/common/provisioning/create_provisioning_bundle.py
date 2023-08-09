@@ -38,6 +38,15 @@ parser.add_argument("--bl1_2_padded_hash_input_file",
 parser.add_argument("--bl1_2_input_file",
                     help="the final bl1_2 image",
                     required=False)
+parser.add_argument("--code_pad_size",
+                    help="size to pad the code section",
+                    required=True)
+parser.add_argument("--values_pad_size",
+                    help="size to pad the values section",
+                    required=True)
+parser.add_argument("--data_pad_size",
+                    help="size to pad the data section",
+                    required=True)
 parser.add_argument("--bundle_output_file",
                     help="bundle output file",
                     required=False)
@@ -90,9 +99,12 @@ patch_bundle = struct_pack([
     bl1_2,
 ])
 
-code = struct_pack([code], pad_to=0x2000)
-values = struct_pack([patch_bundle, values[len(patch_bundle):]], pad_to=0x400)
-data = struct_pack([values, rwdata, rodata], pad_to=0x800)
+code = struct_pack([code],
+                   pad_to=int(args.code_pad_size, 0))
+values = struct_pack([patch_bundle, values[len(patch_bundle):]],
+                     pad_to=int(args.values_pad_size, 0))
+data = struct_pack([values, rwdata, rodata],
+                   pad_to=int(args.values_pad_size, 0)+int(args.data_pad_size, 0))
 
 bundle = struct_pack([
     int(args.magic, 16).to_bytes(4, 'little'),

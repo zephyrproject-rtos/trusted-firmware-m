@@ -73,6 +73,9 @@ add_custom_command(OUTPUT encrypted_provisioning_bundle.bin
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_bundle.py
                     --provisioning_bundle_axf ${CMAKE_BINARY_DIR}/bin/provisioning_bundle.axf
                     --bundle_output_file encrypted_provisioning_bundle.bin
+                    --code_pad_size ${PROVISIONING_CODE_PADDED_SIZE}
+                    --data_pad_size ${PROVISIONING_DATA_PADDED_SIZE}
+                    --values_pad_size ${PROVISIONING_VALUES_PADDED_SIZE}
                     --magic "0xC0DEFEED"
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/encrypted_provisioning_bundle.bin
 )
