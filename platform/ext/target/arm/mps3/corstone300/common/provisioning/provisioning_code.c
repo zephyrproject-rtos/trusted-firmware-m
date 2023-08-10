@@ -7,16 +7,22 @@
 
 #include "tfm_plat_otp.h"
 #include "provisioning_bundle.h"
-
+#include "Driver_Flash.h"
 /* This is a stub to make the linker happy */
 void __Vectors(){}
 
-
+extern ARM_DRIVER_FLASH FLASH_DEV_NAME;
 extern const struct provisioning_data_t data;
 
 enum tfm_plat_err_t __attribute__((section("DO_PROVISION"))) do_provision(void) {
     enum tfm_plat_err_t err;
     uint32_t new_lcs;
+
+    err = (enum tfm_plat_err_t)FLASH_DEV_NAME.Initialize(NULL);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return err;
+    }
+
     err = tfm_plat_otp_write(PLAT_OTP_ID_BL2_ROTPK_0,
                              sizeof(data.bl2_assembly_and_test_prov_data.bl2_rotpk_0),
                              data.bl2_assembly_and_test_prov_data.bl2_rotpk_0);
