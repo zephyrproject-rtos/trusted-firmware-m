@@ -38,10 +38,10 @@ psa_status_t psa_call(psa_handle_t handle, int32_t type,
                       psa_outvec *out_vec,
                       size_t out_len)
 {
-    if ((type > INT16_MAX) ||
-        (type < INT16_MIN) ||
-        (in_len > UINT8_MAX) ||
-        (out_len > UINT8_MAX)) {
+    if ((type    > PSA_CALL_TYPE_MAX) ||
+        (type    < PSA_CALL_TYPE_MIN) ||
+        (in_len  > PSA_MAX_IOVEC)     ||
+        (out_len > PSA_MAX_IOVEC)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
