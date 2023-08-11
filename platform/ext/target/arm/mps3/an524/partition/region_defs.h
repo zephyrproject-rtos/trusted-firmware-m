@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2019-2023 Arm Limited. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,5 +140,18 @@
 #define BOOT_TFM_SHARED_DATA_SIZE (0x400)
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
+
+#define PROVISIONING_BUNDLE_CODE_START (BL2_CODE_START + BL2_CODE_SIZE)
+#define PROVISIONING_BUNDLE_CODE_SIZE  (PROVISIONING_CODE_PADDED_SIZE)
+/* The max size of the values(keys, seeds) that are going to be provisioned
+ * into the OTP. */
+#define PROVISIONING_BUNDLE_VALUES_START (BL2_DATA_START + BL2_DATA_SIZE)
+#define PROVISIONING_BUNDLE_VALUES_SIZE (PROVISIONING_VALUES_PADDED_SIZE)
+#define PROVISIONING_BUNDLE_DATA_START (PROVISIONING_BUNDLE_VALUES_START + \
+                                        PROVISIONING_BUNDLE_VALUES_SIZE)
+#define PROVISIONING_BUNDLE_DATA_SIZE (PROVISIONING_DATA_PADDED_SIZE)
+
+#define PROVISIONING_BUNDLE_START (PROVISIONING_BUNDLE_CODE_START + \
+                                      PROVISIONING_BUNDLE_CODE_SIZE)
 
 #endif /* __REGION_DEFS_H__ */
