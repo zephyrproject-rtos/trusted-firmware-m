@@ -15,6 +15,10 @@
 #include <stddef.h>
 #include <string.h>
 
+#ifdef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
+#include "cc3xx_rng_external_trng.h"
+#endif /* CC3XX_CONFIG_RNG_EXTERNAL_TRNG */
+
 static void rng_init(void)
 {
     /* Enable clock */
@@ -111,6 +115,7 @@ static cc3xx_err_t fill_entropy_buf(uint32_t *buf) {
 }
 
 #ifdef CC3XX_CONFIG_RNG_ENABLE
+#ifndef CC3XX_CONFIG_RNG_EXTERNAL_TRNG
 cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length)
 {
     static uint32_t entropy_buf[6];
@@ -194,4 +199,10 @@ cc3xx_err_t cc3xx_rng_get_random_uint(uint32_t bound, uint32_t *uint)
 
     return CC3XX_ERR_SUCCESS;
 }
+#else
+cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length)
+{
+    return rng_get_random(buf, length);
+}
+#endif /* !CC3XX_CONFIG_RNG_EXTERNAL_TRNG */
 #endif /* CC3XX_CONFIG_RNG_ENABLE */

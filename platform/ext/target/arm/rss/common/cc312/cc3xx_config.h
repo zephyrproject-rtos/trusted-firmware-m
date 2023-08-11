@@ -82,6 +82,11 @@
 /* Whether RNG is enabled */
 #define CC3XX_CONFIG_RNG_ENABLE
 
+/* Whether an external TRNG should be used in place of the standard CC3XX TRNG */
+#ifdef RSS_OTP_TRNG
+#define CC3XX_CONFIG_RNG_EXTERNAL_TRNG
+#endif /* RSS_OTP_TRNG */
+
 /* The number of times the TRNG will be re-read when it fails a statical test
  * before an error is returned.
  */
