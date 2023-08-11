@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include "psa/client.h"
+#include "psa/service.h"
 #include "tfm_psa_call_pack.h"
 
 psa_status_t psa_call(psa_handle_t handle,
