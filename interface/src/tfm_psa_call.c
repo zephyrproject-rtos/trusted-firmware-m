@@ -20,7 +20,7 @@ psa_status_t psa_call(psa_handle_t handle,
         (type    < PSA_CALL_TYPE_MIN) ||
         (in_len  > PSA_MAX_IOVEC)     ||
         (out_len > PSA_MAX_IOVEC)) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
+        psa_panic();
     }
 
     return tfm_psa_call_pack(handle, PARAM_PACK(type, in_len, out_len),
