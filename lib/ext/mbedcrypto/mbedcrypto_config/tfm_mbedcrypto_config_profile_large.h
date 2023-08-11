@@ -164,21 +164,6 @@
 #define MBEDTLS_PK_PARSE_EC_EXTENDED
 
 /**
- * \def MBEDTLS_ERROR_STRERROR_DUMMY
- *
- * Enable a dummy error function to make use of mbedtls_strerror() in
- * third party libraries easier when MBEDTLS_ERROR_C is disabled
- * (no effect when MBEDTLS_ERROR_C is enabled).
- *
- * You can safely disable this if MBEDTLS_ERROR_C is enabled, or if you're
- * not using mbedtls_strerror() or error_strerror() in your application.
- *
- * Disable if you run into name conflicts and want to really remove the
- * mbedtls_strerror()
- */
-#define MBEDTLS_ERROR_STRERROR_DUMMY
-
-/**
  * \def MBEDTLS_NO_PLATFORM_ENTROPY
  *
  * Do not use built-in platform entropy functions.
@@ -331,18 +316,6 @@
  * This module provides a generic entropy pool
  */
 #define MBEDTLS_ENTROPY_C
-
-/**
- * \def MBEDTLS_ERROR_C
- *
- * Enable error code to error string conversion.
- *
- * Module:  library/error.c
- * Caller:
- *
- * This module enables mbedtls_strerror().
- */
-#define MBEDTLS_ERROR_C
 
 /**
  * \def MBEDTLS_HKDF_C
