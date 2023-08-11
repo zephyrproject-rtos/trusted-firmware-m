@@ -204,9 +204,8 @@ if (TFM_PARTITION_CRYPTO)
             platform_s
     )
     target_link_libraries(crypto_service_mbedcrypto
-        PRIVATE
-            ${CC312_DRIVER_API_TARGET}
         PUBLIC
+            ${CC312_DRIVER_API_TARGET}
             crypto_service_crypto_hw
     )
 

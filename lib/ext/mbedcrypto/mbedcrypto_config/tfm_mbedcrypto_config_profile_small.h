@@ -312,7 +312,7 @@
  * This module adds support for the Hashed Message Authentication Code
  * (HMAC)-based key derivation function (HKDF).
  */
-#define MBEDTLS_HKDF_C /* Used for HUK deriviation */
+//#define MBEDTLS_HKDF_C /* Used for HUK deriviation */
 
 /**
  * \def MBEDTLS_MD_C
