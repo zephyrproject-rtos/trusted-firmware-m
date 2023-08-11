@@ -62,30 +62,33 @@ def resolve_exec_reference(command, key, reference_string):
     return command_location
 
 def resolve_size_reference(command, key, reference_string):
-    # Convert size to words
-    size = sizes[reference_string] // 4
+    size = sizes[reference_string]
     if key == 'XSIZE':
+        size = size // 4
         size &= 0xFFFF
         size |= size << 16
+    elif key != 'SRCADDR' and key != 'DESADDR':
+        # Convert size to words
+        size = size // 4
     return size
 
 def resolve_base_address_reference(command, key, reference_string):
     return location_base_addresses[reference_string]
 
 def resolve_program_reference(command, key, reference_string):
-    if "+" in reference_string:
-        split = reference_string.split(" + ")
-        reference_string = split[0].lstrip()
-        add_value = int(split[1], 0)
-    else:
-        add_value = 0
-
     if "-" in reference_string:
-        split = reference_string.split(" - ")
+        split = reference_string.split(" - ", maxsplit=1)
         reference_string = split[0].lstrip()
-        sub_value = int(split[1], 0)
+        sub_value = resolve_program_reference(command, key, split[1])
     else:
         sub_value = 0
+
+    if "+" in reference_string:
+        split = reference_string.split(" + ", maxsplit=1)
+        reference_string = split[0].lstrip()
+        add_value = resolve_program_reference(command, key, split[1])
+    else:
+        add_value = 0
 
     if "_store_addr" in reference_string:
         value = resolve_store_reference(command, key, reference_string.replace("_store_addr", ""))
@@ -96,7 +99,7 @@ def resolve_program_reference(command, key, reference_string):
     elif "_base_address" in reference_string:
         value = resolve_base_address_reference(command, key, reference_string.replace("_base_address", ""))
     else:
-        raise ValueError("Invalid program reference {}".format(reference_string))
+        value = int(reference_string, 0)
     value = value + add_value - sub_value
     logging.debug('resolving reference {} as {}'.format(reference_string, hex(value)))
     return value
@@ -154,6 +157,12 @@ for program in data['program']:
         if location_next_addresses[program['storage_location']] != location_next_addresses[program['execution_location']]:
             location_next_addresses[program['execution_location']] += command_size
         output_locations[program['storage_location']] = True
+        logging.info('Command {} stored at {}, executed from {}, size {}'.format(
+            command['command_name'],
+            hex(command_storage_locations[command['command_name']]),
+            hex(command_execution_locations[command['command_name']]),
+            sizes[command['command_name']],
+            ))
     logging.info('Program {} stored at {}, executed from {}, size {}'.format(
         program['name'],
         hex(location_next_addresses[program['storage_location']] - sizes[program['name']]),

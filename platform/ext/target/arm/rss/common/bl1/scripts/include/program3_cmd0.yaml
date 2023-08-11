@@ -5,9 +5,8 @@
 #
 #-------------------------------------------------------------------------------
 
-# This command in run after trigger 2 is fired. This command stops channel 0
-# from executing by writing Channel0 CH_CMD register. Trigger 2 is fired if the
-# Lifecycle is CM TCI/PCI or DM
+# This command sets GPO value to 0x3. This is done to show that this channel
+# started executing (before the next command which waits for a trigger).
 
 Header:
   - REGCLEAR: 0
@@ -16,20 +15,20 @@ Header:
   - CTRL: 1
   - SRCADDR: 0
   - SRCADDRHI: 0
-  - DESADDR: 1
+  - DESADDR: 0
   - DESADDRHI: 0
-  - XSIZE: 1
+  - XSIZE: 0
   - XSIZEHI: 0
   - SRCTRANSCFG: 0
-  - DESTRANSCFG: 1
+  - DESTRANSCFG: 0
   - XADDRINC: 0
   - YADDRSTRIDE: 0
-  - FILLVAL: 1
+  - FILLVAL: 0
   - YSIZE: 0
   - TMPLTCFG: 0
   - SRCTMPLT: 0
   - DESTMPLT: 0
-  - SRCTRIGINCFG: 1
+  - SRCTRIGINCFG: 0
   - DESTRIGINCFG: 0
   - TRIGOUTCFG: 0
   - GPOEN0: 0
@@ -42,11 +41,6 @@ Header:
   - AUTOCFG: 0
   - LINKADDR: 1
   - LINKADDRHI: 0
-CTRL: 0x12000602
-DESADDR: 'dma350_base_address + 0x1000'
-XSIZE: 0x00010000
-DESTRANSCFG: 0x00000000
-FILLVAL: 0x00000008
-SRCTRIGINCFG: 0x00000202
+CTRL: 0x10000000
 GPOVAL0: 0x00000003
-LINKADDR: "program6_cmd0_exec_addr"
+LINKADDR: "program3_cmd1_exec_addr"

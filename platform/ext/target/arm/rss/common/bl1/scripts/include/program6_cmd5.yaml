@@ -5,14 +5,14 @@
 #
 #-------------------------------------------------------------------------------
 
-# This command zeroes the entire DTCM by writing doublewords.
+# This command writes a random doubleword to the entirety of the DTCM.
 
 Header:
   - REGCLEAR: 0
   - Reserved: 0
   - INTREN: 0
   - CTRL: 1
-  - SRCADDR: 0
+  - SRCADDR: 1
   - SRCADDRHI: 0
   - DESADDR: 1
   - DESADDRHI: 0
@@ -20,9 +20,9 @@ Header:
   - XSIZEHI: 0
   - SRCTRANSCFG: 0
   - DESTRANSCFG: 1
-  - XADDRINC: 0
+  - XADDRINC: 1
   - YADDRSTRIDE: 0
-  - FILLVAL: 1
+  - FILLVAL: 0
   - YSIZE: 0
   - TMPLTCFG: 0
   - SRCTMPLT: 0
@@ -40,10 +40,11 @@ Header:
   - AUTOCFG: 0
   - LINKADDR: 1
   - LINKADDRHI: 0
-CTRL: 0x10000603
+CTRL: 0x10000203
+SRCADDR: 'vm0_base_address'
 DESADDR: 'dtcm_base_address'
-XSIZE: 0x10000000
-DESTRANSCFG: 0x000F0044
-FILLVAL: 0x00000000
-GPOVAL0: 0x00000004
-LINKADDR: "program2_cmd0_exec_addr"
+XSIZE: 0x10001000
+DESTRANSCFG: 0x00000000
+XADDRINC: 0x00010000
+GPOVAL0: 0x0000001E
+LINKADDR: "program6_cmd6_exec_addr"

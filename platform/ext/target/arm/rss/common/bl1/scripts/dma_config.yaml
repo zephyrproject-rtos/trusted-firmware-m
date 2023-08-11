@@ -34,6 +34,12 @@ locations:
         base_address: 0x500A0000
     rss_system_control_registers:
         base_address: 0x58021000
+    trng:
+        base_address: 0x500A5270
+    tram:
+        base_address: 0x5015D000
+    kmu:
+        base_address: 0x5009E000
 
 program:
   - storage_location: "rom"
@@ -44,7 +50,6 @@ program:
     commands:
       - !include include/program0_cmd0.yaml         # Program 0 - Command 0
       - !include include/program0_cmd1.yaml         # Program 0 - Command 1
-      - !include include/program0_cmd2.yaml         # Program 0 - Command 2
 
   - storage_location: "rom"
     execution_location: "rom"
@@ -53,6 +58,7 @@ program:
     description: "Run only in Virgin TCI mode"
     commands:
       - !include include/program1_cmd0.yaml         # Program 1 - Command 0
+      - !include include/program1_cmd1.yaml         # Program 1 - Command 1
 
   - storage_location: "rom"
     execution_location: "rom"
@@ -71,6 +77,7 @@ program:
     description: "Run only in CM and DM modes"
     commands:
       - !include include/program3_cmd0.yaml         # Program 3 - Command 0
+      - !include include/program3_cmd1.yaml         # Program 3 - Command 1
 
   - storage_location: "rom"
     execution_location: "rom"
@@ -92,11 +99,18 @@ program:
     commands:
       - !include include/program5_cmd0.yaml         # Program 5 - Command 0
       - !include include/program5_cmd1.yaml         # Program 5 - Command 1
+      - !include include/program5_cmd2.yaml         # Program 5 - Command 2
 
   - storage_location: "rom"
     execution_location: "rom"
     name: "program6"
-    description: "Release DCU lock and CPUWAIT"
+    description: "Release DCU lock, enable and zeroize TRAM, and release CPUWAIT"
     commands:
       - !include include/program6_cmd0.yaml         # Program 6 - Command 0
       - !include include/program6_cmd1.yaml         # Program 6 - Command 1
+      - !include include/program6_cmd2.yaml         # Program 6 - Command 2
+      - !include include/program6_cmd3.yaml         # Program 6 - Command 3
+      - !include include/program6_cmd4.yaml         # Program 6 - Command 4
+      - !include include/program6_cmd5.yaml         # Program 6 - Command 5
+      - !include include/program6_cmd6.yaml         # Program 6 - Command 6
+      - !include include/program6_cmd7.yaml         # Program 6 - Command 7

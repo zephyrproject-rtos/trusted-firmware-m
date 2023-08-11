@@ -5,8 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-# Copy 1 word from the end of this command into the ICC register of the
-# integrity checker. This triggers the checker.
+# This command reads 8 words from VM0 into the TRAM key registers
 
 Header:
   - REGCLEAR: 0
@@ -19,9 +18,9 @@ Header:
   - DESADDRHI: 0
   - XSIZE: 1
   - XSIZEHI: 0
-  - SRCTRANSCFG: 1
+  - SRCTRANSCFG: 0
   - DESTRANSCFG: 1
-  - XADDRINC: 0
+  - XADDRINC: 1
   - YADDRSTRIDE: 0
   - FILLVAL: 0
   - YSIZE: 0
@@ -42,11 +41,10 @@ Header:
   - LINKADDR: 1
   - LINKADDRHI: 0
 CTRL: 0x10000202
-SRCADDR: 'program4_cmd3_store_addr + program4_cmd3_size - 0x4'
-DESADDR: 'integrity_checker_base_address + 0x4'
-XSIZE: 0x00010001
-SRCTRANSCFG: 0x000F0044
-DESTRIGINCFG: 0x00000000
-GPOVAL0: 0x00000003
-LINKADDR: "program4_cmd4_exec_addr"
-ICC: 0x00000081
+SRCADDR: 'vm0_base_address'
+DESADDR: 'tram_base_address + 0x8'
+XSIZE: 0x00080008
+DESTRANSCFG: 0x00000000
+XADDRINC: 0x00010001
+GPOVAL0: 0x0000001E
+LINKADDR: "program6_cmd3_exec_addr"

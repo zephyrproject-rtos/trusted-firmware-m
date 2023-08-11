@@ -15,7 +15,8 @@ extern "C" {
 #endif
 
 enum rss_kmu_slot_id_t {
-    RSS_KMU_SLOT_VHUK = KMU_USER_SLOT_MIN,
+    RSS_KMU_SLOT_TRAM_KEY = KMU_USER_SLOT_MIN,
+    RSS_KMU_SLOT_VHUK,
     RSS_KMU_SLOT_CPAK_SEED,
     RSS_KMU_SLOT_DAK_SEED,
     /* The session key is used for AEAD, so requires two contiguous slots. Only
