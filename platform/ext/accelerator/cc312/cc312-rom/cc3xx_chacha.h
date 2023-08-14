@@ -68,7 +68,8 @@ cc3xx_err_t cc3xx_chacha20_init(cc3xx_chacha_direction_t direction,
  * \brief                        Get the current state of the CHACHA operation.
  *                               Allows for restartable CHACHA operations.
 
- * \param[out] state            The cc3xx_aes_state_t to write the state into.
+ * \param[out] state            The cc3xx_chacha20_state_t to write the state
+ *                              into.
  */
 void cc3xx_chacha20_get_state(struct cc3xx_chacha_state_t *state);
 
