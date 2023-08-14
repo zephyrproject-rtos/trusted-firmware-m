@@ -300,7 +300,7 @@
  *
  * This module provides the CTR_DRBG AES random number generator.
  */
-#define MBEDTLS_CTR_DRBG_C
+//#define MBEDTLS_CTR_DRBG_C
 
 /**
  * \def MBEDTLS_ENTROPY_C
