@@ -11,6 +11,7 @@
 #include "cc3xx_error.h"
 #include "cc3xx_config.h"
 #include "cc3xx_dma.h"
+#include "cc3xx_poly1305.h"
 
 #include <stdint.h>
 #include <stddef.h>
@@ -38,10 +39,15 @@ struct cc3xx_chacha_state_t {
     bool iv_is_96_bit;
     uint32_t key[8];
 
+    size_t bytes_since_dma_output_addr_set;
+    size_t crypted_len;
+    size_t authed_len;
+
     uint64_t counter;
     uint32_t iv[3];
 
     struct cc3xx_dma_state_t dma_state;
+    struct cc3xx_poly1305_state_t poly_state;
 };
 
 /**
