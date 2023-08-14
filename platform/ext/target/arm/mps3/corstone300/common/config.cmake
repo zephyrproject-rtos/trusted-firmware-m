@@ -10,7 +10,7 @@
 # Make FLIH IRQ test as the default IRQ test on Corstone-310
 set(DEFAULT_NS_SCATTER                ON    CACHE BOOL    "Use default NS scatter files for target")
 set(PSA_API_TEST_TARGET           "cs3x0"   CACHE STRING  "PSA_API_TARGET name")
-set(PROVISIONING_KEYS_CONFIG      "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps3/corstone300/common/provisioning/provisioning_config.cmake"   CACHE FILEPATH  "The config file which has the keys and seeds for provisioning")
+set(PROVISIONING_KEYS_CONFIG      "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake"   CACHE FILEPATH  "The config file which has the keys and seeds for provisioning")
 
 set(FLASH_S_PARTITION_SIZE   "0x80000"    CACHE STRING    "Secure code size")
 set(FLASH_NS_PARTITION_SIZE  "0x300000"   CACHE STRING    "Non-secure code size")

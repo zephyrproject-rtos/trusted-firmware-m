@@ -1,13 +1,12 @@
 #! /usr/bin/env python3
 #
 # -----------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 # -----------------------------------------------------------------------------
 
-import re
 import os
 import sys
 import click
@@ -25,14 +24,9 @@ import imgtool.main
 parser_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(parser_path)
 
-
-sign_bin_size_re = re.compile(r"^\s*RE_SIGN_BIN_SIZE\s*=\s*(.*)")
-load_addr_re = re.compile(r"^\s*RE_IMAGE_LOAD_ADDRESS\s*=\s*(.*)")
-rom_fixed_re = re.compile(r"^\s*RE_IMAGE_ROM_FIXED\s*=\s*(.*)")
-
-#This works around Python 2 and Python 3 handling character encodings
-#differently. More information about this issue at
-#https://click.palletsprojects.com/en/5.x/python3
+# This works around Python 2 and Python 3 handling character encodings
+# differently. More information about this issue at
+# https://click.palletsprojects.com/en/5.x/python3
 os.environ['LC_ALL'] = 'C.UTF-8'
 os.environ['LANG'] = 'C.UTF-8'
 

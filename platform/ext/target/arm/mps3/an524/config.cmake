@@ -19,7 +19,7 @@ set(MBEDCRYPTO_BUILD_TYPE               minsizerel  CACHE STRING "Build type of 
 set(CONFIG_TFM_USE_TRUSTZONE            ON)
 set(TFM_MULTI_CORE_TOPOLOGY             OFF)
 
-set(PROVISIONING_KEYS_CONFIG      "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps3/an524/provisioning/provisioning_config.cmake"   CACHE FILEPATH  "The config file which has the keys and seeds for provisioning")
+set(PROVISIONING_KEYS_CONFIG      "${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake"   CACHE FILEPATH  "The config file which has the keys and seeds for provisioning")
 set(PROVISIONING_CODE_PADDED_SIZE       "0x2000"  CACHE STRING    "")
 set(PROVISIONING_VALUES_PADDED_SIZE     "0x400"   CACHE STRING    "")
 set(PROVISIONING_DATA_PADDED_SIZE       "0x400"   CACHE STRING    "")

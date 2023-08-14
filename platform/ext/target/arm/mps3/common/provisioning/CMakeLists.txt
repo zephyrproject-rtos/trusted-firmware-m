@@ -10,6 +10,7 @@ find_package(Python3)
 
 add_executable(provisioning_bundle)
 
+include(${PROVISIONING_KEYS_CONFIG})
 
 set_target_properties(provisioning_bundle
     PROPERTIES
@@ -97,8 +98,28 @@ target_include_directories(platform_bl2
         .
 )
 
-if(NOT TFM_DUMMY_PROVISIONING)
-    include(${PROVISIONING_KEYS_CONFIG})
+if(TFM_DUMMY_PROVISIONING)
+    target_compile_definitions(provisioning_bundle
+        PRIVATE
+            BL2_ROTPK_0_2048=${BL2_ROTPK_0_2048}
+            BL2_ROTPK_1_2048=${BL2_ROTPK_1_2048}
+            BL2_ROTPK_2_2048=${BL2_ROTPK_2_2048}
+            BL2_ROTPK_3_2048=${BL2_ROTPK_3_2048}
+            BL2_ROTPK_0_3072=${BL2_ROTPK_0_3072}
+            BL2_ROTPK_1_3072=${BL2_ROTPK_1_3072}
+            BL2_ROTPK_2_3072=${BL2_ROTPK_2_3072}
+            BL2_ROTPK_3_3072=${BL2_ROTPK_3_3072}
+            SECURE_DEBUG_PK=${SECURE_DEBUG_PK}
+            HUK=${HUK}
+            IAK=${IAK}
+            IAK_LEN=${IAK_LEN}
+            BOOT_SEED=${BOOT_SEED}
+            IMPLEMENTATION_ID=${IMPLEMENTATION_ID}
+            CERTIFICATION_REFERENCE="${CERTIFICATION_REFERENCE}"
+            VERIFICATION_SERVICE_URL="${VERIFICATION_SERVICE_URL}"
+            ENTROPY_SEED=${ENTROPY_SEED}
+    )
+else()
     add_custom_target(provisioning_data
         SOURCES
             provisioning_data.c

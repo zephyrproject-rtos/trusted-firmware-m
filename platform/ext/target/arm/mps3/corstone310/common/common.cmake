@@ -284,5 +284,5 @@ target_compile_definitions(platform_region_defs
 )
 
 if(NOT PLATFORM_DEFAULT_PROVISIONING)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/provisioning provisioning)
+add_subdirectory(${PLATFORM_DIR}/ext/target/arm/mps3/common/provisioning provisioning)
 endif()

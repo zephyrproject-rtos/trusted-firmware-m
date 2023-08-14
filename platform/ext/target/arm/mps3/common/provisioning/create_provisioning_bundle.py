@@ -20,7 +20,7 @@ def struct_pack(objects, pad_to=0):
         defstring += str(pad_to - size) + "x"
     elif size > pad_to and pad_to != 0:
         print("Error padding struct of size {} to {}".format(size, pad_to))
-        exit(1);
+        exit(1)
 
     return (bytes(struct.pack(defstring, *objects)))
 
