@@ -110,6 +110,11 @@
 #define CC3XX_CONFIG_RNG_RING_OSCILLATOR_ID 0
 #endif /* !CC_RNG_RING_OSCILLATOR_ID */
 
+/* How many virtual registers can be allocated in the PKA engine */
+#ifndef CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT
+#define CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT 64
+#endif /* CC3XX_CONFIG_PKA_MAX_VIRT_REG_AMOUNT */
+
 /* Whether DPA mitigations are enabled. Has a code-size and performance cost */
 #define CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
 

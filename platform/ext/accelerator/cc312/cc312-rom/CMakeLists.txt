@@ -20,6 +20,7 @@ target_sources(cc312_rom
         ./cc3xx_stdlib.c
         ./cc3xx_chacha.c
         ./cc3xx_kdf.c
+        ./cc3xx_pka.c
 )
 
 target_include_directories(cc312_rom
