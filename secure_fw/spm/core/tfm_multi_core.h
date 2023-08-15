@@ -10,8 +10,6 @@
 
 #include <stdbool.h>
 
-#include "tfm_api.h"
-
 /* Follow CMSE flag definitions */
 #define MEM_CHECK_MPU_READWRITE         (1 << 0x0)
 #define MEM_CHECK_AU_NONSECURE          (1 << 0x1)
@@ -96,11 +94,10 @@ void tfm_get_ns_mem_region_attr(const void *p, size_t s,
  * \param[in] flags           The memory access types to be checked between
  *                            given memory and boundaries.
  *
- * \return TFM_SUCCESS if the access is allowed,
- *         TFM_ERROR_GENERIC otherwise.
+ * \return SPM_SUCCESS if the access is allowed,
+ *         SPM_ERROR_GENERIC otherwise.
  */
-enum tfm_status_e tfm_has_access_to_region(const void *p, size_t s,
-                                           uint32_t flags);
+int32_t tfm_has_access_to_region(const void *p, size_t s, uint32_t flags);
 
 /**
  * \brief Initialization of the multi core communication.
@@ -120,10 +117,10 @@ int32_t tfm_inter_core_comm_init(void);
  * \param[in] region_limit  The end address of the region, which should contain
  *                          the range
  *
- * \return TFM_SUCCESS if the region contains the range,
- *         TFM_ERROR_GENERIC otherwise.
+ * \return SPM_SUCCESS if the region contains the range,
+ *         SPM_ERROR_GENERIC otherwise.
  */
-enum tfm_status_e check_address_range(const void *p, size_t s,
-                                      uintptr_t region_start,
-                                      uintptr_t region_limit);
+int32_t check_address_range(const void *p, size_t s,
+                            uintptr_t region_start,
+                            uintptr_t region_limit);
 #endif /* __TFM_MULTI_CORE_H__ */

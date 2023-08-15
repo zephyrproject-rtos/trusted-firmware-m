@@ -5,59 +5,15 @@
  *
  */
 
-#ifndef __TFM_API_H__
-#define __TFM_API_H__
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __TFM_VENEERS_H__
+#define __TFM_VENEERS_H__
 
 #include <stdint.h>
 #include "psa/client.h"
 
-#define TFM_INVALID_CLIENT_ID 0
-
-/**
- * \brief Checks if the provided client ID is a secure client ID.
- *
- * \param[in] client_id         Client ID to check.
- *
- * \retval 1                    Client ID is secure.
- * \retval 0                    Client ID is non-secure.
- */
-#define TFM_CLIENT_ID_IS_S(client_id)  ((client_id)>0)
-
-/**
- * \brief Checks if the provided client ID is a non-secure client ID.
- *
- * \param[in] client_id         Client ID to check.
- *
- * \retval 1                    Client ID is non-secure.
- * \retval 0                    Client ID is secure.
- */
-#define TFM_CLIENT_ID_IS_NS(client_id) ((client_id)<0)
-
-/* The mask used for timeout values */
-#define PSA_TIMEOUT_MASK        PSA_BLOCK
-
-/* FixMe: sort out DEBUG compile option and limit return value options
- * on external interfaces */
-enum tfm_status_e
-{
-    TFM_SUCCESS = 0,
-    TFM_PARTITION_BUSY,
-    TFM_ERROR_SECURE_DOMAIN_LOCKED,
-    TFM_ERROR_INVALID_PARAMETER,
-    TFM_ERROR_PARTITION_NON_REENTRANT,
-    TFM_ERROR_NS_THREAD_MODE_CALL,
-    TFM_ERROR_NOT_INITIALIZED,
-    TFM_ERROR_NO_ACTIVE_PARTITION,
-    TFM_ERROR_INVALID_EXC_MODE,
-    TFM_ERROR_NOT_IN_RANGE,
-    TFM_SECURE_LOCK_FAILED,
-    TFM_SECURE_UNLOCK_FAILED,
-    TFM_ERROR_GENERIC = 0x1F,
-};
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************* Secure function declarations ***************************/
 
@@ -116,4 +72,4 @@ void tfm_psa_close_veneer(psa_handle_t handle);
 }
 #endif
 
-#endif /* __TFM_API_H__ */
+#endif /* __TFM_VENEERS_H__ */

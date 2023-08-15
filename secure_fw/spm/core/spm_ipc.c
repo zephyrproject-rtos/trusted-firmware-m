@@ -21,7 +21,6 @@
 #include "psa/service.h"
 #include "thread.h"
 #include "internal_status_code.h"
-#include "tfm_api.h"
 #include "tfm_arch.h"
 #include "tfm_hal_defs.h"
 #include "tfm_hal_interrupt.h"

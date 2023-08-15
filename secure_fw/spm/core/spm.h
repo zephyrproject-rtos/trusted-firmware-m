@@ -26,6 +26,9 @@
 #define TFM_HANDLE_STATUS_ACTIVE        1 /* Handle in use              */
 #define TFM_HANDLE_STATUS_TO_FREE       2 /* Free the handle            */
 
+/* The mask used for timeout values */
+#define PSA_TIMEOUT_MASK        PSA_BLOCK
+
 /*
  * Set a number limit for stateless handle.
  * Valid handle must be positive, set client handle minimum value to 1.
@@ -60,6 +63,9 @@
 /* Get partition by thread or context data */
 #define GET_THRD_OWNER(x)        TO_CONTAINER(x, struct partition_t, thrd)
 #define GET_CTX_OWNER(x)         TO_CONTAINER(x, struct partition_t, ctx_ctrl)
+
+/* Checks if the provided client ID is a non-secure client ID */
+#define TFM_CLIENT_ID_IS_NS(client_id)        ((client_id) < 0)
 
 /* RoT connection handle list */
 struct connection_t {

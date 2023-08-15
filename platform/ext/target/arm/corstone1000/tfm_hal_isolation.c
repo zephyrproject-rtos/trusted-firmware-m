@@ -8,7 +8,7 @@
  *
  */
 
-#include "tfm_api.h"
+#include "internal_status_code.h"
 #include "tfm_hal_defs.h"
 #include "tfm_multi_core.h"
 #include "tfm_hal_isolation.h"
@@ -99,7 +99,7 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
                                            size_t size,
                                            uint32_t access_type)
 {
-    enum tfm_status_e status;
+    int32_t status;
     uint32_t flags = 0;
 
     if ((access_type & TFM_HAL_ACCESS_READWRITE) == TFM_HAL_ACCESS_READWRITE) {
@@ -119,7 +119,7 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary,
     }
 
     status = tfm_has_access_to_region((const void *)base, size, flags);
-    if (status != TFM_SUCCESS) {
+    if (status != SPM_SUCCESS) {
          return TFM_HAL_ERROR_MEM_FAULT;
     }
 

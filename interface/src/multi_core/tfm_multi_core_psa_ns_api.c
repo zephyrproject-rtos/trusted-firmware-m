@@ -12,7 +12,6 @@
 
 #include "psa/client.h"
 #include "psa/error.h"
-#include "tfm_api.h"
 #include "tfm_ns_mailbox.h"
 
 /*

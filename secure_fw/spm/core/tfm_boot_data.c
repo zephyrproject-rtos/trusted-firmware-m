@@ -10,7 +10,6 @@
 #include "array.h"
 #include "tfm_boot_status.h"
 #include "region_defs.h"
-#include "tfm_api.h"
 #include "psa_manifest/pid.h"
 #include "internal_status_code.h"
 #include "utilities.h"
@@ -157,18 +156,18 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
              curr_partition->boundary, (uintptr_t)buf_start,
              buf_size, TFM_HAL_ACCESS_READWRITE);
     if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
-        args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
+        args[0] = (uint32_t)PSA_ERROR_INVALID_ARGUMENT;
         return;
     }
 
     if (is_boot_data_valid != BOOT_DATA_VALID) {
-        args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
+        args[0] = (uint32_t)PSA_ERROR_INVALID_ARGUMENT;
         return;
     }
 
     /* Check whether caller has access right to given tlv_major_type */
     if (tfm_core_check_boot_data_access_policy(tlv_major)) {
-        args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
+        args[0] = (uint32_t)PSA_ERROR_INVALID_ARGUMENT;
         return;
     }
 
@@ -181,7 +180,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
 
     /* Add header to output buffer as well */
     if (buf_size < SHARED_DATA_HEADER_SIZE) {
-        args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
+        args[0] = (uint32_t)PSA_ERROR_INVALID_ARGUMENT;
         return;
     } else {
         boot_data = (struct tfm_boot_data *)buf_start;
@@ -204,7 +203,7 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
         if (GET_MAJOR(tlv_entry.tlv_type) == tlv_major) {
             /* Check buffer overflow */
             if (((ptr - buf_start) + next_tlv_offset) > buf_size) {
-                args[0] = (uint32_t)TFM_ERROR_INVALID_PARAMETER;
+                args[0] = (uint32_t)PSA_ERROR_INVALID_ARGUMENT;
                 return;
             }
 
@@ -215,6 +214,6 @@ void tfm_core_get_boot_data_handler(uint32_t args[])
     }
 #endif /* BOOT_DATA_AVAILABLE */
 
-    args[0] = (uint32_t)TFM_SUCCESS;
+    args[0] = (uint32_t)PSA_SUCCESS;
     return;
 }

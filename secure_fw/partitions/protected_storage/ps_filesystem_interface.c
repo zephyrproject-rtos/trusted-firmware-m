@@ -7,7 +7,6 @@
 
 #include "psa/client.h"
 #include "psa_manifest/sid.h"
-#include "tfm_api.h"
 #include "tfm_its_defs.h"
 #include "psa_manifest/pid.h"
 #include "tfm_internal_trusted_storage.h"

@@ -93,7 +93,7 @@ The pseudo code of ``tfm_has_access_to_region()`` is shown below.
     :linenos:
     :emphasize-lines: 19,36,46
 
-    enum tfm_status_e tfm_has_access_to_region(const void *p, size_t s, uint8_t flags)
+    int32_t tfm_has_access_to_region(const void *p, size_t s, uint8_t flags)
     {
         struct security_attr_info_t security_attr;
         struct mem_attr_info_t mem_attr;

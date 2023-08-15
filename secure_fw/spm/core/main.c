@@ -6,13 +6,13 @@
  */
 
 #include "build_config_check.h"
+#include "internal_status_code.h"
 #include "fih.h"
 #include "tfm_boot_data.h"
 #include "memory_symbols.h"
 #include "spm.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_hal_platform.h"
-#include "tfm_api.h"
 #include "tfm_spm_log.h"
 #include "tfm_version.h"
 #include "tfm_plat_otp.h"
@@ -31,7 +31,7 @@ static fih_int tfm_core_init(void)
      */
     FIH_CALL(tfm_hal_set_up_static_boundaries, fih_rc, &spm_boundary);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+        FIH_RET(fih_int_encode(SPM_ERROR_GENERIC));
     }
 #ifdef TFM_FIH_PROFILE_ON
     FIH_CALL(tfm_hal_verify_static_boundaries, fih_rc);
@@ -42,19 +42,19 @@ static fih_int tfm_core_init(void)
 
     FIH_CALL(tfm_hal_platform_init, fih_rc);
     if (fih_not_eq(fih_rc, fih_int_encode(TFM_HAL_SUCCESS))) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+        FIH_RET(fih_int_encode(SPM_ERROR_GENERIC));
     }
 
     plat_err = tfm_plat_otp_init();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+        FIH_RET(fih_int_encode(SPM_ERROR_GENERIC));
     }
 
     /* Perform provisioning. */
     if (tfm_plat_provisioning_is_required()) {
         plat_err = tfm_plat_provisioning_perform();
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-            FIH_RET(fih_int_encode(TFM_ERROR_GENERIC));
+            FIH_RET(fih_int_encode(SPM_ERROR_GENERIC));
         }
     } else {
         tfm_plat_provisioning_check_for_dummy_keys();
@@ -78,7 +78,7 @@ static fih_int tfm_core_init(void)
 
     tfm_core_validate_boot_data();
 
-    FIH_RET(fih_int_encode(TFM_SUCCESS));
+    FIH_RET(fih_int_encode(SPM_SUCCESS));
 }
 
 int main(void)
@@ -91,7 +91,7 @@ int main(void)
     fih_delay_init();
 
     FIH_CALL(tfm_core_init, fih_rc);
-    if (fih_not_eq(fih_rc, fih_int_encode(TFM_SUCCESS))) {
+    if (fih_not_eq(fih_rc, fih_int_encode(SPM_SUCCESS))) {
         tfm_core_panic();
     }
 

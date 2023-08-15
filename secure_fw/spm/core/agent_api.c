@@ -10,6 +10,7 @@
 
 #include "ffm/psa_api.h"
 #include "psa/error.h"
+#include "internal_status_code.h"
 #include "tfm_multi_core.h"
 #include "tfm_psa_call_pack.h"
 
@@ -34,7 +35,7 @@ psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
 
         if (tfm_has_access_to_region(invec.base,
                                      invec.len,
-                                     MEM_CHECK_NONSECURE | MEM_CHECK_MPU_READ) != TFM_SUCCESS) {
+                                     MEM_CHECK_NONSECURE | MEM_CHECK_MPU_READ) != SPM_SUCCESS) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
     }
@@ -43,7 +44,7 @@ psa_status_t agent_psa_call(psa_handle_t handle, int32_t ctrl_param,
 
         if (tfm_has_access_to_region(outvec.base,
                                      outvec.len,
-                                     MEM_CHECK_NONSECURE | MEM_CHECK_MPU_READWRITE) != TFM_SUCCESS) {
+                                     MEM_CHECK_NONSECURE | MEM_CHECK_MPU_READWRITE) != SPM_SUCCESS) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
     }

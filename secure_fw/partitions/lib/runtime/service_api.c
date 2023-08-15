@@ -12,9 +12,9 @@
 #include "utilities.h"
 
 __attribute__((naked))
-int32_t tfm_core_get_boot_data(uint8_t major_type,
-                               struct tfm_boot_data *boot_status,
-                               uint32_t len)
+psa_status_t tfm_core_get_boot_data(uint8_t major_type,
+                                    struct tfm_boot_data *boot_status,
+                                    uint32_t len)
 {
     __ASM volatile(
         "SVC    "M2S(TFM_SVC_GET_BOOT_DATA)"               \n"

@@ -9,6 +9,8 @@
 
 #include "psa/error.h"
 
+#define SPM_SUCCESS                 PSA_SUCCESS
+
 /* SPM implementation status range from -249 to -256. */
 #define SPM_ERROR_BAD_PARAMETERS   ((psa_status_t)-249)
 #define SPM_ERROR_SHORT_BUFFER     ((psa_status_t)-250)
