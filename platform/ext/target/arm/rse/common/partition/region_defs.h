@@ -229,7 +229,7 @@
 
 /* Store boot data at the start of the DTCM. */
 #define BOOT_TFM_SHARED_DATA_BASE DTCM_BASE_S
-#define BOOT_TFM_SHARED_DATA_SIZE (0x400)
+#define BOOT_TFM_SHARED_DATA_SIZE (0x600)
 #define BOOT_TFM_SHARED_DATA_LIMIT (BOOT_TFM_SHARED_DATA_BASE + \
                                     BOOT_TFM_SHARED_DATA_SIZE - 1)
 
