@@ -20,7 +20,6 @@ add_library(platform_ns STATIC EXCLUDE_FROM_ALL)
 target_sources(platform_ns
     PRIVATE
         $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/../ext/common/uart_stdout.c>
-        $<$<AND:$<NOT:$<BOOL:${SYMMETRIC_INITIAL_ATTESTATION}>>,$<BOOL:${TEST_NS_ATTESTATION}>>:${CMAKE_CURRENT_SOURCE_DIR}/../ext/common/template/tfm_initial_attest_pub_key.c>
     PUBLIC
         $<$<OR:$<BOOL:${TEST_S_FPU}>,$<BOOL:${TEST_NS_FPU}>>:${CMAKE_SOURCE_DIR}/platform/ext/common/test_interrupt.c>
 )
