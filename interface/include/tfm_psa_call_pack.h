@@ -14,25 +14,35 @@
 extern "C" {
 #endif
 
-#define TYPE_OFFSET     16U
-#define TYPE_MASK       (0xFFFFUL << TYPE_OFFSET)
-#define IN_LEN_OFFSET   8U
-#define IN_LEN_MASK     (0xFFUL << IN_LEN_OFFSET)
-#define OUT_LEN_OFFSET  0U
-#define OUT_LEN_MASK    (0xFFUL << OUT_LEN_OFFSET)
+/*
+ *  31           30-28   27    26-24  23-20   19     18-16   15-0
+ * +------------+-----+------+-------+-----+-------+-------+------+
+ * |            |     |      | invec |     |       | outvec| type |
+ * | Res        | Res | Res  | number| Res | Res   | number|      |
+ * +------------+-----+------+-------+-----+-------+-------+------+
+ *
+ * Res: Reserved.
+ */
+#define TYPE_MASK       0xFFFFUL
 
-#define PARAM_PACK(type, in_len, out_len)                        \
-        (((((uint32_t)type) << TYPE_OFFSET) & TYPE_MASK)       | \
-         ((((uint32_t)in_len) << IN_LEN_OFFSET) & IN_LEN_MASK) | \
-         ((((uint32_t)out_len) << OUT_LEN_OFFSET) & OUT_LEN_MASK))
+#define IN_LEN_OFFSET   24
+#define IN_LEN_MASK     (0x7UL << IN_LEN_OFFSET)
 
-#define PARAM_UNPACK_TYPE(ctrl_param) \
-        ((int32_t)(int16_t)(((ctrl_param) & TYPE_MASK) >> TYPE_OFFSET))
+#define OUT_LEN_OFFSET  16
+#define OUT_LEN_MASK    (0x7UL << OUT_LEN_OFFSET)
 
-#define PARAM_UNPACK_IN_LEN(ctrl_param) \
+#define PARAM_PACK(type, in_len, out_len)                          \
+        ((((uint32_t)(type)) & TYPE_MASK)                        | \
+         ((((uint32_t)(in_len)) << IN_LEN_OFFSET) & IN_LEN_MASK) | \
+         ((((uint32_t)(out_len)) << OUT_LEN_OFFSET) & OUT_LEN_MASK))
+
+#define PARAM_UNPACK_TYPE(ctrl_param)                              \
+        ((int32_t)(int16_t)((ctrl_param) & TYPE_MASK))
+
+#define PARAM_UNPACK_IN_LEN(ctrl_param)                            \
         ((size_t)(((ctrl_param) & IN_LEN_MASK) >> IN_LEN_OFFSET))
 
-#define PARAM_UNPACK_OUT_LEN(ctrl_param) \
+#define PARAM_UNPACK_OUT_LEN(ctrl_param)                           \
         ((size_t)(((ctrl_param) & OUT_LEN_MASK) >> OUT_LEN_OFFSET))
 
 psa_status_t tfm_psa_call_pack(psa_handle_t handle,
