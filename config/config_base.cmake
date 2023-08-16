@@ -68,9 +68,6 @@ set(TFM_NS_MANAGE_NSID                  OFF         CACHE BOOL      "Support NSP
 set(TFM_EXTRA_CONFIG_PATH               ""          CACHE PATH      "Path to extra cmake config file")
 
 set(TFM_MANIFEST_LIST                   ${CMAKE_SOURCE_DIR}/tools/tfm_manifest_list.yaml CACHE FILEPATH "TF-M native Secure Partition manifests list file")
-set(TFM_EXTRA_MANIFEST_LIST_FILES       ""          CACHE FILEPATH  "Extra manifest list file(s), used to list extra Secure Partition manifests.")
-set(TFM_EXTRA_GENERATED_FILE_LIST_PATH  ""          CACHE PATH      "Path to extra generated file list. Appended to stardard TFM generated file list.")
-set(TFM_EXTRA_PARTITION_PATHS           ""          CACHE PATH      "List of extra Secure Partitions directories. An extra Secure Parition folder contains source code, CMakeLists.txt and manifest files")
 
 set(TFM_CODE_SHARING                    OFF         CACHE PATH      "Enable code sharing between MCUboot and secure firmware")
 set(CONFIG_TFM_BOOT_STORE_MEASUREMENTS  ON          CACHE BOOL      "Store measurement values from all the boot stages. Used for initial attestation token.")

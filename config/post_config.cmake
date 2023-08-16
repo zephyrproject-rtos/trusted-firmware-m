@@ -5,6 +5,9 @@
 #
 #-------------------------------------------------------------------------------
 
+# Load the default extra configs about generated files and secure partitions
+include(${CMAKE_SOURCE_DIR}/config/extra_build_config.cmake)
+
 # Load defaults, setting options not already set
 include(config/config_base.cmake)
 

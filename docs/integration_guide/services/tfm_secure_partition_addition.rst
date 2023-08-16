@@ -646,6 +646,10 @@ below. Please note those input shall be wrapped with double quotes.
    one-to-one mapping to Secure Partition directories in
    ``TFM_EXTRA_PARTITION_PATHS``. The orders don't matter either.
 
+   ``TFM_EXTRA_MANIFEST_LIST_FILES`` and ``TFM_EXTRA_PARTITION_PATHS`` can be
+   configurated in multiple extra sources. It is recommended to use CMake list
+   ``APPEND`` method to avoid unexpected override.
+
 Further Notes
 -------------
 
