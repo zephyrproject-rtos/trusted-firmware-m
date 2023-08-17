@@ -272,6 +272,7 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
                 WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
                 DEPENDS tfm_s_ns_bin tfm_s_ns.bin
                 DEPENDS signing_layout_s
+                DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,> $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key_s.pem,>
 
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
                 -v ${MCUBOOT_IMAGE_VERSION_S}
