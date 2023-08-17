@@ -272,8 +272,3 @@ configure_file(${CMAKE_SOURCE_DIR}/config/spe_config.cmake.in
 
 ##################### Platform-specific installation ###########################
 include(${TARGET_PLATFORM_PATH}/install.cmake OPTIONAL)
-
-###################### Install for NS regression tests #########################
-
-include(${CMAKE_SOURCE_DIR}/lib/ext/tf-m-tests/install.cmake OPTIONAL)
-

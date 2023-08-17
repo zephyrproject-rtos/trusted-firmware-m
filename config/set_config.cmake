@@ -26,20 +26,9 @@ include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmak
 # Load platform config, setting options not already set
 include(${TARGET_PLATFORM_PATH}/config.cmake OPTIONAL)
 
-# Parse tf-m-tests config prior to platform specific config.cmake
-# Some platforms select different configuration according when regression tests
-# are enabled.
-include(lib/ext/tf-m-tests/reg_parse.cmake)
-
 # Load profile config, setting options not already set
 if(TFM_PROFILE)
     include(config/profile/${TFM_PROFILE}.cmake)
-endif()
-
-# Load Secure Partition settings according to regression configuration as all SPs are disabled
-# by default
-if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
-    include(${CMAKE_CURRENT_LIST_DIR}/tests/regression_config.cmake)
 endif()
 
 # Load TF-M model specific default config

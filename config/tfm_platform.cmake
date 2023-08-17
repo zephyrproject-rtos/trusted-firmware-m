@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-set(TARGET_PATH "${CMAKE_SOURCE_DIR}/platform/ext/target")
+set(TARGET_PATH "${CMAKE_CURRENT_LIST_DIR}/../platform/ext/target")
 
 if (NOT IS_ABSOLUTE "${TFM_PLATFORM}" AND NOT IS_DIRECTORY "${TARGET_PATH}/${TFM_PLATFORM}")
     # If TFM_PLATFORM is not a relative patch to ${TARGET_PATH}, then it could

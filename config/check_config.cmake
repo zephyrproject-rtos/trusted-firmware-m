@@ -112,12 +112,6 @@ tfm_invalid_config(TFM_PROFILE STREQUAL "profile_small" AND CONFIG_TFM_SPM_BACKE
 
 tfm_invalid_config(TFM_PXN_ENABLE AND NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
 
-########################### Test check config ##################################
-
-if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
-    include(${TFM_TEST_PATH}/config/check_config.cmake)
-endif()
-
 ###################### Compiler check for FP support ###########################
 
 include(config/cp_check.cmake)
