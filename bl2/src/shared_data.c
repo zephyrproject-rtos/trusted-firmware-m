@@ -159,13 +159,18 @@ static int collect_image_measurement_and_metadata(
  * Add application specific data to the shared memory area between the
  * bootloader and runtime SW.
  *
- * @param[in]  hdr        Pointer to the image header stored in RAM.
- * @param[in]  fap        Pointer to the flash area where image is stored.
+ * @param[in]  hdr           Pointer to the image header stored in RAM.
+ * @param[in]  fap           Pointer to the flash area where image is stored.
+ * @param[in]  active_slot   Which slot is active (to boot).
+ * @param[in]  max_app_size  Maximum allowed size of application for update
+ *                           slot.
  *
  * @return                0 on success; nonzero on failure.
  */
 int boot_save_shared_data(const struct image_header *hdr,
-                          const struct flash_area *fap)
+                          const struct flash_area *fap,
+                          const uint8_t active_slot,
+                          const int max_app_size)
 {
     const struct flash_area *temp_fap;
     uint8_t mcuboot_image_id = 0;
@@ -186,6 +191,9 @@ int boot_save_shared_data(const struct image_header *hdr,
         .signer_id_size = 0,
     };
 #endif /* CONFIG_TFM_BOOT_STORE_MEASUREMENTS && !MCUBOOT_MEASURED_BOOT */
+
+    (void)active_slot;
+    (void)max_app_size;
 
     if (hdr == NULL || fap == NULL) {
         return -1;
