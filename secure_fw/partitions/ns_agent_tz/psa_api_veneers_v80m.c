@@ -12,8 +12,8 @@
 #include "config_impl.h"
 #include "security_defs.h"
 #include "svc_num.h"
+#include "tfm_psa_call_pack.h"
 #include "utilities.h"
-
 #include "psa/client.h"
 
 /*
@@ -33,8 +33,6 @@
  */
 
 #if defined(__ICCARM__)
-
-#include "tfm_psa_call_pack.h"
 
 #pragma required = psa_framework_version
 #pragma required = psa_version
@@ -140,6 +138,8 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
         "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
         "   cmp    r2, r3                                     \n"
         "   bne    reent_panic4                               \n"
+        "   ldr    r3, ="M2S(NS_VEC_DESC_BIT)"                \n"
+        "   orrs   r1, r3                                     \n"
         "   pop    {r2, r3}                                   \n"
         "   push   {r4, lr}                                   \n"
         "   bl     "M2S(tfm_psa_call_pack)"                   \n"
