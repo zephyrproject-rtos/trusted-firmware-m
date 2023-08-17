@@ -22,6 +22,10 @@ extern "C" {
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
 #define MBEDTLS_ENTROPY_FORCE_SHA256
 
+#ifdef USE_MBEDTLS_CRYPTOCELL
+#define MBEDTLS_MD_C
+#endif
+
 /* Main Config */
 #ifdef LEGACY_DRIVER_API_ENABLED
 #ifdef MBEDTLS_DHM_C
