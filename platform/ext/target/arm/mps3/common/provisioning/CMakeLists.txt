@@ -39,7 +39,7 @@ target_link_options(provisioning_bundle
 target_sources(provisioning_bundle
     PRIVATE
         ./provisioning_code.c
-        $<IF:$<BOOL:${TFM_DUMMY_PROVISIONING}>,dummy_provisioning_data.c,${CMAKE_CURRENT_BINARY_DIR}/provisioning_data.c>
+        ./provisioning_data.c
 )
 
 target_include_directories(provisioning_bundle
@@ -81,8 +81,6 @@ add_custom_command(OUTPUT encrypted_provisioning_bundle.bin
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/encrypted_provisioning_bundle.bin ${CMAKE_BINARY_DIR}/bin/encrypted_provisioning_bundle.bin
 )
 
-
-
 target_sources(platform_s
     PRIVATE
         ./runtime_stub_provisioning.c
@@ -98,57 +96,33 @@ target_include_directories(platform_bl2
         .
 )
 
-if(TFM_DUMMY_PROVISIONING)
-    target_compile_definitions(provisioning_bundle
-        PRIVATE
-            BL2_ROTPK_0_2048=${BL2_ROTPK_0_2048}
-            BL2_ROTPK_1_2048=${BL2_ROTPK_1_2048}
-            BL2_ROTPK_2_2048=${BL2_ROTPK_2_2048}
-            BL2_ROTPK_3_2048=${BL2_ROTPK_3_2048}
-            BL2_ROTPK_0_3072=${BL2_ROTPK_0_3072}
-            BL2_ROTPK_1_3072=${BL2_ROTPK_1_3072}
-            BL2_ROTPK_2_3072=${BL2_ROTPK_2_3072}
-            BL2_ROTPK_3_3072=${BL2_ROTPK_3_3072}
-            SECURE_DEBUG_PK=${SECURE_DEBUG_PK}
-            HUK=${HUK}
-            IAK=${IAK}
-            IAK_LEN=${IAK_LEN}
-            BOOT_SEED=${BOOT_SEED}
-            IMPLEMENTATION_ID=${IMPLEMENTATION_ID}
-            CERTIFICATION_REFERENCE="${CERTIFICATION_REFERENCE}"
-            VERIFICATION_SERVICE_URL="${VERIFICATION_SERVICE_URL}"
-            ENTROPY_SEED=${ENTROPY_SEED}
-    )
-else()
-    add_custom_target(provisioning_data
-        SOURCES
-            provisioning_data.c
-    )
+add_custom_target(provisioning_data
+    SOURCES
+        provisioning_data.c
+)
 
-    add_custom_command(OUTPUT provisioning_data.c
-        # FIXME: combining the two generator prepends the current path, so two is used
-        DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
-                $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,$<TARGET_FILE_DIR:bl2>/generated_private_key_s.pem,${MCUBOOT_KEY_S}>
-        # FIXME: combining the two generator prepends the current path, so two is used
-        DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
-                $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,$<TARGET_FILE_DIR:bl2>/generated_private_key_ns.pem,${MCUBOOT_KEY_NS}>
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/provisioning_data_template.jinja2
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_data.py
-        WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_data.py
-            ${CMAKE_CURRENT_BINARY_DIR}/provisioning_data.c
-            --bl2_rot_priv_key_0 ${MCUBOOT_KEY_S}
-            --bl2_rot_priv_key_1 ${MCUBOOT_KEY_NS}
-            --template_path ${CMAKE_CURRENT_SOURCE_DIR}
-            --secure_debug_pk ${SECURE_DEBUG_PK}
-            --huk ${HUK}
-            --iak ${IAK}
-            --boot_seed ${BOOT_SEED}
-            --implementation_id ${IMPLEMENTATION_ID}
-            --certification_reference ${CERTIFICATION_REFERENCE}
-            --verification_service_url ${VERIFICATION_SERVICE_URL}
-            --entropy_seed ${ENTROPY_SEED}
+add_custom_command(OUTPUT provisioning_data.c
+    # FIXME: combining the two generator prepends the current path, so two is used
+    DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
+            $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,$<TARGET_FILE_DIR:bl2>/generated_private_key_s.pem,${MCUBOOT_KEY_S}>
+    # FIXME: combining the two generator prepends the current path, so two is used
+    DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
+            $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,$<TARGET_FILE_DIR:bl2>/generated_private_key_ns.pem,${MCUBOOT_KEY_NS}>
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/provisioning_data_template.jinja2
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_data.py
+    WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_data.py
+        ${CMAKE_CURRENT_BINARY_DIR}/provisioning_data.c
+        --bl2_rot_priv_key_0 ${MCUBOOT_KEY_S}
+        --bl2_rot_priv_key_1 ${MCUBOOT_KEY_NS}
+        --template_path ${CMAKE_CURRENT_SOURCE_DIR}
+        --secure_debug_pk ${SECURE_DEBUG_PK}
+        --huk ${HUK}
+        --iak ${IAK}
+        --boot_seed ${BOOT_SEED}
+        --implementation_id ${IMPLEMENTATION_ID}
+        --certification_reference ${CERTIFICATION_REFERENCE}
+        --verification_service_url ${VERIFICATION_SERVICE_URL}
+        --entropy_seed ${ENTROPY_SEED}
 
-    )
-
-endif()
+)
