@@ -134,8 +134,7 @@ uint32_t tfm_arch_refresh_hardware_context(void *p_ctx_ctrl)
     ctx_ctrl  = (struct context_ctrl_t *)p_ctx_ctrl;
     sc = &(((struct full_context_t *)(ctx_ctrl->sp))->stat_ctx);
 
-    tfm_arch_set_psplim(ctx_ctrl->sp_limit);
-    __set_PSP((uintptr_t)sc);
+    arch_update_process_sp((uint32_t)sc, ctx_ctrl->sp_limit);
 
     return ctx_ctrl->exc_ret;
 }

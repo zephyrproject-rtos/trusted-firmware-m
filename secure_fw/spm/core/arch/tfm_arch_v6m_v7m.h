@@ -154,4 +154,18 @@ __STATIC_INLINE uintptr_t arch_seal_thread_stack(uintptr_t stk)
 __STATIC_INLINE void tfm_arch_check_msp_sealing(void)
 {
 }
+
+/*
+ * Update thread stack to architecture registers.
+ * The stack 'bottom' is higher address in this architecture,
+ * and 'toplimit' is the limit of top which is lower address.
+ */
+__STATIC_INLINE void arch_update_process_sp(uint32_t bottom,
+                                            uint32_t toplimit)
+{
+    __set_PSP(bottom);
+    psp_limit = toplimit;
+    __ISB();
+}
+
 #endif /* __TFM_ARCH_V6M_V7M_H__ */

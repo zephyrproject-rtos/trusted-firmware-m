@@ -108,8 +108,7 @@ uint32_t tfm_flih_return_to_isr(psa_flih_result_t result,
     /* Restore current component */
     SET_CURRENT_COMPONENT(p_prev_sp);
 
-    tfm_arch_set_psplim(p_ctx_flih_ret->psplim);
-    __set_PSP(p_ctx_flih_ret->psp);
+    arch_update_process_sp(p_ctx_flih_ret->psp, p_ctx_flih_ret->psplim);
 
     /* Set FLIH result to the ISR */
     p_ctx_flih_ret->state_ctx.r0 = (uint32_t)result;
