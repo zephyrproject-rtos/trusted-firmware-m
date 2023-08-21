@@ -343,9 +343,12 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
          * Setup regions for unprivileged assets only.
          */
         if (!privileged) {
-            //Turn off MPU during configuration
-            if ((MPU->CTRL & MPU_CTRL_ENABLE_Msk)) {
-                ARM_MPU_Disable();
+            mpu_region_num =
+                (MPU->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
+
+            /* There is a limited number of available MPU regions in v8M */
+            if (mpu_region_num <= n_configured_regions) {
+                return TFM_HAL_ERROR_GENERIC;
             }
             if ((plat_data_ptr->periph_start & ~MPU_RBAR_BASE_Msk) != 0) {
                 return TFM_HAL_ERROR_GENERIC;
@@ -353,6 +356,12 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
             if ((plat_data_ptr->periph_limit & ~MPU_RLAR_LIMIT_Msk) != 0x1F) {
                 return TFM_HAL_ERROR_GENERIC;
             }
+
+            /* Turn off MPU during configuration */
+            if (MPU->CTRL & MPU_CTRL_ENABLE_Msk) {
+                ARM_MPU_Disable();
+            }
+
             /* Assemble region base and limit address register contents. */
             local_mpu_region.RBAR = ARM_MPU_RBAR(plat_data_ptr->periph_start,
                                                  ARM_MPU_SH_NON,
@@ -368,20 +377,13 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
             local_mpu_region.RLAR = ARM_MPU_RLAR(plat_data_ptr->periph_limit,
                                                  2);
             #endif
-            n_configured_regions++;
-
-            mpu_region_num =
-                (MPU->TYPE & MPU_TYPE_DREGION_Msk) >> MPU_TYPE_DREGION_Pos;
-
-            /* There is a limited number of availale MPU regions in v8M */
-            if (mpu_region_num < n_configured_regions) {
-                return TFM_HAL_ERROR_GENERIC;
-            }
 
             /* Configure device mpu region */
             ARM_MPU_SetRegion(n_configured_regions,
                               local_mpu_region.RBAR,
                               local_mpu_region.RLAR);
+
+            n_configured_regions++;
 
             /* Enable MPU with the new region added */
             ARM_MPU_Enable(MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_HFNMIENA_Msk);
