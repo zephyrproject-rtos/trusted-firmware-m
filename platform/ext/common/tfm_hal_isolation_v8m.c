@@ -276,7 +276,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 {
     uint32_t i, j;
     bool privileged;
-    bool ns_agent;
+    bool ns_agent_tz;
     uint32_t partition_attrs = 0;
     const struct asset_desc_t *p_asset;
     struct platform_data_t *plat_data_ptr;
@@ -297,7 +297,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
     privileged = IS_PSA_ROT(p_ldinf);
 #endif
 
-    ns_agent = IS_NS_AGENT(p_ldinf);
+    ns_agent_tz = IS_NS_AGENT_TZ(p_ldinf);
     p_asset = LOAD_INFO_ASSET(p_ldinf);
 
     get_partition_named_mmio_list(&mmio_list, &mmio_list_length);
@@ -393,7 +393,7 @@ enum tfm_hal_status_t tfm_hal_bind_boundary(
 
     partition_attrs = ((uint32_t)privileged << HANDLE_ATTR_PRIV_POS) &
                         HANDLE_ATTR_PRIV_MASK;
-    partition_attrs |= ((uint32_t)ns_agent << HANDLE_ATTR_NS_POS) &
+    partition_attrs |= ((uint32_t)ns_agent_tz << HANDLE_ATTR_NS_POS) &
                         HANDLE_ATTR_NS_MASK;
     *p_boundary = (uintptr_t)partition_attrs;
 
@@ -441,6 +441,7 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
         flags |= CMSE_MPU_UNPRIV;
     }
 
+    /* This check is only done for ns_agent_tz */
     if ((uint32_t)boundary & HANDLE_ATTR_NS_MASK) {
         CONTROL_Type ctrl;
         ctrl.w = __TZ_get_CONTROL_NS();
