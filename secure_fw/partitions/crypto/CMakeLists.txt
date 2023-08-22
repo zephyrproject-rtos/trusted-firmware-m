@@ -27,7 +27,7 @@ target_sources(tfm_psa_rot_partition_crypto
         crypto_key_management.c
         crypto_rng.c
         crypto_library.c
-        $<$<BOOL:CRYPTO_TFM_BUILTIN_KEYS_DRIVER>:psa_driver_api/tfm_builtin_key_loader.c>
+        $<$<BOOL:${CRYPTO_TFM_BUILTIN_KEYS_DRIVER}>:psa_driver_api/tfm_builtin_key_loader.c>
 )
 
 # The generated sources
@@ -62,8 +62,7 @@ target_link_libraries(tfm_psa_rot_partition_crypto
 target_compile_definitions(tfm_psa_rot_partition_crypto
     PUBLIC
         MBEDTLS_PSA_CRYPTO_DRIVERS
-        MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
-        $<$<BOOL:CRYPTO_BUILTIN_KEYS>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY>
+        $<$<BOOL:${CRYPTO_TFM_BUILTIN_KEYS_DRIVER}>:MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY>
     PRIVATE
         $<$<STREQUAL:${CRYPTO_HW_ACCELERATOR_TYPE},cc312>:CRYPTO_HW_ACCELERATOR_CC312>
         MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER
@@ -106,9 +105,8 @@ target_compile_definitions(crypto_service_mbedcrypto_config
         $<$<OR:$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8-m.base>,$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv6-m>>:MULADDC_CANNOT_USE_R7>
         $<$<BOOL:${PLATFORM_DEFAULT_NV_SEED}>:PLATFORM_DEFAULT_NV_SEED>
         $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
-        MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS
         MBEDTLS_PSA_CRYPTO_DRIVERS
-        $<$<BOOL:CRYPTO_TFM_BUILTIN_KEYS_DRIVER>:PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY_LOADER>
+        $<$<BOOL:${CRYPTO_TFM_BUILTIN_KEYS_DRIVER}>:MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS PSA_CRYPTO_DRIVER_TFM_BUILTIN_KEY_LOADER>
 )
 
 target_link_libraries(crypto_service_mbedcrypto_config
