@@ -5,7 +5,8 @@
  *
  */
 
-#include "target_cfg.h"
+#include "tfm_peripherals_def.h"
+#include "array.h"
 #include "cmsis.h"
 
 #ifdef RSS_DEBUG_UART
@@ -39,3 +40,18 @@ struct platform_data_t tfm_peripheral_dma0_ch0 = {
         PPC_SP_DO_NOT_CONFIGURE,
         -1
 };
+
+/* Allowed named MMIO of this platform.
+ * Platform RSS only has named MMIO.
+ */
+static const uintptr_t partition_named_mmio_list[] = {
+    (uintptr_t)TFM_PERIPHERAL_STD_UART,
+    (uintptr_t)TFM_PERIPHERAL_TIMER0,
+    (uintptr_t)TFM_PERIPHERAL_DMA0_CH0,
+};
+
+void get_partition_named_mmio_list(const uintptr_t **list, size_t *length)
+{
+    *list = partition_named_mmio_list;
+    *length = ARRAY_SIZE(partition_named_mmio_list);
+}

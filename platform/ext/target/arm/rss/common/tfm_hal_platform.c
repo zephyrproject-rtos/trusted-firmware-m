@@ -6,7 +6,7 @@
  */
 
 #include "cmsis.h"
-#include "target_cfg.h"
+#include "common_target_cfg.h"
 #include "tfm_hal_platform.h"
 #include "tfm_peripherals_def.h"
 #include "uart_stdout.h"

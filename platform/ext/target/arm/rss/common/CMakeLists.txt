@@ -403,7 +403,7 @@ endif()
 target_sources(tfm_spm
     PRIVATE
         target_cfg.c
-        tfm_hal_isolation.c
+        ${PLATFORM_DIR}/ext/common/tfm_hal_isolation_v8m.c
         tfm_hal_platform.c
         tfm_interrupts.c
         faults.c
