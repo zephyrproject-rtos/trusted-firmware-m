@@ -492,6 +492,13 @@ tfm_hal_isolation.c:
     Each platform is expected to implement all the functions declared in
     platform/include/tfm_hal_isolation.h.
 
+    A reference implementation for Armv8-M platforms is provided in
+    platform/ext/common/tfm_hal_isolation_v8m.c. Platforms using the common TF-M
+    linker scripts and scatter files can use it to implement standard TF-M
+    isolation with Armv8-M MPU regions. Platform-specific MPU regions can be
+    appended by defining PLATFORM_STATIC_MPU_REGIONS in the platform's
+    tfm_peripherals_def.h header.
+
     These functions will be called from TF-M.
 
 tfm_platform_system.c:

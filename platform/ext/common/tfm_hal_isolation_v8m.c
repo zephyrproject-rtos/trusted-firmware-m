@@ -68,10 +68,8 @@ REGION_DECLARE(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit);
 #define ARM_MPU_PRIVILEGED           ( 0U )
 #define ARM_MPU_EXECUTE_NEVER        ( 1U )
 #define ARM_MPU_EXECUTE_OK           ( 0U )
-#ifdef TFM_PXN_ENABLE
-    #define ARM_MPU_PRIVILEGE_EXECUTE_NEVER        ( 1U )
-    #define ARM_MPU_PRIVILEGE_EXECUTE_OK           ( 0U )
-#endif
+#define ARM_MPU_PRIVILEGE_EXECUTE_NEVER  ( 1U )
+#define ARM_MPU_PRIVILEGE_EXECUTE_OK     ( 0U )
 
 #endif /* CONFIG_TFM_ENABLE_MEMORY_PROTECT */
 
@@ -181,7 +179,13 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
         ARM_MPU_RLAR((uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit) - 1,
                      1)
         #endif
-    }
+    },
+#endif
+    /* Individual platforms may add further static MPU regions by defining
+     * PLATFORM_STATIC_MPU_REGIONS in their tfm_peripherals_def.h header.
+     */
+#ifdef PLATFORM_STATIC_MPU_REGIONS
+    PLATFORM_STATIC_MPU_REGIONS
 #endif
 };
     ARM_MPU_Region_t localcfg;
