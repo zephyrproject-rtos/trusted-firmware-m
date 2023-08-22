@@ -48,7 +48,7 @@ typedef enum _IRQn_Type {
     /* Reserved                        = 13,      Reserved */
     Combined_PPU_IRQn                  = 14,   /* Combined PPU */
     /* Reserved                        = 15,      Reserved */
-    ETHOS_U55_IRQn                     = 16,   /* NPU0 */
+    NPU0_IRQn                          = 16,   /* NPU0 */
     /* Reserved                        = 17,      Reserved */
     /* Reserved                        = 18,      Reserved */
     /* Reserved                        = 19,      Reserved */

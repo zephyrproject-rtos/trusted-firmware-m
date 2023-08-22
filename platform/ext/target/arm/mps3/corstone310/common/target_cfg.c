@@ -26,6 +26,7 @@
 #include "syscounter_armv8-m_cntrl_drv.h"
 #include "uart_stdout.h"
 #include "tfm_peripherals_def.h"
+#include "ethosu_device.h"
 
 #ifdef PSA_API_TEST_IPC
 #define PSA_FF_TEST_SECURE_UART2
@@ -69,6 +70,9 @@ extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH_EXP0_PPC_CORSTONE310;
 extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH_EXP1_PPC_CORSTONE310;
 extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH_EXP2_PPC_CORSTONE310;
 extern ARM_DRIVER_PPC_CORSTONE310 Driver_PERIPH_EXP3_PPC_CORSTONE310;
+
+/* Import NPU driver */
+extern struct ethosu_device NPU0_S;
 
 /* Define Peripherals NS address range for the platform */
 #define PERIPHERALS_BASE_NS_START      (0x40000000)
@@ -766,6 +770,9 @@ enum tfm_plat_err_t ppc_init_cfg(void)
     err |= Driver_PERIPH_EXP0_PPC_CORSTONE310.Initialize();
     err |= Driver_PERIPH_EXP1_PPC_CORSTONE310.Initialize();
     err |= Driver_PERIPH_EXP3_PPC_CORSTONE310.Initialize();
+
+    /* initialize and config NPU */
+    err |= ethosu_dev_init(&NPU0_S);
 
     /*
      * Configure the response to a security violation as a

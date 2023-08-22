@@ -117,7 +117,7 @@ DEFAULT_IRQ_HANDLER(DMA_Ch_3_Error_Handler)
 DEFAULT_IRQ_HANDLER(DMA_Ch_3_Terminal_Count_Handler)
 DEFAULT_IRQ_HANDLER(DMA_Ch_3_Combined_Handler)
 #endif
-DEFAULT_IRQ_HANDLER(ETHOS_U55_Handler)
+DEFAULT_IRQ_HANDLER(NPU0_Handler)
 DEFAULT_IRQ_HANDLER(GPIO0_Combined_Handler)
 DEFAULT_IRQ_HANDLER(GPIO1_Combined_Handler)
 DEFAULT_IRQ_HANDLER(GPIO2_Combined_Handler)
@@ -232,7 +232,7 @@ extern const VECTOR_TABLE_Type __VECTOR_TABLE[];
   0,                                 /*  13: Reserved */
   COMBINED_PPU_Handler,              /*  14: Combined PPU Handler */
   0,                                 /*  15: Reserved */
-  ETHOS_U55_Handler,                 /*  16: Ethos-U55 Handler */
+  NPU0_Handler,                      /*  16: NPU0 Handler */
   0,                                 /*  17: Reserved */
   0,                                 /*  18: Reserved */
   0,                                 /*  19: Reserved */

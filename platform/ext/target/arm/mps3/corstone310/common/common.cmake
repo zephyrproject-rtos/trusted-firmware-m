@@ -75,6 +75,8 @@ target_include_directories(device_definition
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m
         ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m
+        ${ETHOS_DRIVER_PATH}/src
+        ${ETHOS_DRIVER_PATH}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
         ${CMAKE_SOURCE_DIR}
 )
@@ -194,6 +196,7 @@ target_sources(platform_s
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpc_sie/mpc_sie_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
+        ${ETHOS_DRIVER_PATH}/src/ethosu_device_u55_u65.c
         $<$<OR:$<BOOL:${TEST_NS_SLIH_IRQ}>,$<BOOL:${TEST_NS_FLIH_IRQ}>>:${CORSTONE310_COMMON_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CORSTONE310_COMMON_DIR}/services/src/tfm_platform_system.c>
 )
@@ -208,6 +211,13 @@ target_sources(tfm_sprt
 target_compile_options(platform_s
     PUBLIC
         ${COMPILER_CMSE_FLAG}
+)
+
+target_compile_definitions(platform_s
+    PUBLIC
+        ETHOSU_ARCH=$<LOWER_CASE:${ETHOSU_ARCH}>
+        ETHOS$<UPPER_CASE:${ETHOSU_ARCH}>
+        ETHOSU_LOG_SEVERITY=${ETHOSU_LOG_SEVERITY}
 )
 
 #========================= Platform Non-Secure ================================#

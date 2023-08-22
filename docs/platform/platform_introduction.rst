@@ -4,7 +4,7 @@ Supported Platforms
 
     - Cortex-M85 system:
 
-        - `Corstone-310 Ethos-U55 FVP.
+        - `Corstone-310 Ethos-U55/U65 FVP.
           <https://arm-software.github.io/AVH/main/simulation/html/Using.html>`_
         - `FPGA image loaded on MPS3 board (AN555).
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`_

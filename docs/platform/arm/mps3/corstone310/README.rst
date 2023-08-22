@@ -1,12 +1,12 @@
-Corstone SSE-310 with Ethos-U55 Example Subsystem for Arm Virtual Hardware, and for MPS3 (AN555)
-================================================================================================
+Corstone SSE-310 with Ethos-U55/U65 Example Subsystem for Arm Virtual Hardware, and for MPS3 (AN555)
+====================================================================================================
 
 Introduction
 ------------
 
 Corstone-310 (formerly Corstone-Polaris) is an Arm reference subsystem for
 secure System on Chips containing an Armv8.1-M Cortex-M85 processor and an
-Ethos-U55 neural network processor. It is an MPS3 based platform with the
+Ethos-U55/U65 neural network processor. It is an MPS3 based platform with the
 usual MPS3 peripherals.
 
 This platform port supports all TF-M regression tests (Secure and Non-secure)
@@ -14,7 +14,7 @@ with Isolation Level 1 and 2.
 
 .. note::
 
-   This platform support does not provide software for Ethos-U55 IP, only
+   This platform support does not provide software for Ethos-U55/U65 IP, only
    contains base address and interrupt number for it.
 
 .. note::
@@ -26,7 +26,7 @@ Building TF-M
 
 Follow the instructions in :doc:`Building instructions </building/tfm_build_instruction>`.
 
-For Corstone-310 Ethos-U55 Arm Virtual Hardware use the following platform name:
+For Corstone-310 Ethos-U55/U65 Arm Virtual Hardware use the following platform name:
 
 ``-DTFM_PLATFORM=arm/mps3/corstone310/fvp``
 
@@ -39,8 +39,8 @@ For AN555 use the following platform name:
 
 ``-DTFM_PLATFORM=arm/mps3/corstone310/an555``
 
-To run the example code on Corstone-310 Ethos-U55 Arm Virtual Hardware
-----------------------------------------------------------------------
+To run the example code on Corstone-310 Ethos-U55/U65 Arm Virtual Hardware
+--------------------------------------------------------------------------
 
 To utilize the `Arm Virtual Hardware (AVH) <https://arm-software.github.io/AVH/main/simulation/html/Using.html>`_, you will need to create an `AWS Account <https://aws.amazon.com/>`_ if you don’t already have one.
 

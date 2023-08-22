@@ -28,3 +28,8 @@ set(TFM_MULTI_CORE_TOPOLOGY           OFF)
 
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON)
 set(PLATFORM_FLIH_IRQ_TEST_SUPPORT    ON)
+
+# Ethos-U NPU configurations
+set(ETHOSU_ARCH                       "U55")
+set(ETHOS_DRIVER_PATH                 "DOWNLOAD"  CACHE PATH      "Path to Ethos-U Core Driver (or DOWNLOAD to fetch automatically")
+set(ETHOSU_LOG_SEVERITY               "-1"        CACHE STRING    "Ethos-U Core Driver log severity")
