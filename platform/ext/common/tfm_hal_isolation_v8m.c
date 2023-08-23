@@ -241,15 +241,10 @@ const ARM_MPU_Region_t mpu_region_attributes[] = {
                                     ARM_MPU_ATTR_DEVICE_nGnRE));
 
     /* Configure regions */
+    /* Note: CMSIS MPU API clears the lower 5 address bits without check */
     for (i = 0; i < ARRAY_SIZE(mpu_region_attributes); i++) {
         localcfg.RBAR = mpu_region_attributes[i].RBAR;
         localcfg.RLAR = mpu_region_attributes[i].RLAR;
-        if ((localcfg.RBAR & ~MPU_RBAR_BASE_Msk) != 0) {
-            return TFM_HAL_ERROR_GENERIC;
-        }
-        if ((localcfg.RLAR & ~MPU_RLAR_LIMIT_Msk) != 0x1F) {
-            return TFM_HAL_ERROR_GENERIC;
-        }
         ARM_MPU_SetRegion(i, localcfg.RBAR, localcfg.RLAR);
     }
     n_configured_regions = i;
