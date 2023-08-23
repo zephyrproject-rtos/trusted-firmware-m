@@ -761,6 +761,18 @@ enum tfm_plat_err_t ppc_init_cfg(void)
                                         CLCD_PERIPH_PPCEXP2_POS_MASK,
                                         PPC_SSE300_NONSECURE_CONFIG);
 
+#ifdef CORSTONE300_FVP
+    err |= Driver_PPC_SSE300_PERIPH_EXP2.ConfigSecurity(
+                                        VSI_PERIPH_PPCEXP2_POS_MASK,
+                                        PPC_SSE300_NONSECURE_CONFIG);
+    err |= Driver_PPC_SSE300_PERIPH_EXP2.ConfigSecurity(
+                                        VIO_PERIPH_PPCEXP2_POS_MASK,
+                                        PPC_SSE300_NONSECURE_CONFIG);
+    err |= Driver_PPC_SSE300_PERIPH_EXP2.ConfigSecurity(
+                                        VSOCKET_PERIPH_PPCEXP2_POS_MASK,
+                                        PPC_SSE300_NONSECURE_CONFIG);
+#endif
+
     /* Grant un-privileged access for UART0 in NS domain */
     err |= Driver_PPC_SSE300_PERIPH_EXP2.ConfigPrivilege(
                                         UART0_PERIPH_PPCEXP2_POS_MASK,

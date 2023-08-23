@@ -92,8 +92,13 @@
 #define S_DATA_SIZE     (ISRAM0_SIZE - S_RAM_CODE_SIZE)
 #define S_DATA_LIMIT    (S_DATA_START + S_DATA_SIZE - 1)
 
+#ifdef CORSTONE300_FVP
+/* Size of vector table: 247 interrupt handlers + 4 bytes MPS initial value */
+#define S_CODE_VECTOR_TABLE_SIZE    (0x3E0)
+#else
 /* Size of vector table: 146 interrupt handlers + 4 bytes MPS initial value */
 #define S_CODE_VECTOR_TABLE_SIZE    (0x24C)
+#endif
 
 /* Non-secure regions */
 #define NS_IMAGE_PRIMARY_AREA_OFFSET \
