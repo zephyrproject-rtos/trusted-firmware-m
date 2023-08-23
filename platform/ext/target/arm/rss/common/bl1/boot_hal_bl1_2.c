@@ -144,7 +144,7 @@ static int disable_rom_execution(void)
     struct mpu_armv8m_region_cfg_t rom_region_config = {
         0,
         ROM_BASE_S,
-        ROM_BASE_S + ROM_SIZE,
+        ROM_BASE_S + ROM_SIZE - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RO_PRIV_ONLY,
