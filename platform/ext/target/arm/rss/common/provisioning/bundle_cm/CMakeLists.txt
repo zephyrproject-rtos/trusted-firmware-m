@@ -65,11 +65,12 @@ foreach(RSS_ID RANGE ${RSS_AMOUNT_LOOP_RANGE})
         DEPENDS $<TARGET_FILE_DIR:bl1_2>/bl1_2_padded.bin
         bl1_2_padded_bin bl2_signed_bin cm_provisioning_bundle
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../rss_create_provisioning_bundle.py
-        COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf cm_provisioning_bundle_${RSS_ID}.axf
+        COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle_${RSS_ID}.axf
                         --dump-section CODE=cm_provisioning_code.bin
-        COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
+        COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle_${RSS_ID}.axf
                         --dump-section DATA=cm_provisioning_data.bin
-        COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle.axf
+        COMMAND ${CMAKE_OBJCOPY} $<TARGET_FILE_DIR:cm_provisioning_bundle>/cm_provisioning_bundle_${RSS_ID}.axf
                         --dump-section VALUES=cm_provisioning_values.bin
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../rss_create_provisioning_bundle.py
                         --provisioning_code cm_provisioning_code.bin
