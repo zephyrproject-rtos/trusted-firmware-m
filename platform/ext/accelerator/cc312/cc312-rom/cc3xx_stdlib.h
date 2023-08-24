@@ -29,6 +29,15 @@ extern "C" {
  */
 void cc3xx_dpa_hardened_word_copy(volatile uint32_t *dst,
                                   volatile const uint32_t *src, size_t word_count);
+/**
+ * \brief Securely erases the buffer pointed by buf by overwriting it with random values. Assumes
+ *        the size of the buffer in bytes is a multiple of 4
+ *
+ * \param[in,out] buf        Pointer to the input buffer, must be 4 byte aligned
+ * \param[in]     word_count Length in words of the input buffer
+ *
+ */
+void cc3xx_secure_erase_buffer(uint32_t *buf, size_t word_count);
 
 #ifdef __cplusplus
 }

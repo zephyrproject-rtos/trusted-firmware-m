@@ -13,13 +13,14 @@
 #include <assert.h>
 #include <stdbool.h>
 
-/* This isn't part of cc3xx_config.h as the initial values of the permutation
- * buffer need to be updated if it is increased.
- */
-#define SECURE_COPY_MAX_WORDS 8
-
 #ifdef CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY
 #include "dpa_hardened_word_copy.h"
+#else
+/**
+ * \brief This is a requirement for the maximum number of words that can
+ *        be copied through a single call to \ref cc3xx_dpa_hardened_word_copy
+ */
+#define CC3XX_STDLIB_SECURE_COPY_MAX_WORDS (256)
 #endif /* CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY */
 
 static uint32_t xorshift_plus_128_lfsr(void)
@@ -103,16 +104,32 @@ static void fisher_yates_shuffle(uint8_t *permutation_buf, size_t len)
     }
 }
 
+void cc3xx_secure_erase_buffer(uint32_t *buf, size_t word_count)
+{
+    size_t idx;
+    uint32_t random_val;
+
+    /* Overwrites the input buffer with random values */
+    cc3xx_rng_get_random((uint8_t *)&random_val, sizeof(random_val));
+    for (idx = 0; idx < word_count; idx++) {
+        buf[idx] = random_val;
+    }
+}
+
 #ifndef CC3XX_CONFIG_STDLIB_EXTERNAL_DPA_HARDENED_WORD_COPY
 void cc3xx_dpa_hardened_word_copy(volatile uint32_t *dst,
                                   volatile const uint32_t *src, size_t word_count)
 {
-    uint8_t permutation_buf[SECURE_COPY_MAX_WORDS] = {0, 1, 2, 3, 4, 5, 6, 7};
-    uint32_t offset = 0;
+    uint8_t permutation_buf[word_count]; /* This is a VLA */
     size_t idx;
 
-    /* Make sure this copy can be represented by the permutation buffer */
-    assert(word_count <= SECURE_COPY_MAX_WORDS);
+    /* We don't support more than 256 word permutations per copy, i.e. 2048 bit copy */
+    assert(word_count <= CC3XX_STDLIB_SECURE_COPY_MAX_WORDS);
+
+    /* Initializes the permutation buffer */
+    for (idx = 0; idx < word_count; idx++) {
+        permutation_buf[idx] = idx;
+    }
 
     fisher_yates_shuffle(permutation_buf, word_count);
     for(idx = 0; idx < word_count; idx++) {
