@@ -139,7 +139,6 @@ cc3xx_err_t cc3xx_hash_update(const uint8_t *buf, size_t length)
     return cc3xx_dma_buffered_input_data(buf, length, false);
 }
 
-#ifdef CC3XX_CONFIG_HASH_RESTARTABLE_ENABLE
 void cc3xx_hash_get_state(struct cc3xx_hash_state_t *state)
 {
     state->curr_len = P_CC3XX->hash.hash_cur_len[0];
@@ -162,7 +161,6 @@ void cc3xx_hash_set_state(const struct cc3xx_hash_state_t *state)
     set_hash_h(state->hash_h, hash_h_len);
     memcpy(&dma_state, &state->dma_state, sizeof(dma_state));
 }
-#endif /* CC3XX_CONFIG_HASH_RESTARTABLE_ENABLE */
 
 void cc3xx_hash_finish(uint32_t *res, size_t length)
 {

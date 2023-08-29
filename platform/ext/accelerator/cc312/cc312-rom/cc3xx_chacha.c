@@ -157,7 +157,6 @@ cc3xx_err_t cc3xx_chacha20_init(cc3xx_chacha_direction_t direction,
     return CC3XX_ERR_SUCCESS;
 }
 
-#ifdef CC3XX_CONFIG_CHACHA_RESTARTABLE_ENABLE
 void cc3xx_chacha20_get_state(struct cc3xx_chacha_state_t *state)
 {
     memcpy(state, &chacha_state, sizeof(struct cc3xx_chacha_state_t));
@@ -190,7 +189,6 @@ cc3xx_err_t cc3xx_chacha20_set_state(const struct cc3xx_chacha_state_t *state)
      */
     P_CC3XX->chacha.chacha_control_reg |= 0b1 << 1;
 }
-#endif /* CC3XX_CONFIG_CHACHA_RESTARTABLE_ENABLE */
 
 void cc3xx_chacha20_set_output_buffer(uint8_t *out, size_t out_len)
 {

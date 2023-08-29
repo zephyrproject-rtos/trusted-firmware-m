@@ -22,9 +22,6 @@
 /* Whether the SHA1 hash support is enabled */
 /* #define CC3XX_CONFIG_HASH_SHA1_ENABLE */
 
-/* Whether hashing can be restartable */
-/* #define CC3XX_CONFIG_HASH_RESTARTABLE_ENABLE */
-
 /* Whether the AES CTR support is enabled */
 #define CC3XX_CONFIG_AES_CTR_ENABLE
 
@@ -44,9 +41,6 @@
 /* Whether the AES CCM support is enabled */
 #define CC3XX_CONFIG_AES_CCM_ENABLE
 
-/* Whether AES can be restartable */
-/* #define CC3XX_CONFIG_AES_RESTARTABLE_ENABLE */
-
 /* Whether the AES tunnelling support is enabled. Without this, running CCM mode
  * AES will instead only run the CBC_MAC operation with the CCM IVs, with the
  * CTR decryption having to be done seperately. */
@@ -59,9 +53,6 @@
 
 /* Whether CHACHA is enabled */
 /* #define CC3XX_CONFIG_CHACHA_ENABLE */
-
-/* Whether CHACHA can be restartable */
-/* #define CC3XX_CONFIG_CHACHA_RESTARTABLE_ENABLE */
 
 /* Whether CHACHA_POLY1305 is enabled */
 /* #define CC3XX_CONFIG_CHACHA_POLY1305_ENABLE */

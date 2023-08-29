@@ -488,7 +488,6 @@ cc3xx_err_t cc3xx_aes_init(cc3xx_aes_direction_t direction,
     return CC3XX_ERR_SUCCESS;
 }
 
-#ifdef CC3XX_CONFIG_AES_RESTARTABLE_ENABLE
 void cc3xx_aes_get_state(struct cc3xx_aes_state_t *state)
 {
 #ifdef CC3XX_CONFIG_DPA_MITIGATIONS_ENABLE
@@ -565,7 +564,6 @@ cc3xx_err_t cc3xx_aes_set_state(const struct cc3xx_aes_state_t *state)
 
     return CC3XX_ERR_SUCCESS;
 }
-#endif /* CC3XX_CONFIG_AES_RESTARTABLE_ENABLE */
 
 void cc3xx_aes_set_output_buffer(uint8_t *out, size_t out_len)
 {
