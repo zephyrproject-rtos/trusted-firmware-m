@@ -168,5 +168,10 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
                                                        ns_client_id,
                                                        client_data);
 }
+
+void agent_psa_close(psa_handle_t handle, int32_t ns_client_id)
+{
+    PART_METADATA()->psa_fns->agent_psa_close(handle, ns_client_id);
+}
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */

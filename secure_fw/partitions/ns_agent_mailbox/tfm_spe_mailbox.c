@@ -257,7 +257,7 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         break;
 
     case MAILBOX_PSA_CLOSE:
-        tfm_rpc_psa_close(params->psa_close_params.handle);
+        tfm_rpc_psa_close(params->psa_close_params.handle, msg_ptr->client_id);
         break;
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 

@@ -177,6 +177,13 @@ __naked psa_handle_t agent_psa_connect_svc(uint32_t sid, uint32_t version,
     __asm volatile("svc     "M2S(TFM_SVC_AGENT_PSA_CONNECT)"   \n"
                    "bx      lr                                 \n");
 }
+
+__naked void agent_psa_close_svc(psa_handle_t handle, int32_t ns_client_id)
+{
+    __asm volatile("svc     "M2S(TFM_SVC_AGENT_PSA_CLOSE)"     \n"
+                   "bx      lr                                 \n");
+}
+
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 
@@ -215,6 +222,7 @@ const struct psa_api_tbl_t psa_api_svc = {
                                 agent_psa_call_svc,
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
                                 agent_psa_connect_svc,
+                                agent_psa_close_svc,
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
                             };

@@ -321,6 +321,30 @@ psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
 
     return (psa_handle_t)stat;
 }
+void agent_psa_close(psa_handle_t handle, int32_t ns_client_id)
+{
+    struct partition_t *p_client, *p_target;
+    psa_status_t stat;
+
+    if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
+        /* PSA APIs must be called from Thread mode */
+        tfm_core_panic();
+    }
+
+    p_client = GET_CURRENT_COMPONENT();
+
+    stat = tfm_spm_agent_psa_close(handle, ns_client_id);
+
+    p_target = GET_CURRENT_COMPONENT();
+    if (p_client != p_target) {
+        /* Execution is returned from RoT Service */
+        stat = tfm_spm_partition_psa_reply(p_target->p_handles->msg.handle,
+                                           PSA_SUCCESS);
+    } else {
+        /* Execution is returned from SPM */
+        spm_handle_programmer_errors(stat);
+    }
+}
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 

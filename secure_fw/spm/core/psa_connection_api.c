@@ -19,11 +19,19 @@
 
 psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
 {
-    struct service_t *service;
-    struct connection_t *p_connection;
     int32_t client_id;
     bool ns_caller = tfm_spm_is_ns_caller();
+
+    client_id = tfm_spm_get_client_id(ns_caller);
+    return spm_psa_connect_client_id_associated(sid, version, client_id);
+}
+
+psa_status_t spm_psa_connect_client_id_associated(uint32_t sid, uint32_t version, int32_t client_id)
+{
+    struct service_t *service;
+    struct connection_t *p_connection;
     struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+    bool ns_caller = (client_id < 0) ? true : false;
 
     /*
      * It is a PROGRAMMER ERROR if the RoT Service does not exist on the
@@ -55,8 +63,6 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
         return PSA_ERROR_CONNECTION_REFUSED;
     }
 
-    client_id = tfm_spm_get_client_id(ns_caller);
-
     /*
      * Create connection handle here since it is possible to return the error
      * code to client when creation fails.
@@ -76,9 +82,13 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
 
 psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 {
-    struct connection_t *p_connection;
-    int32_t client_id;
     bool ns_caller = tfm_spm_is_ns_caller();
+    return spm_psa_close_client_id_associated(handle, tfm_spm_get_client_id(ns_caller));
+}
+
+psa_status_t spm_psa_close_client_id_associated(psa_handle_t handle, int32_t client_id)
+{
+    struct connection_t *p_connection;
     psa_status_t status;
 
     /* It will have no effect if called with the NULL handle */
@@ -90,8 +100,6 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
     if (IS_STATIC_HANDLE(handle)) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
-
-    client_id = tfm_spm_get_client_id(ns_caller);
 
     /*
      * It is a PROGRAMMER ERROR if an invalid handle was provided that is not

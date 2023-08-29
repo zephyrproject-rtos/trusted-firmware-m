@@ -106,6 +106,7 @@ Updated programming interfaces
 These Client APIs are expanded from the standard Client APIs:
 
 - ``agent_psa_connect()`` is extended from ``psa_connect()``.
+- ``agent_psa_close()`` is extended from ``psa_close()``.
 - ``agent_psa_call()`` is extended from ``psa_call()``.
 
 And to cooperate with the changed behaviour of these APIs, extra defined
@@ -200,13 +201,14 @@ is a connection-based one.
 
 Agent-specific Client API
 =========================
-``agent_psa_connect()`` is the API added to support agent forwarding NS
-requests.
+``agent_psa_connect()`` and ``agent_psa_close()`` are the APIs added to support
+agent forwarding NS requests.
 
 .. code-block:: c
 
   psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
                                  int32_t ns_client_id, const void *client_data);
+  void agent_psa_close(psa_handle_t handle, int32_t ns_client_id);
 
 One extra parameter ``ns_client_id`` added to tell SPM which NS client the
 agent is representing when API gets called. It is recorded in the handle
@@ -315,7 +317,7 @@ Code Example
                   status = agent_psa_connect(SID(ns_msg), VER(ns_msg),
                                              NSID(ns_msg), &ns_msg);
               } else if (ns_msg.type == PSA_IPC_CLOSE) {
-                  psa_close(ns_msg.handle);
+                  agent_psa_close(ns_msg.handle, NSID(ns_msg));
               } else {
                   /* Other types as call type and let API check errors. */
                   client_param.ns_client_id_stateless = NSID(ns_msg);

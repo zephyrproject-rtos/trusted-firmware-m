@@ -73,6 +73,8 @@ struct psa_api_tbl_t {
     psa_handle_t     (*agent_psa_connect)(uint32_t sid, uint32_t version,
                                           int32_t ns_client_id,
                                           const void *client_data);
+    void             (*agent_psa_close)(psa_handle_t handle,
+                                        int32_t ns_client_id);
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
 };

@@ -326,4 +326,45 @@ struct connection_t *handle_to_connection(psa_handle_t handle);
 
 void update_caller_outvec_len(struct connection_t *handle);
 
+
+/* Following PSA APIs are only needed by connection-based services */
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+
+/* Handler for \ref psa_connect.
+ *
+ * \param[in] sid               RoT Service identity.
+ * \param[in] version           The version of the RoT Service.
+ * \param[in] client_id         Client id of the service caller. It should be
+ *                              validated before this API is being called.
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
+ *                              connection.
+ * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
+ *                              connection at the moment.
+ * \retval "Does not return"    The RoT Service ID and version are not
+ *                              supported, or the caller is not permitted to
+ *                              access the service.
+ */
+psa_status_t spm_psa_connect_client_id_associated(uint32_t sid, uint32_t version,
+                                                  int32_t client_id);
+
+/* Handler for \ref psa_close.
+ *
+ * \param[in] handle            Service handle to the connection to be closed,
+ *                              \ref psa_handle_t
+ * \param[in] client_id         Client id of the connection caller.
+ *
+ * \retval PSA_SUCCESS          Success.
+ * \retval PSA_ERROR_PROGRAMMER_ERROR The call is invalid, one or more of the
+ *                              following are true:
+ * \arg                           Called with a stateless handle.
+ * \arg                           An invalid handle was provided that is not
+ *                                the null handle.
+ * \arg                           The connection is handling a request.
+ */
+psa_status_t spm_psa_close_client_id_associated(psa_handle_t handle, int32_t client_id);
+
+#endif /* #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
+
 #endif /* __SPM_H__ */

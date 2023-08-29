@@ -287,7 +287,8 @@ void deliver_msg_to_tfm_spe(void *private)
             }
             break;
         case OPENAMP_PSA_CLOSE:
-            tfm_rpc_psa_close(s_map_entry->msg.params.psa_close_params.handle);
+            tfm_rpc_psa_close(s_map_entry->msg.params.psa_close_params.handle,
+                              s_map_entry->msg.client_id);
             break;
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
         default:

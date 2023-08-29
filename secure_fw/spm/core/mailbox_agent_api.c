@@ -57,7 +57,6 @@ psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
                                        int32_t ns_client_id,
                                        const void *client_data)
 {
-    (void)ns_client_id;
     (void)client_data;
 
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
@@ -65,8 +64,22 @@ psa_handle_t tfm_spm_agent_psa_connect(uint32_t sid, uint32_t version,
     if (!IS_NS_AGENT_MAILBOX(curr_partition->p_ldinf)) {
         tfm_core_panic();
     }
+    if (ns_client_id >= 0) {
+        tfm_core_panic();
+    }
 
-    return tfm_spm_client_psa_connect(sid, version);
+    return spm_psa_connect_client_id_associated(sid, version, ns_client_id);
 }
 
+psa_status_t tfm_spm_agent_psa_close(psa_handle_t handle,
+                                     int32_t ns_client_id)
+{
+    struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+
+    if ((!IS_NS_AGENT_MAILBOX(curr_partition->p_ldinf)) || (ns_client_id >= 0)) {
+        tfm_core_panic();
+    }
+
+    return spm_psa_close_client_id_associated(handle, ns_client_id);
+}
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */

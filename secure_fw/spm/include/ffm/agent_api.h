@@ -55,7 +55,7 @@ psa_status_t agent_psa_call(psa_handle_t handle, uint32_t control,
  *
  * \param[in] sid                       RoT Service identity.
  * \param[in] version                   The version of the RoT Service.
- * \param[in] ns_client_id              Agent representing NS client's identifier.
+ * \param[in] ns_client_id              NS client's identifier.
  * \param[in] client_data               Client data, treated as opaque by SPM.
  *
  * \retval PSA_SUCCESS                  Success.
@@ -70,8 +70,26 @@ psa_status_t agent_psa_call(psa_handle_t handle, uint32_t control,
 psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
                                int32_t ns_client_id, const void *client_data);
 
+/**
+ * \brief psa_close() interface for NS agents
+ *
+ * \param[in] handle            A handle to an established connection, or the
+ *                              null handle.
+ * \param[in] ns_client_id      NS client's identifier.
+ *
+ * \retval void                 Success.
+ * \retval "PROGRAMMER ERROR"   The call is a PROGRAMMER ERROR if one or more
+ *                              of the following are true:
+ * \arg                           An invalid handle was provided that is not
+ *                                the null handle.
+ * \arg                           The connection is currently handling a
+ *                                request.
+ */
+void agent_psa_close(psa_handle_t handle, int32_t ns_client_id);
+
 #else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #define agent_psa_connect    NULL
+#define agent_psa_close      NULL
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 
 #endif /* __AGENT_API_H__ */

@@ -73,6 +73,7 @@ static psa_api_svc_func_t psa_api_svc_func_table[] = {
     (psa_api_svc_func_t)tfm_spm_partition_psa_reset_signal,
     (psa_api_svc_func_t)tfm_spm_agent_psa_call,
     (psa_api_svc_func_t)tfm_spm_agent_psa_connect,
+    (psa_api_svc_func_t)tfm_spm_agent_psa_close,
 };
 
 static uint32_t thread_mode_spm_return(uint32_t result)

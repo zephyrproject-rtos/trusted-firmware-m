@@ -70,9 +70,9 @@ psa_status_t tfm_rpc_psa_connect(uint32_t sid,
     return agent_psa_connect(sid, version, ns_client_id, client_data);
 }
 
-void tfm_rpc_psa_close(psa_handle_t handle)
+void tfm_rpc_psa_close(psa_handle_t handle, int32_t ns_client_id)
 {
-    psa_close(handle);
+    agent_psa_close(handle, ns_client_id);
 }
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
