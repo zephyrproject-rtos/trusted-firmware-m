@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
  * Copyright 2020-2022 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -40,7 +40,7 @@ const struct memory_region_limits memory_regions = {
         (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base),
 
     .veneer_limit =
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit),
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1,
 
 #ifdef BL2
     .secondary_partition_base =
@@ -182,7 +182,7 @@ static void fih_cdog_init(void)
 {
     status_t result = kStatus_Fail;
     cdog_config_t conf;
-    
+
     /* Initialize CDOG */
     CDOG_GetDefaultConfig(&conf);
 
@@ -202,7 +202,7 @@ static void fih_cdog_init(void)
         SPMLOG_ERRMSG("[CDOG] Init error.\r\n");
         FIH_PANIC;
     }
-   
+
     cdog_init_is_done = true;
 }
 
@@ -245,22 +245,22 @@ fih_int fih_cfi_get_and_increment(uint8_t cnt)
 {
     fih_int saved_ctr = _fih_cfi_ctr;
 
-    /* HW */   
+    /* HW */
     if(cdog_init_is_done == false)
     {
         fih_cdog_init();
     }
-    
+
     /* Start if in the IDLE state */
     if((CDOG->STATUS & CDOG_STATUS_CURST_MASK) == CDOG_STATUS_CURST(0x5)) {
         CDOG_Start(CDOG, 0xFFFFFFFF, fih_int_decode(saved_ctr));
     }
 
     CDOG_Add(CDOG, cnt);
-    
+
     /* SW */
     _fih_cfi_ctr = fih_int_encode(fih_int_decode(_fih_cfi_ctr) + cnt);
-    
+
     return saved_ctr;
 }
 
@@ -276,9 +276,9 @@ void fih_cfi_decrement(void)
     /* Start if in the IDLE state */
     if((CDOG->STATUS & 0xF0000000) == 0x50000000) {
         CDOG_Start(CDOG, 0xFFFFFFFF, (fih_int_decode(_fih_cfi_ctr)));
-    }    
+    }
     CDOG_Sub1(CDOG);
-    
+
     /* SW */
     _fih_cfi_ctr = fih_int_encode(fih_int_decode(_fih_cfi_ctr) - 1);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2020-2023, Arm Limited. All rights reserved.
  * Copyright 2020-2022 NXP. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -42,7 +42,7 @@ struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
 #ifdef CONFIG_TFM_PARTITION_META
 REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
-REGION_DECLARE(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
+REGION_DECLARE(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit);
 #endif
 
 #if TFM_ISOLATION_LEVEL == 3
@@ -56,7 +56,7 @@ static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, PT_RO_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, PT_RO_END, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, PT_RO_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_CODE_IDX,
         MPU_ARMV8M_XN_EXEC_OK,
         MPU_ARMV8M_AP_RO_PRIV_UNPRIV,
@@ -68,7 +68,7 @@ static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, PT_PRIV_RWZI_START, $$Base),
-        (uint32_t)&REGION_NAME(Image$$, PT_PRIV_RWZI_END, $$Base),
+        (uint32_t)&REGION_NAME(Image$$, PT_PRIV_RWZI_END, $$Base) - 1,
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_ONLY,
@@ -78,7 +78,7 @@ static struct mpu_armv8m_region_cfg_t isolation_regions[] = {
     {
         0, /* will be updated before using */
         (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base),
-        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit),
+        (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit) - 1,
         MPU_ARMV8M_MAIR_ATTR_DATA_IDX,
         MPU_ARMV8M_XN_EXEC_NEVER,
         MPU_ARMV8M_AP_RW_PRIV_UNPRIV,
@@ -148,7 +148,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
     region_cfg.region_nr = n_configured_regions;
     region_cfg.region_base = (uint32_t)&REGION_NAME(Image$$, ER_VENEER, $$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit);
+        (uint32_t)&REGION_NAME(Image$$, VENEER_ALIGN, $$Limit) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_CODE_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -170,7 +170,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_START, $$RO$$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit);
+        (uint32_t)&REGION_NAME(Image$$, TFM_UNPRIV_CODE_END, $$RO$$Limit) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_CODE_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -192,7 +192,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_START, $$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base);
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_CODE_END, $$Base) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_CODE_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RO_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -214,7 +214,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
     region_cfg.region_base =
         (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_START, $$Base);
     region_cfg.region_limit =
-        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base);
+        (uint32_t)&REGION_NAME(Image$$, TFM_APP_RW_STACK_END, $$Base) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -257,7 +257,7 @@ FIH_RET_TYPE(enum tfm_hal_status_t) tfm_hal_set_up_static_boundaries(
     region_cfg.region_base =
      (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Base);
     region_cfg.region_limit =
-     (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR, $$ZI$$Limit);
+     (uint32_t)&REGION_NAME(Image$$, TFM_SP_META_PTR_END, $$ZI$$Limit) - 1;
     region_cfg.region_attridx = MPU_ARMV8M_MAIR_ATTR_DATA_IDX;
     region_cfg.attr_access = MPU_ARMV8M_AP_RW_PRIV_UNPRIV;
     region_cfg.attr_sh = MPU_ARMV8M_SH_NONE;
@@ -644,22 +644,22 @@ void ppc_configure_to_secure(struct platform_data_t *platform_data, bool privile
         trdc_mbc_memory_block_config_t mbcBlockConfig;
 
         (void)memset(&mbcBlockConfig, 0, sizeof(mbcBlockConfig));
-    
+
         mbcBlockConfig.nseEnable  = false;
-    
+
         mbcBlockConfig.domainIdx = 0;       /* Core domain */
         mbcBlockConfig.mbcIdx = platform_data->mbcIdx;
         mbcBlockConfig.slaveMemoryIdx = platform_data->slaveMemoryIdx;
         mbcBlockConfig.memoryBlockIdx = platform_data->memoryBlockIdx;
- 
+
         if (privileged == true)
             mbcBlockConfig.memoryAccessControlSelect = TRDC_ACCESS_CONTROL_POLICY_SEC_PRIV_INDEX;
         else
             mbcBlockConfig.memoryAccessControlSelect = TRDC_ACCESS_CONTROL_POLICY_SEC_INDEX;
-        
+
         TRDC_MbcSetMemoryBlockConfig(TRDC, &mbcBlockConfig);
     }
-#endif    
+#endif
 }
 
 #ifdef TFM_FIH_PROFILE_ON
@@ -667,17 +667,17 @@ void ppc_configure_to_secure(struct platform_data_t *platform_data, bool privile
 fih_int tfm_hal_verify_static_boundaries(void)
 {
     int32_t result = TFM_HAL_ERROR_GENERIC;
-    
+
         /* Check if SAU is enabled */
     if(((SAU->CTRL & SAU_CTRL_ENABLE_Msk) == SAU_CTRL_ENABLE_Msk)
 #ifdef AHB_SECURE_CTRL
         /* Check if AHB secure controller check is enabled */
         && (AHB_SECURE_CTRL->MISC_CTRL_DP_REG == AHB_SECURE_CTRL->MISC_CTRL_REG) &&
     #ifdef SECTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING /* Different definition name for LPC55S36 */
-        ((AHB_SECURE_CTRL->MISC_CTRL_REG & SECTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) == SECTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) 
+        ((AHB_SECURE_CTRL->MISC_CTRL_REG & SECTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) == SECTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U))
     #else
-        ((AHB_SECURE_CTRL->MISC_CTRL_REG & AHB_SECURE_CTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) == AHB_SECURE_CTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) 
-    #endif 
+        ((AHB_SECURE_CTRL->MISC_CTRL_REG & AHB_SECURE_CTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U)) == AHB_SECURE_CTRL_MISC_CTRL_REG_ENABLE_SECURE_CHECKING(0x1U))
+    #endif
 #endif /* AHB_SECURE_CTRL */
     )
     {
