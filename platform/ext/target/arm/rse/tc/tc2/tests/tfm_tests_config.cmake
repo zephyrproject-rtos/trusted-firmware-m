@@ -6,4 +6,4 @@
 #-------------------------------------------------------------------------------
 
 # Use common tests config
-include(${CMAKE_CURRENT_LIST_DIR}/../../common/tests/tfm_tests_config.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../../common/tests/tfm_tests_config.cmake)

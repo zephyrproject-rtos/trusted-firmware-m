@@ -9,5 +9,4 @@ set(RSE_XIP                     ON  CACHE BOOL  "Whether to run runtime firmware
 
 set(TFM_ATTESTATION_SCHEME      "DPE"       CACHE STRING    "Attestation scheme to use [OFF, PSA, CCA, DPE]")
 
-# Once all options are set, set common options as fallback
-include(${CMAKE_CURRENT_LIST_DIR}/../common/config.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../common/config.cmake)
