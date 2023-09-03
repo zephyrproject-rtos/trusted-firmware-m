@@ -83,7 +83,7 @@ add_convert_to_bin_target(tfm_s)
 
 set_source_files_properties(
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_svc.c
-    ${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_cross.c
+    ${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_thread_fn_call.c
     ${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_sfn.c
     PROPERTIES
     COMPILE_FLAGS $<$<C_COMPILER_ID:GNU>:-Wno-unused-parameter>
@@ -93,7 +93,7 @@ set_source_files_properties(
 target_sources(tfm_sprt
     PRIVATE
         $<$<BOOL:$<VERSION_GREATER:${TFM_ISOLATION_LEVEL},1>>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_svc.c>
-        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_cross.c>
+        $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_IPC}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_thread_fn_call.c>
         $<$<BOOL:${CONFIG_TFM_SPM_BACKEND_SFN}>:${CMAKE_SOURCE_DIR}/secure_fw/spm/core/psa_interface_sfn.c>
 )
 

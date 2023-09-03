@@ -111,7 +111,7 @@ static uint32_t query_state(struct thread_t *p_thrd, uint32_t *p_retval)
     return state;
 }
 
-extern struct psa_api_tbl_t psa_api_cross;
+extern struct psa_api_tbl_t psa_api_thread_fn_call;
 extern struct psa_api_tbl_t psa_api_svc;
 
 static void prv_process_metadata(struct partition_t *p_pt)
@@ -140,12 +140,12 @@ static void prv_process_metadata(struct partition_t *p_pt)
                                     ARCH_CTXCTRL_ALLOCATED_PTR(ctx_ctrl);
 
 #if TFM_ISOLATION_LEVEL == 1
-    p_rt_meta->psa_fns = &psa_api_cross;
+    p_rt_meta->psa_fns = &psa_api_thread_fn_call;
 #else
     if (tfm_hal_boundary_need_switch(spm_boundary, p_pt->boundary)) {
         p_rt_meta->psa_fns = &psa_api_svc;
     } else {
-        p_rt_meta->psa_fns = &psa_api_cross;
+        p_rt_meta->psa_fns = &psa_api_thread_fn_call;
     }
 #endif
 

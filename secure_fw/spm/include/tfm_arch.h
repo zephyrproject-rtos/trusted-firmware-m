@@ -97,16 +97,6 @@ struct full_context_t {
     struct tfm_state_context_t      stat_ctx;
 };
 
-/*
- * Under cross call ABI, SPM can be preempted by interrupts, the interrupt
- * handling can set SPM API return value and makes the initial SPM API
- * return code invalid. Use one flag to indicate if the return code has been
- * force updated by interrupts, then SPM return code can be discarded as it
- * is out of date.
- */
-#define CROSS_RETCODE_EMPTY         0xEEEEEEED
-#define CROSS_RETCODE_UPDATED       0xEEEEEEEE
-
 /* Context control.
  * CAUTION: Assembly references this structure. DO CHECK the below functions
  * before changing the structure:
@@ -313,14 +303,21 @@ uint32_t arch_release_sched_lock(void);
 uint32_t tfm_arch_trigger_pendsv(void);
 
 /*
- * Switch to SPM stack area if the caller is not NS agent, lock scheduler and
- * target function in the backend will be called to return the value on the
- * caller stack. This function is non-preemptive.
+ * Thread Function Call at Thread mode. It is called in the IPC backend and
+ * isolation level 1. The function switches to the SPM stack to execute the
+ * target PSA API to avoid using up the Secure Partitions' stacks. The NS agent
+ * shares the stack with the SPM so it doesn't need to switch.
+ *
+ * The stack check process destroyes the caller registers so the input args and
+ * the target PSA API address are stored in the caller stack at the beginning.
+ * They are loaded again before the PSA API is called. This function is
+ * non-preemptive except for the target PSA API execution.
  *
  * NOTE: This function cannot be called by any C functions as it uses a
  * customized parameter passing method and puts the target function address in
  * r12. These input parameters a0~a3 come from standard PSA interface input.
+ * The return value is stored in r0 for the PSA API to return.
  */
-void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3);
+void tfm_arch_thread_fn_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3);
 
 #endif

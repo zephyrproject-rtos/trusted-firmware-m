@@ -49,7 +49,7 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
 
 __naked
-void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
+void tfm_arch_thread_fn_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
 {
     __asm volatile(
         "   push    {r4-r6, lr}             \n"
@@ -59,7 +59,10 @@ void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
         "   bl      backend_abi_entering_spm\n" /* r0: new SP, r1: new PSPLIM */
         "   mrs     r5, psplim              \n"
         "   mov     r6, sp                  \n"
-        "   cmp     r0, #0                  \n"
+        "   cmp     r0, #0                  \n" /* Check whether the caller is
+                                                 * NS agent(new SP == 0) or
+                                                 * secure partition(new SP != 0)
+                                                 */
         "   itttt   ne                      \n"
         "   movne   r2, #0                  \n"
         "   msrne   psplim, r2              \n" /* Clear PSPLIM before setting
@@ -67,7 +70,9 @@ void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
                                                  * avoid potential stack
                                                  * overflow.
                                                  */
-        "   movne   sp, r0                  \n" /* To SPM stack */
+        "   movne   sp, r0                  \n" /* Switch to the SPM stack if
+                                                 * caller is NOT an NS agent.
+                                                 */
         "   msrne   psplim, r1              \n"
         "   cpsie   i                       \n"
         "   isb                             \n"
