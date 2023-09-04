@@ -16,6 +16,11 @@
 #include "psa/lifecycle.h"
 #include "psa/service.h"
 #include "runtime_defs.h"
+#include "tfm_arch.h"
+
+#if defined(__ICCARM__)
+#pragma required = arch_cross_call
+#endif
 
 /*
  * R12 stores address of target api which will be called in
