@@ -11,10 +11,6 @@ find_package(Python3)
 ############################### Manifest lists declaration #####################
 list(APPEND MANIFEST_LISTS ${TFM_MANIFEST_LIST})
 
-if (EXISTS ${TFM_TEST_REPO_PATH})
-    list(APPEND MANIFEST_LISTS ${TFM_TEST_REPO_PATH}/test/secure_fw/tfm_test_manifest_list.yaml)
-endif()
-
 if (TFM_EXTRA_MANIFEST_LIST_FILES)
     list(APPEND MANIFEST_LISTS ${TFM_EXTRA_MANIFEST_LIST_FILES})
 endif()
