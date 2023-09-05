@@ -76,6 +76,9 @@ static const struct boot_data_access_policy access_policy_table[] = {
 #ifdef TFM_PARTITION_MEASURED_BOOT
     {TFM_SP_MEASURED_BOOT, TLV_MAJOR_MBS},
 #endif
+#ifdef TFM_PARTITION_DPE
+    {TFM_SP_DPE, TLV_MAJOR_MBS},
+#endif
 };
 
 /*!
