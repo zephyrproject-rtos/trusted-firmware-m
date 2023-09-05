@@ -30,10 +30,6 @@ set(MBEDCRYPTO_GIT_REMOTE               "https://github.com/Mbed-TLS/mbedtls.git
 set(MCUBOOT_PATH                        "DOWNLOAD"  CACHE PATH      "Path to MCUboot (or DOWNLOAD to fetch automatically")
 set(MCUBOOT_VERSION                     "9bef51c"   CACHE STRING    "The version of MCUboot to use")
 
-set(PSA_ARCH_TESTS_PATH                 "DOWNLOAD"  CACHE PATH      "Path to PSA arch tests (or DOWNLOAD to fetch automatically")
-set(PSA_ARCH_TESTS_VERSION              "5c57920"   CACHE STRING    "The version of PSA arch tests to use")
-set(PSA_ARCH_TESTS_FORCE_PATCH          OFF         CACHE BOOL      "Always apply PSA arch tests patches")
-
 set(PLATFORM_PSA_ADAC_SECURE_DEBUG      FALSE       CACHE BOOL      "Whether to use psa-adac secure debug.")
 set(PLATFORM_PSA_ADAC_SOURCE_PATH       "DOWNLOAD"  CACHE PATH      "Path to source dir of psa-adac.")
 set(PLATFORM_PSA_ADAC_VERSION           "4c35930fb6df95400ea4fe5722acaaa594ac3b8b" CACHE STRING "The version of psa-adac to use.")

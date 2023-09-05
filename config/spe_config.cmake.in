@@ -55,7 +55,8 @@ set(TFM_ISOLATION_LEVEL                    @TFM_ISOLATION_LEVEL@        CACHE   
 
 # Testing related options.
 
-set(TEST_PSA_API                           @TEST_PSA_API@          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
+set(TEST_PSA_API                           "@TEST_PSA_API@"          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
+set(PSA_ARCH_TESTS_PATH                    "@PSA_ARCH_TESTS_PATH@"   CACHE PATH      "Path to PSA arch test repository if it was give to SPE build")
 
 # Other common options
 

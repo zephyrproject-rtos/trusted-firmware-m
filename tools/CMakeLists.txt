@@ -15,13 +15,6 @@ if (EXISTS ${TFM_TEST_REPO_PATH})
     list(APPEND MANIFEST_LISTS ${TFM_TEST_REPO_PATH}/test/secure_fw/tfm_test_manifest_list.yaml)
 endif()
 
-if ("${TEST_PSA_API}" STREQUAL "IPC")
-    # The manifest tool does not recognize CMake varibles. Do configure_file() first.
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_ff_test_manifest_list.yaml
-                   ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
-    list(APPEND MANIFEST_LISTS ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
-endif()
-
 if (TFM_EXTRA_MANIFEST_LIST_FILES)
     list(APPEND MANIFEST_LISTS ${TFM_EXTRA_MANIFEST_LIST_FILES})
 endif()
@@ -64,6 +57,7 @@ foreach(MANIFEST_LIST ${MANIFEST_LISTS})
     if (NOT EXISTS ${MANIFEST_LIST})
         message(FATAL_ERROR "Manifest list ${MANIFEST_LIST} doesn't exist")
     endif()
+
 
     # Get the path of the manifest list
     get_filename_component(MANIFEST_LIST_PATH ${MANIFEST_LIST} DIRECTORY)
