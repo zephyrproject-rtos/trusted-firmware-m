@@ -101,7 +101,7 @@ target_sources(platform_s
         Native_Driver/musca_b1_scc_drv.c
         Native_Driver/ppc_sse200_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
-        $<$<NOT:$<BOOL:${TEST_NS_SLIH_IRQ}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
+        $<$<NOT:$<BOOL:${TFM_PARTITION_SLIH_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
         $<$<OR:$<BOOL:${TFM_S_REG_TEST}>,$<BOOL:${TFM_NS_REG_TEST}>>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
         $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_platform_system.c>
 )
@@ -115,7 +115,7 @@ target_sources(tfm_sprt
     PRIVATE
         # The SLIH test Partition accesses the timer as ARoT Partitions.
         # Put the driver to SPRT so that the SLIH tests can access it.
-        $<$<BOOL:${TEST_NS_SLIH_IRQ}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
+        $<$<BOOL:${TFM_PARTITION_SLIH_TEST}>:${CMAKE_CURRENT_SOURCE_DIR}/Native_Driver/timer_cmsdk_drv.c>
 )
 
 #========================= Platform Non-Secure ================================#
