@@ -34,6 +34,7 @@ macro(tfm_toolchain_reset_compiler_flags)
 
     if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 8.0.0)
         add_compile_options(
+            # TO-DO: is this required anymore after split build?
             -fmacro-prefix-map=${TFM_TEST_REPO_PATH}=TFM_TEST_REPO_PATH
         )
     endif()

@@ -60,8 +60,8 @@ add_subdirectory(lib/fih)
 add_subdirectory(tools)
 add_subdirectory(secure_fw)
 
-if(TFM_TEST_REPO_PATH)
-    add_subdirectory(${TFM_TEST_REPO_PATH}/test ${CMAKE_CURRENT_BINARY_DIR}/tf-m-tests)
+if(CONFIG_TFM_TEST_DIR)
+    add_subdirectory(${CONFIG_TFM_TEST_DIR} ${CMAKE_CURRENT_BINARY_DIR}/tf-m-tests)
 endif()
 
 add_subdirectory(interface)
