@@ -14,6 +14,7 @@
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
 #include "config_spm.h"
+#include "ffm/psa_api.h"
 #include "runtime_defs.h"
 #include "stack_watermark.h"
 #include "spm.h"
@@ -378,6 +379,55 @@ psa_status_t backend_assert_signal(struct partition_t *p_pt, psa_signal_t signal
     CRITICAL_SECTION_LEAVE(cs_signal);
 
     return ret;
+}
+
+uint64_t backend_abi_entering_spm(void)
+{
+    struct partition_t *caller = GET_CURRENT_COMPONENT();
+    uint32_t sp = 0;
+    uint32_t sp_limit = 0;
+    AAPCS_DUAL_U32_T spm_stack_info;
+
+#if TFM_ISOLATION_LEVEL == 1
+    /* PSA APIs must be called from Thread mode */
+    if (__get_active_exc_num() != EXC_NUM_THREAD_MODE) {
+        tfm_core_panic();
+    }
+#endif
+
+    /*
+     * Check if caller stack is within SPM stack. If not, then stack needs to
+     * switch. Otherwise, return zeros.
+     */
+    if ((caller->ctx_ctrl.sp <= SPM_THREAD_CONTEXT->sp_limit) ||
+        (caller->ctx_ctrl.sp >  SPM_THREAD_CONTEXT->sp_base)) {
+        sp       = SPM_THREAD_CONTEXT->sp;
+        sp_limit = SPM_THREAD_CONTEXT->sp_limit;
+    }
+
+    AAPCS_DUAL_U32_SET(spm_stack_info, sp, sp_limit);
+
+    arch_acquire_sched_lock();
+
+    return AAPCS_DUAL_U32_AS_U64(spm_stack_info);
+}
+
+uint32_t backend_abi_leaving_spm(uint32_t result)
+{
+    uint32_t sched_attempted;
+
+    spm_handle_programmer_errors(result);
+
+    /* Release scheduler lock and check the record of schedule attempt. */
+    sched_attempted = arch_release_sched_lock();
+
+    /* Interrupt is masked, PendSV will not happen immediately. */
+    if (result == STATUS_NEED_SCHEDULE ||
+        sched_attempted == SCHEDULER_ATTEMPTED) {
+        tfm_arch_trigger_pendsv();
+    }
+
+    return result;
 }
 
 uint64_t ipc_schedule(void)

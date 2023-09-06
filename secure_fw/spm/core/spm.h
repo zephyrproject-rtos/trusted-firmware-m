@@ -318,21 +318,4 @@ void tfm_core_handler_mode(void);
 
 void update_caller_outvec_len(struct connection_t *handle);
 
-#if CONFIG_TFM_SPM_BACKEND_IPC == 1
-
-/*
- * Executes with interrupt unmasked.Check the necessity of switching to SPM
- * stack and lock scheduler. Return value is the pair of SPM SP and PSPLIM if
- * necessary. Otherwise, zeros.
- */
-uint64_t cross_call_entering_c(void);
-
-/*
- * Executes with interrupt masked.
- * Check return value from backend and trigger scheduler in PendSV if necessary.
- */
-psa_status_t cross_call_exiting_c(psa_status_t status);
-
-#endif
-
 #endif /* __SPM_H__ */

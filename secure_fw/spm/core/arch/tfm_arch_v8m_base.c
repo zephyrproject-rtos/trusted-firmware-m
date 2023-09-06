@@ -35,8 +35,8 @@ uint32_t scheduler_lock = SCHEDULER_UNLOCKED;
 #if CONFIG_TFM_SPM_BACKEND_IPC == 1
 
 #pragma required = ipc_schedule
-#pragma required = cross_call_entering_c
-#pragma required = cross_call_exiting_c
+#pragma required = backend_abi_entering_spm
+#pragma required = backend_abi_leaving_spm
 
 #endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
@@ -54,7 +54,7 @@ void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
         "   push   {r0-r5}                  \n"
         "   cpsid  i                        \n"
         "   isb                             \n"
-        "   bl     cross_call_entering_c    \n" /* r0: new SP, r1: new PSPLIM */
+        "   bl     backend_abi_entering_spm \n" /* r0: new SP, r1: new PSPLIM */
         "   mrs    r6, psplim               \n"
         "   mov    r7, sp                   \n"
         "   cmp    r0, #0                   \n"
@@ -76,7 +76,7 @@ void arch_cross_call(uint32_t a0, uint32_t a1, uint32_t a2, uint32_t a3)
         "   blx    r5                       \n"
         "   cpsid  i                        \n"
         "   isb                             \n"
-        "   bl     cross_call_exiting_c     \n"
+        "   bl     backend_abi_leaving_spm  \n"
         "   movs   r2, #0                   \n" /* Back to caller new stack */
         "   msr    psplim, r2               \n"
         "   mov    sp, r7                   \n"

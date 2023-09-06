@@ -6,6 +6,8 @@
  */
 
 #include <string.h>
+#include <stdint.h>
+#include "aapcs_local.h"
 #include "config_spm.h"
 #include "interrupt.h"
 #include "internal_status_code.h"
@@ -74,23 +76,14 @@ static psa_api_svc_func_t psa_api_svc_func_table[] = {
 
 static uint32_t thread_mode_spm_return(psa_status_t result)
 {
-    uint32_t recorded_attempts;
     struct tfm_state_context_t *p_tctx = (struct tfm_state_context_t *)saved_psp;
+
+    backend_abi_leaving_spm(result);
 
     ARCH_STATE_CTX_SET_R0(p_tctx, result);
 
     tfm_arch_set_psplim(saved_psp_limit);
     __set_PSP(saved_psp);
-
-    spm_handle_programmer_errors(result);
-
-    /* Release scheduler lock and check the record of schedule attempt. */
-    recorded_attempts = arch_release_sched_lock();
-
-    if ((result == STATUS_NEED_SCHEDULE) ||
-        (recorded_attempts != SCHEDULER_UNLOCKED)) {
-        tfm_arch_trigger_pendsv();
-    }
 
     return saved_exc_return;
 }
@@ -101,21 +94,18 @@ static void init_spm_func_context(struct context_ctrl_t *p_ctx_ctrl,
     uint32_t sp = __get_PSP();
     uint32_t sp_limit = tfm_arch_get_psplim();
     struct full_context_t *p_tctx = NULL;
-    struct partition_t *caller = GET_CURRENT_COMPONENT();
+    AAPCS_DUAL_U32_T sp_info;
 
     saved_psp       = sp;
     saved_psp_limit = sp_limit;
 
-    /* Check if caller stack is within SPM stack. If not, then stack needs to switch. */
-    if ((caller->ctx_ctrl.sp <= SPM_THREAD_CONTEXT->sp_limit) ||
-        (caller->ctx_ctrl.sp >  SPM_THREAD_CONTEXT->sp_base)) {
-        sp       = SPM_THREAD_CONTEXT->sp;
-        sp_limit = SPM_THREAD_CONTEXT->sp_limit;
-    }
+    sp_info.u64_val = backend_abi_entering_spm();
 
-    /* Build PSA API function context */
-    p_ctx_ctrl->sp       = sp;
-    p_ctx_ctrl->sp_limit = sp_limit;
+    /* SPM SP is saved in R0 */
+    if (sp_info.u32_regs.r0 != 0) {
+        sp       = sp_info.u32_regs.r0;
+        sp_limit = sp_info.u32_regs.r1;
+    }
 
     p_tctx = (struct full_context_t *)(sp);
 
@@ -134,6 +124,7 @@ static void init_spm_func_context(struct context_ctrl_t *p_ctx_ctrl,
 
     /* Assign stack and return code to the context control instance. */
     p_ctx_ctrl->sp             = (uint32_t)(p_tctx);
+    p_ctx_ctrl->sp_limit       = sp_limit;
     p_ctx_ctrl->exc_ret        = (uint32_t)(EXC_RETURN_THREAD_PSP);
 }
 
@@ -169,9 +160,6 @@ static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uin
 
     /* svc_func can be executed in privileged Thread mode */
     __set_CONTROL_nPRIV(0);
-
-    /* Lock scheduler during Thread mode SPM execution */
-    arch_acquire_sched_lock();
 
     ctx[0] = PSA_SUCCESS;
 
