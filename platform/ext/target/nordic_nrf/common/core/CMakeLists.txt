@@ -132,7 +132,7 @@ target_compile_definitions(platform_s
     PUBLIC
         $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
         $<$<BOOL:${NULL_POINTER_EXCEPTION_DETECTION}>:NULL_POINTER_EXCEPTION_DETECTION>
-        $<$<BOOL:${TFM_ITS_ENCRYPTED}>:TFM_ITS_ENCRYPTED>
+        $<$<BOOL:${ITS_ENCRYPTION}>:ITS_ENCRYPTION>
 )
 
 #========================= Platform Non-Secure ================================#
