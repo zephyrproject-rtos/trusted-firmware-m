@@ -14,16 +14,17 @@ Advisory TFMV-6
 | Affected        |                                                            |
 +-----------------+------------------------------------------------------------+
 | Configurations  | CC312 enabled platforms, where the legacy driver API is    |
-|                 | disabled (CC312_LEGACY_DRIVER_API_ENABLED=OFF) and the     |
+|                 | disabled (``CC312_LEGACY_DRIVER_API_ENABLED=OFF``) and the |
 |                 | single part AEAD APIs are implemented through a dedicated  |
 |                 | function and not by leveraging the multipart functions     |
-|                 | (CC3XX_CONFIG_ENABLE_AEAD_ONE_SHOT_USE_MULTIPART not set)  |
+|                 | (``CC3XX_CONFIG_ENABLE_AEAD_ONE_SHOT_USE_MULTIPART`` not   |
+|                 | set)                                                       |
 +-----------------+------------------------------------------------------------+
 | Impact          | It might allow for unauthenticated payloads to be deemed   |
 |                 | as authentic by comparing only the first 4 bytes of the    |
 |                 | authentication tag instead of the full length of 16 bytes  |
 +-----------------+------------------------------------------------------------+
-| Fix Version     | 2e82124af                                                  |
+| Fix Version     | 2e82124af, TF-M v1.8.1                                     |
 +-----------------+------------------------------------------------------------+
 | Credit          | Nordic Semiconductor                                       |
 +-----------------+------------------------------------------------------------+
