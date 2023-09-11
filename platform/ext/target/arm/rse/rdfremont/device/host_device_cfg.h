@@ -38,4 +38,9 @@
 #define HOST_MCP
 #endif /* PLATFORM_HOST_HAS_MCP */
 
+/* SMMU */
+#ifdef PLATFORM_HAS_SMMU_V3
+#define HOST_SMMU
+#endif /* PLATFORM_HAS_SMMU_V3 */
+
 #endif /* __HOST_DEVICE_CFG_H__ */

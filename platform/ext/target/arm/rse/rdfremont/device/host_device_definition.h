@@ -99,6 +99,11 @@ extern struct mscp_dev_t HOST_SCP_DEV;
 extern struct mscp_dev_t HOST_MCP_DEV;
 #endif
 
+#ifdef HOST_SMMU
+#include "smmu_v3_drv.h"
+extern struct smmu_dev_t HOST_SYSCTRL_SMMU_DEV;
+#endif
+
 #ifdef __cplusplus
 }
 #endif

@@ -44,6 +44,8 @@ enum rse_atu_ids {
 
     /* ATU region ID for programming NI-Tower */
     RSE_ATU_NI_TOWER_ID,
+    /* ATU region ID for SYSCTRL SMMU */
+    RSE_ATU_SYSCTRL_SMMU_ID,
 };
 
 /*
@@ -262,5 +264,10 @@ enum rse_atu_ids {
                                  HOST_MCP_INIT_CTRL_SIZE)
 #define HOST_NI_TOWER_SIZE      ALIGN_UP(0x1000000U, RSE_ATU_PAGE_SIZE)
 #define HOST_NI_TOWER_ATU_ID    RSE_ATU_NI_TOWER_ID
+
+/* ATU region mapping to access SYSCTRL SMMU */
+#define HOST_SYSCTRL_SMMU_BASE      (HOST_NI_TOWER_BASE + HOST_NI_TOWER_SIZE)
+#define HOST_SYSCTRL_SMMU_SIZE      0x100000U
+#define HOST_SYSCTRL_SMMU_ATU_ID    RSE_ATU_SYSCTRL_SMMU_ID
 
 #endif  /* __HOST_ATU_BASE_ADDRESS_H__ */

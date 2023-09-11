@@ -217,3 +217,11 @@ struct mscp_dev_t HOST_MCP_DEV = {
     .init_ctrl_base = HOST_MCP_INIT_CTRL_BASE_S,
 };
 #endif
+
+#ifdef HOST_SMMU
+#include "smmu_v3_drv.h"
+struct smmu_dev_t HOST_SYSCTRL_SMMU_DEV = {
+    .smmu_base = HOST_SYSCTRL_SMMU_BASE,
+    .ack_timeout = SMMU_DEFAULT_ACK_TIMEOUT,
+};
+#endif
