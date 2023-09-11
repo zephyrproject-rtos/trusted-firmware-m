@@ -58,6 +58,10 @@ set(TFM_ISOLATION_LEVEL                    @TFM_ISOLATION_LEVEL@        CACHE   
 set(TEST_PSA_API                           "@TEST_PSA_API@"          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
 set(PSA_ARCH_TESTS_PATH                    "@PSA_ARCH_TESTS_PATH@"   CACHE PATH      "Path to PSA arch test repository if it was give to SPE build")
 
+set(ATTEST_KEY_BITS     @ATTEST_KEY_BITS@   CACHE STRING    "The size of the initial attestation key in bits")
+set(SYMMETRIC_INITIAL_ATTESTATION @SYMMETRIC_INITIAL_ATTESTATION@   CACHE BOOL      "Use symmetric crypto for inital attestation")
+set(ATTEST_INCLUDE_TEST_CODE    @ATTEST_INCLUDE_TEST_CODE@         CACHE BOOL      "Include minimal development tests in the initial attestation regression test suite")
+set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH @TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH@ CACHE STRING "Config to use psa crypto setting for Mbed Crypto")
 # Other common options
 
 set(TFM_VERSION                            @TFM_VERSION@)
