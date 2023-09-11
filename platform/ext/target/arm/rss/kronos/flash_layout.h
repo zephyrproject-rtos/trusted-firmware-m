@@ -53,13 +53,6 @@
 
 #define HOST_IMAGE_HEADER_SIZE          (0x2000)
 
-#ifdef RSS_XIP
-/* Each table contains a bit less that 8KiB of HTR and 2KiB of mcuboot headers.
- * The spare space in the 8KiB is used for decryption IVs.
- */
-#define FLASH_SIC_TABLE_SIZE            (0x2800) /* 10KiB */
-#endif /* RSS_XIP */
-
 /* Sector size of the flash hardware; same as FLASH0_SECTOR_SIZE */
 #define FLASH_AREA_IMAGE_SECTOR_SIZE    (0x1000)    /* 512 KiB */
 /* Same as FLASH0_SIZE */

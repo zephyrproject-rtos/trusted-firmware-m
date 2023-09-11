@@ -110,8 +110,8 @@ create the flash image::
 
     fiptool create \
         --align 8192 --rss-bl2           bl2_signed.bin \
-        --align 8192 --rss-ns            tfm_ns.bin \
-        --align 8192 --rss-s             tfm_s.bin \
+        --align 8192 --rss-ns            tfm_ns_encrypted.bin \
+        --align 8192 --rss-s             tfm_s_encrypted.bin \
         --align 8192 --rss-sic-tables-ns tfm_ns_sic_tables_signed.bin \
         --align 8192 --rss-sic-tables-s  tfm_s_sic_tables_signed.bin \
         --align 8192 --rss-scp-bl1       <signed Host SCP BL1 image> \
