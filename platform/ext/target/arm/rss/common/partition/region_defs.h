@@ -50,7 +50,7 @@
  * VM0  | BL2_CODE                                               |
  *      |---------------------------------------------------------
  *      |---------------------------------------------------------
- * VM1  | BL2_CODE                 | XIP tables  | BL2_DATA      |
+ * VM1  |  XIP tables  | BL2_DATA                                |
  *      |---------------------------------------------------------
  *
  * If the size of VM0 and VM1 are larger than 64KiB, the size of BL2 code can be
@@ -224,7 +224,7 @@
  * runtime driver supports DMA remapping.
  */
 #define BL2_DATA_START    (BL2_XIP_TABLES_START + BL2_XIP_TABLES_SIZE)
-#define BL2_DATA_SIZE     (DTCM_SIZE - BOOT_TFM_SHARED_DATA_SIZE)
+#define BL2_DATA_SIZE     (VM0_SIZE + VM1_SIZE - BL2_XIP_TABLES_SIZE - FLASH_BL2_PARTITION_SIZE)
 #define BL2_DATA_LIMIT    (BL2_DATA_START + BL2_DATA_SIZE - 1)
 
 /* Store boot data at the start of the DTCM. */

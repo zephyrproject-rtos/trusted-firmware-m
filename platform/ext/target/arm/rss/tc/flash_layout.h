@@ -41,7 +41,7 @@
 #define TFM_HAL_FLASH_PROGRAM_UNIT      (0x1)
 
 /* Sizes of a images */
-#define FLASH_BL2_PARTITION_SIZE        (0x18000) /* BL2 partition: 96 KiB */
+#define FLASH_BL2_PARTITION_SIZE        (0x10000) /* BL2 partition: 64 KiB */
 #define FLASH_S_PARTITION_SIZE          (0x60000) /* S   partition: 384 KiB */
 #define FLASH_NS_PARTITION_SIZE         (0x60000) /* NS  partition: 384 KiB */
 #define FLASH_AP_PARTITION_SIZE         (0x80000) /* AP  partition: 512 KiB */
