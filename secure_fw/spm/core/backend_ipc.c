@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2021-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2021-2023 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -11,9 +11,9 @@
 #include <stdint.h>
 #include "aapcs_local.h"
 #include "async.h"
+#include "config_spm.h"
 #include "critical_section.h"
 #include "compiler_ext_defs.h"
-#include "config_spm.h"
 #include "ffm/psa_api.h"
 #include "runtime_defs.h"
 #include "stack_watermark.h"
@@ -51,6 +51,10 @@ struct context_ctrl_t *p_spm_thread_context = &spm_thread_context;
 
 /* Indicator point to the partition meta */
 uintptr_t *partition_meta_indicator_pos;
+
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+bool basepri_set_by_ipc_schedule;
+#endif
 
 /*
  * Query the state of current thread.
@@ -454,6 +458,19 @@ uint64_t ipc_schedule(void)
     /* Protect concurrent access to current thread/component and thread status */
     CRITICAL_SECTION_ENTER(cs);
 
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+    if (__get_BASEPRI() == 0) {
+        /*
+         * If BASEPRI is not set, that means an interrupt was taken when
+         * Non-Secure code was executing, and a scheduling is necessary because
+         * a secure partition become runnable.
+         */
+        SPM_ASSERT(!basepri_set_by_ipc_schedule);
+        basepri_set_by_ipc_schedule = true;
+        __set_BASEPRI(SECURE_THREAD_EXECUTION_PRIORITY);
+    }
+#endif
+
     pth_next = thrd_next();
     p_curr_ctx = (struct context_ctrl_t *)(CURRENT_THREAD->p_context_ctrl);
 
@@ -482,6 +499,25 @@ uint64_t ipc_schedule(void)
             }
         }
         ARCH_FLUSH_FP_CONTEXT();
+
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        if (IS_NS_AGENT_TZ(p_part_next->p_ldinf)) {
+            /*
+             * The Non-Secure Agent for TrustZone is going to be scheduled.
+             * A secure partition was scheduled previously, so BASEPRI must be
+             * set to non-zero. However BASEPRI only needs to be reset to 0 if
+             * Non-Secure code execution was interrupted (and not got to secure
+             * execution through a veneer call. Veneers set and unset BASEPRI on
+             * enter and exit). In this case basepri_set_by_ipc_schedule is set,
+             * so it can be used in the condition.
+             */
+            SPM_ASSERT(__get_BASEPRI() == SECURE_THREAD_EXECUTION_PRIORITY);
+            if (basepri_set_by_ipc_schedule) {
+                basepri_set_by_ipc_schedule = false;
+                __set_BASEPRI(0);
+            }
+        }
+#endif
 
         AAPCS_DUAL_U32_SET_A1(ctx_ctrls, (uint32_t)pth_next->p_context_ctrl);
 

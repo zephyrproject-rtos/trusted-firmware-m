@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -16,6 +16,7 @@
 #include "utilities.h"
 #include "psa/client.h"
 #include "psa/service.h"
+#include "tfm_arch.h"
 
 /*
  * This is the veneers of FF-M Client APIs for Armv8.0-m.
@@ -85,6 +86,10 @@ uint32_t tfm_psa_framework_version_veneer(void)
 {
     __ASM volatile(
         SYNTAX_UNIFIED
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r2, ="M2S(SECURE_THREAD_EXECUTION_PRIORITY)"\n"
+        "   msr    basepri, r2                                \n"
+#endif
         "   ldr    r2, [sp]                                   \n"
         "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
         "   cmp    r2, r3                                     \n"
@@ -95,6 +100,10 @@ uint32_t tfm_psa_framework_version_veneer(void)
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
         "   mov    r4, r1                                     \n"
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r1, =0x00                                  \n"
+        "   msr    basepri, r1                                \n"
+#endif
         "   bxns   lr                                         \n"
 
         "reent_panic1:                                        \n"
@@ -107,6 +116,10 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
 {
     __ASM volatile(
         SYNTAX_UNIFIED
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r2, ="M2S(SECURE_THREAD_EXECUTION_PRIORITY)"\n"
+        "   msr    basepri, r2                                \n"
+#endif
         "   ldr    r2, [sp]                                   \n"
         "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
         "   cmp    r2, r3                                     \n"
@@ -118,6 +131,10 @@ uint32_t tfm_psa_version_veneer(uint32_t sid)
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
         "   mov    r4, r1                                     \n"
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r1, =0x00                                  \n"
+        "   msr    basepri, r1                                \n"
+#endif
         "   bxns   lr                                         \n"
 
         "reent_panic2:                                        \n"
@@ -134,6 +151,10 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
     __ASM volatile(
         SYNTAX_UNIFIED
         "   push   {r2, r3}                                   \n"
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r2, ="M2S(SECURE_THREAD_EXECUTION_PRIORITY)"\n"
+        "   msr    basepri, r2                                \n"
+#endif
         "   ldr    r2, [sp, #8]                               \n"
         "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
         "   cmp    r2, r3                                     \n"
@@ -147,6 +168,10 @@ psa_status_t tfm_psa_call_veneer(psa_handle_t handle,
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
         "   mov    r4, r1                                     \n"
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r1, =0x00                                  \n"
+        "   msr    basepri, r1                                \n"
+#endif
         "   bxns   lr                                         \n"
 
         "reent_panic4:                                        \n"
@@ -162,6 +187,10 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
 {
     __ASM volatile(
         SYNTAX_UNIFIED
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r2, ="M2S(SECURE_THREAD_EXECUTION_PRIORITY)"\n"
+        "   msr    basepri, r2                                \n"
+#endif
         "   ldr    r2, [sp]                                   \n"
         "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
         "   cmp    r2, r3                                     \n"
@@ -172,6 +201,10 @@ psa_handle_t tfm_psa_connect_veneer(uint32_t sid, uint32_t version)
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
         "   mov    r4, r1                                     \n"
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r1, =0x00                                  \n"
+        "   msr    basepri, r1                                \n"
+#endif
         "   bxns   lr                                         \n"
 
         "reent_panic3:                                        \n"
@@ -184,6 +217,10 @@ void tfm_psa_close_veneer(psa_handle_t handle)
 {
     __ASM volatile(
         SYNTAX_UNIFIED
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r2, ="M2S(SECURE_THREAD_EXECUTION_PRIORITY)"\n"
+        "   msr    basepri, r2                                \n"
+#endif
         "   ldr    r2, [sp]                                   \n"
         "   ldr    r3, ="M2S(STACK_SEAL_PATTERN)"             \n"
         "   cmp    r2, r3                                     \n"
@@ -195,6 +232,10 @@ void tfm_psa_close_veneer(psa_handle_t handle)
         "   pop    {r1, r2}                                   \n"
         "   mov    lr, r2                                     \n"
         "   mov    r4, r1                                     \n"
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+        "   ldr    r1, =0x00                                  \n"
+        "   msr    basepri, r1                                \n"
+#endif
         "   bxns   lr                                         \n"
 
         "reent_panic5:                                        \n"

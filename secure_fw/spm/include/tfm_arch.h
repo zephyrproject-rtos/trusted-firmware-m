@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -67,10 +67,24 @@
  * priority level configurable on the platform, just below 0x80.
  */
 #define PENDSV_PRIO_FOR_SCHED ((1 << (__NVIC_PRIO_BITS - 1)) - 1)
-#else
+
+#if CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1
+#if (!defined(__ARM_ARCH_8_1M_MAIN__)) && (!defined(__ARM_ARCH_8M_MAIN__))
+#error CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT is not supported in Baseline implementations
+#endif /* (!defined(__ARM_ARCH_8_1M_MAIN__)) && (!defined(__ARM_ARCH_8M_MAIN__)) */
+/* IMPORTANT NOTE:
+ *
+ * When AIRCR.PRIS is set, the Non-Secure execution can act on
+ * FAULTMASK_NS, PRIMASK_NS or BASEPRI_NS register to boost its priority
+ * number up to the value 0x80. To mask NS interrupts in secure thread
+ * execution, set the priority of Secure thread mode execution to this value.
+ */
+#define SECURE_THREAD_EXECUTION_PRIORITY 0x80
+#endif /* CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT == 1 */
+#else /* CONFIG_TFM_USE_TRUSTZONE */
 /* If TZ is not in use, we have the full priority range available */
 #define PENDSV_PRIO_FOR_SCHED ((1 << __NVIC_PRIO_BITS) - 1)
-#endif
+#endif /* CONFIG_TFM_USE_TRUSTZONE */
 
 /* State context defined by architecture */
 struct tfm_state_context_t {

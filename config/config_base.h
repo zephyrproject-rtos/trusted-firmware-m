@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2022-2024, Arm Limited. All rights reserved.
  * Copyright (c) 2023-2024 Cypress Semiconductor Corporation (an Infineon
  * company) or an affiliate of Cypress Semiconductor Corporation. All rights
  * reserved.
@@ -263,6 +263,11 @@
 /* Do not run the scheduler after handling a secure interrupt if the NSPE was pre-empted */
 #ifndef CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED
 #define CONFIG_TFM_SCHEDULE_WHEN_NS_INTERRUPTED 0
+#endif
+
+/* Mask Non-Secure interrupts when executing in secure state. */
+#ifndef CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT
+#define CONFIG_TFM_SECURE_THREAD_MASK_NS_INTERRUPT 0
 #endif
 
 /* Enable OTP/NV_COUNTERS emulation in RAM */
