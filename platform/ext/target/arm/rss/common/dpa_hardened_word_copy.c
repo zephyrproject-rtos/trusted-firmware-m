@@ -13,10 +13,11 @@
 
 #include <assert.h>
 
-/* This isn't part of cc3xx_config.h as the initial values of the permutation
- * buffer need to be updated if it is increased.
+/**
+ * \brief This is a requirement for the maximum number of words that can
+ *        be copied through a single call to \ref cc3xx_dpa_hardened_word_copy
  */
-#define SECURE_COPY_MAX_WORDS 8
+#define CC3XX_STDLIB_SECURE_COPY_MAX_WORDS (256)
 
 static uint32_t xorshift_plus_128_lfsr(void)
 {
@@ -102,12 +103,17 @@ static void fisher_yates_shuffle(uint8_t *permutation_buf, size_t len)
 void dpa_hardened_word_copy(volatile uint32_t *dst,
                             volatile const uint32_t *src, size_t word_count)
 {
-    uint8_t permutation_buf[SECURE_COPY_MAX_WORDS] = {0, 1, 2, 3, 4, 5, 6, 7};
+    uint8_t permutation_buf[word_count]; /* This is a VLA */
     size_t idx;
 
-    /* Make sure this copy can be represented by the permutation buffer */
-    assert(word_count <= SECURE_COPY_MAX_WORDS);
+    /* We don't support more than 256 word permutations per copy, i.e. 2048 bit copy */
+    assert(word_count <= CC3XX_STDLIB_SECURE_COPY_MAX_WORDS);
 
+    /* Initializes the permutation buffer */
+    for (idx = 0; idx < word_count; idx++) {
+        permutation_buf[idx] = idx;
+    }
+    
     fisher_yates_shuffle(permutation_buf, word_count);
     for(idx = 0; idx < word_count; idx++) {
         kmu_random_delay(&KMU_DEV_S, KMU_DELAY_LIMIT_32_CYCLES);
