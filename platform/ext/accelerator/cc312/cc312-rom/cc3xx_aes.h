@@ -112,19 +112,19 @@ struct cc3xx_aes_state_t {
 };
 
 /**
- * \brief                        Initialize an AES operation.
+ * @brief                        Initialize an AES operation.
 
- * \param[in]  direction         Whether the operation should encrypt or decrypt.
- * \param[in]  mode              Which AES mode should be used.
- * \param[in]  key_id            Which user/hardware key should be used.
- * \param[in]  key               If key_id is set to CC3XX_AES_KEY_ID_USER_KEY,
+ * @param[in]  direction         Whether the operation should encrypt or decrypt.
+ * @param[in]  mode              Which AES mode should be used.
+ * @param[in]  key_id            Which user/hardware key should be used.
+ * @param[in]  key               If key_id is set to CC3XX_AES_KEY_ID_USER_KEY,
  *                               this buffer contains the key material.
- * \param[in]  key_size          The size of the key being used.
- * \param[in]  iv                The inital IV/CTR value for the mode. For modes
+ * @param[in]  key_size          The size of the key being used.
+ * @param[in]  iv                The inital IV/CTR value for the mode. For modes
  *                               without an IV/CTR, this may be NULL.
- * \param[in]  iv_len            The size of the IV input.
+ * @param[in]  iv_len            The size of the IV input.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_aes_init(cc3xx_aes_direction_t direction,
@@ -134,51 +134,51 @@ cc3xx_err_t cc3xx_aes_init(cc3xx_aes_direction_t direction,
 
 
 /**
- * \brief                        Get the current state of the AES operation.
+ * @brief                        Get the current state of the AES operation.
  *                               Allows for restartable AES operations.
 
- * \param[out] state            The cc3xx_aes_state_t to write the state into.
+ * @param[out] state            The cc3xx_aes_state_t to write the state into.
  */
 void cc3xx_aes_get_state(struct cc3xx_aes_state_t *state);
 /**
- * \brief                        Set the current state of the AES operation.
+ * @brief                        Set the current state of the AES operation.
  *                               Allows for restartable AES operations.
  *
- * \note                         This funtion initializes the hardware, there is
+ * @note                         This funtion initializes the hardware, there is
  *                               no need to seperately call cc3xx_aes_init.
 
- * \param[in]  state            The cc3xx_aes_state_t to read the state from.
+ * @param[in]  state            The cc3xx_aes_state_t to read the state from.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_aes_set_state(const struct cc3xx_aes_state_t *state);
 
 /**
- * \brief                        Set the length of the tag produced or verfied
+ * @brief                        Set the length of the tag produced or verfied
  *                               by AEAD/MAC modes.
  *
- * \note                         This function is a no-op in non-AEAD/MAC modes.
+ * @note                         This function is a no-op in non-AEAD/MAC modes.
  *
- * \param[in]  tag_len           The length of the tag.
+ * @param[in]  tag_len           The length of the tag.
  */
 void cc3xx_aes_set_tag_len(uint32_t tag_len);
 
 /**
- * \brief                        Set the length of the data that will be input.
+ * @brief                        Set the length of the data that will be input.
  *
- * \note                         This function is a no-op in all but CCM mode.
+ * @note                         This function is a no-op in all but CCM mode.
  *
- * \param[in]  to_crypt_len      How many bytes of data will be encrypted.
- * \param[in]  to_auth_len       How many bytes of data will be authenticated,
+ * @param[in]  to_crypt_len      How many bytes of data will be encrypted.
+ * @param[in]  to_auth_len       How many bytes of data will be authenticated,
  *                               but not encrypted.
  */
 void cc3xx_aes_set_data_len(uint32_t to_crypt_len, uint32_t to_auth_len);
 
 /**
- * \brief                        Get the amount of bytes that have been output
+ * @brief                        Get the amount of bytes that have been output
  *
- * \return                       Amount of bytes of output that has been written
+ * @return                       Amount of bytes of output that has been written
  *                               (which it not necessarily the same amount of
  *                               input that has been submitted, due to DMA
  *                               buffering)
@@ -186,11 +186,11 @@ void cc3xx_aes_set_data_len(uint32_t to_crypt_len, uint32_t to_auth_len);
 size_t cc3xx_aes_get_current_output_size(void);
 
 /**
- * \brief                        Set the buffer that the AES engine will output
+ * @brief                        Set the buffer that the AES engine will output
  *                               into.
  *
- * \param[out] out               The buffer to output into.
- * \param[in]  out_len           The size of the buffer to output into. If this
+ * @param[out] out               The buffer to output into.
+ * @param[in]  out_len           The size of the buffer to output into. If this
  *                               is smaller than the size of the data passed to
  *                               cc3xx_aes_update, that function will fail with
  *                               an error.
@@ -198,52 +198,52 @@ size_t cc3xx_aes_get_current_output_size(void);
 void cc3xx_aes_set_output_buffer(uint8_t *out, size_t out_len);
 
 /**
- * \brief                        Input data to be encrypted/decrypted into an
+ * @brief                        Input data to be encrypted/decrypted into an
  *                               AES operation.
 
- * \param[in]  in                A pointer to the data to be input.
- * \param[in]  in_len            The size of the data to be input.
+ * @param[in]  in                A pointer to the data to be input.
+ * @param[in]  in_len            The size of the data to be input.
  */
 cc3xx_err_t cc3xx_aes_update(const uint8_t* in, size_t in_len);
 
 /**
- * \brief                        Input data to be authenticated, but not
+ * @brief                        Input data to be authenticated, but not
  *                               encrypted or decrypted into an AEAD/MAC
  *                               operation.
  *
- * \note                         This function must not be called after
+ * @note                         This function must not be called after
  *                               cc3xx_aes_update has been called, until a new
  *                               operation is started.
 
- * \param[in]  in                A pointer to the data to be input.
- * \param[in]  in_len            The size of the data to be input.
+ * @param[in]  in                A pointer to the data to be input.
+ * @param[in]  in_len            The size of the data to be input.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 void cc3xx_aes_update_authed_data(const uint8_t* in, size_t in_len);
 
 /**
- * \brief                        Finish an AES operation. Calling this will
+ * @brief                        Finish an AES operation. Calling this will
  *                               encrypt/decrypt the final data.
  *
- * \param[in/out]  tag           The buffer to write the tag into or read and
+ * @param[in,out]  tag           The buffer to write the tag into or read and
  *                               compare the tag from, depending on direction.
  *                               The tag size will be 16 if not explicitly set,
  *                               and the buffer must be sized appropriately. Can
  *                               be NULL if using a non-AEAD/MAC mode.
  *
- * \param[out]     size          The size of the output that has been written.
+ * @param[out]     size          The size of the output that has been written.
  *
- * \return                       CC3XX_ERR_SUCCESS on success / tag comparison
+ * @return                       CC3XX_ERR_SUCCESS on success / tag comparison
  *                               succeeded, another cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_aes_finish(uint32_t *tag, size_t *size);
 
 /**
- * \brief                       Uninitialize the AES engine.
+ * @brief                       Uninitialize the AES engine.
  *
- * \note                        The AES engine is not implicitly uninitialized
+ * @note                        The AES engine is not implicitly uninitialized
  *                              on an error.
  *
  */

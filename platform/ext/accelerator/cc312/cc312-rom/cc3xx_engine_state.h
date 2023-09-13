@@ -29,7 +29,12 @@ enum cc3xx_engine_t {
 
 extern enum cc3xx_engine_t cc3xx_engine_in_use;
 
-void cc3xx_set_engine(enum cc3xx_engine_t);
+/**
+ * @brief Sets the engine being currently used
+ *
+ * @param engine Value of type \ref enum cc3xx_engine_t to be set
+ */
+void cc3xx_set_engine(enum cc3xx_engine_t engine);
 
 #ifdef __cplusplus
 }

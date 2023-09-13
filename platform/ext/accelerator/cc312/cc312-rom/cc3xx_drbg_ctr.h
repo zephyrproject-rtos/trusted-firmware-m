@@ -65,13 +65,14 @@ struct cc3xx_drbg_ctr_state_t {
 /**
  * @brief Instantiate the CTR_DRBG
  *
- * @param state               A pointer to a state structure
- * @param entropy             Buffer containing the entropy for the instantiation
- * @param entropy_len         Size in bytes of the entropy buffer \param entropy
- * @param nonce               Buffer containing the nonce
- * @param nonce_len           Size in bytes of the nonce buffer \param nonce
- * @param personalization     Buffer containing the personalization string
- * @param personalization_len Size in bytes of the personalization buffer \param personalization
+ * @param[out] state              A pointer to a state structure
+ * @param[in] entropy             Buffer containing the entropy for the instantiation
+ * @param[in] entropy_len         Size in bytes of the entropy buffer \param entropy
+ * @param[in] nonce               Buffer containing the nonce
+ * @param[in] nonce_len           Size in bytes of the nonce buffer \param nonce
+ * @param[in] personalization     Buffer containing the personalization string
+ * @param[in] personalization_len Size in bytes of the personalization buffer \param personalization
+ *
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_ctr_init(
@@ -83,11 +84,12 @@ cc3xx_err_t cc3xx_drbg_ctr_init(
 /**
  * @brief Generates random bits from the CTR_DRBG instance
  *
- * @param state                Pointer to an instantiated CTR_DRBG generator
- * @param len_bits             Size in bits to be generated. Must be byte aligned for simplicity
- * @param returned_bits        Pointer where the random bits will be written to
- * @param additional_input     Pointer to the additional input to be used
- * @param additional_input_len Size in bytes of the additional input to be used
+ * @param[in,out] state            Pointer to an instantiated CTR_DRBG generator
+ * @param[in] len_bits             Size in bits to be generated. Must be byte aligned for simplicity
+ * @param[out] returned_bits       Pointer where the random bits will be written to
+ * @param[in] additional_input     Pointer to the additional input to be used
+ * @param[in] additional_input_len Size in bytes of the additional input to be used
+ *
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_ctr_generate(
@@ -98,11 +100,12 @@ cc3xx_err_t cc3xx_drbg_ctr_generate(
 /**
  * @brief Reseeds the CTR_DRBG
  *
- * @param state                A pointer to a state structure
- * @param entropy              Entropy to be used for reseeding
- * @param entropy_len          Size in bytes of the entropy pointed by \param entropy
- * @param additional_input     Optional pointer containing additional input for reseeding
- * @param additional_input_len Size in bytes of the buffer pointed by \param additional_input
+ * @param[in,out] state            A pointer to a state structure
+ * @param[in] entropy              Entropy to be used for reseeding
+ * @param[in] entropy_len          Size in bytes of the entropy pointed by \param entropy
+ * @param[in] additional_input     Optional pointer containing additional input for reseeding
+ * @param[in] additional_input_len Size in bytes of the buffer pointed by \param additional_input
+ *
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_ctr_reseed(
@@ -113,7 +116,8 @@ cc3xx_err_t cc3xx_drbg_ctr_reseed(
 /**
  * @brief Un-initializes the state structure associated to the CTR_DRBG
  *
- * @param state Pointer to the state structure
+ * @param[out] state Pointer to the state structure
+ *
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_ctr_uninit(

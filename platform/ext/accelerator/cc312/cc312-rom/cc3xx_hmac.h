@@ -50,9 +50,9 @@ cc3xx_err_t cc3xx_hmac_set_key(
 /**
  * @brief Update the HMAC operation with a new chunk of data to authenticate
  *
- * @param state A pointer to a state structure
- * @param data Buffer containing the data to use for the update
- * @param data_length Size in bytes of the buffer \param data
+ * @param[in,out] state   A pointer to a state structure
+ * @param[in] data        Buffer containing the data to use for the update
+ * @param[in] data_length Size in bytes of the buffer \param data
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_hmac_update(
@@ -63,9 +63,9 @@ cc3xx_err_t cc3xx_hmac_update(
 /**
  * @brief Finalize the HMAC operation by producing the authentication tag
  *
- * @param state A pointer to a state structure
- * @param tag Output buffer
- * @param tag_size Size in bytes of the buffer \param tag
+ * @param[in,out] state A pointer to a state structure
+ * @param[out] tag      Output buffer
+ * @param[in] tag_size  Size in bytes of the buffer \param tag
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_hmac_finish(

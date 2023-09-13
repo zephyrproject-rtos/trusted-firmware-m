@@ -49,7 +49,7 @@ extern "C" {
 #ifdef CC3XX_CONFIG_DMA_REMAP_ENABLE
 
 /**
- * \brief                        Configure and enable a remap region. Any DMA
+ * @brief                        Configure and enable a remap region. Any DMA
  *                               input/output address that is within a remap
  *                               region will be altered to the offset into the
  *                               region plus the remap base (plus an extra
@@ -58,34 +58,34 @@ extern "C" {
  *                               to use the TCM subordinate interface (as cc3xx
  *                               has no access via the main TCM mapping).
 
- * \param[in]  remap_region_idx  Which remap region should be configured and
+ * @param[in]  remap_region_idx  Which remap region should be configured and
  *                               enabled.
- * \param[in]  remap_region_idx  The configuration for the remap region.
+ * @param[in]  remap_region_idx  The configuration for the remap region.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 void cc3xx_dma_remap_region_init(uint32_t remap_region_idx,
                                  cc3xx_dma_remap_region_t *region);
 /**
- * \brief                        Clear and disable a remap region.
+ * @brief                        Clear and disable a remap region.
  *
- * \param[in]  remap_region_idx  Which remap region should be cleared and
+ * @param[in]  remap_region_idx  Which remap region should be cleared and
  *                               disabled.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 void cc3xx_dma_remap_region_clear(uint32_t remap_region_idx);
 
 /**
- * \brief             Select which CPU memory space should be used for remap
+ * @brief             Select which CPU memory space should be used for remap
  *                    offsets. Useful for selecting different ITCM / DTCMs.
  *
- * \param[in]  cpuid  Which CPU's memory space should be accessed when
+ * @param[in]  cpuid  Which CPU's memory space should be accessed when
  *                    remapping.
  *
- * \return            CC3XX_ERR_SUCCESS on success, another cc3xx_err_t on
+ * @return            CC3XX_ERR_SUCCESS on success, another cc3xx_err_t on
  *                    error.
  */
 void cc3xx_dma_tcm_cpusel(uint32_t cpuid);
@@ -93,66 +93,66 @@ void cc3xx_dma_tcm_cpusel(uint32_t cpuid);
 #endif /* CC3XX_CONFIG_DMA_REMAP_ENABLE */
 
 /**
- * \brief             Use the cc3xx DMA to copy data directly without performing
+ * @brief             Use the cc3xx DMA to copy data directly without performing
  *                    cryptographic operations on it. This function can be used
  *                    as a drop-in replacement for memcpy.
  *
- * \param[out] dest   The pointer to copy data to.
- * \param[in]  src    The pointer to copy data from.
- * \param[in]  length The size of the data.
+ * @param[out] dest   The pointer to copy data to.
+ * @param[in]  src    The pointer to copy data from.
+ * @param[in]  length The size of the data.
  */
 void cc3xx_dma_copy_data(void* dest, const void* src, size_t length);
 
 /**
- * \brief             Set the DMA input location. This triggers DMA input to be
+ * @brief             Set the DMA input location. This triggers DMA input to be
  *                    started. This operation buffers data, and
  *                    cc3xx_dma_flush_buffer must be called to ensure all data
  *                    is processed.
  *
- * \param[in]  buf          The pointer to copy data from.
- * \param[in]  length       The size of the data.
- * \param[in]  write_output Whether the data should be output from the engine.
+ * @param[in]  buf          The pointer to copy data from.
+ * @param[in]  length       The size of the data.
+ * @param[in]  write_output Whether the data should be output from the engine.
  *
- * \return            CC3XX_ERR_SUCCESS on success, another cc3xx_err_t on
+ * @return            CC3XX_ERR_SUCCESS on success, another cc3xx_err_t on
  *                    error.
  */
 cc3xx_err_t cc3xx_dma_buffered_input_data(const void* buf, size_t length,
                                           bool write_output);
 
 /**
- * \brief             Flush the DMA buffer. Engine setup is not saved with the
+ * @brief             Flush the DMA buffer. Engine setup is not saved with the
  *                    DMA buffer, so the engine must be configured correctly
  *                    before this is called.
  *
- * \param[in]  zero_pad_first Whether the data should be zero-padded to the DMA
+ * @param[in]  zero_pad_first Whether the data should be zero-padded to the DMA
  *                            buffer size before being input.
  */
 void cc3xx_dma_flush_buffer(bool zero_pad_first);
 
 /**
- * \brief             Set the size of the DMA block buffer. This must be called
+ * @brief             Set the size of the DMA block buffer. This must be called
  *                    before the DMA is used, as the default value is 0, which
  *                    is invalid.
  *
- * \param[in]  size   The size of the block buffer. Must not be larger than
+ * @param[in]  size   The size of the block buffer. Must not be larger than
  *                    CC3XX_DMA_BLOCK_BUF_MAX_SIZE.
  */
 void cc3xx_dma_set_buffer_size(size_t size);
 
 /**
- * \brief             Set the DMA output location. This controls where the
+ * @brief             Set the DMA output location. This controls where the
  *                    DMA will output to after input is started.
  *
- * \param[out] buf    The pointer to output to.
- * \param[in]  length The size of the output location. The DMA will not copy
+ * @param[out] buf    The pointer to output to.
+ * @param[in]  length The size of the output location. The DMA will not copy
  *                    more data than this to the pointer.
  */
 void cc3xx_dma_set_output(void* buf, size_t length);
 
 /**
- * \brief                       Uninitialize the DMA.
+ * @brief                       Uninitialize the DMA.
  *
- * \note                        The DMA is not implicitly uninitialized
+ * @note                        The DMA is not implicitly uninitialized
  *                              on an error.
  *
  */

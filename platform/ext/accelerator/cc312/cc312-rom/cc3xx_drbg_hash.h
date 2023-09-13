@@ -36,13 +36,13 @@ struct cc3xx_drbg_hash_state_t {
 /**
  * @brief Instantiate the HASH_DRBG generator
  *
- * @param state Pointer to a \ref cc3xx_drbg_hash_state_t context
- * @param entropy Pointer to the collected entropy
- * @param entropy_len Size in bytes of the entropy
- * @param nonce Pointer to the nonce to be used
- * @param nonce_len Size in bytes of the nonce
- * @param personalization Pointer to the personalisation string to be used
- * @param personalization_len Size in bytes of the personalisation string
+ * @param[out] state              Pointer to a \ref cc3xx_drbg_hash_state_t context
+ * @param[in] entropy             Pointer to the collected entropy
+ * @param[in] entropy_len         Size in bytes of the entropy
+ * @param[in] nonce               Pointer to the nonce to be used
+ * @param[in] nonce_len           Size in bytes of the nonce
+ * @param[in] personalization     Pointer to the personalisation string to be used
+ * @param[in] personalization_len Size in bytes of the personalisation string
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_hash_init(
@@ -54,11 +54,11 @@ cc3xx_err_t cc3xx_drbg_hash_init(
 /**
  * @brief Generates random bits from the HASH_DRBG instance
  *
- * @param state Pointer to an instantiated HASH_DRBG generator
- * @param len_bits Size in bits to be generated. Must be byte aligned for simplicity
- * @param returned_bits Pointer holding the returned random bit string
- * @param additional_input Pointer to the additional input to be used
- * @param additional_input_len Size in bytes of the additional input to be used
+ * @param[in,out] state            Pointer to an instantiated HASH_DRBG generator
+ * @param[in] len_bits             Size in bits to be generated. Must be byte aligned for simplicity
+ * @param[out] returned_bits       Pointer holding the returned random bit string
+ * @param[in] additional_input     Pointer to the additional input to be used
+ * @param[in] additional_input_len Size in bytes of the additional input to be used
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_hash_generate(
@@ -69,11 +69,11 @@ cc3xx_err_t cc3xx_drbg_hash_generate(
 /**
  * @brief Reseeds the HASH_DRBG instance
  *
- * @param state Pointer to an instantiated HASH_DRBG generator to reseed
- * @param entropy Pointer to the additional entropy to use for reseeding
- * @param entropy_len Size in bytes of the additional entropy
- * @param additional_input Pointer to the additional input to use for reseeding
- * @param additional_input_len Size in bytes of the additional input buffer
+ * @param[in,out] state            Pointer to an instantiated HASH_DRBG generator to reseed
+ * @param[in] entropy              Pointer to the additional entropy to use for reseeding
+ * @param[in] entropy_len          Size in bytes of the additional entropy
+ * @param[in] additional_input     Pointer to the additional input to use for reseeding
+ * @param[in] additional_input_len Size in bytes of the additional input buffer
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_hash_reseed(
@@ -84,7 +84,7 @@ cc3xx_err_t cc3xx_drbg_hash_reseed(
 /**
  * @brief Un-initializes the state structure associated to the HASH_DRBG
  *
- * @param state Pointer to the structure
+ * @param[out] state Pointer to the state structure
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_hash_uninit(struct cc3xx_drbg_hash_state_t *state);

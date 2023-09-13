@@ -19,29 +19,29 @@ extern "C" {
 /*
  */
 /**
- * \brief                        This is a counter-mode KDF complying with NIST
+ * @brief                        This is a counter-mode KDF complying with NIST
  *                               SP800-108 where the PRF is a the AES cipher
  *                               using the CMAC mode of operation as per NIST
  *                               SP800-38B.
  *
- * \note                         This funtion only outputs keys whose size is a
+ * @note                         This funtion only outputs keys whose size is a
  *                               multiple of the output size of the AES-CMAC
  *                               operation (16 bytes).
  *
- * \param[in]  key_id            Which user/hardware key should be used.
- * \param[in]  key               If key_id is set to CC3XX_AES_KEY_ID_USER_KEY,
+ * @param[in]  key_id            Which user/hardware key should be used.
+ * @param[in]  key               If key_id is set to CC3XX_AES_KEY_ID_USER_KEY,
  *                               this buffer contains the key material.
- * \param[in]  key_size          The size of the key being used.
- * \param[in]  label             The label to input into the derivation
+ * @param[in]  key_size          The size of the key being used.
+ * @param[in]  label             The label to input into the derivation
  *                               operation.
- * \param[in]  label_length      The length of the label.
- * \param[in]  context           The context to input into the derivation
+ * @param[in]  label_length      The length of the label.
+ * @param[in]  context           The context to input into the derivation
  *                               operation.
- * \param[in]  context_length    The length of the context.
- * \param[out] output_key        The buffer to output the key into.
- * \param[in] out_length         The size of the key to derive.
+ * @param[in]  context_length    The length of the context.
+ * @param[out] output_key        The buffer to output the key into.
+ * @param[in] out_length         The size of the key to derive.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_kdf_cmac(cc3xx_aes_key_id_t key_id, const uint32_t *key,

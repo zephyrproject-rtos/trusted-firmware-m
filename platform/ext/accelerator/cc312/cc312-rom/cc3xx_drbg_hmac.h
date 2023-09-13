@@ -38,13 +38,13 @@ struct cc3xx_drbg_hmac_state_t {
 /**
  * @brief Instantiate the HMAC_DRBG
  *
- * @param state A pointer to a state structure
- * @param entropy Buffer containing the entropy for the instantiation
- * @param entropy_len Size in bytes of the entropy buffer \param entropy
- * @param nonce Buffer containing the nonce
- * @param nonce_len Size in bytes of the nonce buffer \param nonce
- * @param personalization Buffer containing the personalization string
- * @param personalization_len Size in bytes of the personalization buffer \param personalization
+ * @param[out] state              A pointer to a state structure
+ * @param[in] entropy             Buffer containing the entropy for the instantiation
+ * @param[in] entropy_len         Size in bytes of the entropy buffer \param entropy
+ * @param[in] nonce               Buffer containing the nonce
+ * @param[in] nonce_len           Size in bytes of the nonce buffer \param nonce
+ * @param[in] personalization     Buffer containing the personalization string
+ * @param[in] personalization_len Size in bytes of the personalization buffer \param personalization
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_hmac_instantiate(
@@ -54,13 +54,13 @@ cc3xx_err_t cc3xx_drbg_hmac_instantiate(
     const uint8_t *personalization, size_t personalization_len);
 
 /**
- * @brief Generate up to len bytes of data
+ * @brief Generate random bits of data using HMAC_DRBG
  *
- * @param state A pointer to a state structure
- * @param len_bits Size in bits to be generated. Note that this does not need to be byte aligned.
- * @param returned_bits Buffer to hold returned bits, must be of size ceil(len_bits/8) bytes
- * @param additional_input Optional pointer containing the additional input to be added
- * @param additional_input_len Size in bytes of the additional input \param additional_input
+ * @param[in,out] state            A pointer to a state structure
+ * @param[in] len_bits             Size in bits to be generated. Note that this does not need to be byte aligned.
+ * @param[out] returned_bits       Buffer to hold returned bits, must be of size ceil(len_bits/8) bytes
+ * @param[in] additional_input     Optional pointer containing the additional input to be added
+ * @param[in] additional_input_len Size in bytes of the additional input \param additional_input
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_hmac_generate(
@@ -71,11 +71,11 @@ cc3xx_err_t cc3xx_drbg_hmac_generate(
 /**
  * @brief Reseeds the HMAC_DRBG
  *
- * @param state A pointer to a state structure
- * @param entropy Entropy to be used for reseeding
- * @param entropy_len Size in bytes of the entropy pointed by \param entropy
- * @param additional_input Optional pointer containing additional input for reseeding
- * @param additional_input_len Size in bytes of the buffer pointed by \param additional_input
+ * @param[in,out] state            A pointer to a state structure
+ * @param[in] entropy              Entropy to be used for reseeding
+ * @param[in] entropy_len          Size in bytes of the entropy pointed by \param entropy
+ * @param[in] additional_input     Optional pointer containing additional input for reseeding
+ * @param[in] additional_input_len Size in bytes of the buffer pointed by \param additional_input
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_hmac_reseed(
@@ -86,7 +86,7 @@ cc3xx_err_t cc3xx_drbg_hmac_reseed(
 /**
  * @brief Un-initializes the state structure associated to the HMAC_DRBG
  *
- * @param state Pointer to the structure
+ * @param[out] state Pointer to the state structure
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_drbg_hmac_uninit(struct cc3xx_drbg_hmac_state_t *state);

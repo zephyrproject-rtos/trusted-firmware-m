@@ -43,7 +43,6 @@ static inline uint64_t bswap_64(uint64_t in) {
     return out;
 }
 
-
 #ifdef __cplusplus
 }
 #endif

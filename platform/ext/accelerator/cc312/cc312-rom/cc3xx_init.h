@@ -18,17 +18,17 @@ extern "C" {
 #endif
 
 /**
- * \brief                        Initialize the CC3XX accelerator.
+ * @brief                        Initialize the CC3XX accelerator.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_init(void);
 
 /**
- * \brief                        Uninitialize the CC3XX accelerator.
+ * @brief                        Uninitialize the CC3XX accelerator.
  *
- * \return                       CC3XX_ERR_SUCCESS on success, another
+ * @return                       CC3XX_ERR_SUCCESS on success, another
  *                               cc3xx_err_t on error.
  */
 cc3xx_err_t cc3xx_uninit(void);
