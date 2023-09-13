@@ -14,10 +14,10 @@ target_sources(tfm_s
         ${CMAKE_CURRENT_SOURCE_DIR}/tfm_hal_platform_reset_halt.c
 )
 
-add_library(flash_drivers STATIC)
+add_library(flash_drivers INTERFACE)
 
 target_include_directories(flash_drivers
-    PRIVATE
+    INTERFACE
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
@@ -27,7 +27,7 @@ target_include_directories(flash_drivers
 )
 
 target_sources(flash_drivers
-    PRIVATE
+    INTERFACE
         cmsis_drivers/Driver_Flash.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/sst26vf064b/spi_sst26vf064b_flash_lib.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/qspi/xilinx_pg153_axi/xilinx_pg153_axi_qspi_controller_drv.c
@@ -35,7 +35,7 @@ target_sources(flash_drivers
 )
 
 target_link_libraries(flash_drivers
-    PRIVATE
+    INTERFACE
         cmsis_includes_s
 )
 

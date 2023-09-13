@@ -9,10 +9,10 @@ cmake_policy(SET CMP0076 NEW)
 
 include(${CORSTONE300_COMMON_DIR}/common.cmake)
 
-add_library(flash_drivers STATIC)
+add_library(flash_drivers INTERFACE)
 
 target_include_directories(flash_drivers
-    PRIVATE
+    INTERFACE
         ${PLATFORM_DIR}/ext/driver
         ${CMAKE_CURRENT_SOURCE_DIR}/partition
         ${CORSTONE300_COMMON_DIR}/partition
@@ -21,13 +21,13 @@ target_include_directories(flash_drivers
 )
 
 target_sources(flash_drivers
-    PRIVATE
+    INTERFACE
         cmsis_drivers/Driver_Flash.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
 )
 
 target_link_libraries(flash_drivers
-    PRIVATE
+    INTERFACE
         cmsis_includes_s
 )
 

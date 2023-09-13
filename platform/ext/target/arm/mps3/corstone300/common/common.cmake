@@ -122,21 +122,24 @@ target_compile_options(cmsis_includes_s
         ${COMPILER_CMSE_FLAG}
 )
 
-target_compile_options(cmsis_includes_s
-    INTERFACE
-        ${COMPILER_CP_FLAG}
-)
-
-target_link_options(cmsis_includes_s
-    INTERFACE
-        ${LINKER_CP_OPTION}
-)
 
 add_library(cmsis_includes_ns INTERFACE)
 target_link_libraries(cmsis_includes_ns INTERFACE cmsis_includes)
 target_include_directories(cmsis_includes_ns
     INTERFACE
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/non_secure
+)
+
+add_library(cp_flags INTERFACE)
+
+target_compile_options(cp_flags
+    INTERFACE
+        ${COMPILER_CP_FLAG}
+)
+
+target_link_options(cp_flags
+    INTERFACE
+        ${LINKER_CP_OPTION}
 )
 
 #========================= Linking ===============================#
@@ -157,16 +160,17 @@ target_link_libraries(platform_bl2
 target_link_libraries(platform_s
     PUBLIC
         cmsis_includes_s
+        cp_flags
     INTERFACE
         device_definition
     PRIVATE
         device_definition_s
-
 )
 
 target_link_libraries(platform_ns
     PUBLIC
         cmsis_includes_ns
+        cp_flags
     PRIVATE
         device_definition_ns
 )
