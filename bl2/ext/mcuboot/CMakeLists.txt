@@ -164,8 +164,7 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
     add_custom_command(OUTPUT tfm_s_signed.bin
         DEPENDS $<TARGET_FILE_DIR:tfm_s>/tfm_s.bin
         DEPENDS tfm_s_bin signing_layout_s
-        # FIXME: combining the two generator prepends the current path, so two is used
-        DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,> $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key_s.pem,>
+        DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
         WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
         #Sign secure binary image with provided secret key
@@ -219,8 +218,7 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
         add_custom_command(OUTPUT tfm_ns_signed.bin
             DEPENDS $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             DEPENDS tfm_ns_bin signing_layout_ns
-            # FIXME: combining the two generator prepends the current path, so two is used
-            DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,> $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key_ns.pem,>
+            DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
             WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
 
             #Sign non-secure binary image with provided secret key
@@ -272,7 +270,7 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
                 WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
                 DEPENDS tfm_s_ns_bin tfm_s_ns.bin
                 DEPENDS signing_layout_s
-                DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,> $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key_s.pem,>
+                DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
 
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/wrapper/wrapper.py
                 -v ${MCUBOOT_IMAGE_VERSION_S}

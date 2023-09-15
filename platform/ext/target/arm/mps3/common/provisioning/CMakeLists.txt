@@ -102,12 +102,8 @@ add_custom_target(provisioning_data
 )
 
 add_custom_command(OUTPUT provisioning_data.c
-    # FIXME: combining the two generator prepends the current path, so two is used
-    DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
-            $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,$<TARGET_FILE_DIR:bl2>/generated_private_key_s.pem,${MCUBOOT_KEY_S}>
-    # FIXME: combining the two generator prepends the current path, so two is used
-    DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
-            $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,$<TARGET_FILE_DIR:bl2>/generated_private_key_ns.pem,${MCUBOOT_KEY_NS}>
+    DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,${MCUBOOT_KEY_S}>
+    DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,${MCUBOOT_KEY_NS}>
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/provisioning_data_template.jinja2
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_data.py
     WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
