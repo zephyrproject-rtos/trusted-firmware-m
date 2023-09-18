@@ -1,14 +1,13 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+# Copyright (c) 2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-# preload.cmake is used to set things that related to the platform that are both
-# immutable and global, which is to say they should apply to any kind of project
-# that uses this platform. In practise this is normally compiler definitions and
-# variables related to hardware.
+# In the new split build this file defines a platform specific parameters
+# like mcpu core, arch etc and to be included by NS toolchain file.
+# A platform owner is free to configure toolchain here for building NS side.
 
 # Set architecture and CPU
 set(TFM_SYSTEM_PROCESSOR cortex-m33)
