@@ -20,6 +20,7 @@
 #include "platform_base_address.h"
 #include "platform_regs.h"
 #include "host_device_definition.h"
+#include "rse_platform_defs.h"
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_hw.h"
@@ -216,7 +217,7 @@ int boot_platform_post_load(uint32_t image_id)
                                      (struct rse_sysctrl_t *)RSE_SYSCTRL_BASE_S;
 
         /* Release SCP CPU from wait */
-        sysctrl->gretreg = 0x1;
+        RELEASE_SCP_CPU(sysctrl->gretreg);
 
         /* Wait for SCP to finish its startup */
         BOOT_LOG_INF("Waiting for SCP BL1 started event");
