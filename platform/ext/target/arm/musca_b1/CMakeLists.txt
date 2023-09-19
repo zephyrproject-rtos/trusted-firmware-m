@@ -25,7 +25,7 @@ target_compile_definitions(platform_region_defs
 # Specify the location of platform specific build dependencies.
 target_sources(tfm_s
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_musca.c
+        Device/Source/startup_musca.c
 )
 
 # Use a common scatter file for Isolation L1 and L2, a dedicated one for Isolation L3
@@ -58,12 +58,12 @@ endif()
 if(BL2)
     target_sources(bl2
         PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_musca.c
+            Device/Source/startup_musca.c
     )
     target_add_scatter_file(bl2
-            $<$<C_COMPILER_ID:ARMClang>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/armclang/musca_bl2.sct>
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/gcc/musca_bl2.ld>
-            $<$<C_COMPILER_ID:IAR>:${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/iar/musca_bl2.icf>
+            $<$<C_COMPILER_ID:ARMClang>:Device/Source/armclang/musca_bl2.sct>
+            $<$<C_COMPILER_ID:GNU>:Device/Source/gcc/musca_bl2.ld>
+            $<$<C_COMPILER_ID:IAR>:Device/Source/iar/musca_bl2.icf>
     )
 endif()
 

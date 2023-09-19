@@ -218,10 +218,6 @@ install(FILES ${PLATFORM_DIR}/ns/toolchain_ns_GNUARM.cmake
 install(DIRECTORY ${TARGET_PLATFORM_PATH}/ns/
         DESTINATION ${INSTALL_PLATFORM_NS_DIR} OPTIONAL)
 
-# Export platform abilities
-install(FILES ${TARGET_PLATFORM_PATH}/config.cmake
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR} OPTIONAL)
-
 install(FILES
         ${CMAKE_SOURCE_DIR}/lib/fih/inc/fih.h
         ${PLATFORM_DIR}/include/tfm_plat_ns.h

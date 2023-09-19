@@ -25,8 +25,9 @@ set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
 
 # Set compiler ID explicitly as it's not detected at this moment
 set(CMAKE_C_COMPILER_ID GNU)
-# A platfomr sprecific MCPU and architecture flags for 2 toolchains
-include(${CONFIG_SPE_PATH}/platform/toolchain_ext.cmake)
+
+# A platfomr sprecific MCPU and architecture flags for NS side
+include(${CONFIG_SPE_PATH}/platform/cpuarch.cmake)
 
 add_compile_options(
     -specs=nano.specs

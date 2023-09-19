@@ -104,31 +104,6 @@ target_compile_definitions(platform_s
         $<$<BOOL:${TEST_S_FPU}>:TEST_S_FPU>
 )
 
-#========================= Platform Non-Secure ================================#
-
-target_sources(platform_ns
-    PRIVATE
-        native_drivers/arm_uart_drv.c
-        native_drivers/timer_cmsdk/timer_cmsdk.c
-        cmsis_drivers/Driver_USART.c
-        retarget/platform_retarget_dev.c
-        cmsis_core/system_core_init.c
-        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${CMAKE_CURRENT_SOURCE_DIR}/plat_test.c>
-    INTERFACE
-        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_core/an521_ns_init.c>
-)
-
-target_include_directories(platform_ns
-    PUBLIC
-        .
-        ../common
-        ${PLATFORM_DIR}/..
-        retarget
-        cmsis_core
-        native_drivers
-        native_drivers/timer_cmsdk
-)
-
 #========================= Platform BL2 =======================================#
 
 if(BL2)
@@ -164,3 +139,41 @@ target_sources(tfm_spm
         faults.c
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
 )
+
+#========================= Files for building NS platform =====================#
+
+install(FILES ${PLATFORM_DIR}/ext/common/uart_stdout.c
+              ${TARGET_PLATFORM_PATH}/native_drivers/arm_uart_drv.c
+              ${TARGET_PLATFORM_PATH}/native_drivers/timer_cmsdk/timer_cmsdk.c
+              ${TARGET_PLATFORM_PATH}/cmsis_drivers/Driver_USART.c
+              ${TARGET_PLATFORM_PATH}/retarget/platform_retarget_dev.c
+              ${TARGET_PLATFORM_PATH}/cmsis_core/an521_ns_init.c
+              DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(DIRECTORY ${TARGET_PLATFORM_PATH}/cmsis_core
+                  ${TARGET_PLATFORM_PATH}/retarget
+              DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(DIRECTORY ${PLATFORM_DIR}/ext/common
+                  ${PLATFORM_DIR}/ext/driver
+              DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
+
+install(FILES ${TARGET_PLATFORM_PATH}/partition/region_defs.h
+              ${TARGET_PLATFORM_PATH}/partition/flash_layout.h
+              ${TARGET_PLATFORM_PATH}/native_drivers/arm_uart_drv.h
+              ${TARGET_PLATFORM_PATH}/native_drivers/timer_cmsdk/timer_cmsdk.h
+              ${TARGET_PLATFORM_PATH}/native_drivers/mpc_sie200_drv.h
+              ${TARGET_PLATFORM_PATH}/native_drivers/ppc_sse200_drv.h
+              ${TARGET_PLATFORM_PATH}/retarget/platform_retarget.h
+              ${TARGET_PLATFORM_PATH}/retarget/platform_retarget_pins.h
+              ${TARGET_PLATFORM_PATH}/target_cfg.h
+              ${TARGET_PLATFORM_PATH}/device_cfg.h
+              ${TARGET_PLATFORM_PATH}/tfm_peripherals_def.h
+              ${TARGET_PLATFORM_PATH}/cmsis_driver_config.h
+              ${TARGET_PLATFORM_PATH}/RTE_Device.h
+              ${PLATFORM_DIR}/ext/common/uart_stdout.h
+              ${PLATFORM_DIR}/ext/driver/Driver_USART.h
+              ${PLATFORM_DIR}/ext/driver/Driver_Common.h
+              ${PLATFORM_DIR}/include/tfm_plat_defs.h
+              ${CMAKE_SOURCE_DIR}/lib/fih/inc/fih.h
+              DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
