@@ -60,9 +60,9 @@ static fih_int tfm_core_init(void)
         if (plat_err != TFM_PLAT_ERR_SUCCESS) {
             FIH_RET(fih_int_encode(SPM_ERROR_GENERIC));
         }
-    } else {
-        tfm_plat_provisioning_check_for_dummy_keys();
     }
+
+    tfm_plat_provisioning_check_for_dummy_keys();
 
     /* Configures architecture */
     tfm_arch_config_extensions();

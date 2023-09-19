@@ -126,9 +126,8 @@ int main(void)
             BOOT_LOG_ERR("Provisioning failed");
             FIH_PANIC;
         }
-    } else {
-        tfm_plat_provisioning_check_for_dummy_keys();
     }
+    tfm_plat_provisioning_check_for_dummy_keys();
 
     FIH_CALL(boot_nv_security_counter_init, fih_rc);
     if (FIH_NOT_EQ(fih_rc, FIH_SUCCESS)) {
