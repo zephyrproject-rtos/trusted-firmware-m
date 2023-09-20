@@ -26,22 +26,4 @@ target_sources(flash_drivers
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
 )
 
-target_link_libraries(flash_drivers
-    INTERFACE
-        cmsis_includes_s
-)
-
-target_link_libraries(platform_bl2
-    PRIVATE
-        flash_drivers
-)
-
-target_link_libraries(platform_s
-    PRIVATE
-        flash_drivers
-)
-
-target_link_libraries(platform_ns
-    PRIVATE
-        flash_drivers
-)
+include(${CORSTONE300_COMMON_DIR}/libflash_drivers.cmake)

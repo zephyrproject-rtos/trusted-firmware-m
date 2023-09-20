@@ -47,6 +47,10 @@ if(NS)
             $<$<AND:$<C_COMPILER_ID:GNU>,$<NOT:$<OR:$<BOOL:${CONFIG_TFM_ENABLE_FP}>,$<BOOL:${CONFIG_TFM_ENABLE_MVE_FP}>>>>:CMSIS_5_RTX_V8MMN>
             $<$<C_COMPILER_ID:IAR>:CMSIS_5_RTX_V81MMN>
     )
+    target_link_options(tfm_ns
+        PUBLIC
+            ${LINKER_CP_OPTION}
+    )
 endif()
 
 if(BL2)
@@ -130,18 +134,6 @@ target_include_directories(cmsis_includes_ns
         ${CORSTONE300_COMMON_DIR}/cmsis_drivers/config/non_secure
 )
 
-add_library(cp_flags INTERFACE)
-
-target_compile_options(cp_flags
-    INTERFACE
-        ${COMPILER_CP_FLAG}
-)
-
-target_link_options(cp_flags
-    INTERFACE
-        ${LINKER_CP_OPTION}
-)
-
 #========================= Linking ===============================#
 
 target_link_libraries(device_definition_s PUBLIC device_definition)
@@ -160,7 +152,6 @@ target_link_libraries(platform_bl2
 target_link_libraries(platform_s
     PUBLIC
         cmsis_includes_s
-        cp_flags
     INTERFACE
         device_definition
     PRIVATE
@@ -170,7 +161,6 @@ target_link_libraries(platform_s
 target_link_libraries(platform_ns
     PUBLIC
         cmsis_includes_ns
-        cp_flags
     PRIVATE
         device_definition_ns
 )
