@@ -28,8 +28,10 @@ cc3xx_err_t cc3xx_hmac_set_key(
     const uint8_t *p_key = key;
     size_t key_length = key_size;
 
-    if ((err = cc3xx_hash_init(alg)) != CC3XX_ERR_SUCCESS)
-        goto out;
+    err = cc3xx_hash_init(alg);
+    if (err != CC3XX_ERR_SUCCESS) {
+        return err;
+    }
 
     if (key_size > CC3XX_HMAC_BLOCK_SIZE) {
         /* hash the key to L bytes */
