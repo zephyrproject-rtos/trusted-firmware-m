@@ -83,11 +83,11 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
         # support
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/assemble.py
             --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
-            --secure ${CMAKE_CURRENT_SOURCE_DIR}/outputs/tfm_s_signed.bin
+            --secure ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s_signed.bin
             --non_secure ${CMAKE_BINARY_DIR}/tfm_ns_signed.bin
             --output ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
         # merge bootloader and application into Hex image for upload
-        COMMAND srec_cat ${CMAKE_CURRENT_SOURCE_DIR}/outputs/bl2.bin -Binary -offset 0xA000000
+        COMMAND srec_cat ${CMAKE_CURRENT_SOURCE_DIR}/bin/bl2.bin -Binary -offset 0xA000000
             ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin -Binary -offset 0xA020000
             -o ${CMAKE_BINARY_DIR}/tfm.hex -Intel
     )
@@ -101,7 +101,7 @@ else()
         # concatenate S + NS binaries into tfm_s_ns.bin
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/assemble.py
             --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
-            --secure ${CMAKE_CURRENT_SOURCE_DIR}/outputs/tfm_s.bin
+            --secure ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s.bin
             --non_secure ${CMAKE_BINARY_DIR}/tfm_ns.bin
             --output ${CMAKE_BINARY_DIR}/tfm_s_ns.bin
 

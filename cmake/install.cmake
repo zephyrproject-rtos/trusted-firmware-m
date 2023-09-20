@@ -8,17 +8,8 @@
 #-------------------------------------------------------------------------------
 
 install(DIRECTORY ${CMAKE_BINARY_DIR}/bin/
-        DESTINATION outputs
+        DESTINATION bin
 )
-
-set(INTERFACE_INC_DIR ${CMAKE_SOURCE_DIR}/interface/include)
-set(INTERFACE_SRC_DIR ${CMAKE_SOURCE_DIR}/interface/src)
-
-set(INSTALL_INTERFACE_INC_DIR    ${TFM_INSTALL_PATH}/interface/include)
-set(INSTALL_INTERFACE_SRC_DIR    ${TFM_INSTALL_PATH}/interface/src)
-set(INSTALL_INTERFACE_LIB_DIR    ${TFM_INSTALL_PATH}/interface/lib)
-set(INSTALL_PLATFORM_NS_DIR      ${TFM_INSTALL_PATH}/platform)
-set(INSTALL_CMAKE_DIR            ${TFM_INSTALL_PATH}/cmake)
 
 # export veneer lib
 if (CONFIG_TFM_USE_TRUSTZONE)
@@ -168,8 +159,6 @@ endif()
 
 ##################### Export image signing information #########################
 
-set(INSTALL_IMAGE_SIGNING_DIR ${TFM_INSTALL_PATH}/image_signing)
-
 if(BL2)
     install(DIRECTORY bl2/ext/mcuboot/scripts
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}
@@ -211,19 +200,15 @@ endif()
 install(CODE "MESSAGE(\"----- Installing platform NS -----\")")
 
 install(FILES ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
-              DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
-install(FILES ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
-              DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
-install(FILES ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
+              ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
+              ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
               DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(DIRECTORY ${PLATFORM_DIR}/ext/cmsis
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(FILES ${CMAKE_SOURCE_DIR}/cmake/spe-CMakeLists.cmake
-        DESTINATION ${TFM_INSTALL_PATH}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}
         RENAME CMakeLists.txt)
 
 install(FILES ${PLATFORM_DIR}/ns/toolchain_ns_GNUARM.cmake
@@ -248,12 +233,12 @@ if (TARGET psa_crypto_config)
 # "psa_crypto_config" target exists not in all configurations.
 # Functionally "psa_crypto_config" provides only include path for Crypto accelerator.
 install(TARGETS tfm_config psa_crypto_config psa_interface
-        DESTINATION ${TFM_INSTALL_PATH}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}
         EXPORT tfm-config
         )
 else()
         install(TARGETS tfm_config psa_interface
-        DESTINATION ${TFM_INSTALL_PATH}
+        DESTINATION ${CMAKE_INSTALL_PREFIX}
         EXPORT tfm-config
         )
 endif()
@@ -269,6 +254,3 @@ install(EXPORT tfm-config
 
 configure_file(${CMAKE_SOURCE_DIR}/config/spe_config.cmake.in
                ${INSTALL_CMAKE_DIR}/spe_config.cmake @ONLY)
-
-##################### Platform-specific installation ###########################
-include(${TARGET_PLATFORM_PATH}/install.cmake OPTIONAL)

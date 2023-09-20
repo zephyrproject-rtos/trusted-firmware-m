@@ -14,7 +14,17 @@ set(TFM_TOOLCHAIN_FILE                  ${CMAKE_SOURCE_DIR}/toolchain_GNUARM.cma
 set(TFM_PLATFORM                        ""          CACHE STRING    "Platform to build TF-M for. Must be either a relative path from [TF-M]/platform/ext/target, or an absolute path.")
 set(CROSS_COMPILE                       arm-none-eabi CACHE STRING  "Cross-compilation triplet")
 
-set(TFM_INSTALL_PATH                    ${CMAKE_BINARY_DIR}/install CACHE PATH "Path to which to install TF-M files")
+set(CMAKE_INSTALL_PREFIX                ${CMAKE_BINARY_DIR}/api_ns CACHE PATH "Install prefix")
+
+set(INTERFACE_INC_DIR                   ${CMAKE_SOURCE_DIR}/interface/include)
+set(INTERFACE_SRC_DIR                   ${CMAKE_SOURCE_DIR}/interface/src)
+
+set(INSTALL_INTERFACE_INC_DIR           ${CMAKE_INSTALL_PREFIX}/interface/include)
+set(INSTALL_INTERFACE_SRC_DIR           ${CMAKE_INSTALL_PREFIX}/interface/src)
+set(INSTALL_INTERFACE_LIB_DIR           ${CMAKE_INSTALL_PREFIX}/interface/lib)
+set(INSTALL_IMAGE_SIGNING_DIR           ${CMAKE_INSTALL_PREFIX}/image_signing)
+set(INSTALL_CMAKE_DIR                   ${CMAKE_INSTALL_PREFIX}/cmake)
+set(INSTALL_PLATFORM_NS_DIR             ${CMAKE_INSTALL_PREFIX}/platform)
 
 set(TFM_DEBUG_SYMBOLS                   ON          CACHE BOOL      "Add debug symbols. Note that setting CMAKE_BUILD_TYPE to Debug or RelWithDebInfo will also add debug symbols.")
 set(TFM_CODE_COVERAGE                   OFF         CACHE BOOL      "Whether to build the binary for lcov tools")
