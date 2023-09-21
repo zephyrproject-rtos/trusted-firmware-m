@@ -11,6 +11,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "psa/crypto.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,6 +26,13 @@ extern "C" {
  * \return Returns 0 on success or a negative integer on failure.
  */
 int dpe_plat_get_rot_cdi(uint8_t *buf, size_t buf_len);
+
+/**
+ * \brief Get the key ID of the root attestation key.
+ *
+ * \return Returns key ID.
+ */
+psa_key_id_t dpe_plat_get_root_attest_key_id(void);
 
 #ifdef __cplusplus
 }

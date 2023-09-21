@@ -8,6 +8,7 @@
 #include "dpe_plat.h"
 #include "device_definition.h"
 #include "rss_kmu_slot_ids.h"
+#include "tfm_crypto_defs.h"
 
 int dpe_plat_get_rot_cdi(uint8_t *buf, size_t buf_len)
 {
@@ -19,4 +20,9 @@ int dpe_plat_get_rot_cdi(uint8_t *buf, size_t buf_len)
     }
 
     return 0;
+}
+
+psa_key_id_t dpe_plat_get_root_attest_key_id(void)
+{
+    return TFM_BUILTIN_KEY_ID_IAK;
 }
