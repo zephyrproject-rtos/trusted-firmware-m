@@ -10,15 +10,14 @@
 #include "cc3xx_hash.h"
 #include "cc3xx_hmac.h"
 
+/* SHA-1, SHA-224 and SHA-256 have all the same block size */
 #define SHA256_BLOCK_SIZE (64)
-
-/* Hardcode support for SHA-256 based HMAC only */
-static const cc3xx_hash_alg_t alg = CC3XX_HASH_ALG_SHA256;
 
 cc3xx_err_t cc3xx_hmac_set_key(
     struct cc3xx_hmac_state_t *state,
     const uint8_t *key,
-    size_t key_size)
+    size_t key_size,
+    cc3xx_hash_alg_t alg)
 {
     const uint8_t ipad = 0x36;
     cc3xx_err_t err;
@@ -40,7 +39,7 @@ cc3xx_err_t cc3xx_hmac_set_key(
             goto out;
         }
         p_key = (const uint8_t *)hash_key_output;
-        key_length = SHA256_OUTPUT_SIZE;
+        key_length = CC3XX_HASH_LENGTH(alg);
     }
 
     cc3xx_hash_finish(hash_key_output, sizeof(hash_key_output));
@@ -53,7 +52,8 @@ cc3xx_err_t cc3xx_hmac_set_key(
     memset(&state->key[key_length], ipad, CC3XX_HMAC_BLOCK_SIZE - key_length);
 
     /* H(K ^ ipad) */
-    if ((err = cc3xx_hash_init(alg)) != CC3XX_ERR_SUCCESS) {
+    err = cc3xx_hash_init(alg);
+    if (err != CC3XX_ERR_SUCCESS) {
         goto out;
     }
 
@@ -62,6 +62,7 @@ cc3xx_err_t cc3xx_hmac_set_key(
 out:
     if (err == CC3XX_ERR_SUCCESS) {
         cc3xx_hash_get_state(&state->hash);
+        state->alg = alg;
     }
     cc3xx_hash_uninit();
     return err;
@@ -91,12 +92,12 @@ cc3xx_err_t cc3xx_hmac_finish(
     uint32_t *tag,
     size_t tag_size)
 {
-    uint32_t scratch[SHA256_OUTPUT_SIZE / sizeof(uint32_t)];
+    uint32_t scratch[CC3XX_HASH_LENGTH(state->alg) / sizeof(uint32_t)];
     const uint8_t ixopad = 0x36 ^ 0x5c; /* ipad ^ opad */
     cc3xx_err_t err;
     size_t idx;
 
-    assert(tag_size >= SHA256_OUTPUT_SIZE);
+    assert(tag_size >= CC3XX_HASH_LENGTH(state->alg));
 
     cc3xx_hash_set_state(&state->hash);
 
@@ -109,7 +110,7 @@ cc3xx_err_t cc3xx_hmac_finish(
     }
 
     /* H( K ^ opad | H(K ^ ipad | data)) */
-    err = cc3xx_hash_init(alg);
+    err = cc3xx_hash_init(state->alg);
     if (err != CC3XX_ERR_SUCCESS) {
         goto out;
     }

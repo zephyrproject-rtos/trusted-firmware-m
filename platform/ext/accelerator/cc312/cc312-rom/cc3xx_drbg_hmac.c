@@ -31,9 +31,10 @@ static cc3xx_err_t cc3xx_drbg_hmac_update(
     const uint8_t byte0 = 0x00; const uint8_t byte1 = 0x01;
     cc3xx_err_t err;
     size_t idx;
+    const cc3xx_hash_alg_t alg = CC3XX_HASH_ALG_SHA256;
 
     /* 1. K = HMAC(K, V || 0x00 || provided_data) */
-    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k));
+    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -59,7 +60,7 @@ static cc3xx_err_t cc3xx_drbg_hmac_update(
     }
 
     /* 2. V = HMAC(K, V) */
-    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k));
+    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -78,7 +79,7 @@ static cc3xx_err_t cc3xx_drbg_hmac_update(
     }
 
     /* 4. K = HMAC(K, V || 0x01 || provided_data) */
-    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k));
+    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -103,7 +104,7 @@ static cc3xx_err_t cc3xx_drbg_hmac_update(
     }
 
     /* 5. V = HMAC(K, V) */
-    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k));
+    err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k), alg);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -151,6 +152,7 @@ cc3xx_err_t cc3xx_drbg_hmac_generate(
     size_t data_len[3] = {0};
     size_t idx;
     size_t last_hmac_update_num = 0;
+    const cc3xx_hash_alg_t alg = CC3XX_HASH_ALG_SHA256;
 
     if (state->reseed_counter == UINT32_MAX) {
         /* When we reach 2^32 invocations we must reseed */
@@ -171,7 +173,10 @@ cc3xx_err_t cc3xx_drbg_hmac_generate(
         uint32_t temp[CC3XX_DRBG_HMAC_OUTLEN/4];
         size_t bytes_to_copy;
         /* V = HMAC(K, V) */
-        err = cc3xx_hmac_set_key(&state->h, (const uint8_t *)state->key_k, sizeof(state->key_k));
+        err = cc3xx_hmac_set_key(&state->h,
+                                 (const uint8_t *)state->key_k,
+                                 sizeof(state->key_k),
+                                 alg);
         if (err != CC3XX_ERR_SUCCESS) {
             return err;
         }

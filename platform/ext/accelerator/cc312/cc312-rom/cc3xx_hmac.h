@@ -29,20 +29,23 @@ extern "C" {
 struct cc3xx_hmac_state_t {
     uint8_t key[CC3XX_HMAC_BLOCK_SIZE];
     struct cc3xx_hash_state_t hash; /* Allows to restart low-level hash */
+    cc3xx_hash_alg_t alg; /* Based on the hashing algorithm, sizes change */
 } __attribute__((aligned(4)));
 
 /**
  * @brief Sets the key for the HMAC operation on the state
  *
- * @param state A pointer to a state structure
- * @param key Buffer containing the key
- * @param key_size Size in bytes of the buffer \param key
+ * @param[out] state   A pointer to a state structure
+ * @param[in] key      Buffer containing the key
+ * @param[in] key_size Size in bytes of the buffer \param key
+ * @param[in] alg      Underlying hashing algorithm
  * @return cc3xx_err_t
  */
 cc3xx_err_t cc3xx_hmac_set_key(
     struct cc3xx_hmac_state_t *state,
     const uint8_t *key,
-    size_t key_size);
+    size_t key_size,
+    cc3xx_hash_alg_t alg);
 
 /**
  * @brief Update the HMAC operation with a new chunk of data to authenticate

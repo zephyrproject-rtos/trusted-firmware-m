@@ -14,15 +14,27 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define SHA1_OUTPUT_SIZE 20
-#define SHA224_OUTPUT_SIZE 28
-#define SHA256_OUTPUT_SIZE 32
+#define SHA1_OUTPUT_SIZE (20)
+#define SHA224_OUTPUT_SIZE (28)
+#define SHA256_OUTPUT_SIZE (32)
 
 typedef enum {
     CC3XX_HASH_ALG_SHA1  =  0b0001U,
     CC3XX_HASH_ALG_SHA224 = 0b1010U,
     CC3XX_HASH_ALG_SHA256 = 0b0010U,
 } cc3xx_hash_alg_t;
+
+/**
+ * @brief Macro that returns the length of the hash associated to the
+ *        algorithm value passed as input
+ */
+#define CC3XX_HASH_LENGTH(alg)                              \
+    (                                                       \
+        alg == CC3XX_HASH_ALG_SHA1 ? SHA1_OUTPUT_SIZE :     \
+        alg == CC3XX_HASH_ALG_SHA224 ? SHA224_OUTPUT_SIZE : \
+        alg == CC3XX_HASH_ALG_SHA256 ? SHA256_OUTPUT_SIZE : \
+        0                                                   \
+    )
 
 struct cc3xx_hash_state_t {
     cc3xx_hash_alg_t alg;
