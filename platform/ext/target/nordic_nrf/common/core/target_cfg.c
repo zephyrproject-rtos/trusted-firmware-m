@@ -767,10 +767,13 @@ enum tfm_plat_err_t spu_periph_init_cfg(void)
     /* Peripheral configuration */
 
     /* The following peripherals share ID:
-     * - FPU
+     * - FPU (FPU cannot be configured in NRF91 series, it's always NS)
      * - DCNF (On 53, but not 91)
      */
+#ifndef NRF91_SERIES
     spu_peripheral_config_non_secure((uint32_t)NRF_FPU, false);
+#endif
+
     /* The following peripherals share ID:
      * - REGULATORS
      * - OSCILLATORS
