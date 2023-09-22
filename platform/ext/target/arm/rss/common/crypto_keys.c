@@ -96,7 +96,13 @@ static enum tfm_plat_err_t tfm_plat_get_iak(uint8_t *buf, size_t buf_len,
     }
 
     *key_bits = ATTEST_KEY_BITS;
+#if (ATTEST_KEY_BITS == 256)
+    *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_256);
+#elif (ATTEST_KEY_BITS == 384)
     *algorithm = PSA_ALG_ECDSA(PSA_ALG_SHA_384);
+#else
+#error "Unsupported IAK size"
+#endif
     *type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
 
     psa_set_key_type(&transient_attr, *type);
