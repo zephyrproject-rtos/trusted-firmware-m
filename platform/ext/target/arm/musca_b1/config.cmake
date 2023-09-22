@@ -12,9 +12,11 @@ set(PLATFORM_GPLED_ENABLED              OFF         CACHE BOOL      "Use the gen
 
 set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
 
-list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH
-    ${CMAKE_SOURCE_DIR}/platform/ext/target/arm/musca_b1/generated_file_list.yaml
-)
+set(EXTRA_GENERATED_FILE_LIST ${CMAKE_SOURCE_DIR}/platform/ext/target/arm/musca_b1/generated_file_list.yaml)
+list(FIND   TFM_EXTRA_GENERATED_FILE_LIST_PATH      ${EXTRA_GENERATED_FILE_LIST}    RET_VAL)
+if(RET_VAL EQUAL -1)
+    list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH ${EXTRA_GENERATED_FILE_LIST})
+endif()
 
 if(BL2)
     set(BL2_TRAILER_SIZE 0x800 CACHE STRING "Trailer size")

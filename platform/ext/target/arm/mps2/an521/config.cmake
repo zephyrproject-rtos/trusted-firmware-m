@@ -7,9 +7,11 @@
 #
 #-------------------------------------------------------------------------------
 
-list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/arm/mps2/an521/generated_file_list.yaml
-)
+set(EXTRA_GENERATED_FILE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/arm/mps2/an521/generated_file_list.yaml)
+list(FIND   TFM_EXTRA_GENERATED_FILE_LIST_PATH      ${EXTRA_GENERATED_FILE_LIST}    RET_VAL)
+if(RET_VAL EQUAL -1)
+    list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH ${EXTRA_GENERATED_FILE_LIST})
+endif()
 
 # Make FLIH IRQ test as the default IRQ test on AN521
 set(TEST_NS_SLIH_IRQ                  OFF   CACHE BOOL    "Whether to build NS regression Second-Level Interrupt Handling tests")

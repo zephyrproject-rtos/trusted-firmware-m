@@ -17,9 +17,11 @@ set(BL2_TRAILER_SIZE                    0x2000      CACHE STRING    "Trailer siz
 set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
 set(MBEDCRYPTO_BUILD_TYPE               minsizerel  CACHE STRING "Build type of Mbed Crypto library")
 
-list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/stm/common/generated_file_list.yaml
-)
+set(EXTRA_GENERATED_FILE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/stm/common/generated_file_list.yaml)
+list(FIND   TFM_EXTRA_GENERATED_FILE_LIST_PATH      ${EXTRA_GENERATED_FILE_LIST}    RET_VAL)
+if(RET_VAL EQUAL -1)
+    list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH ${EXTRA_GENERATED_FILE_LIST})
+endif()
 
 # Platform-specific configurations
 set(CONFIG_TFM_USE_TRUSTZONE            ON)
