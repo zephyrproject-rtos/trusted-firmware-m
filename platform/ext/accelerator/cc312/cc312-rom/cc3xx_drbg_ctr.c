@@ -74,7 +74,7 @@ static cc3xx_err_t cc3xx_drbg_ctr_update(
     err = cc3xx_aes_init(CC3XX_AES_DIRECTION_ENCRYPT,
                          CC3XX_AES_MODE_CTR,
                          CC3XX_AES_KEY_ID_USER_KEY,
-                         (const uint32_t *)state->key_k, sizeof(state->key_k),
+                         (const uint32_t *)state->key_k, CC3XX_AES_KEYSIZE_128,
                          (const uint32_t *)state->block_v, sizeof(state->block_v));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
@@ -205,7 +205,7 @@ cc3xx_err_t cc3xx_drbg_ctr_generate(
     err = cc3xx_aes_init(CC3XX_AES_DIRECTION_ENCRYPT,
                          CC3XX_AES_MODE_CTR,
                          CC3XX_AES_KEY_ID_USER_KEY,
-                         (const uint32_t *)state->key_k, sizeof(state->key_k),
+                         (const uint32_t *)state->key_k, CC3XX_AES_KEYSIZE_128,
                          (const uint32_t *)state->block_v, sizeof(state->block_v));
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
