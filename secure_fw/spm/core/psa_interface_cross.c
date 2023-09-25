@@ -234,9 +234,9 @@ void psa_unmap_outvec_cross(psa_handle_t msg_handle, uint32_t outvec_idx,
 __naked
 __section(".psa_interface_cross_call")
 psa_status_t agent_psa_call_cross(psa_handle_t handle,
-                                  uint32_t ctrl_param,
-                                  const struct client_vectors *vecs,
-                                  const struct client_params *params)
+                                  uint32_t control,
+                                  const struct client_params_t *params,
+                                  const void *client_data_stateless)
 {
     __asm volatile(
         SYNTAX_UNIFIED
@@ -252,7 +252,8 @@ psa_status_t agent_psa_call_cross(psa_handle_t handle,
 __naked
 __section(".psa_interface_cross_call")
 psa_handle_t agent_psa_connect_cross(uint32_t sid, uint32_t version,
-                                     const struct client_params *params)
+                                     int32_t ns_client_id,
+                                     const void *client_data)
 {
     __asm volatile(
         SYNTAX_UNIFIED

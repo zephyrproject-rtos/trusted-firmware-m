@@ -15,48 +15,38 @@
 #include "psa/client.h"
 #include "psa/service.h"
 
-
-struct client_vectors {
-    const psa_invec *in_vec;
-    psa_outvec      *out_vec;
+struct client_params_t {
+    int32_t    ns_client_id_stateless;
+    psa_invec  *p_invecs;
+    psa_outvec *p_outvecs;
 };
-
-
-struct client_params {
-    int32_t     ns_client_id;
-    const void *client_data;
-};
-
 
 /**
- * \brief psa_call() interface for NS agents
+ * \brief Specific psa_call() variants for agents
  *
- * \param[in] handle            Service handle to the established connection,
- *                              \ref psa_handle_t
- * \param[in] ctrl_param        Parameters combined in uint32_t,
- *                              includes request type, in_num and out_num.
- * \param[in] vecs              Combines the psa_invec and psa_outvec params
- *                              for the psa_call() to be made.
- * \param[in] params            NS agent's client identifier.
- *                              Ignored for connection-based services.
- *                              ns_client_id identifies the NS client.
- *                              Zero or positive values are ignored and SPM
- *                              uses the agent's ID instead.
- *                              client_data is treated as opaque by SPM.
+ * \param[in] handle                 Handle to the service being accessed.
+ * \param[in] control                A composited uint32_t value for controlling purpose,
+ *                                   containing call types, numbers of in/out vectors and
+ *                                   attributes of vectors.
+ * \param[in] params                 Combines the psa_invec and psa_outvec params
+ *                                   for the psa_call() to be made, as well as
+ *                                   NS agent's client identifier, which is ignored
+ *                                   for connection-based services.
+ * \param[in] client_data_stateless  Client data, treated as opaque by SPM.
  *
- * \retval PSA_SUCCESS          Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           An invalid handle was passed.
- * \arg                           The connection is already handling a request.
- * \arg                           An invalid memory reference was provided.
- * \arg                           in_num + out_num > PSA_MAX_IOVEC.
- * \arg                           The message is unrecognized by the RoT
- *                                Service or incorrectly formatted.
+ * \retval PSA_SUCCESS               Success.
+ * \retval "Does not return"         The call is invalid, one or more of the
+ *                                   following are true:
+ * \arg                                An invalid handle was passed.
+ * \arg                                The connection is already handling a request.
+ * \arg                                An invalid memory reference was provided.
+ * \arg                                in_num + out_num > PSA_MAX_IOVEC.
+ * \arg                                The message is unrecognized by the RoT
+ *                                     Service or incorrectly formatted.
  */
-psa_status_t agent_psa_call(psa_handle_t handle, uint32_t ctrl_param,
-                            const struct client_vectors *vecs,
-                            const struct client_params *params);
+psa_status_t agent_psa_call(psa_handle_t handle, uint32_t control,
+                            const struct client_params_t *params,
+                            const void *client_data_stateless);
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 
@@ -65,12 +55,8 @@ psa_status_t agent_psa_call(psa_handle_t handle, uint32_t ctrl_param,
  *
  * \param[in] sid                       RoT Service identity.
  * \param[in] version                   The version of the RoT Service.
- * \param[in] params                    NS agent's client identifier.
- *                                      Ignored for connection-based services.
- *                                      ns_client_id identifies the NS client.
- *                                      Zero or positive values are ignored and SPM
- *                                      uses the agent's ID instead.
- *                                      client_data is treated as opaque by SPM.
+ * \param[in] ns_client_id              Agent representing NS client's identifier.
+ * \param[in] client_data               Client data, treated as opaque by SPM.
  *
  * \retval PSA_SUCCESS                  Success.
  * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
@@ -82,7 +68,7 @@ psa_status_t agent_psa_call(psa_handle_t handle, uint32_t ctrl_param,
  *                                      permitted to access the service.
  */
 psa_handle_t agent_psa_connect(uint32_t sid, uint32_t version,
-                               const struct client_params *params);
+                               int32_t ns_client_id, const void *client_data);
 
 #else /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #define agent_psa_connect    NULL

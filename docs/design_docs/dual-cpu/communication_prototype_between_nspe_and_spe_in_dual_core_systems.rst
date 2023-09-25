@@ -455,25 +455,6 @@ structure. It must always return non-NULL.
 TF-M RPC definitions for mailbox
 --------------------------------
 
-PSA client call parameters
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This data structure holds the parameters used in a PSA client call. The
-parameters are passed from non-secure core to secure core via mailbox.
-
-.. code-block:: c
-
-  struct client_call_params_t {
-      uint32_t        sid;
-      psa_handle_t    handle;
-      int32_t         type;
-      const psa_invec *in_vec;
-      size_t          in_len;
-      psa_outvec      *out_vec;
-      size_t          out_len;
-      uint32_t        version;
-  };
-
 Mailbox operations callbacks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -560,15 +541,12 @@ TF-M RPC handler for psa_version().
 
 .. code-block:: c
 
-  uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params,
-                               bool ns_caller);
+  uint32_t tfm_rpc_psa_version(uint32_t sid);
 
 **Parameters**
 
 +---------------+-----------------------------------+
-| ``params``    | Base address of parameters.       |
-+---------------+-----------------------------------+
-| ``ns_caller`` | Whether the caller is non-secure. |
+| ``sid``       | RoT Service identity.             |
 +---------------+-----------------------------------+
 
 **Return**
@@ -593,16 +571,22 @@ TF-M RPC handler for ``psa_connect()``.
 
 .. code-block:: c
 
-  psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params,
-                                   bool ns_caller);
+  psa_status_t tfm_rpc_psa_connect(uint32_t sid,
+                                   uint32_t version,
+                                   int32_t ns_client_id,
+                                   const void *client_data);
 
 **Parameters**
 
-+---------------+-----------------------------------+
-| ``params``    | Base address of parameters.       |
-+---------------+-----------------------------------+
-| ``ns_caller`` | Whether the caller is non-secure. |
-+---------------+-----------------------------------+
++------------------+--------------------------------------------+
+| ``sid``          | RoT Service identity.                      |
++------------------+--------------------------------------------+
+| ``version``      | The version of the RoT Service.            |
++------------------+--------------------------------------------+
+| ``ns_client_id`` | Agent representing NS client's identifier. |
++------------------+--------------------------------------------+
+| ``client_data``  | Client data, treated as opaque by SPM.     |
++------------------+--------------------------------------------+
 
 **Return**
 
@@ -619,8 +603,6 @@ TF-M RPC handler for ``psa_connect()``.
 **Usage**
 
 ``tfm_rpc_psa_connect()`` invokes common ``psa_connect()`` handler in TF-M.
-The parameters in params shall be prepared before calling
-``tfm_rpc_psa_connect()``.
 
 ``tfm_rpc_psa_call()``
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -629,16 +611,26 @@ TF-M RPC handler for ``psa_call()``.
 
 .. code-block:: c
 
-  psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params,
-                                bool ns_caller);
+  psa_status_t tfm_rpc_psa_call(psa_handle_t handle, uint32_t control,
+                                const struct client_params_t *params,
+                                const void *client_data_stateless);
 
 **Parameters**
 
-+---------------+-----------------------------------+
-| ``params``    | Base address of parameters.       |
-+---------------+-----------------------------------+
-| ``ns_caller`` | Whether the caller is non-secure. |
-+---------------+-----------------------------------+
++---------------------------+------------------------------------------------------+
+| ``handle``                | Handle to the service being accessed.                |
++---------------------------+------------------------------------------------------+
+| ``control``               | A composited uint32_t value for controlling purpose, |
+|                           | containing call types, numbers of in/out vectors and |
+|                           | attributes of vectors.                               |
++---------------------------+------------------------------------------------------+
+| ``params``                | Combines the psa_invec and psa_outvec params         |
+|                           | for the psa_call() to be made, as well as            |
+|                           | NS agent's client identifier, which is ignored       |
+|                           | for connection-based services.                       |
++---------------------------+------------------------------------------------------+
+| ``client_data_stateless`` | Client data, treated as opaque by SPM.               |
++---------------------------+------------------------------------------------------+
 
 **Return**
 
@@ -651,8 +643,8 @@ TF-M RPC handler for ``psa_call()``.
 **Usage**
 
 ``tfm_rpc_psa_call()`` invokes common ``psa_call()`` handler in TF-M.
-The parameters in params shall be prepared before calling
-``tfm_rpc_psa_call()``.
+The value of control and parameters in params shall be prepared before
+calling ``tfm_rpc_psa_call()``.
 
 ``tfm_rpc_psa_close()``
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -661,16 +653,13 @@ TF-M RPC ``psa_close()`` handler
 
 .. code-block:: c
 
-  void tfm_rpc_psa_close(const struct client_call_params_t *params,
-                         bool ns_caller);
+  void tfm_rpc_psa_close(psa_handle_t handle);
 
 **Parameters**
 
-+---------------+-----------------------------------+
-| ``params``    | Base address of parameters.       |
-+---------------+-----------------------------------+
-| ``ns_caller`` | Whether the caller is non-secure. |
-+---------------+-----------------------------------+
++---------------+----------------------------------------+
+| ``handle``    | A handle to an established connection. |
++---------------+----------------------------------------+
 
 **Return**
 
@@ -683,8 +672,6 @@ TF-M RPC ``psa_close()`` handler
 **Usage**
 
 ``tfm_rpc_psa_close()`` invokes common ``psa_close()`` handler in TF-M.
-The parameters in params shall be prepared before calling
-``tfm_rpc_psa_close()``.
 
 Other modifications
 ===================
@@ -704,7 +691,7 @@ Reference
 
 ----------------
 
-*Copyright (c) 2019-2022 Arm Limited. All Rights Reserved.*
+*Copyright (c) 2019-2023 Arm Limited. All Rights Reserved.*
 
 *Copyright (c) 2020-2023 Cypress Semiconductor Corporation (an Infineon company)
 or an affiliate of Cypress Semiconductor Corporation. All rights reserved.*

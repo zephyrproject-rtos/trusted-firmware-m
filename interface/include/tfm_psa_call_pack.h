@@ -17,8 +17,8 @@ extern "C" {
 /*
  *  31           30-28   27    26-24  23-20   19     18-16   15-0
  * +------------+-----+------+-------+-----+-------+-------+------+
- * | NS vector  |     |      | invec |     |       | outvec| type |
- * | descriptor | Res | Res  | number| Res | Res   | number|      |
+ * | NS vector  |     | NS   | invec |     | NS    | outvec| type |
+ * | descriptor | Res | invec| number| Res | outvec| number|      |
  * +------------+-----+------+-------+-----+-------+-------+------+
  *
  * Res: Reserved.
@@ -38,6 +38,11 @@ extern "C" {
  */
 #define NS_VEC_DESC_BIT      0x80000000UL
 
+#define NS_INVEC_OFFSET      27
+#define NS_INVEC_BIT         (1UL << NS_INVEC_OFFSET)
+#define NS_OUTVEC_OFFSET     19
+#define NS_OUTVEC_BIT        (1UL << NS_OUTVEC_OFFSET)
+
 #define PARAM_PACK(type, in_len, out_len)                            \
           ((((uint32_t)(type)) & TYPE_MASK)                        | \
            ((((uint32_t)(in_len)) << IN_LEN_OFFSET) & IN_LEN_MASK) | \
@@ -54,6 +59,11 @@ extern "C" {
 
 #define PARAM_SET_NS_VEC(ctrl_param)    ((ctrl_param) | NS_VEC_DESC_BIT)
 #define PARAM_IS_NS_VEC(ctrl_param)     ((ctrl_param) & NS_VEC_DESC_BIT)
+
+#define PARAM_SET_NS_INVEC(ctrl_param)  ((ctrl_param) | NS_INVEC_BIT)
+#define PARAM_IS_NS_INVEC(ctrl_param)   ((ctrl_param) & NS_INVEC_BIT)
+#define PARAM_SET_NS_OUTVEC(ctrl_param) ((ctrl_param) | NS_OUTVEC_BIT)
+#define PARAM_IS_NS_OUTVEC(ctrl_param)  ((ctrl_param) & NS_OUTVEC_BIT)
 
 #define PARAM_HAS_IOVEC(ctrl_param)                                  \
           ((ctrl_param) != (uint32_t)PARAM_UNPACK_TYPE(ctrl_param))

@@ -441,6 +441,10 @@ enum tfm_hal_status_t tfm_hal_memory_check(uintptr_t boundary, uintptr_t base,
         return TFM_HAL_ERROR_INVALID_INPUT;
     }
 
+    if (access_type & TFM_HAL_ACCESS_NS) {
+        flags |= CMSE_NONSECURE;
+    }
+
     if (!((uint32_t)boundary & HANDLE_ATTR_PRIV_MASK)) {
         flags |= CMSE_MPU_UNPRIV;
     }

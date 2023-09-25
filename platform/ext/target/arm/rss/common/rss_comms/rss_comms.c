@@ -27,57 +27,57 @@ static psa_status_t message_dispatch(struct client_request_t *req)
     enum tfm_plat_err_t plat_err;
 
     /* Create the call parameters */
-    struct client_call_params_t spm_params = {
-        .handle = req->handle,
-        .type = req->type,
-        .in_vec = req->in_vec,
-        .in_len = req->in_len,
-        .out_vec = req->out_vec,
-        .out_len = req->out_len,
-        .ns_client_id = req->client_id,
-        .client_data = NULL,
+    struct client_params_t params = {
+        .ns_client_id_stateless = req->client_id,
+        .p_invecs = req->in_vec,
+        .p_outvecs = req->out_vec,
     };
 
     SPMLOG_DBGMSG("[RSS-COMMS] Dispatching message\r\n");
-    SPMLOG_DBGMSGVAL("handle=", spm_params.handle);
-    SPMLOG_DBGMSGVAL("type=", spm_params.type);
-    SPMLOG_DBGMSGVAL("in_len=", spm_params.in_len);
-    SPMLOG_DBGMSGVAL("out_len=", spm_params.out_len);
-    if (spm_params.in_len > 0) {
-        SPMLOG_DBGMSGVAL("in_vec[0].len=", spm_params.in_vec[0].len);
+    SPMLOG_DBGMSGVAL("handle=", req->handle);
+    SPMLOG_DBGMSGVAL("type=", req->type);
+    SPMLOG_DBGMSGVAL("in_len=", req->in_len);
+    SPMLOG_DBGMSGVAL("out_len=", req->out_len);
+    if (req->in_len > 0) {
+        SPMLOG_DBGMSGVAL("in_vec[0].len=", req->in_vec[0].len);
     }
-    if (spm_params.in_len > 1) {
-        SPMLOG_DBGMSGVAL("in_vec[1].len=", spm_params.in_vec[1].len);
+    if (req->in_len > 1) {
+        SPMLOG_DBGMSGVAL("in_vec[1].len=", req->in_vec[1].len);
     }
-    if (spm_params.in_len > 2) {
-        SPMLOG_DBGMSGVAL("in_vec[2].len=", spm_params.in_vec[2].len);
+    if (req->in_len > 2) {
+        SPMLOG_DBGMSGVAL("in_vec[2].len=", req->in_vec[2].len);
     }
-    if (spm_params.in_len > 3) {
-        SPMLOG_DBGMSGVAL("in_vec[3].len=", spm_params.in_vec[3].len);
+    if (req->in_len > 3) {
+        SPMLOG_DBGMSGVAL("in_vec[3].len=", req->in_vec[3].len);
     }
-    if (spm_params.out_len > 0) {
-        SPMLOG_DBGMSGVAL("out_vec[0].len=", spm_params.out_vec[0].len);
+    if (req->out_len > 0) {
+        SPMLOG_DBGMSGVAL("out_vec[0].len=", req->out_vec[0].len);
     }
-    if (spm_params.out_len > 1) {
-        SPMLOG_DBGMSGVAL("out_vec[1].len=", spm_params.out_vec[1].len);
+    if (req->out_len > 1) {
+        SPMLOG_DBGMSGVAL("out_vec[1].len=", req->out_vec[1].len);
     }
-    if (spm_params.out_len > 2) {
-        SPMLOG_DBGMSGVAL("out_vec[2].len=", spm_params.out_vec[2].len);
+    if (req->out_len > 2) {
+        SPMLOG_DBGMSGVAL("out_vec[2].len=", req->out_vec[2].len);
     }
-    if (spm_params.out_len > 3) {
-        SPMLOG_DBGMSGVAL("out_vec[3].len=", spm_params.out_vec[3].len);
+    if (req->out_len > 3) {
+        SPMLOG_DBGMSGVAL("out_vec[3].len=", req->out_vec[3].len);
     }
 
-    plat_err = comms_permissions_service_check(spm_params.handle,
-                                               spm_params.in_vec,
-                                               spm_params.in_len,
-                                               spm_params.type);
+    plat_err = comms_permissions_service_check(req->handle,
+                                               req->in_vec,
+                                               req->in_len,
+                                               req->type);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         SPMLOG_ERRMSG("[RSS-COMMS] Call not permitted\r\n");
         return PSA_ERROR_NOT_PERMITTED;
     }
 
-    return tfm_rpc_psa_call(&spm_params);
+    return tfm_rpc_psa_call(req->handle,
+                            PARAM_PACK(req->type,
+                                       req->in_len,
+                                       req->out_len),
+                            &params,
+                            NULL);
 }
 
 static void rss_comms_reply(const void *owner, int32_t ret)

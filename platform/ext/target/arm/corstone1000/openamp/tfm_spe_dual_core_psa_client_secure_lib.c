@@ -8,7 +8,7 @@
  */
 
 #include "config_impl.h"
-
+#include "tfm_psa_call_pack.h"
 #include "tfm_spe_dual_core_psa_client_secure_lib.h"
 #include "tfm_rpc.h"
 #include "tfm_spe_openamp_interface.h"
@@ -169,25 +169,20 @@ static psa_status_t alloc_and_prepare_out_vecs(psa_outvec **out_vec_start_ptr,
     return PSA_SUCCESS;
 }
 
-static psa_status_t prepare_params_for_psa_call(struct client_call_params_t *spm_params,
+static psa_status_t prepare_params_for_psa_call(struct client_params_t *params,
                            unordered_map_entry_t* s_map_entry)
 {
     psa_status_t ret = PSA_SUCCESS;
 
-    spm_params->handle = s_map_entry->msg.params.psa_call_params.handle;
-    spm_params->type = s_map_entry->msg.params.psa_call_params.type;
-    spm_params->in_len = s_map_entry->msg.params.psa_call_params.in_len;
-    spm_params->out_len = s_map_entry->msg.params.psa_call_params.out_len;
-    spm_params->ns_client_id = s_map_entry->msg.client_id;
-    spm_params->client_data = NULL;
+    params->ns_client_id_stateless = s_map_entry->msg.client_id;
 
-    spm_params->out_vec = NULL;
-    ret = alloc_and_prepare_out_vecs(&spm_params->out_vec, s_map_entry);
+    params->p_outvecs = NULL;
+    ret = alloc_and_prepare_out_vecs(&params->p_outvecs, s_map_entry);
     if (ret != PSA_SUCCESS) {
         return ret;
     }
 
-    spm_params->in_vec = prepare_in_vecs(s_map_entry);
+    params->p_invecs = prepare_in_vecs(s_map_entry);
 
     /* hold the input shared memory */
     tfm_to_openamp_hold_buffer(s_map_entry->input_buffer);
@@ -252,7 +247,7 @@ int32_t register_msg_to_spe_and_verify(void **private, const void *data, size_t 
 
 void deliver_msg_to_tfm_spe(void *private)
 {
-    struct client_call_params_t spm_params = {0};
+    struct client_params_t params = {0};
     psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
     unordered_map_entry_t* s_map_entry = (unordered_map_entry_t*)private;
 
@@ -262,17 +257,20 @@ void deliver_msg_to_tfm_spe(void *private)
             send_service_reply_to_non_secure(psa_ret, s_map_entry);
             break;
         case OPENAMP_PSA_VERSION:
-            spm_params.sid = s_map_entry->msg.params.psa_version_params.sid;
-            psa_ret = tfm_rpc_psa_version(&spm_params);
+            psa_ret = tfm_rpc_psa_version(s_map_entry->msg.params.psa_version_params.sid);
             send_service_reply_to_non_secure(psa_ret, s_map_entry);
             break;
         case OPENAMP_PSA_CALL:
-            psa_ret = prepare_params_for_psa_call(&spm_params, s_map_entry);
+            psa_ret = prepare_params_for_psa_call(&params, s_map_entry);
             if (psa_ret != PSA_SUCCESS) {
                 send_service_reply_to_non_secure(psa_ret, s_map_entry);
                 break;
             }
-            psa_ret = tfm_rpc_psa_call(&spm_params);
+            psa_ret = tfm_rpc_psa_call(s_map_entry->msg.params.psa_call_params.handle,
+                                       PARAM_PACK(s_map_entry->msg.params.psa_call_params.type,
+                                                  s_map_entry->msg.params.psa_call_params.in_len,
+                                                  s_map_entry->msg.params.psa_call_params.out_len),
+                                       &params, NULL);
             if (psa_ret != PSA_SUCCESS) {
                 send_service_reply_to_non_secure(psa_ret, s_map_entry);
                 break;
@@ -280,18 +278,16 @@ void deliver_msg_to_tfm_spe(void *private)
             break;
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
         case OPENAMP_PSA_CONNECT:
-            spm_params.sid = s_map_entry->msg.params.psa_connect_params.sid;
-            spm_params.version = s_map_entry->msg.params.psa_connect_params.version;
-            spm_params.ns_client_id = s_map_entry->msg.client_id;
-            spm_params.client_data = NULL;
-            psa_ret = tfm_rpc_psa_connect(&spm_params);
+            psa_ret = tfm_rpc_psa_connect(s_map_entry->msg.params.psa_connect_params.sid,
+                                          s_map_entry->msg.params.psa_connect_params.version,
+                                          s_map_entry->msg.client_id,
+                                          NULL);
             if (psa_ret != PSA_SUCCESS) {
                 send_service_reply_to_non_secure(psa_ret, s_map_entry);
             }
             break;
         case OPENAMP_PSA_CLOSE:
-            spm_params.handle = s_map_entry->msg.params.psa_close_params.handle;
-            tfm_rpc_psa_close(&spm_params);
+            tfm_rpc_psa_close(s_map_entry->msg.params.psa_close_params.handle);
             break;
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
         default:

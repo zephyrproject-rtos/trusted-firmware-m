@@ -24,27 +24,11 @@
 #include "psa/service.h"
 #include "thread.h"
 #include "spm.h"
+#include "ffm/agent_api.h"
 
 #define TFM_RPC_SUCCESS             (0)
 #define TFM_RPC_INVAL_PARAM         (INT32_MIN + 1)
 #define TFM_RPC_CONFLICT_CALLBACK   (INT32_MIN + 2)
-
-/*
- * This structure holds the parameters used in a PSA client call.
- * The parameters are passed from non-secure core to secure core.
- */
-struct client_call_params_t {
-    uint32_t        sid;
-    psa_handle_t    handle;
-    int32_t         type;
-    const psa_invec *in_vec;
-    size_t          in_len;
-    psa_outvec      *out_vec;
-    size_t          out_len;
-    uint32_t        version;
-    int32_t         ns_client_id;
-    void            *client_data;
-};
 
 /*
  * The underlying mailbox communication implementation should provide
@@ -74,18 +58,21 @@ uint32_t tfm_rpc_psa_framework_version(void);
 /**
  * \brief RPC handler for \ref psa_version.
  *
- * \param[in] params            Base address of parameters
+ * \param[in] sid               RoT Service identity.
  *
  * \retval PSA_VERSION_NONE     The RoT Service is not implemented, or the
  *                              caller is not permitted to access the service.
  * \retval > 0                  The version of the implemented RoT Service.
  */
-uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params);
+uint32_t tfm_rpc_psa_version(uint32_t sid);
 
 /**
  * \brief RPC handler for \ref psa_connect.
  *
- * \param[in] params            Base address of parameters
+ * \param[in] sid               RoT Service identity.
+ * \param[in] version           The version of the RoT Service.
+ * \param[in] ns_client_id      Agent representing NS client's identifier.
+ * \param[in] client_data       Client data, treated as opaque by SPM.
  *
  * \retval PSA_SUCCESS          Success.
  * \retval PSA_CONNECTION_BUSY  The SPM cannot make the connection
@@ -94,29 +81,42 @@ uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params);
  *                              supported, or the caller is not permitted to
  *                              access the service.
  */
-psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params);
+psa_status_t tfm_rpc_psa_connect(uint32_t sid,
+                                 uint32_t version,
+                                 int32_t ns_client_id,
+                                 const void *client_data);
 
 /**
  * \brief RPC handler for \ref psa_call.
  *
- * \param[in] params            Base address of parameters
+ * \param[in] handle                 Handle to the service being accessed.
+ * \param[in] control                A composited uint32_t value for controlling purpose,
+ *                                   containing call types, numbers of in/out vectors and
+ *                                   attributes of vectors.
+ * \param[in] params                 Combines the psa_invec and psa_outvec params
+ *                                   for the psa_call() to be made, as well as
+ *                                   NS agent's client identifier, which is ignored
+ *                                   for connection-based services.
+ * \param[in] client_data_stateless  Client data, treated as opaque by SPM.
  *
- * \retval PSA_SUCCESS          Success.
- * \retval "Does not return"    The call is invalid, one or more of the
- *                              following are true:
- * \arg                           An invalid handle was passed.
- * \arg                           The connection is already handling a request.
- * \arg                           An invalid memory reference was provided.
- * \arg                           in_len + out_len > PSA_MAX_IOVEC.
- * \arg                           The message is unrecognized or
- *                                incorrectly formatted.
+ * \retval PSA_SUCCESS               Success.
+ * \retval "Does not return"         The call is invalid, one or more of the
+ *                                   following are true:
+ * \arg                                An invalid handle was passed.
+ * \arg                                The connection is already handling a request.
+ * \arg                                An invalid memory reference was provided.
+ * \arg                                in_num + out_num > PSA_MAX_IOVEC.
+ * \arg                                The message is unrecognized by the RoT
+ *                                     Service or incorrectly formatted.
  */
-psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params);
+psa_status_t tfm_rpc_psa_call(psa_handle_t handle, uint32_t control,
+                              const struct client_params_t *params,
+                              const void *client_data_stateless);
 
 /**
  * \brief RPC handler for \ref psa_close.
  *
- * \param[in] params            Base address of parameters
+ * \param[in] handle            A handle to an established connection, or the null handle.
  *
  * \retval void                 Success.
  * \retval "Does not return"    The call is invalid, one or more of the
@@ -124,7 +124,7 @@ psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params);
  * \arg                           An invalid handle was provided that is not
  *                                the null handle..
  */
-void tfm_rpc_psa_close(const struct client_call_params_t *params);
+void tfm_rpc_psa_close(psa_handle_t handle);
 
 /**
  * \brief Register underlying mailbox communication operations.

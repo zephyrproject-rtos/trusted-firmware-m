@@ -18,9 +18,11 @@
 #include "utilities.h"
 #include "tfm_arch.h"
 #include "thread.h"
+#include "tfm_psa_call_pack.h"
 #include "tfm_spe_mailbox.h"
 #include "tfm_rpc.h"
 #include "tfm_multi_core.h"
+#include "ffm/agent_api.h"
 
 
 static struct secure_mailbox_queue_t spe_mailbox_queue;
@@ -176,7 +178,10 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
                                     mailbox_queue_status_t *reply_slots)
 {
     const struct psa_client_params_t *params = &msg_ptr->params;
-    struct client_call_params_t spm_params = {0};
+    struct client_params_t client_params = {0};
+    uint32_t control = PARAM_PACK(params->psa_call_params.type,
+                                  params->psa_call_params.in_len,
+                                  params->psa_call_params.out_len);
     psa_status_t psa_ret = PSA_ERROR_GENERIC_ERROR;
     /* assume asynchronous */
     bool sync = false;
@@ -191,8 +196,7 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
         break;
 
     case MAILBOX_PSA_VERSION:
-        spm_params.sid = params->psa_version_params.sid;
-        psa_ret = tfm_rpc_psa_version(&spm_params);
+        psa_ret = tfm_rpc_psa_version(params->psa_version_params.sid);
         sync = true;
         break;
 
@@ -210,6 +214,9 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
                 vectors[idx].in_vec[i].len = 0;
             }
         }
+
+        control = PARAM_SET_NS_INVEC(control);
+
         for (int i = 0; i < PSA_MAX_IOVEC; i++) {
             if (i < params->psa_call_params.out_len) {
                 vectors[idx].out_vec[i] = params->psa_call_params.out_vec[i];
@@ -218,15 +225,14 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
                 vectors[idx].out_vec[i].len = 0;
             }
         }
-        spm_params.handle = params->psa_call_params.handle;
-        spm_params.type = params->psa_call_params.type;
-        spm_params.in_vec = vectors[idx].in_vec;
-        spm_params.in_len = params->psa_call_params.in_len;
-        spm_params.out_vec = vectors[idx].out_vec;
-        spm_params.out_len = params->psa_call_params.out_len;
-        spm_params.ns_client_id = msg_ptr->client_id;
-        spm_params.client_data = NULL;
-        psa_ret = tfm_rpc_psa_call(&spm_params);
+
+        control = PARAM_SET_NS_OUTVEC(control);
+
+        client_params.ns_client_id_stateless = msg_ptr->client_id;
+        client_params.p_invecs = vectors[idx].in_vec;
+        client_params.p_outvecs = vectors[idx].out_vec;
+        psa_ret = tfm_rpc_psa_call(params->psa_call_params.handle,
+                                   control, &client_params, NULL);
         if (psa_ret != PSA_SUCCESS) {
             sync = true;
         }
@@ -235,19 +241,17 @@ static int32_t tfm_mailbox_dispatch(const struct mailbox_msg_t *msg_ptr,
 /* Following cases are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
     case MAILBOX_PSA_CONNECT:
-        spm_params.sid = params->psa_connect_params.sid;
-        spm_params.version = params->psa_connect_params.version;
-        spm_params.ns_client_id = msg_ptr->client_id;
-        spm_params.client_data = NULL;
-        psa_ret = tfm_rpc_psa_connect(&spm_params);
+        psa_ret = tfm_rpc_psa_connect(params->psa_connect_params.sid,
+                                      params->psa_connect_params.version,
+                                      msg_ptr->client_id,
+                                      NULL);
         if (psa_ret != PSA_SUCCESS) {
             sync = true;
         }
         break;
 
     case MAILBOX_PSA_CLOSE:
-        spm_params.handle = params->psa_close_params.handle;
-        tfm_rpc_psa_close(&spm_params);
+        tfm_rpc_psa_close(params->psa_close_params.handle);
         break;
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */
 

@@ -89,45 +89,49 @@ static psa_status_t spm_process_io_vectors(struct connection_t *p_connection,
         }
     }
 
+    if (PARAM_IS_NS_INVEC(ctrl_param)) {
+        /* Vector descriptor is non-secure then vectors are non-secure. */
+        ns_access = TFM_HAL_ACCESS_NS;
+    }
+
     /*
-     * The ns_agent_mailbox partition is responsible for validating the invecs and
-     * outvecs it passes.
-     * For all other partitions, that validation is done here.
+     * For client input vector, it is a PROGRAMMER ERROR if the provided payload
+     * memory reference was invalid or not readable.
      */
-    if (!IS_NS_AGENT_MAILBOX(curr_partition->p_ldinf)) {
-        /*
-         * For client input vector, it is a PROGRAMMER ERROR if the provided payload
-         * memory reference was invalid or not readable.
-         */
-        for (i = 0; i < ivec_num; i++) {
-            FIH_CALL(tfm_hal_memory_check, fih_rc,
-                     curr_partition->boundary, (uintptr_t)ivecs_local[i].base,
-                     ivecs_local[i].len, TFM_HAL_ACCESS_READABLE);
-            if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
-                return PSA_ERROR_PROGRAMMER_ERROR;
-            }
-
-            p_connection->msg.in_size[i]    = ivecs_local[i].len;
-            p_connection->invec_base[i]     = ivecs_local[i].base;
-            p_connection->invec_accessed[i] = 0;
+     for (i = 0; i < ivec_num; i++) {
+        FIH_CALL(tfm_hal_memory_check, fih_rc,
+                  curr_partition->boundary, (uintptr_t)ivecs_local[i].base,
+                  ivecs_local[i].len, TFM_HAL_ACCESS_READABLE | ns_access);
+        if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        /*
-         * For client output vector, it is a PROGRAMMER ERROR if the provided
-         * payload memory reference was invalid or not read-write.
-         */
-        for (i = 0; i < ovec_num; i++) {
-            FIH_CALL(tfm_hal_memory_check, fih_rc,
-                     curr_partition->boundary, (uintptr_t)ovecs_local[i].base,
-                     ovecs_local[i].len, TFM_HAL_ACCESS_READWRITE);
-            if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
-                return PSA_ERROR_PROGRAMMER_ERROR;
-            }
+        p_connection->msg.in_size[i]    = ivecs_local[i].len;
+        p_connection->invec_base[i]     = ivecs_local[i].base;
+        p_connection->invec_accessed[i] = 0;
+    }
 
-            p_connection->msg.out_size[i]   = ovecs_local[i].len;
-            p_connection->outvec_base[i]    = ovecs_local[i].base;
-            p_connection->outvec_written[i] = 0;
+    if (ns_access == TFM_HAL_ACCESS_NS &&
+        !PARAM_IS_NS_VEC(ctrl_param)   &&
+        !PARAM_IS_NS_OUTVEC(ctrl_param)) {
+        ns_access = 0;
+    }
+
+    /*
+     * For client output vector, it is a PROGRAMMER ERROR if the provided
+     * payload memory reference was invalid or not read-write.
+     */
+    for (i = 0; i < ovec_num; i++) {
+        FIH_CALL(tfm_hal_memory_check, fih_rc,
+                    curr_partition->boundary, (uintptr_t)ovecs_local[i].base,
+                    ovecs_local[i].len, TFM_HAL_ACCESS_READWRITE | ns_access);
+        if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
         }
+
+        p_connection->msg.out_size[i]   = ovecs_local[i].len;
+        p_connection->outvec_base[i]    = ovecs_local[i].base;
+        p_connection->outvec_written[i] = 0;
     }
 
     p_connection->caller_outvec = outptr;

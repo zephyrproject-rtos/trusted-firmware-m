@@ -45,56 +45,34 @@ uint32_t tfm_rpc_psa_framework_version(void)
     return tfm_spm_client_psa_framework_version();
 }
 
-uint32_t tfm_rpc_psa_version(const struct client_call_params_t *params)
+uint32_t tfm_rpc_psa_version(uint32_t sid)
 {
-    SPM_ASSERT(params != NULL);
-
-    return tfm_spm_client_psa_version(params->sid);
+    return tfm_spm_client_psa_version(sid);
 }
 
-psa_status_t tfm_rpc_psa_call(const struct client_call_params_t *params)
+psa_status_t tfm_rpc_psa_call(psa_handle_t handle, uint32_t control,
+                              const struct client_params_t *params,
+                              const void *client_data_stateless)
 {
     SPM_ASSERT(params != NULL);
 
-    /* TODO: Is the lifetime of this variable appropriate ? */
-    const struct client_vectors vecs = {
-        .in_vec = params->in_vec,
-        .out_vec = params->out_vec,
-    };
-    const struct client_params client_params = {
-        .ns_client_id = params->ns_client_id,
-        .client_data = params->client_data,
-    };
-
-    return agent_psa_call(params->handle,
-                          PARAM_PACK(params->type,
-                                     params->in_len,
-                                     params->out_len),
-                          &vecs,
-                          &client_params);
+    return agent_psa_call(handle, control, params, client_data_stateless);
 }
 
 /* Following PSA APIs are only needed by connection-based services */
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 
-psa_status_t tfm_rpc_psa_connect(const struct client_call_params_t *params)
+psa_status_t tfm_rpc_psa_connect(uint32_t sid,
+                                 uint32_t version,
+                                 int32_t ns_client_id,
+                                 const void *client_data)
 {
-    SPM_ASSERT(params != NULL);
-    const struct client_params client_params = {
-        .ns_client_id = params->ns_client_id,
-        .client_data = params->client_data,
-    };
-
-    return agent_psa_connect(params->sid,
-                             params->version,
-                             &client_params);
+    return agent_psa_connect(sid, version, ns_client_id, client_data);
 }
 
-void tfm_rpc_psa_close(const struct client_call_params_t *params)
+void tfm_rpc_psa_close(psa_handle_t handle)
 {
-    SPM_ASSERT(params != NULL);
-
-    psa_close(params->handle);
+    psa_close(handle);
 }
 
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API */

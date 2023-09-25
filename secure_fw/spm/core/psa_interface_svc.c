@@ -161,9 +161,9 @@ __naked void psa_eoi_svc(psa_signal_t irq_signal)
 
 #ifdef TFM_PARTITION_NS_AGENT_MAILBOX
 __naked psa_status_t agent_psa_call_svc(psa_handle_t handle,
-                                        uint32_t ctrl_param,
-                                        const struct client_vectors *vecs,
-                                        const struct client_params *params)
+                                        uint32_t control,
+                                        const struct client_params_t *params,
+                                        const void *client_data_stateless)
 {
     __asm volatile("svc     "M2S(TFM_SVC_AGENT_PSA_CALL)"      \n"
                    "bx      lr                                 \n");
@@ -171,7 +171,8 @@ __naked psa_status_t agent_psa_call_svc(psa_handle_t handle,
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 __naked psa_handle_t agent_psa_connect_svc(uint32_t sid, uint32_t version,
-                                           const struct client_params *params)
+                                           int32_t ns_client_id,
+                                           const void *client_data)
 {
     __asm volatile("svc     "M2S(TFM_SVC_AGENT_PSA_CONNECT)"   \n"
                    "bx      lr                                 \n");
