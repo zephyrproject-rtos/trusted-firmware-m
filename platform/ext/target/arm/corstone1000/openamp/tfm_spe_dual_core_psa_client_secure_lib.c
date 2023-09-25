@@ -102,7 +102,7 @@ static psa_invec * prepare_in_vecs(unordered_map_entry_t* s_map_entry)
     return input_buffer_in_vec;
 }
 
-static void * alloc_outout_buffer_in_shared_mem(size_t length,
+static void * alloc_output_buffer_in_shared_mem(size_t length,
         unordered_map_entry_t* s_map_entry)
 {
     uint32_t buffer_sz = 0;
@@ -150,7 +150,7 @@ static psa_status_t alloc_and_prepare_out_vecs(psa_outvec **out_vec_start_ptr,
     }
 
     /* prepare output buffer layout */
-    out_buffer = (output_buffer_with_payload_t*)alloc_outout_buffer_in_shared_mem(
+    out_buffer = (output_buffer_with_payload_t*)alloc_output_buffer_in_shared_mem(
                                                 output_buffer_len, s_map_entry);
 
     for (int i = 0; i < PSA_MAX_IOVEC; i++) {
