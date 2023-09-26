@@ -29,6 +29,7 @@ target_link_options(bl1_1
 target_sources(bl1_1
     PRIVATE
         main.c
+        $<$<BOOL:${CONFIG_GNU_SYSCALL_STUB_ENABLED}>:${CMAKE_SOURCE_DIR}/platform/ext/common/syscalls_stub.c>
 )
 
 target_link_libraries(bl1_1
