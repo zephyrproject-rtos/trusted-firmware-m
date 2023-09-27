@@ -248,8 +248,6 @@ static thrd_fn_t partition_init(struct partition_t *p_pt,
 
     UNI_LISI_INIT_NODE(p_pt, p_handles);
 
-    prv_process_metadata(p_pt);
-
     if (IS_IPC_MODEL(p_pt->p_ldinf)) {
         /* IPC Partition */
         thrd_entry = POSITION_TO_ENTRY(p_pt->p_ldinf->entry, thrd_fn_t);
@@ -310,6 +308,8 @@ void backend_init_comp_assuredly(struct partition_t *p_pt, uint32_t service_sett
               TO_THREAD_PRIORITY(PARTITION_PRIORITY(p_pldi->flags)));
 
     thrd_entry = (comp_init_fns[index])(p_pt, service_setting, &param);
+
+    prv_process_metadata(p_pt);
 
     thrd_start(&p_pt->thrd, thrd_entry, THRD_GENERAL_EXIT, (void *)param);
 }
