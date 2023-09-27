@@ -21,6 +21,7 @@
 #include "tfm_svcalls.h"
 #include "utilities.h"
 #include "core_ext.h"
+#include "ffm/backend.h"
 
 #if !defined(__ARM_ARCH_8M_MAIN__) && !defined(__ARM_ARCH_8_1M_MAIN__)
 #error "Unsupported ARM Architecture."
