@@ -570,5 +570,5 @@ struct mpc_sie_dev_t MPC_DDR4_DEV_S = {
 struct ethosu_device NPU0_S = {
     .reg = (struct NPU_REG *)NPU0_APB_BASE_S,
     .secure = 0,
-    .privileged = 1,
+    .privileged = 0,
 };
