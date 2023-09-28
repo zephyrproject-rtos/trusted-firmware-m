@@ -192,6 +192,9 @@ int main(void)
 
     BOOT_LOG_ERR("Never should get here");
     FIH_PANIC;
+
+    /* Dummy return to be compatible with some check tools */
+    return FIH_FAILURE;
 }
 
 #if defined(MCUBOOT_USE_PSA_CRYPTO)
