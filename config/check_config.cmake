@@ -65,6 +65,9 @@ get_property(MCUBOOT_ALIGN_VAL_LIST CACHE MCUBOOT_ALIGN_VAL PROPERTY STRINGS)
 tfm_invalid_config(BL2 AND (NOT MCUBOOT_ALIGN_VAL IN_LIST MCUBOOT_ALIGN_VAL_LIST) AND NOT USE_KCONFIG_TOOL)
 
 tfm_invalid_config(TFM_DUMMY_PROVISIONING AND MCUBOOT_GENERATE_SIGNING_KEYPAIR)
+
+tfm_invalid_config((NOT MCUBOOT_HW_KEY) AND (MCUBOOT_GENERATE_SIGNING_KEYPAIR))
+
 ####################### Code sharing ###########################################
 
 set(TFM_CODE_SHARING_PLATFORM_LISTS arm/mps2/an521 arm/musca_b1) # Without crypto hw acceleration
