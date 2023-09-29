@@ -110,6 +110,35 @@ if (PLATFORM_DEFAULT_IMAGE_SIGNING)
         set(MCUBOOT_KEY_S $<TARGET_FILE_DIR:bl2>/generated_private_key_s.pem CACHE FILEPATH "" FORCE)
         set(MCUBOOT_KEY_NS $<TARGET_FILE_DIR:bl2>/generated_private_key_ns.pem CACHE FILEPATH "" FORCE)
     endif()
+
+    add_custom_target(public_key ALL
+        SOURCES
+            image_s_signing_public_key.pem
+            image_ns_signing_public_key.pem
+    )
+    add_custom_command(OUTPUT image_s_signing_public_key.pem
+        # If MCUBOOT_GENERATE_SIGNING_KEYPAIR=ON then the command should depend on that
+        # to make sure that the key is generated and copied to the MCUBOOT_KEY_S path.
+        DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
+        COMMAND ${Python3_EXECUTABLE} ${MCUBOOT_PATH}/scripts/imgtool.py
+            getpub
+            -k ${MCUBOOT_KEY_S}
+            -e pem
+            -o image_s_signing_public_key.pem
+        COMMAND ${CMAKE_COMMAND} -E copy image_s_signing_public_key.pem $<TARGET_FILE_DIR:bl2>
+    )
+    add_custom_command(OUTPUT image_ns_signing_public_key.pem
+        # If MCUBOOT_GENERATE_SIGNING_KEYPAIR=ON then the command should depend on that
+        # to make sure that the key is generated and copied to the MCUBOOT_KEY_NS path.
+        DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
+        COMMAND ${Python3_EXECUTABLE} ${MCUBOOT_PATH}/scripts/imgtool.py
+            getpub
+            -k ${MCUBOOT_KEY_NS}
+            -e pem
+            -o image_ns_signing_public_key.pem
+        COMMAND ${CMAKE_COMMAND} -E copy image_ns_signing_public_key.pem $<TARGET_FILE_DIR:bl2>
+    )
+
     set(IMAGE_TYPE "S_IMAGE")
     set(FLASH_AREA_NUM ${MCUBOOT_S_IMAGE_FLASH_AREA_NUM})
     if (MCUBOOT_IMAGE_NUMBER GREATER 1)

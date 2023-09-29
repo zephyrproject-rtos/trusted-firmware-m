@@ -182,10 +182,14 @@ if(BL2)
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
         install(FILES ${MCUBOOT_KEY_S}
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
+        install(FILES $<TARGET_FILE_DIR:bl2>/image_s_signing_public_key.pem
+            DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
         if(MCUBOOT_IMAGE_NUMBER GREATER 1)
             install(FILES $<TARGET_OBJECTS:signing_layout_ns>
                     DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/layout_files)
             install(FILES ${MCUBOOT_KEY_NS}
+                    DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
+            install(FILES $<TARGET_FILE_DIR:bl2>/image_ns_signing_public_key.pem
                     DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}/keys)
         endif()
     endif()
