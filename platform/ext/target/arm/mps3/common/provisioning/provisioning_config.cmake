@@ -5,6 +5,9 @@
 #
 #-------------------------------------------------------------------------------
 
+set(MCUBOOT_KEY_S  "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/root-${MCUBOOT_SIGNATURE_TYPE}.pem" CACHE FILEPATH "Path to key with which to sign secure binary" FORCE)
+set(MCUBOOT_KEY_NS "${CMAKE_SOURCE_DIR}/bl2/ext/mcuboot/root-${MCUBOOT_SIGNATURE_TYPE}_1.pem" CACHE FILEPATH "Path to key with which to sign non-secure binary" FORCE)
+
 set(SECURE_DEBUG_PK "0xf4, 0x0c, 0x8f, 0xbf, 0x12, 0xdb, 0x78, 0x2a, \
 0xfd, 0xf4, 0x75, 0x96, 0x6a, 0x06, 0x82, 0x36, \
 0xe0, 0x32, 0xab, 0x80, 0xd1, 0xb7, 0xf1, 0xbc, \

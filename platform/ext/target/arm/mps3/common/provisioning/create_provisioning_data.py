@@ -49,8 +49,10 @@ def get_key_hash_c_array(key_file):
 @click.option('--iak', metavar='key', required=False)
 @click.option('--boot_seed', metavar='seed', required=False)
 @click.option('--implementation_id', metavar='id', required=False)
-@click.option('--certification_reference', metavar='reference', required=True)
-@click.option('--verification_service_url', metavar='url', required=True)
+@click.option('--certification_reference', metavar='reference', default="",
+              required=False)
+@click.option('--verification_service_url', metavar='url', default="",
+              required=False)
 @click.option('--entropy_seed', metavar='seed', required=False)
 @click.command(help='''Create a signed or unsigned image\n
                INFILE and OUTFILE are parsed as Intel HEX if the params have

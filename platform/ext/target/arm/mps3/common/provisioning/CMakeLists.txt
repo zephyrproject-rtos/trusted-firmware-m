@@ -10,7 +10,17 @@ find_package(Python3)
 
 add_executable(provisioning_bundle)
 
-include(${PROVISIONING_KEYS_CONFIG})
+if(${TFM_DUMMY_PROVISIONING})
+    include(${CMAKE_SOURCE_DIR}/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake)
+else()
+    include("${PROVISIONING_KEYS_CONFIG}" OPTIONAL RESULT_VARIABLE PROVISIONING_KEYS_CONFIG_PATH)
+    if(NOT PROVISIONING_KEYS_CONFIG_PATH)
+        message(WARNING "The PROVISIONING_KEYS_CONFIG is not set. If the keys are not passed via the command line then \
+                        random numbers will be used for HUK/IAK etc. \
+                        To create and use a PROVISIONING_KEYS_CONFIG file, \
+                        see the example in: tf-m/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake")
+    endif()
+endif()
 
 set_target_properties(provisioning_bundle
     PROPERTIES
@@ -109,16 +119,16 @@ add_custom_command(OUTPUT provisioning_data.c
     WORKING_DIRECTORY ${MCUBOOT_PATH}/scripts
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/create_provisioning_data.py
         ${CMAKE_CURRENT_BINARY_DIR}/provisioning_data.c
-        --bl2_rot_priv_key_0 ${MCUBOOT_KEY_S}
-        --bl2_rot_priv_key_1 ${MCUBOOT_KEY_NS}
-        --template_path ${CMAKE_CURRENT_SOURCE_DIR}
-        --secure_debug_pk ${SECURE_DEBUG_PK}
-        --huk ${HUK}
-        --iak ${IAK}
-        --boot_seed ${BOOT_SEED}
-        --implementation_id ${IMPLEMENTATION_ID}
-        --certification_reference ${CERTIFICATION_REFERENCE}
-        --verification_service_url ${VERIFICATION_SERVICE_URL}
-        --entropy_seed ${ENTROPY_SEED}
+        --bl2_rot_priv_key_0=${MCUBOOT_KEY_S}
+        --bl2_rot_priv_key_1=${MCUBOOT_KEY_NS}
+        --template_path=${CMAKE_CURRENT_SOURCE_DIR}
+        --secure_debug_pk=${SECURE_DEBUG_PK}
+        --huk=${HUK}
+        --iak=${IAK}
+        --boot_seed=${BOOT_SEED}
+        --implementation_id=${IMPLEMENTATION_ID}
+        --certification_reference=${CERTIFICATION_REFERENCE}
+        --verification_service_url=${VERIFICATION_SERVICE_URL}
+        --entropy_seed=${ENTROPY_SEED}
 
 )

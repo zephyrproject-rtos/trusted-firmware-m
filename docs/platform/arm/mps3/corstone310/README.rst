@@ -59,18 +59,24 @@ Build instructions with platform name: arm/mps3/corstone310/fvp
 
 .. note::
 
+   If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` and ``-DTFM_DUMMY_PROVISIONING=ON`` then the keys in
+   the ``tf-m/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake`` and the
+   default MCUBoot signing keys will be used for provisioning.
+
    If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` and ``-DTFM_DUMMY_PROVISIONING=OFF`` are set
-   then unique values can be used for provisioning. The ${MCUBOOT_KEY_S} and ${MCUBOOT_KEY_NS}
-   will be used for signing and provisioning so any unique private signing key can be used.
+   then unique values can be used for provisioning. The keys and seeds can be changed by
+   passing the new values to the build command, or by setting the ``-DPROVISIONING_KEYS_CONFIG`` flag
+   to a .cmake file that contains the keys. An example config cmake file can be seen at
+   ``tf-m/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake``.
+   Otherwise new random values are going to be generated and used. For the image signing
+   the ${MCUBOOT_KEY_S} and ${MCUBOOT_KEY_NS} will be used. These variables should point to
+   .pem files that contain the code signing private keys. The public keys are going to be generated
+   from these private keys and will be used for provisioning. The hash of the public key is going to
+   be written into the ``provisioning_data.c`` automatically.
+
    If ``-DMCUBOOT_GENERATE_SIGNING_KEYPAIR=ON`` is set then a new mcuboot signing public and private
    keypair is going to be generated and it's going to be used to sign the S and NS binaries.
 
-   The hash of the public key is going to be written into the ``provisioning_data.c`` automatically.
-   The other keys and seeds can be changed by passing the new values to the build command,
-   otherwise the default values going to be used:
-   ``tf-m/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake``
-   Optionally it's possible to pass a new config file with the ``-DPROVISIONING_KEYS_CONFIG``
-   flag.
 
    The new generated keypair can be found in the ``<build dir>/bin`` folder or in the
    ``<install directory>/image_signing/keys`` after installation.
