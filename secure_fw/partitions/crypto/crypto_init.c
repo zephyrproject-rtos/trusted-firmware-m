@@ -341,7 +341,7 @@ psa_status_t tfm_crypto_api_dispatcher(psa_invec in_vec[],
     int32_t caller_id = 0;
     struct tfm_crypto_key_id_s encoded_key = TFM_CRYPTO_KEY_ID_S_INIT;
     bool is_key_required = false;
-    enum tfm_crypto_group_id group_id;
+    enum tfm_crypto_group_id_t group_id;
 
     if (in_vec[0].len != sizeof(struct tfm_crypto_pack_iovec)) {
         return PSA_ERROR_PROGRAMMER_ERROR;

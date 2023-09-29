@@ -32,6 +32,7 @@ psa_status_t tfm_ps_init(void)
 #endif /* !TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef PS_ENCRYPTION
+    (void)ps_crypto_aead_alg; /* Suppress warning if logging disabled */
     LOG_INFFMT("[INF][PS] Encryption alg: 0x%x\r\n", ps_crypto_aead_alg);
 #endif
 

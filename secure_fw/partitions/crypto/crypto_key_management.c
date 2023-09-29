@@ -45,6 +45,7 @@ psa_status_t tfm_crypto_key_management_interface(psa_invec in_vec[],
     default:
         break;
     }
+
     switch (iov->function_id) {
     case TFM_CRYPTO_IMPORT_KEY_SID:
     {
