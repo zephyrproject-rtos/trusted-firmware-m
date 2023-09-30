@@ -12,6 +12,7 @@
 extern "C" {
 #endif
 
+#include <limits.h>
 #include <stdint.h>
 #include "tfm_crypto_defs.h"
 #include "tfm_crypto_key.h"
