@@ -18,6 +18,7 @@
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
 #include "tfm_hal_ps.h"
 #endif
+#include "flash/its_flash.h"
 #include "flash_fs/its_flash_fs.h"
 #include "psa_manifest/pid.h"
 #include "tfm_its_defs.h"
@@ -55,7 +56,7 @@ static uint8_t __ALIGNED(4) asset_data[ITS_UTILS_ALIGN(ITS_MAX_ASSET_SIZE,
 #endif
 
 #ifdef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE
-static its_flash_fs_ctx_t fs_ctx_its;
+static struct its_flash_fs_ctx_t fs_ctx_its;
 static struct its_flash_fs_config_t fs_cfg_its = {
     .flash_dev = &ITS_FLASH_DEV,
     .program_unit = ITS_FLASH_ALIGNMENT,
@@ -65,7 +66,7 @@ static struct its_flash_fs_config_t fs_cfg_its = {
 #endif /* TFM_PARTITION_INTERNAL_TRUSTED_STORAGE */
 
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
-static its_flash_fs_ctx_t fs_ctx_ps;
+static struct its_flash_fs_ctx_t fs_ctx_ps;
 static struct its_flash_fs_config_t fs_cfg_ps = {
     .flash_dev = &PS_FLASH_DEV,
     .program_unit = PS_FLASH_ALIGNMENT,
@@ -74,7 +75,7 @@ static struct its_flash_fs_config_t fs_cfg_ps = {
 };
 #endif
 
-static its_flash_fs_ctx_t *get_fs_ctx(int32_t client_id)
+static struct its_flash_fs_ctx_t *get_fs_ctx(int32_t client_id)
 {
 #ifdef TFM_PARTITION_PROTECTED_STORAGE
 #ifndef TFM_PARTITION_INTERNAL_TRUSTED_STORAGE

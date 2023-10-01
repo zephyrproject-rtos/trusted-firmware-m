@@ -123,9 +123,11 @@ static uint32_t spm_init_function(uint32_t param)
 
 /* Parameters are treated as assuredly */
 void backend_init_comp_assuredly(struct partition_t *p_pt,
-                                 uint32_t service_set)
+                                 uint32_t service_setting)
 {
     const struct partition_load_info_t *p_pldi = p_pt->p_ldinf;
+
+    (void)service_setting;
 
     p_pt->p_reqs = NULL;
     p_pt->state = SFN_PARTITION_STATE_NOT_INITED;

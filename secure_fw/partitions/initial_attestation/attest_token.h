@@ -146,17 +146,17 @@ struct attest_token_encode_ctx {
  *                        (https://tools.ietf.org/html/rfc8152) or
  *                        in the [IANA COSE Registry]
  *                        (https://www.iana.org/assignments/cose/cose.xhtml).
- * \param[out] out_buffer The output buffer to write the encoded token into.
+ * \param[out] out_buf    The output buffer to write the encoded token into.
  *
  * \return one of the \ref attest_token_err_t errors.
  *
- * The size of the buffer in \c out_buffer->len
+ * The size of the buffer in \c out_buf->len
  * determines the size of the token that can be created. It must be
  * able to hold the final encoded and signed token. The data encoding
  * overhead is just that of CBOR. The signing overhead depends on the
  * signing key size. It is about 150 bytes for 256-bit ECDSA.
  *
- * If \c out_buffer->ptr is \c NULL and \c out_buffer_ptr->len is
+ * If \c out_buf->ptr is \c NULL and \c out_buf->len is
  * large like \c UINT32_MAX no token will be created but the length of
  * the token that would be created will be in \c completed_token as
  * returned by attest_token_encode_finish(). None of the cryptographic
@@ -168,7 +168,7 @@ attest_token_encode_start(struct attest_token_encode_ctx *me,
                           uint32_t opt_flags,
                           int32_t key_select,
                           int32_t cose_alg_id,
-                          const struct q_useful_buf *out_buffer);
+                          const struct q_useful_buf *out_buf);
 
 /**
  * \brief Get a copy of the CBOR encoding context
@@ -203,22 +203,22 @@ void attest_token_encode_add_integer(struct attest_token_encode_ctx *me,
  *
  * \param[in] me     Token creation context.
  * \param[in] label  Integer label for claim.
- * \param[in] value  The binary claim data.
+ * \param[in] bstr   The binary claim data.
  */
 void attest_token_encode_add_bstr(struct attest_token_encode_ctx *me,
                                   int32_t label,
-                                  const struct q_useful_buf_c *value);
+                                  const struct q_useful_buf_c *bstr);
 
 /**
  * \brief Add a text string claim
  *
  * \param[in] me     Token creation context.
  * \param[in] label  Integer label for claim.
- * \param[in] value  The text claim data.
+ * \param[in] tstr   The text claim data.
  */
 void attest_token_encode_add_tstr(struct attest_token_encode_ctx *me,
                                   int32_t label,
-                                  const struct q_useful_buf_c *value);
+                                  const struct q_useful_buf_c *tstr);
 
 /**
  * \brief Add some already-encoded CBOR to payload

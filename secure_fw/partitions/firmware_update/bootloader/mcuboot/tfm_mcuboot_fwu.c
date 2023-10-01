@@ -133,7 +133,7 @@ psa_status_t fwu_bootloader_staging_area_init(psa_fwu_component_t component,
 }
 
 psa_status_t fwu_bootloader_load_image(psa_fwu_component_t component,
-                                       size_t block_offset,
+                                       size_t image_offset,
                                        const void *block,
                                        size_t block_size)
 {
@@ -150,7 +150,7 @@ psa_status_t fwu_bootloader_load_image(psa_fwu_component_t component,
         return PSA_ERROR_BAD_STATE;
     }
 
-    if (flash_area_write(fap, block_offset, block, block_size) != 0) {
+    if (flash_area_write(fap, image_offset, block, block_size) != 0) {
         LOG_ERRFMT("TFM FWU: write flash failed.\r\n");
         return PSA_ERROR_STORAGE_FAILURE;
     }

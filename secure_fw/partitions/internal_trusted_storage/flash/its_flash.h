@@ -22,7 +22,7 @@
 #if ITS_RAM_FS
 /* RAM FS: use a buffer to emulate storage in RAM */
 #include "its_flash_ram.h"
-extern uint8_t its_block_data[];
+extern uint8_t its_block_data[ITS_RAM_FS_SIZE];
 #define ITS_FLASH_DEV its_block_data
 #define ITS_FLASH_ALIGNMENT 1
 #define ITS_FLASH_OPS its_flash_fs_ops_ram

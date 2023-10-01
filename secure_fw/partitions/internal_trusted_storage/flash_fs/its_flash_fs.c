@@ -138,7 +138,7 @@ static psa_status_t its_flash_fs_validate_config(
     return ret;
 }
 
-psa_status_t its_flash_fs_init_ctx(its_flash_fs_ctx_t *fs_ctx,
+psa_status_t its_flash_fs_init_ctx(struct its_flash_fs_ctx_t *fs_ctx,
                                    const struct its_flash_fs_config_t *fs_cfg,
                                    const struct its_flash_fs_ops_t *fs_ops)
 {
@@ -164,7 +164,7 @@ psa_status_t its_flash_fs_init_ctx(its_flash_fs_ctx_t *fs_ctx,
     return PSA_SUCCESS;
 }
 
-psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx)
+psa_status_t its_flash_fs_prepare(struct its_flash_fs_ctx_t *fs_ctx)
 {
     psa_status_t err;
     uint32_t idx;

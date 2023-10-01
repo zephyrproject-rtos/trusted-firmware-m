@@ -32,7 +32,7 @@
 #endif
 
 /* Entrypoint function declaration */
-extern void ns_agent_tz_main(void);
+extern void ns_agent_tz_main(uint32_t c_entry);
 
 /* Stack size must be aligned to satisfy platform alignment requirements */
 #define TFM_NS_AGENT_TZ_STACK_SIZE_ALIGNED \

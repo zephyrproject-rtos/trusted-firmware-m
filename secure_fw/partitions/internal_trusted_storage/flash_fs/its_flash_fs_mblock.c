@@ -1201,7 +1201,7 @@ psa_status_t its_flash_fs_mblock_reserve_file(
                                             bool use_spare,
                                             size_t size,
                                             uint32_t flags,
-                                            uint32_t *idx,
+                                            uint32_t *file_meta_idx,
                                             struct its_file_meta_t *file_meta,
                                             struct its_block_meta_t *block_meta)
 {
@@ -1210,9 +1210,9 @@ psa_status_t its_flash_fs_mblock_reserve_file(
     err = its_mblock_reserve_file(fs_ctx, fid, size, flags, file_meta,
                                   block_meta);
 
-    *idx = its_get_free_file_index(fs_ctx, use_spare);
+    *file_meta_idx = its_get_free_file_index(fs_ctx, use_spare);
     if ((err != PSA_SUCCESS) ||
-        (*idx == ITS_METADATA_INVALID_INDEX)) {
+        (*file_meta_idx == ITS_METADATA_INVALID_INDEX)) {
         return PSA_ERROR_INSUFFICIENT_STORAGE;
     }
 

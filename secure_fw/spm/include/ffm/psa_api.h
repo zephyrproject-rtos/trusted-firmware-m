@@ -397,8 +397,8 @@ psa_status_t tfm_spm_partition_psa_write(psa_handle_t msg_handle, uint32_t outve
  * \arg                         An invalid status code is specified for the
  *                              type of message.
  */
-int32_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
-                                    psa_status_t status);
+psa_status_t tfm_spm_partition_psa_reply(psa_handle_t msg_handle,
+                                         psa_status_t status);
 
 #if CONFIG_TFM_DOORBELL_API == 1
 /**

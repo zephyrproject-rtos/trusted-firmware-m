@@ -63,9 +63,9 @@ void psa_write(psa_handle_t msg_handle, uint32_t outvec_idx,
     PART_METADATA()->psa_fns->psa_write(msg_handle, outvec_idx, buffer, num_bytes);
 }
 
-void psa_reply(psa_handle_t msg_handle, psa_status_t retval)
+void psa_reply(psa_handle_t msg_handle, psa_status_t status)
 {
-    PART_METADATA()->psa_fns->psa_reply(msg_handle, retval);
+    PART_METADATA()->psa_fns->psa_reply(msg_handle, status);
 }
 
 void psa_panic(void)

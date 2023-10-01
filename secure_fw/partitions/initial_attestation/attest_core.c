@@ -747,8 +747,7 @@ error:
 }
 
 psa_status_t
-initial_attest_get_token_size(const size_t challenge_size,
-                              size_t *token_size)
+initial_attest_get_token_size(size_t challenge_size, size_t *token_size)
 {
     enum psa_attest_err_t attest_err = PSA_ATTEST_ERR_SUCCESS;
     struct q_useful_buf_c challenge;

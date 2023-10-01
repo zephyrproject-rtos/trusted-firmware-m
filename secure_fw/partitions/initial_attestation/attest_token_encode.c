@@ -334,9 +334,9 @@ attest_token_encode_borrow_cbor_cntxt(struct attest_token_encode_ctx *me)
  */
 void attest_token_encode_add_integer(struct attest_token_encode_ctx *me,
                                      int32_t label,
-                                     int64_t Value)
+                                     int64_t value)
 {
-    QCBOREncode_AddInt64ToMapN(&(me->cbor_enc_ctx), label, Value);
+    QCBOREncode_AddInt64ToMapN(&(me->cbor_enc_ctx), label, value);
 }
 
 

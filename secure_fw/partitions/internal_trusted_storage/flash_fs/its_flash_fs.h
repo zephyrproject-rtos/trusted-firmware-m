@@ -200,7 +200,7 @@ struct its_flash_fs_file_info_t {
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_init_ctx(its_flash_fs_ctx_t *fs_ctx,
+psa_status_t its_flash_fs_init_ctx(struct its_flash_fs_ctx_t *fs_ctx,
                                    const struct its_flash_fs_config_t *fs_cfg,
                                    const struct its_flash_fs_ops_t *fs_ops);
 
@@ -212,7 +212,7 @@ psa_status_t its_flash_fs_init_ctx(its_flash_fs_ctx_t *fs_ctx,
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx);
+psa_status_t its_flash_fs_prepare(struct its_flash_fs_ctx_t *fs_ctx);
 
 /**
  * \brief Wipes all files from the filesystem.
@@ -222,7 +222,7 @@ psa_status_t its_flash_fs_prepare(its_flash_fs_ctx_t *fs_ctx);
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_wipe_all(its_flash_fs_ctx_t *fs_ctx);
+psa_status_t its_flash_fs_wipe_all(struct its_flash_fs_ctx_t *fs_ctx);
 
 /**
  * \brief Gets the file information referenced by the file ID.
@@ -234,7 +234,7 @@ psa_status_t its_flash_fs_wipe_all(its_flash_fs_ctx_t *fs_ctx);
  *
  * \return Returns error code specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_file_get_info(its_flash_fs_ctx_t *fs_ctx,
+psa_status_t its_flash_fs_file_get_info(struct its_flash_fs_ctx_t *fs_ctx,
                                         const uint8_t *fid,
                                         struct its_flash_fs_file_info_t *info);
 
@@ -251,7 +251,7 @@ psa_status_t its_flash_fs_file_get_info(its_flash_fs_ctx_t *fs_ctx,
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_file_write(its_flash_fs_ctx_t *fs_ctx,
+psa_status_t its_flash_fs_file_write(struct its_flash_fs_ctx_t *fs_ctx,
                                      const uint8_t *fid,
                                      struct its_flash_fs_file_info_t *finfo,
                                      size_t data_size,
@@ -269,7 +269,7 @@ psa_status_t its_flash_fs_file_write(its_flash_fs_ctx_t *fs_ctx,
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_file_read(its_flash_fs_ctx_t *fs_ctx,
+psa_status_t its_flash_fs_file_read(struct its_flash_fs_ctx_t *fs_ctx,
                                     const uint8_t *fid,
                                     size_t size,
                                     size_t offset,
@@ -283,7 +283,7 @@ psa_status_t its_flash_fs_file_read(its_flash_fs_ctx_t *fs_ctx,
  *
  * \return Returns error code as specified in \ref psa_status_t
  */
-psa_status_t its_flash_fs_file_delete(its_flash_fs_ctx_t *fs_ctx,
+psa_status_t its_flash_fs_file_delete(struct its_flash_fs_ctx_t *fs_ctx,
                                       const uint8_t *fid);
 
 #ifdef __cplusplus
