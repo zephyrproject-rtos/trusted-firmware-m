@@ -228,7 +228,7 @@ cc3xx_err_t cc3xx_chacha20_update(const uint8_t* in, size_t in_len)
     uint8_t zero_block[POLY1305_BLOCK_SIZE] = {0};
 
     if (in_len == 0) {
-        return;
+        return CC3XX_ERR_SUCCESS;
     }
 
     /* Input into poly1305 before into the DMA, in case we're doing an in-place
