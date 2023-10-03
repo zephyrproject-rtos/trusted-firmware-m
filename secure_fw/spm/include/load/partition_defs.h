@@ -46,11 +46,11 @@
 #define PARTITION_PRI_LOWEST                    (0xFF)
 #define PARTITION_PRI_MASK                      (0xFF)
 
-#define PARTITION_MODEL_PSA_ROT                 (1U << 8)
-#define PARTITION_MODEL_IPC                     (1U << 9)
+#define PARTITION_MODEL_PSA_ROT                 (1UL << 8)
+#define PARTITION_MODEL_IPC                     (1UL << 9)
 
-#define PARTITION_NS_AGENT_MB                   (1U << 10)
-#define PARTITION_NS_AGENT_TZ                   (1U << 11)
+#define PARTITION_NS_AGENT_MB                   (1UL << 10)
+#define PARTITION_NS_AGENT_TZ                   (1UL << 11)
 
 #define PARTITION_PRIORITY(flag)                ((flag) & PARTITION_PRI_MASK)
 #define TO_THREAD_PRIORITY(x)                   (x)

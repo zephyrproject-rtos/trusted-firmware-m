@@ -48,9 +48,9 @@
                                             */
 #define INVEC_IDX_BASE                 0   /* Base index of invec. */
 
-#define IOVEC_MAPPED_BIT               (1U << 0)
-#define IOVEC_UNMAPPED_BIT             (1U << 1)
-#define IOVEC_ACCESSED_BIT             (1U << 2)
+#define IOVEC_MAPPED_BIT               (1UL << 0)
+#define IOVEC_UNMAPPED_BIT             (1UL << 1)
+#define IOVEC_ACCESSED_BIT             (1UL << 2)
 
 #define IOVEC_IS_MAPPED(handle, iovec_idx)      \
     ((((handle)->iovec_status) >> ((iovec_idx) * IOVEC_STATUS_BITS)) &  \

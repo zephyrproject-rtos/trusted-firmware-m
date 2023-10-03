@@ -30,14 +30,14 @@ extern "C" {
 /* Space reserved for user-defined flags. These are stored in the file metadata
  * and can be retrieved by getting the file info.
  */
-#define ITS_FLASH_FS_USER_FLAGS_MASK   ((1U << 16) - 1)
+#define ITS_FLASH_FS_USER_FLAGS_MASK   ((1UL << 16) - 1)
 
 /* Filesystem flags that can be provided when calling the write function */
-#define ITS_FLASH_FS_WRITE_FLAGS_MASK  ((1U << 24) - (1U << 16))
+#define ITS_FLASH_FS_WRITE_FLAGS_MASK  ((1UL << 24) - (1UL << 16))
 /* Create the file if it does not already exist */
-#define ITS_FLASH_FS_FLAG_CREATE       (1U << 16)
+#define ITS_FLASH_FS_FLAG_CREATE       (1UL << 16)
 /* Remove existing file data if it exists */
-#define ITS_FLASH_FS_FLAG_TRUNCATE     (1U << 17)
+#define ITS_FLASH_FS_FLAG_TRUNCATE     (1UL << 17)
 
 /* Invalid block index */
 #define ITS_BLOCK_INVALID_ID 0xFFFFFFFFU
