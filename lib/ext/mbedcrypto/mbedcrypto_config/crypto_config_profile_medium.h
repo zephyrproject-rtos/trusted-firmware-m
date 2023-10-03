@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+ * Copyright (c) 2018-2023, Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -123,7 +123,7 @@
 #define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_IMPORT   1
 #define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_EXPORT   1
 #define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_GENERATE 1
-#define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_DERIVE   1
+//#define PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_DERIVE   1
 
 #ifdef CRYPTO_HW_ACCELERATOR
 #include "crypto_accelerator_config.h"
