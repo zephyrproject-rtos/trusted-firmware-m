@@ -52,9 +52,6 @@ extensions = [
     'sphinx_tabs.tabs', #Enable tab extension in Sphinx
 ]
 
-# PlantUML
-plantuml = 'java -jar ' + os.environ['PLANTUML_JAR_PATH']
-
 # Make auto section labels generated be prefixed with file name.
 autosectionlabel_prefix_document=True
 # Add auto section label for level 2 headers only.
