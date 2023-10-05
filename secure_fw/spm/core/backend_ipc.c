@@ -193,10 +193,11 @@ psa_status_t backend_messaging(struct service_t *service,
      * thread.
      */
 
-    if (is_tfm_rpc_msg(handle)) {
-        ret = PSA_SUCCESS;
-    } else {
-        ret = backend_wait_signals(handle->p_client, ASYNC_MSG_REPLY);
+    if (!is_tfm_rpc_msg(handle)) {
+        signal = backend_wait_signals(handle->p_client, ASYNC_MSG_REPLY);
+        if (signal == (psa_signal_t)0) {
+            ret = STATUS_NEED_SCHEDULE;
+        }
     }
 
     handle->status = TFM_HANDLE_STATUS_ACTIVE;
@@ -339,10 +340,10 @@ uint32_t backend_system_run(void)
     return control;
 }
 
-psa_status_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
+psa_signal_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals)
 {
     struct critical_section_t cs_signal = CRITICAL_SECTION_STATIC_INIT;
-    psa_status_t ret = PSA_SUCCESS;
+    psa_signal_t ret;
 
     if (!p_pt) {
         tfm_core_panic();
@@ -351,9 +352,8 @@ psa_status_t backend_wait_signals(struct partition_t *p_pt, psa_signal_t signals
     CRITICAL_SECTION_ENTER(cs_signal);
 
     ret = p_pt->signals_asserted & signals;
-    if (ret == 0) {
+    if (ret == (psa_signal_t)0) {
         p_pt->signals_waiting = signals;
-        ret = STATUS_NEED_SCHEDULE;
     }
 
     CRITICAL_SECTION_LEAVE(cs_signal);

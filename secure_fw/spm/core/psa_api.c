@@ -14,6 +14,7 @@
 #include "config_impl.h"
 #include "config_spm.h"
 #include "critical_section.h"
+#include "internal_status_code.h"
 #include "psa/lifecycle.h"
 #include "psa/service.h"
 #include "spm.h"
@@ -58,6 +59,7 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
                                         uint32_t timeout)
 {
     struct partition_t *partition = NULL;
+    psa_signal_t signal;
 
     /*
      * Timeout[30:0] are reserved for future use.
@@ -84,10 +86,15 @@ psa_signal_t tfm_spm_partition_psa_wait(psa_signal_t signal_mask,
      * PendSV and blocked thread gets to run.
      */
     if (timeout == PSA_BLOCK) {
-        return backend_wait_signals(partition, signal_mask);
+        signal = backend_wait_signals(partition, signal_mask);
+        if (signal == (psa_signal_t)0) {
+            signal = (psa_signal_t)STATUS_NEED_SCHEDULE;
+        }
     } else {
-        return partition->signals_asserted & signal_mask;
+        signal = partition->signals_asserted & signal_mask;
     }
+
+    return signal;
 }
 #endif
 
