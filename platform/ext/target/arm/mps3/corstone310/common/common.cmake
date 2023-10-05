@@ -28,26 +28,6 @@ target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_s.icf>
 )
 
-if(NS)
-    target_sources(tfm_ns
-        PRIVATE
-            ${CORSTONE310_COMMON_DIR}/device/source/startup_corstone310.c
-    )
-    if(DEFAULT_NS_SCATTER)
-        target_add_scatter_file(tfm_ns
-            $<$<C_COMPILER_ID:ARMClang>:${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct>
-            $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld>
-            $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf>
-        )
-    endif()
-    target_link_libraries(CMSIS_5_tfm_ns
-        INTERFACE
-            $<$<C_COMPILER_ID:ARMClang>:CMSIS_5_RTX_V8MMN>
-            $<$<C_COMPILER_ID:GNU>:CMSIS_5_RTX_V8MMN>
-            $<$<C_COMPILER_ID:IAR>:CMSIS_5_RTX_V81MMN>
-    )
-endif()
-
 if(BL2)
     target_sources(bl2
         PRIVATE
@@ -79,6 +59,7 @@ target_include_directories(device_definition
         ${ETHOS_DRIVER_PATH}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/device/config
         ${CMAKE_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/platform/include
 )
 
 add_library(device_definition_s STATIC)
@@ -90,12 +71,6 @@ target_sources(device_definition_s
 target_compile_options(device_definition_s
     PRIVATE
         ${COMPILER_CMSE_FLAG}
-)
-
-add_library(device_definition_ns STATIC)
-target_sources(device_definition_ns
-    PUBLIC
-        ${CORSTONE310_COMMON_DIR}/device/source/platform_ns_device_definition.c
 )
 
 #========================= CMSIS lib ===============================#
@@ -131,19 +106,10 @@ target_link_options(cmsis_includes_s
         ${LINKER_CP_OPTION}
 )
 
-add_library(cmsis_includes_ns INTERFACE)
-target_link_libraries(cmsis_includes_ns INTERFACE cmsis_includes)
-target_include_directories(cmsis_includes_ns
-    INTERFACE
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure
-)
-
 #========================= Linking ===============================#
 
 target_link_libraries(device_definition_s PUBLIC device_definition)
 target_link_libraries(device_definition_s PRIVATE cmsis_includes_s)
-target_link_libraries(device_definition_ns PUBLIC device_definition)
-target_link_libraries(device_definition_ns PRIVATE cmsis_includes_ns)
 
 target_link_libraries(platform_bl2
     PUBLIC
@@ -163,12 +129,6 @@ target_link_libraries(platform_s
 
 )
 
-target_link_libraries(platform_ns
-    PUBLIC
-        cmsis_includes_ns
-    PRIVATE
-        device_definition_ns
-)
 #========================= Platform Secure ====================================#
 
 target_include_directories(platform_s
@@ -220,26 +180,6 @@ target_compile_definitions(platform_s
         ETHOSU_LOG_SEVERITY=${ETHOSU_LOG_SEVERITY}
 )
 
-#========================= Platform Non-Secure ================================#
-
-target_sources(platform_ns
-    PRIVATE
-        ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
-        ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
-)
-
-target_include_directories(platform_ns
-    PUBLIC
-        ${CORSTONE310_COMMON_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
-    PRIVATE
-        ${CORSTONE310_COMMON_DIR}/device
-        ${PLATFORM_DIR}/ext/common
-)
-
 #========================= Platform BL2 =======================================#
 
 if(BL2)
@@ -273,6 +213,8 @@ target_sources(tfm_spm
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${PLATFORM_DIR}/ext/common/tfm_interrupts.c>
 )
 
+add_library(tfm_platform_config INTERFACE)
+
 #========================= platform_region_defs ===============================#
 target_compile_definitions(platform_region_defs
     INTERFACE
@@ -286,3 +228,51 @@ target_compile_definitions(platform_region_defs
 if(NOT PLATFORM_DEFAULT_PROVISIONING)
 add_subdirectory(${PLATFORM_DIR}/ext/target/arm/mps3/common/provisioning provisioning)
 endif()
+
+#========================= Files for building NS side platform ================#
+
+install(FILES       ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
+                    ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure/cmsis_driver_config.h
+                    ${CORSTONE310_COMMON_DIR}/cmsis_drivers/config/non_secure/RTE_Device.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/cmsis_drivers)
+
+install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
+                    ${PLATFORM_DIR}/ext/common/uart_stdout.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
+
+install(DIRECTORY   ${CORSTONE310_COMMON_DIR}/device
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common)
+
+install(FILES       ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_reg_map.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_reg_map.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/Driver_USART_CMSDK.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common/Driver_USART_Common.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/target/arm/drivers)
+
+install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_USART.h
+                    ${PLATFORM_DIR}/ext/driver/Driver_Common.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
+
+install(FILES       ${CORSTONE310_COMMON_DIR}/target_cfg.h
+                    ${CORSTONE310_COMMON_DIR}/tfm_peripherals_def.h
+                    ${PLATFORM_DIR}/include/tfm_plat_defs.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/include)
+
+install(DIRECTORY   ${CORSTONE310_COMMON_DIR}/partition
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${CORSTONE310_COMMON_DIR}/cpuarch.cmake
+                    ${CORSTONE310_COMMON_DIR}/config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common)
+
+# Install linker scripts
+install(FILES       ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
+                    ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
+                    ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)
