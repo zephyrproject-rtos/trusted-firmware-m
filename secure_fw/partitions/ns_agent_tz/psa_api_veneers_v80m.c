@@ -15,6 +15,7 @@
 #include "tfm_psa_call_pack.h"
 #include "utilities.h"
 #include "psa/client.h"
+#include "psa/service.h"
 
 /*
  * This is the veneers of FF-M Client APIs for Armv8.0-m.
@@ -35,6 +36,7 @@
 #if defined(__ICCARM__)
 
 #pragma required = psa_framework_version
+#pragma required = psa_panic
 #pragma required = psa_version
 #pragma required = tfm_psa_call_pack
 /* Following PSA APIs are only needed by connection-based services */
