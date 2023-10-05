@@ -43,6 +43,7 @@ extern int32_t platform_svc_handlers(uint8_t svc_number,
 static uint32_t saved_psp;
 static uint32_t saved_psp_limit;
 static uint32_t saved_exc_return;
+static uint32_t saved_control;
 
 typedef psa_status_t (*psa_api_svc_func_t)(uint32_t p0, uint32_t p1, uint32_t p2, uint32_t p3);
 
@@ -84,6 +85,9 @@ static uint32_t thread_mode_spm_return(psa_status_t result)
 
     tfm_arch_set_psplim(saved_psp_limit);
     __set_PSP(saved_psp);
+
+    /* Restore the previous CONTROL register value */
+    __set_CONTROL(saved_control);
 
     return saved_exc_return;
 }
@@ -158,7 +162,10 @@ static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uin
 
     (void)tfm_arch_refresh_hardware_context(&spm_func_ctx_ctrl);
 
-    /* svc_func can be executed in privileged Thread mode */
+    /* svc_func can be executed in privileged Thread mode. Save the current
+     * CONTROL register value so that it can be restored afterwards.
+     */
+    saved_control = __get_CONTROL();
     __set_CONTROL_nPRIV(0);
 
     ctx[0] = PSA_SUCCESS;
