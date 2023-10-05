@@ -25,6 +25,11 @@ target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_s.ld>
 )
 
+target_sources(tfm_s
+    PRIVATE
+    ${NRF_FOLDER_PATH}/startup.c
+)
+
 if(NS)
     target_add_scatter_file(tfm_ns
         $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld>
@@ -32,6 +37,10 @@ if(NS)
     target_link_libraries(CMSIS_5_tfm_ns
         INTERFACE
             CMSIS_5_RTX_V8MMN
+    )
+    target_sources(tfm_ns
+        PRIVATE
+            ${NRF_FOLDER_PATH}/startup.c
     )
 endif()
 
@@ -140,6 +149,10 @@ if(BL2)
             ${NRF_FOLDER_PATH}/common
         PRIVATE
             ${PLATFORM_DIR}/..
+    )
+    target_sources(bl2
+        PRIVATE
+            ${NRF_FOLDER_PATH}/startup.c
     )
 
     target_sources(platform_bl2

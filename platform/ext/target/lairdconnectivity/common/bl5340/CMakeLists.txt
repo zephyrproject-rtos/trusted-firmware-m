@@ -61,6 +61,7 @@ target_compile_definitions(platform_s
 target_include_directories(platform_ns
     PUBLIC
         .
+        ${NRF_PLATFORM_PATH}/common/core
 )
 
 target_sources(platform_ns
@@ -79,6 +80,8 @@ target_compile_definitions(platform_ns
 
 if(BL2)
     target_include_directories(platform_bl2
+        PUBLIC
+            ${NRF_PLATFORM_PATH}/common/core
         PRIVATE
             .
     )
