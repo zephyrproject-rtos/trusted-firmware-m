@@ -25,7 +25,7 @@
 
 #include "platform_s_device_definition.h"
 #include "platform_base_address.h"
-#include "platform/include/tfm_plat_defs.h"
+#include "tfm_plat_defs.h"
 
 /* UART CMSDK driver structures */
 

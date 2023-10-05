@@ -10,17 +10,11 @@
 # address in SRAM memory. The linker places it to the
 # ER_CODE_SRAM address.
 add_library(flash_drivers_s STATIC)
-add_library(flash_drivers_ns STATIC)
 add_library(flash_drivers_bl2 STATIC)
 target_link_libraries(flash_drivers_s
     PRIVATE
         flash_drivers
         cmsis_includes_s
-)
-target_link_libraries(flash_drivers_ns
-    PRIVATE
-        flash_drivers
-        cmsis_includes_ns
 )
 target_link_libraries(flash_drivers_bl2
     PRIVATE
@@ -34,16 +28,6 @@ target_compile_options(flash_drivers_s
 )
 
 target_link_options(flash_drivers_s
-    PRIVATE
-        ${LINKER_CP_OPTION}
-)
-
-target_compile_options(flash_drivers_ns
-    PRIVATE
-        ${COMPILER_CP_FLAG}
-)
-
-target_link_options(flash_drivers_ns
     PRIVATE
         ${LINKER_CP_OPTION}
 )
@@ -66,9 +50,4 @@ target_link_libraries(platform_bl2
 target_link_libraries(platform_s
     PRIVATE
         flash_drivers_s
-)
-
-target_link_libraries(platform_ns
-    PRIVATE
-        flash_drivers_ns
 )
