@@ -1,15 +1,17 @@
-##################################
-Run TF-M examples on Arm platforms
-##################################
-Instructions for how to run TF-M and example test application on Arm platforms.
+################################################
+Run TF-M tests and applications on Arm platforms
+################################################
+Instructions for how to run TF-M tests and applications on Arm platforms.
 
 Follow :doc:`build instruction <tfm_build_instruction>` to build the binaries.
 Follow :doc:`secure boot </design_docs/booting/tfm_secure_boot>` to build the
 binaries with or without BL2 bootloader.
 
-****************************************************************
-Execute TF-M example and regression tests on MPS2 boards and FVP
-****************************************************************
+.. _tf-m_regression_tests:
+
+****************************************************
+Execute TF-M regression tests on MPS2 boards and FVP
+****************************************************
 The BL2 bootloader and TF-M example application and tests have been verified
 using the reference model for MPS2 (AN521), in  `Keil MDK`_ ,
 `Fixed Virtual Platforms`_ and `Arm Development Studio`_ .
@@ -215,9 +217,9 @@ port (baud 115200 8n1) the following messages::
       Description: 'Read interface'
     ....
 
-*******************************************************************
-Execute TF-M example and regression tests on Musca test chip boards
-*******************************************************************
+*******************************************************
+Execute TF-M regression tests on Musca test chip boards
+*******************************************************
 .. Note::
 
     Before executing any images on Musca-B1 board, please check the
