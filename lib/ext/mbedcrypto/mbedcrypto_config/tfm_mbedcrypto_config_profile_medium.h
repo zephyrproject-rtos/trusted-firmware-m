@@ -270,6 +270,23 @@
 #define MBEDTLS_AES_C
 
 /**
+ * \def MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH
+ *
+ * Use only 128-bit keys in AES operations to save ROM.
+ *
+ * Uncomment this macro to remove support for AES operations that use 192-
+ * or 256-bit keys.
+ *
+ * Uncommenting this macro reduces the size of AES code by ~300 bytes
+ * on v8-M/Thumb2.
+ *
+ * Module:  library/aes.c
+ *
+ * Requires: MBEDTLS_AES_C
+ */
+#define MBEDTLS_AES_ONLY_128_BIT_KEY_LENGTH
+
+/**
  * \def MBEDTLS_CIPHER_C
  *
  * Enable the generic cipher layer.
