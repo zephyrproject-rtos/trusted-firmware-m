@@ -24,6 +24,8 @@ else()
     set(BL2_TRAILER_SIZE 0xC00 CACHE STRING "Trailer size")
 endif()
 
+set(TFM_PXN_ENABLE                    ON    CACHE BOOL    "Use Privileged execute never (PXN)")
+
 # Platform-specific configurations
 set(CONFIG_TFM_USE_TRUSTZONE          ON)
 set(TFM_MULTI_CORE_TOPOLOGY           OFF)
