@@ -8,7 +8,7 @@
 #include "config_tfm.h"
 #include "rss_provisioning_bundle.h"
 
-#if (MCUBOOT_SIGN_RSA_LEN == 2048)
+#if (MCUBOOT_SIGNATURE_TYPE == RSA-2048)
 #define ASSEMBLY_AND_TEST_PROV_DATA_KIND_0 {             \
         0xfc, 0x57, 0x01, 0xdc, 0x61, 0x35, 0xe1, 0x32,  \
         0x38, 0x47, 0xbd, 0xc4, 0x0f, 0x04, 0xd2, 0xe5,  \
@@ -21,7 +21,7 @@
         0x3a, 0xf2, 0x29, 0xe9, 0xa7, 0x85, 0xf3, 0xd5,  \
         0xbf, 0x00, 0xb9, 0xd3, 0x2c, 0x1f, 0x03, 0x96,  \
     }
-#elif (MCUBOOT_SIGN_RSA_LEN == 3072)
+#elif (MCUBOOT_SIGNATURE_TYPE == RSA-3072)
 #define ASSEMBLY_AND_TEST_PROV_DATA_KIND_0 {             \
         0xbf, 0xe6, 0xd8, 0x6f, 0x88, 0x26, 0xf4, 0xff,  \
         0x97, 0xfb, 0x96, 0xc4, 0xe6, 0xfb, 0xc4, 0x99,  \
@@ -66,7 +66,7 @@
     }
 #else
 #error "No public key available for given signing algorithm."
-#endif /* MCUBOOT_SIGN_RSA_LEN */
+#endif /* MCUBOOT_SIGNATURE_TYPE */
 
 const struct dm_provisioning_data data = {
     /* BL1 ROTPK 0 */
