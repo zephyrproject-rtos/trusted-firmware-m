@@ -39,6 +39,37 @@
  */
 #ifdef TFM_EXCEPTION_INFO_DUMP
 
+struct exception_info_t {
+    uint32_t EXC_RETURN;        /* EXC_RETURN value in LR. */
+    uint32_t MSP;               /* (Secure) MSP. */
+    uint32_t PSP;               /* (Secure) PSP. */
+    uint32_t *EXC_FRAME;        /* Exception frame on stack. */
+    uint32_t EXC_FRAME_COPY[8]; /* Copy of the basic exception frame. */
+    uint32_t xPSR;              /* Program Status Registers. */
+
+#ifdef FAULT_STATUS_PRESENT
+    uint32_t CFSR;              /* Configurable Fault Status Register. */
+    uint32_t HFSR;              /* Hard Fault Status Register. */
+    uint32_t BFAR;              /* Bus Fault address register. */
+    uint32_t BFARVALID;         /* Whether BFAR contains a valid address. */
+    uint32_t MMFAR;             /* MemManage Fault address register. */
+    uint32_t MMARVALID;         /* Whether MMFAR contains a valid address. */
+#ifdef TRUSTZONE_PRESENT
+    uint32_t SFSR;              /* SecureFault Status Register. */
+    uint32_t SFAR;              /* SecureFault Address Register. */
+    uint32_t SFARVALID;         /* Whether SFAR contains a valid address. */
+#endif
+#endif
+};
+
+/**
+ * \brief Get a pointer to the current exception_info_t context
+ *
+ * \return  A pointer to the exception_info_t context or NULL if no context
+ *          has been stored
+ */
+void tfm_exception_info_get_context(struct exception_info_t *ctx);
+
 /* Store context for an exception, then print the info.
  * Call EXCEPTION_INFO() instead of calling this directly.
  */

@@ -10,30 +10,6 @@
 /* "exception_info.h" must be the last include because of the IAR pragma */
 #include "exception_info.h"
 
-struct exception_info_t {
-    uint32_t EXC_RETURN;        /* EXC_RETURN value in LR. */
-    uint32_t MSP;               /* (Secure) MSP. */
-    uint32_t PSP;               /* (Secure) PSP. */
-    uint32_t *EXC_FRAME;        /* Exception frame on stack. */
-    uint32_t EXC_FRAME_COPY[8]; /* Copy of the basic exception frame. */
-    uint32_t xPSR;              /* Program Status Registers. */
-
-#ifdef FAULT_STATUS_PRESENT
-    uint32_t CFSR;              /* Configurable Fault Status Register. */
-    uint32_t HFSR;              /* Hard Fault Status Register. */
-    uint32_t BFAR;              /* Bus Fault address register. */
-    uint32_t BFARVALID;         /* Whether BFAR contains a valid address. */
-    uint32_t MMFAR;             /* MemManage Fault address register. */
-    uint32_t MMARVALID;         /* Whether MMFAR contains a valid address. */
-#ifdef TRUSTZONE_PRESENT
-    uint32_t SFSR;              /* SecureFault Status Register. */
-    uint32_t SFAR;              /* SecureFault Address Register. */
-    uint32_t SFARVALID;         /* Whether SFAR contains a valid address. */
-#endif
-
-#endif
-};
-
 static struct exception_info_t exception_info;
 
 /**
@@ -207,6 +183,11 @@ static void dump_error(uint32_t error_type)
     }
 
     dump_exception_info(stack_error, &exception_info);
+}
+
+void tfm_exception_info_get_context(struct exception_info_t *ctx)
+{
+    memcpy(ctx, &exception_info, sizeof(exception_info));
 }
 
 void store_and_dump_context(uint32_t LR_in, uint32_t MSP_in, uint32_t PSP_in,
