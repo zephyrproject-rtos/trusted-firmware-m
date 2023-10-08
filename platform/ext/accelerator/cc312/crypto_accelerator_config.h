@@ -91,15 +91,15 @@ extern "C" {
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_CHACHA20
 #endif
 
-#ifdef PSA_WANT_KEY_TYPE_ECC_KEY_PAIR
+#ifdef PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_PUBLIC_KEY
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR_BASIC
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR_IMPORT
 #define MBEDTLS_PSA_ACCEL_KEY_TYPE_ECC_KEY_PAIR_EXPORT
 #endif
 
-#ifdef PSA_WANT_KEY_TYPE_RSA_KEY_PAIR
-#define MBEDTLS_PSA_ACCEL_KEY_TYPE_RSA_KEY_PAIR
+#ifdef PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC
+#define MBEDTLS_PSA_ACCEL_KEY_TYPE_RSA_KEY_PAIR_BASIC
 #endif
 
 #ifdef PSA_WANT_ALG_ECDH
@@ -191,11 +191,11 @@ extern "C" {
 
 #endif /* LEGACY_DRIVER_API_ENABLED */
 
-#if defined(PSA_WANT_ALG_RSA_OAEP)           ||     \
-    defined(PSA_WANT_ALG_RSA_PKCS1V15_CRYPT) ||     \
-    defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN)  ||     \
-    defined(PSA_WANT_ALG_RSA_PSS)            ||     \
-    defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR)  ||     \
+#if defined(PSA_WANT_ALG_RSA_OAEP)                 ||     \
+    defined(PSA_WANT_ALG_RSA_PKCS1V15_CRYPT)       ||     \
+    defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN)        ||     \
+    defined(PSA_WANT_ALG_RSA_PSS)                  ||     \
+    defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC)  ||     \
     defined(PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY)
 #ifdef LEGACY_DRIVER_API_ENABLED
 #define MBEDTLS_RSA_ALT

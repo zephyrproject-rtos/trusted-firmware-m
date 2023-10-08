@@ -21,11 +21,11 @@ extern "C" {
 #define MBEDTLS_ECDSA_SIGN_ALT
 #endif /* PSA_WANT_ALG_ECDSA */
 
-#if defined(PSA_WANT_ALG_RSA_OAEP)           ||     \
-    defined(PSA_WANT_ALG_RSA_PKCS1V15_CRYPT) ||     \
-    defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN)  ||     \
-    defined(PSA_WANT_ALG_RSA_PSS)            ||     \
-    defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR)  ||     \
+#if defined(PSA_WANT_ALG_RSA_OAEP)                 ||     \
+    defined(PSA_WANT_ALG_RSA_PKCS1V15_CRYPT)       ||     \
+    defined(PSA_WANT_ALG_RSA_PKCS1V15_SIGN)        ||     \
+    defined(PSA_WANT_ALG_RSA_PSS)                  ||     \
+    defined(PSA_WANT_KEY_TYPE_RSA_KEY_PAIR_BASIC)  ||     \
     defined(PSA_WANT_KEY_TYPE_RSA_PUBLIC_KEY)
 #define MBEDTLS_RSA_ALT
 #endif
@@ -40,9 +40,9 @@ extern "C" {
 #define MBEDTLS_SHA256_ALT
 #endif /* PSA_WANT_ALG_SHA_256 */
 
-#if defined(PSA_WANT_ALG_ECDH)              ||  \
-    defined(PSA_WANT_ALG_ECDSA)             ||  \
-    defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR) ||  \
+#if defined(PSA_WANT_ALG_ECDH)                    ||  \
+    defined(PSA_WANT_ALG_ECDSA)                   ||  \
+    defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR_BASIC) ||  \
     defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)
 #define MBEDTLS_ECP_ALT
 #endif
