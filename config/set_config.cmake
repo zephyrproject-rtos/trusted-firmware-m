@@ -14,11 +14,6 @@ if(TFM_EXTRA_CONFIG_PATH)
     include(${TFM_EXTRA_CONFIG_PATH})
 endif()
 
-# Load PSA config, setting options not already set
-if(TEST_PSA_API)
-    include(config/tests/config_test_psa_api.cmake)
-endif()
-
 # Load build type config, setting options not already set
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWERCASE)
 include(${CMAKE_SOURCE_DIR}/config/build_type/${CMAKE_BUILD_TYPE_LOWERCASE}.cmake OPTIONAL)

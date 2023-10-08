@@ -20,22 +20,6 @@ tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND (CONFIG_TFM_SPM_BACKEND STREQUAL 
 
 tfm_invalid_config(TFM_ISOLATION_LEVEL EQUAL 3 AND CONFIG_TFM_STACK_WATERMARKS)
 
-tfm_invalid_config((TFM_S_REG_TEST OR TFM_NS_REG_TEST) AND TEST_PSA_API)
-
-tfm_invalid_config(SUITE STREQUAL "IPC" AND NOT TEST_PSA_API STREQUAL "IPC")
-
-tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND NOT TFM_PARTITION_CRYPTO)
-tfm_invalid_config(TEST_PSA_API STREQUAL "INITIAL_ATTESTATION" AND NOT TFM_PARTITION_INITIAL_ATTESTATION)
-tfm_invalid_config(TEST_PSA_API STREQUAL "INTERNAL_TRUSTED_STORAGE" AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-tfm_invalid_config(TEST_PSA_API STREQUAL "PROTECTED_STORAGE" AND NOT TFM_PARTITION_PROTECTED_STORAGE)
-tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_PROTECTED_STORAGE)
-# PSA Arch crypto test intends to test all PSA crypto APIs. Therefore PSA Arch crypto test
-# cannot support to test TF-M Profile Medium, Profile Medium-ARoT-less and Profile Small.
-tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND TFM_PROFILE STREQUAL "profile_medium")
-tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND TFM_PROFILE STREQUAL "profile_medium_arotless")
-tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND TFM_PROFILE STREQUAL "profile_small")
-
 ########################## BL2 #################################################
 
 get_property(MCUBOOT_STRATEGY_LIST CACHE MCUBOOT_UPGRADE_STRATEGY PROPERTY STRINGS)
@@ -85,10 +69,6 @@ tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_PLATFOR
 
 get_property(TFM_FIH_PROFILE_LIST CACHE TFM_FIH_PROFILE PROPERTY STRINGS)
 tfm_invalid_config(NOT TFM_FIH_PROFILE IN_LIST TFM_FIH_PROFILE_LIST)
-
-########################### TF-M initial attestation #####################################
-
-tfm_invalid_config(ATTEST_INCLUDE_TEST_CODE AND NOT (TEST_NS_ATTESTATION OR TEST_S_ATTESTATION))
 
 ######################## TF-M Profile config check #############################
 

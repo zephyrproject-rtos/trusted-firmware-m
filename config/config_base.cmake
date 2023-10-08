@@ -55,12 +55,6 @@ set(BL1                                 OFF         CACHE BOOL      "Whether to 
 set(BL2                                 ON          CACHE BOOL      "Whether to build BL2")
 set(NS_EVALUATION_APP_PATH              ""          CACHE PATH      "Path to TFM NS Evaluation Application")
 
-set(TEST_S                              OFF         CACHE BOOL      "Whether to build S regression tests")
-set(TEST_NS                             OFF         CACHE BOOL      "Whether to build NS regression tests")
-set(TEST_PSA_API                        ""          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
-set(TEST_BL1_1                          OFF         CACHE BOOL      "Whether to build BL1_1 tests")
-set(TEST_BL1_2                          OFF         CACHE BOOL      "Whether to build BL1_2 tests")
-
 set(TFM_ISOLATION_LEVEL                 1           CACHE STRING    "Isolation level")
 set(PSA_FRAMEWORK_HAS_MM_IOVEC          OFF         CACHE BOOL      "Enable MM-IOVEC")
 set(TFM_PROFILE                         ""          CACHE STRING    "Profile to use")
