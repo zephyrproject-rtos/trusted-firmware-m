@@ -162,6 +162,14 @@ string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
 # For GNU Arm Embedded Toolchain doesn't emit __ARM_ARCH_8_1M_MAIN__, adding this macro manually.
 add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__>)
 
+# GNU Arm compiler version greater equal than *11.3.Rel1*
+# has a linker issue that required system calls are missing,
+# such as _read and _write. Add stub functions of required
+# system calls to solve this issue.
+if (GCC_VERSION VERSION_GREATER_EQUAL 11.3.1)
+    set(CONFIG_GNU_SYSCALL_STUB_ENABLED TRUE)
+endif()
+
 add_compile_options(
     -specs=nano.specs
     -Wall
