@@ -457,6 +457,12 @@ Example application
     [INF] Jumping to the first image slot
     [Sec Thread] Secure image initializing!
 
+.. note::
+
+   If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
+   be placed on the ``0x001CB000`` address.
+
+
 Regression tests
 ----------------
 After completing the procedure you should be able to visualize on the serial
@@ -554,4 +560,4 @@ upgrade is described in :doc:`secure boot </design_docs/booting/tfm_secure_boot>
 .. _Keil MDK: http://www2.keil.com/mdk5
 .. _Keil MDK Documentation: https://www2.keil.com/mdk5/docs
 
-*Copyright (c) 2017-2022, Arm Limited. All rights reserved.*
+*Copyright (c) 2017-2023, Arm Limited. All rights reserved.*
