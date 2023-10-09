@@ -35,6 +35,9 @@
 #include "mpu_armv8m_drv.h"
 #include "cmsis.h"
 #include "dpa_hardened_word_copy.h"
+#if RSS_AMOUNT > 1
+#include "rss_handshake.h"
+#endif
 
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
@@ -120,6 +123,28 @@ int32_t boot_platform_init(void)
 
 int32_t boot_platform_post_init(void)
 {
+    int32_t rc;
+
+#if RSS_AMOUNT > 1
+    rc = rss_handshake();
+    if (rc) {
+        return rc;
+    }
+#else
+    uint32_t vhuk_seed[8];
+    size_t vhuk_seed_len;
+
+    rc = rss_derive_vhuk_seed(vhuk_seed, sizeof(vhuk_seed), &vhuk_seed_len);
+    if (rc) {
+        return rc;
+    }
+
+    rc = rss_derive_vhuk((uint8_t *)vhuk_seed, vhuk_seed_len, RSS_KMU_SLOT_VHUK);
+    if (rc) {
+        return rc;
+    }
+#endif
+
     return 0;
 }
 
@@ -287,8 +312,6 @@ out:
 int boot_platform_post_load(uint32_t image_id)
 {
     int rc = 0;
-    uint32_t vhuk_seed[8];
-    size_t vhuk_seed_len;
 
     const struct kmu_key_export_config_t sic_dr0_export_config = {
         SIC_BASE_S + 0x120, /* CC3XX DR0_KEY_WORD0 register */
@@ -309,17 +332,6 @@ int boot_platform_post_load(uint32_t image_id)
         false, /* Don't refresh the masking */
         false, /* Don't disable the masking */
     };
-
-
-    rc = rss_derive_vhuk_seed(vhuk_seed, sizeof(vhuk_seed), &vhuk_seed_len);
-    if (rc) {
-        return rc;
-    }
-
-    rc = rss_derive_vhuk((uint8_t *)vhuk_seed, vhuk_seed_len, RSS_KMU_SLOT_VHUK);
-    if (rc) {
-        return rc;
-    }
 
     rc = rss_derive_cpak_seed(RSS_KMU_SLOT_CPAK_SEED);
     if (rc) {

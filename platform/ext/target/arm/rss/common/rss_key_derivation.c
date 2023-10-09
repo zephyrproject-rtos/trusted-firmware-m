@@ -245,7 +245,26 @@ int rss_derive_vhuk(const uint8_t *vhuk_seeds, size_t vhuk_seeds_len,
 int rss_derive_session_key(const uint8_t *ivs, size_t ivs_len,
                            enum rss_kmu_slot_id_t slot)
 {
-    return rss_derive_key(KMU_HW_SLOT_GUK, NULL, ivs, ivs_len, slot, true);
+    int rc;
+    enum kmu_error_t kmu_err;
+
+    rc = rss_derive_key(KMU_HW_SLOT_GUK, NULL, ivs, ivs_len, slot, true);
+    if (rc) {
+        return rc;
+    }
+
+    /* TODO: Should be removed once rss_derive_key properly locks KMU slots */
+    kmu_err = kmu_set_key_locked(&KMU_DEV_S, slot);
+    if (kmu_err != KMU_ERROR_NONE) {
+        return -1;
+    }
+
+    kmu_err = kmu_set_key_locked(&KMU_DEV_S, slot + 1);
+    if (kmu_err != KMU_ERROR_NONE) {
+        return -1;
+    }
+
+    return 0;
 }
 
 int derive_using_krtl_or_zero_key(uint8_t *label, size_t label_len,

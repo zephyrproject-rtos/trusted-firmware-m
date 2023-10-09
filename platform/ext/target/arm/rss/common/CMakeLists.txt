@@ -92,6 +92,10 @@ if (TFM_MULTI_CORE_TOPOLOGY)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rss_comms rss_comms)
 endif()
 
+if (RSS_AMOUNT GREATER 1)
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/rss_handshake rss_handshake)
+endif()
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/provisioning provisioning)
 
 add_subdirectory(${PLATFORM_DIR}/ext/accelerator/cc312/cc312-rom cc312-rom)
