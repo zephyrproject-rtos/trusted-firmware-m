@@ -192,8 +192,9 @@ psa_status_t backend_messaging(struct service_t *service,
      * If it is a NS request via RPC, it is unnecessary to block current
      * thread.
      */
-
-    if (!is_tfm_rpc_msg(handle)) {
+    if (is_tfm_rpc_msg(handle)) {
+        ret = PSA_SUCCESS;
+    } else {
         signal = backend_wait_signals(handle->p_client, ASYNC_MSG_REPLY);
         if (signal == (psa_signal_t)0) {
             ret = STATUS_NEED_SCHEDULE;
