@@ -2,7 +2,7 @@ Tools
 =====
 
 TF-M has a growing set of tools helping in development, testing and
-verification. The `t-fm-tools <https://git.trustedfirmware.org/TF-M/tf-m-tools.git/tree/>`_
+verification. The `tf-m-tools <https://git.trustedfirmware.org/TF-M/tf-m-tools.git/tree/>`_
 is a repository dedicated for gathering all of them. Please explore it for an
 overview and more detailed information.
 
