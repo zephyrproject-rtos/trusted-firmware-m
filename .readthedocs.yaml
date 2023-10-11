@@ -25,8 +25,8 @@ sphinx:
   configuration: docs/conf.py
 
 # The documentation will also be built in a pdf format
- formats:
-    - pdf
+formats:
+   - pdf
 
 # Configuration of the Python environment
 python:
