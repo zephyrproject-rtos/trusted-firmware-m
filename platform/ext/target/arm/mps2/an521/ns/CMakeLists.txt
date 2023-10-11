@@ -36,14 +36,12 @@ target_compile_definitions(platform_ns
         $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
 )
 
-if(${BL2})
-    target_compile_definitions(platform_ns
-        PUBLIC
-            BL2=${BL2}
-            BL2_HEADER_SIZE=${BL2_HEADER_SIZE}
-            BL2_TRAILER_SIZE=${BL2_TRAILER_SIZE}
-    )
-endif()
+target_compile_definitions(platform_ns
+    PUBLIC
+        BL2=${BL2}
+        BL2_HEADER_SIZE=${BL2_HEADER_SIZE}
+        BL2_TRAILER_SIZE=${BL2_TRAILER_SIZE}
+)
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL GNU)
     set(scatter_file ${CMAKE_CURRENT_LIST_DIR}/linker_scripts/tfm_common_ns.ld)
