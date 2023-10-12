@@ -617,6 +617,11 @@ void cc3xx_aes_set_data_len(uint32_t to_crypt_len, uint32_t to_auth_len)
 #endif /* defined(CC3XX_CONFIG_AES_CCM_ENABLE) */
 }
 
+size_t cc3xx_aes_get_current_output_size(void)
+{
+    return dma_state.current_bytes_output;
+}
+
 #ifdef CC3XX_CONFIG_AES_CCM_ENABLE
 void ccm_calc_iv(bool from_auth)
 {
@@ -976,7 +981,7 @@ cc3xx_err_t ccm_finish(uint32_t *tag)
 }
 #endif /* CC3XX_CONFIG_AES_CCM_ENABLE */
 
-cc3xx_err_t cc3xx_aes_finish(uint32_t *tag)
+cc3xx_err_t cc3xx_aes_finish(uint32_t *tag, size_t *size)
 {
     cc3xx_err_t err = CC3XX_ERR_SUCCESS;
     bool write_output;
@@ -1036,6 +1041,10 @@ cc3xx_err_t cc3xx_aes_finish(uint32_t *tag)
         break;
         default:
         ;
+    }
+
+    if (size != NULL) {
+        *size = cc3xx_aes_get_current_output_size();
     }
 
     cc3xx_aes_uninit();

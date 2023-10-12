@@ -383,7 +383,7 @@ static enum tfm_plat_err_t otp_read_encrypted(uint32_t offset, uint32_t len,
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc3xx_aes_finish(NULL);
+    cc3xx_aes_finish(NULL, NULL);
 
     return TFM_PLAT_ERR_SUCCESS;
 #endif
@@ -437,7 +437,7 @@ static enum tfm_plat_err_t otp_write_encrypted(uint32_t offset, uint32_t len,
         return TFM_PLAT_ERR_SYSTEM_ERR;
     }
 
-    cc3xx_aes_finish(NULL);
+    cc3xx_aes_finish(NULL, NULL);
 
     plat_err = otp_write(offset, len, sizeof(tmp_buf), (uint8_t *)tmp_buf);
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {

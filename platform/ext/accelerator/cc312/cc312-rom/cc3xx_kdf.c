@@ -44,7 +44,7 @@ cc3xx_err_t cc3xx_kdf_cmac(cc3xx_aes_key_id_t key_id, const uint32_t *key,
         cc3xx_aes_update_authed_data(context, context_length);
         cc3xx_aes_update_authed_data((uint8_t *)&l_total_length,
                                      sizeof(l_total_length));
-        cc3xx_aes_finish(cmac_buf);
+        cc3xx_aes_finish(cmac_buf, NULL);
 
         cc3xx_dpa_hardened_word_copy((void *)output_key + output_idx, cmac_buf,
                                      sizeof(cmac_buf) / sizeof(uint32_t));

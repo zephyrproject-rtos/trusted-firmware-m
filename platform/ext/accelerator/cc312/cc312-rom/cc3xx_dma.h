@@ -26,6 +26,7 @@ struct cc3xx_dma_state_t {
     uintptr_t output_addr;
     size_t output_size;
     uint32_t remap_cpusel;
+    size_t current_bytes_output;
 };
 
 extern struct cc3xx_dma_state_t dma_state;

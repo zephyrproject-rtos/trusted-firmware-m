@@ -154,7 +154,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
 
     cc3xx_aes_set_output_buffer(plaintext, ciphertext_length);
     cc3xx_aes_update(ciphertext, ciphertext_length);
-    cc3xx_aes_finish(NULL);
+    cc3xx_aes_finish(NULL, NULL);
 
     return 0;
 }

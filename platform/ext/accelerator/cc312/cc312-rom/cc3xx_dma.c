@@ -82,6 +82,7 @@ static void process_data(const void* buf, size_t length)
         P_CC3XX->dout.dst_lli_word1 = length;
 
         dma_state.output_addr += length;
+        dma_state.current_bytes_output += length;
     }
 
     /* Set the data source */

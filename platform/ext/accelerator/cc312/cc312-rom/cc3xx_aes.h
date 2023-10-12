@@ -176,6 +176,16 @@ void cc3xx_aes_set_tag_len(uint32_t tag_len);
 void cc3xx_aes_set_data_len(uint32_t to_crypt_len, uint32_t to_auth_len);
 
 /**
+ * \brief                        Get the amount of bytes that have been output
+ *
+ * \return                       Amount of bytes of output that has been written
+ *                               (which it not necessarily the same amount of
+ *                               input that has been submitted, due to DMA
+ *                               buffering)
+ */
+size_t cc3xx_aes_get_current_output_size(void);
+
+/**
  * \brief                        Set the buffer that the AES engine will output
  *                               into.
  *
@@ -223,10 +233,12 @@ void cc3xx_aes_update_authed_data(const uint8_t* in, size_t in_len);
  *                               and the buffer must be sized appropriately. Can
  *                               be NULL if using a non-AEAD/MAC mode.
  *
+ * \param[out]     size          The size of the output that has been written.
+ *
  * \return                       CC3XX_ERR_SUCCESS on success / tag comparison
  *                               succeeded, another cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_aes_finish(uint32_t *tag);
+cc3xx_err_t cc3xx_aes_finish(uint32_t *tag, size_t *size);
 
 /**
  * \brief                       Uninitialize the AES engine.

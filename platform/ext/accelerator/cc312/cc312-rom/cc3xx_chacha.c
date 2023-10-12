@@ -190,6 +190,11 @@ cc3xx_err_t cc3xx_chacha20_set_state(const struct cc3xx_chacha_state_t *state)
     P_CC3XX->chacha.chacha_control_reg |= 0b1 << 1;
 }
 
+size_t cc3xx_chacha20_get_current_output_size(void)
+{
+    return dma_state.current_bytes_output;
+}
+
 void cc3xx_chacha20_set_output_buffer(uint8_t *out, size_t out_len)
 {
     uintptr_t prev_addr = dma_state.output_addr + dma_state.block_buf_size_in_use
@@ -272,7 +277,7 @@ static cc3xx_err_t tag_cmp_or_copy(uint32_t *tag, uint32_t *calculated_tag)
     return CC3XX_ERR_SUCCESS;
 }
 
-cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag)
+cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag, size_t *size)
 {
     uint64_t len_block[2] = {0};
     uint32_t calculated_tag[POLY1305_TAG_LEN / sizeof(uint32_t)];
@@ -312,6 +317,10 @@ cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag)
         cc3xx_poly1305_finish(calculated_tag);
 
         return tag_cmp_or_copy(tag, calculated_tag);
+    }
+
+    if (size != NULL) {
+        *size = cc3xx_chacha20_get_current_output_size();
     }
 
     return CC3XX_ERR_SUCCESS;

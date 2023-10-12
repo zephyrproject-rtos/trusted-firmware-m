@@ -95,6 +95,16 @@ void cc3xx_chacha20_get_state(struct cc3xx_chacha_state_t *state);
 cc3xx_err_t cc3xx_chacha20_set_state(const struct cc3xx_chacha_state_t *state);
 
 /**
+ * \brief                        Get the amount of bytes that have been output
+ *
+ * \return                       Amount of bytes of output that has been written
+ *                               (which it not necessarily the same amount of
+ *                               input that has been submitted, due to DMA
+ *                               buffering)
+ */
+size_t cc3xx_chacha20_get_current_output_size(void);
+
+/**
  * \brief                        Set the buffer that the CHACHA engine will
  *                               output into.
  *
@@ -143,10 +153,12 @@ void cc3xx_chacha20_update_authed_data(const uint8_t* in, size_t in_len);
  *                               Can be NULL if not using
  *                               CC3XX_CHACHA_MODE_CHACHA_POLY1305.
  *
+ * \param[out]     size          The size of the output that has been written.
+ *
  * \return                       CC3XX_ERR_SUCCESS on success / tag comparison
  *                               succeeded, another cc3xx_err_t on error.
  */
-cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag);
+cc3xx_err_t cc3xx_chacha20_finish(uint32_t *tag, size_t *size);
 
 /**
  * \brief                       Uninitialize the CHACHA engine.

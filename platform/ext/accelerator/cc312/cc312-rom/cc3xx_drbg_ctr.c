@@ -97,7 +97,7 @@ static cc3xx_err_t cc3xx_drbg_ctr_update(
         }
     }
 
-    err = cc3xx_aes_finish(NULL);
+    err = cc3xx_aes_finish(NULL, NULL);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }
@@ -236,7 +236,7 @@ cc3xx_err_t cc3xx_drbg_ctr_generate(
      */
     cc3xx_aes_get_state(&aes_state);
 
-    err = cc3xx_aes_finish(NULL);
+    err = cc3xx_aes_finish(NULL, NULL);
     if (err != CC3XX_ERR_SUCCESS) {
         return err;
     }

@@ -153,7 +153,7 @@ int32_t bl1_aes_256_ctr_decrypt(enum tfm_bl1_key_id_t key_id,
 
     cc3xx_aes_set_output_buffer(plaintext, ciphertext_length);
     cc3xx_aes_update(ciphertext, ciphertext_length);
-    cc3xx_aes_finish(NULL);
+    cc3xx_aes_finish(NULL, NULL);
 
     return 0;
 }
@@ -191,7 +191,7 @@ static int32_t aes_256_ecb_encrypt(enum tfm_bl1_key_id_t key_id,
 
     cc3xx_aes_set_output_buffer(ciphertext, ciphertext_length);
     cc3xx_aes_update(plaintext, ciphertext_length);
-    cc3xx_aes_finish(NULL);
+    cc3xx_aes_finish(NULL, NULL);
 }
 
 /* This is a counter-mode KDF complying with NIST SP800-108 where the PRF is a

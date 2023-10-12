@@ -148,7 +148,7 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
                      PROVISIONING_BUNDLE_VALUES_SIZE +
                      PROVISIONING_BUNDLE_DATA_SIZE);
 
-    cc_err = cc3xx_aes_finish((uint32_t *)cm_encrypted_bundle->tag);
+    cc_err = cc3xx_aes_finish((uint32_t *)cm_encrypted_bundle->tag, NULL);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         BL1_LOG("[ERR] CM bundle decryption failed\r\n");
         gpio_set(RSS_GPIO_STATE_CM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB);
@@ -222,7 +222,7 @@ static enum tfm_plat_err_t provision_psa_rot(void)
                      PROVISIONING_BUNDLE_VALUES_SIZE +
                      PROVISIONING_BUNDLE_DATA_SIZE);
 
-    cc_err = cc3xx_aes_finish((uint32_t *)dm_encrypted_bundle->tag);
+    cc_err = cc3xx_aes_finish((uint32_t *)dm_encrypted_bundle->tag, NULL);
     if (cc_err != CC3XX_ERR_SUCCESS) {
         BL1_LOG("[ERR] DM bundle decryption failed\r\n");
         gpio_set(RSS_GPIO_STATE_DM_SECURE_PROVISIONING_FAILED_NO_AUTHENTICATED_BLOB);
