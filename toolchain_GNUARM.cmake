@@ -29,10 +29,6 @@ set(COMPILER_CMSE_FLAG -mcmse)
 # with the Ninja generator.
 set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extensions.cmake)
 
-# Read platform settings for CPU, Arch and other important platform-specific
-# configuration options
-include(${CMAKE_SOURCE_DIR}/platform/ext/target/${TFM_PLATFORM}/config.cmake)
-
 # ===================== SEt toolchain CPU and Arch =============================
 
 if (DEFINED TFM_SYSTEM_PROCESSOR)

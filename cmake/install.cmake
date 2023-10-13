@@ -209,10 +209,6 @@ install(FILES ${CMAKE_SOURCE_DIR}/cmake/spe-CMakeLists.cmake
 install(FILES ${PLATFORM_DIR}/ns/toolchain_ns_GNUARM.cmake
         DESTINATION ${INSTALL_CMAKE_DIR})
 
-# copy all files from active platform directory
-install(DIRECTORY ${TARGET_PLATFORM_PATH}/ns/
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR} OPTIONAL)
-
 install(FILES
         ${CMAKE_SOURCE_DIR}/lib/fih/inc/fih.h
         ${PLATFORM_DIR}/include/tfm_plat_ns.h

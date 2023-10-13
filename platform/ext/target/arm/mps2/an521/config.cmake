@@ -7,13 +7,6 @@
 #
 #-------------------------------------------------------------------------------
 
-# Set architecture and CPU
-set(TFM_SYSTEM_PROCESSOR cortex-m33)
-set(TFM_SYSTEM_ARCHITECTURE armv8-m.main)
-set(TFM_SYSTEM_DSP OFF)
-set(CONFIG_TFM_FP_ARCH "fpv5-d16")
-set(CONFIG_TFM_FP_ARCH_ASM "FPv5_D16")
-
 set(EXTRA_GENERATED_FILE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/arm/mps2/an521/generated_file_list.yaml)
 list(FIND   TFM_EXTRA_GENERATED_FILE_LIST_PATH      ${EXTRA_GENERATED_FILE_LIST}    RET_VAL)
 if(RET_VAL EQUAL -1)

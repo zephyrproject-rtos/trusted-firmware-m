@@ -17,11 +17,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/psa/framework_feature.h.in
                ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
                @ONLY)
 
-if (EXISTS ${TARGET_PLATFORM_PATH}/preload_ns.cmake)
-    include(${TARGET_PLATFORM_PATH}/preload_ns.cmake)
-    tfm_toolchain_reload_compiler()
-endif()
-
 ###################### PSA interface (header only) #############################
 
 add_library(psa_interface INTERFACE)

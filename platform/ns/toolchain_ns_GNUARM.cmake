@@ -26,8 +26,134 @@ set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
 # Set compiler ID explicitly as it's not detected at this moment
 set(CMAKE_C_COMPILER_ID GNU)
 
-# A platfomr sprecific MCPU and architecture flags for NS side
-include(${CONFIG_SPE_PATH}/platform/cpuarch.cmake)
+# CMAKE_C_COMPILER_VERSION is not guaranteed to be defined.
+EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION )
+
+# ===================== SEt toolchain CPU and Arch =============================
+
+if (DEFINED TFM_SYSTEM_PROCESSOR)
+    if(TFM_SYSTEM_PROCESSOR MATCHES "cortex-m85")
+        # GNUARM does not support the -mcpu=cortex-m85 flag yet
+        # TODO: Remove this exception when the cortex-m85 support comes out.
+        message(WARNING "Cortex-m85 is not supported by GCC. Falling back to -march usage.")
+    else()
+        set(CMAKE_SYSTEM_PROCESSOR ${TFM_SYSTEM_PROCESSOR})
+
+        if (DEFINED TFM_SYSTEM_DSP)
+            if (NOT TFM_SYSTEM_DSP)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nodsp")
+            endif()
+        endif()
+        # GCC specifies that '+nofp' is available on following M-profile cpus: 'cortex-m4',
+        # 'cortex-m7', 'cortex-m33', 'cortex-m35p' and 'cortex-m55'.
+        # Build fails if other M-profile cpu, such as 'cortex-m23', is added with '+nofp'.
+        # Explicitly list those cpu to align with GCC description.
+        if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+            if(NOT CONFIG_TFM_ENABLE_FP AND
+                (TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m4"
+                OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m7"
+                OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m33"
+                OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m35p"
+                OR TFM_SYSTEM_PROCESSOR STREQUAL "cortex-m55"))
+                    string(APPEND CMAKE_SYSTEM_PROCESSOR "+nofp")
+            endif()
+        endif()
+
+        if(TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
+            if(NOT CONFIG_TFM_ENABLE_MVE)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve")
+            endif()
+            if(NOT CONFIG_TFM_ENABLE_MVE_FP)
+                string(APPEND CMAKE_SYSTEM_PROCESSOR "+nomve.fp")
+            endif()
+        endif()
+    endif()
+
+endif()
+
+# CMAKE_SYSTEM_ARCH variable is not a built-in CMAKE variable. It is used to
+# set the compile and link flags when TFM_SYSTEM_PROCESSOR is not specified.
+# The variable name is choosen to align with the ARMCLANG toolchain file.
+set(CMAKE_SYSTEM_ARCH         ${TFM_SYSTEM_ARCHITECTURE})
+
+if(TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
+    if(CONFIG_TFM_ENABLE_MVE)
+        string(APPEND CMAKE_SYSTEM_ARCH "+mve")
+    endif()
+    if(CONFIG_TFM_ENABLE_MVE_FP)
+        string(APPEND CMAKE_SYSTEM_ARCH "+mve.fp")
+    endif()
+endif()
+
+if (DEFINED TFM_SYSTEM_DSP)
+    # +nodsp modifier is only supported from GCC version 8.
+    if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+        # armv8.1-m.main arch does not have +nodsp option
+        if ((NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main") AND
+            NOT TFM_SYSTEM_DSP)
+            string(APPEND CMAKE_SYSTEM_ARCH "+nodsp")
+        endif()
+    endif()
+endif()
+
+if(GCC_VERSION VERSION_GREATER_EQUAL "8.0.0")
+    if(CONFIG_TFM_ENABLE_FP)
+        string(APPEND CMAKE_SYSTEM_ARCH "+fp")
+    endif()
+endif()
+
+if (GCC_VERSION VERSION_LESS 7.3.1)
+    message(FATAL_ERROR "Please use newer GNU Arm compiler version starting from 7.3.1.")
+endif()
+
+if (GCC_VERSION VERSION_EQUAL 10.2.1)
+    message(FATAL_ERROR "GNU Arm compiler version 10-2020-q4-major has an issue in CMSE support."
+                        " Select other GNU Arm compiler versions instead."
+                        " See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=99157 for the issue detail.")
+endif()
+
+# GNU Arm compiler version greater equal than *11.3.Rel1*
+# has a linker issue that required system calls are missing,
+# such as _read and _write. Add stub functions of required
+# system calls to solve this issue.
+if (GCC_VERSION VERSION_GREATER_EQUAL 11.3.1)
+    set(CONFIG_GNU_SYSCALL_STUB_ENABLED TRUE)
+endif()
+
+if (CMAKE_SYSTEM_PROCESSOR)
+    set(CMAKE_C_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(CMAKE_CXX_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(CMAKE_ASM_FLAGS_INIT "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(CMAKE_C_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+    set(CMAKE_ASM_LINK_FLAGS "-mcpu=${CMAKE_SYSTEM_PROCESSOR}")
+else()
+    set(CMAKE_C_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
+    set(CMAKE_CXX_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
+    set(CMAKE_ASM_FLAGS_INIT "-march=${CMAKE_SYSTEM_ARCH}")
+    set(CMAKE_C_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+    set(CMAKE_ASM_LINK_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
+endif()
+
+set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_INIT})
+set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
+
+set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
+
+if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+    set(COMPILER_CP_FLAG -mfloat-abi=hard)
+    set(LINKER_CP_OPTION -mfloat-abi=hard)
+    if (CONFIG_TFM_ENABLE_FP OR CONFIG_TFM_ENABLE_MVE_FP)
+        set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+        set(LINKER_CP_OPTION -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+    endif()
+else()
+    set(COMPILER_CP_FLAG -mfloat-abi=soft)
+    set(LINKER_CP_OPTION -mfloat-abi=soft)
+endif()
+
+# For GNU Arm Embedded Toolchain doesn't emit __ARM_ARCH_8_1M_MAIN__, adding this macro manually.
+add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__>)
 
 add_compile_options(
     -specs=nano.specs
@@ -56,11 +182,6 @@ add_link_options(
     LINKER:-Map=tfm_ns.map
     -T $<TARGET_OBJECTS:tfm_ns_scatter>
 )
-
-EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION )
-if (GCC_VERSION VERSION_LESS 7.3.1)
-    message(FATAL_ERROR "Please use newer GNU Arm compiler version starting from 7.3.1.")
-endif()
 
 # Specify the linker script used to link `target`.
 # Behaviour for handling linker scripts is so wildly divergent between compilers
