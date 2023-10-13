@@ -41,8 +41,6 @@ target_link_libraries(tfm_api_ns
         $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:${CMAKE_CURRENT_SOURCE_DIR}/interface/lib/s_veneers.o>
 )
 
-target_add_scatter_file()
-
 add_custom_target(tfm_ns_binaries
     DEPENDS tfm_ns
     COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:tfm_ns> ${CMAKE_BINARY_DIR}/tfm_ns.bin

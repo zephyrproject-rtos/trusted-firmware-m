@@ -177,3 +177,8 @@ install(FILES ${TARGET_PLATFORM_PATH}/partition/region_defs.h
               ${PLATFORM_DIR}/include/tfm_plat_defs.h
               ${CMAKE_SOURCE_DIR}/lib/fih/inc/fih.h
               DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
+
+install(FILES ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
+              ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
+              ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
+              DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)

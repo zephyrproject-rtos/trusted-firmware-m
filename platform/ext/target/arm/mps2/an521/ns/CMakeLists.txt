@@ -44,3 +44,12 @@ if(${BL2})
             BL2_TRAILER_SIZE=${BL2_TRAILER_SIZE}
     )
 endif()
+
+if(${CMAKE_C_COMPILER_ID} STREQUAL GNU)
+    set(scatter_file ${CMAKE_CURRENT_LIST_DIR}/linker_scripts/tfm_common_ns.ld)
+endif()
+
+set_target_properties(platform_ns
+                      PROPERTIES INTERFACE_LINK_DEPENDS
+                      ${scatter_file}
+)

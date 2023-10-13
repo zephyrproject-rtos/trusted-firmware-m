@@ -62,25 +62,61 @@ if (GCC_VERSION VERSION_LESS 7.3.1)
     message(FATAL_ERROR "Please use newer GNU Arm compiler version starting from 7.3.1.")
 endif()
 
-macro(target_add_scatter_file)
+# Specify the linker script used to link `target`.
+# Behaviour for handling linker scripts is so wildly divergent between compilers
+# that this macro is required.
+#
+# Vendor platform can set a linker script as property INTERFACE_LINK_DEPENDS of platform_ns.
+# `target` can fetch the linker script from platform_ns.
+#
+# Alternatively, NS build can call target_add_scatter_file() with the install directory of
+# linker script.
+#     target_add_scatter_file(target, install_dir)
+#
+# target_add_scatter_file() fetch a linker script from the install directory.
+macro(target_add_scatter_file target)
 
-    add_library(tfm_ns_scatter OBJECT
-        platform/tfm_common_ns.ld
+    get_target_property(scatter_file
+                        platform_ns
+                        INTERFACE_LINK_DEPENDS
     )
 
-    set_source_files_properties(platform/tfm_common_ns.ld PROPERTIES
+    # If scatter_file is not passed from platform_ns
+    # Try if any linker script is exported in install directory
+    # The intall directory is passed as an optinal argument
+    if(${scatter_file} STREQUAL "scatter_file-NOTFOUND")
+        set(install_dir ${ARGN})
+        list(LENGTH install_dir nr_install_dir)
+
+        # If nr_install_dir == 1, search for sct file under install dir
+        if(${nr_install_dir} EQUAL 1)
+            file(GLOB scatter_file "${install_dir}/*.ld")
+        endif()
+    endif()
+
+    if(NOT EXISTS ${scatter_file})
+        message(FATAL_ERROR "Unable to find NS scatter file ${scatter_file}")
+    endif()
+
+    add_library(${target}_scatter OBJECT)
+    target_sources(${target}_scatter
+        PRIVATE
+            ${scatter_file}
+    )
+
+    set_source_files_properties(${scatter_file} PROPERTIES
         LANGUAGE C
         KEEP_EXTENSION True)
 
-    target_compile_options(tfm_ns_scatter
+    target_compile_options(${target}_scatter
         PRIVATE
             -E
             -P
             -xc
     )
 
-    target_link_libraries(tfm_ns_scatter platform_ns)
+    target_link_libraries(${target}_scatter platform_ns)
 
-    add_dependencies(tfm_ns tfm_ns_scatter)
+    add_dependencies(${target} ${target}_scatter)
 
 endmacro()

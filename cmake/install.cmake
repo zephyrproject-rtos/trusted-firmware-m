@@ -199,11 +199,6 @@ endif()
 
 install(CODE "MESSAGE(\"----- Installing platform NS -----\")")
 
-install(FILES ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
-              ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
-              ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
-              DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
 install(DIRECTORY ${PLATFORM_DIR}/ext/cmsis
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
