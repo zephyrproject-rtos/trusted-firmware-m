@@ -10,6 +10,10 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_C_COMPILER_FORCED TRUE)
 set(CMAKE_CXX_COMPILER_FORCED TRUE)
 
+if(NOT DEFINED CROSS_COMPILE)
+    set(CROSS_COMPILE    arm-none-eabi CACHE STRING "Cross-compiler prefix")
+endif()
+
 find_program(CMAKE_C_COMPILER ${CROSS_COMPILE}-gcc)
 find_program(CMAKE_CXX_COMPILER ${CROSS_COMPILE}-g++)
 
@@ -240,4 +244,49 @@ macro(target_add_scatter_file target)
 
     add_dependencies(${target} ${target}_scatter)
 
+endmacro()
+
+macro(add_convert_to_bin_target target)
+    get_target_property(bin_dir ${target} RUNTIME_OUTPUT_DIRECTORY)
+
+    add_custom_target(${target}_bin
+        SOURCES ${bin_dir}/${target}.bin
+    )
+    add_custom_command(OUTPUT ${bin_dir}/${target}.bin
+        DEPENDS ${target}
+        COMMAND ${CMAKE_OBJCOPY}
+            -O binary $<TARGET_FILE:${target}>
+            ${bin_dir}/${target}.bin
+    )
+
+    add_custom_target(${target}_elf
+        SOURCES ${bin_dir}/${target}.elf
+    )
+    add_custom_command(OUTPUT ${bin_dir}/${target}.elf
+        DEPENDS ${target}
+        COMMAND ${CMAKE_OBJCOPY}
+            -O elf32-littlearm $<TARGET_FILE:${target}>
+            ${bin_dir}/${target}.elf
+    )
+
+    add_custom_target(${target}_hex
+        SOURCES ${bin_dir}/${target}.hex
+    )
+    add_custom_command(OUTPUT ${bin_dir}/${target}.hex
+        DEPENDS ${target}
+        COMMAND ${CMAKE_OBJCOPY}
+            -O ihex $<TARGET_FILE:${target}>
+            ${bin_dir}/${target}.hex
+    )
+
+    add_custom_target(${target}_binaries
+        ALL
+        DEPENDS ${target}_bin
+        DEPENDS ${target}_elf
+        DEPENDS ${target}_hex
+    )
+endmacro()
+
+# A dummy macro to align with Armclang workaround
+macro(tfm_toolchain_reload_compiler)
 endmacro()

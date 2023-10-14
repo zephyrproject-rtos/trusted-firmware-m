@@ -364,3 +364,7 @@ macro(target_weaken_symbols_from_dependency target dependency)
         ARGS $<TARGET_FILE:${dependency}> --wildcard ${SYMBOL_LIST} $<TARGET_FILE:${dependency}>
     )
 endmacro()
+
+# A dummy macro to align with Armclang workaround
+macro(tfm_toolchain_reload_compiler)
+endmacro()

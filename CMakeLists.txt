@@ -46,6 +46,7 @@ set(CMAKE_C_COMPILER_FORCED true)
 set(CMAKE_CXX_COMPILER_FORCED true)
 
 project("Trusted Firmware M" VERSION ${TFM_VERSION} LANGUAGES C CXX ASM)
+tfm_toolchain_reload_compiler()
 
 add_subdirectory(lib/ext)
 add_subdirectory(lib/fih)

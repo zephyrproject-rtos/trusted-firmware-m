@@ -41,13 +41,6 @@ target_link_libraries(tfm_api_ns
         $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:${CMAKE_CURRENT_SOURCE_DIR}/interface/lib/s_veneers.o>
 )
 
-add_custom_target(tfm_ns_binaries
-    DEPENDS tfm_ns
-    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:tfm_ns> ${CMAKE_BINARY_DIR}/tfm_ns.bin
-    COMMAND ${CMAKE_OBJCOPY} -O elf32-littlearm $<TARGET_FILE:tfm_ns>  ${CMAKE_BINARY_DIR}/tfm_ns.elf
-    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:tfm_ns> ${CMAKE_BINARY_DIR}/tfm_ns.hex
-)
-
 if (MCUBOOT_IMAGE_NUMBER GREATER 1)
 
     add_custom_target(tfm_app_binaries
@@ -68,12 +61,12 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
             -s ${MCUBOOT_SECURITY_COUNTER_NS}
             -L ${MCUBOOT_ENC_KEY_LEN}
             -d \"\(0, ${MCUBOOT_S_IMAGE_MIN_VER}\)\"
-            ${CMAKE_BINARY_DIR}/tfm_ns.bin
+            ${CMAKE_BINARY_DIR}/bin/tfm_ns.bin
             $<$<STREQUAL:${MCUBOOT_UPGRADE_STRATEGY},OVERWRITE_ONLY>:--overwrite-only>
             $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
             $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
-            ${CMAKE_BINARY_DIR}/tfm_ns_signed.bin
+            ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
 
         # Create concatenated binary image from the two independently signed
         # binary file. This only uses the local assemble.py script (not from
@@ -82,7 +75,7 @@ if (MCUBOOT_IMAGE_NUMBER GREATER 1)
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/assemble.py
             --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
             --secure ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s_signed.bin
-            --non_secure ${CMAKE_BINARY_DIR}/tfm_ns_signed.bin
+            --non_secure ${CMAKE_BINARY_DIR}/bin/tfm_ns_signed.bin
             --output ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
         # merge bootloader and application into Hex image for upload
         COMMAND srec_cat ${CMAKE_CURRENT_SOURCE_DIR}/bin/bl2.bin -Binary -offset 0xA000000
@@ -100,8 +93,8 @@ else()
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/assemble.py
             --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
             --secure ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s.bin
-            --non_secure ${CMAKE_BINARY_DIR}/tfm_ns.bin
-            --output ${CMAKE_BINARY_DIR}/tfm_s_ns.bin
+            --non_secure ${CMAKE_BINARY_DIR}/bin/tfm_ns.bin
+            --output ${CMAKE_BINARY_DIR}/bin/tfm_s_ns.bin
 
         # sign the combined tfm_s_ns.bin file
         COMMAND ${Python3_EXECUTABLE}
@@ -120,7 +113,7 @@ else()
             $<$<BOOL:${MCUBOOT_CONFIRM_IMAGE}>:--confirm>
             $<$<BOOL:${MCUBOOT_ENC_IMAGES}>:-E${MCUBOOT_KEY_ENC}>
             $<$<BOOL:${MCUBOOT_MEASURED_BOOT}>:--measured-boot-record>
-            ${CMAKE_BINARY_DIR}/tfm_s_ns.bin
+            ${CMAKE_BINARY_DIR}/bin/tfm_s_ns.bin
             ${CMAKE_BINARY_DIR}/tfm_s_ns_signed.bin
     )
 endif()
