@@ -206,7 +206,8 @@ install(FILES ${CMAKE_SOURCE_DIR}/cmake/spe-CMakeLists.cmake
         DESTINATION ${CMAKE_INSTALL_PREFIX}
         RENAME CMakeLists.txt)
 
-install(FILES ${PLATFORM_DIR}/ns/toolchain_ns_GNUARM.cmake
+install(FILES       ${PLATFORM_DIR}/ns/toolchain_ns_GNUARM.cmake
+                    ${PLATFORM_DIR}/ns/toolchain_ns_ARMCLANG.cmake
         DESTINATION ${INSTALL_CMAKE_DIR})
 
 install(FILES
