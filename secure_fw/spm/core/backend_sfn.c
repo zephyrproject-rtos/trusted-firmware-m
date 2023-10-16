@@ -36,18 +36,19 @@ struct partition_t *p_current_partition;
  * Send message and wake up the SP who is waiting on message queue, block the
  * current component state and activate the next component.
  */
-psa_status_t backend_messaging(struct service_t *service,
-                               struct connection_t *handle)
+psa_status_t backend_messaging(struct connection_t *p_connection)
 {
     struct partition_t *p_target;
     psa_status_t status;
 
-    if (!handle || !service || !service->p_ldinf || !service->partition) {
+    if (!p_connection || !p_connection->service ||
+        !p_connection->service->p_ldinf         ||
+        !p_connection->service->partition) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    p_target = service->partition;
-    p_target->p_handles = handle;
+    p_target = p_connection->service->partition;
+    p_target->p_handles = p_connection;
 
     SET_CURRENT_COMPONENT(p_target);
 
@@ -62,9 +63,9 @@ psa_status_t backend_messaging(struct service_t *service,
         p_target->state = SFN_PARTITION_STATE_INITED;
     }
 
-    status = ((service_fn_t)service->p_ldinf->sfn)(&handle->msg);
+    status = ((service_fn_t)p_connection->service->p_ldinf->sfn)(&p_connection->msg);
 
-    handle->status = TFM_HANDLE_STATUS_ACTIVE;
+    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
 
     return status;
 }

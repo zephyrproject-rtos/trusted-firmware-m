@@ -37,8 +37,7 @@ void backend_init_comp_assuredly(struct partition_t *p_pt,
 uint32_t backend_system_run(void);
 
 /* Runtime model-specific message handling mechanism. */
-psa_status_t backend_messaging(struct service_t *p_serv,
-                               struct connection_t *handle);
+psa_status_t backend_messaging(struct connection_t *p_connection);
 
 /*
  * Runtime model-specific message replying.

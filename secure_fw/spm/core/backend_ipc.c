@@ -169,21 +169,22 @@ static void prv_process_metadata(struct partition_t *p_pt)
  * Send message and wake up the SP who is waiting on message queue, block the
  * current thread and trigger scheduler.
  */
-psa_status_t backend_messaging(struct service_t *service,
-                               struct connection_t *handle)
+psa_status_t backend_messaging(struct connection_t *p_connection)
 {
     struct partition_t *p_owner = NULL;
     psa_signal_t signal = 0;
     psa_status_t ret = PSA_SUCCESS;
 
-    if (!handle || !service || !service->p_ldinf || !service->partition) {
+    if (!p_connection || !p_connection->service ||
+        !p_connection->service->p_ldinf         ||
+        !p_connection->service->partition) {
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    p_owner = service->partition;
-    signal = service->p_ldinf->signal;
+    p_owner = p_connection->service->partition;
+    signal = p_connection->service->p_ldinf->signal;
 
-    UNI_LIST_INSERT_AFTER(p_owner, handle, p_handles);
+    UNI_LIST_INSERT_AFTER(p_owner, p_connection, p_handles);
 
     /* Messages put. Update signals */
     ret = backend_assert_signal(p_owner, signal);
@@ -192,16 +193,16 @@ psa_status_t backend_messaging(struct service_t *service,
      * If it is a NS request via RPC, it is unnecessary to block current
      * thread.
      */
-    if (is_tfm_rpc_msg(handle)) {
+    if (is_tfm_rpc_msg(p_connection)) {
         ret = PSA_SUCCESS;
     } else {
-        signal = backend_wait_signals(handle->p_client, ASYNC_MSG_REPLY);
+        signal = backend_wait_signals(p_connection->p_client, ASYNC_MSG_REPLY);
         if (signal == (psa_signal_t)0) {
             ret = STATUS_NEED_SCHEDULE;
         }
     }
 
-    handle->status = TFM_HANDLE_STATUS_ACTIVE;
+    p_connection->status = TFM_HANDLE_STATUS_ACTIVE;
 
     return ret;
 }

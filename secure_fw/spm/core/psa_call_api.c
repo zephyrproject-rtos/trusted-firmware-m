@@ -216,9 +216,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
 
-        service = p_connection->service;
-
-        if (!service) {
+        if (!p_connection->service) {
             /* FixMe: Need to implement a mechanism to resolve this failure. */
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
@@ -240,5 +238,5 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
 
     p_connection->msg.type = type;
 
-    return backend_messaging(service, p_connection);
+    return backend_messaging(p_connection);
 }

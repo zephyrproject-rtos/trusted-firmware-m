@@ -71,12 +71,11 @@ psa_status_t tfm_spm_client_psa_connect(uint32_t sid, uint32_t version)
     spm_init_connection(p_connection, service, client_id);
     p_connection->msg.type = PSA_IPC_CONNECT;
 
-    return backend_messaging(service, p_connection);
+    return backend_messaging(p_connection);
 }
 
 psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 {
-    struct service_t *service;
     struct connection_t *p_connection;
     int32_t client_id;
     bool ns_caller = tfm_spm_is_ns_caller();
@@ -102,8 +101,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    service = p_connection->service;
-    if (!service) {
+    if (!p_connection->service) {
         /* FixMe: Need to implement one mechanism to resolve this failure. */
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
@@ -118,7 +116,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
 
     p_connection->msg.type = PSA_IPC_DISCONNECT;
 
-    return backend_messaging(service, p_connection);
+    return backend_messaging(p_connection);
 }
 
 psa_status_t tfm_spm_partition_psa_set_rhandle(psa_handle_t msg_handle, void *rhandle)
