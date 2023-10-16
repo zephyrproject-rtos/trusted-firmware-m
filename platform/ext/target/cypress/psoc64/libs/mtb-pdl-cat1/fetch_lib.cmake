@@ -18,25 +18,3 @@ fetch_remote_library(
         GIT_PROGRESS        TRUE
         GIT_SUBMODULES      ""
 )
-
-#-------------------------------------------------------------------------------
-
-cmake_minimum_required(VERSION 3.13)
-
-project("Cypress PSoC 6 Peripheral Driver Library" LANGUAGES C ASM)
-
-cmake_policy(SET CMP0076 NEW)
-cmake_policy(SET CMP0079 NEW)
-
-if (NOT DEFINED MTB_PDL_CAT1_LIB_S_TARGET)
-    set(MTB_PDL_CAT1_LIB_S_TARGET mtb-pdl-cat1_lib_s)
-endif()
-if (NOT DEFINED MTB_PDL_CAT1_LIB_NS_TARGET)
-    set(MTB_PDL_CAT1_LIB_NS_TARGET mtb-pdl-cat1_lib_ns)
-endif()
-
-set(CY_PLATFORM_DIR         ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM})
-set(CY_CORE_LIB_PATH        ${CY_PLATFORM_DIR}/libs/core-lib)
-
-add_subdirectory(mtb-pdl-cat1_s_lib)
-add_subdirectory(mtb-pdl-cat1_ns_lib)
