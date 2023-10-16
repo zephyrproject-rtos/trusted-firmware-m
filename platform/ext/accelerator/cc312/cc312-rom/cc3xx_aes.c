@@ -327,6 +327,18 @@ static cc3xx_err_t init_from_state(void)
     /* Set the crypto engine to the AES engine */
     cc3xx_set_engine(CC3XX_ENGINE_AES);
 
+    /* If tunnelling is disabled, DFA mitigations are contolled by the
+     * HOST_FORCE_DFA_ENABLE switch. If tunnelling is enabled, then they are
+     * controlled here, and enabled for all non-tunnelling modes.
+     */
+#if defined(CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE) && defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE)
+    if (aes_state.mode == CC3XX_AES_MODE_CCM) {
+        P_CC3XX->aes.aes_dfa_is_on = 0x0U;
+    } else {
+        P_CC3XX->aes.aes_dfa_is_on = 0x1U;
+    }
+#endif /* defined(CC3XX_CONFIG_DFA_MITIGATIONS_ENABLE) && defined(CC3XX_CONFIG_AES_TUNNELLING_ENABLE) */
+
     /* Clear number of remaining bytes */
     P_CC3XX->aes.aes_remaining_bytes = 0x0U;
 

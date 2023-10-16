@@ -65,12 +65,24 @@ static void check_features(void)
 
 static cc3xx_err_t setup_dfa_countermeasures(void)
 {
+    uint32_t dfa_is_supported = P_CC3XX->aes.aes_hw_flags & (0x1 << 12);
+    uint32_t lock_dfa_enabled = dfa_is_supported;
+
+#ifdef CC3XX_CONFIG_AES_TUNNELLING_ENABLE
+    /* If tunnelling is enabled then the DFA countermeasures will need to be
+     * switched off while it is in use. Because of this, FORCE_DFA_ENABLE needs
+     * to be switched off.
+     */
+    lock_dfa_enabled = false;
+#endif /* CC3XX_CONFIG_AES_TUNNELLING_ENABLE */
+
     /* If the AES DFA countermeasures are supported, enable them. */
-    if (P_CC3XX->aes.aes_hw_flags & (0x1 << 12)) {
-        P_CC3XX->aes.aes_dfa_is_on = 0b1U;
+    if (lock_dfa_enabled) {
         P_CC3XX->ao.host_ao_lock_bits |= 0b1U << 7; /* Set HOST_FORCE_DFA_ENABLE */
-        P_CC3XX->ao.host_ao_lock_bits |= 0b1U << 8; /* Set HOST_DFA_ENABLE_LOCK */
+    } else {
+        P_CC3XX->ao.host_ao_lock_bits &= ~(0b1U << 7); /* Unset HOST_FORCE_DFA_ENABLE */
     }
+    P_CC3XX->ao.host_ao_lock_bits |= 0b1U << 8; /* Set HOST_DFA_ENABLE_LOCK */
 
     return CC3XX_ERR_SUCCESS;
 }
