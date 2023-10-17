@@ -7,6 +7,9 @@
 
 cmake_policy(SET CMP0076 NEW)
 
+if(POLICY CMP0115)
+    cmake_policy(SET CMP0115 OLD)
+endif()
 set(B_U585I_IOT02A_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(STM_COMMON_DIR ${B_U585I_IOT02A_DIR}/../common)
 

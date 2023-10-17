@@ -27,6 +27,8 @@
 #include "load/partition_defs.h"
 #include "load/asset_defs.h"
 #include "load/spm_load_api.h"
+#include "low_level_rng.h"
+#include "boot_hal_cfg.h"
 
 #ifdef FLOW_CONTROL
 #include "target_flowcontrol.h"

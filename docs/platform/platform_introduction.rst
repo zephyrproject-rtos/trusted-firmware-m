@@ -33,6 +33,8 @@ Supported Platforms
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/mps3>`_
         - `LPC55S69.
           <https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus/lpc5500-cortex-m33/lpcxpresso55s69-development-board:LPC55S69-EVK>`_
+        - `STM32H573I-DK.
+          <https://www.st.com/en/evaluation-tools/stm32h573i-dk.html>`_
         - `B-U585I-IOT02A.
           <https://www.st.com/en/evaluation-tools/B-U585I-IOT02A.html>`_
         - `NUCLEO L552ZE Q.
