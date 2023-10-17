@@ -239,6 +239,14 @@ target_include_directories(platform_ns
 #========================= Platform BL2 =======================================#
 
 if(BL2)
+    # boot_hal_bl2.c is compiled as part of 'bl2' target and not inside
+    # 'platform_bl2' where it suppose to be. This is due to
+    # platform_init/quit* apis symbol collision in bl1.
+    target_sources(bl2
+        PRIVATE
+            ${CORSTONE300_COMMON_DIR}/bl2/boot_hal_bl2.c
+    )
+
     target_sources(platform_bl2
         PRIVATE
             ${CORSTONE300_COMMON_DIR}/cmsis_drivers/Driver_USART.c

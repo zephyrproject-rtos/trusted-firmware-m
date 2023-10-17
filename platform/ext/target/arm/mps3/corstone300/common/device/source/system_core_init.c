@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009-2022 Arm Limited. All rights reserved.
+ * Copyright (c) 2009-2023 Arm Limited. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -87,6 +87,18 @@ void SystemInit (void)
     __DSB();
     __ISB();
 
+    /* Disable cache, because of BL2->Secure change.
+       If cache is enabled, then code decompression can fail or cause uncertain
+       behaviour after switching to main.
+       If cache  needed to be Enabled before decompression, make sure to Clean
+       and Invalidate it at the begining of main(..)!
+
+       If so, use:
+       SCB_InvalidateICache();      // I cache cannot be cleaned
+       SCB_CleanInvalidateDCache();
+    */
+    SCB_DisableICache();
+    SCB_DisableDCache();
 
     SystemCoreClock = SYSTEM_CLOCK;
     PeripheralClock = PERIPHERAL_CLOCK;
