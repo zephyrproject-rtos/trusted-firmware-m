@@ -20,6 +20,9 @@ enum tfm_hal_status_t tfm_hal_platform_init(void)
     enum tfm_plat_err_t plat_err = TFM_PLAT_ERR_SYSTEM_ERR;
     enum syscounter_armv8_m_cntrl_error_t counter_err = SYSCOUNTER_ARMV8_M_ERR_NONE;
 
+    SCB_EnableICache();
+    SCB_EnableDCache();
+
     plat_err = enable_fault_handlers();
     if (plat_err != TFM_PLAT_ERR_SUCCESS) {
         return TFM_HAL_ERROR_GENERIC;
