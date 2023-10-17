@@ -188,21 +188,25 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
 
 /************************ Message functions **********************************/
 
-#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
 /**
- * \brief                   Convert the given client handle to SPM recognised
- *                          handle and verify it.
+ * \brief                   Convert the given user handle to SPM recognised
+ *                          connection and verify it.
+ *
+ * \param[in] p_connection  The address of connection pointer to be converted
+ *                          from the given user handle.
  *
  * \param[in] handle        A handle to an established connection that is
  *                          returned by a prior psa_connect call.
  *
- * \return                  A SPM recognised handle or NULL. It is NULL when
- *                          verification of the converted SPM handle fails.
- *                          \ref connection_t structures
+ * \retval PSA_SUCCESS      Success.
+ * \retval PSA_ERROR_CONNECTION_REFUSED The SPM or RoT Service has refused the
+ *                          connection.
+ * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
+ *                          connection at the moment.
  */
-struct connection_t *spm_get_client_connection(psa_handle_t handle,
-                                               int32_t client_id);
-#endif
+psa_status_t spm_get_client_connection(struct connection_t **p_connection,
+                                       psa_handle_t handle,
+                                       int32_t client_id);
 
 /**
  * \brief                   Convert the given message handle to SPM recognised

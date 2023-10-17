@@ -145,10 +145,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
                                      psa_outvec *outptr)
 {
     struct connection_t *p_connection;
-    struct service_t *service;
     int32_t client_id;
-    uint32_t sid, version, index;
-    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
     bool ns_caller = tfm_spm_is_ns_caller();
     int32_t type = PARAM_UNPACK_TYPE(ctrl_param);
     psa_status_t status;
@@ -158,71 +155,11 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    /* It is a PROGRAMMER ERROR if the handle is a null handle. */
-    if (handle == PSA_NULL_HANDLE) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
     client_id = tfm_spm_get_client_id(ns_caller);
 
-    /* Allocate space from handle pool for static handle. */
-    if (IS_STATIC_HANDLE(handle)) {
-        index = GET_INDEX_FROM_STATIC_HANDLE(handle);
-
-        service = stateless_services_ref_tbl[index];
-        if (!service) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
-        }
-
-        sid = service->p_ldinf->sid;
-
-        /*
-         * It is a PROGRAMMER ERROR if the caller is not authorized to access
-         * the RoT Service.
-         */
-        if (tfm_spm_check_authorization(sid, service, ns_caller)
-            != PSA_SUCCESS) {
-            return PSA_ERROR_CONNECTION_REFUSED;
-        }
-
-        version = GET_VERSION_FROM_STATIC_HANDLE(handle);
-
-        if (tfm_spm_check_client_version(service, version) != PSA_SUCCESS) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
-        }
-
-        CRITICAL_SECTION_ENTER(cs_assert);
-        p_connection = spm_allocate_connection();
-        CRITICAL_SECTION_LEAVE(cs_assert);
-
-        if (!p_connection) {
-            return PSA_ERROR_CONNECTION_BUSY;
-        }
-
-        spm_init_connection(p_connection, service, client_id);
-    } else {
-#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-        /* It is a PROGRAMMER ERROR if an invalid handle was passed. */
-        p_connection = spm_get_client_connection(handle, client_id);
-        if (!p_connection) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
-        }
-
-        /*
-         * It is a PROGRAMMER ERROR if the connection is currently
-         * handling a request.
-         */
-        if (p_connection->status != TFM_HANDLE_STATUS_IDLE) {
-            return PSA_ERROR_PROGRAMMER_ERROR;
-        }
-
-        if (!p_connection->service) {
-            /* FixMe: Need to implement a mechanism to resolve this failure. */
-            return PSA_ERROR_PROGRAMMER_ERROR;
-        }
-#else
-        return PSA_ERROR_PROGRAMMER_ERROR;
-#endif
+    status = spm_get_client_connection(&p_connection, handle, client_id);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     if (PARAM_HAS_IOVEC(ctrl_param)) {

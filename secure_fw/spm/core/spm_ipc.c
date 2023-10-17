@@ -178,24 +178,93 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 }
 
 /* Message functions */
-#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
-struct connection_t *spm_get_client_connection(psa_handle_t handle,
-                                               int32_t client_id)
+psa_status_t spm_get_client_connection(struct connection_t **p_connection,
+                                       psa_handle_t handle,
+                                       int32_t client_id)
 {
-    struct connection_t *p_conn_handle = handle_to_connection(handle);
+    struct connection_t *connection;
+    struct service_t *service;
+    uint32_t sid, version, index;
+    struct critical_section_t cs_assert = CRITICAL_SECTION_STATIC_INIT;
+    bool ns_caller = tfm_spm_is_ns_caller();
 
-    if (spm_validate_connection(p_conn_handle) != PSA_SUCCESS) {
-        return NULL;
+    SPM_ASSERT(p_connection);
+
+    /* It is a PROGRAMMER ERROR if the handle is a null handle. */
+    if (handle == PSA_NULL_HANDLE) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    /* Validate the caller id in the connection handle equals client_id. */
-    if (p_conn_handle->msg.client_id != client_id) {
-        return NULL;
-    }
+    if (IS_STATIC_HANDLE(handle)) {
+        /* Allocate space from handle pool for static handle. */
+        index = GET_INDEX_FROM_STATIC_HANDLE(handle);
 
-    return p_conn_handle;
-}
+        service = stateless_services_ref_tbl[index];
+        if (!service) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
+
+        sid = service->p_ldinf->sid;
+
+        /*
+         * It is a PROGRAMMER ERROR if the caller is not authorized to access
+         * the RoT Service.
+         */
+        if (tfm_spm_check_authorization(sid, service, ns_caller) != PSA_SUCCESS) {
+            return PSA_ERROR_CONNECTION_REFUSED;
+        }
+
+        version = GET_VERSION_FROM_STATIC_HANDLE(handle);
+
+        if (tfm_spm_check_client_version(service, version) != PSA_SUCCESS) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
+
+        CRITICAL_SECTION_ENTER(cs_assert);
+        connection = spm_allocate_connection();
+        CRITICAL_SECTION_LEAVE(cs_assert);
+        if (!connection) {
+            return PSA_ERROR_CONNECTION_BUSY;
+        }
+
+        spm_init_connection(connection, service, client_id);
+    } else {
+#if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
+        connection = handle_to_connection(handle);
+        if (!connection) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
+
+        if (spm_validate_connection(connection) != PSA_SUCCESS) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
+
+        /* Validate the caller id in the connection handle equals client_id. */
+        if (connection->msg.client_id != client_id) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
+
+        /*
+         * It is a PROGRAMMER ERROR if the connection is currently
+         * handling a request.
+         */
+        if (connection->status != TFM_HANDLE_STATUS_IDLE) {
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
+
+        if (!(connection->service)) {
+            /* FixMe: Need to implement a mechanism to resolve this failure. */
+            return PSA_ERROR_PROGRAMMER_ERROR;
+        }
+#else
+        return PSA_ERROR_PROGRAMMER_ERROR;
 #endif
+    }
+
+    *p_connection = connection;
+
+    return PSA_SUCCESS;
+}
 
 struct connection_t *spm_msg_handle_to_connection(psa_handle_t msg_handle)
 {

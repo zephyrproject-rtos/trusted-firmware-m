@@ -79,6 +79,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
     struct connection_t *p_connection;
     int32_t client_id;
     bool ns_caller = tfm_spm_is_ns_caller();
+    psa_status_t status;
 
     /* It will have no effect if called with the NULL handle */
     if (handle == PSA_NULL_HANDLE) {
@@ -96,14 +97,9 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
      * It is a PROGRAMMER ERROR if an invalid handle was provided that is not
      * the null handle.
      */
-    p_connection = spm_get_client_connection(handle, client_id);
-    if (!p_connection) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
-
-    if (!p_connection->service) {
-        /* FixMe: Need to implement one mechanism to resolve this failure. */
-        return PSA_ERROR_PROGRAMMER_ERROR;
+    status = spm_get_client_connection(&p_connection, handle, client_id);
+    if (status != PSA_SUCCESS) {
+        return status;
     }
 
     /*
