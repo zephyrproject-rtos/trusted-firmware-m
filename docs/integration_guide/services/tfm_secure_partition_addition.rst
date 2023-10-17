@@ -90,6 +90,11 @@ allocate resources within the SPE. The manifest includes the following:
    The current manifest format in TF-M is "yaml" which is different from the
    requirement of PSA FF.
 
+.. Note::
+   The users can use LOW, NORMAL and HIGH to determine the priority of the Secure Partition
+   in manifest. They are replaced by 01, 02 and 03 auotmatically when parsing manifest
+   lists for section naming.
+
 Here is a manifest reference example for the IPC model:
 
 .. Note::

@@ -273,6 +273,13 @@ def process_partition_manifests(manifest_lists, configs):
         'CONFIG_TFM_FLIH_API'                     : '0',
         'CONFIG_TFM_SLIH_API'                     : '0'
     }
+    priority_map = {
+        'LOWEST'              : '00',
+        'LOW'                 : '01',
+        'NORMAL'              : '02',
+        'HIGH'                : '03',
+        'HIGHEST'             : '04'
+    }
 
     isolation_level = int(configs['TFM_ISOLATION_LEVEL'], base = 10)
     backend = configs['CONFIG_TFM_SPM_BACKEND']
@@ -340,7 +347,7 @@ def process_partition_manifests(manifest_lists, configs):
         manifest_path = manifest_item['manifest']
         with open(manifest_path) as manifest_file:
             manifest = yaml.safe_load(manifest_file)
-            # check manifest attribute validity
+            # Check manifest attribute validity
             manifest_attribute_check(manifest, manifest_item)
 
             if manifest.get('model', None) == 'dual':
@@ -348,6 +355,9 @@ def process_partition_manifests(manifest_lists, configs):
                 # The actual model used follows the backend being used.
                 manifest['model'] = backend
             manifest = manifest_validation(manifest, pid)
+
+            # Priority mapping
+            numbered_priority = priority_map[manifest['priority']]
 
         if pid == None or pid >= TFM_PID_BASE:
             # Count the number of IPC/SFN partitions
@@ -413,7 +423,8 @@ def process_partition_manifests(manifest_lists, configs):
                                'header_file': manifest_head_file,
                                'intermedia_file': intermedia_file,
                                'loadinfo_file': load_info_file,
-                               'output_dir':output_dir})
+                               'output_dir': output_dir,
+                               'numbered_priority': numbered_priority})
 
     logging.info("------------ Display partition configuration - end ------------")
 
@@ -482,6 +493,7 @@ def gen_per_partition_files(context):
         partition_context['manifest'] = one_partition['manifest']
         partition_context['attr'] = one_partition['attr']
         partition_context['manifest_out_basename'] = one_partition['manifest_out_basename']
+        partition_context['numbered_priority'] = one_partition['numbered_priority']
 
         logging.info ('Generating {} in {}'.format(one_partition['attr']['description'],
                                             one_partition['output_dir']))
