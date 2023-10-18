@@ -273,6 +273,8 @@ target_sources(platform_bl1_1
         ./native_drivers/atu_rss_drv.c
         ./native_drivers/kmu_drv.c
         ./native_drivers/lcm_drv.c
+        ./native_drivers/mhu_v2_x.c
+        ./native_drivers/mhu_wrapper_v2_x.c
         ./nv_counters.c
         ./otp_lcm.c
         ./tfm_hal_platform_reset.c
