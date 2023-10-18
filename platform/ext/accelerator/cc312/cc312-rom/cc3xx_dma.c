@@ -210,8 +210,13 @@ void cc3xx_dma_set_buffer_size(size_t size) {
 void cc3xx_dma_set_output(void* buf, size_t length)
 {
     if (buf != NULL) {
-        /* If we're swapping the buffer location, flush remaining data */
-        cc3xx_dma_flush_buffer(false);
+        /* If we're swapping the buffer location, flush remaining data, but only
+         * if the data in the block buffer is marked as needed to be output.
+         */
+        if (dma_state.block_buf_needs_output) {
+            cc3xx_dma_flush_buffer(false);
+        }
+
         /* remap the address, particularly for TCMs */
         dma_state.output_addr = remap_addr((uintptr_t)buf);
     }
