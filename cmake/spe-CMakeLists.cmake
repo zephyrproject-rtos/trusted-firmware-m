@@ -30,6 +30,7 @@ target_sources(tfm_api_ns
 target_include_directories(tfm_api_ns
     PUBLIC
         interface/include
+        interface/include/crypto_keys
 )
 
 add_subdirectory(platform)

@@ -49,7 +49,7 @@ if (TFM_PARTITION_NS_AGENT_MAILBOX)
                         ${INTERFACE_INC_DIR}/multi_core/tfm_mailbox.h
                         ${INTERFACE_INC_DIR}/multi_core/tfm_ns_mailbox_test.h
                         ${CMAKE_BINARY_DIR}/generated/interface/include/tfm_mailbox_config.h
-            DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR}/multi_core)
 endif()
 
 if (TFM_PARTITION_PROTECTED_STORAGE)
@@ -200,6 +200,9 @@ endif()
 install(CODE "MESSAGE(\"----- Installing platform NS -----\")")
 
 install(DIRECTORY ${PLATFORM_DIR}/ext/cmsis
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(DIRECTORY   ${PLATFORM_DIR}/include
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(FILES ${CMAKE_SOURCE_DIR}/cmake/spe-CMakeLists.cmake
