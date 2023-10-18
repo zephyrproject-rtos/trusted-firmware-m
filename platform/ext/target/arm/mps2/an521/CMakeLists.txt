@@ -154,8 +154,7 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/cmsis_core
                     ${TARGET_PLATFORM_PATH}/retarget
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
-install(DIRECTORY   ${PLATFORM_DIR}/ext/common
-                    ${PLATFORM_DIR}/ext/driver
+install(DIRECTORY   ${PLATFORM_DIR}/ext/driver
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
 
 install(FILES       ${TARGET_PLATFORM_PATH}/partition/region_defs.h

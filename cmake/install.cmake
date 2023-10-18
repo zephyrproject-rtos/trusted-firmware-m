@@ -199,8 +199,14 @@ endif()
 
 install(CODE "MESSAGE(\"----- Installing platform NS -----\")")
 
-install(DIRECTORY ${PLATFORM_DIR}/ext/cmsis
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+install(DIRECTORY   ${PLATFORM_DIR}/ext/cmsis
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext)
+
+if(PLATFORM_DEFAULT_UART_STDOUT)
+    install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
+                        ${PLATFORM_DIR}/ext/common/uart_stdout.h
+            DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
+endif()
 
 install(DIRECTORY   ${PLATFORM_DIR}/include
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})

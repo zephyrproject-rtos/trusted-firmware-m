@@ -27,7 +27,7 @@ target_include_directories(platform_ns
         retarget
     PUBLIC
         include
-        cmsis
+        ext/cmsis
         cmsis_core
 )
 
