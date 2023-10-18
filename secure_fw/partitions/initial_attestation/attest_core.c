@@ -21,6 +21,7 @@
 #include "tfm_attest_iat_defs.h"
 #include "t_cose_common.h"
 #include "tfm_crypto_defs.h"
+#include "tfm_sp_log.h"
 
 #define ARRAY_LENGTH(array) (sizeof(array) / sizeof(*(array)))
 
@@ -584,6 +585,7 @@ static enum psa_attest_err_t attest_get_t_cose_algorithm(
             return PSA_ATTEST_ERR_GENERAL;
         }
     } else {
+        LOG_DBGFMT("Attestation: Unexpected key_type for TFM_BUILTIN_KEY_ID_IAK. Key storage may be corrupted!\r\n");
         return PSA_ATTEST_ERR_GENERAL;
     }
 
