@@ -593,8 +593,8 @@ void cc3xx_aes_set_tag_len(uint32_t tag_len)
     switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_CCM_ENABLE
         case CC3XX_AES_MODE_CCM:
-        /* NIST SP800-38C recommends 8 as a lower bound. IEEE 8.2.15 specifies
-         * that 0, 4, 6, 8, 12, 14, 16 are valid for CCM*.
+        /* NIST SP800-38C recommends 8 as a lower bound. IEEE 802.15 specifies
+         * that 0, 4, 6, 8, 10, 12, 14, 16 are valid for CCM*.
          */
         assert(tag_len <= 16 && !(tag_len & 0b1) && tag_len != 2);
         break;
@@ -699,19 +699,19 @@ static void configure_engine_for_authed_data(bool *write_output)
 {
     switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_GCM_ENABLE
-        case CC3XX_AES_MODE_GCM:
+    case CC3XX_AES_MODE_GCM:
         cc3xx_set_engine(CC3XX_ENGINE_HASH);
         break;
 #endif /* CC3XX_CONFIG_AES_GCM_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
-        case CC3XX_AES_MODE_CMAC:
+    case CC3XX_AES_MODE_CMAC:
 #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
 #if defined(CC3XX_CONFIG_AES_CCM_ENABLE)
-        case CC3XX_AES_MODE_CCM:
+    case CC3XX_AES_MODE_CCM:
 #endif /* defined(CC3XX_CONFIG_AES_CCM_ENABLE) */
         cc3xx_set_engine(CC3XX_ENGINE_AES);
         break;
-        default:
+    default:
         return;
     }
 
@@ -753,23 +753,23 @@ void cc3xx_aes_update_authed_data(const uint8_t* in, size_t in_len)
 
     switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_GCM_ENABLE
-        case CC3XX_AES_MODE_GCM:
+    case CC3XX_AES_MODE_GCM:
         break;
 #endif /* CC3XX_CONFIG_AES_GCM_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
-        case CC3XX_AES_MODE_CMAC:
+    case CC3XX_AES_MODE_CMAC:
         P_CC3XX->aes.aes_remaining_bytes = in_len + AES_BLOCK_SIZE;
         break;
 #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
 #if defined(CC3XX_CONFIG_AES_CCM_ENABLE)
-        case CC3XX_AES_MODE_CCM:
+    case CC3XX_AES_MODE_CCM:
         if (aes_state.authed_length == 0) {
             ccm_calc_iv(true);
             aes_state.authed_length += ccm_input_auth_length();
         }
         break;
 #endif /* defined(CC3XX_CONFIG_AES_CCM_ENABLE) */
-        default:
+    default:
         return;
     }
 
@@ -783,7 +783,7 @@ static void configure_engine_for_crypted_data(bool *write_output)
 {
     switch (aes_state.mode) {
 #ifdef CC3XX_CONFIG_AES_GCM_ENABLE
-        case CC3XX_AES_MODE_GCM:
+    case CC3XX_AES_MODE_GCM:
         if (aes_state.direction == CC3XX_AES_DIRECTION_ENCRYPT) {
             cc3xx_set_engine(CC3XX_ENGINE_AES_TO_HASH_AND_DOUT);
         } else {
@@ -792,11 +792,11 @@ static void configure_engine_for_crypted_data(bool *write_output)
         break;
 #endif /* CC3XX_CONFIG_AES_GCM_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CMAC_ENABLE
-        case CC3XX_AES_MODE_CMAC:
+    case CC3XX_AES_MODE_CMAC:
         return;
 #endif /* CC3XX_CONFIG_AES_CMAC_ENABLE */
 #ifdef CC3XX_CONFIG_AES_CCM_ENABLE
-        case CC3XX_AES_MODE_CCM:
+    case CC3XX_AES_MODE_CCM:
 #endif /* CC3XX_CONFIG_AES_CCM_ENABLE */
 #ifdef CC3XX_CONFIG_AES_TUNNELLING_ENABLE
         set_mode(CC3XX_AES_MODE_CTR);
@@ -822,7 +822,7 @@ static void configure_engine_for_crypted_data(bool *write_output)
         return;
 #endif /* CC3XX_CONFIG_AES_TUNNELLING_ENABLE */
         break;
-        default:
+    default:
         cc3xx_set_engine(CC3XX_ENGINE_AES);
     }
 
