@@ -233,6 +233,15 @@ void spm_init_connection(struct connection_t *p_connection,
                          struct service_t *service,
                          int32_t client_id);
 
+/*
+ * Update connection content with information extracted from control param,
+ * including message type and information of IO vectors if any.
+ */
+psa_status_t spm_associate_call_params(struct connection_t *p_connection,
+                                       uint32_t            ctrl_param,
+                                       const psa_invec     *inptr,
+                                       psa_outvec          *outptr);
+
 /**
  * \brief                   Check the client version according to
  *                          version policy

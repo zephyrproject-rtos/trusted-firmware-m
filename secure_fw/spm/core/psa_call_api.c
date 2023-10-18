@@ -18,11 +18,10 @@
 
 extern struct service_t *stateless_services_ref_tbl[];
 
-
-static psa_status_t spm_process_io_vectors(struct connection_t *p_connection,
-                                           uint32_t            ctrl_param,
-                                           const psa_invec     *inptr,
-                                           psa_outvec          *outptr)
+psa_status_t spm_associate_call_params(struct connection_t *p_connection,
+                                       uint32_t            ctrl_param,
+                                       const psa_invec     *inptr,
+                                       psa_outvec          *outptr)
 {
     psa_invec  ivecs_local[PSA_MAX_IOVEC];
     psa_outvec ovecs_local[PSA_MAX_IOVEC];
@@ -32,7 +31,20 @@ static psa_status_t spm_process_io_vectors(struct connection_t *p_connection,
     size_t     ivec_num    = PARAM_UNPACK_IN_LEN(ctrl_param);
     size_t     ovec_num    = PARAM_UNPACK_OUT_LEN(ctrl_param);
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
+    int32_t type = PARAM_UNPACK_TYPE(ctrl_param);
 
+    /* The request type must be zero or positive. */
+    if (type < 0) {
+        return PSA_ERROR_PROGRAMMER_ERROR;
+    }
+
+    p_connection->msg.type = type;
+
+    if (!PARAM_HAS_IOVEC(ctrl_param)) {
+        return PSA_SUCCESS;
+    }
+
+    /* Process IO vectors */
     /* in_len + out_len SHOULD <= PSA_MAX_IOVEC */
     if ((ivec_num > SIZE_MAX - ovec_num) ||
         (ivec_num + ovec_num > PSA_MAX_IOVEC)) {
@@ -98,10 +110,10 @@ static psa_status_t spm_process_io_vectors(struct connection_t *p_connection,
      * For client input vector, it is a PROGRAMMER ERROR if the provided payload
      * memory reference was invalid or not readable.
      */
-     for (i = 0; i < ivec_num; i++) {
+    for (i = 0; i < ivec_num; i++) {
         FIH_CALL(tfm_hal_memory_check, fih_rc,
-                  curr_partition->boundary, (uintptr_t)ivecs_local[i].base,
-                  ivecs_local[i].len, TFM_HAL_ACCESS_READABLE | ns_access);
+                 curr_partition->boundary, (uintptr_t)ivecs_local[i].base,
+                 ivecs_local[i].len, TFM_HAL_ACCESS_READABLE | ns_access);
         if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
@@ -123,8 +135,8 @@ static psa_status_t spm_process_io_vectors(struct connection_t *p_connection,
      */
     for (i = 0; i < ovec_num; i++) {
         FIH_CALL(tfm_hal_memory_check, fih_rc,
-                    curr_partition->boundary, (uintptr_t)ovecs_local[i].base,
-                    ovecs_local[i].len, TFM_HAL_ACCESS_READWRITE | ns_access);
+                 curr_partition->boundary, (uintptr_t)ovecs_local[i].base,
+                 ovecs_local[i].len, TFM_HAL_ACCESS_READWRITE | ns_access);
         if (fih_not_eq(fih_rc, fih_int_encode(PSA_SUCCESS))) {
             return PSA_ERROR_PROGRAMMER_ERROR;
         }
@@ -147,13 +159,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
     struct connection_t *p_connection;
     int32_t client_id;
     bool ns_caller = tfm_spm_is_ns_caller();
-    int32_t type = PARAM_UNPACK_TYPE(ctrl_param);
     psa_status_t status;
-
-    /* The request type must be zero or positive. */
-    if (type < 0) {
-        return PSA_ERROR_PROGRAMMER_ERROR;
-    }
 
     client_id = tfm_spm_get_client_id(ns_caller);
 
@@ -162,18 +168,13 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
         return status;
     }
 
-    if (PARAM_HAS_IOVEC(ctrl_param)) {
-        status = spm_process_io_vectors(p_connection, ctrl_param,
-                                        inptr, outptr);
-        if (status != PSA_SUCCESS) {
-            if (IS_STATIC_HANDLE(handle)) {
-                spm_free_connection(p_connection);
-            }
-            return status;
+    status = spm_associate_call_params(p_connection, ctrl_param, inptr, outptr);
+    if (status != PSA_SUCCESS) {
+        if (IS_STATIC_HANDLE(handle)) {
+            spm_free_connection(p_connection);
         }
+        return status;
     }
-
-    p_connection->msg.type = type;
 
     return backend_messaging(p_connection);
 }
