@@ -204,9 +204,9 @@ struct service_t *tfm_spm_get_service_by_sid(uint32_t sid);
  * \retval PSA_ERROR_CONNECTION_BUSY The SPM or RoT Service cannot make the
  *                          connection at the moment.
  */
-psa_status_t spm_get_client_connection(struct connection_t **p_connection,
-                                       psa_handle_t handle,
-                                       int32_t client_id);
+psa_status_t spm_get_connection(struct connection_t **p_connection,
+                                psa_handle_t handle,
+                                int32_t client_id);
 
 /**
  * \brief                   Convert the given message handle to SPM recognised

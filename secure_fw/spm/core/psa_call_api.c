@@ -163,7 +163,7 @@ psa_status_t tfm_spm_client_psa_call(psa_handle_t handle,
 
     client_id = tfm_spm_get_client_id(ns_caller);
 
-    status = spm_get_client_connection(&p_connection, handle, client_id);
+    status = spm_get_connection(&p_connection, handle, client_id);
     if (status != PSA_SUCCESS) {
         return status;
     }

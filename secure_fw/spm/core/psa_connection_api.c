@@ -97,7 +97,7 @@ psa_status_t tfm_spm_client_psa_close(psa_handle_t handle)
      * It is a PROGRAMMER ERROR if an invalid handle was provided that is not
      * the null handle.
      */
-    status = spm_get_client_connection(&p_connection, handle, client_id);
+    status = spm_get_connection(&p_connection, handle, client_id);
     if (status != PSA_SUCCESS) {
         return status;
     }

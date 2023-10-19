@@ -10,9 +10,11 @@
 #include "current.h"
 #include "fih.h"
 #include "internal_status_code.h"
+#include "spm.h"
 #include "tfm_hal_isolation.h"
 #include "tfm_multi_core.h"
 #include "ffm/agent_api.h"
+#include "ffm/backend.h"
 #include "ffm/psa_api.h"
 #include "psa/error.h"
 
@@ -21,8 +23,10 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
                                     const struct client_params_t *params,
                                     const void *client_data_stateless)
 {
+    struct connection_t *p_connection;
     struct partition_t *curr_partition = GET_CURRENT_COMPONENT();
     fih_int fih_rc = FIH_FAILURE;
+    psa_status_t status;
 
     (void)client_data_stateless;
 
@@ -34,8 +38,17 @@ psa_status_t tfm_spm_agent_psa_call(psa_handle_t handle,
         return PSA_ERROR_PROGRAMMER_ERROR;
     }
 
-    return tfm_spm_client_psa_call(handle, control,
-                                   params->p_invecs, params->p_outvecs);
+    status = spm_get_connection(&p_connection, handle, params->ns_client_id_stateless);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    status = spm_associate_call_params(p_connection, control, params->p_invecs, params->p_outvecs);
+    if (status != PSA_SUCCESS) {
+        return status;
+    }
+
+    return backend_messaging(p_connection);
 }
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1

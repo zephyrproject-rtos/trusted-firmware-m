@@ -178,9 +178,9 @@ int32_t tfm_spm_check_authorization(uint32_t sid,
 }
 
 /* Message functions */
-psa_status_t spm_get_client_connection(struct connection_t **p_connection,
-                                       psa_handle_t handle,
-                                       int32_t client_id)
+psa_status_t spm_get_connection(struct connection_t **p_connection,
+                                psa_handle_t handle,
+                                int32_t client_id)
 {
     struct connection_t *connection;
     struct service_t *service;
