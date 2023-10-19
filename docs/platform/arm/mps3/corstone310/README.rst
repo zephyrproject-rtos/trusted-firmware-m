@@ -14,8 +14,8 @@ with Isolation Level 1 and 2.
 
 .. note::
 
-   This platform support does not provide software for Ethos-U55/U65 IP, only
-   contains base address and interrupt number for it.
+   For Ethos-U55/U65 IP this platform support only provides base address,
+   interrupt number and an example NPU setup as non-secure, unprivileged.
 
 .. note::
 
