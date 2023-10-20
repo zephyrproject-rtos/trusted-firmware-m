@@ -1,15 +1,62 @@
-Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN547)
-==================================================================
+Corstone SSE-300 with Ethos-U55/U65 Example Subsystem for Arm Ecosystem FVP and for MPS3 (AN547, AN552)
+=======================================================================================================
+Introduction
+------------
+
+Corstone-300 is an Arm reference subsystem for secure System on Chips
+containing an Armv8.1-M Cortex-M55 processor and an Ethos-U55/U65 neural
+network processor. It is an MPS3 based platform with the usual MPS3
+peripherals.
+
+This platform port supports all TF-M regression tests (Secure and Non-secure)
+with Isolation Level 1 and 2.
+
+.. note::
+
+   For Ethos-U55/U65 IP this platform support only provides base address,
+   interrupt number and an example NPU setup as non-secure, unprivileged.
+
+.. note::
+
+   For Armclang compiler v6.18 or later version is required.
 
 Building TF-M
 -------------
 
 Follow the instructions in :doc:`Building instructions </building/tfm_build_instruction>`.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Build instructions with platform name: arm/mps3/corstone300/an547
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``-DTFM_PLATFORM=arm/mps3/corstone300/an547``
+
 .. note::
 
-   These builds can be run on the Corstone-300 Ethos-U55 Ecosystem FVP
-   (FVP_SSE300_MPS3) from version 11.22 or higher.
+   For Ethos-U55/U65 IP this platform support only provides base address,
+   interrupt number and an example NPU setup as non-secure, unprivileged.
+
+Build instructions with platform name: arm/mps3/corstone300/an552
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``-DTFM_PLATFORM=arm/mps3/corstone300/an552``
+
+.. note::
+
+   For Ethos-U55/U65 IP this platform support only provides base address,
+   interrupt number and an example NPU setup as non-secure, unprivileged.
+
+Build instructions with platform name: arm/mps3/corstone300/fvp
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``-DTFM_PLATFORM=arm/mps3/corstone300/fvp``
+
+.. note::
+
+   For Ethos-U55/U65 IP this platform support only provides base address,
+   interrupt number and an example NPU setup as non-secure, unprivileged.
+
+.. note::
+
+   The built binaries can be run on the Corstone-300 Ethos-U55/U65 Ecosystem FVP
+   (FVP_SSE300_MPS3). At least Ecosystem FVP version 11.22 is required.
 
 .. note::
 
@@ -37,50 +84,19 @@ Follow the instructions in :doc:`Building instructions </building/tfm_build_inst
    The generated provisioning_data.c file can be found at
    ``<build directory>/platform/target/provisioning/provisioning_data.c``
 
+.. note::
+
    The provisioning bundle generation depends on pyelftools that's have to be installed::
 
     pip3 install pyelftools
 
-Build instructions with platform name: arm/mps3/corstone300/an547
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-``-DTFM_PLATFORM=arm/mps3/corstone300/an547``
-
-.. note::
-
-   This platform support does not provide software for Ethos-U55 IP, only
-   contains base address and interrupt number for it.
-
-.. note::
-
-   The built binaries can be run on the Corstone SSE-300 with Ethos-U55
-   Example Subsystem for MPS3 (AN547).
-   They can also be run on the Corstone-300 Ethos-U55 Ecosystem FVP
-   (FVP_SSE300_MPS3) up until version 11.15. From version 11.16, the FVP
-   is aligned with the AN552 FPGA platform.
-
-Build instructions with platform name: arm/mps3/corstone300/an552
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-``-DTFM_PLATFORM=arm/mps3/corstone300/an552``
-
-.. note::
-
-   This platform support does not provide software for Ethos-U55 IP, only
-   contains base address and interrupt number for it.
-
-Build instructions with platform name: arm/mps3/corstone300/fvp
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-``-DTFM_PLATFORM=arm/mps3/corstone300/fvp``
-
-.. note::
-
-   This platform support does not provide software for Ethos-U55 IP, only
-   contains base address and interrupt number for it.
-
-To run the example code on Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN547)
----------------------------------------------------------------------------------------------
+To run the example code on Corstone SSE-300 with Ethos-U55/U65 Example Subsystem for MPS3 (AN547)
+-------------------------------------------------------------------------------------------------
 FPGA image is available to download `here <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`__
 
-To run BL2 bootloader and TF-M example application and tests in the MPS3 board,
+If the link above is not working just go to `Arm PDH <https://developer.arm.com/downloads>`__ and search for AN547.
+
+To run BL2 bootloader, TF-M example application and tests in the MPS3 board,
 it is required to have AN547 image in the MPS3 board SD card. The image should
 be located in ``<MPS3 device name>/MB/HBI<BoardNumberBoardrevision>/AN547``
 
@@ -112,20 +128,18 @@ The MPS3 board tested is HBI0309C.
    port (baud 115200 8n1) the following messages::
 
     [INF] Starting bootloader
-    [INF] [INF] Beginning provisioning
-
+    [INF] Beginning BL2 provisioning
     [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
-    [INF] [INF] Waiting for provisioning bundle
-
-    [INF] [INF] Running provisioning bundle
-
-    [INF] Swap type: none
-    [INF] Swap type: none
+    [INF] Image index: 1, Swap type: none
+    [INF] Image index: 0, Swap type: none
     [INF] Bootloader chainload address offset: 0x0
     [INF] Jumping to the first image slot
+    [INF] Beginning TF-M provisioning
+    [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
+    [WRN] This device was provisioned with dummy keys. This device is NOT SECURE
     [Sec Thread] Secure image initializing!
     TF-M isolation level is: 0x00000001
-    Booting TF-M v1.8.0
+    Booting TF-M v1.8.1
 
 .. note::
 
@@ -142,9 +156,11 @@ The MPS3 board tested is HBI0309C.
     IMAGE2ADDRESS: 0x00022400
     IMAGE2FILE: \SOFTWARE\prv.bin
 
-To run the example code on Corstone SSE-300 with Ethos-U55 Example Subsystem for MPS3 (AN552)
----------------------------------------------------------------------------------------------
+To run the example code on Corstone SSE-300 with Ethos-U55/U65 Example Subsystem for MPS3 (AN552)
+-------------------------------------------------------------------------------------------------
 FPGA image is available to download `here <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`__
+
+If the link above is not working just go to `Arm PDH <https://developer.arm.com/downloads>`__ and search for AN552.
 
 To run BL2 bootloader and TF-M example application and tests in the MPS3 board,
 it is required to have AN552 image in the MPS3 board SD card. The image should
@@ -178,20 +194,18 @@ The MPS3 board tested is HBI0309C.
    port (baud 115200 8n1) the following messages::
 
     [INF] Starting bootloader
-    [INF] [INF] Beginning provisioning
-
+    [INF] Beginning BL2 provisioning
     [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
-    [INF] [INF] Waiting for provisioning bundle
-
-    [INF] [INF] Running provisioning bundle
-
-    [INF] Swap type: none
-    [INF] Swap type: none
+    [INF] Image index: 1, Swap type: none
+    [INF] Image index: 0, Swap type: none
     [INF] Bootloader chainload address offset: 0x0
     [INF] Jumping to the first image slot
+    [INF] Beginning TF-M provisioning
+    [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
+    [WRN] This device was provisioned with dummy keys. This device is NOT SECURE
     [Sec Thread] Secure image initializing!
     TF-M isolation level is: 0x00000001
-    Booting TF-M v1.8.0
+    Booting TF-M v1.8.1
 
 .. note::
 
@@ -208,38 +222,36 @@ The MPS3 board tested is HBI0309C.
     IMAGE2ADDRESS: 0x00022400
     IMAGE2FILE: \SOFTWARE\prv.bin
 
-To run the example code on Corstone-300 Ethos-U55 Ecosystem FVP
----------------------------------------------------------------
+To run the example code on Corstone-300 Ethos-U55/U65 Ecosystem FVP
+-------------------------------------------------------------------
 FVP is available to download `here <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`__
 
 #. Install the FVP
 #. Copy ``bl2.axf`` and ``tfm_s_ns_signed.bin`` files from
-   build dir to ``<FVP installation path>/models/Linux64_GCC-6.4/``
+   build dir to ``<FVP installation path>/models/Linux64_GCC-9.3/``
 #. Navigate to the same directory and execute the following command to start FVP::
 
     $ ./FVP_Corstone_SSE-300_Ethos-U55 -a cpu0*="bl2.axf" --data "tfm_s_ns_signed.bin"@0x38000000
 
-#. After completing the procedure you should be able to visualize on the serial
-   port the following messages::
+#. After completing the procedure you should be able to see similar messages
+   to this on the serial port (baud 115200 8n1)::
 
     Trying 127.0.0.1...
     Connected to localhost.
     Escape character is '^]'.
     [INF] Starting bootloader
-    [INF] [INF] Beginning provisioning
-
+    [INF] Beginning BL2 provisioning
     [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
-    [INF] [INF] Waiting for provisioning bundle
-
-    [INF] [INF] Running provisioning bundle
-
-    [INF] Swap type: none
-    [INF] Swap type: none
+    [INF] Image index: 1, Swap type: none
+    [INF] Image index: 0, Swap type: none
     [INF] Bootloader chainload address offset: 0x0
     [INF] Jumping to the first image slot
+    [INF] Beginning TF-M provisioning
+    [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
+    [WRN] This device was provisioned with dummy keys. This device is NOT SECURE
     [Sec Thread] Secure image initializing!
     TF-M isolation level is: 0x00000001
-    Booting TF-M v1.8.0
+    Booting TF-M v1.8.1
 
 .. note::
 
@@ -251,7 +263,7 @@ FVP is available to download `here <https://developer.arm.com/tools-and-software
    If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
    be placed on the ``0x10022000`` address with::
 
-   $ ./FVP_Corstone_SSE-300_Ethos-U55 -a cpu0*="bl2.axf" --data "tfm_s_ns_signed.bin"@0x38000000 --data "encrypted_provisioning_bundle.bin"@0x10022000
+   $ ./FVP_Corstone_SSE-300_Ethos-U55 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x38000000 --data "<path-to-build-directory>/encrypted_provisioning_bundle.bin"@0x10022000
 
 
 -------------
