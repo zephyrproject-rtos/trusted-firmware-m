@@ -1,5 +1,5 @@
-Corstone SSE-310 with Ethos-U55/U65 Example Subsystem for Arm Virtual Hardware, and for MPS3 (AN555)
-====================================================================================================
+Corstone SSE-310 with Ethos-U55/U65 Example Subsystem for Arm Ecosystem FVP and for MPS3 (AN555)
+================================================================================================
 
 Introduction
 ------------
@@ -25,19 +25,31 @@ Building TF-M
 -------------
 
 Follow the instructions in :doc:`Building instructions </building/tfm_build_instruction>`.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For Corstone-310 Ethos-U55/U65 Arm Virtual Hardware use the following platform name:
+Build instructions with platform name: arm/mps3/corstone310/an555
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``-DTFM_PLATFORM=arm/mps3/corstone310/an555``
 
+.. note::
+
+   For Ethos-U55/U65 IP this platform support only provides base address,
+   interrupt number and an example NPU setup as non-secure, unprivileged.
+
+
+Build instructions with platform name: arm/mps3/corstone310/fvp
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ``-DTFM_PLATFORM=arm/mps3/corstone310/fvp``
 
 .. note::
 
-   The built binaries can be run on the Corstone-310 Arm Virtual Hardware
-   (VHT_Corstone_SSE-310). At least VHT version 11.17 is required.
+   For Ethos-U55/U65 IP this platform support only provides base address,
+   interrupt number and an example NPU setup as non-secure, unprivileged.
 
-For AN555 use the following platform name:
+.. note::
 
-``-DTFM_PLATFORM=arm/mps3/corstone310/an555``
+   The built binaries can be run on the Corstone-310 Ethos-U55/U65 Ecosystem FVP
+   (FVP_SSE310_MPS3). At least Ecosystem FVP version 11.22 is required.
 
 .. note::
 
@@ -56,7 +68,7 @@ For AN555 use the following platform name:
    The hash of the public key is going to be written into the ``provisioning_data.c`` automatically.
    The other keys and seeds can be changed by passing the new values to the build command,
    otherwise the default values going to be used:
-   ``tf-m/platform/ext/target/arm/mps3/an552/provisioning/provisioning_config.cmake``
+   ``tf-m/platform/ext/target/arm/mps3/common/provisioning/provisioning_config.cmake``
    Optionally it's possible to pass a new config file with the ``-DPROVISIONING_KEYS_CONFIG``
    flag.
 
@@ -71,81 +83,9 @@ For AN555 use the following platform name:
 
     pip3 install pyelftools
 
-
-To run the example code on Corstone-310 Ethos-U55/U65 Arm Virtual Hardware
---------------------------------------------------------------------------
-
-To utilize the `Arm Virtual Hardware (AVH) <https://arm-software.github.io/AVH/main/simulation/html/Using.html>`_, you will need to create an `AWS Account <https://aws.amazon.com/>`_ if you don’t already have one.
-
-Launching the instance in EC2 `(AWS on getting started) <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html>`_
-1. Go to `EC2 <https://console.aws.amazon.com/ec2/v2/>`_ in the AWS Web Console.
-2. Select **Launch Instances** which will take you to a wizard for launching the instance.
-
-     1. **Choose an Amazon Machine Image** `(AMI) <https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html>`_  In the Search box, type `Arm Virtual Hardware` then find the item called "Arm Virtual Hardware" that is by Arm, and press Select for that item.
-        This will raise a subscription page/pop-up titled, **Arm Virtual Hardware**. You will note that the subscription is free from Arm, but AWS does charge for the costs of the instances themselves according to the pricing chart provided.
-
-        You must select Continue if you want to move forward.
-
-     2. **Choose an Instance Type** - Select one of the instance types from the list. Keep in mind that there are charges that accrue while the instance is running.
-        From here you may select **Review and Launch** to move directly to the launch page or select **Next: Configure Instance Details** if you need to set any custom settings for this instance.
-
-
-Once you complete the wizard by initiating the instance launch you will see a page that allows you to navigate directly to the new instance. You may click this link or go back to your list of instances and find the instance through that method.
-
-Whichever way you choose find your new instance and select its instance ID to open the page to manage the instance.
-
-Connecting to the instance:
-   1. Select **Connect** to open an SSH terminal session to the instance in your browser.
-   2. Ensure the **User name** field is set to `ubuntu`.
-   3. Select the **Connect** button to open the session. This will put you in a browser window where you will have an SSH terminal window ready for your input.
-
-The TF-M can be cloned and built in the instance after connecting.
-To run the built binaries:
-
-#. Execute the following command to start VHT::
-
-    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x38000000
-
-#. The  serial port's output can be redirected to a file with::
-
-    $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x38000000 -C mps3_board.uart0.unbuffered_output=1 -C mps3_board.uart0.out_file="output.log"
-
-   The output should contain the following messages::
-
-    Trying 127.0.0.1...
-    Connected to localhost.
-    Escape character is '^]'.
-    [INF] Starting bootloader
-    [INF] Beginning BL2 provisioning
-    [INF] Swap type: none
-    [INF] Swap type: none
-    [INF] Bootloader chainload address offset: 0x40000
-    [INF] Jumping to the first image slot
-    [INF] Beginning TF-M provisioning
-    [Sec Thread] Secure image initializing!
-    TF-M isolation level is:0x00000001
-    Booting TF-M v1.6.0
-    Creating an empty ITS flash layout.
-    Creating an empty PS flash layout.
-    Non-Secure system starting...
-
-
-.. note::
-
-   Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
-   to ``Debug``.
-
-.. note::
-
-   If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
-   be placed on the ``0x10022000`` address with::
-
-   $ VHT_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x38000000 -C mps3_board.uart0.unbuffered_output=1 -C mps3_board.uart0.out_file="output.log" --data "encrypted_provisioning_bundle.bin"@0x10022000
-
-
-To run the example code on AN555
---------------------------------
-FPGA image is available for download from `here <https://developer.arm.com/downloads/view/AN555>`__
+To run the example code on Corstone SSE-310 with Ethos-U55/U65 Example Subsystem for MPS3 (AN555)
+-------------------------------------------------------------------------------------------------
+FPGA image is available to download `here <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`__
 
 If the link above is not working just go to `Arm PDH <https://developer.arm.com/downloads>`__ and search for AN555.
 
@@ -184,25 +124,22 @@ The MPS3 board tested is HBI0309C.
 #. Close ``<MPS3 device name>/MB/HBI0309C/AN555/images.txt``
 #. Unmount/eject the ``<MPS3 device name>`` unit
 #. Reset the board to execute the TF-M example application
-#. After completing the procedure you should be able to see similar messages
-   to this on the serial port (baud 115200 8n1)::
+#. After completing the procedure you should be able to visualize on the serial
+   port (baud 115200 8n1) the following messages::
 
     [INF] Starting bootloader
     [INF] Beginning BL2 provisioning
     [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
-    [INF] Swap type: none
-    [INF] Swap type: none
+    [INF] Image index: 1, Swap type: none
+    [INF] Image index: 0, Swap type: none
     [INF] Bootloader chainload address offset: 0x0
     [INF] Jumping to the first image slot
     [INF] Beginning TF-M provisioning
     [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
+    [WRN] This device was provisioned with dummy keys. This device is NOT SECURE
     [Sec Thread] Secure image initializing!
-    TF-M isolation level is: 0x00000002
-    Booting TF-M <TF-M version and git hash>
-    Creating an empty ITS flash layout.
-    Creating an empty PS flash layout.
-    [INF][Crypto] Provisioning entropy seed... complete.
-    Non-Secure system starting...
+    TF-M isolation level is: 0x00000001
+    Booting TF-M v1.8.1
 
 .. note::
 
@@ -212,8 +149,57 @@ The MPS3 board tested is HBI0309C.
 .. note::
 
    If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
-   be placed on the ``0x10022400`` address.
+   be placed on the ``0x11022400`` address by copying ``encrypted_provisioning_bundle.bin`` and
+   renaming it to ``prv.bin``, then extending the images.txt with::
 
---------------
+    IMAGE2UPDATE: RAM
+    IMAGE2ADDRESS: 0x01_00_1102_2400
+    IMAGE2FILE: \SOFTWARE\prv.bin
+
+To run the example code on Corstone-310 Ethos-U55/U65 Ecosystem FVP
+-------------------------------------------------------------------
+FVP is available to download `here <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`__
+
+#. Install the FVP
+#. Copy ``bl2.axf`` and ``tfm_s_ns_signed.bin`` files from
+   build dir to ``<FVP installation path>/models/Linux64_GCC-9.3/``
+#. Navigate to the same directory and execute the following command to start FVP::
+
+    $ ./FVP_Corstone_SSE-310 -a cpu0*="bl2.axf" --data "tfm_s_ns_signed.bin"@0x38000000
+
+#. After completing the procedure you should be able to see similar messages
+   to this on the serial port (baud 115200 8n1)::
+
+    Trying 127.0.0.1...
+    Connected to localhost.
+    Escape character is '^]'.
+    [INF] Starting bootloader
+    [INF] Beginning BL2 provisioning
+    [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
+    [INF] Image index: 1, Swap type: none
+    [INF] Image index: 0, Swap type: none
+    [INF] Bootloader chainload address offset: 0x0
+    [INF] Jumping to the first image slot
+    [INF] Beginning TF-M provisioning
+    [WRN] TFM_DUMMY_PROVISIONING is not suitable for production! This device is NOT SECURE
+    [WRN] This device was provisioned with dummy keys. This device is NOT SECURE
+    [Sec Thread] Secure image initializing!
+    TF-M isolation level is: 0x00000001
+    Booting TF-M v1.8.1
+
+.. note::
+
+   Some of the messages above are only visible when ``CMAKE_BUILD_TYPE`` is set
+   to ``Debug``.
+
+.. note::
+
+   If ``-DPLATFORM_DEFAULT_PROVISIONING=OFF`` is set then the provisioning bundle has to
+   be placed on the ``0x11022000`` address with::
+
+   $ ./FVP_Corstone_SSE-310 -a cpu0*="<path-to-build-directory>/bl2.axf" --data "<path-to-build-directory>/tfm_s_ns_signed.bin"@0x38000000 --data "<path-to-build-directory>/encrypted_provisioning_bundle.bin"@0x11022000
+
+
+-------------
 
 *Copyright (c) 2021-2023, Arm Limited. All rights reserved.*
