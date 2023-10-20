@@ -43,16 +43,18 @@ u5=0x70000000
 l5=0x90000000
 slot_s=$slot0
 slot_ns=$slot1
+cubedir="`which STM32_Programmer_CLI`"
+cubedir="$(dirname "${cubedir}")"
 #when image are encrypted, image are not installed in place (mcuboot installs the image from download slot)
 if [ $encrypted == "0x1" ]; then
 slot_s=$slot2
 slot_ns=$slot3
 fi
 if [ $slot2 == $u5 ]; then
-external_loader="-el C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32U585I-IOT02A.stldr"
+external_loader="-el $cubedir/ExternalLoader/MX25LM51245G_STM32U585I-IOT02A.stldr"
 fi
 if [ $slot2 == $l5 ]; then
-external_loader="-el C:\PROGRA~1\STMicroelectronics\STM32Cube\STM32CubeProgrammer\bin\ExternalLoader\MX25LM51245G_STM32L562E-DK.stldr"
+external_loader="-el $cubedir/ExternalLoader/MX25LM51245G_STM32L562E-DK.stldr"
 fi
 connect_no_reset="-c port=SWD "$sn_option" mode=UR $external_loader"
 connect="-c port=SWD "$sn_option" mode=UR --hardRst $external_loader"
