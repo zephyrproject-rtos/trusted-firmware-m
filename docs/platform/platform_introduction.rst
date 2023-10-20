@@ -4,8 +4,8 @@ Supported Platforms
 
     - Cortex-M85 system:
 
-        - `Corstone-310 Ethos-U55/U65 FVP.
-          <https://arm-software.github.io/AVH/main/simulation/html/Using.html>`_
+        - `Corstone-310 Ethos-U55/U65 Ecosystem FVP.
+          <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`_
         - `FPGA image loaded on MPS3 board (AN555).
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`_
 
@@ -15,7 +15,7 @@ Supported Platforms
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`_
         - `FPGA image loaded on MPS3 board (AN552).
           <https://developer.arm.com/tools-and-software/development-boards/fpga-prototyping-boards/download-fpga-images>`_
-        - `Corstone-300 Ethos-U55 Ecosystem FVP.
+        - `Corstone-300 Ethos-U55/U65 Ecosystem FVP.
           <https://developer.arm.com/tools-and-software/open-source-software/arm-platforms-software/arm-ecosystem-fvps>`_
 
 
