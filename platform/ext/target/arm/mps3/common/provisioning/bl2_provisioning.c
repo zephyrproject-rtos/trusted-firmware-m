@@ -25,10 +25,11 @@ void tfm_plat_provisioning_check_for_dummy_keys(void)
     tfm_plat_otp_read(PLAT_OTP_ID_IAK, sizeof(iak_start), (uint8_t*)&iak_start);
 
     if(iak_start == 0xA4906F6DB254B4A9) {
-        BOOT_LOG_WRN("[WRN]\033[1;31m ");
-        BOOT_LOG_WRN("This device was provisioned with dummy keys. ");
-        BOOT_LOG_WRN("This device is \033[1;1mNOT SECURE");
-        BOOT_LOG_WRN("\033[0m\r\n");
+         BOOT_LOG_WRN("%s%s%s%s",
+                     "\033[1;31m",
+                     "This device was provisioned with dummy keys. ",
+                     "This device is \033[1;1mNOT SECURE",
+                     "\033[0m");
     }
 
     memset(&iak_start, 0, sizeof(iak_start));
@@ -59,7 +60,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
         return err;
     }
 
-    BOOT_LOG_INF("[INF] Beginning provisioning\r\n");
+    BOOT_LOG_INF("Beginning provisioning");
 #ifdef TFM_DUMMY_PROVISIONING
     BOOT_LOG_WRN("%s%s%s%s",
                  "\033[1;31m",
@@ -70,7 +71,7 @@ enum tfm_plat_err_t tfm_plat_provisioning_perform(void)
 
     if (lcs == PLAT_OTP_LCS_ASSEMBLY_AND_TEST) {
 
-        BOOT_LOG_INF("[INF] Waiting for provisioning bundle\r\n");
+        BOOT_LOG_INF("Waiting for provisioning bundle");
         while (encrypted_bundle->magic != BUNDLE_MAGIC ||
                encrypted_bundle->magic2 != BUNDLE_MAGIC) {
         }
@@ -99,7 +100,7 @@ static enum tfm_plat_err_t provision_assembly_and_test(void)
            (void *)&encrypted_bundle->values,
            PROVISIONING_BUNDLE_VALUES_SIZE);
 
-    BOOT_LOG_INF("[INF] Running provisioning bundle\r\n");
+    BOOT_LOG_INF("Running provisioning bundle");
     err = ((enum tfm_plat_err_t (*)(void))(PROVISIONING_BUNDLE_CODE_START | 0b1))();
 
     memset((void *)PROVISIONING_BUNDLE_CODE_START, 0,
