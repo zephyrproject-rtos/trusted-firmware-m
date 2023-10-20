@@ -26,6 +26,7 @@
 #include "syscounter_armv8-m_cntrl_drv.h"
 #include "uart_stdout.h"
 #include "tfm_peripherals_def.h"
+#include "ethosu_device.h"
 
 #ifdef PSA_API_TEST_IPC
 #define PSA_FF_TEST_SECURE_UART2
@@ -69,6 +70,9 @@ extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP0;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP1;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP2;
 extern DRIVER_PPC_SSE300 Driver_PPC_SSE300_PERIPH_EXP3;
+
+/* Import NPU driver */
+extern struct ethosu_device ETHOS_S;
 
 /* Define Peripherals NS address range for the platform */
 #define PERIPHERALS_BASE_NS_START      (0x40000000)
@@ -786,6 +790,9 @@ enum tfm_plat_err_t ppc_init_cfg(void)
     err |= Driver_PPC_SSE300_PERIPH_EXP0.Initialize();
     err |= Driver_PPC_SSE300_PERIPH_EXP1.Initialize();
     err |= Driver_PPC_SSE300_PERIPH_EXP3.Initialize();
+
+    /* initialize and config NPU */
+    err |= ethosu_dev_init(&ETHOS_S);
 
     /*
      * Configure the response to a security violation as a
