@@ -1,10 +1,8 @@
-#-------------------------------------------------------------------------------
-# Copyright (c) 2020, Nordic Semiconductor ASA.
-# Copyright (c) 2020, Arm Limited. All rights reserved.
+#
+# Copyright (c) 2023, Nordic Semiconductor ASA.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
-#-------------------------------------------------------------------------------
 
 # preload.cmake is used to set things that related to the platform that are both
 # immutable and global, which is to say they should apply to any kind of project

@@ -36,20 +36,6 @@ target_sources(tfm_s
         startup.c
 )
 
-if(NS)
-    target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld>
-    )
-    target_link_libraries(CMSIS_5_tfm_ns
-        INTERFACE
-            CMSIS_5_RTX_V8MMN
-    )
-    target_sources(tfm_ns
-        PRIVATE
-            $<$<C_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/startup.c>
-    )
-endif()
-
 if(BL2)
     target_add_scatter_file(bl2
         $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_bl2.ld>
@@ -108,11 +94,6 @@ if(TFM_PARTITION_PLATFORM)
             services/src/tfm_platform_hal_ioctl.c
             services/src/tfm_ioctl_core_s_api.c
     )
-
-    target_sources(platform_ns
-        PRIVATE
-            services/src/tfm_ioctl_core_ns_api.c
-    )
 endif()
 
 if(TFM_SPM_LOG_RAW_ENABLED)
@@ -133,34 +114,6 @@ target_compile_definitions(platform_s
         $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
         $<$<BOOL:${NULL_POINTER_EXCEPTION_DETECTION}>:NULL_POINTER_EXCEPTION_DETECTION>
         $<$<BOOL:${ITS_ENCRYPTION}>:ITS_ENCRYPTION>
-)
-
-#========================= Platform Non-Secure ================================#
-
-target_sources(platform_ns
-    PRIVATE
-        cmsis_drivers/Driver_USART.c
-        ${HAL_NORDIC_PATH}/nrfx/drivers/src/nrfx_uarte.c
-        nrfx_glue.c
-        $<$<BOOL:${TEST_PSA_API}>:${CMAKE_CURRENT_SOURCE_DIR}/pal_plat_test.c>
-)
-
-target_include_directories(platform_ns
-    PUBLIC
-        .
-        ${HAL_NORDIC_PATH}/nrfx
-        ${HAL_NORDIC_PATH}/nrfx/mdk
-        ${HAL_NORDIC_PATH}/nrfx/drivers/include
-        common
-        ${PLATFORM_DIR}/..
-        services/include
-    PRIVATE
-        ${PLATFORM_DIR}/../interface/include
-)
-
-target_compile_definitions(platform_ns
-    PUBLIC
-        $<$<BOOL:${TEST_PSA_API}>:PSA_API_TEST_ENABLED>
 )
 
 #========================= Platform BL2 =======================================#
@@ -209,3 +162,44 @@ target_sources(tfm_spm
         faults.c
         target_cfg.c
 )
+
+#========================= Files for building NS side platform ================#
+
+configure_file(config_nordic_nrf_spe.cmake.in
+               ${PROJECT_BINARY_DIR}/config_nordic_nrf_spe.cmake)
+
+install(FILES       ${PROJECT_BINARY_DIR}/config_nordic_nrf_spe.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
+                    ${PLATFORM_DIR}/ext/driver/Driver_Flash.h
+                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/cmsis_drivers)
+
+
+install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
+                    startup.c
+                    nrfx_glue.c
+                    pal_plat_test.c
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.h
+                    startup.h
+                    nrfx_config.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
+)
+
+install(DIRECTORY   native_drivers
+                    cmsis_drivers
+                    common
+                    nrfx
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(DIRECTORY   ns/
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)

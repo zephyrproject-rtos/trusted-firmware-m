@@ -29,11 +29,6 @@ target_include_directories(platform_s
         services/include
 )
 
-target_include_directories(platform_ns
-    PUBLIC
-        .
-)
-
 if(BL2)
     target_include_directories(platform_bl2
         PUBLIC
@@ -43,14 +38,27 @@ if(BL2)
     )
 endif()
 
-if (TFM_PARTITION_PLATFORM)
-install(FILES       services/include/tfm_ioctl_api.h
-        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
-endif()
-
 #========================= tfm_spm ============================================#
 
 target_sources(tfm_spm
     PRIVATE
         tfm_hal_platform.c
 )
+
+#========================= Files for building NS side platform ================#
+
+install(FILES       ../common/nrf5340/cpuarch.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+if (TFM_PARTITION_PLATFORM)
+install(FILES       services/include/tfm_ioctl_api.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR}
+)
+endif()
+
+install(FILES       RTE_Device.h
+                    device_cfg.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
+)
+
