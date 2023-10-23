@@ -67,8 +67,19 @@ __naked uint32_t arch_release_sched_lock(void)
     );
 }
 
-/* Caution: Keep 'uint32_t' always for collecting thread return values! */
-__naked uint32_t tfm_arch_trigger_pendsv(void)
+/*
+ * Try to trigger scheduler by setting PendSV if the scheduler is not locked.
+ * Otherwise, record the attempt. The scheduler is locked when SPM is performing
+ * context-related operations that can't be disturbed. The lock is managed by
+ * lock/unlock interfaces with a public variable.
+ *
+ * When this function is returning to the caller, a scheduling event might have
+ * performed and 'R0' may contain significant return values for the caller.
+ * Keep a 'uint32_t' always in case the caller is expecting a return value.
+ *
+ * Caution: This is an API for core usage, do not call it out of SPM.
+ */
+__naked uint32_t arch_attempt_schedule(void)
 {
     __ASM volatile(
         SYNTAX_UNIFIED

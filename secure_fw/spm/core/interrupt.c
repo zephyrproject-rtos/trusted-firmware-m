@@ -180,7 +180,7 @@ void spm_handle_interrupt(void *p_pt, const struct irq_load_info_t *p_ildi)
         /* In SFN backend, there is only one thread, no thread switch. */
 #if CONFIG_TFM_SPM_BACKEND_SFN != 1
         if (ret == STATUS_NEED_SCHEDULE) {
-            tfm_arch_trigger_pendsv();
+            arch_attempt_schedule();
         }
 #endif
     }

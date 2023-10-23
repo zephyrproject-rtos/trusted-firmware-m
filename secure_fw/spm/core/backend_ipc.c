@@ -426,7 +426,7 @@ uint32_t backend_abi_leaving_spm(uint32_t result)
     /* Interrupt is masked, PendSV will not happen immediately. */
     if (result == STATUS_NEED_SCHEDULE ||
         sched_attempted == SCHEDULER_ATTEMPTED) {
-        tfm_arch_trigger_pendsv();
+        arch_attempt_schedule();
     }
 
     return result;

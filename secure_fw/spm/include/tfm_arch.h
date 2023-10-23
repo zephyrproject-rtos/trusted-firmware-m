@@ -297,10 +297,10 @@ void arch_acquire_sched_lock(void);
 uint32_t arch_release_sched_lock(void);
 
 /*
- * Start scheduling if scheduler is not locked, or the attempt is recorded and
- * return without starting the scheduler.
+ * Try to schedule if scheduler is not locked, otherwise record the schedule
+ * attempt and return without scheduling.
  */
-uint32_t tfm_arch_trigger_pendsv(void);
+uint32_t arch_attempt_schedule(void);
 
 /*
  * Thread Function Call at Thread mode. It is called in the IPC backend and

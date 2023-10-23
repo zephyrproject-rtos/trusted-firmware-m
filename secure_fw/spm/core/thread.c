@@ -117,7 +117,7 @@ uint32_t thrd_start_scheduler(struct thread_t **ppth)
 {
     struct thread_t *pth = thrd_next();
 
-    tfm_arch_trigger_pendsv();
+    arch_attempt_schedule();
 
     if (ppth) {
         *ppth = pth;
