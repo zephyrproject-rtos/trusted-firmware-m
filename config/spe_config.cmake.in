@@ -47,12 +47,14 @@ set(CONFIG_TFM_USE_TRUSTZONE               @CONFIG_TFM_USE_TRUSTZONE@   CACHE BO
 set(CONFIG_TFM_SPM_BACKEND                 @CONFIG_TFM_SPM_BACKEND@     CACHE STRING "The SPM backend")
 set(TFM_MULTI_CORE_TOPOLOGY                @TFM_MULTI_CORE_TOPOLOGY@    CACHE BOOL "Platform has multi core")
 set(TFM_PARTITION_NS_AGENT_MAILBOX         @TFM_PARTITION_NS_AGENT_MAILBOX@ CACHE BOOL "Enable the Mailbox agents")
-set(PLATFORM_DEFAULT_CRYPTO_KEYS           @PLATFORM_DEFAULT_CRYPTO_KEYS@   CACHE BOOL "Use the default crypto keys")
 set(PSA_FRAMEWORK_HAS_MM_IOVEC             @PSA_FRAMEWORK_HAS_MM_IOVEC@     CACHE BOOL  "Enable the MM-IOVEC feature")
 set(TFM_ISOLATION_LEVEL                    @TFM_ISOLATION_LEVEL@        CACHE   STRING  "The TFM isolation level")
 
 #set(TFM_MULTI_CORE_NS_OS                  @TFM_MULTI_CORE_NS_OS@)
 #set(TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD   @TFM_MULTI_CORE_NS_OS_MAILBOX_THREAD@)
+
+set(PLATFORM_DEFAULT_CRYPTO_KEYS           @PLATFORM_DEFAULT_CRYPTO_KEYS@   CACHE BOOL "Use the default crypto keys")
+set(PLATFORM_DEFAULT_UART_STDOUT           @PLATFORM_DEFAULT_UART_STDOUT@   CACHE BOOL "Use default uart stdout implementation.")
 
 # Testing related options.
 

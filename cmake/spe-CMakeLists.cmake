@@ -16,21 +16,36 @@ include(spe_export)
 set_target_properties(tfm_config psa_interface PROPERTIES IMPORTED_GLOBAL True)
 target_link_libraries(tfm_config INTERFACE psa_interface)
 
-add_library(tfm_api_ns)
+# In actual NS integration, NS side build should include the source files
+# exported by TF-M build.
+set(INTERFACE_SRC_DIR    ${CMAKE_CURRENT_LIST_DIR}/interface/src)
+set(INTERFACE_INC_DIR    ${CMAKE_CURRENT_LIST_DIR}/interface/include)
 
-file(GLOB spe_sources "interface/src/*.c")
+add_library(tfm_api_ns STATIC)
 
 target_sources(tfm_api_ns
     PRIVATE
-        ${spe_sources}
-        # NS specific implementation of NS interface dispatcher
-        $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:interface/src/os_wrapper/tfm_ns_interface_rtos.c>
+        $<$<BOOL:${TFM_PARTITION_PLATFORM}>:${INTERFACE_SRC_DIR}/tfm_platform_api.c>
+        $<$<BOOL:${TFM_PARTITION_PROTECTED_STORAGE}>:${INTERFACE_SRC_DIR}/tfm_ps_api.c>
+        $<$<BOOL:${TFM_PARTITION_INTERNAL_TRUSTED_STORAGE}>:${INTERFACE_SRC_DIR}/tfm_its_api.c>
+        $<$<BOOL:${TFM_PARTITION_CRYPTO}>:${INTERFACE_SRC_DIR}/tfm_crypto_api.c>
+        $<$<BOOL:${TFM_PARTITION_INITIAL_ATTESTATION}>:${INTERFACE_SRC_DIR}/tfm_attest_api.c>
+        $<$<BOOL:${TFM_PARTITION_FIRMWARE_UPDATE}>:${INTERFACE_SRC_DIR}/tfm_fwu_api.c>
 )
 
+target_sources(tfm_api_ns
+    PRIVATE
+        $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_ns_api.c>
+        $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_SRC_DIR}/multi_core/tfm_multi_core_psa_ns_api.c>
+        $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c>
+)
+
+# Include interface headers exported by TF-M
 target_include_directories(tfm_api_ns
     PUBLIC
-        interface/include
-        interface/include/crypto_keys
+        ${INTERFACE_INC_DIR}
+        ${INTERFACE_INC_DIR}/crypto_keys
+        $<$<BOOL:${TFM_PARTITION_NS_AGENT_MAILBOX}>:${INTERFACE_INC_DIR}/multi_core>
 )
 
 add_library(platform_region_defs INTERFACE)
@@ -54,6 +69,11 @@ target_link_libraries(platform_region_defs
 )
 
 add_subdirectory(platform)
+
+target_sources(platform_ns
+    PRIVATE
+        $<$<BOOL:${PLATFORM_DEFAULT_UART_STDOUT}>:${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/common/uart_stdout.c>
+)
 
 target_link_libraries(tfm_api_ns
     PUBLIC
