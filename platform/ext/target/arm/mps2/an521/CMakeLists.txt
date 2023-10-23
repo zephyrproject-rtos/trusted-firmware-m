@@ -188,3 +188,7 @@ install(DIRECTORY   ${TARGET_PLATFORM_PATH}/ns/
 
 install(FILES       ${TARGET_PLATFORM_PATH}/cpuarch.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+# Copy the platform specific config
+install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})

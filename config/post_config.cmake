@@ -8,11 +8,20 @@
 # Load the default extra configs about generated files and secure partitions
 include(${CMAKE_SOURCE_DIR}/config/extra_build_config.cmake)
 
-# Load defaults, setting options not already set
-include(config/config_base.cmake)
+if(DEFINED CONFIG_TFM_TEST_CONFIG_FILE)
+    if(NOT IS_ABSOLUTE "${CONFIG_TFM_TEST_CONFIG_FILE}")
+        message(SEND_ERROR "CONFIG_TFM_TEST_CONFIG_FILE is not an absolute path:")
+        message(SEND_ERROR "${CONFIG_TFM_TEST_CONFIG_FILE}")
+        message(SEND_ERROR "Configuration might fail.")
+    endif()
+    include(${CONFIG_TFM_TEST_CONFIG_FILE})
+endif()
 
 # Load regression configs overrided by platform
 include(${TARGET_PLATFORM_PATH}/reg_config_override.cmake OPTIONAL)
+
+# Load defaults, setting options not already set
+include(config/config_base.cmake)
 
 # Build system log config
 include(${CMAKE_SOURCE_DIR}/config/tfm_build_log_config.cmake)

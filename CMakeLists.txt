@@ -53,10 +53,6 @@ add_subdirectory(lib/fih)
 add_subdirectory(tools)
 add_subdirectory(secure_fw)
 
-if(CONFIG_TFM_TEST_DIR)
-    add_subdirectory(${CONFIG_TFM_TEST_DIR} ${CMAKE_CURRENT_BINARY_DIR}/tf-m-tests)
-endif()
-
 add_subdirectory(interface)
 if(BL2)
     add_subdirectory(bl2)
@@ -71,6 +67,10 @@ add_subdirectory(platform)
 
 if(CRYPTO_HW_ACCELERATOR)
     add_subdirectory(platform/ext/accelerator)
+endif()
+
+if(DEFINED CONFIG_TFM_TEST_DIR)
+    add_subdirectory(${CONFIG_TFM_TEST_DIR} ${CMAKE_CURRENT_BINARY_DIR}/tf-m-tests)
 endif()
 
 ############################ Config Check ######################################
