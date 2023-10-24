@@ -82,6 +82,7 @@ foreach(RSS_ID RANGE ${RSS_AMOUNT_LOOP_RANGE})
                         --bundle_output_file encrypted_cm_provisioning_bundle_${RSS_ID}.bin
                         --magic "0xC0DEFEED"
                         --rss_id ${RSS_ID}
+                        --tp_mode ${RSS_TP_MODE}
                         --otp_dma_ics_input_file=$<TARGET_FILE_DIR:bl1_2>/otp_dma_ics.bin
                         --key_file=${RSS_RTL_KEY_PATH}
                         --krtl_derivation_label="CM_PROVISIONING"

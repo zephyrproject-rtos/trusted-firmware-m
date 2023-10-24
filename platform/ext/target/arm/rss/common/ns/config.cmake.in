@@ -17,3 +17,4 @@ set(RSS_HAS_EXPANSION_PERIPHERALS           @RSS_HAS_EXPANSION_PERIPHERALS@ CACH
 set(PLATFORM_HAS_PS_NV_OTP_COUNTERS         @PLATFORM_HAS_PS_NV_OTP_COUNTERS@ CACHE BOOL "Whether OTP counters will be used for PS")
 set(RSS_ENABLE_BRINGUP_HELPERS              @RSS_ENABLE_BRINGUP_HELPERS@ CACHE BOOL "Whether RSS bringup helpers are enabled")
 set(RSS_OTP_TRNG                            @RSS_OTP_TRNG@ CACHE BOOL "Whether to use the TRNG from the OTP")
+set(RSS_TP_MODE                             @RSS_TP_MODE@ CACHE STRING "Whether system is in Test or Production mode")

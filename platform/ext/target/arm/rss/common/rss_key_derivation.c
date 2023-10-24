@@ -43,9 +43,12 @@ static int rss_get_boot_state(uint8_t *state, size_t state_buf_len,
                               size_t *state_size)
 {
     int rc;
-    enum plat_otp_lcs_t lcs;
-    uint32_t reprovisioning_bits;
+    enum lcm_error_t lcm_err;
     cc3xx_err_t err;
+
+    enum plat_otp_lcs_t lcs;
+    enum lcm_tp_mode_t tp_mode;
+    uint32_t reprovisioning_bits;
 
     if (state_buf_len < 32) {
         return 1;
@@ -63,6 +66,11 @@ static int rss_get_boot_state(uint8_t *state, size_t state_buf_len,
         return rc;
     }
 
+    lcm_err = lcm_get_tp_mode(&LCM_DEV_S, &tp_mode);
+    if (lcm_err != LCM_ERROR_NONE) {
+        return lcm_err;
+    }
+
     err = cc3xx_hash_init(CC3XX_HASH_ALG_SHA256);
     if (err != CC3XX_ERR_SUCCESS) {
         return -1;
@@ -72,6 +80,12 @@ static int rss_get_boot_state(uint8_t *state, size_t state_buf_len,
     if (err != CC3XX_ERR_SUCCESS) {
         return -1;
     }
+
+    err = cc3xx_hash_update((uint8_t *)&tp_mode, sizeof(tp_mode));
+    if (err != CC3XX_ERR_SUCCESS) {
+        return -1;
+    }
+
     err = cc3xx_hash_update((uint8_t *)&reprovisioning_bits, sizeof(reprovisioning_bits));
     if (err != CC3XX_ERR_SUCCESS) {
         return -1;

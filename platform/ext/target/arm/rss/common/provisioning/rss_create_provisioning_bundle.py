@@ -33,6 +33,7 @@ def derive_encryption_key(input_key):
     # Every element of the boot state is 0
     boot_state = struct_pack([
         int(args.provisioning_lcs).to_bytes(4, byteorder='little'),
+        int(args.tp_mode, 16).to_bytes(4, byteorder='little'),
         bytes(32 + 4),
     ])
     hash = hashlib.sha256()
@@ -61,6 +62,7 @@ parser.add_argument("--magic", help="the magic constant to insert at the start a
 parser.add_argument("--bl1_2_padded_hash_input_file", help="the hash of the final bl1_2 image", required=False)
 parser.add_argument("--bl1_2_input_file", help="the final bl1_2 image", required=False)
 parser.add_argument("--rss_id", help="the ID of the RSS", required=False)
+parser.add_argument("--tp_mode", help="the test or production mode", required=True)
 parser.add_argument("--otp_dma_ics_input_file", help="OTP DMA ICS input file", required=False)
 parser.add_argument("--bundle_output_file", help="bundle output file", required=False)
 parser.add_argument("--key_file", help="the AES-CCM key file", required=True)

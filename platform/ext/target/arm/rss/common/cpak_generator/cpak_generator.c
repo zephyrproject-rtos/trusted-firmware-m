@@ -54,15 +54,18 @@ int load_guk(uint8_t *guk)
 
 int generate_boot_state(uint8_t *bl1_2_hash, uint8_t *boot_state)
 {
-    uint8_t context[PSA_HASH_LENGTH(PSA_ALG_SHA_256) + 2 * sizeof(uint32_t)];
+    uint8_t context[PSA_HASH_LENGTH(PSA_ALG_SHA_256) + 3 * sizeof(uint32_t)];
     uint32_t reprovisioning_bits = 0;
     uint32_t lcs = 3;
+    uint32_t tp_mode = TP_MODE;
 
     memcpy(context, &lcs, sizeof(uint32_t));
 
-    memcpy(context + sizeof(uint32_t), &reprovisioning_bits, sizeof(uint32_t));
+    memcpy(context + sizeof(uint32_t), &tp_mode, sizeof(uint32_t));
 
-    memcpy(context + (2 * sizeof(uint32_t)), bl1_2_hash, 32);
+    memcpy(context + (2 * sizeof(uint32_t)), &reprovisioning_bits, sizeof(uint32_t));
+
+    memcpy(context + (3 * sizeof(uint32_t)), bl1_2_hash, 32);
 
     return mbedtls_sha256(context, sizeof(context), boot_state, 0);
 }
