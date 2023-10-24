@@ -36,11 +36,10 @@ target_compile_definitions(platform_ns
         $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
 )
 
-target_compile_definitions(platform_ns
-    PUBLIC
-        BL2=${BL2}
-        BL2_HEADER_SIZE=${BL2_HEADER_SIZE}
-        BL2_TRAILER_SIZE=${BL2_TRAILER_SIZE}
+# Include region_defs.h and flash_layout.h
+target_include_directories(platform_region_defs
+    INTERFACE
+        include
 )
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL GNU)

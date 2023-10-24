@@ -367,7 +367,8 @@ macro(target_add_scatter_file target)
     )
 
     target_link_libraries(${target}_scatter
-        platform_ns
+        PRIVATE
+            platform_region_defs
     )
 
     target_compile_options(${target}_scatter

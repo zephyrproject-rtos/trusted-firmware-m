@@ -240,7 +240,10 @@ macro(target_add_scatter_file target)
             -xc
     )
 
-    target_link_libraries(${target}_scatter platform_ns)
+    target_link_libraries(${target}_scatter
+        PRIVATE
+            platform_region_defs
+    )
 
     add_dependencies(${target} ${target}_scatter)
 
