@@ -7,20 +7,6 @@
 #
 #-------------------------------------------------------------------------------
 
-function(tfm_invalid_config)
-    if (${ARGV})
-        string (REPLACE ";" " " ARGV_STRING "${ARGV}")
-        string (REPLACE "STREQUAL"     "=" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "GREATER"      ">" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "LESS"         "<" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "VERSION_LESS" "<" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "EQUAL"        "=" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "IN_LIST"      "in" ARGV_STRING "${ARGV_STRING}")
-
-        message(FATAL_ERROR "INVALID CONFIG: ${ARGV_STRING}")
-    endif()
-endfunction()
-
 set (VALID_ISOLATION_LEVELS 1 2 3)
 
 tfm_invalid_config(NOT TFM_ISOLATION_LEVEL IN_LIST VALID_ISOLATION_LEVELS)

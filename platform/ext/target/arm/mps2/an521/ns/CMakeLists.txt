@@ -20,6 +20,9 @@ target_sources(platform_ns
         cmsis_core/startup_an521.c
         cmsis_core/system_core_init.c
         retarget/platform_retarget_dev.c
+    INTERFACE
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_LIST_DIR}/cmsis_core/an521_ns_init.c>
+        $<$<BOOL:${TEST_NS_FPU}>:${CMAKE_CURRENT_LIST_DIR}/test_interrupt.c>
 )
 
 target_include_directories(platform_ns
@@ -34,6 +37,10 @@ target_include_directories(platform_ns
 target_compile_definitions(platform_ns
     PUBLIC
         $<$<BOOL:${PLATFORM_DEFAULT_CRYPTO_KEYS}>:PLATFORM_DEFAULT_CRYPTO_KEYS>
+        $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
+        $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},hard>:CONFIG_TFM_FLOAT_ABI=2>
+        $<$<STREQUAL:${CONFIG_TFM_FLOAT_ABI},soft>:CONFIG_TFM_FLOAT_ABI=0>
+        $<$<BOOL:${CONFIG_TFM_ENABLE_CP10CP11}>:CONFIG_TFM_ENABLE_CP10CP11>
 )
 
 # Include region_defs.h and flash_layout.h

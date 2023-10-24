@@ -24,6 +24,7 @@ set(INSTALL_INTERFACE_SRC_DIR           ${CMAKE_INSTALL_PREFIX}/interface/src)
 set(INSTALL_INTERFACE_LIB_DIR           ${CMAKE_INSTALL_PREFIX}/interface/lib)
 set(INSTALL_IMAGE_SIGNING_DIR           ${CMAKE_INSTALL_PREFIX}/image_signing)
 set(INSTALL_CMAKE_DIR                   ${CMAKE_INSTALL_PREFIX}/cmake)
+set(INSTALL_CONFIG_DIR                  ${CMAKE_INSTALL_PREFIX}/config)
 set(INSTALL_PLATFORM_NS_DIR             ${CMAKE_INSTALL_PREFIX}/platform)
 
 set(TFM_DEBUG_SYMBOLS                   ON          CACHE BOOL      "Add debug symbols. Note that setting CMAKE_BUILD_TYPE to Debug or RelWithDebInfo will also add debug symbols.")

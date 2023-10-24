@@ -33,7 +33,7 @@ set(CMAKE_C_COMPILER_ID GNU)
 # CMAKE_C_COMPILER_VERSION is not guaranteed to be defined.
 EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION )
 
-# ===================== SEt toolchain CPU and Arch =============================
+# ===================== Set toolchain CPU and Arch =============================
 
 if (DEFINED TFM_SYSTEM_PROCESSOR)
     if(TFM_SYSTEM_PROCESSOR MATCHES "cortex-m85")
@@ -142,19 +142,22 @@ set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_INIT})
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_INIT})
 set(CMAKE_ASM_FLAGS ${CMAKE_ASM_FLAGS_INIT})
 
-set(BL2_COMPILER_CP_FLAG -mfloat-abi=soft)
+set(COMPILER_CP_FLAG "-mfloat-abi=soft")
+set(LINKER_CP_OPTION "-mfloat-abi=soft")
 
-if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
-    set(COMPILER_CP_FLAG -mfloat-abi=hard)
-    set(LINKER_CP_OPTION -mfloat-abi=hard)
-    if (CONFIG_TFM_ENABLE_FP OR CONFIG_TFM_ENABLE_MVE_FP)
-        set(COMPILER_CP_FLAG -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
-        set(LINKER_CP_OPTION -mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH})
+if(CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
+    set(COMPILER_CP_FLAG "-mfloat-abi=hard")
+    set(LINKER_CP_OPTION "-mfloat-abi=hard")
+    if(CONFIG_TFM_ENABLE_FP OR CONFIG_TFM_ENABLE_MVE_FP)
+        string(APPEND COMPILER_CP_FLAG " " "-mfpu=${CONFIG_TFM_FP_ARCH}")
+        string(APPEND LINKER_CP_OPTION " " "-mfpu=${CONFIG_TFM_FP_ARCH}")
     endif()
-else()
-    set(COMPILER_CP_FLAG -mfloat-abi=soft)
-    set(LINKER_CP_OPTION -mfloat-abi=soft)
 endif()
+
+string(APPEND CMAKE_C_FLAGS " " ${COMPILER_CP_FLAG})
+string(APPEND CMAKE_ASM_FLAGS " " ${COMPILER_CP_FLAG})
+string(APPEND CMAKE_C_LINK_FLAGS " " ${LINKER_CP_OPTION})
+string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
 
 # For GNU Arm Embedded Toolchain doesn't emit __ARM_ARCH_8_1M_MAIN__, adding this macro manually.
 add_compile_definitions($<$<STREQUAL:${TFM_SYSTEM_ARCHITECTURE},armv8.1-m.main>:__ARM_ARCH_8_1M_MAIN__>)

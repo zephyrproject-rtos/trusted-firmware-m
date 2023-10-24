@@ -195,6 +195,12 @@ if(TFM_PARTITION_FIRMWARE_UPDATE)
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
+######################### Export common configurations #########################
+
+install(FILES       ${CMAKE_SOURCE_DIR}/config/cp_config_default.cmake
+                    ${CMAKE_SOURCE_DIR}/config/cp_check.cmake
+        DESTINATION ${INSTALL_CONFIG_DIR})
+
 ###################### Install NS platform sources #############################
 
 install(CODE "MESSAGE(\"----- Installing platform NS -----\")")

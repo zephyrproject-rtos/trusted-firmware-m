@@ -40,7 +40,7 @@ set(MCUBOOT_IMAGE_VERSION_NS               @MCUBOOT_IMAGE_VERSION_NS@)
 set(MCUBOOT_KEY_NS                         ${CONFIG_SPE_PATH}/image_signing/keys/root-RSA-3072_1.pem)
 set(PLATFORM_DEFAULT_IMAGE_SIGNING         @PLATFORM_DEFAULT_IMAGE_SIGNING@)
 
-# The common options describing a platfomr configuration
+# The common options describing a platform configuration
 
 set(TFM_PLATFORM                           @TFM_PLATFORM@          CACHE STRING    "Platform to build TF-M for. Must be either a relative path from [TF-M]/platform/ext/target, or an absolute path.")
 set(CONFIG_TFM_USE_TRUSTZONE               @CONFIG_TFM_USE_TRUSTZONE@   CACHE BOOL "Use TrustZone")
@@ -65,7 +65,9 @@ set(ATTEST_KEY_BITS     @ATTEST_KEY_BITS@   CACHE STRING    "The size of the ini
 set(SYMMETRIC_INITIAL_ATTESTATION @SYMMETRIC_INITIAL_ATTESTATION@   CACHE BOOL      "Use symmetric crypto for inital attestation")
 set(ATTEST_INCLUDE_TEST_CODE    @ATTEST_INCLUDE_TEST_CODE@         CACHE BOOL      "Include minimal development tests in the initial attestation regression test suite")
 set(TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH @TFM_MBEDCRYPTO_PSA_CRYPTO_CONFIG_PATH@ CACHE STRING "Config to use psa crypto setting for Mbed Crypto")
+
 # Other common options
+set(CONFIG_TFM_ENABLE_FP                   @CONFIG_TFM_ENABLE_FP@    CACHE BOOL      "Enable/disable FP usage")
 
 set(TFM_VERSION                            @TFM_VERSION@)
 set(TFM_NS_MANAGE_NSID                     @TFM_NS_MANAGE_NSID@)

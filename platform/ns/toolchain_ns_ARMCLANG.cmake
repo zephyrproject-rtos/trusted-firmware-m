@@ -220,37 +220,30 @@ macro(tfm_toolchain_reload_compiler)
         set(CMAKE_CXX_FLAGS "-march=${CMAKE_SYSTEM_ARCH}")
     endif()
 
-    set(BL2_COMPILER_CP_FLAG
-        $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
-        $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
-    )
-    # As BL2 does not use hardware FPU, specify '--fpu=SoftVFP' explicitly to use software
-    # library functions for BL2 to override any implicit FPU option, such as '--cpu' option.
-    # Because the implicit hardware FPU option enforces BL2 to initialize FPU but hardware FPU
-    # is not actually enabled in BL2, it will cause BL2 runtime fault.
-    set(BL2_LINKER_CP_OPTION --fpu=SoftVFP)
+    # This flag is used to check if toolchain has fixed VLLDM vulnerability
+    # Check command will fail if C flags consist of keyword other than cpu/arch type.
+    set(CP_CHECK_C_FLAGS ${CMAKE_C_FLAGS})
 
     if (CONFIG_TFM_FLOAT_ABI STREQUAL "hard")
-        set(COMPILER_CP_FLAG
-            $<$<COMPILE_LANGUAGE:C>:-mfloat-abi=hard>
-        )
+        set(COMPILER_CP_C_FLAG "-mfloat-abi=hard")
         if (CONFIG_TFM_ENABLE_FP)
-            set(COMPILER_CP_FLAG
-                $<$<COMPILE_LANGUAGE:C>:-mfpu=${CONFIG_TFM_FP_ARCH};-mfloat-abi=hard>
-                $<$<COMPILE_LANGUAGE:ASM>:--fpu=${CONFIG_TFM_FP_ARCH_ASM}>
-            )
+            set(COMPILER_CP_C_FLAG "-mfloat-abi=hard -mfpu=${CONFIG_TFM_FP_ARCH}")
+            set(COMPILER_CP_ASM_FLAG "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
             # armasm and armlink have the same option "--fpu" and are both used to
             # specify the target FPU architecture. So the supported FPU architecture
             # names can be shared by armasm and armlink.
-            set(LINKER_CP_OPTION --fpu=${CONFIG_TFM_FP_ARCH_ASM})
+            set(LINKER_CP_OPTION "--fpu=${CONFIG_TFM_FP_ARCH_ASM}")
         endif()
     else()
-        set(COMPILER_CP_FLAG
-            $<$<COMPILE_LANGUAGE:C>:-mfpu=softvfp>
-            $<$<COMPILE_LANGUAGE:ASM>:--fpu=softvfp>
-        )
-        set(LINKER_CP_OPTION --fpu=SoftVFP)
+        set(COMPILER_CP_C_FLAG   "-mfpu=softvfp")
+        set(COMPILER_CP_ASM_FLAG "--fpu=softvfp")
+        set(LINKER_CP_OPTION     "--fpu=SoftVFP")
     endif()
+
+    string(APPEND CMAKE_C_FLAGS " " ${COMPILER_CP_C_FLAG})
+    string(APPEND CMAKE_ASM_FLAGS " " ${COMPILER_CP_ASM_FLAG})
+    string(APPEND CMAKE_C_LINK_FLAGS " " ${LINKER_CP_OPTION})
+    string(APPEND CMAKE_ASM_LINK_FLAGS " " ${LINKER_CP_OPTION})
 
     # Workaround for issues with --depend-single-line with armasm and Ninja
     if (CMAKE_GENERATOR STREQUAL "Ninja")

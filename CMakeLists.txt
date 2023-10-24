@@ -21,6 +21,7 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(version)
 include(remote_library)
+include(utils)
 
 if(EXISTS ${CMAKE_SOURCE_DIR}/localrepos.cmake)
     message(WARNING "Building using local repositories from \"" ${CMAKE_SOURCE_DIR}/localrepos.cmake "\"")
