@@ -28,7 +28,7 @@ static psa_status_t message_dispatch(struct client_request_t *req)
 
     /* Create the call parameters */
     struct client_params_t params = {
-        .ns_client_id_stateless = req->client_id,
+        .ns_client_id_stateless = -((int32_t)req->client_id),
         .p_invecs = req->in_vec,
         .p_outvecs = req->out_vec,
     };
