@@ -130,7 +130,7 @@ cc3xx_err_t cc3xx_rng_get_random(uint8_t* buf, size_t length)
                     sizeof(entropy_buf) - entropy_buf_used_idx : length;
 
         /* Fill from entropy buffer if we still have some */
-        memcpy(buf, entropy_buf + entropy_buf_used_idx, copy_size);
+        memcpy(buf, ((uint8_t*)entropy_buf) + entropy_buf_used_idx, copy_size);
         length -= copy_size;
         buf += copy_size;
         entropy_buf_used_idx += copy_size;
