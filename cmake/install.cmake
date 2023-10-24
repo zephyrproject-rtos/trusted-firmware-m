@@ -126,7 +126,7 @@ if (TFM_PARTITION_NS_AGENT_MAILBOX)
 endif()
 
 if (TFM_PARTITION_NS_AGENT_TZ)
-    install(FILES       ${INTERFACE_SRC_DIR}/tfm_psa_ns_api.c
+    install(FILES       ${INTERFACE_SRC_DIR}/tfm_tz_psa_ns_api.c
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
