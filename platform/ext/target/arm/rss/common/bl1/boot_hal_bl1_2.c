@@ -80,6 +80,56 @@ static int32_t init_atu_regions(void)
     return 0;
 }
 
+static int setup_kmu_slot_from_otp(enum rss_kmu_slot_id_t slot,
+                                   enum tfm_otp_element_id_t otp_id,
+                                   struct kmu_key_export_config_t *export_config)
+{
+    int rc;
+    enum kmu_error_t kmu_err;
+    volatile uint32_t *kmu_ptr;
+    size_t kmu_slot_size;
+    enum tfm_plat_err_t plat_err;
+    uint32_t key[8];
+
+    kmu_err = kmu_get_key_buffer_ptr(&KMU_DEV_S, slot, &kmu_ptr, &kmu_slot_size);
+    if (kmu_err != KMU_ERROR_NONE) {
+        return -1;
+    }
+
+    plat_err = tfm_plat_otp_read(otp_id, sizeof(key), (uint8_t*)key);
+    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
+        rc = -1;
+        goto out;
+    }
+
+    dpa_hardened_word_copy(kmu_ptr, key, kmu_slot_size / sizeof(uint32_t));
+
+    kmu_err = kmu_set_key_locked(&KMU_DEV_S, slot);
+    if (kmu_err != KMU_ERROR_NONE) {
+        rc = -1;
+        goto out;
+    }
+
+    kmu_err = kmu_set_key_export_config(&KMU_DEV_S, slot, export_config);
+    if (kmu_err != KMU_ERROR_NONE) {
+        rc = -1;
+        goto out;
+    }
+
+    kmu_err = kmu_set_key_export_config_locked(&KMU_DEV_S, slot);
+    if (kmu_err != KMU_ERROR_NONE) {
+        rc = -1;
+        goto out;
+    }
+
+    rc = 0;
+out:
+    /* TODO replace with side-channel resistant erase */
+    memset(key, 0, sizeof(key));
+
+    return rc;
+}
+
 /* bootloader platform-specific hw initialization */
 int32_t boot_platform_init(void)
 {
@@ -125,6 +175,26 @@ int32_t boot_platform_post_init(void)
 {
     int32_t rc;
 
+    const struct kmu_key_export_config_t sic_dr0_export_config = {
+        SIC_BASE_S + 0x120, /* CC3XX DR0_KEY_WORD0 register */
+        0, /* No delay */
+        0x01, /* Increment by 4 bytes with each write */
+        KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+        KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
+        false, /* Don't refresh the masking */
+        false, /* Don't disable the masking */
+    };
+
+    const struct kmu_key_export_config_t sic_dr1_export_config = {
+        SIC_BASE_S + 0x220, /* SIC DR1_KEY_WORD0 register */
+        0, /* No delay */
+        0x01, /* Increment by 4 bytes with each write */
+        KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
+        KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
+        false, /* Don't refresh the masking */
+        false, /* Don't disable the masking */
+    };
+
 #if RSS_AMOUNT > 1
     rc = rss_handshake();
     if (rc) {
@@ -144,6 +214,30 @@ int32_t boot_platform_post_init(void)
         return rc;
     }
 #endif
+
+    rc = rss_derive_cpak_seed(RSS_KMU_SLOT_CPAK_SEED);
+    if (rc) {
+        return rc;
+    }
+
+    rc = rss_derive_dak_seed(RSS_KMU_SLOT_DAK_SEED);
+    if (rc) {
+        return rc;
+    }
+
+    rc = setup_kmu_slot_from_otp(RSS_KMU_SLOT_SECURE_ENCRYPTION_KEY,
+                                 PLAT_OTP_ID_KEY_SECURE_ENCRYPTION,
+                                 &sic_dr0_export_config);
+    if (rc) {
+        return rc;
+    }
+
+    rc = setup_kmu_slot_from_otp(RSS_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY,
+                                 PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION,
+                                 &sic_dr1_export_config);
+    if (rc) {
+        return rc;
+    }
 
     return 0;
 }
@@ -206,11 +300,6 @@ void boot_platform_quit(struct boot_arm_vector_table *vt)
     }
 #endif
 
-    result = invalidate_hardware_keys();
-    if (result) {
-        while(1){}
-    }
-
 #ifdef CRYPTO_HW_ACCELERATOR
     result = cc3xx_uninit();
     if (result) {
@@ -259,108 +348,14 @@ int boot_platform_pre_load(uint32_t image_id)
     return 0;
 }
 
-static int setup_kmu_slot_from_otp(enum rss_kmu_slot_id_t slot,
-                                   enum tfm_otp_element_id_t otp_id,
-                                   struct kmu_key_export_config_t *export_config)
-{
-    int rc;
-    enum kmu_error_t kmu_err;
-    volatile uint32_t *kmu_ptr;
-    size_t kmu_slot_size;
-    enum tfm_plat_err_t plat_err;
-    uint32_t key[8];
-
-    kmu_err = kmu_get_key_buffer_ptr(&KMU_DEV_S, slot, &kmu_ptr, &kmu_slot_size);
-    if (kmu_err != KMU_ERROR_NONE) {
-        return -1;
-    }
-
-    plat_err = tfm_plat_otp_read(otp_id, sizeof(key), (uint8_t*)key);
-    if (plat_err != TFM_PLAT_ERR_SUCCESS) {
-        rc = -1;
-        goto out;
-    }
-
-    dpa_hardened_word_copy(kmu_ptr, key, kmu_slot_size / sizeof(uint32_t));
-
-    kmu_err = kmu_set_key_locked(&KMU_DEV_S, slot);
-    if (kmu_err != KMU_ERROR_NONE) {
-        rc = -1;
-        goto out;
-    }
-
-    kmu_err = kmu_set_key_export_config(&KMU_DEV_S, slot, export_config);
-    if (kmu_err != KMU_ERROR_NONE) {
-        rc = -1;
-        goto out;
-    }
-
-    kmu_err = kmu_set_key_export_config_locked(&KMU_DEV_S, slot);
-    if (kmu_err != KMU_ERROR_NONE) {
-        rc = -1;
-        goto out;
-    }
-
-    rc = 0;
-out:
-    /* TODO replace with side-channel resistant erase */
-    memset(key, 0, sizeof(key));
-
-    return rc;
-}
-
 int boot_platform_post_load(uint32_t image_id)
 {
-    int rc = 0;
+    int rc;
 
-    const struct kmu_key_export_config_t sic_dr0_export_config = {
-        SIC_BASE_S + 0x120, /* CC3XX DR0_KEY_WORD0 register */
-        0, /* No delay */
-        0x01, /* Increment by 4 bytes with each write */
-        KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-        KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-        false, /* Don't refresh the masking */
-        false, /* Don't disable the masking */
-    };
-
-    const struct kmu_key_export_config_t sic_dr1_export_config = {
-        SIC_BASE_S + 0x220, /* SIC DR1_KEY_WORD0 register */
-        0, /* No delay */
-        0x01, /* Increment by 4 bytes with each write */
-        KMU_DESTINATION_PORT_WIDTH_32_BITS, /* Write 32 bits with each write */
-        KMU_DESTINATION_PORT_WIDTH_8_WRITES, /* Perform 8 writes (total 256 bits) */
-        false, /* Don't refresh the masking */
-        false, /* Don't disable the masking */
-    };
-
-    rc = rss_derive_cpak_seed(RSS_KMU_SLOT_CPAK_SEED);
+    rc = invalidate_hardware_keys();
     if (rc) {
         return rc;
     }
 
-#ifdef RSS_BOOT_KEYS_CCA
-    rc = rss_derive_dak_seed(RSS_KMU_SLOT_DAK_SEED);
-    if (rc) {
-        return rc;
-    }
-#endif
-#ifdef RSS_BOOT_KEYS_DPE
-    rc = rss_derive_rot_cdi(RSS_KMU_SLOT_ROT_CDI);
-    if (rc) {
-        return rc;
-    }
-#endif
-
-    rc = setup_kmu_slot_from_otp(RSS_KMU_SLOT_SECURE_ENCRYPTION_KEY,
-                                 PLAT_OTP_ID_KEY_SECURE_ENCRYPTION,
-                                 &sic_dr0_export_config);
-    if (rc) {
-        return rc;
-    }
-
-    rc = setup_kmu_slot_from_otp(RSS_KMU_SLOT_NON_SECURE_ENCRYPTION_KEY,
-                                 PLAT_OTP_ID_KEY_NON_SECURE_ENCRYPTION,
-                                 &sic_dr1_export_config);
-
-    return rc;
+    return 0;
 }
