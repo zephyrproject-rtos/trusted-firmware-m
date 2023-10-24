@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2023, Nordic Semiconductor ASA.
 #
-# SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+# SPDX-License-Identifier: BSD-3-Clause
 #
 
 cmake_policy(SET CMP0076 NEW)
