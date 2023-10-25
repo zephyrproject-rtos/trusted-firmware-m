@@ -75,7 +75,7 @@ static psa_api_svc_func_t psa_api_svc_func_table[] = {
     (psa_api_svc_func_t)tfm_spm_agent_psa_connect,
 };
 
-static uint32_t thread_mode_spm_return(psa_status_t result)
+static uint32_t thread_mode_spm_return(uint32_t result)
 {
     struct tfm_state_context_t *p_tctx = (struct tfm_state_context_t *)saved_psp;
 
@@ -92,13 +92,14 @@ static uint32_t thread_mode_spm_return(psa_status_t result)
     return saved_exc_return;
 }
 
-static void init_spm_func_context(struct context_ctrl_t *p_ctx_ctrl,
-                                  psa_api_svc_func_t svc_func, uint32_t *ctx)
+static void init_spm_func_context(psa_api_svc_func_t svc_func, uint32_t *ctx)
 {
     uint32_t sp = __get_PSP();
     uint32_t sp_limit = tfm_arch_get_psplim();
-    struct full_context_t *p_tctx = NULL;
     AAPCS_DUAL_U32_T sp_info;
+    struct context_ctrl_t      ctxctl;
+    struct tfm_state_context_t *p_statctx = NULL;
+    uint64_t                   *p_seal = NULL;
 
     saved_psp       = sp;
     saved_psp_limit = sp_limit;
@@ -107,35 +108,31 @@ static void init_spm_func_context(struct context_ctrl_t *p_ctx_ctrl,
 
     /* SPM SP is saved in R0 */
     if (sp_info.u32_regs.r0 != 0) {
-        sp       = sp_info.u32_regs.r0;
-        sp_limit = sp_info.u32_regs.r1;
+        ctxctl.sp       = sp_info.u32_regs.r0;
+        ctxctl.sp_limit = sp_info.u32_regs.r1;
     }
 
-    p_tctx = (struct full_context_t *)(sp);
+    ARCH_CTXCTRL_ALLOCATE_STACK(&ctxctl, sizeof(*p_statctx) + sizeof(uint64_t));
 
     /* Check if enough space on stack */
-    if ((uintptr_t)p_tctx - sizeof(struct full_context_t) < sp_limit) {
+    if (ctxctl.sp < ctxctl.sp_limit) {
         tfm_core_panic();
     }
 
-    /* Reserve a full context (state context + additional context) on the stack. */
-    p_tctx--;
-    spm_memset(p_tctx, 0, sizeof(*p_tctx));
-
-    /* ctx[0] ~ ctx[3] correspond to r0 ~ r3 */
-    ARCH_CTXCTRL_EXCRET_PATTERN(&p_tctx->stat_ctx, ctx[0], ctx[1], ctx[2], ctx[3],
+    p_statctx = (struct tfm_state_context_t *)ARCH_CTXCTRL_ALLOCATED_PTR(&ctxctl);
+    ARCH_CTXCTRL_EXCRET_PATTERN(p_statctx, ctx[0], ctx[1], ctx[2], ctx[3],
                                 svc_func, tfm_svc_thread_mode_spm_return);
 
-    /* Assign stack and return code to the context control instance. */
-    p_ctx_ctrl->sp             = (uint32_t)(p_tctx);
-    p_ctx_ctrl->sp_limit       = sp_limit;
-    p_ctx_ctrl->exc_ret        = (uint32_t)(EXC_RETURN_THREAD_PSP);
+    /* p_statctx will be released and the top is the higher address. */
+    p_seal = (uint64_t *)(p_statctx + 1);
+    *p_seal = TFM_STACK_SEAL_VALUE_64;
+
+    arch_update_process_sp(ctxctl.sp, ctxctl.sp_limit);
 }
 
 static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uint32_t exc_return)
 {
     psa_api_svc_func_t svc_func = NULL;
-    struct context_ctrl_t spm_func_ctx_ctrl;
     uint8_t svc_idx = svc_number & TFM_SVC_NUM_INDEX_MSK;
 
     if (TFM_SVC_IS_HANDLER_MODE(svc_number)) {
@@ -158,9 +155,7 @@ static int32_t prepare_to_thread_mode_spm(uint8_t svc_number, uint32_t *ctx, uin
 
     saved_exc_return = exc_return;
 
-    init_spm_func_context(&spm_func_ctx_ctrl, svc_func, ctx);
-
-    (void)tfm_arch_refresh_hardware_context(&spm_func_ctx_ctrl);
+    init_spm_func_context(svc_func, ctx);
 
     /* svc_func can be executed in privileged Thread mode. Save the current
      * CONTROL register value so that it can be restored afterwards.
