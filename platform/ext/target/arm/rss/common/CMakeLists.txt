@@ -343,6 +343,9 @@ target_sources(platform_bl1_2
     PRIVATE
         ./bl1/boot_hal_bl1_2.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/mpu/armv8m/mpu_armv8m_drv.c
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/lcm_drv.c>
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/device/source/device_definition.c>
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_dcu.c>
 )
 
 target_include_directories(platform_bl1_2
@@ -356,6 +359,7 @@ target_compile_definitions(platform_bl1_2
         $<$<BOOL:${TFM_PARTITION_DELEGATED_ATTESTATION}>:RSS_BOOT_KEYS_CCA>
         $<$<BOOL:${TFM_PARTITION_DPE}>:RSS_BOOT_KEYS_DPE>
         $<$<BOOL:${RSS_AMOUNT}>:RSS_AMOUNT=${RSS_AMOUNT}>
+        $<$<BOOL:${PLATFORM_PSA_ADAC_SECURE_DEBUG}>:PLATFORM_PSA_ADAC_SECURE_DEBUG>
 )
 
 if(RSS_USE_HOST_FLASH)

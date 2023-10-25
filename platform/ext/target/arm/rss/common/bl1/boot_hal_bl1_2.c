@@ -39,6 +39,17 @@
 #include "rss_handshake.h"
 #endif
 
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+#include <stdbool.h>
+#include "target_cfg.h"
+#include "platform_dcu.h"
+
+#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
+
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
+
+//TODO: This debug state needs be a context parameter for IAK derivation
+uint32_t debug_state = 0;
 struct mpu_armv8m_dev_t dev_mpu_s = { MPU_BASE };
 
 uint32_t image_offsets[2];
@@ -129,6 +140,78 @@ out:
 
     return rc;
 }
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+static void read_debug_state_from_reset_syndrome(void)
+{
+    struct rss_sysctrl_t *sysctrl = (struct rss_sysctrl_t *)RSS_SYSCTRL_BASE_S;
+    uint32_t reg_value = sysctrl->reset_syndrome;
+
+    /* Bits 24:31 (SWSYN) are allocated for software defined reset syndrome */
+    reg_value = (reg_value >> 24) & 0xFF;
+
+    /* Use last TFM_PLAT_LAST_CCA_ADAC_ZONE number of bits of
+     * RESET_SYNDROME.SWSYN register for conveying debug state information
+     */
+    uint16_t read_mask = (1 << TFM_PLAT_LAST_CCA_ADAC_ZONE) -1;
+    debug_state = reg_value & read_mask;
+}
+
+static int32_t tfm_plat_select_and_apply_debug_permissions(void)
+{
+    if (CHECK_BIT(debug_state, TFM_PLAT_CCA_ADAC_ZONE1 - 1)) {
+        return tfm_plat_apply_debug_permissions(TFM_PLAT_CCA_ADAC_ZONE1);
+    }
+
+    if (CHECK_BIT(debug_state, TFM_PLAT_CCA_ADAC_ZONE2 - 1)) {
+        return tfm_plat_apply_debug_permissions(TFM_PLAT_CCA_ADAC_ZONE2);
+
+    } else {
+        return 0;
+    }
+}
+
+static int32_t debug_preconditions_check(bool *valid_debug_conditions)
+{
+    enum tfm_plat_err_t err;
+    enum plat_otp_lcs_t lcs;
+
+    /* Read LCS from OTP */
+    err = tfm_plat_otp_read(PLAT_OTP_ID_LCS, sizeof(lcs), (uint8_t*)&lcs);
+    if (err != TFM_PLAT_ERR_SUCCESS) {
+        return -1;
+    }
+
+    *valid_debug_conditions = (lcs == PLAT_OTP_LCS_SECURED) ? true : false;
+
+    return 0;
+}
+
+static int32_t boot_platform_init_debug(void)
+{
+    int32_t rc;
+    bool valid_debug_conditions;
+
+    rc = debug_preconditions_check(&valid_debug_conditions);
+    if (rc != 0) {
+        return rc;
+    }
+
+    if (valid_debug_conditions) {
+        /* Read debug state from reset syndrome register */
+        read_debug_state_from_reset_syndrome();
+        /* Apply required debug permissions */
+        rc = tfm_plat_select_and_apply_debug_permissions();
+        if (rc != 0) {
+            return rc;
+        }
+    }
+    /* Lock DCU so that debug permissions cannot be updated during current
+     * power cycle
+     */
+    return tfm_plat_lock_dcu();
+}
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
 /* bootloader platform-specific hw initialization */
 int32_t boot_platform_init(void)
@@ -238,6 +321,13 @@ int32_t boot_platform_post_init(void)
     if (rc) {
         return rc;
     }
+
+#ifdef PLATFORM_PSA_ADAC_SECURE_DEBUG
+    rc = boot_platform_init_debug();
+    if (rc) {
+        return rc;
+    }
+#endif /* PLATFORM_PSA_ADAC_SECURE_DEBUG */
 
     return 0;
 }
