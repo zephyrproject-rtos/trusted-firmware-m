@@ -26,6 +26,9 @@ install(FILES       ${INTERFACE_INC_DIR}/psa/client.h
 install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/psa_manifest/sid.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa_manifest)
 
+install(FILES       ${CMAKE_BINARY_DIR}/generated/interface/include/config_impl.h
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
+
 install(FILES       ${INTERFACE_INC_DIR}/tfm_veneers.h
                     ${INTERFACE_INC_DIR}/tfm_ns_interface.h
         DESTINATION ${INSTALL_INTERFACE_INC_DIR})

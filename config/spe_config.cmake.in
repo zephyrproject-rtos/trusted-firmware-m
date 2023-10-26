@@ -61,8 +61,9 @@ set(PLATFORM_DEFAULT_UART_STDOUT           @PLATFORM_DEFAULT_UART_STDOUT@   CACH
 
 # Testing related options.
 
-set(TEST_PSA_API                           "@TEST_PSA_API@"          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
-set(PSA_ARCH_TESTS_PATH                    "@PSA_ARCH_TESTS_PATH@"   CACHE PATH      "Path to PSA arch test repository if it was give to SPE build")
+set(TEST_PSA_API                           @TEST_PSA_API@          CACHE STRING    "Which (if any) of the PSA API tests should be compiled")
+set(PSA_ARCH_TESTS_PATH                    @PSA_ARCH_TESTS_PATH@   CACHE PATH      "Path to PSA arch test repository if it was give to SPE build")
+set(INCLUDE_PANIC_TESTS                    @INCLUDE_PANIC_TESTS@   CACHE BOOL      "Include panic tests")
 
 set(ATTEST_KEY_BITS     @ATTEST_KEY_BITS@   CACHE STRING    "The size of the initial attestation key in bits")
 set(SYMMETRIC_INITIAL_ATTESTATION @SYMMETRIC_INITIAL_ATTESTATION@   CACHE BOOL      "Use symmetric crypto for inital attestation")
