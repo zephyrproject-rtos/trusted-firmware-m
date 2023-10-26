@@ -182,21 +182,6 @@ struct context_flih_ret_t {
                 .exc_ret   = 0,                                           \
             }
 
-/**
- * \brief Get Link Register
- * \details Returns the value of the Link Register (LR)
- * \return LR value
- */
-#if !defined ( __ICCARM__ )
-__attribute__ ((always_inline)) __STATIC_INLINE uint32_t __get_LR(void)
-{
-    register uint32_t result;
-
-    __ASM volatile ("MOV %0, LR\n" : "=r" (result));
-    return result;
-}
-#endif
-
 __STATIC_INLINE uint32_t __save_disable_irq(void)
 {
     uint32_t result;
@@ -218,17 +203,6 @@ __STATIC_INLINE uint32_t __get_active_exc_num(void)
     /* if non-zero, exception is active. NOT banked S/NS */
     IPSR.w = __get_IPSR();
     return IPSR.b.ISR;
-}
-
-__attribute__ ((always_inline))
-__STATIC_INLINE void __set_CONTROL_SPSEL(uint32_t SPSEL)
-{
-    CONTROL_Type ctrl;
-
-    ctrl.w = __get_CONTROL();
-    ctrl.b.SPSEL = SPSEL;
-    __set_CONTROL(ctrl.w);
-    __ISB();
 }
 
 __attribute__ ((always_inline))
