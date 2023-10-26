@@ -216,6 +216,7 @@ if(BL2)
             partition
             Device/Include
             project_template/bl2
+            ${PLATFORM_DIR}/ext/target/nxp/common
             ${PLATFORM_DIR}/ext/target/nxp/common/Device/Include
             ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver
             ${NXP_HAL_FILE_PATH}/lpcxpresso55s69/Native_Driver/drivers
