@@ -99,6 +99,7 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
             DEPENDS tfm_ns_bin $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
             DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_ns.o
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts
 
             #Sign non-secure binary image with provided secret key
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/wrapper/wrapper.py
@@ -130,6 +131,7 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s_signed.bin
             DEPENDS tfm_ns_signed_bin tfm_ns_signed.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts
 
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/assemble.py
                 --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
@@ -145,11 +147,12 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
         add_custom_command(OUTPUT tfm_s_ns.bin
             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s.bin
             DEPENDS tfm_ns_bin $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
-            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts
 
             # concatenate S + NS binaries into tfm_s_ns.bin
             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/assemble.py
-                --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
+                --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
                 --secure ${CMAKE_CURRENT_SOURCE_DIR}/bin/tfm_s.bin
                 --non_secure $<TARGET_FILE_DIR:tfm_ns>/tfm_ns.bin
                 --output tfm_s_ns.bin
@@ -158,14 +161,15 @@ if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
 
         add_custom_command(OUTPUT tfm_s_ns_signed.bin
             DEPENDS tfm_s_ns_bin tfm_s_ns.bin
-            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
             DEPENDS $<IF:$<BOOL:${MCUBOOT_GENERATE_SIGNING_KEYPAIR}>,generated_private_key,>
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts
 
             # sign the combined tfm_s_ns.bin file
             COMMAND ${Python3_EXECUTABLE}
                 ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/scripts/wrapper/wrapper.py
                 --version ${MCUBOOT_IMAGE_VERSION_S}
-                --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s.o
+                --layout ${CMAKE_CURRENT_SOURCE_DIR}/image_signing/layout_files/signing_layout_s_ns.o
                 --key ${MCUBOOT_KEY_S}
                 --public-key-format $<IF:$<BOOL:${MCUBOOT_HW_KEY}>,full,hash>
                 --align ${MCUBOOT_ALIGN_VAL}
