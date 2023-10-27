@@ -237,14 +237,7 @@ psa_status_t agent_psa_call_thread_fn_call(psa_handle_t handle,
                                            const struct client_params_t *params,
                                            const void *client_data_stateless)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_agent_psa_call                 \n"
-        "mov    r12, r4                                     \n"
-        "bl     tfm_arch_thread_fn_call                     \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    TFM_THREAD_FN_CALL_ENTRY(tfm_spm_agent_psa_call);
 }
 
 #if CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1
@@ -254,14 +247,7 @@ psa_handle_t agent_psa_connect_thread_fn_call(uint32_t sid, uint32_t version,
                                               int32_t ns_client_id,
                                               const void *client_data)
 {
-    __asm volatile(
-        SYNTAX_UNIFIED
-        "push   {r4, lr}                                    \n"
-        "ldr    r4, =tfm_spm_agent_psa_connect              \n"
-        "mov    r12, r4                                     \n"
-        "bl     tfm_arch_thread_fn_call                     \n"
-        "pop    {r4, pc}                                    \n"
-    );
+    TFM_THREAD_FN_CALL_ENTRY(tfm_spm_agent_psa_connect);
 }
 #endif /* CONFIG_TFM_CONNECTION_BASED_SERVICE_API == 1 */
 #endif /* TFM_PARTITION_NS_AGENT_MAILBOX */
