@@ -8,6 +8,9 @@
 # This CMake script template contains the set of options settled on secure side
 # build but necessary for building the non-secure side too.
 
+# TF-M Profile
+set(TFM_PROFILE                            @TFM_PROFILE@    CACHE STRING "The TF-M profile")
+
 set(TFM_PARTITION_INTERNAL_TRUSTED_STORAGE @TFM_PARTITION_INTERNAL_TRUSTED_STORAGE@ CACHE BOOL      "Enable Internal Trusted Storage partition")
 set(TFM_PARTITION_CRYPTO                   @TFM_PARTITION_CRYPTO@                CACHE BOOL      "Enable Crypto partition")
 set(TFM_PARTITION_INITIAL_ATTESTATION      @TFM_PARTITION_INITIAL_ATTESTATION@   CACHE BOOL      "Enable Initial Attestation partition")
