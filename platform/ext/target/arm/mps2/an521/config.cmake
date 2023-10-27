@@ -7,11 +7,7 @@
 #
 #-------------------------------------------------------------------------------
 
-set(EXTRA_GENERATED_FILE_LIST ${CMAKE_CURRENT_SOURCE_DIR}/platform/ext/target/arm/mps2/an521/generated_file_list.yaml)
-list(FIND   TFM_EXTRA_GENERATED_FILE_LIST_PATH      ${EXTRA_GENERATED_FILE_LIST}    RET_VAL)
-if(RET_VAL EQUAL -1)
-    list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH ${EXTRA_GENERATED_FILE_LIST})
-endif()
+list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH ${CMAKE_CURRENT_LIST_DIR}/generated_file_list.yaml)
 
 if(BL2)
     set(BL2_TRAILER_SIZE 0x10000 CACHE STRING "Trailer size")

@@ -23,6 +23,7 @@ endif()
 
 # Remove any duplicate entries to prevent same path appended twice in case of mulitiple runs
 list(REMOVE_DUPLICATES MANIFEST_LISTS)
+list(REMOVE_DUPLICATES TFM_EXTRA_GENERATED_FILE_LIST_PATH)
 
 ############################### File list declaration ##########################
 set(GENERATED_FILE_LISTS ${CMAKE_CURRENT_SOURCE_DIR}/tfm_generated_file_list.yaml)
