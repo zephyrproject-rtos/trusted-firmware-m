@@ -154,12 +154,14 @@ void tfm_rpc_unregister_ops(void);
  */
 void tfm_rpc_client_call_handler(void);
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 /**
  * \brief Reply PSA client call return result
  *
  * \param[in] void
  */
 void tfm_rpc_client_call_reply(void);
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
 /*
  * Check if the message was allocated for a non-secure request via RPC

@@ -113,6 +113,7 @@ void tfm_rpc_client_call_handler(void)
     rpc_ops.handle_req();
 }
 
+#if CONFIG_TFM_SPM_BACKEND_IPC == 1
 void tfm_rpc_client_call_reply(void)
 {
     psa_msg_t msg;
@@ -127,6 +128,7 @@ void tfm_rpc_client_call_reply(void)
         handle->status = TFM_HANDLE_STATUS_IDLE;
     }
 }
+#endif /* CONFIG_TFM_SPM_BACKEND_IPC == 1 */
 
 void tfm_rpc_set_caller_data(struct connection_t *handle, int32_t client_id)
 {
