@@ -187,7 +187,6 @@ add_link_options(
     LINKER:--no-wchar-size-warning
     LINKER:--print-memory-usage
     LINKER:-Map=tfm_ns.map
-    -T $<TARGET_OBJECTS:tfm_ns_scatter>
 )
 
 # Specify the linker script used to link `target`.
@@ -249,6 +248,11 @@ macro(target_add_scatter_file target)
     )
 
     add_dependencies(${target} ${target}_scatter)
+
+    target_link_options(${target}
+        PRIVATE
+            -T $<TARGET_OBJECTS:${target}_scatter>
+    )
 
 endmacro()
 
