@@ -14,10 +14,10 @@ const struct cm_provisioning_data data = {
     {},
     /* DMA ICS */
     {},
-    /* SAM config placeholder */
-    {0},
     /* RSS_ID */
     0,
+    /* SAM config placeholder */
+    {0},
     /* GUK */
     {
         0x01, 0x23, 0x45, 0x67, 0x89, 0x01, 0x23, 0x45,
