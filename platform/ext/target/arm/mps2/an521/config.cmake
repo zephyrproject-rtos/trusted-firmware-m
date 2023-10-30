@@ -13,9 +13,6 @@ if(RET_VAL EQUAL -1)
     list(APPEND TFM_EXTRA_GENERATED_FILE_LIST_PATH ${EXTRA_GENERATED_FILE_LIST})
 endif()
 
-# Make FLIH IRQ test as the default IRQ test on AN521
-set(TEST_NS_SLIH_IRQ                  OFF   CACHE BOOL    "Whether to build NS regression Second-Level Interrupt Handling tests")
-
 if(BL2)
     set(BL2_TRAILER_SIZE 0x10000 CACHE STRING "Trailer size")
 else()
@@ -23,16 +20,9 @@ else()
     set(BL2_TRAILER_SIZE 0x10400 CACHE STRING "Trailer size")
 endif()
 
-# Paramters for PSA API tests
-
-set(PSA_API_TEST_TARGET              an521     CACHE STRING  "PSA_API_TARGET name")
-set(PSA_API_TEST_CPU_ARCH            armv8m_ml CACHE STRING  "NSPE CPU_ARCH for PSA tests")
-
 # Platform-specific configurations
 
 set(CONFIG_TFM_USE_TRUSTZONE          ON)
 set(TFM_MULTI_CORE_TOPOLOGY           OFF)
 
 set(PLATFORM_HAS_ISOLATION_L3_SUPPORT ON)
-set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON)
-set(PLATFORM_FLIH_IRQ_TEST_SUPPORT    ON)

@@ -264,3 +264,7 @@ install(FILES       Device/Source/armclang/musca_ns.sct
                     Device/Source/gcc/musca_ns.ld
                     Device/Source/iar/musca_ns.icf
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)
+
+# Install test configs
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/tests
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})

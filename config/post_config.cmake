@@ -14,7 +14,24 @@ if(DEFINED CONFIG_TFM_TEST_CONFIG_FILE)
         message(SEND_ERROR "${CONFIG_TFM_TEST_CONFIG_FILE}")
         message(SEND_ERROR "Configuration might fail.")
     endif()
+
+    # Include platform specific regression tests preference at first
+    include(${TARGET_PLATFORM_PATH}/tests/tfm_tests_config.cmake OPTIONAL)
+    # Then include the test configuration specified by users
     include(${CONFIG_TFM_TEST_CONFIG_FILE})
+endif()
+
+if(DEFINED CONFIG_PSA_ARCH_TESTS_CONFIG_FILE)
+    if(NOT IS_ABSOLUTE "${CONFIG_PSA_ARCH_TESTS_CONFIG_FILE}")
+        message(SEND_ERROR "CONFIG_PSA_ARCH_TESTS_CONFIG_FILE is not an absolute path:")
+        message(SEND_ERROR "${CONFIG_PSA_ARCH_TESTS_CONFIG_FILE}")
+        message(SEND_ERROR "Configuration might fail.")
+    endif()
+
+    # Include platform specific psa arch tests preference at first
+    include(${TARGET_PLATFORM_PATH}/tests/psa_arch_tests_config.cmake OPTIONAL)
+    # Then include the test configuration specified by users
+    include(${CONFIG_PSA_ARCH_TESTS_CONFIG_FILE})
 endif()
 
 # Load regression configs overrided by platform

@@ -193,3 +193,7 @@ install(FILES       ${TARGET_PLATFORM_PATH}/cpuarch.cmake
 # Copy the platform specific config
 install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+# Install test configs
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/tests
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})

@@ -167,3 +167,7 @@ install(FILES       ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
                     ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
                     ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)
+
+# Install test configs
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/tests
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})

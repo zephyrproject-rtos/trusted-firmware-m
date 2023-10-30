@@ -9,7 +9,6 @@
 
 set(CRYPTO_HW_ACCELERATOR               ON          CACHE BOOL      "Whether to enable the crypto hardware accelerator on supported platforms")
 
-set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cryptography mode" FORCE)
 set(PLATFORM_GPLED_ENABLED              OFF         CACHE BOOL      "Use the general purpose LEDs on the platform board")
 
 set(EXTRA_GENERATED_FILE_LIST ${CMAKE_SOURCE_DIR}/platform/ext/target/arm/musca_b1/generated_file_list.yaml)
@@ -27,17 +26,11 @@ endif()
 
 set(PLATFORM_DEFAULT_SYSTEM_RESET_HALT  OFF         CACHE BOOL      "Use default system reset/halt implementation")
 
-# Paramters for PSA API tests
-
-set(PSA_API_TEST_TARGET              musca_b1     CACHE STRING  "PSA_API_TARGET name")
-set(PSA_API_TEST_CPU_ARCH            armv8m_ml    CACHE STRING  "NSPE CPU_ARCH for PSA tests")
-
 # Platform-specific configurations
 set(CONFIG_TFM_USE_TRUSTZONE            ON)
 set(TFM_MULTI_CORE_TOPOLOGY             OFF)
 
 set(PLATFORM_HAS_ISOLATION_L3_SUPPORT   ON)
-set(PLATFORM_SLIH_IRQ_TEST_SUPPORT      ON)
 
 set(PLATFORM_HAS_FIRMWARE_UPDATE_SUPPORT ON)
 set(MCUBOOT_DATA_SHARING                ON)
