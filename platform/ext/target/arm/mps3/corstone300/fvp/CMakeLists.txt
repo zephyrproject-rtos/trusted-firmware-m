@@ -45,8 +45,3 @@ install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
 
 install(FILES       ${TARGET_PLATFORM_PATH}/cmsis_drivers/Driver_Flash.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
-
-install(FILES       ${CORSTONE300_COMMON_DIR}/device/source/startup_corstone300.c
-                    ${CORSTONE300_COMMON_DIR}/device/source/system_core_init.c
-                    ${CORSTONE300_COMMON_DIR}/device/source/platform_ns_device_definition.c
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/device/source)

@@ -9,37 +9,10 @@
 # to CMakeLists.txt. It instructs how to build a platform on non-secture side.
 # The structure and sources list are fully platform specific.
 
-add_library(platform_ns)
+cmake_policy(SET CMP0076 NEW)
 
-target_sources(platform_ns
-    PRIVATE
-        common/cmsis_drivers/Driver_USART.c
-        common/device/source/startup_corstone300.c
-        common/device/source/system_core_init.c
-        common/device/source/platform_ns_device_definition.c
-        ext/target/arm/drivers/uart_cmsdk_drv.c
-        ext/common/uart_stdout.c
-        ext/target/arm/drivers/systimer_armv8-m_drv.c
-)
+set(PLATFORM_DIR    ${CMAKE_CURRENT_LIST_DIR})
 
-target_include_directories(platform_ns
-    PRIVATE
-        retarget
-    PUBLIC
-        common/include
-        common/device/include
-        device
-        device/config
-        device/include
-        ext/cmsis
-        ext/common
-        ext/driver
-        ext/target/arm/drivers
-        include
-)
+add_library(platform_ns STATIC)
 
-# Include region_defs.h and flash_layout.h
-target_include_directories(platform_region_defs
-    INTERFACE
-        partition
-)
+include(${CORSTONE300_COMMON_DIR}/common.cmake)

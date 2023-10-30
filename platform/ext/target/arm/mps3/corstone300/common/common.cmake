@@ -238,19 +238,12 @@ install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/common)
 
 install(DIRECTORY   ${CORSTONE300_COMMON_DIR}/device
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+                    ${CORSTONE300_COMMON_DIR}/native_drivers
+                    ${CORSTONE300_COMMON_DIR}/cmsis_drivers
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common)
 
-install(FILES       ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.c
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.c
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.h
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_reg_map.h
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_reg_map.h
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/timer/armv8m/systimer_armv8-m_drv.h
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/Driver_USART_CMSDK.h
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/common/Driver_USART_Common.h
-                    ${PLATFORM_DIR}/ext/target/arm/drivers/counter/armv8m/syscounter_armv8-m_cntrl_drv.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/target/arm/drivers)
+install(DIRECTORY   ${PLATFORM_DIR}/ext/target/arm/drivers
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/target/arm)
 
 install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_USART.h
                     ${PLATFORM_DIR}/ext/driver/Driver_Common.h
@@ -263,14 +256,24 @@ install(FILES       ${CORSTONE300_COMMON_DIR}/target_cfg.h
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/include)
 
 install(DIRECTORY   ${CORSTONE300_COMMON_DIR}/partition
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common)
 
 install(FILES       ${CORSTONE300_COMMON_DIR}/cpuarch.cmake
                     ${CORSTONE300_COMMON_DIR}/config.cmake
+                    ${CORSTONE300_COMMON_DIR}/target_cfg.h
+                    ${CORSTONE300_COMMON_DIR}/ns/common.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common)
 
-# Install linker scripts
-install(FILES       ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
-                    ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
-                    ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)
+install(FILES       ${CORSTONE300_COMMON_DIR}/check_config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(DIRECTORY   ${CORSTONE300_COMMON_DIR}/tests
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+if(DEFAULT_NS_SCATTER)
+    # Install linker scripts
+    install(FILES       ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
+                        ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
+                        ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
+            DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)
+endif()
