@@ -70,7 +70,7 @@ if(CRYPTO_HW_ACCELERATOR)
     add_subdirectory(platform/ext/accelerator)
 endif()
 
-if(DEFINED CONFIG_TFM_TEST_DIR)
+if(IS_DIRECTORY ${CONFIG_TFM_TEST_DIR})
     add_subdirectory(${CONFIG_TFM_TEST_DIR} ${CMAKE_CURRENT_BINARY_DIR}/tf-m-tests)
 endif()
 

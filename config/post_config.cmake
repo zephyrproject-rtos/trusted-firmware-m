@@ -8,7 +8,7 @@
 # Load the default extra configs about generated files and secure partitions
 include(${CMAKE_SOURCE_DIR}/config/extra_build_config.cmake)
 
-if(DEFINED CONFIG_TFM_TEST_CONFIG_FILE)
+if(CONFIG_TFM_TEST_CONFIG_FILE)
     if(NOT IS_ABSOLUTE "${CONFIG_TFM_TEST_CONFIG_FILE}")
         message(SEND_ERROR "CONFIG_TFM_TEST_CONFIG_FILE is not an absolute path:")
         message(SEND_ERROR "${CONFIG_TFM_TEST_CONFIG_FILE}")
@@ -21,7 +21,7 @@ if(DEFINED CONFIG_TFM_TEST_CONFIG_FILE)
     include(${CONFIG_TFM_TEST_CONFIG_FILE})
 endif()
 
-if(DEFINED CONFIG_PSA_ARCH_TESTS_CONFIG_FILE)
+if(CONFIG_PSA_ARCH_TESTS_CONFIG_FILE)
     if(NOT IS_ABSOLUTE "${CONFIG_PSA_ARCH_TESTS_CONFIG_FILE}")
         message(SEND_ERROR "CONFIG_PSA_ARCH_TESTS_CONFIG_FILE is not an absolute path:")
         message(SEND_ERROR "${CONFIG_PSA_ARCH_TESTS_CONFIG_FILE}")
