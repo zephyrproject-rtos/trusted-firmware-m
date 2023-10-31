@@ -20,6 +20,7 @@ target_include_directories(platform_region_defs
 target_sources(tfm_ns
     PRIVATE
         ${CORSTONE310_COMMON_DIR}/device/source/startup_corstone310.c
+        ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
 )
 
 #========================= Device definition lib ===============================#
@@ -27,6 +28,7 @@ target_sources(tfm_ns
 add_library(device_definition INTERFACE)
 target_include_directories(device_definition
     INTERFACE
+        ${CORSTONE310_COMMON_DIR}
         ${CORSTONE310_COMMON_DIR}/device/include
         ${CORSTONE310_COMMON_DIR}/native_drivers
         ${CORSTONE310_COMMON_DIR}/partition
@@ -53,10 +55,14 @@ target_sources(device_definition_ns
 add_library(cmsis_includes INTERFACE)
 target_include_directories(cmsis_includes
     INTERFACE
+        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
         ${CORSTONE310_COMMON_DIR}/device/include
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers
         ${PLATFORM_DIR}/ext/cmsis
         ${CORSTONE310_COMMON_DIR}/partition
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/driver
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext/common
 )
 
 add_library(cmsis_includes_ns INTERFACE)
@@ -83,19 +89,7 @@ target_link_libraries(platform_ns
 target_sources(platform_ns
     PRIVATE
         ${CORSTONE310_COMMON_DIR}/cmsis_drivers/Driver_USART.c
-        ${CORSTONE310_COMMON_DIR}/device/source/system_core_init.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/emulated/emulated_flash_drv.c
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/cmsdk/uart_cmsdk_drv.c
-)
-
-target_include_directories(platform_ns
-    PUBLIC
-        ${CORSTONE310_COMMON_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/device/config
-    PRIVATE
-        ${CORSTONE310_COMMON_DIR}/device
-        ${PLATFORM_DIR}/ext/common
 )
 
 #========================= platform_region_defs ===============================#
