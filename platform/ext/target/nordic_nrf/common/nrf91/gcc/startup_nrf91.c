@@ -22,7 +22,6 @@
  */
 
 #include "cmsis.h"
-#include "hw_init.h"
 #include "startup.h"
 #include "exception_info.h"
 

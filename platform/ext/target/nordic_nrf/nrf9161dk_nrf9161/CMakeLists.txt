@@ -46,16 +46,27 @@ target_sources(tfm_spm
 #========================= Files for building NS side platform ================#
 
 install(FILES       ../common/nrf9120/cpuarch.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/nrf9120
+)
+
+install(FILES       ${CMAKE_CURRENT_LIST_DIR}/ns/cpuarch_ns.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+        RENAME      cpuarch.cmake
 )
 
 if (TFM_PARTITION_PLATFORM)
-install(FILES       services/include/tfm_ioctl_api.h
-        DESTINATION ${INSTALL_INTERFACE_INC_DIR}
-)
+    install(FILES       services/include/tfm_ioctl_api.h
+            DESTINATION ${INSTALL_INTERFACE_INC_DIR}
+    )
 endif()
 
 install(FILES       RTE_Device.h
                     device_cfg.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
+                    ns/CMakeLists.txt
+                    config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(DIRECTORY   tests
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
 )

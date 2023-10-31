@@ -4,4 +4,4 @@
 # SPDX-License-Identifier: BSD-3-Clause
 #
 
-set(HAL_NORDIC_PATH @HAL_NORDIC_PATH@ CACHE STRING "Path to nordic HAL")
+set(HAL_NORDIC_PATH @HAL_NORDIC_PATH@ CACHE STRING "Path to nordic HAL" FORCE)

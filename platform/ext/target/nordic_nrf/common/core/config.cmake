@@ -8,9 +8,6 @@
 #
 #-------------------------------------------------------------------------------
 
-set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON)
-set(PLATFORM_FLIH_IRQ_TEST_SUPPORT    ON)
-
 set(HAL_NORDIC_PATH "DOWNLOAD" CACHE PATH "Path to the Nordic HAL (or DOWNLOAD to fetch automatically)")
 set(HAL_NORDIC_VERSION "nrfx-3.0.0" CACHE STRING "Version of the Nordic HAL to download")
 set(HAL_NORDIC_REMOTE "https://github.com/zephyrproject-rtos/hal_nordic" CACHE STRING "Remote of the Nordic HAL to download")
@@ -39,7 +36,3 @@ endif()
 # Platform-specific configurations
 set(CONFIG_TFM_USE_TRUSTZONE            ON)
 set(TFM_MULTI_CORE_TOPOLOGY             OFF)
-
-# Make FLIH IRQ test as the default IRQ test on nordic platforms
-set(TEST_NS_SLIH_IRQ                  OFF   CACHE BOOL    "Whether to build NS regression Second-Level Interrupt Handling tests")
-

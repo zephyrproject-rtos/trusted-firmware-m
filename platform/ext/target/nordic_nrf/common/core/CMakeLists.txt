@@ -169,37 +169,38 @@ configure_file(config_nordic_nrf_spe.cmake.in
                ${PROJECT_BINARY_DIR}/config_nordic_nrf_spe.cmake)
 
 install(FILES       ${PROJECT_BINARY_DIR}/config_nordic_nrf_spe.cmake
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/core
 )
 
 install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
                     ${PLATFORM_DIR}/ext/driver/Driver_Flash.h
                     ${PLATFORM_DIR}/ext/driver/Driver_USART.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/cmsis_drivers)
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/ext/driver)
 
 
 install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
                     startup.c
                     nrfx_glue.c
                     pal_plat_test.c
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/core
 )
 
 install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.h
                     startup.h
                     nrfx_config.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
+                    ns/CMakeLists.txt
+                    config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/core
 )
 
 install(DIRECTORY   native_drivers
                     cmsis_drivers
                     common
                     nrfx
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+                    services
+                    tests
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/core
 )
-
-install(DIRECTORY   ns/
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(FILES       ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
         DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)

@@ -1,8 +1,10 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020, Nordic Semiconductor ASA.
+# Copyright (c) 2023, Nordic Semiconductor ASA.
 #
 # SPDX-License-Identifier: BSD-3-Clause
-#
 #-------------------------------------------------------------------------------
 
-include(${PLATFORM_PATH}/common/nrf5340/config.cmake)
+set(PLATFORM_DIR  ${CMAKE_CURRENT_LIST_DIR})
+set(PLATFORM_PATH ${CMAKE_CURRENT_LIST_DIR})
+
+include(${CMAKE_CURRENT_LIST_DIR}/common/nrf5340/cpuarch.cmake)

@@ -73,11 +73,13 @@ target_sources(tfm_spm
 
 install(FILES       nrfx_config_nrf91.h
                     target_cfg.h
-        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
+                    ns/CMakeLists.txt
+                    config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/common/nrf91
 )
 
 install(DIRECTORY    partition
                      gcc
-                     ns/
-        DESTINATION  ${INSTALL_PLATFORM_NS_DIR}/soc
+                     tests
+        DESTINATION  ${INSTALL_PLATFORM_NS_DIR}/common/nrf91
 )

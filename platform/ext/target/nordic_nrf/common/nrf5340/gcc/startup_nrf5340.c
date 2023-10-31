@@ -22,10 +22,6 @@
  */
 
 #include "cmsis.h"
-
-#ifdef NRF_HW_INIT_RESET_ON_BOOT
-#include "hw_init.h"
-#endif
 #include "startup.h"
 #include "exception_info.h"
 
