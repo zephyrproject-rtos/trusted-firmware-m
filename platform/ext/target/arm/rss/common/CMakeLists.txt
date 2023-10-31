@@ -217,6 +217,10 @@ target_sources(platform_bl2
         tfm_hal_platform_reset.c
         device/source/device_definition.c
         device/source/system_core_init.c
+        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/apu/ni_tower_apu_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/discovery/ni_tower_discovery_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/psam/ni_tower_psam_drv.c>
+        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower/ni_tower_rss_drv.c>
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/libraries/dma350_lib.c>
         native_drivers/atu_rss_drv.c
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:${CMAKE_CURRENT_SOURCE_DIR}/native_drivers/dma350_ch_drv.c>
@@ -242,6 +246,7 @@ target_include_directories(platform_bl2
         device/config
         device/include
         device/source/armclang
+        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:${CMAKE_CURRENT_SOURCE_DIR}/host_drivers/ni_tower>
         native_drivers
         partition
         services/src
@@ -264,6 +269,7 @@ target_compile_definitions(platform_bl2
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:PLATFORM_HAS_BOOT_DMA>
         $<$<BOOL:${PLATFORM_BOOT_DMA_MIN_SIZE_REQ}>:BOOT_DMA_MIN_SIZE_REQ=${PLATFORM_BOOT_DMA_MIN_SIZE_REQ}>
         $<$<BOOL:${PLATFORM_HAS_BOOT_DMA}>:CMSIS_device_header="rss.h">
+        $<$<BOOL:${PLATFORM_HAS_NI_TOWER}>:PLATFORM_HAS_NI_TOWER>
 )
 
 target_compile_options(platform_bl2
