@@ -18,20 +18,24 @@
 #include <stddef.h>
 #include <string.h>
 
+#ifdef CC3XX_CONFIG_HASH_SHA256_ENABLE
 static const uint32_t iv_sha256[8] = {
     0x67e6096aU, 0x85ae67bbU, 0x72f36e3cU, 0x3af54fa5U,
     0x7f520e51U, 0x8c68059bU, 0xabd9831fU, 0x19cde05bU,
 };
-
+#endif /* CC3XX_CONFIG_SHA256_ENABLE */
+#ifdef CC3XX_CONFIG_HASH_SHA224_ENABLE
 static const uint32_t iv_sha224[8] = {
     0xD89E05C1U, 0x07D57C36U, 0x17DD7030U, 0x39590EF7U,
     0x310BC0FFU, 0x11155868U, 0xA78FF964U, 0xA44FFABEU,
 };
-
+#endif /* CC3XX_CONFIG_HASH_SHA224_ENABLE */
+#ifdef CC3XX_CONFIG_HASH_SHA1_ENABLE
 static const uint32_t iv_sha1[5] = {
     0x01234567U, 0x89ABCDEFU, 0xFEDCBA98U, 0x76543210U,
     0xF0E1D2C3U,
 };
+#endif /* CC3XX_CONFIG_HASH_SHA1_ENABLE */
 
 static void set_hash_h(const uint32_t *buf, size_t length)
 {
@@ -78,7 +82,7 @@ cc3xx_err_t cc3xx_hash_init(cc3xx_hash_alg_t alg)
 {
     cc3xx_hash_uninit();
 
-    uint32_t *iv;
+    const uint32_t *iv;
     size_t iv_len;
 
     init_without_iv_set(alg);
