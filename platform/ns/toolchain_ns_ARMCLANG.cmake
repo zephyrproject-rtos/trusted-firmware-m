@@ -23,7 +23,7 @@ set(CMAKE_ASM_COMPILER armasm)
 # at a particular step in the compiler initialisation. It is used here to
 # configure the extensions for object files. Despite the name, it also works
 # with the Ninja generator.
-#set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/cmake/set_extensions.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/set_extensions.cmake)
 
 if(NOT DEFINED CMAKE_OBJCOPY)
     set(CMAKE_OBJCOPY ${CROSS_COMPILE}-objcopy CACHE FILEPATH "Path to objcopy")

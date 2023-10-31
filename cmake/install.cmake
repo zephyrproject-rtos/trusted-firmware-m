@@ -159,7 +159,6 @@ if(TFM_PARTITION_PLATFORM)
             DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 endif()
 
-
 ##################### Export image signing information #########################
 
 if(BL2)
@@ -260,3 +259,7 @@ install(EXPORT tfm-config
 
 configure_file(${CMAKE_SOURCE_DIR}/config/spe_config.cmake.in
                ${INSTALL_CMAKE_DIR}/spe_config.cmake @ONLY)
+
+# Toolchain utils
+install(FILES       cmake/set_extensions.cmake
+        DESTINATION ${INSTALL_CMAKE_DIR})

@@ -30,6 +30,12 @@ set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
 # Set compiler ID explicitly as it's not detected at this moment
 set(CMAKE_C_COMPILER_ID GNU)
 
+# This variable name is a bit of a misnomer. The file it is set to is included
+# at a particular step in the compiler initialisation. It is used here to
+# configure the extensions for object files. Despite the name, it also works
+# with the Ninja generator.
+set(CMAKE_USER_MAKE_RULES_OVERRIDE ${CMAKE_CURRENT_LIST_DIR}/set_extensions.cmake)
+
 # CMAKE_C_COMPILER_VERSION is not guaranteed to be defined.
 EXECUTE_PROCESS( COMMAND ${CMAKE_C_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION )
 
