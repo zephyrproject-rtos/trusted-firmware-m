@@ -8,4 +8,3 @@
 set(TFM_CRYPTO_TEST_ALG_CFB             OFF         CACHE BOOL      "Test CFB cryptography mode")
 
 set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON)
-set(PLATFORM_FLIH_IRQ_TEST_SUPPORT    ON)
