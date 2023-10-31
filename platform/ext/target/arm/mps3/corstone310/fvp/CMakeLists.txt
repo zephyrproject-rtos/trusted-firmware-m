@@ -132,4 +132,5 @@ install(FILES       ${TARGET_PLATFORM_PATH}/ns/CMakeLists.txt
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})
 
 install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
+                    ${TARGET_PLATFORM_PATH}/check_config.cmake
         DESTINATION ${INSTALL_PLATFORM_NS_DIR})

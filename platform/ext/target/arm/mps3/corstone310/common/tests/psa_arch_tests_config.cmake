@@ -5,11 +5,4 @@
 #
 #-------------------------------------------------------------------------------
 
-add_definitions(
-    -DCORSTONE310_AN555
-)
-
-set(CORSTONE310_COMMON_DIR "${CMAKE_CURRENT_LIST_DIR}/common")
-set(TARGET_PLATFORM_PATH    ${CMAKE_CURRENT_LIST_DIR})
-
-include(${CORSTONE310_COMMON_DIR}/cpuarch.cmake)
+set(PSA_API_TEST_TARGET          "cs3x0"    CACHE STRING  "PSA_API_TARGET name")

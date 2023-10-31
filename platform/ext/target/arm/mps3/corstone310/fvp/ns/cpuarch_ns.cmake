@@ -10,5 +10,6 @@ add_definitions(
 )
 
 set(CORSTONE310_COMMON_DIR "${CMAKE_CURRENT_LIST_DIR}/common")
+set(TARGET_PLATFORM_PATH    ${CMAKE_CURRENT_LIST_DIR})
 
 include(${CORSTONE310_COMMON_DIR}/cpuarch.cmake)
