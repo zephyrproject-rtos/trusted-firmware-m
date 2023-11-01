@@ -5,5 +5,5 @@
 #
 #-------------------------------------------------------------------------------
 
-# Use common preload.cmake
-include(${CMAKE_CURRENT_LIST_DIR}/../common/preload.cmake)
+# Use common cpuarch.cmake
+include(${CMAKE_CURRENT_LIST_DIR}/../common/cpuarch.cmake)

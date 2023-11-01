@@ -57,6 +57,7 @@ endif()
 
 if (TFM_PARTITION_PROTECTED_STORAGE)
     install(FILES       ${INTERFACE_INC_DIR}/psa/protected_storage.h
+                        ${INTERFACE_INC_DIR}/psa/storage_common.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR}/psa)
     install(FILES       ${INTERFACE_INC_DIR}/tfm_ps_defs.h
             DESTINATION ${INSTALL_INTERFACE_INC_DIR})

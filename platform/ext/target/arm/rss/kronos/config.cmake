@@ -19,7 +19,7 @@ set(CONFIG_TFM_BOOT_STORE_ENCODED_MEASUREMENTS ON  CACHE BOOL   "Enable storing 
 
 set(TFM_MBEDCRYPTO_PLATFORM_EXTRA_CONFIG_PATH  ""  CACHE PATH   "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
-set(TFM_PLAT_SPECIFIC_MANIFEST_FILE            "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
+set(TFM_MANIFEST_LIST                          "${CMAKE_CURRENT_LIST_DIR}/manifest/tfm_manifest_list.yaml" CACHE PATH "Config to append to standard Mbed Crypto config, used by platforms to cnfigure feature support")
 
 set(PLATFORM_HAS_PS_NV_OTP_COUNTERS            ON  CACHE BOOL   "Platform supports nvm counters for PS in OTP")
 

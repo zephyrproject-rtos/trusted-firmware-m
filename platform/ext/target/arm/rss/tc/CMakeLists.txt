@@ -40,28 +40,6 @@ target_include_directories(platform_s
         $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
 )
 
-#========================= Platform_ns ========================================#
-
-target_sources(platform_ns
-    PRIVATE
-        cmsis_drivers/Driver_Flash.c
-        device/host_device_definition.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${CMAKE_CURRENT_SOURCE_DIR}/cmsis_drivers/Driver_USART.c>
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
-)
-
-target_include_directories(platform_ns
-    PUBLIC
-        ./cmsis_drivers
-        ./device
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/common
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi
-        ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
-        $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
-)
-
 #========================= Platform BL2 =======================================#
 
 target_sources(platform_bl2
@@ -118,3 +96,34 @@ target_include_directories(platform_bl1_2
         ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata
         $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011>
 )
+
+#========================= Files for building NS side platform ================#
+
+install(FILES       $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c>
+                    $<$<NOT:$<BOOL:${RSS_DEBUG_UART}>>:${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.h>
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.c
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/flash/strata/spi_strataflashj3_flash_lib.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.c
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/flash/cfi/cfi_drv.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/native_drivers
+)
+
+install(DIRECTORY   cmsis_drivers
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(DIRECTORY   device
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(FILES       rss_memory_sizes.h
+                    flash_layout.h
+                    host_base_address.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/partition)
+
+install(DIRECTORY   ns/
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       cpuarch.cmake
+                    config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/config/subplatform/)

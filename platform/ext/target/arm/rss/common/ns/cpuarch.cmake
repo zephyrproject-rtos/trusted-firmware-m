@@ -1,9 +1,9 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2022-2023, Arm Limited. All rights reserved.
+# Copyright (c) 2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
 #-------------------------------------------------------------------------------
 
-# Once all options are set, set common options as fallback
-include(${CMAKE_CURRENT_LIST_DIR}/../common/config.cmake)
+# This is just a wrapper to sort out path issues
+include(${CMAKE_CURRENT_LIST_DIR}/config/subplatform/cpuarch.cmake)
