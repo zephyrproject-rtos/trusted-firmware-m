@@ -44,14 +44,3 @@ target_include_directories(platform_region_defs
     INTERFACE
         include
 )
-
-if(${CMAKE_C_COMPILER_ID} STREQUAL GNU)
-    set(scatter_file ${CMAKE_CURRENT_LIST_DIR}/linker_scripts/tfm_common_ns.ld)
-elseif(${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
-    set(scatter_file ${CMAKE_CURRENT_LIST_DIR}/linker_scripts/tfm_common_ns.sct)
-endif()
-
-set_target_properties(platform_ns
-                      PROPERTIES INTERFACE_LINK_DEPENDS
-                      ${scatter_file}
-)
