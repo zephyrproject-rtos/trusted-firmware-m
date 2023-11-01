@@ -30,6 +30,9 @@ def struct_pack(objects, pad_to=0):
 def chunk_bytes(x, n):
     return [x[i:i+n] for i in range(0, len(x), n)]
 
+def round_up(x, boundary):
+    return ((x + (boundary - 1)) // boundary) * boundary
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--input_image", help="the image to create table from", required=True)
 parser.add_argument("--encrypt_key_file", help="Key to encrypt image with", required=False)
@@ -53,6 +56,9 @@ else:
 
 fw_version_bytes = int(args.image_version, 0).to_bytes(4, 'little')
 nonce_bytes = secrets.token_bytes(8)
+
+# We need to pad the image to the authentication page size
+image = struct_pack([image], round_up(len(image), sic_page_size))
 
 # The SIC uses a non-standard counter construction, so we need to do this
 # manually
