@@ -12,8 +12,9 @@
 add_library(platform_ns)
 
 target_sources(platform_ns
+    PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/Device/Source/startup_stm32l5xx_ns.c
     PRIVATE
-        Device/Source/startup_stm32l5xx_ns.c
         hal/Src/stm32l5xx_hal.c
         Device/Source/system_stm32l5xx.c
         CMSIS_Driver/low_level_com.c
@@ -25,7 +26,6 @@ target_sources(platform_ns
         hal/Src/stm32l5xx_hal_uart.c
         hal/Src/stm32l5xx_hal_uart_ex.c
         hal/Src/stm32l5xx_hal_cortex.c
-
 )
 
 target_include_directories(platform_ns
@@ -40,16 +40,4 @@ target_include_directories(platform_ns
 target_include_directories(platform_region_defs
     INTERFACE
         partition
-)
-
-if(${CMAKE_C_COMPILER_ID} STREQUAL GNU)
-    set(scatter_file ${CMAKE_CURRENT_LIST_DIR}/linker_scripts/appli_ns.ld)
-elseif(${CMAKE_C_COMPILER_ID} STREQUAL ARMClang)
-    set(scatter_file ${CMAKE_CURRENT_LIST_DIR}/linker_scripts/appli_ns.sct)
-elseif(${CMAKE_C_COMPILER_ID} STREQUAL IAR)
-    set(scatter_file ${CMAKE_CURRENT_LIST_DIR}/linker_scripts/appli_ns.icf)
-endif()
-set_target_properties(platform_ns
-                      PROPERTIES INTERFACE_LINK_DEPENDS
-                      ${scatter_file}
 )
