@@ -169,11 +169,11 @@
 #define HOST_ACCESS_PS_BASE_OFFSET       (HOST_ACCESS_PS_BASE_S - HOST_ACCESS_BASE_S)
 #endif /* TFM_PARTITION_PROTECTED_STORAGE */
 
-/* SIC regions open in BL2 and runtime */
+/* SIC regions open in BL2 and runtime. These must be contiguous */
 #define RSS_RUNTIME_S_XIP_BASE_S         SIC_HOST_BASE_S              /* RSS runtime secure image XIP secure address */
-#define RSS_RUNTIME_NS_XIP_BASE_S        (SIC_HOST_BASE_S + 0x060000) /* RSS runtime non-secure image XIP secure address */
+#define RSS_RUNTIME_NS_XIP_BASE_S        (SIC_HOST_BASE_S + FLASH_S_PARTITION_SIZE) /* RSS runtime non-secure image XIP secure address */
 
-#define RSS_RUNTIME_NS_XIP_BASE_NS       (SIC_HOST_BASE_NS + 0x060000) /* RSS runtime non-secure image XIP non-secure address */
+#define RSS_RUNTIME_NS_XIP_BASE_NS       (SIC_HOST_BASE_NS + FLASH_S_PARTITION_SIZE) /* RSS runtime non-secure image XIP non-secure address */
 
 /* Memory map addresses exempt from memory attribution by both the SAU and IDAU */
 #define RSS_EWIC_BASE                    0xE0047000 /* External Wakeup Interrupt Controller

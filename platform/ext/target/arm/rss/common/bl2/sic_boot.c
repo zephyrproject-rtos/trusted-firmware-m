@@ -40,9 +40,17 @@ int sic_boot_init(void)
 {
     enum sic_error_t sic_err;
 
+    /* The regions must be contiguous. This check is static, so will be compiled
+     * out if it succeeds.
+     */
+    if (RSS_RUNTIME_NS_XIP_BASE_S != RSS_RUNTIME_S_XIP_BASE_S + FLASH_S_PARTITION_SIZE) {
+        return 1;
+    }
+
     sic_err = sic_auth_init(&SIC_DEV_S, SIC_DIGEST_SIZE_256,
                             SIC_DIGEST_COMPARE_FIRST_QWORD,
-                            RSS_RUNTIME_S_XIP_BASE_S, FLASH_S_PARTITION_SIZE);
+                            RSS_RUNTIME_S_XIP_BASE_S,
+                            FLASH_S_PARTITION_SIZE + FLASH_NS_PARTITION_SIZE);
     if (sic_err != SIC_ERROR_NONE) {
         return 1;
     }
