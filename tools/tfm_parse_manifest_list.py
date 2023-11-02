@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2018-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2018-2023, Arm Limited. All rights reserved.
 # Copyright (c) 2022 Cypress Semiconductor Corporation (an Infineon company)
 # or an affiliate of Cypress Semiconductor Corporation. All rights reserved.
 #
@@ -294,11 +294,18 @@ def process_partition_manifests(manifest_lists, configs):
         with open(item) as manifest_list_yaml_file:
             manifest_dic = yaml.safe_load(manifest_list_yaml_file)['manifest_list']
             for dict in manifest_dic:
-                # Replace environment variables in the manifest path and convert to absolute path.
-                # If it's already abspath, the path will not be changed.
-                manifest_path = os.path.join(os.path.dirname(item), # path of manifest list
-                                             os.path.expandvars(dict['manifest']))\
-                                             .replace('\\', '/')
+                # Replace environment variables in the manifest path.
+                expanded_path = os.path.expandvars(dict['manifest']).replace('\\', '/')
+
+                # If the manifest exists relative to the manifest list, then use
+                # that. Else, either interpret it as an absolute path or one
+                # relative to the current working directory
+                path_relative_to_manifest_list = os.path.join(os.path.dirname(item), # path of manifest list
+                                                              expanded_path)
+                if os.path.isfile(path_relative_to_manifest_list):
+                    manifest_path = path_relative_to_manifest_list
+                else:
+                    manifest_path = expanded_path
                 dict['manifest'] = manifest_path
                 all_manifests.append(dict)
 

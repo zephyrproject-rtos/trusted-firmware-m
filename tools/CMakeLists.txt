@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Copyright (c) 2020-2022, Arm Limited. All rights reserved.
+# Copyright (c) 2020-2023, Arm Limited. All rights reserved.
 #
 # SPDX-License-Identifier: BSD-3-Clause
 #
@@ -65,7 +65,13 @@ foreach(MANIFEST_LIST ${MANIFEST_LISTS})
     foreach(MANIFEST ${MANIFESTS})
         # Convert to absolute paths
         if (NOT IS_ABSOLUTE ${MANIFEST})
-            get_filename_component(MANIFEST "${MANIFEST_LIST_PATH}/${MANIFEST}" ABSOLUTE)
+            # First try relative to the manifest
+            if (EXISTS "${MANIFEST_LIST_PATH}/${MANIFEST}")
+                get_filename_component(MANIFEST "${MANIFEST_LIST_PATH}/${MANIFEST}" ABSOLUTE)
+            # Then try relative to the root TF-M source directory
+            elseif (EXISTS "${CMAKE_SOURCE_DIR}/${MANIFEST}")
+                get_filename_component(MANIFEST "${CMAKE_SOURCE_DIR}/${MANIFEST}" ABSOLUTE)
+            endif()
         endif()
         list(APPEND MANIFEST_FILES ${MANIFEST})
     endforeach()
@@ -170,6 +176,7 @@ add_custom_target(
 # is to run the script at cmake-time.
 execute_process(
     COMMAND ${MANIFEST_COMMAND}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     RESULT_VARIABLE RET
 )
 
