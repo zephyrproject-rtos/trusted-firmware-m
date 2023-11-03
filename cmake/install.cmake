@@ -161,7 +161,7 @@ endif()
 
 ##################### Export image signing information #########################
 
-if(BL2)
+if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
     install(DIRECTORY bl2/ext/mcuboot/scripts
             DESTINATION ${INSTALL_IMAGE_SIGNING_DIR}
             PATTERN "scripts/*.py"
