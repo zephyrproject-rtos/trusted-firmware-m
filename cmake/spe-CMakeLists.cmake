@@ -92,6 +92,8 @@ target_link_libraries(tfm_api_ns
 
 if(BL2 AND PLATFORM_DEFAULT_IMAGE_SIGNING)
 
+    find_package(Python3)
+
     add_custom_target(tfm_s_ns_signed_bin
         ALL
         SOURCES tfm_s_ns_signed.bin
