@@ -35,3 +35,21 @@ target_sources(flash_drivers
 )
 
 include(${CORSTONE300_COMMON_DIR}/libflash_drivers.cmake)
+
+#========================= Files for building NS side platform ================#
+
+install(FILES       ${TARGET_PLATFORM_PATH}/partition/platform_base_address.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/partition)
+
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/device
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${TARGET_PLATFORM_PATH}/ns/cpuarch_ns.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+        RENAME      cpuarch.cmake)
+
+install(FILES       ${TARGET_PLATFORM_PATH}/ns/CMakeLists.txt
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})

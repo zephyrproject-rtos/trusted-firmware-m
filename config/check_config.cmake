@@ -7,20 +7,6 @@
 #
 #-------------------------------------------------------------------------------
 
-function(tfm_invalid_config)
-    if (${ARGV})
-        string (REPLACE ";" " " ARGV_STRING "${ARGV}")
-        string (REPLACE "STREQUAL"     "=" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "GREATER"      ">" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "LESS"         "<" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "VERSION_LESS" "<" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "EQUAL"        "=" ARGV_STRING "${ARGV_STRING}")
-        string (REPLACE "IN_LIST"      "in" ARGV_STRING "${ARGV_STRING}")
-
-        message(FATAL_ERROR "INVALID CONFIG: ${ARGV_STRING}")
-    endif()
-endfunction()
-
 set (VALID_ISOLATION_LEVELS 1 2 3)
 
 tfm_invalid_config(NOT TFM_ISOLATION_LEVEL IN_LIST VALID_ISOLATION_LEVELS)
@@ -30,22 +16,6 @@ tfm_invalid_config(TFM_ISOLATION_LEVEL GREATER 1 AND PSA_FRAMEWORK_HAS_MM_IOVEC)
 tfm_invalid_config(TFM_MULTI_CORE_TOPOLOGY AND TFM_NS_MANAGE_NSID)
 tfm_invalid_config(TFM_PLAT_SPECIFIC_MULTI_CORE_COMM AND NOT TFM_MULTI_CORE_TOPOLOGY)
 tfm_invalid_config(TFM_ISOLATION_LEVEL EQUAL 3 AND CONFIG_TFM_STACK_WATERMARKS)
-
-tfm_invalid_config((TFM_S_REG_TEST OR TFM_NS_REG_TEST) AND TEST_PSA_API)
-
-tfm_invalid_config(SUITE STREQUAL "IPC" AND NOT TEST_PSA_API STREQUAL "IPC")
-
-tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND NOT TFM_PARTITION_CRYPTO)
-tfm_invalid_config(TEST_PSA_API STREQUAL "INITIAL_ATTESTATION" AND NOT TFM_PARTITION_INITIAL_ATTESTATION)
-tfm_invalid_config(TEST_PSA_API STREQUAL "INTERNAL_TRUSTED_STORAGE" AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-tfm_invalid_config(TEST_PSA_API STREQUAL "PROTECTED_STORAGE" AND NOT TFM_PARTITION_PROTECTED_STORAGE)
-tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_INTERNAL_TRUSTED_STORAGE)
-tfm_invalid_config(TEST_PSA_API STREQUAL "STORAGE" AND NOT TFM_PARTITION_PROTECTED_STORAGE)
-# PSA Arch crypto test intends to test all PSA crypto APIs. Therefore PSA Arch crypto test
-# cannot support to test TF-M Profile Medium, Profile Medium-ARoT-less and Profile Small.
-tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND TFM_PROFILE STREQUAL "profile_medium")
-tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND TFM_PROFILE STREQUAL "profile_medium_arotless")
-tfm_invalid_config(TEST_PSA_API STREQUAL "CRYPTO" AND TFM_PROFILE STREQUAL "profile_small")
 
 ########################## BL2 #################################################
 
@@ -100,10 +70,6 @@ tfm_invalid_config(TFM_PARTITION_PROTECTED_STORAGE AND NOT TFM_PARTITION_PLATFOR
 get_property(TFM_FIH_PROFILE_LIST CACHE TFM_FIH_PROFILE PROPERTY STRINGS)
 tfm_invalid_config(NOT TFM_FIH_PROFILE IN_LIST TFM_FIH_PROFILE_LIST)
 
-########################### TF-M initial attestation #####################################
-
-tfm_invalid_config(ATTEST_INCLUDE_TEST_CODE AND NOT (TEST_NS_ATTESTATION OR TEST_S_ATTESTATION))
-
 ######################## TF-M Profile config check #############################
 
 tfm_invalid_config(TFM_PROFILE STREQUAL "profile_small" AND CONFIG_TFM_SPM_BACKEND_IPC)
@@ -111,12 +77,6 @@ tfm_invalid_config(TFM_PROFILE STREQUAL "profile_small" AND CONFIG_TFM_SPM_BACKE
 ######################## TF-M Arch config check ################################
 
 tfm_invalid_config(TFM_PXN_ENABLE AND NOT TFM_SYSTEM_ARCHITECTURE STREQUAL "armv8.1-m.main")
-
-########################### Test check config ##################################
-
-if(TFM_S_REG_TEST OR TFM_NS_REG_TEST)
-    include(${TFM_TEST_PATH}/config/check_config.cmake)
-endif()
 
 ###################### Compiler check for FP support ###########################
 

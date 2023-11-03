@@ -15,7 +15,7 @@
 
 #if (__ARM_FEATURE_CMSE & 0x2) /* Secure */
 
-#if defined(TEST_NS_SLIH_IRQ) || defined(TEST_NS_FLIH_IRQ)
+#if defined(TFM_PARTITION_SLIH_TEST) || defined(TFM_PARTITION_FLIH_TEST)
 
 extern void TFM_TIMER0_IRQ_Handler(void); /* Implemented in secure_fw\core\tfm_secure_irq_handlers.inc */
 
@@ -69,7 +69,7 @@ void tfm_plat_test_secure_timer_stop(void)
     CTIMER_Deinit(CTIMER);
 }
 
-#endif /* (TEST_NS_SLIH_IRQ || TEST_NS_FLIH_IRQ) */
+#endif /* (TFM_PARTITION_SLIH_TEST || TFM_PARTITION_FLIH_TEST) */
 
 #else
 

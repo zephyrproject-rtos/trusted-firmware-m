@@ -44,7 +44,18 @@ target_link_libraries(platform_s
         flash_drivers
 )
 
-target_link_libraries(platform_ns
-    PRIVATE
-        flash_drivers
-)
+#========================= Files for building NS side platform ================#
+
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/device
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${TARGET_PLATFORM_PATH}/ns/cpuarch_ns.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+        RENAME      cpuarch.cmake)
+
+install(FILES       ${TARGET_PLATFORM_PATH}/ns/CMakeLists.txt
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
+                    ${TARGET_PLATFORM_PATH}/check_config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})

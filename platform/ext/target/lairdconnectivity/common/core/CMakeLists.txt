@@ -171,10 +171,10 @@ endif()
 
 if (TFM_PARTITION_PLATFORM)
 install(FILES       ${NRF_FOLDER_PATH}/services/include/tfm_ioctl_core_api.h
-        DESTINATION ${TFM_INSTALL_PATH}/interface/include)
+        DESTINATION ${INSTALL_INTERFACE_INC_DIR})
 
 install(FILES       ${NRF_FOLDER_PATH}/services/src/tfm_ioctl_core_ns_api.c
-        DESTINATION ${TFM_INSTALL_PATH}/interface/src)
+        DESTINATION ${INSTALL_INTERFACE_SRC_DIR})
 
 endif()
 

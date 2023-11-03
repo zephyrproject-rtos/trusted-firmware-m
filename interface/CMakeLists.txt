@@ -17,20 +17,15 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/psa/framework_feature.h.in
                ${CMAKE_BINARY_DIR}/generated/interface/include/psa/framework_feature.h
                @ONLY)
 
-if (EXISTS ${TARGET_PLATFORM_PATH}/preload_ns.cmake)
-    include(${TARGET_PLATFORM_PATH}/preload_ns.cmake)
-    tfm_toolchain_reload_compiler()
-endif()
-
 ###################### PSA interface (header only) #############################
 
 add_library(psa_interface INTERFACE)
 
 target_include_directories(psa_interface
     INTERFACE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_BINARY_DIR}/generated/interface/include
-        $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/generated/interface/include>
+        $<BUILD_INTERFACE:$<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:${CMAKE_CURRENT_SOURCE_DIR}/include/multi_core>>
 )
 
 target_link_libraries(psa_interface
@@ -45,6 +40,7 @@ target_compile_definitions(psa_interface
         $<$<BOOL:${CONFIG_TFM_USE_TRUSTZONE}>:CONFIG_TFM_USE_TRUSTZONE>
         $<$<BOOL:${TFM_MULTI_CORE_TOPOLOGY}>:TFM_MULTI_CORE_TOPOLOGY>
         $<$<BOOL:${CONFIG_TFM_PARTITION_META}>:CONFIG_TFM_PARTITION_META>
+        $<$<BOOL:${TEST_NS_MULTI_CORE}>:TFM_MULTI_CORE_TEST>
 )
 
 ###################### PSA api (S lib) #########################################

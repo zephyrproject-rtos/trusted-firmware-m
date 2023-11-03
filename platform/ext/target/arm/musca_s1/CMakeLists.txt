@@ -28,31 +28,6 @@ target_add_scatter_file(tfm_s
     $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_s.icf>
 )
 
-if(NS)
-    target_sources(tfm_ns
-        PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/Device/Source/startup_musca.c
-    )
-    target_add_scatter_file(tfm_ns
-        $<$<C_COMPILER_ID:ARMClang>:${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct>
-        $<$<C_COMPILER_ID:GNU>:${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld>
-        $<$<C_COMPILER_ID:IAR>:${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf>
-    )
-    target_link_libraries(CMSIS_5_tfm_ns
-        INTERFACE
-            $<$<OR:$<BOOL:${CONFIG_TFM_ENABLE_FP}>,$<BOOL:${CONFIG_TFM_ENABLE_MVE_FP}>>:CMSIS_5_RTX_V8MMFN>
-            $<$<NOT:$<OR:$<BOOL:${CONFIG_TFM_ENABLE_FP}>,$<BOOL:${CONFIG_TFM_ENABLE_MVE_FP}>>>:CMSIS_5_RTX_V8MMN>
-    )
-    target_compile_options(tfm_ns
-        PUBLIC
-            ${COMPILER_CP_FLAG}
-    )
-    target_link_options(tfm_ns
-        PUBLIC
-            ${LINKER_CP_OPTION}
-    )
-endif()
-
 if(BL2)
     target_sources(bl2
         PRIVATE
@@ -78,6 +53,7 @@ target_include_directories(platform_s
         partition
         services/include
         Libraries
+        driver
         ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
     INTERFACE
         cc312
@@ -116,33 +92,6 @@ target_compile_definitions(platform_s
     PUBLIC
         $<$<BOOL:${TEST_NS_FPU}>:TEST_NS_FPU>
         $<$<BOOL:${TEST_S_FPU}>:TEST_S_FPU>
-)
-
-#========================= Platform Non-Secure ================================#
-
-target_sources(platform_ns
-    PRIVATE
-        Native_Driver/timer_cmsdk_drv.c
-        CMSIS_Driver/Driver_USART.c
-        Device/Source/system_core_init.c
-        Device/Source/device_definition.c
-        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
-        $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_ioctl_ns_api.c>
-        $<$<BOOL:${PLATFORM_GPLED_ENABLED}>:${CMAKE_CURRENT_SOURCE_DIR}/services/src/tfm_gpled_api.c>
-)
-
-target_include_directories(platform_ns
-    PUBLIC
-        .
-        CMSIS_Driver/Config
-        Device/Config
-        Device/Include
-        Native_Driver
-        services/include
-        Libraries
-        ${PLATFORM_DIR}/ext/cmsis
-    PRIVATE
-        ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011
 )
 
 #========================= Platform BL2 =======================================#
@@ -191,5 +140,59 @@ target_sources(tfm_spm
         tfm_hal_isolation.c
         tfm_hal_platform.c
         faults.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c
+        tfm_interrupts.c
 )
+
+#========================= Files for building NS side platform ================#
+
+install(FILES       ${PLATFORM_DIR}/ext/common/uart_stdout.c
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.c
+                    Libraries/mt25ql_flash_lib.c
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(DIRECTORY   Native_Driver
+                    CMSIS_Driver
+                    services
+                    partition
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+)
+
+install(FILES       target_cfg.h
+                    Libraries/mt25ql_flash_lib.h
+                    tfm_peripherals_def.h
+                    Device/Config/device_cfg.h
+                    ${PLATFORM_DIR}/ext/target/arm/drivers/usart/pl011/uart_pl011_drv.h
+                    ${PLATFORM_DIR}/ext/accelerator/cc312/crypto_accelerator_config.h
+                    ${PLATFORM_DIR}/ext/common/uart_stdout.h
+                    ${PLATFORM_DIR}/include/tfm_plat_defs.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include
+)
+
+install(DIRECTORY   Device/Include
+                    Device/Source
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/Device
+)
+
+install(FILES       ${PLATFORM_DIR}/ext/driver/Driver_Common.h
+                    ${PLATFORM_DIR}/ext/driver/Driver_Flash.h
+                    ${PLATFORM_DIR}/ext/driver/Driver_USART.h
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/include)
+
+# copy all files from active platform directory
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/ns/
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${TARGET_PLATFORM_PATH}/cpuarch.cmake
+                    ${TARGET_PLATFORM_PATH}/config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+# Install linker scripts
+install(FILES       ${PLATFORM_DIR}/ext/common/armclang/tfm_common_ns.sct
+                    ${PLATFORM_DIR}/ext/common/gcc/tfm_common_ns.ld
+                    ${PLATFORM_DIR}/ext/common/iar/tfm_common_ns.icf
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}/linker_scripts)
+
+# Install test configs
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/tests
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})

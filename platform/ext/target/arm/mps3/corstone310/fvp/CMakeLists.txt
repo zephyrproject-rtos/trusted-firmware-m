@@ -104,11 +104,6 @@ target_link_libraries(platform_s
         flash_drivers
 )
 
-target_link_libraries(platform_ns
-    PRIVATE
-        flash_drivers
-)
-
 target_sources(platform_s
     PRIVATE
         $<$<BOOL:${PLATFORM_SVC_HANDLERS}>:${CMAKE_CURRENT_SOURCE_DIR}/platform_svc_handler.c>
@@ -123,3 +118,19 @@ target_sources(tfm_spm
     PRIVATE
         $<$<OR:$<BOOL:${CONFIG_TFM_FLIH_API}>,$<BOOL:${CONFIG_TFM_SLIH_API}>>:${CMAKE_CURRENT_SOURCE_DIR}/tfm_interrupts.c>
 )
+
+#========================= Files for building NS side platform ================#
+
+install(DIRECTORY   ${TARGET_PLATFORM_PATH}/device
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${TARGET_PLATFORM_PATH}/ns/cpuarch_ns.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR}
+        RENAME      cpuarch.cmake)
+
+install(FILES       ${TARGET_PLATFORM_PATH}/ns/CMakeLists.txt
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})
+
+install(FILES       ${TARGET_PLATFORM_PATH}/config.cmake
+                    ${TARGET_PLATFORM_PATH}/check_config.cmake
+        DESTINATION ${INSTALL_PLATFORM_NS_DIR})

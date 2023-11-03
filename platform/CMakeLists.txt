@@ -10,8 +10,6 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
-add_subdirectory(ns)
-
 add_library(platform_s STATIC)
 add_library(platform_region_defs INTERFACE)
 add_library(platform_common_interface INTERFACE)
@@ -30,7 +28,7 @@ if (TFM_PARTITION_CRYPTO)
     add_library(platform_crypto_keys STATIC)
 endif()
 
-set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR})
+set(PLATFORM_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE PATH "Path to platform directory")
 
 add_subdirectory(ext/target/${TFM_PLATFORM} target)
 
@@ -53,11 +51,11 @@ target_compile_options(cmsis_stack_override
 
 target_include_directories(platform_common_interface
     INTERFACE
-        ./ext
-        ./ext/cmsis
-        ./ext/common
-        ./ext/driver
-        ./include
+        ext
+        ext/cmsis
+        ext/common
+        ext/driver
+        include
 )
 
 #========================= Platform Secure ====================================#
@@ -233,9 +231,9 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
     target_include_directories(platform_bl1_1_interface
         INTERFACE
             .
-            ./include
-            ./ext/cmsis
-            ./ext/driver
+            include
+            ext/cmsis
+            ext/driver
     )
 
     target_link_libraries(platform_bl1_1_interface
@@ -261,8 +259,8 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
 
     target_sources(platform_bl1_1
         PRIVATE
-            ./ext/common/boot_hal_bl1_1.c
-            ./ext/common/uart_stdout.c
+            ext/common/boot_hal_bl1_1.c
+            ext/common/uart_stdout.c
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
     )
@@ -284,9 +282,9 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
     target_include_directories(platform_bl1_2
         PRIVATE
             .
-            ./include
-            ./ext/cmsis
-            ./ext/driver
+            include
+            ext/cmsis
+            ext/driver
     )
 
     target_link_libraries(platform_bl1_2
@@ -312,7 +310,7 @@ if(BL1 AND PLATFORM_DEFAULT_BL1)
 
     target_sources(platform_bl1_2
         PRIVATE
-            ./ext/common/boot_hal_bl1_2.c
+            ext/common/boot_hal_bl1_2.c
             $<$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>:ext/common/template/nv_counters.c>
             $<$<OR:$<BOOL:${PLATFORM_DEFAULT_NV_COUNTERS}>,$<BOOL:${PLATFORM_DEFAULT_OTP}>>:ext/common/template/flash_otp_nv_counters_backend.c>
             $<$<BOOL:${PLATFORM_DEFAULT_OTP}>:ext/common/template/otp_flash.c>
