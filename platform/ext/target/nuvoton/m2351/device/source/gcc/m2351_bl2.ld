@@ -63,7 +63,7 @@ SECTIONS
 
         /* .zero.table
          * To clear multiple BSS sections,
-         * uncomment .zero.table and,
+         * uncomment .zero.table section and,
          * define __STARTUP_CLEAR_BSS_MULTIPLE in startup file */
         . = ALIGN(4);
         __zero_table_start__ = .;
