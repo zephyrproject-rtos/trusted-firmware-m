@@ -12,6 +12,3 @@ set(SECURE_UART1                        ON         CACHE BOOL      "Enable secur
 set(NRF_NS_STORAGE                      OFF        CACHE BOOL      "Enable non-secure storage partition")
 set(BL2                                 ON         CACHE BOOL      "Whether to build BL2")
 set(NRF_NS_SECONDARY                    ${BL2}     CACHE BOOL      "Enable non-secure secondary partition")
-
-# Platform-specific configurations
-set(PSA_API_TEST_TARGET                 "nrf5340")

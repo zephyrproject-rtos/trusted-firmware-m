@@ -9,6 +9,9 @@
 # Visual Studio Code
 .vscode/
 
+# Local dependency repo
+localrepos.cmake
+
 # Garbage files
 /build*/
 /cmake_build*/

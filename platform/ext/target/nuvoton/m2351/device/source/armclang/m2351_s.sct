@@ -137,13 +137,13 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TEST_NS_SLIH_IRQ
+#ifdef TFM_PARTITION_SLIH_TEST
     TFM_SLIH_TEST_LINKER +0 ALIGN 32 {
         *tfm_Slih_test_service.* (+RO)
         *timer_cmsdk* (+RO)
         *(TFM_SLIH_TEST_ATTR_FN)
     }
-#endif /* TEST_NS_SLIH_IRQ */
+#endif /* TFM_PARTITION_SLIH_TEST */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     TFM_SP_SECURE_CLIENT_2_LINKER +0 ALIGN 32 {
@@ -238,7 +238,7 @@ LR_CODE S_CODE_START {
     }
 #endif /* TFM_PARTITION_TEST_CORE_IPC */
 
-#ifdef TEST_NS_SLIH_IRQ
+#ifdef TFM_PARTITION_SLIH_TEST
     TFM_SP_SLIH_TEST_LINKER_DATA +0 ALIGN 32 {
         *tfm_slih_test_service.* (+RW +ZI)
         *timer_cmsdk* (+RW +ZI)
@@ -248,7 +248,7 @@ LR_CODE S_CODE_START {
 
     TFM_SP_SLIH_TEST_LINKER_STACK +0 ALIGN 128 EMPTY 0x0400 {
     }
-#endif /* TEST_NS_SLIH_IRQ */
+#endif /* TFM_PARTITION_SLIH_TEST */
 
 #ifdef TFM_PARTITION_TEST_SECURE_SERVICES
     TFM_SP_SECURE_CLIENT_2_LINKER_DATA +0 ALIGN 32 {

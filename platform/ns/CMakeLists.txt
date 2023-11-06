@@ -10,12 +10,7 @@ cmake_minimum_required(VERSION 3.15)
 cmake_policy(SET CMP0076 NEW)
 cmake_policy(SET CMP0079 NEW)
 
-if (EXISTS ${TARGET_PLATFORM_PATH}/preload_ns.cmake)
-    include(${TARGET_PLATFORM_PATH}/preload_ns.cmake)
-    tfm_toolchain_reload_compiler()
-endif()
-
-add_library(platform_ns STATIC EXCLUDE_FROM_ALL)
+add_library(platform_ns STATIC)
 
 target_sources(platform_ns
     PRIVATE

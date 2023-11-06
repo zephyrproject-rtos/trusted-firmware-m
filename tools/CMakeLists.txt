@@ -11,17 +11,6 @@ find_package(Python3)
 ############################### Manifest lists declaration #####################
 list(APPEND MANIFEST_LISTS ${TFM_MANIFEST_LIST})
 
-if (TFM_NS_REG_TEST OR TFM_S_REG_TEST)
-    list(APPEND MANIFEST_LISTS ${TFM_TEST_PATH}/secure_fw/tfm_test_manifest_list.yaml)
-endif()
-
-if ("${TEST_PSA_API}" STREQUAL "IPC")
-    # The manifest tool does not recognize CMake varibles. Do configure_file() first.
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tfm_psa_ff_test_manifest_list.yaml
-                   ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
-    list(APPEND MANIFEST_LISTS ${CMAKE_CURRENT_BINARY_DIR}/tfm_psa_ff_test_manifest_list.yaml)
-endif()
-
 if (TFM_EXTRA_MANIFEST_LIST_FILES)
     list(APPEND MANIFEST_LISTS ${TFM_EXTRA_MANIFEST_LIST_FILES})
 endif()
@@ -34,6 +23,7 @@ endif()
 
 # Remove any duplicate entries to prevent same path appended twice in case of mulitiple runs
 list(REMOVE_DUPLICATES MANIFEST_LISTS)
+list(REMOVE_DUPLICATES TFM_EXTRA_GENERATED_FILE_LIST_PATH)
 
 ############################### File list declaration ##########################
 set(GENERATED_FILE_LISTS ${CMAKE_CURRENT_SOURCE_DIR}/tfm_generated_file_list.yaml)
@@ -64,6 +54,7 @@ foreach(MANIFEST_LIST ${MANIFEST_LISTS})
     if (NOT EXISTS ${MANIFEST_LIST})
         message(FATAL_ERROR "Manifest list ${MANIFEST_LIST} doesn't exist")
     endif()
+
 
     # Get the path of the manifest list
     get_filename_component(MANIFEST_LIST_PATH ${MANIFEST_LIST} DIRECTORY)

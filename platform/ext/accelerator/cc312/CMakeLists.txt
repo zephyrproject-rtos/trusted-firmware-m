@@ -219,7 +219,7 @@ if (TFM_PARTITION_CRYPTO)
 
     target_include_directories(psa_crypto_config
         INTERFACE
-            ${CMAKE_CURRENT_SOURCE_DIR}
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     )
 
     target_compile_options(crypto_service_cc312

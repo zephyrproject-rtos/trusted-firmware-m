@@ -8,11 +8,7 @@
 #-------------------------------------------------------------------------------
 
 set(DEFAULT_NS_SCATTER           ON         CACHE BOOL      "Use default NS scatter files for target")
-set(PSA_API_TEST_TARGET          "cs3x0"    CACHE STRING    "PSA_API_TARGET name")
 set(PROVISIONING_KEYS_CONFIG     ""         CACHE FILEPATH  "The config file which has the keys and seeds for provisioning")
-
-# Make FLIH IRQ test as the default IRQ test on Corstone-310
-set(TEST_NS_SLIH_IRQ                  OFF   CACHE BOOL    "Whether to build NS regression Second-Level Interrupt Handling tests")
 
 set(FLASH_S_PARTITION_SIZE   "0x80000"    CACHE STRING    "Secure code size")
 set(FLASH_NS_PARTITION_SIZE  "0x300000"   CACHE STRING    "Non-secure code size")
@@ -29,9 +25,6 @@ set(TFM_PXN_ENABLE                    ON    CACHE BOOL    "Use Privileged execut
 # Platform-specific configurations
 set(CONFIG_TFM_USE_TRUSTZONE          ON)
 set(TFM_MULTI_CORE_TOPOLOGY           OFF)
-
-set(PLATFORM_SLIH_IRQ_TEST_SUPPORT    ON)
-set(PLATFORM_FLIH_IRQ_TEST_SUPPORT    ON)
 
 # Ethos-U NPU configurations
 set(ETHOSU_ARCH                       "U55")

@@ -95,7 +95,7 @@ if(TFM_PARTITION_CRYPTO)
 
     target_include_directories(psa_crypto_config
         INTERFACE
-            ${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/
+            $<BUILD_INTERFACE:${PLATFORM_DIR}/ext/target/${TFM_PLATFORM}/accelerator/>
     )
 
     target_compile_definitions(crypto_service_crypto_hw
